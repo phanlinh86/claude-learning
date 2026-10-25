@@ -1,6 +1,6 @@
 # Using Claude Well
 
-Text extracted from `Claude_Usage_Guide.pptx` (33 slides) so it is searchable and diffable on GitHub.
+Text extracted from `Using Claude Well.pptx` (42 slides) so it is searchable and diffable on GitHub.
 
 ## 1. Using Claude Well
 - From writing a good prompt to settings, agents, workflows and plans
@@ -320,7 +320,31 @@ Text extracted from `Claude_Usage_Guide.pptx` (33 slides) so it is searchable an
 - Memory
 - CLAUDE.md, project files, notes it writes for its future self
 
-## 23. Five workflow patterns: start with the simplest
+## 23. MCP gives Claude one standard plug for every app
+- MCP stands for Model Context Protocol, an open standard Anthropic published in 2024
+- Model is the AI, here Claude; context is the data and actions it can reach
+- Protocol means shared rules, so any app that follows them works with any MCP client
+- Claude
+- MCP client
+- Claude, Claude Code or an IDE. Shows the server's actions to Claude as tools.
+- MCP server
+- The connector
+- Sits in front of one app. Lists its actions and runs them when Claude asks.
+- Your app
+- Drive, Slack, GitHub
+- Does the work with your sign-in and permissions, then returns the result.
+- MCP
+- App API
+- What a server can offer Claude
+- Tools
+- Actions to run: search files, post a message, open a ticket
+- Resources
+- Data to read: a document, a table, a customer record
+- Prompts
+- Ready-made templates for the app's common tasks
+- A connector is a ready-made MCP server you switch on in Claude by signing in. Each app builds it once, and it works in any MCP client.
+
+## 24. Five workflow patterns: start with the simplest
 - Prompt chaining
 - Fixed steps, each feeds the next
 - Outline → draft → translate
@@ -337,7 +361,7 @@ Text extracted from `Claude_Usage_Guide.pptx` (33 slides) so it is searchable an
 - One writes, one critiques, loop
 - Translation, polishing a proposal
 
-## 24. Multi-agent: a lead agent and parallel subagents
+## 25. Multi-agent: a lead agent and parallel subagents
 - Lead agent: plans, delegates, combines
 - Subagent A
 - Subagent B
@@ -354,7 +378,7 @@ Text extracted from `Claude_Usage_Guide.pptx` (33 slides) so it is searchable an
 - −90%
 - up to 90% less time on complex research, by searching in parallel
 
-## 25. Subagents in Claude Code: a markdown file is all it takes
+## 26. Subagents in Claude Code: a markdown file is all it takes
 - # .claude/agents/code-reviewer.md
 - ---
 - name: code-reviewer
@@ -377,7 +401,7 @@ Text extracted from `Claude_Usage_Guide.pptx` (33 slides) so it is searchable an
 - Why
 - Own context window, limited tools, cheaper model, reusable. They still count toward usage
 
-## 26. How to brief a subagent (or any delegated agent)
+## 27. How to brief a subagent (or any delegated agent)
 - Objective
 - One clear goal and why it matters
 - Output format
@@ -393,7 +417,7 @@ Text extracted from `Claude_Usage_Guide.pptx` (33 slides) so it is searchable an
 - STRONG
 - “Find how the 2021–23 chip shortage affected EU car makers’ output. Use industry reports and company filings, not news opinion. Another agent covers US and Asia, so skip those. Return 5 bullets with a figure and source URL each, max 150 words.”
 
-## 27. PART 5
+## 28. PART 5
 - Workflows & plans
 - Plan before acting, write things down, and turn what works into something repeatable.
 - explore
@@ -402,7 +426,7 @@ Text extracted from `Claude_Usage_Guide.pptx` (33 slides) so it is searchable an
 - check
 - repeat
 
-## 28. Explore → Plan → Build → Check: the core loop for real work
+## 29. Explore → Plan → Build → Check: the core loop for real work
 - 1  Explore
 - Have Claude read the relevant files or sources first. No changes yet.
 - 2  Plan
@@ -414,7 +438,128 @@ Text extracted from `Claude_Usage_Guide.pptx` (33 slides) so it is searchable an
 - Why planning pays off
 - Fixing a wrong plan costs one message. Fixing wrong code or a wrong 20-page report costs an afternoon. For anything bigger than a quick edit, ask for the plan first: “Don’t write code yet. Propose a plan, list the files you’ll change and the risks.”
 
-## 29. Turn what works into building blocks you can reuse
+## 30. Explore: Claude reads first and changes nothing yet
+- # Explore: read first, no edits yet
+- Read src/billing/ and the failing test in
+- tests/test_invoice.py. Don't change any
+- files yet. Then tell me:
+- 1. How an invoice total is calculated today
+- 2. Which files a fix would touch
+- 3. Anything that looks risky or unclear
+- # For broad searches, keep the main
+- # context clean:
+- Use the Explore subagent to find every
+- place that calls calculate_total().
+- # Close the step with:
+- Summarize what you found in five bullets.
+- Goal
+- Claude learns the code, data or sources before it decides anything. No edits.
+- How
+- Point it at specific files, folders, docs or URLs. Ask for a summary back, not a solution.
+- Good sign
+- The summary names the right files and spots what you would have flagged yourself.
+- Avoid
+- Opening with “fix the bug”. Claude guesses, and the guess carries into every later step.
+- Note: Explore is a prompt you type in the Claude chat, not a file. Lines starting with # are labels for this slide; leave them out when you paste.
+
+## 31. Plan: agree the steps in writing before any change
+- # Plan mode: press Shift+Tab until it
+- # shows plan mode, then ask:
+- Plan how to add tax-exempt customers
+- to invoicing. Include:
+- - Files to change and why
+- - Steps in order, each small enough to test
+- - How we'll know it works (tests to add)
+- - Questions you need me to answer
+- # Then reply to correct it:
+- Drop step 4, we'll do that later. Use
+- the existing Customer table, no new one.
+- # When it's right:
+- Save the plan to plan.md, then do step 1.
+- Goal
+- A short written plan you can read in a minute and correct in one message.
+- How
+- Plan mode keeps Claude read-only. Answer its questions, cut scope, then approve.
+- Good sign
+- Each step is small and testable, in an order that makes sense to you.
+- Avoid
+- Approving a plan you only skimmed. A vague plan produces vague work.
+- Note: Plan is a prompt you type in the Claude chat, not a file. Lines starting with # are labels; leave them out. plan.md is where Claude saves the plan.
+
+## 32. Build: one step at a time, with a checkpoint after each
+- # Work one step at a time
+- Do step 1 of plan.md only. Run the tests
+- when you're done, then stop and show me
+- the diff.
+- # Step looks right:
+- Commit with a clear message, update
+- progress.txt, then do step 2.
+- # Going the wrong way? Press Esc, then:
+- Stop. Keep the old function name;
+- other services call it. Redo step 2.
+- # Long task, fresh session:
+- Read plan.md and progress.txt and
+- continue from the next open step.
+- Goal
+- Turn the plan into working changes while you keep control of the direction.
+- How
+- Small steps, a commit after each, and progress.txt updated so a new session can resume.
+- Good sign
+- Each diff is small enough to read, and tests pass before the next step starts.
+- Avoid
+- “Do the whole plan” on large work. When it goes wrong, you can't see where.
+- Note: Build is a series of prompts you type in the chat. Lines starting with # are labels; leave them out. plan.md and progress.txt are files in your project.
+
+## 33. Check: prove the work is done before you accept it
+- # Verify against the plan
+- Run the full test suite and the linter.
+- Then compare the result with plan.md and
+- list anything missing or changed.
+- # Second opinion, fresh context
+- Use the code-reviewer subagent on this
+- branch. Report bugs, security issues and
+- untested paths. Don't fix anything yet.
+- # Ask about gaps
+- What did you not verify? List anything
+- you assumed rather than checked.
+- # Then ship
+- Fix the review items, rerun the tests,
+- and commit.
+- Goal
+- Evidence that it works: tests pass, the result matches the plan, nothing extra changed.
+- How
+- Run the tests, open the result yourself, and have a fresh subagent review it.
+- Good sign
+- Claude lists what it could not verify instead of just saying “done”.
+- Avoid
+- Trusting “all tests pass” without seeing the run, or letting Claude edit tests to pass.
+- Note: Check is a prompt you type in the chat. Lines starting with # are labels; leave them out. code-reviewer is a subagent file in .claude/agents/ (slide 26).
+
+## 34. One prompt for all four steps, two stops when it's risky
+- # One prompt, two checkpoints
+- Add tax-exempt customers to invoicing.
+- 1. Explore src/billing/ and tests/.
+- Don't edit anything.
+- 2. Write the plan to plan.md.
+- STOP and wait for my OK.
+- 3. Build one step at a time. Run the
+- tests after each, log progress.txt.
+- 4. Run all tests and the linter, then
+- use the code-reviewer subagent.
+- 5. Report what passed and what you
+- couldn't verify.
+- STOP: don't commit until I confirm.
+- One prompt is enough
+- Small, clear task with good tests, on a branch. Delete both STOP lines.
+- Keep the checkpoints
+- Unclear requirements, no tests, or code that touches money, security or shared services.
+- Why these two stops
+- Reading the plan takes a minute and catches most wrong turns. Reading the diff catches the rest before it ships.
+- Fully hands-off
+- Tests and a subagent review are the gate. Claude works on a branch; a person approves the pull request.
+- Note: type this once in the Claude chat. Claude pauses at each STOP until you reply; lines starting with # are labels.
+
+## 35. Turn what works into building blocks you can reuse
 - CLAUDE.md
 - Project memory: commands, style, gotchas. Loaded every session.
 - Skills
@@ -428,7 +573,32 @@ Text extracted from `Claude_Usage_Guide.pptx` (33 slides) so it is searchable an
 - Headless & scheduled
 - claude -p in scripts and CI, the Agent SDK in your app, scheduled tasks for routines.
 
-## 30. Long-running work: keep state in files
+## 36. Make a skill: one folder with a SKILL.md file
+- # .claude/skills/weekly-brief/SKILL.md
+- ---
+- name: weekly-brief
+- description: Builds the weekly competitor
+- brief. Use when asked for the weekly
+- brief or a competitor update.
+- ---
+- # Weekly competitor brief
+- 1. Run scripts/fetch_news.py for each
+- company in competitors.csv
+- 2. Summarize launches, pricing, hiring
+- 3. Fill template.docx, one page max
+- 4. Flag anything you could not verify
+- # Same folder: scripts/, template.docx,
+- # competitors.csv
+- 1  Create the folder
+- .claude/skills/<name>/ in a project, or ~/.claude/skills/ for all projects. In the Claude apps, upload it as a zip.
+- 2  Write SKILL.md
+- A name and a description that says when to use it. Claude reads only these until a task matches.
+- 3  Add scripts and files
+- Templates, examples and scripts the steps call. Claude opens them only when needed.
+- 4  Test and refine
+- Ask for the task in plain words and check the skill triggers. The skill-creator skill can draft and test one.
+
+## 37. Long-running work: keep state in files
 - plan.md
 - The agreed plan and current step
 - progress.txt
@@ -447,7 +617,7 @@ Text extracted from `Claude_Usage_Guide.pptx` (33 slides) so it is searchable an
 - Sending, posting, paying, emailing
 - Anything that touches shared systems
 
-## 31. Worked example: a weekly competitor brief that runs itself
+## 38. Worked example: a weekly competitor brief that runs itself
 - Skill
 - competitor-brief/SKILL.md: sources, format, tone
 - Plan
@@ -467,7 +637,7 @@ Text extracted from `Claude_Usage_Guide.pptx` (33 slides) so it is searchable an
 - scheduled task
 - Start manual: run it once in chat, fix the prompt, then save it as a skill, then add subagents, then schedule it for Monday 8:00. Each step only after the previous one works.
 
-## 32. Cheat sheet
+## 39. Cheat sheet
 - Prompt
 - Brief it like a new colleague
 - Say why, show examples, use XML tags
@@ -485,7 +655,25 @@ Text extracted from `Claude_Usage_Guide.pptx` (33 slides) so it is searchable an
 - State in files, checkpoints in git
 - Repeat 3× → make it a skill, hook or subagent
 
-## 33. Keep learning
+## 40. Watch it in action: planning, skills and subagents
+- Click a title to open the video in your browser. Community videos are third-party and may lag behind the newest features.
+- Claude Code in an Hour: A Developer's Intro
+- Why You Need Plan Mode in Claude Code
+- Claude Agent Skills Explained
+- Agent Skills with Anthropic (course)
+- Advanced Patterns: Subagents, MCP and Scaling
+- Claude Code Tutorial #8: Subagents
+
+## 41. Example repos on GitHub: skills, subagents and MCP
+- Click a repo to open it on GitHub. Community repos are third-party; read a file before you install it.
+- anthropics/skills
+- anthropics/claude-code
+- anthropics/claude-cookbooks
+- modelcontextprotocol/servers
+- VoltAgent/awesome-claude-code-subagents
+- hesreallyhim/awesome-claude-code
+
+## 42. Keep learning
 - Settings change fast. These pages are the source of truth (as of Oct 2026).
 - Prompting best practices: platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices
 - Opus 5.5 migration guide (sampling, effort, thinking): platform.claude.com/docs/en/models/opus-5-5/migration-guide

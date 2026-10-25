@@ -13,3 +13,4 @@ My notes, decks and prompt templates from learning how to use Claude well.
 | 2026-10-25 | **From Tokens to Teams of Agents** (39 slides): how LLMs work (tokens, attention, sampling, RAG), agents, multi-agent systems |
 | 2026-10-25 | **Using Claude Well v1** (33 slides): prompting, effort & caching, where to use Claude, agents, Explore→Plan→Build→Check |
 | 2026-10-25 | **Prompt template**: XML-structured prompt (role / context / task / rules / format) for a 4-slide HPQ equity briefing |
+| 2026-10-25 | **Using Claude Well v2** (42 slides): added MCP, a slide per Explore/Plan/Build/Check step, making a skill, demo videos, example GitHub repos |
