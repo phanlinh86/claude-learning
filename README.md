@@ -10,3 +10,4 @@ My notes, decks and prompt templates from learning how to use Claude well.
 ## Learning log
 | Date | What I learned / added |
 |---|---|
+| 2026-10-25 | **From Tokens to Teams of Agents** (39 slides): how LLMs work (tokens, attention, sampling, RAG), agents, multi-agent systems |
