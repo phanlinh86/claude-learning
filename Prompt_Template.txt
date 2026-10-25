@@ -1,0 +1,15 @@
+<role>You are an equity analyst preparing a short briefing for [retail investors / my study group].</role>
+<context>HPQ stock has risen recently. Verify the trend before explaining it.</context>
+<task>
+Slide 1: HP's last 4 reported quarters — chart of revenue, operating expenses, net income, and net margin (net income ÷ revenue).
+Slide 2: Price chart for the last 3 months, marked with the news events that explain the moves.
+Slide 3: Diagram of what supports vs. what threatens the stock.
+Slide 4: 5-year price chart plus a dotted bear/base/bull projection for 3 years. State the assumption behind each.
+</task>
+<rules>
+- Financial figures: only from HP's SEC filings or earnings releases.
+- Prices and news: reputable sources, cited on each slide.
+- Calculated ratios are allowed if labelled "calculated".
+- Projections must be labelled illustrative, not advice.
+</rules>
+<format>4 slides, one chart or diagram each, max ~30 words of text per slide. Downloadable as PowerPoint.</format>
