@@ -31,3 +31,4 @@ Copy the most recent run folder, rename it (`<yyyy-mm>-<industry>`), replace `re
 | Folder | Industry | Person |
 |---|---|---|
 | `2026-10-hdd` | HDD (Seagate, Western Digital, Toshiba; competitors SSD/NAND, tape) | 15-year HDD servo engineer |
+| `2026-10-factory-automation` | Factory automation (Siemens, Schneider, ABB, Rockwell, Emerson, Honeywell, Fanuc, Keyence, Yaskawa, Mitsubishi Electric, Omron, Inovance) | Senior corporate-strategy professional, 15 years, global |

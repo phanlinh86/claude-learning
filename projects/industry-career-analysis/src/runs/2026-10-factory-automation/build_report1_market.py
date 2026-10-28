@@ -60,7 +60,7 @@ for b, v in zip(bars, vals):
 ax.set_ylabel("Year-on-year growth, %"); ax.set_ylim(0, 58); ax.grid(axis="x", visible=False)
 ax.tick_params(axis="x", labelsize=7.5)
 ax.set_title("2026 upcycle: leaders' order and sales growth", loc="left", fontsize=10, fontweight="bold")
-story.append(fig(f, IMG + "cycle.png", caption="Sources: company results releases (Fanuc 23 Oct 2026; ABB Q3 2026 via news summary — verify; "
+story.append(fig(f, IMG + "cycle.png", caption="Sources: company results releases (Fanuc 23 Oct 2026; ABB Q3 2026 release; "
                  "Keyence Jul 2026; Siemens Aug 2026; Rockwell Aug 2026; Yaskawa Apr 2026)."))
 
 story.append(table([
@@ -255,7 +255,7 @@ for s in [
     "IFR via CGTN, China robot market 2025: https://news.cgtn.com/news/2026-09-24/China-remains-world-s-largest-industrial-robot-market-report-1QHHXCQHdrq/p.html",
     "Siemens Q3 FY2026 earnings release: https://assets.new.siemens.com/siemens/assets/api/uuid:84d1a90b-542e-4775-a907-06f29940eb71/HQCOPR202608037434EN.pdf ; Q4 FY2025: https://assets.new.siemens.com/siemens/assets/api/uuid:3948cdd4-35e0-4c1d-8412-9aed4097b3d0/HQCOPR202511117277EN.pdf",
     "Rockwell Automation Q3 FY2026 results: https://www.rockwellautomation.com/en-au/company/news/press-releases/Rockwell-Automation-Reports-Third-Quarter-2026-Results.html",
-    "ABB Q3 2026 (news summary): https://www.bluewin.ch/en/news/abb-sees-a-massive-increase-in-orders-in-the-third-quarter-li.3641751",
+    "ABB Q3 2026 results: https://www.webdisclosure.com/press-release/abb-ltd-q3-2026-results-5kMEGgmixHu",
     "Fanuc H1 FY2026 presentation: https://2slides.com/de/gallery/fanuc-h1-fy2026-earnings-presentation ; Keyence results Jul 2026: https://www.keyence.co.jp/pdf/FinancialResults_202607_en.pdf ; Yaskawa FY2025: https://www.yaskawa-global.com/wp-content/uploads/2026/04/20260410_en.pdf",
     "J.P.Morgan Global Manufacturing PMI Sep 2026: https://www.australianmanufacturing.com.au/?p=196398",
     "Roland Berger, Industrial automation update 2026: https://www.rolandberger.com/en/Insights/Publications/Industrial-automation-update-2026.html",
