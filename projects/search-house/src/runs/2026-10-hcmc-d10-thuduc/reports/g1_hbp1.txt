@@ -1,0 +1,24 @@
+TD-01 | QL13 Hiệp Bình Phước phân lô | 52m2 | 3 tầng | 3-4PN/3WC | HXH | legal not stated | 6.8 tỷ (~131tr/m2) | listing via muaban ward index
+FLAGS: bedroom mismatch; no sổ hồng mention; above area avg; near QL13 widening to 60m (construction Q4/2026-2028) - check quy hoạch
+MARKET: Chợ Hiệp Bình / Bình Triệu ~1.5-2 km - ordinary wet market
+SUPERMARKET: Bách Hóa Xanh QL13 ~0.5 km; GigaMall ~3 km
+SCHOOL: TH Hiệp Bình Phước ~1 km - public ward school
+HOSPITAL: Hoàn Mỹ Thủ Đức ~3-4 km (private, well regarded); BV TP Thủ Đức ~5 km
+SAFETY: ordinary; QL13 traffic/accidents; low-lying riverside flood at high tide; construction until 2028
+SCORES S3 L3 V2
+
+TD-02 | near Vạn Phúc City, HBP riverside | 100m2 | 3 tầng + ST | 2PN | HXH + garage | sổ đỏ/hồng | listing EXPIRED | 7.2 tỷ (72tr/m2)
+FLAGS: expired (may be sold); check hoàn công & lộ giới; riverside flood risk
+MARKET: Chợ Hiệp Bình ~2 km
+SUPERMARKET: Bách Hóa Xanh QL13 ~0.5-1 km; GigaMall ~3 km
+SCHOOL: TH Hiệp Bình Phước ~1-1.5 km
+HOSPITAL: Hoàn Mỹ Thủ Đức ~4 km; BV TP Thủ Đức ~5 km
+SAFETY: Vạn Phúc upscale & better security; low-lying, record tide Oct 2026; QL13 construction
+SCORES S3 L4 V4
+
+TD-03 | "on QL13" HBP | 51m2 | 3 tầng | 3PN/2WC | alley n/a | legal n/a | 6.x tỷ (~6-6.5)
+FLAGS: vague price, broker pitch, no address/legal; QL13 widening risk
+MARKET: Chợ Bình Triệu/Hiệp Bình ~1.5-2 km; SUPERMARKET BHX ~0.5 km; Co.opmart Tam Bình ~3 km
+SCHOOL TH Hiệp Bình Phước ~1 km; HOSPITAL Hoàn Mỹ TĐ ~3-4 km
+SCORES S3 L3 V2
+SOURCES: vneconomy QL13 widening https://vneconomy.vn/tp-ho-chi-minh-chi-hon-12-400-ty-dong-giai-toa-hon-1-000-ho-dan-mo-rong-quoc-lo-13.htm ; https://baodautu.vn/tphcm-khoi-cong-mo-rong-quoc-lo-13-vao-quy-iv2026-d414483.html ; tide https://cafef.vn/trieu-cuong-song-sai-gon-vuot-dinh-lich-su-nhieu-tuyen-pho-ngap-sau-188261012100018672.chn

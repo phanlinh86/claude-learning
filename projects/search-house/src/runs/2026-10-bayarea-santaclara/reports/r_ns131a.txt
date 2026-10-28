@@ -1,0 +1,23 @@
+NS-5 1317 Dryden Dr SJ 95131 | 1538 | 6000 | 3/2.5 | 2-car attached | 1971 | HOA 0 | detached 1-story ranch | Active 10/21/2026 6 DOM | $1.65M ($1,073/sqft); sold $1.86M Apr 2024
+FLAGS: priced below 2024 sale -> multiple offers likely; permit history for expansion; commute borderline
+GROCERY Safeway Berryessa Rd ~1.2mi; SCHOOL Vinci Park Elem (Berryessa USD) 8/10 0.2mi; HOSPITAL Regional Medical Center SJ (Level II trauma) ~4mi
+SAFETY: Berryessa one of safer SJ areas (Niche A-); low-moderate flood; I-680 noise ~0.5mi
+COMMUTE 20-25 (borderline) | S4 L5 V3 Ver5
+
+NS-6 1094 Rock Ave | 1828 | 3000 | 3/2.5 | 2-car | 2005 | HOA 0? | detached small lot | Active 9/10 ~47 DOM | $1.598M ($874/sqft)
+FLAGS: Flood Factor 5/10 (22-32% 30yr) flood insurance; former rental; mixed industrial Oakland Rd; room to negotiate
+GROCERY 99 Ranch Milpitas ~2mi; SCHOOL Orchard Elem K-8 (Orchard SD) 5/10 0.3mi; HOSPITAL Regional ~5mi
+SAFETY: ~SJ avg crime; moderate flood/liquefaction; Oakland Rd/railroad noise
+COMMUTE 15-20 | S3 L3 V4 Ver5
+
+NS-9 1873 Silkwood Ln | 1828 | 3139 | 3/2.5 | 2-car attached | 2007 | no HOA | detached | Active ~41 DOM | $1.598M ($874/sqft)
+FLAGS: same area as NS-6, check flood; small lot; EV hookup
+same amenities (Orchard 5/10 ~0.4mi) | COMMUTE 15-20 | S3 L3 V4 Ver4
+
+NS-10 1357 Goldenlake Rd | 1960 | ~6000 | 4/2.5 bedrooms upstairs | garage likely | ~1973 | 0 | detached 2-story | Active | $1.499M (~$765/sqft)
+FLAGS: fixer "endless potential" budget $100-250K+; details unconfirmed
+GROCERY Safeway Berryessa ~1.3mi; SCHOOL Brooktree 6/10 ~0.9mi (maybe Vinci Park 8/10); HOSPITAL Regional ~4mi
+SAFETY: quiet Berryessa A-; low flood
+COMMUTE 20-25 borderline | S4 L4 V4 Ver2
+AREA: 95131 all-types median $1.285M (Aug 2026 Redfin); one SFH sale $1.86M $1,052/sqft
+SOURCES: https://www.compass.com/listing/1317-dryden-drive-san-jose-ca-95131/1531672125323846785/ ; https://www.redfin.com/CA/San-Jose/1094-Rock-Ave-95131/home/1363452 ; https://www.remax.com/ca/san-jose/home-details/1873-silkwood-ln-san-jose-ca-95131/4108835140916219577/M00000101/ML82061065 ; https://www.niche.com/places-to-live/n/berryessa-san-jose-ca/

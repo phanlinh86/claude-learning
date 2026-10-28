@@ -1,0 +1,18 @@
+NS-7 1459 Goldenlake Rd SJ 95131 ML82064644 | 2591 | 6090 | 6/4 | 2-car attached | 1974 | none | detached 2-story | Active 10/22/2026 5 DOM | $1.83M (~$706/sqft); bought 7/23/2026 $1.6M (flip)
+FLAGS: fast flip - pull permits, full inspection
+GROCERY Lundy/Berryessa corridor ~1-1.5mi (unverified); SCHOOL Brooktree Elem (Berryessa USD) 6/10 ~0.8mi; HOSPITAL Regional Medical Center SJ ~4mi (ER; trauma center closed Aug 2024)
+SAFETY: Berryessa below-avg crime (unverified); FEMA X/D; I-680/SJC noise
+COMMUTE 18-25 | S4 L4 V4 Ver4
+
+NS-8 1367 Shore Dr | 2250 | 3252 | 5/5 | 2-car | 2014 | HOA? | detached 2-story | ~34 DOM | $1.999888M ($889/sqft)
+FLAGS: tiny lot; high vs comp 1399 Shore $1.75M after 167 DOM
+SCHOOL Vinci Park 8/10 ~0.7mi; HOSPITAL Regional ~4mi | COMMUTE 15-22 | S3 L4 V2 Ver3
+
+NS-11 1753 Ridgetree Way (Tennyson Woods) ML82054701 | 2400 | 6000 | 4/3 | 3-car attached | 1979 | none | split-level | Active 10/21 | $2.088888M (stretch 4.4%)
+FLAGS: 32-year owner - check roof/plumbing/electrical; stairs
+SCHOOL Brooktree 6/10 ~0.1mi; HOSPITAL Regional ~4-5mi | COMMUTE 20-25 | S4 L4 V3 Ver4
+
+NS-12 1280 Turrett Dr | 2032 incl JADU | 5998 | 5/3 | NO GARAGE (converted to JADU) | 1970 | none | 2-story | ~59 DOM | $1.275M (cut $475K 10/24, = 2021 sale price)
+FLAGS: no garage -> fails; priced to bid up -> AVOID (criteria)
+SCHOOL Vinci Park 8/10 ~0.4mi | COMMUTE 18-22 | S3 L3 V4 Ver4
+SOURCES: https://www.coldwellbankerhomes.com/ca/san-jose/1459-goldenlake-rd/pid_74402855/ ; https://www.neighborhoods.com/ca/san-jose/1367-shore-dr/property/42191044 ; https://www.coldwellbankerhomes.com/ca/san-jose/1753-ridgetree-way/pid_74374937/ ; https://www.coldwellbankerhomes.com/ca/san-jose/1280-turrett-dr/pid_73329594/ ; https://www.sanjoseinside.com/business/regional-medical-center-says-it-will-close-trauma-center-in-august/

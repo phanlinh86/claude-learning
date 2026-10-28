@@ -30,5 +30,6 @@ Type: single-family house, at least 3 bedrooms, car access preferred
 A run takes about 10–15 minutes.
 
 ## Files
+- `src/` – Python scripts that build the Excel and PDF, one folder per past run (see `src/README.md`)
 - `.claude/skills/search-house/SKILL.md` – general skill
 - `.claude/skills/search-nha-sai-gon/SKILL.md` – Ho Chi Minh City skill

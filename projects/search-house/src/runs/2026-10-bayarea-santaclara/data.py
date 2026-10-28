@@ -1,0 +1,225 @@
+BUDGET = 2_000_000
+MINSQFT = 1400
+HC = "https://www.homes.com/property/"
+WORK = "Marvell, 5488 Marvell Lane, Santa Clara, CA 95054"
+
+WEBSITES = [
+ ("Zillow", "https://www.zillow.com", "Largest US portal; Zestimates and price/tax history. Blocks automated reading - browse it yourself."),
+ ("Redfin", "https://www.redfin.com", "Fast MLS updates, sold comps, Flood Factor and school data; partly blocked for automated reading."),
+ ("Realtor.com", "https://www.realtor.com", "MLS-fed listings, often the most up-to-date status (pending/contingent)."),
+ ("Homes.com", "https://www.homes.com", "Clean city/ZIP lists with price-drop tags; main source for this shortlist."),
+ ("MLSListings", "https://www.mlslistings.com", "The Bay Area MLS itself; city market stats (median, $/sqft, days on market)."),
+ ("Brokerage sites (Compass, Coldwell Banker, Sereno, RE/MAX)", "https://www.coldwellbankerhomes.com", "Full MLS detail pages that usually load when portals block."),
+ ("GreatSchools", "https://www.greatschools.org", "School ratings and assigned-school lookups by address."),
+ ("FEMA Flood Map Service Center", "https://msc.fema.gov", "Official flood zone for each address (affects insurance)."),
+]
+
+# (city, address, url, price, beds, baths, sqft, note)
+ALL = [
+ # Santa Clara (homes.com page 1)
+ ("Santa Clara","3021 Santa Maria Ave, 95051",HC+"3021-santa-maria-ave-santa-clara-ca/jkskk5pyg40np/",1799000,4,3,1586,"Shortlisted SC-1"),
+ ("Santa Clara","2044 Finley Pl, 95050",HC+"2044-finley-place-santa-clara-ca/7sr06n1j9kcqw/",2498000,4,3,2360,"Over budget"),
+ ("Santa Clara","3483 Emmett Pl, 95051",HC+"3483-emmett-place-santa-clara-ca/71dvxrfp9393k/",1899000,3,2,1302,"Under 1,400 sq ft"),
+ ("Santa Clara","3015 Machado Ave, 95051",HC+"3015-machado-ave-santa-clara-ca/50blz0fbsvhnj/",2499000,4,3,2019,"Over budget"),
+ ("Santa Clara","679 Cupples Ct, 95051",HC+"679-cupples-ct-santa-clara-ca/37xkl908xw52h/",2950000,4,3,2375,"Over budget"),
+ ("Santa Clara","1718 Pomeroy Ave, 95051",HC+"1718-pomeroy-ave-santa-clara-ca/0pe7y6hcqngtf/",1688000,3,2,1080,"Under 1,400 sq ft"),
+ ("Santa Clara","621 Hilmar St, 95050",HC+"621-hilmar-st-santa-clara-ca/6mvtjxwppz204/",2178000,3,2.5,2671,"Over budget (>5%)"),
+ ("Santa Clara","5019 Avenida de Lago, 95054",HC+"5019-avenida-de-lago-santa-clara-ca/decrfj2952teb/",1968888,4,2,1584,"Shortlisted SC-2"),
+ ("Santa Clara","1659 Hood Ct, 95051",HC+"1659-hood-ct-santa-clara-ca/6ky8ygnxe4j0d/",2388000,5,4,2035,"Over budget"),
+ ("Santa Clara","376 Cypress Ave, 95050",HC+"376-cypress-ave-santa-clara-ca/2498kvqvmbkbe/",2388000,4,2,1817,"Over budget"),
+ ("Santa Clara","1152 Pierce St, 95050",HC+"1152-pierce-st-santa-clara-ca/4h7csbwed4lr5/",1280000,3,2,998,"Under 1,400 sq ft"),
+ ("Santa Clara","646 Bucher Ave, 95051",HC+"646-bucher-ave-santa-clara-ca/tb2cprdtb5bmd/",1988000,3,2,1518,"Shortlisted SC-3"),
+ ("Santa Clara","908 Fremont St, 95050",HC+"908-fremont-st-santa-clara-ca/x54zg0qw0yr6h/",2478000,3,3,3207,"Over budget"),
+ ("Santa Clara","2124 San Antonio Pl, 95051",HC+"2124-san-antonio-place-santa-clara-ca/n9t1mh9t9n51h/",1780000,3,2,1078,"Under 1,400 sq ft"),
+ ("Santa Clara","2015 Jackson St, 95050",HC+"2015-jackson-st-santa-clara-ca/8rczz6b31g1rd/",1499888,3,1,985,"Under 1,400 sq ft; 1 bath"),
+ ("Santa Clara","3633 Vireo Ave, 95051",HC+"3633-vireo-ave-santa-clara-ca/nne03p58rpctx/",2798000,4,2.5,2350,"Over budget"),
+ ("Santa Clara","930 White Dr, 95051",HC+"930-white-dr-santa-clara-ca/d1qsdyfdec2d3/",1988888,4,2,1446,"Shortlisted SC-4"),
+ ("Santa Clara","2527 Malone Pl, 95050",HC+"2527-malone-place-santa-clara-ca/2bmwnqtf655lc/",1995000,3,2,1617,"Shortlisted SC-5"),
+ ("Santa Clara","3805 Thrush Way, 95051",HC+"3805-thrush-way-santa-clara-ca/vqw9gmbg6bnhn/",2388888,4,2.5,1897,"Over budget"),
+ ("Santa Clara","2347 Warburton Ave, 95050",HC+"2347-warburton-ave-santa-clara-ca/peqnen4npjfm6/",1650000,3,1,1021,"Under 1,400 sq ft; 1 bath"),
+ ("Santa Clara","3282 Loma Alta Dr, 95051",HC+"3282-loma-alta-dr-santa-clara-ca/3cmkqzpk035jq/",2298000,4,2.5,1791,"Over budget"),
+ ("Santa Clara","3131 Dorcich St, 95050",HC+"3131-dorcich-st-santa-clara-ca/2kcwsmjy9tmw5/",1598000,3,1.5,1573,"Only 1.5 baths"),
+ ("Santa Clara","1940 Briarwood Dr, 95051",HC+"1940-briarwood-dr-santa-clara-ca/33l4h2x3gjg9y/",1400000,3,2,1212,"Under 1,400 sq ft; court sale"),
+ ("Santa Clara","3786 Dunford Way, 95051",HC+"3786-dunford-way-santa-clara-ca/zxflk9d1jpvbp/",2399000,4,2,1480,"Over budget"),
+ ("Santa Clara","2199 Avenida de Las Flores, 95054",HC+"2199-avenida-de-las-flores-santa-clara-ca/eg48qsndg5rxz/",1399000,3,2,1563,"Shortlisted SC-6"),
+ ("Santa Clara","1000 Wood Duck Ave, 95051",HC+"1000-wood-duck-ave-santa-clara-ca/j8vw3kvmr4zck/",2598000,4,3,1793,"Over budget"),
+ ("Santa Clara","2831 Monroe St, 95051",HC+"2831-monroe-st-santa-clara-ca/9mlxtm1s3psjv/",1988888,4,2,1815,"Shortlisted SC-7"),
+ ("Santa Clara","1145 Market St, 95050",HC+"1145-market-st-santa-clara-ca/1tgzmmkh25tvj/",1999950,3,3,1373,"Under 1,400 sq ft"),
+ ("Santa Clara","2005 Stanley Ave, 95050",HC+"2005-stanley-ave-santa-clara-ca/hlfce4ge1nlvb/",1899950,3,3,1420,"Shortlisted SC-8"),
+ ("Santa Clara","950 Camino Dr, 95050",HC+"950-camino-dr-santa-clara-ca/khegnh3e51z13/",2400000,3,2,2193,"Over budget"),
+ ("Santa Clara","2631 Monroe St, 95051",HC+"2631-monroe-st-santa-clara-ca/ykd9bnpsehfr9/",1499900,3,2,1207,"Under 1,400 sq ft"),
+ ("Santa Clara","1893 Bowers Ave, 95051",HC+"1893-bowers-ave-santa-clara-ca/zbetp3pw71cpy/",1699000,3,2,1034,"Under 1,400 sq ft"),
+ ("Santa Clara","1765 Market St, 95050",HC+"1765-market-st-santa-clara-ca/gev9fy3cfejmx/",2188000,5,5,1324,"Two homes on one lot; over budget"),
+ # Sunnyvale
+ ("Sunnyvale","807 S Wolfe Rd, 94086",HC+"807-s-wolfe-rd-sunnyvale-ca/1kpgwkt7mw9wy/",2098888,4,2,1617,"Shortlisted SV-1 (stretch)"),
+ ("Sunnyvale","1110 Breezewood Ct, 94089",HC+"1110-breezewood-ct-sunnyvale-ca/6jqe4tl2enwdc/",1578800,3,2,1108,"Under 1,400 sq ft"),
+ ("Sunnyvale","1389 Sydney Dr, 94087",HC+"1389-sydney-dr-sunnyvale-ca/q5t4x445sk1bx/",2098000,3,2,1585,"Shortlisted SV-2 (stretch)"),
+ ("Sunnyvale","885 Coachella Ave, 94085",HC+"885-coachella-ave-sunnyvale-ca/pdk8l0mmexsyf/",1468000,3,1.5,1085,"Under 1,400 sq ft"),
+ ("Sunnyvale","348 Angel Ave, 94086",HC+"348-angel-ave-sunnyvale-ca/xzpncqd86mzxn/",1988000,5,4,2428,"Shortlisted SV-8"),
+ ("Sunnyvale","813 San Petronio Ave, 94085",HC+"813-san-petronio-ave-sunnyvale-ca/qj730jk8zh50v/",1898500,3,2,1640,"Shortlisted SV-3"),
+ ("Sunnyvale","366 Pismo Ter, 94086",HC+"366-pismo-terrace-sunnyvale-ca/8ne6cmpm96972/",1999990,3,2.5,1354,"Under 1,400 sq ft"),
+ ("Sunnyvale","1181 Blazingwood Dr, 94089",HC+"1181-blazingwood-dr-sunnyvale-ca/h2ckhqlglck38/",1499888,3,2,1528,"Shortlisted SV-4"),
+ ("Sunnyvale","392 E McKinley Ave, 94086",HC+"392-e-mckinley-ave-sunnyvale-ca/rz3lk6p90r90f/",1898888,3,2,1313,"Under 1,400 sq ft"),
+ ("Sunnyvale","837 Dwight Ave, 94086",HC+"837-dwight-ave-sunnyvale-ca/c053k551yk7fs/",1638000,3,1.5,1073,"Under 1,400 sq ft"),
+ ("Sunnyvale","586 Borregas Ave, 94085",HC+"586-borregas-ave-sunnyvale-ca/ms9j6nkb1yzk7/",1890000,3,2,1516,"Shortlisted SV-5 (no garage)"),
+ ("Sunnyvale","263 E Hemlock Ave, 94085",HC+"263-e-hemlock-ave-sunnyvale-ca/xjfz2b4jk225k/",1658000,3,2,1168,"Under 1,400 sq ft"),
+ ("Sunnyvale","225 S Mathilda Ave, 94086",HC+"225-s-mathilda-ave-sunnyvale-ca/jkfxrmlcy1cxy/",1888000,5,3,1538,"Shortlisted SV-6 (no garage)"),
+ ("Sunnyvale","1213 Manet Dr, 94087",HC+"1213-manet-dr-sunnyvale-ca/3wzcrqs3ehtex/",1998000,3,2.5,1552,"Shortlisted SV-7"),
+ # Mountain View (under $2M page)
+ ("Mountain View","128 Bonny St, 94043",HC+"128-bonny-st-mountain-view-ca/kj77v6vcy2bf5/",1998000,3,2,1331,"Under 1,400 sq ft"),
+ ("Mountain View","1734 Spring St, 94043",HC+"1734-spring-st-mountain-view-ca/yht2y4sm2n246/",1799999,3,2,1104,"Under 1,400 sq ft"),
+ ("Mountain View","3312 Pyramid Way, 94043",HC+"3312-pyramid-way-mountain-view-ca/x7bd5xby250lm/",1988000,3,3.5,1781,"Shortlisted MV-1"),
+ ("Mountain View","3818 Pyramid Way, 94043",HC+"3818-pyramid-way-mountain-view-ca/1pzs1cd8wdrxy/",1750000,4,4,1751,"Shortlisted MV-2"),
+ ("Mountain View","435 Nicholas Dr, 94043",HC+"435-nicholas-dr-mountain-view-ca/bkykew0h9vlrc/",1599000,3,2.5,1375,"Under 1,400 sq ft"),
+ ("Mountain View","250 Stierlin Rd, 94043",HC+"250-stierlin-rd-mountain-view-ca/37z4f56f08jtw/",1988888,3,2,1080,"Under 1,400 sq ft"),
+ # North San Jose 95134
+ ("North San Jose","4213 Verdigris Cir, 95134",HC+"4213-verdigris-cir-san-jose-ca/mc0jn1lehbxx6/",1775000,3,2.5,1828,"Shortlisted NS-1"),
+ ("North San Jose","681 Epic Way (Pyrus Place Plan 3), 95134",HC+"681-epic-way-san-jose-ca/3qwgp7cwlh8tk/",1488000,3,3.5,1827,"Shortlisted NS-2 (townhouse)"),
+ ("North San Jose","687 Epic Way (Pyrus Place Plan 4), 95134",HC+"687-epic-way-san-jose-ca/7zh79vqcgxppy/",1568000,4,3.5,1987,"Shortlisted NS-3 (townhouse)"),
+ ("North San Jose","675 Epic Way (Pyrus Place Plan 5), 95134",HC+"plan-5-5m-pyrus-place/1wbbds2vwx6rn/",1798000,4,3.5,2315,"Shortlisted NS-4 (townhouse)"),
+ ("North San Jose","5114 Archangel Dr, 95002",HC+"5114-archangel-dr-san-jose-ca/v40qnbxtdc1fr/",1290000,4,2.5,1981,"Alviso 95002 - outside requested area"),
+ # North San Jose / Berryessa 95131
+ ("North San Jose","1317 Dryden Dr, 95131",HC+"1317-dryden-dr-san-jose-ca/wzylt837b9n38/",1650000,3,2.5,1538,"Shortlisted NS-5"),
+ ("North San Jose","1094 Rock Ave, 95131",HC+"1094-rock-ave-san-jose-ca/w9l5vydwvezwd/",1598000,3,2.5,1828,"Shortlisted NS-6"),
+ ("North San Jose","1280 Turrett Dr, 95131",HC+"1280-turrett-dr-san-jose-ca/8fhkb2v6tnj4c/",1275000,5,3,2032,"Shortlisted NS-12 (no garage)"),
+ ("North San Jose","2032 Nunes Dr, 95131",HC+"2032-nunes-dr-san-jose-ca/82vz0z8t7sfj8/",1295000,4,2,1234,"Under 1,400 sq ft"),
+ ("North San Jose","1459 Goldenlake Rd, 95131",HC+"1459-goldenlake-rd-san-jose-ca/z5v0snzk3t2wj/",1830000,6,4,2591,"Shortlisted NS-7"),
+ ("North San Jose","1382 Sajak Ave, 95131",HC+"1382-sajak-ave-san-jose-ca/g5szqffwf2fek/",2188000,4,3,2530,"Over budget (>5%)"),
+ ("North San Jose","1367 Shore Dr, 95131",HC+"1367-shore-dr-san-jose-ca/xgrzl1d0wwgzm/",1999888,5,5,2250,"Shortlisted NS-8"),
+ ("North San Jose","1972 Doxey Dr, 95131",HC+"1972-doxey-dr-san-jose-ca/mt0dhhzcrht2f/",1498000,3,2,1361,"Under 1,400 sq ft"),
+ ("North San Jose","1255 Briarberry Ct, 95131",HC+"1255-briarberry-ct-san-jose-ca/enj8qc2r8wx4v/",1299888,3,2,1215,"Under 1,400 sq ft"),
+ ("North San Jose","1357 Goldenlake Rd, 95131",HC+"1357-goldenlake-rd-san-jose-ca/xq69hyefwp75l/",1499000,4,2.5,1960,"Shortlisted NS-10"),
+ ("North San Jose","1873 Silkwood Ln, 95131",HC+"1873-silkwood-ln-san-jose-ca/7rjq4vsb9zlvk/",1598000,3,2.5,1828,"Shortlisted NS-9"),
+ ("North San Jose","1753 Ridgetree Way, 95131",HC+"1753-ridgetree-way-san-jose-ca/pbfmcqbvn1wg9/",2088888,4,3,2400,"Shortlisted NS-11 (stretch)"),
+]
+
+# (id, city, address, sqft, lot, bdba, garage, year, hoa, status, price, url, grocery, school, hospital, safety, commute, flags, S, L, V, Ver, avoid)
+SL = [
+ ("SC-7","Santa Clara","2831 Monroe St, Santa Clara 95051",1815,"7,000 (corner)","4/2","2-car attached",1958,"None","Active, ~44-68 days; cut $410K from $2.499M on 9/9/2026",1988888,
+  "Lucky/Safeway on El Camino ~1 mi (est.)","Bracher Elem (Santa Clara USD) 6/10, 0.27 mi; Bowers 7/10 0.43 mi","Kaiser Santa Clara Medical Center (ER) ~2 mi",
+  "Santa Clara violent crime below US average (city-data); flood zone likely X - verify; possible San Tomas Expwy noise.","15-20 min","Motivated seller after big cuts; 'fully permitted' expansion - get permit copies; corner lot sees more traffic.",4,4,5,4,False),
+ ("SC-5","Santa Clara","2527 Malone Pl, Santa Clara 95050",1617,"6,534","3/2 + 1/1 ADU","2-car attached",1957,"None","Active, 66 days; cut $300K",1995000,
+  "Safeway/Lucky, Homestead Rd ~1 mi (est.)","C.W. Haman Elem (Santa Clara USD) 6/10, 0.4 mi; Millikin 10/10 nearby (choice school)","Kaiser Santa Clara (ER) ~1.5-2 mi",
+  "Central Santa Clara, average-to-low crime; away from the Bay so lower flood/liquefaction risk (verify).","15-18 min","Right at the budget cap; permitted ADU with its own address (2529 Malone) - rental income or family suite.",4,5,4,4,False),
+ ("NS-6","North San Jose","1094 Rock Ave, San Jose 95131",1828,"3,000","3/2.5","2-car",2005,"$0 (verify)","Active, ~47 days",1598000,
+  "99 Ranch Market, Milpitas Square ~2 mi (est.)","Orchard Elem K-8 (Orchard SD) 5/10, 0.3 mi","Regional Medical Center of San Jose (ER) ~5 mi",
+  "Mixed residential/industrial Oakland Rd area, crime ~San Jose average; Redfin Flood Factor 5/10 - flood insurance likely; rail/truck noise.","15-20 min","Small lot; former rental; flood risk.",3,3,4,5,False),
+ ("SV-4","Sunnyvale","1181 Blazingwood Dr, Sunnyvale 94089 (Lakewood Village)",1528,"5,670","3/2","2-car attached",1958,"None","Active (~65 days); bought $1.25M Jun 2026, remodeled flip",1499888,
+  "New Wing Yuan Market, Lakewood Shopping Center ~0.5 mi","Fairwood Elem (Sunnyvale SD) 9/10, 0.3 mi; Fremont High 9/10","Kaiser Santa Clara (ER) ~2.5 mi",
+  "Sunnyvale crime below CA average (NeighborhoodScout); Flood Factor 1/10; Hwy 237/Lawrence noise ~0.5 mi.","8-12 min","Investor flip (+$250K in 2 months) - ask for permits and the full work list; local grocery center may be redeveloped.",3,4,5,4,False),
+ ("SV-8","Sunnyvale","348 Angel Ave, Sunnyvale 94086",2428,"6,400","5/4 (incl. 1/1 ADU)","Detached 2-car + EV, ADU above",2026,"None","Active, new construction; relisted $3.588M -> $2.98M -> $1.988M",1988000,
+  "Safeway on El Camino / downtown ~0.8 mi (est.)","Bishop Elem (Sunnyvale SD) 7/10, 0.7 mi; Fremont High 9/10","Kaiser Santa Clara (ER) ~3 mi",
+  "Central Sunnyvale, crime near city average; possible Caltrain/Central Expwy noise.","10-14 min","Priced to start a bidding war - expect final price well above $2M; confirm final inspection / certificate of occupancy.",3,5,3,4,False),
+ ("SC-1","Santa Clara","3021 Santa Maria Ave, Santa Clara 95051 (Bowers Crest)",1586,"~5,550","4/3 (2 primary suites)","2-car attached",1955,"None","Active, just listed",1799000,
+  "Bowers Plaza / El Camino centers ~0.9 mi","Likely Bowers Elem (Santa Clara USD) 7/10, ~0.5-1 mi","Kaiser Santa Clara (ER) ~1.5 mi",
+  "Santa Clara violent crime about half the US rate (city-data); flood zone likely X; occasional SJC aircraft noise.","12-18 min","Below city median $/sqft - expect multiple offers; confirm school assignment.",4,4,5,3,False),
+ ("SC-3","Santa Clara","646 Bucher Ave, Santa Clara 95051 (Mariposa Gardens)",1518,"5,247","3/2","2-car attached + EV",1954,"None","Active, 82 days; cut $100K",1988000,
+  "Safeway, 2760 Homestead Rd ~0.8 mi","Westwood Elem (Santa Clara USD) 6/10, 0.5 mi; Millikin 10/10 (choice)","Kaiser Santa Clara (ER) ~1.2 mi",
+  "Quiet residential street; flood zone likely X.","15-20 min","Long time on market, above median $/sqft - room to negotiate; expansion permits.",4,4,3,4,False),
+ ("NS-9","North San Jose","1873 Silkwood Ln, San Jose 95131",1828,"3,139","3/2.5","2-car attached",2007,"None listed","Active, ~41 days",1598000,
+  "99 Ranch Market, Milpitas Square ~2 mi (est.)","Orchard Elem K-8 (Orchard SD) 5/10, ~0.4 mi","Regional Medical Center of San Jose (ER) ~5 mi",
+  "Same area as NS-6: crime ~city average, moderate flood/liquefaction, rail noise.","15-20 min","Small lot; check flood factor.",3,3,4,4,False),
+ ("SV-7","Sunnyvale","1213 Manet Dr, Sunnyvale 94087",1552,"2,755","3/2.5","2-car attached",1976,"None","Active, ~96 days; cut ~$200-300K",1998000,
+  "Safeway/Lucky, Hollenbeck-El Camino ~1 mi (est.)","Stocklmeir Elem (Cupertino USD) 10/10 per listing - verify; Cupertino Middle 9/10","El Camino Hospital Mountain View (ER) ~3.5 mi",
+  "Low-crime southwest Sunnyvale; flood zone likely X.","16-20 min","Very small lot; school assignment conflicts in MLS - verify with Cupertino USD.",5,3,4,3,False),
+ ("SV-1","Sunnyvale","807 S Wolfe Rd, Sunnyvale 94086",1617,"7,000","4/2 + office","2-car",1965,"None","Active, ~26 days; cut $100K",2098888,
+  "Safeway/Lucky on El Camino ~0.8 mi (est.)","Likely Ponderosa Elem (Sunnyvale SD) ~6-7/10 (est.); Fremont High 9/10","Kaiser Santa Clara (ER) ~2.5 mi",
+  "Sunnyvale crime below CA average; fronts 4-lane Wolfe Rd (traffic noise).","12-16 min","5% over budget; busy-road frontage hurts resale.",4,3,3,4,False),
+ ("NS-5","North San Jose","1317 Dryden Dr, San Jose 95131 (Berryessa)",1538,"6,000","3/2.5","2-car attached",1971,"None","Active, listed 10/21/2026",1650000,
+  "Safeway, Berryessa Rd ~1.2 mi","Vinci Park Elem (Berryessa Union SD) 8/10, 0.2 mi","Regional Medical Center of San Jose (ER) ~4 mi",
+  "Berryessa is one of San Jose's safer areas (Niche A-); I-680 ~0.5 mi.","20-25 min (over limit)","Priced $210K under its 2024 sale - expect bidding; commute slightly over 20 min.",4,5,3,5,False),
+ ("NS-7","North San Jose","1459 Goldenlake Rd, San Jose 95131 (Berryessa)",2591,"6,090","6/4","2-car attached",1974,"None","Active, listed 10/22/2026; bought $1.6M Jul 2026 (flip)",1830000,
+  "Lundy/Berryessa corridor stores ~1-1.5 mi (est.)","Brooktree Elem (Berryessa Union SD) 6/10, 0.8 mi","Regional Medical Center of San Jose (ER) ~4 mi",
+  "Berryessa generally below SJ average crime (unverified); I-680/SJC noise.","18-25 min (borderline)","Fast flip - pull permits; commute borderline.",4,4,4,4,False),
+ ("SV-2","Sunnyvale","1389 Sydney Dr, Sunnyvale 94087",1585,"~4,350","3/2 + loft","2-car attached",1971,"None shown","Active, ~33 days",2098000,
+  "Safeway/Nob Hill ~1 mi (est.)","Nimitz Elem (Cupertino USD) 6/10, 0.1 mi; Cupertino Middle 9/10; Fremont High 9/10","El Camino Hospital Mountain View (ER) ~3.5 mi",
+  "One of Sunnyvale's safest areas (NeighborhoodScout); flood zone likely X.","18-22 min (borderline)","'Patio home' - confirm detached and not in the Woodgate townhouse HOA; 5% over budget.",5,4,3,3,False),
+ ("NS-11","North San Jose","1753 Ridgetree Way, San Jose 95131 (Tennyson Woods)",2400,"6,000","4/3","3-car attached",1979,"None","Active, listed 10/21/2026",2088888,
+  "Lundy Ave / Sierra Rd stores ~1-1.5 mi (est.)","Brooktree Elem (Berryessa Union SD) 6/10, 0.1 mi","Regional Medical Center of San Jose (ER) ~4.5 mi",
+  "Established Berryessa neighbourhood; some I-680 noise.","20-25 min (over limit)","4.4% over budget; 32-year owner - check roof, plumbing, electrical; split-level stairs.",4,4,3,4,False),
+ ("SC-2","Santa Clara","5019 Avenida de Lago, Santa Clara 95054",1584,"6,500","4/2","2-car attached (tract, est.)",1976,"None","Active",1968888,
+  "Safeway, Rivermark Village ~1 mi","Kathryn Hughes Elem (Santa Clara USD) 6/10, 0.2 mi","Kaiser Santa Clara (ER) ~4.5 mi",
+  "Quiet tract; liquefaction likely (Bay mud); Levi's Stadium / SJC noise.","8-12 min","Priced ~$300K above an as-is twin sale ($1.66M) - you pay for the remodel; check permits.",4,4,3,3,False),
+ ("SC-8","Santa Clara","2005 Stanley Ave, Santa Clara 95050 (Westwood)",1420,"7,000","3/3","2-car",1955,"None","Active, listed 10/14/2026",1899950,
+  "Lucky/Safeway ~1 mi (est.)","Westwood Elem (Santa Clara USD) 6/10, 0.5 mi","Kaiser Santa Clara (ER) ~1.5 mi",
+  "Redfin Flood Factor 5/10 (56-68% over 30 yrs); San Tomas / I-280 noise.","15-20 min","High vs. a $1.65M sale across the street; check addition permits; flood insurance.",3,4,2,4,False),
+ ("MV-2","Mountain View","3818 Pyramid Way, Mountain View 94043",1751,"~1,425","4/4","2-car attached",2019,"~$186/mo","Active; cut $238K",1750000,
+  "Safeway, 570 N Shoreline ~2 mi (est.)","Jose Antonio Vargas Elem (MV Whisman SD) 8/10, 0.3 mi","El Camino Hospital Mountain View (ER) ~3 mi",
+  "Quiet Whisman area; near MEW Superfund groundwater plume (ask for vapor disclosure); light-rail/Moffett noise.","12-18 min","Small-lot 3-story detached home; data from same-plan sale (listing blocked) - verify; Mello-Roos check.",4,4,5,2,False),
+ ("MV-1","Mountain View","3312 Pyramid Way, Mountain View 94043",1781,"~1,425","3/3.5","2-car attached",2018,"~$186/mo","Active",1988000,
+  "Safeway, 570 N Shoreline ~2 mi (est.)","Jose Antonio Vargas Elem (MV Whisman SD) 8/10, 0.3 mi","El Camino Hospital Mountain View (ER) ~3 mi",
+  "Same as MV-2.","12-18 min","Same-plan twin sold $2.125M - fair price; tiny lot; vapor disclosure.",4,4,4,2,False),
+ ("NS-1","North San Jose","4213 Verdigris Cir, San Jose 95134 (Renaissance)",1828,"~2,500 (est.)","3/2.5","2-car attached (est.)",1996,"Small (verify)","Active, first time on market",1775000,
+  "Safeway, Rivermark Plaza ~1 mi","Don Callejon K-8 (Santa Clara USD) ~7/10 (est.), 0.5 mi","Kaiser Santa Clara (ER) ~4 mi",
+  "Crime at/below SJ average (est.); mapped liquefaction zone; FEMA X behind levees likely; VTA/Hwy 237 noise.","10-12 min","Listing blocked - details unverified; a smaller house on the same street sold $1.88M, so expect offers.",4,4,4,2,False),
+ ("SC-6","Santa Clara","2199 Avenida de Las Flores, Santa Clara 95054",1563,"7,125","3/2","Attached",1976,"None","Active - Zillow tags PRE-FORECLOSURE",1399000,
+  "Safeway, Rivermark ~1 mi","Kathryn Hughes Elem (Santa Clara USD) 6/10, 0.3 mi","Kaiser Santa Clara (ER) ~4.5 mi",
+  "Same quiet tract as SC-2.","8-12 min","Distressed sale: lender/timing risk, as-is, dated interior; price shown $1.399M-$1.599M.",4,4,4,2,False),
+ ("NS-10","North San Jose","1357 Goldenlake Rd, San Jose 95131 (Berryessa)",1960,"~6,000 (est.)","4/2.5","Likely",1973,"Likely none","Active",1499000,
+  "Safeway, Berryessa Rd ~1.3 mi","Brooktree Elem 6/10 ~0.9 mi (maybe Vinci Park 8/10)","Regional Medical Center of San Jose (ER) ~4 mi",
+  "Quiet Berryessa (Niche A-); low flood risk.","20-25 min (over limit)","Fixer - budget $100-250K+; details unconfirmed.",4,4,4,2,False),
+ ("SV-3","Sunnyvale","813 San Petronio Ave, Sunnyvale 94085",1640,"~5,600 (est.)","3/2 + office","NOT confirmed",1955,"Likely none","Active",1898500,
+  "Fair Oaks / Arques markets ~1 mi (est.)","San Miguel Elem (Sunnyvale SD) 5/10, 0.2 mi; Fremont High 9/10","Kaiser Santa Clara (ER) ~3 mi",
+  "Check FEMA zone; some Hwy 101 noise.","12-15 min","Least verified; garage unconfirmed; office permits.",3,3,3,2,False),
+ ("NS-8","North San Jose","1367 Shore Dr, San Jose 95131",2250,"3,252","5/5","2-car",2014,"Unknown","Active, ~34 days",1999888,
+  "Market Park Plaza area ~1 mi (est.)","Vinci Park Elem (Berryessa Union SD) 8/10, 0.7 mi","Regional Medical Center of San Jose (ER) ~4 mi",
+  "Moderate crime (unverified); FEMA 'D' nearby; Oakland Rd/I-880/SJC noise.","15-22 min","Tiny lot; high vs. 1399 Shore Dr sale ($1.75M).",3,4,2,3,False),
+ ("NS-2","North San Jose","681 Epic Way (Pyrus Place), San Jose 95134",1827,"-","3/3.5","2-car + EV",2026,"$370/mo","Relisted at $1.58M",1488000,
+  "Safeway Rivermark ~2 mi","Montague Elem 5/10 ~2.5 mi","Kaiser Santa Clara ~5 mi","Average crime; liquefaction; construction noise.","12-15 min","MLS lists it as a 3-story TOWNHOUSE - not a detached house.",3,3,3,4,True),
+ ("NS-3","North San Jose","687 Epic Way (Pyrus Place), San Jose 95134",1987,"-","4/3.5","2-car + EV",2026,"$375/mo","Active, 29 days",1568000,
+  "Safeway Rivermark ~2 mi","Montague Elem 5/10 ~2.5 mi","Kaiser Santa Clara ~5 mi","Same as NS-2.","12-15 min","Townhouse (3-story) - not a detached house.",3,3,3,4,True),
+ ("NS-4","North San Jose","675 Epic Way Plan 5 (Pyrus Place), San Jose 95134",2315,"-","4/3.5","2-car (est.)",2026,"~$375/mo","Unverified (floor plan)",1798000,
+  "Safeway Rivermark ~2 mi","Montague Elem 5/10 ~2.5 mi","Kaiser Santa Clara ~5 mi","Same as NS-2.","12-15 min","Townhouse floor plan with no MLS record.",3,3,2,1,True),
+ ("SV-5","Sunnyvale","586 Borregas Ave, Sunnyvale 94085",1516,"5,725","3/2","NONE (driveway)",1949,"None","Active; price raised after offer deadline",1890000,
+  "Downtown Sunnyvale ~1 mi","Bishop Elem 7/10, 0.3 mi","El Camino MV / Kaiser SC ~4 mi","Flood risk 4/10; Hwy 101 ~0.4 mi.","12-18 min","No garage (fails requirement).",3,3,2,4,True),
+ ("SV-6","Sunnyvale","225 S Mathilda Ave, Sunnyvale 94086",1538,"5,000","5/3 (incl. ADU)","NONE (converted to ADU)",1920,"None","Active, relisted",1888000,
+  "Trader Joe's / downtown ~0.8 mi","Cumberland Elem 10/10, 0.8 mi","El Camino MV / Kaiser SC ~3.5 mi","Busy Mathilda frontage; Caltrain horns.","10-13 min","No garage and main house only ~960 sq ft (fails requirements).",3,2,2,4,True),
+ ("NS-12","North San Jose","1280 Turrett Dr, San Jose 95131",2032,"5,998","5/3 (incl. JADU)","NONE (converted to JADU)",1970,"None","Active; cut $475K",1275000,
+  "Lundy Ave stores ~1 mi (est.)","Vinci Park Elem 8/10, 0.4 mi","Regional Medical Center SJ ~4 mi","Crime ~SJ average.","18-22 min","No garage (fails requirement); priced to start bidding.",3,3,4,4,True),
+]
+def _url(i):
+    for a in ALL:
+        if a[7].startswith("Shortlisted " + i):
+            return a[2]
+    raise KeyError(i)
+SL = [r[:11] + (_url(r[0]),) + r[11:] for r in SL]
+
+PICK = "SC-7"
+ALT = ["SC-5","NS-6","SV-4","SV-8","SC-1","SC-3","NS-9","SV-7","SV-1","NS-5"]
+REASON = {
+ "SC-5": "Ties for the top score: 1,617 sq ft 3/2 ranch plus a permitted 1-bed ADU with its own address, attached 2-car garage, 15-18 min to Marvell, 1.5 mi to Kaiser. $1.995M after a $300K cut - right at budget, negotiable.",
+ "NS-6": "Best value per sq ft that meets the commute: 1,828 sq ft, built 2005, 2-car garage, $1.598M ($874/sqft), 15-20 min. Downsides: small lot, Flood Factor 5/10 and an industrial-edge street.",
+ "SV-4": "Closest commute (8-12 min) and best school (Fairwood 9/10): remodeled 3/2, 1,528 sq ft, 2-car garage, only $1.5M. It's a quick investor flip - insist on permits and a full inspection.",
+ "SV-8": "Brand-new 2026 build, 2,428 sq ft with a 1-bed ADU, 10-14 min commute. The $1.988M price is a bidding-war starter after asking $2.98M - expect it to sell well above budget.",
+ "SC-1": "Fresh listing at $1.799M, below the city median $/sqft: 4 bed / 3 bath with two primary suites, 2-car garage, 12-18 min. Expect multiple offers; confirm the school.",
+ "SC-3": "Remodeled 3/2 with EV-ready 2-car garage on a quiet street near Millikin (10/10, choice school). 82 days on market, so room to negotiate below $1.988M.",
+ "NS-9": "Twin of NS-6 (2007, 1,828 sq ft, 3/2.5, 2-car) at $1.598M with 15-20 min commute; same small-lot and flood caveats.",
+ "SV-7": "Quiet, low-crime southwest Sunnyvale with a Cupertino USD address (Stocklmeir 10/10 claimed - verify). Tiny 2,755 sq ft lot; 96 days on market, so negotiable.",
+ "SV-1": "4 bed + office on a 7,000 sq ft lot, 12-16 min commute - but $2.099M (5% over budget) and it fronts 4-lane Wolfe Rd.",
+ "NS-5": "Highest raw score (fully verified, Vinci Park 8/10, safe Berryessa) at $1.65M, but the commute is 20-25 min, just over your limit, and it will likely get bid up.",
+}
+AVOID = [
+ ("NS-2 / NS-3 / NS-4", "Pyrus Place (Epic Way) new builds are 3-story townhouses with $370+/mo HOA, not detached houses."),
+ ("SV-5 / SV-6 / NS-12", "No garage (SV-6's main house is also only ~960 sq ft)."),
+ ("SC-6 (caution)", "Pre-foreclosure: cheap, but lender approval, timing and as-is condition make it a risky first purchase."),
+]
+SUMMARY = (
+ "I reviewed {n_all} active listings on Homes.com, cross-checked on MLSListings, Redfin, Zillow and brokerage sites, across Santa Clara, Sunnyvale, Mountain View and North San Jose. "
+ "{n_sl} homes met (or came within 5% of) your size, bed/bath and budget rules; research agents then checked each one's grocery, school, hospital, safety, hazards and commute to Marvell. "
+ "<b>Key finding:</b> Santa Clara is the sweet spot - its single-family median is $1.82M ($1,212/sq ft, MLSListings Sep 2026), so $2M buys a full 1,500-1,800 sq ft house 15-20 minutes from Marvell. "
+ "Sunnyvale (~$2.8M median) and Mountain View ($2.98M) only offer flips, small lots or bidding-war bait at this price; North San Jose / Berryessa gives the most space but some homes are 20-25 minutes away."
+)
+WHY = [
+ "<b>Top score (21/25) with the lowest price per sq ft of the leaders</b> - ~$1,096/sq ft vs. the $1,212 Santa Clara median.",
+ "<b>Most house for the money:</b> 1,815 sq ft, 4 bed / 2 bath, single story, central air, attached 2-car garage on a 7,000 sq ft corner lot.",
+ "<b>Motivated seller:</b> cut from $2.499M to $1.989M ($410K) and relisted - good leverage to negotiate below asking.",
+ "<b>Commute and services:</b> 15-20 min to Marvell, Kaiser Santa Clara ER ~2 mi, Bracher Elementary 0.3 mi, no HOA.",
+]
+WATCH = "Watch-outs: the listing says the expansion is 'fully permitted' - get copies before offering; the corner lot gets more street traffic; Bracher Elementary rates 6/10 (Bowers 7/10 nearby). If you'd rather have an ADU for rental income, SC-5 scores the same."
+SOURCES = [
+ "Listings: homes.com city/ZIP pages (Oct 27, 2026); MLSListings ML82058420 (2831 Monroe), ML82053595 (2527 Malone), ML82056880 (646 Bucher), ML82063878 (3021 Santa Maria); Coldwell Banker, Compass, RE/MAX, Sereno detail pages",
+ "Market: MLSListings Santa Clara market stats Sep 2026 ($1.817M median, $1,212/sqft); aegishomesre.com Mountain View YTD 2026 ($2.98M); julianalee.com Sunnyvale and 95131/95134 sales reports",
+ "Marvell address: marvell.com/company/offices",
+ "Schools: GreatSchools and Niche school pages; Santa Clara USD, Sunnyvale SD, Cupertino USD, Berryessa Union SD",
+ "Safety: city-data.com Santa Clara crime 2025; NeighborhoodScout Sunnyvale 2024; Niche Berryessa; Redfin/First Street Flood Factor; San Jose Inside (Regional Medical Center trauma closure 2024)",
+]

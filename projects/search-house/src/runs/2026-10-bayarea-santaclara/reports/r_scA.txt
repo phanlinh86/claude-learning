@@ -1,0 +1,22 @@
+AREA: Santa Clara SFH Sep 2026 median $1,817,000, $1,212/sqft, 9 DOM (https://about.mlslistings.com/browse-listings/Santa-Clara-County/Santa-Clara)
+SC-1 3021 Santa Maria Ave SC 95051 (Bowers Crest) ML82063878 | 1586 | ~5550 | 4/3 (2 primary suites) | 2-car attached | 1955 | no HOA | detached | Active new | $1.799M ($1,134/sqft, below median), no price changes
+FLAGS: none; school listed "Other"
+GROCERY Bowers Plaza/El Camino centers ~0.8-0.9mi; SCHOOL likely Bowers Elem (SCUSD) 7/10 ~0.5-1mi; HOSPITAL Kaiser SC ~1.5mi
+SAFETY: SC violent 98.7 vs US 180.9, property 205 vs 120.8 (city-data); FEMA X likely; some SJC reverse-flow noise
+COMMUTE 12-18 | S4 L4 V5 Ver3
+
+SC-3 646 Bucher Ave (Mariposa Gardens) ML82056880 | 1518 | 5247 | 3/2 | 2-car attached EV | 1954 | 0 | detached 1-story | Active 82 DOM | $1.988M (from $2.088M) $1,310/sqft
+FLAGS: sitting long; above median; expanded - permits
+GROCERY Safeway 2760 Homestead ~0.7-1mi; SCHOOL Westwood 6/10 0.52 (Millikin 10/10 choice school 0.48); HOSPITAL Kaiser SC ~1-1.5mi
+COMMUTE 15-20 | S4 L4 V3 Ver4
+
+SC-4 930 White Dr | 1446 | ~5300? | 4/2 | garage unconfirmed | ~1955 | ? | SFH | Active new | $1.988888M ($1,375/sqft)
+FLAGS: overpriced (944 White 1465sqft sat 145 DOM at $1.928M); small rooms; details unconfirmed
+GROCERY Safeway Homestead ~0.5-1; SCHOOL Central Park Elem 8/10 ~0.23mi; HOSPITAL Kaiser ~1-1.5
+SAFETY: next to Central Park | COMMUTE 15-18 | S4 L5 V2 Ver2
+
+SC-7 2831 Monroe St ML82058420 | 1815 | 7000 corner | 4/2 | 2-car attached | 1958 | 0 | detached 1-story R1 central air | Active 44-68 DOM | $1.988888M (from $2.499M, -$410K 9/9/2026) ~$1,096/sqft
+FLAGS: motivated seller; "fully permitted" expansion - verify; corner lot traffic
+GROCERY El Camino supermarkets ~1mi; SCHOOL Bracher Elem 6/10 0.27 (Bowers 7/10 0.43); HOSPITAL Kaiser ~2mi
+COMMUTE 15-20 | S4 L4 V5 Ver4
+SOURCES: https://www.xome.com/realestate/3021-santa-maria-avenue-santa-clara-ca-95051-l428380056 ; https://www.mlslistings.com/property/ML82056880 ; https://www.mlslistings.com/property/ML82058420 ; https://www.city-data.com/crime/crime-Santa-Clara-California.html

@@ -1,0 +1,22 @@
+SC-2 5019 Avenida de Lago SC 95054 | 1584 | 6500 | 4/2 | 2-car attached (tract, est) | ~1976 | no HOA | detached 1-story | Active | $1.969M (~$1,243/sqft)
+FLAGS: high for tract (as-is twin 4967 Avenida De Angelina sold $1.66M); check remodel permits
+GROCERY Safeway Rivermark ~1mi; SCHOOL Kathryn Hughes Elem (SCUSD) 6/10 ~0.2mi; HOSPITAL Kaiser SC ~4.5mi
+SAFETY: quiet tract low-mod crime; flood zone check (likely X); liquefaction likely; Levi's/SJC noise
+COMMUTE 8-12 | S4 L4 V3 Ver3
+
+SC-6 2199 Avenida de Las Flores SC 95054 | 1563 | 7125 | 3/2 | attached garage | 1976 | none | detached 1-story R1 | Active, Zillow "Pre-foreclosure", 190 days; price $1.399M per homes.com card (index also shows $1.599M) | Zestimate $1.463M
+FLAGS: distressed sale (lender/timing risk, as-is, dated interior); not 55+/leasehold/scam
+same amenities (Kathryn Hughes ~0.3mi) | COMMUTE 8-12 | S4 L4 V4 Ver2
+
+SC-5 2527 Malone Pl SC 95050 | 1617 + ~560 ADU (permitted, own address) | 6534 | 3/2 + 1/1 ADU | attached 2-car | 1957 | none | detached ranch | Active 66 DOM | $1.995M after $300K drop
+FLAGS: at budget cap; negotiable
+GROCERY Safeway/Lucky Homestead ~1mi; SCHOOL C.W. Haman Elem 6/10 0.39mi (Millikin 10/10 0.63mi nearby - verify boundary); HOSPITAL Kaiser SC ~1.5-2mi
+SAFETY: central SC avg-low crime; away from Bay; San Tomas/Homestead traffic
+COMMUTE 15-18 | S4 L5 V4 Ver4
+
+SC-8 2005 Stanley Ave SC 95050 | 1420 | 7000 | 3/3 | 2-car | 1955 | 0 | detached (Westwood) | Active new 10/14/2026 | $1.89995M ($1,338/sqft)
+FLAGS: Flood Factor 5/10 (56-68% 30yr); high vs comp 2006 Stanley $1.65M; check addition permits; pond
+GROCERY Lucky/Safeway ~1mi; SCHOOL Westwood Elem 6/10 0.5mi; HOSPITAL Kaiser SC ~1.5mi
+SAFETY: avg crime; flood main hazard; San Tomas/280 noise
+COMMUTE 15-20 | S3 L4 V2 Ver4
+SOURCES: https://www.mlslistings.com/property/ML82058329 ; https://www.zillow.com/homedetails/2199-Avenida-De-Las-Flores-Santa-Clara-CA-95054/19488563_zpid/ ; https://about.mlslistings.com/property/ML82053595 ; https://www.redfin.com/CA/Santa-Clara/2005-Stanley-Ave-95050/home/1305380 ; https://www.greatschools.org//california/santa-clara/5633-Kathryn-Hughes-Elementary-School/

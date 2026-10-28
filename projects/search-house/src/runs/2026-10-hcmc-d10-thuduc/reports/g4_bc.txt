@@ -1,0 +1,17 @@
+TD-15 | Ngô Chí Quốc, Bình Chiểu (Tam Bình) | 53m2 4x14 | 4 tầng | 2PN/3WC | hẻm ô tô tránh | legal n/a | listing page price 4.9 tỷ, title says "nhỉnh 4 tỷ TL" | ~92tr/m2 at 4.9
+FLAGS: price mismatch (negotiate toward ~4.1-4.5); only 2PN; next to Bình Chiểu IZ
+MARKET Chợ Bình Chiểu ~1 km; SUPERMARKET BHX ~0.5 km, GO! Dĩ An ~4 km; SCHOOL TH Bình Chiểu ~1-1.5 km; HOSPITAL BV Thủ Đức (29 Phú Châu, Class I, 800 beds) ~4-5 km
+SAFETY: industrial-zone worker area, past bag-snatching reports; heavy trucks; no flood listing
+S3 L3 V3
+
+TD-16 | Đường số 5, Linh Trung (Linh Xuân) near Hoàng Diệu 2 / ĐH Ngân Hàng | 59.1m2, 5.5m frontage | floors n/a | 2PN/2WC | n/a | legal n/a | 5.05 tỷ (~85tr/m2) | batdongsan category page only
+MARKET Chợ Nhỏ ~1 km (busy, cheap); SUPERMARKET BHX Hoàng Diệu 2 ~0.5 km, Vincom Thủ Đức ~2.5 km; SCHOOL TH Linh Trung ~1 km; HOSPITAL BV Đa khoa khu vực Thủ Đức (64 Lê Văn Chí) ~1-1.5 km
+SAFETY: student/worker area between Linh Trung EPZ & ĐHQG; petty/motorbike theft; no flood report
+S3 L4 V3
+
+TD-17 | alley Bình Thọ near Vincom Thủ Đức | 88m2 | 4 tầng | 7PN/7WC | ô tô tránh | legal n/a | 28/07/2026 | 5.8 tỷ (~66tr/m2)
+FLAGS: rooming house/CHDV not family home; price far below area 100-150tr/m2 -> likely vi bằng/planning; suspicious
+MARKET Chợ Thủ Đức ~1.5 km; SUPERMARKET Vincom Thủ Đức/WinMart ~0.5 km; SCHOOL TH Bình Thọ ~1 km; HOSPITAL BV ĐK khu vực Thủ Đức ~2.5 km
+SAFETY: central, safer; near Metro; traffic on Võ Văn Ngân
+S4 L4 V2
+SOURCES: https://www.pharmacity.vn/benh-vien-thu-duc.htm ; https://hellobacsi.com/care/benh-vien/benh-vien-da-khoa-khu-vuc-thu-duc-2204/ ; https://news.tuoitre.vn/residents-warned-of-23-frequently-flooded-streets-in-ho-chi-minh-city-103251121111338935.htm

@@ -49,3 +49,6 @@ Sections: title with budget in USD and tỷ + rate; Summary (ads reviewed, how m
 
 ## Deliver
 Send the PDF and Excel with SendUserFile. Write a short markdown summary of the pick, top 10 and avoid list to the attached Project if one exists. In the chat reply: the main pick and why in 2–3 sentences, the top 10 as one line each, the avoid list, method caveats (estimated distances, blocked pages), and a Sources list.
+
+## Reuse the build scripts
+Before writing the Excel and PDF, look in `projects/search-house/src/runs/` for the latest run in the same market. Copy that folder to `src/runs/<yyyy-mm>-<area>/`, replace `data.py` with this run's listings, research and wording, adjust titles in the build scripts, run them, then commit the new run folder (scripts, `reports/`, `output/`). Never put the user's email or other personal details in committed files - the repo is public.

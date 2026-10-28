@@ -1,0 +1,16 @@
+AREA: Sunnyvale SFH Sep 2026 ~$2.82M median ~$1,653/sqft (julianalee calc); crime violent 2.39/1k vs CA 4.86, property 18.51 vs 20.78 (NeighborhoodScout)
+SV-3 813 San Petronio Ave 94085 | 1640 | ~5600? | 3+office/2 | garage NOT confirmed | 1950s | likely none | detached | Active Compass | $1.8985M (~$1,158/sqft)
+FLAGS: least verified; garage unconfirmed; office/addition permits
+GROCERY Fair Oaks/Arques ~0.8-1mi; SCHOOL San Miguel Elem (SSD) 5/10 ~0.2mi (Fremont HS 9/10); HOSPITAL Kaiser SC ~3mi
+SAFETY: check FEMA; 101 noise | COMMUTE 12-15 | S3 L3 V3 Ver2
+
+SV-4 1181 Blazingwood Dr 94089 (Lakewood Village) ML82064946 | 1528 | 5670 | 3/2 | 2-car attached | 1958 | none | detached SFH | Active as of Aug 27; ~65 DOM | $1.499888M (~$982/sqft); sold $1.25M 6/24/26, flipped
+FLAGS: investor flip ~$250K markup - permits & work list; local grocery center proposed redevelopment
+GROCERY New Wing Yuan Market Lakewood ~0.5mi; SCHOOL Fairwood Elem (SSD) 9/10 0.29mi (Fremont HS 9/10); HOSPITAL Kaiser SC ~2.5mi
+SAFETY: flood factor 1/10; 237/Lawrence noise ~0.5mi; liquefaction moderate
+COMMUTE 8-12 | S3 L4 V5 Ver4
+
+SV-5 586 Borregas Ave 94085 | 1516 | 5725 | 3/2 | NO GARAGE | 1949 | 0 | detached | Active | $1.89M (raised after offer deadline)
+FLAGS: no garage -> fails; flood 4/10 -> AVOID
+GROCERY downtown ~1mi; SCHOOL Bishop Elem 7/10; HOSPITAL El Camino MV/Kaiser ~4mi | COMMUTE 12-18 | S3 L3 V2 Ver4
+SOURCES: https://www.remax.com/ca/sunnyvale/home-details/1181-blazingwood-dr-sunnyvale-ca-94089/15327621818992478372/M00000101/ML82064946 ; https://www.redfin.com/CA/Sunnyvale/1181-Blazingwood-Dr-94089/home/1173463 ; https://www.compass.com/homedetails/586-Borregas-Ave-Sunnyvale-CA-94085/761817855427611801_lid/ ; https://www.neighborhoodscout.com/ca/sunnyvale/crime ; https://julianalee.com/sunnyvale/real-estate-sales/sunnyvale-home-sales-2026-09.htm

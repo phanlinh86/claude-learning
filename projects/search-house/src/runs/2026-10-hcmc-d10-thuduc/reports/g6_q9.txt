@@ -1,0 +1,12 @@
+TD-18 | off Lã Xuân Oai, Tăng Nhơn Phú A | 76m2 4.5x15 | cấp 4 | 2PN | alley width n/a | legal n/a | 27/10/2026 | 4.64 tỷ (~61tr/m2)
+FLAGS: below street avg; old house; verify SHR/hoàn công; Lã Xuân Oai flooded 300m on 14/8/2023
+MARKET Chợ Tăng Nhơn Phú ~1 km (local, low-lying); SUPERMARKET BHX <1 km, Vincom Plaza Lê Văn Việt ~2-3 km; SCHOOL public primary TNP ward ~1 km (unverified); HOSPITAL BV Quân dân y miền Đông ~2.5 km (Grade II, 500 beds, MRI, emergency), BV Lê Văn Việt ~2 km
+SAFETY: quiet established; flooding is main risk; ~17 km / 40-50 min to D10
+S3 L4 V4
+
+TD-19 | alley Nguyễn Xiển, Long Bình near Vinhomes Grand Park | 62m2 4x15 | 2 tầng | 4PN | HXH | legal n/a | date n/a | 4.99 tỷ (~80tr/m2)
+FLAGS: above Long Bình avg 56tr/m2; 4PN on 2 floors suspicious; check Nguyễn Xiển widening; container trucks
+MARKET local Long Bình ~2 km; SUPERMARKET Vincom Mega Mall Grand Park ~1.5-3 km; SCHOOL public primary Long Bình ~1.5 km; HOSPITAL Vinmec Grand Park clinic ~2 km (clinic only), real hospital BV Quân dân y miền Đông ~6-7 km
+SAFETY: newer filling area, quiet stretches; hospitals far; 22-25 km / 50-70 min to D10
+S3 L3 V2
+SOURCES: https://vnexpress.net/duong-ngap-ca-met-o-thu-duc-4641696.html ; https://hellobacsi.com/care/benh-vien/benh-vien-quan-dan-y-mien-dong-2281/ ; https://www.vinmec.com/eng/hospital/vinmec-grand-park-international-general-clinic

@@ -1,0 +1,18 @@
+PN-1 Đặng Văn Ngữ, old P10 PN | 54m2 4.5x12 | 1 trệt 2 lầu | 4PN/4WC | HXH | sổ hồng riêng | 04/10/2026 | 6.89 tỷ (127tr/m2) furnished
+FLAGS: 17% below avg; bán gấp; floor count mismatch; no hoàn công info
+MARKET Chợ Trần Hữu Trang ~0.8; SUPERMARKET BHX <0.5, Co.opmart Rạch Miễu ~2; SCHOOL TH Phạm Ngọc Thạch ~0.5-1 (Labor Order, city/national prizes); HOSPITAL Hoàn Mỹ Sài Gòn ~1.5, BV Phú Nhuận ~2
+SAFETY: central established, ordinary petty theft; rush hour traffic; ~3.5km/12-15 min to Hồ Con Rùa
+S4 L4 V4 Ver3
+
+PN-3 Trần Hữu Trang | 60m2 (dims 69.75) | trệt 2 lầu | 3PN/3WC | motorbike-only alley (no car) | sổ hồng riêng chính chủ | 27/10 | 7.6 tỷ TL
+FLAGS: area mismatch; no car access; near budget ceiling
+MARKET Chợ Trần Hữu Trang ~0.3; SUPERMARKET BHX/WinMart+ <0.5; SCHOOL TH Nguyễn Đình Chính ~1 (two sessions, 99.7% promotion); HOSPITAL Hoàn Mỹ Sài Gòn ~1
+SAFETY: dense central safe; motorbike alley limits emergency access; ~10-12 min to Hồ Con Rùa
+S4 L4 V3 Ver2
+
+PN-5 hẻm Nguyễn Kiệm, Đức Nhuận | 70m2 | 2 tầng | 5PN | 2m alley no car | sổ hồng (claim) | 27/10 | 6.6 tỷ (94tr/m2)
+FLAGS: 40% below avg; broker; rooming layout; Nguyễn Kiệm flooding 7 Oct 2026
+MARKET local ~1.5; SUPERMARKET Co.opmart Nguyễn Kiệm ~1-1.5; SCHOOL TH Hồ Văn Huê ~1 (national std); HOSPITAL BV Quân y 175 ~2
+SAFETY: flood & traffic axis; 15-20 min to Hồ Con Rùa
+S3 L3 V3 Ver2
+SOURCES: https://toplist.vn/top-list/truong-tieu-hoc-cong-lap-tot-nhat-quan-phu-nhuan-tp-hcm-57949.htm ; https://www.vietnamplus.vn/ngap-keo-dai-do-mua-lon-o-phia-bac-thanh-pho-ho-chi-minh-post1140641.vnp

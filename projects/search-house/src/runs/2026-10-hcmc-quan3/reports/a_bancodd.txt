@@ -1,0 +1,12 @@
+Q3-A Nguyễn Thiện Thuật, Bàn Cờ (old P3) | 58m2 claimed but 3.5x14.5=50.75 | 1 trệt 2 lầu | 4PN/3WC | alley n/a, "sân đỗ xe" | sổ hồng riêng, hoàn công đủ (claim) | 25/10/2026 | 6.8 tỷ
+FLAGS: ~50% of Q3 avg; area mismatch; broker, masked phone, bait phrases
+MARKET Chợ Bàn Cờ ~0.2 km (famous, cramped); SUPERMARKET Co.opmart Nguyễn Đình Chiểu ~1 km, BHX ~0.3; SCHOOL TH Phan Đình Phùng ~0.4 km (top Q3 public); HOSPITAL BV Bình Dân ~0.7 km (major public surgical), BV 115 ~1.5
+SAFETY: dense, long-established, safe; narrow motorbike alleys; no flood reports
+S4 L4 V2 Ver2
+
+Q3-B hẻm 62 Lý Chính Thắng, Xuân Hòa | 60m2 6x10 | 2 tầng | 4PN/2WC | alley n/a (5m, motorbike) | "sổ công nhận 60m2", no hoàn công | 19/10/2026 | 4.9 tỷ (82tr/m2)
+FLAGS: severe; same hẻm 31m2 at 7 tỷ; likely shared/vi bằng/bait
+MARKET Chợ Tân Định ~1.5 km; SUPERMARKET Co.opmart NĐC ~1.2, BHX/WinMart+ ~0.5; SCHOOL TH Nguyễn Thái Sơn ~0.5 km (reputable); HOSPITAL BV Bình Dân ~1.3, Từ Dũ ~2
+SAFETY: quiet central well-off area; rush-hour traffic; central Q3 roads flooded in heavy rain 2024-25
+S4 L4 V1 Ver2  -> AVOID
+SOURCES: https://mytour.vn/vi/blog/bai-viet/top-6-truong-tieu-hoc-cong-lap-xuat-sac-o-quan-3.html ; https://tuoitrenews.vn/news/society/20240615/heavy-rainfall-swamps-downtown-ho-chi-minh-city-streets/80428.html

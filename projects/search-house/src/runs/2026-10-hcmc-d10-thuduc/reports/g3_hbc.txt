@@ -1,0 +1,21 @@
+TD-07 | Đường số 10 frontage, Hiệp Bình (old HBC) | 51.6m2 4.3x12 | 4 tầng | 6PN/4WC | frontage | legal n/a | ~27/10/2026 | 5.62 tỷ (~109tr/m2)
+FLAGS: 6PN suggests rental build; legal unconfirmed
+MARKET Chợ Hiệp Bình ~0.5-1 km; SUPERMARKET GigaMall ~1.5-2 km, BHX ~0.5 km; SCHOOL TH Hiệp Bình Chánh ~1 km; HOSPITAL BV Thủ Đức (Grade I, 800 beds) ~4-5 km
+SAFETY: dense, near Ngã tư Bình Phước/QL13 heavy traffic; some lanes flood
+S3 L4 V3
+
+TD-08 | Tô Ngọc Vân, Tam Bình | 60m2 8x7.5 | floors n/a | 3PN | listed as hẻm | legal n/a | ~27/10/2026 | 6.9 tỷ (~115tr/m2)
+FLAGS: shallow lot; Tô Ngọc Vân flooded up to 1m on 14/8/2023; Ring Road 2 construction nearby - check clearance zone
+MARKET Chợ đầu mối nông sản Thủ Đức ~1-2 km; SUPERMARKET BHX ~0.5 km, GigaMall ~2-3 km; SCHOOL TH Tam Bình ~1 km; HOSPITAL BV Thủ Đức ~1.5-2 km
+S3 L4 V2
+
+TD-09 | Đường số 4, Tam Phú (Tam Bình) | 70m2 | cấp 4 | 1PN | xe hơi vào sát cửa, SHR (per alonhadat index) | 3.9 tỷ (~56tr/m2) | listing not reopened by agent
+FLAGS: below area range; needs rebuild; verify still live
+MARKET Chợ Tam Bình ~1-2 km; SUPERMARKET BHX ~0.5 km; SCHOOL public primary Tam Phú ~1 km; HOSPITAL BV Thủ Đức (29 Phú Châu) ~1 km
+SAFETY: quiet residential lanes; some low streets flood
+S3 L4 V4
+
+TD-10 | Tam Bình, street n/a | 136m2 5x26 | 1 trệt 1 lầu | 3PN/2WC | near truck road | legal NOT stated | 3.3 tỷ (24tr/m2)
+FLAGS: HIGH RISK likely vi bằng/sổ chung/agri land; bait-like
+S3 L3 V1
+SOURCES: https://vnexpress.net/duong-ngap-ca-met-o-thu-duc-4641696.html ; https://www.vietnamplus.vn/thanh-pho-ho-chi-minh-dat-muc-tieu-khep-kin-vanh-dai-2-vao-cuoi-nam-2027-post1129689.amp ; https://www.pharmacity.vn/benh-vien-thu-duc.htm

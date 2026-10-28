@@ -1,0 +1,24 @@
+TD-11 | Phạm Văn Đồng, old Linh Tây (Thủ Đức ward) | 57m2 4.3x14 | 1 trệt 2 lầu | 4PN/3WC | hẻm thông near main rd, width n/a | sổ hồng, hoàn công đủ | 15/10/2026 | 5.5 tỷ (~96tr/m2)
+FLAGS: no exact alley no.; ward/WC inconsistencies; car access unconfirmed
+MARKET Chợ Thủ Đức ~2.5 km (main wet market, floods in heavy rain); SUPERMARKET GigaMall ~2-3 km, BHX ~0.5 km; SCHOOL TH Linh Tây ~1 km public; HOSPITAL BV Đa khoa khu vực Thủ Đức (new 1000-bed, opened Apr 2025) ~3 km
+SAFETY: university/student area; PVĐ wide arterial; listing says high/dry; no flood report found
+S3 L4 V3
+
+TD-12 | off Đặng Văn Bi, 1 lot from Đường số 9, Linh Chiểu | 52m2 (URL says 48) | cấp 4 | 1PN/1WC | car alley ô tô tránh | "giấy tờ hợp lệ" - sổ hồng unclear | 25/10/2026 | 4.7 tỷ
+FLAGS: area maybe exaggerated; legal vague; needs rebuild
+MARKET Chợ Thủ Đức ~1 km; SUPERMARKET Vincom Plaza Thủ Đức ~1.5 km; SCHOOL TH Đặng Văn Bi ~0.5-1 km; HOSPITAL BV TP Thủ Đức ~3 km
+SAFETY: Chợ Thủ Đức/Kha Vạn Cân zone floods ankle-knee deep (SGGP); near Metro L1 Thủ Đức/Bình Thái stations
+S3 L4 V3
+
+TD-13 | off Đường số 8, Linh Đông (Hiệp Bình), phân lô | 52m2 4x12 | 3 tầng | 3PN/3WC | HXH | SHR, hoàn công đủ, no lộ giới | 19/10/2026 | 6.8 tỷ (~131tr/m2)
+FLAGS: above area average; confirm SHR
+MARKET Chợ Linh Đông ~1.5 km; SUPERMARKET GigaMall ~1.5 km; SCHOOL TH Linh Đông ~1 km; HOSPITAL BV TP Thủ Đức ~3 km
+SAFETY: good phân lô cluster; Linh Đông road flooding reported Aug 2025
+S3 L4 V2
+
+TD-14 | 131/46 Đường số 8, Linh Xuân | 53m2 4.8x11 nở hậu, 146m2 usable | trệt 2 lầu + ST | 3PN/2WC | car alley, 7m road nearby | sổ hồng, hoàn công n/a | 23/10/2026 | 5.8 tỷ TL (~109tr/m2)
+FLAGS: hoàn công unconfirmed; shallow lot; farthest from D10
+MARKET Chợ Xuân Hiệp ~0.3-0.5 km; SUPERMARKET BHX nearby, GO! Dĩ An ~3 km; SCHOOL TH Linh Xuân/Xuân Hiệp ~0.5-1 km; HOSPITAL BV Đa khoa khu vực Thủ Đức ~2.5 km, BV ĐHQG ~4 km
+SAFETY: quiet clean area next to football field & Linh Xuân cultural center (seller claim); no flood reports
+S4 L4 V4
+SOURCES: https://plo.vn/tphcm-khanh-thanh-benh-vien-da-khoa-khu-vuc-thu-duc-hon-1900-ti-dong-post846276.html ; https://www.sggp.org.vn/cap-bach-giai-quyet-ngap-khu-vuc-cho-thu-duc-post812486.html
