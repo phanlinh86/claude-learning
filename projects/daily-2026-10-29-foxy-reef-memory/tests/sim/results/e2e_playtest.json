@@ -1,0 +1,166 @@
+{
+ "when": "2026-10-29T09:23:57.436Z",
+ "minutes": 4,
+ "soak": {
+  "skill1": {
+   "stats": {
+    "games": 0,
+    "scores": [],
+    "times": [],
+    "levels": [],
+    "matches": 0,
+    "mistakes": 0,
+    "errors": []
+   },
+   "maxLevelSeen": 108,
+   "seasonsSeen": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "maxFx": 50,
+   "maxParticles": 65,
+   "maxCupcakeList": 3,
+   "samples": 24,
+   "anomalies": [],
+   "errors": [],
+   "note": "air>airMax samples within 0.01 s were rounding in getState() (toFixed(2)); removed"
+  },
+  "skill0.35": {
+   "stats": {
+    "games": 1,
+    "scores": [
+     8360
+    ],
+    "times": [
+     1195.08
+    ],
+    "levels": [
+     38
+    ],
+    "matches": 346,
+    "mistakes": 320,
+    "errors": []
+   },
+   "maxLevelSeen": 36,
+   "seasonsSeen": [
+    2,
+    1,
+    0,
+    3
+   ],
+   "maxFx": 33,
+   "maxParticles": 80,
+   "maxCupcakeList": 2,
+   "samples": 24,
+   "anomalies": [],
+   "errors": [],
+   "note": "air>airMax samples within 0.01 s were rounding in getState() (toFixed(2)); removed"
+  }
+ },
+ "frames": {
+  "winterAdaptive": {
+   "frames": 402,
+   "fps": 33.40840528883311,
+   "rafMedian": 33.29999999999927,
+   "rafP95": 50.099999999998545,
+   "rafMax": 166.69999999999982,
+   "over33ms": 78,
+   "drawMean": 2.6067164178835736,
+   "drawP95": 12.799999999813735,
+   "stepMean": 0.3350746269124694,
+   "stepP95": 0.6000000005587935,
+   "renderScale": 1.125,
+   "canvas": [
+    1080,
+    608
+   ],
+   "state": {
+    "mode": "playing",
+    "state": "playing",
+    "score": 190,
+    "combo": 0,
+    "level": 3,
+    "season": 3,
+    "lap": 0,
+    "air": 98.72,
+    "airMax": 100,
+    "time": 15.258333333333107,
+    "cards": 8,
+    "cupcakes": 5,
+    "particles": 65,
+    "fx": 13
+   },
+   "errors": []
+  },
+  "winterNoAdaptive": {
+   "frames": 388,
+   "fps": 32.244928487729474,
+   "rafMedian": 33.30000000000018,
+   "rafP95": 50,
+   "rafMax": 50.100000000000364,
+   "over33ms": 57,
+   "drawMean": 11.463659793817794,
+   "drawP95": 14.099999999627471,
+   "stepMean": 0.25515463916325615,
+   "stepP95": 0.5,
+   "renderScale": 2,
+   "canvas": [
+    1920,
+    1080
+   ],
+   "state": {
+    "mode": "playing",
+    "state": "playing",
+    "score": 190,
+    "combo": 0,
+    "level": 3,
+    "season": 3,
+    "lap": 0,
+    "air": 98.62,
+    "airMax": 100,
+    "time": 15.341666666666436,
+    "cards": 8,
+    "cupcakes": 5,
+    "particles": 65,
+    "fx": 11
+   },
+   "errors": []
+  },
+  "springNoAdaptive": {
+   "frames": 360,
+   "fps": 44.909059155210706,
+   "rafMedian": 16.700000000000728,
+   "rafP95": 33.399999999999636,
+   "rafMax": 33.5,
+   "over33ms": 16,
+   "drawMean": 11.39583333332816,
+   "drawP95": 14.300000000745058,
+   "stepMean": 0.1758333333250549,
+   "stepP95": 0.39999999944120646,
+   "renderScale": 2,
+   "canvas": [
+    1920,
+    1080
+   ],
+   "state": {
+    "mode": "playing",
+    "state": "playing",
+    "score": 150,
+    "combo": 5,
+    "level": 0,
+    "season": 0,
+    "lap": 0,
+    "air": 59.77,
+    "airMax": 60,
+    "time": 11.33333333333333,
+    "cards": 4,
+    "cupcakes": 2,
+    "particles": 52,
+    "fx": 48
+   },
+   "errors": []
+  }
+ }
+}

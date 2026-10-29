@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+<defs><clipPath id="fb6"><path d="M12,32 C14,20 26,12 38,13 C50,14 58,23 59,32 C58,41 50,50 38,51 C26,52 14,44 12,32 Z"/></clipPath></defs>
+<g stroke-linejoin="round" stroke-linecap="round" stroke="#173d86" stroke-width="2.6">
+<path d="M14,32 C9,24 5,20 2,20 C3,26 5,29 6,32 C5,35 3,38 2,44 C5,44 9,40 14,32 Z" fill="#ffd23c"/>
+<path d="M28,15 C30,8 38,4 46,5 C44,9 44,12 46,16 Z" fill="#ffd23c"/>
+<path d="M30,49 C32,55 37,58 42,58 C41,55 41,52 42,49 Z" fill="#ffd23c"/>
+<path d="M12,32 C14,20 26,12 38,13 C50,14 58,23 59,32 C58,41 50,50 38,51 C26,52 14,44 12,32 Z" fill="#3a86f0" stroke="none"/>
+<g clip-path="url(#fb6)">
+  <path d="M22,8 C19,22 19,42 22,56 L29,56 C26,42 26,22 29,8 Z M40,8 C37,22 37,42 40,56 L45,56 C42,42 42,22 45,8 Z" fill="#fff" stroke="#173d86" stroke-width="1.6"/>
+  <path d="M10,40 C22,52 50,54 62,38 L62,60 L10,60 Z" fill="#2a6cd0" stroke="none"/>
+</g>
+<path d="M12,32 C14,20 26,12 38,13 C50,14 58,23 59,32 C58,41 50,50 38,51 C26,52 14,44 12,32 Z" fill="none" stroke-width="2.8"/>
+<path d="M34,34 C38,34 41,37 40,41 C37,40 34,38 34,34 Z" fill="#ffd23c" stroke-width="2"/>
+</g>
+<path d="M32,17.6 C36,16.4 40,16.4 44,17.4" fill="none" stroke="#fff" stroke-width="2.2" opacity="0.75" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="50" cy="28" r="4.6" fill="#fff" stroke="#173d86" stroke-width="1.8"/><circle cx="51.2" cy="28.4" r="2.8" fill="#22160f"/><circle cx="52.2" cy="27.2" r="1" fill="#fff"/>
+<path d="M51.5,37 C52.75,39.25 55.25,39.25 56.5,37" fill="none" stroke="#173d86" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/><ellipse cx="48.6" cy="36.8" rx="2" ry="1.2" fill="#ff9fd0" opacity="0.85"/>
+</svg>
