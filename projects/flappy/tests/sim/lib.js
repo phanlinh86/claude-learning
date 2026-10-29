@@ -224,11 +224,10 @@ function playRound(opts) {
     player: opts.player, seed: opts.seed, survived: false, playTime: 0, score: 0, hits: 0, drops: 0, misses: 0,
     flaps: 0, bestCombo: 0, seasonIndex: 0, firstPointAt: null, seasonAt: [], deathCause: null,
     emptyTime: 0, oppTime: 0, oppSamples: 0, dropsImpossible: 0, dropsPredictedHit: 0,
-    ceilingHits: 0, comboPoints: 0, highDrops: 0, highDropHits: 0, deathScore: null, deathSpeed: null,
+    ceilingHits: 0, comboPoints: 0, highDrops: 0, deathScore: null, deathSpeed: null,
     deathSinceSeason: null, lastFlapY: null, maxSpeedJump: 0, deathWind: null
   };
   let lastCeiling = -1e9, lastFlapAt = 0, sampleClock = 0, prevSpeed = w.scrollSpeed;
-  const dropMeta = new Map();
   let lastSeasonAt = 0;
   let guard = 0;
   while (guard++ < (cap + 5) * 60) {
@@ -242,17 +241,10 @@ function playRound(opts) {
     for (const e of w.drainEvents()) {
       if (e.type === 'flap') { lastFlapAt = w.playTime; m.lastFlapY = e.y; }
       else if (e.type === 'drop') {
-        const meta = { high: w.bird.y < 120 };
-        if (opts.sampleOpp !== false) {
-          // evaluated right after spawn: use the drop's own state = the predict from just before is equivalent
-          // enough; we re-evaluate possibility from current state with the new drop's init
-        }
-        dropMeta.set(e.id, meta);
-        if (meta.high) m.highDrops++;
+        if (w.bird.y < 120) m.highDrops++;
       } else if (e.type === 'hit') {
         if (m.firstPointAt === null) m.firstPointAt = w.playTime;
         if (e.points > c.pointsPerHit) m.comboPoints += e.points - c.pointsPerHit;
-        const meta = dropMeta.get(e.id); if (meta && meta.high) m.highDropHits++;
       } else if (e.type === 'season') {
         m.seasonAt.push(+w.playTime.toFixed(2)); lastSeasonAt = w.playTime;
       } else if (e.type === 'ceiling') { m.ceilingHits++; lastCeiling = w.playTime; }
@@ -332,7 +324,7 @@ function summarize(rounds) {
     oppFrac: mean(rounds.map(r => r.oppFrac)),
     impossibleFrac: mean(rounds.map(r => r.impossibleFrac)),
     ceilingPerMin: totalTime ? rounds.reduce((a, r) => a + r.ceilingHits, 0) / (totalTime / 60) : 0,
-    highDropAcc: (() => { const hd = rounds.reduce((a, r) => a + r.highDrops, 0); return hd ? rounds.reduce((a, r) => a + r.highDropHits, 0) / hd : null; })(),
+    highDropShare: (() => { const d = rounds.reduce((a, r) => a + r.drops, 0); return d ? rounds.reduce((a, r) => a + r.highDrops, 0) / d : null; })(),
     causes,
     deathSinceSeasonMed: pct(rounds.filter(r => r.deathSinceSeason !== null).map(r => r.deathSinceSeason), 0.5),
     maxSpeedJump: Math.max.apply(null, rounds.map(r => r.maxSpeedJump)),

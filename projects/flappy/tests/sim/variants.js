@@ -60,14 +60,36 @@ function comboWindow(sec) {
 
 function compose(...fns) { return (w, FF) => fns.forEach(f => f && f(w, FF)); }
 
+/* --- mechanic prototype: "brave flyer" bonus — a hit from a treat released low (y >= lowY) is worth +1 --- */
+function lowBonus(lowY, bonus) {
+  return function (w) {
+    const spawn0 = w._spawnDrop.bind(w), hit0 = w._hit.bind(w);
+    w.lowHits = 0;
+    w._spawnDrop = function (preVy) { spawn0(preVy); this.drops[this.drops.length - 1].releaseY = this.bird.y; };
+    w._hit = function (d, t) {
+      const s0 = this.score; hit0(d, t);
+      if (d.releaseY >= lowY) {
+        this.score += bonus; this.lowHits++;
+        const ev = this._events[this._events.length - 1]; if (ev && ev.type === 'hit') { ev.points += bonus; ev.low = true; }
+        const idx = Math.floor(this.score / this.cfg.pointsPerSeason);
+        if (idx !== this.seasonIndex) { this.seasonIndex = idx; this.season = idx % 4; this._emit({ type: 'season', season: this.season, seasonIndex: idx }); }
+      }
+    };
+  };
+}
+
 // recommended package (keep in sync with docs/reports/playtest_report.md)
-const PPS = { easy: 12, normal: 20, hard: 25 };
-function recommendedConfig(FF) {
+const PPS = { easy: 12, normal: 25, hard: 25 };
+const PPS_PLUS = { easy: 12, normal: 35, hard: 35 };   // the brave-flyer bonus raises points/min ~40 %
+function recommendedGlobal(FF) {
   const C = FF.CONFIG;
-  C.ceilingBounce = 40;
-  C.dropCooldown = 0.32;
-  C.maxDrops = 4;
-  C.comboBonusAt = 3; C.comboBonus = 1;
+  C.maxDrops = 2;          // was 6: limits ceiling spam via air-time, aimers unaffected
+  C.ceilingBounce = 0;     // was 140: no downward kick at the ceiling (with the cushion below)
+}
+function recommendedAfter(p, FF, pps) {
+  const C = FF.CONFIG, o = { pointsPerSeason: (pps || PPS)[p] };
+  if (p === 'easy') { o.gravity = C.gravity * 0.72; o.flapImpulse = C.flapImpulse * 0.9; o.maxFall = C.maxFall * 0.62; }
+  return o;
 }
 
 module.exports = {
@@ -101,14 +123,11 @@ module.exports = {
   combo4s: { patch: comboWindow(4) },
 
   // full recommended package
-  recommended: {
-    globalPatch: recommendedConfig,
-    configAfter: p => ({ pointsPerSeason: PPS[p] }),
-    patch: compose(basket(4, 0.7))
-  },
-  recommendedNoBasket: {
-    globalPatch: recommendedConfig,
-    configAfter: p => ({ pointsPerSeason: PPS[p] })
-  }
+  lowBonus: { patch: lowBonus(280, 1) },
+  // config + tiny code (cushion) — priority 1–4 in the report
+  recommended: { globalPatch: recommendedGlobal, configAfter: recommendedAfter, patch: softCeiling },
+  // + the two small mechanics (Easy hearts, brave-flyer bonus) — priority 5–6
+  recommendedPlus: { globalPatch: recommendedGlobal, configAfter: (p, FF) => recommendedAfter(p, FF, PPS_PLUS),
+    patch: compose(softCeiling, lives(3, ['easy']), lowBonus(280, 1)) }
 };
-module.exports._helpers = { basket, softCeiling, lives, comboWindow, compose, PPS };
+module.exports._helpers = { basket, softCeiling, lives, comboWindow, lowBonus, compose, PPS };
