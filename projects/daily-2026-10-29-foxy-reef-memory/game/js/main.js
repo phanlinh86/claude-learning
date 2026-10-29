@@ -8,19 +8,8 @@
 
   /* Difficulty presets → CONFIG overrides (see docs/MECHANICS.md). Unknown keys are skipped safely. */
   function difficultyOverrides(d, peek) {
-    const C = RF.CONFIG || {};
-    const o = {};
-    const scale = (k, f) => {
-      if (!(k in C)) return;
-      if (typeof C[k] === 'number') o[k] = C[k] * f;
-      else if (Array.isArray(C[k])) o[k] = C[k].map(v => typeof v === 'number' ? v * f : v);
-    };
-    if (d === 'easy') {
-      scale('airMax', 1.45); scale('airPerMatch', 1.4); scale('airDrain', 0.75); scale('mismatchShow', 1.25); scale('slideSpeed', 0.8);
-    } else if (d === 'hard') {
-      scale('airMax', 0.75); scale('airPerMatch', 0.75); scale('airDrain', 1.15); scale('mismatchShow', 0.8);
-    }
-    if ('peekTime' in C) o.peekTime = peek;
+    const o = Object.assign({}, (RF.DIFFICULTY && RF.DIFFICULTY[d]) || {});
+    o.peekTime = peek;   // the Settings "Peek at start" choice always wins
     return o;
   }
 
@@ -125,7 +114,7 @@
       RF.UI.setHud(false);
       RF.UI.showGameOver({
         score: w.score, best: Math.max(prev, w.score), newBest: newBest && w.score > 0,
-        matches: w.matches || 0, mistakes: w.mistakes || 0, bestCombo: w.bestCombo || 0, cupcakes: w.cupcakes || 0,
+        matches: w.matches || 0, mistakes: w.mistakes || 0, bestCombo: w.bestCombo || 0, cupcakes: w.cupcakesEaten || 0,
         cleared: w.level || 0,
         seasonName: SEASON_NAMES[w.season || 0] + ((w.lap || 0) > 0 ? ' (lap ' + (w.lap + 1) + ')' : '') + ' · level ' + ((w.level || 0) + 1)
       });
@@ -304,7 +293,7 @@
       const w = Game.world;
       return w && { mode: Game.mode, state: w.state, score: w.score, combo: w.combo, level: w.level, season: w.season, lap: w.lap,
         air: +(w.air || 0).toFixed(2), airMax: w.airMax, time: w.time, cards: w.cards.filter(c => c.state !== 'gone').length,
-        cupcakes: w.cupcakes, particles: Game.weather ? Game.weather.particles.length : 0, fx: Game.renderer.fx.length };
+        cupcakes: w.cupcakesEaten, particles: Game.weather ? Game.weather.particles.length : 0, fx: Game.renderer.fx.length };
     },
     setSpeed(n) { Game.speed = n; },
     select(id) { return Game.world.select(id); },

@@ -32,14 +32,15 @@
     step: 1 / 120,            // s, fixed simulation sub-step
 
     // --- board layout (DESIGN §2)
-    trayX: 585, trayY: 298,   // px, tray centre
+    trayX: 585, trayY: 305,   // px, tray centre (below the HUD band)
     trayMaxW: 590, trayMaxH: 430,
     trayPad: 16,              // px, tray padding around the grid (clamped to max size)
-    cardW: 84, cardH: 98, cardGap: 10,
+    cardW: 76, cardH: 88, cardGap: 8,    // 6×4 grid → 496×376, clear of the HUD
     grids: [[4, 3], [4, 4], [5, 4], [6, 4]],   // [cols, rows] per season
     faceCount: 12,
 
     // --- deal / peek
+    introDelay: 1.2,          // s, empty tray while the season banner shows, then the deal
     dealTotal: 0.9,           // s, first card starts → last card lands
     dealFly: 0.45,            // s, one card's flight
     dealFromY: 640,           // px, cards rise in from below the screen…
@@ -89,13 +90,13 @@
     foxEatRadius: 28,         // px
     foxEatTime: 0.4, foxOopsTime: 0.6, foxCheerTime: 0.9,
     foxBobAmp: 4, foxBobFreq: 0.6,
-    foxTurnRate: 6,           // 1/s, angle smoothing
+    foxTurnRate: 4.5,          // 1/s, angle smoothing
     foxMaxTilt: 0.35,         // rad
     foxSurfaceSpeed: 40,      // px/s, floats up when out of air
 
     // --- cupcakes
     cupcakeRise: 22,          // px/s terminal buoyant rise
-    cupcakeDrift: 45,         // px/s max drift toward Foxy
+    cupcakeDrift: 120,        // px/s max drift toward Foxy (she waits until it leaves the card area)
     cupcakePopVy: -70,        // px/s initial upward pop
     cupcakeEase: 2,           // 1/s velocity relaxation (water drag)
     cupcakeWobble: 10,        // px sway amplitude
@@ -161,6 +162,11 @@
     // NOTE: DESIGN §5.1 uses `w.cupcakes` for both the list and the counter.
     // w.cupcakes = the LIST of floating cupcakes; w.cupcakesEaten = the counter.
     this.cupcakes = [];
+    // interop: code that treats w.cupcakes as the counter ('× ' + w.cupcakes, `${w.cupcakes}`)
+    // still shows the eaten count. Prefer w.cupcakesEaten for the number.
+    var self = this;
+    Object.defineProperty(this.cupcakes, 'valueOf', { value: function () { return self.cupcakesEaten; } });
+    Object.defineProperty(this.cupcakes, 'toString', { value: function () { return String(self.cupcakesEaten); } });
     this.startLevel(0);
     return this;
   };
@@ -483,6 +489,7 @@
   World.prototype._stepIntro = function (h) {
     var c = this.cfg, i, k, t = this._phaseT;
     if (this.phase === 'deal') {
+      t -= c.introDelay || 0;   // banner first, then the cards fly in
       var end = 0;
       for (i = 0; i < this.cards.length; i++) {
         k = this.cards[i];
@@ -647,7 +654,7 @@
     if (this.state !== 'dead') {
       for (i = 0; i < this.cupcakes.length; i++) {
         var t = this.cupcakes[i];
-        if (!t.alive || t.age < 0.15) continue;
+        if (!t.alive || t.age < 0.15 || t.x > Z.x1 + 70) continue;   // wait until it drifts out of the card area
         var dd = (t.x - f.x) * (t.x - f.x) + (t.y - f.y) * (t.y - f.y);
         if (dd < bd) { bd = dd; best = t; }
       }
@@ -692,9 +699,11 @@
       }
     }
     // facing (with hysteresis), tilt, bob, frames
+    var oldFlip = f.flipX;
     if (f.vx > 12) f.flipX = 1; else if (f.vx < -12) f.flipX = -1;
+    if (f.flipX !== oldFlip) f.angle = -f.angle;   // mirror the tilt with the sprite (nose stays up)
     var sp = Math.hypot(f.vx, f.vy);
-    var tilt = sp > 5 ? clamp(Math.atan2(f.vy, Math.abs(f.vx) + 20) * 0.8, -c.foxMaxTilt, c.foxMaxTilt) * f.flipX : 0;
+    var tilt = clamp(Math.atan2(f.vy, Math.abs(f.vx) + 40) * 0.8, -c.foxMaxTilt, c.foxMaxTilt) * Math.min(1, sp / 40) * f.flipX;
     f.angle += (tilt - f.angle) * (1 - Math.exp(-c.foxTurnRate * h));
     f.bob = Math.sin(TAU * c.foxBobFreq * this.time) * c.foxBobAmp * (this.state === 'dead' ? 0.4 : 1);
     f._swim += h * (1.2 + sp / 45);

@@ -13,7 +13,7 @@
   ];
   const FONT = '"Segoe UI Black","Segoe UI","Arial Rounded MT Bold","Trebuchet MS",system-ui,sans-serif';
   const TAU = Math.PI * 2;
-  const CW = 84, CH = 98;
+  let CW = 76, CH = 88;   // updated from world.cfg each frame
   const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
   const lerp = (a, b, t) => a + (b - a) * t;
   const easeOutBack = t => 1 + 2.70158 * Math.pow(t - 1, 3) + 1.70158 * Math.pow(t - 1, 2);
@@ -119,7 +119,7 @@
     update(dt) {
       this.time += dt;
       if (this.vis.t < 1) this.vis.t = Math.min(1, this.vis.t + dt / 1.6);
-      if (this.banner) { this.banner.t += dt; if (this.banner.t > 2.6) this.banner = null; }
+      if (this.banner) { this.banner.t += dt; if (this.banner.t > 1.95) this.banner = null; }
       this.shake = Math.max(0, this.shake - dt);
       this.flash = Math.max(0, this.flash - dt * 2.2);
       for (const f of this.fx) {
@@ -240,9 +240,12 @@
       else { this.backdrop(v.cur, 1); this.floor(v.cur, 1); }
 
       if (this.weather) { this.ambient(this.weather.ambient); this.particles('back'); }
-      if (w) {
+      if (w && w.cfg) { CW = w.cfg.cardW || CW; CH = w.cfg.cardH || CH; }
+      if (w && mode !== 'title') {   // the title screen shows only the reef and Foxy, no board behind the logo
         this.drawTray();
         this.drawCards(mode);
+      }
+      if (w) {
         this.drawCupcakes();
         this.drawTexts();
         this.drawFox();
@@ -336,8 +339,9 @@
         g.scale(sx * sc, sc);
         if (showFace) {
           if (front) g.drawImage(front, -CW / 2, -CH / 2, CW, CH);
-          const face = A.sprite('face_' + String(c.face).padStart(2, '0'), 60, 60);
-          if (face) g.drawImage(face, -30, -30, 60, 60);
+          const fs = Math.round(CW * 0.7);
+          const face = A.sprite('face_' + String(c.face).padStart(2, '0'), fs, fs);
+          if (face) g.drawImage(face, -fs / 2, -fs / 2, fs, fs);
         } else if (back) g.drawImage(back, -CW / 2, -CH / 2, CW, CH);
         if (c.glow > 0) {
           g.globalAlpha = alpha * c.glow;
@@ -478,7 +482,7 @@
       const cup = RF.Assets.hasCustom('treat') ? RF.Assets.sprite('custom:treat', ...RF.Assets.fit('treat', 26, 26)) : RF.Assets.sprite('cupcake', 26, 26);
       g.fillStyle = 'rgba(255,255,255,0.88)'; this.roundRect(16, 70, 96, 34, 17); g.fill();
       if (cup) { const [cw, ch] = RF.Assets.hasCustom('treat') ? RF.Assets.fit('treat', 26, 26) : [26, 26]; g.drawImage(cup, 24, 87 - ch / 2, cw, ch); }
-      this.text('× ' + w.cupcakes, 56, 87, 17, '#b8336d', null, 'left');
+      this.text('× ' + (w.cupcakesEaten || 0), 56, 87, 17, '#b8336d', null, 'left');
       // air meter (a row of bubbles inside a pill)
       const frac = clamp(w.air / (w.airMax || 1), 0, 1), low = frac < 0.25;
       const x0 = 712, y0 = 78, mw = 232, mh = 26;
@@ -507,8 +511,8 @@
       const t = b.t;
       let x;
       if (t < 0.45) x = lerp(-W, 0, easeOutBack(t / 0.45));
-      else if (t < 2.1) x = 0;
-      else x = lerp(0, W, Math.pow((t - 2.1) / 0.5, 2));
+      else if (t < 1.5) x = 0;
+      else x = lerp(0, W, Math.pow((t - 1.5) / 0.45, 2));
       g.save(); g.translate(x, 0);
       g.fillStyle = si.color; g.globalAlpha = 0.93;
       g.beginPath(); g.moveTo(W / 2 - 280, 190); g.lineTo(W / 2 + 280, 182); g.lineTo(W / 2 + 298, 290); g.lineTo(W / 2 - 262, 300); g.closePath(); g.fill();
