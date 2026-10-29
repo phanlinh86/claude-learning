@@ -1,0 +1,7058 @@
+[
+ {
+  "spec": {
+   "model": "kid6",
+   "difficulty": "easy",
+   "peek": 0
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    0.9333333333333333,
+    0.7333333333333333,
+    0.7333333333333333,
+    0.7333333333333333,
+    0.6666666666666666,
+    0.26666666666666666,
+    0.26666666666666666,
+    0.23333333333333334,
+    0.13333333333333333,
+    0.13333333333333333
+   ],
+   "lap1": 0.7333333333333333,
+   "lap2": 0.26666666666666666,
+   "deathLevel": 7,
+   "endless": 0,
+   "sessionMin": 13.779861111101319,
+   "sessionP10": 6.832833333329858,
+   "sessionP90": 21.414444444487028,
+   "score": 1643,
+   "bestCombo": 4,
+   "topLoss": "Winter L2 40%, Winter 20%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 55.47499999999813,
+     "airLeft": 59.12499999997374,
+     "airLeftFrac": 0.6569444444441527,
+     "minAirFrac": 0.609999999999707,
+     "mistakesPerPair": 1.0166666666666668,
+     "score": 218,
+     "bonusShare": 0.5505050505050505,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 81.18333333333001,
+     "airLeft": 56.40833333329481,
+     "airLeftFrac": 0.5372222222218553,
+     "minAirFrac": 0.4963492063488025,
+     "mistakesPerPair": 1.2291666666666667,
+     "score": 236,
+     "bonusShare": 0.47999279019466473,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 0.9333333333333333,
+     "time": 119.64999999999449,
+     "airLeft": 45.94166666660607,
+     "airLeftFrac": 0.36753333333284854,
+     "minAirFrac": 0.33566666666618183,
+     "mistakesPerPair": 1.5533333333333335,
+     "score": 229,
+     "bonusShare": 0.3693181818181818,
+     "maxCombo": 3
+    },
+    {
+     "reached": 0.9333333333333333,
+     "clearIfReached": 0.7857142857142857,
+     "time": 148.10000000001,
+     "airLeft": 45.49166666661725,
+     "airLeftFrac": 0.31373563218356726,
+     "minAirFrac": 0.2861494252870139,
+     "mistakesPerPair": 1.7232142857142858,
+     "score": 255,
+     "bonusShare": 0.35221610280618937,
+     "maxCombo": 3
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid9",
+   "difficulty": "easy",
+   "peek": 0
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 24,
+   "endless": 0.6,
+   "sessionMin": 25.59833333342918,
+   "sessionP10": 22.406250000055206,
+   "sessionP90": 27.036638889003054,
+   "score": 6159,
+   "bestCombo": 6,
+   "topLoss": "Autumn L6 13%, Winter L6 13%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 34.299999999999336,
+     "airLeft": 80.29999999997318,
+     "airLeftFrac": 0.8922222222219243,
+     "minAirFrac": 0.8216666666664186,
+     "mistakesPerPair": 0.788888888888889,
+     "score": 280,
+     "bonusShare": 0.5861872146118722,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 47.291666666665265,
+     "airLeft": 89.54999999996224,
+     "airLeftFrac": 0.8528571428567833,
+     "minAirFrac": 0.7844444444441365,
+     "mistakesPerPair": 0.8833333333333333,
+     "score": 319,
+     "bonusShare": 0.5659778280055968,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 65.27499999999759,
+     "airLeft": 100.31666666661519,
+     "airLeftFrac": 0.8025333333329214,
+     "minAirFrac": 0.7487999999996473,
+     "mistakesPerPair": 1.0699999999999996,
+     "score": 350,
+     "bonusShare": 0.5592044669583238,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 87.94166666666297,
+     "airLeft": 105.64999999997184,
+     "airLeftFrac": 0.7286206896549782,
+     "minAirFrac": 0.6848275862067765,
+     "mistakesPerPair": 1.2888888888888888,
+     "score": 384,
+     "bonusShare": 0.5409124721051326,
+     "maxCombo": 3
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "casual",
+   "difficulty": "easy",
+   "peek": 0
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 24,
+   "endless": 1,
+   "sessionMin": 17.387499999991302,
+   "sessionP10": 16.937944444431782,
+   "sessionP90": 17.756916666662676,
+   "score": 7853,
+   "bestCombo": 7,
+   "topLoss": "",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 23.374999999999954,
+     "airLeft": 90,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.899259259259179,
+     "mistakesPerPair": 0.65,
+     "score": 299,
+     "bonusShare": 0.5973154362416108,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 31.60833333333282,
+     "airLeft": 104.87916666665384,
+     "airLeftFrac": 0.9988492063490841,
+     "minAirFrac": 0.9069841269839771,
+     "mistakesPerPair": 0.6375,
+     "score": 379,
+     "bonusShare": 0.5514480646059594,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 47.058333333331944,
+     "airLeft": 118.53333333329635,
+     "airLeftFrac": 0.9482666666663708,
+     "minAirFrac": 0.8773999999998261,
+     "mistakesPerPair": 0.8833333333333332,
+     "score": 417,
+     "bonusShare": 0.5742298578199052,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 56.59999999999807,
+     "airLeft": 136.8166666667076,
+     "airLeftFrac": 0.9435632183910869,
+     "minAirFrac": 0.8774137931036887,
+     "mistakesPerPair": 0.9222222222222224,
+     "score": 491,
+     "bonusShare": 0.5652173913043478,
+     "maxCombo": 4
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "strong",
+   "difficulty": "easy",
+   "peek": 0
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 24,
+   "endless": 1,
+   "sessionMin": 10.349722222215549,
+   "sessionP10": 10.210527777771231,
+   "sessionP90": 10.568166666659794,
+   "score": 9478,
+   "bestCombo": 9,
+   "topLoss": "",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 13.99166666666694,
+     "airLeft": 90,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9467592592592169,
+     "mistakesPerPair": 0.5777777777777777,
+     "score": 340,
+     "bonusShare": 0.5294117647058824,
+     "maxCombo": 5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 18.316666666666908,
+     "airLeft": 105,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.949365079365039,
+     "mistakesPerPair": 0.5625,
+     "score": 400,
+     "bonusShare": 0.525,
+     "maxCombo": 4.5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 23.633333333333272,
+     "airLeft": 125,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9566666666666321,
+     "mistakesPerPair": 0.6166666666666666,
+     "score": 485,
+     "bonusShare": 0.5155187074829932,
+     "maxCombo": 5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 29.141666666666293,
+     "airLeft": 145,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9526149425287913,
+     "mistakesPerPair": 0.638888888888889,
+     "score": 585,
+     "bonusShare": 0.4957627118644068,
+     "maxCombo": 5.5
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "random",
+   "difficulty": "easy",
+   "peek": 0
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    0.9333333333333333,
+    0.9,
+    0.9,
+    0.9,
+    0.8333333333333334,
+    0.6333333333333333,
+    0.6333333333333333,
+    0.6333333333333333,
+    0.4666666666666667,
+    0.26666666666666666
+   ],
+   "lap1": 0.9,
+   "lap2": 0.6333333333333333,
+   "deathLevel": 10,
+   "endless": 0,
+   "sessionMin": 14.653055555544968,
+   "sessionP10": 7.522805555551453,
+   "sessionP90": 19.52694444446299,
+   "score": 2480,
+   "bestCombo": 3.5,
+   "topLoss": "Winter L3 20%, Winter L2 20%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 31.608333333332823,
+     "airLeft": 82.99166666664199,
+     "airLeftFrac": 0.9221296296293555,
+     "minAirFrac": 0.7903703703701505,
+     "mistakesPerPair": 5.227777777777778,
+     "score": 239,
+     "bonusShare": 0.6654228855721394,
+     "maxCombo": 2
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 46.84999999999862,
+     "airLeft": 88.62499999996787,
+     "airLeftFrac": 0.8440476190473131,
+     "minAirFrac": 0.7438492063488813,
+     "mistakesPerPair": 5.895833333333333,
+     "score": 283,
+     "bonusShare": 0.6201923076923077,
+     "maxCombo": 2
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 0.9333333333333333,
+     "time": 86.53333333332971,
+     "airLeft": 79.05833333326494,
+     "airLeftFrac": 0.6324666666661196,
+     "minAirFrac": 0.561266666666152,
+     "mistakesPerPair": 8.82,
+     "score": 277,
+     "bonusShare": 0.5597560975609757,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.9333333333333333,
+     "clearIfReached": 0.9642857142857143,
+     "time": 132.11666666666395,
+     "airLeft": 61.47499999995718,
+     "airLeftFrac": 0.423965517241084,
+     "minAirFrac": 0.3549999999996706,
+     "mistakesPerPair": 10.797619047619047,
+     "score": 274,
+     "bonusShare": 0.4491525423728814,
+     "maxCombo": 2
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "randomSlow",
+   "difficulty": "easy",
+   "peek": 0
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.7333333333333333,
+    0.3333333333333333,
+    0.03333333333333333,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 1,
+   "endless": 0,
+   "sessionMin": 3.364722222221901,
+   "sessionP10": 1.5350000000003228,
+   "sessionP90": 5.94563888888622,
+   "score": 186,
+   "bestCombo": 2,
+   "topLoss": "Summer 40%, Autumn 30%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.7333333333333333,
+     "time": 76.29999999999696,
+     "airLeft": 38.29999999998214,
+     "airLeftFrac": 0.4255555555553571,
+     "minAirFrac": 0.3561111111108489,
+     "mistakesPerPair": 4.405555555555555,
+     "score": 156,
+     "bonusShare": 0.48717948717948717,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.7333333333333333,
+     "clearIfReached": 0.45454545454545453,
+     "time": 106.84999999999522,
+     "airLeft": 30.741666666630323,
+     "airLeftFrac": 0.29277777777743164,
+     "minAirFrac": 0.24015873015838268,
+     "mistakesPerPair": 4.556818181818182,
+     "score": 164,
+     "bonusShare": 0.35805860805860806,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.3333333333333333,
+     "clearIfReached": 0.1,
+     "time": 117.96666666666125,
+     "airLeft": 47.624999999939675,
+     "airLeftFrac": 0.3809999999995174,
+     "minAirFrac": 0.3336666666661831,
+     "mistakesPerPair": 4.8100000000000005,
+     "score": 206,
+     "bonusShare": 0.46601941747572817,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.03333333333333333,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 4.666666666666667,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 1
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "sweeper",
+   "difficulty": "easy",
+   "peek": 0
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.3,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 0,
+   "endless": 0,
+   "sessionMin": 1.6594444444448664,
+   "sessionP10": 1.5350000000003228,
+   "sessionP90": 2.2341944444451514,
+   "score": 20,
+   "bestCombo": 1,
+   "topLoss": "Spring 70%, Summer 30%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.3,
+     "time": 20.36666666666679,
+     "airLeft": 90,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9087037037036311,
+     "mistakesPerPair": 11.45,
+     "score": 260,
+     "bonusShare": 0.6428571428571429,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.3,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 12.98611111111111,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 0
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid6",
+   "difficulty": "easy",
+   "peek": 1
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    0.9,
+    0.7666666666666667,
+    0.7666666666666667,
+    0.7666666666666667,
+    0.7,
+    0.5333333333333333,
+    0.5333333333333333,
+    0.5,
+    0.26666666666666666,
+    0.06666666666666667
+   ],
+   "lap1": 0.7666666666666667,
+   "lap2": 0.5333333333333333,
+   "deathLevel": 9.5,
+   "endless": 0,
+   "sessionMin": 16.04458333332148,
+   "sessionP10": 6.661722222218902,
+   "sessionP90": 20.770000000034376,
+   "score": 2239,
+   "bestCombo": 4.5,
+   "topLoss": "Autumn L3 23%, Winter L3 20%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 53.56666666666491,
+     "airLeft": 60.24166666664233,
+     "airLeftFrac": 0.6693518518515815,
+     "minAirFrac": 0.6250925925923222,
+     "mistakesPerPair": 0.8555555555555556,
+     "score": 221,
+     "bonusShare": 0.5683229813664596,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 81.12499999999667,
+     "airLeft": 55.74583333329137,
+     "airLeftFrac": 0.5309126984122988,
+     "minAirFrac": 0.491071428571028,
+     "mistakesPerPair": 1.1291666666666667,
+     "score": 235,
+     "bonusShare": 0.46332565284178184,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 0.9,
+     "time": 115.81666666666138,
+     "airLeft": 47.64999999994421,
+     "airLeftFrac": 0.3811999999995537,
+     "minAirFrac": 0.34026666666621536,
+     "mistakesPerPair": 1.5499999999999998,
+     "score": 238,
+     "bonusShare": 0.4014084507042254,
+     "maxCombo": 3
+    },
+    {
+     "reached": 0.9,
+     "clearIfReached": 0.8518518518518519,
+     "time": 142.2000000000053,
+     "airLeft": 51.39166666661461,
+     "airLeftFrac": 0.35442528735596285,
+     "minAirFrac": 0.31867816091917855,
+     "mistakesPerPair": 1.6080246913580245,
+     "score": 272,
+     "bonusShare": 0.35344827586206895,
+     "maxCombo": 3
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid9",
+   "difficulty": "easy",
+   "peek": 1
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 24,
+   "endless": 0.8,
+   "sessionMin": 24.998055555643763,
+   "sessionP10": 24.2818611111902,
+   "sessionP90": 25.916583333433238,
+   "score": 6444,
+   "bestCombo": 6,
+   "topLoss": "Winter L6 13%, Autumn L5 3%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 32.89166666666608,
+     "airLeft": 81.70833333330764,
+     "airLeftFrac": 0.9078703703700848,
+     "minAirFrac": 0.8446296296293998,
+     "mistakesPerPair": 0.6666666666666666,
+     "score": 264,
+     "bonusShare": 0.6183206106870229,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 44.958333333332064,
+     "airLeft": 91.79583333329896,
+     "airLeftFrac": 0.8742460317457043,
+     "minAirFrac": 0.815039682539399,
+     "mistakesPerPair": 0.8,
+     "score": 315,
+     "bonusShare": 0.5832034207830386,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 60.32499999999786,
+     "airLeft": 105.26666666661913,
+     "airLeftFrac": 0.842133333332953,
+     "minAirFrac": 0.7933333333329906,
+     "mistakesPerPair": 0.8999999999999998,
+     "score": 384,
+     "bonusShare": 0.5551018140400589,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 85.50833333332977,
+     "airLeft": 107.9999999999724,
+     "airLeftFrac": 0.7448275862067062,
+     "minAirFrac": 0.7041379310343556,
+     "mistakesPerPair": 1.1499999999999995,
+     "score": 412,
+     "bonusShare": 0.5308613373652636,
+     "maxCombo": 3.5
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "casual",
+   "difficulty": "easy",
+   "peek": 1
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 24,
+   "endless": 1,
+   "sessionMin": 17.06347222220969,
+   "sessionP10": 16.508638888876614,
+   "sessionP90": 17.623138888883194,
+   "score": 7863,
+   "bestCombo": 7,
+   "topLoss": "",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 21.591666666666722,
+     "airLeft": 90,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.921759259259197,
+     "mistakesPerPair": 0.5333333333333333,
+     "score": 280,
+     "bonusShare": 0.6389844646022312,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 29.033333333332966,
+     "airLeft": 105,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.918412698412588,
+     "mistakesPerPair": 0.5583333333333333,
+     "score": 380,
+     "bonusShare": 0.5526315789473685,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 43.01666666666551,
+     "airLeft": 121.3416666666351,
+     "airLeftFrac": 0.9707333333330809,
+     "minAirFrac": 0.8949333333331478,
+     "mistakesPerPair": 0.7899999999999997,
+     "score": 428,
+     "bonusShare": 0.5601757582252707,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 51.374999999998366,
+     "airLeft": 140.18750000004195,
+     "airLeftFrac": 0.9668103448278755,
+     "minAirFrac": 0.8935919540232358,
+     "mistakesPerPair": 0.8111111111111111,
+     "score": 490,
+     "bonusShare": 0.5799516055855221,
+     "maxCombo": 4
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "strong",
+   "difficulty": "easy",
+   "peek": 1
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 24,
+   "endless": 1,
+   "sessionMin": 9.83541666666046,
+   "sessionP10": 9.62322222221621,
+   "sessionP90": 10.017027777771407,
+   "score": 9503,
+   "bestCombo": 8,
+   "topLoss": "",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 11.683333333333493,
+     "airLeft": 90,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9656481481481208,
+     "mistakesPerPair": 0.29444444444444445,
+     "score": 305,
+     "bonusShare": 0.5903225806451613,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 15.891666666667035,
+     "airLeft": 105,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9623412698412399,
+     "mistakesPerPair": 0.35,
+     "score": 390,
+     "bonusShare": 0.5388157894736842,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 21.708333333333382,
+     "airLeft": 125,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9602333333333017,
+     "mistakesPerPair": 0.45000000000000007,
+     "score": 485,
+     "bonusShare": 0.5159574468085106,
+     "maxCombo": 5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 25.87499999999981,
+     "airLeft": 145,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9646264367816413,
+     "mistakesPerPair": 0.45555555555555566,
+     "score": 590,
+     "bonusShare": 0.4915254237288136,
+     "maxCombo": 5.5
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "random",
+   "difficulty": "easy",
+   "peek": 1
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    0.9333333333333333,
+    0.9,
+    0.9,
+    0.9,
+    0.8333333333333334,
+    0.6333333333333333,
+    0.6333333333333333,
+    0.6333333333333333,
+    0.4666666666666667,
+    0.26666666666666666
+   ],
+   "lap1": 0.9,
+   "lap2": 0.6333333333333333,
+   "deathLevel": 10,
+   "endless": 0,
+   "sessionMin": 14.926388888878053,
+   "sessionP10": 7.675416666662425,
+   "sessionP90": 19.891388888912076,
+   "score": 2480,
+   "bestCombo": 3.5,
+   "topLoss": "Winter L3 20%, Winter L2 20%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 31.608333333332823,
+     "airLeft": 82.99166666664199,
+     "airLeftFrac": 0.9221296296293555,
+     "minAirFrac": 0.7903703703701505,
+     "mistakesPerPair": 5.227777777777778,
+     "score": 239,
+     "bonusShare": 0.6654228855721394,
+     "maxCombo": 2
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 46.84999999999862,
+     "airLeft": 88.62499999996787,
+     "airLeftFrac": 0.8440476190473131,
+     "minAirFrac": 0.7438492063488813,
+     "mistakesPerPair": 5.895833333333333,
+     "score": 283,
+     "bonusShare": 0.6201923076923077,
+     "maxCombo": 2
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 0.9333333333333333,
+     "time": 86.53333333332971,
+     "airLeft": 79.05833333326494,
+     "airLeftFrac": 0.6324666666661196,
+     "minAirFrac": 0.561266666666152,
+     "mistakesPerPair": 8.82,
+     "score": 277,
+     "bonusShare": 0.5597560975609757,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.9333333333333333,
+     "clearIfReached": 0.9642857142857143,
+     "time": 132.11666666666395,
+     "airLeft": 61.47499999995718,
+     "airLeftFrac": 0.423965517241084,
+     "minAirFrac": 0.3549999999996706,
+     "mistakesPerPair": 10.797619047619047,
+     "score": 274,
+     "bonusShare": 0.4491525423728814,
+     "maxCombo": 2
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "randomSlow",
+   "difficulty": "easy",
+   "peek": 1
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.7333333333333333,
+    0.3333333333333333,
+    0.03333333333333333,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 1,
+   "endless": 0,
+   "sessionMin": 3.4102777777774147,
+   "sessionP10": 1.5577777777781185,
+   "sessionP90": 6.013972222219492,
+   "score": 186,
+   "bestCombo": 2,
+   "topLoss": "Summer 40%, Autumn 30%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.7333333333333333,
+     "time": 76.29999999999696,
+     "airLeft": 38.29999999998214,
+     "airLeftFrac": 0.4255555555553571,
+     "minAirFrac": 0.3561111111108489,
+     "mistakesPerPair": 4.405555555555555,
+     "score": 156,
+     "bonusShare": 0.48717948717948717,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.7333333333333333,
+     "clearIfReached": 0.45454545454545453,
+     "time": 106.84999999999522,
+     "airLeft": 30.741666666630323,
+     "airLeftFrac": 0.29277777777743164,
+     "minAirFrac": 0.24015873015838268,
+     "mistakesPerPair": 4.556818181818182,
+     "score": 164,
+     "bonusShare": 0.35805860805860806,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.3333333333333333,
+     "clearIfReached": 0.1,
+     "time": 117.96666666666125,
+     "airLeft": 47.624999999939675,
+     "airLeftFrac": 0.3809999999995174,
+     "minAirFrac": 0.3336666666661831,
+     "mistakesPerPair": 4.8100000000000005,
+     "score": 206,
+     "bonusShare": 0.46601941747572817,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.03333333333333333,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 4.666666666666667,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 1
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "sweeper",
+   "difficulty": "easy",
+   "peek": 1
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.3,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 0,
+   "endless": 0,
+   "sessionMin": 1.682222222222662,
+   "sessionP10": 1.5577777777781185,
+   "sessionP90": 2.2797500000006656,
+   "score": 20,
+   "bestCombo": 1,
+   "topLoss": "Spring 70%, Summer 30%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.3,
+     "time": 20.36666666666679,
+     "airLeft": 90,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9087037037036311,
+     "mistakesPerPair": 11.45,
+     "score": 260,
+     "bonusShare": 0.6428571428571429,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.3,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 12.98611111111111,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 0
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid6",
+   "difficulty": "easy",
+   "peek": 2
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    0.8666666666666667,
+    0.8666666666666667,
+    0.8333333333333334,
+    0.7333333333333333,
+    0.4666666666666667,
+    0.4666666666666667,
+    0.43333333333333335,
+    0.26666666666666666,
+    0.1
+   ],
+   "lap1": 0.8666666666666667,
+   "lap2": 0.4666666666666667,
+   "deathLevel": 7,
+   "endless": 0,
+   "sessionMin": 14.587222222211695,
+   "sessionP10": 7.315888888884975,
+   "sessionP90": 20.478722222252888,
+   "score": 2061,
+   "bestCombo": 5,
+   "topLoss": "Winter L2 27%, Winter L3 17%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 47.7833333333319,
+     "airLeft": 66.17499999996747,
+     "airLeftFrac": 0.7352777777774163,
+     "minAirFrac": 0.6899074074070727,
+     "mistakesPerPair": 0.8111111111111111,
+     "score": 234,
+     "bonusShare": 0.5684333759046403,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 70.45833333333061,
+     "airLeft": 67.13333333327863,
+     "airLeftFrac": 0.6393650793645584,
+     "minAirFrac": 0.6014285714280504,
+     "mistakesPerPair": 0.9833333333333333,
+     "score": 265,
+     "bonusShare": 0.4751071464168245,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 106.3916666666619,
+     "airLeft": 58.54583333326778,
+     "airLeftFrac": 0.46836666666614224,
+     "minAirFrac": 0.43649999999947553,
+     "mistakesPerPair": 1.2966666666666664,
+     "score": 253,
+     "bonusShare": 0.4375695216907675,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 0.8666666666666667,
+     "time": 145.14166666667433,
+     "airLeft": 48.449999999947686,
+     "airLeftFrac": 0.334137931034122,
+     "minAirFrac": 0.306379310344466,
+     "mistakesPerPair": 1.6083333333333332,
+     "score": 279,
+     "bonusShare": 0.361659181510824,
+     "maxCombo": 3
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid9",
+   "difficulty": "easy",
+   "peek": 2
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 24,
+   "endless": 0.9,
+   "sessionMin": 24.478611111192706,
+   "sessionP10": 22.952333333395494,
+   "sessionP90": 25.67972222231911,
+   "score": 6515,
+   "bestCombo": 6,
+   "topLoss": "Winter L6 3%, Winter L4 3%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 30.641666666666207,
+     "airLeft": 82.1416666666445,
+     "airLeftFrac": 0.9126851851849389,
+     "minAirFrac": 0.8484259259257699,
+     "mistakesPerPair": 0.6777777777777778,
+     "score": 262,
+     "bonusShare": 0.6153846153846154,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 41.79166666666558,
+     "airLeft": 94.79583333330135,
+     "airLeftFrac": 0.9028174603171556,
+     "minAirFrac": 0.8331746031743794,
+     "mistakesPerPair": 0.7,
+     "score": 336,
+     "bonusShare": 0.5522348160821215,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 58.29166666666464,
+     "airLeft": 106.15416666662142,
+     "airLeftFrac": 0.8492333333329715,
+     "minAirFrac": 0.8017333333330228,
+     "mistakesPerPair": 0.8633333333333332,
+     "score": 362,
+     "bonusShare": 0.573224998351902,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 81.59999999999665,
+     "airLeft": 111.99166666664483,
+     "airLeftFrac": 0.7723563218389298,
+     "minAirFrac": 0.7164942528734544,
+     "mistakesPerPair": 1.1472222222222224,
+     "score": 417,
+     "bonusShare": 0.5378500237304225,
+     "maxCombo": 3
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "casual",
+   "difficulty": "easy",
+   "peek": 2
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 24,
+   "endless": 1,
+   "sessionMin": 16.45791666665444,
+   "sessionP10": 16.0376944444326,
+   "sessionP90": 16.947333333320717,
+   "score": 8056,
+   "bestCombo": 7,
+   "topLoss": "",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 18.85000000000021,
+     "airLeft": 90,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9350925925925055,
+     "mistakesPerPair": 0.35,
+     "score": 300,
+     "bonusShare": 0.6,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 27.424999999999724,
+     "airLeft": 105,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9361111111110452,
+     "mistakesPerPair": 0.4666666666666667,
+     "score": 370,
+     "bonusShare": 0.5675675675675675,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 39.64999999999903,
+     "airLeft": 124.46666666665192,
+     "airLeftFrac": 0.9957333333332153,
+     "minAirFrac": 0.9051666666664894,
+     "mistakesPerPair": 0.6866666666666668,
+     "score": 447,
+     "bonusShare": 0.5555555555555556,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 49.94999999999845,
+     "airLeft": 141.37500000003908,
+     "airLeftFrac": 0.9750000000002694,
+     "minAirFrac": 0.8950574712645636,
+     "mistakesPerPair": 0.7666666666666665,
+     "score": 509,
+     "bonusShare": 0.5489755306603774,
+     "maxCombo": 4
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "strong",
+   "difficulty": "easy",
+   "peek": 2
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 24,
+   "endless": 1,
+   "sessionMin": 9.542222222216283,
+   "sessionP10": 9.330472222216475,
+   "sessionP90": 9.695916666660588,
+   "score": 9639,
+   "bestCombo": 8,
+   "topLoss": "",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 10.041666666666746,
+     "airLeft": 90,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9713888888888662,
+     "mistakesPerPair": 0.1111111111111111,
+     "score": 325,
+     "bonusShare": 0.5550284629981025,
+     "maxCombo": 4.5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 14.083333333333613,
+     "airLeft": 105,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9701587301587065,
+     "mistakesPerPair": 0.225,
+     "score": 420,
+     "bonusShare": 0.5,
+     "maxCombo": 5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 19.0250000000002,
+     "airLeft": 125,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9674666666666407,
+     "mistakesPerPair": 0.29,
+     "score": 510,
+     "bonusShare": 0.49019607843137253,
+     "maxCombo": 5.5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 24.158333333333243,
+     "airLeft": 145,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9689655172414076,
+     "mistakesPerPair": 0.3916666666666666,
+     "score": 580,
+     "bonusShare": 0.5,
+     "maxCombo": 5
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "random",
+   "difficulty": "easy",
+   "peek": 2
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    0.9333333333333333,
+    0.9,
+    0.9,
+    0.9,
+    0.8333333333333334,
+    0.6333333333333333,
+    0.6333333333333333,
+    0.6333333333333333,
+    0.4666666666666667,
+    0.26666666666666666
+   ],
+   "lap1": 0.9,
+   "lap2": 0.6333333333333333,
+   "deathLevel": 10,
+   "endless": 0,
+   "sessionMin": 15.126388888877871,
+   "sessionP10": 7.78708333332899,
+   "sessionP90": 20.158055555582138,
+   "score": 2480,
+   "bestCombo": 3.5,
+   "topLoss": "Winter L3 20%, Winter L2 20%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 31.608333333332823,
+     "airLeft": 82.99166666664199,
+     "airLeftFrac": 0.9221296296293555,
+     "minAirFrac": 0.7903703703701505,
+     "mistakesPerPair": 5.227777777777778,
+     "score": 239,
+     "bonusShare": 0.6654228855721394,
+     "maxCombo": 2
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 46.84999999999862,
+     "airLeft": 88.62499999996787,
+     "airLeftFrac": 0.8440476190473131,
+     "minAirFrac": 0.7438492063488813,
+     "mistakesPerPair": 5.895833333333333,
+     "score": 283,
+     "bonusShare": 0.6201923076923077,
+     "maxCombo": 2
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 0.9333333333333333,
+     "time": 86.53333333332971,
+     "airLeft": 79.05833333326494,
+     "airLeftFrac": 0.6324666666661196,
+     "minAirFrac": 0.561266666666152,
+     "mistakesPerPair": 8.82,
+     "score": 277,
+     "bonusShare": 0.5597560975609757,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.9333333333333333,
+     "clearIfReached": 0.9642857142857143,
+     "time": 132.11666666666395,
+     "airLeft": 61.47499999995718,
+     "airLeftFrac": 0.423965517241084,
+     "minAirFrac": 0.3549999999996706,
+     "mistakesPerPair": 10.797619047619047,
+     "score": 274,
+     "bonusShare": 0.4491525423728814,
+     "maxCombo": 2
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "randomSlow",
+   "difficulty": "easy",
+   "peek": 2
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.7333333333333333,
+    0.3333333333333333,
+    0.03333333333333333,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 1,
+   "endless": 0,
+   "sessionMin": 3.4436111111107177,
+   "sessionP10": 1.5744444444447985,
+   "sessionP90": 6.063972222219446,
+   "score": 186,
+   "bestCombo": 2,
+   "topLoss": "Summer 40%, Autumn 30%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.7333333333333333,
+     "time": 76.29999999999696,
+     "airLeft": 38.29999999998214,
+     "airLeftFrac": 0.4255555555553571,
+     "minAirFrac": 0.3561111111108489,
+     "mistakesPerPair": 4.405555555555555,
+     "score": 156,
+     "bonusShare": 0.48717948717948717,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.7333333333333333,
+     "clearIfReached": 0.45454545454545453,
+     "time": 106.84999999999522,
+     "airLeft": 30.741666666630323,
+     "airLeftFrac": 0.29277777777743164,
+     "minAirFrac": 0.24015873015838268,
+     "mistakesPerPair": 4.556818181818182,
+     "score": 164,
+     "bonusShare": 0.35805860805860806,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.3333333333333333,
+     "clearIfReached": 0.1,
+     "time": 117.96666666666125,
+     "airLeft": 47.624999999939675,
+     "airLeftFrac": 0.3809999999995174,
+     "minAirFrac": 0.3336666666661831,
+     "mistakesPerPair": 4.8100000000000005,
+     "score": 206,
+     "bonusShare": 0.46601941747572817,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.03333333333333333,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 4.666666666666667,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 1
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "sweeper",
+   "difficulty": "easy",
+   "peek": 2
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.3,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 0,
+   "endless": 0,
+   "sessionMin": 1.6988888888893419,
+   "sessionP10": 1.5744444444447985,
+   "sessionP90": 2.3130833333339686,
+   "score": 20,
+   "bestCombo": 1,
+   "topLoss": "Spring 70%, Summer 30%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.3,
+     "time": 20.36666666666679,
+     "airLeft": 90,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9087037037036311,
+     "mistakesPerPair": 11.45,
+     "score": 260,
+     "bonusShare": 0.6428571428571429,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.3,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 12.98611111111111,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 0
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid6",
+   "difficulty": "easy",
+   "peek": 3
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    0.8333333333333334,
+    0.8333333333333334,
+    0.8,
+    0.6666666666666666,
+    0.4,
+    0.4,
+    0.4,
+    0.2,
+    0.13333333333333333
+   ],
+   "lap1": 0.8333333333333334,
+   "lap2": 0.4,
+   "deathLevel": 7,
+   "endless": 0,
+   "sessionMin": 14.021388888878876,
+   "sessionP10": 7.515027777773682,
+   "sessionP90": 22.878111111172327,
+   "score": 1775,
+   "bestCombo": 4,
+   "topLoss": "Winter L2 27%, Autumn L3 20%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 48.82499999999851,
+     "airLeft": 64.53333333330433,
+     "airLeftFrac": 0.7170370370367147,
+     "minAirFrac": 0.6723148148144535,
+     "mistakesPerPair": 0.7777777777777779,
+     "score": 228,
+     "bonusShare": 0.5636305934623929,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 72.64166666666384,
+     "airLeft": 64.94999999994971,
+     "airLeftFrac": 0.6185714285709496,
+     "minAirFrac": 0.5783333333328534,
+     "mistakesPerPair": 1,
+     "score": 259,
+     "bonusShare": 0.5096181046676096,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 112.09999999999492,
+     "airLeft": 53.49166666660509,
+     "airLeftFrac": 0.4279333333328407,
+     "minAirFrac": 0.39606666666617407,
+     "mistakesPerPair": 1.3533333333333333,
+     "score": 258,
+     "bonusShare": 0.4176356589147287,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 0.8333333333333334,
+     "time": 153.20000000001406,
+     "airLeft": 40.39166666662163,
+     "airLeftFrac": 0.278563218390494,
+     "minAirFrac": 0.2510919540226779,
+     "mistakesPerPair": 1.7638888888888893,
+     "score": 264,
+     "bonusShare": 0.2962962962962963,
+     "maxCombo": 3
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid9",
+   "difficulty": "easy",
+   "peek": 3
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 24,
+   "endless": 0.8666666666666667,
+   "sessionMin": 23.89069444451855,
+   "sessionP10": 22.9965277778405,
+   "sessionP90": 25.1788888889794,
+   "score": 6652,
+   "bestCombo": 6,
+   "topLoss": "Winter L6 13%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 25.80833333333315,
+     "airLeft": 87.14166666665325,
+     "airLeftFrac": 0.9682407407405916,
+     "minAirFrac": 0.8979629629628818,
+     "mistakesPerPair": 0.41666666666666663,
+     "score": 294,
+     "bonusShare": 0.5861872146118722,
+     "maxCombo": 3.5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 38.10833333333245,
+     "airLeft": 97.98749999997054,
+     "airLeftFrac": 0.9332142857140052,
+     "minAirFrac": 0.864960317460119,
+     "mistakesPerPair": 0.5541666666666667,
+     "score": 344,
+     "bonusShare": 0.5732959850606909,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 63.91666666666433,
+     "airLeft": 100.52916666661696,
+     "airLeftFrac": 0.8042333333329357,
+     "minAirFrac": 0.7515666666663035,
+     "mistakesPerPair": 0.9700000000000002,
+     "score": 353,
+     "bonusShare": 0.5509314753770852,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 74.94999999999703,
+     "airLeft": 117.01666666665261,
+     "airLeftFrac": 0.8070114942527766,
+     "minAirFrac": 0.7525862068965307,
+     "mistakesPerPair": 0.9805555555555555,
+     "score": 427,
+     "bonusShare": 0.5452095125541664,
+     "maxCombo": 3
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "casual",
+   "difficulty": "easy",
+   "peek": 3
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 24,
+   "endless": 1,
+   "sessionMin": 16.06277777776591,
+   "sessionP10": 15.701805555544015,
+   "sessionP90": 16.400527777765603,
+   "score": 8113,
+   "bestCombo": 6.5,
+   "topLoss": "",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 16.02500000000037,
+     "airLeft": 90,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9451851851851416,
+     "mistakesPerPair": 0.25000000000000006,
+     "score": 305,
+     "bonusShare": 0.5903225806451613,
+     "maxCombo": 3.5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 23.674999999999937,
+     "airLeft": 105,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.941111111111034,
+     "mistakesPerPair": 0.3541666666666667,
+     "score": 375,
+     "bonusShare": 0.5600995732574681,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 37.64166666666581,
+     "airLeft": 124.67499999998064,
+     "airLeftFrac": 0.9973999999998451,
+     "minAirFrac": 0.9209666666665401,
+     "mistakesPerPair": 0.6166666666666667,
+     "score": 425,
+     "bonusShare": 0.585383664756769,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 46.108333333332,
+     "airLeft": 144.73750000002207,
+     "airLeftFrac": 0.998189655172566,
+     "minAirFrac": 0.9262643678162719,
+     "mistakesPerPair": 0.6555555555555556,
+     "score": 509,
+     "bonusShare": 0.5524682010902484,
+     "maxCombo": 4
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "strong",
+   "difficulty": "easy",
+   "peek": 3
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 24,
+   "endless": 1,
+   "sessionMin": 9.245694444438776,
+   "sessionP10": 9.148444444438864,
+   "sessionP90": 9.404388888883075,
+   "score": 10455,
+   "bestCombo": 10,
+   "topLoss": "",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 8.85000000000002,
+     "airLeft": 90,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9819444444444301,
+     "mistakesPerPair": 0.016666666666666666,
+     "score": 380,
+     "bonusShare": 0.47368421052631576,
+     "maxCombo": 6
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 11.825000000000166,
+     "airLeft": 105,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9842857142857018,
+     "mistakesPerPair": 0.05,
+     "score": 510,
+     "bonusShare": 0.4117647058823529,
+     "maxCombo": 8
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 17.408333333333626,
+     "airLeft": 125,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9758666666666475,
+     "mistakesPerPair": 0.1733333333333333,
+     "score": 520,
+     "bonusShare": 0.4807692307692308,
+     "maxCombo": 5.5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 22.408333333333342,
+     "airLeft": 145,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9705172413793371,
+     "mistakesPerPair": 0.2777777777777778,
+     "score": 580,
+     "bonusShare": 0.5,
+     "maxCombo": 5
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "random",
+   "difficulty": "easy",
+   "peek": 3
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    0.9333333333333333,
+    0.9,
+    0.9,
+    0.9,
+    0.8333333333333334,
+    0.6333333333333333,
+    0.6333333333333333,
+    0.6333333333333333,
+    0.4666666666666667,
+    0.26666666666666666
+   ],
+   "lap1": 0.9,
+   "lap2": 0.6333333333333333,
+   "deathLevel": 10,
+   "endless": 0,
+   "sessionMin": 15.32638888887769,
+   "sessionP10": 7.898749999995555,
+   "sessionP90": 20.4247222222522,
+   "score": 2480,
+   "bestCombo": 3.5,
+   "topLoss": "Winter L3 20%, Winter L2 20%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 31.608333333332823,
+     "airLeft": 82.99166666664199,
+     "airLeftFrac": 0.9221296296293555,
+     "minAirFrac": 0.7903703703701505,
+     "mistakesPerPair": 5.227777777777778,
+     "score": 239,
+     "bonusShare": 0.6654228855721394,
+     "maxCombo": 2
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 46.84999999999862,
+     "airLeft": 88.62499999996787,
+     "airLeftFrac": 0.8440476190473131,
+     "minAirFrac": 0.7438492063488813,
+     "mistakesPerPair": 5.895833333333333,
+     "score": 283,
+     "bonusShare": 0.6201923076923077,
+     "maxCombo": 2
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 0.9333333333333333,
+     "time": 86.53333333332971,
+     "airLeft": 79.05833333326494,
+     "airLeftFrac": 0.6324666666661196,
+     "minAirFrac": 0.561266666666152,
+     "mistakesPerPair": 8.82,
+     "score": 277,
+     "bonusShare": 0.5597560975609757,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.9333333333333333,
+     "clearIfReached": 0.9642857142857143,
+     "time": 132.11666666666395,
+     "airLeft": 61.47499999995718,
+     "airLeftFrac": 0.423965517241084,
+     "minAirFrac": 0.3549999999996706,
+     "mistakesPerPair": 10.797619047619047,
+     "score": 274,
+     "bonusShare": 0.4491525423728814,
+     "maxCombo": 2
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "randomSlow",
+   "difficulty": "easy",
+   "peek": 3
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.7333333333333333,
+    0.3333333333333333,
+    0.03333333333333333,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 1,
+   "endless": 0,
+   "sessionMin": 3.4769444444440207,
+   "sessionP10": 1.5911111111114784,
+   "sessionP90": 6.113972222219401,
+   "score": 186,
+   "bestCombo": 2,
+   "topLoss": "Summer 40%, Autumn 30%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.7333333333333333,
+     "time": 76.29999999999696,
+     "airLeft": 38.29999999998214,
+     "airLeftFrac": 0.4255555555553571,
+     "minAirFrac": 0.3561111111108489,
+     "mistakesPerPair": 4.405555555555555,
+     "score": 156,
+     "bonusShare": 0.48717948717948717,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.7333333333333333,
+     "clearIfReached": 0.45454545454545453,
+     "time": 106.84999999999522,
+     "airLeft": 30.741666666630323,
+     "airLeftFrac": 0.29277777777743164,
+     "minAirFrac": 0.24015873015838268,
+     "mistakesPerPair": 4.556818181818182,
+     "score": 164,
+     "bonusShare": 0.35805860805860806,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.3333333333333333,
+     "clearIfReached": 0.1,
+     "time": 117.96666666666125,
+     "airLeft": 47.624999999939675,
+     "airLeftFrac": 0.3809999999995174,
+     "minAirFrac": 0.3336666666661831,
+     "mistakesPerPair": 4.8100000000000005,
+     "score": 206,
+     "bonusShare": 0.46601941747572817,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.03333333333333333,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 4.666666666666667,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 1
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "sweeper",
+   "difficulty": "easy",
+   "peek": 3
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.3,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 0,
+   "endless": 0,
+   "sessionMin": 1.7155555555560218,
+   "sessionP10": 1.5911111111114784,
+   "sessionP90": 2.3464166666672717,
+   "score": 20,
+   "bestCombo": 1,
+   "topLoss": "Spring 70%, Summer 30%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.3,
+     "time": 20.36666666666679,
+     "airLeft": 90,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9087037037036311,
+     "mistakesPerPair": 11.45,
+     "score": 260,
+     "bonusShare": 0.6428571428571429,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.3,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 12.98611111111111,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 0
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid6",
+   "difficulty": "normal",
+   "peek": 0
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.9333333333333333,
+    0.7,
+    0.23333333333333334,
+    0.03333333333333333,
+    0.03333333333333333,
+    0.03333333333333333,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0.03333333333333333,
+   "lap2": 0,
+   "deathLevel": 2,
+   "endless": 0,
+   "sessionMin": 4.0072222222213165,
+   "sessionP10": 2.0700000000007486,
+   "sessionP90": 6.230277777774851,
+   "score": 358,
+   "bestCombo": 3,
+   "topLoss": "Autumn 47%, Summer 23%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.9333333333333333,
+     "time": 53.908333333331555,
+     "airLeft": 24.691666666669697,
+     "airLeftFrac": 0.4115277777778283,
+     "minAirFrac": 0.36180555555560606,
+     "mistakesPerPair": 1.0111111111111113,
+     "score": 149,
+     "bonusShare": 0.32711061577040956,
+     "maxCombo": 3
+    },
+    {
+     "reached": 0.9333333333333333,
+     "clearIfReached": 0.75,
+     "time": 78.53333333333016,
+     "airLeft": 16.058333333332655,
+     "airLeftFrac": 0.2294047619047522,
+     "minAirFrac": 0.1867857142857046,
+     "mistakesPerPair": 1.1964285714285714,
+     "score": 170,
+     "bonusShare": 0.21428571428571427,
+     "maxCombo": 3
+    },
+    {
+     "reached": 0.7,
+     "clearIfReached": 0.3333333333333333,
+     "time": 99.48333333332897,
+     "airLeft": 16.10833333331594,
+     "airLeftFrac": 0.189509803921364,
+     "minAirFrac": 0.15441176470567772,
+     "mistakesPerPair": 1.3857142857142857,
+     "score": 194,
+     "bonusShare": 0.16666666666666666,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.23333333333333334,
+     "clearIfReached": 0.14285714285714285,
+     "time": 129.26666666666168,
+     "airLeft": 7.324999999968313,
+     "airLeftFrac": 0.07324999999968312,
+     "minAirFrac": 0.0434166666663498,
+     "mistakesPerPair": 1.523809523809524,
+     "score": 264,
+     "bonusShare": 0.05303030303030303,
+     "maxCombo": 1
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid9",
+   "difficulty": "normal",
+   "peek": 0
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0.9666666666666667,
+    0.9333333333333333,
+    0.9333333333333333,
+    0.9,
+    0.6,
+    0.16666666666666666
+   ],
+   "lap1": 1,
+   "lap2": 0.9333333333333333,
+   "deathLevel": 11,
+   "endless": 0,
+   "sessionMin": 12.169861111102783,
+   "sessionP10": 10.467277777770999,
+   "sessionP90": 14.050222222212184,
+   "score": 2339,
+   "bestCombo": 5,
+   "topLoss": "Winter L3 43%, Autumn L3 30%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 33.49999999999938,
+     "airLeft": 45.10000000000187,
+     "airLeftFrac": 0.7516666666666978,
+     "minAirFrac": 0.6995833333333619,
+     "mistakesPerPair": 0.788888888888889,
+     "score": 210,
+     "bonusShare": 0.44184839044652124,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 46.29166666666532,
+     "airLeft": 47.7624999999957,
+     "airLeftFrac": 0.6823214285713672,
+     "minAirFrac": 0.6392261904761266,
+     "mistakesPerPair": 0.8833333333333333,
+     "score": 235,
+     "bonusShare": 0.39655172413793105,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 63.77499999999766,
+     "airLeft": 51.81666666664253,
+     "airLeftFrac": 0.6096078431369709,
+     "minAirFrac": 0.5714705882350084,
+     "mistakesPerPair": 1.0699999999999996,
+     "score": 252,
+     "bonusShare": 0.38722706045689764,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 86.04166666666308,
+     "airLeft": 50.54999999996266,
+     "airLeftFrac": 0.5054999999996266,
+     "minAirFrac": 0.46958333333295854,
+     "mistakesPerPair": 1.2888888888888888,
+     "score": 273,
+     "bonusShare": 0.35125060125060126,
+     "maxCombo": 3
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "casual",
+   "difficulty": "normal",
+   "peek": 0
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 19,
+   "endless": 0,
+   "sessionMin": 14.25444444443422,
+   "sessionP10": 13.246999999990692,
+   "sessionP90": 15.451249999988688,
+   "score": 4849,
+   "bestCombo": 7,
+   "topLoss": "Winter L5 30%, Summer L6 27%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 23.899999999999924,
+     "airLeft": 54.700000000001324,
+     "airLeftFrac": 0.9116666666666888,
+     "minAirFrac": 0.8336111111111234,
+     "mistakesPerPair": 0.6944444444444445,
+     "score": 227,
+     "bonusShare": 0.4782608695652174,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 32.42499999999944,
+     "airLeft": 61.90416666666205,
+     "airLeftFrac": 0.8843452380951722,
+     "minAirFrac": 0.807857142857093,
+     "mistakesPerPair": 0.6916666666666667,
+     "score": 287,
+     "bonusShare": 0.446360153256705,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 44.42499999999876,
+     "airLeft": 70.42083333329904,
+     "airLeftFrac": 0.8284803921564594,
+     "minAirFrac": 0.7693137254898581,
+     "mistakesPerPair": 0.8766666666666666,
+     "score": 328,
+     "bonusShare": 0.44261695906432746,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 53.591666666664906,
+     "airLeft": 82.99999999995782,
+     "airLeftFrac": 0.8299999999995782,
+     "minAirFrac": 0.7772499999996556,
+     "mistakesPerPair": 0.9333333333333333,
+     "score": 383,
+     "bonusShare": 0.43223443223443225,
+     "maxCombo": 4
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "strong",
+   "difficulty": "normal",
+   "peek": 0
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 24,
+   "endless": 1,
+   "sessionMin": 10.305138888882256,
+   "sessionP10": 10.217749999993446,
+   "sessionP90": 10.454111111104343,
+   "score": 7480,
+   "bestCombo": 9,
+   "topLoss": "",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 13.891666666666936,
+     "airLeft": 60,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9172222222222269,
+     "mistakesPerPair": 0.5777777777777777,
+     "score": 265,
+     "bonusShare": 0.4542857142857143,
+     "maxCombo": 4.5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 18.041666666666924,
+     "airLeft": 70,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9249404761903823,
+     "mistakesPerPair": 0.5541666666666667,
+     "score": 330,
+     "bonusShare": 0.42424242424242425,
+     "maxCombo": 5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 23.399999999999952,
+     "airLeft": 85,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9330392156862072,
+     "mistakesPerPair": 0.5866666666666666,
+     "score": 395,
+     "bonusShare": 0.430448717948718,
+     "maxCombo": 5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 28.733333333332983,
+     "airLeft": 100,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9301249999999325,
+     "mistakesPerPair": 0.6500000000000001,
+     "score": 500,
+     "bonusShare": 0.4,
+     "maxCombo": 5
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "random",
+   "difficulty": "normal",
+   "peek": 0
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.9666666666666667,
+    0.9333333333333333,
+    0.7333333333333333,
+    0.36666666666666664,
+    0.3333333333333333,
+    0.3,
+    0.03333333333333333,
+    0.03333333333333333,
+    0.03333333333333333,
+    0.03333333333333333,
+    0,
+    0
+   ],
+   "lap1": 0.36666666666666664,
+   "lap2": 0.03333333333333333,
+   "deathLevel": 3,
+   "endless": 0,
+   "sessionMin": 5.1063888888869835,
+   "sessionP10": 2.905750000000096,
+   "sessionP90": 8.168666666661977,
+   "score": 651,
+   "bestCombo": 3,
+   "topLoss": "Winter 37%, Autumn L2 27%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.9666666666666667,
+     "time": 30.283333333332894,
+     "airLeft": 48.316666666668354,
+     "airLeftFrac": 0.8052777777778058,
+     "minAirFrac": 0.6608333333333583,
+     "mistakesPerPair": 5.105555555555556,
+     "score": 168,
+     "bonusShare": 0.5394736842105263,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.9666666666666667,
+     "clearIfReached": 0.9655172413793104,
+     "time": 45.5249999999987,
+     "airLeft": 47.624999999997186,
+     "airLeftFrac": 0.6803571428571027,
+     "minAirFrac": 0.5867261904761507,
+     "mistakesPerPair": 5.5905172413793105,
+     "score": 205,
+     "bonusShare": 0.4618725868725869,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.9333333333333333,
+     "clearIfReached": 0.7857142857142857,
+     "time": 81.52499999999665,
+     "airLeft": 34.066666666645695,
+     "airLeftFrac": 0.4007843137252435,
+     "minAirFrac": 0.30990196078407517,
+     "mistakesPerPair": 7.975000000000001,
+     "score": 199,
+     "bonusShare": 0.3532178217821782,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.7333333333333333,
+     "clearIfReached": 0.5,
+     "time": 104.98333333332866,
+     "airLeft": 31.60833333330602,
+     "airLeftFrac": 0.3160833333330602,
+     "minAirFrac": 0.26791666666638775,
+     "mistakesPerPair": 9.125,
+     "score": 204,
+     "bonusShare": 0.29577464788732394,
+     "maxCombo": 2
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "randomSlow",
+   "difficulty": "normal",
+   "peek": 0
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.4666666666666667,
+    0.03333333333333333,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 0,
+   "endless": 0,
+   "sessionMin": 1.2102777777778422,
+   "sessionP10": 1.0352777777777298,
+   "sessionP90": 2.5648333333337394,
+   "score": 50,
+   "bestCombo": 2,
+   "topLoss": "Spring 53%, Summer 43%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.4666666666666667,
+     "time": 59.85833333333122,
+     "airLeft": 18.741666666670035,
+     "airLeftFrac": 0.31236111111116727,
+     "minAirFrac": 0.24583333333338758,
+     "mistakesPerPair": 3.55,
+     "score": 118,
+     "bonusShare": 0.3220338983050847,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.4666666666666667,
+     "clearIfReached": 0.07142857142857142,
+     "time": 56.79999999999806,
+     "airLeft": 37.79166666666475,
+     "airLeftFrac": 0.539880952380925,
+     "minAirFrac": 0.48488095238092327,
+     "mistakesPerPair": 3.4375,
+     "score": 176,
+     "bonusShare": 0.4318181818181818,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.03333333333333333,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 3.5,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "sweeper",
+   "difficulty": "normal",
+   "peek": 0
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.3,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 0,
+   "endless": 0,
+   "sessionMin": 1.1347222222222264,
+   "sessionP10": 1.0352777777777298,
+   "sessionP90": 1.6508611111115261,
+   "score": 20,
+   "bestCombo": 1,
+   "topLoss": "Spring 70%, Summer 30%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.3,
+     "time": 20.36666666666679,
+     "airLeft": 57.86666666666747,
+     "airLeftFrac": 0.9644444444444579,
+     "minAirFrac": 0.8630555555555633,
+     "mistakesPerPair": 7.905555555555556,
+     "score": 200,
+     "bonusShare": 0.5454545454545454,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.3,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 8.652777777777779,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 0
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid6",
+   "difficulty": "normal",
+   "peek": 1
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    0.7333333333333333,
+    0.26666666666666666,
+    0.06666666666666667,
+    0.06666666666666667,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0.06666666666666667,
+   "lap2": 0,
+   "deathLevel": 2,
+   "endless": 0,
+   "sessionMin": 3.960416666665804,
+   "sessionP10": 2.491611111111584,
+   "sessionP90": 6.330972222219203,
+   "score": 404,
+   "bestCombo": 4,
+   "topLoss": "Autumn 47%, Summer 27%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 52.69999999999829,
+     "airLeft": 25.608333333336226,
+     "airLeftFrac": 0.4268055555556038,
+     "minAirFrac": 0.3770833333333815,
+     "mistakesPerPair": 0.8555555555555556,
+     "score": 152,
+     "bonusShare": 0.3605179463880055,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 0.7333333333333333,
+     "time": 73.44999999999712,
+     "airLeft": 21.141666666665138,
+     "airLeftFrac": 0.3020238095237877,
+     "minAirFrac": 0.25940476190474004,
+     "mistakesPerPair": 1.125,
+     "score": 184,
+     "bonusShare": 0.23145761741122567,
+     "maxCombo": 3
+    },
+    {
+     "reached": 0.7333333333333333,
+     "clearIfReached": 0.36363636363636365,
+     "time": 103.89166666666205,
+     "airLeft": 11.699999999985415,
+     "airLeftFrac": 0.13764705882335782,
+     "minAirFrac": 0.10254901960767154,
+     "mistakesPerPair": 1.4227272727272726,
+     "score": 184,
+     "bonusShare": 0.1308211873444721,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.26666666666666666,
+     "clearIfReached": 0.25,
+     "time": 119.92499999999447,
+     "airLeft": 16.66666666663381,
+     "airLeftFrac": 0.1666666666663381,
+     "minAirFrac": 0.13683333333300474,
+     "mistakesPerPair": 1.458333333333333,
+     "score": 213,
+     "bonusShare": 0.15199425080848006,
+     "maxCombo": 2
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid9",
+   "difficulty": "normal",
+   "peek": 1
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0.9333333333333333,
+    0.9333333333333333,
+    0.9,
+    0.5666666666666667,
+    0.36666666666666664
+   ],
+   "lap1": 1,
+   "lap2": 0.9333333333333333,
+   "deathLevel": 11,
+   "endless": 0,
+   "sessionMin": 11.837638888880862,
+   "sessionP10": 10.386444444437739,
+   "sessionP90": 14.559249999989499,
+   "score": 2469,
+   "bestCombo": 5,
+   "topLoss": "Autumn L3 33%, Autumn L4 20%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 32.29166666666612,
+     "airLeft": 46.308333333335135,
+     "airLeftFrac": 0.7718055555555856,
+     "minAirFrac": 0.7215277777778064,
+     "mistakesPerPair": 0.6666666666666666,
+     "score": 192,
+     "bonusShare": 0.4791666666666667,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 44.058333333332115,
+     "airLeft": 50.22916666666396,
+     "airLeftFrac": 0.7175595238094852,
+     "minAirFrac": 0.6689285714285282,
+     "mistakesPerPair": 0.8,
+     "score": 231,
+     "bonusShare": 0.4286527387170216,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 59.02499999999793,
+     "airLeft": 56.56666666664181,
+     "airLeftFrac": 0.665490196078139,
+     "minAirFrac": 0.6270588235291186,
+     "mistakesPerPair": 0.8999999999999998,
+     "score": 286,
+     "bonusShare": 0.3902439024390244,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 83.4916666666632,
+     "airLeft": 53.09999999996308,
+     "airLeftFrac": 0.5309999999996309,
+     "minAirFrac": 0.50049999999963,
+     "mistakesPerPair": 1.1499999999999995,
+     "score": 302,
+     "bonusShare": 0.35374149659863946,
+     "maxCombo": 3.5
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "casual",
+   "difficulty": "normal",
+   "peek": 1
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 21,
+   "endless": 0,
+   "sessionMin": 14.681111111100499,
+   "sessionP10": 12.919833333324323,
+   "sessionP90": 15.972833333321546,
+   "score": 5115,
+   "bestCombo": 7,
+   "topLoss": "Autumn L6 33%, Autumn L5 23%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 21.100000000000083,
+     "airLeft": 56.95833333333453,
+     "airLeftFrac": 0.9493055555555755,
+     "minAirFrac": 0.8663888888888993,
+     "mistakesPerPair": 0.5166666666666668,
+     "score": 225,
+     "bonusShare": 0.5024752475247525,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 29.358333333332947,
+     "airLeft": 65.09583333332392,
+     "airLeftFrac": 0.9299404761903418,
+     "minAirFrac": 0.8507738095237087,
+     "mistakesPerPair": 0.5666666666666667,
+     "score": 304,
+     "bonusShare": 0.4406926406926407,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 39.74999999999903,
+     "airLeft": 75.67083333330442,
+     "airLeftFrac": 0.8902450980388755,
+     "minAirFrac": 0.8316176470585912,
+     "mistakesPerPair": 0.7266666666666666,
+     "score": 328,
+     "bonusShare": 0.44776358967042373,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 50.033333333331775,
+     "airLeft": 85.79583333329577,
+     "airLeftFrac": 0.8579583333329577,
+     "minAirFrac": 0.8037916666663674,
+     "mistakesPerPair": 0.8333333333333335,
+     "score": 371,
+     "bonusShare": 0.44920110564282345,
+     "maxCombo": 3.5
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "strong",
+   "difficulty": "normal",
+   "peek": 1
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 24,
+   "endless": 1,
+   "sessionMin": 9.820694444438253,
+   "sessionP10": 9.718694444438345,
+   "sessionP90": 10.005388888882528,
+   "score": 7366,
+   "bestCombo": 8.5,
+   "topLoss": "",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 11.658333333333491,
+     "airLeft": 60,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9484722222222252,
+     "mistakesPerPair": 0.2888888888888889,
+     "score": 250,
+     "bonusShare": 0.48,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 15.866666666667035,
+     "airLeft": 70,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9520238095237714,
+     "mistakesPerPair": 0.3458333333333333,
+     "score": 320,
+     "bonusShare": 0.43792766373411535,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 21.358333333333402,
+     "airLeft": 85,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9434803921568178,
+     "mistakesPerPair": 0.41666666666666674,
+     "score": 425,
+     "bonusShare": 0.4000553709856035,
+     "maxCombo": 6
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 26.39166666666645,
+     "airLeft": 100,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9514999999999375,
+     "mistakesPerPair": 0.4722222222222221,
+     "score": 480,
+     "bonusShare": 0.4166666666666667,
+     "maxCombo": 5
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "random",
+   "difficulty": "normal",
+   "peek": 1
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.9666666666666667,
+    0.9333333333333333,
+    0.7333333333333333,
+    0.36666666666666664,
+    0.3333333333333333,
+    0.3,
+    0.03333333333333333,
+    0.03333333333333333,
+    0.03333333333333333,
+    0.03333333333333333,
+    0,
+    0
+   ],
+   "lap1": 0.36666666666666664,
+   "lap2": 0.03333333333333333,
+   "deathLevel": 3,
+   "endless": 0,
+   "sessionMin": 5.197499999998012,
+   "sessionP10": 2.9740833333333674,
+   "sessionP90": 8.328111111106276,
+   "score": 651,
+   "bestCombo": 3,
+   "topLoss": "Winter 37%, Autumn L2 27%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.9666666666666667,
+     "time": 30.283333333332894,
+     "airLeft": 48.316666666668354,
+     "airLeftFrac": 0.8052777777778058,
+     "minAirFrac": 0.6608333333333583,
+     "mistakesPerPair": 5.105555555555556,
+     "score": 168,
+     "bonusShare": 0.5394736842105263,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.9666666666666667,
+     "clearIfReached": 0.9655172413793104,
+     "time": 45.5249999999987,
+     "airLeft": 47.624999999997186,
+     "airLeftFrac": 0.6803571428571027,
+     "minAirFrac": 0.5867261904761507,
+     "mistakesPerPair": 5.5905172413793105,
+     "score": 205,
+     "bonusShare": 0.4618725868725869,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.9333333333333333,
+     "clearIfReached": 0.7857142857142857,
+     "time": 81.52499999999665,
+     "airLeft": 34.066666666645695,
+     "airLeftFrac": 0.4007843137252435,
+     "minAirFrac": 0.30990196078407517,
+     "mistakesPerPair": 7.975000000000001,
+     "score": 199,
+     "bonusShare": 0.3532178217821782,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.7333333333333333,
+     "clearIfReached": 0.5,
+     "time": 104.98333333332866,
+     "airLeft": 31.60833333330602,
+     "airLeftFrac": 0.3160833333330602,
+     "minAirFrac": 0.26791666666638775,
+     "mistakesPerPair": 9.125,
+     "score": 204,
+     "bonusShare": 0.29577464788732394,
+     "maxCombo": 2
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "randomSlow",
+   "difficulty": "normal",
+   "peek": 1
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.4666666666666667,
+    0.03333333333333333,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 0,
+   "endless": 0,
+   "sessionMin": 1.233055555555638,
+   "sessionP10": 1.0580555555555062,
+   "sessionP90": 2.6103888888892537,
+   "score": 50,
+   "bestCombo": 2,
+   "topLoss": "Spring 53%, Summer 43%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.4666666666666667,
+     "time": 59.85833333333122,
+     "airLeft": 18.741666666670035,
+     "airLeftFrac": 0.31236111111116727,
+     "minAirFrac": 0.24583333333338758,
+     "mistakesPerPair": 3.55,
+     "score": 118,
+     "bonusShare": 0.3220338983050847,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.4666666666666667,
+     "clearIfReached": 0.07142857142857142,
+     "time": 56.79999999999806,
+     "airLeft": 37.79166666666475,
+     "airLeftFrac": 0.539880952380925,
+     "minAirFrac": 0.48488095238092327,
+     "mistakesPerPair": 3.4375,
+     "score": 176,
+     "bonusShare": 0.4318181818181818,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.03333333333333333,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 3.5,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "sweeper",
+   "difficulty": "normal",
+   "peek": 1
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.3,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 0,
+   "endless": 0,
+   "sessionMin": 1.1575000000000224,
+   "sessionP10": 1.0580555555555062,
+   "sessionP90": 1.6964166666671179,
+   "score": 20,
+   "bestCombo": 1,
+   "topLoss": "Spring 70%, Summer 30%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.3,
+     "time": 20.36666666666679,
+     "airLeft": 57.86666666666747,
+     "airLeftFrac": 0.9644444444444579,
+     "minAirFrac": 0.8630555555555633,
+     "mistakesPerPair": 7.905555555555556,
+     "score": 200,
+     "bonusShare": 0.5454545454545454,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.3,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 8.652777777777779,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 0
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid6",
+   "difficulty": "normal",
+   "peek": 2
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.9666666666666667,
+    0.8333333333333334,
+    0.5333333333333333,
+    0.16666666666666666,
+    0.16666666666666666,
+    0.13333333333333333,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0.16666666666666666,
+   "lap2": 0,
+   "deathLevel": 3,
+   "endless": 0,
+   "sessionMin": 5.318749999997902,
+   "sessionP10": 2.3598055555561483,
+   "sessionP90": 9.53027777777185,
+   "score": 503,
+   "bestCombo": 4,
+   "topLoss": "Winter 37%, Autumn 30%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.9666666666666667,
+     "time": 46.59999999999864,
+     "airLeft": 31.716666666669127,
+     "airLeftFrac": 0.5286111111111521,
+     "minAirFrac": 0.4788888888889299,
+     "mistakesPerPair": 0.8,
+     "score": 166,
+     "bonusShare": 0.38095238095238093,
+     "maxCombo": 3
+    },
+    {
+     "reached": 0.9666666666666667,
+     "clearIfReached": 0.8620689655172413,
+     "time": 68.24999999999741,
+     "airLeft": 26.341666666664196,
+     "airLeftFrac": 0.3763095238094885,
+     "minAirFrac": 0.3336904761904409,
+     "mistakesPerPair": 0.9612068965517241,
+     "score": 192,
+     "bonusShare": 0.2708333333333333,
+     "maxCombo": 3
+    },
+    {
+     "reached": 0.8333333333333334,
+     "clearIfReached": 0.64,
+     "time": 95.44999999999587,
+     "airLeft": 20.141666666646188,
+     "airLeftFrac": 0.23696078431348455,
+     "minAirFrac": 0.20186274509779828,
+     "mistakesPerPair": 1.2480000000000002,
+     "score": 194,
+     "bonusShare": 0.19709989258861438,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.5333333333333333,
+     "clearIfReached": 0.3125,
+     "time": 121.21666666666107,
+     "airLeft": 15.374999999965937,
+     "airLeftFrac": 0.15374999999965935,
+     "minAirFrac": 0.12391666666632602,
+     "mistakesPerPair": 1.4166666666666667,
+     "score": 220,
+     "bonusShare": 0.1414141414141414,
+     "maxCombo": 2
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid9",
+   "difficulty": "normal",
+   "peek": 2
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0.9666666666666667,
+    0.9666666666666667,
+    0.9666666666666667,
+    0.9333333333333333,
+    0.8,
+    0.5666666666666667
+   ],
+   "lap1": 1,
+   "lap2": 0.9666666666666667,
+   "deathLevel": 13.5,
+   "endless": 0,
+   "sessionMin": 13.691249999990287,
+   "sessionP10": 10.580388888882007,
+   "sessionP90": 14.7030833333227,
+   "score": 2853,
+   "bestCombo": 5,
+   "topLoss": "Autumn L4 40%, Winter L3 23%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 30.04166666666624,
+     "airLeft": 47.741666666668216,
+     "airLeftFrac": 0.7956944444444702,
+     "minAirFrac": 0.7454166666666897,
+     "mistakesPerPair": 0.6777777777777778,
+     "score": 193,
+     "bonusShare": 0.47368421052631576,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 41.04999999999895,
+     "airLeft": 52.85416666666126,
+     "airLeftFrac": 0.7550595238094465,
+     "minAirFrac": 0.7069047619047008,
+     "mistakesPerPair": 0.7,
+     "score": 251,
+     "bonusShare": 0.41362851903786,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 56.99166666666471,
+     "airLeft": 57.95416666663661,
+     "airLeftFrac": 0.6818137254898424,
+     "minAirFrac": 0.6449509803918013,
+     "mistakesPerPair": 0.8633333333333332,
+     "score": 266,
+     "bonusShare": 0.4243762993762994,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 79.79999999999676,
+     "airLeft": 56.79166666663025,
+     "airLeftFrac": 0.5679166666663025,
+     "minAirFrac": 0.5340833333329297,
+     "mistakesPerPair": 1.1472222222222224,
+     "score": 307,
+     "bonusShare": 0.3670632536153507,
+     "maxCombo": 3
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "casual",
+   "difficulty": "normal",
+   "peek": 2
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 22,
+   "endless": 0.06666666666666667,
+   "sessionMin": 15.286111111099949,
+   "sessionP10": 14.208944444434263,
+   "sessionP90": 15.901861111099388,
+   "score": 5508,
+   "bestCombo": 7,
+   "topLoss": "Autumn L6 47%, Winter L6 30%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 18.750000000000217,
+     "airLeft": 58.2666666666677,
+     "airLeftFrac": 0.9711111111111284,
+     "minAirFrac": 0.8904166666666757,
+     "mistakesPerPair": 0.3611111111111111,
+     "score": 236,
+     "bonusShare": 0.4915254237288136,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 26.724999999999763,
+     "airLeft": 66.62499999999129,
+     "airLeftFrac": 0.9517857142855899,
+     "minAirFrac": 0.8802380952379065,
+     "mistakesPerPair": 0.4666666666666667,
+     "score": 290,
+     "bonusShare": 0.45230476952304766,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 39.23333333333239,
+     "airLeft": 75.0208333333027,
+     "airLeftFrac": 0.882598039215326,
+     "minAirFrac": 0.8335784313722481,
+     "mistakesPerPair": 0.6600000000000001,
+     "score": 327,
+     "bonusShare": 0.45317385866166354,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 48.42499999999853,
+     "airLeft": 87.4708333332971,
+     "airLeftFrac": 0.874708333332971,
+     "minAirFrac": 0.8155416666663409,
+     "mistakesPerPair": 0.725,
+     "score": 391,
+     "bonusShare": 0.4473749965296094,
+     "maxCombo": 4
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "strong",
+   "difficulty": "normal",
+   "peek": 2
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 24,
+   "endless": 1,
+   "sessionMin": 9.529861111105184,
+   "sessionP10": 9.34663888888313,
+   "sessionP90": 9.615249999993994,
+   "score": 7579,
+   "bestCombo": 8,
+   "topLoss": "",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 10.016666666666744,
+     "airLeft": 60,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9570833333333357,
+     "mistakesPerPair": 0.1111111111111111,
+     "score": 265,
+     "bonusShare": 0.4542857142857143,
+     "maxCombo": 4.5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 14.60833333333364,
+     "airLeft": 70,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9485714285713877,
+     "mistakesPerPair": 0.25833333333333336,
+     "score": 330,
+     "bonusShare": 0.42424242424242425,
+     "maxCombo": 5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 18.800000000000214,
+     "airLeft": 85,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.954117647058787,
+     "mistakesPerPair": 0.29000000000000004,
+     "score": 425,
+     "bonusShare": 0.4000553709856035,
+     "maxCombo": 5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 24.2999999999999,
+     "airLeft": 100,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9566666666666321,
+     "mistakesPerPair": 0.38611111111111107,
+     "score": 480,
+     "bonusShare": 0.4166666666666667,
+     "maxCombo": 5
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "random",
+   "difficulty": "normal",
+   "peek": 2
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.9666666666666667,
+    0.9333333333333333,
+    0.7333333333333333,
+    0.36666666666666664,
+    0.3333333333333333,
+    0.3,
+    0.03333333333333333,
+    0.03333333333333333,
+    0.03333333333333333,
+    0.03333333333333333,
+    0,
+    0
+   ],
+   "lap1": 0.36666666666666664,
+   "lap2": 0.03333333333333333,
+   "deathLevel": 3,
+   "endless": 0,
+   "sessionMin": 5.264166666664618,
+   "sessionP10": 3.024083333333322,
+   "sessionP90": 8.444777777772837,
+   "score": 651,
+   "bestCombo": 3,
+   "topLoss": "Winter 37%, Autumn L2 27%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.9666666666666667,
+     "time": 30.283333333332894,
+     "airLeft": 48.316666666668354,
+     "airLeftFrac": 0.8052777777778058,
+     "minAirFrac": 0.6608333333333583,
+     "mistakesPerPair": 5.105555555555556,
+     "score": 168,
+     "bonusShare": 0.5394736842105263,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.9666666666666667,
+     "clearIfReached": 0.9655172413793104,
+     "time": 45.5249999999987,
+     "airLeft": 47.624999999997186,
+     "airLeftFrac": 0.6803571428571027,
+     "minAirFrac": 0.5867261904761507,
+     "mistakesPerPair": 5.5905172413793105,
+     "score": 205,
+     "bonusShare": 0.4618725868725869,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.9333333333333333,
+     "clearIfReached": 0.7857142857142857,
+     "time": 81.52499999999665,
+     "airLeft": 34.066666666645695,
+     "airLeftFrac": 0.4007843137252435,
+     "minAirFrac": 0.30990196078407517,
+     "mistakesPerPair": 7.975000000000001,
+     "score": 199,
+     "bonusShare": 0.3532178217821782,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.7333333333333333,
+     "clearIfReached": 0.5,
+     "time": 104.98333333332866,
+     "airLeft": 31.60833333330602,
+     "airLeftFrac": 0.3160833333330602,
+     "minAirFrac": 0.26791666666638775,
+     "mistakesPerPair": 9.125,
+     "score": 204,
+     "bonusShare": 0.29577464788732394,
+     "maxCombo": 2
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "randomSlow",
+   "difficulty": "normal",
+   "peek": 2
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.4666666666666667,
+    0.03333333333333333,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 0,
+   "endless": 0,
+   "sessionMin": 1.2497222222223179,
+   "sessionP10": 1.0747222222221786,
+   "sessionP90": 2.6437222222225567,
+   "score": 50,
+   "bestCombo": 2,
+   "topLoss": "Spring 53%, Summer 43%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.4666666666666667,
+     "time": 59.85833333333122,
+     "airLeft": 18.741666666670035,
+     "airLeftFrac": 0.31236111111116727,
+     "minAirFrac": 0.24583333333338758,
+     "mistakesPerPair": 3.55,
+     "score": 118,
+     "bonusShare": 0.3220338983050847,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.4666666666666667,
+     "clearIfReached": 0.07142857142857142,
+     "time": 56.79999999999806,
+     "airLeft": 37.79166666666475,
+     "airLeftFrac": 0.539880952380925,
+     "minAirFrac": 0.48488095238092327,
+     "mistakesPerPair": 3.4375,
+     "score": 176,
+     "bonusShare": 0.4318181818181818,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.03333333333333333,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 3.5,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "sweeper",
+   "difficulty": "normal",
+   "peek": 2
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.3,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 0,
+   "endless": 0,
+   "sessionMin": 1.1741666666667023,
+   "sessionP10": 1.0747222222221786,
+   "sessionP90": 1.7297500000004777,
+   "score": 20,
+   "bestCombo": 1,
+   "topLoss": "Spring 70%, Summer 30%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.3,
+     "time": 20.36666666666679,
+     "airLeft": 57.86666666666747,
+     "airLeftFrac": 0.9644444444444579,
+     "minAirFrac": 0.8630555555555633,
+     "mistakesPerPair": 7.905555555555556,
+     "score": 200,
+     "bonusShare": 0.5454545454545454,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.3,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 8.652777777777779,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 0
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid6",
+   "difficulty": "normal",
+   "peek": 3
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    0.9,
+    0.5333333333333333,
+    0.13333333333333333,
+    0.13333333333333333,
+    0.03333333333333333,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0.13333333333333333,
+   "lap2": 0,
+   "deathLevel": 3,
+   "endless": 0,
+   "sessionMin": 5.505833333331065,
+   "sessionP10": 3.603611111110573,
+   "sessionP90": 7.954666666662172,
+   "score": 509,
+   "bestCombo": 4,
+   "topLoss": "Winter 40%, Autumn 37%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 47.99999999999856,
+     "airLeft": 29.93333333333598,
+     "airLeftFrac": 0.498888888888933,
+     "minAirFrac": 0.4491666666667108,
+     "mistakesPerPair": 0.7777777777777779,
+     "score": 159,
+     "bonusShare": 0.37797619047619047,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 0.9,
+     "time": 70.31666666666396,
+     "airLeft": 24.274999999997263,
+     "airLeftFrac": 0.3467857142856752,
+     "minAirFrac": 0.30416666666662756,
+     "mistakesPerPair": 0.9708333333333333,
+     "score": 178,
+     "bonusShare": 0.3229166666666667,
+     "maxCombo": 3
+    },
+    {
+     "reached": 0.9,
+     "clearIfReached": 0.5925925925925926,
+     "time": 98.758333333329,
+     "airLeft": 16.354166666650624,
+     "airLeftFrac": 0.19240196078412497,
+     "minAirFrac": 0.1573039215684387,
+     "mistakesPerPair": 1.3074074074074076,
+     "score": 192,
+     "bonusShare": 0.16277258566978192,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.5333333333333333,
+     "clearIfReached": 0.25,
+     "time": 127.33333333332803,
+     "airLeft": 9.258333333301792,
+     "airLeftFrac": 0.09258333333301792,
+     "minAirFrac": 0.06274999999968459,
+     "mistakesPerPair": 1.4583333333333333,
+     "score": 202,
+     "bonusShare": 0.08977943460702081,
+     "maxCombo": 2
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid9",
+   "difficulty": "normal",
+   "peek": 3
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0.9666666666666667,
+    0.9666666666666667,
+    0.9666666666666667,
+    0.8666666666666667,
+    0.6333333333333333
+   ],
+   "lap1": 1,
+   "lap2": 0.9666666666666667,
+   "deathLevel": 14,
+   "endless": 0,
+   "sessionMin": 13.285277777768435,
+   "sessionP10": 11.133833333325946,
+   "sessionP90": 15.13208333332231,
+   "score": 3022,
+   "bestCombo": 5,
+   "topLoss": "Autumn L4 30%, Winter L3 23%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 25.66666666666649,
+     "airLeft": 52.891666666668094,
+     "airLeftFrac": 0.8815277777778016,
+     "minAirFrac": 0.8266666666666864,
+     "mistakesPerPair": 0.41666666666666663,
+     "score": 226,
+     "bonusShare": 0.4681198317133324,
+     "maxCombo": 3.5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 37.60833333333248,
+     "airLeft": 55.86249999999441,
+     "airLeftFrac": 0.7980357142856345,
+     "minAirFrac": 0.7543452380951547,
+     "mistakesPerPair": 0.5541666666666667,
+     "score": 261,
+     "bonusShare": 0.43405399222145963,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 62.71666666666439,
+     "airLeft": 52.22916666664422,
+     "airLeftFrac": 0.6144607843134613,
+     "minAirFrac": 0.5692647058820873,
+     "mistakesPerPair": 0.9700000000000002,
+     "score": 259,
+     "bonusShare": 0.3890515222482436,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 73.54999999999711,
+     "airLeft": 62.45416666662511,
+     "airLeftFrac": 0.6245416666662511,
+     "minAirFrac": 0.5845416666662449,
+     "mistakesPerPair": 0.9805555555555555,
+     "score": 318,
+     "bonusShare": 0.3814673390270207,
+     "maxCombo": 3
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "casual",
+   "difficulty": "normal",
+   "peek": 3
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 23,
+   "endless": 0.16666666666666666,
+   "sessionMin": 15.413611111099833,
+   "sessionP10": 13.891388888878994,
+   "sessionP90": 15.773111111099507,
+   "score": 5844,
+   "bestCombo": 7,
+   "topLoss": "Winter L6 50%, Autumn L6 20%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 15.866666666667035,
+     "airLeft": 59.18333333333398,
+     "airLeftFrac": 0.9863888888888996,
+     "minAirFrac": 0.9195833333333394,
+     "mistakesPerPair": 0.24444444444444446,
+     "score": 241,
+     "bonusShare": 0.4835897435897436,
+     "maxCombo": 3.5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 23.674999999999937,
+     "airLeft": 68.46666666665305,
+     "airLeftFrac": 0.9780952380950436,
+     "minAirFrac": 0.9002380952380109,
+     "mistakesPerPair": 0.3416666666666667,
+     "score": 301,
+     "bonusShare": 0.4540673211781206,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 37.07499999999918,
+     "airLeft": 77.06666666664006,
+     "airLeftFrac": 0.9066666666663536,
+     "minAirFrac": 0.8419607843134032,
+     "mistakesPerPair": 0.5766666666666667,
+     "score": 338,
+     "bonusShare": 0.46065255851932496,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 45.658333333332024,
+     "airLeft": 89.57499999996544,
+     "airLeftFrac": 0.8957499999996543,
+     "minAirFrac": 0.8389166666663594,
+     "mistakesPerPair": 0.6333333333333333,
+     "score": 405,
+     "bonusShare": 0.43358852837525824,
+     "maxCombo": 5
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "strong",
+   "difficulty": "normal",
+   "peek": 3
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 24,
+   "endless": 1,
+   "sessionMin": 9.219027777772133,
+   "sessionP10": 9.101694444438907,
+   "sessionP90": 9.364749999994222,
+   "score": 8559,
+   "bestCombo": 9,
+   "topLoss": "",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 8.85000000000002,
+     "airLeft": 60,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9729166666666682,
+     "mistakesPerPair": 0.016666666666666666,
+     "score": 320,
+     "bonusShare": 0.375,
+     "maxCombo": 6
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 11.825000000000166,
+     "airLeft": 70,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9764285714285527,
+     "mistakesPerPair": 0.05,
+     "score": 440,
+     "bonusShare": 0.3181818181818182,
+     "maxCombo": 8
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 17.225000000000303,
+     "airLeft": 85,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9643137254901677,
+     "mistakesPerPair": 0.16666666666666666,
+     "score": 465,
+     "bonusShare": 0.36563367252543943,
+     "maxCombo": 6
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 21.941666666666702,
+     "airLeft": 100,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9623333333332914,
+     "mistakesPerPair": 0.2611111111111111,
+     "score": 485,
+     "bonusShare": 0.4124149659863946,
+     "maxCombo": 5
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "random",
+   "difficulty": "normal",
+   "peek": 3
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.9666666666666667,
+    0.9333333333333333,
+    0.7333333333333333,
+    0.36666666666666664,
+    0.3333333333333333,
+    0.3,
+    0.03333333333333333,
+    0.03333333333333333,
+    0.03333333333333333,
+    0.03333333333333333,
+    0,
+    0
+   ],
+   "lap1": 0.36666666666666664,
+   "lap2": 0.03333333333333333,
+   "deathLevel": 3,
+   "endless": 0,
+   "sessionMin": 5.330833333331224,
+   "sessionP10": 3.0740833333332764,
+   "sessionP90": 8.561444444439399,
+   "score": 651,
+   "bestCombo": 3,
+   "topLoss": "Winter 37%, Autumn L2 27%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.9666666666666667,
+     "time": 30.283333333332894,
+     "airLeft": 48.316666666668354,
+     "airLeftFrac": 0.8052777777778058,
+     "minAirFrac": 0.6608333333333583,
+     "mistakesPerPair": 5.105555555555556,
+     "score": 168,
+     "bonusShare": 0.5394736842105263,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.9666666666666667,
+     "clearIfReached": 0.9655172413793104,
+     "time": 45.5249999999987,
+     "airLeft": 47.624999999997186,
+     "airLeftFrac": 0.6803571428571027,
+     "minAirFrac": 0.5867261904761507,
+     "mistakesPerPair": 5.5905172413793105,
+     "score": 205,
+     "bonusShare": 0.4618725868725869,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.9333333333333333,
+     "clearIfReached": 0.7857142857142857,
+     "time": 81.52499999999665,
+     "airLeft": 34.066666666645695,
+     "airLeftFrac": 0.4007843137252435,
+     "minAirFrac": 0.30990196078407517,
+     "mistakesPerPair": 7.975000000000001,
+     "score": 199,
+     "bonusShare": 0.3532178217821782,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.7333333333333333,
+     "clearIfReached": 0.5,
+     "time": 104.98333333332866,
+     "airLeft": 31.60833333330602,
+     "airLeftFrac": 0.3160833333330602,
+     "minAirFrac": 0.26791666666638775,
+     "mistakesPerPair": 9.125,
+     "score": 204,
+     "bonusShare": 0.29577464788732394,
+     "maxCombo": 2
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "randomSlow",
+   "difficulty": "normal",
+   "peek": 3
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.4666666666666667,
+    0.03333333333333333,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 0,
+   "endless": 0,
+   "sessionMin": 1.2663888888889978,
+   "sessionP10": 1.0913888888888585,
+   "sessionP90": 2.6770555555558597,
+   "score": 50,
+   "bestCombo": 2,
+   "topLoss": "Spring 53%, Summer 43%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.4666666666666667,
+     "time": 59.85833333333122,
+     "airLeft": 18.741666666670035,
+     "airLeftFrac": 0.31236111111116727,
+     "minAirFrac": 0.24583333333338758,
+     "mistakesPerPair": 3.55,
+     "score": 118,
+     "bonusShare": 0.3220338983050847,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.4666666666666667,
+     "clearIfReached": 0.07142857142857142,
+     "time": 56.79999999999806,
+     "airLeft": 37.79166666666475,
+     "airLeftFrac": 0.539880952380925,
+     "minAirFrac": 0.48488095238092327,
+     "mistakesPerPair": 3.4375,
+     "score": 176,
+     "bonusShare": 0.4318181818181818,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.03333333333333333,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 3.5,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "sweeper",
+   "difficulty": "normal",
+   "peek": 3
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.3,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 0,
+   "endless": 0,
+   "sessionMin": 1.1908333333333823,
+   "sessionP10": 1.0913888888888585,
+   "sessionP90": 1.7630833333338376,
+   "score": 20,
+   "bestCombo": 1,
+   "topLoss": "Spring 70%, Summer 30%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.3,
+     "time": 20.36666666666679,
+     "airLeft": 57.86666666666747,
+     "airLeftFrac": 0.9644444444444579,
+     "minAirFrac": 0.8630555555555633,
+     "mistakesPerPair": 7.905555555555556,
+     "score": 200,
+     "bonusShare": 0.5454545454545454,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.3,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 8.652777777777779,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 0
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid6",
+   "difficulty": "hard",
+   "peek": 0
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.43333333333333335,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 0,
+   "endless": 0,
+   "sessionMin": 0.835277777777741,
+   "sessionP10": 0.7686111111110782,
+   "sessionP90": 1.8871111111117143,
+   "score": 60,
+   "bestCombo": 2,
+   "topLoss": "Spring 57%, Summer 43%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.43333333333333335,
+     "time": 44.16666666666544,
+     "airLeft": 8.433333333335643,
+     "airLeftFrac": 0.21083333333339108,
+     "minAirFrac": 0.16125000000005776,
+     "mistakesPerPair": 0.9111111111111113,
+     "score": 116,
+     "bonusShare": 0.13793103448275862,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.43333333333333335,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 1.0576923076923077,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid9",
+   "difficulty": "hard",
+   "peek": 0
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    0.9666666666666667,
+    0.9333333333333333,
+    0.7666666666666667,
+    0.7,
+    0.5,
+    0.13333333333333333,
+    0.03333333333333333,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0.7666666666666667,
+   "lap2": 0.03333333333333333,
+   "deathLevel": 5.5,
+   "endless": 0,
+   "sessionMin": 5.740694444441962,
+   "sessionP10": 3.9596666666658042,
+   "sessionP90": 7.7392499999957005,
+   "score": 1013,
+   "bestCombo": 5,
+   "topLoss": "Autumn L2 37%, Summer L2 20%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 32.633333333332764,
+     "airLeft": 19.966666666668488,
+     "airLeftFrac": 0.49916666666671217,
+     "minAirFrac": 0.44958333333337885,
+     "mistakesPerPair": 0.788888888888889,
+     "score": 160,
+     "bonusShare": 0.25,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 0.9666666666666667,
+     "time": 44.83333333333207,
+     "airLeft": 21.758333333335848,
+     "airLeftFrac": 0.43516666666671694,
+     "minAirFrac": 0.39550000000005026,
+     "mistakesPerPair": 0.8833333333333333,
+     "score": 182,
+     "bonusShare": 0.2222222222222222,
+     "maxCombo": 4
+    },
+    {
+     "reached": 0.9666666666666667,
+     "clearIfReached": 0.9655172413793104,
+     "time": 62.14999999999775,
+     "airLeft": 20.441666666670166,
+     "airLeftFrac": 0.3297043010753252,
+     "minAirFrac": 0.2977150537634973,
+     "mistakesPerPair": 1.075862068965517,
+     "score": 189,
+     "bonusShare": 0.1991504247876062,
+     "maxCombo": 3
+    },
+    {
+     "reached": 0.9333333333333333,
+     "clearIfReached": 0.8214285714285714,
+     "time": 80.99999999999669,
+     "airLeft": 18.591666666660572,
+     "airLeftFrac": 0.24788888888880764,
+     "minAirFrac": 0.22144444444436318,
+     "mistakesPerPair": 1.261904761904762,
+     "score": 210,
+     "bonusShare": 0.15966386554621848,
+     "maxCombo": 3
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "casual",
+   "difficulty": "hard",
+   "peek": 0
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0.9333333333333333,
+    0.7,
+    0.4
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 11,
+   "endless": 0,
+   "sessionMin": 8.460833333328377,
+   "sessionP10": 7.184861111107316,
+   "sessionP90": 8.940833333327943,
+   "score": 2515,
+   "bestCombo": 6,
+   "topLoss": "Spring L4 33%, Winter L3 30%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 23.59999999999994,
+     "airLeft": 29.000000000001307,
+     "airLeftFrac": 0.7250000000000327,
+     "minAirFrac": 0.6754166666666994,
+     "mistakesPerPair": 0.6944444444444445,
+     "score": 176,
+     "bonusShare": 0.3258426966292135,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 31.916666666666135,
+     "airLeft": 34.67500000000178,
+     "airLeftFrac": 0.6935000000000355,
+     "minAirFrac": 0.651333333333368,
+     "mistakesPerPair": 0.6916666666666667,
+     "score": 231,
+     "bonusShare": 0.31245185237061424,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 43.66666666666547,
+     "airLeft": 38.679166666669076,
+     "airLeftFrac": 0.6238575268817592,
+     "minAirFrac": 0.5906586021505755,
+     "mistakesPerPair": 0.8766666666666666,
+     "score": 262,
+     "bonusShare": 0.30222567711316584,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 53.04999999999827,
+     "airLeft": 46.541666666656035,
+     "airLeftFrac": 0.6205555555554139,
+     "minAirFrac": 0.5941111111109694,
+     "mistakesPerPair": 0.9333333333333333,
+     "score": 310,
+     "bonusShare": 0.2978296768105685,
+     "maxCombo": 4
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "strong",
+   "difficulty": "hard",
+   "peek": 0
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 22,
+   "endless": 0.16666666666666666,
+   "sessionMin": 9.63124999999398,
+   "sessionP10": 8.020749999995445,
+   "sessionP90": 10.254805555548968,
+   "score": 5828,
+   "bestCombo": 8,
+   "topLoss": "Autumn L6 37%, Winter L6 13%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 13.8583333333336,
+     "airLeft": 38.74166666666742,
+     "airLeftFrac": 0.9685416666666855,
+     "minAirFrac": 0.8685416666666784,
+     "mistakesPerPair": 0.5722222222222222,
+     "score": 222,
+     "bonusShare": 0.35416666666666663,
+     "maxCombo": 4.5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 17.733333333333608,
+     "airLeft": 48.77500000000098,
+     "airLeftFrac": 0.9755000000000196,
+     "minAirFrac": 0.8899166666666752,
+     "mistakesPerPair": 0.5291666666666667,
+     "score": 289,
+     "bonusShare": 0.3425526819923372,
+     "maxCombo": 5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 23.82499999999993,
+     "airLeft": 58.76666666666799,
+     "airLeftFrac": 0.9478494623656126,
+     "minAirFrac": 0.8798387096774363,
+     "mistakesPerPair": 0.6066666666666667,
+     "score": 344,
+     "bonusShare": 0.3380952380952381,
+     "maxCombo": 5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 28.266666666666342,
+     "airLeft": 71.32499999997798,
+     "airLeftFrac": 0.9509999999997063,
+     "minAirFrac": 0.8855555555554326,
+     "mistakesPerPair": 0.6305555555555556,
+     "score": 431,
+     "bonusShare": 0.32711357078254877,
+     "maxCombo": 6
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "random",
+   "difficulty": "hard",
+   "peek": 0
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.9,
+    0.7666666666666667,
+    0.26666666666666666,
+    0.03333333333333333,
+    0.03333333333333333,
+    0.03333333333333333,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0.03333333333333333,
+   "lap2": 0,
+   "deathLevel": 2,
+   "endless": 0,
+   "sessionMin": 2.522361111111556,
+   "sessionP10": 1.276861111111254,
+   "sessionP90": 4.169777777776725,
+   "score": 334,
+   "bestCombo": 3,
+   "topLoss": "Autumn 50%, Winter 23%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.9,
+     "time": 29.98333333333291,
+     "airLeft": 22.616666666668337,
+     "airLeftFrac": 0.5654166666667084,
+     "minAirFrac": 0.48000000000004095,
+     "mistakesPerPair": 4.855555555555556,
+     "score": 120,
+     "bonusShare": 0.34065934065934067,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.9,
+     "clearIfReached": 0.8518518518518519,
+     "time": 42.73333333333219,
+     "airLeft": 23.85833333333573,
+     "airLeftFrac": 0.4771666666667146,
+     "minAirFrac": 0.41316666666671364,
+     "mistakesPerPair": 5.416666666666667,
+     "score": 158,
+     "bonusShare": 0.29411764705882354,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.7666666666666667,
+     "clearIfReached": 0.34782608695652173,
+     "time": 63.44166666666435,
+     "airLeft": 19.150000000003573,
+     "airLeftFrac": 0.3088709677419931,
+     "minAirFrac": 0.25416666666672283,
+     "mistakesPerPair": 6.565217391304347,
+     "score": 176,
+     "bonusShare": 0.23291177356218007,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.26666666666666666,
+     "clearIfReached": 0.125,
+     "time": 91.28333333332944,
+     "airLeft": 8.308333333328651,
+     "airLeftFrac": 0.11077777777771534,
+     "minAirFrac": 0.07677777777771631,
+     "mistakesPerPair": 7.166666666666667,
+     "score": 156,
+     "bonusShare": 0.10256410256410256,
+     "maxCombo": 1.5
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "randomSlow",
+   "difficulty": "hard",
+   "peek": 0
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.16666666666666666,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 0,
+   "endless": 0,
+   "sessionMin": 0.7686111111110782,
+   "sessionP10": 0.7019444444444153,
+   "sessionP90": 1.6356666666670696,
+   "score": 20,
+   "bestCombo": 1,
+   "topLoss": "Spring 83%, Summer 17%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.16666666666666666,
+     "time": 39.93333333333235,
+     "airLeft": 12.666666666668903,
+     "airLeftFrac": 0.31666666666672255,
+     "minAirFrac": 0.26666666666672256,
+     "mistakesPerPair": 2.5722222222222215,
+     "score": 106,
+     "bonusShare": 0.24528301886792453,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.16666666666666666,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 2.55,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "sweeper",
+   "difficulty": "hard",
+   "peek": 0
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.26666666666666666,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 0,
+   "endless": 0,
+   "sessionMin": 0.7686111111110782,
+   "sessionP10": 0.7019444444444153,
+   "sessionP90": 1.2873888888890146,
+   "score": 20,
+   "bestCombo": 1,
+   "topLoss": "Spring 73%, Summer 27%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.26666666666666666,
+     "time": 18.633333333333557,
+     "airLeft": 33.96666666666769,
+     "airLeftFrac": 0.8491666666666923,
+     "minAirFrac": 0.7637500000000206,
+     "mistakesPerPair": 5.46111111111111,
+     "score": 166,
+     "bonusShare": 0.4107948628948282,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.26666666666666666,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 6.15625,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 0
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid6",
+   "difficulty": "hard",
+   "peek": 1
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.4666666666666667,
+    0.16666666666666666,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 0,
+   "endless": 0,
+   "sessionMin": 0.891388888888849,
+   "sessionP10": 0.8247222222221862,
+   "sessionP90": 3.1566944444443124,
+   "score": 90,
+   "bestCombo": 3,
+   "topLoss": "Spring 53%, Summer 30%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.4666666666666667,
+     "time": 42.21666666666555,
+     "airLeft": 10.38333333333563,
+     "airLeftFrac": 0.25958333333339073,
+     "minAirFrac": 0.21000000000005742,
+     "mistakesPerPair": 0.8444444444444446,
+     "score": 126,
+     "bonusShare": 0.1596045197740113,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.4666666666666667,
+     "clearIfReached": 0.35714285714285715,
+     "time": 61.866666666664436,
+     "airLeft": 4.725000000002712,
+     "airLeftFrac": 0.09450000000005425,
+     "minAirFrac": 0.054833333333387566,
+     "mistakesPerPair": 0.9375,
+     "score": 148,
+     "bonusShare": 0.05555555555555555,
+     "maxCombo": 3
+    },
+    {
+     "reached": 0.16666666666666666,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 1.02,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid9",
+   "difficulty": "hard",
+   "peek": 1
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    0.9666666666666667,
+    0.9333333333333333,
+    0.8666666666666667,
+    0.8666666666666667,
+    0.6666666666666666,
+    0.26666666666666666,
+    0.03333333333333333,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0.8666666666666667,
+   "lap2": 0.03333333333333333,
+   "deathLevel": 6,
+   "endless": 0,
+   "sessionMin": 6.133611111108271,
+   "sessionP10": 4.242472222221103,
+   "sessionP90": 7.555583333329201,
+   "score": 1181,
+   "bestCombo": 5,
+   "topLoss": "Autumn L2 40%, Winter L2 23%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 31.64166666666615,
+     "airLeft": 20.958333333335098,
+     "airLeftFrac": 0.5239583333333775,
+     "minAirFrac": 0.47437500000004407,
+     "mistakesPerPair": 0.6666666666666666,
+     "score": 142,
+     "bonusShare": 0.29577464788732394,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 0.9666666666666667,
+     "time": 43.01666666666551,
+     "airLeft": 23.57500000000241,
+     "airLeftFrac": 0.4715000000000482,
+     "minAirFrac": 0.43183333333338153,
+     "mistakesPerPair": 0.8,
+     "score": 178,
+     "bonusShare": 0.25287356321839083,
+     "maxCombo": 3
+    },
+    {
+     "reached": 0.9666666666666667,
+     "clearIfReached": 0.9655172413793104,
+     "time": 57.2416666666647,
+     "airLeft": 25.35000000000322,
+     "airLeftFrac": 0.4088709677419874,
+     "minAirFrac": 0.37688172043015944,
+     "mistakesPerPair": 0.8896551724137928,
+     "score": 225,
+     "bonusShare": 0.21733212341197822,
+     "maxCombo": 4
+    },
+    {
+     "reached": 0.9333333333333333,
+     "clearIfReached": 0.9285714285714286,
+     "time": 80.64999999999671,
+     "airLeft": 18.941666666659536,
+     "airLeftFrac": 0.2525555555554605,
+     "minAirFrac": 0.226111111111016,
+     "mistakesPerPair": 1.1428571428571428,
+     "score": 242,
+     "bonusShare": 0.16994750656167978,
+     "maxCombo": 3
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "casual",
+   "difficulty": "hard",
+   "peek": 1
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0.9666666666666667,
+    0.9666666666666667,
+    0.8,
+    0.6333333333333333
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 12,
+   "endless": 0,
+   "sessionMin": 8.721805555550363,
+   "sessionP10": 7.287722222218333,
+   "sessionP90": 9.272277777772086,
+   "score": 2682,
+   "bestCombo": 6,
+   "topLoss": "Summer L4 30%, Spring L4 23%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 20.758333333333436,
+     "airLeft": 31.608333333334322,
+     "airLeftFrac": 0.790208333333358,
+     "minAirFrac": 0.7395833333333552,
+     "mistakesPerPair": 0.5166666666666668,
+     "score": 175,
+     "bonusShare": 0.35690653432588915,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 28.81666666666631,
+     "airLeft": 37.775000000001604,
+     "airLeftFrac": 0.755500000000032,
+     "minAirFrac": 0.7156666666666988,
+     "mistakesPerPair": 0.5666666666666667,
+     "score": 248,
+     "bonusShare": 0.31073025335320414,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 39.20833333333239,
+     "airLeft": 43.38333333333553,
+     "airLeftFrac": 0.6997311827957343,
+     "minAirFrac": 0.6677419354839064,
+     "mistakesPerPair": 0.7266666666666666,
+     "score": 263,
+     "bonusShare": 0.31720283533260635,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 49.36666666666515,
+     "airLeft": 50.02916666665489,
+     "airLeftFrac": 0.6670555555553985,
+     "minAirFrac": 0.640611111110954,
+     "mistakesPerPair": 0.8333333333333335,
+     "score": 298,
+     "bonusShare": 0.31134611483059443,
+     "maxCombo": 3.5
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "strong",
+   "difficulty": "hard",
+   "peek": 1
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 24,
+   "endless": 0.9,
+   "sessionMin": 9.793194444438278,
+   "sessionP10": 9.588277777771797,
+   "sessionP90": 9.973416666660336,
+   "score": 6232,
+   "bestCombo": 8,
+   "topLoss": "Autumn L6 3%, Autumn L5 3%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 11.40833333333348,
+     "airLeft": 40,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9116666666666745,
+     "mistakesPerPair": 0.2833333333333333,
+     "score": 210,
+     "bonusShare": 0.38095238095238093,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 15.583333333333687,
+     "airLeft": 50,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9240000000000077,
+     "mistakesPerPair": 0.35,
+     "score": 279,
+     "bonusShare": 0.3552496139989707,
+     "maxCombo": 4.5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 21.483333333333395,
+     "airLeft": 60.52500000000065,
+     "airLeftFrac": 0.9762096774193654,
+     "minAirFrac": 0.9034274193548469,
+     "mistakesPerPair": 0.4600000000000001,
+     "score": 371,
+     "bonusShare": 0.32614065678581805,
+     "maxCombo": 5.5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 25.95833333333314,
+     "airLeft": 72.86249999998,
+     "airLeftFrac": 0.9714999999997334,
+     "minAirFrac": 0.9077222222220427,
+     "mistakesPerPair": 0.4888888888888888,
+     "score": 433,
+     "bonusShare": 0.3348623853211009,
+     "maxCombo": 5
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "random",
+   "difficulty": "hard",
+   "peek": 1
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.9,
+    0.7666666666666667,
+    0.26666666666666666,
+    0.03333333333333333,
+    0.03333333333333333,
+    0.03333333333333333,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0.03333333333333333,
+   "lap2": 0,
+   "deathLevel": 2,
+   "endless": 0,
+   "sessionMin": 2.590694444444827,
+   "sessionP10": 1.3201388888890642,
+   "sessionP90": 4.260888888887753,
+   "score": 334,
+   "bestCombo": 3,
+   "topLoss": "Autumn 50%, Winter 23%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.9,
+     "time": 29.98333333333291,
+     "airLeft": 22.616666666668337,
+     "airLeftFrac": 0.5654166666667084,
+     "minAirFrac": 0.48000000000004095,
+     "mistakesPerPair": 4.855555555555556,
+     "score": 120,
+     "bonusShare": 0.34065934065934067,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.9,
+     "clearIfReached": 0.8518518518518519,
+     "time": 42.73333333333219,
+     "airLeft": 23.85833333333573,
+     "airLeftFrac": 0.4771666666667146,
+     "minAirFrac": 0.41316666666671364,
+     "mistakesPerPair": 5.416666666666667,
+     "score": 158,
+     "bonusShare": 0.29411764705882354,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.7666666666666667,
+     "clearIfReached": 0.34782608695652173,
+     "time": 63.44166666666435,
+     "airLeft": 19.150000000003573,
+     "airLeftFrac": 0.3088709677419931,
+     "minAirFrac": 0.25416666666672283,
+     "mistakesPerPair": 6.565217391304347,
+     "score": 176,
+     "bonusShare": 0.23291177356218007,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.26666666666666666,
+     "clearIfReached": 0.125,
+     "time": 91.28333333332944,
+     "airLeft": 8.308333333328651,
+     "airLeftFrac": 0.11077777777771534,
+     "minAirFrac": 0.07677777777771631,
+     "mistakesPerPair": 7.166666666666667,
+     "score": 156,
+     "bonusShare": 0.10256410256410256,
+     "maxCombo": 1.5
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "randomSlow",
+   "difficulty": "hard",
+   "peek": 1
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.16666666666666666,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 0,
+   "endless": 0,
+   "sessionMin": 0.7913888888888547,
+   "sessionP10": 0.7247222222221918,
+   "sessionP90": 1.6812222222226614,
+   "score": 20,
+   "bestCombo": 1,
+   "topLoss": "Spring 83%, Summer 17%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.16666666666666666,
+     "time": 39.93333333333235,
+     "airLeft": 12.666666666668903,
+     "airLeftFrac": 0.31666666666672255,
+     "minAirFrac": 0.26666666666672256,
+     "mistakesPerPair": 2.5722222222222215,
+     "score": 106,
+     "bonusShare": 0.24528301886792453,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.16666666666666666,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 2.55,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "sweeper",
+   "difficulty": "hard",
+   "peek": 1
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.26666666666666666,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 0,
+   "endless": 0,
+   "sessionMin": 0.7913888888888547,
+   "sessionP10": 0.7247222222221918,
+   "sessionP90": 1.3329444444446064,
+   "score": 20,
+   "bestCombo": 1,
+   "topLoss": "Spring 73%, Summer 27%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.26666666666666666,
+     "time": 18.633333333333557,
+     "airLeft": 33.96666666666769,
+     "airLeftFrac": 0.8491666666666923,
+     "minAirFrac": 0.7637500000000206,
+     "mistakesPerPair": 5.46111111111111,
+     "score": 166,
+     "bonusShare": 0.4107948628948282,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.26666666666666666,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 6.15625,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 0
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid6",
+   "difficulty": "hard",
+   "peek": 2
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.7333333333333333,
+    0.23333333333333334,
+    0.03333333333333333,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 1,
+   "endless": 0,
+   "sessionMin": 1.8881944444450482,
+   "sessionP10": 0.8413888888888519,
+   "sessionP90": 3.240916666666458,
+   "score": 188,
+   "bestCombo": 3,
+   "topLoss": "Summer 50%, Spring 27%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.7333333333333333,
+     "time": 42.52499999999887,
+     "airLeft": 10.075000000002373,
+     "airLeftFrac": 0.25187500000005936,
+     "minAirFrac": 0.202291666666726,
+     "mistakesPerPair": 0.7444444444444444,
+     "score": 121,
+     "bonusShare": 0.15880503144654087,
+     "maxCombo": 3
+    },
+    {
+     "reached": 0.7333333333333333,
+     "clearIfReached": 0.3181818181818182,
+     "time": 53.23333333333159,
+     "airLeft": 13.358333333336326,
+     "airLeftFrac": 0.2671666666667265,
+     "minAirFrac": 0.22750000000005982,
+     "mistakesPerPair": 0.8636363636363636,
+     "score": 170,
+     "bonusShare": 0.12037037037037036,
+     "maxCombo": 2.5
+    },
+    {
+     "reached": 0.23333333333333334,
+     "clearIfReached": 0.14285714285714285,
+     "time": 78.79999999999681,
+     "airLeft": 3.791666666670355,
+     "airLeftFrac": 0.06115591397855411,
+     "minAirFrac": 0.029166666666726158,
+     "mistakesPerPair": 1,
+     "score": 188,
+     "bonusShare": 0.0425531914893617,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.03333333333333333,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 1.1666666666666667,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 1
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid9",
+   "difficulty": "hard",
+   "peek": 2
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    0.9666666666666667,
+    0.9666666666666667,
+    0.8666666666666667,
+    0.8333333333333334,
+    0.7,
+    0.23333333333333334,
+    0.06666666666666667,
+    0.06666666666666667,
+    0.03333333333333333,
+    0.03333333333333333,
+    0
+   ],
+   "lap1": 0.8666666666666667,
+   "lap2": 0.06666666666666667,
+   "deathLevel": 6,
+   "endless": 0,
+   "sessionMin": 6.259861111108156,
+   "sessionP10": 4.146861111110078,
+   "sessionP90": 7.669222222217986,
+   "score": 1204,
+   "bestCombo": 5,
+   "topLoss": "Autumn L2 47%, Winter L2 17%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 29.39166666666628,
+     "airLeft": 23.208333333334913,
+     "airLeftFrac": 0.5802083333333728,
+     "minAirFrac": 0.5306250000000394,
+     "mistakesPerPair": 0.6777777777777778,
+     "score": 143,
+     "bonusShare": 0.2954963235294118,
+     "maxCombo": 3
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 0.9666666666666667,
+     "time": 40.149999999999004,
+     "airLeft": 26.23333333333548,
+     "airLeftFrac": 0.5246666666667096,
+     "minAirFrac": 0.4850000000000429,
+     "mistakesPerPair": 0.6958333333333333,
+     "score": 196,
+     "bonusShare": 0.26356589147286824,
+     "maxCombo": 4
+    },
+    {
+     "reached": 0.9666666666666667,
+     "clearIfReached": 1,
+     "time": 56.6833333333314,
+     "airLeft": 25.90833333333652,
+     "airLeftFrac": 0.41787634408607294,
+     "minAirFrac": 0.385887096774245,
+     "mistakesPerPair": 0.8655172413793102,
+     "score": 206,
+     "bonusShare": 0.24731182795698925,
+     "maxCombo": 3
+    },
+    {
+     "reached": 0.9666666666666667,
+     "clearIfReached": 0.896551724137931,
+     "time": 76.92499999999691,
+     "airLeft": 22.66666666665993,
+     "airLeftFrac": 0.30222222222213235,
+     "minAirFrac": 0.2757777777776879,
+     "mistakesPerPair": 1.132183908045977,
+     "score": 237,
+     "bonusShare": 0.16954022988505746,
+     "maxCombo": 3
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "casual",
+   "difficulty": "hard",
+   "peek": 2
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0.8666666666666667
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 13,
+   "endless": 0,
+   "sessionMin": 8.806111111105842,
+   "sessionP10": 8.24661111110635,
+   "sessionP90": 9.882305555549308,
+   "score": 3015,
+   "bestCombo": 6,
+   "topLoss": "Summer L4 43%, Spring L4 17%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 18.541666666666895,
+     "airLeft": 33.40833333333428,
+     "airLeftFrac": 0.8352083333333569,
+     "minAirFrac": 0.7833333333333556,
+     "mistakesPerPair": 0.3611111111111111,
+     "score": 186,
+     "bonusShare": 0.3548387096774194,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 26.408333333333115,
+     "airLeft": 39.570833333334775,
+     "airLeftFrac": 0.7914166666666955,
+     "minAirFrac": 0.7517500000000289,
+     "mistakesPerPair": 0.4666666666666667,
+     "score": 235,
+     "bonusShare": 0.3385113856589147,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 38.89166666666574,
+     "airLeft": 43.48750000000213,
+     "airLeftFrac": 0.7014112903226151,
+     "minAirFrac": 0.6694220430107871,
+     "mistakesPerPair": 0.6600000000000001,
+     "score": 264,
+     "bonusShare": 0.313508064516129,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 47.66666666666524,
+     "airLeft": 51.687499999988944,
+     "airLeftFrac": 0.6891666666665193,
+     "minAirFrac": 0.6622777777776288,
+     "mistakesPerPair": 0.725,
+     "score": 320,
+     "bonusShare": 0.3133313480246178,
+     "maxCombo": 4
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "strong",
+   "difficulty": "hard",
+   "peek": 2
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 24,
+   "endless": 1,
+   "sessionMin": 9.563194444438487,
+   "sessionP10": 9.377222222216433,
+   "sessionP90": 9.670749999993944,
+   "score": 6476,
+   "bestCombo": 9,
+   "topLoss": "",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 10.016666666666744,
+     "airLeft": 40,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9356250000000037,
+     "mistakesPerPair": 0.1111111111111111,
+     "score": 210,
+     "bonusShare": 0.375,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 14.34166666666696,
+     "airLeft": 50,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9323333333333395,
+     "mistakesPerPair": 0.24166666666666667,
+     "score": 300,
+     "bonusShare": 0.3337041156840934,
+     "maxCombo": 5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 19.45833333333351,
+     "airLeft": 61.49166666666738,
+     "airLeftFrac": 0.9918010752688287,
+     "minAirFrac": 0.9286290322580686,
+     "mistakesPerPair": 0.3366666666666668,
+     "score": 344,
+     "bonusShare": 0.36046511627906974,
+     "maxCombo": 5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 24.341666666666566,
+     "airLeft": 74.39999999998997,
+     "airLeftFrac": 0.9919999999998663,
+     "minAirFrac": 0.9258888888887026,
+     "mistakesPerPair": 0.39166666666666666,
+     "score": 428,
+     "bonusShare": 0.34578010699858064,
+     "maxCombo": 5
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "random",
+   "difficulty": "hard",
+   "peek": 2
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.9,
+    0.7666666666666667,
+    0.26666666666666666,
+    0.03333333333333333,
+    0.03333333333333333,
+    0.03333333333333333,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0.03333333333333333,
+   "lap2": 0,
+   "deathLevel": 2,
+   "endless": 0,
+   "sessionMin": 2.6406944444447817,
+   "sessionP10": 1.3518055555557549,
+   "sessionP90": 4.327555555554359,
+   "score": 334,
+   "bestCombo": 3,
+   "topLoss": "Autumn 50%, Winter 23%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.9,
+     "time": 29.98333333333291,
+     "airLeft": 22.616666666668337,
+     "airLeftFrac": 0.5654166666667084,
+     "minAirFrac": 0.48000000000004095,
+     "mistakesPerPair": 4.855555555555556,
+     "score": 120,
+     "bonusShare": 0.34065934065934067,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.9,
+     "clearIfReached": 0.8518518518518519,
+     "time": 42.73333333333219,
+     "airLeft": 23.85833333333573,
+     "airLeftFrac": 0.4771666666667146,
+     "minAirFrac": 0.41316666666671364,
+     "mistakesPerPair": 5.416666666666667,
+     "score": 158,
+     "bonusShare": 0.29411764705882354,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.7666666666666667,
+     "clearIfReached": 0.34782608695652173,
+     "time": 63.44166666666435,
+     "airLeft": 19.150000000003573,
+     "airLeftFrac": 0.3088709677419931,
+     "minAirFrac": 0.25416666666672283,
+     "mistakesPerPair": 6.565217391304347,
+     "score": 176,
+     "bonusShare": 0.23291177356218007,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.26666666666666666,
+     "clearIfReached": 0.125,
+     "time": 91.28333333332944,
+     "airLeft": 8.308333333328651,
+     "airLeftFrac": 0.11077777777771534,
+     "minAirFrac": 0.07677777777771631,
+     "mistakesPerPair": 7.166666666666667,
+     "score": 156,
+     "bonusShare": 0.10256410256410256,
+     "maxCombo": 1.5
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "randomSlow",
+   "difficulty": "hard",
+   "peek": 2
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.16666666666666666,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 0,
+   "endless": 0,
+   "sessionMin": 0.8080555555555204,
+   "sessionP10": 0.7413888888888576,
+   "sessionP90": 1.7145555555560212,
+   "score": 20,
+   "bestCombo": 1,
+   "topLoss": "Spring 83%, Summer 17%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.16666666666666666,
+     "time": 39.93333333333235,
+     "airLeft": 12.666666666668903,
+     "airLeftFrac": 0.31666666666672255,
+     "minAirFrac": 0.26666666666672256,
+     "mistakesPerPair": 2.5722222222222215,
+     "score": 106,
+     "bonusShare": 0.24528301886792453,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.16666666666666666,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 2.55,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "sweeper",
+   "difficulty": "hard",
+   "peek": 2
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.26666666666666666,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 0,
+   "endless": 0,
+   "sessionMin": 0.8080555555555204,
+   "sessionP10": 0.7413888888888576,
+   "sessionP90": 1.3662777777779662,
+   "score": 20,
+   "bestCombo": 1,
+   "topLoss": "Spring 73%, Summer 27%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.26666666666666666,
+     "time": 18.633333333333557,
+     "airLeft": 33.96666666666769,
+     "airLeftFrac": 0.8491666666666923,
+     "minAirFrac": 0.7637500000000206,
+     "mistakesPerPair": 5.46111111111111,
+     "score": 166,
+     "bonusShare": 0.4107948628948282,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.26666666666666666,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 6.15625,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 0
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid6",
+   "difficulty": "hard",
+   "peek": 3
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.7,
+    0.3,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 1,
+   "endless": 0,
+   "sessionMin": 1.8590277777783584,
+   "sessionP10": 0.8580555555555176,
+   "sessionP90": 3.296027777777519,
+   "score": 174,
+   "bestCombo": 3,
+   "topLoss": "Summer 40%, Spring 30%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.7,
+     "time": 43.1166666666655,
+     "airLeft": 9.483333333335695,
+     "airLeftFrac": 0.23708333333339238,
+     "minAirFrac": 0.18750000000005906,
+     "mistakesPerPair": 0.7555555555555553,
+     "score": 126,
+     "bonusShare": 0.17721518987341772,
+     "maxCombo": 3
+    },
+    {
+     "reached": 0.7,
+     "clearIfReached": 0.42857142857142855,
+     "time": 54.76666666666484,
+     "airLeft": 11.82500000000308,
+     "airLeftFrac": 0.23650000000006158,
+     "minAirFrac": 0.1968333333333949,
+     "mistakesPerPair": 0.8571428571428571,
+     "score": 146,
+     "bonusShare": 0.13793103448275862,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.3,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 1.0444444444444445,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "kid9",
+   "difficulty": "hard",
+   "peek": 3
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    0.9666666666666667,
+    0.9,
+    0.8666666666666667,
+    0.8,
+    0.5,
+    0.3,
+    0.13333333333333333,
+    0.03333333333333333,
+    0,
+    0
+   ],
+   "lap1": 0.9,
+   "lap2": 0.3,
+   "deathLevel": 6.5,
+   "endless": 0,
+   "sessionMin": 6.634166666663372,
+   "sessionP10": 4.698361111109577,
+   "sessionP90": 8.527694444439428,
+   "score": 1367,
+   "bestCombo": 5,
+   "topLoss": "Autumn L2 30%, Winter L2 20%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 25.34166666666651,
+     "airLeft": 27.25833333333474,
+     "airLeftFrac": 0.6814583333333686,
+     "minAirFrac": 0.631875000000035,
+     "mistakesPerPair": 0.41666666666666663,
+     "score": 176,
+     "bonusShare": 0.3229166666666667,
+     "maxCombo": 3.5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 36.96666666666585,
+     "airLeft": 29.191666666668645,
+     "airLeftFrac": 0.583833333333373,
+     "minAirFrac": 0.5441666666667062,
+     "mistakesPerPair": 0.5541666666666667,
+     "score": 207,
+     "bonusShare": 0.2857142857142857,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 0.9666666666666667,
+     "time": 60.49999999999785,
+     "airLeft": 21.80000000000331,
+     "airLeftFrac": 0.3516129032258598,
+     "minAirFrac": 0.31962365591403186,
+     "mistakesPerPair": 0.9700000000000002,
+     "score": 200,
+     "bonusShare": 0.22018348623853212,
+     "maxCombo": 3
+    },
+    {
+     "reached": 0.9666666666666667,
+     "clearIfReached": 0.9310344827586207,
+     "time": 71.38333333333057,
+     "airLeft": 28.2083333333252,
+     "airLeftFrac": 0.37611111111100265,
+     "minAirFrac": 0.3496666666665582,
+     "mistakesPerPair": 0.9683908045977011,
+     "score": 260,
+     "bonusShare": 0.21739130434782608,
+     "maxCombo": 3
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "casual",
+   "difficulty": "hard",
+   "peek": 3
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    0.9
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 14,
+   "endless": 0,
+   "sessionMin": 9.13847222221665,
+   "sessionP10": 8.168944444439754,
+   "sessionP90": 10.002666666660309,
+   "score": 3192,
+   "bestCombo": 7,
+   "topLoss": "Autumn L4 53%, Summer L4 17%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 15.783333333333697,
+     "airLeft": 36.133333333334065,
+     "airLeftFrac": 0.9033333333333516,
+     "minAirFrac": 0.8537500000000182,
+     "mistakesPerPair": 0.24444444444444446,
+     "score": 193,
+     "bonusShare": 0.3655830753353973,
+     "maxCombo": 3.5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 23.54166666666661,
+     "airLeft": 42.35833333333456,
+     "airLeftFrac": 0.8471666666666913,
+     "minAirFrac": 0.8053333333333558,
+     "mistakesPerPair": 0.3416666666666667,
+     "score": 248,
+     "bonusShare": 0.33480825958702065,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 36.58333333333254,
+     "airLeft": 45.58750000000201,
+     "airLeftFrac": 0.7352822580645486,
+     "minAirFrac": 0.7032930107527207,
+     "mistakesPerPair": 0.5766666666666667,
+     "score": 274,
+     "bonusShare": 0.33837480349108257,
+     "maxCombo": 4
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 45.016666666665394,
+     "airLeft": 53.92083333332211,
+     "airLeftFrac": 0.7189444444442947,
+     "minAirFrac": 0.6924999999998502,
+     "mistakesPerPair": 0.6333333333333333,
+     "score": 333,
+     "bonusShare": 0.31662515566625155,
+     "maxCombo": 5
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "strong",
+   "difficulty": "hard",
+   "peek": 3
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "lap1": 1,
+   "lap2": 1,
+   "deathLevel": 24,
+   "endless": 1,
+   "sessionMin": 9.216249999994357,
+   "sessionP10": 9.0476388888834,
+   "sessionP90": 9.351722222216457,
+   "score": 7507,
+   "bestCombo": 10,
+   "topLoss": "",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 8.85000000000002,
+     "airLeft": 40,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9593750000000023,
+     "mistakesPerPair": 0.016666666666666666,
+     "score": 280,
+     "bonusShare": 0.2857142857142857,
+     "maxCombo": 6
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 11.866666666666836,
+     "airLeft": 50,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9670000000000019,
+     "mistakesPerPair": 0.05416666666666667,
+     "score": 400,
+     "bonusShare": 0.25,
+     "maxCombo": 8
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 17.658333333333612,
+     "airLeft": 62,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9493279569892511,
+     "mistakesPerPair": 0.18666666666666668,
+     "score": 384,
+     "bonusShare": 0.3229166666666667,
+     "maxCombo": 5
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 22.016666666666698,
+     "airLeft": 75,
+     "airLeftFrac": 1,
+     "minAirFrac": 0.9456666666666128,
+     "mistakesPerPair": 0.2722222222222222,
+     "score": 459,
+     "bonusShare": 0.3232982295482295,
+     "maxCombo": 6
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "random",
+   "difficulty": "hard",
+   "peek": 3
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.9,
+    0.7666666666666667,
+    0.26666666666666666,
+    0.03333333333333333,
+    0.03333333333333333,
+    0.03333333333333333,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0.03333333333333333,
+   "lap2": 0,
+   "deathLevel": 2,
+   "endless": 0,
+   "sessionMin": 2.6906944444447363,
+   "sessionP10": 1.3834722222224451,
+   "sessionP90": 4.394222222220965,
+   "score": 334,
+   "bestCombo": 3,
+   "topLoss": "Autumn 50%, Winter 23%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.9,
+     "time": 29.98333333333291,
+     "airLeft": 22.616666666668337,
+     "airLeftFrac": 0.5654166666667084,
+     "minAirFrac": 0.48000000000004095,
+     "mistakesPerPair": 4.855555555555556,
+     "score": 120,
+     "bonusShare": 0.34065934065934067,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.9,
+     "clearIfReached": 0.8518518518518519,
+     "time": 42.73333333333219,
+     "airLeft": 23.85833333333573,
+     "airLeftFrac": 0.4771666666667146,
+     "minAirFrac": 0.41316666666671364,
+     "mistakesPerPair": 5.416666666666667,
+     "score": 158,
+     "bonusShare": 0.29411764705882354,
+     "maxCombo": 2
+    },
+    {
+     "reached": 0.7666666666666667,
+     "clearIfReached": 0.34782608695652173,
+     "time": 63.44166666666435,
+     "airLeft": 19.150000000003573,
+     "airLeftFrac": 0.3088709677419931,
+     "minAirFrac": 0.25416666666672283,
+     "mistakesPerPair": 6.565217391304347,
+     "score": 176,
+     "bonusShare": 0.23291177356218007,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.26666666666666666,
+     "clearIfReached": 0.125,
+     "time": 91.28333333332944,
+     "airLeft": 8.308333333328651,
+     "airLeftFrac": 0.11077777777771534,
+     "minAirFrac": 0.07677777777771631,
+     "mistakesPerPair": 7.166666666666667,
+     "score": 156,
+     "bonusShare": 0.10256410256410256,
+     "maxCombo": 1.5
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "randomSlow",
+   "difficulty": "hard",
+   "peek": 3
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.16666666666666666,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 0,
+   "endless": 0,
+   "sessionMin": 0.8247222222221862,
+   "sessionP10": 0.7580555555555233,
+   "sessionP90": 1.747888888889381,
+   "score": 20,
+   "bestCombo": 1,
+   "topLoss": "Spring 83%, Summer 17%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.16666666666666666,
+     "time": 39.93333333333235,
+     "airLeft": 12.666666666668903,
+     "airLeftFrac": 0.31666666666672255,
+     "minAirFrac": 0.26666666666672256,
+     "mistakesPerPair": 2.5722222222222215,
+     "score": 106,
+     "bonusShare": 0.24528301886792453,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.16666666666666666,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 2.55,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ },
+ {
+  "spec": {
+   "model": "sweeper",
+   "difficulty": "hard",
+   "peek": 3
+  },
+  "sum": {
+   "n": 30,
+   "clear": [
+    0.26666666666666666,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "lap1": 0,
+   "lap2": 0,
+   "deathLevel": 0,
+   "endless": 0,
+   "sessionMin": 0.8247222222221862,
+   "sessionP10": 0.7580555555555233,
+   "sessionP90": 1.399611111111326,
+   "score": 20,
+   "bestCombo": 1,
+   "topLoss": "Spring 73%, Summer 27%",
+   "season": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.26666666666666666,
+     "time": 18.633333333333557,
+     "airLeft": 33.96666666666769,
+     "airLeftFrac": 0.8491666666666923,
+     "minAirFrac": 0.7637500000000206,
+     "mistakesPerPair": 5.46111111111111,
+     "score": 166,
+     "bonusShare": 0.4107948628948282,
+     "maxCombo": 1
+    },
+    {
+     "reached": 0.26666666666666666,
+     "clearIfReached": 0,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": 6.15625,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": 0
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    },
+    {
+     "reached": 0,
+     "clearIfReached": null,
+     "time": null,
+     "airLeft": null,
+     "airLeftFrac": null,
+     "minAirFrac": null,
+     "mistakesPerPair": null,
+     "score": null,
+     "bonusShare": null,
+     "maxCombo": null
+    }
+   ]
+  }
+ }
+]

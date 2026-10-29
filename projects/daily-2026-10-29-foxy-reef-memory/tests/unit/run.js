@@ -113,6 +113,20 @@ test('world: intro pause — the season banner shows on an empty tray before the
   assert.strictEqual(w.state, 'playing');
 });
 
+test('mismatch penalty: free when both cards are new, costs air when a seen card is re-flipped', () => {
+  const w = new RF.World({ seed: 5, config: { introDelay: 0, peekTime: 0 } });
+  run(w, 3, H);
+  const pick = () => w.cards.filter(c => c.state === 'down');
+  const a = pick()[0], b = pick().find(c => c.face !== a.face);
+  const air0 = w.air;
+  w.select(a.id); w.select(b.id); run(w, 1.2, H);
+  assert.ok(w.air > air0 - 1.25 - 0.05, 'first look is free (only normal drain)');
+  const c2 = pick().find(c => c.id !== a.id && c.id !== b.id && c.face !== a.face);
+  const air1 = w.air;
+  w.select(a.id); w.select(c2.id); events(w); run(w, 0.3, H);
+  assert.ok(w.air < air1 - 0.3 - w.cfg.mismatchPenalty + 0.05, 'seen card costs ' + w.cfg.mismatchPenalty + ' s');
+});
+
 test('world: faces are random pairs from the 12, seeded', () => {
   for (const seed of [1, 2, 3]) {
     const w = new RF.World({ seed, config: { introDelay: 0 } });
@@ -487,7 +501,7 @@ function clearLevel(w) {
   }
   let t = 0; while (w.state === 'playing' && t < 3) { w.update(H); t += H; }
 }
-test('level: clear → bonus = round(air)×2 → cleared 2.5 s → next season; lap after winter', () => {
+test('level: clear → bonus = round(air)×airBonusPerSec → cleared 2.5 s → next season; lap after winter', () => {
   const w = playing(12);
   const evs = [];
   clearLevel(w);
@@ -495,7 +509,7 @@ test('level: clear → bonus = round(air)×2 → cleared 2.5 s → next season; 
   assert.strictEqual(w.state, 'cleared');
   const cl = evs.find(e => e.type === 'cleared');
   assert.ok(cl && cl.level === 0);
-  assert.strictEqual(cl.bonus, Math.round(cl.air) * 2);
+  assert.strictEqual(cl.bonus, Math.round(cl.air) * w.cfg.airBonusPerSec);
   assert.strictEqual(w.score, 6 * 10 + 10 + 20 + 30 + 40 + 50 + 50 - 60 + cl.bonus);  // 10..50 capped combo
   assert.strictEqual(w.fox.frame, 'cheer');
   const airFrozen = w.air; run(w, 1, H); assert.strictEqual(w.air, airFrozen, 'no drain while celebrating');
@@ -503,12 +517,12 @@ test('level: clear → bonus = round(air)×2 → cleared 2.5 s → next season; 
   run(w, 0.02, H);
   assert.strictEqual(w.level, 1); assert.strictEqual(w.season, 1); assert.strictEqual(w.state, 'ready');
   assert.ok(events(w).some(e => e.type === 'season' && e.season === 1 && e.level === 1));
-  assert.strictEqual(w.air, 70);
+  assert.strictEqual(w.air, w.cfg.airMax[1]);
   // through autumn and winter → lap 1 spring with less air
   for (let lv = 1; lv < 4; lv++) { untilPlaying(w); clearLevel(w); run(w, 2.6, H); }
   assert.strictEqual(w.level, 4); assert.strictEqual(w.season, 0); assert.strictEqual(w.lap, 1);
-  assert.ok(Math.abs(w.airMax - 60 * 0.8) < 1e-9);
-  assert.ok(Math.abs(w.airPerMatch - 3 * 0.8) < 1e-9);
+  assert.ok(Math.abs(w.airMax - w.cfg.airMax[0] * w.cfg.lapAirMul) < 1e-9);
+  assert.ok(Math.abs(w.airPerMatch - w.cfg.airPerMatch * w.cfg.lapAirMul) < 1e-9);
   assert.deepStrictEqual([w.cols, w.rows], [4, 3]);
   assert.strictEqual(w.levelsCleared, 4);
 });

@@ -147,3 +147,9 @@ Extra events:
 Results:
 - Skill 1 clears every level with no forgetting and about 1.55 moves per pair.
 - Skill 0.3 needs about 2 moves per pair and dies in endless play around levels 23–36. Bots are much faster than humans, so a person feels the air pressure several laps earlier.
+
+## v1.1 tuning (from docs/reports/playtest_report.md)
+- **Mismatch penalty:** a mismatch that re-flips an already-seen card costs `mismatchPenalty` s of air (Easy 0.5, Normal 1, Hard 1.5), never below `penaltyFloor` (1 s). Two never-seen cards are free. This stops random mashing from beating memory play (masher on Normal: Summer 93 % → 43 %, first lap 37 % → 0 %; a 6-year-old is barely affected).
+- **Endless laps end:** `lapAirMul`/`lapAirMin` are Easy 0.85/0.4, Normal 0.7/0.15, Hard 0.7/0.12. A casual adult's session went from 14.8 to about 10 min, and a strong player ends around lap 6.
+- **Air:** `airMax` is Normal [60,75,95,115] and Easy [90,110,135,160]. `airBonusPerSec` went from 2 to 1, so score mostly rewards matching rather than speed.
+- **Peek:** the "Auto" setting follows the difficulty (Easy 2 s, Normal 1 s, Hard 0).

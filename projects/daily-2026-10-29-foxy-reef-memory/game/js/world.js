@@ -63,9 +63,9 @@
     settleDamp: 0.5,          // settle spring damping ratio (≈ 2–3 px overshoot)
 
     // --- air (timer)
-    airMax: [60, 70, 85, 100],// s per season, lap 0
-    lapAirMul: 0.8,           // airMax and airPerMatch × lapAirMul^lap (endless laps get tight) …
-    lapAirMin: 0.3,           // … but never below this fraction
+    airMax: [60, 75, 95, 115],// s per season, lap 0
+    lapAirMul: 0.7,           // airMax and airPerMatch × lapAirMul^lap (endless laps get tight) …
+    lapAirMin: 0.15,          // … but never below this fraction
     airPerMatch: 3,           // s refilled on each match (capped at airMax), lap 0
     airLowFrac: 0.25,         // 'airlow' event below this fraction
     airLowRearm: 0.4,         // re-armed once air climbs back above this fraction
@@ -74,7 +74,9 @@
     // --- score
     pointsPerMatch: 10,
     comboCap: 5,
-    airBonusPerSec: 2,
+    airBonusPerSec: 1,
+    mismatchPenalty: 1,       // s of air lost when a mismatch re-flips an already-seen card
+    penaltyFloor: 1,          // s, the penalty never takes air below this
     cheerCombo: 3,            // Foxy cheers at combo ≥ this
     clearTime: 2.5,           // s, 'cleared' celebration before the next level
 
@@ -107,9 +109,9 @@
 
   /* Difficulty presets (suggestions — integrator maps menu choice to these overrides). */
   var DIFFICULTY = {
-    easy:   { peekTime: 2, airMax: [90, 105, 125, 145], airPerMatch: 4, mismatchShow: 1.0, lapAirMul: 0.88, lapAirMin: 0.5 },
-    normal: {},
-    hard:   { airMax: [40, 50, 62, 75], airPerMatch: 2, mismatchShow: 0.6, lapAirMul: 0.75 }
+    easy:   { peekTime: 2, airMax: [90, 110, 135, 160], airPerMatch: 4, mismatchShow: 1.0, lapAirMul: 0.85, lapAirMin: 0.4, mismatchPenalty: 0.5 },
+    normal: { peekTime: 1 },
+    hard:   { peekTime: 0, airMax: [40, 50, 62, 75], airPerMatch: 2, mismatchShow: 0.6, lapAirMul: 0.7, lapAirMin: 0.12, mismatchPenalty: 1.5 }
   };
 
   /* ---------- helpers ---------- */
@@ -194,6 +196,7 @@
     var c = this.cfg;
     i = Math.max(0, i | 0);
     this.level = i;
+    this._seen = {};              // card ids the player has already looked at this level (for the mismatch penalty)
     this.season = i % 4;
     this.lap = Math.floor(i / 4);
     this.levelTime = 0;
@@ -369,6 +372,7 @@
       this.combo++;
       this.bestCombo = Math.max(this.bestCombo, this.combo);
       this.matches++;
+      if (this._seen) this._seen[a.id] = this._seen[b.id] = true;
       var pts = c.pointsPerMatch * Math.min(this.combo, c.comboCap);
       this.score += pts;
       this.air = Math.min(this.airMax, this.air + this.airPerMatch);
@@ -384,6 +388,15 @@
       this.mistakes++;
       this.combo = 0;
       a._wt = b._wt = 0;
+      // Careless mismatch: re-flipping a card you had already seen costs a little air (honest exploration is free).
+      // Stops random mashing from beating real memory play (playtest report, change 1).
+      var seen = this._seen || (this._seen = {});
+      if (c.mismatchPenalty > 0 && (seen[a.id] || seen[b.id])) {
+        var a0 = this.air;
+        this.air = Math.max(Math.min(a0, c.penaltyFloor), a0 - c.mismatchPenalty);
+        if (a0 - this.air > 0) this._emit({ type: 'penalty', amount: a0 - this.air, x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+      }
+      seen[a.id] = seen[b.id] = true;
       this._mismatch = { ids: [a.id, b.id], timer: c.mismatchShow };
       this._emit({ type: 'mismatch', ids: [a.id, b.id] });
       this._foxAct('oops', c.foxOopsTime);

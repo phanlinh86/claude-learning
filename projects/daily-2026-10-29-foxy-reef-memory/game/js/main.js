@@ -257,9 +257,11 @@
     adapt(real) {
       if (params.get('adaptive') === '0' || this.mode === 'paused' || this.mode === 'boot') return;
       if (this._adaptHold > 0) { this._adaptHold--; return; }
-      this._slow = real > 0.022 ? (this._slow || 0) + 1 : Math.max(0, (this._slow || 0) - 2);
+      // smoothed frame time (an alternating 16/33 ms cadence averages ~25 ms and must still trigger)
+      this._ft = this._ft == null ? real : this._ft + (real - this._ft) * 0.1;
+      this._slowT = this._ft > 0.020 ? (this._slowT || 0) + real : 0;
       const R = this.renderer;
-      if (this._slow > 70 && R.px > 1.01) { R.maxPx = Math.max(1, R.px * 0.75); R.resize(); this._slow = 0; this._adaptHold = 60; }
+      if (this._slowT > 1.5 && R.px > 1.01) { R.maxPx = Math.max(1, R.px * 0.75); R.resize(); this._slowT = 0; this._ft = null; this._adaptHold = 60; }
     },
 
     frame(ts) {

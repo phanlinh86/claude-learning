@@ -875,11 +875,13 @@ async function testLap2() {
   }
   info('levels ' + JSON.stringify(info0));
   const L4 = info0[4];
-  check('level 5 = Spring lap 2: 12 cards, gravity up, air ×0.8 (48 s)', L4.season === 0 && L4.lap === 1 && L4.n === 12 && L4.gy === -1 && Math.abs(L4.airMax - 48) < 0.01 && L4.air === L4.airMax, L4);
-  check('lap 2 refill per match ×0.8', Math.abs(L4.apm - 2.4) < 0.01, L4.apm);
+  const CF = await ev(page, () => RF.debug.world.cfg);   // the world's merged tuning (difficulty preset applied)
+  const lapAir = lap => Math.max(CF.lapAirMin, Math.pow(CF.lapAirMul, lap));
+  check('level 5 = Spring lap 2: 12 cards, gravity up, air × lapAirMul', L4.season === 0 && L4.lap === 1 && L4.n === 12 && L4.gy === -1 && Math.abs(L4.airMax - CF.airMax[0] * lapAir(1)) < 0.01 && L4.air === L4.airMax, L4);
+  check('lap 2 refill per match × lapAirMul', Math.abs(L4.apm - CF.airPerMatch * lapAir(1)) < 0.01, L4.apm);
   check('level 7 = Autumn lap 2: current flips direction vs lap 1', info0[6].season === 2 && info0[6].gx === -info0[2].gx && info0[6].gx !== 0, { l3: info0[2].gx, l7: info0[6].gx });
   check('level 8 = Winter lap 2: 6×4, gravity down', info0[7].cols === 6 && info0[7].rows === 4 && info0[7].gy === 1, info0[7]);
-  check('level 41 (lap 11): air never below lapAirMin 0.3 (Spring 60×0.3 = 18 s)', Math.abs(info0[40].airMax - 18) < 0.01, info0[40]);
+  check('level 41 (lap 11): air never below lapAirMin', Math.abs(info0[40].airMax - CF.airMax[0] * CF.lapAirMin) < 0.01, info0[40]);
   check('seasons beyond lap 1 switch backdrop + weather', Object.values(info0).every(x => x.vis === x.season && x.wx === x.season), Object.values(info0).map(x => [x.season, x.vis, x.wx]));
   // HUD text "Lap 2"
   await ev(page, () => RF.debug.gotoLevel(4));
@@ -903,7 +905,7 @@ async function testLap2() {
   const st = await ev(page, () => ({ level: RF.debug.world.level, season: RF.debug.world.season, lap: RF.debug.world.lap, vis: RF.Game.renderer.vis.cur, wx: RF.debug.weather.season, score: RF.debug.world.score, music: RF.Audio.season }));
   const cl = await evLog(page, 'cleared');
   check('clearing Winter goes on to Spring lap 2 (score kept, backdrop/weather/music switch)', st.level === 4 && st.season === 0 && st.lap === 1 && st.vis === 0 && st.wx === 0 && st.music === 0 && st.score > 0 && cl.length >= 1, st);
-  check('level clear: air bonus = round(air)×2 added', cl.length >= 1 && cl[0].bonus === Math.round(cl[0].air) * 2, cl[0]);
+  check('level clear: air bonus = round(air)×airBonusPerSec added', cl.length >= 1 && cl[0].bonus === Math.round(cl[0].air) * (await ev(page, () => RF.debug.world.cfg.airBonusPerSec)), cl[0]);
   await ev(page, () => RF.debug.setSpeed(1)); await page.waitForTimeout(300);
   await shot(page, '22_lap2_play');
   await ev(page, () => { RF.debug.setBot(false); RF.debug.world.air = 0.001; });

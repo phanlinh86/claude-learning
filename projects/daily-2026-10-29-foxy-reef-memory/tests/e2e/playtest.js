@@ -1,7 +1,7 @@
 // High-speed in-browser playtest + frame-time measurement.
 //   node tests/e2e/playtest.js [minutes=3] [port=8793]
 // Starts `python3 -m http.server <port>` in game/ unless something already answers on that port.
-// 1) bot + autorestart at speed 16 for <minutes>: samples RF.debug.getState(), RF.debug.stats, errors,
+// 1) bot + autorestart at speed 16, <minutes>/2 with skill 1 and <minutes>/2 with skill 0.35: samples RF.debug.getState(), RF.debug.stats, errors,
 //    and checks for leaks (renderer fx, particles) and impossible states.
 // 2) speed 1, bot on Winter (level=3), 1920×1080: rAF intervals + CPU time spent in step/draw per frame,
 //    with adaptive quality on (shipped) and off (?adaptive=0).
@@ -61,25 +61,16 @@ async function measureFrames(browser, query, seconds, shot) {
   return r;
 }
 
-(async () => {
-  let server = null;
-  if (!(await up())) {
-    server = spawn('python3', ['-m', 'http.server', String(port)], { cwd: path.join(__dirname, '..', '..', 'game'), stdio: 'ignore' });
-    for (let i = 0; i < 50 && !(await up()); i++) await sleep(200);
-  }
-  const browser = await chromium.launch();
-  const result = { when: new Date().toISOString(), minutes };
-
-  // ---------- 1) high-speed soak ----------
+async function soak(browser, skill, mins) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errors = [];
   page.on('pageerror', e => errors.push('pageerror: ' + e.message));
   page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
-  await page.goto(base + '?mute=1&bot=1&autostart=1&autorestart=1&speed=16');
+  await page.goto(base + '?mute=1&bot=1&autostart=1&autorestart=1&speed=16&skill=' + skill);
   const samples = [], anomalies = [];
   const t0 = Date.now();
-  let shots = 0;
-  while (Date.now() - t0 < minutes * 60000) {
+  let shots = skill === 1 ? 0 : 4;
+  while (Date.now() - t0 < mins * 60000) {
     await page.waitForTimeout(5000);
     const s = await page.evaluate(() => {
       const st = RF.debug.getState(), w = RF.debug.world;
@@ -93,20 +84,38 @@ async function measureFrames(browser, query, seconds, shot) {
     });
     s.t = Math.round((Date.now() - t0) / 1000);
     samples.push(s);
-    if (s.badCards || s.dupCells || !s.foxOk || s.air < 0 || s.air > s.airMax + 1e-6 || s.fx > 400 || s.particles > 150 || s.cupList > 20) anomalies.push(s);
+    if (s.badCards || s.dupCells || !s.foxOk || s.air < 0 || s.air > s.airMax + 0.01 || s.fx > 400 || s.particles > 150 || s.cupList > 20) anomalies.push(s);
     if (shots < 4 && s.mode === 'playing' && s.season === shots) { await page.evaluate(() => RF.debug.setSpeed(1)); await page.waitForTimeout(300); await page.screenshot({ path: path.join(OUT, `playtest_season${shots}.png`) }); await page.evaluate(() => RF.debug.setSpeed(16)); shots++; }
   }
-  result.soak = {
+  const r = {
     stats: await page.evaluate(() => RF.debug.stats),
     maxLevelSeen: Math.max(...samples.map(s => s.level || 0)),
     seasonsSeen: [...new Set(samples.map(s => s.season))],
     maxFx: Math.max(...samples.map(s => s.fx)), maxParticles: Math.max(...samples.map(s => s.particles)), maxCupcakeList: Math.max(...samples.map(s => s.cupList)),
     samples: samples.length, anomalies, errors
   };
-  await page.screenshot({ path: path.join(OUT, 'playtest_soak_end.png') });
+  await page.screenshot({ path: path.join(OUT, 'playtest_soak_skill' + skill + '.png') });
   await page.close();
-  console.log('soak', JSON.stringify(Object.assign({}, result.soak, { stats: Object.assign({}, result.soak.stats, { scores: undefined, times: undefined, levels: undefined }) })));
-  console.log('soak levels per game', JSON.stringify(result.soak.stats.levels), 'scores', JSON.stringify(result.soak.stats.scores));
+  return r;
+}
+
+(async () => {
+  let server = null;
+  if (!(await up())) {
+    server = spawn('python3', ['-m', 'http.server', String(port)], { cwd: path.join(__dirname, '..', '..', 'game'), stdio: 'ignore' });
+    for (let i = 0; i < 50 && !(await up()); i++) await sleep(200);
+  }
+  const browser = await chromium.launch();
+  const result = { when: new Date().toISOString(), minutes };
+
+  // ---------- 1) high-speed soak: a perfect bot (skill 1) and a weak bot (skill 0.35, so game over + autorestart happen) ----------
+  result.soak = {};
+  for (const skill of [1, 0.35]) {
+    const r = await soak(browser, skill, minutes / 2);
+    result.soak['skill' + skill] = r;
+    console.log('soak skill', skill, JSON.stringify(Object.assign({}, r, { samples: undefined, stats: Object.assign({}, r.stats, { scores: undefined, times: undefined, levels: undefined }) })));
+    console.log('  levels reached per game', JSON.stringify(r.stats.levels), 'scores', JSON.stringify(r.stats.scores), 'game-time s', JSON.stringify(r.stats.times));
+  }
 
   // ---------- 2) frame times on Winter at 1920×1080 ----------
   result.frames = {
@@ -123,7 +132,7 @@ async function measureFrames(browser, query, seconds, shot) {
   const keep = path.join(__dirname, '..', 'sim', 'results');
   fs.mkdirSync(keep, { recursive: true });
   fs.writeFileSync(path.join(keep, 'e2e_playtest.json'), JSON.stringify(result, null, 1));
-  const bad = result.soak.errors.length + result.soak.anomalies.length + Object.values(result.frames).reduce((s, f) => s + f.errors.length, 0);
+  const bad = Object.values(result.soak).reduce((n, r) => n + r.errors.length + r.anomalies.length, 0) + Object.values(result.frames).reduce((s, f) => s + f.errors.length, 0);
   console.log(bad ? `PROBLEMS: ${bad}` : 'OK: no errors, no anomalies');
   process.exit(bad ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(2); });

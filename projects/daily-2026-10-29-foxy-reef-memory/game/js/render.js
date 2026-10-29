@@ -91,6 +91,7 @@
             break;
           }
           case 'mismatch': for (const id of (e.ids || [])) { const c = this.card(id); if (c) { this.bubbles(c.x, c.y + CH / 2 + 6, 3, 0.5); c._miss = 0.9; } } break;
+          case 'penalty': this.texts.push({ text: '-' + Math.round(e.amount) + 's air', x: 830, y: 108, life: 0, max: 1.2, size: 18, color: '#ff8a8a' }); break;
           case 'eat': this.sparks(e.x, e.y, 8, '#ffd1e8'); this.texts.push({ text: 'Yum!', x: e.x, y: Math.max(150, e.y - 40), life: 0, max: 0.9, size: 20, color: '#ffffff' }); break;
           case 'cupcake': this.bubbles(e.x, e.y, 4, 0.8); break;
           case 'airlow': { const f = w && w.fox; this.texts.push({ text: 'Air is low!', x: f ? f.x : 140, y: f ? Math.max(150, f.y - 70) : 200, life: 0, max: 1.8, size: 24, color: '#ff6b6b' }); break; }

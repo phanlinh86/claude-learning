@@ -2,6 +2,7 @@
 //   node tests/sim/run.js baseline [N]   difficulty × peek × player-model grid (current game values)
 //   node tests/sim/run.js gravity  [N]   gravity twist on vs off (Normal, peek 1)
 //   node tests/sim/run.js tuning   [N]   current vs proposed tuning (proposals.js)
+//   node tests/sim/run.js final    [N]   recommended package (+ optional whirlpool twist), long cap
 //   node tests/sim/run.js all      [N]
 // Writes tests/sim/results/<exp>.json and <exp>.md (tables used in docs/reports/playtest_report.md).
 'use strict';
@@ -95,7 +96,8 @@ async function gravity(n) {
 
 async function tuning(n) {
   const specs = [];
-  for (const [name, prop] of Object.entries(P.variants)) {
+  for (const name of P.tuningOnly) {
+    const prop = P.variants[name];
     for (const d of ['easy', 'normal', 'hard']) for (const m of [...HUMANS, 'random', 'randomSlow']) {
       const pk = P.peekFor(name, d);
       specs.push({ model: m, difficulty: d, peek: pk, proposal: prop, variant: name });
@@ -114,6 +116,28 @@ async function tuning(n) {
   save('tuning', groups.map(g => ({ spec: g.spec, sum: g.sum })), md);
 }
 
+// Final check of the recommended package with a long cap (does the endless game end for strong players?)
+// plus the optional "whirlpool from lap 2" twist.
+async function final(n) {
+  const rec = P.variants.recommended, specs = [];
+  for (const [d, m] of [['normal', 'kid6'], ['normal', 'kid9'], ['normal', 'casual'], ['normal', 'strong'], ['hard', 'casual'], ['hard', 'strong'], ['easy', 'kid6'], ['easy', 'kid9']]) {
+    for (const [v, prop] of [['current', {}], ['recommended', rec], ['recommended+whirlpool', Object.assign({ flowFromLap: 1 }, rec)]]) {
+      specs.push({ model: m, difficulty: d, peek: v === 'current' ? 1 : P.peekFor('P1P2P3_full', d), proposal: prop, variant: v, maxLevels: 48, maxTime: 3600 });
+    }
+  }
+  const res = await batch(specs, n);
+  const rows = res.map(({ spec, runs }) => {
+    const sum = S.summarize(runs, 48);
+    const lap2mpp = S.mean(runs.flatMap(r => r.levels.filter(l => l.lap === 1).map(l => l.mistakes / l.pairs)));
+    return [spec.variant, spec.model, spec.difficulty + ' p' + spec.peek, S.pct(sum.clear[0]), S.pct(sum.lap1), S.pct(sum.lap2),
+      sum.endless >= 0.5 ? `≥48 (${S.pct(sum.endless)})` : '#' + S.f0(sum.deathLevel + 1) + ' ' + S.levelName(Math.round(sum.deathLevel)),
+      `${S.f1(sum.sessionMin)} (${S.f1(sum.sessionP10)}–${S.f1(sum.sessionP90)})`, S.f1(lap2mpp), S.f0(sum.score)];
+  });
+  const md = [`## Final: current vs recommended (cap 48 levels / 60 min), ${n} runs per row`,
+    S.table(['Variant', 'Model', 'Setting', 'Spring', 'Lap 1', 'Lap 2', 'Median death', 'Session min (p10–p90)', 'Lap-2 mistakes/pair', 'Score'], rows)].join('\n\n');
+  save('final', rows, md);
+}
+
 (async () => {
   const exp = process.argv[2] || 'all';
   const n = parseInt(process.argv[3] || '40', 10);
@@ -121,5 +145,6 @@ async function tuning(n) {
   if (exp === 'baseline' || exp === 'all') await baseline(n);
   if (exp === 'gravity' || exp === 'all') await gravity(Math.max(n, 100));
   if (exp === 'tuning' || exp === 'all') await tuning(n);
+  if (exp === 'final' || exp === 'all') await final(n);
   console.error(`done in ${((Date.now() - t0) / 1000).toFixed(0)} s`);
 })();

@@ -5,9 +5,12 @@
 // main.js difficultyOverrides(), and a Human model that only acts through world.select().
 // `proposal` = experimental rule changes that are simulated here (not in the game yet):
 //   proposal.config         extra RF.CONFIG overrides (applied after the difficulty preset)
+//   proposal.byDifficulty   { easy: {...}, normal: {...}, hard: {...} } overrides per difficulty
 //   proposal.noGravity      disable the gravity twist (baseline comparison)
 //   proposal.mismatchPenalty  air seconds lost on a mismatch where a card had ALREADY been seen
 //                             face-up before (no penalty for honest exploration)
+//   proposal.flowFromLap    from this lap index on, removals compact the whole board (see below)
+//   proposal.penaltyFloor   the penalty never takes air below this (default 0.01 s)
 'use strict';
 const path = require('path');
 const { load } = require(path.join(__dirname, '..', 'unit', 'load.js'));
@@ -30,11 +33,35 @@ function difficultyOverrides(d, peek) {
 
 function runGame(opts) {
   const prop = opts.proposal || {};
-  const cfg = Object.assign(difficultyOverrides(opts.difficulty, opts.peek), prop.config || {});
+  const cfg = Object.assign(difficultyOverrides(opts.difficulty, opts.peek), prop.config || {},
+    (prop.byDifficulty && prop.byDifficulty[opts.difficulty]) || {});
   const w = new RF.World({ seed: opts.seed, config: cfg });
   if (prop.noGravity) {
     w.startLevel = function (i) { RF.World.prototype.startLevel.call(this, i); this.gravity = { x: 0, y: 0 }; return this; };
     w.gravity = { x: 0, y: 0 };
+  }
+  if (prop.flowFromLap !== undefined) {
+    // "whirlpool" idea: from lap N, a removal compacts the WHOLE board along the gravity
+    // (reading order for up/down, column order for sideways), so cards also hop between lines.
+    const base = w._applyGravity;
+    w._applyGravity = function () {
+      const g = this.gravity;
+      if (this.lap < prop.flowFromLap || (!g.x && !g.y)) return base.call(this);
+      const vertical = g.y !== 0, C = this.cols, R = this.rows;
+      const idx = (k) => vertical ? k.row * C + k.col : k.col * R + k.row;
+      const live = this.cards.filter(k => k.state !== 'gone').sort((a, b) => idx(a) - idx(b));
+      const toEnd = vertical ? g.y > 0 : g.x > 0, N = C * R, moves = [];
+      live.forEach((k, j) => {
+        const t = toEnd ? N - live.length + j : j;
+        const col = vertical ? t % C : Math.floor(t / R), row = vertical ? Math.floor(t / C) : t % R;
+        if (col !== k.col || row !== k.row) {
+          moves.push({ id: k.id, fromCol: k.col, fromRow: k.row, col, row });
+          k.col = col; k.row = row; k._spd = 0; k._mode = 'travel'; k.moving = true; k.settling = false;
+        }
+      });
+      if (moves.length) { this._emit({ type: 'slide', ids: moves.map(m => m.id), moves, gravity: { x: g.x, y: g.y } }); this._fixCursor(); }
+      return moves;
+    };
   }
   const rng = new RF.RNG('player' + opts.seed + opts.model);
   const model = typeof opts.model === 'string' ? MODELS[opts.model] : opts.model;
@@ -65,7 +92,7 @@ function runGame(opts) {
           cur.mistakes++;
           if (prop.mismatchPenalty) {
             const pen = typeof prop.mismatchPenalty === 'number' ? prop.mismatchPenalty : prop.mismatchPenalty[opts.difficulty] || 0;
-            if (pen && e.ids.some(id => seen.has(id))) { w.air = Math.max(0.01, w.air - pen); penaltyTotal += pen; }
+            if (pen && e.ids.some(id => seen.has(id))) { const a0 = w.air; w.air = Math.max(Math.min(a0, prop.penaltyFloor || 0.01), a0 - pen); penaltyTotal += a0 - w.air; }
           }
           for (const id of e.ids) seen.add(id);
           break;
