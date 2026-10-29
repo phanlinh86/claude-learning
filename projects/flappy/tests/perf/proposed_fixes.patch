@@ -1,0 +1,280 @@
+--- a/game/index.html
++++ b/game/index.html
+@@ -6,6 +6,17 @@
+ <title>Family Flappy</title>
+ <link rel="icon" href="assets/default/icon.svg">
+ <link rel="stylesheet" href="css/style.css">
++<link rel="preload" as="image" href="assets/default/seasons/spring/sky.svg">
++<link rel="preload" as="image" href="assets/default/seasons/spring/clouds.svg">
++<link rel="preload" as="image" href="assets/default/seasons/spring/far.svg">
++<link rel="preload" as="image" href="assets/default/seasons/spring/mid.svg">
++<link rel="preload" as="image" href="assets/default/seasons/spring/ground.svg">
++<link rel="preload" as="image" href="assets/default/bird_mid.svg">
++<link rel="preload" as="image" href="assets/default/bird_up.svg">
++<link rel="preload" as="image" href="assets/default/bird_down.svg">
++<link rel="preload" as="image" href="assets/default/turtle_walk1.svg">
++<link rel="preload" as="image" href="assets/default/turtle_walk2.svg">
++<link rel="preload" as="image" href="assets/default/drop.svg">
+ </head>
+ <body>
+ <div id="stage">
+--- a/game/js/main.js
++++ b/game/js/main.js
+@@ -50,7 +50,8 @@
+       this.renderer.resize();
+       FF.UI.init(this);
+       this.bindInput();
+-      window.addEventListener('resize', () => this.renderer.resize());
++      // P6: one resize per burst (dragging a window edge fires dozens of events; each one re-rasterizes every layer)
++      window.addEventListener('resize', () => { clearTimeout(this._rsz); this._rsz = setTimeout(() => this.renderer.resize(), 120); });
+       if (params.get('autostart') === '1') this.startGame(); else this.toTitle();
+       this.last = performance.now();
+       requestAnimationFrame(t => this.frame(t));
+@@ -265,6 +266,19 @@
+       }
+     },
+ 
++    /* P5 adaptive quality: if frames keep taking > 22 ms (~45 fps) for ~1.5 s, render fewer pixels
++     * (backing scale × 0.75, down to 1 device px per logical px). Only ever steps down; ?adaptive=0 disables. */
++    adapt(real) {
++      if (params.get('adaptive') === '0' || this.mode === 'paused' || this.mode === 'boot') return;
++      if (this._adaptHold > 0) { this._adaptHold--; return; }   // ignore the frames right after a resize
++      this._slow = real > 0.022 ? (this._slow || 0) + 1 : Math.max(0, (this._slow || 0) - 2);
++      const R = this.renderer;
++      if (this._slow > 70 && R.px > 1.01) {
++        R.maxPx = Math.max(1, R.px * 0.75); R.resize();
++        this._slow = 0; this._adaptHold = 60;
++      }
++    },
++
+     frame(ts) {
+       try {
+         const real = Math.min(0.1, Math.max(0, (ts - this.last) / 1000));
+@@ -278,6 +292,7 @@
+           this.renderer.update(dt);
+         }
+         this.renderer.draw(this.mode);
++        this.adapt(real);
+       } catch (err) {
+         console.error(err);
+         if (this.stats.errors.length < 20) this.stats.errors.push(String(err && err.stack || err));
+--- a/game/js/render.js
++++ b/game/js/render.js
+@@ -29,6 +29,7 @@
+       this.lines = [];
+       for (let i = 0; i < 7; i++) this.lines.push({ x: Math.random() * W, y: 40 + Math.random() * 260, len: 40 + Math.random() * 70, a: 0.1 + Math.random() * 0.15 });
+       this.debug = /[?&]debug=1/.test(location.search);
++      const mp = /[?&]maxpx=([\d.]+)/.exec(location.search); this.maxPx = mp ? +mp[1] : 2;
+       this.pointsPerSeason = 10;
+       this.resize();
+     }
+@@ -40,21 +41,25 @@
+       this.cssScale = s;
+       this.canvas.style.width = Math.round(W * s) + 'px';
+       this.canvas.style.height = Math.round(H * s) + 'px';
+-      this.canvas.width = Math.round(W * s * dpr);
+-      this.canvas.height = Math.round(H * s * dpr);
+-      this.px = s * dpr; // device pixels per logical pixel
++      // P3: cap the backing store (default 2 → at most 1920×1080 device px); the browser upscales the rest.
++      // Fill cost grows with pixels: 4K full screen is 4× the pixels of 1080p for ~no visible gain in a cartoon game.
++      this.px = Math.min(s * dpr, this.maxPx || 2); // device pixels per logical pixel
++      this.canvas.width = Math.round(W * this.px);
++      this.canvas.height = Math.round(H * this.px);
+       // keep the HUD buttons and toasts inside the game area even when the window is not 16:9
+       const ox = (vw - W * s) / 2, oy = (vh - H * s) / 2;
+       const hud = document.getElementById('hud'), toast = document.getElementById('toast');
+       if (hud) { hud.style.top = (oy + 14 * s) + 'px'; hud.style.right = (ox + 14 * s) + 'px'; }
+       if (toast) toast.style.bottom = (oy + 30 * s) + 'px';
+       FF.Assets.setScale(this.px);
++      if (this.vis) FF.Assets.warmSeason(this.vis.cur);
+     }
+ 
+     attach(world, weather) { this.world = world; this.weather = weather; this.fx.length = 0; this.texts.length = 0; this.banner = null; this.shake = 0; this.flash = 0; }
+ 
+     setSeason(i, instant) {
+       i = ((i % 4) + 4) % 4;
++      FF.Assets.warmSeason((i + 1) % 4); FF.Assets.warmSeason(0);
+       if (instant) { this.vis = { cur: i, prev: i, t: 1 }; return; }
+       if (i === this.vis.cur) return;
+       this.vis = { cur: i, prev: this.vis.t < 0.5 ? this.vis.prev : this.vis.cur, t: 0 };
+@@ -129,12 +134,15 @@
+     tile(key, off, y, w, h, alpha) {
+       const spr = FF.Assets.sprite(key, w, h);
+       if (!spr) return false;
+-      const g = this.ctx;
+-      let x = -(((off % w) + w) % w);
+-      x = Math.round(x * this.px) / this.px;
++      // Blit at 1:1 device pixels: a stretched full-screen drawImage (even by 1 px) takes the
++      // filtered/resampling path, which costs 10x more in software and extra texture taps on a GPU.
++      const g = this.ctx, sw = spr.width, cw = g.canvas.width;
++      let x = -Math.round((((off % w) + w) % w) * sw / w);
++      g.setTransform(1, 0, 0, 1, this._ox, this._oy);
+       if (alpha < 1) g.globalAlpha = alpha;
+-      for (; x < W; x += w) g.drawImage(spr, x, y, w + 1 / this.px, h);
++      for (const yd = Math.round(y * this.px); x < cw; x += sw) g.drawImage(spr, x, yd);
+       g.globalAlpha = 1;
++      g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
+       return true;
+     }
+     customBg(slot, alpha) {
+@@ -167,7 +175,8 @@
+       const g = this.ctx;
+       const sky = FF.Assets.sprite(name + '_sky', W, H);
+       g.globalAlpha = alpha;
+-      if (sky) g.drawImage(sky, 0, 0, W, H); else { g.fillStyle = '#9fd8f5'; g.fillRect(0, 0, W, H); }
++      if (sky) { g.setTransform(1, 0, 0, 1, this._ox, this._oy); g.drawImage(sky, 0, 0); g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy); }
++      else { g.fillStyle = '#9fd8f5'; g.fillRect(0, 0, W, H); }
+       g.globalAlpha = 1;
+       this.tile(name + '_clouds', scroll * PARALLAX.clouds + this.time * 7, 0, W, H, alpha);
+       this.tile(name + '_far', scroll * PARALLAX.far, 0, W, H, alpha);
+@@ -209,14 +218,16 @@
+     // ---------------- main draw ----------------
+     draw(mode) {
+       const g = this.ctx, w = this.world;
+-      g.setTransform(this.px, 0, 0, this.px, 0, 0);
+-      g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
++      this._ox = this._oy = 0;
+       if (this.shake > 0) {
+-        const m = this.shake * 14;
+-        g.translate((Math.random() - .5) * m, (Math.random() - .5) * m);
++        const m = this.shake * 14 * this.px;
++        this._ox = Math.round((Math.random() - .5) * m); this._oy = Math.round((Math.random() - .5) * m);
+       }
++      g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
++      g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+       const v = this.vis;
+-      FF.Assets.trimSeasons([v.cur, v.prev]);
++      const lerped = w ? this.interp(w) : false;      // P2: draw the world between its last two 1/120 s steps
++      if (this._trimKey !== v.cur * 4 + v.prev) { this._trimKey = v.cur * 4 + v.prev; FF.Assets.trimSeasons([v.cur, v.prev, (v.cur + 1) % 4, 0]); }
+ 
+       // 1. sky + parallax backdrop (cross-faded between seasons)
+       if (v.t < 1 && v.prev !== v.cur) { this.backdrop(v.prev, 1); this.fadeLayer(() => this.backdrop(v.cur, 1), v.t); }
+@@ -260,7 +271,29 @@
+       if (w && (mode === 'playing' || mode === 'paused' || mode === 'ready')) this.hud(mode);
+       if (this.banner) this.drawBanner();
+       if (this.debug && w) this.debugDraw();
++      if (lerped) this.uninterp();
++    }
++
++    /* Render interpolation: World runs fixed 1/120 s steps; a display frame almost never lands exactly on a
++     * step, so drawing the latest step makes motion advance 0,1,2 or 3 steps per frame (judder at 60/75/120/144 Hz).
++     * World._step stores the previous step's positions (_p*); draw at prev + (cur - prev) * (acc / step). */
++    interp(w) {
++      const a = clamp(w._acc / (w.cfg.step || 1 / 120), 0, 1), S = this._saved || (this._saved = []);
++      S.length = 0;
++      this._a = a;
++      this._lerp(w, 'scroll', '_pScroll');
++      const b = w.bird; this._lerp(b, 'x', '_px'); this._lerp(b, 'y', '_py'); this._lerp(b, 'angle', '_pa');
++      for (const t of w.turtles) { this._lerp(t, 'x', '_px'); this._lerp(t, 'y', '_py'); }
++      for (const d of w.drops) { this._lerp(d, 'x', '_px'); this._lerp(d, 'y', '_py'); }
++      this._rs = w.scroll;
++      return S.length > 0;
++    }
++    _lerp(o, k, pk) {
++      const p = o[pk]; if (p == null) return;
++      const S = this._saved; S.push(o, k, o[k]);
++      o[k] = p + (o[k] - p) * this._a;
+     }
++    uninterp() { const S = this._saved; for (let i = S.length - 3; i >= 0; i -= 3) S[i][S[i + 1]] = S[i + 2]; S.length = 0; }
+ 
+     /* Draw fn() into an offscreen canvas at full strength, then blend it in once (clean cross-fade, no ghosting). */
+     fadeLayer(fn, a) {
+@@ -268,7 +301,7 @@
+       if (o.width !== this.canvas.width || o.height !== this.canvas.height) { o.width = this.canvas.width; o.height = this.canvas.height; }
+       const g0 = this.ctx;
+       this.ctx = o.getContext('2d');
+-      this.ctx.setTransform(this.px, 0, 0, this.px, 0, 0);
++      this.ctx.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
+       this.ctx.imageSmoothingQuality = 'high';
+       try { fn(); } finally { this.ctx = g0; }
+       g0.save(); g0.setTransform(1, 0, 0, 1, 0, 0); g0.globalAlpha = a; g0.drawImage(o, 0, 0); g0.restore();
+--- a/game/js/assets.js
++++ b/game/js/assets.js
+@@ -108,13 +108,15 @@
+     scale: 1,
+     _cache: new Map(),
+ 
++    /* P4: only what the first screen needs blocks start-up (characters, particles, spring);
++     * summer/autumn/winter art (~150 KB raw) streams in behind the title screen. */
+     async loadAll(onProgress) {
+       const keys = Object.keys(files);
++      const later = k => /^(summer|autumn|winter)_/.test(k);
+       let done = 0;
+-      await Promise.all(keys.map(async k => {
+-        this.img[k] = await loadImage(files[k]);
+-        done++; if (onProgress) onProgress(done / keys.length);
+-      }));
++      const one = async k => { this.img[k] = await loadImage(files[k]); done++; if (onProgress) onProgress(done / keys.length); };
++      this.restLoaded = Promise.all(keys.filter(later).map(one)).then(() => this.warmSeason(1));
++      await Promise.all(keys.filter(k => !later(k)).map(one));
+       await this.loadCustom();
+     },
+ 
+@@ -168,7 +170,38 @@
+ 
+     setScale(s) {
+       s = Math.max(0.5, Math.min(4, s));
+-      if (Math.abs(s - this.scale) > 0.01) { this.scale = s; this._cache.clear(); }
++      if (Math.abs(s - this.scale) > 0.01) {
++        this.scale = s; this._cache.clear(); this._wq.length = 0;
++      }
++    },
++
++    /* P1: rasterize sprites ahead of time in idle callbacks (one or two per callback) instead of inside a frame. */
++    _wq: [],
++    warm(list) {
++      for (const [key, w, h] of list) {
++        const ck = key + '|' + Math.round(w * 4) + '|' + Math.round(h * 4);
++        if (!this._cache.has(ck) && !this._wq.some(q => q[3] === ck)) this._wq.push([key, w, h, ck]);
++      }
++      this._pump();
++    },
++    warmSeason(s) {
++      const n = SEASONS[s];
++      this.warm([[n + '_ground', 960, 80], [n + '_sky', 960, 540], [n + '_clouds', 960, 540], [n + '_far', 960, 540], [n + '_mid', 960, 540]]);
++    },
++    _pump() {
++      if (this._wt || !this._wq.length) return;
++      const ric = window.requestIdleCallback || (f => setTimeout(() => f({ timeRemaining: () => 10 }), 50));
++      this._wt = ric(dl => {
++        this._wt = 0;
++        do {
++          const [key, w, h, ck] = this._wq.shift();
++          if (this._cache.has(ck)) continue;
++          const c = this._raster(key, w, h, ck);
++          // force the recorded SVG draw to actually rasterize now (canvas 2D defers work until the canvas is read)
++          if (c) { const p = this._probe || (this._probe = makeCanvas(1, 1).getContext('2d')); p.drawImage(c, 0, 0, 1, 1); }
++        } while (this._wq.length && dl.timeRemaining() > 12);
++        this._pump();
++      }, { timeout: 250 });   // a busy machine never goes idle: still finish within ~1-2 s, one layer per frame
+     },
+ 
+     /* Rasterized sprite for a default key or 'custom:<slot>' at logical size w×h. */
+@@ -176,9 +209,12 @@
+       const ck = key + '|' + Math.round(w * 4) + '|' + Math.round(h * 4);
+       let c = this._cache.get(ck);
+       if (c) return c;
++      return this._raster(key, w, h, ck);
++    },
++    _raster(key, w, h, ck) {
+       const src = key.startsWith('custom:') ? this.custom[key.slice(7)] : this.img[key];
+       if (!src) return null;
+-      c = makeCanvas(w * this.scale, h * this.scale);
++      const c = makeCanvas(w * this.scale, h * this.scale);
+       const g = c.getContext('2d');
+       g.imageSmoothingQuality = 'high';
+       g.drawImage(src, 0, 0, c.width, c.height);
+--- a/game/js/world.js
++++ b/game/js/world.js
+@@ -525,6 +525,11 @@
+ 
+   /* ------------------------------ main step ------------------------------ */
+   World.prototype._step = function (h) {
++    // previous-step positions for render interpolation (see Renderer.interp)
++    var b = this.bird, i;
++    this._pScroll = this.scroll; b._px = b.x; b._py = b.y; b._pa = b.angle;
++    for (i = 0; i < this.turtles.length; i++) { this.turtles[i]._px = this.turtles[i].x; this.turtles[i]._py = this.turtles[i].y; }
++    for (i = 0; i < this.drops.length; i++) { this.drops[i]._px = this.drops[i].x; this.drops[i]._py = this.drops[i].y; }
+     this.time += h;
+     this._updateEnv(h);
+     this.scroll += this.scrollSpeed * h;

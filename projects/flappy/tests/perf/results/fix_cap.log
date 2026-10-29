@@ -1,0 +1,48 @@
+PLAY 1280x720@1   cpu1 backing 1280x720  title fps=60 p95=16.7
+     spring  fps=60    p50=16.7 p95=16.8 p99=16.8 max=16.8 >20ms=0% dropped=0 draw p50/p95=0.4/0.6 js p50=0.4 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+     summer  fps=60    p50=16.7 p95=16.7 p99=16.8 max=16.8 >20ms=0% dropped=0 draw p50/p95=0.3/3.1 js p50=0.4 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+     autumn  fps=60    p50=16.7 p95=16.7 p99=16.8 max=16.8 >20ms=0% dropped=0 draw p50/p95=0.3/0.6 js p50=0.4 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+     winter  fps=60    p50=16.7 p95=16.8 p99=16.8 max=16.8 >20ms=0% dropped=0 draw p50/p95=0.3/0.4 js p50=0.4 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+PLAY 1920x1080@1  cpu1 backing 1920x1080  title fps=59.5 p95=16.8
+     spring  fps=59.9  p50=16.7 p95=16.8 p99=16.8 max=33.2 >20ms=0.2% dropped=1 draw p50/p95=10.3/12.7 js p50=10.4 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+     summer  fps=56.7  p50=16.7 p95=33.3 p99=33.4 max=33.4 >20ms=5.8% dropped=33 draw p50/p95=10.1/14.5 js p50=10.2 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+     autumn  fps=59.9  p50=16.7 p95=16.7 p99=16.8 max=33.3 >20ms=0.2% dropped=1 draw p50/p95=9.3/12 js p50=9.4 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+     winter  fps=60    p50=16.7 p95=16.7 p99=16.8 max=16.8 >20ms=0% dropped=0 draw p50/p95=9.1/11.2 js p50=9.1 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+PLAY 1920x1080@1.5 cpu1 backing 1920x1080  title fps=59.3 p95=16.8
+     spring  fps=60    p50=16.7 p95=16.7 p99=16.8 max=16.8 >20ms=0% dropped=0 draw p50/p95=9.1/10.7 js p50=9.2 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+     summer  fps=57.1  p50=16.7 p95=33.2 p99=33.4 max=33.5 >20ms=5.1% dropped=29 draw p50/p95=9.9/14 js p50=10 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+     autumn  fps=59.5  p50=16.7 p95=16.8 p99=16.8 max=33.4 >20ms=0.8% dropped=5 draw p50/p95=9.5/12.8 js p50=9.5 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+     winter  fps=59.7  p50=16.7 p95=16.7 p99=16.8 max=33.4 >20ms=0.5% dropped=3 draw p50/p95=9.1/12.4 js p50=9.1 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+PLAY 1920x1080@2  cpu1 backing 1920x1080  title fps=59.5 p95=16.7
+     spring  fps=59.8  p50=16.7 p95=16.7 p99=16.8 max=33.4 >20ms=0.3% dropped=2 draw p50/p95=9.9/13.1 js p50=9.9 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+     summer  fps=56.8  p50=16.7 p95=33.3 p99=33.4 max=50 >20ms=5.5% dropped=32 draw p50/p95=9.5/13.7 js p50=9.6 LT=1 uneven=0% sd=0 rasters=0 restarts=0
+     autumn  fps=59.9  p50=16.7 p95=16.7 p99=16.8 max=33.4 >20ms=0.2% dropped=1 draw p50/p95=9/11.1 js p50=9 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+     winter  fps=56.8  p50=16.7 p95=33.3 p99=33.4 max=33.4 >20ms=5.6% dropped=32 draw p50/p95=9.4/13.4 js p50=9.5 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+PLAY 2560x1440@1  cpu1 backing 1920x1080  title fps=54.8 p95=33.3
+     spring  fps=59    p50=16.7 p95=16.8 p99=33.3 max=33.4 >20ms=1.7% dropped=10 draw p50/p95=8.9/11.4 js p50=8.9 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+     summer  fps=57    p50=16.7 p95=33.3 p99=33.4 max=33.5 >20ms=5.3% dropped=30 draw p50/p95=9.4/14.3 js p50=9.5 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+     autumn  fps=59.6  p50=16.7 p95=16.7 p99=16.8 max=33.4 >20ms=0.7% dropped=4 draw p50/p95=9.4/13.2 js p50=9.5 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+     winter  fps=58    p50=16.7 p95=16.8 p99=33.4 max=50 >20ms=3.3% dropped=20 draw p50/p95=9.5/14.1 js p50=9.6 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+PLAY 1920x1080@1  cpu4 backing 1920x1080  title fps=16 p95=83.3
+     spring  fps=15.2  p50=66.7 p95=83.4 p99=100.1 max=116.7 >20ms=100% dropped=448 draw p50/p95=46.5/57.9 js p50=46.9 LT=153 uneven=0% sd=0.012 rasters=0 restarts=0
+     summer  fps=13.9  p50=66.7 p95=116.7 p99=116.7 max=133.3 >20ms=100% dropped=460 draw p50/p95=48.7/72.5 js p50=48.8 LT=139 uneven=0.7% sd=0.047 rasters=0 restarts=0
+     autumn  fps=14.4  p50=66.7 p95=116.6 p99=149.9 max=166.6 >20ms=100% dropped=454 draw p50/p95=45.9/73 js p50=46.3 LT=143 uneven=2.8% sd=0.058 rasters=0 restarts=0
+     winter  fps=13.3  p50=66.7 p95=149.9 p99=183.4 max=200 >20ms=100% dropped=467 draw p50/p95=48.4/84.2 js p50=48.6 LT=133 uneven=9.8% sd=0.104 rasters=0 restarts=0
+PLAY 1920x1080@1  cpu6 backing 1920x1080  title fps=10.3 p95=166.6
+     spring  fps=9     p50=116.6 p95=133.4 p99=200.1 max=200.1 >20ms=100% dropped=508 draw p50/p95=81.1/97.2 js p50=81.4 LT=92 uneven=8.9% sd=0.106 rasters=0 restarts=0
+     summer  fps=8.6   p50=116.7 p95=133.4 p99=183.4 max=183.4 >20ms=100% dropped=510 draw p50/p95=82.5/96.6 js p50=82.8 LT=86 uneven=17.6% sd=0.088 rasters=0 restarts=0
+     autumn  fps=6.2   p50=133.4 p95=266.7 p99=300 max=300 >20ms=100% dropped=539 draw p50/p95=91.3/138.2 js p50=91.6 LT=66 uneven=61.3% sd=0.19 rasters=0 restarts=0
+     winter  fps=7.2   p50=116.7 p95=216.7 p99=300 max=300 >20ms=100% dropped=524 draw p50/p95=82.7/133.6 js p50=82.8 LT=73 uneven=37.5% sd=0.204 rasters=0 restarts=0
+PLAY 1920x1080@2  cpu4 backing 1920x1080  title fps=16 p95=83.4
+     spring  fps=14.1  p50=66.7 p95=100 p99=133.3 max=133.4 >20ms=100% dropped=460 draw p50/p95=51/66 js p50=51.5 LT=142 uneven=0.7% sd=0.03 rasters=0 restarts=0
+     summer  fps=12.5  p50=66.7 p95=133.3 p99=133.5 max=149.9 >20ms=100% dropped=473 draw p50/p95=53.4/84.6 js p50=53.7 LT=126 uneven=11.2% sd=0.084 rasters=0 restarts=0
+     autumn  fps=13    p50=66.7 p95=133.3 p99=150.1 max=183.3 >20ms=100% dropped=469 draw p50/p95=51.6/79.6 js p50=51.9 LT=132 uneven=5.4% sd=0.077 rasters=0 restarts=0
+     winter  fps=13.3  p50=66.7 p95=116.7 p99=133.4 max=150 >20ms=100% dropped=465 draw p50/p95=51.1/76.5 js p50=51.3 LT=132 uneven=3.8% sd=0.066 rasters=0 restarts=0
+SEASON 1280x720@1   cpu1 summer: worst 16.8ms (4 rasters 1.6ms, dropped 0) | autumn: worst 20.4ms (8 rasters 11.7ms, dropped 0) | winter: worst 16.8ms (1 rasters 0.3ms, dropped 0) | spring (lap 2): worst 16.8ms (0 rasters 0ms, dropped 0) | restart→spring: worst 16.8ms (0 rasters)
+SEASON 1920x1080@1  cpu1 summer: worst 33.4ms (4 rasters 2.3ms, dropped 13) | autumn: worst 33.4ms (5 rasters 6ms, dropped 33) | winter: worst 33.5ms (1 rasters 0.4ms, dropped 51) | spring (lap 2): worst 33.5ms (0 rasters 0ms, dropped 11) | restart→spring: worst 16.8ms (0 rasters)
+SEASON 1920x1080@1.5 cpu1 summer: worst 33.4ms (4 rasters 1.5ms, dropped 10) | autumn: worst 33.4ms (5 rasters 5.7ms, dropped 25) | winter: worst 50ms (1 rasters 0.4ms, dropped 35) | spring (lap 2): worst 33.4ms (0 rasters 0ms, dropped 10) | restart→spring: worst 16.8ms (0 rasters)
+SEASON 1920x1080@2  cpu1 summer: worst 50ms (4 rasters 1.9ms, dropped 15) | autumn: worst 50.1ms (5 rasters 7.8ms, dropped 35) | winter: worst 33.4ms (1 rasters 0.3ms, dropped 46) | spring (lap 2): worst 33.4ms (0 rasters 0ms, dropped 11) | restart→spring: worst 16.8ms (0 rasters)
+SEASON 2560x1440@1  cpu1 summer: worst 33.4ms (4 rasters 2.5ms, dropped 19) | autumn: worst 50.1ms (5 rasters 6.4ms, dropped 38) | winter: worst 50.1ms (1 rasters 0.9ms, dropped 61) | spring (lap 2): worst 33.5ms (0 rasters 0ms, dropped 13) | restart→spring: worst 16.8ms (0 rasters)
+SEASON 1920x1080@1  cpu4 summer: worst 216.8ms (7 rasters 72.9ms, dropped 125) | autumn: worst 183.3ms (4 rasters 20.7ms, dropped 134) | winter: worst 133.3ms (1 rasters 1.5ms, dropped 126) | spring (lap 2): worst 166.7ms (0 rasters 0ms, dropped 126) | restart→spring: worst 83.3ms (0 rasters)
+SEASON 1920x1080@1  cpu6 summer: worst 350ms (7 rasters 111ms, dropped 135) | autumn: worst 333.3ms (6 rasters 90.2ms, dropped 149) | winter: worst 400.1ms (4 rasters 66.2ms, dropped 149) | spring (lap 2): worst 283.3ms (0 rasters 0ms, dropped 139) | restart→spring: worst 150ms (0 rasters)
+results → /home/claude/claude-learning/projects/flappy/tests/perf/results/fix_cap.json

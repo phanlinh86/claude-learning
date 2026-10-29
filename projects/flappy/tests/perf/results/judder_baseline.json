@@ -1,0 +1,306 @@
+[
+ {
+  "hz": 60,
+  "jitterMs": 0,
+  "mode": "base",
+  "unevenFramesPct": 33.3,
+  "speedRatioSD": 0.2,
+  "rmsErrPx": 0.41,
+  "worstPhaseUnevenPct": 66.6,
+  "minRatio": 0.5,
+  "maxRatio": 1.5,
+  "stepsHist": {
+   "2": 1199
+  }
+ },
+ {
+  "hz": 60,
+  "jitterMs": 0,
+  "mode": "interp",
+  "unevenFramesPct": 0,
+  "speedRatioSD": 0,
+  "rmsErrPx": 0,
+  "worstPhaseUnevenPct": 0,
+  "minRatio": 1,
+  "maxRatio": 1,
+  "stepsHist": {
+   "2": 1199
+  }
+ },
+ {
+  "hz": 60,
+  "jitterMs": 0.25,
+  "mode": "base",
+  "unevenFramesPct": 49.52,
+  "speedRatioSD": 0.34,
+  "rmsErrPx": 0.67,
+  "worstPhaseUnevenPct": 53,
+  "minRatio": 0.5,
+  "maxRatio": 1.5,
+  "stepsHist": {
+   "1": 318,
+   "2": 563,
+   "3": 318
+  }
+ },
+ {
+  "hz": 60,
+  "jitterMs": 0.25,
+  "mode": "interp",
+  "unevenFramesPct": 0,
+  "speedRatioSD": 0,
+  "rmsErrPx": 0,
+  "worstPhaseUnevenPct": 0,
+  "minRatio": 1,
+  "maxRatio": 1,
+  "stepsHist": {
+   "1": 318,
+   "2": 563,
+   "3": 318
+  }
+ },
+ {
+  "hz": 75,
+  "jitterMs": 0,
+  "mode": "base",
+  "unevenFramesPct": 73.3,
+  "speedRatioSD": 0.3,
+  "rmsErrPx": 0.49,
+  "worstPhaseUnevenPct": 73.3,
+  "minRatio": 0.62,
+  "maxRatio": 1.25,
+  "stepsHist": {
+   "1": 599,
+   "2": 900
+  }
+ },
+ {
+  "hz": 75,
+  "jitterMs": 0,
+  "mode": "interp",
+  "unevenFramesPct": 0,
+  "speedRatioSD": 0,
+  "rmsErrPx": 0,
+  "worstPhaseUnevenPct": 0,
+  "minRatio": 1,
+  "maxRatio": 1,
+  "stepsHist": {
+   "1": 599,
+   "2": 900
+  }
+ },
+ {
+  "hz": 75,
+  "jitterMs": 0.25,
+  "mode": "base",
+  "unevenFramesPct": 66.2,
+  "speedRatioSD": 0.3,
+  "rmsErrPx": 0.48,
+  "worstPhaseUnevenPct": 67.2,
+  "minRatio": 0.58,
+  "maxRatio": 1.38,
+  "stepsHist": {
+   "1": 599,
+   "2": 900
+  }
+ },
+ {
+  "hz": 75,
+  "jitterMs": 0.25,
+  "mode": "interp",
+  "unevenFramesPct": 0,
+  "speedRatioSD": 0,
+  "rmsErrPx": 0,
+  "worstPhaseUnevenPct": 0,
+  "minRatio": 1,
+  "maxRatio": 1,
+  "stepsHist": {
+   "1": 599,
+   "2": 900
+  }
+ },
+ {
+  "hz": 120,
+  "jitterMs": 0,
+  "mode": "base",
+  "unevenFramesPct": 66.7,
+  "speedRatioSD": 0.81,
+  "rmsErrPx": 0.81,
+  "worstPhaseUnevenPct": 66.7,
+  "minRatio": 0,
+  "maxRatio": 1.98,
+  "stepsHist": {
+   "0": 799,
+   "1": 800,
+   "2": 800
+  }
+ },
+ {
+  "hz": 120,
+  "jitterMs": 0,
+  "mode": "interp",
+  "unevenFramesPct": 0,
+  "speedRatioSD": 0,
+  "rmsErrPx": 0,
+  "worstPhaseUnevenPct": 0,
+  "minRatio": 1,
+  "maxRatio": 1,
+  "stepsHist": {
+   "0": 799,
+   "1": 800,
+   "2": 800
+  }
+ },
+ {
+  "hz": 120,
+  "jitterMs": 0.25,
+  "mode": "base",
+  "unevenFramesPct": 49.4,
+  "speedRatioSD": 0.67,
+  "rmsErrPx": 0.67,
+  "worstPhaseUnevenPct": 50.7,
+  "minRatio": 0,
+  "maxRatio": 1.98,
+  "stepsHist": {
+   "0": 608,
+   "1": 1182,
+   "2": 609
+  }
+ },
+ {
+  "hz": 120,
+  "jitterMs": 0.25,
+  "mode": "interp",
+  "unevenFramesPct": 0,
+  "speedRatioSD": 0,
+  "rmsErrPx": 0,
+  "worstPhaseUnevenPct": 0,
+  "minRatio": 1,
+  "maxRatio": 1,
+  "stepsHist": {
+   "0": 608,
+   "1": 1182,
+   "2": 609
+  }
+ },
+ {
+  "hz": 144,
+  "jitterMs": 0,
+  "mode": "base",
+  "unevenFramesPct": 16.6,
+  "speedRatioSD": 0.45,
+  "rmsErrPx": 0.37,
+  "worstPhaseUnevenPct": 16.6,
+  "minRatio": 0,
+  "maxRatio": 1.21,
+  "stepsHist": {
+   "0": 479,
+   "1": 2400
+  }
+ },
+ {
+  "hz": 144,
+  "jitterMs": 0,
+  "mode": "interp",
+  "unevenFramesPct": 0,
+  "speedRatioSD": 0,
+  "rmsErrPx": 0,
+  "worstPhaseUnevenPct": 0,
+  "minRatio": 1,
+  "maxRatio": 1,
+  "stepsHist": {
+   "0": 479,
+   "1": 2400
+  }
+ },
+ {
+  "hz": 144,
+  "jitterMs": 0.25,
+  "mode": "base",
+  "unevenFramesPct": 31,
+  "speedRatioSD": 0.45,
+  "rmsErrPx": 0.37,
+  "worstPhaseUnevenPct": 31.3,
+  "minRatio": 0,
+  "maxRatio": 1.49,
+  "stepsHist": {
+   "0": 479,
+   "1": 2400
+  }
+ },
+ {
+  "hz": 144,
+  "jitterMs": 0.25,
+  "mode": "interp",
+  "unevenFramesPct": 0,
+  "speedRatioSD": 0,
+  "rmsErrPx": 0,
+  "worstPhaseUnevenPct": 0,
+  "minRatio": 1,
+  "maxRatio": 1,
+  "stepsHist": {
+   "0": 479,
+   "1": 2400
+  }
+ },
+ {
+  "hz": 165,
+  "jitterMs": 0,
+  "mode": "base",
+  "unevenFramesPct": 100,
+  "speedRatioSD": 0.61,
+  "rmsErrPx": 0.45,
+  "worstPhaseUnevenPct": 100,
+  "minRatio": 0,
+  "maxRatio": 1.39,
+  "stepsHist": {
+   "0": 899,
+   "1": 2400
+  }
+ },
+ {
+  "hz": 165,
+  "jitterMs": 0,
+  "mode": "interp",
+  "unevenFramesPct": 0,
+  "speedRatioSD": 0,
+  "rmsErrPx": 0,
+  "worstPhaseUnevenPct": 0,
+  "minRatio": 1,
+  "maxRatio": 1,
+  "stepsHist": {
+   "0": 899,
+   "1": 2400
+  }
+ },
+ {
+  "hz": 165,
+  "jitterMs": 0.25,
+  "mode": "base",
+  "unevenFramesPct": 95.83,
+  "speedRatioSD": 0.62,
+  "rmsErrPx": 0.44,
+  "worstPhaseUnevenPct": 96.4,
+  "minRatio": 0,
+  "maxRatio": 1.77,
+  "stepsHist": {
+   "0": 900,
+   "1": 2399
+  }
+ },
+ {
+  "hz": 165,
+  "jitterMs": 0.25,
+  "mode": "interp",
+  "unevenFramesPct": 0,
+  "speedRatioSD": 0,
+  "rmsErrPx": 0,
+  "worstPhaseUnevenPct": 0,
+  "minRatio": 1,
+  "maxRatio": 1,
+  "stepsHist": {
+   "0": 900,
+   "1": 2399
+  }
+ }
+]
