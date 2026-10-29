@@ -1,0 +1,21 @@
+PLAY 1280x720@1   cpu1 backing 1280x720  title fps=59.8 p95=16.7
+     spring  fps=60    p50=16.7 p95=16.8 p99=16.8 max=16.8 >20ms=0% dropped=0 draw p50/p95=0.5/0.9 js p50=0.6 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+     summer  fps=60    p50=16.7 p95=16.7 p99=16.8 max=16.8 >20ms=0% dropped=0 draw p50/p95=0.5/0.8 js p50=0.6 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+     autumn  fps=57.5  p50=16.7 p95=16.8 p99=33.4 max=33.4 >20ms=4.3% dropped=15 draw p50/p95=0.7/4.5 js p50=0.8 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+     winter  fps=59.5  p50=16.7 p95=16.8 p99=16.8 max=33.3 >20ms=0.8% dropped=3 draw p50/p95=0.6/0.9 js p50=0.7 LT=0 uneven=0% sd=0 rasters=0 restarts=0
+PLAY 1920x1080@1  cpu4 backing 960x540  title fps=9.6 p95=166.7
+     spring  fps=15    p50=66.7 p95=100 p99=283.3 max=283.3 >20ms=96.7% dropped=269 draw p50/p95=0.6/81.5 js p50=0.9 LT=72 uneven=3.3% sd=0.08 rasters=16 restarts=0
+     summer  fps=20.3  p50=49.9 p95=100 p99=133.4 max=183.3 >20ms=89.3% dropped=237 draw p50/p95=0.8/9.8 js p50=2 LT=41 uneven=1.7% sd=0.053 rasters=18 restarts=0
+     autumn  fps=21.8  p50=50 p95=83.3 p99=100 max=183.2 >20ms=86.3% dropped=229 draw p50/p95=2.2/6.2 js p50=3.1 LT=52 uneven=0.8% sd=0.04 rasters=16 restarts=0
+     winter  fps=22.2  p50=50 p95=66.7 p99=83.3 max=83.4 >20ms=88% dropped=226 draw p50/p95=2.3/5.3 js p50=3.1 LT=60 uneven=0% sd=0 rasters=0 restarts=0
+PLAY 1920x1080@1  cpu6 backing 1080x608  title fps=6.2 p95=200.1
+     spring  fps=4.7   p50=216.6 p95=283.2 p99=283.4 max=283.4 >20ms=100% dropped=318 draw p50/p95=153.5/207.4 js p50=155.1 LT=27 uneven=100% sd=0.067 rasters=14 restarts=0
+     summer  fps=7.3   p50=116.7 p95=249.9 p99=283.4 max=283.4 >20ms=100% dropped=309 draw p50/p95=0.7/29.7 js p50=1 LT=45 uneven=39.5% sd=0.211 rasters=2 restarts=0
+     autumn  fps=7.6   p50=150 p95=216.7 p99=233.4 max=233.4 >20ms=100% dropped=311 draw p50/p95=5.2/37.7 js p50=6.9 LT=45 uneven=57.8% sd=0.212 rasters=0 restarts=0
+     winter  fps=14.2  p50=66.7 p95=116.7 p99=116.7 max=116.7 >20ms=96.5% dropped=274 draw p50/p95=1.8/8.4 js p50=4.4 LT=62 uneven=0% sd=0.042 rasters=2 restarts=0
+PLAY 1920x1080@2  cpu4 backing 960x540  title fps=10.1 p95=133.4
+     spring  fps=15    p50=66.6 p95=133.3 p99=250 max=250 >20ms=98.9% dropped=270 draw p50/p95=0.7/70.4 js p50=1.2 LT=64 uneven=5.6% sd=0.092 rasters=16 restarts=0
+     summer  fps=18.3  p50=50 p95=116.6 p99=116.7 max=233.4 >20ms=93.6% dropped=250 draw p50/p95=1.9/13.1 js p50=3.1 LT=59 uneven=0.9% sd=0.061 rasters=16 restarts=0
+     autumn  fps=21.5  p50=33.4 p95=83.4 p99=116.6 max=150 >20ms=84.5% dropped=231 draw p50/p95=1.7/7.4 js p50=2.9 LT=49 uneven=0.8% sd=0.032 rasters=17 restarts=0
+     winter  fps=21.1  p50=49.9 p95=83.4 p99=116.6 max=116.7 >20ms=85.7% dropped=232 draw p50/p95=2.4/6.2 js p50=3.4 LT=54 uneven=0% sd=0.018 rasters=0 restarts=0
+results → /home/claude/claude-learning/projects/flappy/tests/perf/results/fix_all_slowcpu.json

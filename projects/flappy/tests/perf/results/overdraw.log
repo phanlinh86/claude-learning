@@ -1,0 +1,8 @@
+baseline  1280x720@1    1280x720   spring 7.7MP (8.36x)  summer 7.7MP (8.34x)  autumn 8.2MP (8.92x)  winter 8.2MP (8.89x)  crossfade 15.8MP (17.19x)
+baseline  1920x1080@1   1920x1080  spring 17.3MP (8.35x)  summer 17.3MP (8.34x)  autumn 18.5MP (8.91x)  winter 18.4MP (8.89x)  crossfade 35.6MP (17.19x)
+baseline  1920x1080@2   3840x2160  spring 69.3MP (8.35x)  summer 69.2MP (8.34x)  autumn 73.9MP (8.91x)  winter 73.7MP (8.89x)  crossfade 142.5MP (17.18x)
+baseline  2560x1440@1   2560x1440  spring 30.8MP (8.35x)  summer 30.7MP (8.34x)  autumn 32.8MP (8.91x)  winter 32.8MP (8.89x)  crossfade 63.4MP (17.19x)
+fix       1280x720@1    1280x720   spring 7.7MP (8.35x)  summer 7.7MP (8.34x)  autumn 8.2MP (8.91x)  winter 8.2MP (8.89x)  crossfade 15.8MP (17.18x)
+fix       1920x1080@1   1920x1080  spring 17.3MP (8.35x)  summer 17.3MP (8.34x)  autumn 18.5MP (8.91x)  winter 18.4MP (8.88x)  crossfade 35.6MP (17.18x)
+fix       1920x1080@2   1920x1080  spring 17.3MP (8.35x)  summer 17.3MP (8.34x)  autumn 18.5MP (8.91x)  winter 18.4MP (8.88x)  crossfade 35.6MP (17.18x)
+fix       2560x1440@1   1920x1080  spring 17.3MP (8.35x)  summer 17.3MP (8.34x)  autumn 18.5MP (8.91x)  winter 18.4MP (8.88x)  crossfade 35.6MP (17.18x)

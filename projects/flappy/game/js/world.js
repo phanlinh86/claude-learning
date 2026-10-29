@@ -525,6 +525,11 @@
 
   /* ------------------------------ main step ------------------------------ */
   World.prototype._step = function (h) {
+    // previous-step positions for render interpolation (see Renderer.interp)
+    var b = this.bird, i;
+    this._pScroll = this.scroll; b._px = b.x; b._py = b.y; b._pa = b.angle;
+    for (i = 0; i < this.turtles.length; i++) { this.turtles[i]._px = this.turtles[i].x; this.turtles[i]._py = this.turtles[i].y; }
+    for (i = 0; i < this.drops.length; i++) { this.drops[i]._px = this.drops[i].x; this.drops[i]._py = this.drops[i].y; }
     this.time += h;
     this._updateEnv(h);
     this.scroll += this.scrollSpeed * h;

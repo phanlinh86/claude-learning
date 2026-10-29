@@ -108,13 +108,15 @@
     scale: 1,
     _cache: new Map(),
 
+    /* P4: only what the first screen needs blocks start-up (characters, particles, spring);
+     * summer/autumn/winter art (~150 KB raw) streams in behind the title screen. */
     async loadAll(onProgress) {
       const keys = Object.keys(files);
+      const later = k => /^(summer|autumn|winter)_/.test(k);
       let done = 0;
-      await Promise.all(keys.map(async k => {
-        this.img[k] = await loadImage(files[k]);
-        done++; if (onProgress) onProgress(done / keys.length);
-      }));
+      const one = async k => { this.img[k] = await loadImage(files[k]); done++; if (onProgress) onProgress(done / keys.length); };
+      this.restLoaded = Promise.all(keys.filter(later).map(one)).then(() => this.warmSeason(1));
+      await Promise.all(keys.filter(k => !later(k)).map(one));
       await this.loadCustom();
     },
 
@@ -168,7 +170,38 @@
 
     setScale(s) {
       s = Math.max(0.5, Math.min(4, s));
-      if (Math.abs(s - this.scale) > 0.01) { this.scale = s; this._cache.clear(); }
+      if (Math.abs(s - this.scale) > 0.01) {
+        this.scale = s; this._cache.clear(); this._wq.length = 0;
+      }
+    },
+
+    /* P1: rasterize sprites ahead of time in idle callbacks (one or two per callback) instead of inside a frame. */
+    _wq: [],
+    warm(list) {
+      for (const [key, w, h] of list) {
+        const ck = key + '|' + Math.round(w * 4) + '|' + Math.round(h * 4);
+        if (!this._cache.has(ck) && !this._wq.some(q => q[3] === ck)) this._wq.push([key, w, h, ck]);
+      }
+      this._pump();
+    },
+    warmSeason(s) {
+      const n = SEASONS[s];
+      this.warm([[n + '_ground', 960, 80], [n + '_sky', 960, 540], [n + '_clouds', 960, 540], [n + '_far', 960, 540], [n + '_mid', 960, 540]]);
+    },
+    _pump() {
+      if (this._wt || !this._wq.length) return;
+      const ric = window.requestIdleCallback || (f => setTimeout(() => f({ timeRemaining: () => 10 }), 50));
+      this._wt = ric(dl => {
+        this._wt = 0;
+        do {
+          const [key, w, h, ck] = this._wq.shift();
+          if (this._cache.has(ck)) continue;
+          const c = this._raster(key, w, h, ck);
+          // force the recorded SVG draw to actually rasterize now (canvas 2D defers work until the canvas is read)
+          if (c) { const p = this._probe || (this._probe = makeCanvas(1, 1).getContext('2d')); p.drawImage(c, 0, 0, 1, 1); }
+        } while (this._wq.length && dl.timeRemaining() > 12);
+        this._pump();
+      }, { timeout: 250 });   // a busy machine never goes idle: still finish within ~1-2 s, one layer per frame
     },
 
     /* Rasterized sprite for a default key or 'custom:<slot>' at logical size w×h. */
@@ -176,9 +209,12 @@
       const ck = key + '|' + Math.round(w * 4) + '|' + Math.round(h * 4);
       let c = this._cache.get(ck);
       if (c) return c;
+      return this._raster(key, w, h, ck);
+    },
+    _raster(key, w, h, ck) {
       const src = key.startsWith('custom:') ? this.custom[key.slice(7)] : this.img[key];
       if (!src) return null;
-      c = makeCanvas(w * this.scale, h * this.scale);
+      const c = makeCanvas(w * this.scale, h * this.scale);
       const g = c.getContext('2d');
       g.imageSmoothingQuality = 'high';
       g.drawImage(src, 0, 0, c.width, c.height);
