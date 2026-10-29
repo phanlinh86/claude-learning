@@ -1,0 +1,173 @@
+{
+ "base": "http://127.0.0.1:8773/index.html",
+ "minutes": 0.5,
+ "highSpeed": {
+  "wallSeconds": 46.982,
+  "approxGameSeconds": 751.712,
+  "games": 1,
+  "scores": [
+   299
+  ],
+  "times": [
+   464.59
+  ],
+  "hits": 284,
+  "drops": 917,
+  "seasonsReached": [
+   29
+  ],
+  "gameErrors": [],
+  "samples": [
+   {
+    "t": 2.024,
+    "score": 18,
+    "season": 1,
+    "games": 0
+   },
+   {
+    "t": 5.771,
+    "score": 45,
+    "season": 0,
+    "games": 0
+   },
+   {
+    "t": 7.977,
+    "score": 69,
+    "season": 2,
+    "games": 0
+   },
+   {
+    "t": 10.496,
+    "score": 93,
+    "season": 1,
+    "games": 0
+   },
+   {
+    "t": 12.749,
+    "score": 110,
+    "season": 3,
+    "games": 0
+   },
+   {
+    "t": 15.227,
+    "score": 132,
+    "season": 1,
+    "games": 0
+   },
+   {
+    "t": 17.246,
+    "score": 153,
+    "season": 3,
+    "games": 0
+   },
+   {
+    "t": 19.269,
+    "score": 176,
+    "season": 1,
+    "games": 0
+   },
+   {
+    "t": 21.279,
+    "score": 193,
+    "season": 3,
+    "games": 0
+   },
+   {
+    "t": 23.296,
+    "score": 212,
+    "season": 1,
+    "games": 0
+   },
+   {
+    "t": 25.345,
+    "score": 234,
+    "season": 3,
+    "games": 0
+   },
+   {
+    "t": 27.441,
+    "score": 259,
+    "season": 1,
+    "games": 0
+   },
+   {
+    "t": 29.493,
+    "score": 278,
+    "season": 3,
+    "games": 0
+   },
+   {
+    "t": 31.65,
+    "score": 296,
+    "season": 1,
+    "games": 0
+   }
+  ],
+  "screenshots": 4
+ },
+ "perf": [
+  {
+   "viewport": "1920x1080",
+   "dpr": 2,
+   "season": 3,
+   "mode": "playing",
+   "particles": 86,
+   "frameIntervalMs": {
+    "n": 42,
+    "mean": 213.88,
+    "p50": 200,
+    "p95": 283.4,
+    "p99": 300,
+    "max": 366.6
+   },
+   "fps": 4.7,
+   "jsWorkMs": {
+    "n": 42,
+    "mean": 174.49,
+    "p50": 157.4,
+    "p95": 235.1,
+    "p99": 260.2,
+    "max": 295.7
+   },
+   "longFramesOver20ms": 42,
+   "note": "headless Chromium (software GL); real GPU should be faster"
+  },
+  {
+   "viewport": "1920x1080",
+   "dpr": 1,
+   "season": 0,
+   "mode": "playing",
+   "particles": 88,
+   "frameIntervalMs": {
+    "n": 189,
+    "mean": 51.94,
+    "p50": 50,
+    "p95": 83.4,
+    "p99": 116.7,
+    "max": 150
+   },
+   "fps": 19.3,
+   "jsWorkMs": {
+    "n": 189,
+    "mean": 42.14,
+    "p50": 38,
+    "p95": 59.8,
+    "p99": 104.2,
+    "max": 137.1
+   },
+   "longFramesOver20ms": 189,
+   "note": "headless Chromium (software GL); real GPU should be faster"
+  },
+  {
+   "control": true,
+   "dpr": 2,
+   "msPerFullScreenBlit": 3.41
+  },
+  {
+   "control": true,
+   "dpr": 1,
+   "msPerFullScreenBlit": 1
+  }
+ ],
+ "errors": []
+}

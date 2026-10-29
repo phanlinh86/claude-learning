@@ -25,12 +25,20 @@
     },
     get(k, def) { return Object.prototype.hasOwnProperty.call(this.cache, k) ? this.cache[k] : def; },
     getJSON(k, def) { try { const v = this.get(k); return v == null ? def : JSON.parse(v); } catch (e) { return def; } },
+    /* Save a value. Returns a Promise<boolean>; on failure the value is NOT kept in memory either,
+     * so what the player sees always matches what will be there after a restart. */
     set(k, v) {
       v = String(v);
+      const prev = this.cache[k];
       this.cache[k] = v;
-      if (this.native) { Promise.resolve(window.ffStoreSet(k, v)).catch(e => console.warn('store set', k, e)); return; }
-      try { localStorage.setItem(PREFIX + k, v); }
-      catch (e) { console.warn('localStorage full or blocked', e); }
+      const fail = () => { if (prev === undefined) delete this.cache[k]; else this.cache[k] = prev; return false; };
+      if (this.native) {
+        return Promise.resolve(window.ffStoreSet(k, v))
+          .then(ok => ok === false ? fail() : true)
+          .catch(e => { console.warn('store set', k, e); return fail(); });
+      }
+      try { localStorage.setItem(PREFIX + k, v); return Promise.resolve(true); }
+      catch (e) { console.warn('localStorage full or blocked', e); return Promise.resolve(fail()); }
     },
     setJSON(k, v) { this.set(k, JSON.stringify(v)); },
     del(k) {

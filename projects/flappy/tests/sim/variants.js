@@ -85,6 +85,11 @@ module.exports = {
   basket4: { patch: basket(4, 0.7) },
   basket3: { patch: basket(3, 0.9) },
 
+  maxd2: { globalPatch: FF => { FF.CONFIG.maxDrops = 2; } },
+  maxd3: { globalPatch: FF => { FF.CONFIG.maxDrops = 3; } },
+  basket5: { patch: basket(5, 0.5) },
+  hitcd15: { globalPatch: FF => { FF.CONFIG.hitCooldown = 1.5; } },
+
   // ceiling
   ceil40: { globalPatch: FF => { FF.CONFIG.ceilingBounce = 40; } },
   ceil0soft: { globalPatch: FF => { FF.CONFIG.ceilingBounce = 0; }, patch: softCeiling },

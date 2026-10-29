@@ -43,8 +43,8 @@
     async boot() {
       await FF.Storage.init();
       Object.assign(this.settings, FF.Storage.getJSON('settings', {}));
-      if (params.get('mute') === '1') this.settings.muted = true;
-      FF.Audio.setOptions({ sfx: this.settings.sfx, music: this.settings.music, muted: this.settings.muted });
+      this.urlMute = params.get('mute') === '1';   // test switch: never saved into settings
+      FF.Audio.setOptions({ sfx: this.settings.sfx, music: this.settings.music, muted: this.settings.muted || this.urlMute });
       this.renderer = new FF.Renderer(document.getElementById('game'));
       await FF.Assets.loadAll();
       this.renderer.resize();
@@ -70,6 +70,7 @@
 
     toTitle() {
       this.mode = 'title';
+      FF.Audio.stopMusic();
       this.world = this.makeWorld(this.seed != null ? this.seed + 99 : null);
       this.bot = new FF.Bot(this.world, { skill: 0.92, seed: 3 });
       this.world.flap();
@@ -105,11 +106,12 @@
       FF.Audio.unlock();
       if (this.mode === 'ready') { this.mode = 'playing'; this.world.flap(); }
       else if (this.mode === 'playing') this.world.flap();
-      else if (this.mode === 'over' && performance.now() - this.overAt > 700) this.startGame();
+      else if (this.mode === 'over' && this.canRestart()) this.startGame();
     },
 
     pause() {
       if (this.mode !== 'playing' && this.mode !== 'ready') return;
+      if (this.world && this.world.state === 'dead') return;   // game-over panel is about to appear
       this.pausedFrom = this.mode;
       this.mode = 'paused';
       FF.UI.setHud(false);
@@ -147,13 +149,14 @@
       if (this.autoRestart) setTimeout(() => this.startGame(), 50);
     },
 
+    canRestart() { return performance.now() - this.overAt > 700; },   // anti-mash lock after game over
     best() { return parseInt(FF.Storage.get('best_' + this.settings.difficulty, '0'), 10) || 0; },
     resetBest() { ['easy', 'normal', 'hard'].forEach(d => FF.Storage.del('best_' + d)); },
 
     setSetting(k, v) {
       this.settings[k] = v;
       FF.Storage.setJSON('settings', this.settings);
-      FF.Audio.setOptions({ sfx: this.settings.sfx, music: this.settings.music, muted: this.settings.muted });
+      FF.Audio.setOptions({ sfx: this.settings.sfx, music: this.settings.music, muted: this.settings.muted || this.urlMute });
       if (k === 'music') { if (v && this.mode !== 'title') FF.Audio.startMusic(); if (!v) FF.Audio.stopMusic(); }
       if (k === 'seasonPts') this.renderer.pointsPerSeason = v;
     },
@@ -190,13 +193,18 @@
           if (e.repeat) { e.preventDefault(); return; }
           if (this.mode === 'ready' || this.mode === 'playing') { e.preventDefault(); this.flapInput(); return; }
           if (this.mode === 'over' && e.code === 'Space') { e.preventDefault(); this.flapInput(); return; }
-          if (this.mode === 'title' && ui === 'scrTitle' && e.code === 'Space') { e.preventDefault(); this.startGame(); return; }
+          if (this.mode === 'title' && ui === 'scrTitle' && e.code === 'Space') {
+            const f = document.activeElement;
+            if (f && f.tagName === 'BUTTON' && f.id !== 'btnPlay') return;   // let the focused button act
+            e.preventDefault(); this.startGame(); return;
+          }
         }
-        if (e.code === 'Enter' && this.mode === 'over' && performance.now() - this.overAt > 700) { e.preventDefault(); this.startGame(); }
+        if (e.code === 'Enter' && this.mode === 'over') { e.preventDefault(); if (this.canRestart()) this.startGame(); }
       });
       const stage = document.getElementById('stage');
       stage.addEventListener('pointerdown', e => {
         if (e.button !== undefined && e.button > 0) return;
+        if (e.target.closest && e.target.closest('button, .screen, #hud, input, label')) return;   // HUD buttons must not flap
         if (this.mode === 'ready' || this.mode === 'playing') { e.preventDefault(); this.flapInput(); }
       });
       window.addEventListener('blur', () => { if (this.mode === 'playing') this.pause(); });
@@ -205,7 +213,13 @@
       window.addEventListener('dragover', e => e.preventDefault());
       window.addEventListener('drop', e => e.preventDefault());
       window.addEventListener('contextmenu', e => e.preventDefault());
-      document.addEventListener('fullscreenchange', () => { this.fullscreen = !!document.fullscreenElement || (this.fullscreen && typeof window.ffFullscreen === 'function'); this.renderer.resize(); });
+      // kid-proofing: no accidental zoom (Ctrl+wheel / Ctrl +/-/0) or reload (F5 / Ctrl+R) inside the app
+      window.addEventListener('wheel', e => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
+      window.addEventListener('keydown', e => {
+        const k = e.key;
+        if (k === 'F5' || ((e.ctrlKey || e.metaKey) && ['r', 'R', '+', '=', '-', '_', '0', 'p', 'P', 'f', 'F', 'g', 'G', 'u', 'U'].includes(k))) e.preventDefault();
+      }, true);
+      document.addEventListener('fullscreenchange', () => { this.fullscreen = !!document.fullscreenElement || (this.fullscreen && typeof window.ffFullscreen === 'function'); this.renderer.resize(); FF.UI.syncSettings(); });
     },
 
     handleEvents(evts) {

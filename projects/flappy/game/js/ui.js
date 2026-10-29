@@ -21,7 +21,7 @@
       click('btnRestart', () => game.startGame());
       click('btnPauseSettings', () => this.open('scrSettings', 'scrPause'));
       click('btnPauseMenu', () => game.toTitle());
-      click('btnAgain', () => game.startGame());
+      click('btnAgain', () => { if (game.canRestart()) game.startGame(); });
       click('btnOverMenu', () => game.toTitle());
       click('btnPause', () => game.pause());
       click('btnMuteHud', () => game.toggleMute());
@@ -128,7 +128,7 @@
         const prev = el.querySelector('.prev');
         if (custom) {
           const c = A.custom[s.id];
-          const img = new Image(); img.src = c.toDataURL(); prev.appendChild(img);
+          const img = new Image(); img.src = A.thumb(s.id); prev.appendChild(img);
         } else if (s.kind === 'bg') {
           const c = document.createElement('canvas'); c.width = 320; c.height = 180;
           c.style.width = '100%'; c.style.height = '100%';
@@ -167,6 +167,7 @@
 
     async applyFile(slotId, file) {
       try {
+        this.toast('Saving picture…', 4000);
         await FF.Assets.setCustom(slotId, file);
         this.renderSlots();
         this.toast('Picture saved on this computer!');

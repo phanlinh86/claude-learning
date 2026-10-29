@@ -427,16 +427,18 @@ async function testPause() {
   await page.click('#btnPause'); await page.waitForTimeout(80);
   const fl2 = await ev(page, () => ({ f: FF.debug.world.flaps, d: FF.debug.world.drops_made }));
   check('pause button click does not flap the bird / drop a treat', fl2.f === fl.f, { before: fl, after: fl2 });
-  await page.click('#btnResume'); await page.waitForTimeout(80);
+  await page.click('#btnResume');
+  await ev(page, () => { FF.debug.world.bird.y = 150; FF.debug.world.bird.vy = 0; });   // HUD clicks no longer flap: keep the bird airborne
+  await page.waitForTimeout(80);
   const fm = await ev(page, () => FF.debug.world.flaps);
   await page.click('#btnMuteHud'); await page.waitForTimeout(80);
   check('mute HUD button click does not flap the bird', fm === await ev(page, () => FF.debug.world.flaps), { before: fm, after: await ev(page, () => FF.debug.world.flaps) });
   await page.click('#btnMuteHud');
-  await ev(page, () => FF.debug.setBot(true, 1));
+  await ev(page, () => { FF.debug.world.bird.y = 150; FF.debug.world.bird.vy = 0; FF.debug.setBot(true, 1); });
   // window blur
   await page.waitForTimeout(200);
   await ev(page, () => window.dispatchEvent(new Event('blur'))); await page.waitForTimeout(100);
-  check('pause: window blur auto-pauses', (await mode(page)) === 'paused');
+  check('pause: window blur auto-pauses', (await mode(page)) === 'paused', await ev(page, () => ({ mode: FF.debug.mode, state: FF.debug.world.state, y: FF.debug.world.bird.y, ui: FF.UI.current })));
   await page.click('#btnResume'); await page.waitForTimeout(100);
   // visibilitychange
   await ev(page, () => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => true }); document.dispatchEvent(new Event('visibilitychange')); });
@@ -653,14 +655,14 @@ async function testCustomPictures() {
   // very large image → downscaled
   const big = await makeImage(page, 4000, 3000, 'bird');
   await pickFile(page, slotIdx('bird'), { name: 'huge.png', mimeType: 'image/png', buffer: big });
-  await page.waitForFunction(() => FF.Assets.customSrc.bird && FF.Assets.customSrc.bird.naturalWidth <= 640, null, { timeout: 15000 }).catch(() => {});
+  await page.waitForFunction(() => FF.Assets.customSrc.bird && FF.Assets.customSrc.bird.naturalWidth <= 512, null, { timeout: 15000 }).catch(() => {});
   const dim = await ev(page, () => ({ w: FF.Assets.customSrc.bird.naturalWidth, h: FF.Assets.customSrc.bird.naturalHeight, len: (localStorage.getItem('ff:img_bird') || '').length }));
-  check('4000×3000 character picture downscaled to ≤640 px and stored', dim.w <= 640 && dim.h <= 640 && dim.w >= 600 && dim.len > 1000, dim);
+  check('4000×3000 character picture downscaled to ≤512 px and stored', dim.w <= 512 && dim.h <= 512 && dim.w >= 480 && dim.len > 1000, dim);
   const bigBg = await makeImage(page, 4000, 3000, 'bg', 'image/jpeg');
   await pickFile(page, slotIdx('bg_winter'), { name: 'huge.jpg', mimeType: 'image/jpeg', buffer: bigBg });
   await page.waitForFunction(() => FF.Assets.customSrc.bg_winter, null, { timeout: 15000 }).catch(() => {});
   const dimBg = await ev(page, () => ({ w: FF.Assets.customSrc.bg_winter.naturalWidth, h: FF.Assets.customSrc.bg_winter.naturalHeight, len: (localStorage.getItem('ff:img_bg_winter') || '').length }));
-  check('4000×3000 background downscaled to ≤1920×1080 and stored', dimBg.w <= 1920 && dimBg.h <= 1080 && dimBg.len > 1000, dimBg);
+  check('4000×3000 background downscaled to ≤1280×720 and stored', dimBg.w <= 1280 && dimBg.h <= 720 && dimBg.len > 1000, dimBg);
   // Reset all
   await page.click('#btnResetAll'); await page.waitForTimeout(150);
   check('Reset all: every slot back to original + storage cleared', await ev(page, () => FF.Assets.SLOTS.every(s => !FF.Assets.hasCustom(s.id)) && Object.keys(localStorage).filter(k => k.startsWith('ff:img_')).length === 0));

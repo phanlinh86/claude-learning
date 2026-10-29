@@ -82,7 +82,7 @@
       const url = URL.createObjectURL(file);
       const img = new Image();
       img.onload = () => {
-        const max = kind === 'bg' ? [1920, 1080] : [640, 640];
+        const max = kind === 'bg' ? [1280, 720] : [512, 512];
         const k = Math.min(1, max[0] / img.naturalWidth, max[1] / img.naturalHeight);
         const c = makeCanvas(img.naturalWidth * k, img.naturalHeight * k);
         const g = c.getContext('2d');
@@ -90,7 +90,10 @@
         g.drawImage(img, 0, 0, c.width, c.height);
         URL.revokeObjectURL(url);
         // Backgrounds are opaque → JPEG keeps them small. Characters may have transparency → PNG.
-        resolve(kind === 'bg' ? c.toDataURL('image/jpeg', 0.9) : c.toDataURL('image/png'));
+        // (WebP keeps transparency at a fraction of PNG's size; fall back to PNG if unsupported.)
+        let out = kind === 'bg' ? c.toDataURL('image/jpeg', 0.85) : c.toDataURL('image/webp', 0.9);
+        if (kind !== 'bg' && !out.startsWith('data:image/webp')) out = c.toDataURL('image/png');
+        resolve(out);
       };
       img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('That picture could not be opened.')); };
       img.src = url;
@@ -131,7 +134,8 @@
     async setCustom(slotId, file) {
       const slot = SLOTS.find(s => s.id === slotId);
       const data = await fileToDataURL(file, slot.kind);
-      FF.Storage.set('img_' + slotId, data);
+      const ok = await FF.Storage.set('img_' + slotId, data);
+      if (!ok) throw new Error('Not enough room to save that picture. Try resetting another picture first.');
       // photos (opaque corners) look best as a round sticker; cut-outs with transparency stay whole
       if (slot.kind === 'char') FF.Storage.set('shape_' + slotId, (await isOpaque(data)) ? 'circle' : 'fit');
       await this.loadCustom();
@@ -146,6 +150,19 @@
       FF.Storage.del('img_' + slotId); FF.Storage.del('shape_' + slotId);
       delete this.customSrc[slotId]; delete this.custom[slotId];
       this._cache.clear();
+    },
+    /* Small preview image (data URL) for the Change Pictures cards — cached, cheap to redraw. */
+    thumb(slotId) {
+      const src = this.custom[slotId]; if (!src) return '';
+      this._thumbs = this._thumbs || {};
+      const key = slotId + '|' + (FF.Storage.get('shape_' + slotId, '') || '') + '|' + src.width + 'x' + src.height;
+      if (this._thumbs[slotId] && this._thumbs[slotId].key === key) return this._thumbs[slotId].url;
+      const k = Math.min(1, 240 / src.width, 160 / src.height);
+      const c = makeCanvas(src.width * k, src.height * k);
+      c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
+      const url = c.toDataURL('image/png');
+      this._thumbs[slotId] = { key, url };
+      return url;
     },
     hasCustom(slotId) { return !!this.custom[slotId]; },
 

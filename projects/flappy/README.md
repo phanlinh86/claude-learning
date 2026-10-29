@@ -33,8 +33,8 @@ cd projects/flappy
 node tests/unit/run.js                       # simulation / physics / weather / bot unit tests
 (cd game && python3 -m http.server 8765) &   # serve the game
 node tests/e2e/smoke.js                      # browser smoke test + screenshots in tests/out/
-node tests/e2e/functional.js                 # full functional test suite (menus, input, pictures, settings…)
-node tests/e2e/playtest.js                   # high-speed bot play-test report
+node tests/e2e/functional.js http://127.0.0.1:8765/index.html   # full functional test suite (menus, input, pictures, settings…)
+node tests/e2e/playtest.js http://127.0.0.1:8765/index.html     # high-speed bot play-test report
 ```
 URL switches for testing: `?speed=8` (time scale), `?bot=1` (autopilot), `?autostart=1`, `?autorestart=1`, `?seed=42`, `?mute=1`, `?debug=1` (hit boxes).
 `window.FF.debug` exposes the world state to automation.

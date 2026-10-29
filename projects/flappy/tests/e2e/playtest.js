@@ -65,8 +65,9 @@ function stat(arr) {
     page.on('pageerror', e => report.errors.push('perf pageerror: ' + e.message));
     await page.goto(base + '?mute=1&bot=1&autostart=1&autorestart=1&speed=16&seed=3');
     await page.waitForFunction(() => window.FF && FF.debug && FF.debug.world, null, { timeout: 20000 });
-    // fast-forward until winter
-    await page.waitForFunction(() => FF.debug.world && FF.debug.world.season === 3 && FF.debug.mode === 'playing', null, { timeout: 120000, polling: 200 })
+    // jump to the edge of winter (score 29) and let the next hit trigger the real season change
+    await page.evaluate(() => { FF.debug.setSpeed(4); const w = FF.debug.world; w.score = 29; w.seasonIndex = 2; w.season = 2; });
+    await page.waitForFunction(() => FF.debug.world && FF.debug.world.season === 3 && FF.debug.mode === 'playing', null, { timeout: 60000, polling: 100 })
       .catch(() => page.evaluate(() => { FF.debug.weather.setSeason(3, { instant: true }); }));
     await page.evaluate(() => FF.debug.setSpeed(1));
     await sleep(3000);  // let winter particles ramp to full count
@@ -89,12 +90,30 @@ function stat(arr) {
     await ctx.close();
   }
 
+  /* ---------------- 3) control: raw canvas cost of full-screen blits in this browser ---------------- */
+  for (const dpr of [2, 1]) {
+    const ctx = await browser.newContext({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: dpr });
+    const page = await ctx.newPage();
+    await page.setContent('<canvas id=c></canvas>');
+    const r = await page.evaluate((dpr) => {
+      const c = document.getElementById('c'); c.width = 1920 * dpr; c.height = 1080 * dpr;
+      const g = c.getContext('2d');
+      const src = document.createElement('canvas'); src.width = c.width; src.height = c.height;
+      const s = src.getContext('2d'); const grd = s.createLinearGradient(0, 0, 0, src.height);
+      grd.addColorStop(0, '#9fd8f5'); grd.addColorStop(1, '#ffffff'); s.fillStyle = grd; s.fillRect(0, 0, src.width, src.height);
+      const t = []; for (let k = 0; k < 20; k++) { const a = performance.now(); for (let i = 0; i < 10; i++) g.drawImage(src, 0, 0); g.getImageData(0, 0, 1, 1); t.push((performance.now() - a) / 10); }
+      t.sort((a, b) => a - b); return t[10];
+    }, dpr);
+    report.perf.push({ control: true, dpr, msPerFullScreenBlit: +r.toFixed(2) });
+    await ctx.close();
+  }
+
   await browser.close();
   fs.writeFileSync(path.join(RES, 'browser_playtest.json'), JSON.stringify(report, null, 1));
   const hs = report.highSpeed;
   console.log(`high-speed: ${hs.games} games in ~${(hs.approxGameSeconds / 60).toFixed(0)} game-min; hits ${hs.hits}/${hs.drops} drops; scores ${JSON.stringify(hs.scores.slice(0, 20))}`);
   console.log('seasonsReached', JSON.stringify(hs.seasonsReached.slice(0, 20)));
-  for (const p of report.perf) console.log(`perf dpr${p.dpr}: season ${p.season} particles ${p.particles} fps ${p.fps} interval ${JSON.stringify(p.frameIntervalMs)} js ${JSON.stringify(p.jsWorkMs)} >20ms:${p.longFramesOver20ms}`);
+  for (const p of report.perf) if (p.control) console.log(`control dpr${p.dpr}: ${p.msPerFullScreenBlit} ms per full-screen blit`); else console.log(`perf dpr${p.dpr}: season ${p.season} particles ${p.particles} fps ${p.fps} interval ${JSON.stringify(p.frameIntervalMs)} js ${JSON.stringify(p.jsWorkMs)} >20ms:${p.longFramesOver20ms}`);
   console.log('errors', JSON.stringify(report.errors.concat(hs.gameErrors)));
   process.exit(report.errors.length || hs.gameErrors.length ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(2); });

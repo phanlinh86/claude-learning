@@ -167,7 +167,12 @@ func main() {
 		messageBox("Family Flappy", "Game files are missing: "+err.Error())
 		return
 	}
-	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	// A fixed port keeps the page origin stable between runs (matters for the browser fallback);
+	// fall back to any free port if it is taken.
+	ln, err := net.Listen("tcp", "127.0.0.1:47613")
+	if err != nil {
+		ln, err = net.Listen("tcp", "127.0.0.1:0")
+	}
 	if err != nil {
 		messageBox("Family Flappy", "Could not start: "+err.Error())
 		return
@@ -206,6 +211,8 @@ func main() {
 	defer w.Destroy()
 
 	hwnd := uintptr(w.Window())
+	// Start maximized: the logical 1280×760 size looks small on high-DPI laptop screens.
+	procShowWindow.Call(hwnd, swMaximize)
 	fsc := &fullscreen{}
 
 	w.Bind("ffStoreAll", func() map[string]string { return st.All() })
