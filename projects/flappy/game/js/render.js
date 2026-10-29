@@ -27,7 +27,7 @@
       this.vis = { cur: 0, prev: 0, t: 1 };
       this.banner = null;
       this.lines = [];
-      for (let i = 0; i < 7; i++) this.lines.push({ x: Math.random() * W, y: 40 + Math.random() * 380, len: 40 + Math.random() * 70, a: 0.1 + Math.random() * 0.15 });
+      for (let i = 0; i < 7; i++) this.lines.push({ x: Math.random() * W, y: 40 + Math.random() * 260, len: 40 + Math.random() * 70, a: 0.1 + Math.random() * 0.15 });
       this.debug = /[?&]debug=1/.test(location.search);
       this.pointsPerSeason = 10;
       this.resize();
@@ -43,6 +43,11 @@
       this.canvas.width = Math.round(W * s * dpr);
       this.canvas.height = Math.round(H * s * dpr);
       this.px = s * dpr; // device pixels per logical pixel
+      // keep the HUD buttons and toasts inside the game area even when the window is not 16:9
+      const ox = (vw - W * s) / 2, oy = (vh - H * s) / 2;
+      const hud = document.getElementById('hud'), toast = document.getElementById('toast');
+      if (hud) { hud.style.top = (oy + 14 * s) + 'px'; hud.style.right = (ox + 14 * s) + 'px'; }
+      if (toast) toast.style.bottom = (oy + 30 * s) + 'px';
       FF.Assets.setScale(this.px);
     }
 
@@ -64,29 +69,29 @@
           case 'flap': this.puffs(e.x - 22, e.y + 4, 3, '#ffffff', 0.55); break;
           case 'hit': {
             for (let i = 0; i < 7; i++) {
-              const a = -Math.PI / 2 + (i - 3) * 0.32 + (Math.random() - 0.5) * 0.2;
-              const sp = 120 + Math.random() * 120;
-              this.fx.push({ k: 'heart', x: e.x, y: e.y - 6, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, g: 240, life: 0, max: 0.9 + Math.random() * 0.3, size: 16 + Math.random() * 10, rot: (Math.random() - .5) * .6, vr: (Math.random() - .5) * 3 });
+              const a = -Math.PI / 2 + (Math.random() - 0.5) * 1.9;
+              const sp = 90 + Math.random() * 170;
+              this.fx.push({ k: 'heart', x: e.x, y: e.y - 6, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, g: 240, life: -i * 0.025, max: 0.9 + Math.random() * 0.3, size: 16 + Math.random() * 10, rot: (Math.random() - .5) * .6, vr: (Math.random() - .5) * 3 });
             }
             this.sparks(e.x, e.y - 4, 10, '#fff6a8');
             this.fx.push({ k: 'ring', x: e.x, y: e.y, life: 0, max: 0.45, color: '#ffffff' });
             const combo = e.combo || 1;
-            const label = (e.points > 1 ? '+' + e.points : '+1') + (combo >= 2 ? '  Combo x' + combo + '!' : '');
-            this.texts.push({ text: label, x: e.x, y: e.y - 40, life: 0, max: 1.1, size: combo >= 3 ? 30 : 26, color: combo >= 3 ? '#ffe14d' : '#ffffff' });
+            this.texts.push({ text: '+' + (e.points || 1), x: e.x, y: e.y - 30, life: 0, max: 1.1, size: combo >= 3 ? 34 : 28, color: combo >= 3 ? '#ffe14d' : '#ffffff' });
+            if (combo >= 2) this.texts.push({ text: 'Combo x' + combo + '!', x: e.x, y: e.y - 6, life: 0, max: 1.1, size: 18, color: '#ffe14d' });
             break;
           }
-          case 'miss': this.puffs(e.x, e.y - 2, 4, this.vis.cur === 3 ? '#ffffff' : '#d8c09a', 0.4, true); break;
+          case 'miss': this.puffs(e.x, e.y + 2, 7, this.vis.cur === 3 ? '#ffffff' : '#c9a777', 0.55, true, 9); break;
           case 'ceiling': this.puffs(e.x, e.y - 20, 3, '#ffffff', 0.4); break;
           case 'season': this.showBanner(e.season); this.flash = Math.max(this.flash, 0.35); this.setSeason(e.season); break;
           case 'dead': this.shake = 0.45; this.flash = 0.6; this.sparks(e.x, e.y, 12, '#ffffff'); break;
         }
       }
     }
-    puffs(x, y, n, color, max, ground) {
+    puffs(x, y, n, color, max, ground, minSize) {
       for (let i = 0; i < n; i++) {
         this.fx.push({ k: 'puff', x: x + (Math.random() - .5) * 10, y: y + (Math.random() - .5) * 8,
           vx: (ground ? (Math.random() - .5) * 80 : -40 - Math.random() * 60), vy: ground ? -20 - Math.random() * 40 : (Math.random() - .5) * 40,
-          g: 0, life: 0, max: max + Math.random() * 0.2, size: 6 + Math.random() * 6, color, scroll: ground });
+          g: 0, life: 0, max: max + Math.random() * 0.2, size: (minSize || 6) + Math.random() * (minSize ? 8 : 6), color, scroll: ground });
       }
     }
     sparks(x, y, n, color) {
@@ -99,8 +104,8 @@
     update(dt) {
       this.time += dt;
       const sc = this.world ? this.world.scrollSpeed : 0;
-      if (this.vis.t < 1) this.vis.t = Math.min(1, this.vis.t + dt / 2.2);
-      if (this.banner) { this.banner.t += dt; if (this.banner.t > 2.6) this.banner = null; }
+      if (this.vis.t < 1) this.vis.t = Math.min(1, this.vis.t + dt / 1.6);
+      if (this.banner) { this.banner.t += dt; if (this.banner.t > 2.1) this.banner = null; }
       this.shake = Math.max(0, this.shake - dt);
       this.flash = Math.max(0, this.flash - dt * 2.2);
       for (const f of this.fx) {
@@ -111,11 +116,12 @@
         if (f.vr) f.rot += f.vr * dt;
       }
       this.fx = this.fx.filter(f => f.life < f.max);
+      if (this.fx.length > 400) this.fx.splice(0, this.fx.length - 400);
       for (const t of this.texts) { t.life += dt; t.y -= 38 * dt; }
       this.texts = this.texts.filter(t => t.life < t.max);
       for (const l of this.lines) {
         l.x -= (sc * 2.4 + 60) * dt;
-        if (l.x + l.len < 0) { l.x = W + Math.random() * 200; l.y = 40 + Math.random() * 380; l.len = 40 + Math.random() * 70; }
+        if (l.x + l.len < 0) { l.x = W + Math.random() * 200; l.y = 40 + Math.random() * 260; l.len = 40 + Math.random() * 70; }
       }
     }
 
@@ -134,22 +140,30 @@
     customBg(slot, alpha) {
       const c = FF.Assets.custom[slot]; if (!c) return false;
       const g = this.ctx;
-      // cover-fit with a slow ping-pong pan so a still photo still feels like flying
-      const k = Math.max(W * 1.12 / c.width, H / c.height);
-      const dw = c.width * k, dh = c.height * k;
-      const range = dw - W;
+      // cover-fit, then a slow one-way pan over mirrored copies (never reverses, no seam)
+      const k = Math.max(W / c.width, H / c.height);
+      const dw = c.width * k, dh = c.height * k, y = (H - dh) / 2 - 20;
       const scroll = this.world ? this.world.scroll : 0;
-      const x = -range * (0.5 + 0.5 * Math.sin(scroll * 0.0009));
+      const off = (scroll * 0.05) % (2 * dw);
       const spr = FF.Assets.sprite('custom:' + slot, dw, dh);
       g.globalAlpha = alpha;
-      g.drawImage(spr, x, (H - dh) / 2 - 20, dw, dh);
+      for (let i = 0; i < 3; i++) {
+        const x = -off + i * dw;
+        if (x > W || x + dw < 0) continue;
+        if (i % 2 === 1) { g.save(); g.translate(x + dw, y); g.scale(-1, 1); g.drawImage(spr, 0, 0, dw + 1 / this.px, dh); g.restore(); }
+        else g.drawImage(spr, x, y, dw + 1 / this.px, dh);
+      }
       g.globalAlpha = 1;
       return true;
     }
     backdrop(s, alpha) {
       const name = FF.Assets.SEASONS[s];
       const scroll = this.world ? this.world.scroll : 0;
-      if (this.customBg('bg_' + name, alpha)) return;
+      if (this.customBg('bg_' + name, alpha)) {
+        // keep drifting clouds over a photo so it still has depth
+        this.tile(name + '_clouds', scroll * PARALLAX.clouds + this.time * 7, 0, W, H, alpha * 0.6);
+        return;
+      }
       const g = this.ctx;
       const sky = FF.Assets.sprite(name + '_sky', W, H);
       g.globalAlpha = alpha;
@@ -205,7 +219,7 @@
       FF.Assets.trimSeasons([v.cur, v.prev]);
 
       // 1. sky + parallax backdrop (cross-faded between seasons)
-      if (v.t < 1 && v.prev !== v.cur) { this.backdrop(v.prev, 1); this.backdrop(v.cur, v.t); }
+      if (v.t < 1 && v.prev !== v.cur) { this.backdrop(v.prev, 1); this.fadeLayer(() => this.backdrop(v.cur, 1), v.t); }
       else this.backdrop(v.cur, 1);
 
       // 2. weather ambient + back particles
@@ -222,9 +236,11 @@
       if (v.t < 1 && v.prev !== v.cur) { this.ground(v.prev, 1); this.ground(v.cur, v.t); }
       else this.ground(v.cur, 1);
 
+      if (mode === 'ready' && w) this.readyOverlay();   // under the bird so it never hides it
       if (w) {
         this.drawTurtles();
         this.drawDrops();
+        this.drawTexts();                               // score popups sit under the bird
         this.drawBird();
       }
       // 5. front weather + effects
@@ -242,9 +258,20 @@
 
       // 6. HUD
       if (w && (mode === 'playing' || mode === 'paused' || mode === 'ready')) this.hud(mode);
-      if (mode === 'ready') this.readyOverlay();
       if (this.banner) this.drawBanner();
       if (this.debug && w) this.debugDraw();
+    }
+
+    /* Draw fn() into an offscreen canvas at full strength, then blend it in once (clean cross-fade, no ghosting). */
+    fadeLayer(fn, a) {
+      const o = this._off || (this._off = document.createElement('canvas'));
+      if (o.width !== this.canvas.width || o.height !== this.canvas.height) { o.width = this.canvas.width; o.height = this.canvas.height; }
+      const g0 = this.ctx;
+      this.ctx = o.getContext('2d');
+      this.ctx.setTransform(this.px, 0, 0, this.px, 0, 0);
+      this.ctx.imageSmoothingQuality = 'high';
+      try { fn(); } finally { this.ctx = g0; }
+      g0.save(); g0.setTransform(1, 0, 0, 1, 0, 0); g0.globalAlpha = a; g0.drawImage(o, 0, 0); g0.restore();
     }
 
     ambient(a) {
@@ -282,7 +309,7 @@
         }
         const spr = A.sprite('p_' + p.sprite, 32, 32);
         if (!spr) continue;
-        const fx = p.flipX == null ? 1 : (Math.abs(p.flipX) < 0.08 ? 0.08 * Math.sign(p.flipX || 1) : p.flipX);
+        const fx = p.flipX == null ? 1 : (Math.abs(p.flipX) < 0.22 ? 0.22 * Math.sign(p.flipX || 1) : p.flipX);
         g.setTransform(this.px, 0, 0, this.px, 0, 0);
         g.translate(p.x, p.y); g.rotate(p.rot || 0); g.scale(fx, 1);
         g.drawImage(spr, -p.size / 2, -p.size / 2, p.size, p.size);
@@ -297,7 +324,7 @@
       for (const t of w.turtles) {
         if (t.x < -200 || t.x > W + 200) continue;
         const tw = t.w || 132, th = t.h || 79;
-        this.shadow(t.x, 0, tw * 0.85, 0.22);
+        this.shadow(t.x, 0, tw * 0.85, 0.32);
         g.save();
         g.translate(t.x, t.y);
         if (t.dir < 0) g.scale(-1, 1);
@@ -317,7 +344,10 @@
           g.scale(sx, sy);
           const key = 'turtle_' + (happy ? 'happy' : (t.frame === 'walk2' ? 'walk2' : 'walk1'));
           const spr = A.sprite(key, tw, th);
-          if (spr) g.drawImage(spr, -tw / 2, -th, tw, th);
+          const ph = (t.walkPhase || 0) * TAU, walking = !happy && !t.paused;
+          const bobD = walking ? -Math.abs(Math.sin(ph * 2)) * 1.6 : 0;   // small lift on each step
+          if (walking) g.rotate(Math.sin(ph * 2) * 0.025);
+          if (spr) g.drawImage(spr, -tw / 2, -th + bobD, tw, th);
         }
         g.restore();
       }
@@ -338,6 +368,7 @@
         g.save();
         g.globalAlpha = alpha;
         g.translate(d.x, d.y); g.rotate(d.angle || 0);
+        if (d.landed && (d.life == null || d.life > 0.75)) g.scale(1.25, 0.75);   // squish on landing
         g.drawImage(spr, -dw / 2, -dh / 2, dw, dh);
         g.restore();
       }
@@ -349,16 +380,16 @@
       const custom = A.hasCustom('bird');
       g.save();
       g.translate(b.x, b.y);
-      g.rotate(b.angle || 0);
+      g.rotate((b.angle || 0) * (custom ? 0.55 : 1));   // photos look odd nose-diving at 70°
       const sq = b.squash || 1;
       g.scale(1 / Math.sqrt(sq), sq);
       if (custom) {
         const [cw, ch] = A.fit('bird', 84, 70);
         const phase = (b.wingPhase || 0) * TAU;
         const wingA = -0.35 - Math.sin(phase) * 0.75;
-        this.wing(-cw * 0.12, -ch * 0.18, cw * 0.55, wingA - 0.25, 0.75);
+        this.wing(-cw * 0.36, -ch * 0.02, cw * 0.62, wingA - 0.25, 1, '#dfe8f2');
         g.drawImage(A.sprite('custom:bird', cw, ch), -cw / 2, -ch / 2, cw, ch);
-        this.wing(-cw * 0.05, -ch * 0.12, cw * 0.6, wingA, 1);
+        this.wing(-cw * 0.30, ch * 0.02, cw * 0.62, wingA, 1, '#ffffff');
       } else {
         const frame = b.frame === 'up' || b.frame === 'down' ? b.frame : 'mid';
         const spr = A.sprite('bird_' + frame, 78, 65);
@@ -373,10 +404,10 @@
         }
       }
     }
-    wing(px, py, len, ang, alpha) {
+    wing(px, py, len, ang, alpha, fill) {
       const g = this.ctx;
       g.save(); g.translate(px, py); g.rotate(ang); g.globalAlpha = alpha;
-      g.fillStyle = '#ffffff'; g.strokeStyle = '#9fb3c8'; g.lineWidth = 2.5; g.lineJoin = 'round';
+      g.fillStyle = fill || '#ffffff'; g.strokeStyle = '#6f8fb5'; g.lineWidth = 3; g.lineJoin = 'round';
       g.beginPath();
       g.moveTo(0, 0);
       g.quadraticCurveTo(-len * 0.35, -len * 0.55, -len, -len * 0.35);
@@ -402,11 +433,13 @@
     drawFx() {
       const g = this.ctx, A = FF.Assets;
       for (const f of this.fx) {
+        if (f.life < 0) continue;
         const k = f.life / f.max;
         if (f.k === 'heart') {
           const spr = A.sprite('heart', 48, 48);
-          const s = f.size * (k < 0.15 ? k / 0.15 : 1);
-          g.save(); g.globalAlpha = clamp(1.6 - k * 1.6, 0, 1);
+          let s = f.size * (k < 0.15 ? k / 0.15 : 1);
+          if (k > 0.7) s *= 1 - (k - 0.7) / 0.3 * 0.6;            // shrink away instead of turning murky
+          g.save(); g.globalAlpha = k > 0.9 ? clamp((1 - k) * 10, 0, 1) * 0.9 : 1;
           g.translate(f.x, f.y); g.rotate(f.rot);
           if (spr) g.drawImage(spr, -s / 2, -s / 2, s, s);
           g.restore();
@@ -425,6 +458,9 @@
         }
       }
       g.globalAlpha = 1;
+    }
+    drawTexts() {
+      const g = this.ctx;
       for (const t of this.texts) {
         const k = t.life / t.max;
         const pop = k < 0.2 ? easeOutBack(k / 0.2) : 1;
@@ -456,7 +492,8 @@
       g.lineWidth = 3; g.strokeStyle = si.color; g.stroke();
       const icon = FF.Assets.sprite(si.icon, 32, 32);
       if (icon) g.drawImage(icon, 24, 23, 32, 32);
-      this.text(si.name, 62, 32, 17, si.dark, null, 'left');
+      const lap = Math.floor((w.seasonIndex || 0) / 4);
+      this.text(si.name + (lap > 0 ? ' · Lap ' + (lap + 1) : ''), 62, 32, 17, si.dark, null, 'left');
       g.fillStyle = 'rgba(0,0,0,0.1)'; this.roundRect(62, 45, 136, 8, 4); g.fill();
       g.fillStyle = si.color; this.roundRect(62, 45, Math.max(8, 136 * prog), 8, 4); g.fill();
     }
@@ -464,16 +501,16 @@
     readyOverlay() {
       const g = this.ctx, w = this.world;
       const t = this.time;
-      this.text('Get Ready!', W / 2, 150, 58, '#ffd23f', '#5a3416', 'center', 10);
+      this.text('Get Ready!', W / 2, 140, 58, '#ffd23f', '#5a3416', 'center', 10);
       // tap prompt
       const pulse = 1 + 0.06 * Math.sin(t * 6);
-      g.save(); g.translate(W / 2, 230); g.scale(pulse, pulse);
+      g.save(); g.translate(W / 2, 320); g.scale(pulse, pulse);
       g.fillStyle = 'rgba(255,255,255,0.92)'; this.roundRect(-210, -24, 420, 48, 24); g.fill();
       this.text('Click, tap or press SPACE to flap', 0, 1, 20, '#3a5a7a', null);
       g.restore();
       // tip
-      g.fillStyle = 'rgba(40,60,90,0.55)'; this.roundRect(W / 2 - 260, 270, 520, 36, 18); g.fill();
-      this.text('Every flap drops a treat — land it on a turtle\'s shell!', W / 2, 288, 16, '#ffffff', null);
+      g.fillStyle = 'rgba(40,60,90,0.55)'; this.roundRect(W / 2 - 260, 362, 520, 36, 18); g.fill();
+      this.text('Every flap drops a treat — land it on a turtle\'s shell!', W / 2, 380, 16, '#ffffff', null);
       // tap ripple near bird
       const b = w.bird, rk = (t * 1.2) % 1;
       g.strokeStyle = `rgba(255,255,255,${(1 - rk).toFixed(3)})`; g.lineWidth = 3;
@@ -485,15 +522,15 @@
       const t = b.t;
       let x;
       if (t < 0.45) x = lerp(-W, 0, easeOutBack(t / 0.45));
-      else if (t < 2.1) x = 0;
-      else x = lerp(0, W, Math.pow((t - 2.1) / 0.5, 2));
+      else if (t < 1.6) x = 0;
+      else x = lerp(0, W, Math.pow((t - 1.6) / 0.5, 2));
       g.save(); g.translate(x, 0);
       g.fillStyle = si.color; g.globalAlpha = 0.92;
-      g.beginPath(); g.moveTo(W / 2 - 250, 180); g.lineTo(W / 2 + 250, 172); g.lineTo(W / 2 + 270, 252); g.lineTo(W / 2 - 230, 262); g.closePath(); g.fill();
+      g.beginPath(); g.moveTo(W / 2 - 240, 120); g.lineTo(W / 2 + 240, 112); g.lineTo(W / 2 + 258, 184); g.lineTo(W / 2 - 222, 194); g.closePath(); g.fill();
       g.globalAlpha = 1;
       const icon = FF.Assets.sprite(si.icon, 32, 32);
-      if (icon) { g.drawImage(icon, W / 2 - 215, 196, 46, 46); g.drawImage(icon, W / 2 + 170, 190, 46, 46); }
-      this.text(si.name + '!', W / 2, 216, 48, '#ffffff', si.dark, 'center', 9);
+      if (icon) { g.drawImage(icon, W / 2 - 205, 130, 42, 42); g.drawImage(icon, W / 2 + 165, 124, 42, 42); }
+      this.text(si.name + '!', W / 2, 152, 44, '#ffffff', si.dark, 'center', 9);
       g.restore();
     }
 

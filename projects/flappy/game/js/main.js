@@ -112,12 +112,14 @@
       if (this.mode !== 'playing' && this.mode !== 'ready') return;
       this.pausedFrom = this.mode;
       this.mode = 'paused';
+      FF.UI.setHud(false);
       FF.UI.show('scrPause');
     },
     resume() {
       if (this.mode !== 'paused') return;
       this.mode = this.pausedFrom || 'playing';
       FF.UI.hideAll();
+      FF.UI.setHud(true);
       this.last = performance.now();
       this.canvasFocus();
     },

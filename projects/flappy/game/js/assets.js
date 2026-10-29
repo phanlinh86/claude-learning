@@ -63,6 +63,18 @@
     return c;
   }
 
+  /* True when all four corners of the picture are opaque (a photo rather than a cut-out). */
+  async function isOpaque(src) {
+    const img = await loadImage(src);
+    if (!img) return false;
+    const c = makeCanvas(img.naturalWidth, img.naturalHeight), g = c.getContext('2d');
+    g.drawImage(img, 0, 0);
+    const w = c.width - 1, h = c.height - 1;
+    try {
+      return [[0, 0], [w, 0], [0, h], [w, h]].every(([x, y]) => g.getImageData(x, y, 1, 1).data[3] > 250);
+    } catch (e) { return false; }
+  }
+
   /* Downscale a file the player picked to something small enough to store. */
   function fileToDataURL(file, kind) {
     return new Promise((resolve, reject) => {
@@ -120,7 +132,8 @@
       const slot = SLOTS.find(s => s.id === slotId);
       const data = await fileToDataURL(file, slot.kind);
       FF.Storage.set('img_' + slotId, data);
-      if (slot.kind === 'char' && !FF.Storage.get('shape_' + slotId)) FF.Storage.set('shape_' + slotId, 'fit');
+      // photos (opaque corners) look best as a round sticker; cut-outs with transparency stay whole
+      if (slot.kind === 'char') FF.Storage.set('shape_' + slotId, (await isOpaque(data)) ? 'circle' : 'fit');
       await this.loadCustom();
     },
     setShape(slotId, shape) {

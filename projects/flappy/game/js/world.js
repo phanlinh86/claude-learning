@@ -51,7 +51,7 @@
     noseDownFull: 640,     // px/s, …and reach tiltDown at this vy
     tiltUpRate: 20,        // 1/s, exponential approach rate toward nose-up target
     tiltDownRate: 4.5,     // 1/s, approach rate toward nose-down (slow = smooth)
-    wingFastRate: 10,      // wing cycles/s right after a flap (energetic)
+    wingFastRate: 7,       // wing cycles/s right after a flap (each pose holds ≥2 frames at 60 fps)
     wingGlideRate: 3.2,    // wing cycles/s when gliding / falling
     wingFastTime: 0.25,    // s, fast-flap duration after a flap
     squashFlap: 1.15,      // squash value right after a flap (1 = normal)
@@ -132,7 +132,7 @@
     if (over) for (k in over) o[k] = over[k];
     return o;
   }
-  function wingFrame(p) { return p < 0.25 ? 'up' : p < 0.5 ? 'mid' : p < 0.75 ? 'down' : 'mid'; }
+  function wingFrame(p) { return p < 0.2 ? 'up' : p < 0.4 ? 'mid' : p < 0.75 ? 'down' : 'mid'; } // biased to the power stroke
 
   /**
    * Pure drop physics for one sub-step (shared by World and by prediction/Bot).
@@ -494,8 +494,8 @@
         this.state = 'dead';
         this._emit({ type: 'dead', x: b.x, y: b.y, score: this.score });
       }
-    } else { // dead: lie on the ground, nose down, wings still
-      b.angle = approach(b.angle, c.tiltDown, 6, h);
+    } else { // dead: a soft belly-flop on the ground (beak stays out of the dirt), wings still
+      b.angle = approach(b.angle, 0.45, 8, h);
     }
     b.squash = 1 + (b.squash - 1) * Math.exp(-c.squashRecover * h);
     b.frame = wingFrame(b.wingPhase);

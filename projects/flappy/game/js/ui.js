@@ -119,7 +119,7 @@
         const custom = A.hasCustom(s.id);
         const el = document.createElement('div');
         el.className = 'slot';
-        const title = s.kind === 'bg' ? s.name + ' background' : s.name;
+        const title = s.kind === 'bg' ? s.name + ' sky' : s.name;
         el.innerHTML = `<h3>${title}</h3><div class="prev ${s.kind === 'bg' ? 'bg' : ''}"></div>
           <div class="tag ${custom ? 'custom' : ''}">${custom ? '★ Your picture' : 'Original'}</div>
           ${s.kind === 'char' ? `<div class="shape"><button data-shape="fit">Whole picture</button><button data-shape="circle">Round</button></div>` : ''}
@@ -169,7 +169,7 @@
       try {
         await FF.Assets.setCustom(slotId, file);
         this.renderSlots();
-        this.toast('Picture saved!');
+        this.toast('Picture saved on this computer!');
       } catch (e) {
         this.toast(e.message || 'Could not use that picture', 3200);
       }

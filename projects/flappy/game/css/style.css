@@ -144,3 +144,31 @@ kbd{display:inline-block;padding:0 .45em;border-radius:.35em;background:#fff;bor
 /* ---------- toast ---------- */
 .toast{position:absolute;bottom:calc(var(--u)*4);left:50%;transform:translateX(-50%);background:rgba(30,40,60,.88);color:#fff;
   padding:calc(var(--u)*.8) calc(var(--u)*2);border-radius:99px;font-size:calc(var(--u)*1.7);z-index:20;animation:fadeIn .2s}
+
+/* ---------- v1.1 polish (visual QA fixes) ---------- */
+#hud{top:calc(var(--u)*1.4);right:calc(var(--u)*1.4)} /* overridden by Renderer.resize() to hug the canvas */
+.slot-grid{grid-template-columns:repeat(12,minmax(0,1fr));gap:calc(var(--u)*1)}
+.slot{grid-column:span 4;padding:calc(var(--u)*.8);gap:calc(var(--u)*.45)}
+.slot:nth-child(n+4){grid-column:span 3}
+.slot:nth-child(n+4) .tag{display:none}
+.slot h3{font-size:calc(var(--u)*1.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.slot .prev{aspect-ratio:auto;height:calc(var(--u)*7.5)}
+.slot .shape button{white-space:nowrap}
+#scrCustom .panel{padding-top:calc(var(--u)*1.6);padding-bottom:calc(var(--u)*1.6)}
+#scrCustom .panel h2{margin-bottom:calc(var(--u)*.2);font-size:calc(var(--u)*3.4)}
+#scrCustom .small{margin:calc(var(--u)*.4) 0}
+#scrCustom .menu{margin-top:calc(var(--u)*.8)}
+.title-icon{width:calc(var(--u)*9);height:calc(var(--u)*9)}
+.title-wrap{margin-top:calc(var(--u)*-4)}
+.best-line{display:inline-block;background:rgba(40,60,90,.55);padding:calc(var(--u)*.4) calc(var(--u)*1.6);border-radius:99px;text-shadow:none}
+.tagline{font-weight:700;text-shadow:0 2px 0 #3a5a7a,0 0 calc(var(--u)*.6) #3a5a7a,0 0 calc(var(--u)*1.6) rgba(30,50,80,.6)}
+.how-ico{display:flex;align-items:center;justify-content:center;gap:4px;font-size:inherit}
+.how-ico img{width:calc(var(--u)*5.6);height:auto}
+.how-ico.quad{display:grid;grid-template-columns:repeat(2,auto);gap:2px}
+.how-ico.quad img{width:calc(var(--u)*2.8)}
+.how-ico .keycap{font-family:"Segoe UI",system-ui,sans-serif;font-weight:800;font-size:calc(var(--u)*1.3);background:#fff;border:1px solid #cdb68a;border-bottom-width:3px;border-radius:.4em;padding:.1em .45em}
+.set,.sc span{font-weight:800}
+.btn svg.i{width:1em;height:1em;vertical-align:-.12em;fill:currentColor;filter:drop-shadow(0 2px 0 rgba(0,0,0,.2))}
+.medal::before{content:"★";position:absolute;inset:0;display:grid;place-items:center;font-size:calc(var(--u)*5);color:rgba(255,255,255,.8);z-index:1;font-family:"Segoe UI Symbol","Segoe UI",sans-serif}
+.medal.none::before{content:"?";color:#c9b48a}
+.medal-ribbon{position:relative}
