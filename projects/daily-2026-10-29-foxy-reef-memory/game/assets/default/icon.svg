@@ -96,10 +96,10 @@
 <path d="M45,84 Q35,93 27,96" fill="none" stroke="#ff8a3d" stroke-width="6.6" stroke-linejoin="round" stroke-linecap="round"/>
 <circle cx="27" cy="96" r="4.9" fill="#5a2f1c" stroke="#7a3414" stroke-width="2.2"/>
 <circle cx="25.7" cy="94.5" r="1.3" fill="#8a5a40"/>
-<path d="M66,70 Q58,62 53,47" fill="none" stroke="#7a3414" stroke-width="11" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M66,70 Q58,62 53,47" fill="none" stroke="#e8692a" stroke-width="6.6" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="53" cy="47" r="4.9" fill="#5a2f1c" stroke="#7a3414" stroke-width="2.2"/>
-<circle cx="51.7" cy="45.5" r="1.3" fill="#8a5a40"/>
+<path d="M64,68 Q50,60 45,40" fill="none" stroke="#7a3414" stroke-width="11" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64,68 Q50,60 45,40" fill="none" stroke="#e8692a" stroke-width="6.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="45" cy="40" r="4.9" fill="#5a2f1c" stroke="#7a3414" stroke-width="2.2"/>
+<circle cx="43.7" cy="38.5" r="1.3" fill="#8a5a40"/>
 <path d="M70,66 C72,56 84,52 94,56 L96,64 C88,70 76,72 70,66 Z" fill="#ff8a3d"/>
 <path d="M76,66 C82,61 90,61 95,63" fill="none" stroke="#fff1dc" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
 <!-- glass back tint -->
@@ -148,7 +148,7 @@
 <path d="M78,81 Q100,86 117,70" fill="none" stroke="#ff8a3d" stroke-width="6.6" stroke-linejoin="round" stroke-linecap="round"/>
 <circle cx="117" cy="70" r="4.9" fill="#5a2f1c" stroke="#7a3414" stroke-width="2.2"/>
 <circle cx="115.7" cy="68.5" r="1.3" fill="#8a5a40"/>
-<path d="M124,44 C125.08,48.8 125.2,48.92 130,50 C125.2,51.08 125.08,51.2 124,56 C122.92,51.2 122.8,51.08 118,50 C122.8,48.92 122.92,48.8 124,44 Z" fill="#ffe45c" stroke="#b07a10" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/><path d="M126,64.4 C126.648,67.28 126.72,67.352 129.6,68 C126.72,68.648 126.648,68.72 126,71.6 C125.352,68.72 125.28,68.648 122.4,68 C125.28,67.352 125.352,67.28 126,64.4 Z" fill="#fff4a8" stroke="#b07a10" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/><path d="M48,29.6 C48.792,33.12 48.88,33.208 52.4,34 C48.88,34.792 48.792,34.88 48,38.4 C47.208,34.88 47.12,34.792 43.6,34 C47.12,33.208 47.208,33.12 48,29.6 Z" fill="#fff4a8" stroke="#b07a10" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M124,44 C125.08,48.8 125.2,48.92 130,50 C125.2,51.08 125.08,51.2 124,56 C122.92,51.2 122.8,51.08 118,50 C122.8,48.92 122.92,48.8 124,44 Z" fill="#ffe45c" stroke="#b07a10" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/><path d="M126,64.4 C126.648,67.28 126.72,67.352 129.6,68 C126.72,68.648 126.648,68.72 126,71.6 C125.352,68.72 125.28,68.648 122.4,68 C125.28,67.352 125.352,67.28 126,64.4 Z" fill="#fff4a8" stroke="#b07a10" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/><path d="M36,23.6 C36.792,27.12 36.88,27.208 40.4,28 C36.88,28.792 36.792,28.88 36,32.4 C35.208,28.88 35.12,28.792 31.6,28 C35.12,27.208 35.208,27.12 36,23.6 Z" fill="#fff4a8" stroke="#b07a10" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>
 </g></g>
 </g>
 <circle cx="128" cy="128" r="117" fill="none" stroke="#e8fbff" stroke-width="5" opacity=".9"/>

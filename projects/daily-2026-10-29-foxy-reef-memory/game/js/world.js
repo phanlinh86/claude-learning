@@ -62,10 +62,10 @@
     settleDamp: 0.5,          // settle spring damping ratio (≈ 2–3 px overshoot)
 
     // --- air (timer)
-    airMax: [50, 65, 80, 95], // s per season, lap 0
-    lapAirMul: 0.87,          // airMax × lapAirMul^lap …
-    lapAirMin: 0.55,          // … but never below this fraction
-    airPerMatch: 4,           // s refilled on each match (capped at airMax)
+    airMax: [60, 70, 85, 100],// s per season, lap 0
+    lapAirMul: 0.8,           // airMax and airPerMatch × lapAirMul^lap (endless laps get tight) …
+    lapAirMin: 0.3,           // … but never below this fraction
+    airPerMatch: 3,           // s refilled on each match (capped at airMax), lap 0
     airLowFrac: 0.25,         // 'airlow' event below this fraction
     airLowRearm: 0.4,         // re-armed once air climbs back above this fraction
     airDrainInSlides: true,   // documented choice: air drains while cards slide
@@ -106,9 +106,9 @@
 
   /* Difficulty presets (suggestions — integrator maps menu choice to these overrides). */
   var DIFFICULTY = {
-    easy:   { peekTime: 2, airMax: [75, 95, 115, 135], airPerMatch: 6, mismatchShow: 1.0, lapAirMul: 0.92 },
+    easy:   { peekTime: 2, airMax: [90, 105, 125, 145], airPerMatch: 4, mismatchShow: 1.0, lapAirMul: 0.88, lapAirMin: 0.5 },
     normal: {},
-    hard:   { airMax: [38, 50, 62, 74], airPerMatch: 3, mismatchShow: 0.6, lapAirMul: 0.85 }
+    hard:   { airMax: [40, 50, 62, 75], airPerMatch: 2, mismatchShow: 0.6, lapAirMul: 0.75 }
   };
 
   /* ---------- helpers ---------- */
@@ -169,10 +169,11 @@
   World.prototype.drainEvents = function () { var e = this._events; this._events = []; return e; };
 
   /* ------------------------------ level setup ------------------------------ */
-  World.prototype.levelAirMax = function (i) {
-    var c = this.cfg, s = i % 4, lap = Math.floor(i / 4);
-    return c.airMax[s] * Math.max(c.lapAirMin, Math.pow(c.lapAirMul, lap));
+  World.prototype.lapFactor = function (i) {
+    var c = this.cfg;
+    return Math.max(c.lapAirMin, Math.pow(c.lapAirMul, Math.floor(i / 4)));
   };
+  World.prototype.levelAirMax = function (i) { return this.cfg.airMax[i % 4] * this.lapFactor(i); };
 
   World.prototype.cellPos = function (col, row) {
     var c = this.cfg, gw = this.cols * c.cardW + (this.cols - 1) * c.cardGap,
@@ -195,6 +196,7 @@
     this.pairs = (this.cols * this.rows) / 2;          // added
     this.airMax = this.levelAirMax(i);
     this.air = this.airMax;
+    this.airPerMatch = this.cfg.airPerMatch * this.lapFactor(i);   // added: refill for this level
     this._airLowArmed = true;
     this.combo = 0;
     this.gravity = this.season === 0 ? { x: 0, y: -1 } :
@@ -363,7 +365,7 @@
       this.matches++;
       var pts = c.pointsPerMatch * Math.min(this.combo, c.comboCap);
       this.score += pts;
-      this.air = Math.min(this.airMax, this.air + c.airPerMatch);
+      this.air = Math.min(this.airMax, this.air + this.airPerMatch);
       this._emit({ type: 'match', ids: [a.id, b.id], x: mid.x, y: mid.y, points: pts, combo: this.combo, face: a.face });
       if (this.combo >= c.cheerCombo) this._foxAct('cheer', c.foxCheerTime);
       var left = 0;

@@ -182,9 +182,9 @@ FRAMES.oops = { ...FRAMES.swim2, tail: -8, eyes: 'wide', mouth: 'oops', blush: 1
   extraHead: `<path d="M80.5,33 C78.8,36 78.4,38.2 80.5,39.4 C82.6,38.2 82.2,36 80.5,33 Z" fill="#7fd7ff" stroke="#2f7fa8" stroke-width="1.2" ${R}/>
 <path d="M89,50 L92.5,49 M89.3,52.4 L92.6,51" stroke="#e85a64" stroke-width="1.1" ${R} opacity=".7"/>` };
 FRAMES.cheer = { tail: 14, eyes: 'sparkle', mouth: 'grin', blush: 0.95,
-  nearFront: 'M78,81 Q100,86 117,70', farFront: 'M70,74 Q66,80 66,80', farFrontTop: 'M66,70 Q58,62 53,47',
+  nearFront: 'M78,81 Q100,86 117,70', farFront: 'M70,74 Q66,80 66,80', farFrontTop: 'M64,68 Q50,60 45,40',
   nearHind: 'M45,84 Q35,93 27,96', farHind: 'M50,85 Q53,95 57,101',
-  extra: sparkle(124, 50, 6) + sparkle(126, 68, 3.6, '#fff4a8') + sparkle(48, 34, 4.4, '#fff4a8') };
+  extra: sparkle(124, 50, 6) + sparkle(126, 68, 3.6, '#fff4a8') + sparkle(36, 28, 4.4, '#fff4a8') };
 
 for (const [n, o] of Object.entries(FRAMES)) write(`fox_${n}.svg`, svg(140, 120, fox(o)));
 
@@ -284,13 +284,11 @@ const faces = [];
     else if (i % 2) d += ` Q${(cx + (ro * .55) * Math.cos(a - 18 * Math.PI / 180) * 1.02).toFixed(1)},${(cy + (ro * .55) * Math.sin(a - 18 * Math.PI / 180)).toFixed(1)} ${x.toFixed(1)},${y.toFixed(1)}`;
     else d += ` Q${(cx + (ro * .55) * Math.cos(a - 18 * Math.PI / 180)).toFixed(1)},${(cy + (ro * .55) * Math.sin(a - 18 * Math.PI / 180)).toFixed(1)} ${x.toFixed(1)},${y.toFixed(1)}`;
   }
-  // rounded star: use stroke-linejoin round with a thick same-colour stroke to soften tips
   d += ' Z';
   const dots = [[32, 12], [52, 28], [45, 52], [19, 52], [12, 28], [32, 18], [46, 31], [40, 46], [24, 46], [18, 31]]
     .map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i < 5 ? 1.5 : 1.2}" fill="#ffd27a"/>`).join('');
   faces.push(`<path d="${d}" fill="#a8461a" stroke="#a8461a" stroke-width="10" ${R}/>
 <path d="${d}" fill="#ff8a3a" stroke="#ff8a3a" stroke-width="4.8" ${R}/>
-<path d="${d}" fill="#ff8a3a" transform="translate(32 34) scale(.62) translate(-32 -34)" opacity=".0"/>
 <path d="M29.6,13 C27,21 24,25.6 16,28.4" fill="none" stroke="#ffb978" stroke-width="2.6" ${R}/>
 ${dots}
 ${eye(27.5, 33, 3)}${eye(36.5, 33, 3)}
