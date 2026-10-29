@@ -1,9 +1,0 @@
-JUDDER 60Hz jitter 0ms: fps=20.4 uneven=0% sd=0.001
-JUDDER 60Hz jitter 0.25ms: fps=18.5 uneven=0% sd=0.04
-JUDDER 75Hz jitter 0ms: fps=21.5 uneven=0% sd=0.079
-JUDDER 75Hz jitter 0.25ms: fps=20.4 uneven=0% sd=0.075
-JUDDER 120Hz jitter 0ms: fps=20.8 uneven=0% sd=0.104
-JUDDER 120Hz jitter 0.25ms: fps=19.4 uneven=0% sd=0.094
-JUDDER 144Hz jitter 0ms: fps=19.7 uneven=0% sd=0.059
-JUDDER 144Hz jitter 0.25ms: fps=19.6 uneven=0% sd=0.064
-results → /home/claude/claude-learning/projects/flappy/tests/perf/results/judder_baseline_browser.json

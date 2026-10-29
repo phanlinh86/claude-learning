@@ -5,6 +5,7 @@ This repo is where I learn Claude and build small projects with it: programs, ag
 ## Layout
 - `doc/` – learning material: `tutorials/` (decks), `notes/` (text extracted from the decks)
 - `projects/<name>/` – one folder per program; each has its own `CLAUDE.md` with project-specific rules
+- `projects/daily-game/<name>/` – games made with `/build-game` (index: `projects/daily-game/DAILY_GAMES.md`)
 - `agents/` – standalone agents built with the Claude Agent SDK
 - `.claude/skills/<name>/SKILL.md` – skills I build (one folder per skill)
 - `.claude/agents/` – subagent definitions
