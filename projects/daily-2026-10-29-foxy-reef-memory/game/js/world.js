@@ -40,7 +40,7 @@
     faceCount: 12,
 
     // --- deal / peek
-    introDelay: 1.2,          // s, empty tray while the season banner shows, then the deal
+    introDelay: 1.4,          // s, empty tray while the season banner shows, then the deal
     dealTotal: 0.9,           // s, first card starts → last card lands
     dealFly: 0.45,            // s, one card's flight
     dealFromY: 640,           // px, cards rise in from below the screen…
@@ -92,16 +92,16 @@
     foxBobAmp: 4, foxBobFreq: 0.6,
     foxTurnRate: 4.5,          // 1/s, angle smoothing
     foxMaxTilt: 0.35,         // rad
-    foxSurfaceSpeed: 40,      // px/s, floats up when out of air
+    foxSurfaceSpeed: 110,      // px/s, floats up when out of air
 
     // --- cupcakes
     cupcakeRise: 22,          // px/s terminal buoyant rise
-    cupcakeDrift: 120,        // px/s max drift toward Foxy (she waits until it leaves the card area)
+    cupcakeDrift: 220,        // px/s max drift toward Foxy (she waits until it leaves the card area)
     cupcakePopVy: -70,        // px/s initial upward pop
     cupcakeEase: 2,           // 1/s velocity relaxation (water drag)
     cupcakeWobble: 10,        // px sway amplitude
     cupcakeWobbleFreq: 1.6,   // Hz
-    cupcakeTopY: 110,         // px, stops rising here
+    cupcakeTopY: 150,         // px, stops rising here
     cupcakeLife: 12           // s, then it just pops (no points)
   };
 
@@ -626,7 +626,7 @@
         continue;
       }
       t.scale = Math.min(1, t.scale + h / 0.25);
-      var tvx = clamp((f.x - t.x) * 0.3, -c.cupcakeDrift, c.cupcakeDrift);
+      var tvx = clamp((f.x - t.x) * 0.9, -c.cupcakeDrift, c.cupcakeDrift);
       var tvy = t.y > c.cupcakeTopY ? -c.cupcakeRise : (c.cupcakeTopY - t.y) * 0.5;
       t.vx += (tvx - t.vx) * ease;
       t.vy += (tvy - t.vy) * ease;
@@ -654,7 +654,7 @@
     if (this.state !== 'dead') {
       for (i = 0; i < this.cupcakes.length; i++) {
         var t = this.cupcakes[i];
-        if (!t.alive || t.age < 0.15 || t.x > Z.x1 + 70) continue;   // wait until it drifts out of the card area
+        if (!t.alive || t.age < 0.15 || t.x > this.tray.x) continue;   // fetch once it leaves the card tray   // wait until it drifts out of the card area
         var dd = (t.x - f.x) * (t.x - f.x) + (t.y - f.y) * (t.y - f.y);
         if (dd < bd) { bd = dd; best = t; }
       }

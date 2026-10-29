@@ -182,3 +182,6 @@ canvas#game{background:#2c8fb0}
 .panel h2{color:#e0662b}
 .slot .prev.card img{height:92%;width:auto;border-radius:8%}
 .air-legend{display:inline-flex;align-items:center;gap:.4em}
+
+.gchip{display:inline-grid;place-items:center;width:calc(var(--u)*2.8);height:calc(var(--u)*2.8);border-radius:50%;color:#fff;
+  font-family:"Segoe UI",system-ui,sans-serif;font-weight:900;font-size:calc(var(--u)*1.8);text-shadow:0 1px 0 rgba(0,0,0,.3);border:2px solid #fff}

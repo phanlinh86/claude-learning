@@ -76,7 +76,7 @@
       const w = this.world;
       for (const e of evts) {
         switch (e.type) {
-          case 'flip': { const c = this.card(e.id); if (c) this.bubbles(c.x, c.y + 30, 2, 0.6); break; }
+          case 'flip': { const c = this.card(e.id); if (c) this.bubbles(c.x, c.y + CH / 2 + 6, 2, 0.6); break; }
           case 'match': {
             const ids = e.ids || [];
             for (const id of ids) { const c = this.card(id); if (c) { this.sparks(c.x, c.y, 10, '#fff6a8'); this.fx.push({ k: 'ring', x: c.x, y: c.y, life: 0, max: 0.5, color: '#ffffff' }); } }
@@ -90,18 +90,30 @@
             if (combo >= 2) this.texts.push({ text: 'Combo x' + combo + '!', x, y: y + 6, life: 0, max: 1.1, size: 18, color: '#ffe14d' });
             break;
           }
-          case 'mismatch': for (const id of (e.ids || [])) { const c = this.card(id); if (c) this.bubbles(c.x, c.y, 3, 0.5); } break;
-          case 'eat': this.sparks(e.x, e.y, 8, '#ffd1e8'); this.texts.push({ text: 'Yum!', x: e.x, y: e.y - 40, life: 0, max: 0.9, size: 20, color: '#ffffff' }); break;
+          case 'mismatch': for (const id of (e.ids || [])) { const c = this.card(id); if (c) { this.bubbles(c.x, c.y + CH / 2 + 6, 3, 0.5); c._miss = 0.9; } } break;
+          case 'eat': this.sparks(e.x, e.y, 8, '#ffd1e8'); this.texts.push({ text: 'Yum!', x: e.x, y: Math.max(150, e.y - 40), life: 0, max: 0.9, size: 20, color: '#ffffff' }); break;
           case 'cupcake': this.bubbles(e.x, e.y, 4, 0.8); break;
-          case 'airlow': this.texts.push({ text: 'Air is low!', x: 820, y: 130, life: 0, max: 1.6, size: 20, color: '#ffd1d1' }); break;
+          case 'airlow': { const f = w && w.fox; this.texts.push({ text: 'Air is low!', x: f ? f.x : 140, y: f ? Math.max(150, f.y - 70) : 200, life: 0, max: 1.8, size: 24, color: '#ff6b6b' }); break; }
           case 'cleared':
             this.flash = Math.max(this.flash, 0.3);
+            this._clearT = 0;
             for (let i = 0; i < 26; i++) this.bubbles(300 + Math.random() * 560, 520, 1, 1.6 + Math.random());
+            for (let i = 0; i < 18; i++) {
+              const a = Math.random() * TAU, sp = 120 + Math.random() * 200;
+              this.fx.push({ k: 'heart', x: 585, y: 300, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60, g: 120, life: -i * 0.02, max: 1.3, size: 18 + Math.random() * 12, rot: (Math.random() - .5) * .6, vr: (Math.random() - .5) * 3 });
+            }
+            this.sparks(585, 300, 40, '#ffe14d');
+            this.fx.push({ k: 'ring', x: 585, y: 300, life: 0, max: 0.8, color: '#ffe14d', big: true });
             this.texts.push({ text: 'Reef cleared!', x: 585, y: 230, life: 0, max: 2.2, size: 46, color: '#ffe14d', big: true });
             if (e.bonus) this.texts.push({ text: 'Air bonus +' + e.bonus, x: 585, y: 284, life: 0, max: 2.2, size: 24, color: '#ffffff', big: true });
             break;
           case 'season': this.showBanner(e.season); this.setSeason(e.season); break;
-          case 'dead': this.flash = 0.4; this.shake = 0.25; break;
+          case 'dead': {
+            this.flash = 0.4; this.shake = 0.25;
+            this.texts.push({ text: 'Out of air!', x: 585, y: 250, life: 0, max: 2.5, size: 44, color: '#ffd1d1', big: true });
+            const f = w && w.fox; if (f) this.bubbles(f.x, f.y - 30, 10, 1.4);
+            break;
+          }
         }
       }
     }
@@ -119,8 +131,10 @@
     update(dt) {
       this.time += dt;
       if (this.vis.t < 1) this.vis.t = Math.min(1, this.vis.t + dt / 1.6);
-      if (this.banner) { this.banner.t += dt; if (this.banner.t > 1.95) this.banner = null; }
+      if (this.banner) { this.banner.t += dt; if (this.banner.t > 1.35) this.banner = null; }
       this.shake = Math.max(0, this.shake - dt);
+      if (this._clearT != null) this._clearT += dt;
+      if (this.world) for (const c of this.world.cards) if (c._miss > 0) c._miss -= dt;
       this.flash = Math.max(0, this.flash - dt * 2.2);
       for (const f of this.fx) {
         f.life += dt;
@@ -173,6 +187,9 @@
       const n = RF.Assets.SEASONS[s], t = this.time;
       const sway = s === 2 ? 1.8 : 1;   // autumn current
       if (this.customBg('bg_' + n, alpha)) {
+        const g = this.ctx;
+        const wash = this._wash || (this._wash = (() => { const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, 'rgba(40,170,210,0.28)'); gr.addColorStop(1, 'rgba(10,60,110,0.38)'); return gr; })());
+        g.globalAlpha = alpha; g.fillStyle = wash; g.fillRect(0, 0, W, H); g.globalAlpha = 1;   // keep a photo feeling underwater
         this.tile(n + '_rays', Math.sin(t * 0.07) * 30, 0, W, H, alpha * 0.6, true);
         return;
       }
@@ -298,7 +315,7 @@
       const w = this.world, t = w.tray; if (!t) return;
       const key = [t.x, t.y, t.w, t.h, this.px, this.vis.cur].join('|');
       if (!this._tray || this._tray.key !== key) {
-        const pad = 16, c = document.createElement('canvas');
+        const pad = 6, c = document.createElement('canvas');
         c.width = Math.ceil((t.w + pad * 2 + 20) * this.px); c.height = Math.ceil((t.h + pad * 2 + 24) * this.px);
         const g = c.getContext('2d'); g.scale(this.px, this.px);
         const TRAY = ['rgba(12,70,88,0.30)', 'rgba(10,72,110,0.32)', 'rgba(52,40,22,0.32)', 'rgba(8,14,44,0.38)'];   // per-season backing (env artist)
@@ -308,7 +325,10 @@
         this._tray = { key, c, x: t.x - pad - 10, y: t.y - pad - 10 };
       }
       const g = this.ctx;
+      const a = w.state === 'cleared' ? clamp(1 - (this._clearT || 0) / 1.2, 0.3, 1) : 1;
+      g.globalAlpha = a;
       g.drawImage(this._tray.c, this._tray.x, this._tray.y, this._tray.c.width / this.px, this._tray.c.height / this.px);
+      g.globalAlpha = 1;
     }
 
     drawCards(mode) {
@@ -335,6 +355,7 @@
         g.globalAlpha = alpha;
         g.save();
         g.translate(c.x, c.y + lift);
+        if (c.rot) g.rotate(c.rot);
         if (c.wiggle > 0) g.rotate(Math.sin(this.time * 38) * 0.09 * c.wiggle);
         g.scale(sx * sc, sc);
         if (showFace) {
@@ -347,6 +368,12 @@
           g.globalAlpha = alpha * c.glow;
           g.lineWidth = 5; g.strokeStyle = '#fff3a0';
           this.roundRect(-CW / 2 - 2, -CH / 2 - 2, CW + 4, CH + 4, 14); g.stroke();
+        }
+        if (c._miss > 0 && showFace) {
+          g.globalAlpha = alpha * Math.min(1, c._miss * 2);
+          g.lineWidth = 4; g.strokeStyle = '#ff6b6b';
+          this.roundRect(-CW / 2 - 1, -CH / 2 - 1, CW + 2, CH + 2, 13); g.stroke();
+          g.globalAlpha = alpha;
         }
         if (hover) { g.globalAlpha = 0.18; g.fillStyle = '#ffffff'; this.roundRect(-CW / 2, -CH / 2, CW, CH, 12); g.fill(); }
         g.restore();
@@ -386,7 +413,8 @@
       for (const k of w.cupcakes || []) {
         if (k.alive === false) continue;
         const s = k.scale == null ? 1 : k.scale;
-        g.save(); g.translate(k.x, k.y); g.rotate(k.rot || 0); g.scale(s, s);
+        const t = w.tray, over = t && k.x > t.x && k.x < t.x + t.w && k.y > t.y && k.y < t.y + t.h;
+        g.save(); g.globalAlpha = over ? 0.7 : 1; g.translate(k.x, k.y); g.rotate(k.rot || 0); g.scale(s, s);
         g.drawImage(spr, -dw / 2, -dh / 2, dw, dh);
         g.restore();
       }
@@ -398,19 +426,27 @@
       const custom = A.hasCustom('hero');
       g.save();
       g.translate(f.x, f.y + (f.bob || 0));
-      g.rotate((f.angle || 0) * (custom ? 0.5 : 1));
-      if ((f.flipX || 1) < 0) g.scale(-1, 1);
       if (custom) {
+        // a photo can't be mirrored (text/faces would flip) — it leans into the swim instead, wobbles, breathes and paddles
+        const t = this.time, dir = f.flipX || 1;
+        g.rotate(-0.12 * dir + Math.sin(t * 4.2) * 0.07 + (f.angle || 0) * 0.3);
         const [cw, ch] = A.fit('hero', FOX_W, FOX_H);
-        const sq = f.frame === 'eat' ? 1.08 : f.frame === 'cheer' ? 1.05 + 0.04 * Math.sin(this.time * 18) : 1;
+        const sq = (f.frame === 'eat' ? 1.08 : f.frame === 'cheer' ? 1.05 + 0.04 * Math.sin(t * 18) : 1) * (1 + 0.035 * Math.sin(t * 8.4));
+        const pad = Math.sin(t * 9) * 0.5;
+        for (const side of [-1, 1]) {   // two orange flippers paddling under the picture
+          g.save(); g.translate(side * cw * 0.28, ch * 0.42); g.rotate(side * 0.35 + pad * side);
+          g.fillStyle = '#ff8a3d'; g.strokeStyle = '#7a3414'; g.lineWidth = 2.5;
+          g.beginPath(); g.ellipse(0, 9, 7, 13, 0, 0, TAU); g.fill(); g.stroke(); g.restore();
+        }
         g.scale(2 - sq, sq);
-        // a little diving helmet ring so a photo still looks underwater
         g.drawImage(A.sprite('custom:hero', cw, ch), -cw / 2, -ch / 2, cw, ch);
         g.globalAlpha = 0.55; g.lineWidth = 3; g.strokeStyle = '#e8fbff';
         g.beginPath(); g.ellipse(0, -4, cw * 0.56, ch * 0.6, 0, 0, TAU); g.stroke();
         g.globalAlpha = 0.35; g.fillStyle = '#ffffff';
         g.beginPath(); g.ellipse(-cw * 0.22, -ch * 0.32, cw * 0.08, ch * 0.05, -0.6, 0, TAU); g.fill();
       } else {
+        g.rotate(f.angle || 0);
+        if ((f.flipX || 1) < 0) g.scale(-1, 1);
         const fr = ['swim1', 'swim2', 'swim3', 'eat', 'oops', 'cheer'].includes(f.frame) ? f.frame : 'swim1';
         const spr = A.sprite('fox_' + fr, FOX_W, FOX_H);
         if (spr) g.drawImage(spr, -FOX_CX, -FOX_CY, FOX_W, FOX_H);
@@ -440,6 +476,9 @@
         } else if (f.k === 'spark') {
           g.globalAlpha = 1 - k; g.fillStyle = f.color;
           g.beginPath(); g.arc(f.x, f.y, f.size * (1 - k * 0.5), 0, TAU); g.fill();
+        } else if (f.k === 'ring' && f.big) {
+          g.globalAlpha = 0.9 * (1 - k); g.strokeStyle = f.color; g.lineWidth = 6 * (1 - k) + 1;
+          g.beginPath(); g.arc(f.x, f.y, 30 + k * 260, 0, TAU); g.stroke();
         } else if (f.k === 'ring') {
           g.globalAlpha = 0.8 * (1 - k); g.strokeStyle = f.color; g.lineWidth = 4 * (1 - k) + 1;
           this.roundRect(f.x - CW / 2 - k * 20, f.y - CH / 2 - k * 20, CW + k * 40, CH + k * 40, 14 + k * 10); g.stroke();
@@ -469,7 +508,7 @@
       this.text(String(w.score), 0, 0, 52, '#ffffff', '#123a55', 'center', 9);
       g.restore();
       const left = w.cards.filter(c => c.state !== 'gone' && c.state !== 'matched').length / 2;
-      this.text('Pairs left: ' + Math.ceil(left) + (w.combo >= 2 ? '   Combo x' + w.combo : ''), W / 2, 86, 16, w.combo >= 2 ? '#ffe14d' : '#e8fbff', '#123a55', 'center', 5);
+      this.text('Pairs left: ' + Math.ceil(left) + (w.combo >= 2 ? '   Combo x' + w.combo : ''), W / 2, 84, 16, w.combo >= 2 ? '#ffe14d' : '#e8fbff', '#123a55', 'center', 5);
       // season pill
       const si = SEASON_INFO[w.season] || SEASON_INFO[0];
       g.fillStyle = 'rgba(255,255,255,0.88)'; this.roundRect(16, 16, 214, 46, 23); g.fill();
@@ -477,7 +516,8 @@
       const icon = RF.Assets.sprite(si.icon, 32, 32);
       if (icon) g.drawImage(icon, 24, 23, 32, 32);
       this.text(si.short + (w.lap > 0 ? ' · Lap ' + (w.lap + 1) : ''), 62, 31, 17, si.dark, null, 'left');
-      this.text('Level ' + (w.level + 1), 62, 50, 12, '#55708a', null, 'left');
+      this.text('Level ' + (w.level + 1), 62, 50, 14, '#55708a', null, 'left');
+      this.gravityChip(208, 39, 15, si.color, w.gravity);
       // cupcakes counter
       const cup = RF.Assets.hasCustom('treat') ? RF.Assets.sprite('custom:treat', ...RF.Assets.fit('treat', 26, 26)) : RF.Assets.sprite('cupcake', 26, 26);
       g.fillStyle = 'rgba(255,255,255,0.88)'; this.roundRect(16, 70, 96, 34, 17); g.fill();
@@ -485,15 +525,32 @@
       this.text('× ' + (w.cupcakesEaten || 0), 56, 87, 17, '#b8336d', null, 'left');
       // air meter (a row of bubbles inside a pill)
       const frac = clamp(w.air / (w.airMax || 1), 0, 1), low = frac < 0.25;
-      const x0 = 712, y0 = 78, mw = 232, mh = 26;
+      const x0 = 712, y0 = 68, mw = 232, mh = 22;
       g.fillStyle = 'rgba(10,40,70,0.55)'; this.roundRect(x0, y0, mw, mh, 13); g.fill();
       const pulse = low ? 0.6 + 0.4 * Math.sin(this.time * 10) : 1;
       g.fillStyle = low ? `rgba(255,120,120,${pulse})` : '#7fe3ff';
-      this.roundRect(x0 + 3, y0 + 3, Math.max(20, (mw - 6) * frac), mh - 6, 10); g.fill();
-      g.fillStyle = 'rgba(255,255,255,0.45)'; this.roundRect(x0 + 8, y0 + 5, Math.max(10, (mw - 16) * frac), 5, 3); g.fill();
+      if (frac > 0.005) {
+        this.roundRect(x0 + 3, y0 + 3, Math.max(mh - 6, (mw - 6) * frac), mh - 6, (mh - 6) / 2); g.fill();
+        g.fillStyle = 'rgba(255,255,255,0.45)'; this.roundRect(x0 + 8, y0 + 5, Math.max(6, (mw - 16) * frac), 4, 2); g.fill();
+      }
+      if (low) { g.lineWidth = 3; g.strokeStyle = `rgba(255,90,90,${pulse})`; this.roundRect(x0, y0, mw, mh, mh / 2); g.stroke(); }
       const bub = RF.Assets.sprite('p_bubble', 32, 32);
       if (bub) g.drawImage(bub, x0 - 16, y0 - 4, 32, 32);
       this.text('AIR', x0 + mw / 2, y0 + mh / 2 + 1, 14, '#ffffff', '#123a55', 'center', 4);
+    }
+
+    /* small round badge with an arrow showing which way the water pulls the cards this level */
+    gravityChip(x, y, r, color, gv) {
+      const g = this.ctx;
+      g.fillStyle = color; g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill();
+      g.lineWidth = 2; g.strokeStyle = '#ffffff'; g.stroke();
+      const ax = Math.sign((gv && gv.x) || 0), ay = Math.sign((gv && gv.y) || 0);
+      g.strokeStyle = '#ffffff'; g.lineWidth = 3; g.lineCap = 'round'; g.lineJoin = 'round';
+      if (!ax && !ay) { g.beginPath(); g.moveTo(x - 6, y); g.lineTo(x + 6, y); g.stroke(); return; }   // still water
+      const L = 7, ex = x + ax * L, ey = y + ay * L;
+      g.beginPath(); g.moveTo(x - ax * L, y - ay * L); g.lineTo(ex, ey);
+      g.moveTo(ex, ey); g.lineTo(ex - ax * 5 - ay * 5, ey - ay * 5 - ax * 5);
+      g.moveTo(ex, ey); g.lineTo(ex - ax * 5 + ay * 5, ey - ay * 5 + ax * 5); g.stroke();
     }
 
     readyOverlay() {
@@ -502,7 +559,8 @@
       const label = peeking ? 'Remember the sea friends!' : 'Get ready…';
       const a = 0.85 + 0.15 * Math.sin(this.time * 6);
       this.ctx.globalAlpha = a;
-      this.text(label, 585, 470, 24, '#ffe14d', '#123a55', 'center', 6);
+      const t = w.tray || { x: 337, y: 117, w: 496, h: 376 };
+      this.text(label, t.x + t.w / 2, Math.min(526, t.y + t.h + 18), 22, '#ffe14d', '#123a55', 'center', 6);
       this.ctx.globalAlpha = 1;
     }
 
@@ -511,16 +569,17 @@
       const t = b.t;
       let x;
       if (t < 0.45) x = lerp(-W, 0, easeOutBack(t / 0.45));
-      else if (t < 1.5) x = 0;
-      else x = lerp(0, W, Math.pow((t - 1.5) / 0.45, 2));
+      else if (t < 1.0) x = 0;
+      else x = lerp(0, W, Math.pow((t - 1.0) / 0.35, 2));
       g.save(); g.translate(x, 0);
       g.fillStyle = si.color; g.globalAlpha = 0.93;
       g.beginPath(); g.moveTo(W / 2 - 280, 190); g.lineTo(W / 2 + 280, 182); g.lineTo(W / 2 + 298, 290); g.lineTo(W / 2 - 262, 300); g.closePath(); g.fill();
       g.globalAlpha = 1;
       this.text(si.name + '!', W / 2, 222, 42, '#ffffff', si.dark, 'center', 9);
-      this.text(si.hint, W / 2, 266, 20, '#ffffff', si.dark, 'center', 5);
-      // gravity arrow
-      const [ax, ay] = si.arrow;
+      const gv = (this.world && this.world.gravity) || { x: si.arrow[0], y: si.arrow[1] };
+      const ax = Math.sign(gv.x || 0), ay = Math.sign(gv.y || 0);
+      const hint = b.s === 2 ? 'A current pushes shells ' + (ax < 0 ? 'LEFT!' : 'RIGHT!') : si.hint;
+      this.text(hint, W / 2, 266, 20, '#ffffff', si.dark, 'center', 5);
       if (ax || ay) {
         const cx = W / 2 + 240, cy = 238, L = 22;
         g.strokeStyle = '#ffffff'; g.lineWidth = 6; g.lineCap = 'round';
