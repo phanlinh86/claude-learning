@@ -298,9 +298,10 @@
         const pad = 16, c = document.createElement('canvas');
         c.width = Math.ceil((t.w + pad * 2 + 20) * this.px); c.height = Math.ceil((t.h + pad * 2 + 24) * this.px);
         const g = c.getContext('2d'); g.scale(this.px, this.px);
-        g.fillStyle = 'rgba(0,20,40,0.25)'; this.roundRect(10, 16, t.w + pad * 2, t.h + pad * 2, 26, g); g.fill();
-        g.fillStyle = 'rgba(255,248,230,0.20)'; this.roundRect(10, 10, t.w + pad * 2, t.h + pad * 2, 26, g); g.fill();
-        g.lineWidth = 3; g.strokeStyle = 'rgba(255,255,255,0.45)'; g.stroke();
+        const TRAY = ['rgba(12,70,88,0.30)', 'rgba(10,72,110,0.32)', 'rgba(52,40,22,0.32)', 'rgba(8,14,44,0.38)'];   // per-season backing (env artist)
+        g.fillStyle = 'rgba(0,20,40,0.18)'; this.roundRect(10, 16, t.w + pad * 2, t.h + pad * 2, 26, g); g.fill();
+        g.fillStyle = TRAY[this.vis.cur] || TRAY[0]; this.roundRect(10, 10, t.w + pad * 2, t.h + pad * 2, 26, g); g.fill();
+        g.lineWidth = 2; g.strokeStyle = 'rgba(255,255,255,0.18)'; this.roundRect(12, 12, t.w + pad * 2 - 4, t.h + pad * 2 - 4, 24, g); g.stroke();
         this._tray = { key, c, x: t.x - pad - 10, y: t.y - pad - 10 };
       }
       const g = this.ctx;

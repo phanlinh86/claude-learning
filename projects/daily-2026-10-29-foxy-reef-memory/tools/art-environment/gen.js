@@ -6,7 +6,8 @@ const fs = require('fs');
 const path = require('path');
 const OUT = process.argv[2] || path.join(__dirname, '../../game/assets/default');
 const W = 960;
-const f = n => (Math.round(n * 10) / 10).toString();
+let PREC = 10; // coordinate precision (10 = 0.1 px); dense layers drop to whole px to stay < 60 KB
+const f = n => (Math.round(n * PREC) / PREC).toString();
 
 // ---------- helpers ----------
 function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
@@ -47,11 +48,12 @@ function branchCoral(x, y, s, c, seed) {
   }
   const trunks = 3;
   for (let i = 0; i < trunks; i++) grow(x + (i - 1) * 7 * s, y, -Math.PI / 2 + (i - 1) * 0.45, 30 * s, 11 * s, 3);
-  let o = '';
-  for (const g of segs) o += strokeP(g.d, c.dark, g.w, ` transform="translate(${f(2.5 * s)} ${f(2 * s)})"`);
-  for (const g of segs) o += strokeP(g.d, c.base, g.w);
-  for (const g of segs) if (g.w < 7 * s) o += circ(g.x1 - g.w * 0.15, g.y1 - g.w * 0.15, g.w * 0.28, c.light);
-  for (const g of segs) if (g.w > 6 * s) o += strokeP(g.d, c.light, g.w * 0.22, ` transform="translate(${f(-g.w * 0.22)} 0)" opacity="0.7"`);
+  const grp = (col, extra, body) => `<g fill="none" stroke="${col}" stroke-linecap="round"${extra}>${body}</g>`;
+  const ps = (d, w) => `<path d="${d}" stroke-width="${f(w)}"/>`;
+  let o = grp(c.dark, ` transform="translate(${f(2.5 * s)} ${f(2 * s)})"`, segs.map(g => ps(g.d, g.w)).join(''));
+  o += grp(c.base, '', segs.map(g => ps(g.d, g.w)).join(''));
+  o += grp(c.light, ` opacity="0.7" transform="translate(${f(-1.8 * s)} 0)"`, segs.filter(g => g.w > 6 * s).map(g => ps(g.d, g.w * 0.22)).join(''));
+  o += `<g fill="${c.light}">` + segs.filter(g => g.w < 7 * s).map(g => `<circle cx="${f(g.x1 - g.w * 0.15)}" cy="${f(g.y1 - g.w * 0.15)}" r="${f(g.w * 0.28)}"/>`).join('') + '</g>';
   return o;
 }
 // sea fan: rounded fan with a lattice of veins
@@ -116,16 +118,16 @@ function kelp(x, y, h, s, c, seed) {
   let d = `M${f(x)} ${f(y)}`; const N = 16;
   for (let i = 1; i <= N; i++) { const t = i / N; d += `L${f(px(t))} ${f(y - h * t)}`; }
   let o = strokeP(d, c.dark, 4.5 * s, ` transform="translate(${f(1.5 * s)} 0)"`) + strokeP(d, c.stem, 3.2 * s);
-  const blades = Math.floor(h / (26 * s));
+  const blades = Math.floor(h / (26 * s)); let leaves = '', bulbs = '';
   for (let i = 1; i <= blades; i++) {
     const t = i / (blades + 0.6); const bx = px(t), by = y - h * t; const side = i % 2 ? 1 : -1;
     const L = (20 + r() * 8) * s * (1 - t * 0.25), Wd = 6.5 * s * (1 - t * 0.2); const ang = side * (38 + r() * 14) - 90;
     const tf = `translate(${f(bx)} ${f(by)}) rotate(${f(ang + 90)})`;
     const leaf = `M0 0C${f(Wd)} ${f(-L * 0.3)} ${f(Wd * 0.8)} ${f(-L * 0.8)} 0 ${f(-L)}C${f(-Wd * 0.9)} ${f(-L * 0.75)} ${f(-Wd)} ${f(-L * 0.3)} 0 0Z`;
-    o += `<path d="${leaf}" fill="${c.dark}" transform="${tf} translate(${f(1.5 * s)} ${f(1 * s)})"/><path d="${leaf}" fill="${c.base}" transform="${tf}"/>`;
-    o += `<path d="M0 ${f(-2 * s)}L0 ${f(-L * 0.8)}" stroke="${c.light}" stroke-width="${f(1.2 * s)}" stroke-linecap="round" opacity="0.8" transform="${tf}"/>`;
-    o += circ(bx + side * 2 * s, by - 1 * s, 2.6 * s, c.bulb || c.light);
+    leaves += `<g transform="${tf}"><path d="${leaf}" fill="${c.dark}" transform="translate(1.5 1)"/><path d="${leaf}"/><path d="M0 -2V${f(-L * 0.8)}" fill="none" stroke="${c.light}" opacity="0.8"/></g>`;
+    bulbs += `<circle cx="${f(bx + side * 2 * s)}" cy="${f(by - 1 * s)}" r="${f(2.6 * s)}"/>`;
   }
+  o += `<g fill="${c.base}" stroke-width="${f(1.2 * s)}" stroke-linecap="round">${leaves}</g><g fill="${c.bulb || c.light}">${bulbs}</g>`;
   o += circ(px(1), y - h - 2 * s, 3.5 * s, c.base) + circ(px(1) - 1 * s, y - h - 3 * s, 1.4 * s, c.light);
   return o;
 }
@@ -161,7 +163,7 @@ function starfish(x, y, s, col, dark, rot) {
 function farCoralHead(x, y, s, col) { // bumpy rounded top
   let d = `M${f(x - 30 * s)} ${f(y)}`; const bumps = [[-24, -14, 9], [-11, -24, 11], [4, -28, 12], [18, -20, 10], [27, -10, 7]];
   for (const [dx, dy, r] of bumps) d += `A${f(r * s)} ${f(r * s)} 0 0 1 ${f(x + (dx + r * 0.9) * s)} ${f(y + dy * s + r * 0.6 * s)}`;
-  return `<path d="${d}L${f(x + 30 * s)} ${f(y)}Z" fill="${col}"/>`;
+  return `<path d="${d}L${f(x + 30 * s)} ${f(y + 40)}L${f(x - 30 * s)} ${f(y + 40)}Z" fill="${col}"/>`;
 }
 function farKelp(x, y, h, s, col, seed) {
   const r = rng(seed); const ph = r() * 6; let d = `M${f(x)} ${f(y)}`; let o = '';
@@ -170,7 +172,7 @@ function farKelp(x, y, h, s, col, seed) {
   for (let i = 1; i < 6; i++) { const t = i / 6.3; const bx = x + Math.sin(t * 3 + ph) * 7 * s * t, by = y - h * t, side = i % 2 ? 1 : -1; o += ell(bx + side * 6 * s, by - 6 * s, 3.4 * s, 10 * s, col, ` transform="rotate(${side * 35} ${f(bx + side * 6 * s)} ${f(by - 6 * s)})"`); }
   return o;
 }
-function farFan(x, y, s, col) { return `<path d="M${f(x - 3 * s)} ${f(y)}C${f(x - 40 * s)} ${f(y - 30 * s)} ${f(x - 30 * s)} ${f(y - 66 * s)} ${f(x)} ${f(y - 62 * s)}C${f(x + 30 * s)} ${f(y - 66 * s)} ${f(x + 40 * s)} ${f(y - 30 * s)} ${f(x + 3 * s)} ${f(y)}Z" fill="${col}"/>`; }
+function farFan(x, y, s, col) { return `<path d="M${f(x - 3 * s)} ${f(y)}C${f(x - 40 * s)} ${f(y - 30 * s)} ${f(x - 30 * s)} ${f(y - 66 * s)} ${f(x)} ${f(y - 62 * s)}C${f(x + 30 * s)} ${f(y - 66 * s)} ${f(x + 40 * s)} ${f(y - 30 * s)} ${f(x + 3 * s)} ${f(y)}V${f(y + 40)}H${f(x - 3 * s)}Z" fill="${col}"/>`; }
 // distant rock arch
 function farArch(x, y, s, col) { return `<path d="M${f(x - 70 * s)} ${f(y)}C${f(x - 72 * s)} ${f(y - 60 * s)} ${f(x - 40 * s)} ${f(y - 92 * s)} ${f(x + 4 * s)} ${f(y - 90 * s)}C${f(x + 50 * s)} ${f(y - 88 * s)} ${f(x + 74 * s)} ${f(y - 55 * s)} ${f(x + 70 * s)} ${f(y)}L${f(x + 36 * s)} ${f(y)}C${f(x + 36 * s)} ${f(y - 34 * s)} ${f(x + 20 * s)} ${f(y - 52 * s)} ${f(x)} ${f(y - 52 * s)}C${f(x - 22 * s)} ${f(y - 52 * s)} ${f(x - 34 * s)} ${f(y - 32 * s)} ${f(x - 34 * s)} ${f(y)}Z" fill="${col}"/>`; }
 
@@ -187,7 +189,7 @@ const S = {
     kelp: { base: '#5fcf7a', dark: '#38995a', light: '#a8f0b8', stem: '#3f9e5c', bulb: '#9ee6a8' },
     grass: { base: '#6ad884', dark: '#3fa862' }, rock: { base: '#5f9fa8', dark: '#477e8a', light: '#8cc6c9' },
     floorGrass: { base: '#69d07f', dark: '#3c9d5c' }, shell: { base: '#ffd2df', dark: '#d77f9c' }, star: ['#ff9f7a', '#c9603e'],
-    rays: { col: '#f4fff6', a: 0.34, n: 6, srcX: 200 },
+    rays: { col: '#f4fff6', a: 0.22, n: 6, srcX: 200 },
   },
   summer: {
     water: ['#a8f4f6', '#52d6ec', '#22a6d4', '#1675b0'], glow: '#fffbe0', glowX: 700, caustic: 0.16,
@@ -199,10 +201,10 @@ const S = {
     kelp: { base: '#6cd68a', dark: '#3d9f62', light: '#b2f3c2', stem: '#44a666', bulb: '#ffe07a' },
     grass: { base: '#74dc8c', dark: '#45ac66' }, rock: { base: '#5aa7c0', dark: '#3f86a4', light: '#8dcbe0' },
     floorGrass: { base: '#76d68a', dark: '#46a466' }, shell: { base: '#ffe3c2', dark: '#d79a62' }, star: ['#ff7e5f', '#c7472e'],
-    rays: { col: '#fffbe6', a: 0.46, n: 7, srcX: 700 },
+    rays: { col: '#fffbe6', a: 0.3, n: 7, srcX: 700 },
   },
   autumn: {
-    water: ['#f6d48e', '#d3aa62', '#8f8a5c', '#3f5a54'], glow: '#fff1c8', glowX: 640, caustic: 0.11,
+    water: ['#f4cc7e', '#d09f55', '#8c8257', '#3d5652'], glow: '#fff1c8', glowX: 640, caustic: 0.11,
     far: ['#b39a66', '#96865e'], dune: '#8b7a55',
     sand: ['#e8c890', '#d6ad6e', '#b98d52', '#f7e2b6'],
     coralA: { base: '#e2553a', dark: '#a8352a', light: '#ff9a7c' }, coralB: { base: '#f08a3a', dark: '#b85e22', light: '#ffc38a' },
@@ -212,26 +214,26 @@ const S = {
     kelp2: { base: '#d5503a', dark: '#94321f', light: '#ff9a7e', stem: '#9c3e26', bulb: '#ff8a5a' },
     grass: { base: '#c99a3e', dark: '#9a6f28' }, rock: { base: '#7e7558', dark: '#615a44', light: '#a69a72' },
     floorGrass: { base: '#d0962f', dark: '#9e6a22' }, shell: { base: '#fbe1c0', dark: '#bf8250' }, star: ['#e8573e', '#9e3324'],
-    rays: { col: '#ffe9b8', a: 0.3, n: 6, srcX: 640 },
+    rays: { col: '#ffe9b8', a: 0.22, n: 6, srcX: 640 },
   },
   winter: {
     water: ['#6f8fd0', '#3f5ca8', '#25387a', '#141c4a'], glow: '#dce8ff', glowX: 480, caustic: 0.07,
     far: ['#4b63a3', '#3d5290'], dune: '#3d4f8a',
-    sand: ['#c9d3ec', '#aab6d8', '#8a96c0', '#eef3ff'],
+    sand: ['#b7c3e3', '#9aa7d0', '#7c88b7', '#e2eaff'],
     coralA: { base: '#cfe6ff', dark: '#8fb0dd', light: '#ffffff' }, coralB: { base: '#e9f3ff', dark: '#a7bfe2', light: '#ffffff' },
     fan: { base: '#b9d3f6', dark: '#7f9fd0', light: '#f4f9ff' }, anem: { base: '#c7b8f2', dark: '#8e7fcf', light: '#f6f2ff', stem: '#7666b6' },
     sponge: { base: '#a9c4ea', dark: '#7290c4', light: '#e6f0ff' }, brain: { base: '#d8e4f6', dark: '#9fb2d4', light: '#ffffff' },
     kelp: { base: '#7fb5c9', dark: '#4f8299', light: '#cbeaf4', stem: '#568aa0', bulb: '#d6f1ff' },
     grass: { base: '#8fb8d0', dark: '#6390ac' }, rock: { base: '#5a6aa6', dark: '#454f86', light: '#8a98cc' },
     floorGrass: { base: '#9cc4d8', dark: '#6b98b4' }, shell: { base: '#f2f6ff', dark: '#8e9cc8' }, star: ['#b6c6f2', '#6f7fb8'],
-    rays: { col: '#dfe9ff', a: 0.14, n: 5, srcX: 480 },
+    rays: { col: '#dfe9ff', a: 0.1, n: 5, srcX: 480 },
   },
 };
 
 function waterSVG(s) {
   const c = S[s]; const [a, b, cc, d] = c.water;
   const defs = `<linearGradient id="w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="0.3" stop-color="${b}"/><stop offset="0.68" stop-color="${cc}"/><stop offset="1" stop-color="${d}"/></linearGradient>` +
-    `<radialGradient id="g" cx="${c.glowX / 960}" cy="0" r="0.55" gradientTransform="translate(${c.glowX / 960} 0) scale(1 1.4) translate(${-c.glowX / 960} 0)"><stop offset="0" stop-color="${c.glow}" stop-opacity="0.55"/><stop offset="1" stop-color="${c.glow}" stop-opacity="0"/></radialGradient>` +
+    `<radialGradient id="g" cx="${c.glowX / 960}" cy="0" r="0.55" gradientTransform="translate(${c.glowX / 960} 0) scale(1 1.4) translate(${-c.glowX / 960} 0)"><stop offset="0" stop-color="${c.glow}" stop-opacity="0.42"/><stop offset="1" stop-color="${c.glow}" stop-opacity="0"/></radialGradient>` +
     `<linearGradient id="v" x1="0" y1="0" x2="0" y2="1"><stop offset="0.55" stop-color="${d}" stop-opacity="0"/><stop offset="1" stop-color="${d}" stop-opacity="0.45"/></linearGradient>`;
   let o = `<rect width="960" height="540" fill="url(#w)"/><rect width="960" height="540" fill="url(#g)"/>`;
   // surface: bright wavy band at the top with a lighter rim
@@ -254,13 +256,13 @@ function farSVG(s) {
   const c = S[s]; const [back, front] = c.far; const r = rng(s.length * 13 + 5); let o = '';
   // back haze ridge with silhouettes
   o += band(408, [[10, 2, 0.4], [6, 5, 1.7], [3, 9, 0.2]], back);
-  for (let i = 0; i < 9; i++) { const x = i * 107 + r() * 40; o += wrap(x, 40, xx => farCoralHead(xx, 404 + r() * 4, 0.8 + r() * 0.5, back)); }
-  for (let i = 0; i < 6; i++) { const x = 60 + i * 160 + r() * 50; const h = 70 + r() * 70; o += wrap(x, 20, xx => farKelp(xx, 410, h, 0.9, back, i * 9 + s.length)); }
-  o += wrap(700, 75, xx => farArch(xx, 412, 0.95, back));
+  for (let i = 0; i < 9; i++) { const x = i * 107 + r() * 40; const yy0 = 404 + r() * 4, sc = 0.8 + r() * 0.5; o += wrap(x, 40, xx => farCoralHead(xx, yy0, sc, back)); }
+  for (let i = 0; i < 6; i++) { const x = 60 + i * 160 + r() * 50; const h = 70 + r() * 70; o += wrap(x, 40, xx => farKelp(xx, 410, h, 0.9, back, i * 9 + s.length)); }
+  o += wrap(700, 75, xx => farArch(xx, 432, 0.95, back));
   // front ridge, darker, a bit lower
   o += band(440, [[9, 3, 1.1], [5, 7, 2.6], [2.5, 13, 0.9]], front);
-  for (let i = 0; i < 7; i++) { const x = 40 + i * 140 + r() * 50; o += wrap(x, 40, xx => (i % 2 ? farFan(xx, 440, 0.8 + r() * 0.4, front) : farCoralHead(xx, 438, 0.9 + r() * 0.4, front))); }
-  if (s === 'autumn') for (let i = 0; i < 10; i++) { const x = 20 + i * 96 + r() * 40; o += wrap(x, 20, xx => farKelp(xx, 444, 120 + r() * 120, 1.1, front, i * 31)); }
+  for (let i = 0; i < 7; i++) { const x = 40 + i * 140 + r() * 50; const sc = 0.8 + r() * 0.5; o += wrap(x, 40, xx => (i % 2 ? farFan(xx, 440, sc, front) : farCoralHead(xx, 438, sc, front))); }
+  if (s === 'autumn') for (let i = 0; i < 10; i++) { const x = 20 + i * 96 + r() * 40; const hh = 120 + r() * 120; o += wrap(x, 40, xx => farKelp(xx, 444, hh, 1.1, front, i * 31)); }
   return svg(960, 540, o);
 }
 
@@ -275,28 +277,28 @@ function midSVG(s) {
   const A = [];
   if (s === 'autumn') {
     // kelp forest: tall stalks
-    [[30, 300], [72, 360], [118, 250], [168, 330], [222, 270]].forEach(([x, h], i) => A.push(wrap(x, 30, xx => kelp(xx, 462, h, 1.15, i % 2 ? kelpB : kelpC, 50 + i))));
+    [[52, 300], [104, 360], [176, 320], [232, 260]].forEach(([x, h], i) => A.push(wrap(x, 45, xx => kelp(xx, 462, h, 1.15, i % 2 ? kelpB : kelpC, 50 + i))));
     A.push(branchCoral(100, 452, 0.85, c.coralA, 7) + fanCoral(196, 452, 0.9, c.fan, 3) + anemone(58, 456, 1, c.anem, 2) + tubeSponge(250, 458, 0.9, c.sponge, 4));
   } else {
-    A.push(wrap(34, 30, xx => kelp(xx, 462, s === 'winter' ? 170 : 220, 1, kelpC, 51)));
+    A.push(wrap(48, 45, xx => kelp(xx, 462, s === 'winter' ? 170 : 220, 1, kelpC, 51)));
     A.push(fanCoral(92, 444, 1.25, c.fan, 3));
     A.push(branchCoral(160, 450, 1.05, c.coralA, 7));
     A.push(tubeSponge(226, 458, 1, c.sponge, 4));
     A.push(anemone(126, 462, 1.05, c.anem, 2) + brainCoral(60, 462, 0.9, c.brain, 9));
-    A.push(wrap(250, 20, xx => grass(xx, 464, 1.2, c.grass, 31, 6)));
+    A.push(wrap(250, 30, xx => grass(xx, 464, 1.5, c.grass, 31, 7)) + wrap(8, 30, xx => grass(xx, 464, 1.7, c.grass, 34, 7)) + grass(196, 466, 1.3, c.grass, 35, 5));
   }
   // ---- cluster B (around x 780-960, wraps) ----
   const B = [];
   if (s === 'autumn') {
-    [[820, 280], [866, 350], [912, 240], [950, 320]].forEach(([x, h], i) => B.push(wrap(x, 30, xx => kelp(xx, 462, h, 1.15, i % 2 ? kelpC : kelpB, 70 + i))));
-    B.push(wrap(890, 40, xx => branchCoral(xx, 454, 0.9, c.coralB, 17) + brainCoral(xx + 38, 462, 0.8, c.brain, 19)));
+    [[796, 280], [852, 350], [914, 300]].forEach(([x, h], i) => B.push(wrap(x, 45, xx => kelp(xx, 462, h, 1.15, i % 2 ? kelpC : kelpB, 70 + i))));
+    B.push(wrap(850, 75, xx => branchCoral(xx, 454, 0.9, c.coralB, 17)) + wrap(915, 40, xx => brainCoral(xx, 462, 0.8, c.brain, 19)));
   } else {
-    B.push(wrap(820, 40, xx => branchCoral(xx, 452, 0.9, c.coralB, 17)));
-    B.push(wrap(880, 50, xx => fanCoral(xx, 446, 1.05, c.coralA, 13)));
-    B.push(wrap(940, 30, xx => kelp(xx, 462, s === 'winter' ? 150 : 190, 1, kelpC, 53)));
+    B.push(wrap(820, 75, xx => branchCoral(xx, 452, 0.9, c.coralB, 17)));
+    B.push(wrap(872, 55, xx => fanCoral(xx, 446, 1.05, c.coralA, 13)));
+    B.push(wrap(912, 45, xx => kelp(xx, 462, s === 'winter' ? 150 : 190, 1, kelpC, 53)));
     B.push(wrap(905, 40, xx => brainCoral(xx, 464, 1, c.brain, 21)));
     B.push(wrap(860, 30, xx => anemone(xx, 464, 0.95, c.anem, 22)));
-    B.push(wrap(790, 20, xx => grass(xx, 464, 1.1, c.grass, 33, 5)));
+    B.push(wrap(790, 30, xx => grass(xx, 464, 1.5, c.grass, 33, 7)) + wrap(925, 30, xx => grass(xx, 466, 1.3, c.grass, 36, 5)));
   }
   o += A.join('') + B.join('');
   // ---- calm middle (x 280-760): only low, sparse props (≤ ~40 px tall) ----
@@ -325,12 +327,12 @@ function floorSVG(s) {
   // pebbles
   for (let i = 0; i < 26; i++) { const x = r() * 960, y = 30 + r() * 55, rr = 2 + r() * 4; o += wrap(x, 8, xx => ell(xx + 0.8, y + 0.8, rr, rr * 0.62, sand3) + ell(xx, y, rr, rr * 0.62, mix(sand2, c.rock.base, 0.35)) + ell(xx - rr * 0.3, y - rr * 0.25, rr * 0.35, rr * 0.2, hi, ' opacity="0.8"')); }
   // grass tufts poking up from the lip
-  for (let i = 0; i < 9; i++) { const x = 40 + i * 107 + r() * 40; o += wrap(x, 14, xx => grass(xx, 24 + r() * 6, 0.75, c.floorGrass, 200 + i, 4)); }
+  for (let i = 0; i < 9; i++) { const x = 40 + i * 107 + r() * 40; const gy = 26 + r() * 6; o += wrap(x, 18, xx => grass(xx, gy, 0.9, c.floorGrass, 200 + i, 4)); }
   // shells + starfish
   for (let i = 0; i < 6; i++) { const x = 80 + i * 160 + r() * 60, y = 40 + r() * 34; o += wrap(x, 10, xx => shell(xx, y, 0.9, c.shell)); }
-  for (let i = 0; i < 2; i++) { const x = 250 + i * 470 + r() * 60, y = 52 + r() * 20; o += wrap(x, 12, xx => starfish(xx, y, 1, c.star[0], c.star[1], r() * 50)); }
+  for (let i = 0; i < 2; i++) { const x = 250 + i * 470 + r() * 60, y = 52 + r() * 20; const rot = r() * 50; o += wrap(x, 12, xx => starfish(xx, y, 1, c.star[0], c.star[1], rot)); }
   if (s === 'autumn') for (let i = 0; i < 16; i++) { const x = r() * 960, y = 22 + r() * 60, a = r() * 180, col = ['#e8792e', '#d5503a', '#f2b13c'][i % 3]; o += wrap(x, 8, xx => ell(xx, y, 6, 2.4, col, ` transform="rotate(${f(a)} ${f(xx)} ${f(y)})"`)); }
-  if (s === 'winter') for (let i = 0; i < 40; i++) { const x = r() * 960, y = 14 + r() * 74; o += wrap(x, 3, xx => circ(xx, y, 0.8 + r() * 1.4, '#ffffff', ` opacity="${f(0.5 + r() * 0.4)}"`)); }
+  if (s === 'winter') for (let i = 0; i < 40; i++) { const x = r() * 960, y = 14 + r() * 74; const rr = 0.8 + r() * 1.4, op = f(0.5 + r() * 0.4); o += wrap(x, 3, xx => circ(xx, y, rr, '#ffffff', ` opacity="${op}"`)); }
   if (s === 'spring') for (let i = 0; i < 10; i++) { const x = r() * 960, y = 30 + r() * 50; o += wrap(x, 5, xx => circ(xx, y, 2.2, '#ffc6d6') + circ(xx, y, 0.9, '#ff8fb1')); }
   return svg(960, 90, `<rect y="14" width="960" height="76" fill="${sand}"/>` + o);
 }
@@ -356,7 +358,7 @@ P.bubble = `<circle cx="16" cy="16" r="11.5" fill="#1d5a7a" fill-opacity="0.08" 
   `<path d="M21.5 20.5A7 7 0 0 1 18.5 23" fill="none" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.4" stroke-linecap="round"/>`;
 const glowDef = (id, col) => `<radialGradient id="${id}"><stop offset="0" stop-color="${col}" stop-opacity="0.75"/><stop offset="0.45" stop-color="${col}" stop-opacity="0.25"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></radialGradient>`;
 const star4 = (cx, cy, R, r0, col) => `<path d="M${cx} ${cy - R}Q${cx + r0} ${cy - r0} ${cx + R} ${cy}Q${cx + r0} ${cy + r0} ${cx} ${cy + R}Q${cx - r0} ${cy + r0} ${cx - R} ${cy}Q${cx - r0} ${cy - r0} ${cx} ${cy - R}Z" fill="${col}"/>`;
-P.plankton = [glowDef('g', '#bffcff'), `<circle cx="16" cy="16" r="15" fill="url(#g)"/>` + star4(16, 16, 9, 1.6, '#e9ffff') + circ(16, 16, 2.4, '#ffffff')];
+P.plankton = [glowDef('g', '#bffcff'), `<circle cx="16" cy="16" r="15" fill="url(#g)"/>` + star4(16, 16, 9, 1.6, '#e9ffff').replace('/>', ' stroke="#3fb8c4" stroke-opacity="0.55" stroke-width="0.9" stroke-linejoin="round"/>') + circ(16, 16, 2.4, '#ffffff')];
 P.sparkle = [glowDef('g', '#fff2a8'), `<circle cx="16" cy="16" r="15" fill="url(#g)"/>` + star4(16, 16, 13, 2.4, '#ffd84a') + star4(16, 16, 10, 1.6, '#fff7c8') + circ(16, 16, 2.2, '#ffffff') + star4(26, 7, 3.5, 0.8, '#fff7c8')];
 P.snow = [`<radialGradient id="g"><stop offset="0" stop-color="#ffffff" stop-opacity="1"/><stop offset="0.5" stop-color="#f2f7ff" stop-opacity="0.85"/><stop offset="1" stop-color="#e6efff" stop-opacity="0"/></radialGradient>`,
   `<circle cx="16" cy="16" r="8" fill="url(#g)"/><path d="M13.2 14.6C14 12.6 17.4 12.2 18.6 14C19.8 15.8 18.6 18.6 16.2 18.8C14.2 19 12.6 16.6 13.2 14.6Z" fill="#ffffff" opacity="0.95"/>` + circ(20.5, 11.8, 1.1, '#ffffff', ' opacity="0.8"') + circ(11.2, 19.6, 0.8, '#ffffff', ' opacity="0.7"')];
@@ -399,7 +401,7 @@ for (const s of Object.keys(S)) {
   const d = path.join(OUT, 'seasons', s); fs.mkdirSync(d, { recursive: true });
   fs.writeFileSync(path.join(d, 'water.svg'), waterSVG(s));
   fs.writeFileSync(path.join(d, 'far.svg'), farSVG(s));
-  fs.writeFileSync(path.join(d, 'mid.svg'), midSVG(s));
+  PREC = s === 'autumn' ? 1 : 10; fs.writeFileSync(path.join(d, 'mid.svg'), midSVG(s)); PREC = 10;
   fs.writeFileSync(path.join(d, 'floor.svg'), floorSVG(s));
   fs.writeFileSync(path.join(d, 'rays.svg'), raysSVG(s));
 }
