@@ -26,7 +26,7 @@ canvas#game{display:block;background:#87ceeb;touch-action:none;cursor:pointer}
   padding:calc(var(--u)*2.4) calc(var(--u)*3.2);min-width:calc(var(--u)*34);max-width:94vw;max-height:94vh;overflow:auto;
   box-shadow:0 calc(var(--u)*.8) 0 #c9a25e, 0 calc(var(--u)*2) calc(var(--u)*4) rgba(0,0,0,.35);
   text-align:center;animation:pop .32s cubic-bezier(.2,.9,.3,1.2)}
-.panel.wide{width:calc(var(--u)*62)}
+.panel.wide{width:calc(var(--u)*80)}
 .panel.xwide{width:calc(var(--u)*84)}
 .panel h2{margin:0 0 calc(var(--u)*1.4);font-size:calc(var(--u)*4.2);color:#e0662b;
   text-shadow:0 calc(var(--u)*.3) 0 #ffd9a8;letter-spacing:.02em}

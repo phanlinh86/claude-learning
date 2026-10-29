@@ -9,7 +9,7 @@
   /* Difficulty presets → CONFIG overrides (see docs/MECHANICS.md). Unknown keys are skipped safely. */
   function difficultyOverrides(d, peek) {
     const o = Object.assign({}, (RF.DIFFICULTY && RF.DIFFICULTY[d]) || {});
-    o.peekTime = peek;   // the Settings "Peek at start" choice always wins
+    if (peek !== 'auto' && peek != null) o.peekTime = +peek;   // 'auto' = the difficulty's own peek (Easy 2 s, Normal/Hard none)
     return o;
   }
 
@@ -21,7 +21,7 @@
     autoRestart: params.get('autorestart') === '1',
     seed: params.has('seed') ? num('seed', 1) : null,
     world: null, weather: null, bot: null, renderer: null,
-    settings: { sfx: true, music: true, muted: false, difficulty: 'normal', peek: 1 },
+    settings: { sfx: true, music: true, muted: false, difficulty: 'normal', peek: 'auto' },
     fullscreen: false, overAt: 0, deadAt: -1,
     stats: { games: 0, scores: [], times: [], levels: [], matches: 0, mistakes: 0, errors: [] },
 

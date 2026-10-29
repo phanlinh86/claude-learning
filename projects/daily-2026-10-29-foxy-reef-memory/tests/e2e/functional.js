@@ -886,8 +886,12 @@ async function testLap2() {
   await ev(page, () => { RF.Game.renderer.banner = null; RF.Game.renderer.draw('playing'); });
   await shot(page, '20_lap2_hud');
   // banner gravity arrow must match the actual autumn current direction (it flips with seed + lap)
-  const arrows = await ev(page, () => { const out = []; for (const lv of [2, 6]) { RF.debug.gotoLevel(lv); out.push({ lv, gx: RF.debug.world.gravity.x, arrow: RF.Renderer.SEASON_INFO[2].arrow[0] }); } return out; });
-  check('Autumn banner arrow points the way the current really pushes (both laps)', arrows.every(a => Math.sign(a.gx) === Math.sign(a.arrow)), arrows);
+  // the banner hint (and arrow, drawn from the same vector) must match the real current, which flips with seed + lap
+  const arrows = await ev(page, () => { const R = RF.Game.renderer, out = [];
+    for (const lv of [2, 6]) { RF.debug.gotoLevel(lv); const said = []; const o = R.text; R.text = function (str) { said.push(str); return o.apply(this, arguments); };
+      R.banner = { s: 2, t: 0.8 }; R.draw('playing'); R.text = o; out.push({ lv, gx: RF.debug.world.gravity.x, hint: said.find(t => /current/i.test(t)) }); }
+    return out; });
+  check('Autumn banner says the way the current really pushes (both laps)', arrows.every(a => a.hint && (a.gx < 0 ? /LEFT/ : /RIGHT/).test(a.hint)), arrows);
   await ev(page, () => { RF.debug.gotoLevel(6); RF.Game.renderer.banner = { s: 2, t: 0.8 }; RF.Game.renderer.draw('playing'); });
   await shot(page, '21_autumn_banner_lap2');
   // natural progression winter → lap 2 spring via the bot
@@ -1049,6 +1053,8 @@ async function testLongRun() {
         cache: RF.Assets._cache.size, heapMB: performance.memory ? +(performance.memory.usedJSHeapSize / 1048576).toFixed(1) : null, errors: G.stats.errors.length };
     }));
     maxLevel = Math.max(maxLevel, samples[samples.length - 1].level);
+    // a strong bot rarely runs out of air: every other sample, end the round to exercise game over → auto-restart
+    if (samples.length % 2 === 0) await ev(page, () => { const w = RF.debug.world; if (w.state === 'playing') w.air = 0.001; });
     info('long run ' + JSON.stringify(samples[samples.length - 1]));
   }
   const st = await ev(page, () => RF.Game.stats);
@@ -1064,7 +1070,7 @@ async function testLongRun() {
     check('long run: JS heap does not keep growing (< +40 MB)', hN - h1 < 40, { from: h1, to: hN });
   }
   if (!QUICK) {
-    check('long run: bot died and auto-restarted at least once', st.games >= 1, { games: st.games });
+    check('long run: game over → auto-restart works repeatedly (≥ 3 games)', st.games >= 3, { games: st.games, levels: st.levels });
     check('long run: reached lap 2 (level ≥ 5)', maxLevel >= 4, { maxLevel });
   }
   await ev(page, () => RF.debug.setSpeed(1)); await page.waitForTimeout(300);

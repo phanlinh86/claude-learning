@@ -2,7 +2,7 @@
 # Build FoxyReefMemory.exe (Windows x64) — works from Linux, macOS or Windows (Git Bash).
 # Needs: Go 1.22+, Node + Playwright (only to render the app icon), Python 3 + Pillow.
 set -euo pipefail
-cd "$(dirname "$0")/.."            # projects/flappy
+cd "$(dirname "$0")/.."            # projects/daily-2026-10-29-foxy-reef-memory
 ROOT=$(pwd)
 export GOPROXY=${GOPROXY:-https://proxy.golang.org,direct}
 export GOSUMDB=${GOSUMDB:-sum.golang.org}

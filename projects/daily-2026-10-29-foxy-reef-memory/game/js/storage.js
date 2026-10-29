@@ -1,5 +1,5 @@
 /* RF.Storage — tiny key/value store.
- * In the Windows app it is backed by files in %APPDATA%\FamilyFlappy\data (via functions the
+ * In the Windows app it is backed by files in %APPDATA%\FoxyReefMemory\data (via functions the
  * Go host binds: ffStoreAll / ffStoreSet / ffStoreDel). In a plain browser it falls back to
  * localStorage. Values are strings; helpers for JSON. All reads come from an in-memory cache. */
 (function (RF) {

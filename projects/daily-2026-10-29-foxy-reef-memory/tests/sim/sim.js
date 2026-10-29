@@ -14,6 +14,12 @@ const { load } = require(path.join(__dirname, '..', 'unit', 'load.js'));
 const { MODELS, Human } = require('./players');
 
 const RF = load(['rng.js', 'world.js']);
+// Speed-up: Foxy and the cupcakes are pure presentation (no effect on air, score or cards),
+// so the sim skips them (~25 % faster). Set SIM_FULL=1 to simulate them anyway.
+if (!process.env.SIM_FULL) {
+  RF.World.prototype._stepFox = function () {};
+  RF.World.prototype._stepCupcakes = function () { this.cupcakes.length = 0; };
+}
 
 // same as main.js difficultyOverrides(d, peek)
 function difficultyOverrides(d, peek) {

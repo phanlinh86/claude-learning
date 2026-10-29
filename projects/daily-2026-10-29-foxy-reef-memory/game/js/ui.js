@@ -37,7 +37,7 @@
       $('setMusic').addEventListener('change', e => game.setSetting('music', e.target.checked));
       $('setFull').addEventListener('change', e => game.setFullscreen(e.target.checked));
       this.seg('setDifficulty', v => game.setSetting('difficulty', v));
-      this.seg('setPeek', v => game.setSetting('peek', parseInt(v, 10)));
+      this.seg('setPeek', v => game.setSetting('peek', v === 'auto' ? 'auto' : parseInt(v, 10)));
 
       // hidden file input used by the picture slots
       this.filePick = $('filePick');
@@ -62,7 +62,7 @@
       const s = this.game.settings;
       $('setSfx').checked = s.sfx; $('setMusic').checked = s.music; $('setFull').checked = !!this.game.fullscreen;
       $('setDifficulty').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === s.difficulty));
-      $('setPeek').querySelectorAll('button').forEach(b => b.classList.toggle('on', parseInt(b.dataset.v, 10) === s.peek));
+      $('setPeek').querySelectorAll('button').forEach(b => b.classList.toggle('on', String(b.dataset.v) === String(s.peek)));
       this.syncMute();
     },
     syncMute() {
