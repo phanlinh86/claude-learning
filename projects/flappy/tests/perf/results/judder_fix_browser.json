@@ -1,0 +1,73 @@
+{
+ "label": "judder_fix_browser",
+ "base": "http://127.0.0.1:8780/index.html",
+ "date": "2026-10-29T05:50:36.669Z",
+ "chromium": "153.0.8010.12",
+ "quick": true,
+ "judder": [
+  {
+   "hz": 60,
+   "jitterMs": 0,
+   "fps": 60,
+   "unevenScrollPct": 0,
+   "scrollRatioSD": 0,
+   "p95": 16.7
+  },
+  {
+   "hz": 60,
+   "jitterMs": 0.25,
+   "fps": 60,
+   "unevenScrollPct": 0,
+   "scrollRatioSD": 0,
+   "p95": 17.2
+  },
+  {
+   "hz": 75,
+   "jitterMs": 0,
+   "fps": 72,
+   "unevenScrollPct": 0,
+   "scrollRatioSD": 0,
+   "p95": 13.4
+  },
+  {
+   "hz": 75,
+   "jitterMs": 0.25,
+   "fps": 68.7,
+   "unevenScrollPct": 0,
+   "scrollRatioSD": 0,
+   "p95": 26.5
+  },
+  {
+   "hz": 120,
+   "jitterMs": 0,
+   "fps": 92.7,
+   "unevenScrollPct": 0,
+   "scrollRatioSD": 0,
+   "p95": 16.7
+  },
+  {
+   "hz": 120,
+   "jitterMs": 0.25,
+   "fps": 98.1,
+   "unevenScrollPct": 0,
+   "scrollRatioSD": 0,
+   "p95": 16.9
+  },
+  {
+   "hz": 144,
+   "jitterMs": 0,
+   "fps": 107,
+   "unevenScrollPct": 0,
+   "scrollRatioSD": 0,
+   "p95": 13.9
+  },
+  {
+   "hz": 144,
+   "jitterMs": 0.25,
+   "fps": 96.3,
+   "unevenScrollPct": 0,
+   "scrollRatioSD": 0,
+   "p95": 14.3
+  }
+ ]
+}

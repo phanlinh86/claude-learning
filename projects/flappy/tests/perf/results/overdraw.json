@@ -1,0 +1,262 @@
+{
+ "baseline": [
+  {
+   "backing": "1280x720",
+   "backingMP": 0.92,
+   "seasons": {
+    "spring": {
+     "MPperFrame": 7.7,
+     "overdraw": 8.36,
+     "calls": 69
+    },
+    "summer": {
+     "MPperFrame": 7.7,
+     "overdraw": 8.34,
+     "calls": 37
+    },
+    "autumn": {
+     "MPperFrame": 8.2,
+     "overdraw": 8.92,
+     "calls": 65
+    },
+    "winter": {
+     "MPperFrame": 8.2,
+     "overdraw": 8.89,
+     "calls": 41
+    }
+   },
+   "crossfade": {
+    "MPperFrame": 15.8,
+    "overdraw": 17.19,
+    "calls": 51
+   },
+   "viewport": "1280x720@1"
+  },
+  {
+   "backing": "1920x1080",
+   "backingMP": 2.07,
+   "seasons": {
+    "spring": {
+     "MPperFrame": 17.3,
+     "overdraw": 8.35,
+     "calls": 71
+    },
+    "summer": {
+     "MPperFrame": 17.3,
+     "overdraw": 8.34,
+     "calls": 37
+    },
+    "autumn": {
+     "MPperFrame": 18.5,
+     "overdraw": 8.91,
+     "calls": 65
+    },
+    "winter": {
+     "MPperFrame": 18.4,
+     "overdraw": 8.89,
+     "calls": 41
+    }
+   },
+   "crossfade": {
+    "MPperFrame": 35.6,
+    "overdraw": 17.19,
+    "calls": 51
+   },
+   "viewport": "1920x1080@1"
+  },
+  {
+   "backing": "3840x2160",
+   "backingMP": 8.29,
+   "seasons": {
+    "spring": {
+     "MPperFrame": 69.3,
+     "overdraw": 8.35,
+     "calls": 72
+    },
+    "summer": {
+     "MPperFrame": 69.2,
+     "overdraw": 8.34,
+     "calls": 37
+    },
+    "autumn": {
+     "MPperFrame": 73.9,
+     "overdraw": 8.91,
+     "calls": 65
+    },
+    "winter": {
+     "MPperFrame": 73.7,
+     "overdraw": 8.89,
+     "calls": 41
+    }
+   },
+   "crossfade": {
+    "MPperFrame": 142.5,
+    "overdraw": 17.18,
+    "calls": 51
+   },
+   "viewport": "1920x1080@2"
+  },
+  {
+   "backing": "2560x1440",
+   "backingMP": 3.69,
+   "seasons": {
+    "spring": {
+     "MPperFrame": 30.8,
+     "overdraw": 8.35,
+     "calls": 71
+    },
+    "summer": {
+     "MPperFrame": 30.7,
+     "overdraw": 8.34,
+     "calls": 37
+    },
+    "autumn": {
+     "MPperFrame": 32.8,
+     "overdraw": 8.91,
+     "calls": 65
+    },
+    "winter": {
+     "MPperFrame": 32.8,
+     "overdraw": 8.89,
+     "calls": 41
+    }
+   },
+   "crossfade": {
+    "MPperFrame": 63.4,
+    "overdraw": 17.19,
+    "calls": 51
+   },
+   "viewport": "2560x1440@1"
+  }
+ ],
+ "fix": [
+  {
+   "backing": "1280x720",
+   "backingMP": 0.92,
+   "seasons": {
+    "spring": {
+     "MPperFrame": 7.7,
+     "overdraw": 8.35,
+     "calls": 72
+    },
+    "summer": {
+     "MPperFrame": 7.7,
+     "overdraw": 8.34,
+     "calls": 37
+    },
+    "autumn": {
+     "MPperFrame": 8.2,
+     "overdraw": 8.91,
+     "calls": 66
+    },
+    "winter": {
+     "MPperFrame": 8.2,
+     "overdraw": 8.89,
+     "calls": 41
+    }
+   },
+   "crossfade": {
+    "MPperFrame": 15.8,
+    "overdraw": 17.18,
+    "calls": 51
+   },
+   "viewport": "1280x720@1"
+  },
+  {
+   "backing": "1920x1080",
+   "backingMP": 2.07,
+   "seasons": {
+    "spring": {
+     "MPperFrame": 17.3,
+     "overdraw": 8.35,
+     "calls": 68
+    },
+    "summer": {
+     "MPperFrame": 17.3,
+     "overdraw": 8.34,
+     "calls": 37
+    },
+    "autumn": {
+     "MPperFrame": 18.5,
+     "overdraw": 8.91,
+     "calls": 65
+    },
+    "winter": {
+     "MPperFrame": 18.4,
+     "overdraw": 8.88,
+     "calls": 41
+    }
+   },
+   "crossfade": {
+    "MPperFrame": 35.6,
+    "overdraw": 17.18,
+    "calls": 51
+   },
+   "viewport": "1920x1080@1"
+  },
+  {
+   "backing": "1920x1080",
+   "backingMP": 2.07,
+   "seasons": {
+    "spring": {
+     "MPperFrame": 17.3,
+     "overdraw": 8.35,
+     "calls": 70
+    },
+    "summer": {
+     "MPperFrame": 17.3,
+     "overdraw": 8.34,
+     "calls": 37
+    },
+    "autumn": {
+     "MPperFrame": 18.5,
+     "overdraw": 8.91,
+     "calls": 65
+    },
+    "winter": {
+     "MPperFrame": 18.4,
+     "overdraw": 8.88,
+     "calls": 41
+    }
+   },
+   "crossfade": {
+    "MPperFrame": 35.6,
+    "overdraw": 17.18,
+    "calls": 51
+   },
+   "viewport": "1920x1080@2"
+  },
+  {
+   "backing": "1920x1080",
+   "backingMP": 2.07,
+   "seasons": {
+    "spring": {
+     "MPperFrame": 17.3,
+     "overdraw": 8.35,
+     "calls": 71
+    },
+    "summer": {
+     "MPperFrame": 17.3,
+     "overdraw": 8.34,
+     "calls": 37
+    },
+    "autumn": {
+     "MPperFrame": 18.5,
+     "overdraw": 8.91,
+     "calls": 65
+    },
+    "winter": {
+     "MPperFrame": 18.4,
+     "overdraw": 8.88,
+     "calls": 41
+    }
+   },
+   "crossfade": {
+    "MPperFrame": 35.6,
+    "overdraw": 17.18,
+    "calls": 51
+   },
+   "viewport": "2560x1440@1"
+  }
+ ]
+}

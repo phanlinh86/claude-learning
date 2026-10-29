@@ -29,6 +29,7 @@
       this.lines = [];
       for (let i = 0; i < 7; i++) this.lines.push({ x: Math.random() * W, y: 40 + Math.random() * 260, len: 40 + Math.random() * 70, a: 0.1 + Math.random() * 0.15 });
       this.debug = /[?&]debug=1/.test(location.search);
+      const mp = /[?&]maxpx=([\d.]+)/.exec(location.search); this.maxPx = mp ? +mp[1] : 2;
       this.pointsPerSeason = 10;
       this.resize();
     }
@@ -40,21 +41,25 @@
       this.cssScale = s;
       this.canvas.style.width = Math.round(W * s) + 'px';
       this.canvas.style.height = Math.round(H * s) + 'px';
-      this.canvas.width = Math.round(W * s * dpr);
-      this.canvas.height = Math.round(H * s * dpr);
-      this.px = s * dpr; // device pixels per logical pixel
+      // P3: cap the backing store (default 2 → at most 1920×1080 device px); the browser upscales the rest.
+      // Fill cost grows with pixels: 4K full screen is 4× the pixels of 1080p for ~no visible gain in a cartoon game.
+      this.px = Math.min(s * dpr, this.maxPx || 2); // device pixels per logical pixel
+      this.canvas.width = Math.round(W * this.px);
+      this.canvas.height = Math.round(H * this.px);
       // keep the HUD buttons and toasts inside the game area even when the window is not 16:9
       const ox = (vw - W * s) / 2, oy = (vh - H * s) / 2;
       const hud = document.getElementById('hud'), toast = document.getElementById('toast');
       if (hud) { hud.style.top = (oy + 14 * s) + 'px'; hud.style.right = (ox + 14 * s) + 'px'; }
       if (toast) toast.style.bottom = (oy + 30 * s) + 'px';
       FF.Assets.setScale(this.px);
+      if (this.vis) FF.Assets.warmSeason(this.vis.cur);
     }
 
     attach(world, weather) { this.world = world; this.weather = weather; this.fx.length = 0; this.texts.length = 0; this.banner = null; this.shake = 0; this.flash = 0; }
 
     setSeason(i, instant) {
       i = ((i % 4) + 4) % 4;
+      FF.Assets.warmSeason((i + 1) % 4); FF.Assets.warmSeason(0);
       if (instant) { this.vis = { cur: i, prev: i, t: 1 }; return; }
       if (i === this.vis.cur) return;
       this.vis = { cur: i, prev: this.vis.t < 0.5 ? this.vis.prev : this.vis.cur, t: 0 };
@@ -129,12 +134,15 @@
     tile(key, off, y, w, h, alpha) {
       const spr = FF.Assets.sprite(key, w, h);
       if (!spr) return false;
-      const g = this.ctx;
-      let x = -(((off % w) + w) % w);
-      x = Math.round(x * this.px) / this.px;
+      // Blit at 1:1 device pixels: a stretched full-screen drawImage (even by 1 px) takes the
+      // filtered/resampling path, which costs 10x more in software and extra texture taps on a GPU.
+      const g = this.ctx, sw = spr.width, cw = g.canvas.width;
+      let x = -Math.round((((off % w) + w) % w) * sw / w);
+      g.setTransform(1, 0, 0, 1, this._ox, this._oy);
       if (alpha < 1) g.globalAlpha = alpha;
-      for (; x < W; x += w) g.drawImage(spr, x, y, w + 1 / this.px, h);
+      for (const yd = Math.round(y * this.px); x < cw; x += sw) g.drawImage(spr, x, yd);
       g.globalAlpha = 1;
+      g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
       return true;
     }
     customBg(slot, alpha) {
@@ -167,7 +175,8 @@
       const g = this.ctx;
       const sky = FF.Assets.sprite(name + '_sky', W, H);
       g.globalAlpha = alpha;
-      if (sky) g.drawImage(sky, 0, 0, W, H); else { g.fillStyle = '#9fd8f5'; g.fillRect(0, 0, W, H); }
+      if (sky) { g.setTransform(1, 0, 0, 1, this._ox, this._oy); g.drawImage(sky, 0, 0); g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy); }
+      else { g.fillStyle = '#9fd8f5'; g.fillRect(0, 0, W, H); }
       g.globalAlpha = 1;
       this.tile(name + '_clouds', scroll * PARALLAX.clouds + this.time * 7, 0, W, H, alpha);
       this.tile(name + '_far', scroll * PARALLAX.far, 0, W, H, alpha);
@@ -209,14 +218,16 @@
     // ---------------- main draw ----------------
     draw(mode) {
       const g = this.ctx, w = this.world;
-      g.setTransform(this.px, 0, 0, this.px, 0, 0);
-      g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+      this._ox = this._oy = 0;
       if (this.shake > 0) {
-        const m = this.shake * 14;
-        g.translate((Math.random() - .5) * m, (Math.random() - .5) * m);
+        const m = this.shake * 14 * this.px;
+        this._ox = Math.round((Math.random() - .5) * m); this._oy = Math.round((Math.random() - .5) * m);
       }
+      g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
+      g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
       const v = this.vis;
-      FF.Assets.trimSeasons([v.cur, v.prev]);
+      const lerped = w ? this.interp(w) : false;      // P2: draw the world between its last two 1/120 s steps
+      if (this._trimKey !== v.cur * 4 + v.prev) { this._trimKey = v.cur * 4 + v.prev; FF.Assets.trimSeasons([v.cur, v.prev, (v.cur + 1) % 4, 0]); }
 
       // 1. sky + parallax backdrop (cross-faded between seasons)
       if (v.t < 1 && v.prev !== v.cur) { this.backdrop(v.prev, 1); this.fadeLayer(() => this.backdrop(v.cur, 1), v.t); }
@@ -260,7 +271,29 @@
       if (w && (mode === 'playing' || mode === 'paused' || mode === 'ready')) this.hud(mode);
       if (this.banner) this.drawBanner();
       if (this.debug && w) this.debugDraw();
+      if (lerped) this.uninterp();
     }
+
+    /* Render interpolation: World runs fixed 1/120 s steps; a display frame almost never lands exactly on a
+     * step, so drawing the latest step makes motion advance 0,1,2 or 3 steps per frame (judder at 60/75/120/144 Hz).
+     * World._step stores the previous step's positions (_p*); draw at prev + (cur - prev) * (acc / step). */
+    interp(w) {
+      const a = clamp(w._acc / (w.cfg.step || 1 / 120), 0, 1), S = this._saved || (this._saved = []);
+      S.length = 0;
+      this._a = a;
+      this._lerp(w, 'scroll', '_pScroll');
+      const b = w.bird; this._lerp(b, 'x', '_px'); this._lerp(b, 'y', '_py'); this._lerp(b, 'angle', '_pa');
+      for (const t of w.turtles) { this._lerp(t, 'x', '_px'); this._lerp(t, 'y', '_py'); }
+      for (const d of w.drops) { this._lerp(d, 'x', '_px'); this._lerp(d, 'y', '_py'); }
+      this._rs = w.scroll;
+      return S.length > 0;
+    }
+    _lerp(o, k, pk) {
+      const p = o[pk]; if (p == null) return;
+      const S = this._saved; S.push(o, k, o[k]);
+      o[k] = p + (o[k] - p) * this._a;
+    }
+    uninterp() { const S = this._saved; for (let i = S.length - 3; i >= 0; i -= 3) S[i][S[i + 1]] = S[i + 2]; S.length = 0; }
 
     /* Draw fn() into an offscreen canvas at full strength, then blend it in once (clean cross-fade, no ghosting). */
     fadeLayer(fn, a) {
@@ -268,7 +301,7 @@
       if (o.width !== this.canvas.width || o.height !== this.canvas.height) { o.width = this.canvas.width; o.height = this.canvas.height; }
       const g0 = this.ctx;
       this.ctx = o.getContext('2d');
-      this.ctx.setTransform(this.px, 0, 0, this.px, 0, 0);
+      this.ctx.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
       this.ctx.imageSmoothingQuality = 'high';
       try { fn(); } finally { this.ctx = g0; }
       g0.save(); g0.setTransform(1, 0, 0, 1, 0, 0); g0.globalAlpha = a; g0.drawImage(o, 0, 0); g0.restore();

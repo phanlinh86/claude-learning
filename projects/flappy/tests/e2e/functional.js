@@ -655,7 +655,7 @@ async function testCustomPictures() {
   // very large image → downscaled
   const big = await makeImage(page, 4000, 3000, 'bird');
   await pickFile(page, slotIdx('bird'), { name: 'huge.png', mimeType: 'image/png', buffer: big });
-  await page.waitForFunction(() => FF.Assets.customSrc.bird && FF.Assets.customSrc.bird.naturalWidth <= 512, null, { timeout: 15000 }).catch(() => {});
+  await page.waitForFunction(() => FF.Assets.customSrc.bird && FF.Assets.customSrc.bird.naturalWidth >= 480, null, { timeout: 15000 }).catch(() => {});
   const dim = await ev(page, () => ({ w: FF.Assets.customSrc.bird.naturalWidth, h: FF.Assets.customSrc.bird.naturalHeight, len: (localStorage.getItem('ff:img_bird') || '').length }));
   check('4000×3000 character picture downscaled to ≤512 px and stored', dim.w <= 512 && dim.h <= 512 && dim.w >= 480 && dim.len > 1000, dim);
   const bigBg = await makeImage(page, 4000, 3000, 'bg', 'image/jpeg');
@@ -702,7 +702,8 @@ async function testLayout() {
       const fits = cv.w <= w + 1 && cv.h <= h + 1 && (Math.abs(cv.w - w) < 2 || Math.abs(cv.h - h) < 2);
       const centered = Math.abs(cv.l - (w - cv.w) / 2) < 2 && Math.abs(cv.t - (h - cv.h) / 2) < 2;
       check(`layout ${tag}: canvas letterboxed 16:9, fills one axis, centred`, Math.abs(aspect - 16 / 9) < 0.01 && fits && centered, cv);
-      check(`layout ${tag}: backing store = css size × dpr`, Math.abs(cv.bw - cv.w * dsf) < 2 && Math.abs(cv.bh - cv.h * dsf) < 2, [cv.bw, cv.bh]);
+      { const k = Math.min(1, 1920 / (cv.w * dsf));   // render resolution is capped at 1920×1080 (performance fix P3)
+        check(`layout ${tag}: backing store = css size × dpr (capped at 1920×1080)`, Math.abs(cv.bw - cv.w * dsf * k) < 2 && Math.abs(cv.bh - cv.h * dsf * k) < 2, [cv.bw, cv.bh]); }
       const issues = [];
       for (const scr of ['scrTitle', 'scrSettings', 'scrCustom', 'scrHow', 'scrPause', 'scrOver']) {
         await ev(page, s => {

@@ -1,0 +1,8609 @@
+{
+ "label": "baseline",
+ "base": "http://127.0.0.1:8780/index.html",
+ "date": "2026-10-29T04:45:27.060Z",
+ "chromium": "153.0.8010.12",
+ "quick": false,
+ "load": [
+  {
+   "net": "wifi",
+   "netName": "Home Wi-Fi 30 Mbps / 40 ms",
+   "cpu": 1,
+   "viewport": "1920x1080@1",
+   "phase": "cold",
+   "requests": 50,
+   "networkRequests": 50,
+   "status304": 0,
+   "transferKB": 121.7,
+   "dcl": 234,
+   "load": 512,
+   "fp": 208,
+   "fcp": 620,
+   "title": 513,
+   "firstGameFrame": 594,
+   "firstDrawMs": 79.4,
+   "firstFrameRasters": 8,
+   "firstFrameRasterMs": 20.9,
+   "longtasks": [
+    [
+     513.2,
+     91
+    ],
+    [
+     615.3,
+     55
+    ],
+    [
+     682.1,
+     53
+    ]
+   ],
+   "artFirstReqMs": 56,
+   "artLastEndMs": 489,
+   "wallMs": 2220,
+   "waterfall": [
+    {
+     "url": "/index.html?mute=1&seed=42",
+     "status": 200,
+     "cache": false,
+     "startMs": 0,
+     "endMs": 47,
+     "bytes": 2655
+    },
+    {
+     "url": "/css/style.css",
+     "status": 200,
+     "cache": false,
+     "startMs": 54,
+     "endMs": 108,
+     "bytes": 3964
+    },
+    {
+     "url": "/assets/default/icon.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 56,
+     "endMs": 109,
+     "bytes": 2026
+    },
+    {
+     "url": "/assets/default/bird_up.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 56,
+     "endMs": 109,
+     "bytes": 1371
+    },
+    {
+     "url": "/assets/default/drop.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 56,
+     "endMs": 116,
+     "bytes": 1029
+    },
+    {
+     "url": "/assets/default/turtle_happy.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 56,
+     "endMs": 119,
+     "bytes": 1664
+    },
+    {
+     "url": "/assets/default/particles/blossom.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 56,
+     "endMs": 116,
+     "bytes": 757
+    },
+    {
+     "url": "/assets/default/particles/butterfly_a.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 56,
+     "endMs": 219,
+     "bytes": 892
+    },
+    {
+     "url": "/assets/default/particles/leaf_orange.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 56,
+     "endMs": 219,
+     "bytes": 672
+    },
+    {
+     "url": "/assets/default/particles/snowflake.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 56,
+     "endMs": 244,
+     "bytes": 663
+    },
+    {
+     "url": "/js/rng.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 57,
+     "endMs": 153,
+     "bytes": 1413
+    },
+    {
+     "url": "/js/world.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 57,
+     "endMs": 158,
+     "bytes": 8742
+    },
+    {
+     "url": "/js/weather.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 57,
+     "endMs": 155,
+     "bytes": 6007
+    },
+    {
+     "url": "/js/bot.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 57,
+     "endMs": 165,
+     "bytes": 2249
+    },
+    {
+     "url": "/js/storage.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 57,
+     "endMs": 161,
+     "bytes": 1415
+    },
+    {
+     "url": "/js/assets.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 59,
+     "endMs": 168,
+     "bytes": 3627
+    },
+    {
+     "url": "/js/audio.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 59,
+     "endMs": 197,
+     "bytes": 3671
+    },
+    {
+     "url": "/js/render.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 59,
+     "endMs": 205,
+     "bytes": 8036
+    },
+    {
+     "url": "/js/ui.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 59,
+     "endMs": 203,
+     "bytes": 3472
+    },
+    {
+     "url": "/js/main.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 59,
+     "endMs": 219,
+     "bytes": 5102
+    },
+    {
+     "url": "/assets/default/bird_mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 227,
+     "endMs": 273,
+     "bytes": 1362
+    },
+    {
+     "url": "/assets/default/bird_down.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 282,
+     "bytes": 1372
+    },
+    {
+     "url": "/assets/default/turtle_walk1.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 282,
+     "bytes": 1610
+    },
+    {
+     "url": "/assets/default/turtle_walk2.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 282,
+     "bytes": 1614
+    },
+    {
+     "url": "/assets/default/heart.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 283,
+     "bytes": 743
+    },
+    {
+     "url": "/assets/default/particles/petal.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 295,
+     "bytes": 640
+    },
+    {
+     "url": "/assets/default/particles/leaf_red.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 323,
+     "bytes": 1385
+    },
+    {
+     "url": "/assets/default/particles/leaf_yellow.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 328,
+     "bytes": 675
+    },
+    {
+     "url": "/assets/default/particles/butterfly_b.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 328,
+     "bytes": 904
+    },
+    {
+     "url": "/assets/default/particles/seed.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 328,
+     "bytes": 931
+    },
+    {
+     "url": "/assets/default/seasons/spring/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 329,
+     "bytes": 668
+    },
+    {
+     "url": "/assets/default/seasons/spring/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 340,
+     "bytes": 2881
+    },
+    {
+     "url": "/assets/default/seasons/spring/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 379,
+     "bytes": 4523
+    },
+    {
+     "url": "/assets/default/seasons/spring/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 381,
+     "bytes": 4399
+    },
+    {
+     "url": "/assets/default/seasons/spring/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 377,
+     "bytes": 962
+    },
+    {
+     "url": "/assets/default/seasons/summer/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 380,
+     "bytes": 871
+    },
+    {
+     "url": "/assets/default/seasons/summer/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 381,
+     "bytes": 2357
+    },
+    {
+     "url": "/assets/default/seasons/summer/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 388,
+     "bytes": 4830
+    },
+    {
+     "url": "/assets/default/seasons/summer/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 430,
+     "bytes": 4151
+    },
+    {
+     "url": "/assets/default/seasons/summer/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 428,
+     "bytes": 1003
+    },
+    {
+     "url": "/assets/default/seasons/autumn/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 429,
+     "bytes": 687
+    },
+    {
+     "url": "/assets/default/seasons/autumn/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 429,
+     "bytes": 2917
+    },
+    {
+     "url": "/assets/default/seasons/autumn/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 229,
+     "endMs": 430,
+     "bytes": 4509
+    },
+    {
+     "url": "/assets/default/seasons/autumn/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 229,
+     "endMs": 442,
+     "bytes": 3734
+    },
+    {
+     "url": "/assets/default/seasons/autumn/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 229,
+     "endMs": 474,
+     "bytes": 978
+    },
+    {
+     "url": "/assets/default/seasons/winter/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 229,
+     "endMs": 474,
+     "bytes": 678
+    },
+    {
+     "url": "/assets/default/seasons/winter/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 229,
+     "endMs": 474,
+     "bytes": 2898
+    },
+    {
+     "url": "/assets/default/seasons/winter/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 229,
+     "endMs": 489,
+     "bytes": 6383
+    },
+    {
+     "url": "/assets/default/seasons/winter/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 229,
+     "endMs": 485,
+     "bytes": 3538
+    },
+    {
+     "url": "/assets/default/seasons/winter/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 229,
+     "endMs": 489,
+     "bytes": 1026
+    }
+   ]
+  },
+  {
+   "net": "wifi",
+   "netName": "Home Wi-Fi 30 Mbps / 40 ms",
+   "cpu": 1,
+   "viewport": "1920x1080@1",
+   "phase": "warm",
+   "requests": 50,
+   "networkRequests": 49,
+   "status304": 0,
+   "transferKB": 0,
+   "dcl": 89,
+   "load": 218,
+   "fp": 272,
+   "fcp": 272,
+   "title": 121,
+   "firstGameFrame": 204,
+   "firstDrawMs": 82.8,
+   "firstFrameRasters": 8,
+   "firstFrameRasterMs": 19.6,
+   "longtasks": [
+    [
+     120.6,
+     96
+    ],
+    [
+     218.9,
+     65
+    ],
+    [
+     293,
+     70
+    ]
+   ],
+   "artFirstReqMs": 61,
+   "artLastEndMs": 86,
+   "wallMs": 1939,
+   "waterfall": [
+    {
+     "url": "/index.html?mute=1&seed=42",
+     "status": 200,
+     "cache": true,
+     "startMs": 0,
+     "endMs": 3,
+     "bytes": 0
+    },
+    {
+     "url": "/css/style.css",
+     "status": 200,
+     "cache": false,
+     "startMs": 61,
+     "endMs": 61,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/icon.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 61,
+     "endMs": 61,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/bird_up.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 61,
+     "endMs": 62,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/drop.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 62,
+     "endMs": 62,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/turtle_happy.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 62,
+     "endMs": 62,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/blossom.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 62,
+     "endMs": 62,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/butterfly_a.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 62,
+     "endMs": 62,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/leaf_orange.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 62,
+     "endMs": 62,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/snowflake.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 62,
+     "endMs": 62,
+     "bytes": 0
+    },
+    {
+     "url": "/js/rng.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 63,
+     "endMs": 63,
+     "bytes": 0
+    },
+    {
+     "url": "/js/world.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 63,
+     "endMs": 63,
+     "bytes": 0
+    },
+    {
+     "url": "/js/weather.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 63,
+     "endMs": 63,
+     "bytes": 0
+    },
+    {
+     "url": "/js/bot.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 63,
+     "endMs": 63,
+     "bytes": 0
+    },
+    {
+     "url": "/js/storage.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 63,
+     "endMs": 63,
+     "bytes": 0
+    },
+    {
+     "url": "/js/assets.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 63,
+     "endMs": 63,
+     "bytes": 0
+    },
+    {
+     "url": "/js/audio.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 63,
+     "endMs": 64,
+     "bytes": 0
+    },
+    {
+     "url": "/js/render.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 64,
+     "endMs": 64,
+     "bytes": 0
+    },
+    {
+     "url": "/js/ui.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 64,
+     "endMs": 64,
+     "bytes": 0
+    },
+    {
+     "url": "/js/main.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 64,
+     "endMs": 64,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/bird_mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 79,
+     "endMs": 79,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/bird_down.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 79,
+     "endMs": 80,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/turtle_walk1.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 80,
+     "endMs": 80,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/turtle_walk2.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 80,
+     "endMs": 80,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/heart.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 80,
+     "endMs": 80,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/petal.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 80,
+     "endMs": 80,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/leaf_red.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 81,
+     "endMs": 81,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/leaf_yellow.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 81,
+     "endMs": 81,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/butterfly_b.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 81,
+     "endMs": 81,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/seed.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 81,
+     "endMs": 81,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 82,
+     "endMs": 82,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 82,
+     "endMs": 82,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 82,
+     "endMs": 82,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 82,
+     "endMs": 83,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 83,
+     "endMs": 84,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 84,
+     "endMs": 84,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 84,
+     "endMs": 84,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 84,
+     "endMs": 84,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 84,
+     "endMs": 84,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 84,
+     "endMs": 84,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 85,
+     "endMs": 85,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 85,
+     "endMs": 85,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 85,
+     "endMs": 85,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 85,
+     "endMs": 85,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 85,
+     "endMs": 85,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 85,
+     "endMs": 85,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 85,
+     "endMs": 85,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 85,
+     "endMs": 86,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 86,
+     "endMs": 86,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 86,
+     "endMs": 86,
+     "bytes": 0
+    }
+   ]
+  },
+  {
+   "net": "wifi",
+   "netName": "Home Wi-Fi 30 Mbps / 40 ms",
+   "cpu": 1,
+   "viewport": "1920x1080@1",
+   "phase": "expired",
+   "requests": 50,
+   "networkRequests": 50,
+   "status304": 49,
+   "transferKB": 15.8,
+   "dcl": 227,
+   "load": 492,
+   "fp": 164,
+   "fcp": 624,
+   "title": 492,
+   "firstGameFrame": 596,
+   "firstDrawMs": 102.4,
+   "firstFrameRasters": 8,
+   "firstFrameRasterMs": 27.6,
+   "longtasks": [
+    [
+     492.2,
+     114
+    ],
+    [
+     614.9,
+     68
+    ],
+    [
+     686.4,
+     52
+    ]
+   ],
+   "artFirstReqMs": 69,
+   "artLastEndMs": 471,
+   "wallMs": 2313,
+   "waterfall": [
+    {
+     "url": "/index.html?mute=1&seed=42",
+     "status": 200,
+     "cache": false,
+     "startMs": 0,
+     "endMs": 45,
+     "bytes": 330
+    },
+    {
+     "url": "/css/style.css",
+     "status": 304,
+     "cache": false,
+     "startMs": 68,
+     "endMs": 112,
+     "bytes": 329
+    },
+    {
+     "url": "/assets/default/icon.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 68,
+     "endMs": 115,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/bird_up.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 114,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/drop.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 127,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/turtle_happy.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 126,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/blossom.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 128,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/butterfly_a.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 219,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/leaf_orange.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 223,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/snowflake.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 245,
+     "bytes": 319
+    },
+    {
+     "url": "/js/rng.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 156,
+     "bytes": 343
+    },
+    {
+     "url": "/js/world.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 161,
+     "bytes": 343
+    },
+    {
+     "url": "/js/weather.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 160,
+     "bytes": 343
+    },
+    {
+     "url": "/js/bot.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 170,
+     "bytes": 343
+    },
+    {
+     "url": "/js/storage.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 174,
+     "bytes": 343
+    },
+    {
+     "url": "/js/assets.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 172,
+     "bytes": 343
+    },
+    {
+     "url": "/js/audio.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 200,
+     "bytes": 343
+    },
+    {
+     "url": "/js/render.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 205,
+     "bytes": 343
+    },
+    {
+     "url": "/js/ui.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 208,
+     "bytes": 343
+    },
+    {
+     "url": "/js/main.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 216,
+     "bytes": 343
+    },
+    {
+     "url": "/assets/default/bird_mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 220,
+     "endMs": 267,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/bird_down.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 221,
+     "endMs": 270,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/turtle_walk1.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 221,
+     "endMs": 270,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/turtle_walk2.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 221,
+     "endMs": 272,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/heart.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 221,
+     "endMs": 271,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/petal.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 221,
+     "endMs": 288,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/leaf_red.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 221,
+     "endMs": 315,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/leaf_yellow.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 221,
+     "endMs": 317,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/butterfly_b.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 221,
+     "endMs": 318,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/seed.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 221,
+     "endMs": 325,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/sky.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 222,
+     "endMs": 324,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/far.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 222,
+     "endMs": 334,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 222,
+     "endMs": 362,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/ground.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 222,
+     "endMs": 362,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/clouds.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 222,
+     "endMs": 363,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/sky.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 222,
+     "endMs": 368,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/far.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 222,
+     "endMs": 370,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 222,
+     "endMs": 377,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/ground.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 222,
+     "endMs": 409,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/clouds.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 222,
+     "endMs": 411,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/sky.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 222,
+     "endMs": 412,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/far.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 222,
+     "endMs": 420,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 222,
+     "endMs": 418,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/ground.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 222,
+     "endMs": 423,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/clouds.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 222,
+     "endMs": 455,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/sky.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 222,
+     "endMs": 456,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/far.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 222,
+     "endMs": 459,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 223,
+     "endMs": 467,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/ground.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 223,
+     "endMs": 468,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/clouds.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 223,
+     "endMs": 471,
+     "bytes": 319
+    }
+   ]
+  },
+  {
+   "net": "fast4g",
+   "netName": "Fast 4G 9 Mbps / 170 ms",
+   "cpu": 1,
+   "viewport": "1920x1080@1",
+   "phase": "cold",
+   "requests": 50,
+   "networkRequests": 50,
+   "status304": 0,
+   "transferKB": 121.7,
+   "dcl": 759,
+   "load": 1810,
+   "fp": 440,
+   "fcp": 912,
+   "title": 1811,
+   "firstGameFrame": 1893,
+   "firstDrawMs": 80.5,
+   "firstFrameRasters": 8,
+   "firstFrameRasterMs": 20.4,
+   "longtasks": [
+    [
+     1811,
+     90
+    ],
+    [
+     1912.2,
+     57
+    ]
+   ],
+   "artFirstReqMs": 182,
+   "artLastEndMs": 1793,
+   "wallMs": 3591,
+   "waterfall": [
+    {
+     "url": "/index.html?mute=1&seed=42",
+     "status": 200,
+     "cache": false,
+     "startMs": 0,
+     "endMs": 176,
+     "bytes": 2655
+    },
+    {
+     "url": "/css/style.css",
+     "status": 200,
+     "cache": false,
+     "startMs": 180,
+     "endMs": 374,
+     "bytes": 3964
+    },
+    {
+     "url": "/assets/default/icon.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 182,
+     "endMs": 375,
+     "bytes": 2026
+    },
+    {
+     "url": "/assets/default/bird_up.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 182,
+     "endMs": 369,
+     "bytes": 1371
+    },
+    {
+     "url": "/assets/default/drop.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 182,
+     "endMs": 370,
+     "bytes": 1029
+    },
+    {
+     "url": "/assets/default/turtle_happy.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 183,
+     "endMs": 377,
+     "bytes": 1664
+    },
+    {
+     "url": "/assets/default/particles/blossom.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 183,
+     "endMs": 373,
+     "bytes": 757
+    },
+    {
+     "url": "/assets/default/particles/butterfly_a.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 183,
+     "endMs": 744,
+     "bytes": 892
+    },
+    {
+     "url": "/assets/default/particles/leaf_orange.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 183,
+     "endMs": 744,
+     "bytes": 672
+    },
+    {
+     "url": "/assets/default/particles/snowflake.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 183,
+     "endMs": 906,
+     "bytes": 663
+    },
+    {
+     "url": "/js/rng.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 183,
+     "endMs": 546,
+     "bytes": 1413
+    },
+    {
+     "url": "/js/world.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 183,
+     "endMs": 565,
+     "bytes": 8742
+    },
+    {
+     "url": "/js/weather.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 183,
+     "endMs": 565,
+     "bytes": 6007
+    },
+    {
+     "url": "/js/bot.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 183,
+     "endMs": 558,
+     "bytes": 2249
+    },
+    {
+     "url": "/js/storage.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 183,
+     "endMs": 553,
+     "bytes": 1415
+    },
+    {
+     "url": "/js/assets.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 183,
+     "endMs": 563,
+     "bytes": 3627
+    },
+    {
+     "url": "/js/audio.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 183,
+     "endMs": 727,
+     "bytes": 3671
+    },
+    {
+     "url": "/js/render.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 183,
+     "endMs": 744,
+     "bytes": 8036
+    },
+    {
+     "url": "/js/ui.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 183,
+     "endMs": 739,
+     "bytes": 3472
+    },
+    {
+     "url": "/js/main.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 183,
+     "endMs": 748,
+     "bytes": 5102
+    },
+    {
+     "url": "/assets/default/bird_mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 932,
+     "bytes": 1362
+    },
+    {
+     "url": "/assets/default/bird_down.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 932,
+     "bytes": 1372
+    },
+    {
+     "url": "/assets/default/turtle_walk1.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 946,
+     "bytes": 1610
+    },
+    {
+     "url": "/assets/default/turtle_walk2.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 948,
+     "bytes": 1614
+    },
+    {
+     "url": "/assets/default/heart.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 941,
+     "bytes": 743
+    },
+    {
+     "url": "/assets/default/particles/petal.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 1082,
+     "bytes": 640
+    },
+    {
+     "url": "/assets/default/particles/leaf_red.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 1109,
+     "bytes": 1385
+    },
+    {
+     "url": "/assets/default/particles/leaf_yellow.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 1112,
+     "bytes": 675
+    },
+    {
+     "url": "/assets/default/particles/butterfly_b.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 1120,
+     "bytes": 904
+    },
+    {
+     "url": "/assets/default/particles/seed.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 1123,
+     "bytes": 931
+    },
+    {
+     "url": "/assets/default/seasons/spring/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 1125,
+     "bytes": 668
+    },
+    {
+     "url": "/assets/default/seasons/spring/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 1261,
+     "bytes": 2881
+    },
+    {
+     "url": "/assets/default/seasons/spring/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 1292,
+     "bytes": 4523
+    },
+    {
+     "url": "/assets/default/seasons/spring/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 1289,
+     "bytes": 4399
+    },
+    {
+     "url": "/assets/default/seasons/spring/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 1294,
+     "bytes": 962
+    },
+    {
+     "url": "/assets/default/seasons/summer/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 1295,
+     "bytes": 871
+    },
+    {
+     "url": "/assets/default/seasons/summer/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 1301,
+     "bytes": 2357
+    },
+    {
+     "url": "/assets/default/seasons/summer/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 1439,
+     "bytes": 4830
+    },
+    {
+     "url": "/assets/default/seasons/summer/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 1471,
+     "bytes": 4151
+    },
+    {
+     "url": "/assets/default/seasons/summer/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 1466,
+     "bytes": 1003
+    },
+    {
+     "url": "/assets/default/seasons/autumn/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 1467,
+     "bytes": 687
+    },
+    {
+     "url": "/assets/default/seasons/autumn/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 1473,
+     "bytes": 2917
+    },
+    {
+     "url": "/assets/default/seasons/autumn/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 1478,
+     "bytes": 4509
+    },
+    {
+     "url": "/assets/default/seasons/autumn/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 1618,
+     "bytes": 3734
+    },
+    {
+     "url": "/assets/default/seasons/autumn/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 755,
+     "endMs": 1639,
+     "bytes": 978
+    },
+    {
+     "url": "/assets/default/seasons/winter/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 756,
+     "endMs": 1642,
+     "bytes": 678
+    },
+    {
+     "url": "/assets/default/seasons/winter/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 756,
+     "endMs": 1647,
+     "bytes": 2898
+    },
+    {
+     "url": "/assets/default/seasons/winter/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 756,
+     "endMs": 1658,
+     "bytes": 6383
+    },
+    {
+     "url": "/assets/default/seasons/winter/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 756,
+     "endMs": 1655,
+     "bytes": 3538
+    },
+    {
+     "url": "/assets/default/seasons/winter/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 756,
+     "endMs": 1793,
+     "bytes": 1026
+    }
+   ]
+  },
+  {
+   "net": "fast4g",
+   "netName": "Fast 4G 9 Mbps / 170 ms",
+   "cpu": 1,
+   "viewport": "1920x1080@1",
+   "phase": "warm",
+   "requests": 50,
+   "networkRequests": 49,
+   "status304": 0,
+   "transferKB": 0,
+   "dcl": 71,
+   "load": 87,
+   "fp": 228,
+   "fcp": 228,
+   "title": 86,
+   "firstGameFrame": 164,
+   "firstDrawMs": 77,
+   "firstFrameRasters": 8,
+   "firstFrameRasterMs": 18.7,
+   "longtasks": [
+    [
+     86.9,
+     88
+    ],
+    [
+     186.4,
+     68
+    ]
+   ],
+   "artFirstReqMs": 55,
+   "artLastEndMs": 69,
+   "wallMs": 1798,
+   "waterfall": [
+    {
+     "url": "/index.html?mute=1&seed=42",
+     "status": 200,
+     "cache": true,
+     "startMs": 0,
+     "endMs": 3,
+     "bytes": 0
+    },
+    {
+     "url": "/css/style.css",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 55,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/icon.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 55,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/bird_up.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 55,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/drop.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 55,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/turtle_happy.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 55,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/blossom.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 55,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/butterfly_a.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 55,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/leaf_orange.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 55,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/snowflake.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 55,
+     "bytes": 0
+    },
+    {
+     "url": "/js/rng.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 56,
+     "bytes": 0
+    },
+    {
+     "url": "/js/world.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 56,
+     "endMs": 56,
+     "bytes": 0
+    },
+    {
+     "url": "/js/weather.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 56,
+     "endMs": 56,
+     "bytes": 0
+    },
+    {
+     "url": "/js/bot.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 56,
+     "endMs": 56,
+     "bytes": 0
+    },
+    {
+     "url": "/js/storage.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 56,
+     "endMs": 56,
+     "bytes": 0
+    },
+    {
+     "url": "/js/assets.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 56,
+     "endMs": 56,
+     "bytes": 0
+    },
+    {
+     "url": "/js/audio.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 56,
+     "endMs": 56,
+     "bytes": 0
+    },
+    {
+     "url": "/js/render.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 56,
+     "endMs": 56,
+     "bytes": 0
+    },
+    {
+     "url": "/js/ui.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 56,
+     "endMs": 56,
+     "bytes": 0
+    },
+    {
+     "url": "/js/main.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 56,
+     "endMs": 56,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/bird_mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 67,
+     "endMs": 67,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/bird_down.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 67,
+     "endMs": 67,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/turtle_walk1.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 67,
+     "endMs": 67,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/turtle_walk2.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 67,
+     "endMs": 67,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/heart.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 67,
+     "endMs": 67,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/petal.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 67,
+     "endMs": 67,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/leaf_red.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 67,
+     "endMs": 67,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/leaf_yellow.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 67,
+     "endMs": 67,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/butterfly_b.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 67,
+     "endMs": 68,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/seed.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 68,
+     "endMs": 68,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 68,
+     "endMs": 68,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 68,
+     "endMs": 68,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 68,
+     "endMs": 68,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 68,
+     "endMs": 68,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 68,
+     "endMs": 68,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 68,
+     "endMs": 68,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 68,
+     "endMs": 68,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 68,
+     "endMs": 68,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 68,
+     "endMs": 68,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 68,
+     "endMs": 68,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 68,
+     "endMs": 68,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 68,
+     "endMs": 68,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 68,
+     "endMs": 69,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 69,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 69,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 69,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 69,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 69,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 69,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 69,
+     "endMs": 69,
+     "bytes": 0
+    }
+   ]
+  },
+  {
+   "net": "fast4g",
+   "netName": "Fast 4G 9 Mbps / 170 ms",
+   "cpu": 1,
+   "viewport": "1920x1080@1",
+   "phase": "expired",
+   "requests": 50,
+   "networkRequests": 50,
+   "status304": 49,
+   "transferKB": 15.8,
+   "dcl": 790,
+   "load": 1826,
+   "fp": 468,
+   "fcp": 976,
+   "title": 1826,
+   "firstGameFrame": 1903,
+   "firstDrawMs": 76.4,
+   "firstFrameRasters": 11,
+   "firstFrameRasterMs": 19.9,
+   "longtasks": [
+    [
+     1826,
+     87
+    ],
+    [
+     1922,
+     50
+    ]
+   ],
+   "artFirstReqMs": 237,
+   "artLastEndMs": 1810,
+   "wallMs": 3600,
+   "waterfall": [
+    {
+     "url": "/index.html?mute=1&seed=42",
+     "status": 200,
+     "cache": false,
+     "startMs": 0,
+     "endMs": 181,
+     "bytes": 330
+    },
+    {
+     "url": "/css/style.css",
+     "status": 304,
+     "cache": false,
+     "startMs": 236,
+     "endMs": 415,
+     "bytes": 329
+    },
+    {
+     "url": "/assets/default/icon.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 237,
+     "endMs": 417,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/bird_up.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 237,
+     "endMs": 418,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/drop.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 237,
+     "endMs": 422,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/turtle_happy.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 237,
+     "endMs": 424,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/blossom.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 237,
+     "endMs": 430,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/butterfly_a.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 237,
+     "endMs": 787,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/leaf_orange.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 237,
+     "endMs": 796,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/snowflake.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 238,
+     "endMs": 940,
+     "bytes": 319
+    },
+    {
+     "url": "/js/rng.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 238,
+     "endMs": 588,
+     "bytes": 343
+    },
+    {
+     "url": "/js/world.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 238,
+     "endMs": 592,
+     "bytes": 343
+    },
+    {
+     "url": "/js/weather.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 238,
+     "endMs": 606,
+     "bytes": 343
+    },
+    {
+     "url": "/js/bot.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 238,
+     "endMs": 606,
+     "bytes": 343
+    },
+    {
+     "url": "/js/storage.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 238,
+     "endMs": 610,
+     "bytes": 343
+    },
+    {
+     "url": "/js/assets.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 238,
+     "endMs": 612,
+     "bytes": 343
+    },
+    {
+     "url": "/js/audio.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 238,
+     "endMs": 763,
+     "bytes": 343
+    },
+    {
+     "url": "/js/render.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 238,
+     "endMs": 772,
+     "bytes": 343
+    },
+    {
+     "url": "/js/ui.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 238,
+     "endMs": 781,
+     "bytes": 343
+    },
+    {
+     "url": "/js/main.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 238,
+     "endMs": 784,
+     "bytes": 343
+    },
+    {
+     "url": "/assets/default/bird_mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 786,
+     "endMs": 969,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/bird_down.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 787,
+     "endMs": 968,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/turtle_walk1.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 787,
+     "endMs": 974,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/turtle_walk2.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 787,
+     "endMs": 974,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/heart.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 788,
+     "endMs": 978,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/petal.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 788,
+     "endMs": 1113,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/leaf_red.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 788,
+     "endMs": 1143,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/leaf_yellow.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 788,
+     "endMs": 1143,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/butterfly_b.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 788,
+     "endMs": 1148,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/seed.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 788,
+     "endMs": 1150,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/sky.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 788,
+     "endMs": 1153,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/far.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 788,
+     "endMs": 1288,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 788,
+     "endMs": 1316,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/ground.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 788,
+     "endMs": 1319,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/clouds.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 789,
+     "endMs": 1322,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/sky.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 789,
+     "endMs": 1325,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/far.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 789,
+     "endMs": 1327,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 789,
+     "endMs": 1463,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/ground.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 789,
+     "endMs": 1493,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/clouds.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 789,
+     "endMs": 1496,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/sky.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 789,
+     "endMs": 1498,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/far.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 789,
+     "endMs": 1499,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 789,
+     "endMs": 1502,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/ground.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 789,
+     "endMs": 1636,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/clouds.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 789,
+     "endMs": 1666,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/sky.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 789,
+     "endMs": 1670,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/far.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 789,
+     "endMs": 1674,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 789,
+     "endMs": 1677,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/ground.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 789,
+     "endMs": 1679,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/clouds.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 789,
+     "endMs": 1810,
+     "bytes": 319
+    }
+   ]
+  },
+  {
+   "net": "slow4g",
+   "netName": "Slow 4G 1.6 Mbps / 300 ms",
+   "cpu": 1,
+   "viewport": "1920x1080@1",
+   "phase": "cold",
+   "requests": 50,
+   "networkRequests": 50,
+   "status304": 0,
+   "transferKB": 121.7,
+   "dcl": 1446,
+   "load": 3199,
+   "fp": 764,
+   "fcp": 1256,
+   "title": 3199,
+   "firstGameFrame": 3284,
+   "firstDrawMs": 82.5,
+   "firstFrameRasters": 8,
+   "firstFrameRasterMs": 20.8,
+   "longtasks": [
+    [
+     3199.6,
+     91
+    ],
+    [
+     3300.7,
+     58
+    ],
+    [
+     3360.9,
+     62
+    ]
+   ],
+   "artFirstReqMs": 319,
+   "artLastEndMs": 3179,
+   "wallMs": 4997,
+   "waterfall": [
+    {
+     "url": "/index.html?mute=1&seed=42",
+     "status": 200,
+     "cache": false,
+     "startMs": 0,
+     "endMs": 314,
+     "bytes": 2655
+    },
+    {
+     "url": "/css/style.css",
+     "status": 200,
+     "cache": false,
+     "startMs": 318,
+     "endMs": 688,
+     "bytes": 3964
+    },
+    {
+     "url": "/assets/default/icon.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 319,
+     "endMs": 696,
+     "bytes": 2026
+    },
+    {
+     "url": "/assets/default/bird_up.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 319,
+     "endMs": 659,
+     "bytes": 1371
+    },
+    {
+     "url": "/assets/default/drop.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 319,
+     "endMs": 666,
+     "bytes": 1029
+    },
+    {
+     "url": "/assets/default/turtle_happy.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 320,
+     "endMs": 703,
+     "bytes": 1664
+    },
+    {
+     "url": "/assets/default/particles/blossom.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 320,
+     "endMs": 681,
+     "bytes": 757
+    },
+    {
+     "url": "/assets/default/particles/butterfly_a.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 320,
+     "endMs": 1409,
+     "bytes": 892
+    },
+    {
+     "url": "/assets/default/particles/leaf_orange.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 320,
+     "endMs": 1417,
+     "bytes": 672
+    },
+    {
+     "url": "/assets/default/particles/snowflake.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 320,
+     "endMs": 1597,
+     "bytes": 663
+    },
+    {
+     "url": "/js/rng.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 320,
+     "endMs": 967,
+     "bytes": 1413
+    },
+    {
+     "url": "/js/world.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 320,
+     "endMs": 1078,
+     "bytes": 8742
+    },
+    {
+     "url": "/js/weather.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 320,
+     "endMs": 1085,
+     "bytes": 6007
+    },
+    {
+     "url": "/js/bot.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 320,
+     "endMs": 1049,
+     "bytes": 2249
+    },
+    {
+     "url": "/js/storage.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 320,
+     "endMs": 1026,
+     "bytes": 1415
+    },
+    {
+     "url": "/js/assets.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 320,
+     "endMs": 1093,
+     "bytes": 3627
+    },
+    {
+     "url": "/js/audio.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 320,
+     "endMs": 1288,
+     "bytes": 3671
+    },
+    {
+     "url": "/js/render.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 320,
+     "endMs": 1385,
+     "bytes": 8036
+    },
+    {
+     "url": "/js/ui.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 320,
+     "endMs": 1393,
+     "bytes": 3472
+    },
+    {
+     "url": "/js/main.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 320,
+     "endMs": 1438,
+     "bytes": 5102
+    },
+    {
+     "url": "/assets/default/bird_mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1444,
+     "endMs": 1753,
+     "bytes": 1362
+    },
+    {
+     "url": "/assets/default/bird_down.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1444,
+     "endMs": 1761,
+     "bytes": 1372
+    },
+    {
+     "url": "/assets/default/turtle_walk1.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1444,
+     "endMs": 1790,
+     "bytes": 1610
+    },
+    {
+     "url": "/assets/default/turtle_walk2.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1444,
+     "endMs": 1798,
+     "bytes": 1614
+    },
+    {
+     "url": "/assets/default/heart.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1444,
+     "endMs": 1785,
+     "bytes": 743
+    },
+    {
+     "url": "/assets/default/particles/petal.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1444,
+     "endMs": 1904,
+     "bytes": 640
+    },
+    {
+     "url": "/assets/default/particles/leaf_red.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1444,
+     "endMs": 2061,
+     "bytes": 1385
+    },
+    {
+     "url": "/assets/default/particles/leaf_yellow.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1444,
+     "endMs": 2069,
+     "bytes": 675
+    },
+    {
+     "url": "/assets/default/particles/butterfly_b.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1444,
+     "endMs": 2091,
+     "bytes": 904
+    },
+    {
+     "url": "/assets/default/particles/seed.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1444,
+     "endMs": 2099,
+     "bytes": 931
+    },
+    {
+     "url": "/assets/default/seasons/spring/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1445,
+     "endMs": 2105,
+     "bytes": 668
+    },
+    {
+     "url": "/assets/default/seasons/spring/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1445,
+     "endMs": 2218,
+     "bytes": 2881
+    },
+    {
+     "url": "/assets/default/seasons/spring/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1445,
+     "endMs": 2406,
+     "bytes": 4523
+    },
+    {
+     "url": "/assets/default/seasons/spring/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1445,
+     "endMs": 2420,
+     "bytes": 4399
+    },
+    {
+     "url": "/assets/default/seasons/spring/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1445,
+     "endMs": 2414,
+     "bytes": 962
+    },
+    {
+     "url": "/assets/default/seasons/summer/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1445,
+     "endMs": 2428,
+     "bytes": 871
+    },
+    {
+     "url": "/assets/default/seasons/summer/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1445,
+     "endMs": 2443,
+     "bytes": 2357
+    },
+    {
+     "url": "/assets/default/seasons/summer/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1445,
+     "endMs": 2548,
+     "bytes": 4830
+    },
+    {
+     "url": "/assets/default/seasons/summer/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1445,
+     "endMs": 2736,
+     "bytes": 4151
+    },
+    {
+     "url": "/assets/default/seasons/summer/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1445,
+     "endMs": 2728,
+     "bytes": 1003
+    },
+    {
+     "url": "/assets/default/seasons/autumn/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1445,
+     "endMs": 2743,
+     "bytes": 687
+    },
+    {
+     "url": "/assets/default/seasons/autumn/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1445,
+     "endMs": 2766,
+     "bytes": 2917
+    },
+    {
+     "url": "/assets/default/seasons/autumn/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1445,
+     "endMs": 2788,
+     "bytes": 4509
+    },
+    {
+     "url": "/assets/default/seasons/autumn/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1445,
+     "endMs": 2871,
+     "bytes": 3734
+    },
+    {
+     "url": "/assets/default/seasons/autumn/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1445,
+     "endMs": 3036,
+     "bytes": 978
+    },
+    {
+     "url": "/assets/default/seasons/winter/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1445,
+     "endMs": 3044,
+     "bytes": 678
+    },
+    {
+     "url": "/assets/default/seasons/winter/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1445,
+     "endMs": 3058,
+     "bytes": 2898
+    },
+    {
+     "url": "/assets/default/seasons/winter/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1445,
+     "endMs": 3110,
+     "bytes": 6383
+    },
+    {
+     "url": "/assets/default/seasons/winter/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1445,
+     "endMs": 3125,
+     "bytes": 3538
+    },
+    {
+     "url": "/assets/default/seasons/winter/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 1445,
+     "endMs": 3179,
+     "bytes": 1026
+    }
+   ]
+  },
+  {
+   "net": "slow4g",
+   "netName": "Slow 4G 1.6 Mbps / 300 ms",
+   "cpu": 1,
+   "viewport": "1920x1080@1",
+   "phase": "warm",
+   "requests": 50,
+   "networkRequests": 49,
+   "status304": 0,
+   "transferKB": 0,
+   "dcl": 68,
+   "load": 184,
+   "fp": 228,
+   "fcp": 228,
+   "title": 97,
+   "firstGameFrame": 173,
+   "firstDrawMs": 75.1,
+   "firstFrameRasters": 8,
+   "firstFrameRasterMs": 18.2,
+   "longtasks": [
+    [
+     97.4,
+     86
+    ],
+    [
+     184.6,
+     52
+    ]
+   ],
+   "artFirstReqMs": 48,
+   "artLastEndMs": 67,
+   "wallMs": 1887,
+   "waterfall": [
+    {
+     "url": "/index.html?mute=1&seed=42",
+     "status": 200,
+     "cache": true,
+     "startMs": 0,
+     "endMs": 2,
+     "bytes": 0
+    },
+    {
+     "url": "/css/style.css",
+     "status": 200,
+     "cache": false,
+     "startMs": 48,
+     "endMs": 48,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/icon.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 48,
+     "endMs": 48,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/bird_up.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 48,
+     "endMs": 48,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/drop.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 48,
+     "endMs": 48,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/turtle_happy.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 48,
+     "endMs": 48,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/blossom.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 48,
+     "endMs": 48,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/butterfly_a.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 48,
+     "endMs": 48,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/leaf_orange.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 48,
+     "endMs": 48,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/snowflake.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 48,
+     "endMs": 48,
+     "bytes": 0
+    },
+    {
+     "url": "/js/rng.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 48,
+     "endMs": 48,
+     "bytes": 0
+    },
+    {
+     "url": "/js/world.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 48,
+     "endMs": 48,
+     "bytes": 0
+    },
+    {
+     "url": "/js/weather.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 48,
+     "endMs": 48,
+     "bytes": 0
+    },
+    {
+     "url": "/js/bot.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 48,
+     "endMs": 48,
+     "bytes": 0
+    },
+    {
+     "url": "/js/storage.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 48,
+     "endMs": 48,
+     "bytes": 0
+    },
+    {
+     "url": "/js/assets.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 48,
+     "endMs": 48,
+     "bytes": 0
+    },
+    {
+     "url": "/js/audio.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 49,
+     "endMs": 49,
+     "bytes": 0
+    },
+    {
+     "url": "/js/render.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 49,
+     "endMs": 49,
+     "bytes": 0
+    },
+    {
+     "url": "/js/ui.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 49,
+     "endMs": 49,
+     "bytes": 0
+    },
+    {
+     "url": "/js/main.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 49,
+     "endMs": 49,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/bird_mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 63,
+     "endMs": 63,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/bird_down.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 64,
+     "endMs": 64,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/turtle_walk1.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 64,
+     "endMs": 64,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/turtle_walk2.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 64,
+     "endMs": 64,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/heart.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 64,
+     "endMs": 64,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/petal.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 64,
+     "endMs": 64,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/leaf_red.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 64,
+     "endMs": 64,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/leaf_yellow.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 64,
+     "endMs": 64,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/butterfly_b.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 64,
+     "endMs": 64,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/seed.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 64,
+     "endMs": 64,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 64,
+     "endMs": 64,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 64,
+     "endMs": 64,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 64,
+     "endMs": 64,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 64,
+     "endMs": 65,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 65,
+     "endMs": 65,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 65,
+     "endMs": 65,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 65,
+     "endMs": 65,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 65,
+     "endMs": 65,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 66,
+     "endMs": 66,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 66,
+     "endMs": 66,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 66,
+     "endMs": 66,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 66,
+     "endMs": 66,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 66,
+     "endMs": 67,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 67,
+     "endMs": 67,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 67,
+     "endMs": 67,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 67,
+     "endMs": 67,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 67,
+     "endMs": 67,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 67,
+     "endMs": 67,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 67,
+     "endMs": 67,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 67,
+     "endMs": 67,
+     "bytes": 0
+    }
+   ]
+  },
+  {
+   "net": "slow4g",
+   "netName": "Slow 4G 1.6 Mbps / 300 ms",
+   "cpu": 1,
+   "viewport": "1920x1080@1",
+   "phase": "expired",
+   "requests": 50,
+   "networkRequests": 50,
+   "status304": 49,
+   "transferKB": 15.8,
+   "dcl": 1305,
+   "load": 3131,
+   "fp": 704,
+   "fcp": 1208,
+   "title": 3131,
+   "firstGameFrame": 3257,
+   "firstDrawMs": 124.9,
+   "firstFrameRasters": 8,
+   "firstFrameRasterMs": 22.4,
+   "longtasks": [
+    [
+     3131.3,
+     133
+    ],
+    [
+     3273.6,
+     53
+    ],
+    [
+     3327.9,
+     71
+    ]
+   ],
+   "artFirstReqMs": 344,
+   "artLastEndMs": 3114,
+   "wallMs": 5000,
+   "waterfall": [
+    {
+     "url": "/index.html?mute=1&seed=42",
+     "status": 200,
+     "cache": false,
+     "startMs": 0,
+     "endMs": 315,
+     "bytes": 330
+    },
+    {
+     "url": "/css/style.css",
+     "status": 304,
+     "cache": false,
+     "startMs": 344,
+     "endMs": 654,
+     "bytes": 329
+    },
+    {
+     "url": "/assets/default/icon.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 344,
+     "endMs": 669,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/bird_up.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 344,
+     "endMs": 673,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/drop.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 344,
+     "endMs": 676,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/turtle_happy.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 344,
+     "endMs": 685,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/blossom.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 344,
+     "endMs": 691,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/butterfly_a.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 345,
+     "endMs": 1310,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/leaf_orange.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 345,
+     "endMs": 1315,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/snowflake.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 345,
+     "endMs": 1578,
+     "bytes": 319
+    },
+    {
+     "url": "/js/rng.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 345,
+     "endMs": 962,
+     "bytes": 343
+    },
+    {
+     "url": "/js/world.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 345,
+     "endMs": 976,
+     "bytes": 343
+    },
+    {
+     "url": "/js/weather.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 345,
+     "endMs": 985,
+     "bytes": 343
+    },
+    {
+     "url": "/js/bot.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 345,
+     "endMs": 992,
+     "bytes": 343
+    },
+    {
+     "url": "/js/storage.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 345,
+     "endMs": 1000,
+     "bytes": 343
+    },
+    {
+     "url": "/js/assets.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 345,
+     "endMs": 1008,
+     "bytes": 343
+    },
+    {
+     "url": "/js/audio.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 345,
+     "endMs": 1270,
+     "bytes": 343
+    },
+    {
+     "url": "/js/render.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 345,
+     "endMs": 1286,
+     "bytes": 343
+    },
+    {
+     "url": "/js/ui.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 345,
+     "endMs": 1291,
+     "bytes": 343
+    },
+    {
+     "url": "/js/main.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 347,
+     "endMs": 1299,
+     "bytes": 343
+    },
+    {
+     "url": "/assets/default/bird_mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1301,
+     "endMs": 1615,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/bird_down.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1302,
+     "endMs": 1622,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/turtle_walk1.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1302,
+     "endMs": 1629,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/turtle_walk2.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1302,
+     "endMs": 1637,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/heart.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1302,
+     "endMs": 1645,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/petal.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1302,
+     "endMs": 1885,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/leaf_red.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1302,
+     "endMs": 1922,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/leaf_yellow.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1302,
+     "endMs": 1929,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/butterfly_b.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1302,
+     "endMs": 1937,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/seed.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1303,
+     "endMs": 1945,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/sky.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1303,
+     "endMs": 1952,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/far.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1303,
+     "endMs": 2193,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1303,
+     "endMs": 2230,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/ground.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1303,
+     "endMs": 2236,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/clouds.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1303,
+     "endMs": 2244,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/sky.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1303,
+     "endMs": 2252,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/far.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1303,
+     "endMs": 2259,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1304,
+     "endMs": 2499,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/ground.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1304,
+     "endMs": 2536,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/clouds.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1304,
+     "endMs": 2544,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/sky.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1304,
+     "endMs": 2551,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/far.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1304,
+     "endMs": 2559,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1304,
+     "endMs": 2567,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/ground.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1304,
+     "endMs": 2807,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/clouds.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1304,
+     "endMs": 2844,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/sky.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1304,
+     "endMs": 2853,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/far.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1304,
+     "endMs": 2859,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1304,
+     "endMs": 2867,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/ground.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1304,
+     "endMs": 2874,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/clouds.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 1304,
+     "endMs": 3114,
+     "bytes": 319
+    }
+   ]
+  },
+  {
+   "net": "wifi",
+   "netName": "Home Wi-Fi 30 Mbps / 40 ms",
+   "cpu": 4,
+   "viewport": "1920x1080@1",
+   "phase": "cold",
+   "requests": 50,
+   "networkRequests": 50,
+   "status304": 0,
+   "transferKB": 121.7,
+   "dcl": 388,
+   "load": 1436,
+   "fp": 340,
+   "fcp": 1460,
+   "title": 949,
+   "firstGameFrame": 1378,
+   "firstDrawMs": 421.9,
+   "firstFrameRasters": 8,
+   "firstFrameRasterMs": 98.8,
+   "longtasks": [
+    [
+     206.6,
+     73
+    ],
+    [
+     864,
+     65
+    ],
+    [
+     947.7,
+     471
+    ],
+    [
+     1446.4,
+     273
+    ]
+   ],
+   "artFirstReqMs": 74,
+   "artLastEndMs": 686,
+   "wallMs": 4073,
+   "waterfall": [
+    {
+     "url": "/index.html?mute=1&seed=42",
+     "status": 200,
+     "cache": false,
+     "startMs": 0,
+     "endMs": 49,
+     "bytes": 2655
+    },
+    {
+     "url": "/css/style.css",
+     "status": 200,
+     "cache": false,
+     "startMs": 74,
+     "endMs": 127,
+     "bytes": 3964
+    },
+    {
+     "url": "/assets/default/icon.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 74,
+     "endMs": 127,
+     "bytes": 2026
+    },
+    {
+     "url": "/assets/default/bird_up.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 74,
+     "endMs": 127,
+     "bytes": 1371
+    },
+    {
+     "url": "/assets/default/drop.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 74,
+     "endMs": 136,
+     "bytes": 1029
+    },
+    {
+     "url": "/assets/default/turtle_happy.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 74,
+     "endMs": 136,
+     "bytes": 1664
+    },
+    {
+     "url": "/assets/default/particles/blossom.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 74,
+     "endMs": 137,
+     "bytes": 757
+    },
+    {
+     "url": "/assets/default/particles/butterfly_a.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 74,
+     "endMs": 228,
+     "bytes": 892
+    },
+    {
+     "url": "/assets/default/particles/leaf_orange.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 75,
+     "endMs": 229,
+     "bytes": 672
+    },
+    {
+     "url": "/assets/default/particles/snowflake.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 78,
+     "endMs": 268,
+     "bytes": 663
+    },
+    {
+     "url": "/js/rng.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 78,
+     "endMs": 172,
+     "bytes": 1413
+    },
+    {
+     "url": "/js/world.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 78,
+     "endMs": 175,
+     "bytes": 8742
+    },
+    {
+     "url": "/js/weather.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 78,
+     "endMs": 173,
+     "bytes": 6007
+    },
+    {
+     "url": "/js/bot.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 78,
+     "endMs": 183,
+     "bytes": 2249
+    },
+    {
+     "url": "/js/storage.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 78,
+     "endMs": 182,
+     "bytes": 1415
+    },
+    {
+     "url": "/js/assets.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 78,
+     "endMs": 184,
+     "bytes": 3627
+    },
+    {
+     "url": "/js/audio.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 78,
+     "endMs": 221,
+     "bytes": 3671
+    },
+    {
+     "url": "/js/render.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 78,
+     "endMs": 223,
+     "bytes": 8036
+    },
+    {
+     "url": "/js/ui.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 78,
+     "endMs": 223,
+     "bytes": 3472
+    },
+    {
+     "url": "/js/main.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 78,
+     "endMs": 233,
+     "bytes": 5102
+    },
+    {
+     "url": "/assets/default/bird_mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 371,
+     "endMs": 425,
+     "bytes": 1362
+    },
+    {
+     "url": "/assets/default/bird_down.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 371,
+     "endMs": 427,
+     "bytes": 1372
+    },
+    {
+     "url": "/assets/default/turtle_walk1.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 371,
+     "endMs": 427,
+     "bytes": 1610
+    },
+    {
+     "url": "/assets/default/turtle_walk2.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 371,
+     "endMs": 428,
+     "bytes": 1614
+    },
+    {
+     "url": "/assets/default/heart.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 371,
+     "endMs": 428,
+     "bytes": 743
+    },
+    {
+     "url": "/assets/default/particles/petal.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 371,
+     "endMs": 428,
+     "bytes": 640
+    },
+    {
+     "url": "/assets/default/particles/leaf_red.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 371,
+     "endMs": 479,
+     "bytes": 1385
+    },
+    {
+     "url": "/assets/default/particles/leaf_yellow.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 371,
+     "endMs": 478,
+     "bytes": 675
+    },
+    {
+     "url": "/assets/default/particles/butterfly_b.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 371,
+     "endMs": 495,
+     "bytes": 904
+    },
+    {
+     "url": "/assets/default/particles/seed.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 371,
+     "endMs": 494,
+     "bytes": 931
+    },
+    {
+     "url": "/assets/default/seasons/spring/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 371,
+     "endMs": 495,
+     "bytes": 668
+    },
+    {
+     "url": "/assets/default/seasons/spring/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 371,
+     "endMs": 497,
+     "bytes": 2881
+    },
+    {
+     "url": "/assets/default/seasons/spring/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 371,
+     "endMs": 562,
+     "bytes": 4523
+    },
+    {
+     "url": "/assets/default/seasons/spring/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 371,
+     "endMs": 566,
+     "bytes": 4399
+    },
+    {
+     "url": "/assets/default/seasons/spring/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 371,
+     "endMs": 542,
+     "bytes": 962
+    },
+    {
+     "url": "/assets/default/seasons/summer/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 371,
+     "endMs": 543,
+     "bytes": 871
+    },
+    {
+     "url": "/assets/default/seasons/summer/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 371,
+     "endMs": 565,
+     "bytes": 2357
+    },
+    {
+     "url": "/assets/default/seasons/summer/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 371,
+     "endMs": 568,
+     "bytes": 4830
+    },
+    {
+     "url": "/assets/default/seasons/summer/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 372,
+     "endMs": 603,
+     "bytes": 4151
+    },
+    {
+     "url": "/assets/default/seasons/summer/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 372,
+     "endMs": 617,
+     "bytes": 1003
+    },
+    {
+     "url": "/assets/default/seasons/autumn/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 372,
+     "endMs": 617,
+     "bytes": 687
+    },
+    {
+     "url": "/assets/default/seasons/autumn/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 372,
+     "endMs": 620,
+     "bytes": 2917
+    },
+    {
+     "url": "/assets/default/seasons/autumn/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 372,
+     "endMs": 622,
+     "bytes": 4509
+    },
+    {
+     "url": "/assets/default/seasons/autumn/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 372,
+     "endMs": 640,
+     "bytes": 3734
+    },
+    {
+     "url": "/assets/default/seasons/autumn/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 372,
+     "endMs": 654,
+     "bytes": 978
+    },
+    {
+     "url": "/assets/default/seasons/winter/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 372,
+     "endMs": 668,
+     "bytes": 678
+    },
+    {
+     "url": "/assets/default/seasons/winter/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 372,
+     "endMs": 669,
+     "bytes": 2898
+    },
+    {
+     "url": "/assets/default/seasons/winter/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 372,
+     "endMs": 670,
+     "bytes": 6383
+    },
+    {
+     "url": "/assets/default/seasons/winter/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 372,
+     "endMs": 670,
+     "bytes": 3538
+    },
+    {
+     "url": "/assets/default/seasons/winter/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 372,
+     "endMs": 686,
+     "bytes": 1026
+    }
+   ]
+  },
+  {
+   "net": "wifi",
+   "netName": "Home Wi-Fi 30 Mbps / 40 ms",
+   "cpu": 4,
+   "viewport": "1920x1080@1",
+   "phase": "warm",
+   "requests": 50,
+   "networkRequests": 49,
+   "status304": 0,
+   "transferKB": 0,
+   "dcl": 338,
+   "load": 437,
+   "fp": 336,
+   "fcp": 940,
+   "title": 437,
+   "firstGameFrame": 855,
+   "firstDrawMs": 414.6,
+   "firstFrameRasters": 8,
+   "firstFrameRasterMs": 105.3,
+   "longtasks": [
+    [
+     360.1,
+     52
+    ],
+    [
+     438.7,
+     453
+    ],
+    [
+     941.8,
+     301
+    ]
+   ],
+   "artFirstReqMs": 204,
+   "artLastEndMs": 325,
+   "wallMs": 3415,
+   "waterfall": [
+    {
+     "url": "/index.html?mute=1&seed=42",
+     "status": 200,
+     "cache": true,
+     "startMs": 0,
+     "endMs": 1,
+     "bytes": 0
+    },
+    {
+     "url": "/css/style.css",
+     "status": 200,
+     "cache": false,
+     "startMs": 203,
+     "endMs": 203,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/icon.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 204,
+     "endMs": 204,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/bird_up.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 204,
+     "endMs": 205,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/drop.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 205,
+     "endMs": 205,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/turtle_happy.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 205,
+     "endMs": 205,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/blossom.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 205,
+     "endMs": 206,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/butterfly_a.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 206,
+     "endMs": 206,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/leaf_orange.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 206,
+     "endMs": 207,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/snowflake.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 207,
+     "endMs": 207,
+     "bytes": 0
+    },
+    {
+     "url": "/js/rng.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 207,
+     "endMs": 208,
+     "bytes": 0
+    },
+    {
+     "url": "/js/world.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 208,
+     "endMs": 208,
+     "bytes": 0
+    },
+    {
+     "url": "/js/weather.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 208,
+     "endMs": 208,
+     "bytes": 0
+    },
+    {
+     "url": "/js/bot.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 208,
+     "endMs": 208,
+     "bytes": 0
+    },
+    {
+     "url": "/js/storage.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 209,
+     "endMs": 209,
+     "bytes": 0
+    },
+    {
+     "url": "/js/assets.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 210,
+     "endMs": 210,
+     "bytes": 0
+    },
+    {
+     "url": "/js/audio.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 210,
+     "endMs": 211,
+     "bytes": 0
+    },
+    {
+     "url": "/js/render.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 211,
+     "endMs": 211,
+     "bytes": 0
+    },
+    {
+     "url": "/js/ui.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 211,
+     "endMs": 212,
+     "bytes": 0
+    },
+    {
+     "url": "/js/main.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 212,
+     "endMs": 212,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/bird_mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 303,
+     "endMs": 305,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/bird_down.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 306,
+     "endMs": 306,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/turtle_walk1.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 307,
+     "endMs": 308,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/turtle_walk2.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 308,
+     "endMs": 308,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/heart.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 308,
+     "endMs": 308,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/petal.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 309,
+     "endMs": 310,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/leaf_red.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 310,
+     "endMs": 310,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/leaf_yellow.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 310,
+     "endMs": 311,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/butterfly_b.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 312,
+     "endMs": 312,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/seed.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 312,
+     "endMs": 313,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 313,
+     "endMs": 313,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 313,
+     "endMs": 314,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 314,
+     "endMs": 314,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 315,
+     "endMs": 315,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 315,
+     "endMs": 316,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 316,
+     "endMs": 316,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 316,
+     "endMs": 317,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 317,
+     "endMs": 317,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 317,
+     "endMs": 318,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 318,
+     "endMs": 319,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 319,
+     "endMs": 320,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 320,
+     "endMs": 320,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 320,
+     "endMs": 321,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 321,
+     "endMs": 322,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 322,
+     "endMs": 322,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 322,
+     "endMs": 323,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 323,
+     "endMs": 323,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 324,
+     "endMs": 324,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 324,
+     "endMs": 325,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 325,
+     "endMs": 325,
+     "bytes": 0
+    }
+   ]
+  },
+  {
+   "net": "wifi",
+   "netName": "Home Wi-Fi 30 Mbps / 40 ms",
+   "cpu": 4,
+   "viewport": "1920x1080@1",
+   "phase": "expired",
+   "requests": 50,
+   "networkRequests": 50,
+   "status304": 49,
+   "transferKB": 15.8,
+   "dcl": 474,
+   "load": 1276,
+   "fp": 388,
+   "fcp": 1320,
+   "title": 832,
+   "firstGameFrame": 1233,
+   "firstDrawMs": 396.2,
+   "firstFrameRasters": 8,
+   "firstFrameRasterMs": 94.7,
+   "longtasks": [
+    [
+     757.8,
+     50
+    ],
+    [
+     832.3,
+     435
+    ],
+    [
+     1288.3,
+     263
+    ]
+   ],
+   "artFirstReqMs": 262,
+   "artLastEndMs": 736,
+   "wallMs": 3851,
+   "waterfall": [
+    {
+     "url": "/index.html?mute=1&seed=42",
+     "status": 200,
+     "cache": false,
+     "startMs": 0,
+     "endMs": 50,
+     "bytes": 330
+    },
+    {
+     "url": "/css/style.css",
+     "status": 304,
+     "cache": false,
+     "startMs": 261,
+     "endMs": 306,
+     "bytes": 329
+    },
+    {
+     "url": "/assets/default/icon.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 262,
+     "endMs": 306,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/bird_up.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 262,
+     "endMs": 307,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/drop.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 262,
+     "endMs": 337,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/turtle_happy.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 262,
+     "endMs": 342,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/blossom.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 262,
+     "endMs": 343,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/butterfly_a.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 262,
+     "endMs": 453,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/leaf_orange.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 265,
+     "endMs": 451,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/snowflake.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 265,
+     "endMs": 454,
+     "bytes": 319
+    },
+    {
+     "url": "/js/rng.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 266,
+     "endMs": 352,
+     "bytes": 343
+    },
+    {
+     "url": "/js/world.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 266,
+     "endMs": 353,
+     "bytes": 343
+    },
+    {
+     "url": "/js/weather.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 266,
+     "endMs": 355,
+     "bytes": 343
+    },
+    {
+     "url": "/js/bot.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 266,
+     "endMs": 389,
+     "bytes": 343
+    },
+    {
+     "url": "/js/storage.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 266,
+     "endMs": 393,
+     "bytes": 343
+    },
+    {
+     "url": "/js/assets.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 267,
+     "endMs": 394,
+     "bytes": 343
+    },
+    {
+     "url": "/js/audio.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 267,
+     "endMs": 399,
+     "bytes": 343
+    },
+    {
+     "url": "/js/render.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 267,
+     "endMs": 400,
+     "bytes": 343
+    },
+    {
+     "url": "/js/ui.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 267,
+     "endMs": 401,
+     "bytes": 343
+    },
+    {
+     "url": "/js/main.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 268,
+     "endMs": 438,
+     "bytes": 343
+    },
+    {
+     "url": "/assets/default/bird_mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 464,
+     "endMs": 526,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/bird_down.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 464,
+     "endMs": 531,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/turtle_walk1.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 464,
+     "endMs": 537,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/turtle_walk2.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 464,
+     "endMs": 533,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/heart.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 464,
+     "endMs": 535,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/petal.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 464,
+     "endMs": 536,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/leaf_red.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 464,
+     "endMs": 569,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/leaf_yellow.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 464,
+     "endMs": 581,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/butterfly_b.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 464,
+     "endMs": 586,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/seed.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 464,
+     "endMs": 586,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/sky.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 464,
+     "endMs": 585,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/far.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 465,
+     "endMs": 586,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 465,
+     "endMs": 611,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/ground.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 465,
+     "endMs": 624,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/clouds.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 465,
+     "endMs": 633,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/sky.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 465,
+     "endMs": 634,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/far.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 465,
+     "endMs": 634,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 465,
+     "endMs": 640,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/ground.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 465,
+     "endMs": 655,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/clouds.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 469,
+     "endMs": 669,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/sky.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 469,
+     "endMs": 681,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/far.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 470,
+     "endMs": 684,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 471,
+     "endMs": 685,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/ground.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 471,
+     "endMs": 691,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/clouds.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 471,
+     "endMs": 698,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/sky.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 472,
+     "endMs": 715,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/far.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 472,
+     "endMs": 729,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 472,
+     "endMs": 729,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/ground.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 473,
+     "endMs": 731,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/clouds.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 473,
+     "endMs": 736,
+     "bytes": 319
+    }
+   ]
+  },
+  {
+   "net": "wifi",
+   "netName": "Home Wi-Fi 30 Mbps / 40 ms",
+   "cpu": 1,
+   "viewport": "1920x1080@2",
+   "phase": "cold",
+   "requests": 50,
+   "networkRequests": 50,
+   "status304": 0,
+   "transferKB": 121.7,
+   "dcl": 230,
+   "load": 515,
+   "fp": 192,
+   "fcp": 884,
+   "title": 514,
+   "firstGameFrame": 775,
+   "firstDrawMs": 257.7,
+   "firstFrameRasters": 8,
+   "firstFrameRasterMs": 80,
+   "longtasks": [
+    [
+     515.5,
+     307
+    ],
+    [
+     843.4,
+     174
+    ]
+   ],
+   "artFirstReqMs": 54,
+   "artLastEndMs": 484,
+   "wallMs": 2993,
+   "waterfall": [
+    {
+     "url": "/index.html?mute=1&seed=42",
+     "status": 200,
+     "cache": false,
+     "startMs": 0,
+     "endMs": 47,
+     "bytes": 2655
+    },
+    {
+     "url": "/css/style.css",
+     "status": 200,
+     "cache": false,
+     "startMs": 54,
+     "endMs": 108,
+     "bytes": 3964
+    },
+    {
+     "url": "/assets/default/icon.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 54,
+     "endMs": 110,
+     "bytes": 2026
+    },
+    {
+     "url": "/assets/default/bird_up.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 54,
+     "endMs": 108,
+     "bytes": 1371
+    },
+    {
+     "url": "/assets/default/drop.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 109,
+     "bytes": 1029
+    },
+    {
+     "url": "/assets/default/turtle_happy.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 110,
+     "bytes": 1664
+    },
+    {
+     "url": "/assets/default/particles/blossom.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 110,
+     "bytes": 757
+    },
+    {
+     "url": "/assets/default/particles/butterfly_a.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 227,
+     "bytes": 892
+    },
+    {
+     "url": "/assets/default/particles/leaf_orange.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 227,
+     "bytes": 672
+    },
+    {
+     "url": "/assets/default/particles/snowflake.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 248,
+     "bytes": 663
+    },
+    {
+     "url": "/js/rng.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 151,
+     "bytes": 1413
+    },
+    {
+     "url": "/js/world.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 159,
+     "bytes": 8742
+    },
+    {
+     "url": "/js/weather.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 159,
+     "bytes": 6007
+    },
+    {
+     "url": "/js/bot.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 154,
+     "bytes": 2249
+    },
+    {
+     "url": "/js/storage.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 153,
+     "bytes": 1415
+    },
+    {
+     "url": "/js/assets.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 156,
+     "bytes": 3627
+    },
+    {
+     "url": "/js/audio.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 197,
+     "bytes": 3671
+    },
+    {
+     "url": "/js/render.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 207,
+     "bytes": 8036
+    },
+    {
+     "url": "/js/ui.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 208,
+     "bytes": 3472
+    },
+    {
+     "url": "/js/main.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 55,
+     "endMs": 219,
+     "bytes": 5102
+    },
+    {
+     "url": "/assets/default/bird_mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 227,
+     "endMs": 282,
+     "bytes": 1362
+    },
+    {
+     "url": "/assets/default/bird_down.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 227,
+     "endMs": 282,
+     "bytes": 1372
+    },
+    {
+     "url": "/assets/default/turtle_walk1.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 227,
+     "endMs": 286,
+     "bytes": 1610
+    },
+    {
+     "url": "/assets/default/turtle_walk2.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 227,
+     "endMs": 284,
+     "bytes": 1614
+    },
+    {
+     "url": "/assets/default/heart.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 227,
+     "endMs": 287,
+     "bytes": 743
+    },
+    {
+     "url": "/assets/default/particles/petal.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 227,
+     "endMs": 296,
+     "bytes": 640
+    },
+    {
+     "url": "/assets/default/particles/leaf_red.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 227,
+     "endMs": 328,
+     "bytes": 1385
+    },
+    {
+     "url": "/assets/default/particles/leaf_yellow.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 227,
+     "endMs": 327,
+     "bytes": 675
+    },
+    {
+     "url": "/assets/default/particles/butterfly_b.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 340,
+     "bytes": 904
+    },
+    {
+     "url": "/assets/default/particles/seed.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 339,
+     "bytes": 931
+    },
+    {
+     "url": "/assets/default/seasons/spring/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 340,
+     "bytes": 668
+    },
+    {
+     "url": "/assets/default/seasons/spring/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 341,
+     "bytes": 2881
+    },
+    {
+     "url": "/assets/default/seasons/spring/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 376,
+     "bytes": 4523
+    },
+    {
+     "url": "/assets/default/seasons/spring/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 376,
+     "bytes": 4399
+    },
+    {
+     "url": "/assets/default/seasons/spring/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 386,
+     "bytes": 962
+    },
+    {
+     "url": "/assets/default/seasons/summer/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 386,
+     "bytes": 871
+    },
+    {
+     "url": "/assets/default/seasons/summer/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 386,
+     "bytes": 2357
+    },
+    {
+     "url": "/assets/default/seasons/summer/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 388,
+     "bytes": 4830
+    },
+    {
+     "url": "/assets/default/seasons/summer/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 427,
+     "bytes": 4151
+    },
+    {
+     "url": "/assets/default/seasons/summer/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 423,
+     "bytes": 1003
+    },
+    {
+     "url": "/assets/default/seasons/autumn/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 429,
+     "bytes": 687
+    },
+    {
+     "url": "/assets/default/seasons/autumn/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 429,
+     "bytes": 2917
+    },
+    {
+     "url": "/assets/default/seasons/autumn/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 437,
+     "bytes": 4509
+    },
+    {
+     "url": "/assets/default/seasons/autumn/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 437,
+     "bytes": 3734
+    },
+    {
+     "url": "/assets/default/seasons/autumn/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 474,
+     "bytes": 978
+    },
+    {
+     "url": "/assets/default/seasons/winter/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 479,
+     "bytes": 678
+    },
+    {
+     "url": "/assets/default/seasons/winter/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 482,
+     "bytes": 2898
+    },
+    {
+     "url": "/assets/default/seasons/winter/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 484,
+     "bytes": 6383
+    },
+    {
+     "url": "/assets/default/seasons/winter/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 484,
+     "bytes": 3538
+    },
+    {
+     "url": "/assets/default/seasons/winter/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 228,
+     "endMs": 483,
+     "bytes": 1026
+    }
+   ]
+  },
+  {
+   "net": "wifi",
+   "netName": "Home Wi-Fi 30 Mbps / 40 ms",
+   "cpu": 1,
+   "viewport": "1920x1080@2",
+   "phase": "warm",
+   "requests": 50,
+   "networkRequests": 49,
+   "status304": 0,
+   "transferKB": 0,
+   "dcl": 216,
+   "load": 239,
+   "fp": 620,
+   "fcp": 620,
+   "title": 239,
+   "firstGameFrame": 513,
+   "firstDrawMs": 270.9,
+   "firstFrameRasters": 11,
+   "firstFrameRasterMs": 82.5,
+   "longtasks": [
+    [
+     240.7,
+     333
+    ],
+    [
+     585.1,
+     195
+    ]
+   ],
+   "artFirstReqMs": 191,
+   "artLastEndMs": 215,
+   "wallMs": 2544,
+   "waterfall": [
+    {
+     "url": "/index.html?mute=1&seed=42",
+     "status": 200,
+     "cache": true,
+     "startMs": 0,
+     "endMs": 4,
+     "bytes": 0
+    },
+    {
+     "url": "/css/style.css",
+     "status": 200,
+     "cache": false,
+     "startMs": 191,
+     "endMs": 191,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/icon.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 191,
+     "endMs": 191,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/bird_up.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 191,
+     "endMs": 191,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/drop.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 191,
+     "endMs": 191,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/turtle_happy.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 191,
+     "endMs": 191,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/blossom.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 191,
+     "endMs": 191,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/butterfly_a.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 191,
+     "endMs": 191,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/leaf_orange.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 191,
+     "endMs": 191,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/snowflake.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 191,
+     "endMs": 192,
+     "bytes": 0
+    },
+    {
+     "url": "/js/rng.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 192,
+     "endMs": 192,
+     "bytes": 0
+    },
+    {
+     "url": "/js/world.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 192,
+     "endMs": 192,
+     "bytes": 0
+    },
+    {
+     "url": "/js/weather.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 192,
+     "endMs": 192,
+     "bytes": 0
+    },
+    {
+     "url": "/js/bot.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 192,
+     "endMs": 192,
+     "bytes": 0
+    },
+    {
+     "url": "/js/storage.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 192,
+     "endMs": 192,
+     "bytes": 0
+    },
+    {
+     "url": "/js/assets.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 192,
+     "endMs": 192,
+     "bytes": 0
+    },
+    {
+     "url": "/js/audio.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 192,
+     "endMs": 192,
+     "bytes": 0
+    },
+    {
+     "url": "/js/render.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 192,
+     "endMs": 192,
+     "bytes": 0
+    },
+    {
+     "url": "/js/ui.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 193,
+     "endMs": 193,
+     "bytes": 0
+    },
+    {
+     "url": "/js/main.js",
+     "status": 200,
+     "cache": false,
+     "startMs": 193,
+     "endMs": 193,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/bird_mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 211,
+     "endMs": 211,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/bird_down.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 211,
+     "endMs": 211,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/turtle_walk1.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 211,
+     "endMs": 212,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/turtle_walk2.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 212,
+     "endMs": 212,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/heart.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 212,
+     "endMs": 212,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/petal.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 212,
+     "endMs": 212,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/leaf_red.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 212,
+     "endMs": 212,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/leaf_yellow.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 212,
+     "endMs": 212,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/butterfly_b.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 212,
+     "endMs": 212,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/particles/seed.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 212,
+     "endMs": 212,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 212,
+     "endMs": 212,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 212,
+     "endMs": 212,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 212,
+     "endMs": 213,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 213,
+     "endMs": 213,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/spring/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 213,
+     "endMs": 213,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 213,
+     "endMs": 213,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 213,
+     "endMs": 213,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 213,
+     "endMs": 213,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 213,
+     "endMs": 213,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/summer/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 213,
+     "endMs": 213,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 213,
+     "endMs": 214,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 214,
+     "endMs": 214,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 214,
+     "endMs": 214,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 214,
+     "endMs": 214,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/autumn/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 214,
+     "endMs": 214,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/sky.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 214,
+     "endMs": 214,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/far.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 214,
+     "endMs": 214,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/mid.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 214,
+     "endMs": 214,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/ground.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 214,
+     "endMs": 214,
+     "bytes": 0
+    },
+    {
+     "url": "/assets/default/seasons/winter/clouds.svg",
+     "status": 200,
+     "cache": false,
+     "startMs": 214,
+     "endMs": 215,
+     "bytes": 0
+    }
+   ]
+  },
+  {
+   "net": "wifi",
+   "netName": "Home Wi-Fi 30 Mbps / 40 ms",
+   "cpu": 1,
+   "viewport": "1920x1080@2",
+   "phase": "expired",
+   "requests": 50,
+   "networkRequests": 50,
+   "status304": 49,
+   "transferKB": 15.8,
+   "dcl": 391,
+   "load": 661,
+   "fp": 332,
+   "fcp": 1056,
+   "title": 661,
+   "firstGameFrame": 942,
+   "firstDrawMs": 279.9,
+   "firstFrameRasters": 8,
+   "firstFrameRasterMs": 93.7,
+   "longtasks": [
+    [
+     661.3,
+     323
+    ],
+    [
+     1001.9,
+     191
+    ]
+   ],
+   "artFirstReqMs": 230,
+   "artLastEndMs": 644,
+   "wallMs": 3134,
+   "waterfall": [
+    {
+     "url": "/index.html?mute=1&seed=42",
+     "status": 200,
+     "cache": false,
+     "startMs": 0,
+     "endMs": 43,
+     "bytes": 330
+    },
+    {
+     "url": "/css/style.css",
+     "status": 304,
+     "cache": false,
+     "startMs": 230,
+     "endMs": 277,
+     "bytes": 329
+    },
+    {
+     "url": "/assets/default/icon.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 230,
+     "endMs": 277,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/bird_up.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 230,
+     "endMs": 278,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/drop.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 230,
+     "endMs": 293,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/turtle_happy.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 230,
+     "endMs": 301,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/blossom.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 230,
+     "endMs": 304,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/butterfly_a.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 230,
+     "endMs": 401,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/leaf_orange.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 231,
+     "endMs": 403,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/snowflake.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 231,
+     "endMs": 417,
+     "bytes": 319
+    },
+    {
+     "url": "/js/rng.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 231,
+     "endMs": 322,
+     "bytes": 343
+    },
+    {
+     "url": "/js/world.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 231,
+     "endMs": 325,
+     "bytes": 343
+    },
+    {
+     "url": "/js/weather.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 231,
+     "endMs": 325,
+     "bytes": 343
+    },
+    {
+     "url": "/js/bot.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 231,
+     "endMs": 339,
+     "bytes": 343
+    },
+    {
+     "url": "/js/storage.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 231,
+     "endMs": 357,
+     "bytes": 343
+    },
+    {
+     "url": "/js/assets.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 231,
+     "endMs": 358,
+     "bytes": 343
+    },
+    {
+     "url": "/js/audio.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 231,
+     "endMs": 368,
+     "bytes": 343
+    },
+    {
+     "url": "/js/render.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 231,
+     "endMs": 370,
+     "bytes": 343
+    },
+    {
+     "url": "/js/ui.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 231,
+     "endMs": 373,
+     "bytes": 343
+    },
+    {
+     "url": "/js/main.js",
+     "status": 304,
+     "cache": false,
+     "startMs": 231,
+     "endMs": 382,
+     "bytes": 343
+    },
+    {
+     "url": "/assets/default/bird_mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 384,
+     "endMs": 428,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/bird_down.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 385,
+     "endMs": 428,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/turtle_walk1.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 385,
+     "endMs": 429,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/turtle_walk2.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 386,
+     "endMs": 446,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/heart.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 386,
+     "endMs": 450,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/petal.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 386,
+     "endMs": 462,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/leaf_red.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 387,
+     "endMs": 472,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/leaf_yellow.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 387,
+     "endMs": 475,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/butterfly_b.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 387,
+     "endMs": 476,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/particles/seed.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 387,
+     "endMs": 491,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/sky.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 388,
+     "endMs": 495,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/far.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 388,
+     "endMs": 508,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 388,
+     "endMs": 515,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/ground.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 388,
+     "endMs": 521,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/spring/clouds.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 388,
+     "endMs": 520,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/sky.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 388,
+     "endMs": 535,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/far.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 388,
+     "endMs": 540,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 388,
+     "endMs": 555,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/ground.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 388,
+     "endMs": 559,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/summer/clouds.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 388,
+     "endMs": 564,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/sky.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 388,
+     "endMs": 566,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/far.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 388,
+     "endMs": 579,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 388,
+     "endMs": 583,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/ground.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 389,
+     "endMs": 598,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/autumn/clouds.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 389,
+     "endMs": 604,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/sky.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 389,
+     "endMs": 616,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/far.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 389,
+     "endMs": 613,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/mid.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 391,
+     "endMs": 629,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/ground.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 391,
+     "endMs": 627,
+     "bytes": 319
+    },
+    {
+     "url": "/assets/default/seasons/winter/clouds.svg",
+     "status": 304,
+     "cache": false,
+     "startMs": 391,
+     "endMs": 644,
+     "bytes": 319
+    }
+   ]
+  }
+ ],
+ "micro": [
+  {
+   "viewport": "1280x720@1",
+   "backing": "1280x720",
+   "flushOnly": 0.025,
+   "fullLayer_scaledHigh": 4.235,
+   "fullLayer_opaqueSky": 0.345,
+   "fullLayer_scaledLow": 2.82,
+   "fullLayer_1to1Device": 0.36,
+   "backdrop4Layers": 14.765,
+   "fullRectTint": 0.27,
+   "sunRays6Gradients": 1.675,
+   "fogGradient": 0.835,
+   "fadeLayer": 20.1,
+   "hudText": 0.09,
+   "particlesWinter": 0.01,
+   "particlesSpring": 0.005,
+   "trimSeasons": 0.002,
+   "fullDraw": 19.44,
+   "raster": {
+    "autumn_sky": 7.567,
+    "autumn_clouds": 3.967,
+    "autumn_far": 4.067,
+    "autumn_mid": 5.133,
+    "autumn_ground": 1.233
+   }
+  },
+  {
+   "viewport": "1920x1080@1",
+   "backing": "1920x1080",
+   "flushOnly": 0.01,
+   "fullLayer_scaledHigh": 10.04,
+   "fullLayer_opaqueSky": 0.845,
+   "fullLayer_scaledLow": 6.48,
+   "fullLayer_1to1Device": 0.775,
+   "backdrop4Layers": 32.745,
+   "fullRectTint": 0.675,
+   "sunRays6Gradients": 2.415,
+   "fogGradient": 1.87,
+   "fadeLayer": 42.01,
+   "hudText": 0.095,
+   "particlesWinter": 0.005,
+   "particlesSpring": 0.005,
+   "trimSeasons": 0.002,
+   "fullDraw": 41.7,
+   "raster": {
+    "autumn_sky": 18.7,
+    "autumn_clouds": 9.1,
+    "autumn_far": 12.533,
+    "autumn_mid": 9.367,
+    "autumn_ground": 1.8
+   }
+  },
+  {
+   "viewport": "2560x1440@1",
+   "backing": "2560x1440",
+   "flushOnly": 0.015,
+   "fullLayer_scaledHigh": 22.355,
+   "fullLayer_opaqueSky": 1.345,
+   "fullLayer_scaledLow": 14.29,
+   "fullLayer_1to1Device": 1.295,
+   "backdrop4Layers": 55.245,
+   "fullRectTint": 1.435,
+   "sunRays6Gradients": 3.725,
+   "fogGradient": 3.74,
+   "fadeLayer": 79.36,
+   "hudText": 0.225,
+   "particlesWinter": 0.01,
+   "particlesSpring": 0.005,
+   "trimSeasons": 0.003,
+   "fullDraw": 79.925,
+   "raster": {
+    "autumn_sky": 32.567,
+    "autumn_clouds": 15,
+    "autumn_far": 15.9,
+    "autumn_mid": 15.5,
+    "autumn_ground": 3.4
+   }
+  }
+ ],
+ "play": [
+  {
+   "viewport": "1280x720@1",
+   "cpu": 1,
+   "backing": [
+    1280,
+    720
+   ],
+   "title": {
+    "frames": 187,
+    "fps": 46.4,
+    "p50": 20.1,
+    "p95": 30.1,
+    "p99": 32,
+    "max": 32.6,
+    "over20ms": 52.7,
+    "dropped": 28,
+    "drawP50": 0.4,
+    "drawP95": 0.8,
+    "drawMax": 3.1,
+    "unevenScrollPct": 26.9,
+    "scrollRatioSD": 0.293,
+    "frameJsP50": 0.5,
+    "frameJsP95": 1.6,
+    "longTasks": 0,
+    "longTaskMs": 0,
+    "rasterMisses": 3,
+    "rasterMs": 1.4,
+    "restarts": 0,
+    "heapMB": 9.5
+   },
+   "seasons": [
+    {
+     "season": "spring",
+     "frames": 479,
+     "fps": 47.8,
+     "p50": 20.2,
+     "p95": 26.4,
+     "p99": 31.4,
+     "max": 45.3,
+     "over20ms": 54.2,
+     "dropped": 41,
+     "drawP50": 0.4,
+     "drawP95": 0.8,
+     "drawMax": 2.4,
+     "unevenScrollPct": 30.5,
+     "scrollRatioSD": 0.326,
+     "frameJsP50": 0.5,
+     "frameJsP95": 0.9,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "summer",
+     "frames": 458,
+     "fps": 45.7,
+     "p50": 19.9,
+     "p95": 38.2,
+     "p99": 40.1,
+     "max": 42,
+     "over20ms": 46,
+     "dropped": 63,
+     "drawP50": 0.4,
+     "drawP95": 15.7,
+     "drawMax": 19.2,
+     "unevenScrollPct": 23,
+     "scrollRatioSD": 0.307,
+     "frameJsP50": 0.5,
+     "frameJsP95": 15.9,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "autumn",
+     "frames": 484,
+     "fps": 48.3,
+     "p50": 19.8,
+     "p95": 27.5,
+     "p99": 30.5,
+     "max": 32.9,
+     "over20ms": 43.3,
+     "dropped": 53,
+     "drawP50": 0.4,
+     "drawP95": 0.6,
+     "drawMax": 6.8,
+     "unevenScrollPct": 27.5,
+     "scrollRatioSD": 0.315,
+     "frameJsP50": 0.5,
+     "frameJsP95": 0.7,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "winter",
+     "frames": 512,
+     "fps": 51.2,
+     "p50": 19,
+     "p95": 27.2,
+     "p99": 29.7,
+     "max": 30.6,
+     "over20ms": 25.2,
+     "dropped": 32,
+     "drawP50": 0.4,
+     "drawP95": 0.6,
+     "drawMax": 2.6,
+     "unevenScrollPct": 18.2,
+     "scrollRatioSD": 0.278,
+     "frameJsP50": 0.4,
+     "frameJsP95": 0.7,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    }
+   ],
+   "errors": []
+  },
+  {
+   "viewport": "1920x1080@1",
+   "cpu": 1,
+   "backing": [
+    1920,
+    1080
+   ],
+   "title": {
+    "frames": 96,
+    "fps": 23.9,
+    "p50": 41.2,
+    "p95": 50.2,
+    "p99": 60.5,
+    "max": 60.5,
+    "over20ms": 100,
+    "dropped": 138,
+    "drawP50": 37,
+    "drawP95": 45.8,
+    "drawMax": 61.2,
+    "unevenScrollPct": 21.1,
+    "scrollRatioSD": 0.211,
+    "frameJsP50": 37.2,
+    "frameJsP95": 45.9,
+    "longTasks": 3,
+    "longTaskMs": 171,
+    "rasterMisses": 3,
+    "rasterMs": 1.9,
+    "restarts": 0,
+    "heapMB": 9.5
+   },
+   "seasons": [
+    {
+     "season": "spring",
+     "frames": 225,
+     "fps": 22.4,
+     "p50": 42.7,
+     "p95": 59.7,
+     "p99": 62.9,
+     "max": 66.2,
+     "over20ms": 100,
+     "dropped": 385,
+     "drawP50": 38,
+     "drawP95": 53.4,
+     "drawMax": 59.2,
+     "unevenScrollPct": 8.9,
+     "scrollRatioSD": 0.187,
+     "frameJsP50": 38.1,
+     "frameJsP95": 53.6,
+     "longTasks": 31,
+     "longTaskMs": 1748,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "summer",
+     "frames": 201,
+     "fps": 20.1,
+     "p50": 45.1,
+     "p95": 87.2,
+     "p99": 90.2,
+     "max": 97.4,
+     "over20ms": 100,
+     "dropped": 437,
+     "drawP50": 39.9,
+     "drawP95": 72.1,
+     "drawMax": 78.9,
+     "unevenScrollPct": 10.5,
+     "scrollRatioSD": 0.163,
+     "frameJsP50": 40,
+     "frameJsP95": 72.2,
+     "longTasks": 42,
+     "longTaskMs": 2944,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "autumn",
+     "frames": 236,
+     "fps": 23.6,
+     "p50": 41.6,
+     "p95": 52.3,
+     "p99": 60.7,
+     "max": 64.5,
+     "over20ms": 100,
+     "dropped": 355,
+     "drawP50": 36.6,
+     "drawP95": 43.8,
+     "drawMax": 59.3,
+     "unevenScrollPct": 14.9,
+     "scrollRatioSD": 0.182,
+     "frameJsP50": 36.7,
+     "frameJsP95": 44.2,
+     "longTasks": 13,
+     "longTaskMs": 719,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "winter",
+     "frames": 242,
+     "fps": 24.2,
+     "p50": 40.7,
+     "p95": 50.3,
+     "p99": 65.6,
+     "max": 72.6,
+     "over20ms": 100,
+     "dropped": 324,
+     "drawP50": 35.9,
+     "drawP95": 45.6,
+     "drawMax": 65.6,
+     "unevenScrollPct": 10.8,
+     "scrollRatioSD": 0.189,
+     "frameJsP50": 35.9,
+     "frameJsP95": 45.8,
+     "longTasks": 12,
+     "longTaskMs": 698,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    }
+   ],
+   "errors": []
+  },
+  {
+   "viewport": "1920x1080@1.5",
+   "cpu": 1,
+   "backing": [
+    2880,
+    1620
+   ],
+   "title": {
+    "frames": 42,
+    "fps": 10.3,
+    "p50": 96.3,
+    "p95": 105.9,
+    "p99": 123.2,
+    "max": 123.2,
+    "over20ms": 100,
+    "dropped": 197,
+    "drawP50": 72.3,
+    "drawP95": 81.1,
+    "drawMax": 99.1,
+    "unevenScrollPct": 0,
+    "scrollRatioSD": 0.08,
+    "frameJsP50": 72.7,
+    "frameJsP95": 81.3,
+    "longTasks": 43,
+    "longTaskMs": 4157,
+    "rasterMisses": 2,
+    "rasterMs": 1.1,
+    "restarts": 0,
+    "heapMB": 9.5
+   },
+   "seasons": [
+    {
+     "season": "spring",
+     "frames": 94,
+     "fps": 9.4,
+     "p50": 104.3,
+     "p95": 131.9,
+     "p99": 148.1,
+     "max": 148.1,
+     "over20ms": 100,
+     "dropped": 501,
+     "drawP50": 72.9,
+     "drawP95": 97.2,
+     "drawMax": 100.6,
+     "unevenScrollPct": 4.3,
+     "scrollRatioSD": 0.085,
+     "frameJsP50": 73,
+     "frameJsP95": 97.3,
+     "longTasks": 94,
+     "longTaskMs": 9962,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "summer",
+     "frames": 99,
+     "fps": 9.8,
+     "p50": 100,
+     "p95": 119.8,
+     "p99": 145.6,
+     "max": 145.6,
+     "over20ms": 100,
+     "dropped": 498,
+     "drawP50": 58.7,
+     "drawP95": 85.7,
+     "drawMax": 93.1,
+     "unevenScrollPct": 1,
+     "scrollRatioSD": 0.072,
+     "frameJsP50": 58.9,
+     "frameJsP95": 85.8,
+     "longTasks": 99,
+     "longTaskMs": 9987,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "autumn",
+     "frames": 89,
+     "fps": 8.8,
+     "p50": 92.7,
+     "p95": 202.6,
+     "p99": 221.1,
+     "max": 221.1,
+     "over20ms": 100,
+     "dropped": 504,
+     "drawP50": 59.3,
+     "drawP95": 167.8,
+     "drawMax": 189,
+     "unevenScrollPct": 22.7,
+     "scrollRatioSD": 0.205,
+     "frameJsP50": 59.5,
+     "frameJsP95": 168.2,
+     "longTasks": 89,
+     "longTaskMs": 10084,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "winter",
+     "frames": 86,
+     "fps": 8.6,
+     "p50": 97.3,
+     "p95": 211,
+     "p99": 269.5,
+     "max": 269.5,
+     "over20ms": 100,
+     "dropped": 511,
+     "drawP50": 68.8,
+     "drawP95": 174.8,
+     "drawMax": 228.5,
+     "unevenScrollPct": 21.2,
+     "scrollRatioSD": 0.21,
+     "frameJsP50": 69,
+     "frameJsP95": 177.2,
+     "longTasks": 87,
+     "longTaskMs": 10147,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    }
+   ],
+   "errors": []
+  },
+  {
+   "viewport": "1920x1080@2",
+   "cpu": 1,
+   "backing": [
+    3840,
+    2160
+   ],
+   "title": {
+    "frames": 23,
+    "fps": 5.6,
+    "p50": 175.3,
+    "p95": 216.7,
+    "p99": 224.8,
+    "max": 224.8,
+    "over20ms": 100,
+    "dropped": 216,
+    "drawP50": 157.4,
+    "drawP95": 203,
+    "drawMax": 205.3,
+    "unevenScrollPct": 100,
+    "scrollRatioSD": 0.06,
+    "frameJsP50": 157.6,
+    "frameJsP95": 203.6,
+    "longTasks": 22,
+    "longTaskMs": 3897,
+    "rasterMisses": 2,
+    "rasterMs": 1.5,
+    "restarts": 0,
+    "heapMB": 9.5
+   },
+   "seasons": [
+    {
+     "season": "spring",
+     "frames": 59,
+     "fps": 5.9,
+     "p50": 167.1,
+     "p95": 189.8,
+     "p99": 236.5,
+     "max": 236.5,
+     "over20ms": 100,
+     "dropped": 539,
+     "drawP50": 152.2,
+     "drawP95": 175.1,
+     "drawMax": 218.4,
+     "unevenScrollPct": 100,
+     "scrollRatioSD": 0.039,
+     "frameJsP50": 152.3,
+     "frameJsP95": 175.3,
+     "longTasks": 59,
+     "longTaskMs": 10029,
+     "rasterMisses": 2,
+     "rasterMs": 1.2,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "summer",
+     "frames": 38,
+     "fps": 3.7,
+     "p50": 309.5,
+     "p95": 384.9,
+     "p99": 409.4,
+     "max": 409.4,
+     "over20ms": 100,
+     "dropped": 558,
+     "drawP50": 262,
+     "drawP95": 338.4,
+     "drawMax": 343.8,
+     "unevenScrollPct": 100,
+     "scrollRatioSD": 0.14,
+     "frameJsP50": 262.3,
+     "frameJsP95": 338.5,
+     "longTasks": 39,
+     "longTaskMs": 10363,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "autumn",
+     "frames": 59,
+     "fps": 5.9,
+     "p50": 169,
+     "p95": 198.3,
+     "p99": 237.8,
+     "max": 237.8,
+     "over20ms": 100,
+     "dropped": 536,
+     "drawP50": 150.3,
+     "drawP95": 182.3,
+     "drawMax": 215.4,
+     "unevenScrollPct": 100,
+     "scrollRatioSD": 0.048,
+     "frameJsP50": 150.5,
+     "frameJsP95": 182.5,
+     "longTasks": 60,
+     "longTaskMs": 10198,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "winter",
+     "frames": 38,
+     "fps": 3.7,
+     "p50": 320.1,
+     "p95": 381.9,
+     "p99": 409.7,
+     "max": 409.7,
+     "over20ms": 100,
+     "dropped": 563,
+     "drawP50": 269.4,
+     "drawP95": 320,
+     "drawMax": 363.3,
+     "unevenScrollPct": 100,
+     "scrollRatioSD": 0.143,
+     "frameJsP50": 269.5,
+     "frameJsP95": 320.3,
+     "longTasks": 38,
+     "longTaskMs": 10271,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    }
+   ],
+   "errors": []
+  },
+  {
+   "viewport": "2560x1440@1",
+   "cpu": 1,
+   "backing": [
+    2560,
+    1440
+   ],
+   "title": {
+    "frames": 49,
+    "fps": 12.3,
+    "p50": 78.6,
+    "p95": 106,
+    "p99": 146.7,
+    "max": 146.7,
+    "over20ms": 100,
+    "dropped": 191,
+    "drawP50": 40.6,
+    "drawP95": 57.4,
+    "drawMax": 65.6,
+    "unevenScrollPct": 2.1,
+    "scrollRatioSD": 0.097,
+    "frameJsP50": 41.1,
+    "frameJsP95": 57.6,
+    "longTasks": 49,
+    "longTaskMs": 3926,
+    "rasterMisses": 3,
+    "rasterMs": 5.5,
+    "restarts": 0,
+    "heapMB": 9.5
+   },
+   "seasons": [
+    {
+     "season": "spring",
+     "frames": 128,
+     "fps": 12.8,
+     "p50": 77,
+     "p95": 97.9,
+     "p99": 108.1,
+     "max": 114.9,
+     "over20ms": 100,
+     "dropped": 474,
+     "drawP50": 39.3,
+     "drawP95": 50.4,
+     "drawMax": 57.6,
+     "unevenScrollPct": 0,
+     "scrollRatioSD": 0.086,
+     "frameJsP50": 39.5,
+     "frameJsP95": 51.9,
+     "longTasks": 128,
+     "longTaskMs": 9929,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "summer",
+     "frames": 109,
+     "fps": 10.8,
+     "p50": 80.1,
+     "p95": 166.1,
+     "p99": 176.5,
+     "max": 206.2,
+     "over20ms": 100,
+     "dropped": 500,
+     "drawP50": 37.2,
+     "drawP95": 142.1,
+     "drawMax": 181.6,
+     "unevenScrollPct": 13,
+     "scrollRatioSD": 0.155,
+     "frameJsP50": 37.3,
+     "frameJsP95": 142.3,
+     "longTasks": 108,
+     "longTaskMs": 9922,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "autumn",
+     "frames": 116,
+     "fps": 11.6,
+     "p50": 75,
+     "p95": 142.7,
+     "p99": 187.3,
+     "max": 204.1,
+     "over20ms": 100,
+     "dropped": 477,
+     "drawP50": 30.1,
+     "drawP95": 122.8,
+     "drawMax": 164.4,
+     "unevenScrollPct": 13,
+     "scrollRatioSD": 0.146,
+     "frameJsP50": 30.2,
+     "frameJsP95": 123,
+     "longTasks": 116,
+     "longTaskMs": 10010,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "winter",
+     "frames": 117,
+     "fps": 11.7,
+     "p50": 72.9,
+     "p95": 151.3,
+     "p99": 167.3,
+     "max": 210.1,
+     "over20ms": 100,
+     "dropped": 474,
+     "drawP50": 25.6,
+     "drawP95": 125,
+     "drawMax": 180.8,
+     "unevenScrollPct": 13.8,
+     "scrollRatioSD": 0.144,
+     "frameJsP50": 25.8,
+     "frameJsP95": 125.7,
+     "longTasks": 118,
+     "longTaskMs": 10022,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    }
+   ],
+   "errors": []
+  },
+  {
+   "viewport": "1920x1080@1",
+   "cpu": 4,
+   "backing": [
+    1920,
+    1080
+   ],
+   "title": {
+    "frames": 20,
+    "fps": 4.9,
+    "p50": 201.2,
+    "p95": 232.5,
+    "p99": 232.5,
+    "max": 232.5,
+    "over20ms": 100,
+    "dropped": 215,
+    "drawP50": 183.6,
+    "drawP95": 210.1,
+    "drawMax": 210.1,
+    "unevenScrollPct": 100,
+    "scrollRatioSD": 0.028,
+    "frameJsP50": 184.4,
+    "frameJsP95": 213.7,
+    "longTasks": 20,
+    "longTaskMs": 4076,
+    "rasterMisses": 0,
+    "rasterMs": 0,
+    "restarts": 0,
+    "heapMB": 9.5
+   },
+   "seasons": [
+    {
+     "season": "spring",
+     "frames": 49,
+     "fps": 4.8,
+     "p50": 204.8,
+     "p95": 233.4,
+     "p99": 261,
+     "max": 261,
+     "over20ms": 100,
+     "dropped": 550,
+     "drawP50": 184.7,
+     "drawP95": 206.9,
+     "drawMax": 241.6,
+     "unevenScrollPct": 100,
+     "scrollRatioSD": 0.032,
+     "frameJsP50": 184.9,
+     "frameJsP95": 207.4,
+     "longTasks": 48,
+     "longTaskMs": 9931,
+     "rasterMisses": 2,
+     "rasterMs": 4.2,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "summer",
+     "frames": 31,
+     "fps": 3.1,
+     "p50": 374,
+     "p95": 442.7,
+     "p99": 453.6,
+     "max": 453.6,
+     "over20ms": 100,
+     "dropped": 553,
+     "drawP50": 311,
+     "drawP95": 355.4,
+     "drawMax": 365.4,
+     "unevenScrollPct": 100,
+     "scrollRatioSD": 0.111,
+     "frameJsP50": 311.1,
+     "frameJsP95": 356.2,
+     "longTasks": 32,
+     "longTaskMs": 10521,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "autumn",
+     "frames": 26,
+     "fps": 2.6,
+     "p50": 401.6,
+     "p95": 473.2,
+     "p99": 497.8,
+     "max": 497.8,
+     "over20ms": 100,
+     "dropped": 565,
+     "drawP50": 326.7,
+     "drawP95": 372.7,
+     "drawMax": 377.2,
+     "unevenScrollPct": 100,
+     "scrollRatioSD": 0.06,
+     "frameJsP50": 327.1,
+     "frameJsP95": 374.1,
+     "longTasks": 26,
+     "longTaskMs": 10188,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "winter",
+     "frames": 31,
+     "fps": 3.1,
+     "p50": 354.8,
+     "p95": 442.5,
+     "p99": 459.6,
+     "max": 459.6,
+     "over20ms": 100,
+     "dropped": 560,
+     "drawP50": 300.8,
+     "drawP95": 351.5,
+     "drawMax": 353.2,
+     "unevenScrollPct": 100,
+     "scrollRatioSD": 0.119,
+     "frameJsP50": 301.3,
+     "frameJsP95": 351.8,
+     "longTasks": 31,
+     "longTaskMs": 10183,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    }
+   ],
+   "errors": []
+  },
+  {
+   "viewport": "1920x1080@1",
+   "cpu": 6,
+   "backing": [
+    1920,
+    1080
+   ],
+   "title": {
+    "frames": 14,
+    "fps": 3.5,
+    "p50": 293.7,
+    "p95": 330.1,
+    "p99": 330.1,
+    "max": 330.1,
+    "over20ms": 100,
+    "dropped": 212,
+    "drawP50": 265.1,
+    "drawP95": 303.7,
+    "drawMax": 303.7,
+    "unevenScrollPct": 100,
+    "scrollRatioSD": 0.032,
+    "frameJsP50": 266.7,
+    "frameJsP95": 304.8,
+    "longTasks": 13,
+    "longTaskMs": 3722,
+    "rasterMisses": 0,
+    "rasterMs": 0,
+    "restarts": 0,
+    "heapMB": 9.5
+   },
+   "seasons": [
+    {
+     "season": "spring",
+     "frames": 31,
+     "fps": 3.1,
+     "p50": 331.5,
+     "p95": 375.6,
+     "p99": 389.3,
+     "max": 389.3,
+     "over20ms": 100,
+     "dropped": 561,
+     "drawP50": 294.5,
+     "drawP95": 337.2,
+     "drawMax": 341.1,
+     "unevenScrollPct": 100,
+     "scrollRatioSD": 0.04,
+     "frameJsP50": 294.8,
+     "frameJsP95": 339.1,
+     "longTasks": 31,
+     "longTaskMs": 9980,
+     "rasterMisses": 2,
+     "rasterMs": 9,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "summer",
+     "frames": 20,
+     "fps": 2,
+     "p50": 622.3,
+     "p95": 742.6,
+     "p99": 742.6,
+     "max": 742.6,
+     "over20ms": 100,
+     "dropped": 566,
+     "drawP50": 517,
+     "drawP95": 628.6,
+     "drawMax": 628.6,
+     "unevenScrollPct": 100,
+     "scrollRatioSD": 0.1,
+     "frameJsP50": 527.4,
+     "frameJsP95": 629,
+     "longTasks": 19,
+     "longTaskMs": 9666,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "autumn",
+     "frames": 19,
+     "fps": 1.9,
+     "p50": 581.7,
+     "p95": 863.2,
+     "p99": 863.2,
+     "max": 863.2,
+     "over20ms": 100,
+     "dropped": 552,
+     "drawP50": 451.7,
+     "drawP95": 692.4,
+     "drawMax": 692.4,
+     "unevenScrollPct": 100,
+     "scrollRatioSD": 0.06,
+     "frameJsP50": 454,
+     "frameJsP95": 693,
+     "longTasks": 20,
+     "longTaskMs": 10630,
+     "rasterMisses": 5,
+     "rasterMs": 125.9,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "winter",
+     "frames": 21,
+     "fps": 2,
+     "p50": 523.8,
+     "p95": 731.3,
+     "p99": 731.3,
+     "max": 731.3,
+     "over20ms": 100,
+     "dropped": 572,
+     "drawP50": 423.5,
+     "drawP95": 570.7,
+     "drawMax": 577.4,
+     "unevenScrollPct": 100,
+     "scrollRatioSD": 0.082,
+     "frameJsP50": 424.7,
+     "frameJsP95": 572.7,
+     "longTasks": 21,
+     "longTaskMs": 10208,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    }
+   ],
+   "errors": []
+  },
+  {
+   "viewport": "1920x1080@2",
+   "cpu": 4,
+   "backing": [
+    3840,
+    2160
+   ],
+   "title": {
+    "frames": 6,
+    "fps": 1.4,
+    "p50": 703.9,
+    "p95": 785.7,
+    "p99": 785.7,
+    "max": 785.7,
+    "over20ms": 100,
+    "dropped": 211,
+    "drawP50": 649.6,
+    "drawP95": 733.1,
+    "drawMax": 733.1,
+    "unevenScrollPct": 100,
+    "scrollRatioSD": 0.007,
+    "frameJsP50": 651.7,
+    "frameJsP95": 733.5,
+    "longTasks": 5,
+    "longTaskMs": 3616,
+    "rasterMisses": 6,
+    "rasterMs": 13.3,
+    "restarts": 0,
+    "heapMB": 9.5
+   },
+   "seasons": [
+    {
+     "season": "spring",
+     "frames": 13,
+     "fps": 1.3,
+     "p50": 794.3,
+     "p95": 878,
+     "p99": 878,
+     "max": 878,
+     "over20ms": 100,
+     "dropped": 564,
+     "drawP50": 735.8,
+     "drawP95": 822.1,
+     "drawMax": 822.1,
+     "unevenScrollPct": 100,
+     "scrollRatioSD": 0.006,
+     "frameJsP50": 735.9,
+     "frameJsP95": 822.8,
+     "longTasks": 13,
+     "longTaskMs": 10352,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "summer",
+     "frames": 11,
+     "fps": 1,
+     "p50": 846.8,
+     "p95": 1620,
+     "p99": 1620,
+     "max": 1620,
+     "over20ms": 100,
+     "dropped": 573,
+     "drawP50": 752,
+     "drawP95": 1421.4,
+     "drawMax": 1421.4,
+     "unevenScrollPct": 100,
+     "scrollRatioSD": 0.024,
+     "frameJsP50": 753.6,
+     "frameJsP95": 1423.3,
+     "longTasks": 12,
+     "longTaskMs": 12263,
+     "rasterMisses": 3,
+     "rasterMs": 8.9,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "autumn",
+     "frames": 7,
+     "fps": 0.6,
+     "p50": 1567.3,
+     "p95": 1625.9,
+     "p99": 1625.9,
+     "max": 1625.9,
+     "over20ms": 100,
+     "dropped": 556,
+     "drawP50": 1295.2,
+     "drawP95": 1339.1,
+     "drawMax": 1339.1,
+     "unevenScrollPct": 100,
+     "scrollRatioSD": 0.001,
+     "frameJsP50": 1296.1,
+     "frameJsP95": 1339.7,
+     "longTasks": 7,
+     "longTaskMs": 10911,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "winter",
+     "frames": 7,
+     "fps": 0.7,
+     "p50": 1410.6,
+     "p95": 1603.7,
+     "p99": 1603.7,
+     "max": 1603.7,
+     "over20ms": 100,
+     "dropped": 517,
+     "drawP50": 1228.7,
+     "drawP95": 1388,
+     "drawMax": 1388,
+     "unevenScrollPct": 100,
+     "scrollRatioSD": 0.004,
+     "frameJsP50": 1229.3,
+     "frameJsP95": 1393.1,
+     "longTasks": 7,
+     "longTaskMs": 10283,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    }
+   ],
+   "errors": []
+  }
+ ],
+ "season": [
+  {
+   "viewport": "1280x720@1",
+   "cpu": 1,
+   "changes": [
+    {
+     "to": "summer",
+     "worstFrameMs": 56.3,
+     "worstDrawMs": 34,
+     "rasterMisses": 9,
+     "rasterMs": 10.3,
+     "crossfadeFps": 41.3,
+     "crossfadeP95": 40.5,
+     "dropped": 27,
+     "longTasks": 1
+    },
+    {
+     "to": "autumn",
+     "worstFrameMs": 55.5,
+     "worstDrawMs": 34,
+     "rasterMisses": 8,
+     "rasterMs": 9.8,
+     "crossfadeFps": 35.1,
+     "crossfadeP95": 52.5,
+     "dropped": 52,
+     "longTasks": 7
+    },
+    {
+     "to": "winter",
+     "worstFrameMs": 67.5,
+     "worstDrawMs": 33.4,
+     "rasterMisses": 11,
+     "rasterMs": 19.3,
+     "crossfadeFps": 27.2,
+     "crossfadeP95": 44.8,
+     "dropped": 76,
+     "longTasks": 2
+    },
+    {
+     "to": "spring (lap 2)",
+     "worstFrameMs": 43.7,
+     "worstDrawMs": 18.1,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "crossfadeFps": 44.7,
+     "crossfadeP95": 38.3,
+     "dropped": 21,
+     "longTasks": 0
+    }
+   ],
+   "restartFromWinter": {
+    "worstFrameMs": 30.1,
+    "rasterMisses": 0,
+    "rasterMs": 0,
+    "dropped": 5
+   }
+  },
+  {
+   "viewport": "1920x1080@1",
+   "cpu": 1,
+   "changes": [
+    {
+     "to": "summer",
+     "worstFrameMs": 123.2,
+     "worstDrawMs": 105.6,
+     "rasterMisses": 9,
+     "rasterMs": 19.1,
+     "crossfadeFps": 19.3,
+     "crossfadeP95": 87.2,
+     "dropped": 103,
+     "longTasks": 12
+    },
+    {
+     "to": "autumn",
+     "worstFrameMs": 120.1,
+     "worstDrawMs": 100.7,
+     "rasterMisses": 8,
+     "rasterMs": 17,
+     "crossfadeFps": 15.1,
+     "crossfadeP95": 117.5,
+     "dropped": 115,
+     "longTasks": 19
+    },
+    {
+     "to": "winter",
+     "worstFrameMs": 119.7,
+     "worstDrawMs": 99.9,
+     "rasterMisses": 11,
+     "rasterMs": 34.4,
+     "crossfadeFps": 13.5,
+     "crossfadeP95": 117.3,
+     "dropped": 113,
+     "longTasks": 33
+    },
+    {
+     "to": "spring (lap 2)",
+     "worstFrameMs": 89.5,
+     "worstDrawMs": 75.4,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "crossfadeFps": 24,
+     "crossfadeP95": 80.9,
+     "dropped": 98,
+     "longTasks": 9
+    }
+   ],
+   "restartFromWinter": {
+    "worstFrameMs": 66.2,
+    "rasterMisses": 0,
+    "rasterMs": 0,
+    "dropped": 95
+   }
+  },
+  {
+   "viewport": "1920x1080@1.5",
+   "cpu": 1,
+   "changes": [
+    {
+     "to": "summer",
+     "worstFrameMs": 334.4,
+     "worstDrawMs": 291.8,
+     "rasterMisses": 9,
+     "rasterMs": 47.5,
+     "crossfadeFps": 7.4,
+     "crossfadeP95": 334.4,
+     "dropped": 136,
+     "longTasks": 20
+    },
+    {
+     "to": "autumn",
+     "worstFrameMs": 261.5,
+     "worstDrawMs": 223.3,
+     "rasterMisses": 8,
+     "rasterMs": 39.9,
+     "crossfadeFps": 5.7,
+     "crossfadeP95": 261.5,
+     "dropped": 135,
+     "longTasks": 16
+    },
+    {
+     "to": "winter",
+     "worstFrameMs": 216,
+     "worstDrawMs": 184.5,
+     "rasterMisses": 6,
+     "rasterMs": 34.9,
+     "crossfadeFps": 5.9,
+     "crossfadeP95": 216,
+     "dropped": 139,
+     "longTasks": 16
+    },
+    {
+     "to": "spring (lap 2)",
+     "worstFrameMs": 217.9,
+     "worstDrawMs": 185.9,
+     "rasterMisses": 5,
+     "rasterMs": 38.8,
+     "crossfadeFps": 5.5,
+     "crossfadeP95": 217.9,
+     "dropped": 139,
+     "longTasks": 15
+    }
+   ],
+   "restartFromWinter": {
+    "worstFrameMs": 226.2,
+    "rasterMisses": 0,
+    "rasterMs": 0,
+    "dropped": 129
+   }
+  },
+  {
+   "viewport": "1920x1080@2",
+   "cpu": 1,
+   "changes": [
+    {
+     "to": "summer",
+     "worstFrameMs": 390.7,
+     "worstDrawMs": 352.2,
+     "rasterMisses": 7,
+     "rasterMs": 62.7,
+     "crossfadeFps": 3.2,
+     "crossfadeP95": 390.7,
+     "dropped": 142,
+     "longTasks": 9
+    },
+    {
+     "to": "autumn",
+     "worstFrameMs": 443.5,
+     "worstDrawMs": 371.8,
+     "rasterMisses": 2,
+     "rasterMs": 1.5,
+     "crossfadeFps": 3,
+     "crossfadeP95": 443.5,
+     "dropped": 155,
+     "longTasks": 9
+    },
+    {
+     "to": "winter",
+     "worstFrameMs": 499.1,
+     "worstDrawMs": 431.7,
+     "rasterMisses": 6,
+     "rasterMs": 75.3,
+     "crossfadeFps": 2.9,
+     "crossfadeP95": 499.1,
+     "dropped": 157,
+     "longTasks": 8
+    },
+    {
+     "to": "spring (lap 2)",
+     "worstFrameMs": 408.8,
+     "worstDrawMs": 347.2,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "crossfadeFps": 2.9,
+     "crossfadeP95": 408.8,
+     "dropped": 155,
+     "longTasks": 8
+    }
+   ],
+   "restartFromWinter": {
+    "worstFrameMs": 378.1,
+    "rasterMisses": 0,
+    "rasterMs": 0,
+    "dropped": 133
+   }
+  },
+  {
+   "viewport": "2560x1440@1",
+   "cpu": 1,
+   "changes": [
+    {
+     "to": "summer",
+     "worstFrameMs": 216.1,
+     "worstDrawMs": 192.4,
+     "rasterMisses": 9,
+     "rasterMs": 39.2,
+     "crossfadeFps": 10.2,
+     "crossfadeP95": 195.8,
+     "dropped": 125,
+     "longTasks": 28
+    },
+    {
+     "to": "autumn",
+     "worstFrameMs": 222.7,
+     "worstDrawMs": 186.7,
+     "rasterMisses": 8,
+     "rasterMs": 32.3,
+     "crossfadeFps": 7,
+     "crossfadeP95": 222.7,
+     "dropped": 136,
+     "longTasks": 20
+    },
+    {
+     "to": "winter",
+     "worstFrameMs": 212.5,
+     "worstDrawMs": 177.8,
+     "rasterMisses": 6,
+     "rasterMs": 28.8,
+     "crossfadeFps": 6.7,
+     "crossfadeP95": 212.5,
+     "dropped": 138,
+     "longTasks": 19
+    },
+    {
+     "to": "spring (lap 2)",
+     "worstFrameMs": 214.4,
+     "worstDrawMs": 176.8,
+     "rasterMisses": 5,
+     "rasterMs": 29.1,
+     "crossfadeFps": 6.8,
+     "crossfadeP95": 214.4,
+     "dropped": 135,
+     "longTasks": 18
+    }
+   ],
+   "restartFromWinter": {
+    "worstFrameMs": 191.8,
+    "rasterMisses": 0,
+    "rasterMs": 0,
+    "dropped": 135
+   }
+  },
+  {
+   "viewport": "1920x1080@1",
+   "cpu": 4,
+   "changes": [
+    {
+     "to": "summer",
+     "worstFrameMs": 625.7,
+     "worstDrawMs": 519.9,
+     "rasterMisses": 6,
+     "rasterMs": 85,
+     "crossfadeFps": 2.3,
+     "crossfadeP95": 625.7,
+     "dropped": 148,
+     "longTasks": 6
+    },
+    {
+     "to": "autumn",
+     "worstFrameMs": 595.1,
+     "worstDrawMs": 502.5,
+     "rasterMisses": 15,
+     "rasterMs": 178.7,
+     "crossfadeFps": 2.1,
+     "crossfadeP95": 595.1,
+     "dropped": 166,
+     "longTasks": 8
+    },
+    {
+     "to": "winter",
+     "worstFrameMs": 599.7,
+     "worstDrawMs": 489.2,
+     "rasterMisses": 11,
+     "rasterMs": 157.8,
+     "crossfadeFps": 2.1,
+     "crossfadeP95": 599.7,
+     "dropped": 168,
+     "longTasks": 8
+    },
+    {
+     "to": "spring (lap 2)",
+     "worstFrameMs": 454.9,
+     "worstDrawMs": 384.1,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "crossfadeFps": 2.5,
+     "crossfadeP95": 454.9,
+     "dropped": 160,
+     "longTasks": 8
+    }
+   ],
+   "restartFromWinter": {
+    "worstFrameMs": 219.6,
+    "rasterMisses": 0,
+    "rasterMs": 0,
+    "dropped": 133
+   }
+  },
+  {
+   "viewport": "1920x1080@1",
+   "cpu": 6,
+   "changes": [
+    {
+     "to": "summer",
+     "worstFrameMs": 927.1,
+     "worstDrawMs": 784.7,
+     "rasterMisses": 7,
+     "rasterMs": 150.3,
+     "crossfadeFps": 1.6,
+     "crossfadeP95": 927.1,
+     "dropped": 145,
+     "longTasks": 6
+    },
+    {
+     "to": "autumn",
+     "worstFrameMs": 775,
+     "worstDrawMs": 638.9,
+     "rasterMisses": 8,
+     "rasterMs": 130.9,
+     "crossfadeFps": 1.5,
+     "crossfadeP95": 775,
+     "dropped": 151,
+     "longTasks": 5
+    },
+    {
+     "to": "winter",
+     "worstFrameMs": 1031.6,
+     "worstDrawMs": 823.7,
+     "rasterMisses": 6,
+     "rasterMs": 142.4,
+     "crossfadeFps": 1.4,
+     "crossfadeP95": 1031.6,
+     "dropped": 170,
+     "longTasks": 4
+    },
+    {
+     "to": "spring (lap 2)",
+     "worstFrameMs": 369.1,
+     "worstDrawMs": 320.5,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "crossfadeFps": 2.9,
+     "crossfadeP95": 369.1,
+     "dropped": 159,
+     "longTasks": 8
+    }
+   ],
+   "restartFromWinter": {
+    "worstFrameMs": 338.6,
+    "rasterMisses": 0,
+    "rasterMs": 0,
+    "dropped": 140
+   }
+  }
+ ],
+ "resize": [
+  {
+   "cpu": 1,
+   "steps": [
+    {
+     "to": "1920x1080",
+     "worstFrameMs": 85.8,
+     "rasterMisses": 16,
+     "rasterMs": 20.7,
+     "dropped": 46
+    },
+    {
+     "to": "1280x720",
+     "worstFrameMs": 38.6,
+     "rasterMisses": 16,
+     "rasterMs": 9.4,
+     "dropped": 15
+    },
+    {
+     "to": "1366x768",
+     "worstFrameMs": 42.3,
+     "rasterMisses": 14,
+     "rasterMs": 10.7,
+     "dropped": 6
+    },
+    {
+     "to": "2560x1440",
+     "worstFrameMs": 151.2,
+     "rasterMisses": 14,
+     "rasterMs": 39.3,
+     "dropped": 69
+    }
+   ]
+  },
+  {
+   "cpu": 4,
+   "steps": [
+    {
+     "to": "1920x1080",
+     "worstFrameMs": 444.6,
+     "rasterMisses": 14,
+     "rasterMs": 94,
+     "dropped": 88
+    },
+    {
+     "to": "1280x720",
+     "worstFrameMs": 203.3,
+     "rasterMisses": 16,
+     "rasterMs": 47.7,
+     "dropped": 83
+    },
+    {
+     "to": "1366x768",
+     "worstFrameMs": 161.5,
+     "rasterMisses": 14,
+     "rasterMs": 48.7,
+     "dropped": 70
+    },
+    {
+     "to": "2560x1440",
+     "worstFrameMs": 672.9,
+     "rasterMisses": 13,
+     "rasterMs": 160.6,
+     "dropped": 86
+    }
+   ]
+  }
+ ],
+ "profile": [
+  {
+   "viewport": "1920x1080@1",
+   "cpu": 4,
+   "season": 1,
+   "totalMs": 10290.5,
+   "top": [
+    {
+     "fn": "drawImage",
+     "ms": 4732.9,
+     "pct": 46
+    },
+    {
+     "fn": "restore",
+     "ms": 3724.6,
+     "pct": 36.2
+    },
+    {
+     "fn": "(program)",
+     "ms": 1683.8,
+     "pct": 16.4
+    },
+    {
+     "fn": "strokeText",
+     "ms": 10.4,
+     "pct": 0.1
+    },
+    {
+     "fn": "(garbage collector)",
+     "ms": 9.8,
+     "pct": 0.1
+    },
+    {
+     "fn": "Weather.update weather.js:396",
+     "ms": 9.3,
+     "pct": 0.1
+    },
+    {
+     "fn": "Weather._butterfly weather.js:293",
+     "ms": 8.7,
+     "pct": 0.1
+    },
+    {
+     "fn": "ambient render.js:277",
+     "ms": 7.6,
+     "pct": 0.1
+    },
+    {
+     "fn": "fill",
+     "ms": 7.6,
+     "pct": 0.1
+    },
+    {
+     "fn": "particles render.js:300",
+     "ms": 6.8,
+     "pct": 0.1
+    },
+    {
+     "fn": "draw render.js:210",
+     "ms": 6.6,
+     "pct": 0.1
+    },
+    {
+     "fn": "World.predictDrop world.js:552",
+     "ms": 5,
+     "pct": 0
+    },
+    {
+     "fn": "save",
+     "ms": 4.7,
+     "pct": 0
+    },
+    {
+     "fn": "World._updateDrops world.js:389",
+     "ms": 4.7,
+     "pct": 0
+    },
+    {
+     "fn": "G.frame",
+     "ms": 4.6,
+     "pct": 0
+    },
+    {
+     "fn": "Weather._step weather.js:325",
+     "ms": 4.4,
+     "pct": 0
+    },
+    {
+     "fn": "text render.js:183",
+     "ms": 4.1,
+     "pct": 0
+    },
+    {
+     "fn": "requestAnimationFrame",
+     "ms": 3.8,
+     "pct": 0
+    },
+    {
+     "fn": "A.sprite",
+     "ms": 3.5,
+     "pct": 0
+    },
+    {
+     "fn": "_playStep audio.js:196",
+     "ms": 3.3,
+     "pct": 0
+    },
+    {
+     "fn": "shadow render.js:197",
+     "ms": 3.2,
+     "pct": 0
+    },
+    {
+     "fn": "createGain",
+     "ms": 2.9,
+     "pct": 0
+    },
+    {
+     "fn": "tone audio.js:64",
+     "ms": 2.9,
+     "pct": 0
+    },
+    {
+     "fn": "setTransform",
+     "ms": 2.6,
+     "pct": 0
+    },
+    {
+     "fn": "Weather._move weather.js:232",
+     "ms": 2,
+     "pct": 0
+    }
+   ]
+  },
+  {
+   "viewport": "1920x1080@2",
+   "cpu": 1,
+   "season": 3,
+   "totalMs": 10111.6,
+   "top": [
+    {
+     "fn": "drawImage",
+     "ms": 8392.6,
+     "pct": 83
+    },
+    {
+     "fn": "(program)",
+     "ms": 1358.3,
+     "pct": 13.4
+    },
+    {
+     "fn": "restore",
+     "ms": 327.7,
+     "pct": 3.2
+    },
+    {
+     "fn": "tile render.js:129",
+     "ms": 3.3,
+     "pct": 0
+    },
+    {
+     "fn": "A.sprite",
+     "ms": 2.8,
+     "pct": 0
+    },
+    {
+     "fn": "draw render.js:210",
+     "ms": 1.9,
+     "pct": 0
+    },
+    {
+     "fn": "text render.js:183",
+     "ms": 1.9,
+     "pct": 0
+    },
+    {
+     "fn": "ambient render.js:277",
+     "ms": 1.8,
+     "pct": 0
+    },
+    {
+     "fn": "strokeText",
+     "ms": 1.8,
+     "pct": 0
+    },
+    {
+     "fn": "particles render.js:300",
+     "ms": 1.6,
+     "pct": 0
+    },
+    {
+     "fn": "save",
+     "ms": 1.6,
+     "pct": 0
+    },
+    {
+     "fn": "(garbage collector)",
+     "ms": 1.6,
+     "pct": 0
+    },
+    {
+     "fn": "R.draw",
+     "ms": 1.2,
+     "pct": 0
+    },
+    {
+     "fn": "backdrop render.js:159",
+     "ms": 1.2,
+     "pct": 0
+    },
+    {
+     "fn": "World.predictDrop world.js:552",
+     "ms": 1.1,
+     "pct": 0
+    },
+    {
+     "fn": "Weather._count weather.js:102",
+     "ms": 1.1,
+     "pct": 0
+    },
+    {
+     "fn": "setTransform",
+     "ms": 0.9,
+     "pct": 0
+    },
+    {
+     "fn": "getContext",
+     "ms": 0.9,
+     "pct": 0
+    },
+    {
+     "fn": "World._updateTurtles world.js:331",
+     "ms": 0.9,
+     "pct": 0
+    },
+    {
+     "fn": "sprite assets.js:175",
+     "ms": 0.9,
+     "pct": 0
+    },
+    {
+     "fn": "createGain",
+     "ms": 0.7,
+     "pct": 0
+    },
+    {
+     "fn": "createOscillator",
+     "ms": 0.6,
+     "pct": 0
+    },
+    {
+     "fn": "(idle)",
+     "ms": 0.6,
+     "pct": 0
+    },
+    {
+     "fn": "clamp render.js:15",
+     "ms": 0.6,
+     "pct": 0
+    },
+    {
+     "fn": "requestAnimationFrame",
+     "ms": 0.6,
+     "pct": 0
+    }
+   ]
+  }
+ ],
+ "trace": {
+  "viewport": "1920x1080@1",
+  "cpu": 1,
+  "seconds": 8,
+  "events": [
+   {
+    "event": "main:RunTask",
+    "n": 1630,
+    "totalMs": 7903.5,
+    "maxMs": 72.8
+   },
+   {
+    "event": "main:ProxyMain::BeginMainFrame",
+    "n": 177,
+    "totalMs": 7861.7,
+    "maxMs": 72.7
+   },
+   {
+    "event": "main:FireAnimationFrame",
+    "n": 355,
+    "totalMs": 6990.5,
+    "maxMs": 62.6
+   },
+   {
+    "event": "other:RunTask",
+    "n": 5324,
+    "totalMs": 901.1,
+    "maxMs": 4.2
+   },
+   {
+    "event": "main:Commit",
+    "n": 178,
+    "totalMs": 844.5,
+    "maxMs": 11.5
+   },
+   {
+    "event": "main:LayerTreeHost::DoUpdateLayers",
+    "n": 178,
+    "totalMs": 826.2,
+    "maxMs": 11.4
+   },
+   {
+    "event": "main:Canvas2DResourceProvider::ProduceCanvasResource",
+    "n": 178,
+    "totalMs": 204.6,
+    "maxMs": 3.3
+   },
+   {
+    "event": "other:ProxyImpl::ReadyToCommit",
+    "n": 178,
+    "totalMs": 37,
+    "maxMs": 1.3
+   },
+   {
+    "event": "other:LayerTreeHostImpl::CommitComplete",
+    "n": 178,
+    "totalMs": 18.5,
+    "maxMs": 0.4
+   },
+   {
+    "event": "main:PrePaint",
+    "n": 178,
+    "totalMs": 13.3,
+    "maxMs": 0.2
+   },
+   {
+    "event": "main:Canvas2DResourceProvider::Snapshot",
+    "n": 8003,
+    "totalMs": 13,
+    "maxMs": 0.2
+   },
+   {
+    "event": "main:LocalFrameView::RunPrePaintLifecyclePhase",
+    "n": 178,
+    "totalMs": 11.6,
+    "maxMs": 0.2
+   },
+   {
+    "event": "main:Blink.PrePaint.UpdateTime",
+    "n": 178,
+    "totalMs": 11.2,
+    "maxMs": 0.2
+   },
+   {
+    "event": "other:TileManager::CheckPendingGpuWorkAndIssueSignals",
+    "n": 496,
+    "totalMs": 10.2,
+    "maxMs": 0.4
+   },
+   {
+    "event": "other:ProxyImpl::Commit",
+    "n": 178,
+    "totalMs": 9.8,
+    "maxMs": 0.3
+   },
+   {
+    "event": "main:LocalFrameView::RunPaintLifecyclePhase",
+    "n": 178,
+    "totalMs": 6.7,
+    "maxMs": 0.1
+   },
+   {
+    "event": "main:ProxyMain::BeginMainFrame::commit",
+    "n": 178,
+    "totalMs": 5.8,
+    "maxMs": 0.1
+   },
+   {
+    "event": "other:LayerTreeHostImpl::FinishCommit",
+    "n": 178,
+    "totalMs": 5.2,
+    "maxMs": 0.3
+   },
+   {
+    "event": "main:MinorGC",
+    "n": 6,
+    "totalMs": 4.6,
+    "maxMs": 2.5
+   },
+   {
+    "event": "main:Blink.Paint.UpdateTime",
+    "n": 178,
+    "totalMs": 4.4,
+    "maxMs": 0.1
+   },
+   {
+    "event": "main:V8.GCScavenger",
+    "n": 6,
+    "totalMs": 4.3,
+    "maxMs": 2.4
+   },
+   {
+    "event": "main:V8.GC_SCAVENGER",
+    "n": 6,
+    "totalMs": 4.2,
+    "maxMs": 2.4
+   },
+   {
+    "event": "main:V8.GC_SCAVENGER_SCAVENGE",
+    "n": 6,
+    "totalMs": 4.1,
+    "maxMs": 2.4
+   },
+   {
+    "event": "main:V8.GC_SCAVENGER_SCAVENGE_PARALLEL_PHASE",
+    "n": 6,
+    "totalMs": 3.1,
+    "maxMs": 2.2
+   },
+   {
+    "event": "other:Scheduler::RunTask",
+    "n": 72,
+    "totalMs": 2.8,
+    "maxMs": 0.2
+   },
+   {
+    "event": "main:LocalFrameView::RunStyleAndLayoutLifecyclePhases",
+    "n": 178,
+    "totalMs": 2.4,
+    "maxMs": 0.2
+   },
+   {
+    "event": "other:GpuChannel::ExecuteDeferredRequest",
+    "n": 72,
+    "totalMs": 2.3,
+    "maxMs": 0.1
+   },
+   {
+    "event": "other:LayerTreeHostImpl::BeginCommit",
+    "n": 178,
+    "totalMs": 2.3,
+    "maxMs": 0.1
+   },
+   {
+    "event": "other:TileManager::AssignGpuMemoryToTiles",
+    "n": 357,
+    "totalMs": 1.8,
+    "maxMs": 0.1
+   },
+   {
+    "event": "other:Scheduler::NotifyReadyToCommit",
+    "n": 178,
+    "totalMs": 1.7,
+    "maxMs": 0
+   }
+  ]
+ }
+}

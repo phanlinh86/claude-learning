@@ -1,0 +1,1859 @@
+{
+ "label": "fix_nocap",
+ "base": "http://127.0.0.1:8780/index.html",
+ "date": "2026-10-29T05:25:35.071Z",
+ "chromium": "153.0.8010.12",
+ "quick": false,
+ "micro": [
+  {
+   "viewport": "1280x720@1",
+   "backing": "1280x720",
+   "flushOnly": 0.03,
+   "fullLayer_scaledHigh": 3.615,
+   "fullLayer_opaqueSky": 0.35,
+   "fullLayer_scaledLow": 3.09,
+   "fullLayer_1to1Device": 0.325,
+   "backdrop4Layers": 1.595,
+   "fullRectTint": 0.26,
+   "sunRays6Gradients": 1.005,
+   "fogGradient": 0.64,
+   "fadeLayer": 5.49,
+   "hudText": 0.145,
+   "particlesWinter": 0.01,
+   "particlesSpring": 0.005,
+   "trimSeasons": 0.006,
+   "fullDraw": 3.675,
+   "raster": {
+    "autumn_sky": 5.3,
+    "autumn_clouds": 3.5,
+    "autumn_far": 3.733,
+    "autumn_mid": 4.233,
+    "autumn_ground": 0.9
+   }
+  },
+  {
+   "viewport": "1920x1080@1",
+   "backing": "1920x1080",
+   "flushOnly": 0.02,
+   "fullLayer_scaledHigh": 10.32,
+   "fullLayer_opaqueSky": 0.88,
+   "fullLayer_scaledLow": 6.555,
+   "fullLayer_1to1Device": 0.935,
+   "backdrop4Layers": 3.695,
+   "fullRectTint": 0.695,
+   "sunRays6Gradients": 2.295,
+   "fogGradient": 1.76,
+   "fadeLayer": 9.82,
+   "hudText": 0.095,
+   "particlesWinter": 0.005,
+   "particlesSpring": 0.005,
+   "trimSeasons": 0.003,
+   "fullDraw": 7.7,
+   "raster": {
+    "autumn_sky": 13.533,
+    "autumn_clouds": 8.067,
+    "autumn_far": 8.467,
+    "autumn_mid": 10.6,
+    "autumn_ground": 1.767
+   }
+  },
+  {
+   "viewport": "2560x1440@1",
+   "backing": "2560x1440",
+   "flushOnly": 0.02,
+   "fullLayer_scaledHigh": 16.925,
+   "fullLayer_opaqueSky": 1.405,
+   "fullLayer_scaledLow": 11.795,
+   "fullLayer_1to1Device": 1.35,
+   "backdrop4Layers": 6.885,
+   "fullRectTint": 1.345,
+   "sunRays6Gradients": 4.18,
+   "fogGradient": 3.605,
+   "fadeLayer": 23.13,
+   "hudText": 0.19,
+   "particlesWinter": 0.01,
+   "particlesSpring": 0.005,
+   "trimSeasons": 0.003,
+   "fullDraw": 18.08,
+   "raster": {
+    "autumn_sky": 32.633,
+    "autumn_clouds": 17.267,
+    "autumn_far": 18.6,
+    "autumn_mid": 19.267,
+    "autumn_ground": 2.7
+   }
+  }
+ ],
+ "play": [
+  {
+   "viewport": "1280x720@1",
+   "cpu": 1,
+   "backing": [
+    1280,
+    720
+   ],
+   "title": {
+    "frames": 241,
+    "fps": 60,
+    "p50": 16.7,
+    "p95": 16.7,
+    "p99": 16.8,
+    "max": 16.8,
+    "over20ms": 0,
+    "dropped": 0,
+    "drawP50": 0.3,
+    "drawP95": 0.5,
+    "drawMax": 2.7,
+    "unevenScrollPct": 0,
+    "scrollRatioSD": 0,
+    "frameJsP50": 0.4,
+    "frameJsP95": 0.7,
+    "longTasks": 0,
+    "longTaskMs": 0,
+    "rasterMisses": 3,
+    "rasterMs": 1.2,
+    "restarts": 0,
+    "heapMB": 9.5
+   },
+   "seasons": [
+    {
+     "season": "spring",
+     "frames": 601,
+     "fps": 60,
+     "p50": 16.7,
+     "p95": 16.8,
+     "p99": 16.8,
+     "max": 16.8,
+     "over20ms": 0,
+     "dropped": 0,
+     "drawP50": 0.4,
+     "drawP95": 0.7,
+     "drawMax": 3.4,
+     "unevenScrollPct": 0,
+     "scrollRatioSD": 0,
+     "frameJsP50": 0.5,
+     "frameJsP95": 0.8,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "summer",
+     "frames": 601,
+     "fps": 60,
+     "p50": 16.7,
+     "p95": 16.7,
+     "p99": 16.8,
+     "max": 16.8,
+     "over20ms": 0,
+     "dropped": 0,
+     "drawP50": 0.4,
+     "drawP95": 3.8,
+     "drawMax": 5.1,
+     "unevenScrollPct": 0,
+     "scrollRatioSD": 0,
+     "frameJsP50": 0.5,
+     "frameJsP95": 3.9,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "autumn",
+     "frames": 601,
+     "fps": 60,
+     "p50": 16.7,
+     "p95": 16.8,
+     "p99": 16.8,
+     "max": 16.8,
+     "over20ms": 0,
+     "dropped": 0,
+     "drawP50": 0.4,
+     "drawP95": 0.7,
+     "drawMax": 1.7,
+     "unevenScrollPct": 0,
+     "scrollRatioSD": 0,
+     "frameJsP50": 0.5,
+     "frameJsP95": 0.8,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "winter",
+     "frames": 600,
+     "fps": 60,
+     "p50": 16.7,
+     "p95": 16.8,
+     "p99": 16.8,
+     "max": 16.8,
+     "over20ms": 0,
+     "dropped": 0,
+     "drawP50": 0.4,
+     "drawP95": 0.6,
+     "drawMax": 1.6,
+     "unevenScrollPct": 0,
+     "scrollRatioSD": 0,
+     "frameJsP50": 0.4,
+     "frameJsP95": 0.7,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    }
+   ],
+   "errors": []
+  },
+  {
+   "viewport": "1920x1080@1",
+   "cpu": 1,
+   "backing": [
+    1920,
+    1080
+   ],
+   "title": {
+    "frames": 236,
+    "fps": 58.5,
+    "p50": 16.7,
+    "p95": 16.8,
+    "p99": 33.4,
+    "max": 50,
+    "over20ms": 2.1,
+    "dropped": 6,
+    "drawP50": 11,
+    "drawP95": 15.3,
+    "drawMax": 26.5,
+    "unevenScrollPct": 0,
+    "scrollRatioSD": 0,
+    "frameJsP50": 11,
+    "frameJsP95": 15.4,
+    "longTasks": 0,
+    "longTaskMs": 0,
+    "rasterMisses": 2,
+    "rasterMs": 1.2,
+    "restarts": 0,
+    "heapMB": 9.5
+   },
+   "seasons": [
+    {
+     "season": "spring",
+     "frames": 596,
+     "fps": 59.5,
+     "p50": 16.7,
+     "p95": 16.7,
+     "p99": 16.8,
+     "max": 33.3,
+     "over20ms": 0.8,
+     "dropped": 5,
+     "drawP50": 11.1,
+     "drawP95": 14.6,
+     "drawMax": 18.3,
+     "unevenScrollPct": 0,
+     "scrollRatioSD": 0,
+     "frameJsP50": 11.2,
+     "frameJsP95": 14.8,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "summer",
+     "frames": 544,
+     "fps": 54.3,
+     "p50": 16.7,
+     "p95": 33.3,
+     "p99": 33.4,
+     "max": 50,
+     "over20ms": 10.1,
+     "dropped": 57,
+     "drawP50": 11.6,
+     "drawP95": 19.8,
+     "drawMax": 23.8,
+     "unevenScrollPct": 0,
+     "scrollRatioSD": 0,
+     "frameJsP50": 11.7,
+     "frameJsP95": 20,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "autumn",
+     "frames": 595,
+     "fps": 59.4,
+     "p50": 16.7,
+     "p95": 16.8,
+     "p99": 33.3,
+     "max": 33.3,
+     "over20ms": 1,
+     "dropped": 6,
+     "drawP50": 10.6,
+     "drawP95": 14.2,
+     "drawMax": 19.5,
+     "unevenScrollPct": 0,
+     "scrollRatioSD": 0,
+     "frameJsP50": 10.7,
+     "frameJsP95": 14.4,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "winter",
+     "frames": 598,
+     "fps": 59.7,
+     "p50": 16.7,
+     "p95": 16.7,
+     "p99": 16.8,
+     "max": 33.4,
+     "over20ms": 0.5,
+     "dropped": 3,
+     "drawP50": 10.8,
+     "drawP95": 13.8,
+     "drawMax": 25.9,
+     "unevenScrollPct": 0,
+     "scrollRatioSD": 0,
+     "frameJsP50": 10.9,
+     "frameJsP95": 13.9,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    }
+   ],
+   "errors": []
+  },
+  {
+   "viewport": "1920x1080@1.5",
+   "cpu": 1,
+   "backing": [
+    2880,
+    1620
+   ],
+   "title": {
+    "frames": 130,
+    "fps": 32.4,
+    "p50": 33.3,
+    "p95": 33.4,
+    "p99": 50,
+    "max": 66.7,
+    "over20ms": 81.4,
+    "dropped": 110,
+    "drawP50": 14.3,
+    "drawP95": 17.3,
+    "drawMax": 21.3,
+    "unevenScrollPct": 0,
+    "scrollRatioSD": 0.001,
+    "frameJsP50": 14.5,
+    "frameJsP95": 17.6,
+    "longTasks": 0,
+    "longTaskMs": 0,
+    "rasterMisses": 3,
+    "rasterMs": 1.9,
+    "restarts": 0,
+    "heapMB": 9.5
+   },
+   "seasons": [
+    {
+     "season": "spring",
+     "frames": 314,
+     "fps": 31.3,
+     "p50": 33.3,
+     "p95": 50,
+     "p99": 50,
+     "max": 50.1,
+     "over20ms": 85.9,
+     "dropped": 287,
+     "drawP50": 14.7,
+     "drawP95": 18.2,
+     "drawMax": 21.1,
+     "unevenScrollPct": 0,
+     "scrollRatioSD": 0,
+     "frameJsP50": 14.8,
+     "frameJsP95": 18.2,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "summer",
+     "frames": 295,
+     "fps": 29.5,
+     "p50": 33.3,
+     "p95": 50.1,
+     "p99": 66.7,
+     "max": 66.7,
+     "over20ms": 85,
+     "dropped": 305,
+     "drawP50": 14.2,
+     "drawP95": 38.9,
+     "drawMax": 44.1,
+     "unevenScrollPct": 0,
+     "scrollRatioSD": 0,
+     "frameJsP50": 14.3,
+     "frameJsP95": 39.1,
+     "longTasks": 27,
+     "longTaskMs": 1549,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "autumn",
+     "frames": 311,
+     "fps": 31.1,
+     "p50": 33.3,
+     "p95": 49.9,
+     "p99": 50.1,
+     "max": 50.1,
+     "over20ms": 86.8,
+     "dropped": 289,
+     "drawP50": 13.3,
+     "drawP95": 17.1,
+     "drawMax": 21.6,
+     "unevenScrollPct": 0,
+     "scrollRatioSD": 0,
+     "frameJsP50": 13.4,
+     "frameJsP95": 17.2,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "winter",
+     "frames": 325,
+     "fps": 32.3,
+     "p50": 33.3,
+     "p95": 33.4,
+     "p99": 50,
+     "max": 50.1,
+     "over20ms": 82.4,
+     "dropped": 277,
+     "drawP50": 13.4,
+     "drawP95": 16.4,
+     "drawMax": 21.9,
+     "unevenScrollPct": 0,
+     "scrollRatioSD": 0,
+     "frameJsP50": 13.5,
+     "frameJsP95": 16.5,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    }
+   ],
+   "errors": []
+  },
+  {
+   "viewport": "1920x1080@2",
+   "cpu": 1,
+   "backing": [
+    3840,
+    2160
+   ],
+   "title": {
+    "frames": 80,
+    "fps": 19.9,
+    "p50": 50,
+    "p95": 66.7,
+    "p99": 100,
+    "max": 100,
+    "over20ms": 100,
+    "dropped": 159,
+    "drawP50": 38.2,
+    "drawP95": 45.1,
+    "drawMax": 51.4,
+    "unevenScrollPct": 0,
+    "scrollRatioSD": 0.001,
+    "frameJsP50": 38.4,
+    "frameJsP95": 45.5,
+    "longTasks": 21,
+    "longTaskMs": 1126,
+    "rasterMisses": 3,
+    "rasterMs": 1.7,
+    "restarts": 0,
+    "heapMB": 9.5
+   },
+   "seasons": [
+    {
+     "season": "spring",
+     "frames": 196,
+     "fps": 19.5,
+     "p50": 50,
+     "p95": 66.7,
+     "p99": 66.7,
+     "max": 66.7,
+     "over20ms": 100,
+     "dropped": 405,
+     "drawP50": 39.2,
+     "drawP95": 47.2,
+     "drawMax": 53.7,
+     "unevenScrollPct": 0,
+     "scrollRatioSD": 0,
+     "frameJsP50": 39.4,
+     "frameJsP95": 47.4,
+     "longTasks": 110,
+     "longTaskMs": 5908,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "summer",
+     "frames": 174,
+     "fps": 17.4,
+     "p50": 50,
+     "p95": 100,
+     "p99": 116.7,
+     "max": 133.3,
+     "over20ms": 100,
+     "dropped": 425,
+     "drawP50": 40.1,
+     "drawP95": 67.6,
+     "drawMax": 77.6,
+     "unevenScrollPct": 0.6,
+     "scrollRatioSD": 0.024,
+     "frameJsP50": 40.3,
+     "frameJsP95": 68,
+     "longTasks": 118,
+     "longTaskMs": 7238,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "autumn",
+     "frames": 189,
+     "fps": 18.8,
+     "p50": 50,
+     "p95": 66.7,
+     "p99": 100,
+     "max": 100.1,
+     "over20ms": 100,
+     "dropped": 411,
+     "drawP50": 39.4,
+     "drawP95": 48.1,
+     "drawMax": 64.5,
+     "unevenScrollPct": 0,
+     "scrollRatioSD": 0,
+     "frameJsP50": 39.5,
+     "frameJsP95": 48.3,
+     "longTasks": 122,
+     "longTaskMs": 6690,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "winter",
+     "frames": 182,
+     "fps": 18.1,
+     "p50": 50,
+     "p95": 100,
+     "p99": 116.7,
+     "max": 166.7,
+     "over20ms": 100,
+     "dropped": 419,
+     "drawP50": 38.9,
+     "drawP95": 64.8,
+     "drawMax": 78.3,
+     "unevenScrollPct": 0.6,
+     "scrollRatioSD": 0.04,
+     "frameJsP50": 38.9,
+     "frameJsP95": 64.9,
+     "longTasks": 71,
+     "longTaskMs": 4615,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    }
+   ],
+   "errors": []
+  },
+  {
+   "viewport": "2560x1440@1",
+   "cpu": 1,
+   "backing": [
+    2560,
+    1440
+   ],
+   "title": {
+    "frames": 165,
+    "fps": 41.2,
+    "p50": 16.7,
+    "p95": 33.4,
+    "p99": 50,
+    "max": 116.6,
+    "over20ms": 40.2,
+    "dropped": 75,
+    "drawP50": 7.9,
+    "drawP95": 10.5,
+    "drawMax": 13.9,
+    "unevenScrollPct": 0,
+    "scrollRatioSD": 0.011,
+    "frameJsP50": 8.1,
+    "frameJsP95": 11.1,
+    "longTasks": 0,
+    "longTaskMs": 0,
+    "rasterMisses": 4,
+    "rasterMs": 2.2,
+    "restarts": 0,
+    "heapMB": 9.5
+   },
+   "seasons": [
+    {
+     "season": "spring",
+     "frames": 437,
+     "fps": 43.6,
+     "p50": 16.7,
+     "p95": 33.4,
+     "p99": 33.4,
+     "max": 50.1,
+     "over20ms": 37.2,
+     "dropped": 164,
+     "drawP50": 7.8,
+     "drawP95": 9.9,
+     "drawMax": 12.3,
+     "unevenScrollPct": 0,
+     "scrollRatioSD": 0,
+     "frameJsP50": 7.9,
+     "frameJsP95": 10,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "summer",
+     "frames": 394,
+     "fps": 39.4,
+     "p50": 16.7,
+     "p95": 49.9,
+     "p99": 50.1,
+     "max": 50.1,
+     "over20ms": 46.8,
+     "dropped": 206,
+     "drawP50": 7.5,
+     "drawP95": 27.1,
+     "drawMax": 34.4,
+     "unevenScrollPct": 0,
+     "scrollRatioSD": 0,
+     "frameJsP50": 7.6,
+     "frameJsP95": 27.1,
+     "longTasks": 1,
+     "longTaskMs": 52,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "autumn",
+     "frames": 425,
+     "fps": 42.4,
+     "p50": 16.7,
+     "p95": 33.4,
+     "p99": 33.4,
+     "max": 50,
+     "over20ms": 41,
+     "dropped": 176,
+     "drawP50": 6.9,
+     "drawP95": 8.9,
+     "drawMax": 15.2,
+     "unevenScrollPct": 0,
+     "scrollRatioSD": 0,
+     "frameJsP50": 6.9,
+     "frameJsP95": 9.1,
+     "longTasks": 0,
+     "longTaskMs": 0,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "winter",
+     "frames": 427,
+     "fps": 42.7,
+     "p50": 16.7,
+     "p95": 33.4,
+     "p99": 50,
+     "max": 66.7,
+     "over20ms": 38,
+     "dropped": 173,
+     "drawP50": 6,
+     "drawP95": 9.6,
+     "drawMax": 39.7,
+     "unevenScrollPct": 0,
+     "scrollRatioSD": 0,
+     "frameJsP50": 6.1,
+     "frameJsP95": 9.8,
+     "longTasks": 2,
+     "longTaskMs": 108,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    }
+   ],
+   "errors": []
+  },
+  {
+   "viewport": "1920x1080@1",
+   "cpu": 4,
+   "backing": [
+    1920,
+    1080
+   ],
+   "title": {
+    "frames": 68,
+    "fps": 16.8,
+    "p50": 50.1,
+    "p95": 83.3,
+    "p99": 116.6,
+    "max": 116.6,
+    "over20ms": 100,
+    "dropped": 173,
+    "drawP50": 42.8,
+    "drawP95": 53,
+    "drawMax": 58.3,
+    "unevenScrollPct": 0,
+    "scrollRatioSD": 0.017,
+    "frameJsP50": 43.1,
+    "frameJsP95": 53.2,
+    "longTasks": 56,
+    "longTaskMs": 3303,
+    "rasterMisses": 2,
+    "rasterMs": 4.7,
+    "restarts": 0,
+    "heapMB": 9.5
+   },
+   "seasons": [
+    {
+     "season": "spring",
+     "frames": 146,
+     "fps": 14.6,
+     "p50": 66.7,
+     "p95": 99.9,
+     "p99": 116.5,
+     "max": 116.7,
+     "over20ms": 99.3,
+     "dropped": 452,
+     "drawP50": 50.1,
+     "drawP95": 68.1,
+     "drawMax": 97.9,
+     "unevenScrollPct": 0,
+     "scrollRatioSD": 0.017,
+     "frameJsP50": 50.6,
+     "frameJsP95": 68.2,
+     "longTasks": 141,
+     "longTaskMs": 9673,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "summer",
+     "frames": 126,
+     "fps": 12.5,
+     "p50": 66.7,
+     "p95": 133.3,
+     "p99": 150.1,
+     "max": 150.1,
+     "over20ms": 100,
+     "dropped": 473,
+     "drawP50": 52.6,
+     "drawP95": 82.4,
+     "drawMax": 97.4,
+     "unevenScrollPct": 8,
+     "scrollRatioSD": 0.081,
+     "frameJsP50": 52.8,
+     "frameJsP95": 83.7,
+     "longTasks": 126,
+     "longTaskMs": 9936,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "autumn",
+     "frames": 129,
+     "fps": 12.8,
+     "p50": 66.7,
+     "p95": 116.7,
+     "p99": 166.7,
+     "max": 216.6,
+     "over20ms": 100,
+     "dropped": 471,
+     "drawP50": 52.5,
+     "drawP95": 76.8,
+     "drawMax": 124.2,
+     "unevenScrollPct": 3.9,
+     "scrollRatioSD": 0.077,
+     "frameJsP50": 52.6,
+     "frameJsP95": 78,
+     "longTasks": 130,
+     "longTaskMs": 10034,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "winter",
+     "frames": 144,
+     "fps": 14.4,
+     "p50": 66.7,
+     "p95": 83.4,
+     "p99": 116.7,
+     "max": 116.7,
+     "over20ms": 100,
+     "dropped": 453,
+     "drawP50": 51.1,
+     "drawP95": 61.7,
+     "drawMax": 77.2,
+     "unevenScrollPct": 0,
+     "scrollRatioSD": 0.017,
+     "frameJsP50": 51.7,
+     "frameJsP95": 62.3,
+     "longTasks": 143,
+     "longTaskMs": 9874,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    }
+   ],
+   "errors": []
+  },
+  {
+   "viewport": "1920x1080@1",
+   "cpu": 6,
+   "backing": [
+    1920,
+    1080
+   ],
+   "title": {
+    "frames": 41,
+    "fps": 10.3,
+    "p50": 100,
+    "p95": 149.9,
+    "p99": 183.3,
+    "max": 183.3,
+    "over20ms": 100,
+    "dropped": 194,
+    "drawP50": 68.4,
+    "drawP95": 85.6,
+    "drawMax": 101.2,
+    "unevenScrollPct": 15,
+    "scrollRatioSD": 0.113,
+    "frameJsP50": 68.6,
+    "frameJsP95": 91.1,
+    "longTasks": 40,
+    "longTaskMs": 3660,
+    "rasterMisses": 2,
+    "rasterMs": 3.7,
+    "restarts": 0,
+    "heapMB": 9.5
+   },
+   "seasons": [
+    {
+     "season": "spring",
+     "frames": 95,
+     "fps": 9.5,
+     "p50": 100,
+     "p95": 133.4,
+     "p99": 166.6,
+     "max": 166.6,
+     "over20ms": 100,
+     "dropped": 501,
+     "drawP50": 77.2,
+     "drawP95": 94.4,
+     "drawMax": 126.5,
+     "unevenScrollPct": 7.4,
+     "scrollRatioSD": 0.099,
+     "frameJsP50": 77.9,
+     "frameJsP95": 94.6,
+     "longTasks": 94,
+     "longTaskMs": 9800,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "summer",
+     "frames": 88,
+     "fps": 8.7,
+     "p50": 116.7,
+     "p95": 150,
+     "p99": 166.6,
+     "max": 166.6,
+     "over20ms": 100,
+     "dropped": 510,
+     "drawP50": 82.2,
+     "drawP95": 107.7,
+     "drawMax": 115.1,
+     "unevenScrollPct": 14.9,
+     "scrollRatioSD": 0.102,
+     "frameJsP50": 83.1,
+     "frameJsP95": 107.9,
+     "longTasks": 87,
+     "longTaskMs": 9872,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "autumn",
+     "frames": 69,
+     "fps": 6.9,
+     "p50": 116.7,
+     "p95": 250,
+     "p99": 316.6,
+     "max": 316.6,
+     "over20ms": 100,
+     "dropped": 527,
+     "drawP50": 85.5,
+     "drawP95": 134.2,
+     "drawMax": 147.2,
+     "unevenScrollPct": 42.6,
+     "scrollRatioSD": 0.226,
+     "frameJsP50": 85.7,
+     "frameJsP95": 136.4,
+     "longTasks": 70,
+     "longTaskMs": 9831,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "winter",
+     "frames": 77,
+     "fps": 7.6,
+     "p50": 116.6,
+     "p95": 233.4,
+     "p99": 333.4,
+     "max": 333.4,
+     "over20ms": 100,
+     "dropped": 525,
+     "drawP50": 80.5,
+     "drawP95": 135.1,
+     "drawMax": 157.2,
+     "unevenScrollPct": 25,
+     "scrollRatioSD": 0.21,
+     "frameJsP50": 80.6,
+     "frameJsP95": 136.1,
+     "longTasks": 78,
+     "longTaskMs": 9968,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    }
+   ],
+   "errors": []
+  },
+  {
+   "viewport": "1920x1080@2",
+   "cpu": 4,
+   "backing": [
+    3840,
+    2160
+   ],
+   "title": {
+    "frames": 15,
+    "fps": 3.7,
+    "p50": 250.1,
+    "p95": 416.6,
+    "p99": 416.6,
+    "max": 416.6,
+    "over20ms": 100,
+    "dropped": 214,
+    "drawP50": 199.4,
+    "drawP95": 241.7,
+    "drawMax": 241.7,
+    "unevenScrollPct": 100,
+    "scrollRatioSD": 0.049,
+    "frameJsP50": 201.3,
+    "frameJsP95": 242.6,
+    "longTasks": 18,
+    "longTaskMs": 4109,
+    "rasterMisses": 1,
+    "rasterMs": 2.7,
+    "restarts": 0,
+    "heapMB": 9.5
+   },
+   "seasons": [
+    {
+     "season": "spring",
+     "frames": 37,
+     "fps": 3.6,
+     "p50": 266.7,
+     "p95": 333.4,
+     "p99": 350,
+     "max": 350,
+     "over20ms": 100,
+     "dropped": 559,
+     "drawP50": 217.2,
+     "drawP95": 248.2,
+     "drawMax": 269.5,
+     "unevenScrollPct": 100,
+     "scrollRatioSD": 0.028,
+     "frameJsP50": 217.3,
+     "frameJsP95": 262.1,
+     "longTasks": 36,
+     "longTaskMs": 9882,
+     "rasterMisses": 2,
+     "rasterMs": 5.7,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "summer",
+     "frames": 27,
+     "fps": 2.7,
+     "p50": 316.6,
+     "p95": 583.3,
+     "p99": 600,
+     "max": 600,
+     "over20ms": 100,
+     "dropped": 558,
+     "drawP50": 238.9,
+     "drawP95": 359.5,
+     "drawMax": 364.8,
+     "unevenScrollPct": 100,
+     "scrollRatioSD": 0.085,
+     "frameJsP50": 241.5,
+     "frameJsP95": 359.6,
+     "longTasks": 29,
+     "longTaskMs": 9698,
+     "rasterMisses": 1,
+     "rasterMs": 1.6,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "autumn",
+     "frames": 19,
+     "fps": 1.8,
+     "p50": 533.3,
+     "p95": 666.6,
+     "p99": 666.6,
+     "max": 666.6,
+     "over20ms": 100,
+     "dropped": 569,
+     "drawP50": 336,
+     "drawP95": 362.6,
+     "drawMax": 362.6,
+     "unevenScrollPct": 100,
+     "scrollRatioSD": 0.017,
+     "frameJsP50": 336.9,
+     "frameJsP95": 364.1,
+     "longTasks": 21,
+     "longTaskMs": 9746,
+     "rasterMisses": 1,
+     "rasterMs": 2.2,
+     "restarts": 0,
+     "heapMB": 9.5
+    },
+    {
+     "season": "winter",
+     "frames": 33,
+     "fps": 3.2,
+     "p50": 300,
+     "p95": 466.6,
+     "p99": 516.6,
+     "max": 516.6,
+     "over20ms": 100,
+     "dropped": 561,
+     "drawP50": 215.6,
+     "drawP95": 250.5,
+     "drawMax": 314.4,
+     "unevenScrollPct": 100,
+     "scrollRatioSD": 0.06,
+     "frameJsP50": 216.9,
+     "frameJsP95": 250.7,
+     "longTasks": 37,
+     "longTaskMs": 10385,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "restarts": 0,
+     "heapMB": 9.5
+    }
+   ],
+   "errors": []
+  }
+ ],
+ "season": [
+  {
+   "viewport": "1280x720@1",
+   "cpu": 1,
+   "changes": [
+    {
+     "to": "summer",
+     "worstFrameMs": 16.8,
+     "worstDrawMs": 7.1,
+     "rasterMisses": 4,
+     "rasterMs": 2.1,
+     "crossfadeFps": 60,
+     "crossfadeP95": 16.7,
+     "dropped": 0,
+     "longTasks": 0
+    },
+    {
+     "to": "autumn",
+     "worstFrameMs": 23.3,
+     "worstDrawMs": 23.3,
+     "rasterMisses": 8,
+     "rasterMs": 9.1,
+     "crossfadeFps": 60,
+     "crossfadeP95": 16.8,
+     "dropped": 0,
+     "longTasks": 0
+    },
+    {
+     "to": "winter",
+     "worstFrameMs": 16.8,
+     "worstDrawMs": 7,
+     "rasterMisses": 1,
+     "rasterMs": 0.4,
+     "crossfadeFps": 60,
+     "crossfadeP95": 16.7,
+     "dropped": 0,
+     "longTasks": 0
+    },
+    {
+     "to": "spring (lap 2)",
+     "worstFrameMs": 16.8,
+     "worstDrawMs": 4.3,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "crossfadeFps": 60,
+     "crossfadeP95": 16.8,
+     "dropped": 0,
+     "longTasks": 0
+    }
+   ],
+   "restartFromWinter": {
+    "worstFrameMs": 16.8,
+    "rasterMisses": 0,
+    "rasterMs": 0,
+    "dropped": 0
+   }
+  },
+  {
+   "viewport": "1920x1080@1",
+   "cpu": 1,
+   "changes": [
+    {
+     "to": "summer",
+     "worstFrameMs": 50,
+     "worstDrawMs": 42.4,
+     "rasterMisses": 4,
+     "rasterMs": 2,
+     "crossfadeFps": 54,
+     "crossfadeP95": 33.3,
+     "dropped": 15,
+     "longTasks": 0
+    },
+    {
+     "to": "autumn",
+     "worstFrameMs": 49.9,
+     "worstDrawMs": 28,
+     "rasterMisses": 5,
+     "rasterMs": 6.2,
+     "crossfadeFps": 47.5,
+     "crossfadeP95": 33.4,
+     "dropped": 31,
+     "longTasks": 0
+    },
+    {
+     "to": "winter",
+     "worstFrameMs": 50,
+     "worstDrawMs": 19.6,
+     "rasterMisses": 1,
+     "rasterMs": 0.4,
+     "crossfadeFps": 41.1,
+     "crossfadeP95": 33.4,
+     "dropped": 47,
+     "longTasks": 0
+    },
+    {
+     "to": "spring (lap 2)",
+     "worstFrameMs": 33.4,
+     "worstDrawMs": 22.6,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "crossfadeFps": 56,
+     "crossfadeP95": 33.3,
+     "dropped": 10,
+     "longTasks": 0
+    }
+   ],
+   "restartFromWinter": {
+    "worstFrameMs": 29.2,
+    "rasterMisses": 0,
+    "rasterMs": 0,
+    "dropped": 0
+   }
+  },
+  {
+   "viewport": "1920x1080@1.5",
+   "cpu": 1,
+   "changes": [
+    {
+     "to": "summer",
+     "worstFrameMs": 83.3,
+     "worstDrawMs": 67.1,
+     "rasterMisses": 6,
+     "rasterMs": 19.8,
+     "crossfadeFps": 29.6,
+     "crossfadeP95": 50,
+     "dropped": 77,
+     "longTasks": 1
+    },
+    {
+     "to": "autumn",
+     "worstFrameMs": 83.4,
+     "worstDrawMs": 37.8,
+     "rasterMisses": 3,
+     "rasterMs": 1.3,
+     "crossfadeFps": 23.2,
+     "crossfadeP95": 66.7,
+     "dropped": 92,
+     "longTasks": 27
+    },
+    {
+     "to": "winter",
+     "worstFrameMs": 83.4,
+     "worstDrawMs": 38.6,
+     "rasterMisses": 1,
+     "rasterMs": 0.6,
+     "crossfadeFps": 17.9,
+     "crossfadeP95": 66.7,
+     "dropped": 106,
+     "longTasks": 42
+    },
+    {
+     "to": "spring (lap 2)",
+     "worstFrameMs": 66.7,
+     "worstDrawMs": 41.1,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "crossfadeFps": 32.7,
+     "crossfadeP95": 50,
+     "dropped": 70,
+     "longTasks": 7
+    }
+   ],
+   "restartFromWinter": {
+    "worstFrameMs": 33.4,
+    "rasterMisses": 0,
+    "rasterMs": 0,
+    "dropped": 51
+   }
+  },
+  {
+   "viewport": "1920x1080@2",
+   "cpu": 1,
+   "changes": [
+    {
+     "to": "summer",
+     "worstFrameMs": 150,
+     "worstDrawMs": 109.5,
+     "rasterMisses": 6,
+     "rasterMs": 32.2,
+     "crossfadeFps": 16,
+     "crossfadeP95": 100,
+     "dropped": 110,
+     "longTasks": 34
+    },
+    {
+     "to": "autumn",
+     "worstFrameMs": 183.3,
+     "worstDrawMs": 93.4,
+     "rasterMisses": 3,
+     "rasterMs": 1.5,
+     "crossfadeFps": 10.3,
+     "crossfadeP95": 150,
+     "dropped": 130,
+     "longTasks": 27
+    },
+    {
+     "to": "winter",
+     "worstFrameMs": 166.7,
+     "worstDrawMs": 77.2,
+     "rasterMisses": 1,
+     "rasterMs": 0.5,
+     "crossfadeFps": 10.5,
+     "crossfadeP95": 116.7,
+     "dropped": 127,
+     "longTasks": 28
+    },
+    {
+     "to": "spring (lap 2)",
+     "worstFrameMs": 100.1,
+     "worstDrawMs": 66.3,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "crossfadeFps": 18.3,
+     "crossfadeP95": 100,
+     "dropped": 107,
+     "longTasks": 11
+    }
+   ],
+   "restartFromWinter": {
+    "worstFrameMs": 50.1,
+    "rasterMisses": 0,
+    "rasterMs": 0,
+    "dropped": 94
+   }
+  },
+  {
+   "viewport": "2560x1440@1",
+   "cpu": 1,
+   "changes": [
+    {
+     "to": "summer",
+     "worstFrameMs": 100,
+     "worstDrawMs": 83.7,
+     "rasterMisses": 8,
+     "rasterMs": 33.2,
+     "crossfadeFps": 39.2,
+     "crossfadeP95": 50,
+     "dropped": 52,
+     "longTasks": 2
+    },
+    {
+     "to": "autumn",
+     "worstFrameMs": 66.7,
+     "worstDrawMs": 27.8,
+     "rasterMisses": 3,
+     "rasterMs": 1.2,
+     "crossfadeFps": 29.6,
+     "crossfadeP95": 50.1,
+     "dropped": 76,
+     "longTasks": 0
+    },
+    {
+     "to": "winter",
+     "worstFrameMs": 66.7,
+     "worstDrawMs": 38.9,
+     "rasterMisses": 1,
+     "rasterMs": 0.4,
+     "crossfadeFps": 22.3,
+     "crossfadeP95": 66.7,
+     "dropped": 95,
+     "longTasks": 4
+    },
+    {
+     "to": "spring (lap 2)",
+     "worstFrameMs": 50.1,
+     "worstDrawMs": 32.4,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "crossfadeFps": 39.6,
+     "crossfadeP95": 50,
+     "dropped": 52,
+     "longTasks": 0
+    }
+   ],
+   "restartFromWinter": {
+    "worstFrameMs": 33.4,
+    "rasterMisses": 0,
+    "rasterMs": 0,
+    "dropped": 26
+   }
+  },
+  {
+   "viewport": "1920x1080@1",
+   "cpu": 4,
+   "changes": [
+    {
+     "to": "summer",
+     "worstFrameMs": 233.3,
+     "worstDrawMs": 196.1,
+     "rasterMisses": 8,
+     "rasterMs": 81.3,
+     "crossfadeFps": 12.9,
+     "crossfadeP95": 116.7,
+     "dropped": 121,
+     "longTasks": 34
+    },
+    {
+     "to": "autumn",
+     "worstFrameMs": 216.7,
+     "worstDrawMs": 114.8,
+     "rasterMisses": 4,
+     "rasterMs": 24,
+     "crossfadeFps": 7.8,
+     "crossfadeP95": 216.7,
+     "dropped": 133,
+     "longTasks": 22
+    },
+    {
+     "to": "winter",
+     "worstFrameMs": 216.8,
+     "worstDrawMs": 103.2,
+     "rasterMisses": 1,
+     "rasterMs": 11,
+     "crossfadeFps": 8.2,
+     "crossfadeP95": 150.1,
+     "dropped": 133,
+     "longTasks": 23
+    },
+    {
+     "to": "spring (lap 2)",
+     "worstFrameMs": 233.3,
+     "worstDrawMs": 96.2,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "crossfadeFps": 8.1,
+     "crossfadeP95": 166.7,
+     "dropped": 135,
+     "longTasks": 24
+    }
+   ],
+   "restartFromWinter": {
+    "worstFrameMs": 83.4,
+    "rasterMisses": 0,
+    "rasterMs": 0,
+    "dropped": 109
+   }
+  },
+  {
+   "viewport": "1920x1080@1",
+   "cpu": 6,
+   "changes": [
+    {
+     "to": "summer",
+     "worstFrameMs": 366.7,
+     "worstDrawMs": 274.7,
+     "rasterMisses": 6,
+     "rasterMs": 105.1,
+     "crossfadeFps": 6.1,
+     "crossfadeP95": 366.7,
+     "dropped": 141,
+     "longTasks": 19
+    },
+    {
+     "to": "autumn",
+     "worstFrameMs": 433.3,
+     "worstDrawMs": 317.6,
+     "rasterMisses": 7,
+     "rasterMs": 120.7,
+     "crossfadeFps": 4.1,
+     "crossfadeP95": 433.3,
+     "dropped": 135,
+     "longTasks": 12
+    },
+    {
+     "to": "winter",
+     "worstFrameMs": 483.3,
+     "worstDrawMs": 374.6,
+     "rasterMisses": 6,
+     "rasterMs": 139.4,
+     "crossfadeFps": 3.8,
+     "crossfadeP95": 483.3,
+     "dropped": 146,
+     "longTasks": 12
+    },
+    {
+     "to": "spring (lap 2)",
+     "worstFrameMs": 316.7,
+     "worstDrawMs": 149.1,
+     "rasterMisses": 0,
+     "rasterMs": 0,
+     "crossfadeFps": 3.9,
+     "crossfadeP95": 316.7,
+     "dropped": 143,
+     "longTasks": 12
+    }
+   ],
+   "restartFromWinter": {
+    "worstFrameMs": 216.8,
+    "rasterMisses": 0,
+    "rasterMs": 0,
+    "dropped": 123
+   }
+  }
+ ],
+ "resize": [
+  {
+   "cpu": 1,
+   "steps": [
+    {
+     "to": "1920x1080",
+     "worstFrameMs": 50.8,
+     "rasterMisses": 16,
+     "rasterMs": 23.5,
+     "dropped": 2
+    },
+    {
+     "to": "1280x720",
+     "worstFrameMs": 33.4,
+     "rasterMisses": 16,
+     "rasterMs": 9.4,
+     "dropped": 1
+    },
+    {
+     "to": "1366x768",
+     "worstFrameMs": 33.3,
+     "rasterMisses": 14,
+     "rasterMs": 11.3,
+     "dropped": 1
+    },
+    {
+     "to": "2560x1440",
+     "worstFrameMs": 83.3,
+     "rasterMisses": 14,
+     "rasterMs": 30.5,
+     "dropped": 24
+    }
+   ]
+  },
+  {
+   "cpu": 4,
+   "steps": [
+    {
+     "to": "1920x1080",
+     "worstFrameMs": 249.9,
+     "rasterMisses": 16,
+     "rasterMs": 91.9,
+     "dropped": 69
+    },
+    {
+     "to": "1280x720",
+     "worstFrameMs": 149.9,
+     "rasterMisses": 15,
+     "rasterMs": 43.2,
+     "dropped": 60
+    },
+    {
+     "to": "1366x768",
+     "worstFrameMs": 150.1,
+     "rasterMisses": 14,
+     "rasterMs": 49.4,
+     "dropped": 54
+    },
+    {
+     "to": "2560x1440",
+     "worstFrameMs": 433.3,
+     "rasterMisses": 13,
+     "rasterMs": 152.7,
+     "dropped": 78
+    }
+   ]
+  }
+ ],
+ "profile": [
+  {
+   "viewport": "1920x1080@1",
+   "cpu": 4,
+   "season": 1,
+   "totalMs": 10182.2,
+   "top": [
+    {
+     "fn": "drawImage",
+     "ms": 6844.6,
+     "pct": 67.2
+    },
+    {
+     "fn": "(program)",
+     "ms": 2620.4,
+     "pct": 25.7
+    },
+    {
+     "fn": "restore",
+     "ms": 420.8,
+     "pct": 4.1
+    },
+    {
+     "fn": "(garbage collector)",
+     "ms": 29.1,
+     "pct": 0.3
+    },
+    {
+     "fn": "drawTurtles render.js:354",
+     "ms": 23,
+     "pct": 0.2
+    },
+    {
+     "fn": "draw render.js:219",
+     "ms": 21.6,
+     "pct": 0.2
+    },
+    {
+     "fn": "text render.js:192",
+     "ms": 19.6,
+     "pct": 0.2
+    },
+    {
+     "fn": "shadow render.js:206",
+     "ms": 15.3,
+     "pct": 0.2
+    },
+    {
+     "fn": "setTransform",
+     "ms": 13.6,
+     "pct": 0.1
+    },
+    {
+     "fn": "strokeText",
+     "ms": 12,
+     "pct": 0.1
+    },
+    {
+     "fn": "particles render.js:333",
+     "ms": 11.2,
+     "pct": 0.1
+    },
+    {
+     "fn": "requestAnimationFrame",
+     "ms": 10.1,
+     "pct": 0.1
+    },
+    {
+     "fn": "R.draw",
+     "ms": 9.1,
+     "pct": 0.1
+    },
+    {
+     "fn": "fill",
+     "ms": 8,
+     "pct": 0.1
+    },
+    {
+     "fn": "save",
+     "ms": 7.8,
+     "pct": 0.1
+    },
+    {
+     "fn": "A.sprite",
+     "ms": 7.5,
+     "pct": 0.1
+    },
+    {
+     "fn": "(idle)",
+     "ms": 7.4,
+     "pct": 0.1
+    },
+    {
+     "fn": "ambient render.js:310",
+     "ms": 6.1,
+     "pct": 0.1
+    },
+    {
+     "fn": "Weather._move weather.js:232",
+     "ms": 5.6,
+     "pct": 0.1
+    },
+    {
+     "fn": "createOscillator",
+     "ms": 4.5,
+     "pct": 0
+    },
+    {
+     "fn": "get",
+     "ms": 4.4,
+     "pct": 0
+    },
+    {
+     "fn": "World._updateDrops world.js:389",
+     "ms": 4.1,
+     "pct": 0
+    },
+    {
+     "fn": "drawDrops render.js:389",
+     "ms": 3.9,
+     "pct": 0
+    },
+    {
+     "fn": "rotate",
+     "ms": 3.7,
+     "pct": 0
+    },
+    {
+     "fn": "interp render.js:280",
+     "ms": 3.3,
+     "pct": 0
+    }
+   ]
+  },
+  {
+   "viewport": "1920x1080@2",
+   "cpu": 1,
+   "season": 3,
+   "totalMs": 10077.5,
+   "top": [
+    {
+     "fn": "drawImage",
+     "ms": 7541.3,
+     "pct": 74.8
+    },
+    {
+     "fn": "(program)",
+     "ms": 2327.8,
+     "pct": 23.1
+    },
+    {
+     "fn": "restore",
+     "ms": 75.2,
+     "pct": 0.7
+    },
+    {
+     "fn": "tile render.js:134",
+     "ms": 23.1,
+     "pct": 0.2
+    },
+    {
+     "fn": "setTransform",
+     "ms": 7.4,
+     "pct": 0.1
+    },
+    {
+     "fn": "fill",
+     "ms": 6.6,
+     "pct": 0.1
+    },
+    {
+     "fn": "draw render.js:219",
+     "ms": 6.2,
+     "pct": 0.1
+    },
+    {
+     "fn": "particles render.js:333",
+     "ms": 6,
+     "pct": 0.1
+    },
+    {
+     "fn": "ambient render.js:310",
+     "ms": 5.9,
+     "pct": 0.1
+    },
+    {
+     "fn": "shadow render.js:206",
+     "ms": 4,
+     "pct": 0
+    },
+    {
+     "fn": "A.sprite",
+     "ms": 3.9,
+     "pct": 0
+    },
+    {
+     "fn": "(garbage collector)",
+     "ms": 3.6,
+     "pct": 0
+    },
+    {
+     "fn": "save",
+     "ms": 3.4,
+     "pct": 0
+    },
+    {
+     "fn": "text render.js:192",
+     "ms": 3.1,
+     "pct": 0
+    },
+    {
+     "fn": "strokeText",
+     "ms": 3,
+     "pct": 0
+    },
+    {
+     "fn": "rotate",
+     "ms": 2.9,
+     "pct": 0
+    },
+    {
+     "fn": "R.draw",
+     "ms": 2.8,
+     "pct": 0
+    },
+    {
+     "fn": "requestAnimationFrame",
+     "ms": 2.7,
+     "pct": 0
+    },
+    {
+     "fn": "Weather._move weather.js:232",
+     "ms": 2.6,
+     "pct": 0
+    },
+    {
+     "fn": "G.frame",
+     "ms": 2.1,
+     "pct": 0
+    },
+    {
+     "fn": "drawFx render.js:466",
+     "ms": 2.1,
+     "pct": 0
+    },
+    {
+     "fn": "Weather._step weather.js:325",
+     "ms": 1.9,
+     "pct": 0
+    },
+    {
+     "fn": "World.predictDrop world.js:557",
+     "ms": 1.7,
+     "pct": 0
+    },
+    {
+     "fn": "drawTurtles render.js:354",
+     "ms": 1.6,
+     "pct": 0
+    },
+    {
+     "fn": "addColorStop",
+     "ms": 1.5,
+     "pct": 0
+    }
+   ]
+  }
+ ]
+}

@@ -139,3 +139,7 @@ Additive fields/events, tunables and physics rationale for 5.1–5.3: see `docs/
 ### 5.4 Test hooks (main.js)
 URL params: `?speed=N` (time scale, e.g. 8), `?bot=1` (autopilot), `?seed=N`, `?mute=1`.
 `window.FF.debug` → `{ world, weather, getState(), setSpeed(n), flap(), startGame() }`.
+
+### 5.5 Rendering performance contract (v1.1)
+- `World._step` records previous-step positions (`world._pScroll`, `bird._px/_py/_pa`, `turtle._px/_py`, `drop._px/_py`); the renderer interpolates between the previous and current step so motion is even at any monitor refresh rate (60/75/120/144/165 Hz).
+- Full-screen layers are drawn at exact device pixels (no stretching), the canvas backing store is capped at 1920×1080 device pixels, the next season and spring are pre-rasterized in idle time, and quality steps down automatically if frames stay above 22 ms (`?adaptive=0` disables). See `docs/reports/performance_report.md`.

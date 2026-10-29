@@ -50,7 +50,8 @@
       this.renderer.resize();
       FF.UI.init(this);
       this.bindInput();
-      window.addEventListener('resize', () => this.renderer.resize());
+      // P6: one resize per burst (dragging a window edge fires dozens of events; each one re-rasterizes every layer)
+      window.addEventListener('resize', () => { clearTimeout(this._rsz); this._rsz = setTimeout(() => this.renderer.resize(), 120); });
       if (params.get('autostart') === '1') this.startGame(); else this.toTitle();
       this.last = performance.now();
       requestAnimationFrame(t => this.frame(t));
@@ -265,6 +266,19 @@
       }
     },
 
+    /* P5 adaptive quality: if frames keep taking > 22 ms (~45 fps) for ~1.5 s, render fewer pixels
+     * (backing scale × 0.75, down to 1 device px per logical px). Only ever steps down; ?adaptive=0 disables. */
+    adapt(real) {
+      if (params.get('adaptive') === '0' || this.mode === 'paused' || this.mode === 'boot') return;
+      if (this._adaptHold > 0) { this._adaptHold--; return; }   // ignore the frames right after a resize
+      this._slow = real > 0.022 ? (this._slow || 0) + 1 : Math.max(0, (this._slow || 0) - 2);
+      const R = this.renderer;
+      if (this._slow > 70 && R.px > 1.01) {
+        R.maxPx = Math.max(1, R.px * 0.75); R.resize();
+        this._slow = 0; this._adaptHold = 60;
+      }
+    },
+
     frame(ts) {
       try {
         const real = Math.min(0.1, Math.max(0, (ts - this.last) / 1000));
@@ -278,6 +292,7 @@
           this.renderer.update(dt);
         }
         this.renderer.draw(this.mode);
+        this.adapt(real);
       } catch (err) {
         console.error(err);
         if (this.stats.errors.length < 20) this.stats.errors.push(String(err && err.stack || err));
