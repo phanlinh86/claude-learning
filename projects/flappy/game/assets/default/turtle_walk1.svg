@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="120" viewBox="0 0 200 120">
+<defs><clipPath id="twalk1c"><path d="M37,82 C35,44 64,16 100,16 C136,16 165,44 163,82 Z"/></clipPath></defs>
+<!-- far legs -->
+<path d="M53,84 L55,107 C53,116 84,116 82,107 L77,84 Z" fill="#7cbd4f" stroke="#3d6b25" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M64,113.5 L64,110 M71,113.5 L71,110 M78,113 L77,110" stroke="#3d6b25" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" opacity="0.55"/>
+<path d="M113,84 L109,111 C107,120 138,120 136,111 L137,84 Z" fill="#7cbd4f" stroke="#3d6b25" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M118,117.5 L118,114 M125,117.5 L125,114 M132,117 L131,114" stroke="#3d6b25" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" opacity="0.55"/>
+<!-- tail -->
+<path d="M40,88 C32,88 24,92 19,98 C28,99 36,97 44,94 Z" fill="#a3da6e" stroke="#3d6b25" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<!-- near legs (tops hidden by belly) -->
+<path d="M47,84 L43,111 C41,120 72,120 70,111 L71,84 Z" fill="#a3da6e" stroke="#3d6b25" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M52,117.5 L52,114 M59,117.5 L59,114 M66,117 L65,114" stroke="#3d6b25" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" opacity="0.55"/>
+<path d="M135,84 L137,107 C135,116 166,116 164,107 L159,84 Z" fill="#a3da6e" stroke="#3d6b25" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M146,113.5 L146,110 M153,113.5 L153,110 M160,113 L159,110" stroke="#3d6b25" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" opacity="0.55"/>
+<!-- body under shell -->
+<path d="M40,84 C46,104 154,104 160,84 Z" fill="#7cbd4f" stroke="#3d6b25" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<!-- head + neck -->
+<g transform="translate(0 0) rotate(0 160 78)">
+  <path d="M146,88 C148,74 156,64 164,60 L172,86 C164,94 154,94 146,88 Z" fill="#a3da6e" stroke="#3d6b25" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M155,60 C155,46 165,38 177,38 C190,38 198,48 198,60 C198,74 189,82 176,82 C164,82 155,74 155,60 Z" fill="#a3da6e" stroke="#3d6b25" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M163,47 C167,43 173,41 179,42" fill="none" stroke="#c7ee99" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="182" cy="55" rx="6.4" ry="7.6" fill="#2d4a1e"/>
+  <circle cx="184.4" cy="52" r="2.5" fill="#ffffff"/>
+  <circle cx="180.4" cy="58.4" r="1.1" fill="#ffffff" opacity="0.8"/>
+  <ellipse cx="172" cy="67" rx="5" ry="3.2" fill="#ff9a9a" opacity="0.8"/>
+  <path d="M183,68 C186,72 192,71 195,66" fill="none" stroke="#2d4a1e" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/>
+</g>
+<!-- shell -->
+<path d="M37,82 C35,44 64,16 100,16 C136,16 165,44 163,82 Z" fill="#4caa3c"/>
+<g clip-path="url(#twalk1c)">
+  <path d="M30,64 C60,80 140,80 170,64 L170,90 L30,90 Z" fill="#2f7f2b"/>
+  <g stroke="#2d4a1e" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M86,26 L114,26 L124,44 L114,62 L86,62 L76,44 Z" fill="#62c04a"/>
+    <path d="M76,44 L86,26 L80,10 L56,14 L50,30 L58,44 Z" fill="#62c04a"/>
+    <path d="M124,44 L114,26 L120,10 L144,14 L150,30 L142,44 Z" fill="#62c04a"/>
+    <path d="M58,44 L76,44 L86,62 L80,90 L40,90 L44,58 Z" fill="#62c04a"/>
+    <path d="M142,44 L124,44 L114,62 L120,90 L160,90 L156,58 Z" fill="#62c04a"/>
+    <path d="M86,62 L114,62 L120,90 L80,90 Z" fill="#62c04a"/>
+    <path d="M58,44 L50,30 L30,32 L30,58 L44,58 Z" fill="#62c04a"/>
+    <path d="M142,44 L150,30 L170,32 L170,58 L156,58 Z" fill="#62c04a"/>
+  </g>
+  <path d="M90,32 L110,32 L116,44" fill="none" stroke="#86d861" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M62,24 C66,20 72,18 78,18" fill="none" stroke="#86d861" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M30,72 C60,86 140,86 170,72 L170,90 L30,90 Z" fill="#2f7f2b" opacity="0.55"/>
+</g>
+<path d="M37,82 C35,44 64,16 100,16 C136,16 165,44 163,82 Z" fill="none" stroke="#2d4a1e" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M58,36 C64,28 72,24 80,23" fill="none" stroke="#ffffff" stroke-width="3.2" opacity="0.5" stroke-linejoin="round" stroke-linecap="round"/>
+<!-- rim -->
+<rect x="31" y="76" width="138" height="14" rx="7" fill="#c9e98a" stroke="#2d4a1e" stroke-width="3"/>
+<path d="M40,86 L160,86" stroke="#a6d06a" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+<g fill="#a6d06a"><circle cx="54" cy="82" r="1.6"/><circle cx="77" cy="82.5" r="1.6"/><circle cx="100" cy="82.8" r="1.6"/><circle cx="123" cy="82.5" r="1.6"/><circle cx="146" cy="82" r="1.6"/></g>
+</svg>
