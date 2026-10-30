@@ -16,6 +16,7 @@
   const lerp = (a, b, t) => a + (b - a) * t;
   const easeOutBack = t => 1 + 2.70158 * Math.pow(t - 1, 3) + 1.70158 * Math.pow(t - 1, 2);
   const PIP = 60, BEAR = 52, GEM = 30;           // drawn sizes at scale 1
+  const PIP_BIG = PIP * 1.6;                     // Pip's size at max growth: sprites are cached at this size
   const PIP_FOOT = 90 / 96, BEAR_FOOT = 76 / 80;  // feet anchor as a fraction of the sprite height
   const GEM_COLORS = { pink: '#ff7ab8', blue: '#5ab4ff', yellow: '#ffd23c', green: '#5fd38a' };
   const BEAR_COLORS = { red: '#ff5a6e', green: '#4fcf7a', orange: '#ff9a3d' };
@@ -74,11 +75,11 @@
           case 'gem': {
             const col = GEM_COLORS[e.color] || '#ffffff';
             this.sparks(e.x, e.y - 10, 8, col);
-            this.texts.push({ text: '+' + e.points, x: e.x, y: e.y - 34, life: 0, max: 0.9, size: 18 + 3 * (e.size || 1), color: (e.size || 1) >= 4 ? '#ffe14d' : '#ffffff' });
+            this.texts.push({ text: '+' + e.points, x: e.x, y: (w && w.pip ? w.pip.y - PIP * (w.pip.scale || 1) - 8 : e.y - 34), life: 0, max: 0.9, size: 18 + 3 * (e.size || 1), color: (e.size || 1) >= 4 ? '#ffe14d' : '#ffffff' });
             break;
           }
           case 'grow': this.ring(w.pip.x, w.pip.y - 20, '#ffffff', 0.35); break;
-          case 'maxsize': this.texts.push({ text: 'Max size! Press SPACE to Pop!', x: clamp(w.pip.x, 240, 720), y: Math.max(150, w.pip.y - 90), life: 0, max: 1.8, size: 20, color: '#ffe14d' }); break;
+          case 'maxsize': this.texts.push({ text: 'Max size! ' + (CD.Game && CD.Game.isTouch ? 'Tap ★ to Pop!' : 'Press SPACE to Pop!'), x: clamp(w.pip.x, 240, 720), y: Math.max(150, w.pip.y - 90), life: 0, max: 1.8, size: 20, color: '#ffe14d' }); break;
           case 'pop': {
             this.flash = Math.max(this.flash, 0.35); this.shake = 0.15;
             for (let i = 0; i < 24; i++) {
@@ -90,8 +91,13 @@
             this.texts.push({ text: 'POP! +' + e.points, x: e.x, y: Math.max(120, e.y - 70), life: 0, max: 1.3, size: 32, color: '#ffe14d' });
             break;
           }
-          case 'dash': this.puffs(e.x, e.y, 5, '#ffffff'); break;
-          case 'bump': this.shake = 0.3; this.flash = Math.max(this.flash, 0.2); this.texts.push({ text: 'Boing!', x: e.x, y: Math.max(120, e.y - 60), life: 0, max: 0.9, size: 24, color: '#ffd1e6' }); this.sparks(e.x, e.y - 20, 10, '#ffffff'); break;
+          case 'dash': this.puffs(e.x, e.y, 5, this.trailColor()); break;
+          case 'heal': this.texts.push({ text: '+1 ♥', x: 160, y: 110, life: 0, max: 1.4, size: 24, color: '#ff7ab8' }); break;
+          case 'go': this.texts.push({ text: 'Go!', x: 480, y: 260, life: 0, max: 0.9, size: 48, color: '#ffffff', big: true }); break;
+          case 'shrink': if (w && w.pip) this.ring(w.pip.x, w.pip.y - 20, '#ffd1e6', 0.35); break;
+          case 'bounce': this.ring(e.x, e.y, '#ffd1e6', 0.4); this.puffs(e.x, e.y, 4, '#ffc6e3'); break;
+          case 'gemgone': if (!e.loose) this.puffs(e.x, e.y - 12, 3, '#ffffff'); break;
+          case 'bump': this.shake = 0.3; this.flash = Math.max(this.flash, 0.2); this.texts.push({ text: 'Boing!', x: e.x, y: Math.max(120, (w && w.pip ? w.pip.y - PIP * (w.pip.scale || 1) - 12 : e.y - 60)), life: 0, max: 0.9, size: 24, color: '#ffd1e6' }); this.sparks(e.x, e.y - 20, 10, '#ffffff'); break;
           case 'jarfull': this.texts.push({ text: 'Jar full! Find the gate →', x: 585, y: 140, life: 0, max: 2.4, size: 26, color: '#ffe14d', big: true }); break;
           case 'gateopen': this.ring(e.x != null ? e.x : 900, e.y != null ? e.y : 300, '#fff3a0', 0.7, true); break;
           case 'cleared':
@@ -111,6 +117,7 @@
     puffs(x, y, n, color) {
       for (let i = 0; i < n; i++) this.fx.push({ k: 'puff', x: x + (Math.random() - .5) * 16, y: y - 4 + (Math.random() - .5) * 6, vx: (Math.random() - .5) * 60, vy: -10 - Math.random() * 30, g: 0, life: 0, max: 0.45 + Math.random() * 0.2, size: 6 + Math.random() * 6, color });
     }
+    trailColor() { return ['#ffffff', '#f6e3c8', '#ffd6ee', '#7fc8f7'][this.vis.cur] || '#ffffff'; }   // visible on every ground
     ring(x, y, color, max, big) { this.fx.push({ k: 'circle', x, y, life: 0, max, r0: 10, r1: big ? 110 : 50, color }); }
 
     update(dt) {
@@ -130,7 +137,7 @@
       this.texts = this.texts.filter(t => t.life < t.max);
       // dash trail
       const w = this.world;
-      if (w && w.pip && w.pip.sliding && (this._trail = (this._trail || 0) - dt) < 0) { this._trail = 0.03; this.puffs(w.pip.x, w.pip.y, 1, '#ffffff'); }
+      if (w && w.pip && w.pip.sliding && (this._trail = (this._trail || 0) - dt) < 0) { this._trail = 0.03; this.puffs(w.pip.x, w.pip.y, 1, this.trailColor()); }
     }
 
     // ---------------- helpers ----------------
@@ -214,7 +221,7 @@
       else this.backdrop(v.cur, 1);
       if (this.weather) { this.ambient(this.weather.ambient); this.particles('back'); }
       if (w) {
-        this.drawGate();
+        this.drawGateGlow();
         this.drawEntities(mode);
       }
       this.layer(CD.Assets.SEASONS[v.cur] + '_edge', 1);
@@ -252,18 +259,23 @@
       g.globalAlpha = 1;
     }
 
+    drawGateGlow() {
+      const g = this.ctx, gt = this.world.gate;
+      if (!gt || !gt.open) return;
+      const p = 0.5 + 0.5 * Math.sin(this.time * 4), k = gt.t == null ? 1 : clamp(gt.t, 0, 1);
+      g.globalAlpha = (0.25 + 0.2 * p) * k; g.fillStyle = '#fff3a0';   // warm glow invites Pip in
+      g.beginPath(); g.ellipse(gt.x, gt.y + 10, 62, 78, 0, 0, TAU); g.fill(); g.globalAlpha = 1;
+    }
     drawGate() {
       const g = this.ctx, gt = this.world.gate, A = CD.Assets;
       if (!gt) return;
-      const open = gt.open, gw = 90, gh = 120, bx = gt.x, by = gt.y + 60;
-      if (open) {   // warm glow invites Pip in
-        const p = 0.5 + 0.5 * Math.sin(this.time * 4);
-        g.globalAlpha = 0.25 + 0.2 * p; g.fillStyle = '#fff3a0';
-        g.beginPath(); g.ellipse(bx, by - 50, 62, 78, 0, 0, TAU); g.fill(); g.globalAlpha = 1;
-      }
-      const spr = A.sprite(open ? 'gate_open' : 'gate_closed', gw, gh);
+      const gw = 90, gh = 120, bx = gt.x, by = gt.y + 60;
+      const k = gt.open ? (gt.t == null ? 1 : clamp(gt.t, 0, 1)) : 0;   // open animation: closed gate fades, barrier slides down
       this.shadow(bx, by, 80, 0.18);
-      if (spr) g.drawImage(spr, bx - gw / 2, by - gh, gw, gh);
+      const op = A.sprite('gate_open', gw, gh), cl = A.sprite('gate_closed', gw, gh);
+      if (k > 0 && op) { g.globalAlpha = k; g.drawImage(op, bx - gw / 2, by - gh, gw, gh); }
+      if (k < 1 && cl) { g.globalAlpha = 1 - k; g.drawImage(cl, bx - gw / 2, by - gh + k * 40, gw, gh); }
+      g.globalAlpha = 1;
     }
 
     drawEntities(mode) {
@@ -271,14 +283,17 @@
       for (const m of w.gems) O.push(m);
       for (const b of w.bears) O.push(b);
       if (w.pip) O.push(w.pip);
+      const gateKey = this._gateKey || (this._gateKey = { isGate: true, y: 0 });
+      if (w.gate) { gateKey.y = w.gate.y + 60; O.push(gateKey); }
       O.sort((a, b) => a.y - b.y);
       for (const o of O) {
-        if (o === w.pip) this.drawPip(mode);
+        if (o.isGate) this.drawGate();
+        else if (o === w.pip) this.drawPip(mode);
         else if (o.kind) this.drawBear(o);
         else this.drawGem(o);
       }
       // pointer target marker
-      if (this.pointer && mode === 'playing') {
+      if (this.pointer && this.pointerHeld && mode === 'playing') {   // only while the mouse/finger is held
         const g = this.ctx, [x, y] = this.pointer, p = 0.5 + 0.5 * Math.sin(this.time * 8);
         g.strokeStyle = `rgba(255,255,255,${0.5 + 0.3 * p})`; g.lineWidth = 3;
         g.beginPath(); g.ellipse(x, y, 14 + p * 3, 6 + p, 0, 0, TAU); g.stroke();
@@ -288,26 +303,32 @@
     drawGem(m) {
       const g = this.ctx, A = CD.Assets;
       const ap = m.appear == null ? 1 : clamp(m.appear, 0, 1);
-      if (ap < 1) {   // telegraph: a twinkling sparkle where the gem will appear
-        const s = 10 + 16 * ap, spr = A.sprite('p_sparkle', 32, 32);
-        g.globalAlpha = 0.5 + 0.5 * ap;
+      const col = GEM_COLORS[m.color] || '#ffffff';
+      if (ap < 1) {   // telegraph: gem-coloured ring on the ground + a big twinkling sparkle
+        g.strokeStyle = col; g.globalAlpha = 0.35 + 0.5 * ap; g.lineWidth = 3;
+        g.beginPath(); g.ellipse(m.x, m.y, 8 + 10 * ap, 3 + 4 * ap, 0, 0, TAU); g.stroke();
+        const s = 14 + 20 * ap, spr = A.sprite('p_sparkle', 32, 32);
         if (spr) { g.save(); g.translate(m.x, m.y - 14); g.rotate(this.time * 3); g.drawImage(spr, -s / 2, -s / 2, s, s); g.restore(); }
         g.globalAlpha = 1;
+        m._shown = false;
         return;
       }
-      const fade = m.loose && m.life != null && m.life < 1 ? (Math.sin(this.time * 20) > 0 ? 0.35 : 1) : 1;
+      if (!m._shown) { m._shown = true; m._popT = this.time; this.sparks(m.x, m.y - 14, 4, col); }
+      const pt = clamp((this.time - (m._popT || 0)) / 0.25, 0, 1), popS = pt < 1 ? easeOutBack(pt) : 1;   // bouncy scale-in
+      const warn = (m.life != null && m.life < 1.5);
+      const fade = warn ? (Math.sin(this.time * 20) > 0 ? 0.35 : 1) : 1;
       const bob = m.bob != null ? m.bob : Math.sin(this.time * 3 + (m.id || 0)) * 2.5;
       this.shadow(m.x, m.y, 20, 0.16);
       g.globalAlpha = fade;
       const custom = A.hasCustom('gem');
       if (custom) {
         const [cw, ch] = A.fit('gem', GEM + 4, GEM + 4);
-        g.drawImage(A.sprite('custom:gem', cw, ch), m.x - cw / 2, m.y - 14 - ch / 2 + bob, cw, ch);
+        g.drawImage(A.sprite('custom:gem', cw, ch), m.x - cw / 2, m.y - 14 - ch / 2 - bob, cw, ch);
         g.lineWidth = 2.5; g.strokeStyle = GEM_COLORS[m.color] || '#fff';
-        g.beginPath(); g.arc(m.x, m.y - 14 + bob, Math.max(cw, ch) / 2 + 2, 0, TAU); g.stroke();
+        g.beginPath(); g.arc(m.x, m.y - 14 - bob, Math.max(cw, ch) / 2 + 2, 0, TAU); g.stroke();
       } else {
-        const spr = A.sprite('gem_' + (m.color || 'pink'), GEM, GEM);
-        if (spr) g.drawImage(spr, m.x - GEM / 2, m.y - 14 - GEM / 2 + bob, GEM, GEM);
+        const spr = A.sprite('gem_' + (m.color || 'pink'), GEM, GEM), gs = GEM * popS;
+        if (spr) g.drawImage(spr, m.x - gs / 2, m.y - 14 - gs / 2 - bob, gs, gs);
       }
       g.globalAlpha = 1;
     }
@@ -342,9 +363,16 @@
     drawPip(mode) {
       const g = this.ctx, w = this.world, p = w.pip, A = CD.Assets;
       const sc = p.scale || 1, sz = PIP * sc;
-      if (p.invuln > 0 && Math.sin(this.time * 30) > 0.2) { this.shadow(p.x, p.y, sz * 0.7, 0.1); return; }   // blink while safe
-      this.shadow(p.x, p.y, sz * 0.7, 0.25);
+      const inv = (w.cfg && w.cfg.invulnTime) || 1.5;
+      const blink = p.invuln > 0 && p.invuln < inv - 0.35 && Math.sin(this.time * 30) > 0.2;   // keep Pip visible so kids never lose him
+      this.shadow(p.x, p.y, sz * 0.8, 0.25);
+      if (w.size >= (w.sizeMax || 5) && mode === 'playing') {   // max size: pulsing gold ring on the ground
+        const k = 0.5 + 0.5 * Math.sin(this.time * 6);
+        g.strokeStyle = `rgba(255,210,60,${0.55 + 0.35 * k})`; g.lineWidth = 3 + 2 * k;
+        g.beginPath(); g.ellipse(p.x, p.y + 1, sz * 0.55 + 4 * k, sz * 0.2 + 2 * k, 0, 0, TAU); g.stroke();
+      }
       g.save();
+      if (blink) g.globalAlpha = 0.35;
       g.translate(p.x, p.y - (p.z || 0));   // z = hop height (puffs); the shadow stays on the ground
       const sq = p.squash || 0;            // signed wobble from the world
       g.scale(1 + sq, 1 - sq);
@@ -356,11 +384,14 @@
           g.fillStyle = '#ff9a3d'; g.strokeStyle = '#8a4a14'; g.lineWidth = 2;
           g.beginPath(); g.ellipse(side * cw * 0.2, -3 + Math.sin(this.time * 12 + side) * 1.5, 8, 4, 0, 0, TAU); g.fill(); g.stroke();
         }
-        g.drawImage(A.sprite('custom:hero', cw, ch), -cw / 2, -ch - 2, cw, ch);
+        const [bw, bh] = A.fit('hero', PIP_BIG * 1.15, PIP_BIG * 1.15);   // rasterize once at the largest size, scale down
+        g.drawImage(A.sprite('custom:hero', bw, bh), -cw / 2, -ch - 2, cw, ch);
       } else {
+        const mv = Math.min(1, Math.hypot(p.vx || 0, p.vy || 0) / 120);
+        if (p.frame !== 'slide') { g.rotate(Math.sin(this.time * 11) * 0.07 * mv); g.translate(0, -Math.abs(Math.sin(this.time * 11)) * 2 * mv); }
         if ((p.facing || 1) < 0) g.scale(-1, 1);
         const fr = ['idle', 'walk1', 'walk2', 'slide', 'hurt', 'cheer'].includes(p.frame) ? p.frame : 'idle';
-        const spr = A.sprite('pip_' + fr, sz, sz);
+        const spr = A.sprite('pip_' + fr, PIP_BIG, PIP_BIG);   // one cached raster per frame (not per animated size)
         if (spr) g.drawImage(spr, -sz / 2, -sz * PIP_FOOT, sz, sz);
       }
       g.restore();
@@ -372,7 +403,7 @@
           if (spr) g.drawImage(spr, p.x + Math.cos(ang) * sz * 0.55 - s / 2, p.y - sz * 0.5 + Math.sin(ang) * sz * 0.35 - s / 2, s, s);
         }
         const a = 0.75 + 0.25 * Math.sin(this.time * 6);
-        g.globalAlpha = a; this.text('POP!', p.x, Math.max(80, p.y - sz - 14), 16, '#ffe14d', '#6a2d5c', 'center', 4); g.globalAlpha = 1;
+        g.globalAlpha = a; this.text(CD.Game && CD.Game.isTouch ? 'POP! (★)' : 'POP! (Space)', p.x, Math.max(96, p.y - sz - 14), 18, '#ffe14d', '#6a2d5c', 'center', 5); g.globalAlpha = 1;
       }
     }
 
@@ -413,17 +444,21 @@
     hud() {
       const g = this.ctx, w = this.world, A = CD.Assets;
       // hearts + size pips (top-left)
-      g.fillStyle = 'rgba(255,255,255,0.85)'; this.roundRect(14, 12, 40 + 30 * (w.heartsMax || 3), 46, 23); g.fill();
+      const pt = w.pip ? w.pip.y - PIP * (w.pip.scale || 1) : 999;
+      const hudA = pt < 70 ? 0.45 : 1;   // fade the HUD if Pip walks up under it
+      g.globalAlpha = hudA;
+      g.fillStyle = 'rgba(255,255,255,0.96)'; this.roundRect(14, 12, 40 + 30 * (w.heartsMax || 3), 46, 23); g.fill();
       const hf = A.sprite('heart_full', 28, 28), he = A.sprite('heart_empty', 28, 28);
       for (let i = 0; i < (w.heartsMax || 3); i++) { const s = i < w.hearts ? hf : he; if (s) g.drawImage(s, 26 + i * 30, 21, 28, 28); }
-      const smax = w.sizeMax || 5;
-      g.fillStyle = 'rgba(255,255,255,0.85)'; this.roundRect(14, 64, 82 + 20 * smax, 26, 13); g.fill();
-      this.text('SIZE', 22, 77, 11, '#a8407e', null, 'left');
+      const smax = w.sizeMax || 5, sx0 = 26 + 30 * (w.heartsMax || 3) + 16;   // size pill sits on the hearts row (above the arena)
+      g.fillStyle = 'rgba(255,255,255,0.96)'; this.roundRect(sx0, 12, 82 + 20 * smax, 46, 23); g.fill();
+      this.text('SIZE', sx0 + 10, 35, 13, '#a8407e', null, 'left');
       for (let i = 0; i < smax; i++) {
-        g.fillStyle = i < w.size ? (w.size >= smax ? '#ffd23c' : '#ff8fc8') : 'rgba(168,64,126,0.18)';
-        g.beginPath(); g.arc(60 + i * 20, 77, 7, 0, TAU); g.fill();
+        g.fillStyle = i < w.size ? (w.size >= smax ? '#ffd23c' : '#ff8fc8') : '#ffffff';
+        g.beginPath(); g.arc(sx0 + 52 + i * 20, 35, 7, 0, TAU); g.fill();
+        if (i >= w.size) { g.strokeStyle = 'rgba(168,64,126,0.45)'; g.lineWidth = 1.5; g.stroke(); }
       }
-      this.text('×' + w.size, 58 + smax * 20, 77, 13, '#a8407e', null, 'left');
+      this.text('×' + w.size, sx0 + 48 + smax * 20, 35, 15, '#a8407e', null, 'left');
       // score
       if (this._lastScore !== w.score) { this._scorePop = 1; this._lastScore = w.score; }
       this._scorePop = Math.max(0, (this._scorePop || 0) - 0.06);
@@ -432,8 +467,8 @@
       const bi = BIOME_INFO[w.biome] || BIOME_INFO[0];
       this.text(bi.name + (w.lap > 0 ? ' · Lap ' + (w.lap + 1) : ''), W / 2, 72, 14, '#ffffff', '#6a2d5c', 'center', 4);
       // gem jar (top-right, under the HUD buttons)
-      const jx = 800, jy = 70, jar = A.sprite('jar', 44, 55);
-      g.fillStyle = 'rgba(255,255,255,0.85)'; this.roundRect(jx - 8, jy - 2, 140, 58, 18); g.fill();
+      const jx = 700, jy = 4, jar = A.sprite('jar', 44, 55);   // jar lives in the top band, left of the HUD buttons
+      g.fillStyle = 'rgba(255,255,255,0.96)'; this.roundRect(jx - 8, jy - 2, 136, 58, 18); g.fill();
       const frac = clamp(w.jar / (w.jarTarget || 1), 0, 1);
       if (frac > 0) {
         const ix = jx + 10 * 44 / 64, iw = 44 * 44 / 64, iy = jy + 22 * 55 / 80, ih = 50 * 55 / 80;
@@ -442,6 +477,7 @@
       }
       if (jar) g.drawImage(jar, jx, jy, 44, 55);
       this.text(w.jar + '/' + w.jarTarget, jx + 54, jy + 28, 20, frac >= 1 ? '#2d9a52' : '#a8407e', null, 'left');
+      g.globalAlpha = 1;
       // dash cooldown dot
       if (w.pip && w.pip.dashCd > 0 && w.size < smax) {
         const cdMax = (w.cfg && w.cfg.dashCooldown) || 1.2, k = 1 - clamp(w.pip.dashCd / cdMax, 0, 1);

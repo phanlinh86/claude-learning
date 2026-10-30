@@ -71,7 +71,7 @@
     gemLife: 14,                   // s, an uncollected gem fades and respawns elsewhere
     gemPointsPerSize: 10,
     gemMinFromPip: 130, gemMinFromBear: 80, gemMinFromGem: 70, gemMinFromGate: 90, gemEdge: 26,
-    looseLife: 6, looseSpeed: [150, 220], looseDrag: 3.2, looseTelegraph: 0.35, looseBounce: 0.6,
+    looseLife: 6, looseSpeed: [240, 320], looseDrag: 3.2, looseTelegraph: 0.6, looseBounce: 0.6,
 
     // --- bears
     bearRadius: 18,

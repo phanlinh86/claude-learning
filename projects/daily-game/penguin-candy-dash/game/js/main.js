@@ -10,7 +10,7 @@
   function difficultyOverrides(d) { return Object.assign({}, (CD.DIFFICULTY && CD.DIFFICULTY[d]) || {}); }
 
   const Game = {
-    mode: 'boot',
+    mode: 'boot', isTouch,
     isApp: params.get('app') === '1' || typeof window.ffStoreSet === 'function',
     speed: Math.max(0.1, Math.min(64, num('speed', 1))),
     botMode: params.get('bot') === '1',
@@ -63,6 +63,7 @@
 
     startGame() {
       CD.Audio.unlock();
+      this.runDifficulty = this.settings.difficulty;   // best score belongs to the difficulty the run started on
       this.world = this.makeWorld();
       const lv = params.has('level') ? Math.max(0, num('level', 0) | 0) : 0;
       if (lv > 0 && this.world.startLevel) this.world.startLevel(lv);
@@ -101,7 +102,7 @@
     canRestart() { return performance.now() - this.overAt > 700; },
 
     gameOver() {
-      const w = this.world, key = 'best_' + this.settings.difficulty;
+      const w = this.world, key = 'best_' + (this.runDifficulty || this.settings.difficulty);
       const prev = parseInt(CD.Storage.get(key, '0'), 10) || 0, newBest = w.score > prev;
       if (newBest) CD.Storage.set(key, String(w.score));
       this.mode = 'over'; this.overAt = performance.now();
@@ -141,6 +142,7 @@
     playerCanAct() { return this.mode === 'playing' && this.world && this.world.state !== 'dead' && !this.bot; },
     action() { CD.Audio.unlock(); if (this.playerCanAct()) this.world.action(); },
     applyMove() {
+      this.renderer.pointerHeld = this.pointerDown;
       if (!this.playerCanAct()) return;
       const k = this.keys;
       const mx = (k.ArrowRight || k.KeyD ? 1 : 0) - (k.ArrowLeft || k.KeyA ? 1 : 0);
