@@ -1,0 +1,1 @@
+{ "easy": { "fairSpeed": 130, "speedMul": 0.75, "catchHalfW": 44, "multThresholds": [0, 3, 7, 12, 20], "rockChance": [0.03, 0.08, 0.12, 0.16] } }
