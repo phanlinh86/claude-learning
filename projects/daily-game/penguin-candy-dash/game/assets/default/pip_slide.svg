@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+<defs><clipPath id="ps"><path d="M18,68 C17,55 33,46 54,46 C73,46 87,55 88,68 C89,80 76,89 53,89 C32,89 19,81 18,68 Z"/></clipPath></defs>
+<g opacity=".85" stroke-linejoin="round" stroke-linecap="round" fill="none">
+  <path d="M4,60 L13,60 M2,70 L12,70 M6,80 L14,80" stroke="#ffffff" stroke-width="3.2"/>
+  <path d="M4,60 L13,60 M2,70 L12,70 M6,80 L14,80" stroke="#8fb0e8" stroke-width="1.2"/>
+</g>
+<g transform="translate(16,76) rotate(-150)"><path d="M-7,-1 C-7,-5 -2,-6.4 3,-5.4 C7,-4.8 10.4,-3.2 10.4,-1 C11.4,0.6 9.4,1.8 7.4,1.2 C6.2,2.2 4.2,2.2 3,1.3 C1.8,2.3 -0.4,2.2 -1.4,1.2 C-4.4,1.8 -7,1.2 -7,-1 Z" fill="#ffad45" stroke="#a3520f" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/><path d="M-4,-3 C-1,-4.4 3,-4.2 6,-3" fill="none" stroke="#ffd08a" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/></g><g transform="translate(19,84) rotate(-165)"><path d="M-7,-1 C-7,-5 -2,-6.4 3,-5.4 C7,-4.8 10.4,-3.2 10.4,-1 C11.4,0.6 9.4,1.8 7.4,1.2 C6.2,2.2 4.2,2.2 3,1.3 C1.8,2.3 -0.4,2.2 -1.4,1.2 C-4.4,1.8 -7,1.2 -7,-1 Z" fill="#ffad45" stroke="#a3520f" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/><path d="M-4,-3 C-1,-4.4 3,-4.2 6,-3" fill="none" stroke="#ffd08a" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/></g>
+<path d="M18,68 C17,55 33,46 54,46 C73,46 87,55 88,68 C89,80 76,89 53,89 C32,89 19,81 18,68 Z" fill="#22326a"/>
+<g clip-path="url(#ps)">
+  <ellipse cx="54" cy="64" rx="34" ry="20" fill="#2f4486"/>
+  <ellipse cx="38" cy="52" rx="12" ry="3.6" fill="#5b78c9" transform="rotate(-8 38 52)"/>
+  <path d="M14,80 C30,74 66,72 92,76 L92,96 L14,96 Z" fill="#fff6e6"/>
+  <path d="M14,86 C34,84 66,84 92,82 L92,96 L14,96 Z" fill="#f2dcbc"/>
+  <path d="M62,62 C61,53 69,48 76,51 C82,51 88,57 88,64 C88,71 82,75 75,75 C68,75 63,70 62,62 Z" fill="#fff6e6"/>
+</g>
+<path d="M18,68 C17,55 33,46 54,46 C73,46 87,55 88,68 C89,80 76,89 53,89 C32,89 19,81 18,68 Z" fill="none" stroke="#141c40" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M30,52 C38,47.6 48,46.6 56,47.2" fill="none" stroke="#9fb4f0" stroke-width="2.6" opacity=".75" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M60,55 C56,62 56,76 60,85" fill="none" stroke="#9e1f55" stroke-width="11.6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M60,55 C56,62 56,76 60,85" fill="none" stroke="#ff5c9d" stroke-width="7.6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M60,55 C56,62 56,76 60,85" fill="none" stroke="#fff4f8" stroke-width="7.6" stroke-dasharray="3 4.4"/>
+<path d="M57,56 C49,49 40,47 30,42" fill="none" stroke="#9e1f55" stroke-width="10.6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M57,56 C49,49 40,47 30,42" fill="none" stroke="#ff5c9d" stroke-width="6.4" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M57,56 C49,49 40,47 30,42" fill="none" stroke="#fff4f8" stroke-width="6.4" stroke-dasharray="2.6 4"/>
+<ellipse cx="70.6" cy="66.6" rx="3.6" ry="2.2" fill="#ff7f9e" opacity=".85"/>
+<path d="M66,61.4 C67.6,56.4 73.4,56.4 75,61.4" fill="none" stroke="#16152a" stroke-width="2.7" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M78.6,60 C79.6,56.2 83.4,56.2 84.4,60" fill="none" stroke="#16152a" stroke-width="2.3" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M82,63.6 C86,60.6 91.6,61.6 94.6,64.6 C91.4,68.2 86,69 82,67.2 Z" fill="#ffa23a" stroke="#9a4a10" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M83.6,65.8 C87,66 90,65.6 92.6,64.8" fill="none" stroke="#e57a18" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>
+<g transform="translate(44,68) rotate(72) scale(1)"><path d="M0,-3 C-8,2 -13,12 -12.4,22 C-6,20.6 0,13.4 3.4,5 Z" fill="#2f4486" stroke="#141c40" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/></g>
+<path d="M90,46.6 C90.6,49.3 90.7,49.4 93.4,50 C90.7,50.6 90.6,50.7 90,53.4 C89.4,50.7 89.3,50.6 86.6,50 C89.3,49.4 89.4,49.3 90,46.6 Z" fill="#fff" stroke="#c7861a" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Pip's Candy Dash</title>
+<link rel="icon" href="assets/default/icon.svg">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="stage">
+  <canvas id="game" aria-label="Pip's Candy Dash game"></canvas>
+
+  <!-- In-game HUD buttons -->
+  <div id="hud" class="hidden">
+    <button id="btnPause" class="icon-btn" title="Pause (Esc)" aria-label="Pause">
+      <svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg>
+    </button>
+    <button id="btnMuteHud" class="icon-btn" title="Sound (M)" aria-label="Toggle sound"></button>
+  </div>
+
+  <!-- Title screen -->
+  <section id="scrTitle" class="screen">
+    <div class="title-wrap">
+      <img id="titleIcon" class="title-icon" src="assets/default/icon.svg" alt="">
+      <h1 class="logo"><span class="l1">Pip's</span> <span class="l2">Candy Dash</span></h1>
+      <p class="tagline">Scoop up candy gems, grow rounder, dodge the grumpy jelly bears!</p>
+      <div class="menu">
+        <button id="btnPlay" class="btn btn-big btn-green"><svg class="i" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg>&nbsp; Play</button>
+        <button id="btnCustomize" class="btn btn-orange">🖼️&nbsp; Change Pictures</button>
+        <div class="row">
+          <button id="btnHow" class="btn btn-blue btn-small">❓ How to Play</button>
+          <button id="btnSettings" class="btn btn-blue btn-small">⚙️ Settings</button>
+        </div>
+        <button id="btnQuit" class="btn btn-grey btn-small hidden"><svg class="i" viewBox="0 0 24 24"><path d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7l-1.4-1.4L9.2 12 2.9 5.7l1.4-1.4 6.3 6.3 6.3-6.3z"/></svg>&nbsp;Quit</button>
+      </div>
+      <p class="best-line">Best score: <b id="bestTitle">0</b></p>
+    </div>
+  </section>
+
+  <!-- Pause -->
+  <section id="scrPause" class="screen hidden dim">
+    <div class="panel">
+      <h2>Paused</h2>
+      <div class="menu">
+        <button id="btnResume" class="btn btn-big btn-green"><svg class="i" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg>&nbsp; Resume</button>
+        <button id="btnRestart" class="btn btn-orange"><svg class="i" viewBox="0 0 24 24"><path d="M12 4a8 8 0 1 0 8 8h-3a5 5 0 1 1-5-5v3l5-4.5L12 1z"/></svg>&nbsp; Restart</button>
+        <button id="btnPauseSettings" class="btn btn-blue">⚙️&nbsp; Settings</button>
+        <button id="btnPauseMenu" class="btn btn-grey"><svg class="i" viewBox="0 0 24 24"><path d="M12 3 2 12h3v8h5v-5h4v5h5v-8h3z"/></svg>&nbsp; Main Menu</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Game over -->
+  <section id="scrOver" class="screen hidden dim">
+    <div class="panel over-panel">
+      <h2 class="over-title">Game Over</h2>
+      <div class="over-body">
+        <div class="medal-box"><div id="medal" class="medal none"></div><div id="medalName" class="medal-name"></div></div>
+        <div class="scores">
+          <div class="sc"><span>Score</span><b id="overScore">0</b></div>
+          <div class="sc"><span>Best</span><b id="overBest">0</b><i id="newBest" class="new-best hidden">NEW!</i></div>
+          <div class="stats" id="overStats"></div>
+        </div>
+      </div>
+      <div class="menu row">
+        <button id="btnAgain" class="btn btn-big btn-green"><svg class="i" viewBox="0 0 24 24"><path d="M12 4a8 8 0 1 0 8 8h-3a5 5 0 1 1-5-5v3l5-4.5L12 1z"/></svg>&nbsp; Play Again</button>
+        <button id="btnOverMenu" class="btn btn-grey"><svg class="i" viewBox="0 0 24 24"><path d="M12 3 2 12h3v8h5v-5h4v5h5v-8h3z"/></svg>&nbsp; Menu</button>
+      </div>
+      <p class="hint small">Press <kbd>Enter</kbd> to play again</p>
+    </div>
+  </section>
+
+  <!-- How to play -->
+  <section id="scrHow" class="screen hidden dim">
+    <div class="panel wide">
+      <h2>How to Play</h2>
+      <div class="how-grid">
+        <div class="how"><div class="how-ico"><img src="assets/default/pip_walk1.svg" alt=""></div><p><b>Move</b> Pip with the <kbd>←↑→↓</kbd> / <kbd>WASD</kbd> keys, or hold the mouse or your finger where he should waddle.</p></div>
+        <div class="how"><div class="how-ico quad"><img src="assets/default/gem_pink.svg" alt=""><img src="assets/default/gem_blue.svg" alt=""><img src="assets/default/gem_yellow.svg" alt=""><img src="assets/default/gem_green.svg" alt=""></div><p>Scoop up <b>candy gems</b>. Each one makes Pip <b>rounder</b> and worth more points (up to ×5)… but easier to bump!</p></div>
+        <div class="how"><div class="how-ico"><img src="assets/default/bear_green_1.svg" alt=""></div><p>Dodge the grumpy <b>jelly bears</b>. A bump costs a heart and drops gems. Press <kbd>Space</kbd> to <b>belly-slide</b> away!</p></div>
+        <div class="how"><div class="how-ico"><img src="assets/default/pip_cheer.svg" alt=""></div><p>When Pip is as round as can be, press <kbd>Space</kbd> to <b>Pop!</b>: shrink back with a sparkle burst that stuns bears. Fill the <b>jar</b> to open the gate!</p></div>
+      </div>
+      <p class="small">Other keys: <kbd>Esc</kbd>/<kbd>P</kbd> pause · <kbd>M</kbd> sound · <kbd>F11</kbd> full screen</p>
+      <div class="menu"><button class="btn btn-green btn-back">OK, let's waddle!</button></div>
+    </div>
+  </section>
+
+  <!-- Settings -->
+  <section id="scrSettings" class="screen hidden dim">
+    <div class="panel">
+      <h2>Settings</h2>
+      <div class="settings">
+        <label class="set"><span>Sound effects</span><input type="checkbox" id="setSfx"><i class="tog"></i></label>
+        <label class="set"><span>Music</span><input type="checkbox" id="setMusic"><i class="tog"></i></label>
+        <div class="set"><span>Difficulty</span>
+          <div class="seg" id="setDifficulty">
+            <button data-v="easy">Easy</button><button data-v="normal">Normal</button><button data-v="hard">Hard</button>
+          </div>
+        </div>
+        <label class="set"><span>Full screen <small>(F11)</small></span><input type="checkbox" id="setFull"><i class="tog"></i></label>
+        <div class="set"><span>Best score</span><button id="btnResetBest" class="btn btn-grey btn-tiny">Reset</button></div>
+      </div>
+      <div class="menu"><button class="btn btn-green btn-back"><svg class="i" viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-2.1 2.1L9 20.4 21.3 8.1l-2.1-2.1z"/></svg>&nbsp;Done</button></div>
+    </div>
+  </section>
+
+  <!-- Customize pictures -->
+  <section id="scrCustom" class="screen hidden dim">
+    <div class="panel xwide">
+      <h2>Change Pictures</h2>
+      <p class="small">Use a pet, a family photo or a drawing! Drag a picture onto a card or click <b>Choose…</b></p>
+      <div id="slotGrid" class="slot-grid"></div>
+      <div class="menu row">
+        <button id="btnResetAll" class="btn btn-grey">Reset all</button>
+        <button class="btn btn-green btn-back"><svg class="i" viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-2.1 2.1L9 20.4 21.3 8.1l-2.1-2.1z"/></svg>&nbsp;Done</button>
+      </div>
+    </div>
+  </section>
+
+  <button id="btnAction" class="action-btn hidden" aria-label="Dash / Pop">★</button>
+  <div id="toast" class="toast hidden"></div>
+  <input type="file" id="filePick" accept="image/*" class="hidden">
+</div>
+
+<script src="js/rng.js"></script>
+<script src="js/world.js"></script>
+<script src="js/weather.js"></script>
+<script src="js/bot.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/assets.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/render.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

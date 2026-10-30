@@ -1,0 +1,1670 @@
+[
+ {
+  "spec": {
+   "model": "kid6",
+   "difficulty": "easy",
+   "noTerrain": false,
+   "proposal": "pkgF"
+  },
+  "sum": {
+   "n": 24,
+   "lap1": 0.25,
+   "lap2": 0,
+   "lap3": 0,
+   "laps": [
+    0.25,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "meadow": 1,
+   "deathLevel": 3,
+   "capped": 0,
+   "sessionMin": 2.428333333333864,
+   "sessionP10": 1.0966666666666431,
+   "sessionP90": 3.755499999999323,
+   "score": 3910,
+   "scorePerMin": 1604.7543155590038,
+   "gemShare": 0.609950463062675,
+   "popShare": 0.13590351066121042,
+   "clearShare": 0.2541460262761146,
+   "gemMul": 3.2163543441226574,
+   "pops": 9.125,
+   "stunnedPerPop": 0.7625570776255708,
+   "biome": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 24.84999999999987,
+     "timeP90": 32.76333333333275,
+     "hearts": 0.5833333333333334,
+     "kinds": {
+      "red": 14,
+      "green": 0,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 14,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 14,
+     "pops": 1.8333333333333333,
+     "maxSizeFrac": 0.35917432812647526,
+     "meanSize": 3.467938259336357
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 0.7916666666666666,
+     "time": 35.73333333333259,
+     "timeP90": 37.8366666666658,
+     "hearts": 2.625,
+     "kinds": {
+      "red": 30,
+      "green": 33,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 43,
+      "slow": 20,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 63,
+     "pops": 2.2083333333333335,
+     "maxSizeFrac": 0.3457168515794074,
+     "meanSize": 3.46667131161944
+    },
+    {
+     "reached": 0.7916666666666666,
+     "clearIfReached": 0.7894736842105263,
+     "time": 40.033333333332344,
+     "timeP90": 42.48999999999887,
+     "hearts": 2.1578947368421053,
+     "kinds": {
+      "red": 17,
+      "green": 24,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 32,
+      "slow": 0,
+      "ice": 0,
+      "puff": 9
+     },
+     "bumps": 41,
+     "pops": 2.6315789473684212,
+     "maxSizeFrac": 0.36647121641880215,
+     "meanSize": 3.5176165324027466
+    },
+    {
+     "reached": 0.625,
+     "clearIfReached": 0.4,
+     "time": 42.99999999999884,
+     "timeP90": 49.17499999999849,
+     "hearts": 3.4,
+     "kinds": {
+      "red": 12,
+      "green": 14,
+      "orange": 25
+     },
+     "ter": {
+      "plain": 35,
+      "slow": 0,
+      "ice": 16,
+      "puff": 0
+     },
+     "bumps": 51,
+     "pops": 2.8666666666666667,
+     "maxSizeFrac": 0.3923978308941821,
+     "meanSize": 3.5857755508155003
+    }
+   ],
+   "kinds": {
+    "red": 82,
+    "green": 92,
+    "orange": 32
+   },
+   "ter": {
+    "plain": 158,
+    "slow": 20,
+    "ice": 17,
+    "puff": 11
+   },
+   "bumps": 206,
+   "gateBumps": 19
+  }
+ },
+ {
+  "spec": {
+   "model": "kid6",
+   "difficulty": "easy",
+   "noTerrain": true,
+   "proposal": "pkgF"
+  },
+  "sum": {
+   "n": 24,
+   "lap1": 0.375,
+   "lap2": 0,
+   "lap3": 0,
+   "laps": [
+    0.375,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "meadow": 1,
+   "deathLevel": 3,
+   "capped": 0,
+   "sessionMin": 2.299305555556203,
+   "sessionP10": 1.4746944444447192,
+   "sessionP90": 4.23583333333222,
+   "score": 4005,
+   "scorePerMin": 1680.4840259324565,
+   "gemShare": 0.6001297978861487,
+   "popShare": 0.13934730205822363,
+   "clearShare": 0.26052290005562767,
+   "gemMul": 3.185531496062992,
+   "pops": 10.708333333333334,
+   "stunnedPerPop": 0.8482490272373541,
+   "biome": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 24.84999999999987,
+     "timeP90": 32.76333333333275,
+     "hearts": 0.5833333333333334,
+     "kinds": {
+      "red": 14,
+      "green": 0,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 14,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 14,
+     "pops": 1.8333333333333333,
+     "maxSizeFrac": 0.35917432812647526,
+     "meanSize": 3.467938259336357
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 0.9166666666666666,
+     "time": 30.199999999999566,
+     "timeP90": 36.13999999999923,
+     "hearts": 1.5833333333333333,
+     "kinds": {
+      "red": 16,
+      "green": 22,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 38,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 38,
+     "pops": 2.5416666666666665,
+     "maxSizeFrac": 0.33322690684855016,
+     "meanSize": 3.403615469572072
+    },
+    {
+     "reached": 0.9166666666666666,
+     "clearIfReached": 0.7727272727272727,
+     "time": 38.699999999999086,
+     "timeP90": 43.48666666666548,
+     "hearts": 2.5,
+     "kinds": {
+      "red": 23,
+      "green": 32,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 55,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 55,
+     "pops": 2.5,
+     "maxSizeFrac": 0.3843291140380856,
+     "meanSize": 3.616929008994914
+    },
+    {
+     "reached": 0.7083333333333334,
+     "clearIfReached": 0.5294117647058824,
+     "time": 41.39999999999893,
+     "timeP90": 48.60666666666519,
+     "hearts": 3.588235294117647,
+     "kinds": {
+      "red": 11,
+      "green": 23,
+      "orange": 27
+     },
+     "ter": {
+      "plain": 61,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 61,
+     "pops": 2.588235294117647,
+     "maxSizeFrac": 0.3675404720186923,
+     "meanSize": 3.6119751323667044
+    }
+   ],
+   "kinds": {
+    "red": 78,
+    "green": 103,
+    "orange": 46
+   },
+   "ter": {
+    "plain": 227,
+    "slow": 0,
+    "ice": 0,
+    "puff": 0
+   },
+   "bumps": 227,
+   "gateBumps": 20
+  }
+ },
+ {
+  "spec": {
+   "model": "casual",
+   "difficulty": "easy",
+   "noTerrain": false,
+   "proposal": "pkgF"
+  },
+  "sum": {
+   "n": 24,
+   "lap1": 1,
+   "lap2": 0.875,
+   "lap3": 0.7083333333333334,
+   "laps": [
+    1,
+    0.875,
+    0.7083333333333334,
+    0.4166666666666667,
+    0,
+    0
+   ],
+   "meadow": 1,
+   "deathLevel": 15,
+   "capped": 0,
+   "sessionMin": 10.5394444444376,
+   "sessionP10": 5.419222222220033,
+   "sessionP90": 13.88599999999011,
+   "score": 21445,
+   "scorePerMin": 2028.6419820101758,
+   "gemShare": 0.5353839362748049,
+   "popShare": 0.18310961295371095,
+   "clearShare": 0.2815064507714842,
+   "gemMul": 3.0983511379470507,
+   "pops": 56.75,
+   "stunnedPerPop": 1.7004405286343611,
+   "biome": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 21.9666666666667,
+     "timeP90": 26.23666666666646,
+     "hearts": 0.041666666666666664,
+     "kinds": {
+      "red": 1,
+      "green": 0,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 1,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 1,
+     "pops": 1.4166666666666667,
+     "maxSizeFrac": 0.44022656536421206,
+     "meanSize": 3.641297480048163
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 27.641666666666378,
+     "timeP90": 31.69499999999948,
+     "hearts": 0.041666666666666664,
+     "kinds": {
+      "red": 0,
+      "green": 1,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 1,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 1,
+     "pops": 2.1666666666666665,
+     "maxSizeFrac": 0.3683881027828902,
+     "meanSize": 3.4776831649426705
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 32.94166666666608,
+     "timeP90": 38.51833333333243,
+     "hearts": 0.4166666666666667,
+     "kinds": {
+      "red": 4,
+      "green": 6,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 6,
+      "slow": 0,
+      "ice": 0,
+      "puff": 4
+     },
+     "bumps": 10,
+     "pops": 2.9583333333333335,
+     "maxSizeFrac": 0.3758078839911072,
+     "meanSize": 3.4990303944687753
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 36.49999999999921,
+     "timeP90": 41.74166666666558,
+     "hearts": 1.0416666666666667,
+     "kinds": {
+      "red": 4,
+      "green": 9,
+      "orange": 12
+     },
+     "ter": {
+      "plain": 14,
+      "slow": 0,
+      "ice": 11,
+      "puff": 0
+     },
+     "bumps": 25,
+     "pops": 3.5833333333333335,
+     "maxSizeFrac": 0.3673495510281826,
+     "meanSize": 3.5009542679923995
+    }
+   ],
+   "kinds": {
+    "red": 97,
+    "green": 159,
+    "orange": 155
+   },
+   "ter": {
+    "plain": 292,
+    "slow": 13,
+    "ice": 85,
+    "puff": 21
+   },
+   "bumps": 411,
+   "gateBumps": 15
+  }
+ },
+ {
+  "spec": {
+   "model": "casual",
+   "difficulty": "easy",
+   "noTerrain": true,
+   "proposal": "pkgF"
+  },
+  "sum": {
+   "n": 24,
+   "lap1": 1,
+   "lap2": 1,
+   "lap3": 0.9166666666666666,
+   "laps": [
+    1,
+    1,
+    0.9166666666666666,
+    0.6666666666666666,
+    0.125,
+    0
+   ],
+   "meadow": 1,
+   "deathLevel": 17,
+   "capped": 0,
+   "sessionMin": 11.788055555547574,
+   "sessionP10": 9.829722222216022,
+   "sessionP90": 14.243722222212007,
+   "score": 25010,
+   "scorePerMin": 2133.6717971801877,
+   "gemShare": 0.5367477636215776,
+   "popShare": 0.18455204662510166,
+   "clearShare": 0.27870018975332067,
+   "gemMul": 3.104762838102705,
+   "pops": 67.08333333333333,
+   "stunnedPerPop": 1.76583850931677,
+   "biome": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 21.9666666666667,
+     "timeP90": 26.23666666666646,
+     "hearts": 0.041666666666666664,
+     "kinds": {
+      "red": 1,
+      "green": 0,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 1,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 1,
+     "pops": 1.4166666666666667,
+     "maxSizeFrac": 0.44022656536421206,
+     "meanSize": 3.641297480048163
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 25.424999999999837,
+     "timeP90": 29.068333333332962,
+     "hearts": 0.25,
+     "kinds": {
+      "red": 3,
+      "green": 3,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 6,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 6,
+     "pops": 2.25,
+     "maxSizeFrac": 0.3785269551699301,
+     "meanSize": 3.4912346935924634
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 32.35833333333278,
+     "timeP90": 37.3333333333325,
+     "hearts": 0.2916666666666667,
+     "kinds": {
+      "red": 4,
+      "green": 3,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 7,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 7,
+     "pops": 2.7083333333333335,
+     "maxSizeFrac": 0.37219284520417295,
+     "meanSize": 3.528948467589814
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 34.11666666666601,
+     "timeP90": 39.17499999999906,
+     "hearts": 0.8333333333333334,
+     "kinds": {
+      "red": 3,
+      "green": 9,
+      "orange": 8
+     },
+     "ter": {
+      "plain": 20,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 20,
+     "pops": 3.625,
+     "maxSizeFrac": 0.3193755623890044,
+     "meanSize": 3.364200986858061
+    }
+   ],
+   "kinds": {
+    "red": 89,
+    "green": 157,
+    "orange": 195
+   },
+   "ter": {
+    "plain": 441,
+    "slow": 0,
+    "ice": 0,
+    "puff": 0
+   },
+   "bumps": 441,
+   "gateBumps": 30
+  }
+ },
+ {
+  "spec": {
+   "model": "strong",
+   "difficulty": "easy",
+   "noTerrain": false,
+   "proposal": "pkgF"
+  },
+  "sum": {
+   "n": 24,
+   "lap1": 1,
+   "lap2": 1,
+   "lap3": 1,
+   "laps": [
+    1,
+    1,
+    1,
+    1,
+    0.9583333333333334,
+    0.7083333333333334
+   ],
+   "meadow": 1,
+   "deathLevel": 27,
+   "capped": 0.16666666666666666,
+   "sessionMin": 22.02666666671704,
+   "sessionP10": 16.956055555542875,
+   "sessionP90": 26.86913888900092,
+   "score": 43590,
+   "scorePerMin": 1994.7629325835333,
+   "gemShare": 0.5086670365622669,
+   "popShare": 0.22864331222377407,
+   "clearShare": 0.2626896512139591,
+   "gemMul": 2.8572272971520687,
+   "pops": 146.375,
+   "stunnedPerPop": 1.8035866780529461,
+   "biome": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 20.200000000000134,
+     "timeP90": 23.544999999999945,
+     "hearts": 0,
+     "kinds": {
+      "red": 0,
+      "green": 0,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 0,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 0,
+     "pops": 1.9166666666666667,
+     "maxSizeFrac": 0.32481432991114095,
+     "meanSize": 3.3185185872259826
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 26.866666666666422,
+     "timeP90": 29.908333333332912,
+     "hearts": 0.041666666666666664,
+     "kinds": {
+      "red": 1,
+      "green": 0,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 1,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 1,
+     "pops": 2.6666666666666665,
+     "maxSizeFrac": 0.2692379772845445,
+     "meanSize": 3.203518099192546
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 29.85833333333292,
+     "timeP90": 32.86166666666608,
+     "hearts": 0.08333333333333333,
+     "kinds": {
+      "red": 0,
+      "green": 2,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 2,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 2,
+     "pops": 3.0416666666666665,
+     "maxSizeFrac": 0.3070672285134306,
+     "meanSize": 3.322657239065768
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 34.583333333332654,
+     "timeP90": 39.90499999999901,
+     "hearts": 0.375,
+     "kinds": {
+      "red": 4,
+      "green": 2,
+      "orange": 3
+     },
+     "ter": {
+      "plain": 5,
+      "slow": 0,
+      "ice": 4,
+      "puff": 0
+     },
+     "bumps": 9,
+     "pops": 4.041666666666667,
+     "maxSizeFrac": 0.24317851490690603,
+     "meanSize": 3.1554533104408833
+    }
+   ],
+   "kinds": {
+    "red": 156,
+    "green": 186,
+    "orange": 179
+   },
+   "ter": {
+    "plain": 394,
+    "slow": 21,
+    "ice": 93,
+    "puff": 13
+   },
+   "bumps": 521,
+   "gateBumps": 22
+  }
+ },
+ {
+  "spec": {
+   "model": "strong",
+   "difficulty": "easy",
+   "noTerrain": true,
+   "proposal": "pkgF"
+  },
+  "sum": {
+   "n": 24,
+   "lap1": 1,
+   "lap2": 1,
+   "lap3": 1,
+   "laps": [
+    1,
+    1,
+    1,
+    1,
+    0.9166666666666666,
+    0.8333333333333334
+   ],
+   "meadow": 1,
+   "deathLevel": 27,
+   "capped": 0.08333333333333333,
+   "sessionMin": 20.87097222225788,
+   "sessionP10": 16.8056944444319,
+   "sessionP90": 25.383472222315337,
+   "score": 43630,
+   "scorePerMin": 2078.7030932686084,
+   "gemShare": 0.5076401971418242,
+   "popShare": 0.22766455443283667,
+   "clearShare": 0.2646952484253392,
+   "gemMul": 2.8697289156626504,
+   "pops": 144.875,
+   "stunnedPerPop": 1.8817946505608283,
+   "biome": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 20.200000000000134,
+     "timeP90": 23.544999999999945,
+     "hearts": 0,
+     "kinds": {
+      "red": 0,
+      "green": 0,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 0,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 0,
+     "pops": 1.9166666666666667,
+     "maxSizeFrac": 0.32481432991114095,
+     "meanSize": 3.3185185872259826
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 24.566666666666553,
+     "timeP90": 27.63999999999971,
+     "hearts": 0.041666666666666664,
+     "kinds": {
+      "red": 1,
+      "green": 0,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 1,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 1,
+     "pops": 2.5833333333333335,
+     "maxSizeFrac": 0.2834557847156314,
+     "meanSize": 3.277962237772043
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 29.69166666666626,
+     "timeP90": 33.46166666666605,
+     "hearts": 0.16666666666666666,
+     "kinds": {
+      "red": 2,
+      "green": 2,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 4,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 4,
+     "pops": 3.0833333333333335,
+     "maxSizeFrac": 0.30695676160279906,
+     "meanSize": 3.2926300657487304
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 30.808333333332865,
+     "timeP90": 35.49666666666593,
+     "hearts": 0.125,
+     "kinds": {
+      "red": 3,
+      "green": 0,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 3,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 3,
+     "pops": 3.5833333333333335,
+     "maxSizeFrac": 0.30098775011701445,
+     "meanSize": 3.3125505769990533
+    }
+   ],
+   "kinds": {
+    "red": 157,
+    "green": 177,
+    "orange": 175
+   },
+   "ter": {
+    "plain": 509,
+    "slow": 0,
+    "ice": 0,
+    "puff": 0
+   },
+   "bumps": 509,
+   "gateBumps": 31
+  }
+ },
+ {
+  "spec": {
+   "model": "kid6",
+   "difficulty": "normal",
+   "noTerrain": false,
+   "proposal": "pkgF"
+  },
+  "sum": {
+   "n": 24,
+   "lap1": 0,
+   "lap2": 0,
+   "lap3": 0,
+   "laps": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "meadow": 0.9583333333333334,
+   "deathLevel": 1,
+   "capped": 0,
+   "sessionMin": 1.2812500000001208,
+   "sessionP10": 0.9538611111110677,
+   "sessionP90": 2.4152222222227646,
+   "score": 1655,
+   "scorePerMin": 1348.5811232572742,
+   "gemShare": 0.7120273445844905,
+   "popShare": 0.1619312112796411,
+   "clearShare": 0.1260414441358684,
+   "gemMul": 3.177311725452812,
+   "pops": 5.75,
+   "stunnedPerPop": 0.4927536231884058,
+   "biome": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.9583333333333334,
+     "time": 37.54999999999915,
+     "timeP90": 42.206666666665555,
+     "hearts": 1.0416666666666667,
+     "kinds": {
+      "red": 25,
+      "green": 0,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 25,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 25,
+     "pops": 2.625,
+     "maxSizeFrac": 0.3939046070633036,
+     "meanSize": 3.5808443245104034
+    },
+    {
+     "reached": 0.9583333333333334,
+     "clearIfReached": 0.21739130434782608,
+     "time": 54.01666666666488,
+     "timeP90": 54.56666666666485,
+     "hearts": 2.5652173913043477,
+     "kinds": {
+      "red": 17,
+      "green": 42,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 46,
+      "slow": 13,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 59,
+     "pops": 2.5217391304347827,
+     "maxSizeFrac": 0.3371342725092276,
+     "meanSize": 3.392294076057788
+    },
+    {
+     "reached": 0.20833333333333334,
+     "clearIfReached": 0.4,
+     "time": 54.633333333331514,
+     "timeP90": 55.13999999999815,
+     "hearts": 2.6,
+     "kinds": {
+      "red": 5,
+      "green": 8,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 9,
+      "slow": 0,
+      "ice": 0,
+      "puff": 4
+     },
+     "bumps": 13,
+     "pops": 3.2,
+     "maxSizeFrac": 0.3341846185711672,
+     "meanSize": 3.445495075839163
+    },
+    {
+     "reached": 0.08333333333333333,
+     "clearIfReached": 0,
+     "time": null,
+     "timeP90": null,
+     "hearts": 3,
+     "kinds": {
+      "red": 0,
+      "green": 3,
+      "orange": 3
+     },
+     "ter": {
+      "plain": 4,
+      "slow": 0,
+      "ice": 2,
+      "puff": 0
+     },
+     "bumps": 6,
+     "pops": 0.5,
+     "maxSizeFrac": 0.47289324775937247,
+     "meanSize": 3.6387831345890485
+    }
+   ],
+   "kinds": {
+    "red": 47,
+    "green": 53,
+    "orange": 3
+   },
+   "ter": {
+    "plain": 84,
+    "slow": 13,
+    "ice": 2,
+    "puff": 4
+   },
+   "bumps": 103,
+   "gateBumps": 4
+  }
+ },
+ {
+  "spec": {
+   "model": "kid6",
+   "difficulty": "normal",
+   "noTerrain": true,
+   "proposal": "pkgF"
+  },
+  "sum": {
+   "n": 24,
+   "lap1": 0,
+   "lap2": 0,
+   "lap3": 0,
+   "laps": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "meadow": 0.9583333333333334,
+   "deathLevel": 1,
+   "capped": 0,
+   "sessionMin": 1.1793055555555951,
+   "sessionP10": 0.8971944444444042,
+   "sessionP90": 2.33333333333395,
+   "score": 1585,
+   "scorePerMin": 1401.4419870861973,
+   "gemShare": 0.7243047158403869,
+   "popShare": 0.15074566706972994,
+   "clearShare": 0.12494961708988311,
+   "gemMul": 3.2089285714285714,
+   "pops": 5.75,
+   "stunnedPerPop": 0.42028985507246375,
+   "biome": [
+    {
+     "reached": 1,
+     "clearIfReached": 0.9583333333333334,
+     "time": 37.54999999999915,
+     "timeP90": 42.206666666665555,
+     "hearts": 1.0416666666666667,
+     "kinds": {
+      "red": 25,
+      "green": 0,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 25,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 25,
+     "pops": 2.625,
+     "maxSizeFrac": 0.3939046070633036,
+     "meanSize": 3.5808443245104034
+    },
+    {
+     "reached": 0.9583333333333334,
+     "clearIfReached": 0.43478260869565216,
+     "time": 44.491666666665424,
+     "timeP90": 47.87666666666523,
+     "hearts": 2.391304347826087,
+     "kinds": {
+      "red": 24,
+      "green": 31,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 55,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 55,
+     "pops": 2.217391304347826,
+     "maxSizeFrac": 0.34970400839451016,
+     "meanSize": 3.464836123189447
+    },
+    {
+     "reached": 0.4166666666666667,
+     "clearIfReached": 0.1,
+     "time": 53.499999999998245,
+     "timeP90": 53.499999999998245,
+     "hearts": 2.9,
+     "kinds": {
+      "red": 9,
+      "green": 20,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 29,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 29,
+     "pops": 2.4,
+     "maxSizeFrac": 0.3796911563248207,
+     "meanSize": 3.566734632085197
+    },
+    {
+     "reached": 0.041666666666666664,
+     "clearIfReached": 0,
+     "time": null,
+     "timeP90": null,
+     "hearts": 3,
+     "kinds": {
+      "red": 2,
+      "green": 0,
+      "orange": 1
+     },
+     "ter": {
+      "plain": 3,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 3,
+     "pops": 0,
+     "maxSizeFrac": 0.1627516778523477,
+     "meanSize": 3.377516778523459
+    }
+   ],
+   "kinds": {
+    "red": 60,
+    "green": 51,
+    "orange": 1
+   },
+   "ter": {
+    "plain": 112,
+    "slow": 0,
+    "ice": 0,
+    "puff": 0
+   },
+   "bumps": 112,
+   "gateBumps": 6
+  }
+ },
+ {
+  "spec": {
+   "model": "casual",
+   "difficulty": "normal",
+   "noTerrain": false,
+   "proposal": "pkgF"
+  },
+  "sum": {
+   "n": 24,
+   "lap1": 0.7083333333333334,
+   "lap2": 0.25,
+   "lap3": 0.041666666666666664,
+   "laps": [
+    0.7083333333333334,
+    0.25,
+    0.041666666666666664,
+    0,
+    0,
+    0
+   ],
+   "meadow": 1,
+   "deathLevel": 7,
+   "capped": 0,
+   "sessionMin": 5.798749999997465,
+   "sessionP10": 2.4166944444449854,
+   "sessionP90": 9.541861111105172,
+   "score": 10010,
+   "scorePerMin": 1693.0321615564735,
+   "gemShare": 0.6545655032020018,
+   "popShare": 0.1953009033461979,
+   "clearShare": 0.15013359345180033,
+   "gemMul": 3.2034039020340392,
+   "pops": 30.375,
+   "stunnedPerPop": 1.316872427983539,
+   "biome": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 33.06666666666607,
+     "timeP90": 36.48999999999921,
+     "hearts": 0.16666666666666666,
+     "kinds": {
+      "red": 4,
+      "green": 0,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 4,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 4,
+     "pops": 2.4583333333333335,
+     "maxSizeFrac": 0.4242829917971649,
+     "meanSize": 3.65048546954329
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 43.28333333333216,
+     "timeP90": 50.0866666666651,
+     "hearts": 0.7083333333333334,
+     "kinds": {
+      "red": 6,
+      "green": 11,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 12,
+      "slow": 5,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 17,
+     "pops": 3.5833333333333335,
+     "maxSizeFrac": 0.38325454344418436,
+     "meanSize": 3.5105048450706415
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 0.9166666666666666,
+     "time": 48.27499999999854,
+     "timeP90": 51.20333333333171,
+     "hearts": 0.875,
+     "kinds": {
+      "red": 5,
+      "green": 16,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 14,
+      "slow": 0,
+      "ice": 0,
+      "puff": 7
+     },
+     "bumps": 21,
+     "pops": 3.8333333333333335,
+     "maxSizeFrac": 0.421010745778911,
+     "meanSize": 3.6122606838111437
+    },
+    {
+     "reached": 0.9166666666666666,
+     "clearIfReached": 0.7727272727272727,
+     "time": 50.48333333333175,
+     "timeP90": 56.11333333333143,
+     "hearts": 1.4545454545454546,
+     "kinds": {
+      "red": 5,
+      "green": 15,
+      "orange": 12
+     },
+     "ter": {
+      "plain": 15,
+      "slow": 0,
+      "ice": 17,
+      "puff": 0
+     },
+     "bumps": 32,
+     "pops": 4.818181818181818,
+     "maxSizeFrac": 0.3122431988335286,
+     "meanSize": 3.405968541653021
+    }
+   ],
+   "kinds": {
+    "red": 35,
+    "green": 94,
+    "orange": 54
+   },
+   "ter": {
+    "plain": 128,
+    "slow": 11,
+    "ice": 33,
+    "puff": 11
+   },
+   "bumps": 183,
+   "gateBumps": 8
+  }
+ },
+ {
+  "spec": {
+   "model": "casual",
+   "difficulty": "normal",
+   "noTerrain": true,
+   "proposal": "pkgF"
+  },
+  "sum": {
+   "n": 24,
+   "lap1": 0.7083333333333334,
+   "lap2": 0.3333333333333333,
+   "lap3": 0.08333333333333333,
+   "laps": [
+    0.7083333333333334,
+    0.3333333333333333,
+    0.08333333333333333,
+    0,
+    0,
+    0
+   ],
+   "meadow": 1,
+   "deathLevel": 6.5,
+   "capped": 0,
+   "sessionMin": 5.459305555553329,
+   "sessionP10": 2.674666666666973,
+   "sessionP90": 9.457638888883025,
+   "score": 9465,
+   "scorePerMin": 1783.9238365835865,
+   "gemShare": 0.6536221851203323,
+   "popShare": 0.19367186545587817,
+   "clearShare": 0.15270594942378954,
+   "gemMul": 3.2050718849840254,
+   "pops": 31.25,
+   "stunnedPerPop": 1.3413333333333333,
+   "biome": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 33.06666666666607,
+     "timeP90": 36.48999999999921,
+     "hearts": 0.16666666666666666,
+     "kinds": {
+      "red": 4,
+      "green": 0,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 4,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 4,
+     "pops": 2.4583333333333335,
+     "maxSizeFrac": 0.4242829917971649,
+     "meanSize": 3.65048546954329
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 38.41666666666577,
+     "timeP90": 43.00666666666551,
+     "hearts": 0.3333333333333333,
+     "kinds": {
+      "red": 3,
+      "green": 5,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 8,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 8,
+     "pops": 3.4583333333333335,
+     "maxSizeFrac": 0.4062638110268914,
+     "meanSize": 3.589289775435006
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 45.09999999999872,
+     "timeP90": 49.32666666666515,
+     "hearts": 0.4583333333333333,
+     "kinds": {
+      "red": 5,
+      "green": 6,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 11,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 11,
+     "pops": 4.166666666666667,
+     "maxSizeFrac": 0.40297896583952536,
+     "meanSize": 3.5735315441821474
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 0.7083333333333334,
+     "time": 47.18333333333194,
+     "timeP90": 52.92333333333161,
+     "hearts": 1.7083333333333333,
+     "kinds": {
+      "red": 10,
+      "green": 13,
+      "orange": 18
+     },
+     "ter": {
+      "plain": 41,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 41,
+     "pops": 4.833333333333333,
+     "maxSizeFrac": 0.3585917357085148,
+     "meanSize": 3.505680132136576
+    }
+   ],
+   "kinds": {
+    "red": 45,
+    "green": 65,
+    "orange": 64
+   },
+   "ter": {
+    "plain": 174,
+    "slow": 0,
+    "ice": 0,
+    "puff": 0
+   },
+   "bumps": 174,
+   "gateBumps": 8
+  }
+ },
+ {
+  "spec": {
+   "model": "strong",
+   "difficulty": "normal",
+   "noTerrain": false,
+   "proposal": "pkgF"
+  },
+  "sum": {
+   "n": 24,
+   "lap1": 0.9583333333333334,
+   "lap2": 0.875,
+   "lap3": 0.8333333333333334,
+   "laps": [
+    0.9583333333333334,
+    0.875,
+    0.8333333333333334,
+    0.25,
+    0.041666666666666664,
+    0
+   ],
+   "meadow": 1,
+   "deathLevel": 15,
+   "capped": 0,
+   "sessionMin": 13.642499999990331,
+   "sessionP10": 6.902944444440906,
+   "sessionP90": 17.142083333324063,
+   "score": 25160,
+   "scorePerMin": 1824.2369978882964,
+   "gemShare": 0.6067005180636086,
+   "popShare": 0.2358218684598758,
+   "clearShare": 0.1574776134765156,
+   "gemMul": 2.9817890565719587,
+   "pops": 89.54166666666667,
+   "stunnedPerPop": 1.396928804094928,
+   "biome": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 29.68333333333293,
+     "timeP90": 35.17833333333262,
+     "hearts": 0,
+     "kinds": {
+      "red": 0,
+      "green": 0,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 0,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 0,
+     "pops": 3,
+     "maxSizeFrac": 0.33492819952362457,
+     "meanSize": 3.414909698775657
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 38.82499999999908,
+     "timeP90": 44.994999999998726,
+     "hearts": 0.125,
+     "kinds": {
+      "red": 0,
+      "green": 3,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 2,
+      "slow": 1,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 3,
+     "pops": 4,
+     "maxSizeFrac": 0.30062818961167526,
+     "meanSize": 3.3020034123682964
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 41.42499999999893,
+     "timeP90": 45.709999999998686,
+     "hearts": 0.125,
+     "kinds": {
+      "red": 2,
+      "green": 1,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 2,
+      "slow": 0,
+      "ice": 0,
+      "puff": 1
+     },
+     "bumps": 3,
+     "pops": 4.791666666666667,
+     "maxSizeFrac": 0.3353128979943348,
+     "meanSize": 3.3959554613715905
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 0.9583333333333334,
+     "time": 48.34999999999854,
+     "timeP90": 51.866666666665004,
+     "hearts": 0.5833333333333334,
+     "kinds": {
+      "red": 8,
+      "green": 3,
+      "orange": 3
+     },
+     "ter": {
+      "plain": 8,
+      "slow": 0,
+      "ice": 6,
+      "puff": 0
+     },
+     "bumps": 14,
+     "pops": 5.416666666666667,
+     "maxSizeFrac": 0.2771594239492206,
+     "meanSize": 3.2668121181405554
+    }
+   ],
+   "kinds": {
+    "red": 69,
+    "green": 70,
+    "orange": 53
+   },
+   "ter": {
+    "plain": 136,
+    "slow": 15,
+    "ice": 33,
+    "puff": 8
+   },
+   "bumps": 192,
+   "gateBumps": 9
+  }
+ },
+ {
+  "spec": {
+   "model": "strong",
+   "difficulty": "normal",
+   "noTerrain": true,
+   "proposal": "pkgF"
+  },
+  "sum": {
+   "n": 24,
+   "lap1": 1,
+   "lap2": 1,
+   "lap3": 0.9166666666666666,
+   "laps": [
+    1,
+    1,
+    0.9166666666666666,
+    0.4166666666666667,
+    0.041666666666666664,
+    0
+   ],
+   "meadow": 1,
+   "deathLevel": 15,
+   "capped": 0,
+   "sessionMin": 12.88499999999102,
+   "sessionP10": 10.867888888881744,
+   "sessionP90": 16.888277777765385,
+   "score": 25000,
+   "scorePerMin": 1922.0497662849245,
+   "gemShare": 0.6052050821274315,
+   "popShare": 0.2377912292316908,
+   "clearShare": 0.15700368864087771,
+   "gemMul": 2.984298484259619,
+   "pops": 97,
+   "stunnedPerPop": 1.479810996563574,
+   "biome": [
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 29.68333333333293,
+     "timeP90": 35.17833333333262,
+     "hearts": 0,
+     "kinds": {
+      "red": 0,
+      "green": 0,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 0,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 0,
+     "pops": 3,
+     "maxSizeFrac": 0.33492819952362457,
+     "meanSize": 3.414909698775657
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 36.39999999999922,
+     "timeP90": 39.80999999999902,
+     "hearts": 0.16666666666666666,
+     "kinds": {
+      "red": 0,
+      "green": 4,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 4,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 4,
+     "pops": 4,
+     "maxSizeFrac": 0.3245647150768563,
+     "meanSize": 3.3845319384019152
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 42.074999999998894,
+     "timeP90": 45.213333333332045,
+     "hearts": 0.08333333333333333,
+     "kinds": {
+      "red": 1,
+      "green": 1,
+      "orange": 0
+     },
+     "ter": {
+      "plain": 2,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 2,
+     "pops": 4.5,
+     "maxSizeFrac": 0.32029910841765724,
+     "meanSize": 3.3584123787279636
+    },
+    {
+     "reached": 1,
+     "clearIfReached": 1,
+     "time": 45.891666666665344,
+     "timeP90": 49.26166666666515,
+     "hearts": 0.2916666666666667,
+     "kinds": {
+      "red": 4,
+      "green": 0,
+      "orange": 3
+     },
+     "ter": {
+      "plain": 7,
+      "slow": 0,
+      "ice": 0,
+      "puff": 0
+     },
+     "bumps": 7,
+     "pops": 5.75,
+     "maxSizeFrac": 0.28339323056262306,
+     "meanSize": 3.2863592867050726
+    }
+   ],
+   "kinds": {
+    "red": 62,
+    "green": 76,
+    "orange": 63
+   },
+   "ter": {
+    "plain": 201,
+    "slow": 0,
+    "ice": 0,
+    "puff": 0
+   },
+   "bumps": 201,
+   "gateBumps": 7
+  }
+ }
+]

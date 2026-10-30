@@ -1,0 +1,87 @@
+{
+ "highSpeed": {
+  "minutes": 3,
+  "stats": {
+   "games": 5,
+   "scores": [
+    17880,
+    14930,
+    31250,
+    14770,
+    20250
+   ],
+   "times": [
+    527.61,
+    425.91,
+    900.12,
+    402.21,
+    618.4
+   ],
+   "levels": [
+    15,
+    13,
+    23,
+    13,
+    17
+   ],
+   "gems": 1905,
+   "pops": 359,
+   "bumps": 45,
+   "errors": []
+  },
+  "maxLevel": 23,
+  "maxParticles": 65,
+  "maxFx": 67,
+  "errors": [],
+  "last": {
+   "mode": "playing",
+   "state": "playing",
+   "score": 60,
+   "level": 0,
+   "biome": 0,
+   "lap": 0,
+   "hearts": 3,
+   "size": 4,
+   "jar": 3,
+   "jarTarget": 12,
+   "time": 5.858333333333414,
+   "bears": 2,
+   "gems": 2,
+   "pip": {
+    "x": 552,
+    "y": 309
+   },
+   "particles": 47,
+   "fx": 0
+  },
+  "gameSecondsSimulated": null
+ },
+ "frames": [
+  {
+   "adaptive": true,
+   "frames": 599,
+   "fps": 59.9,
+   "median": 16.7,
+   "p95": 16.7,
+   "p99": 16.8,
+   "max": 33.4,
+   "renderScale": 2,
+   "biome": 3,
+   "particles": 60,
+   "errors": []
+  },
+  {
+   "adaptive": false,
+   "frames": 596,
+   "fps": 59.6,
+   "median": 16.7,
+   "p95": 16.8,
+   "p99": 16.8,
+   "max": 33.4,
+   "renderScale": 2,
+   "biome": 3,
+   "particles": 60,
+   "errors": []
+  }
+ ]
+}
