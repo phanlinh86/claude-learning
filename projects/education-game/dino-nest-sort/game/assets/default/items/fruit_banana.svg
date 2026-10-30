@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><clipPath id="banana_c1"><path d="M 20 32 C 14 78 46 112 98 104 C 110 102 114 94 110 86 C 72 92 46 74 42 32 Z" /></clipPath><clipPath id="banana_c2"><rect x="23" y="18" width="16" height="16" rx="3.5" /></clipPath><g id="banana_sil"><path d="M 20 32 C 14 78 46 112 98 104 C 110 102 114 94 110 86 C 72 92 46 74 42 32 Z" /><rect x="23" y="18" width="16" height="16" rx="3.5" /></g></defs>
+<use href="#banana_sil" xlink:href="#banana_sil" transform="translate(0 3)" fill="#1B2433" stroke="#1B2433" stroke-width="15" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>
+<use href="#banana_sil" xlink:href="#banana_sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="15" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 20 32 C 14 78 46 112 98 104 C 110 102 114 94 110 86 C 72 92 46 74 42 32 Z" fill="#E8BE2A"/>
+<g clip-path="url(#banana_c1)"><g transform="translate(4 -6)"><path d="M 20 32 C 14 78 46 112 98 104 C 110 102 114 94 110 86 C 72 92 46 74 42 32 Z" fill="#FFD93D"/></g>
+<ellipse cx="40" cy="66" rx="4" ry="14" transform="rotate(-25 40 66)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M 20 32 C 14 78 46 112 98 104 C 110 102 114 94 110 86 C 72 92 46 74 42 32 Z" fill="none" stroke="#C3920C" stroke-width="3" stroke-linejoin="round"/>
+<path d="M 32 36 C 34 70 60 94 102 96" fill="none" stroke="#E1B624" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+<rect x="23" y="18" width="16" height="16" rx="3.5" fill="#9A6A34"/>
+<g clip-path="url(#banana_c2)">
+</g>
+<rect x="23" y="18" width="16" height="16" rx="3.5" fill="none" stroke="#5E3C18" stroke-width="2.4" stroke-linejoin="round"/>
+<ellipse cx="108" cy="90" rx="4" ry="3" transform="rotate(-20 108 90)" fill="#6E4A22"/>
+</svg>
