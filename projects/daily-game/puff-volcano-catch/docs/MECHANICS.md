@@ -116,7 +116,7 @@ Zone hand-over: the old zone's particles fade within ~2 s while the new zone ram
 
 ## 8. Simulated balance
 
-`node tests/sim/run.js 100 20` — 100 rounds per cell, 20 min game-time cap. The bot sees every item; a young child plays like the skill-0.4 row or worse. "s per zone" = median seconds to fill the pouch on lap 1.
+`node tests/sim/run.js 100 20` — 100 rounds per cell, 20 min game-time cap. The bot sees every item and plays like a casual adult even at skill 0.4. Check child balance with the 4- and 6-year-old models in `tests/sim/players.js` (see `docs/reports/playtest_report.md`). Easy was retuned after the playtest (speedMul 0.75, catchHalfW 44, multThresholds [0,3,7,12,20], fewer rocks, fairSpeed 130); the Easy rows below are from before that change. "s per zone" = median seconds to fill the pouch on lap 1.
 
 | Diff | Skill | Survival min (median) | Died ≤ cap | Score (median) | Level reached (median) | Clear L1 | Catch rate | Catch L1 | Ouches/min | Rains/min | Best combo | s per zone, lap 1: beach / jungle / ash / crater |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|

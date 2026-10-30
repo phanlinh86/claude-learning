@@ -54,7 +54,14 @@
       const hud = document.getElementById('hud'), toast = document.getElementById('toast'), act = document.getElementById('btnAction');
       if (hud) { hud.style.top = (oy + 14 * s) + 'px'; hud.style.right = (ox + 14 * s) + 'px'; }
       if (toast) toast.style.bottom = (oy + 30 * s) + 'px';
-      if (act) { act.style.right = (ox + 24 * s) + 'px'; act.style.bottom = (oy + 24 * s) + 'px'; }
+      if (act) {
+        // phones: put the rain button in the side bar beside the letter-boxed game so it never covers Puff;
+        // tablets (no side bar): bottom-right corner, faded while Puff floats near it
+        const bw = Math.min(110 * s, Math.max(0, ox - 8));
+        if (bw >= 52) { act.style.width = act.style.height = bw + 'px'; act.style.right = 'calc(' + ((ox - bw) / 2) + 'px + env(safe-area-inset-right, 0px) / 2)'; act.style.bottom = (oy + 40 * s) + 'px'; act.style.fontSize = (bw * 0.45) + 'px'; this._actSide = true; }
+        else { act.style.width = act.style.height = ''; act.style.fontSize = ''; act.style.right = (ox + 24 * s) + 'px'; act.style.bottom = (oy + 24 * s) + 'px'; this._actSide = false; }
+        this._act = act;
+      }
       VC.Assets.setScale(this.px);
       if (this.vis) VC.Assets.warmSeason(this.vis.cur);
     }
@@ -88,7 +95,7 @@
             break;
           case 'miss':
             this.puffs(e.x, e.y, 4, '#f6e6c4');
-            if (e.combo >= 3) this.texts.push({ text: 'Combo lost', x: clamp(e.x, 90, 870), y: e.y - 30, life: 0, max: 0.9, size: 18, color: '#ffd1d1' });
+            if (e.combo >= 3) this.texts.push({ text: 'Combo lost', x: clamp(e.x, 90, 870), y: e.y - 64, life: 0, max: 0.9, size: 20, color: '#ffd1d1' });
             break;
           case 'ouch':
             this.shake = 0.28; this.redFlash = 0.5;
@@ -171,11 +178,11 @@
     }
     backdrop(b, alpha) {
       const n = VC.Assets.SEASONS[b], w = this.world;
-      if (this.customBg('bg_' + n, alpha)) return;
+      const sh = w && w.volcano ? w.volcano.shake || 0 : 0;
+      if (this.customBg('bg_' + n, alpha)) { this.layer(n + '_volcano', alpha, sh ? Math.sin(this.time * 70) * sh : 0, 0); return; }
       if (!this.layer(n + '_sky', alpha)) { const g = this.ctx; g.fillStyle = '#8fd0f2'; g.fillRect(0, 0, W, H); }
       const off = -((this.time * 6) % W);
       this.layer(n + '_clouds', alpha, off, 20, W, 220); this.layer(n + '_clouds', alpha, off + W, 20, W, 220);
-      const sh = w && w.volcano ? w.volcano.shake || 0 : 0;
       this.layer(n + '_volcano', alpha, sh ? Math.sin(this.time * 70) * sh : 0, 0);
     }
     text(str, x, y, size, fill, stroke, align = 'center', lw) {
@@ -231,8 +238,8 @@
       if (this.weather) { this.ambient(this.weather.ambient); this.particles('back'); }
       if (w) {
         this.drawRain();
-        this.drawItems(false);
         this.drawPuff(mode);
+        this.drawItems(false);   // flying items in front of Puff so they stay visible all the way into the basket
       }
       const gk = n => VC.Assets.SEASONS[n] + '_ground';
       if (fading) { this.layer(gk(v.prev), 1 - v.t); this.layer(gk(v.cur), v.t); }
@@ -277,14 +284,14 @@
 
     drawCraterGlow() {
       const g = this.ctx, v = this.world.volcano || {}, c = (this.world.cfg && this.world.cfg.crater) || { x: 480, y: 210 };
-      const k = clamp(0.25 + 0.5 * (v.glow || 0) + 0.6 * (v.rumble || 0), 0, 1) * (0.9 + 0.1 * Math.sin(this.time * 5));
+      const rb = v.rumble || 0, k = clamp(0.2 + 0.4 * (v.glow || 0) + 1.0 * rb, 0, 1) * (0.9 + 0.1 * Math.sin(this.time * 5));
       if (k < 0.02) return;
       const gr = this._glowGrad || (this._glowGrad = (() => {
         const r = g.createRadialGradient(0, 0, 4, 0, 0, 120);
         r.addColorStop(0, 'rgba(255,230,140,0.9)'); r.addColorStop(0.35, 'rgba(255,160,80,0.45)'); r.addColorStop(1, 'rgba(255,120,80,0)');
         return r;
       })());
-      g.save(); g.translate(c.x, c.y - 4); g.scale(1, 0.62); g.globalAlpha = k; g.fillStyle = gr;
+      g.save(); g.translate(c.x, c.y - 4); g.scale(1 + 0.6 * rb, (1 + 0.6 * rb) * 0.62); g.globalAlpha = k; g.fillStyle = gr;
       g.beginPath(); g.arc(0, 0, 120, 0, TAU); g.fill(); g.restore();
     }
 
@@ -293,10 +300,12 @@
       if (!r || !(r.active > 0)) return;
       const cw = r.w || 130, x = r.x != null ? r.x : w.puff.x, top = 0, bot = w.puff.y - 28;
       const a = clamp(r.active / 0.25, 0, 1) * 0.9;
-      const gr = this._rainGrad || (this._rainGrad = (() => { const q = g.createLinearGradient(0, 0, 0, 400); q.addColorStop(0, 'rgba(150,210,255,0)'); q.addColorStop(1, 'rgba(150,210,255,0.32)'); return q; })());
+      const gr = this._rainGrad || (this._rainGrad = (() => { const q = g.createLinearGradient(0, 0, 0, 400); q.addColorStop(0, 'rgba(150,210,255,0.12)'); q.addColorStop(1, 'rgba(150,210,255,0.45)'); return q; })());
       g.globalAlpha = a; g.fillStyle = gr;
       this.roundRect(x - cw / 2, top, cw, bot - top, 24); g.fill();
-      g.globalAlpha = 1;
+      g.strokeStyle = 'rgba(255,255,255,0.6)'; g.lineWidth = 2; g.setLineDash([10, 8]); g.lineDashOffset = -this.time * 120;
+      g.beginPath(); g.moveTo(x - cw / 2, top); g.lineTo(x - cw / 2, bot); g.moveTo(x + cw / 2, top); g.lineTo(x + cw / 2, bot); g.stroke();
+      g.setLineDash([]); g.globalAlpha = 1;
     }
 
     itemSprite(it) {
@@ -306,7 +315,7 @@
         if (A.hasCustom('coin')) { const [fw, fh] = A.fit('coin', s, s); return { spr: A.sprite('custom:coin', fw, fh), w: fw, h: fh, ring: METAL_COLORS[it.metal], s }; }
         return { spr: A.sprite('coin_' + it.metal, s, s), w: s, h: s, s };
       }
-      if (A.hasCustom('rock')) { const [fw, fh] = A.fit('rock', ROCK, ROCK); return { spr: A.sprite('custom:rock', fw, fh), w: fw, h: fh, ring: '#ff8a2a', s: ROCK }; }
+      if (A.hasCustom('rock')) { const [fw, fh] = A.fit('rock', ROCK, ROCK); return { spr: A.sprite('custom:rock', fw, fh), w: fw, h: fh, ring: '#e8253a', dash: true, s: ROCK }; }
       return { spr: A.sprite(it.variant ? 'rock_2' : 'rock', ROCK, ROCK), w: ROCK, h: ROCK, s: ROCK };
     }
     drawItem(it) {
@@ -321,15 +330,22 @@
         if (it.state === 'caught' || it.state === 'ground') sx = it.state === 'ground' ? 1 : sx;
         g.scale(sx, 1);
       } else g.rotate(it.rot || 0);
-      if (d.ring) { g.strokeStyle = d.ring; g.lineWidth = 3; g.beginPath(); g.arc(0, 0, d.s * 0.55, 0, TAU); g.stroke(); }
+      if (it.kind === 'rock') {   // warm pulsing halo: rocks read on the night zone and on dark ground
+        const hg = this._haloGrad || (this._haloGrad = (() => { const r = g.createRadialGradient(0, 0, 4, 0, 0, 26); r.addColorStop(0, 'rgba(255,150,60,0.9)'); r.addColorStop(1, 'rgba(255,150,60,0)'); return r; })());
+        const ga = g.globalAlpha; g.globalAlpha = ga * (0.45 + 0.15 * Math.sin(this.time * 7 + it.id)); g.fillStyle = hg; g.beginPath(); g.arc(0, 0, 26, 0, TAU); g.fill(); g.globalAlpha = ga;
+        if (d.dash) { g.fillStyle = 'rgba(232,37,58,0.22)'; g.beginPath(); g.arc(0, 0, d.s * 0.62, 0, TAU); g.fill(); }
+      }
+      if (d.ring) { g.strokeStyle = d.ring; g.lineWidth = d.dash ? 4 : 3; if (d.dash) g.setLineDash([5, 4]); g.beginPath(); g.arc(0, 0, d.s * 0.55, 0, TAU); g.stroke(); g.setLineDash([]); }
       g.drawImage(d.spr, -d.w / 2, -d.h / 2, d.w, d.h);
       if (it.kind === 'coin' && it.metal === 'gold' && it.state === 'fly') {   // rare gold twinkles
         const sp = VC.Assets.sprite('p_sparkle', 32, 32), s = 10 + 4 * Math.sin(this.time * 9 + it.id);
         if (sp) { g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy); g.drawImage(sp, it.x + 10 - s / 2, it.y - 12 - s / 2, s, s); }
       }
       g.restore();
-      if (it.kind === 'rock' && it.state === 'fly' && (this._trailT = (this._trailT || 0) + 1) % 3 === 0 && this.fx.length < 300) {
-        this.fx.push({ k: 'puff', x: it.x, y: it.y, vx: 0, vy: -10, g: 0, life: 0, max: 0.4, size: 5, color: 'rgba(120,100,110,0.6)' });
+      const pf = this.world && this.world.puff;
+      if (it.kind === 'rock' && it.state === 'fly' && (this._trailT = (this._trailT || 0) + 1) % 2 === 0 && this.fx.length < 300 &&
+          !(pf && it.y > pf.y - 50 && Math.abs(it.x - pf.x) < 56)) {   // no smoke specks on Puff's face
+        this.fx.push({ k: 'puff', x: it.x, y: it.y, vx: 0, vy: -10, g: 0, life: 0, max: 0.55, size: 8, color: 'rgba(150,130,140,0.45)' });
       }
     }
     /* grounded = false → flying items (behind Puff and the ground); true → items resting on the sand. */
@@ -345,7 +361,7 @@
       const g = this.ctx, w = this.world, p = w.puff, A = VC.Assets;
       if (!p) return;
       const bob = p.bob || 0;
-      const blink = p.invuln > 0 && w.state !== 'dead' && Math.floor(this.time * 12) % 2 === 0;
+      const blink = p.invuln > 0 && w.state !== 'dead' && Math.floor(this.time * 12) % 2 === 0, BA = 0.7;
       const sw = p.swing || 0;
       const rimX = p.rimX != null ? p.rimX : p.x, rimY = (p.rimY != null ? p.rimY : 446) + bob;
       // rope attach points on Puff (rotated by tilt)
@@ -357,7 +373,7 @@
       const h1 = hang(-38 * BK), h2 = hang(38 * BK);
       // shadow on the sand
       g.fillStyle = 'rgba(40,30,60,0.16)'; g.beginPath(); g.ellipse(rimX, 496, 34, 7, 0, 0, TAU); g.fill();
-      if (blink) g.globalAlpha = 0.45;
+      if (blink) g.globalAlpha = BA;
       // ropes
       g.strokeStyle = '#7a4a22'; g.lineWidth = 2.2; g.lineCap = 'round';
       g.beginPath(); g.moveTo(a1[0], a1[1]); g.quadraticCurveTo((a1[0] + h1[0]) / 2 - 2, (a1[1] + h1[1]) / 2 + 3, h1[0], h1[1]);
@@ -368,12 +384,12 @@
       if (bk) g.drawImage(bk, -BK_RIM[0], -BK_RIM[1], BK_W, BK_H);
       g.restore();
       for (const it of w.items) if (it.state === 'caught') this.drawItem(it);
-      g.save(); g.globalAlpha = blink ? 0.45 : 1; g.translate(rimX, rimY); g.rotate(sw * 0.6);
+      g.save(); g.globalAlpha = blink ? BA : 1; g.translate(rimX, rimY); g.rotate(sw * 0.6);
       if (bf) g.drawImage(bf, -BK_RIM[0], -BK_RIM[1], BK_W, BK_H);
       g.restore();
       // Puff
       const sq = p.squash || 0;
-      g.save(); g.globalAlpha = blink ? 0.45 : 1;
+      g.save(); g.globalAlpha = blink ? BA : 1;
       g.translate(p.x, p.y); g.rotate(p.tilt || 0); g.scale(1 + 0.18 * sq, 1 - 0.18 * sq);
       if (A.hasCustom('hero')) {
         const [fw, fh] = A.fit('hero', PUFF_W, PUFF_H), spr = A.sprite('custom:hero', fw, fh);
@@ -381,8 +397,8 @@
         g.scale(wob, 2 - wob);
         if (spr) g.drawImage(spr, -fw / 2, -fh / 2, fw, fh);
         // little cloud hands that hold the ropes
-        g.fillStyle = '#ffffff'; g.strokeStyle = '#5d63b0'; g.lineWidth = 2;
-        [ROPE_A, ROPE_B].forEach(q => { g.beginPath(); g.arc(q[0], q[1], 6, 0, TAU); g.fill(); g.stroke(); });
+        g.fillStyle = '#c99a5e'; g.strokeStyle = '#7a4a22'; g.lineWidth = 2;   // rope knots
+        [ROPE_A, ROPE_B].forEach(q => { g.beginPath(); g.arc(q[0], q[1], 4.5, 0, TAU); g.fill(); g.stroke(); });
       } else {
         const fr = A.sprite('puff_' + (p.frame || 'idle'), PUFF_W, PUFF_H) || A.sprite('puff_idle', PUFF_W, PUFF_H);
         if (fr) g.drawImage(fr, -PUFF_W / 2, -PUFF_H / 2, PUFF_W, PUFF_H);
@@ -434,6 +450,8 @@
 
     hud() {
       const g = this.ctx, w = this.world, A = VC.Assets, hm = w.heartsMax || 3;
+      if (this._act && !this._actSide) { const op = w.puff && w.puff.x > 780 ? '0.3' : '0.6'; if (this._act.style.opacity !== op) this._act.style.opacity = op; }
+      else if (this._act && this._act.style.opacity) this._act.style.opacity = '';
       // hearts (top-left)
       g.fillStyle = 'rgba(255,255,255,0.94)'; this.roundRect(14, 12, 24 + 30 * hm, 46, 23); g.fill();
       const hf = A.sprite('heart_full', 28, 28), he = A.sprite('heart_empty', 28, 28);
@@ -447,7 +465,7 @@
       g.beginPath(); g.arc(rx + 29, 35, 16, -Math.PI / 2, -Math.PI / 2 + TAU * (r.active > 0 ? 0 : clamp(r.charge, 0, 1))); g.stroke();
       const dr = A.sprite('drop', 22, 22);
       if (dr) { g.save(); g.translate(rx + 29, 35); g.scale(rp, rp); g.globalAlpha = ready || r.active > 0 ? 1 : 0.5; g.drawImage(dr, -11, -11, 22, 22); g.restore(); }
-      if (ready) this.text(VC.Game && VC.Game.isTouch ? 'RAIN!' : 'SPACE', rx + 52, 36, 15, '#2a6ab0', null, 'left');
+      if (ready) this.text(VC.Game && VC.Game.isTouch ? 'RAIN!' : 'SPACE', rx + 52, 36, 17, '#2a6ab0', null, 'left');
       // score + combo (centre)
       if (this._lastScore !== w.score) { this._scorePop = 1; this._lastScore = w.score; }
       this._scorePop = Math.max(0, (this._scorePop || 0) - 0.06);
@@ -457,12 +475,12 @@
       const lo = th[m - 1] || 0, hi = th[m], frac = hi ? clamp(((w.combo || 0) - lo) / (hi - lo), 0, 1) : 1;
       const mp = 1 + 0.3 * (this._multPop || 0);
       g.fillStyle = 'rgba(40,25,70,0.55)'; this.roundRect(W / 2 - 80, 62, 160, 22, 11); g.fill();
-      g.fillStyle = m >= 5 ? '#ffd84a' : ['#ffffff', '#9fe3ff', '#8ff0b0', '#ffc46b', '#ffd84a'][m - 1];
+      g.fillStyle = m >= 5 ? '#ffd84a' : ['#bfe6ff', '#9fe3ff', '#8ff0b0', '#ffc46b', '#ffd84a'][m - 1];
       if (frac > 0) { this.roundRect(W / 2 - 78, 64, Math.max(18, 156 * frac), 18, 9); g.globalAlpha = 0.55; g.fill(); g.globalAlpha = 1; }
-      this.text('combo ' + (w.combo || 0), W / 2 - 70, 73, 13, '#ffffff', null, 'left');
+      this.text('combo ' + (w.combo || 0), W / 2 - 72, 73, 16, '#ffffff', '#3a2550', 'left', 4);
       g.save(); g.translate(W / 2 + 54, 73); g.scale(mp, mp); this.text('×' + m, 0, 0, 17, m >= 2 ? '#ffe14d' : '#ffffff', '#3a2550', 'center', 4); g.restore();
       // coin pouch (top-right, left of the HUD buttons)
-      const jx = 700, jy = 8, pouch = A.sprite('pouch', 40, 45);
+      const jx = 680, jy = 8, pouch = A.sprite('pouch', 40, 45);
       g.fillStyle = 'rgba(255,255,255,0.94)'; this.roundRect(jx - 8, jy + 4, 136, 46, 23); g.fill();
       if (pouch) g.drawImage(pouch, jx - 2, jy + 1, 40, 45);
       const pf = clamp(w.pouch / (w.pouchTarget || 1), 0, 1);
@@ -470,7 +488,7 @@
       g.fillStyle = 'rgba(122,67,22,0.18)'; this.roundRect(jx + 44, jy + 34, 74, 8, 4); g.fill();
       if (pf > 0) { g.fillStyle = '#f5b21c'; this.roundRect(jx + 44, jy + 34, Math.max(8, 74 * pf), 8, 4); g.fill(); }
       const zi = ZONE_INFO[w.zone] || ZONE_INFO[0];
-      this.text(zi.name + (w.lap > 0 ? ' · Lap ' + (w.lap + 1) : ''), jx + 60, jy + 62, 13, '#ffffff', '#3a2550', 'center', 4);
+      this.text(zi.name + (w.lap > 0 ? ' · Lap ' + (w.lap + 1) : ''), jx + 60, jy + 62, 16, '#ffffff', '#3a2550', 'center', 4);
     }
 
     drawBanner() {

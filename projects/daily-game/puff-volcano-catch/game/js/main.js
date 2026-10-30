@@ -32,7 +32,10 @@
       this.renderer.resize();
       VC.UI.init(this);
       this.bindInput();
-      window.addEventListener('resize', () => { clearTimeout(this._rsz); this._rsz = setTimeout(() => this.renderer.resize(), 120); });
+      window.addEventListener('resize', () => {
+        clearTimeout(this._rsz); this._rsz = setTimeout(() => this.renderer.resize(), 120);
+        if (isTouch && window.innerHeight > window.innerWidth && this.mode === 'playing') this.pause();   // phone turned to portrait
+      });
       if (params.get('autostart') === '1') this.startGame(); else this.toTitle();
       this.last = performance.now();
       requestAnimationFrame(t => this.frame(t));
@@ -187,14 +190,17 @@
         if (e.button === 2) { this.action(); return; }
         if (e.pointerType === 'touch' && this._touches && this._touches.size >= 1) { this.action(); return; }   // second finger = action
         (this._touches = this._touches || new Set()).add(e.pointerId);
+        this._steerId = e.pointerId;   // only this finger / button steers Puff
         this.pointerDown = true; setPtr(e);
       });
       stage.addEventListener('pointermove', e => {
         if (this.mode !== 'playing') return;
+        if (e.pointerType === 'mouse' && e.target.closest && e.target.closest('button, .screen, #hud')) { this._mouseFollow = false; return; }   // hovering the HUD never pulls Puff
+        if (this.pointerDown && e.pointerId !== this._steerId) return;   // a second finger (rain tap) never steers
         if (e.pointerType === 'mouse') { const p0 = this._lastMouse; this._lastMouse = [e.clientX, e.clientY]; if (p0 && Math.abs(p0[0] - e.clientX) + Math.abs(p0[1] - e.clientY) > 2) this._mouseFollow = true; }
         if (this.pointerDown || e.pointerType === 'mouse') setPtr(e);
       });
-      const up = e => { if (this._touches) this._touches.delete(e.pointerId); if (!this._touches || !this._touches.size) { this.pointerDown = false; if (e.pointerType !== 'mouse') this.renderer.pointer = null; } };
+      const up = e => { if (this._touches) this._touches.delete(e.pointerId); if (e.pointerId === this._steerId) this._steerId = null; if (!this._touches || !this._touches.size) { this.pointerDown = false; if (e.pointerType !== 'mouse') this.renderer.pointer = null; } };
       window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
       const act = document.getElementById('btnAction');
       if (act) act.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); this.action(); });

@@ -140,12 +140,14 @@
     easy: {
       heartsMax: 5, invulnTime: 1.6, rainRecharge: 5, healLaps: 4,
       pouchTargets: [16, 20, 24, 28],
-      speedMul: 0.85,
+      speedMul: 0.75,                       // playtest: slower, floatier arcs (4-year-old zone 1: 95 s → 65 s)
       apex: [[125, 175], [115, 170], [110, 165], [105, 160]],      // lower (and slower) eruptions
       burstInterval: [3.0, 2.8, 2.6, 2.4],
       burstWeights: [[0.85, 0.15, 0], [0.7, 0.3, 0], [0.55, 0.4, 0.05], [0.45, 0.45, 0.1]],
-      rockChance: [0.04, 0.1, 0.15, 0.2], rockCap: 0.3,
-      fairSpeed: 200
+      rockChance: [0.03, 0.08, 0.12, 0.16], rockCap: 0.3,   // playtest: fewer rocks offset the wider basket
+      catchHalfW: 44,                       // playtest: wider basket for 3–5 year olds
+      multThresholds: [0, 3, 7, 12, 20],    // playtest: ×2 after 3 catches so little kids feel the combo
+      fairSpeed: 130
     },
     normal: {},
     hard: {
@@ -399,7 +401,7 @@
       v.rumble = Math.max(0, v.rumble - h / 0.25);
     }
     v.glow = clamp(0.2 + 0.55 * v.rumble + this._kick, 0, 1);
-    v.shake = v.rumble * 2.5 + this._kick * 5;
+    v.shake = v.rumble * 4 + this._kick * 5;
   };
 
   // rumble duration of the NEXT burst, drawn once per burst (deterministic)

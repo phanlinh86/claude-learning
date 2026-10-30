@@ -771,6 +771,10 @@ async function testLayout() {
     const page = await newPage({ viewport: { width: w, height: h }, dsf, touch: touchDev, mobile: touchDev });
     await boot(page, 'seed=5');
     const tag = `${w}x${h}@${dsf}${touchDev ? ' touch' : ''}`;
+    if (touchDev && h > w) {   // portrait phone: the game asks to turn the phone sideways
+      check(`layout ${tag}: portrait shows the 'turn your phone sideways' overlay`, await visible(page, '#rotate'));
+      errorsOk(page, `layout ${tag}`); await close(page); continue;
+    }
     const cv = await ev(page, () => { const c = document.getElementById('game'), r = c.getBoundingClientRect(); return { l: r.left, t: r.top, w: r.width, h: r.height, bw: c.width, bh: c.height, vw: innerWidth, vh: innerHeight }; });
     const fits = (near(cv.w, cv.vw, 2) || near(cv.h, cv.vh, 2)) && cv.w <= cv.vw + 1 && cv.h <= cv.vh + 1;
     const centered = near(cv.l, (cv.vw - cv.w) / 2, 1.5) && near(cv.t, (cv.vh - cv.h) / 2, 1.5);
@@ -801,12 +805,12 @@ async function testLayout() {
       const l = Math.min(...rs.map(r => r.left)), t = Math.min(...rs.map(r => r.top)), rr = Math.max(...rs.map(r => r.right)), b = Math.max(...rs.map(r => r.bottom));
       return { l: (l - c.left) * k, t: (t - c.top) * k, r: (rr - c.left) * k, b: (b - c.top) * k, minPx: Math.min(...rs.map(r => r.width)) };
     });
-    // pouch panel is drawn at logical x 692..828, y 12..58 (render.js hud())
-    check(`layout ${tag}: HUD buttons inside the canvas and clear of the pouch panel`, hud.l >= 0 && hud.t >= 0 && hud.r <= 960 && hud.b <= 540 && hud.l >= 828, hud);
+    // pouch panel is drawn at logical x 672..808, y 12..58 (render.js hud())
+    check(`layout ${tag}: HUD buttons inside the canvas and clear of the pouch panel`, hud.l >= 0 && hud.t >= 0 && hud.r <= 960 && hud.b <= 540 && hud.l >= 808, hud);
     if (touchDev) check(`layout ${tag}: HUD buttons ≥ 32 css px (finger-sized)`, hud.minPx >= 32, hud.minPx);
     if (touchDev) {
-      const a = await ev(page, () => { const c = document.getElementById('game').getBoundingClientRect(), e = document.getElementById('btnAction'), r = e.getBoundingClientRect(); return { vis: !e.classList.contains('hidden') && r.width > 0, inside: r.left >= c.left - 1 && r.right <= c.right + 1 && r.top >= c.top - 1 && r.bottom <= c.bottom + 1, w: r.width }; });
-      check(`layout ${tag}: 💧 shown, inside the canvas, ≥ 44 px`, a.vis && a.inside && a.w >= 44, a);
+      const a = await ev(page, () => { const c = document.getElementById('game').getBoundingClientRect(), e = document.getElementById('btnAction'), r = e.getBoundingClientRect(); return { vis: !e.classList.contains('hidden') && r.width > 0, inside: r.left >= c.left - 1 && r.right <= c.right + 1 && r.top >= c.top - 1 && r.bottom <= c.bottom + 1, side: r.left >= c.right - 1 && r.right <= innerWidth + 1, w: r.width }; });
+      check(`layout ${tag}: 💧 shown, inside the canvas or in the side bar (never over the play area), ≥ 44 px`, a.vis && (a.inside || a.side) && a.w >= 44, a);
     } else check(`layout ${tag}: 💧 hidden on non-touch`, !(await visible(page, '#btnAction')));
     if (w < 900 || w === 1920) { await page.waitForTimeout(1500); await shot(page, `14_layout_${w}x${h}_${dsf}_game`); }
     check(`layout ${tag}: no horizontal/vertical page scroll`, await ev(page, () => document.documentElement.scrollWidth <= innerWidth && document.documentElement.scrollHeight <= innerHeight));

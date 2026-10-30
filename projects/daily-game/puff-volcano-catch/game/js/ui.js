@@ -46,6 +46,8 @@
         this.filePick.value = '';
       });
       if (game.isApp) $('btnQuit').classList.remove('hidden');
+      if (game.isTouch) document.body.classList.add('touch');
+      if (!game.isApp && !document.fullscreenEnabled) $('rowFull').classList.add('hidden');
       this.renderSlots();
       this.syncSettings();
     },
@@ -64,7 +66,7 @@
       this.syncMute();
     },
     syncMute() {
-      const m = this.game.settings.muted;
+      const m = this.game.settings.muted || this.game.urlMute;
       $('btnMuteHud').innerHTML = m
         ? '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9l5 6M21 9l-5 6" stroke="#fff" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>'
         : '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" stroke="#fff" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>';
