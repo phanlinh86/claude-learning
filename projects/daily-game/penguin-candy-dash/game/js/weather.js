@@ -319,7 +319,7 @@
   Weather.prototype.update = function (dt, env) {
     if (!(dt > 0)) return;
     var wind = (env && env.wind) || 0, h = this.stepH;
-    this._acc += Math.min(dt, 0.25);
+    this._acc += dt;
     while (this._acc >= h - 1e-12) { this._acc -= h; this._step(h, wind); }
     if (this._acc < 0) this._acc = 0;
     this._updateAmbient();

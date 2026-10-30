@@ -97,10 +97,11 @@
     // --- terrain zones (one flavour per biome)
     zonesByBiome: [
       [],
-      [ // Chocolate River: slow stream band y 270–350, wafer-bridge gaps x 300–360 and 640–700
+      [ // Chocolate River: slow stream band y 270–350, wafer-bridge gaps x 300–360 and 640–700,
+        // and no slow from x 850 on (wafer landing under the gate, art x 852–964)
         { type: 'slow', shape: 'rect', x: 40, y: 270, w: 260, h: 80 },
         { type: 'slow', shape: 'rect', x: 360, y: 270, w: 280, h: 80 },
-        { type: 'slow', shape: 'rect', x: 700, y: 270, w: 220, h: 80 }
+        { type: 'slow', shape: 'rect', x: 700, y: 270, w: 150, h: 80 }
       ],
       [ // Cotton Candy Clouds: springy puffs
         { type: 'bouncy', shape: 'circle', x: 300, y: 200, r: 70 },
@@ -112,10 +113,12 @@
         { type: 'ice', shape: 'rect', x: 560, y: 320, w: 280, h: 150 }
       ]
     ],
-    bridgesByBiome: [[], [{ x: 300, y: 270, w: 60, h: 80 }, { x: 640, y: 270, w: 60, h: 80 }], [], []],
+    // non-slow wafer surfaces across the river: 2 bridges + the gate landing (x ≥ 850)
+    bridgesByBiome: [[], [{ x: 300, y: 270, w: 60, h: 80 }, { x: 640, y: 270, w: 60, h: 80 }, { x: 850, y: 270, w: 70, h: 80 }], [], []],
     slowMul: 0.55,                 // max speed × in 'slow'
     iceMul: 0.25,                  // accel & braking × on 'ice' (keeps momentum)
-    bouncyK: 14,                   // 1/s², outward spring accel per px of penetration
+    bouncyPush: 2.2,               // 1/s: outward drift = 2.2 px/s per px of penetration (added to position,
+                                   //  so braking can't cancel it; centre of r70 = 154 px/s < Pip's 165–210)
     bouncyImpulse: 140,            // px/s outward kick on entering a puff
     bouncyFloat: 0.6,              // accel & braking × inside a puff (floaty)
     hopVz: 150, hopGravity: 900,   // visual hop (z) on a puff bounce
@@ -404,7 +407,7 @@
   World.prototype.update = function (dt) {
     if (!(dt > 0)) return;
     var h = this.cfg.step;
-    this._acc += Math.min(dt, 0.25);     // clamp huge frame gaps (tab switch)
+    this._acc += dt;                     // no clamp here: main.js clamps tab-switch gaps BEFORE × speed
     while (this._acc >= h - 1e-12) {
       this._acc -= h;
       this._step(h);
@@ -510,7 +513,7 @@
       var z = this.zones[ter.puff], dx = e.x - z.x, dy = e.y - z.y, d = hyp(dx, dy);
       if (d < 1e-6) { dx = 1; dy = 0; d = 1; }
       var ux = dx / d, uy = dy / d, pen = z.r - d;
-      e.vx += ux * c.bouncyK * pen * h; e.vy += uy * c.bouncyK * pen * h;
+      e.x += ux * c.bouncyPush * pen * h; e.y += uy * c.bouncyPush * pen * h;
       if (e._puff !== ter.puff) {
         var vin = -(e.vx * ux + e.vy * uy);           // speed toward the centre
         if (vin > 20) {

@@ -78,7 +78,7 @@
             break;
           }
           case 'grow': this.ring(w.pip.x, w.pip.y - 20, '#ffffff', 0.35); break;
-          case 'maxsize': this.texts.push({ text: 'Max size! Press SPACE to Pop!', x: clamp(w.pip.x, 180, 780), y: Math.max(110, w.pip.y - 90), life: 0, max: 1.8, size: 20, color: '#ffe14d' }); break;
+          case 'maxsize': this.texts.push({ text: 'Max size! Press SPACE to Pop!', x: clamp(w.pip.x, 240, 720), y: Math.max(150, w.pip.y - 90), life: 0, max: 1.8, size: 20, color: '#ffe14d' }); break;
           case 'pop': {
             this.flash = Math.max(this.flash, 0.35); this.shake = 0.15;
             for (let i = 0; i < 24; i++) {
@@ -220,7 +220,7 @@
       this.layer(CD.Assets.SEASONS[v.cur] + '_edge', 1);
       if (this.weather) this.particles('front');
       this.drawFx();
-      this.drawTexts();
+      if (mode !== 'title') this.drawTexts();   // no score pop-ups over the title logo
       g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
       if (this.flash > 0) { g.fillStyle = `rgba(255,255,255,${(this.flash * 0.55).toFixed(3)})`; g.fillRect(0, 0, W, H); }
       if (w && w.state === 'dead') { g.fillStyle = 'rgba(60,20,50,0.22)'; g.fillRect(0, 0, W, H); }
@@ -296,7 +296,7 @@
         return;
       }
       const fade = m.loose && m.life != null && m.life < 1 ? (Math.sin(this.time * 20) > 0 ? 0.35 : 1) : 1;
-      const bob = Math.sin(this.time * 3 + (m.id || 0)) * 2.5;
+      const bob = m.bob != null ? m.bob : Math.sin(this.time * 3 + (m.id || 0)) * 2.5;
       this.shadow(m.x, m.y, 20, 0.16);
       g.globalAlpha = fade;
       const custom = A.hasCustom('gem');
@@ -317,7 +317,7 @@
       const a = b.spawnT == null ? 1 : clamp(b.spawnT, 0, 1);
       this.shadow(b.x, b.y, 44, 0.2 * a);
       g.save(); g.globalAlpha = a;
-      g.translate(b.x, b.y);
+      g.translate(b.x, b.y - (b.z || 0));
       const stun = b.stun > 0;
       const wob = stun ? Math.sin(this.time * 10) * 0.08 : Math.sin(this.time * 9 + (b.id || 0)) * 0.05 * Math.min(1, Math.hypot(b.vx || 0, b.vy || 0) / 40);
       g.rotate(wob);
@@ -345,9 +345,9 @@
       if (p.invuln > 0 && Math.sin(this.time * 30) > 0.2) { this.shadow(p.x, p.y, sz * 0.7, 0.1); return; }   // blink while safe
       this.shadow(p.x, p.y, sz * 0.7, 0.25);
       g.save();
-      g.translate(p.x, p.y);
-      const sq = p.squash || 1;
-      g.scale(1 / Math.sqrt(sq), sq);
+      g.translate(p.x, p.y - (p.z || 0));   // z = hop height (puffs); the shadow stays on the ground
+      const sq = p.squash || 0;            // signed wobble from the world
+      g.scale(1 + sq, 1 - sq);
       if (A.hasCustom('hero')) {
         const [cw, ch] = A.fit('hero', sz * 1.15, sz * 1.15);
         const waddle = Math.sin(this.time * 12) * (Math.hypot(p.vx || 0, p.vy || 0) > 20 ? 0.09 : 0.02);
@@ -417,13 +417,13 @@
       const hf = A.sprite('heart_full', 28, 28), he = A.sprite('heart_empty', 28, 28);
       for (let i = 0; i < (w.heartsMax || 3); i++) { const s = i < w.hearts ? hf : he; if (s) g.drawImage(s, 26 + i * 30, 21, 28, 28); }
       const smax = w.sizeMax || 5;
-      g.fillStyle = 'rgba(255,255,255,0.85)'; this.roundRect(14, 64, 40 + 22 * smax, 26, 13); g.fill();
+      g.fillStyle = 'rgba(255,255,255,0.85)'; this.roundRect(14, 64, 82 + 20 * smax, 26, 13); g.fill();
       this.text('SIZE', 22, 77, 11, '#a8407e', null, 'left');
       for (let i = 0; i < smax; i++) {
         g.fillStyle = i < w.size ? (w.size >= smax ? '#ffd23c' : '#ff8fc8') : 'rgba(168,64,126,0.18)';
         g.beginPath(); g.arc(60 + i * 20, 77, 7, 0, TAU); g.fill();
       }
-      this.text('×' + w.size, 64 + smax * 20, 77, 13, '#a8407e', null, 'left');
+      this.text('×' + w.size, 58 + smax * 20, 77, 13, '#a8407e', null, 'left');
       // score
       if (this._lastScore !== w.score) { this._scorePop = 1; this._lastScore = w.score; }
       this._scorePop = Math.max(0, (this._scorePop || 0) - 0.06);
