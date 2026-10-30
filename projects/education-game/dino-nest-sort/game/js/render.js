@@ -118,11 +118,12 @@
       const g = c.getContext('2d');
       g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, bw, bh);
       const gy = layout.groundY;
-      const groundTop = gy - 70, midBottom = gy - 10, farBottom = gy - 120;   // per env artist: tops at gy-70 / gy-370 / gy-540
+      const k = this._layerScale(layout);   // tall portrait: bigger hills fill the sky behind the items
+      const groundTop = gy - 30 - 40 * k, midBottom = gy - 10, farBottom = gy - 120;   // per env artist (k=1: tops gy-70 / gy-370 / gy-540)
       const layers = [
-        { n: 'far', w: 1200, h: 420, bottom: farBottom, off: 0.15 * 1300 * level },
-        { n: 'mid', w: 1200, h: 360, bottom: midBottom, off: 0.35 * 1300 * level },
-        { n: 'ground', w: 1200, h: 260, bottom: groundTop + 260, off: 0 }
+        { n: 'far', w: 1200 * k, h: 420 * k, bottom: farBottom, off: 0.15 * 1300 * level },
+        { n: 'mid', w: 1200 * k, h: 360 * k, bottom: midBottom, off: 0.35 * 1300 * level },
+        { n: 'ground', w: 1200 * k, h: 260 * k, bottom: groundTop + 260 * k, off: 0 }
       ];
       for (const L of layers) {
         const tw = Math.round(L.w * rs), th = Math.round(L.h * rs);
@@ -138,11 +139,12 @@
       this.land = c; this.landKey = key;
       return c;
     }
+    _layerScale(layout) { return layout && layout.H > layout.W * 1.6 ? 1.36 : 1; }
     prewarm(layout, level) { // build tiles ahead of time (cheap when cached)
-      const rs = this.rs;
-      DN.Assets.exact('far', Math.round(1200 * rs), Math.round(420 * rs));
-      DN.Assets.exact('mid', Math.round(1200 * rs), Math.round(360 * rs));
-      DN.Assets.exact('ground', Math.round(1200 * rs), Math.round(260 * rs));
+      const rs = this.rs, k = this._layerScale(layout);
+      DN.Assets.exact('far', Math.round(1200 * k * rs), Math.round(420 * k * rs));
+      DN.Assets.exact('mid', Math.round(1200 * k * rs), Math.round(360 * k * rs));
+      DN.Assets.exact('ground', Math.round(1200 * k * rs), Math.round(260 * k * rs));
     }
 
     /* ---------- frame ---------- */
@@ -172,7 +174,11 @@
       const land = this._landscape(layout, o.title ? 0 : world.level);
       g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(land, 0, 0); g.setTransform(rs, 0, 0, rs, 0, 0);
       if (amb.tint) { g.fillStyle = amb.tint; g.fillRect(0, 0, W, H); }
-      if ((amb.darkness || 0) > 0.01) { g.fillStyle = `rgba(30,40,60,${amb.darkness})`; g.fillRect(0, 0, W, H); }
+      if ((amb.darkness || 0) > 0.01) {   // darker sky, lighter play band near the ground
+        const d = amb.darkness / 0.25, dg = g.createLinearGradient(0, 0, 0, H);
+        dg.addColorStop(0, `rgba(30,40,60,${0.28 * d})`); dg.addColorStop(1, `rgba(30,40,60,${0.12 * d})`);
+        g.fillStyle = dg; g.fillRect(0, 0, W, H);
+      }
       this._particles(weather.particles, 'back');
 
       if (o.title) {
@@ -190,6 +196,10 @@
       const a = w.alpha == null ? 1 : w.alpha;
       const g = this.g;
       const items = w.items || [], baskets = w.baskets || [];
+      const hi = w.held != null ? items.find(i => i.id === w.held) : null;
+      const hn = hi && w.nestAt ? w.nestAt(hi.x, hi.y) : null;
+      this._hoverNest = hn ? hn.id : null;
+      this._sizeSprite = (w.topic === 'size' && items[0] && items[0].sprite) || null;
       // nests: back, in-nest items, front, plate
       for (const b of baskets) this._nest(b, items, a, w);
       // resting / moving items (not in nests), held last
@@ -205,7 +215,14 @@
       for (const it of free) this._item(it, a);
       const h = held != null ? items.find(i => i.id === held) : null;
       if (h) { this._shadow(h, a); this._item(h, a); }
-      this._bo(w, o, a);
+      if (o.done) this._doneBo(w);
+      else this._bo(w, o, a);
+    }
+    _doneBo(w) {   // celebration: a big cheering Bo centred above the panel
+      const H = this.H, W = this.W, h = Math.min(H * 0.38, 380);
+      const cyc = this.time % 1.1, hop = Math.max(0, Math.sin(cyc / 0.55 * Math.PI)) * (cyc < 0.55 ? 40 : 0);
+      const y = Math.min(w.layout.groundY - 10, H * (H > W ? 0.5 : 0.52));
+      this._character(cyc < 0.55 ? 'bo_cheer' : 'bo_happy', W / 2, y - hop, h, 1, y, hop);
     }
     _flyIntoNest(it, w) {
       // a flying item that is already dropping into its nest is drawn between nest back and front (see _nest)
@@ -217,14 +234,19 @@
       const g = this.g;
       const nw = b.w;
       const sq = clamp(b.squash || 0, -0.3, 0.3);
-      const sh = b.shake || 0, shx = Math.abs(sh) <= 1.5 ? sh * 12 : sh;
+      const sh = b.shake || 0, shx = Math.abs(sh) <= 1.5 ? sh * 14 : sh;
+      const hover = b.id === this._hoverNest ? 0.05 : 0;
       const bottom = b.y + nw * 0.38;
       g.save();
-      g.translate(b.x + shx, bottom); g.scale(1 + sq, 1 - sq); g.translate(-b.x, -bottom);
+      g.translate(b.x + shx, bottom); g.scale(1 + sq + hover, 1 - sq + hover); g.translate(-b.x, -bottom);
       // contact shadow on the grass
       g.fillStyle = 'rgba(50,40,20,.18)';
       g.beginPath(); g.ellipse(b.x, bottom - nw * 0.02, nw * 0.5, nw * 0.07, 0, 0, TAU); g.fill();
       // hint glow
+      if (hover) {   // same soft cue for every nest under a held item (never gives the answer away)
+        g.fillStyle = 'rgba(255,255,255,.28)';
+        g.beginPath(); g.ellipse(b.x, b.y + nw * 0.05, nw * 0.62, nw * 0.36, 0, 0, TAU); g.fill();
+      }
       if ((b.glow || 0) > 0.01) {
         const pulse = 0.65 + 0.35 * Math.sin(this.time * 8);
         const gr = g.createRadialGradient(b.x, b.y, nw * 0.1, b.x, b.y, nw * 0.75);
@@ -248,7 +270,7 @@
         g.strokeStyle = p.fill; g.lineWidth = nw * 0.05;
         g.beginPath(); g.ellipse(b.x, b.y + nw * 0.02, nw * 0.43, nw * 0.1, 0, 0.12 * Math.PI, 0.88 * Math.PI); g.stroke();
       }
-      this._plate(b, b.x, b.y + nw * 0.2, nw * 0.44);
+      this._plate(b, b.x, b.y + nw * 0.2, nw * 0.52);
       g.restore();
     }
 
@@ -268,21 +290,24 @@
       g.save(); g.translate(cx, cy);
       switch (L.type) {
         case 'color': this._sprite('egg_' + L.value, 0, 2, ih * 1.05); break;
-        case 'shape': drawShape(g, L.value, '#ffffff', ih * 0.82, { flat: true }); break;
+        case 'shape': drawShape(g, L.value, '#8a6a4a', ih * 0.82, { flat: true }); break;
         case 'home': this._sprite('home_' + L.value, 0, 0, ih * 1.08); break;
-        case 'size': this._sprite('egg_plain', 0, L.value === 'big' ? 0 : ih * 0.2, L.value === 'big' ? ih * 1.1 : ih * 0.5); break;
+        case 'size': {
+          const spr = this._sizeSprite || 'egg_plain';
+          this._sprite(spr, 0, L.value === 'big' ? 0 : ih * 0.2, L.value === 'big' ? ih * 1.15 : ih * 0.62); break;
+        }
         case 'letter': outlinedText(g, String(L.value), 0, ih * 0.04, ih * 0.86, INK, null, iw); break;
         case 'parity': {
           const word = DN.I18N ? DN.I18N.name(this.lang, 'parity', L.value) : L.value;
           outlinedText(g, word, 0, -ih * 0.14, ih * 0.5, INK, null, iw);
-          outlinedText(g, L.value === 'odd' ? '1 3 5' : '2 4 6', 0, ih * 0.3, ih * 0.3, '#8a6a4a', null, iw);
+          outlinedText(g, L.value === 'odd' ? '1 3 5' : '2 4 6', 0, ih * 0.3, ih * 0.36, '#8a6a4a', null, iw);
           break;
         }
         case 'number': {
           const n = L.value;
           if (b.need) {
             outlinedText(g, String(n), 0, -ih * 0.14, ih * 0.62, INK, null, iw);
-            this._dots(n, b.count || 0, 0, ih * 0.33, iw, ih * 0.22);
+            this._dots(n, b.count || 0, 0, ih * 0.33, iw, ih * 0.3);
           } else outlinedText(g, String(n), 0, ih * 0.04, ih * 0.8, INK, null, iw);
           break;
         }
@@ -359,8 +384,13 @@
         if (o.speaking && Math.floor(this.time / 0.15) % 2 === 0 && frame === 'bo_idle') frame = 'bo_talk';
         else if (frame === 'bo_idle' && this._blinking(o.dt)) frame = 'bo_blink';
       }
-      const breathe = 1 + 0.018 * Math.sin(this.time * 2.6);
-      this._character(frame, L.x, L.y - (bo.hop || 0), L.h, breathe);
+      const hop = bo.hop || 0;
+      if (this._lastHop > 2 && hop <= 2) this._landSquash = 0.22;
+      this._lastHop = hop;
+      this._landSquash = Math.max(0, (this._landSquash || 0) - (o.dt || 0));
+      const sq = this._landSquash > 0 ? 0.92 + 0.08 * (1 - this._landSquash / 0.22) : 1;
+      const breathe = (1 + 0.018 * Math.sin(this.time * 2.6)) * sq;
+      this._character(frame, L.x, L.y - hop, L.h, breathe, L.y, hop);
     }
     _blinking(dt) {
       this._blinkT -= dt || 0;
@@ -368,11 +398,12 @@
       if (this._blink > 0) { this._blink -= dt || 0; return true; }
       return false;
     }
-    _character(frame, x, y, h, breathe) {
+    _character(frame, x, y, h, breathe, groundY, hop) {
       const g = this.g, box = h * 256 / 208;      // Bo's silhouette ≈ 81 % (208 px) of the 256 box
       const spr = DN.Assets.sprite(frame, box * this.rs) || DN.Assets.sprite('bo_idle', box * this.rs);
-      g.fillStyle = 'rgba(40,40,20,.2)';
-      g.beginPath(); g.ellipse(x, y - box * 0.02, box * 0.3, box * 0.05, 0, 0, TAU); g.fill();
+      const sy = groundY == null ? y : groundY, shk = 1 / (1 + (hop || 0) / 60);   // shadow stays on the ground, shrinks in the air
+      g.fillStyle = `rgba(40,40,20,${0.2 * shk})`;
+      g.beginPath(); g.ellipse(x, sy - box * 0.02, box * 0.3 * shk, box * 0.05 * shk, 0, 0, TAU); g.fill();
       if (!spr) return;
       g.save(); g.translate(x, y); g.scale(1 / (breathe * 0.5 + 0.5), breathe);
       g.drawImage(spr, -box * 128 / 256, -box * 244 / 256, box, box);
@@ -387,7 +418,7 @@
       const cyc = this.time % 2.4;
       const frame = cyc < 0.5 ? 'bo_happy' : cyc < 0.62 ? 'bo_blink' : 'bo_idle';
       const hop = cyc < 0.5 ? Math.sin(cyc / 0.5 * Math.PI) * 22 : 0;
-      this._character(frame, x, y - hop, h, 1 + 0.02 * Math.sin(this.time * 2.6));
+      this._character(frame, x, y - hop, h, 1 + 0.02 * Math.sin(this.time * 2.6), y, hop);
       // a decorative nest with eggs
       if (!portrait) {
         const nx = W - L.ins.right - W * 0.16, nw = Math.min(260, W * 0.2), ny = L.groundY - nw * 0.25;
@@ -418,8 +449,9 @@
         outlinedText(g, name, 0, bh * 0.14, 62, '#2e8c78', '#ffffff', bw - 60);
       } else {
         const s1 = I ? I.t(lang, 'ui.stars') : 'Stars';
-        outlinedText(g, `${s1}: ${w.levelStars || 0}`, 0, -bh * 0.18, 40, '#8a6a4a', null, bw - 60);
-        for (let i = 0; i < 5; i++) this._sprite('star', (i - 2) * 62, bh * 0.2, 56, Math.sin(this.time * 3 + i) * 0.1);
+        outlinedText(g, s1, 0, -bh * 0.24, 34, '#8a6a4a', null, bw - 60);
+        this._sprite('star', -48, bh * 0.14, 84, Math.sin(this.time * 3) * 0.12);
+        outlinedText(g, '× ' + (w.levelStars || 0), 44, bh * 0.16, 62, '#2e8c78', '#ffffff', 160);
       }
       g.restore();
     }
@@ -442,10 +474,10 @@
         // a star that flies from (x,y) to the HUD counter on an arc
         fx.push({ k: 'star', x0: x, y0: y, x1: this.hudStar.x, y1: this.hudStar.y, t: -(opt.delay || 0), life: 0.8, size: 70, onDone: opt.onDone });
       } else if (type === 'confetti') {
-        const n = Math.round(70 * this.quality);
+        const n = Math.round(110 * this.quality);
         for (let i = 0; i < n; i++) {
           fx.push({ k: 'p', sprite: R() < 0.5 ? 'confetti_a' : 'confetti_b', x: R() * this.W, y: -20 - R() * this.H * 0.5, vx: (R() - 0.5) * 60, vy: 60 + R() * 120,
-            g: 30, drag: 0.6, t: 0, life: 5 + R() * 2, size: 18 + R() * 10, rot: R() * TAU, vr: (R() - 0.5) * 10, sway: R() * TAU });
+            g: 30, drag: 0.6, t: 0, life: 5 + R() * 2, size: 22 + R() * 12, rot: R() * TAU, vr: (R() - 0.5) * 10, sway: R() * TAU });
         }
       } else if (type === 'hint') {
         for (let i = 0; i < 6; i++) { const a = R() * TAU; fx.push({ k: 'p', sprite: 'sparkle', x: x + Math.cos(a) * 80, y: y + Math.sin(a) * 40 - 20, vx: 0, vy: -30, g: 0, t: 0, life: 0.9, size: 22, rot: 0, vr: 3 }); }
@@ -525,6 +557,19 @@
     if (!r) return;
     const saveG = r.g, saveRs = r.rs;
     r.g = g; r.rs = dpr;
+    if (thing.dots) {   // numeral + dots (ages ≤ 5 talk choices)
+      g.save(); g.translate(cw / 2, ch * 0.4);
+      outlinedText(g, String(thing.text), 0, 0, ch * 0.55, INK, null, cw * 0.9);
+      g.restore();
+      const n = thing.dots, per = n > 5 ? Math.ceil(n / 2) : n, rows = n > 5 ? 2 : 1, d = Math.min(cw / (per * 1.3), ch * 0.16);
+      for (let i = 0; i < n; i++) {
+        const r0 = Math.floor(i / per), c = i % per, cnt = r0 === 0 ? Math.min(per, n) : n - per;
+        g.fillStyle = '#ff9a2e'; g.beginPath();
+        g.arc(cw / 2 + (c - (cnt - 1) / 2) * d * 1.25, ch * 0.8 + (r0 - (rows - 1) / 2) * d * 1.1, d * 0.42, 0, TAU); g.fill();
+      }
+      r.g = saveG; r.rs = saveRs;
+      return;
+    }
     const n = thing.count || 1;
     const s = Math.min(ch * 0.86, (cw * 0.92) / Math.min(n, n > 6 ? Math.ceil(n / 2) : n) * 1.0);
     const rows = n > 6 ? 2 : 1, per = Math.ceil(n / rows);

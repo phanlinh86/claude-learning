@@ -56,7 +56,7 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 .title-top { width: 100%; display: flex; justify-content: space-between; align-items: flex-start; }
 .title-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
   padding-bottom: 6vh; }
-.logo { margin: 0; text-align: center; line-height: .95; font-weight: 900; font-size: clamp(44px, 11 * var(--u), 108px);
+.logo { margin: 0; max-width: 80vw; text-align: center; line-height: .95; font-weight: 900; font-size: clamp(44px, 11 * var(--u), 108px);
   color: #fff; letter-spacing: 1px;
   text-shadow: 0 4px 0 #2e8c78, 0 8px 0 rgba(0, 0, 0, .12), 0 0 24px rgba(255, 255, 255, .5);
   -webkit-text-stroke: 2px #2e8c78; paint-order: stroke fill; }
@@ -101,7 +101,14 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 .toggle { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; background: #fff; padding: 10px 12px; border-radius: 14px; }
 .toggle input { width: 26px; height: 26px; accent-color: var(--green); }
 .small-note { font-size: 14px; opacity: .75; margin: 4px 0 12px; }
-.settings-panel > .btn { width: 100%; }
+.settings-panel > .btn { width: 100%; position: sticky; bottom: -22px; box-shadow: 0 6px 0 var(--green-d), 0 -10px 16px var(--cream); }
+@media (max-height: 500px) {
+  .settings-panel h2 { margin-bottom: 6px; }
+  .set-row { margin: 6px 0; }
+  .set-grid { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin: 8px 0; gap: 6px; }
+  .toggle { padding: 6px 10px; }
+  .settings-panel > .btn { bottom: -12px; min-height: 52px; }
+}
 
 /* ---------- HUD ---------- */
 #hud { position: absolute; top: calc(var(--sa-t) + 10px); right: calc(var(--sa-r) + 10px); display: flex; align-items: center; gap: 10px; z-index: 5; }
@@ -137,6 +144,7 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 .talk-choices button small { font-size: 16px; font-weight: 800; }
 .talk-choices button canvas { width: 64px; height: 64px; }
 .talk-choices button.right { border-color: var(--green); background: #e5f8e9; animation: bump .5s; }
+.talk-choices button.glow { border-color: #ffc531; box-shadow: 0 0 0 6px rgba(255,197,49,.45), 0 6px 0 rgba(120,80,40,.22); animation: breathe 1s ease-in-out infinite; }
 .talk-choices button.wrongpick { opacity: .45; }
 .talk-choices button:active { transform: translateY(4px); }
 .mic-btn { margin-top: 16px; display: inline-flex; align-items: center; gap: 10px; min-height: 60px; padding: 8px 22px; border-radius: 99px;
@@ -161,11 +169,27 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
   .panel h2 { margin-bottom: 8px; }
   .btn { min-height: 54px; }
   .btn-big { min-height: 60px; }
-  .talk-panel #talkShow { width: 210px; }
-  .talk-choices button { min-height: 76px; min-width: 92px; font-size: 28px; }
-  .talk-q { margin: 2px 0 8px; }
-  .mic-btn { margin-top: 8px; min-height: 50px; }
+  /* landscape phones: Talk time in two columns (preview left, question + answers right) */
+  .talk-panel { display: grid; grid-template-columns: 170px minmax(0, 1fr); grid-template-rows: auto auto 1fr auto;
+    column-gap: 16px; align-items: center; max-width: min(760px, 100%); padding: 10px 16px; }
+  .talk-panel h2 { grid-column: 1 / -1; font-size: 24px; margin: 0 0 4px; }
+  .talk-panel #talkShow { grid-column: 1; grid-row: 2 / 5; width: 170px; }
+  .talk-q { grid-column: 2; margin: 0 0 8px; font-size: 20px; }
+  .talk-choices { grid-column: 2; }
+  .mic-btn { grid-column: 2; justify-self: center; margin-top: 8px; min-height: 48px; }
+  .talk-choices button { min-height: 72px; min-width: 88px; font-size: 26px; }
   .hud-stars img { width: 30px; height: 30px; } .hud-stars { font-size: 22px; }
   .icon-btn { width: 48px; height: 48px; }
+}
+@media (max-width: 430px) {
+  .talk-choices { gap: 8px; }
+  .talk-choices button { min-width: 90px; padding: 8px 8px; }
+  .panel { padding: 18px 14px; }
+}
+@media (min-width: 768px) and (min-height: 700px) {   /* iPad: larger Talk time */
+  .talk-panel { max-width: 720px; }
+  .talk-panel #talkShow { width: 380px; }
+  .talk-choices button { min-width: 140px; min-height: 120px; font-size: 44px; }
+  .talk-choices button canvas { width: 84px; height: 84px; }
 }
 @media (prefers-reduced-motion: reduce) { .btn-play { animation: none; } }

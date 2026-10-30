@@ -29,16 +29,20 @@
     // ---- timing / state machine (s)
     step: 1 / 120,             // fixed simulation sub-step (≤ 1/120 per DESIGN)
     maxFrame: 1.0,             // s, largest dt accepted per update() (speed mode passes big dt)
-    roundsPerLevel: 5,
+    roundsPerLevel: 4,         // playtest: 5 → 4 (warm-up + 3 real rounds) — chapters were too long at ages 3–4
+    chapterTimeLimit: 75,      // s since the chapter began: after ≥ chapterMinRounds rounds, go to Talk time once exceeded
+    chapterMinRounds: 3,
     introTime: 1.8,            // chapter banner
     appearTime: 0.45,          // item pop-in (back-overshoot)
     appearStagger: 0.07,       // s between consecutive items popping in (~0.6 s for 8 items)
     nestAppearTime: 0.35,      // new nests pop in
-    roundDoneTime: 2.0,        // stars on screen
-    leaveDelay: 1.2,           // s into roundDone when items hop out of the nests
+    roundDoneTime: 1.7,        // stars on screen (playtest 2.0 → 1.7)
+    leaveDelay: 1.0,           // s into roundDone when items hop out of the nests (< roundDoneTime − leaveTime)
     leaveTime: 0.4,            // hop-out + fade
     talkAfterAnswer: 1.6,      // talk panel stays after an answer
-    levelDoneTime: 2.4,
+    levelDoneTime: 2.0,        // playtest 2.4 → 2.0
+    talkAskTime: 12,           // s without an answer → talkAsk (re-ask), repeating
+    talkGlowAfterAsks: 2,      // from this re-ask on, talk.glowAnswer = true (UI glows the right choice)
 
     // ---- layout (DESIGN §2; px)
     shortSide: 720, minLong: 960, maxLong: 1600,
@@ -49,7 +53,8 @@
     signScale: 0.55,           // sign width = 0.55 × nest w (sign.svg 128×112)
     boX: 105, boYLand: 225, boYPort: 245, boHLand: 175, boHPort: 190,
     bubbleDx: 85, bubbleY: 24, bubbleMaxW: 620, bubbleRightGap: 150, bubbleH: 104,
-    playMargin: 40, playTopGap: 10, playNestGap: 24,
+    playMargin: 40, playTopGap: 10,
+    playNestGap: 44,           // px between play band and nest top (playtest 24 → 44): resting items stay OUT of the 90 px drop zone
     hudW: 140, hudH: 90,       // DOM buttons top-right: x > W−ins.right−140, y < ins.top+90
     minSpacing: 1.1,           // min centre distance = 1.1 × size
     minShrink: 0.75,           // generator shrinks items to ≥ 0.75× before giving up
@@ -59,7 +64,10 @@
 
     // ---- touch (px)
     touchR: 0.6, touchPad: 14, // item radius = 0.6 × size + 14
-    nestPadSide: 30, nestPadUp: 90,
+    nestPadSide: 45,           // drop zone grows 45 px left/right/down (playtest 30 → 45: catches 'just beside' drops)
+    nestPadUp: 90,
+    tapMovePx: 24, tapTime: 0.35,   // finger moved < 24 px and released < 0.35 s after down → a TAP, not a drop
+    tapReturnTime: 0.25, tapApex: 6,
 
     // ---- drag: critically damped spring + pendulum tilt
     dragOmega: 28,             // rad/s; ζ = 1 → 95 % settle in ≈ 4.7/ω = 0.17 s
@@ -96,11 +104,16 @@
     leaveVy: -420, leaveVx: 90, leaveG: 1600,
 
     // ---- help
-    hintAfterMisses: 2, hintTime: 3, idleTime: 12,
+    hintAfterMisses: 2, hintTime: 3,
+    hintCooldown: 6,           // s: no auto-hint within 6 s of the last one, nor while the nest still glows
+    idleTime: 12,              // s without a grab → idle nudge; the gap then grows ×1.5 per nudge up to idleMax
+    idleBackoff: 1.5, idleMax: 30,
 
     // ---- Bo
     moodTime: { happy: 0.9, cheer: 1.6, oops: 0.8, think: 1.4 },
-    cheerHopPx: 26, cheerHopTime: 0.4, lookRate: 6
+    cheerHopPx: 26, cheerHopTime: 0.4, lookRate: 6,
+    // ---- tall portrait phones (visual QA): item band height ≤ 0.85·W above the nests, items ×1.2
+    portraitPlayMaxFrac: 0.85, portraitItemScale: 1.2
   };
   DN.CONFIG = CONFIG;
 
@@ -133,12 +146,20 @@
     var nestTop = ny - cfg.nestTopFrac * nh;
     var px = ins.left + cfg.playMargin, py = bo.y + cfg.playTopGap;
     var play = { x: px, y: py, w: W - ins.right - cfg.playMargin - px, h: nestTop - cfg.playNestGap - py };
+    // tall portrait phones: keep items in a band just above the nests (short drags) and make them bigger
+    var itemScale = 1;
+    if (portrait && play.h > cfg.portraitPlayMaxFrac * W) {
+      var ph = cfg.portraitPlayMaxFrac * W;
+      play.y = nestTop - cfg.playNestGap - ph; play.h = ph;
+      if (H / W > 1.6) itemScale = cfg.portraitItemScale;
+    }
+    play.itemScale = itemScale;
     var sw = cfg.signScale * nw;
     return {
       W: W, H: H, ins: ins, portrait: portrait, groundY: groundY,
       nest: { y: ny, w: nw, h: nh, xs: xs, n: n, top: nestTop,
         sign: { w: sw, h: sw * 112 / 128, bottomY: groundY + 0.5 * (H - groundY) } },   // suggested sign placement (stake bottom)
-      bo: bo, bubble: bubble, play: play,
+      bo: bo, bubble: bubble, play: play, itemScale: itemScale,
       hud: { x: W - ins.right - cfg.hudW, y: 0, w: cfg.hudW + ins.right, h: ins.top + cfg.hudH }
     };
   }
@@ -167,11 +188,25 @@
     return hex.length > rect.length ? hex : rect;
   }
 
+  /** Farthest-point sampling: spreads the chosen grid points over the play area (no 3 sums in one column). */
+  function spreadPick(pts, n) {
+    if (pts.length <= n) return pts.slice(0, n);
+    var out = [pts[0]], used = [true], dmin = [], i, j;
+    for (i = 0; i < pts.length; i++) { used[i] = i === 0; dmin[i] = hyp(pts[i].x - pts[0].x, pts[i].y - pts[0].y); }
+    while (out.length < n) {
+      var best = -1, bd = -1;
+      for (i = 0; i < pts.length; i++) if (!used[i] && dmin[i] > bd) { bd = dmin[i]; best = i; }
+      used[best] = true; out.push(pts[best]);
+      for (j = 0; j < pts.length; j++) dmin[j] = Math.min(dmin[j], hyp(pts[j].x - pts[best].x, pts[j].y - pts[best].y));
+    }
+    return out;
+  }
+
   /** Sets homeX/homeY/size of `items` (each has baseSize) inside play. Returns { shrink, ok }. */
   function packItems(items, play, rng, cfg) {
     if (!items.length) return { shrink: 1, ok: true };
-    var maxBase = 0, i;
-    for (i = 0; i < items.length; i++) maxBase = Math.max(maxBase, items[i].baseSize);
+    var maxBase = 0, i, k0 = play.itemScale || 1;
+    for (i = 0; i < items.length; i++) maxBase = Math.max(maxBase, items[i].baseSize * k0);
     var jit = cfg.packJitter, s = 1, pts = null, ok = true;
     for (s = 1; s > 0.2; s = Math.round((s - cfg.shrinkStep) * 1000) / 1000) {
       var size = maxBase * s, d = cfg.minSpacing * size + 2 * Math.SQRT2 * jit;
@@ -179,10 +214,10 @@
       if (pts.length >= items.length) break;
       if (s - cfg.shrinkStep < cfg.minShrink - 1e-9) ok = false;   // giving up the 0.75 floor: keep shrinking (never overlap)
     }
-    var pick = rng.shuffle(pts).slice(0, items.length);
+    var pick = spreadPick(rng.shuffle(pts), items.length);
     for (i = 0; i < items.length; i++) {
       var it = items[i];
-      it.size = it.baseSize * s;
+      it.size = it.baseSize * k0 * s;
       it.homeX = pick[i].x + rng.float(-jit, jit);
       it.homeY = pick[i].y + rng.float(-jit, jit);
     }
@@ -228,7 +263,9 @@
     this.events = [];
     this.sessions = 0;
     this.interactive = false;
-    this._idleT = 0; this._roundEnded = false; this._vpCount = 0;
+    this._idleT = 0; this._idleGap = this.cfg.idleTime; this._roundEnded = false; this._vpCount = 0;
+    this._lastHintT = -1e9; this.levelStartTime = 0; this._talkAskT = 0; this._talkAsks = 0;
+    this._down = { x: 0, y: 0, t: 0, maxD: 0 };
     this.setViewport(opts.width || 1280, opts.height || 720, opts.ins || null);
     this.bo.lookX = this.layout.play.x + this.layout.play.w / 2; this.bo.lookY = this.layout.play.y + this.layout.play.h / 2;
   }
@@ -307,7 +344,7 @@
     this.level = clamp(i | 0, 0, this.levels.length - 1);
     this.topic = this.levels[this.level];
     this.weather = this.level;
-    this.round = 0; this.levelStars = 0;
+    this.round = 0; this.levelStars = 0; this.levelStartTime = this.time;
     this.items = []; this.baskets = []; this.cur = null; this.held = null; this.talk = null; this.talkAnswered = null;
     this.interactive = false;
     this._setState('intro');
@@ -323,7 +360,7 @@
     var rr = new DN.RNG(rseed);
     var cur = DN.Content.makeRound(this.topic, { age: this.age, lang: this.lang, rng: rr, roundIndex: this.round, layout: this.layout });
     this.cur = cur;
-    this.roundMistakes = 0; this.held = null; this._idleT = 0; this._roundEnded = false; this.interactive = false;
+    this.roundMistakes = 0; this.held = null; this._idleT = 0; this._idleGap = cfg.idleTime; this._roundEnded = false; this.interactive = false;
     this.baskets = cur.baskets.map(function (b) {
       return { id: b.id, label: b.label, need: b.need !== undefined ? b.need : null, count: 0, reserved: 0,
         x: b.x, y: b.y, w: b.w, h: b.h, squash: 0, _sqv: 0, shake: 0, _shakeT: -1, glow: 0, _glowT: 0,
@@ -359,7 +396,9 @@
     this.interactive = false;
     this._setState('roundDone');
     this._mood('cheer');
-    this._emit({ type: 'roundDone', stars: st, mistakes: m });
+    var ev = { type: 'roundDone', stars: st, mistakes: m };
+    if (this.cur.mode === 'count') { ev.count = this.baskets[0].need; ev.need = this.baskets[0].need; }   // Bo says "N! Great!"
+    this._emit(ev);
   };
 
   P._leaveAll = function () {
@@ -377,7 +416,8 @@
   P._startTalk = function () {
     var rr = new DN.RNG((this.rng.next() * 4294967296) >>> 0);
     this.talk = DN.Content.makeTalk(this.topic, { age: this.age, lang: this.lang, rng: rr });
-    this.talkAnswered = null;
+    this.talk.glowAnswer = false;
+    this.talkAnswered = null; this._talkAskT = 0; this._talkAsks = 0;
     this._setState('talk');
     this._emit({ type: 'talk', talk: this.talk });
   };
@@ -415,18 +455,30 @@
     this.items.splice(this.items.indexOf(best), 1); this.items.push(best);   // draw on top
     best.state = 'drag'; best.t = 0; best._f = null;
     best._offX = (best.x - x) * cfg.grabKeep; best._offY = (best.y - y) * cfg.grabKeep;
-    this.held = best.id; this._idleT = 0;
+    this.held = best.id; this._idleT = 0; this._idleGap = cfg.idleTime;
+    this._down.x = x; this._down.y = y; this._down.t = this.time; this._down.maxD = 0;
     this._emit({ type: 'grab', id: best.id, nameKind: best.nameKind, nameValue: best.nameValue });
     return best.id;
   };
-  P.pointerMove = function (x, y) { this.finger.x = x; this.finger.y = y; };
+  P.pointerMove = function (x, y) {
+    this.finger.x = x; this.finger.y = y;
+    if (this.held) this._down.maxD = Math.max(this._down.maxD, hyp(x - this._down.x, y - this._down.y));
+  };
   P.pointerUp = function (x, y) {
     if (x !== undefined) { this.finger.x = x; this.finger.y = y; }
     this.finger.down = false;
     if (!this.held) return;
     var it = this.itemById(this.held);
     this.held = null;
-    if (it && it.state === 'drag') this._drop(it, this.finger.x, this.finger.y);
+    if (!it || it.state !== 'drag') return;
+    var cfg = this.cfg, d = Math.max(this._down.maxD, hyp(this.finger.x - this._down.x, this.finger.y - this._down.y));
+    if (d < cfg.tapMovePx && this.time - this._down.t < cfg.tapTime) {
+      // C1 tap guard: a quick tap is "what is this?", never a drop — no drop/miss/wrong/hint, no misses++
+      this._planReturn(it, 'tap');
+      this._emit({ type: 'tap', id: it.id, nameKind: it.nameKind, nameValue: it.nameValue });
+      return;
+    }
+    this._drop(it, this.finger.x, this.finger.y);
   };
   P.cancelDrag = function () {
     this.finger.down = false;
@@ -480,12 +532,16 @@
     }
   };
 
-  P._autoHint = function (it) {
-    if (it.misses >= this.cfg.hintAfterMisses) this._glow(this.basketById(it.answer));
+  P._autoHint = function (it) {   // C2: never while that nest still glows, nor within hintCooldown s of the last hint
+    if (it.misses < this.cfg.hintAfterMisses) return;
+    var b = this.basketById(it.answer);
+    if (!b || b._glowT > 0 || this.time - this._lastHintT < this.cfg.hintCooldown) return;
+    this._glow(b);
   };
   P._glow = function (b) {
     if (!b) return null;
     b._glowT = this.cfg.hintTime;
+    this._lastHintT = this.time;
     this._mood('think');
     this._emit({ type: 'hint', basketId: b.id });
     return b.id;
@@ -497,7 +553,10 @@
       var c = this.items[i];
       if (c.state === 'idle' || c.state === 'return' || c.state === 'appear') { it = c; break; }
     }
-    return it ? this._glow(this.basketById(it.answer)) : null;
+    if (!it) return null;
+    var b = this.basketById(it.answer);
+    if (b && b._glowT > 0) return b.id;          // already glowing: no repeated event / voice line
+    return this._glow(b);
   };
 
   // ---------------------------------------------------------------- trajectories
@@ -526,10 +585,10 @@
   };
 
   P._planReturn = function (it, kind) {
-    var cfg = this.cfg, wrong = kind === 'wrong';
-    var T = wrong ? cfg.wrongReturnTime : cfg.missReturnTime;
+    var cfg = this.cfg, wrong = kind === 'wrong', tap = kind === 'tap';
+    var T = wrong ? cfg.wrongReturnTime : tap ? cfg.tapReturnTime : cfg.missReturnTime;
     if (it.state === 'return' && it._f && it._retKind === kind) T = Math.max(0.15, it._f.T - it._f.tau);
-    it._f = arc(it, it.homeX, it.homeY, T, wrong ? cfg.wrongApex : cfg.missApex, 0);
+    it._f = arc(it, it.homeX, it.homeY, T, wrong ? cfg.wrongApex : tap ? cfg.tapApex : cfg.missApex, 0);
     it._f.size1 = it.size;
     it._retKind = kind;
     it.state = 'return'; it.t = 0;
@@ -555,8 +614,9 @@
       case 'round':
         if (this.interactive && !this.held) {
           this._idleT += h;
-          if (this._idleT >= cfg.idleTime) {
+          if (this._idleT >= this._idleGap - 1e-9) {
             this._idleT = 0; this._mood('think');
+            this._idleGap = Math.min(cfg.idleMax, this._idleGap * cfg.idleBackoff);   // C4: 12 → 18 → 27 → 30 s
             this._emit({ type: 'idle', promptKey: this.cur.promptKey, params: this.cur.params });
           }
         }
@@ -565,11 +625,18 @@
         if (this.stateTime >= cfg.leaveDelay && this.stateTime - h < cfg.leaveDelay) this._leaveAll();
         if (this.stateTime >= cfg.roundDoneTime) {
           this.round++;
-          if (this.round < this.roundsPerLevel) this._beginRound(); else this._startTalk();
+          var long = this.round >= cfg.chapterMinRounds && this.time - this.levelStartTime > cfg.chapterTimeLimit;   // C3
+          if (this.round < this.roundsPerLevel && !long) this._beginRound(); else this._startTalk();
         }
         break;
       case 'talk':
-        if (this.talkAnswered && this.stateTime >= cfg.talkAfterAnswer) this._levelDone();
+        if (this.talkAnswered) { if (this.stateTime >= cfg.talkAfterAnswer) this._levelDone(); break; }
+        this._talkAskT += h;
+        if (this._talkAskT >= cfg.talkAskTime - 1e-9) {
+          this._talkAskT = 0; this._talkAsks++;
+          if (this._talkAsks >= cfg.talkGlowAfterAsks) this.talk.glowAnswer = true;
+          this._emit({ type: 'talkAsk', talk: this.talk, n: this._talkAsks, glowAnswer: this.talk.glowAnswer });
+        }
         break;
       case 'levelDone':
         if (this.stateTime >= cfg.levelDoneTime) {

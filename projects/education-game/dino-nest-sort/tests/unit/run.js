@@ -115,8 +115,8 @@ test('content: palette, age topics and word tables exactly as DESIGN §3/§5.1',
   assert.deepStrictEqual(J(DN.PALETTE.red), { fill: '#E84A4A', dark: '#A8282E' });
   assert.deepStrictEqual(J(DN.PALETTE.cream), { fill: '#FFF4DC', dark: '#C9A877' });
   assert.deepStrictEqual(Object.keys(DN.PALETTE), ['red', 'blue', 'yellow', 'green', 'orange', 'purple', 'cream']);
-  assert.deepStrictEqual(J(DN.AGE_TOPICS), { 3: ['colors', 'shapes', 'size', 'homes'], 4: ['colors', 'shapes', 'count', 'homes'],
-    5: ['shapes', 'count', 'letters', 'homes'], 6: ['lower', 'initial', 'add', 'count'], 7: ['add', 'sub', 'initial', 'oddeven'] });
+  assert.deepStrictEqual(J(DN.AGE_TOPICS), { 3: ['colors', 'size', 'shapes', 'homes'], 4: ['colors', 'count', 'shapes', 'homes'],
+    5: ['count', 'letters', 'shapes', 'homes'], 6: ['count', 'initial', 'lower', 'add'], 7: ['initial', 'add', 'sub', 'oddeven'] });
   assert.deepStrictEqual(J(DN.Content.topicsFor(9)), J(DN.AGE_TOPICS[7]));
   const en = DN.WORDS.en.map(w => w.word + ' ' + w.initial).join(' · ');
   assert.strictEqual(en, 'apple A · bear B · bat B · bird B · banana B · cat C · cow C · duck D · fish F · frog F · hen H · owl O · orange O · rabbit R · sheep S · squirrel S · strawberry S');
@@ -155,12 +155,14 @@ test('content: every topic × age × 1000 seeds → valid, completable rounds wi
         break;
       }
       case 'size':
-        assert.strictEqual(n, 2); assert.strictEqual(r.items.length, 4);
-        assert.strictEqual(new Set(r.items.map(i => i.color)).size, 1);
+        assert.strictEqual(n, 2);
+        if (ri === 0) assert.strictEqual(r.items.length, 2);
+        else { assert.ok(r.items.length >= 4 && r.items.length <= 5); for (const b of r.baskets) assert.ok(per[b.id].length >= 2 && per[b.id].length <= 3); }
+        assert.ok(new Set(r.items.map(i => i.color)).size <= (ri >= 2 ? 2 : 1));
         for (const it of r.items) assert.strictEqual(it.scale, sizeOK[it.nameValue]);
         break;
       case 'homes': {
-        assert.strictEqual(n, age === 3 ? 2 : age === 4 ? 3 : 4, ctx);
+        assert.strictEqual(n, age === 3 ? 2 : 3, ctx);
         const H2 = { pond: ['fish', 'frog', 'duck'], tree: ['bird', 'owl', 'squirrel'], field: ['rabbit', 'cow', 'sheep', 'hen'], cave: ['bat', 'bear'] };
         for (const b of r.baskets) for (const it of per[b.id]) { assert.ok(H2[b.label.value].includes(it.nameValue)); assert.notStrictEqual(it.nameValue, 'cat'); }
         assert.strictEqual(new Set(r.items.map(i => i.nameValue)).size, r.items.length);
@@ -168,9 +170,9 @@ test('content: every topic × age × 1000 seeds → valid, completable rounds wi
       }
       case 'count': {
         assert.strictEqual(r.mode, 'count'); assert.strictEqual(n, 1);
-        const N = r.baskets[0].need, hi = { 3: 5, 4: 5, 5: 10, 6: 12, 7: 12 }[age];
-        assert.ok(N >= 1 && N <= hi, ctx);
-        if (ri === 0) assert.ok(N <= 3);
+        const N = r.baskets[0].need, lo = { 3: 1, 4: 1, 5: 3, 6: 4, 7: 4 }[age], hi = { 3: 5, 4: 5, 5: 10, 6: 12, 7: 12 }[age];
+        if (ri === 0) assert.ok(age >= 6 ? N >= 2 && N <= 4 : N >= 1 && N <= 3, ctx);
+        else assert.ok(N >= Math.max(2, lo) && N <= hi, ctx);
         assert.strictEqual(r.items.length, N + (N <= 3 ? 3 : 2));
         assert.deepStrictEqual(J(r.params), { n: N, fruit: r.params.fruit });
         assert.strictEqual(new Set(r.items.map(i => i.sprite)).size, 1);
@@ -255,7 +257,7 @@ test('layout: §2 formulas, short-side rule', () => {
   assert.deepStrictEqual([L.bubble.x, L.bubble.y, L.bubble.h], [L.bo.x + 85, 24, 104]);
   assert.strictEqual(L.bubble.w, Math.min(620, 1280 - L.bubble.x - 0 - 150));
   assert.deepStrictEqual([L.play.x, L.play.y, L.play.x + L.play.w], [44 + 40, 225 + 10, 1280 - 40]);
-  assert.ok(Math.abs(L.play.y + L.play.h - (L.nest.y - 0.39 * L.nest.h - 24)) < 1e-9);
+  assert.ok(Math.abs(L.play.y + L.play.h - (L.nest.y - 0.39 * L.nest.h - 44)) < 1e-9);
   const Lp = DN.World.computeLayout(720, 1556, { top: 44, bottom: 30, left: 0, right: 0 }, 2);
   assert.deepStrictEqual([Lp.bo.y, Lp.bo.h], [44 + 245, 190]);
 });
@@ -364,14 +366,15 @@ test('drag: critically damped follow (no overshoot) and pendulum tilt that swing
   assert.ok(hyp(it.x - tx0, it.y - ty0) < 0.5, 'lifted 10 px above the finger target');
   assert.ok(it.lift > 0.99);
   // fast swipe right 400 px in 0.25 s, then stop
+  const sg = fx0 < w.layout.W / 2 ? 1 : -1;     // swipe 400 px towards the middle
   const n = 30; let maxX = -1e9, rots = [];
-  for (let i = 1; i <= n; i++) { w.pointerMove(fx0 + 400 * i / n, fy0); w.update(H); }
-  const tx = fx0 + 400 + it._offX;
-  run(w, 3, () => { maxX = Math.max(maxX, it.x); rots.push(it.rot); });
-  assert.ok(maxX <= tx + 0.5, 'no positional overshoot ' + (maxX - tx));
+  for (let i = 1; i <= n; i++) { w.pointerMove(fx0 + sg * 400 * i / n, fy0); w.update(H); }
+  const tx = fx0 + sg * 400 + it._offX;
+  run(w, 3, () => { maxX = Math.max(maxX, sg * it.x); rots.push(sg * it.rot); });
+  assert.ok(maxX <= sg * tx + 0.5, 'no positional overshoot ' + (maxX - sg * tx));
   assert.ok(Math.abs(it.x - tx) < 0.1);
   const minRot = Math.min(...rots), maxRot = Math.max(...rots);
-  assert.ok(minRot < -0.2 && minRot >= -0.45 - 0.2, 'tilts back while moving right: ' + minRot);
+  assert.ok(minRot < -0.2 && minRot >= -0.45 - 0.2, 'tilts back against the motion: ' + minRot);
   assert.ok(maxRot > 0.03, 'swings past vertical (pendulum): ' + maxRot);
   let crossings = 0; for (let i = 1; i < rots.length; i++) if (Math.sign(rots[i]) !== Math.sign(rots[i - 1]) && Math.abs(rots[i] - rots[i - 1]) > 1e-6) crossings++;
   assert.ok(crossings >= 2, 'swings at least twice: ' + crossings);
@@ -507,14 +510,16 @@ test('grab rules: generous radius, one held item, no grabbing appear/fly/in, re-
   assert.strictEqual(w.items[w.items.length - 1], o2, 'held item drawn last');
 });
 
-test('nest drop zone: +30 px sides, +90 px up; overlapping zones pick the nearest nest', () => {
+test('nest drop zone: +45 px sides/bottom, +90 px up; overlapping zones pick the nearest nest', () => {
   const w = mkWorld({ seed: 11, age: 5, vp: VIEWPORTS[1] });   // 960 wide: 4 nests 24 px apart → zones overlap
   roundOf(w, 'colors', 1); settleAppear(w);
   const b = w.baskets[0], top = b.y - 0.39 * b.h;
   assert.strictEqual(w.nestAt(b.x, top - 89), b);
   assert.strictEqual(w.nestAt(b.x, top - 91), null);
-  assert.strictEqual(w.nestAt(b.x - b.w / 2 - 29, b.y), b);
-  assert.strictEqual(w.nestAt(b.x - b.w / 2 - 31, b.y), null);
+  assert.strictEqual(w.nestAt(b.x - b.w / 2 - 44, b.y), b);
+  assert.strictEqual(w.nestAt(b.x - b.w / 2 - 46, b.y), null);
+  assert.strictEqual(w.nestAt(b.x, top + b.h + 44), b);
+  assert.strictEqual(w.nestAt(b.x, top + b.h + 46), null);
   const b1 = w.baskets[1], mid = (b.x + b1.x) / 2;
   assert.strictEqual(w.nestAt(mid - 1, b.y), b); assert.strictEqual(w.nestAt(mid + 1, b.y), b1);
 });
@@ -620,26 +625,27 @@ test('help: 2 misses on the same item → auto hint (glow 3 s); hint() for held 
   assert.strictEqual(w.drainEvents().filter(x => x.type === 'hint')[0].basketId, o.answer);
 });
 
-test('idle: event every 12 s without a grab (with promptKey/params), reset by a grab', () => {
+test('idle: nudges after 12 s, then back off ×1.5 (18, 27, 30 cap); reset by a grab and by a new round', () => {
   const w = mkWorld({ seed: 41, age: 4 });
   roundOf(w, 'count', 2); settleAppear(w); w.drainEvents();
   const times = []; let t = 0;
-  run(w, 30, () => { t += H; for (const e of w.drainEvents()) if (e.type === 'idle') { times.push(t); assert.strictEqual(e.promptKey, 'p.count'); assert.deepStrictEqual(J(e.params), J(w.cur.params)); } });
-  assert.strictEqual(times.length, 2);
-  assert.ok(Math.abs(times[0] - 12) < 3 * H && Math.abs(times[1] - 24) < 3 * H);
+  run(w, 130, () => { t += H; for (const e of w.drainEvents()) if (e.type === 'idle') { times.push(t); assert.strictEqual(e.promptKey, 'p.count'); assert.deepStrictEqual(J(e.params), J(w.cur.params)); } });
+  const want = [12, 30, 57, 87, 117];
+  assert.strictEqual(times.length, want.length, JSON.stringify(times));
+  times.forEach((x, i) => assert.ok(Math.abs(x - want[i]) < 4 * H, x + ' vs ' + want[i]));
   const it = idleItems(w)[0]; w.pointerDown(it.x, it.y); run(w, 20);
   assert.ok(!w.drainEvents().some(e => e.type === 'idle'), 'no idle while holding');
   w.cancelDrag(); run(w, 11);
   assert.ok(!w.drainEvents().some(e => e.type === 'idle'));
   run(w, 1.2);
-  assert.ok(w.drainEvents().some(e => e.type === 'idle'));
+  assert.ok(w.drainEvents().some(e => e.type === 'idle'), 'grab reset the gap to 12 s');
 });
 
-test('state machine: timings intro 1.8 / roundDone 2.0 / talk +1.6 / levelDone 2.4 → sessionDone', () => {
+test('state machine: timings intro 1.8 / roundDone 1.7 / talk +1.6 / levelDone 2.0 → sessionDone (4 rounds)', () => {
   const w = mkWorld({ seed: 50, age: 3 });
   w.newSession();
   const ev0 = w.drainEvents();
-  assert.deepStrictEqual(J(ev0[0]), { type: 'session', levels: ['colors', 'shapes', 'size', 'homes'] });
+  assert.deepStrictEqual(J(ev0[0]), { type: 'session', levels: ['colors', 'size', 'shapes', 'homes'] });
   assert.deepStrictEqual(J(ev0[1]), { type: 'level', level: 0, topic: 'colors' });
   assert.strictEqual(w.state, 'intro');
   let t = 0; while (w.state === 'intro') { w.update(H); t += H; }
@@ -648,14 +654,14 @@ test('state machine: timings intro 1.8 / roundDone 2.0 / talk +1.6 / levelDone 2
   assert.deepStrictEqual(J(re), { type: 'round', round: 0, topic: 'colors', mode: 'sort', promptKey: 'p.colors', params: {} });
   for (let lvl = 0; lvl < 4; lvl++) {
     if (lvl > 0) { while (w.state === 'intro') w.update(H); }
-    for (let r = 0; r < 5; r++) {
+    for (let r = 0; r < 4; r++) {
       assert.strictEqual(w.state, 'round'); assert.strictEqual(w.round, r);
       settleAppear(w); solveRound(w);
       assert.strictEqual(w.state, 'roundDone');
       t = 0; let left = null;
       while (w.state === 'roundDone') { w.update(H); t += H; if (left === null && w.items.length && w.items.every(i => i.state === 'leave')) left = t; }
-      assert.ok(Math.abs(t - 2.0) < 2 * H, 'roundDone ' + t);
-      assert.ok(Math.abs(left - 1.2) < 2 * H, 'leave at 1.2 s');
+      assert.ok(Math.abs(t - 1.7) < 2 * H, 'roundDone ' + t);
+      assert.ok(Math.abs(left - 1.0) < 2 * H, 'leave at 1.0 s');
     }
     assert.strictEqual(w.state, 'talk');
     const te = w.drainEvents().find(e => e.type === 'talk');
@@ -668,17 +674,17 @@ test('state machine: timings intro 1.8 / roundDone 2.0 / talk +1.6 / levelDone 2
       assert.ok(Math.abs(t - 1.6) < 2 * H);
     }
     const ld = w.drainEvents().find(e => e.type === 'levelDone');
-    assert.deepStrictEqual(J(ld), { type: 'levelDone', level: lvl, stars: lvl === 2 ? 15 : 16 });
+    assert.deepStrictEqual(J(ld), { type: 'levelDone', level: lvl, stars: lvl === 2 ? 12 : 13 });
     t = 0; while (w.state === 'levelDone') { w.update(H); t += H; }
-    assert.ok(Math.abs(t - 2.4) < 2 * H);
+    assert.ok(Math.abs(t - 2.0) < 2 * H);
     assert.strictEqual(w.weather, lvl === 3 ? 3 : lvl + 1);
   }
   assert.strictEqual(w.state, 'sessionDone');
-  assert.deepStrictEqual(J(w.drainEvents().find(e => e.type === 'sessionDone')), { type: 'sessionDone', stars: 63 });
+  assert.deepStrictEqual(J(w.drainEvents().find(e => e.type === 'sessionDone')), { type: 'sessionDone', stars: 51 });
   run(w, 5); assert.strictEqual(w.state, 'sessionDone');
   w.setAge(7); w.setLang('vi'); assert.strictEqual(w.age, 3, 'age applies at newSession');
   w.newSession(); assert.deepStrictEqual([w.age, w.lang, w.stars, w.state], [7, 'vi', 0, 'intro']);
-  w.startLevel(2); assert.deepStrictEqual([w.level, w.topic, w.weather, w.state], [2, 'initial', 2, 'intro']);
+  w.startLevel(2); assert.deepStrictEqual([w.level, w.topic, w.weather, w.state], [2, 'sub', 2, 'intro']);
 });
 
 test('Bo: moods on events, cheer hops, looks at the held item', () => {
@@ -696,6 +702,122 @@ test('Bo: moods on events, cheer hops, looks at the held item', () => {
   assert.ok(maxHop > 20);
 });
 
+test('C1 tap guard: a quick tap is not a drop (tap event, quiet return, no misses/hint); a drag still counts', () => {
+  for (const vp of [VIEWPORTS[3], VIEWPORTS[8], VIEWPORTS[0]]) {
+    const w = mkWorld({ seed: 60, age: 5, vp });
+    roundOf(w, 'colors', 1); settleAppear(w); w.drainEvents();
+    for (const it of w.items.slice()) {
+      const hx = it.homeX, hy = it.homeY;
+      assert.strictEqual(w.pointerDown(it.x + 5, it.y - 4), it.id);
+      w.pointerMove(it.x + 15, it.y); run(w, 0.15); w.pointerUp(it.x + 15, it.y);
+      const ev = w.drainEvents();
+      assert.deepStrictEqual(ev.map(e => e.type), ['grab', 'tap']);
+      assert.deepStrictEqual(J(ev[1]), { type: 'tap', id: it.id, nameKind: it.nameKind, nameValue: it.nameValue });
+      assert.strictEqual(it.misses, 0); assert.strictEqual(it.state, 'return');
+      run(w, 0.4);
+      assert.strictEqual(it.state, 'idle');
+      assert.ok(hyp(it.x - hx, it.y - hy) <= 3.01);
+    }
+    assert.strictEqual(w.roundMistakes, 0);
+    assert.ok(w.items.every(i => i.state === 'idle'));
+  }
+  // held longer than 0.35 s, or moved ≥ 24 px → a real drop
+  const w = mkWorld({ seed: 61, age: 5 });
+  roundOf(w, 'colors', 1); settleAppear(w); w.drainEvents();
+  let it = idleItems(w)[0];
+  w.pointerDown(it.x, it.y); run(w, 0.4); w.pointerUp(it.x, it.y);
+  assert.ok(w.drainEvents().some(e => e.type === 'miss'), 'long hold in place = miss');
+  run(w, 0.6);
+  it = idleItems(w)[0];
+  const b = w.basketById(it.answer), p = nestPoint(b, w.cfg);
+  w.pointerDown(it.x, it.y);
+  for (let i = 1; i <= 12; i++) { w.pointerMove(it.x + (p.x - it.x) * i / 12, it.y + (p.y - it.y) * i / 12); w.update(H); }   // 0.1 s flick
+  w.pointerUp(p.x, p.y);
+  assert.ok(w.drainEvents().some(e => e.type === 'correct'), 'quick flick into the nest counts');
+  // moving away and back within 0.35 s is not a tap either
+  run(w, 0.6); it = idleItems(w)[0];
+  w.pointerDown(it.x, it.y); w.pointerMove(it.x + 80, it.y); w.update(H); w.pointerMove(it.x, it.y); w.update(H); w.pointerUp(it.x, it.y);
+  assert.ok(!w.drainEvents().some(e => e.type === 'tap'));
+});
+
+test('C2 hint cooldown: no auto-hint while the nest glows or within 6 s of the last hint', () => {
+  const w = mkWorld({ seed: 62, age: 5 });
+  roundOf(w, 'colors', 1); settleAppear(w);
+  const it = idleItems(w)[0], e = emptyPoint(w), hints = [];
+  let t = 0;
+  for (let k = 0; k < 14; k++) {      // 14 misses on the same item, one every ≈ 0.85 s
+    dragTo(w, it, e.x + 40, e.y);
+    const n = Math.round(0.3 / H);
+    for (let i = 0; i < n; i++) w.update(H);
+    t = w.time;
+    for (const x of w.drainEvents()) if (x.type === 'hint') hints.push(t);
+  }
+  assert.ok(it.misses === 14);
+  assert.ok(hints.length >= 2 && hints.length <= 3, 'hints ' + hints.length);
+  for (let i = 1; i < hints.length; i++) assert.ok(hints[i] - hints[i - 1] >= 6 - 1e-6);
+});
+
+test('C3 chapter time limit: after ≥ 3 rounds a chapter longer than 75 s goes to Talk time', () => {
+  const w = mkWorld({ seed: 63, age: 4 });
+  w.newSession();
+  while (w.state === 'intro') w.update(H);
+  let rounds = 0;
+  while (w.state !== 'talk') {
+    if (w.state === 'round') { settleAppear(w); run(w, 30); solveRound(w); rounds++; }   // a slow kid: 30 s idle per round
+    w.update(H);
+  }
+  assert.strictEqual(rounds, 3, 'slow chapter stops after 3 rounds');
+  assert.ok(w.time - w.levelStartTime > 75);
+  const w2 = mkWorld({ seed: 63, age: 4 });
+  w2.newSession(); while (w2.state === 'intro') w2.update(H);
+  rounds = 0;
+  while (w2.state !== 'talk') { if (w2.state === 'round') { settleAppear(w2); solveRound(w2); rounds++; } w2.update(H); }
+  assert.strictEqual(rounds, 4, 'a quick chapter keeps all 4 rounds');
+});
+
+test('talk re-ask: talkAsk every 12 s without an answer; glowAnswer from the 2nd re-ask', () => {
+  const w = mkWorld({ seed: 64, age: 3 });
+  roundOf(w, 'size', 1); w._startTalk(); w.drainEvents();
+  assert.strictEqual(w.talk.glowAnswer, false);
+  const asks = []; let t = 0;
+  run(w, 40, () => { t += H; for (const e of w.drainEvents()) if (e.type === 'talkAsk') asks.push({ t, n: e.n, g: e.glowAnswer, talk: e.talk }); });
+  assert.deepStrictEqual(asks.map(a => a.n), [1, 2, 3]);
+  asks.forEach((a, i) => assert.ok(Math.abs(a.t - 12 * (i + 1)) < 3 * H));
+  assert.deepStrictEqual(asks.map(a => a.g), [false, true, true]);
+  assert.strictEqual(asks[0].talk, w.talk); assert.strictEqual(w.talk.glowAnswer, true);
+  w.talkAnswer(w.talk.answerId); run(w, 1.5);
+  assert.ok(!w.drainEvents().some(e => e.type === 'talkAsk'), 'no re-ask after an answer');
+});
+
+test('count rounds: roundDone carries count/need = N', () => {
+  const w = mkWorld({ seed: 65, age: 5 });
+  roundOf(w, 'count', 2); settleAppear(w);
+  const N = w.baskets[0].need; w.drainEvents();
+  solveRound(w);
+  const rd = w.drainEvents().find(e => e.type === 'roundDone');
+  assert.deepStrictEqual([rd.count, rd.need, rd.stars], [N, N, 3]);
+  const w2 = mkWorld({ seed: 65, age: 5 }); roundOf(w2, 'colors', 1); settleAppear(w2); solveRound(w2);
+  const r2 = w2.drainEvents().find(e => e.type === 'roundDone');
+  assert.ok(!('count' in r2));
+});
+
+test('content variety: initial talk answers ~uniform; age-5 homes 3 of 4; size rounds vary', () => {
+  for (const lang of ['en', 'vi']) {
+    const cnt = {};
+    for (let s = 1; s <= 3000; s++) { const t = DN.Content.makeTalk('initial', { age: 7, lang, rng: new DN.RNG(s) }); const a = t.choices.find(c => c.id === t.answerId).value; cnt[a] = (cnt[a] || 0) + 1; }
+    const v = Object.values(cnt); assert.strictEqual(v.length, 9);
+    assert.ok(Math.max(...v) / 3000 < 0.15, lang + ' ' + JSON.stringify(cnt));
+  }
+  const sets = new Set(), sizes = new Set();
+  for (let s = 1; s <= 200; s++) {
+    sets.add(DN.Content.makeRound('homes', { age: 5, rng: new DN.RNG(s), roundIndex: 2 }).baskets.map(b => b.label.value).sort().join());
+    const r = DN.Content.makeRound('size', { age: 3, rng: new DN.RNG(s), roundIndex: 1 + (s % 4) });
+    sizes.add(r.items.length + ':' + new Set(r.items.map(i => i.color)).size);
+  }
+  assert.strictEqual(sets.size, 4);
+  assert.ok(sizes.size >= 4, JSON.stringify([...sizes]));
+});
+
 // ======================================================= sessions / bot / determinism
 test('determinism: same seed + same inputs → identical event stream and state', () => {
   const a = playSession(77, 5, 0.6, { keep: true }), b = playSession(77, 5, 0.6, { keep: true });
@@ -711,13 +833,15 @@ test('bot: full session reaches sessionDone for every age, both languages, sever
     const lens = [];
     for (let s = 1; s <= 3; s++) {
       const vp = VIEWPORTS[(s + age) % VIEWPORTS.length];
-      const r = playSession(s * 100 + age, age, skill, { lang: s % 2 ? 'en' : 'vi', vp });
+      let rounds = 0;
+      const r = playSession(s * 100 + age, age, skill, { lang: s % 2 ? 'en' : 'vi', vp, each: (w, ev) => { for (const e of ev) if (e.type === 'roundDone') rounds++; } });
       assert.strictEqual(r.w.state, 'sessionDone', 'age ' + age + ' skill ' + skill);
-      assert.ok(r.w.stars >= 20 && r.w.stars <= 64);
+      assert.ok(rounds >= 12 && rounds <= 16, 'rounds ' + rounds);
+      assert.ok(r.w.stars >= rounds && r.w.stars <= 3 * rounds + 4);
       lens.push(r.t);
       if (skill === 1) {
         assert.strictEqual(r.bot.stats.wrong, 0); assert.strictEqual(r.bot.stats.misses, 0);
-        assert.strictEqual(r.w.stars, 64, 'perfect bot gets every star');
+        assert.strictEqual(r.w.stars, 3 * rounds + 4, 'perfect bot gets every star');
         assert.strictEqual(r.bot.stats.talkRight, 4);
       } else assert.ok(r.bot.stats.wrong + r.bot.stats.misses > 0);
       assert.strictEqual(r.bot.stats.talks, 4);

@@ -95,7 +95,8 @@
     },
 
     /* ---------- Talk time ---------- */
-    openTalk(talk, lang, onChoice, mic) {
+    openTalk(talk, lang, onChoice, mic, age) {
+      this._age = age || 4;
       $('talkTitle').textContent = T(lang, 'talk.intro').split(/[!.?]/)[0] + '!';
       $('talkQ').textContent = T(lang, talk.promptKey, talk.params || {});
       this.only('scrTalk');
@@ -110,8 +111,8 @@
           requestAnimationFrame(() => DN.Renderer.preview(cv, visual));
           const sm = document.createElement('small'); sm.textContent = NAME(lang, c.kind, c.value); b.appendChild(sm);
         } else {
-          b.textContent = c.kind === 'parity' || c.kind === 'size' ? NAME(lang, c.kind, c.value) : String(c.value);
-          if (c.kind === 'parity' || c.kind === 'size') b.style.fontSize = '26px';
+          b.textContent = c.kind === 'parity' ? NAME(lang, c.kind, c.value) : String(c.value);
+          if (c.kind === 'parity') b.style.fontSize = '26px';
         }
         b.addEventListener('click', () => onChoice(c.id));
         box.appendChild(b);
@@ -128,8 +129,13 @@
         case 'home': return { sprite: 'home_' + c.value };
         case 'animal': return { sprite: 'animal_' + c.value };
         case 'fruit': return { sprite: 'fruit_' + c.value };
+        case 'size': return { sprite: 'egg_plain', scale: c.value === 'big' ? 1 : 0.55 };   // pictures, no reading needed
+        case 'number': return this._age <= 5 && c.value >= 1 && c.value <= 10 ? { dots: +c.value, text: String(c.value) } : null;
         default: return null;
       }
+    },
+    glowTalk(answerId) {
+      [...$('talkChoices').children].forEach(b => { if (b.dataset.id === String(answerId)) b.classList.add('glow'); });
     },
     markTalk(choiceId, answerId) {
       [...$('talkChoices').children].forEach(b => {

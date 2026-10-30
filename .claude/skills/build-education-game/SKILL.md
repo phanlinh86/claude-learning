@@ -43,7 +43,14 @@ Ask no questions; it must run unattended (also from a scheduled task).
 - Huge touch targets (items ≥ 100 logical px at short side 720, hit radius = 0.6 × size + 14, drop zones +30 px sides and
   +90 px upwards — kids drop high). One active finger; extra fingers are ignored.
 - Every generated round must be completable (the generator self-checks); the first chapter at the default age is trivially easy.
-- Short sessions: 4 chapters × 5 rounds (~5–8 minutes) then a celebration and "Play again" with new random content.
+- Short sessions: 4 chapters × 4 rounds (target 60–100 s per chapter for a toddler, session ≤ 8 min) with a chapter time
+  limit (after ≥ 3 rounds, go to Talk time once the chapter passes 75 s), then a celebration and "Play again".
+- Chapters easiest first for every age; content varies every round (no identical rounds); a "warm-up" first round per
+  chapter with 1 item per target.
+- **A tap is not a drop:** finger moved < 24 px and released within 0.35 s → the item hops home quietly and the helper
+  just says its name. Keep resting items ≥ 44 px above the drop zones so a tap can never land in one.
+- Hint cooldown (no new hint while one glows or within 6 s); idle nudges back off ×1.5 up to 30 s; Talk time re-asks every
+  12 s, glows the answer after the 2nd re-ask, and stops speaking after 3 (nobody may be in the room).
 - **Parent gate:** settings (age 3–7+, language, child's name, sound, music, voice, microphone) open only after holding
   the gear for 2 s. Language may also be switched on the title screen.
 - Original, gentle, kid-safe art and sound only. No ads, no network after load, no data leaves the device.
@@ -57,6 +64,7 @@ Ask no questions; it must run unattended (also from a scheduled task).
 | window edges | **safe areas**: read `env(safe-area-inset-*)` from a hidden probe element's padding, convert to logical px, pass to `World.setViewport(W, H, ins)`; HUD and bubble respect them |
 | kid-proof Ctrl+R etc. | also block pinch (`gesturestart`), double-tap zoom, long-press callout/selection, rubber-band scroll (`touchmove` preventDefault except `.scroll`), `100dvh` stage |
 | audio unlock on first click | iOS: resume AudioContext **and** play a silent buffer inside the first `touchend`/`click`; same gesture calls `speechSynthesis` once (Voice.unlock) |
+| (new) tall portrait phones | keep items in a band ≤ 0.85 × W tall just above the targets (short drags), items ×1.2 when H/W > 1.6, background layers ×1.36 so hills fill the empty sky; spread items with farthest-point sampling |
 | 1920×1080 backing cap | cap ≈ 3.2 MP on touch devices (iPad Pro / iPhone Pro), adaptive quality steps down when frames stay > 22 ms |
 | custom pictures screen | dropped; customisation = child's name + age + language |
 | blur → pause | `visibilitychange` → pause, suspend audio, stop speech |
@@ -74,6 +82,9 @@ Fonts: `ui-rounded, "SF Pro Rounded", "Arial Rounded MT Bold", "Nunito", system-
   matching; optional, tap always works; hide the mic when unsupported or permission is denied.
 - One **Talk time** question per chapter: show an item, ask (voice + text), 2–3 big picture/number choices + mic button.
 - Duck the music while the helper speaks; disable speech when `speed > 1` (tests) — log only.
+- Speech rules that survived the playtest: feedback lines interrupt, but "round done" praise and hints **queue** (otherwise
+  the final count — the most important word — is never heard); skip a new praise if one started < 1.2 s ago.
+- Talk-time choices are pictures for ages ≤ 5 (big/small eggs, numerals with dots), never words a 3-year-old must read.
 
 ## Team (launch in parallel, in the background; each prompt points at `docs/DESIGN.md`, names its files, forbids others)
 Write `docs/DESIGN.md` FIRST: layout rules for any aspect + insets, art style + exact palette (answer colours must be
@@ -119,6 +130,15 @@ After each report: fix, re-run unit + smoke + functional until green, commit.
    make it a daily scheduled task ("Run /build-education-game random 4 and deliver it").
 
 ## Pitfalls (learned)
+- **The bot bypasses the input layer.** A green bot smoke test proved nothing about fingers: in Dino Nest Sort the
+  `Input.attach` callbacks passed `(x, y)` while main read `p.x` — no child could grab anything. Functional QA must drive
+  real CDP touch events from day one, and the smoke test should include one real drag.
+- `Object.assign(DN.debug, { get mode() {…} })` copies the getter's *value*; use
+  `Object.defineProperties(obj, Object.getOwnPropertyDescriptors({...}))` for live test hooks.
+- Session-only URL flags (`?lang=`) must live in a separate override, never in the settings object that gets saved.
+- On resize/rotation: cancel any drag *and* clamp every travelling item into the new screen.
+- Lower-case l and capital I are identical in rounded fonts: drop I from lower-case rounds.
+- Colour-blind safety below age 5: never pair blue+purple or red+green in one round; labels also show the item picture.
 - iOS speaks nothing unless the first utterance happens inside a user gesture; speech recognition needs Siri/Dictation
   enabled and may be missing in home-screen mode — always keep tap answers.
 - Never speak on every event at high frequency: queue ≤ 2, drop stale lines, interrupt only for feedback.

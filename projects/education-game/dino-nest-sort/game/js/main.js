@@ -11,12 +11,15 @@
     debug: Q.get('debug') === '1', age: Q.has('age') ? qn('age', 4) : null, lang: Q.get('lang'), level: Q.has('level') ? qn('level', 0) : null,
     novoice: Q.get('novoice') === '1', botSkill: qn('skill', 0.8)
   };
-  const T = (key, p) => (DN.I18N ? DN.I18N.t(S.lang, key, Object.assign({ child: S.name || '' }, p || {})) : key);
-  const NAME = (kind, v) => (DN.I18N ? DN.I18N.name(S.lang, kind, v) : String(v));
+  const T = (key, p) => (DN.I18N ? DN.I18N.t(curLang(), key, Object.assign({ child: S.name || '' }, p || {})) : key);
+  const NAME = (kind, v) => (DN.I18N ? DN.I18N.name(curLang(), kind, v) : String(v));
 
   /* ---------- settings (URL flags never saved) ---------- */
   const DEF = { age: 4, lang: (navigator.language || 'en').toLowerCase().startsWith('vi') ? 'vi' : 'en', name: '', sfx: true, music: true, voice: true, mic: true };
   let S = Object.assign({}, DEF);
+  let langOverride = FLAGS.lang === 'vi' || FLAGS.lang === 'en' ? FLAGS.lang : null;   // URL ?lang= is session-only
+  const curLang = () => langOverride || S.lang;
+  const curAge = () => FLAGS.age || S.age;
   const saveSettings = () => DN.Storage.setJSON('settings', S);
   const progress = { totalStars: 0, sessions: 0 };
 
@@ -25,7 +28,7 @@
   let speed = FLAGS.speed, autoRestart = FLAGS.autorestart;
   let view = { W: 960, H: 720, s: 1, left: 0, top: 0, ins: { top: 0, right: 0, bottom: 0, left: 0 } };
   const stats = { sessions: 0, rounds: 0, correct: 0, wrong: 0, misses: 0, talks: 0, talkRight: 0, frames: 0, slowFrames: 0 };
-  let shownStars = 0, lastRoundEvt = null, missSay = 0, lastGrabSay = 0;
+  let shownStars = 0, lastRoundEvt = null, missSay = 0, lastGrabSay = 0, lastPraise = 0;
 
   /* ---------- sizing ---------- */
   function readInsets() {
@@ -49,7 +52,10 @@
   let quality = 1;
   function maxPixels() { return (('ontouchstart' in window) || navigator.maxTouchPoints > 0) ? 3.2e6 : 2.2e6; }
   function applySize() {
+    const prev = view;
     view = computeView();
+    // rotation while holding an item: the finger's old logical point is meaningless now → put it back quietly
+    if (world && world.cancelDrag && (prev.W !== view.W || prev.H !== view.H)) world.cancelDrag();
     const dpr = window.devicePixelRatio || 1;
     let rs = view.s * dpr * quality;
     const px = view.W * rs * view.H * rs, cap = maxPixels();
@@ -60,6 +66,14 @@
     c.style.left = view.left + 'px'; c.style.top = view.top + 'px';
     render.resize(view.W, view.H, rs);
     world.setViewport(view.W, view.H, view.ins);
+    // anything still travelling from the old layout starts inside the new screen
+    for (const it of world.items || []) {
+      if (it.state === 'in') continue;
+      const m = (it.size || 100) / 2;
+      const cx = v => Math.max(m, Math.min(view.W - m, v)), cy = v => Math.max(m, Math.min(view.H - m, v));
+      it.x = cx(it.x); it.y = cy(it.y);
+      if (it._px != null) { it._px = cx(it._px); it._py = cy(it._py); }
+    }
     weather.resize(view.W, view.H);
     placeBubble();
     updateHudStarTarget();
@@ -92,7 +106,7 @@
   }
   function applyAudio() {
     DN.Audio.setOptions({ sfx: S.sfx, music: S.music, muted: FLAGS.mute });
-    if (DN.Voice) { DN.Voice.setLang(S.lang); DN.Voice.setEnabled(voiceOn()); }
+    if (DN.Voice) { DN.Voice.setLang(curLang()); DN.Voice.setEnabled(voiceOn()); }
   }
   function promptText(e) {
     const p = Object.assign({}, e.params || {});
@@ -104,7 +118,7 @@
   /* ---------- game flow ---------- */
   function startGame() {
     DN.Audio.unlock();
-    world.setAge(FLAGS.age || S.age); world.setLang(FLAGS.lang || S.lang);
+    world.setAge(curAge()); world.setLang(curLang());
     world.newSession();
     if (FLAGS.level != null) world.startLevel(Math.max(0, Math.min(3, FLAGS.level | 0)));
     shownStars = 0; DN.UI.setStars(0);
@@ -120,7 +134,7 @@
     if (DN.Voice) DN.Voice.stop();
     DN.Audio.stopMusic();
     DN.UI.only('scrTitle'); DN.UI.show('hud', false); DN.UI.say('');
-    DN.UI.setTitleInfo(progress.totalStars, S.age, S.lang);
+    DN.UI.setTitleInfo(progress.totalStars, curAge(), curLang());
     weather.setWeather(0, {});
   }
   function pause() {
@@ -178,7 +192,10 @@
         stats.correct++;
         if (world.cur && world.cur.mode === 'count') break;      // counting speaks the number on landing
         const ev = Object.assign({ label: (basketById(e.basketId) || {}).label }, e);
-        const s1 = DN.I18N.sayCorrect ? DN.I18N.sayCorrect(S.lang, ev) : '';
+        const now = performance.now();
+        if (now - lastPraise < 1200) break;          // don't stack praise when drops come fast
+        lastPraise = now;
+        const s1 = DN.I18N.sayCorrect ? DN.I18N.sayCorrect(curLang(), ev) : '';
         speak(s1 && Math.random() < 0.65 ? s1 : T('praise'), { interrupt: true });
         break;
       }
@@ -206,7 +223,7 @@
         const b = basketById(e.basketId);
         DN.Audio.play('hint');
         if (b) render.burst('hint', b.x, b.y);
-        speak(T('hint'), { interrupt: true });
+        speak(T('hint'));                            // hints queue, they never cut each other off
         break;
       }
       case 'idle':
@@ -221,11 +238,21 @@
             delay: i * 0.22, onDone: () => { shownStars++; DN.UI.setStars(shownStars, true); DN.Audio.play('star', { i }); }
           });
         }
-        speak(T('great'), { interrupt: true });
+        speak(T('great'));                           // queued: never cuts off the last count / praise
         DN.UI.setDots(world.roundsPerLevel || 5, ((e.round != null ? e.round : world.round) % (world.roundsPerLevel || 5)) + 1);
         break;
       }
       case 'talk': openTalk(e.talk || world.talk); break;
+      case 'talkAsk': {   // no answer yet: ask again, and after the 2nd re-ask glow the right answer
+        const tk = e.talk || world.talk;
+        if (tk && e.n <= 3) speak(T(tk.promptKey, tk.params || {}), { priority: true });   // stop talking to an empty room
+        if (e.n >= 2 || (tk && tk.glowAnswer)) DN.UI.glowTalk(tk.answerId);
+        break;
+      }
+      case 'tap':         // a quick tap on an item: Bo just says its name
+        if (e.nameKind) speak(NAME(e.nameKind, e.nameValue), { interrupt: true });
+        DN.Audio.play('grab');
+        break;
       case 'talkResult': {
         stats.talks++; if (e.correct) stats.talkRight++;
         DN.UI.markTalk(e.choiceId, e.answerId);
@@ -236,7 +263,7 @@
           speak(T('talk.right'), { interrupt: true });
         } else {
           DN.Audio.play('wrong');
-          speak(DN.I18N.talkWrong ? DN.I18N.talkWrong(S.lang, ans.kind, ans.value) : T('talk.wrong', { answer: NAME(ans.kind, ans.value) }), { interrupt: true });
+          speak(DN.I18N.talkWrong ? DN.I18N.talkWrong(curLang(), ans.kind, ans.value) : T('talk.wrong', { answer: NAME(ans.kind, ans.value) }), { interrupt: true });
         }
         break;
       }
@@ -267,7 +294,7 @@
     mode = 'talk';
     if (world.cancelDrag) world.cancelDrag();
     const canMic = S.mic && DN.Voice && DN.Voice.canListen && DN.Voice.canListen() && !FLAGS.bot;
-    DN.UI.openTalk(talk, S.lang, id => { DN.Audio.play('click'); world.talkAnswer(id); }, canMic);
+    DN.UI.openTalk(talk, curLang(), id => { DN.Audio.play('click'); world.talkAnswer(id); }, canMic, curAge());
     const q = T(talk.promptKey, talk.params || {});
     speak(T('talk.intro') + ' ' + q, { interrupt: true, priority: true });
   }
@@ -277,8 +304,8 @@
     if (DN.Voice.stop) DN.Voice.stop();
     DN.Audio.play('listen');
     DN.UI.setListening(true, T('ui.listening'));
-    const choices = talk.choices.map(c => ({ id: c.id, words: DN.I18N.words(S.lang, c.kind, c.value) }));
-    DN.Voice.listen({ lang: S.lang, choices, timeoutMs: 6000 }).then(res => {
+    const choices = talk.choices.map(c => ({ id: c.id, words: DN.I18N.words(curLang(), c.kind, c.value) }));
+    DN.Voice.listen({ lang: curLang(), choices, timeoutMs: 6000 }).then(res => {
       DN.UI.setListening(false, T('ui.tapOrSay'));
       if (world.state !== 'talk') return;
       if (res && res.id != null) world.talkAnswer(res.id);
@@ -310,7 +337,7 @@
     weather.update(dt * Math.min(speed, 4), { groundY: world.layout.groundY });
     const speaking = DN.Voice && DN.Voice.isSpeaking ? DN.Voice.isSpeaking() : false;
     DN.Audio.duck(speaking);
-    render.draw(world, weather, { dt: dt * Math.min(speed, 4), lang: S.lang, title: mode === 'title' || mode === 'loading', speaking, debug: FLAGS.debug });
+    render.draw(world, weather, { dt: dt * Math.min(speed, 4), lang: curLang(), title: mode === 'title' || mode === 'loading', speaking, done: mode === 'done', debug: FLAGS.debug });
     adapt(raw);
   }
   function adapt(raw) {  // adaptive quality: step the render scale down when frames stay slow
@@ -323,10 +350,10 @@
   function toLogical(cx, cy) { return { x: (cx - view.left) / view.s, y: (cy - view.top) / view.s }; }
   function onDown(p) {
     if (mode !== 'play' || bot) return;
+    if (world.pointerDown(p.x, p.y) != null) return;           // items win over Bo's tap zone
     const L = world.layout.bo;
     // tapping Bo (or his bubble) repeats the instruction
-    if (Math.abs(p.x - L.x) < L.h * 0.45 && p.y < L.y + 10 && p.y > L.y - L.h * 1.05) { repeatPrompt(); return; }
-    world.pointerDown(p.x, p.y);
+    if (Math.abs(p.x - L.x) < L.h * 0.45 && p.y < L.y + 10 && p.y > L.y - L.h * 1.05) repeatPrompt();
   }
   function repeatPrompt() {
     if (!lastRoundEvt || world.state !== 'round') return;
@@ -339,9 +366,9 @@
     DN.Input.kidProof();
     DN.Input.attach($('game'), {
       toLogical,
-      down: onDown,
-      move: p => { if (mode === 'play' && !bot) world.pointerMove(p.x, p.y); },
-      up: p => { if (mode === 'play' && !bot) world.pointerUp(p.x, p.y); },
+      down: (x, y) => onDown({ x, y }),       // DN.Input calls handlers with (x, y, ev) in logical px
+      move: (x, y) => { if (mode === 'play' && !bot) world.pointerMove(x, y); },
+      up: (x, y) => { if (mode === 'play' && !bot) world.pointerUp(x, y); },
       cancel: () => { if (world.cancelDrag) world.cancelDrag(); }
     });
     const unlock = () => { DN.Audio.unlock(); if (DN.Voice) DN.Voice.unlock(); };
@@ -356,7 +383,7 @@
     $('btnDoneHome').addEventListener('click', () => { DN.Audio.play('click'); goTitle(); });
     $('btnMic').addEventListener('click', listen);
     document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => {
-      S.lang = b.dataset.lang; saveSettings(); DN.UI.applyLang(S.lang); applyAudio(); DN.UI.setTitleInfo(progress.totalStars, S.age, S.lang);
+      S.lang = b.dataset.lang; langOverride = null; saveSettings(); DN.UI.applyLang(curLang()); applyAudio(); DN.UI.setTitleInfo(progress.totalStars, curAge(), curLang());
       updateVoiceInfo();
       DN.Audio.play('click');
       if (mode === 'title') speak(T('ui.welcome'), { interrupt: true });
@@ -369,10 +396,10 @@
     DN.UI.bindSettings(S, k => {
       saveSettings();
       if (k === 'sfx' || k === 'music' || k === 'voice') applyAudio();
-      if (k === 'age') DN.UI.setTitleInfo(progress.totalStars, S.age, S.lang);
+      if (k === 'age') DN.UI.setTitleInfo(progress.totalStars, curAge(), curLang());
       if (k === 'name' && DN.I18N.setChild) DN.I18N.setChild(S.name);
     });
-    $('btnSettingsDone').addEventListener('click', () => { DN.Audio.play('click'); DN.UI.only('scrTitle'); DN.UI.setTitleInfo(progress.totalStars, S.age, S.lang); });
+    $('btnSettingsDone').addEventListener('click', () => { DN.Audio.play('click'); DN.UI.only('scrTitle'); DN.UI.setTitleInfo(progress.totalStars, curAge(), curLang()); });
 
     window.addEventListener('resize', onResize);
     window.addEventListener('orientationchange', () => setTimeout(applySize, 250));
@@ -391,10 +418,10 @@
   }
   function updateVoiceInfo() {
     if (!DN.Voice) return;
-    const has = DN.Voice.hasVoice ? DN.Voice.hasVoice(S.lang) : false;
+    const has = DN.Voice.hasVoice ? DN.Voice.hasVoice(curLang()) : false;
     const nm = DN.Voice.voiceName ? DN.Voice.voiceName() : '';
     const mic = DN.Voice.canListen && DN.Voice.canListen();
-    const v = has ? (S.lang === 'vi' ? 'Giọng đọc: ' : 'Voice: ') + (nm || '✓') : (S.lang === 'vi' ? 'Máy chưa có giọng tiếng Việt — vào Cài đặt › Trợ năng › Nội dung được đọc để tải giọng.' : 'No voice for this language on this device yet.');
+    const v = has ? (curLang() === 'vi' ? 'Giọng đọc: ' : 'Voice: ') + (nm || '✓') : (curLang() === 'vi' ? 'Máy chưa có giọng tiếng Việt — vào Cài đặt › Trợ năng › Nội dung được đọc để tải giọng.' : 'No voice for this language on this device yet.');
     const m = mic ? '' : ' · ' + T('ui.micUnsupported');
     DN.UI.setVoiceInfo(v + m);
   }
@@ -424,12 +451,11 @@
     await DN.Storage.init();
     S = Object.assign({}, DEF, DN.Storage.getJSON('settings', {}));
     Object.assign(progress, DN.Storage.getJSON('progress', {}));
-    DN.UI.applyLang(FLAGS.lang || S.lang);
-    if (FLAGS.lang) S.lang = FLAGS.lang;   // session only — not saved unless the parent changes it
+    DN.UI.applyLang(curLang());
     if (DN.I18N && DN.I18N.setChild) DN.I18N.setChild(S.name);
-    if (DN.Voice) DN.Voice.init({ lang: S.lang, enabled: voiceOn() });
+    if (DN.Voice) DN.Voice.init({ lang: curLang(), enabled: voiceOn() });
     render = new DN.Renderer($('game')); DN.render = render;
-    world = new DN.World({ seed: FLAGS.seed != null ? FLAGS.seed : (Date.now() & 0x7fffffff), age: FLAGS.age || S.age, lang: S.lang });
+    world = new DN.World({ seed: FLAGS.seed != null ? FLAGS.seed : (Date.now() & 0x7fffffff), age: FLAGS.age || S.age, lang: curLang() });
     weather = new DN.Weather({ width: 960, height: 720, seed: 11 });
     hooks();
     bindUI();
@@ -440,7 +466,7 @@
     applyAudio();
     if (FLAGS.bot) bot = new DN.Bot(world, { skill: FLAGS.botSkill, seed: 7 });
     DN.UI.only('scrTitle');
-    DN.UI.setTitleInfo(progress.totalStars, S.age, S.lang);
+    DN.UI.setTitleInfo(progress.totalStars, curAge(), curLang());
     mode = 'title';
     requestAnimationFrame(frame);
     if (FLAGS.autostart) startGame();

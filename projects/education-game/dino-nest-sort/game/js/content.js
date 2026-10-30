@@ -12,8 +12,8 @@
  *
  * Warm-up rule (small deviation, see MECHANICS.md): roundIndex 0 of every chapter
  * uses 1 item per nest for the sort topics (colors, shapes, homes, letters, lower,
- * initial, add, sub) and 2 per nest for oddeven, so the first round of each chapter
- * (and the first chapter at age 4) is trivially easy.
+ * initial, add, sub, size) and 2 per nest for oddeven; count warm-up N is 1–3 (2–4 from age 6),
+ * so the first round of each chapter (and the first chapter at age 4) is trivially easy.
  */
 (function (DN) {
   'use strict';
@@ -29,12 +29,13 @@
   };
   var COLORS = ['red', 'blue', 'yellow', 'green', 'orange', 'purple'];
 
+  // chapter order = easiest first (playtest P3: measured chapter time / errors per round)
   DN.AGE_TOPICS = {
-    3: ['colors', 'shapes', 'size', 'homes'],
-    4: ['colors', 'shapes', 'count', 'homes'],
-    5: ['shapes', 'count', 'letters', 'homes'],
-    6: ['lower', 'initial', 'add', 'count'],
-    7: ['add', 'sub', 'initial', 'oddeven']
+    3: ['colors', 'size', 'shapes', 'homes'],
+    4: ['colors', 'count', 'shapes', 'homes'],
+    5: ['count', 'letters', 'shapes', 'homes'],
+    6: ['count', 'initial', 'lower', 'add'],
+    7: ['initial', 'add', 'sub', 'oddeven']
   };
   var ALL_TOPICS = ['colors', 'shapes', 'size', 'homes', 'count', 'letters', 'lower', 'initial', 'add', 'sub', 'oddeven'];
 
@@ -60,11 +61,14 @@
   // base drawn sizes (px, logical) before the world's fit-shrink; eggs are drawn 100–130 (DESIGN §4.1)
   var SIZE = { egg: 116, animal: 112, fruit: 100, shape: 106 };
   var SIZE_SCALE = { big: 1.3, small: 0.72 };
-  var COUNT_RANGE = { 3: [1, 5], 4: [1, 5], 5: [1, 10], 6: [1, 12], 7: [1, 12] };
+  var COUNT_RANGE = { 3: [1, 5], 4: [1, 5], 5: [3, 10], 6: [4, 12], 7: [4, 12] };   // playtest P4: real lower bounds
 
   function ageOf(a) { a = Math.round(+a || 4); return a < 3 ? 3 : a > 7 ? 7 : a; }
   function langOf(l) { return l === 'vi' ? 'vi' : 'en'; }
-  function pool(lang) { return LETTER_POOL[langOf(lang)].split(''); }
+  function pool(lang, topic) {   // lower-case l and capital I look identical in rounded fonts: no I when lower case is shown
+    var P = LETTER_POOL[langOf(lang)].split('');
+    return topic === 'lower' ? P.filter(function (c) { return c !== 'I'; }) : P;
+  }
 
   function item(o) {
     return { id: null, sprite: o.sprite || null, shape: o.shape || null, color: o.color || null, text: o.text === undefined ? null : o.text,
@@ -79,7 +83,8 @@
 
   // nests per age for the n-nest sort topics
   function nestsFor(topic, age) {
-    if (topic === 'colors' || topic === 'shapes' || topic === 'homes') return age <= 3 ? 2 : age === 4 ? 3 : 4;
+    if (topic === 'homes') return age <= 3 ? 2 : 3;          // age 5: 3 of the 4 homes per round (variety, shorter rounds)
+    if (topic === 'colors' || topic === 'shapes') return age <= 3 ? 2 : age === 4 ? 3 : 4;
     if (topic === 'size' || topic === 'oddeven') return 2;
     if (topic === 'count') return 1;
     return 3;
@@ -94,7 +99,10 @@
 
     switch (topic) {
       case 'colors': {
-        var cs = rng.sample(COLORS, n);
+        // colour-blind safety (visual QA): below age 5 never put blue+purple or red+green in the same round
+        var cs = rng.sample(COLORS, n), tries = 0;
+        var clash = function (c) { return (c.indexOf('blue') >= 0 && c.indexOf('purple') >= 0) || (c.indexOf('red') >= 0 && c.indexOf('green') >= 0); };
+        while (age < 5 && clash(cs) && tries++ < 40) cs = rng.sample(COLORS, n);
         for (i = 0; i < n; i++) {
           labels.push({ type: 'color', value: cs[i] });
           for (j = 0; j < per; j++) add(egg(cs[i], 1, i, 'color', cs[i]));
@@ -119,10 +127,13 @@
         break;
       }
       case 'size': {
-        var c = rng.pick(COLORS), order = rng.shuffle(['big', 'small']);
+        // variety (playtest P7): warm-up 1 egg per nest; later 2–3 per nest (≤ 5 eggs so big eggs fit in one row);
+        // from round 2 on, half of the rounds mix two colours so only the size matters
+        var c = rng.pick(COLORS), c2 = ri >= 2 && rng.chance(0.5) ? rng.pick(COLORS.filter(function (x) { return x !== c; })) : c;
+        var order = rng.shuffle(['big', 'small']), cnts = warm ? [1, 1] : rng.pick([[2, 2], [2, 3], [3, 2]]);
         for (i = 0; i < 2; i++) {
           labels.push({ type: 'size', value: order[i] });
-          for (j = 0; j < 2; j++) add(egg(c, SIZE_SCALE[order[i]], i, 'size', order[i]));
+          for (j = 0; j < cnts[i]; j++) add(egg(j % 2 ? c2 : c, SIZE_SCALE[order[i]], i, 'size', order[i]));
         }
         break;
       }
@@ -138,7 +149,7 @@
       case 'count': {
         mode = 'count';
         var r = COUNT_RANGE[age];
-        var N = warm ? rng.int(1, Math.min(3, r[1])) : rng.int(Math.min(2, r[1]), r[1]);
+        var N = warm ? (age >= 6 ? rng.int(2, 4) : rng.int(1, Math.min(3, r[1]))) : rng.int(Math.max(2, r[0]), r[1]);
         var fruit = rng.pick(FRUITS), extra = N <= 3 ? 3 : 2;
         params = { n: N, fruit: fruit }; need = N;
         labels.push({ type: 'number', value: N });
@@ -147,7 +158,7 @@
       }
       case 'letters':
       case 'lower': {
-        var ls = rng.sample(pool(lang), 3);
+        var ls = rng.sample(pool(lang, topic), 3);
         for (i = 0; i < 3; i++) {
           labels.push({ type: 'letter', value: ls[i] });
           var t = topic === 'lower' ? ls[i].toLowerCase() : ls[i];
@@ -338,14 +349,17 @@
       }
       case 'letters':
       case 'lower': {
-        var P = pool(lang); a = rng.pick(P);
+        var P = pool(lang, topic); a = rng.pick(P);
         show.sprite = 'egg_plain'; show.color = 'cream'; show.text = topic === 'lower' ? a.toLowerCase() : a;
         ch = choicesFrom(rng, 'letter', a, P, 3); break;
       }
       case 'initial': {
-        var words = DN.WORDS[lang], w0 = rng.pick(words), inits = [];
+        // letter first (uniform), then one of its words — otherwise 'B' (4 words) is the answer 24 % of the time
+        var words = DN.WORDS[lang], inits = [];
         words.forEach(function (w) { if (inits.indexOf(w.initial) < 0) inits.push(w.initial); });
-        show.sprite = w0.sprite; a = w0.initial;
+        a = rng.pick(inits);
+        var w0 = rng.pick(words.filter(function (w) { return w.initial === a; }));
+        show.sprite = w0.sprite;
         ch = choicesFrom(rng, 'letter', a, inits, 3); break;
       }
       case 'add': {

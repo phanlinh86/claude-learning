@@ -72,6 +72,8 @@
       // the middle of the play band: far above every nest drop zone
       goal.x = L.play.x + L.play.w * r.float(0.3, 0.7);
       goal.y = L.play.y + Math.min(60, L.play.h * 0.3);
+      // a real miss travels: stay clear of the world's tap guard (< tapMovePx counts as a tap)
+      if (hyp(goal.x - it.x, goal.y - it.y) < 4 * w.cfg.tapMovePx) goal.x = it.x + (it.x < L.play.x + L.play.w / 2 ? 1 : -1) * 4 * w.cfg.tapMovePx;
     } else {
       var b = goal.b;
       goal.x = b.x + r.float(-0.25, 0.25) * b.w;

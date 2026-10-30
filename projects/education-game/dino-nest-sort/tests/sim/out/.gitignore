@@ -1,0 +1,3 @@
+# raw per-session sim dumps (tens of MB) — regenerate with tests/sim/run_matrix.js
+*.json
+*.log

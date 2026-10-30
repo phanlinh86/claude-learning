@@ -34,7 +34,7 @@ Requirement: `../REQUIREMENT.md`. Namespace: **`window.DN`**. Classic `<script>`
   HUD buttons (DOM, top-right) occupy `x > W - ins.right - 140, y < ins.top + 90` — nothing interactive there.
 - Items rest inside `layout.play` without overlapping (min centre distance 1.1 × size). If they don't fit,
   the generator shrinks item size down to 0.75× before giving up.
-- Item touch radius is generous: `0.6 × size + 14`. Nest drop zone: the nest rect grown by 30 px on each
+- Item touch radius is generous: `0.6 × size + 14`. Nest drop zone: the nest rect grown by 45 px on each
   side and 90 px upwards (kids drop high).
 
 ## 3. Art style guide (ALL artists)
@@ -111,11 +111,11 @@ Script order: rng, i18n, content, world, weather, bot, storage, assets, audio, v
 ```
 DN.PALETTE = { red:{fill,dark}, blue:…, yellow:…, green:…, orange:…, purple:…, cream:… }   // §3
 DN.AGE_TOPICS = {
-  3: ['colors','shapes','size','homes'],
-  4: ['colors','shapes','count','homes'],
-  5: ['shapes','count','letters','homes'],
-  6: ['lower','initial','add','count'],
-  7: ['add','sub','initial','oddeven'] }           // age ≥7 uses 7
+  3: ['colors','size','shapes','homes'],
+  4: ['colors','count','shapes','homes'],
+  5: ['count','letters','shapes','homes'],
+  6: ['count','initial','lower','add'],
+  7: ['initial','add','sub','oddeven'] }           // age ≥7 uses 7; easiest chapter first (playtest)
 DN.Content.makeRound(topic, { age, lang, rng, roundIndex, layout }) → round   // pure, deterministic
 DN.Content.makeTalk(topic, { age, lang, rng }) → talk
 DN.WORDS = { en: [{word:'apple', sprite:'fruit_apple', initial:'A'}, …], vi: [{word:'táo', sprite:'fruit_apple', initial:'T'}, …] }
@@ -124,10 +124,10 @@ Topic rules (nests n / items):
 - `colors`: n = 2 (age 3), 3 (4), 4 (5+); items `egg_<color>`, 2 per nest; nest label `{type:'color', value}`.
 - `shapes`: shapes from `circle, square, triangle, star, heart` (+`rectangle` age 5+); procedural item (`sprite:null, shape, color`);
   age ≤4: each shape keeps one colour per round; age 5: colours mixed so only the shape matters. Label `{type:'shape', value}`.
-- `size`: 2 nests `{type:'size', value:'big'|'small'}`; 4 eggs of one random colour, scales 1.3 / 0.72.
-- `homes`: n = 2/3/4; animals → homes: pond(fish, frog, duck), tree(bird, owl, squirrel), field(rabbit, cow, sheep, hen), cave(bat, bear);
+- `size`: 2 nests `{type:'size', value:'big'|'small'}`; scales 1.3 / 0.72; warm-up 1 egg per nest, then 2–3 per nest (≤ 5 eggs) of one random colour (from round 2, half the rounds mix 2 colours).
+- `homes`: n = 2/3/3 (age 5: 3 of the 4 homes per round); animals → homes: pond(fish, frog, duck), tree(bird, owl, squirrel), field(rabbit, cow, sheep, hen), cave(bat, bear);
   `cat` is only used in `initial`. Label `{type:'home', value}`.
-- `count` (mode `'count'`): one nest `{type:'number', value:N}` with `need:N`; N per age: 4→1–5, 5→1–10, 6→1–12; round 0 is small (≤3).
+- `count` (mode `'count'`): one nest `{type:'number', value:N}` with `need:N`; N per age: 4→1–5, 5→3–10, 6/7→4–12 (rounds ≥ 1: N ≥ max(2, min)); round 0 is small (≤3; 2–4 from age 6).
   Items: N + 2 (min 3 extra when N ≤ 3) fruit of one kind. Round ends when the nest holds N. Items stay in the nest once in.
 - `letters`: 3 nests with capitals; `egg_plain` items with `text` = the same capital, 2 per nest. Pools:
   en `ABCDEFGHIKLMNOPRSTUW`, vi `ABCDEGHIKLMNOPSTUVXY` (age 5 avoids diacritic letters).
@@ -154,9 +154,9 @@ Talk object (one question per chapter):
 talk = { promptKey:'talk.<topic>', params, show:{ sprite|null, shape?, color?, text?, count? /*draw N copies*/ },
          choices:[{ id, kind, value }]  /*3 choices, shuffled*/, answerId }
 ```
-(colors: "What colour is this egg?"; shapes: "What shape is this?"; size: show a big egg — "Is it big or small?" (2 choices);
+(colors: "What colour is this egg?"; shapes: "What shape is this?"; size: show a big or small egg — "Is it big or small?" (2 choices, kind `size`; UI draws egg pictures);
 homes: show an animal — "Where does it live?"; count: show k fruit — "How many?"; letters/lower: "Which letter is this?";
-initial: show a picture — "Which letter does it start with?"; add/sub: show the sum — "What is the answer?"; oddeven: show a number — "Odd or even?" (2 choices).)
+initial: pick the letter uniformly, then show a picture of one of its words — "Which letter does it start with?"; add/sub: show the sum — "What is the answer?"; oddeven: show a number — "Odd or even?" (2 choices).)
 
 ### 5.2 `DN.World` (headless, deterministic with seed + inputs; fixed sub-steps ≤ 1/120 s)
 ```js
@@ -172,8 +172,8 @@ w.setAge(a); w.setLang(l);       // take effect at the next newSession()
 w.update(dt);  w.drainEvents() → [{type, ...}]
 ```
 State machine: `'intro'` (chapter banner 1.8 s) → `'round'` (items pop in over ~0.6 s, then interactive) →
-`'roundDone'` (2.0 s, stars) → next round … after `roundsPerLevel` (5) rounds → `'talk'` (waits for `talkAnswer`/`skipTalk`;
-after an answer stays 1.6 s) → `'levelDone'` (2.4 s) → next `'intro'`, after level 3 → `'sessionDone'` (stays until newSession).
+`'roundDone'` (1.7 s, stars) → next round … after `roundsPerLevel` (4) rounds — or after ≥ 3 rounds once the chapter has run > 75 s
+(`chapterTimeLimit`) → `'talk'` (waits for `talkAnswer`/`skipTalk`; re-asks every 12 s; after an answer stays 1.6 s) → `'levelDone'` (2.0 s) → next `'intro'`, after level 3 → `'sessionDone'` (stays until newSession).
 Fields:
 ```
 w.state, w.level (0..3), w.levels[] (topic ids), w.topic, w.weather (= level), w.round, w.roundsPerLevel,
@@ -189,7 +189,10 @@ w.held (item id or null), w.talk, w.bo { mood:'idle'|'happy'|'cheer'|'think'|'oo
 Events: `session {levels}`, `level {level, topic}`, `round {round, topic, mode, promptKey, params}`, `appear {id}`,
 `grab {id, nameKind, nameValue}`, `drop {id, basketId|null}`, `correct {id, basketId, nameKind, nameValue, label}`,
 `wrong {id, basketId, misses}`, `miss {id}` (dropped outside any nest), `land {id, basketId, count, need}`,
-`hint {basketId}`, `idle {promptKey, params}` (12 s without a grab), `roundDone {stars, mistakes}`, `talk {talk}`,
+`hint {basketId}` (auto-hints: not while that nest glows, ≥ 6 s apart), `idle {promptKey, params}` (12 s without a grab, then gaps ×1.5 up to 30 s; reset on grab/new round),
+`tap {id, nameKind, nameValue}` (finger moved < 24 px and released < 0.35 s: NOT a drop — item settles home, no drop/miss/wrong/hint),
+`roundDone {stars, mistakes, count?, need?}` (count/need = N in count rounds), `talk {talk}`,
+`talkAsk {talk, n, glowAnswer}` (no answer for 12 s, repeats; from n = 2 `talk.glowAnswer = true` → glow the right choice),
 `talkResult {correct, choiceId, answerId}`, `levelDone {level, stars}`, `sessionDone {stars}`.
 
 Motion & feel (physically believable; document constants in `DN.CONFIG` with units):
@@ -206,7 +209,7 @@ Motion & feel (physically believable; document constants in `DN.CONFIG` with uni
 - Bo: `mood` set on events (correct → happy 0.9 s, roundDone → cheer 1.6 s, wrong → oops 0.8 s, hint/idle → think); `hop` on cheer;
   `lookX/lookY` follow the held item.
 - Stars per round: 0 mistakes → 3, 1 → 2, ≥2 → 1. Talk: correct → +1 star.
-- After 2 misses with the same item → auto `hint` for that item's nest (glow 3 s).
+- After 2 misses with the same item → auto `hint` for that item's nest (glow 3 s), at most one per 6 s and never while that nest glows.
 - First chapter at age 4 must be trivially easy and every round must be completable (generator self-checks).
 
 ### 5.3 `DN.Weather`
