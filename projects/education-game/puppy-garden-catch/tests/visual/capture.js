@@ -1,6 +1,7 @@
-// Visual QA capture: every screen x device x language, chapter moods, topics, drag, motion sheets, notch.
-//   node tests/visual/capture.js [section ...]     sections: screens moods topics drag motion notch  (default: all)
-// Output: tests/out/visual/**.png   (motion frames are montaged by tests/visual/sheets.sh)
+// Visual QA capture for Puppy Garden Catch: every screen x device x language, weather chapters,
+// every topic for ages 3-7, Pip moods, catch / hint moments, notch insets, DOM geometry.
+//   node tests/visual/capture.js [section ...]   sections: screens moods topics pip notch measure extra  (default: all)
+// Output: tests/out/visual/<section>/*.png  (+ measure.jsonl, topics/layout.jsonl)
 const { chromium } = require('playwright');
 const path = require('path'), fs = require('fs');
 const serve = require('../e2e/serve');
@@ -12,7 +13,8 @@ const DEV = {
   ipadP: { viewport: { width: 820, height: 1180 }, dpr: 2 },
   ipadL: { viewport: { width: 1180, height: 820 }, dpr: 2 }
 };
-const TOPIC_AGE = { colors: 3, shapes: 3, size: 3, homes: 3, count: 4, letters: 5, lower: 6, initial: 6, add: 6, sub: 7, oddeven: 7 };
+const AGES = { 3: ['colors', 'shapes', 'size', 'animals'], 4: ['colors', 'shapes', 'count', 'animals'],
+  5: ['shapes', 'count', 'letters', 'animals'], 6: ['lower', 'initial', 'add', 'count'], 7: ['add', 'sub', 'initial', 'oddeven'] };
 const want = process.argv.slice(2);
 const on = s => !want.length || want.includes(s);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -25,88 +27,89 @@ async function open(dev, q, opts = {}) {
   page.on('pageerror', e => console.log('  pageerror', dev, String(e)));
   if (opts.notch) {
     const css = opts.notch === 'P'
-      ? ':root{--sa-t:47px !important;--sa-b:34px !important}#safeProbe{padding:47px 0 34px 0 !important}'
-      : ':root{--sa-l:47px !important;--sa-r:47px !important;--sa-b:21px !important}#safeProbe{padding:0 47px 21px 47px !important}';
+      ? ':root{--sa-t:59px !important;--sa-b:34px !important}'
+      : ':root{--sa-l:59px !important;--sa-r:59px !important;--sa-b:21px !important}';
     await page.addInitScript(c => { document.addEventListener('DOMContentLoaded', () => { const s = document.createElement('style'); s.textContent = c; document.head.appendChild(s); }); }, css);
   }
-  await page.goto(srv.url + '?mute=1&novoice=1&seed=5&' + q);
+  await page.goto(srv.url + '?mute=1&novoice=1&seed=' + (opts.seed || 5) + '&' + q);
   await page.waitForFunction(() => window.PG && PG.debug && PG.debug.mode === 'title', null, { timeout: 20000 });
-  await sleep(500);
-  if (opts.notch) await page.evaluate(n => {   // overlay unsafe zones (sensor housing + home bar) so they show in shots
+  await sleep(400);
+  if (opts.notch) await page.evaluate(n => {   // draw the unsafe zones (sensor housing + home bar) so they show in shots
     const add = st => { const d = document.createElement('div'); d.style.cssText = 'position:fixed;z-index:999;pointer-events:none;' + st; document.body.appendChild(d); };
-    if (n === 'P') { add('left:0;right:0;top:0;height:47px;background:rgba(255,0,0,.18)'); add('left:50%;top:11px;width:126px;height:37px;margin-left:-63px;border-radius:20px;background:#000');
+    if (n === 'P') { add('left:0;right:0;top:0;height:59px;background:rgba(255,0,0,.18)'); add('left:50%;top:11px;width:126px;height:37px;margin-left:-63px;border-radius:20px;background:#000');
       add('left:0;right:0;bottom:0;height:34px;background:rgba(255,0,0,.18)'); add('left:50%;bottom:8px;width:140px;height:5px;margin-left:-70px;border-radius:3px;background:#000'); }
-    else { add('left:0;top:0;bottom:0;width:47px;background:rgba(255,0,0,.18)'); add('left:11px;top:50%;width:37px;height:126px;margin-top:-63px;border-radius:20px;background:#000');
-      add('right:0;top:0;bottom:0;width:47px;background:rgba(255,0,0,.18)'); add('left:0;right:0;bottom:0;height:21px;background:rgba(255,0,0,.18)');
+    else { add('left:0;top:0;bottom:0;width:59px;background:rgba(255,0,0,.18)'); add('left:11px;top:50%;width:37px;height:126px;margin-top:-63px;border-radius:20px;background:#000');
+      add('right:0;top:0;bottom:0;width:59px;background:rgba(255,0,0,.18)'); add('left:0;right:0;bottom:0;height:21px;background:rgba(255,0,0,.18)');
       add('left:50%;bottom:8px;width:200px;height:5px;margin-left:-100px;border-radius:3px;background:#000'); }
   }, opts.notch);
   return { ctx, page };
 }
-// start a game and jump to (level, topic); wait until the round is interactive, then slow time to ~freeze
-async function toRound(page, level = 0, topic = null) {
-  await page.evaluate(([level, topic]) => {
-    PG.debug.startGame();
-    const w = PG.debug.world;
-    if (topic) w.levels[level] = topic;
-    if (level || topic) w.startLevel(level);
-    PG.debug.weather.setWeather(level, { instant: true });
-    PG.debug.setSpeed(6);
-  }, [level, topic]);
-  await page.waitForFunction(() => { const w = PG.debug.world; return w.state === 'round' && w.interactive && w.items.every(i => i.state === 'idle'); }, null, { timeout: 20000 });
-  await page.evaluate(() => PG.debug.setSpeed(1));
-  await sleep(700);           // let weather particles populate, bubble pop settle
-  await page.evaluate(() => PG.debug.setSpeed(0.1));
-  await sleep(150);
-}
+const freeze = page => page.evaluate(() => PG.debug.setSpeed(0.1));
 const shot = (page, f) => page.screenshot({ path: f });
+/** start (or jump to) a level and wait for bubbles in mid-air: >=2 falling, the lowest past 35 % of the fall */
+async function toMidRound(page, level = null, start = true) {
+  await page.evaluate(([level, start]) => {
+    if (start) PG.debug.startGame();
+    if (level != null) PG.debug.gotoLevel(level);
+    PG.debug.weather.setWeather(PG.debug.world.level, { instant: true });
+    PG.debug.setSpeed(4);
+  }, [level, start]);
+  await page.waitForFunction(() => {
+    const w = PG.debug.world, L = w.layout; if (w.state !== 'round') return false;
+    const f = w.items.filter(i => i.state === 'fall');
+    const need = Math.min(2, (w.cur && w.cur.maxAir) || 2);
+    return f.length >= need && f.some(i => i.y > L.spawnY + 0.35 * (L.sky.bottom - L.spawnY));
+  }, null, { timeout: 30000, polling: 30 });
+  await freeze(page); await sleep(120);
+}
+/** CSS rect of a logical rect (for clipped screenshots) */
+const cssRect = (page, r) => page.evaluate(r => { const v = PG.debug.view(); return { x: Math.max(0, v.left + r.x * v.s), y: Math.max(0, v.top + r.y * v.s), width: r.w * v.s, height: r.h * v.s }; }, r);
 
 async function screens() {
   const dir = mk(path.join(OUT, 'screens'));
   for (const dev of Object.keys(DEV)) for (const lang of ['en', 'vi']) {
     const tag = `${dev}-${lang}`;
     const { ctx, page } = await open(dev, `age=4&lang=${lang}`);
-    await sleep(600);
+    await sleep(900);
     await shot(page, path.join(dir, `${tag}-01-title.png`));
-    await page.evaluate(() => { PG.UI.refreshSettings(); PG.UI.only('scrSettings'); });
-    await sleep(500);
+    await page.evaluate(() => PG.debug.setSpeed(0.1)); await sleep(100);   // let decorative bubbles drift to another spot
+    await page.evaluate(() => { PG.UI.refreshSettings(); PG.UI.only('scrSettings'); }); await sleep(450);
     await shot(page, path.join(dir, `${tag}-02-settings.png`));
-    await page.evaluate(() => PG.UI.only('scrTitle'));
-    // chapter banner
-    await page.evaluate(() => { PG.debug.startGame(); });
-    await sleep(550);
-    await page.evaluate(() => PG.debug.setSpeed(0.1));
-    await sleep(100);
+    await page.evaluate(() => { PG.UI.only('scrTitle'); PG.debug.setSpeed(1); });
+    // chapter banner (intro state, banner fully in)
+    await page.evaluate(() => PG.debug.startGame());
+    await page.waitForFunction(() => PG.debug.world.state === 'intro' && PG.debug.world.stateTime > 0.6);
+    await freeze(page); await sleep(80);
     await shot(page, path.join(dir, `${tag}-03-banner.png`));
-    await page.evaluate(() => PG.debug.setSpeed(6));
-    await page.waitForFunction(() => { const w = PG.debug.world; return w.state === 'round' && w.interactive; });
-    await page.evaluate(() => PG.debug.setSpeed(1)); await sleep(600);
-    await page.evaluate(() => PG.debug.setSpeed(0.1)); await sleep(100);
+    await toMidRound(page, null, false);
     await shot(page, path.join(dir, `${tag}-04-round.png`));
+    // hint glow on the lowest right bubble
+    await page.evaluate(() => { PG.debug.world.hint(); PG.debug.setSpeed(1); }); await sleep(350); await freeze(page); await sleep(60);
+    await shot(page, path.join(dir, `${tag}-05-hint.png`));
+    // catch moment: bot steers, freeze right after an item lands in the basket
+    await page.evaluate(() => { PG.debug.setBot(true, 1); PG.debug.setSpeed(1); });
+    await page.waitForFunction(() => PG.debug.world.items.some(i => i.state === 'in' && i.t < 0.25) || PG.debug.world.state !== 'round', null, { timeout: 30000, polling: 16 });
+    await freeze(page); await sleep(60);
+    await shot(page, path.join(dir, `${tag}-06-catch.png`));
+    await page.evaluate(() => PG.debug.setBot(false));
+    await page.evaluate(() => PG.debug.setSpeed(1));
     await page.click('#btnPause'); await sleep(450);
-    await shot(page, path.join(dir, `${tag}-05-pause.png`));
+    await shot(page, path.join(dir, `${tag}-07-pause.png`));
     await page.click('#btnResume'); await sleep(200);
-    // round done + flying stars
-    await page.evaluate(() => { PG.debug.setSpeed(1); PG.debug.world._endRound(); });
-    await sleep(420);
-    await page.evaluate(() => PG.debug.setSpeed(0.1)); await sleep(80);
-    await shot(page, path.join(dir, `${tag}-06-rounddone.png`));
+    // round done
+    await page.evaluate(() => { PG.debug.world._endRound(); }); await sleep(450); await freeze(page); await sleep(60);
+    await shot(page, path.join(dir, `${tag}-08-rounddone.png`));
     // talk time
-    await page.evaluate(() => { PG.debug.setSpeed(1); PG.debug.world._startTalk(); });
-    await sleep(700);
-    await shot(page, path.join(dir, `${tag}-07-talk.png`));
-    await page.evaluate(() => { const w = PG.debug.world; w.talkAnswer(w.talk.answerId); PG.debug.setSpeed(0.1); });
-    await sleep(500);
-    await shot(page, path.join(dir, `${tag}-08-talk-right.png`));
-    // level done
-    await page.evaluate(() => { PG.debug.setSpeed(1); PG.debug.world._levelDone(); });
-    await sleep(700);
-    await page.evaluate(() => PG.debug.setSpeed(0.1)); await sleep(80);
-    await shot(page, path.join(dir, `${tag}-09-leveldone.png`));
-    // session done + confetti
+    await page.evaluate(() => { PG.debug.setSpeed(1); PG.debug.world._startTalk(); }); await sleep(800);
+    await shot(page, path.join(dir, `${tag}-09-talk.png`));
+    await page.evaluate(() => { const w = PG.debug.world; w.talkAnswer(w.talk.answerId); PG.debug.setSpeed(0.1); }); await sleep(500);
+    await shot(page, path.join(dir, `${tag}-10-talk-right.png`));
+    await page.evaluate(() => { PG.debug.setSpeed(1); PG.debug.world._levelDone(); }); await sleep(700); await freeze(page); await sleep(60);
+    await shot(page, path.join(dir, `${tag}-11-leveldone.png`));
     await page.evaluate(() => { const w = PG.debug.world; w.level = w.levels.length - 1; w._levelDone(); PG.debug.setSpeed(6); });
     await page.waitForFunction(() => PG.debug.mode === 'done', null, { timeout: 20000 });
     await page.evaluate(() => PG.debug.setSpeed(1)); await sleep(1500);
-    await shot(page, path.join(dir, `${tag}-10-done.png`));
+    await shot(page, path.join(dir, `${tag}-12-done.png`));
     await ctx.close();
     console.log('screens', tag);
   }
@@ -114,10 +117,10 @@ async function screens() {
 
 async function moods() {
   const dir = mk(path.join(OUT, 'moods'));
-  for (const dev of ['iphoneL', 'iphoneP', 'ipadL', 'ipadP']) for (let lv = 0; lv < 4; lv++) {
-    const { ctx, page } = await open(dev, `age=3&lang=en`);
-    await toRound(page, lv, 'colors');
-    await shot(page, path.join(dir, `${dev}-L${lv}-colors.png`));
+  for (const dev of Object.keys(DEV)) for (let lv = 0; lv < 4; lv++) {
+    const { ctx, page } = await open(dev, `age=4&lang=en&level=${lv}`);
+    await toMidRound(page);
+    await shot(page, path.join(dir, `${dev}-L${lv}.png`));
     await ctx.close();
   }
   console.log('moods done');
@@ -125,119 +128,129 @@ async function moods() {
 
 async function topics() {
   const dir = mk(path.join(OUT, 'topics'));
-  const plan = [['iphoneL', 'en'], ['iphoneP', 'vi'], ['ipadP', 'en'], ['ipadL', 'vi']];
-  for (const [dev, lang] of plan) for (const [topic, age] of Object.entries(TOPIC_AGE)) {
-    const { ctx, page } = await open(dev, `age=${age}&lang=${lang}`);
-    await toRound(page, 2, topic);         // level 2 = rain = darkest mood (worst case for contrast)
-    await shot(page, path.join(dir, `${dev}-${lang}-${topic}-a${age}.png`));
-    const lay = await page.evaluate(() => { const w = PG.debug.world; return { W: w.layout.W, H: w.layout.H, play: w.layout.play, nestTop: w.layout.nest.top, groundY: w.layout.groundY,
-      bo: w.layout.bo, sizes: w.items.map(i => Math.round(i.size)), ys: w.items.map(i => Math.round(i.y)), shrink: w.packShrink, n: w.items.length, nests: w.baskets.length, nestW: Math.round(w.baskets[0].w) }; });
-    fs.appendFileSync(path.join(dir, 'layout.jsonl'), JSON.stringify({ dev, lang, topic, age, ...lay }) + '\n');
+  const plan = [['iphoneP', 'vi'], ['iphoneL', 'en'], ['ipadP', 'en'], ['ipadL', 'vi']];
+  for (const [dev, lang] of plan) for (const age of Object.keys(AGES)) for (let lv = 0; lv < 4; lv++) {
+    const topic = AGES[age][lv];
+    const { ctx, page } = await open(dev, `age=${age}&lang=${lang}&level=${lv}`, { seed: 3 + lv });
+    await toMidRound(page);
+    // move Pip a little so he's not exactly under a bubble, and take the shot
+    await shot(page, path.join(dir, `${dev}-${lang}-a${age}-L${lv}-${topic}.png`));
+    const lay = await page.evaluate(() => { const w = PG.debug.world, L = w.layout;
+      return { W: L.W, H: L.H, ins: L.ins, groundY: L.groundY, pupH: L.pup.h, basketW: L.basket.w, spawnY: L.spawnY, rimY: L.sky.bottom,
+        sizes: w.items.map(i => Math.round(i.size)), texts: w.items.map(i => i.text).filter(Boolean), bubble: document.getElementById('bubble').getBoundingClientRect().toJSON(),
+        bubbleText: document.getElementById('bubbleText').textContent, bubbleFont: document.getElementById('bubbleText').style.fontSize,
+        bubbleOverflow: (() => { const b = document.getElementById('bubble'); return b.scrollHeight > b.clientHeight + 1 || b.scrollWidth > b.clientWidth + 1; })(),
+        hud: document.getElementById('hud').getBoundingClientRect().toJSON(), s: PG.debug.view().s }; });
+    fs.appendFileSync(path.join(dir, 'layout.jsonl'), JSON.stringify({ dev, lang, age, lv, topic, ...lay }) + '\n');
+    // close-up of the basket tag
+    const b = await page.evaluate(() => { const w = PG.debug.world, b = w.basket; return { x: b.x - b.w * 0.75, y: b.y - b.w * 0.6, w: b.w * 1.5, h: b.w * 1.25 }; });
+    await page.screenshot({ path: path.join(dir, `${dev}-${lang}-a${age}-L${lv}-${topic}-basket.png`), clip: await cssRect(page, b) });
     await ctx.close();
   }
   console.log('topics done');
 }
 
-async function drag() {
-  const dir = mk(path.join(OUT, 'drag'));
-  for (const dev of ['iphoneL', 'iphoneP', 'ipadL']) {
-    const { ctx, page } = await open(dev, 'age=3&lang=en');
-    await toRound(page, 0, 'colors');
-    await page.evaluate(() => PG.debug.setSpeed(1));
-    // grab first item and sweep it right/left so it tilts; screenshot mid-sweep
-    await page.evaluate(() => {
-      const w = PG.debug.world, it = w.items[0];
-      const x0 = it.x, y0 = it.y; w.pointerDown(x0, y0);
-      const t0 = w.time;
-      window.__drag = () => { const t = w.time - t0; w.pointerMove(x0 + 220 * Math.sin(t * 3.2), y0 - 60 - 40 * Math.min(1, t)); if (w.held && window.__drag) requestAnimationFrame(window.__drag); };
-      requestAnimationFrame(window.__drag);
-    });
-    await sleep(380);
-    await page.evaluate(() => PG.debug.setSpeed(0.1));
-    await sleep(60);
-    await shot(page, path.join(dir, `${dev}-held-swing.png`));
-    // held over the correct nest (shows drop target / lift shadow over the nest)
-    await page.evaluate(() => { const w = PG.debug.world, it = w.itemById(w.held), b = w.basketById(it.answer); window.__drag = null; w.pointerMove(b.x, b.y - b.w * 0.45); PG.debug.setSpeed(1); });
-    await sleep(500);
-    await page.evaluate(() => PG.debug.setSpeed(0.1)); await sleep(60);
-    await shot(page, path.join(dir, `${dev}-held-overnest.png`));
+/* Pip in every mood + run frames, close-up crops (iPad landscape, sunny and rain) */
+async function pip() {
+  const dir = mk(path.join(OUT, 'pip'));
+  for (const [dev, lv] of [['ipadL', 0], ['iphoneP', 2], ['iphoneL', 3]]) {
+    const { ctx, page } = await open(dev, `age=4&lang=en&level=${lv}`);
+    await toMidRound(page);
+    await page.evaluate(() => { PG.debug.world.items = []; PG.debug.world.cfg.autoSpawn = false; });
+    const crop = async () => cssRect(page, await page.evaluate(() => { const w = PG.debug.world, L = w.layout; return { x: w.pup.x - L.pup.h * 1.0, y: L.pup.y - L.pup.h * 1.35, w: L.pup.h * 2.0, h: L.pup.h * 1.45 }; }));
+    for (const m of ['idle', 'happy', 'cheer', 'think', 'oops', 'talk', 'blink']) {
+      await page.evaluate(m => { const w = PG.debug.world; w._mood(m); w.pup._hopT = -1; w.pup.hop = 0; w.pup.moodT = 99; PG.debug.setSpeed(0.1); }, m);
+      await sleep(120);
+      await page.screenshot({ path: path.join(dir, `${dev}-mood-${m}.png`), clip: await crop() });
+    }
+    // run: steer to the right edge and freeze mid-run (two shots for both stride frames)
+    await page.evaluate(() => { const w = PG.debug.world; w.pup.mood = 'idle'; w.pup.moodT = 0; PG.debug.setSpeed(1); w.pointerDown(w.layout.W * 0.15, w.layout.groundY - 200); });
+    await sleep(220); await freeze(page);
+    await page.screenshot({ path: path.join(dir, `${dev}-run-left.png`), clip: await crop() });
+    await page.evaluate(() => { const w = PG.debug.world; PG.debug.setSpeed(1); w.pointerMove(w.layout.W * 0.85, w.layout.groundY - 200); });
+    await sleep(260); await freeze(page);
+    await page.screenshot({ path: path.join(dir, `${dev}-run-right.png`), clip: await crop() });
+    await page.evaluate(() => { const w = PG.debug.world; w.pointerUp(); });
     await ctx.close();
   }
-  console.log('drag done');
-}
-
-/* Motion contact sheets: frames every 50 ms of game time, cropped around the action (logical rect). */
-async function motion() {
-  const dir = mk(path.join(OUT, 'motion'));
-  const { ctx, page } = await open('iphoneL', 'age=3&lang=en', { dpr: 2 });
-  await toRound(page, 0, 'colors');
-  await page.evaluate(() => {
-    const w = PG.debug.world, cv = document.getElementById('game');
-    window.__rec = function (dur, crop, script) {
-      return new Promise(res => {
-        const frames = [], rs = cv.width / w.layout.W, t0 = w.time; let next = 0;
-        const sc = 340 / (crop.w * rs);
-        function tick() {
-          const t = w.time - t0;
-          if (script) script(t);
-          if (t >= next - 1e-6) {
-            const c = document.createElement('canvas'); c.width = Math.round(crop.w * rs * sc); c.height = Math.round(crop.h * rs * sc);
-            c.getContext('2d').drawImage(cv, crop.x * rs, crop.y * rs, crop.w * rs, crop.h * rs, 0, 0, c.width, c.height);
-            frames.push({ t: Math.round(t * 1000), url: c.toDataURL('image/png') }); next += 0.05;
-          }
-          if (t < dur) requestAnimationFrame(tick); else res(frames);
-        }
-        requestAnimationFrame(tick);
-      });
-    };
-  });
-  const save = async (name, frames) => {
-    const d = mk(path.join(dir, name)); fs.readdirSync(d).forEach(f => fs.unlinkSync(path.join(d, f)));
-    frames.forEach((f, i) => fs.writeFileSync(path.join(d, `${String(i).padStart(3, '0')}_${f.t}ms.png`), Buffer.from(f.url.split(',')[1], 'base64')));
-    console.log('motion', name, frames.length);
-  };
-  const run = (dur, crop, scriptSrc) => page.evaluate(([dur, crop, s]) => { PG.debug.setSpeed(0.25); return window.__rec(dur, crop, s ? eval('(' + s + ')') : null); }, [dur, crop, scriptSrc]);
-  // 1 drag swing: grab, fling right over 0.35 s, hold still (pendulum settle)
-  const crop1 = await page.evaluate(() => { const w = PG.debug.world, it = w.items[0]; window.__it = it; window.__x0 = it.x; window.__y0 = it.y;
-    return { x: Math.max(0, it.x - 120), y: Math.max(0, it.y - 160), w: 520, h: 280 }; });
-  await save('1_drag_swing', await run(1.6, crop1, `t => { const w = PG.debug.world; if (!w.held && t < 0.02) w.pointerDown(__x0, __y0);
-    const u = Math.min(1, t / 0.35), e = u * u * (3 - 2 * u); w.pointerMove(__x0 + 280 * e, __y0 - 50 * e); }`));
-  // 2 flight into nest + landing squash: release the held item over its nest
-  const crop2 = await page.evaluate(() => { const w = PG.debug.world, it = w.itemById(w.held), b = w.basketById(it.answer);
-    window.__b = b; w.pointerMove(b.x, b.y - 140); return { x: Math.max(0, Math.min(it.x, b.x) - 160), y: Math.max(0, Math.min(it.y, b.y) - 200), w: Math.abs(it.x - b.x) + 320, h: Math.abs(it.y - b.y) + 320 }; });
-  await save('2_fly_land', await run(1.1, crop2, `t => { const w = PG.debug.world; if (w.held && t > 0.1) w.pointerUp(__b.x, __b.y - 140); }`));
-  // 3 wrong drop: shake + return
-  const crop3 = await page.evaluate(() => { const w = PG.debug.world, it = w.items.find(i => i.state === 'idle'), b = w.baskets.find(b => b.id !== it.answer);
-    window.__x0 = it.x; window.__y0 = it.y; window.__b = b; return { x: Math.max(0, Math.min(it.x, b.x) - 160), y: Math.max(0, Math.min(it.y, b.y) - 200), w: Math.abs(it.x - b.x) + 320, h: Math.abs(it.y - b.y) + 320 }; });
-  await save('3_wrong_return', await run(1.6, crop3, `t => { const w = PG.debug.world;
-    if (t < 0.02 && !w.held) w.pointerDown(__x0, __y0);
-    if (t < 0.3) { const u = t / 0.3; w.pointerMove(__x0 + (__b.x - __x0) * u, __y0 + (__b.y - 110 - __y0) * u); }
-    else if (w.held) w.pointerUp(__b.x, __b.y - 110); }`));
-  // 4 appear pop: start a fresh round
-  const crop4 = await page.evaluate(() => { const w = PG.debug.world; w._beginRound(); const P = w.layout.play; return { x: P.x, y: P.y, w: P.w, h: P.h }; });
-  await save('4_appear_pop', await run(0.9, crop4, null));
-  // 5 Bo cheer / hop
-  const crop5 = await page.evaluate(() => { const w = PG.debug.world, L = w.layout.bo; w._mood('cheer'); return { x: Math.max(0, L.x - 140), y: Math.max(0, L.y - L.h * 1.35), w: 280, h: L.h * 1.5 }; });
-  await save('5_bo_cheer', await run(1.4, crop5, null));
-  await ctx.close();
+  console.log('pip done');
 }
 
 async function notch() {
   const dir = mk(path.join(OUT, 'notch'));
   for (const [dev, n] of [['iphoneP', 'P'], ['iphoneL', 'L']]) for (const lang of ['en', 'vi']) {
     const { ctx, page } = await open(dev, `age=6&lang=${lang}`, { notch: n });
+    await sleep(500);
     await shot(page, path.join(dir, `${dev}-${lang}-title.png`));
-    await toRound(page, 0, 'add');
+    await page.evaluate(() => { PG.UI.refreshSettings(); PG.UI.only('scrSettings'); }); await sleep(450);
+    await shot(page, path.join(dir, `${dev}-${lang}-settings.png`));
+    await page.evaluate(() => PG.UI.only('scrTitle'));
+    await toMidRound(page, 2);
     await shot(page, path.join(dir, `${dev}-${lang}-round.png`));
-    await page.evaluate(() => { PG.debug.setSpeed(1); PG.debug.world._startTalk(); }); await sleep(700);
+    const ins = await page.evaluate(() => ({ ins: PG.debug.world.layout.ins, hud: document.getElementById('hud').getBoundingClientRect().toJSON(), bubble: document.getElementById('bubble').getBoundingClientRect().toJSON() }));
+    fs.appendFileSync(path.join(dir, 'insets.jsonl'), JSON.stringify({ dev, lang, ...ins }) + '\n');
+    await page.evaluate(() => { PG.debug.setSpeed(1); PG.debug.world._startTalk(); }); await sleep(800);
     await shot(page, path.join(dir, `${dev}-${lang}-talk.png`));
     await page.evaluate(() => { const w = PG.debug.world; w.level = w.levels.length - 1; w._levelDone(); PG.debug.setSpeed(6); });
     await page.waitForFunction(() => PG.debug.mode === 'done', null, { timeout: 20000 });
-    await page.evaluate(() => PG.debug.setSpeed(1)); await sleep(1200);
+    await page.evaluate(() => PG.debug.setSpeed(1)); await sleep(1300);
     await shot(page, path.join(dir, `${dev}-${lang}-done.png`));
     await ctx.close();
   }
   console.log('notch done');
+}
+
+/* Later rounds (past the all-right warm-up): mixed right/wrong colours/shapes, count basket filling up */
+async function extra() {
+  const dir = mk(path.join(OUT, 'extra'));
+  const plan = [['iphoneP', 3, 0], ['iphoneL', 4, 0], ['ipadL', 4, 1], ['iphoneP', 5, 0], ['ipadP', 4, 2], ['iphoneL', 6, 3], ['ipadL', 3, 2]];
+  for (const [dev, age, lv] of plan) for (const rd of [2, 4]) {
+    const { ctx, page } = await open(dev, `age=${age}&lang=en&level=${lv}`, { seed: 11 + rd });
+    await page.evaluate(() => { PG.debug.startGame(); PG.debug.setSpeed(6); });
+    await page.waitForFunction(() => PG.debug.world.state === 'round');
+    await page.evaluate(rd => { const w = PG.debug.world; w.round = rd; w._beginRound(); }, rd);
+    // let the bot catch a couple so the basket shows items inside
+    await page.evaluate(() => { PG.debug.setBot(true, 1); PG.debug.setSpeed(3); });
+    await page.waitForFunction(() => { const w = PG.debug.world; return w.basket.count >= Math.min(2, w.basket.need - 1) || w.state !== 'round'; }, null, { timeout: 40000, polling: 30 }).catch(() => {});
+    await page.evaluate(() => PG.debug.setBot(false));
+    await page.waitForFunction(() => { const w = PG.debug.world; return w.state !== 'round' || w.items.filter(i => i.state === 'fall').length >= 2; }, null, { timeout: 20000, polling: 30 }).catch(() => {});
+    await freeze(page); await sleep(100);
+    const tag = `${dev}-a${age}-L${lv}-r${rd}`;
+    await shot(page, path.join(dir, `${tag}.png`));
+    const info = await page.evaluate(() => { const w = PG.debug.world; return { topic: w.topic, state: w.state, count: w.basket.count, need: w.basket.need,
+      pool: (w.cur.pool || []).map(p => p.color || p.sprite || p.text) }; });
+    fs.appendFileSync(path.join(dir, 'extra.jsonl'), JSON.stringify({ tag, ...info }) + '\n');
+    await ctx.close();
+  }
+  console.log('extra done');
+}
+
+/* DOM geometry: bubble vs HUD overlap, text overflow, talk choices size, title bubbles vs logo/Play */
+async function measure() {
+  const f = path.join(OUT, 'measure.jsonl'); try { fs.unlinkSync(f); } catch (e) {}
+  for (const dev of Object.keys(DEV)) for (const lang of ['en', 'vi']) for (const age of [3, 5, 7]) {
+    const { ctx, page } = await open(dev, `age=${age}&lang=${lang}`);
+    const title = await page.evaluate(() => { const R = s => document.querySelector(s).getBoundingClientRect().toJSON(); return { logo: R('.logo'), play: R('#btnPlay'), tagline: R('#tagline'), info: R('.title-info'), top: R('.title-top') }; });
+    const rounds = [];
+    for (let lv = 0; lv < 4; lv++) {
+      await toMidRound(page, lv, lv === 0);
+      rounds.push(await page.evaluate(() => {
+        const R = id => document.getElementById(id).getBoundingClientRect(), b = R('bubble'), h = R('hud'), bt = document.getElementById('bubbleText'), be = document.getElementById('bubble');
+        return { topic: PG.debug.world.topic, text: bt.textContent, font: bt.style.fontSize, bubble: [b.left, b.top, b.right, b.bottom].map(Math.round), hud: [h.left, h.top, h.right, h.bottom].map(Math.round),
+          overlapHud: !(b.right <= h.left || b.bottom <= h.top || b.top >= h.bottom || b.left >= h.right),
+          overflow: be.scrollHeight > be.clientHeight + 1 || be.scrollWidth > be.clientWidth + 1 || bt.scrollWidth > be.clientWidth };
+      }));
+    }
+    await page.evaluate(() => { PG.debug.setSpeed(1); PG.debug.world._startTalk(); }); await sleep(600);
+    const talk = await page.evaluate(() => {
+      const p = document.querySelector('.talk-panel'), pr = p.getBoundingClientRect();
+      const ch = [...document.querySelectorAll('#talkChoices button')].map(b => { const r = b.getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height)]; });
+      return { panel: [pr.left, pr.top, pr.right, pr.bottom].map(Math.round), scroll: p.scrollHeight > p.clientHeight + 1, choices: ch, q: document.getElementById('talkQ').textContent, vh: innerHeight, vw: innerWidth };
+    });
+    fs.appendFileSync(f, JSON.stringify({ dev, lang, age, title, rounds, talk }) + '\n');
+    await ctx.close();
+  }
+  console.log('measure done');
 }
 
 (async () => {
@@ -247,9 +260,10 @@ async function notch() {
     if (on('screens')) await screens();
     if (on('moods')) await moods();
     if (on('topics')) { try { fs.unlinkSync(path.join(OUT, 'topics', 'layout.jsonl')); } catch (e) {} await topics(); }
-    if (on('drag')) await drag();
-    if (on('motion')) await motion();
-    if (on('notch')) await notch();
+    if (on('pip')) await pip();
+    if (on('notch')) { try { fs.unlinkSync(path.join(OUT, 'notch', 'insets.jsonl')); } catch (e) {} await notch(); }
+    if (on('measure')) await measure();
+    if (on('extra')) { try { fs.unlinkSync(path.join(OUT, 'extra', 'extra.jsonl')); } catch (e) {} await extra(); }
   } catch (e) { console.error(e); process.exitCode = 1; }
   await browser.close(); srv.close();
 })();

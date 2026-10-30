@@ -193,3 +193,7 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
   .talk-choices button canvas { width: 84px; height: 84px; }
 }
 @media (prefers-reduced-motion: reduce) { .btn-play { animation: none; } }
+@media (orientation: portrait) {
+  .title-wrap { padding-bottom: calc(26vh + var(--sa-b)); }
+  #scrDone { align-items: flex-start; padding-top: calc(var(--sa-t) + 10vh); padding-bottom: 0; }
+}

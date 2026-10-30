@@ -50,6 +50,8 @@
     basketW: { 3: 220, 4: 210, 5: 200, 6: 185, 7: 185 }, basketPortraitK: 1.1, basketAspect: 0.62,
     rimFrac: 0.32,             // rim centre = pup.y − 0.32·pup.h (face stays visible above the back rim)
     laneMargin: 16,            // px between basket edge and the safe-area edge at Pip's extremes
+    maxLaneW: 820,             // px, Pip's range is capped (centred) on very wide screens (QA playtest row 9)
+    maxItemSize: 135,          // px, the biggest item (big ball 1.3 × 104): top reserve keeps its bubble below the speech bubble
     skyTopGap: 150,            // sky.top = ins.top + 150
     spawnDy: 40,               // bubbles are born at sky.top + 40 (bubble top clears the speech bubble)
     bubbleX: 20, bubbleY: 16, bubbleMaxW: 680, bubbleSideGap: 190, bubbleH: 100,
@@ -67,7 +69,7 @@
 
     // ---- spawning
     autoSpawn: true,           // false = tests spawn by hand with w._spawn(true|false)
-    firstSpawn: 0.8,           // s into the round (DESIGN 0.6; tuned: lets Pip's prompt start first)
+    firstSpawn: 0.6,           // s into the round (QA playtest row 7)
     spawnGap: 1.6, spawnGapAge3: 2.0,   // s, minimum between two spawns (DESIGN 1.3 / 1.6; tuned calmer)
     appearTime: 0.4,           // bubble pops into existence (back-overshoot)
     bubbleK: 1.35,             // bubble diameter = 1.35 × item size
@@ -76,9 +78,13 @@
     firstNearK: 0.35,          // first spawn of a round lands within 0.35·W of Pip
     warmNearPx: [30, 70],      // warm-up first spawn: right above Pip's side (offset range px)
     rightGapMax: 1.0,          // s with no right bubble in the air (air full of wrong ones) → extra right spawn
+    stillTime: 1.0,            // s: Pip has not moved (|vx| ≤ 25 px/s) for this long → "still"
+    stillWrongGap: 40,         // px: a wrong bubble never lands within catch reach + 40 px of a still Pip
+    idleHold: 15,              // s with the finger up and no touch → no new bubbles …
+    idleTrickle: 8,            // … except one right bubble every 8 s (only when the sky is empty), aimed just outside reach
 
     // ---- fall (in the bubble)
-    fallSpeed: { 3: 58, 4: 64, 5: 78, 6: 88, 7: 98 },     // px/s terminal velocity for a 460 px drop (DESIGN 70/80/95/105/115;
+    fallSpeed: { 3: 62, 4: 68, 5: 78, 6: 88, 7: 98 },     // px/s terminal velocity for a 460 px drop (DESIGN 70/80/95/105/115;
                                                           //   tuned to the ≈ 6–8 s fall and the 60–100 s chapter target)
     fallLevelK: 0.05,          // × (1 + 0.05·level)
     dragRate: 2.2,             // 1/s:  v' = (vT − v)·2.2
@@ -93,7 +99,7 @@
     hintSlow: 0.55,            // glowing bubble falls at 0.55×
 
     // ---- assist (ages ≤ magnetMaxAge)
-    magnetMaxAge: 4,
+    magnetMaxAge: 6,             // QA playtest row 1 (was 4)
     magnetX: 70,               // px beyond the catch edge
     magnetUp: 140,             // px above the rim
     magnetRate: 2.0,           // 1/s, gentle exponential pull of the drift centre toward the basket
@@ -166,7 +172,7 @@
     return { W: S, H: clamp(Math.round(S / aspect), cfg.minLong, cfg.maxLong) };
   }
 
-  function computeLayout(W, H, ins, age, cfg) {
+  function computeLayout(W, H, ins, age, cfg, topReserve) {
     ins = { top: +(ins && ins.top) || 0, right: +(ins && ins.right) || 0, bottom: +(ins && ins.bottom) || 0, left: +(ins && ins.left) || 0 };
     age = ageOf(age);
     var portrait = H > W, tall = H / W > cfg.tallRatio;
@@ -175,8 +181,10 @@
     var bw = cfg.basketW[age] * (portrait ? cfg.basketPortraitK : 1), bh = cfg.basketAspect * bw;
     var py = groundY + cfg.pupFeetDy, rimDy = cfg.rimFrac * ph;
     var minX = ins.left + 0.5 * bw + cfg.laneMargin, maxX = W - ins.right - 0.5 * bw - cfg.laneMargin;
+    if (maxX - minX > cfg.maxLaneW) { var cx = (minX + maxX) / 2; minX = cx - cfg.maxLaneW / 2; maxX = cx + cfg.maxLaneW / 2; }
     var skyTop = ins.top + cfg.skyTopGap, rimY = py - rimDy;
     var spawnY = skyTop + cfg.spawnDy;
+    if (topReserve > 0) spawnY = Math.max(spawnY, topReserve + 0.5 * cfg.bubbleK * cfg.maxItemSize + 6);   // below the speech bubble
     var fallDist = rimY - spawnY;
     return {
       W: W, H: H, ins: ins, portrait: portrait, groundY: groundY,
@@ -184,7 +192,7 @@
       basket: { w: bw, h: bh, rimDy: rimDy },
       sky: { top: skyTop, bottom: rimY },
       lanes: { x0: minX, x1: maxX },
-      spawnY: spawnY,
+      spawnY: spawnY, topReserve: topReserve > 0 ? topReserve : 0,
       fallScale: clamp(fallDist / cfg.refFallPx, cfg.fallScaleMin, cfg.fallScaleMax),
       bubble: { x: ins.left + cfg.bubbleX, y: ins.top + cfg.bubbleY, w: Math.min(cfg.bubbleMaxW, W - ins.left - ins.right - cfg.bubbleSideGap), h: cfg.bubbleH },
       pupTap: { r: cfg.pupTapK * ph },
@@ -248,7 +256,7 @@
     this.pup.lookX = this.pup.x; this.pup.lookY = this.layout.spawnY;
   }
   World.logicalSize = logicalSize;
-  World.computeLayout = function (W, H, ins, age, cfg) { return computeLayout(W, H, ins, age, merge(CONFIG, cfg)); };
+  World.computeLayout = function (W, H, ins, age, cfg, topReserve) { return computeLayout(W, H, ins, age, merge(CONFIG, cfg), topReserve); };
   World.computeSlots = function (need, maxSize, bw, bh, cfg) { return computeSlots(need, maxSize, bw, bh, merge(CONFIG, cfg)); };
 
   var P = World.prototype;
@@ -265,12 +273,22 @@
   // ---------------------------------------------------------------- viewport
   P.setViewport = function (W, H, ins) {
     var old = this.layout;
-    this.layout = computeLayout(W, H, ins, this.age, this.cfg);
+    this.layout = computeLayout(W, H, ins, this.age, this.cfg, this._topReserve);
     this._afterLayout(old);
   };
-  P._afterLayout = function (old) {
+  /** Bottom edge (logical px) of the speech bubble: new bubbles are born below it. Same value → no-op; a change with
+   *  the same W/H/insets re-lays out WITHOUT cancelling an active steer. */
+  P.setTopReserve = function (y) {
+    y = +y > 0 ? +y : 0;
+    if (y === (this._topReserve || 0)) return;
+    this._topReserve = y;
+    var old = this.layout;
+    this.layout = computeLayout(old.W, old.H, old.ins, this.age, this.cfg, y);
+    this._afterLayout(old, true);
+  };
+  P._afterLayout = function (old, keepSteer) {
     var L = this.layout, p = this.pup, b = this.basket, i;
-    this.cancelDrag();
+    if (!keepSteer) this.cancelDrag();
     p.x = clamp(p.x, L.pup.minX, L.pup.maxX); p.targetX = clamp(p.targetX, L.pup.minX, L.pup.maxX); p._px = p.x;
     b.w = L.basket.w; b.h = L.basket.h;
     if (this.cur) this._makeSlots();
@@ -309,8 +327,9 @@
     this.levels = PG.Content.topicsFor(this.age);
     this.stars = 0;
     var L = this.layout;
-    this.layout = computeLayout(L.W, L.H, L.ins, this.age, this.cfg);   // basket width depends on age
+    this.layout = computeLayout(L.W, L.H, L.ins, this.age, this.cfg, this._topReserve);   // basket width depends on age
     this._afterLayout(L);
+    this._lastTouch = this.time;
     this._emit({ type: 'session', levels: this.levels.slice() });
     this.startLevel(0);
   };
@@ -331,7 +350,9 @@
   P._beginRound = function () {
     var cfg = this.cfg;
     var rseed = (this.rng.next() * 4294967296) >>> 0;
-    var cur = PG.Content.makeRound(this.topic, { age: this.age, lang: this.lang, rng: new PG.RNG(rseed), roundIndex: this.round });
+    var cur = PG.Content.makeRound(this.topic, { age: this.age, lang: this.lang, rng: new PG.RNG(rseed), roundIndex: this.round,
+      avoid: this.round > 0 ? this._prevRoundKey : null });   // no target repeated from the previous round
+    this._prevRoundKey = PG.Content.roundKey(cur);
     this.cur = cur;
     this._srng = new PG.RNG(cur.seed);
     this.items = [];
@@ -411,30 +432,40 @@
   P.pointerDown = function (x, y) {
     this.finger.x = x; this.finger.y = y; this.finger.down = true;
     var hit = this.state === 'round' ? this.itemAt(x, y) : null;
-    this._steer = { x0: x, y0: y, t0: this.time, maxD: 0, hitId: hit ? hit.id : null };
+    this._steer = { x0: x, y0: y, t0: this.time, maxD: 0, hitId: hit ? hit.id : null, pending: !!hit };
+    this._lastTouch = this.time;
     if (!this._canSteer()) return null;
-    var L = this.layout, p = this.pup;
-    p.targetX = clamp(x, L.pup.minX, L.pup.maxX); p.steering = true;
+    // on a bubble: maybe a "what is it?" tap — steer only once the finger moves ≥ tapMovePx or is held > tapTime
+    if (!hit) this._startSteer(x);
     return hit ? hit.id : null;
+  };
+  P._startSteer = function (x) {
+    var L = this.layout, p = this.pup;
+    if (this._steer) this._steer.pending = false;
+    p.targetX = clamp(x, L.pup.minX, L.pup.maxX); p.steering = true;
   };
   P.pointerMove = function (x, y) {
     this.finger.x = x; this.finger.y = y;
     var s = this._steer;
     if (!s || !this.finger.down) return;
     s.maxD = Math.max(s.maxD, hyp(x - s.x0, y - s.y0));
+    this._lastTouch = this.time;
+    if (s.pending && s.maxD >= this.cfg.tapMovePx && this._canSteer()) this._startSteer(x);
     if (this.pup.steering && this._canSteer()) { var L = this.layout; this.pup.targetX = clamp(x, L.pup.minX, L.pup.maxX); }
   };
   P.pointerUp = function (x, y) {
     if (x !== undefined) this.pointerMove(x, y);
     var s = this._steer, cfg = this.cfg;
     this.finger.down = false; this.pup.steering = false; this._steer = null;
+    this._lastTouch = this.time;
     if (!s) return;
     var isTap = s.maxD < cfg.tapMovePx && this.time - s.t0 < cfg.tapTime;
     if (!isTap || this.state !== 'round') return;
     var it = s.hitId ? this.itemById(s.hitId) : null;
     if (it && it.state !== 'in' && it.state !== 'pop' && it.state !== 'leave') {
       this.counters.taps++;
-      if (!cfg.tapRuns) this.pup.targetX = this.pup.x;
+      if (cfg.tapRuns) { var Lr = this.layout; this.pup.targetX = clamp(this.finger.x, Lr.pup.minX, Lr.pup.maxX); }
+      else { this.pup.vx = 0; this.pup.targetX = this.pup.x; }      // only names it: Pip stays exactly where he is
       this._emit({ type: 'tap', id: it.id, nameKind: it.nameKind, nameValue: it.nameValue });   // Pip keeps running to x (tapRuns)
       return;
     }
@@ -508,6 +539,12 @@
     this._noRightT = rightAir ? 0 : this._noRightT + h;
     if (this.basket.reserved >= this.basket.need || !cfg.autoSpawn) return;
     if (this._spawnCount === 0) { if (this.stateTime >= cfg.firstSpawn - 1e-9) this._spawn(true); return; }
+    // idle hold: hands off the screen for idleHold s → no new bubbles, except one right bubble every idleTrickle s
+    // (only when the sky is empty), aimed just outside catch + magnet reach — the child has to come back and move Pip
+    if (!this.finger.down && this.time - (this._lastTouch || 0) > cfg.idleHold) {
+      if (air === 0 && this._sinceSpawn >= cfg.idleTrickle - 1e-9) this._spawn(true, cfg.magnetX + 40);
+      return;
+    }
     if (this._sinceSpawn < this._spawnGap() - 1e-9) return;
     if (air < cur.maxAir) this._spawn(rightAir === 0 ? true : null);
     else if (rightAir === 0 && this._noRightT >= cfg.rightGapMax - 1e-9 && air < cur.maxAir + 1) this._spawn(true);
@@ -517,7 +554,8 @@
     return this.cfg.fallSpeed[age] * (1 + this.cfg.fallLevelK * this.level) * this._fallScale();
   };
 
-  P._spawn = function (forceRight) {
+  /** forceRight: true | false | null (rules); awayExtra (px): land at least catch reach + awayExtra from Pip. */
+  P._spawn = function (forceRight, awayExtra) {
     var cfg = this.cfg, cur = this.cur, r = this._srng, L = this.layout, i;
     var right = forceRight === true ? true : forceRight === false ? false : (this.age <= 4 && !this._lastRight) ? true : r.chance(cur.rightShare);
     var rights = [], wrongs = [];
@@ -561,16 +599,27 @@
       }
       land = best;
     }
+    // still-Pip guard: a wrong bubble is never aimed at a Pip that has not moved for stillTime s
+    if (awayExtra === undefined && !t.right && this.time - (this._movedT || 0) > cfg.stillTime) awayExtra = cfg.stillWrongGap;
+    if (awayExtra !== undefined) {
+      var edge = 0.5 * this.basket.w + cfg.catchSideK * size + awayExtra, d = land - this.pup.x;
+      if (Math.abs(d) < edge) {
+        var sg = d >= 0 ? 1 : -1, nl = this.pup.x + sg * edge;
+        if (nl < x0 || nl > x1) nl = this.pup.x - sg * edge;
+        land = clamp(nl, x0, x1);
+      }
+    }
     var xs = clamp(land - drift, x0, x1);
     var id = 'b' + (this._nextId++);
+    var ph0 = r.float(0, TAU);
     var it = {
       id: id, sprite: t.sprite, shape: t.shape, color: t.anyColor ? r.pick(PG.Content.COLORS) : t.color, text: t.text,
       scale: t.scale, size: size, size0: size, nameKind: t.nameKind, nameValue: t.nameValue, right: t.right,
-      x: xs, y: L.spawnY, xb: xs, ub: this.windVx, vx: 0, vy: 0, rot: 0, vr: 0, sx: 1, sy: 1, _q: 0, _qv: 0,
+      x: xs + cfg.swayAmp * Math.sin(ph0), y: L.spawnY, xb: xs, ub: this.windVx, vx: 0, vy: 0, rot: 0, vr: 0, sx: 1, sy: 1, _q: 0, _qv: 0,
       bsx: 1, bsy: 1, _bq: 0, _bqv: 0, alpha: 1,
       state: 'appear', t: 0, appear: 0, bubble: 1, glow: 0, _glowT: 0,
-      phase: r.float(0, TAU), _swP: r.float(cfg.swayPeriodMin, cfg.swayPeriodMax), misses: 0,
-      inBasket: false, slot: -1, _f: null, _px: xs, _py: L.spawnY, _prot: 0
+      phase: ph0, _swP: r.float(cfg.swayPeriodMin, cfg.swayPeriodMax), misses: 0,
+      inBasket: false, slot: -1, _f: null, _px: xs + cfg.swayAmp * Math.sin(ph0), _py: L.spawnY, _prot: 0
     };
     this.items.push(it);
     this._spawnCount++; this._sinceSpawn = 0; this._lastRight = t.right;
@@ -598,6 +647,9 @@
     var lt = this.time - this.levelStartTime;
     this.wind = (cfg.windBase[this.weather] || 0) * (1 + cfg.windWobble * Math.sin(TAU * lt / cfg.windPeriod));
     this.windVx = this.wind * cfg.windPx;
+
+    var st = this._steer;
+    if (st && st.pending && this.finger.down && this.time - st.t0 > cfg.tapTime + 1e-9 && this._canSteer()) this._startSteer(this.finger.x);
 
     switch (this.state) {
       case 'intro': if (this.stateTime >= cfg.introTime - 1e-9) this._beginRound(); break;
@@ -650,6 +702,7 @@
     if (p.x < L.pup.minX) { p.x = L.pup.minX; if (p.vx < 0) p.vx = 0; }
     if (p.x > L.pup.maxX) { p.x = L.pup.maxX; if (p.vx > 0) p.vx = 0; }
     p.ax = (p.vx - vx0) / h;
+    if (Math.abs(p.vx) > 25 || this._movedT === undefined) this._movedT = this.time;
     if (Math.abs(p.vx) < 1e-3 && Math.abs(p.targetX - p.x) < 0.05) { p.vx = 0; p.x = p.targetX; }
     p.run = Math.min(1, Math.abs(p.vx) / L.pup.speed);
     p.step = (p.step + Math.abs(p.vx) * cfg.stepK * h) % TAU;

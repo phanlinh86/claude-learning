@@ -32,6 +32,7 @@ const VIEWPORTS = [
   { W: 1036, H: 720, ins: { top: 32, bottom: 27, left: 0, right: 0 }, name: 'iPad 1180×820 landscape insets' }
 ];
 const SPRITE_OK = /^(ball_(red|blue|yellow|green|orange|purple|plain)|fruit_(apple|banana|strawberry|orange|pear|cherry|carrot)|animal_(fish|frog|duck|bird|owl|squirrel|rabbit|cow|sheep|bat|bear|hen|cat|pig|snail|ladybug)|bubble)$/;
+const CLASHES = cs => [['blue', 'purple'], ['red', 'green'], ['yellow', 'orange']].some(([a, b]) => cs.includes(a) && cs.includes(b));
 const NAME_KINDS = ['color', 'shape', 'size', 'animal', 'fruit', 'number', 'letter', 'parity', 'sum', 'diff', 'word'];
 
 // ---------- helpers ----------
@@ -148,14 +149,14 @@ test('content: every topic × age × 200 seeds × rounds 0–4 × en/vi → vali
         assert.strictEqual(r.pool.length, age === 3 ? 2 : age === 4 ? 3 : 4, ctx);
         const cs = r.pool.map(t => t.color);
         for (const t of r.pool) assert.strictEqual(t.sprite, 'ball_' + t.color);
-        if (age < 5) { assert.ok(!(cs.includes('blue') && cs.includes('purple')) && !(cs.includes('red') && cs.includes('green')), ctx + ' colour-blind'); }
+        if (age < 5) assert.ok(!CLASHES(cs), ctx + ' colour-blind');
         assert.deepStrictEqual(J(r.params), { color: r.target.value });
         break;
       }
       case 'shapes':
         assert.strictEqual(kinds, age === 3 ? 2 : age === 4 ? 3 : 4, ctx);
         for (const t of r.pool) { assert.strictEqual(t.sprite, null); if (age < 5) { assert.notStrictEqual(t.shape, 'rectangle'); assert.ok(t.color && !t.anyColor); } else assert.ok(t.anyColor && !t.color); }
-        if (age < 5) assert.strictEqual(new Set(r.pool.map(t => t.color)).size, r.pool.length, 'own colour per shape');
+        if (age < 5) { assert.strictEqual(new Set(r.pool.map(t => t.color)).size, r.pool.length, 'own colour per shape'); assert.ok(!CLASHES(r.pool.map(t => t.color)), ctx + ' shape colours colour-blind'); }
         break;
       case 'size':
         assert.strictEqual(r.pool.length, 2);
@@ -171,8 +172,8 @@ test('content: every topic × age × 200 seeds × rounds 0–4 × en/vi → vali
         assert.strictEqual(r.pool.length, 2);
         assert.ok(PG.Content.FRUITS.includes(r.target.value));
         if (age === 4) assert.ok(ri === 0 ? N >= 1 && N <= 2 : N >= 2 && N <= 5, ctx + ' N ' + N);
-        if (age === 5) assert.ok(ri === 0 ? N === 3 : N >= 3 && N <= 10, ctx + ' N ' + N);
-        if (age >= 6) assert.ok(N >= 4 && N <= 12, ctx + ' N ' + N);
+        if (age === 5) assert.ok(ri === 0 ? N === 3 : N >= 3 && N <= 6, ctx + ' N ' + N);
+        if (age >= 6) assert.ok(N >= 4 && N <= 8, ctx + ' N ' + N);
         if (age === 3) assert.ok(N >= 1 && N <= 3);
         break;
       }
@@ -237,7 +238,7 @@ test('talk: every topic × age × 200 seeds → sister-game format, distinct cho
     assert.ok(t.show.sprite || t.show.shape);
     if (t.show.sprite) assert.ok(SPRITE_OK.test(t.show.sprite), t.show.sprite);
     if (topic === 'count') assert.strictEqual(ans.value, t.show.count);
-    if (topic === 'colors') { assert.strictEqual(ans.value, t.show.color); assert.strictEqual(t.show.sprite, 'ball_' + t.show.color); }
+    if (topic === 'colors') { assert.strictEqual(ans.value, t.show.color); assert.strictEqual(t.show.sprite, 'ball_' + t.show.color); if (age < 5) assert.ok(!CLASHES(t.choices.map(c => c.value)), 'talk colour-blind ' + t.choices.map(c => c.value)); }
     if (topic === 'shapes') assert.strictEqual(ans.value, t.show.shape);
     if (topic === 'size') assert.strictEqual(ans.value, t.show.scale > 1 ? 'big' : 'small');
     if (topic === 'animals') { assert.strictEqual(ans.kind, 'animal'); assert.strictEqual(t.params.sound, ans.value); assert.strictEqual(t.show.sprite, 'bubble'); assert.strictEqual(t.show.text, null); }
@@ -262,7 +263,10 @@ test('layout: §2 formulas and the short-side rule', () => {
   assert.deepStrictEqual([L.pup.y, L.pup.h, L.pup.speed], [L.groundY + 6, 200, 1150]);
   assert.deepStrictEqual([L.basket.w, L.basket.rimDy], [210, 0.32 * 200]);
   near(L.basket.h, 0.62 * 210, 1e-9);
-  assert.deepStrictEqual([L.pup.minX, L.pup.maxX], [44 + 105 + 16, 1556 - 44 - 105 - 16]);
+  const c0 = (44 + 105 + 16 + 1556 - 44 - 105 - 16) / 2;      // 1556 wide: lanes capped at maxLaneW 820, centred
+  assert.deepStrictEqual([L.pup.minX, L.pup.maxX], [c0 - 410, c0 + 410]);
+  const L9 = PG.World.computeLayout(960, 720, null, 4);
+  assert.deepStrictEqual([L9.pup.minX, L9.pup.maxX], [105 + 16, 960 - 105 - 16], 'narrow screens: not capped');
   assert.deepStrictEqual([L.lanes.x0, L.lanes.x1], [L.pup.minX, L.pup.maxX]);
   assert.deepStrictEqual([L.sky.top, L.sky.bottom], [150, L.pup.y - L.basket.rimDy]);
   assert.deepStrictEqual([L.bubble.x, L.bubble.y, L.bubble.w, L.bubble.h], [64, 16, 680, 100]);
@@ -424,7 +428,7 @@ test('catch (right): catch → pop → correct; pop-and-drop parabola into the s
 
 test('catch geometry: rim band and |x − basket.x| ≤ 0.5·w + 0.25·size; no catch when moving up or beside', () => {
   for (const [dx, ok] of [[0, true], [0.5, true], [1, false]]) {
-    const w = mkWorld(manual({ seed: 9, age: 6, config: { windBase: [0, 0, 0, 0] } }));      // age 6: no magnet, no wind
+    const w = mkWorld(manual({ seed: 9, age: 7, config: { windBase: [0, 0, 0, 0] } }));      // age 7: no magnet, no wind
     roundOf(w, 'colors', 2);
     const it = w._spawn(true);
     const half = 0.5 * w.basket.w + 0.25 * it.size;
@@ -435,7 +439,7 @@ test('catch geometry: rim band and |x − basket.x| ≤ 0.5·w + 0.25·size; no 
   }
 });
 
-test('assist magnet (age ≤ 4): a right bubble just beside the basket is pulled in; never wrong ones, never age 5+', () => {
+test('assist magnet (age ≤ 6): a right bubble just beside the basket is pulled in; never wrong ones, never age 7', () => {
   function tryCatch(age, right) {
     const w = mkWorld(manual({ seed: 10, age }));
     roundOf(w, 'colors', 2);
@@ -448,8 +452,9 @@ test('assist magnet (age ≤ 4): a right bubble just beside the basket is pulled
   }
   assert.strictEqual(tryCatch(4, true), 'pop');
   assert.strictEqual(tryCatch(3, true), 'pop');
+  assert.strictEqual(tryCatch(6, true), 'pop');
   assert.notStrictEqual(tryCatch(4, false), 'pop');
-  assert.notStrictEqual(tryCatch(5, true), 'pop');
+  assert.notStrictEqual(tryCatch(7, true), 'pop');
 });
 
 test('wrong catch: basket shakes (3 wiggles, 0.5 s); item dips, hops out away from Pip (180, −520, g 1500), re-bubbles at the apex and rises away', () => {
@@ -555,7 +560,7 @@ test('spawning: first spawn of every round is right and near Pip; never two wron
     for (let ri = 0; ri < 4; ri++) {
       roundOf(w, topic, ri);
       const px = w.layout.lanes.x0 + (w.layout.lanes.x1 - w.layout.lanes.x0) * ((s * 37 + ri * 11) % 100) / 100;
-      steerTo(w, px, 3); w.pointerUp(px, w.layout.groundY + 24);
+      steerTo(w, px, 3);              // finger stays down (no idle hold); Pip parked
       roundOf(w, topic, ri);
       let lastRight = true, first = true, noRight = 0;
       const fallT = (w.layout.sky.bottom - w.layout.spawnY) / w._fallV(age) + 1 / w.cfg.dragRate;
@@ -830,7 +835,7 @@ test('talk re-ask: talkAsk every 12 s without an answer; glowAnswer from the 2nd
 test('Pip moods: correct → happy 0.9 s, wrong → oops 0.8 s, hint → think, roundDone → cheer 1.6 s with 3 hops; eyes follow the lowest right bubble', () => {
   const w = mkWorld(manual({ seed: 70, age: 5 }));
   roundOf(w, 'colors', 3);
-  const far = place(w._spawn(true), w.layout.lanes.x1 - 20, w.layout.spawnY + 50, w);
+  const far = place(w._spawn(true), w.layout.lanes.x0 + 20, w.layout.spawnY + 50, w);   // far outside catch + magnet reach
   run(w, 2);
   assert.ok(hyp(w.pup.lookX - far.x, w.pup.lookY - far.y) < 20, 'looks at the bubble');
   catchOne(w, true); assert.strictEqual(w.pup.mood, 'happy'); run(w, 0.95); assert.strictEqual(w.pup.mood, 'idle');
@@ -861,6 +866,151 @@ test('setViewport mid-round: drag cancelled, Pip and bubbles clamped into the ne
     const sl = w.basket.slots[c.slot];
     near(c.x, w.basket.x + sl.dx, 1e-6); near(c.y, w.basket.y + sl.dy, 1e-6);
   }
+});
+
+
+// ======================================================= QA round 1
+test('QA F2: a tap on a bubble never moves Pip; hold > 0.35 s or a 24 px move on a bubble steers; a tap on the grass sends Pip there', () => {
+  for (const hold of [0.06, 0.2, 0.34]) {
+    const w = mkWorld(manual({ seed: 101, age: 4, vp: VIEWPORTS[0] }));
+    roundOf(w, 'colors', 2);
+    const it = place(w._spawn(true), w.layout.lanes.x1 - 40, w.layout.spawnY + 120, w);
+    run(w, 0.5); w.drainEvents();
+    const x0 = w.pup.x;
+    assert.strictEqual(w.pointerDown(it.x, it.y), it.id);
+    run(w, hold, () => assert.strictEqual(w.pup.x, x0, 'no steer during a possible tap'));
+    w.pointerUp(it.x, it.y);
+    assert.strictEqual(w.drainEvents().filter(e => e.type === 'tap').length, 1);
+    assert.strictEqual(w.pup.vx, 0);
+    run(w, 1.5); assert.strictEqual(w.pup.x, x0, 'Pip stayed exactly (hold ' + hold + ')');
+  }
+  // held on a bubble > tapTime → becomes a steer toward the finger
+  const w = mkWorld(manual({ seed: 102, age: 4, vp: VIEWPORTS[0] }));
+  roundOf(w, 'colors', 2);
+  const it = place(w._spawn(false), w.layout.lanes.x1 - 40, w.layout.spawnY + 120, w);
+  run(w, 0.5); const x0 = w.pup.x;
+  w.pointerDown(it.x, it.y); run(w, 0.3); assert.strictEqual(w.pup.x, x0);
+  run(w, 0.1); assert.ok(w.pup.steering, 'held → steering');
+  run(w, 1.5); assert.ok(w.pup.x > x0 + 200, 'ran toward the held finger');
+  w.pointerUp(it.x, it.y); assert.ok(!w.drainEvents().some(e => e.type === 'tap'), 'a long hold is no tap');
+  // moved ≥ 24 px from a bubble → steer
+  const w2 = mkWorld(manual({ seed: 103, age: 4, vp: VIEWPORTS[0] }));
+  roundOf(w2, 'colors', 2);
+  const b = place(w2._spawn(true), w2.layout.lanes.x0 + 80, w2.layout.spawnY + 120, w2);
+  run(w2, 0.5); const x2 = w2.pup.x;
+  w2.pointerDown(b.x, b.y); w2.pointerMove(b.x + 10, b.y); run(w2, 0.05); assert.strictEqual(w2.pup.x, x2);
+  const fx = b.x + 30; w2.pointerMove(fx, b.y); run(w2, 1.5); near(w2.pup.x, Math.max(w2.layout.pup.minX, fx), 1, 'drag from a bubble steers');
+  // tap on empty grass still sends Pip there
+  const w3 = mkWorld(manual({ seed: 104, age: 4, vp: VIEWPORTS[0] }));
+  roundOf(w3, 'colors', 2);
+  const gx = w3.layout.lanes.x0 + 50, gy = w3.layout.groundY + 30;
+  w3.pointerDown(gx, gy); run(w3, 0.1); w3.pointerUp(gx, gy); run(w3, 2);
+  near(w3.pup.x, gx, 0.5, 'grass tap → Pip runs there');
+});
+
+test('QA setTopReserve: spawn line below the speech bubble, kept across setViewport, same value is a no-op, a change keeps the steer', () => {
+  const w = mkWorld(manual({ seed: 105, age: 4, vp: VIEWPORTS[5] }));     // notch portrait
+  roundOf(w, 'colors', 2);
+  const base = w.layout.spawnY;
+  assert.strictEqual(base, 108 + 150 + 40);
+  steerTo(w, w.layout.lanes.x0, 0.2);
+  assert.ok(w.pup.steering && w.finger.down);
+  w.setTopReserve(252);
+  const want = Math.max(base, 252 + 0.675 * 135 + 6);
+  near(w.layout.spawnY, want, 1e-9, 'spawnY');
+  assert.ok(w.pup.steering && w.finger.down, 'a changed reserve keeps the steer');
+  const vT = w.cfg.fallSpeed[4] * w.layout.fallScale, T = (w.layout.sky.bottom - w.layout.spawnY) / vT + 1 / w.cfg.dragRate;
+  assert.ok(T >= 6 && T <= 9, 'fall time still ' + T.toFixed(2));
+  const L1 = w.layout; w.setTopReserve(252);
+  assert.strictEqual(w.layout, L1, 'same value → no-op'); assert.ok(w.pup.steering);
+  const it = w._spawn(true); assert.strictEqual(it.y, w.layout.spawnY);
+  w.setViewport(720, 1556, { top: 108, bottom: 62 });
+  near(w.layout.spawnY, want, 1e-9, 'setViewport keeps the reserve');
+  assert.ok(!w.pup.steering, 'setViewport still cancels the steer');
+  w.setTopReserve(0); assert.strictEqual(w.layout.spawnY, base);
+  w.setTopReserve(150); assert.strictEqual(w.layout.spawnY, base, 'a reserve above the default line changes nothing');
+  for (const v of VIEWPORTS) { w.setViewport(v.W, v.H, v.ins); w.setTopReserve(v.ins ? v.ins.top + 140 : 140); assert.ok(w.layout.sky.bottom - w.layout.spawnY > 250, v.name); }
+});
+
+test('QA still-Pip guard: a wrong bubble never lands within catch reach + 40 px of a Pip that has not moved for 1 s', () => {
+  let wrongs = 0, close = 0, movingClose = 0;
+  for (let s = 1; s <= 30; s++) {
+    const w = mkWorld({ seed: 200 + s, age: 3 + (s % 5), vp: VIEWPORTS[s % VIEWPORTS.length], config: { catchAbove: -1e6 } });
+    roundOf(w, PG.Content.topicsFor(3 + (s % 5))[s % 4], 2);
+    steerTo(w, w.layout.lanes.x0 + (w.layout.lanes.x1 - w.layout.lanes.x0) * (s % 7) / 6, 2);   // finger held still
+    const fallT = (w.layout.sky.bottom - w.layout.spawnY) / w._fallV(w.age) + 1 / w.cfg.dragRate;
+    run(w, 25, () => {
+      for (const e of w.drainEvents()) if (e.type === 'appear') {
+        const it = w.itemById(e.id); if (it.right) continue;
+        wrongs++;
+        const land = Math.max(w.layout.lanes.x0, Math.min(w.layout.lanes.x1, it.xb + w.windVx * fallT));
+        if (Math.abs(land - w.pup.x) < 0.5 * w.basket.w + 0.25 * it.size + 40 - 1) close++;
+      }
+    });
+  }
+  assert.ok(wrongs > 100, 'wrongs ' + wrongs);
+  assert.strictEqual(close, 0, 'wrong bubbles aimed at a still Pip');
+  void movingClose;
+});
+
+test('QA idle hold: hands off for 15 s → no new bubbles except one right bubble every 8 s, aimed outside reach; a touch resumes', () => {
+  const w = mkWorld({ seed: 106, age: 4 });
+  roundOf(w, 'colors', 2);
+  const spawns = [];
+  run(w, 60, () => { for (const e of w.drainEvents()) if (e.type === 'appear') spawns.push({ t: w.stateTime, it: w.itemById(e.id) }); });
+  const late = spawns.filter(x => x.t > 15 + 8);   // after the hold began and the sky emptied
+  assert.ok(spawns.some(x => x.t < 15), 'normal spawning first');
+  assert.ok(late.length >= 2 && late.length <= 6, 'trickle ' + late.length);
+  for (const x of late) assert.ok(x.it.right, 'only right bubbles in the hold');
+  for (let i = 1; i < late.length; i++) assert.ok(late[i].t - late[i - 1].t >= 8 - 1e-6, 'every ≥ 8 s');
+  for (const x of late) {
+    const fallT = (w.layout.sky.bottom - w.layout.spawnY) / w._fallV(4) + 1 / w.cfg.dragRate;
+    const land = x.it.xb + w.windVx * fallT;
+    assert.ok(Math.abs(land - w.pup.x) >= 0.5 * w.basket.w + 0.25 * x.it.size + 70 + 40 - 30, 'aimed outside catch + magnet reach');
+  }
+  assert.strictEqual(w.basket.count, 0, 'the round does not play itself');
+  // a touch resumes normal spawning
+  steerTo(w, w.pup.x, 0.05);
+  const n0 = w.counters.spawns; run(w, 6);
+  assert.ok(w.counters.spawns - n0 >= 2, 'spawning resumed');
+});
+
+test('QA content: no target repeated from the previous round (size: size + colour); talk colours colour-blind safe below 5', () => {
+  let pairs = 0, same = 0;
+  for (let s = 1; s <= 12; s++) {
+    const r = playSession(700 + s, 3 + (s % 5), 0.9, { keep: true, vp: VIEWPORTS[s % VIEWPORTS.length] });
+    let prev = null, lvl = -1;
+    for (const e of r.events) {
+      if (e.type === 'level') { lvl = e.level; prev = null; }
+      if (e.type === 'round') {
+        const key = e.topic === 'size' ? e.params.size : e.topic + JSON.stringify(e.params);
+        if (prev !== null && e.topic !== 'size') { pairs++; if (key === prev) same++; }
+        prev = key;
+      }
+    }
+    void lvl;
+  }
+  assert.ok(pairs > 100); assert.strictEqual(same, 0, 'repeated targets ' + same + '/' + pairs);
+  for (let s = 1; s <= 300; s++) {
+    const o = { age: 3, lang: 'en', rng: new PG.RNG(s), roundIndex: 2 };
+    const a = PG.Content.makeRound('size', o);
+    const b = PG.Content.makeRound('size', { age: 3, lang: 'en', rng: new PG.RNG(s * 7), roundIndex: 3, avoid: PG.Content.roundKey(a) });
+    assert.notStrictEqual(PG.Content.roundKey(b), PG.Content.roundKey(a));
+  }
+  assert.ok(PG.Content.clash(['yellow', 'orange', 'red']) && !PG.Content.clash(['yellow', 'red', 'blue']));
+});
+
+test('QA bot: presses again when the world cancels its steer mid-round', () => {
+  const w = mkWorld({ seed: 107, age: 4 });
+  const bot = new PG.Bot(w, { skill: 0.9, seed: 3 });
+  w.newSession();
+  runUntil(w, () => { bot.step(H); return w.state === 'round' && bot.finger.down; }, 20);
+  assert.ok(w.finger.down);
+  w.setViewport(1036, 720, null);               // cancels the steer
+  assert.ok(!w.finger.down);
+  bot.step(H); w.update(H);
+  assert.ok(w.finger.down && w.pup.steering, 'pressed again');
+  assert.strictEqual(bot.stats.represses, 1);
 });
 
 // ======================================================= sessions / bot / determinism

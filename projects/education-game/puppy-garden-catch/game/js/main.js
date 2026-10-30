@@ -54,8 +54,9 @@
   function applySize() {
     const prev = view;
     view = computeView();
-    // rotation while holding an item: the finger's old logical point is meaningless now → put it back quietly
-    if (world && world.cancelDrag && (prev.W !== view.W || prev.H !== view.H)) world.cancelDrag();
+    const ins0 = prev.ins || {}, ins1 = view.ins;
+    const geomChanged = !layoutDone || prev.W !== view.W || prev.H !== view.H ||
+      ['top', 'right', 'bottom', 'left'].some(k => Math.abs((ins0[k] || 0) - ins1[k]) > 0.5);
     const dpr = window.devicePixelRatio || 1;
     let rs = view.s * dpr * quality;
     const px = view.W * rs * view.H * rs, cap = maxPixels();
@@ -65,9 +66,9 @@
     c.style.width = view.cssW + 'px'; c.style.height = view.cssH + 'px';
     c.style.left = view.left + 'px'; c.style.top = view.top + 'px';
     render.resize(view.W, view.H, rs);
-    world.setViewport(view.W, view.H, view.ins);
-    // world.setViewport cancels the steer and clamps Pip and every bubble into the new screen
-    weather.resize(view.W, view.H);
+    // only a real size/inset change re-lays the world out (setViewport cancels the child's steer);
+    // a render-quality step only resizes the backing store
+    if (geomChanged) { world.setViewport(view.W, view.H, view.ins); weather.resize(view.W, view.H); layoutDone = true; }
     placeBubble();
     updateHudStarTarget();
   }
@@ -83,12 +84,14 @@
       else { r.y = hud.bottom + 8; r.w = Math.min(window.innerWidth - r.x - 12 - view.ins.right * view.s, 560); }
     }
     PG.UI.placeBubble(r);
+    // new bubbles must be born below the speech bubble (it drops under the HUD on narrow phones)
+    if (world.setTopReserve) world.setTopReserve((r.y + r.h - view.top) / view.s);
   }
   function updateHudStarTarget() {
     const p = PG.UI.hudStarPoint();
     if (p.x || p.y) render.hudStar = { x: (p.x - view.left) / view.s, y: (p.y - view.top) / view.s };
   }
-  let resizeT = 0;
+  let resizeT = 0, layoutDone = false, needResize = false;
   function onResize() { clearTimeout(resizeT); resizeT = setTimeout(applySize, 120); }
 
   /* ---------- voice ---------- */
@@ -316,6 +319,7 @@
   function frame(ts) {
     requestAnimationFrame(frame);
     if (document.hidden) { last = ts; return; }
+    if (needResize) { needResize = false; applySize(); }   // before drawing: resizing clears the canvas
     let dt = last ? (ts - last) / 1000 : 0.016;
     last = ts;
     const raw = dt;
@@ -340,7 +344,7 @@
   function adapt(raw) {  // adaptive quality: step the render scale down when frames stay slow
     if (raw > 0.5) return;
     if (raw > 0.022) { slowAcc += raw; fastAcc = 0; stats.slowFrames++; } else { slowAcc = Math.max(0, slowAcc - raw * 0.5); fastAcc += raw; }
-    if (slowAcc > 1.5 && quality > 0.6) { quality *= 0.85; render.quality = Math.max(0.5, quality); slowAcc = 0; applySize(); }
+    if (slowAcc > 1.5 && quality > 0.6) { quality *= 0.85; render.quality = Math.max(0.5, quality); slowAcc = 0; needResize = true; }
   }
 
   /* ---------- input ---------- */

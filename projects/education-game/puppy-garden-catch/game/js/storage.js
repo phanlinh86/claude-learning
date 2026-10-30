@@ -2,7 +2,7 @@
  * Values are strings; JSON helpers. set() returns Promise<boolean> and rolls back the cached value on failure. */
 (function (PG) {
   'use strict';
-  const PREFIX = 'dn:';
+  const PREFIX = 'pg:';   // own prefix: Dino Nest Sort lives on the same github.io origin
   const S = {
     native: false,
     cache: {},

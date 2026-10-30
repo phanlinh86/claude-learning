@@ -62,7 +62,7 @@
   // base drawn item sizes (px, logical) — balls 90–120 (DESIGN §4.1); the bubble is 1.35× this
   var SIZE = { ball: 104, animal: 108, fruit: 100, shape: 100 };
   var SIZE_SCALE = { big: 1.3, small: 0.7 };
-  var COUNT_RANGE = { 3: [1, 3], 4: [1, 5], 5: [3, 10], 6: [4, 12], 7: [4, 12] };
+  var COUNT_RANGE = { 3: [1, 3], 4: [1, 5], 5: [3, 6], 6: [4, 8], 7: [4, 8] };   // QA playtest row 2 (was 5: 3–10, 6+: 4–12)
   var MAX_AIR = { 3: 2, 4: 3, 5: 3, 6: 4, 7: 4 };
 
   function ageOf(a) { a = Math.round(+a || 4); return a < 3 ? 3 : a > 7 ? 7 : a; }
@@ -72,8 +72,12 @@
     return topic === 'lower' ? P.filter(function (c) { return c !== 'I' && c !== 'L'; }) : P;
   }
   function range(a, b) { var r = []; for (var i = a; i <= b; i++) r.push(i); return r; }
-  // colour-blind safety below age 5: never blue+purple or red+green together
-  function clash(cs) { return (cs.indexOf('blue') >= 0 && cs.indexOf('purple') >= 0) || (cs.indexOf('red') >= 0 && cs.indexOf('green') >= 0); }
+  // colour-blind safety below age 5: never blue+purple, red+green or yellow+orange together (rounds and Talk time)
+  var CLASH = [['blue', 'purple'], ['red', 'green'], ['yellow', 'orange']];
+  function clash(cs) {
+    for (var i = 0; i < CLASH.length; i++) if (cs.indexOf(CLASH[i][0]) >= 0 && cs.indexOf(CLASH[i][1]) >= 0) return true;
+    return false;
+  }
   function safeColors(rng, n, age) {
     var cs = rng.sample(COLORS, n), tries = 0;
     while (age < 5 && clash(cs) && tries++ < 60) cs = rng.sample(COLORS, n);
@@ -102,8 +106,19 @@
   }
   function needFor(ri, rng) { return ri <= 0 ? 1 : ri === 1 ? 2 : ri === 2 ? rng.int(2, 3) : 3; }
 
+  /** What a child hears as "the same round again": the target (size: size + colour). */
+  function roundKey(r) { return r.topic === 'size' ? r.target.value + '|' + r.pool[0].color : r.topic + ':' + String(r.target.value); }
+
+  /** o.avoid = roundKey of the previous round: re-rolled (same rng stream, ≤ 8 tries) so the target is not repeated. */
   function makeRound(topic, o) {
     o = o || {};
+    if (!o.rng) o = { age: o.age, lang: o.lang, roundIndex: o.roundIndex, avoid: o.avoid, rng: new PG.RNG(1) };
+    var r = makeRound1(topic, o);
+    for (var k = 0; k < 8 && o.avoid && roundKey(r) === o.avoid; k++) r = makeRound1(topic, o);
+    return r;
+  }
+
+  function makeRound1(topic, o) {
     var age = ageOf(o.age), lang = langOf(o.lang), rng = o.rng || new PG.RNG(1), ri = o.roundIndex || 0;
     var warm = ri === 0, n = kindsFor(topic, age), pool = [], params = {}, target, mode = 'catch', promptKey = 'p.' + topic;
     var need = needFor(ri, rng), rightShare = warm ? 0.7 : 0.55, i, k;
@@ -274,9 +289,12 @@
     var age = ageOf(o.age), lang = langOf(o.lang), rng = o.rng || new PG.RNG(1);
     var show = { sprite: null, shape: null, color: null, text: null, count: 1, scale: 1 }, params = {}, ch, a, k;
     switch (topic) {
-      case 'colors':
+      case 'colors': {
         a = rng.pick(COLORS); show.sprite = 'ball_' + a; show.color = a;
-        ch = choicesFrom(rng, 'color', a, COLORS, 3); break;
+        ch = choicesFrom(rng, 'color', a, COLORS, 3);
+        for (var tr = 0; tr < 60 && age < 5 && clash(ch.choices.map(function (c) { return c.value; })); tr++) ch = choicesFrom(rng, 'color', a, COLORS, 3);
+        break;
+      }
       case 'shapes': {
         var sp = age >= 5 ? SHAPES.concat(['rectangle']) : SHAPES;
         a = rng.pick(sp); show.shape = a; show.color = rng.pick(COLORS);
@@ -333,7 +351,7 @@
   }
 
   PG.Content = {
-    makeRound: makeRound, makeTalk: makeTalk, validate: validate, matches: matches,
+    makeRound: makeRound, makeTalk: makeTalk, validate: validate, matches: matches, roundKey: roundKey, clash: clash,
     topicsFor: function (age) { return PG.AGE_TOPICS[ageOf(age)].slice(); },
     kindsFor: function (topic, age) { return kindsFor(topic, ageOf(age)); },
     TOPICS: ALL_TOPICS, COLORS: COLORS, SHAPES: SHAPES.concat(['rectangle']), FRUITS: FRUITS, ANIMALS: ANIMALS,

@@ -215,7 +215,7 @@
     _donePup(w) {
       const H = this.H, W = this.W, h = Math.min(H * 0.36, 360);
       const cyc = this.time % 1.1, hop = cyc < 0.55 ? Math.sin(cyc / 0.55 * Math.PI) * 40 : 0;
-      const y = Math.min(w.layout.groundY + 6, H * (H > W ? 0.5 : 0.55));
+      const y = H > W ? w.layout.groundY + 6 : Math.min(w.layout.groundY + 6, H * 0.55);   // portrait: stand on the grass
       this._character(cyc < 0.55 ? 'pup_cheer' : 'pup_happy', W / 2, y - hop, h, 1, y, hop, 0, false);
     }
 
@@ -295,7 +295,9 @@
     /* the wooden tag on the basket shows what to catch (a picture, so non-readers know too) */
     _tag(w, cx, cy, tw) {
       const cur = w.cur; if (!cur || !cur.target) return;
-      const g = this.g, T = cur.target, th = tw * 0.62;
+      const g = this.g, T = cur.target;
+      if (T.kind === 'number' || T.kind === 'parity') tw *= 1.55;   // maths needs room to stay readable on phones
+      const th = Math.min(tw * 0.62, 0.62 * 0.46 * (w.basket.w || 210) * 1.2);
       const count = cur.mode === 'count';
       const h = count ? th * 1.25 : th;
       g.save();
@@ -317,11 +319,11 @@
           else this._sprite('animal_' + T.value, cx, iy, ih);
           break;
         case 'letter': outlinedText(g, cur.topic === 'lower' ? String(T.value).toLowerCase() : String(T.value), cx, iy + 2, ih * 0.9, INK, null, tw * 0.86); break;
-        case 'number': outlinedText(g, String((cur.params && cur.params.sum) || T.value).replace('+', ' + ').replace('−', ' − ') + ' = ?', cx, iy + 2, ih * 0.58, INK, null, tw * 0.9); break;
+        case 'number': outlinedText(g, String((cur.params && cur.params.sum) || T.value).replace('+', '+').replace('−', '−'), cx, iy + 2, ih * 0.66, INK, null, tw * 0.94); break;
         case 'parity': {
           const word = PG.I18N ? PG.I18N.name(this.lang, 'parity', T.value) : T.value;
-          outlinedText(g, word, cx, iy - ih * 0.18, ih * 0.5, INK, null, tw * 0.86);
-          outlinedText(g, T.value === 'odd' ? '1 3 5' : '2 4 6', cx, iy + ih * 0.3, ih * 0.36, '#8a6a4a', null, tw * 0.86);
+          outlinedText(g, word, cx, iy - ih * 0.2, ih * 0.56, INK, null, tw * 0.9);
+          outlinedText(g, T.value === 'odd' ? '1 3 5' : '2 4 6', cx, iy + ih * 0.32, ih * 0.46, '#8a6a4a', null, tw * 0.9);
           break;
         }
       }
@@ -404,8 +406,9 @@
       const n = portrait ? 3 : 4;
       for (let i = 0; i < n; i++) {
         const per = 9 + i * 1.7, u = ((this.time + i * 3.1) % per) / per;
-        const bx = portrait ? W * (0.18 + 0.64 * i / (n - 1)) : W * (0.62 + 0.3 * (i / (n - 1))) - L.ins.right * 0.5;
-        const top = L.ins.top + (portrait ? 160 : 120), bottom = portrait ? y - h * 1.25 : L.groundY - 60;
+        // keep clear of the logo, tagline and Play button: a band above the logo (portrait) / the right edge (landscape)
+        const bx = portrait ? W * (0.16 + 0.68 * i / (n - 1)) : W * (0.8 + 0.14 * (i / (n - 1))) - L.ins.right;
+        const top = L.ins.top + (portrait ? 150 : 170), bottom = portrait ? Math.max(top + 60, H * 0.25) : L.groundY - 60;
         const by = lerp(top, bottom, u) , sx = Math.sin(this.time * 2.2 + i * 1.7) * 18;
         const a = clamp(u * 6, 0, 1) * clamp((1 - u) * 6, 0, 1);
         const s = portrait ? 96 : 92;

@@ -11,7 +11,8 @@
  *   Target: the lowest right bubble; a wrong one with p = (1 − skill)·0.35 per new target; at low skill it
  *   sometimes stops short (p = (1 − skill)·0.4) and predicts only from the current position.
  *   Dodging: a falling wrong bubble about to reach the rim over the basket is noticed with p = skill and avoided.
- *   A finger is always held ≥ 0.4 s, so the bot never produces a tap. Talk: answers after 1.0–2.2 s, right with
+ *   A finger is always held ≥ 0.4 s, so the bot never produces a tap. If the world cancels the steer (resize) while the
+ *   finger is down, the bot presses again (stats.represses). Talk: answers after 1.0–2.2 s, right with
  *   p = 0.5 + skill/2.
  */
 (function (PG) {
@@ -126,6 +127,11 @@
       return;
     }
     this._talkT = -1;
+    // robustness: the world cancelled our steer (setViewport / cancelDrag) while we think the finger is down → press again
+    if (this.finger.down && !w.finger.down) {
+      if (w.state === 'round' && !w._roundEnded) { w.pointerDown(this.finger.x, this.finger.y); this.stats.steers++; this.stats.represses = (this.stats.represses || 0) + 1; this._downT = 0; }
+      else this.finger.down = false;
+    }
     if (this.finger.down) this._downT += dt;
 
     if (w.state !== 'round' || w._roundEnded) {

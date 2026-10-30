@@ -1,1 +1,2 @@
 tests/out/
+tests/sim/out/*.json

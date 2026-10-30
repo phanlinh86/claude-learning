@@ -10,3 +10,4 @@ Settings → Accessibility → Spoken Content → Voices → Vietnamese (downloa
 | Date | Name | Mechanic | Theme | Ages | Folder | Link |
 |---|---|---|---|---|---|---|
 | 2026-10-29 | Dino Nest Sort · Khủng Long Xếp Tổ | sort into nests (drag) | dinosaur valley, sunny → breezy → rain → rainbow | 3–7 (default 4) | `projects/education-game/dino-nest-sort/` | [play on iPhone / iPad / browser](https://phanlinh86.github.io/claude-learning/projects/education-game/dino-nest-sort/game/) |
+| 2026-10-30 | Puppy Garden Catch · Cún Con Hứng Quà | catch the falling answer with a basket (drag / tap to steer) | rainy-day garden, sunny → breezy → rain → rainbow | 3–7 (default 4) | `projects/education-game/puppy-garden-catch/` | [play on iPhone / iPad / browser](https://phanlinh86.github.io/claude-learning/projects/education-game/puppy-garden-catch/game/) |
