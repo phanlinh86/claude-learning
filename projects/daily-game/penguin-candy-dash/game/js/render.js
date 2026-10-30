@@ -354,6 +354,14 @@
         if (spr) g.drawImage(spr, -BEAR / 2, -BEAR * BEAR_FOOT, BEAR, BEAR);
       }
       g.restore();
+      if (b.nap > 0) {   // sleepy follower: floating Zzz
+        for (let i = 0; i < 3; i++) {
+          const k = ((this.time * 0.8 + i / 3) % 1);
+          g.globalAlpha = 1 - k;
+          this.text('z', b.x + 14 + k * 18, b.y - BEAR - k * 26, 12 + i * 3, '#ffffff', '#6a2d5c', 'center', 3);
+        }
+        g.globalAlpha = 1;
+      }
       if (stun) for (let i = 0; i < 3; i++) {
         const ang = this.time * 5 + i * TAU / 3, spr = A.sprite('p_star', 32, 32);
         if (spr) g.drawImage(spr, b.x + Math.cos(ang) * 18 - 6, b.y - BEAR - 4 + Math.sin(ang) * 5 - 6, 12, 12);

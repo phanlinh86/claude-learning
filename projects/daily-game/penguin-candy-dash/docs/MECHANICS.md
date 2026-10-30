@@ -164,3 +164,23 @@ Steady counts per biome: meadow 47, river 42, clouds 45, glacier 60. During a 2 
 | Glacier | sprinkles in 3 colours (tumbling: spin plus a flipX of cos); sugar snowflakes in 3 depth layers (far dots, mid, front); sugar | fall: terminal speed, pendulum sway, parallax-scaled wind |
 
 Ambient tint per biome: warm cream, cocoa, pink, and icy blue with fog 0.12. The tint blends with the ramps during a hand-over.
+
+## v1.1 tuning (from docs/reports/playtest_report.md, package "final")
+- **Stop bump chains:** `bearRestTime` 2.5 s (Easy 3.0). `invulnTime` is 2.0 s on Normal and 2.5 s on Easy.
+- **Gentler follower and guard:**
+  - follower: `followLag` 1.2 (Easy 1.4), `followDirect` 40;
+  - guard: `guardAggro` 80 (Easy 70, Hard 100), `guardCharge` 1.0 (Hard 1.15), `guardChargeMax` 0.9, `guardCool` 2.0, `guardOrbitR` 75.
+- **Kinder contact:** `hitForgive` 0.70 (Easy 0.6), `bearCapFrac` 0.65.
+- **One new bear kind per biome:** `bearCounts` [1,2,2,3] on Normal and Easy. `bearSpeedMul` is 0.75 on Normal and 0.6 on Easy.
+- **Longer biomes:** `jarTargets` Normal [18,23,27,30], Easy [12,15,18,21], Hard [20,23,29,33]. `healOnClear` 2.
+- **Pop rewards popping near bears:** `popBase` 30, `popPerBear` 30.
+- **Sleepy follower (new):** after chasing for `followNapAfter` s (Normal 6, Easy 5, Hard 9), the green bear naps for `followNap` s (2.5 / 3 / 1.5). It emits a `nap` event and has a `bear.nap` timer; the renderer shows a floating "Zzz".
+- **Re-simulation with the final values** (6 seeds per model × difficulty; `tests/sim/results/baseline_v1.1.md`):
+
+| Model | Difficulty | Session | Result |
+|---|---|---|---|
+| 6-year-old | Easy | 2.8 min (was 1.1) | clears Meadow 100 %, lap 1 50 % |
+| Casual adult | Normal | 6.9 min (was 1.2) | clears lap 1 67 % |
+| Strong adult | Normal | 14.1 min | – |
+
+  Random mashing, corner camping and circle-strafing clear 0 % of lap 1 on every difficulty.

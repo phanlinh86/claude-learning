@@ -50,3 +50,7 @@ P.pkgF = {
   normal: Object.assign({}, P.pkgD.normal, { bearSpeedMul: 0.75, bearCounts: [1, 2, 2, 3] }),
   hard: P.pkgD.hard
 };
+// pkgF + Pop! timing reward: popping next to bears pays (risk), spamming it in the open does not
+P.pkgFpop = { all: Object.assign({}, P.pkgF.all, { popPerBear: 30, popBase: 30 }), easy: P.pkgF.easy, normal: P.pkgF.normal, hard: P.pkgF.hard };
+// FINAL recommendation: pkgFpop + a steeper lap ramp on Easy so endless Easy also ends
+P.final = { all: P.pkgFpop.all, easy: Object.assign({}, P.pkgF.easy, { bearLapMul: 0.22 }), normal: P.pkgF.normal, hard: P.pkgF.hard };

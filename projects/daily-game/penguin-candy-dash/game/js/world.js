@@ -584,6 +584,7 @@
         b.mode = 'idle';
       } else if (b.rest > 0) {
         b.rest = Math.max(0, b.rest - h); b.mode = 'rest';
+        if (b.nap > 0) b.nap = Math.max(0, b.nap - h);
       } else if (b.kind === 'red') {
         b.mode = 'wander';
         var wx = b._wx - b.x, wy = b._wy - b.y, wd = hyp(wx, wy);
@@ -593,6 +594,12 @@
         } else { sp = Math.min(base * 0.9, wd * 3); dvx = wx / wd * sp; dvy = wy / wd * sp; }
       } else if (b.kind === 'green') {
         b.mode = 'follow';
+        // Sleepy follower (playtest addition #1): after chasing a while it naps — a clear "run now!" window for kids.
+        b._chase = (b._chase || 0) + h;
+        if (c.followNapAfter > 0 && b._chase > c.followNapAfter) {
+          b._chase = 0; b.rest = b.nap = c.followNap; b.mode = 'rest';
+          this._emit({ type: 'nap', id: b.id, x: b.x, y: b.y, time: c.followNap });
+        }
         var dpx = p.x - b.x, dpy = p.y - b.y, dp = hyp(dpx, dpy);
         var t = dp < c.followDirect ? p : this._trail(info.followLag);
         var fx = t.x - b.x, fy = t.y - b.y, fd = hyp(fx, fy);
@@ -825,6 +832,20 @@
   };
 
   CD.CONFIG = CONFIG;
+  /* v1.1 tuning from docs/reports/playtest_report.md (package "final"): stops bump chains, gentler follower and guard,
+   * kinder contact, one new bear kind per biome, longer biomes, Pop rewards popping next to bears. */
+  Object.assign(CONFIG, {
+    bearRestTime: 2.5, followLag: 1.2, followDirect: 40,
+    guardAggro: 80, guardCharge: 1.0, guardChargeMax: 0.9, guardCool: 2.0, guardOrbitR: 75,
+    hitForgive: 0.70, bearCapFrac: 0.65, popBase: 30, popPerBear: 30,
+    // Normal is the base config
+    invulnTime: 2.0, bearSpeedMul: 0.75, bearCounts: [1, 2, 2, 3], healOnClear: 2, jarTargets: [18, 23, 27, 30],
+    followNapAfter: 6, followNap: 2.5   // sleepy follower
+  });
+  DIFFICULTY.normal = {};
+  Object.assign(DIFFICULTY.easy, { bearRestTime: 3.0, followLag: 1.4, guardAggro: 70, invulnTime: 2.5, bearSpeedMul: 0.6, healOnClear: 2,
+    bearCounts: [1, 2, 2, 3], jarTargets: [12, 15, 18, 21], hitForgive: 0.6, bearLapMul: 0.22, followNapAfter: 5, followNap: 3 });
+  Object.assign(DIFFICULTY.hard, { guardAggro: 100, guardCharge: 1.15, jarTargets: [20, 23, 29, 33], followNapAfter: 9, followNap: 1.5 });
   CD.DIFFICULTY = DIFFICULTY;
   CD.World = World;
 })(window.CD = window.CD || {});

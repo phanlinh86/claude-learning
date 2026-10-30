@@ -6,4 +6,4 @@ Games made with `/build-game` (one folder each, no dates in folder names). `/bui
 |---|---|---|---|---|---|
 | 2026-10-28 | Family Flappy | one-button flyer, no pipes (requested by you) | four seasons | `projects/daily-game/flappy/` | [play in browser](https://phanlinh86.github.io/claude-learning/projects/daily-game/flappy/game/) · exe: built by `tools/build.sh` |
 | 2026-10-29 | Foxy's Reef Memory | memory-match cards with a timer | coral reef | `projects/daily-game/foxy-reef-memory/` | [play in browser](https://phanlinh86.github.io/claude-learning/projects/daily-game/foxy-reef-memory/game/) · exe: built by `tools/build.sh` |
-| 2026-10-29 (2nd roll) | Pip's Candy Dash | top-down collector with gentle chasers | candy land | `projects/daily-game/penguin-candy-dash/` | _pending_ |
+| 2026-10-29 (2nd roll) | Pip's Candy Dash | top-down collector with gentle chasers | candy land | `projects/daily-game/penguin-candy-dash/` | [play in browser](https://phanlinh86.github.io/claude-learning/projects/daily-game/penguin-candy-dash/game/) (after merge to main) · exe: built by `tools/build.sh` |

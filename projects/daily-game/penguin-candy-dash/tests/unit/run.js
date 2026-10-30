@@ -73,7 +73,7 @@ test('world: initial state and DESIGN §5.1 contract fields', () => {
   assert.deepStrictEqual(w.arena, { x: 40, y: 84, w: 880, h: 432 });
   assert.deepStrictEqual(w.zones, []);
   for (const k of ['x', 'y', 'vx', 'vy', 'facing', 'frame', 'scale', 'radius', 'invuln', 'dashCd', 'sliding', 'squash', '_px', '_py']) assert.ok(k in w.pip, 'pip.' + k);
-  assert.strictEqual(w.bears.length, 2);
+  assert.strictEqual(w.bears.length, w.cfg.bearCounts[0]);
   for (const b of w.bears) for (const k of ['id', 'kind', 'x', 'y', 'vx', 'vy', 'facing', 'frame', 'stun', 'radius', 'spawnT', '_px', '_py']) assert.ok(k in b, 'bear.' + k);
   assert.ok(w.gems.length >= 3);
   for (const g of w.gems) for (const k of ['id', 'color', 'x', 'y', 'vx', 'vy', 'appear', 'loose', 'life', '_px', '_py']) assert.ok(k in g, 'gem.' + k);
@@ -289,8 +289,8 @@ test('pop: only at max size; size → 1, +50 +10 per bear within 160 px, stun 2.
   w.size = 5; w.drainEvents();
   assert.strictEqual(w.action(), 'pop');
   const ev = w.drainEvents(), pe = ev.find(e => e.type === 'pop');
-  assert.ok(pe && pe.stunned === 2 && pe.points === 70);
-  assert.strictEqual(w.size, 1); assert.strictEqual(w.score, 70); assert.strictEqual(w.pops, 1);
+  assert.ok(pe && pe.stunned === 2 && pe.points === w.cfg.popBase + 2 * w.cfg.popPerBear);
+  assert.strictEqual(w.size, 1); assert.strictEqual(w.score, w.cfg.popBase + 2 * w.cfg.popPerBear); assert.strictEqual(w.pops, 1);
   assert.ok(b1.stun === 2.5 && b2.stun === 2.5 && b3.stun === 0);
   // a stunned bear touching Pip does nothing
   w.update(H); b1.x = w.pip.x + 5; b1.y = w.pip.y;
@@ -337,7 +337,7 @@ test('bears: guard charges when Pip comes near its gem, then gives up', () => {
   w.pip.x = 140; w.pip.y = 300;
   run(w, 2);
   assert.strictEqual(b.mode, 'orbit');
-  w.pip.x = 420; w.pip.y = 300; w.pip.invuln = 0;   // (a guard never charges a blinking, invulnerable Pip)
+  w.pip.x = 500 - w.cfg.guardAggro + 20; w.pip.y = 300; w.pip.invuln = 0;   // (a guard never charges a blinking, invulnerable Pip)
   let charged = false;
   run(w, 0.5, 1 / 60, () => { if (b.mode === 'charge') charged = true; });
   assert.ok(charged);
@@ -346,7 +346,7 @@ test('bears: guard charges when Pip comes near its gem, then gives up', () => {
   assert.strictEqual(b.mode, 'orbit', 'returns to guarding');
 });
 
-test('bears: never faster than 0.75 × Pip max speed (any size, any terrain), never stack, spawn away from Pip', () => {
+test('bears: never faster than bearCapFrac × Pip max speed (any size, any terrain), never stack, spawn away from Pip', () => {
   for (const level of [0, 1, 2, 3, 7, 12]) {
     const w = new CD.World({ seed: 10 + level, config: CD.DIFFICULTY.hard });
     w.startLevel(level);
@@ -372,7 +372,18 @@ test('bears: never faster than 0.75 × Pip max speed (any size, any terrain), ne
   }
   // counts by level and lap
   const w = new CD.World({ seed: 1 });
-  assert.deepStrictEqual([0, 1, 2, 3, 4, 7, 40].map(i => w.levelInfo(i).bears), [2, 3, 3, 4, 3, 5, 8]);
+  const C = w.cfg, exp = i => Math.min(C.bearMax, C.bearCounts[i % 4] + C.bearsPerLap * Math.floor(i / 4));
+  assert.deepStrictEqual([0, 1, 2, 3, 4, 7, 40].map(i => w.levelInfo(i).bears), [0, 1, 2, 3, 4, 7, 40].map(exp));
+});
+
+test('sleepy follower: the green bear naps after chasing for followNapAfter s (nap event, harmless rest)', () => {
+  const w = world(21, { bearCounts: [0, 0, 0, 0] }); clearGems(w);
+  const b = w._spawnBear('green', 0); b.spawnT = 1; b.x = 700; b.y = 300;
+  w.pip.x = 200; w.pip.y = 300;
+  let nap = null;
+  run(w, w.cfg.followNapAfter + 1, 1 / 60, () => { w.pip.x = 200; w.pip.y = 300; w.pip.invuln = 9; for (const e of w.drainEvents()) if (e.type === 'nap') nap = e; });
+  assert.ok(nap, 'nap event');
+  assert.ok(b.nap > 0 && b.mode === 'rest');
 });
 
 // ---------- bump ----------
@@ -390,7 +401,7 @@ test('bump: −1 heart, −1 size, drops 2 re-collectable gems, knock-back, invu
   assert.ok(ev.some(e => e.type === 'drop' && e.n === 2));
   assert.strictEqual(w.hearts, 2); assert.strictEqual(w.size, 2); assert.strictEqual(w.jar, 3); assert.strictEqual(w.bumps, 1);
   assert.ok(w.pip.vx < -200, 'knocked back away from the bear');
-  assert.ok(Math.abs(w.pip.invuln - 1.5) < 0.02);
+  assert.ok(Math.abs(w.pip.invuln - w.cfg.invulnTime) < 0.02);
   assert.strictEqual(w.pip.frame, 'hurt');
   const loose = w.gems.filter(g => g.loose);
   assert.strictEqual(loose.length, 2);
@@ -492,8 +503,8 @@ test('zones: cloud puffs push out springily (bounce event + hop), meadow has no 
 // ---------- jar, gate, levels ----------
 test('jar → gate → cleared (bonus hearts × 100, heal) → next biome; laps get harder', () => {
   const w = world(17, NOBEARS);
-  assert.strictEqual(w.jarTarget, 12);
-  w.jar = 11;
+  assert.strictEqual(w.jarTarget, w.cfg.jarTargets[0]);
+  w.jar = w.jarTarget - 1;
   const g = w.gems[0]; g.appear = 1; w.pip.x = g.x; w.pip.y = g.y; w.update(H);
   let ev = w.drainEvents().map(e => e.type);
   assert.ok(ev.includes('jarfull') && ev.includes('gateopen'));
@@ -514,7 +525,7 @@ test('jar → gate → cleared (bonus hearts × 100, heal) → next biome; laps 
   assert.strictEqual(w.level, 0);
   run(w, 0.2);
   assert.strictEqual(w.level, 1); assert.strictEqual(w.biome, 1); assert.notStrictEqual(w.state, 'cleared');
-  assert.strictEqual(w.size, 1); assert.strictEqual(w.jar, 0); assert.strictEqual(w.jarTarget, 15);
+  assert.strictEqual(w.size, 1); assert.strictEqual(w.jar, 0); assert.strictEqual(w.jarTarget, w.cfg.jarTargets[1]);
   assert.ok(w.drainEvents().some(e => e.type === 'biome' && e.biome === 1 && e.level === 1));
   // lap 2 (level 4): meadow again, more bears / gems, bigger jar, faster bears, shorter follow lag
   const L = new CD.World({ seed: 1 }), a = L.levelInfo(0), b = L.levelInfo(4);
