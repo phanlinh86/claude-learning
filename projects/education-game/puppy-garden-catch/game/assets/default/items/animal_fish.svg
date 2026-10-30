@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><clipPath id="fish_c1"><path d="M 84 64 C 94 52 106 38 116 38 C 120 40 118 52 113 64 C 118 76 120 88 116 90 C 106 90 94 76 84 64 Z" /></clipPath><clipPath id="fish_c2"><path d="M 38 38 C 44 18 68 16 80 36 C 66 34 52 34 38 38 Z" /></clipPath><clipPath id="fish_c3"><path d="M 52 92 C 56 106 70 108 76 98 C 68 96 60 94 52 92 Z" /></clipPath><clipPath id="fish_c4"><ellipse cx="56" cy="64" rx="40" ry="32" /></clipPath><clipPath id="fish_c5"><path d="M 66 70 C 72 66 80 67 82 72 C 78 78 70 78 66 70 Z" /></clipPath><clipPath id="fish_c6"><circle cx="14" cy="38" r="5" /></clipPath><clipPath id="fish_c7"><circle cx="22" cy="24" r="3.4" /></clipPath><g id="fish_sil"><path d="M 84 64 C 94 52 106 38 116 38 C 120 40 118 52 113 64 C 118 76 120 88 116 90 C 106 90 94 76 84 64 Z" /><path d="M 38 38 C 44 18 68 16 80 36 C 66 34 52 34 38 38 Z" /><path d="M 52 92 C 56 106 70 108 76 98 C 68 96 60 94 52 92 Z" /><ellipse cx="56" cy="64" rx="40" ry="32" /><circle cx="14" cy="38" r="5" /><circle cx="22" cy="24" r="3.4" /></g></defs>
+<use href="#fish_sil" xlink:href="#fish_sil" transform="translate(0 3)" fill="#1B2433" stroke="#1B2433" stroke-width="15" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>
+<use href="#fish_sil" xlink:href="#fish_sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="15" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 84 64 C 94 52 106 38 116 38 C 120 40 118 52 113 64 C 118 76 120 88 116 90 C 106 90 94 76 84 64 Z" fill="#E99C2A"/>
+<g clip-path="url(#fish_c1)"><g transform="translate(-4 -5)"><path d="M 84 64 C 94 52 106 38 116 38 C 120 40 118 52 113 64 C 118 76 120 88 116 90 C 106 90 94 76 84 64 Z" fill="#FFB13B"/></g>
+<ellipse cx="104" cy="48" rx="5" ry="3" transform="rotate(40 104 48)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M 84 64 C 94 52 106 38 116 38 C 120 40 118 52 113 64 C 118 76 120 88 116 90 C 106 90 94 76 84 64 Z" fill="none" stroke="#C47A0E" stroke-width="3" stroke-linejoin="round"/>
+<path d="M 100 56 L 110 50 M 100 72 L 110 78" fill="none" stroke="#C47A0E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+<path d="M 38 38 C 44 18 68 16 80 36 C 66 34 52 34 38 38 Z" fill="#FFB13B"/>
+<g clip-path="url(#fish_c2)">
+</g>
+<path d="M 38 38 C 44 18 68 16 80 36 C 66 34 52 34 38 38 Z" fill="none" stroke="#C47A0E" stroke-width="3" stroke-linejoin="round"/>
+<path d="M 52 92 C 56 106 70 108 76 98 C 68 96 60 94 52 92 Z" fill="#FFB13B"/>
+<g clip-path="url(#fish_c3)">
+</g>
+<path d="M 52 92 C 56 106 70 108 76 98 C 68 96 60 94 52 92 Z" fill="none" stroke="#C47A0E" stroke-width="3" stroke-linejoin="round"/>
+<ellipse cx="56" cy="64" rx="40" ry="32" fill="#26AABB"/>
+<g clip-path="url(#fish_c4)"><g transform="translate(-4 -5)"><ellipse cx="56" cy="64" rx="40" ry="32" fill="#2FC3D6"/></g>
+<path d="M 62 30 C 54 50 54 78 62 98" fill="none" stroke="#16808F" stroke-width="7" opacity=".28"/><path d="M 76 32 C 70 50 70 78 76 96" fill="none" stroke="#16808F" stroke-width="5" opacity=".22"/><ellipse cx="50" cy="82" rx="26" ry="12" fill="#BDF3F7" opacity=".8"/>
+<ellipse cx="40" cy="44" rx="12" ry="6" transform="rotate(-20 40 44)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<ellipse cx="56" cy="64" rx="40" ry="32" fill="none" stroke="#16808F" stroke-width="3" stroke-linejoin="round"/>
+<path d="M 66 70 C 72 66 80 67 82 72 C 78 78 70 78 66 70 Z" fill="#FFB13B"/>
+<g clip-path="url(#fish_c5)">
+</g>
+<path d="M 66 70 C 72 66 80 67 82 72 C 78 78 70 78 66 70 Z" fill="none" stroke="#C47A0E" stroke-width="2.4" stroke-linejoin="round"/>
+<circle cx="37" cy="58" r="12" fill="#FFFFFF" stroke="#16808F" stroke-width="2.4"/>
+<ellipse cx="35.5" cy="58" rx="8" ry="9.12" fill="#2A2135"/>
+<circle cx="32.94" cy="54.64" r="3.52" fill="#FFFFFF"/>
+<circle cx="38.54" cy="61.2" r="1.44" fill="#FFFFFF" opacity=".9"/>
+<ellipse cx="42" cy="76" rx="6" ry="3.72" fill="#FF7F9E" opacity="0.6"/>
+<ellipse cx="19" cy="68" rx="3.6" ry="3.2" fill="#FF8FA8" stroke="#16808F" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="14" cy="38" r="5" fill="#E8FBFF"/>
+<g clip-path="url(#fish_c6)">
+<ellipse cx="12.5" cy="36.5" rx="1.8" ry="1.4" fill="#FFFFFF" opacity=".5"/>
+</g>
+<circle cx="14" cy="38" r="5" fill="none" stroke="#5FB7CF" stroke-width="2.2" stroke-linejoin="round"/>
+<circle cx="22" cy="24" r="3.4" fill="#E8FBFF"/>
+<g clip-path="url(#fish_c7)">
+</g>
+<circle cx="22" cy="24" r="3.4" fill="none" stroke="#5FB7CF" stroke-width="2" stroke-linejoin="round"/>
+</svg>

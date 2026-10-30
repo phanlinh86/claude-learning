@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pup Catch">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#8FD3FF">
+<meta name="description" content="A gentle learning game for kids 3–7: catch colours, shapes, fruit and animals with Pip the puppy. English and Vietnamese, with voice.">
+<title>Puppy Garden Catch · Cún Con Hứng Quà</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/default/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="stage">
+  <canvas id="game" aria-label="Puppy Garden Catch"></canvas>
+  <div id="safeProbe" aria-hidden="true"></div>
+
+  <!-- Pip's speech bubble (positioned from world.layout.bubble) -->
+  <div id="bubble" class="bubble hidden no-game-input" role="status" aria-live="polite"><span id="bubbleText"></span></div>
+
+  <!-- In-game HUD -->
+  <div id="hud" class="hidden">
+    <div class="hud-stars"><img src="assets/default/ui/star.svg" alt=""><b id="hudStars">0</b></div>
+    <div id="hudDots" class="hud-dots"></div>
+    <button id="btnPause" class="icon-btn" aria-label="Pause">
+      <svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.8"/><rect x="14" y="5" width="4" height="14" rx="1.8"/></svg>
+    </button>
+  </div>
+
+  <!-- Title -->
+  <section id="scrTitle" class="screen title-screen">
+    <div class="title-top">
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button class="chip" data-lang="en">English</button>
+        <button class="chip" data-lang="vi">Tiếng Việt</button>
+      </div>
+      <button id="btnParents" class="gear-btn" aria-label="Parents: hold to open settings">
+        <svg class="ring" viewBox="0 0 48 48"><circle cx="24" cy="24" r="21"/></svg>
+        <svg class="gear" viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.5 7.5 0 0 0-1.7-1L15 3h-4l-.4 2.7a7.5 7.5 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.5 7.5 0 0 0 1.7 1L11 21h4l.4-2.7a7.5 7.5 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg>
+        <span class="gear-tip" data-i18n="ui.holdForParents">Hold for parents</span>
+      </button>
+    </div>
+    <div class="title-wrap">
+      <h1 class="logo"><span id="logo1">Puppy</span> <span id="logo2">Garden Catch</span></h1>
+      <p id="tagline" class="tagline"></p>
+      <button id="btnPlay" class="btn-play" aria-label="Play">
+        <svg viewBox="0 0 24 24"><path d="M8 4.8v14.4c0 .8.9 1.3 1.6.8l11-7.2a1 1 0 0 0 0-1.6l-11-7.2C8.9 3.5 8 4 8 4.8z"/></svg>
+      </button>
+      <p class="title-info"><img src="assets/default/ui/star.svg" alt=""> <b id="titleStars">0</b> <span id="titleAge"></span></p>
+    </div>
+  </section>
+
+  <!-- Parent settings -->
+  <section id="scrSettings" class="screen hidden dim">
+    <div class="panel settings-panel scroll">
+      <h2 data-i18n="ui.settings">Settings</h2>
+      <div class="set-row"><label data-i18n="ui.age">Age</label>
+        <div id="ageChips" class="chips">
+          <button class="chip" data-age="3">3</button><button class="chip" data-age="4">4</button><button class="chip" data-age="5">5</button>
+          <button class="chip" data-age="6">6</button><button class="chip" data-age="7">7+</button>
+        </div></div>
+      <div class="set-row"><label data-i18n="ui.language">Language</label>
+        <div class="chips lang-switch">
+          <button class="chip" data-lang="en">English</button><button class="chip" data-lang="vi">Tiếng Việt</button>
+        </div></div>
+      <div class="set-row"><label for="inpName" data-i18n="ui.name">Child's name</label>
+        <input id="inpName" type="text" maxlength="16" autocomplete="off" autocorrect="off" spellcheck="false"></div>
+      <div class="set-grid">
+        <label class="toggle"><input type="checkbox" id="optSfx"><span data-i18n="ui.sound">Sound effects</span></label>
+        <label class="toggle"><input type="checkbox" id="optMusic"><span data-i18n="ui.music">Music</span></label>
+        <label class="toggle"><input type="checkbox" id="optVoice"><span data-i18n="ui.voice">Pip's voice</span></label>
+        <label class="toggle"><input type="checkbox" id="optMic"><span data-i18n="ui.mic">Answer by talking</span></label>
+      </div>
+      <p id="voiceInfo" class="small-note"></p>
+      <button id="btnSettingsDone" class="btn btn-green" data-i18n="ui.done">Done</button>
+    </div>
+  </section>
+
+  <!-- Pause -->
+  <section id="scrPause" class="screen hidden dim">
+    <div class="panel">
+      <h2 data-i18n="ui.paused">Paused</h2>
+      <div class="menu">
+        <button id="btnResume" class="btn btn-big btn-green"><svg class="i" viewBox="0 0 24 24"><path d="M8 4.8v14.4c0 .8.9 1.3 1.6.8l11-7.2a1 1 0 0 0 0-1.6l-11-7.2C8.9 3.5 8 4 8 4.8z"/></svg><span data-i18n="ui.resume">Resume</span></button>
+        <button id="btnHome" class="btn btn-orange"><svg class="i" viewBox="0 0 24 24"><path d="M12 3 2 12h3v8h5v-5h4v5h5v-8h3z"/></svg><span data-i18n="ui.home">Home</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Talk time -->
+  <section id="scrTalk" class="screen hidden dim">
+    <div class="panel talk-panel">
+      <h2 id="talkTitle"></h2>
+      <canvas id="talkShow" width="300" height="180"></canvas>
+      <p id="talkQ" class="talk-q"></p>
+      <div id="talkChoices" class="talk-choices"></div>
+      <button id="btnMic" class="mic-btn hidden" aria-label="Answer by talking">
+        <svg viewBox="0 0 24 24"><path d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-6a3.5 3.5 0 0 0-7 0v6A3.5 3.5 0 0 0 12 15zm6-3.5a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.9V22h2v-2.6a8 8 0 0 0 7-7.9z"/></svg>
+        <span id="micLabel"></span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Session done -->
+  <section id="scrDone" class="screen hidden">
+    <div class="panel done-panel">
+      <h2 id="doneTitle"></h2>
+      <div class="done-stars"><img src="assets/default/ui/star.svg" alt=""><b id="doneStars">0</b></div>
+      <div class="menu row">
+        <button id="btnAgain" class="btn btn-big btn-green"><svg class="i" viewBox="0 0 24 24"><path d="M12 4a8 8 0 1 0 8 8h-3a5 5 0 1 1-5-5v3l5-4.5L12 1z"/></svg><span data-i18n="ui.playAgain">Play again</span></button>
+        <button id="btnDoneHome" class="btn btn-orange"><svg class="i" viewBox="0 0 24 24"><path d="M12 3 2 12h3v8h5v-5h4v5h5v-8h3z"/></svg><span data-i18n="ui.home">Home</span></button>
+      </div>
+    </div>
+  </section>
+
+  <div id="loading" class="screen"><div class="loader"></div></div>
+</div>
+
+<script src="js/rng.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/content.js"></script>
+<script src="js/world.js"></script>
+<script src="js/weather.js"></script>
+<script src="js/bot.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/assets.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/voice.js"></script>
+<script src="js/input.js"></script>
+<script src="js/render.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

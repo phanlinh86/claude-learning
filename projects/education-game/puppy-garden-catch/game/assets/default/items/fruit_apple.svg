@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><clipPath id="apple_c1"><path d="M 70 26 C 78 14 96 12 104 18 C 98 32 82 36 70 26 Z" /></clipPath><clipPath id="apple_c2"><path d="M 64 38 C 52 28 20 30 18 62 C 16 92 38 114 56 112 C 60 111 62 109 64 109 C 66 109 68 111 72 112 C 90 114 112 92 110 62 C 108 30 76 28 64 38 Z" /></clipPath><g id="apple_sil"><path d="M 63 38 C 63 30 64 24 68 16" fill="none" stroke-width="20"/><path d="M 70 26 C 78 14 96 12 104 18 C 98 32 82 36 70 26 Z" /><path d="M 64 38 C 52 28 20 30 18 62 C 16 92 38 114 56 112 C 60 111 62 109 64 109 C 66 109 68 111 72 112 C 90 114 112 92 110 62 C 108 30 76 28 64 38 Z" /></g></defs>
+<use href="#apple_sil" xlink:href="#apple_sil" transform="translate(0 3)" fill="#1B2433" stroke="#1B2433" stroke-width="15" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>
+<use href="#apple_sil" xlink:href="#apple_sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="15" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 63 38 C 63 30 64 24 68 16" fill="none" stroke="#7A4A24" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 70 26 C 78 14 96 12 104 18 C 98 32 82 36 70 26 Z" fill="#5CC04A"/>
+<g clip-path="url(#apple_c1)">
+<path d="M 74 26 C 84 22 92 20 100 19" fill="none" stroke="#2C7F22" stroke-width="1.8" opacity=".6"/>
+</g>
+<path d="M 70 26 C 78 14 96 12 104 18 C 98 32 82 36 70 26 Z" fill="none" stroke="#2C7F22" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M 64 38 C 52 28 20 30 18 62 C 16 92 38 114 56 112 C 60 111 62 109 64 109 C 66 109 68 111 72 112 C 90 114 112 92 110 62 C 108 30 76 28 64 38 Z" fill="#CD3431"/>
+<g clip-path="url(#apple_c2)"><g transform="translate(-6 -6)"><path d="M 64 38 C 52 28 20 30 18 62 C 16 92 38 114 56 112 C 60 111 62 109 64 109 C 66 109 68 111 72 112 C 90 114 112 92 110 62 C 108 30 76 28 64 38 Z" fill="#E8413C"/></g>
+<ellipse cx="36" cy="52" rx="9" ry="14" transform="rotate(20 36 52)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M 64 38 C 52 28 20 30 18 62 C 16 92 38 114 56 112 C 60 111 62 109 64 109 C 66 109 68 111 72 112 C 90 114 112 92 110 62 C 108 30 76 28 64 38 Z" fill="none" stroke="#A01F1E" stroke-width="3" stroke-linejoin="round"/>
+<ellipse cx="46" cy="46" rx="4" ry="3" transform="rotate(30 46 46)" fill="#FFFFFF" opacity="0.75"/>
+</svg>

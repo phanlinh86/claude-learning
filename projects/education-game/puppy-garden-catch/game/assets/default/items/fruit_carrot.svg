@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><clipPath id="carrot_c1"><path d="M 82 46 C 87.9 33.45 78.93 12.9 70.53 16.13 C 62.13 19.35 69.22 40.62 82 46 Z" /></clipPath><clipPath id="carrot_c2"><path d="M 82 46 C 94.45 38.16 100.01 13.56 91.32 11.23 C 82.62 8.9 75.14 32.98 82 46 Z" /></clipPath><clipPath id="carrot_c3"><path d="M 82 46 C 95.52 47.92 111.76 33.49 106.09 26.49 C 100.43 19.5 82.93 32.38 82 46 Z" /></clipPath><clipPath id="carrot_c4"><path d="M 72 34 C 84 30 98 42 94 56 C 88 70 58 96 28 114 C 22 117 16 112 19 106 C 36 76 56 44 72 34 Z" /></clipPath><g id="carrot_sil"><path d="M 82 46 C 87.9 33.45 78.93 12.9 70.53 16.13 C 62.13 19.35 69.22 40.62 82 46 Z" /><path d="M 82 46 C 94.45 38.16 100.01 13.56 91.32 11.23 C 82.62 8.9 75.14 32.98 82 46 Z" /><path d="M 82 46 C 95.52 47.92 111.76 33.49 106.09 26.49 C 100.43 19.5 82.93 32.38 82 46 Z" /><path d="M 72 34 C 84 30 98 42 94 56 C 88 70 58 96 28 114 C 22 117 16 112 19 106 C 36 76 56 44 72 34 Z" /></g></defs>
+<use href="#carrot_sil" xlink:href="#carrot_sil" transform="translate(0 3)" fill="#1B2433" stroke="#1B2433" stroke-width="15" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>
+<use href="#carrot_sil" xlink:href="#carrot_sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="15" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 82 46 C 87.9 33.45 78.93 12.9 70.53 16.13 C 62.13 19.35 69.22 40.62 82 46 Z" fill="#4FB548"/>
+<g clip-path="url(#carrot_c1)">
+<path d="M 82 46 L 73.4 23.59" fill="none" stroke="#257A22" stroke-width="1.8" opacity=".55"/>
+</g>
+<path d="M 82 46 C 87.9 33.45 78.93 12.9 70.53 16.13 C 62.13 19.35 69.22 40.62 82 46 Z" fill="none" stroke="#257A22" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M 82 46 C 94.45 38.16 100.01 13.56 91.32 11.23 C 82.62 8.9 75.14 32.98 82 46 Z" fill="#4FB548"/>
+<g clip-path="url(#carrot_c2)">
+<path d="M 82 46 L 88.99 19.92" fill="none" stroke="#257A22" stroke-width="1.8" opacity=".55"/>
+</g>
+<path d="M 82 46 C 94.45 38.16 100.01 13.56 91.32 11.23 C 82.62 8.9 75.14 32.98 82 46 Z" fill="none" stroke="#257A22" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M 82 46 C 95.52 47.92 111.76 33.49 106.09 26.49 C 100.43 19.5 82.93 32.38 82 46 Z" fill="#4FB548"/>
+<g clip-path="url(#carrot_c3)">
+<path d="M 82 46 L 100.07 31.37" fill="none" stroke="#257A22" stroke-width="1.8" opacity=".55"/>
+</g>
+<path d="M 82 46 C 95.52 47.92 111.76 33.49 106.09 26.49 C 100.43 19.5 82.93 32.38 82 46 Z" fill="none" stroke="#257A22" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M 72 34 C 84 30 98 42 94 56 C 88 70 58 96 28 114 C 22 117 16 112 19 106 C 36 76 56 44 72 34 Z" fill="#E67717"/>
+<g clip-path="url(#carrot_c4)"><g transform="translate(-5 -5)"><path d="M 72 34 C 84 30 98 42 94 56 C 88 70 58 96 28 114 C 22 117 16 112 19 106 C 36 76 56 44 72 34 Z" fill="#FF8A1E"/></g>
+<path d="M 64 50 L 72 56 M 50 70 L 60 76 M 40 86 L 46 91 M 74 40 L 80 46 M 30 102 L 34 105" fill="none" stroke="#B9560A" stroke-width="2.4" stroke-linecap="round" opacity=".55"/>
+<ellipse cx="60" cy="50" rx="4" ry="14" transform="rotate(45 60 50)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M 72 34 C 84 30 98 42 94 56 C 88 70 58 96 28 114 C 22 117 16 112 19 106 C 36 76 56 44 72 34 Z" fill="none" stroke="#B9560A" stroke-width="3" stroke-linejoin="round"/>
+</svg>
