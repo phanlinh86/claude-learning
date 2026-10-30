@@ -1,5 +1,5 @@
-/* CD.UI — menus, settings and the "Change Pictures" screen (DOM overlay on top of the canvas). */
-(function (CD) {
+/* VC.UI — menus, settings and the "Change Pictures" screen (DOM overlay on top of the canvas). */
+(function (VC) {
   'use strict';
   const $ = id => document.getElementById(id);
   const SCREENS = ['scrTitle', 'scrPause', 'scrOver', 'scrHow', 'scrSettings', 'scrCustom'];
@@ -11,7 +11,7 @@
 
     init(game) {
       this.game = game;
-      const click = (id, fn) => $(id).addEventListener('click', e => { e.stopPropagation(); CD.Audio.unlock(); CD.Audio.play('click'); fn(e); });
+      const click = (id, fn) => $(id).addEventListener('click', e => { e.stopPropagation(); VC.Audio.unlock(); VC.Audio.play('click'); fn(e); });
       click('btnPlay', () => game.startGame());
       click('btnCustomize', () => this.open('scrCustom', 'scrTitle'));
       click('btnHow', () => this.open('scrHow', 'scrTitle'));
@@ -26,11 +26,11 @@
       click('btnPause', () => game.pause());
       click('btnMuteHud', () => game.toggleMute());
       click('btnResetAll', () => {
-        CD.Assets.SLOTS.forEach(s => CD.Assets.clearCustom(s.id));
+        VC.Assets.SLOTS.forEach(s => VC.Assets.clearCustom(s.id));
         this.renderSlots(); game.picturesChanged(); this.toast('All pictures reset to the originals');
       });
       click('btnResetBest', () => { game.resetBest(); this.toast('Best scores cleared'); });
-      document.querySelectorAll('.btn-back').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); CD.Audio.play('click'); this.back(); }));
+      document.querySelectorAll('.btn-back').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); VC.Audio.play('click'); this.back(); }));
 
       // settings controls
       $('setSfx').addEventListener('change', e => game.setSetting('sfx', e.target.checked));
@@ -52,7 +52,7 @@
 
     seg(id, onPick) {
       $(id).querySelectorAll('button').forEach(b => b.addEventListener('click', e => {
-        e.stopPropagation(); CD.Audio.play('click');
+        e.stopPropagation(); VC.Audio.play('click');
         onPick(b.dataset.v); this.syncSettings();
       }));
     },
@@ -92,11 +92,11 @@
       $('overScore').textContent = info.score;
       $('overBest').textContent = info.best;
       $('newBest').classList.toggle('hidden', !info.newBest);
-      const c = info.cleared;   // biomes cleared: 1 bronze, 2 silver, 3 gold, 4+ platinum
+      const c = info.cleared;   // zones cleared: 1 bronze, 2 silver, 3 gold, 4+ platinum
       const m = c >= 4 ? 'platinum' : c >= 3 ? 'gold' : c >= 2 ? 'silver' : c >= 1 ? 'bronze' : 'none';
       $('medal').className = 'medal ' + m;
-      $('medalName').textContent = m === 'none' ? 'Clear a biome for a medal' : m[0].toUpperCase() + m.slice(1) + ' medal';
-      $('overStats').innerHTML = `Gems scooped: <b>${info.gems}</b> · Pops: <b>${info.pops}</b><br>Bumps: <b>${info.bumps}</b> · Biggest Pip: <b>size ${info.maxSize}</b><br>Reached: <b>${info.biomeName}</b>`;
+      $('medalName').textContent = m === 'none' ? 'Clear a zone for a medal' : m[0].toUpperCase() + m.slice(1) + ' medal';
+      $('overStats').innerHTML = `Coins caught: <b>${info.coins}</b> · Best combo: <b>${info.bestCombo}</b><br>Rocks steamed: <b>${info.steamed}</b> · Ouches: <b>${info.ouches}</b><br>Reached: <b>${info.zoneName}</b>`;
       this.show('scrOver');
     },
 
@@ -109,14 +109,14 @@
 
     // ---------- Change Pictures ----------
     renderSlots() {
-      const A = CD.Assets, grid = $('slotGrid');
+      const A = VC.Assets, grid = $('slotGrid');
       grid.innerHTML = '';
-      const defaultPreview = s => s.id === 'hero' ? A.files.pip_idle : s.id === 'gem' ? A.files.gem_pink : s.id === 'bear' ? A.files.bear_green_1 : null;
+      const defaultPreview = s => s.id === 'hero' ? A.files.puff_idle : s.id === 'coin' ? A.files.coin_gold : s.id === 'rock' ? A.files.rock : null;
       A.SLOTS.forEach(s => {
         const custom = A.hasCustom(s.id);
         const el = document.createElement('div');
         el.className = 'slot';
-        const title = s.kind === 'bg' ? s.name + ' ground' : s.name;
+        const title = s.kind === 'bg' ? s.name : s.name;
         el.innerHTML = `<h3>${title}</h3><div class="prev ${s.kind === 'bg' ? 'bg' : ''}"></div>
           <div class="tag ${custom ? 'custom' : ''}">${custom ? '★ Your picture' : 'Original'}</div>
           ${s.kind === 'char' ? `<div class="shape"><button data-shape="fit">Whole picture</button><button data-shape="circle">Round</button></div>` : ''}
@@ -130,14 +130,13 @@
           const c = document.createElement('canvas'); c.width = 320; c.height = 180;
           c.style.width = '100%'; c.style.height = '100%';
           const g = c.getContext('2d'); const n = A.SEASONS[s.season];
-          ['ground', 'zone'].forEach(l => { const im = A.img[n + '_' + l]; if (im) g.drawImage(im, 0, 0, 320, 180); });
-          const gr = A.img[n + '_edge']; if (gr) g.drawImage(gr, 0, 0, 320, 180);
+          ['sky', 'volcano', 'ground'].forEach(l => { const im = A.img[n + '_' + l]; if (im) g.drawImage(im, 0, 0, 320, 180); });
           prev.appendChild(c);
         } else {
           const img = new Image(); img.src = defaultPreview(s); prev.appendChild(img);
         }
         if (s.kind === 'char') {
-          const shape = CD.Storage.get('shape_' + s.id, 'fit');
+          const shape = VC.Storage.get('shape_' + s.id, 'fit');
           el.querySelectorAll('.shape button').forEach(b => {
             b.classList.toggle('on', b.dataset.shape === shape);
             b.disabled = !custom; if (!custom) b.style.opacity = .5;
@@ -165,13 +164,13 @@
     async applyFile(slotId, file) {
       try {
         this.toast('Saving picture…', 4000);
-        await CD.Assets.setCustom(slotId, file);
+        await VC.Assets.setCustom(slotId, file);
         this.renderSlots();
-        this.toast('Picture saved on this computer!');
+        this.toast('Picture saved on this device!');
       } catch (e) {
         this.toast(e.message || 'Could not use that picture', 3200);
       }
     }
   };
-  CD.UI = UI;
-})(window.CD = window.CD || {});
+  VC.UI = UI;
+})(window.VC = window.VC || {});

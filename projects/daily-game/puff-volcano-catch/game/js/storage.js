@@ -1,10 +1,10 @@
-/* CD.Storage — tiny key/value store.
- * In the Windows app it is backed by files in %APPDATA%\PipsCandyDash\data (via functions the
+/* VC.Storage — tiny key/value store.
+ * In the Windows app it is backed by files in %APPDATA%\PuffsVolcanoCatch\data (via functions the
  * Go host binds: ffStoreAll / ffStoreSet / ffStoreDel). In a plain browser it falls back to
  * localStorage. Values are strings; helpers for JSON. All reads come from an in-memory cache. */
-(function (CD) {
+(function (VC) {
   'use strict';
-  const PREFIX = 'cd:';
+  const PREFIX = 'pvc:';
   const S = {
     native: false,
     cache: {},
@@ -47,5 +47,5 @@
       try { localStorage.removeItem(PREFIX + k); } catch (e) {}
     }
   };
-  CD.Storage = S;
-})(window.CD = window.CD || {});
+  VC.Storage = S;
+})(window.VC = window.VC || {});

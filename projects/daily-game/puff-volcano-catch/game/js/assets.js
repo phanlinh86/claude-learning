@@ -1,30 +1,27 @@
-/* CD.Assets — loads default SVG art, player-chosen pictures, and caches pre-rasterized sprites.
+/* VC.Assets — loads default SVG art, player-chosen pictures, and caches pre-rasterized sprites.
  * Sprites are rasterized once at (logical size × render scale) so drawing stays fast and crisp. */
-(function (CD) {
+(function (VC) {
   'use strict';
-  const SEASONS = ['meadow', 'river', 'clouds', 'glacier'];   // biomes (kept the name SEASONS for the shared helpers)
+  const SEASONS = ['beach', 'jungle', 'ash', 'crater'];   // island zones (kept the name SEASONS for the shared helpers)
+  const LAYERS = ['sky', 'clouds', 'volcano', 'ground'];
   const D = 'assets/default/';
-  const files = { icon: D + 'icon.svg', jar: D + 'jar.svg', gate_closed: D + 'gate_closed.svg', gate_open: D + 'gate_open.svg',
-    heart_full: D + 'heart_full.svg', heart_empty: D + 'heart_empty.svg' };
-  ['idle', 'walk1', 'walk2', 'slide', 'hurt', 'cheer'].forEach(f => { files['pip_' + f] = D + 'pip_' + f + '.svg'; });
-  ['red', 'green', 'orange'].forEach(c => ['1', '2', 'stun'].forEach(f => { files['bear_' + c + '_' + f] = D + 'bear_' + c + '_' + f + '.svg'; }));
-  ['pink', 'blue', 'yellow', 'green'].forEach(c => { files['gem_' + c] = D + 'gem_' + c + '.svg'; });
-  ['sparkle', 'sugar', 'floss', 'sprinkle_pink', 'sprinkle_blue', 'sprinkle_yellow', 'ripple', 'snowflake', 'star']
+  const files = { icon: D + 'icon.svg', pouch: D + 'pouch.svg', drop: D + 'drop.svg', basket: D + 'basket.svg', basket_front: D + 'basket_front.svg',
+    heart_full: D + 'heart_full.svg', heart_empty: D + 'heart_empty.svg', rock: D + 'rock.svg', rock_2: D + 'rock_2.svg' };
+  ['idle', 'happy', 'ouch', 'blow'].forEach(f => { files['puff_' + f] = D + 'puff_' + f + '.svg'; });
+  ['copper', 'silver', 'gold'].forEach(m => { files['coin_' + m] = D + 'coin_' + m + '.svg'; });
+  ['smoke', 'ember', 'ash', 'leaf', 'sparkle', 'rain', 'steam', 'firefly', 'butterfly', 'star']
     .forEach(p => { files['p_' + p] = D + 'particles/' + p + '.svg'; });
-  SEASONS.forEach(s => {
-    files[s + '_ground'] = D + 'biomes/' + s + '/ground.svg';
-    files[s + '_edge'] = D + 'biomes/' + s + '/edge.svg';
-    if (s !== 'meadow') files[s + '_zone'] = D + 'biomes/' + s + '/zone.svg';
-  });
+  SEASONS.forEach(s => LAYERS.forEach(l => { files[s + '_' + l] = D + 'zones/' + s + '/' + l + '.svg'; }));
+  const LAYER_SIZE = { sky: [960, 540], clouds: [960, 220], volcano: [960, 540], ground: [960, 540] };
 
   const SLOTS = [
-    { id: 'hero', name: 'Pip', kind: 'char', box: [72, 72] },
-    { id: 'gem', name: 'Gem', kind: 'char', box: [32, 32] },
-    { id: 'bear', name: 'Bear', kind: 'char', box: [56, 56] },
-    { id: 'bg_meadow', name: 'Meadow', kind: 'bg', season: 0 },
-    { id: 'bg_river', name: 'River', kind: 'bg', season: 1 },
-    { id: 'bg_clouds', name: 'Clouds', kind: 'bg', season: 2 },
-    { id: 'bg_glacier', name: 'Glacier', kind: 'bg', season: 3 }
+    { id: 'hero', name: 'Puff', kind: 'char', box: [96, 80] },
+    { id: 'coin', name: 'Coin', kind: 'char', box: [34, 34] },
+    { id: 'rock', name: 'Sizzly rock', kind: 'char', box: [36, 36] },
+    { id: 'bg_beach', name: 'Sunny Beach', kind: 'bg', season: 0 },
+    { id: 'bg_jungle', name: 'Jungle Slopes', kind: 'bg', season: 1 },
+    { id: 'bg_ash', name: 'Ash Fields', kind: 'bg', season: 2 },
+    { id: 'bg_crater', name: 'Crater Rim', kind: 'bg', season: 3 }
   ];
 
   function loadImage(src) {
@@ -104,7 +101,7 @@
   }
 
   const A = {
-    SEASONS, SLOTS, files,
+    SEASONS, SLOTS, LAYERS, LAYER_SIZE, files,
     img: {},           // key -> HTMLImageElement (defaults)
     customSrc: {},     // slot -> HTMLImageElement (as stored)
     custom: {},        // slot -> processed canvas
@@ -115,7 +112,7 @@
      * summer/autumn/winter art (~150 KB raw) streams in behind the title screen. */
     async loadAll(onProgress) {
       const keys = Object.keys(files);
-      const later = k => /^(river|clouds|glacier)_/.test(k);
+      const later = k => /^(jungle|ash|crater)_/.test(k);
       let done = 0;
       const one = async k => { this.img[k] = await loadImage(files[k]); done++; if (onProgress) onProgress(done / keys.length); };
       this.restLoaded = Promise.all(keys.filter(later).map(one)).then(() => this.warmSeason(1));
@@ -124,7 +121,7 @@
     },
 
     async loadCustom() {
-      const S = CD.Storage;
+      const S = VC.Storage;
       await Promise.all(SLOTS.map(async s => {
         const data = S.get('img_' + s.id);
         if (!data) { delete this.customSrc[s.id]; delete this.custom[s.id]; return; }
@@ -139,20 +136,20 @@
     async setCustom(slotId, file) {
       const slot = SLOTS.find(s => s.id === slotId);
       const data = await fileToDataURL(file, slot.kind);
-      const ok = await CD.Storage.set('img_' + slotId, data);
+      const ok = await VC.Storage.set('img_' + slotId, data);
       if (!ok) throw new Error('Not enough room to save that picture. Try resetting another picture first.');
       // photos (opaque corners) look best as a round sticker; cut-outs with transparency stay whole
-      if (slot.kind === 'char') CD.Storage.set('shape_' + slotId, (await isOpaque(data)) ? 'circle' : 'fit');
+      if (slot.kind === 'char') VC.Storage.set('shape_' + slotId, (await isOpaque(data)) ? 'circle' : 'fit');
       await this.loadCustom();
     },
     setShape(slotId, shape) {
-      CD.Storage.set('shape_' + slotId, shape);
+      VC.Storage.set('shape_' + slotId, shape);
       const src = this.customSrc[slotId];
       if (src) this.custom[slotId] = processCustom(src, shape);
       this._cache.clear();
     },
     clearCustom(slotId) {
-      CD.Storage.del('img_' + slotId); CD.Storage.del('shape_' + slotId);
+      VC.Storage.del('img_' + slotId); VC.Storage.del('shape_' + slotId);
       delete this.customSrc[slotId]; delete this.custom[slotId];
       this._cache.clear();
     },
@@ -160,7 +157,7 @@
     thumb(slotId) {
       const src = this.custom[slotId]; if (!src) return '';
       this._thumbs = this._thumbs || {};
-      const key = slotId + '|' + (CD.Storage.get('shape_' + slotId, '') || '') + '|' + src.width + 'x' + src.height;
+      const key = slotId + '|' + (VC.Storage.get('shape_' + slotId, '') || '') + '|' + src.width + 'x' + src.height;
       if (this._thumbs[slotId] && this._thumbs[slotId].key === key) return this._thumbs[slotId].url;
       const k = Math.min(1, 240 / src.width, 160 / src.height);
       const c = makeCanvas(src.width * k, src.height * k);
@@ -189,7 +186,7 @@
     },
     warmSeason(s) {
       const n = SEASONS[s];
-      this.warm([[n + '_ground', 960, 540], [n + '_edge', 960, 540]].concat(s ? [[n + '_zone', 960, 540]] : []));
+      this.warm(LAYERS.map(l => [n + '_' + l, LAYER_SIZE[l][0], LAYER_SIZE[l][1]]));
     },
     _pump() {
       if (this._wt || !this._wq.length) return;
@@ -241,5 +238,5 @@
       }
     }
   };
-  CD.Assets = A;
-})(window.CD = window.CD || {});
+  VC.Assets = A;
+})(window.VC = window.VC || {});

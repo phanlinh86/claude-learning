@@ -1,13 +1,13 @@
-/* main.js — game controller: boot, loop, input (keys / pointer-follow / touch / action button), modes,
- * settings, test hooks. Modes: 'title' (bot demo) → 'playing' ⇄ 'paused' → 'over'. World states live in CD.World. */
-(function (CD) {
+/* main.js — game controller: boot, loop, input (keys / horizontal pointer-follow / touch / Cool Rain button), modes,
+ * settings, test hooks. Modes: 'title' (bot demo) → 'playing' ⇄ 'paused' → 'over'. World states live in VC.World. */
+(function (VC) {
   'use strict';
   const params = new URLSearchParams(location.search);
   const num = (k, d) => { const v = parseFloat(params.get(k)); return isFinite(v) ? v : d; };
-  const BIOMES = ['Gumdrop Meadow', 'Chocolate River', 'Cotton Candy Clouds', 'Ice-Cream Glacier'];
+  const ZONES = ['Sunny Beach', 'Jungle Slopes', 'Ash Fields', 'Crater Rim'];
   const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 
-  function difficultyOverrides(d) { return Object.assign({}, (CD.DIFFICULTY && CD.DIFFICULTY[d]) || {}); }
+  function difficultyOverrides(d) { return Object.assign({}, (VC.DIFFICULTY && VC.DIFFICULTY[d]) || {}); }
 
   const Game = {
     mode: 'boot', isTouch,
@@ -19,18 +19,18 @@
     world: null, weather: null, bot: null, renderer: null,
     settings: { sfx: true, music: true, muted: false, difficulty: 'normal' },
     fullscreen: false, overAt: 0, deadAt: -1,
-    keys: {}, pointerDown: false, run: { gems: 0, pops: 0, bumps: 0, maxSize: 1 },
-    stats: { games: 0, scores: [], times: [], levels: [], gems: 0, pops: 0, bumps: 0, errors: [] },
+    keys: {}, pointerDown: false, run: { coins: 0, rains: 0, ouches: 0, steamed: 0, bestCombo: 0 },
+    stats: { games: 0, scores: [], times: [], levels: [], coins: 0, rains: 0, ouches: 0, errors: [] },
 
     async boot() {
-      await CD.Storage.init();
-      Object.assign(this.settings, CD.Storage.getJSON('settings', {}));
+      await VC.Storage.init();
+      Object.assign(this.settings, VC.Storage.getJSON('settings', {}));
       this.urlMute = params.get('mute') === '1';
-      CD.Audio.setOptions({ sfx: this.settings.sfx, music: this.settings.music, muted: this.settings.muted || this.urlMute });
-      this.renderer = new CD.Renderer(document.getElementById('game'));
-      await CD.Assets.loadAll();
+      VC.Audio.setOptions({ sfx: this.settings.sfx, music: this.settings.music, muted: this.settings.muted || this.urlMute });
+      this.renderer = new VC.Renderer(document.getElementById('game'));
+      await VC.Assets.loadAll();
       this.renderer.resize();
-      CD.UI.init(this);
+      VC.UI.init(this);
       this.bindInput();
       window.addEventListener('resize', () => { clearTimeout(this._rsz); this._rsz = setTimeout(() => this.renderer.resize(), 120); });
       if (params.get('autostart') === '1') this.startGame(); else this.toTitle();
@@ -40,46 +40,46 @@
 
     makeWorld(seed, forTitle) {
       const s = seed != null ? seed : (this.seed != null ? this.seed : (Math.random() * 1e9) | 0);
-      const w = new CD.World({ seed: s, config: forTitle ? {} : difficultyOverrides(this.settings.difficulty) });
+      const w = new VC.World({ seed: s, config: forTitle ? {} : difficultyOverrides(this.settings.difficulty) });
       w.reset();
       return w;
     },
-    makeWeather() { return new CD.Weather({ width: 960, height: 540, seed: 5 }); },
+    makeWeather() { return new VC.Weather({ width: 960, height: 540, seed: 5 }); },
 
     toTitle() {
-      CD.Audio.stopMusic();
+      VC.Audio.stopMusic();
       this.mode = 'title';
       this.world = this.makeWorld(this.seed != null ? this.seed + 99 : null, true);
-      this.bot = new CD.Bot(this.world, { skill: 0.8, seed: 3 });
+      this.bot = new VC.Bot(this.world, { skill: 0.8, seed: 3 });
       this.weather = this.weather || this.makeWeather();
       this.weather.setSeason(0, { instant: true });
       this.renderer.attach(this.world, this.weather);
       this.renderer.setSeason(0, true);
-      CD.Audio.setSeason(0);
+      VC.Audio.setSeason(0);
       this.deadAt = -1;
-      CD.UI.setHud(false); this.showAction(false);
-      CD.UI.show('scrTitle');
+      VC.UI.setHud(false); this.showAction(false);
+      VC.UI.show('scrTitle');
     },
 
     startGame() {
-      CD.Audio.unlock();
+      VC.Audio.unlock();
       this.runDifficulty = this.settings.difficulty;   // best score belongs to the difficulty the run started on
       this.world = this.makeWorld();
       const lv = params.has('level') ? Math.max(0, num('level', 0) | 0) : 0;
       if (lv > 0 && this.world.startLevel) this.world.startLevel(lv);
-      this.bot = this.botMode ? new CD.Bot(this.world, { skill: num('skill', 1), seed: 11 }) : null;
+      this.bot = this.botMode ? new VC.Bot(this.world, { skill: num('skill', 1), seed: 11 }) : null;
       if (!this.weather) this.weather = this.makeWeather();
-      const b = this.world.biome || 0;
+      const b = this.world.zone || 0;
       this.weather.setSeason(b, { instant: this.renderer.vis.cur === b });
       this.renderer.attach(this.world, this.weather);
       this.renderer.setSeason(b, this.renderer.vis.cur === b);
       this.renderer.showBanner(b);
-      CD.Audio.setSeason(b); CD.Audio.play('start');
-      if (this.settings.music) CD.Audio.startMusic();
+      VC.Audio.setSeason(b); VC.Audio.play('start');
+      if (this.settings.music) VC.Audio.startMusic();
       this.mode = 'playing';
-      this.deadAt = -1; this.run = { gems: 0, pops: 0, bumps: 0, maxSize: 1 };
+      this.deadAt = -1; this.run = { coins: 0, rains: 0, ouches: 0, steamed: 0, bestCombo: 0 };
       this.keys = {}; this.pointerDown = false; this.renderer.pointer = null;
-      CD.UI.hideAll(); CD.UI.setHud(true); this.showAction(true);
+      VC.UI.hideAll(); VC.UI.setHud(true); this.showAction(true);
       this.canvasFocus();
     },
     showAction(on) { const b = document.getElementById('btnAction'); if (b) b.classList.toggle('hidden', !(on && isTouch)); },
@@ -88,13 +88,13 @@
       if (this.mode !== 'playing') return;
       if (this.world && this.world.state === 'dead') return;
       this.mode = 'paused'; this.keys = {}; this.pointerDown = false;
-      CD.UI.setHud(false); this.showAction(false);
-      CD.UI.show('scrPause');
+      VC.UI.setHud(false); this.showAction(false);
+      VC.UI.show('scrPause');
     },
     resume() {
       if (this.mode !== 'paused') return;
       this.mode = 'playing';
-      CD.UI.hideAll(); CD.UI.setHud(true); this.showAction(true);
+      VC.UI.hideAll(); VC.UI.setHud(true); this.showAction(true);
       this.last = performance.now();
       this.canvasFocus();
     },
@@ -103,31 +103,31 @@
 
     gameOver() {
       const w = this.world, key = 'best_' + (this.runDifficulty || this.settings.difficulty);
-      const prev = parseInt(CD.Storage.get(key, '0'), 10) || 0, newBest = w.score > prev;
-      if (newBest) CD.Storage.set(key, String(w.score));
+      const prev = parseInt(VC.Storage.get(key, '0'), 10) || 0, newBest = w.score > prev;
+      if (newBest) VC.Storage.set(key, String(w.score));
       this.mode = 'over'; this.overAt = performance.now();
-      CD.UI.setHud(false); this.showAction(false);
-      CD.UI.showGameOver({
+      VC.UI.setHud(false); this.showAction(false);
+      VC.UI.showGameOver({
         score: w.score, best: Math.max(prev, w.score), newBest: newBest && w.score > 0,
-        gems: this.run.gems, pops: this.run.pops, bumps: this.run.bumps, maxSize: this.run.maxSize, cleared: w.level || 0,
-        biomeName: BIOMES[w.biome || 0] + ((w.lap || 0) > 0 ? ' (lap ' + (w.lap + 1) + ')' : '')
+        coins: this.run.coins, steamed: this.run.steamed, ouches: this.run.ouches, bestCombo: Math.max(this.run.bestCombo, w.bestCombo || 0), cleared: w.level || 0,
+        zoneName: ZONES[w.zone || 0] + ((w.lap || 0) > 0 ? ' (lap ' + (w.lap + 1) + ')' : '')
       });
-      if (newBest && w.score > 0) CD.Audio.play('best');
+      if (newBest && w.score > 0) VC.Audio.play('best');
       const st = this.stats;
       st.games++; st.scores.push(w.score); st.times.push(+w.time.toFixed(2)); st.levels.push(w.level || 0);
-      st.gems += this.run.gems; st.pops += this.run.pops; st.bumps += this.run.bumps;
+      st.coins += this.run.coins; st.rains += this.run.rains; st.ouches += this.run.ouches;
       if (this.autoRestart) setTimeout(() => this.startGame(), 50);
     },
 
-    best() { return parseInt(CD.Storage.get('best_' + this.settings.difficulty, '0'), 10) || 0; },
-    resetBest() { ['easy', 'normal', 'hard'].forEach(d => CD.Storage.del('best_' + d)); },
+    best() { return parseInt(VC.Storage.get('best_' + this.settings.difficulty, '0'), 10) || 0; },
+    resetBest() { ['easy', 'normal', 'hard'].forEach(d => VC.Storage.del('best_' + d)); },
     setSetting(k, v) {
       this.settings[k] = v;
-      CD.Storage.setJSON('settings', this.settings);
-      CD.Audio.setOptions({ sfx: this.settings.sfx, music: this.settings.music, muted: this.settings.muted || this.urlMute });
-      if (k === 'music') { if (v && this.mode !== 'title') CD.Audio.startMusic(); if (!v) CD.Audio.stopMusic(); }
+      VC.Storage.setJSON('settings', this.settings);
+      VC.Audio.setOptions({ sfx: this.settings.sfx, music: this.settings.music, muted: this.settings.muted || this.urlMute });
+      if (k === 'music') { if (v && this.mode !== 'title') VC.Audio.startMusic(); if (!v) VC.Audio.stopMusic(); }
     },
-    toggleMute() { this.setSetting('muted', !this.settings.muted); CD.UI.syncMute(); CD.UI.toast(this.settings.muted ? 'Sound off' : 'Sound on', 900); },
+    toggleMute() { this.setSetting('muted', !this.settings.muted); VC.UI.syncMute(); VC.UI.toast(this.settings.muted ? 'Sound off' : 'Sound on', 900); },
     setFullscreen(on) {
       this.fullscreen = on;
       if (typeof window.ffFullscreen === 'function') window.ffFullscreen(on);
@@ -135,39 +135,39 @@
       else if (!on && document.fullscreenElement) document.exitFullscreen().catch(() => {});
       setTimeout(() => this.renderer.resize(), 150);
     },
-    picturesChanged() { CD.Assets._ver = (CD.Assets._ver || 0) + 1; },
+    picturesChanged() { VC.Assets._ver = (VC.Assets._ver || 0) + 1; },
     quit() { if (typeof window.ffQuit === 'function') window.ffQuit(); else window.close(); },
 
     // ---------------- input ----------------
     playerCanAct() { return this.mode === 'playing' && this.world && this.world.state !== 'dead' && !this.bot; },
-    action() { CD.Audio.unlock(); if (this.playerCanAct()) this.world.action(); },
+    action() { VC.Audio.unlock(); if (this.playerCanAct()) this.world.action(); },
     applyMove() {
       this.renderer.pointerHeld = this.pointerDown;
       if (!this.playerCanAct()) return;
       const k = this.keys;
       const mx = (k.ArrowRight || k.KeyD ? 1 : 0) - (k.ArrowLeft || k.KeyA ? 1 : 0);
-      const my = (k.ArrowDown || k.KeyS ? 1 : 0) - (k.ArrowUp || k.KeyW ? 1 : 0);
-      if (mx || my) { const l = Math.hypot(mx, my); this.world.setMove(mx / l, my / l); this.world.setTarget(null); this.renderer.pointer = null; }
+      if (mx) { this.world.setMove(mx); this.world.setTarget(null); this.renderer.pointer = null; this._mouseFollow = false; }
       else {
-        this.world.setMove(0, 0);
-        if (this.pointerDown && this.renderer.pointer) this.world.setTarget(this.renderer.pointer[0], this.renderer.pointer[1]);
+        this.world.setMove(0);
+        // touch: follow while the finger is down; mouse: follow the cursor once it has moved over the game
+        if (this.renderer.pointer && (this.pointerDown || this._mouseFollow)) this.world.setTarget(this.renderer.pointer[0]);
         else this.world.setTarget(null);
       }
     },
     bindInput() {
-      const MOVE = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'KeyA', 'KeyD', 'KeyW', 'KeyS'];
+      const MOVE = ['ArrowLeft', 'ArrowRight', 'KeyA', 'KeyD'];
       window.addEventListener('keydown', e => {
-        if (e.code === 'F11') { e.preventDefault(); this.setFullscreen(!this.fullscreen); CD.UI.syncSettings(); return; }
+        if (e.code === 'F11') { e.preventDefault(); this.setFullscreen(!this.fullscreen); VC.UI.syncSettings(); return; }
         if (e.code === 'KeyM' && !e.repeat) { this.toggleMute(); return; }
-        const ui = CD.UI.current;
+        const ui = VC.UI.current;
         if (e.code === 'Escape' || e.code === 'KeyP') {
           if (this.mode === 'playing') { this.pause(); e.preventDefault(); return; }
           if (this.mode === 'paused' && ui === 'scrPause') { this.resume(); e.preventDefault(); return; }
-          if (ui === 'scrHow' || ui === 'scrSettings' || ui === 'scrCustom') { CD.UI.back(); e.preventDefault(); return; }
+          if (ui === 'scrHow' || ui === 'scrSettings' || ui === 'scrCustom') { VC.UI.back(); e.preventDefault(); return; }
           return;
         }
         if (this.mode === 'playing') {
-          if (MOVE.includes(e.code)) { e.preventDefault(); this.keys[e.code] = true; CD.Audio.unlock(); return; }
+          if (MOVE.includes(e.code)) { e.preventDefault(); this.keys[e.code] = true; VC.Audio.unlock(); return; }
           if (e.code === 'Space' || e.code === 'Enter' || e.code === 'ShiftLeft' || e.code === 'ShiftRight') { e.preventDefault(); if (!e.repeat) this.action(); return; }
         }
         if (this.mode === 'over' && (e.code === 'Enter' || e.code === 'Space')) { e.preventDefault(); if (this.canRestart()) this.startGame(); return; }
@@ -181,15 +181,19 @@
       const stage = document.getElementById('stage');
       const setPtr = e => { this.renderer.pointer = this.renderer.toLogical(e.clientX, e.clientY); };
       stage.addEventListener('pointerdown', e => {
-        if (e.target.closest && e.target.closest('button, .screen, #hud, input, label')) return;   // HUD/menu clicks never move Pip
+        if (e.target.closest && e.target.closest('button, .screen, #hud, input, label')) return;   // HUD/menu clicks never move Puff
         if (this.mode !== 'playing') return;
-        e.preventDefault(); CD.Audio.unlock();
+        e.preventDefault(); VC.Audio.unlock();
         if (e.button === 2) { this.action(); return; }
         if (e.pointerType === 'touch' && this._touches && this._touches.size >= 1) { this.action(); return; }   // second finger = action
         (this._touches = this._touches || new Set()).add(e.pointerId);
         this.pointerDown = true; setPtr(e);
       });
-      stage.addEventListener('pointermove', e => { if (this.mode === 'playing' && (this.pointerDown || e.pointerType === 'mouse')) setPtr(e); });
+      stage.addEventListener('pointermove', e => {
+        if (this.mode !== 'playing') return;
+        if (e.pointerType === 'mouse') { const p0 = this._lastMouse; this._lastMouse = [e.clientX, e.clientY]; if (p0 && Math.abs(p0[0] - e.clientX) + Math.abs(p0[1] - e.clientY) > 2) this._mouseFollow = true; }
+        if (this.pointerDown || e.pointerType === 'mouse') setPtr(e);
+      });
       const up = e => { if (this._touches) this._touches.delete(e.pointerId); if (!this._touches || !this._touches.size) { this.pointerDown = false; if (e.pointerType !== 'mouse') this.renderer.pointer = null; } };
       window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
       const act = document.getElementById('btnAction');
@@ -204,30 +208,33 @@
         const k = e.key;
         if (k === 'F5' || ((e.ctrlKey || e.metaKey) && ['r', 'R', '+', '=', '-', '_', '0', 'p', 'P', 'f', 'F', 'g', 'G', 'u', 'U'].includes(k))) e.preventDefault();
       }, true);
-      document.addEventListener('fullscreenchange', () => { this.fullscreen = !!document.fullscreenElement || (this.fullscreen && typeof window.ffFullscreen === 'function'); this.renderer.resize(); CD.UI.syncSettings(); });
+      document.addEventListener('fullscreenchange', () => { this.fullscreen = !!document.fullscreenElement || (this.fullscreen && typeof window.ffFullscreen === 'function'); this.renderer.resize(); VC.UI.syncSettings(); });
     },
 
     handleEvents(evts) {
       const sound = this.mode !== 'title', w = this.world;
       for (const e of evts) {
         switch (e.type) {
-          case 'gem': if (sound) CD.Audio.play('gem', { size: e.size }); this.run.gems++; break;
-          case 'grow': if (sound) CD.Audio.play('grow'); this.run.maxSize = Math.max(this.run.maxSize, e.size || w.size); break;
-          case 'maxsize': if (sound) CD.Audio.play('maxsize'); break;
-          case 'pop': if (sound) CD.Audio.play('pop'); this.run.pops++; break;
-          case 'dash': if (sound) CD.Audio.play('dash'); break;
-          case 'bump': if (sound) CD.Audio.play('bump'); this.run.bumps++; break;
-          case 'drop': if (sound) CD.Audio.play('drop'); break;
-          case 'jarfull': if (sound) CD.Audio.play('jarfull'); break;
-          case 'gateopen': if (sound) CD.Audio.play('gateopen'); break;
-          case 'cleared': if (sound) CD.Audio.play('cleared'); break;
-          case 'biome': case 'season': {
-            const b = e.biome != null ? e.biome : e.season;
-            this.weather.setSeason(b); CD.Audio.setSeason(b);
-            if (sound && (e.level || 0) > 0) CD.Audio.play('season');
+          case 'rumble': if (sound) VC.Audio.play('rumble'); break;
+          case 'erupt': if (sound) VC.Audio.play('erupt', { n: e.n }); break;
+          case 'catch': if (sound) VC.Audio.play('catch', { mult: e.mult, metal: e.metal }); this.run.coins++; this.run.bestCombo = Math.max(this.run.bestCombo, e.combo || 0); break;
+          case 'multup': if (sound) VC.Audio.play('multup', { mult: e.mult }); break;
+          case 'miss': if (sound) VC.Audio.play('miss', { combo: e.combo }); break;
+          case 'ouch': if (sound) VC.Audio.play('ouch'); this.run.ouches++; break;
+          case 'rockland': if (sound) VC.Audio.play('thud'); break;
+          case 'rain': if (sound) VC.Audio.play('rain'); this.run.rains++; break;
+          case 'steam': if (sound) VC.Audio.play('steam'); this.run.steamed++; break;
+          case 'raincharged': if (sound) VC.Audio.play('charged'); break;
+          case 'pouchfull': if (sound) VC.Audio.play('pouchfull'); break;
+          case 'cleared': if (sound) VC.Audio.play('cleared'); break;
+          case 'heal': if (sound) VC.Audio.play('heal'); break;
+          case 'zone': case 'season': {
+            const b = e.zone != null ? e.zone : e.season;
+            this.weather.setSeason(b); VC.Audio.setSeason(b);
+            if (sound && (e.level || 0) > 0) VC.Audio.play('season');
             break;
           }
-          case 'dead': if (sound) CD.Audio.play('dead'); this.deadAt = w.time; break;
+          case 'dead': if (sound) VC.Audio.play('dead'); this.deadAt = w.time; break;
         }
       }
       this.renderer.onEvents(evts);
@@ -240,11 +247,11 @@
       w.update(h);
       const ev = w.drainEvents();
       if (ev.length) this.handleEvents(ev);
-      this.weather.update(h, {});
+      this.weather.update(h, { volcano: w.volcano, rain: w.rain });
       if (this.mode === 'playing' && w.state === 'dead' && this.deadAt >= 0 && w.time - this.deadAt > 1.4) this.gameOver();
       if (this.mode === 'title' && (w.state === 'dead' || (w.level || 0) >= 2) && (this.deadAt >= 0 ? w.time - this.deadAt > 1.5 : true)) {
         this.world = this.makeWorld(null, true);
-        this.bot = new CD.Bot(this.world, { skill: 0.8, seed: (Math.random() * 1e6) | 0 });
+        this.bot = new VC.Bot(this.world, { skill: 0.8, seed: (Math.random() * 1e6) | 0 });
         this.renderer.attach(this.world, this.weather); this.deadAt = -1;
         this.weather.setSeason(0); this.renderer.setSeason(0);
       }
@@ -279,21 +286,22 @@
     }
   };
 
-  CD.Game = Game;
-  CD.debug = {
+  VC.Game = Game;
+  VC.debug = {
     get world() { return Game.world; },
     get weather() { return Game.weather; },
     get mode() { return Game.mode; },
     get stats() { return Game.stats; },
     getState() {
       const w = Game.world;
-      return w && { mode: Game.mode, state: w.state, score: w.score, level: w.level, biome: w.biome, lap: w.lap, hearts: w.hearts,
-        size: w.size, jar: w.jar, jarTarget: w.jarTarget, time: w.time, bears: w.bears.length, gems: w.gems.length,
-        pip: w.pip && { x: Math.round(w.pip.x), y: Math.round(w.pip.y) }, particles: Game.weather ? Game.weather.particles.length : 0, fx: Game.renderer.fx.length };
+      return w && { mode: Game.mode, state: w.state, score: w.score, level: w.level, zone: w.zone, lap: w.lap, hearts: w.hearts,
+        combo: w.combo, mult: w.mult, pouch: w.pouch, pouchTarget: w.pouchTarget, time: w.time, items: w.items.length,
+        rain: w.rain && { charge: +w.rain.charge.toFixed(2), active: w.rain.active }, puff: w.puff && { x: Math.round(w.puff.x), y: Math.round(w.puff.y) },
+        particles: Game.weather ? Game.weather.particles.length : 0, fx: Game.renderer.fx.length };
     },
     setSpeed(n) { Game.speed = n; },
     startGame() { Game.startGame(); },
-    setBot(on, skill) { Game.botMode = on; Game.bot = on ? new CD.Bot(Game.world, { skill: skill == null ? 1 : skill, seed: 11 }) : null; },
+    setBot(on, skill) { Game.botMode = on; Game.bot = on ? new VC.Bot(Game.world, { skill: skill == null ? 1 : skill, seed: 11 }) : null; },
     setAutoRestart(on) { Game.autoRestart = on; },
     gotoLevel(i) { Game.world.startLevel(i); }
   };
@@ -302,4 +310,4 @@
     console.error(e);
     document.body.insertAdjacentHTML('beforeend', '<pre style="color:#fff;padding:20px">Could not start the game: ' + (e && e.message) + '</pre>');
   }));
-})(window.CD = window.CD || {});
+})(window.VC = window.VC || {});

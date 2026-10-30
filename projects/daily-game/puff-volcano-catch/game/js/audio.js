@@ -1,18 +1,18 @@
-/* CD.Audio — every sound is synthesized with WebAudio (no audio files, nothing to license).
- * Gentle SFX + a soft generative music loop whose key/tempo/instrument change with the season. */
-(function (CD) {
+/* VC.Audio — every sound is synthesized with WebAudio (no audio files, nothing to license).
+ * Gentle SFX + a soft generative music loop whose key/tempo/instrument change with the island zone. */
+(function (VC) {
   'use strict';
   const NOTE = n => 440 * Math.pow(2, (n - 69) / 12); // MIDI → Hz
 
   const SEASON_MUSIC = [
-    // spring: bright C major, plucky triangle
-    { root: 60, tempo: 104, prog: [[0, 4, 7], [7, 11, 14], [9, 12, 16], [5, 9, 12]], lead: 'triangle', scale: [0, 2, 4, 7, 9], swing: 0.0 },
-    // summer: sunny G major, a touch faster
-    { root: 55, tempo: 112, prog: [[0, 4, 7], [5, 9, 12], [7, 11, 14], [5, 9, 12]], lead: 'square', scale: [0, 2, 4, 7, 9], swing: 0.08 },
-    // autumn: mellow A minor
-    { root: 57, tempo: 92, prog: [[0, 3, 7], [-4, 0, 3], [3, 7, 10], [-2, 2, 5]], lead: 'triangle', scale: [0, 3, 5, 7, 10], swing: 0.12 },
-    // winter: calm D major, music-box sine bells
-    { root: 62, tempo: 84, prog: [[0, 4, 7], [-3, 0, 4], [5, 9, 12], [7, 11, 14]], lead: 'sine', scale: [0, 2, 4, 7, 9], swing: 0.0 }
+    // Sunny Beach: breezy F major, plucky triangle with a lazy island swing
+    { root: 65, tempo: 100, prog: [[0, 4, 7], [5, 9, 12], [7, 11, 14], [5, 9, 12]], lead: 'triangle', scale: [0, 2, 4, 7, 9], swing: 0.14 },
+    // Jungle Slopes: bouncy C major, marimba-like sine
+    { root: 60, tempo: 112, prog: [[0, 4, 7], [-3, 0, 4], [5, 9, 12], [7, 11, 14]], lead: 'sine', scale: [0, 2, 4, 7, 9], swing: 0.08 },
+    // Ash Fields: warm, mellow A minor at sunset
+    { root: 57, tempo: 96, prog: [[0, 3, 7], [-4, 0, 3], [3, 7, 10], [-2, 2, 5]], lead: 'triangle', scale: [0, 3, 5, 7, 10], swing: 0.1 },
+    // Crater Rim: calm D major night, music-box bells
+    { root: 62, tempo: 88, prog: [[0, 4, 7], [-3, 0, 4], [5, 9, 12], [7, 11, 14]], lead: 'sine', scale: [0, 2, 4, 7, 9], swing: 0.0 }
   ];
 
   const A = {
@@ -93,27 +93,27 @@
       if (!this.ctx || this.muted || !this.sfxOn) return;
       const r = 1 + (Math.random() - 0.5) * 0.08; // tiny pitch variation keeps repeats pleasant
       switch (name) {
-        case 'gem': {            // bright "ting", pitch rises with Pip's size
-          const sz = Math.min(5, opt.size || 1);
-          const n = 76 + [0, 2, 4, 7, 9][sz - 1];
-          this.tone(NOTE(n), 0.16, { type: 'triangle', vol: 0.18 });
-          this.tone(NOTE(n + 12), 0.12, { type: 'sine', vol: 0.08, at: 0.05 });
+        case 'catch': {           // bright coin "ting", pitch climbs with the combo multiplier
+          const m = Math.min(5, opt.mult || 1), n = 76 + [0, 2, 4, 7, 9][m - 1];
+          this.tone(NOTE(n), 0.14, { type: 'triangle', vol: 0.17 });
+          this.tone(NOTE(n + 7), 0.16, { type: 'sine', vol: 0.09, at: 0.05 });
+          if (opt.metal === 'gold') [12, 16, 19].forEach((d, i) => this.tone(NOTE(n + d), 0.18, { type: 'sine', vol: 0.07, at: 0.1 + i * 0.05 }));
           break;
         }
-        case 'grow': this.tone(300 * r, 0.14, { type: 'sine', vol: 0.08, slideTo: 420 * r, at: 0.06 }); break;
-        case 'maxsize': [0, 4, 7, 12].forEach((n, i) => this.tone(NOTE(84 + n), 0.18, { type: 'sine', vol: 0.07, at: i * 0.05 })); break;
-        case 'pop':
-          this.noise(0.12, { vol: 0.2, f0: 1800, f1: 400, q: 0.8 });
-          [0, 4, 7, 12, 16].forEach((n, i) => this.tone(NOTE(72 + n), 0.3, { type: 'triangle', vol: 0.14, at: 0.04 + i * 0.05 }));
+        case 'multup': { const m = opt.mult || 2; [0, 4, 7, 12].forEach((d, i) => this.tone(NOTE(72 + m * 2 + d), 0.2, { type: 'square', vol: 0.045, at: i * 0.06 })); break; }
+        case 'miss': this.tone(330 * r, 0.16, { type: 'sine', vol: 0.08, slideTo: 220 * r }); this.noise(0.1, { vol: 0.06, f0: 500, q: 0.8 }); break;
+        case 'rumble': this.tone(55, 0.6, { type: 'sine', vol: 0.16, slideTo: 70, attack: 0.15 }); this.noise(0.5, { vol: 0.05, type: 'lowpass', f0: 180, q: 0.5 }); break;
+        case 'erupt': this.noise(0.25, { vol: 0.12, f0: 300, f1: 1400, q: 0.7 }); this.tone(120 * r, 0.2, { type: 'triangle', vol: 0.12, slideTo: 260 }); break;
+        case 'ouch':             // soft cartoon "bonk", never harsh
+          this.tone(260, 0.3, { type: 'sine', vol: 0.18, slideTo: 150 });
+          this.tone(390, 0.2, { type: 'triangle', vol: 0.06, slideTo: 220, at: 0.03 });
           break;
-        case 'dash': this.noise(0.18, { vol: 0.14, f0: 600, f1: 2400, q: 0.7 }); break;
-        case 'bump':             // soft cartoon "boing", never harsh
-          this.tone(220, 0.35, { type: 'sine', vol: 0.18, slideTo: 140 });
-          this.tone(330, 0.25, { type: 'triangle', vol: 0.06, slideTo: 200, at: 0.03 });
-          break;
-        case 'drop': for (let i = 0; i < 2; i++) this.tone((900 - i * 150) * r, 0.08, { type: 'sine', vol: 0.06, at: i * 0.07 }); break;
-        case 'jarfull': [0, 4, 7, 12].forEach((n, i) => this.tone(NOTE(72 + n), 0.35, { type: 'triangle', vol: 0.15, at: i * 0.09 })); break;
-        case 'gateopen': this.tone(NOTE(67), 0.6, { type: 'sine', vol: 0.12, slideTo: NOTE(79) }); break;
+        case 'thud': this.tone(90 * r, 0.18, { type: 'sine', vol: 0.12, slideTo: 60 }); this.noise(0.15, { vol: 0.05, f0: 900, f1: 300, q: 1 }); break;
+        case 'rain': this.noise(1.1, { vol: 0.1, f0: 4000, f1: 2500, q: 0.6 }); this.tone(NOTE(84), 0.25, { type: 'sine', vol: 0.06, slideTo: NOTE(79) }); break;
+        case 'steam': this.noise(0.35, { vol: 0.1, type: 'highpass', f0: 3000, f1: 6000, q: 0.5 }); break;
+        case 'charged': [0, 7].forEach((d, i) => this.tone(NOTE(88 + d), 0.12, { type: 'sine', vol: 0.06, at: i * 0.07 })); break;
+        case 'heal': [0, 4, 7].forEach((d, i) => this.tone(NOTE(79 + d), 0.2, { type: 'sine', vol: 0.08, at: 0.3 + i * 0.07 })); break;
+        case 'pouchfull': [0, 4, 7, 12].forEach((n, i) => this.tone(NOTE(72 + n), 0.35, { type: 'triangle', vol: 0.15, at: i * 0.09 })); break;
         case 'cleared': [0, 4, 7, 12, 16, 19].forEach((n, i) => this.tone(NOTE(72 + n), 0.5, { type: 'triangle', vol: 0.15, at: i * 0.08 })); break;
         case 'season': [0, 7, 12].forEach((n, i) => this.tone(NOTE(84 + n), 0.8, { type: 'sine', vol: 0.07, at: i * 0.12 })); break;
         case 'dead':
@@ -203,5 +203,5 @@
       }
     }
   };
-  CD.Audio = A;
-})(window.CD = window.CD || {});
+  VC.Audio = A;
+})(window.VC = window.VC || {});
