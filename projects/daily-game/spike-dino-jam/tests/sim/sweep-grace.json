@@ -1,0 +1,5 @@
+{ "normal": {
+  "proposed": { "safeNeck": 6, "bonkR": 14, "songTargets": [10, 12, 14, 16], "trailSpacing": 22 },
+  "proposed+grace0.5": { "safeNeck": 6, "bonkR": 14, "songTargets": [10, 12, 14, 16], "trailSpacing": 22, "_bounceGrace": 0.5 },
+  "proposed+grace0.8": { "safeNeck": 6, "bonkR": 14, "songTargets": [10, 12, 14, 16], "trailSpacing": 22, "_bounceGrace": 0.8 }
+} }

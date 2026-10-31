@@ -1,0 +1,16 @@
+{
+  "name": "Spike's Dino Jam",
+  "short_name": "Dino Jam",
+  "description": "Skate around Lullaby Valley with Spike the hedgehog and collect a growing train of musical notes!",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#1f3d22",
+  "theme_color": "#3f9a3e",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -1,0 +1,6 @@
+{ "easy": {
+  "proposed": { "speed0": 105, "speedPerBiome": 4, "safeNeck": 7, "bonkR": 12, "songTargets": [8, 10, 12, 14], "trailSpacing": 22 },
+  "proposed+grace0.8": { "speed0": 105, "speedPerBiome": 4, "safeNeck": 7, "bonkR": 12, "songTargets": [8, 10, 12, 14], "trailSpacing": 22, "_bounceGrace": 0.8 }
+}, "normal": {
+  "proposed+grace1.0": { "safeNeck": 6, "bonkR": 14, "songTargets": [10, 12, 14, 16], "trailSpacing": 22, "_bounceGrace": 1.0 }
+} }
