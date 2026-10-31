@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><clipPath id="hare_c1"><ellipse cx="47" cy="34" rx="10" ry="27" transform="rotate(-10 47 34)" /></clipPath><clipPath id="hare_c2"><ellipse cx="81" cy="34" rx="10" ry="27" transform="rotate(10 81 34)" /></clipPath><clipPath id="hare_c3"><ellipse cx="64" cy="100" rx="27" ry="16" /></clipPath><clipPath id="hare_c4"><ellipse cx="44" cy="111" rx="13" ry="6" /></clipPath><clipPath id="hare_c5"><ellipse cx="84" cy="111" rx="13" ry="6" /></clipPath><clipPath id="hare_c6"><ellipse cx="64" cy="70" rx="30" ry="26" /></clipPath><clipPath id="hare_c7"><ellipse cx="54" cy="97" rx="6" ry="5" /></clipPath><clipPath id="hare_c8"><ellipse cx="74" cy="97" rx="6" ry="5" /></clipPath><g id="hare_sil"><ellipse cx="47" cy="34" rx="10" ry="27" transform="rotate(-10 47 34)" /><ellipse cx="81" cy="34" rx="10" ry="27" transform="rotate(10 81 34)" /><ellipse cx="64" cy="100" rx="27" ry="16" /><ellipse cx="44" cy="111" rx="13" ry="6" /><ellipse cx="84" cy="111" rx="13" ry="6" /><ellipse cx="64" cy="70" rx="30" ry="26" /></g></defs>
+<use href="#hare_sil" xlink:href="#hare_sil" transform="translate(0 3)" fill="#2B4A7A" stroke="#2B4A7A" stroke-width="15" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>
+<use href="#hare_sil" xlink:href="#hare_sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="15" stroke-linejoin="round" stroke-linecap="round"/>
+<ellipse cx="47" cy="34" rx="10" ry="27" transform="rotate(-10 47 34)" fill="#D3DEEB"/>
+<g clip-path="url(#hare_c1)"><g transform="translate(-4 -5)"><ellipse cx="47" cy="34" rx="10" ry="27" transform="rotate(-10 47 34)" fill="#FCFDFF"/></g>
+<ellipse cx="47" cy="37" rx="4.6" ry="19" transform="rotate(-10 47 37)" fill="#F4B3C2"/><ellipse cx="43.5" cy="9" rx="11" ry="8" transform="rotate(-10 43.5 9)" fill="#8A97AB"/>
+</g>
+<ellipse cx="47" cy="34" rx="10" ry="27" transform="rotate(-10 47 34)" fill="none" stroke="#71839C" stroke-width="3" stroke-linejoin="round"/>
+<ellipse cx="81" cy="34" rx="10" ry="27" transform="rotate(10 81 34)" fill="#D3DEEB"/>
+<g clip-path="url(#hare_c2)"><g transform="translate(-4 -5)"><ellipse cx="81" cy="34" rx="10" ry="27" transform="rotate(10 81 34)" fill="#FCFDFF"/></g>
+<ellipse cx="81" cy="37" rx="4.6" ry="19" transform="rotate(10 81 37)" fill="#F4B3C2"/><ellipse cx="84.5" cy="9" rx="11" ry="8" transform="rotate(10 84.5 9)" fill="#8A97AB"/>
+</g>
+<ellipse cx="81" cy="34" rx="10" ry="27" transform="rotate(10 81 34)" fill="none" stroke="#71839C" stroke-width="3" stroke-linejoin="round"/>
+<ellipse cx="64" cy="100" rx="27" ry="16" fill="#D3DEEB"/>
+<g clip-path="url(#hare_c3)"><g transform="translate(-4 -5)"><ellipse cx="64" cy="100" rx="27" ry="16" fill="#FCFDFF"/></g>
+</g>
+<ellipse cx="64" cy="100" rx="27" ry="16" fill="none" stroke="#71839C" stroke-width="3" stroke-linejoin="round"/>
+<ellipse cx="44" cy="111" rx="13" ry="6" fill="#D3DEEB"/>
+<g clip-path="url(#hare_c4)"><g transform="translate(-2 -3)"><ellipse cx="44" cy="111" rx="13" ry="6" fill="#FCFDFF"/></g>
+</g>
+<ellipse cx="44" cy="111" rx="13" ry="6" fill="none" stroke="#71839C" stroke-width="2.6" stroke-linejoin="round"/>
+<ellipse cx="84" cy="111" rx="13" ry="6" fill="#D3DEEB"/>
+<g clip-path="url(#hare_c5)"><g transform="translate(-2 -3)"><ellipse cx="84" cy="111" rx="13" ry="6" fill="#FCFDFF"/></g>
+</g>
+<ellipse cx="84" cy="111" rx="13" ry="6" fill="none" stroke="#71839C" stroke-width="2.6" stroke-linejoin="round"/>
+<ellipse cx="64" cy="70" rx="30" ry="26" fill="#D3DEEB"/>
+<g clip-path="url(#hare_c6)"><g transform="translate(-4 -5)"><ellipse cx="64" cy="70" rx="30" ry="26" fill="#FCFDFF"/></g>
+<ellipse cx="64" cy="82" rx="13" ry="8.5" fill="#FFFFFF"/>
+<ellipse cx="48" cy="55" rx="8" ry="4.5" transform="rotate(-30 48 55)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<ellipse cx="64" cy="70" rx="30" ry="26" fill="none" stroke="#71839C" stroke-width="3" stroke-linejoin="round"/>
+<ellipse cx="52" cy="66" rx="6.6" ry="7.52" fill="#2A2135"/>
+<circle cx="49.89" cy="63.23" r="2.9" fill="#FFFFFF"/>
+<circle cx="54.51" cy="68.64" r="1.19" fill="#FFFFFF" opacity=".9"/>
+<ellipse cx="76" cy="66" rx="6.6" ry="7.52" fill="#2A2135"/>
+<circle cx="73.89" cy="63.23" r="2.9" fill="#FFFFFF"/>
+<circle cx="78.51" cy="68.64" r="1.19" fill="#FFFFFF" opacity=".9"/>
+<path d="M 60 76 C 60 74 68 74 68 76 L 64 80.5 Z" fill="#E8829E" stroke="#B65C78" stroke-width="1.4" stroke-linejoin="round"/>
+<path d="M 64 80.5 L 64 83 M 64 83 Q 60 87 57 84.5 M 64 83 Q 68 87 71 84.5" fill="none" stroke="#6A6E80" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 44 80 L 32 78 M 44 84 L 33 86 M 84 80 L 96 78 M 84 84 L 95 86" fill="none" stroke="#9AA6B8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse cx="44" cy="76" rx="5.5" ry="3.41" fill="#FF7F9E" opacity="0.6"/>
+<ellipse cx="84" cy="76" rx="5.5" ry="3.41" fill="#FF7F9E" opacity="0.6"/>
+<ellipse cx="54" cy="97" rx="6" ry="5" fill="#FCFDFF"/>
+<g clip-path="url(#hare_c7)">
+</g>
+<ellipse cx="54" cy="97" rx="6" ry="5" fill="none" stroke="#71839C" stroke-width="2.2" stroke-linejoin="round"/>
+<ellipse cx="74" cy="97" rx="6" ry="5" fill="#FCFDFF"/>
+<g clip-path="url(#hare_c8)">
+</g>
+<ellipse cx="74" cy="97" rx="6" ry="5" fill="none" stroke="#71839C" stroke-width="2.2" stroke-linejoin="round"/>
+</svg>

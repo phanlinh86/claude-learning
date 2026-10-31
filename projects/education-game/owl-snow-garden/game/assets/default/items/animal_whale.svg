@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><clipPath id="whale_c1"><path d="M 24 21 C 28 26 27 29 24 29 C 21 29 20 26 24 21 Z" /></clipPath><clipPath id="whale_c2"><path d="M 56 21 C 60 26 59 29 56 29 C 53 29 52 26 56 21 Z" /></clipPath><clipPath id="whale_c3"><path d="M 100 70 C 98 58 100 46 106 40 C 112 42 114 50 112 58 C 116 52 122 48 124 52 C 124 62 116 72 106 78 Z" /></clipPath><clipPath id="whale_c4"><path d="M 10 76 C 8 52 24 36 46 36 C 70 36 86 54 98 66 C 102 70 106 70 108 68 C 110 76 104 84 94 88 C 78 98 52 104 34 100 C 18 96 10 88 10 76 Z" /></clipPath><clipPath id="whale_c5"><ellipse cx="54" cy="92" rx="12" ry="6" transform="rotate(28 54 92)" /></clipPath><g id="whale_sil"><path d="M 40 36 L 40 20 C 37 14 31 13 27 18 M 40 20 C 43 14 49 13 53 18" fill="none" stroke-width="21.4"/><path d="M 24 21 C 28 26 27 29 24 29 C 21 29 20 26 24 21 Z" /><path d="M 56 21 C 60 26 59 29 56 29 C 53 29 52 26 56 21 Z" /><path d="M 100 70 C 98 58 100 46 106 40 C 112 42 114 50 112 58 C 116 52 122 48 124 52 C 124 62 116 72 106 78 Z" /><path d="M 10 76 C 8 52 24 36 46 36 C 70 36 86 54 98 66 C 102 70 106 70 108 68 C 110 76 104 84 94 88 C 78 98 52 104 34 100 C 18 96 10 88 10 76 Z" /></g></defs>
+<use href="#whale_sil" xlink:href="#whale_sil" transform="translate(0 3)" fill="#2B4A7A" stroke="#2B4A7A" stroke-width="15" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>
+<use href="#whale_sil" xlink:href="#whale_sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="15" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 40 36 L 40 20 C 37 14 31 13 27 18 M 40 20 C 43 14 49 13 53 18" fill="none" stroke="#5E98C6" stroke-width="6.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 40 36 L 40 20 C 37 14 31 13 27 18 M 40 20 C 43 14 49 13 53 18" fill="none" stroke="#BFE4FA" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 24 21 C 28 26 27 29 24 29 C 21 29 20 26 24 21 Z" fill="#BFE4FA"/>
+<g clip-path="url(#whale_c1)">
+</g>
+<path d="M 24 21 C 28 26 27 29 24 29 C 21 29 20 26 24 21 Z" fill="none" stroke="#5E98C6" stroke-width="2" stroke-linejoin="round"/>
+<path d="M 56 21 C 60 26 59 29 56 29 C 53 29 52 26 56 21 Z" fill="#BFE4FA"/>
+<g clip-path="url(#whale_c2)">
+</g>
+<path d="M 56 21 C 60 26 59 29 56 29 C 53 29 52 26 56 21 Z" fill="none" stroke="#5E98C6" stroke-width="2" stroke-linejoin="round"/>
+<path d="M 100 70 C 98 58 100 46 106 40 C 112 42 114 50 112 58 C 116 52 122 48 124 52 C 124 62 116 72 106 78 Z" fill="#9CB8D1"/>
+<g clip-path="url(#whale_c3)">
+</g>
+<path d="M 100 70 C 98 58 100 46 106 40 C 112 42 114 50 112 58 C 116 52 122 48 124 52 C 124 62 116 72 106 78 Z" fill="none" stroke="#4D6D8C" stroke-width="3" stroke-linejoin="round"/>
+<path d="M 10 76 C 8 52 24 36 46 36 C 70 36 86 54 98 66 C 102 70 106 70 108 68 C 110 76 104 84 94 88 C 78 98 52 104 34 100 C 18 96 10 88 10 76 Z" fill="#85A2BC"/>
+<g clip-path="url(#whale_c4)"><g transform="translate(-4 -5)"><path d="M 10 76 C 8 52 24 36 46 36 C 70 36 86 54 98 66 C 102 70 106 70 108 68 C 110 76 104 84 94 88 C 78 98 52 104 34 100 C 18 96 10 88 10 76 Z" fill="#A7C2DA"/></g>
+<path d="M 12 82 C 30 94 60 96 92 86 L 96 110 L 10 110 Z" fill="#DDEAF5"/>
+<ellipse cx="30" cy="46" rx="10" ry="5" transform="rotate(-25 30 46)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M 10 76 C 8 52 24 36 46 36 C 70 36 86 54 98 66 C 102 70 106 70 108 68 C 110 76 104 84 94 88 C 78 98 52 104 34 100 C 18 96 10 88 10 76 Z" fill="none" stroke="#4D6D8C" stroke-width="3" stroke-linejoin="round"/>
+<ellipse cx="54" cy="92" rx="12" ry="6" transform="rotate(28 54 92)" fill="#9AB5CE"/>
+<g clip-path="url(#whale_c5)">
+</g>
+<ellipse cx="54" cy="92" rx="12" ry="6" transform="rotate(28 54 92)" fill="none" stroke="#4D6D8C" stroke-width="2.4" stroke-linejoin="round"/>
+<ellipse cx="36" cy="62" rx="6.6" ry="7.52" fill="#2A2135"/>
+<circle cx="33.89" cy="59.23" r="2.9" fill="#FFFFFF"/>
+<circle cx="38.51" cy="64.64" r="1.19" fill="#FFFFFF" opacity=".9"/>
+<path d="M 16 78 Q 28 88 44 80" fill="none" stroke="#4D6D8C" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse cx="46" cy="74" rx="6" ry="3.72" fill="#FF7F9E" opacity="0.6"/>
+<path d="M 64 52 Q 70 50 76 54" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+</svg>

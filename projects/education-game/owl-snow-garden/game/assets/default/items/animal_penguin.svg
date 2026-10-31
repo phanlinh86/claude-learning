@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><clipPath id="penguin_c1"><ellipse cx="50" cy="112" rx="12" ry="5.5" /></clipPath><clipPath id="penguin_c2"><ellipse cx="78" cy="112" rx="12" ry="5.5" /></clipPath><clipPath id="penguin_c3"><ellipse cx="24" cy="76" rx="8" ry="20" transform="rotate(22 24 76)" /></clipPath><clipPath id="penguin_c4"><ellipse cx="104" cy="76" rx="8" ry="20" transform="rotate(-22 104 76)" /></clipPath><clipPath id="penguin_c5"><ellipse cx="64" cy="66" rx="38" ry="47" /></clipPath><clipPath id="penguin_c6"><path d="M 56 59 C 58 56 70 56 72 59 C 70 64 66 68 64 68 C 62 68 58 64 56 59 Z" /></clipPath><g id="penguin_sil"><ellipse cx="50" cy="112" rx="12" ry="5.5" /><ellipse cx="78" cy="112" rx="12" ry="5.5" /><ellipse cx="24" cy="76" rx="8" ry="20" transform="rotate(22 24 76)" /><ellipse cx="104" cy="76" rx="8" ry="20" transform="rotate(-22 104 76)" /><ellipse cx="64" cy="66" rx="38" ry="47" /></g></defs>
+<use href="#penguin_sil" xlink:href="#penguin_sil" transform="translate(0 3)" fill="#2B4A7A" stroke="#2B4A7A" stroke-width="15" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>
+<use href="#penguin_sil" xlink:href="#penguin_sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="15" stroke-linejoin="round" stroke-linecap="round"/>
+<ellipse cx="50" cy="112" rx="12" ry="5.5" fill="#FF9A2E"/>
+<g clip-path="url(#penguin_c1)">
+</g>
+<ellipse cx="50" cy="112" rx="12" ry="5.5" fill="none" stroke="#C4650C" stroke-width="2.4" stroke-linejoin="round"/>
+<ellipse cx="78" cy="112" rx="12" ry="5.5" fill="#FF9A2E"/>
+<g clip-path="url(#penguin_c2)">
+</g>
+<ellipse cx="78" cy="112" rx="12" ry="5.5" fill="none" stroke="#C4650C" stroke-width="2.4" stroke-linejoin="round"/>
+<ellipse cx="24" cy="76" rx="8" ry="20" transform="rotate(22 24 76)" fill="#33405A"/>
+<g clip-path="url(#penguin_c3)">
+</g>
+<ellipse cx="24" cy="76" rx="8" ry="20" transform="rotate(22 24 76)" fill="none" stroke="#1B2335" stroke-width="3" stroke-linejoin="round"/>
+<ellipse cx="104" cy="76" rx="8" ry="20" transform="rotate(-22 104 76)" fill="#33405A"/>
+<g clip-path="url(#penguin_c4)">
+</g>
+<ellipse cx="104" cy="76" rx="8" ry="20" transform="rotate(-22 104 76)" fill="none" stroke="#1B2335" stroke-width="3" stroke-linejoin="round"/>
+<ellipse cx="64" cy="66" rx="38" ry="47" fill="#2A354C"/>
+<g clip-path="url(#penguin_c5)"><g transform="translate(-4 -5)"><ellipse cx="64" cy="66" rx="38" ry="47" fill="#33405A"/></g>
+<path d="M 64 42 C 56 28 34 30 34 52 C 34 72 38 98 64 110 C 90 98 94 72 94 52 C 94 30 72 28 64 42 Z" fill="#FBFCFF"/><ellipse cx="64" cy="100" rx="22" ry="10" fill="#DCE4EE"/>
+<ellipse cx="42" cy="34" rx="9" ry="5" transform="rotate(-30 42 34)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<ellipse cx="64" cy="66" rx="38" ry="47" fill="none" stroke="#1B2335" stroke-width="3" stroke-linejoin="round"/>
+<ellipse cx="52.5" cy="50" rx="6.4" ry="7.3" fill="#2A2135"/>
+<circle cx="50.45" cy="47.31" r="2.82" fill="#FFFFFF"/>
+<circle cx="54.93" cy="52.56" r="1.15" fill="#FFFFFF" opacity=".9"/>
+<ellipse cx="75.5" cy="50" rx="6.4" ry="7.3" fill="#2A2135"/>
+<circle cx="73.45" cy="47.31" r="2.82" fill="#FFFFFF"/>
+<circle cx="77.93" cy="52.56" r="1.15" fill="#FFFFFF" opacity=".9"/>
+<path d="M 56 59 C 58 56 70 56 72 59 C 70 64 66 68 64 68 C 62 68 58 64 56 59 Z" fill="#ED8A24"/>
+<g clip-path="url(#penguin_c6)"><g transform="translate(-1.5 -2)"><path d="M 56 59 C 58 56 70 56 72 59 C 70 64 66 68 64 68 C 62 68 58 64 56 59 Z" fill="#FF9A2E"/></g>
+</g>
+<path d="M 56 59 C 58 56 70 56 72 59 C 70 64 66 68 64 68 C 62 68 58 64 56 59 Z" fill="none" stroke="#C4650C" stroke-width="2.2" stroke-linejoin="round"/>
+<ellipse cx="44" cy="62" rx="5.5" ry="3.41" fill="#FF7F9E" opacity="0.6"/>
+<ellipse cx="84" cy="62" rx="5.5" ry="3.41" fill="#FF7F9E" opacity="0.6"/>
+</svg>
