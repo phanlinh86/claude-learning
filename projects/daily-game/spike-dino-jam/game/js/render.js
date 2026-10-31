@@ -70,7 +70,9 @@
       this._bg.clear();
       const S = v.s, I = v.ins;
       // arena: whole canvas minus safe areas, HUD band and the bush border
-      const ar = { x0: Math.round(I.left + BORDER), y0: Math.round(I.top + HUD_H + 12), x1: Math.round(v.VW - I.right - BORDER), y1: Math.round(v.VH - I.bottom - BORDER + 4) };
+      const hudH = S < 0.75 ? 80 : HUD_H;   // phones: the HUD is drawn bigger, so the band is taller
+      this._hudK = clamp(0.8 / S, 1, 1.6);   // HUD scale so hearts / counters stay ≥ ~20 CSS px on phones
+      const ar = { x0: Math.round(I.left + BORDER), y0: Math.round(I.top + hudH + 12), x1: Math.round(v.VW - I.right - BORDER), y1: Math.round(v.VH - I.bottom - BORDER + 4) };
       // touch kickflip button: bottom-right, ≥ 66 CSS px; notes never spawn under it
       const B = Math.max(84, 70 / S);
       const ab = { x: v.VW - I.right - 14 - B, y: v.VH - I.bottom - 14 - B, w: B, h: B };
@@ -132,6 +134,7 @@
       if (custom) {   // player's picture: cover the whole canvas, slightly darkened at the margins by the border
         const k = Math.max(c.width / custom.width, c.height / custom.height);
         g.drawImage(custom, (c.width - custom.width * k) / 2, (c.height - custom.height * k) / 2, custom.width * k, custom.height * k);
+        g.fillStyle = 'rgba(255,255,255,.16)'; g.fillRect(0, 0, c.width, c.height);   // calm a busy photo so notes read
       } else if (ground) {
         const t = document.createElement('canvas'); t.width = t.height = Math.max(8, Math.round(TILE * px));
         t.getContext('2d').drawImage(ground, 0, 0, t.width, t.height);
@@ -181,19 +184,19 @@
       const nSide = Math.max(1, Math.round(H / 260));
       for (let i = 0; i < nSide; i++) {
         const y = ar.y0 + H * (i + 0.6) / (nSide + 0.2);
-        out.push([ar.x0 - 6, y, i % 2 === 0 ? 3 : 0, s, false]);
-        out.push([ar.x1 + 6, y + 40, i % 2 === 0 ? 1 : 2, s * 0.9, true]);
+        out.push([Math.max(ar.x0 - 30, 24), y, i % 2 === 0 ? 3 : 0, s, false]);   // on the bush strip, but never off-screen
+        out.push([Math.min(ar.x1 + 30, this.VW - 24), y + 40, i % 2 === 0 ? 1 : 2, s * 0.9, true]);
       }
       // bottom
       const nB = Math.max(1, Math.round(W / 330));
       for (let i = 0; i < nB; i++) {
         const x = ar.x0 + W * (i + 0.5) / nB;
         if (touch && x > L.act.x - 60) continue;
-        out.push([x, ar.y1 + 30, [0, 2, 1][i % 3], s, i % 2 === 1]);
+        out.push([x, ar.y1 + 50, [0, 2, 1][i % 3], s, i % 2 === 1]);
       }
       // top: only between the hearts and the score, and between the score and the buttons
-      if (W > 700) out.push([ar.x0 + W * 0.30, ar.y0 - 4, 0, s * 0.8, false]);
-      if (W > 820) out.push([ar.x0 + W * 0.68, ar.y0 - 4, 2, s * 0.8, true]);
+      if (W > 700) out.push([ar.x0 + W * 0.30, ar.y0 - 18, 0, s * 0.8, false]);
+      if (W > 820) out.push([ar.x0 + W * 0.68, ar.y0 - 18, 2, s * 0.8, true]);
       return out;
     }
 
@@ -214,7 +217,7 @@
             this.texts.push({ text: 'Boing!', x: e.x, y: e.y - 60, life: 0, max: 1, size: 30, color: '#ffd1e6' });
             this.stars(e.x, e.y - 40);
             break;
-          case 'bounce': this.puffs(e.x, e.y, 3, 'rgba(255,255,255,.8)'); break;
+          case 'bounce': this.puffs(e.x, e.y, 6, 'rgba(255,255,255,.8)'); break;
           case 'flip': this.puffs(e.x, e.y + 4, 4, 'rgba(255,255,255,.75)'); break;
           case 'land': this.puffs(e.x, e.y + 4, 3, 'rgba(255,255,255,.7)'); break;
           case 'flipready': this._flipPop = 1; break;
@@ -242,7 +245,7 @@
             }
             break;
           }
-          case 'go': this.texts.push({ text: 'Go!', x: this.VW / 2, y: this.VH * 0.42, life: 0, max: 0.8, size: 46, color: '#ffffff', big: true }); break;
+          case 'go': this.texts.push({ text: 'Go!', x: this.VW / 2, y: this.VH * 0.3 + 92, life: 0, max: 0.8, size: 46, color: '#ffffff', big: true }); break;
           case 'biome': case 'season': { const z = e.biome != null ? e.biome : e.season; this.showBanner(z); this.setSeason(z); break; }
           case 'dead': this.flash = 0.4; this.shake = 0.3; this.texts.push({ text: 'Out of hearts!', x: this.VW / 2, y: this.VH * 0.45, life: 0, max: 2.5, size: 40, color: '#ffd1e6', big: true }); break;
         }
@@ -259,7 +262,7 @@
 
     update(dt) {
       this.time += dt;
-      if (this.vis.t < 1) this.vis.t = Math.min(1, this.vis.t + dt / 1.0);
+      if (this.vis.t < 1) this.vis.t = Math.min(1, this.vis.t + dt / 0.7);
       if (this.banner) { this.banner.t += dt; if (this.banner.t > 1.8) this.banner = null; }
       this.shake = Math.max(0, this.shake - dt);
       this.flash = Math.max(0, this.flash - dt * 2.2);
@@ -339,8 +342,9 @@
       if (alpha != null) g.globalAlpha = alpha;
       if (A.hasCustom('note')) {
         const [fw, fh] = A.fit('note', 28, 28), col = gold ? GOLD : NOTE_COLORS[kind || 0], r = 17 * scale;
+        g.beginPath(); g.arc(x, y, r + 2, 0, TAU); g.fillStyle = '#ffffff'; g.fill();
         g.fillStyle = col; g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill();
-        g.lineWidth = 2; g.strokeStyle = 'rgba(0,0,0,.25)'; g.stroke();
+        g.lineWidth = 3; g.strokeStyle = 'rgba(40,30,50,.7)'; g.stroke();
         const c = this.spr('custom:note', fw, fh);
         if (c) g.drawImage(c, x - fw * scale / 2, y - fh * scale / 2, fw * scale, fh * scale);
       } else {
@@ -362,9 +366,13 @@
       for (const p of w.pillows) {
         if (p.state === 'fall') {
           const zMax = p.zMax || 120, z = lerp(p._pz != null ? p._pz : p.z, p.z, al), k = clamp(1 - z / zMax, 0, 1);
-          g.strokeStyle = 'rgba(255,255,255,' + (0.35 + 0.4 * k) + ')'; g.lineWidth = 2; g.setLineDash([5, 5]);
-          g.beginPath(); g.ellipse(p.x, p.y, 30, 15, 0, 0, TAU); g.stroke(); g.setLineDash([]);
-          this.shadow(g, p.x, p.y, 8 + 18 * k, 4 + 9 * k, 0.12 + 0.2 * k);
+          // two-tone marching ring: readable on snow and on grass, grows bolder as the pillow drops
+          const rx = 34, ry = 17;
+          g.lineWidth = 4; g.strokeStyle = 'rgba(40,30,70,' + (0.35 + 0.35 * k) + ')';
+          g.beginPath(); g.ellipse(p.x, p.y, rx, ry, 0, 0, TAU); g.stroke();
+          g.lineWidth = 2; g.strokeStyle = 'rgba(255,255,255,' + (0.6 + 0.4 * k) + ')'; g.setLineDash([7, 6]); g.lineDashOffset = -this.time * 20;
+          g.beginPath(); g.ellipse(p.x, p.y, rx, ry, 0, 0, TAU); g.stroke(); g.setLineDash([]); g.lineDashOffset = 0;
+          this.shadow(g, p.x, p.y, 10 + 22 * k, 5 + 11 * k, 0.18 + 0.27 * k);
         } else {
           const a = clamp(p.life / 0.4, 0, 1), sq = 1 + Math.max(0, 0.25 - (1.5 - p.life)) * 1.2;
           this.shadow(g, p.x, p.y + 6, 22, 9, 0.18 * a);
@@ -379,13 +387,14 @@
         if (n.state === 'idle') { z = 4 + Math.sin(t * 3 + n.id) * 3; g.fillStyle = 'rgba(255,255,255,.22)'; g.beginPath(); g.arc(x, y, 18 + Math.sin(t * 4 + n.id) * 2, 0, TAU); g.fill(); }
         if (n.state === 'loose' && n.life < 1.2) a = (Math.floor(n.life * 8) % 2) ? 0.35 : 1;
         this.shadow(g, x, y + 2, 10 * sc, 4 * sc, 0.2);
+        if (n.gold) { g.strokeStyle = 'rgba(255,214,60,' + (0.5 + 0.4 * Math.sin(t * 6)) + ')'; g.lineWidth = 3; g.beginPath(); g.arc(x, y - z - 8, 21 + Math.sin(t * 6) * 3, 0, TAU); g.stroke(); }
         this.drawNote(g, x, y - z - 8, n.kind, n.gold, sc, a, 0);
       }
       // trail + Spike, y-sorted
       const list = this._sortBuf; list.length = 0;
       for (let i = 0; i < w.trail.length; i++) list.push(i);
       list.push(-1);
-      const ty = i => i < 0 ? iq(s) : iq(w.trail[i]);
+      const ty = i => i < 0 ? iq(s) + 14 : iq(w.trail[i]);   // Spike's board covers the first notes
       list.sort((a, b) => ty(a) - ty(b));
       for (const tr of w.trail) this.shadow(g, ip(tr), iq(tr) + 2, 10, 4, 0.18);
       for (const i of list) {
@@ -416,7 +425,7 @@
       const bc = this.spr('board', BOARD[0], BOARD[1]);
       const jt = s.jump > 0 && this.world.cfg.jumpTime ? clamp(s.jump / this.world.cfg.jumpTime, 0, 1) : 0;
       if (bc) {
-        g.save(); g.translate(x, y - z); g.rotate(s.heading || 0);
+        g.save(); g.translate(x, y - z); g.scale(1, 0.62); g.rotate(s.heading || 0);   // 3/4 camera: the ground plane is squashed
         const k = 1 + z / 90; g.scale(k, k * (jt ? Math.cos(jt * TAU) : 1));
         g.drawImage(bc, -BOARD[0] / 2, -BOARD[1] / 2, BOARD[0], BOARD[1]); g.restore();
       }
@@ -473,38 +482,43 @@
       for (const t of this.texts) {
         const k = t.life / t.max, a = k > 0.75 ? (1 - k) / 0.25 : 1, sc = t.big ? (t.life < 0.25 ? easeOutBack(t.life / 0.25) : 1) : 1;
         g.globalAlpha = clamp(a, 0, 1);
-        this.text(g, t.text, clamp(t.x, 90, this.VW - 90), t.y, Math.round(t.size * sc), t.color);
+        this.text(g, t.text, clamp(t.x, 90, this.VW - 90), Math.max(t.y, this.layout.arena.y0 + t.size * 0.6), Math.round(t.size * sc), t.color);
       }
       g.globalAlpha = 1;
     }
     drawHud(g, w) {
-      const I = this.ins, x0 = I.left + 16, y0 = I.top + 14, narrow = this.VW < 700;
-      // hearts
-      const hs = narrow ? 24 : 28;
+      const I = this.ins, K = this._hudK || 1, x0 = I.left + 14, y0 = I.top + 12, touch = !!(DJ.Game && DJ.Game.isTouch);
+      // hearts on a soft plate (readable on snow)
+      const hs = Math.round(26 * K), bw = Math.round(130 * K), bh = Math.round(13 * K);
+      const plateW = Math.max(w.heartsMax * (hs + 3), 30 * K + bw + 48 * K) + 14, plateH = hs + bh + 30 * K;
+      g.fillStyle = 'rgba(20,30,40,.30)'; this.rr(g, x0 - 7, y0 - 6, plateW, plateH, 12); g.fill();
       for (let i = 0; i < w.heartsMax; i++) this.drawSprite(g, i < w.hearts ? 'heart_full' : 'heart_empty', x0 + i * (hs + 3), y0, hs, hs);
       // song progress bar under the hearts
-      const by = y0 + hs + 8, bw = narrow ? 120 : 150;
-      this.drawSprite(g, 'songbar', x0 - 4, by - 6, 30, 30);
-      g.fillStyle = 'rgba(30,30,50,.45)'; this.rr(g, x0 + 28, by + 2, bw, 14, 7); g.fill();
+      const by = y0 + hs + 8 * K, ic = Math.round(26 * K), bx = x0 + ic;
+      this.drawSprite(g, 'songbar', x0 - 3, by - 6 * K, ic, ic);
+      g.fillStyle = 'rgba(30,30,50,.5)'; this.rr(g, bx, by, bw, bh, bh / 2); g.fill();
       const f = w.songTarget ? clamp(w.song / w.songTarget, 0, 1) : 0;
-      if (f > 0) { const grd = g.createLinearGradient(x0 + 28, 0, x0 + 28 + bw, 0); grd.addColorStop(0, '#ff7fb0'); grd.addColorStop(0.5, '#5ec2ff'); grd.addColorStop(1, '#5edfa6'); g.fillStyle = grd; this.rr(g, x0 + 28, by + 2, Math.max(14, bw * f), 14, 7); g.fill(); }
-      this.text(g, w.song + '/' + w.songTarget, x0 + 28 + bw + 8, by + 9, 16, '#ffffff', 'left');
-      // score, top centre (between the hearts block and the HUD buttons)
-      const right = this._hudBtn ? this._hudBtn.l : this.VW - 120;
-      const cx = narrow ? Math.min(this.VW / 2 + 40, (x0 + 150 + right) / 2 + 30) : this.VW / 2;
-      this.text(g, String(w.score), cx, y0 + 18, narrow ? 30 : 36, '#ffffff');
+      if (f > 0) { const grd = g.createLinearGradient(bx, 0, bx + bw, 0); grd.addColorStop(0, '#ff7fb0'); grd.addColorStop(0.5, '#5ec2ff'); grd.addColorStop(1, '#5edfa6'); g.fillStyle = grd; this.rr(g, bx, by, Math.max(bh, bw * f), bh, bh / 2); g.fill(); }
+      this.text(g, w.song + '/' + w.songTarget, bx + bw + 6, by + bh / 2, Math.round(16 * K), '#ffffff', 'left');
+      // score: centred between the hearts plate and the HUD buttons
+      const right = this._hudBtn ? this._hudBtn.l : this.VW - 120, leftEdge = x0 + plateW;
+      const cx = (right - leftEdge) > 260 ? clamp(this.VW / 2, leftEdge + 70, right - 70) : (leftEdge + right) / 2;
+      const ss = Math.round(Math.min(36, 26 * K * 1.15));
+      this.text(g, String(w.score), cx, y0 + ss * 0.55, ss, '#ffffff');
       // kickflip charge (desktop: small meter under the score; touch: the button shows it)
-      if (!(DJ.Game && DJ.Game.isTouch)) {
+      if (!touch) {
         const s = w.spike, fc = clamp(s.flip, 0, 1), mx = cx - 46, my = y0 + 44;
         this.drawSprite(g, 'flip', mx - 4, my - 9, 26, 26);
         g.fillStyle = 'rgba(30,30,50,.45)'; this.rr(g, mx + 26, my, 66, 9, 4.5); g.fill();
         g.fillStyle = fc >= 1 ? '#ffd34d' : '#b9a7ff'; this.rr(g, mx + 26, my, Math.max(9, 66 * fc), 9, 4.5); g.fill();
         if (this._flipPop > 0) { g.globalAlpha = this._flipPop; g.strokeStyle = '#fff'; g.lineWidth = 2; this.rr(g, mx + 24, my - 2, 70, 13, 6); g.stroke(); g.globalAlpha = 1; }
       }
-      // boss warning: a small Mumbles icon blinks 3 s before a visit
-      const b = w.boss;
-      if (b && b.state === 'away' && w.state === 'playing' && b.next < 3 && b.next > 0) {
-        if (Math.floor(this.time * 4) % 2 === 0) { const c = this.spr('ptera_fly1', 56, 40); if (c) g.drawImage(c, cx + (narrow ? 50 : 70), y0 + 2, 56, 40); }
+      // boss warning: a small Mumbles icon blinks 3 s before a visit (under the score, never under the buttons)
+      const b = w.boss, iw = 50, ih = 36, wide = right - cx > 150;
+      const wr = this._warnRect = { x0: Math.min(wide ? cx + 60 : cx - iw / 2, right - iw - 6), y0: wide ? y0 + 2 : y0 + ss + 4 };
+      wr.x1 = wr.x0 + iw; wr.y1 = wr.y0 + ih;
+      if (b && b.state === 'away' && w.state === 'playing' && b.next < 3 && b.next > 0 && Math.floor(this.time * 4) % 2 === 0) {
+        const c = this.spr('ptera_fly1', iw, ih); if (c) g.drawImage(c, wr.x0, wr.y0, iw, ih);
       }
     }
     rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }

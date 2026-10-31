@@ -111,3 +111,21 @@ Pre-render the whole static background (tiles + border + decor) once per biome a
 - **Input:** Pointer Events. One steering finger with pointer capture (Spike skates toward the finger). A second finger = kickflip. On touch the kickflip button (≥ 66 CSS px) sits bottom-right; notes never spawn under it. UI buttons fire on touch `pointerup`; the ghost click is swallowed. Rotation releases the steering finger.
 - **iOS:** audio unlock in the first `touchend`; `visibilitychange` pauses and suspends audio; kid-proofing (no zoom, no rubber-band, no callouts).
 - **Home screen:** `manifest.webmanifest` plus 180/192/512 PNG icons from `tools/render_mobile_icons.js`.
+
+## 9. Changes after QA (2026-10-31)
+- **Contract additions from the mechanics engineer** (see `docs/MECHANICS.md`): `w._acc` for interpolation; pillows interpolate `_pcx,_pcy,_pz` (draw at `cx, cy − z`, shadow at `x, y`); events `go`, `loosegone`, `pillowpuff`; `Weather.burst(sprite,x,y,n)`.
+- **Playtest tuning** (`docs/reports/playtest.md`):
+  - Easy: speed0 105, safeNeck 7, bonkR 12, songs 8/10/12/14.
+  - Normal: safeNeck 6, bonkR 14, songs 10/12/14/16.
+  - Easy and Normal: trailSpacing 22.
+  - All levels: `targetDead` 48 (fixes orbiting a note at high speed).
+  - New `bounceGrace` 0.8 s: no self-bonk right after a bush bounce (0 on Hard).
+- **Touch button:** pillows and loose notes are pushed out of the `avoid` circles (`World._outOfAvoid`).
+- **Visual QA:**
+  - two-tone, marching pillow landing ring
+  - board squashed to the 3/4 view
+  - Spike drawn over the first notes of his tail
+  - bigger HUD on phones on a backing plate, with an 80 px HUD band
+  - floating texts kept below the HUD
+  - decor moved onto the bush strip
+  - CSS fixes for small phones

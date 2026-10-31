@@ -97,7 +97,7 @@
       if (id === 'scrCustom') this.renderSlots();
       if (id === 'scrTitle') $('bestTitle').textContent = this.game.best();
       // focus the main button so keyboard users can press Enter
-      const first = id && $(id).querySelector('.btn-big, .btn');
+      const first = id && ($(id).querySelector('.btn-big') || $(id).querySelector('.btn-back') || $(id).querySelector('.btn'));   // never a destructive button (Reset best) or a file picker
       if (first) setTimeout(() => first.focus({ preventScroll: true }), 30);
     },
     open(id, backTo) { this.backTo = backTo; this.show(id); },
@@ -105,7 +105,7 @@
       if (this.current === 'scrCustom') this.game.picturesChanged();
       this.show(this.backTo || 'scrTitle');
     },
-    setHud(on) { $('hud').classList.toggle('hidden', !on); },
+    setHud(on) { $('hud').classList.toggle('hidden', !on); if (on && this.game.renderer) this.game.renderer._measureHud(); },
 
     showGameOver(info) {
       $('overScore').textContent = info.score;

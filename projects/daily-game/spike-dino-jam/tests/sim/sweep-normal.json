@@ -1,0 +1,9 @@
+{ "normal": {
+  "D_C_songs": { "speed0": 135, "speedPerBiome": 5, "safeNeck": 5, "bonkR": 15, "songTargets": [10, 12, 15, 18] },
+  "I_songs_only": { "songTargets": [10, 12, 14, 16] },
+  "J_tail6_14": { "safeNeck": 6, "bonkR": 14, "songTargets": [10, 12, 14, 16] },
+  "K_J_invuln": { "safeNeck": 6, "bonkR": 14, "songTargets": [10, 12, 14, 16], "invulnTime": 2.0 },
+  "L_J_hearts4": { "safeNeck": 6, "bonkR": 14, "songTargets": [10, 12, 14, 16], "heartsMax": 4 },
+  "M_J_spacing22": { "safeNeck": 6, "bonkR": 14, "songTargets": [10, 12, 14, 16], "trailSpacing": 22 },
+  "N_J_slow140": { "safeNeck": 6, "bonkR": 14, "songTargets": [10, 12, 14, 16], "speed0": 140 }
+} }

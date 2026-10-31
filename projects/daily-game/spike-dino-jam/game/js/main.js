@@ -109,7 +109,7 @@
     pause() {
       if (this.mode !== 'playing') return;
       if (this.world && this.world.state === 'dead') return;
-      this.mode = 'paused'; this.keys = {}; this.pointerDown = false;
+      this.mode = 'paused'; this.keys = {}; this.releasePointer();
       DJ.UI.setHud(false); this.showAction(false);
       DJ.UI.show('scrPause');
     },
@@ -149,7 +149,11 @@
       DJ.Audio.setOptions({ sfx: this.settings.sfx, music: this.settings.music, muted: this.settings.muted || this.urlMute });
       if (k === 'music') { if (v && this.mode !== 'title') DJ.Audio.startMusic(); if (!v) DJ.Audio.stopMusic(); }
     },
-    toggleMute() { this.setSetting('muted', !this.settings.muted); DJ.UI.syncMute(); DJ.UI.toast(this.settings.muted ? 'Sound off' : 'Sound on', 900); },
+    toggleMute() {
+      const on = !this.settings.muted;
+      if (!on) this.urlMute = false;   // unmuting also lifts a ?mute=1 test flag (never saved), so the toast tells the truth
+      this.setSetting('muted', on); DJ.UI.syncMute(); DJ.UI.toast(this.settings.muted || this.urlMute ? 'Sound off' : 'Sound on', 900);
+    },
     setFullscreen(on) {
       this.fullscreen = on;
       if (typeof window.ffFullscreen === 'function') window.ffFullscreen(on);

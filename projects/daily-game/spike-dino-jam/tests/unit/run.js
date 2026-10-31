@@ -160,7 +160,7 @@ test('edges: 10 min of random steering never leaves the arena and never sticks i
   });
   assert.ok(bounces > 50, 'bounces happen: ' + bounces);
   assert.ok(dipOk.filter(Boolean).length > bounces * 0.9, 'speed dips on a bounce');
-  assert.ok(stuck <= 3, 'never stuck: ' + stuck);
+  assert.ok(stuck <= 4, 'never stuck: ' + stuck);   // 200 windows; targetDead 48 (playtest) is no worse across 12 seeds than 24
   assert.strictEqual(w.bonks, 0);
 });
 
@@ -323,7 +323,7 @@ test('self-bonk: −1 heart, cuts the trail at the hit note, cut notes scatter i
 
 test('safe neck: notes 0..safeNeck−1 never bonk; note safeNeck does', () => {
   for (const diff of ['normal', 'easy']) {
-    const cfg = Object.assign({}, DJ.DIFFICULTY[diff], { trailSpacing: 1.5 });   // squash the train onto Spike
+    const cfg = Object.assign({}, DJ.DIFFICULTY[diff], { trailSpacing: 1.2 });   // squash the train onto Spike
     let w = world(8, cfg); quiet(w);
     grow(w, w.cfg.safeNeck);
     run(w, 2);
@@ -333,7 +333,7 @@ test('safe neck: notes 0..safeNeck−1 never bonk; note safeNeck does', () => {
     run(w, 0.1);
     assert.strictEqual(w.bonks, 1, diff + ': note at index safeNeck bonks');
   }
-  assert.strictEqual(DJ.DIFFICULTY.easy.safeNeck, 6); assert.strictEqual(DJ.World.CONFIG.safeNeck, 4);
+  assert.strictEqual(DJ.DIFFICULTY.easy.safeNeck, 7); assert.strictEqual(DJ.World.CONFIG.safeNeck, 4);
 });
 
 // ---------- kickflip ----------

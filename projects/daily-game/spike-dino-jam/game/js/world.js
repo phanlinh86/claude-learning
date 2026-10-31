@@ -49,7 +49,8 @@
     turnGain: 9,                   // 1/s, desired turn rate = heading error × gain (then clamped)
     turnEase: 12,                  // 1/s, angular velocity eases to the desired rate (63 % in 0.08 s: no snap)
     wallSlide: 36,                 // px: within this of a bush, the part of the wish pointing into it is dropped
-    targetDead: 24,                // px, pointer within this → keep heading (no orbit jitter)
+    targetDead: 48,                // px, pointer within this → keep heading (no orbit jitter; playtest: 24 let fast laps orbit a note forever)
+    bounceGrace: 0.8,              // s, no self-bonk right after a bush bounce (playtest: 35–44 % of kid bonks came from the fold-back)
     leanRate: 8,                   // 1/s, lean easing
     // edges
     bounceDip: 0.78,               // × speed on an edge bounce (a soft bush absorbs a bit)
@@ -143,20 +144,22 @@
   /* Difficulty presets: overrides merged over CONFIG. */
   var DIFFICULTY = {
     easy: {
-      speed0: 120, speedPerBiome: 5, heartsMax: 5,
-      songTargets: [8, 11, 14, 17],
+      // playtest (docs/reports/playtest.md): kid model reached biome 4 in 7 % → 79 % with these
+      speed0: 105, speedPerBiome: 4, heartsMax: 5,
+      songTargets: [8, 10, 12, 14], trailSpacing: 22,
       jumpTime: 0.8, flipRecharge: 2.4,
-      safeNeck: 6, bonkR: 14, edgeSafe: 40,
+      safeNeck: 7, bonkR: 12, edgeSafe: 40,
       pillowDur: 1.6, looseLife: 5, invulnTime: 1.8
     },
-    normal: {},
+    // playtest: kid model cleared biome 2 in 43 % → 96 %, adults/bots still never lose
+    normal: { safeNeck: 6, bonkR: 14, songTargets: [10, 12, 14, 16], trailSpacing: 22 },
     hard: {
       // playtest (tests/sim): with the normal numbers the bot never lost on hard → faster, tighter,
       // a thinner soft edge, more accurate pillows and Mumbles every 25 s
       speed0: 185, speedPerBiome: 7, speedMax: 260,
       songTargets: [12, 16, 20, 24], notesOnField: 1,
       safeNeck: 3, bonkR: 18, edgeSafe: 12, pillowDur: 1.15, pillowSpread: 55, bossEvery: 25,
-      invulnTime: 1.2, looseLife: 3.5, healOnClear: 0
+      invulnTime: 1.2, looseLife: 3.5, healOnClear: 0, bounceGrace: 0, safeNeck: 3, bonkR: 18, songTargets: [12, 16, 20, 24], trailSpacing: 24
     }
   };
 
@@ -238,7 +241,7 @@
     s.x = (A.x0 + A.x1) / 2; s.y = (A.y0 + A.y1) / 2; s.heading = 0; s.turn = 0; s.lean = 0;
     s.speed = info.speed * c.readySpeed; s.jump = 0; s.z = 0; s.flip = 1; s.dizzy = 0; s.invuln = 0;
     s.happy = 0; s.lock = 0; s.facing = 1; s.frame = 'idle'; s._px = s.x; s._py = s.y;
-    this._bounceT = 0; this._hop = 0;
+    this._bounceT = 0; this._graceT = 0; this._hop = 0;
     // seed the path history with a straight line behind Spike (clamped inside the arena)
     this._pathHead = -1; this._pathLen = 0;
     for (var k = 40; k >= 0; k--) this._pushPath(Math.max(A.x0 + c.spikeR, s.x - k * c.pathStep), s.y);
@@ -366,6 +369,7 @@
     if (s.happy > 0) s.happy = Math.max(0, s.happy - h);
     if (s.lock > 0) s.lock = Math.max(0, s.lock - h);
     if (this._bounceT > 0) this._bounceT -= h;
+    if (this._graceT > 0) this._graceT -= h;
     // kickflip
     if (s.flip < 1) {
       s.flip = Math.min(1, s.flip + h / c.flipRecharge);
@@ -432,6 +436,7 @@
       s.heading = this.bounceHeading(s.heading, wx, wy, desired !== null ? wrap(desired - s.heading - Math.PI) : s.turn, s.x, s.y);
       s.turn = -s.turn * 0.5;
       s.lock = c.bounceLock;
+      this._graceT = c.bounceGrace;
       if (this._bounceT <= 0) {
         s.speed *= c.bounceDip;
         this._bounceT = c.bounceGap;
@@ -614,6 +619,23 @@
       n.x += n.vx * h; n.y += n.vy * h;
       if (n.x < A.x0 + m) { n.x = A.x0 + m; n.vx = Math.abs(n.vx) * 0.5; } else if (n.x > A.x1 - m) { n.x = A.x1 - m; n.vx = -Math.abs(n.vx) * 0.5; }
       if (n.y < A.y0 + m) { n.y = A.y0 + m; n.vy = Math.abs(n.vy) * 0.5; } else if (n.y > A.y1 - m) { n.y = A.y1 - m; n.vy = -Math.abs(n.vy) * 0.5; }
+      if (this.avoid.length) this._outOfAvoid(n, m);
+    }
+  };
+
+  /* Push a point out of the `avoid` circles (the touch kickflip button), then back inside the arena. */
+  World.prototype._outOfAvoid = function (p, m) {
+    var A = this.arena;
+    for (var k = 0; k < this.avoid.length; k++) {
+      var a = this.avoid[k], dx = p.x - a.x, dy = p.y - a.y, d = Math.sqrt(dx * dx + dy * dy), R = a.r + m;
+      if (d >= R) continue;
+      // push toward the arena centre side so it never ends up off-screen in the corner
+      var ux = d > 1 ? dx / d : -1, uy = d > 1 ? dy / d : -1;
+      if (ux > 0 && a.x + R > A.x1 - m) ux = -Math.abs(ux) || -1;
+      if (uy > 0 && a.y + R > A.y1 - m) uy = -Math.abs(uy) || -1;
+      var L = Math.sqrt(ux * ux + uy * uy); ux /= L; uy /= L;
+      p.x = clamp(a.x + ux * R, A.x0 + m, A.x1 - m); p.y = clamp(a.y + uy * R, A.y0 + m, A.y1 - m);
+      if (p.vx !== undefined) { p.vx *= 0.3; p.vy *= 0.3; }
     }
   };
 
@@ -644,7 +666,7 @@
       this._pick(n);
       if (this.state !== 'playing') return;
     }
-    if (s.z > c.airZ || s.invuln > 0 || this.inEdgeZone(s.x, s.y)) return;
+    if (s.z > c.airZ || s.invuln > 0 || this._graceT > 0 || this.inEdgeZone(s.x, s.y)) return;
     var T = this.trail, br2 = c.bonkR * c.bonkR;
     for (i = c.safeNeck; i < T.length; i++) {
       var t = T[i];
@@ -778,6 +800,7 @@
       p.x = clamp(p.x + r.range(-c.pillowSpread, c.pillowSpread), A.x0 + e, A.x1 - e);
       p.y = clamp(p.y + r.range(-c.pillowSpread, c.pillowSpread), A.y0 + e, A.y1 - e);
     }
+    this._outOfAvoid(p, 26);
     var pl = { id: this._nextId++, x: p.x, y: p.y, sx: b.x, sy: b.y + c.pillowZ0, t: 0, dur: c.pillowDur, z: c.pillowZ0, z0: c.pillowZ0,
       vz0: (0.5 * c.pillowG * c.pillowDur * c.pillowDur - c.pillowZ0) / c.pillowDur,
       zMax: 0, rot: 0, spin: r.range(2.5, 4.5) * r.sign(), state: 'fall', life: c.pillowLife, cx: b.x, cy: b.y + c.pillowZ0,

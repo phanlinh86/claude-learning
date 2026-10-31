@@ -181,7 +181,7 @@ canvas#game{background:#4f8a3f}
 .panel h2{color:#e0662b}
 .panel.wide{width:calc(var(--u)*80)}
 .action-btn{position:absolute;z-index:4;width:calc(var(--u)*11);height:calc(var(--u)*11);border-radius:50%;border:calc(var(--u)*.5) solid #fff;
-  background:conic-gradient(rgba(255,211,77,.92) var(--charge,100%), rgba(98,67,191,.78) 0);color:#fff;font-size:calc(var(--u)*5);font-family:var(--font);box-shadow:0 calc(var(--u)*.5) calc(var(--u)*1.2) rgba(0,0,0,.3);
+  background:conic-gradient(rgba(255,211,77,.80) var(--charge,100%), rgba(98,67,191,.62) 0);color:#fff;font-size:calc(var(--u)*5);font-family:var(--font);box-shadow:0 calc(var(--u)*.5) calc(var(--u)*1.2) rgba(0,0,0,.3);
   touch-action:none;transition:opacity .2s;display:flex;align-items:center;justify-content:center;padding:0}
 .action-btn:active{transform:scale(.94)}
 .action-btn img{width:62%;height:62%;pointer-events:none;filter:drop-shadow(0 2px 2px rgba(0,0,0,.3))}
@@ -263,3 +263,12 @@ body.touch .btn:focus-visible,body.touch .btn:focus{outline:none}
   .slot .btn{padding-left:10px;padding-right:10px;min-width:0}
   .slot .shape button{padding:2px 6px}
 }
+
+/* QA fixes (docs/reports/visual_qa.md) */
+@media (max-height:430px){.slot .btns{gap:4px}.slot .btn{padding-left:6px!important;padding-right:6px!important;font-size:13px!important;min-width:0}}
+.icon-btn{background:rgba(30,45,70,.62)!important}
+.icon-btn svg{filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
+#scrCustom:not(.hidden) ~ #toast{bottom:auto!important;top:calc(env(safe-area-inset-top,0px) + 12px)}
+.btn-small{font-size:max(15px, calc(var(--u)*1.8))}
+body.touch .tagline,body.touch .best-line{font-size:max(14px, 1em)}
+.slot .tag,.slot .shape button{font-size:max(11px, 1em)}

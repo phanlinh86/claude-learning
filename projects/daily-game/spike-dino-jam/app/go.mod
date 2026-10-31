@@ -1,4 +1,4 @@
-module puffsvolcanocatch
+module spikesdinojam
 
 go 1.22
 
