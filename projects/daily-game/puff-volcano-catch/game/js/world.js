@@ -261,6 +261,30 @@
 
   /* ------------------------------ input ------------------------------ */
   World.prototype.setMove = function (mx) { mx = +mx || 0; this._mx = clamp(mx, -1, 1); };
+  /** setPlayRange(xMin, xMax): the part of the shore Puff can reach on this screen (mobile layouts are
+   *  narrower in portrait, or keep clear of the on-screen rain button). Coins only land where Puff can go:
+   *  targets stay 20 px inside the range. Clamps Puff and any in-flight item's future spawns; items already
+   *  flying keep their arcs. Defaults (desktop 16:9) are 70..890 → targets 90..870. */
+  World.prototype.setPlayRange = function (xMin, xMax) {
+    var c = this.cfg, cx = c.crater.x;
+    xMin = Math.max(20, Math.min(cx - 120, +xMin || 70));
+    xMax = Math.min(940, Math.max(cx + 120, +xMax || 890));
+    c.xMin = xMin; c.xMax = xMax;
+    c.targetMin = xMin + 20; c.targetMax = xMax - 20;
+    var p = this.puff;
+    if (p) { if (p.x < xMin) { p.x = xMin; p.vx = 0; } else if (p.x > xMax) { p.x = xMax; p.vx = 0; } p._px = p.x; }
+    // re-aim coins/rocks already in the air (rotation mid-flight): horizontal motion is linear, so changing vx
+    // moves the landing spot into the new range and the item still crosses the catch line on time
+    var items = this.items || [];
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i];
+      if (it.state !== 'fly' || !(it.tCross > this.time) || it.tx == null) continue;
+      var nt = Math.max(c.targetMin, Math.min(c.targetMax, it.tx));
+      if (nt !== it.tx) { it.vx = (nt - it.x) / (it.tCross - this.time); it.tx = nt; }
+    }
+    return this;
+  };
+
   World.prototype.setTarget = function (x) {
     if (x === null || x === undefined || typeof x !== 'number' || !isFinite(x)) { this._target = null; return; }
     this._target = +x;

@@ -2,16 +2,24 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Volcano Catch">
+<meta name="format-detection" content="telephone=no">
 <meta name="theme-color" content="#1f9fa0">
+<meta name="description" content="Catch the coins a sleepy island volcano burps up! A family catcher game for iPhone, iPad and the browser.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 <title>Puff's Volcano Catch</title>
-<link rel="icon" href="assets/default/icon.svg">
+<link rel="icon" href="assets/default/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <div id="stage">
   <canvas id="game" aria-label="Puff's Volcano Catch game"></canvas>
+  <div id="safeProbe" aria-hidden="true"></div>
 
   <!-- In-game HUD buttons -->
   <div id="hud" class="hidden">
@@ -78,7 +86,7 @@
     <div class="panel wide">
       <h2>How to Play</h2>
       <div class="how-grid">
-        <div class="how"><div class="how-ico"><img src="assets/default/puff_idle.svg" alt=""></div><p><b>Move</b> Puff <span class="kb-only">with <kbd>←</kbd> <kbd>→</kbd> / <kbd>A</kbd> <kbd>D</kbd>, or move the mouse</span><span class="touch-only">: hold your finger where Puff should float</span>.</p></div>
+        <div class="how"><div class="how-ico"><img src="assets/default/puff_idle.svg" alt=""></div><p><b>Move</b> Puff<span class="kb-only"> with <kbd>←</kbd> <kbd>→</kbd> / <kbd>A</kbd> <kbd>D</kbd>, or move the mouse</span><span class="touch-only">: hold your finger where Puff should float</span>.</p></div>
         <div class="how"><div class="how-ico quad"><img src="assets/default/coin_copper.svg" alt=""><img src="assets/default/coin_silver.svg" alt=""><img src="assets/default/coin_gold.svg" alt=""><img src="assets/default/pouch.svg" alt=""></div><p>Watch the volcano <b>rumble</b>, then run under the flying <b>coins</b>. Gold is worth 5! Fill the <b>pouch</b> to clear the zone.</p></div>
         <div class="how"><div class="how-ico"><img src="assets/default/puff_happy.svg" alt=""></div><p>Catch coin after coin to grow your <b>combo</b>: ×2, ×3… up to <b>×5</b> points! A coin that lands in the sand resets it.</p></div>
         <div class="how"><div class="how-ico"><img src="assets/default/rock.svg" alt=""></div><p>Don't catch the warm <b>sizzly rocks</b>: that's a heart! Press <span class="kb-only"><kbd>Space</kbd></span><span class="touch-only">the 💧 button</span> for <b>Cool Rain</b> to turn rocks above Puff into steam.</p></div>
@@ -123,7 +131,6 @@
   <button id="btnAction" class="action-btn hidden" aria-label="Cool Rain">💧</button>
   <div id="toast" class="toast hidden"></div>
   <input type="file" id="filePick" accept="image/*" class="hidden">
-  <div id="rotate"><div class="ph">📱</div><div>Turn your phone sideways to play!</div></div>
 </div>
 
 <script src="js/rng.js"></script>
