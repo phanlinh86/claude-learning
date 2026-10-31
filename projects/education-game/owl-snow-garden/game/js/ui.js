@@ -100,7 +100,9 @@
       $('talkTitle').textContent = T(lang, 'talk.intro').split(/[!.?]/)[0] + '!';
       $('talkQ').textContent = T(lang, talk.promptKey, talk.params || {});
       this.only('scrTalk');
-      requestAnimationFrame(() => SG.Renderer.preview($('talkShow'), talk.show || {}));
+      const sh = talk.show || {}, empty = !sh.sprite && !sh.shape && !sh.flower && (sh.text == null || sh.text === '');
+      $('talkShow').classList.toggle('hidden', empty);   // animals: the question names the animal, no picture
+      if (!empty) requestAnimationFrame(() => SG.Renderer.preview($('talkShow'), sh));
       const box = $('talkChoices'); box.innerHTML = '';
       talk.choices.forEach(c => {
         const b = document.createElement('button');

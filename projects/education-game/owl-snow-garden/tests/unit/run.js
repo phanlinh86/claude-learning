@@ -137,7 +137,7 @@ test('content: palette, animals, age topics and word tables exactly as DESIGN §
   assert.ok(!TOPICS.includes('homes') && TOPICS.includes('animals'));
 });
 
-const clash = cs => (cs.includes('blue') && cs.includes('purple')) || (cs.includes('red') && cs.includes('green'));
+const clash = cs => (cs.includes('blue') && cs.includes('purple')) || (cs.includes('red') && cs.includes('green')) || (cs.includes('yellow') && cs.includes('orange'));
 
 test('content: every topic × age × 600 seeds → valid, completable rounds with the §5.1 rules', () => {
   const sizeOK = { big: 1.3, small: 0.72 };
@@ -173,9 +173,9 @@ test('content: every topic × age × 600 seeds → valid, completable rounds wit
       case 'size':
         assert.strictEqual(n, 2);
         if (ri === 0) assert.strictEqual(r.items.length, 2);
-        else { assert.ok(r.items.length >= 4 && r.items.length <= 5); for (const b of r.baskets) assert.ok(per[b.id].length >= 2 && per[b.id].length <= 3); }
+        else { assert.strictEqual(r.items.length, 4); for (const b of r.baskets) assert.ok(per[b.id].length >= 1 && per[b.id].length <= 3); }
         assert.strictEqual(new Set(r.items.map(i => i.color)).size, 1, 'one colour');
-        for (const it of r.items) { assert.strictEqual(it.scale, sizeOK[it.nameValue]); assert.strictEqual(it.sprite, 'seed_' + it.color); }
+        for (const it of r.items) { assert.strictEqual(it.scale, sizeOK[it.nameValue]); assert.strictEqual(it.sprite, 'seed_' + it.color); assert.strictEqual(it.size, 116, 'drawn = size · scale'); }
         break;
       case 'animals': {
         assert.strictEqual(r.mode, 'ask');
@@ -281,7 +281,10 @@ test('layout: §2 formulas (pots, Lumi, bubble, play), short-side rule', () => {
   assert.deepStrictEqual(J(SG.World.logicalSize(4000, 1000)), { W: 1600, H: 720 });
   const L = SG.World.computeLayout(1280, 720, { top: 0, right: 0, bottom: 20, left: 44 }, 3);
   assert.strictEqual(L.groundY, 720 - 20 - 70);
-  assert.strictEqual(L.pot.w, Math.min(230, (1280 - 44 - 40) / 3 - 24));
+  const pw0 = Math.min(230, (1280 - 44 - 40) / 3 - 24), altH = (Lx) => Lx.pot.top - Lx.playGap - (Lx.ins.top + 24 + 104 + 16);
+  assert.ok(L.pot.w <= pw0 && L.pot.w > pw0 - 20 && (L.pot.w === pw0 || L.pot.w === 190 || altH(L) >= 240),
+    'landscape: formula width, shrunk only as far as needed for a 240 px seed band (' + L.pot.w + ')');
+  const L0 = SG.World.computeLayout(1280, 720, null, 3); assert.strictEqual(L0.pot.w, 230, 'no shrink when there is room');
   assert.ok(Math.abs(L.pot.h - 0.78 * L.pot.w) < 1e-9);
   assert.strictEqual(L.pot.bottom, L.groundY + 8);
   assert.ok(Math.abs(L.pot.top - (L.pot.bottom - L.pot.h)) < 1e-9);
@@ -291,20 +294,26 @@ test('layout: §2 formulas (pots, Lumi, bubble, play), short-side rule', () => {
   assert.deepStrictEqual([L.bubble.x, L.bubble.y, L.bubble.h], [L.lumi.x + 85, 24, 104]);
   assert.strictEqual(L.bubble.w, Math.min(620, 1280 - L.bubble.x - 0 - 150));
   assert.deepStrictEqual([L.play.x, L.play.y, L.play.x + L.play.w], [44 + 40, 225 + 10, 1280 - 40]);
-  assert.ok(Math.abs(L.play.y + L.play.h - (L.pot.top - 44)) < 1e-9);
+  assert.ok(L.playGap >= 74 && Math.abs(L.play.y + L.play.h - (L.pot.top - L.playGap)) < 1e-9, 'band ends playGap above the pots');
+  const stemH = Math.min(80, Math.max(45, 0.42 * L.pot.h)), clear = stemH - 0.24 * L.pot.h + 0.5 * Math.min(96, 0.5 * L.pot.w);
+  assert.ok(Math.abs(L.pot.flowerTop - (L.pot.top - clear)) < 1e-9 && L.pot.top - L.playGap <= L.pot.flowerTop + 1e-9, 'seed band clear of the flower head');
   assert.ok(L.playAlt && L.playAlt.y === L.bubble.y + L.bubble.h + 16 && L.playAlt.ex, 'landscape alt band');
   const Lp = SG.World.computeLayout(720, 1556, { top: 44, bottom: 30, left: 0, right: 0 }, 2);
   assert.deepStrictEqual([Lp.lumi.y, Lp.lumi.h], [44 + 245, 190]);
   assert.strictEqual(Lp.playAlt, null);
   assert.ok(Lp.tall && Lp.play.itemScale === 1.2 && Lp.play.h <= 0.85 * 720 + 1e-9, 'tall portrait band');
-  assert.ok(Math.abs(Lp.play.y + Lp.play.h - (Lp.pot.top - 44)) < 1e-9, 'band just above the pots');
+  assert.ok(Math.abs(Lp.play.y + Lp.play.h - (Lp.pot.top - Lp.playGap)) < 1e-9, 'band just above the pots');
+  assert.strictEqual(Lp.pot.w, 290, 'tall portrait, ≤ 3 pots: 290 px pots');
+  assert.strictEqual(Lp.groundY, 1556 - 30 - 70 - Math.min(120, 0.25 * (1556 - 1.6 * 720)), 'tall portrait: garden raised');
+  const L4 = SG.World.computeLayout(720, 1556, null, 4);
+  assert.strictEqual(L4.pot.w, (720 - 12) / 4 - 8, 'portrait: margin 6, gap 8');
   const Lq = SG.World.computeLayout(720, 960, null, 2);
   assert.ok(!Lq.tall && Lq.play.itemScale === 1);
   // planter (count): w = min(safe − 80, 120 + 96 N), h = min(0.42 w, 170), same bottom line, centred
   for (const N of [1, 3, 5, 10, 12]) {
     const pr = SG.Content.planterRect(L, N);
     assert.strictEqual(pr.w, Math.min(1280 - 44 - 80, 120 + 96 * N));
-    assert.strictEqual(pr.h, Math.min(0.42 * pr.w, 170));
+    assert.strictEqual(pr.h, Math.min(0.42 * pr.w, 170, L.pot.h));
     assert.strictEqual(pr.bottom, L.pot.bottom);
     assert.strictEqual(pr.x, 44 + (1280 - 44) / 2);
     assert.ok(Math.abs(pr.y - (pr.top + 0.27 * pr.h)) < 1e-9);
@@ -318,7 +327,7 @@ test('layout: every viewport × pot count → pots/play/Lumi/bubble/HUD inside t
     const inside = (R) => R.x >= safe.x - 1e-6 && R.y >= safe.y - 1e-6 && R.x + R.w <= safe.x + safe.w + 1e-6 && R.y + R.h <= safe.y + safe.h + 1e-6;
     for (const P of [L.play, L.playAlt].filter(Boolean)) {
       assert.ok(inside(P), ctx + ' play');
-      assert.ok(P.w > 300 && P.h > 120, ctx + ' play big enough ' + P.w + 'x' + P.h);
+      assert.ok(P.w > 300 && (P.h > 120 || (P === L.play && L.playAlt && L.playAlt.h >= 200)), ctx + ' play big enough ' + P.w + 'x' + P.h);
       const hud = { x: v.W - ins.right - 140, y: 0, w: 140 + ins.right, h: ins.top + 90 };
       for (const R of [L.bubble, hud]) assert.ok(!rectsOverlap(R, P), ctx + ' play vs ' + JSON.stringify(R));
       if (P === L.play) assert.ok(!rectsOverlap(lumiRect(L), P), ctx + ' play vs Lumi');
@@ -330,7 +339,8 @@ test('layout: every viewport × pot count → pots/play/Lumi/bubble/HUD inside t
     for (let i = 0; i < n; i++) {
       assert.ok(inside(pots[i]), ctx + ' pot inside');
       assert.ok(!rectsOverlap(pots[i], L.play), ctx + ' pot vs play');
-      for (let j = i + 1; j < n; j++) assert.ok(pots[i].x + pots[i].w + 20 <= pots[j].x, ctx + ' pots apart');
+      for (let j = i + 1; j < n; j++) assert.ok(pots[i].x + pots[i].w + (L.portrait ? 8 : 20) - 1e-9 <= pots[j].x, ctx + ' pots apart');
+      assert.ok(L.play.y >= L.lumi.y + 10 - 1e-9, ctx + ' band below Lumi');
     }
     const pr = SG.Content.planterRect(L, 12);
     assert.ok(inside({ x: pr.x - pr.w / 2, y: pr.top, w: pr.w, h: pr.h }), ctx + ' planter inside');
@@ -378,15 +388,19 @@ test('slots: pots 1–3 slots on the soil line (centre-out), planter N holes lef
     for (const b of w.baskets) {
       const ctx = v.name + ' ' + topic + ' ' + b.id;
       assert.strictEqual(b.soilY, b.y);
-      assert.ok(b.flowerSize > 20 && b.stemH >= 50 && b.stemH <= 95, ctx);
+      assert.ok(b.flowerSize > 20 && b.flowerSize <= 96 && Math.abs(b.stemH - Math.min(80, Math.max(45, 0.42 * b.h))) < 1e-9, ctx);
       const cap = topic === 'count' ? b.need : topic === 'animals' ? w.cur.queue.filter(q => q === b.id).length : w.items.filter(i => i.answer === b.id).length;
       assert.strictEqual(b.slots.length, cap, ctx);
       for (const sl of b.slots) {
         assert.ok(Math.abs(sl.y - (b.y - 0.3 * b.slotSize)) < 1e-9, ctx + ' seed rests on the soil');
         assert.ok(sl.x - b.slotSize / 2 >= b.x - b.w / 2 - 1e-6 && sl.x + b.slotSize / 2 <= b.x + b.w / 2 + 1e-6, ctx + ' inside');
-        assert.ok(sl.stem > 0.8 && sl.stem <= 1);
+        assert.ok(sl.stem >= 0.72 && sl.stem <= 1 && Math.abs(sl.lean) <= 0.08 + 1e-12);
+        if (b.kind === 'pot') assert.ok(Math.sign(sl.lean) === Math.sign(Math.round(sl.x - b.x)) || sl.lean === 0, 'leans outward');
       }
-      if (b.kind === 'planter') { for (let i = 1; i < b.slots.length; i++) assert.ok(b.slots[i].x > b.slots[i - 1].x, 'left → right'); }
+      if (b.kind === 'planter') {
+        for (let i = 1; i < b.slots.length; i++) { assert.ok(b.slots[i].x > b.slots[i - 1].x, 'left → right'); assert.strictEqual(b.slots[i].stem, i % 2 ? 0.72 : 1); }
+        assert.ok(Math.abs(b.flowerSize - Math.min(96, b.w * 0.84 / b.need * 0.85)) < 1e-9);
+      } else if (b.slots.length > 1) assert.ok(Math.abs(b.flowerSize - Math.min(96, b.w * 0.66 / b.slots.length * 1.05)) < 1e-9, 'heads do not overlap much');
       else if (b.slots.length === 3) assert.strictEqual(b.slots[0].x, b.x, 'centre first');
       for (let i = 0; i < b.slots.length; i++) for (let j = i + 1; j < b.slots.length; j++) assert.ok(Math.abs(b.slots[i].x - b.slots[j].x) >= b.slotSize * 0.79, ctx + ' apart');
     }
@@ -593,12 +607,12 @@ test('grab rules: generous radius, one held item, no grabbing appear/fly/in, re-
   assert.strictEqual(w.items[w.items.length - 1], o2, 'held item drawn last');
 });
 
-test('pot drop zone: +45 px sides/bottom, +90 px up; overlapping zones pick the nearest nest', () => {
+test('pot drop zone: +45 px sides/bottom, +120 px up; overlapping zones pick the nearest pot', () => {
   const w = mkWorld({ seed: 11, age: 5, vp: VIEWPORTS[1] });   // 960 wide: 4 nests 24 px apart → zones overlap
   roundOf(w, 'colors', 1); settleAppear(w);
   const b = w.baskets[0], top = b.top;
-  assert.strictEqual(w.potAt(b.x, top - 89), b);
-  assert.strictEqual(w.potAt(b.x, top - 91), null);
+  assert.strictEqual(w.potAt(b.x, top - 119), b);
+  assert.strictEqual(w.potAt(b.x, top - 121), null);
   assert.strictEqual(w.potAt(b.x - b.w / 2 - 44, b.y), b);
   assert.strictEqual(w.potAt(b.x - b.w / 2 - 46, b.y), null);
   assert.strictEqual(w.potAt(b.x, b.bottom + 44), b);
@@ -628,6 +642,28 @@ test('appear: staggered 70 ms pop-ins with back overshoot, appear events; pots p
   assert.ok(maxA > 1.05, 'overshoot ' + maxA);
   assert.ok(Math.abs(t - (0.07 * (w.items.length - 1) + 0.45)) < 2 * H);
   assert.ok(w.baskets.every(b => b.appear === 1));
+});
+
+test('QA fixes: size topic small pot 0.72× (same x/bottom); count rounds never repeat the previous N or colour', () => {
+  for (const v of VIEWPORTS) for (let s2 = 1; s2 <= 6; s2++) {
+    const w = mkWorld({ seed: s2, age: 3, vp: v }); roundOf(w, 'size', 1 + (s2 % 3));
+    const big = w.baskets.find(b => b.label.value === 'big'), small = w.baskets.find(b => b.label.value === 'small');
+    const i = w.baskets.indexOf(small);
+    assert.ok(Math.abs(small.w - 0.72 * big.w) < 1e-9 && Math.abs(small.h - 0.72 * big.h) < 1e-9);
+    assert.strictEqual(small.x, w.layout.pot.xs[i]); assert.strictEqual(small.bottom, big.bottom);
+    assert.ok(Math.abs(small.y - (small.top + 0.24 * small.h)) < 1e-9, 'soil of the small pot');
+    for (const it of w.items) assert.strictEqual(it.size * it.scale, it.size * (it.nameValue === 'big' ? 1.3 : 0.72));
+  }
+  for (const age of [3, 4, 5, 6, 7]) for (let s2 = 1; s2 <= 10; s2++) {
+    const w = mkWorld({ seed: 200 + s2, age }); w.levels = ['count']; w.startLevel(0);
+    let prev = null;
+    for (let r = 0; r < 6; r++) {
+      w.round = r; w._beginRound();
+      const p = w.cur.params;
+      if (prev) { assert.notStrictEqual(p.n, prev.n, 'N repeats'); assert.notStrictEqual(p.color, prev.color, 'colour repeats'); }
+      prev = { n: p.n, color: p.color };
+    }
+  }
 });
 
 // ======================================================= planting / growth
@@ -842,12 +878,12 @@ test('help: 2 misses on the same seed → auto hint (glow 3 s); hint() for the h
   assert.strictEqual(w.drainEvents().filter(x => x.type === 'hint')[0].basketId, o.answer);
 });
 
-test('idle: nudges after 12 s, then back off ×1.5 (18, 27, 30 cap); reset by a grab and by a new round', () => {
+test('idle: nudges after 12 s, then back off ×2 (24, 48, 60 cap); reset by a grab and by a new round', () => {
   const w = mkWorld({ seed: 41, age: 4 });
   roundOf(w, 'count', 2); settleAppear(w); w.drainEvents();
   const times = []; let t = 0;
   run(w, 130, () => { t += H; for (const e of w.drainEvents()) if (e.type === 'idle') { times.push(t); assert.strictEqual(e.promptKey, 'p.count'); assert.deepStrictEqual(J(e.params), J(w.cur.params)); } });
-  const want = [12, 30, 57, 87, 117];
+  const want = [12, 36, 84];
   assert.strictEqual(times.length, want.length, JSON.stringify(times));
   times.forEach((x, i) => assert.ok(Math.abs(x - want[i]) < 4 * H, x + ' vs ' + want[i]));
   const it = idleItems(w)[0]; w.pointerDown(it.x, it.y); run(w, 20);
@@ -970,7 +1006,7 @@ test('hint cooldown: no auto-hint while the pot glows or within 6 s of the last 
   for (let i = 1; i < hints.length; i++) assert.ok(hints[i] - hints[i - 1] >= 6 - 1e-6);
 });
 
-test('chapter time limit: after ≥ 3 rounds a chapter longer than 75 s goes to Talk time', () => {
+test('chapter time limit: after ≥ 3 rounds a chapter longer than 60 s goes to Talk time', () => {
   const w = mkWorld({ seed: 63, age: 4 });
   w.newSession();
   while (w.state === 'intro') w.update(H);
@@ -980,7 +1016,7 @@ test('chapter time limit: after ≥ 3 rounds a chapter longer than 75 s goes to 
     w.update(H);
   }
   assert.strictEqual(rounds, 3, 'slow chapter stops after 3 rounds');
-  assert.ok(w.time - w.levelStartTime > 75);
+  assert.ok(w.time - w.levelStartTime > 60);
   const w2 = mkWorld({ seed: 63, age: 4 });
   w2.newSession(); while (w2.state === 'intro') w2.update(H);
   rounds = 0;
@@ -1021,7 +1057,7 @@ test('content variety: initial talk answers ~uniform; animal sets vary; size rou
   assert.strictEqual(Object.keys(seen).length, 9, 'every arctic animal appears');
   assert.ok(sets.size > 40);
   assert.deepStrictEqual([...qs].sort(), [3, 4, 5, 6]);
-  assert.deepStrictEqual([...sizes].sort(), [4, 5]);
+  assert.deepStrictEqual([...sizes].sort(), [4]);
 });
 
 // ======================================================= sessions / bot / determinism

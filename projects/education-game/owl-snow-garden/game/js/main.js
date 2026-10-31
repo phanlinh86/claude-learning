@@ -28,7 +28,7 @@
   let speed = FLAGS.speed, autoRestart = FLAGS.autorestart;
   let view = { W: 960, H: 720, s: 1, left: 0, top: 0, ins: { top: 0, right: 0, bottom: 0, left: 0 } };
   const stats = { sessions: 0, rounds: 0, correct: 0, wrong: 0, misses: 0, talks: 0, talkRight: 0, frames: 0, slowFrames: 0 };
-  let firstAsk = true, shownStars = 0, lastRoundEvt = null, missSay = 0, lastGrabSay = 0, lastPraise = 0;
+  let idleSaid = 0, lastName = '', firstAsk = true, shownStars = 0, lastRoundEvt = null, missSay = 0, lastGrabSay = 0, lastPraise = 0;
 
   /* ---------- sizing ---------- */
   function readInsets() {
@@ -138,10 +138,10 @@
     weather.setWeather(0, {});
   }
   function pause() {
-    if (mode !== 'play') return;
+    if (mode !== 'play' && mode !== 'talk') return;
     mode = 'paused';
     if (world.cancelDrag) world.cancelDrag();
-    if (SG.Voice) SG.Voice.stop();
+    if (SG.Voice) { SG.Voice.stop(); if (SG.Voice.stopListening) SG.Voice.stopListening(); }
     SG.Audio.stopMusic();
     SG.UI.only('scrPause');
   }
@@ -155,6 +155,13 @@
   function currentPrompt() {   // ask mode: the prompt follows the current target pot
     const p = world.prompt ? world.prompt() : null;
     return p ? promptText(p) : (lastRoundEvt ? promptText(lastRoundEvt) : '');
+  }
+  // seed names on grab/tap: only when Lumi is quiet, and not the same name again within 3 s (playtest M2)
+  function sayName(txt, now) {
+    if (!txt || (SG.Voice && SG.Voice.isSpeaking())) return;
+    if (now - lastGrabSay < 700 || (txt === lastName && now - lastGrabSay < 3000)) return;
+    lastGrabSay = now; lastName = txt;
+    speak(txt);
   }
   function handleEvents() {
     const evs = world.drainEvents();
@@ -175,7 +182,7 @@
         render.prewarm(L, e.level + 1);
         break;
       case 'round': {
-        lastRoundEvt = e; stats.rounds++; firstAsk = true;
+        lastRoundEvt = e; stats.rounds++; firstAsk = true; idleSaid = 0;
         SG.UI.setDots(world.roundsPerLevel || 5, e.round % (world.roundsPerLevel || 5));
         if (e.mode === 'ask') break;                 // the 'ask' event right after names the first animal
         const txt = promptText(e);
@@ -186,7 +193,10 @@
         const full = promptText(e);
         SG.UI.say(full);
         if (firstAsk) speak(full, { priority: true });
-        else speak(T('p.animalsNext', e.params), {});   // queued after the praise
+        else {   // queued after the praise; any older waiting line (a stale "Now the …!", a seed name) goes
+          if (SG.Voice && SG.Voice.dropQueued) SG.Voice.dropQueued();
+          speak(T('p.animalsNext', e.params), {});
+        }
         firstAsk = false;
         break;
       }
@@ -194,10 +204,7 @@
       case 'grab': {
         SG.Audio.play('grab');
         const now = performance.now();
-        if (SG.Voice && !SG.Voice.isSpeaking() && now - lastGrabSay > 700 && e.nameKind) {
-          lastGrabSay = now;
-          speak(NAME(e.nameKind, e.nameValue));
-        }
+        if (e.nameKind) sayName(NAME(e.nameKind, e.nameValue), now);
         break;
       }
       case 'drop': SG.Audio.play('whoosh'); break;
@@ -251,7 +258,7 @@
         break;
       }
       case 'idle':
-        speak(T('idle') + ' ' + currentPrompt());
+        if (++idleSaid <= 4) speak(T('idle') + ' ' + currentPrompt());   // then stay quiet: maybe nobody is there
         break;
       case 'roundDone': {
         SG.Audio.play('round');
@@ -274,7 +281,7 @@
         break;
       }
       case 'tap':         // a quick tap on a seed: Lumi just says its name
-        if (e.nameKind) speak(NAME(e.nameKind, e.nameValue), { interrupt: true });
+        if (e.nameKind) sayName(NAME(e.nameKind, e.nameValue), performance.now());   // never cuts Lumi off (counting!)
         SG.Audio.play('grab');
         break;
       case 'talkResult': {
@@ -339,13 +346,15 @@
   }
 
   /* ---------- loop ---------- */
-  let last = 0, slowAcc = 0, fastAcc = 0;
+  let last = 0, slowAcc = 0, fastAcc = 0, pendingResize = false;
   function frame(ts) {
     requestAnimationFrame(frame);
     if (document.hidden) { last = ts; return; }
     let dt = last ? (ts - last) / 1000 : 0.016;
     last = ts;
     const raw = dt;
+    // a backing-store resize clears the canvas: do it before drawing, never between draw and present (pink flash)
+    if (pendingResize) { pendingResize = false; render.resize(view.W, view.H, renderScale()); }
     dt = Math.min(dt, 0.1);
     stats.frames++;
     if (mode === 'play' || mode === 'talk' || mode === 'done') {
@@ -361,14 +370,14 @@
     weather.update(dt * Math.min(speed, 4), { groundY: world.layout.groundY });
     const speaking = SG.Voice && SG.Voice.isSpeaking ? SG.Voice.isSpeaking() : false;
     SG.Audio.duck(speaking);
-    render.draw(world, weather, { dt: dt * Math.min(speed, 4), lang: curLang(), title: mode === 'title' || mode === 'loading', speaking, done: mode === 'done', debug: FLAGS.debug });
+    render.draw(world, weather, { dt: dt * Math.min(speed, 4), lang: curLang(), title: mode === 'title' || mode === 'loading', speaking, done: mode === 'done', compact: window.innerHeight <= 430 && window.innerWidth > window.innerHeight, debug: FLAGS.debug });
     adapt(raw);
   }
   function adapt(raw) {  // adaptive quality: step the render scale down when frames stay slow
     if (raw > 0.5) return;
     if (raw > 0.022) { slowAcc += raw; fastAcc = 0; stats.slowFrames++; } else { slowAcc = Math.max(0, slowAcc - raw * 0.5); fastAcc += raw; }
     // only the backing store shrinks: World.setViewport would cancel the child's drag (sister-game lesson)
-    if (slowAcc > 1.5 && quality > 0.6) { quality *= 0.85; render.quality = Math.max(0.5, quality); slowAcc = 0; render.resize(view.W, view.H, renderScale()); }
+    if (slowAcc > 1.5 && quality > 0.6) { quality *= 0.85; render.quality = Math.max(0.5, quality); slowAcc = 0; pendingResize = true; }
   }
 
   /* ---------- input ---------- */

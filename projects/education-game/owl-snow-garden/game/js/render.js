@@ -268,7 +268,8 @@
       }
       const au = amb.aurora || 0;
       if (au > 0.01) this._aurora(au, weather.auroraT || t);
-      const skyMax = gy - 230;
+      const P = world.playRect || layout.play;   // keep the sun/moon above the seed band (a yellow seed on the sun vanishes)
+      const skyMax = Math.min(gy - 230, P ? P.y - 70 : gy - 230);
       if ((amb.sun || 0) > 0.01) {
         const big = amb.sunY > 0.38 ? 240 : 180;
         this._sprite('sun', W * (amb.sunX == null ? 0.66 : amb.sunX), Math.min(skyMax, H * (amb.sunY == null ? 0.14 : amb.sunY)), big, 0, amb.sun);
@@ -303,6 +304,7 @@
       const hn = hi && w.potAt ? w.potAt(hi.x, hi.y) : null;
       this._hoverNest = hn ? hn.id : null;
       this._sizeSprite = (w.topic === 'size' && items[0] && items[0].sprite) || null;
+      if (o.done) { this._doneGarden(w); this._doneLumi(w, o); return; }
       // pots: back, planted seeds + flowers, front, sign
       for (const b of baskets) this._pot(b, items, a, w);
       // resting / moving items (not in nests), held last
@@ -318,14 +320,22 @@
       for (const it of free) this._item(it, a);
       const h = held != null ? items.find(i => i.id === held) : null;
       if (h) { this._shadow(h, a); this._item(h, a); }
-      if (o.done) this._doneLumi(w);
-      else this._lumi(w, o, a);
+      this._lumi(w, o, a);
     }
-    _doneLumi(w) {   // celebration: a big cheering Lumi centred above the panel
-      const H = this.H, W = this.W, h = Math.min(H * 0.38, 380);
+    _doneGarden(w) {   // the night garden: a row of glowing flowers swaying on the snow
+      const L = w.layout, W = this.W, gy = L.groundY + 10, cols = ['red', 'yellow', 'purple', 'blue', 'orange', 'green'];
+      const n = Math.max(6, Math.round((W - L.ins.left - L.ins.right) / 120)), step = (W - L.ins.left - L.ins.right) / n;
+      for (let i = 0; i < n; i++) {
+        const x = L.ins.left + step * (i + 0.5), len = 70 + 30 * ((i * 7) % 3) / 2;
+        drawFlower(this.g, x, gy, len, 1, cols[i % cols.length], 78, Math.sin(this.time * 1.5 + i) * 0.07, null, this);
+      }
+    }
+    _doneLumi(w, o) {   // celebration: a big cheering Lumi centred above the panel (left of it on short landscape phones)
+      const H = this.H, W = this.W, h = Math.min(H * (o && o.compact ? 0.5 : 0.38), 380);
       const cyc = this.time % 1.1, hop = Math.max(0, Math.sin(cyc / 0.55 * Math.PI)) * (cyc < 0.55 ? 40 : 0);
-      const y = Math.min(w.layout.groundY - 10, H * (H > W ? 0.5 : 0.52));
-      this._character(cyc < 0.55 ? 'lumi_cheer' : 'lumi_happy', W / 2, y - hop, h, 1, y, hop);
+      const y = o && o.compact ? w.layout.groundY - 20 : Math.min(w.layout.groundY - 10, H * (H > W ? 0.5 : 0.52));
+      const cx = o && o.compact ? w.layout.ins.left + W * 0.2 : W / 2;
+      this._character(cyc < 0.55 ? 'lumi_cheer' : 'lumi_happy', cx, y - hop, h, 1, y, hop);
     }
     _flyIntoNest(it, w) {
       // a flying item that is already dropping into its nest is drawn between nest back and front (see _nest)
@@ -375,7 +385,7 @@
         g.beginPath(); g.ellipse(b.x, cy, rx, ry, 0, 0.1 * Math.PI, 0.9 * Math.PI); g.stroke();
       }
       if (planter) this._plate(b, b.x, top + ph * 0.62, Math.min(pw * 0.3, ph * 0.95));
-      else this._plate(b, b.x, top + ph * 0.66, pw * 0.5);
+      else this._plate(b, b.x, top + ph * 0.66, pw * 0.6);
       g.restore();
     }
     _sinkingSeed(it, a) {
@@ -394,9 +404,10 @@
       const al = it.state === 'leave' ? clamp(it.alpha == null ? 1 : it.alpha, 0, 1) : 1;
       if (al <= 0.01) return;
       const len = stem * (b.stemH || 70) * (slot.stem || 1);
-      const sway = this._wind * 0.12 + Math.sin(this.time * 1.7 + slot.x * 0.013) * (0.03 + 0.05 * this._sway);
+      const sway = (slot.lean || 0) + this._wind * 0.12 + Math.sin(this.time * 1.7 + slot.x * 0.013) * (0.03 + 0.05 * this._sway);
+      const hs = (b.flowerSize || 80) * clamp(it.scale || 1, 0.75, 1.25);   // size topic: big seeds → big flowers
       this.g.save(); this.g.globalAlpha *= al;
-      drawFlower(this.g, slot.x, b.soilY != null ? b.soilY : b.y, len, it.petals || 0, it.flower || it.color || 'red', b.flowerSize || 80, sway, it, this);
+      drawFlower(this.g, slot.x, b.soilY != null ? b.soilY : b.y, len, it.petals || 0, it.flower || it.color || 'red', hs, sway, it, this);
       this.g.restore();
     }
 
@@ -417,7 +428,7 @@
       switch (L.type) {
         case 'color': this._sprite('seed_' + L.value, 0, 2, ih * 1.05); break;
         case 'shape': drawShape(g, L.value, '#8a6a4a', ih * 0.82, { flat: true }); break;
-        case 'animal': this._sprite('animal_' + L.value, 0, 0, ih * 1.12); break;
+        case 'animal': this._sprite('animal_' + L.value, 0, 0, ih * 1.3); break;
         case 'size': {
           const spr = this._sizeSprite || 'seed_plain';
           this._sprite(spr, 0, L.value === 'big' ? 0 : ih * 0.2, L.value === 'big' ? ih * 1.15 : ih * 0.62); break;
@@ -482,6 +493,11 @@
       g.globalAlpha = alpha;
       g.translate(x, y); g.rotate(rot);
       g.scale((it.sx || 1) * k, (it.sy || 1) * k);
+      if ((this._night || 0) > 0.3 && !inNest) {   // night: a soft light halo keeps seed outlines readable on navy
+        const gr = g.createRadialGradient(0, 0, s * 0.2, 0, 0, s * 0.62);
+        gr.addColorStop(0, `rgba(255,255,240,${0.55 * this._night})`); gr.addColorStop(1, 'rgba(255,255,240,0)');
+        g.fillStyle = gr; g.beginPath(); g.arc(0, 0, s * 0.62, 0, TAU); g.fill();
+      }
       this.drawItemBody(g, it, s);
       g.restore();
     }

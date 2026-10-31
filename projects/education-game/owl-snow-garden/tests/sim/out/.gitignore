@@ -1,0 +1,2 @@
+# big raw sim dumps — regenerate with node tests/sim/playtest.js
+*.json

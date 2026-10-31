@@ -154,6 +154,11 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 
 /* ---------- done ---------- */
 #scrDone { align-items: flex-end; padding-bottom: calc(var(--sa-b) + 4vh); }
+/* short landscape phones: panel on the right so the cheering Lumi (left) stays visible */
+@media (orientation: landscape) and (max-height: 430px) {
+  #scrDone { align-items: center; justify-content: flex-end; padding-bottom: calc(var(--sa-b) + 12px); }
+  #scrDone .done-panel { max-width: min(470px, 56vw); }
+}
 .done-panel { background: rgba(255, 248, 232, .94); max-width: 560px; }
 .done-stars { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 56px; font-weight: 900; margin: 0 0 14px; }
 .done-stars img { width: 72px; }

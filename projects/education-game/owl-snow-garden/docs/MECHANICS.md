@@ -2,10 +2,23 @@
 
 Files: `game/js/rng.js`, `content.js`, `world.js`, `weather.js`, `bot.js`. Plain scripts on `window.SG`, no DOM, no
 dependency on `SG.I18N` (content/world only emit kinds, values and keys). Tests: `node tests/unit/run.js`
-(44 tests, about 11 s). Playtest simulator: `tests/sim/` (`run_matrix.js` → `summarize.js`). Units everywhere: logical px
+(45 tests, about 11 s). Playtest simulator: `tests/sim/` (`run_matrix.js` → `summarize.js`). Units everywhere: logical px
 (short side 720), seconds, radians, y down. Started from Dino Nest Sort's mechanics. Everything not listed here works
 exactly as in `../dino-nest-sort/docs/MECHANICS.md` (all the playtest fixes are kept: tap guard, hint cooldown,
 idle back-off, chapter time limit, Talk re-ask).
+
+## 0. QA round 1 changes (docs/reports/playtest_report.md, visual_report.md)
+| | change | why |
+|---|---|---|
+| CONFIG | `potPadUp` 90 → **120**, `chapterTimeLimit` 75 → **60**, `idleBackoff` 1.5 → **2**, `idleMax` 30 → **60** | high drops missed 49 %; chapters into 60–100 s; fewer nudges to an empty room |
+| P1-1 | `stemH = clamp(0.42 h, 45, 80)`; seed band gap `layout.playGap = max(74, flower clearance)` (74–81 px) | resting seeds covered the new flowers; seeds stay out of the 120 px zone |
+| P2-2 | pots `flowerSize = min(96, sxp·1.05)` (1 slot: 0.5 w); planter `min(96, sxp·0.85)`, stems alternate 1 / 0.72; new `slot.lean` | neighbour flowers overlapped |
+| P1-3 | size topic: the small pot is 0.72 × (same x and bottom); seed `size` is now the unscaled 116 and **drawn = size · scale** (packing, hit radius and slots use it) | both pots looked the same; big seeds overlapped in tall portrait (they were scaled twice) |
+| P1-4 / P2-3 | portrait: pot margin 6, gap 8; tall portrait (H/W > 1.6): pots up to 290 px with ≤ 3 pots, groundY raised by min(120, 0.25·(H − 1.6 W)) | tiny signs with 4 pots; empty top on iPhones |
+| P2-6 | below age 5 one colour of blue/purple, red/green **and yellow/orange** is dropped (3 colours left), also for colour Talk choices | yellow–orange is weak for deutan vision |
+| C1 / C2 | size rounds always 4 seeds `[[2,2],[1,3],[3,1]]`; a count round never repeats the previous count round's N or colour | pack scale; variety |
+| new | landscape pots shrink (not below 190 px) until the alternative seed band is ≥ 240 px tall; the planter is never taller than the n = 1 pot | the bigger gap left iPad landscape seeds at 0.75× |
+| new | a drop is judged by the pot under the **finger** first, then the seed centre | with the taller zone a fast flick left the lagging seed over the neighbour pot |
 
 ## 1. API (DESIGN §5 + additions)
 | | |
@@ -29,17 +42,20 @@ bloomed in that pot/planter so far → count "one, two, …" on bloom), `hint {b
 ### Fields for the renderer
 - **Pot / planter (basket):** `kind` `'pot'|'planter'`, `x` (centre), `y` = soil centre = `soilY` (flower base), `w, h`,
   `top` (sprite top), `bottom` (= groundY + 8), sprite rect `[x − w/2, top, w, h]`; `slots[{x, y, stem}]` (`y` = centre of
-  a seed resting on the soil = `soilY − 0.3·slotSize`; `stem` = height factor 0.86–1 so neighbours differ), `slotSize`
-  (seed size on the soil), **`flowerSize`** (suggested flower head width, ≤ 96), **`stemH`** (suggested full stem height,
-  50–95 px), `count`, `blooms`, `need` (planter), `squash`, `shake`, `glow`, `appear` (pop-in when the pot set changes;
+  a seed resting on the soil = `soilY − 0.3·slotSize`; `stem` = height factor (pots 1 / 0.86 outer, planter 1 / 0.72
+  alternating); **`lean`** = outward stem lean in rad, outer pot slots ±0.08, planter 0), `slotSize` (DRAWN seed size on the
+  soil), **`flowerSize`** (flower head width, ≤ 96), **`stemH`** (`clamp(0.42 h, 45, 80)` px; head centre =
+  `soilY − stem·stemH·slot.stem`), `count`, `blooms`, `need` (planter), `squash`, `shake`, `glow`, `appear` (pop-in when the pot set changes;
   the planter always pops in).
 - **Seed (item):** as Dino plus `flower` (palette key of its flower — seed colour; plain/word seeds get a random colour),
   `planted`, `grow` (0→1 linear), **`sink`** (0→1 eased: seed shrinks and drops into the soil behind the pot front),
   **`stem`** (0→1, critically damped: stem height = `stem · stemH · slot.stem`), **`petals`** (0→≈1.2→1, petal opening
   with overshoot), `bloomed`, `overPot` (= `overNest`: falling half of a flight → draw between pot back/front), `alpha`,
   `appear`. `initial` items are animal stickers (`sprite: 'animal_<x>'`), shapes are procedural (`sprite: null`).
-- **Layout:** `pot {y, w, h, xs[], n, top, bottom, sign {w, h, bottomY}}` (also as `layout.nest`), `lumi {x, y, h}`,
-  `bubble`, `play`, `playAlt` (landscape only, may be null), `groundY`, `portrait`, `tall`, `hud`.
+- **Layout:** `pot {y, w, h, xs[], n, top, bottom, flowerTop, sign {w, h, bottomY}}` (also as `layout.nest`;
+  `flowerTop` = top of the highest possible flower head), **`playGap`** (px between the seed band and the pot top),
+  `lumi {x, y, h}`, `bubble`, `play`, `playAlt` (landscape only, may be null), `groundY`, `portrait`, `tall`, `hud`.
+- Seeds are drawn at `size · scale` (`scale` ≠ 1 only in the size topic); size-topic pots differ in `w`/`h`/`top`/`y`.
 - Ids are strings: items `'i0'…`, baskets `'b0'…`, talk choices `'c0'…`.
 
 ## 2. Content (DESIGN §5.1)
@@ -47,36 +63,46 @@ bloomed in that pot/planter so far → count "one, two, …" on bloom), `hint {b
 |---|---|---|---|
 | colors | sort | 2/3/4 (age 3/4/5+) | `seed_<color>`, 2 per pot (warm-up 1) |
 | shapes | sort | 2/3/4 | procedural shapes, one colour per shape ≤ 4, mixed colours 5+, rectangle from 5 |
-| size | sort | 2 (big/small) | `seed_<color>` × 1.3 / 0.72, one colour; warm-up 1+1, then 2–3 per pot (≤ 5) |
+| size | sort | 2 (big/small; small pot 0.72×) | `seed_<color>`, `size` 116, `scale` 1.3 / 0.72, one colour; warm-up 1+1, then 2+2 / 1+3 / 3+1 |
 | animals | **ask** | 2/3/4 | `queue`: warm-up each pot once, later each pot 1–2×, shuffled, never the same pot twice in a row; seeds = queue length, mixed colours, `answer: null`, `nameKind 'seed'` |
-| count | count | 1 planter, `need N` | N + 2 (+3 when N ≤ 3) seeds of one colour, `nameKind 'seed'`; N: 3–4 → 1–5, 5 → 3–10, 6–7 → 4–12 (round 0 ≤ 3, 2–4 from age 6; later N ≥ 2). 11–14 seeds use base size 104 instead of 116 so they fit an iPad in landscape |
+| count | count | 1 planter, `need N` | N + 2 (+3 when N ≤ 3) seeds of one colour, `nameKind 'seed'`; N: 3–4 → 1–5, 5 → 3–10, 6–7 → 4–12 (round 0 ≤ 3, 2–4 from age 6; later N ≥ 2); N and the colour never repeat the previous count round's. 11–14 seeds use base size 104 instead of 116 so they fit an iPad in landscape |
 | letters / lower / add / sub / oddeven | sort | 3 (2 for oddeven) | `seed_plain` with `text` (as Dino) |
 | initial | sort | 3 letters | arctic animal stickers; en B F H P R S W, vi G C T H |
 
-Colour-blind rule (below age 5): the round's colour set never holds blue+purple or red+green (one of each pair is dropped
-before sampling) — colours, shapes, animals rounds and the colour Talk choices. Every round passes `validate()` (pots
+Colour-blind rule (below age 5): the round's colour set never holds blue+purple, red+green or yellow+orange (one of each
+pair is dropped before sampling, 3 colours left) — colours, shapes, animals rounds and the colour Talk choices (the
+answer's partner is the one dropped). Every round passes `validate()` (pots
 non-empty, labels unique, each seed truly matches its pot; ask: queue length = seeds, every pot asked, `params.animal` =
 first target; count: ≥ N + 2 seeds) or `makeRound` throws; tested for 11 topics × 5 ages × 600 seeds.
 Talk: colours shows a flower (`show.flower`), count shows `count` flowers, animals shows nothing and puts the animal in
 `talk.params.animal` (3 animal choices), initial puts the shown word in `talk.params.word`.
 
 ## 3. Layout (DESIGN §2) and packing
-`groundY = H − ins.bottom − 70`; pots `w = min(230, (W − ins.l − ins.r − 40)/n − 24)`, `h = 0.78 w`, `bottom = groundY + 8`,
-`top = bottom − h`, `y (soil) = top + 0.24 h`. Planter `w = min(safe width − 80, 120 + 96 N)`, `h = min(0.42 w, 170)`,
-same bottom, centred, soil `top + 0.27 h`. Lumi/bubble/HUD exactly §2. Play band: `x ins.left+40 … W−ins.right−40`,
-`y lumi.y + 10 … pot.top − 44` (44 not 24: resting seeds stay out of the 90 px drop zone — Dino playtest). Tall portrait
-(H/W > 1.6): band ≤ 0.85 W just above the pots and seeds × 1.2.
+`groundY = H − ins.bottom − 70` (tall portrait: − min(120, 0.25·(H − 1.6 W)), e.g. −101 on a 720×1556 phone); pots
+`w = min(maxW, (W − ins.l − ins.r − 2·margin)/n − gap)` with margin/gap 20/24 (landscape) or 6/8 (portrait), maxW 230
+(290 in tall portrait with ≤ 3 pots); `h = 0.78 w`, `bottom = groundY + 8`, `top = bottom − h`, `y (soil) = top + 0.24 h`.
+Landscape only: `w` steps down by 2 px (to ≥ 190) until the alternative band (below) is ≥ 240 px tall — 1280×720 keeps
+230, iPhone landscape with insets ≈ 202, iPad landscape with insets 190. Size topic: the small pot is 0.72 × (same x,
+same bottom). Planter `w = min(safe width − 80, 120 + 96 N)`, `h = min(0.42 w, 170, pot.h)`, same bottom, centred, soil
+`top + 0.27 h`. Lumi/bubble/HUD exactly §2. Play band: `x ins.left+40 … W−ins.right−40`, `y lumi.y + 10 … pot.top − playGap`.
+**`playGap = max(74, ⌈clear⌉)`** with `clear = stemH − 0.24 h + 0.5·min(96, 0.5 w)` (the highest flower head above the
+pot top; `pot.flowerTop = top − clear`): 74 keeps resting seed centres out of the 120 px drop zone, `clear` keeps them
+off a full-grown centred flower. Result: 75–81 px. I chose the full clearance (not "most of" the head) because it costs
+at most 7 px over the 74 minimum and the landscape pot fit recovers the lost height. Tall portrait (H/W > 1.6): band ≤ 0.85 W just above the
+pots and seeds × 1.2.
 
 **Landscape alternative band (new):** the taller pots (0.78 w vs the old 0.62 w nest) left too little height on
 iPad landscape, so World also tries `playAlt` = full width from 16 px below the bubble down to `pot.top − 44`, with
 Lumi's box (±90 px around `lumi.x`, from his head to `lumi.y + 10`) cut out. The seeds use whichever band keeps them
 bigger (`w.playRect`); same seed → same choice. Worst pack scale over every topic × age × 10 viewports × 30 seeds:
-**0.8** (floor 0.75); the alternative band is used in 9 % of rounds (iPad landscape counting and 8-seed rounds).
+**0.75** (count rounds with 13–14 seeds on the 960-wide notch landscape test viewport); real devices in the simulator:
+iPad landscape 0.8, iPad portrait 0.9, iPhone landscape 0.9, iPhone portrait 1.0. The alternative band is used in 7 % of rounds.
 
-Slots: pots get one row on the soil line spread over 66 % of the width, filled centre-out (1–3 per pot); the planter has
-N holes over 84 % of its width, filled **left → right** (counting order). Slots are reserved on drop. Hit tests: seed
-radius `0.6·size + 14`, nearest centre wins; pot zone = sprite rect + 45 px left/right/below + 90 px above, nearest pot
-centre wins where zones overlap.
+Slots: pots get one row on the soil line spread over 66 % of the width, filled centre-out (1–3 per pot), outer stems
+lean outward (±0.08 rad); the planter has N holes over 84 % of its width, filled **left → right** (counting order), stems
+alternating 1 / 0.72. Slots are reserved on drop. Hit tests: seed radius `0.6·size·scale + 14`, nearest centre wins;
+pot zone = sprite rect + 45 px left/right/below + **120 px above**, nearest pot centre wins where zones overlap. A drop
+takes the pot under the finger, else the pot under the seed centre.
 
 ## 4. Motion (all in `SG.CONFIG`, fixed step 1/120 s, semi-implicit Euler)
 | Motion | Model | Constants |
@@ -104,32 +130,35 @@ centre wins where zones overlap.
 - Count mode: done at the landing that makes `count == need`; a drop into a full planter (last seed still in the air)
   floats home without penalty.
 - Help, idle, Talk: as Dino (hint after 2 misses, glow 3 s, cooldown 6 s; idle 12 → 18 → 27 → 30 s; Talk re-ask every
-  12 s, answer glows from the 2nd re-ask; chapter time limit 75 s after ≥ 3 rounds).
+  12 s, answer glows from the 2nd re-ask; chapter time limit 75 s after ≥ 3 rounds) — **now** idle 12 → 24 → 48 → 60 s
+  and the chapter time limit is **60 s** (QA round 1).
 
 ## 6. State machine and session timing
 `menu` → `newSession()` → `intro` 1.8 s → `round` (pop-in ≈ 0.45 + 0.07·(n−1) s, then interactive → solved →
 `completing` ≈ 1.0 s after the last landing) → `roundDone` 1.7 s (fade at 1.0 s) → … 4 rounds (3 once the chapter is
-> 75 s old) → `talk` → `levelDone` 2.0 s → next chapter (time of day = chapter index) … → `sessionDone`.
+> 60 s old) → `talk` → `levelDone` 2.0 s → next chapter (time of day = chapter index) … → `sessionDone`.
 
 Bot sessions in the unit test (game seconds, average of 3 seeds, 1/30 s frames):
 
 | age | bot 0.6: session / chapter | bot 1.0: session / chapter |
 |---|---|---|
-| 3 | 212 / 51 | 173 / 41 |
-| 4 | 222 / 53 | 186 / 45 |
-| 5 | 254 / 61 | 220 / 53 |
-| 6 | 216 / 52 | 188 / 45 |
-| 7 | 236 / 57 | 194 / 46 |
+| 3 | 215 / 52 | 172 / 41 |
+| 4 | 227 / 55 | 193 / 46 |
+| 5 | 256 / 62 | 221 / 53 |
+| 6 | 220 / 53 | 192 / 46 |
+| 7 | 236 / 57 | 194 / 47 |
 
 The bot reacts in 0.25–0.8 s, much faster than a child. Child models from the playtest simulator (`tests/sim`,
-1 920 sessions, 4 viewports, both languages; mean / p90 chapter seconds):
+before QA round 1: 1 920 sessions, 4 viewports, both languages; mean / p90 chapter seconds):
 
 | driver | age 3 | **age 4** | age 5 | age 6 | age 7 |
 |---|---|---|---|---|---|
 | typical kid | 82 / 94 | **87 / 105** | 91 / 102 | 78 / 93 | 67 / 76 |
 | toddler (slow, 35 % random pot) | 95 / 110 | **105 / 133** | 128 / 169 | 110 / 133 | 111 / 132 |
 
-So a typical 4-year-old's chapter is ≈ 87 s (target 60–100 s) and a session ≈ 6 min. Planting adds ≈ 1 s per round
+After QA round 1 (`run_matrix --n 2`, 640 sessions): typical kid age 3 / 4 → 77 / 76 s per chapter (p90 87 / 88),
+session 306 / 304 s; toddler age 3 / 4 → 80 / 98 s (p90 92 / 131); drops-high misses 0 %; idle nudges for an absent
+child 12 → 24 → 48 → 60 s (6 in 5 min). Before the fixes a typical 4-year-old's chapter was ≈ 87 s and a session ≈ 6 min. Planting adds ≈ 1 s per round
 compared with Dino (the last bloom + 0.4 s). Simulator health: 0 errors, 0 invariant breaks, fully deterministic
 (rerun, 1/60 and 1/120 s replays), taps judged as drops 0 %, near-pot misses 0 %, seeds resting in a drop zone 0 %,
 worst pack scale 0.8 on iPad landscape. An absent child gets 11 nudges in 5 min. 10 full sessions simulate in < 1 s.
@@ -174,10 +203,13 @@ Talk right p = 0.5 + skill/2 after 1.0–2.2 s. Skill 1 never errs (52/52 stars 
 - Sky colours: `SKY` at the top of `weather.js`; particle density: `count` in `Weather.MOODS[i].emitters`.
 
 ## 10. Deviations from DESIGN.md
-1. Pot drop zone grows **45 px** sideways/down (DESIGN §2 still says 30; the Dino playtest raised it); play band ends
-   **44 px** above the pot top (DESIGN: 24) so resting seeds stay out of the 90 px upward zone.
+1. Pot drop zone grows **45 px** sideways/down and **120 px** up (DESIGN §2: 30 / 90); the seed band ends `layout.playGap`
+   (75–81 px) above the pot top (DESIGN: 24). Landscape pots may shrink to 190 px, portrait pots use margin 6 / gap 8,
+   tall portrait pots reach 290 px and the ground is raised (QA round 1).
 2. Landscape alternative play band (§3 above) — internal to World; DESIGN's `layout.play` is unchanged.
-3. Count rounds with 11–14 seeds use seed base size 104 (otherwise 116) so they fit iPad landscape at ≥ 0.75×.
+3. Count rounds with 11–14 seeds use seed base size 104 (otherwise 116) so they fit iPad landscape at ≥ 0.75×. Size-topic
+   seeds keep `size` 116 and carry the 1.3 / 0.72 in `scale` (drawn = size · scale).
+8. A drop is judged by the finger's pot first (Dino: the item centre first).
 4. `ask` is emitted on the **drop** that is correct (not on landing), so the next target is live while the seed flies.
 5. Below age 5 the colour-blind rule also applies to shape colours, animal-round seeds and the colour Talk choices.
 6. Flowers fade in place at round end (no hop-out like the Dino eggs); count extras pop away as soon as the planter is full.

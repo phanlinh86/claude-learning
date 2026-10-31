@@ -55,6 +55,7 @@
   var SIZE_SCALE = { big: 1.3, small: 0.72 };
   var COUNT_RANGE = { 3: [1, 5], 4: [1, 5], 5: [3, 10], 6: [4, 12], 7: [4, 12] };
   // the count planter (DESIGN §2): w = min(safe width − 80, 120 + 96·N), h = min(0.42 w, 170); soil line 54/200
+  var SMALL_POT = 0.72;   // size topic: the 'small' pot is 0.72 × (same x, same bottom); keep = SG.CONFIG.sizeSmallPot
   var PLANTER = { margin: 80, base: 120, perHole: 96, aspect: 0.42, maxH: 170, soilFrac: 0.27 };
 
   function ageOf(a) { a = Math.round(+a || 4); return a < 3 ? 3 : a > 7 ? 7 : a; }
@@ -66,12 +67,16 @@
 
   // colour-blind safety (visual QA): below age 5 never blue+purple or red+green in one round
   function clash(cs) {
-    return (cs.indexOf('blue') >= 0 && cs.indexOf('purple') >= 0) || (cs.indexOf('red') >= 0 && cs.indexOf('green') >= 0);
+    return (cs.indexOf('blue') >= 0 && cs.indexOf('purple') >= 0) || (cs.indexOf('red') >= 0 && cs.indexOf('green') >= 0) ||
+      (cs.indexOf('yellow') >= 0 && cs.indexOf('orange') >= 0);
   }
-  /** A colour set safe for `age`: below 5 one of blue/purple and one of red/green is dropped (4 colours left). */
-  function safeColors(rng, age) {
+  // pairs a colour-blind child (or a toddler) confuses: blue/purple, red/green, yellow/orange (QA P2-6: deutan ΔE 12)
+  var PAIRS = [['blue', 'purple'], ['red', 'green'], ['yellow', 'orange']];
+  /** A colour set safe for `age`: below 5 one colour of every confusable pair is dropped (3 colours left).
+   *  `keep` (optional) is always kept (its partner is the one dropped). */
+  function safeColors(rng, age, keep) {
     if (age >= 5) return COLORS.slice();
-    var drop = [rng.pick(['blue', 'purple']), rng.pick(['red', 'green'])];
+    var drop = PAIRS.map(function (p) { return p.indexOf(keep) >= 0 ? p[1 - p.indexOf(keep)] : rng.pick(p); });
     return COLORS.filter(function (c) { return drop.indexOf(c) < 0; });
   }
 
@@ -81,7 +86,7 @@
       flower: o.flower || (o.color && o.color !== 'cream' ? o.color : null) };
   }
   function seed(color, scale, answer, nameKind, nameValue) {
-    return item({ sprite: 'seed_' + color, color: color, scale: scale, size: SIZE.seed * scale, nameKind: nameKind, nameValue: nameValue, answer: answer });
+    return item({ sprite: 'seed_' + color, color: color, scale: scale, size: SIZE.seed, nameKind: nameKind, nameValue: nameValue, answer: answer });   // drawn = size · scale
   }
   function plainSeed(text, answer, nameKind, nameValue, flower) {
     return item({ sprite: 'seed_plain', color: 'cream', text: text, size: SIZE.seed, nameKind: nameKind, nameValue: nameValue, answer: answer, flower: flower });
@@ -143,7 +148,7 @@
       }
       case 'size': {
         // warm-up 1 seed per pot; later 2–3 per pot (≤ 5 seeds so big seeds fit), one colour per round
-        var c = rng.pick(COLORS), order = rng.shuffle(['big', 'small']), cnts = warm ? [1, 1] : rng.pick([[2, 2], [2, 3], [3, 2]]);
+        var c = rng.pick(COLORS), order = rng.shuffle(['big', 'small']), cnts = warm ? [1, 1] : rng.pick([[2, 2], [1, 3], [3, 1]]);   // QA C1: always 4
         params = { color: c };
         for (i = 0; i < 2; i++) {
           labels.push({ type: 'size', value: order[i] });
@@ -167,8 +172,10 @@
       case 'count': {
         mode = 'count';
         var r = COUNT_RANGE[age];
-        var N = warm ? (age >= 6 ? rng.int(2, 4) : rng.int(1, Math.min(3, r[1]))) : rng.int(Math.max(2, r[0]), r[1]);
-        var cc = rng.pick(COLORS), extra = N <= 3 ? 3 : 2;
+        var nlo = warm ? (age >= 6 ? 2 : 1) : Math.max(2, r[0]), nhi = warm ? (age >= 6 ? 4 : Math.min(3, r[1])) : r[1];
+        var prev = o.prev || {}, nPool = range(nlo, nhi).filter(function (v) { return v !== prev.n; });
+        var N = nPool.length ? rng.pick(nPool) : nlo;                                            // QA C2: never the previous N
+        var cc = rng.pick(COLORS.filter(function (v) { return v !== prev.color; })), extra = N <= 3 ? 3 : 2;   // … nor its colour
         params = { n: N, color: cc }; need = N;
         labels.push({ type: 'number', value: N });
         var csz = N + extra > 10 ? SIZE.seedMany : SIZE.seed;     // 11–14 seeds: a bit smaller so they fit iPad landscape
@@ -258,7 +265,7 @@
   /** Planter geometry for `need` holes (DESIGN §2): centred in the safe area, bottom on the pot bottom line. */
   function planterRect(layout, need) {
     var ins = layout.ins, sw = layout.W - ins.left - ins.right, pot = layout.pot || layout.nest;
-    var w = Math.min(sw - PLANTER.margin, PLANTER.base + need * PLANTER.perHole), h = Math.min(PLANTER.aspect * w, PLANTER.maxH);
+    var w = Math.min(sw - PLANTER.margin, PLANTER.base + need * PLANTER.perHole), h = Math.min(PLANTER.aspect * w, PLANTER.maxH, pot.h || 1e9);   // never taller than the (n = 1) pot: the seed band ends above it
     var bottom = pot.bottom !== undefined ? pot.bottom : layout.groundY + 8;
     return { x: ins.left + sw / 2, y: bottom - h + PLANTER.soilFrac * h, w: w, h: h, top: bottom - h, bottom: bottom };
   }
@@ -274,9 +281,10 @@
     var xs = pot.xs && pot.xs.length === baskets.length ? pot.xs : potXs(layout, baskets.length);
     for (i = 0; i < baskets.length; i++) {
       b = baskets[i];
-      b.x = xs[i]; b.y = pot.y; b.w = pot.w; b.h = pot.h;
-      b.top = pot.top !== undefined ? pot.top : pot.y - 0.24 * pot.h;
-      b.bottom = b.top + pot.h;
+      var k = b.label && b.label.type === 'size' && b.label.value === 'small' ? SMALL_POT : 1;   // size topic: a small pot
+      b.bottom = pot.bottom !== undefined ? pot.bottom : pot.y + 0.76 * pot.h;
+      b.x = xs[i]; b.w = pot.w * k; b.h = pot.h * k;
+      b.top = b.bottom - b.h; b.y = b.top + 0.24 * b.h;
     }
   }
   function potXs(layout, n) {
@@ -369,7 +377,6 @@
     for (var i = 0; i < c.length; i++) if (c[i] >= lo && c[i] <= hi) d.push(c[i]);
     return d;
   }
-  var PARTNER = { blue: 'purple', purple: 'blue', red: 'green', green: 'red' };
 
   function makeTalk(topic, o) {
     o = o || {};
@@ -378,13 +385,7 @@
     switch (topic) {
       case 'colors': {
         a = rng.pick(COLORS); show.flower = a; show.color = a;
-        var dp = COLORS;
-        if (age < 5) {        // no colour-blind clash pair among the choices: drop a's partner and one of the other pair
-          var other = PARTNER[a] === 'purple' || PARTNER[a] === 'blue' ? ['red', 'green'] : ['blue', 'purple'];
-          var drop = [PARTNER[a], rng.pick(other)];
-          if (!PARTNER[a]) drop = [rng.pick(['blue', 'purple']), rng.pick(['red', 'green'])];
-          dp = COLORS.filter(function (c) { return drop.indexOf(c) < 0; });
-        }
+        var dp = safeColors(rng, age, a);   // below 5: no confusable pair among the choices (3 colours incl. the answer)
         ch = choicesFrom(rng, 'color', a, dp, 3); break;
       }
       case 'shapes': {

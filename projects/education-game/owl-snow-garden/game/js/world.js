@@ -8,7 +8,7 @@
  *  Result depends only on seed + the sub-step index at which inputs arrive.
  *
  *  Drawing a seed (renderer contract):
- *    centre (x, y), rotation rot, drawn width = size
+ *    centre (x, y), rotation rot, drawn width = size · scale (scale ≠ 1 only in the size topic: 1.3 / 0.72)
  *    scale  = appear(0..1, back-overshoot) · (1 + (cfg.liftScale−1)·lift) · (sx, sy)
  *    alpha  = item.alpha (fades on 'leave')
  *    Items in state 'in' (and 'fly' once item.overPot) go between pot_back and pot_front.
@@ -17,7 +17,9 @@
  *    item.sink   0→1  (grow 0–0.25)  seed shrinks and drops into the soil, behind the pot front
  *    item.stem   0→1  (from grow 0.25, critically damped spring) stem height = stem · basket.stemH · slot.stem
  *    item.petals 0→1  (from grow 0.55, spring ω 14 ζ 0.45 → overshoots to ≈ 1.2) petal opening
- *    flower base = (slot.x, basket.soilY); flower head width ≈ basket.flowerSize; colour = item.flower
+ *    flower base = (slot.x, basket.soilY); head centre = soilY − stem·stemH·slot.stem; head width ≈ basket.flowerSize;
+ *    slot.lean = outward stem lean (rad); colour = item.flower. layout.pot.flowerTop = highest head top; the seed band
+ *    ends layout.playGap px above the pot top (≥ 74, clear of the 120 px drop zone and of that head)
  *  Drawing a pot: basket.x = centre x, basket.y = soil (opening) centre y, w × h,
  *    sprite rect = [x − w/2, basket.top, w, h] (basket.bottom = top + h).
  *    kind 'pot' (pot_back/front, 256×200) or 'planter' (planter_back/front, 512×200, N holes = slots).
@@ -35,7 +37,7 @@
     step: 1 / 120,             // fixed simulation sub-step (≤ 1/120 per DESIGN)
     maxFrame: 1.0,             // s, largest dt accepted per update() (speed mode passes big dt)
     roundsPerLevel: 4,         // warm-up + 3 real rounds
-    chapterTimeLimit: 75,      // s since the chapter began: after ≥ chapterMinRounds rounds, go to Talk time once exceeded
+    chapterTimeLimit: 60,      // s since the chapter began: after ≥ chapterMinRounds rounds, go to Talk time once exceeded (QA playtest 75 → 60)
     chapterMinRounds: 3,
     introTime: 1.8,            // chapter banner
     appearTime: 0.45,          // item pop-in (back-overshoot)
@@ -65,11 +67,20 @@
     potBottomDy: 8,            // pot bottom = groundY + 8
     potSoilFrac: 0.24,         // soil centre y = top + 0.24 h (soil (128,48) in 256×200)
     potSlotSpan: 0.66,         // slots spread over 66 % of the pot width
+    potSideMarginPort: 6, potGapPort: 8,   // portrait: wider pots (QA P1-4: iPhone portrait with 4 pots)
+    potMaxWTall: 290,          // tall portrait (H/W > 1.6) with ≤ 3 pots: bigger pots (QA P2-3)
+    tallGroundRaise: 0.25, tallGroundMax: 120,   // tall portrait: groundY rises by min(120, 0.25·(H − 1.6 W)) px
+    sizeSmallPot: 0.72,        // size topic: the 'small' pot is 0.72 × the big one (same x, same bottom)
+    stemFrac: 0.42, stemMin: 45, stemMax: 80,   // stemH = clamp(0.42 h, 45, 80) px (QA P1-1: shorter stems)
+    flowerMax: 96,             // flower head width cap (px)
+    minAltBand: 240, potMinWLand: 190,   // landscape: pots shrink (not below 190 px) until the alt seed band is ≥ 240 px tall
+    leanMax: 0.08,             // outer pot slots lean outward by up to ±0.08 rad (slot.lean)
     signScale: 0.55,           // sign width = 0.55 × pot w (sign.svg 128×112)
     lumiX: 105, lumiYLand: 225, lumiYPort: 245, lumiHLand: 175, lumiHPort: 190,
     bubbleDx: 85, bubbleY: 24, bubbleMaxW: 620, bubbleRightGap: 150, bubbleH: 104,
     playMargin: 40, playTopGap: 10,
-    playPotGap: 44,            // px between play band and pot top: resting seeds stay OUT of the 90 px drop zone
+    playPotGap: 74,            // px (minimum) between play band and pot top: resting seeds stay OUT of the 120 px drop zone;
+                               // the band gap grows further if a full flower head would reach higher (layout.playGap)
     playLumiGap: 90, playBubbleGap: 16,   // landscape alternative band: from below the bubble, Lumi's box (±90 px) cut out
     hudW: 140, hudH: 90,       // DOM buttons top-right: x > W−ins.right−140, y < ins.top+90
     minSpacing: 1.1,           // min centre distance = 1.1 × size
@@ -81,7 +92,7 @@
     // ---- touch (px)
     touchR: 0.6, touchPad: 14, // item radius = 0.6 × size + 14
     potPadSide: 45,            // drop zone grows 45 px left/right/down (Dino playtest 30 → 45)
-    potPadUp: 90,
+    potPadUp: 120,             // QA playtest 90 → 120: children release high above the pot
     tapMovePx: 24, tapTime: 0.35,   // finger moved < 24 px and released < 0.35 s after down → a TAP, not a drop
     tapReturnTime: 0.25, tapApex: 6,
 
@@ -120,7 +131,7 @@
     hintAfterMisses: 2, hintTime: 3,
     hintCooldown: 6,           // s: no auto-hint within 6 s of the last one, nor while the pot still glows
     idleTime: 12,              // s without a grab → idle nudge; the gap then grows ×1.5 per nudge up to idleMax
-    idleBackoff: 1.5, idleMax: 30,
+    idleBackoff: 2, idleMax: 60,   // QA playtest: 12 → 24 → 48 → 60 s
 
     // ---- Lumi
     moodTime: { happy: 0.9, cheer: 1.6, oops: 0.8, think: 1.4 },
@@ -145,25 +156,39 @@
     return { W: S, H: clamp(Math.round(S / aspect), cfg.minLong, cfg.maxLong) };
   }
 
+  function stemOf(h, cfg) { return clamp(cfg.stemFrac * h, cfg.stemMin, cfg.stemMax); }
+
   function computeLayout(W, H, ins, n, cfg) {
     ins = { top: +(ins && ins.top) || 0, right: +(ins && ins.right) || 0, bottom: +(ins && ins.bottom) || 0, left: +(ins && ins.left) || 0 };
     n = n || 3;
     var portrait = H > W, tall = H / W > cfg.tallAspect;
-    var groundY = H - ins.bottom - cfg.groundOffset;
-    var aw = W - ins.left - ins.right - 2 * cfg.potSideMargin;
-    var pw = Math.min(cfg.potMaxW, aw / n - cfg.potGap), ph = cfg.potAspect * pw;
-    var bottom = groundY + cfg.potBottomDy, top = bottom - ph, py = top + cfg.potSoilFrac * ph, xs = [];
-    for (var i = 0; i < n; i++) xs.push(ins.left + cfg.potSideMargin + (aw / n) * (i + 0.5));
+    var raise = tall ? Math.min(cfg.tallGroundMax, cfg.tallGroundRaise * (H - cfg.tallAspect * W)) : 0;
+    var groundY = H - ins.bottom - cfg.groundOffset - raise;
+    var margin = portrait ? cfg.potSideMarginPort : cfg.potSideMargin, gap = portrait ? cfg.potGapPort : cfg.potGap;
+    var maxW = tall && n <= 3 ? cfg.potMaxWTall : cfg.potMaxW;
+    var aw = W - ins.left - ins.right - 2 * margin;
+    var pw = Math.min(maxW, aw / n - gap), ph, top, flowerClear, pgap;
+    var bottom = groundY + cfg.potBottomDy, altTop = ins.top + cfg.bubbleY + cfg.bubbleH + cfg.playBubbleGap;
+    for (;;) {
+      ph = cfg.potAspect * pw; top = bottom - ph;
+      // highest flower head above the pot top (one centred flower of width min(96, 0.5 w) on a full stem)
+      flowerClear = stemOf(ph, cfg) - cfg.potSoilFrac * ph + 0.5 * Math.min(cfg.flowerMax, 0.5 * pw);
+      pgap = Math.max(cfg.playPotGap, Math.ceil(flowerClear));
+      if (portrait || top - pgap - altTop >= cfg.minAltBand || pw <= cfg.potMinWLand) break;
+      pw = Math.max(cfg.potMinWLand, pw - 2);      // short landscape (iPad with insets): slightly smaller pots, bigger seeds
+    }
+    var py = top + cfg.potSoilFrac * ph, xs = [];
+    for (var i = 0; i < n; i++) xs.push(ins.left + margin + (aw / n) * (i + 0.5));
     var lumi = { x: ins.left + cfg.lumiX, y: ins.top + (portrait ? cfg.lumiYPort : cfg.lumiYLand), h: portrait ? cfg.lumiHPort : cfg.lumiHLand };
     var bx = lumi.x + cfg.bubbleDx;
     var bubble = { x: bx, y: ins.top + cfg.bubbleY, w: Math.min(cfg.bubbleMaxW, W - bx - ins.right - cfg.bubbleRightGap), h: cfg.bubbleH };
     var px = ins.left + cfg.playMargin, pyy = lumi.y + cfg.playTopGap;
-    var play = { x: px, y: pyy, w: W - ins.right - cfg.playMargin - px, h: top - cfg.playPotGap - pyy };
+    var play = { x: px, y: pyy, w: W - ins.right - cfg.playMargin - px, h: top - pgap - pyy };
     // tall portrait phones: keep seeds in a band just above the pots (short drags) and make them bigger
     var itemScale = 1;
     if (portrait && play.h > cfg.portraitPlayMaxFrac * W) {
       var bh = cfg.portraitPlayMaxFrac * W;
-      play.y = top - cfg.playPotGap - bh; play.h = bh;
+      play.y = top - pgap - bh; play.h = bh;
       if (tall) itemScale = cfg.portraitItemScale;
     }
     play.itemScale = itemScale;
@@ -172,15 +197,15 @@
     var playAlt = null;
     if (!portrait) {
       var ay = bubble.y + bubble.h + cfg.playBubbleGap;
-      playAlt = { x: play.x, y: ay, w: play.w, h: top - cfg.playPotGap - ay, itemScale: 1,
+      playAlt = { x: play.x, y: ay, w: play.w, h: top - pgap - ay, itemScale: 1,
         ex: { x: lumi.x - cfg.playLumiGap, y: lumi.y - lumi.h, w: 2 * cfg.playLumiGap, h: lumi.h + cfg.playTopGap } };
       if (playAlt.h <= play.h + 1) playAlt = null;
     }
     var sw = cfg.signScale * pw;
-    var pot = { y: py, w: pw, h: ph, xs: xs, n: n, top: top, bottom: bottom,
+    var pot = { y: py, w: pw, h: ph, xs: xs, n: n, top: top, bottom: bottom, flowerTop: top - flowerClear,
       sign: { w: sw, h: sw * 112 / 128, bottomY: groundY + 0.5 * (H - groundY) } };   // suggested sign placement (stake bottom)
     return {
-      W: W, H: H, ins: ins, portrait: portrait, tall: tall, groundY: groundY,
+      W: W, H: H, ins: ins, portrait: portrait, tall: tall, groundY: groundY, playGap: pgap,
       pot: pot, nest: pot,                 // `nest` = old name (same object)
       lumi: lumi, bubble: bubble, play: play, playAlt: playAlt, itemScale: itemScale,
       hud: { x: W - ins.right - cfg.hudW, y: 0, w: cfg.hudW + ins.right, h: ins.top + cfg.hudH }
@@ -237,7 +262,7 @@
   function packItems(items, play, rng, cfg) {
     if (!items.length) return { shrink: 1, ok: true };
     var maxBase = 0, i, k0 = play.itemScale || 1;
-    for (i = 0; i < items.length; i++) maxBase = Math.max(maxBase, items[i].baseSize * k0);
+    for (i = 0; i < items.length; i++) maxBase = Math.max(maxBase, items[i].baseSize * (items[i].scale || 1) * k0);   // drawn size = size · scale
     var jit = cfg.packJitter, s = 1, pts = null, ok = true;
     for (s = 1; s > 0.2; s = Math.round((s - cfg.shrinkStep) * 1000) / 1000) {
       var size = maxBase * s, d = cfg.minSpacing * size + 2 * Math.SQRT2 * jit;
@@ -262,21 +287,23 @@
   function computeSlots(b, cap, baseSize, cfg) {
     cap = Math.max(1, cap);
     var slots = [], k, sxp, s, x0;
+    b.stemH = stemOf(b.h, cfg);
     if (b.kind === 'planter') {
       sxp = b.w * 0.84 / cap; x0 = b.x - b.w * 0.42 + sxp / 2;
       s = Math.min(baseSize * cfg.slotScale, sxp, b.h * 0.6);
-      for (k = 0; k < cap; k++) slots.push({ x: x0 + k * sxp, y: b.y - 0.3 * s, stem: k % 2 ? 0.9 : 1 });
-      b.flowerSize = Math.min(96, sxp * 1.05);
-      b.stemH = clamp(0.6 * b.h, 50, 95);
+      for (k = 0; k < cap; k++) slots.push({ x: x0 + k * sxp, y: b.y - 0.3 * s, stem: k % 2 ? 0.72 : 1, lean: 0 });   // alternate heights: heads don't touch
+      b.flowerSize = Math.min(cfg.flowerMax, sxp * 0.85);
     } else {
       sxp = cap > 1 ? b.w * cfg.potSlotSpan / cap : 0;
       s = Math.min(baseSize * cfg.slotScale, b.w * 0.5, cap > 1 ? sxp * 1.25 : 1e9);
       var idx = [], mid = (cap - 1) / 2;
       for (k = 0; k < cap; k++) idx.push(k);
       idx.sort(function (a, c) { return Math.abs(a - mid) - Math.abs(c - mid) || a - c; });   // centre-out
-      for (k = 0; k < cap; k++) slots.push({ x: b.x + (idx[k] - mid) * sxp, y: b.y - 0.3 * s, stem: Math.abs(idx[k] - mid) < 0.6 ? 1 : 0.86 });
-      b.flowerSize = Math.min(96, cap > 1 ? sxp * 1.2 : b.w * 0.5);
-      b.stemH = clamp(0.5 * b.h, 50, 95);
+      for (k = 0; k < cap; k++) {
+        var off = idx[k] - mid;
+        slots.push({ x: b.x + off * sxp, y: b.y - 0.3 * s, stem: Math.abs(off) < 0.6 ? 1 : 0.86, lean: mid > 0 ? cfg.leanMax * off / mid : 0 });
+      }
+      b.flowerSize = Math.min(cfg.flowerMax, cap > 1 ? sxp * 1.05 : b.w * 0.5);
     }
     b.slots = slots; b.slotSize = s; b.soilY = b.y;
   }
@@ -358,7 +385,7 @@
       it = this.items[i];
       var b = it.basketId ? this.basketById(it.basketId) : null;
       if (it.state === 'in' || it.state === 'leave') {
-        if (b && it.slot >= 0) { var sl = b.slots[it.slot]; it.x = it._px = sl.x; it.y = it._py = sl.y; it.size = b.slotSize; }
+        if (b && it.slot >= 0) { var sl = b.slots[it.slot]; it.x = it._px = sl.x; it.y = it._py = sl.y; it.size = b.slotSize / (it.scale || 1); }
       } else if (it.state === 'fly') {
         this._planFly(it, b, it.vx, it.vy, true);
       } else if (it.state === 'idle' || it.state === 'appear') {
@@ -386,7 +413,7 @@
     var cap = 0, base = 0, i, mode = this.cur.mode;
     for (i = 0; i < this.items.length; i++) {
       var it = this.items[i];
-      if (mode !== 'sort' || it.answer === b.id) base = Math.max(base, it.baseSize);
+      if (mode !== 'sort' || it.answer === b.id) base = Math.max(base, it.baseSize * (it.scale || 1));
       if (mode === 'sort' && it.answer === b.id) cap++;
     }
     if (mode === 'ask') for (i = 0; i < this.cur.queue.length; i++) if (this.cur.queue[i] === b.id) cap++;
@@ -399,7 +426,7 @@
     this.age = this._pendingAge; this.lang = this._pendingLang;
     this.sessions++;
     this.levels = SG.Content.topicsFor(this.age);
-    this.stars = 0;
+    this.stars = 0; this._prevCount = null;
     this._emit({ type: 'session', levels: this.levels.slice() });
     this.startLevel(0);
   };
@@ -424,8 +451,9 @@
     this.layout = computeLayout(this.layout.W, this.layout.H, this.layout.ins, n, cfg);
     var rseed = (this.rng.next() * 4294967296) >>> 0;
     var rr = new SG.RNG(rseed);
-    var cur = SG.Content.makeRound(this.topic, { age: this.age, lang: this.lang, rng: rr, roundIndex: this.round, layout: this.layout });
+    var cur = SG.Content.makeRound(this.topic, { age: this.age, lang: this.lang, rng: rr, roundIndex: this.round, layout: this.layout, prev: this._prevCount });
     this.cur = cur;
+    if (cur.mode === 'count') this._prevCount = { n: cur.params.n, color: cur.params.color };   // C2: next count round avoids both
     this.roundMistakes = 0; this.held = null; this._idleT = 0; this._idleGap = cfg.idleTime; this._roundEnded = false; this.interactive = false;
     this.completing = false; this._lastBloomT = -1e9;
     var keep = prevN === cur.baskets.length && prevKind === cur.baskets[0].kind && cur.mode !== 'count';
@@ -538,7 +566,7 @@
     for (var i = this.items.length - 1; i >= 0; i--) {
       var it = this.items[i];
       if (!this._canGrab(it)) continue;
-      var r = cfg.touchR * it.size + cfg.touchPad, d = hyp(x - it.x, y - it.y) / r;
+      var r = cfg.touchR * it.size * (it.scale || 1) + cfg.touchPad, d = hyp(x - it.x, y - it.y) / r;
       if (d <= 1 && d < bestD - 1e-9) { best = it; bestD = d; }
     }
     if (!best) return null;
@@ -593,7 +621,8 @@
   P.nestAt = P.potAt;   // old name
 
   P._drop = function (it, fx, fy) {
-    var b = this.potAt(it.x, it.y) || this.potAt(fx, fy), mode = this.cur.mode;
+    // the finger's pot wins (a fast flick leaves the seed lagging over a neighbour); the seed centre catches 'beside' drops
+    var b = this.potAt(fx, fy) || this.potAt(it.x, it.y), mode = this.cur.mode;
     if (b && mode === 'count' && b.reserved >= b.need) {      // planter already full (last seed in the air)
       this._emit({ type: 'drop', id: it.id, basketId: null });
       this._planReturn(it, 'miss');
@@ -678,7 +707,7 @@
     var H = clamp(cfg.flyApex + Math.max(0, -(rvy || 0)) * cfg.flyApexFromVy, cfg.flyApex, cfg.flyApexMax);
     var vx0 = clamp((rvx || 0) * cfg.flyInherit, -500, 500);
     it._f = arc(it, sl.x, sl.y, T, H, vx0);
-    it._f.size1 = b.slotSize;
+    it._f.size1 = b.slotSize / (it.scale || 1);   // slotSize is the drawn size; item.size is drawn × scale
     it.state = 'fly'; it.t = 0; it.overPot = it.overNest = false;
   };
 

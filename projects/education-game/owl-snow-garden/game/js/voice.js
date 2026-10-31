@@ -283,6 +283,9 @@
     });
   };
 
+  // drop every line still waiting (the one being spoken finishes): used when an instruction became stale
+  V.dropQueued = function () { flushQueue('dropped'); };
+
   V.sayKey = function (key, params, opts) {
     var lang = opts && opts.lang ? opts.lang : V._lang;
     var text = I18N() ? I18N().t(lang, key, params) : key;

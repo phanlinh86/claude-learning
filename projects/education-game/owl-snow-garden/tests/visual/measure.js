@@ -1,10 +1,10 @@
-// DOM geometry checks (overflow / overlap) for the visual report.   node tests/visual/measure.js
+// DOM geometry checks (overflow / overlap) for the visual report — Owlet's Snow Garden.   node tests/visual/measure.js
 const { chromium } = require('playwright');
 const serve = require('../e2e/serve');
 const DEV = { iphoneP: [393, 852, 3], iphoneL: [852, 393, 3], ipadP: [820, 1180, 2], ipadL: [1180, 820, 2], iphoneSE_L: [667, 375, 2] };
 (async () => {
   const srv = await serve(), browser = await chromium.launch();
-  for (const [dev, [w, h, dpr]] of Object.entries(DEV)) for (const lang of ['en', 'vi']) for (const age of [3, 6]) {
+  for (const [dev, [w, h, dpr]] of Object.entries(DEV)) for (const lang of ['en', 'vi']) for (const age of [3, 5, 7]) {
     const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: dpr, isMobile: true, hasTouch: true });
     const page = await ctx.newPage();
     await page.goto(srv.url + `?mute=1&novoice=1&seed=5&age=${age}&lang=${lang}`);
@@ -17,7 +17,7 @@ const DEV = { iphoneP: [393, 852, 3], iphoneL: [852, 393, 3], ipadP: [820, 1180,
       const v = SG.debug.view(), w = SG.debug.world;
       const itemsTopCss = Math.min(...w.items.map(i => v.top + (i.homeY - i.size / 2) * v.s));
       const out = { bubble, hud, bubbleFont: parseFloat(bt.style.fontSize), bubbleText: bt.textContent.length, itemsTopCss: Math.round(itemsTopCss),
-        overlapHud: !(bubble.r <= hud.l || bubble.b <= hud.t || bubble.t >= hud.b), s: +v.s.toFixed(3), itemCss: Math.round(w.items[0].size * v.s), boCss: Math.round(w.layout.bo.h * v.s) };
+        overlapHud: !(bubble.r <= hud.l || bubble.b <= hud.t || bubble.t >= hud.b), s: +v.s.toFixed(3), itemCss: Math.round(w.items[0].size * v.s), lumiCss: Math.round(w.layout.lumi.h * v.s), bubbleScroll: document.getElementById("bubble").scrollHeight, bubbleClient: document.getElementById("bubble").clientHeight };
       w._startTalk();
       return out;
     });
