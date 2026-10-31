@@ -29,13 +29,15 @@
       VC.Audio.setOptions({ sfx: this.settings.sfx, music: this.settings.music, muted: this.settings.muted || this.urlMute });
       this.renderer = new VC.Renderer(document.getElementById('game'));
       await VC.Assets.loadAll();
-      this.renderer.resize();
       VC.UI.init(this);
       this.bindInput();
-      window.addEventListener('resize', () => {
-        clearTimeout(this._rsz); this._rsz = setTimeout(() => this.renderer.resize(), 120);
-        if (isTouch && window.innerHeight > window.innerWidth && this.mode === 'playing') this.pause();   // phone turned to portrait
-      });
+      this.relayout();
+      // rotation / resize / Safari toolbar changes: re-layout (debounced); the world keeps running and Puff is
+      // clamped into the new shore range. A finger that was steering is released so Puff doesn't jump.
+      const onResize = () => { clearTimeout(this._rsz); this._rsz = setTimeout(() => this.relayout(), 120); };
+      window.addEventListener('resize', onResize);
+      window.addEventListener('orientationchange', () => { this.releasePointer(); onResize(); });
+      if (window.visualViewport) window.visualViewport.addEventListener('resize', onResize);
       if (params.get('autostart') === '1') this.startGame(); else this.toTitle();
       this.last = performance.now();
       requestAnimationFrame(t => this.frame(t));
@@ -44,9 +46,23 @@
     makeWorld(seed, forTitle) {
       const s = seed != null ? seed : (this.seed != null ? this.seed : (Math.random() * 1e9) | 0);
       const w = new VC.World({ seed: s, config: forTitle ? {} : difficultyOverrides(this.settings.difficulty) });
+      this.applyPlayRange(w);
       w.reset();
       return w;
     },
+    /* safe-area insets (CSS px) read from a hidden element padded with env(safe-area-inset-*) */
+    readInsets() {
+      const el = document.getElementById('safeProbe'); if (!el) return null;
+      const cs = getComputedStyle(el);
+      return { top: parseFloat(cs.paddingTop) || 0, right: parseFloat(cs.paddingRight) || 0, bottom: parseFloat(cs.paddingBottom) || 0, left: parseFloat(cs.paddingLeft) || 0 };
+    },
+    relayout() {
+      this.renderer.resize(this.readInsets());
+      if (this.world) this.applyPlayRange(this.world);
+      if (this.world) { const c = this.world.cfg; if (this.renderer.pointer) this.renderer.pointer[0] = Math.max(c.xMin, Math.min(c.xMax, this.renderer.pointer[0])); }
+    },
+    applyPlayRange(w) { const L = this.renderer && this.renderer.layout; if (L && w.setPlayRange) w.setPlayRange(L.playMin, L.playMax); },
+    releasePointer() { this.pointerDown = false; this._steerId = null; if (this._touches) this._touches.clear(); if (this.isTouch && this.renderer) this.renderer.pointer = null; },
     makeWeather() { return new VC.Weather({ width: 960, height: 540, seed: 5 }); },
 
     toTitle() {
@@ -192,6 +208,7 @@
         (this._touches = this._touches || new Set()).add(e.pointerId);
         this._steerId = e.pointerId;   // only this finger / button steers Puff
         this.pointerDown = true; setPtr(e);
+        try { if (e.pointerType === 'touch') stage.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
       });
       stage.addEventListener('pointermove', e => {
         if (this.mode !== 'playing') return;
@@ -200,12 +217,25 @@
         if (e.pointerType === 'mouse') { const p0 = this._lastMouse; this._lastMouse = [e.clientX, e.clientY]; if (p0 && Math.abs(p0[0] - e.clientX) + Math.abs(p0[1] - e.clientY) > 2) this._mouseFollow = true; }
         if (this.pointerDown || e.pointerType === 'mouse') setPtr(e);
       });
-      const up = e => { if (this._touches) this._touches.delete(e.pointerId); if (e.pointerId === this._steerId) this._steerId = null; if (!this._touches || !this._touches.size) { this.pointerDown = false; if (e.pointerType !== 'mouse') this.renderer.pointer = null; } };
+      const up = e => {
+        if (this._touches) this._touches.delete(e.pointerId);
+        // the steering finger lifted: Puff stops following, even if a second (rain) finger is still down
+        if (e.pointerId === this._steerId || !this._touches || !this._touches.size) {
+          this._steerId = null; this.pointerDown = false; if (e.pointerType !== 'mouse') this.renderer.pointer = null;
+        }
+      };
       window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
       const act = document.getElementById('btnAction');
       if (act) act.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); this.action(); });
       window.addEventListener('blur', () => { this.keys = {}; this.pointerDown = false; if (this.mode === 'playing') this.pause(); });
-      document.addEventListener('visibilitychange', () => { if (document.hidden && this.mode === 'playing') this.pause(); });
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) { if (this.mode === 'playing') this.pause(); this.releasePointer(); VC.Audio.suspend(); }
+        else VC.Audio.resume();
+      });
+      // iOS: audio may only start inside a gesture — unlock on the first touchend / click / key
+      const unlock = () => VC.Audio.unlock();
+      ['touchend', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, unlock, { capture: true, passive: true }));
+      this.kidProof();
       window.addEventListener('dragover', e => e.preventDefault());
       window.addEventListener('drop', e => e.preventDefault());
       window.addEventListener('contextmenu', e => e.preventDefault());
@@ -215,6 +245,23 @@
         if (k === 'F5' || ((e.ctrlKey || e.metaKey) && ['r', 'R', '+', '=', '-', '_', '0', 'p', 'P', 'f', 'F', 'g', 'G', 'u', 'U'].includes(k))) e.preventDefault();
       }, true);
       document.addEventListener('fullscreenchange', () => { this.fullscreen = !!document.fullscreenElement || (this.fullscreen && typeof window.ffFullscreen === 'function'); this.renderer.resize(); VC.UI.syncSettings(); });
+    },
+
+    /* Touch kid-proofing (iPhone / iPad): no pinch or double-tap zoom, no long-press callout, no rubber-band
+     * scroll or pull-to-refresh. Scrollable panels opt back in with the .scroll class. */
+    kidProof() {
+      const NP = { passive: false }, prevent = e => { if (e.cancelable) e.preventDefault(); };
+      const formy = t => t && t.closest && t.closest('input, textarea, select, .scroll');
+      ['gesturestart', 'gesturechange', 'gestureend'].forEach(t => document.addEventListener(t, prevent, NP));
+      document.addEventListener('touchstart', e => { if (e.touches && e.touches.length > 1 && !(e.target.closest && e.target.closest('#stage'))) prevent(e); }, NP);
+      document.addEventListener('touchmove', e => { if (!formy(e.target)) prevent(e); }, NP);
+      let lastEnd = 0;
+      document.addEventListener('touchend', e => {
+        const t = Date.now();
+        if (t - lastEnd < 320 && !(e.target.closest && e.target.closest('button, a, input, label, select, .scroll'))) prevent(e);
+        lastEnd = t;
+      }, NP);
+      document.addEventListener('dblclick', e => { if (!formy(e.target)) prevent(e); }, NP);
     },
 
     handleEvents(evts) {

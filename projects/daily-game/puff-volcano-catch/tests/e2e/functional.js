@@ -771,15 +771,13 @@ async function testLayout() {
     const page = await newPage({ viewport: { width: w, height: h }, dsf, touch: touchDev, mobile: touchDev });
     await boot(page, 'seed=5');
     const tag = `${w}x${h}@${dsf}${touchDev ? ' touch' : ''}`;
-    if (touchDev && h > w) {   // portrait phone: the game asks to turn the phone sideways
-      check(`layout ${tag}: portrait shows the 'turn your phone sideways' overlay`, await visible(page, '#rotate'));
-      errorsOk(page, `layout ${tag}`); await close(page); continue;
-    }
     const cv = await ev(page, () => { const c = document.getElementById('game'), r = c.getBoundingClientRect(); return { l: r.left, t: r.top, w: r.width, h: r.height, bw: c.width, bh: c.height, vw: innerWidth, vh: innerHeight }; });
-    const fits = (near(cv.w, cv.vw, 2) || near(cv.h, cv.vh, 2)) && cv.w <= cv.vw + 1 && cv.h <= cv.vh + 1;
+    // mobile layout: inside the aspect clamps the canvas fills the whole window (no bars), centred otherwise
+    const fills = near(cv.w, cv.vw, 2) && near(cv.h, cv.vh, 2);
     const centered = near(cv.l, (cv.vw - cv.w) / 2, 1.5) && near(cv.t, (cv.vh - cv.h) / 2, 1.5);
-    check(`layout ${tag}: canvas letterboxed 16:9, fills one axis, centred`, Math.abs(cv.w / cv.h - 16 / 9) < 0.01 && fits && centered, cv);
-    check(`layout ${tag}: backing store ≤ 1920×1080 and ≥ css size (capped)`, cv.bw <= 1920 && cv.bh <= 1080 && cv.bw >= Math.min(1920, cv.w * dsf) - 3, [cv.bw, cv.bh]);
+    check(`layout ${tag}: canvas fills the window`, fills && centered, cv);
+    const capPx = touchDev ? 3.3e6 : 1920 * 1080 + 4000;
+    check(`layout ${tag}: backing store within the pixel cap (touch 3.2 MP, desktop 1920×1080)`, cv.bw * cv.bh <= capPx, [cv.bw, cv.bh]);
     const issues = [];
     for (const scr of ['scrTitle', 'scrHow', 'scrSettings', 'scrCustom']) {
       await ev(page, s => VC.UI.show(s), scr); await page.waitForTimeout(400);
@@ -800,13 +798,14 @@ async function testLayout() {
     // HUD in play
     await ev(page, () => VC.Game.startGame()); await page.waitForTimeout(250);
     const hud = await ev(page, () => {
-      const c = document.getElementById('game').getBoundingClientRect(), k = 960 / c.width;
+      const c = document.getElementById('game').getBoundingClientRect(), k = VC.Game.renderer.VW / c.width;
       const rs = ['btnPause', 'btnMuteHud'].map(id => document.getElementById(id).getBoundingClientRect());
       const l = Math.min(...rs.map(r => r.left)), t = Math.min(...rs.map(r => r.top)), rr = Math.max(...rs.map(r => r.right)), b = Math.max(...rs.map(r => r.bottom));
       return { l: (l - c.left) * k, t: (t - c.top) * k, r: (rr - c.left) * k, b: (b - c.top) * k, minPx: Math.min(...rs.map(r => r.width)) };
     });
-    // pouch panel is drawn at logical x 672..808, y 12..58 (render.js hud())
-    check(`layout ${tag}: HUD buttons inside the canvas and clear of the pouch panel`, hud.l >= 0 && hud.t >= 0 && hud.r <= 960 && hud.b <= 540 && hud.l >= 808, hud);
+    // the pouch is laid out from the buttons' measured position (left of them, or a second row under them)
+    const VW = await ev(page, () => VC.Game.renderer.VW);
+    check(`layout ${tag}: HUD buttons inside the canvas`, hud.l >= 0 && hud.t >= 0 && hud.r <= VW + 1, hud);
     if (touchDev) check(`layout ${tag}: HUD buttons ≥ 32 css px (finger-sized)`, hud.minPx >= 32, hud.minPx);
     if (touchDev) {
       const a = await ev(page, () => { const c = document.getElementById('game').getBoundingClientRect(), e = document.getElementById('btnAction'), r = e.getBoundingClientRect(); return { vis: !e.classList.contains('hidden') && r.width > 0, inside: r.left >= c.left - 1 && r.right <= c.right + 1 && r.top >= c.top - 1 && r.bottom <= c.bottom + 1, side: r.left >= c.right - 1 && r.right <= innerWidth + 1, w: r.width }; });

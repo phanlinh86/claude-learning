@@ -1,0 +1,16 @@
+{
+  "name": "Puff's Volcano Catch",
+  "short_name": "Volcano Catch",
+  "description": "Catch the coins a sleepy island volcano burps up, build your combo, dodge the sizzly rocks!",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#145a72",
+  "theme_color": "#1f9fa0",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

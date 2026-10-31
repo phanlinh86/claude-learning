@@ -196,9 +196,46 @@ body:not(.touch) .touch-only{display:none}
   #scrCustom .small{display:none}
   .panel{padding:calc(var(--u)*1.4) calc(var(--u)*2.4)}
 }
-/* portrait phone: ask to turn it sideways */
-#rotate{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;
-  background:#145a72;color:#fff;font-family:var(--font);font-weight:900;font-size:24px;text-align:center;padding:24px}
-#rotate .ph{font-size:64px;animation:turn 1.6s ease-in-out infinite}
-@keyframes turn{0%,30%{transform:rotate(0)}60%,100%{transform:rotate(90deg)}}
-@media (orientation:portrait) and (max-width:820px){ body.touch #rotate{display:flex} }
+/* ---------- mobile (iPhone / iPad): full-screen canvas, safe areas, portrait ---------- */
+html,body{overscroll-behavior:none;touch-action:none;-webkit-touch-callout:none;-webkit-text-size-adjust:100%}
+#stage{display:block;height:100dvh}
+canvas#game{position:absolute;left:0;top:0}
+#safeProbe{position:absolute;visibility:hidden;pointer-events:none;inset:0;
+  padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+.screen{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+.panel{max-width:calc(100vw - 16px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px));
+  max-height:calc(100dvh - 16px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));-webkit-overflow-scrolling:touch}
+button{touch-action:manipulation}
+img,svg,canvas{-webkit-user-drag:none}
+input,textarea{-webkit-user-select:text;user-select:text}
+/* portrait: the game is 720 logical px wide, so size the menus from the width instead of a 16:9 box */
+@media (orientation:portrait){
+  :root{--u:min(1.55vw, 1.05vh)}
+  .logo{font-size:calc(var(--u)*9)}
+  .menu .row{flex-wrap:wrap;justify-content:center}
+  .panel.wide,.panel.xwide{width:auto}
+  .how-grid{grid-template-columns:1fr !important}
+  .slot-grid{grid-template-columns:repeat(6,minmax(0,1fr)) !important}
+  .slot{grid-column:span 2 !important}
+  .slot:nth-child(n+4){grid-column:span 3 !important}
+}
+
+/* fingers: every menu button at least 44 px tall on touch screens (Apple HIG) */
+@media (pointer:coarse){
+  .btn{min-height:44px}
+  .btn-big{min-height:52px}
+  .seg button,.slot .btn,.btn-tiny{min-height:40px}
+}
+/* short landscape phones with finger-sized buttons: compact Change Pictures + title */
+@media (max-height:430px){
+  .slot .tag{display:none}
+  .slot .prev{height:calc(var(--u)*4.6)}
+  .slot{gap:calc(var(--u)*.3);padding:calc(var(--u)*.5)}
+  .slot h3{font-size:calc(var(--u)*1.4)}
+  #scrCustom .panel h2{font-size:calc(var(--u)*2.8)}
+  #scrCustom .menu{margin-top:calc(var(--u)*.5)}
+  #scrCustom .menu .btn{min-height:40px;padding-top:0;padding-bottom:0}
+  .title-wrap{margin-top:0}
+  .title-icon{width:calc(var(--u)*7);height:calc(var(--u)*7)}
+  .logo{font-size:calc(var(--u)*7)}
+}

@@ -42,10 +42,19 @@
       this.applyMute();
       return true;
     },
+    /* Call inside a user gesture. iOS Safari only starts audio from a gesture: resume the context AND start one
+     * silent sample in the same touchend/click (also wakes it after an interruption, e.g. a phone call). */
     unlock() {
       if (!this.ensure()) return;
-      if (this.ctx.state === 'suspended') this.ctx.resume();
+      const c = this.ctx;
+      if (c.state !== 'running' && !this._hidden) c.resume().catch(() => {});
+      if (!this._silentDone || c.state !== 'running') {
+        try { const b = c.createBuffer(1, 1, 22050), s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); this._silentDone = true; } catch (e) {}
+      }
     },
+    /* Page hidden (home button, app switch, lock): stop the audio clock so nothing plays in the background. */
+    suspend() { this._hidden = true; if (this.ctx && this.ctx.state === 'running') this.ctx.suspend().catch(() => {}); },
+    resume() { this._hidden = false; if (this.ctx && this.ctx.state !== 'running') this.ctx.resume().catch(() => {}); },
     applyMute() {
       if (!this.ctx) return;
       const t = this.ctx.currentTime;
