@@ -101,3 +101,17 @@ URL `?speed=N&bot=1&skill=S&autostart=1&autorestart=1&seed=N&mute=1&debug=1&leve
 
 ## 7. Performance rules (from day one)
 Pixel-exact full-screen layer blits, render interpolation, pre-warm the next zone in idle time, backing store capped at 1920×1080 + adaptive quality + debounced resize, cached gradients, no per-frame allocations in hot loops where easy.
+
+## 8. Mobile (v1.1, iPhone / iPad)
+Same platform layer as the education games (`.claude/skills/build-education-game/SKILL.md`, "Mobile translation"), adapted to a side-view scene:
+- **Layout:** the canvas fills the screen. Logical size: landscape ≥ 16:9 is 540 tall and up to 1280 wide; otherwise landscape is 960 wide and up to 960 tall; portrait is 560 wide (720 when aspect ≥ 0.6) and up to 1600 tall. Beyond these limits it letter-boxes.
+- **Scene placement:** the 960×540 scene sits at `(SX, SY) = ((VW-960)/2, VH-540)`.
+  - The sky layer is extended into one cached device-pixel canvas per zone: averaged side columns, an averaged top strip, and stars at night.
+  - Cloud strips tile across the full width, and stack in portrait.
+  - The ground is mirrored to the sides.
+  - A custom background in portrait fits the sky band and fades out at its bottom edge.
+- **Safe areas:** read from `#safeProbe` (`env(safe-area-inset-*)`). The HUD is inset; `World.setPlayRange(xMin, xMax)` is called with the visible shore minus 50 px, and stops short of the corner 💧 button. The 💧 button sits in the sky when `SY ≥ 150`, otherwise bottom-right, and is ≥ 66 CSS px.
+- **Input:** Pointer Events. One steering finger with pointer capture. A second finger triggers Cool Rain. UI buttons fire on touch `pointerup`, and the ghost click that follows is swallowed. Rotating or resizing releases the steering finger.
+- **iOS:** the audio unlock (resume + a silent buffer) happens in the first `touchend`. `visibilitychange` pauses the game and suspends audio. Kid-proofing blocks gesture zoom, double-tap zoom, `touchmove` (except inside panels) and long-press callouts.
+- **Home screen:** `manifest.webmanifest` plus 180/192/512 PNG icons from `tools/render_mobile_icons.js`.
+- **Backing store:** capped at 3.2 MP on touch devices and 1920×1080 on desktop.

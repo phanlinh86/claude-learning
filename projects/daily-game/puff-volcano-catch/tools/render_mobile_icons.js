@@ -10,8 +10,8 @@ const fs = require('fs'), path = require('path');
   const b = await chromium.launch(); const p = await b.newPage();
   for (const [name, s] of [['apple-touch-icon.png', 180], ['icon-192.png', 192], ['icon-512.png', 512]]) {
     await p.setViewportSize({ width: s, height: s });
-    const k = name === 'icon-512.png' ? 0.86 : 0.96;   // the maskable 512 keeps the badge inside the safe zone
-    await p.setContent(`<html><body style="margin:0;width:${s}px;height:${s}px;display:grid;place-items:center;
+    const k = name === 'icon-512.png' ? 0.92 : 1.16;   // home-screen icons: full-bleed (iOS rounds the corners); the maskable 512 keeps the badge in the safe zone
+    await p.setContent(`<html><body style="margin:0;width:${s}px;height:${s}px;display:grid;place-items:center;overflow:hidden;
       background:radial-gradient(circle at 50% 38%,#bff6ef,#4fd1c5 55%,#1f9fa0)">
       <img src="data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}" style="width:${s * k}px;height:${s * k}px;display:block"></body></html>`);
     await p.waitForTimeout(80);

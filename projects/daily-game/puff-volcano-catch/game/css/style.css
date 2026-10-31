@@ -239,3 +239,23 @@ input,textarea{-webkit-user-select:text;user-select:text}
   .title-icon{width:calc(var(--u)*7);height:calc(var(--u)*7)}
   .logo{font-size:calc(var(--u)*7)}
 }
+.panel{overscroll-behavior:contain}
+body.touch .btn:focus-visible,body.touch .btn:focus{outline:none}
+/* readable menu text on phones */
+@media (pointer:coarse){
+  .how p{font-size:max(14px, calc(var(--u)*1.55))}
+  .btn-tiny,.slot .btn{font-size:max(14px, calc(var(--u)*1.5))}
+  .seg button{font-size:max(14px, calc(var(--u)*1.6));min-width:56px}
+  .slot h3{font-size:max(13px, calc(var(--u)*1.6))}
+  .slot .tag{font-size:11px}
+  .slot .shape button{font-size:12px;min-height:32px}
+  .set{font-size:max(15px, calc(var(--u)*1.8))}
+  .small{font-size:max(13px, calc(var(--u)*1.55))}
+}
+/* portrait phones: the three picture cards are narrow — let their buttons wrap instead of overflowing */
+@media (orientation:portrait){
+  .slot{min-width:0}
+  .slot .btns,.slot .shape{flex-wrap:wrap;justify-content:center;max-width:100%}
+  .slot .btn{padding-left:10px;padding-right:10px;min-width:0}
+  .slot .shape button{padding:2px 6px}
+}

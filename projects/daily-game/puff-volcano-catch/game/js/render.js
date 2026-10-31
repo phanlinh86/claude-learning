@@ -55,7 +55,7 @@
       let VW, VH;
       if (ar >= 16 / 9) { VH = H; VW = Math.min(1280, Math.round(H * ar)); }
       else if (ar >= 1) { VW = W; VH = Math.min(960, Math.round(W / ar)); }
-      else { VW = 560; VH = Math.min(1600, Math.round(560 / ar)); }
+      else { VW = ar >= 0.6 ? 720 : 560; VH = Math.min(1600, Math.round(VW / ar)); }   // tablets see more island
       const s = Math.min(vw / VW, vh / VH), cssW = VW * s, cssH = VH * s, left = (vw - cssW) / 2, top = (vh - cssH) / 2;
       const sa = insetsCss || { top: 0, right: 0, bottom: 0, left: 0 };
       const ins = { top: Math.max(0, sa.top - top) / s, right: Math.max(0, sa.right - left) / s, bottom: Math.max(0, sa.bottom - top) / s, left: Math.max(0, sa.left - left) / s };
@@ -219,11 +219,42 @@
     customBg(slot, alpha) {
       const c = VC.Assets.custom[slot]; if (!c) return false;
       const g = this.ctx, VW = this.VW, VH = this.VH, k = Math.max(VW / c.width, VH / c.height), dw = c.width * k, dh = c.height * k;
+      if (VH > VW * 1.2) return this.customBgTall(slot, c, alpha);
       this.screenOn();
       g.globalAlpha = alpha;
       g.drawImage(VC.Assets.sprite('custom:' + slot, dw, dh), (VW - dw) / 2, (VH - dh) / 2, dw, dh);
       g.fillStyle = 'rgba(255,248,240,0.25)'; g.fillRect(0, 0, VW, VH);   // soften so Puff and coins stay readable
       g.globalAlpha = 1;
+      this.sceneOn();
+      return true;
+    }
+    /* Tall portrait: a photo stretched over the whole 560×1200 screen would be cropped ~2.6×. Instead fit it to
+     * the sky band (top of the screen down to just under the horizon), top-aligned, and fade its lower edge into
+     * the zone's own sky; built once per picture/size into a device-pixel canvas. */
+    customBgTall(slot, c, alpha) {
+      const zone = VC.Assets.SLOTS.find(q => q.id === slot), z = zone ? zone.season : 0;
+      const key = 'c|' + slot + '|' + (VC.Assets._ver || 0) + '|' + this.VW + 'x' + this.VH + '|' + this.px.toFixed(3) + '|' + c.width;
+      let out = this._ext.get(key);
+      if (!out) {
+        const base = this.skyExt(z);
+        out = document.createElement('canvas'); out.width = Math.round(this.VW * this.px); out.height = Math.round(this.VH * this.px);
+        const o = out.getContext('2d');
+        if (base) o.drawImage(base, 0, 0);
+        const bh = (this.SY + 330) * this.px, k = Math.max(out.width / c.width, bh / c.height), dw = c.width * k, dh = c.height * k;
+        const t = document.createElement('canvas'); t.width = out.width; t.height = Math.ceil(bh);
+        const tg = t.getContext('2d'); tg.imageSmoothingQuality = 'high';
+        tg.drawImage(c, (t.width - dw) / 2, 0, dw, dh);
+        tg.globalCompositeOperation = 'destination-in';
+        const gr = tg.createLinearGradient(0, bh - 80 * this.px, 0, bh); gr.addColorStop(0, 'rgba(0,0,0,1)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+        tg.fillStyle = gr; tg.fillRect(0, 0, t.width, t.height);
+        o.drawImage(t, 0, 0);
+        o.fillStyle = 'rgba(255,248,240,0.22)'; o.fillRect(0, 0, out.width, bh);
+        if (this._ext.size > 4) this._ext.delete(this._ext.keys().next().value);
+        this._ext.set(key, out);
+      }
+      this.screenOn();
+      const g = this.ctx; g.setTransform(1, 0, 0, 1, this._shx, this._shy);
+      if (alpha < 1) g.globalAlpha = alpha; g.drawImage(out, 0, 0); g.globalAlpha = 1;
       this.sceneOn();
       return true;
     }
@@ -240,14 +271,20 @@
       const g = c.getContext('2d'), dx = this._sxd, dy = this._syd, sw = spr.width, sh = spr.height;
       g.imageSmoothingEnabled = true;
       g.drawImage(spr, dx, dy);
-      if (dx > 0) { g.drawImage(spr, 0, 0, 2, sh, 0, dy, dx + 1, sh); g.drawImage(spr, sw - 2, 0, 2, sh, dx + sw - 1, dy, c.width - dx - sw + 1, sh); }
+      if (dx > 0) {
+        // side strips: each edge's outer 96 px averaged into one column (keeps the sky→sea gradient, while a
+        // single star or wave pixel can no longer smear into a horizontal streak)
+        const col = (sx0) => { const t = document.createElement('canvas'); t.width = 1; t.height = sh; const tg = t.getContext('2d'); tg.imageSmoothingQuality = 'high'; tg.drawImage(spr, sx0, 0, Math.round(96 * this.px), sh, 0, 0, 1, sh); return t; };
+        g.drawImage(col(0), 0, 0, 1, sh, 0, dy, dx + 1, sh);
+        g.drawImage(col(sw - Math.round(96 * this.px)), 0, 0, 1, sh, dx + sw - 1, dy, c.width - dx - sw + 1, sh);
+      }
       if (dy > 0) {
         // average the sky's top rows down to a 16-px strip first, so a star or cloud pixel in that row can't
         // stretch into a vertical streak
-        const t = document.createElement('canvas'); t.width = 16; t.height = 1;
+        const t = document.createElement('canvas'); t.width = 1; t.height = 1;
         const tg = t.getContext('2d'); tg.imageSmoothingEnabled = true; tg.imageSmoothingQuality = 'high';
-        tg.drawImage(c, 0, dy + 1, c.width, Math.max(2, Math.round(6 * this.px)), 0, 0, 16, 1);
-        g.drawImage(t, 0, 0, 16, 1, 0, 0, c.width, dy + 1);
+        tg.drawImage(c, 0, dy + 1, c.width, Math.max(2, Math.round(6 * this.px)), 0, 0, 1, 1);
+        g.drawImage(t, 0, 0, 1, 1, 0, 0, c.width, dy + 1);
         if (z === 3) {   // night: stars in the extra sky (the weather only twinkles stars inside the scene)
           let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
           const nStars = Math.round(this.VW * this.SY / 9000);
@@ -272,13 +309,20 @@
         else { g.fillStyle = '#8fd0f2'; g.fillRect(0, 0, this.VW, this.VH); }
         this.sceneOn();
         // drifting cloud strip, tiled across the visible width; portrait gets fainter strips higher up the sky
-        for (let k = 0; ; k++) {
-          const y = 20 - 330 * k;
+        // (tiles step by the sprite's own device-pixel width so neighbours never overlap or gap by a pixel)
+        const cs = VC.Assets.sprite(n + '_clouds', W, 220);
+        if (cs) for (let k = 0; k < 8; k++) {
+          const y = 20 - 230 * k;
           if (k > 0 && y < -this.SY - 120) break;
-          const off = -((this.time * (6 - k) + 377 * k) % W), a = alpha * (k === 0 ? 1 : Math.max(0.35, 0.8 - 0.2 * k));
-          for (let x = off - W * Math.ceil(Math.max(0, this.SX) / W + 1); x < this.VW - this.SX; x += W) if (x + W > -this.SX) this.layer(n + '_clouds', a, x, y, W, 220);
-          if (k > 6) break;
+          const step = cs.width, a = alpha * (k === 0 ? 1 : Math.max(0.5, 0.85 - 0.12 * k));
+          const offD = -Math.round(((this.time * Math.max(2, 6 - k) + 377 * k) * this.px) % step);
+          const left = -this._sxd, right = this.canvas.width - this._sxd;
+          let xd = offD - step * Math.ceil(Math.max(0, offD - left) / step);
+          g.globalAlpha = a;
+          for (; xd < right; xd += step) { g.setTransform(1, 0, 0, 1, this._ox + xd, this._oy + Math.round(y * this.px)); g.drawImage(cs, 0, 0); }
+          g.globalAlpha = 1;
         }
+        g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
       }
       this.layer(n + '_volcano', alpha, sh ? Math.sin(this.time * 70) * sh : 0, 0);
     }
@@ -367,7 +411,7 @@
       if (this.flash > 0) { g.fillStyle = `rgba(255,255,255,${(this.flash * 0.55).toFixed(3)})`; g.fillRect(0, 0, VW, VH); }
       if (this.redFlash > 0) { g.fillStyle = `rgba(255,120,90,${(this.redFlash * 0.22).toFixed(3)})`; g.fillRect(0, 0, VW, VH); }
       if (w && w.state === 'dead') { g.fillStyle = 'rgba(40,20,60,0.22)'; g.fillRect(0, 0, VW, VH); }
-      if (w && (mode === 'playing' || mode === 'paused')) this.hud();
+      if (w && mode === 'playing') this.hud();   // paused: the panel covers it on small screens
       if (lerped) this.uninterp();
     }
 
@@ -438,8 +482,9 @@
       if (it.state === 'steam') a *= 0.6;
       if (a <= 0.01) return;
       g.save(); g.globalAlpha = a; g.translate(it.x, it.y);
+      if (this.cssScale < 0.8) g.scale(1.2, 1.2);   // phones: coins and rocks drawn 20 % bigger (hitboxes unchanged)
       if (it.kind === 'coin') {
-        let sx = Math.cos(it.spin || 0); sx = Math.abs(sx) < 0.14 ? 0.14 * (sx < 0 ? -1 : 1) : sx;
+        let sx = Math.cos(it.spin || 0); sx = Math.abs(sx) < 0.3 ? 0.3 * (sx < 0 ? -1 : 1) : sx;
         if (it.state === 'caught' || it.state === 'ground') sx = it.state === 'ground' ? 1 : sx;
         g.scale(sx, 1);
       } else g.rotate(it.rot || 0);
@@ -598,11 +643,12 @@
       const th = (w.cfg && w.cfg.multThresholds) || [0, 5, 12, 22, 35], m = w.mult || 1;
       const lo = th[m - 1] || 0, hi = th[m], frac = hi ? clamp(((w.combo || 0) - lo) / (hi - lo), 0, 1) : 1;
       const mp = 1 + 0.3 * (this._multPop || 0);
-      g.fillStyle = 'rgba(40,25,70,0.55)'; this.roundRect(-80, 62, 160, 22, 11); g.fill();
+      g.fillStyle = 'rgba(40,25,70,0.55)'; this.roundRect(-90, 61, 180, 24, 12); g.fill();
+      g.strokeStyle = 'rgba(255,255,255,0.35)'; g.lineWidth = 1.5; g.stroke();
       g.fillStyle = m >= 5 ? '#ffd84a' : ['#bfe6ff', '#9fe3ff', '#8ff0b0', '#ffc46b', '#ffd84a'][m - 1];
       if (frac > 0) { this.roundRect(-78, 64, Math.max(18, 156 * frac), 18, 9); g.globalAlpha = 0.55; g.fill(); g.globalAlpha = 1; }
-      this.text('combo ' + (w.combo || 0), -72, 73, 16, '#ffffff', '#3a2550', 'left', 4);
-      g.save(); g.translate(54, 73); g.scale(mp, mp); this.text('×' + m, 0, 0, 17, m >= 2 ? '#ffe14d' : '#ffffff', '#3a2550', 'center', 4); g.restore();
+      this.text('combo ' + (w.combo || 0), -72, 73, this.cssScale < 0.8 ? 19 : 16, '#ffffff', '#3a2550', 'left', 4);
+      g.save(); g.translate(54, 73); g.scale(mp, mp); this.text('×' + m, 0, 0, this.cssScale < 0.8 ? 20 : 17, m >= 2 ? '#ffe14d' : '#ffffff', '#3a2550', 'center', 4); g.restore();
       g.restore();
       // coin pouch: left of the pause/sound buttons, or on a second row under them when that would hit the score
       const btn = this._hudBtn || { l: VW - I.right - 130, b: T + 64 };
@@ -616,14 +662,14 @@
       g.fillStyle = 'rgba(122,67,22,0.18)'; this.roundRect(jx + 44, jy + 34, 74, 8, 4); g.fill();
       if (pf > 0) { g.fillStyle = '#f5b21c'; this.roundRect(jx + 44, jy + 34, Math.max(8, 74 * pf), 8, 4); g.fill(); }
       const zi = ZONE_INFO[w.zone] || ZONE_INFO[0];
-      this.text(zi.name + (w.lap > 0 ? ' · Lap ' + (w.lap + 1) : ''), jx + 60, jy + 62, 16, '#ffffff', '#3a2550', 'center', 4);
+      this.text(zi.name + (w.lap > 0 ? ' · Lap ' + (w.lap + 1) : ''), jx + 60, jy + 62, this.cssScale < 0.8 ? 19 : 16, '#ffffff', '#3a2550', 'center', 4);
     }
 
     drawBanner() {
       const g = this.ctx, b = this.banner, bi = ZONE_INFO[b.s] || ZONE_INFO[0], t = b.t;
       let x;
       if (t < 0.4) x = lerp(-W, 0, easeOutBack(t / 0.4)); else if (t < 1.25) x = 0; else x = lerp(0, W, Math.pow((t - 1.25) / 0.35, 2));
-      g.save(); g.translate(x, 0);
+      g.save(); g.translate(x, this.SY >= 150 ? -Math.min(this.SY * 0.5, 260) : 0);   // portrait: above the crater
       g.fillStyle = bi.color; g.globalAlpha = 0.94;
       g.beginPath(); g.moveTo(W / 2 - 310, 112); g.lineTo(W / 2 + 310, 104); g.lineTo(W / 2 + 328, 206); g.lineTo(W / 2 - 292, 214); g.closePath(); g.fill();
       g.globalAlpha = 1;

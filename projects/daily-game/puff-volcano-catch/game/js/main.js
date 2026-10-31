@@ -5,7 +5,8 @@
   const params = new URLSearchParams(location.search);
   const num = (k, d) => { const v = parseFloat(params.get(k)); return isFinite(v) ? v : d; };
   const ZONES = ['Sunny Beach', 'Jungle Slopes', 'Ash Fields', 'Crater Rim'];
-  const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  // phone / tablet (coarse pointer); a Windows touch laptop with a mouse keeps the desktop layout
+  const isTouch = window.matchMedia ? window.matchMedia('(pointer:coarse)').matches : (('ontouchstart' in window) || navigator.maxTouchPoints > 0);
 
   function difficultyOverrides(d) { return Object.assign({}, (VC.DIFFICULTY && VC.DIFFICULTY[d]) || {}); }
 
@@ -57,6 +58,8 @@
       return { top: parseFloat(cs.paddingTop) || 0, right: parseFloat(cs.paddingRight) || 0, bottom: parseFloat(cs.paddingBottom) || 0, left: parseFloat(cs.paddingLeft) || 0 };
     },
     relayout() {
+      if (this._lastW != null && this._lastW !== window.innerWidth) this.releasePointer();   // Split View / Stage Manager
+      this._lastW = window.innerWidth;
       this.renderer.resize(this.readInsets());
       if (this.world) this.applyPlayRange(this.world);
       if (this.world) { const c = this.world.cfg; if (this.renderer.pointer) this.renderer.pointer[0] = Math.max(c.xMin, Math.min(c.xMax, this.renderer.pointer[0])); }
@@ -251,14 +254,13 @@
      * scroll or pull-to-refresh. Scrollable panels opt back in with the .scroll class. */
     kidProof() {
       const NP = { passive: false }, prevent = e => { if (e.cancelable) e.preventDefault(); };
-      const formy = t => t && t.closest && t.closest('input, textarea, select, .scroll');
+      const formy = t => t && t.closest && t.closest('input, textarea, select, .scroll, .panel');   // panels may scroll
       ['gesturestart', 'gesturechange', 'gestureend'].forEach(t => document.addEventListener(t, prevent, NP));
-      document.addEventListener('touchstart', e => { if (e.touches && e.touches.length > 1 && !(e.target.closest && e.target.closest('#stage'))) prevent(e); }, NP);
       document.addEventListener('touchmove', e => { if (!formy(e.target)) prevent(e); }, NP);
       let lastEnd = 0;
       document.addEventListener('touchend', e => {
         const t = Date.now();
-        if (t - lastEnd < 320 && !(e.target.closest && e.target.closest('button, a, input, label, select, .scroll'))) prevent(e);
+        if (t - lastEnd < 320 && !(e.target.closest && e.target.closest('button, a, input, label, select, .scroll, .prev, .slot'))) prevent(e);
         lastEnd = t;
       }, NP);
       document.addEventListener('dblclick', e => { if (!formy(e.target)) prevent(e); }, NP);

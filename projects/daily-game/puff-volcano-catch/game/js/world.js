@@ -273,6 +273,15 @@
     c.targetMin = xMin + 20; c.targetMax = xMax - 20;
     var p = this.puff;
     if (p) { if (p.x < xMin) { p.x = xMin; p.vx = 0; } else if (p.x > xMax) { p.x = xMax; p.vx = 0; } p._px = p.x; }
+    // re-aim coins/rocks already in the air (rotation mid-flight): horizontal motion is linear, so changing vx
+    // moves the landing spot into the new range and the item still crosses the catch line on time
+    var items = this.items || [];
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i];
+      if (it.state !== 'fly' || !(it.tCross > this.time) || it.tx == null) continue;
+      var nt = Math.max(c.targetMin, Math.min(c.targetMax, it.tx));
+      if (nt !== it.tx) { it.vx = (nt - it.x) / (it.tCross - this.time); it.tx = nt; }
+    }
     return this;
   };
 
