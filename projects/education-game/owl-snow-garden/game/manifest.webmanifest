@@ -1,0 +1,16 @@
+{
+  "name": "Owlet's Snow Garden · Vườn Hoa Cú Tuyết",
+  "short_name": "Snow Garden",
+  "description": "Plant seeds and grow flowers with Lumi the snowy owlet. English & Vietnamese.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#F3B5C9",
+  "theme_color": "#F3B5C9",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
