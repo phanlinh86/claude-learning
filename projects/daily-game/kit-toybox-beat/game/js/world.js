@@ -73,9 +73,11 @@
 
     // --- judging windows (s, |tap − note.time|)
     perfectWin: 0.075,
-    goodWin: 0.15,
-    earlyWin: 0.30,                // tap earlier than goodWin but within this → the note is missed early (anti-spam)
+    goodWin: 0.17,                 // playtest: 0.15 → 0.17 (kid model clears Normal Dawn 53 % → 98 %; 0.18 lets chord spam through)
+    earlyWin: 0.34,                // tap earlier than goodWin but within this → the note is missed early (anti-spam)
     oneButton: false,              // every tap is lane −1 ("any")
+    wrongLaneMiss: true,           // a lane tap that hits nothing while the OTHER lane has a note inside goodWin misses that note
+                                   //  (Kit flew to the wrong track). Kills the 'tap both lanes on every beat' exploit.
 
     // --- groove (rocket fuel 0..1)
     grooveStart: 0.6,
@@ -83,7 +85,7 @@
     goodGain: 0.02,
     missCost: 0.08,                // also for early misses
     poofCost: 0.08,
-    firstLevelCostMul: 0.75,       // × miss/poof cost on level 1 (lap 0): very winnable for a 6-year-old
+    firstLevelCostMul: 0.5,        // × miss/poof cost on level 1 (lap 0): very winnable for a 6-year-old
     grooveFloor: 0,                // groove can't drop below this…
     grooveFloorLevels: 0,          // …on level indices < this (Easy: 1 → level 1 can't be lost)
     grooveLow: 0.25,               // 'groovelow' when crossing below
@@ -96,8 +98,9 @@
     clearBonus: 1000,              // × groove × (1 + lap)
 
     // --- Kit
-    kitMoveTime: 0.09,             // s, critically damped spring reaches ≈ 94 % of a lane change in this time
+    kitMoveTime: 0.065,            // s (visual QA: 0.09 arrived ~75 ms after the catch), critically damped spring reaches ≈ 94 % of a lane change in this time
     reachTime: 0.18,               // s of 'reach' frame after a tap
+    reachFirst: 0.08,              // s: 'reach' always shows first, even on a perfect (then 'happy')
     happyTime: 0.35,               // s of 'happy' frame after a perfect
     dizzyTime: 0.9                 // s of 'dizzy' frame after a poof (frames only, input still works)
   };
@@ -106,10 +109,10 @@
   var DIFFICULTY = {
     easy: {
       name: 'easy', oneButton: true,
-      perfectWin: 0.10, goodWin: 0.22, earlyWin: 0.30,
+      perfectWin: 0.10, goodWin: 0.22, earlyWin: 0.34, wrongLaneMiss: false,
       missCost: 0.04, poofCost: 0.03, firstLevelCostMul: 1,
       grooveFloor: 0.05, grooveFloorLevels: 1,
-      minGap: 0.5, eighthsFrom: 99,   // DESIGN said 0.55; 0.5 keeps every quarter of Night (112 BPM = 0.536 s) maxDensity: 4,
+      minGap: 0.5, eighthsFrom: 99, maxDensity: 4,   // DESIGN said 0.55; 0.5 keeps every quarter of Night (112 BPM = 0.536 s)
       densStart: [1.2, 1.6, 2.0, 2.4], densRamp: 0.8, densLap: 0.3,
       approach: 2.2, approachMin: 1.4
     },
@@ -117,7 +120,7 @@
     hard: {
       name: 'hard',
       perfectWin: 0.055, goodWin: 0.11, earlyWin: 0.28,
-      missCost: 0.11, poofCost: 0.10, firstLevelCostMul: 1,
+      missCost: 0.11, poofCost: 0.10, firstLevelCostMul: 1, pillowClear: 1.5,
       minGap: 0.18, eighthsFrom: 0, crossEighths: true,
       densStart: [2.2, 2.8, 3.2, 3.6], densRamp: 1.4, densLap: 0.4,
       approach: 1.6, approachMin: 0.95
@@ -191,6 +194,7 @@
     var c = this.cfg;
     this.time = 0;
     this._acc = 0;
+    this.deadT = -1;                 // s since the groove ran out (−1 = alive); renderer: rocket sputter / sink
     this.score = 0;
     this.groove = c.grooveStart;
     this.combo = 0; this.maxCombo = 0; this.mult = 1;
@@ -268,6 +272,13 @@
           pat = pickN(n);
           laneA = rng.chance(c.laneKeep) ? prevA : 1 - prevA;
         }
+      }
+      // no 0.25 s cross-lane jump: if the previous bar ended on beat 3.5 and this bar starts on its downbeat,
+      // keep that first coin in the same lane (unless fast cross-lane eighths are allowed, i.e. Hard)
+      if (!allowX && prevPat && bar > 0 && prevPat.p[prevPat.p.length - 1][0] === 3.5 && pat.p[0][0] === 0) {
+        var prevLast = prevPat.p[prevPat.p.length - 1][1] === 'A' ? prevA : 1 - prevA;
+        var first = pat.p[0][1] === 'A' ? laneA : 1 - laneA;
+        if (first !== prevLast) laneA = 1 - laneA;
       }
       prevPat = pat; prevA = laneA;
       for (var j = 0; j < pat.p.length; j++) {
@@ -409,6 +420,14 @@
         return this._miss(n, true, t);
       }
     }
+    // wrong track (playtest §3b): the other lane has a note inside the good window → it is missed now
+    if (c.wrongLaneMiss && lane >= 0) {
+      for (i = this._first; i < notes.length; i++) {
+        n = notes[i];
+        if (n.time - t > c.goodWin + 1e-9) break;
+        if (n.state === 'live' && n.lane !== lane && Math.abs(t - n.time) <= c.goodWin + 1e-9) return this._miss(n, false, t);
+      }
+    }
     var e = { type: 'empty', lane: lane };
     this._emit(e);
     return e;
@@ -481,6 +500,7 @@
   World.prototype._setDead = function () {
     this.groove = 0;
     this.state = 'dead';
+    this.deadT = 0;
     this.kit.dizzy = Math.max(this.kit.dizzy, 1e9);   // dizzy for good (renderer: rocket sputters)
     this._emit({ type: 'dead', score: this.score });
   };
@@ -502,6 +522,7 @@
     // external `boss.next` poke (main.js debug bossNow()) → real visit
     if (b.state === 'away' && b.next !== this._bossNextOut && b.next < 0.5) this.bossNow();
     this.time += h;
+    if (this.deadT >= 0) this.deadT += h;
     k.reach += h;
     if (k.dizzy > 0) k.dizzy = Math.max(0, k.dizzy - h);
     if (k.happy > 0) k.happy = Math.max(0, k.happy - h);
@@ -560,7 +581,7 @@
     k.pos = k.lane + (d + a * h) * e;
     k.vel = (v - om * a * h) * e;
     if (k.pos < 0) { k.pos = 0; k.vel = 0; } else if (k.pos > 1) { k.pos = 1; k.vel = 0; }
-    k.frame = k.dizzy > 0 ? 'dizzy' : k.happy > 0 ? 'happy' : k.reach < c.reachTime ? 'reach' : 'idle';
+    k.frame = k.dizzy > 0 ? 'dizzy' : k.reach < c.reachFirst ? 'reach' : k.happy > 0 ? 'happy' : k.reach < c.reachTime ? 'reach' : 'idle';
   };
 
   /* Baron Fluff: state machine from the visit schedule, smooth eased path, gentle bob on the beat. */

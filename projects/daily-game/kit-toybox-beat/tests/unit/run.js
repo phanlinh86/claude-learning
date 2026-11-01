@@ -70,8 +70,11 @@ test('tables: CONFIG, DIFFICULTY (easy one-button), LEVELS', () => {
   assert.ok(KB.DIFFICULTY.normal && KB.DIFFICULTY.hard);
   assert.deepStrictEqual(J(KB.LEVELS.map(l => l.key + l.bpm)), ['dawn84', 'noon96', 'sunset104', 'night112']);
   const n = mk('normal'), e = mk('easy'), h = mk('hard');
-  assert.strictEqual([n.cfg.perfectWin, n.cfg.goodWin, n.cfg.earlyWin].join(), '0.075,0.15,0.3');
-  assert.strictEqual([e.cfg.perfectWin, e.cfg.goodWin, e.cfg.earlyWin].join(), '0.1,0.22,0.3');
+  assert.strictEqual([n.cfg.perfectWin, n.cfg.goodWin, n.cfg.earlyWin].join(), '0.075,0.17,0.34');
+  assert.strictEqual(n.cfg.wrongLaneMiss, true); assert.strictEqual(new KB.World({ seed: 1, config: KB.DIFFICULTY.easy }).cfg.wrongLaneMiss, false);
+  assert.strictEqual(new KB.World({ seed: 1, config: KB.DIFFICULTY.easy }).cfg.maxDensity, 4, 'easy maxDensity applies');
+  assert.strictEqual(new KB.World({ seed: 1, config: KB.DIFFICULTY.hard }).cfg.pillowClear, 1.5);
+  assert.strictEqual([e.cfg.perfectWin, e.cfg.goodWin, e.cfg.earlyWin].join(), '0.1,0.22,0.34');
   assert.strictEqual([h.cfg.perfectWin, h.cfg.goodWin, h.cfg.earlyWin].join(), '0.055,0.11,0.28');
   near(n.approach, 1.8, 1e-9, 'normal approach at 84 BPM');
   assert.ok(e.approach > n.approach && h.approach < n.approach);
@@ -204,10 +207,20 @@ test('judging: perfect / good / early / empty / miss at exact offsets (normal, h
 });
 
 test('judging: lanes, earliest note first, one-button, timing offset', () => {
-  // wrong lane inside the good window → empty, no penalty (normal)
+  // wrong lane inside the good window → that note is missed now (wrongLaneMiss, normal)
   let w = custom('normal', [{ time: 2, lane: 0 }]);
   run(w, 1.9); let g = w.groove;
+  let wl = tapAt(w, 1, 2.05); assert.strictEqual(wl.type, 'miss'); assert.strictEqual(w.notes[0].state, 'miss'); assert.ok(w.groove < g);
+  // …but a wrong-lane tap with the other lane's note outside goodWin is still empty, no penalty
+  w = custom('normal', [{ time: 2, lane: 0 }]); run(w, 1.5); g = w.groove;
+  assert.strictEqual(tapAt(w, 1, 1.6).type, 'empty'); assert.strictEqual(w.groove, g); assert.strictEqual(w.notes[0].state, 'live');
+  // with wrongLaneMiss off: empty, no penalty
+  w = new KB.World({ seed: 1, config: { wrongLaneMiss: false } }); w = custom('normal', [{ time: 2, lane: 0 }]); w.cfg.wrongLaneMiss = false;
+  run(w, 1.9); g = w.groove;
   assert.strictEqual(tapAt(w, 1, 2).type, 'empty'); assert.strictEqual(w.groove, g);
+  // chord exploit (both lanes on the beat) only catches one and misses nothing extra when a note is there; the second tap is empty
+  w = custom('normal', [{ time: 2, lane: 1 }]); run(w, 1.9);
+  assert.strictEqual(tapAt(w, 0, 2).type, 'miss', 'upper tap on a lower coin = wrong track');
   // two notes in the window → the earliest
   w = custom('normal', [{ time: 2, lane: 0 }, { time: 2.25, lane: 0 }]);
   run(w, 1.9); let e = tapAt(w, 0, 2.12);
@@ -267,7 +280,7 @@ test('groove, combo, multiplier, score rules', () => {
   assert.strictEqual(hits[12].kind, 'gold'); assert.strictEqual(hits[12].points, 100 * 2 * 3);
   assert.strictEqual(hits[40].points, 400);
   assert.strictEqual(w.score, hits.reduce((s, h) => s + h.points, 0));
-  near(w.groove, Math.min(1, 0.3 + 44 * 0.035 + 0.02), 1e-9);
+  
   assert.strictEqual(w.groove, 1, 'groove capped at 1');
   // miss → combo / mult reset with combobreak
   w.notes.push({ id: 9999, lane: 0, kind: 'coin', pitch: 0, state: 'live', judge: null, err: 0, tDone: 0, time: w.songTime + 1, beat: 0 });
@@ -275,8 +288,8 @@ test('groove, combo, multiplier, score rules', () => {
   assert.ok(w.drainEvents().some(e => e.type === 'combobreak' && e.combo === 45), 'combobreak when combo ≥ 5');
   assert.strictEqual(w.combo, 0); assert.strictEqual(w.mult, 1);
   // costs: level 1 scaled ×0.75, others full; groovelow when crossing 0.25
-  const a = custom('normal', [{ time: 1 }, { time: 2 }, { time: 3 }]); a.level = 0; a.groove = 0.3;
-  run(a, 1.5); near(a.groove, 0.3 - 0.08 * 0.75, 1e-9);
+  const a = custom('normal', [{ time: 1 }, { time: 2 }, { time: 3 }]); a.level = 0; a.groove = 0.27;
+  run(a, 1.5); near(a.groove, 0.27 - 0.08 * a.cfg.firstLevelCostMul, 1e-9);
   assert.ok(a.drainEvents().some(e => e.type === 'groovelow'));
   const b = custom('normal', [{ time: 1 }]); b.level = 2; b.groove = 0.5;
   run(b, 1.5); near(b.groove, 0.42, 1e-9);
@@ -376,15 +389,31 @@ test('kit: lane easing quick, smooth, bounded (critically damped, no overshoot)'
     maxStep = Math.max(maxStep, v.kit.pos - p0);
     if (t90 < 0 && v.kit.pos >= 0.9) t90 = (i + 1) * H;
   }
-  assert.ok(t90 > 0.04 && t90 <= 0.1, 'reaches 90 % in ' + t90);
-  assert.ok(maxStep < 0.2, 'max step ' + maxStep);
+  assert.ok(t90 > 0.03 && t90 <= 0.08, 'reaches 90 % in ' + t90);
+  assert.ok(maxStep < 0.26, 'max step ' + maxStep);
   // frantic alternation stays in [0,1]
   for (let i = 0; i < 600; i++) { if (i % 3 === 0) v.tap(i % 2); v.update(H); assert.ok(v.kit.pos >= 0 && v.kit.pos <= 1); }
   // frames
   const f = custom('normal', [{ time: 1, lane: 0 }]); run(f, 0.98); tapAt(f, 0, 1);
-  f.update(H); assert.strictEqual(f.kit.frame, 'happy');
+  f.update(H); assert.strictEqual(f.kit.frame, 'reach', 'reach shows first even on a perfect');
+  run(f, 0.1); assert.strictEqual(f.kit.frame, 'happy');
   run(f, 0.4); assert.strictEqual(f.kit.frame, 'idle');
   f.tap(1); f.update(H); assert.strictEqual(f.kit.frame, 'reach');
+});
+
+test('chart: no 0.25 s cross-lane jump after a bar ending on beat 3.5 (normal/easy); deadT', () => {
+  let jumps = 0, checked = 0;
+  for (const d of ['normal', 'easy']) for (let seed = 1; seed <= 60; seed++) for (const L of [1, 3, 7]) {
+    const w = new KB.World({ seed, config: KB.DIFFICULTY[d] }); w.reset(); w.startLevel(L);
+    const ns = w.notes;
+    for (let i = 1; i < ns.length; i++) {
+      const gap = ns[i].time - ns[i - 1].time;
+      if (gap < w.beatLen * 0.75 && ns[i].lane !== ns[i - 1].lane && ns[i].kind !== 'pillow' && ns[i - 1].kind !== 'pillow') jumps++;
+      checked++;
+    }
+  }
+  assert.ok(checked > 1000); assert.strictEqual(jumps, 0, 'fast cross-lane jumps: ' + jumps);
+  const w = mk('normal', 3); assert.strictEqual(w.deadT, -1); w._die(); assert.strictEqual(w.deadT, 0); w.update(0.5); assert.ok(w.deadT > 0.45);
 });
 
 test('boss: away → enter → hover → leave → away; smooth path; throw / bossin / bossout events; next countdown', () => {

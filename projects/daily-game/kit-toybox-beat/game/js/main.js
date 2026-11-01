@@ -83,6 +83,7 @@
 
     startGame() {
       KB.Audio.unlock();
+      { const t = document.getElementById('toast'); if (t) t.classList.add('hidden'); }
       this.runDifficulty = this.difficulty();   // best score belongs to the difficulty the run started on
       this.world = this.makeWorld();
       const lv = params.has('level') ? Math.max(0, num('level', 0) | 0) : 0;
@@ -138,7 +139,7 @@
       if (this.autoRestart) setTimeout(() => this.startGame(), 50);
     },
 
-    best() { return parseInt(KB.Storage.get('best_' + this.settings.difficulty, '0'), 10) || 0; },
+    best() { return parseInt(KB.Storage.get('best_' + this.difficulty(), '0'), 10) || 0; },
     resetBest() { DIFFS.forEach(d => KB.Storage.del('best_' + d)); },
     setSetting(k, v) {
       this.settings[k] = v;
@@ -147,9 +148,16 @@
       if (k === 'music' && v && (this.mode === 'playing' || this.mode === 'paused')) KB.Audio.startMusic();
     },
     toggleMute() {
-      const on = !this.settings.muted;
-      if (!on) this.urlMute = false;   // unmuting also lifts a ?mute=1 test flag (never saved), so the toast tells the truth
-      this.setSetting('muted', on); KB.UI.syncMute(); KB.UI.toast(this.settings.muted || this.urlMute ? 'Sound off' : 'Sound on', 900);
+      // Toggle what the player actually hears. A ?mute=1 test flag is never saved: if only the flag is muting,
+      // M just lifts the flag (the saved setting stays as it was).
+      if (this.urlMute && !this.settings.muted) {
+        this.urlMute = false;
+        KB.Audio.setOptions({ sfx: this.settings.sfx, music: this.settings.music, muted: false });
+      } else {
+        const on = !this.settings.muted;
+        if (!on) this.urlMute = false;
+        this.setSetting('muted', on);
+      } KB.UI.syncMute(); KB.UI.toast(this.settings.muted || this.urlMute ? 'Sound off' : 'Sound on', 900);
     },
     setFullscreen(on) {
       this.fullscreen = on;

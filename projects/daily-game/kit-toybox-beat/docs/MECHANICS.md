@@ -135,3 +135,13 @@ Approach time: `approach = max(approachMin, approach·(84/bpm)^0.5)`.
   - skip chance 0.3·(1−skill)²
   - wrong-lane chance 0.12·(1−skill), never in one-button mode
   - `bot.stats`: `{taps, planned, skipped, wrongLane, perfect, good, miss, bounced, poofed, levels, maxLevel}`. Call `bot.step(dt)` before `w.update(dt)`.
+
+## Changes after QA (2026-11-01)
+Playtest (`docs/reports/playtest.md`, re-simulated in `tests/sim/results/baseline.md`):
+- Normal: `firstLevelCostMul` 0.75 → 0.5, `goodWin` 0.15 → 0.17, `earlyWin` 0.30 → 0.34. Easy: `earlyWin` 0.30 → 0.34, `maxDensity: 4` now actually applies (it was inside a comment). Hard: `pillowClear` 1 → 1.5.
+- New `wrongLaneMiss` (CONFIG true, Easy false): a lane tap that judges nothing while the **other** lane has a live note within ±goodWin misses that note immediately (`miss`, early false). Kills the "tap both lanes on every beat" exploit (Normal: clears all 8 → median 1 level; Hard: 61 % → 0 %), honest players unaffected. Kid model clears Normal Dawn 53 % → 98 %.
+- Chart: on Normal/Easy (no `crossEighths`), if a bar ends with an eighth on beat 3.5 and the next bar starts on its downbeat, that first coin stays in the same lane (no 0.25 s cross-lane jump). Unit-tested over 360 charts.
+
+Kit / render (visual QA):
+- `kitMoveTime` 0.09 → 0.065 s (Kit now arrives with the coin). New `reachFirst` 0.08 s: frame order is dizzy → reach (first 0.08 s after a tap, even on a perfect) → happy → reach (until `reachTime`) → idle.
+- New world field **`w.deadT`**: −1 while alive, else seconds since the groove ran out (counts up in the 'dead' state). The renderer uses it for the rocket sputter / gentle sink before game over.

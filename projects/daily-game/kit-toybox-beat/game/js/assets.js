@@ -85,8 +85,10 @@
       const url = URL.createObjectURL(file);
       const img = new Image();
       img.onload = () => {
-        const max = kind === 'bg' ? [1280, 720] : [512, 512];
-        const k = Math.min(1, max[0] / img.naturalWidth, max[1] / img.naturalHeight);
+        // Backgrounds are drawn "cover" on any screen shape (landscape 1280×540 … portrait 560×1600), so keep
+        // the long edge up to 1600 px instead of fitting into 1280×720 (a portrait photo looked blurry).
+        const k = kind === 'bg' ? Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight))
+                                : Math.min(1, 512 / img.naturalWidth, 512 / img.naturalHeight);
         const c = makeCanvas(img.naturalWidth * k, img.naturalHeight * k);
         const g = c.getContext('2d');
         g.imageSmoothingQuality = 'high';
@@ -94,7 +96,7 @@
         URL.revokeObjectURL(url);
         // Backgrounds are opaque → JPEG keeps them small. Characters may have transparency → PNG.
         // (WebP keeps transparency at a fraction of PNG's size; fall back to PNG if unsupported.)
-        let out = kind === 'bg' ? c.toDataURL('image/jpeg', 0.85) : c.toDataURL('image/webp', 0.9);
+        let out = kind === 'bg' ? c.toDataURL('image/jpeg', 0.82) : c.toDataURL('image/webp', 0.9);
         if (kind !== 'bg' && !out.startsWith('data:image/webp')) out = c.toDataURL('image/png');
         resolve(out);
       };

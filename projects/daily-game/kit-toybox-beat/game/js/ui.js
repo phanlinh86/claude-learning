@@ -46,7 +46,18 @@
         KB.Assets.SLOTS.forEach(s => KB.Assets.clearCustom(s.id));
         this.renderSlots(); game.picturesChanged(); this.toast('All pictures reset to the originals');
       });
-      click('btnResetBest', () => { game.resetBest(); this.toast('Best scores cleared'); });
+      click('btnResetBest', () => {
+        // two taps within 3 s (a small child tapping around shouldn't wipe the best scores)
+        const b = document.getElementById('btnResetBest');
+        if (!this._resetArmed) {
+          this._resetArmed = true; b.textContent = 'Sure?'; b.classList.add('armed');
+          clearTimeout(this._resetT);
+          this._resetT = setTimeout(() => { this._resetArmed = false; b.textContent = 'Reset'; b.classList.remove('armed'); }, 3000);
+          return;
+        }
+        clearTimeout(this._resetT); this._resetArmed = false; b.textContent = 'Reset'; b.classList.remove('armed');
+        game.resetBest(); this.toast('Best scores cleared');
+      });
       document.querySelectorAll('.btn-back').forEach(b => tap(b, e => { e.stopPropagation(); KB.Audio.play('click'); this.back(); }));
 
       // settings controls

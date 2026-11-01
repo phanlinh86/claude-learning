@@ -35,7 +35,12 @@ var (
 	procSetWindowPos     = user32.NewProc("SetWindowPos")
 	procMonitorFromWnd   = user32.NewProc("MonitorFromWindow")
 	procGetMonitorInfo   = user32.NewProc("GetMonitorInfoW")
-	procGetWindowRect    = user32.NewProc("GetWindowRect")
+	procGetWindowPlace   = user32.NewProc("GetWindowPlacement")
+	procSetWindowPlace   = user32.NewProc("SetWindowPlacement")
+	procFindWindowW      = user32.NewProc("FindWindowW")
+	procSetForeground    = user32.NewProc("SetForegroundWindow")
+	kernel32             = syscall.NewLazyDLL("kernel32.dll")
+	procCreateMutexW     = kernel32.NewProc("CreateMutexW")
 	procShowWindow       = user32.NewProc("ShowWindow")
 )
 
@@ -44,14 +49,30 @@ const (
 	wsOverlappedWnd   = 0x00CF0000
 	wsPopup           = 0x80000000
 	wsVisible         = 0x10000000
+	swpNoSize         = 0x0001
+	swpNoMove         = 0x0002
 	swpNoZOrder       = 0x0004
 	swpFrameChanged   = 0x0020
 	swpNoOwnerZOrder  = 0x0200
 	monitorDefNearest = 2
 	swMaximize        = 3
+	swRestore         = 9
+	errAlreadyExists  = 183
 )
 
 type rect struct{ Left, Top, Right, Bottom int32 }
+type point struct{ X, Y int32 }
+
+// WINDOWPLACEMENT: remembers the normal rect AND the maximized state, so leaving full screen
+// restores a maximized window correctly (GetWindowRect on a maximized window did not).
+type windowPlacement struct {
+	Length           uint32
+	Flags            uint32
+	ShowCmd          uint32
+	PtMinPosition    point
+	PtMaxPosition    point
+	RcNormalPosition rect
+}
 type monitorInfo struct {
 	CbSize    uint32
 	RcMonitor rect
@@ -123,7 +144,7 @@ func (s *store) All() map[string]string {
 type fullscreen struct {
 	on        bool
 	prevStyle uintptr
-	prevRect  rect
+	prevPlace windowPlacement
 }
 
 func (f *fullscreen) set(hwnd uintptr, on bool) {
@@ -133,7 +154,8 @@ func (f *fullscreen) set(hwnd uintptr, on bool) {
 	if on {
 		s, _, _ := procGetWindowLongPtr.Call(hwnd, toIdx(gwlStyle))
 		f.prevStyle = s
-		procGetWindowRect.Call(hwnd, uintptr(unsafe.Pointer(&f.prevRect)))
+		f.prevPlace = windowPlacement{Length: uint32(unsafe.Sizeof(windowPlacement{}))}
+		procGetWindowPlace.Call(hwnd, uintptr(unsafe.Pointer(&f.prevPlace)))
 		mon, _, _ := procMonitorFromWnd.Call(hwnd, monitorDefNearest)
 		mi := monitorInfo{CbSize: uint32(unsafe.Sizeof(monitorInfo{}))}
 		procGetMonitorInfo.Call(mon, uintptr(unsafe.Pointer(&mi)))
@@ -143,16 +165,34 @@ func (f *fullscreen) set(hwnd uintptr, on bool) {
 			swpNoZOrder|swpNoOwnerZOrder|swpFrameChanged)
 	} else {
 		procSetWindowLongPtr.Call(hwnd, toIdx(gwlStyle), f.prevStyle)
-		r := f.prevRect
-		procSetWindowPos.Call(hwnd, 0, uintptr(r.Left), uintptr(r.Top), uintptr(r.Right-r.Left), uintptr(r.Bottom-r.Top),
-			swpNoZOrder|swpNoOwnerZOrder|swpFrameChanged)
+		procSetWindowPos.Call(hwnd, 0, 0, 0, 0, 0, swpNoZOrder|swpNoOwnerZOrder|swpFrameChanged|swpNoMove|swpNoSize)
+		procSetWindowPlace.Call(hwnd, uintptr(unsafe.Pointer(&f.prevPlace)))
 	}
 	f.on = on
 }
 
 func toIdx(i int) uintptr { return uintptr(int64(i)) }
 
+// singleInstance returns false if the game is already running; it then brings that window to the front.
+// (Two copies would share one save folder and race each other's writes.)
+func singleInstance() bool {
+	name, _ := syscall.UTF16PtrFromString("Local\\KitsToyboxBeat.SingleInstance")
+	h, _, err := procCreateMutexW.Call(0, 0, uintptr(unsafe.Pointer(name)))
+	if h != 0 && err == syscall.Errno(errAlreadyExists) {
+		title, _ := syscall.UTF16PtrFromString("Kit's Toybox Beat")
+		if hwnd, _, _ := procFindWindowW.Call(0, uintptr(unsafe.Pointer(title))); hwnd != 0 {
+			procShowWindow.Call(hwnd, swRestore)
+			procSetForeground.Call(hwnd)
+		}
+		return false
+	}
+	return true // the mutex handle is kept open for the life of the process
+}
+
 func main() {
+	if !singleInstance() {
+		return
+	}
 	appData := os.Getenv("APPDATA")
 	if appData == "" {
 		appData = os.TempDir()

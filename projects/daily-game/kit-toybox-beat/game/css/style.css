@@ -283,3 +283,33 @@ body.touch .tagline,body.touch .best-line{font-size:max(14px, 1em)}
 .offset input[type=range]{width:calc(var(--u)*16);min-width:110px;accent-color:var(--orange);touch-action:pan-x}
 .offset b{min-width:4.2em;text-align:right;font-size:.85em;color:#8a6a3a}
 @media (orientation:portrait){ .set-offset{flex-wrap:wrap} .offset input[type=range]{width:auto;flex:1} }
+
+/* ---------- visual QA round 1 (docs/reports/visual_qa.md) ---------- */
+/* P2-5 readable menu text on phones */
+@media (pointer:coarse){
+  .stats{font-size:max(13px, calc(var(--u)*1.45))}
+  .medal-name,.sc span{font-size:max(13px, calc(var(--u)*1.6))}
+  .new-best{font-size:max(11px, calc(var(--u)*1.3))}
+  .set small{font-size:max(11px, .65em)}
+  .slot .shape button{font-size:13px}
+}
+/* P2-6 short landscape phones: Settings fits without scrolling, Done visible */
+@media (max-height:430px){
+  #scrSettings .panel{padding:8px 16px}
+  #scrSettings .panel h2{margin-bottom:4px;font-size:calc(var(--u)*3.4)}
+  #scrSettings .settings{display:grid;grid-template-columns:1fr 1fr;gap:6px;min-width:0}
+  #scrSettings .set{padding:4px 12px;min-height:40px}
+  #scrSettings .set-offset{grid-column:span 2}
+  #scrSettings .menu{margin-top:6px}
+  #scrSettings .menu .btn{min-height:40px;padding-top:0;padding-bottom:0}
+}
+/* P3-7 portrait title: tagline off the screen edges, window shows above the logo, demo calmer */
+.tagline{padding:0 16px}
+@media (orientation:portrait){
+  #scrTitle{background:rgba(40,30,70,.25)}
+  #scrTitle .title-wrap{margin-top:8vh}
+}
+/* P3-8 Change Pictures tag on one line on phones */
+.slot .tag{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+@media (pointer:coarse){ .slot .tag{font-size:12px} }
+.btn-tiny.armed{background:#e8574f;color:#fff}

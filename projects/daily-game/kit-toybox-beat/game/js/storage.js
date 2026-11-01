@@ -8,6 +8,7 @@
   const S = {
     native: false,
     cache: {},
+    _seq: {},
     async init() {
       this.native = typeof window.ffStoreSet === 'function' && typeof window.ffStoreAll === 'function';
       if (this.native) {
@@ -31,7 +32,13 @@
       v = String(v);
       const prev = this.cache[k];
       this.cache[k] = v;
-      const fail = () => { if (prev === undefined) delete this.cache[k]; else this.cache[k] = prev; return false; };
+      const seq = (this._seq[k] = (this._seq[k] || 0) + 1);
+      // roll back only if this is still the latest write for that key (an older write failing late
+      // must not wipe a newer, successful value)
+      const fail = () => {
+        if (this._seq[k] === seq) { if (prev === undefined) delete this.cache[k]; else this.cache[k] = prev; }
+        return false;
+      };
       if (this.native) {
         return Promise.resolve(window.ffStoreSet(k, v))
           .then(ok => ok === false ? fail() : true)
@@ -40,11 +47,16 @@
       try { localStorage.setItem(PREFIX + k, v); return Promise.resolve(true); }
       catch (e) { console.warn('localStorage full or blocked', e); return Promise.resolve(fail()); }
     },
-    setJSON(k, v) { this.set(k, JSON.stringify(v)); },
+    setJSON(k, v) { return this.set(k, JSON.stringify(v)); },
+    /* Delete a value. Returns a Promise<boolean>. */
     del(k) {
       delete this.cache[k];
-      if (this.native) { Promise.resolve(window.ffStoreDel(k)).catch(() => {}); return; }
-      try { localStorage.removeItem(PREFIX + k); } catch (e) {}
+      this._seq[k] = (this._seq[k] || 0) + 1;
+      if (this.native) {
+        return Promise.resolve(window.ffStoreDel(k)).then(ok => ok !== false)
+          .catch(e => { console.warn('store del', k, e); return false; });
+      }
+      try { localStorage.removeItem(PREFIX + k); return Promise.resolve(true); } catch (e) { return Promise.resolve(false); }
     }
   };
   KB.Storage = S;
