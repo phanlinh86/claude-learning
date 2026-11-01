@@ -190,7 +190,7 @@
       }
       // sun / moon stay high, small enough not to sit behind the balloon band (a yellow balloon on the sun vanishes)
       const P = layout.play;
-      const skyMax = Math.max(80 + (layout.ins ? layout.ins.top : 0), Math.min(gy - 230, P ? P.y - 40 : gy - 230));
+      const skyMax = Math.max(60 + (layout.ins ? layout.ins.top : 0), (P ? P.y - 0.6 * (layout.balloonSize || 110) : gy - 300) - 62);
       if ((amb.sun || 0) > 0.01) {
         const big = amb.sunY > 0.38 ? 180 : 150;
         this._sprite('sun', W * (amb.sunX == null ? 0.66 : amb.sunX), Math.min(skyMax, H * (amb.sunY == null ? 0.14 : amb.sunY)), big, 0, amb.sun);
@@ -404,9 +404,9 @@
       const cyc = this.time % 2.4;
       const frame = cyc < 0.5 ? 'miu_happy' : cyc < 0.62 ? 'miu_blink' : 'miu_idle';
       const hop = cyc < 0.5 ? Math.sin(cyc / 0.5 * Math.PI) * 18 : 0;
-      const bs = portrait ? 96 : 92;
-      if (portrait) this._bunch(W * 0.7, L.groundY - 40, bs, ['red', 'yellow', 'blue', 'green', 'purple'], this.time, 220);
-      else this._bunch(W - L.ins.right - W * 0.16, L.groundY - 30, bs, ['red', 'yellow', 'blue', 'green', 'purple'], this.time, 230);
+      const bs = portrait ? 86 : 80;
+      if (portrait) this._bunch(W * 0.7, L.groundY - 10, bs, ['red', 'yellow', 'blue', 'green', 'purple'], this.time, 200);
+      else this._bunch(W - L.ins.right - Math.max(150, W * 0.12), L.groundY + 10, bs, ['red', 'yellow', 'blue', 'green', 'purple'], this.time, 200);
       this._character(frame, x, y - hop, h, 1 + 0.02 * Math.sin(this.time * 2.6), y, hop);
     }
     _doneScene(w, o) {   // the night party: every farm friend on the grass, balloons drifting up, Miu cheering
@@ -431,7 +431,7 @@
       }
       const hgt = Math.min(H * (o && o.compact ? 0.5 : 0.34), 340);
       const cyc = t % 1.1, hop = cyc < 0.55 ? Math.sin(cyc / 0.55 * Math.PI) * 36 : 0;
-      const y = o && o.compact ? L.groundY - 10 : Math.min(L.groundY - 20, H * (H > W ? 0.5 : 0.52));
+      const y = o && o.compact ? L.groundY - 10 : Math.min(L.groundY - 20, H * (H > W ? 0.4 : 0.52));
       const cx = o && o.compact ? L.ins.left + W * 0.18 : W / 2;
       this._character(cyc < 0.55 ? 'miu_cheer' : 'miu_happy', cx, y - hop, hgt, 1, y, hop);
     }
@@ -471,11 +471,11 @@
       if (type === 'pop') {
         const col = colHex(opt.color || 'red'), size = opt.size || 110;
         fx.push({ k: 'flash', x, y, t: 0, life: 0.32, size, color: opt.color || 'red' });
-        const n = Math.round(16 * this.quality);
+        const n = Math.round(24 * this.quality);
         for (let i = 0; i < n; i++) {
-          const a = R() * TAU, sp = 180 + R() * 320;
+          const a = R() * TAU, sp = 220 + R() * 360;
           fx.push({ k: 'p', sprite: R() < 0.5 ? 'confetti_a' : 'confetti_b', tint: col, x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 120,
-            g: 520, drag: 1.4, t: 0, life: 0.9 + R() * 0.5, size: 16 + R() * 10, rot: R() * TAU, vr: (R() - 0.5) * 14, sway: R() * TAU });
+            g: 520, drag: 1.4, t: 0, life: 0.9 + R() * 0.5, size: 22 + R() * 12, rot: R() * TAU, vr: (R() - 0.5) * 14, sway: R() * TAU });
         }
         for (let i = 0; i < 5; i++) {
           const a = R() * TAU, sp = 90 + R() * 140;

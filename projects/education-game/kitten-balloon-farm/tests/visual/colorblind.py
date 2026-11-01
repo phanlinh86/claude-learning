@@ -1,4 +1,4 @@
-"""Deuteranopia / protanopia simulation (Machado 2009, severity 1.0, applied in linear RGB).
+"""Deuteranopia / protanopia simulation for Kitten's Balloon Farm screenshots (Machado 2009, severity 1.0, linear RGB).
    python3 -I tests/visual/colorblind.py in.png ...   ->  writes *_deut.png / *_prot.png into tests/out/visual/cvd/"""
 import sys, os
 from PIL import Image

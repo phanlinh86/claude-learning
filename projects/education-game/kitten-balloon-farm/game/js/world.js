@@ -24,7 +24,8 @@
     // ---- timing / state machine (s)
     step: 1 / 120,             // fixed simulation sub-step (≤ 1/120 per DESIGN)
     maxFrame: 1.0,             // largest dt accepted per update() (speed mode passes big dt)
-    roundsPerLevel: 4,         // warm-up + 3 rounds
+    roundsPerLevel: 4,         // warm-up + 3 rounds …
+    roundsByAge: { 6: 6, 7: 6 }, // … but 6 at ages 6–7 (QA P2-6: their chapters were 38–52 s); the 75 s limit still applies
     chapterTimeLimit: 75,      // s since the chapter began: after ≥ chapterMinRounds rounds go to Talk time once exceeded
     chapterMinRounds: 3,
     introTime: 2.5,            // chapter banner + "Chapter 2 · Shapes!" + the 2.5 s sky crossfade (playtest: 1.8 → 2.5)
@@ -44,32 +45,35 @@
     tallAspect: 1.6, tallGroundRaise: 0.3, tallGroundMax: 140,   // tall portrait: groundY rises by min(140, 0.3·(H − 1.6 W))
     miuDx: 110, miuDy: 18, miuHLand: 190, miuHPort: 200,          // Miu feet anchor (ins.left + 110, groundY + 18)
     signDx: 165, signDy: 24, signW: 150, signVBW: 128, signVBH: 112,   // sign post foot (miu.x + 165, groundY + 24), board 150 wide
-    bubbleX: 24, bubbleY: 20, bubbleMaxW: 640, bubbleRightGap: 160, bubbleH: 104,
+    bubbleX: 24, bubbleY: 20, bubbleMaxW: 640, bubbleRightGap: 160, bubbleH: 122,   // landscape bubble (QA: 104 → 122, the DOM bubble is taller)
+    bubbleHPort: 124, bubbleGapPort: 24, // portrait: the DOM bubble sits BELOW the HUD: y = ins.top + hudH + 24, h = 124 (2-line VI prompt)
     playSide: 50,              // balloon bodies stay ≥ 50 px from the safe-area sides
     playTopGap: 30,            // … and ≥ 30 px below the bubble
     playGroundGap: 150,        // lowest balloon centre = groundY − 150 …
-    stringReach: 1.5, stringBelowGround: 50,   // … or higher, so knot (≈ 0.6·size) + rope (0.9·size) ends ≤ 50 px below groundY (tall phones, age 3)
+    stringReach: 1.57, stringBelowGround: 50,  // … or higher, so circle knot (0.668·size) + rope (0.9·size) + max bob ends ≤ 50 px below groundY
     portraitBandFrac: 1.05,    // portrait: band height ≤ 1.05·W, kept just above the ground (short reach)
     miuBoxDx: 110,             // no balloon body in the box x < sign.x + 110, y > groundY − 320 (Miu + sign)
     miuBoxH: 320,
     miuBoxHMin: 240,           // crowded rounds only (packing fails otherwise): the box shrinks to 240 px (bodies still clear Miu's hat)
-    yardDx: 120, yardRight: 60, yardDy: 30,   // friends land on y = groundY + 30, x from sign.x + 120 to W − ins.right − 60
-    yardSpacing: 92, yardRowDy: 24,           // 92 px apart; a 2nd row stands 24 px further back, offset half a slot
+    yardDx: 95, yardRight: 60, yardDy: 30,    // friends land on y = groundY + 30, x from sign.x + 95 to W − ins.right − 60 (QA P2-4: 120 → 95)
+    yardSpacing: 88, yardRowDy: 24,           // 88 px apart (3 per row in portrait); a 2nd row stands 24 px further back, offset half a slot
     hudW: 160, hudH: 96,       // DOM buttons top-right: x > W − ins.right − 160, y < ins.top + 96
 
     // ---- balloons
     balloonSize: { 3: 128, 4: 118, 5: 108, 6: 108, 7: 108 },   // body width by age
     tallScale: 1.15,           // ×1.15 on tall portrait phones
     homeSpacing: 1.2,          // min centre distance = 1.2 × mean size of the pair
-    homeSpacingMany: 1.05, manyAt: 10,   // > 10 balloons (count 9–12 at ages 5–7): 1.05 × so they keep ≥ 100 px on an iPad
+    homeSpacingMany: 1.05, manyAt: 8,    // > 8 balloons (count N ≥ 7 at ages 5–7): 1.05 × so they stay big in the short (bubble 122) iPad band
     shrinkStep: 0.05, minShrink: 0.8, // sizes shrink in 5 % steps down to 0.8× before packing gives up (then keeps shrinking)
     packGrid: 14,              // px: candidate grid for farthest-point sampling
     packTriesMany: 24,         // crowded rounds (> 10 balloons): more restarts before shrinking
     packTries: 6,              // attempts per size step before shrinking (2 spread, 2 tight, 2 with the lower Miu box)
     packSlack: 0.8,            // pick randomly among candidates whose clearance is ≥ 80 % of the best (spread + variety)
-    knotY: { circle: 0.6, heart: 0.5, star: 0.5, square: 0.56, triangle: 0.52, rect: 0.42 },   // knot below centre (× size) if KB.BalloonArt is absent
+    knotY: { circle: 0.668, heart: 0.543, star: 0.433, square: 0.553, triangle: 0.453, rect: 0.393 },   // = KB.BalloonArt.knotY (used when it is absent)
     touchR: 0.6, touchPad: 14, // hit radius = 0.6 × size + 14; nearest centre wins
-    tapAtRise: 0.6,            // a rising balloon reacts after 60 % of its rise
+    tapAtRise: 0.6,            // a rising balloon reacts after 60 % of its rise (earlier taps: a tiny squash, riseNudge)
+    riseNudge: 0.08,           // squash q for a tap on a balloon that is still too low to pop
+    touchBelow: 0.95, touchBelowW: 0.35,   // QA P1-1: no circle hit → a tap ≤ 0.95·size below the centre and ≤ 0.35·size sideways (the knot / string top) counts
 
     // rise: buoyant under-damped spring from below the grass to home
     riseStagger: 0.12,         // s between balloons
@@ -101,7 +105,8 @@
 
     // friends (animal stickers from popped animal balloons)
     friendSize: 84,
-    friendGravity: 600, friendTerminal: 222,    // drag k = g / v_t = 2.7 1/s → ≈ 220 px/s terminal (leaf-like)
+    friendGravity: 600, friendTerminal: 222,    // drag k = g / v_t: ≈ 220 px/s terminal (leaf-like) …
+    friendFallTime: 2.0,       // … long drops scale gravity + v_t by drop / D0 (D0 ≈ 362 px = 2 s of the default fall): every friend lands ≤ ≈ 2 s after the pop
     friendPopVy: -60,          // a little hop up when the balloon bursts
     friendSwayAmp: 18, friendSwayRad: 0.25, friendSwayHz: 0.7,   // sway ±18 px / ±0.25 rad like a leaf
     friendBounceG: 900, friendBounce0: 160, friendRestitution: 0.35, friendBounces: 2,   // first hop ≥ 160 px/s (≈ 14 px), then ×0.35
@@ -122,6 +127,8 @@
 
     // ---- help
     hintAfterMisses: 2, hintTime: 3,
+    wrongLock: 0.8,            // QA P1-3: every tap is ignored for 0.8 s after a wrong tap (no event, no mistake) — anti-spam
+    idleGlowFrom: 2,           // QA P3-8: from the 2nd idle nudge of a round the target also glows
     hintCooldown: 6,           // s: no auto-hint while one glows nor within 6 s of the last
     idleTime: 12,              // s without a tap → idle nudge …
     idleBackoff: 1.5, idleMax: 30,   // … gap ×1.5 per nudge up to 30 s
@@ -156,10 +163,11 @@
     var sign = { x: miu.x + cfg.signDx, y: groundY + cfg.signDy, w: sw, h: sh };
     var bx = ins.left + cfg.bubbleX;
     var bubble = { x: bx, y: ins.top + cfg.bubbleY, w: Math.min(cfg.bubbleMaxW, W - bx - ins.right - cfg.bubbleRightGap), h: cfg.bubbleH };
+    if (portrait) { bubble.y = ins.top + cfg.hudH + cfg.bubbleGapPort; bubble.h = cfg.bubbleHPort; bubble.w = Math.min(cfg.bubbleMaxW, W - bx - ins.right - cfg.bubbleX); }
     var size = (cfg.balloonSize[age] || cfg.balloonSize[5]) * (tall ? cfg.tallScale : 1);
     // play = rectangle of allowed balloon CENTRES for a balloon of the base size
     var x0 = ins.left + cfg.playSide + size / 2, x1 = W - ins.right - cfg.playSide - size / 2;
-    var y0 = bubble.y + bubble.h + cfg.playTopGap + size / 2, y1 = groundY - Math.max(cfg.playGroundGap, cfg.stringReach * size - cfg.stringBelowGround);
+    var y0 = bubble.y + bubble.h + cfg.playTopGap + size / 2, y1 = groundY - Math.max(cfg.playGroundGap, cfg.stringReach * size + cfg.bobAmp[1] - cfg.stringBelowGround);
     if (portrait && y1 - y0 > cfg.portraitBandFrac * W) y0 = y1 - cfg.portraitBandFrac * W;
     var play = { x: x0, y: y0, w: Math.max(0, x1 - x0), h: Math.max(0, y1 - y0) };
     var excl = { x: -1e4, y: groundY - cfg.miuBoxH, w: 1e4 + sign.x + cfg.miuBoxDx, h: 1e4 };   // Miu + sign box (bodies stay out)
@@ -208,6 +216,9 @@
       var it = items[order[oi]], sz = it.base * s, r = sz / 2;
       // centre range for this size (bigger balloons: the band shrinks by the extra half-width)
       var ex = Math.max(0, (sz - base) / 2), ax = P.x + ex, aw = P.w - 2 * ex, ay = P.y + ex, ah = P.h - 2 * ex;
+      // the string (knot + unscaled rope + bob) must end ≤ stringBelowGround under groundY (big balloons sit higher)
+      var kf = cfg.knotY[it.shape] || cfg.knotY.circle, lowY = L.groundY + cfg.stringBelowGround - cfg.bobAmp[1] - kf * sz - cfg.stringSeg * (cfg.stringPts - 1) * sz / (it.scale || 1);
+      if (ay + ah > lowY) ah = Math.max(0, lowY - ay);
       if (aw < 0) { ax = P.x + P.w / 2; aw = 0; }
       if (ah < 0) { ay = P.y + P.h / 2; ah = 0; }
       var nx = Math.max(1, Math.floor(aw / g) + 1), ny = Math.max(1, Math.floor(ah / g) + 1);
@@ -261,7 +272,7 @@
     this.miu = { mood: 'idle', moodT: 0, lookX: 0, lookY: 0, hop: 0, _hopT: -1 };
     this.events = [];
     this.sessions = 0; this.interactive = false; this.solved = false;
-    this._solvedT = -1; this._idleT = 0; this._idleGap = this.cfg.idleTime; this._roundEnded = false;
+    this._solvedT = -1; this._lockT = 0; this._idleN = 0; this._idleT = 0; this._idleGap = this.cfg.idleTime; this._roundEnded = false;
     this._lastHintT = -1e9; this.levelStartTime = 0; this._talkAskT = 0; this._talkAsks = 0;
     this._lookId = null; this._lookT = -1e9; this._hist = []; this._friendN = 0;
     this.packShrink = 1; this.packOk = true;
@@ -376,6 +387,7 @@
     this.topic = this.levels[this.level];
     this.weather = this.level;
     this.round = 0; this.levelStars = 0; this.levelStartTime = this.time; this._hist = [];
+    this.roundsPerLevel = (this.cfg.roundsByAge && this.cfg.roundsByAge[this.age]) || this.cfg.roundsPerLevel;
     this.balloons = []; this.friends = []; this.shreds = []; this.cur = null; this.talk = null; this.talkAnswered = null;
     this.queue = []; this.target = null; this.interactive = false; this.solved = false;
     this.sign = { type: null, value: null, need: null, filled: 0, wob: 0, _wv: 0 };
@@ -390,7 +402,7 @@
     var rr = new KB.RNG((this.rng.next() * 4294967296) >>> 0);
     var cur = KB.Content.makeRound(this.topic, { age: this.age, lang: this.lang, rng: rr, roundIndex: this.round, history: this._hist, layout: this.layout });
     this.cur = cur; this._hist.push(cur.sum);
-    this.roundMistakes = 0; this.pops = 0; this._idleT = 0; this._idleGap = cfg.idleTime; this._roundEnded = false;
+    this.roundMistakes = 0; this.pops = 0; this._lockT = 0; this._idleN = 0; this._idleT = 0; this._idleGap = cfg.idleTime; this._roundEnded = false;
     this.interactive = false; this.solved = false; this._solvedT = -1;
     this.friends = []; this.shreds = []; this._friendN = 0;
     this.sign = { type: cur.sign.type, value: cur.sign.value, need: cur.sign.need !== undefined ? cur.sign.need : null, filled: 0,
@@ -486,6 +498,7 @@
     this.finger.x = x; this.finger.y = y; this.finger.down = true;
     if (this.state !== 'round' || this.solved || this._roundEnded) return null;
     this._idleT = 0; this._idleGap = this.cfg.idleTime;   // any touch shows the child is here
+    if (this.time < this._lockT) return null;              // boing lock after a wrong tap
     var cfg = this.cfg, best = null, bestD = 1e9;
     for (var i = 0; i < this.balloons.length; i++) {
       var b = this.balloons[i];
@@ -493,7 +506,18 @@
       var r = cfg.touchR * b.size + cfg.touchPad, d = hyp(x - b.x, y - b.y);
       if (d <= r && d < bestD - 1e-9) { best = b; bestD = d; }
     }
-    if (!best) return null;
+    if (!best) for (i = 0; i < this.balloons.length; i++) {   // the knot / top of the string counts for its balloon
+      b = this.balloons[i]; if (!this.canTap(b)) continue;
+      var dx = x - b.x, dy = y - b.y, dd = hyp(dx, dy);
+      if (dy > 0 && dy <= cfg.touchBelow * b.size && Math.abs(dx) <= cfg.touchBelowW * b.size && dd < bestD) { best = b; bestD = dd; }
+    }
+    if (!best) {   // a balloon still too low to pop: a tiny squash so the child sees the touch
+      for (i = 0; i < this.balloons.length; i++) {
+        b = this.balloons[i];
+        if (b.state === 'rise' && b.t >= 0 && b.popT < 0 && !this.canTap(b) && hyp(x - b.x, y - b.y) <= cfg.touchR * b.size + cfg.touchPad) { b._q = Math.max(b._q, cfg.riseNudge); break; }
+      }
+      return null;
+    }
     this._lookId = best.id; this._lookT = this.time;
     if (best.cool > 0) return best.id;                    // still boinging from a wrong tap
     var mode = this.cur.mode;
@@ -535,7 +559,7 @@
   P._wrong = function (b, fx, fy) {
     var cfg = this.cfg;
     this.roundMistakes++;
-    b.cool = cfg.wrongCooldown;
+    b.cool = cfg.wrongCooldown; this._lockT = this.time + cfg.wrongLock;
     var dx = b.x - fx, dy = b.y - fy, d = hyp(dx, dy);
     if (d < 1) { dx = b.x >= this.layout.W / 2 ? -1 : 1; dy = -0.3; d = hyp(dx, dy); }
     b.vx += dx / d * cfg.wrongImpulse; b.vy += dy / d * cfg.wrongImpulse;
@@ -573,12 +597,12 @@
     if (!t || t.glowT > 0 || this.time - this._lastHintT < this.cfg.hintCooldown) return null;
     return this._glow(t);
   };
-  P._glow = function (b) {
+  P._glow = function (b, fromIdle) {
     b.glowT = this.cfg.hintTime;
     this._lastHintT = this.time;
     this._lookId = b.id; this._lookT = this.time;
     this._mood('think');
-    this._emit({ type: 'hint', id: b.id });
+    this._emit(fromIdle ? { type: 'hint', id: b.id, idle: true } : { type: 'hint', id: b.id });
     return b.id;
   };
   /** Manual hint (tap on Miu / bubble): glows the (next) target; no event if it glows already. */
@@ -620,7 +644,9 @@
             this._idleT = 0; this._mood('think');
             this._idleGap = Math.min(cfg.idleMax, this._idleGap * cfg.idleBackoff);   // 12 → 18 → 27 → 30 s
             var pr = this.prompt();
-            this._emit({ type: 'idle', promptKey: pr.promptKey, params: pr.params });
+            this._idleN++;
+            this._emit({ type: 'idle', promptKey: pr.promptKey, params: pr.params, n: this._idleN });
+            if (this._idleN >= cfg.idleGlowFrom) { var it = this._hintTarget(); if (it && it.glowT <= 0) this._glow(it, true); }
           }
         }
         if (this.solved && !this._roundEnded) {
@@ -794,7 +820,13 @@
       var k = this._friendN++, s = this._yardSlot(k), y0 = b.y + cfg.friendSize / 2;
       this.friends.push({ id: 'f' + k, balloonId: b.id, sprite: b.sprite, nameValue: b.nameValue, slot: k,
         x: b.x, y: y0, _px: b.x, _py: y0, rot: 0, _prot: 0, vy: cfg.friendPopVy, state: 'fall', t: 0, bounces: 0,
-        x0: b.x, y0: y0, tx: s.x, ty: Math.max(s.y, y0 + 1), sx: 1, sy: 1, _q: 0, _qv: 0, size: cfg.friendSize, alpha: 1, _ph: r.float(0, TAU) });
+        x0: b.x, y0: y0, tx: s.x, ty: Math.max(s.y, y0 + 1), vt: 0, g: 0, sx: 1, sy: 1, _q: 0, _qv: 0, size: cfg.friendSize, alpha: 1, _ph: r.float(0, TAU) });
+      // long drops (tall phones): scale gravity AND terminal speed by D / D0 (D0 = the drop the default leaf covers in
+      // friendFallTime) — the same motion stretched in space, so every friend lands ≈ friendFallTime after the pop
+      var F = this.friends[this.friends.length - 1], vt0 = cfg.friendTerminal, g0 = cfg.friendGravity;
+      var D0 = vt0 * cfg.friendFallTime - vt0 * vt0 / g0 * (1 - Math.exp(-g0 * cfg.friendFallTime / vt0));
+      var ks = Math.max(1, (F.ty - F.y0) / D0);
+      F.vt = vt0 * ks; F.g = g0 * ks;
     }
   };
 
@@ -802,8 +834,8 @@
     var cfg = this.cfg, g, u;
     f.t += h;
     if (f.state === 'fall') {
-      g = cfg.friendGravity;
-      f.vy += (g - (g / cfg.friendTerminal) * f.vy) * h;
+      g = f.g;
+      f.vy += (g - (g / f.vt) * f.vy) * h;
       f.y += f.vy * h;
       u = clamp((f.y - f.y0) / Math.max(1, f.ty - f.y0), 0, 1);
       var ph = f._ph + TAU * cfg.friendSwayHz * f.t;
@@ -811,15 +843,15 @@
       f.rot = cfg.friendSwayRad * Math.cos(ph) * (1 - u);
       if (f.y >= f.ty) {
         f.y = f.ty; f.x = f.tx; f.rot = 0; f.state = 'land'; f.bounces = 0;
-        f._q = cfg.friendSquash * clamp(f.vy / cfg.friendTerminal, 0.5, 1.2); f._qv = 0;
-        f.vy = -Math.max(cfg.friendBounce0, cfg.friendRestitution * f.vy);
+        f._q = cfg.friendSquash * clamp(f.vy / f.vt, 0.5, 1.2); f._qv = 0;
+        f.vy = -Math.max(cfg.friendBounce0, cfg.friendRestitution * Math.min(f.vy, cfg.friendTerminal));
         this._emit({ type: 'land', id: f.id, x: f.x, y: f.y, sprite: f.sprite, nameValue: f.nameValue });
       }
     } else if (f.state === 'land') {
       f.vy += cfg.friendBounceG * h; f.y += f.vy * h;
       if (f.y >= f.ty) {
         f.y = f.ty; f.bounces++;
-        f._q = cfg.friendSquash * clamp(f.vy / cfg.friendTerminal, 0, 1) * 0.8; f._qv = 0;
+        f._q = cfg.friendSquash * clamp(f.vy / f.vt, 0, 1) * 0.8; f._qv = 0;
         if (f.bounces >= cfg.friendBounces) { f.state = 'rest'; f.vy = 0; f.t = 0; }
         else f.vy = -cfg.friendRestitution * f.vy;
       }

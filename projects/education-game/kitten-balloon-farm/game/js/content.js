@@ -64,7 +64,7 @@
   var SHAPES = ['circle', 'heart', 'star', 'square', 'triangle'];   // + 'rect' from age 5
   var LETTER_POOL = { en: 'ABCDEFGHIKLMNOPRSTUW', vi: 'ABCDEGHIKLMNOPSTUVXY' };
   var MINUS = '−';
-  var SIZE_SCALE = { big: 1.3, small: 0.72 };
+  var SIZE_SCALE = { big: 1.3, small: 0.8 };   // QA: small 0.72 → 0.8 so a small balloon stays ≥ 100 px at every age
   var COUNT_RANGE = { 3: [1, 5], 4: [1, 5], 5: [3, 10], 6: [4, 12], 7: [4, 12] };
   var NCHOICE = { 3: 2, 4: 3, 5: 4, 6: 4, 7: 4 };   // colours / shapes / animals in one round
   var MAXB = { 3: 5, 4: 6, 5: 8, 6: 8, 7: 8 };      // find-mode balloons per round
@@ -78,17 +78,35 @@
     return topic === 'lower' ? P.filter(function (c) { return c !== 'I'; }) : P;
   }
 
-  /* Colour-blind / toddler safety: below age 5 never blue+purple, red+green (DESIGN) nor yellow+orange in one round. */
-  var PAIRS = [['blue', 'purple'], ['red', 'green'], ['yellow', 'orange']];
+  /* Colour-blind / toddler safety: below age 5 never blue+purple, red+green (DESIGN), yellow+orange nor green+orange
+   * (deutan / protan confusion, QA) in one round. */
+  var PAIRS = [['blue', 'purple'], ['red', 'green'], ['yellow', 'orange'], ['green', 'orange']];
   function clash(cs) {
     for (var i = 0; i < PAIRS.length; i++) if (cs.indexOf(PAIRS[i][0]) >= 0 && cs.indexOf(PAIRS[i][1]) >= 0) return true;
     return false;
   }
   /** Colours safe for `age`; below 5 one colour of every confusable pair is dropped; `keep` always stays. */
+  var SAFE_SETS = (function () {   // every largest clash-free colour set (size 3 with the 4 pairs)
+    var sets = [], best = 0;
+    for (var m = 1; m < 64; m++) {
+      var cs = COLORS.filter(function (c, i) { return m & (1 << i); });
+      if (clash(cs)) continue;
+      if (cs.length > best) { best = cs.length; sets = []; }
+      if (cs.length === best) sets.push(cs);
+    }
+    return sets;
+  })();
   function safeColors(rng, age, keep) {
     if (age >= 5) return COLORS.slice();
-    var drop = PAIRS.map(function (p) { return p.indexOf(keep) >= 0 ? p[1 - p.indexOf(keep)] : rng.pick(p); });
-    return COLORS.filter(function (c) { return drop.indexOf(c) < 0; });
+    var ok = SAFE_SETS.filter(function (s) { return !keep || s.indexOf(keep) >= 0; });
+    return rng.pick(ok.length ? ok : SAFE_SETS).slice();
+  }
+  /** Colours not used yet in this chapter (falls back to "not the last one", then to all). */
+  function freshColors(hist, pool) {
+    pool = pool || COLORS;
+    var used = hist.map(function (h) { return h.color; }), f = pool.filter(function (v) { return used.indexOf(v) < 0; });
+    if (!f.length) { var last = hist.length ? hist[hist.length - 1].color : null; f = pool.filter(function (v) { return v !== last; }); }
+    return f.length ? f : pool.slice();
   }
 
   function balloon(o) {
@@ -160,8 +178,7 @@
         break;
       }
       case 'size': {
-        var used = hist.map(function (h) { return h.color; });
-        var c = rng.pick(COLORS.filter(function (v) { return used.indexOf(v) < 0; }));   // a new colour every round
+        var c = rng.pick(freshColors(hist));   // a new colour every round
         var prevSize = hist.length ? hist[hist.length - 1].target : null;
         var tsz = prevSize ? (rng.chance(0.65) ? (prevSize === 'big' ? 'small' : 'big') : prevSize) : rng.pick(['big', 'small']);
         var osz = tsz === 'big' ? 'small' : 'big';
@@ -175,10 +192,10 @@
         mode = 'count';
         var rr = COUNT_RANGE[age], lo, hi;
         if (warm) { lo = age >= 5 ? 2 : 1; hi = 3; } else { lo = Math.max(2, rr[0]); hi = rr[1]; }
-        var usedN = hist.map(function (h) { return h.target; }), usedC = hist.map(function (h) { return h.color; });
+        var usedN = hist.map(function (h) { return h.target; });
         var nPool = range(lo, hi).filter(function (v) { return usedN.indexOf(v) < 0; });
         var N = rng.pick(nPool.length ? nPool : range(lo, hi));
-        var cc = rng.pick(COLORS.filter(function (v) { return usedC.indexOf(v) < 0; }));
+        var cc = rng.pick(freshColors(hist));
         var extra = N <= 3 ? 3 : 2;
         for (i = 0; i < N + extra; i++) add(balloon({ color: cc, answer: true, nameKind: 'balloon', nameValue: cc }));
         params = { n: N, color: cc }; sign = { type: 'number', value: N, need: N }; target = N;

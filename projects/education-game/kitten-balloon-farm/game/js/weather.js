@@ -63,7 +63,7 @@
         { kind: 'leaf', layer: 'back', count: 2, size: [12, 16], alpha: [0.8, 0.95], sprite: 'petal' }
       ] },
     { name: 'sunset',
-      amb: { windBase: 10, gusty: 12, sway: 0.25, sun: 1, sunX: 0.22, sunY: 0.5, moon: 0.15, moonX: 0.84, moonY: 0.22, stars: 0.1, darkness: 0.08 },
+      amb: { windBase: 10, gusty: 12, sway: 0.25, sun: 1, sunX: 0.74, sunY: 0.34, moon: 0.15, moonX: 0.84, moonY: 0.22, stars: 0.1, darkness: 0.08 },
       clouds: { n: 3, speed: [5, 10], alpha: 0.9, scale: [0.6, 0.95] },
       emitters: [
         { kind: 'seed', layer: 'back', count: 12, size: [14, 22], alpha: [0.75, 0.95], sprite: 'seed' },

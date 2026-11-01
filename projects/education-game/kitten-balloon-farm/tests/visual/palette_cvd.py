@@ -1,4 +1,4 @@
-"""CIEDE76 distance between every pair of answer colours, normal vs deuteranopia vs protanopia.
+"""CIEDE76 distance between every pair of Kitten's Balloon Farm answer colours (DESIGN §3), normal vs deuteranopia vs protanopia.
    python3 -I tests/visual/palette_cvd.py"""
 import numpy as np, itertools
 P = {'red': '#E84A4A', 'blue': '#3C8DE8', 'yellow': '#FFD23F', 'green': '#4CC26B', 'orange': '#FF9A2E', 'purple': '#9B6BE0'}

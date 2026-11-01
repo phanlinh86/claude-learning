@@ -1,8 +1,9 @@
-// Functional QA suite for Owlet's Snow Garden — real touch/mouse input on iPhone/iPad-sized mobile contexts.
-//   node tests/e2e/functional.js              (all groups)
-//   node tests/e2e/functional.js input ask    (only some groups)
-// Prints PASS/FAIL per check, writes tests/out/functional/results.json + screenshots, exits 1 on any FAIL.
-// Env: SG_GAME_ROOT=<dir> tests another build of game/.
+// Functional QA suite for Kitten's Balloon Farm — REAL touch input on iPhone/iPad-sized mobile contexts.
+//   node tests/e2e/functional.js                 (all groups)
+//   node tests/e2e/functional.js tap count ask   (only some groups)
+// Groups: boot lang gate settings tap stars count ask multi repeat talk pause rotate hud bot
+// Prints PASS/FAIL per check + a summary table, writes tests/out/functional/results.json (+ screenshots on failure),
+// exits 1 on any FAIL. Env: KB_GAME_ROOT=<dir> tests another build of game/.
 const { chromium } = require('playwright');
 const path = require('path'), fs = require('fs');
 const serve = require('./serve');
@@ -19,15 +20,14 @@ const ONLY = process.argv.slice(2);
 const want = g => !ONLY.length || ONLY.includes(g);
 
 const results = [];
+let curGroup = '';
 function check(name, ok, info) {
-  results.push({ name, ok: !!ok, info: info == null ? '' : info });
-  console.log((ok ? 'PASS ' : 'FAIL ') + name + (ok || info == null ? '' : '  -- ' + (typeof info === 'string' ? info : JSON.stringify(info)).slice(0, 500)));
+  results.push({ group: curGroup, name, ok: !!ok, info: info == null ? '' : info });
+  console.log((ok ? 'PASS ' : 'FAIL ') + name + (ok || info == null ? '' : '  -- ' + (typeof info === 'string' ? info : JSON.stringify(info)).slice(0, 600)));
   return !!ok;
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-// Text sanitiser shared by all groups.
-const BARE_KEYS = ['praise', 'wrong', 'miss', 'hint', 'idle', 'great'];
 function badText(s) {
   if (s == null) return null;
   s = String(s);
@@ -35,889 +35,775 @@ function badText(s) {
   if (/[{}]/.test(s)) return 'brace';
   if (/\bundefined\b|\bNaN\b|\bnull\b|\[object/.test(s)) return 'undefined/NaN/null';
   if (/\b(p|ui|topic|talk|say|session|chapter)\.[a-zA-Z]/.test(s)) return 'raw i18n key';
-  if (BARE_KEYS.includes(s.trim())) return 'bare key';
   return null;
 }
-const VI_RE = /[ăâđêôơưàáạảãèéẹẻẽìíịỉĩòóọỏõùúụủũỳýỵỷỹằắặẳẵầấậẩẫềếệểễồốộổỗờớợởỡừứựửữ]/i;
-const EN_WORDS = /\b(the|pot|pots|seed|seeds|flower|flowers|Plant|Put|Yes|Great|Chapter|Now|Next|Count|Which)\b/;
-
-/* Collect every user-visible string: canvas fillText, and DOM text of bubble / talk / done / title. */
-const INIT = () => {
-  window.__texts = new Set();
-  const add = t => { if (t != null && String(t).trim()) window.__texts.add(String(t)); };
-  const P = CanvasRenderingContext2D.prototype, f = P.fillText;
-  P.fillText = function (t, ...a) { add(t); return f.call(this, t, ...a); };
-  window.__collect = () => ['bubbleText', 'talkQ', 'talkTitle', 'doneTitle', 'titleAge', 'tagline', 'micLabel']
-    .forEach(id => { const e = document.getElementById(id); if (e) add(e.textContent); });
-  document.addEventListener('DOMContentLoaded', () => {
-    const mo = new MutationObserver(() => {
-      window.__collect();
-      document.querySelectorAll('#talkChoices button').forEach(b => add(b.textContent));
-    });
-    mo.observe(document.body, { subtree: true, childList: true, characterData: true });
-  });
-};
 
 let srv, browser;
 async function open(dev, q = '', opt = {}) {
-  const ctx = await browser.newContext({ viewport: dev.viewport, deviceScaleFactor: dev.dpr, isMobile: true, hasTouch: true });
-  await ctx.addInitScript(INIT);
-  if (opt.storage) await ctx.addInitScript(s => { if (!sessionStorage.getItem('__seeded')) { localStorage.clear(); for (const k in s) localStorage.setItem(k, s[k]); sessionStorage.setItem('__seeded', '1'); } }, opt.storage);
+  const ctx = opt.ctx || await browser.newContext({ viewport: dev.viewport, deviceScaleFactor: dev.dpr, isMobile: true, hasTouch: true });
   const page = await ctx.newPage();
   const errors = [];
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   page.on('pageerror', e => errors.push(String(e)));
+  page.on('response', r => { if (r.status() >= 400) errors.push('HTTP ' + r.status() + ' ' + r.url()); });
   await page.goto(srv.url + (q ? '?' + q : ''));
   await waitTitle(page);
   await installEv(page);
   const cdp = await ctx.newCDPSession(page);
-  return { ctx, page, errors, cdp, dev };
+  return { ctx, page, errors, cdp, dev, close: () => (opt.ctx ? page.close() : ctx.close()) };
 }
 async function waitTitle(page) {
-  await page.waitForFunction(() => window.KB && KB.debug && KB.debug.mode && KB.debug.mode !== 'loading', null, { timeout: 15000 });
+  await page.waitForFunction(() => window.KB && KB.debug && KB.debug.mode === 'title', null, { timeout: 15000 });
 }
+/* Record every world event (with a timestamp) and count world.pointerDown calls (to prove HUD/menu taps never reach it). */
 async function installEv(page) {
   await page.evaluate(() => {
-    window.__ev = [];
+    window.__ev = []; window.__downs = 0;
     const w = KB.debug.world;
     if (w.__hooked) return;
     w.__hooked = true;
     const o = w._emit;
-    w._emit = function (e) { window.__ev.push(Object.assign({ at: performance.now() }, e)); return o.call(this, e); };
+    w._emit = function (e) {
+      window.__ev.push(Object.assign({ at: performance.now(), wt: this.time }, e));
+      if (e.type === 'talk' && window.__stopBotOnTalk) KB.debug.setBot(false);
+      return o.call(this, e);
+    };
+    const pd = w.pointerDown;
+    w.pointerDown = function (x, y) { window.__downs++; return pd.call(this, x, y); };
   });
 }
-const evTypes = page => page.evaluate(() => window.__ev.map(e => e.type));
 const evOf = (page, t) => page.evaluate(t => window.__ev.filter(e => e.type === t).map(e => { const o = Object.assign({}, e); delete o.talk; return o; }), t);
 const clearEv = page => page.evaluate(() => { window.__ev = []; });
 const mode = page => page.evaluate(() => KB.debug.mode);
+const downs = page => page.evaluate(() => window.__downs);
 const voiceN = page => page.evaluate(() => KB.debug.voiceLog.length);
 const visible = (page, id) => page.evaluate(i => { const e = document.getElementById(i); return !!e && !e.classList.contains('hidden') && e.getBoundingClientRect().width > 0; }, id);
-const itemOf = (page, id) => page.evaluate(id => { const i = KB.debug.world.items.find(i => i.id === id); return i && { id: i.id, state: i.state, x: i.x, y: i.y, homeX: i.homeX, homeY: i.homeY, planted: i.planted, grow: i.grow, bloomed: i.bloomed, basketId: i.basketId, alpha: i.alpha, misses: i.misses }; }, id);
+async function shot(c, name) { try { await c.page.screenshot({ path: path.join(OUT, `${c.dev.name}-${name}.png`) }); } catch (e) { /* ignore */ } }
 
-/* ---------- input helpers (CDP touch = real touch + pointer events in Chromium) ---------- */
-async function touch(cdp, type, pts) { await cdp.send('Input.dispatchTouchEvent', { type, touchPoints: pts.map(p => ({ x: p.x, y: p.y, id: p.id || 0, radiusX: 4, radiusY: 4, force: 1 })) }); }
-async function tap(c, x, y) { await touch(c.cdp, 'touchStart', [{ x, y }]); await sleep(50); await touch(c.cdp, 'touchEnd', []); }
-async function tapEl(c, sel) {
-  await c.page.locator(sel).first().evaluate(e => e.scrollIntoView({ block: 'nearest' }));   // parents scroll the settings panel
-  const bb = await c.page.locator(sel).first().boundingBox();
+/* Live balloons with their screen position (CSS px) and whether a tap on them is right now. */
+const balloons = page => page.evaluate(() => {
+  const w = KB.debug.world, m = w.cur && w.cur.mode;
+  return w.balloons.map(b => {
+    const s = KB.debug.balloonScreen(b.id);
+    return { id: b.id, state: b.state, popT: b.popT, cool: b.cool, tap: w.canTap(b), right: m === 'count' ? true : m === 'ask' ? b.id === w.target : !!b.answer,
+      nameValue: b.nameValue, x: b.x, y: b.y, hx: b.hx, hy: b.hy, size: b.size, sx: s.x, sy: s.y, r: s.r };
+  });
+});
+async function waitInteractive(page, timeout = 20000) {
+  await page.waitForFunction(() => { const w = KB.debug.world; return KB.debug.mode === 'play' && w.state === 'round' && w.interactive && !w.solved && w.balloons.some(b => w.canTap(b)); }, null, { timeout });
+  await sleep(120);
+}
+async function waitState(page, st, timeout = 20000) {
+  await page.waitForFunction(st => KB.debug.world.state === st, st, { timeout });
+}
+/* A REAL touch tap at a balloon's current centre (balloons bob: re-read right before tapping). */
+async function tapBalloon(c, id) {
+  const p = await c.page.evaluate(id => KB.debug.balloonScreen(id), id);
+  if (!p) throw new Error('no balloon ' + id);
+  await c.page.touchscreen.tap(p.x, p.y);
+  return p;
+}
+/* Pick a point on the empty sky far (> hit radius + 40 px) from every balloon and from Miu / the sign. */
+const emptySky = page => page.evaluate(() => {
+  const w = KB.debug.world, v = KB.debug.view(), L = w.layout, P = L.play;
+  let best = null, bd = -1;
+  for (let gx = 0; gx <= 10; gx++) for (let gy = 0; gy <= 8; gy++) {
+    const x = P.x + P.w * gx / 10, y = P.y + P.h * gy / 8;
+    if (x < L.sign.x + 140 && y > L.groundY - 340) continue;
+    let d = 1e9;
+    for (const b of w.balloons) if (b.state !== 'gone') d = Math.min(d, Math.hypot(b.x - x, b.y - y) - (0.6 * b.size + 14));
+    if (d > bd) { bd = d; best = { x, y }; }
+  }
+  return best && { x: v.left + best.x * v.s, y: v.top + best.y * v.s, clear: bd };
+});
+const nanCheck = page => page.evaluate(() => {
+  const w = KB.debug.world, bad = [];
+  const fin = (o, ks, tag) => ks.forEach(k => { if (o[k] != null && !isFinite(o[k])) bad.push(tag + '.' + k + '=' + o[k]); });
+  for (const b of w.balloons) { fin(b, ['x', 'y', 'rot', 'size', 'sx', 'sy', 'hx', 'hy', 'vx', 'vy'], 'b' + b.id); (b.string || []).forEach((p, i) => fin(p, ['x', 'y'], 'b' + b.id + 's' + i)); }
+  for (const f of w.friends) fin(f, ['x', 'y', 'rot', 'sx', 'sy'], 'f' + f.id);
+  fin(w.miu, ['lookX', 'lookY', 'hop'], 'miu');
+  return bad;
+});
+
+/* ---------- CDP touch helpers ---------- */
+async function touch(cdp, type, pts) {
+  await cdp.send('Input.dispatchTouchEvent', { type, touchPoints: pts.map(p => ({ x: p.x, y: p.y, id: p.id || 0, radiusX: 4, radiusY: 4, force: 1 })) });
+}
+async function elCenter(page, sel) {
+  const bb = await page.locator(sel).first().boundingBox();
   if (!bb) throw new Error('no box for ' + sel);
-  await tap(c, bb.x + bb.width / 2, bb.y + bb.height / 2);
-  await sleep(60);
+  return { x: bb.x + bb.width / 2, y: bb.y + bb.height / 2 };
 }
-const FLAKES = [];
-async function drag(c, from, to, opt = {}) {
-  const steps = opt.steps || 14;
-  for (let attempt = 0; ; attempt++) {
-    await touch(c.cdp, 'touchStart', [from]);
-    await sleep(60);
-    if (opt.expectGrab === false || attempt >= 1) break;
-    const d = await c.page.evaluate(([x, y]) => {
-      const w = KB.debug.world, v = KB.debug.view(), lx = (x - v.left) / v.s, ly = (y - v.top) / v.s;
-      const near = w.items.map(i => ({ id: i.id, s: i.state, d: Math.hypot(i.x - lx, i.y - ly) | 0, r: (0.6 * i.size + 14) | 0 })).sort((a, b) => a.d - b.d)[0];
-      return { held: w.held, mode: KB.debug.mode, state: w.state, lx: lx | 0, ly: ly | 0, near, el: (document.elementFromPoint(x, y) || {}).id };
-    }, [from.x, from.y]);
-    if (d.held) { c.grabbedOnce = true; break; }
-    if (!c.grabbedOnce || !d.near || d.near.d > d.near.r || d.mode !== 'play' || d.state !== 'round') break;
-    FLAKES.push(d);
-    console.log('  note: touchStart did not grab, retrying once ' + JSON.stringify(d));
-    await touch(c.cdp, 'touchEnd', []); await sleep(120);
-  }
-  for (let i = 1; i <= steps; i++) {
-    const u = i / steps;
-    await touch(c.cdp, 'touchMove', [{ x: from.x + (to.x - from.x) * u, y: from.y + (to.y - from.y) * u }]);
-    await sleep(16);
-  }
-  await sleep(opt.settle || 260);           // let the spring catch up with the finger
-  if (opt.beforeUp) await opt.beforeUp();
-  await touch(c.cdp, 'touchEnd', []);
-}
-/** logical → CSS px */
-async function css(page, x, y) { return page.evaluate(([x, y]) => { const v = KB.debug.view(); return { x: v.left + x * v.s, y: v.top + y * v.s }; }, [x, y]); }
-async function waitRound(page, timeout = 15000) {
-  await page.waitForFunction(() => KB.debug.mode === 'play' && KB.debug.world.state === 'round' && KB.debug.world.interactive &&
-    KB.debug.world.items.every(i => i.state === 'idle' || i.state === 'in'), null, { timeout });
-}
-async function roundInfo(page) {
-  return page.evaluate(() => {
-    const w = KB.debug.world;
-    return { mode: w.cur && w.cur.mode, round: w.round, level: w.level, topic: w.topic, target: w.target, queue: (w.queue || []).slice(),
-      items: w.items.map(i => ({ id: i.id, answer: i.answer, goal: w.goalOf(i), x: i.x, y: i.y, size: i.size, state: i.state, homeX: i.homeX, homeY: i.homeY })),
-      baskets: w.baskets.map(b => ({ id: b.id, kind: b.kind, label: b.label, x: b.x, y: b.y, w: b.w, h: b.h, top: b.top, bottom: b.bottom, need: b.need, count: b.count, glow: b.glow })),
-      layout: w.layout };
-  });
-}
-async function dragItemToBasket(c, itemId, basketId, opt) {
-  const r = await roundInfo(c.page);
-  const it = r.items.find(i => i.id === itemId), b = r.baskets.find(x => x.id === basketId);
-  const from = await css(c.page, it.x, it.y), to = await css(c.page, b.x, b.top + b.h * 0.15);
-  await drag(c, from, to, opt);
-}
-async function startPlay(c) { await tapEl(c, '#btnPlay'); await waitRound(c.page); }
-
-/** An empty point (logical) where a dropped seed is a miss: prefers the snow below/between the pots, else open sky. */
-async function emptyPoint(page, preferSnow = true) {
-  return page.evaluate(pref => {
-    const w = KB.debug.world, L = w.layout, v = KB.debug.view();
-    const hit = (x, y) => {
-      const el = document.elementFromPoint(v.left + x * v.s, v.top + y * v.s);
-      if (!el || el.id !== 'game') return true;                         // HUD / bubble cover it
-      // a seed held at the finger centre rides 10 px above it; check finger point and seed point
-      if (w.potAt(x, y) || w.potAt(x, y - 10) || w.potAt(x, y - 30) || w.potAt(x, y + 10)) return true;
-      if (Math.abs(x - L.lumi.x) < L.lumi.h * 0.6 && y < L.lumi.y + 20 && y > L.lumi.y - L.lumi.h * 1.1) return true;
-      return w.items.some(i => i.state !== 'leave' && Math.hypot(i.x - x, i.y - y) < 0.6 * i.size + 30);
-    };
-    if (pref) {
-      for (let y = L.H - 18; y > L.groundY; y -= 8)
-        for (let x = 60; x < L.W - 60; x += 12) if (!hit(x, y)) return { x, y, where: 'snow' };
-    }
-    const P = w.playRect || L.play;
-    for (let y = P.y + 10; y < P.y + P.h; y += 10)
-      for (let x = P.x + 10; x < P.x + P.w; x += 12) if (!hit(x, y)) return { x, y, where: 'sky' };
-    return null;
-  }, preferSnow);
-}
-
-/* Layout validator: idle items inside the play band, pots on screen, nothing under HUD / bubble. */
-async function validateLayout(page) {
-  return page.evaluate(() => {
-    const w = KB.debug.world, L = w.layout, v = KB.debug.view(), P = w.playRect || L.play, probs = [];
-    const toCss = (x, y, wd, ht) => ({ l: v.left + x * v.s, t: v.top + y * v.s, r: v.left + (x + wd) * v.s, b: v.top + (y + ht) * v.s });
-    const rectOf = id => { const e = document.getElementById(id); if (!e || e.classList.contains('hidden')) return null; const r = e.getBoundingClientRect(); return r.width ? { l: r.left, t: r.top, r: r.right, b: r.bottom } : null; };
-    const hud = rectOf('hud'), bub = rectOf('bubble');
-    const ov = (a, b) => a && b && a.l < b.r && a.r > b.l && a.t < b.b && a.b > b.t;
-    const tol = 8;
-    for (const it of w.items) {
-      if (it.state === 'leave') continue;
-      const hs = it.size / 2;
-      if (it.state === 'idle' || it.state === 'appear') {
-        if (it.homeX - hs < P.x - tol || it.homeX + hs > P.x + P.w + tol || it.homeY - hs < P.y - tol || it.homeY + hs > P.y + P.h + tol)
-          probs.push(`${it.id} home outside play (${it.homeX | 0},${it.homeY | 0}) play=${P.x | 0},${P.y | 0},${P.w | 0},${P.h | 0}`);
-        if (Math.abs(it.x - it.homeX) > 6 || Math.abs(it.y - it.homeY) > 6) probs.push(`${it.id} idle but not at home`);
-      }
-      if (it.x - hs < -2 || it.x + hs > L.W + 2 || it.y - hs < -2 || it.y + hs > L.H + 2) probs.push(`${it.id} off-screen (${it.x | 0},${it.y | 0}) ${it.state}`);
-      if (it.state === 'idle') {
-        const r = toCss(it.x - hs, it.y - hs, it.size, it.size);
-        if (ov(r, hud)) probs.push(`${it.id} under HUD`);
-        if (ov(r, bub)) probs.push(`${it.id} under bubble`);
-      }
-      if (it.state === 'in') {
-        const b = w.baskets.find(b => b.id === it.basketId);
-        if (!b || Math.abs(it.x - b.x) > b.w / 2 + 5 || it.y < b.top - 40 || it.y > b.bottom) probs.push(`${it.id} 'in' but not in its pot`);
-      }
-    }
-    for (const b of w.baskets) {
-      if (b.x - b.w / 2 < -1 || b.x + b.w / 2 > L.W + 1 || b.bottom > L.H + 1) probs.push(`pot ${b.id} off-screen`);
-      const r = toCss(b.x - b.w / 2, b.top, b.w, b.h);
-      if (ov(r, hud)) probs.push(`pot ${b.id} under HUD`);
-    }
-    if (ov(hud, bub)) probs.push('bubble overlaps HUD');
-    if (w.held) { const it = w.items.find(i => i.id === w.held); if (!it || it.state !== 'drag') probs.push('held id but item not dragging'); }
-    for (const it of w.items) if (it.state === 'drag' && it.id !== w.held) probs.push(`${it.id} stuck in drag`);
-    return probs;
-  });
+async function tapEl(c, sel) { const p = await elCenter(c.page, sel); await c.page.touchscreen.tap(p.x, p.y); await sleep(80); }
+async function startGame(c, speed = 1) {
+  await c.page.evaluate(s => { KB.debug.setSpeed(s); KB.debug.startGame(); }, speed);
 }
 
 /* ======================================================================= groups */
-
 async function gBoot() {
   for (const d of ALL) {
     const c = await open(d, 'mute=1&seed=3');
-    const t = await c.page.evaluate(() => ({ mode: KB.debug.mode, title: !document.getElementById('scrTitle').classList.contains('hidden'),
-      stars: document.getElementById('titleStars').textContent, age: document.getElementById('titleAge').textContent,
-      logo: document.getElementById('logo1').textContent + ' ' + document.getElementById('logo2').textContent, doc: document.title,
-      hud: document.getElementById('hud').classList.contains('hidden'), loading: document.getElementById('loading').classList.contains('hidden') }));
-    check(`[${d.name}] boot to title`, t.mode === 'title' && t.title && t.hud && t.loading, t);
-    check(`[${d.name}] title shows logo, stars + age`, /Owlet/.test(t.logo) && /Snow Garden/.test(t.logo) && /^\d+$/.test(t.stars) && /4/.test(t.age), t);
-    const bb = await c.page.locator('#btnPlay').boundingBox();
-    check(`[${d.name}] play button on screen, >= 60px`, bb && bb.x >= 0 && bb.y >= 0 && bb.x + bb.width <= d.viewport.width && bb.y + bb.height <= d.viewport.height && bb.width >= 60, bb);
-    await c.page.screenshot({ path: path.join(OUT, d.name + '-title.png') });
-    await sleep(300);
-    check(`[${d.name}] no console errors at boot`, c.errors.length === 0, c.errors);
-    await c.ctx.close();
+    await sleep(700);
+    const st = await c.page.evaluate(() => ({ mode: KB.debug.mode, title: !document.getElementById('scrTitle').classList.contains('hidden'),
+      loading: !document.getElementById('loading').classList.contains('hidden'), logo: document.querySelector('.logo').textContent.trim(),
+      play: document.getElementById('btnPlay').getBoundingClientRect(), W: KB.debug.getState().W, H: KB.debug.getState().H, sw: document.documentElement.scrollWidth, iw: innerWidth }));
+    check(`boot/${d.name}: title shown, loader gone`, st.mode === 'title' && st.title && !st.loading, st);
+    check(`boot/${d.name}: play button on screen & ≥ 60 px`, st.play.width >= 60 && st.play.left >= 0 && st.play.right <= d.viewport.width && st.play.bottom <= d.viewport.height, st.play);
+    check(`boot/${d.name}: logical short side 720`, Math.min(st.W, st.H) === 720, { W: st.W, H: st.H });
+    check(`boot/${d.name}: no horizontal overflow`, st.sw <= st.iw + 1, { sw: st.sw, iw: st.iw });
+    // tap Play with a real touch
+    await tapEl(c, '#btnPlay');
+    await sleep(500);
+    check(`boot/${d.name}: Play (touch) starts the game`, (await mode(c.page)) === 'play' && await visible(c.page, 'hud'), await mode(c.page));
+    check(`boot/${d.name}: zero console errors`, c.errors.length === 0, c.errors);
+    await c.close();
   }
 }
 
 async function gLang() {
-  const d = DEV.iphoneP;
-  const c = await open(d, 'mute=1', { storage: { 'kb:settings': JSON.stringify({ lang: 'en', age: 5 }) } });
-  const read = () => c.page.evaluate(() => ({ logo: document.getElementById('logo1').textContent + ' ' + document.getElementById('logo2').textContent,
-    tag: document.getElementById('tagline').textContent, lang: document.documentElement.lang, doc: document.title,
-    viOn: document.querySelector('#scrTitle .chip[data-lang="vi"]').classList.contains('on'), age: document.getElementById('titleAge').textContent,
-    tTitle: KB.I18N.t(document.documentElement.lang, 'ui.title') }));
-  const before = await read();
-  check('[lang] EN title texts', /Owlet/.test(before.logo) && before.lang === 'en' && before.tag.length > 0 && before.doc === before.tTitle, before);
-  await tapEl(c, '#scrTitle .chip[data-lang="vi"]');
-  await sleep(150);
-  const after = await read();
-  check('[lang] chip EN→VI changes logo/tagline/document title (ui.title)', after.logo === 'Vườn Hoa Cú Tuyết' && after.tag !== before.tag && VI_RE.test(after.tag) && after.lang === 'vi' && after.viOn && after.doc === 'Vườn Hoa Cú Tuyết', { before, after });
-  check('[lang] VI title shows age in Vietnamese', /Tuổi 5/.test(after.age), after.age);
+  const ctx = await browser.newContext({ viewport: DEV.iphoneP.viewport, deviceScaleFactor: 3, isMobile: true, hasTouch: true, locale: 'en-US' });
+  const c = await open(DEV.iphoneP, 'mute=1', { ctx });
+  const read = () => c.page.evaluate(() => ({ l1: document.getElementById('logo1').textContent, l2: document.getElementById('logo2').textContent,
+    title: document.title, lang: document.documentElement.lang, on: [...document.querySelectorAll('.title-screen [data-lang]')].filter(b => b.classList.contains('on')).map(b => b.dataset.lang),
+    tag: document.getElementById('tagline').textContent, age: document.getElementById('titleAge').textContent, gear: document.querySelector('.gear-tip').textContent }));
+  const a = await read();
+  check('lang: default EN title/logo', a.lang === 'en' && /Kitten/.test(a.l1 + a.l2) && /Kitten/.test(a.title) && a.on.join() === 'en', a);
+  await tapEl(c, '.title-screen [data-lang="vi"]');
+  const b = await read();
+  check('lang: VI chip updates logo + document.title + html lang', b.lang === 'vi' && b.l1 === 'Bóng Bay' && /Mèo Con/.test(b.l2) && /Bóng Bay/.test(b.title) && b.on.join() === 'vi', b);
+  check('lang: VI tagline / age / gear tip translated', !badText(b.tag || 'x') && /Tuổi|tuổi/.test(b.age) && b.gear !== a.gear, b);
   const vl = await c.page.evaluate(() => KB.debug.voiceLog.slice(-1)[0]);
-  check('[lang] chip tap greets in Vietnamese', vl && vl.lang === 'vi' && VI_RE.test(vl.text), vl);
+  check('lang: switching says a welcome line in VI', vl && vl.lang === 'vi' && !badText(vl.text), vl);
   await c.page.reload(); await waitTitle(c.page);
-  const re = await c.page.evaluate(() => [document.getElementById('logo1').textContent, document.documentElement.lang, JSON.parse(localStorage.getItem('kb:settings') || '{}').lang]);
-  check('[lang] VI persists after reload (sg:settings)', re[0] === 'Vườn Hoa' && re[1] === 'vi' && re[2] === 'vi', re);
-  await tapEl(c, '#scrTitle .chip[data-lang="en"]'); await sleep(100);
-  const back = await read();
-  check('[lang] VI→EN switches back', /Owlet/.test(back.logo) && back.lang === 'en', back);
-  check('[lang] no console errors', c.errors.length === 0, c.errors);
-  await c.ctx.close();
+  const r = await read();
+  check('lang: VI choice persists across reload', r.lang === 'vi' && r.l1 === 'Bóng Bay', r);
+  await tapEl(c, '.title-screen [data-lang="en"]');
+  const e = await read();
+  check('lang: back to EN', e.lang === 'en' && /Kitten/.test(e.title), e);
+  // in-game prompt follows the language
+  await c.page.goto(srv.url + '?mute=1&seed=5&lang=vi'); await waitTitle(c.page); await installEv(c.page);
+  await startGame(c, 2); await waitInteractive(c.page);
+  const bub = await c.page.evaluate(() => document.getElementById('bubbleText').textContent);
+  check('lang: ?lang=vi → Vietnamese prompt in the bubble', /[ăâđêôơưàáạảãèéẹẻẽìíịỉĩòóọỏõùúụủũ]/i.test(bub) && !badText(bub), bub);
+  check('lang: zero console errors', c.errors.length === 0, c.errors);
+  await ctx.close();
 }
 
 async function gGate() {
-  for (const d of [DEV.iphoneP, DEV.ipadL]) {
-    const c = await open(d, 'mute=1');
-    const g = await c.page.locator('#btnParents').boundingBox();
-    const gx = g.x + g.width / 2, gy = g.y + g.height / 2;
-    check(`[gate ${d.name}] gear is >= 44px tap target`, g.width >= 44 && g.height >= 44, g);
-    await tap(c, gx, gy); await sleep(500);
-    check(`[gate ${d.name}] short tap on gear does NOT open settings`, !(await visible(c.page, 'scrSettings')));
-    await touch(c.cdp, 'touchStart', [{ x: gx, y: gy }]); await sleep(1200); await touch(c.cdp, 'touchEnd', []); await sleep(300);
-    check(`[gate ${d.name}] 1.2 s hold does NOT open settings`, !(await visible(c.page, 'scrSettings')));
-    await touch(c.cdp, 'touchStart', [{ x: gx, y: gy }]); await sleep(400);
-    await touch(c.cdp, 'touchMove', [{ x: gx - 150, y: gy + 150 }]); await sleep(2000); await touch(c.cdp, 'touchEnd', []); await sleep(200);
-    check(`[gate ${d.name}] hold that slides off the gear is cancelled`, !(await visible(c.page, 'scrSettings')));
-    await touch(c.cdp, 'touchStart', [{ x: gx, y: gy }]); await sleep(2200); await touch(c.cdp, 'touchEnd', []); await sleep(300);
-    check(`[gate ${d.name}] 2.2 s touch hold opens settings`, await visible(c.page, 'scrSettings'));
-    await c.page.screenshot({ path: path.join(OUT, d.name + '-settings.png') });
-    const pan = await c.page.evaluate(() => { const p = document.querySelector('.settings-panel').getBoundingClientRect(); return { b: p.bottom, t: p.top, vh: innerHeight }; });
-    check(`[gate ${d.name}] settings panel inside viewport`, pan.t >= 0 && pan.b <= pan.vh + 1, pan);
-    await tapEl(c, '#btnSettingsDone'); await sleep(200);
-    check(`[gate ${d.name}] Done returns to title`, (await visible(c.page, 'scrTitle')) && !(await visible(c.page, 'scrSettings')));
-    await c.page.mouse.move(gx, gy); await c.page.mouse.down(); await sleep(400); await c.page.mouse.up(); await sleep(300);
-    check(`[gate ${d.name}] short mouse click does NOT open settings`, !(await visible(c.page, 'scrSettings')));
-    await c.page.mouse.down(); await sleep(2200); await c.page.mouse.up(); await sleep(300);
-    check(`[gate ${d.name}] 2.2 s mouse hold opens settings`, await visible(c.page, 'scrSettings'));
-    check(`[gate ${d.name}] no console errors`, c.errors.length === 0, c.errors);
-    await c.ctx.close();
-  }
+  const c = await open(DEV.iphoneP, 'mute=1');
+  const g = await elCenter(c.page, '#btnParents');
+  // short tap
+  await c.page.touchscreen.tap(g.x, g.y); await sleep(400);
+  check('gate: short tap on ⚙ does NOT open settings', !(await visible(c.page, 'scrSettings')));
+  // 1 s hold
+  await touch(c.cdp, 'touchStart', [g]); await sleep(1000); await touch(c.cdp, 'touchEnd', []); await sleep(300);
+  check('gate: 1 s hold does NOT open settings', !(await visible(c.page, 'scrSettings')));
+  // hold that slides away
+  await touch(c.cdp, 'touchStart', [g]); await sleep(400);
+  await touch(c.cdp, 'touchMove', [{ x: g.x - 150, y: g.y + 200 }]); await sleep(1900); await touch(c.cdp, 'touchEnd', []); await sleep(200);
+  check('gate: hold that slides off the gear is cancelled', !(await visible(c.page, 'scrSettings')));
+  // 2 s+ hold
+  await touch(c.cdp, 'touchStart', [g]); await sleep(1000);
+  const mid = await c.page.evaluate(() => +getComputedStyle(document.getElementById('btnParents')).getPropertyValue('--p') || +document.getElementById('btnParents').style.getPropertyValue('--p'));
+  await sleep(1300); await touch(c.cdp, 'touchEnd', []); await sleep(300);
+  check('gate: hold shows progress', mid > 0.3 && mid < 0.8, mid);
+  check('gate: 2 s hold with real touch opens settings', await visible(c.page, 'scrSettings'));
+  check('gate: title hidden behind settings', !(await visible(c.page, 'scrTitle')));
+  check('gate: zero console errors', c.errors.length === 0, c.errors);
+  await c.close();
 }
 
 async function openSettingsByHold(c) {
-  const g = await c.page.locator('#btnParents').boundingBox();
-  await touch(c.cdp, 'touchStart', [{ x: g.x + g.width / 2, y: g.y + g.height / 2 }]); await sleep(2200); await touch(c.cdp, 'touchEnd', []); await sleep(250);
+  const g = await elCenter(c.page, '#btnParents');
+  await touch(c.cdp, 'touchStart', [g]); await sleep(2300); await touch(c.cdp, 'touchEnd', []); await sleep(300);
   return visible(c.page, 'scrSettings');
 }
-
 async function gSettings() {
-  const d = DEV.iphoneP;
-  const c = await open(d, 'mute=1', { storage: { 'kb:settings': JSON.stringify({ lang: 'en', age: 4 }) } });
-  check('[settings] gate opens', await openSettingsByHold(c));
-  await tapEl(c, '#ageChips .chip[data-age="6"]');
-  await tapEl(c, '#scrSettings .chip[data-lang="vi"]');
-  await c.page.locator('#inpName').fill('Linh');
-  for (const id of ['optSfx', 'optMusic', 'optMic']) { await tapEl(c, `label:has(#${id})`); }
-  await sleep(150);
-  const ls = await c.page.evaluate(() => Object.keys(localStorage));
-  const st = await c.page.evaluate(() => JSON.parse(localStorage.getItem('kb:settings') || 'null'));
-  check('[settings] changes saved to sg:settings', st && st.age === 6 && st.lang === 'vi' && st.name === 'Linh' && st.sfx === false && st.music === false && st.mic === false && st.voice === true, st);
-  check('[settings] every storage key uses the sg: prefix', ls.every(k => k.startsWith('kb:')), ls);
-  await tapEl(c, '#btnSettingsDone'); await sleep(150);
-  const ta = await c.page.evaluate(() => document.getElementById('titleAge').textContent);
-  check('[settings] title age updates after Done', /6/.test(ta), ta);
-  await c.page.reload(); await waitTitle(c.page); await installEv(c.page);
+  const ctx = await browser.newContext({ viewport: DEV.iphoneP.viewport, deviceScaleFactor: 3, isMobile: true, hasTouch: true, locale: 'en-US' });
+  let c = await open(DEV.iphoneP, 'mute=1', { ctx });
+  check('settings: opened by hold', await openSettingsByHold(c));
+  await tapEl(c, '#ageChips [data-age="6"]');
+  await c.page.locator('#inpName').fill('Mầm');
+  await tapEl(c, '#scrSettings label.toggle:has(#optMusic)');
+  await tapEl(c, '#scrSettings [data-lang="vi"]');
+  const s1 = await c.page.evaluate(() => JSON.parse(localStorage.getItem('kb:settings') || '{}'));
+  check('settings: saved to localStorage kb:settings', s1.age === 6 && s1.name === 'Mầm' && s1.music === false && s1.lang === 'vi', s1);
+  await tapEl(c, '#btnSettingsDone');
+  check('settings: Done returns to title', await visible(c.page, 'scrTitle') && !(await visible(c.page, 'scrSettings')));
+  const ageTxt = await c.page.evaluate(() => document.getElementById('titleAge').textContent);
+  check('settings: title shows the new age', /6/.test(ageTxt), ageTxt);
+  await c.page.reload(); await waitTitle(c.page);
+  const st = await c.page.evaluate(() => KB.debug.getState().settings);
+  check('settings: persist across reload (age, name, music, lang)', st.age === 6 && st.name === 'Mầm' && st.music === false && st.lang === 'vi', st);
+  const chips = await c.page.evaluate(() => { KB.UI.refreshSettings(); return [...document.querySelectorAll('#ageChips .chip.on')].map(b => b.dataset.age); });
+  check('settings: age chip 6 highlighted after reload', chips.join() === '6', chips);
+  // child's name used in praise
+  await installEv(c.page); await startGame(c, 2); await waitInteractive(c.page);
+  await c.page.evaluate(() => KB.debug.voiceLog.length = 0);
+  const r = (await balloons(c.page)).find(b => b.tap && b.right);
+  await tapBalloon(c, r.id); await sleep(500);
+  const lines = await c.page.evaluate(() => KB.debug.voiceLog.map(l => l.text));
+  check('settings: lines are clean after a tap (no raw keys)', lines.length > 0 && lines.every(l => !badText(l)), lines);
+  await c.page.close();
+
+  // URL flags are never saved
+  await c.page.evaluate && null;
+  const ctx2 = await browser.newContext({ viewport: DEV.iphoneP.viewport, deviceScaleFactor: 3, isMobile: true, hasTouch: true, locale: 'en-US' });
+  c = await open(DEV.iphoneP, 'mute=1&lang=vi&age=6', { ctx: ctx2 });
+  const t1 = await c.page.evaluate(() => ({ l1: document.getElementById('logo1').textContent, age: document.getElementById('titleAge').textContent, ls: localStorage.getItem('kb:settings') }));
+  check('flags: ?lang=vi&age=6 applied for the session', t1.l1 === 'Bóng Bay' && /6/.test(t1.age), t1);
+  check('flags: nothing saved just by loading with flags', t1.ls == null, t1.ls);
+  // play one tap so progress is saved, and change an unrelated setting (sound) → settings saved
   await openSettingsByHold(c);
-  const dom = await c.page.evaluate(() => ({ age: [...document.querySelectorAll('#ageChips .chip.on')].map(b => b.dataset.age), name: document.getElementById('inpName').value,
-    sfx: document.getElementById('optSfx').checked, music: document.getElementById('optMusic').checked, voice: document.getElementById('optVoice').checked, mic: document.getElementById('optMic').checked, lang: document.documentElement.lang }));
-  check('[settings] persist across reload (DOM)', dom.age.join() === '6' && dom.name === 'Linh' && !dom.sfx && !dom.music && dom.voice && !dom.mic && dom.lang === 'vi', dom);
-  await c.page.locator('#inpName').fill('{child}<b>');
-  await sleep(100);
-  const nm = await c.page.evaluate(() => JSON.parse(localStorage.getItem('kb:settings')).name);
-  check('[settings] name strips {} <>', !/[{}<>]/.test(nm), nm);
-  await c.page.locator('#inpName').fill('Linh');
-  await tapEl(c, '#ageChips .chip[data-age="7"]'); await tapEl(c, '#btnSettingsDone'); await sleep(100);
-  const t7 = await c.page.evaluate(() => document.getElementById('titleAge').textContent);
-  check('[settings] age 7 shows 7+', /7\+/.test(t7), t7);
-  await startPlay(c);
-  const wa = await c.page.evaluate(() => ({ age: KB.debug.world.age, lang: KB.debug.world.lang, levels: KB.debug.world.levels }));
-  check('[settings] game starts at saved age 7 + saved lang vi', wa.age === 7 && wa.lang === 'vi', wa);
-  check('[settings] no console errors', c.errors.length === 0, c.errors);
-  await c.ctx.close();
-
-  // ---- URL flags must not leak into saved settings
-  const c2 = await open(d, 'lang=vi&age=6&mute=1', { storage: { 'kb:settings': JSON.stringify({ lang: 'en', age: 4, name: '', sfx: true, music: true, voice: true, mic: true }) } });
-  let s0 = await c2.page.evaluate(() => JSON.parse(localStorage.getItem('kb:settings')));
-  check('[flags] boot with ?lang=vi&age=6&mute=1 does not write settings', s0.lang === 'en' && s0.age === 4, s0);
-  const ui = await c2.page.evaluate(() => ({ lang: document.documentElement.lang, age: document.getElementById('titleAge').textContent }));
-  check('[flags] ?lang=vi applies to the UI for the session', ui.lang === 'vi', ui);
-  check('[flags] title age reflects ?age=6 override', /6/.test(ui.age), ui);
-  await openSettingsByHold(c2);
-  await tapEl(c2, 'label:has(#optSfx)'); await sleep(100);
-  s0 = await c2.page.evaluate(() => JSON.parse(localStorage.getItem('kb:settings')));
-  check('[flags] toggling a setting under ?lang=vi does not save lang=vi', s0.lang === 'en', s0);
-  check('[flags] toggling a setting under ?age=6 does not save age=6', s0.age === 4, s0);
-  check('[flags] ?mute=1 not saved', !('mute' in s0) && s0.sfx === false, s0);
-  await c2.ctx.close();
+  await tapEl(c, '#scrSettings label.toggle:has(#optSfx)');
+  const s2 = await c.page.evaluate(() => JSON.parse(localStorage.getItem('kb:settings') || '{}'));
+  check('flags: saving another setting does not store the flag values', s2.lang === 'en' && s2.age === 4 && s2.sfx === false, s2);
+  const chips2 = await c.page.evaluate(() => [...document.querySelectorAll('#ageChips .chip.on')].map(b => b.dataset.age).join());
+  check('flags: settings panel shows the age actually being played (6)', chips2 === '6', 'age chips highlight ' + chips2 + ' while the session plays age 6 (URL flag)');
+  await tapEl(c, '#ageChips [data-age="5"]');
+  const t5 = await c.page.evaluate(() => ({ title: document.getElementById('titleAge').textContent, saved: JSON.parse(localStorage.getItem('kb:settings')).age }));
+  check('flags: a parent picking age 5 in settings is applied to this session', /5/.test(t5.title), Object.assign(t5, { note: 'URL ?age=6 keeps overriding the chip the parent just tapped' }));
+  await tapEl(c, '#ageChips [data-age="4"]');
+  await tapEl(c, '#btnSettingsDone');
+  await c.page.goto(srv.url + '?mute=1'); await waitTitle(c.page);
+  const t2 = await c.page.evaluate(() => ({ l1: document.getElementById('logo1').textContent, age: document.getElementById('titleAge').textContent, s: KB.debug.getState().settings }));
+  check('flags: without flags → saved EN, age 4 again', t2.l1 !== 'Bóng Bay' && /4/.test(t2.age) && t2.s.sfx === false, t2);
+  check('settings: zero console errors', c.errors.length === 0, c.errors);
+  await ctx.close(); await ctx2.close();
 }
 
-/* Real touch input on the canvas: correct drop → plant/grow/bloom, wrong, miss on snow, tap, hint, Lumi, 2nd finger. */
-async function gInput() {
+/* Basic real-touch taps on every viewport: right → correct + pop, wrong → wrong (gentle), empty sky → nothing. */
+async function gTap() {
   for (const d of ALL) {
-    const N = `[${d.name}]`;
-    const c = await open(d, 'mute=1&seed=4&age=4');
-    const p = c.page;
-    await startPlay(c);
-    let r = await roundInfo(p);
-    check(`${N} round 1 is sort mode with >= 2 pots`, r.mode === 'sort' && r.baskets.length >= 2 && r.baskets.every(b => b.kind === 'pot'), { mode: r.mode, n: r.baskets.length });
-    let probs = await validateLayout(p);
-    check(`${N} initial layout valid`, probs.length === 0, probs);
-    const bub = await p.evaluate(() => document.getElementById('bubbleText').textContent);
-    check(`${N} prompt shown in bubble`, !badText(bub), bub);
-
-    // --- HUD / bubble taps never grab; bubble repeats the prompt
-    await clearEv(p);
-    const vn0 = await voiceN(p);
-    await tapEl(c, '#hud .hud-stars'); await sleep(400);
-    await tapEl(c, '#bubble'); await sleep(200);
-    let ev = await evTypes(p);
-    check(`${N} tapping HUD / bubble never grabs`, !ev.includes('grab') && (await p.evaluate(() => KB.debug.world.held)) == null, ev);
-    const lastLine = await p.evaluate(() => KB.debug.voiceLog.slice(-1)[0].text);
-    check(`${N} tapping bubble repeats the prompt`, (await voiceN(p)) > vn0 && lastLine === bub, { lastLine, bub });
-
-    // --- tap Lumi repeats the prompt
-    const lu = r.layout.lumi;
-    const lp = await css(p, lu.x, lu.y - lu.h * 0.5);
-    const vn1 = await voiceN(p);
-    await clearEv(p);
-    await tap(c, lp.x, lp.y); await sleep(250);
-    const ll = await p.evaluate(() => KB.debug.voiceLog.slice(-1)[0].text);
-    check(`${N} tap Lumi repeats the prompt (voiceLog grows)`, (await voiceN(p)) > vn1 && ll === bub && !(await evTypes(p)).includes('grab'),
-      { ll, bub, el: await p.evaluate(([x, y]) => (document.elementFromPoint(x, y) || {}).id, [lp.x, lp.y]) });
-
-    // --- tap on a seed is not a drop
-    r = await roundInfo(p);
-    const T0 = r.items.find(i => i.state === 'idle');
-    await clearEv(p);
-    const vnT = await voiceN(p);
-    const tp = await css(p, T0.x, T0.y);
-    await tap(c, tp.x, tp.y); await sleep(500);
-    ev = await evTypes(p);
-    const tI = await itemOf(p, T0.id);
-    check(`${N} quick tap on a seed = 'tap' (no drop/miss/wrong), seed stays home, name spoken`,
-      ev.includes('tap') && !ev.includes('drop') && !ev.includes('miss') && !ev.includes('wrong') && tI.state === 'idle' && tI.misses === 0 && (await voiceN(p)) > vnT, { ev, tI });
-
-    // --- correct drop → planted, grows and blooms
-    r = await roundInfo(p);
-    const A = r.items.find(i => i.state === 'idle');
-    await clearEv(p);
-    const vn2 = await voiceN(p);
-    const aFrom = await css(p, A.x, A.y), goalB = r.baskets.find(b => b.id === A.goal);
-    const aTo = await css(p, goalB.x, goalB.top + goalB.h * 0.15);
-    let follow = null;
-    await drag(c, aFrom, aTo, { beforeUp: async () => {
-      follow = await p.evaluate(([id, tx, ty]) => { const w = KB.debug.world, v = KB.debug.view(), it = w.items.find(i => i.id === id); return { held: w.held, state: it.state, dx: Math.abs(it.x - (tx - v.left) / v.s), dy: Math.abs(it.y - (ty - v.top) / v.s) }; }, [A.id, aTo.x, aTo.y]);
-    } });
-    check(`${N} dragged seed follows the finger`, follow && follow.held === A.id && follow.state === 'drag' && follow.dx < 30 && follow.dy < 40, follow);
-    await p.waitForFunction(id => { const i = KB.debug.world.items.find(i => i.id === id); return !i || i.grow >= 1 || i.state === 'leave'; }, A.id, { timeout: 5000 }).catch(() => {});
-    ev = await evTypes(p);
-    const aI = await itemOf(p, A.id);
-    const bl = (await evOf(p, 'bloom')).find(e => e.id === A.id);
-    check(`${N} correct drop → grab+drop+correct+land, seed planted in its pot`, ['grab', 'drop', 'correct', 'land'].every(t => ev.includes(t)) && aI && aI.planted && aI.basketId === A.goal, { ev, aI });
-    check(`${N} planted seed grows (grow→1) and blooms (bloom event)`, aI && (aI.grow >= 0.999 || aI.state === 'leave') && aI.bloomed && bl && bl.basketId === A.goal && bl.n >= 1, { aI, bl });
-    check(`${N} correct drop makes Lumi speak`, (await voiceN(p)) > vn2);
-
-    // --- wrong drop → bounces home, not planted
-    r = await roundInfo(p);
-    const B = r.items.find(i => i.state === 'idle');
-    const wrongB = r.baskets.find(b => b.id !== B.goal);
-    await clearEv(p);
-    await dragItemToBasket(c, B.id, wrongB.id);
-    await sleep(150);
-    const midB = await itemOf(p, B.id);
-    await sleep(800);
-    ev = await evTypes(p);
-    const bs = await itemOf(p, B.id);
-    const wr = (await evOf(p, 'wrong'))[0];
-    check(`${N} drag to wrong pot → wrong event, seed bounces home, not planted`, ev.includes('wrong') && !ev.includes('correct') && midB.state === 'return' &&
-      bs.state === 'idle' && !bs.planted && Math.abs(bs.x - bs.homeX) < 6 && Math.abs(bs.y - bs.homeY) < 6 && wr && wr.target === B.goal, { ev, midB: midB.state, bs, wr });
-
-    // --- miss on empty snow (x2) → hint glows the right pot
-    r = await roundInfo(p);
-    const C = r.items.find(i => i.state === 'idle' && i.id !== B.id) || r.items.find(i => i.state === 'idle');
-    const ep = await emptyPoint(p, true);
-    if (!ep) { check(`${N} found an empty spot to miss on`, false, 'none'); }
-    else {
-      const epc = await css(p, ep.x, ep.y);
-      await clearEv(p);
-      let Ci = await itemOf(p, C.id);
-      await drag(c, await css(p, Ci.x, Ci.y), epc);
-      await sleep(800);
-      ev = await evTypes(p);
-      Ci = await itemOf(p, C.id);
-      check(`${N} drop on empty ${ep.where} → miss, seed returns home, not planted`, ev.includes('miss') && !ev.includes('wrong') && !ev.includes('correct') && Ci.state === 'idle' && !Ci.planted, { ev, ep, Ci });
-      await drag(c, await css(p, Ci.x, Ci.y), epc);
-      await sleep(500);
-      ev = await evTypes(p);
-      const gl = await p.evaluate(id => { const w = KB.debug.world; const it = w.items.find(i => i.id === id); const g = w.goalOf(it); return { goal: g, glows: w.baskets.map(b => [b.id, +b.glow.toFixed(2)]) }; }, C.id);
-      const hintE = (await evOf(p, 'hint'))[0];
-      const gGoal = gl.glows.find(x => x[0] === gl.goal), others = gl.glows.filter(x => x[0] !== gl.goal);
-      check(`${N} two misses on one seed → hint, the right pot glows (others don't)`, ev.filter(e => e === 'miss').length === 2 && hintE && hintE.basketId === gl.goal && gGoal[1] > 0.5 && others.every(o => o[1] === 0), { ev, gl, hintE });
-    }
-
-    // --- second finger ignored
-    await sleep(500);
-    r = await roundInfo(p);
-    const idle = r.items.filter(i => i.state === 'idle');
-    if (idle.length >= 2) {
-      await clearEv(p);
-      const f1 = await css(p, idle[0].x, idle[0].y), f2 = await css(p, idle[1].x, idle[1].y);
-      await touch(c.cdp, 'touchStart', [{ x: f1.x, y: f1.y, id: 0 }]); await sleep(50);
-      await touch(c.cdp, 'touchStart', [{ x: f1.x, y: f1.y, id: 0 }, { x: f2.x, y: f2.y, id: 1 }]); await sleep(50);
-      await touch(c.cdp, 'touchMove', [{ x: f1.x + 20, y: f1.y - 20, id: 0 }, { x: f2.x + 40, y: f2.y - 40, id: 1 }]); await sleep(100);
-      const held = await p.evaluate(() => KB.debug.world.held);
-      await touch(c.cdp, 'touchMove', [{ x: f1.x + 20, y: f1.y - 20, id: 0 }]); await sleep(50);
-      await touch(c.cdp, 'touchEnd', []); await sleep(700);
-      ev = await evTypes(p);
-      check(`${N} second finger ignored (one grab, first seed)`, ev.filter(e => e === 'grab').length === 1 && held === idle[0].id, { ev, held });
-    } else check(`${N} second finger ignored`, true, 'skipped: <2 idle seeds');
-
-    // --- finish the round correctly → roundDone + HUD stars
-    await sleep(400);
-    for (let k = 0; k < 14; k++) {
-      if ((await p.evaluate(() => KB.debug.world.state)) !== 'round') break;
-      r = await roundInfo(p);
-      const it = r.items.find(i => i.state === 'idle');
-      if (!it) { await sleep(300); continue; }
-      await dragItemToBasket(c, it.id, it.goal); await sleep(650);
-    }
-    await p.waitForFunction(() => KB.debug.world.state !== 'round', null, { timeout: 6000 }).catch(() => {});
+    const c = await open(d, 'mute=1&seed=11&age=4');
+    await startGame(c, 1); await waitInteractive(c.page);
+    let bs = await balloons(c.page);
+    const right = bs.find(b => b.tap && b.right), wrong = bs.find(b => b.tap && !b.right);
+    check(`tap/${d.name}: round has a right and a wrong balloon`, right && wrong, bs.map(b => [b.id, b.right, b.state]));
+    // empty sky
+    const sky = await emptySky(c.page);
+    await clearEv(c.page);
+    const d0 = await downs(c.page);
+    await c.page.touchscreen.tap(sky.x, sky.y); await sleep(250);
+    const evE = await c.page.evaluate(() => window.__ev.map(e => e.type).filter(t => t === 'correct' || t === 'wrong' || t === 'pop'));
+    check(`tap/${d.name}: tap on empty sky reaches the world but pops nothing`, (await downs(c.page)) === d0 + 1 && evE.length === 0 && (await mode(c.page)) === 'play', { sky, evE });
+    // wrong
+    await clearEv(c.page);
+    await tapBalloon(c, wrong.id); await sleep(150);
+    const we = await evOf(c.page, 'wrong'), pe = await evOf(c.page, 'pop');
+    check(`tap/${d.name}: wrong balloon → wrong event, no pop`, we.length === 1 && we[0].id === wrong.id && pe.length === 0, { we, pe });
+    const wb = (await balloons(c.page)).find(b => b.id === wrong.id);
+    check(`tap/${d.name}: wrong balloon is gentle (still floating, squashed, not popped)`, wb && (wb.state === 'float' || wb.state === 'rise') && wb.popT < 0, wb);
+    check(`tap/${d.name}: wrong event names the target`, we[0] && we[0].target != null && we[0].targetNameValue != null, we[0]);
+    // wrong balloon comes back home
     await sleep(1600);
-    const hs = await p.evaluate(() => ({ hud: +document.getElementById('hudStars').textContent, stars: KB.debug.world.stars, ev: window.__ev.filter(e => e.type === 'roundDone').map(e => e.stars), blooms: window.__ev.filter(e => e.type === 'bloom').length, lands: window.__ev.filter(e => e.type === 'land').length }));
-    check(`${N} round done after every seed bloomed → stars fly into HUD counter`, hs.ev.length === 1 && hs.stars >= 1 && hs.hud === hs.stars && hs.blooms === hs.lands, hs);
-    check(`${N} input: no console errors`, c.errors.length === 0, c.errors);
-    await c.page.screenshot({ path: path.join(OUT, d.name + '-after-round.png') });
-    await c.ctx.close();
+    const wb2 = (await balloons(c.page)).find(b => b.id === wrong.id);
+    check(`tap/${d.name}: wrong balloon floats back home (< 30 px)`, wb2 && Math.hypot(wb2.x - wb2.hx, wb2.y - wb2.hy) < 30, wb2 && Math.hypot(wb2.x - wb2.hx, wb2.y - wb2.hy));
+    // right
+    await clearEv(c.page);
+    const c0 = await c.page.evaluate(() => KB.debug.stats.correct);
+    await tapBalloon(c, right.id); await sleep(350);
+    const ce = await evOf(c.page, 'correct'), pp = await evOf(c.page, 'pop');
+    check(`tap/${d.name}: right balloon → correct event at touch-down`, ce.length === 1 && ce[0].id === right.id, ce);
+    check(`tap/${d.name}: pop event follows ≈ 0.08 s later`, pp.length === 1 && pp[0].id === right.id && pp[0].at - ce[0].at >= 40 && pp[0].at - ce[0].at < 400, pp[0] && ce[0] && pp[0].at - ce[0].at);
+    check(`tap/${d.name}: stats.correct counted`, (await c.page.evaluate(() => KB.debug.stats.correct)) === c0 + 1);
+    const rb = (await balloons(c.page)).find(b => b.id === right.id);
+    check(`tap/${d.name}: popped balloon is gone from play`, rb && (rb.state === 'pop' || rb.state === 'gone'), rb && rb.state);
+    // finish the round by touch
+    for (let k = 0; k < 10; k++) {
+      const r2 = (await balloons(c.page)).find(b => b.tap && b.right);
+      if (!r2 || await c.page.evaluate(() => KB.debug.world.solved)) break;
+      await tapBalloon(c, r2.id); await sleep(250);
+    }
+    try { await waitState(c.page, 'roundDone', 8000); check(`tap/${d.name}: round ends after all right balloons`, true); }
+    catch (e) { check(`tap/${d.name}: round ends after all right balloons`, false, await c.page.evaluate(() => KB.debug.getState())); }
+    check(`tap/${d.name}: no NaN`, (await nanCheck(c.page)).length === 0, await nanCheck(c.page));
+    check(`tap/${d.name}: zero console errors`, c.errors.length === 0, c.errors);
+    if (results.some(r => !r.ok && r.name.includes(d.name))) await shot(c, 'tap-fail');
+    await c.close();
   }
 }
 
-/* Dispatched PointerEvents (iPad with Pencil/trackpad path) and mouse drag */
-async function gPointer() {
-  const c = await open(DEV.ipadL, 'mute=1&seed=4&age=4');
-  await startPlay(c);
-  let r = await roundInfo(c.page);
-  let it = r.items[0], b = r.baskets.find(x => x.id === it.goal);
-  await clearEv(c.page);
-  await c.page.evaluate(([fx, fy, tx, ty]) => new Promise(res => {
-    const v = KB.debug.view(), cv = document.getElementById('game');
-    const P = (type, x, y) => cv.dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true, pointerId: 7, pointerType: 'touch', isPrimary: true, clientX: v.left + x * v.s, clientY: v.top + y * v.s }));
-    P('pointerdown', fx, fy);
-    let k = 0;
-    const iv = setInterval(() => { k++; const u = Math.min(1, k / 14); P('pointermove', fx + (tx - fx) * u, fy + (ty - fy) * u); if (k >= 24) { clearInterval(iv); P('pointerup', tx, ty); res(); } }, 16);
-  }), [it.x, it.y, b.x, b.top + b.h * 0.15]);
-  await sleep(900);
-  let ev = await evTypes(c.page);
-  check('[pointer] dispatched PointerEvent drag to the right pot plants the seed', ev.includes('correct') && ev.includes('land'), ev);
-  r = await roundInfo(c.page);
-  it = r.items.find(i => i.state === 'idle'); b = r.baskets.find(x => x.id === it.goal);
-  const f = await css(c.page, it.x, it.y), t = await css(c.page, b.x, b.top + b.h * 0.15);
-  await clearEv(c.page);
-  await c.page.mouse.move(f.x, f.y); await c.page.mouse.down();
-  await c.page.mouse.move(t.x, t.y, { steps: 14 }); await sleep(300); await c.page.mouse.up(); await sleep(800);
-  ev = await evTypes(c.page);
-  check('[mouse] mouse drag to correct pot works', ev.includes('correct') && ev.includes('land'), ev);
-  check('[pointer] no console errors', c.errors.length === 0, c.errors);
-  await c.ctx.close();
+/* Star rules: 3 (no mistakes) / 2 (one) / 1 (two or more). Rounds run back to back in chapter 1 (colours). */
+async function gStars() {
+  const c = await open(DEV.iphoneL, 'mute=1&seed=21&age=4');
+  await startGame(c, 2);
+  const plan = [0, 1, 2, 3];
+  for (let i = 0; i < plan.length; i++) {
+    await waitInteractive(c.page);
+    const rnd = await c.page.evaluate(() => KB.debug.world.round);
+    await clearEv(c.page);
+    for (let k = 0; k < (i === 1 ? 0 : plan[i]); k++) {
+      const bs = await balloons(c.page);
+      const w = bs.filter(b => b.tap && !b.right && b.cool <= 0);
+      if (!w.length) break;
+      await tapBalloon(c, w[k % w.length].id); await sleep(1000);   // > CONFIG.wrongLock (0.8 s): taps right after a wrong one are ignored
+    }
+    if (i === 1) {   // a double tap on the same wrong balloon (within its 0.3 s cooldown) counts once
+      const w2 = (await balloons(c.page)).find(b => b.tap && !b.right && b.cool <= 0);
+      if (w2) { const p = await c.page.evaluate(id => KB.debug.balloonScreen(id), w2.id); await c.page.touchscreen.tap(p.x, p.y); await sleep(30); await c.page.touchscreen.tap(p.x, p.y); await sleep(200); }
+      plan[i] = 1;
+    }
+    const nw = (await evOf(c.page, 'wrong')).length;
+    for (let k = 0; k < 12; k++) {
+      if (await c.page.evaluate(() => KB.debug.world.solved)) break;
+      const r = (await balloons(c.page)).find(b => b.tap && b.right);
+      if (r) await tapBalloon(c, r.id);
+      await sleep(200);
+    }
+    await waitState(c.page, 'roundDone', 8000).catch(() => {});
+    const rd = (await evOf(c.page, 'roundDone'))[0];
+    const exp = plan[i] === 0 ? 3 : plan[i] === 1 ? 2 : 1;
+    check(`stars: round ${rnd} with ${nw} wrong → ${exp} stars`, rd && nw === plan[i] && rd.stars === exp && rd.mistakes === nw, { rd, nw });
+    if (plan[i] >= 2) {
+      const h = await evOf(c.page, 'hint');
+      check(`stars: round ${rnd} — 2nd wrong tap glows the right balloon (hint)`, h.length >= 1, h);
+    }
+  }
+  const tot = await c.page.evaluate(() => KB.debug.world.stars);
+  check('stars: world total = 3+2+1+1', tot === 7, tot);
+  await sleep(1500);
+  const hud = await c.page.evaluate(() => +document.getElementById('hudStars').textContent);
+  check('stars: HUD star count matches', hud === 7, hud);
+  check('stars: zero console errors', c.errors.length === 0, c.errors);
+  await c.close();
 }
 
-/* Count mode: one planter with N holes; exactly N seeds end the round, extras fade away. */
 async function gCount() {
-  const lvl = await (async () => { const c = await open(DEV.ipadL, 'mute=1&age=4'); const l = await c.page.evaluate(() => KB.AGE_TOPICS[4].indexOf('count')); await c.ctx.close(); return l; })();
-  check('[count] age 4 has a count chapter', lvl >= 0, lvl);
-  for (const [seed, dev] of [[5, DEV.ipadL], [9, DEV.iphoneP]]) {
-    const N = `[count s${seed} ${dev.name}]`;
-    const c = await open(dev, `mute=1&seed=${seed}&age=4&level=${lvl}`);
-    const p = c.page;
-    await startPlay(c);
-    let r = await roundInfo(p);
-    const b = r.baskets[0];
-    check(`${N} count round with 1 planter`, r.mode === 'count' && r.baskets.length === 1 && b.kind === 'planter' && b.need >= 1, { mode: r.mode, n: r.baskets.length, kind: b.kind, need: b.need, topic: r.topic });
-    const bub = await p.evaluate(() => document.getElementById('bubbleText').textContent);
-    check(`${N} prompt names the number`, !badText(bub) && (bub.includes(String(b.need)) || /\b(one|two|three|four|five|six|seven|eight|nine|ten)\b/i.test(bub)), bub);
-    check(`${N} more seeds than holes (real counting)`, r.items.length > b.need, { items: r.items.length, need: b.need });
-    await clearEv(p);
-    const vlBefore = await voiceN(p);
-    let ok = true;
-    for (let k = 0; k < b.need; k++) {
-      r = await roundInfo(p);
-      const it = r.items.find(i => i.state === 'idle');
-      if (!it) { ok = false; check(`${N} idle seed available for ${k + 1}/${b.need}`, false, r.items.map(i => i.state)); break; }
-      await dragItemToBasket(c, it.id, b.id);
-      await sleep(600);
-      const st = await p.evaluate(() => ({ s: KB.debug.world.state, c: KB.debug.world.baskets[0] && KB.debug.world.baskets[0].count, comp: KB.debug.world.completing }));
-      if (k < b.need - 1 && (st.s !== 'round' || st.comp)) { ok = false; check(`${N} round ended early after ${k + 1}/${b.need}`, false, st); break; }
+  const c = await open(DEV.ipadP, 'mute=1&seed=31&age=4');
+  await startGame(c, 2);
+  await c.page.evaluate(() => KB.debug.gotoLevel(KB.debug.world.levels.indexOf('count')));
+  const topic = await c.page.evaluate(() => KB.debug.world.topic);
+  check('count: age 4 has a count chapter', topic === 'count', topic);
+  for (let r = 0; r < 2; r++) {
+    await waitInteractive(c.page);
+    const info = await c.page.evaluate(() => ({ mode: KB.debug.world.cur.mode, need: KB.debug.world.sign.need, n: KB.debug.world.balloons.length, filled: KB.debug.world.sign.filled }));
+    check(`count r${r}: mode count, N + extras balloons`, info.mode === 'count' && info.need >= 1 && info.n > info.need && info.filled === 0, info);
+    await clearEv(c.page);
+    const fills = [];
+    for (let k = 0; k < info.need; k++) {
+      const b = (await balloons(c.page)).find(b => b.tap);
+      if (!b) break;
+      const wasSolved = await c.page.evaluate(() => KB.debug.world.solved);
+      check(`count r${r}: not solved before pop ${k + 1}`, !wasSolved);
+      await tapBalloon(c, b.id); await sleep(220);
+      fills.push(await c.page.evaluate(() => KB.debug.world.sign.filled));
     }
-    await sleep(250);
-    const mid = await p.evaluate(() => { const w = KB.debug.world; return { s: w.state, comp: w.completing, count: w.baskets[0].count, extras: w.items.filter(i => !i.planted).map(i => [i.state, +i.alpha.toFixed(2)]) }; });
-    check(`${N} planter full → extras fade away at once (state leave)`, ok && mid.count === b.need && mid.extras.length > 0 && mid.extras.every(e => e[0] === 'leave'), mid);
-    await p.waitForFunction(() => KB.debug.world.state === 'roundDone', null, { timeout: 5000 }).catch(() => {});
-    const st = await p.evaluate(() => ({ s: KB.debug.world.state, count: KB.debug.world.baskets[0].count, inN: KB.debug.world.items.filter(i => i.planted).length, bloomed: KB.debug.world.items.filter(i => i.bloomed).length, extras: KB.debug.world.items.filter(i => !i.planted).map(i => +i.alpha.toFixed(2)) }));
-    check(`${N} exactly N seeds bloom and end the round; extras invisible`, ok && st.s === 'roundDone' && st.count === b.need && st.inN === b.need && st.bloomed === b.need && st.extras.every(a => a === 0), { need: b.need, st });
-    const blooms = (await evOf(p, 'bloom')).map(e => e.n);
-    check(`${N} bloom events count 1..N`, blooms.join() === Array.from({ length: b.need }, (_, i) => i + 1).join(), blooms);
-    const nums = await p.evaluate(n => KB.debug.voiceLog.slice(-n).map(l => l.text), (await voiceN(p)) - vlBefore);
-    check(`${N} Lumi counts aloud on bloom`, nums.length >= b.need && nums.every(s => !badText(s)), nums);
-    check(`${N} no console errors`, c.errors.length === 0, c.errors);
-    await c.ctx.close();
+    check(`count r${r}: sign.filled follows every pop (1..N)`, fills.join() === Array.from({ length: info.need }, (_, i) => i + 1).join(), fills);
+    const ce = await evOf(c.page, 'correct');
+    check(`count r${r}: correct events carry n and need`, ce.length === info.need && ce.every((e, i) => e.n === i + 1 && e.need === info.need), ce.map(e => [e.n, e.need]));
+    const after = await c.page.evaluate(() => ({ solved: KB.debug.world.solved, live: KB.debug.world.balloons.filter(b => b.state === 'float' || b.state === 'rise').length }));
+    check(`count r${r}: exactly N pops solves the round, extras fly away`, after.solved && after.live === 0, after);
+    // an extra tap where an extra balloon was must not count
+    const extra = (await balloons(c.page)).find(b => b.state === 'away');
+    if (extra) { await c.page.touchscreen.tap(extra.sx, extra.sy); await sleep(150); }
+    check(`count r${r}: no (N+1)th pop`, (await evOf(c.page, 'correct')).length === info.need && (await c.page.evaluate(() => KB.debug.world.sign.filled)) === info.need);
+    await waitState(c.page, 'roundDone', 8000).catch(() => {});
+    const rd = (await evOf(c.page, 'roundDone'))[0];
+    check(`count r${r}: roundDone with count = need, 3 stars`, rd && rd.count === info.need && rd.stars === 3, rd);
+    await waitState(c.page, 'round', 10000).catch(() => {});
   }
-  // overfill: an extra seed thrown while the last one is in the air must not count
-  const c = await open(DEV.ipadL, `mute=1&seed=5&age=4&level=${lvl}`);
-  await startPlay(c);
-  let r = await roundInfo(c.page);
-  const b = r.baskets[0];
-  for (let k = 0; k < b.need - 1; k++) { r = await roundInfo(c.page); const it = r.items.find(i => i.state === 'idle'); await dragItemToBasket(c, it.id, b.id); await sleep(600); }
-  r = await roundInfo(c.page);
-  const idle = r.items.filter(i => i.state === 'idle');
-  const to = await css(c.page, b.x, b.top + b.h * 0.15);
-  await drag(c, await css(c.page, idle[0].x, idle[0].y), to, { steps: 4, settle: 120 });
-  await drag(c, await css(c.page, idle[1].x, idle[1].y), to, { steps: 4, settle: 120 });
-  await sleep(900);
-  const st = await c.page.evaluate(() => ({ s: KB.debug.world.state, count: KB.debug.world.baskets[0] ? KB.debug.world.baskets[0].count : -1, mistakes: KB.debug.world.roundMistakes }));
-  check('[count] extra seed after the Nth is rejected without penalty', st.count === b.need && st.mistakes === 0, { need: b.need, st });
-  check('[count] overfill: no console errors', c.errors.length === 0, c.errors);
-  await c.ctx.close();
+  check('count: no NaN', (await nanCheck(c.page)).length === 0);
+  check('count: zero console errors', c.errors.length === 0, c.errors);
+  await c.close();
 }
 
-/* Ask mode (animals): Lumi asks for one animal at a time, world.target is the asked pot. */
 async function gAsk() {
-  for (const [dev, lang, seed] of [[DEV.ipadL, 'en', 12], [DEV.iphoneP, 'vi', 13]]) {
-    const N = `[ask ${dev.name} ${lang}]`;
-    const c = await open(dev, `mute=1&seed=${seed}&age=4&level=3&lang=${lang}`);
-    const p = c.page;
-    await startPlay(c);
-    let r = await roundInfo(p);
-    check(`${N} level 3 at age 4 is an animals/ask round`, r.topic === 'animals' && r.mode === 'ask' && r.baskets.length >= 2 && r.target && r.queue[0] === r.target, { topic: r.topic, mode: r.mode, target: r.target, q: r.queue });
-    const animalName = await p.evaluate(([lang, id]) => { const b = KB.debug.world.baskets.find(b => b.id === id); return KB.I18N.name(lang, b.label.type, b.label.value); }, [lang, r.target]);
-    let bub = await p.evaluate(() => document.getElementById('bubbleText').textContent);
-    check(`${N} bubble asks for the target animal`, bub.toLowerCase().includes(String(animalName).toLowerCase()) && !badText(bub) && (lang === 'en' || VI_RE.test(bub)), { bub, animalName });
-    // wrong pot
-    const t0 = r.target;
-    let it = r.items.find(i => i.state === 'idle');
-    const other = r.baskets.find(b => b.id !== t0);
-    await clearEv(p);
-    await dragItemToBasket(c, it.id, other.id); await sleep(900);
-    let ev = await evTypes(p);
-    let wr = (await evOf(p, 'wrong'))[0];
-    let afterW = await p.evaluate(() => KB.debug.world.target);
-    let iw = await itemOf(p, it.id);
-    check(`${N} drop into a non-target pot is wrong, target unchanged, seed home`, ev.includes('wrong') && !ev.includes('correct') && wr && wr.target === t0 && afterW === t0 && iw.state === 'idle' && !iw.planted, { ev, wr, afterW, iw });
-    // right pot
-    r = await roundInfo(p);
-    const q1 = r.queue[1] || null;
-    it = r.items.find(i => i.state === 'idle');
-    await clearEv(p);
-    await dragItemToBasket(c, it.id, t0); await sleep(1500);
-    ev = await evTypes(p);
-    const asks = await evOf(p, 'ask');
-    const tNow = await p.evaluate(() => KB.debug.world.target);
-    iw = await itemOf(p, it.id);
-    check(`${N} drop into world.target is correct, seed planted + bloomed there`, ev.includes('correct') && iw.planted && iw.basketId === t0 && iw.bloomed, { ev, iw });
-    check(`${N} target advances to the next queued animal (+ ask event)`, tNow === q1 && (q1 == null || (asks.length === 1 && asks[0].basketId === q1)), { tNow, q1, asks });
-    if (q1) {
-      const nm2 = await p.evaluate(([lang, id]) => { const b = KB.debug.world.baskets.find(b => b.id === id); return KB.I18N.name(lang, b.label.type, b.label.value); }, [lang, q1]);
-      bub = await p.evaluate(() => document.getElementById('bubbleText').textContent);
-      const said = await p.evaluate(() => KB.debug.voiceLog.slice(-3).map(l => l.text));
-      check(`${N} bubble + voice name the next animal`, bub.toLowerCase().includes(String(nm2).toLowerCase()) && said.some(s => s.toLowerCase().includes(String(nm2).toLowerCase())), { bub, said, nm2 });
-      // hint in ask mode glows the target
-      r = await roundInfo(p);
-      it = r.items.find(i => i.state === 'idle');
-      const ep = await emptyPoint(p, true);
-      await clearEv(p);
-      for (let k = 0; k < 2; k++) { const cur = await itemOf(p, it.id); await drag(c, await css(p, cur.x, cur.y), await css(p, ep.x, ep.y)); await sleep(700); }
-      const hint = (await evOf(p, 'hint'))[0];
-      const glow = await p.evaluate(() => { const w = KB.debug.world; return w.baskets.find(b => b.id === w.target).glow; });
-      check(`${N} hint after 2 misses glows the asked pot`, hint && hint.basketId === q1 && glow > 0.5, { hint, glow, q1 });
+  const c = await open(DEV.iphoneP, 'mute=1&seed=41&age=4');
+  await startGame(c, 2);
+  await c.page.evaluate(() => KB.debug.gotoLevel(KB.debug.world.levels.indexOf('animals')));
+  await clearEv(c.page);
+  for (let r = 0; r < 2; r++) {
+    await waitInteractive(c.page);
+    const since = await c.page.evaluate(() => window.__ev.filter(e => e.type === 'round').slice(-1)[0].at - 1);
+    const evR = t => c.page.evaluate(([t, s]) => window.__ev.filter(e => e.type === t && e.at >= s).map(e => { const o = Object.assign({}, e); delete o.talk; return o; }), [t, since]);
+    const info = await c.page.evaluate(() => ({ mode: KB.debug.world.cur.mode, queue: KB.debug.world.queue.slice(), target: KB.debug.world.target }));
+    check(`ask r${r}: mode ask, target = queue[0]`, info.mode === 'ask' && info.queue.length >= 2 && info.target === info.queue[0], info);
+    const first = (await evR('ask'))[0];
+    check(`ask r${r}: first ask event names the target`, first && first.first && first.balloonId === info.target, first);
+    // wrong animal
+    const wrongB = (await balloons(c.page)).find(b => b.tap && b.id !== info.target);
+    await tapBalloon(c, wrongB.id); await sleep(200);
+    const we = await evR('wrong');
+    const t2 = await c.page.evaluate(() => KB.debug.world.target);
+    check(`ask r${r}: wrong animal → wrong event (target unchanged, balloon kept)`, we.length === 1 && we[0].target === info.target && t2 === info.target && (await balloons(c.page)).find(b => b.id === wrongB.id).popT < 0, { we, t2 });
+    await sleep(400);
+    const popped = [], bubbles = [];
+    for (let k = 0; k < info.queue.length + 2; k++) {
+      const tg = await c.page.evaluate(() => KB.debug.world.target);
+      if (tg == null || await c.page.evaluate(() => KB.debug.world.solved)) break;
+      // wait until the target is tappable
+      await c.page.waitForFunction(id => { const w = KB.debug.world, b = w.balloonById(id); return b && w.canTap(b) && b.cool <= 0; }, tg, { timeout: 5000 }).catch(() => {});
+      await tapBalloon(c, tg); await sleep(350);
+      popped.push(tg);
+      bubbles.push(await c.page.evaluate(() => document.getElementById('bubbleText').textContent));
     }
-    // finish the round by dropping into the target each time
-    for (let k = 0; k < 14; k++) {
-      if ((await p.evaluate(() => KB.debug.world.state)) !== 'round') break;
-      r = await roundInfo(p);
-      it = r.items.find(i => i.state === 'idle');
-      if (!it || !r.target) { await sleep(300); continue; }
-      await dragItemToBasket(c, it.id, r.target); await sleep(650);
-    }
-    await p.waitForFunction(() => KB.debug.world.state !== 'round', null, { timeout: 6000 }).catch(() => {});
-    const fin = await p.evaluate(() => ({ s: KB.debug.world.state, target: KB.debug.world.target, q: KB.debug.world.queue.length }));
-    check(`${N} round completes when every asked animal got a flower`, fin.s === 'roundDone' && fin.target == null && fin.q === 0, fin);
-    check(`${N} no console errors`, c.errors.length === 0, c.errors);
-    await p.screenshot({ path: path.join(OUT, `ask-${dev.name}-${lang}.png`) });
-    await c.ctx.close();
+    check(`ask r${r}: targets popped in queue order`, popped.join() === info.queue.join(), { popped, queue: info.queue });
+    const asks = (await evR('ask')).map(e => e.balloonId);
+    check(`ask r${r}: an ask event per target, in order`, asks.join() === info.queue.join(), { asks, queue: info.queue });
+    check(`ask r${r}: bubble follows the next animal`, bubbles.slice(0, -1).every(t => !badText(t)) && new Set(bubbles.slice(0, -1)).size === Math.max(1, bubbles.length - 1), bubbles);
+    await waitState(c.page, 'roundDone', 8000).catch(() => {});
+    const rd = (await evR('roundDone'))[0];
+    check(`ask r${r}: round done, 2 stars (one mistake)`, rd && rd.stars === 2, rd);
+    const fr = await c.page.evaluate(() => KB.debug.world.friends.map(f => ({ s: f.state, x: f.x | 0, y: f.y | 0 })));
+    const midAir = fr.filter(f => f.s === 'fall').length;
+    check(`ask r${r}: friends are on the grass when the round ends (stars)`, midAir === 0, { dev: 'iphone-portrait', fr });
+    await sleep(1200);   // speed 2 → 2.4 s of game time, before the friends fade
+    const land = await evR('land');
+    check(`ask r${r}: every animal friend lands on the grass`, land.length === info.queue.length, { land: land.length });
+    check(`ask r${r}: no NaN in friends`, (await nanCheck(c.page)).length === 0, await nanCheck(c.page));
   }
+  check('ask: zero console errors', c.errors.length === 0, c.errors);
+  await c.close();
 }
 
-/* Talk time via the bot, then hand control to a real finger. */
-async function reachTalk(c) {
-  const p = c.page;
-  await p.evaluate(() => { KB.debug.setBot(true, 1); KB.debug.setSpeed(12); });
-  await p.waitForFunction(() => {
-    if (KB.debug.world.state === 'talk' && !KB.debug.world.talkAnswered) { KB.debug.setBot(false); KB.debug.world.cancelDrag(); KB.debug.setSpeed(1); return true; }
-    return false;
-  }, null, { timeout: 90000, polling: 'raf' });
-  await sleep(500);
-  return p.evaluate(() => ({ mode: KB.debug.mode, answered: KB.debug.world.talkAnswered, talk: KB.debug.world.talk, visible: !document.getElementById('scrTalk').classList.contains('hidden') }));
+async function gMulti() {
+  const c = await open(DEV.ipadL, 'mute=1&seed=51&age=4');
+  await startGame(c, 1); await waitInteractive(c.page);
+  const bs = await balloons(c.page);
+  const right = bs.find(b => b.tap && b.right);
+  const sky = await emptySky(c.page);
+  await clearEv(c.page);
+  // finger 1 rests on the sky, finger 2 lands on the right balloon
+  await touch(c.cdp, 'touchStart', [{ x: sky.x, y: sky.y, id: 1 }]); await sleep(80);
+  const p = await c.page.evaluate(id => KB.debug.balloonScreen(id), right.id);
+  await touch(c.cdp, 'touchStart', [{ x: sky.x, y: sky.y, id: 1 }, { x: p.x, y: p.y, id: 2 }]); await sleep(80);
+  await touch(c.cdp, 'touchEnd', [{ x: sky.x, y: sky.y, id: 1 }]); await sleep(40);
+  await touch(c.cdp, 'touchEnd', []); await sleep(200);
+  const ce = await evOf(c.page, 'correct');
+  check('multi: second simultaneous finger is ignored', ce.length === 0, ce);
+  // both fingers down at once (one touchStart with two points): only the first counts
+  await clearEv(c.page);
+  const p2 = await c.page.evaluate(id => KB.debug.balloonScreen(id), right.id);
+  await touch(c.cdp, 'touchStart', [{ x: sky.x, y: sky.y, id: 3 }, { x: p2.x, y: p2.y, id: 4 }]); await sleep(80);
+  await touch(c.cdp, 'touchEnd', []); await sleep(200);
+  check('multi: two fingers in one touchStart → only the first is used', (await evOf(c.page, 'correct')).length === 0, await evOf(c.page, 'correct'));
+  // a normal single tap still works afterwards (no stuck pointer)
+  await clearEv(c.page);
+  await tapBalloon(c, right.id); await sleep(250);
+  check('multi: a single tap afterwards still pops', (await evOf(c.page, 'correct')).length === 1);
+  // CDP touchCancel recovery
+  await touch(c.cdp, 'touchStart', [{ x: sky.x, y: sky.y, id: 5 }]); await sleep(50);
+  await touch(c.cdp, 'touchCancel', []); await sleep(80);
+  await clearEv(c.page);
+  const r2 = (await balloons(c.page)).find(b => b.tap && b.right) || (await balloons(c.page)).find(b => b.tap);
+  if (r2) { await tapBalloon(c, r2.id); await sleep(250); }
+  const evs = await c.page.evaluate(() => window.__ev.filter(e => e.type === 'correct' || e.type === 'wrong').length);
+  check('multi: taps work after a touchcancel', !r2 || evs === 1, evs);
+  check('multi: zero console errors', c.errors.length === 0, c.errors);
+  await c.close();
+}
+
+async function gRepeat() {
+  // voice NOT disabled by flags (no mute/novoice), speed 1; headless may have no TTS voices → check the log
+  const c = await open(DEV.iphoneL, 'seed=61&age=4');
+  await startGame(c, 1); await waitInteractive(c.page);
+  const info = await c.page.evaluate(() => ({ en: KB.Voice.isEnabled(), sup: KB.Voice.isSupported(), voices: KB.Voice.voices().length }));
+  console.log('      voice in headless:', JSON.stringify(info));
+  check('repeat: voice enabled at speed 1 without flags', info.en === true, info);
+  const prompt = await c.page.evaluate(() => document.getElementById('bubbleText').textContent);
+  const L = await c.page.evaluate(() => { const v = KB.debug.view(), m = KB.debug.world.layout.miu, s = KB.debug.world.layout.sign; return { mx: v.left + m.x * v.s, my: v.top + (m.y - m.h * 0.5) * v.s, sx: v.left + s.x * v.s, sy: v.top + (s.y - s.w * 0.5) * v.s }; });
+  const n0 = await voiceN(c.page);
+  await clearEv(c.page);
+  await c.page.touchscreen.tap(L.mx, L.my); await sleep(300);
+  const n1 = await voiceN(c.page);
+  const last = await c.page.evaluate(() => KB.debug.voiceLog.slice(-1)[0]);
+  const ev1 = await c.page.evaluate(() => window.__ev.filter(e => e.type === 'correct' || e.type === 'wrong').length);
+  check('repeat: tap on Miu repeats the prompt (voiceLog grows)', n1 === n0 + 1 && last && !badText(last.text), { n0, n1, last, prompt });
+  check('repeat: tap on Miu pops nothing', ev1 === 0, ev1);
+  check('repeat: Miu looks thoughtful', (await c.page.evaluate(() => KB.debug.world.miu.mood)) === 'think');
+  await tapEl(c, '#bubble'); await sleep(300);
+  const n2 = await voiceN(c.page);
+  check('repeat: tap on the bubble repeats the prompt', n2 === n1 + 1, { n1, n2 });
+  check('repeat: bubble tap never reaches the world', (await c.page.evaluate(() => window.__ev.filter(e => e.type === 'correct' || e.type === 'wrong').length)) === 0);
+  await c.page.touchscreen.tap(L.sx, L.sy); await sleep(300);
+  check('repeat: tap on the sign repeats the prompt', (await voiceN(c.page)) === n2 + 1, await voiceN(c.page));
+  // speech queue never piles up: tap Miu many times quickly
+  for (let i = 0; i < 8; i++) { await c.page.touchscreen.tap(L.mx, L.my); await sleep(40); }
+  check('repeat: rapid Miu taps → no errors', c.errors.length === 0, c.errors);
+  // voice off at high speed
+  await c.page.evaluate(() => KB.debug.setSpeed(4));
+  check('repeat: voice disabled at speed > 1', (await c.page.evaluate(() => KB.Voice.isEnabled())) === false);
+  check('repeat: zero console errors', c.errors.length === 0, c.errors);
+  await c.close();
+}
+
+async function toTalk(c) {
+  await c.page.evaluate(() => { window.__stopBotOnTalk = true; KB.debug.setBot(true, 1); KB.debug.setSpeed(6); });
+  await c.page.waitForFunction(() => KB.debug.mode === 'talk' && KB.debug.world.state === 'talk', null, { timeout: 60000 });
+  await c.page.evaluate(() => { window.__stopBotOnTalk = false; KB.debug.setBot(false); KB.debug.setSpeed(1); });
+  await sleep(300);
 }
 async function gTalk() {
-  for (const [d, right, lang] of [[DEV.ipadP, false, 'en'], [DEV.iphoneL, true, 'vi'], [DEV.iphoneP, true, 'en']]) {
-    const N = `[talk ${d.name} ${right ? 'right' : 'wrong'} ${lang}]`;
-    const c = await open(d, `mute=1&seed=6&age=4&lang=${lang}`);
-    const p = c.page;
-    await startPlay(c);
-    const t = await reachTalk(c);
-    if (!check(`${N} talk panel opens, unanswered`, t.mode === 'talk' && t.visible && !t.answered, { mode: t.mode, visible: t.visible, answered: t.answered })) { await c.ctx.close(); continue; }
-    const txt = await p.evaluate(() => ({ q: document.getElementById('talkQ').textContent, title: document.getElementById('talkTitle').textContent, ch: [...document.querySelectorAll('#talkChoices button')].map(b => b.textContent + '|' + b.dataset.id) }));
-    check(`${N} talk texts clean`, [txt.q, txt.title, ...txt.ch].every(s => s && !badText(s)) && (lang === 'en' || VI_RE.test(txt.q)), txt);
-    await p.screenshot({ path: path.join(OUT, `${d.name}-talk-${lang}.png`) });
-    const boxes = await p.evaluate(() => [...document.querySelectorAll('#talkChoices button')].map(b => { const r = b.getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom, w: r.width, h: r.height }; }));
-    check(`${N} choices on screen, >= 60px`, boxes.length >= 2 && boxes.every(b => b.l >= 0 && b.t >= 0 && b.r <= d.viewport.width && b.b <= d.viewport.height && b.w >= 60 && b.h >= 60), boxes);
-    const ans = t.talk.answerId;
-    const pick = right ? ans : t.talk.choices.find(x => x.id !== ans).id;
-    const other = t.talk.choices.find(x => x.id !== pick).id;
-    await clearEv(p);
-    // boxes first: on a slow headless renderer the panel may close (1.6 game-s after the answer) before a 3rd tap
-    const bb = await p.locator(`#talkChoices button[data-id="${pick}"]`).boundingBox();
-    const ob = await p.locator(`#talkChoices button[data-id="${other}"]`).boundingBox();
-    await tap(c, bb.x + bb.width / 2, bb.y + bb.height / 2); await sleep(40);
-    const cls0 = await p.evaluate(() => [...document.querySelectorAll('#talkChoices button')].map(b => b.dataset.id + ':' + b.className));
-    await tap(c, bb.x + bb.width / 2, bb.y + bb.height / 2); await sleep(40);
-    await tap(c, ob.x + ob.width / 2, ob.y + ob.height / 2);
-    await sleep(200);
-    const res = await p.evaluate(() => ({ ev: window.__ev.filter(e => e.type === 'talkResult').map(e => ({ correct: e.correct, choiceId: e.choiceId })), talks: KB.debug.stats.talks, cls: [...document.querySelectorAll('#talkChoices button')].map(b => b.dataset.id + ':' + b.className) }));
-    check(`${N} tapping a choice answers; exactly one talkResult`, res.ev.length === 1 && res.talks === 1 && res.ev[0].correct === right && res.ev[0].choiceId === pick, res);
-    check(`${N} right answer highlighted`, cls0.some(s => s.startsWith(ans + ':') && /right/.test(s)), cls0);
-    const said = await p.evaluate(() => KB.debug.voiceLog.slice(-1)[0]);
-    check(`${N} Lumi responds in ${lang}`, said && said.lang === lang && !badText(said.text) && (lang === 'en' || VI_RE.test(said.text)), said);
-    await p.waitForFunction(() => KB.debug.mode === 'play' && document.getElementById('scrTalk').classList.contains('hidden'), null, { timeout: 6000 }).catch(() => {});
-    check(`${N} panel closes, mode back to play`, (await mode(p)) === 'play' && !(await visible(p, 'scrTalk')));
-    await p.waitForFunction(() => KB.debug.world.state === 'round' && KB.debug.world.level === 1, null, { timeout: 8000 }).catch(() => {});
-    const s2 = await p.evaluate(() => ({ s: KB.debug.world.state, l: KB.debug.world.level }));
-    check(`${N} game continues to next chapter`, s2.s === 'round' && s2.l === 1, s2);
-    check(`${N} no console errors`, c.errors.length === 0, c.errors);
-    await c.ctx.close();
-  }
+  const c = await open(DEV.ipadL, 'mute=1&seed=71&age=4');
+  await startGame(c, 2);
+  // chapter 1: answer right by tap
+  await toTalk(c);
+  check('talk: Talk time screen opens after the chapter', await visible(c.page, 'scrTalk'));
+  const tk = await c.page.evaluate(() => { const t = KB.debug.world.talk; return { answerId: t.answerId, ids: t.choices.map(c => c.id), q: document.getElementById('talkQ').textContent, btns: [...document.querySelectorAll('#talkChoices button')].map(b => ({ id: b.dataset.id, w: b.getBoundingClientRect().width, h: b.getBoundingClientRect().height })) }; });
+  check('talk: 2–4 choice buttons, ≥ 64 px', tk.btns.length >= 2 && tk.btns.length <= 4 && tk.btns.every(b => b.w >= 64 && b.h >= 64), tk.btns);
+  check('talk: question text clean', !badText(tk.q), tk.q);
+  const s0 = await c.page.evaluate(() => KB.debug.world.stars);
+  await clearEv(c.page);
+  const d0 = await downs(c.page);
+  await tapEl(c, `#talkChoices button[data-id="${tk.answerId}"]`); await sleep(300);
+  const tr = await evOf(c.page, 'talkResult');
+  check('talk: right answer by tap → talkResult correct', tr.length === 1 && tr[0].correct === true, tr);
+  check('talk: +1 star', (await c.page.evaluate(() => KB.debug.world.stars)) === s0 + 1);
+  check('talk: right button marked', await c.page.evaluate(id => document.querySelector(`#talkChoices button[data-id="${id}"]`).classList.contains('right'), String(tk.answerId)));
+  check('talk: choice taps never reach the canvas', (await downs(c.page)) === d0, { d0, d1: await downs(c.page) });
+  // a second tap is ignored
+  const other = tk.ids.find(i => i !== tk.answerId);
+  await tapEl(c, `#talkChoices button[data-id="${other}"]`); await sleep(200);
+  check('talk: a second answer is ignored', (await evOf(c.page, 'talkResult')).length === 1);
+  await c.page.waitForFunction(() => KB.debug.world.state === 'intro' && KB.debug.world.level === 1, null, { timeout: 10000 }).catch(() => {});
+  check('talk: next chapter starts, talk screen closed', (await c.page.evaluate(() => KB.debug.world.level)) === 1 && !(await visible(c.page, 'scrTalk')) && (await mode(c.page)) === 'play');
+
+  // chapter 2: wait for the re-asks (auto-glow), then answer wrong
+  await toTalk(c);
+  await clearEv(c.page);
+  const tk2 = await c.page.evaluate(() => { const t = KB.debug.world.talk; return { answerId: t.answerId, ids: t.choices.map(c => c.id) }; });
+  await c.page.evaluate(() => KB.debug.setSpeed(4));
+  await c.page.waitForFunction(() => window.__ev.filter(e => e.type === 'talkAsk').length >= 1, null, { timeout: 15000 }).catch(() => {});
+  await sleep(100);
+  const g1 = await c.page.evaluate(() => [...document.querySelectorAll('#talkChoices button.glow')].map(b => b.dataset.id));
+  check('talk: 1st re-ask (12 s) does not glow yet', g1.length === 0, g1);
+  await c.page.waitForFunction(() => window.__ev.filter(e => e.type === 'talkAsk').length >= 2, null, { timeout: 15000 }).catch(() => {});
+  await sleep(100);
+  const g2 = await c.page.evaluate(() => [...document.querySelectorAll('#talkChoices button.glow')].map(b => b.dataset.id));
+  const asks = await evOf(c.page, 'talkAsk');
+  check('talk: re-ask every 12 s', asks.length >= 2 && Math.abs(asks[1].wt - asks[0].wt - 12) < 0.1, asks.map(a => a.wt));
+  check('talk: 2nd re-ask glows the right answer (only)', g2.length === 1 && g2[0] === String(tk2.answerId), g2);
+  check('talk: world talk.glowAnswer set', await c.page.evaluate(() => KB.debug.world.talk.glowAnswer === true));
+  await c.page.evaluate(() => KB.debug.setSpeed(1));
+  const wrongId = tk2.ids.find(i => i !== tk2.answerId);
+  const s1 = await c.page.evaluate(() => KB.debug.world.stars);
+  await tapEl(c, `#talkChoices button[data-id="${wrongId}"]`); await sleep(300);
+  const tr2 = await evOf(c.page, 'talkResult');
+  check('talk: wrong answer by tap → talkResult correct:false, no star lost', tr2.length === 1 && tr2[0].correct === false && (await c.page.evaluate(() => KB.debug.world.stars)) === s1, tr2);
+  const marks = await c.page.evaluate(() => [...document.querySelectorAll('#talkChoices button')].map(b => b.dataset.id + ':' + b.className));
+  check('talk: wrong pick marked, right answer shown', marks.some(m => m.startsWith(String(tk2.answerId) + ':') && /right/.test(m)) && marks.some(m => m.startsWith(String(wrongId) + ':') && /wrongpick/.test(m)), marks);
+  await c.page.waitForFunction(() => KB.debug.world.level === 2, null, { timeout: 10000 }).catch(() => {});
+  check('talk: game goes on after a wrong answer', (await c.page.evaluate(() => KB.debug.world.level)) === 2);
+  // chapter 3: nobody answers — re-asks keep coming, but Miu stops speaking after the 3rd (empty room)
+  await toTalk(c);
+  await clearEv(c.page);
+  const vl0 = await voiceN(c.page);
+  await c.page.evaluate(() => KB.debug.setSpeed(8));
+  await c.page.waitForFunction(() => window.__ev.filter(e => e.type === 'talkAsk').length >= 4, null, { timeout: 30000 }).catch(() => {});
+  await sleep(300);
+  await c.page.evaluate(() => KB.debug.setSpeed(1));
+  const nAsk = (await evOf(c.page, 'talkAsk')).length, spoken = (await voiceN(c.page)) - vl0;
+  check('talk: after 4 silent re-asks Miu has spoken only 3 of them', nAsk >= 4 && spoken === 3, { nAsk, spoken });
+  check('talk: nobody answering → the game pauses itself (no fail, no timeout), Talk time still open', (await mode(c.page)) === 'paused' && (await c.page.evaluate(() => KB.debug.world.state)) === 'talk');
+  await tapEl(c, '#btnResume'); await sleep(300);
+  check('talk: Resume returns to the open Talk time', (await mode(c.page)) === 'talk');
+  check('talk: zero console errors', c.errors.length === 0, c.errors);
+  await c.close();
 }
 
 async function gPause() {
-  const d = DEV.iphoneL;
-  const c = await open(d, 'seed=2&age=4');     // NOT muted: check music state
-  const p = c.page;
-  await startPlay(c);
-  const mus = () => p.evaluate(() => !!KB.Audio._playing);
-  const hasMusicFlag = await p.evaluate(() => '_playing' in KB.Audio);
-  check('[pause] music playing in game', !hasMusicFlag || await mus(), { hasMusicFlag });
-  const r = await roundInfo(p);
-  const it0 = r.items.find(i => i.state === 'idle');
-  const f = await css(p, it0.x, it0.y);
-  await touch(c.cdp, 'touchStart', [f]); await sleep(50); await touch(c.cdp, 'touchMove', [{ x: f.x + 30, y: f.y + 30 }]); await sleep(80);
-  const held0 = await p.evaluate(() => KB.debug.world.held);
-  await p.evaluate(() => document.getElementById('btnPause').click());   // a second hand presses pause
-  await sleep(150);
-  await touch(c.cdp, 'touchEnd', []); await sleep(100);
-  const ps = await p.evaluate(() => ({ mode: KB.debug.mode, held: KB.debug.world.held, drag: KB.debug.world.items.filter(i => i.state === 'drag').length }));
-  check('[pause] pausing while holding cancels the drag', held0 && ps.mode === 'paused' && !ps.held && ps.drag === 0, { held0, ps });
+  const c = await open(DEV.iphoneP, 'mute=1&seed=81&age=4');
+  await startGame(c, 1); await waitInteractive(c.page);
+  const d0 = await downs(c.page);
+  await tapEl(c, '#btnPause'); await sleep(300);
+  check('pause: HUD pause button → paused screen', (await mode(c.page)) === 'paused' && await visible(c.page, 'scrPause'));
+  check('pause: the HUD tap did not reach the canvas', (await downs(c.page)) === d0, { d0, d1: await downs(c.page) });
+  const t0 = await c.page.evaluate(() => KB.debug.world.time);
+  await sleep(800);
+  const t1 = await c.page.evaluate(() => KB.debug.world.time);
+  check('pause: world frozen while paused', t1 === t0, { t0, t1 });
+  await tapEl(c, '#btnResume'); await sleep(300);
+  check('pause: Resume → play', (await mode(c.page)) === 'play' && !(await visible(c.page, 'scrPause')));
+  check('pause: Resume tap did not reach the canvas', (await downs(c.page)) === d0);
+  await sleep(400);
+  check('pause: world runs again', (await c.page.evaluate(() => KB.debug.world.time)) > t1);
+  const r = (await balloons(c.page)).find(b => b.tap && b.right);
+  await clearEv(c.page); await tapBalloon(c, r.id); await sleep(250);
+  check('pause: taps work after resume', (await evOf(c.page, 'correct')).length === 1);
+  // visibilitychange
+  await c.page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => true }); Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' }); document.dispatchEvent(new Event('visibilitychange')); });
+  await sleep(200);
+  check('visibility: hidden → paused', (await mode(c.page)) === 'paused');
+  await c.page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => false }); Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'visible' }); document.dispatchEvent(new Event('visibilitychange')); });
+  await sleep(300);
+  check('visibility: back → stays on the pause screen (child resumes)', (await mode(c.page)) === 'paused' && await visible(c.page, 'scrPause'));
   await tapEl(c, '#btnResume'); await sleep(200);
-  check('[pause] resume via button', (await mode(p)) === 'play' && !(await visible(p, 'scrPause')) && (!hasMusicFlag || await mus()));
-  await tapEl(c, '#btnPause'); await sleep(200);
-  check('[pause] HUD pause button pauses (touch)', (await mode(p)) === 'paused' && (await visible(p, 'scrPause')) && (!hasMusicFlag || !(await mus())));
-  const t0 = await p.evaluate(() => KB.debug.world.time); await sleep(500);
-  check('[pause] world frozen while paused', (await p.evaluate(() => KB.debug.world.time)) === t0);
+  check('visibility: resume works', (await mode(c.page)) === 'play');
+  // Home from pause → title, then Play works again
+  await tapEl(c, '#btnPause'); await tapEl(c, '#btnHome'); await sleep(300);
+  check('pause: Home → title', (await mode(c.page)) === 'title' && await visible(c.page, 'scrTitle'));
+  await tapEl(c, '#btnPlay'); await sleep(300);
+  check('pause: Play from title after Home', (await mode(c.page)) === 'play');
+  // pause during talk
+  await toTalk(c);
+  await c.page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => true }); document.dispatchEvent(new Event('visibilitychange')); Object.defineProperty(document, 'hidden', { configurable: true, get: () => false }); });
+  await sleep(200);
+  check('pause: visibility pause during Talk time', (await mode(c.page)) === 'paused');
   await tapEl(c, '#btnResume'); await sleep(200);
-  check('[pause] resume', (await mode(p)) === 'play');
-  const setHidden = h => p.evaluate(h => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => h }); Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => h ? 'hidden' : 'visible' }); document.dispatchEvent(new Event('visibilitychange')); }, h);
-  // visibilitychange while dragging
-  const r2 = await roundInfo(p);
-  const it1 = r2.items.find(i => i.state === 'idle');
-  const f1 = await css(p, it1.x, it1.y);
-  await touch(c.cdp, 'touchStart', [f1]); await sleep(50); await touch(c.cdp, 'touchMove', [{ x: f1.x + 30, y: f1.y + 20 }]); await sleep(80);
-  await setHidden(true); await sleep(200);
-  const hv = await p.evaluate(() => ({ mode: KB.debug.mode, held: KB.debug.world.held }));
-  check('[pause] page hidden → paused, drag cancelled', hv.mode === 'paused' && !hv.held, hv);
-  await touch(c.cdp, 'touchEnd', []);
-  const tH = await p.evaluate(() => KB.debug.world.time); await sleep(400);
-  check('[pause] world frozen while hidden', (await p.evaluate(() => KB.debug.world.time)) === tH);
-  await setHidden(false); await sleep(200);
-  check('[pause] page visible again → stays paused until child taps', (await mode(p)) === 'paused' && (await visible(p, 'scrPause')));
-  await tapEl(c, '#btnResume'); await sleep(200);
-  check('[pause] resume after visibility', (await mode(p)) === 'play');
-  await tapEl(c, '#btnPause'); await sleep(150);
-  await tapEl(c, '#btnHome'); await sleep(300);
-  const h = await p.evaluate(() => ({ mode: KB.debug.mode, music: !!KB.Audio._playing, hud: document.getElementById('hud').classList.contains('hidden'), bubble: document.getElementById('bubble').classList.contains('hidden'), title: !document.getElementById('scrTitle').classList.contains('hidden') }));
-  check('[pause] Home → title, music stopped, HUD+bubble hidden', h.mode === 'title' && !h.music && h.hud && h.bubble && h.title, h);
-  await startPlay(c);
-  check('[pause] Play from title after Home starts a fresh session', (await p.evaluate(() => KB.debug.world.level === 0 && KB.debug.world.round === 0)));
-  await tapEl(c, '#btnPause'); await tapEl(c, '#btnHome'); await sleep(200);
-  const s0 = await p.evaluate(() => KB.debug.stats.sessions);
-  const pb = await p.locator('#btnPlay').boundingBox();
-  await tap(c, pb.x + pb.width / 2, pb.y + pb.height / 2); await tap(c, pb.x + pb.width / 2, pb.y + pb.height / 2); await sleep(300);
-  check('[pause] double tap on Play starts exactly one session', (await p.evaluate(() => KB.debug.stats.sessions)) === s0 + 1);
-  // pause / resume during Talk time
-  await waitRound(p);
-  await reachTalk(c);
-  const tp = await p.evaluate(() => { const r = document.getElementById('btnPause').getBoundingClientRect(); const e = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2); return { mode: KB.debug.mode, pauseReachable: !!e && !!e.closest('#btnPause') }; });
-  await setHidden(true); await sleep(150);
-  const mt = await p.evaluate(() => ({ mode: KB.debug.mode, music: !!KB.Audio._playing, ctx: KB.Audio.ctx && KB.Audio.ctx.state }));
-  await setHidden(false); await sleep(150);
-  check('[pause] page hidden during Talk time silences audio', !mt.music || mt.ctx !== 'running', mt);
-  if (mt.mode === 'paused') {
-    await tapEl(c, '#btnResume'); await sleep(200);
-    check('[pause] resume during Talk time returns to the Talk panel', (await mode(p)) === 'talk' && (await visible(p, 'scrTalk')), { tp, mode: await mode(p) });
-  } else check('[pause] page hidden during Talk time pauses the game (shows Pause on return)', false, { tp, mt });
-  check('[pause] no console errors', c.errors.length === 0, c.errors);
-  await c.ctx.close();
+  check('pause: resume returns to Talk time', (await mode(c.page)) === 'talk' && await visible(c.page, 'scrTalk'));
+  check('pause: zero console errors', c.errors.length === 0, c.errors);
+  await c.close();
 }
 
-/* Rotation: resize portrait↔landscape while idle and while holding a seed. */
 async function gRotate() {
-  for (const [P, L] of [[DEV.iphoneP, DEV.iphoneL], [DEV.ipadP, DEV.ipadL]]) {
-    const dn = P.name.split('-')[0];
-    const c = await open(P, 'mute=1&seed=8&age=5');
-    const p = c.page;
-    await startPlay(c);
-    let r = await roundInfo(p);
-    const first = r.items.find(i => i.state === 'idle');
-    await dragItemToBasket(c, first.id, first.goal); await sleep(800);
-    for (const [k, vp] of [['→landscape idle', L.viewport], ['→portrait idle', P.viewport]]) {
-      await p.setViewportSize(vp); await sleep(600);
-      const probs = await validateLayout(p);
-      const v = await p.evaluate(() => { const v = KB.debug.view(); return { fits: v.cssW <= innerWidth + 1 && v.cssH <= innerHeight + 1, W: v.W, H: v.H, iw: innerWidth, ih: innerHeight }; });
-      check(`[rotate ${dn}] ${k}: layout valid`, probs.length === 0 && v.fits && (v.W > v.H) === (v.iw > v.ih), { probs, v });
-    }
-    for (const [k, vp, back] of [['hold →landscape', L.viewport, P.viewport], ['hold →portrait', P.viewport, L.viewport]]) {
-      await p.setViewportSize(back); await sleep(500);
-      if ((await p.evaluate(() => KB.debug.world.state)) !== 'round') await waitRound(p).catch(() => {});
-      await clearEv(p);
-      r = await roundInfo(p);
-      const it = r.items.find(i => i.state === 'idle');
-      if (!it) { check(`[rotate ${dn}] ${k}`, true, 'skipped: no idle seed'); continue; }
-      const f = await css(p, it.x, it.y);
-      await touch(c.cdp, 'touchStart', [f]); await sleep(50);
-      await touch(c.cdp, 'touchMove', [{ x: f.x + 15, y: f.y - 15 }]); await sleep(100);
-      const held = await p.evaluate(() => KB.debug.world.held);
-      await p.setViewportSize(vp); await sleep(500);
-      const mid = await p.evaluate(() => { const w = KB.debug.world; return { held: w.held, W: w.layout.W, H: w.layout.H }; });
-      const probsMid = await validateLayout(p);
-      const inside = await p.evaluate(() => { const w = KB.debug.world, L = w.layout; return w.items.filter(i => i.state !== 'leave').every(i => i.x >= 0 && i.x <= L.W && i.y >= 0 && i.y <= L.H); });
-      await touch(c.cdp, 'touchEnd', []); await sleep(900);
-      const after = await p.evaluate(id => { const w = KB.debug.world; const i = w.items.find(i => i.id === id); return { held: w.held, s: i && i.state }; }, it.id);
-      const probs = await validateLayout(p);
-      const ev = await evTypes(p);
-      check(`[rotate ${dn}] ${k}: rotation cancels the drag, seeds stay inside the screen`, held === it.id && !mid.held && inside && probsMid.length === 0, { held, mid, inside, probsMid });
-      check(`[rotate ${dn}] ${k}: no stale drop after lifting the finger`, !ev.includes('correct') && !ev.includes('wrong') && !ev.includes('miss') && !ev.includes('drop'), { ev });
-      check(`[rotate ${dn}] ${k}: after release seed settled, layout valid`, !after.held && after.s !== 'drag' && probs.length === 0, { after, probs });
-    }
-    await p.setViewportSize(P.viewport); await sleep(500);
-    r = await roundInfo(p);
-    const it2 = r.items.find(i => i.state === 'idle');
-    if (it2) {
-      const ep = await emptyPoint(p, false);
-      if (ep) {
-        await drag(c, await css(p, it2.x, it2.y), await css(p, ep.x, ep.y), { settle: 120 });
-        await p.setViewportSize(L.viewport); await sleep(900);
-        const probs = await validateLayout(p);
-        check(`[rotate ${dn}] rotate while a seed flies home: layout valid`, probs.length === 0, probs);
+  const pairs = [[DEV.iphoneP, DEV.iphoneL], [DEV.ipadL, DEV.ipadP], [DEV.iphoneL, DEV.iphoneP]];
+  for (const [a, b] of pairs) {
+    for (const lvl of [0, 2]) {
+      const c = await open(a, 'mute=1&seed=9' + lvl + '&age=4');
+      await startGame(c, 1);
+      if (lvl) await c.page.evaluate(l => KB.debug.gotoLevel(l), lvl);
+      await waitInteractive(c.page);
+      // pop one first (so there is a mid-round state)
+      // change the round state first: pop one if more than one is needed, else make a gentle wrong tap
+      const bs0 = await balloons(c.page), rights = bs0.filter(x => x.tap && x.right);
+      const need = await c.page.evaluate(() => KB.debug.world.cur.mode === 'count' ? KB.debug.world.sign.need : null);
+      const r0 = (need ? need > 1 : rights.length > 1) ? rights[0] : bs0.find(x => x.tap && !x.right);
+      if (r0) { await tapBalloon(c, r0.id); await sleep(200); }
+      const before = await c.page.evaluate(() => ({ round: KB.debug.world.round, level: KB.debug.world.level, pops: KB.debug.world.pops, state: KB.debug.world.state }));
+      const tag = `rotate/${a.name}→${b.name} L${lvl}`;
+      await c.page.setViewportSize(b.viewport); await sleep(500);
+      const st = await c.page.evaluate(() => {
+        const w = KB.debug.world, L = w.layout, P = L.play, v = KB.debug.view();
+        const live = w.balloons.filter(x => x.state === 'float' || x.state === 'rise');
+        return { W: L.W, H: L.H, view: { W: v.W, H: v.H }, round: w.round, level: w.level, pops: w.pops, state: w.state,
+          outScreen: live.filter(x => x.x - x.size / 2 < -1 || x.x + x.size / 2 > L.W + 1 || x.y - x.size / 2 < -1 || (x.state !== 'rise' && x.y + x.size / 2 > L.H + 1)).map(x => x.id),   // rising balloons come up from below the grass by design
+          outBand: live.filter(x => x.hx < P.x - 1 || x.hx > P.x + P.w + 1 || x.hy < P.y - 1 || x.hy > P.y + P.h + 1).map(x => [x.id, x.hx | 0, x.hy | 0]),
+          P, n: live.length };
+      });
+      const landscape = b.viewport.width > b.viewport.height;
+      check(`${tag}: world re-laid out to the new shape`, landscape ? st.W > st.H : st.H > st.W, { W: st.W, H: st.H });
+      check(`${tag}: round continues (same round, pops kept)`, st.round === before.round && st.level === before.level && st.pops === before.pops && st.state === 'round', { before, st });
+      check(`${tag}: live balloons inside the screen`, st.outScreen.length === 0, st.outScreen);
+      check(`${tag}: balloon homes inside the play band`, st.outBand.length === 0, { out: st.outBand, P: st.P });
+      await sleep(1500);
+      const st2 = await c.page.evaluate(() => { const w = KB.debug.world, P = w.layout.play;
+        return w.balloons.filter(x => x.state === 'float').map(x => ({ id: x.id, d: Math.hypot(x.x - x.hx, x.y - x.hy) | 0, inBand: x.y > P.y - 40 && x.y < P.y + P.h + 40 && x.x > P.x - 40 && x.x < P.x + P.w + 40 })); });
+      check(`${tag}: balloons settle in the band after rotation`, st2.every(x => x.inBand && x.d < 40), st2.filter(x => !x.inBand || x.d >= 40));
+      // taps still work (real touch at the new positions)
+      await clearEv(c.page);
+      let ok = 0;
+      for (let k = 0; k < 14; k++) {
+        if (await c.page.evaluate(() => KB.debug.world.solved)) break;
+        const r = (await balloons(c.page)).find(x => x.tap && x.right);
+        if (!r) break;
+        await tapBalloon(c, r.id); await sleep(230); ok++;
       }
+      const ce = (await evOf(c.page, 'correct')).length;
+      check(`${tag}: taps after rotation pop the right balloons`, ce === ok && ok > 0, { ce, ok });
+      await waitState(c.page, 'roundDone', 8000).catch(() => {});
+      check(`${tag}: round finishes after rotation`, ['roundDone', 'round', 'talk', 'intro'].includes(await c.page.evaluate(() => KB.debug.world.state)) && await c.page.evaluate(() => KB.debug.world.solved || KB.debug.world.state !== 'round'));
+      // HUD + bubble still inside the screen
+      const ui = await c.page.evaluate(() => ['hud', 'bubble'].map(id => { const r = document.getElementById(id).getBoundingClientRect(); return { id, l: r.left | 0, r: r.right | 0, t: r.top | 0, b: r.bottom | 0 }; }));
+      check(`${tag}: HUD and bubble on screen`, ui.every(u => u.l >= 0 && u.r <= b.viewport.width + 1 && u.t >= 0 && u.b <= b.viewport.height), ui);
+      check(`${tag}: no NaN`, (await nanCheck(c.page)).length === 0, await nanCheck(c.page));
+      check(`${tag}: zero console errors`, c.errors.length === 0, c.errors);
+      if (results.some(r => !r.ok && r.name.startsWith(tag))) await shot(c, `rotate-L${lvl}-fail`);
+      await c.close();
     }
-    await p.setViewportSize(L.viewport); await sleep(400);
-    if ((await p.evaluate(() => KB.debug.world.state)) !== 'round') await waitRound(p, 20000).catch(() => {});
-    r = await roundInfo(p);
-    const it3 = r.items.find(i => i.state === 'idle');
-    if (it3) {
-      await clearEv(p);
-      await dragItemToBasket(c, it3.id, it3.goal); await sleep(800);
-      check(`[rotate ${dn}] still playable after rotations`, (await evTypes(p)).includes('correct'));
-    }
-    await p.screenshot({ path: path.join(OUT, `rotate-${dn}.png`) });
-    check(`[rotate ${dn}] no console errors`, c.errors.length === 0, c.errors);
-    await c.ctx.close();
   }
+  // rotate during the rise (balloons travelling) and during the friends' fall
+  const c = await open(DEV.iphoneL, 'mute=1&seed=97&age=4');
+  await startGame(c, 1);
+  await c.page.evaluate(() => KB.debug.gotoLevel(3));
+  await c.page.waitForFunction(() => KB.debug.world.state === 'round' && KB.debug.world.balloons.some(b => b.state === 'rise' && b.t > 0.1), null, { timeout: 10000 });
+  await c.page.setViewportSize(DEV.iphoneP.viewport); await sleep(1800);
+  const s = await c.page.evaluate(() => { const w = KB.debug.world, P = w.layout.play; return w.balloons.filter(b => b.state === 'float' || b.state === 'rise').map(b => ({ id: b.id, st: b.state, x: b.x | 0, y: b.y | 0, ok: b.x > P.x - 40 && b.x < P.x + P.w + 40 && b.y > P.y - 40 && b.y < P.y + P.h + 40 })); });
+  check('rotate/during rise: rising balloons end up in the new band', s.length > 0 && s.every(x => x.ok), s.filter(x => !x.ok));
+  await waitInteractive(c.page);
+  const tg = await c.page.evaluate(() => KB.debug.world.target);
+  await tapBalloon(c, tg); await sleep(150);
+  await c.page.setViewportSize(DEV.iphoneL.viewport); await sleep(2500);
+  const f = await c.page.evaluate(() => { const w = KB.debug.world, L = w.layout; return w.friends.map(f => ({ st: f.state, x: f.x | 0, y: f.y | 0, ok: isFinite(f.x) && f.x > 0 && f.x < L.W && Math.abs(f.y - L.yard.y) < 60 })); });
+  check('rotate/during friend fall: friend lands in the new yard', f.length >= 1 && f.every(x => x.ok), f);
+  check('rotate/during rise: zero console errors', c.errors.length === 0, c.errors);
+  await c.close();
 }
 
-/* Full bot sessions at high speed for every age, both languages. */
-async function botSession(age, lang, dev, seed) {
-  const N = `[bot age${age} ${lang} ${dev.name}]`;
-  const c = await open(dev, `speed=12&bot=1&autostart=1&seed=${seed}&mute=1&age=${age}&lang=${lang}&skill=0.7`);
-  const p = c.page;
-  const t0 = Date.now();
-  let done = false;
-  try { await p.waitForFunction(() => KB.debug.mode === 'done', null, { timeout: 240000, polling: 500 }); done = true; } catch (e) { /* report below */ }
-  const st = await p.evaluate(() => ({ s: KB.debug.getState(), stats: KB.debug.stats, bot: KB.debug.bot && KB.debug.bot.stats, levels: KB.debug.world.levels }));
-  check(`${N} session reaches done (${((Date.now() - t0) / 1000).toFixed(0)} s)`, done, st);
-  await p.evaluate(() => window.__collect());
-  const dt = await p.evaluate(() => ({ done: document.getElementById('doneTitle').textContent, stars: document.getElementById('doneStars').textContent, wstars: KB.debug.world.stars }));
-  if (done) {
-    check(`${N} done screen shows stars`, +dt.stars === dt.wstars && dt.wstars > 0 && !badText(dt.done), dt);
-    check(`${N} played all 4 chapters incl. Talk time`, st.stats.talks === 4 && st.levels.length === 4, { talks: st.stats.talks, levels: st.levels });
-    await p.screenshot({ path: path.join(OUT, `bot-${age}-${lang}-done.png`) });
-    await p.evaluate(() => KB.debug.setSpeed(1));
-    await tapEl(c, '#btnAgain');
-    await sleep(400);
-    const ag = await p.evaluate(() => ({ mode: KB.debug.mode, level: KB.debug.world.level, sessions: KB.debug.stats.sessions, hud: document.getElementById('hudStars').textContent }));
-    check(`${N} play again starts a new session`, ag.mode === 'play' && ag.level === 0 && ag.sessions === 2 && ag.hud === '0', ag);
-  }
-  const texts = await p.evaluate(() => ({ voice: KB.debug.voiceLog.map(l => l.lang + '|' + l.text), canvas: [...window.__texts] }));
-  const bad = [];
-  for (const v of texts.voice) { const [l, ...rest] = v.split('|'); const s = rest.join('|'); const why = badText(s); if (why) bad.push(why + ': ' + s); if (l !== lang) bad.push('wrong lang: ' + v); }
-  for (const s of texts.canvas) { const why = badText(s); if (why) bad.push(why + ': ' + s); }
-  check(`${N} every voice line non-empty, right language, no placeholders (${texts.voice.length} voice + ${texts.canvas.length} UI strings)`, texts.voice.length > 20 && bad.length === 0, [...new Set(bad)].slice(0, 12));
-  if (lang === 'vi') {
-    const viLike = texts.voice.filter(v => VI_RE.test(v)).length;
-    const en = texts.voice.filter(v => EN_WORDS.test(v));
-    check(`${N} Vietnamese lines really Vietnamese (diacritics)`, viLike / Math.max(1, texts.voice.length) > 0.6 && en.length === 0, { viLike, n: texts.voice.length, en: en.slice(0, 5) });
-  }
-  check(`${N} no console errors`, c.errors.length === 0, c.errors.slice(0, 5));
-  fs.writeFileSync(path.join(OUT, `texts-${age}-${lang}.json`), JSON.stringify(texts, null, 1));
-  await c.ctx.close();
-  return Date.now() - t0;
+async function gHud() {
+  const c = await open(DEV.iphoneL, 'mute=1&seed=101&age=4');
+  await startGame(c, 1); await waitInteractive(c.page);
+  // tap on the HUD star counter (not a button) and the dots
+  const d0 = await downs(c.page);
+  for (const sel of ['#hud .hud-stars', '#hudDots', '#bubble']) { await tapEl(c, sel); await sleep(120); }
+  check('hud: HUD / bubble taps never reach the world', (await downs(c.page)) === d0, { d0, d1: await downs(c.page) });
+  // a balloon right under the HUD? find the closest balloon to the HUD and make sure it is not under it
+  const hud = await c.page.evaluate(() => { const r = document.getElementById('hud').getBoundingClientRect(); const v = KB.debug.view(); return { l: (r.left - v.left) / v.s, b: (r.bottom - v.top) / v.s }; });
+  const under = (await balloons(c.page)).filter(b => b.hx + b.size / 2 > hud.l && b.hy - b.size / 2 < hud.b);
+  check('hud: no balloon home under the HUD', under.length === 0, { hud, under: under.map(b => [b.id, b.hx | 0, b.hy | 0]) });
+  // play-again flow is covered by the bot group; title buttons should not leak into the world either
+  check('hud: zero console errors', c.errors.length === 0, c.errors);
+  await c.close();
 }
+
 async function gBot() {
-  const jobs = [];
-  const devs = [DEV.ipadL, DEV.iphoneP, DEV.iphoneL, DEV.ipadP];
+  const ages = [3, 4, 5, 6, 7], langs = ['en', 'vi'];
   let k = 0;
-  for (const age of [3, 4, 5, 6, 7]) for (const lang of ['en', 'vi']) jobs.push([age, lang, devs[k++ % devs.length], 10 + k]);
-  const PAR = 5;
-  for (let i = 0; i < jobs.length; i += PAR) await Promise.all(jobs.slice(i, i + PAR).map(j => botSession(...j)));
-  const c = await open(DEV.iphoneL, 'speed=12&bot=1&autostart=1&autorestart=1&seed=3&mute=1&age=3');
-  let ok = false;
-  try { await c.page.waitForFunction(() => KB.debug.stats.sessions >= 2 && KB.debug.mode === 'play', null, { timeout: 240000, polling: 500 }); ok = true; } catch (e) { /* */ }
-  check('[bot] autorestart starts a new session after done', ok, await c.page.evaluate(() => KB.debug.getState()));
-  check('[bot] autorestart: no console errors', c.errors.length === 0, c.errors);
-  await c.ctx.close();
-}
-
-/* Low-skill bot exercising hints/idle at age 3 (mistake + help lines), both languages. */
-async function gHelpLines() {
-  for (const lang of ['en', 'vi']) {
-    const c = await open(DEV.iphoneP, `speed=12&bot=1&autostart=1&seed=21&mute=1&age=3&lang=${lang}&skill=0`);
-    await c.page.waitForFunction(() => KB.debug.world.level >= 1 || KB.debug.mode === 'done', null, { timeout: 120000, polling: 500 }).catch(() => {});
-    await c.page.evaluate(() => { KB.debug.setBot(false); KB.debug.world.cancelDrag(); });
-    await c.page.waitForFunction(() => KB.debug.world.state === 'round' && KB.debug.world.interactive, null, { timeout: 20000 }).catch(() => {});
-    await c.page.evaluate(() => { window.__ev = []; });
-    await c.page.waitForFunction(() => window.__ev.some(e => e.type === 'idle'), null, { timeout: 20000 }).catch(() => {});
-    const texts = await c.page.evaluate(() => KB.debug.voiceLog.map(l => l.lang + '|' + l.text));
-    const ev = await c.page.evaluate(() => window.__ev.map(e => e.type));
-    check(`[help ${lang}] idle nudge fires after 12 s`, ev.includes('idle'), ev);
-    const bad = texts.map(s => { const [l, ...r] = s.split('|'); const t = r.join('|'); return [badText(t) || (l !== lang ? 'wrong lang' : null), s]; }).filter(x => x[0]);
-    check(`[help ${lang}] wrong/miss/hint/idle lines clean (${texts.length} lines)`, bad.length === 0, bad.slice(0, 8));
-    const st = await c.page.evaluate(() => KB.debug.stats);
-    check(`[help ${lang}] low-skill bot made mistakes (wrong/miss) that were voiced`, st.wrong + st.misses > 0, st);
-    await c.ctx.close();
+  const table = [];
+  for (const age of ages) for (const lang of langs) {
+    const d = ALL[k++ % ALL.length];
+    const c = await open(d, `mute=1&seed=${200 + k}&age=${age}&lang=${lang}`);
+    await c.page.evaluate(() => { KB.debug.setBot(true, 0.75); KB.debug.setSpeed(8); KB.debug.startGame(); });
+    const t0 = Date.now();
+    let nan = [], texts = new Set(), bad = [];
+    let done = false;
+    while (Date.now() - t0 < 150000) {
+      await sleep(400);
+      const s = await c.page.evaluate(() => ({ m: KB.debug.mode, b: document.getElementById('bubbleText').textContent, q: document.getElementById('talkQ').textContent }));
+      [s.b, s.q].forEach(t => { if (t && !texts.has(t)) { texts.add(t); if (badText(t)) bad.push(t); } });
+      const nn = await nanCheck(c.page); if (nn.length) nan = nan.concat(nn).slice(0, 10);
+      if (s.m === 'done') { done = true; break; }
+    }
+    const tag = `bot/age${age}-${lang} (${d.name})`;
+    const res = await c.page.evaluate(() => ({ st: KB.debug.getState(), stats: KB.debug.bot && KB.debug.bot.stats, done: document.getElementById('doneTitle').textContent, ds: document.getElementById('doneStars').textContent, lines: KB.debug.voiceLog.map(l => l.text) }));
+    check(`${tag}: reaches the done screen`, done && await visible(c.page, 'scrDone'), res.st);
+    const topics = (await evOf(c.page, 'level')).map(e => e.topic);
+    check(`${tag}: 4 chapters played`, topics.length === 4, topics);
+    check(`${tag}: no NaN in balloons / friends`, nan.length === 0, nan);
+    const badLines = res.lines.filter(l => badText(l));
+    check(`${tag}: all bubble/voice text clean`, bad.length === 0 && badLines.length === 0, bad.concat(badLines).slice(0, 5));
+    if (lang === 'vi') check(`${tag}: done title in Vietnamese`, /[ăâđêôơưàáạảãèéẹẻẽìíịỉĩòóọỏõùúụủũ]/i.test(res.done), res.done);
+    const stars = res.st.stars, rpl = await c.page.evaluate(() => KB.debug.world.roundsPerLevel), maxStars = 4 * (rpl * 3 + 1);
+    check(`${tag}: stars ≤ ${maxStars} and shown on the done screen`, stars > 0 && stars <= maxStars && +res.ds === stars, { stars, ds: res.ds, rpl });
+    table.push({ age, lang, dev: d.name, secs: ((Date.now() - t0) / 1000).toFixed(0), stars, topics: topics.join('/') });
+    if (age === 4 || age === 7) {
+      // Play again (real touch)
+      await clearEv(c.page);
+      await c.page.evaluate(() => KB.debug.setBot(false));
+      await tapEl(c, '#btnAgain'); await sleep(400);
+      const pa = await c.page.evaluate(() => ({ m: KB.debug.mode, st: KB.debug.world.state, lvl: KB.debug.world.level, stars: KB.debug.world.stars, hud: !document.getElementById('hud').classList.contains('hidden'), hs: document.getElementById('hudStars').textContent, done: !document.getElementById('scrDone').classList.contains('hidden') }));
+      check(`${tag}: Play again → fresh session`, pa.m === 'play' && pa.lvl === 0 && pa.stars === 0 && pa.hud && pa.hs === '0' && !pa.done, pa);
+      await waitInteractive(c.page).catch(() => {});
+      const r = (await balloons(c.page)).find(b => b.tap && b.right);
+      if (r) { await tapBalloon(c, r.id); await sleep(250); }
+      check(`${tag}: real taps work in the replayed session`, (await evOf(c.page, 'correct')).length === 1);
+    }
+    check(`${tag}: zero console errors`, c.errors.length === 0, c.errors);
+    if (!done) await shot(c, `bot-age${age}-${lang}-stuck`);
+    await c.close();
   }
+  console.table(table);
 }
 
 (async () => {
-  const root = process.env.SG_GAME_ROOT ? path.resolve(process.env.SG_GAME_ROOT) : undefined;
-  srv = await serve(root);
-  if (root) console.log('NOTE: testing game at ' + root);
+  srv = await serve(process.env.KB_GAME_ROOT || undefined);
   browser = await chromium.launch();
-  const T0 = Date.now();
-  const groups = { boot: gBoot, lang: gLang, gate: gGate, settings: gSettings, input: gInput, pointer: gPointer, count: gCount, ask: gAsk, talk: gTalk, pause: gPause, rotate: gRotate, help: gHelpLines, bot: gBot };
-  for (const [g, fn] of Object.entries(groups)) {
+  const groups = [['boot', gBoot], ['lang', gLang], ['gate', gGate], ['settings', gSettings], ['tap', gTap], ['stars', gStars], ['count', gCount],
+    ['ask', gAsk], ['multi', gMulti], ['repeat', gRepeat], ['talk', gTalk], ['pause', gPause], ['rotate', gRotate], ['hud', gHud], ['bot', gBot]];
+  for (const [g, fn] of groups) {
     if (!want(g)) continue;
-    const t0 = Date.now();
-    try { await fn(); } catch (e) { check(`[${g}] group crashed`, false, String(e.stack || e).slice(0, 600)); }
-    console.log(`  (${g} ${((Date.now() - t0) / 1000).toFixed(1)} s)`);
+    curGroup = g;
+    console.log(`\n== ${g}`);
+    try { await fn(); } catch (e) { check(`${g}: group crashed`, false, String(e && e.stack || e).slice(0, 800)); }
   }
   await browser.close(); srv.close();
+  fs.writeFileSync(path.join(OUT, 'results.json'), JSON.stringify(results, null, 1));
+  const byGroup = {};
+  for (const r of results) { const g = byGroup[r.group] = byGroup[r.group] || { group: r.group, pass: 0, fail: 0 }; r.ok ? g.pass++ : g.fail++; }
+  console.log('\n== summary');
+  console.table(Object.values(byGroup).map(g => ({ group: g.group, pass: g.pass, fail: g.fail, result: g.fail ? 'FAIL' : 'PASS' })));
   const fails = results.filter(r => !r.ok);
-  fs.writeFileSync(path.join(OUT, 'results.json'), JSON.stringify({ when: new Date().toISOString(), seconds: Math.round((Date.now() - T0) / 1000), pass: results.length - fails.length, fail: fails.length, flakeRetries: FLAKES, results }, null, 1));
-  if (FLAKES.length) console.log(`(${FLAKES.length} touch-start retries, see results.json flakeRetries)`);
-  console.log(`\n${results.length - fails.length} passed, ${fails.length} failed  (${((Date.now() - T0) / 1000).toFixed(0)} s)`);
+  console.log(`${results.length - fails.length}/${results.length} checks passed`);
+  fails.forEach(f => console.log('FAIL ' + f.name));
   process.exit(fails.length ? 1 : 0);
 })();

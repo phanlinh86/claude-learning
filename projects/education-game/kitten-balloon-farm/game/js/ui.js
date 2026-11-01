@@ -32,14 +32,15 @@
       const a = T(lang, 'ui.age');
       $('titleAge').textContent = `· ${a === 'ui.age' ? 'Age' : a} ${age >= 7 ? '7+' : age}`;
     },
-    bindSettings(s, onChange) {
+    bindSettings(s, onChange, getAge) {   // getAge: the age actually played (a session-only ?age= flag may differ from s.age)
       const chips = document.querySelectorAll('#ageChips .chip');
       const refresh = () => {
-        chips.forEach(c => c.classList.toggle('on', +c.dataset.age === Math.min(7, s.age)));
+        const age = getAge ? getAge() : s.age;
+        chips.forEach(c => c.classList.toggle('on', +c.dataset.age === Math.min(7, age)));
         $('optSfx').checked = s.sfx; $('optMusic').checked = s.music; $('optVoice').checked = s.voice; $('optMic').checked = s.mic;
         if (document.activeElement !== $('inpName')) $('inpName').value = s.name || '';
       };
-      chips.forEach(c => c.addEventListener('click', () => { s.age = +c.dataset.age; refresh(); onChange('age'); }));
+      chips.forEach(c => c.addEventListener('click', () => { s.age = +c.dataset.age; onChange('age'); refresh(); }));
       [['optSfx', 'sfx'], ['optMusic', 'music'], ['optVoice', 'voice'], ['optMic', 'mic']].forEach(([id, k]) =>
         $(id).addEventListener('change', () => { s[k] = $(id).checked; onChange(k); }));
       $('inpName').addEventListener('input', () => { s.name = $('inpName').value.replace(/[<>{}]/g, '').slice(0, 16); onChange('name'); });
@@ -95,7 +96,8 @@
       $('talkQ').textContent = T(lang, talk.promptKey, talk.params || {});
       this.only('scrTalk');
       const sh = talk.show || {}, empty = !sh.sprite && !sh.shape && (sh.text == null || sh.text === '');
-      $('talkShow').classList.toggle('hidden', empty);   // animals: the question names the animal, no picture
+      $('talkShow').classList.toggle('hidden', empty);
+      document.querySelector('.talk-panel').classList.toggle('noshow', empty);   // animals: the question names the animal, no picture
       if (!empty) requestAnimationFrame(() => KB.Renderer.preview($('talkShow'), sh));
       const box = $('talkChoices'); box.innerHTML = '';
       talk.choices.forEach(c => {

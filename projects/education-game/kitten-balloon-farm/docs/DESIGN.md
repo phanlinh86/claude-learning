@@ -129,7 +129,7 @@ round = { topic, mode:'find'|'count'|'ask', promptKey:'p.<topic>', params:{color
 ```
 Topics:
 - `colors` (find): target colour; k targets (warm-up 1, later 2–3) + distractors from n−1 other colours (n = 2/3/4 at age 3/4/5+),
-  1–2 each; total ≤ 5 (age 3), ≤ 6 (4), ≤ 8 (5+). All circle balloons. Never blue+purple or red+green in one round below age 5.
+  1–2 each; total ≤ 5 (age 3), ≤ 6 (4), ≤ 8 (5+). All circle balloons. Never blue+purple, red+green, yellow+orange or green+orange in one round below age 5 (visual QA, colour-blind safety).
   The 4 rounds of a chapter use 4 different target colours.
 - `shapes` (find): target shape from circle, heart, star, square, triangle (+rect at 5+); n shapes per round as colours;
   age ≤ 4: every balloon of the round has the SAME colour (the shape is the only cue); age 5: mixed colours.

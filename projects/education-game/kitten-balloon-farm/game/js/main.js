@@ -19,7 +19,8 @@
   let S = Object.assign({}, DEF);
   let langOverride = FLAGS.lang === 'vi' || FLAGS.lang === 'en' ? FLAGS.lang : null;   // URL ?lang= is session-only
   const curLang = () => langOverride || S.lang;
-  const curAge = () => FLAGS.age || S.age;
+  let ageOverride = FLAGS.age || null;           // URL ?age= is session-only; a parent's pick wins
+  const curAge = () => ageOverride || S.age;
   const saveSettings = () => KB.Storage.setJSON('settings', S);
   const progress = { totalStars: 0, sessions: 0 };
 
@@ -28,7 +29,7 @@
   let speed = FLAGS.speed, autoRestart = FLAGS.autorestart;
   let view = { W: 960, H: 720, s: 1, left: 0, top: 0, ins: { top: 0, right: 0, bottom: 0, left: 0 } };
   const stats = { sessions: 0, rounds: 0, correct: 0, wrong: 0, misses: 0, talks: 0, talkRight: 0, frames: 0, slowFrames: 0 };
-  let idleSaid = 0, lastName = '', firstAsk = true, shownStars = 0, lastRoundEvt = null, missSay = 0, lastGrabSay = 0, lastPraise = 0;
+  let promptUntil = 0, lastWrongSay = 0, idleSaid = 0, lastName = '', firstAsk = true, shownStars = 0, lastRoundEvt = null, missSay = 0, lastGrabSay = 0, lastPraise = 0;
 
   /* ---------- sizing ---------- */
   function readInsets() {
@@ -111,6 +112,9 @@
     KB.Audio.setOptions({ sfx: S.sfx, music: S.music, muted: FLAGS.mute });
     if (KB.Voice) { KB.Voice.setLang(curLang()); KB.Voice.setEnabled(voiceOn()); }
   }
+  // the instruction is the most important line: praise / wrong lines must not cut it off (playtest P1-2)
+  function speakPrompt(txt, opt) { promptUntil = performance.now() + 300 + 72 * (txt || '').length; speak(txt, opt); }
+  const canInterrupt = () => performance.now() > promptUntil;
   function promptText(e) {
     return T(e.promptKey, e.params || {});
   }
@@ -185,13 +189,13 @@
         KB.UI.setDots(world.roundsPerLevel || 5, e.round % (world.roundsPerLevel || 5));
         if (e.mode === 'ask') break;                 // the 'ask' event right after names the first animal
         const txt = promptText(e);
-        KB.UI.say(txt); speak(txt, { priority: true });
+        KB.UI.say(txt); speakPrompt(txt, { priority: true });
         break;
       }
       case 'ask': {
         const full = promptText(e);
         KB.UI.say(full);
-        if (firstAsk) speak(full, { priority: true });
+        if (firstAsk) speakPrompt(full, { priority: true });
         else {   // queued after the praise; any older waiting line (a stale "Now the …!", a seed name) goes
           if (KB.Voice && KB.Voice.dropQueued) KB.Voice.dropQueued();
           speak(T('p.animalsNext', e.params), {});
@@ -212,7 +216,7 @@
         lastPraise = now;
         const ev = Object.assign({ mode: world.cur && world.cur.mode }, e);
         const s1 = KB.I18N.sayCorrect ? KB.I18N.sayCorrect(lang, ev) : '';
-        speak(s1 && Math.random() < 0.75 ? s1 : T('praise'), { interrupt: true });
+        speak(s1 && Math.random() < 0.75 ? s1 : T('praise'), { interrupt: canInterrupt() });
         break;
       }
       case 'pop': {
@@ -227,7 +231,11 @@
         KB.Audio.play('boing');
         const b = balloonById(e.id);
         render.burst('wrong', e.x, e.y, { size: b ? b.size : 110 });
-        speak(KB.I18N.sayWrong ? KB.I18N.sayWrong(curLang(), e) : T('wrong'), { interrupt: true });
+        const nowW = performance.now();
+        if (nowW - lastWrongSay > 2500) {   // the boing always plays; the sentence at most every 2.5 s (playtest P1-3)
+          lastWrongSay = nowW;
+          speak(KB.I18N.sayWrong ? KB.I18N.sayWrong(curLang(), e) : T('wrong'), { interrupt: canInterrupt() });
+        }
         break;
       }
       case 'land': {
@@ -239,11 +247,12 @@
         const b = balloonById(e.id);
         KB.Audio.play('hint');
         if (b) render.burst('hint', b.x, b.y, { size: b.size });
-        speak(T('hint'));                            // hints queue, they never cut each other off
+        if (!e.idle) speak(T('hint'));               // hints queue; an idle glow already had its idle line
         break;
       }
       case 'idle':
         if (++idleSaid <= 4) speak(T('idle') + ' ' + currentPrompt());   // then stay quiet: maybe nobody is there
+        else if (idleSaid >= 5 && !bot) pause();   // ≈ 2 min without a tap: nobody is playing — pause the music and the game
         break;
       case 'roundDone': {
         KB.Audio.play('round');
@@ -262,6 +271,7 @@
       case 'talkAsk': {   // no answer yet: ask again, and after the 2nd re-ask glow the right answer
         const tk = e.talk || world.talk;
         if (tk && e.n <= 3) speak(T(tk.promptKey, tk.params || {}), { priority: true });   // stop talking to an empty room
+        if (e.n >= 4 && !bot) { pause(); break; }
         if (e.n >= 2 || (tk && tk.glowAnswer)) KB.UI.glowTalk(tk.answerId);
         break;
       }
@@ -285,6 +295,7 @@
         break;
       case 'sessionDone': {
         KB.Audio.play('fanfare');
+        weather.setWeather(3, {});                 // the night party under the stars and fireflies
         render.burst('confetti', 0, 0);
         progress.totalStars += e.stars || 0; progress.sessions++;
         KB.Storage.setJSON('progress', progress);
@@ -308,7 +319,7 @@
     const canMic = S.mic && KB.Voice && KB.Voice.canListen && KB.Voice.canListen() && !FLAGS.bot;
     KB.UI.openTalk(talk, curLang(), id => { KB.Audio.play('click'); world.talkAnswer(id); }, canMic, curAge());
     const q = T(talk.promptKey, talk.params || {});
-    speak(T('talk.intro') + ' ' + q, { interrupt: true, priority: true });
+    speakPrompt(T('talk.intro') + ' ' + q, { priority: true });   // queued after the round's praise, not cutting it off
   }
   function listen() {
     const talk = world.talk;
@@ -340,6 +351,7 @@
     stats.frames++;
     if (mode === 'play' || mode === 'talk' || mode === 'done') {
       let left = dt * speed;
+      world.wind = (weather.ambient && weather.ambient.wind) || 0;   // gusts push the balloons
       while (left > 1e-6) {
         const step = Math.min(left, 1 / 30);
         if (bot && (mode === 'play' || mode === 'talk')) bot.step(step);
@@ -351,7 +363,7 @@
     weather.update(dt * Math.min(speed, 4), { groundY: world.layout.groundY });
     const speaking = KB.Voice && KB.Voice.isSpeaking ? KB.Voice.isSpeaking() : false;
     KB.Audio.duck(speaking);
-    render.draw(world, weather, { dt: dt * Math.min(speed, 4), lang: curLang(), title: mode === 'title' || mode === 'loading', speaking, done: mode === 'done', compact: window.innerHeight <= 430 && window.innerWidth > window.innerHeight, debug: FLAGS.debug });
+    render.draw(world, weather, { dt: dt * Math.min(speed, 4), lang: curLang(), title: mode === 'title' || mode === 'loading', speaking, done: mode === 'done', compact: window.innerWidth > window.innerHeight, debug: FLAGS.debug });
     adapt(raw);
   }
   function adapt(raw) {  // adaptive quality: step the render scale down when frames stay slow
@@ -375,7 +387,7 @@
     if (!lastRoundEvt || world.state !== 'round') return;
     KB.Audio.play('click');
     world.miu && (world.miu.mood = 'think', world.miu.moodT = 1.2);
-    speak(currentPrompt(), { interrupt: true });
+    const cp = currentPrompt(); promptUntil = 0; speakPrompt(cp, { interrupt: true });
   }
 
   function bindUI() {
@@ -412,9 +424,9 @@
     KB.UI.bindSettings(S, k => {
       saveSettings();
       if (k === 'sfx' || k === 'music' || k === 'voice') applyAudio();
-      if (k === 'age') KB.UI.setTitleInfo(progress.totalStars, curAge(), curLang());
+      if (k === 'age') { ageOverride = null; KB.UI.setTitleInfo(progress.totalStars, curAge(), curLang()); }
       if (k === 'name' && KB.I18N.setChild) KB.I18N.setChild(S.name);
-    });
+    }, curAge);
     $('btnSettingsDone').addEventListener('click', () => { KB.Audio.play('click'); KB.UI.only('scrTitle'); KB.UI.setTitleInfo(progress.totalStars, curAge(), curLang()); });
 
     window.addEventListener('resize', onResize);

@@ -174,7 +174,7 @@ test('content: every topic × age 3–7 × en/vi × 200 seeds → valid, complet
         }
         case 'size': {
           assert.strictEqual(new Set(B.map(b => b.color)).size, 1, ctx);
-          assert.ok(B.every(b => b.scale === 1.3 || b.scale === 0.72), ctx);
+          assert.ok(B.every(b => b.scale === 1.3 || b.scale === 0.8), ctx);
           assert.ok(B.every(b => (b.scale === 1.3) === (b.nameValue === 'big')), ctx);
           if (warm) assert.strictEqual(B.length, 2, ctx);
           assert.ok(B.length <= 4, ctx);
@@ -238,7 +238,7 @@ test('content: every topic × age 3–7 × en/vi × 200 seeds → valid, complet
   console.log('      ' + n + ' rounds');
 });
 
-test('content: colour-blind rule — below age 5 never blue+purple, red+green (nor yellow+orange) in one round or Talk', () => {
+test('content: colour-blind rule — below age 5 never blue+purple, red+green, yellow+orange, green+orange in one round or Talk', () => {
   for (const topic of TOPICS) for (const age of [3, 4]) for (let s = 0; s < 300; s++) {
     for (const r of chapter(topic, age, 'en', s)) {
       const cs = [...new Set(r.balloons.map(b => b.color))];
@@ -311,14 +311,16 @@ test('layout: §2 formulas (groundY, Miu, sign, bubble, yard, balloon size, shor
   assert.strictEqual(L.groundY, 720 - 27 - 96);
   assert.deepStrictEqual([L.miu.x, L.miu.y, L.miu.h], [120, L.groundY + 18, 190]);
   assert.deepStrictEqual([L.sign.x, L.sign.y, L.sign.w], [285, L.groundY + 24, 150]);
-  assert.deepStrictEqual([L.bubble.x, L.bubble.y, L.bubble.h], [34, 52, 104]); assert.strictEqual(L.bubble.w, Math.min(640, 960 - 34 - 160));
-  assert.deepStrictEqual([L.yard.x0, L.yard.x1, L.yard.y], [405, 900, L.groundY + 30]);
+  assert.deepStrictEqual([L.bubble.x, L.bubble.y, L.bubble.h], [34, 52, 122]); assert.strictEqual(L.bubble.w, Math.min(640, 960 - 34 - 160));
+  assert.deepStrictEqual([L.yard.x0, L.yard.x1, L.yard.y], [380, 900, L.groundY + 30]);
   assert.strictEqual(L.balloonSize, 118);
-  assert.strictEqual(L.play.y, 52 + 104 + 30 + 59); assert.strictEqual(L.play.y + L.play.h, L.groundY - 150);
+  assert.strictEqual(L.play.y, 52 + 122 + 30 + 59); assert.strictEqual(L.play.y + L.play.h, L.groundY - 150);
   const T = KB.World.computeLayout(720, 1556, null, 3);
   assert.ok(T.tall && T.portrait);
   assert.strictEqual(T.groundY, 1556 - 96 - Math.min(140, 0.3 * (1556 - 1152)));
   assert.strictEqual(T.balloonSize, 128 * 1.15); assert.strictEqual(T.miu.h, 200);
+  const PP = KB.World.computeLayout(720, 960, { top: 32, bottom: 27, left: 0, right: 0 }, 4);   // portrait: bubble below the HUD
+  assert.deepStrictEqual([PP.bubble.y, PP.bubble.h], [32 + 96 + 24, 124]); assert.ok(PP.play.y >= PP.bubble.y + 124 + 30 + 59 - 1e-6);
   assert.ok(Math.abs(T.play.h - 1.05 * 720) < 1e-6, 'portrait band ≤ 1.05 W');
   for (const a of [3, 4, 5, 6, 7]) assert.strictEqual(KB.World.computeLayout(1280, 720, null, a).balloonSize, { 3: 128, 4: 118, 5: 108, 6: 108, 7: 108 }[a]);
 });
@@ -346,7 +348,7 @@ test('layout: 12 viewports × every topic × age × 12 seeds → homes inside pl
         assert.ok(!circleRect(b.hx, b.hy, r, L.bubble), 'under bubble ' + ctx);
         assert.ok(!circleRect(b.hx, b.hy, r, miuRect(L)), 'over Miu ' + ctx);
         assert.ok(!circleRect(b.hx, b.hy, r, signRect(L)), 'over sign ' + ctx);
-        assert.ok(b.hy + 0.6 * b.size + 0.9 * b.size / b.scale <= L.groundY + 50 + 1e-6, 'string tail ends at the grass ' + ctx);
+        assert.ok(b.hy + CFG.bobAmp[1] + CFG.knotY[b.shape] * b.size + 0.9 * b.size / b.scale <= L.groundY + 50 + 1e-6, 'string tail ends at the grass ' + ctx);
       }
       for (let i = 0; i < B.length; i++) for (let j = i + 1; j < B.length; j++) {
         const d = hyp(B[i].hx - B[j].hx, B[i].hy - B[j].hy);
@@ -459,7 +461,7 @@ test('wrong: boing — squash wobble 0.18, impulse ≈ 220 px/s away from the fi
   assert.strictEqual(w.roundMistakes, 1);
   let maxRot = 0, maxDx = 0;
   run(w, 0.25, () => { maxRot = Math.max(maxRot, Math.abs(b.rot)); maxDx = Math.max(maxDx, b.x - hx); });
-  assert.strictEqual(w.pointerDown(b.x, b.y), b.id); w.pointerUp();
+  assert.strictEqual(w.pointerDown(b.x, b.y), null, 'wrong lock: every tap ignored for 0.8 s'); w.pointerUp();
   assert.ok(!events(w).some(x => x.type === 'wrong'), 'cooldown: a 2nd tap within 0.3 s is ignored');
   assert.strictEqual(w.roundMistakes, 1);
   run(w, 0.9, () => { maxRot = Math.max(maxRot, Math.abs(b.rot)); maxDx = Math.max(maxDx, b.x - hx); });
@@ -527,7 +529,7 @@ test('ask mode: ask at start + on each target change; only the target pops; frie
   const landed = [];
   for (let k = 0; k < n; k++) {
     const t = w.balloonById(w.target);
-    run(w, 0.35);
+    run(w, 0.85);   // past the 0.8 s wrong lock
     tap(w, t);
     ev = events(w);
     assert.ok(ev.some(e => e.type === 'correct' && e.id === t.id));
@@ -538,7 +540,7 @@ test('ask mode: ask at start + on each target change; only the target pops; frie
     let maxV = 0, maxRot = 0, t0 = 0, landT = null;
     while (f.state === 'fall' && t0 < 6) { w.update(H); t0 += H; maxV = Math.max(maxV, f.vy); maxRot = Math.max(maxRot, Math.abs(f.rot)); for (const e of w.drainEvents()) if (e.type === 'land') { landT = t0; landed.push(e); } }
     assert.ok(landT !== null, 'landed');
-    assert.ok(maxV <= 223 && maxV > 150, 'terminal ≈ 220 px/s: ' + maxV);
+    assert.ok(maxV <= f.vt + 1 && maxV > 150 && f.vt >= 222, 'terminal ≈ v_t: ' + maxV);
     assert.ok(maxRot > 0.1 && maxRot <= 0.25 + 1e-9, 'leaf sway ' + maxRot);
     assert.ok(Math.abs(f.y - f.ty) < 1e-6 && f.x >= L.yard.x0 && f.x <= L.yard.x1 && f.y <= L.H - L.ins.bottom && f.x + 42 <= L.W - L.ins.right, 'on the yard, on screen');
     let maxHop = 0; const ty = f.ty;
@@ -547,7 +549,7 @@ test('ask mode: ask at start + on each target change; only the target pops; frie
     assert.strictEqual(f.state, 'rest');
   }
   assert.strictEqual(new Set(landed.map(e => Math.round(e.x))).size, n, 'next free x per friend');
-  const xs = w.friends.map(f => f.x); for (let i = 1; i < xs.length; i++) assert.ok(Math.abs(xs[i] - xs[i - 1]) >= 92 - 1e-6 || w.friends[i].ty !== w.friends[i - 1].ty);
+  const xs = w.friends.map(f => f.x); for (let i = 1; i < xs.length; i++) assert.ok(Math.abs(xs[i] - xs[i - 1]) >= CFG.yardSpacing - 1e-6 || w.friends[i].ty !== w.friends[i - 1].ty);
   let g = 0; while (w.state === 'round' && g++ < 600) w.update(H);
   assert.strictEqual(w.state, 'roundDone');
   assert.strictEqual(events(w).find(e => e.type === 'roundDone').stars, 2);
@@ -577,13 +579,14 @@ test('help: 2 wrong taps → hint glows the next target 3 s (bobs bigger); coold
   roundOf(w, 'colors', 1); settle(w); settleFloat(w); w.drainEvents();
   const bad = wrongOnes(w);
   tap(w, bad[0]); assert.ok(!events(w).some(e => e.type === 'hint'));
-  run(w, 0.4); tap(w, bad[bad.length > 1 ? 1 : 0]);
+  run(w, 0.85); tap(w, bad[bad.length > 1 ? 1 : 0]);
   const h = events(w).find(e => e.type === 'hint');
   assert.ok(h, 'hint after 2 wrongs');
   const t = w.balloonById(h.id); assert.ok(t.answer);
   run(w, 0.5); assert.ok(t.glow > 0.9);
   run(w, 0.4); tap(w, bad[0]); assert.ok(!events(w).some(e => e.type === 'hint'), 'glowing: no new hint');
   run(w, 2.3); assert.strictEqual(t.glow, 0, 'glow ends after 3 s');
+  // (all wrong taps above are ≥ 0.8 s apart: the wrong lock never swallows them)
   run(w, 0.4); tap(w, bad[0]); assert.ok(!events(w).some(e => e.type === 'hint'), 'cooldown 6 s');
   run(w, 3); tap(w, bad[0]); assert.ok(events(w).some(e => e.type === 'hint'), 'after 6 s a new hint');
   // manual hint
@@ -609,7 +612,7 @@ test('stars: 0 wrong → 3, 1 → 2, ≥ 2 → 1; Talk right → +1', () => {
   for (const [m, st] of [[0, 3], [1, 2], [2, 1], [4, 1]]) {
     const w = mkWorld({ seed: 16 + m, age: 4 });
     roundOf(w, 'colors', 2); settle(w); settleFloat(w);
-    for (let i = 0; i < m; i++) { tap(w, wrongOnes(w)[0]); run(w, 0.35); }
+    for (let i = 0; i < m; i++) { tap(w, wrongOnes(w)[0]); run(w, 0.85); }
     solveRound(w);
     assert.strictEqual(w.roundStars, st, m + ' mistakes');
   }
@@ -664,6 +667,50 @@ test('Miu: moods on events, cheer hops, looks at the tapped balloon', () => {
   let maxHop = 0; run(w, 1, () => { maxHop = Math.max(maxHop, w.miu.hop); });
   assert.ok(maxHop > 20 && maxHop <= 26 + 1e-9);
   assert.strictEqual(w.lumi, w.miu, 'Owl alias');
+});
+
+test('QA fixes: knot/string-top taps count, 0.8 s wrong lock, squash on a too-low balloon, idle glow from the 2nd nudge', () => {
+  const w = mkWorld({ seed: 60, age: 4 });
+  roundOf(w, 'colors', 1); settle(w); settleFloat(w); w.drainEvents();
+  const b = rightOnes(w)[0], r = CFG.touchR * b.size + CFG.touchPad;
+  const others = w.balloons.filter(o => o !== b && hyp(o.x - b.x, o.y - (b.y + 0.9 * b.size)) <= CFG.touchR * o.size + CFG.touchPad + 1);
+  assert.ok(0.9 * b.size > r);
+  if (!others.length) { assert.strictEqual(w.pointerDown(b.x + 5, b.y + 0.9 * b.size), b.id, 'string top counts'); w.pointerUp(); }
+  assert.strictEqual(w.pointerDown(b.x + 0.5 * b.size, b.y + 0.9 * b.size), null, 'too far sideways'); w.pointerUp();
+  // wrong lock
+  const w2 = mkWorld({ seed: 61, age: 4 }); roundOf(w2, 'colors', 1); settle(w2); settleFloat(w2); w2.drainEvents();
+  tap(w2, wrongOnes(w2)[0]); w2.drainEvents();
+  run(w2, 0.5); const g = rightOnes(w2)[0];
+  assert.strictEqual(tap(w2, g), null); assert.strictEqual(events(w2).length, 0, 'no event during the lock');
+  run(w2, 0.35); const g2 = rightOnes(w2)[0]; assert.strictEqual(tap(w2, g2), g2.id);
+  assert.ok(events(w2).some(e => e.type === 'correct'), 'taps work again after 0.8 s');
+  assert.strictEqual(w2.roundMistakes, 1);
+  // squash nudge on a still-rising balloon
+  const w3 = mkWorld({ seed: 62, age: 4 }); roundOf(w3, 'colors', 1); run(w3, 0.2);
+  const lo = w3.balloons.find(o => o.t > 0 && !w3.canTap(o));
+  assert.strictEqual(w3.pointerDown(lo.x, lo.y), null); assert.ok(Math.abs(lo._q - CFG.riseNudge) < 1e-9); assert.ok(!w3.drainEvents().some(e => e.type === 'correct' || e.type === 'wrong'));
+  // idle glow
+  const w4 = mkWorld({ seed: 63, age: 4 }); roundOf(w4, 'animals', 1); settle(w4); w4.drainEvents();
+  const hs = []; run(w4, 31, () => { for (const e of w4.drainEvents()) if (e.type === 'hint' || e.type === 'idle') hs.push(e); });
+  assert.deepStrictEqual(hs.map(e => e.type), ['idle', 'idle', 'hint']);
+  assert.strictEqual(hs[1].n, 2); assert.ok(hs[2].idle && hs[2].id === w4.target);
+});
+
+test('QA fixes: friends land ≈ 2 s after the pop on tall phones; ages 6–7 play 6 rounds; many count rounds never throw', () => {
+  for (const v of [VIEWPORTS[2], VIEWPORTS[10], VIEWPORTS[4]]) {
+    const w = mkWorld({ seed: 64, age: 3, vp: v }); roundOf(w, 'animals', 2); settle(w); settleFloat(w); w.drainEvents();
+    const t = w.balloons.find(b => b.id === w.target); tap(w, t);
+    let tt = 0, landT = null; while (landT === null && tt < 5) { w.update(H); tt += H; if (w.drainEvents().some(e => e.type === 'land')) landT = tt; }
+    assert.ok(landT > 1.0 && landT < 2.3, v.name + ' lands after ' + landT);
+  }
+  for (const [age, n] of [[3, 4], [5, 4], [6, 6], [7, 6]]) {
+    const w = mkWorld({ seed: 65, age }); w.newSession(); assert.strictEqual(w.roundsPerLevel, n, 'age ' + age);
+  }
+  const w = mkWorld({ seed: 66, age: 6 }); w.levels = ['count', 'size', 'colors']; 
+  for (const tp of ['count', 'size', 'colors', 'shapes']) { w.levels = [tp]; w.startLevel(0); for (let i = 0; i < 30; i++) { w.round = i; w._beginRound(); } }
+  const small = KB.Content.makeRound('size', { age: 6, rng: new KB.RNG(1), roundIndex: 1 });
+  for (const age of AGES) assert.ok(CFG.balloonSize[age] * KB.Content.SIZE_SCALE.small >= 86, 'small balloon size');
+  void small;
 });
 
 // ======================================================= physics
@@ -780,7 +827,8 @@ test('bot: full sessions for every age × lang × 4 viewports reach sessionDone,
     assert.ok(maxRound < 60, 'stuck round ' + maxRound + ' ' + ctx);
     assert.ok(r.t < 480, 'session ≤ 8 min for the bot ' + r.t + ' ' + ctx);
     assert.ok(r.bot.stats.taps === r.bot.stats.correct + r.bot.stats.wrong + r.bot.stats.misses + (r.bot.stats.taps - r.bot.stats.correct - r.bot.stats.wrong - r.bot.stats.misses));
-    assert.ok(r.w.stars >= 16 && r.w.stars <= 52, ctx);
+    const maxStars = r.w.levels.length * (3 * (CFG.roundsByAge[age] || 4) + 1);
+    assert.ok(r.w.stars >= 16 && r.w.stars <= maxStars, ctx + ' stars ' + r.w.stars);
   }
 });
 
