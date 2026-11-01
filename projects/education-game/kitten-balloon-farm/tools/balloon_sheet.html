@@ -1,0 +1,76 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Balloon sheet</title>
+<style>body{margin:0;background:#666;font:14px system-ui}canvas{display:block}</style></head>
+<body>
+<!-- Test sheet for KB.BalloonArt: every shape x every colour at 118 px on sky / sunset / navy (night=1),
+     a glow example, a squashed sx=1.2/sy=0.85 example, a pop flash + shreds, strings and sample text, then 3x.
+     Open directly, or render with: node tools/art_miu_sheet.js  (writes docs/art/balloons_sheet.png) -->
+<canvas id="c"></canvas>
+<script src="../game/js/balloon_art.js"></script>
+<script>
+(function () {
+  var B = KB.BalloonArt, SH = B.SHAPES, COLS = Object.keys(B.COLORS);
+  var dpr = window.devicePixelRatio || 1, S = 118, CW = 150, RH = 175;
+  var BGS = [['#CFEAFB', '#E9F6FF', 0], ['#F59A5B', '#F8C98E', 0.3], ['#16204A', '#2A3570', 1]];
+  var big = 3, W = CW * COLS.length + 40;
+  var H = BGS.length * (RH * SH.length + 30) + 330 + 4 * 170 * big + 40;
+  var cv = document.getElementById('c');
+  cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px';
+  var ctx = cv.getContext('2d');
+  ctx.scale(dpr, dpr);
+  function string(x, y, len, sway) {
+    ctx.beginPath(); ctx.moveTo(x, y);
+    ctx.bezierCurveTo(x + sway, y + len * 0.33, x - sway, y + len * 0.66, x + sway * 0.5, y + len);
+    ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(80,64,56,.85)'; ctx.stroke();
+  }
+  function balloon(x, y, o, withString, txt) {
+    var sx = o.sx || 1, sy = o.sy || 1;
+    if (withString) string(x, y + B.knotY(o.shape, o.size) * sy, o.size * 0.5, 6);
+    ctx.save(); ctx.translate(x, y); B.draw(ctx, o); ctx.restore();
+    if (txt) {
+      ctx.font = 'bold ' + Math.round(o.size * 0.5) + 'px "Arial Rounded MT Bold", system-ui, sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = B.textColor(o.color);
+      ctx.fillText(txt, x, y + B.textY(o.shape, o.size));
+    }
+  }
+  var y0 = 0;
+  BGS.forEach(function (bg, bi) {
+    var h = RH * SH.length + 30, g = ctx.createLinearGradient(0, y0, 0, y0 + h);
+    g.addColorStop(0, bg[0]); g.addColorStop(1, bg[1]);
+    ctx.fillStyle = g; ctx.fillRect(0, y0, W, h);
+    SH.forEach(function (s, r) {
+      COLS.forEach(function (c, i) {
+        var txt = (bi === 1 && i % 2 === 0) ? (r % 2 ? '7' : 'A') : null;
+        balloon(40 + CW / 2 + i * CW - 20, y0 + 30 + r * RH + 70, { shape: s, color: c, size: S, night: bg[2] }, true, txt);
+      });
+    });
+    y0 += h;
+  });
+  // glow / squash / pop flash / shreds row
+  var g2 = ctx.createLinearGradient(0, y0, 0, y0 + 330); g2.addColorStop(0, '#CFEAFB'); g2.addColorStop(1, '#E9F6FF');
+  ctx.fillStyle = g2; ctx.fillRect(0, y0, W, 330);
+  balloon(110, y0 + 130, { shape: 'circle', color: 'red', size: S, glow: 1 }, true);
+  balloon(270, y0 + 130, { shape: 'heart', color: 'pink', size: S, glow: 0.6 }, true);
+  balloon(430, y0 + 140, { shape: 'circle', color: 'blue', size: S, sx: 1.2, sy: 0.85 }, true);
+  balloon(590, y0 + 140, { shape: 'star', color: 'yellow', size: S, sx: 1.2, sy: 0.85 }, true);
+  balloon(750, y0 + 130, { shape: 'heart', color: 'purple', size: S * 1.3 }, true);
+  balloon(900, y0 + 150, { shape: 'heart', color: 'purple', size: S * 0.72 }, true);
+  B.drawPopFlash(ctx, 1010, y0 + 100, S, 0.15, 'green');
+  B.drawPopFlash(ctx, 1110, y0 + 130, S, 0.45, 'orange');
+  var sh = [];
+  for (var j = 0; j < 14; j++) sh.push({ x: 1000 + (j % 7) * 26, y: y0 + 240 + Math.floor(j / 7) * 30, rot: j * 0.9, color: COLS[j % 6], life: 1 - j * 0.04 });
+  B.drawShreds(ctx, sh);
+  y0 += 330;
+  // 3x on sky: every shape twice, colours cycling so every colour appears (context scaled 3x -> dpr-aware cache)
+  var cell = W / 3, rows = 4;
+  ctx.fillStyle = '#DDF1FF'; ctx.fillRect(0, y0, W, rows * 170 * big + 40);
+  ctx.save(); ctx.translate(0, y0); ctx.scale(big, big);
+  for (var n = 0; n < 12; n++) {
+    var s3 = SH[n % SH.length], c3 = COLS[n % COLS.length];
+    balloon(((n % 3) + 0.5) * cell / big, 14 + Math.floor(n / 3) * 170 + 82, { shape: s3, color: c3, size: S }, true, n === 5 ? 'B' : null);
+  }
+  ctx.restore();
+  document.title = 'done';
+})();
+</script>
+</body></html>

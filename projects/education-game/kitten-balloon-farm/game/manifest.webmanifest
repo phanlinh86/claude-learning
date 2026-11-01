@@ -1,0 +1,16 @@
+{
+  "name": "Kitten's Balloon Farm · Bóng Bay Nông Trại Mèo Con",
+  "short_name": "Balloon Farm",
+  "description": "Pop balloons and learn colours, shapes, counting and farm animals with Miu the kitten. English & Vietnamese.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#FFD6C2",
+  "theme_color": "#FFD6C2",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

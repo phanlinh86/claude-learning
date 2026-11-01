@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><clipPath id="sheep_c1"><rect x="30" y="96" width="10" height="20" rx="5" /></clipPath><clipPath id="sheep_c2"><rect x="44" y="96" width="10" height="20" rx="5" /></clipPath><clipPath id="sheep_c3"><rect x="64" y="96" width="10" height="20" rx="5" /></clipPath><clipPath id="sheep_c4"><rect x="78" y="96" width="10" height="20" rx="5" /></clipPath><clipPath id="sheep_c5"><path d="M 88.26 84.77 Q 90.6 91.84 80.69 95.15 Q 78.47 102.78 66.55 102.07 Q 59.38 109.2 49.07 103.92 Q 37.75 107.81 32.27 100.3 Q 20.7 99.56 19.98 92.03 Q 11.22 87.7 15.03 81 Q 10.45 74.54 18.55 69.74 Q 18.48 62.3 29.73 60.83 Q 34.35 53.23 46.01 56.32 Q 55.62 50.42 63.67 57.22 Q 75.62 55.7 78.65 63.35 Q 89.08 66.07 87.52 73.29 Q 94.29 78.86 88.26 84.77 Z" /></clipPath><clipPath id="sheep_c6"><ellipse cx="74" cy="52" rx="11" ry="5.5" transform="rotate(-25 74 52)" /></clipPath><clipPath id="sheep_c7"><ellipse cx="113" cy="52" rx="10" ry="5" transform="rotate(25 113 52)" /></clipPath><clipPath id="sheep_c8"><path d="M 78 52 C 78 40 86 36 94 36 C 104 36 110 44 110 54 C 110 68 104 78 94 78 C 84 78 78 66 78 52 Z" /></clipPath><clipPath id="sheep_c9"><path d="M 107.29 40.96 Q 107.99 46.29 99.46 46.84 Q 94.13 52.34 87.27 47.55 Q 78.41 48.24 77.85 42.67 Q 72.09 39.16 76.71 35.04 Q 76.01 29.71 84.54 29.16 Q 89.87 23.66 96.73 28.45 Q 105.59 27.76 106.15 33.33 Q 111.91 36.84 107.29 40.96 Z" /></clipPath><g id="sheep_sil"><rect x="30" y="96" width="10" height="20" rx="5" /><rect x="44" y="96" width="10" height="20" rx="5" /><rect x="64" y="96" width="10" height="20" rx="5" /><rect x="78" y="96" width="10" height="20" rx="5" /><path d="M 88.26 84.77 Q 90.6 91.84 80.69 95.15 Q 78.47 102.78 66.55 102.07 Q 59.38 109.2 49.07 103.92 Q 37.75 107.81 32.27 100.3 Q 20.7 99.56 19.98 92.03 Q 11.22 87.7 15.03 81 Q 10.45 74.54 18.55 69.74 Q 18.48 62.3 29.73 60.83 Q 34.35 53.23 46.01 56.32 Q 55.62 50.42 63.67 57.22 Q 75.62 55.7 78.65 63.35 Q 89.08 66.07 87.52 73.29 Q 94.29 78.86 88.26 84.77 Z" /><ellipse cx="74" cy="52" rx="11" ry="5.5" transform="rotate(-25 74 52)" /><ellipse cx="113" cy="52" rx="10" ry="5" transform="rotate(25 113 52)" /><path d="M 78 52 C 78 40 86 36 94 36 C 104 36 110 44 110 54 C 110 68 104 78 94 78 C 84 78 78 66 78 52 Z" /><path d="M 107.29 40.96 Q 107.99 46.29 99.46 46.84 Q 94.13 52.34 87.27 47.55 Q 78.41 48.24 77.85 42.67 Q 72.09 39.16 76.71 35.04 Q 76.01 29.71 84.54 29.16 Q 89.87 23.66 96.73 28.45 Q 105.59 27.76 106.15 33.33 Q 111.91 36.84 107.29 40.96 Z" /></g></defs>
+<g transform="translate(0.2 1.2) scale(0.95)">
+<use href="#sheep_sil" xlink:href="#sheep_sil" transform="translate(0 3)" fill="#3A3020" stroke="#3A3020" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>
+<use href="#sheep_sil" xlink:href="#sheep_sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="30" y="96" width="10" height="20" rx="5" fill="#675449"/>
+<g clip-path="url(#sheep_c1)"><g transform="translate(-2 -3)"><rect x="30" y="96" width="10" height="20" rx="5" fill="#7C665A"/></g>
+<rect x="28" y="110" width="14" height="8" rx="0" fill="#3E302A"/>
+</g>
+<rect x="30" y="96" width="10" height="20" rx="5" fill="none" stroke="#46362E" stroke-width="2.4" stroke-linejoin="round"/>
+<rect x="44" y="96" width="10" height="20" rx="5" fill="#675449"/>
+<g clip-path="url(#sheep_c2)"><g transform="translate(-2 -3)"><rect x="44" y="96" width="10" height="20" rx="5" fill="#7C665A"/></g>
+<rect x="42" y="110" width="14" height="8" rx="0" fill="#3E302A"/>
+</g>
+<rect x="44" y="96" width="10" height="20" rx="5" fill="none" stroke="#46362E" stroke-width="2.4" stroke-linejoin="round"/>
+<rect x="64" y="96" width="10" height="20" rx="5" fill="#675449"/>
+<g clip-path="url(#sheep_c3)"><g transform="translate(-2 -3)"><rect x="64" y="96" width="10" height="20" rx="5" fill="#7C665A"/></g>
+<rect x="62" y="110" width="14" height="8" rx="0" fill="#3E302A"/>
+</g>
+<rect x="64" y="96" width="10" height="20" rx="5" fill="none" stroke="#46362E" stroke-width="2.4" stroke-linejoin="round"/>
+<rect x="78" y="96" width="10" height="20" rx="5" fill="#675449"/>
+<g clip-path="url(#sheep_c4)"><g transform="translate(-2 -3)"><rect x="78" y="96" width="10" height="20" rx="5" fill="#7C665A"/></g>
+<rect x="76" y="110" width="14" height="8" rx="0" fill="#3E302A"/>
+</g>
+<rect x="78" y="96" width="10" height="20" rx="5" fill="none" stroke="#46362E" stroke-width="2.4" stroke-linejoin="round"/>
+<path d="M 88.26 84.77 Q 90.6 91.84 80.69 95.15 Q 78.47 102.78 66.55 102.07 Q 59.38 109.2 49.07 103.92 Q 37.75 107.81 32.27 100.3 Q 20.7 99.56 19.98 92.03 Q 11.22 87.7 15.03 81 Q 10.45 74.54 18.55 69.74 Q 18.48 62.3 29.73 60.83 Q 34.35 53.23 46.01 56.32 Q 55.62 50.42 63.67 57.22 Q 75.62 55.7 78.65 63.35 Q 89.08 66.07 87.52 73.29 Q 94.29 78.86 88.26 84.77 Z" fill="#E8DDC6"/>
+<g clip-path="url(#sheep_c5)"><g transform="translate(-3 -4)"><path d="M 88.26 84.77 Q 90.6 91.84 80.69 95.15 Q 78.47 102.78 66.55 102.07 Q 59.38 109.2 49.07 103.92 Q 37.75 107.81 32.27 100.3 Q 20.7 99.56 19.98 92.03 Q 11.22 87.7 15.03 81 Q 10.45 74.54 18.55 69.74 Q 18.48 62.3 29.73 60.83 Q 34.35 53.23 46.01 56.32 Q 55.62 50.42 63.67 57.22 Q 75.62 55.7 78.65 63.35 Q 89.08 66.07 87.52 73.29 Q 94.29 78.86 88.26 84.77 Z" fill="#FFFBF0"/></g>
+<path d="M 34 82 q 4 -4 8 0 M 52 92 q 4 -4 8 0 M 62 74 q 4 -4 8 0" fill="none" stroke="#E8DDC6" stroke-width="1.8" stroke-linecap="round" opacity=".6"/>
+<ellipse cx="40" cy="64" rx="10" ry="4" transform="rotate(-12 40 64)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M 88.26 84.77 Q 90.6 91.84 80.69 95.15 Q 78.47 102.78 66.55 102.07 Q 59.38 109.2 49.07 103.92 Q 37.75 107.81 32.27 100.3 Q 20.7 99.56 19.98 92.03 Q 11.22 87.7 15.03 81 Q 10.45 74.54 18.55 69.74 Q 18.48 62.3 29.73 60.83 Q 34.35 53.23 46.01 56.32 Q 55.62 50.42 63.67 57.22 Q 75.62 55.7 78.65 63.35 Q 89.08 66.07 87.52 73.29 Q 94.29 78.86 88.26 84.77 Z" fill="none" stroke="#6F6355" stroke-width="2.4" stroke-linejoin="round"/>
+<ellipse cx="74" cy="52" rx="11" ry="5.5" transform="rotate(-25 74 52)" fill="#7C665A"/>
+<g clip-path="url(#sheep_c6)">
+<ellipse cx="75" cy="52" rx="6" ry="2.5" transform="rotate(-25 75 52)" fill="#E7A0A8"/>
+</g>
+<ellipse cx="74" cy="52" rx="11" ry="5.5" transform="rotate(-25 74 52)" fill="none" stroke="#46362E" stroke-width="2.4" stroke-linejoin="round"/>
+<ellipse cx="113" cy="52" rx="10" ry="5" transform="rotate(25 113 52)" fill="#7C665A"/>
+<g clip-path="url(#sheep_c7)">
+<ellipse cx="112" cy="52" rx="5.5" ry="2.3" transform="rotate(25 112 52)" fill="#E7A0A8"/>
+</g>
+<ellipse cx="113" cy="52" rx="10" ry="5" transform="rotate(25 113 52)" fill="none" stroke="#46362E" stroke-width="2.4" stroke-linejoin="round"/>
+<path d="M 78 52 C 78 40 86 36 94 36 C 104 36 110 44 110 54 C 110 68 104 78 94 78 C 84 78 78 66 78 52 Z" fill="#675449"/>
+<g clip-path="url(#sheep_c8)"><g transform="translate(-3 -4)"><path d="M 78 52 C 78 40 86 36 94 36 C 104 36 110 44 110 54 C 110 68 104 78 94 78 C 84 78 78 66 78 52 Z" fill="#7C665A"/></g>
+<ellipse cx="86" cy="46" rx="4" ry="2.5" transform="rotate(-30 86 46)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M 78 52 C 78 40 86 36 94 36 C 104 36 110 44 110 54 C 110 68 104 78 94 78 C 84 78 78 66 78 52 Z" fill="none" stroke="#46362E" stroke-width="2.4" stroke-linejoin="round"/>
+<ellipse cx="95" cy="72" rx="9" ry="5.5" fill="#9C8274"/>
+<path d="M 92 70 L 95 72.5 L 98 70" fill="none" stroke="#3A2C26" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 107.29 40.96 Q 107.99 46.29 99.46 46.84 Q 94.13 52.34 87.27 47.55 Q 78.41 48.24 77.85 42.67 Q 72.09 39.16 76.71 35.04 Q 76.01 29.71 84.54 29.16 Q 89.87 23.66 96.73 28.45 Q 105.59 27.76 106.15 33.33 Q 111.91 36.84 107.29 40.96 Z" fill="#E8DDC6"/>
+<g clip-path="url(#sheep_c9)"><g transform="translate(-2 -3)"><path d="M 107.29 40.96 Q 107.99 46.29 99.46 46.84 Q 94.13 52.34 87.27 47.55 Q 78.41 48.24 77.85 42.67 Q 72.09 39.16 76.71 35.04 Q 76.01 29.71 84.54 29.16 Q 89.87 23.66 96.73 28.45 Q 105.59 27.76 106.15 33.33 Q 111.91 36.84 107.29 40.96 Z" fill="#FFFBF0"/></g>
+</g>
+<path d="M 107.29 40.96 Q 107.99 46.29 99.46 46.84 Q 94.13 52.34 87.27 47.55 Q 78.41 48.24 77.85 42.67 Q 72.09 39.16 76.71 35.04 Q 76.01 29.71 84.54 29.16 Q 89.87 23.66 96.73 28.45 Q 105.59 27.76 106.15 33.33 Q 111.91 36.84 107.29 40.96 Z" fill="none" stroke="#6F6355" stroke-width="2.4" stroke-linejoin="round"/>
+<circle cx="87" cy="56" r="6.6" fill="#FFFFFF" stroke="#46362E" stroke-width="2.4"/>
+<ellipse cx="88.2" cy="56.4" rx="4.6" ry="5.24" fill="#2F2622"/>
+<circle cx="86.73" cy="54.47" r="2.02" fill="#FFFFFF"/>
+<circle cx="89.95" cy="58.24" r="0.83" fill="#FFFFFF" opacity=".9"/>
+<circle cx="102" cy="55" r="6" fill="#FFFFFF" stroke="#46362E" stroke-width="2.4"/>
+<ellipse cx="103" cy="55.4" rx="4.2" ry="4.79" fill="#2F2622"/>
+<circle cx="101.66" cy="53.64" r="1.85" fill="#FFFFFF"/>
+<circle cx="104.6" cy="57.08" r="0.76" fill="#FFFFFF" opacity=".9"/>
+<ellipse cx="83" cy="67" rx="4.2" ry="2.6" fill="#FF8FA8" opacity="0.8"/>
+<ellipse cx="106" cy="66" rx="3.6" ry="2.23" fill="#FF8FA8" opacity="0.8"/>
+</g>
+</svg>
