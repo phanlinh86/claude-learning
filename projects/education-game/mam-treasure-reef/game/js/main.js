@@ -200,7 +200,11 @@
   }
   function saveResume() {
     addPlayTime();
-    if (profile && world.level != null && world.state !== 'sessionDone') TR.Progress.setResume(profile, { lagoon, level: world.level, levelStars: lagoonStars.slice(), pearls: profile.pearls || 0 });
+    if (!profile || world.level == null || world.state === 'sessionDone') return;
+    // during the chapter-end dance world.level is still the finished chapter: resume at the next one (functional QA F1)
+    const lvl = world.state === 'levelDone' ? world.level + 1 : world.level;
+    if (lvl > 3) return;
+    TR.Progress.setResume(profile, { lagoon, level: lvl, levelStars: lagoonStars.slice(), pearls: profile.pearls || 0 });
   }
   function addPlayTime() {
     if (!profile || !playT0) return;

@@ -154,7 +154,7 @@ sides; nearest mound centre wins where pads overlap. Drag drop zone: chest rect 
 - Ask mode exactly as Snow Garden (`w.target` = queue head chest id).
 - Photobomb: `_chapterCorrect % 3 === 0` and fewer than 2 this chapter → `photobomb {dir ±1, y 0.15–0.6}`; counters reset per chapter.
 - Help, idle, Talk: hint after 2 misses (glow 3 s, cooldown 6 s); idle 12 → 24 → 48 → 60 s (reset by a grab or a tap); Talk
-  re-ask every 12 s, answer glows from the 2nd re-ask; **chapter time limit 75 s after ≥ 3 rounds**.
+  re-ask every 12 s, answer glows from the 2nd re-ask; **chapter time limit 100 s after ≥ 3 rounds** (playtest: 75 s cut 38 % of a typical 4-year-old's chapters).
 
 ## 6. Dig state machine
 ```
@@ -165,7 +165,7 @@ mound: buried ──tap, label = target──▶ open (puff 1, open 0→1)  ·  
 round: appear (items pop in) → interactive → … → queue empty & nothing in the air (count: count ≥ need) → completing →
        roundDone (0.5 s after the last land) → leave (1.0 s) → next round / Talk
 ```
-Session: `menu` → `newSession({lagoon, plan})` → `intro` 1.8 s → rounds (4, or 3 once the chapter is > 75 s old) → `talk` →
+Session: `menu` → `newSession({lagoon, plan})` → `intro` 1.8 s → rounds (4, or 3 once the chapter is > 100 s old) → `talk` →
 `levelDone` 2.0 s (Tutu dances, +10 pearls) → next chapter (time of day = chapter index) … → `sessionDone` (+25 pearls).
 Rotation (`setViewport`): drag → re-pack resting items, re-target flights; dig → `cancelDrag`, mounds re-anchored to the new
 `moundGrid[slot]`, buried/peek items re-sized and re-placed, hopping items re-based, flying items clamped into the viewport and
@@ -241,4 +241,4 @@ moving (a tap). Skill 1 never errs (52/52 stars in every lagoon).
 7. Count rounds' `params` are `{n}` only (no colour: pearls have none); count items are `pearl` with `nameKind 'pearl'`; coloured
    shells use `nameKind 'color'` everywhere (was `'seed'`).
 8. `pearl` is emitted after `roundDone` / `levelDone` / before `sessionDone` (the payloads of those events already hold the totals).
-9. Chapter time limit is **75 s** (the REQUIREMENT/task value; Snow Garden's QA had lowered it to 60).
+9. Chapter time limit is **100 s** (raised from 75 after the playtest). Other playtest-tuned values: tapTime 1.0 s (toddlers hold pokes), moundPad 40, peekAbove 0.3, hintTime 5 s.

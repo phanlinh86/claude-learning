@@ -42,7 +42,7 @@ const threads = Math.max(1, +opt('threads', Math.min(4, os.cpus().length)));
 
 /* The recommended CONFIG changes (see docs/reports/playtest_report.md); re-simulated below as before/after. */
 const PROPOSAL = {
-  tapTime: 1.0,            // a toddler's poke-and-hold on a treasure is a tap, not a drop (0.35 → 1.0)
+  tapTime: 1e9,            // a finger that never moved 24 px is always a tap, never a drop (0.35 s → no time limit)
   peekAbove: 0.3,          // the wrong-dig peek no longer rises into the mound of the row above (0.55 → 0.3)
   chapterTimeLimit: 100,   // a typical 4-year-old keeps the 4th round instead of being cut at 75 s (75 → 100)
   hintTime: 5,             // the glow outlasts a slow child's 3–5 s think (3 → 5)
@@ -116,13 +116,13 @@ function report(base, prop, wall) {
   // ---- 3. correctness checks per model
   P(`## 3. Input / geometry / flow checks per model (all ages, lagoons, viewports)`);
   P(``);
-  P(`| model | pokes → counted as drop (held ≥ tapTime) | near-zone misses | high drops missed / high drops | dig taps ignored: outside pad / wobbled ≥ 24 px (of taps) | peek overlaps: mound above / chest (max px) of peeks | packed outside / overlapping | count rounds done | look-alike accepts (rounds with twins) | bad next / nexts | anomalies | 3+ structurally identical rounds in a chapter | same label set as the previous round |`);
+  P(`| model | pokes → counted as drop (of which: wrong-chest / correct) | near-zone misses | high drops missed / high drops | dig taps ignored: outside pad / wobbled ≥ 24 px (of taps) | peek overlaps: mound above / chest (max px) of peeks | packed outside / overlapping | count rounds done | look-alike accepts (rounds with twins) | bad next / nexts | anomalies | 3+ structurally identical rounds in a chapter | same label set as the previous round |`);
   P(`|---|---|---|---|---|---|---|---|---|---|---|---|---|`);
   const byM = groupBy(base, r => r.model);
   for (const m of models) {
     const rs = byM[m]; if (!rs) continue;
     const A = L.aggregate(rs);
-    P(`| ${m} | ${A.tapAsDrop} of ${A.pokes} (${A.longPokes}) | ${A.nearMiss} of ${A.misses} misses | ${A.highMissed} / ${A.highDrops} | ${A.ignoredDigTaps} / ${A.wobbleIgnored} (${A.digTaps}) | ${A.peekOverlapMound} / ${A.peekOverlapChest} (${f0(A.peekOverlapMax)}) of ${A.peeks} | ${A.packOutside} / ${A.packOverlap} | ${A.countDone} / ${A.countRounds} | ${A.lookalike} (${A.lookalikeRounds} of ${A.digRounds}) | ${A.nextBad} / ${A.nexts} | ${A.anomalies} | ${A.sameRuns} of ${A.chapters} | ${A.sameLabels} of ${A.roundsN} |`);
+    P(`| ${m} | ${A.tapAsDrop} of ${A.pokes} (${A.pokeWrong} / ${A.pokeCorrect}) | ${A.nearMiss} of ${A.misses} misses | ${A.highMissed} / ${A.highDrops} | ${A.ignoredDigTaps} / ${A.wobbleIgnored} (${A.digTaps}) | ${A.peekOverlapMound} / ${A.peekOverlapChest} (${f0(A.peekOverlapMax)}) of ${A.peeks} | ${A.packOutside} / ${A.packOverlap} | ${A.countDone} / ${A.countRounds} | ${A.lookalike} (${A.lookalikeRounds} of ${A.digRounds}) | ${A.nextBad} / ${A.nexts} | ${A.anomalies} | ${A.sameRuns} of ${A.chapters} | ${A.sameLabels} of ${A.roundsN} |`);
   }
   P(``);
   const anomalies = [], variety = [];
@@ -170,11 +170,13 @@ function report(base, prop, wall) {
     P(``);
     P('```json\n' + JSON.stringify(PROPOSAL, null, 1) + '\n```');
     P(``);
+    const bp = groupBy(prop, r => r.model + '|' + r.age), propSeeds = Math.max(...prop.map(r => r.seed));
+    P(`Before = the same cells of the base matrix restricted to seeds ≤ ${propSeeds} (identical seeds on both sides).`);
+    P(``);
     P(`| model | age | 6-lagoon est. (min) before → after | dig / drag chapter s | pokes counted as drops | peek overlaps (max px) | short chapters | hints per round | stars 3 | dig taps outside pad | stuck / anomalies |`);
     P(`|---|---|---|---|---|---|---|---|---|---|---|`);
-    const bp = groupBy(prop, r => r.model + '|' + r.age);
     for (const m of [...new Set(prop.map(r => r.model))]) for (const a of ages) {
-      const A = L.aggregate((byMA[m + '|' + a] || [])), B = L.aggregate(bp[m + '|' + a] || []);
+      const A = L.aggregate((byMA[m + '|' + a] || []).filter(r => r.seed <= propSeeds)), B = L.aggregate(bp[m + '|' + a] || []);
       if (!B.n) continue;
       P(`| ${m} | ${a} | ${min(A.total6)} → ${min(B.total6)} | ${f0(L.mean(A.digChapDur))} / ${f0(L.mean(A.dragChapDur))} → ${f0(L.mean(B.digChapDur))} / ${f0(L.mean(B.dragChapDur))} | ${A.tapAsDrop}/${A.pokes} → ${B.tapAsDrop}/${B.pokes} | ${A.peekOverlapMound} (${f0(A.peekOverlapMax)}) → ${B.peekOverlapMound} (${f0(B.peekOverlapMax)}) | ${pc(A.shortChapters, A.chapters)} → ${pc(B.shortChapters, B.chapters)} | ${(A.hints / Math.max(1, A.roundsN)).toFixed(2)} → ${(B.hints / Math.max(1, B.roundsN)).toFixed(2)} | ${pc(A.stars[3], A.roundsN)} → ${pc(B.stars[3], B.roundsN)} | ${A.ignoredDigTaps}/${A.digTaps} → ${B.ignoredDigTaps}/${B.digTaps} | ${A.stuck}/${A.anomalies} → ${B.stuck}/${B.anomalies} |`);
     }

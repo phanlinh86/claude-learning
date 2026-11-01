@@ -1000,7 +1000,7 @@ test('dig: wrong tap → dig(false) + wrong {moundId,itemId,nameKind,nameValue},
   let minY = 1e9, t = 0, wig = 0, prevW = 0, peekMax = 0;
   while (it.state === 'peek') { w.update(H); t += H; minY = Math.min(minY, it.y); peekMax = Math.max(peekMax, it.peek); if (wrongM.wiggle * prevW < 0) wig++; prevW = wrongM.wiggle; }
   assert.ok(Math.abs(t - 1.1) < 2 * H, 'peek time ' + t);
-  assert.ok(Math.abs(minY - (top - drawn * 0.55)) < 1, 'rose fully above the mound: ' + (top - minY) / drawn);
+  assert.ok(Math.abs(minY - (top - drawn * w.cfg.peekAbove)) < 1, 'rose above the mound by cfg.peekAbove: ' + (top - minY) / drawn);
   assert.ok(peekMax > 0.99 && wig >= 4, 'peek 1 and wiggle ' + wig);
   assert.strictEqual(it.state, 'buried'); assert.strictEqual(wrongM.state, 'buried'); assert.ok(Math.abs(it.y - y0) < 1e-9 && it.peek === 0, 're-buried');
   assert.ok(!w.drainEvents().some(e => e.type === 'hint'), 'no hint after 1 miss');
@@ -1011,7 +1011,7 @@ test('dig: wrong tap → dig(false) + wrong {moundId,itemId,nameKind,nameValue},
   assert.ok(hint && hint.moundId === w.targetMound().id, 'hint → target mound');
   assert.strictEqual(w.roundMistakes, 2);
   w.update(H); assert.strictEqual(w.targetMound().glow, 1); assert.strictEqual(w.tutu.mood, 'think');
-  run(w, 2.5); assert.ok(w.targetMound().glow > 0); run(w, 0.7); assert.strictEqual(w.targetMound().glow, 0);
+  run(w, 4.5); assert.ok(w.targetMound().glow > 0); run(w, 0.7); assert.strictEqual(w.targetMound().glow, 0);
   assert.strictEqual(w.hint(), w.targetMound().id, 'hint() glows the target mound');
   // a tap on an open / peeking mound or during peek does nothing harmful; finish the round
   solveRound(w);
@@ -1033,8 +1033,8 @@ test('dig: tap-is-not-a-drag — a finger that moves ≥ 24 px does nothing; tap
   // tap the poking item top of another mound (above the mound rect) → that mound
   const m2 = buriedMounds(w)[0], it2 = w.itemById(m2.itemId);
   assert.strictEqual(w.moundAt(m2.x, it2.y - it2.size * it2.scale / 2 + 2), m2, 'the poking item is part of the tap rect');
-  assert.strictEqual(w.moundAt(m2.x - m2.w / 2 - 23, m2.y + 23), m2, '+24 px pad');
-  assert.strictEqual(w.moundAt(m2.x - m2.w / 2 - 25, m2.y + 25), null);
+  assert.strictEqual(w.moundAt(m2.x - m2.w / 2 - 39, m2.y + 39), m2, '+40 px pad');
+  assert.strictEqual(w.moundAt(m2.x - m2.w / 2 - 41, m2.y + 41), null);
   let e = null;   // a spot of bare sand between two mounds
   for (let x = 0; x < w.layout.W && !e; x += 7) for (let y = 0; y < w.layout.H && !e; y += 7) if (!w.moundAt(x, y) && w.moundAt(x - 60, y) && y > w.layout.play.y) e = { x, y };
   assert.ok(e && w.moundAt(e.x, e.y) === null);
@@ -1175,7 +1175,7 @@ test('stars: 0 mistakes → 3, 1 → 2, ≥ 2 → 1; talk right → +1', () => {
   assert.deepStrictEqual(J(w2.drainEvents().find(e => e.type === 'talkResult')), { type: 'talkResult', correct: false, choiceId: wrong, answerId: w2.talk.answerId });
 });
 
-test('help: 2 misses on the same item → auto hint (glow 3 s); hint() for the held item; cooldown 6 s', () => {
+test('help: 2 misses on the same item → auto hint (glow 5 s); hint() for the held item; cooldown 6 s', () => {
   const w = mkWorld({ seed: 40, age: 5 });
   roundOf(w, 'colors', 1); settleAppear(w);
   const it = idleItems(w)[0], wb = w.baskets.find(b => b.id !== it.answer);
@@ -1189,7 +1189,7 @@ test('help: 2 misses on the same item → auto hint (glow 3 s); hint() for the h
   const rb = w.basketById(it.answer);
   w.update(H);
   assert.strictEqual(rb.glow, 1); assert.strictEqual(w.tutu.mood, 'think');
-  run(w, 2.5); assert.ok(rb.glow > 0); run(w, 0.6); assert.strictEqual(rb.glow, 0);
+  run(w, 4.5); assert.ok(rb.glow > 0); run(w, 0.6); assert.strictEqual(rb.glow, 0);
   run(w, 0.5);
   const o = idleItems(w)[1]; w.pointerDown(o.x, o.y);
   assert.strictEqual(w.hint(), o.answer);
@@ -1312,8 +1312,8 @@ test('tap guard (drag): a quick tap is not a drop (tap event, quiet return, no m
   const w = mkWorld({ seed: 61, age: 5 });
   roundOf(w, 'colors', 1); settleAppear(w); w.drainEvents();
   let it = idleItems(w)[0];
-  w.pointerDown(it.x, it.y); run(w, 0.4); w.pointerUp(it.x, it.y);
-  assert.ok(w.drainEvents().some(e => e.type === 'miss'), 'long hold in place = miss');
+  w.pointerDown(it.x, it.y); run(w, 1.2); w.pointerUp(it.x, it.y);
+  assert.ok(w.drainEvents().some(e => e.type === 'miss'), 'very long hold in place (> tapTime) = miss');
   run(w, 0.6);
   it = idleItems(w)[0];
   const b = w.basketById(it.answer), p = chestPoint(b);

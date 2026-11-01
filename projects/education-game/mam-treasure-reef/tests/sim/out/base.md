@@ -1,6 +1,6 @@
 # Playtest summary — base
 
-1260 sessions (one lagoon each) · models perfect, typical, slow3, random, spammer, idle, high · ages 3,4,5,6,7 · lagoons 1,2,3,4,5,6 · viewports land, port · 3 seed(s) per cell · lang en · config {} · 155.5 s wall on 2 thread(s)
+1260 sessions (one lagoon each) · models perfect, typical, slow3, random, spammer, idle, high · ages 3,4,5,6,7 · lagoons 1,2,3,4,5,6 · viewports land, port · 3 seed(s) per cell · lang en · config {} · 115.2 s wall on 2 thread(s)
 
 Times are simulated game seconds (the world's own clock, incl. the 1.8 s chapter banner, 1.7 s stars, 2.0 s dance and the child's Talk-time think). Add ≈ 10 s per lagoon for the real map / fanfare screens.
 
@@ -86,17 +86,17 @@ Times are simulated game seconds (the world's own clock, incl. the 1.8 s chapter
 
 ## 3. Input / geometry / flow checks per model (all ages, lagoons, viewports)
 
-| model | pokes → counted as drop (held ≥ tapTime) | near-zone misses | high drops missed / high drops | dig taps ignored: outside pad / wobbled ≥ 24 px (of taps) | peek overlaps: mound above / chest (max px) of peeks | packed outside / overlapping | count rounds done | look-alike accepts (rounds with twins) | bad next / nexts | anomalies | 3+ identical rounds in a chapter |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| perfect | 0 of 0 (0) | 0 of 0 misses | 0 / 0 | 0 / 0 (3286) | 0 / 0 (0) of 0 | 0 / 0 | 480 / 480 | 682 (947 of 1440) | 0 / 1327 | 0 | 319 of 720 |
-| typical | 631 of 1013 (518) | 0 of 734 misses | 0 / 0 | 20 / 0 (4481) | 347 / 0 (22) of 779 | 0 / 0 | 453 / 453 | 670 (946 of 1440) | 0 / 1279 | 0 | 171 of 720 |
-| slow3 | 1348 of 1745 (1228) | 0 of 1835 misses | 0 / 1032 | 1377 / 0 (6567) | 602 / 0 (22) of 1344 | 0 / 0 | 431 / 431 | 538 (830 of 1244) | 0 / 1019 | 0 | 91 of 720 |
-| random | 0 of 0 (0) | 0 of 20634 misses | 0 / 0 | 0 / 0 (0) | 527 / 0 (22) of 1053 | 0 / 0 | 196 / 201 | 332 (392 of 659) | 0 / 612 | 0 | 67 of 427 |
-| spammer | 0 of 0 (0) | 0 of 0 misses | 0 / 0 | 16 / 0 (2114) | 755 / 0 (22) of 1535 | 0 / 0 | 466 / 466 | 701 (947 of 1440) | 0 / 1301 | 0 | 288 of 720 |
-| idle | 522 of 912 (438) | 0 of 611 misses | 0 / 0 | 13 / 0 (3962) | 289 / 0 (22) of 692 | 0 / 0 | 396 / 396 | 564 (832 of 1281) | 0 / 1098 | 0 | 109 of 720 |
-| high | 0 of 0 (0) | 0 of 0 misses | 0 / 7085 | 10 / 0 (3996) | 166 / 0 (22) of 379 | 0 / 0 | 464 / 464 | 682 (943 of 1440) | 0 / 1321 | 0 | 249 of 720 |
+| model | pokes → counted as drop (of which: wrong-chest / correct) | near-zone misses | high drops missed / high drops | dig taps ignored: outside pad / wobbled ≥ 24 px (of taps) | peek overlaps: mound above / chest (max px) of peeks | packed outside / overlapping | count rounds done | look-alike accepts (rounds with twins) | bad next / nexts | anomalies | 3+ structurally identical rounds in a chapter | same label set as the previous round |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| perfect | 0 of 0 (0 / 0) | 0 of 0 misses | 0 / 0 | 0 / 0 (3286) | 0 / 0 (0) of 0 | 0 / 0 | 480 / 480 | 682 (947 of 1440) | 0 / 1327 | 0 | 265 of 720 | 175 of 2880 |
+| typical | 631 of 1013 (23 / 8) | 0 of 734 misses | 0 / 0 | 20 / 0 (4481) | 347 / 0 (22) of 779 | 0 / 0 | 453 / 453 | 670 (946 of 1440) | 0 / 1279 | 0 | 117 of 720 | 155 of 2650 |
+| slow3 | 1348 of 1745 (30 / 21) | 0 of 1835 misses | 0 / 1032 | 1377 / 0 (6567) | 602 / 0 (22) of 1344 | 0 / 0 | 431 / 431 | 538 (830 of 1244) | 0 / 1019 | 0 | 37 of 720 | 125 of 2333 |
+| random | 0 of 0 (0 / 0) | 0 of 20634 misses | 0 / 0 | 0 / 0 (0) | 527 / 0 (22) of 1053 | 0 / 0 | 196 / 201 | 332 (392 of 659) | 0 / 612 | 0 | 30 of 427 | 53 of 1117 |
+| spammer | 0 of 0 (0 / 0) | 0 of 0 misses | 0 / 0 | 16 / 0 (2114) | 755 / 0 (22) of 1535 | 0 / 0 | 466 / 466 | 701 (947 of 1440) | 0 / 1301 | 0 | 234 of 720 | 166 of 2829 |
+| idle | 522 of 912 (15 / 7) | 0 of 611 misses | 0 / 0 | 13 / 0 (3962) | 289 / 0 (22) of 692 | 0 / 0 | 396 / 396 | 564 (832 of 1281) | 0 / 1098 | 0 | 55 of 720 | 138 of 2362 |
+| high | 0 of 0 (0 / 0) | 0 of 0 misses | 0 / 7085 | 10 / 0 (3996) | 166 / 0 (22) of 379 | 0 / 0 | 464 / 464 | 682 (943 of 1440) | 0 / 1321 | 0 | 195 of 720 | 152 of 2784 |
 
-Identical-round samples: a3 L1 colors/drag: colors|sort|B2I4 · a3 L1 colors/dig: colors|dig|M6T3 · a3 L2 shapes/drag: shapes|sort|B2I4 · a3 L3 size/dig: size|dig|M6T3 · a4 L5 colors/dig: colors|dig|M6T3 · a4 L6 count/drag: count|count|Nnull · a5 L1 count/drag: count|count|Nnull · a5 L2 count/drag: count|count|Nnull
+Identical-round samples: a3 L1 colors/drag: colors|sort|B2I4 · a3 L1 colors/dig: colors|dig|M6T3 · a3 L2 shapes/drag: shapes|sort|B2I4 · a3 L3 size/dig: size|dig|M6T3 · a4 L5 colors/dig: colors|dig|M6T3 · a5 L4 letters/dig: letters|dig|M6T2 · a6 L1 initial/drag: initial|sort|B3I3 · a6 L2 initial/drag: initial|sort|B3I3
 
 ## 4. Typical 4-year-old model: mean lagoon duration (s) per age × lagoon, and the 6-lagoon total
 
@@ -124,35 +124,38 @@ Plan level (content.js PLAN): lagoons where consecutive chapters repeat the same
 
 ```json
 {
- "tapTime": 1,
+ "tapTime": 1000000000,
  "peekAbove": 0.3,
- "chapterTimeLimit": 110,
- "hintCooldown": 4
+ "chapterTimeLimit": 100,
+ "hintTime": 5,
+ "moundPad": 40
 }
 ```
 
-| model | age | 6-lagoon est. (min) before → after | pokes counted as drops | peek overlaps (max px) | short chapters | hints per round | stars 3 | stuck / anomalies |
-|---|---|---|---|---|---|---|---|---|
-| typical | 3 | 28.9 → 30.7 | 113/201 → 0/160 | 71 (22) → 0 (0) | 11% → 0% | 0.38 → 0.36 | 42% → 39% | 0/0 → 0/0 |
-| typical | 4 | 29.9 → 34.8 | 121/191 → 0/170 | 49 (22) → 0 (0) | 41% → 4% | 0.34 → 0.29 | 52% → 50% | 0/0 → 0/0 |
-| typical | 5 | 32.3 → 34.6 | 147/222 → 0/161 | 67 (22) → 0 (0) | 35% → 18% | 0.34 → 0.33 | 56% → 55% | 0/0 → 0/0 |
-| typical | 6 | 30.6 → 34.6 | 121/188 → 0/154 | 81 (22) → 0 (0) | 32% → 4% | 0.36 → 0.35 | 50% → 49% | 0/0 → 0/0 |
-| typical | 7 | 31.2 → 36.4 | 129/211 → 0/181 | 79 (22) → 0 (0) | 41% → 3% | 0.43 → 0.36 | 41% → 44% | 0/0 → 0/0 |
-| slow3 | 3 | 51.5 → 55.1 | 184/250 → 0/194 | 116 (22) → 0 (0) | 81% → 52% | 1.44 → 1.49 | 21% → 20% | 0/0 → 0/0 |
-| slow3 | 4 | 61.6 → 63.5 | 291/395 → 0/254 | 74 (22) → 0 (0) | 64% → 47% | 1.54 → 1.50 | 40% → 42% | 2/0 → 2/0 |
-| slow3 | 5 | 61.7 → 65.5 | 284/355 → 0/233 | 141 (22) → 0 (0) | 79% → 51% | 1.55 → 1.54 | 41% → 42% | 1/0 → 1/0 |
-| slow3 | 6 | 59.4 → 62.5 | 272/341 → 0/232 | 147 (22) → 0 (0) | 78% → 52% | 1.53 → 1.57 | 35% → 35% | 0/0 → 0/0 |
-| slow3 | 7 | 64.6 → 68.4 | 317/404 → 0/265 | 124 (22) → 0 (0) | 77% → 63% | 1.83 → 1.98 | 29% → 27% | 1/0 → 1/0 |
-| high | 3 | 24.5 → 24.6 | 0/0 → 0/0 | 33 (22) → 0 (0) | 0% → 0% | 0.08 → 0.09 | 64% → 64% | 0/0 → 0/0 |
-| high | 4 | 28.1 → 29.4 | 0/0 → 0/0 | 22 (22) → 0 (0) | 13% → 0% | 0.08 → 0.09 | 68% → 67% | 0/0 → 0/0 |
-| high | 5 | 28.1 → 31.0 | 0/0 → 0/0 | 30 (22) → 0 (0) | 24% → 0% | 0.07 → 0.07 | 75% → 71% | 0/0 → 0/0 |
-| high | 6 | 27.4 → 29.4 | 0/0 → 0/0 | 43 (22) → 0 (0) | 15% → 0% | 0.05 → 0.05 | 69% → 66% | 0/0 → 0/0 |
-| high | 7 | 28.3 → 30.5 | 0/0 → 0/0 | 38 (22) → 0 (0) | 15% → 0% | 0.08 → 0.10 | 63% → 61% | 0/0 → 0/0 |
-| idle | 3 | 55.2 → 60.6 | 68/133 → 0/131 | 48 (22) → 0 (0) | 73% → 10% | 0.32 → 0.32 | 45% → 43% | 0/0 → 0/0 |
-| idle | 4 | 59.9 → 62.3 | 105/190 → 0/128 | 39 (22) → 0 (0) | 67% → 40% | 0.39 → 0.32 | 53% → 51% | 0/0 → 0/0 |
-| idle | 5 | 61.2 → 64.0 | 118/184 → 0/128 | 58 (22) → 0 (0) | 72% → 38% | 0.35 → 0.32 | 53% → 50% | 0/0 → 0/0 |
-| idle | 6 | 59.5 → 62.3 | 118/200 → 0/135 | 75 (22) → 0 (0) | 76% → 36% | 0.36 → 0.32 | 51% → 52% | 0/0 → 0/0 |
-| idle | 7 | 60.5 → 63.1 | 113/205 → 0/151 | 69 (22) → 0 (0) | 72% → 43% | 0.41 → 0.37 | 45% → 43% | 0/0 → 0/0 |
+| model | age | 6-lagoon est. (min) before → after | dig / drag chapter s | pokes counted as drops | peek overlaps (max px) | short chapters | hints per round | stars 3 | dig taps outside pad | stuck / anomalies |
+|---|---|---|---|---|---|---|---|---|---|---|
+Before = the same cells of the base matrix restricted to seeds ≤ 2 (identical seeds on both sides).
+
+| typical | 3 | 29.4 → 30.8 | 52 / 91 → 53 / 97 | 84/146 → 0/164 | 47 (22) → 0 (0) | 13% → 0% | 0.41 → 0.33 | 40% → 37% | 1/594 → 0/629 | 0/0 → 0/0 |
+| typical | 4 | 30.2 → 34.4 | 52 / 95 → 51 / 117 | 90/138 → 0/167 | 36 (22) → 0 (0) | 41% → 7% | 0.37 → 0.26 | 50% → 50% | 3/595 → 0/572 | 0/0 → 0/0 |
+| typical | 5 | 32.4 → 34.0 | 52 / 106 → 53 / 113 | 91/135 → 0/162 | 49 (22) → 0 (0) | 35% → 22% | 0.36 → 0.33 | 55% → 55% | 5/596 → 0/618 | 0/0 → 0/0 |
+| typical | 6 | 30.4 → 33.0 | 53 / 95 → 54 / 107 | 84/130 → 0/142 | 58 (22) → 0 (0) | 33% → 14% | 0.37 → 0.31 | 49% → 49% | 1/622 → 0/630 | 0/0 → 0/0 |
+| typical | 7 | 30.9 → 35.3 | 53 / 97 → 52 / 121 | 88/141 → 0/169 | 47 (22) → 0 (0) | 42% → 13% | 0.39 → 0.36 | 42% → 43% | 2/616 → 0/596 | 0/0 → 0/0 |
+| slow3 | 3 | 51.6 → 48.8 | 101 / 153 → 101 / 140 | 124/171 → 0/166 | 74 (22) → 0 (0) | 81% → 46% | 1.43 → 0.98 | 22% → 23% | 183/881 → 59/851 | 0/0 → 0/0 |
+| slow3 | 4 | 62.1 → 59.1 | 94 / 213 → 94 / 198 | 187/257 → 0/255 | 44 (22) → 0 (0) | 64% → 47% | 1.57 → 1.06 | 41% → 38% | 164/794 → 57/774 | 1/0 → 0/0 |
+| slow3 | 5 | 61.8 → 62.6 | 103 / 202 → 106 / 203 | 194/242 → 0/271 | 93 (22) → 0 (0) | 80% → 46% | 1.56 → 1.21 | 42% → 35% | 178/903 → 73/913 | 1/0 → 2/0 |
+| slow3 | 6 | 59.2 → 55.0 | 104 / 188 → 97 / 174 | 183/232 → 0/184 | 100 (22) → 0 (0) | 79% → 49% | 1.52 → 0.95 | 35% → 35% | 195/904 → 67/819 | 0/0 → 0/0 |
+| slow3 | 7 | 64.9 → 60.1 | 107 / 214 → 98 / 198 | 210/266 → 0/245 | 85 (22) → 0 (0) | 79% → 51% | 1.84 → 1.19 | 27% → 26% | 195/936 → 57/833 | 1/0 → 0/0 |
+| high | 3 | 24.6 → 24.6 | 47 / 73 → 47 / 72 | 0/0 → 0/0 | 24 (22) → 0 (0) | 0% → 0% | 0.09 → 0.09 | 64% → 64% | 1/536 → 0/536 | 0/0 → 0/0 |
+| high | 4 | 28.4 → 29.5 | 47 / 91 → 47 / 96 | 0/0 → 0/0 | 16 (22) → 0 (0) | 10% → 0% | 0.08 → 0.08 | 68% → 66% | 3/541 → 0/542 | 0/0 → 0/0 |
+| high | 5 | 28.3 → 30.7 | 47 / 90 → 47 / 102 | 0/0 → 0/0 | 24 (22) → 0 (0) | 25% → 2% | 0.09 → 0.07 | 72% → 71% | 1/544 → 0/549 | 0/0 → 0/0 |
+| high | 6 | 27.4 → 29.4 | 48 / 85 → 48 / 95 | 0/0 → 0/0 | 27 (22) → 0 (0) | 15% → 0% | 0.05 → 0.05 | 69% → 66% | 0/555 → 0/554 | 0/0 → 0/0 |
+| high | 7 | 28.3 → 30.5 | 48 / 90 → 48 / 101 | 0/0 → 0/0 | 22 (22) → 0 (0) | 17% → 0% | 0.08 → 0.09 | 63% → 61% | 1/555 → 0/559 | 0/0 → 0/0 |
+| idle | 3 | 55.3 → 58.4 | 126 / 147 → 132 / 156 | 46/88 → 0/104 | 26 (22) → 0 (0) | 73% → 29% | 0.35 → 0.28 | 44% → 41% | 2/530 → 0/614 | 0/0 → 0/0 |
+| idle | 4 | 60.2 → 61.7 | 126 / 171 → 132 / 173 | 65/124 → 0/127 | 32 (22) → 0 (0) | 69% → 43% | 0.43 → 0.29 | 51% → 54% | 0/528 → 0/601 | 0/0 → 0/0 |
+| idle | 5 | 61.4 → 63.7 | 126 / 177 → 132 / 182 | 70/118 → 0/133 | 42 (22) → 0 (0) | 73% → 43% | 0.33 → 0.32 | 52% → 50% | 2/523 → 0/616 | 0/0 → 0/0 |
+| idle | 6 | 59.6 → 61.6 | 127 / 167 → 133 / 171 | 81/134 → 0/140 | 48 (22) → 0 (0) | 76% → 42% | 0.38 → 0.29 | 52% → 53% | 2/539 → 0/623 | 0/0 → 0/0 |
+| idle | 7 | 60.7 → 62.9 | 127 / 173 → 132 / 178 | 73/137 → 0/149 | 47 (22) → 0 (0) | 70% → 45% | 0.39 → 0.35 | 45% → 43% | 2/540 → 0/625 | 0/0 → 0/0 |
 
 ## 7. Determinism (same seed, run twice)
 

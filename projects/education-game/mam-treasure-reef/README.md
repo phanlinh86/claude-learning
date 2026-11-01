@@ -55,7 +55,8 @@ node tests/unit/progress.test.js           # profiles / progress tests
 node tests/e2e/smoke.js                    # bot plays lagoons on iPhone/iPad viewports
 node tests/e2e/functional.js               # real touch, profiles, map, settings, rotation, talk time, …
 node tests/visual/capture.js               # screenshots into tests/out/visual
-node tests/sim/playtest.js                 # headless playtests (see docs/reports/playtest_report.md)
+node tests/sim/playtest.js --quick         # headless child-model playtests (see docs/reports/playtest_report.md)
+node tests/e2e/screens.js                  # quick screen tour → tests/out/screens
 ```
 URL switches for testing: `?speed=8&bot=1&autostart=1&autorestart=1&seed=3&mute=1&debug=1&age=5&lang=vi&lagoon=2&level=1&novoice=1&skill=0.6&profile=test`
 (never saved; `profile=test` keeps progress in memory). `window.TR.debug` exposes the world, state, progress and controls.

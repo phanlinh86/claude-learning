@@ -55,7 +55,7 @@
     step: 1 / 120,             // fixed simulation sub-step (≤ 1/120 per DESIGN)
     maxFrame: 1.0,             // s, largest dt accepted per update() (speed mode passes big dt)
     roundsPerLevel: 4,         // warm-up + 3 real rounds
-    chapterTimeLimit: 75,      // s since the chapter began: after ≥ chapterMinRounds rounds, go to Talk time once exceeded
+    chapterTimeLimit: 100,     // s since the chapter began: after ≥ chapterMinRounds rounds, go to Talk time once exceeded
     chapterMinRounds: 3,
     introTime: 1.8,            // chapter banner
     appearTime: 0.45,          // item pop-in (back-overshoot)
@@ -110,9 +110,9 @@
     moundChestGap: 12,         // bottom row: mound bottom this far above the dig chest top
     digTutuGap: 105,           // landscape: mound columns start right of Tutu (tutu.x + 105)
     moundItemFrac: 0.62,       // drawn item ≤ 0.62 × mound w
-    moundPad: 24,              // tap rect = mound rect (+ peeking item) + 24 px all sides
+    moundPad: 40,              // tap rect = mound rect (+ peeking item) + 40 px all sides (playtest: 3-year-olds tap the sand beside it)
     peekFrac: 0.42,            // visible top fraction of a buried item
-    peekAbove: 0.55,           // peek: item centre at moundTop − 0.55 · drawn size (fully above)
+    peekAbove: 0.3,            // peek: item centre at moundTop − 0.3 · drawn size (playtest: 0.55 overlapped the mound above)
     peekTime: 1.1, peekRise: 0.18,
     digHopApex: 90, digHopTime: 0.32,
     moundOpenTime: 0.25, moundPuffTime: 0.6, moundWiggleTime: 0.5, moundWiggles: 3,
@@ -123,7 +123,7 @@
     touchR: 0.6, touchPad: 14, // item radius = 0.6 × size + 14
     chestPadSide: 45,          // drop zone grows 45 px left/right/down
     chestPadUp: 120,           // children release high above the chest
-    tapMovePx: 24, tapTime: 0.35,   // finger moved < 24 px and released < 0.35 s after down → a TAP, not a drop
+    tapMovePx: 24, tapTime: 1.0,    // finger moved < 24 px and released < 1 s after down → a TAP, not a drop (playtest: toddlers hold pokes 0.4–0.8 s)
     tapReturnTime: 0.25, tapApex: 6,
 
     // ---- drag: critically damped spring + pendulum tilt
@@ -158,7 +158,7 @@
     wiggleAmp: 0.12, wiggleTime: 0.4, wiggleMin: 4, wiggleMax: 8,
 
     // ---- help
-    hintAfterMisses: 2, hintTime: 3,
+    hintAfterMisses: 2, hintTime: 5,
     hintCooldown: 6,           // s: no auto-hint within 6 s of the last one, nor while the target still glows
     idleTime: 12,              // s without a grab/tap → idle nudge; the gap then grows ×2 per nudge up to idleMax
     idleBackoff: 2, idleMax: 60,
@@ -798,6 +798,7 @@
     if (this.state !== 'round' || this.held || this._roundEnded || this.completing) return null;
     var cfg = this.cfg;
     this._down.x = x; this._down.y = y; this._down.t = this.time; this._down.maxD = 0;
+    this._idleT = 0;                                              // any touch counts as activity (no nudges while hammering the sand)
     if (this.isDig()) { this._digDown = true; return null; }     // dig mode: a tap is judged on release (no drag)
     var best = null, bestD = 1e9;
     for (var i = this.items.length - 1; i >= 0; i--) {

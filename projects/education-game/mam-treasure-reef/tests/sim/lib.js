@@ -250,7 +250,7 @@ function runSessionInner(o) {
   const R = {            // metrics
     model, age, lagoon, seed, vp: o.vp || 'land', lang, done: false, timeout: false, total: 0,
     chapters: [], rounds: [], stuck: 0, stuckDig: 0, stuckDrag: 0, hints: 0, idles: 0, idleMaxRound: 0, talkAskMax: 0, talkAsks: 0, crabs: 0, crabMounds: 0, photobombs: 0, pearls: 0, stars: 0,
-    tapAsDrop: 0, pokes: 0, longPokes: 0, nearMiss: 0, highDrops: 0, highMissed: 0, drops: 0, misses: 0, wrongs: 0, corrects: 0,
+    tapAsDrop: 0, pokes: 0, longPokes: 0, pokeWrong: 0, pokeCorrect: 0, nearMiss: 0, highDrops: 0, highMissed: 0, drops: 0, misses: 0, wrongs: 0, corrects: 0,
     ignoredDigTaps: 0, wobbleIgnored: 0, digTaps: 0, peekOverlapChest: 0, peekOverlapMound: 0, peekOverlapMax: 0, peeks: 0,
     packOutside: 0, packOverlap: 0, dragRounds: 0, digRounds: 0, countRounds: 0, countDone: 0, lookalike: 0, lookalikeRounds: 0,
     nextBad: 0, nexts: 0, anomalies: [], shortChapters: 0, variety: [], sameRuns: 0, sameLabels: 0
@@ -348,7 +348,7 @@ function runSessionInner(o) {
         }
       } else if (g.kind === 'poke') {
         R.pokes++;
-        if (g.ev.includes('drop')) { R.tapAsDrop++; if (g.hold >= w.cfg.tapTime) R.longPokes++; }
+        if (g.ev.includes('drop')) { R.tapAsDrop++; if (g.hold >= w.cfg.tapTime) R.longPokes++; if (g.ev.includes('wrong')) R.pokeWrong++; if (g.ev.includes('correct')) R.pokeCorrect++; }
       } else if (g.kind === 'drag' || g.kind === 'spam-drag') {
         if (g.meant === 'early') continue;
         if (g.ev.includes('miss')) {
@@ -394,7 +394,7 @@ function pct(a, q) { if (!a.length) return 0; const s = a.slice().sort((x, y) =>
 
 function aggregate(results) {
   const A = { n: results.length, done: 0, timeout: 0, stuck: 0, stuckDig: 0, stuckDrag: 0, lagoonDur: [], chapDur: [], digChapDur: [], dragChapDur: [], chapInBand: 0, chapN: 0, roundDur: [], stars: { 1: 0, 2: 0, 3: 0 }, roundsN: 0,
-    hints: 0, pearls: [], crabs: 0, crabMounds: 0, photobombs: 0, chapters: 0, tapAsDrop: 0, pokes: 0, longPokes: 0, nearMiss: 0, highDrops: 0, highMissed: 0, misses: 0, drops: 0,
+    hints: 0, pearls: [], crabs: 0, crabMounds: 0, photobombs: 0, chapters: 0, tapAsDrop: 0, pokes: 0, longPokes: 0, pokeWrong: 0, pokeCorrect: 0, nearMiss: 0, highDrops: 0, highMissed: 0, misses: 0, drops: 0,
     ignoredDigTaps: 0, wobbleIgnored: 0, digTaps: 0, peekOverlapChest: 0, peekOverlapMound: 0, peekOverlapMax: 0, peeks: 0, packOutside: 0, packOverlap: 0, dragRounds: 0, digRounds: 0,
     countRounds: 0, countDone: 0, lookalike: 0, lookalikeRounds: 0, nextBad: 0, nexts: 0, anomalies: 0, anomalyList: [], shortChapters: 0, idles: 0, idleMaxRound: 0, talkAskMax: 0, talkAsks: 0, sameRuns: 0, sameLabels: 0, varietyList: [], talkRight: 0, talkDur: [],
     byLagoon: {} };
@@ -404,7 +404,7 @@ function aggregate(results) {
     A.stuck += r.stuck; A.stuckDig += r.stuckDig; A.stuckDrag += r.stuckDrag;
     for (const c of r.chapters) { A.chapters++; if (c.dur != null) { A.chapDur.push(c.dur); (c.mech === 'dig' ? A.digChapDur : A.dragChapDur).push(c.dur); A.chapN++; if (c.dur >= 60 && c.dur <= 100) A.chapInBand++; } if (c.talkRight) A.talkRight++; if (c.talkDur != null) A.talkDur.push(c.talkDur); }
     for (const q of r.rounds) if (q.done) { A.roundDur.push(q.dur); A.stars[q.stars]++; A.roundsN++; }
-    for (const k of ['hints', 'crabs', 'crabMounds', 'photobombs', 'tapAsDrop', 'pokes', 'longPokes', 'nearMiss', 'highDrops', 'highMissed', 'misses', 'drops', 'ignoredDigTaps', 'wobbleIgnored', 'digTaps', 'peekOverlapChest', 'peekOverlapMound', 'peeks', 'packOutside', 'packOverlap', 'dragRounds', 'digRounds', 'countRounds', 'countDone', 'lookalike', 'lookalikeRounds', 'nextBad', 'nexts', 'shortChapters', 'idles', 'talkAsks', 'sameRuns', 'sameLabels']) A[k] += r[k];
+    for (const k of ['hints', 'crabs', 'crabMounds', 'photobombs', 'tapAsDrop', 'pokes', 'longPokes', 'pokeWrong', 'pokeCorrect', 'nearMiss', 'highDrops', 'highMissed', 'misses', 'drops', 'ignoredDigTaps', 'wobbleIgnored', 'digTaps', 'peekOverlapChest', 'peekOverlapMound', 'peeks', 'packOutside', 'packOverlap', 'dragRounds', 'digRounds', 'countRounds', 'countDone', 'lookalike', 'lookalikeRounds', 'nextBad', 'nexts', 'shortChapters', 'idles', 'talkAsks', 'sameRuns', 'sameLabels']) A[k] += r[k];
     A.peekOverlapMax = Math.max(A.peekOverlapMax, r.peekOverlapMax);
     A.idleMaxRound = Math.max(A.idleMaxRound, r.idleMaxRound); A.talkAskMax = Math.max(A.talkAskMax, r.talkAskMax);
     A.anomalies += r.anomalies.length; if (r.anomalies.length && A.anomalyList.length < 8) A.anomalyList.push(r.model + '/a' + r.age + '/L' + r.lagoon + '/s' + r.seed + ': ' + r.anomalies.slice(0, 3).join('; '));
