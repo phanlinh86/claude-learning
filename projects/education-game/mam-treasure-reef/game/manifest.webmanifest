@@ -1,0 +1,16 @@
+{
+  "name": "Mầm's Treasure Reef · Mầm Tìm Kho Báu",
+  "short_name": "Treasure Reef",
+  "description": "Dig up and sort treasure under the sea with Tutu the baby turtle. English & Vietnamese, with voice.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#5FC9DD",
+  "theme_color": "#5FC9DD",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

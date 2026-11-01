@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><clipPath id="jellyfish_c1"><path d="M 16 64 C 14 30 36 10 64 10 C 92 10 114 30 112 64 Q 106 72 100 64 Q 94 72 88 64 Q 82 72 76 64 Q 70 72 64 64 Q 58 72 52 64 Q 46 72 40 64 Q 34 72 28 64 Q 22 72 16 64 Z" /></clipPath><g id="jellyfish_sil"><path d="M 34 76 C 28 86 36 94 30 104 C 26 110 30 116 28 120" fill="none" stroke-width="25.5"/><path d="M 48 82 C 44 92 52 100 46 110 C 42 116 48 120 46 124" fill="none" stroke-width="25.5"/><path d="M 64 84 C 68 94 60 102 66 112 C 70 118 64 122 66 124" fill="none" stroke-width="25.5"/><path d="M 94 76 C 100 86 92 94 98 104 C 102 110 98 116 100 120" fill="none" stroke-width="25.5"/><path d="M 80 82 C 84 92 76 100 82 110 C 86 116 80 120 82 124" fill="none" stroke-width="25.5"/><path d="M 16 64 C 14 30 36 10 64 10 C 92 10 114 30 112 64 Q 106 72 100 64 Q 94 72 88 64 Q 82 72 76 64 Q 70 72 64 64 Q 58 72 52 64 Q 46 72 40 64 Q 34 72 28 64 Q 22 72 16 64 Z" /></g></defs>
+<use href="#jellyfish_sil" xlink:href="#jellyfish_sil" transform="translate(0 3)" fill="#1F4A6E" stroke="#1F4A6E" stroke-width="15" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>
+<use href="#jellyfish_sil" xlink:href="#jellyfish_sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="15" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 34 76 C 28 86 36 94 30 104 C 26 110 30 116 28 120" fill="none" stroke="#B45C86" stroke-width="10.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+<path d="M 34 76 C 28 86 36 94 30 104 C 26 110 30 116 28 120" fill="none" stroke="#F4A6C4" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+<path d="M 48 82 C 44 92 52 100 46 110 C 42 116 48 120 46 124" fill="none" stroke="#B45C86" stroke-width="10.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+<path d="M 48 82 C 44 92 52 100 46 110 C 42 116 48 120 46 124" fill="none" stroke="#F4A6C4" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+<path d="M 64 84 C 68 94 60 102 66 112 C 70 118 64 122 66 124" fill="none" stroke="#B45C86" stroke-width="10.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+<path d="M 64 84 C 68 94 60 102 66 112 C 70 118 64 122 66 124" fill="none" stroke="#F4A6C4" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+<path d="M 94 76 C 100 86 92 94 98 104 C 102 110 98 116 100 120" fill="none" stroke="#B45C86" stroke-width="10.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+<path d="M 94 76 C 100 86 92 94 98 104 C 102 110 98 116 100 120" fill="none" stroke="#F4A6C4" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+<path d="M 80 82 C 84 92 76 100 82 110 C 86 116 80 120 82 124" fill="none" stroke="#B45C86" stroke-width="10.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+<path d="M 80 82 C 84 92 76 100 82 110 C 86 116 80 120 82 124" fill="none" stroke="#F4A6C4" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+<g opacity="0.92">
+<path d="M 16 64 C 14 30 36 10 64 10 C 92 10 114 30 112 64 Q 106 72 100 64 Q 94 72 88 64 Q 82 72 76 64 Q 70 72 64 64 Q 58 72 52 64 Q 46 72 40 64 Q 34 72 28 64 Q 22 72 16 64 Z" fill="#DC8AAC"/>
+<g clip-path="url(#jellyfish_c1)"><g transform="translate(-4 -5)"><path d="M 16 64 C 14 30 36 10 64 10 C 92 10 114 30 112 64 Q 106 72 100 64 Q 94 72 88 64 Q 82 72 76 64 Q 70 72 64 64 Q 58 72 52 64 Q 46 72 40 64 Q 34 72 28 64 Q 22 72 16 64 Z" fill="#F4A6C4"/></g>
+<path d="M 24 60 C 26 38 42 22 64 22 C 86 22 102 38 104 60 Z" fill="#FCE0EC" opacity=".45"/><path d="M 30 60 Q 64 52 98 60" fill="none" stroke="#B45C86" stroke-width="2" opacity=".35"/>
+<ellipse cx="40" cy="28" rx="12" ry="6.5" transform="rotate(-30 40 28)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M 16 64 C 14 30 36 10 64 10 C 92 10 114 30 112 64 Q 106 72 100 64 Q 94 72 88 64 Q 82 72 76 64 Q 70 72 64 64 Q 58 72 52 64 Q 46 72 40 64 Q 34 72 28 64 Q 22 72 16 64 Z" fill="none" stroke="#B45C86" stroke-width="3" stroke-linejoin="round"/>
+</g>
+<ellipse cx="50" cy="44" rx="7.6" ry="8.66" fill="#2E2638"/>
+<circle cx="47.57" cy="40.81" r="3.34" fill="#FFFFFF"/>
+<circle cx="52.89" cy="47.04" r="1.37" fill="#FFFFFF" opacity=".9"/>
+<ellipse cx="78" cy="44" rx="7.6" ry="8.66" fill="#2E2638"/>
+<circle cx="75.57" cy="40.81" r="3.34" fill="#FFFFFF"/>
+<circle cx="80.89" cy="47.04" r="1.37" fill="#FFFFFF" opacity=".9"/>
+<ellipse cx="38" cy="54" rx="6" ry="3.72" fill="#F7A3B8" opacity="0.6"/>
+<ellipse cx="90" cy="54" rx="6" ry="3.72" fill="#F7A3B8" opacity="0.6"/>
+<path d="M 58 54 Q 64 60.6 70 54" fill="none" stroke="#B45C86" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><clipPath id="dolphin_c1"><path d="M 108 90 C 104 82 110 76 118 76 C 120 82 118 88 116 92 C 122 92 126 98 124 106 C 116 104 110 100 108 90 Z" /></clipPath><clipPath id="dolphin_c2"><path d="M 10 62 C 8 48 22 34 44 30 C 70 26 94 34 104 50 C 110 60 108 72 104 80 C 110 84 112 90 112 96 C 104 96 98 92 94 86 C 82 92 66 92 54 86 C 36 80 20 76 10 62 Z" /></clipPath><clipPath id="dolphin_c3"><path d="M 14 58 C 8 60 4 66 8 72 C 12 76 22 78 30 74 C 28 66 22 60 14 58 Z" /></clipPath><clipPath id="dolphin_c4"><path d="M 62 30 C 66 18 78 12 86 16 C 80 22 78 28 80 34 Z" /></clipPath><clipPath id="dolphin_c5"><path d="M 46 72 C 52 82 60 88 70 86 C 64 78 58 74 46 72 Z" /></clipPath><g id="dolphin_sil"><path d="M 108 90 C 104 82 110 76 118 76 C 120 82 118 88 116 92 C 122 92 126 98 124 106 C 116 104 110 100 108 90 Z" /><path d="M 10 62 C 8 48 22 34 44 30 C 70 26 94 34 104 50 C 110 60 108 72 104 80 C 110 84 112 90 112 96 C 104 96 98 92 94 86 C 82 92 66 92 54 86 C 36 80 20 76 10 62 Z" /><path d="M 14 58 C 8 60 4 66 8 72 C 12 76 22 78 30 74 C 28 66 22 60 14 58 Z" /><path d="M 62 30 C 66 18 78 12 86 16 C 80 22 78 28 80 34 Z" /></g></defs>
+<use href="#dolphin_sil" xlink:href="#dolphin_sil" transform="translate(0 3)" fill="#1F4A6E" stroke="#1F4A6E" stroke-width="15" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>
+<use href="#dolphin_sil" xlink:href="#dolphin_sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="15" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 108 90 C 104 82 110 76 118 76 C 120 82 118 88 116 92 C 122 92 126 98 124 106 C 116 104 110 100 108 90 Z" fill="#7FA8C9"/>
+<g clip-path="url(#dolphin_c1)">
+</g>
+<path d="M 108 90 C 104 82 110 76 118 76 C 120 82 118 88 116 92 C 122 92 126 98 124 106 C 116 104 110 100 108 90 Z" fill="none" stroke="#3E5E80" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M 10 62 C 8 48 22 34 44 30 C 70 26 94 34 104 50 C 110 60 108 72 104 80 C 110 84 112 90 112 96 C 104 96 98 92 94 86 C 82 92 66 92 54 86 C 36 80 20 76 10 62 Z" fill="#668CAD"/>
+<g clip-path="url(#dolphin_c2)"><g transform="translate(-4 -5)"><path d="M 10 62 C 8 48 22 34 44 30 C 70 26 94 34 104 50 C 110 60 108 72 104 80 C 110 84 112 90 112 96 C 104 96 98 92 94 86 C 82 92 66 92 54 86 C 36 80 20 76 10 62 Z" fill="#7FA8C9"/></g>
+<path d="M 8 66 C 20 80 40 86 60 86 C 76 86 90 82 100 74 L 104 100 L 4 100 Z" fill="#D9E8F3"/>
+<ellipse cx="44" cy="40" rx="12" ry="5" transform="rotate(-15 44 40)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M 10 62 C 8 48 22 34 44 30 C 70 26 94 34 104 50 C 110 60 108 72 104 80 C 110 84 112 90 112 96 C 104 96 98 92 94 86 C 82 92 66 92 54 86 C 36 80 20 76 10 62 Z" fill="none" stroke="#3E5E80" stroke-width="3" stroke-linejoin="round"/>
+<path d="M 14 58 C 8 60 4 66 8 72 C 12 76 22 78 30 74 C 28 66 22 60 14 58 Z" fill="#7FA8C9"/>
+<g clip-path="url(#dolphin_c3)">
+<ellipse cx="12" cy="64" rx="3" ry="1.6" transform="rotate(-20 12 64)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M 14 58 C 8 60 4 66 8 72 C 12 76 22 78 30 74 C 28 66 22 60 14 58 Z" fill="none" stroke="#3E5E80" stroke-width="2.8" stroke-linejoin="round"/>
+<path d="M 62 30 C 66 18 78 12 86 16 C 80 22 78 28 80 34 Z" fill="#7FA8C9"/>
+<g clip-path="url(#dolphin_c4)">
+</g>
+<path d="M 62 30 C 66 18 78 12 86 16 C 80 22 78 28 80 34 Z" fill="none" stroke="#3E5E80" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M 46 72 C 52 82 60 88 70 86 C 64 78 58 74 46 72 Z" fill="#759DBE"/>
+<g clip-path="url(#dolphin_c5)">
+</g>
+<path d="M 46 72 C 52 82 60 88 70 86 C 64 78 58 74 46 72 Z" fill="none" stroke="#3E5E80" stroke-width="2.4" stroke-linejoin="round"/>
+<ellipse cx="35.2" cy="54" rx="7.4" ry="8.44" fill="#2E2638"/>
+<circle cx="32.83" cy="50.89" r="3.26" fill="#FFFFFF"/>
+<circle cx="38.01" cy="56.96" r="1.33" fill="#FFFFFF" opacity=".9"/>
+<path d="M 16 70 Q 26 78 40 72" fill="none" stroke="#3E5E80" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse cx="44" cy="64" rx="5" ry="3.1" fill="#F7A3B8" opacity="0.6"/>
+</svg>

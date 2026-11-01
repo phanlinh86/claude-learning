@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><clipPath id="crab_c1"><circle cx="9" cy="45" r="6.5" /></clipPath><clipPath id="crab_c2"><circle cx="16" cy="54" r="13" /></clipPath><clipPath id="crab_c3"><circle cx="119" cy="45" r="6.5" /></clipPath><clipPath id="crab_c4"><circle cx="112" cy="54" r="13" /></clipPath><clipPath id="crab_c5"><ellipse cx="64" cy="76" rx="38" ry="27" /></clipPath><clipPath id="crab_c6"><path d="M 56 74 Q 64 85.2 72 74 Z" /></clipPath><g id="crab_sil"><path d="M 40 92 Q 30 98 24 110" fill="none" stroke-width="27"/><path d="M 88 92 Q 98 98 104 110" fill="none" stroke-width="27"/><path d="M 50 98 Q 44 106 42 116" fill="none" stroke-width="27"/><path d="M 78 98 Q 84 106 86 116" fill="none" stroke-width="27"/><path d="M 36 86 Q 24 88 14 96" fill="none" stroke-width="27"/><path d="M 92 86 Q 104 88 114 96" fill="none" stroke-width="27"/><path d="M 36 72 Q 24 70 18 62" fill="none" stroke-width="28"/><path d="M 92 72 Q 104 70 110 62" fill="none" stroke-width="28"/><circle cx="9" cy="45" r="6.5" /><circle cx="16" cy="54" r="13" /><circle cx="119" cy="45" r="6.5" /><circle cx="112" cy="54" r="13" /><path d="M 50 50 L 50 36" fill="none" stroke-width="26.5"/><path d="M 78 50 L 78 36" fill="none" stroke-width="26.5"/><ellipse cx="64" cy="76" rx="38" ry="27" /></g></defs>
+<use href="#crab_sil" xlink:href="#crab_sil" transform="translate(0 3)" fill="#1F4A6E" stroke="#1F4A6E" stroke-width="15" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>
+<use href="#crab_sil" xlink:href="#crab_sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="15" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 40 92 Q 30 98 24 110" fill="none" stroke="#A8512F" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 40 92 Q 30 98 24 110" fill="none" stroke="#F08A5D" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 88 92 Q 98 98 104 110" fill="none" stroke="#A8512F" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 88 92 Q 98 98 104 110" fill="none" stroke="#F08A5D" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 50 98 Q 44 106 42 116" fill="none" stroke="#A8512F" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 50 98 Q 44 106 42 116" fill="none" stroke="#F08A5D" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 78 98 Q 84 106 86 116" fill="none" stroke="#A8512F" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 78 98 Q 84 106 86 116" fill="none" stroke="#F08A5D" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 36 86 Q 24 88 14 96" fill="none" stroke="#A8512F" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 36 86 Q 24 88 14 96" fill="none" stroke="#F08A5D" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 92 86 Q 104 88 114 96" fill="none" stroke="#A8512F" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 92 86 Q 104 88 114 96" fill="none" stroke="#F08A5D" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 36 72 Q 24 70 18 62" fill="none" stroke="#A8512F" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 36 72 Q 24 70 18 62" fill="none" stroke="#F08A5D" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 92 72 Q 104 70 110 62" fill="none" stroke="#A8512F" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 92 72 Q 104 70 110 62" fill="none" stroke="#F08A5D" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="9" cy="45" r="6.5" fill="#F08A5D"/>
+<g clip-path="url(#crab_c1)">
+</g>
+<circle cx="9" cy="45" r="6.5" fill="none" stroke="#A8512F" stroke-width="2.6" stroke-linejoin="round"/>
+<circle cx="16" cy="54" r="13" fill="#D5744C"/>
+<g clip-path="url(#crab_c2)"><g transform="translate(-3 -4)"><circle cx="16" cy="54" r="13" fill="#F08A5D"/></g>
+<ellipse cx="11" cy="48" rx="4.5" ry="2.6" transform="rotate(-30 11 48)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<circle cx="16" cy="54" r="13" fill="none" stroke="#A8512F" stroke-width="3" stroke-linejoin="round"/>
+<path d="M 13 42 Q 9 48 4 50" fill="none" stroke="#A8512F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="119" cy="45" r="6.5" fill="#F08A5D"/>
+<g clip-path="url(#crab_c3)">
+</g>
+<circle cx="119" cy="45" r="6.5" fill="none" stroke="#A8512F" stroke-width="2.6" stroke-linejoin="round"/>
+<circle cx="112" cy="54" r="13" fill="#D5744C"/>
+<g clip-path="url(#crab_c4)"><g transform="translate(-3 -4)"><circle cx="112" cy="54" r="13" fill="#F08A5D"/></g>
+<ellipse cx="107" cy="48" rx="4.5" ry="2.6" transform="rotate(-30 107 48)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<circle cx="112" cy="54" r="13" fill="none" stroke="#A8512F" stroke-width="3" stroke-linejoin="round"/>
+<path d="M 115 42 Q 119 48 124 50" fill="none" stroke="#A8512F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 50 50 L 50 36" fill="none" stroke="#A8512F" stroke-width="11.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 50 50 L 50 36" fill="none" stroke="#F08A5D" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 78 50 L 78 36" fill="none" stroke="#A8512F" stroke-width="11.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 78 50 L 78 36" fill="none" stroke="#F08A5D" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse cx="64" cy="76" rx="38" ry="27" fill="#D5744C"/>
+<g clip-path="url(#crab_c5)"><g transform="translate(-4 -5)"><ellipse cx="64" cy="76" rx="38" ry="27" fill="#F08A5D"/></g>
+<ellipse cx="64" cy="92" rx="24" ry="9" fill="#F7B38F" opacity=".55"/><path d="M 40 58 Q 46 54 52 58 M 76 58 Q 82 54 88 58" fill="none" stroke="#A8512F" stroke-width="2" opacity=".35"/>
+<ellipse cx="44" cy="60" rx="11" ry="5.5" transform="rotate(-25 44 60)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<ellipse cx="64" cy="76" rx="38" ry="27" fill="none" stroke="#A8512F" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="50" cy="36" r="9.5" fill="#FFFFFF" stroke="#A8512F" stroke-width="2.4"/>
+<ellipse cx="50" cy="36.4" rx="5.6" ry="6.38" fill="#2E2638"/>
+<circle cx="48.21" cy="34.05" r="2.46" fill="#FFFFFF"/>
+<circle cx="52.13" cy="38.64" r="1.01" fill="#FFFFFF" opacity=".9"/>
+<circle cx="78" cy="36" r="9.5" fill="#FFFFFF" stroke="#A8512F" stroke-width="2.4"/>
+<ellipse cx="78" cy="36.4" rx="5.6" ry="6.38" fill="#2E2638"/>
+<circle cx="76.21" cy="34.05" r="2.46" fill="#FFFFFF"/>
+<circle cx="80.13" cy="38.64" r="1.01" fill="#FFFFFF" opacity=".9"/>
+<ellipse cx="40" cy="76" rx="6" ry="3.72" fill="#F7A3B8" opacity="0.6"/>
+<ellipse cx="88" cy="76" rx="6" ry="3.72" fill="#F7A3B8" opacity="0.6"/>
+<path d="M 56 74 Q 64 85.2 72 74 Z" fill="#5A2E3C"/>
+<g clip-path="url(#crab_c6)"><ellipse cx="64" cy="81.7" rx="5.76" ry="3.5" fill="#F08AA0"/></g>
+<path d="M 56 74 Q 64 85.2 72 74 Z" fill="none" stroke="#A8512F" stroke-width="2.4" stroke-linejoin="round"/>
+</svg>

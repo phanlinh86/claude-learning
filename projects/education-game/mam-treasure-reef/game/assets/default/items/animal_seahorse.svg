@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><clipPath id="seahorse_c1"><path d="M 84 58 C 98 50 108 60 102 76 C 96 84 86 82 82 76 Z" /></clipPath><clipPath id="seahorse_c2"><path d="M 48 46 C 46 56 54 62 56 68 C 50 72 44 80 46 90 C 48 100 58 106 70 104 C 84 100 90 80 86 62 C 84 52 76 46 66 44 Z" /></clipPath><clipPath id="seahorse_c3"><path d="M 50 36 C 40 36 26 38 16 42 C 12 44 12 50 16 52 C 26 54 40 54 50 52 Z" /></clipPath><clipPath id="seahorse_c4"><circle cx="58" cy="38" r="22" /></clipPath><clipPath id="seahorse_c5"><circle cx="48" cy="16" r="5" /></clipPath><clipPath id="seahorse_c6"><circle cx="58" cy="12" r="5.5" /></clipPath><clipPath id="seahorse_c7"><circle cx="68" cy="15" r="4.5" /></clipPath><g id="seahorse_sil"><path d="M 84 58 C 98 50 108 60 102 76 C 96 84 86 82 82 76 Z" /><path d="M 62 102 C 56 114 60 126 72 124 C 82 122 82 110 72 110 C 66 110 66 118 72 118" fill="none" stroke-width="31.5"/><path d="M 48 46 C 46 56 54 62 56 68 C 50 72 44 80 46 90 C 48 100 58 106 70 104 C 84 100 90 80 86 62 C 84 52 76 46 66 44 Z" /><path d="M 50 36 C 40 36 26 38 16 42 C 12 44 12 50 16 52 C 26 54 40 54 50 52 Z" /><circle cx="58" cy="38" r="22" /><circle cx="48" cy="16" r="5" /><circle cx="58" cy="12" r="5.5" /><circle cx="68" cy="15" r="4.5" /></g></defs>
+<use href="#seahorse_sil" xlink:href="#seahorse_sil" transform="translate(0 3)" fill="#1F4A6E" stroke="#1F4A6E" stroke-width="15" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>
+<use href="#seahorse_sil" xlink:href="#seahorse_sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="15" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 84 58 C 98 50 108 60 102 76 C 96 84 86 82 82 76 Z" fill="#F0CC76"/>
+<g clip-path="url(#seahorse_c1)">
+<path d="M 90 60 L 92 76 M 97 62 L 97 74" fill="none" stroke="#9C6E1A" stroke-width="1.8" opacity=".5"/>
+</g>
+<path d="M 84 58 C 98 50 108 60 102 76 C 96 84 86 82 82 76 Z" fill="none" stroke="#9C6E1A" stroke-width="2.6" stroke-linejoin="round"/>
+<path d="M 62 102 C 56 114 60 126 72 124 C 82 122 82 110 72 110 C 66 110 66 118 72 118" fill="none" stroke="#9C6E1A" stroke-width="16.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 62 102 C 56 114 60 126 72 124 C 82 122 82 110 72 110 C 66 110 66 118 72 118" fill="none" stroke="#E9B949" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 58 106 L 64 108 M 58 116 L 64 116" fill="none" stroke="#9C6E1A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.45"/>
+<path d="M 48 46 C 46 56 54 62 56 68 C 50 72 44 80 46 90 C 48 100 58 106 70 104 C 84 100 90 80 86 62 C 84 52 76 46 66 44 Z" fill="#CC9C37"/>
+<g clip-path="url(#seahorse_c2)"><g transform="translate(-4 -5)"><path d="M 48 46 C 46 56 54 62 56 68 C 50 72 44 80 46 90 C 48 100 58 106 70 104 C 84 100 90 80 86 62 C 84 52 76 46 66 44 Z" fill="#E9B949"/></g>
+<path d="M 56 66 C 48 76 50 94 60 104 C 72 106 78 96 76 84 C 74 74 66 68 56 66 Z" fill="#F6DC9A"/><path d="M 52 78 Q 64 76 74 82 M 52 88 Q 64 86 74 92 M 56 98 Q 66 96 72 100" fill="none" stroke="#9C6E1A" stroke-width="2" opacity=".4"/>
+<ellipse cx="58" cy="72" rx="6" ry="10" transform="rotate(15 58 72)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M 48 46 C 46 56 54 62 56 68 C 50 72 44 80 46 90 C 48 100 58 106 70 104 C 84 100 90 80 86 62 C 84 52 76 46 66 44 Z" fill="none" stroke="#9C6E1A" stroke-width="3" stroke-linejoin="round"/>
+<path d="M 50 36 C 40 36 26 38 16 42 C 12 44 12 50 16 52 C 26 54 40 54 50 52 Z" fill="#CC9C37"/>
+<g clip-path="url(#seahorse_c3)"><g transform="translate(-3 -4)"><path d="M 50 36 C 40 36 26 38 16 42 C 12 44 12 50 16 52 C 26 54 40 54 50 52 Z" fill="#E9B949"/></g>
+<ellipse cx="28" cy="42" rx="6" ry="2" transform="rotate(-5 28 42)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M 50 36 C 40 36 26 38 16 42 C 12 44 12 50 16 52 C 26 54 40 54 50 52 Z" fill="none" stroke="#9C6E1A" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="58" cy="38" r="22" fill="#CC9C37"/>
+<g clip-path="url(#seahorse_c4)"><g transform="translate(-4 -5)"><circle cx="58" cy="38" r="22" fill="#E9B949"/></g>
+<ellipse cx="48" cy="26" rx="8" ry="4.5" transform="rotate(-30 48 26)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<circle cx="58" cy="38" r="22" fill="none" stroke="#9C6E1A" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="48" cy="16" r="5" fill="#E9B949"/>
+<g clip-path="url(#seahorse_c5)">
+</g>
+<circle cx="48" cy="16" r="5" fill="none" stroke="#9C6E1A" stroke-width="2.4" stroke-linejoin="round"/>
+<circle cx="58" cy="12" r="5.5" fill="#E9B949"/>
+<g clip-path="url(#seahorse_c6)">
+</g>
+<circle cx="58" cy="12" r="5.5" fill="none" stroke="#9C6E1A" stroke-width="2.4" stroke-linejoin="round"/>
+<circle cx="68" cy="15" r="4.5" fill="#E9B949"/>
+<g clip-path="url(#seahorse_c7)">
+</g>
+<circle cx="68" cy="15" r="4.5" fill="none" stroke="#9C6E1A" stroke-width="2.4" stroke-linejoin="round"/>
+<ellipse cx="51" cy="40" rx="8" ry="9.12" fill="#2E2638"/>
+<circle cx="48.44" cy="36.64" r="3.52" fill="#FFFFFF"/>
+<circle cx="54.04" cy="43.2" r="1.44" fill="#FFFFFF" opacity=".9"/>
+<ellipse cx="42" cy="52" rx="5" ry="3.1" fill="#F7A3B8" opacity="0.6"/>
+<path d="M 20.5 46 Q 24 49 27.5 46" fill="none" stroke="#9C6E1A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
