@@ -1,8 +1,10 @@
-// Functional QA suite for Owlet's Snow Garden — real touch/mouse input on iPhone/iPad-sized mobile contexts.
-//   node tests/e2e/functional.js              (all groups)
-//   node tests/e2e/functional.js input ask    (only some groups)
+// Functional QA suite for Mầm's Treasure Reef — real touch input on iPhone/iPad-sized mobile contexts.
+//   node tests/e2e/functional.js                 (all groups)
+//   node tests/e2e/functional.js drag dig        (only some groups)
+// Groups: boot lang gate profiles map resume drag dig count talk settings rotate bot
 // Prints PASS/FAIL per check, writes tests/out/functional/results.json + screenshots, exits 1 on any FAIL.
-// Env: SG_GAME_ROOT=<dir> tests another build of game/.
+// The bot bypasses the input layer, so every "finger" here is a real touch (CDP touch events → pointer events)
+// or page.touchscreen.tap; the bot is only used to fast-forward to a state (then switched off by a page-side hook).
 const { chromium } = require('playwright');
 const path = require('path'), fs = require('fs');
 const serve = require('./serve');
@@ -17,907 +19,710 @@ const DEV = {
 const ALL = [DEV.iphoneP, DEV.iphoneL, DEV.ipadP, DEV.ipadL];
 const ONLY = process.argv.slice(2);
 const want = g => !ONLY.length || ONLY.includes(g);
+const BASE = 'mute=1&profile=test';          // every page: silent, progress in memory
 
 const results = [];
+let curGroup = '';
 function check(name, ok, info) {
-  results.push({ name, ok: !!ok, info: info == null ? '' : info });
-  console.log((ok ? 'PASS ' : 'FAIL ') + name + (ok || info == null ? '' : '  -- ' + (typeof info === 'string' ? info : JSON.stringify(info)).slice(0, 500)));
+  results.push({ group: curGroup, name, ok: !!ok, info: info == null ? '' : info });
+  console.log((ok ? 'PASS ' : 'FAIL ') + name + (ok || info == null ? '' : '  -- ' + (typeof info === 'string' ? info : JSON.stringify(info)).slice(0, 600)));
   return !!ok;
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-// Text sanitiser shared by all groups.
-const BARE_KEYS = ['praise', 'wrong', 'miss', 'hint', 'idle', 'great'];
-function badText(s) {
-  if (s == null) return null;
-  s = String(s);
-  if (!s.trim()) return 'empty';
-  if (/[{}]/.test(s)) return 'brace';
-  if (/\bundefined\b|\bNaN\b|\bnull\b|\[object/.test(s)) return 'undefined/NaN/null';
-  if (/\b(p|ui|topic|talk|say|session|chapter)\.[a-zA-Z]/.test(s)) return 'raw i18n key';
-  if (BARE_KEYS.includes(s.trim())) return 'bare key';
-  return null;
-}
 const VI_RE = /[ăâđêôơưàáạảãèéẹẻẽìíịỉĩòóọỏõùúụủũỳýỵỷỹằắặẳẵầấậẩẫềếệểễồốộổỗờớợởỡừứựửữ]/i;
-const EN_WORDS = /\b(the|pot|pots|seed|seeds|flower|flowers|Plant|Put|Yes|Great|Chapter|Now|Next|Count|Which)\b/;
-
-/* Collect every user-visible string: canvas fillText, and DOM text of bubble / talk / done / title. */
-const INIT = () => {
-  window.__texts = new Set();
-  const add = t => { if (t != null && String(t).trim()) window.__texts.add(String(t)); };
-  const P = CanvasRenderingContext2D.prototype, f = P.fillText;
-  P.fillText = function (t, ...a) { add(t); return f.call(this, t, ...a); };
-  window.__collect = () => ['bubbleText', 'talkQ', 'talkTitle', 'doneTitle', 'titleAge', 'tagline', 'micLabel']
-    .forEach(id => { const e = document.getElementById(id); if (e) add(e.textContent); });
-  document.addEventListener('DOMContentLoaded', () => {
-    const mo = new MutationObserver(() => {
-      window.__collect();
-      document.querySelectorAll('#talkChoices button').forEach(b => add(b.textContent));
-    });
-    mo.observe(document.body, { subtree: true, childList: true, characterData: true });
-  });
-};
 
 let srv, browser;
-async function open(dev, q = '', opt = {}) {
+async function open(dev, q = '') {
   const ctx = await browser.newContext({ viewport: dev.viewport, deviceScaleFactor: dev.dpr, isMobile: true, hasTouch: true });
-  await ctx.addInitScript(INIT);
-  if (opt.storage) await ctx.addInitScript(s => { if (!sessionStorage.getItem('__seeded')) { localStorage.clear(); for (const k in s) localStorage.setItem(k, s[k]); sessionStorage.setItem('__seeded', '1'); } }, opt.storage);
   const page = await ctx.newPage();
   const errors = [];
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   page.on('pageerror', e => errors.push(String(e)));
-  await page.goto(srv.url + (q ? '?' + q : ''));
+  await page.goto(srv.url + '?' + BASE + (q ? '&' + q : ''));
   await waitTitle(page);
-  await installEv(page);
+  await installHook(page);
   const cdp = await ctx.newCDPSession(page);
-  return { ctx, page, errors, cdp, dev };
+  return { ctx, page, errors, cdp, dev, N: `[${dev.name}]` };
 }
 async function waitTitle(page) {
-  await page.waitForFunction(() => window.TR && TR.debug && TR.debug.mode && TR.debug.mode !== 'loading', null, { timeout: 15000 });
+  await page.waitForFunction(() => window.TR && TR.debug && TR.debug.mode && TR.debug.mode !== 'loading', null, { timeout: 20000 });
 }
-async function installEv(page) {
+/* Page-side hook: every drained world event is copied into window.__events; window.__stopOn(e) (optional) switches the
+ * bot off and the speed to 1 as soon as a matching event is drained (deterministic hand-over from bot to finger). */
+async function installHook(page) {
   await page.evaluate(() => {
-    window.__ev = [];
+    window.__events = [];
     const w = TR.debug.world;
     if (w.__hooked) return;
     w.__hooked = true;
-    const o = w._emit;
-    w._emit = function (e) { window.__ev.push(Object.assign({ at: performance.now() }, e)); return o.call(this, e); };
+    const o = w.drainEvents;
+    w.drainEvents = function () {
+      const evs = o.call(this);
+      for (const e of evs) {
+        const c = Object.assign({ at: Math.round(performance.now()) }, e); delete c.talk;
+        window.__events.push(c);
+        if (window.__stopOn) { try { if (window.__stopOn(e)) { window.__stopOn = null; TR.debug.setBot(false); TR.debug.setSpeed(1); } } catch (err) { window.__stopOn = null; } }
+      }
+      return evs;
+    };
   });
 }
-const evTypes = page => page.evaluate(() => window.__ev.map(e => e.type));
-const evOf = (page, t) => page.evaluate(t => window.__ev.filter(e => e.type === t).map(e => { const o = Object.assign({}, e); delete o.talk; return o; }), t);
-const clearEv = page => page.evaluate(() => { window.__ev = []; });
+const stopOn = (page, body) => page.evaluate(b => { window.__stopOn = new Function('e', b); }, body);
+const evTypes = page => page.evaluate(() => window.__events.map(e => e.type));
+const evOf = (page, t) => page.evaluate(t => window.__events.filter(e => e.type === t), t);
+const clearEv = page => page.evaluate(() => { window.__events = []; });
+const lastEv = (page, n = 12) => page.evaluate(n => window.__events.slice(-n).map(e => { const o = Object.assign({}, e); delete o.at; return o; }), n);
 const mode = page => page.evaluate(() => TR.debug.mode);
-const voiceN = page => page.evaluate(() => TR.debug.voiceLog.length);
 const visible = (page, id) => page.evaluate(i => { const e = document.getElementById(i); return !!e && !e.classList.contains('hidden') && e.getBoundingClientRect().width > 0; }, id);
-const itemOf = (page, id) => page.evaluate(id => { const i = TR.debug.world.items.find(i => i.id === id); return i && { id: i.id, state: i.state, x: i.x, y: i.y, homeX: i.homeX, homeY: i.homeY, planted: i.planted, grow: i.grow, bloomed: i.bloomed, basketId: i.basketId, alpha: i.alpha, misses: i.misses }; }, id);
+const itemOf = (page, id) => page.evaluate(id => { const i = TR.debug.world.items.find(i => i.id === id); return i && { id: i.id, state: i.state, x: i.x, y: i.y, homeX: i.homeX, homeY: i.homeY, basketId: i.basketId, misses: i.misses, size: i.size }; }, id);
+const moundOf = (page, id) => page.evaluate(id => { const m = TR.debug.world.mounds.find(m => m.id === id); return m && { id: m.id, state: m.state, glow: m.glow, crab: m.crab, itemId: m.itemId, x: m.x, y: m.y, w: m.w, h: m.h }; }, id);
+async function shot(c, name) { try { await c.page.screenshot({ path: path.join(OUT, `${c.dev.name}-${name}.png`) }); } catch (e) { /* ignore */ } }
 
-/* ---------- input helpers (CDP touch = real touch + pointer events in Chromium) ---------- */
+/* ---------- input helpers (CDP touch = real touch → pointer events in Chromium) ---------- */
 async function touch(cdp, type, pts) { await cdp.send('Input.dispatchTouchEvent', { type, touchPoints: pts.map(p => ({ x: p.x, y: p.y, id: p.id || 0, radiusX: 4, radiusY: 4, force: 1 })) }); }
-async function tap(c, x, y) { await touch(c.cdp, 'touchStart', [{ x, y }]); await sleep(50); await touch(c.cdp, 'touchEnd', []); }
+async function tap(c, x, y) { await c.page.touchscreen.tap(x, y); }
+async function hold(c, x, y, ms) { await touch(c.cdp, 'touchStart', [{ x, y }]); await sleep(ms); await touch(c.cdp, 'touchEnd', []); }
+async function box(c, sel) {
+  const loc = c.page.locator(sel).first();
+  await loc.evaluate(e => e.scrollIntoView({ block: 'nearest' })).catch(() => {});
+  return loc.boundingBox();
+}
 async function tapEl(c, sel) {
-  await c.page.locator(sel).first().evaluate(e => e.scrollIntoView({ block: 'nearest' }));   // parents scroll the settings panel
-  const bb = await c.page.locator(sel).first().boundingBox();
+  const bb = await box(c, sel);
   if (!bb) throw new Error('no box for ' + sel);
   await tap(c, bb.x + bb.width / 2, bb.y + bb.height / 2);
-  await sleep(60);
+  await sleep(80);
 }
-const FLAKES = [];
+/** finger path from → to with `steps` moves (≥ 8), then release (unless opt.noUp) */
 async function drag(c, from, to, opt = {}) {
-  const steps = opt.steps || 14;
-  for (let attempt = 0; ; attempt++) {
-    await touch(c.cdp, 'touchStart', [from]);
-    await sleep(60);
-    if (opt.expectGrab === false || attempt >= 1) break;
-    const d = await c.page.evaluate(([x, y]) => {
-      const w = TR.debug.world, v = TR.debug.view(), lx = (x - v.left) / v.s, ly = (y - v.top) / v.s;
-      const near = w.items.map(i => ({ id: i.id, s: i.state, d: Math.hypot(i.x - lx, i.y - ly) | 0, r: (0.6 * i.size + 14) | 0 })).sort((a, b) => a.d - b.d)[0];
-      return { held: w.held, mode: TR.debug.mode, state: w.state, lx: lx | 0, ly: ly | 0, near, el: (document.elementFromPoint(x, y) || {}).id };
-    }, [from.x, from.y]);
-    if (d.held) { c.grabbedOnce = true; break; }
-    if (!c.grabbedOnce || !d.near || d.near.d > d.near.r || d.mode !== 'play' || d.state !== 'round') break;
-    FLAKES.push(d);
-    console.log('  note: touchStart did not grab, retrying once ' + JSON.stringify(d));
-    await touch(c.cdp, 'touchEnd', []); await sleep(120);
-  }
+  const steps = Math.max(8, opt.steps || 12);
+  await touch(c.cdp, 'touchStart', [from]);
+  await sleep(opt.holdFirst || 60);
   for (let i = 1; i <= steps; i++) {
-    const u = i / steps;
-    await touch(c.cdp, 'touchMove', [{ x: from.x + (to.x - from.x) * u, y: from.y + (to.y - from.y) * u }]);
+    const u = i / steps, e = u * u * (3 - 2 * u);
+    await touch(c.cdp, 'touchMove', [{ x: from.x + (to.x - from.x) * e, y: from.y + (to.y - from.y) * e }]);
     await sleep(16);
   }
-  await sleep(opt.settle || 260);           // let the spring catch up with the finger
+  await sleep(opt.settle || 280);           // let the spring catch up with the finger
   if (opt.beforeUp) await opt.beforeUp();
-  await touch(c.cdp, 'touchEnd', []);
+  if (!opt.noUp) await touch(c.cdp, 'touchEnd', []);
 }
 /** logical → CSS px */
 async function css(page, x, y) { return page.evaluate(([x, y]) => { const v = TR.debug.view(); return { x: v.left + x * v.s, y: v.top + y * v.s }; }, [x, y]); }
-async function waitRound(page, timeout = 15000) {
+async function waitRound(page, timeout = 20000) {
   await page.waitForFunction(() => TR.debug.mode === 'play' && TR.debug.world.state === 'round' && TR.debug.world.interactive &&
-    TR.debug.world.items.every(i => i.state === 'idle' || i.state === 'in'), null, { timeout });
+    TR.debug.world.items.every(i => i.state === 'idle' || i.state === 'in' || i.state === 'buried'), null, { timeout });
 }
 async function roundInfo(page) {
   return page.evaluate(() => {
     const w = TR.debug.world;
-    return { mode: w.cur && w.cur.mode, round: w.round, level: w.level, topic: w.topic, target: w.target, queue: (w.queue || []).slice(),
-      items: w.items.map(i => ({ id: i.id, answer: i.answer, goal: w.goalOf(i), x: i.x, y: i.y, size: i.size, state: i.state, homeX: i.homeX, homeY: i.homeY })),
-      baskets: w.baskets.map(b => ({ id: b.id, kind: b.kind, label: b.label, x: b.x, y: b.y, w: b.w, h: b.h, top: b.top, bottom: b.bottom, need: b.need, count: b.count, glow: b.glow })),
-      layout: w.layout };
+    return { mode: w.cur && w.cur.mode, mech: w.cur && w.cur.mech, topic: w.topic, round: w.round, level: w.level, target: w.target, queue: (w.queue || []).slice(), crab: w.cur && w.cur.crab || null, need: w.cur && w.cur.need || null,
+      items: w.items.map(i => ({ id: i.id, answer: i.answer, goal: w.goalOf ? w.goalOf(i) : i.answer, x: i.x, y: i.y, size: i.size, scale: i.scale, state: i.state, homeX: i.homeX, homeY: i.homeY, moundId: i.moundId, label: i.label })),
+      baskets: w.baskets.map(b => ({ id: b.id, kind: b.kind, label: b.label, x: b.x, y: b.y, w: b.w, h: b.h, top: b.top, bottom: b.bottom, need: b.need, count: b.count, reserved: b.reserved, glow: b.glow })),
+      mounds: w.mounds.map(m => ({ id: m.id, x: m.x, y: m.y, w: m.w, h: m.h, state: m.state, itemId: m.itemId, crab: m.crab, glow: m.glow })),
+      targetMound: (w.targetMound && w.targetMound() || {}).id || null, roundMistakes: w.roundMistakes, layout: { W: w.layout.W, H: w.layout.H, play: w.layout.play, groundY: w.layout.groundY, tutu: w.layout.tutu } };
   });
 }
-async function dragItemToBasket(c, itemId, basketId, opt) {
-  const r = await roundInfo(c.page);
-  const it = r.items.find(i => i.id === itemId), b = r.baskets.find(x => x.id === basketId);
-  const from = await css(c.page, it.x, it.y), to = await css(c.page, b.x, b.top + b.h * 0.15);
-  await drag(c, from, to, opt);
+async function startGame(c, lagoon, opt = {}) {
+  await c.page.evaluate(([l, bot, speed]) => { TR.debug.setBot(!!bot, 1); TR.debug.setSpeed(speed || 1); TR.debug.startGame(l); }, [lagoon, !!opt.bot, opt.speed || 1]);
+  if (!opt.bot) await waitRound(c.page);
 }
-async function startPlay(c) { await tapEl(c, '#btnPlay'); await waitRound(c.page); }
-
-/** An empty point (logical) where a dropped seed is a miss: prefers the snow below/between the pots, else open sky. */
-async function emptyPoint(page, preferSnow = true) {
-  return page.evaluate(pref => {
-    const w = TR.debug.world, L = w.layout, v = TR.debug.view();
-    const hit = (x, y) => {
-      const el = document.elementFromPoint(v.left + x * v.s, v.top + y * v.s);
-      if (!el || el.id !== 'game') return true;                         // HUD / bubble cover it
-      // a seed held at the finger centre rides 10 px above it; check finger point and seed point
-      if (w.potAt(x, y) || w.potAt(x, y - 10) || w.potAt(x, y - 30) || w.potAt(x, y + 10)) return true;
-      if (Math.abs(x - L.lumi.x) < L.lumi.h * 0.6 && y < L.lumi.y + 20 && y > L.lumi.y - L.lumi.h * 1.1) return true;
-      return w.items.some(i => i.state !== 'leave' && Math.hypot(i.x - x, i.y - y) < 0.6 * i.size + 30);
-    };
-    if (pref) {
-      for (let y = L.H - 18; y > L.groundY; y -= 8)
-        for (let x = 60; x < L.W - 60; x += 12) if (!hit(x, y)) return { x, y, where: 'snow' };
-    }
-    const P = w.playRect || L.play;
-    for (let y = P.y + 10; y < P.y + P.h; y += 10)
-      for (let x = P.x + 10; x < P.x + P.w; x += 12) if (!hit(x, y)) return { x, y, where: 'sky' };
-    return null;
-  }, preferSnow);
-}
-
-/* Layout validator: idle items inside the play band, pots on screen, nothing under HUD / bubble. */
-async function validateLayout(page) {
+/** drop point in CSS px for a chest: 60 logical px ABOVE the opening (kids drop high) */
+async function dropPoint(page, b) { return css(page, b.x, b.y - 60); }
+async function moundPoint(page, m) { return css(page, m.x, m.y - m.h * 0.5); }
+/** an empty point (logical) in the play band that is in no chest's drop zone and away from items */
+async function emptyPoint(page) {
   return page.evaluate(() => {
-    const w = TR.debug.world, L = w.layout, v = TR.debug.view(), P = w.playRect || L.play, probs = [];
-    const toCss = (x, y, wd, ht) => ({ l: v.left + x * v.s, t: v.top + y * v.s, r: v.left + (x + wd) * v.s, b: v.top + (y + ht) * v.s });
-    const rectOf = id => { const e = document.getElementById(id); if (!e || e.classList.contains('hidden')) return null; const r = e.getBoundingClientRect(); return r.width ? { l: r.left, t: r.top, r: r.right, b: r.bottom } : null; };
-    const hud = rectOf('hud'), bub = rectOf('bubble');
-    const ov = (a, b) => a && b && a.l < b.r && a.r > b.l && a.t < b.b && a.b > b.t;
-    const tol = 8;
+    const w = TR.debug.world, L = w.layout, P = w.playRect || L.play;
+    const bad = (x, y) => w.chestAt(x, y) || w.chestAt(x, y - 10) || w.chestAt(x, y + 20) ||
+      (Math.abs(x - L.tutu.x) < L.tutu.h * 0.6 && y < L.tutu.y + 20 && y > L.tutu.y - L.tutu.h * 1.1) ||
+      w.items.some(i => i.state !== 'leave' && Math.hypot(i.x - x, i.y - y) < 0.6 * i.size + 40);
+    for (let y = P.y + 20; y < P.y + P.h; y += 12) for (let x = P.x + 20; x < P.x + P.w; x += 14) if (!bad(x, y)) return { x, y };
+    return { x: P.x + P.w / 2, y: P.y + 20 };
+  });
+}
+/* geometry validator: items + mounds inside the logical viewport, nothing stuck in drag */
+async function geometry(page) {
+  return page.evaluate(() => {
+    const w = TR.debug.world, L = w.layout, probs = [];
     for (const it of w.items) {
       if (it.state === 'leave') continue;
-      const hs = it.size / 2;
-      if (it.state === 'idle' || it.state === 'appear') {
-        if (it.homeX - hs < P.x - tol || it.homeX + hs > P.x + P.w + tol || it.homeY - hs < P.y - tol || it.homeY + hs > P.y + P.h + tol)
-          probs.push(`${it.id} home outside play (${it.homeX | 0},${it.homeY | 0}) play=${P.x | 0},${P.y | 0},${P.w | 0},${P.h | 0}`);
-        if (Math.abs(it.x - it.homeX) > 6 || Math.abs(it.y - it.homeY) > 6) probs.push(`${it.id} idle but not at home`);
-      }
-      if (it.x - hs < -2 || it.x + hs > L.W + 2 || it.y - hs < -2 || it.y + hs > L.H + 2) probs.push(`${it.id} off-screen (${it.x | 0},${it.y | 0}) ${it.state}`);
-      if (it.state === 'idle') {
-        const r = toCss(it.x - hs, it.y - hs, it.size, it.size);
-        if (ov(r, hud)) probs.push(`${it.id} under HUD`);
-        if (ov(r, bub)) probs.push(`${it.id} under bubble`);
-      }
-      if (it.state === 'in') {
-        const b = w.baskets.find(b => b.id === it.basketId);
-        if (!b || Math.abs(it.x - b.x) > b.w / 2 + 5 || it.y < b.top - 40 || it.y > b.bottom) probs.push(`${it.id} 'in' but not in its pot`);
-      }
+      const hs = (it.size * (it.scale || 1)) / 2;
+      if (it.x - hs < -2 || it.x + hs > L.W + 2 || it.y - hs < -2 || it.y + hs > L.H + 2) probs.push(`${it.id} off-screen (${it.x | 0},${it.y | 0}) ${it.state} W=${L.W} H=${L.H}`);
+      if (it.state === 'drag' && it.id !== w.held) probs.push(`${it.id} stuck in drag`);
     }
-    for (const b of w.baskets) {
-      if (b.x - b.w / 2 < -1 || b.x + b.w / 2 > L.W + 1 || b.bottom > L.H + 1) probs.push(`pot ${b.id} off-screen`);
-      const r = toCss(b.x - b.w / 2, b.top, b.w, b.h);
-      if (ov(r, hud)) probs.push(`pot ${b.id} under HUD`);
-    }
-    if (ov(hud, bub)) probs.push('bubble overlaps HUD');
-    if (w.held) { const it = w.items.find(i => i.id === w.held); if (!it || it.state !== 'drag') probs.push('held id but item not dragging'); }
-    for (const it of w.items) if (it.state === 'drag' && it.id !== w.held) probs.push(`${it.id} stuck in drag`);
+    for (const m of w.mounds) if (m.x - m.w / 2 < -2 || m.x + m.w / 2 > L.W + 2 || m.y > L.H + 2 || m.y - m.h < -2) probs.push(`mound ${m.id} off-screen (${m.x | 0},${m.y | 0})`);
+    for (const b of w.baskets) if (b.x - b.w / 2 < -2 || b.x + b.w / 2 > L.W + 2 || b.bottom > L.H + 2) probs.push(`chest ${b.id} off-screen`);
     return probs;
   });
 }
 
-/* ======================================================================= groups */
-
+/* ======================================================================= 1. boot, language, gate */
 async function gBoot() {
+  curGroup = 'boot';
   for (const d of ALL) {
-    const c = await open(d, 'mute=1&seed=3');
+    const c = await open(d, 'seed=3');
     const t = await c.page.evaluate(() => ({ mode: TR.debug.mode, title: !document.getElementById('scrTitle').classList.contains('hidden'),
-      stars: document.getElementById('titleStars').textContent, age: document.getElementById('titleAge').textContent,
-      logo: document.getElementById('logo1').textContent + ' ' + document.getElementById('logo2').textContent, doc: document.title,
-      hud: document.getElementById('hud').classList.contains('hidden'), loading: document.getElementById('loading').classList.contains('hidden') }));
-    check(`[${d.name}] boot to title`, t.mode === 'title' && t.title && t.hud && t.loading, t);
-    check(`[${d.name}] title shows logo, stars + age`, /Owlet/.test(t.logo) && /Snow Garden/.test(t.logo) && /^\d+$/.test(t.stars) && /4/.test(t.age), t);
+      logo: document.getElementById('logo1').textContent + ' ' + document.getElementById('logo2').textContent, tag: document.getElementById('tagline').textContent,
+      hud: document.getElementById('hud').classList.contains('hidden'), loading: document.getElementById('loading').classList.contains('hidden'), who: document.getElementById('titleWho').textContent }));
+    check(`${c.N} boot to title (hud + loader hidden)`, t.mode === 'title' && t.title && t.hud && t.loading, t);
+    check(`${c.N} title shows EN logo + tagline + profile name`, /Treasure Reef/.test(t.logo) && t.tag.length > 0 && /Mầm/.test(t.who), t);
     const bb = await c.page.locator('#btnPlay').boundingBox();
-    check(`[${d.name}] play button on screen, >= 60px`, bb && bb.x >= 0 && bb.y >= 0 && bb.x + bb.width <= d.viewport.width && bb.y + bb.height <= d.viewport.height && bb.width >= 60, bb);
-    await c.page.screenshot({ path: path.join(OUT, d.name + '-title.png') });
-    await sleep(300);
-    check(`[${d.name}] no console errors at boot`, c.errors.length === 0, c.errors);
-    await c.ctx.close();
-  }
-}
-
-async function gLang() {
-  const d = DEV.iphoneP;
-  const c = await open(d, 'mute=1', { storage: { 'tr:settings': JSON.stringify({ lang: 'en', age: 5 }) } });
-  const read = () => c.page.evaluate(() => ({ logo: document.getElementById('logo1').textContent + ' ' + document.getElementById('logo2').textContent,
-    tag: document.getElementById('tagline').textContent, lang: document.documentElement.lang, doc: document.title,
-    viOn: document.querySelector('#scrTitle .chip[data-lang="vi"]').classList.contains('on'), age: document.getElementById('titleAge').textContent,
-    tTitle: TR.I18N.t(document.documentElement.lang, 'ui.title') }));
-  const before = await read();
-  check('[lang] EN title texts', /Owlet/.test(before.logo) && before.lang === 'en' && before.tag.length > 0 && before.doc === before.tTitle, before);
-  await tapEl(c, '#scrTitle .chip[data-lang="vi"]');
-  await sleep(150);
-  const after = await read();
-  check('[lang] chip EN→VI changes logo/tagline/document title (ui.title)', after.logo === 'Vườn Hoa Cú Tuyết' && after.tag !== before.tag && VI_RE.test(after.tag) && after.lang === 'vi' && after.viOn && after.doc === 'Vườn Hoa Cú Tuyết', { before, after });
-  check('[lang] VI title shows age in Vietnamese', /Tuổi 5/.test(after.age), after.age);
-  const vl = await c.page.evaluate(() => TR.debug.voiceLog.slice(-1)[0]);
-  check('[lang] chip tap greets in Vietnamese', vl && vl.lang === 'vi' && VI_RE.test(vl.text), vl);
-  await c.page.reload(); await waitTitle(c.page);
-  const re = await c.page.evaluate(() => [document.getElementById('logo1').textContent, document.documentElement.lang, JSON.parse(localStorage.getItem('tr:settings') || '{}').lang]);
-  check('[lang] VI persists after reload (tr:settings)', re[0] === 'Vườn Hoa' && re[1] === 'vi' && re[2] === 'vi', re);
-  await tapEl(c, '#scrTitle .chip[data-lang="en"]'); await sleep(100);
-  const back = await read();
-  check('[lang] VI→EN switches back', /Owlet/.test(back.logo) && back.lang === 'en', back);
-  check('[lang] no console errors', c.errors.length === 0, c.errors);
-  await c.ctx.close();
-}
-
-async function gGate() {
-  for (const d of [DEV.iphoneP, DEV.ipadL]) {
-    const c = await open(d, 'mute=1');
+    check(`${c.N} play button on screen, >= 60px`, bb && bb.x >= 0 && bb.y >= 0 && bb.x + bb.width <= d.viewport.width && bb.y + bb.height <= d.viewport.height && bb.width >= 60, bb);
+    await shot(c, 'title');
+    // language toggle en → vi → en
+    await tapEl(c, '#scrTitle .chip[data-lang="vi"]'); await sleep(150);
+    const vi = await c.page.evaluate(() => ({ logo: document.getElementById('logo1').textContent + ' ' + document.getElementById('logo2').textContent, tag: document.getElementById('tagline').textContent, lang: document.documentElement.lang, doc: document.title }));
+    check(`${c.N} lang chip EN→VI switches logo/tagline/document title`, vi.logo === 'Mầm Tìm Kho Báu' && VI_RE.test(vi.tag) && vi.lang === 'vi' && vi.doc === 'Mầm Tìm Kho Báu', vi);
+    await tapEl(c, '#scrTitle .chip[data-lang="en"]'); await sleep(150);
+    const en = await c.page.evaluate(() => ({ logo: document.getElementById('logo1').textContent + ' ' + document.getElementById('logo2').textContent, lang: document.documentElement.lang }));
+    check(`${c.N} lang chip VI→EN switches back`, /Treasure Reef/.test(en.logo) && en.lang === 'en', en);
+    // parent gate
     const g = await c.page.locator('#btnParents').boundingBox();
     const gx = g.x + g.width / 2, gy = g.y + g.height / 2;
-    check(`[gate ${d.name}] gear is >= 44px tap target`, g.width >= 44 && g.height >= 44, g);
+    check(`${c.N} gear is >= 44px tap target`, g.width >= 44 && g.height >= 44, g);
     await tap(c, gx, gy); await sleep(500);
-    check(`[gate ${d.name}] short tap on gear does NOT open settings`, !(await visible(c.page, 'scrSettings')));
-    await touch(c.cdp, 'touchStart', [{ x: gx, y: gy }]); await sleep(1200); await touch(c.cdp, 'touchEnd', []); await sleep(300);
-    check(`[gate ${d.name}] 1.2 s hold does NOT open settings`, !(await visible(c.page, 'scrSettings')));
-    await touch(c.cdp, 'touchStart', [{ x: gx, y: gy }]); await sleep(400);
-    await touch(c.cdp, 'touchMove', [{ x: gx - 150, y: gy + 150 }]); await sleep(2000); await touch(c.cdp, 'touchEnd', []); await sleep(200);
-    check(`[gate ${d.name}] hold that slides off the gear is cancelled`, !(await visible(c.page, 'scrSettings')));
-    await touch(c.cdp, 'touchStart', [{ x: gx, y: gy }]); await sleep(2200); await touch(c.cdp, 'touchEnd', []); await sleep(300);
-    check(`[gate ${d.name}] 2.2 s touch hold opens settings`, await visible(c.page, 'scrSettings'));
-    await c.page.screenshot({ path: path.join(OUT, d.name + '-settings.png') });
-    const pan = await c.page.evaluate(() => { const p = document.querySelector('.settings-panel').getBoundingClientRect(); return { b: p.bottom, t: p.top, vh: innerHeight }; });
-    check(`[gate ${d.name}] settings panel inside viewport`, pan.t >= 0 && pan.b <= pan.vh + 1, pan);
+    check(`${c.N} short tap on gear does NOT open settings`, !(await visible(c.page, 'scrSettings')) && (await mode(c.page)) === 'title');
+    await hold(c, gx, gy, 900); await sleep(300);
+    check(`${c.N} 0.9 s hold does NOT open settings`, !(await visible(c.page, 'scrSettings')));
+    await hold(c, gx, gy, 2300); await sleep(300);
+    check(`${c.N} 2.3 s hold opens settings`, (await visible(c.page, 'scrSettings')) && (await mode(c.page)) === 'settings');
+    await shot(c, 'settings');
     await tapEl(c, '#btnSettingsDone'); await sleep(200);
-    check(`[gate ${d.name}] Done returns to title`, (await visible(c.page, 'scrTitle')) && !(await visible(c.page, 'scrSettings')));
-    await c.page.mouse.move(gx, gy); await c.page.mouse.down(); await sleep(400); await c.page.mouse.up(); await sleep(300);
-    check(`[gate ${d.name}] short mouse click does NOT open settings`, !(await visible(c.page, 'scrSettings')));
-    await c.page.mouse.down(); await sleep(2200); await c.page.mouse.up(); await sleep(300);
-    check(`[gate ${d.name}] 2.2 s mouse hold opens settings`, await visible(c.page, 'scrSettings'));
-    check(`[gate ${d.name}] no console errors`, c.errors.length === 0, c.errors);
+    check(`${c.N} settings Done returns to title`, (await visible(c.page, 'scrTitle')) && !(await visible(c.page, 'scrSettings')));
+    check(`${c.N} no console errors (boot/lang/gate)`, c.errors.length === 0, c.errors);
     await c.ctx.close();
   }
 }
 
-async function openSettingsByHold(c) {
-  const g = await c.page.locator('#btnParents').boundingBox();
-  await touch(c.cdp, 'touchStart', [{ x: g.x + g.width / 2, y: g.y + g.height / 2 }]); await sleep(2200); await touch(c.cdp, 'touchEnd', []); await sleep(250);
-  return visible(c.page, 'scrSettings');
+/* ======================================================================= 2. profiles */
+async function gProfiles() {
+  curGroup = 'profiles';
+  for (const d of [DEV.iphoneP, DEV.ipadL]) {
+    const c = await open(d, 'seed=3');
+    const p0 = await c.page.evaluate(() => { const p = TR.Progress.current(); return { n: TR.Progress.list().length, name: p && p.name, age: p && p.age, avatar: p && p.avatar, sayAs: p && p.sayAs }; });
+    check(`${c.N} default profile "Mầm" exists (age 4, turtle)`, p0.n === 1 && p0.name === 'Mầm' && p0.age === 4 && p0.avatar === 'turtle', p0);
+    await tapEl(c, '#btnPlay'); await sleep(300);
+    check(`${c.N} with one profile Play goes straight to the map`, (await mode(c.page)) === 'map' && (await visible(c.page, 'scrMap')) && !(await visible(c.page, 'scrProfiles')), await mode(c.page));
+    await c.page.evaluate(() => TR.debug.goTitle()); await sleep(150);
+    // create a 2nd profile through the parent gate
+    const g = await c.page.locator('#btnParents').boundingBox();
+    await hold(c, g.x + g.width / 2, g.y + g.height / 2, 2300); await sleep(250);
+    check(`${c.N} gate opens settings`, await visible(c.page, 'scrSettings'));
+    const nBtn = await c.page.evaluate(() => document.querySelectorAll('#settingsProfiles button').length);
+    check(`${c.N} settings lists 1 player + "+ new player"`, nBtn === 2, nBtn);
+    await tapEl(c, '#settingsProfiles button:last-child'); await sleep(200);
+    check(`${c.N} "+ new player" opens the editor`, await visible(c.page, 'scrProfileEdit'));
+    await c.page.locator('#inpName').fill('Anna');
+    await c.page.locator('#inpSayAs').fill('');
+    await tapEl(c, '#ageChips .chip[data-age="5"]');
+    await tapEl(c, '#btnProfileSave'); await sleep(250);
+    const after = await c.page.evaluate(() => ({ list: TR.Progress.list().map(p => [p.name, p.age, p.sayAs]), cur: TR.Progress.current().name, settings: !document.getElementById('scrSettings').classList.contains('hidden'), n: document.querySelectorAll('#settingsProfiles button').length }));
+    check(`${c.N} Save creates Anna (age 5, sayAs "") and returns to settings`, after.list.length === 2 && after.list[1][0] === 'Anna' && after.list[1][1] === 5 && after.list[1][2] === '' && after.settings && after.n === 3, after);
+    await tapEl(c, '#btnSettingsDone'); await sleep(200);
+    await tapEl(c, '#btnPlay'); await sleep(300);
+    const cards = await c.page.evaluate(() => [...document.querySelectorAll('#profileCards .profile-card')].map(b => b.querySelector('b') && b.querySelector('b').textContent));
+    check(`${c.N} with 2 profiles Play shows the picker with both cards`, (await mode(c.page)) === 'profiles' && cards.length === 2 && cards.includes('Mầm') && cards.includes('Anna'), cards);
+    await shot(c, 'profiles');
+    const annaIdx = cards.indexOf('Anna');
+    await tapEl(c, `#profileCards .profile-card:nth-child(${annaIdx + 1})`); await sleep(300);
+    const mp = await c.page.evaluate(() => ({ mode: TR.debug.mode, name: document.getElementById('mapName').textContent, prof: TR.debug.profile && TR.debug.profile.name, age: TR.debug.profile && TR.debug.profile.age }));
+    check(`${c.N} tapping Anna's card opens the map as Anna`, mp.mode === 'map' && mp.name === 'Anna' && mp.prof === 'Anna' && mp.age === 5, mp);
+    // max 4 profiles
+    const mx = await c.page.evaluate(() => { const a = TR.Progress.create({ name: 'Bo', age: 3 }), b = TR.Progress.create({ name: 'Cu', age: 6 }), e = TR.Progress.create({ name: 'Five', age: 7 }); return { a: !!a, b: !!b, fifth: e, n: TR.Progress.list().length }; });
+    check(`${c.N} max 4 profiles (5th create returns null)`, mx.a && mx.b && mx.fifth === null && mx.n === 4, mx);
+    await c.page.evaluate(() => TR.debug.goTitle()); await sleep(150);
+    await hold(c, g.x + g.width / 2, g.y + g.height / 2, 2300); await sleep(250);
+    const btns = await c.page.evaluate(() => [...document.querySelectorAll('#settingsProfiles button')].map(b => b.textContent.trim()));
+    check(`${c.N} settings with 4 players hides "+ new player"`, btns.length === 4 && !btns.some(t => t.startsWith('+')), btns);
+    check(`${c.N} no console errors (profiles)`, c.errors.length === 0, c.errors);
+    await c.ctx.close();
+  }
 }
 
-async function gSettings() {
-  const d = DEV.iphoneP;
-  const c = await open(d, 'mute=1', { storage: { 'tr:settings': JSON.stringify({ lang: 'en', age: 4 }) } });
-  check('[settings] gate opens', await openSettingsByHold(c));
-  await tapEl(c, '#ageChips .chip[data-age="6"]');
-  await tapEl(c, '#scrSettings .chip[data-lang="vi"]');
-  await c.page.locator('#inpName').fill('Linh');
-  for (const id of ['optSfx', 'optMusic', 'optMic']) { await tapEl(c, `label:has(#${id})`); }
-  await sleep(150);
-  const ls = await c.page.evaluate(() => Object.keys(localStorage));
-  const st = await c.page.evaluate(() => JSON.parse(localStorage.getItem('tr:settings') || 'null'));
-  check('[settings] changes saved to tr:settings', st && st.age === 6 && st.lang === 'vi' && st.name === 'Linh' && st.sfx === false && st.music === false && st.mic === false && st.voice === true, st);
-  check('[settings] every storage key uses the tr: prefix', ls.every(k => k.startsWith('tr:')), ls);
-  await tapEl(c, '#btnSettingsDone'); await sleep(150);
-  const ta = await c.page.evaluate(() => document.getElementById('titleAge').textContent);
-  check('[settings] title age updates after Done', /6/.test(ta), ta);
-  await c.page.reload(); await waitTitle(c.page); await installEv(c.page);
-  await openSettingsByHold(c);
-  const dom = await c.page.evaluate(() => ({ age: [...document.querySelectorAll('#ageChips .chip.on')].map(b => b.dataset.age), name: document.getElementById('inpName').value,
-    sfx: document.getElementById('optSfx').checked, music: document.getElementById('optMusic').checked, voice: document.getElementById('optVoice').checked, mic: document.getElementById('optMic').checked, lang: document.documentElement.lang }));
-  check('[settings] persist across reload (DOM)', dom.age.join() === '6' && dom.name === 'Linh' && !dom.sfx && !dom.music && dom.voice && !dom.mic && dom.lang === 'vi', dom);
-  await c.page.locator('#inpName').fill('{child}<b>');
-  await sleep(100);
-  const nm = await c.page.evaluate(() => JSON.parse(localStorage.getItem('tr:settings')).name);
-  check('[settings] name strips {} <>', !/[{}<>]/.test(nm), nm);
-  await c.page.locator('#inpName').fill('Linh');
-  await tapEl(c, '#ageChips .chip[data-age="7"]'); await tapEl(c, '#btnSettingsDone'); await sleep(100);
-  const t7 = await c.page.evaluate(() => document.getElementById('titleAge').textContent);
-  check('[settings] age 7 shows 7+', /7\+/.test(t7), t7);
-  await startPlay(c);
-  const wa = await c.page.evaluate(() => ({ age: TR.debug.world.age, lang: TR.debug.world.lang, levels: TR.debug.world.levels }));
-  check('[settings] game starts at saved age 7 + saved lang vi', wa.age === 7 && wa.lang === 'vi', wa);
-  check('[settings] no console errors', c.errors.length === 0, c.errors);
-  await c.ctx.close();
-
-  // ---- URL flags must not leak into saved settings
-  const c2 = await open(d, 'lang=vi&age=6&mute=1', { storage: { 'tr:settings': JSON.stringify({ lang: 'en', age: 4, name: '', sfx: true, music: true, voice: true, mic: true }) } });
-  let s0 = await c2.page.evaluate(() => JSON.parse(localStorage.getItem('tr:settings')));
-  check('[flags] boot with ?lang=vi&age=6&mute=1 does not write settings', s0.lang === 'en' && s0.age === 4, s0);
-  const ui = await c2.page.evaluate(() => ({ lang: document.documentElement.lang, age: document.getElementById('titleAge').textContent }));
-  check('[flags] ?lang=vi applies to the UI for the session', ui.lang === 'vi', ui);
-  check('[flags] title age reflects ?age=6 override', /6/.test(ui.age), ui);
-  await openSettingsByHold(c2);
-  await tapEl(c2, 'label:has(#optSfx)'); await sleep(100);
-  s0 = await c2.page.evaluate(() => JSON.parse(localStorage.getItem('tr:settings')));
-  check('[flags] toggling a setting under ?lang=vi does not save lang=vi', s0.lang === 'en', s0);
-  check('[flags] toggling a setting under ?age=6 does not save age=6', s0.age === 4, s0);
-  check('[flags] ?mute=1 not saved', !('mute' in s0) && s0.sfx === false, s0);
-  await c2.ctx.close();
-}
-
-/* Real touch input on the canvas: correct drop → plant/grow/bloom, wrong, miss on snow, tap, hint, Lumi, 2nd finger. */
-async function gInput() {
+/* ======================================================================= 3. reef map, bot lagoon, trophies */
+async function gMap() {
+  curGroup = 'map';
   for (const d of ALL) {
-    const N = `[${d.name}]`;
-    const c = await open(d, 'mute=1&seed=4&age=4');
-    const p = c.page;
-    await startPlay(c);
-    let r = await roundInfo(p);
-    check(`${N} round 1 is sort mode with >= 2 pots`, r.mode === 'sort' && r.baskets.length >= 2 && r.baskets.every(b => b.kind === 'pot'), { mode: r.mode, n: r.baskets.length });
-    let probs = await validateLayout(p);
-    check(`${N} initial layout valid`, probs.length === 0, probs);
-    const bub = await p.evaluate(() => document.getElementById('bubbleText').textContent);
-    check(`${N} prompt shown in bubble`, !badText(bub), bub);
-
-    // --- HUD / bubble taps never grab; bubble repeats the prompt
-    await clearEv(p);
-    const vn0 = await voiceN(p);
-    await tapEl(c, '#hud .hud-stars'); await sleep(400);
-    await tapEl(c, '#bubble'); await sleep(200);
-    let ev = await evTypes(p);
-    check(`${N} tapping HUD / bubble never grabs`, !ev.includes('grab') && (await p.evaluate(() => TR.debug.world.held)) == null, ev);
-    const lastLine = await p.evaluate(() => TR.debug.voiceLog.slice(-1)[0].text);
-    check(`${N} tapping bubble repeats the prompt`, (await voiceN(p)) > vn0 && lastLine === bub, { lastLine, bub });
-
-    // --- tap Lumi repeats the prompt
-    const lu = r.layout.lumi;
-    const lp = await css(p, lu.x, lu.y - lu.h * 0.5);
-    const vn1 = await voiceN(p);
-    await clearEv(p);
-    await tap(c, lp.x, lp.y); await sleep(250);
-    const ll = await p.evaluate(() => TR.debug.voiceLog.slice(-1)[0].text);
-    check(`${N} tap Lumi repeats the prompt (voiceLog grows)`, (await voiceN(p)) > vn1 && ll === bub && !(await evTypes(p)).includes('grab'),
-      { ll, bub, el: await p.evaluate(([x, y]) => (document.elementFromPoint(x, y) || {}).id, [lp.x, lp.y]) });
-
-    // --- tap on a seed is not a drop
-    r = await roundInfo(p);
-    const T0 = r.items.find(i => i.state === 'idle');
-    await clearEv(p);
-    const vnT = await voiceN(p);
-    const tp = await css(p, T0.x, T0.y);
-    await tap(c, tp.x, tp.y); await sleep(500);
-    ev = await evTypes(p);
-    const tI = await itemOf(p, T0.id);
-    check(`${N} quick tap on a seed = 'tap' (no drop/miss/wrong), seed stays home, name spoken`,
-      ev.includes('tap') && !ev.includes('drop') && !ev.includes('miss') && !ev.includes('wrong') && tI.state === 'idle' && tI.misses === 0 && (await voiceN(p)) > vnT, { ev, tI });
-
-    // --- correct drop → planted, grows and blooms
-    r = await roundInfo(p);
-    const A = r.items.find(i => i.state === 'idle');
-    await clearEv(p);
-    const vn2 = await voiceN(p);
-    const aFrom = await css(p, A.x, A.y), goalB = r.baskets.find(b => b.id === A.goal);
-    const aTo = await css(p, goalB.x, goalB.top + goalB.h * 0.15);
-    let follow = null;
-    await drag(c, aFrom, aTo, { beforeUp: async () => {
-      follow = await p.evaluate(([id, tx, ty]) => { const w = TR.debug.world, v = TR.debug.view(), it = w.items.find(i => i.id === id); return { held: w.held, state: it.state, dx: Math.abs(it.x - (tx - v.left) / v.s), dy: Math.abs(it.y - (ty - v.top) / v.s) }; }, [A.id, aTo.x, aTo.y]);
-    } });
-    check(`${N} dragged seed follows the finger`, follow && follow.held === A.id && follow.state === 'drag' && follow.dx < 30 && follow.dy < 40, follow);
-    await p.waitForFunction(id => { const i = TR.debug.world.items.find(i => i.id === id); return !i || i.grow >= 1 || i.state === 'leave'; }, A.id, { timeout: 5000 }).catch(() => {});
-    ev = await evTypes(p);
-    const aI = await itemOf(p, A.id);
-    const bl = (await evOf(p, 'bloom')).find(e => e.id === A.id);
-    check(`${N} correct drop → grab+drop+correct+land, seed planted in its pot`, ['grab', 'drop', 'correct', 'land'].every(t => ev.includes(t)) && aI && aI.planted && aI.basketId === A.goal, { ev, aI });
-    check(`${N} planted seed grows (grow→1) and blooms (bloom event)`, aI && (aI.grow >= 0.999 || aI.state === 'leave') && aI.bloomed && bl && bl.basketId === A.goal && bl.n >= 1, { aI, bl });
-    check(`${N} correct drop makes Lumi speak`, (await voiceN(p)) > vn2);
-
-    // --- wrong drop → bounces home, not planted
-    r = await roundInfo(p);
-    const B = r.items.find(i => i.state === 'idle');
-    const wrongB = r.baskets.find(b => b.id !== B.goal);
-    await clearEv(p);
-    await dragItemToBasket(c, B.id, wrongB.id);
-    await sleep(150);
-    const midB = await itemOf(p, B.id);
-    await sleep(800);
-    ev = await evTypes(p);
-    const bs = await itemOf(p, B.id);
-    const wr = (await evOf(p, 'wrong'))[0];
-    check(`${N} drag to wrong pot → wrong event, seed bounces home, not planted`, ev.includes('wrong') && !ev.includes('correct') && midB.state === 'return' &&
-      bs.state === 'idle' && !bs.planted && Math.abs(bs.x - bs.homeX) < 6 && Math.abs(bs.y - bs.homeY) < 6 && wr && wr.target === B.goal, { ev, midB: midB.state, bs, wr });
-
-    // --- miss on empty snow (x2) → hint glows the right pot
-    r = await roundInfo(p);
-    const C = r.items.find(i => i.state === 'idle' && i.id !== B.id) || r.items.find(i => i.state === 'idle');
-    const ep = await emptyPoint(p, true);
-    if (!ep) { check(`${N} found an empty spot to miss on`, false, 'none'); }
-    else {
-      const epc = await css(p, ep.x, ep.y);
-      await clearEv(p);
-      let Ci = await itemOf(p, C.id);
-      await drag(c, await css(p, Ci.x, Ci.y), epc);
-      await sleep(800);
-      ev = await evTypes(p);
-      Ci = await itemOf(p, C.id);
-      check(`${N} drop on empty ${ep.where} → miss, seed returns home, not planted`, ev.includes('miss') && !ev.includes('wrong') && !ev.includes('correct') && Ci.state === 'idle' && !Ci.planted, { ev, ep, Ci });
-      await drag(c, await css(p, Ci.x, Ci.y), epc);
-      await sleep(500);
-      ev = await evTypes(p);
-      const gl = await p.evaluate(id => { const w = TR.debug.world; const it = w.items.find(i => i.id === id); const g = w.goalOf(it); return { goal: g, glows: w.baskets.map(b => [b.id, +b.glow.toFixed(2)]) }; }, C.id);
-      const hintE = (await evOf(p, 'hint'))[0];
-      const gGoal = gl.glows.find(x => x[0] === gl.goal), others = gl.glows.filter(x => x[0] !== gl.goal);
-      check(`${N} two misses on one seed → hint, the right pot glows (others don't)`, ev.filter(e => e === 'miss').length === 2 && hintE && hintE.basketId === gl.goal && gGoal[1] > 0.5 && others.every(o => o[1] === 0), { ev, gl, hintE });
-    }
-
-    // --- second finger ignored
-    await sleep(500);
-    r = await roundInfo(p);
-    const idle = r.items.filter(i => i.state === 'idle');
-    if (idle.length >= 2) {
-      await clearEv(p);
-      const f1 = await css(p, idle[0].x, idle[0].y), f2 = await css(p, idle[1].x, idle[1].y);
-      await touch(c.cdp, 'touchStart', [{ x: f1.x, y: f1.y, id: 0 }]); await sleep(50);
-      await touch(c.cdp, 'touchStart', [{ x: f1.x, y: f1.y, id: 0 }, { x: f2.x, y: f2.y, id: 1 }]); await sleep(50);
-      await touch(c.cdp, 'touchMove', [{ x: f1.x + 20, y: f1.y - 20, id: 0 }, { x: f2.x + 40, y: f2.y - 40, id: 1 }]); await sleep(100);
-      const held = await p.evaluate(() => TR.debug.world.held);
-      await touch(c.cdp, 'touchMove', [{ x: f1.x + 20, y: f1.y - 20, id: 0 }]); await sleep(50);
-      await touch(c.cdp, 'touchEnd', []); await sleep(700);
-      ev = await evTypes(p);
-      check(`${N} second finger ignored (one grab, first seed)`, ev.filter(e => e === 'grab').length === 1 && held === idle[0].id, { ev, held });
-    } else check(`${N} second finger ignored`, true, 'skipped: <2 idle seeds');
-
-    // --- finish the round correctly → roundDone + HUD stars
-    await sleep(400);
-    for (let k = 0; k < 14; k++) {
-      if ((await p.evaluate(() => TR.debug.world.state)) !== 'round') break;
-      r = await roundInfo(p);
-      const it = r.items.find(i => i.state === 'idle');
-      if (!it) { await sleep(300); continue; }
-      await dragItemToBasket(c, it.id, it.goal); await sleep(650);
-    }
-    await p.waitForFunction(() => TR.debug.world.state !== 'round', null, { timeout: 6000 }).catch(() => {});
-    await sleep(1600);
-    const hs = await p.evaluate(() => ({ hud: +document.getElementById('hudStars').textContent, stars: TR.debug.world.stars, ev: window.__ev.filter(e => e.type === 'roundDone').map(e => e.stars), blooms: window.__ev.filter(e => e.type === 'bloom').length, lands: window.__ev.filter(e => e.type === 'land').length }));
-    check(`${N} round done after every seed bloomed → stars fly into HUD counter`, hs.ev.length === 1 && hs.stars >= 1 && hs.hud === hs.stars && hs.blooms === hs.lands, hs);
-    check(`${N} input: no console errors`, c.errors.length === 0, c.errors);
-    await c.page.screenshot({ path: path.join(OUT, d.name + '-after-round.png') });
-    await c.ctx.close();
-  }
-}
-
-/* Dispatched PointerEvents (iPad with Pencil/trackpad path) and mouse drag */
-async function gPointer() {
-  const c = await open(DEV.ipadL, 'mute=1&seed=4&age=4');
-  await startPlay(c);
-  let r = await roundInfo(c.page);
-  let it = r.items[0], b = r.baskets.find(x => x.id === it.goal);
-  await clearEv(c.page);
-  await c.page.evaluate(([fx, fy, tx, ty]) => new Promise(res => {
-    const v = TR.debug.view(), cv = document.getElementById('game');
-    const P = (type, x, y) => cv.dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true, pointerId: 7, pointerType: 'touch', isPrimary: true, clientX: v.left + x * v.s, clientY: v.top + y * v.s }));
-    P('pointerdown', fx, fy);
-    let k = 0;
-    const iv = setInterval(() => { k++; const u = Math.min(1, k / 14); P('pointermove', fx + (tx - fx) * u, fy + (ty - fy) * u); if (k >= 24) { clearInterval(iv); P('pointerup', tx, ty); res(); } }, 16);
-  }), [it.x, it.y, b.x, b.top + b.h * 0.15]);
-  await sleep(900);
-  let ev = await evTypes(c.page);
-  check('[pointer] dispatched PointerEvent drag to the right pot plants the seed', ev.includes('correct') && ev.includes('land'), ev);
-  r = await roundInfo(c.page);
-  it = r.items.find(i => i.state === 'idle'); b = r.baskets.find(x => x.id === it.goal);
-  const f = await css(c.page, it.x, it.y), t = await css(c.page, b.x, b.top + b.h * 0.15);
-  await clearEv(c.page);
-  await c.page.mouse.move(f.x, f.y); await c.page.mouse.down();
-  await c.page.mouse.move(t.x, t.y, { steps: 14 }); await sleep(300); await c.page.mouse.up(); await sleep(800);
-  ev = await evTypes(c.page);
-  check('[mouse] mouse drag to correct pot works', ev.includes('correct') && ev.includes('land'), ev);
-  check('[pointer] no console errors', c.errors.length === 0, c.errors);
-  await c.ctx.close();
-}
-
-/* Count mode: one planter with N holes; exactly N seeds end the round, extras fade away. */
-async function gCount() {
-  const lvl = await (async () => { const c = await open(DEV.ipadL, 'mute=1&age=4'); const l = await c.page.evaluate(() => TR.AGE_TOPICS[4].indexOf('count')); await c.ctx.close(); return l; })();
-  check('[count] age 4 has a count chapter', lvl >= 0, lvl);
-  for (const [seed, dev] of [[5, DEV.ipadL], [9, DEV.iphoneP]]) {
-    const N = `[count s${seed} ${dev.name}]`;
-    const c = await open(dev, `mute=1&seed=${seed}&age=4&level=${lvl}`);
-    const p = c.page;
-    await startPlay(c);
-    let r = await roundInfo(p);
-    const b = r.baskets[0];
-    check(`${N} count round with 1 planter`, r.mode === 'count' && r.baskets.length === 1 && b.kind === 'planter' && b.need >= 1, { mode: r.mode, n: r.baskets.length, kind: b.kind, need: b.need, topic: r.topic });
-    const bub = await p.evaluate(() => document.getElementById('bubbleText').textContent);
-    check(`${N} prompt names the number`, !badText(bub) && (bub.includes(String(b.need)) || /\b(one|two|three|four|five|six|seven|eight|nine|ten)\b/i.test(bub)), bub);
-    check(`${N} more seeds than holes (real counting)`, r.items.length > b.need, { items: r.items.length, need: b.need });
-    await clearEv(p);
-    const vlBefore = await voiceN(p);
-    let ok = true;
-    for (let k = 0; k < b.need; k++) {
-      r = await roundInfo(p);
-      const it = r.items.find(i => i.state === 'idle');
-      if (!it) { ok = false; check(`${N} idle seed available for ${k + 1}/${b.need}`, false, r.items.map(i => i.state)); break; }
-      await dragItemToBasket(c, it.id, b.id);
-      await sleep(600);
-      const st = await p.evaluate(() => ({ s: TR.debug.world.state, c: TR.debug.world.baskets[0] && TR.debug.world.baskets[0].count, comp: TR.debug.world.completing }));
-      if (k < b.need - 1 && (st.s !== 'round' || st.comp)) { ok = false; check(`${N} round ended early after ${k + 1}/${b.need}`, false, st); break; }
-    }
-    await sleep(250);
-    const mid = await p.evaluate(() => { const w = TR.debug.world; return { s: w.state, comp: w.completing, count: w.baskets[0].count, extras: w.items.filter(i => !i.planted).map(i => [i.state, +i.alpha.toFixed(2)]) }; });
-    check(`${N} planter full → extras fade away at once (state leave)`, ok && mid.count === b.need && mid.extras.length > 0 && mid.extras.every(e => e[0] === 'leave'), mid);
-    await p.waitForFunction(() => TR.debug.world.state === 'roundDone', null, { timeout: 5000 }).catch(() => {});
-    const st = await p.evaluate(() => ({ s: TR.debug.world.state, count: TR.debug.world.baskets[0].count, inN: TR.debug.world.items.filter(i => i.planted).length, bloomed: TR.debug.world.items.filter(i => i.bloomed).length, extras: TR.debug.world.items.filter(i => !i.planted).map(i => +i.alpha.toFixed(2)) }));
-    check(`${N} exactly N seeds bloom and end the round; extras invisible`, ok && st.s === 'roundDone' && st.count === b.need && st.inN === b.need && st.bloomed === b.need && st.extras.every(a => a === 0), { need: b.need, st });
-    const blooms = (await evOf(p, 'bloom')).map(e => e.n);
-    check(`${N} bloom events count 1..N`, blooms.join() === Array.from({ length: b.need }, (_, i) => i + 1).join(), blooms);
-    const nums = await p.evaluate(n => TR.debug.voiceLog.slice(-n).map(l => l.text), (await voiceN(p)) - vlBefore);
-    check(`${N} Lumi counts aloud on bloom`, nums.length >= b.need && nums.every(s => !badText(s)), nums);
-    check(`${N} no console errors`, c.errors.length === 0, c.errors);
-    await c.ctx.close();
-  }
-  // overfill: an extra seed thrown while the last one is in the air must not count
-  const c = await open(DEV.ipadL, `mute=1&seed=5&age=4&level=${lvl}`);
-  await startPlay(c);
-  let r = await roundInfo(c.page);
-  const b = r.baskets[0];
-  for (let k = 0; k < b.need - 1; k++) { r = await roundInfo(c.page); const it = r.items.find(i => i.state === 'idle'); await dragItemToBasket(c, it.id, b.id); await sleep(600); }
-  r = await roundInfo(c.page);
-  const idle = r.items.filter(i => i.state === 'idle');
-  const to = await css(c.page, b.x, b.top + b.h * 0.15);
-  await drag(c, await css(c.page, idle[0].x, idle[0].y), to, { steps: 4, settle: 120 });
-  await drag(c, await css(c.page, idle[1].x, idle[1].y), to, { steps: 4, settle: 120 });
-  await sleep(900);
-  const st = await c.page.evaluate(() => ({ s: TR.debug.world.state, count: TR.debug.world.baskets[0] ? TR.debug.world.baskets[0].count : -1, mistakes: TR.debug.world.roundMistakes }));
-  check('[count] extra seed after the Nth is rejected without penalty', st.count === b.need && st.mistakes === 0, { need: b.need, st });
-  check('[count] overfill: no console errors', c.errors.length === 0, c.errors);
-  await c.ctx.close();
-}
-
-/* Ask mode (animals): Lumi asks for one animal at a time, world.target is the asked pot. */
-async function gAsk() {
-  for (const [dev, lang, seed] of [[DEV.ipadL, 'en', 12], [DEV.iphoneP, 'vi', 13]]) {
-    const N = `[ask ${dev.name} ${lang}]`;
-    const c = await open(dev, `mute=1&seed=${seed}&age=4&level=3&lang=${lang}`);
-    const p = c.page;
-    await startPlay(c);
-    let r = await roundInfo(p);
-    check(`${N} level 3 at age 4 is an animals/ask round`, r.topic === 'animals' && r.mode === 'ask' && r.baskets.length >= 2 && r.target && r.queue[0] === r.target, { topic: r.topic, mode: r.mode, target: r.target, q: r.queue });
-    const animalName = await p.evaluate(([lang, id]) => { const b = TR.debug.world.baskets.find(b => b.id === id); return TR.I18N.name(lang, b.label.type, b.label.value); }, [lang, r.target]);
-    let bub = await p.evaluate(() => document.getElementById('bubbleText').textContent);
-    check(`${N} bubble asks for the target animal`, bub.toLowerCase().includes(String(animalName).toLowerCase()) && !badText(bub) && (lang === 'en' || VI_RE.test(bub)), { bub, animalName });
-    // wrong pot
-    const t0 = r.target;
-    let it = r.items.find(i => i.state === 'idle');
-    const other = r.baskets.find(b => b.id !== t0);
-    await clearEv(p);
-    await dragItemToBasket(c, it.id, other.id); await sleep(900);
-    let ev = await evTypes(p);
-    let wr = (await evOf(p, 'wrong'))[0];
-    let afterW = await p.evaluate(() => TR.debug.world.target);
-    let iw = await itemOf(p, it.id);
-    check(`${N} drop into a non-target pot is wrong, target unchanged, seed home`, ev.includes('wrong') && !ev.includes('correct') && wr && wr.target === t0 && afterW === t0 && iw.state === 'idle' && !iw.planted, { ev, wr, afterW, iw });
-    // right pot
-    r = await roundInfo(p);
-    const q1 = r.queue[1] || null;
-    it = r.items.find(i => i.state === 'idle');
-    await clearEv(p);
-    await dragItemToBasket(c, it.id, t0); await sleep(1500);
-    ev = await evTypes(p);
-    const asks = await evOf(p, 'ask');
-    const tNow = await p.evaluate(() => TR.debug.world.target);
-    iw = await itemOf(p, it.id);
-    check(`${N} drop into world.target is correct, seed planted + bloomed there`, ev.includes('correct') && iw.planted && iw.basketId === t0 && iw.bloomed, { ev, iw });
-    check(`${N} target advances to the next queued animal (+ ask event)`, tNow === q1 && (q1 == null || (asks.length === 1 && asks[0].basketId === q1)), { tNow, q1, asks });
-    if (q1) {
-      const nm2 = await p.evaluate(([lang, id]) => { const b = TR.debug.world.baskets.find(b => b.id === id); return TR.I18N.name(lang, b.label.type, b.label.value); }, [lang, q1]);
-      bub = await p.evaluate(() => document.getElementById('bubbleText').textContent);
-      const said = await p.evaluate(() => TR.debug.voiceLog.slice(-3).map(l => l.text));
-      check(`${N} bubble + voice name the next animal`, bub.toLowerCase().includes(String(nm2).toLowerCase()) && said.some(s => s.toLowerCase().includes(String(nm2).toLowerCase())), { bub, said, nm2 });
-      // hint in ask mode glows the target
-      r = await roundInfo(p);
-      it = r.items.find(i => i.state === 'idle');
-      const ep = await emptyPoint(p, true);
-      await clearEv(p);
-      for (let k = 0; k < 2; k++) { const cur = await itemOf(p, it.id); await drag(c, await css(p, cur.x, cur.y), await css(p, ep.x, ep.y)); await sleep(700); }
-      const hint = (await evOf(p, 'hint'))[0];
-      const glow = await p.evaluate(() => { const w = TR.debug.world; return w.baskets.find(b => b.id === w.target).glow; });
-      check(`${N} hint after 2 misses glows the asked pot`, hint && hint.basketId === q1 && glow > 0.5, { hint, glow, q1 });
-    }
-    // finish the round by dropping into the target each time
-    for (let k = 0; k < 14; k++) {
-      if ((await p.evaluate(() => TR.debug.world.state)) !== 'round') break;
-      r = await roundInfo(p);
-      it = r.items.find(i => i.state === 'idle');
-      if (!it || !r.target) { await sleep(300); continue; }
-      await dragItemToBasket(c, it.id, r.target); await sleep(650);
-    }
-    await p.waitForFunction(() => TR.debug.world.state !== 'round', null, { timeout: 6000 }).catch(() => {});
-    const fin = await p.evaluate(() => ({ s: TR.debug.world.state, target: TR.debug.world.target, q: TR.debug.world.queue.length }));
-    check(`${N} round completes when every asked animal got a flower`, fin.s === 'roundDone' && fin.target == null && fin.q === 0, fin);
-    check(`${N} no console errors`, c.errors.length === 0, c.errors);
-    await p.screenshot({ path: path.join(OUT, `ask-${dev.name}-${lang}.png`) });
-    await c.ctx.close();
-  }
-}
-
-/* Talk time via the bot, then hand control to a real finger. */
-async function reachTalk(c) {
-  const p = c.page;
-  await p.evaluate(() => { TR.debug.setBot(true, 1); TR.debug.setSpeed(12); });
-  await p.waitForFunction(() => {
-    if (TR.debug.world.state === 'talk' && !TR.debug.world.talkAnswered) { TR.debug.setBot(false); TR.debug.world.cancelDrag(); TR.debug.setSpeed(1); return true; }
-    return false;
-  }, null, { timeout: 90000, polling: 'raf' });
-  await sleep(500);
-  return p.evaluate(() => ({ mode: TR.debug.mode, answered: TR.debug.world.talkAnswered, talk: TR.debug.world.talk, visible: !document.getElementById('scrTalk').classList.contains('hidden') }));
-}
-async function gTalk() {
-  for (const [d, right, lang] of [[DEV.ipadP, false, 'en'], [DEV.iphoneL, true, 'vi'], [DEV.iphoneP, true, 'en']]) {
-    const N = `[talk ${d.name} ${right ? 'right' : 'wrong'} ${lang}]`;
-    const c = await open(d, `mute=1&seed=6&age=4&lang=${lang}`);
-    const p = c.page;
-    await startPlay(c);
-    const t = await reachTalk(c);
-    if (!check(`${N} talk panel opens, unanswered`, t.mode === 'talk' && t.visible && !t.answered, { mode: t.mode, visible: t.visible, answered: t.answered })) { await c.ctx.close(); continue; }
-    const txt = await p.evaluate(() => ({ q: document.getElementById('talkQ').textContent, title: document.getElementById('talkTitle').textContent, ch: [...document.querySelectorAll('#talkChoices button')].map(b => b.textContent + '|' + b.dataset.id) }));
-    check(`${N} talk texts clean`, [txt.q, txt.title, ...txt.ch].every(s => s && !badText(s)) && (lang === 'en' || VI_RE.test(txt.q)), txt);
-    await p.screenshot({ path: path.join(OUT, `${d.name}-talk-${lang}.png`) });
-    const boxes = await p.evaluate(() => [...document.querySelectorAll('#talkChoices button')].map(b => { const r = b.getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom, w: r.width, h: r.height }; }));
-    check(`${N} choices on screen, >= 60px`, boxes.length >= 2 && boxes.every(b => b.l >= 0 && b.t >= 0 && b.r <= d.viewport.width && b.b <= d.viewport.height && b.w >= 60 && b.h >= 60), boxes);
-    const ans = t.talk.answerId;
-    const pick = right ? ans : t.talk.choices.find(x => x.id !== ans).id;
-    const other = t.talk.choices.find(x => x.id !== pick).id;
-    await clearEv(p);
-    // boxes first: on a slow headless renderer the panel may close (1.6 game-s after the answer) before a 3rd tap
-    const bb = await p.locator(`#talkChoices button[data-id="${pick}"]`).boundingBox();
-    const ob = await p.locator(`#talkChoices button[data-id="${other}"]`).boundingBox();
-    await tap(c, bb.x + bb.width / 2, bb.y + bb.height / 2); await sleep(40);
-    const cls0 = await p.evaluate(() => [...document.querySelectorAll('#talkChoices button')].map(b => b.dataset.id + ':' + b.className));
-    await tap(c, bb.x + bb.width / 2, bb.y + bb.height / 2); await sleep(40);
-    await tap(c, ob.x + ob.width / 2, ob.y + ob.height / 2);
-    await sleep(200);
-    const res = await p.evaluate(() => ({ ev: window.__ev.filter(e => e.type === 'talkResult').map(e => ({ correct: e.correct, choiceId: e.choiceId })), talks: TR.debug.stats.talks, cls: [...document.querySelectorAll('#talkChoices button')].map(b => b.dataset.id + ':' + b.className) }));
-    check(`${N} tapping a choice answers; exactly one talkResult`, res.ev.length === 1 && res.talks === 1 && res.ev[0].correct === right && res.ev[0].choiceId === pick, res);
-    check(`${N} right answer highlighted`, cls0.some(s => s.startsWith(ans + ':') && /right/.test(s)), cls0);
-    const said = await p.evaluate(() => TR.debug.voiceLog.slice(-1)[0]);
-    check(`${N} Lumi responds in ${lang}`, said && said.lang === lang && !badText(said.text) && (lang === 'en' || VI_RE.test(said.text)), said);
-    await p.waitForFunction(() => TR.debug.mode === 'play' && document.getElementById('scrTalk').classList.contains('hidden'), null, { timeout: 6000 }).catch(() => {});
-    check(`${N} panel closes, mode back to play`, (await mode(p)) === 'play' && !(await visible(p, 'scrTalk')));
-    await p.waitForFunction(() => TR.debug.world.state === 'round' && TR.debug.world.level === 1, null, { timeout: 8000 }).catch(() => {});
-    const s2 = await p.evaluate(() => ({ s: TR.debug.world.state, l: TR.debug.world.level }));
-    check(`${N} game continues to next chapter`, s2.s === 'round' && s2.l === 1, s2);
-    check(`${N} no console errors`, c.errors.length === 0, c.errors);
-    await c.ctx.close();
-  }
-}
-
-async function gPause() {
-  const d = DEV.iphoneL;
-  const c = await open(d, 'seed=2&age=4');     // NOT muted: check music state
-  const p = c.page;
-  await startPlay(c);
-  const mus = () => p.evaluate(() => !!TR.Audio._playing);
-  const hasMusicFlag = await p.evaluate(() => '_playing' in TR.Audio);
-  check('[pause] music playing in game', !hasMusicFlag || await mus(), { hasMusicFlag });
-  const r = await roundInfo(p);
-  const it0 = r.items.find(i => i.state === 'idle');
-  const f = await css(p, it0.x, it0.y);
-  await touch(c.cdp, 'touchStart', [f]); await sleep(50); await touch(c.cdp, 'touchMove', [{ x: f.x + 30, y: f.y + 30 }]); await sleep(80);
-  const held0 = await p.evaluate(() => TR.debug.world.held);
-  await p.evaluate(() => document.getElementById('btnPause').click());   // a second hand presses pause
-  await sleep(150);
-  await touch(c.cdp, 'touchEnd', []); await sleep(100);
-  const ps = await p.evaluate(() => ({ mode: TR.debug.mode, held: TR.debug.world.held, drag: TR.debug.world.items.filter(i => i.state === 'drag').length }));
-  check('[pause] pausing while holding cancels the drag', held0 && ps.mode === 'paused' && !ps.held && ps.drag === 0, { held0, ps });
-  await tapEl(c, '#btnResume'); await sleep(200);
-  check('[pause] resume via button', (await mode(p)) === 'play' && !(await visible(p, 'scrPause')) && (!hasMusicFlag || await mus()));
-  await tapEl(c, '#btnPause'); await sleep(200);
-  check('[pause] HUD pause button pauses (touch)', (await mode(p)) === 'paused' && (await visible(p, 'scrPause')) && (!hasMusicFlag || !(await mus())));
-  const t0 = await p.evaluate(() => TR.debug.world.time); await sleep(500);
-  check('[pause] world frozen while paused', (await p.evaluate(() => TR.debug.world.time)) === t0);
-  await tapEl(c, '#btnResume'); await sleep(200);
-  check('[pause] resume', (await mode(p)) === 'play');
-  const setHidden = h => p.evaluate(h => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => h }); Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => h ? 'hidden' : 'visible' }); document.dispatchEvent(new Event('visibilitychange')); }, h);
-  // visibilitychange while dragging
-  const r2 = await roundInfo(p);
-  const it1 = r2.items.find(i => i.state === 'idle');
-  const f1 = await css(p, it1.x, it1.y);
-  await touch(c.cdp, 'touchStart', [f1]); await sleep(50); await touch(c.cdp, 'touchMove', [{ x: f1.x + 30, y: f1.y + 20 }]); await sleep(80);
-  await setHidden(true); await sleep(200);
-  const hv = await p.evaluate(() => ({ mode: TR.debug.mode, held: TR.debug.world.held }));
-  check('[pause] page hidden → paused, drag cancelled', hv.mode === 'paused' && !hv.held, hv);
-  await touch(c.cdp, 'touchEnd', []);
-  const tH = await p.evaluate(() => TR.debug.world.time); await sleep(400);
-  check('[pause] world frozen while hidden', (await p.evaluate(() => TR.debug.world.time)) === tH);
-  await setHidden(false); await sleep(200);
-  check('[pause] page visible again → stays paused until child taps', (await mode(p)) === 'paused' && (await visible(p, 'scrPause')));
-  await tapEl(c, '#btnResume'); await sleep(200);
-  check('[pause] resume after visibility', (await mode(p)) === 'play');
-  await tapEl(c, '#btnPause'); await sleep(150);
-  await tapEl(c, '#btnHome'); await sleep(300);
-  const h = await p.evaluate(() => ({ mode: TR.debug.mode, music: !!TR.Audio._playing, hud: document.getElementById('hud').classList.contains('hidden'), bubble: document.getElementById('bubble').classList.contains('hidden'), title: !document.getElementById('scrTitle').classList.contains('hidden') }));
-  check('[pause] Home → title, music stopped, HUD+bubble hidden', h.mode === 'title' && !h.music && h.hud && h.bubble && h.title, h);
-  await startPlay(c);
-  check('[pause] Play from title after Home starts a fresh session', (await p.evaluate(() => TR.debug.world.level === 0 && TR.debug.world.round === 0)));
-  await tapEl(c, '#btnPause'); await tapEl(c, '#btnHome'); await sleep(200);
-  const s0 = await p.evaluate(() => TR.debug.stats.sessions);
-  const pb = await p.locator('#btnPlay').boundingBox();
-  await tap(c, pb.x + pb.width / 2, pb.y + pb.height / 2); await tap(c, pb.x + pb.width / 2, pb.y + pb.height / 2); await sleep(300);
-  check('[pause] double tap on Play starts exactly one session', (await p.evaluate(() => TR.debug.stats.sessions)) === s0 + 1);
-  // pause / resume during Talk time
-  await waitRound(p);
-  await reachTalk(c);
-  const tp = await p.evaluate(() => { const r = document.getElementById('btnPause').getBoundingClientRect(); const e = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2); return { mode: TR.debug.mode, pauseReachable: !!e && !!e.closest('#btnPause') }; });
-  await setHidden(true); await sleep(150);
-  const mt = await p.evaluate(() => ({ mode: TR.debug.mode, music: !!TR.Audio._playing, ctx: TR.Audio.ctx && TR.Audio.ctx.state }));
-  await setHidden(false); await sleep(150);
-  check('[pause] page hidden during Talk time silences audio', !mt.music || mt.ctx !== 'running', mt);
-  if (mt.mode === 'paused') {
-    await tapEl(c, '#btnResume'); await sleep(200);
-    check('[pause] resume during Talk time returns to the Talk panel', (await mode(p)) === 'talk' && (await visible(p, 'scrTalk')), { tp, mode: await mode(p) });
-  } else check('[pause] page hidden during Talk time pauses the game (shows Pause on return)', false, { tp, mt });
-  check('[pause] no console errors', c.errors.length === 0, c.errors);
-  await c.ctx.close();
-}
-
-/* Rotation: resize portrait↔landscape while idle and while holding a seed. */
-async function gRotate() {
-  for (const [P, L] of [[DEV.iphoneP, DEV.iphoneL], [DEV.ipadP, DEV.ipadL]]) {
-    const dn = P.name.split('-')[0];
-    const c = await open(P, 'mute=1&seed=8&age=5');
-    const p = c.page;
-    await startPlay(c);
-    let r = await roundInfo(p);
-    const first = r.items.find(i => i.state === 'idle');
-    await dragItemToBasket(c, first.id, first.goal); await sleep(800);
-    for (const [k, vp] of [['→landscape idle', L.viewport], ['→portrait idle', P.viewport]]) {
-      await p.setViewportSize(vp); await sleep(600);
-      const probs = await validateLayout(p);
-      const v = await p.evaluate(() => { const v = TR.debug.view(); return { fits: v.cssW <= innerWidth + 1 && v.cssH <= innerHeight + 1, W: v.W, H: v.H, iw: innerWidth, ih: innerHeight }; });
-      check(`[rotate ${dn}] ${k}: layout valid`, probs.length === 0 && v.fits && (v.W > v.H) === (v.iw > v.ih), { probs, v });
-    }
-    for (const [k, vp, back] of [['hold →landscape', L.viewport, P.viewport], ['hold →portrait', P.viewport, L.viewport]]) {
-      await p.setViewportSize(back); await sleep(500);
-      if ((await p.evaluate(() => TR.debug.world.state)) !== 'round') await waitRound(p).catch(() => {});
-      await clearEv(p);
-      r = await roundInfo(p);
-      const it = r.items.find(i => i.state === 'idle');
-      if (!it) { check(`[rotate ${dn}] ${k}`, true, 'skipped: no idle seed'); continue; }
-      const f = await css(p, it.x, it.y);
-      await touch(c.cdp, 'touchStart', [f]); await sleep(50);
-      await touch(c.cdp, 'touchMove', [{ x: f.x + 15, y: f.y - 15 }]); await sleep(100);
-      const held = await p.evaluate(() => TR.debug.world.held);
-      await p.setViewportSize(vp); await sleep(500);
-      const mid = await p.evaluate(() => { const w = TR.debug.world; return { held: w.held, W: w.layout.W, H: w.layout.H }; });
-      const probsMid = await validateLayout(p);
-      const inside = await p.evaluate(() => { const w = TR.debug.world, L = w.layout; return w.items.filter(i => i.state !== 'leave').every(i => i.x >= 0 && i.x <= L.W && i.y >= 0 && i.y <= L.H); });
-      await touch(c.cdp, 'touchEnd', []); await sleep(900);
-      const after = await p.evaluate(id => { const w = TR.debug.world; const i = w.items.find(i => i.id === id); return { held: w.held, s: i && i.state }; }, it.id);
-      const probs = await validateLayout(p);
-      const ev = await evTypes(p);
-      check(`[rotate ${dn}] ${k}: rotation cancels the drag, seeds stay inside the screen`, held === it.id && !mid.held && inside && probsMid.length === 0, { held, mid, inside, probsMid });
-      check(`[rotate ${dn}] ${k}: no stale drop after lifting the finger`, !ev.includes('correct') && !ev.includes('wrong') && !ev.includes('miss') && !ev.includes('drop'), { ev });
-      check(`[rotate ${dn}] ${k}: after release seed settled, layout valid`, !after.held && after.s !== 'drag' && probs.length === 0, { after, probs });
-    }
-    await p.setViewportSize(P.viewport); await sleep(500);
-    r = await roundInfo(p);
-    const it2 = r.items.find(i => i.state === 'idle');
-    if (it2) {
-      const ep = await emptyPoint(p, false);
-      if (ep) {
-        await drag(c, await css(p, it2.x, it2.y), await css(p, ep.x, ep.y), { settle: 120 });
-        await p.setViewportSize(L.viewport); await sleep(900);
-        const probs = await validateLayout(p);
-        check(`[rotate ${dn}] rotate while a seed flies home: layout valid`, probs.length === 0, probs);
-      }
-    }
-    await p.setViewportSize(L.viewport); await sleep(400);
-    if ((await p.evaluate(() => TR.debug.world.state)) !== 'round') await waitRound(p, 20000).catch(() => {});
-    r = await roundInfo(p);
-    const it3 = r.items.find(i => i.state === 'idle');
-    if (it3) {
-      await clearEv(p);
-      await dragItemToBasket(c, it3.id, it3.goal); await sleep(800);
-      check(`[rotate ${dn}] still playable after rotations`, (await evTypes(p)).includes('correct'));
-    }
-    await p.screenshot({ path: path.join(OUT, `rotate-${dn}.png`) });
-    check(`[rotate ${dn}] no console errors`, c.errors.length === 0, c.errors);
-    await c.ctx.close();
-  }
-}
-
-/* Full bot sessions at high speed for every age, both languages. */
-async function botSession(age, lang, dev, seed) {
-  const N = `[bot age${age} ${lang} ${dev.name}]`;
-  const c = await open(dev, `speed=12&bot=1&autostart=1&seed=${seed}&mute=1&age=${age}&lang=${lang}&skill=0.7`);
-  const p = c.page;
-  const t0 = Date.now();
-  let done = false;
-  try { await p.waitForFunction(() => TR.debug.mode === 'done', null, { timeout: 240000, polling: 500 }); done = true; } catch (e) { /* report below */ }
-  const st = await p.evaluate(() => ({ s: TR.debug.getState(), stats: TR.debug.stats, bot: TR.debug.bot && TR.debug.bot.stats, levels: TR.debug.world.levels }));
-  check(`${N} session reaches done (${((Date.now() - t0) / 1000).toFixed(0)} s)`, done, st);
-  await p.evaluate(() => window.__collect());
-  const dt = await p.evaluate(() => ({ done: document.getElementById('doneTitle').textContent, stars: document.getElementById('doneStars').textContent, wstars: TR.debug.world.stars }));
-  if (done) {
-    check(`${N} done screen shows stars`, +dt.stars === dt.wstars && dt.wstars > 0 && !badText(dt.done), dt);
-    check(`${N} played all 4 chapters incl. Talk time`, st.stats.talks === 4 && st.levels.length === 4, { talks: st.stats.talks, levels: st.levels });
-    await p.screenshot({ path: path.join(OUT, `bot-${age}-${lang}-done.png`) });
-    await p.evaluate(() => TR.debug.setSpeed(1));
-    await tapEl(c, '#btnAgain');
-    await sleep(400);
-    const ag = await p.evaluate(() => ({ mode: TR.debug.mode, level: TR.debug.world.level, sessions: TR.debug.stats.sessions, hud: document.getElementById('hudStars').textContent }));
-    check(`${N} play again starts a new session`, ag.mode === 'play' && ag.level === 0 && ag.sessions === 2 && ag.hud === '0', ag);
-  }
-  const texts = await p.evaluate(() => ({ voice: TR.debug.voiceLog.map(l => l.lang + '|' + l.text), canvas: [...window.__texts] }));
-  const bad = [];
-  for (const v of texts.voice) { const [l, ...rest] = v.split('|'); const s = rest.join('|'); const why = badText(s); if (why) bad.push(why + ': ' + s); if (l !== lang) bad.push('wrong lang: ' + v); }
-  for (const s of texts.canvas) { const why = badText(s); if (why) bad.push(why + ': ' + s); }
-  check(`${N} every voice line non-empty, right language, no placeholders (${texts.voice.length} voice + ${texts.canvas.length} UI strings)`, texts.voice.length > 20 && bad.length === 0, [...new Set(bad)].slice(0, 12));
-  if (lang === 'vi') {
-    const viLike = texts.voice.filter(v => VI_RE.test(v)).length;
-    const en = texts.voice.filter(v => EN_WORDS.test(v));
-    check(`${N} Vietnamese lines really Vietnamese (diacritics)`, viLike / Math.max(1, texts.voice.length) > 0.6 && en.length === 0, { viLike, n: texts.voice.length, en: en.slice(0, 5) });
-  }
-  check(`${N} no console errors`, c.errors.length === 0, c.errors.slice(0, 5));
-  fs.writeFileSync(path.join(OUT, `texts-${age}-${lang}.json`), JSON.stringify(texts, null, 1));
-  await c.ctx.close();
-  return Date.now() - t0;
-}
-async function gBot() {
-  const jobs = [];
-  const devs = [DEV.ipadL, DEV.iphoneP, DEV.iphoneL, DEV.ipadP];
-  let k = 0;
-  for (const age of [3, 4, 5, 6, 7]) for (const lang of ['en', 'vi']) jobs.push([age, lang, devs[k++ % devs.length], 10 + k]);
-  const PAR = 5;
-  for (let i = 0; i < jobs.length; i += PAR) await Promise.all(jobs.slice(i, i + PAR).map(j => botSession(...j)));
-  const c = await open(DEV.iphoneL, 'speed=12&bot=1&autostart=1&autorestart=1&seed=3&mute=1&age=3');
-  let ok = false;
-  try { await c.page.waitForFunction(() => TR.debug.stats.sessions >= 2 && TR.debug.mode === 'play', null, { timeout: 240000, polling: 500 }); ok = true; } catch (e) { /* */ }
-  check('[bot] autorestart starts a new session after done', ok, await c.page.evaluate(() => TR.debug.getState()));
-  check('[bot] autorestart: no console errors', c.errors.length === 0, c.errors);
-  await c.ctx.close();
-}
-
-/* Low-skill bot exercising hints/idle at age 3 (mistake + help lines), both languages. */
-async function gHelpLines() {
-  for (const lang of ['en', 'vi']) {
-    const c = await open(DEV.iphoneP, `speed=12&bot=1&autostart=1&seed=21&mute=1&age=3&lang=${lang}&skill=0`);
-    await c.page.waitForFunction(() => TR.debug.world.level >= 1 || TR.debug.mode === 'done', null, { timeout: 120000, polling: 500 }).catch(() => {});
-    await c.page.evaluate(() => { TR.debug.setBot(false); TR.debug.world.cancelDrag(); });
-    await c.page.waitForFunction(() => TR.debug.world.state === 'round' && TR.debug.world.interactive, null, { timeout: 20000 }).catch(() => {});
-    await c.page.evaluate(() => { window.__ev = []; });
-    await c.page.waitForFunction(() => window.__ev.some(e => e.type === 'idle'), null, { timeout: 20000 }).catch(() => {});
-    const texts = await c.page.evaluate(() => TR.debug.voiceLog.map(l => l.lang + '|' + l.text));
-    const ev = await c.page.evaluate(() => window.__ev.map(e => e.type));
-    check(`[help ${lang}] idle nudge fires after 12 s`, ev.includes('idle'), ev);
-    const bad = texts.map(s => { const [l, ...r] = s.split('|'); const t = r.join('|'); return [badText(t) || (l !== lang ? 'wrong lang' : null), s]; }).filter(x => x[0]);
-    check(`[help ${lang}] wrong/miss/hint/idle lines clean (${texts.length} lines)`, bad.length === 0, bad.slice(0, 8));
-    const st = await c.page.evaluate(() => TR.debug.stats);
-    check(`[help ${lang}] low-skill bot made mistakes (wrong/miss) that were voiced`, st.wrong + st.misses > 0, st);
-    await c.ctx.close();
-  }
-}
-
-(async () => {
-  const root = process.env.SG_GAME_ROOT ? path.resolve(process.env.SG_GAME_ROOT) : undefined;
-  srv = await serve(root);
-  if (root) console.log('NOTE: testing game at ' + root);
-  browser = await chromium.launch();
-  const T0 = Date.now();
-  const groups = { boot: gBoot, lang: gLang, gate: gGate, settings: gSettings, input: gInput, pointer: gPointer, count: gCount, ask: gAsk, talk: gTalk, pause: gPause, rotate: gRotate, help: gHelpLines, bot: gBot };
-  for (const [g, fn] of Object.entries(groups)) {
-    if (!want(g)) continue;
+    const c = await open(d, 'seed=5');
+    await c.page.evaluate(() => TR.debug.goMap()); await sleep(300);
+    const m0 = await c.page.evaluate(() => [...document.querySelectorAll('#lagoons .lagoon')].map(e => ({ id: e.dataset.lagoon, locked: e.classList.contains('locked'), lock: !!e.querySelector('.lock'), trophy: !!e.querySelector('.trophy') })));
+    check(`${c.N} map: lagoon 1 unlocked, 2–6 locked`, m0.length === 6 && !m0[0].locked && m0.slice(1).every(l => l.locked && l.lock) && !m0.some(l => l.trophy), m0);
+    await shot(c, 'map0');
+    await tapEl(c, '#lagoons .lagoon[data-lagoon="2"]'); await sleep(600);
+    check(`${c.N} tapping a locked badge does not start a lagoon`, (await mode(c.page)) === 'map' && (await visible(c.page, 'scrMap')), await mode(c.page));
+    const res0 = await visible(c.page, 'resumeBar');
+    check(`${c.N} no resume bar before any play`, !res0);
+    // bot finishes lagoon 1
+    await startGame(c, 1, { bot: true, speed: 8 });
     const t0 = Date.now();
-    try { await fn(); } catch (e) { check(`[${g}] group crashed`, false, String(e.stack || e).slice(0, 600)); }
-    console.log(`  (${g} ${((Date.now() - t0) / 1000).toFixed(1)} s)`);
+    let finished = true;
+    try { await c.page.waitForFunction(() => TR.debug.mode === 'done', null, { timeout: 120000 }); }
+    catch (e) { finished = false; }
+    const secs = Math.round((Date.now() - t0) / 1000);
+    check(`${c.N} bot finishes lagoon 1 (mode done, ${secs}s)`, finished, finished ? '' : await c.page.evaluate(() => TR.debug.getState()));
+    if (!finished) { await c.ctx.close(); continue; }
+    await sleep(400);
+    await c.page.evaluate(() => TR.debug.setBot(false));
+    const sd = (await evOf(c.page, 'sessionDone'))[0] || {};
+    const pr = await c.page.evaluate(() => { const p = TR.debug.profile, P = TR.Progress; return { l1: p.lagoons['1'], unlocked2: P.unlocked(p, 2), unlocked3: P.unlocked(p, 3), trophy: P.trophy(p, 1), total: p.totalStars, pearls: p.pearls, resume: p.resume, doneTrophy: document.getElementById('doneTrophy').getAttribute('src'), doneStars: document.getElementById('doneStars').textContent }; });
+    await shot(c, 'done');
+    check(`${c.N} lagoon 1 recorded done, stars persisted in TR.Progress (${pr.total})`, pr.l1 && pr.l1.done && pr.total === sd.stars && pr.total >= 0 && pr.total <= 52 && pr.l1.stars.reduce((a, b) => a + b, 0) === sd.stars, { pr, sd });
+    check(`${c.N} lagoon 2 unlocked, 3 still locked, resume cleared`, pr.unlocked2 && !pr.unlocked3 && pr.resume === null, pr);
+    check(`${c.N} trophy awarded and shown on the done screen`, !!pr.trophy && /trophy_/.test(pr.doneTrophy || '') && pr.doneStars === String(sd.stars), pr);
+    await tapEl(c, '#btnNext'); await sleep(500);
+    const st = await c.page.evaluate(() => TR.debug.getState());
+    check(`${c.N} "Next lagoon" starts lagoon 2`, st.mode === 'play' && st.lagoon === 2, st);
+    await c.page.evaluate(() => { TR.debug.setBot(false); TR.debug.goMap(); }); await sleep(300);
+    const m1 = await c.page.evaluate(() => [...document.querySelectorAll('#lagoons .lagoon')].map(e => ({ id: e.dataset.lagoon, locked: e.classList.contains('locked'), trophy: !!e.querySelector('.trophy'), next: e.classList.contains('next') })));
+    check(`${c.N} map after lagoon 1: badge 1 has a trophy, 2 unlocked + next, 3–6 locked`, m1[0].trophy && !m1[1].locked && m1[1].next && m1.slice(2).every(l => l.locked), m1);
+    await shot(c, 'map1');
+    await tapEl(c, '#btnTreasure'); await sleep(300);
+    const tr = await c.page.evaluate(() => ({ mode: TR.debug.mode, lit: document.querySelectorAll('#trophies .trophy-slot img:not(.dim)').length, slots: document.querySelectorAll('#trophies .trophy-slot').length, totals: document.getElementById('treasureTotals').textContent }));
+    check(`${c.N} Treasure Room shows 1 trophy of 6`, tr.mode === 'treasure' && tr.lit === 1 && tr.slots === 6, tr);
+    await shot(c, 'treasure');
+    check(`${c.N} no console errors (map)`, c.errors.length === 0, c.errors);
+    await c.ctx.close();
+  }
+}
+
+/* ======================================================================= 4. resume */
+async function gResume() {
+  curGroup = 'resume';
+  for (const d of [DEV.iphoneL, DEV.ipadP]) {
+    const c = await open(d, 'seed=4');
+    await stopOn(c.page, "return e.type === 'level' && e.level === 1");
+    await startGame(c, 1, { bot: true, speed: 8 });
+    await c.page.waitForFunction(() => TR.debug.world.level === 1 && !TR.debug.bot, null, { timeout: 60000 });
+    const ld = (await evOf(c.page, 'levelDone'))[0];
+    check(`${c.N} bot finishes chapter 1 (levelDone level 0, world.level 1)`, ld && ld.level === 0 && ld.stars >= 0, ld);
+    await waitRound(c.page);
+    const r0 = await c.page.evaluate(() => ({ resume: TR.debug.profile.resume, speed: TR.debug.getState().speed }));
+    check(`${c.N} after chapter 1, resume = {lagoon 1, level 1}`, r0.resume && r0.resume.lagoon === 1 && r0.resume.level === 1, r0);
+    await tapEl(c, '#btnPause'); await sleep(200);
+    check(`${c.N} pause button pauses`, (await mode(c.page)) === 'paused' && (await visible(c.page, 'scrPause')));
+    await tapEl(c, '#btnMap'); await sleep(300);
+    const r1 = await c.page.evaluate(() => ({ mode: TR.debug.mode, resume: TR.debug.profile.resume, bar: !document.getElementById('resumeBar').classList.contains('hidden'), text: document.getElementById('resumeText').textContent }));
+    check(`${c.N} "Map" from pause → map with resume {1,1} and a visible resume bar`, r1.mode === 'map' && r1.resume && r1.resume.lagoon === 1 && r1.resume.level === 1 && r1.bar && /2/.test(r1.text), r1);
+    await shot(c, 'resume-map');
+    await tapEl(c, '#btnResumeLagoon'); await sleep(400);
+    const r2 = await c.page.evaluate(() => ({ mode: TR.debug.mode, level: TR.debug.world.level, lagoon: TR.debug.getState().lagoon, stars: TR.debug.world.stars }));
+    check(`${c.N} resume bar continues at chapter 2 (world.level 1) with the stars kept`, r2.mode === 'play' && r2.level === 1 && r2.lagoon === 1 && r2.stars === (ld ? ld.stars : -1), { r2, ld });
+    // tapping the lagoon-1 badge with a resume also continues at chapter 2
+    await c.page.evaluate(() => { TR.debug.pause(); }); await sleep(100);
+    await tapEl(c, '#btnMap'); await sleep(250);
+    await tapEl(c, '#lagoons .lagoon[data-lagoon="1"]'); await sleep(400);
+    const r3 = await c.page.evaluate(() => ({ mode: TR.debug.mode, level: TR.debug.world.level }));
+    check(`${c.N} badge 1 with a resume continues at chapter 2`, r3.mode === 'play' && r3.level === 1, r3);
+    // edge: pausing during the chapter-end dance (levelDone state) must not lose the finished chapter
+    await c.page.evaluate(() => { TR.debug.setBot(true, 1); TR.debug.setSpeed(8); });
+    await stopOn(c.page, "return e.type === 'levelDone' && e.level === 1");
+    await c.page.waitForFunction(() => !TR.debug.bot && TR.debug.world.state === 'levelDone', null, { timeout: 60000 }).catch(() => {});
+    await c.page.evaluate(() => TR.debug.pause()); await sleep(100);
+    await tapEl(c, '#btnMap'); await sleep(250);
+    const r4 = await c.page.evaluate(() => ({ mode: TR.debug.mode, resume: TR.debug.profile.resume, state: TR.debug.world.state }));
+    check(`${c.N} pause during the chapter-end dance keeps resume at the NEXT chapter (level 2)`, r4.resume && r4.resume.level === 2, r4);
+    check(`${c.N} no console errors (resume)`, c.errors.length === 0, c.errors);
+    await c.ctx.close();
+  }
+}
+
+/* ======================================================================= 5. real touch: drag chapter (lagoon 2 chapter 1) */
+async function gDrag() {
+  curGroup = 'drag';
+  for (const d of ALL) {
+    const c = await open(d, 'seed=3'), p = c.page;
+    await startGame(c, 2);
+    let r = await roundInfo(p);
+    check(`${c.N} lagoon 2 chapter 1 is a drag sort round with >= 2 chests`, r.mech === 'drag' && r.mode === 'sort' && r.baskets.length >= 2 && r.items.length >= 3, { mech: r.mech, mode: r.mode, n: r.baskets.length, items: r.items.length });
+    let probs = await geometry(p);
+    check(`${c.N} drag round geometry valid`, probs.length === 0, probs);
+    await shot(c, 'drag0');
+    // --- correct drag: finger path, drop 60 px above the chest opening
+    const A = r.items.find(i => i.state === 'idle' && i.goal);
+    const gb = r.baskets.find(b => b.id === A.goal);
+    await clearEv(p);
+    const from = await css(p, A.x, A.y), to = await dropPoint(p, gb);
+    let follow = null;
+    await drag(c, from, to, { beforeUp: async () => {
+      follow = await p.evaluate(([id, tx, ty]) => { const w = TR.debug.world, v = TR.debug.view(), it = w.items.find(i => i.id === id); return { held: w.held, state: it.state, dx: Math.abs(it.x - (tx - v.left) / v.s), dy: Math.abs(it.y - (ty - v.top) / v.s) }; }, [A.id, to.x, to.y]);
+    } });
+    check(`${c.N} dragged treasure follows the finger`, follow && follow.held === A.id && follow.state === 'drag' && follow.dx < 30 && follow.dy < 45, follow);
+    await p.waitForFunction(id => { const i = TR.debug.world.items.find(i => i.id === id); return i && i.state === 'in'; }, A.id, { timeout: 4000 }).catch(() => {});
+    let ev = await evTypes(p);
+    const aI = await itemOf(p, A.id);
+    const cnt = await p.evaluate(id => TR.debug.world.baskets.find(b => b.id === id).count, gb.id);
+    check(`${c.N} correct drop (60 px high) → grab, drop, correct, land; chest.count 0→1`, ['grab', 'drop', 'correct', 'land', 'sparkle'].every(t => ev.includes(t)) && !ev.includes('wrong') && aI.state === 'in' && aI.basketId === gb.id && cnt === 1, { ev, aI, cnt });
+    // --- wrong chest → 'wrong', treasure returns home
+    r = await roundInfo(p);
+    const B = r.items.find(i => i.state === 'idle' && i.goal);
+    const wb = r.baskets.find(b => b.id !== B.goal);
+    await clearEv(p);
+    await drag(c, await css(p, B.x, B.y), await dropPoint(p, wb));
+    await sleep(1100);
+    ev = await evTypes(p);
+    const bI = await itemOf(p, B.id), wr = (await evOf(p, 'wrong'))[0];
+    check(`${c.N} wrong chest → 'wrong' (basket ${wb.id}), treasure back home, not in a chest`, ev.includes('wrong') && !ev.includes('correct') && wr && wr.basketId === wb.id && bI.state === 'idle' && bI.basketId == null && Math.abs(bI.x - bI.homeX) < 8 && Math.abs(bI.y - bI.homeY) < 12, { ev, bI, wr });
+    // --- quick tap (< 0.35 s, < 24 px) → 'tap', never a drop
+    await clearEv(p);
+    const tp = await css(p, B.x, B.y);
+    await touch(c.cdp, 'touchStart', [tp]); await sleep(60); await touch(c.cdp, 'touchMove', [{ x: tp.x + 3, y: tp.y + 2 }]); await sleep(40); await touch(c.cdp, 'touchEnd', []);
+    await sleep(500);
+    ev = await evTypes(p);
+    const tI = await itemOf(p, B.id);
+    check(`${c.N} quick tap → 'tap' event only (no drop/miss/wrong), treasure stays home`, ev.includes('tap') && ev.includes('grab') && !ev.includes('drop') && !ev.includes('miss') && !ev.includes('wrong') && tI.state === 'idle' && tI.basketId == null, { ev, tI });
+    // --- release in empty space → 'miss', floats home
+    r = await roundInfo(p);
+    const C = r.items.find(i => i.state === 'idle');
+    const ep = await emptyPoint(p);
+    await clearEv(p);
+    await drag(c, await css(p, C.x, C.y), await css(p, ep.x, ep.y));
+    await sleep(900);
+    ev = await evTypes(p);
+    const cI = await itemOf(p, C.id);
+    check(`${c.N} release in empty space → 'miss', treasure floats home`, ev.includes('miss') && !ev.includes('wrong') && !ev.includes('correct') && cI.state === 'idle' && Math.abs(cI.x - cI.homeX) < 8, { ev, cI, ep });
+    probs = await geometry(p);
+    check(`${c.N} geometry still valid, nothing held`, probs.length === 0 && (await p.evaluate(() => TR.debug.world.held)) == null, probs);
+    check(`${c.N} no console errors (drag)`, c.errors.length === 0, c.errors);
+    await c.ctx.close();
+  }
+}
+
+/* ======================================================================= 6. real touch: dig chapter (lagoon 1 chapter 1) */
+async function gDig() {
+  curGroup = 'dig';
+  for (const d of ALL) {
+    const c = await open(d, 'seed=3'), p = c.page;      // seed 3: round 2 of chapter 1 has a crab mound
+    await startGame(c, 1);
+    let r = await roundInfo(p);
+    check(`${c.N} lagoon 1 chapter 1 is a dig round (4 mounds, 1 chest)`, r.mech === 'dig' && r.mode === 'dig' && r.mounds.length >= 4 && r.baskets.length === 1 && r.targetMound, { mech: r.mech, mode: r.mode, mounds: r.mounds.length, tm: r.targetMound });
+    let probs = await geometry(p);
+    check(`${c.N} dig round geometry valid`, probs.length === 0, probs);
+    await shot(c, 'dig0');
+    const tgtLabel = r.items.find(i => i.id === r.target).label;
+    const wrongMounds = r.mounds.filter(m => m.state === 'buried' && !m.crab && m.itemId && !sameLabel(r.items.find(i => i.id === m.itemId).label, tgtLabel));
+    check(`${c.N} round has wrong mounds to test with`, wrongMounds.length >= 1, wrongMounds.map(m => m.id));
+    // --- wrong tap → 'wrong', peek, back to buried within ~1.5 s
+    await clearEv(p);
+    const w1 = wrongMounds[0];
+    let mp = await moundPoint(p, w1);
+    await tap(c, mp.x, mp.y);
+    await sleep(250);
+    const peek = await moundOf(p, w1.id);
+    await sleep(1400);
+    const back = await moundOf(p, w1.id);
+    let ev = await evTypes(p);
+    const wr = (await evOf(p, 'wrong'))[0];
+    check(`${c.N} wrong mound tap → dig{correct:false} + wrong, mound peeks then re-buries`, ev.includes('dig') && ev.includes('wrong') && !ev.includes('correct') && wr && wr.moundId === w1.id && peek.state === 'peek' && back.state === 'buried', { ev, peek: peek.state, back: back.state, wr });
+    // --- second wrong tap → hint glows the target mound
+    r = await roundInfo(p);
+    const w2 = wrongMounds.length > 1 ? wrongMounds[1] : w1;
+    await clearEv(p);
+    mp = await moundPoint(p, w2);
+    await tap(c, mp.x, mp.y);
+    await sleep(350);
+    ev = await evTypes(p);
+    const hint = (await evOf(p, 'hint'))[0];
+    const tm = await moundOf(p, r.targetMound);
+    const rm = await p.evaluate(() => TR.debug.world.roundMistakes);
+    check(`${c.N} 2nd wrong tap → 'hint' on the target mound, glow > 0, roundMistakes 2`, ev.includes('hint') && hint && hint.moundId === r.targetMound && tm.glow > 0 && rm === 2, { ev, hint, glow: tm.glow, rm });
+    await shot(c, 'dig-hint');
+    await sleep(1300);
+    // --- a finger that moves > 24 px before release does nothing
+    r = await roundInfo(p);
+    const T = r.mounds.find(m => m.id === r.targetMound);
+    await clearEv(p);
+    mp = await moundPoint(p, T);
+    const far = await css(p, T.x + 70, T.y - T.h * 0.5);
+    await drag(c, mp, far, { steps: 8, settle: 100 });
+    await sleep(400);
+    ev = await evTypes(p);
+    const tAfter = await moundOf(p, T.id);
+    check(`${c.N} finger moving > 24 px before release does nothing (target still buried)`, !ev.includes('dig') && !ev.includes('wrong') && !ev.includes('correct') && tAfter.state === 'buried', { ev, state: tAfter.state });
+    // --- correct tap → dig correct, the item flies into the chest
+    await clearEv(p);
+    const q0 = r.queue.length;
+    await tap(c, mp.x, mp.y);
+    await p.waitForFunction(id => { const w = TR.debug.world, it = w.items.find(i => i.moundId === id); return it && it.state === 'in'; }, T.id, { timeout: 4000 }).catch(() => {});
+    ev = await evTypes(p);
+    const dg = (await evOf(p, 'dig')).find(e => e.correct);
+    const tI = await p.evaluate(id => { const w = TR.debug.world, it = w.items.find(i => i.moundId === id); const m = w.mounds.find(m => m.id === id); return { state: it.state, basketId: it.basketId, mound: m.state, count: w.baskets[0].count, q: w.queue.length }; }, T.id);
+    check(`${c.N} target mound tap → dig{correct:true}, correct, land; item in the chest, mound open`, dg && dg.moundId === T.id && ev.includes('correct') && ev.includes('land') && tI.state === 'in' && tI.basketId === 'b0' && tI.mound === 'open' && tI.count >= 1 && tI.q === q0 - 1, { ev, dg, tI });
+    // --- finish the warm-up round via taps, then look for the crab in round 2
+    await finishDigRound(c);
+    await waitRound(p).catch(() => {});
+    r = await roundInfo(p);
+    check(`${c.N} round 2 reached by real taps (round ${r.round}, ${r.mounds.length} mounds)`, r.round === 1 && r.mode === 'dig', { round: r.round, mounds: r.mounds.length });
+    if (r.crab) {
+      const cm = r.mounds.find(m => m.id === r.crab);
+      const rm0 = r.roundMistakes;
+      await clearEv(p);
+      mp = await moundPoint(p, cm);
+      await tap(c, mp.x, mp.y);
+      await sleep(300);
+      ev = await evTypes(p);
+      const cr = (await evOf(p, 'crab'))[0];
+      const after = await p.evaluate(id => ({ rm: TR.debug.world.roundMistakes, m: TR.debug.world.mounds.find(m => m.id === id).state }), cm.id);
+      check(`${c.N} crab mound tap → 'crab' event, no 'wrong', roundMistakes unchanged`, cr && cr.moundId === cm.id && !ev.includes('wrong') && !ev.includes('dig') && after.rm === rm0 && after.m === 'open', { ev, cr, after });
+      await shot(c, 'crab');
+    } else check(`${c.N} crab mound present in round 2 (seed 3)`, false, { crab: r.crab, mounds: r.mounds.length });
+    probs = await geometry(p);
+    check(`${c.N} dig geometry still valid`, probs.length === 0, probs);
+    check(`${c.N} no console errors (dig)`, c.errors.length === 0, c.errors);
+    await c.ctx.close();
+  }
+}
+function sameLabel(a, b) { return !!a && !!b && a.type === b.type && String(a.value) === String(b.value); }
+/** taps the target mound until the round is solved (real taps) */
+async function finishDigRound(c, max = 8) {
+  const p = c.page;
+  for (let i = 0; i < max; i++) {
+    const t = await p.evaluate(() => { const w = TR.debug.world; if (w.state !== 'round' || !w.interactive || w.completing) return null; const m = w.targetMound(); return m ? { x: m.x, y: m.y, h: m.h } : null; });
+    if (!t) break;
+    const mp = await css(p, t.x, t.y - t.h * 0.5);
+    await tap(c, mp.x, mp.y);
+    await sleep(900);
+  }
+}
+
+/* ======================================================================= 7. count rounds via real touch */
+async function gCount() {
+  curGroup = 'count';
+  // dig pearls: age 4, lagoon 3 chapter 1 = count:1-5 dig
+  for (const d of [DEV.iphoneP, DEV.ipadL]) {
+    const c = await open(d, 'seed=3&age=4'), p = c.page;
+    await startGame(c, 3);
+    let r = await roundInfo(p);
+    check(`${c.N} age 4 lagoon 3 chapter 1 is a dig COUNT round (long chest, need N)`, r.mode === 'dig' && r.topic === 'count' && r.need >= 1 && r.baskets[0].kind === 'long', { mode: r.mode, topic: r.topic, need: r.need, kind: r.baskets[0].kind });
+    await clearEv(p);
+    await finishDigRound(c, r.need + 2);
+    await p.waitForFunction(() => window.__events.some(e => e.type === 'roundDone'), null, { timeout: 6000 }).catch(() => {});
+    const ev = await evTypes(p), counts = await evOf(p, 'count'), rd = (await evOf(p, 'roundDone'))[0];
+    check(`${c.N} tapping ${r.need} pearl mounds completes the count round (count events 1..N, roundDone)`, rd && counts.length >= r.need && counts[counts.length - 1].n === r.need && ev.filter(t => t === 'correct').length === r.need, { ev, counts: counts.map(e => e.n), rd });
+    await shot(c, 'count-dig');
+    check(`${c.N} no console errors (dig count)`, c.errors.length === 0, c.errors);
+    await c.ctx.close();
+  }
+  // drag pearls into the long chest: age 5, lagoon 2 chapter 1 = count:3-10 drag
+  for (const d of [DEV.iphoneL, DEV.ipadP]) {
+    const c = await open(d, 'seed=3&age=5'), p = c.page;
+    await startGame(c, 2);
+    let r = await roundInfo(p);
+    const need = r.need || r.baskets[0].need;          // drag count: need lives on the long chest
+    check(`${c.N} age 5 lagoon 2 chapter 1 is a drag COUNT round (long chest, need N)`, r.mode === 'count' && need >= 1 && r.baskets[0].kind === 'long', { mode: r.mode, topic: r.topic, need, kind: r.baskets[0].kind });
+    await clearEv(p);
+    const lb = r.baskets[0];
+    for (let i = 0; i < need; i++) {
+      r = await roundInfo(p);
+      const it = r.items.find(x => x.state === 'idle');
+      if (!it) break;
+      await drag(c, await css(p, it.x, it.y), await dropPoint(p, lb));
+      await p.waitForFunction(id => { const i = TR.debug.world.items.find(i => i.id === id); return !i || i.state === 'in'; }, it.id, { timeout: 3000 }).catch(() => {});
+      await sleep(150);
+    }
+    await p.waitForFunction(() => window.__events.some(e => e.type === 'roundDone'), null, { timeout: 6000 }).catch(() => {});
+    const ev = await evTypes(p), counts = await evOf(p, 'count'), rd = (await evOf(p, 'roundDone'))[0];
+    check(`${c.N} dragging ${need} pearls into the long chest completes the round (count 1..N, roundDone)`, rd && counts.length >= need && counts[counts.length - 1].n === need && !ev.includes('wrong'), { ev, counts: counts.map(e => e.n), rd });
+    await shot(c, 'count-drag');
+    check(`${c.N} no console errors (drag count)`, c.errors.length === 0, c.errors);
+    await c.ctx.close();
+  }
+}
+
+/* ======================================================================= 8. talk time */
+async function gTalk() {
+  curGroup = 'talk';
+  for (const d of [DEV.iphoneP, DEV.ipadL]) {
+    const c = await open(d, 'seed=6'), p = c.page;
+    await stopOn(p, "return e.type === 'talk'");
+    await startGame(c, 1, { bot: true, speed: 8 });
+    await p.waitForFunction(() => TR.debug.mode === 'talk' && !TR.debug.bot, null, { timeout: 60000 });
+    await sleep(300);
+    const tk = await p.evaluate(() => { const t = TR.debug.world.talk; return { answerId: t.answerId, choices: t.choices.map(c => c.id), answered: TR.debug.world.talkAnswered, q: document.getElementById('talkQ').textContent, btns: [...document.querySelectorAll('#talkChoices button')].map(b => b.dataset.id) }; });
+    check(`${c.N} Talk time opens with the question + ${tk.choices.length} choice buttons, unanswered`, (await visible(p, 'scrTalk')) && tk.q.length > 0 && tk.btns.join() === tk.choices.join() && !tk.answered, tk);
+    await shot(c, 'talk');
+    await clearEv(p);
+    await tapEl(c, `#talkChoices [data-id="${tk.answerId}"]`); await sleep(300);
+    const tr = (await evOf(p, 'talkResult'))[0];
+    const cls = await p.evaluate(id => document.querySelector(`#talkChoices [data-id="${id}"]`).className, tk.answerId);
+    check(`${c.N} tapping the right choice → talkResult correct, button marked right`, tr && tr.correct === true && tr.choiceId === tk.answerId && /right/.test(cls), { tr, cls });
+    // second talk (chapter 2): tap a wrong choice
+    await p.waitForFunction(() => TR.debug.world.level === 1, null, { timeout: 15000 });
+    await stopOn(p, "return e.type === 'talk'");
+    await p.evaluate(() => { TR.debug.setBot(true, 1); TR.debug.setSpeed(8); });
+    await p.waitForFunction(() => TR.debug.mode === 'talk' && !TR.debug.bot && TR.debug.world.level === 1, null, { timeout: 60000 });
+    await sleep(300);
+    const tk2 = await p.evaluate(() => { const t = TR.debug.world.talk; return { answerId: t.answerId, wrong: t.choices.map(c => c.id).find(id => id !== t.answerId) }; });
+    await clearEv(p);
+    await tapEl(c, `#talkChoices [data-id="${tk2.wrong}"]`); await sleep(300);
+    const tr2 = (await evOf(p, 'talkResult'))[0];
+    const cls2 = await p.evaluate(ids => ids.map(id => document.querySelector(`#talkChoices [data-id="${id}"]`).className), [tk2.wrong, tk2.answerId]);
+    check(`${c.N} tapping a wrong choice → talkResult wrong, pick marked wrongpick, answer marked right`, tr2 && tr2.correct === false && tr2.choiceId === tk2.wrong && /wrongpick/.test(cls2[0]) && /right/.test(cls2[1]), { tr2, cls2 });
+    await tapEl(c, `#talkChoices [data-id="${tk2.answerId}"]`); await sleep(200);
+    const n = await p.evaluate(() => window.__events.filter(e => e.type === 'talkResult').length);
+    check(`${c.N} a second answer is ignored (one talkResult)`, n === 1, n);
+    check(`${c.N} no console errors (talk)`, c.errors.length === 0, c.errors);
+    await c.ctx.close();
+  }
+}
+
+/* ======================================================================= 9. pause / visibility / volume / settings persistence */
+async function gSettings() {
+  curGroup = 'settings';
+  const d = DEV.iphoneP;
+  const c = await open(d, 'seed=3&lang=vi'), p = c.page;
+  await p.evaluate(() => localStorage.removeItem('tr:settings'));
+  const ui0 = await p.evaluate(() => ({ lang: document.documentElement.lang, logo: document.getElementById('logo1').textContent }));
+  check('[settings] ?lang=vi applies to the UI for the session', ui0.lang === 'vi' && ui0.logo === 'Mầm', ui0);
+  await startGame(c, 2);
+  await tapEl(c, '#btnPause'); await sleep(200);
+  check('[settings] pause button → mode paused', (await mode(p)) === 'paused' && (await visible(p, 'scrPause')));
+  const v0 = await p.evaluate(() => TR.debug.getState().settings.volume);
+  await tapEl(c, '#btnQuieter'); await sleep(100);
+  const v1 = await p.evaluate(() => TR.debug.getState().settings.volume);
+  await tapEl(c, '#btnLouder'); await tapEl(c, '#btnLouder'); await sleep(100);
+  const v2 = await p.evaluate(() => TR.debug.getState().settings.volume);
+  check(`[settings] volume −/+ steps of 10 and clamps at 100 (${v0}→${v1}→${v2})`, v0 === 100 && v1 === 90 && v2 === 100, { v0, v1, v2 });
+  for (let i = 0; i < 12; i++) await tapEl(c, '#btnQuieter');
+  const v3 = await p.evaluate(() => ({ v: TR.debug.getState().settings.volume, meter: document.getElementById('volMeter').style.width }));
+  check('[settings] volume clamps at 0', v3.v === 0 && v3.meter === '0%', v3);
+  for (let i = 0; i < 4; i++) await tapEl(c, '#btnLouder');
+  const s1 = await p.evaluate(() => JSON.parse(localStorage.getItem('tr:settings') || 'null'));
+  check('[settings] volume saved to tr:settings (40) and ?lang=vi NOT saved', s1 && s1.volume === 40 && s1.lang !== 'vi' && !('mute' in s1) && !('profile' in s1) && !('seed' in s1), s1);
+  await tapEl(c, '#btnResume'); await sleep(150);
+  check('[settings] Resume → mode play', (await mode(p)) === 'play');
+  // visibilitychange → pause
+  await p.evaluate(() => { Object.defineProperty(document, 'hidden', { get: () => true, configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
+  await sleep(150);
+  const hid = await mode(p);
+  await p.evaluate(() => { delete document.hidden; document.dispatchEvent(new Event('visibilitychange')); });
+  await sleep(150);
+  check('[settings] visibilitychange (hidden) pauses the game, pause screen shown', hid === 'paused' && (await visible(p, 'scrPause')), hid);
+  check('[settings] coming back does not auto-resume (stays paused until tap)', (await mode(p)) === 'paused');
+  await tapEl(c, '#btnHome'); await sleep(200);
+  check('[settings] Home from pause → title', (await mode(p)) === 'title');
+  // settings slider persists across reload
+  const g = await p.locator('#btnParents').boundingBox();
+  await hold(c, g.x + g.width / 2, g.y + g.height / 2, 2300); await sleep(250);
+  check('[settings] gate opens settings', await visible(p, 'scrSettings'));
+  const sl = await p.evaluate(() => ({ v: document.getElementById('inpVolume').value, l: document.getElementById('volLabel').textContent }));
+  check('[settings] slider shows the pause-menu volume (40)', sl.v === '40' && sl.l === '40%', sl);
+  await p.evaluate(() => { const i = document.getElementById('inpVolume'); i.value = '65'; i.dispatchEvent(new Event('input', { bubbles: true })); });
+  await tapEl(c, 'label:has(#optMusic)'); await sleep(150);
+  const s2 = await p.evaluate(() => JSON.parse(localStorage.getItem('tr:settings') || 'null'));
+  check('[settings] slider 65 + music off saved; lang still not vi', s2 && s2.volume === 65 && s2.music === false && s2.lang !== 'vi', s2);
+  await p.reload(); await waitTitle(p); await installHook(p);
+  const g2 = await p.locator('#btnParents').boundingBox();
+  await hold(c, g2.x + g2.width / 2, g2.y + g2.height / 2, 2300); await sleep(250);
+  const dom = await p.evaluate(() => ({ v: document.getElementById('inpVolume').value, music: document.getElementById('optMusic').checked, st: TR.debug.getState().settings.volume, lang: document.documentElement.lang }));
+  check('[settings] reload keeps volume 65 + music off (and ?lang=vi still only a session override)', dom.v === '65' && !dom.music && dom.st === 65 && dom.lang === 'vi', dom);
+  const keys = await p.evaluate(() => Object.keys(localStorage));
+  check('[settings] every storage key uses the tr: prefix, progress not written with ?profile=test', keys.every(k => k.startsWith('tr:')) && !keys.includes('tr:progress'), keys);
+  // language chip in settings saves lang
+  await tapEl(c, '#scrSettings .chip[data-lang="en"]'); await sleep(150);
+  const s3 = await p.evaluate(() => JSON.parse(localStorage.getItem('tr:settings')).lang);
+  check('[settings] language chip (user action) saves lang=en', s3 === 'en', s3);
+  check('[settings] no console errors (settings)', c.errors.length === 0, c.errors);
+  await c.ctx.close();
+}
+
+/* ======================================================================= 10. rotation mid-round */
+async function gRotate() {
+  curGroup = 'rotate';
+  for (const d of [DEV.iphoneP, DEV.iphoneL, DEV.ipadP, DEV.ipadL]) {
+    const swapped = { width: d.viewport.height, height: d.viewport.width };
+    // drag chapter: rotate while a finger holds a treasure
+    let c = await open(d, 'seed=3'), p = c.page;
+    await startGame(c, 2);
+    let r = await roundInfo(p);
+    const A = r.items.find(i => i.state === 'idle');
+    const from = await css(p, A.x, A.y), ep = await emptyPoint(p), to = await css(p, ep.x, ep.y);
+    await drag(c, from, to, { noUp: true, settle: 150 });
+    const held0 = await p.evaluate(() => TR.debug.world.held);
+    check(`${c.N} drag in progress before rotation`, held0 === A.id, held0);
+    await p.setViewportSize(swapped);
+    await sleep(700);
+    const st = await p.evaluate(() => ({ held: TR.debug.world.held, W: TR.debug.getState().W, H: TR.debug.getState().H, mode: TR.debug.mode, states: TR.debug.world.items.map(i => i.state) }));
+    const portraitNow = swapped.height > swapped.width;
+    check(`${c.N} rotation to ${swapped.width}×${swapped.height} cancels the drag cleanly (held null, no item in drag)`, st.held === null && !st.states.includes('drag') && (portraitNow ? st.W === 720 : st.H === 720), st);
+    await touch(c.cdp, 'touchEnd', []); await sleep(800);
+    let probs = await geometry(p);
+    check(`${c.N} after rotation all treasures + chests inside the viewport`, probs.length === 0 && (await p.evaluate(() => TR.debug.world.held)) === null, probs);
+    await shot(c, 'rotated-drag');
+    // the game is still playable with a finger after rotation
+    r = await roundInfo(p);
+    const B = r.items.find(i => i.state === 'idle' && i.goal), gb = r.baskets.find(b => b.id === B.goal);
+    await clearEv(p);
+    await drag(c, await css(p, B.x, B.y), await dropPoint(p, gb));
+    await sleep(900);
+    check(`${c.N} a correct drag still works after rotation`, (await evTypes(p)).includes('correct'), await lastEv(p, 8));
+    await p.setViewportSize(d.viewport); await sleep(600);
+    probs = await geometry(p);
+    check(`${c.N} rotating back keeps geometry valid`, probs.length === 0, probs);
+    check(`${c.N} no console errors (rotate drag)`, c.errors.length === 0, c.errors);
+    await c.ctx.close();
+    // dig chapter
+    c = await open(d, 'seed=3'); p = c.page;
+    await startGame(c, 1);
+    await p.setViewportSize(swapped); await sleep(700);
+    probs = await geometry(p);
+    const dg = await p.evaluate(() => ({ mounds: TR.debug.world.mounds.map(m => m.state), items: TR.debug.world.items.map(i => i.state), W: TR.debug.getState().W, H: TR.debug.getState().H }));
+    check(`${c.N} dig rotation: mounds + items inside the viewport, all still buried`, probs.length === 0 && dg.mounds.every(s => s === 'buried') && dg.items.every(s => s === 'buried'), { probs, dg });
+    await shot(c, 'rotated-dig');
+    r = await roundInfo(p);
+    const T = r.mounds.find(m => m.id === r.targetMound);
+    await clearEv(p);
+    const mp = await moundPoint(p, T);
+    await tap(c, mp.x, mp.y); await sleep(600);
+    const dig = (await evOf(p, 'dig'))[0];
+    check(`${c.N} a correct mound tap still works after rotation`, dig && dig.correct && dig.moundId === T.id, await lastEv(p, 8));
+    check(`${c.N} no console errors (rotate dig)`, c.errors.length === 0, c.errors);
+    await c.ctx.close();
+  }
+}
+
+/* ======================================================================= 11. full bot sessions, ages 3..7, lagoons 1 and 6 */
+async function gBot() {
+  curGroup = 'bot';
+  const jobs = [];
+  for (const age of [3, 4, 5, 6, 7]) for (const lagoon of [1, 6]) jobs.push({ age, lagoon, dev: (age + lagoon) % 2 ? DEV.iphoneL : DEV.ipadP });
+  const run = async j => {
+    const c = await open(j.dev, `seed=${j.age * 10 + j.lagoon}&age=${j.age}&lang=${j.lagoon === 6 ? 'vi' : 'en'}`);
+    const p = c.page, tag = `[bot age ${j.age} lagoon ${j.lagoon} ${j.dev.name}]`;
+    await startGame(c, j.lagoon, { bot: true, speed: 8 });
+    const t0 = Date.now();
+    let done = true;
+    try { await p.waitForFunction(() => TR.debug.mode === 'done', null, { timeout: 150000 }); } catch (e) { done = false; }
+    const secs = Math.round((Date.now() - t0) / 1000);
+    const st = await p.evaluate(() => ({ s: TR.debug.getState(), stats: TR.debug.stats, pearls: window.__events.filter(e => e.type === 'pearl').map(e => e.total), sd: window.__events.find(e => e.type === 'sessionDone'), levels: window.__events.filter(e => e.type === 'level').map(e => e.mech + ':' + e.topic), stuck: window.__events.filter(e => e.type === 'round').length, profile: TR.debug.profile && { pearls: TR.debug.profile.pearls, total: TR.debug.profile.totalStars } }));
+    const mono = st.pearls.every((v, i) => i === 0 || v >= st.pearls[i - 1]);
+    check(`${tag} session finishes (${secs}s, ${st.stuck} rounds, ${st.levels.join(' ')})`, done, done ? '' : st.s);
+    check(`${tag} zero console errors`, c.errors.length === 0, c.errors.slice(0, 5));
+    if (done) {
+      check(`${tag} stars within 0..52 (${st.sd && st.sd.stars}), profile total matches`, st.sd && st.sd.stars >= 0 && st.sd.stars <= 52 && st.profile.total === st.sd.stars, { sd: st.sd, profile: st.profile });
+      check(`${tag} pearls monotonic (${st.pearls.length} pearl events, last ${st.pearls.slice(-1)[0]}) and profile pearls = world pearls`, mono && st.pearls.length > 0 && st.profile.pearls === st.sd.pearls, { last: st.pearls.slice(-5), profile: st.profile, sd: st.sd && st.sd.pearls });
+      check(`${tag} 4 chapters alternate dig/drag`, st.levels.length === 4 && st.levels.every((l, i) => i === 0 || l.split(':')[0] !== st.levels[i - 1].split(':')[0]), st.levels);
+    }
+    await c.ctx.close();
+  };
+  // run 5 at a time
+  for (let i = 0; i < jobs.length; i += 5) await Promise.all(jobs.slice(i, i + 5).map(run));
+}
+
+/* ======================================================================= main */
+(async () => {
+  const T0 = Date.now();
+  srv = await serve(process.env.TR_GAME_ROOT || undefined);
+  browser = await chromium.launch();
+  const groups = [['boot', gBoot], ['profiles', gProfiles], ['map', gMap], ['resume', gResume], ['drag', gDrag], ['dig', gDig], ['count', gCount], ['talk', gTalk], ['settings', gSettings], ['rotate', gRotate], ['bot', gBot]];
+  for (const [name, fn] of groups) {
+    if (!want(name)) continue;
+    console.log(`\n=== ${name} ===`);
+    try { await fn(); } catch (e) { curGroup = name; check(`[${name}] group crashed`, false, String(e && e.stack || e).slice(0, 800)); }
   }
   await browser.close(); srv.close();
   const fails = results.filter(r => !r.ok);
-  fs.writeFileSync(path.join(OUT, 'results.json'), JSON.stringify({ when: new Date().toISOString(), seconds: Math.round((Date.now() - T0) / 1000), pass: results.length - fails.length, fail: fails.length, flakeRetries: FLAKES, results }, null, 1));
-  if (FLAKES.length) console.log(`(${FLAKES.length} touch-start retries, see results.json flakeRetries)`);
-  console.log(`\n${results.length - fails.length} passed, ${fails.length} failed  (${((Date.now() - T0) / 1000).toFixed(0)} s)`);
+  fs.writeFileSync(path.join(OUT, 'results.json'), JSON.stringify({ when: new Date().toISOString(), seconds: Math.round((Date.now() - T0) / 1000), results }, null, 1));
+  console.log(`\n${results.length - fails.length}/${results.length} checks passed in ${Math.round((Date.now() - T0) / 1000)}s` + (fails.length ? `\nFAILED:\n` + fails.map(f => '  ' + f.name).join('\n') : ''));
   process.exit(fails.length ? 1 : 0);
-})();
+})().catch(e => { console.error(e); process.exit(1); });

@@ -9,6 +9,7 @@
   const LAGOON_KEYS = ['beach', 'coral', 'cave', 'bay', 'ship', 'rainbow'];
   // map badge positions (fractions of the map area) — landscape winding path / portrait zig-zag
   const POS_L = [[0.1, 0.7], [0.27, 0.28], [0.45, 0.68], [0.62, 0.28], [0.79, 0.68], [0.92, 0.3]];
+  const POS_C = [[0.09, 0.5], [0.255, 0.5], [0.42, 0.5], [0.585, 0.5], [0.75, 0.5], [0.915, 0.5]];   // compact landscape phones: one row
   const POS_P = [[0.26, 0.84], [0.72, 0.7], [0.28, 0.55], [0.72, 0.4], [0.3, 0.25], [0.7, 0.1]];
 
   const UI = {
@@ -74,7 +75,8 @@
       $('mapStars').textContent = p.totalStars || 0; $('mapPearls').textContent = p.pearls || 0;
       const box = $('lagoons'); box.innerHTML = '';
       const portrait = window.innerHeight > window.innerWidth;
-      const pos = portrait ? POS_P : POS_L;
+      const compact = !portrait && window.innerHeight <= 430;
+      const pos = portrait ? POS_P : compact ? POS_C : POS_L;
       let nextId = null;
       for (let i = 1; i <= 6; i++) {
         const unlocked = P.unlocked(p, i), lg = (p.lagoons || {})[i] || { stars: [0, 0, 0, 0], done: false };
@@ -110,7 +112,7 @@
       pos.forEach(([fx, fy], i) => {
         const x = fx * w, y = fy * h;
         if (i === 0) d += `M${x} ${y}`;
-        else { const [px, py] = [pos[i - 1][0] * w, pos[i - 1][1] * h]; d += ` Q${(px + x) / 2} ${py + (y - py) * 0.1 + (i % 2 ? 40 : -40)} ${x} ${y}`; }
+        else { const [px, py] = [pos[i - 1][0] * w, pos[i - 1][1] * h]; d += ` Q${(px + x) / 2} ${py + (y - py) * 0.1 + (compact ? 0 : i % 2 ? 40 : -40)} ${x} ${y}`; }
       });
       svg.innerHTML = `<path d="${d}"/>`;
       // resume ribbon

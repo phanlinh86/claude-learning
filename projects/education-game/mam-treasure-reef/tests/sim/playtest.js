@@ -1,305 +1,210 @@
 #!/usr/bin/env node
-// High-speed playtest (report-only): thousands of headless sessions per age × driver, plus absent-child runs.
-//   node tests/sim/playtest.js --n 60 --name base
-//   node tests/sim/playtest.js --n 60 --name prop --config '{"idleMax":45}'
-//   node tests/sim/playtest.js --report base[,prop]      → markdown tables (stdout + tests/sim/out/<name>.md)
-// Drivers: bot0.3 bot0.6 bot0.9 (TR.Bot), slow3 (slow 3-year-old), dropsHighRim (always the right pot, releases
-// 60–120 px above the pot RIM), tapper (random taps / flicks / drags), spammer, typical, toddler (lib.js profiles).
-// Speech: MainSpeech mirrors main.js onEvent → TR.Voice.say policy in GAME time; VoiceQueue mirrors voice.js
-// (MAXQ 2, stale 5 s for non-priority, interrupt = flush + cancel + 90 ms gap).
+// Mầm's Treasure Reef — high-speed headless playtest (report-only; never edits game code).
+//
+//   node tests/sim/playtest.js                 default matrix: 7 models × ages 3–7 × 6 lagoons × 2 viewports × 3 seeds (< 4 min)
+//   node tests/sim/playtest.js --quick         7 models × ages 3–7 × lagoons 1,4 × 2 viewports × 1 seed (< 60 s)
+//   node tests/sim/playtest.js --full          20 seeds per viewport (8400 sessions, ≈ 30 min on 2 cores)
+//   node tests/sim/playtest.js --seeds 5 --models typical,slow3 --ages 3,4 --lagoons 1,2,3 --lang vi
+//   node tests/sim/playtest.js --config '{"tapTime":1.0}' --name prop        world config overrides (opts.config)
+//   node tests/sim/playtest.js --no-proposal   skip the before/after re-simulation of the recommended changes
+//   node tests/sim/playtest.js --dig-extra 1   content experiment: later dig rounds ask for one more target (sim-side patch)
+//
+// Prints a markdown summary (also saved to tests/sim/out/<name>.md + .json). Child models and metrics: ./lib.js.
 'use strict';
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-const { Worker, isMainThread, parentPort } = require('worker_threads');
+const { Worker, isMainThread, parentPort, workerData } = require('worker_threads');
 const L = require('./lib');
-const TR = L.TR;
 
-/* ------------------------------------------------------------------ extra child models */
-L.KID_PROFILES.slow3 = { reaction: [2, 4], speed: [250, 450], wobble: 22, pRandomNest: 0.3, pHigh: 0.35, highRange: [40, 140], highFromRim: true,
-  pBeside: 0.2, pMidway: 0.08, grabSpread: 0.8, talkDelay: [3, 8], talkRight: 0.55, pickReturning: 0.1 };
-L.KID_PROFILES.dropsHighRim = { reaction: [0.8, 1.6], speed: [500, 800], wobble: 8, pRandomNest: 0, pHigh: 1, highRange: [60, 120], highFromRim: true,
-  pBeside: 0, pMidway: 0, grabSpread: 0.4, talkDelay: [1.5, 3], talkRight: 0.9 };
-// Kid.goal measures 'high' from the soil centre; patch (sim only) so highFromRim profiles measure from the rim (b.top)
-(function patchKid() {
-  const w = new TR.World({ seed: 1 }); const k = L.makeDriver('toddler', w, 4, 1); const KP = Object.getPrototypeOf(k);
-  const orig = KP.goal;
-  KP.goal = function (it) {
-    const g = orig.call(this, it);
-    if (g.kind === 'high' && this.p.highFromRim) { const hr = this.p.highRange; g.y = g.b.top - this.r.float(hr[0], hr[1]); }
-    return g;
-  };
-})();
-
-/* ------------------------------------------------------------------ voice.js queue model (game time) */
-class VoiceQueue {
-  constructor(lang) { this.lang = lang; this.t = 0; this.cur = null; this.q = []; this.started = []; this.req = [];
-    this.drop = { maxq: 0, stale: 0, flush: 0 }; this.cuts = []; this.maxPending = 0; }
-  dur(text) { const n = String(text).trim().split(/\s+/).length; return 0.25 + n / (this.lang === 'vi' ? 3.0 : 2.3); }
-  speaking() { return !!this.cur; }
-  advance(t) { this.t = t; while (this.cur && this.cur.start + this.cur.d <= t) { const e = this.cur.start + this.cur.d; this.cur = null; this._kick(e); } if (!this.cur) this._kick(t); }
-  _kick(t) {
-    while (!this.cur && this.q.length) {
-      const it = this.q.shift();
-      if (!it.priority && t - it.t > 5) { this.drop.stale++; continue; }
-      const st = Math.max(t, it.ready);
-      this.cur = Object.assign({}, it, { start: st, d: this.dur(it.text) }); this.started.push(this.cur);
-    }
-  }
-  say(type, text, o) {
-    o = o || {}; if (!text) return;
-    const it = { type, text: String(text), t: this.t, priority: !!o.priority, ready: this.t + (o.interrupt ? 0.09 : 0) };
-    this.req.push({ t: this.t, type, text: it.text, interrupt: !!o.interrupt, priority: !!o.priority });
-    if (o.interrupt) {
-      this.drop.flush += this.q.length; this.q = [];
-      if (this.cur) {
-        const el = this.t - this.cur.start;
-        this.cuts.push({ t: this.t, cut: this.cur.type, by: type, frac: Math.max(0, Math.min(1, el / this.cur.d)), never: el <= 0, text: this.cur.text });
-        this.cur.cutAt = this.t; this.cur = null;
-      }
-      this.q.push(it); this._kick(this.t); return;
-    }
-    this.q.push(it); this.maxPending = Math.max(this.maxPending, this.q.length);
-    while (this.q.length > 2) { let idx = this.q.findIndex((x, i) => i < this.q.length - 1 && !x.priority); if (idx < 0) idx = 0; this.q.splice(idx, 1); this.drop.maxq++; }
-    if (!this.cur) this._kick(this.t);
-  }
+/* ------------------------------------------------------------------ worker */
+if (!isMainThread) {
+  const out = workerData.tasks.map(t => { const r = L.runSession(t); delete r.log; return r; });
+  parentPort.postMessage(out);
+  return;
 }
 
-/* main.js onEvent → speak() policy, in game seconds (main uses wall ms: 700 ms grab, 1200 ms praise) */
-class MainSpeech {
-  constructor(lang, seed, policy) { this.pol = policy || {}; this.lastTap = { t: -9, text: '' }; this.lang = lang; this.v = new VoiceQueue(lang); this.rng = new TR.RNG(seed); this.firstAsk = true;
-    this.lastGrab = -9; this.lastPraise = -9; this.missSay = 0; this.countRounds = []; this.curCount = null; this.lastRound = null; }
-  T(k, p) { try { const s = TR.I18N.t(this.lang, k, Object.assign({ child: '' }, p || {}), this.rng); return s == null ? k : String(s); } catch (e) { return k; } }
-  N(k, v) { try { return String(TR.I18N.name(this.lang, k, v)); } catch (e) { return String(v); } }
-  prompt(w) { const p = w.prompt(); return p ? this.T(p.promptKey, p.params) : ''; }
-  on(e, w) {
-    const v = this.v, t = w.time; v.advance(t);
-    switch (e.type) {
-      case 'level': v.say('level', this.T('ui.chapter', { n: e.level + 1 }) + '. ' + this.T('topic.' + e.topic), { interrupt: true }); break;
-      case 'round':
-        this.firstAsk = true; this.lastRound = e;
-        if (e.mode === 'count') { this.curCount = { need: e.params.n, lines: [], idx0: v.started.length, reqIdx0: v.req.length }; this.countRounds.push(this.curCount); } else this.curCount = null;
-        if (e.mode !== 'ask') v.say('round', this.T(e.promptKey, e.params), { priority: true }); break;
-      case 'ask':
-        if (this.firstAsk) v.say('ask', this.T(e.promptKey, e.params), { priority: true });
-        else { if (this.pol.askReplace) v.q = v.q.filter(x => x.type !== 'askNext' && x.type !== 'grab'); v.say('askNext', this.T('p.animalsNext', e.params), {}); }
-        this.firstAsk = false; break;
-      case 'grab':
-        if (!v.speaking() && t - this.lastGrab > 0.7 && e.nameKind) {
-          const txt = this.N(e.nameKind, e.nameValue);
-          if (this.pol.tapQuiet && txt === this.lastTap.text && t - this.lastTap.t < 3) break;   // proposal: same name not again within 3 s
-          this.lastGrab = t; this.lastTap = { t, text: txt }; v.say('grab', txt);
-        }
-        break;
-      case 'correct': {
-        if (w.cur && w.cur.mode === 'count') break;
-        if (t - this.lastPraise < 1.2) break; this.lastPraise = t;
-        const b = w.basketById(e.basketId), ev = Object.assign({ label: b && b.label }, e);
-        const s1 = TR.I18N.sayCorrect ? TR.I18N.sayCorrect(this.lang, ev, this.rng) : '';
-        v.say('correct', s1 && this.rng.next() < 0.65 ? s1 : this.T('praise'), { interrupt: true }); break;
-      }
-      case 'bloom': if (w.cur && w.cur.mode === 'count') { const s = TR.I18N.sayCount(this.lang, e.n, e.need, this.rng); v.say('count', s, { interrupt: true }); if (this.curCount) this.curCount.lines.push({ n: e.n, item: v.started[v.started.length - 1] === undefined ? null : null, reqAt: t, text: s, ref: v.q[v.q.length - 1] }); } break;
-      case 'wrong': { const b = w.basketById(e.basketId), tb = e.target != null ? w.basketById(e.target) : null;
-        v.say('wrong', TR.I18N.sayWrong ? TR.I18N.sayWrong(this.lang, { label: b && b.label, target: tb && tb.label }, this.rng) : this.T('wrong'), { interrupt: true }); break; }
-      case 'miss': if (++this.missSay % 2 === 1) v.say('miss', this.T('miss')); break;
-      case 'hint': v.say('hint', this.T('hint')); break;
-      case 'idle':
-        if (e.type === 'idle') this.idleN = (w.round === this.idleRound && w.level === this.idleLevel) ? (this.idleN || 0) + 1 : 1;
-        this.idleRound = w.round; this.idleLevel = w.level;
-        if (this.pol.idleSpeakMax && this.idleN > this.pol.idleSpeakMax) break;   // proposal: stop talking to an empty room
-        v.say('idle', this.T('idle') + ' ' + this.prompt(w)); break;
-      case 'roundDone': if (!(w.cur && w.cur.mode === 'count')) v.say('roundDone', this.T('great')); break;
-      case 'talk': v.say('talk', this.T('talk.intro') + ' ' + this.T(e.talk.promptKey, e.talk.params || {}), { interrupt: true, priority: true }); break;
-      case 'talkAsk': if (e.n <= 3) v.say('talkAsk', this.T(e.talk.promptKey, e.talk.params || {}), { priority: true }); break;
-      case 'tap': {
-        if (!e.nameKind) break;
-        const txt = this.N(e.nameKind, e.nameValue);
-        if (this.pol.tapQuiet) {   // proposal: a tap never cuts Lumi off, and the same name is not repeated within 2 s
-          if (v.speaking() || (txt === this.lastTap.text && t - this.lastTap.t < 3)) break;
-          this.lastTap = { t, text: txt }; v.say('tap', txt, {}); break;
-        }
-        v.say('tap', txt, { interrupt: true }); break;
-      }
-      case 'talkResult': v.say('talkResult', e.correct ? this.T('talk.right') : 'wrong-answer', { interrupt: true }); break;
-      case 'sessionDone': v.say('sessionDone', this.T('session.done', { stars: e.stars || 0 }), { interrupt: true }); break;
-    }
-  }
-}
+/* ------------------------------------------------------------------ CLI */
+const argv = process.argv.slice(2);
+const flag = n => argv.includes('--' + n);
+const opt = (n, d) => { const i = argv.indexOf('--' + n); return i >= 0 && argv[i + 1] !== undefined ? argv[i + 1] : d; };
+const quick = flag('quick'), full = flag('full');
+const seeds = +opt('seeds', quick ? 1 : full ? 20 : 3);
+const models = opt('models', L.MODEL_NAMES.join(',')).split(',');
+const ages = opt('ages', '3,4,5,6,7').split(',').map(Number);
+const lagoons = opt('lagoons', quick ? '1,4' : '1,2,3,4,5,6').split(',').map(Number);
+const vps = opt('vps', 'land,port').split(',');
+const lang = opt('lang', 'en');
+const config = JSON.parse(opt('config', '{}'));
+const name = opt('name', quick ? 'quick' : full ? 'full' : 'base');
+const withProposal = !flag('no-proposal') && !opt('config', null);
+const threads = Math.max(1, +opt('threads', Math.min(4, os.cpus().length)));
 
-/* speech quality metrics from a VoiceQueue (shared with the browser replay) */
-function speechMetrics(v, countRounds) {
-  const S = v.started;
-  let rep2 = 0, repReq2 = 0;
-  for (let i = 1; i < S.length; i++) if (S[i].text === S[i - 1].text && S[i].start - S[i - 1].start < 2) rep2++;
-  for (let i = 1; i < v.req.length; i++) if (v.req[i].text === v.req[i - 1].text && v.req[i].t - v.req[i - 1].t < 2) repReq2++;
-  const cutBy = {}; let early = 0;
-  for (const c of v.cuts) { const k = c.cut + '<-' + c.by; cutBy[k] = (cutBy[k] || 0) + 1; if (c.frac < 0.5) early++; }
-  // counting completeness: each count round must START every number 1..N; "heard" = not cut before 60 %
-  let cr = 0, crComplete = 0, crHeard = 0;
-  for (const r of countRounds || []) {
-    if (!r.done) continue; cr++;
-    const st = S.filter(x => x.type === 'count' && x.t >= r.t0 && x.t <= r.t1);
-    const nums = new Set(), heard = new Set();
-    for (const x of st) { const n = parseInt(x.n, 10); nums.add(n); const end = x.cutAt !== undefined ? x.cutAt : x.start + x.d; if ((end - x.start) / x.d >= 0.6) heard.add(n); }
-    let okS = true, okH = true; for (let n = 1; n <= r.need; n++) { if (!nums.has(n)) okS = false; if (!heard.has(n)) okH = false; }
-    if (okS) crComplete++; if (okH) crHeard++;
-  }
-  return { req: v.req.length, started: S.length, maxq: v.drop.maxq, stale: v.drop.stale, flush: v.drop.flush, maxPending: v.maxPending,
-    cuts: v.cuts.length, early, cutBy, rep2, repReq2, cr, crComplete, crHeard };
-}
+/* The recommended CONFIG changes (see docs/reports/playtest_report.md); re-simulated below as before/after. */
+const PROPOSAL = {
+  tapTime: 1.0,            // a toddler's poke-and-hold on a treasure is a tap, not a drop (0.35 → 1.0)
+  peekAbove: 0.3,          // the wrong-dig peek no longer rises into the mound of the row above (0.55 → 0.3)
+  chapterTimeLimit: 100,   // a typical 4-year-old keeps the 4th round instead of being cut at 75 s (75 → 100)
+  hintTime: 5,             // the glow outlasts a slow child's 3–5 s think (3 → 5)
+  moundPad: 40             // wider tap pad around a mound: fewer toddler taps fall on bare sand (24 → 40)
+};
+const digExtra = +opt('dig-extra', 0);   // content experiment: later dig rounds ask for this many more targets (lib withPatch)
 
-/* ------------------------------------------------------------------ one session */
-function runOne(job) {
-  const ms = { speech: null, hints: [], hintGapsMin: 1e9, asks: [], askRounds: [], content: [], talkN: 0, talkRight: 0,
-    taps: 0, tapDrops: 0, flicks: 0, overlapRest: 0, outScreen: 0, restInZone: 0, checks: 0, idleT: [], countRounds: [] };
-  let sp = null, curAsk = null, lastHintT = null, curCount = null;
-  const hooks = {
-    onEvent(e, w) {
-      if (e.type === 'session') {
-        sp = new MainSpeech(w.lang, job.seed + 77, job.speechPolicy);
-        // per-step invariant checks (every 4th update)
-        const up = w.update.bind(w); let k = 0;
-        w.update = function (dt) { up(dt); if ((++k & 3) === 0) check(w); sp.v.advance(w.time); };
-        // tap-guard instrumentation
-        const pd = w.pointerDown.bind(w), pm = w.pointerMove.bind(w), pu = w.pointerUp.bind(w);
-        let g = null;
-        w.pointerDown = function (x, y) { const r = pd(x, y); if (r) g = { x, y, t: w.time, m: 0 }; return r; };
-        w.pointerMove = function (x, y) { if (g) g.m = Math.max(g.m, L.hyp(x - g.x, y - g.y)); return pm(x, y); };
-        w.pointerUp = function (x, y) {
-          const n0 = w.events.length, gg = g; g = null;
-          const r = pu(x, y);
-          if (gg) {
-            const m = Math.max(gg.m, x !== undefined ? L.hyp(x - gg.x, y - gg.y) : 0), dur = w.time - gg.t;
-            const isTap = m < w.cfg.tapMovePx && dur < w.cfg.tapTime;
-            const dropped = w.events.slice(n0).some(ev => ev.type === 'drop');
-            if (isTap) { ms.taps++; if (dropped) ms.tapDrops++; } else if (dur < 0.35) ms.flicks++;
-          }
-          return r;
-        };
-      }
-      if (sp) sp.on(e, w);
-      switch (e.type) {
-        case 'round': {
-          const it = w.items, info = { l: w.level, r: e.round, topic: e.topic, mode: e.mode, labels: w.baskets.map(b => b.label.value).sort(),
-            colors: Array.from(new Set(it.map(i => i.color))).sort(), n: e.params && e.params.n, color: e.params && e.params.color };
-          ms.content.push(info);
-          curAsk = e.mode === 'ask' ? { queue: w.queue.slice(), asks: [], labels: info.labels } : null;
-          if (curAsk) ms.askRounds.push(curAsk);
-          if (e.mode === 'count') { curCount = { need: e.params.n, t0: w.time, t1: null, done: false }; ms.countRounds.push(curCount); } else curCount = null;
-          lastHintT = null; break;
-        }
-        case 'ask': if (curAsk) curAsk.asks.push(e.params.animal); break;
-        case 'hint': ms.hints.push(w.time); if (lastHintT !== null) ms.hintGapsMin = Math.min(ms.hintGapsMin, w.time - lastHintT); lastHintT = w.time; break;
-        case 'idle': ms.idleT.push(w.time); break;
-        case 'roundDone': if (curCount) { curCount.t1 = w.time + 2; curCount.done = true; } break;
-        case 'talkResult': ms.talkN++; if (e.correct) ms.talkRight++; break;
-      }
-    }
-  };
-  function check(w) {
-    if (w.state !== 'round') return;
-    ms.checks++;
-    const Ly = w.layout, ins = Ly.ins, rest = w.items.filter(i => i.state === 'idle');
-    for (const it of rest) {
-      const h = it.size / 2;
-      if (it.x - h < ins.left - 1 || it.x + h > Ly.W - ins.right + 1 || it.y - h < ins.top - 1 || it.y + h > Ly.H - ins.bottom + 1) ms.outScreen++;
-      if (w.potAt(it.homeX, it.homeY)) ms.restInZone++;
-    }
-    for (let i = 0; i < rest.length; i++) for (let j = i + 1; j < rest.length; j++) {
-      const a = rest[i], b = rest[j];
-      if (L.hyp(a.x - b.x, a.y - b.y) < 0.5 * (a.size + b.size) - 1) ms.overlapRest++;
-    }
-  }
-  const m = L.runSession(Object.assign({}, job, { hooks }));
-  // number tags on count lines (needed for completeness)
-  if (sp) for (const s of sp.v.started) if (s.type === 'count') s.n = parseInt(String(s.text).match(/\d+/) ? String(s.text).match(/\d+/)[0] : wordNum(sp.lang, s.text), 10);
-  ms.speech = sp ? speechMetrics(sp.v, ms.countRounds) : null;
-  // ask repetition inside a round: same animal asked twice in a row
-  let askRep = 0, askPairs = 0;
-  for (const a of ms.askRounds) for (let i = 1; i < a.asks.length; i++) { askPairs++; if (a.asks[i] === a.asks[i - 1]) askRep++; }
-  const chapters = m.chapters.map(c => ({ topic: c.topic, dur: c.end !== null ? c.end - c.start : null, stars: c.stars }));
-  return {
-    age: m.age, lang: m.lang, vp: m.vp, driver: m.driver, seed: m.seed, done: m.done, sessionTime: m.sessionTime, simTime: m.simTime, stars: m.stars, endState: m.endState,
-    chapters, rounds: m.rounds.map(r => ({ l: r.level, topic: r.topic, mode: r.mode, dur: r.end !== null ? r.end - r.start : null, items: r.items, nests: r.nests,
-      wrong: r.wrong, miss: r.miss, hints: r.hints, idles: r.idles, stars: r.stars })),
-    hints: m.hints, hintGapMin: ms.hintGapsMin, idles: m.idles, idleGaps: m.idleGaps, wrongs: m.wrongs, misses: m.misses, drops: m.drops, grabs: m.grabs,
-    stuck: m.stuck.length, stuckKinds: m.stuck.slice(0, 2), invariant: m.invariant.length, errors: m.errors.slice(0, 2),
-    unreachable: m.unreachable, tapHazard: m.tapHazard, itemsSeen: m.itemsSeen, packShrinkMin: m.packShrinkMin,
-    taps: ms.taps, tapDrops: ms.tapDrops, flicks: ms.flicks, overlapRest: ms.overlapRest, outScreen: ms.outScreen, restInZone: ms.restInZone, checks: ms.checks,
-    talkN: ms.talkN, talkRight: ms.talkRight, askRep, askPairs, askRounds: ms.askRounds.map(a => ({ q: a.queue.length, first: a.asks[0], labels: a.labels })),
-    content: ms.content, speech: ms.speech
-  };
+/* ------------------------------------------------------------------ run a matrix on worker threads */
+function matrix(ms, cfg, seedsN) {
+  const tasks = [];
+  for (const model of ms) for (const age of ages) for (const lagoon of lagoons) for (const vp of vps) for (let s = 1; s <= seedsN; s++)
+    tasks.push({ model, age, lagoon, vp, seed: s, lang, config: cfg, patch: digExtra ? { digExtraTargets: digExtra } : null });
+  return tasks;
 }
-function wordNum(lang, text) {
-  const s = String(text).toLowerCase();
-  for (let n = 20; n >= 1; n--) { const nm = String(TR.I18N.numberName(lang, n)).toLowerCase(); if (s.startsWith(nm)) return n; }
-  return NaN;
-}
-
-/* ------------------------------------------------------------------ absent child */
-function absentRun(age, seed, lang, config, policy) {
-  const w = new TR.World({ seed, age, lang, config: config || {} }); w.setViewport(960, 720, {});
-  const sp = new MainSpeech(lang, seed, policy);
-  const bot = new TR.Bot(w, { skill: 1, seed: seed + 1 });
-  const out = { age, seed, idle: [], idleSpoken: 0, idleReq: 0, talkAsks: 0, talkAskSpoken: 0, ok: true, err: null, resumed: false };
-  const tick = (drive) => { if (drive) bot.step(1 / 30); w.update(1 / 30); sp.v.advance(w.time); for (const e of w.drainEvents()) { sp.on(e, w); if (e.type === 'idle') out.idle.push(w.time); if (e.type === 'talkAsk') out.talkAsks++; } };
-  try {
-    w.newSession(); for (const e of w.drainEvents()) sp.on(e, w);
-    while (!(w.state === 'round' && w.round === 1 && w.interactive)) tick(true);
-    const t0 = w.time, r0 = sp.v.started.length;
-    for (let i = 0; i < 600 * 30; i++) tick(false);
-    out.idleSpoken = sp.v.started.slice(r0).filter(s => s.type === 'idle').length;
-    out.idleReq = sp.v.req.filter(r => r.type === 'idle' && r.t >= t0).length;
-    out.idleRel = out.idle.map(t => t - t0);
-    if (w.state !== 'round') out.ok = false;
-    while (w.state !== 'talk') tick(true);
-    const r1 = sp.v.started.length;
-    for (let i = 0; i < 300 * 30; i++) tick(false);
-    out.talkAskSpoken = sp.v.started.slice(r1).filter(s => s.type === 'talkAsk').length;
-    out.talkGlow = !!(w.talk && w.talk.glowAnswer);
-    if (w.state !== 'talk') out.ok = false;
-    let n = 0; while (w.state !== 'sessionDone' && n++ < 1800 * 30) tick(true);
-    out.resumed = w.state === 'sessionDone';
-  } catch (e) { out.ok = false; out.err = String(e.stack || e); }
-  return out;
-}
-
-/* ------------------------------------------------------------------ CLI / workers */
-const DRIVERS = ['bot0.3', 'bot0.6', 'bot0.9', 'slow3', 'dropsHighRim', 'tapper', 'spammer', 'typical', 'toddler'];
-const VPS = ['iphoneP', 'iphoneL', 'ipadL', 'ipadP'];
-
-if (isMainThread && require.main === module) {
-  const args = process.argv.slice(2), get = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
-  if (get('report')) { require('./playtest_report').report(get('report').split(',')); return; }
-  const n = +get('n', 40), name = get('name', 'base'), config = JSON.parse(get('config', '{}')), speechPolicy = JSON.parse(get('policy', '{}'));
-  const drivers = get('drivers', DRIVERS.join(',')).split(','), ages = get('ages', '3,4,5,6,7').split(',').map(Number);
-  const jobs = []; let seed = +get('seed0', 5000);
-  for (const driver of drivers) for (const age of ages) for (let k = 0; k < n; k++) {
-    const s = seed++;
-    jobs.push({ kind: 'session', age, lang: k % 2 ? 'vi' : 'en', vp: VPS[k % 4], driver, seed: s, config, speechPolicy, maxTime: driver === 'tapper' ? 2400 : 1800 });
-  }
-  const nAbs = +get('absent', 20);
-  for (const age of ages) for (let k = 0; k < nAbs; k++) jobs.push({ kind: 'absent', age, lang: k % 2 ? 'vi' : 'en', seed: 900 + age * 100 + k, config, speechPolicy });
-  const nw = Math.max(1, os.cpus().length); const t0 = Date.now(); const res = []; let next = 0, left = nw;
-  for (let i = 0; i < nw; i++) {
-    const wk = new Worker(__filename);
-    const feed = () => wk.postMessage(next < jobs.length ? jobs[next++] : null);
-    wk.on('message', r => { if (r === 'bye') { if (--left === 0) finish(); return; } res.push(r); if (res.length % 200 === 0) process.stderr.write(res.length + '/' + jobs.length + '\n'); feed(); });
-    wk.on('error', e => { console.error(e); process.exit(1); });
-    feed();
-  }
-  function finish() {
-    const out = path.join(__dirname, 'out'); fs.mkdirSync(out, { recursive: true });
-    fs.writeFileSync(path.join(out, 'pt_' + name + '.json'), JSON.stringify({ name, config, speechPolicy, n, sessions: res.filter(r => r.kind !== 'absent'), absent: res.filter(r => r.kind === 'absent') }));
-    console.log(`${res.length} runs in ${((Date.now() - t0) / 1000).toFixed(0)} s → tests/sim/out/pt_${name}.json`);
-  }
-} else if (!isMainThread) {
-  parentPort.on('message', j => {
-    if (j === null) { parentPort.postMessage('bye'); parentPort.close(); return; }
-    let r;
-    try { r = j.kind === 'absent' ? Object.assign({ kind: 'absent' }, absentRun(j.age, j.seed, j.lang, j.config, j.speechPolicy)) : runOne(j); }
-    catch (e) { r = { kind: j.kind, age: j.age, driver: j.driver, seed: j.seed, errors: [String(e.stack || e)], fatal: true }; }
-    parentPort.postMessage(r);
+function runTasks(tasks) {
+  return new Promise((resolve, reject) => {
+    const n = Math.min(threads, tasks.length), chunks = Array.from({ length: n }, () => []);
+    // interleave so that each worker gets a similar mix of cheap and expensive models
+    tasks.forEach((t, i) => chunks[i % n].push(t));
+    const results = []; let left = n;
+    chunks.forEach(ch => {
+      const wk = new Worker(__filename, { workerData: { tasks: ch } });
+      wk.on('message', m => { results.push(...m); if (--left === 0) resolve(results); });
+      wk.on('error', reject);
+    });
   });
 }
-module.exports = { runOne, absentRun, VoiceQueue, MainSpeech, speechMetrics, DRIVERS };
+
+/* ------------------------------------------------------------------ report */
+const f0 = v => (Math.round(v)).toString();
+const f1 = v => (Math.round(v * 10) / 10).toFixed(1);
+const pc = (a, b) => (b ? Math.round(100 * a / b) + '%' : '–');
+const min = s => f1(s / 60);
+function groupBy(rs, key) { const g = {}; for (const r of rs) (g[key(r)] = g[key(r)] || []).push(r); return g; }
+
+function report(base, prop, wall) {
+  const out = [];
+  const P = s => out.push(s);
+  P(`# Playtest summary — ${name}`);
+  P(``);
+  P(`${base.length} sessions (one lagoon each) · models ${models.join(', ')} · ages ${ages.join(',')} · lagoons ${lagoons.join(',')} · viewports ${vps.join(', ')} · ${seeds} seed(s) per cell · lang ${lang} · config ${JSON.stringify(config)} · ${f1(wall)} s wall on ${threads} thread(s)`);
+  P(``);
+  P(`Times are simulated game seconds (the world's own clock, incl. the 1.8 s chapter banner, 1.7 s stars, 2.0 s dance and the child's Talk-time think). Add ≈ 10 s per lagoon for the real map / fanfare screens.`);
+  P(``);
+
+  // ---- 1. pace per model × age
+  P(`## 1. Pace per model × age`);
+  P(``);
+  P(`| model | age | n | done | lagoon s (min/mean/max) | **6 lagoons est.** | chapter s mean (60–100 s band) | short chapters | round s mean / p95 | stuck (dig / drag) | timeouts |`);
+  P(`|---|---|---|---|---|---|---|---|---|---|---|`);
+  const byMA = groupBy(base, r => r.model + '|' + r.age);
+  for (const m of models) for (const a of ages) {
+    const rs = byMA[m + '|' + a]; if (!rs) continue;
+    const A = L.aggregate(rs);
+    P(`| ${m} | ${a} | ${A.n} | ${A.done} | ${A.lagoonDur.length ? f0(Math.min(...A.lagoonDur)) + ' / ' + f0(L.mean(A.lagoonDur)) + ' / ' + f0(Math.max(...A.lagoonDur)) : '–'} | **${min(A.total6)} min** | ${f0(L.mean(A.chapDur))} (${pc(A.chapInBand, A.chapN)}) | ${pc(A.shortChapters, A.chapters)} | ${f1(L.mean(A.roundDur))} / ${f1(L.pct(A.roundDur, 0.95))} | ${A.stuck} (${A.stuckDig} / ${A.stuckDrag}) | ${A.timeout} |`);
+  }
+  P(``);
+
+  // ---- 2. fun / reward counters
+  P(`## 2. Rewards and surprises per model × age`);
+  P(``);
+  P(`| model | age | stars 3 / 2 / 1 | hints per round | pearls per lagoon | crab taps / crab mounds | photobombs per chapter | Talk right | Talk s | idle nudges (max per round) | talk re-asks (max) |`);
+  P(`|---|---|---|---|---|---|---|---|---|---|---|`);
+  for (const m of models) for (const a of ages) {
+    const rs = byMA[m + '|' + a]; if (!rs) continue;
+    const A = L.aggregate(rs);
+    P(`| ${m} | ${a} | ${pc(A.stars[3], A.roundsN)} / ${pc(A.stars[2], A.roundsN)} / ${pc(A.stars[1], A.roundsN)} | ${(A.hints / Math.max(1, A.roundsN)).toFixed(2)} | ${f0(L.mean(A.pearls))} | ${A.crabs} / ${A.crabMounds} | ${(A.photobombs / Math.max(1, A.chapters)).toFixed(2)} | ${pc(A.talkRight, A.chapters)} | ${f1(L.mean(A.talkDur))} | ${A.idles} (${A.idleMaxRound}) | ${A.talkAsks} (${A.talkAskMax}) |`);
+  }
+  P(``);
+
+  // ---- 3. correctness checks per model
+  P(`## 3. Input / geometry / flow checks per model (all ages, lagoons, viewports)`);
+  P(``);
+  P(`| model | pokes → counted as drop (held ≥ tapTime) | near-zone misses | high drops missed / high drops | dig taps ignored: outside pad / wobbled ≥ 24 px (of taps) | peek overlaps: mound above / chest (max px) of peeks | packed outside / overlapping | count rounds done | look-alike accepts (rounds with twins) | bad next / nexts | anomalies | 3+ structurally identical rounds in a chapter | same label set as the previous round |`);
+  P(`|---|---|---|---|---|---|---|---|---|---|---|---|---|`);
+  const byM = groupBy(base, r => r.model);
+  for (const m of models) {
+    const rs = byM[m]; if (!rs) continue;
+    const A = L.aggregate(rs);
+    P(`| ${m} | ${A.tapAsDrop} of ${A.pokes} (${A.longPokes}) | ${A.nearMiss} of ${A.misses} misses | ${A.highMissed} / ${A.highDrops} | ${A.ignoredDigTaps} / ${A.wobbleIgnored} (${A.digTaps}) | ${A.peekOverlapMound} / ${A.peekOverlapChest} (${f0(A.peekOverlapMax)}) of ${A.peeks} | ${A.packOutside} / ${A.packOverlap} | ${A.countDone} / ${A.countRounds} | ${A.lookalike} (${A.lookalikeRounds} of ${A.digRounds}) | ${A.nextBad} / ${A.nexts} | ${A.anomalies} | ${A.sameRuns} of ${A.chapters} | ${A.sameLabels} of ${A.roundsN} |`);
+  }
+  P(``);
+  const anomalies = [], variety = [];
+  for (const m of models) { const A = L.aggregate(byM[m] || []); anomalies.push(...A.anomalyList); variety.push(...A.varietyList); }
+  if (anomalies.length) { P(`Anomaly samples: ` + anomalies.slice(0, 6).join(' · ')); P(``); }
+  if (variety.length) { P(`Identical-round samples: ` + [...new Set(variety)].slice(0, 8).join(' · ')); P(``); }
+
+  // ---- 4. per-lagoon durations for the typical child
+  if (byM.typical) {
+    P(`## 4. Typical 4-year-old model: mean lagoon duration (s) per age × lagoon, and the 6-lagoon total`);
+    P(``);
+    P(`| age | ` + lagoons.map(l => 'L' + l).join(' | ') + ` | total (min) | + 10 s/lagoon UI |`);
+    P(`|---|` + lagoons.map(() => '---').join('|') + `|---|---|`);
+    for (const a of ages) {
+      const rs = byM.typical.filter(r => r.age === a && r.done); if (!rs.length) continue;
+      const byL = groupBy(rs, r => r.lagoon); let tot = 0; const cells = [];
+      for (const l of lagoons) { const d = byL[l] ? L.mean(byL[l].map(r => r.total)) : 0; tot += d; cells.push(f0(d)); }
+      const scale = 6 / lagoons.length;
+      P(`| ${a} | ${cells.join(' | ')} | ${min(tot * scale)} | ${min(tot * scale + 60)} |`);
+    }
+    P(``);
+    P(`Mechanic split (typical, all ages): ` + (() => {
+      const ch = []; for (const r of byM.typical) for (const c of r.chapters) if (c.dur != null) ch.push(c);
+      const dig = ch.filter(c => c.mech === 'dig'), drag = ch.filter(c => c.mech === 'drag');
+      return `dig chapters mean ${f0(L.mean(dig.map(c => c.dur)))} s (${pc(dig.filter(c => c.dur >= 60 && c.dur <= 100).length, dig.length)} in band), drag chapters mean ${f0(L.mean(drag.map(c => c.dur)))} s (${pc(drag.filter(c => c.dur >= 60 && c.dur <= 100).length, drag.length)} in band)`;
+    })());
+    P(``);
+  }
+
+  // ---- 5. plan-level variety
+  P(`## 5. Variety for a bored child`);
+  P(``);
+  P(`Plan level (content.js PLAN): lagoons where consecutive chapters repeat the same topic (the mechanic alternates, so only the topic repeats):`);
+  P(``);
+  for (const a of ages) {
+    const hits = [];
+    for (const l of lagoons) { const p = L.TR.Content.planFor(a, l); for (let i = 1; i < p.length; i++) if (p[i].topic === p[i - 1].topic) hits.push('L' + l + ' ch' + i + '→' + (i + 1) + ' ' + p[i].topic); }
+    P(`- age ${a}: ` + (hits.length ? hits.join(', ') : 'none'));
+  }
+  P(``);
+
+  // ---- 6. proposal
+  if (prop) {
+    P(`## 6. Recommended CONFIG changes re-simulated (same seeds, models typical / slow3 / high / idle)`);
+    P(``);
+    P('```json\n' + JSON.stringify(PROPOSAL, null, 1) + '\n```');
+    P(``);
+    P(`| model | age | 6-lagoon est. (min) before → after | dig / drag chapter s | pokes counted as drops | peek overlaps (max px) | short chapters | hints per round | stars 3 | dig taps outside pad | stuck / anomalies |`);
+    P(`|---|---|---|---|---|---|---|---|---|---|---|`);
+    const bp = groupBy(prop, r => r.model + '|' + r.age);
+    for (const m of [...new Set(prop.map(r => r.model))]) for (const a of ages) {
+      const A = L.aggregate((byMA[m + '|' + a] || [])), B = L.aggregate(bp[m + '|' + a] || []);
+      if (!B.n) continue;
+      P(`| ${m} | ${a} | ${min(A.total6)} → ${min(B.total6)} | ${f0(L.mean(A.digChapDur))} / ${f0(L.mean(A.dragChapDur))} → ${f0(L.mean(B.digChapDur))} / ${f0(L.mean(B.dragChapDur))} | ${A.tapAsDrop}/${A.pokes} → ${B.tapAsDrop}/${B.pokes} | ${A.peekOverlapMound} (${f0(A.peekOverlapMax)}) → ${B.peekOverlapMound} (${f0(B.peekOverlapMax)}) | ${pc(A.shortChapters, A.chapters)} → ${pc(B.shortChapters, B.chapters)} | ${(A.hints / Math.max(1, A.roundsN)).toFixed(2)} → ${(B.hints / Math.max(1, B.roundsN)).toFixed(2)} | ${pc(A.stars[3], A.roundsN)} → ${pc(B.stars[3], B.roundsN)} | ${A.ignoredDigTaps}/${A.digTaps} → ${B.ignoredDigTaps}/${B.digTaps} | ${A.stuck}/${A.anomalies} → ${B.stuck}/${B.anomalies} |`);
+    }
+    P(``);
+  }
+  return out.join('\n');
+}
+
+/* ------------------------------------------------------------------ main */
+(async () => {
+  const t0 = Date.now();
+  const tasks = matrix(models, config, seeds);
+  process.stderr.write(`playtest: ${tasks.length} sessions on ${threads} threads…\n`);
+  const base = await runTasks(tasks);
+  let prop = null;
+  if (withProposal) {
+    const pm = ['typical', 'slow3', 'high', 'idle'].filter(m => models.includes(m));
+    const pt = matrix(pm, Object.assign({}, config, PROPOSAL), Math.max(1, Math.min(seeds, 2)));
+    process.stderr.write(`playtest: proposal re-simulation, ${pt.length} sessions…\n`);
+    prop = await runTasks(pt);
+  }
+  // determinism: a handful of cells, run twice
+  const det = [];
+  for (const m of ['typical', 'random', 'spammer'].filter(m => models.includes(m))) det.push(Object.assign({ model: m }, L.deterministic({ model: m, age: 4, lagoon: 2, seed: 11, vp: 'port', lang, config })));
+  const wall = (Date.now() - t0) / 1000;
+  let md = report(base, prop, wall);
+  md += `\n## 7. Determinism (same seed, run twice)\n\n` + det.map(d => `- ${d.model}: ${d.same ? 'identical' : 'DIFFERENT'} event log (${d.events} events)`).join('\n') + '\n';
+  const dir = path.join(__dirname, 'out'); fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, name + '.md'), md);
+  fs.writeFileSync(path.join(dir, name + '.json'), JSON.stringify({ args: argv, base: base.map(r => Object.assign({}, r, { rounds: undefined, chapters: r.chapters.map(c => ({ level: c.level, topic: c.topic, mech: c.mech, dur: c.dur, rounds: c.rounds, stars: c.stars })) })), prop: prop && prop.map(r => Object.assign({}, r, { rounds: undefined })), det }));
+  process.stdout.write(md + '\n');
+  process.stderr.write(`playtest: ${f1(wall)} s → tests/sim/out/${name}.md\n`);
+})().catch(e => { console.error(e); process.exit(1); });

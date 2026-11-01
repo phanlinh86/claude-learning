@@ -183,7 +183,7 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 .lagoon { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 2px; width: 150px; }
 .lagoon img.badge { width: clamp(96px, 19 * var(--u), 150px); height: auto; filter: drop-shadow(0 6px 0 rgba(20, 50, 90, .25)); transition: transform .1s; }
 .lagoon:active img.badge { transform: scale(.94); }
-.lagoon b { font-size: clamp(14px, 2.6 * var(--u), 20px); font-weight: 900; color: #fff; text-shadow: 0 2px 0 #1f5ba8, 0 0 10px rgba(0, 0, 0, .3); text-align: center; line-height: 1.05; }
+.lagoon b { font-size: clamp(16px, 2.6 * var(--u), 20px); max-width: 150px; font-weight: 900; color: #fff; text-shadow: 0 2px 0 #1f5ba8, 0 0 10px rgba(0, 0, 0, .3); text-align: center; line-height: 1.05; }
 .lagoon .stars { display: flex; gap: 2px; background: rgba(255, 255, 255, .8); border-radius: 99px; padding: 2px 8px; font-size: 15px; font-weight: 900; align-items: center; }
 .lagoon .stars img { width: 18px; height: 18px; }
 .lagoon.locked img.badge { filter: grayscale(1) brightness(.75) drop-shadow(0 6px 0 rgba(20, 50, 90, .25)); }
@@ -255,7 +255,7 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
   .talk-choices button { min-height: 72px; min-width: 88px; font-size: 26px; }
   .hud-stars img { width: 30px; height: 30px; } .hud-stars { font-size: 22px; }
   .hud-pearls { display: none; }
-  .lagoon { width: 120px; } .lagoon b { font-size: 13px; }
+  .lagoon { width: 136px; } .lagoon b { font-size: 15px; } .lagoon img.badge { width: 82px; } .lagoon .lock { width: 34px; } .lagoon .trophy { width: 34px; }
   .trophies { grid-template-columns: repeat(6, 1fr); }
   .icon-btn { width: 48px; height: 48px; }
 }

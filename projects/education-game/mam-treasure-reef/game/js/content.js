@@ -105,8 +105,9 @@
   /** A colour set safe for `age`: below 5 one colour of every confusable pair is dropped (3 colours left).
    *  `keep` (optional) is always kept (its partner is the one dropped). */
   function safeColors(rng, age, keep) {
-    if (age >= 5) return COLORS.slice();
-    var drop = PAIRS.map(function (p) { return p.indexOf(keep) >= 0 ? p[1 - p.indexOf(keep)] : rng.pick(p); });
+    // age ≥ 5: 4-colour rounds exist, so only the worst pair (blue/purple, ΔE 4.5 deuteranope) loses one colour (visual QA P2-5)
+    var pairs = age >= 5 ? PAIRS.slice(0, 1) : PAIRS;
+    var drop = pairs.map(function (p) { return p.indexOf(keep) >= 0 ? p[1 - p.indexOf(keep)] : rng.pick(p); });
     return COLORS.filter(function (c) { return drop.indexOf(c) < 0; });
   }
 

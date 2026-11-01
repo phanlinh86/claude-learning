@@ -282,9 +282,10 @@
       if (h) { this._shadow(h, a); this._item(h, a); }
       this._tutu(w, o, a);
     }
-    _donePile(w) {   // celebration: an open long chest overflowing with shells and pearls
-      const L = w.layout, W = this.W, g = this.g, gy = L.groundY + 8;
-      const pw = Math.min(W * 0.5, 520), ph = pw * 200 / 512, x = W / 2, top = gy - ph;
+    _donePile(w) {   // celebration: an open long chest overflowing with shells and pearls (kept clear of the DOM panel)
+      const L = w.layout, W = this.W, H = this.H, g = this.g, portrait = H > W;
+      const pw = portrait ? Math.min(W * 0.46, 330) : Math.min(W * 0.24, 280), ph = pw * 200 / 512;
+      const x = portrait ? W * 0.7 : W * 0.86, gy = portrait ? H * 0.4 : L.groundY + 8, top = gy - ph;
       g.fillStyle = 'rgba(20,50,90,.2)'; g.beginPath(); g.ellipse(x, gy - 4, pw * 0.46, ph * 0.08, 0, 0, TAU); g.fill();
       this._img('long_back', x - pw / 2, top, pw, ph);
       const cols = ['red', 'yellow', 'purple', 'blue', 'orange', 'green'];
@@ -293,15 +294,15 @@
         if (i % 3 === 1) this._sprite('pearl', bx, by, s * 0.9); else this._sprite('shell_' + cols[i % 6], bx, by, s);
       }
       this._img('long_front', x - pw / 2, top, pw, ph);
-      // sparkles
       for (let i = 0; i < 6; i++) { const ph2 = i * 1.1 + this.time * 2; this._sprite('sparkle', x + Math.sin(ph2) * pw * 0.4, top - 10 - Math.abs(Math.cos(ph2 * 0.7)) * 50, 18 + 8 * Math.sin(ph2 * 3), 0, 0.8); }
     }
-    _doneTutu(w, o) {
-      const H = this.H, W = this.W, h = Math.min(H * (o && o.compact ? 0.5 : 0.36), 360);
+    _doneTutu(w, o) {   // dancing Tutu: upper half in portrait, left of the panel in landscape
+      const H = this.H, W = this.W, portrait = H > W;
+      const h = Math.min(H * (o && o.compact ? 0.5 : portrait ? 0.22 : 0.36), 360);
       const cyc = this.time % 0.9, dance = Math.floor(this.time / 0.45) % 2 === 0;
       const hop = Math.max(0, Math.sin(cyc / 0.45 * Math.PI)) * (cyc < 0.45 ? 26 : 0);
-      const y = w.layout.groundY + 6;
-      const cx = o && o.compact ? w.layout.ins.left + W * 0.18 : W * (W > H ? 0.22 : 0.5);
+      const y = portrait ? H * 0.4 : w.layout.groundY + 6;
+      const cx = o && o.compact ? w.layout.ins.left + W * 0.18 : W * (portrait ? 0.3 : 0.15);
       this._character(dance ? 'tutu_dance_a' : 'tutu_dance_b', cx, y - hop, h, 1, y, hop);
     }
     _flyIntoChest(it, w) {

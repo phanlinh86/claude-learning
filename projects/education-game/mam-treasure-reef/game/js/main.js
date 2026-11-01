@@ -87,7 +87,7 @@
     const hud = $('hud').getBoundingClientRect();
     if (hud.width > 0 && r.x + r.w > hud.left - 10 && r.y < hud.bottom) {
       const roomRight = hud.left - 12 - r.x;
-      if (roomRight >= 260) r.w = roomRight;
+      if (roomRight >= 360) r.w = roomRight;
       else { r.y = hud.bottom + 8; r.w = Math.min(window.innerWidth - r.x - 12 - view.ins.right * view.s, 560); }
     }
     TR.UI.placeBubble(r);
