@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Treasure Reef">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#5FC9DD">
+<meta name="description" content="A learning game for kids 3–7: dig up and sort treasure under the sea with Tutu the baby turtle — colours, shapes, counting, letters and sea friends. English and Vietnamese, with voice. Made for Mầm.">
+<title>Mầm's Treasure Reef · Mầm Tìm Kho Báu</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/default/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="stage">
+  <canvas id="game" aria-label="Mầm's Treasure Reef"></canvas>
+  <div id="safeProbe" aria-hidden="true"></div>
+
+  <!-- Tutu's speech bubble (positioned from world.layout.bubble) -->
+  <div id="bubble" class="bubble hidden no-game-input" role="status" aria-live="polite"><span id="bubbleText"></span></div>
+
+  <!-- In-game HUD -->
+  <div id="hud" class="hidden">
+    <div class="hud-stars"><img src="assets/default/ui/star.svg" alt=""><b id="hudStars">0</b></div>
+    <div class="hud-pearls"><img src="assets/default/ui/pearl_icon.svg" alt=""><b id="hudPearls">0</b></div>
+    <div id="hudDots" class="hud-dots"></div>
+    <button id="btnPause" class="icon-btn" aria-label="Pause">
+      <svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.8"/><rect x="14" y="5" width="4" height="14" rx="1.8"/></svg>
+    </button>
+  </div>
+
+  <!-- Title -->
+  <section id="scrTitle" class="screen title-screen">
+    <div class="title-top">
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button class="chip" data-lang="en">English</button>
+        <button class="chip" data-lang="vi">Tiếng Việt</button>
+      </div>
+      <button id="btnParents" class="gear-btn" aria-label="Parents: hold to open settings">
+        <svg class="ring" viewBox="0 0 48 48"><circle cx="24" cy="24" r="21"/></svg>
+        <svg class="gear" viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.5 7.5 0 0 0-1.7-1L15 3h-4l-.4 2.7a7.5 7.5 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.5 7.5 0 0 0 1.7 1L11 21h4l.4-2.7a7.5 7.5 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg>
+        <span class="gear-tip" data-i18n="ui.holdForParents">Hold for parents</span>
+      </button>
+    </div>
+    <div class="title-wrap">
+      <h1 class="logo"><span id="logo1">Mầm's</span> <span id="logo2">Treasure Reef</span></h1>
+      <p id="tagline" class="tagline"></p>
+      <button id="btnPlay" class="btn-play" aria-label="Play">
+        <svg viewBox="0 0 24 24"><path d="M8 4.8v14.4c0 .8.9 1.3 1.6.8l11-7.2a1 1 0 0 0 0-1.6l-11-7.2C8.9 3.5 8 4 8 4.8z"/></svg>
+      </button>
+      <p class="title-info"><img src="assets/default/ui/star.svg" alt=""> <b id="titleStars">0</b> <img src="assets/default/ui/pearl_icon.svg" alt=""> <b id="titlePearls">0</b> <span id="titleWho"></span></p>
+    </div>
+  </section>
+
+  <!-- Profiles: who is playing? -->
+  <section id="scrProfiles" class="screen hidden dim">
+    <div class="panel profiles-panel">
+      <h2 data-i18n="ui.whoPlays">Who is playing?</h2>
+      <div id="profileCards" class="profile-cards"></div>
+      <p class="small-note" data-i18n="ui.profilesHint">Parents: hold ⚙ on the title screen to add or change players.</p>
+      <div class="menu row">
+        <button id="btnProfilesBack" class="btn btn-orange"><svg class="i" viewBox="0 0 24 24"><path d="M12 3 2 12h3v8h5v-5h4v5h5v-8h3z"/></svg><span data-i18n="ui.home">Home</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reef map -->
+  <section id="scrMap" class="screen hidden map-screen">
+    <div class="map-top">
+      <button id="btnMapHome" class="icon-btn" aria-label="Home"><svg viewBox="0 0 24 24"><path d="M12 3 2 12h3v8h5v-5h4v5h5v-8h3z"/></svg></button>
+      <div class="map-who"><img id="mapAvatar" src="" alt=""><b id="mapName"></b></div>
+      <div class="map-totals"><img src="assets/default/ui/star.svg" alt=""><b id="mapStars">0</b> <img src="assets/default/ui/pearl_icon.svg" alt=""><b id="mapPearls">0</b></div>
+      <button id="btnTreasure" class="icon-btn trophy-btn" aria-label="Treasure room"><img src="assets/default/ui/trophy_gold.svg" alt=""></button>
+    </div>
+    <div class="map-wrap scroll">
+      <svg id="mapPath" class="map-path" aria-hidden="true"></svg>
+      <div id="lagoons" class="lagoons"></div>
+    </div>
+    <div id="resumeBar" class="resume-bar hidden"><button id="btnResumeLagoon" class="btn btn-big btn-green"><svg class="i" viewBox="0 0 24 24"><path d="M8 4.8v14.4c0 .8.9 1.3 1.6.8l11-7.2a1 1 0 0 0 0-1.6l-11-7.2C8.9 3.5 8 4 8 4.8z"/></svg><span id="resumeText"></span></button></div>
+  </section>
+
+  <!-- Treasure room -->
+  <section id="scrTreasure" class="screen hidden dim">
+    <div class="panel treasure-panel scroll">
+      <h2 data-i18n="ui.treasure">Treasure Room</h2>
+      <div id="trophies" class="trophies"></div>
+      <p id="treasureTotals" class="treasure-totals"></p>
+      <button id="btnTreasureBack" class="btn btn-green" data-i18n="ui.done">Done</button>
+    </div>
+  </section>
+
+  <!-- Parent settings -->
+  <section id="scrSettings" class="screen hidden dim">
+    <div class="panel settings-panel scroll">
+      <h2 data-i18n="ui.settings">Settings</h2>
+      <div class="set-row"><label data-i18n="ui.language">Language</label>
+        <div class="chips lang-switch">
+          <button class="chip" data-lang="en">English</button><button class="chip" data-lang="vi">Tiếng Việt</button>
+        </div></div>
+      <div class="set-row"><label for="inpVolume" data-i18n="ui.volume">Volume</label>
+        <div class="vol-row"><input id="inpVolume" type="range" min="0" max="100" step="5"><b id="volLabel">100%</b></div></div>
+      <div class="set-grid">
+        <label class="toggle"><input type="checkbox" id="optSfx"><span data-i18n="ui.sound">Sound effects</span></label>
+        <label class="toggle"><input type="checkbox" id="optMusic"><span data-i18n="ui.music">Music</span></label>
+        <label class="toggle"><input type="checkbox" id="optVoice"><span data-i18n="ui.voice">Tutu's voice</span></label>
+        <label class="toggle"><input type="checkbox" id="optMic"><span data-i18n="ui.mic">Answer by talking</span></label>
+      </div>
+      <p id="voiceInfo" class="small-note"></p>
+      <h3 data-i18n="ui.players">Players</h3>
+      <div id="settingsProfiles" class="settings-profiles"></div>
+      <button id="btnSettingsDone" class="btn btn-green" data-i18n="ui.done">Done</button>
+    </div>
+  </section>
+
+  <!-- Profile editor (parents) -->
+  <section id="scrProfileEdit" class="screen hidden dim">
+    <div class="panel settings-panel scroll">
+      <h2 id="profileEditTitle" data-i18n="ui.newProfile">New player</h2>
+      <div class="set-row"><label for="inpName" data-i18n="ui.name">Name</label>
+        <input id="inpName" type="text" maxlength="16" autocomplete="off" autocorrect="off" spellcheck="false"></div>
+      <div class="set-row"><label for="inpSayAs" data-i18n="ui.sayAs">Say the name as</label>
+        <input id="inpSayAs" type="text" maxlength="16" autocomplete="off" autocorrect="off" spellcheck="false"></div>
+      <p class="small-note" data-i18n="ui.sayAsHint">How an English voice should say the name (a Vietnamese voice says it properly), e.g. "Mum" for Mầm.</p>
+      <div class="set-row"><label data-i18n="ui.age">Age</label>
+        <div id="ageChips" class="chips">
+          <button class="chip" data-age="3">3</button><button class="chip" data-age="4">4</button><button class="chip" data-age="5">5</button>
+          <button class="chip" data-age="6">6</button><button class="chip" data-age="7">7+</button>
+        </div></div>
+      <div class="set-row"><label data-i18n="ui.avatar">Picture</label>
+        <div id="avatarChips" class="chips avatar-chips"></div></div>
+      <div class="menu row">
+        <button id="btnProfileSave" class="btn btn-green" data-i18n="ui.save">Save</button>
+        <button id="btnProfileCancel" class="btn btn-orange" data-i18n="ui.cancel">Cancel</button>
+        <button id="btnProfileDelete" class="btn btn-red" data-i18n="ui.delete">Delete</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pause -->
+  <section id="scrPause" class="screen hidden dim">
+    <div class="panel">
+      <h2 data-i18n="ui.paused">Paused</h2>
+      <div class="vol-big">
+        <button id="btnQuieter" class="icon-btn" aria-label="Quieter"><svg viewBox="0 0 24 24"><path d="M5 10v4h3l4 4V6L8 10H5z"/></svg></button>
+        <div class="vol-meter"><i id="volMeter"></i></div>
+        <button id="btnLouder" class="icon-btn" aria-label="Louder"><svg viewBox="0 0 24 24"><path d="M3 10v4h3l4 4V6L6 10H3zm11.5 2a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zm-2.5-9v2.1a7 7 0 0 1 0 13.8V21a9 9 0 0 0 0-18z"/></svg></button>
+      </div>
+      <div class="menu">
+        <button id="btnResume" class="btn btn-big btn-green"><svg class="i" viewBox="0 0 24 24"><path d="M8 4.8v14.4c0 .8.9 1.3 1.6.8l11-7.2a1 1 0 0 0 0-1.6l-11-7.2C8.9 3.5 8 4 8 4.8z"/></svg><span data-i18n="ui.resume">Resume</span></button>
+        <button id="btnMap" class="btn btn-blue"><svg class="i" viewBox="0 0 24 24"><path d="M3 5l6-2 6 2 6-2v16l-6 2-6-2-6 2V5zm6 0v14l6 2V7L9 5z"/></svg><span data-i18n="ui.map">Map</span></button>
+        <button id="btnHome" class="btn btn-orange"><svg class="i" viewBox="0 0 24 24"><path d="M12 3 2 12h3v8h5v-5h4v5h5v-8h3z"/></svg><span data-i18n="ui.home">Home</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Talk time -->
+  <section id="scrTalk" class="screen hidden dim">
+    <div class="panel talk-panel">
+      <h2 id="talkTitle"></h2>
+      <canvas id="talkShow" width="300" height="180"></canvas>
+      <p id="talkQ" class="talk-q"></p>
+      <div id="talkChoices" class="talk-choices"></div>
+      <button id="btnMic" class="mic-btn hidden" aria-label="Answer by talking">
+        <svg viewBox="0 0 24 24"><path d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-6a3.5 3.5 0 0 0-7 0v6A3.5 3.5 0 0 0 12 15zm6-3.5a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.9V22h2v-2.6a8 8 0 0 0 7-7.9z"/></svg>
+        <span id="micLabel"></span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Lagoon done -->
+  <section id="scrDone" class="screen hidden">
+    <div class="panel done-panel">
+      <h2 id="doneTitle"></h2>
+      <div class="done-row">
+        <img id="doneTrophy" class="done-trophy" src="assets/default/ui/trophy_gold.svg" alt="">
+        <div class="done-stars"><img src="assets/default/ui/star.svg" alt=""><b id="doneStars">0</b></div>
+        <div class="done-stars"><img src="assets/default/ui/pearl_icon.svg" alt=""><b id="donePearls">0</b></div>
+      </div>
+      <div class="menu row">
+        <button id="btnNext" class="btn btn-big btn-green"><svg class="i" viewBox="0 0 24 24"><path d="M8 4.8v14.4c0 .8.9 1.3 1.6.8l11-7.2a1 1 0 0 0 0-1.6l-11-7.2C8.9 3.5 8 4 8 4.8z"/></svg><span id="btnNextText" data-i18n="ui.nextLagoon">Next lagoon</span></button>
+        <button id="btnDoneMap" class="btn btn-blue"><svg class="i" viewBox="0 0 24 24"><path d="M3 5l6-2 6 2 6-2v16l-6 2-6-2-6 2V5zm6 0v14l6 2V7L9 5z"/></svg><span data-i18n="ui.map">Map</span></button>
+      </div>
+    </div>
+  </section>
+
+  <div id="loading" class="screen"><div class="loader"></div></div>
+</div>
+
+<script src="js/rng.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/content.js"></script>
+<script src="js/world.js"></script>
+<script src="js/weather.js"></script>
+<script src="js/bot.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/progress.js"></script>
+<script src="js/assets.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/voice.js"></script>
+<script src="js/input.js"></script>
+<script src="js/render.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

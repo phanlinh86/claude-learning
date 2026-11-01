@@ -20,4 +20,5 @@ My notes, decks and prompt templates from learning how to use Claude well.
 | 2026-10-25 | **Prompt template**: XML-structured prompt (role / context / task / rules / format) for a 4-slide HPQ equity briefing |
 | 2026-10-25 | **Using Claude Well v2** (42 slides): added MCP, a slide per Explore/Plan/Build/Check step, making a skill, demo videos, example GitHub repos |
 | 2026-10-25 | **Repo structure**: one repo sorted by kind; started projects `flappy`, `stock-briefing`, `pdf-summarizer` |
+| 2026-10-31 | **build-game-for-mam** skill: a 30–40 min learning game for Mầm (profiles, saved progress, EN/VI voice that says her name right); first game *Mầm's Treasure Reef* (`projects/education-game/GAMES_FOR_MAM.md`) |
 | 2026-10-28 | **industry-career-analysis** skill: multi-agent industry + employer research for a career decision; first run on the HDD industry (3 PDF reports) |

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><clipPath id="whale_c1"><circle cx="26" cy="14" r="4.2" /></clipPath><clipPath id="whale_c2"><circle cx="62" cy="14" r="4.2" /></clipPath><clipPath id="whale_c3"><path d="M 98 68 C 98 56 104 46 112 42 C 116 48 116 56 112 62 C 118 58 124 58 126 64 C 124 74 114 82 104 84 Z" /></clipPath><clipPath id="whale_c4"><path d="M 8 74 C 6 52 26 40 54 40 C 82 40 100 52 104 70 C 106 82 100 96 86 102 C 66 110 36 108 20 100 C 10 94 8 86 8 74 Z" /></clipPath><clipPath id="whale_c5"><ellipse cx="60" cy="94" rx="12" ry="6" transform="rotate(24 60 94)" /></clipPath><g id="whale_sil"><path d="M 44 40 L 44 24 C 40 18 32 17 28 22 M 44 24 C 48 18 56 17 60 22" fill="none" stroke-width="23.9"/><circle cx="26" cy="14" r="4.2" /><circle cx="62" cy="14" r="4.2" /><path d="M 98 68 C 98 56 104 46 112 42 C 116 48 116 56 112 62 C 118 58 124 58 126 64 C 124 74 114 82 104 84 Z" /><path d="M 8 74 C 6 52 26 40 54 40 C 82 40 100 52 104 70 C 106 82 100 96 86 102 C 66 110 36 108 20 100 C 10 94 8 86 8 74 Z" /></g></defs>
+<use href="#whale_sil" xlink:href="#whale_sil" transform="translate(0 3)" fill="#1F4A6E" stroke="#1F4A6E" stroke-width="15" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>
+<use href="#whale_sil" xlink:href="#whale_sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="15" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 44 40 L 44 24 C 40 18 32 17 28 22 M 44 24 C 48 18 56 17 60 22" fill="none" stroke="#6A9CC2" stroke-width="8.9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 44 40 L 44 24 C 40 18 32 17 28 22 M 44 24 C 48 18 56 17 60 22" fill="none" stroke="#C9E6F6" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="26" cy="14" r="4.2" fill="#C9E6F6"/>
+<g clip-path="url(#whale_c1)">
+</g>
+<circle cx="26" cy="14" r="4.2" fill="none" stroke="#6A9CC2" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="62" cy="14" r="4.2" fill="#C9E6F6"/>
+<g clip-path="url(#whale_c2)">
+</g>
+<circle cx="62" cy="14" r="4.2" fill="none" stroke="#6A9CC2" stroke-width="2" stroke-linejoin="round"/>
+<path d="M 98 68 C 98 56 104 46 112 42 C 116 48 116 56 112 62 C 118 58 124 58 126 64 C 124 74 114 82 104 84 Z" fill="#879FB7"/>
+<g clip-path="url(#whale_c3)">
+</g>
+<path d="M 98 68 C 98 56 104 46 112 42 C 116 48 116 56 112 62 C 118 58 124 58 126 64 C 124 74 114 82 104 84 Z" fill="none" stroke="#465F78" stroke-width="3" stroke-linejoin="round"/>
+<path d="M 8 74 C 6 52 26 40 54 40 C 82 40 100 52 104 70 C 106 82 100 96 86 102 C 66 110 36 108 20 100 C 10 94 8 86 8 74 Z" fill="#738BA3"/>
+<g clip-path="url(#whale_c4)"><g transform="translate(-4 -5)"><path d="M 8 74 C 6 52 26 40 54 40 C 82 40 100 52 104 70 C 106 82 100 96 86 102 C 66 110 36 108 20 100 C 10 94 8 86 8 74 Z" fill="#8EA6BE"/></g>
+<path d="M 8 80 C 20 94 50 100 86 92 C 94 90 100 86 104 80 L 104 112 L 4 112 Z" fill="#DCE6EE"/><path d="M 14 88 Q 40 100 72 96 M 20 94 Q 44 104 70 100" fill="none" stroke="#8BA0B4" stroke-width="1.8" opacity=".35"/>
+<ellipse cx="30" cy="52" rx="12" ry="5.5" transform="rotate(-20 30 52)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M 8 74 C 6 52 26 40 54 40 C 82 40 100 52 104 70 C 106 82 100 96 86 102 C 66 110 36 108 20 100 C 10 94 8 86 8 74 Z" fill="none" stroke="#465F78" stroke-width="3" stroke-linejoin="round"/>
+<ellipse cx="60" cy="94" rx="12" ry="6" transform="rotate(24 60 94)" fill="#839BB4"/>
+<g clip-path="url(#whale_c5)">
+</g>
+<ellipse cx="60" cy="94" rx="12" ry="6" transform="rotate(24 60 94)" fill="none" stroke="#465F78" stroke-width="2.4" stroke-linejoin="round"/>
+<ellipse cx="33.4" cy="66" rx="7.4" ry="8.44" fill="#2E2638"/>
+<circle cx="31.03" cy="62.89" r="3.26" fill="#FFFFFF"/>
+<circle cx="36.21" cy="68.96" r="1.33" fill="#FFFFFF" opacity=".9"/>
+<path d="M 16 80 Q 30 90 48 82" fill="none" stroke="#465F78" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse cx="44" cy="76" rx="6" ry="3.72" fill="#F7A3B8" opacity="0.6"/>
+</svg>
