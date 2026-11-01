@@ -1,7 +1,7 @@
 # Education games
 
 Kids' learning games made with the `build-education-game` skill (`.claude/skills/build-education-game/`).
-Index with play links: `EDUCATION_GAMES.md`. One self-contained folder per game (`<slug>/`), each with its own
+Index with play links: `EDUCATION_GAMES.md`; games made for Mầm with `build-game-for-mam` are also listed in `GAMES_FOR_MAM.md`. One self-contained folder per game (`<slug>/`), each with its own
 `CLAUDE.md`, `README.md`, `docs/DESIGN.md` (the module contract) and tests.
 
 Rules: mobile-first (iPhone/iPad Safari, portrait + landscape, safe areas), English + Vietnamese with voice,
