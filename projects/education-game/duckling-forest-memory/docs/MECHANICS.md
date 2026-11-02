@@ -8,6 +8,45 @@ Playtests: `node tests/sim/playtest.js` (2 400 sessions, ≈ 8 min on 2 cores), 
 CONFIG comparisons), `node tests/sim/determinism.js`, `node tests/sim/content_stats.js`, `node tests/sim/run_matrix.js` → `summarize.js`.
 Units: logical px (short side 720), seconds, radians, y down; rot > 0 = clockwise.
 
+## 0. QA round 1 changes (docs/reports/{functional,visual,playtest}_report.md) — variety first
+- **Topic rotation (P1-1):** `DM.AGE_POOLS` (≥ 5 topics per age: 3 colors/animals/size/shapes/count · 4 colors/animals/shapes/count/size ·
+  5 shapes/count/letters/animals/colors · 6 lower/initial/add/count/letters · 7 initial/add/sub/oddeven/count), `DM.Content.DIFFICULTY`.
+  `DM.Content.topicsFor(age, rng, lastTopics)`: chapter 1 = the easiest pool topic that was not chapter 1 last time; chapters 2–4 =
+  3 others, topics left out last time first, sorted easiest first (no rng → the fixed `DM.AGE_TOPICS`). `w.newSession({ lastTopics })`
+  or `w.lastTopics = […]` before `newSession()`; `w.levels` = the session's topics (main.js stores `dm:lastTopics`). Count at age 3: 1–4.
+- **Surprise round (P1-2):** round index `surpriseRound 2` of every chapter; type `surpriseTypes[(level + offset) % 3]`, offset random per
+  session (`w._surpriseOff`). `w.surprise`, `cur.surprise`, `round.surprise` (null otherwise).
+  - `shuffle`: after the hide (faces fully down) phase `'shuffle'`: 1 swap (2 from age 5) of face-down cards with different keys
+    (never a yellow card next to Dee); each card flies a smooth-step quadratic bezier bulging 0.35·d + 30 px to its own side (they
+    pass each other), lift 1 mid-way, rot ±0.12, landing squash; `shuffleTime 0.9`, then 0.15 s → `play`. Event `shuffle {a, b}` per swap.
+    No taps during the shuffle. Children in the sim lose track of a moved card with p = 1 − track (typical 0.6–0.9).
+  - `golden`: `cur.golden` = one pair key (no visible cue on the cards). Its match → `match.golden = true`, event `golden {a, b, key, x, y}`,
+    Dee `cheer` (3 hops), the reward carries `golden: true` (also on the `reward` event) → rainbow burst in render / main.
+  - `pond`: `DM.World.pondLayout(grid)` → `grid.style 'pond'`: cards 0.92× (never below the age minimum), column pitch kept, columns
+    lifted on a sine arc (≤ 0.4·card h, limited by the board), rows staggered ± ≤ (gap' − 14)/2, a centred last-row card never lifted
+    above its neighbours → every pair of cards ≥ 14 px apart (test, 12 viewports); `grid.rect` = the real bounding box; face-down /
+    face-up cards bob ±3 px at 0.4 Hz (`pondBob`).
+  - Cost in the sims: ≈ +1 s per chapter (shuffle). Typical 4-year-old chapter 93.8 → 95.3 s.
+- **Same card again and again (P1-4):** a tap on the one open card (no mismatch showing) does NOT reset the idle timer; `sameTapHint 3`
+  such taps → auto hint (cooldown rules apply) on that card's partner; another card resets the count (`w._sameN`).
+- **Third tap (P2-1):** `thirdTapAfter 0.5` — the fast reset only once the mismatch has shown ≥ 0.5 s; earlier third taps return `null`
+  (before the check the mismatch is now always shown and counted normally).
+- **Peek per card (P2-2):** `peek = peekByAge[age] · (0.6 + 0.1·cards)` (`peekPerCard`): age 4, 4 cards 2.2 s, 6 → 2.6 s.
+- **Rewards (P2-3, visual P2-1/P2-4, functional P2-1):** `perchStep 52`, candidates jittered ±18 / ±12 px (ground ±4 y, fixed per layout);
+  pick = random among free perches ≥ 24 px (`perchMinGap`) from other rewards, weighted by that gap (≤ 160) — no lattice; every 2nd
+  butterfly prefers flowers (ground) first; animals / acorns fall back to `branch`; 2 ground rows (`groundPerchDy [72, 40]`, perch
+  `row` 0 front / 1 back — render the back row first, i.e. sort rewards by y); sizes star 52, acorn 28; acorn piles in rows of
+  4/3/3/2, 0.6·size apart (`acornSpread 24` = minimum half-width). **`w.hudKeep = {x, y, w, h}`** (logical px, set by main before
+  `setViewport`) → `layout.hudKeep`, an extra keep-out for reward perches only. Crowding (> 40 % overlap) in the unit check:
+  7 / 3 420 reward pairs (was 12–28 % of rewards on portrait).
+- **Grid ties (P2-4):** within 0.5 px (both at the 210 px cap) → the squarer grid (smaller |cols − rows|), then board A (above Dee),
+  then wider (landscape) / taller (portrait). No single card column on any test viewport.
+- **Talk size (visual P2-5):** `talk.params.animal` = the shown animal; each choice has `sprite` (= `talk.show.sprite`) and `scale` 1 / 0.6.
+- **Colour safety (visual P3-10):** the clash rule and "no pink" now hold up to age 5 (`COLOR_SAFE_MAX_AGE`) → age-5 colour rounds ≤ 3 pairs.
+- Quick playtest after the changes (`pt_qa1`, 800 sessions): typical 4-year-old chapter 95.3 s ✔, typical sessions max 440 s ✔,
+  child models p90 454 s ✔, careful4 p90 467 s ✔, 0 stuck / NaN / errors, 0 / 42 183 bad reward placements, smallest card 123 px;
+  spammer age 4 chapter 54 → 64 s (it now sees each mismatch). Unit tests: 39.
+
 ## 1. API (DESIGN §5.2) — names kept from Kitten so `main.js` keeps working
 `setViewport(W, H, ins)`, `setAge`, `setLang`, `newSession`, `startLevel(i)`, `update(dt)`, `drainEvents()`,
 `pointerDown(x, y)` → card id or `null` (flips happen **on touch-down**), `pointerMove`, `pointerUp`, `cancelDrag()` (no-op),

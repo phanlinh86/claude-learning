@@ -17,7 +17,7 @@ function compact(m) {
     sessionTime: m.sessionTime, simTime: m.simTime, stars: m.stars,
     chapters: m.chapters.map(c => ({ topic: c.topic, dur: c.end !== null ? c.end - c.start : null, stars: c.stars, rounds: c.rounds })),
     rounds: m.rounds.map(r => ({ l: r.level, r: r.round, topic: r.topic, dur: r.end !== null ? r.end - r.start : null, ia: r.interactiveAt,
-      n: r.cards, wrong: r.wrong, hints: r.hints, idles: r.idles, stars: r.stars })),
+      n: r.cards, sp: r.surprise, wrong: r.wrong, hints: r.hints, idles: r.idles, stars: r.stars })),
     hints: m.hints, idles: m.idles, idleGaps: m.idleGaps, wrongs: m.wrongs, corrects: m.corrects, talkAsks: m.talkAsks,
     stuck: m.stuck.length, stuckKinds: m.stuck.slice(0, 3), slow: m.slow.length, invariant: m.invariant.length, errors: m.errors.slice(0, 2),
     offscreen: m.offscreen, homesSeen: m.homesSeen, packShrinkMin: m.packShrinkMin, packFail: m.packFail,

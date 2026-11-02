@@ -217,3 +217,13 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 .vol-btn { width: 64px !important; height: 64px !important; }
 .vol-btn svg { width: 34px; }
 .vol-level { min-width: 64px; font-size: 24px; font-weight: 900; text-align: center; }
+
+/* short landscape phones: tighter settings so every toggle shows above the sticky Done button */
+@media (orientation: landscape) and (max-height: 430px) {
+  .settings-panel h2 { margin: 0 0 4px; font-size: 22px; }
+  .set-row { margin: 2px 0; gap: 8px; }
+  .set-row .chip, .chips .chip { min-height: 40px; padding: 4px 12px; }
+  #inpName { padding: 6px 10px; font-size: 17px; }
+  .set-grid { gap: 4px 10px; }
+  .toggle { min-height: 40px; }
+}

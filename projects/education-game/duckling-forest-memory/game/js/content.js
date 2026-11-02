@@ -49,13 +49,23 @@
     7: ['initial', 'add', 'sub', 'oddeven']
   };
   var ALL_TOPICS = ['colors', 'size', 'shapes', 'count', 'animals', 'letters', 'lower', 'initial', 'add', 'sub', 'oddeven'];
+  // QA P1-1: every age has a POOL of ≥ 5 topics; a session plays 4 of them (rotating, so "Play again" differs)
+  DM.AGE_POOLS = {
+    3: ['colors', 'animals', 'size', 'shapes', 'count'],
+    4: ['colors', 'animals', 'shapes', 'count', 'size'],
+    5: ['shapes', 'count', 'letters', 'animals', 'colors'],
+    6: ['lower', 'initial', 'add', 'count', 'letters'],
+    7: ['initial', 'add', 'sub', 'oddeven', 'count']
+  };
+  // easiest first (a chapter list is always sorted by this)
+  var DIFFICULTY = ['colors', 'animals', 'size', 'shapes', 'letters', 'count', 'lower', 'initial', 'add', 'sub', 'oddeven'];
 
   // ---- tables (DESIGN §5.1)
   var PAIRS = { 3: [2, 2, 3, 3], 4: [2, 3, 4, 4], 5: [3, 4, 5, 5], 6: [3, 4, 5, 6], 7: [3, 4, 5, 6] };   // pairs per round
   var PEEK = { 3: 3.5, 4: 2.5, 5: 2.0, 6: 1.5, 7: 1.5 };            // s all cards stay face up at the round start
   var MAX_PAIRS = 6;                                                // ≤ 12 cards (DESIGN §8)
   var SMALL_SCALE = 0.6;                                            // 'size' topic: the small animal is 0.6× the big one
-  var COUNT_RANGE = { 3: [1, 5], 4: [1, 5], 5: [1, 10], 6: [1, 12], 7: [1, 12] };
+  var COUNT_RANGE = { 3: [1, 4], 4: [1, 5], 5: [1, 10], 6: [1, 12], 7: [1, 12] };
   var WARM_COUNT_MAX = 3;                                           // warm-up count round (ages ≤ 4) uses 1–3 only
   var ODDEVEN_MAX = 12;
   var ADD_MAX = { 6: 10, 7: 20 };                                   // sums within 10 (age 6) / 20 (age 7)
@@ -74,7 +84,9 @@
       Wd('ếch', 'frog', 'Ê')]
   };
 
-  /* Colour-blind / toddler safety: below age 5 never blue+purple, red+green, yellow+orange or green+orange in one round. */
+  /* Colour-blind / toddler safety: up to age 5 (COLOR_SAFE_MAX_AGE) never blue+purple, red+green, yellow+orange or
+   * green+orange in one round, and no pink (QA visual P3-10: blue+purple ΔE00 1.2 under deuteranopia at age 5). */
+  var COLOR_SAFE_MAX_AGE = 5;
   var CLASH = [['blue', 'purple'], ['red', 'green'], ['yellow', 'orange'], ['green', 'orange']];
   function clash(cs) {
     for (var i = 0; i < CLASH.length; i++) if (cs.indexOf(CLASH[i][0]) >= 0 && cs.indexOf(CLASH[i][1]) >= 0) return true;
@@ -106,7 +118,7 @@
 
   /** The most pairs a topic can hold at an age / language (colour safety, word lists). */
   function maxPairs(topic, age, lang) {
-    if (topic === 'colors') return age < 5 ? SAFE_MAX : COLORS5.length;
+    if (topic === 'colors') return age <= COLOR_SAFE_MAX_AGE ? SAFE_MAX : COLORS5.length;
     if (topic === 'shapes') return shapesFor(age).length;
     if (topic === 'initial') return initialsOf(lang).length;
     if (topic === 'size' || topic === 'animals') return DM.ANIMALS.length;
@@ -156,7 +168,7 @@
     var add = function (c) { cards.push(c); };
     switch (topic) {
       case 'colors': {
-        var pool = age < 5 ? rng.pick(SAFE_SETS).slice() : COLORS5.slice();
+        var pool = age <= COLOR_SAFE_MAX_AGE ? rng.pick(SAFE_SETS).slice() : COLORS5.slice();
         var cs = freshSample(rng, pool, N, pv);
         rewardKind = 'butterfly';
         for (i = 0; i < N; i++) {
@@ -352,7 +364,7 @@
     }
     if (r.topic === 'colors') {
       var cs = keys.map(function (k) { return r.pairInfo[k].nameValue; });
-      if (r.age < 5 && clash(cs)) return 'colour clash';
+      if (r.age <= COLOR_SAFE_MAX_AGE && (clash(cs) || cs.indexOf('pink') >= 0)) return 'colour clash';
     }
     return null;
   }
@@ -385,7 +397,7 @@
     var show = null, params = {}, ch, a, k;
     switch (topic) {
       case 'colors': {
-        var pool = age < 5 ? rng.pick(SAFE_SETS) : COLORS5;
+        var pool = age <= COLOR_SAFE_MAX_AGE ? rng.pick(SAFE_SETS) : COLORS5;
         a = rng.pick(pool); show = { kind: 'color', value: a, color: a };
         ch = choicesFrom(rng, 'color', a, pool, 3); break;
       }
@@ -396,7 +408,11 @@
       case 'size': {
         a = rng.pick(['big', 'small']); var an = rng.pick(DM.ANIMALS);
         show = { kind: 'animal', value: an, sprite: 'animal_' + an, scale: a === 'big' ? 1 : SMALL_SCALE, size: a };
-        ch = choicesFrom(rng, 'size', a, ['big', 'small'], 2); break;
+        params = { animal: an };
+        ch = choicesFrom(rng, 'size', a, ['big', 'small'], 2);
+        // QA P2-5: the choice icons show the SAME animal (big 1.0 / small 0.6)
+        ch.choices.forEach(function (c) { c.sprite = show.sprite; c.scale = c.value === 'big' ? 1 : SMALL_SCALE; });
+        break;
       }
       case 'animals': {
         a = rng.pick(DM.ANIMALS); params = { animal: a };
@@ -442,9 +458,26 @@
     return { topic: topic, promptKey: 'talk.' + topic, params: params, show: show, choices: ch.choices, answerId: ch.answerId };
   }
 
+  /** 4 chapter topics for a session. Without rng: the fixed DM.AGE_TOPICS list (tests / old callers).
+   * With rng: chapter 1 = the easiest pool topic that was not chapter 1 last time; chapters 2–4 = 3 of the others, preferring
+   * topics left out of `last`, then sorted easiest first (DIFFICULTY). */
+  function topicsFor(age, rng, last) {
+    age = ageOf(age);
+    if (!rng) return DM.AGE_TOPICS[age].slice();
+    var pool = DM.AGE_POOLS[age].slice().sort(function (a, b) { return DIFFICULTY.indexOf(a) - DIFFICULTY.indexOf(b); });
+    last = Array.isArray(last) ? last : [];
+    var first = pool[0];
+    for (var i = 0; i < pool.length; i++) if (pool[i] !== last[0]) { first = pool[i]; break; }
+    var rest = pool.filter(function (t) { return t !== first; });
+    var fresh = rng.shuffle(rest.filter(function (t) { return last.indexOf(t) < 0; }));
+    var old = rng.shuffle(rest.filter(function (t) { return last.indexOf(t) >= 0; }));
+    var pick = fresh.concat(old).slice(0, 3).sort(function (a, b) { return DIFFICULTY.indexOf(a) - DIFFICULTY.indexOf(b); });
+    return [first].concat(pick);
+  }
+
   DM.Content = {
     makeRound: makeRound, makeTalk: makeTalk, validate: validate, facesMatch: facesMatch,
-    topicsFor: function (age) { return DM.AGE_TOPICS[ageOf(age)].slice(); },
+    topicsFor: topicsFor, DIFFICULTY: DIFFICULTY, COLOR_SAFE_MAX_AGE: COLOR_SAFE_MAX_AGE,
     pairsFor: pairsFor, maxPairs: maxPairs,
     TOPICS: ALL_TOPICS, COLORS: COLORS, COLORS5: COLORS5, SHAPES: SHAPES.concat(['rect']), ANIMALS: DM.ANIMALS,
     PAIRS: PAIRS, PEEK: PEEK, MAX_PAIRS: MAX_PAIRS, SMALL_SCALE: SMALL_SCALE, COUNT_RANGE: COUNT_RANGE, LETTER_POOL: LETTER_POOL,

@@ -29,7 +29,7 @@
   let speed = FLAGS.speed, autoRestart = FLAGS.autorestart;
   let view = { W: 960, H: 720, s: 1, left: 0, top: 0, ins: { top: 0, right: 0, bottom: 0, left: 0 } };
   const stats = { sessions: 0, rounds: 0, correct: 0, wrong: 0, misses: 0, talks: 0, talkRight: 0, frames: 0, slowFrames: 0 };
-  let promptUntil = 0, lastWrongSay = 0, idleSaid = 0, lastName = '', firstAsk = true, shownStars = 0, lastRoundEvt = null, missSay = 0, lastGrabSay = 0, lastPraise = 0;
+  let rewardSaid = false, lastMatchAt = 0, promptUntil = 0, lastWrongSay = 0, idleSaid = 0, lastName = '', firstAsk = true, shownStars = 0, lastRoundEvt = null, missSay = 0, lastGrabSay = 0, lastPraise = 0;
 
   /* ---------- sizing ---------- */
   function readInsets() {
@@ -59,9 +59,20 @@
     if (px > cap) rs *= Math.sqrt(cap / px);
     return Math.max(0.5, rs);
   }
+  function measureHud() {   // the real DOM HUD + speech bubble in logical px (rewards must not perch under them)
+    const box = (r, pad) => ({ x: (r.left - view.left) / view.s - pad, y: 0, w: r.width / view.s + 2 * pad, h: (r.bottom - view.top) / view.s + pad });
+    const h = $('hud').getBoundingClientRect(), b = $('bubble').getBoundingClientRect();
+    let k = h.width > 0 ? box(h, 8) : { x: view.W - view.ins.right - 430, y: 0, w: 430, h: view.ins.top + 115 };   // hidden: estimate
+    if (b.width > 0) {   // union with the bubble (on phones it sits below the HUD, lower than the world's own estimate)
+      const bb = box(b, 10), x0 = Math.min(k.x, bb.x), x1 = Math.max(k.x + k.w, bb.x + bb.w);
+      k = { x: x0, y: 0, w: x1 - x0, h: Math.max(k.h, bb.h) };
+    }
+    return k;
+  }
   function applySize() {
     const prev = view;
     view = computeView();
+    if (world) world.hudKeep = measureHud();
     // rotation while holding an item: the finger's old logical point is meaningless now → put it back quietly
     if (world && world.cancelDrag && (prev.W !== view.W || prev.H !== view.H)) world.cancelDrag();
     const rs = renderScale();
@@ -124,7 +135,9 @@
   function startGame() {
     DM.Audio.unlock();
     world.setAge(curAge()); world.setLang(curLang());
-    world.newSession();
+    world.lastTopics = DM.Storage.getJSON('lastTopics', null);   // chapters rotate between sessions
+    world.newSession({ lastTopics: world.lastTopics });
+    if (world.levels) DM.Storage.setJSON('lastTopics', world.levels);
     if (FLAGS.level != null) world.startLevel(Math.max(0, Math.min(3, FLAGS.level | 0)));
     shownStars = 0; DM.UI.setStars(0);
     mode = 'play';
@@ -132,7 +145,7 @@
     DM.Audio.setMood(world.level || 0); DM.Audio.startMusic();
     applyAudio();
     stats.sessions++;
-    requestAnimationFrame(() => { updateHudStarTarget(); placeBubble(); });
+    requestAnimationFrame(() => { updateHudStarTarget(); placeBubble(); applySize(); });
   }
   function goTitle() {
     mode = 'title';
@@ -153,11 +166,14 @@
   function resume() {
     if (mode !== 'paused') return;
     mode = world.state === 'talk' ? 'talk' : 'play';
+    idleSaid = 0;   // a returning child gets the nudges again before the next auto-pause
     DM.UI.only(mode === 'talk' ? 'scrTalk' : undefined);
     DM.Audio.startMusic();
   }
 
-  function currentPrompt() {   // ask mode: the prompt follows the current target pot
+  let lastPromptText = '';
+  function currentPrompt() {   // prompts have several wordings: repeat the one Dee said, word for word
+    if (lastPromptText) return lastPromptText;
     const p = world.prompt ? world.prompt() : null;
     return p ? promptText(p) : (lastRoundEvt ? promptText(lastRoundEvt) : '');
   }
@@ -182,6 +198,7 @@
         DM.Audio.setMood(e.level); DM.Audio.play('chapter');
         DM.UI.setDots(world.roundsPerLevel || 5, 0);
         speak(T('ui.chapter', { n: e.level + 1 }) + '. ' + T('topic.' + e.topic), { interrupt: true });
+        speak(T('weather.' + e.level));   // "Spring is here!" — queued after the chapter name
         DM.UI.say(T('topic.' + e.topic));
         render.prewarm(L, e.level + 1);
         break;
@@ -189,7 +206,19 @@
         lastRoundEvt = e; stats.rounds++; idleSaid = 0;
         DM.UI.setDots(world.roundsPerLevel || 5, e.round % (world.roundsPerLevel || 5));
         const txt = promptText(e);
+        lastPromptText = txt; rewardSaid = false;
         DM.UI.say(txt); speakPrompt(txt, { priority: true });
+        if (e.surprise) {   // one surprise round per chapter: shuffle / golden pair / lily-pond layout
+          DM.Audio.play('surprise');
+          speak(T('surprise.' + e.surprise));
+        }
+        break;
+      }
+      case 'shuffle': DM.Audio.play('swap'); break;
+      case 'golden': {
+        DM.Audio.play('golden');
+        render.burst('rainbow', e.x, e.y);
+        speak(T('golden'), { interrupt: true });
         break;
       }
       case 'deal': DM.Audio.play('deal'); break;
@@ -215,6 +244,7 @@
         DM.Audio.play('match', { count: e.found || 0 });
         const ca = cardById(e.a), cb = cardById(e.b);
         if (ca && cb) render.burst('pop', (ca.x + cb.x) / 2, (ca.y + cb.y) / 2, { color: (ca.face && ca.face.color) || null, size: ca.w * 1.4, delay: 0 });
+        lastMatchAt = performance.now();
         speak(DM.I18N.sayMatch ? DM.I18N.sayMatch(curLang(), Object.assign({ topic: world.topic }, e)) : T('praise'), { interrupt: true });
         break;
       }
@@ -232,7 +262,15 @@
         DM.Audio.play('reward', { kind: e.kind });
         break;
       }
-      case 'land': DM.Audio.play('land', { kind: e.kind }); break;
+      case 'land': {
+        DM.Audio.play('land', { kind: e.kind });
+        // once per round, when Dee is quiet and the match line is over: name what joined the forest
+        const now = performance.now();
+        if (!rewardSaid && e.kind && !(DM.Voice && DM.Voice.isSpeaking()) && now - lastMatchAt > 4000) {
+          rewardSaid = true; speak(T('reward.' + e.kind));
+        }
+        break;
+      }
       case 'hint': {
         DM.Audio.play('hint');
         for (const id of [e.a, e.b]) { const c = cardById(id); if (c) render.burst('hint', c.x, c.y, { size: c.w }); }

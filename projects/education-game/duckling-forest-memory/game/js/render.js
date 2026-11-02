@@ -159,21 +159,40 @@
       const a = w.alpha == null ? 1 : w.alpha;
       const L = w.layout;
       this._groundY = L.groundY;
-      this._panel(L);
-      for (const r of w.rewards || []) if (r.kind === 'lantern') this._reward(r, a);
+      const showPanel = w.state === 'round' && w.phase !== 'done';   // between rounds the rewards fill the forest
+      this._panelA = clamp((this._panelA == null ? 0 : this._panelA) + (showPanel ? 1 : -1) * (o.dt || 0) * 3, 0, 1);
+      if (L.grid && L.grid.style === 'pond') this._pads(w, a); else this._panel(L);
+      const rws = (w.rewards || []).slice().sort((p, q) => p.y - q.y);   // back row first
+      for (const r of rws) if (r.kind === 'lantern') this._reward(r, a);
       this._dee(w, o, a);
       this._stack(w, L);
       const cards = (w.cards || []).filter(c => c.state !== 'gone');
       // resting cards first, lifted / moving ones on top
       cards.sort((p, q) => (p.lift || 0) - (q.lift || 0));
       for (const c of cards) this._card(c, a);
-      for (const r of w.rewards || []) if (r.kind !== 'lantern') this._reward(r, a);
+      for (const r of rws) if (r.kind !== 'lantern') this._reward(r, a);
+    }
+    _pads(w, a) {   // surprise "pond" round: every card floats on its own lily pad
+      const g = this.g, k = this._panelA == null ? 1 : this._panelA;
+      if (k <= 0.01) return;
+      g.save(); g.globalAlpha = k;
+      for (const c of w.cards || []) {
+        if (c.state === 'gone') continue;
+        const x = c._px == null ? c.x : lerp(c._px, c.x, a), y = (c._py == null ? c.y : lerp(c._py, c.y, a)) + c.h * 0.38;
+        g.fillStyle = 'rgba(70,120,140,.25)'; g.beginPath(); g.ellipse(x, y + 8, c.w * 0.78, c.h * 0.22, 0, 0, TAU); g.fill();
+        g.fillStyle = this._season === 3 ? '#B9D3C9' : '#7DB86A';
+        g.beginPath(); g.ellipse(x, y, c.w * 0.72, c.h * 0.2, 0, 0.25, TAU - 0.25); g.lineTo(x, y); g.closePath(); g.fill();
+        g.strokeStyle = this._season === 3 ? '#8FB0A6' : '#4E8A47'; g.lineWidth = 3; g.stroke();
+      }
+      g.restore();
     }
     _panel(L) {   // the soft mossy clearing behind the grid
       const G = L.grid;
       if (!G || !G.rect) return;
       const g = this.g, R = G.rect, pad = Math.max(16, G.gap * 1.2), P = PANEL[this._season || 0];
-      g.save();
+      const k = this._panelA == null ? 1 : this._panelA;
+      if (k <= 0.01) return;
+      g.save(); g.globalAlpha = k;
       g.fillStyle = `rgba(${P[0]},${P[1]})`;
       g.beginPath(); roundRect(g, R.x - pad, R.y - pad, R.w + pad * 2, R.h + pad * 2, 40); g.fill();
       g.lineWidth = 3; g.strokeStyle = P[2]; g.stroke();
@@ -406,6 +425,12 @@
           const a = R() * TAU, sp = 90 + R() * 140;
           fx.push({ k: 'p', sprite: 'sparkle', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, g: 0, t: 0, life: 0.5 + R() * 0.2, size: 20 + R() * 12, rot: R() * TAU, vr: 4 });
         }
+      } else if (type === 'rainbow') {   // the magic pair: a rainbow arc grows out of the burst + golden sparkles
+        fx.push({ k: 'rainbow', x, y, t: 0, life: 2.2, size: Math.min(this.W, this.H) * 0.42 });
+        for (let i = 0; i < 26; i++) {
+          const a = R() * TAU, sp = 120 + R() * 300;
+          fx.push({ k: 'p', sprite: 'sparkle', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 100, g: 200, t: 0, life: 1 + R() * 0.6, size: 22 + R() * 18, rot: R() * TAU, vr: 5 });
+        }
       } else if (type === 'land') {
         for (let i = 0; i < 4; i++) fx.push({ k: 'p', sprite: 'puff', x: x + (R() - 0.5) * 40, y: y - 6, vx: (R() - 0.5) * 90, vy: -20 - R() * 30, g: 40, t: 0, life: 0.45, size: 20 + R() * 10, rot: R() * TAU, vr: 0, grow: 1.5, a0: 0.6 });
       } else if (type === 'star') {
@@ -443,6 +468,15 @@
           g.strokeStyle = `rgba(255,250,220,${0.9 * (1 - u)})`; g.lineWidth = 8 * (1 - u) + 1;
           g.beginPath(); g.arc(f.x, f.y, f.size * (0.25 + 0.6 * u), 0, TAU); g.stroke();
           g.fillStyle = `rgba(255,255,240,${0.55 * (1 - u) * (1 - u)})`; g.beginPath(); g.arc(f.x, f.y, f.size * 0.35 * (1 - u * 0.5), 0, TAU); g.fill();
+        } else if (f.k === 'rainbow') {
+          const grow = Math.min(1, u * 3), fade = u > 0.7 ? (1 - u) / 0.3 : 1;
+          const cols = ['#E84A4A', '#FF9A2E', '#FFD23F', '#4CC26B', '#3C8DE8', '#9B6BE0'];
+          g.save(); g.globalAlpha = 0.75 * fade; g.lineCap = 'round';
+          cols.forEach((c, i) => {
+            g.strokeStyle = c; g.lineWidth = f.size * 0.045;
+            g.beginPath(); g.arc(f.x, f.y + f.size * 0.25, f.size * (0.62 - i * 0.05), Math.PI, Math.PI + Math.PI * grow); g.stroke();
+          });
+          g.restore();
         } else if (f.k === 'ring') {
           g.strokeStyle = `rgba(${f.color || '255,240,150'},${0.8 * (1 - u)})`; g.lineWidth = 6 * (1 - u) + 1;
           g.beginPath(); g.ellipse(f.x, f.y, f.size * (0.3 + u * 0.5), f.size * (0.3 + u * 0.5), 0, 0, TAU); g.stroke();

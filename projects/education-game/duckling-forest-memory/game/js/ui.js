@@ -125,7 +125,7 @@
         case 'color': return { kind: 'color', value: c.value, color: c.value };
         case 'shape': return { kind: 'shape', value: c.value, shape: c.value, color: 'blue' };
         case 'animal': return { kind: 'animal', value: c.value, sprite: 'animal_' + c.value };
-        case 'size': return { kind: 'animal', value: 'bear', sprite: 'animal_bear', scale: c.value === 'big' ? 1 : 0.6, size: c.value };
+        case 'size': { const sp = c.sprite || 'animal_bear'; return { kind: 'animal', value: sp.replace('animal_', ''), sprite: sp, scale: c.scale || (c.value === 'big' ? 1 : 0.6), size: c.value }; }
         case 'number': return this._age <= 5 && c.value >= 1 && c.value <= 10 ? { kind: 'dots', value: +c.value, n: +c.value } : null;
         default: return null;
       }

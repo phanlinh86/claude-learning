@@ -44,27 +44,27 @@ const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const KID_PROFILES = {
   // a slow, dreamy 3-year-old
   slow3: { peekRecall: 0.15, flipRecall: 0.4, tau: 20, pRandom: 0.3, listen: [2.5, 4], reaction: [2.5, 4.5], afterFlip: [1.0, 1.6],
-    patience: 0.9, pDistract: 0.3, followHint: 0.8, distract: [5, 15], aim: 0.9, speed: [250, 450], talkDelay: [3, 8], talkRight: 0.55 },
+    patience: 0.9, pDistract: 0.3, track: 0.35, followHint: 0.8, distract: [5, 15], aim: 0.9, speed: [250, 450], talkDelay: [3, 8], talkRight: 0.55 },
   // a quick but impulsive 3-year-old (often taps on before a mismatch flips back)
   toddler: { peekRecall: 0.2, flipRecall: 0.45, tau: 20, pRandom: 0.35, listen: [1.5, 2.5], reaction: [1.0, 2.0], afterFlip: [0.2, 0.6],
-    patience: 0.3, pDistract: 0.15, followHint: 0.8, distract: [3, 8], aim: 1.0, speed: [350, 600], talkDelay: [2, 5], talkRight: 0.6 },
+    patience: 0.3, pDistract: 0.15, track: 0.4, followHint: 0.8, distract: [3, 8], aim: 1.0, speed: [350, 600], talkDelay: [2, 5], talkRight: 0.6 },
   // a careful 4-year-old with a weak memory: always waits, but forgets a lot
   careful4: { peekRecall: 0.2, flipRecall: 0.45, tau: 25, pRandom: 0.15, listen: [2, 3], reaction: [1.6, 3.0], afterFlip: [0.8, 1.4],
-    patience: 1.0, pDistract: 0.1, followHint: 0.8, distract: [4, 10], aim: 0.7, speed: [350, 550], talkDelay: [3, 6], talkRight: 0.75 },
+    patience: 1.0, pDistract: 0.1, track: 0.5, followHint: 0.8, distract: [4, 10], aim: 0.7, speed: [350, 550], talkDelay: [3, 6], talkRight: 0.75 },
   typical: null    // per age, see typicalProfile()
 };
 function typicalProfile(age) {
   const k = clamp((age - 3) / 4, 0, 1);
   return { peekRecall: 0.3 + 0.3 * k, flipRecall: 0.55 + 0.3 * k, tau: 30 + 60 * k, pRandom: 0.2 - 0.15 * k,
     listen: [1.8 - 0.6 * k, 2.8 - 0.8 * k], reaction: [1.3 - 0.5 * k, 2.6 - 1.1 * k], afterFlip: [0.6, 1.1 - 0.3 * k],
-    patience: 0.85, pDistract: 0.15 - 0.08 * k, followHint: 0.8, distract: [4, 10], aim: 0.75, speed: [400 + 300 * k, 650 + 350 * k],
+    patience: 0.85, pDistract: 0.15 - 0.08 * k, track: 0.6 + 0.3 * k, followHint: 0.8, distract: [4, 10], aim: 0.75, speed: [400 + 300 * k, 650 + 350 * k],
     talkDelay: [3 - k, 5.5 - 1.5 * k], talkRight: 0.7 + 0.25 * k };
 }
 
 class Kid {
   constructor(w, prof, seed) {
     this.w = w; this.p = prof; this.r = new DM.RNG(seed); this.f = { x: w.layout.W / 2, y: w.layout.H / 2, down: false };
-    this.phase = 'wait'; this.t = 0; this.talkT = -1; this.roundKey = ''; this.mem = {}; this.vis = {}; this.target = null;
+    this.phase = 'wait'; this.t = 0; this.talkT = -1; this.roundKey = ''; this.mem = {}; this.vis = {}; this.sw = {}; this.target = null;
     this.stats = { taps: 0, misses: 0, third: 0 };
   }
   rf(a) { return this.r.float(a[0], a[1]); }
@@ -72,6 +72,7 @@ class Kid {
     const w = this.w, p = this.p;
     for (const c of w.cards) {
       if (c.state === 'gone') { delete this.mem[c.id]; continue; }
+      if (c._sw && !this.sw[c.id]) { this.sw[c.id] = 1; if (!this.r.chance(p.track)) delete this.mem[c.id]; }   // lost track in a shuffle
       const vis = c.flip > 0.9 || (c.flip > 0.7 && c.peekT >= 0);
       if (vis && !this.vis[c.id] && this.r.chance(w.phase === 'peek' ? p.peekRecall : p.flipRecall)) this.mem[c.id] = { key: c.key, t: w.time };
       this.vis[c.id] = vis;
@@ -116,7 +117,7 @@ class Kid {
     this.talkT = -1;
     if (w.state !== 'round') { this.phase = 'wait'; this.roundKey = ''; return; }
     const rk = w.level + ':' + w.round + ':' + w.cur.seed;
-    if (rk !== this.roundKey) { this.roundKey = rk; this.mem = {}; this.vis = {}; this.phase = 'wait'; this.t = -1; this.distracted = r.chance(p.pDistract); }
+    if (rk !== this.roundKey) { this.roundKey = rk; this.mem = {}; this.vis = {}; this.sw = {}; this.phase = 'wait'; this.t = -1; this.distracted = r.chance(p.pDistract); }
     this.observe();
     if (w.phase !== 'play' && w.phase !== 'resolve') return;
     if (this.t < 0) { this.t = this.rf(p.listen) + (this.distracted ? this.rf(p.distract) : 0); }
@@ -243,7 +244,7 @@ function runSession(o) {
       case 'level': if (ch) ch.end = w.time; ch = { level: e.level, topic: e.topic, start: w.time, end: null, stars: 0, rounds: 0 }; m.chapters.push(ch); break;
       case 'round':
         rd = { level: w.level, round: e.round, topic: e.topic, start: w.time, interactiveAt: null, end: null,
-          cards: w.cards.length, wrong: 0, hints: 0, idles: 0, stars: 0 };
+          surprise: e.surprise || null, cards: w.cards.length, wrong: 0, hints: 0, idles: 0, stars: 0 };
         m.rounds.push(rd); lastIdleT = null; if (ch) ch.rounds++;
         if (o.keepContent) m.content.push({ l: w.level, r: e.round, topic: e.topic, pairs: e.pairs, keys: w.cards.map(c => c.key).sort().join(',') });
         break;

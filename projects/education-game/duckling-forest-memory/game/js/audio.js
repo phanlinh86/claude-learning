@@ -169,6 +169,11 @@
           else this.tone(NOTE(96), 0.4, { type: 'sine', vol: 0.12 });
           break;
         }
+        case 'surprise': [0, 4, 7, 11, 14].forEach((n, i) => this.tone(NOTE(79 + n), 0.18, { type: 'triangle', vol: 0.14, at: i * 0.06 })); break;
+        case 'swap': this.noise(0.5, { vol: 0.12, type: 'bandpass', f0: 600, f1: 2400, q: 0.7 }); this.tone(400, 0.5, { type: 'sine', vol: 0.08, slideTo: 800 }); break;
+        case 'golden':   // the magic pair: a rising harp run
+          [0, 2, 4, 7, 9, 12, 14, 16, 19, 24].forEach((n, i) => this.tone(NOTE(72 + n), 0.35, { type: 'triangle', vol: 0.16, at: i * 0.05 }));
+          break;
         case 'land': this.tone(220 * r, 0.12, { type: 'sine', vol: 0.18, slideTo: 140 * r }); break;
         case 'bounce': this.tone(260 * r, 0.18, { vol: 0.13, slideTo: 420 * r }); break;
         case 'hop': this.tone(330 * r, 0.16, { vol: 0.13, slideTo: 620 * r, type: 'triangle' }); break;

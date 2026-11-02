@@ -44,7 +44,19 @@
     // DESIGN 3: 2,2,3,3 · 4: 2,3,4,4 · 5: 3,4,5,5 · 6–7: 3,4,5,6 gave a typical 4-year-old chapter of 119 s (target 60–100)
     // and typical sessions up to 527 s (target ≤ 480). Tuned: 94 s / ≤ 460 s (docs/MECHANICS.md §9).
     pairsByAge: { 3: [2, 2, 2, 3], 4: [2, 2, 3, 3], 5: [2, 3, 4, 4], 6: [3, 3, 4, 5], 7: [3, 4, 4, 5] },
-    peekByAge: { 3: 2.8, 4: 2.2, 5: 2.0, 6: 1.5, 7: 1.5 },   // s face up (DESIGN 3.5 / 2.5 / 2.0 / 1.5 / 1.5)
+    peekByAge: { 3: 2.8, 4: 2.2, 5: 2.0, 6: 1.5, 7: 1.5 },   // s face up (DESIGN 3.5 / 2.5 / 2.0 / 1.5 / 1.5) …
+    peekPerCard: true,         // … × (0.6 + 0.1·cards) (QA P2-2): 4 cards 1.0×, 6 → 1.2×, 8 → 1.4×, 10 → 1.6×
+
+    // ---- surprise round (QA P1-2): one per chapter, the type rotates per chapter from a random start per session
+    surpriseRound: 2,          // round index (the 3rd round; always played: the chapter limit applies after ≥ 3 rounds)
+    surpriseTypes: ['shuffle', 'golden', 'pond'],
+    shuffleTime: 0.9,          // shuffle: after the hide, 2 face-down cards swap along arcs (2 swaps from age 5) …
+    shuffleFrom: 5,            // … age from which 2 pairs of cards swap
+    shuffleArc: 0.35,          // arc bulge = 0.35·distance (+ 30 px), one card each side
+    shuffleSettle: 0.15,       // s after the swap → play
+    pondScale: 0.92,           // pond: cards 0.92× the grid size (never below the age minimum) …
+    pondArc: 0.4,              // … columns follow an arc of up to 0.4·card height, rows stagger sideways …
+    pondBob: 3, pondBobHz: 0.4,  // … and the cards bob ±3 px like lily pads
     adaptHold: true,           // after a HARD round the next round does not grow (pairs = min(table, last round's pairs)) …
     adaptSlowPlay: 40,         // … hard = more than 40 s of play, or only 1 star
 
@@ -72,6 +84,8 @@
     cardMin: { 3: 120, 4: 120, 5: 104, 6: 104, 7: 104 },   // smallest allowed card width per age
     cardMax: 210,              // cards never get wider than this (2-pair rounds on a big portrait screen)
     hitPad: 10,                // hit test = card rect grown by 10 px; nearest rect wins
+    sameTapHint: 3,            // QA P1-4: 3 taps on the one open card (no idle reset) → auto hint (partner glows)
+    thirdTapAfter: 0.5,        // QA P2-1: the third-tap reset needs both mismatched faces shown ≥ 0.5 s
     yellowDeeGap: 40,          // colour rounds: no yellow card within 40 px of Dee's box (Dee is yellow too)
 
     // deal: ballistic arcs from the deck, staggered, with a spin, landing squash
@@ -116,14 +130,15 @@
 
     // ---- rewards (one per match; they stay the whole chapter)
     maxRewards: 30,            // per chapter (DESIGN §8)
-    perchStep: 64,             // candidate perch grid (px)
-    perchTight: 3,             // pick randomly among the 3 free perches closest to the other rewards (tight packing, still varied)
+    perchStep: 52,             // candidate perch grid (px) (QA P2-3: 64 → 52)
+    perchJitter: [18, 12],     // ± px x / y per candidate (ground rows ±4 y): no lattice look (QA visual P2-1)
+    perchMinGap: 24,           // prefer free perches ≥ 24 px from other rewards; random pick weighted by that gap (≤ 160)
     perchMargin: 10,           // reward boxes keep 10 px from the cards, bubble, HUD, Dee and the safe-area edges
-    groundPerchDy: 72,         // ground perches: bottom anchor at groundY + 72 (animals 70 px tall stay below the board)
+    groundPerchDy: [72, 40],   // ground rows: bottom anchor at groundY + 72 (front) and + 40 (back row; render back first)
     branchDy: [-420, -360, -300],   // branch heights relative to groundY (env artist: mid_* low branches) — lanterns hang here
     canopyDy: 26,              // + a branch row at ins.top + 26 (the canopy edge at the top of the screen)
     lilyCount: 2,              // the 2 rightmost ground perches are lily pads (frogs go there first)
-    sizes: { butterfly: 46, star: 44, lantern: 52, animal: 70, acorn: 22 },
+    sizes: { butterfly: 46, star: 52, lantern: 52, animal: 70, acorn: 28 },   // (QA: star 44 → 52, acorn 22 → 28)
     lanternString: 36,         // px of string from the branch to the lantern top
     flyTime: [0.9, 1.8], flySpeed: 900,   // butterflies / stars / lanterns: T = 0.7 + d/900 s within [0.9, 1.8]
     flyArc: 0.35, flyArcMax: 170,         // bezier control point raised by 0.35·d (≤ 170 px)
@@ -133,7 +148,7 @@
     hopG: 2600, hopApex: [80, 46, 30], animalHops: 3, hopSquash: 0.18,   // animals: 3 parabolic hops, apex 80/46/30 px
     idleHopEvery: [4, 8], idleHopPx: 10,  // resting animals do a tiny hop now and then
     acornG: 2000, acornRest: 0.4, acornFric: 0.75, acornRoll: 6, acornApex: [60, 130], acornStagger: 0.04, acornMax: 12,
-    acornSpread: 34,           // pile half-width
+    acornSpread: 24,           // pile: acorns 0.6·size apart in rows of 4 / 3 / 3 / 2 (QA P2-3: narrower piles)
     pendG: 980, pendDamp: 0.8, pendWind: 0.0025, pendKick: 0.32,   // lanterns: pendulum g/L, damping /s, wind torque, first swing
     starTwinkle: 0.1, starHz: 1.4, bobPx: 4,
 
@@ -223,8 +238,11 @@
         var raw = fitCard(b, cols, rows, cfg), sc = Math.min(raw, cfg.cardMax);
         var better = !best || sc > best.sc + 0.5;
         if (!better && best && Math.abs(sc - best.sc) <= 0.5) {
-          var pref = L.portrait ? rows - best.rows : cols - best.cols;
-          better = pref > 0;
+          // QA P2-4 ties: the squarer grid, then board A (above Dee), then wider (landscape) / taller (portrait)
+          var sq = Math.abs(cols - rows) - Math.abs(best.cols - best.rows);
+          if (sq !== 0) better = sq < 0;
+          else if (bi !== best.bi) better = bi < best.bi;
+          else better = (L.portrait ? rows - best.rows : cols - best.cols) > 0;
         }
         if (better) best = { sc: sc, raw: raw, cols: cols, rows: rows, bi: bi };
       }
@@ -241,36 +259,76 @@
       board: B, rect: { x: x0, y: y0, w: gw, h: gh }, minOk: cw >= (cfg.cardMin[age] || cfg.cardMin[5]) - 1e-9 };
   }
 
+  /** Pond surprise: the grid's slots become lily pads — cards 0.92× (≥ the age minimum), columns on an arc, rows staggered
+   * sideways; neighbours keep ≥ gapMin (column pitch unchanged, stagger ≤ (gap' − gapMin)/2); the result is re-centred in the board. */
+  function pondLayout(g, age, cfg) {
+    var B = g.board, minW = cfg.cardMin[age] || cfg.cardMin[5];
+    var cw = Math.min(g.cw, Math.max(minW, g.cw * cfg.pondScale)), ch = cw / cfg.cardAspect;
+    var px = g.cw + g.gap, py = g.ch + g.gap, gapX = px - cw;
+    var gw = (g.cols - 1) * px + cw, gh = (g.rows - 1) * py + ch;
+    var S = Math.max(0, Math.min((gapX - cfg.gapMin) / 2, (B.w - gw) / 2, 0.25 * cw));
+    var A = Math.max(0, Math.min(B.h - gh, cfg.pondArc * ch));
+    var pts = g.slots.map(function (s, k) {
+      var r = Math.floor(k / g.cols), c = Math.round((s.x - g.x0 - g.cw / 2) / px * 1e6) / 1e6;
+      var arc = function (cc) { return Math.sin(Math.PI * (clamp(cc, 0, g.cols - 1) + 0.5) / g.cols); };
+      // a centred last-row card sits between two columns: never lift it more than the cards above it (keeps the gap)
+      var lift = Math.abs(c - Math.round(c)) > 1e-3 ? Math.min(arc(c - 0.5), arc(c + 0.5)) : arc(c);
+      return { x: s.x + (r % 2 ? S : -S) * (g.rows > 1 ? 1 : 0), y: s.y - A * lift };
+    });
+    var x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    pts.forEach(function (q) { x0 = Math.min(x0, q.x - cw / 2); x1 = Math.max(x1, q.x + cw / 2); y0 = Math.min(y0, q.y - ch / 2); y1 = Math.max(y1, q.y + ch / 2); });
+    var dx = B.x + (B.w - (x1 - x0)) / 2 - x0, dy = B.y + (B.h - (y1 - y0)) / 2 - y0;
+    pts.forEach(function (q) { q.x += dx; q.y += dy; });
+    var o = {}; for (var k in g) o[k] = g[k];
+    o.cw = cw; o.ch = ch; o.slots = pts; o.style = 'pond';
+    o.rect = { x: x0 + dx, y: y0 + dy, w: x1 - x0, h: y1 - y0 };
+    o.minOk = cw >= minW - 1e-9;
+    return o;
+  }
+
   /* ------------------------------------------------------------------ perches
    * Candidate points (kind ground | lily | branch | air). A reward kind maps a point to its final anchor + box; a point is
    * valid for a reward when that box is inside the safe area and clear of the bubble, HUD, Dee and the CURRENT card grid
    * (all grown by perchMargin). Rewards whose box a new, bigger grid covers fly to a new perch at the round start. */
   function perchCandidates(L, cfg) {
-    var out = [], ins = L.ins, st = cfg.perchStep, x, y, i;
-    var gx = [], gy = L.groundY + cfg.groundPerchDy;
-    for (x = ins.left + 44; x <= L.W - ins.right - 44 + 1e-6; x += st) gx.push(x);
-    for (i = 0; i < gx.length; i++) out.push({ x: gx[i], y: gy, kind: i >= gx.length - cfg.lilyCount ? 'lily' : 'ground' });
+    var out = [], ins = L.ins, st = cfg.perchStep, x, y, i, j;
+    var jr = new DM.RNG((Math.imul(L.W | 0, 7919) ^ Math.imul(L.H | 0, 104729) ^ 0x51ed) >>> 0), JX = cfg.perchJitter[0], JY = cfg.perchJitter[1];
+    var gdy = [].concat(cfg.groundPerchDy);
+    for (j = 0; j < gdy.length; j++) {
+      var gx = [];
+      for (x = ins.left + 44 + (j % 2) * st / 2; x <= L.W - ins.right - 44 + 1e-6; x += st) gx.push(x);
+      for (i = 0; i < gx.length; i++) out.push({ x: clamp(gx[i] + jr.float(-JX, JX), ins.left + 40, L.W - ins.right - 40), y: L.groundY + gdy[j] + jr.float(-4, 4),
+        kind: j === 0 && i >= gx.length - cfg.lilyCount ? 'lily' : 'ground', row: j });
+    }
     var bys = cfg.branchDy.map(function (d) { return L.groundY + d; }).concat([ins.top + cfg.canopyDy]);
-    for (i = 0; i < bys.length; i++) for (x = ins.left + 40 + (i % 2) * st / 2; x <= L.W - ins.right - 40; x += st) out.push({ x: x, y: bys[i], kind: 'branch' });
+    for (i = 0; i < bys.length; i++) for (x = ins.left + 40 + (i % 2) * st / 2; x <= L.W - ins.right - 40; x += st)
+      out.push({ x: x + jr.float(-JX, JX), y: bys[i] + jr.float(-JY, JY) * (i === bys.length - 1 ? 0.3 : 1), kind: 'branch' });
     var row = 0;
     for (y = ins.top + 40; y <= L.groundY - 50; y += st * 0.85, row++)
-      for (x = ins.left + 36 + (row % 2) * st / 2; x <= L.W - ins.right - 36; x += st) out.push({ x: x, y: y, kind: 'air' });
+      for (x = ins.left + 36 + (row % 2) * st / 2; x <= L.W - ins.right - 36; x += st) out.push({ x: x + jr.float(-JX, JX), y: y + jr.float(-JY, JY), kind: 'air' });
     return out;
   }
   var PREF = {
-    butterfly: ['branch', 'ground', 'air'], lantern: ['branch', 'air'], star: ['air', 'branch'], acorns: ['ground', 'lily'],
-    animal: ['ground', 'lily'], frog: ['lily', 'ground'], owl: ['branch', 'ground'], squirrel: ['branch', 'ground']
+    butterfly: ['branch', 'ground', 'air'], butterfly2: ['ground', 'branch', 'air'], lantern: ['branch', 'air'], star: ['air', 'branch'],
+    acorns: ['ground', 'lily', 'branch'], animal: ['ground', 'lily', 'branch'], frog: ['lily', 'ground', 'branch'],
+    owl: ['branch', 'ground', 'lily'], squirrel: ['branch', 'ground', 'lily']
   };
   function prefFor(r) {
     if (r.kind === 'animal') { var a = String(r.sprite || '').replace('animal_', ''); return PREF[a] || PREF.animal; }
+    if (r.kind === 'butterfly' && r._alt) return PREF.butterfly2;   // every 2nd butterfly sits on a flower first
     return PREF[r.kind];
   }
+  var ACORN_ROWS = [4, 3, 3, 2];
+  function acornRows(n) { var rows = [], left = Math.max(1, Math.min(12, n || 1)); for (var i = 0; left > 0; i++) { var k = Math.min(left, ACORN_ROWS[i]); rows.push(k); left -= k; } return rows; }
   /** Final placement of reward kind at perch point p → { x, y, ax, ay, box }. */
-  function placeAt(kind, p, cfg) {
+  function placeAt(kind, p, cfg, n) {
     var S = cfg.sizes, s, o = { ax: null, ay: null };
     switch (kind) {
       case 'animal': s = S.animal; o.x = p.x; o.y = p.y; o.box = { x: p.x - s / 2, y: p.y - s, w: s, h: s }; break;
-      case 'acorns': s = cfg.acornSpread + S.acorn / 2; o.x = p.x; o.y = p.y; o.box = { x: p.x - s, y: p.y - 2.2 * S.acorn, w: 2 * s, h: 2.2 * S.acorn }; break;
+      case 'acorns': {
+        var R = S.acorn / 2, rows = acornRows(n), hw = (rows[0] - 1) / 2 * 0.6 * S.acorn + R, hh = 2 * R + (rows.length - 1) * 1.25 * R;
+        s = Math.max(hw, cfg.acornSpread); o.x = p.x; o.y = p.y; o.box = { x: p.x - s, y: p.y - hh, w: 2 * s, h: hh }; break;
+      }
       case 'lantern':
         s = S.lantern;
         if (p.kind === 'branch') { o.ax = p.x; o.ay = p.y; o.x = p.x; o.y = p.y + cfg.lanternString + s / 2;
@@ -291,6 +349,7 @@
     var m = cfg.perchMargin;
     if (!inside(box, inflate(L.safe, -6))) return false;
     var obs = [L.bubble, L.hud, L.deeRect];
+    if (L.hudKeep) obs.push(L.hudKeep);       // the REAL (DOM-measured) HUD from main.js (rewards only)
     if (L.grid) obs.push(L.grid.rect);
     for (var i = 0; i < obs.length; i++) if (overlapArea(box, inflate(obs[i], m)) > 0) return false;
     return true;
@@ -313,7 +372,8 @@
     this.time = 0; this.stateTime = 0; this.phaseTime = 0; this.alpha = 0; this._acc = 0;
     this.cur = null; this.cards = []; this.rewards = []; this.collected = []; this.open = [];
     this.talk = null; this.talkAnswered = null;
-    this.held = null; this.pairsHeld = false; this.wind = 0; this._hard = false; this._lastPairs = 0; this._playStart = 0;
+    this.held = null; this.pairsHeld = false; this.wind = 0; this.hudKeep = opts.hudKeep || null; this.lastTopics = null;
+    this.surprise = null; this._surpriseOff = 0; this._sameN = 0; this._bfN = 0; this._hard = false; this._lastPairs = 0; this._playStart = 0;
     this.finger = { x: 0, y: 0, down: false };
     this.dee = { mood: 'idle', moodT: 0, lookX: 0, lookY: 0, hop: 0, _hopT: -1, _hopPx: 0, _hopN: 0 };
     this.events = []; this.sessions = 0; this.interactive = false; this.solved = false;
@@ -326,7 +386,8 @@
   World.logicalSize = logicalSize;
   World.computeLayout = function (W, H, ins, cfg) { return computeLayout(W, H, ins, merge(CONFIG, cfg)); };
   World.chooseGrid = function (L, n, age, cfg) { return chooseGrid(L, n, DM.Content.ageOf(age || 4), merge(CONFIG, cfg)); };
-  World.placeAt = function (kind, p, cfg) { return placeAt(kind, p, merge(CONFIG, cfg)); };
+  World.placeAt = function (kind, p, cfg, n) { return placeAt(kind, p, merge(CONFIG, cfg), n); };
+  World.pondLayout = function (g, age, cfg) { return pondLayout(g, DM.Content.ageOf(age || 4), merge(CONFIG, cfg)); };
   World.rectGap = rectGap; World.overlapArea = overlapArea;
 
   var P = World.prototype;
@@ -355,6 +416,8 @@
   P.setViewport = function (W, H, ins) {
     var keepGrid = this.layout && this.layout.grid;
     this.layout = computeLayout(W, H, ins, this.cfg);
+    var hk = this.hudKeep;
+    this.layout.hudKeep = hk && hk.w > 0 && hk.h > 0 ? { x: +hk.x, y: +hk.y, w: +hk.w, h: +hk.h } : null;
     if (this.cur && this.cards.length) this._relayoutRound();
     else if (keepGrid) this.layout.grid = null;
     if (this.rewards.length) this._reperchAll(true);
@@ -362,10 +425,12 @@
 
   P._relayoutRound = function () {
     var L = this.layout, g = chooseGrid(L, this.cards.length, this.age, this.cfg), i;
+    if (this.surprise === 'pond') g = pondLayout(g, this.age, this.cfg);
     L.grid = g; L.board = g.board;
     for (i = 0; i < this.cards.length; i++) {
       var c = this.cards[i], s = g.slots[c.slot];
       c.hx = s.x; c.hy = s.y; c.w = g.cw; c.h = g.ch;
+      c._sw = null;
       if (c.state === 'deal') { this._dealPath(c); if (c.t < 0) { c.x = c._px = L.stack.x; c.y = c._py = L.stack.y; } }
       else if (c.state !== 'matched') { c.x = c._px = s.x; c.y = c._py = s.y; c.vx = c.vy = 0; }
     }
@@ -400,10 +465,13 @@
   };
 
   // ---------------------------------------------------------------- session flow
-  P.newSession = function () {
+  /** opts.lastTopics (or w.lastTopics): the previous session's chapter topics → this session rotates (DM.Content.topicsFor). */
+  P.newSession = function (opts) {
     this.age = this._pendingAge; this.lang = this._pendingLang;
     this.sessions++;
-    this.levels = DM.Content.topicsFor(this.age);
+    var last = (opts && opts.lastTopics) || this.lastTopics || null;
+    this.levels = DM.Content.topicsFor(this.age, this.rng, last);
+    this._surpriseOff = this.rng.int(0, this.cfg.surpriseTypes.length - 1);
     this.stars = 0; this.collected = [];
     this._emit({ type: 'session', levels: this.levels.slice() });
     this.startLevel(0);
@@ -418,6 +486,7 @@
     this.roundsPerLevel = this.cfg.roundsPerLevel;
     this.cards = []; this.rewards = []; this.open = []; this.cur = null; this.talk = null; this.talkAnswered = null;
     this.interactive = false; this.solved = false; this._mis = null; this._anims = []; this.layout.grid = null; this._rewardN = 0;
+    this.surprise = null; this._bfN = 0;
     this._setState('intro'); this.phase = null;
     this._emit({ type: 'level', level: this.level, topic: this.topic });
   };
@@ -430,11 +499,16 @@
     var cur = DM.Content.makeRound(this.topic, { age: this.age, lang: this.lang, rng: rr, roundIndex: this.round, history: this._hist,
       pairs: want, peekByAge: cfg.peekByAge });
     this.pairsHeld = held;
+    if (cfg.peekPerCard) cur.peek = cur.peek * (0.6 + 0.1 * cur.cards.length);
+    var ST = cfg.surpriseTypes, sp = ST && ST.length && this.round === cfg.surpriseRound ? ST[(this.level + this._surpriseOff) % ST.length] : null;
+    this.surprise = sp; cur.surprise = sp; cur.golden = sp === 'golden' ? rr.pick(Object.keys(cur.pairInfo).sort()) : null;
+    this._shuffled = false; this._sameN = 0;
     this.cur = cur; this._hist.push(cur.sum);
     this.mismatches = 0; this.streak = 0; this.found = 0; this.pairs = cur.pairs; this.open = []; this._mis = null; this._anims = [];
     this._idleN = 0; this._idleT = 0; this._idleGap = cfg.idleTime; this._doneT = -1; this._holdT = -1;
     this.interactive = false; this.solved = false;
     var g = chooseGrid(L, cur.cards.length, this.age, cfg);
+    if (sp === 'pond') g = pondLayout(g, this.age, cfg);
     L.grid = g; L.board = g.board;
     this.cards = cur.cards.map(function (s, k) {
       return { id: s.id, key: s.key, face: s.face, nameKind: s.nameKind, nameValue: s.nameValue, size: s.size || null, word: s.word || null,
@@ -447,7 +521,7 @@
     for (i = 0; i < this.cards.length; i++) this._dealPath(this.cards[i]);
     if (cur.topic === 'colors') this._yellowRule(true);
     this._setState('round'); this._setPhase('deal');
-    this._emit({ type: 'round', round: this.round, topic: this.topic, promptKey: cur.promptKey, params: cur.params, pairs: cur.pairs, held: held });
+    this._emit({ type: 'round', round: this.round, topic: this.topic, promptKey: cur.promptKey, params: cur.params, pairs: cur.pairs, held: held, surprise: sp });
     this._reperchAll(false);     // rewards the new grid covers fly to a free perch
   };
 
@@ -458,6 +532,48 @@
     c._dx0 = x0; c._dy0 = y0; c._dT = T;
     c._dvx = (c.hx - x0) / T; c._dvy = (c.hy - y0 - 0.5 * cfg.dealGravity * T * T) / T;
     c._dw = c._spinTurns * TAU / T; c._drot0 = -c._dw * T;
+  };
+
+  P._startPlay = function () {
+    this._setPhase('play'); this.interactive = true; this._idleT = 0; this._playStart = this.time;
+    this._emit({ type: 'play' });
+  };
+
+  /** Shuffle surprise: 1 swap (2 from age shuffleFrom) of face-down cards with different keys; each card flies along a
+   * bezier bulging to its own side (they pass each other), lift 1 mid-way. Colour rounds never move yellow next to Dee. */
+  P._startShuffle = function () {
+    var cfg = this.cfg, L = this.layout, rr = this.rng, self = this, cards = this.cards.slice(), swaps = [];
+    this._shuffled = true;
+    var nSw = this.age >= cfg.shuffleFrom ? 2 : 1, used = {};
+    function okAt(c, slot) {
+      if (c.face.color !== 'yellow') return true;
+      var q = L.grid.slots[slot];
+      return rectGap({ x: q.x - c.w / 2, y: q.y - c.h / 2, w: c.w, h: c.h }, L.deeRect) >= cfg.yellowDeeGap - 1e-6;
+    }
+    for (var t = 0; t < nSw; t++) {
+      var opts = [];
+      for (var i = 0; i < cards.length; i++) for (var j = i + 1; j < cards.length; j++) {
+        var a = cards[i], b = cards[j];
+        if (used[a.id] || used[b.id] || a.key === b.key || a.state !== 'down' || b.state !== 'down') continue;
+        if (!okAt(a, b.slot) || !okAt(b, a.slot)) continue;
+        opts.push([a, b]);
+      }
+      if (!opts.length) break;
+      var pr = opts[Math.floor(rr.next() * opts.length)];
+      used[pr[0].id] = used[pr[1].id] = 1; swaps.push(pr);
+    }
+    this._setPhase('shuffle');
+    swaps.forEach(function (pr) {
+      var a = pr[0], b = pr[1], sa = a.slot;
+      a.slot = b.slot; b.slot = sa;
+      [a, b].forEach(function (c, side) {
+        var q = L.grid.slots[c.slot], x0 = c.x, y0 = c.y, dx = q.x - x0, dy = q.y - y0, d = hyp(dx, dy) || 1;
+        var bulge = (cfg.shuffleArc * d + 30) * (side ? -1 : 1);
+        c._sw = { x0: x0, y0: y0, x1: q.x, y1: q.y, cx: (x0 + q.x) / 2 - dy / d * bulge, cy: (y0 + q.y) / 2 + dx / d * bulge, t: 0 };
+        c.hx = q.x; c.hy = q.y;
+      });
+      self._emit({ type: 'shuffle', a: a.id, b: b.id });
+    });
   };
 
   P._endRound = function () {
@@ -516,18 +632,22 @@
     if (this.state !== 'round' || this.solved) return null;
     var ph = this.phase;
     if (ph !== 'play' && ph !== 'resolve') return null;
-    this._idleT = 0; this._idleGap = this.cfg.idleTime;      // any touch shows the child is here
-    var c = this._hit(x, y);
+    var c = this._hit(x, y), cfg = this.cfg;
+    // QA P1-4: tapping the ONE open card again and again is not "activity" (no idle reset); 3 such taps → a hint
+    var same = !!c && c.state === 'up' && this.open.length === 1 && this.open[0] === c.id && !this._mis;
+    if (!same) { this._idleT = 0; this._idleGap = cfg.idleTime; }   // any other touch shows the child is here
     if (!c) return null;
     this._lookId = c.id; this._lookT = this.time; this._lastTapId = c.id;
+    if (same) { if (++this._sameN >= cfg.sameTapHint) { this._sameN = 0; this._autoHint(); } }
+    else this._sameN = 0;
     if (c.state === 'matched' || c.state === 'up') { this._emitTap(c); return c.id; }
     // c is face down
     if (ph === 'resolve' && !this._mis) return null;          // a pair was just found (≤ matchResolveTime): flips wait
     if (this.open.length < 2) { this._flipUp(c); return c.id; }
     var a = this.cardById(this.open[0]), b = this.cardById(this.open[1]);
-    if (a.key === b.key || !this.cfg.fastReset) return null; // a match is about to be confirmed
-    // impatient third tap: the two mismatched cards flip down at once, the new one flips up
-    if (!this._mis) this._mismatch(a, b, false);
+    if (a.key === b.key || !cfg.fastReset) return null;     // a match is about to be confirmed
+    // impatient third tap: only after both faces showed thirdTapAfter s (QA P2-1); then both flip down at once, the new one up
+    if (!this._mis || this._mis.t < cfg.thirdTapAfter) return null;
     this._flipDown(a); this._flipDown(b);
     this.open = []; this._mis = null; this._setPhase('play');
     this._flipUp(c);
@@ -569,7 +689,12 @@
     this._mood(last ? 'cheer' : 'happy');
     var ev = { type: 'match', a: a.id, b: b.id, key: a.key, nameKind: info.nameKind, nameValue: info.nameValue, found: this.found, pairs: this.pairs };
     ['parity', 'animal', 'word', 'text', 'lower'].forEach(function (k) { if (info[k] !== undefined) ev[k] = info[k]; });
-    this._emit(this._names(ev, a, b));
+    if (this.cur.golden && a.key === this.cur.golden) {
+      ev.golden = true; M.golden = true;
+      this._mood('cheer');
+      this._emit(this._names(ev, a, b));
+      this._emit({ type: 'golden', a: a.id, b: b.id, key: a.key, x: M.mx, y: M.my });
+    } else this._emit(this._names(ev, a, b));
     if (last) { this.solved = true; this.interactive = false; }
   };
 
@@ -640,10 +765,13 @@
       anchor: info.kind === 'animal' ? 'bottom' : 'center', ax: null, ay: null, state: 'fly', t: 0, perch: null, target: null,
       _ph: rr.float(0, TAU), _q: 0, _qv: 0, _nextIdle: rr.float(2, 5), pieces: null, _th: 0, _tw: 0 };
     if (r.kind === 'animal') r.y = r._py = R.my + r.size / 2;
+    if (r.kind === 'butterfly') r._alt = (this._bfN++) % 2 === 1;
+    if (R.golden) r.golden = true;
     this.rewards.push(r);
     this.collected.push({ kind: r.kind, color: r.color, shape: r.shape, sprite: r.sprite, n: r.n, text: r.text });
     this._perch(r, false);
-    this._emit({ type: 'reward', id: r.id, kind: r.kind, x: R.mx, y: R.my, color: r.color, shape: r.shape, sprite: r.sprite, n: r.n, text: r.text });
+    this._emit({ type: 'reward', id: r.id, kind: r.kind, x: R.mx, y: R.my, color: r.color, shape: r.shape, sprite: r.sprite, n: r.n, text: r.text,
+      golden: !!R.golden });
     return r;
   };
 
@@ -658,7 +786,7 @@
       for (i = 0; i < L.perchCands.length; i++) {
         var p = L.perchCands[i];
         if (p.kind !== pref[j]) continue;
-        var pl = placeAt(r.kind, p, cfg);
+        var pl = placeAt(r.kind, p, cfg, r.n);
         if (!boxFree(pl.box, L, cfg)) continue;
         var ov = 0;
         for (var b = 0; b < boxes.length; b++) ov += overlapArea(pl.box, boxes[b]);
@@ -674,12 +802,16 @@
       if (free.length) break;
     }
     var pick = best;
-    if (free.length) {
-      if (boxes.length) { free.sort(function (u, v) { return u._gap - v._gap || u.x - v.x || u.y - v.y; }); free = free.slice(0, cfg.perchTight); }
-      pick = free[Math.floor(this.rng.next() * free.length)];
+    if (free.length) {   // spread out: prefer perches ≥ perchMinGap from the others, random weighted by the gap (≤ 160 px)
+      var pool = free.filter(function (q) { return q._gap >= cfg.perchMinGap; });
+      if (!pool.length) pool = free;
+      var tot = 0, wsum = pool.map(function (q) { tot += Math.min(160, q._gap) + 1; return tot; });
+      var u = this.rng.next() * tot, k = 0;
+      while (k < pool.length - 1 && wsum[k] < u) k++;
+      pick = pool[k];
     }
     if (!pick) {   // nothing valid at all (tiny screen): the ground strip in the middle
-      pick = placeAt(r.kind, { x: L.W / 2, y: L.groundY + cfg.groundPerchDy, kind: 'ground' }, cfg); pick.kind = 'ground';
+      pick = placeAt(r.kind, { x: L.W / 2, y: L.groundY + [].concat(cfg.groundPerchDy)[0], kind: 'ground' }, cfg, r.n); pick.kind = 'ground';
     }
     r.target = pick; r.perch = { kind: pick.kind, x: pick.x, y: pick.y };
     if (snap) this._snapReward(r); else this._fly(r);
@@ -736,13 +868,13 @@
   };
 
   P._makePieces = function (r, rest) {
-    var cfg = this.cfg, T = r.target, n = Math.min(cfg.acornMax, Math.max(1, r.n || 1)), rr = this.rng, R = cfg.sizes.acorn / 2;
-    var bottom = Math.min(n, 6), sp = cfg.acornSpread, x0 = r.x, y0 = r.y;
-    r.pieces = [];
-    for (var k = 0; k < n; k++) {
-      var lay = k < bottom ? 0 : 1, idx = lay ? k - bottom : k, cnt = lay ? n - bottom : bottom;
-      var tx = T.x + (cnt > 1 ? (idx / (cnt - 1) - 0.5) * 2 * (sp - R) * (lay ? 0.7 : 1) : 0) + (rest ? 0 : rr.float(-4, 4));
-      var ty = T.y - R - lay * R * 1.3;
+    var cfg = this.cfg, T = r.target, n = Math.min(cfg.acornMax, Math.max(1, r.n || 1)), rr = this.rng, D = cfg.sizes.acorn, R = D / 2;
+    var rows = acornRows(n), x0 = r.x, y0 = r.y, k = 0;
+    r.pieces = []; r._hw = Math.max((rows[0] - 1) / 2 * 0.6 * D + R, cfg.acornSpread);
+    for (var lay = 0; lay < rows.length; lay++) for (var idx = 0; idx < rows[lay]; idx++, k++) {
+      // a pile: rows of 4 / 3 / 3 / 2, each row 0.6·size apart, every row on the gaps of the one below
+      var tx = T.x + (idx - (rows[lay] - 1) / 2) * 0.6 * D + (rest ? 0 : rr.float(-2, 2));
+      var ty = T.y - R - lay * R * 1.25;
       var pc = { x: x0, y: y0, _px: x0, _py: y0, rot: 0, _prot: 0, vx: 0, vy: 0, vr: 0, tx: tx, ty: ty, state: 'wait',
         delay: k * cfg.acornStagger, hop: null };
       if (rest) { pc.x = pc._px = tx; pc.y = pc._py = ty; pc.state = 'rest'; pc.rot = pc._prot = rr.float(-0.4, 0.4); }
@@ -857,7 +989,7 @@
           if (pc.state === 'roll') {
             pc.vx -= pc.vx * Math.min(1, cfg.acornRoll * h);
             pc.x += pc.vx * h; pc.rot += pc.vx / R * h;
-            pc.x = clamp(pc.x, T.x - cfg.acornSpread + R, T.x + cfg.acornSpread - R);
+            pc.x = clamp(pc.x, T.x - r._hw + R, T.x + r._hw - R);
             if (Math.abs(pc.vx) < 2) { pc.vx = 0; pc.state = 'rest'; }
             else all = false;
           }
@@ -954,11 +1086,20 @@
         for (i = 0; i < cards.length; i++) { c = cards[i]; if (c.waveT >= 0) { c.waveT -= h; if (c.waveT <= 0) { c.waveT = -1; c.flipT = 0; } } }
         all = true;
         for (i = 0; i < cards.length; i++) if (cards[i].flip >= cfg.playAtHide || cards[i].flipT > 0) { all = false; break; }
-        if (all) {
-          this._setPhase('play'); this.interactive = true; this._idleT = 0; this._playStart = this.time;
-          this._emit({ type: 'play' });
+        if (all && this.surprise === 'shuffle' && !this._shuffled) {
+          for (i = 0; i < cards.length; i++) if (cards[i].flip > 0.03) { all = false; break; }   // faces fully hidden first
+          if (all) { this._startShuffle(); break; }
+          break;
         }
+        if (all) this._startPlay();
         break;
+      case 'shuffle': {
+        all = true;
+        for (i = 0; i < cards.length; i++) if (cards[i]._sw) { all = false; break; }
+        if (all && this._holdT < 0) this._holdT = 0;
+        if (this._holdT >= 0) { this._holdT += h; if (this._holdT >= cfg.shuffleSettle) { this._holdT = -1; this._startPlay(); } }
+        break;
+      }
       case 'play':
       case 'resolve':
       case 'done': {
@@ -1031,6 +1172,20 @@
         c.state = 'down'; c.x = c.hx; c.y = c.hy; c.rot = 0; c.sx = c.sy = 1; c._q = cfg.dealSquash; c._qv = 0;
       }
       return;
+    }
+    if (c._sw) {   // shuffle flight (quadratic bezier, smooth-step), lifted
+      var S = c._sw; S.t += h;
+      var su = smooth(S.t / cfg.shuffleTime), sq = 1 - su;
+      c.x = sq * sq * S.x0 + 2 * sq * su * S.cx + su * su * S.x1;
+      c.y = sq * sq * S.y0 + 2 * sq * su * S.cy + su * su * S.y1;
+      c.lift = Math.sin(Math.PI * Math.min(1, S.t / cfg.shuffleTime));
+      c.rot = 0.12 * Math.sin(TAU * Math.min(1, S.t / cfg.shuffleTime)) * (S.cx > (S.x0 + S.x1) / 2 ? 1 : -1);
+      if (S.t >= cfg.shuffleTime) { c._sw = null; c.x = c.hx; c.y = c.hy; c.rot = 0; c.lift = 0; c._q = cfg.dealSquash * 0.7; c._qv = 0; }
+      c.sx = 1 + c._q; c.sy = 1 - c._q;
+      return;
+    }
+    if (this.surprise === 'pond' && (c.state === 'down' || c.state === 'up')) {   // lily pads bob gently
+      c.x = c.hx; c.y = c.hy + cfg.pondBob * Math.sin(c._ph + TAU * cfg.pondBobHz * this.time);
     }
     // hint peek on a face-down card
     if (c.state === 'down') {

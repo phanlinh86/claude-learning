@@ -30,6 +30,7 @@ function section(n) { console.log('-- ' + n); }
 const NEG_EN = /\b(no|not|wrong|bad|fail|failed|incorrect|oh no|mistake|oops)\b/i;
 const NEG_VI = /(^|[\s,.!?])(sai|dở|tệ|hỏng|không đúng|chưa đúng|trật|sai rồi)([\s,.!?]|$)/iu;
 function positive(s) { return !NEG_EN.test(s) && !NEG_VI.test(String(s).toLowerCase()); }
+const r0 = () => 0, r9 = () => 0.99;
 const nWords = (s) => String(s).split(/\s+/).filter(Boolean).length;
 function clean(s) {
   return typeof s === 'string' && s.trim().length > 0 && s.indexOf('{') < 0 && s.indexOf('}') < 0 &&
@@ -59,6 +60,7 @@ const REQUIRED = []
   .concat(TOPICS.map(k => 'topic.' + k))
   .concat([0, 1, 2, 3].map(k => 'weather.' + k))
   .concat(TOPICS.map(k => 'p.' + k)).concat(['p.any'])
+  .concat(['surprise.shuffle', 'surprise.golden', 'surprise.pond', 'golden'])
   .concat(['peek', 'hide', 'praise', 'great', 'wrong', 'miss', 'hint', 'idle', 'talk.intro', 'talk.right', 'talk.wrong',
     'talk.animalsAny', 'session.done', 'say.countDone', 'mismatch.two', 'match.any'])
   .concat(['color', 'shape', 'shapeColor', 'animal', 'number', 'letter', 'capital', 'small', 'expr', 'word'].map(k => 'flip.' + k))
@@ -141,16 +143,29 @@ for (const lang of I.langs) for (const k of I.keys(lang)) {
 }
 eq(I.t('xx', 'ui.play'), 'Play', 'unknown language falls back to English');
 eq(I.t('en', 'no.such.key'), 'no.such.key', 'unknown key returns the key');
-eq(I.t('en', 'p.nosuchtopic'), 'Find two cards that match!', 'unknown prompt → p.any');
-eq(I.t('vi', 'p.nosuchtopic'), 'Bé ơi, tìm hai thẻ giống nhau nhé!', 'vi unknown prompt → p.any');
+eq(I.t('en', 'p.nosuchtopic', {}, r0), 'Find two cards that match!', 'unknown prompt → p.any');
+eq(I.t('vi', 'p.nosuchtopic', {}, r0), 'Bé ơi, tìm hai thẻ giống nhau nhé!', 'vi unknown prompt → p.any');
 ok(clean(I.t('en', null)) || I.t('en', null) === '', 't with a null key does not throw');
 
 section('prompts, peek/hide, talk');
-eq(I.t('en', 'p.colors'), 'Find the colour pairs!', 'en p.colors');
-eq(I.t('en', 'p.count', { n: 3 }), 'Match each number with its acorns!', 'en p.count ignores params');
-eq(I.t('en', 'p.animals', {}), 'Find two of each animal!', 'en p.animals');
-eq(I.t('vi', 'p.colors'), 'Bé ơi, tìm hai thẻ cùng màu nhé!', 'vi p.colors');
-eq(I.t('vi', 'p.animals', { animal: 'fox' }), 'Bé ơi, tìm hai bạn thú giống nhau nhé!', 'vi p.animals');
+for (const lang of I.langs) for (const k of TOPICS.map(x => 'p.' + x).concat(['p.any'])) {
+  const v = I.raw(lang, k);
+  ok(Array.isArray(v) && v.length === 3 && new Set(v).size === 3, `${lang} ${k} has 3 different variants`);
+  for (let i = 0; i < 3; i++) eq(I.t(lang, k, {}, () => (i + 0.5) / 3), I.t(lang, k, {}, () => (i + 0.5) / 3), `${lang} ${k}[${i}] is deterministic with an rng`);
+}
+for (const lang of I.langs) for (const k of ['surprise.shuffle', 'surprise.golden', 'surprise.pond', 'golden']) {
+  const v = I.raw(lang, k);
+  ok(Array.isArray(v) && v.length === 2, `${lang} ${k} has 2 variants`);
+}
+eq(I.t('en', 'golden', {}, r0), 'A rainbow! You found the magic pair!', 'en golden');
+eq(I.t('vi', 'surprise.pond', {}, r0), 'Các thẻ đang nổi trên lá sen nè!', 'vi surprise.pond');
+for (const lang of I.langs) { for (let i = 0; i < 4; i++) ok(clean(I.t(lang, 'weather.' + i)), `${lang} weather.${i} kept`);
+  for (const k of ['butterfly', 'lantern', 'acorns', 'animal', 'star']) ok(I.has(lang, 'reward.' + k), `${lang} reward.${k} kept`); }
+eq(I.t('en', 'p.colors', {}, r0), 'Find the colour pairs!', 'en p.colors');
+eq(I.t('en', 'p.count', { n: 3 }, r0), 'Match each number with its acorns!', 'en p.count ignores params');
+eq(I.t('en', 'p.animals', {}, r0), 'Find two of each animal!', 'en p.animals');
+eq(I.t('vi', 'p.colors', {}, r0), 'Bé ơi, tìm hai thẻ cùng màu nhé!', 'vi p.colors');
+eq(I.t('vi', 'p.animals', { animal: 'fox' }, r0), 'Bé ơi, tìm hai bạn thú giống nhau nhé!', 'vi p.animals');
 for (const lang of I.langs) for (const t of TOPICS) for (const params of [undefined, null, {}, { n: 4 }, { color: 'red', shape: 'x' }, 'junk', 7]) {
   const s = I.t(lang, 'p.' + t, params);
   ok(clean(s) && s !== 'p.' + t && nWords(s) <= 12, `${lang} p.${t} renders with params ${JSON.stringify(params)}: ${s}`);
@@ -274,7 +289,6 @@ for (const lang of I.langs) for (const kind of I.NAME_KINDS) for (const v of [un
 
 // ------------------------------------------------------------------ card lines
 section('sayFlip: exact lines');
-const r0 = () => 0, r9 = () => 0.99;
 const card = (nameKind, nameValue, face) => ({ nameKind, nameValue, face: face || { kind: nameKind, value: nameValue } });
 eq(I.sayFlip('en', card('color', 'red'), r0), 'Red!', 'en color');
 eq(I.sayFlip('en', card('color', 'orange'), r9), 'An orange butterfly!', 'en color variant, a → an');
@@ -511,7 +525,7 @@ section('lines for every card and pair content.js makes');
     if (!r || !Array.isArray(r.cards)) { ok(false, `makeRound ${topic} returns cards[]`); continue; }
     rounds++;
     const txt = I2.t(lang, r.promptKey, r.params || {});
-    ok(clean(txt) && txt !== r.promptKey && txt !== I2.t(lang, 'p.any'), `${lang} ${r.promptKey} renders: ${txt}`);
+    ok(clean(txt) && txt !== r.promptKey && ![].concat(I2.raw(lang, 'p.any')).includes(txt), `${lang} ${r.promptKey} renders: ${txt}`);
     for (const c of r.cards) {
       ok(I2.NAME_KINDS.includes(c.nameKind), `${lang} card nameKind ${c.nameKind} is a known kind`);
       const s1 = I2.sayFlip(lang, { id: c.id, nameKind: c.nameKind, nameValue: c.nameValue, face: c.face, size: c.size });   // as World emits

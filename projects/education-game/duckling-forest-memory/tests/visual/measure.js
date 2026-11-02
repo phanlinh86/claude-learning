@@ -1,45 +1,47 @@
-// DOM geometry checks (overflow / overlap) for the visual report — Kitten's Balloon Farm.   node tests/visual/measure.js
-// Per device × language × age: the speech bubble (font, overflow, real bottom vs world.layout.bubble, highest balloon body
-// over 30 re-rolled rounds, with and without notch insets), the Talk panel (overflow, choice rows, empty preview column)
-// and the settings panel (hidden rows behind the sticky Done button).
-const { chromium } = require('playwright');
-const serve = require('../e2e/serve');
-const DEV = { iphoneP: [393, 852, 3], iphoneL: [852, 393, 3], ipadP: [820, 1180, 2], ipadL: [1180, 820, 2], seL: [667, 375, 2] };
-const NOTCH = { iphoneP: ':root{--sa-t:59px !important;--sa-b:34px !important}', iphoneL: ':root{--sa-l:59px !important;--sa-r:59px !important;--sa-b:21px !important}' };
+// Text-fit checks for Dee's Forest Memory (EN + VI) on every device:   node tests/visual/measure.js
+// - the speech bubble with every prompt (p.*), the longest feedback lines, idle/hint lines: font size after _fitBubble,
+//   overflow, real bottom vs the top of the tallest grid of that age (logical px; < 0 = covers cards)
+// - the chapter banner: topic names are squeezed by fitText to bw − 60 → effective font px (62 nominal)
+// - the Talk panel for every topic: overflow, rows of choices, clipped labels
+const V = require('./lib');
+const DEVS = ['iphoneP', 'iphoneL', 'ipadP', 'ipadL', 'seL'];
+const TOPICS = ['colors', 'size', 'shapes', 'count', 'animals', 'letters', 'lower', 'initial', 'add', 'sub', 'oddeven'];
 (async () => {
-  const srv = await serve(), browser = await chromium.launch();
-  for (const [dev, [w, h, dpr]] of Object.entries(DEV)) for (const notch of NOTCH[dev] ? [false, true] : [false]) for (const lang of ['en', 'vi']) for (const age of [3, 5, 7]) {
-    const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: dpr, isMobile: true, hasTouch: true });
-    const page = await ctx.newPage();
-    if (notch) await page.addInitScript(c => document.addEventListener('DOMContentLoaded', () => { const s = document.createElement('style'); s.textContent = c; document.head.appendChild(s); }), NOTCH[dev]);
-    await page.goto(srv.url + `?mute=1&novoice=1&seed=5&age=${age}&lang=${lang}`);
-    await page.waitForFunction(() => window.DM && DM.debug && DM.debug.mode === 'title');
-    await page.evaluate(() => { DM.debug.startGame(); DM.debug.setSpeed(6); });
-    await page.waitForFunction(() => DM.debug.world.state === 'round' && DM.debug.world.interactive, null, { timeout: 20000 });
-    await page.waitForTimeout(150);
-    const r = await page.evaluate(() => {
-      const v = DM.debug.view(), w = DM.debug.world, L = w.layout;
-      const b = document.getElementById('bubble').getBoundingClientRect(), bt = document.getElementById('bubbleText');
-      let top = 1e9;   // highest balloon body top over many re-rolls of every topic of this age
-      const lv = w.levels.slice();
-      for (let k = 0; k < lv.length; k++) for (let i = 0; i < 8; i++) { w.topic = lv[k]; w.round = 3; w._hist = []; w._beginRound(); for (const x of w.balloons) top = Math.min(top, x.hy - 0.6 * x.size); }
-      const out = { bubbleFont: +parseFloat(bt.style.fontSize).toFixed(1), bubbleOverflow: document.getElementById('bubble').scrollHeight - document.getElementById('bubble').clientHeight,
-        bubbleBottom: +((b.bottom - v.top) / v.s).toFixed(1), layoutBubbleBottom: L.bubble.y + L.bubble.h, highestBody: +top.toFixed(1),
-        coveredBy: +Math.max(0, (b.bottom - v.top) / v.s - top).toFixed(1), s: +v.s.toFixed(3), balloonCss: Math.round(L.balloonSize * v.s) };
-      w._startTalk();
-      return out;
-    });
-    await page.waitForTimeout(500);
-    const t = await page.evaluate(() => {
-      const p = document.querySelector('.talk-panel'), pr = p.getBoundingClientRect(), show = document.getElementById('talkShow');
-      const ch = [...document.querySelectorAll('#talkChoices button')].map(b => b.getBoundingClientRect());
-      const cols = getComputedStyle(p).gridTemplateColumns;
-      return { overflow: p.scrollHeight - p.clientHeight, top: Math.round(pr.top), bottom: Math.round(pr.bottom), vh: innerHeight, rows: new Set(ch.map(c => Math.round(c.top))).size,
-        emptyPreviewColumn: show.classList.contains('hidden') && cols.split(' ').length > 1 ? cols : null };
-    });
-    const s = await page.evaluate(() => { DM.UI.only('scrSettings'); const p = document.querySelector('.settings-panel'); return { scroll: p.scrollHeight - p.clientHeight }; });
-    console.log(JSON.stringify({ dev, notch, lang, age, ...r, talk: t, settings: s }));
+  await V.start();
+  for (const dev of DEVS) for (const lang of ['en', 'vi']) {
+    const { ctx, page } = await V.open(dev, `age=7&lang=${lang}`);
+    await page.evaluate(() => { const D = DM.debug; D.toRound(0, 'oddeven', 3); D.peekUp(); });
+    await V.sleep(200);
+    const r = await page.evaluate(([lang, TOPICS]) => {
+      const D = DM.debug, v = D.view(), w = D.world, I = DM.I18N, b = document.getElementById('bubble'), t = document.getElementById('bubbleText');
+      const lines = TOPICS.map(k => ['p.' + k, I.t(lang, 'p.' + k, { n: 5 })]);
+      for (const k of ['hint', 'idle', 'peek', 'hide', 'great', 'praise']) { const s = I.t(lang, k); if (s && s !== k) lines.push([k, s]); }
+      if (I.sayMismatch) lines.push(['mismatch', I.sayMismatch(lang, { topic: 'initial', nameKindA: 'animal', nameValueA: 'hedgehog', nameKindB: 'animal', nameValueB: 'squirrel', faceA: {}, faceB: {} })]);
+      const gridTop = w.layout.grid.rect.y;
+      const out = lines.map(([k, s]) => { DM.UI.say(s); const q = b.getBoundingClientRect();
+        return { k, len: s.length, font: +parseFloat(t.style.fontSize).toFixed(1), overflow: b.scrollHeight - b.clientHeight, clear: +(gridTop - (q.bottom - v.top) / v.s).toFixed(1) }; });
+      // banner squeeze
+      const c = document.createElement('canvas').getContext('2d'), FONT = getComputedStyle(document.body).fontFamily, bw = Math.min(620, v.W - 80) - 60;
+      const banner = TOPICS.map(k => { const s = I.t(lang, 'topic.' + k); c.font = `900 62px ${FONT}`; const wd = c.measureText(s).width; return { k, s, px: +(wd > bw ? 62 * bw / wd : 62).toFixed(1) }; });
+      return { lines: out, banner, s: v.s };
+    }, [lang, TOPICS]);
+    const worst = r.lines.reduce((a, l) => (l.clear < a.clear ? l : a));
+    const small = r.lines.reduce((a, l) => (l.font < a.font ? l : a));
+    const bmin = r.banner.reduce((a, l) => (l.px < a.px ? l : a));
+    console.log(`${dev.padEnd(8)} ${lang} bubble: min font ${small.font}px (${small.k}), max overflow ${Math.max(...r.lines.map(l => l.overflow))}, worst clearance to grid ${worst.clear} (${worst.k}) | banner min ${bmin.px}px logical = ${(bmin.px * r.s).toFixed(1)} css ("${bmin.s}")`);
+    // Talk panel per topic
+    const talk = [];
+    for (const tp of TOPICS) {
+      const t = await page.evaluate(tp => { const w = DM.debug.world; w.topic = tp; w._startTalk(); return true; }, tp);
+      await V.sleep(250);
+      talk.push(await page.evaluate(tp => { const p = document.querySelector('.talk-panel'), r = p.getBoundingClientRect(), ch = [...document.querySelectorAll('#talkChoices button')];
+        const sh = document.getElementById('talkShow').getBoundingClientRect();
+        return { tp, overflow: p.scrollHeight - p.clientHeight, off: Math.max(0, r.bottom - innerHeight, -r.top), rows: new Set(ch.map(b => Math.round(b.getBoundingClientRect().top))).size,
+          clipped: ch.filter(b => b.scrollWidth > b.clientWidth + 1).length, show: Math.round(sh.width), minBtn: Math.min(...ch.map(b => Math.round(Math.min(b.getBoundingClientRect().width, b.getBoundingClientRect().height)))) }; }, tp));
+      await page.evaluate(() => { const D = DM.debug, w = D.world; w.skipTalk(); D.toRound(0, 'oddeven', 3); });
+    }
+    console.log('   talk:', talk.map(t => `${t.tp}${t.overflow > 0 || t.off > 0 || t.clipped ? `!ov${t.overflow}/off${Math.round(t.off)}/clip${t.clipped}` : ''} r${t.rows} pic${t.show} btn${t.minBtn}`).join('  '));
     await ctx.close();
   }
-  await browser.close(); srv.close();
+  await V.stop();
 })();
