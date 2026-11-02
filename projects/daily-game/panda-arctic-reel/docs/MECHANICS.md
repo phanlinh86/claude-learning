@@ -26,7 +26,7 @@ All motion runs in fixed sub-steps of **1/120 s**. Every moving object stores `p
 | `wobbleDecay / tugDecay` | 3.2 / 4.5 | 1/s | Slip wobble (`hook.wob`) and rod bend (`reel.tug`) fade exponentially |
 | `stepMinPx` | 26 | px | Smallest reel step |
 | `zoneJumpMin / zoneEdge / zoneStartMin` | 0.22 / 0.04 / 0.35 | frac | The zone moves at least 0.22 after each tap, never touches the ends, and the first zone is ≥ 0.35 so there's time to aim |
-| `catchFly / bucketDX / bucketDY` | 0.65 / −150 / −20 | s / px | Caught gem arcs from the hole to `(holeX−150, surfaceY−20)` |
+| `catchFly / bucketDX / bucketDY` | 0.75 / −150 / −20 | s / px | Caught gem arcs from the hole to `(holeX−150, surfaceY−20)` |
 | `maxLines` | 3 | — | Spools |
 | `snapReset / invuln` | 1.0 / 1.5 | s | The hook is gone for 1 s, then puffers can't snap the new line for 1.5 s (`world.invuln` = 2.5 at the snap) |
 | `puffTime / puffDrift / puffRise` | 0.28 / 42 / 16 | s / px/s | The puffer inflates first, then drifts away from the hole and floats up |
@@ -50,9 +50,9 @@ All motion runs in fixed sub-steps of **1/120 s**. Every moving object stores `p
 | `gemR / pufferR` | 30 / 16 | 27 / 19 | 24 / 21 | px hit radii (easy: big gems, small puffers) |
 | `gemEvery` | 3.0–4.4 | 3.0–4.4 | 2.8–4.2 | s between gem spawns |
 | `gemSpeed` | 30–44 | 38–56 | 46–68 | px/s base drift |
-| `reelWidth / reelWidthZone / reelWidthMin` | .38/.02/.30 | .30/.025/.20 | .24/.025/.15 | green zone (frac of the meter) and how much it shrinks per zone |
+| `reelWidth / reelWidthZone / reelWidthMin` | .38/.02/.30 | .30/.02/.20 | .24/.02/.17 | green zone (frac of the meter) and how much it shrinks per zone |
 | `perfect` | 0.11 | 0.08 | 0.06 | gold-centre width (frac) |
-| `needle / needleZone` | 0.50/0.04 | 0.65/0.07 | 0.85/0.09 | sweeps/s (0→1 is one sweep) and the increase per zone |
+| `needle / needleZone` | 0.50/0.04 | 0.65/0.05 | 0.85/0.06 | sweeps/s (0→1 is one sweep) and the increase per zone |
 | `stepsFull` | 4 | 5 | 6 | Good taps needed from the deepest point (`stepPx = max(26, (maxHookY−waterTop)/stepsFull)`) |
 | `maxSlips` | 3 | 3 | 3 | slips before the gem escapes |
 | `pufferEvery / pufferMin / pufferGrow` | 24/10/.85 | 13/5/.82 | 8/3.2/.80 | s; spawn interval = `max(min, every·grow^level) / loopMult`, ±25% jitter |
@@ -72,7 +72,7 @@ in air:    a = airGravity                   (above waterTop: after a catch or sn
 
 The drag always opposes motion, so letting go while sinking at full speed gives a short, smooth stop (about 0.13 s, 15 px of overshoot) before the hook floats up. It never reverses instantly. At `maxHookY`/`minHookY` the speed reflects at ×0.25, and below 18 px/s it stops. Tilt eases (rate 7/s) toward `clamp(v/vTerm) · 0.42 rad`. A `splash` event fires whenever the hook crosses `waterTop` going down (at the start, after a catch, after a new line).
 
-**Hook while reeling.** Physics is off and the hook follows tweens. A Good/Perfect tap starts `easeOutCubic` from the current y to the new target over 0.22 s (a quick tug that slows at the end). A slip starts `easeInOutSine` half a step down over 0.38 s and sets `hook.wob = 1`. The wobble decays as e^(−3.2t) and shakes the gem sideways (`±7 px · wob`, 20 rad/s) and the tilt. The hooked gem eases onto the hook over 0.15 s, then rides at `(hook.x + wobble, hook.y + 18)`. When a target reaches `waterTop`, the last tug lifts the hook to `waterTop − 22`. At the end of that tug the catch happens: the gem arcs to the bucket (`y = lerp − sin(πk)·90`, 0.65 s), the empty hook hangs 0.35 s, then falls back in under gravity with a splash.
+**Hook while reeling.** Physics is off and the hook follows tweens. A Good/Perfect tap starts `easeOutCubic` from the current y to the new target over 0.22 s (a quick tug that slows at the end). A slip starts `easeInOutSine` half a step down over 0.38 s and sets `hook.wob = 1`. The wobble decays as e^(−3.2t) and shakes the gem sideways (`±7 px · wob`, 20 rad/s) and the tilt. The hooked gem eases onto the hook over 0.15 s, then rides at `(hook.x + wobble, hook.y + 18)`. When a target reaches `waterTop`, the last tug lifts the hook to `waterTop − 22`. At the end of that tug the catch happens: the gem arcs to the bucket (`y = lerp − sin(πk)·150`, 0.75 s (high over Bao's hat)), the empty hook hangs 0.35 s, then falls back in under gravity with a splash.
 
 **Swimmers** (`gem`, `puffer`, `fish`) spawn just outside a random edge and move horizontally at `base · (1 + 0.35·depth) · (1 + 0.1·zone) · loopMult`, where depth is 0 at the top and 1 at the bottom. The y position is `by + sin(phase)·bobAmp`, and `by` is the depth line they travel along. Fish come in small schools (two to four in the kelp zone) and are never hit-tested. Swimmers are removed 90 px past the far edge.
 
@@ -149,3 +149,5 @@ How to read it:
 - At gem-catching speed (about 10 gems/min) the bot is limited by how often gems spawn and drift past, not by reeling. That is intended: zones are paced by the sea, not by the player's speed.
 - Snaps are rare for a careful player. Hard punishes sloppy reeling (escapes) much more than puffers do. The game-overs on Hard come from loops 2–3, where up to 5 puffers are alive at once.
 - Endless mode: loop *n* zone 0 is ×(1+0.08n) faster than loop 0 zone 0, but slower than the aurora zone just before it. That gives a short breather when the zones loop.
+
+> Tuning after the playtest (2026-11-02): Normal/Hard `needleZone` and `reelWidthZone` lowered and Hard `reelWidthMin` raised (see `docs/reports/playtest.md`); pacing tables above were measured before that change.

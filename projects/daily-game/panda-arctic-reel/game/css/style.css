@@ -60,8 +60,8 @@ kbd{display:inline-block;padding:0 .45em;border-radius:.35em;background:#fff;bor
   animation:bob 2.2s ease-in-out infinite}
 @keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(calc(var(--u)*-1)) rotate(3deg)}}
 .logo{margin:calc(var(--u)*.5) 0 0;font-size:calc(var(--u)*8.5);line-height:1;letter-spacing:.01em;
-  -webkit-text-stroke:calc(var(--u)*.45) #5a3416;paint-order:stroke fill;
-  text-shadow:0 calc(var(--u)*.7) 0 #5a3416, 0 calc(var(--u)*1.2) calc(var(--u)*1.4) rgba(0,0,0,.35)}
+  -webkit-text-stroke:calc(var(--u)*.45) #173a66;paint-order:stroke fill;
+  text-shadow:0 calc(var(--u)*.7) 0 #173a66, 0 calc(var(--u)*1.2) calc(var(--u)*1.4) rgba(0,0,0,.35)}
 .logo .l1{color:#ffd23f}.logo .l2{color:#ff8a3d}
 .tagline{margin:calc(var(--u)*1) 0 0;font-size:calc(var(--u)*2.2);color:#fff;
   text-shadow:0 2px 0 #3a5a7a,0 0 calc(var(--u)*1) rgba(0,0,0,.4)}
@@ -94,7 +94,7 @@ kbd{display:inline-block;padding:0 .45em;border-radius:.35em;background:#fff;bor
 .scores{text-align:left;min-width:calc(var(--u)*22)}
 .sc{display:flex;align-items:baseline;justify-content:space-between;gap:calc(var(--u)*2);position:relative}
 .sc span{font-size:calc(var(--u)*2);color:#c26a2b}
-.sc b{font-size:calc(var(--u)*4.4);color:#fff;-webkit-text-stroke:calc(var(--u)*.3) #5a3416;paint-order:stroke fill;text-shadow:0 calc(var(--u)*.35) 0 #5a3416}
+.sc b{font-size:calc(var(--u)*4.4);color:#fff;-webkit-text-stroke:calc(var(--u)*.3) #173a66;paint-order:stroke fill;text-shadow:0 calc(var(--u)*.35) 0 #173a66}
 .new-best{position:absolute;right:calc(var(--u)*-3.2);top:0;background:#ff5a5a;color:#fff;font-style:normal;font-size:calc(var(--u)*1.3);
   padding:.15em .5em;border-radius:.5em;transform:rotate(12deg);animation:pop .4s .5s both}
 .stats{margin-top:calc(var(--u)*.8);font-family:"Segoe UI",system-ui,sans-serif;font-weight:700;font-size:calc(var(--u)*1.45);color:#7a5a2a;line-height:1.5}
@@ -173,9 +173,9 @@ kbd{display:inline-block;padding:0 .45em;border-radius:.35em;background:#fff;bor
 .medal.none::before{content:"?";color:#c9b48a}
 .medal-ribbon{position:relative}
 
-/* ---------- Kit's Toybox Beat theme ---------- */
+/* ---------- theme ---------- */
 html,body{background:#0f2347}
-canvas#game{background:#f6d2c4}
+canvas#game{background:#1d3a6b}
 .logo .l1{color:#ffffff}.logo .l2{color:#ff6b6b}
 .logo{font-size:calc(var(--u)*8)}
 .panel h2{color:#d23a3e}
@@ -252,7 +252,7 @@ body.touch .btn:focus-visible,body.touch .btn:focus{outline:none}
   .seg button{font-size:max(14px, calc(var(--u)*1.6));min-width:56px}
   .slot h3{font-size:max(13px, calc(var(--u)*1.6))}
   .slot .tag{font-size:11px}
-  .slot .shape button{font-size:12px;min-height:32px}
+  .slot .shape button{font-size:12px;min-height:40px}
   .set{font-size:max(15px, calc(var(--u)*1.8))}
   .small{font-size:max(13px, calc(var(--u)*1.55))}
 }
@@ -270,19 +270,15 @@ body.touch .btn:focus-visible,body.touch .btn:focus{outline:none}
 .icon-btn svg{filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
 #scrCustom:not(.hidden) ~ #toast{bottom:auto!important;top:calc(env(safe-area-inset-top,0px) + 12px)}
 .btn-small{font-size:max(15px, calc(var(--u)*1.8))}
-body.touch .tagline,body.touch .best-line{font-size:max(14px, 1em)}
+body.touch .tagline{font-size:max(15px, calc(var(--u)*2.2))}body.touch .best-line{font-size:max(15px, calc(var(--u)*2))}
 .slot .tag,.slot .shape button{font-size:max(11px, 1em)}
 
-/* ---------- Kit's Toybox Beat additions ---------- */
+/* ---------- additions ---------- */
 .logo{-webkit-text-stroke-color:#173a66;text-shadow:0 calc(var(--u)*.7) 0 #173a66, 0 calc(var(--u)*1.2) calc(var(--u)*1.4) rgba(0,0,0,.35)}
-.tagline,.best-line{text-shadow:0 2px 0 #4a2a5a,0 0 calc(var(--u)*.6) #4a2a5a}
-.best-line{background:rgba(60,40,90,.6)}
+.tagline,.best-line{text-shadow:0 2px 0 #173a66,0 0 calc(var(--u)*.6) #173a66}
+.best-line{background:rgba(20,50,90,.6)}
 .how-ico img{width:calc(var(--u)*4.2)}
-.set-offset{cursor:default}
-.offset{display:flex;align-items:center;gap:calc(var(--u)*1)}
-.offset input[type=range]{width:calc(var(--u)*16);min-width:110px;accent-color:var(--orange);touch-action:pan-x}
-.offset b{min-width:4.2em;text-align:right;font-size:.85em;color:#8a6a3a}
-@media (orientation:portrait){ .set-offset{flex-wrap:wrap} .offset input[type=range]{width:auto;flex:1} }
+@media (orientation:portrait){   }
 
 /* ---------- visual QA round 1 (docs/reports/visual_qa.md) ---------- */
 /* P2-5 readable menu text on phones */
@@ -299,8 +295,7 @@ body.touch .tagline,body.touch .best-line{font-size:max(14px, 1em)}
   #scrSettings .panel h2{margin-bottom:4px;font-size:calc(var(--u)*3.4)}
   #scrSettings .settings{display:grid;grid-template-columns:1fr 1fr;gap:6px;min-width:0}
   #scrSettings .set{padding:4px 12px;min-height:40px}
-  #scrSettings .set-offset{grid-column:span 2}
-  #scrSettings .menu{margin-top:6px}
+  #scrSettings   #scrSettings .menu{margin-top:6px}
   #scrSettings .menu .btn{min-height:40px;padding-top:0;padding-bottom:0}
 }
 /* P3-7 portrait title: tagline off the screen edges, window shows above the logo, demo calmer */

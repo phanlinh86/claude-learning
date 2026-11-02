@@ -545,6 +545,20 @@ test('weather: every zone, bursts, portrait 720×1600 — bounded counts, sane f
 
 // ---------- run ----------
 let pass = 0, fail = 0;
+test('anti-mash: hammering the button at 10 Hz makes a hooked gem escape (playtest guard)', () => {
+  for (const d of ['easy', 'normal', 'hard']) {
+    let landed = 0, escaped = 0;
+    for (let seed = 1; seed <= 20; seed++) {
+      const w = mk(d, seed); quiet(w); hookGem(w, 'ruby', w.layout.bands[2] + 20); w.drainEvents();
+      for (let k = 0; k < 60 && w.phase === 'reel'; k++) { w.press(); w.release(); run(w, 0.1); }
+      const ev = w.drainEvents().map(e => e.type);
+      if (ev.includes('catch')) landed++; if (ev.includes('escape')) escaped++;
+    }
+    assert.ok(landed <= 3, d + ': mashing landed ' + landed + '/20');
+    assert.ok(escaped >= 15, d + ': mashing escaped only ' + escaped + '/20');
+  }
+});
+
 for (const t of tests) {
   try { t.fn(); pass++; console.log('PASS ' + t.name); }
   catch (e) { fail++; console.log('FAIL ' + t.name + '\n     ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join('\n     ') : e)); }

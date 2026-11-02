@@ -51,7 +51,7 @@
     zoneJumpMin: 0.22,      // frac  after each tap the green zone moves at least this far (no memorising)
     zoneEdge: 0.04,         // frac  zone never touches the meter ends
     zoneStartMin: 0.35,     // frac  first zone centre ≥ this, so the needle (starting at 0) gives time to aim
-    catchFly: 0.65,         // s     gem flies in an arc from the hole to the bucket
+    catchFly: 0.75,         // s     gem flies in an arc from the hole to the bucket
     bucketDX: -150,         // px    bucket (gem landing point) relative to holeX
     bucketDY: -20,          // px    bucket landing y relative to surfaceY
 
@@ -117,9 +117,9 @@
         gemR: 27, pufferR: 19,
         gemEvery: [3.0, 4.4],
         gemSpeed: [38, 56],
-        reelWidth: 0.30, reelWidthZone: 0.025, reelWidthMin: 0.20,
+        reelWidth: 0.30, reelWidthZone: 0.02, reelWidthMin: 0.20,   // playtest: green shrinks a bit slower per zone
         perfect: 0.08,
-        needle: 0.65, needleZone: 0.07,
+        needle: 0.65, needleZone: 0.05,   // playtest: aurora/loop needle was the main cause of late escapes
         stepsFull: 5,
         maxSlips: 3,
         pufferEvery: 13, pufferMin: 5, pufferMax: 2, pufferMaxCap: 4,
@@ -131,9 +131,9 @@
         gemR: 24, pufferR: 21,
         gemEvery: [2.8, 4.2],
         gemSpeed: [46, 68],
-        reelWidth: 0.24, reelWidthZone: 0.025, reelWidthMin: 0.15,
+        reelWidth: 0.24, reelWidthZone: 0.02, reelWidthMin: 0.17,   // playtest: 0.15 at loop speed was a coin flip
         perfect: 0.06,
-        needle: 0.85, needleZone: 0.09,
+        needle: 0.85, needleZone: 0.06,   // playtest: aurora/loop needle was the main cause of late escapes
         stepsFull: 6,
         maxSlips: 3,
         pufferEvery: 8, pufferMin: 3.2, pufferMax: 3, pufferMaxCap: 5,
@@ -614,7 +614,7 @@
         var k = clamp(it.t / CONFIG.catchFly, 0, 1);
         var bx = L.holeX + CONFIG.bucketDX, by = L.surfaceY + CONFIG.bucketDY;
         it.x = it.fx0 + (bx - it.fx0) * k;
-        it.y = it.fy0 + (by - it.fy0) * k - M.sin(M.PI * k) * 90;
+        it.y = it.fy0 + (by - it.fy0) * k - M.sin(M.PI * k) * 150;
         if (k >= 1) remove = true;
       } else if (it.state === 'puffed') {
         it.puff = clamp(it.t / CONFIG.puffTime, 0, 1);

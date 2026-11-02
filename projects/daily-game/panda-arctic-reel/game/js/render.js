@@ -196,11 +196,13 @@
           }
           case 'reelGood': {
             const hk = w.hook;
-            if (e.perfect) { this.say('Perfect!', hk.x + 60, hk.y - 30, '#ffe14d', 24); this.ring(hk.x, hk.y + 18, '#ffe14d', 0.4, 40); }
+            const sx = this.reelPos(w)[0] > hk.x ? hk.x - 70 : hk.x + 70;
+            if (e.perfect) { this.say('Perfect!', sx, hk.y - 30, '#ffe14d', 24); this.ring(hk.x, e.y + 18, '#ffe14d', 0.4, 40); }
+            else { this.say('Good!', sx, hk.y - 30, '#9dffbf', 20); this.ring(hk.x, e.y + 18, '#53d88a', 0.35, 34); }
             if (wx) wx.burst('bubble_s', hk.x, hk.y + 10, e.perfect ? 7 : 4, { speed: 70, life: 0.7, size: 10, up: 0.9 });
             break;
           }
-          case 'reelSlip': this.say('Oops!', w.hook.x + 60, w.hook.y - 20, '#ffc8a0', 20); break;
+          case 'reelSlip': { const hk = w.hook, sx = this.reelPos(w)[0] > hk.x ? hk.x - 70 : hk.x + 70; this.say('Oops!', sx, hk.y - 20, '#ff8a7a', 22); this.reelFlash = 0.3; break; }
           case 'escape': if (e.item) this.say('It got away!', e.item.x, e.item.y - 50, '#ffd0b0', 22); break;
           case 'catch': {
             const it = e.item, gold = it && it.type === 'gold';
@@ -239,6 +241,7 @@
       this.goldFlash = Math.max(0, this.goldFlash - dt * 1.5);
       this.bucketPop = Math.max(0, (this.bucketPop || 0) - dt * 3);
       this.goldHint = Math.max(0, (this.goldHint || 0) - dt);
+      this.reelFlash = Math.max(0, (this.reelFlash || 0) - dt);
       for (const f of this.fx) f.life += dt;
       this.fx = this.fx.filter(f => f.life < f.max);
       for (const t of this.texts) { t.life += dt; t.y -= 26 * dt; }
@@ -264,6 +267,7 @@
       const al = clamp(w.alpha == null ? 1 : w.alpha, 0, 1);
       this.drawParticles(g, 'sky');
       this.drawParticles(g, 'back');
+      if (amb && amb.tint) { g.fillStyle = amb.tint; g.fillRect(0, w.layout.waterTop, this.VW, this.VH - w.layout.waterTop); }   // water light only; items stay bright
       this.drawItems(g, w, al, false);
       this.drawBucket(g, w);
       this.drawLineAndHook(g, w, al);
@@ -271,13 +275,12 @@
       this.drawItems(g, w, al, true);     // hooked / caught gems above the line
       this.drawParticles(g, 'front');
       this.drawFx(g);
-      if (amb && amb.tint) { g.fillStyle = amb.tint; g.fillRect(0, w.layout.waterTop, this.VW, this.VH - w.layout.waterTop); }
       g.setTransform(px, 0, 0, px, 0, 0);
       if (this.flash > 0) { g.fillStyle = 'rgba(255,255,255,' + (this.flash * 0.35) + ')'; g.fillRect(0, 0, this.VW, this.VH); }
       if (this.goldFlash > 0) { g.fillStyle = 'rgba(255,220,90,' + (this.goldFlash * 0.22) + ')'; g.fillRect(0, 0, this.VW, this.VH); }
-      if (w.reel && w.reel.active) this.drawReel(g, w);
+      if (w.reel && w.reel.active && mode !== 'title') this.drawReel(g, w);
       if (mode !== 'title') { this.drawHint(g, w); this.drawHud(g, w); this.drawBanner(g); }
-      this.drawTexts(g);
+      if (mode !== 'title') this.drawTexts(g);
       if (this.debug) this.drawDebug(g, w);
     }
 
@@ -351,8 +354,19 @@
       if (hk.lost) {   // snapped: a curly loose end dangles from the rod
         g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 1.6;
         g.beginPath(); g.moveTo(tip[0], tip[1]);
-        for (let i = 1; i <= 12; i++) g.lineTo(tip[0] + Math.sin(i * 1.4 + this.time * 3) * 5, tip[1] + i * 3);
-        g.stroke(); return;
+        for (let i = 1; i <= 18; i++) g.lineTo(tip[0] + Math.sin(i * 1.4 + this.time * 3) * 5, tip[1] + i * 3);
+        g.stroke();
+        // the cut hook sinks and fades in the water with a short wavy bit of line
+        const fa = clamp((w._snapT || 0) / 1.0, 0, 1);
+        if (fa > 0.02 && hy > w.layout.waterTop) {
+          g.globalAlpha = fa; g.beginPath(); g.moveTo(hx, hy - 70);
+          for (let i = 1; i <= 8; i++) g.lineTo(hx + Math.sin(i * 1.3 + this.time * 4) * 4, hy - 70 + i * 5);
+          g.stroke();
+          const hc = this.spr('hook', HOOK[0], HOOK[1]);
+          if (hc) { g.save(); g.translate(hx, hy - 30); g.rotate(hk.tilt || 0.3); g.drawImage(hc, -12, -1.5, HOOK[0], HOOK[1]); g.restore(); }
+          g.globalAlpha = 1;
+        }
+        return;
       }
       const ax = hx + Math.sin(hk.tilt || 0) * 0, ay = hy - 30;   // line attach is 30 px above the hit centre
       // the line sags a little when slack (rising / idle) and is straight when tense (sinking / reeling)
@@ -376,9 +390,9 @@
       const s = (gold ? GEM_G : GEM) * scale, cu = this.custom('gem', s, s);
       g.globalAlpha = alpha == null ? 1 : alpha;
       if (glow > 0.05 || gold || cu) {   // a coloured glow ring keeps values readable (also on custom gems)
-        const r = s * 0.78, gr = g.createRadialGradient(x, y, s * 0.2, x, y, r);
-        const col = GEM_COL[type] || '#fff', ga = gold ? 0.55 + 0.25 * Math.sin(this.time * 6) : Math.max(glow * 0.6, cu ? 0.45 : 0);
-        gr.addColorStop(0, col); gr.addColorStop(1, 'rgba(255,255,255,0)');
+        const r = s * 1.1, gr = g.createRadialGradient(x, y, s * 0.2, x, y, r);
+        const col = GEM_COL[type] || '#fff', ga = gold ? 0.55 + 0.25 * Math.sin(this.time * 6) : Math.max(glow * 0.75, cu ? 0.45 : 0);
+        gr.addColorStop(0, col); gr.addColorStop(0.45, col); gr.addColorStop(1, 'rgba(255,255,255,0)');
         g.globalAlpha = (alpha == null ? 1 : alpha) * ga; g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill();
         g.globalAlpha = alpha == null ? 1 : alpha;
       }
@@ -399,7 +413,7 @@
         const x = lerp(it.prevX == null ? it.x : it.prevX, it.x, al), y = lerp(it.prevY == null ? it.y : it.prevY, it.y, al);
         const left = (it.vx || 0) < 0;
         if (it.kind === 'gem') {
-          if (it.state === 'caught') { const k = clamp(it.t / 0.65, 0, 1); this.drawGem(g, it.type, x, y, 1 - k * 0.45, false, 1); }
+          if (it.state === 'caught') { const k = clamp(it.t / 0.75, 0, 1); this.drawGem(g, it.type, x, y, 1 - clamp((k - 0.6) / 0.4, 0, 1) * 0.45, false, 1); }
           else if (it.state === 'hooked') this.drawGem(g, it.type, x, y, 1, false, 1);
           else if (it.state === 'escape') this.drawGem(g, it.type, x, y, 1, true, clamp((3 - it.t) / 0.8, 0, 1));
           else this.drawGem(g, it.type, x, y + Math.sin(this.time * 2 + it.id) * 1.5, 1, true, 1);
@@ -435,14 +449,15 @@
       const L = w.layout, hy = w.hook.y, R = 64;
       let cx = L.holeX + 170;
       if (cx + R + 14 > this.VW - this.ins.right) cx = L.holeX - 170;
-      const cy = clamp(hy + 20, L.waterTop + R + 34, this.VH - this.ins.bottom - 46);
+      const cy = clamp(hy + 20, L.waterTop + R + 50, this.VH - this.ins.bottom - 46);
       return [cx, cy, R];
     }
     drawReel(g, w) {
       const r = w.reel, [cx, cy, R] = this.reelPos(w);
       const a0 = Math.PI * 1.08, a1 = Math.PI * 1.92, ang = u => lerp(a0, a1, clamp(u, 0, 1));
       // plate
-      g.fillStyle = 'rgba(12,28,60,.72)'; this.rr(g, cx - R - 16, cy - R - 20, 2 * R + 32, R + 64, 22); g.fill();
+      const rf = this.reelFlash || 0, nx = rf > 0 ? Math.sin(rf * 60) * 3 : 0;
+      g.fillStyle = rf > 0 ? 'rgba(150,40,50,.8)' : 'rgba(12,28,60,.72)'; this.rr(g, cx - R - 16 + nx, cy - R - 42, 2 * R + 32, R + 86, 22); g.fill();
       g.strokeStyle = 'rgba(227,251,255,.55)'; g.lineWidth = 2; g.stroke();
       g.lineCap = 'round';
       g.lineWidth = 16; g.strokeStyle = 'rgba(255,255,255,.22)'; g.beginPath(); g.arc(cx, cy, R, a0, a1); g.stroke();
@@ -462,10 +477,10 @@
       for (let i = 0; i < show; i++) { g.fillStyle = '#e3fbff'; g.beginPath(); g.arc(cx - (show - 1) * 7 + i * 14, cy + 22, 5, 0, TAU); g.fill(); }
       for (let i = 0; i < (r.maxSlips || 3); i++) {
         g.fillStyle = i < (r.slips || 0) ? 'rgba(255,140,120,.95)' : 'rgba(255,255,255,.28)';
-        g.beginPath(); g.arc(cx - 14 + i * 14, cy + 36, 4, 0, TAU); g.fill();
+        g.beginPath(); g.arc(cx - 14 + i * 14, cy + 36, 5, 0, TAU); g.fill();
       }
       const pulse = inZone ? 1 + 0.08 * Math.sin(this.time * 20) : 1;
-      this.text(g, inZone ? 'TAP!' : 'Reel', cx, cy - R - 2, Math.round(17 * pulse), inZone ? '#9dffbf' : '#e3fbff');
+      this.text(g, inZone ? 'TAP!' : 'Reel', cx, cy - R - 24, Math.round(17 * pulse), inZone ? '#9dffbf' : '#e3fbff');
     }
 
     // ---------------- fx, text, HUD ----------------
@@ -494,13 +509,16 @@
     drawHint(g, w) {
       // first zone: a pulsing "hold to sink" chip next to the hook until the player hooks the first gem
       if (w.level === 0 && w.stats && w.stats.hooks === 0 && w.phase === 'roam' && !(PR.Game && PR.Game.bot)) {
-        const [hx, hy] = this.hookPos(w, 1), a = 0.75 + 0.25 * Math.sin(this.time * 5);
+        const [hx, hy] = this.hookPos(w, 1), a = 0.9 + 0.1 * Math.sin(this.time * 5);
         const touch = PR.Game && PR.Game.isTouch, msg = touch ? 'Hold = sink · let go = float' : 'Hold SPACE = sink · let go = float';
+        const fs = Math.round(17 * Math.min(this._hudK || 1, 1.4)), ty = Math.min(this.VH - 40, Math.max(w.layout.waterTop + 40, hy + 56));
+        g.font = '900 ' + fs + 'px ' + FONT; const tw = g.measureText(msg).width;
         g.globalAlpha = a;
-        this.text(g, msg, w.layout.holeX, Math.min(this.VH - 40, Math.max(w.layout.waterTop + 40, hy + 50)), 17, '#ffffff');
-        // arrow
-        const ay = hy + 12 + Math.sin(this.time * 5) * 4;
-        g.fillStyle = '#ffffff'; g.beginPath(); g.moveTo(w.layout.holeX + 26, ay); g.lineTo(w.layout.holeX + 38, ay); g.lineTo(w.layout.holeX + 32, ay + 10); g.closePath(); g.fill();
+        g.fillStyle = 'rgba(16,34,70,.55)'; this.rr(g, hx - tw / 2 - 12, ty - fs * 0.8, tw + 24, fs * 1.6, fs * 0.8); g.fill();
+        this.text(g, msg, hx, ty, fs, '#ffffff');
+        // arrow under the hook
+        const ay = hy + 24 + Math.sin(this.time * 5) * 4;
+        g.fillStyle = '#ffffff'; g.beginPath(); g.moveTo(hx - 7, ay); g.lineTo(hx + 7, ay); g.lineTo(hx, ay + 10); g.closePath(); g.fill();
         g.globalAlpha = 1;
       }
       if (this.goldHint > 0 && w.phase === 'roam') {
@@ -512,8 +530,8 @@
      * his bucket fill the narrow sky) and the zone pill with gem progress (right of the hole, below the buttons in portrait). */
     drawHud(g, w) {
       const I = this.ins, L = w.layout, portrait = this.VW < this.VH;
-      const K = portrait ? Math.min(this._hudK || 1, 1.3) : (this._hudK || 1);
-      const x0 = I.left + 12, y0 = portrait ? Math.max(L.waterTop + 22, I.top + 10) : I.top + 10;
+      const K = portrait ? Math.min(this._hudK || 1, 1.1) : (this._hudK || 1);
+      const x0 = I.left + 12, y0 = I.top + 10;
       const ss = Math.round(26 * K), ic = Math.round(26 * K);
       const plateW = Math.round(Math.max(3 * (ic + 4) + 16, 120 * K)), plateH = Math.round(76 * K);
       g.fillStyle = 'rgba(16,34,70,.5)'; this.rr(g, x0 - 4, y0 - 4, plateW, plateH, 12); g.fill();
@@ -531,7 +549,7 @@
       const pw = Math.min(250 * K, right - left - 16);
       if (pw > 70) {
         const cx = (left + right) / 2, info = ZONE_INFO[(w.zone || 0) % 4], loop = w.loop ? ' ' + (w.loop + 1) : '';
-        g.fillStyle = 'rgba(16,34,70,.45)'; this.rr(g, cx - pw / 2 - 8, py - 4, pw + 16, Math.round(50 * K), 12); g.fill();
+        g.fillStyle = 'rgba(16,34,70,.55)'; this.rr(g, cx - pw / 2 - 8, py - 4, pw + 16, Math.round(50 * K), 12); g.fill();
         g.font = '900 ' + Math.round(15 * K) + 'px ' + FONT;
         const fs = Math.round(15 * K * Math.min(1, pw / Math.max(1, g.measureText(info.name + loop).width)));
         this.text(g, info.name + loop, cx, py + 9 * K, fs, '#ffffff');
@@ -539,7 +557,7 @@
         for (let i = 0; i < n; i++) {
           const gx = gx0 + i * d, gy = py + 30 * K;
           if (i < got) this.drawC(g, 'gem_amethyst', gx, gy, Math.min(15 * K, d * 0.95), Math.min(15 * K, d * 0.95));
-          else { g.fillStyle = 'rgba(255,255,255,.28)'; g.beginPath(); g.arc(gx, gy, 4.5 * K, 0, TAU); g.fill(); }
+          else { g.fillStyle = 'rgba(255,255,255,.55)'; g.beginPath(); g.arc(gx, gy, 5 * K, 0, TAU); g.fill(); g.strokeStyle = 'rgba(16,34,70,.5)'; g.lineWidth = 1.5; g.stroke(); }
         }
       }
     }

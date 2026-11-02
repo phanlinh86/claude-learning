@@ -17,7 +17,7 @@
     seed: params.has('seed') ? num('seed', 1) : null,
     urlDiff: DIFFS.includes(params.get('diff')) ? params.get('diff') : null,   // test flag, never saved
     world: null, weather: null, bot: null, renderer: null,
-    settings: { sfx: true, music: true, muted: false, difficulty: 'normal' },
+    settings: { sfx: true, music: true, muted: false, difficulty: 'easy' },   // playtest: first run on Easy (a family game)
     fullscreen: false, overAt: 0, deadT: -1,
     pointers: new Set(), keysDown: new Set(),
     stats: { games: 0, scores: [], times: [], levels: [], gems: 0, gold: 0, snaps: 0, escapes: 0, errors: [] },
@@ -25,7 +25,7 @@
     async boot() {
       await PR.Storage.init();
       Object.assign(this.settings, PR.Storage.getJSON('settings', {}));
-      if (!DIFFS.includes(this.settings.difficulty)) this.settings.difficulty = 'normal';
+      if (!DIFFS.includes(this.settings.difficulty)) this.settings.difficulty = 'easy';
       this.urlMute = params.get('mute') === '1';
       PR.Audio.setOptions({ sfx: this.settings.sfx, music: this.settings.music, muted: this.settings.muted || this.urlMute });
       this.renderer = new PR.Renderer(document.getElementById('game'));
@@ -289,16 +289,25 @@
       }
     },
 
-    adapt(real) {
-      if (params.get('adaptive') === '0' || this.mode === 'paused' || this.mode === 'boot') return;
+    /* Adaptive quality: judge the time spent on OUR work (simulate + draw), not the time between frames — a phone in
+     * Low Power Mode runs at a steady 30 fps and must not be mistaken for an overloaded one. Steps down when the work
+     * stays above 14 ms, recovers when it stays under 6 ms; never below 1 device px per logical px (or ~2/3 of the
+     * natural resolution on touch screens). Off at test speeds. */
+    adapt(work) {
+      if (params.get('adaptive') === '0' || this.mode === 'paused' || this.mode === 'boot' || this.speed !== 1) return;
       if (this._adaptHold > 0) { this._adaptHold--; return; }
-      this._ft = this._ft == null ? real : this._ft + (real - this._ft) * 0.1;
-      this._slowT = this._ft > 0.022 ? (this._slowT || 0) + real : 0;
-      const R = this.renderer;
-      if (this._slowT > 1.5 && R.px > 1.01) { R.maxPx = Math.max(1, R.px * 0.75); R.resize(); this._slowT = 0; this._ft = null; this._adaptHold = 60; }
+      this._wt = this._wt == null ? work : this._wt + (work - this._wt) * 0.05;
+      const R = this.renderer, natural = R.cssScale * (window.devicePixelRatio || 1);
+      const floor = Math.max(1, this.isTouch ? natural * 0.67 : 1);
+      if (this._wt > 0.014) { this._slowN = (this._slowN || 0) + 1; this._fastN = 0; }
+      else if (this._wt < 0.006) { this._fastN = (this._fastN || 0) + 1; this._slowN = 0; }
+      else { this._slowN = 0; this._fastN = 0; }
+      if (this._slowN > 90 && R.px > floor + 0.01) { R.maxPx = Math.max(floor, R.px * 0.8); R.resize(); this._slowN = 0; this._wt = null; this._adaptHold = 60; }
+      else if (this._fastN > 300 && R.maxPx && R.px < natural - 0.01) { R.maxPx = Math.min(natural, R.px * 1.2); if (R.maxPx >= natural) R.maxPx = 0; R.resize(); this._fastN = 0; this._wt = null; this._adaptHold = 60; }
     },
 
     frame(ts) {
+      const t0 = performance.now();
       try {
         const real = Math.min(0.1, Math.max(0, (ts - this.last) / 1000));
         this.last = ts;
@@ -309,7 +318,7 @@
           this.renderer.update(dt);
         }
         this.renderer.draw(this.mode);
-        this.adapt(real);
+        this.adapt((performance.now() - t0) / 1000);
       } catch (err) {
         console.error(err);
         if (this.stats.errors.length < 20) this.stats.errors.push(String(err && err.stack || err));

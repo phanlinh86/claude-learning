@@ -20,7 +20,7 @@
   // targets per zone: shallows, kelp, twilight, aurora
   var ZONES = [
     { snow: 46, skySpark: 0,  bubble: 16, kelp: 0,  plankton: 0,  jelly: 0, tint: null,                          glow: 0.0,  aurora: 0 },
-    { snow: 30, skySpark: 0,  bubble: 12, kelp: 12, plankton: 0,  jelly: 0, tint: 'rgba(255,190,90,0.06)',        glow: 0.15, aurora: 0 },
+    { snow: 30, skySpark: 0,  bubble: 12, kelp: 12, plankton: 0,  jelly: 0, tint: 'rgba(255,190,90,0.06)',        glow: 0.35, aurora: 0 },
     { snow: 34, skySpark: 6,  bubble: 10, kelp: 0,  plankton: 34, jelly: 0, tint: 'rgba(120,60,160,0.10)',        glow: 0.45, aurora: 0 },
     { snow: 18, skySpark: 16, bubble: 8,  kelp: 0,  plankton: 14, jelly: 4, tint: 'rgba(10,20,60,0.18)',          glow: 0.85, aurora: 1 }
   ];

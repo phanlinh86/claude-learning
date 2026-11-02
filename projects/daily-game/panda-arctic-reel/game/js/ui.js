@@ -39,7 +39,7 @@
       click('btnPauseSettings', () => this.open('scrSettings', 'scrPause'));
       click('btnPauseMenu', () => game.toTitle());
       click('btnAgain', () => { if (game.canRestart()) game.startGame(); });
-      click('btnOverMenu', () => game.toTitle());
+      click('btnOverMenu', () => { if (game.canRestart()) game.toTitle(); });
       click('btnPause', () => game.pause());
       click('btnMuteHud', () => game.toggleMute());
       click('btnResetAll', () => {
@@ -93,7 +93,6 @@
       $('setDifficulty').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === s.difficulty));
       this.syncMute();
     },
-    fmtOffset(v) { return v === 0 ? '0 ms' : (v > 0 ? '+' : '−') + Math.abs(v) + ' ms'; },
     syncMute() {
       const m = this.game.settings.muted || this.game.urlMute;
       $('btnMuteHud').innerHTML = m
