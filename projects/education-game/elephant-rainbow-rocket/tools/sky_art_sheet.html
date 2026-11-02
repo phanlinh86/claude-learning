@@ -1,0 +1,143 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Sky art sheet</title>
+<style>body{margin:0;background:#666;font:14px system-ui}canvas{display:block}</style></head>
+<body>
+<!-- Test sheet for RR.SkyArt. #islands (default): every island colour (white + 7 answer colours) at every mood (morning /
+     noon / sunset / night) as clouds, planets at night, a glow example, all at in-game width 200 px and a few at 3×.
+     #tokens: every token kind on white clouds (shapes ×8, stars 1–12, numbers with stars 1–10, numbers, letters, text,
+     animals via a placeholder sprite), plus ribbon / flame / puff / boost button / spark / star, plus the rocket composite
+     (rocket_back + Bim + rocket_front via SkyArt.drawRocket) at 190 px upright and tilted ±0.5 rad with flame.
+     Render with: node tools/sky_art_sheet.js  (writes docs/art/sky_art_sheet.png + sky_art_sheet_2.png) -->
+<canvas id="c"></canvas>
+<script src="../game/js/sky_art.js"></script>
+<script>
+(function () {
+  var S = RR.SkyArt, COLS = Object.keys(S.COLORS), dpr = window.devicePixelRatio || 1;
+  var cv = document.getElementById('c'), ctx = cv.getContext('2d'), mode = location.hash === '#tokens' ? 'tokens' : 'islands';
+  var SKY = [['#FFE3C9', '#A9DBF7'], ['#CDEBFB', '#7EC8F2'], ['#9E8BD6', '#E7A2C4', '#FFB38A'], ['#1D2556', '#3A2F6E']];
+  var NAMES = ['morning', 'noon', 'sunset', 'night'];
+  var imgs = {};
+  function size(W, H) { cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+  function sky(y, h, W, m) {
+    var c = SKY[m], g = ctx.createLinearGradient(0, y, 0, y + h);
+    if (m === 2) { g.addColorStop(0, c[0]); g.addColorStop(0.5, c[1]); g.addColorStop(1, c[2]); }
+    else if (m === 3) { g.addColorStop(0, c[0]); g.addColorStop(1, c[1]); }
+    else { g.addColorStop(0, c[1]); g.addColorStop(1, c[0]); }
+    ctx.fillStyle = g; ctx.fillRect(0, y, W, h);
+  }
+  function label(t, x, y, light) { ctx.font = '600 13px system-ui'; ctx.textAlign = 'left'; ctx.fillStyle = light ? '#fff' : '#33405c'; ctx.fillText(t, x, y); }
+  function at(x, y, fn) { ctx.save(); ctx.translate(x, y); fn(); ctx.restore(); }
+  function load(n) {
+    return new Promise(function (res) { var im = new Image(); im.onload = function () { imgs[n] = im; res(); }; im.onerror = function () { res(); }; im.src = '../game/assets/default/' + n; });
+  }
+  function sprite(name, x, y, s, wave) {
+    var im = imgs['items/animal_' + name + (wave ? '_wave' : '') + '.svg'] || imgs['items/animal_' + name + '.svg'];
+    if (im) { ctx.drawImage(im, x - s / 2, y - s / 2, s, s); return; }
+    ctx.beginPath(); ctx.arc(x, y, s * 0.42, 0, Math.PI * 2); ctx.fillStyle = '#E9D9BC'; ctx.fill(); ctx.strokeStyle = '#9A774C'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = '#4A3A2A'; ctx.font = 'bold ' + Math.round(s * 0.2) + 'px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(name, x, y);
+  }
+
+  function islands() {
+    var W = 1960, IW = 200, colW = 216, rowH = 190;
+    var keys = [null].concat(COLS);
+    var H = 4 * (rowH + 30) + (rowH + 120) + 520;
+    size(W, H);
+    var y = 0;
+    for (var m = 0; m < 4; m++) {
+      sky(y, rowH + 30, W, m); label(NAMES[m] + ' — clouds (white + 7 answer colours), w = 200, with a sample gem / token', 12, y + 18, m >= 2);
+      keys.forEach(function (k, i) {
+        at(118 + i * colW, y + 70, function () {
+          S.drawIsland(ctx, IW, { style: 'cloud', color: k, mood: m, t: 0 });
+          if (!k) S.drawToken(ctx, { kind: 'shape', shape: S.SHAPES[i % 8], color: COLS[(i + 2) % 7] }, 84);
+        });
+      });
+      y += rowH + 30;
+    }
+    sky(y, rowH + 120, W, 3); label('night — planets (pastel ×3, 7 answer colours), w = 200 → Ø160; last: glow 1 on a cloud and a planet', 12, y + 18, true);
+    var list = [0, 1, 2].map(function (v) { return { c: null, v: v }; }).concat(COLS.map(function (c) { return { c: c, v: 0 }; }));
+    list.forEach(function (e, i) {
+      at(110 + i * 200, y + 50, function () {
+        S.drawIsland(ctx, IW, { style: 'planet', color: e.c, mood: 3, variant: e.v });
+        if (i < 3) S.drawToken(ctx, { kind: 'stars', value: i + 2, n: i + 2 }, 70);
+      });
+    });
+    y += rowH + 120;
+    // 3× zoom + glow + crossfade
+    sky(y, 520, W, 2); label('3× : white sunset cloud with a gem · red noon cloud · glow · mood 1.5 crossfade', 12, y + 18);
+    at(330, y + 170, function () { S.drawIsland(ctx, 600, { style: 'cloud', mood: 2 }); S.drawToken(ctx, { kind: 'shape', shape: 'heart', color: 'pink' }, 250); });
+    at(980, y + 170, function () { S.drawIsland(ctx, 600, { style: 'cloud', color: 'red', mood: 1 }); });
+    at(1500, y + 120, function () { S.drawIsland(ctx, 200, { style: 'cloud', glow: 1, t: 0.3, mood: 0 }); S.drawToken(ctx, { kind: 'number', value: 3, n: 3 }, 80); });
+    at(1500, y + 330, function () { S.drawIsland(ctx, 200, { style: 'cloud', color: 'green', mood: 1.5 }); });
+    at(1780, y + 120, function () { S.drawIsland(ctx, 200, { style: 'planet', glow: 1, t: 1.1, mood: 3 }); });
+    at(1780, y + 330, function () { S.drawIsland(ctx, 200, { style: 'cloud', color: 'yellow', mood: 3 }); });
+  }
+
+  function tokens() {
+    var W = 1960, H = 2300;
+    size(W, H);
+    var y = 0, TS = 84;
+    function row(m, h, title, items, step, iw) {
+      sky(y, h, W, m); label(title, 12, y + 18, m >= 2);
+      items.forEach(function (tok, i) {
+        at(100 + i * step, y + h - 70, function () {
+          S.drawIsland(ctx, iw || 180, { style: 'cloud', mood: m });
+          S.drawToken(ctx, tok, TS, { sprite: sprite, wave: i % 2 === 1 });
+        });
+      });
+      y += h;
+    }
+    row(0, 210, 'shapes ×8 (age ≤ 4 distinct colours), token size 84 on 180-px clouds', S.SHAPES.map(function (s, i) { return { kind: 'shape', shape: s, color: COLS[i % 7] }; }), 200);
+    row(1, 200, 'stars 1–9 (dice layout)', [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (n) { return { kind: 'stars', value: n, n: n }; }), 200);
+    row(2, 200, 'stars 10–12 · number badges with n stars 1–5', [10, 11, 12].map(function (n) { return { kind: 'stars', value: n, n: n }; })
+      .concat([1, 2, 3, 4, 5].map(function (n) { return { kind: 'number', value: n, n: n }; })), 200);
+    row(3, 200, 'numbers with stars 6–10 · plain numbers 0, 12, 20', [6, 7, 8, 9, 10].map(function (n) { return { kind: 'number', value: n, n: n }; })
+      .concat([0, 12, 20].map(function (n) { return { kind: 'number', value: n }; })), 200);
+    row(0, 200, 'letters A M W Q a g Đ Ư · text', ['A', 'M', 'W', 'Q', 'a', 'g', 'Đ', 'Ư'].map(function (l) { return { kind: 'letter', value: l }; })
+      .concat([{ kind: 'text', value: '2 + 3', text: '2 + 3' }]), 200);
+    row(1, 210, 'animals (sprite callback; odd = wave) · size big / small · color (nothing)', ['cat', 'dog', 'cow', 'pig', 'sheep', 'duck', 'lion', 'frog'].map(function (a) { return { kind: 'animal', value: a }; })
+      .concat([{ kind: 'size', value: 'big', animal: 'cow', scale: 1 }]), 200);
+    // effects
+    var hFx = 520;
+    sky(y, hFx, W, 1); label('ribbon (fresh → faded), flame power 0.2 / 0.5 / 1 (two times), smoke puffs, boost button (t=0 / 0.3 / pressed), sparks, stars', 12, y + 18);
+    var pts = [];
+    for (var i = 0; i < 120; i++) { var u = i / 119; pts.push({ x: 40 + u * 640, y: y + 380 - Math.sin(u * Math.PI) * 240 + Math.sin(u * 9) * 14, a: u }); }
+    S.drawRibbon(ctx, pts, 30);
+    var pts2 = [];
+    for (i = 0; i < 40; i++) { var v = i / 39; pts2.push({ x: 120 + v * 200, y: y + 470 - v * 60, a: 1 }); }
+    S.drawRibbon(ctx, pts2, 22);
+    [0.2, 0.5, 1].forEach(function (p, k) { [0, 0.37].forEach(function (t, j) { at(740 + k * 90 + j * 40, y + 120 + j * 150, function () { S.drawFlame(ctx, p, t); }); }); });
+    [0, 1, 2, 3].forEach(function (m, k) { at(1060 + k * 60, y + 420, function () { S.drawPuff(ctx, 52, 0.95, m); }); });
+    at(1420, y + 140, function () { S.drawBoostButton(ctx, 78, 0); });
+    at(1640, y + 140, function () { S.drawBoostButton(ctx, 78, 0.3); });
+    at(1840, y + 140, function () { S.drawBoostButton(ctx, 78, 0, true); });
+    [10, 18, 30, 48].forEach(function (s, k) { at(1360 + k * 70, y + 330, function () { S.drawSpark(ctx, s, '#FFFFFF'); }); at(1360 + k * 70, y + 420, function () { S.drawStar(ctx, s); }); });
+    at(1660, y + 420, function () { S.drawStar(ctx, 40, 'pink'); }); at(1720, y + 420, function () { S.drawStar(ctx, 40, 'blue'); });
+    y += hFx;
+    // rocket composite at 190 px on 3 skies, upright & tilted
+    var hR = 320;
+    [0, 2, 3].forEach(function (m) {
+      sky(y, hR, W, m); label('rocket composite (drawRocket, h = 190, origin = feet): rot 0 / −0.5 / +0.5 / −0.25 with flame · each mood · on a cloud pad', 12, y + 18, m >= 2);
+      var moods = ['idle', 'talk', 'happy', 'cheer', 'think', 'oops', 'blink'];
+      moods.forEach(function (md, k) {
+        var x = 120 + k * 250, fy = y + 250, rot = [0, -0.5, 0.5, -0.25, 0, 0.25, 0][k];
+        if (k === 0 || k >= 4) at(x, fy, function () { S.drawIsland(ctx, 200, { style: m === 3 ? 'planet' : 'cloud', mood: m }); });
+        at(x, fy, function () {
+          ctx.rotate(rot);
+          S.drawRocket(ctx, 190, { back: imgs['characters/rocket_back.svg'], bim: imgs['characters/bim_' + md + '.svg'], front: imgs['characters/rocket_front.svg'] },
+            { flame: (k >= 1 && k <= 3) ? 1 - (k - 1) * 0.3 : 0, t: k * 0.21 });
+        });
+      });
+      y += hR;
+    });
+  }
+
+  var need = ['characters/rocket_back.svg', 'characters/rocket_front.svg'];
+  ['idle', 'blink', 'talk', 'happy', 'cheer', 'think', 'oops'].forEach(function (m) { need.push('characters/bim_' + m + '.svg'); });
+  ['cat', 'dog', 'cow', 'pig', 'sheep', 'duck', 'lion', 'frog'].forEach(function (a) { need.push('items/animal_' + a + '.svg', 'items/animal_' + a + '_wave.svg'); });
+  Promise.all(need.map(load)).then(function () {
+    try { if (mode === 'tokens') tokens(); else islands(); } catch (e) { console.log('ERR ' + e.stack); }
+    document.title = 'done';
+  });
+})();
+</script>
+</body></html>
