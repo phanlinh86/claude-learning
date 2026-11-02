@@ -23,8 +23,10 @@ and faces, and loves to be encouraged by name. Her name must be pronounced prope
    normal 4-chapter × 4-round session (+ Talk time). Finishing a world unlocks the next and awards a trophy (bronze /
    silver ≥ 20 / gold ≥ 32 of 52 stars). Lagoon 6 is a mixed review. Quitting mid-world saves a resume point (world,
    chapter, stars) and the map shows a "Keep playing" ribbon.
-2. **Variety against boredom.** Two mechanics that alternate chapter by chapter (e.g. tap-to-dig and drag-to-sort; the rolled
-   mechanic plus the proven drag-sort). Content must never repeat an identical round inside a chapter. Add free surprises:
+2. **Variety against boredom.** Two mechanics from two DIFFERENT families that alternate chapter by chapter (the rolled
+   mechanic plus a second one rolled with `--salt mechanic=2`, re-salted until its `family` differs). At most one of them may
+   be from the *container* family (drag/drop/catch into something) — parents' feedback: "the game keeps dropping something
+   into a basket". Content must never repeat an identical round inside a chapter. Add free surprises:
    a photobombing creature every 3rd correct answer (≤ 2 per chapter), a giggling critter under one target per round that
    is never a mistake, a helper dance with a 2-bar kazoo tune at chapter end, confetti + fanfare per world.
 3. **Profiles, score, progress.** `progress.js`: up to 4 profiles {name, sayAs, age, avatar}; a default profile
@@ -34,7 +36,8 @@ and faces, and loves to be encouraged by name. Her name must be pronounced prope
 4. **Her name, spoken right.** `voice.js` splits every line at the child's name and speaks the name with the best **vi-VN**
    voice when the name has Vietnamese letters and a Vietnamese voice exists; otherwise it substitutes the parent-set
    "say the name as" spelling (default "Mum"). Praise lines (≥ 8 per language) all use `{child}`.
-5. **Loud and adjustable.** Audio chain gain → compressor (−18 dB, 4:1) → user volume × 1.6 makeup; default 100 %; a volume
+5. **Loud and adjustable.** `navigator.audioSession.type = 'playback'` on unlock (iOS media channel, see build-education-game
+   "Loud, clear sound"). Audio chain gain → compressor (−18 dB, 4:1) → user volume × 1.6 makeup; default 100 %; a volume
    slider in settings and big **+ / −** buttons in the pause menu (kid-reachable). Voice utterances follow the same volume.
 6. **Funny sounds.** Synth boing (slide + vibrato), kazoo (saw through a nasal band-pass), slide whistle, bubbles, sand poof,
    rising counting chimes, bouncy swing-beat day music with shaker, music box at night.
@@ -43,7 +46,8 @@ and faces, and loves to be encouraged by name. Her name must be pronounced prope
    kid-proof input, safe areas, Add-to-Home-Screen icons, no network after load, no data leaves the device.
 
 ## Random mode
-As in build-education-game (date seed, `roll.py`, avoid repeats of the last 14 days, swap ≤ 1 incoherent element), then
+As in build-education-game (date seed, `roll.py` — it avoids the mechanic families of the last 3 games and rations the
+container family, swap ≤ 1 incoherent element), then
 write `REQUIREMENT.md` with the lagoon × age topic table (see the reference game) and announce in 2–3 lines.
 
 ## Team and phases

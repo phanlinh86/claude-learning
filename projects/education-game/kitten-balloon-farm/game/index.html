@@ -71,6 +71,8 @@
         </div></div>
       <div class="set-row"><label for="inpName" data-i18n="ui.name">Child's name</label>
         <input id="inpName" type="text" maxlength="16" autocomplete="off" autocorrect="off" spellcheck="false"></div>
+      <div class="set-row"><label for="optVolume" data-i18n="ui.volume">Volume</label>
+        <input id="optVolume" type="range" min="0" max="100" step="5" value="100"></div>
       <div class="set-grid">
         <label class="toggle"><input type="checkbox" id="optSfx"><span data-i18n="ui.sound">Sound effects</span></label>
         <label class="toggle"><input type="checkbox" id="optMusic"><span data-i18n="ui.music">Music</span></label>
@@ -88,6 +90,11 @@
       <h2 data-i18n="ui.paused">Paused</h2>
       <div class="menu">
         <button id="btnResume" class="btn btn-big btn-green"><svg class="i" viewBox="0 0 24 24"><path d="M8 4.8v14.4c0 .8.9 1.3 1.6.8l11-7.2a1 1 0 0 0 0-1.6l-11-7.2C8.9 3.5 8 4 8 4.8z"/></svg><span data-i18n="ui.resume">Resume</span></button>
+        <div class="vol-row" role="group" aria-label="Volume">
+          <button id="btnVolDown" class="icon-btn vol-btn" aria-label="Quieter"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><rect x="15" y="11" width="7" height="2.4" rx="1.2"/></svg></button>
+          <span id="volLevel" class="vol-level"></span>
+          <button id="btnVolUp" class="icon-btn vol-btn" aria-label="Louder"><svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><rect x="15" y="11" width="7" height="2.4" rx="1.2"/><rect x="17.3" y="8.7" width="2.4" height="7" rx="1.2"/></svg></button>
+        </div>
         <button id="btnHome" class="btn btn-orange"><svg class="i" viewBox="0 0 24 24"><path d="M12 3 2 12h3v8h5v-5h4v5h5v-8h3z"/></svg><span data-i18n="ui.home">Home</span></button>
       </div>
     </div>

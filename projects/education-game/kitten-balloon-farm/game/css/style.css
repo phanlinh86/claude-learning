@@ -210,3 +210,10 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 @media (prefers-reduced-motion: reduce) { .btn-play { animation: none; } }
 /* the smallest landscape phones (SE): no room for the tagline next to Miu */
 @media (orientation: landscape) and (max-height: 380px) { .tagline { display: none; } }
+
+/* volume: slider in settings, big − / + in the pause menu (kid-reachable) */
+#optVolume { width: 220px; height: 36px; accent-color: var(--green); }
+.vol-row { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 4px 0; }
+.vol-btn { width: 64px !important; height: 64px !important; }
+.vol-btn svg { width: 34px; }
+.vol-level { min-width: 64px; font-size: 24px; font-weight: 900; text-align: center; }

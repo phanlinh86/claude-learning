@@ -44,7 +44,7 @@
 
   var V = {
     log: [], onStart: null, onEnd: null, onListen: null,
-    _lang: 'en', _enabled: true, _unlocked: false, _inited: false
+    _lang: 'en', _enabled: true, _unlocked: false, _inited: false, _volume: 1
   };
   var synth = null, voices = [], pickCache = {}, current = null, queue = [], keepAlive = null, kickTimer = null;
   var voiceListeners = [], voiceSig = '';
@@ -152,7 +152,7 @@
     u.lang = LANG_TAG[item.lang];
     var v = pick(item.lang);
     if (v) u.voice = v;
-    u.rate = item.rate; u.pitch = item.pitch; u.volume = 1;
+    u.rate = item.rate; u.pitch = item.pitch; u.volume = V._volume == null ? 1 : V._volume;
     u.onstart = function () {
       if (item.started || item.done) return;
       item.started = true; call(V.onStart, item.display);
@@ -248,6 +248,7 @@
   V.setLang = function (l) { V._lang = l === 'vi' ? 'vi' : 'en'; };
   V.getLang = function () { return V._lang; };
   V.setEnabled = function (b) { V._enabled = !!b; if (!V._enabled) V.stop(); };
+  V.setVolume = function (v) { V._volume = Math.max(0, Math.min(1, +v || 0)); };   // follows the game's volume setting
   V.isEnabled = function () { return V._enabled; };
   V.isSupported = function () { return !!(synth || getSynth()); };
   V.isSpeaking = function () { return !!current; };
