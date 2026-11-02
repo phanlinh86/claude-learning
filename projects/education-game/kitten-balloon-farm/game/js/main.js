@@ -15,7 +15,7 @@
   const NAME = (kind, v) => (KB.I18N ? KB.I18N.name(curLang(), kind, v) : String(v));
 
   /* ---------- settings (URL flags never saved) ---------- */
-  const DEF = { age: 4, lang: (navigator.language || 'en').toLowerCase().startsWith('vi') ? 'vi' : 'en', name: '', sfx: true, music: true, voice: true, mic: true };
+  const DEF = { age: 4, lang: (navigator.language || 'en').toLowerCase().startsWith('vi') ? 'vi' : 'en', name: '', sfx: true, music: true, voice: true, mic: true, volume: 1 };
   let S = Object.assign({}, DEF);
   let langOverride = FLAGS.lang === 'vi' || FLAGS.lang === 'en' ? FLAGS.lang : null;   // URL ?lang= is session-only
   const curLang = () => langOverride || S.lang;
@@ -109,8 +109,10 @@
     if (KB.Voice) KB.Voice.say(text, opt || {});
   }
   function applyAudio() {
-    KB.Audio.setOptions({ sfx: S.sfx, music: S.music, muted: FLAGS.mute });
-    if (KB.Voice) { KB.Voice.setLang(curLang()); KB.Voice.setEnabled(voiceOn()); }
+    KB.Audio.setOptions({ sfx: S.sfx, music: S.music, muted: FLAGS.mute, volume: S.volume == null ? 1 : S.volume });
+    if (KB.Voice) { KB.Voice.setLang(curLang()); KB.Voice.setEnabled(voiceOn()); if (KB.Voice.setVolume) KB.Voice.setVolume(S.volume == null ? 1 : S.volume); }
+    const vl = $('volLevel'); if (vl) vl.textContent = Math.round((S.volume == null ? 1 : S.volume) * 100) + '%';
+    const vs = $('optVolume'); if (vs && document.activeElement !== vs) vs.value = Math.round((S.volume == null ? 1 : S.volume) * 100);
   }
   // the instruction is the most important line: praise / wrong lines must not cut it off (playtest P1-2)
   function speakPrompt(txt, opt) { promptUntil = performance.now() + 300 + 72 * (txt || '').length; speak(txt, opt); }
@@ -410,6 +412,12 @@
     $('btnAgain').addEventListener('click', () => { KB.Audio.play('click'); startGame(); });
     $('btnDoneHome').addEventListener('click', () => { KB.Audio.play('click'); goTitle(); });
     $('btnMic').addEventListener('click', listen);
+    // volume: settings slider + big − / + in the pause menu
+    $('optVolume').addEventListener('input', () => { S.volume = +$('optVolume').value / 100; saveSettings(); applyAudio(); });
+    $('optVolume').addEventListener('change', () => KB.Audio.play('pop'));
+    const step = d => { S.volume = Math.max(0, Math.min(1, Math.round(((S.volume == null ? 1 : S.volume) + d) * 10) / 10)); saveSettings(); applyAudio(); KB.Audio.play('pop'); };
+    $('btnVolDown').addEventListener('click', () => step(-0.1));
+    $('btnVolUp').addEventListener('click', () => step(0.1));
     document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => {
       S.lang = b.dataset.lang; langOverride = null; saveSettings(); KB.UI.applyLang(curLang()); applyAudio(); KB.UI.setTitleInfo(progress.totalStars, curAge(), curLang());
       updateVoiceInfo();

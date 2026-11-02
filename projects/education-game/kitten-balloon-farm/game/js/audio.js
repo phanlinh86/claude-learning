@@ -13,8 +13,8 @@
   const SCALE = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24];
 
   const A = {
-    ctx: null, master: null, sfx: null, music: null, amb: null, noiseBuf: null,
-    sfxOn: true, musicOn: true, muted: false, ducked: false,
+    ctx: null, master: null, user: null, sfx: null, music: null, amb: null, noiseBuf: null,
+    sfxOn: true, musicOn: true, muted: false, ducked: false, volume: 1,
     mood: 0, _timer: null, _next: 0, _step: 0, _phrase: null, _playing: false, _rain: null, _lastPlay: {},
 
     ensure() {
@@ -23,10 +23,13 @@
       if (!AC) return false;
       try { this.ctx = new AC(); } catch (e) { return false; }
       const c = this.ctx;
-      this.master = c.createGain(); this.master.gain.value = 0.9;
-      const comp = c.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4;
-      this.master.connect(comp); comp.connect(c.destination);
-      this.sfx = c.createGain(); this.sfx.gain.value = 0.6; this.sfx.connect(this.master);
+      // chain: sfx/music/amb → master (mute) → compressor → user volume × 1.6 makeup → speakers (phones are quiet)
+      this.master = c.createGain(); this.master.gain.value = 1;
+      const comp = c.createDynamicsCompressor();
+      comp.threshold.value = -18; comp.knee.value = 12; comp.ratio.value = 4; comp.attack.value = 0.004; comp.release.value = 0.18;
+      this.user = c.createGain(); this.user.gain.value = this.volume * 1.6;
+      this.master.connect(comp); comp.connect(this.user); this.user.connect(c.destination);
+      this.sfx = c.createGain(); this.sfx.gain.value = 0.9; this.sfx.connect(this.master);
       this.music = c.createGain(); this.music.gain.value = 0; this.music.connect(this.master);
       this.amb = c.createGain(); this.amb.gain.value = 0; this.amb.connect(this.master);
       const len = c.sampleRate * 2;
@@ -37,6 +40,8 @@
       return true;
     },
     unlock() {
+      // iOS: use the media channel (media volume, plays with the side switch on) instead of the quiet ambient one
+      try { if (navigator.audioSession && navigator.audioSession.type !== 'playback') navigator.audioSession.type = 'playback'; } catch (e) {}
       if (!this.ensure()) return;
       const c = this.ctx;
       if (c.state !== 'running') c.resume().catch(() => {});
@@ -48,14 +53,17 @@
     apply() {
       if (!this.ctx) return;
       const t = this.ctx.currentTime;
-      this.master.gain.setTargetAtTime(this.muted ? 0 : 0.9, t, 0.03);
-      this.sfx.gain.setTargetAtTime(this.sfxOn ? 0.6 : 0, t, 0.03);
-      const mv = this.musicOn && this._playing ? (this.ducked ? 0.05 : 0.15) : 0;
+      this.master.gain.setTargetAtTime(this.muted ? 0 : 1, t, 0.03);
+      this.user.gain.setTargetAtTime(Math.max(0, Math.min(1, this.volume)) * 1.6, t, 0.03);
+      this.sfx.gain.setTargetAtTime(this.sfxOn ? 0.9 : 0, t, 0.03);
+      const mv = this.musicOn && this._playing ? (this.ducked ? 0.07 : 0.22) : 0;
       this.music.gain.setTargetAtTime(mv, t, this.ducked ? 0.08 : 0.5);
       const av = this.sfxOn && this._playing && this.mood === 3 ? (this.ducked ? 0.02 : 0.05) : 0;   // soft night wind
       this.amb.gain.setTargetAtTime(av, t, 0.8);
     },
-    setOptions({ sfx, music, muted }) {
+    setVolume(v) { this.setOptions({ volume: v }); },
+    setOptions({ sfx, music, muted, volume }) {
+      if (volume !== undefined) this.volume = Math.max(0, Math.min(1, +volume || 0));
       if (sfx !== undefined) this.sfxOn = sfx;
       if (music !== undefined) this.musicOn = music;
       if (muted !== undefined) this.muted = muted;
@@ -97,59 +105,59 @@
       this._lastPlay[name] = now;
       const r = 1 + (Math.random() - 0.5) * 0.08;
       switch (name) {
-        case 'appear': this.tone(520 * r, 0.09, { vol: 0.07, slideTo: 880 * r }); break;
+        case 'appear': this.tone(520 * r, 0.09, { vol: 0.13, slideTo: 880 * r }); break;
         case 'grab':
-          this.tone(NOTE(76) * r, 0.08, { type: 'triangle', vol: 0.12, slideTo: NOTE(83) * r });
+          this.tone(NOTE(76) * r, 0.08, { type: 'triangle', vol: 0.22, slideTo: NOTE(83) * r });
           break;
-        case 'whoosh': this.noise(0.22, { vol: 0.06, f0: 500, f1: 1800, q: 0.8 }); break;
+        case 'whoosh': this.noise(0.22, { vol: 0.11, f0: 500, f1: 1800, q: 0.8 }); break;
         case 'land':     // soft plop into the soil
-          this.tone(240 * r, 0.14, { type: 'sine', vol: 0.16, slideTo: 120 * r });
-          this.noise(0.1, { vol: 0.04, f0: 300, f1: 900, q: 0.7 });
+          this.tone(240 * r, 0.14, { type: 'sine', vol: 0.29, slideTo: 120 * r });
+          this.noise(0.1, { vol: 0.07, f0: 300, f1: 900, q: 0.7 });
           break;
         case 'bloom': {  // sprout "bloop" up + bell chime; count rounds climb the scale with the count
           const n = opt.count ? SCALE[Math.min(SCALE.length - 1, opt.count - 1)] : 7;
-          this.tone(300 * r, 0.16, { type: 'sine', vol: 0.12, slideTo: 720 * r });
-          this.tone(NOTE(72 + n), 0.4, { type: 'triangle', vol: 0.15, at: 0.06 });
-          this.tone(NOTE(84 + n), 0.35, { type: 'sine', vol: 0.06, at: 0.1 });
+          this.tone(300 * r, 0.16, { type: 'sine', vol: 0.22, slideTo: 720 * r });
+          this.tone(NOTE(72 + n), 0.4, { type: 'triangle', vol: 0.27, at: 0.06 });
+          this.tone(NOTE(84 + n), 0.35, { type: 'sine', vol: 0.11, at: 0.1 });
           break;
         }
         case 'wrong':    // soft "boop-boop", never a buzzer
-          this.tone(392, 0.12, { vol: 0.1 });
-          this.tone(330, 0.18, { vol: 0.1, at: 0.13 });
+          this.tone(392, 0.12, { vol: 0.18 });
+          this.tone(330, 0.18, { vol: 0.18, at: 0.13 });
           break;
-        case 'miss': this.tone(500 * r, 0.25, { vol: 0.06, slideTo: 300 * r }); break;
-        case 'hint': [0, 4, 7, 12].forEach((n, i) => this.tone(NOTE(88 + n), 0.2, { vol: 0.05, at: i * 0.07 })); break;
-        case 'star': this.tone(NOTE(84 + (opt.i || 0) * 4), 0.35, { type: 'triangle', vol: 0.13 }); this.tone(NOTE(96 + (opt.i || 0) * 4), 0.3, { vol: 0.05, at: 0.03 }); break;
-        case 'round': [0, 4, 7, 12].forEach((n, i) => this.tone(NOTE(72 + n), 0.3, { type: 'triangle', vol: 0.12, at: i * 0.09 })); break;
-        case 'level': [0, 4, 7, 12, 16, 19, 24].forEach((n, i) => this.tone(NOTE(67 + n), 0.45, { type: 'triangle', vol: 0.12, at: i * 0.08 })); break;
+        case 'miss': this.tone(500 * r, 0.25, { vol: 0.11, slideTo: 300 * r }); break;
+        case 'hint': [0, 4, 7, 12].forEach((n, i) => this.tone(NOTE(88 + n), 0.2, { vol: 0.09, at: i * 0.07 })); break;
+        case 'star': this.tone(NOTE(84 + (opt.i || 0) * 4), 0.35, { type: 'triangle', vol: 0.23 }); this.tone(NOTE(96 + (opt.i || 0) * 4), 0.3, { vol: 0.09, at: 0.03 }); break;
+        case 'round': [0, 4, 7, 12].forEach((n, i) => this.tone(NOTE(72 + n), 0.3, { type: 'triangle', vol: 0.22, at: i * 0.09 })); break;
+        case 'level': [0, 4, 7, 12, 16, 19, 24].forEach((n, i) => this.tone(NOTE(67 + n), 0.45, { type: 'triangle', vol: 0.22, at: i * 0.08 })); break;
         case 'fanfare':
           [[0, 0], [4, .14], [7, .28], [12, .42], [7, .62], [12, .76], [16, .9]].forEach(([n, t]) => {
-            this.tone(NOTE(72 + n), 0.4, { type: 'square', vol: 0.05, at: t }); this.tone(NOTE(60 + n), 0.4, { type: 'triangle', vol: 0.1, at: t });
+            this.tone(NOTE(72 + n), 0.4, { type: 'square', vol: 0.09, at: t }); this.tone(NOTE(60 + n), 0.4, { type: 'triangle', vol: 0.18, at: t });
           });
           break;
-        case 'chapter': [0, 7, 12].forEach((n, i) => this.tone(NOTE(79 + n), 0.8, { vol: 0.08, at: i * 0.12 })); break;
+        case 'chapter': [0, 7, 12].forEach((n, i) => this.tone(NOTE(79 + n), 0.8, { vol: 0.14, at: i * 0.12 })); break;
         case 'pop': {    // balloon POP: a sharp broadband burst + a low tonal "pock"; count rounds add a rising chime
-          this.noise(0.09, { vol: 0.22, type: 'highpass', f0: 900, q: 0.5 });
-          this.noise(0.16, { vol: 0.08, f0: 2600, f1: 900, q: 0.8, at: 0.01 });
-          this.tone(190 * r, 0.09, { type: 'triangle', vol: 0.16, slideTo: 90 * r });
+          this.noise(0.09, { vol: 0.38, type: 'highpass', f0: 900, q: 0.5 });
+          this.noise(0.16, { vol: 0.14, f0: 2600, f1: 900, q: 0.8, at: 0.01 });
+          this.tone(190 * r, 0.09, { type: 'triangle', vol: 0.29, slideTo: 90 * r });
           const n = opt.count ? SCALE[Math.min(SCALE.length - 1, opt.count - 1)] : 7;
-          this.tone(NOTE(76 + n), 0.32, { type: 'triangle', vol: 0.1, at: 0.05 });
-          this.tone(NOTE(88 + n), 0.28, { type: 'sine', vol: 0.04, at: 0.08 });
+          this.tone(NOTE(76 + n), 0.32, { type: 'triangle', vol: 0.18, at: 0.05 });
+          this.tone(NOTE(88 + n), 0.28, { type: 'sine', vol: 0.07, at: 0.08 });
           break;
         }
         case 'boing':    // wrong tap: a friendly rubbery boing, never a buzzer
-          this.tone(220 * r, 0.32, { type: 'sine', vol: 0.13, slideTo: 330 * r });
-          this.tone(330 * r, 0.2, { type: 'sine', vol: 0.06, at: 0.12, slideTo: 250 * r });
+          this.tone(220 * r, 0.32, { type: 'sine', vol: 0.23, slideTo: 330 * r });
+          this.tone(330 * r, 0.2, { type: 'sine', vol: 0.11, at: 0.12, slideTo: 250 * r });
           break;
         case 'rise':     // balloon squeak as it floats up
           if (now - (this._lastPlay.riseQ || 0) < 0.09) return;
           this._lastPlay.riseQ = now;
-          this.tone(620 * r, 0.12, { type: 'sine', vol: 0.035, slideTo: 980 * r }); break;
-        case 'bounce': this.tone(260 * r, 0.18, { vol: 0.07, slideTo: 420 * r }); break;
-        case 'hop': this.tone(330 * r, 0.16, { vol: 0.07, slideTo: 620 * r, type: 'triangle' }); break;
-        case 'click': this.tone(900, 0.05, { vol: 0.08, slideTo: 1300 }); break;
-        case 'talkRight': [0, 4, 7, 12].forEach((n, i) => this.tone(NOTE(76 + n), 0.3, { type: 'triangle', vol: 0.13, at: i * 0.08 })); break;
-        case 'listen': this.tone(NOTE(81), 0.12, { vol: 0.1 }); this.tone(NOTE(88), 0.12, { vol: 0.1, at: 0.1 }); break;
+          this.tone(620 * r, 0.12, { type: 'sine', vol: 0.06, slideTo: 980 * r }); break;
+        case 'bounce': this.tone(260 * r, 0.18, { vol: 0.13, slideTo: 420 * r }); break;
+        case 'hop': this.tone(330 * r, 0.16, { vol: 0.13, slideTo: 620 * r, type: 'triangle' }); break;
+        case 'click': this.tone(900, 0.05, { vol: 0.14, slideTo: 1300 }); break;
+        case 'talkRight': [0, 4, 7, 12].forEach((n, i) => this.tone(NOTE(76 + n), 0.3, { type: 'triangle', vol: 0.23, at: i * 0.08 })); break;
+        case 'listen': this.tone(NOTE(81), 0.12, { vol: 0.18 }); this.tone(NOTE(88), 0.12, { vol: 0.18, at: 0.1 }); break;
       }
     },
 

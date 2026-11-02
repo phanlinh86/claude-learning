@@ -19,8 +19,14 @@ the integration and every fix. Phases: Explore → Plan → Build → Check → 
 Ask no questions; it must run unattended (also from a scheduled task).
 1. Today's date in the user's time zone with the current-time tool (not the shell clock). The date is the seed.
 2. Read `projects/education-game/EDUCATION_GAMES.md` (create it if missing) to avoid repeats.
-3. Roll: `python3 .claude/skills/build-education-game/roll.py "$DATE" $AGE $HINT`. If the mechanic or theme appeared in
-   the last 14 days, re-roll that table with `--salt mechanic=r1` (`r2`, …).
+3. Roll: `python3 .claude/skills/build-education-game/roll.py "$DATE" $AGE $HINT`. The roller reads both game indexes and
+   **never repeats a mechanic family used in the last 3 games** (families: container, pop, seek, memory, trace, music, path,
+   build) and allows the *container* family — anything dragged, dropped or caught INTO something (nests, baskets, pots, chests,
+   mouths, onto the helper) — at most once in the last 6 games. Themes/helpers of the last 5 games are skipped. A second game on
+   the same date: add `--salt mechanic=b --salt theme=b --salt helper=b --salt weather=b`. Print `family` and `recent_games` in
+   the announcement. Parents' feedback (2026-11-01): "the game keeps dropping something into a basket — she gets bored".
+   The core loop must FEEL different from the last game: a different gesture (tap / flip / trace / hop / build / play a
+   tune), a different reward animation and a different screen layout, not just new art on the same drag-and-drop world.
 4. Sanity-check: you may swap ONE element if the mix is incoherent (e.g. the helper doesn't fit the theme). Say which and why.
 5. Map the age to 4 chapter topics (one per weather/time-of-day stage). Proven table (Dino Nest Sort):
    | age | chapters |
@@ -54,6 +60,16 @@ Ask no questions; it must run unattended (also from a scheduled task).
 - **Parent gate:** settings (age 3–7+, language, child's name, sound, music, voice, microphone) open only after holding
   the gear for 2 s. Language may also be switched on the title screen.
 - Original, gentle, kid-safe art and sound only. No ads, no network after load, no data leaves the device.
+
+## Loud, clear sound on phones (parents' feedback 2026-11-01: "the sound is quite soft on mobile")
+- iOS Safari puts Web Audio on the quiet *ambient* channel (also silenced by the side switch). In `Audio.unlock()` set
+  `if (navigator.audioSession) navigator.audioSession.type = 'playback'` (Safari 16.4+) so it uses the media volume.
+- Chain: sfx/music/amb → master (mute/duck) → `DynamicsCompressor` (threshold −18 dB, knee 12, ratio 4, attack 4 ms,
+  release 180 ms) → user volume gain × **1.6 makeup** → destination. Single SFX peaks 0.2–0.35, never below 0.1 for a
+  reward sound; music bed 0.22 (ducked 0.07 under speech).
+- Settings get a **volume slider** (default 100 %, saved) and the pause menu big **− / +** buttons; speech utterances use
+  the same volume (`u.volume`). Speech rate stays ≈ 0.9; TTS volume itself is the phone's media volume.
+- Functional QA checks the chain exists (`KB.debug` exposes the gains) and that the volume setting persists.
 
 ## Mobile translation of build-game (what to change)
 | build-game (desktop) | education game (mobile) |
