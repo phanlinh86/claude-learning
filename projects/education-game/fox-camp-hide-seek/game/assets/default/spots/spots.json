@@ -1,6 +1,6 @@
 {
   "bush": {
-    "peekY": 53,
+    "peekY": 52,
     "season": 0
   },
   "stump": {
@@ -8,15 +8,15 @@
     "season": 0
   },
   "tent": {
-    "peekY": 59,
-    "season": 1
-  },
-  "rock": {
     "peekY": 58,
     "season": 1
   },
+  "rock": {
+    "peekY": 54,
+    "season": 1
+  },
   "leaves": {
-    "peekY": 62,
+    "peekY": 55,
     "season": 2
   },
   "log": {
@@ -28,7 +28,7 @@
     "season": 3
   },
   "drift": {
-    "peekY": 62,
+    "peekY": 56,
     "season": 3
   }
 }

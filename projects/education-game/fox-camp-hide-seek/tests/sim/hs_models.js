@@ -87,6 +87,56 @@ class Sloppy {
   }
 }
 
+
+/** Repeater: "taps the same place again and again". At the first ask of a round it picks a hiding place (random among the
+ *  hidden ones) and keeps tapping that SAME screen point every 0.8–1.6 s for the whole round — also after that friend was
+ *  found (the place is then empty). soft: with p = follow per tap it taps a glowing place instead (a child who notices). */
+class Repeater {
+  constructor(w, seed, follow) { this.w = w; this.r = new FC.RNG(seed); this.follow = follow || 0; this.pt = null; this.rk = ''; this.t = 1; this.talkT = -1; this.stats = { taps: 0, empty: 0 }; }
+  step(dt) {
+    const w = this.w, r = this.r;
+    if (w.state === 'talk') return talkRandom(this, dt, [3, 6]);
+    this.talkT = -1;
+    if (w.state !== 'round') return;
+    const rk = w.sessions + ':' + w.level + ':' + w.round;
+    if (rk !== this.rk && w.phase === 'ask') { this.rk = rk; const hp = L.hiddenPlaces(w); const h = w.placeHit(r.pick(hp)); this.pt = { x: h.x, y: h.y }; }
+    if (!this.pt || w.phase !== 'ask') return;
+    this.t -= dt; if (this.t > 0) return;
+    this.t = r.float(0.8, 1.6);
+    let x = this.pt.x, y = this.pt.y;
+    const g = L.hiddenPlaces(w).find(p => p.glow > 0.3);
+    if (g && this.follow && r.chance(this.follow)) { const h = w.placeHit(g.id); x = h.x; y = h.y; }
+    this.stats.taps++;
+    if (L.tapAt(w, x, y) === 'empty') this.stats.empty++;
+  }
+}
+
+/** Pip-and-grass child: every 1–2.5 s taps Pip (40 %), the grass / sky (35 %, a point that hits nothing) or a hiding place
+ *  (25 %: a glowing one with p = 0.85, else a random hidden one). Measures whether help reaches a child who mostly pokes Pip. */
+class PipGrass {
+  constructor(w, seed) { this.w = w; this.r = new FC.RNG(seed); this.t = 1; this.talkT = -1; this.stats = { taps: 0, pip: 0, grass: 0, place: 0 }; }
+  step(dt) {
+    const w = this.w, r = this.r;
+    if (w.state === 'talk') return talkRandom(this, dt, [3, 6]);
+    this.talkT = -1;
+    if (w.state !== 'round') return;
+    this.t -= dt; if (this.t > 0) return;
+    this.t = r.float(1, 2.5);
+    const k = r.next(); let x, y;
+    if (k < 0.4) { const h = w.pipHit(); x = h.x + r.float(-0.2, 0.2) * h.w; y = h.y + r.float(-0.2, 0.2) * h.h; this.stats.pip++; }
+    else if (k < 0.75) {
+      this.stats.grass++;
+      for (let i = 0; i < 40; i++) { x = r.float(0, w.layout.W); y = r.float(0, w.layout.H); if (w.phase !== 'ask' || !w._hit(x, y)) break; }
+    } else {
+      this.stats.place++;
+      const hp = L.hiddenPlaces(w); if (!hp.length) return;
+      const g = hp.find(p => p.glow > 0.3), pl = g && r.chance(0.85) ? g : r.pick(hp), h = w.placeHit(pl.id); x = h.x; y = h.y;
+    }
+    this.stats.taps++;
+    L.tapAt(w, x, y);
+  }
+}
+
 function slowProfile() {   // slow 3-year-old: long think 3–8 s, 40 % wrong, long retries, often distracted
   return { skill: 0.6, think: [3, 8], retry: [2, 4], followHint: 0.8, pDistract: 0.12, distract: [4, 12], pCritter: 0.5, talk: [4, 9], talkRight: 0.6, spread: 0.35 };
 }
@@ -102,10 +152,14 @@ function makeModel(name, w, age, seed) {
     case 'sloppy': return new Sloppy(w, age, seed);
     case 'absent': return new Absent();
     case 'confused': return new Confused(w, seed);
+    case 'repeater': return new Repeater(w, seed, 0);
+    case 'repeaterSoft': return new Repeater(w, seed, 0.5);
+    case 'pipGrass': return new PipGrass(w, seed);
+    case 'thoughtful': return new L.Kid(w, Object.assign(L.typicalProfile(age), { skill: 0.97, think: [3, 5], pDistract: 0 }), seed);
   }
   const m = /^bot([\d.]+)$/.exec(name);
   if (m) return new FC.Bot(w, { skill: +m[1], seed });
   throw new Error('unknown model ' + name);
 }
 
-module.exports = { makeModel, Spammer, Absent, Sloppy, Confused, slowProfile };
+module.exports = { makeModel, Spammer, Absent, Sloppy, Confused, Repeater, PipGrass, slowProfile };

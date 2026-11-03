@@ -29,7 +29,7 @@
   let speed = FLAGS.speed, autoRestart = FLAGS.autorestart;
   let view = { W: 960, H: 720, s: 1, left: 0, top: 0, ins: { top: 0, right: 0, bottom: 0, left: 0 } };
   const stats = { sessions: 0, rounds: 0, correct: 0, wrong: 0, misses: 0, talks: 0, talkRight: 0, frames: 0, slowFrames: 0 };
-  let surpriseLine = '', promptUntil = 0, lastWrongSay = 0, idleSaid = 0, lastName = '', shownStars = 0, lastRoundEvt = null, lastGrabSay = 0, lastPraise = 0;
+  let lastBoop = 0, surpriseLine = '', promptUntil = 0, lastWrongSay = 0, idleSaid = 0, lastName = '', shownStars = 0, lastRoundEvt = null, lastGrabSay = 0, lastPraise = 0;
 
   /* ---------- sizing ---------- */
   function readInsets() {
@@ -256,6 +256,11 @@
         break;
       }
       case 'seat': FC.Audio.play('seat'); break;
+      case 'reveal': {   // the last friend nobody asked for pops out at the party and joins the fire
+        FC.Audio.play('rustle'); FC.Audio.play('pop'); FC.Audio.play('giggle');
+        const p = placeById(e.placeId); if (p) { const t = placeTop(p); render.burst('rustle', p.x, t.y + 20, { size: p.w, n: 10 }); render.burst('found', p.x, t.y, { size: p.w * 0.8 }); }
+        break;
+      }
       case 'wrong': {
         stats.wrong++;
         FC.Audio.play('boo'); FC.Audio.play('giggle');
@@ -267,7 +272,7 @@
         }
         break;
       }
-      case 'locked': FC.Audio.play('boop'); break;   // tap lock after a wrong peek: no reward for spamming
+      case 'locked': { const nl = performance.now(); if (nl - lastBoop > 400) { lastBoop = nl; FC.Audio.play('boop'); } break; }   // tap lock after a wrong peek: no reward for spamming
       case 'hint': {
         FC.Audio.play('hint');
         const p = placeById(e.placeId); if (p) { const t = placeTop(p); render.burst('hint', p.x, t.y + 40, { size: p.w }); }

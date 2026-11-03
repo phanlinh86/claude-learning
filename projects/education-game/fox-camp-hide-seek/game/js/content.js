@@ -162,6 +162,7 @@
     var t = (tbl && tbl[age]) || PLACES[age];
     var n = t[Math.min(ri, t.length - 1)];
     if (topic === 'colors' && age < COLOR_SAFE_BELOW) n = Math.min(n, SAFE_MAX);
+    if (topic === 'size') n = 2;   // one animal per round, big + small (only two sizes can be asked apart)
     return Math.max(2, Math.min(MAX_PLACES, n));
   }
 
@@ -190,11 +191,14 @@
     if (ALL_TOPICS.indexOf(topic) < 0) throw new Error('FC.Content: unknown topic ' + topic);
     var n = o.places ? Math.max(2, Math.min(MAX_PLACES, o.places)) : placesFor(topic, age, ri, o.placesByAge);
     if (topic === 'colors' && age < COLOR_SAFE_BELOW) n = Math.min(n, SAFE_MAX);
-    var r = null, err = null;
+    if (topic === 'size') n = 2;
+    var r = null, err = null, av = o.avoid && o.avoid.promptKey !== 'p.countUp' ? o.avoid.promptKey + JSON.stringify(o.avoid.params) : null;
     for (var attempt = 0; attempt < 40; attempt++) {
       r = buildRound(topic, age, lang, rng, ri, n, season);
       r.surprise = o.surprise || null;
       err = validate(r);
+      // never open a round with the question that closed the previous one (o.avoid = that ask)
+      if (!err && av && attempt < 39 && r.asks[0].promptKey + JSON.stringify(r.asks[0].params) === av) { err = 'repeats the previous ask'; continue; }
       if (!err) break;
     }
     if (err) throw new Error('FC.Content: invalid round (' + topic + ', age ' + age + '): ' + err);
@@ -222,6 +226,9 @@
         } else cs = rng.shuffle(COLORS5.slice());
         for (i = 0; i < n; i++) clues.push(cHat(cs[i]));
         friends = friendsFor(rng, n, []);
+        // every clash-free 3-set holds yellow: make the yellow hat the leftover (never asked) in half of those rounds
+        var yi = cs.indexOf('yellow');
+        if (age < COLOR_SAFE_BELOW && n >= 3 && yi >= 0 && rng.chance(0.5)) order = order.filter(function (q) { return q !== yi; }).concat([yi]);
         break;
       }
       case 'shapes': {
@@ -231,7 +238,7 @@
         break;
       }
       case 'count': {
-        if (ri < 2) {                    // count up: signs 1…n (numeral + stars), asks 1, 2, … n−1 in order
+        if (ri === 1) {                  // count up (round 1): signs 1…n (numeral + stars), asks 1, 2, … n−1 in order
           var vals = range(1, n);
           for (i = 0; i < n; i++) clues.push(cSign(vals[i], true));
           // places in a random left-to-right order; asks by value
@@ -241,7 +248,7 @@
           order = []; for (i = 1; i <= n; i++) order.push(perm[i - 1]);
         } else {
           var R = COUNT_RANGE[age], pool = range(R[0], R[1]);
-          var vs = age <= 4 ? spreadPick(rng, pool, n) : rng.shuffle(pool).slice(0, n);
+          var vs = age <= 4 && n <= 2 ? spreadPick(rng, pool, n) : rng.shuffle(pool).slice(0, n);   // ≥ 2 apart for pairs; 3+ from 1–5 would always be 1, 3, 5 (skew)
           for (i = 0; i < n; i++) clues.push(cSign(vs[i], false));
         }
         friends = friendsFor(rng, n, []);
@@ -254,10 +261,9 @@
       }
       case 'size': {
         // the same animal big AND small (+ other animals with a random size)
-        var an = rng.pick(FC.ANIMALS), others = friendsFor(rng, n - 1, [an]).slice(1);
-        friends = [an, an].concat(others);
+        var an = rng.pick(FC.ANIMALS);   // ONE animal per round (DESIGN §5.1): big + small
+        friends = [an, an];
         clues = [cSize(an, 'big'), cSize(an, 'small')];
-        others.forEach(function (b) { clues.push(cSize(b, rng.chance(0.5) ? 'big' : 'small')); });
         // shuffle the positions together
         var ps = rng.shuffle(range(0, n - 1)), f2 = [], c2 = [];
         for (i = 0; i < n; i++) { f2[ps[i]] = friends[i]; c2[ps[i]] = clues[i]; }
@@ -326,7 +332,7 @@
       switch (topic) {
         case 'colors': pk = 'p.colors'; pr = { color: c.color }; break;
         case 'shapes': pk = 'p.shapes'; pr = { shape: c.shape }; break;
-        case 'count': if (ri < 2) { pk = 'p.countUp'; pr = { n: c.n, first: q === 0 }; } else { pk = 'p.count'; pr = { n: c.n }; } break;
+        case 'count': if (ri === 1) { pk = 'p.countUp'; pr = { n: c.n, first: q === 0 }; } else { pk = 'p.count'; pr = { n: c.n }; } break;
         case 'animals': pk = age >= 4 && ri >= 2 && (q + soundOff) % 2 === 0 ? 'p.sound' : 'p.animals'; pr = { animal: c.animal }; break;
         case 'size': pk = 'p.size'; pr = { size: c.size, animal: c.animal }; break;
         case 'initial': pk = 'p.initial'; pr = { letter: c.initial }; break;

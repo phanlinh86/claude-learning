@@ -185,7 +185,8 @@ levelDone | sessionDone`, plus:
   score effect).
 - Events: `level {level, topic}`, `round {round, topic, places, surprise}`, `gather`, `countNum {n}`, `hideIn {placeId}`, `ready`,
   `ask`, `peek`, `found`, `seat`, `wrong`, `locked`, `hint {placeId, idle?}`, `idle {n}`, `empty`, `pokePip`, `swap`, `critter`,
-  `critterTap`, `roundDone`, `talk`, `talkAsk {n}`, `talkResult`, `levelDone`, `sessionDone`.
+  `critterTap`, `roundDone`, `reveal {placeId, friendId, nameKind, nameValue, clue}` (at the party the never-asked friend pops
+  out by itself and hops to the bench → one more `seat` per round than `found`), `talk`, `talkAsk {n}`, `talkResult`, `levelDone`, `sessionDone`.
 - Rotation / resize mid-round: re-layout places, snap friends to their places or seats, finish any running animation instantly.
 
 ### 5.3 `FC.Weather` — as the rocket game's API (`setWeather(i)` 0 spring, 1 summer, 2 autumn, 3 winter; crossfade 2.5 s),

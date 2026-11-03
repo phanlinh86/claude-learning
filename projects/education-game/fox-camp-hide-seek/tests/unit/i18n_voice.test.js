@@ -144,7 +144,7 @@ eq(I.t('vi', 'weather.3'), 'Ui lạnh quá, tuyết rơi rồi!', 'vi weather 3 
 eq(I.t('en', 'gather', {}, r0), 'Let’s play hide-and-seek!', 'en gather[0]');
 eq(I.t('vi', 'gather', {}, r0), 'Mình chơi trốn tìm nhé!', 'vi gather[0]');
 eq(I.t('en', 'countNum.1') + ' ' + I.t('en', 'countNum.2') + ' ' + I.t('en', 'countNum.3', {}, r0),
-  'One… Two… Three! Ready? Here I come!', 'en count 1-2-3');
+  'One… Two… Three! Here I come!', 'en count 1-2-3');
 eq(I.t('vi', 'countNum.1') + ' ' + I.t('vi', 'countNum.2') + ' ' + I.t('vi', 'countNum.3', {}, r0),
   'Một… Hai… Ba! Pip đi tìm đây!', 'vi count 1-2-3');
 eq(I.speech('en', I.t('en', 'countNum.1')), 'One.', 'count speech: … becomes a pause');

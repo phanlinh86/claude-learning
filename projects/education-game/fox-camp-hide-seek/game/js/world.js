@@ -42,16 +42,16 @@
     gatherStagger: 0.12,
     gatherWave: 0.25,          // s of waving after the last friend arrived
     countTime: 2.6,            // count phase: Pip covers his eyes …
-    countAt: [0.3, 1.1, 1.9],  // … countNum 1, 2, 3
+    countAt: [0.3, 1.0, 1.7],  // … countNum 1, 2, 3 (QA: the question follows the "three!" promptly)
     runAt: 0.35, runStagger: 0.15,   // the friends start running to their places
     peekTime: 0.7,             // Pip's 'peek' mood after the count
     openTime: 0.18,            // a place opens 0 → 1 (closes in closeTime)
     closeTime: 0.2,
-    popDelay: 0.06, popTime: 0.25, popBack: 1.7,   // the friend pops up (rise 0 → 1, back-out overshoot ≈ 1.1)
+    popDelay: 0.06, popTime: 0.25, popBack: 1.7, popPeak: 1.1, popRoom: 0.5,   // the friend pops up (rise 0 → place.riseMax ≤ 1, back-out overshoot ≈ 1.1)
     duckTime: 0.22,            // rise 1 → 0
     booTime: 0.9,              // a wrong friend giggles + wiggles, then ducks
     wiggleAmp: 0.14, wiggleHz: 2.4,
-    foundMin: 0.6,             // phase 'found' ≥ 0.6 s (until the friend has jumped clear of its place)
+    foundMin: 0.8,             // phase 'found' ≥ 0.8 s (until the friend has jumped clear of its place)
     partyTime: 2.2,            // party (dance) ≥ 2.2 s, and until every friend sits + 0.3 s
     partyAfterSeat: 0.3,
     leaveStagger: 0.08, leaveMax: 2.0,
@@ -73,14 +73,14 @@
     bubbleHPort: 124, bubbleGapPort: 24, hudW: 160, hudH: 96,
     groundLand: 28, groundPort: 40,
     pipX: 120, pipH: 230, pipHPort: 250, pipAspect: 0.66,   // Pip's hit box is 0.66·h wide
-    campX: 150, campDy: 10, campW: 200,
+    campX: 150, campXPort: 125, campDy: 10, campW: 200,   // portrait: the fire 25 px further right so the bench fits beside Pip
     backLand: 0.58, backScaleLand: 0.86, frontLand: 150,
     backPort: 0.47, backScalePort: 0.88, midPort: 0.62, midScalePort: 0.94, frontPort: 300,
-    fieldLeft: 250, fieldRight: 260,   // landscape front row: ins.left + 250 … W − ins.right − 260
+    fieldLeft: 330, fieldRight: 330,   // landscape front row centres: ins.left + 330 … W − ins.right − 330 (objects clear of Pip and the flame column)
     fieldEdge: 0.6,                    // other rows: ± 0.6·spotW from the safe edges
     spotW: { 3: 220, 4: 220, 5: 200, 6: 200, 7: 200 },
     spotArtW: 240, spotArtH: 200, spotAnchor: 196,
-    peekY: { bush: 53, stump: 50, tent: 59, rock: 58, leaves: 62, log: 63, snowman: 63, drift: 62 },   // viewBox y of the clip line (= spots.json 2026-11-03; World.applySpots overrides)
+    peekY: { bush: 52, stump: 50, tent: 58, rock: 54, leaves: 55, log: 63, snowman: 63, drift: 56 },   // viewBox y of the clip line (= spots.json; leak-checked with tools/art_spots_sheet.js; World.applySpots overrides)
     friendFrac: 0.75,          // friend size = 0.75·spotW·row.scale
     seatFrac: 0.55,            // seated friend size = 0.55·spotW
     peekRiseFrac: 0.42,        // a hidden friend's head top is 0.42·size above peekY
@@ -95,7 +95,9 @@
     rowMinDY: 40, frontMinGround: 20,
     shrink: [1, 0.94, 0.88, 0.82, 0.76, 0.7, 0.64, 0.58],
     hitPad: 22, pipHitPad: 20,
-    seats: [[-0.95, 0], [-1.6, 0.02], [-2.25, 0], [0.62, -0.12], [0.08, -0.4], [-0.48, -0.38]],   // × seat size from the fire
+    seats: [[0, 0], [1, 0.02], [2, 0], [0.5, -0.42], [1.5, -0.42], [2.5, -0.42]],   // [column, dy × seat size]: columns go LEFT from the flames
+    seatGap: 0.6, seatGapMin: 0.38,   // column spacing × seat size (squeezed down to 0.4 when Pip is near, portrait)
+    flameHalf: 0.35,                 // the flame column is camp.x ± 0.35·camp.w: no seated friend inside it
     gatherYLand: 18,
 
     // ---- motion (physics)
@@ -120,6 +122,7 @@
     wrongLock: 0.8, wrongLock2: 1.6,   // s: place taps ignored after a wrong peek (1.6 s from the 2nd miss) → event 'locked'
     hintGlowTime: 4, hintLift: 0.16, hintBob: 0.06, hintBobHz: 1.6,
     idleTime: 12, idleBackoff: 1.5, idleMax: 30, idleHintFrom: 2,
+    softTapHint: 3,            // the 3rd tap on an empty place / Pip within one ask glows the answer (they do not reset idle)
     tapMove: 24, tapTime: 0.35,          // a press on Pip is a TAP when it moves < 24 px and lasts < 0.35 s
 
     // ---- Pip
@@ -172,7 +175,7 @@
     var groundY = H - ins.bottom - (portrait ? cfg.groundPort : cfg.groundLand);
     var ph = (portrait ? cfg.pipHPort : cfg.pipH) * sc;
     var pip = { x: ins.left + cfg.pipX, y: groundY - 6, h: ph, w: ph * cfg.pipAspect };
-    var camp = { x: W - ins.right - cfg.campX, y: groundY - cfg.campDy, w: cfg.campW * sc };
+    var camp = { x: W - ins.right - (portrait ? cfg.campXPort : cfg.campX), y: groundY - cfg.campDy, w: cfg.campW * sc };
     var spotW = (cfg.spotW[age] || cfg.spotW[5]) * sc, e = spotW * cfg.fieldEdge;
     var x0 = ins.left + e, x1 = W - ins.right - e, rows;
     if (portrait) {
@@ -185,10 +188,14 @@
     }
     var front = rows[rows.length - 1];
     var seat = spotW * cfg.seatFrac, fs = spotW * cfg.friendFrac;
-    var bench = cfg.seats.map(function (s) { return { x: camp.x + s[0] * seat, y: camp.y + 2 + s[1] * seat }; });
+    // bench: columns to the LEFT of the flame column (flames are drawn after the friends), squeezed when Pip is near
+    var bx0 = camp.x - cfg.flameHalf * camp.w - 0.5 * seat - 8, room = bx0 - (pip.x + pip.w / 2 + 0.5 * seat + 4);
+    var maxCol = Math.max.apply(null, cfg.seats.map(function (s) { return s[0]; }));
+    var gap = seat * clamp(maxCol > 0 ? room / (maxCol * seat) : cfg.seatGap, cfg.seatGapMin, cfg.seatGap);
+    var bench = cfg.seats.map(function (s) { return { x: bx0 - s[0] * gap, y: camp.y + 2 + s[1] * seat }; });
     // the gather line: in the open meadow, clear of Pip (and of the fire in landscape)
     var gather = portrait
-      ? { y: front.y + 0.5 * (groundY - front.y), x0: pip.x + pip.w / 2 + 10 + fs * 0.4, x1: W - ins.right - fs * 0.55 }
+      ? { y: front.y + 0.5 * (groundY - front.y), x0: pip.x + pip.w / 2 + 10 + fs * 0.4, x1: camp.x - 0.6 * camp.w }
       : { y: groundY - cfg.gatherYLand, x0: pip.x + pip.w / 2 + 24 + fs * 0.45, x1: camp.x - spotW * 0.6 };
     if (gather.x1 < gather.x0) gather.x1 = gather.x0;
     return {
@@ -445,7 +452,7 @@
     var cf = 0;
     live.forEach(function (p) { var f = self.friendById(p.friendId); cf = Math.max(cf, cfg.clueFrac[(f && f.clue.kind) || 'badge'] || 0.55); });
     this._cf = cf;
-    var sol = solvePlaces(L, cfg, live.length, this._pv(), cf, this._keeps(), this.cur.seed);
+    var sol = solvePlaces(L, cfg, live.length, this._pv(), Math.max(cf, cfg.popRoom), this._keeps(), this.cur.seed);   // keep room for a pop (riseMax ≥ ≈ 0.63)
     this.geo = { k: sol.k, split: sol.split, cramped: sol.cramped, rowsY: sol.rowsY, clueFrac: cf };
     live.forEach(function (p, i) {
       var s = sol.slots[i];
@@ -455,6 +462,12 @@
       p.peekY = p.y - (cfg.spotAnchor - pv) * p.w / cfg.spotArtW;
       p.peekRise = p.fs * cfg.peekRiseFrac;
       p.clueTop = p.peekY - (cfg.peekRiseFrac + cf) * p.fs;
+      // a popped-up friend stands taller than its clue box: near a keep-out (portrait bubble) it rises only so far that its
+      // head (with the pop overshoot) stays ≥ 8 px below the box
+      var T = L.ins.top + 4, ks = self._keeps(), size = p.fs, lo = p.x - size / 2, hi = p.x + size / 2;
+      for (var q = 0; q < ks.length; q++) if (hi > ks[q].x && lo < ks[q].x + ks[q].w) T = Math.max(T, ks[q].y + ks[q].h + cfg.keepMargin);
+      var span = size * (1 - cfg.peekRiseFrac);
+      p.riseMax = clamp((p.peekY - cfg.peekRiseFrac * p.fs - T - cfg.takeoffStretch * size) / (span * cfg.popPeak), 0, 1);
     });
   };
   /** Rotation / resize mid-round: every running animation finishes instantly (with its events) and objects snap. */
@@ -497,7 +510,7 @@
     this.weather = this.season = this.level % 4;
     this.round = 0; this.levelStars = 0; this.levelStartTime = this.time;
     this.roundsPerLevel = this.cfg.roundsPerLevel;
-    this.cur = null; this.talk = null; this.talkAnswered = null; this.surprise = null;
+    this.cur = null; this.talk = null; this.talkAnswered = null; this.surprise = null; this._lastAskOf = null;
     this.places = []; this.friends = []; this.critter = null; this._press = null; this._asked = false;
     this._setState('intro'); this.phase = null;
     this._mood('idle', 0.01);
@@ -509,7 +522,8 @@
     var rr = new FC.RNG((this.rng.next() * 4294967296) >>> 0);
     var ST = cfg.surpriseTypes, sp = ST && ST.length && this.round === cfg.surpriseRound ? ST[(this.level + this._surpriseOff) % ST.length] : null;
     this.cur = FC.Content.makeRound(this.topic, { age: this.age, lang: this.lang, rng: rr, roundIndex: this.round, season: this.season,
-      surprise: sp, placesByAge: cfg.placesByAge });
+      surprise: sp, placesByAge: cfg.placesByAge, avoid: this._lastAskOf || null });
+    this._lastAskOf = this.cur.asks[this.cur.asks.length - 1];
     this.surprise = sp;
     this.ask = 0; this.asks = this.cur.asks.length; this.misses = 0; this.askMisses = 0; this.streak = 0; this._asked = false;
     this._critterAt = -1; this._critterDone = false; this._swapDone = false; this.critter = null; this._seatN = 0;
@@ -572,7 +586,7 @@
     var a = this._askObj(), f = this._answerF();
     this._setPhase('ask');
     this._asked = true;
-    this.askMisses = 0; this._lockUntil = -1;
+    this.askMisses = 0; this._lockUntil = -1; this._softN = 0;
     this._idleT = 0; this._idleGap = this.cfg.idleTime; this._idleN = 0;
     this._emit({ type: 'ask', ask: this.ask, asks: this.asks, promptKey: a.promptKey, params: a.params, answerId: f.home, friendId: f.id });
     if (this.surprise === 'critter' && !this._critterDone && this._critterAt < 0 && (this.ask === 1 || this.asks === 1)) {
@@ -594,7 +608,7 @@
       var p = this.placeById(left.home);
       p._openT = 1; this._kickPlace(p, 0.7);
       left.state = 'pop';
-      left._queue.push({ type: 'rise', to: 1, T: cfg.popTime, ease: 'back', state: 'pop', onDone: function () {
+      left._queue.push({ type: 'rise', to: p.riseMax, T: cfg.popTime, ease: 'back', state: 'pop', onDone: function () {
         self._emit({ type: 'reveal', placeId: p.id, friendId: left.id, nameKind: left.clue.nameKind, nameValue: left.clue.nameValue, clue: left.clue });
         self._toFire(left, function () { self._partySeatT = self.time; });
       } });
@@ -667,16 +681,18 @@
     }
     if (this.phase !== 'ask') return null;
     var hit = this._hit(x, y);
-    if (hit === 'pip') { this._touch(); this._press = { x0: x, y0: y, t0: this.time, moved: false }; return 'pip'; }
+    if (hit === 'pip') { this._press = { x0: x, y0: y, t0: this.time, moved: false }; this._softTap(); return 'pip'; }
     if (!hit) return null;   // grass / sky: the idle help keeps counting
     var p = hit, f = this.friendById(p.friendId);
     this._lookAt = p.id;
-    if (p.found) { this._touch(); this._emit({ type: 'empty', placeId: p.id, x: p.x, y: p.peekY }); return 'empty'; }
+    if (p.found) { this._emit({ type: 'empty', placeId: p.id, x: p.x, y: p.peekY }); this._softTap(); return 'empty'; }
     if (this._locked() || !f || f.state !== 'hidden') { this._emit({ type: 'locked', placeId: p.id }); return 'locked'; }   // spamming is not rewarded
     this._touch();
     this._peek(p, f);
     return p.id;
   };
+  /** Taps on Pip / an empty place are not peeks: they never reset the idle help, and the 3rd one in an ask glows the answer. */
+  P._softTap = function () { if (++this._softN === this.cfg.softTapHint) this._doHint(false); };
   P.pointerMove = function (x, y) {
     if (!this._press) return;
     if (hyp(x - this._press.x0, y - this._press.y0) >= this.cfg.tapMove) this._press.moved = true;
@@ -707,7 +723,7 @@
     f.state = 'pop';
     this._emit({ type: 'peek', placeId: p.id, friendId: f.id, right: right });
     f._queue.push({ type: 'wait', T: cfg.popDelay, state: 'pop' });
-    f._queue.push({ type: 'rise', to: 1, T: cfg.popTime, ease: 'back', state: 'pop', onDone: function () { self._resolve(p, f, right); } });
+    f._queue.push({ type: 'rise', to: p.riseMax, T: cfg.popTime, ease: 'back', state: 'pop', onDone: function () { self._resolve(p, f, right); } });
   };
 
   P._resolve = function (p, f, right) {
@@ -746,7 +762,7 @@
   P._toFire = function (f, done) {
     var cfg = this.cfg, self = this, p = this.placeById(f.home), seat = this._seatN++ % 6;
     f.state = 'jump';
-    f._queue.push({ type: 'hop', to: { kind: 'front', id: p.id }, hops: 1, apex: [cfg.jumpApex, cfg.jumpApex], state: 'jump',
+    f._queue.push({ type: 'hop', to: { kind: 'front', id: p.id }, hops: 1, apex: [cfg.jumpApex, cfg.jumpApex], capTop: true, state: 'jump',
       onStart: function () { f.place = null; f.at = null; },
       onDone: function () {
         f._queue.push({ type: 'hop', to: { kind: 'seat', i: seat }, apex: cfg.seatApex, hopLen: cfg.seatHop, minHops: 2, maxHops: 4, state: 'hop',
@@ -773,7 +789,7 @@
       var f = s[0], from = s[1], to = s[2], apex = s[3];
       from._openT = 1; self._kickPlace(from, 0.8);
       f.state = 'pop';
-      f._queue.push({ type: 'rise', to: 1, T: cfg.popTime, ease: 'back', state: 'pop', onDone: function () {
+      f._queue.push({ type: 'rise', to: from.riseMax, T: cfg.popTime, ease: 'back', state: 'pop', onDone: function () {
         if (j === 0) {
           // the friends trade places: homes + place.friendId follow (the asks follow the FRIENDS, so every ask stays solvable)
           A.home = pB.id; B.home = pA.id; pA.friendId = B.id; pB.friendId = A.id;
@@ -830,13 +846,15 @@
       case 'seat': s = L.bench[to.i % L.bench.length]; return { x: s.x, y: s.y, size: L.seatSize * f.scale };
       case 'gather': {
         var G = L.gather, u = to.n > 1 ? to.i / (to.n - 1) : 0.5;
-        return { x: lerp(G.x0, G.x1, u), y: G.y + (to.i % 2 ? -10 : 0), size: L.friendSize * f.scale };
+        var gapX = to.n > 1 ? (G.x1 - G.x0) / (to.n - 1) : 1e9, dy = gapX < 0.6 * L.friendSize ? 0.22 * L.friendSize : 10;   // crowded: two staggered lines
+        return { x: lerp(G.x0, G.x1, u), y: G.y + (to.i % 2 ? -dy : 0), size: L.friendSize * f.scale };
       }
       case 'exit': return { x: L.exitX + (to.i || 0) * 30, y: L.gather.y, size: L.friendSize * f.scale };
     }
     return { x: f.x, y: f.y, size: f.size };
   };
-  P._riseY = function (p, f, rise) { return p.peekY + (1 - this.cfg.peekRiseFrac) * f.size * (1 - rise); };
+  /** Hidden feet: the head top is peekRiseFrac·p.fs above peekY for every friend (a small friend shows eyes + ears too). */
+  P._riseY = function (p, f, rise) { return p.peekY + Math.max(0, f.size - this.cfg.peekRiseFrac * p.fs) * (1 - rise); };
 
   P._begin = function (f, S) {
     S.t = 0;
@@ -854,7 +872,13 @@
   P._nextHop = function (f, S) {
     var A = this._anchor(f, S.to), m = S.hops - S.k, g = this.cfg.hopG;
     var x1 = m <= 1 ? A.x : f.x + (A.x - f.x) / m, y1 = m <= 1 ? A.y : f.y + (A.y - f.y) / m;
-    var a = this._crng.float(S.apex[0], S.apex[1]), apexY = Math.min(f.y, y1) - a;
+    var a = this._crng.float(S.apex[0], S.apex[1]);
+    if (S.capTop) {   // the found friend's jump never flies under the bubble / HUD (QA: portrait back row)
+      var lo = Math.min(f.x, x1) - f.size / 2, hi = Math.max(f.x, x1) + f.size / 2, top = this.layout.ins.top + 4, ks = this._keeps();
+      for (var q = 0; q < ks.length; q++) if (hi > ks[q].x && lo < ks[q].x + ks[q].w) top = Math.max(top, ks[q].y + ks[q].h + 8);
+      a = clamp(Math.min(f.y, y1) - Math.max(f.size, A.size) * (1 + this.cfg.takeoffStretch) - top, 0, a);   // incl. the take-off stretch
+    }
+    var apexY = Math.min(f.y, y1) - a;
     var t1 = Math.sqrt(2 * (f.y - apexY) / g), t2 = Math.sqrt(2 * (y1 - apexY) / g);
     S.hop = { x0: f.x, y0: f.y, x1: x1, y1: y1, t1: t1, T: t1 + t2, t: 0, s0: f.size, s1: lerp(f.size, A.size, 1 / m), dir: x1 >= f.x ? 1 : -1 };
     f._q = -this.cfg.takeoffStretch; f._qv = 0;
@@ -937,7 +961,7 @@
       var lift = 0;
       if (f.state === 'hidden') {
         lift = p.glow * cfg.hintLift * (1 + Math.sin(TAU * cfg.hintBobHz * this.time) * cfg.hintBob / cfg.hintLift);
-        f.bob = lift * (1 - cfg.peekRiseFrac) * f.size;
+        f.bob = lift * Math.max(0, f.size - cfg.peekRiseFrac * p.fs);
       } else f.bob = 0;
       f.x = p.x; f.y = this._riseY(p, f, f.rise + lift);
     } else {
@@ -994,7 +1018,10 @@
     var top = Math.min.apply(null, back.map(function (p) { return p.clueTop; }));
     var backY = Math.min.apply(null, back.map(function (p) { return p.y; }));
     var cands = [], ys = [top - 6, backY - 0.25 * L.spotW];
-    var pb = this._pipBox();
+    for (var gy = L.ins.top + s + 6; gy <= L.groundY - 10; gy += 20) ys.push(gy);   // fallback: any free height
+    var pb = this._pipBox(), cw = L.camp.w;
+    var blocks = [{ l: L.camp.x - cw * 0.65, t: L.camp.y - cw * 1.1, r: L.camp.x + cw * 0.65, b: L.camp.y + 4 }];   // tent + fire
+    L.bench.forEach(function (B) { blocks.push({ l: B.x - L.seatSize / 2, t: B.y - L.seatSize, r: B.x + L.seatSize / 2, b: B.y }); });
     ys.forEach(function (y) {
       for (var x = L.ins.left + s / 2 + 12; x <= L.W - L.ins.right - s / 2 - 12; x += 16) {
         var l = x - s / 2, r = x + s / 2, t = y - s, b = y, ok = t > L.ins.top + 4;
@@ -1003,10 +1030,14 @@
           if (r + m > B.l && l - m < B.r && t - m < B.b && b + m > B.t) ok = false;
           if (r + m > O.l && l - m < O.r && t - m < O.b && b + m > O.t) ok = false; }
         if (ok && r + m > pb.l && l - m < pb.r && t - m < pb.b && b + m > pb.t) ok = false;
+        for (q = 0; ok && q < blocks.length; q++) { var Z = blocks[q]; if (r + m > Z.l && l - m < Z.r && t - m < Z.b && b + m > Z.t) ok = false; }
         if (ok) cands.push({ x: x, y: y, size: s });
       }
     });
     if (!cands.length) return null;
+    // "behind the forest edge": the highest free band wins
+    var yMin = Math.min.apply(null, cands.map(function (c) { return c.y; }));
+    cands = cands.filter(function (c) { return c.y <= yMin + 40; });
     return cands[Math.floor(this._crng.next() * cands.length)];
   };
   P._stepCritter = function (h) {

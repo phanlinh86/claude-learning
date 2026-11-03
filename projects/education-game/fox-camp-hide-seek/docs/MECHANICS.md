@@ -1,7 +1,7 @@
 # Pip's Camp Hide & Seek — Mechanics (`FC.CONFIG`, layout, motion, events, playtest tuning)
 
 Owner: mechanics engineer. Code: `game/js/{rng,content,world,weather,bot}.js`. Contract: `docs/DESIGN.md` §2, §5.1–5.5.
-Tests: `node tests/unit/run.js` (35 tests, ≈ 16 s). Sims: `node tests/sim/playtest.js [--n 40] [--drivers …] [--config '{…}']`
+Tests: `node tests/unit/run.js` (40 tests, ≈ 20 s). Sims: `node tests/sim/playtest.js [--n 40] [--drivers …] [--config '{…}']`
 (1 000 sessions ≈ 2 min), `node tests/sim/hs_playtest.js [--n 16] [--ages 3,4,6] [--models …] [--jobs 4]` (child models),
 `node tests/sim/determinism.js`, `node tests/sim/content_stats.js [chapters]`, `node tests/sim/hs_browser.js` (the real page in
 Playwright, needs the lead's build). Reports go to `tests/sim/out/` (JSON is git-ignored).
@@ -46,20 +46,23 @@ Statics: `FC.World.logicalSize(cssW, cssH)`, `computeLayout(W, H, ins, cfg, age)
 | `hud` | `x = W − ins.right − 160, y = 0, w = 160 + ins.right, h = ins.top + 96` |
 | `groundY` | `H − ins.bottom − 28` (landscape) / `− 40` (portrait) |
 | `pip` | `{x: ins.left + 120, y: groundY − 6 (feet), h: 230 / 250 (portrait) × scale, w: 0.66·h (hit box)}` |
-| `camp` | `{x: W − ins.right − 150, y: groundY − 10, w: 200·scale}` (flames base ≈ 0.29·w above y) |
-| `bench[6]` | seat feet points `camp + (dx, dy)·seatSize`, `CONFIG.seats` = (−0.95, 0) (−1.6, 0.02) (−2.25, 0) left of the fire, (0.62, −0.12) (0.08, −0.4) (−0.48, −0.38) right / behind; `seatSize = 0.55·spotW` |
+| `camp` | `{x: W − ins.right − 150 (portrait − 125), y: groundY − 10, w: 200·scale}` (flames base ≈ 0.29·w above y; flame column `x ± 0.35·w`) |
+| `bench[6]` | seat feet points in columns LEFT of the flame column (flames are drawn after the friends): `x = camp.x − 0.35·camp.w − 0.5·seatSize − 8 − col·gap`, `y = camp.y + 2 + dy·seatSize`; `CONFIG.seats` = [col, dy] (0, 0) (1, 0.02) (2, 0) front row, (0.5, −0.42) (1.5, −0.42) (2.5, −0.42) back row; `gap = 0.6·seatSize`, squeezed to ≥ 0.38 so no seat overlaps Pip (portrait); `seatSize = 0.55·spotW` |
 | `rows` | landscape back `0.58·H` (scale 0.86), front `groundY − 150` (1); portrait back `0.47·H` (0.88), middle `min(0.62·H, (back+front)/2)` (0.94, only > 4 places), front `groundY − 300·scale` (1) |
-| `field` | landscape front row `ins.left + 250 … W − ins.right − 260`; every other row `± 0.6·w` from the safe edges (shrinks with the places) |
+| `field` | landscape front row `ins.left + 330 … W − ins.right − 330` (objects clear of Pip and the flame column, QA); every other row `± 0.6·w` from the safe edges (shrinks with the places) |
 | `spotW`, `spotH` | 220 (age ≤ 4), 200 (5+) × scale; drawn height = 200/240·w |
 | `friendSize`, `peekRise` | `0.75·spotW`, `0.42·friendSize` (front row, unshrunk; each place has its own `fs`, `peekRise`) |
-| `gather` | `{y, x0, x1}` the line the friends hop to: landscape `groundY − 18`, between Pip and the fire; portrait halfway between the front row and the ground, right of Pip |
+| `gather` | `{y, x0, x1}` the line the friends hop to: landscape `groundY − 18`, between Pip and the fire; portrait halfway between the front row and the ground, from right of Pip to `camp.x − 0.6·camp.w`; when crowded (spacing < 0.6·size) every 2nd friend stands 0.22·size higher |
 | `exitX` | `W + 0.7·friendSize` (where friends enter / leave) |
 
 **Place geometry** (per place, set by `_placeLayout`): `w = spotW·row.scale·k`, `h = 200/240·w`, `fs = 0.75·w`,
 `peekY = y − (196 − CONFIG.peekY[kind])·w/240`, `peekRise = 0.42·fs`,
 `clueTop = peekY − peekRise − clueFrac·fs` (`clueFrac` = the round's clue: hat 0.2, flag / sign / badge 0.55, ears / size 0.04).
-`CONFIG.peekY` (viewBox px of the 200-tall art) = **bush 53, stump 50, tent 59, rock 58, leaves 62, log 63, snowman 63,
-drift 62** (copied from the artist's `spots.json`, 2026-11-03; the first placeholders were 60/70/55/65/70/85/40/60).
+`CONFIG.peekY` (viewBox px of the 200-tall art) = **bush 52, stump 50, tent 58, rock 54, leaves 55, log 63, snowman 63,
+drift 56** (= `spots.json` and `tools/art_spots.py` PEEK). QA asked for the art's median tops (bush 50, stump 46, tent 56,
+rock 50, leaves 53, drift 52) so faces show; `tools/art_spots_sheet.js` measured leaks there (drift 148 px, rock 120, stump 82,
+bush 59 — a cut-off head over background), so each kind was raised in 2-px steps to the lowest leak-free line (≤ 16 px, the
+old baseline). History: placeholders 60/70/55/65/70/85/40/60 → artist 53/50/59/58/62/63/63/62 → now.
 
 **Solver** (`solvePlaces`, deterministic from the round seed): splits n places over the rows in DESIGN order (landscape
 2 → 0+2, 3 → 0+3, 4 → 2+2, 5 → 2+3, 6 → 3+3; portrait 2 → front, 3 → 1+0+2, 4 → 2+0+2, 5 → 2+1+2, 6 → 2+2+2, each with
@@ -73,6 +76,11 @@ Measured: every viewport in the test list × ages × 2–6 places × 4 seasons f
 k ≥ 0.82 everywhere (iPad portrait 4 places: 0.88); 6 places on iPad portrait 720×960: k = 0.58–0.64.
 After changing `w.hudKeep` call `setViewport` again (main.js does on every resize).
 
+**Pop height** (`place.riseMax`): a popped friend stands taller than its clue box (`ears` clue: 0.46·fs); near a keep-out it
+rises only to `riseMax` so its head (pop overshoot 1.1 + take-off stretch) stays ≥ 8 px below the box. The solver reserves
+room for at least 0.5·fs above the head line (`CONFIG.popRoom`), so `riseMax ≥ 0.63` (iPad portrait p10 0.63, elsewhere ≈ 1).
+The found friend's jump apex is capped the same way (`capTop`): it never flies under the bubble / HUD.
+
 **Hit test** (`_hit`, in order): peek boxes → object boxes (front row first) → Pip's box → padded place boxes
 (`x ± w/2, clueTop … y` + 22 px, nearest wins) → Pip + 20 px. The centre of `placeHit(id)` always picks that place.
 
@@ -80,10 +88,10 @@ After changing `w.hudKeep` call `setViewport` again (main.js does on every resiz
 | phase | what happens | numbers |
 |---|---|---|
 | gather | places pop in (back-out 0 → 1.12 → 1, 0.35 s, stagger 0.07 s); friends hop in from `exitX` (stagger 0.12 s, hops ≤ 440 px, apex 36–50) to the gather line and **wave** | ≥ `gatherMin` 1.0 s + 0.25 s of waving; event `gather` |
-| count | Pip `cover`; `countNum` 1/2/3 at 0.3 / 1.1 / 1.9 s; from 0.35 s the friends run (stagger 0.15 s, 2 hops, 3 when > 420 px, apex 28–42) to their place, land on its peek line and **duck** (rise 1 → 0 in 0.22 s, place shake + `hideIn`) | ≥ `countTime` 2.6 s and all hidden → Pip `peek` (0.7 s), `ready`, `ask` |
-| ask | idle nudges 12 s, ×1.5, ≤ 30 s (`idle {n}`; idle n ≥ 2 also hints); tap a place → `peek` | taps on grass do not reset the idle timer |
-| peek | the place opens (0 → 1 in 0.18 s, shake kick ≈ 0.1 rad, squash 0.08); after 0.06 s the friend **pops** (rise 0 → 1, back-out c = 1.7: peak ≈ 1.10, 0.25 s) | resolves 0.31 s after the tap |
-| found (right) | `found`; fire flares (`fire.power` 1, decays to 0.35 at 0.9/s); the friend **jumps** out (one ballistic arc, apex 90 px) to 0.34·w in front of the place, then hops 2–4 times (≤ 250 px, apex 40–64) to the next bench seat → `seated` + `seat` | phase lasts ≥ 0.6 s and until the jump is done, then the next `ask` |
+| count | Pip `cover`; `countNum` 1/2/3 at 0.3 / 1.0 / 1.7 s; from 0.35 s the friends run (stagger 0.15 s, 2 hops, 3 when > 420 px, apex 28–42) to their place, land on its peek line and **duck** (rise 1 → 0 in 0.22 s, place shake + `hideIn`) | ≥ `countTime` 2.6 s and all hidden → Pip `peek` (0.7 s), `ready`, `ask` |
+| ask | idle nudges 12 s, ×1.5, ≤ 30 s (`idle {n}`; idle n ≥ 2 also hints); tap a place → `peek` | only a real peek (or the squirrel) resets the idle timer — grass, Pip (`pokePip`) and empty-place taps do not; the **3rd Pip / empty tap within an ask glows the answer** (`softTapHint`, no cooldown) |
+| peek | the place opens (0 → 1 in 0.18 s, shake kick ≈ 0.1 rad, squash 0.08); after 0.06 s the friend **pops** (rise 0 → `riseMax`, back-out c = 1.7: peak ≈ 1.10×, 0.25 s) | resolves 0.31 s after the tap |
+| found (right) | `found`; fire flares (`fire.power` 1, decays to 0.35 at 0.9/s); the friend **jumps** out (one ballistic arc, apex 90 px) to 0.34·w in front of the place, then hops 2–4 times (≤ 250 px, apex 40–64) to the next bench seat → `seated` + `seat` | phase lasts ≥ 0.8 s and until the jump is done, then the next `ask` |
 | wrong | `wrong`; friend **boo**: wiggles (rot 0.14·sin(2π·2.4 t)·(1 − t/0.9)), looks at Pip, 0.9 s, then ducks (0.22 s) and the place closes (0.2 s); tap lock 0.8 s (1.6 s from the 2nd miss of an ask) → taps on places = `locked`; 2nd miss → `hint` always; later misses → hint with a 6 s cooldown | phase goes straight back to `ask` |
 | swap (surprise) | after the 1st find two hidden friends pop (0.25 s), trade places on crossing arcs (apex 120 / 60 px, ≈ 0.6 s), duck (0.22 s); `swap {a, b, placeA, placeB}` | ≈ 1.1 s |
 | party | `roundDone {stars}` (3/2/1 for 0/1/≥ 2 misses); Pip `cheer`; the **leftover** (never asked) friend pops (`reveal`) and hops to a seat; seated friends **dance** (hops in place, apex 16 px, period 0.46 s, stagger 0.12 s by seat) | ≥ 2.2 s and everybody seated + 0.3 s |
@@ -96,6 +104,8 @@ stretch (q = −0.1), landing squash (q = +0.2) on a spring ω 22, ζ 0.32 → `
 ≈ 1.05). 0.07 s ground contact between hops. Lean on a rotation spring (ω 16, ζ 0.7) up to 0.16 rad into the hop direction.
 Place shake: rotation spring ω 18, ζ 0.22, kicked so the first peak is 0.1 rad (`kickFor`), damped < 0.03 within 1 s.
 Hinted place: `glow` 0 → 1 (4 s), its hidden friend lifts `rise = 0.16·glow` and bobs (`f.bob` px, 1.6 Hz) so the clue rises.
+Hidden pose: feet = `peekY + max(0, size − 0.42·place.fs)·(1 − rise)`, i.e. the head top is 0.42·**fs** above the line for every
+friend — a small (0.62×) friend shows 68 % of itself (eyes + ears), not a 24 px tuft (QA).
 
 **Resize / rotation mid-round**: `setViewport` re-solves the places (same seed), then **every running motion finishes
 instantly with its events** (a running friend ducks in → `hideIn`; a pop resolves → `found`/`wrong`; a found friend → its
@@ -123,9 +133,14 @@ friends distinct (except `size`), no two consecutive asks with the same value, c
 - **Colours below age 5**: clash-free sets only (blue+purple, red+green, yellow+orange, green+orange, red+orange). The
   largest clash-free set has 3 colours, so colour rounds below 5 have ≤ 3 places — and every 3-set contains yellow
   (content_stats: yellow ≈ 30 % of the answers, orange ≈ 2 %). Two equal hats could never be told apart by an ask.
-- **count**: rounds 0–1 count up (signs 1…n with numeral + stars; asks 1, 2, … in order; the last sign is the leftover);
-  rounds 2–3 stars only (age ≤ 4 values in 1–5 spread ≥ 2 apart when possible).
-- **size** (age 3): the same animal big + small (scale 1 / 0.62) + others; the first ask is one of that pair.
+- **count** (deviation, QA skew): only round 1 counts up (signs 1…n with numeral + stars; asks 1, 2, … in order; the last sign
+  is the leftover); rounds 0, 2, 3 stars only (2 places: values ≥ 2 apart; 3+ places: any distinct values — 3 of 1–5 spread
+  ≥ 2 apart is always 1, 3, 5). Age-4 share of "1" answers 35 % → 27 % (count-up always asks "1").
+- **No repeat across rounds**: `makeRound(…, {avoid})` rejects a round whose first ask equals the previous round's last ask
+  (`promptKey + params`; `p.countUp` excepted); the world passes it (reset per chapter).
+- **Colours**: in half the 3-hat rounds the yellow hat is the leftover → yellow 32 % → 16 % of age-4 colour answers.
+- **size**: ONE animal per round (DESIGN §5.1), big + small (scale 1 / 0.62) → always 2 places, 1 ask (i18n has only big /
+  small, so a 3rd friend of the same animal could never be asked apart).
 - **animals**: ears clue; from round 2 at age ≥ 4 half the asks are by sound (`p.sound`).
 - **initial**: asked friends have pairwise different initials; the leftover has another initial or no word (en sheep, vi chó).
 - **oddeven** (deviation): a parity ask can only be unique once per round (after it, the rest all share one parity), so a
@@ -149,6 +164,9 @@ the hit box), confused (random taps, follows a glow), absent, talkAbsent.
 | 6 | 95.7 / 104.9 s | 90.6 s | 426 s | 0.18 | 48 % |
 | 7 | 90.8 / 99.6 s | 91.1 s | 402 s | 0.11 | 64 % |
 All 1 000 sessions finish (random tapper included), no NaN, no stuck state; longest typical ask 21 s; deterministic.
+**After the QA pass** (2026-11-03): typical chapter 68.5 / 74.9 / 89.4 / 97.0 / 92.8 s (ages 3–7), bot 0.8 at age 4 60.1 s,
+typical session max 447 s; high-speed models: confused child stuck asks 0 (idle glow now reaches it), 2nd-miss glow never
+swallowed, absent → pause at ≈ 123 s.
 High-speed child models (age 4): watching time (gather / count / peek / found / swap / party) 45 % of play for a typical
 child, asking 36 %; answers left / middle / right 33/34/33 % in 3-place rounds; back row 35 %; the 2nd-miss glow was never
 swallowed; spammers get `locked` 9–17 × per ask and mostly 1-star rounds; absent child → 5th idle (≈ 124 s) → main pauses.

@@ -240,6 +240,9 @@
     c.lineJoin = 'round'; c.lineCap = 'round';
     // soft contact shadow on the head under the cuff
     c.fillStyle = 'rgba(40,30,40,0.18)'; ell(c, 0, cy1 + u * 0.01, chw * 0.95, u * 0.03); c.fill();
+    // cream halo so a green / yellow hat still pops on the meadow (visual QA P2-4)
+    c.fillStyle = 'rgba(255,248,232,0.95)'; pomPath(c, u, lw * 3); c.fill();
+    domePath(c, u); c.strokeStyle = 'rgba(255,248,232,0.95)'; c.lineWidth = lw * 6; c.stroke();
     // pompom (behind the dome)
     pomPath(c, u, lw); c.fillStyle = col.dark; c.fill();
     pomPath(c, u, 0); c.fillStyle = col.base; c.fill();

@@ -34,7 +34,7 @@ KINDS = ['bush', 'stump', 'tent', 'rock', 'leaves', 'log', 'snowman', 'drift']
 SEASON = {'bush': 0, 'stump': 0, 'tent': 1, 'rock': 1, 'leaves': 2, 'log': 2, 'snowman': 3, 'drift': 3}
 # clip line (viewBox y) = the LOWEST point of the object's top contour over x 60..180 (measured by
 # tools/art_spots_sheet.js, which prints a warning when the art and these numbers disagree)
-PEEK = {'bush': 53, 'stump': 50, 'tent': 59, 'rock': 58, 'leaves': 62, 'log': 63, 'snowman': 63, 'drift': 62}
+PEEK = {'bush': 52, 'stump': 50, 'tent': 58, 'rock': 54, 'leaves': 55, 'log': 63, 'snowman': 63, 'drift': 56}
 
 
 def f(v):

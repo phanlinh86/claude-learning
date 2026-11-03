@@ -161,7 +161,7 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
   #scrDone .done-panel { max-width: min(470px, 46vw); }
 }
 @media (orientation: portrait) {
-  #scrDone { padding-bottom: calc(var(--sa-b) + 20vh); }
+  #scrDone { padding-bottom: calc(var(--sa-b) + 2vh); }
   /* portrait title: logo + ▶ at the top, Pip and the campsite below (visual QA P1-2) */
   .title-wrap { justify-content: flex-start; padding-top: 4vh; padding-bottom: 0; gap: 6px; }
   .btn-play { width: clamp(110px, 22 * var(--u), 170px); }

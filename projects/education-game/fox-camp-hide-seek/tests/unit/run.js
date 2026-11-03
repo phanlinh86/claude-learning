@@ -139,7 +139,7 @@ test('content: places per round 3: 2,2,3,3 · 4: 2,3,4,4 · 5: 3,4,5,5 · 6–7:
   const T = { 3: [2, 2, 3, 3], 4: [2, 3, 4, 4], 5: [3, 4, 5, 5], 6: [4, 5, 6, 6], 7: [4, 5, 6, 6] };
   for (const age of AGES) for (const topic of TOPICS) for (let ri = 0; ri < 4; ri++) {
     const r = C.makeRound(topic, { age, lang: 'en', rng: new FC.RNG(ri + 1), roundIndex: ri });
-    const want = topic === 'colors' && age < 5 ? Math.min(3, T[age][ri]) : T[age][ri];
+    const want = topic === 'size' ? 2 : topic === 'colors' && age < 5 ? Math.min(3, T[age][ri]) : T[age][ri];
     assert.strictEqual(r.places.length, want, topic + ' age ' + age + ' r' + ri);
     assert.strictEqual(r.asks.length, want - 1);
     assert.strictEqual(r.places[0].clue.kind, C.CLUE_OF[topic]);
@@ -159,11 +159,11 @@ test('content: colour-blind pairs never below age 5 (blue+purple, red+green, yel
   assert.ok(pinkSeen, 'pink is an answer colour from age 5');
 });
 
-test('content: count — rounds 0–1 count up (numeral + stars, asks 1, 2, … in order), rounds 2–3 stars only, age 4 n ∈ 1–5 spread', () => {
+test('content: count — round 1 counts up (numeral + stars, asks 1, 2, … in order), rounds 2–3 stars only, age 4 n ∈ 1–5 spread', () => {
   let gaps = 0, rounds = 0;
   for (const age of AGES) for (let s = 0; s < 120; s++) for (let ri = 0; ri < 4; ri++) {
     const r = C.makeRound('count', { age, lang: 'en', rng: new FC.RNG(s * 5 + ri), roundIndex: ri });
-    if (ri < 2) {
+    if (ri === 1) {
       assert.deepStrictEqual(r.asks.map(a => a.params.n), r.asks.map((a, i) => i + 1));
       assert.ok(r.asks.every(a => a.promptKey === 'p.countUp'));
       assert.strictEqual(r.asks[0].params.first, true);
@@ -176,18 +176,19 @@ test('content: count — rounds 0–1 count up (numeral + stars, asks 1, 2, … 
         const v = r.places.map(p => p.clue.n).sort((a, b) => a - b);
         assert.ok(v[0] >= 1 && v[v.length - 1] <= 5);
         rounds++; if (v.every((x, i) => !i || x - v[i - 1] >= 2)) gaps++;
-        if (v.length <= 3) assert.ok(v.every((x, i) => !i || x - v[i - 1] >= 2), '≥ 2 apart when possible: ' + v);
+        if (v.length <= 2) assert.ok(v.every((x, i) => !i || x - v[i - 1] >= 2), '≥ 2 apart when possible: ' + v);
       }
     }
   }
   assert.ok(rounds > 0);
 });
 
-test('content: size (age 3) — the same animal big AND small (scale 1 / 0.62), the first ask is one of that pair', () => {
+test('content: size (age 3) — ONE animal per round, big AND small (scale 1 / 0.62)', () => {
   for (let s = 0; s < 300; s++) for (let ri = 0; ri < 4; ri++) {
     const r = C.makeRound('size', { age: 3, lang: s % 2 ? 'vi' : 'en', rng: new FC.RNG(s + 1), roundIndex: ri });
-    const ps = r.places, a0 = ps[r.asks[0].answer];
-    assert.ok(ps.some(p => p !== a0 && p.friend === a0.friend && p.clue.size !== a0.clue.size), 'first ask: one of a big+small pair');
+    const ps = r.places;
+    assert.strictEqual(ps.length, 2); assert.strictEqual(ps[0].friend, ps[1].friend);
+    assert.deepStrictEqual(ps.map(p => p.clue.size).sort(), ['big', 'small']);
     for (const p of ps) { assert.strictEqual(p.clue.scale, p.clue.size === 'big' ? 1 : 0.62); assert.strictEqual(p.clue.animal, p.friend); }
   }
 });
@@ -218,6 +219,30 @@ test('content: shapes ≤ 4 each flag its own colour; initial: distinct initials
       assert.ok(left >= 0);
     }
   }
+});
+
+test('content: a round never opens with the ask that closed the previous round (count-up "find 1" excepted); less skew', () => {
+  for (const age of AGES) for (const topic of FC.AGE_POOLS[age]) for (let s = 0; s < 60; s++) {
+    const rng = new FC.RNG(s * 11 + age);
+    let prev = null;
+    for (let ri = 0; ri < 4; ri++) {
+      const r = C.makeRound(topic, { age, lang: 'en', rng, roundIndex: ri, avoid: prev });
+      if (prev && r.asks[0].promptKey !== 'p.countUp') assert.notStrictEqual(r.asks[0].promptKey + JSON.stringify(r.asks[0].params), prev.promptKey + JSON.stringify(prev.params), topic);
+      prev = r.asks[r.asks.length - 1];
+    }
+  }
+  const share = (topic, age, key) => {
+    const c = {}; let n = 0;
+    for (let s = 0; s < 400; s++) for (let ri = 0; ri < 4; ri++) {
+      const r = C.makeRound(topic, { age, lang: 'en', rng: new FC.RNG(s * 4 + ri), roundIndex: ri });
+      for (const a of r.asks) { const v = key(r.places[a.answer].clue); c[v] = (c[v] || 0) + 1; n++; }
+    }
+    return Object.fromEntries(Object.entries(c).map(([k, v]) => [k, v / n]));
+  };
+  const cnt = share('count', 4, c => c.n), col = share('colors', 4, c => c.color);
+  assert.ok(cnt[1] < 0.3, '"1" share of age-4 count answers ' + cnt[1].toFixed(2));
+  assert.ok(col.yellow < 0.27, 'yellow share of age-4 colour answers ' + col.yellow.toFixed(2));
+  console.log('     (age 4: count "1" ' + (100 * cnt[1]).toFixed(0) + ' %, colour yellow ' + (100 * col.yellow).toFixed(0) + ' %)');
 });
 
 test('content: oddeven — exactly one parity ask per round, the others are sums (p.add); hiding kinds alternate per season', () => {
@@ -261,7 +286,7 @@ test('layout: DESIGN §2 numbers (bubble, groundY, pip, camp, rows, field, spotW
   assert.strictEqual(L.groundY, 692); assert.deepStrictEqual([L.pip.x, L.pip.y, L.pip.h], [120, 686, 230]);
   assert.deepStrictEqual([L.camp.x, L.camp.y], [1130, 682]);
   assert.strictEqual(L.rows.length, 2); assert.strictEqual(L.rows[0].y, 0.58 * 720); assert.strictEqual(L.rows[0].scale, 0.86);
-  assert.strictEqual(L.rows[1].y, 692 - 150); assert.deepStrictEqual([L.field.x0, L.field.x1], [250, 1020]);
+  assert.strictEqual(L.rows[1].y, 692 - 150); assert.deepStrictEqual([L.field.x0, L.field.x1], [330, 950]);
   assert.strictEqual(L.spotW, 220); assert.strictEqual(FC.World.computeLayout(1280, 720, null, {}, 6).spotW, 200);
   assert.strictEqual(L.bench.length, 6); assert.ok(Math.abs(L.seatSize - 0.55 * 220) < 1e-9);
   const P = FC.World.computeLayout(720, 1556, { top: 108, right: 0, bottom: 62, left: 0 }, {}, 4);
@@ -352,7 +377,7 @@ test('world: every round event carries its fields', () => {
   assert.ok(f.every(e => e.n >= 1));
 });
 
-test('world: gather → count timing — staggered hop-in, countNum at 0.3 / 1.1 / 1.9 s, hideIn, ready → ask; taps ignored meanwhile', () => {
+test('world: gather → count timing — staggered hop-in, countNum at 0.3 / 1.0 / 1.7 s, hideIn, ready → ask; taps ignored meanwhile', () => {
   const w = mkWorld({ age: 4, seed: 5 });
   w.levels = ['animals', 'animals', 'animals', 'animals']; w.startLevel(0); w.round = 3; w._beginRound();
   const ev = [], t0 = w.time;
@@ -372,7 +397,7 @@ test('world: gather → count timing — staggered hop-in, countNum at 0.3 / 1.1
   assert.strictEqual(ignored, 0, 'taps during gather / count return null');
   const cn = ev.filter(e => e[0] === 'countNum');
   assert.deepStrictEqual(cn.map(e => e[2]), [1, 2, 3]);
-  assert.ok(Math.abs((cn[1][1] - cn[0][1]) - 0.8) < 0.02 && Math.abs((cn[2][1] - cn[1][1]) - 0.8) < 0.02);
+  assert.ok(Math.abs((cn[1][1] - cn[0][1]) - 0.7) < 0.02 && Math.abs((cn[2][1] - cn[1][1]) - 0.7) < 0.02);
   assert.strictEqual(ev.filter(e => e[0] === 'hideIn').length, w.places.length);
   const iReady = ev.findIndex(e => e[0] === 'ready'), iAsk = ev.findIndex(e => e[0] === 'ask');
   assert.ok(iReady >= 0 && iAsk === iReady + 1);
@@ -391,7 +416,7 @@ test('world: right peek → found, the friend jumps out and hops to the next ben
   // taps during peek → null
   for (const p of w.places) { const h = w.placeHit(p.id); assert.strictEqual(w.pointerDown(h.x, h.y), null); }
   let rmax = 0; until(w, () => { rmax = Math.max(rmax, f.rise); return w.phase === 'found'; });
-  assert.ok(rmax > 1.03, 'the pop overshoots (' + rmax.toFixed(3) + ')');
+  const rm = w.placeById(a).riseMax; assert.ok(rm > 0.4 && rmax > rm * 1.05, 'the pop overshoots (' + rmax.toFixed(3) + ' vs ' + rm.toFixed(3) + ')');
   const e2 = evs(w); const fe = e2.find(e => e.type === 'found');
   assert.ok(fe && fe.friendId === f.id && fe.n === 1);
   assert.strictEqual(w.fire.power, 1);
@@ -697,12 +722,72 @@ test('world: hidden friends keep the head top peekRise above peekY (clipping con
   for (const f of w.friends) {
     const p = w.placeById(f.home);
     const head = f.y - f.size;
-    assert.ok(Math.abs((p.peekY - head) - CFG.peekRiseFrac * f.size) < 1e-6, 'head top 0.42·size above the line');
+    assert.ok(Math.abs((p.peekY - head) - CFG.peekRiseFrac * p.fs) < 1e-6, 'head top 0.42·fs above the line');
     assert.strictEqual(f.place, p.id);
   }
   const a = w.answerId(), f = w.friendById(w.placeById(a).friendId), y0 = f.y;
   w.hint(); run(w, 1.0);
   assert.ok(f.y < y0 - 5, 'a hinted friend peeks a little higher');
+});
+
+test('world: a small friend (size round) still shows 0.42·fs of itself above the line (eyes + ears)', () => {
+  const w = roundOf(mkWorld({ age: 3, seed: 14 }), 'size', 2);
+  const sm = w.friends.find(f => f.clue.size === 'small'), p = w.placeById(sm.home);
+  assert.ok(Math.abs(p.peekY - (sm.y - sm.size) - CFG.peekRiseFrac * p.fs) < 1e-6);
+  assert.ok((p.peekY - (sm.y - sm.size)) / sm.size >= 0.6, 'most of the small head shows');
+});
+
+test('world: Pip / empty-place taps do not reset the idle help; the 3rd one in an ask glows the answer', () => {
+  const w = roundOf(mkWorld({ age: 4, seed: 15 }), 'animals', 3);
+  const a = w.answerId(); tapPlace(w, a); until(w, () => w.phase === 'ask'); evs(w);
+  run(w, 5);
+  const t0 = w._idleT, ph = w.pipHit();
+  w.pointerDown(ph.x, ph.y); w.pointerUp(ph.x, ph.y);
+  assert.ok(w._idleT >= t0, 'Pip tap keeps the idle clock');
+  tapPlace(w, a);
+  assert.ok(w._idleT >= t0, 'empty tap keeps the idle clock');
+  assert.ok(!evs(w).some(e => e.type === 'hint'));
+  w.pointerDown(ph.x, ph.y); w.pointerUp(ph.x, ph.y);
+  const h = evs(w).find(e => e.type === 'hint'); assert.ok(h && h.placeId === w.answerId(), '3rd soft tap → hint');
+  run(w, 7.2); assert.ok(evs(w).some(e => e.type === 'idle'), 'idle at 12 s despite the taps');
+});
+
+test('world: bench seats sit left of the flame column and clear of Pip; landscape front row clear of Pip / the camp', () => {
+  for (const v of VIEWPORTS) for (const age of [3, 4, 6]) {
+    const L = FC.World.computeLayout(v.W, v.H, v.ins, {}, age), fh = CFG.flameHalf * L.camp.w;
+    const pr = L.pip.x + L.pip.w / 2;
+    for (const S of L.bench) {
+      assert.ok(S.x + L.seatSize / 2 <= L.camp.x - fh + 1e-6, v.name + ': seat in the flames');
+      assert.ok(S.x - L.seatSize / 2 >= pr - 1e-6, v.name + ': seat over Pip ' + (S.x - L.seatSize / 2) + ' < ' + pr);
+    }
+    if (!L.portrait) {
+      assert.ok(L.field.x0 - CFG.objHalf * L.spotW >= pr - 1, v.name + ': front row over Pip');
+      assert.ok(L.field.x1 + CFG.objHalf * L.spotW <= L.camp.x - fh + 1, v.name + ': front row over the flames');
+    } else assert.ok(L.gather.x1 <= L.camp.x - 0.6 * L.camp.w + 1e-6, 'portrait gather line ends left of the fire');
+  }
+});
+
+test('world: a popping / jumping friend never goes under the bubble / HUD (portrait back row)', () => {
+  let n = 0;
+  for (const v of [VIEWPORTS[3], VIEWPORTS[7], VIEWPORTS[5], VIEWPORTS[10]]) for (let s = 0; s < 6; s++) {
+    const w = roundOf(mkWorld({ age: 4, seed: 50 + s, vp: v }), 'animals', 3);
+    const keeps = [w.layout.bubble, w.layout.hud];
+    for (let k = 0; k < 3; k++) {
+      const a = w.answerId(); if (!a) break;
+      const f = w.friendById(w.placeById(a).friendId);
+      tapPlace(w, a);
+      until(w, () => {
+        if (f.state === 'jump' || f.state === 'pop') for (const K of keeps) {
+          if (f.x + f.size / 2 > K.x && f.x - f.size / 2 < K.x + K.w) assert.ok(f.y - f.size * f.sy >= K.y + K.h, v.name + ': ' + f.state + ' under a keep-out ' + (f.y - f.size * f.sy).toFixed(0) + ' < ' + (K.y + K.h));
+        }
+        return f.state === 'seated' || f.state === 'dance' || (w.phase === 'ask' && f.state !== 'jump' && f.state !== 'pop');
+      }, 4000);
+      n++;
+      if (w.ask >= w.asks) break;
+      until(w, () => w.phase === 'ask', 4000);
+    }
+  }
+  assert.ok(n > 20);
 });
 
 test('world: spots.json → CONFIG.peekY (applySpots) moves the clip line', () => {

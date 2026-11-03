@@ -271,7 +271,7 @@
       'gather': ['Let’s play hide-and-seek!', 'Hide-and-seek time, friends!', 'Everybody hide! Pip will count!'],
       'countNum.1': 'One…',
       'countNum.2': 'Two…',
-      'countNum.3': ['Three! Ready? Here I come!', 'Three! Here I come!'],
+      'countNum.3': ['Three! Here I come!', 'Three! Coming to find you!'],
 
       'p.any': ['Who is hiding? Tap to peek!', 'Let’s peek! Tap a hiding place!', 'Where are my friends? Tap one!'],
       'p.colors': ['Where is the friend in the {color} hat?', 'Who has the {color} hat? Let’s find them!',

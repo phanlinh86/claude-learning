@@ -12,6 +12,7 @@ const { fork } = require('child_process');
 const L = require('./lib');
 const M = require('./hs_models');
 const FC = L.FC;
+const PATCH = require('./patches').apply(FC, (process.argv.includes('--patch') ? process.argv[process.argv.indexOf('--patch') + 1] : ''));
 
 const args = process.argv.slice(2), get = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
 const N = +get('n', 80), config = JSON.parse(get('config', '{}'));
@@ -162,7 +163,7 @@ if (require.main !== module) { /* required as a library */ } else if (args.inclu
   }))).then(parts => {
     const S = [].concat(...parts);
     const rows = summarize(S);
-    const md = `## High-speed playtest "${TAG}" — ${S.length} sessions${Object.keys(config).length ? ' · config ' + JSON.stringify(config) : ''}\n\n` + table(rows) + `\n_${((Date.now() - t0) / 1000).toFixed(0)} s wall_\n`;
+    const md = `## High-speed playtest "${TAG}" — ${S.length} sessions${PATCH.length ? ' · patch ' + PATCH.join(',') : ''}${Object.keys(config).length ? ' · config ' + JSON.stringify(config) : ''}\n\n` + table(rows) + `\n_${((Date.now() - t0) / 1000).toFixed(0)} s wall_\n`;
     const out = path.join(__dirname, 'out'); fs.mkdirSync(out, { recursive: true });
     fs.writeFileSync(path.join(out, 'hs_' + TAG + '.json'), JSON.stringify(rows, null, 1));
     fs.writeFileSync(path.join(out, 'hs_' + TAG + '.md'), md);

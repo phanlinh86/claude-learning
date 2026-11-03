@@ -8,7 +8,9 @@ const { chromium } = require('playwright');
 const serve = require('../e2e/serve');
 const args = process.argv.slice(2), get = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
 const SESS = +get('sessions', 2), AGES = get('ages', '3,4,5,6,7').split(',').map(Number), SPEED = +get('speed', 8);
-const VPS = [{ name: 'ipad-landscape', viewport: { width: 1180, height: 820 }, dpr: 2 }, { name: 'iphone-portrait', viewport: { width: 393, height: 852 }, dpr: 3 }];
+const ALLVP = [{ name: 'ipad-landscape', viewport: { width: 1180, height: 820 }, dpr: 2 }, { name: 'iphone-portrait', viewport: { width: 393, height: 852 }, dpr: 3 },
+  { name: 'iphone-landscape', viewport: { width: 852, height: 393 }, dpr: 3 }];
+const VPS = get('vp', '') ? ALLVP.filter(v => get('vp').split(',').includes(v.name)) : ALLVP.slice(0, 2);   // --vp iphone-portrait
 
 (async () => {
   const srv = await serve(), browser = await chromium.launch(), res = [];

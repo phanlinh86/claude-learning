@@ -428,14 +428,24 @@
       const pipX = portrait ? fxC - cw * 0.5 - pw * 0.3 : fxC - cw * 0.5 - pw * 0.42;
       const met = (w.met && w.met.length ? w.met : (FC.ANIMALS || [])).slice(0, 8);
       const n = met.length, gap = portrait ? 70 : 84;
-      for (let i = 0; i < n; i++) {
-        const side = i % 2 ? 1 : -1, kk = Math.floor(i / 2);
-        let fx = side > 0 ? fxC + cw * 0.55 + 40 + kk * gap : pipX - pw * 0.45 - 30 - kk * gap;
-        let fyy = gy + 14;
+      // landscape: slots right of the fire up to the done panel (≈ 0.54·W), then left of Pip, then a back row (visual QA P2-6)
+      const slots = [];
+      if (!portrait) {
+        const xr = W - (ins.right || 0) - 50, xl = (ins.left || 0) + 40;
+        for (let x = fxC + cw * 0.55 + 40; x <= xr; x += gap) slots.push({ x, y: gy + 14, s: 92, flip: true });
+        for (let x = pipX - pw * 0.45 - 30; x >= xl; x -= gap) slots.push({ x, y: gy + 14, s: 92, flip: false });
+        for (let x = fxC + cw * 0.55 + 40 + gap / 2; x <= xr && slots.length < n; x += gap) slots.push({ x, y: gy - 38, s: 78, flip: true, back: true });
+      }
+      const order = [];
+      for (let i = 0; i < n; i++) order.push(i);
+      if (!portrait) order.sort((a, b) => ((slots[a] && slots[a].back) ? 0 : 1) - ((slots[b] && slots[b].back) ? 0 : 1));   // back row first
+      for (const i of order) {
+        let fx, fyy, sz = portrait ? 80 : 92, flip = i % 2 === 1;
         if (portrait) { fx = (ins.left || 0) + 40 + (W - (ins.left || 0) - (ins.right || 0) - 80) * (i + 0.5) / n; fyy = gy + 115 + (i % 2) * 18; }
+        else { const sl = slots[i]; if (!sl) continue; fx = sl.x; fyy = sl.y; sz = sl.s; flip = sl.flip; }
         if (fx < (ins.left || 0) + 40 || fx > W - (ins.right || 0) - 40) continue;
         const hp = Math.max(0, Math.sin(t * 3.2 + i * 0.9)) * 16;
-        this._friend(w, { id: i, animal: met[i], x: fx, y: fyy - hp + (portrait ? 0 : (kk % 2) * 10), size: portrait ? 80 : 92, state: 'dance', wave: hp > 8, flip: side > 0 }, 1, false);
+        this._friend(w, { id: i, animal: met[i], x: fx, y: fyy - hp, size: sz, state: 'dance', wave: hp > 8, flip }, 1, false);
       }
       const nm = FC.Assets.has('pip_cheer') ? 'pip_cheer' : 'pip_idle';
       if (FC.Assets.has(nm)) this._img(nm, pipX - pw / 2, gy + 30 - hop - ph * 292 / 300, pw, ph);
