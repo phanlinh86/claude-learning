@@ -1,0 +1,134 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Camp art sheet</title>
+<style>body{margin:0;background:#666;font:14px system-ui}canvas{display:block}</style></head>
+<body>
+<!-- Test sheet for FC.CampArt. Every clue kind / value / colour drawn over the animal friends (items/animal_*.svg) at
+     in-game friend size (140 px; a few rows at 120 and 160), clue origin = FC.CampArt.HEAD_TOP of each animal (red dot);
+     a "hidden" row clips the friends at a hiding-place line so only what peeks out shows; then campfire flames
+     (power 0 / 0.5 / 1, three times), hint glow, butterflies, sparks, stars, and a 3× zoom.
+     Render with: node tools/camp_art_sheet.js  (writes docs/art/camp_art_sheet.png) -->
+<canvas id="c"></canvas>
+<script>window.FC = {};</script>
+<script src="../game/js/camp_art.js"></script>
+<script>
+(function () {
+  var S = FC.CampArt, COLS = Object.keys(S.COLORS), dpr = window.devicePixelRatio || 1;
+  var ANIMALS = ['cat', 'dog', 'cow', 'pig', 'sheep', 'duck', 'lion', 'frog'];
+  var cv = document.getElementById('c'), ctx = cv.getContext('2d'), imgs = {};
+  var W = 1960, H = 3600;
+  cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  function meadow(y, h, dark) {
+    var g = ctx.createLinearGradient(0, y, 0, y + h);
+    if (dark) { g.addColorStop(0, '#1D2A44'); g.addColorStop(1, '#2C3A52'); }
+    else { g.addColorStop(0, '#CDEBFB'); g.addColorStop(0.62, '#F6F0D8'); g.addColorStop(0.63, '#B9DC9C'); g.addColorStop(1, '#9CC985'); }
+    ctx.fillStyle = g; ctx.fillRect(0, y, W, h);
+  }
+  function label(t, x, y, light) { ctx.font = '600 13px system-ui'; ctx.textAlign = 'left'; ctx.fillStyle = light ? '#fff' : '#33405c'; ctx.fillText(t, x, y); }
+  function load(n) {
+    return new Promise(function (res) { var im = new Image(); im.onload = function () { imgs[n] = im; res(); }; im.onerror = function () { res(); }; im.src = '../game/assets/default/' + n; });
+  }
+  // friend at box top-left (x, y) with size s; clue drawn at its head top. hideY: clip line (screen y) or null
+  function friend(a, x, y, s, clue, opt) {
+    opt = opt || {};
+    var ht = S.HEAD_TOP[a], ox = x + ht[0] / 128 * s, oy = y + ht[1] / 128 * s;
+    ctx.save();
+    if (opt.hideY != null) { ctx.beginPath(); ctx.rect(x - 200, opt.hideY - 600, s + 400, 600); ctx.clip(); }
+    if (imgs['items/animal_' + a + '.svg']) ctx.drawImage(imgs['items/animal_' + a + '.svg'], x, y, s, s);
+    ctx.restore();
+    if (opt.glow) { ctx.save(); ctx.translate(x + s / 2, opt.hideY || (y + s / 2)); S.drawGlow(ctx, s * 1.5, s * 0.9, opt.t || 0, 1); ctx.restore(); }
+    ctx.save(); ctx.translate(ox, oy); S.drawClue(ctx, clue, s, { t: opt.t || 0, bob: opt.bob || 0 }); ctx.restore();
+    if (opt.dot !== false) { ctx.fillStyle = 'red'; ctx.fillRect(ox - 1.5, oy - 1.5, 3, 3); }
+    if (opt.hideY != null) {   // a sage "bush" line to show the hiding place top
+      ctx.fillStyle = '#8DB27A'; ctx.strokeStyle = '#5F8452'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(x - 30, opt.hideY + 70); ctx.quadraticCurveTo(x - 34, opt.hideY - 6, x + s * 0.2, opt.hideY);
+      ctx.quadraticCurveTo(x + s / 2, opt.hideY - 10, x + s * 0.8, opt.hideY); ctx.quadraticCurveTo(x + s + 34, opt.hideY - 6, x + s + 30, opt.hideY + 70);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+    // clue box (thin dashed) for the hit-box check
+    var bx = S.clueBox(clue, s);
+    if (bx && opt.box) { ctx.save(); ctx.setLineDash([3, 3]); ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 1; ctx.strokeRect(ox + bx.x0, oy + bx.y0, bx.x1 - bx.x0, bx.y1 - bx.y0); ctx.restore(); }
+  }
+
+  function draw() {
+    var y = 0, s = 140, step = 236;
+    // 1. hats: all 7 colours + one extra, every animal
+    meadow(y, 250); label('hats — 7 answer colours on the 8 animals, friend size 140 px (red dot = HEAD_TOP clue origin, dashed = clueBox)', 12, y + 18);
+    ANIMALS.forEach(function (a, i) { friend(a, 30 + i * step, y + 80, s, { kind: 'hat', color: COLS[i % 7] }, { box: true }); });
+    y += 250;
+    meadow(y, 250); label('hats — same colours rotated (each animal × other colour), size 120 and 160', 12, y + 18);
+    ANIMALS.forEach(function (a, i) { var sz = i % 2 ? 160 : 120; friend(a, 30 + i * step, y + 80 + (160 - sz), sz, { kind: 'hat', color: COLS[(i + 3) % 7] }); });
+    y += 250;
+    // 2. flags
+    meadow(y, 300); label('flags — the 8 shapes (FC.SHAPES), mixed colours, size 140', 12, y + 18);
+    S.SHAPES.forEach(function (sh, i) { friend(ANIMALS[i], 30 + i * step, y + 130, s, { kind: 'flag', shape: sh, color: COLS[(i * 3) % 7] }, { box: true }); });
+    y += 300;
+    meadow(y, 300); label('flags — all in red (shape must read on its own), size 120', 12, y + 18);
+    S.SHAPES.forEach(function (sh, i) { friend(ANIMALS[(i + 4) % 8], 40 + i * step, y + 150, 120, { kind: 'flag', shape: sh, color: 'red' }); });
+    y += 300;
+    // 3. signs
+    meadow(y, 300); label('signs — numeral + stars (count up) 1..6, and stars only 1..2', 12, y + 18);
+    for (var i = 0; i < 8; i++) {
+      var n = i < 6 ? i + 1 : i - 5;
+      friend(ANIMALS[i], 30 + i * step, y + 140, s, i < 6 ? { kind: 'sign', n: n, number: true } : { kind: 'sign', n: n }, { box: true });
+    }
+    y += 300;
+    meadow(y, 300); label('signs — stars only 3..10', 12, y + 18);
+    for (i = 0; i < 8; i++) friend(ANIMALS[(i + 2) % 8], 30 + i * step, y + 140, s, { kind: 'sign', n: i + 3 });
+    y += 300;
+    meadow(y, 300); label('signs — 11, 12 stars only; 7..10, 12 with numerals; badges below', 12, y + 18);
+    var sl = [{ n: 11 }, { n: 12 }, { n: 7, number: true }, { n: 8, number: true }, { n: 9, number: true }, { n: 10, number: true }, { n: 12, text: '12' }, { n: 5, text: '5' }];
+    sl.forEach(function (c, i) { c.kind = 'sign'; friend(ANIMALS[i], 30 + i * step, y + 140, s, c); });
+    y += 300;
+    // 4. badges
+    meadow(y, 300); label('badges — letters / numbers / sums', 12, y + 18);
+    ['A', 'b', 'M', 'g', '7', '12', '3+4', '9−2'].forEach(function (tx, i) { friend(ANIMALS[i], 30 + i * step, y + 140, s, { kind: 'badge', text: tx }, { box: true }); });
+    y += 300;
+    // 5. hidden: clipped at the hiding line ≈ 30 % of the box below the head top
+    meadow(y, 260); label('hidden — friends clipped at a hiding-place line (only the head top + clue peek out); last two: hint glow + bob', 12, y + 18);
+    var hid = [{ kind: 'hat', color: 'red' }, { kind: 'hat', color: 'yellow' }, { kind: 'flag', shape: 'star', color: 'blue' }, { kind: 'flag', shape: 'triangle', color: 'green' },
+      { kind: 'sign', n: 3 }, { kind: 'ears' }, { kind: 'hat', color: 'purple' }, { kind: 'sign', n: 4, number: true }];
+    hid.forEach(function (c, i) {
+      var a = ANIMALS[i], ht = S.HEAD_TOP[a], top = y + 120, by = top - ht[1] / 128 * s;
+      friend(a, 30 + i * step, by, s, c, { hideY: top + 0.2 * s, glow: i >= 6, bob: i >= 6 ? 1 : 0, t: 0.3, dot: false });
+    });
+    y += 260;
+    // 6. dark background check
+    meadow(y, 250, true); label('on a dark (winter night) background', 12, y + 18, true);
+    var dk = [{ kind: 'hat', color: 'blue' }, { kind: 'hat', color: 'purple' }, { kind: 'flag', shape: 'heart', color: 'pink' }, { kind: 'flag', shape: 'diamond', color: 'orange' },
+      { kind: 'sign', n: 6 }, { kind: 'badge', text: 'K' }, { kind: 'hat', color: 'green' }, { kind: 'flag', shape: 'oval', color: 'yellow' }];
+    dk.forEach(function (c, i) { friend(ANIMALS[i], 30 + i * step, y + 90, s, c, { dot: false }); });
+    y += 250;
+    // 7. effects
+    meadow(y, 290, true); label('flames: power 0 / 0.5 / 1 at t = 0, 0.4, 0.8 (size 80) · glow · butterflies · sparks · stars', 12, y + 18, true);
+    var fx = 60;
+    [0, 0.5, 1].forEach(function (p) {
+      [0, 0.4, 0.8].forEach(function (t) {
+        ctx.save(); ctx.translate(fx, y + 240);
+        ctx.fillStyle = '#7A5230'; ctx.fillRect(-46, -4, 92, 12);
+        S.drawFlames(ctx, p, t, 80); ctx.restore(); fx += 120;
+      });
+    });
+    ctx.save(); ctx.translate(fx + 60, y + 160); S.drawGlow(ctx, 200, 120, 0.2, 1); ctx.restore();
+    fx += 220;
+    ['#FFE27A', 'pink', 'blue', '#FFFFFF'].forEach(function (c, i) { ctx.save(); ctx.translate(fx + i * 60, y + 120); S.drawButterfly(ctx, 40, i * 0.05, c); ctx.restore(); });
+    ['#FFE27A', 'pink'].forEach(function (c, i) { ctx.save(); ctx.translate(fx + i * 60, y + 200); S.drawButterfly(ctx, 24, 0.11, c); ctx.restore(); });
+    fx += 260;
+    ['#FFFFFF', 'yellow', 'pink'].forEach(function (c, i) { ctx.save(); ctx.translate(fx + i * 40, y + 120); S.drawSpark(ctx, 28, c); ctx.restore(); });
+    [null, 'red', null].forEach(function (c, i) { ctx.save(); ctx.translate(fx + i * 50, y + 200); S.drawStar(ctx, [40, 32, 12][i], c); ctx.restore(); });
+    y += 290;
+    // 8. 3× zoom
+    meadow(y, 680); label('3× : red hat on the cat, star flag on the dog, sign 5 with numeral on the cow, badge B on the sheep, big flames', 12, y + 18);
+    friend('cat', 20, y + 150, 420, { kind: 'hat', color: 'red' });
+    friend('dog', 470, y + 240, 420, { kind: 'flag', shape: 'star', color: 'blue' });
+    friend('cow', 940, y + 240, 420, { kind: 'sign', n: 5, number: true });
+    friend('sheep', 1400, y + 240, 420, { kind: 'badge', text: 'B' });
+    ctx.save(); ctx.translate(1840, y + 640); ctx.fillStyle = '#7A5230'; ctx.fillRect(-60, -4, 120, 14); S.drawFlames(ctx, 1, 0.5, 110); ctx.restore();
+    console.log('heights', JSON.stringify(['hat', 'flag', 'sign', 'badge', 'ears'].map(function (k) { return k + ':' + (S.clueHeight({ kind: k, n: 5, text: 'A' }, 100) / 100).toFixed(3); })));
+    document.title = 'done';
+  }
+  var list = [];
+  ANIMALS.forEach(function (a) { list.push(load('items/animal_' + a + '.svg')); });
+  Promise.all(list).then(draw).catch(function (e) { console.log('ERR ' + e.message); document.title = 'done'; });
+})();
+</script>
+</body></html>

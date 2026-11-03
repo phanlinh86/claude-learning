@@ -1,0 +1,34 @@
+{
+  "bush": {
+    "peekY": 53,
+    "season": 0
+  },
+  "stump": {
+    "peekY": 50,
+    "season": 0
+  },
+  "tent": {
+    "peekY": 59,
+    "season": 1
+  },
+  "rock": {
+    "peekY": 58,
+    "season": 1
+  },
+  "leaves": {
+    "peekY": 62,
+    "season": 2
+  },
+  "log": {
+    "peekY": 63,
+    "season": 2
+  },
+  "snowman": {
+    "peekY": 63,
+    "season": 3
+  },
+  "drift": {
+    "peekY": 62,
+    "season": 3
+  }
+}
