@@ -44,7 +44,7 @@
 
     difficulty() { return this.urlDiff || this.settings.difficulty; },
     makeWorld(seed, forTitle, level) {
-      const s = seed != null ? seed : (this.seed != null ? this.seed : (Math.random() * 1e9) | 0);
+      const s = seed != null ? seed : (this.seed != null ? this.seed + this.stats.games : (Math.random() * 1e9) | 0);   // seeded soak runs still vary game to game
       const R = this.renderer;
       return new EG.World({ seed: s, difficulty: forTitle ? 'normal' : this.difficulty(), width: R.VW, height: R.VH, level: level || 0 });
     },
@@ -275,7 +275,7 @@
           case 'pumpkinDrop': if (sound) A.play('pumpkinDrop'); break;
           case 'pumpkinWake': if (sound) A.play('pumpkinWake'); break;
           case 'rise': if (sound && !this._riseSnd) { A.play('rise'); this._riseSnd = true; setTimeout(() => { this._riseSnd = false; }, 120); } break;
-          case 'refuse': if (sound) A.play('refuse'); break;
+          case 'refuse': { const n = performance.now(); if (sound && !(n - (this._refuseAt || 0) < 300)) { A.play('refuse'); this._refuseAt = n; } break; }   // mashing a full column: at most one 'nuh-uh' per 0.3 s
           case 'newTier': if (sound && e.tier >= 4) A.play('newTier'); break;
           case 'goal': if (sound) A.play('goal'); break;
           case 'danger': if (sound && e.level >= 0.75) A.play('danger'); break;

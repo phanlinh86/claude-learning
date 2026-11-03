@@ -28,6 +28,8 @@
     padLandscape: 22,       // px     gap under the board in landscape
     padPortrait: 60,        // px     home-indicator safe gap in portrait
     sideMargin: 40,         // px     total horizontal margin around the board
+    sideMarginPortrait: 96, // px     portrait: room for Ember's wings at the edge columns and the frame knobs
+    hudPortrait: 180,       // px     portrait: HUD strip height above Ember
     maxCell: 104,           // px     cells never get bigger than this (iPad portrait)
     minCell: 16,            // px     tiny windows stay playable
     emberAbove: 0.95,       // cells  Ember's body centre is this far above the board top
@@ -116,25 +118,25 @@
       // pumpkinChance[zone] = probability that `next` is a pumpkin (never two in a row; zone ≥ 1 only).
       easy: {
         rows: 7,                                   // 35 cells
-        spawn: [[3, 2, 0, 0],                      // courtyard: tiers 1–2 only (a 6-year-old's first place), 1.40
-                [5, 4, 1, 0],                      // cellar     1.70 units/drop
-                [4, 4, 2, 0.5],                    // library    2.29
-                [3, 3, 2.5, 1.2]],                 // tower      2.95 (the moon needs 128 units)
+        spawn: [[1, 3, 0, 0],                      // courtyard: tiers 1–2 only (a 6-year-old's first place), 1.75
+                [2, 4, 3, 0.5],                    // cellar     2.74 units/drop  (playtest: a 5-year-old at ~14 drops/min
+                [3, 4, 3, 1],                      // library    2.82              needs ≈75 s for the candle and ≈115 s
+                [2, 3, 3, 2]],                     // tower      3.60              for the lantern; was 100 s / 176 s)
         pumpkinChance: [0, 0, 0, 0],               // never pumpkins on Easy (dropped ones; night pumpkins rise from level 2)
         riseFrom: 2,                               // level  the courtyard and cellar are pressure-free
-        riseEvery: [9, 9, 5, 4],                   // drops  per zone: the night creeps every N drops…
+        riseEvery: [9, 9, 6, 5],                   // drops  per zone: the night creeps every N drops…
         riseCount: [1, 1, 2, 2]                    // …lifting this many pumpkins (distinct seeded columns)
       },
       normal: {
         rows: 7,
         spawn: [[5, 3, 1, 0],                      // 1.67 units/drop: candle in ≈20–30 s
                 [5, 3, 1.5, 0.3],                  // 1.98
-                [4, 3, 2, 0.8],                    // 2.49
-                [3, 3, 2.5, 1.5]],                 // 3.10
+                [3, 3, 3, 1],                      // 2.90 (playtest: casual adult's star 121 s → 101 s)
+                [2, 3, 3, 2]],                     // 3.60
         pumpkinChance: [0, 0.06, 0.08, 0.1],       // a sleepy pumpkin every 10–16 drops from the cellar on
         riseFrom: 1,                               // from the cellar on
         riseEvery: [5, 4, 4, 3],
-        riseCount: [1, 2, 3, 3]
+        riseCount: [1, 2, 2, 3]                    // playtest: library 0.75 → 0.5 pumpkins per drop (it was the casual adult's wall)
       },
       hard: {
         rows: 6,                                   // 30 cells: less room to park things
@@ -277,7 +279,10 @@
     cols = cols || C.cols; rows = rows || C.rows;
     var portrait = h > w;
     var top = portrait ? C.topPortrait : C.topLandscape, pad = portrait ? C.padPortrait : C.padLandscape;
-    var cell = M.floor(M.min((h - top - pad) / rows, (w - C.sideMargin) / cols, C.maxCell));
+    // Ember needs ~1.85 cells above the board (visual QA: her head was cut off on 4:3 landscape); in portrait the
+    // HUD strip (score/goal/next + Boo meter + rise counter) needs `hudPortrait` px above her (functional QA, iPad).
+    var vCap = portrait ? (h - pad - C.hudPortrait) / (rows + 1.75) : (h - pad - 8) / (rows + 1.85);
+    var cell = M.floor(M.min((h - top - pad) / rows, vCap, (w - (portrait ? C.sideMarginPortrait : C.sideMargin)) / cols, C.maxCell));
     if (!(cell >= C.minCell)) cell = C.minCell;
     var boardW = cols * cell, boardH = rows * cell;
     var boardX = M.round((w - boardW) / 2), boardY = h - pad - boardH;

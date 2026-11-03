@@ -308,3 +308,4 @@ body.touch .tagline{font-size:max(15px, calc(var(--u)*2.2))}body.touch .best-lin
 .slot .tag{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 @media (pointer:coarse){ .slot .tag{font-size:12px} }
 .btn-tiny.armed{background:#e8574f;color:#fff}
+@media (max-aspect-ratio: 3/4){ .logo{font-size:calc(var(--u)*6.4)} .title-wrap{padding:0 calc(var(--u)*2)} }

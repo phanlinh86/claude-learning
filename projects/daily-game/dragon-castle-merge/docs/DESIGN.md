@@ -109,3 +109,9 @@ SFX: aim tick (soft), drop "whoosh", land thud (volume by speed), soft bounce, m
 - Pointer Events: `pointermove` over the stage aims (mouse only; touch aims on `pointerdown`); `pointerup` (tap) drops into the column under the finger. Dragging a finger sideways moves Ember; lifting drops. UI buttons fire on `pointerup`; the ghost click is swallowed.
 - iOS: audio unlock in the first `touchend`; `visibilitychange` pauses and suspends audio; kid-proofing (no zoom, no rubber-band, no callouts, no text selection).
 - Home screen: `manifest.webmanifest` plus 180/192/512 PNG icons from `tools/render_mobile_icons.js`.
+
+## 9. Changes after build and QA (2026-11-03)
+- **Night creeps** (new rule, mechanics engineer): from `riseFrom` (Normal/Hard level 1, Easy level 2) every `riseEvery[zone]` drops, `riseCount[zone]` sleepy pumpkins rise from the bottom of distinct columns, pushing them up one cell; event `{type:'rise', col, item}`; `world.riseIn` counts down. Without it the refuse-only rule meant nobody ever lost. The HUD shows "rise in N".
+- Woken pumpkins have state `'rolling'`; 8 + 8 makes a "super moon" (`merge` with `super: true`); Boo only carries tiers ≤ 3 (`helperMaxTier`).
+- Layout: the cell is also capped so Ember fits above the board (landscape `(h − pad − 8)/(rows + 1.85)`) and so the portrait HUD strip fits (`(h − pad − 180)/(rows + 1.75)`); portrait side margin 96.
+- Tier 3 is magenta `#ff5fa2` (colour-blind separation from tier 2).

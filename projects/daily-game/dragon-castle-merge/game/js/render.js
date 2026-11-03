@@ -12,7 +12,7 @@
   ];
   const TIER = [
     null,
-    { name: 'Firefly', col: '#b6f04a' }, { name: 'Blue Fireflies', col: '#5cc8ff' }, { name: 'Pink Fireflies', col: '#ff7ac8' },
+    { name: 'Firefly', col: '#b6f04a' }, { name: 'Blue Fireflies', col: '#5cc8ff' }, { name: 'Pink Fireflies', col: '#ff5fa2' },
     { name: 'Firefly Jar', col: '#ffd44a' }, { name: 'Candle', col: '#ff9a3c' }, { name: 'Lantern', col: '#ff5a5a' },
     { name: 'Star', col: '#ffe14d' }, { name: 'Moon', col: '#e9e2ff' }
   ];
@@ -22,6 +22,8 @@
   const lerp = (a, b, t) => a + (b - a) * t;
   const EMBER_K = 1.75, HOLD_DY = (138 - 78) / 160;     // Ember drawn cell×1.75 from a 160 viewBox; hold point under her centre
   const BOO_K = 1.4;
+  // ring colours for a custom light picture: all 8 distinct (tier 7 is violet so it never matches the jar's yellow)
+  const RING = [null, '#b6f04a', '#5cc8ff', '#ff5fa2', '#ffd44a', '#ff9a3c', '#ff5a5a', '#b98cff', '#e9e2ff'];
 
   class Renderer {
     constructor(canvas) {
@@ -247,9 +249,9 @@
             else if (e.count >= 3) this.say(e.count >= 4 ? 'Mega merge!' : 'Triple!', e.x, e.y - L.cell * 1.1, '#ffd2f0', 22);
             break;
           }
-          case 'combo': this.comboShow = 1.2; if (e.combo >= 3) this.say('Combo ×' + e.combo + '!', L.boardX + L.boardW / 2, L.boardY + L.cell * 0.9, '#ffe14d', 24); break;
-          case 'newTier': if (e.tier >= 4) this.say('New: ' + TIER[e.tier].name + '!', L.boardX + L.boardW / 2, L.boardY + L.cell * 1.7, TIER[e.tier].col, 22); break;
-          case 'helper': this.say('Boo is here to help!', L.boardX + L.boardW / 2, L.boardY + L.cell * 0.9, '#f3eeff', 24); break;
+          case 'combo': this.comboShow = 1.2; if (e.combo >= 3) this.say('Combo ×' + e.combo + '!', L.boardX + L.boardW / 2, L.boardY + L.cell * 0.9, '#ffe14d', 24, 'combo'); break;
+          case 'newTier': if (e.tier >= 4 && e.tier < w.goalTier) this.say('New: ' + TIER[e.tier].name + '!', L.boardX + L.boardW / 2, L.boardY + L.cell * 1.7, TIER[e.tier].col, 22); break;
+          case 'helper': this.say('Boo is here to help!', L.boardX + L.boardW / 2, L.boardY + L.cell * 1.9, '#f3eeff', 22, 'boo'); break;
           case 'helperCarry': if (wx) wx.burst('heart', e.item.x, e.item.y, 4, { speed: 90, life: 0.8, size: 12 * L.cell / 55, gravity: -60, layer: 'front' }); break;
           case 'pumpkinWake': {
             const p = e.item;
@@ -266,7 +268,7 @@
           }
           case 'goal': {
             this.flash = 0.6; this.flashCol = '#fff2c4';
-            this.say(TIER[clamp(e.tier, 1, 8)].name + '! The castle glows!', L.boardX + L.boardW / 2, L.boardY + L.cell * 1.4, '#ffe9a8', 26);
+            this.say('The castle glows!', L.boardX + L.boardW / 2, L.boardY + L.cell * 1.4, '#ffe9a8', 26);
             this.pop('+' + e.bonus, e.x, e.y - L.cell * 0.7, '#ffe14d', 26);
             if (wx) wx.burst('star', e.x, e.y, 14, { speed: 260, life: 1.0, size: 16 * L.cell / 55, gravity: 200, up: 0.4, layer: 'front' });
             break;
@@ -280,11 +282,14 @@
     ring(x, y, col, life, r, wdt) {
       if (this._quiet()) return; this.fx.push({ kind: 'ring', x, y, col, t: 0, life, r, w: wdt || 3 }); if (this.fx.length > 40) this.fx.shift(); }
     pop(txt, x, y, col, size) {
-      if (this._quiet()) return; this.texts.push({ txt, x, y, col, size, t: 0, life: 0.9, vy: -55 }); if (this.texts.length > 24) this.texts.shift(); }
-    say(txt, x, y, col, size) {
       if (this._quiet()) return;
-      for (const t of this.texts) if (t.big && t.t < 0.4) t.y -= size * 1.1;   // stack, don't overlap
-      this.texts.push({ txt, x, y, col, size, t: 0, life: 1.5, vy: -18, big: true }); if (this.texts.length > 24) this.texts.shift();
+      for (const t of this.texts) if (!t.big && t.t < 0.35 && Math.abs(t.x - x) < 60 && Math.abs(t.y - y) < size) y = t.y - size * 1.1;
+      this.texts.push({ txt, x, y, col, size, t: 0, life: 0.9, vy: -55 }); if (this.texts.length > 24) this.texts.shift(); }
+    say(txt, x, y, col, size, key) {
+      if (this._quiet()) return;
+      if (key) this.texts = this.texts.filter(t => t.key !== key);          // a new combo text replaces the old one
+      for (const t of this.texts) if (t.big && t.t < 1.2 && Math.abs(t.y - y) < size * 1.2) t.y -= size * 1.25;   // stack, don't overlap
+      this.texts.push({ txt, x, y, col, size, t: 0, life: 1.5, vy: -18, big: true, key }); if (this.texts.length > 24) this.texts.shift();
     }
 
     update(dt) {
@@ -295,7 +300,7 @@
       this.heldPop = Math.min(1, this.heldPop + dt / 0.28);
       this.comboShow = Math.max(0, this.comboShow - dt);
       if (this.lane) { this.lane.t -= dt; if (this.lane.t <= 0) this.lane = null; }
-      if (this.banner) { this.banner.t += dt; if (this.banner.t > 2.6) this.banner = null; }
+      if (this.banner) { this.banner.t += dt; if (this.banner.t > 2.0) this.banner = null; }
       for (const f of this.fx) f.t += dt;
       this.fx = this.fx.filter(f => f.t < f.life);
       for (const t of this.texts) { t.t += dt; t.y += t.vy * dt; }
@@ -326,12 +331,17 @@
       this.drawLane(g, w, mode);
       this.drawItems(g, w);
       this.drawBoo(g, w);
-      this.drawEmber(g, w, mode);
+      if (mode !== 'title') this.drawEmber(g, w, mode);
       this.drawParticles(g, 'front');
       this.drawFx(g);
       if (this.debug) this.drawDebug(g, w);
       g.setTransform(px, 0, 0, px, 0, 0);
       if (mode !== 'title') this.drawHud(g, w, mode);
+      else {   // calm the live demo board behind the title menu
+        const dg = g.createRadialGradient(this.VW / 2, this.VH / 2, 0, this.VW / 2, this.VH / 2, Math.max(this.VW, this.VH) * 0.6);
+        dg.addColorStop(0, 'rgba(18,10,40,.55)'); dg.addColorStop(1, 'rgba(18,10,40,.15)');
+        g.fillStyle = dg; g.fillRect(0, 0, this.VW, this.VH);
+      }
       if (this.banner && mode !== 'title') this.drawBanner(g);
       if (this.flash > 0) { g.globalAlpha = Math.min(0.55, this.flash * 0.8); g.fillStyle = this.flashCol; g.fillRect(0, 0, this.VW, this.VH); g.globalAlpha = 1; }
     }
@@ -380,9 +390,10 @@
         const im = this.spr(awake ? 'pumpkin_awake' : 'pumpkin', s, s);
         if (im) g.drawImage(im, -s / 2, -s / 2, s, s); else { g.fillStyle = '#ff9b3d'; g.beginPath(); g.arc(0, 0, s * 0.4, 0, TAU); g.fill(); }
       } else if (A.hasCustom('item')) {
-        const t = clamp(tier, 1, 8), col = TIER[t].col, k = 0.78 + 0.04 * t, ss = s * k;
+        const t = clamp(tier, 1, 8), col = RING[t], k = 0.74 + 0.03 * t, ss = s * k;
         g.beginPath(); g.arc(0, 0, ss * 0.52, 0, TAU); g.fillStyle = this._alpha(col, 0.35); g.fill();
         g.lineWidth = Math.max(3, s * 0.08); g.strokeStyle = col; g.stroke();
+        if (t >= 5) { g.beginPath(); g.arc(0, 0, ss * 0.52 + Math.max(4, s * 0.1), 0, TAU); g.lineWidth = Math.max(1.5, s * 0.035); g.stroke(); }
         const [fw, fh] = A.fit('item', ss * 0.86, ss * 0.86), im = this.spr('custom:item', fw, fh);
         if (im) g.drawImage(im, -fw / 2, -fh / 2, fw, fh);
         // tier pips under the picture
@@ -500,6 +511,10 @@
         const x = clamp(t.x, 80, this.VW - 80);
         g.globalAlpha = k > 0.7 ? (1 - k) / 0.3 : 1;
         g.font = '900 ' + Math.round(t.size * sc * this._hudK) + 'px ' + FONT;
+        if (t.big && this.world) {   // never wider than the board (+40): no text under the HUD panels
+          const maxW = this.world.layout.boardW + 40, tw = g.measureText(t.txt).width;
+          if (tw > maxW) g.font = '900 ' + Math.floor(t.size * sc * this._hudK * maxW / tw) + 'px ' + FONT;
+        }
         g.lineWidth = Math.max(3, t.size * 0.22); g.strokeStyle = 'rgba(30,16,60,.9)'; g.strokeText(t.txt, x, t.y);
         g.fillStyle = t.col; g.fillText(t.txt, x, t.y);
       }
@@ -586,10 +601,10 @@
 
     drawBanner(g) {
       const b = this.banner, info = ZONE_INFO[b.s % 4], t = b.t, L = this.world.layout;
-      const a = t < 0.35 ? t / 0.35 : t > 2.1 ? Math.max(0, (2.6 - t) / 0.5) : 1;
+      const a = t < 0.3 ? t / 0.3 : t > 1.6 ? Math.max(0, (2.0 - t) / 0.4) : 1;
       const y = L.boardY + Math.min(L.boardH * 0.3, L.cell * 2.2) - (1 - a) * 16, cx = L.boardX + L.boardW / 2;
       const w = Math.min(this.VW - 40, Math.max(L.boardW + 80, 360)), h = 92;
-      g.globalAlpha = a * 0.94;
+      g.globalAlpha = a * 0.82;
       this._panel(g, cx - w / 2, y - h / 2, w, h, 22);
       g.globalAlpha = a;
       this._text(g, info.name + (b.loop ? '  ★' + (b.loop + 1) : ''), cx, y - 18, 28, info.color, 'center');

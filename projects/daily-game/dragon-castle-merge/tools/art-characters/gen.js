@@ -30,7 +30,7 @@ const P = {
   // lights
   t1: '#b6f04a', t1s: '#86c22a', t1l: '#3d6a0e',
   t2: '#5cc8ff', t2s: '#2f9fe0', t2l: '#14588a',
-  t3: '#ff7ac8', t3s: '#e04ea6', t3l: '#8a1f63',
+  t3: '#ff5fa2', t3s: '#d83a85', t3l: '#9c1f5c',
   t4: '#ffd44a', t4s: '#f0a820', t4l: '#8a5a00', glass: '#e4f4ff', glassLine: '#4e6a9c',
   cork: '#c98a4b', corkS: '#a66b31', corkL: '#6b3f17',
   t5: '#ff9a3c', t5core: '#ffe68a', t5l: '#b04812', wax: '#fff3d6', waxS: '#ecd2a6', waxL: '#9a7a4a',

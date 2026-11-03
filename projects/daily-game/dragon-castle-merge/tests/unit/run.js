@@ -73,9 +73,11 @@ test('layout: DESIGN §2 numbers (landscape, hard, portrait, iPad)', () => {
   assert.strictEqual(L.cell, 55); assert.strictEqual(L.boardW, 275); assert.strictEqual(L.boardH, 385);
   assert.strictEqual(L.boardY, 133); assert.strictEqual(L.boardX, Math.round((960 - 275) / 2));
   near(L.emberY, 133 - 55 * 0.95, 1e-9); near(L.holdY, L.emberY + 55 * 0.55, 1e-9); near(L.itemSize, 55 * 0.86, 1e-9);
-  assert.strictEqual(EG.World.computeLayout(960, 540, 5, 6).cell, 65);
+  assert.strictEqual(EG.World.computeLayout(960, 540, 5, 6).cell, 64);   // hard: capped so Ember fits above the board
   const P = EG.World.computeLayout(560, 1200, 5, 7);
-  assert.ok(P.portrait); assert.strictEqual(P.cell, 104); assert.strictEqual(P.boardY + P.boardH, 1200 - 60);
+  assert.ok(P.portrait); assert.strictEqual(P.cell, 92); assert.strictEqual(P.boardY + P.boardH, 1200 - 60);
+  assert.strictEqual(EG.World.computeLayout(960, 720, 5, 7).cell, 77);   // 4:3 landscape: Ember's head stays on screen
+  assert.strictEqual(EG.World.computeLayout(720, 960, 5, 7).cell, 82);   // iPad portrait: HUD strip above Ember
   const w = mk('normal', 1);
   near(w.colX(0), L.boardX + 27.5, 1e-9); near(w.rowY(0), L.boardY + L.boardH - 27.5, 1e-9);
   assert.strictEqual(mk('hard').rows, 6);
@@ -521,7 +523,7 @@ test('setLayout: every board item snaps to its cell, Ember to her column', () =>
   w.held = { tier: 5, kind: 'light' }; w.drop(2); run(w, 0.25);       // mid-fall
   w.aim(4);
   w.setLayout(560, 1200);
-  assert.strictEqual(w.layout.cell, 104);
+  assert.strictEqual(w.layout.cell, 92);
   for (const it of w.items) {
     assert.strictEqual(it.x, w.colX(it.col)); assert.strictEqual(it.y, w.rowY(it.row));
     assert.strictEqual(it.prevX, it.x); assert.strictEqual(it.prevY, it.y);

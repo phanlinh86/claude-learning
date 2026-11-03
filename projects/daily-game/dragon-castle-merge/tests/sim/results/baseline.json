@@ -1,0 +1,3464 @@
+[
+ {
+  "n": 100,
+  "overs": 25,
+  "over3": 0,
+  "survMed": 900.0166666661768,
+  "survP10": 815.8949999995866,
+  "survP90": 900.0166666661768,
+  "dropsMed": 508,
+  "dropsP10": 464.8,
+  "dropsP90": 516.1,
+  "dpm": 34.105879440633075,
+  "scoreMed": 31533,
+  "scoreP10": 26800.3,
+  "scoreP90": 35205.700000000004,
+  "firstMergeT": 4.258333333333324,
+  "firstMergeDrop": 3,
+  "firstCandleT": 33.86666666666603,
+  "firstCandleDrop": 20.5,
+  "reach": [
+   100,
+   100,
+   100,
+   98,
+   98,
+   21
+  ],
+  "lvT": [
+   {
+    "med": 35.083333333332625,
+    "n": 100
+   },
+   {
+    "med": 61.2166666666632,
+    "n": 100
+   },
+   {
+    "med": 87.80000000004794,
+    "n": 100
+   },
+   {
+    "med": 132.8416666666414,
+    "n": 98
+   }
+  ],
+  "lvD": [
+   {
+    "med": 20.5,
+    "n": 100
+   },
+   {
+    "med": 36,
+    "n": 100
+   },
+   {
+    "med": 50,
+    "n": 100
+   },
+   {
+    "med": 74,
+    "n": 98
+   }
+  ],
+  "finalLevelMed": 7,
+  "levelAt3": 3,
+  "boosPerMin": 1.948098186661045,
+  "boosPerGame": 28.27,
+  "booCarry": {
+   "1": 1098,
+   "2": 976,
+   "3": 800,
+   "pumpkin": 4691
+  },
+  "booFlyBy": 65,
+  "rises": 18089,
+  "wakes": 12184,
+  "wakesRisen": 12184,
+  "pumpkinDrops": 0,
+  "refusedPerGame": 0,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 10,
+  "maxTime": 900,
+  "name": "bot 0.3",
+  "diff": "easy"
+ },
+ {
+  "n": 100,
+  "overs": 31,
+  "over3": 0,
+  "survMed": 900.0166666661768,
+  "survP10": 767.0183333329644,
+  "survP90": 900.0166666661768,
+  "dropsMed": 542,
+  "dropsP10": 468,
+  "dropsP90": 554,
+  "dpm": 36.539200327161424,
+  "scoreMed": 34654,
+  "scoreP10": 29641.8,
+  "scoreP90": 38538.8,
+  "firstMergeT": 2.7833333333333283,
+  "firstMergeDrop": 2,
+  "firstCandleT": 27.41666666666639,
+  "firstCandleDrop": 18,
+  "reach": [
+   100,
+   100,
+   100,
+   100,
+   100,
+   48
+  ],
+  "lvT": [
+   {
+    "med": 28.72499999999965,
+    "n": 100
+   },
+   {
+    "med": 52.38333333333037,
+    "n": 100
+   },
+   {
+    "med": 83.90833333336562,
+    "n": 100
+   },
+   {
+    "med": 129.41666666670324,
+    "n": 100
+   }
+  ],
+  "lvD": [
+   {
+    "med": 18,
+    "n": 100
+   },
+   {
+    "med": 33.5,
+    "n": 100
+   },
+   {
+    "med": 50,
+    "n": 100
+   },
+   {
+    "med": 76,
+    "n": 100
+   }
+  ],
+  "finalLevelMed": 7,
+  "levelAt3": 3,
+  "boosPerMin": 1.9631052685859842,
+  "boosPerGame": 28.24,
+  "booCarry": {
+   "1": 542,
+   "2": 784,
+   "3": 946,
+   "pumpkin": 4940
+  },
+  "booFlyBy": 95,
+  "rises": 20547,
+  "wakes": 14454,
+  "wakesRisen": 14454,
+  "pumpkinDrops": 0,
+  "refusedPerGame": 0,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 10,
+  "maxTime": 900,
+  "name": "bot 0.6",
+  "diff": "easy"
+ },
+ {
+  "n": 100,
+  "overs": 10,
+  "over3": 0,
+  "survMed": 900.0166666661768,
+  "survP10": 894.3133333328486,
+  "survP90": 900.0166666661768,
+  "dropsMed": 581,
+  "dropsP10": 569.8,
+  "dropsP90": 590,
+  "dpm": 38.87795544644663,
+  "scoreMed": 38753,
+  "scoreP10": 35869.9,
+  "scoreP90": 41377.700000000004,
+  "firstMergeT": 2.474999999999996,
+  "firstMergeDrop": 2,
+  "firstCandleT": 18.58333333333356,
+  "firstCandleDrop": 13.5,
+  "reach": [
+   100,
+   100,
+   100,
+   100,
+   100,
+   79
+  ],
+  "lvT": [
+   {
+    "med": 19.791666666666824,
+    "n": 100
+   },
+   {
+    "med": 40.808333333331014,
+    "n": 100
+   },
+   {
+    "med": 76.2083333333333,
+    "n": 100
+   },
+   {
+    "med": 114.45833333342233,
+    "n": 100
+   }
+  ],
+  "lvD": [
+   {
+    "med": 13.5,
+    "n": 100
+   },
+   {
+    "med": 28,
+    "n": 100
+   },
+   {
+    "med": 48.5,
+    "n": 100
+   },
+   {
+    "med": 71.5,
+    "n": 100
+   }
+  ],
+  "finalLevelMed": 8,
+  "levelAt3": 3,
+  "boosPerMin": 1.638773869196563,
+  "boosPerGame": 24.23,
+  "booCarry": {
+   "1": 272,
+   "2": 480,
+   "3": 763,
+   "pumpkin": 3857
+  },
+  "booFlyBy": 181,
+  "rises": 23429,
+  "wakes": 18911,
+  "wakesRisen": 18911,
+  "pumpkinDrops": 0,
+  "refusedPerGame": 0,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 9,
+  "maxTime": 900,
+  "name": "bot 0.9",
+  "diff": "easy"
+ },
+ {
+  "n": 300,
+  "overs": 31,
+  "over3": 0,
+  "survMed": 1200.016666665904,
+  "survP10": 1050.6949999993733,
+  "survP90": 1200.016666665904,
+  "dropsMed": 278,
+  "dropsP10": 243.20000000000002,
+  "dropsP90": 294,
+  "dpm": 14.010566505918405,
+  "scoreMed": 15254.5,
+  "scoreP10": 12611.700000000003,
+  "scoreP90": 17447.8,
+  "firstMergeT": 9.600000000000056,
+  "firstMergeDrop": 2,
+  "firstCandleT": 99.28333333332898,
+  "firstCandleDrop": 24,
+  "reach": [
+   300,
+   300,
+   299,
+   268,
+   84,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 100.48333333332891,
+    "n": 300
+   },
+   {
+    "med": 175.8916666667438,
+    "n": 300
+   },
+   {
+    "med": 230.76666666647694,
+    "n": 299
+   },
+   {
+    "med": 330.308333333033,
+    "n": 268
+   }
+  ],
+  "lvD": [
+   {
+    "med": 24,
+    "n": 300
+   },
+   {
+    "med": 43,
+    "n": 300
+   },
+   {
+    "med": 54,
+    "n": 299
+   },
+   {
+    "med": 76,
+    "n": 268
+   }
+  ],
+  "finalLevelMed": 4,
+  "levelAt3": 1,
+  "boosPerMin": 0.635178227530823,
+  "boosPerGame": 12.356666666666667,
+  "booCarry": {
+   "1": 1785,
+   "2": 1319,
+   "3": 906,
+   "pumpkin": 6338
+  },
+  "booFlyBy": 41,
+  "rises": 22571,
+  "wakes": 14869,
+  "wakesRisen": 14869,
+  "pumpkinDrops": 0,
+  "refusedPerGame": 14.993333333333334,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 10,
+  "maxTime": 1200,
+  "name": "kid5",
+  "diff": "easy",
+  "playerStats": {
+   "taps": 78734,
+   "buffered": 7409,
+   "double": 7522,
+   "matchTaps": 16277,
+   "refusedTaps": 4163
+  }
+ },
+ {
+  "n": 150,
+  "overs": 9,
+  "over3": 0,
+  "survMed": 1200.016666665904,
+  "survP10": 1200.016666665904,
+  "survP90": 1200.016666665904,
+  "dropsMed": 229,
+  "dropsP10": 217,
+  "dropsP90": 241,
+  "dpm": 11.510920574074026,
+  "scoreMed": 12668.5,
+  "scoreP10": 10189.7,
+  "scoreP90": 14317.8,
+  "firstMergeT": 11.616666666666823,
+  "firstMergeDrop": 2,
+  "firstCandleT": 127.39999999999412,
+  "firstCandleDrop": 25,
+  "reach": [
+   150,
+   150,
+   150,
+   115,
+   5,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 128.6083333333279,
+    "n": 150
+   },
+   {
+    "med": 235.59999999994204,
+    "n": 150
+   },
+   {
+    "med": 277.64166666641415,
+    "n": 150
+   },
+   {
+    "med": 365.1166666663346,
+    "n": 115
+   }
+  ],
+  "lvD": [
+   {
+    "med": 25,
+    "n": 150
+   },
+   {
+    "med": 44,
+    "n": 150
+   },
+   {
+    "med": 51,
+    "n": 150
+   },
+   {
+    "med": 71,
+    "n": 115
+   }
+  ],
+  "finalLevelMed": 4,
+  "levelAt3": 1,
+  "boosPerMin": 0.5346213561060753,
+  "boosPerGame": 10.6,
+  "booCarry": {
+   "1": 869,
+   "2": 585,
+   "3": 402,
+   "pumpkin": 2603
+  },
+  "booFlyBy": 29,
+  "rises": 9514,
+  "wakes": 6139,
+  "wakesRisen": 6139,
+  "pumpkinDrops": 0,
+  "refusedPerGame": 15.233333333333333,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 10,
+  "maxTime": 1200,
+  "name": "kid5 slow",
+  "diff": "easy",
+  "playerStats": {
+   "taps": 33373,
+   "buffered": 3116,
+   "double": 3152,
+   "matchTaps": 3718,
+   "refusedTaps": 2140
+  }
+ },
+ {
+  "n": 300,
+  "overs": 44,
+  "over3": 0,
+  "survMed": 1200.016666665904,
+  "survP10": 1136.6283333326285,
+  "survP90": 1200.016666665904,
+  "dropsMed": 500,
+  "dropsP10": 476.8,
+  "dropsP90": 506,
+  "dpm": 25.066906373699673,
+  "scoreMed": 30488,
+  "scoreP10": 27317.6,
+  "scoreP90": 34945.100000000006,
+  "firstMergeT": 4.633333333333322,
+  "firstMergeDrop": 2,
+  "firstCandleT": 44.55833333333209,
+  "firstCandleDrop": 20,
+  "reach": [
+   300,
+   300,
+   300,
+   300,
+   300,
+   52
+  ],
+  "lvT": [
+   {
+    "med": 45.84166666666535,
+    "n": 300
+   },
+   {
+    "med": 79.35000000000052,
+    "n": 300
+   },
+   {
+    "med": 125.41666666671314,
+    "n": 300
+   },
+   {
+    "med": 190.64166666649328,
+    "n": 300
+   }
+  ],
+  "lvD": [
+   {
+    "med": 20,
+    "n": 300
+   },
+   {
+    "med": 34,
+    "n": 300
+   },
+   {
+    "med": 52,
+    "n": 300
+   },
+   {
+    "med": 77,
+    "n": 300
+   }
+  ],
+  "finalLevelMed": 7,
+  "levelAt3": 2,
+  "boosPerMin": 1.2162484331929249,
+  "boosPerGame": 24.02,
+  "booCarry": {
+   "1": 1238,
+   "2": 2008,
+   "3": 2693,
+   "pumpkin": 11410
+  },
+  "booFlyBy": 383,
+  "rises": 52750,
+  "wakes": 38401,
+  "wakesRisen": 38401,
+  "pumpkinDrops": 0,
+  "refusedPerGame": 0,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 9,
+  "maxTime": 1200,
+  "name": "adult",
+  "diff": "easy"
+ },
+ {
+  "n": 30,
+  "overs": 0,
+  "over3": 0,
+  "survMed": 600.0166666664496,
+  "survP10": 600.0166666664496,
+  "survP90": 600.0166666664496,
+  "dropsMed": 15,
+  "dropsP10": 10,
+  "dropsP90": 29.000000000000014,
+  "dpm": 1.8166162051060715,
+  "scoreMed": 160,
+  "scoreP10": 51,
+  "scoreP90": 727.8000000000003,
+  "firstMergeT": 1.8499999999999983,
+  "firstMergeDrop": 2,
+  "firstCandleT": 14.16666666666695,
+  "firstCandleDrop": 15,
+  "reach": [
+   7,
+   1,
+   0,
+   0,
+   0,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 15.36666666666701,
+    "n": 7
+   },
+   {
+    "med": 23.7166666666658,
+    "n": 1
+   },
+   {
+    "med": null,
+    "n": 0
+   },
+   {
+    "med": null,
+    "n": 0
+   }
+  ],
+  "lvD": [
+   {
+    "med": 15,
+    "n": 7
+   },
+   {
+    "med": 20,
+    "n": 1
+   },
+   {
+    "med": null,
+    "n": 0
+   },
+   {
+    "med": null,
+    "n": 0
+   }
+  ],
+  "finalLevelMed": 0,
+  "levelAt3": 0,
+  "boosPerMin": 0.003333240743313891,
+  "boosPerGame": 0.03333333333333333,
+  "booCarry": {
+   "1": 0,
+   "2": 0,
+   "3": 1,
+   "pumpkin": 0
+  },
+  "booFlyBy": 0,
+  "rises": 4,
+  "wakes": 0,
+  "wakesRisen": 0,
+  "pumpkinDrops": 0,
+  "refusedPerGame": 5847.3,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 3,
+  "maxTime": 600,
+  "name": "spam same@10",
+  "diff": "easy",
+  "playerStats": {
+   "taps": 180000,
+   "busyTaps": 4581,
+   "accepted": 30
+  }
+ },
+ {
+  "n": 30,
+  "overs": 0,
+  "over3": 0,
+  "survMed": 600.0166666664496,
+  "survP10": 600.0166666664496,
+  "survP90": 600.0166666664496,
+  "dropsMed": 15,
+  "dropsP10": 10,
+  "dropsP90": 29.000000000000014,
+  "dpm": 1.8166162051060715,
+  "scoreMed": 160,
+  "scoreP10": 51,
+  "scoreP90": 727.8000000000003,
+  "firstMergeT": 1.7499999999999987,
+  "firstMergeDrop": 2,
+  "firstCandleT": 14.066666666666945,
+  "firstCandleDrop": 15,
+  "reach": [
+   7,
+   1,
+   0,
+   0,
+   0,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 15.266666666667005,
+    "n": 7
+   },
+   {
+    "med": 23.716666666665812,
+    "n": 1
+   },
+   {
+    "med": null,
+    "n": 0
+   },
+   {
+    "med": null,
+    "n": 0
+   }
+  ],
+  "lvD": [
+   {
+    "med": 15,
+    "n": 7
+   },
+   {
+    "med": 20,
+    "n": 1
+   },
+   {
+    "med": null,
+    "n": 0
+   },
+   {
+    "med": null,
+    "n": 0
+   }
+  ],
+  "finalLevelMed": 0,
+  "levelAt3": 0,
+  "boosPerMin": 0.003333240743313891,
+  "boosPerGame": 0.03333333333333333,
+  "booCarry": {
+   "1": 0,
+   "2": 0,
+   "3": 1,
+   "pumpkin": 0
+  },
+  "booFlyBy": 0,
+  "rises": 4,
+  "wakes": 0,
+  "wakesRisen": 0,
+  "pumpkinDrops": 0,
+  "refusedPerGame": 35081.8,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 3,
+  "maxTime": 600,
+  "name": "spam same@60",
+  "diff": "easy",
+  "playerStats": {
+   "taps": 1080030,
+   "busyTaps": 27576,
+   "accepted": 30
+  }
+ },
+ {
+  "n": 30,
+  "overs": 0,
+  "over3": 0,
+  "survMed": 600.0166666664496,
+  "survP10": 600.0166666664496,
+  "survP90": 600.0166666664496,
+  "dropsMed": 82,
+  "dropsP10": 49.9,
+  "dropsP90": 110.60000000000001,
+  "dpm": 8.239771117471939,
+  "scoreMed": 2417,
+  "scoreP10": 933.9,
+  "scoreP90": 4066.600000000001,
+  "firstMergeT": 2.2666666666666635,
+  "firstMergeDrop": 2,
+  "firstCandleT": 20.350000000000126,
+  "firstCandleDrop": 18,
+  "reach": [
+   29,
+   20,
+   3,
+   0,
+   0,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 21.550000000000058,
+    "n": 29
+   },
+   {
+    "med": 34.68333333333136,
+    "n": 20
+   },
+   {
+    "med": 41.03333333333101,
+    "n": 3
+   },
+   {
+    "med": null,
+    "n": 0
+   }
+  ],
+  "lvD": [
+   {
+    "med": 18,
+    "n": 29
+   },
+   {
+    "med": 30.5,
+    "n": 20
+   },
+   {
+    "med": 35,
+    "n": 3
+   },
+   {
+    "med": null,
+    "n": 0
+   }
+  ],
+  "finalLevelMed": 2,
+  "levelAt3": 2,
+  "boosPerMin": 0.20332768534214735,
+  "boosPerGame": 2.033333333333333,
+  "booCarry": {
+   "1": 36,
+   "2": 20,
+   "3": 22,
+   "pumpkin": 50
+  },
+  "booFlyBy": 6,
+  "rises": 316,
+  "wakes": 92,
+  "wakesRisen": 92,
+  "pumpkinDrops": 0,
+  "refusedPerGame": 5136.9,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 6,
+  "maxTime": 600,
+  "name": "spam alt@10",
+  "diff": "easy",
+  "playerStats": {
+   "taps": 180000,
+   "busyTaps": 25893,
+   "accepted": 130
+  }
+ },
+ {
+  "n": 30,
+  "overs": 13,
+  "over3": 0,
+  "survMed": 600.0166666664496,
+  "survP10": 250.19833333342459,
+  "survP90": 600.0166666664496,
+  "dropsMed": 474,
+  "dropsP10": 218.1,
+  "dropsP90": 487.3,
+  "dpm": 49.211231097893716,
+  "scoreMed": 24639.5,
+  "scoreP10": 10435,
+  "scoreP90": 27477.9,
+  "firstMergeT": 4.766666666666655,
+  "firstMergeDrop": 5,
+  "firstCandleT": 32.82499999999942,
+  "firstCandleDrop": 30,
+  "reach": [
+   30,
+   30,
+   30,
+   22,
+   21,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 34.033333333332685,
+    "n": 30
+   },
+   {
+    "med": 66.48333333332957,
+    "n": 30
+   },
+   {
+    "med": 65.65833333335377,
+    "n": 30
+   },
+   {
+    "med": 94.43333333340581,
+    "n": 22
+   }
+  ],
+  "lvD": [
+   {
+    "med": 30,
+    "n": 30
+   },
+   {
+    "med": 55.5,
+    "n": 30
+   },
+   {
+    "med": 49.5,
+    "n": 30
+   },
+   {
+    "med": 69,
+    "n": 22
+   }
+  ],
+  "finalLevelMed": 5,
+  "levelAt3": 3,
+  "boosPerMin": 2.4535310984624603,
+  "boosPerGame": 20.266666666666666,
+  "booCarry": {
+   "1": 392,
+   "2": 204,
+   "3": 112,
+   "pumpkin": 1052
+  },
+  "booFlyBy": 5,
+  "rises": 3346,
+  "wakes": 1950,
+  "wakesRisen": 1950,
+  "pumpkinDrops": 0,
+  "refusedPerGame": 20.766666666666666,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 11,
+  "maxTime": 600,
+  "name": "spam sweep@10",
+  "diff": "easy",
+  "playerStats": {
+   "taps": 148671,
+   "busyTaps": 148019,
+   "accepted": 515
+  }
+ },
+ {
+  "n": 30,
+  "overs": 11,
+  "over3": 2,
+  "survMed": 600.0166666664496,
+  "survP10": 243.1216666667523,
+  "survP90": 600.0166666664496,
+  "dropsMed": 485.5,
+  "dropsP10": 204.8,
+  "dropsP90": 499.1,
+  "dpm": 49.50632678905707,
+  "scoreMed": 27255.5,
+  "scoreP10": 9741.1,
+  "scoreP90": 29820.9,
+  "firstMergeT": 3.6416666666666586,
+  "firstMergeDrop": 3.5,
+  "firstCandleT": 34.21666666666601,
+  "firstCandleDrop": 29.5,
+  "reach": [
+   30,
+   30,
+   28,
+   26,
+   26,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 36.158333333332564,
+    "n": 30
+   },
+   {
+    "med": 53.42499999999697,
+    "n": 30
+   },
+   {
+    "med": 76.5166666667239,
+    "n": 28
+   },
+   {
+    "med": 100.84166666672041,
+    "n": 26
+   }
+  ],
+  "lvD": [
+   {
+    "med": 29.5,
+    "n": 30
+   },
+   {
+    "med": 44.5,
+    "n": 30
+   },
+   {
+    "med": 60,
+    "n": 28
+   },
+   {
+    "med": 79.5,
+    "n": 26
+   }
+  ],
+  "finalLevelMed": 6,
+  "levelAt3": 3,
+  "boosPerMin": 2.5115941594591327,
+  "boosPerGame": 22.5,
+  "booCarry": {
+   "1": 376,
+   "2": 189,
+   "3": 101,
+   "pumpkin": 1300
+  },
+  "booFlyBy": 2,
+  "rises": 3957,
+  "wakes": 2300,
+  "wakesRisen": 2300,
+  "pumpkinDrops": 0,
+  "refusedPerGame": 38.63333333333333,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 11,
+  "maxTime": 600,
+  "name": "spam rand@10",
+  "diff": "easy",
+  "playerStats": {
+   "taps": 161242,
+   "busyTaps": 160054,
+   "accepted": 683
+  }
+ },
+ {
+  "n": 30,
+  "overs": 15,
+  "over3": 2,
+  "survMed": 599.2166666664504,
+  "survP10": 237.5916666667479,
+  "survP90": 600.0166666664496,
+  "dropsMed": 482,
+  "dropsP10": 206.20000000000002,
+  "dropsP90": 495.1,
+  "dpm": 49.74586040644386,
+  "scoreMed": 27308.5,
+  "scoreP10": 9467.7,
+  "scoreP90": 30622.3,
+  "firstMergeT": 3.1666666666666603,
+  "firstMergeDrop": 3,
+  "firstCandleT": 31.86666666666614,
+  "firstCandleDrop": 27,
+  "reach": [
+   30,
+   30,
+   28,
+   21,
+   21,
+   1
+  ],
+  "lvT": [
+   {
+    "med": 33.60833333333271,
+    "n": 30
+   },
+   {
+    "med": 59.06666666666332,
+    "n": 30
+   },
+   {
+    "med": 63.05833333336324,
+    "n": 28
+   },
+   {
+    "med": 106.60000000008483,
+    "n": 21
+   }
+  ],
+  "lvD": [
+   {
+    "med": 27,
+    "n": 30
+   },
+   {
+    "med": 50,
+    "n": 30
+   },
+   {
+    "med": 50,
+    "n": 28
+   },
+   {
+    "med": 84,
+    "n": 21
+   }
+  ],
+  "finalLevelMed": 6,
+  "levelAt3": 3,
+  "boosPerMin": 2.505705955566785,
+  "boosPerGame": 20.3,
+  "booCarry": {
+   "1": 383,
+   "2": 209,
+   "3": 93,
+   "pumpkin": 1090
+  },
+  "booFlyBy": 3,
+  "rises": 3748,
+  "wakes": 2218,
+  "wakesRisen": 2218,
+  "pumpkinDrops": 0,
+  "refusedPerGame": 32.1,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 11,
+  "maxTime": 600,
+  "name": "spam rand@60",
+  "diff": "easy",
+  "playerStats": {
+   "taps": 874963,
+   "busyTaps": 873970,
+   "accepted": 611
+  }
+ },
+ {
+  "n": 30,
+  "overs": 15,
+  "over3": 0,
+  "survMed": 598.4499999997844,
+  "survP10": 252.19166666675952,
+  "survP90": 600.0166666664496,
+  "dropsMed": 469.5,
+  "dropsP10": 216.7,
+  "dropsP90": 485,
+  "dpm": 48.91574172841786,
+  "scoreMed": 26683.5,
+  "scoreP10": 10865.6,
+  "scoreP90": 29879.100000000002,
+  "firstMergeT": 3.9166666666666576,
+  "firstMergeDrop": 4,
+  "firstCandleT": 33.04999999999941,
+  "firstCandleDrop": 28,
+  "reach": [
+   30,
+   30,
+   30,
+   22,
+   22,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 34.9749999999993,
+    "n": 30
+   },
+   {
+    "med": 57.41666666666341,
+    "n": 30
+   },
+   {
+    "med": 76.7500000000228,
+    "n": 30
+   },
+   {
+    "med": 92.93333333340001,
+    "n": 22
+   }
+  ],
+  "lvD": [
+   {
+    "med": 28,
+    "n": 30
+   },
+   {
+    "med": 49,
+    "n": 30
+   },
+   {
+    "med": 65,
+    "n": 30
+   },
+   {
+    "med": 75,
+    "n": 22
+   }
+  ],
+  "finalLevelMed": 6,
+  "levelAt3": 3,
+  "boosPerMin": 2.4637995809916236,
+  "boosPerGame": 20.7,
+  "booCarry": {
+   "1": 354,
+   "2": 202,
+   "3": 87,
+   "pumpkin": 1139
+  },
+  "booFlyBy": 3,
+  "rises": 3853,
+  "wakes": 2304,
+  "wakesRisen": 2304,
+  "pumpkinDrops": 0,
+  "refusedPerGame": 38.233333333333334,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 11,
+  "maxTime": 600,
+  "name": "spam aimdrop@30",
+  "diff": "easy",
+  "playerStats": {
+   "taps": 453677,
+   "busyTaps": 452500,
+   "accepted": 628
+  }
+ },
+ {
+  "n": 100,
+  "overs": 100,
+  "over3": 3,
+  "survMed": 308.0500000000485,
+  "survP10": 231.0866666667427,
+  "survP90": 633.2316666664194,
+  "dropsMed": 181,
+  "dropsP10": 138.9,
+  "dropsP90": 366.50000000000006,
+  "dpm": 35.05282515330773,
+  "scoreMed": 9835,
+  "scoreP10": 7106.4,
+  "scoreP90": 24852.800000000003,
+  "firstMergeT": 4.224999999999991,
+  "firstMergeDrop": 3,
+  "firstCandleT": 27.8499999999997,
+  "firstCandleDrop": 17,
+  "reach": [
+   100,
+   100,
+   94,
+   42,
+   39,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 29.058333333332964,
+    "n": 100
+   },
+   {
+    "med": 56.799999999996786,
+    "n": 100
+   },
+   {
+    "med": 87.59166666669422,
+    "n": 94
+   },
+   {
+    "med": 107.64166666670818,
+    "n": 42
+   }
+  ],
+  "lvD": [
+   {
+    "med": 17,
+    "n": 100
+   },
+   {
+    "med": 31.5,
+    "n": 100
+   },
+   {
+    "med": 49,
+    "n": 94
+   },
+   {
+    "med": 58,
+    "n": 42
+   }
+  ],
+  "finalLevelMed": 3,
+  "levelAt3": 2.5,
+  "boosPerMin": 1.7578754640590082,
+  "boosPerGame": 11.86,
+  "booCarry": {
+   "1": 145,
+   "2": 174,
+   "3": 165,
+   "pumpkin": 2820
+  },
+  "booFlyBy": 19,
+  "rises": 15976,
+  "wakes": 12001,
+  "wakesRisen": 10903,
+  "pumpkinDrops": 1256,
+  "refusedPerGame": 0,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 9,
+  "maxTime": 900,
+  "name": "bot 0.3",
+  "diff": "normal"
+ },
+ {
+  "n": 100,
+  "overs": 100,
+  "over3": 1,
+  "survMed": 501.9416666665388,
+  "survP10": 232.69500000007733,
+  "survP90": 625.8466666664262,
+  "dropsMed": 308,
+  "dropsP10": 148.8,
+  "dropsP90": 385.3,
+  "dpm": 37.53431355192714,
+  "scoreMed": 19626,
+  "scoreP10": 7858.7,
+  "scoreP90": 25598,
+  "firstMergeT": 2.774999999999995,
+  "firstMergeDrop": 2,
+  "firstCandleT": 24.26666666666657,
+  "firstCandleDrop": 16,
+  "reach": [
+   100,
+   100,
+   99,
+   63,
+   62,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 25.474999999999834,
+    "n": 100
+   },
+   {
+    "med": 50.441666666663814,
+    "n": 100
+   },
+   {
+    "med": 74.95000000002878,
+    "n": 99
+   },
+   {
+    "med": 108.06666666674963,
+    "n": 63
+   }
+  ],
+  "lvD": [
+   {
+    "med": 16,
+    "n": 100
+   },
+   {
+    "med": 30,
+    "n": 100
+   },
+   {
+    "med": 46,
+    "n": 99
+   },
+   {
+    "med": 66,
+    "n": 63
+   }
+  ],
+  "finalLevelMed": 5,
+  "levelAt3": 3,
+  "boosPerMin": 1.7334439553784606,
+  "boosPerGame": 12.89,
+  "booCarry": {
+   "1": 66,
+   "2": 167,
+   "3": 175,
+   "pumpkin": 3131
+  },
+  "booFlyBy": 31,
+  "rises": 19480,
+  "wakes": 15211,
+  "wakesRisen": 14013,
+  "pumpkinDrops": 1364,
+  "refusedPerGame": 0,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 8.5,
+  "maxTime": 900,
+  "name": "bot 0.6",
+  "diff": "normal"
+ },
+ {
+  "n": 100,
+  "overs": 100,
+  "over3": 0,
+  "survMed": 546.7583333331647,
+  "survP10": 262.1916666667563,
+  "survP90": 640.1949999997465,
+  "dropsMed": 354,
+  "dropsP10": 177.2,
+  "dropsP90": 423.6,
+  "dpm": 39.45637018189099,
+  "scoreMed": 23794,
+  "scoreP10": 10129.7,
+  "scoreP90": 28752.1,
+  "firstMergeT": 2.466666666666663,
+  "firstMergeDrop": 2,
+  "firstCandleT": 16.933333333333653,
+  "firstCandleDrop": 12,
+  "reach": [
+   100,
+   100,
+   100,
+   83,
+   81,
+   3
+  ],
+  "lvT": [
+   {
+    "med": 18.133333333333585,
+    "n": 100
+   },
+   {
+    "med": 39.87499999999777,
+    "n": 100
+   },
+   {
+    "med": 73.14166666667231,
+    "n": 100
+   },
+   {
+    "med": 105.25000000005724,
+    "n": 83
+   }
+  ],
+  "lvD": [
+   {
+    "med": 12,
+    "n": 100
+   },
+   {
+    "med": 26,
+    "n": 100
+   },
+   {
+    "med": 47.5,
+    "n": 100
+   },
+   {
+    "med": 67,
+    "n": 83
+   }
+  ],
+  "finalLevelMed": 6,
+  "levelAt3": 3,
+  "boosPerMin": 1.4218728351638634,
+  "boosPerGame": 12.03,
+  "booCarry": {
+   "1": 61,
+   "2": 112,
+   "3": 177,
+   "pumpkin": 2825
+  },
+  "booFlyBy": 40,
+  "rises": 25117,
+  "wakes": 21447,
+  "wakesRisen": 19824,
+  "pumpkinDrops": 1730,
+  "refusedPerGame": 0,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 8,
+  "maxTime": 900,
+  "name": "bot 0.9",
+  "diff": "normal"
+ },
+ {
+  "n": 300,
+  "overs": 279,
+  "over3": 0,
+  "survMed": 637.041666666416,
+  "survP10": 478.0099999998939,
+  "survP90": 913.5016666661654,
+  "dropsMed": 146,
+  "dropsP10": 115.7,
+  "dropsP90": 201.00000000000023,
+  "dpm": 13.804658654130183,
+  "scoreMed": 7042.5,
+  "scoreP10": 4236.9,
+  "scoreP90": 10439.500000000002,
+  "firstMergeT": 9.650000000000059,
+  "firstMergeDrop": 2,
+  "firstCandleT": 95.49166666666252,
+  "firstCandleDrop": 23,
+  "reach": [
+   300,
+   300,
+   250,
+   29,
+   10,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 97.04999999999578,
+    "n": 300
+   },
+   {
+    "med": 144.32500000008685,
+    "n": 300
+   },
+   {
+    "med": 216.69999999980504,
+    "n": 250
+   },
+   {
+    "med": 245.93333333310966,
+    "n": 29
+   }
+  ],
+  "lvD": [
+   {
+    "med": 23,
+    "n": 300
+   },
+   {
+    "med": 33.5,
+    "n": 300
+   },
+   {
+    "med": 48,
+    "n": 250
+   },
+   {
+    "med": 54,
+    "n": 29
+   }
+  ],
+  "finalLevelMed": 3,
+  "levelAt3": 1,
+  "boosPerMin": 0.5295131874389941,
+  "boosPerGame": 5.94,
+  "booCarry": {
+   "1": 337,
+   "2": 316,
+   "3": 246,
+   "pumpkin": 4175
+  },
+  "booFlyBy": 21,
+  "rises": 26628,
+  "wakes": 18523,
+  "wakesRisen": 16283,
+  "pumpkinDrops": 2595,
+  "refusedPerGame": 24.263333333333332,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 8,
+  "maxTime": 1200,
+  "name": "kid5",
+  "diff": "normal",
+  "playerStats": {
+   "taps": 49293,
+   "buffered": 4195,
+   "double": 4292,
+   "matchTaps": 8935,
+   "refusedTaps": 6851
+  }
+ },
+ {
+  "n": 150,
+  "overs": 140,
+  "over3": 0,
+  "survMed": 792.9249999996075,
+  "survP10": 556.8399999998222,
+  "survP90": 1008.9816666660776,
+  "dropsMed": 149,
+  "dropsP10": 108.9,
+  "dropsP90": 185.29999999999998,
+  "dpm": 11.348209257911371,
+  "scoreMed": 7123,
+  "scoreP10": 3693.8,
+  "scoreP90": 9822.799999999997,
+  "firstMergeT": 11.750000000000163,
+  "firstMergeDrop": 2,
+  "firstCandleT": 124.1166666666609,
+  "firstCandleDrop": 24,
+  "reach": [
+   150,
+   150,
+   113,
+   13,
+   1,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 125.36666666666083,
+    "n": 150
+   },
+   {
+    "med": 173.49166666666736,
+    "n": 150
+   },
+   {
+    "med": 269.09999999981517,
+    "n": 113
+   },
+   {
+    "med": 266.83333333309065,
+    "n": 13
+   }
+  ],
+  "lvD": [
+   {
+    "med": 24,
+    "n": 150
+   },
+   {
+    "med": 34,
+    "n": 150
+   },
+   {
+    "med": 49,
+    "n": 113
+   },
+   {
+    "med": 51,
+    "n": 13
+   }
+  ],
+  "finalLevelMed": 3,
+  "levelAt3": 1,
+  "boosPerMin": 0.4129964687021901,
+  "boosPerGame": 5.493333333333333,
+  "booCarry": {
+   "1": 195,
+   "2": 172,
+   "3": 93,
+   "pumpkin": 1903
+  },
+  "booFlyBy": 10,
+  "rises": 12832,
+  "wakes": 9059,
+  "wakesRisen": 7938,
+  "pumpkinDrops": 1313,
+  "refusedPerGame": 26.986666666666668,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 8,
+  "maxTime": 1200,
+  "name": "kid5 slow",
+  "diff": "normal",
+  "playerStats": {
+   "taps": 24536,
+   "buffered": 2074,
+   "double": 2110,
+   "matchTaps": 2405,
+   "refusedTaps": 3857
+  }
+ },
+ {
+  "n": 300,
+  "overs": 300,
+  "over3": 0,
+  "survMed": 414.16666666661865,
+  "survP10": 324.6833333333667,
+  "survP90": 863.7099999995432,
+  "dropsMed": 174.5,
+  "dropsP10": 139,
+  "dropsP90": 364.4000000000001,
+  "dpm": 25.45136656390463,
+  "scoreMed": 9529.5,
+  "scoreP10": 6742.5,
+  "scoreP90": 23407.9,
+  "firstMergeT": 4.608333333333322,
+  "firstMergeDrop": 2,
+  "firstCandleT": 39.96666666666568,
+  "firstCandleDrop": 18,
+  "reach": [
+   300,
+   300,
+   290,
+   102,
+   95,
+   1
+  ],
+  "lvT": [
+   {
+    "med": 41.174999999998946,
+    "n": 300
+   },
+   {
+    "med": 72.84166666666253,
+    "n": 300
+   },
+   {
+    "med": 121.35833333341589,
+    "n": 290
+   },
+   {
+    "med": 154.70833333321542,
+    "n": 102
+   }
+  ],
+  "lvD": [
+   {
+    "med": 18,
+    "n": 300
+   },
+   {
+    "med": 30,
+    "n": 300
+   },
+   {
+    "med": 51,
+    "n": 290
+   },
+   {
+    "med": 63,
+    "n": 102
+   }
+  ],
+  "finalLevelMed": 3,
+  "levelAt3": 2,
+  "boosPerMin": 1.0584954730844098,
+  "boosPerGame": 9.24,
+  "booCarry": {
+   "1": 152,
+   "2": 421,
+   "3": 503,
+   "pumpkin": 6295
+  },
+  "booFlyBy": 87,
+  "rises": 45383,
+  "wakes": 35606,
+  "wakesRisen": 32323,
+  "pumpkinDrops": 3701,
+  "refusedPerGame": 0,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 8,
+  "maxTime": 1200,
+  "name": "adult",
+  "diff": "normal"
+ },
+ {
+  "n": 30,
+  "overs": 0,
+  "over3": 0,
+  "survMed": 600.0166666664496,
+  "survP10": 600.0166666664496,
+  "survP90": 600.0166666664496,
+  "dropsMed": 14.5,
+  "dropsP10": 9.9,
+  "dropsP90": 23.200000000000003,
+  "dpm": 1.599955556790668,
+  "scoreMed": 150,
+  "scoreP10": 41.8,
+  "scoreP90": 525.8000000000001,
+  "firstMergeT": 1.8499999999999983,
+  "firstMergeDrop": 2,
+  "firstCandleT": 13.866666666666935,
+  "firstCandleDrop": 14,
+  "reach": [
+   5,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 15.066666666666995,
+    "n": 5
+   },
+   {
+    "med": null,
+    "n": 0
+   },
+   {
+    "med": null,
+    "n": 0
+   },
+   {
+    "med": null,
+    "n": 0
+   }
+  ],
+  "lvD": [
+   {
+    "med": 14,
+    "n": 5
+   },
+   {
+    "med": null,
+    "n": 0
+   },
+   {
+    "med": null,
+    "n": 0
+   },
+   {
+    "med": null,
+    "n": 0
+   }
+  ],
+  "finalLevelMed": 0,
+  "levelAt3": 0,
+  "boosPerMin": 0.003333240743313891,
+  "boosPerGame": 0.03333333333333333,
+  "booCarry": {
+   "1": 0,
+   "2": 0,
+   "3": 0,
+   "pumpkin": 0
+  },
+  "booFlyBy": 1,
+  "rises": 24,
+  "wakes": 2,
+  "wakesRisen": 2,
+  "pumpkinDrops": 3,
+  "refusedPerGame": 5866.966666666666,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 3,
+  "maxTime": 600,
+  "name": "spam same@10",
+  "diff": "normal",
+  "playerStats": {
+   "taps": 180000,
+   "busyTaps": 3991,
+   "accepted": 30
+  }
+ },
+ {
+  "n": 30,
+  "overs": 0,
+  "over3": 0,
+  "survMed": 600.0166666664496,
+  "survP10": 600.0166666664496,
+  "survP90": 600.0166666664496,
+  "dropsMed": 14.5,
+  "dropsP10": 9.9,
+  "dropsP90": 23.200000000000003,
+  "dpm": 1.599955556790668,
+  "scoreMed": 150,
+  "scoreP10": 41.8,
+  "scoreP90": 525.8000000000001,
+  "firstMergeT": 1.7499999999999987,
+  "firstMergeDrop": 2,
+  "firstCandleT": 13.76666666666693,
+  "firstCandleDrop": 14,
+  "reach": [
+   5,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 14.96666666666699,
+    "n": 5
+   },
+   {
+    "med": null,
+    "n": 0
+   },
+   {
+    "med": null,
+    "n": 0
+   },
+   {
+    "med": null,
+    "n": 0
+   }
+  ],
+  "lvD": [
+   {
+    "med": 14,
+    "n": 5
+   },
+   {
+    "med": null,
+    "n": 0
+   },
+   {
+    "med": null,
+    "n": 0
+   },
+   {
+    "med": null,
+    "n": 0
+   }
+  ],
+  "finalLevelMed": 0,
+  "levelAt3": 0,
+  "boosPerMin": 0.003333240743313891,
+  "boosPerGame": 0.03333333333333333,
+  "booCarry": {
+   "1": 0,
+   "2": 0,
+   "3": 0,
+   "pumpkin": 0
+  },
+  "booFlyBy": 1,
+  "rises": 24,
+  "wakes": 2,
+  "wakesRisen": 2,
+  "pumpkinDrops": 3,
+  "refusedPerGame": 35199.96666666667,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 3,
+  "maxTime": 600,
+  "name": "spam same@60",
+  "diff": "normal",
+  "playerStats": {
+   "taps": 1080030,
+   "busyTaps": 24031,
+   "accepted": 30
+  }
+ },
+ {
+  "n": 30,
+  "overs": 0,
+  "over3": 0,
+  "survMed": 600.0166666664496,
+  "survP10": 600.0166666664496,
+  "survP90": 600.0166666664496,
+  "dropsMed": 69,
+  "dropsP10": 42,
+  "dropsP90": 103.5,
+  "dpm": 7.103136024001903,
+  "scoreMed": 2158,
+  "scoreP10": 958.4000000000001,
+  "scoreP90": 3886.0000000000005,
+  "firstMergeT": 2.2666666666666635,
+  "firstMergeDrop": 2,
+  "firstCandleT": 20.7750000000001,
+  "firstCandleDrop": 19,
+  "reach": [
+   28,
+   24,
+   3,
+   0,
+   0,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 21.9916666666667,
+    "n": 28
+   },
+   {
+    "med": 29.79999999999831,
+    "n": 24
+   },
+   {
+    "med": 38.666666666664476,
+    "n": 3
+   },
+   {
+    "med": null,
+    "n": 0
+   }
+  ],
+  "lvD": [
+   {
+    "med": 19,
+    "n": 28
+   },
+   {
+    "med": 27,
+    "n": 24
+   },
+   {
+    "med": 32,
+    "n": 3
+   },
+   {
+    "med": null,
+    "n": 0
+   }
+  ],
+  "finalLevelMed": 2,
+  "levelAt3": 2,
+  "boosPerMin": 0.17999500013895012,
+  "boosPerGame": 1.8,
+  "booCarry": {
+   "1": 9,
+   "2": 11,
+   "3": 8,
+   "pumpkin": 103
+  },
+  "booFlyBy": 5,
+  "rises": 894,
+  "wakes": 454,
+  "wakesRisen": 370,
+  "pumpkinDrops": 106,
+  "refusedPerGame": 5240.4,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 6,
+  "maxTime": 600,
+  "name": "spam alt@10",
+  "diff": "normal",
+  "playerStats": {
+   "taps": 180000,
+   "busyTaps": 22788,
+   "accepted": 116
+  }
+ },
+ {
+  "n": 30,
+  "overs": 30,
+  "over3": 22,
+  "survMed": 164.8000000000233,
+  "survP10": 133.99999999999878,
+  "survP90": 206.94833333339017,
+  "dropsMed": 141.5,
+  "dropsP10": 113.6,
+  "dropsP90": 167.70000000000002,
+  "dpm": 50.967272979844516,
+  "scoreMed": 6274.5,
+  "scoreP10": 4108.4,
+  "scoreP90": 8060.1,
+  "firstMergeT": 4.766666666666655,
+  "firstMergeDrop": 5,
+  "firstCandleT": 29.149999999999626,
+  "firstCandleDrop": 26,
+  "reach": [
+   30,
+   30,
+   21,
+   2,
+   1,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 31.024999999999523,
+    "n": 30
+   },
+   {
+    "med": 50.7166666666638,
+    "n": 30
+   },
+   {
+    "med": 59.13333333332997,
+    "n": 21
+   },
+   {
+    "med": 43.02500000003424,
+    "n": 2
+   }
+  ],
+  "lvD": [
+   {
+    "med": 26,
+    "n": 30
+   },
+   {
+    "med": 40.5,
+    "n": 30
+   },
+   {
+    "med": 48,
+    "n": 21
+   },
+   {
+    "med": 37,
+    "n": 2
+   }
+  ],
+  "finalLevelMed": 3,
+  "levelAt3": 3,
+  "boosPerMin": 1.9042041730027779,
+  "boosPerGame": 5.6,
+  "booCarry": {
+   "1": 46,
+   "2": 37,
+   "3": 19,
+   "pumpkin": 372
+  },
+  "booFlyBy": 1,
+  "rises": 2382,
+  "wakes": 1621,
+  "wakesRisen": 1410,
+  "pumpkinDrops": 252,
+  "refusedPerGame": 21,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 8,
+  "maxTime": 600,
+  "name": "spam sweep@10",
+  "diff": "normal",
+  "playerStats": {
+   "taps": 52916,
+   "busyTaps": 52256,
+   "accepted": 461
+  }
+ },
+ {
+  "n": 30,
+  "overs": 30,
+  "over3": 20,
+  "survMed": 161.3833333333539,
+  "survP10": 124.27833333332757,
+  "survP90": 212.22500000006104,
+  "dropsMed": 138.5,
+  "dropsP10": 110.10000000000001,
+  "dropsP90": 173.1,
+  "dpm": 51.08220951171013,
+  "scoreMed": 6025.5,
+  "scoreP10": 3983.5000000000005,
+  "scoreP90": 8816.400000000001,
+  "firstMergeT": 3.2333333333333267,
+  "firstMergeDrop": 3,
+  "firstCandleT": 32.30833333333278,
+  "firstCandleDrop": 28.5,
+  "reach": [
+   30,
+   30,
+   21,
+   2,
+   0,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 33.52499999999938,
+    "n": 30
+   },
+   {
+    "med": 39.599999999997756,
+    "n": 30
+   },
+   {
+    "med": 57.64999999999672,
+    "n": 21
+   },
+   {
+    "med": 45.84166666670315,
+    "n": 2
+   }
+  ],
+  "lvD": [
+   {
+    "med": 28.5,
+    "n": 30
+   },
+   {
+    "med": 32,
+    "n": 30
+   },
+   {
+    "med": 48,
+    "n": 21
+   },
+   {
+    "med": 37.5,
+    "n": 2
+   }
+  ],
+  "finalLevelMed": 3,
+  "levelAt3": 3,
+  "boosPerMin": 1.8628394015293053,
+  "boosPerGame": 5.433333333333334,
+  "booCarry": {
+   "1": 42,
+   "2": 27,
+   "3": 30,
+   "pumpkin": 369
+  },
+  "booFlyBy": 1,
+  "rises": 2362,
+  "wakes": 1571,
+  "wakesRisen": 1369,
+  "pumpkinDrops": 232,
+  "refusedPerGame": 28.366666666666667,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 8,
+  "maxTime": 600,
+  "name": "spam rand@10",
+  "diff": "normal",
+  "playerStats": {
+   "taps": 52480,
+   "busyTaps": 51599,
+   "accepted": 441
+  }
+ },
+ {
+  "n": 30,
+  "overs": 30,
+  "over3": 24,
+  "survMed": 161.9416666666877,
+  "survP10": 118.87666666666121,
+  "survP90": 200.52333333338507,
+  "dropsMed": 140,
+  "dropsP10": 112.9,
+  "dropsP90": 168.40000000000003,
+  "dpm": 52.07056309507963,
+  "scoreMed": 6386.5,
+  "scoreP10": 4005.9000000000005,
+  "scoreP90": 7985.900000000001,
+  "firstMergeT": 3.1666666666666603,
+  "firstMergeDrop": 3,
+  "firstCandleT": 33.31666666666606,
+  "firstCandleDrop": 31,
+  "reach": [
+   30,
+   30,
+   21,
+   1,
+   1,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 35.15833333333262,
+    "n": 30
+   },
+   {
+    "med": 44.058333333330836,
+    "n": 30
+   },
+   {
+    "med": 51.33333333334174,
+    "n": 21
+   },
+   {
+    "med": 84.7833333333985,
+    "n": 1
+   }
+  ],
+  "lvD": [
+   {
+    "med": 31,
+    "n": 30
+   },
+   {
+    "med": 35.5,
+    "n": 30
+   },
+   {
+    "med": 43,
+    "n": 21
+   },
+   {
+    "med": 70,
+    "n": 1
+   }
+  ],
+  "finalLevelMed": 3,
+  "levelAt3": 3,
+  "boosPerMin": 1.780921279134425,
+  "boosPerGame": 4.933333333333334,
+  "booCarry": {
+   "1": 49,
+   "2": 37,
+   "3": 17,
+   "pumpkin": 309
+  },
+  "booFlyBy": 5,
+  "rises": 2280,
+  "wakes": 1565,
+  "wakesRisen": 1368,
+  "pumpkinDrops": 243,
+  "refusedPerGame": 28.4,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 8,
+  "maxTime": 600,
+  "name": "spam rand@60",
+  "diff": "normal",
+  "playerStats": {
+   "taps": 299171,
+   "busyTaps": 298289,
+   "accepted": 425
+  }
+ },
+ {
+  "n": 30,
+  "overs": 30,
+  "over3": 21,
+  "survMed": 166.44166666669128,
+  "survP10": 139.54333333333653,
+  "survP90": 195.84333333338134,
+  "dropsMed": 138,
+  "dropsP10": 123.6,
+  "dropsP90": 164.3,
+  "dpm": 50.92086446400272,
+  "scoreMed": 6148.5,
+  "scoreP10": 4871.6,
+  "scoreP90": 7830,
+  "firstMergeT": 3.541666666666659,
+  "firstMergeDrop": 3.5,
+  "firstCandleT": 29.199999999999623,
+  "firstCandleDrop": 25.5,
+  "reach": [
+   30,
+   30,
+   26,
+   0,
+   0,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 30.949999999999523,
+    "n": 30
+   },
+   {
+    "med": 46.133333333330725,
+    "n": 30
+   },
+   {
+    "med": 55.05833333333021,
+    "n": 26
+   },
+   {
+    "med": null,
+    "n": 0
+   }
+  ],
+  "lvD": [
+   {
+    "med": 25.5,
+    "n": 30
+   },
+   {
+    "med": 36,
+    "n": 30
+   },
+   {
+    "med": 44,
+    "n": 26
+   },
+   {
+    "med": null,
+    "n": 0
+   }
+  ],
+  "finalLevelMed": 3,
+  "levelAt3": 3,
+  "boosPerMin": 1.7866064072996617,
+  "boosPerGame": 5,
+  "booCarry": {
+   "1": 54,
+   "2": 28,
+   "3": 19,
+   "pumpkin": 337
+  },
+  "booFlyBy": 0,
+  "rises": 2289,
+  "wakes": 1557,
+  "wakesRisen": 1324,
+  "pumpkinDrops": 266,
+  "refusedPerGame": 29.3,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 8.5,
+  "maxTime": 600,
+  "name": "spam aimdrop@30",
+  "diff": "normal",
+  "playerStats": {
+   "taps": 151119,
+   "busyTaps": 150210,
+   "accepted": 427
+  }
+ },
+ {
+  "n": 100,
+  "overs": 100,
+  "over3": 0,
+  "survMed": 317.37500000004,
+  "survP10": 265.16666666675417,
+  "survP90": 627.266666666425,
+  "dropsMed": 198.5,
+  "dropsP10": 163.9,
+  "dropsP90": 385.20000000000005,
+  "dpm": 37.57245392001842,
+  "scoreMed": 9127,
+  "scoreP10": 6716.9,
+  "scoreP90": 21386.600000000006,
+  "firstMergeT": 4.033333333333324,
+  "firstMergeDrop": 3,
+  "firstCandleT": 28.05833333333302,
+  "firstCandleDrop": 18,
+  "reach": [
+   100,
+   100,
+   100,
+   25,
+   23,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 29.266666666666286,
+    "n": 100
+   },
+   {
+    "med": 60.09166666666326,
+    "n": 100
+   },
+   {
+    "med": 97.10000000004321,
+    "n": 100
+   },
+   {
+    "med": 131.94999999998421,
+    "n": 25
+   }
+  ],
+  "lvD": [
+   {
+    "med": 18,
+    "n": 100
+   },
+   {
+    "med": 36,
+    "n": 100
+   },
+   {
+    "med": 58.5,
+    "n": 100
+   },
+   {
+    "med": 80,
+    "n": 25
+   }
+  ],
+  "finalLevelMed": 3,
+  "levelAt3": 2,
+  "boosPerMin": 1.393350196568516,
+  "boosPerGame": 8.89,
+  "booCarry": {
+   "1": 149,
+   "2": 192,
+   "3": 155,
+   "pumpkin": 1945
+  },
+  "booFlyBy": 17,
+  "rises": 12461,
+  "wakes": 11606,
+  "wakesRisen": 8926,
+  "pumpkinDrops": 2972,
+  "refusedPerGame": 0,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 8,
+  "maxTime": 900,
+  "name": "bot 0.3",
+  "diff": "hard"
+ },
+ {
+  "n": 100,
+  "overs": 100,
+  "over3": 0,
+  "survMed": 289.4083333333988,
+  "survP10": 225.71166666673844,
+  "survP90": 602.4716666664474,
+  "dropsMed": 198,
+  "dropsP10": 152.9,
+  "dropsP90": 400.40000000000003,
+  "dpm": 40.743801505947566,
+  "scoreMed": 9348,
+  "scoreP10": 6668.3,
+  "scoreP90": 23287.4,
+  "firstMergeT": 2.633333333333329,
+  "firstMergeDrop": 2,
+  "firstCandleT": 24.73333333333321,
+  "firstCandleDrop": 17,
+  "reach": [
+   100,
+   100,
+   99,
+   27,
+   25,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 25.949999999999807,
+    "n": 100
+   },
+   {
+    "med": 48.808333333330566,
+    "n": 100
+   },
+   {
+    "med": 89.86666666668762,
+    "n": 99
+   },
+   {
+    "med": 110.48333333331433,
+    "n": 27
+   }
+  ],
+  "lvD": [
+   {
+    "med": 17,
+    "n": 100
+   },
+   {
+    "med": 31,
+    "n": 100
+   },
+   {
+    "med": 59,
+    "n": 99
+   },
+   {
+    "med": 73,
+    "n": 27
+   }
+  ],
+  "finalLevelMed": 3,
+  "levelAt3": 3,
+  "boosPerMin": 1.3660782592646556,
+  "boosPerGame": 8.08,
+  "booCarry": {
+   "1": 58,
+   "2": 151,
+   "3": 177,
+   "pumpkin": 1744
+  },
+  "booFlyBy": 35,
+  "rises": 12816,
+  "wakes": 12073,
+  "wakesRisen": 9391,
+  "pumpkinDrops": 2972,
+  "refusedPerGame": 0,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 7,
+  "maxTime": 900,
+  "name": "bot 0.6",
+  "diff": "hard"
+ },
+ {
+  "n": 100,
+  "overs": 100,
+  "over3": 1,
+  "survMed": 539.2083333331716,
+  "survP10": 242.5433333334185,
+  "survP90": 649.3633333330714,
+  "dropsMed": 377.5,
+  "dropsP10": 173.7,
+  "dropsP90": 462.1,
+  "dpm": 42.63033574661185,
+  "scoreMed": 20760.5,
+  "scoreP10": 8070,
+  "scoreP90": 27100.5,
+  "firstMergeT": 2.3499999999999965,
+  "firstMergeDrop": 2,
+  "firstCandleT": 17.50833333333362,
+  "firstCandleDrop": 13,
+  "reach": [
+   100,
+   100,
+   99,
+   60,
+   57,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 18.716666666666885,
+    "n": 100
+   },
+   {
+    "med": 46.616666666664024,
+    "n": 100
+   },
+   {
+    "med": 75.1000000000166,
+    "n": 99
+   },
+   {
+    "med": 125.34166666672307,
+    "n": 60
+   }
+  ],
+  "lvD": [
+   {
+    "med": 13,
+    "n": 100
+   },
+   {
+    "med": 32,
+    "n": 100
+   },
+   {
+    "med": 52,
+    "n": 99
+   },
+   {
+    "med": 88,
+    "n": 60
+   }
+  ],
+  "finalLevelMed": 5,
+  "levelAt3": 3,
+  "boosPerMin": 1.2025782548952204,
+  "boosPerGame": 9.24,
+  "booCarry": {
+   "1": 52,
+   "2": 139,
+   "3": 206,
+   "pumpkin": 1909
+  },
+  "booFlyBy": 50,
+  "rises": 18982,
+  "wakes": 18785,
+  "wakesRisen": 15228,
+  "pumpkinDrops": 3741,
+  "refusedPerGame": 0,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 7,
+  "maxTime": 900,
+  "name": "bot 0.9",
+  "diff": "hard"
+ },
+ {
+  "n": 300,
+  "overs": 279,
+  "over3": 0,
+  "survMed": 725.9833333330017,
+  "survP10": 533.2766666665103,
+  "survP90": 963.7549999994523,
+  "dropsMed": 173,
+  "dropsP10": 124.9,
+  "dropsP90": 226,
+  "dpm": 14.079935308123362,
+  "scoreMed": 7255,
+  "scoreP10": 4079.0000000000005,
+  "scoreP90": 10153.300000000003,
+  "firstMergeT": 8.108333333333317,
+  "firstMergeDrop": 2,
+  "firstCandleT": 95.8916666666625,
+  "firstCandleDrop": 23,
+  "reach": [
+   300,
+   298,
+   245,
+   22,
+   3,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 97.41666666666242,
+    "n": 300
+   },
+   {
+    "med": 168.05833333340428,
+    "n": 298
+   },
+   {
+    "med": 249.63333333311044,
+    "n": 245
+   },
+   {
+    "med": 330.1333333330331,
+    "n": 22
+   }
+  ],
+  "lvD": [
+   {
+    "med": 23,
+    "n": 300
+   },
+   {
+    "med": 40,
+    "n": 298
+   },
+   {
+    "med": 60,
+    "n": 245
+   },
+   {
+    "med": 71,
+    "n": 22
+   }
+  ],
+  "finalLevelMed": 3,
+  "levelAt3": 1,
+  "boosPerMin": 0.44111851523354817,
+  "boosPerGame": 5.456666666666667,
+  "booCarry": {
+   "1": 377,
+   "2": 374,
+   "3": 274,
+   "pumpkin": 3556
+  },
+  "booFlyBy": 28,
+  "rises": 22978,
+  "wakes": 20992,
+  "wakesRisen": 15277,
+  "pumpkinDrops": 6580,
+  "refusedPerGame": 30.946666666666665,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 8,
+  "maxTime": 1200,
+  "name": "kid5",
+  "diff": "hard",
+  "playerStats": {
+   "taps": 56554,
+   "buffered": 4701,
+   "double": 4836,
+   "matchTaps": 9305,
+   "refusedTaps": 8700
+  }
+ },
+ {
+  "n": 150,
+  "overs": 143,
+  "over3": 0,
+  "survMed": 833.024999999571,
+  "survP10": 609.2016666664413,
+  "survP90": 1082.7666666660107,
+  "dropsMed": 162,
+  "dropsP10": 117,
+  "dropsP90": 204,
+  "dpm": 11.538389383863183,
+  "scoreMed": 6408.5,
+  "scoreP10": 3717.2,
+  "scoreP90": 9386.6,
+  "firstMergeT": 10.80833333333345,
+  "firstMergeDrop": 2,
+  "firstCandleT": 119.24999999999451,
+  "firstCandleDrop": 24,
+  "reach": [
+   150,
+   148,
+   109,
+   5,
+   0,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 120.45833333332777,
+    "n": 150
+   },
+   {
+    "med": 203.47499999994562,
+    "n": 148
+   },
+   {
+    "med": 306.6499999997211,
+    "n": 109
+   },
+   {
+    "med": 284.36666666640804,
+    "n": 5
+   }
+  ],
+  "lvD": [
+   {
+    "med": 24,
+    "n": 150
+   },
+   {
+    "med": 40,
+    "n": 148
+   },
+   {
+    "med": 59,
+    "n": 109
+   },
+   {
+    "med": 56,
+    "n": 5
+   }
+  ],
+  "finalLevelMed": 3,
+  "levelAt3": 1,
+  "boosPerMin": 0.35934799253806454,
+  "boosPerGame": 5.04,
+  "booCarry": {
+   "1": 228,
+   "2": 190,
+   "3": 129,
+   "pumpkin": 1561
+  },
+  "booFlyBy": 12,
+  "rises": 10077,
+  "wakes": 9040,
+  "wakesRisen": 6483,
+  "pumpkinDrops": 2981,
+  "refusedPerGame": 31.52,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 8,
+  "maxTime": 1200,
+  "name": "kid5 slow",
+  "diff": "hard",
+  "playerStats": {
+   "taps": 26706,
+   "buffered": 2166,
+   "double": 2221,
+   "matchTaps": 2460,
+   "refusedTaps": 4492
+  }
+ },
+ {
+  "n": 300,
+  "overs": 300,
+  "over3": 0,
+  "survMed": 432.1166666666023,
+  "survP10": 337.7300000000215,
+  "survP90": 850.8216666662216,
+  "dropsMed": 192,
+  "dropsP10": 150.9,
+  "dropsP90": 370.30000000000007,
+  "dpm": 26.699038158794092,
+  "scoreMed": 8662.5,
+  "scoreP10": 6412.8,
+  "scoreP90": 19945.100000000002,
+  "firstMergeT": 4.383333333333323,
+  "firstMergeDrop": 2,
+  "firstCandleT": 40.74999999999897,
+  "firstCandleDrop": 19,
+  "reach": [
+   300,
+   300,
+   297,
+   52,
+   41,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 41.958333333332234,
+    "n": 300
+   },
+   {
+    "med": 82.86666666666851,
+    "n": 300
+   },
+   {
+    "med": 130.16666666674695,
+    "n": 297
+   },
+   {
+    "med": 158.5583333332151,
+    "n": 52
+   }
+  ],
+  "lvD": [
+   {
+    "med": 19,
+    "n": 300
+   },
+   {
+    "med": 36,
+    "n": 300
+   },
+   {
+    "med": 56,
+    "n": 297
+   },
+   {
+    "med": 72,
+    "n": 52
+   }
+  ],
+  "finalLevelMed": 3,
+  "levelAt3": 2,
+  "boosPerMin": 0.8440107242692845,
+  "boosPerGame": 6.8933333333333335,
+  "booCarry": {
+   "1": 193,
+   "2": 448,
+   "3": 509,
+   "pumpkin": 4056
+  },
+  "booFlyBy": 91,
+  "rises": 33532,
+  "wakes": 32065,
+  "wakesRisen": 24589,
+  "pumpkinDrops": 8274,
+  "refusedPerGame": 0,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 7,
+  "maxTime": 1200,
+  "name": "adult",
+  "diff": "hard"
+ },
+ {
+  "n": 30,
+  "overs": 0,
+  "over3": 0,
+  "survMed": 600.0166666664496,
+  "survP10": 600.0166666664496,
+  "survP90": 600.0166666664496,
+  "dropsMed": 13,
+  "dropsP10": 9,
+  "dropsP90": 18.1,
+  "dpm": 1.296630649149104,
+  "scoreMed": 139,
+  "scoreP10": 41.8,
+  "scoreP90": 300.6000000000002,
+  "firstMergeT": 1.733333333333332,
+  "firstMergeDrop": 2,
+  "firstCandleT": 12.63333333333354,
+  "firstCandleDrop": 14,
+  "reach": [
+   3,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 13.850000000000268,
+    "n": 3
+   },
+   {
+    "med": null,
+    "n": 0
+   },
+   {
+    "med": null,
+    "n": 0
+   },
+   {
+    "med": null,
+    "n": 0
+   }
+  ],
+  "lvD": [
+   {
+    "med": 14,
+    "n": 3
+   },
+   {
+    "med": null,
+    "n": 0
+   },
+   {
+    "med": null,
+    "n": 0
+   },
+   {
+    "med": null,
+    "n": 0
+   }
+  ],
+  "finalLevelMed": 0,
+  "levelAt3": 0,
+  "boosPerMin": 0,
+  "boosPerGame": 0,
+  "booCarry": {
+   "1": 0,
+   "2": 0,
+   "3": 0,
+   "pumpkin": 0
+  },
+  "booFlyBy": 0,
+  "rises": 8,
+  "wakes": 0,
+  "wakesRisen": 0,
+  "pumpkinDrops": 2,
+  "refusedPerGame": 5899.466666666666,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 2.5,
+  "maxTime": 600,
+  "name": "spam same@10",
+  "diff": "hard",
+  "playerStats": {
+   "taps": 180000,
+   "busyTaps": 3016,
+   "accepted": 30
+  }
+ },
+ {
+  "n": 30,
+  "overs": 0,
+  "over3": 0,
+  "survMed": 600.0166666664496,
+  "survP10": 600.0166666664496,
+  "survP90": 600.0166666664496,
+  "dropsMed": 13,
+  "dropsP10": 9,
+  "dropsP90": 18.1,
+  "dpm": 1.296630649149104,
+  "scoreMed": 139,
+  "scoreP10": 41.8,
+  "scoreP90": 300.6000000000002,
+  "firstMergeT": 1.6333333333333324,
+  "firstMergeDrop": 2,
+  "firstCandleT": 12.533333333333536,
+  "firstCandleDrop": 14,
+  "reach": [
+   3,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 13.750000000000263,
+    "n": 3
+   },
+   {
+    "med": null,
+    "n": 0
+   },
+   {
+    "med": null,
+    "n": 0
+   },
+   {
+    "med": null,
+    "n": 0
+   }
+  ],
+  "lvD": [
+   {
+    "med": 14,
+    "n": 3
+   },
+   {
+    "med": null,
+    "n": 0
+   },
+   {
+    "med": null,
+    "n": 0
+   },
+   {
+    "med": null,
+    "n": 0
+   }
+  ],
+  "finalLevelMed": 0,
+  "levelAt3": 0,
+  "boosPerMin": 0,
+  "boosPerGame": 0,
+  "booCarry": {
+   "1": 0,
+   "2": 0,
+   "3": 0,
+   "pumpkin": 0
+  },
+  "booFlyBy": 0,
+  "rises": 8,
+  "wakes": 0,
+  "wakesRisen": 0,
+  "pumpkinDrops": 2,
+  "refusedPerGame": 35395.23333333333,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 2.5,
+  "maxTime": 600,
+  "name": "spam same@60",
+  "diff": "hard",
+  "playerStats": {
+   "taps": 1080030,
+   "busyTaps": 18173,
+   "accepted": 30
+  }
+ },
+ {
+  "n": 30,
+  "overs": 0,
+  "over3": 0,
+  "survMed": 600.0166666664496,
+  "survP10": 600.0166666664496,
+  "survP90": 600.0166666664496,
+  "dropsMed": 46.5,
+  "dropsP10": 31.8,
+  "dropsP90": 70.1,
+  "dpm": 5.119857781730136,
+  "scoreMed": 978,
+  "scoreP10": 536.8000000000001,
+  "scoreP90": 2269.8,
+  "firstMergeT": 2.1333333333333306,
+  "firstMergeDrop": 2,
+  "firstCandleT": 18.26666666666691,
+  "firstCandleDrop": 17,
+  "reach": [
+   27,
+   7,
+   2,
+   0,
+   0,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 19.66666666666683,
+    "n": 27
+   },
+   {
+    "med": 34.4499999999981,
+    "n": 7
+   },
+   {
+    "med": 50.958333333330444,
+    "n": 2
+   },
+   {
+    "med": null,
+    "n": 0
+   }
+  ],
+  "lvD": [
+   {
+    "med": 17,
+    "n": 27
+   },
+   {
+    "med": 33,
+    "n": 7
+   },
+   {
+    "med": 47,
+    "n": 2
+   },
+   {
+    "med": null,
+    "n": 0
+   }
+  ],
+  "finalLevelMed": 1,
+  "levelAt3": 1,
+  "boosPerMin": 0.0766645370962195,
+  "boosPerGame": 0.7666666666666667,
+  "booCarry": {
+   "1": 2,
+   "2": 8,
+   "3": 5,
+   "pumpkin": 42
+  },
+  "booFlyBy": 2,
+  "rises": 376,
+  "wakes": 225,
+  "wakesRisen": 146,
+  "pumpkinDrops": 114,
+  "refusedPerGame": 5497.233333333334,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 4,
+  "maxTime": 600,
+  "name": "spam alt@10",
+  "diff": "hard",
+  "playerStats": {
+   "taps": 180000,
+   "busyTaps": 15083,
+   "accepted": 114
+  }
+ },
+ {
+  "n": 30,
+  "overs": 30,
+  "over3": 21,
+  "survMed": 165.08333333335685,
+  "survP10": 132.98166666666464,
+  "survP90": 219.13666666673322,
+  "dropsMed": 149,
+  "dropsP10": 118.9,
+  "dropsP90": 195.2,
+  "dpm": 54.30045869628346,
+  "scoreMed": 5887.5,
+  "scoreP10": 3875.4000000000005,
+  "scoreP90": 8095.1,
+  "firstMergeT": 3.983333333333324,
+  "firstMergeDrop": 4,
+  "firstCandleT": 30.49999999999955,
+  "firstCandleDrop": 27.5,
+  "reach": [
+   30,
+   30,
+   20,
+   1,
+   0,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 32.14999999999946,
+    "n": 30
+   },
+   {
+    "med": 41.749999999997634,
+    "n": 30
+   },
+   {
+    "med": 65.25833333335387,
+    "n": 20
+   },
+   {
+    "med": 96.68333333341027,
+    "n": 1
+   }
+  ],
+  "lvD": [
+   {
+    "med": 27.5,
+    "n": 30
+   },
+   {
+    "med": 35,
+    "n": 30
+   },
+   {
+    "med": 59.5,
+    "n": 20
+   },
+   {
+    "med": 88,
+    "n": 1
+   }
+  ],
+  "finalLevelMed": 3,
+  "levelAt3": 3,
+  "boosPerMin": 1.6950889825619744,
+  "boosPerGame": 4.9,
+  "booCarry": {
+   "1": 72,
+   "2": 46,
+   "3": 28,
+   "pumpkin": 273
+  },
+  "booFlyBy": 2,
+  "rises": 1878,
+  "wakes": 1679,
+  "wakesRisen": 1219,
+  "pumpkinDrops": 556,
+  "refusedPerGame": 24.7,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 8,
+  "maxTime": 600,
+  "name": "spam sweep@10",
+  "diff": "hard",
+  "playerStats": {
+   "taps": 52010,
+   "busyTaps": 51239,
+   "accepted": 546
+  }
+ },
+ {
+  "n": 30,
+  "overs": 30,
+  "over3": 15,
+  "survMed": 181.62500000003666,
+  "survP10": 136.14000000000067,
+  "survP90": 215.43666666673025,
+  "dropsMed": 165,
+  "dropsP10": 130.8,
+  "dropsP90": 196.5,
+  "dpm": 55.05938286945421,
+  "scoreMed": 6597.5,
+  "scoreP10": 4501.700000000001,
+  "scoreP90": 8055.4000000000015,
+  "firstMergeT": 2.833333333333328,
+  "firstMergeDrop": 3,
+  "firstCandleT": 32.76666666666609,
+  "firstCandleDrop": 30.5,
+  "reach": [
+   30,
+   29,
+   23,
+   0,
+   0,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 34.366666666666,
+    "n": 30
+   },
+   {
+    "med": 45.133333333330775,
+    "n": 29
+   },
+   {
+    "med": 63.43333333334269,
+    "n": 23
+   },
+   {
+    "med": null,
+    "n": 0
+   }
+  ],
+  "lvD": [
+   {
+    "med": 30.5,
+    "n": 30
+   },
+   {
+    "med": 40,
+    "n": 29
+   },
+   {
+    "med": 56,
+    "n": 23
+   },
+   {
+    "med": null,
+    "n": 0
+   }
+  ],
+  "finalLevelMed": 3,
+  "levelAt3": 3,
+  "boosPerMin": 1.7443756619833846,
+  "boosPerGame": 5.2,
+  "booCarry": {
+   "1": 65,
+   "2": 40,
+   "3": 34,
+   "pumpkin": 297
+  },
+  "booFlyBy": 0,
+  "rises": 1964,
+  "wakes": 1771,
+  "wakesRisen": 1256,
+  "pumpkinDrops": 593,
+  "refusedPerGame": 40.6,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 8,
+  "maxTime": 600,
+  "name": "spam rand@10",
+  "diff": "hard",
+  "playerStats": {
+   "taps": 53640,
+   "busyTaps": 52392,
+   "accepted": 574
+  }
+ },
+ {
+  "n": 30,
+  "overs": 30,
+  "over3": 18,
+  "survMed": 169.7833333333606,
+  "survP10": 133.02166666666466,
+  "survP90": 240.12333333341658,
+  "dropsMed": 157.5,
+  "dropsP10": 129.3,
+  "dropsP90": 221.70000000000002,
+  "dpm": 55.867496001737805,
+  "scoreMed": 5979,
+  "scoreP10": 4233.200000000001,
+  "scoreP90": 9827,
+  "firstMergeT": 2.966666666666661,
+  "firstMergeDrop": 3,
+  "firstCandleT": 30.47499999999955,
+  "firstCandleDrop": 29.5,
+  "reach": [
+   30,
+   28,
+   21,
+   2,
+   1,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 32.199999999999456,
+    "n": 30
+   },
+   {
+    "med": 44.649999999997476,
+    "n": 28
+   },
+   {
+    "med": 66.31666666669516,
+    "n": 21
+   },
+   {
+    "med": 79.11666666672963,
+    "n": 2
+   }
+  ],
+  "lvD": [
+   {
+    "med": 29.5,
+    "n": 30
+   },
+   {
+    "med": 40,
+    "n": 28
+   },
+   {
+    "med": 60,
+    "n": 21
+   },
+   {
+    "med": 72,
+    "n": 2
+   }
+  ],
+  "finalLevelMed": 3,
+  "levelAt3": 3,
+  "boosPerMin": 1.7825662869463834,
+  "boosPerGame": 5.533333333333333,
+  "booCarry": {
+   "1": 53,
+   "2": 52,
+   "3": 19,
+   "pumpkin": 355
+  },
+  "booFlyBy": 2,
+  "rises": 2110,
+  "wakes": 1841,
+  "wakesRisen": 1339,
+  "pumpkinDrops": 582,
+  "refusedPerGame": 38.8,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 8,
+  "maxTime": 600,
+  "name": "spam rand@60",
+  "diff": "hard",
+  "playerStats": {
+   "taps": 335247,
+   "busyTaps": 334053,
+   "accepted": 587
+  }
+ },
+ {
+  "n": 30,
+  "overs": 30,
+  "over3": 13,
+  "survMed": 182.82500000003762,
+  "survP10": 136.50000000000142,
+  "survP90": 249.36000000009034,
+  "dropsMed": 162.5,
+  "dropsP10": 122.4,
+  "dropsP90": 215.60000000000002,
+  "dpm": 54.05828612988958,
+  "scoreMed": 6422,
+  "scoreP10": 3800.2,
+  "scoreP90": 8861.300000000001,
+  "firstMergeT": 2.9833333333333276,
+  "firstMergeDrop": 3,
+  "firstCandleT": 30.699999999999537,
+  "firstCandleDrop": 28.5,
+  "reach": [
+   30,
+   29,
+   23,
+   2,
+   1,
+   0
+  ],
+  "lvT": [
+   {
+    "med": 31.991666666666134,
+    "n": 30
+   },
+   {
+    "med": 43.51666666666421,
+    "n": 29
+   },
+   {
+    "med": 67.66666666667331,
+    "n": 23
+   },
+   {
+    "med": 60.800000000048385,
+    "n": 2
+   }
+  ],
+  "lvD": [
+   {
+    "med": 28.5,
+    "n": 30
+   },
+   {
+    "med": 37,
+    "n": 29
+   },
+   {
+    "med": 60,
+    "n": 23
+   },
+   {
+    "med": 54,
+    "n": 2
+   }
+  ],
+  "finalLevelMed": 3,
+  "levelAt3": 3,
+  "boosPerMin": 1.8873782313001806,
+  "boosPerGame": 5.966666666666667,
+  "booCarry": {
+   "1": 71,
+   "2": 57,
+   "3": 41,
+   "pumpkin": 339
+  },
+  "booFlyBy": 0,
+  "rises": 2067,
+  "wakes": 1808,
+  "wakesRisen": 1312,
+  "pumpkinDrops": 574,
+  "refusedPerGame": 33.96666666666667,
+  "invariant": [],
+  "stuck": 0,
+  "maxComboMed": 8,
+  "maxTime": 600,
+  "name": "spam aimdrop@30",
+  "diff": "hard",
+  "playerStats": {
+   "taps": 170704,
+   "busyTaps": 169655,
+   "accepted": 524
+  }
+ }
+]
