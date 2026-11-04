@@ -1,0 +1,16 @@
+{
+  "name": "Lulu's Jungle Tower · Hươu Lulu Xếp Tháp",
+  "short_name": "Jungle Tower",
+  "description": "Build wobbly block towers with Lulu the baby giraffe: colours, shapes, counting and animals. English & Vietnamese.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#BFE6F2",
+  "theme_color": "#BFE6F2",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
