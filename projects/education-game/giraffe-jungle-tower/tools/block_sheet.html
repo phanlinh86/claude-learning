@@ -1,0 +1,96 @@
+<!doctype html>
+<!-- Contact sheet for JT.BlockArt (character artist B). Open directly or via `node tools/block_sheet.js`.
+     ?panel=green|light|night draws one panel only (default: all three stacked). -->
+<html><head><meta charset="utf-8"><title>Block sheet</title>
+<style>body{margin:0;background:#222}canvas{display:block}</style></head>
+<body><canvas id="c"></canvas>
+<script src="../game/js/block_art.js"></script>
+<script>
+(function () {
+  var BA = JT.BlockArt;
+  var ANIMALS = ['monkey', 'elephant', 'tiger', 'parrot', 'lion', 'frog', 'snake', 'hippo'];
+  var COLORS = ['red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink'];
+  var SHAPES = ['circle', 'square', 'triangle', 'star', 'heart', 'rect', 'diamond', 'oval'];
+  var PANELS = { green: '#5E9E6A', light: '#F4EFD6', night: '#1C2650' };
+  var qp = new URLSearchParams(location.search), only = qp.get('panel');
+  var imgs = {};
+  function img(name) { var i = imgs[name]; return i && i.complete && i.naturalWidth ? i : null; }
+  var loads = ANIMALS.map(function (a) {
+    return new Promise(function (res) { var i = new Image(); i.onload = i.onerror = res; i.src = '../game/assets/default/items/animal_' + a + '.svg'; imgs['animal_' + a] = i; });
+  });
+
+  function rows(S) {
+    var R = [];
+    R.push(COLORS.map(function (c) { return { kind: 'color', value: c, color: c }; }));
+    R.push(SHAPES.map(function (s, i) { return { kind: 'shape', value: s, shape: s, color: COLORS[i % 6] }; }));
+    R.push(SHAPES.map(function (s, i) { return { kind: 'shape', value: s, shape: s, color: COLORS[(i + 3) % 7] }; }));
+    R.push([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (n) { return { kind: 'dots', value: n, n: n }; }));
+    R.push([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (n) { return { kind: 'number', value: n, n: n, showDots: true }; }));
+    R.push([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (n) { return { kind: 'number', value: n, n: n }; }));
+    R.push(ANIMALS.map(function (a) { return { kind: 'animal', value: a, animal: a }; }));
+    R.push(['A', 'B', 'M', 'W', 'a', 'b', 'g', 'Đ', 'ă', 'ơ'].map(function (l) { return { kind: 'letter', value: l, text: l }; }));
+    R.push(['2+3', '5−2', '10−4', '7', 'odd', 'even', 'lẻ', 'chẵn'].map(function (t) { return { kind: 'text', value: t, text: t }; }));
+    R.push([{ kind: 'size', value: 'big', size: 'big', color: 'orange' }, { kind: 'size', value: 'small', size: 'small', color: 'orange' },
+            { kind: 'size', value: 'big', size: 'big', color: 'blue' }, { kind: 'size', value: 'small', size: 'small', color: 'blue' },
+            { kind: 'size', value: 'big', size: 'big', animal: 'elephant' }, { kind: 'size', value: 'small', size: 'small', animal: 'elephant' },
+            { kind: 'animal', value: 'zebra', animal: 'zebra' /* missing image → fallback */ }]);
+    return R;
+  }
+
+  function drawPanel(g, x0, y0, W, bg, label) {
+    var y = y0, pad = 18;
+    g.fillStyle = bg; g.fillRect(x0, y0, W, 99999);
+    [112, 84].forEach(function (S) {
+      var step = S + 22;
+      rows(S).forEach(function (row) {
+        row.forEach(function (b, i) {
+          var cx = x0 + pad + S / 2 + i * step, cy = y + 12 + S / 2;
+          // ground shadow so the cube sits
+          g.fillStyle = 'rgba(0,0,0,0.18)'; g.beginPath(); g.ellipse(cx, cy + S * BA.blockScale(b) / 2 + 3, S * 0.48 * BA.blockScale(b), 5, 0, 0, 7); g.fill();
+          g.save(); g.translate(cx, cy + (S - S * BA.blockScale(b)) / 2);   // small size block rests on the same line
+          BA.drawBlock(g, b, S, { dpr: DPR, img: img });
+          g.restore();
+        });
+        y += S + 28;
+      });
+      // states: glow 0.5 / 1, lift 1, glow+lift
+      var st = [{ glow: 0.5 }, { glow: 1 }, { lift: 1 }, { glow: 1, lift: 1 }, {}];
+      st.forEach(function (o, i) {
+        var cx = x0 + pad + S / 2 + 20 + i * (S + 50), cy = y + 30 + S / 2;
+        g.save(); g.translate(cx, cy); if (o.lift) g.scale(1.08, 1.08);
+        BA.drawBlock(g, { kind: 'color', value: 'blue', color: 'blue' }, S, { dpr: DPR, glow: o.glow, lift: o.lift, t: 0.3 });
+        g.restore();
+      });
+      y += S + 70;
+    });
+    // stickers at 128 and 60 px
+    var x = x0 + pad;
+    ANIMALS.forEach(function (a) { if (img('animal_' + a)) g.drawImage(img('animal_' + a), x, y, 128, 128); x += 136; });
+    y += 140; x = x0 + pad;
+    ANIMALS.forEach(function (a) { if (img('animal_' + a)) g.drawImage(img('animal_' + a), x, y, 60, 60); x += 70; });
+    // ghost hand, flowers, leaf pad, glow
+    g.save(); g.translate(x + 60, y + 6); BA.drawGhostHand(g, 90, 0.2); g.restore();
+    y += 110;
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (t, i) {
+      ['coral', 'cream', 'lilac'].forEach(function (h, j) { g.save(); g.translate(x0 + pad + 30 + i * 70, y + 20 + j * 60); BA.drawFlower(g, 44, t, h); g.restore(); });
+    });
+    g.save(); g.translate(x0 + 560, y + 110); BA.drawLeafPad(g, 420, 56);
+    g.translate(0, -42 - 2); BA.drawBlock(g, { kind: 'dots', value: 3, n: 3 }, 84, { dpr: DPR }); g.translate(110, 0); BA.drawBlock(g, { kind: 'animal', value: 'frog', animal: 'frog' }, 84, { dpr: DPR, img: img }); g.restore();
+    g.save(); g.translate(x0 + 900, y + 80); BA.drawGlow(g, 120, 80, 0, 1); g.strokeStyle = 'rgba(255,255,255,.4)'; g.strokeRect(-60, -40, 120, 80); g.restore();
+    y += 200;
+    return y - y0;
+  }
+
+  var DPR = +(qp.get('dpr') || 1);
+  Promise.all(loads).then(function () {
+    var cv = document.getElementById('c'), names = only ? [only] : Object.keys(PANELS);
+    var W = 1600, H = 3400 * names.length;
+    cv.width = W * DPR; cv.height = H * DPR; cv.style.width = W + 'px'; cv.style.height = H + 'px';
+    var g = cv.getContext('2d'); g.scale(DPR, DPR);
+    var y = 0;
+    names.forEach(function (n) { y += drawPanel(g, 0, y, W, PANELS[n], n); });
+    window.SHEET_H = y; window.SHEET_W = W;
+    document.title = 'done';
+  });
+})();
+</script></body></html>
