@@ -141,7 +141,7 @@
       const ok = await MS.Storage.set('img_' + slotId, data);
       if (!ok) throw new Error('Not enough room to save that picture. Try resetting another picture first.');
       // photos (opaque corners) look best as a round sticker; cut-outs with transparency stay whole
-      if (slot.kind === 'char') MS.Storage.set('shape_' + slotId, (await isOpaque(data)) ? 'circle' : 'fit');
+      if (slot.kind === 'char' && slotId !== 'crate') MS.Storage.set('shape_' + slotId, (await isOpaque(data)) ? 'circle' : 'fit');
       await this.loadCustom();
     },
     setShape(slotId, shape) {

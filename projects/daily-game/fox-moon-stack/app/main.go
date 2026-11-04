@@ -17,6 +17,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"sync"
 	"syscall"
 	"unsafe"
@@ -244,7 +245,7 @@ func main() {
 	})
 	if w == nil {
 		// WebView2 runtime missing (very rare on Windows 11): fall back to the default browser.
-		exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+		exec.Command("rundll32", "url.dll,FileProtocolHandler", strings.TrimSuffix(url, "?app=1")).Start()
 		messageBox("Juno's Moon Stack", "Juno's Moon Stack opened in your web browser.\n\nKeep this message open while you play; press OK to quit.\n\n(To play in its own window, install the free Microsoft Edge WebView2 Runtime.)")
 		return
 	}

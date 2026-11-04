@@ -74,7 +74,7 @@ function twinkles(R, n, y0, y1, col, rmin, rmax, avoid = []) {
   while (k < n) {
     const x = 20 + R() * (W - 40), y = y0 + R() * (y1 - y0), r = rmin + R() * (rmax - rmin);
     if (inCalm(x, y, 30) || avoid.some(([ax, ay, ar]) => Math.hypot(x - ax, y - ay) < ar)) continue;
-    s += circ(x, y, r * 1.6, col, op(0.12)) + pth(twinkle(x, y, r, 0.2), col, op(0.85)); k++;
+    s += pth(twinkle(x, y, r, 0.2), col, op(0.85)); k++;
   }
   return s;
 }

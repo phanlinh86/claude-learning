@@ -132,7 +132,7 @@
       if (this.autoRestart) setTimeout(() => this.startGame(), 50);
     },
 
-    best() { return parseInt(MS.Storage.get('best_' + this.difficulty(), '0'), 10) || 0; },
+    best(d) { return parseInt(MS.Storage.get('best_' + (d || this.difficulty()), '0'), 10) || 0; },
     resetBest() { DIFFS.forEach(d => MS.Storage.del('best_' + d)); },
     setSetting(k, v) {
       this.settings[k] = v;
@@ -182,7 +182,7 @@
         if (this.mode === 'playing') {
           if (DROP_KEYS.includes(e.code)) { e.preventDefault(); if (!e.repeat) this.drop(); return; }
         }
-        if (this.mode === 'over' && (e.code === 'Enter' || e.code === 'Space')) { e.preventDefault(); if (!e.repeat && this.canRestart()) this.startGame(); return; }
+        if (this.mode === 'over' && (e.code === 'Enter' || e.code === 'Space')) { const f = document.activeElement; if (f && f.tagName === 'BUTTON' && f.id !== 'btnAgain') return; e.preventDefault(); if (!e.repeat && this.canRestart()) this.startGame(); return; }
         if (this.mode === 'title' && ui === 'scrTitle' && e.code === 'Space') {
           const f = document.activeElement;
           if (f && f.tagName === 'BUTTON' && f.id !== 'btnPlay') return;

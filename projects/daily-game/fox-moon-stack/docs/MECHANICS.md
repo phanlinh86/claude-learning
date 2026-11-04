@@ -95,7 +95,7 @@ The result is a slow teeter for a crate just past the edge (about 0.6 s) and a q
 ### Difficulty (`CONFIG.difficulty`)
 | | swing × | crate × | perfectTol (×w) | hearts | inherit × | sway × | assist |
 |---|---|---|---|---|---|---|---|
-| easy | 0.72 | 1.15 | 0.22 | 4 | 0.5 | 0.65 | 0.4 |
+| easy | 0.6 | 1.35 | 0.22 | 5 | 0.5 | 0.65 | 0.6 |
 | normal | 1.0 | 1.0 | 0.13 | 3 | 1.0 | 1.0 | 0.15 |
 | hard | 1.22 | 0.9 | 0.085 | 3 | 1.15 | 1.25 | 0 |
 
@@ -168,3 +168,13 @@ Sims (20 seeds each, 960×540, up to 300 s):
 - **predictLanding()** returns `{x, dx, perfect, ok, landY, topX, topW, tol}`. The last three are extras for the drop guide.
 - **Test hook:** `world.setTower([dx…])` builds a tower of placed crates at rest offsets (px ×u from cx).
 - **Weather update.** Call `weather.update(dt, world.cam.y)` (lerped or not) and `weather.resize(VW, VH)` on layout changes.
+
+## 8. Changes after the playtest (2026-11-04)
+The high-speed playtest (`docs/reports/playtest.md`) found Easy too hard for a real 4–6-year-old (13 % cleared planet 1) and topples dominating Normal/Hard. Applied CONFIG changes (`tests/sim/results/proposal.patch`):
+- `difficulty.easy`: swing 0.72 → 0.6, crate 1.15 → 1.35, hearts 4 → 5, assist 0.4 → 0.6 (kid clears planet 1: 13 % → 55 % landscape, 85 % iPhone portrait).
+- `difficulty.normal`: perfectTol 0.13 → 0.15, assist 0.15 → 0.5 (topples per 100 drops 6.8 → 1.2).
+- `difficulty.hard`: perfectTol 0.085 → 0.11, assist 0 → 0.2 (perfect window 29 → 35 ms).
+- `loopGoal` 2 → 1, `loopTolMin` 0.7 → 0.8.
+- Easy: a miss no longer shrinks Juno, so children see the "grows bigger" twist.
+- Goal show is 0.4 s longer (`goalCamStart` 1.25, `rocketIn` 1.2, `rocketLand`/`goalCamEnd` 2.5, `goalTime` 3.0) so the flag is seen before the camera glides down; Juno flies into the rocket.
+The tables in §3–§5 above were measured before these changes.

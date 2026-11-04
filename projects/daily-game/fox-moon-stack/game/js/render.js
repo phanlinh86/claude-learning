@@ -219,7 +219,7 @@
           case 'grow': {
             this.growPulse = 1;
             const s = w.saucer;
-            this.say('Juno grows bigger!', L.cx, w.layout.saucerScreenY + w.cam.y + L.unit * 1.5, '#9ff5ea', 22, 'grow');
+            this.say('Juno grows bigger!', s.x, s.y - L.unit * 0.95 * s.scale, '#9ff5ea', 22, 'grow');
             if (wx) wx.burst('star', s.x, s.y, 12, { speed: 200 * u, life: 0.8, size: 14 * u, gravity: 100, layer: 'front' });
             break;
           }
@@ -227,8 +227,9 @@
           case 'combo': this.comboShow = 1.2; break;
           case 'goal': {
             this.flash = 0.55; this.flashCol = '#fff2c4';
+            this.texts = this.texts.filter(t => t.big ? t.key !== 'perfect' : t.t > 0.6);
             this.say('Planet done!', L.cx, w.layout.saucerScreenY + w.cam.y + L.unit * 1.4, '#ffe9a8', 30, 'goal');
-            this.pop('+' + e.bonus, e.x, e.y - L.unit * 0.3, '#ffd23f', 24);
+            this.pop('+' + e.bonus, e.x + L.unit * 0.9, e.y - L.unit * 0.3, '#ffd23f', 24);
             if (wx) wx.burst('star', e.x, e.y, 16, { speed: 260 * u, life: 1.0, size: 16 * u, gravity: 220, up: 0.5, layer: 'front' });
             break;
           }
@@ -375,15 +376,20 @@
       const p = w.predictLanding && w.predictLanding(); if (!p) return;
       const c = w.held, a = w.alpha || 0, hx = lerp(c.prevX, c.x, a), hy = lerp(c.prevY, c.y, a) + c.h / 2;
       const easy = w.difficulty === 'easy';
-      const col = !easy ? 'rgba(255,255,255,.55)' : p.perfect ? '#9dffb0' : p.ok ? '#ffffff' : '#ff8aa0';
+      const col = !easy ? 'rgba(255,255,255,.6)' : p.perfect ? '#ffe14d' : p.ok ? '#ffffff' : '#ff4d6d';
       const ly = w.tower.topY;
       g.save();
-      g.globalAlpha = 0.45 + 0.15 * Math.sin(this.time * 6);
-      g.setLineDash([4, 7]); g.lineWidth = 2; g.strokeStyle = col;
+      g.globalAlpha = 0.6 + 0.15 * Math.sin(this.time * 6);
+      g.setLineDash([4, 7]); g.lineWidth = 3; g.strokeStyle = col;
       g.beginPath(); g.moveTo(hx, hy + 4); g.lineTo(p.x, ly - 8); g.stroke(); g.setLineDash([]);
-      // landing shadow: a soft bar on top of the tower
-      g.globalAlpha = easy ? 0.5 : 0.3; g.fillStyle = col;
-      this._rr(g, p.x - c.w / 2, ly - 6, c.w, 6, 3); g.fill();
+      // landing shadow on top of the tower: solid bar = stays, dashed + ✕ = falls off, star = perfect (shape, not only colour)
+      g.globalAlpha = easy ? 0.85 : 0.4;
+      if (p.ok) { g.fillStyle = col; this._rr(g, p.x - c.w / 2, ly - 6, c.w, 6, 3); g.fill(); }
+      else {
+        g.setLineDash([8, 6]); g.lineWidth = 3; g.strokeStyle = col; this._rr(g, p.x - c.w / 2, ly - 6, c.w, 6, 3); g.stroke(); g.setLineDash([]);
+        if (easy) { const r = 7; g.beginPath(); g.moveTo(p.x - r, ly - 20 - r); g.lineTo(p.x + r, ly - 20 + r); g.moveTo(p.x + r, ly - 20 - r); g.lineTo(p.x - r, ly - 20 + r); g.lineWidth = 4; g.stroke(); }
+      }
+      if (easy && p.perfect) this._star(g, p.x, ly - 20, 11, col);
       g.restore();
     }
 
@@ -450,8 +456,16 @@
 
     drawSaucer(g, w, mode) {
       const s = w.saucer, L = w.layout, a = w.alpha || 0, A = MS.Assets, u = L.unit;
-      if (w.phase === 'travel' && w.phaseT > 0.5) return;
-      const x = lerp(s.prevX, s.x, a), y = lerp(s.prevY, s.y, a), sc = lerp(s.prevScale || s.scale, s.scale, a);
+      let x = lerp(s.prevX, s.x, a), y = lerp(s.prevY, s.y, a), sc = lerp(s.prevScale || s.scale, s.scale, a);
+      if (w.phase === 'goal' || w.phase === 'travel') {   // Juno flies down to the rocket and climbs in
+        const r = w.rocket, t = w.phase === 'goal' ? Math.max(0, w.phaseT - 2.5) : 0.5 + w.phaseT;
+        if (r) {
+          const k = clamp(t / 0.6, 0, 1), e = k * k * (3 - 2 * k);
+          const rx = lerp(r.prevX, r.x, a), ry = lerp(r.prevY, r.y, a) - u * 0.3;
+          x = lerp(x, rx, e); y = lerp(y, ry, e); sc *= 1 - 0.85 * e;
+          if (k >= 1) return;
+        }
+      }
       const S = u * JUNO_K * sc;
       // beam + held crate
       if (w.held) {
@@ -459,7 +473,7 @@
         const ex = x, ey = y + S * JUNO_EMIT, bh = hy - c.h / 2 - ey;
         const bim = this.spr('beam', 80, 120);
         if (bim && bh > 2) {
-          g.save(); g.globalAlpha = 0.75 + 0.2 * Math.sin(this.time * 9);
+          g.save(); g.globalCompositeOperation = 'lighter'; g.globalAlpha = 0.55 + 0.12 * Math.sin(this.time * 9);
           g.translate(ex, ey); g.rotate(Math.atan2(-(hx - ex), bh) * 0.8);
           g.drawImage(bim, -c.w * 0.55, 0, c.w * 1.1, bh + 4); g.restore();
         }
@@ -554,12 +568,23 @@
       g.lineJoin = 'round'; g.lineWidth = Math.max(2.5, size * 0.18); g.strokeStyle = 'rgba(14,10,44,.95)'; g.strokeText(txt, x, y);
       g.fillStyle = col; g.fillText(txt, x, y);
     }
+    /* Panels fade when Juno's saucer flies under them (and during the goal show), so she is never hidden. */
+    _fadeFor(w, x, y, wd, ht) {
+      if (w.phase === 'goal' || w.phase === 'travel') return 0.35;
+      const s = w.saucer, a = w.alpha || 0, S = w.layout.unit * JUNO_K * s.scale, camY = this.camY();
+      const sx = lerp(s.prevX, s.x, a), sy = lerp(s.prevY, s.y, a) - camY;
+      const l = sx - S * 0.45, r = sx + S * 0.45, t = sy - S * JUNO_CY, b = sy + S * 0.3;
+      return (r > x && l < x + wd && b > y && t < y + ht) ? 0.3 : 1;
+    }
     drawHud(g, w, mode) {
       const L = w.layout, K = Math.min(this._hudK, 1.25), I = this.ins, VW = this.VW;
-      const best = MS.Game ? MS.Game.best() : 0;
+      const best = MS.Game ? MS.Game.best(MS.Game.runDifficulty) : 0;
       const x0 = I.left + 12, top = I.top + 12, hb = this._hudBtn;
       // score + best + hearts (left)
       const pw = 190 * Math.min(K, 1.1);
+      this._hudA = this._hudA || [1, 1];
+      this._hudA[0] += (this._fadeFor(w, x0, top, pw, 98) - this._hudA[0]) * 0.15;
+      g.globalAlpha = this._hudA[0];
       this._panel(g, x0, top, pw, 98, 18);
       this._text(g, String(w.score), x0 + 16, top + 30, 32 * K, '#fff', 'left');
       this._text(g, 'Best ' + Math.max(best, w.score), x0 + 16, top + 58, 13 * K, '#ffd98a', 'left', '800');
@@ -575,6 +600,9 @@
       let cx, cy, cw;
       if (!L.portrait) { cw = clamp(right - (x0 + pw) - 24, 200, 320); cx = Math.max(x0 + pw + 12 + cw / 2, VW / 2); if (cx + cw / 2 > right) cx = right - cw / 2; cy = top; }
       else { cw = Math.min(VW - I.left - I.right - 24, 420); cx = VW / 2; cy = top + 108; }
+      g.globalAlpha = 1;
+      this._hudA[1] += (this._fadeFor(w, cx - cw / 2, cy, cw, 78) - this._hudA[1]) * 0.15;
+      g.globalAlpha = this._hudA[1];
       this._panel(g, cx - cw / 2, cy, cw, 78, 18);
       const info = ZONE_INFO[w.zone % 4];
       this._text(g, info.name + (w.loop ? ' ★' + (w.loop + 1) : ''), cx - cw / 2 + 14, cy + 18, 13 * K, info.color, 'left', '800');
@@ -589,16 +617,17 @@
       const gx0 = bx + 48 * Math.min(K, 1.1);
       for (let i = 0; i < 5; i++) {
         const on = w.grow >= 5 || i < w.growCoins, im = this.spr('coin_0', cs, cs);
-        g.globalAlpha = on ? 1 : 0.28;
+        g.globalAlpha = (on ? 1 : 0.28) * this._hudA[1];
         if (im) g.drawImage(im, gx0 + i * (cs + 4), gy - cs / 2, cs, cs);
       }
-      g.globalAlpha = 1;
+      g.globalAlpha = this._hudA[1];
       this._growAt = { x: gx0 + Math.min(4, w.growCoins) * (cs + 4) + cs / 2, y: gy };
       for (let i = 0; i < 5; i++) {
         const on = i < w.grow, sx = bx + bw - 8 - (4 - i) * 15;
         this._star(g, sx, gy, on ? 6.5 * (1 + (i === w.grow - 1 ? this.growPulse * 0.6 : 0)) : 5, on ? '#9ff5ea' : 'rgba(159,245,234,.25)');
       }
-      if (this.hintOn && mode === 'playing' && !this.banner) this._text(g, ZONE_INFO[0].hint, L.cx, w.tower.topY - this.camY() - L.unit * 1.25, 18 * K, '#fff', 'center', '800');
+      g.globalAlpha = 1;
+      if (this.hintOn && mode === 'playing' && !this.banner) this._text(g, ZONE_INFO[0].hint, L.cx, Math.min(this.VH - 24, L.groundY - this.camY() + (this.VH - L.groundY) * 0.5), 18 * K, '#fff', 'center', '800');
     }
     _star(g, x, y, r, col) {
       g.beginPath();
@@ -609,13 +638,13 @@
     drawBanner(g) {
       const b = this.banner, info = ZONE_INFO[b.s % 4], t = b.t, L = this.world.layout;
       const a = t < 0.3 ? t / 0.3 : t > 1.8 ? Math.max(0, (2.2 - t) / 0.4) : 1;
-      const cx = L.cx, y = L.saucerScreenY + L.unit * 1.75 - (1 - a) * 16;
-      const w = Math.min(this.VW - 40, 420), h = 86;
+      const h = 76, cx = L.cx, y = Math.min(this.VH - h / 2 - 6, L.groundY - this.camY() + (this.VH - L.groundY) * 0.5) - (1 - a) * 16;
+      const w = Math.min(this.VW - 40, 420);
       g.globalAlpha = a * 0.85;
       this._panel(g, cx - w / 2, y - h / 2, w, h, 22);
       g.globalAlpha = a;
-      this._text(g, info.name + (b.loop ? '  ★' + (b.loop + 1) : ''), cx, y - 16, 28, info.color, 'center');
-      this._text(g, 'Stack ' + b.goal + ' crates!', cx, y + 20, 18, '#fff', 'center', '800');
+      this._text(g, info.name + (b.loop ? '  ★' + (b.loop + 1) : ''), cx, y - 14, 26, info.color, 'center');
+      this._text(g, 'Stack ' + b.goal + ' crates!', cx, y + 18, 17, '#fff', 'center', '800');
       g.globalAlpha = 1;
     }
 

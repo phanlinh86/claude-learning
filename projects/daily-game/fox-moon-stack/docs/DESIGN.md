@@ -100,3 +100,11 @@ SFX: drop "whoop" (beam release), crate land thud (heavier with size), perfect "
 - Pointer Events: `pointerdown` on the stage (not on UI) drops. UI buttons fire on click; the ghost click is swallowed.
 - iOS: audio unlock in the first `touchend`; `visibilitychange` pauses and suspends audio; kid-proofing (no zoom, no rubber-band, no callouts, no text selection).
 - Home screen: `manifest.webmanifest` plus 180/192/512 PNG icons from `tools/render_mobile_icons.js`.
+
+## 9. Changes after build and QA (2026-11-04)
+- Coins: `world.coins` is the total; the live coin objects are `world.coinList`. `predictLanding()` also returns `topX, topW, tol`; `world.setTower([dx…])` is a test hook. Beam assist (`difficulty.assist`) pulls off-centre landings part-way back.
+- Playtest tuning (see MECHANICS §8): Easy 5 hearts, wider crates, slower swing; more assist on Normal/Hard; Easy never shrinks Juno.
+- HUD panels fade to 30 % while Juno's saucer flies under them (and during the goal show) instead of moving the saucer down (the play band is too short at 540 px).
+- Planet banner and first-play hint sit on the ground strip (never over the hanging crate). Drop guide on Easy: yellow star = perfect, solid white bar = stays, dashed red bar + ✕ = falls (shape as well as colour). Tractor beam drawn additive.
+- Sky stars lost their flat halo discs (looked like grey coins when scaled ×2.25 in portrait).
+- A custom crate picture defaults to "Whole picture" (round stickers don't fit a box).

@@ -1,0 +1,38 @@
+--- a/projects/daily-game/fox-moon-stack/tests/unit/run.js
++++ b/projects/daily-game/fox-moon-stack/tests/unit/run.js
+@@ -184,7 +184,7 @@
+ });
+ 
+ test('edge: off-centre but centre over the top → stays, combo breaks, tower sways (assist on Easy)', () => {
+-  const w = mk('hard');                    // hard: no beam assist → stays exactly where it touched
++  const w = mk('hard');                    // hard: a small beam assist → stays near where it touched
+   dropAt(w, 0); resolve(w);
+   dropAt(w, 0); resolve(w);
+   const top = w.tower.topX, dx = 0.38 * w.held.w;
+@@ -193,7 +193,7 @@
+   const e = of(ev, 'edge')[0]; assert.ok(e, types(ev).join(','));
+   near(e.dx, dx, 1e-6);
+   assert.ok(of(ev, 'comboBreak').length === 1 && w.combo === 0);
+-  const c = e.crate; near(c.x, top + dx, 1e-6); assert.strictEqual(c.state, 'placed');
++  const c = e.crate; near(c.tx, top + dx * (1 - C.difficulty.hard.assist), 1e-6); near(c.x, c.tx, 0.1); assert.strictEqual(c.state, 'placed');
+   let maxS = 0; for (let i = 0; i < 240; i++) { w.update(H); maxS = Math.max(maxS, Math.abs(w.tower.sway)); }
+   assert.ok(maxS > 5, 'sways ' + maxS);
+   // Easy: the beam pulls it 40 % back to the centre (smoothly)
+@@ -340,7 +340,7 @@
+   assert.ok(of(ev, 'spawn').length >= 1);
+   // gotoLevel jumps and emits levelUp; loops
+   w.gotoLevel(5); const e2 = w.drainEvents(); assert.strictEqual(of(e2, 'levelUp')[0].level, 5);
+-  assert.strictEqual(w.zone, 1); assert.strictEqual(w.loop, 1); assert.strictEqual(w.goal, 14);
++  assert.strictEqual(w.zone, 1); assert.strictEqual(w.loop, 1); assert.strictEqual(w.goal, C.planets[1].goal + C.loopGoal);
+ });
+ 
+ test('game over at 0 hearts (after the tumble), input ignored afterwards', () => {
+@@ -350,7 +350,7 @@
+   deq(types(ev).filter(t => ['miss', 'heartLost', 'gameOver'].includes(t)), ['miss', 'heartLost', 'gameOver']);
+   assert.strictEqual(w.phase, 'over'); assert.strictEqual(w.hearts, 0);
+   assert.strictEqual(w.drop(), false); run(w, 1); assert.strictEqual(w.stats.drops, 1);
+-  assert.strictEqual(mk('easy').hearts, 4); assert.strictEqual(mk('hard').maxHearts, 3);
++  assert.strictEqual(mk('easy').hearts, C.difficulty.easy.hearts); assert.strictEqual(mk('hard').maxHearts, 3);
+ });
+ 
+ test('drop buffer: a press during settle (≤ 0.25 s before the spawn) drops the next crate; older presses are ignored', () => {

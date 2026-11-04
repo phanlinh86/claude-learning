@@ -80,8 +80,8 @@
 
     // ---- camera ----
     camOmega: 5,            // rad/s  critically damped spring to the target: 90 % in ≈0.8 s, never overshoots
-    goalCamStart: 0.75,     // s      in the goal phase the camera starts gliding down with the rocket…
-    goalCamEnd: 2.05,       // s      …and reaches the ground when it touches down
+    goalCamStart: 1.25,     // s      in the goal phase the camera starts gliding down with the rocket…
+    goalCamEnd: 2.5,        // s      …and reaches the ground when it touches down
 
     // ---- saucer ----
     saucerGrow: 0.08,       // ×/step scale = 1 + 0.08·grow (DESIGN)
@@ -95,9 +95,9 @@
     dropBuffer: 0.25,       // s      a press while no crate is held is kept this long (one press only)
 
     // ---- goal sequence ----
-    goalTime: 2.6,          // s      flag rises, rocket glides in and lands
-    rocketIn: 0.75,         // s      rocket appears (top of screen) at this time…
-    rocketLand: 2.05,       // s      …and touches down here (decelerating like a retro-burn)
+    goalTime: 3.0,          // s      flag rises, rocket glides in and lands
+    rocketIn: 1.2,          // s      rocket appears (top of screen) at this time…
+    rocketLand: 2.5,        // s      …and touches down here (decelerating like a retro-burn)
     travelTime: 1.0,        // s      crates fade, rocket lifts off, then levelUp
     rocketAcc: 1400,        // px/s²  (×u) lift-off acceleration in travel
     heartReward: 1,         // —      hearts back on every new planet (up to max)
@@ -116,19 +116,21 @@
     loopSwing: 0.12,        // ×/loop saucer swings 12 % faster each round…
     loopSwingCap: 1.6,      // ×      …up to 60 % faster
     loopG: 0.06,            // ×/loop slightly heavier gravity each round
-    loopGoal: 2,            // crates more per round
+    loopGoal: 1,            // crates more per round (playtest: +2 made late planets 20+ crates and 75 s+; +1 keeps 45–60 s)
     loopTol: 0.06,          // ×/loop perfect zone shrinks 6 % per round…
-    loopTolMin: 0.7,        // ×      …to at least 70 %
+    loopTolMin: 0.8,        // ×      …to at least 80 % (playtest: 70 % left Hard 1–2-frame perfect windows)
 
     // ---- per difficulty (Easy is tuned for a 6-year-old) ----
     difficulty: {
-      easy:   { swing: 0.72, crate: 1.15, perfectTol: 0.22,  hearts: 4, inherit: 0.5,  sway: 0.65, assist: 0.4 },
-      normal: { swing: 1.0,  crate: 1.0,  perfectTol: 0.13,  hearts: 3, inherit: 1.0,  sway: 1.0,  assist: 0.15 },
-      hard:   { swing: 1.22, crate: 0.9,  perfectTol: 0.085, hearts: 3, inherit: 1.15, sway: 1.25, assist: 0 }
+      easy:   { swing: 0.6,  crate: 1.35, perfectTol: 0.22,  hearts: 5, inherit: 0.5,  sway: 0.65, assist: 0.6 },
+      normal: { swing: 1.0,  crate: 1.0,  perfectTol: 0.15,  hearts: 3, inherit: 1.0,  sway: 1.0,  assist: 0.5 },
+      hard:   { swing: 1.22, crate: 0.9,  perfectTol: 0.11,  hearts: 3, inherit: 1.15, sway: 1.25, assist: 0.2 }
     },
     //  swing = × planet swingW · crate = × crate size · perfectTol = |dx| ≤ tol·w is perfect · hearts at start/max
     //  inherit = × CONFIG.inherit · sway = × sway kicks · assist = share of an off-centre landing the beam
-    //  pulls back toward the centre (the crate slides in over ≈0.12 s; Easy forgives lean, Hard is raw physics)
+    //  pulls back toward the centre (the crate slides in over ≈0.12 s; Easy forgives lean, Hard is nearly raw physics)
+    //  Playtest 2026-11-04 (tests/sim, docs/reports/playtest.md): Easy stay window 302 → 433 ms for 4–6-year-olds;
+    //  Normal/Hard assist so centre-of-mass topples are ~30 % / ~50 % of heart losses instead of 67 %.
 
     // ---- planets (zone = level % 4) ----
     planets: [
@@ -595,7 +597,7 @@
     this.stats.misses++;
     this._breakCombo();
     this._emit({ type: 'miss', crate: c });
-    if (this.grow > 0) { this.grow--; this._emit({ type: 'shrink', grow: this.grow }); }
+    if (this.grow > 0 && this.difficulty !== 'easy') { this.grow--; this._emit({ type: 'shrink', grow: this.grow }); }
     this._loseHeart();
     this._enterSettle(CONFIG.missSettle);
   };

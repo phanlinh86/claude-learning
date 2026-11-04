@@ -184,7 +184,7 @@ test('perfect: within perfectTol·w snaps to the top centre, combo +1, light swa
 });
 
 test('edge: off-centre but centre over the top → stays, combo breaks, tower sways (assist on Easy)', () => {
-  const w = mk('hard');                    // hard: no beam assist → stays exactly where it touched
+  const w = mk('hard');                    // hard: a small beam assist → stays near where it touched
   dropAt(w, 0); resolve(w);
   dropAt(w, 0); resolve(w);
   const top = w.tower.topX, dx = 0.38 * w.held.w;
@@ -193,7 +193,7 @@ test('edge: off-centre but centre over the top → stays, combo breaks, tower sw
   const e = of(ev, 'edge')[0]; assert.ok(e, types(ev).join(','));
   near(e.dx, dx, 1e-6);
   assert.ok(of(ev, 'comboBreak').length === 1 && w.combo === 0);
-  const c = e.crate; near(c.x, top + dx, 1e-6); assert.strictEqual(c.state, 'placed');
+  const c = e.crate; near(c.tx, top + dx * (1 - C.difficulty.hard.assist), 1e-6); near(c.x, c.tx, 0.1); assert.strictEqual(c.state, 'placed');
   let maxS = 0; for (let i = 0; i < 240; i++) { w.update(H); maxS = Math.max(maxS, Math.abs(w.tower.sway)); }
   assert.ok(maxS > 5, 'sways ' + maxS);
   // Easy: the beam pulls it 40 % back to the centre (smoothly)
@@ -328,10 +328,11 @@ test('goal → flag → rocket → travel → levelUp: fresh tower on the next p
   const ev = []; const at = {}; let t = 0;
   for (let i = 0; i < 120 * 6; i++) { w.update(H); t += H; for (const e of w.drainEvents()) { ev.push(e); if (!(e.type in at)) at[e.type] = t; } if (w.level === 1 && w.phase === 'swing' && t > at.levelUp) break; }
   const seq = types(ev).filter(x => ['land', 'goal', 'rocket', 'levelUp'].includes(x));
+  const CFG_ROCKET = MS.World.CONFIG.rocketLand, CFG_LEVELUP = MS.World.CONFIG.goalTime + MS.World.CONFIG.travelTime;   // timings from CONFIG (goal → rocket → travel)
   deq(seq, ['land', 'goal', 'rocket', 'levelUp']);
   const goal = of(ev, 'goal')[0]; assert.strictEqual(goal.bonus, 100);
-  assert.ok(at.rocket - at.goal > 1.5 && at.rocket - at.goal < 2.3, 'rocket after ' + (at.rocket - at.goal));
-  assert.ok(at.levelUp - at.goal > 3.2 && at.levelUp - at.goal < 3.9, 'levelUp after ' + (at.levelUp - at.goal));
+  assert.ok(Math.abs(at.rocket - at.goal - CFG_ROCKET) < 0.15, 'rocket after ' + (at.rocket - at.goal));
+  assert.ok(Math.abs(at.levelUp - at.goal - CFG_LEVELUP) < 0.4, 'levelUp after ' + (at.levelUp - at.goal));
   const lu = of(ev, 'levelUp')[0]; assert.strictEqual(lu.level, 1); assert.strictEqual(lu.zone, 1);
   assert.strictEqual(w.level, 1); assert.strictEqual(w.zone, 1); assert.strictEqual(w.placed, 0); assert.strictEqual(w.tower.list.length, 0);
   assert.strictEqual(w.goal, 12); assert.strictEqual(w.hearts, 3); assert.ok(w.held && w.phase === 'swing');
@@ -340,7 +341,7 @@ test('goal → flag → rocket → travel → levelUp: fresh tower on the next p
   assert.ok(of(ev, 'spawn').length >= 1);
   // gotoLevel jumps and emits levelUp; loops
   w.gotoLevel(5); const e2 = w.drainEvents(); assert.strictEqual(of(e2, 'levelUp')[0].level, 5);
-  assert.strictEqual(w.zone, 1); assert.strictEqual(w.loop, 1); assert.strictEqual(w.goal, 14);
+  assert.strictEqual(w.zone, 1); assert.strictEqual(w.loop, 1); assert.strictEqual(w.goal, C.planets[1].goal + C.loopGoal);
 });
 
 test('game over at 0 hearts (after the tumble), input ignored afterwards', () => {
@@ -350,7 +351,7 @@ test('game over at 0 hearts (after the tumble), input ignored afterwards', () =>
   deq(types(ev).filter(t => ['miss', 'heartLost', 'gameOver'].includes(t)), ['miss', 'heartLost', 'gameOver']);
   assert.strictEqual(w.phase, 'over'); assert.strictEqual(w.hearts, 0);
   assert.strictEqual(w.drop(), false); run(w, 1); assert.strictEqual(w.stats.drops, 1);
-  assert.strictEqual(mk('easy').hearts, 4); assert.strictEqual(mk('hard').maxHearts, 3);
+  assert.strictEqual(mk('easy').hearts, C.difficulty.easy.hearts); assert.strictEqual(mk('hard').maxHearts, 3);
 });
 
 test('drop buffer: a press during settle (≤ 0.25 s before the spawn) drops the next crate; older presses are ignored', () => {
