@@ -71,7 +71,7 @@ Units: px (logical, y down) and s. CONFIG lengths are in **units** (`layout.unit
 ### Difficulty (`CONFIG.difficulty`)
 | | speed | hearts | reaction | gaps | gapShare | extra calm | catchK | hitK | wrong / hit breaks combo | safeStart |
 |---|---|---|---|---|---|---|---|---|---|---|
-| easy | ×0.78 | 5 | 1.4 s | 0.8–1.4 u | 30 % | 0.5–1.6 s | ×1.35 | ×0.8 | no / no | 3 s |
+| easy | ×0.78 | 5 | 1.8 s | 0.8–1.4 u | 30 % | 0.8–2.0 s | ×1.35 | ×0.6 | no / no | 3 s |
 | normal | ×1.0 | 3 | 0.95 s | 0.8–1.9 u | 45 % | 0.2–1.1 s | ×1 | ×1 | yes / yes | 2 s |
 | hard | ×1.15 | 3 | 0.7 s | 1.0–2.2 u | 50 % | 0.05–0.8 s | ×1 | ×1.05 | yes / yes | 2 s |
 
@@ -161,3 +161,8 @@ Front-layer ambient particles are small, at most alpha 0.5, and never glowing co
 - **Events**: `land.speed` ≈ 960 for a full flip and smaller for a stumble (scale the clank). A bump or fall on Normal/Hard also emits `comboBreak` when the combo was ≥ 2 (Easy keeps the combo). `gotoLevel` emits `levelUp` with `bonus: 0`.
 - `setLayout(w, h)` keeps everything at the same place in units (x scaled by the unit ratio, y kept relative to the corridor mid-line). It zeroes the lerp and generates ahead for wider screens. Call it on every resize or rotate.
 - `setTrack(spec)` (tests): x in units relative to Bolt. `{roofs:[[a,b]], rails:[[a,b]], obstacles:[{kind, variant, x}], fireflies:[{x, side:'floor'|'ceil'|'mid', dy, color}], gates:[{x, color}], finish}`. It turns the generator off.
+
+## 9. Changes after QA (2026-11-05)
+- Playtest (docs/reports/playtest.md): Easy `reaction` 1.4 → 1.8 s, `extra` [0.5, 1.6] → [0.8, 2.0] s, `hitK` 0.8 → 0.6 (the kid model now finishes Dawn 93 % / Noon 52 %); firefly lines are one colour each (`gen.lineMono`), so reading the colour now pays off.
+- Visual QA: the fall line is capped to stay on screen (`_fallY`: ≤ height − 0.45 u, ≥ 0.75 u), the dangle is clamped on screen and `catchDamp` 8 → 18, so the whole drone rescue is visible on 16:9.
+- Portrait `midY` 0.50·h → 0.47·h (less empty sky above the rail).

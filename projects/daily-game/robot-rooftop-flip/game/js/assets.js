@@ -192,7 +192,9 @@
       this._wt = ric(dl => {
         this._wt = 0;
         do {
-          const [key, w, h, ck] = this._wq.shift();
+          const it = this._wq.shift();
+          if (!it) break;   // setScale() may have emptied the queue while this callback was pending
+          const [key, w, h, ck] = it;
           if (this._cache.has(ck)) continue;
           const c = this._raster(key, w, h, ck);
           // force the recorded SVG draw to actually rasterize now (canvas 2D defers work until the canvas is read)

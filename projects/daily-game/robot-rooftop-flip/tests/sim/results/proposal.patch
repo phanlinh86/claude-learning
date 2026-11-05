@@ -1,0 +1,23 @@
+diff --git a/projects/daily-game/robot-rooftop-flip/game/js/world.js b/projects/daily-game/robot-rooftop-flip/game/js/world.js
+--- a/projects/daily-game/robot-rooftop-flip/game/js/world.js
++++ b/projects/daily-game/robot-rooftop-flip/game/js/world.js
+@@ -109,16 +109,16 @@
+       maxGapUnit: 2.2       // unit   widest gap anywhere
+     },
+ 
+-    // ---- per difficulty (Easy is tuned for a 6-year-old) ----
++    // ---- per difficulty (Easy is tuned for a 4–6-year-old: playtest docs/reports/playtest.md) ----
+     difficulty: {
+-      easy:   { speed: 0.78, hearts: 5, reaction: 1.4,  gapMin: 0.8, gapMax: 1.4, gapShare: 0.30, extra: [0.5, 1.6], catchK: 1.35, hitK: 0.8,  wrongBreaks: false, hitBreaks: false, safeStart: 3.0 },
++      easy:   { speed: 0.78, hearts: 5, reaction: 1.8,  gapMin: 0.8, gapMax: 1.4, gapShare: 0.30, extra: [0.8, 2.0], catchK: 1.35, hitK: 0.6,  wrongBreaks: false, hitBreaks: false, safeStart: 3.0 },
+       normal: { speed: 1.0,  hearts: 3, reaction: 0.95, gapMin: 0.8, gapMax: 1.9, gapShare: 0.45, extra: [0.2, 1.1], catchK: 1.0,  hitK: 1.0,  wrongBreaks: true,  hitBreaks: true,  safeStart: 2.0 },
+       hard:   { speed: 1.15, hearts: 3, reaction: 0.7,  gapMin: 1.0, gapMax: 2.2, gapShare: 0.5,  extra: [0.05, 0.8], catchK: 1.0, hitK: 1.05, wrongBreaks: true,  hitBreaks: true,  safeStart: 2.0 }
+     },
+     //  speed = × zone speed · reaction = s the player gets between two forced flips (on top of the flight) ·
+     //  gapMin/Max = gap width (unit) · gapShare = share of hazards that are gaps (the rest are vents/signs: you
+     //  can see them coming better) · extra = s of random calm added after each hazard · catchK = × catch radius ·
+-  //  hitK = × obstacle hit box (Easy forgives a late flip by ≈0.1 u) ·
++  //  hitK = × obstacle hit box (Easy 0.6: a flip that grazes a corner, or a tap a bit late, is forgiven; running into it still bumps) ·
+     //  wrongBreaks = a wrong-colour firefly resets the combo · hitBreaks = a bump/fall resets the combo ·
+     //  safeStart = s of an empty track at the start of a run / after gotoLevel
+ 

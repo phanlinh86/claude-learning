@@ -66,7 +66,7 @@
     carry: 0.9,             // s      …carries him (≥ 0.9 s, longer if the next safe spot is further)…
     droneOut: 0.6,          // s      …drops him and flies off ahead
     hang: 0.72,             // unit   drone body centre ↔ Bolt's body centre while carried (rope + hook)
-    catchDamp: 8,           // 1/s    Bolt's fall speed is damped out while the drone reaches him (he dangles, no snap)
+    catchDamp: 18,          // 1/s    Bolt's fall speed is damped out while the drone reaches him (he dangles, no snap)
     rescueAhead: 1.6,       // unit   the drop spot needs this much clear surface ahead (+ half a reaction)
 
     // ---- scoring ----
@@ -106,19 +106,20 @@
       match: 0.65,          // —      share of fireflies in Bolt's colour (DESIGN ≈65 %)
       arcMatch: 0.8,        // —      fireflies on a flip arc are a reward: mostly matching
       arcLead: 0.45,        // unit   the arc starts this far before the latest flip point (where a good player flips)
+      lineMono: true,       // —      a firefly line is ONE colour (like a cluster), so the player can read it and pick a surface
       maxGapUnit: 2.2       // unit   widest gap anywhere
     },
 
-    // ---- per difficulty (Easy is tuned for a 6-year-old) ----
+    // ---- per difficulty (Easy is tuned for a 4–6-year-old: playtest docs/reports/playtest.md) ----
     difficulty: {
-      easy:   { speed: 0.78, hearts: 5, reaction: 1.4,  gapMin: 0.8, gapMax: 1.4, gapShare: 0.30, extra: [0.5, 1.6], catchK: 1.35, hitK: 0.8,  wrongBreaks: false, hitBreaks: false, safeStart: 3.0 },
+      easy:   { speed: 0.78, hearts: 5, reaction: 1.8,  gapMin: 0.8, gapMax: 1.4, gapShare: 0.30, extra: [0.8, 2.0], catchK: 1.35, hitK: 0.6,  wrongBreaks: false, hitBreaks: false, safeStart: 3.0 },
       normal: { speed: 1.0,  hearts: 3, reaction: 0.95, gapMin: 0.8, gapMax: 1.9, gapShare: 0.45, extra: [0.2, 1.1], catchK: 1.0,  hitK: 1.0,  wrongBreaks: true,  hitBreaks: true,  safeStart: 2.0 },
       hard:   { speed: 1.15, hearts: 3, reaction: 0.7,  gapMin: 1.0, gapMax: 2.2, gapShare: 0.5,  extra: [0.05, 0.8], catchK: 1.0, hitK: 1.05, wrongBreaks: true,  hitBreaks: true,  safeStart: 2.0 }
     },
     //  speed = × zone speed · reaction = s the player gets between two forced flips (on top of the flight) ·
     //  gapMin/Max = gap width (unit) · gapShare = share of hazards that are gaps (the rest are vents/signs: you
     //  can see them coming better) · extra = s of random calm added after each hazard · catchK = × catch radius ·
-  //  hitK = × obstacle hit box (Easy forgives a late flip by ≈0.1 u) ·
+  //  hitK = × obstacle hit box (Easy 0.6: a flip that grazes a corner, or a tap a bit late, is forgiven; running into it still bumps) ·
     //  wrongBreaks = a wrong-colour firefly resets the combo · hitBreaks = a bump/fall resets the combo ·
     //  safeStart = s of an empty track at the start of a run / after gotoLevel
 
@@ -154,7 +155,7 @@
     w = +w || 960; h = +h || 540;
     var portrait = h > w;
     var unit = portrait ? M.min(w / 6, h / 8) : M.min(w / 9.6, h / 5.4);
-    var midY = portrait ? 0.5 * h : 0.53 * h;
+    var midY = portrait ? 0.47 * h : 0.53 * h;   // portrait: a little higher, less empty sky above the rail
     var ceilY = midY - 1.45 * unit, floorY = midY + 1.45 * unit;
     return { width: w, height: h, portrait: portrait, unit: unit, midY: midY, ceilY: ceilY, floorY: floorY,
       corridorH: floorY - ceilY, heroX: portrait ? 0.22 * w : 0.26 * w };
@@ -454,7 +455,12 @@
       var y = this.standY(side), ok = true, i;
       for (i = 0; i < n && ok; i++) ok = this._ffOk(x0 + i * CONFIG.ff.spacing * u, y);
       if (!ok) continue;
-      for (i = 0; i < n; i++) { var x = x0 + i * CONFIG.ff.spacing * u; this._addFF(x, y, this._ffColor(x, CONFIG.gen.match)); }
+      var mono = CONFIG.gen.lineMono, lc = -1;
+      if (mono) {
+        if (this._colorAt(x0) !== this._colorAt(x0 + len)) continue;   // never straddle a paint gate
+        lc = this._ffColor(x0, CONFIG.gen.match);
+      }
+      for (i = 0; i < n; i++) { var x = x0 + i * CONFIG.ff.spacing * u; this._addFF(x, y, mono ? lc : this._ffColor(x, CONFIG.gen.match)); }
       return;
     }
   };
@@ -603,8 +609,8 @@
       if (h.y > L.floorY + 4 * u || h.y < L.ceilY - 4 * u) h.vy = 0;
       return;
     }
-    if (h.y > L.floorY + CONFIG.fallOut * u) this._fall('floor');
-    else if (h.y < L.ceilY - CONFIG.fallOut * u) this._fall('ceil');
+    if (h.y > this._fallY('floor')) this._fall('floor');
+    else if (h.y < this._fallY('ceil')) this._fall('ceil');
   };
 
   World.prototype._collide = function () {
@@ -642,6 +648,13 @@
   };
 
   // ------------------------------------------------------------------ fall + drone rescue
+  /** y past which Bolt has left the corridor. Capped so the fall and the rescue stay on screen (16:9 is only
+   *  540 tall: floorY + 1.3 u would be below the bottom edge) and clear of the HUD at the top. */
+  World.prototype._fallY = function (side) {
+    var L = this.layout, u = L.unit;
+    return side === 'floor' ? M.min(L.floorY + CONFIG.fallOut * u, L.height - 0.45 * u)
+                            : M.max(L.ceilY - CONFIG.fallOut * u, 0.75 * u);
+  };
   World.prototype._fall = function (fromSide) {
     var h = this.hero;
     this.stats.falls++;
@@ -681,6 +694,8 @@
     if (d.state === 'in') {
       h.vy *= M.exp(-CONFIG.catchDamp * dt);                 // he dangles to a stop as the drone reaches him
       h.y += h.vy * dt;
+      var lo = L.height - 0.4 * u, hi = 0.7 * u;            // …and never dangles off screen
+      if (h.y > lo) { h.y = lo; h.vy = 0; } else if (h.y < hi) { h.y = hi; h.vy = 0; }
       var e = smooth(d.t / CONFIG.droneIn);
       d.x = this.cam.x + lerp(R.sx, L.heroX, e);
       d.y = lerp(R.sy, h.y + R.hs * hang, e);

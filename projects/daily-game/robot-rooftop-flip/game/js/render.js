@@ -179,7 +179,11 @@
     }
     drawSceneBack(g, b, alpha, camX) {
       const bg = this.background(b);
-      if (bg.custom) { g.globalAlpha = alpha; g.drawImage(bg.sky, 0, 0); g.globalAlpha = 1; return; }
+      if (bg.custom) {
+        g.globalAlpha = alpha; g.drawImage(bg.sky, 0, 0);
+        if (this.world) { const L = this.world.layout, px = this.px; g.globalAlpha = alpha * 0.22; g.fillStyle = '#0a0c24'; g.fillRect(0, L.ceilY * px, this.canvas.width, L.corridorH * px); }
+        g.globalAlpha = 1; return;
+      }
       this._blitTile(g, bg.sky, camX * 0.02 + this.time * 2, alpha);
       this._blitTile(g, bg.far, camX * 0.12, alpha);
       this._blitTile(g, bg.mid, camX * 0.35, alpha);
@@ -208,20 +212,20 @@
             const x = this._sx(e.x), c = e.ff ? e.ff.color : h.color;
             if (wx) wx.burst('bit_' + COLORS[c], x, e.y, 7, { speed: 150 * u, life: 0.55, size: 12 * u, gravity: 80, layer: 'front', scroll: 0.6 });
             this.ring(x, e.y, COL[c], 0.35, 26 * u, 3);
-            this.pop('+' + e.points, x + 6 * u, e.y - 26 * u, COL[c], 17);
+            this.pop('+' + e.points, x + 46 * u, e.y - 18 * u, COL[c], 17);
             break;
           }
           case 'wrong': {
             const x = this._sx(e.ff.x);
-            this.pop('✕', x, e.ff.y - 20 * u, '#ffffff', 18);
+            this.pop('✕', x + 30 * u, e.ff.y - 16 * u, '#ffffff', 18);
             this._wrongN = (this._wrongN || 0) + 1;
             if (this._wrongN <= 3 || this._wrongN % 6 === 0) this.say('Not my colour!', this._sayX(), this._sayY(), '#ffffff', 20, 'wrong');
             break;
           }
-          case 'combo': this.multShow = 1.2; this.say('×' + e.mult + ' Glow streak!', this._sayX(), this._sayY(), '#fff2a8', 24, 'combo'); break;
+          case 'combo': this.multShow = 1.2; this.say('×' + e.mult + ' Glow streak!', this.VW / 2, this._lowY() - 12, '#fff2a8', 24, 'combo'); break;
           case 'comboBreak': this.multShow = 0.6; break;
           case 'gate': {
-            this.colorPulse = 1; this.flash = 0.35; this.flashCol = COL[e.color];
+            this.colorPulse = 1; this.flash = 0.12; this.flashCol = COL[e.color];
             this.say(COL_NAME[e.color] + '!', this._sayX(), this._sayY(), COL[e.color], 28, 'gate');
             if (wx) wx.burst('bit_' + COLORS[e.color], L.heroX, h ? h.y : L.midY, 12, { speed: 200 * u, life: 0.7, size: 13 * u, gravity: 0, layer: 'front', scroll: 0.3 });
             break;
@@ -252,8 +256,11 @@
       }
     }
     /* Big callouts float in the middle of the corridor ahead of Bolt, never on top of him. */
-    _sayX() { const L = this.world.layout; return Math.min(this.VW - 120, L.heroX + Math.max(2.6 * L.unit, (this.VW - L.heroX) * 0.42)); }
-    _sayY() { return this.world.layout.midY; }
+    _sayX() { const L = this.world.layout; return Math.min(this.VW - 100, L.heroX + 1.5 * L.unit); }
+    _sayY() {   // beside Bolt, on the open side of the corridor (above him on the roof, below him on the rail)
+      const w = this.world, L = w.layout, h = w.hero;
+      return h && h.grav < 0 ? Math.min(L.floorY - 0.5 * L.unit, h.y + 1.0 * L.unit) : Math.max(L.ceilY + 0.5 * L.unit, h.y - 1.0 * L.unit);
+    }
     _quiet() { return RF.Game && RF.Game.mode === 'title'; }   // the title demo stays calm behind the menu
     ring(x, y, col, life, r, wdt) {
       if (this._quiet()) return; this.fx.push({ kind: 'ring', x, y, col, t: 0, life, r, w: wdt || 3 }); if (this.fx.length > 40) this.fx.shift(); }
@@ -454,17 +461,17 @@
         const tw = 0.75 + 0.25 * Math.sin(this.time * 6 + f.id * 1.7);
         // glow (brighter at night, and for Bolt's own colour)
         g.globalCompositeOperation = 'lighter';
-        g.globalAlpha = al * tw * (night ? 0.95 : 0.7) * (match ? 1 : 0.6);
-        const gr = (match ? 0.62 : 0.48) * u * k;
+        g.globalAlpha = al * tw * (match ? (night ? 0.95 : 0.75) : 0.35);
+        const gr = (match ? 0.62 : 0.42) * u * k;
         g.drawImage(this._glowSpr(f.color, 0.62 * u), x - gr, y - gr, gr * 2, gr * 2);
         g.globalCompositeOperation = 'source-over';
         g.globalAlpha = al;
-        const s = S * k * (match ? 1.06 : 0.92);
+        const s = S * k * (match ? 1.06 : 0.88) * (f.color === 1 ? 1.15 : 1);
         if (custom) {
           const im = this.spr('custom:firefly', s, s);
           g.beginPath(); g.arc(x, y, s * 0.55, 0, TAU); g.fillStyle = COL[f.color]; g.fill();
           if (im) g.drawImage(im, x - s * 0.45, y - s * 0.45, s * 0.9, s * 0.9);
-          symbolPath(g, f.color, x + s * 0.38, y + s * 0.34, s * 0.2);
+          symbolPath(g, f.color, x + s * 0.4, y + s * 0.36, s * 0.32);
           g.fillStyle = COL[f.color]; g.fill(); g.lineWidth = 1.5; g.strokeStyle = '#fff'; g.stroke();
         } else {
           const fr = Math.floor(this.time * 14 + f.id) % 2;
@@ -503,18 +510,30 @@
       const h = w.hero, L = w.layout, u = L.unit, a = w.alpha || 0;
       const x = lerp(h.prevX, h.x, a), y = lerp(h.prevY, h.y, a), ft = lerp(h.prevFlipT, h.flipT, a);
       const S = u * BOLT_K;
-      // blink while safe after a bump
-      if (h.invuln > 0 && w.phase !== 'over' && Math.floor(this.time * 10) % 2 === 0) g.globalAlpha = 0.45;
-      // turn-over: vertical scale through ±0.18 plus a tilt (nose leads in the direction of travel)
+      const blink = h.invuln > 0 && w.phase !== 'over' && Math.floor(this.time * 10) % 2 === 0;
+      if (blink) g.globalAlpha = 0.55;
+      // turn-over: vertical scale through ±0.42 (sign flips in one frame) plus a tilt: the nose leads the way
       let sy = Math.cos(Math.PI * ft);
-      if (Math.abs(sy) < 0.18) sy = sy < 0 ? -0.18 : 0.18;
+      if (Math.abs(sy) < 0.42) sy = ft < 0.5 ? 0.42 : -0.42;
       const going = h.grav < 0 ? -1 : 1;
-      const tilt = -Math.sin(Math.PI * ft) * 0.55 * going + (h.knock || 0) * Math.sin(this.time * 30) * 0.12;
-      const sq = h.squash || 0;
+      const tilt = Math.sin(Math.PI * ft) * 0.45 * going + (h.knock || 0) * Math.sin(this.time * 30) * 0.12;
+      const sq = h.squash || 0, foot = BOLT_STAND * u;
+      const hop = h.bumpT != null && h.bumpT < 0.45 ? Math.sin(h.bumpT / 0.45 * Math.PI) * 0.22 * u : 0;
+      // a soft ring of Bolt's colour under his paws (the colour cue a small child sees first)
+      if (h.grounded && h.state !== 'rescue') {
+        const ry = h.side === 'ceil' ? L.ceilY : L.floorY;
+        g.save(); g.globalCompositeOperation = 'lighter'; g.globalAlpha = (blink ? 0.5 : 0.9) * (0.75 + 0.25 * Math.sin(this.time * 5));
+        g.translate(x, ry); g.scale(1, 0.28);
+        g.drawImage(this._glowSpr(h.color, 0.6 * u), -0.6 * u, -0.6 * u, 1.2 * u, 1.2 * u);
+        g.restore();
+        g.globalAlpha = blink ? 0.55 : 1;
+      }
       g.save();
-      g.translate(x, y);
+      g.translate(x, y - hop * (h.grav < 0 ? -1 : 1));
       g.rotate(tilt);
-      g.scale(1 + sq * 0.16, sy * (1 - sq * 0.16));
+      g.scale(1, sy);
+      // landing squash pivots on the feet line, so the paws stay on the surface
+      g.translate(0, foot); g.scale(1 + sq * 0.16, 1 - sq * 0.16); g.translate(0, -foot);
       // shadow-ish contact glow on the surface (only when standing)
       const custom = RF.Assets.hasCustom('hero');
       const air = !h.grounded || h.state === 'rescue';
@@ -546,12 +565,12 @@
         const cx = (60 - 64) / 128 * S, cy = topY + 82 / 128 * S, r = 10 / 128 * S;
         const pulse = 1 + this.colorPulse * 0.5;
         g.globalCompositeOperation = 'lighter';
-        const gl = this._glowSpr(h.color, 0.4 * u), gr = r * 2.6 * pulse;
-        g.globalAlpha *= 0.85;
+        const gl = this._glowSpr(h.color, 0.4 * u), gr = r * 3.4 * pulse;
+        g.globalAlpha *= 0.95;
         g.drawImage(gl, cx - gr, cy - gr, gr * 2, gr * 2);
         g.globalCompositeOperation = 'source-over';
-        g.globalAlpha = (h.invuln > 0 && w.phase !== 'over' && Math.floor(this.time * 10) % 2 === 0) ? 0.45 : 1;
-        symbolPath(g, h.color, cx, cy + r * 0.05, r * 0.72 * pulse);
+        g.globalAlpha = blink ? 0.55 : 1;
+        symbolPath(g, h.color, cx, cy + r * 0.05, r * 1.0 * pulse);
         g.fillStyle = COL[h.color]; g.fill();
         g.lineWidth = 1.2; g.strokeStyle = '#ffffff'; g.stroke();
       }

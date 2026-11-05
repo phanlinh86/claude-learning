@@ -1,0 +1,25 @@
+diff --git a/projects/daily-game/robot-rooftop-flip/game/js/world.js b/projects/daily-game/robot-rooftop-flip/game/js/world.js
+--- a/projects/daily-game/robot-rooftop-flip/game/js/world.js
++++ b/projects/daily-game/robot-rooftop-flip/game/js/world.js
+@@ -106,6 +106,7 @@
+       match: 0.65,          // —      share of fireflies in Bolt's colour (DESIGN ≈65 %)
+       arcMatch: 0.8,        // —      fireflies on a flip arc are a reward: mostly matching
+       arcLead: 0.45,        // unit   the arc starts this far before the latest flip point (where a good player flips)
++      lineMono: true,       // —      a firefly line is ONE colour (like a cluster), so the player can read it and pick a surface
+       maxGapUnit: 2.2       // unit   widest gap anywhere
+     },
+ 
+@@ -454,7 +455,12 @@
+       var y = this.standY(side), ok = true, i;
+       for (i = 0; i < n && ok; i++) ok = this._ffOk(x0 + i * CONFIG.ff.spacing * u, y);
+       if (!ok) continue;
+-      for (i = 0; i < n; i++) { var x = x0 + i * CONFIG.ff.spacing * u; this._addFF(x, y, this._ffColor(x, CONFIG.gen.match)); }
++      var mono = CONFIG.gen.lineMono, lc = -1;
++      if (mono) {
++        if (this._colorAt(x0) !== this._colorAt(x0 + len)) continue;   // never straddle a paint gate
++        lc = this._ffColor(x0, CONFIG.gen.match);
++      }
++      for (i = 0; i < n; i++) { var x = x0 + i * CONFIG.ff.spacing * u; this._addFF(x, y, mono ? lc : this._ffColor(x, CONFIG.gen.match)); }
+       return;
+     }
+   };

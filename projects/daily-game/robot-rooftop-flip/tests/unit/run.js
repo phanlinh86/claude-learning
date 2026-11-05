@@ -76,7 +76,7 @@ test('layout: DESIGN §2 numbers (landscape, portrait, wide)', () => {
   assert.strictEqual(L.unit, 100); assert.ok(!L.portrait);
   near(L.midY, 286.2, 1e-9); near(L.ceilY, 141.2, 1e-9); near(L.floorY, 431.2, 1e-9); near(L.corridorH, 290, 1e-9); near(L.heroX, 249.6, 1e-9);
   const P = RF.World.computeLayout(560, 1000);
-  assert.ok(P.portrait); near(P.unit, 560 / 6, 1e-9); near(P.midY, 500, 1e-9); near(P.heroX, 0.22 * 560, 1e-9);
+  assert.ok(P.portrait); near(P.unit, 560 / 6, 1e-9); near(P.midY, 470, 1e-9); near(P.heroX, 0.22 * 560, 1e-9);
   near(RF.World.computeLayout(1280, 540).unit, 100, 1e-9);
   const w = mk(); near(w.standY('floor'), 431.2 - 42, 1e-9); near(w.standY('ceil'), 141.2 + 42, 1e-9);
   near(w.hero.x - w.cam.x, L.heroX, 1e-9);
@@ -294,7 +294,7 @@ test('fairness: one surface always safe, hazard windows, forced-flip spacing, ga
     const w = genTrack(diff, loop * 4, seed, 160);         // ≈ 1500 units ≈ 5–6 levels
     const u = w.layout.unit, D = C.difficulty[diff], m = C.gen.margin * u, tF = w.flightTime();
     const hz = w.hazards.filter(h => h.x1 + 3 * u < w.gen.frontier), start = w.plans[0].startX;   // the newest hazard's tail is not built yet
-    assert.ok(hz.length > 150, 'hazards ' + hz.length);
+    assert.ok(hz.length > 120, 'hazards ' + hz.length);   // sample-size guard (Easy ≈ 135 with the playtest's calmer Easy)
     assert.ok(w.plans.length >= 4, 'several levels generated');
     const cap = x => w._capFor(w._planAt(x), x);
     // safe start

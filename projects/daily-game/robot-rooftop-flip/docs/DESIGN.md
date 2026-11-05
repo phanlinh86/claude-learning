@@ -18,7 +18,7 @@ Fantasy in one sentence: **it must FEEL like a springy little robot pup snapping
 - Units: px (logical), seconds. y grows **downward**. There is **no vertical camera**: world y = screen y. Horizontal scroll: `cam.x` = world x at the screen's left edge; `screenX = worldX − cam.x` (lerped with `world.alpha`).
 - `RF.World.computeLayout(w, h)` (static) → `layout {width, height, portrait, unit, midY, ceilY, floorY, corridorH, heroX}`:
   - `unit = portrait ? min(w/6, h/8) : min(w/9.6, h/5.4)` (100 at 960×540, ≈93 at 560×1000).
-  - `midY = portrait ? 0.50·h : 0.53·h`; `ceilY = midY − 1.45·unit` (the rail's running underside); `floorY = midY + 1.45·unit` (the rooftop line); `corridorH = floorY − ceilY`.
+  - `midY = portrait ? 0.47·h : 0.53·h`; `ceilY = midY − 1.45·unit` (the rail's running underside); `floorY = midY + 1.45·unit` (the rooftop line); `corridorH = floorY − ceilY`.
   - `heroX = portrait ? 0.22·w : 0.26·w` (Bolt's body centre, screen x; fixed).
   - At 960×540: ceilY ≈ 141, floorY ≈ 431. Below floorY = building facades; above ceilY = rail girders, cables and sky.
 - Bolt's world x = `cam.x + heroX`. `cam.x` grows by `speed·dt`.
@@ -86,7 +86,7 @@ Palette hints: dawn sky `#f6b7a8`→`#b8a3d9`, roofs warm brick `#b56a5a`; noon 
   - Obstacles: hero box overlaps an obstacle box (not `hit`) while `invuln = 0` → `bump`: one heart lost, the obstacle becomes `hit` (squash and no more collisions), `invuln = 1.5 s`, `bumpT = 0`.
   - Fireflies: hover with a gentle bob (`baseY + sin`) and a tiny drift. Catch when the hero box overlaps the circle (`r = 0.22·unit`, ×1.35 on Easy). Same colour → `catch`: `combo += 1`, `mult = min(5, 1 + ⌊combo/5⌋)`, `points = 10·mult`, event `combo` when mult grows. Other colour → `wrong`: the firefly flees (zips up/away, `state:'flee'`); on Normal/Hard combo → 0 (`comboBreak` if it was ≥ 2); on Easy nothing else happens.
   - Gates: when the hero passes `gate.x` → `hero.color = gate.color`, event `gate`. Gates appear every ~8–14 s and always change the colour. After a gate most upcoming fireflies (~65 %) match the new colour.
-  - Track generation (deterministic, ≥ 2 screens ahead, culled behind): the first 2 s of every run are safe (both surfaces solid, no obstacles). **Fairness:** at every x at least one surface is solid and obstacle-free; a hazard on one surface needs the other surface clear from `hazard.x0 − (flightDist + margin)` to `hazard.x1 + margin`; two hazards that force flips are at least `reaction·speed + flightDist` apart (`reaction` per difficulty: easy 1.4 s, normal 0.95 s, hard 0.7 s). Gaps 0.8–2.2 units wide (narrower on Easy). Firefly patterns: lines along a surface, an arc along the flip path, small clusters; never inside an obstacle.
+  - Track generation (deterministic, ≥ 2 screens ahead, culled behind): the first 2 s of every run are safe (both surfaces solid, no obstacles). **Fairness:** at every x at least one surface is solid and obstacle-free; a hazard on one surface needs the other surface clear from `hazard.x0 − (flightDist + margin)` to `hazard.x1 + margin`; two hazards that force flips are at least `reaction·speed + flightDist` apart (`reaction` per difficulty: easy 1.8 s, normal 0.95 s, hard 0.7 s). Gaps 0.8–2.2 units wide (narrower on Easy). Firefly patterns: lines along a surface, an arc along the flip path, small clusters; never inside an obstacle.
   - Levels: `levelLen` units per zone (≈ 60–80 s at its speed). At the end a `finish` arch is placed; passing it → `finish`, bonus `100 × (zone + 1) × (loop + 1)`, +1 heart (up to max), `levelUp` (level++), the next zone's track continues without a stop.
   - Lose: hearts reach 0 → phase `over`, event `gameOver` (the scroll eases to a stop over ~0.6 s).
   - The first level must be easy for a 6-year-old: Easy = slower, fewer and narrower gaps, longer reaction gaps, 5 hearts, bigger catch radius.
@@ -109,3 +109,8 @@ SFX: flip "zoop" (rising for up, falling for down), land "clank" (magnet), catch
 - Pointer Events: `pointerdown` on the stage (not on UI) flips. UI buttons fire on click; the ghost click is swallowed.
 - iOS: audio unlock in the first `touchend`; `visibilitychange` pauses and suspends audio; kid-proofing (no zoom, no rubber-band, no callouts, no text selection).
 - Home screen: `manifest.webmanifest` plus 180/192/512 PNG icons from `tools/render_mobile_icons.js`.
+
+## 9. Changes after build and QA (2026-11-05)
+- Mechanics: see MECHANICS §9 (Easy tuning, one-colour firefly lines, on-screen fall + rescue, portrait midY 0.47·h).
+- Renderer: Bolt's chest symbol is bigger with a bigger glow, plus a soft ring of his colour under his paws; the turn-over never squashes below 42 % height and the nose leads the flip; landing squash pivots on the feet; a bump makes a small hop; wrong-colour fireflies glow dimmer; the yellow star is drawn 15 % bigger; event callouts sit beside Bolt on the open side of the corridor, the streak callout on the facade; the gate flash is subtle; custom backgrounds get a soft dark band behind the corridor.
+- Integration: the sprite pre-warm queue survives a resize (`assets.js`), How to Play fits short landscape phones, the "NEW!" badge stays inside its box.
