@@ -1,0 +1,143 @@
+<!doctype html>
+<!-- Contact sheet for RB.BandArt + the animal stickers (character artist B). Open directly or via `node tools/band_sheet.js`.
+     ?sheet=band|animals   ?bg=wood|lawn|snow (one panel only; default: all three stacked)   ?zoom=1 (3x section only) -->
+<html><head><meta charset="utf-8"><title>Band sheet</title>
+<style>body{margin:0;background:#222}canvas{display:block}</style></head>
+<body><canvas id="c"></canvas>
+<script src="../game/js/band_art.js"></script>
+<script>
+(function () {
+  var BA = RB.BandArt;
+  var ANIMALS = ['duck', 'cat', 'dog', 'cow', 'sheep', 'hen', 'bird', 'pig'];
+  var COLORS = ['red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink'];
+  var SHAPES = ['circle', 'square', 'triangle', 'star', 'heart', 'rect', 'diamond', 'oval'];
+  var BGS = { wood: '#D9A86C', lawn: '#8CC47A', snow: '#EEF2F7' };
+  var SEASON = { wood: 'autumn', lawn: 'spring', snow: 'winter' };
+  var qp = new URLSearchParams(location.search), which = qp.get('sheet') || 'band', only = qp.get('bg'), zoomOnly = qp.get('zoom') === '1';
+  var W = 1800, S = 150, CELL = 172, ROWH = 230;
+  var imgs = {};
+  function img(name) { var i = imgs[name]; return i && i.complete && i.naturalWidth ? i : null; }
+  var loads = [];
+  ANIMALS.forEach(function (a) {
+    ['', '_sing'].forEach(function (suf) {
+      loads.push(new Promise(function (res) {
+        var i = new Image(); i.onload = i.onerror = res; i.src = '../game/assets/default/items/animal_' + a + suf + '.svg'; imgs['animal_' + a + suf] = i;
+      }));
+    });
+  });
+
+  function bandRows() {
+    var R = [];
+    R.push({ label: 'colour drums', items: COLORS.map(function (c) { return { kind: 'color', value: c, color: c }; }) });
+    R.push({ label: 'shape drums', items: SHAPES.map(function (s, i) { return { kind: 'shape', value: s, shape: s, color: COLORS[i % 7] }; }) });
+    R.push({ label: 'dots 1-10', items: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (n) { return { kind: 'dots', value: n, n: n }; }) });
+    R.push({ label: 'numbers + dots', items: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (n) { return { kind: 'number', value: n, n: n, showDots: true }; }) });
+    R.push({ label: 'numbers', items: [0, 3, 7, 10, 12].map(function (n) { return { kind: 'number', value: n, n: n }; })
+      .concat(['A', 'b', 'M', 'w'].map(function (l) { return { kind: 'letter', value: l, text: l }; })) });
+    R.push({ label: 'text + size', items: ['2 + 3', '5 − 2', 'cat', 'mèo'].map(function (t) { return { kind: 'text', value: t, text: t }; })
+      .concat([{ kind: 'size', value: 'big', size: 'big', color: 'blue' }, { kind: 'size', value: 'small', size: 'small', color: 'blue' },
+               { kind: 'size', value: 'big', size: 'big', color: 'pink' }, { kind: 'size', value: 'small', size: 'small', color: 'pink' }]) });
+    R.push({ label: 'hit / glow / animals', items: [
+      { it: { kind: 'color', color: 'red', value: 'red' }, opt: { hit: 1 } }, { it: { kind: 'color', color: 'green', value: 'green' }, opt: { hit: 0.5 } },
+      { it: { kind: 'shape', shape: 'star', color: 'yellow', value: 'star' }, opt: { hit: 0.8 } },
+      { it: { kind: 'color', color: 'yellow', value: 'yellow' }, opt: { glow: 1 } }, { it: { kind: 'dots', n: 4, value: 4 }, opt: { glow: 0.6 } },
+      { it: { kind: 'animal', animal: 'cow', value: 'cow' }, opt: {} }, { it: { kind: 'animal', animal: 'cow', value: 'cow' }, opt: { sing: true, hit: 1 } },
+      { it: { kind: 'animal', animal: 'zebra', value: 'zebra' }, opt: {} }, { it: { kind: 'animal', animal: 'duck', value: 'duck' }, opt: { glow: 1 } }] });
+    return R;
+  }
+
+  function bg(g, x, y, w, h, key) {
+    g.fillStyle = BGS[key]; g.fillRect(x, y, w, h);
+    g.fillStyle = 'rgba(0,0,0,0.5)'; g.font = 'bold 18px sans-serif'; g.textAlign = 'left'; g.textBaseline = 'top';
+    g.fillText(key, x + 8, y + 6);
+  }
+  function member(g, x, y, it, opt, s) {
+    s = s || S;
+    g.save(); g.translate(x, y + s / 2); BA.drawStool(g, s * 0.62, 38 * s / 150); g.restore();
+    g.save(); g.translate(x, y);
+    var o = { dpr: 1, img: img, t: 0.3 }; for (var k in opt || {}) o[k] = opt[k];
+    BA.drawMember(g, it, s, o); g.restore();
+    // guide: the seat line
+    g.fillStyle = 'rgba(255,0,0,0.5)'; g.fillRect(x - s * 0.5, y + s / 2, 6, 1);
+  }
+
+  function bandPanel(g, y0, key) {
+    var rows = bandRows(), y = y0;
+    bg(g, 0, y0, W, rows.length * ROWH + 640, key);
+    rows.forEach(function (r) {
+      g.fillStyle = 'rgba(0,0,0,0.45)'; g.font = '14px sans-serif'; g.textAlign = 'left'; g.fillText(r.label, 8, y + 28);
+      r.items.forEach(function (it, i) {
+        var o = it.it ? it.opt : {}, item = it.it || it;
+        member(g, 100 + i * CELL, y + 30 + S / 2, item, o);
+      });
+      y += ROWH;
+    });
+    // big drum hit 0 / 1, notes, number cards, ghost hand, sheet
+    g.save(); g.translate(130, y + 100); BA.drawBigDrum(g, 92, { hit: 0 }); g.restore();
+    g.save(); g.translate(360, y + 100); BA.drawBigDrum(g, 92, { hit: 1 }); g.restore();
+    g.save(); g.translate(590, y + 100); BA.drawBigDrum(g, 100, { hit: 0.4, glow: 1, t: 0.3 }); g.restore();
+    COLORS.forEach(function (c, i) { g.save(); g.translate(760 + i * 80, y + 70); BA.drawNote(g, 34, c); g.restore(); });
+    g.save(); g.translate(760 + 7 * 80, y + 70); BA.drawNote(g, 34, null, { empty: true }); g.restore();
+    g.save(); g.translate(760 + 8 * 80, y + 70); BA.drawNote(g, 34, 'red', { pop: 1 }); g.restore();
+    [[3, 2], [5, 5], [8, 3], [10, 0]].forEach(function (p, i) { g.save(); g.translate(840 + i * 200, y + 220); BA.drawNumberCard(g, 180, 150, p[0], p[1]); g.restore(); });
+    g.save(); g.translate(1680, y + 160); BA.drawGhostHand(g, 110, 0.2); g.restore();
+    y += 330;
+    var ys = y;
+    BA.drawSheet(g, 60, 840, ys, 4, SEASON[key]);
+    [0, 1, 2, 3].forEach(function (i) {
+      g.save(); g.translate(170 + i * 180, ys); if (i < 2) BA.drawNote(g, 34, ['red', 'blue'][i]); else BA.drawNote(g, 34, null, { empty: true }); g.restore();
+    });
+    BA.drawSheet(g, 920, 1740, ys, 5, (['spring', 'summer', 'autumn', 'winter'])[(Object.keys(BGS).indexOf(key) + 1) % 4]);
+    [0, 1, 2, 3, 4].forEach(function (i) { g.save(); g.translate(1010 + i * 160, ys); BA.drawNote(g, 34, i < 3 ? COLORS[i + 2] : null, { empty: i >= 3 }); g.restore(); });
+    g.save(); g.translate(W / 2, ys + 120); BA.drawGlow(g, 300, 100, 0.3, 1); g.restore();
+    return rows.length * ROWH + 640;
+  }
+
+  function zoomPanel(g, y0) {
+    var Z = 450, h = 2 * 560 + 20, keys = ['wood', 'lawn', 'snow'];
+    var items = [{ kind: 'color', color: 'red', value: 'red' }, { kind: 'shape', shape: 'heart', color: 'pink', value: 'heart' },
+      { kind: 'number', n: 4, value: 4, showDots: true }, { kind: 'dots', n: 6, value: 6 }, { kind: 'letter', text: 'B', value: 'B' },
+      { kind: 'color', color: 'yellow', value: 'yellow' }];
+    items.forEach(function (it, i) {
+      var cx = 300 + (i % 3) * 600, cy = y0 + 20 + Math.floor(i / 3) * 560;
+      bg(g, cx - 300, cy, 600, 560, keys[(i + Math.floor(i / 3)) % 3]);
+      member(g, cx, cy + 40 + Z / 2, it, i === 5 ? { hit: 0.7 } : {}, Z);
+    });
+    return h;
+  }
+
+  function animalsPanel(g, y0, key) {
+    var h = 2 * ROWH + 20;
+    bg(g, 0, y0, W, h, key);
+    ANIMALS.forEach(function (a, i) {
+      member(g, 110 + i * 200, y0 + 30 + S / 2, { kind: 'animal', animal: a, value: a }, {});
+      member(g, 110 + i * 200, y0 + 30 + ROWH + S / 2, { kind: 'animal', animal: a, value: a }, { sing: true });
+    });
+    // 110 px reference column at the right
+    return h;
+  }
+  function animalsZoom(g, y0) {
+    var Z = 420, keys = ['wood', 'lawn', 'snow'], cw = 450, ch = 500;
+    ANIMALS.forEach(function (a, i) {
+      [false, true].forEach(function (sing, j) {
+        var k = i * 2 + j, cx = (k % 4) * cw, cy = y0 + Math.floor(k / 4) * ch;
+        bg(g, cx, cy, cw, ch, keys[(i) % 3]);
+        member(g, cx + cw / 2, cy + 20 + Z / 2, { kind: 'animal', animal: a, value: a }, { sing: sing }, Z);
+      });
+    });
+    return 4 * ch;
+  }
+
+  Promise.all(loads).then(function () {
+    var c = document.getElementById('c'), g = c.getContext('2d');
+    var keys = only ? [only] : ['wood', 'lawn', 'snow'];
+    c.width = W; c.height = 12000;
+    var y = 0;
+    if (!zoomOnly) keys.forEach(function (k) { y += (which === 'animals' ? animalsPanel : bandPanel)(g, y, k) + 8; });
+    if (!only) y += (which === 'animals' ? animalsZoom : zoomPanel)(g, y) + 8;
+    window.SHEET_H = y;
+    document.title = 'done';
+  });
+})();
+</script>
+</body></html>
