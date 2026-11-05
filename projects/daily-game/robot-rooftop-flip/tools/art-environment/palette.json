@@ -1,0 +1,26 @@
+{
+  "dawn": {
+    "wall": "#b56a5a",
+    "bottom": "#6e3a3a",
+    "skyTop": "#a596d2",
+    "skyBottom": "#f8c8a8"
+  },
+  "noon": {
+    "wall": "#c9a27a",
+    "bottom": "#7e5d42",
+    "skyTop": "#55a8ee",
+    "skyBottom": "#cdeeff"
+  },
+  "sunset": {
+    "wall": "#7d4e5e",
+    "bottom": "#43283a",
+    "skyTop": "#3e3482",
+    "skyBottom": "#ffb36a"
+  },
+  "night": {
+    "wall": "#3b4466",
+    "bottom": "#20263f",
+    "skyTop": "#0a1130",
+    "skyBottom": "#2b2f6b"
+  }
+}
