@@ -112,6 +112,7 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 
 /* ---------- HUD ---------- */
 #hud { position: absolute; top: calc(var(--sa-t) + 10px); right: calc(var(--sa-r) + 10px); display: flex; align-items: center; gap: 10px; z-index: 5; }
+#stage.talking #hud { z-index: 12; }   /* the pause button stays reachable during Talk time */
 .hud-stars { display: flex; align-items: center; gap: 4px; background: rgba(255, 255, 255, .85); border-radius: 99px; padding: 4px 14px 4px 6px;
   font-size: 26px; font-weight: 900; box-shadow: 0 3px 0 rgba(0, 0, 0, .12); }
 .hud-stars img { width: 38px; height: 38px; }
@@ -142,7 +143,7 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
   border: 4px solid #bfd8ee; box-shadow: 0 6px 0 rgba(40, 60, 110, .2); font-size: 34px; font-weight: 900;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
 .talk-choices button small { font-size: 16px; font-weight: 800; }
-.talk-choices button canvas { width: 64px; height: 64px; }
+.talk-choices button canvas { width: 88px; height: 88px; }
 .talk-choices button.right { border-color: var(--green); background: #e5f8e9; animation: bump .5s; }
 .talk-choices button.glow { border-color: #ffc531; box-shadow: 0 0 0 6px rgba(255,197,49,.45), 0 6px 0 rgba(40,60,110,.2); animation: breathe 1s ease-in-out infinite; }
 .talk-choices button.wrongpick { opacity: .45; }
@@ -205,7 +206,7 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
   .talk-panel { max-width: 720px; }
   .talk-panel #talkShow { width: 380px; }
   .talk-choices button { min-width: 140px; min-height: 120px; font-size: 44px; }
-  .talk-choices button canvas { width: 84px; height: 84px; }
+  .talk-choices button canvas { width: 104px; height: 104px; }
 }
 @media (prefers-reduced-motion: reduce) { .btn-play { animation: none; } }
 /* the smallest landscape phones (SE): no room for the tagline next to Bop */

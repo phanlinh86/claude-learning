@@ -123,7 +123,7 @@
     _choiceVisual(c) {   // pictures on the answer buttons: the same drums / animal stickers as the band (no reading needed ≤ 5)
       switch (c.kind) {
         case 'color': case 'shape': case 'animal': case 'size': case 'dots': case 'letter': return c;
-        case 'number': return this._age <= 5 && c.value >= 1 && c.value <= 10 ? Object.assign({}, c, { n: +c.value, showDots: true }) : null;
+        case 'number': return this._age <= 5 && c.value >= 1 && c.value <= 10 ? { kind: 'card', n: +c.value } : null;   // big numeral + dots (visual QA P1-3)
         default: return null;
       }
     },

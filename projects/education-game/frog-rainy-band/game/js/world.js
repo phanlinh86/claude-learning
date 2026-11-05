@@ -30,7 +30,7 @@
     step: 1 / 120,             // fixed simulation sub-step (≤ 1/120 per DESIGN)
     maxFrame: 1.0,             // largest dt accepted per update() (speed mode passes big dt)
     roundsPerLevel: 4,         // songs per chapter
-    chapterTimeLimit: 80,      // s since the chapter began: after ≥ chapterMinRounds songs go to Talk time once exceeded
+    chapterTimeLimit: 85,      // s since the chapter began: after ≥ chapterMinRounds songs go to Talk time once exceeded
     chapterMinRounds: 3,
     introTime: 2.5,            // chapter banner + season line (the 2.5 s weather crossfade)
     talkAfterAnswer: 1.6,
@@ -42,19 +42,19 @@
     shortSide: 720, minLong: 960, maxLong: 1600, tallRatio: 1.6,
     groundLand: 24, groundPort: 36,
     memberS: 150, memberS4: 132, tallScale: 1.15, memberMin: 112,
-    stageX0Land: 400, stageX0Small: 375, smallW: 1100, stageEdge: 24, stageDyLand: 74, stageDyPort: 330, stageDyTall: 380,
-    stoolH: 38, slotEdge: 20, slotGap: 24, slotMaxGap: 110,
-    bigDrumLand: { dx: 280, dy: 92, r: 92 }, bigDrumPort: { dx: 470, dy: 100, r: 100 },
-    bopLand: { dx: 130, dy: 4, h: 300 }, bopPort: { dx: 150, dy: 4, h: 320 },
+    stageX0Land: 420, stageX0Small: 395, smallW: 1100, stageEdge: 24, stageDyLand: 74, stageDyPort: 330, stageDyTall: 380,
+    stoolH: 38, slotEdge: 20, slotGap: 24, slotMaxGap: 110, drumClear: 20, slotOverhang: 16,
+    bigDrumLand: { dx: 305, dy: 92, r: 92 }, bigDrumPort: { dx: 470, dy: 100, r: 100 },
+    bopLand: { dx: 160, dy: 4, h: 300 }, bopPort: { dx: 150, dy: 4, h: 320 },
     sheetTopLand: 200, sheetAbove: 170, sheetBelowBubble: 100, sheetAbovePort: 230, noteR: 34, noteGap: 110,
     cardW: 180, cardH: 150, cardAbove: 190, cardGap: 12,
-    bubbleX: 24, bubbleYLand: 18, bubbleMaxW: 560, bubbleRight: 200, bubbleHLand: 122, bubbleYPort: 110, bubbleHPort: 124,
+    bubbleX: 24, bubbleYLand: 18, bubbleMaxW: 560, bubbleRight: 200, bubbleHLand: 122, bubbleYPort: 140, bubbleHPort: 124,
     hudW: 160, hudH: 96,
     hitFrac: 0.6, hitPad: 14,  // member hit box: centre ± (0.6·S + 14)
-    drumPad: 20, drumAssistPad: 90, bopHalfW: 0.3, bopPad: 20, snailR: 70,
+    drumPad: 20, drumAssistPad: 90, bopHalfW: 0.3, bopPad: 20, snailR: 80,
 
     // ---- input
-    tapMovePx: 40, tapTime: 0.6,   // tap = down + up < 0.6 s and < max(40, w.tapMoveMin) px; a held / slid finger does nothing
+    tapMovePx: 64, tapTime: 0.8,   // tap = down + up < 0.8 s and < max(64, w.tapMoveMin) px; a held / slid finger does nothing (QA: 40 / 0.6 threw small slides away)
     pressSquash: 0.06,             // tiny squash while a finger rests on a member
 
     // ---- motion (physics)
@@ -73,8 +73,9 @@
 
     // ---- round flow
     playTime: 0.6,             // phase 'play' after a right tap (the note flies 0.55 s)
-    beatLead: 2.4, beatGap: 0.6, beatTail: 0.5, replayLead: 0.7,   // listen: Bop's beats start after the prompt began
-    songLead: 0.5, songGap: 0.45, songTail: 0.45, songHold: 0.6,
+    beatLead: 4.6, beatGap: 0.75, beatTail: 0.5, replayLead: 0.7,   // listen: Bop's beats start ≥ beatLead after the prompt began (QA: 2.4 drummed over it)
+    beatHoldMax: 8, beatAfterHold: 0.3,   // holdBeats(true): the beats wait for main's release (≥ beatLead, ≤ 8 s), first beat 0.3 s after it
+    songLead: 1.0, songGap: 0.5, songTail: 0.45, songHold: 0.6,
     clearTime: 0.9, clearNoteGap: 0.1,
     countCardRate: 5,
 
@@ -84,13 +85,16 @@
     wrongLock: 0.6,            // s: member taps ignored after a wrong one → event 'locked'
     hintTime: 4, hintTap: 0.9,
     idleTime: 12, idleBackoff: 1.5, idleMax: 30, idleHintFrom: 2,
+    drumQuiet: 1.2, drumQuietMax: 3,   // after a drum count completes: the next ask waits for 1.2 s without a big-drum tap (≤ 3 s)
+    drumShortNudge: 4,              // started counting but stopped short: a nudge + hint after 4 s without a big-drum tap
+    drumGuard: 0.7,                 // a big-drum tap in the first 0.7 s of a drum ask is a free boom, not a count
     softMissHint: 2,           // drum ask: the 2nd tap on a band drum instead of the big drum hints the big drum
     // once the big drum was hinted in a drum ask, a tap on empty space within drumAssistPad px around it counts on it too
 
     // ---- surprise round: one per chapter, the type rotates per chapter from a random start per session
     surpriseRound: 2,
     surpriseTypes: ['snail', 'shower'],
-    snailIn: 5, snailOut: 2.5, snailRing: 0.6, snailSize: 110, snailDx: 60, snailFrom: 90,
+    snailIn: 5, snailOut: 2.5, snailRing: 0.6, snailSize: 140, snailDx: 60, snailFrom: 90,
     showerTime: 4, showerUp: 0.4, showerDown: 0.6, umbrellaTime: 2.5, raindrops: 6, raindropAt: 0.5, raindropGap: 0.55,
 
     // ---- Bop
@@ -135,12 +139,16 @@
       : { x0: ins.left + (W < cfg.smallW ? cfg.stageX0Small : cfg.stageX0Land), x1: W - ins.right - cfg.stageEdge, y: groundY - cfg.stageDyLand };
     var S0 = k >= 4 ? cfg.memberS4 : cfg.memberS;
     if (portrait && tall) S0 *= cfg.tallScale;
-    var span = stage.x1 - stage.x0 - 2 * cfg.slotEdge;
-    var fit = (span - (k - 1) * cfg.slotGap) / k;
-    var S = Math.max(cfg.memberMin, Math.floor(Math.min(S0, fit)));
-    var slots = slotsFor(stage, S, k, cfg);
     var bd = portrait ? cfg.bigDrumPort : cfg.bigDrumLand, bp = portrait ? cfg.bopPort : cfg.bopLand;
     var bigDrum = { x: ins.left + bd.dx, y: groundY - bd.dy, r: bd.r };
+    // the band's x range: inside the stage, in landscape also ≥ drumClear px right of the big drum; when 4 members do not fit
+    // at memberMin, the outer members may overhang the plank's right end by ≤ slotOverhang (their stools stay on it)
+    var row = { lo: stage.x0 + cfg.slotEdge, hi: stage.x1 - cfg.slotEdge, y: stage.y };
+    if (!portrait) row.lo = Math.max(row.lo, bigDrum.x + bigDrum.r + cfg.drumClear);
+    var fitOf = function () { return (row.hi - row.lo - (k - 1) * cfg.slotGap) / k; }, fit = fitOf();
+    if (fit < Math.min(S0, cfg.memberMin)) { row.hi = Math.min(stage.x1 + cfg.slotOverhang, W - ins.right - 8); fit = fitOf(); }
+    var S = Math.max(cfg.memberMin, Math.floor(Math.min(S0, fit)));
+    var slots = slotsFor(row, S, k, cfg);
     var bop = { x: ins.left + bp.dx, y: groundY - bp.dy, h: bp.h };
     var bx = ins.left + cfg.bubbleX;
     // portrait: tall phones put the bubble under the HUD row; short portraits (iPads) on the HUD row, left of the HUD, so the
@@ -175,9 +183,9 @@
       splashY: groundY, safe: { x: ins.left, y: ins.top, w: W - ins.left - ins.right, h: H - ins.top - ins.bottom }
     };
   }
-  /** Member centres: evenly spaced (≥ S + 24, ≤ S + 110 apart), centred over the stage. */
-  function slotsFor(stage, S, k, cfg) {
-    var a = stage.x0 + S / 2 + cfg.slotEdge, b = stage.x1 - S / 2 - cfg.slotEdge, out = [];
+  /** Member centres: evenly spaced (≥ S + 24, ≤ S + 110 apart), centred over row {lo, hi (member edges), y (stage top)}. */
+  function slotsFor(row, S, k, cfg) {
+    var a = row.lo + S / 2, b = row.hi - S / 2, out = [], stage = row;
     var gap = k > 1 ? Math.min((b - a) / (k - 1), S + cfg.slotMaxGap) : 0, c = (a + b) / 2, y = stage.y - cfg.stoolH - S / 2;
     for (var i = 0; i < k; i++) out.push({ x: c - gap * (k - 1) / 2 + i * gap, y: y });
     return out;
@@ -207,7 +215,7 @@
     this.bop = { x: 0, y: 0, h: 300, mood: 'idle', moodT: 0, blinkT: 3, blink: false, look: 0, lookX: 0, lookY: 0 };
     this.events = []; this.sessions = 0; this._idN = 0;
     this._idleN = 0; this._idleT = 0; this._idleGap = this.cfg.idleTime; this._lastHintT = -1e9; this.levelStartTime = 0;
-    this._talkAskT = 0; this._talkAsks = 0; this._lockUntil = -1; this._press = null; this._softMiss = 0;
+    this._talkAskT = 0; this._talkAsks = 0; this._lockUntil = -1; this._press = null; this._softMiss = 0; this._lastDrumT = -1e9; this._beatHold = false;
     this._vp = null; this._view = null; this.tapMoveMin = 0; this._wobDir = 1;
     this.setViewport(opts.width || 1280, opts.height || 720, opts.ins || null);
   }
@@ -403,7 +411,8 @@
 
   P._startAsk = function () {
     var a = this._askObj(), cfg = this.cfg, D = this.bigDrum, slot = this.slotOf(this.ask) || { x: 0, y: 0 };
-    this.askMisses = 0; this._lockUntil = -1; this._softMiss = 0; this._drumHinted = false;
+    this.askMisses = 0; this._lockUntil = -1; this._softMiss = 0; this._drumHinted = false; this._shortNudged = false;
+    this._beatHold = false;
     this._idleT = 0; this._idleGap = cfg.idleTime; this._idleN = 0;
     this.members.forEach(function (m) { m._glowT = 0; m.hinted = false; });
     D._glowT = 0;
@@ -413,7 +422,7 @@
       this._setPhase('ask');
     } else if (a.mode === 'listen') {
       if (this.countCard) this.countCard.vis = false;
-      this._beats = { i: 0, n: a.n, nextAt: this.time + cfg.beatLead, last: -1 };
+      this._beats = { i: 0, n: a.n, nextAt: this.time + cfg.beatLead, maxAt: this.time + cfg.beatHoldMax, last: -1 };
       this._setPhase('beats');
     } else this._setPhase('ask');
     var R = this._rightMember();
@@ -425,14 +434,28 @@
   P.replayBeats = function () {
     var a = this._askObj();
     if (this.state !== 'round' || this.phase !== 'ask' || !a || a.mode !== 'listen') return false;
-    this._beats = { i: 0, n: a.n, nextAt: this.time + this.cfg.replayLead, last: -1 };
+    this._beats = { i: 0, n: a.n, nextAt: this.time + this.cfg.replayLead, maxAt: this.time + this.cfg.beatHoldMax, last: -1 };
+    this._beatHold = false;
     this._setPhase('beats');
     this.hintHand = null;
     this._emit({ type: 'replayBeats', n: a.n, x: this.bigDrum.x, y: this.bigDrum.y });
     return true;
   };
+  /** Listen ask: main holds Bop's beats while the prompt is being spoken (holdBeats(true) on the `ask` / `replayBeats` event)
+   *  and releases them when the voice has finished (holdBeats(false)). The first beat comes ≥ beatLead (replay: replayLead)
+   *  after the ask and beatAfterHold after the release; after beatHoldMax s the beats start anyway (no voice / headless).
+   *  → true while beats are waiting for the hold. */
+  P.holdBeats = function (on) {
+    this._beatHold = !!on;
+    return !!on && this.state === 'round' && this.phase === 'beats' && this._beats && this._beats.i === 0;
+  };
   P._stepBeats = function () {
     var B = this._beats, cfg = this.cfg, D = this.bigDrum;
+    if (B.i === 0 && this._beatHold) {
+      if (this.time < B.maxAt) { if (this.time + cfg.beatAfterHold > B.nextAt) B.nextAt = this.time + cfg.beatAfterHold; return; }
+      this._beatHold = false; B.nextAt = Math.min(B.nextAt, this.time);   // fallback: no release came, start now
+    }
+    if (B.i === 0) this._beatHold = false;
     while (B.i < B.n && this.time >= B.nextAt - 1e-9) {
       B.i++; B.last = this.time; B.nextAt += cfg.beatGap;
       this._drumHit(cfg.beatSquash);
@@ -542,8 +565,15 @@
   };
   P._tapBigDrum = function () {
     var a = this._askObj(), D = this.bigDrum, cfg = this.cfg;
+    this._lastDrumT = this.time;
+    if (this.phase === 'ask' && a && a.mode === 'drum' && this.phaseTime < cfg.drumGuard) {   // a late tap of the last count
+      this._drumHit(cfg.drumSquash * 0.8);
+      this._emit({ type: 'boom', guard: true, x: D.x, y: D.y - 0.75 * D.r });
+      return 'boom';
+    }
     if (this.phase === 'ask' && a && a.mode === 'drum') {
       this._touch();
+      this._shortNudged = false;
       D.count++;
       this._drumHit(cfg.drumSquash);
       this._mood('drum');
@@ -1016,6 +1046,18 @@
       case 'beats': this._stepBeats(); break;
       case 'ask': {
         this._idleT += h;
+        var da = this._askObj(), D0 = this.bigDrum;
+        // drum ask: started counting but stopped short → an early nudge + hint after drumShortNudge s
+        if (da && da.mode === 'drum' && D0.count > 0 && D0.count < da.n && !this._shortNudged && this.time - this._lastDrumT >= cfg.drumShortNudge - 1e-9) {
+          this._shortNudged = true;
+          this._idleT = 0;
+          this._idleN++;
+          this._mood('think');
+          this._emit({ type: 'idle', n: this._idleN, short: true, count: D0.count, promptKey: da.promptKey, params: da.params, mode: da.mode,
+            x: D0.x, y: D0.y });
+          this._autoHint(true);
+          break;
+        }
         if (this._idleT >= this._idleGap - 1e-9) {
           this._idleT = 0;
           this._idleGap = Math.min(cfg.idleMax, this._idleGap * cfg.idleBackoff);
@@ -1028,9 +1070,13 @@
         }
         break;
       }
-      case 'play':
-        if (this.phaseTime >= cfg.playTime && !this.flyNotes.length) this._advance();
+      case 'play': {
+        var pa = this._askObj(), quiet = true;
+        // after a drum count: wait until the child stops drumming (drumQuiet s without a big-drum tap, ≤ drumQuietMax s)
+        if (pa && pa.mode === 'drum') quiet = this.time - this._lastDrumT >= cfg.drumQuiet - 1e-9 || this.phaseTime >= cfg.drumQuietMax - 1e-9;
+        if (this.phaseTime >= cfg.playTime && !this.flyNotes.length && quiet) this._advance();
         break;
+      }
       case 'song': this._stepSong(); break;
     }
   };

@@ -41,7 +41,7 @@
     return FALLBACK_PALETTE.orange;
   }
 
-  var WOOD = { base: '#E7C590', dark: '#A8743F', light: '#F5DFB6', line: '#7E5530' };
+  var WOOD = { base: '#E7C590', dark: '#8E5F33', light: '#F5DFB6', line: '#7E5530' };
   var SKIN = '#FFF6E4', SKIN_SH = '#EEDCBC', CORD = '#FFF6E4';
   var LABEL = '#FBEBCB';
   var INK = '#5A3A22';
@@ -320,7 +320,7 @@
         var nv = it.n != null ? it.n : +it.value, num = it.text != null ? it.text : (it.n != null ? it.n : it.value);
         if (it.showDots && nv > 0) {
           drawLabel(ctx, num, cy - fh * (nv > 5 ? 0.23 : 0.17), fh * (nv > 5 ? 0.54 : 0.66), fw * 0.8, ink);
-          drawDotRow(ctx, nv, fw * 0.94, cy + fh * (nv > 5 ? 0.25 : 0.29), fh * (nv > 5 ? 0.085 : 0.1), ink);
+          drawDotRow(ctx, nv, fw * 0.94, cy + fh * (nv > 5 ? 0.25 : 0.29), fh * (nv > 5 ? 0.11 : 0.13), ink);
         } else drawLabel(ctx, num, cy, fh * 0.92, fw * 0.86, ink);
         break;
       case 'letter':

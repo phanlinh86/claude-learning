@@ -29,13 +29,14 @@ const DEVICES = [
     await page.waitForFunction(() => RB.debug.world.state === 'round' && RB.debug.world.phase === 'ask', null, { timeout: 20000 });
     await page.evaluate(() => RB.debug.setSpeed(1));
     const tgt = await page.evaluate(() => {
-      const w = RB.debug.world, drum = w.ask && w.ask.mode === 'drum', id = RB.debug.answerId();
-      return { drum, n: drum ? (w.ask.n || 1) : 1, at: drum ? RB.debug.bigDrumScreen() : (id != null ? RB.debug.memberScreen(id) : null) };
+      const w = RB.debug.world, drum = w._mode() === 'drum', id = RB.debug.answerId();
+      return { drum, n: drum ? (w._askObj().n || 1) : 1, at: drum ? RB.debug.bigDrumScreen() : (id != null ? RB.debug.memberScreen(id) : null) };
     });
     const notes = () => page.evaluate(() => (RB.debug.world.sheet && RB.debug.world.sheet.notes ? RB.debug.world.sheet.notes.filter(Boolean).length : 0));
     const before = await notes();
     if (tgt.at) {
       const cdp = await ctx.newCDPSession(page);
+      if (tgt.drum) await page.waitForTimeout(900);   // drumGuard: the first 0.7 s of a drum ask are free booms
       for (let k = 0; k < tgt.n; k++) {
         await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: tgt.at.x, y: tgt.at.y, id: 1 }] });
         await page.waitForTimeout(70);

@@ -321,8 +321,8 @@
         if (note) {
           const pop = note.pop || 0, sc = 1 + 0.4 * pop;
           const col = this._noteColor(note);
-          this._note(s.x, s.y + bob, nr * 2 * sc, col, false, Math.sin(this.time * 3 + i) * 0.08);
-        } else this._note(s.x, s.y + bob, nr * 2, null, true, 0);
+          this._note(s.x, s.y + bob, nr * sc, col, false, Math.sin(this.time * 3 + i) * 0.08);
+        } else this._note(s.x, s.y + bob, nr, null, true, 0);
       }
       void a;
     }
@@ -358,7 +358,7 @@
     }
     _flyNote(n, a) {
       const x = ip(n, 'x', a), y = ip(n, 'y', a);
-      this._note(x, y, 60, n.color && RB.PALETTE && RB.PALETTE[n.color] ? RB.PALETTE[n.color].base : (n.color && n.color[0] === '#' ? n.color : this._noteColor(n)), false, n.rot || 0);
+      this._note(x, y, (this._L && this._L.noteR) || 34, n.color && RB.PALETTE && RB.PALETTE[n.color] ? RB.PALETTE[n.color].base : (n.color && n.color[0] === '#' ? n.color : this._noteColor(n)), false, n.rot || 0);
     }
     _countCard(w) {
       const C = w.countCard, L = this._L; if (!C || !(C.show > 0.01)) return;
@@ -428,7 +428,7 @@
       const gy = H - (ins.bottom || 0) - (portrait ? 60 : 30);
       let S = portrait ? 140 : 120;
       const lg = o.boxes && o.boxes.logo;
-      let cx = portrait ? W * 0.62 : W - (ins.right || 0) - Math.max(260, W * 0.24);
+      let cx = portrait ? W * 0.68 : W - (ins.right || 0) - Math.max(260, W * 0.24);
       let sy = gy - 40;
       // the band must not sit under the logo (iPad landscape)
       if (!portrait && lg && sy - 38 - S * 1.1 < lg.y + lg.h && cx + 1.5 * S > lg.x && cx - 1.5 * S < lg.x + lg.w) S = clamp((sy - 38 - (lg.y + lg.h + 10)) / 1.1, 80, 120);
@@ -448,10 +448,11 @@
       const dp = o.boxes && o.boxes.done;
       const gy = portrait ? Math.min(H * 0.64, dp ? dp.y - 20 : H) : H - (ins.bottom || 0) - 30;
       const S = portrait ? 110 : 104;
-      const cx = portrait ? W * 0.6 : (ins.left || 0) + Math.max(470, W * 0.36);
+      let cx = portrait ? W * 0.6 : (ins.left || 0) + Math.max(470, W * 0.36);
+      if (!portrait && dp) cx = Math.max((ins.left || 0) + 330 + 2.3 * S, Math.min(cx, dp.x - 20 - 2.3 * S));   // keep the band clear of the panel
       this._miniBand(cx, gy - 30, S, ['red', 'orange', 'yellow', 'green', 'blue'].slice(0, portrait ? 3 : 4), t, true);
       const bh = portrait ? Math.min(330, gy - 160) : Math.min(320, H * 0.5), k = bh / BOP.h;
-      const bx = (ins.left || 0) + (portrait ? 120 : 150);
+      const bx = (ins.left || 0) + (portrait ? 150 : 160);
       const hop = Math.max(0, Math.sin(t * 4)) * 16;
       this._shadow(bx, gy + 2, BOP.w * k * 0.62, 1);
       const nm = RB.Assets.has('bop_cheer') ? (Math.sin(t * 4) > 0 ? 'bop_cheer' : (RB.Assets.has('bop_drum_up') ? 'bop_drum_up' : 'bop_cheer')) : 'bop_idle';
@@ -662,6 +663,7 @@
       if (b.kind === 'color' && !b.color) b.color = b.value;
       if (b.kind === 'animal' && !b.animal) b.animal = b.value;
       const S = s * 0.9;
+      if (b.kind === 'card' && BA() && BA().drawNumberCard) { g.save(); try { BA().drawNumberCard(g, s * 0.92, s * 0.8, b.n, b.n); } catch (e) { } g.restore(); return; }
       g.save();
       let ok = false;
       if (BA() && BA().drawMember) { try { BA().drawMember(g, b, S, { dpr: this.rs, img: imgOf, cache: false }); ok = true; } catch (e) { ok = false; } }

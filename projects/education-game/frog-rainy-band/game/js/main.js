@@ -151,6 +151,7 @@
   }
   function goTitle() {
     mode = 'title';
+    $('stage').classList.remove('talking');
     if (RB.Voice) RB.Voice.stop();
     RB.Audio.stopMusic();
     RB.UI.only('scrTitle'); RB.UI.show('hud', false); RB.UI.say('');
@@ -173,12 +174,13 @@
     if (world.resetNudges) world.resetNudges();
     RB.UI.only(mode === 'talk' ? 'scrTalk' : undefined);
     RB.Audio.startMusic();
+    if (world.phase === 'song' && RB.Audio.setSong) RB.Audio.setSong(true);
     // say the question again so a returning child knows what to do
     if (mode === 'talk' && world.talk) speak(T(world.talk.promptKey, world.talk.params || {}), { priority: true });
     else if (world.state === 'round' && world.phase === 'ask') setTimeout(repeatPrompt, 300);
   }
 
-  let lastPromptText = '';
+  let lastPromptText = '', holdPrompt = null;
   function currentPrompt() {   // prompts have several wordings: repeat the one Bop said, word for word
     if (lastPromptText) return lastPromptText;
     const p = world.prompt ? world.prompt() : null;
@@ -245,6 +247,8 @@
         const txt = T(e.promptKey, e.params || {});
         lastPromptText = txt;
         RB.UI.say(txt); speakPrompt(txt, { priority: true });
+        // listen asks: the beats wait until Bop has finished saying the prompt (playtest P1-1); world falls back after 8 s
+        if (e.mode === 'listen' && voiceOn() && world.holdBeats) { holdPrompt = txt; world.holdBeats(true); } else holdPrompt = null;
         break;
       }
       case 'press': RB.Audio.play('press'); break;
@@ -279,11 +283,13 @@
         break;
       }
       case 'idle':
+        if (e.short) { const h = hasKey('hint.drum') ? T('hint.drum') : T('hint'); speak(h, { interrupt: canInterrupt() }); break; }   // counted some, stopped short
         if (++idleSaid <= 4) speak(T('idle') + ' ' + currentPrompt());   // then stay quiet: maybe nobody is there
         else if (idleSaid >= 5 && !bot) pause();   // ≈ 2 min without a tap: nobody is playing — pause
         break;
       case 'pokeBop': case 'pokeLulu':
-        if (performance.now() - promptStart > 3000 && !pendingPrompt) repeatPrompt();
+        if (e.replay) { const r = hasKey('replay') ? T('replay') : ''; if (r) speak(r, { interrupt: true }); }   // the world replays the beats
+        else if (performance.now() - promptStart > 3000 && !pendingPrompt) repeatPrompt();
         else if (world.bop) { world.bop.mood = 'happy'; world.bop.moodT = 0.6; }
         break;
       case 'replayBeats': if (world.bop) { world.bop.mood = 'drum_up'; world.bop.moodT = 0.4; } break;
@@ -310,7 +316,7 @@
       case 'boom': RB.Audio.play('boom'); if (e.x != null) render.burst('notes', e.x, e.y - 60, { n: 2 }); break;
       case 'songStart': {
         RB.Audio.setSong(true);
-        const t = line('saySongStart', e, 'songStart'); if (t && t !== 'songStart') { RB.UI.say(t); speak(t, { interrupt: true }); }
+        const t = line('saySongStart', e, 'songStart'); if (t && t !== 'songStart') { RB.UI.say(t); speak(t); }   // queued: never cut the last praise
         if (world.bop) { world.bop.mood = 'drum_up'; world.bop.moodT = 0.4; }
         break;
       }
@@ -386,6 +392,7 @@
       case 'levelDone':
         RB.Audio.play('level'); RB.UI.say('');
         if (mode === 'talk') { mode = 'play'; RB.UI.only(); }
+        $('stage').classList.remove('talking');
         break;
       case 'sessionDone': {
         RB.Audio.setSong(false);
@@ -411,6 +418,7 @@
   /* ---------- Talk time ---------- */
   function openTalk(talk) {
     if (!talk) return;
+    $('stage').classList.add('talking');
     mode = 'talk';
     if (world.cancelDrag) world.cancelDrag();
     const canMic = S.mic && RB.Voice && RB.Voice.canListen && RB.Voice.canListen() && !FLAGS.bot;
@@ -490,6 +498,10 @@
     if (!lastAsk || world.state !== 'round') return;
     RB.Audio.play('click');
     if (world.bop) { world.bop.mood = 'think'; world.bop.moodT = 1.2; }
+    if (world._mode && world._mode() === 'listen' && world.phase === 'ask' && world.replayBeats) {   // bubble tap: hear the booms again
+      const r = hasKey('replay') ? T('replay') : ''; if (r) speak(r, { interrupt: true });
+      world.replayBeats(); return;
+    }
     const cp = currentPrompt(); promptUntil = 0; speakPrompt(cp, { interrupt: true });
   }
 
@@ -516,7 +528,7 @@
     // volume: settings slider + big − / + in the pause menu
     $('optVolume').addEventListener('input', () => { S.volume = +$('optVolume').value / 100; saveSettings(); applyAudio(); });
     $('optVolume').addEventListener('change', () => RB.Audio.play('pop'));
-    const step = d => { S.volume = Math.max(0, Math.min(1, Math.round(((S.volume == null ? 1 : S.volume) + d) * 10) / 10)); saveSettings(); applyAudio(); RB.Audio.play('pop'); };
+    const step = d => { S.volume = Math.max(0, Math.min(1, Math.round(((S.volume == null ? 1 : S.volume) + d) * 20) / 20)); saveSettings(); applyAudio(); RB.Audio.play('pop'); };
     $('btnVolDown').addEventListener('click', () => step(-0.1));
     $('btnVolUp').addEventListener('click', () => step(0.1));
     document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => {
@@ -573,7 +585,7 @@
       voiceLog: (RB.Voice && RB.Voice.log) || prev.voiceLog || [],
       getState() {
         return { mode, state: world.state, level: world.level, topic: world.topic, round: world.round, stars: world.stars,
-          phase: world.phase, ask: world.ask, askMode: world.ask && world.ask.mode, members: (world.members || []).length,
+          phase: world.phase, ask: world.ask, askMode: world._mode ? world._mode() : (world.prompt && world.prompt() ? world.prompt().mode : null), members: (world.members || []).length,
           notes: world.sheet && world.sheet.notes ? world.sheet.notes.filter(Boolean).length : 0, sheetN: world.sheet ? world.sheet.n : 0, W: view.W, H: view.H, ins: view.ins, settings: Object.assign({}, S), speed };
       },
       setSpeed(n) { speed = Math.max(0.1, +n || 1); applyAudio(); },
@@ -599,7 +611,8 @@
     Object.assign(progress, RB.Storage.getJSON('progress', {}));
     RB.UI.applyLang(curLang());
     if (RB.I18N && RB.I18N.setChild) RB.I18N.setChild(S.name);
-    if (RB.Voice) { RB.Voice.init({ lang: curLang(), enabled: voiceOn() }); const prevStart = RB.Voice.onStart; RB.Voice.onStart = d => { onVoiceStart(d); if (prevStart) prevStart(d); }; }
+    if (RB.Voice) { RB.Voice.init({ lang: curLang(), enabled: voiceOn() }); const prevStart = RB.Voice.onStart; RB.Voice.onStart = d => { onVoiceStart(d); if (prevStart) prevStart(d); };
+      const prevEnd = RB.Voice.onEnd; RB.Voice.onEnd = d => { if (holdPrompt && d === holdPrompt && world && world.holdBeats) { holdPrompt = null; world.holdBeats(false); } if (prevEnd) prevEnd(d); }; }
     render = new RB.Renderer($('game')); RB.render = render;
     world = new RB.World({ seed: FLAGS.seed != null ? FLAGS.seed : (Date.now() & 0x7fffffff), age: FLAGS.age || S.age, lang: curLang() });
     weather = new RB.Weather({ width: 960, height: 720, seed: 11 });

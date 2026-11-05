@@ -240,6 +240,8 @@ test('layout: slots, sheet, card, drum, Bop inside the safe area; nothing under 
       assert.ok(Math.abs(s.y - (L.stage.y - 38 - L.S / 2)) < 1e-6, 'members sit on the stools');
       const D = L.bigDrum, drawn = { x: D.x - D.r, y: D.y - 0.75 * D.r, w: 2 * D.r, h: 1.5 * D.r };
       assert.ok(!boxesOverlap({ x: s.x - L.S / 2, y: s.y - L.S / 2, w: L.S, h: L.S }, drawn), 'member over the big drum ' + where);
+      if (!L.portrait) assert.ok(s.x - L.S / 2 >= D.x + D.r + 20 - 1e-6, 'member ≥ 20 px right of the big drum ' + where);
+      assert.ok(s.x >= L.stage.x0 && s.x <= L.stage.x1, 'stool on the plank ' + where);
     });
     assert.strictEqual(L.sheet.slots.length, n);
     L.sheet.slots.forEach((s, i) => {
@@ -314,23 +316,24 @@ test('world: states and phases follow intro → round(deal, ask, play, song) →
 test('world: tap vs slide vs hold; tapMoveMin widens the slop', () => {
   const w = roundOf(mkWorld({ age: 4 }), 'colors', 1);
   const m = rightM(w), b = w.memberHit(m);
-  // a slide (60 px) does nothing
+  assert.strictEqual(CFG.tapMovePx, 64); assert.strictEqual(CFG.tapTime, 0.8);
+  // a slide (70 px) does nothing
   assert.strictEqual(w.pointerDown(b.x, b.y), m.id);
-  w.update(0.05); w.pointerMove(b.x + 60, b.y); w.update(0.05);
-  assert.strictEqual(w.pointerUp(b.x + 60, b.y), null);
-  // a long hold (0.7 s) does nothing
-  w.pointerDown(b.x, b.y); run(w, 0.7); assert.strictEqual(w.pointerUp(b.x, b.y), null);
-  // a press shows a tiny squash, then a short wobbly tap (30 px) plays
+  w.update(0.05); w.pointerMove(b.x + 70, b.y); w.update(0.05);
+  assert.strictEqual(w.pointerUp(b.x + 70, b.y), null);
+  // a long hold (0.9 s) does nothing
+  w.pointerDown(b.x, b.y); run(w, 0.9); assert.strictEqual(w.pointerUp(b.x, b.y), null);
+  // a press shows a tiny squash, then a slow wobbly tap (0.6 s, 55 px) still plays
   w.pointerDown(b.x, b.y); run(w, 0.15);
   assert.ok(m.q > 0.03, 'press squash ' + m.q);
-  w.pointerMove(b.x + 30, b.y); run(w, 0.1);
-  assert.strictEqual(w.pointerUp(b.x + 30, b.y), 'play');
-  // tapMoveMin from main: 45 px still a tap when the slop is 50
+  w.pointerMove(b.x + 55, b.y); run(w, 0.45);
+  assert.strictEqual(w.pointerUp(b.x + 55, b.y), 'play');
+  // tapMoveMin from main: 80 px still a tap when the slop is 90
   const w2 = roundOf(mkWorld({ age: 4 }), 'colors', 1);
-  w2.tapMoveMin = 50;
+  w2.tapMoveMin = 90;
   const b2 = w2.memberHit(rightM(w2));
-  w2.pointerDown(b2.x, b2.y); w2.pointerMove(b2.x + 45, b2.y);
-  assert.strictEqual(w2.pointerUp(b2.x + 45, b2.y), 'play');
+  w2.pointerDown(b2.x, b2.y); w2.pointerMove(b2.x + 80, b2.y);
+  assert.strictEqual(w2.pointerUp(b2.x + 80, b2.y), 'play');
   // cancelDrag drops the press
   const w3 = roundOf(mkWorld({ age: 4 }), 'colors', 1), b3 = w3.memberHit(rightM(w3));
   w3.pointerDown(b3.x, b3.y); w3.cancelDrag();
@@ -397,6 +400,7 @@ test('world: drum mode — tap the big drum n times, count card, drumDone + note
   assert.strictEqual(ev.filter(e => e.type === 'boom' && e.member).length, 2);
   const hh = ev.find(e => e.type === 'hint');
   assert.ok(hh && hh.target === 'bigDrum' && hh.memberId === null);
+  run(w, 0.4);
   for (let i = 1; i <= a.n; i++) {
     run(w, 0.4);
     assert.strictEqual(tapBox(w, w.bigDrumHit()), 'drum');
@@ -407,18 +411,75 @@ test('world: drum mode — tap the big drum n times, count card, drumDone + note
     assert.ok(w.bigDrum.hit > 0.9);
     if (i < a.n) assert.strictEqual(w.phase, 'ask'); else { assert.ok(e.find(x => x.type === 'drumDone' && x.n === a.n)); assert.strictEqual(w.phase, 'play'); }
   }
+  run(w, 0.3);
   assert.strictEqual(tapBox(w, w.bigDrumHit()), 'boom');   // extra taps after n: a boom only
-  run(w, 0.6);
+  run(w, 0.4);
   assert.ok(evs(w).find(e => e.type === 'note' && e.i === 0));
   assert.ok(w.sheet.notes[0] && w.sheet.notes[0].memberId === null);
-  run(w, 0.2);
+  run(w, 0.7);
+  assert.strictEqual(w.ask, 0, 'drumQuiet: still waiting 1.1 s after the last boom');
+  run(w, 0.15);
   assert.strictEqual(w.ask, 1);
   assert.strictEqual(w.bigDrum.count, 0);
   assert.strictEqual(w.countCard.lit, 0);
 });
 
+test('world: drum guard, drum quiet (max 3 s), short-count nudge after 4 s', () => {
+  const w = roundOf(mkWorld({ age: 4 }), 'count', 1);
+  evs(w);
+  const a = w.prompt();
+  // a tap in the first 0.7 s of a drum ask is a free boom (a late tap of the previous count)
+  assert.strictEqual(tapBox(w, w.bigDrumHit()), 'boom');
+  assert.strictEqual(w.bigDrum.count, 0);
+  assert.ok(evs(w).find(e => e.type === 'boom' && e.guard));
+  run(w, 0.7);
+  assert.strictEqual(tapBox(w, w.bigDrumHit()), 'drum');
+  assert.strictEqual(w.bigDrum.count, 1);
+  // stops short: idle {short: true} + hint after 4 s (not 12)
+  const t0 = w.time;
+  let idle = null, hint = null;
+  until(w, () => { for (const e of w.drainEvents()) { if (e.type === 'idle') idle = idle || Object.assign({ t: w.time - t0 }, e); if (e.type === 'hint') hint = hint || e; } return !!idle; });
+  assert.ok(idle.short && idle.count === 1 && Math.abs(idle.t - CFG.drumShortNudge) < 0.02, JSON.stringify(idle));
+  assert.ok(hint && hint.target === 'bigDrum' && hint.idle);
+  run(w, 5);
+  assert.ok(!w.drainEvents().some(e => e.type === 'idle'), 'one short nudge per stop');
+  // finish the count, then a drumming spammer: the next ask opens after drumQuietMax at the latest
+  for (let i = 1; i < a.n; i++) { tapBox(w, w.bigDrumHit()); run(w, 0.3); }
+  assert.strictEqual(w.phase, 'play');
+  const p0 = w.time;
+  until(w, () => { if (w.phase === 'play') { tapBox(w, w.bigDrumHit()); run(w, 0.4); } return w.phase !== 'play'; });
+  assert.ok(w.time - p0 <= CFG.drumQuietMax + 0.45, 'quiet max ' + (w.time - p0));
+  assert.strictEqual(w.ask, 1); assert.strictEqual(w.bigDrum.count, 0);
+});
+
+test('world: holdBeats — listen beats wait for main\'s release (≥ beatLead), fallback after 8 s', () => {
+  const w = roundOf(mkWorld({ age: 4 }), 'count', 2);
+  assert.strictEqual(w.phase, 'beats');
+  const t0 = w.time - w.phaseTime;
+  assert.strictEqual(w.holdBeats(true), true);
+  let first = null;
+  const watch = () => { for (const e of w.drainEvents()) if (e.type === 'beat' && first === null) first = w.time - t0; };
+  run(w, 6, watch);
+  assert.strictEqual(first, null, 'held');
+  w.holdBeats(false);
+  run(w, 0.5, watch);
+  assert.ok(first !== null && Math.abs(first - (6 + CFG.beatAfterHold)) < 0.05, 'first beat after the release ' + first);
+  // released early: beatLead stays the minimum
+  const w2 = roundOf(mkWorld({ age: 4, seed: 2 }), 'count', 2), s0 = w2.time - w2.phaseTime;
+  w2.holdBeats(true); run(w2, 1); w2.holdBeats(false);
+  let f2 = null; until(w2, () => { for (const e of w2.drainEvents()) if (e.type === 'beat' && f2 === null) f2 = w2.time - s0; return f2 !== null; });
+  assert.ok(Math.abs(f2 - CFG.beatLead) < 0.02, 'beatLead minimum ' + f2);
+  // never released: the beats start after beatHoldMax
+  const w3 = roundOf(mkWorld({ age: 4, seed: 3 }), 'count', 2), s3 = w3.time - w3.phaseTime;
+  w3.holdBeats(true);
+  let f3 = null; until(w3, () => { for (const e of w3.drainEvents()) if (e.type === 'beat' && f3 === null) f3 = w3.time - s3; return f3 !== null; });
+  assert.ok(Math.abs(f3 - CFG.beatHoldMax) < 0.02, 'fallback ' + f3);
+  assert.strictEqual(w3.holdBeats(true), false, 'no hold once the beats run');
+});
+
 test('world: drum assist — once hinted, a near miss beside the big drum counts', () => {
   const w = roundOf(mkWorld({ age: 4 }), 'count', 0);
+  run(w, 0.8);
   const D = w.layout.bigDrum, x = D.x, y = D.y - 0.75 * D.r - 20 - 40;
   assert.strictEqual(tapBox(w, { x, y }), null);
   assert.strictEqual(w.bigDrum.count, 0);

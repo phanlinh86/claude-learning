@@ -1,7 +1,7 @@
 # Bop's Rainy Band — Mechanics (`RB.CONFIG`, layout, motion, events, playtest tuning)
 
 Owner: mechanics engineer. Code: `game/js/{rng,content,world,weather,bot}.js`. Contract: `docs/DESIGN.md` §2, §5.1–5.5.
-Tests: `node tests/unit/run.js` (27 tests, ≈ 15 s; `node tests/unit/run.js <name part>` runs a subset).
+Tests: `node tests/unit/run.js` (29 tests, ≈ 15 s; `node tests/unit/run.js <name part>` runs a subset).
 Sims (report-only, `tests/sim/`): `node tests/sim/hs_playtest.js [--n 300] [--ages 3,4] [--models typical,slow3,…] [--jobs 2]
 [--config '{…}'] [--tag x]` (high-speed playtest → `tests/sim/out/hs_<tag>.md`), `node tests/sim/determinism.js`,
 `node tests/sim/content_stats.js [chapters]`, `node tests/sim/hs_browser.js` / `hs_browser_voice.js` (the real page in
@@ -20,11 +20,16 @@ Playwright, needs the lead's build). JSON reports are git-ignored.
 `setAge(a)`, `setLang(l)` (both apply at the next `newSession`), `newSession({lastTopics})`, `startLevel(i)`, `update(dt)`,
 `drainEvents()`, `skipTalk()`, `resetNudges()` (after a pause), `talkAnswer(choiceId)` → bool, `hint()` (manual, e.g. a tap on
 the bubble) → member id | `'bigDrum'` | null, `replayBeats()` → bool (listen ask, phase `ask`: Bop plays the beats again — main
-calls it for a bubble tap; a tap on Bop does it by itself).
+calls it for a bubble tap; a tap on Bop does it by itself), `holdBeats(on)` → bool (main calls `holdBeats(true)` on a listen
+`ask` / `replayBeats` event and `holdBeats(false)` when Bop's prompt voice has finished; the first beat then comes
+`beatAfterHold 0.3 s` after the release, never earlier than `beatLead` (replay: `replayLead`) after the ask; after
+`beatHoldMax 8 s` the beats start anyway, so headless / voice-off never stalls. The hold is cleared at every new ask and
+replay; returns true while beats are waiting for it).
 **Input (one active pointer, logical px):** `pointerDown(x, y)` → member id | `'bigDrum'` | `'bop'` | `'snail'` | null (a press
 only: the member shows a tiny press squash); `pointerMove(x, y)`; `pointerUp(x, y)` → `'play'` | `'wrong'` | `'locked'` |
 `'drum'` | `'boom'` | `'pokeBop'` | `'snail'` | null; `cancelDrag()` (touchcancel / pause: the press is dropped, no event).
-**A tap** = down + up within `tapTime 0.6 s` and `< max(tapMovePx 40, w.tapMoveMin)` px of travel; a slide or a held finger does
+**A tap** = down + up within `tapTime 0.8 s` and `< max(tapMovePx 64, w.tapMoveMin)` px of travel (round 2, QA P2-3: 0.6 s /
+40 px threw small slides away); a slide or a held finger does
 nothing (`pointerUp` → null).
 **Queries:** `prompt()` → `{promptKey, params, mode, n}` | null (phases `ask` and `beats`), `answerId()` → id of the right member
 (phase `ask`; null in mode drum and while Bop drums the beats), `memberHit(id)` / `bigDrumHit()` / `bopHit()` / `snailHit()` →
@@ -39,8 +44,8 @@ shower, surprise, cur (the round), members, flyNotes, sheet, countCard, bigDrum,
 - `round` phases: `deal → ask | beats → play → ask | beats → … → play → song`, then **state `roundDone`, phase `clear`** (as the
   sister games: the `roundDone` *event* fires at the end of the song, stars show while the band hops off).
 - `beats` (listen asks only): Bop drums n beats; member taps are ignored, a tap on Bop does nothing; then `ask`.
-- Chapter = 4 songs; Talk time comes early once ≥ 3 songs are done (`chapterMinRounds`) and the chapter is > 80 s old
-  (`chapterTimeLimit`). `roundsPerLevel` then becomes the songs played (the HUD dots fill). Talk re-asks every 12 s
+- Chapter = 4 songs; Talk time comes early once ≥ 3 songs are done (`chapterMinRounds`) and the chapter is > 85 s old
+  (`chapterTimeLimit`, round 2: 80 → 85). `roundsPerLevel` then becomes the songs played (the HUD dots fill). Talk re-asks every 12 s
   (`talkAsk {n}`), `talk.glowAnswer` from the 2nd re-ask.
 - Surprise: one round per chapter, `surpriseRound 2` (the 3rd song, always played), type `['snail','shower'][(level + off) % 2]`
   with a random `off` per session (they alternate between chapters). A shower needs ≥ 3 notes (it comes after the 2nd), else snail.
@@ -50,14 +55,14 @@ shower, surprise, cur (the round), members, flyNotes, sheet, countCard, bigDrum,
 |---|---|
 | `W, H, ins, portrait, tall` | DESIGN short-side rule; `tall` = H/W > 1.6 |
 | `groundY` | `H − ins.bottom − 24` (landscape) / `− 36` (portrait). Also `splashY` (weather) |
-| `stage {x0, x1, y}` | landscape `x0 = ins.left + 380` (W < 1100: 350), `x1 = W − ins.right − 24`, `y = groundY − 74`; portrait `x0 = ins.left + 24`, `y = groundY − 330` (tall − 380) |
-| `S` | member square: 150 (k ≤ 3) / 132 (k = 4), ×1.15 in tall portrait, shrunk to fit `k·S + (k−1)·24 ≤ x1 − x0 − 40`, never < 112 (960-wide landscape with 4 members: 118) |
-| `slots` | member centres, `y = stage.y − 38 (stool) − S/2`; spaced `min((b − a)/(k − 1), S + 110)` (≥ S + 24 by the S rule), centred over `a = x0 + S/2 + 20 … b = x1 − S/2 − 20` |
-| `bigDrum {x, y, r}` | landscape `(ins.left + 250, groundY − 92)`, r 92; portrait `(ins.left + 470, groundY − 100)`, r 100. Drawn 2r × 1.5r around the centre |
-| `bop {x, y, h}` | FEET: landscape `(ins.left + 100, groundY − 4)`, h 300; portrait `(ins.left + 150, groundY − 4)`, h 320 |
-| `sheet {x0, x1, y, noteR, slots}` | landscape `y = max(ins.top + 200, stage.y − S − 38 − 170)`, over the stage x range; portrait `y = bubble bottom + 60`; n slots ≤ 110 apart, centred. Portrait count rounds: `x1 = countCard.x − 16` (the card sits at the right of the sheet row) |
+| `stage {x0, x1, y}` | landscape `x0 = ins.left + 420` (W < 1100: 395), `x1 = W − ins.right − 24`, `y = groundY − 74`; portrait `x0 = ins.left + 24`, `y = groundY − 330` (tall − 380) |
+| `S` | member square: 150 (k ≤ 3) / 132 (k = 4), ×1.15 in tall portrait, shrunk to fit the band row, never < 112 (960-wide landscape with 4 members: 115) |
+| `slots` | member centres, `y = stage.y − 38 (stool) − S/2`; spaced `min((b − a)/(k − 1), S + 110)` (≥ S + 24 by the S rule), centred over the band row: member edges from `lo = x0 + 20` (landscape also `≥ bigDrum.x + r + 20`, `drumClear`) to `hi = x1 − 20`; when k members don't fit at S 112, `hi = min(x1 + 16, W − ins.right − 8)` (`slotOverhang`: the outer member may hang over the plank end, its stool stays on it) |
+| `bigDrum {x, y, r}` | landscape `(ins.left + 305, groundY − 92)`, r 92; portrait `(ins.left + 470, groundY − 100)`, r 100. Drawn 2r × 1.5r around the centre |
+| `bop {x, y, h}` | FEET: landscape `(ins.left + 160, groundY − 4)`, h 300; portrait `(ins.left + 150, groundY − 4)`, h 320 |
+| `sheet {x0, x1, y, noteR, slots}` | landscape `y = max(ins.top + 200, stage.y − S − 38 − 170)`, over the stage x range; portrait `y = max(bubble bottom + 100, stage.y − S − 38 − 230)` (`sheetBelowBubble`, `sheetAbovePort`); n slots ≤ 110 apart, centred. Portrait count rounds: `x1 = countCard.x − 16` (the card sits at the right of the sheet row) |
 | `countCard {x, y, w, h, cx, cy}` | **top-left box + centre**, 180×150. Landscape centred on `bigDrum.x`, top `= max(bubble bottom + 12, bigDrum.y − 1.5r − 190)`; portrait right end of the sheet row (`cx = stage.x1 − 90`), top `= bubble bottom + 12` |
-| `bubble` | landscape `x = ins.left + 24, y = ins.top + 18, w = min(560, W − ins.right − 200 − x), h = 122`; tall portrait `y = ins.top + 110, w = W − x − ins.right − 24, h = 124`; **short portrait (iPad, H/W ≤ 1.6): on the HUD row** `y = ins.top + 18, w = W − ins.right − 160 − 14 − x` (deviation, as the sister game: the 110 px bubble left no room for the sheet + card above the band at 720×960) |
+| `bubble` | landscape `x = ins.left + 24, y = ins.top + 18, w = min(560, W − ins.right − 200 − x), h = 122`; tall portrait `y = ins.top + 140` (round 2: = main's DOM bubble under the HUD row), w = W − x − ins.right − 24, h = 124`; **short portrait (iPad, H/W ≤ 1.6): on the HUD row** `y = ins.top + 18, w = W − ins.right − 160 − 14 − x` (deviation, as the sister game: the 110 px bubble left no room for the sheet + card above the band at 720×960) |
 | `hud` | `x = W − ins.right − 160, y = 0, w = 160 + ins.right, h = ins.top + 96` |
 | `stoolH` | 38 (BandArt.drawStool at `(slot.x, stage.y − 38)`) |
 
@@ -79,7 +84,7 @@ the bubble, spacing ≥ S + 24, S ≥ 112, the sheet ≥ 20 px above the band, t
 | **hop off** | rightmost first, 0.12 s apart, arc to `W + S` (g 2400, apex 100, 0.58 s) |
 | **hit / sing / glow** | `hit` 1 → 0 in 0.4 s (skin ripple); `sing` 1 for 0.7 s (animals); glow → 1 at 6/s while hinted (4 s), → 0 at 3/s |
 | **ghost hand** | `w.hintHand {x, y, t, alpha, target}`: fingertip on the target, a tap every 0.9 s (14 px up → 4 px pressed), fades in 0.25 s / out 0.35 s, 4 s |
-| **snail** | crawls from `W + 90` to `stage.x1 − 60` on the grass in front of the stage's right pot (`y = groundY − 2`) in 5 s with stretch pulses (sx 1 … 1.08 at 1.1 Hz); leaves after the song in 2.5 s (ease-in). **Deviation:** DESIGN says the stage's left end, but there is no free plank there (slot 0's stool starts 15 px from x0 at 960 wide) and the big drum / Bop stand left of the stage |
+| **snail** | (drawn 140 wide, hit radius 80) crawls from `W + 90` to `stage.x1 − 60` on the grass in front of the stage's right pot (`y = groundY − 2`) in 5 s with stretch pulses (sx 1 … 1.08 at 1.1 Hz); leaves after the song in 2.5 s (ease-in). **Deviation:** DESIGN says the stage's left end, but there is no free plank there (slot 0's stool starts 15 px from x0 at 960 wide) and the big drum / Bop stand left of the stage |
 | **shower** | `w.shower` 0 → 1 in 0.4 s, holds to 4 s, → 0 in 0.6 s; Bop `umbrella` 2.5 s; 6 raindrops from 0.5 s, 0.55 s apart, on the members in a shuffled round robin (tiny squash, hit 0.4); `w.wind = 0.4·shower` |
 
 ## 5. Round flow and timing (`RB.CONFIG`)
@@ -89,9 +94,9 @@ the bubble, spacing ≥ S + 24, S ≥ 112, the sheet ≥ 20 px above the band, t
 | pick ask | `ask` event; idle nudges after 12 s, ×1.5 up to 30 s (`idle {n}`; the 2nd idle hints, respecting `hintCooldown 6`) |
 | right tap | `play` → note flies 0.55 s → `note`; phase `play` ≥ 0.6 s (and until the note landed) → next ask / song |
 | wrong tap | `wrong`, member taps locked 0.6 s (`locked`); the 2nd miss on an ask always hints (`hint`), later misses hint with the 6 s cooldown |
-| drum ask | the count card `{n, lit}` shows; each big-drum tap `drumTap {i, n}`; at i = n `drumDone` + a note from the drum; taps after that → `boom`. Band-drum taps → `boom {member: true}`; the 2nd one in an ask hints the big drum |
-| listen ask | `ask` (Bop starts to speak) → phase `beats`: first beat after `beatLead 2.4 s`, `beat {i, n}` every 0.6 s, `beatsDone` 0.5 s after the last → phase `ask`. Replay lead 0.7 s. Right answer → the card shows n lit |
-| song | `songStart` → after 0.5 s a `songNote` every 0.45 s (note pops, its member plays; drum notes: the big drum) → +0.45 s `songEnd` (Bop cheers, the snail leaves) → +0.6 s `roundDone {stars}` |
+| drum ask | the count card `{n, lit}` shows; each big-drum tap `drumTap {i, n}`; at i = n `drumDone` + a note from the drum; taps after that → `boom`. Band-drum taps → `boom {member: true}`; the 2nd one in an ask hints the big drum. **Round 2 (QA P1-2, P2-1):** after `drumDone` phase `play` lasts until no big-drum tap came for `drumQuiet 1.2 s` (≤ `drumQuietMax 3 s` in all), so extra taps never count on the next ask; a big-drum tap in the first `drumGuard 0.7 s` of a drum ask is a free `boom {guard: true}`; stopped short (0 < count < n, no tap for `drumShortNudge 4 s`) → `idle {short: true, count}` + a hint on the big drum (once per stop, idle cooldown rules otherwise) |
+| listen ask | `ask` (Bop starts to speak) → phase `beats`: first beat after `beatLead 4.6 s` (or after main's `holdBeats` release, ≤ 8 s), `beat {i, n}` every 0.75 s, `beatsDone` 0.5 s after the last → phase `ask`. Replay lead 0.7 s. Right answer → the card shows n lit |
+| song | `songStart` → after 1.0 s a `songNote` every 0.5 s (note pops, its member plays; drum notes: the big drum) → +0.45 s `songEnd` (Bop cheers, the snail leaves) → +0.6 s `roundDone {stars}` |
 | clear | state `roundDone`: members hop off, a `clearNote` every 0.1 s, next round after ≥ 0.9 s |
 | stars | 3 / 2 / 1 for 0 / 1 / ≥ 2 misses in the song; Talk + 1 |
 
@@ -141,6 +146,12 @@ Verdict:
 - chapter mean by topic, typical age 4: colors 92.7 · animals 92.1 · shapes 92.8 · count 104.4 · size 89.9 s (count at the general
   note table was 105 s at age 4 and 147–160 s at ages 6–7 → `COUNT_NOTES`, drum ranges 6: 2–7 / 7: 3–8; now 109 / 111 s at 6–7).
 
+**Round 2** (`--n 100 --tag round2`, after the QA fixes: beatLead 4.6, beatGap 0.75, songLead 1.0, songGap 0.5, tap 64 px /
+0.8 s, chapterTimeLimit 85, drumQuiet / drumGuard / drumShortNudge): typical chapter mean / session p90 — age 3 87.4 / 381 s,
+**age 4 97.8 / 426 s** (60–100 ✓, ≤ 480 ✓), age 5 99.6 / 426, age 6 101.1 / 437, age 7 98.3 / 420; count chapter typical age 4
+108.7 s; perfect age 4 61.4 s; stars typical age 4 44/31/24 %. No ask > 60 s or song > 120 s for engaged models, no stuck
+state, no NaN, every 2nd miss hinted, absent → pause at 121 s. (The full table below is the round-1 run.)
+
 Tuning history: v1 (`--n 40`): count chapters 146–160 s at ages 6–7, typical age-7 session p90 505 s, tapper stuck on drum asks
 (a random tap hits the big drum ≈ 6 % of the time) → `COUNT_NOTES`, drum assist (`drumAssistPad 90` once the drum was hinted),
 song tail 0.55 → 0.45 s, song hold 0.75 → 0.6 s, deal delay 0.3 → 0.2 s, settle 0.15 → 0.12 s.
@@ -186,8 +197,8 @@ slot)}` · `beat {i, n, x, y}` · `beatsDone {n, x, y}` · `replayBeats {n, x, y
 nameValue, i, n, mode, promptKey, params, misses}` · `drumTap {i, n, x, y}` · `drumDone {i, n, x, y, pitch, color}` ·
 `note {i, n, color, pitch, x, y}` · `wrong {memberId, x, y, item, block, pitch, nameKind, nameValue, want {kind, value, item,
 memberId, color?, shape?, animal?, size?, n?, text?}, streak, misses, mode, promptKey, params}` · `locked {memberId, x, y}` ·
-`hint {memberId | null, target (member id | 'bigDrum'), x, y, idle?}` · `idle {n, promptKey, params, mode, x, y}` ·
-`boom {x, y, memberId?, member?, pitch?}` · `pokeBop {promptKey, params, mode, replay, x, y}` · `songStart {n, x, y}` ·
+`hint {memberId | null, target (member id | 'bigDrum'), x, y, idle?}` · `idle {n, promptKey, params, mode, x, y, short?, count?}` ·
+`boom {x, y, memberId?, member?, pitch?, guard?}` · `pokeBop {promptKey, params, mode, replay, x, y}` · `songStart {n, x, y}` ·
 `songNote {i, n, memberId | null, pitch, color, x, y (note), mx, my (who plays)}` · `songEnd {n, x, y}` ·
 `roundDone {round, stars, misses, x, y}` · `clearNote {i, color, x, y}` · `snail {x, y}` · `snailTap {x, y}` · `snailRing {x, y}` ·
 `shower {dur, x, y}` · `raindrop {memberId, pitch, x, y}` · `showerEnd` · `talk {talk}` · `talkAsk {talk, n, glowAnswer}` ·
@@ -212,25 +223,27 @@ drops within 70 px of it.
 
 ## 10. `RB.CONFIG` (tuned values, `game/js/world.js`; `new RB.World({config})` overrides any key)
 ```
-step: 1/120, maxFrame: 1, roundsPerLevel: 4, chapterTimeLimit: 80, chapterMinRounds: 3, introTime: 2.5, talkAfterAnswer: 1.6,
+step: 1/120, maxFrame: 1, roundsPerLevel: 4, chapterTimeLimit: 85, chapterMinRounds: 3, introTime: 2.5, talkAfterAnswer: 1.6,
 levelDoneTime: 1.8, talkAskTime: 12, talkGlowAfterAsks: 2, shortSide: 720, minLong: 960, maxLong: 1600, tallRatio: 1.6,
-groundLand: 24, groundPort: 36, memberS: 150, memberS4: 132, tallScale: 1.15, memberMin: 112, stageX0Land: 380,
-stageX0Small: 350, smallW: 1100, stageEdge: 24, stageDyLand: 74, stageDyPort: 330, stageDyTall: 380, stoolH: 38,
-slotEdge: 20, slotGap: 24, slotMaxGap: 110, bigDrumLand: {"dx":250,"dy":92,"r":92}, bigDrumPort: {"dx":470,"dy":100,"r":100},
-bopLand: {"dx":100,"dy":4,"h":300}, bopPort: {"dx":150,"dy":4,"h":320}, sheetTopLand: 200, sheetAbove: 170,
-sheetBelowBubble: 60, noteR: 34, noteGap: 110, cardW: 180, cardH: 150, cardAbove: 190, cardGap: 12, bubbleX: 24,
-bubbleYLand: 18, bubbleMaxW: 560, bubbleRight: 200, bubbleHLand: 122, bubbleYPort: 110, bubbleHPort: 124, hudW: 160,
-hudH: 96, hitFrac: 0.6, hitPad: 14, drumPad: 20, drumAssistPad: 90, bopHalfW: 0.3, bopPad: 20, snailR: 70, tapMovePx: 40,
-tapTime: 0.6, pressSquash: 0.06, hopG: 1600, hopApex: 120, hopFar: 700, hopPause: 0.05, dealStagger: 0.12, dealDelay: 0.2,
-dealSettle: 0.12, outG: 2400, outApex: 100, outStagger: 0.12, squashOmega: 22, squashZeta: 0.35, landSquash: 0.2,
-playSquash: 0.18, sxPerQ: 0.83, hitTime: 0.4, singTime: 0.7, wobOmega: 18, wobZeta: 0.22, wobPeak: 0.25, swayAmp: 0.035,
-swayHz: 0.45, breatheAmp: 0.02, breatheHz: 0.6, wiggleAmp: 0.1, wiggleHz: 2.2, glowBounce: 8, noteTime: 0.55, noteApex: 90,
-noteSpin: 5.5, popTime: 0.35, drumSquash: 0.12, drumHitTime: 0.35, beatSquash: 0.1, playTime: 0.6, beatLead: 2.4,
-beatGap: 0.6, beatTail: 0.5, replayLead: 0.7, songLead: 0.5, songGap: 0.45, songTail: 0.45, songHold: 0.6, clearTime: 0.9,
+groundLand: 24, groundPort: 36, memberS: 150, memberS4: 132, tallScale: 1.15, memberMin: 112, stageX0Land: 420,
+stageX0Small: 395, smallW: 1100, stageEdge: 24, stageDyLand: 74, stageDyPort: 330, stageDyTall: 380, stoolH: 38,
+slotEdge: 20, slotGap: 24, slotMaxGap: 110, drumClear: 20, slotOverhang: 16, bigDrumLand: {"dx":305,"dy":92,"r":92},
+bigDrumPort: {"dx":470,"dy":100,"r":100}, bopLand: {"dx":160,"dy":4,"h":300}, bopPort: {"dx":150,"dy":4,"h":320},
+sheetTopLand: 200, sheetAbove: 170, sheetBelowBubble: 100, sheetAbovePort: 230, noteR: 34, noteGap: 110, cardW: 180,
+cardH: 150, cardAbove: 190, cardGap: 12, bubbleX: 24, bubbleYLand: 18, bubbleMaxW: 560, bubbleRight: 200, bubbleHLand: 122,
+bubbleYPort: 140, bubbleHPort: 124, hudW: 160, hudH: 96, hitFrac: 0.6, hitPad: 14, drumPad: 20, drumAssistPad: 90,
+bopHalfW: 0.3, bopPad: 20, snailR: 80, tapMovePx: 64, tapTime: 0.8, pressSquash: 0.06, hopG: 1600, hopApex: 120, hopFar: 700,
+hopPause: 0.05, dealStagger: 0.12, dealDelay: 0.2, dealSettle: 0.12, outG: 2400, outApex: 100, outStagger: 0.12,
+squashOmega: 22, squashZeta: 0.35, landSquash: 0.2, playSquash: 0.18, sxPerQ: 0.83, hitTime: 0.4, singTime: 0.7,
+wobOmega: 18, wobZeta: 0.22, wobPeak: 0.25, swayAmp: 0.035, swayHz: 0.45, breatheAmp: 0.02, breatheHz: 0.6, wiggleAmp: 0.1,
+wiggleHz: 2.2, glowBounce: 8, noteTime: 0.55, noteApex: 90, noteSpin: 5.5, popTime: 0.35, drumSquash: 0.12,
+drumHitTime: 0.35, beatSquash: 0.1, playTime: 0.6, beatLead: 4.6, beatGap: 0.75, beatTail: 0.5, replayLead: 0.7,
+beatHoldMax: 8, beatAfterHold: 0.3, songLead: 1, songGap: 0.5, songTail: 0.45, songHold: 0.6, clearTime: 0.9,
 clearNoteGap: 0.1, countCardRate: 5, hintAfterMisses: 2, hintCooldown: 6, wrongLock: 0.6, hintTime: 4, hintTap: 0.9,
-idleTime: 12, idleBackoff: 1.5, idleMax: 30, idleHintFrom: 2, softMissHint: 2, surpriseRound: 2,
-surpriseTypes: ["snail","shower"], snailIn: 5, snailOut: 2.5, snailRing: 0.6, snailSize: 110, snailDx: 60, snailFrom: 90,
-showerTime: 4, showerUp: 0.4, showerDown: 0.6, umbrellaTime: 2.5, raindrops: 6, raindropAt: 0.5, raindropGap: 0.55,
+idleTime: 12, idleBackoff: 1.5, idleMax: 30, idleHintFrom: 2, drumQuiet: 1.2, drumQuietMax: 3, drumShortNudge: 4,
+drumGuard: 0.7, softMissHint: 2, surpriseRound: 2, surpriseTypes: ["snail","shower"], snailIn: 5, snailOut: 2.5,
+snailRing: 0.6, snailSize: 140, snailDx: 60, snailFrom: 90, showerTime: 4, showerUp: 0.4, showerDown: 0.6, umbrellaTime: 2.5,
+raindrops: 6, raindropAt: 0.5, raindropGap: 0.55,
 moodTime: {"happy":0.9,"cheer":1.6,"oops":0.8,"think":1.4,"talk":1,"drum":0.22,"drum_up":0.3,"umbrella":2.5}, lookRate: 6,
 blink: [2.2,5], blinkTime: 0.13
 ```
