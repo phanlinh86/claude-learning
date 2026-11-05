@@ -1,0 +1,12 @@
+diff --git a/projects/daily-game/robot-rooftop-flip/tests/unit/run.js b/projects/daily-game/robot-rooftop-flip/tests/unit/run.js
+--- a/projects/daily-game/robot-rooftop-flip/tests/unit/run.js
++++ b/projects/daily-game/robot-rooftop-flip/tests/unit/run.js
+@@ -294,7 +294,7 @@ test('fairness: one surface always safe, hazard windows, forced-flip spacing, ga
+     const w = genTrack(diff, loop * 4, seed, 160);         // ≈ 1500 units ≈ 5–6 levels
+     const u = w.layout.unit, D = C.difficulty[diff], m = C.gen.margin * u, tF = w.flightTime();
+     const hz = w.hazards.filter(h => h.x1 + 3 * u < w.gen.frontier), start = w.plans[0].startX;   // the newest hazard's tail is not built yet
+-    assert.ok(hz.length > 150, 'hazards ' + hz.length);
++    assert.ok(hz.length > 120, 'hazards ' + hz.length);   // sample-size guard (Easy ≈ 135 with the playtest's calmer Easy)
+     assert.ok(w.plans.length >= 4, 'several levels generated');
+     const cap = x => w._capFor(w._planAt(x), x);
+     // safe start

@@ -1,0 +1,6 @@
+{
+  "note": "CONFIG overrides proposed by the playtest (docs/reports/playtest.md). Keep in sync with results/proposal.patch.",
+  "overrides": {
+    "difficulty": { "easy": { "reaction": 1.8, "extra": [0.8, 2.0], "hitK": 0.6 } }
+  }
+}
