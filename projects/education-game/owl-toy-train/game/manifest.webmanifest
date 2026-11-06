@@ -1,0 +1,16 @@
+{
+  "name": "Momo's Toy Train · Chuyến Tàu Đồ Chơi Của Cú Momo",
+  "short_name": "Toy Train",
+  "description": "Load Momo the owl's toy train: colours, shapes, counting and animal homes. English & Vietnamese.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#F3E6CF",
+  "theme_color": "#F3E6CF",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

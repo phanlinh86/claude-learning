@@ -1,0 +1,247 @@
+<!doctype html>
+<!-- Contact-sheet page for TT.TrainArt + the animal/home stickers. Driven by tools/train_sheet.js (Playwright):
+     train_sheet.html?sheet=train|cargo|animals|engine|tunnel|plates|fit  → draws into #c, sets window.done = true. -->
+<html><head><meta charset="utf-8"><title>Train art sheet</title>
+<style>html,body{margin:0;background:#fff}canvas{display:block}</style></head>
+<body><canvas id="c"></canvas>
+<script src="../game/js/train_art.js"></script>
+<script>
+(function () {
+  var TA = TT.TrainArt, q = new URLSearchParams(location.search), sheet = q.get('sheet') || 'train';
+  var ANIMALS = ['cow', 'pig', 'sheep', 'duck', 'frog', 'fish', 'bird', 'squirrel', 'butterfly', 'bunny', 'mouse', 'fox'];
+  var HOMES = ['barn', 'pond', 'tree', 'burrow'], CARGO = ['teddy', 'ball', 'duckie', 'rocket', 'boat', 'drum'];
+  var names = ANIMALS.map(function (a) { return 'items/animal_' + a; }).concat(HOMES.map(function (h) { return 'items/home_' + h; }),
+    CARGO.map(function (c) { return 'items/cargo_' + c; }), ['characters/momo_idle', 'characters/momo_whistle', 'characters/momo_point', 'characters/bunny_toy']);
+  var imgs = {};
+  function load(n) {
+    return new Promise(function (res) {
+      var im = new Image(); im.onload = function () { imgs[n.split('/')[1]] = im; res(); }; im.onerror = function () { res(); };
+      im.src = '../game/assets/default/' + n + '.svg';
+    });
+  }
+  var img = function (n) { return imgs[n] || null; };
+  var cv = document.getElementById('c'), ctx = cv.getContext('2d');
+  function size(w, h) { cv.width = w; cv.height = h; cv.style.width = w + 'px'; cv.style.height = h + 'px'; }
+  function label(t, x, y, col) { ctx.save(); ctx.font = '600 15px system-ui, sans-serif'; ctx.fillStyle = col || '#4A3A2A'; ctx.fillText(t, x, y); ctx.restore(); }
+
+  // ---------------------------------------------------------------- the parked train on a band
+  function band(y0, H, mood) {
+    var wall = mood === 'night' ? '#4B4F78' : '#F3E6CF', floor = mood === 'night' ? '#5A5470' : '#D8B88E';
+    ctx.fillStyle = wall; ctx.fillRect(0, y0, cv.width, H);
+    ctx.fillStyle = floor; ctx.fillRect(0, y0 + H - 90, cv.width, 90);
+    ctx.fillStyle = mood === 'night' ? '#6C7898' : '#CFE3D8'; ctx.fillRect(0, y0 + H - 250, cv.width, 120);   // rug strip
+  }
+  function train(y0, H, cars, o) {
+    o = o || {};
+    var W = cv.width, E = o.E || 240, trackY = y0 + H - 50, ex = 20, S = 104;
+    TA.drawTrack(ctx, 0, W, trackY, o.scroll || 0);
+    var span = W - 20 - (ex + E + 16), n = cars.length, carW = Math.min(260, (span - 16 * (n - 1)) / n), carH = Math.max(96, Math.min(150, 0.62 * carW));
+    var total = n * carW + (n - 1) * 16, cx0 = ex + E + 16 + (span - total) / 2;
+    var carScale = Math.max(0.55, Math.min(0.85, carW / (2.3 * S)));
+    var eg = TA.engineGeom(E);
+    ctx.save(); ctx.translate(ex, trackY);
+    TA.drawEngine(ctx, E, { wheelRot: o.rot || 0, whistle: o.whistle || 0, lamp: o.lamp || 0, night: o.night || 0, glow: o.glow || 0, t: 0.3 }, 'back');
+    var momo = img(o.momo || 'momo_idle');
+    if (momo) { var mh = 0.95 * E, mx = (eg.cab.x0 + eg.cab.x1) / 2; ctx.drawImage(momo, mx - mh / 2, eg.cab.floorY - mh * 292 / 300, mh, mh); }
+    TA.drawEngine(ctx, E, { wheelRot: o.rot || 0, whistle: o.whistle || 0, lamp: o.lamp || 0, night: o.night || 0, glow: o.glow || 0, t: 0.3 }, 'front');
+    ctx.restore();
+    // couplings
+    var hy = trackY + eg.hookY;
+    TA.drawCoupling(ctx, ex + E, cx0, hy, o.stretch || 0);
+    cars.forEach(function (car, i) {
+      var x = cx0 + i * (carW + 16);
+      if (i) TA.drawCoupling(ctx, x - 16, x, trackY + TA.carGeom(carW, carH).hookY, o.stretch || 0);
+      ctx.save(); ctx.translate(x, trackY);
+      TA.drawCar(ctx, car, carW, carH, { wheelRot: o.rot || 0, img: img, glow: car.glow || 0, t: 0.3 }, 'back');
+      var floorY = -26 - carH + 0.62 * carH, s = S * carScale;
+      (car.cargo || []).forEach(function (it, j, arr) {
+        var k = arr.length, px = carW * (0.5 + (j - (k - 1) / 2) * 0.32), row = it.row || 0;
+        ctx.save(); ctx.translate(px + row * 12, floorY - 0.46 * s - row * 0.28 * S); TA.drawCargo(ctx, it, s, { img: img }); ctx.restore();
+      });
+      TA.drawCar(ctx, car, carW, carH, { wheelRot: o.rot || 0, img: img, glow: car.glow || 0, t: 0.3 }, 'front');
+      ctx.restore();
+    });
+    // a few cargo resting on the rug
+    (o.rug || []).forEach(function (it, j) {
+      ctx.save(); ctx.translate(380 + j * 150, trackY - 270); TA.drawCargo(ctx, it, S, { img: img, shadow: true, glow: it.glow || 0, t: 0.3 }); ctx.restore();
+    });
+    label('carW ' + carW.toFixed(0) + '  carH ' + carH.toFixed(0) + '  E ' + E, W - 240, y0 + 22, o.night ? '#FFF' : null);
+  }
+
+  function sheetTrain() {
+    size(1556, 3 * 720);
+    band(0, 720, 'morning');
+    train(0, 720, [
+      { label: { type: 'color', color: 'red' }, cargo: [{ kind: 'block', toy: 'cube', color: 'red' }, { kind: 'block', toy: 'ball', color: 'red' }] },
+      { label: { type: 'shape', value: 'star', color: 'yellow' }, cargo: [{ kind: 'shape', shape: 'star', color: 'yellow' }] },
+      { label: { type: 'number', value: 3 }, need: 3, filled: 2, glow: 1, cargo: [{ kind: 'sprite', sprite: 'cargo_teddy' }, { kind: 'sprite', sprite: 'cargo_teddy' }] }
+    ], { rug: [{ kind: 'block', toy: 'cone', color: 'blue' }, { kind: 'block', toy: 'cylinder', color: 'green', glow: 1 }, { kind: 'shape', shape: 'heart', color: 'pink' }, { kind: 'sprite', sprite: 'animal_cow' }, { kind: 'letter', text: 'B', color: 'blue' }] });
+    band(720, 720, 'noon');
+    train(720, 720, [
+      { label: { type: 'home', value: 'barn' }, cargo: [{ kind: 'sprite', sprite: 'animal_pig' }, { kind: 'sprite', sprite: 'animal_cow' }] },
+      { label: { type: 'letter', value: 'M' }, cargo: [{ kind: 'letter', text: 'M', color: 'green' }] },
+      { label: { type: 'text', value: '3+2' }, cargo: [{ kind: 'number', text: '5', color: 'orange' }] },
+      { label: { type: 'home', value: 'burrow' }, cargo: [{ kind: 'sprite', sprite: 'animal_fox' }] }
+    ], { momo: 'momo_point', rot: 0.8 });
+    band(1440, 720, 'night');
+    train(1440, 720, [
+      { label: { type: 'size', value: 'big', color: 'purple' }, cargo: [{ kind: 'size', toy: 'cube', color: 'purple', value: 'big' }] },
+      { label: { type: 'size', value: 'small', color: 'purple' }, cargo: [{ kind: 'size', toy: 'cube', color: 'purple', value: 'small' }] },
+      { label: { type: 'parity', value: 'odd' }, cargo: [{ kind: 'number', text: '7', color: 'yellow' }] },
+      { label: { type: 'parity', value: 'even' }, cargo: [{ kind: 'number', text: '4', color: 'red' }] }
+    ], { lamp: 1, night: 1, whistle: 0.6, momo: 'momo_whistle', glow: 1 });
+  }
+
+  // ---------------------------------------------------------------- cargo
+  function sheetCargo() {
+    var items = [];
+    ['cube', 'ball', 'cone', 'cylinder'].forEach(function (t, i) { items.push({ kind: 'block', toy: t, color: ['red', 'blue', 'yellow', 'green'][i] }); });
+    ['cube', 'ball', 'cone', 'cylinder'].forEach(function (t, i) { items.push({ kind: 'block', toy: t, color: ['orange', 'purple', 'pink', 'red'][i] }); });
+    ['circle', 'square', 'triangle', 'star', 'heart', 'rect', 'diamond', 'oval'].forEach(function (s, i) {
+      items.push({ kind: 'shape', shape: s, color: ['red', 'blue', 'yellow', 'green', 'pink', 'orange', 'purple', 'blue'][i] });
+    });
+    [['letter', 'A', 'red'], ['letter', 'b', 'blue'], ['letter', 'M', 'yellow'], ['letter', 'g', 'green'], ['number', '7', 'orange'], ['number', '10', 'purple'],
+     ['text', '3+2', 'pink'], ['letter', 'Ư', null]].forEach(function (a) { items.push({ kind: a[0], text: a[1], color: a[2] }); });
+    items.push({ kind: 'size', toy: 'cube', color: 'green', value: 'big' }, { kind: 'size', toy: 'cube', color: 'green', value: 'small' },
+      { kind: 'size', toy: 'ball', color: 'red', value: 'big' }, { kind: 'size', toy: 'ball', color: 'red', value: 'small' });
+    CARGO.forEach(function (c) { items.push({ kind: 'sprite', sprite: 'cargo_' + c }); });
+    items.push({ kind: 'sprite', sprite: 'animal_cow' }, { kind: 'sprite', sprite: 'missing_sprite' });
+    var S = 104, cell = 128, cols = 12, rows = Math.ceil(items.length / cols);
+    var big = items.filter(function (it, i) { return [0, 1, 2, 3, 11, 12, 13, 16, 17, 20, 22, 28].indexOf(i) >= 0; });
+    size(cols * cell, rows * cell + 40 + Math.ceil(big.length / 4) * 330 + 20);
+    ctx.fillStyle = '#CFE3D8'; ctx.fillRect(0, 0, cv.width, rows * cell + 30);
+    label('cargo at S = 104 on the rug (#CFE3D8), shadow on', 8, 18);
+    items.forEach(function (it, i) {
+      var x = (i % cols) * cell + cell / 2, y = Math.floor(i / cols) * cell + 30 + cell / 2;
+      ctx.save(); ctx.translate(x, y); TA.drawCargo(ctx, it, S, { img: img, shadow: true }); ctx.restore();
+      ctx.strokeStyle = 'rgba(0,0,0,0.08)'; ctx.strokeRect(x - S / 2, y - S / 2, S, S);
+    });
+    var y0 = rows * cell + 40;
+    ctx.fillStyle = '#D8B88E'; ctx.fillRect(0, y0 - 10, cv.width, cv.height - y0 + 10);
+    label('3× (S = 104 scaled ×3)', 8, y0 + 8);
+    big.forEach(function (it, i) {
+      var x = (i % 4) * 384 + 192, y = y0 + Math.floor(i / 4) * 330 + 170;
+      ctx.save(); ctx.translate(x, y); ctx.scale(3, 3); TA.drawCargo(ctx, it, S, { img: img, shadow: true, squash: i === 3 ? { sx: 1.15, sy: 0.85 } : null }); ctx.restore();
+    });
+  }
+
+  // ---------------------------------------------------------------- animals + homes
+  function sheetAnimals() {
+    var all = ANIMALS.map(function (a) { return 'animal_' + a; }).concat(HOMES.map(function (h) { return 'home_' + h; }));
+    size(16 * 96 + 16, 96 + 72 + 96 + 72 + 2 * 250 + 40);
+    var bgs = ['#CFE3D8', '#D8B88E', '#4B4F78'], y = 0;
+    [[90, '#CFE3D8'], [64, '#FFF6E4'], [90, '#4B4F78'], [64, '#D8B88E']].forEach(function (r) {
+      var s = r[0], rh = s + 6;
+      ctx.fillStyle = r[1]; ctx.fillRect(0, y, cv.width, rh);
+      all.forEach(function (n, i) { var im = img(n); if (im) ctx.drawImage(im, 8 + i * 96 + (96 - s) / 2, y + 3, s, s); });
+      // bottom-anchor guide (156/160)
+      ctx.fillStyle = 'rgba(200,0,0,0.5)'; ctx.fillRect(0, y + 3 + s * 156 / 160, 6, 1);
+      y += rh;
+    });
+    void bgs;
+    for (var k = 0; k < 2; k++) {
+      ctx.fillStyle = k ? '#D8B88E' : '#CFE3D8'; ctx.fillRect(0, y, cv.width, 250);
+      all.slice(k * 8, k * 8 + 8).forEach(function (n, i) { var im = img(n); if (im) ctx.drawImage(im, 8 + i * 192, y + 5, 240, 240); });
+      y += 250;
+    }
+  }
+
+  // ---------------------------------------------------------------- engine states
+  function sheetEngine() {
+    var E = 240;
+    size(1500, 1180);
+    ctx.fillStyle = '#F3E6CF'; ctx.fillRect(0, 0, 1500, 400);
+    ctx.fillStyle = '#4B4F78'; ctx.fillRect(0, 400, 1500, 400);
+    [[0, 0, 0, 'whistle 0'], [0.5, 0, 0, 'whistle 0.5'], [1, 0, 0, 'whistle 1'], [0, 1, 1, 'night lamp 1 + glow']].forEach(function (s, i) {
+      var x = 40 + i * 360, y = 370;
+      TA.drawTrack(ctx, x - 30, x + E + 30, y, 0);
+      ctx.save(); ctx.translate(x, y);
+      var o = { whistle: s[0], lamp: s[1], night: s[2], glow: s[1], t: 0.2 };
+      TA.drawEngine(ctx, E, o, 'back');
+      var m = img(s[0] > 0 ? 'momo_whistle' : 'momo_idle'), g = TA.engineGeom(E);
+      if (m) { var mh = 0.95 * E; ctx.drawImage(m, (g.cab.x0 + g.cab.x1) / 2 - mh / 2, g.cab.floorY - mh * 292 / 300, mh, mh); }
+      TA.drawEngine(ctx, E, o, 'front');
+      ctx.restore(); label(s[3], x, 24);
+    });
+    // night row: engine with/without lamp at E=180, E=210
+    [[180, 1, 1], [210, 0.6, 1], [240, 0, 1]].forEach(function (s, i) {
+      var x = 120 + i * 480, y = 770;
+      TA.drawTrack(ctx, x - 60, x + s[0] + 60, y, 10);
+      ctx.save(); ctx.translate(x, y); TA.drawEngine(ctx, s[0], { lamp: s[1], night: s[2], t: 0 }, 'back'); TA.drawEngine(ctx, s[0], { lamp: s[1], night: s[2], t: 0 }, 'front'); ctx.restore();
+      label('E ' + s[0] + ' lamp ' + s[1], x, 430, '#FFF');
+    });
+    // wheel rotation frames (front half of the engine, 2×)
+    ctx.fillStyle = '#D8B88E'; ctx.fillRect(0, 800, 1500, 380);
+    for (var f = 0; f < 6; f++) {
+      var x = 20 + f * 245, y = 1150;
+      ctx.save(); ctx.beginPath(); ctx.rect(x, 830, 235, 340); ctx.clip();
+      ctx.translate(x + 20, y); ctx.scale(1.6, 1.6);
+      TA.drawTrack(ctx, -20, 160, 0, f * 10);
+      TA.drawEngine(ctx, 240, { wheelRot: f * Math.PI / 6 }, 'back'); TA.drawEngine(ctx, 240, { wheelRot: f * Math.PI / 6 }, 'front');
+      ctx.restore(); label('rot ' + f + '·30°', x + 4, 846);
+    }
+  }
+
+  // ---------------------------------------------------------------- tunnel
+  function sheetTunnel() {
+    size(1200, 560);
+    ctx.fillStyle = '#F3E6CF'; ctx.fillRect(0, 0, 1200, 560);
+    ctx.fillStyle = '#D8B88E'; ctx.fillRect(0, 470, 1200, 90);
+    var E = 240, h = 1.42 * E, trackY = 480;
+    // left: parts separately; right: train entering
+    [[200, 'back only', 'back'], [520, 'front only', 'front']].forEach(function (s) {
+      TA.drawTunnel(ctx, s[0], trackY, h, s[2]); label(s[1], s[0] - 100, 24);
+    });
+    var tx = 900;
+    TA.drawTrack(ctx, 600, 1200, trackY, 0);
+    TA.drawTunnel(ctx, tx, trackY, h, 'back');
+    ctx.save(); ctx.translate(tx - 60, trackY); TA.drawEngine(ctx, E, {}, 'back'); TA.drawEngine(ctx, E, {}, 'front'); ctx.restore();
+    TA.drawTunnel(ctx, tx, trackY, h, 'front');
+    ctx.strokeStyle = 'red'; ctx.beginPath(); ctx.moveTo(tx, 40); ctx.lineTo(tx, 540); ctx.stroke();
+    label('train entering (x = tunnelX red line)', tx - 200, 24);
+  }
+
+  // ---------------------------------------------------------------- plates at small and big car sizes
+  function sheetPlates() {
+    var cars = [
+      { label: { type: 'color', color: 'blue' } }, { label: { type: 'color', color: 'yellow' } },
+      { label: { type: 'shape', value: 'triangle', color: 'green' } }, { label: { type: 'shape', value: 'oval', color: 'purple' } },
+      { label: { type: 'number', value: 4, showDots: true } }, { label: { type: 'number', value: 8 }, need: 8, filled: 5 },
+      { label: { type: 'number', value: 12 }, need: 12, filled: 12 }, { label: { type: 'letter', value: 'A' } },
+      { label: { type: 'text', value: '10-4' } }, { label: { type: 'home', value: 'pond' } }, { label: { type: 'home', value: 'tree' } },
+      { label: { type: 'home', value: 'nohome' } }
+    ];
+    size(1560, 2 * 3 * 240 + 20);
+    [[150, 96], [260, 150]].forEach(function (d, r) {
+      ctx.fillStyle = r ? '#D8B88E' : '#CFE3D8'; ctx.fillRect(0, r * 720, 1560, 720);
+      cars.forEach(function (c, i) {
+        var col = i % 4, row = Math.floor(i / 4), x = 20 + col * (d[0] + 110), y = r * 720 + 220 + row * 235;
+        TA.drawTrack(ctx, x - 10, x + d[0] + 10, y, 0);
+        ctx.save(); ctx.translate(x, y); TA.drawCar(ctx, c, d[0], d[1], { img: img, t: 0 }, 'back'); TA.drawCar(ctx, c, d[0], d[1], { img: img, t: 0 }, 'front'); ctx.restore();
+      });
+      label('car ' + d[0] + '×' + d[1], 8, r * 720 + 18);
+    });
+  }
+
+  // ---------------------------------------------------------------- fit measurement for the animal stickers
+  function sheetFit() {
+    var out = {}, R = 4;
+    size(160 * R, 160 * R);
+    ANIMALS.forEach(function (a) {
+      var im = img('animal_' + a); if (!im) return;
+      ctx.clearRect(0, 0, cv.width, cv.height); ctx.drawImage(im, 0, 0, 160 * R, 160 * R);
+      var d = ctx.getImageData(0, 0, cv.width, cv.height).data, x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1;
+      for (var y = 0; y < cv.height; y++) for (var x = 0; x < cv.width; x++) if (d[(y * cv.width + x) * 4 + 3] > 20) {
+        if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+      }
+      out['animal_' + a] = [x0 / R, y0 / R, (x1 + 1) / R, (y1 + 1) / R];
+    });
+    window.fitResult = out;
+  }
+
+  Promise.all(names.map(load)).then(function () {
+    ({ train: sheetTrain, cargo: sheetCargo, animals: sheetAnimals, engine: sheetEngine, tunnel: sheetTunnel, plates: sheetPlates, fit: sheetFit }[sheet] || sheetTrain)();
+    window.done = true;
+  }).catch(function (e) { window.err = String(e && e.stack || e); window.done = true; });
+})();
+</script></body></html>

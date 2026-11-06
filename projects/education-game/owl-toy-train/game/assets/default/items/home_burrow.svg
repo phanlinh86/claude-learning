@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="160" height="160" viewBox="0 0 160 160">
+<defs><clipPath id="home_burrow_clip"><circle cx="64" cy="64" r="52"/></clipPath><clipPath id="home_burrow_c1"><path d="M -6 120 C -4 80 26 50 64 48 C 102 50 132 80 134 120 Z" /></clipPath><clipPath id="home_burrow_c2"><ellipse cx="62" cy="94" rx="26" ry="22" /></clipPath><clipPath id="home_burrow_c3"><path d="M 88 104 C 96 98 110 92 120 90 C 118 98 108 108 94 112 C 90 112 86 108 88 104 Z" /></clipPath><clipPath id="home_burrow_c4"><path d="M 88 104 C 82 96 80 90 84 88 C 86 94 88 98 90 102 C 88 94 90 88 94 88 C 94 94 92 100 90 104 Z" /></clipPath></defs>
+<g transform="translate(0 -1.5) scale(1.25)">
+<circle cx="64" cy="66.5" r="58" fill="#2A2420" opacity=".16"/>
+<circle cx="64" cy="64" r="58" fill="#FFFFFF" stroke="#4E7A2E" stroke-width="3"/>
+<g clip-path="url(#home_burrow_clip)">
+<rect x="0" y="0" width="128" height="128" rx="0" fill="#CDEBFA"/>
+<path d="M -6 120 C -4 80 26 50 64 48 C 102 50 132 80 134 120 Z" fill="#78BD4D"/>
+<g clip-path="url(#home_burrow_c1)"><g transform="translate(-6 -5)"><path d="M -6 120 C -4 80 26 50 64 48 C 102 50 132 80 134 120 Z" fill="#8ED05E"/></g>
+<ellipse cx="40" cy="62" rx="14" ry="5" transform="rotate(-25 40 62)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M -6 120 C -4 80 26 50 64 48 C 102 50 132 80 134 120 Z" fill="none" stroke="#4E9A2E" stroke-width="2.4" stroke-linejoin="round"/>
+<path d="M 24 74 L 22 68 M 27 74 L 28 68" fill="none" stroke="#4E9A2E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 98 66 L 96 60 M 101 66 L 102 60" fill="none" stroke="#4E9A2E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 108 84 L 106 78 M 111 84 L 112 78" fill="none" stroke="#4E9A2E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 40 58 L 38 52 M 43 58 L 44 52" fill="none" stroke="#4E9A2E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse cx="62" cy="94" rx="26" ry="22" fill="#A9784A"/>
+<g clip-path="url(#home_burrow_c2)">
+</g>
+<ellipse cx="62" cy="94" rx="26" ry="22" fill="none" stroke="#6B4422" stroke-width="2.6" stroke-linejoin="round"/>
+<ellipse cx="62" cy="97" rx="19" ry="16.5" fill="#3A2618"/>
+<ellipse cx="58" cy="92" rx="6" ry="3" fill="#5A3C26" opacity="0.6"/>
+<path d="M 88 104 C 96 98 110 92 120 90 C 118 98 108 108 94 112 C 90 112 86 108 88 104 Z" fill="#FF9A2E"/>
+<g clip-path="url(#home_burrow_c3)">
+<ellipse cx="104" cy="98" rx="6" ry="1.5" transform="rotate(-20 104 98)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M 88 104 C 96 98 110 92 120 90 C 118 98 108 108 94 112 C 90 112 86 108 88 104 Z" fill="none" stroke="#C4650C" stroke-width="2.2" stroke-linejoin="round"/>
+<path d="M 98 104 L 100 108 M 106 100 L 108 104" fill="none" stroke="#C4650C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 88 104 C 82 96 80 90 84 88 C 86 94 88 98 90 102 C 88 94 90 88 94 88 C 94 94 92 100 90 104 Z" fill="#4FB848"/>
+<g clip-path="url(#home_burrow_c4)">
+</g>
+<path d="M 88 104 C 82 96 80 90 84 88 C 86 94 88 98 90 102 C 88 94 90 88 94 88 C 94 94 92 100 90 104 Z" fill="none" stroke="#26781F" stroke-width="1.8" stroke-linejoin="round"/>
+</g>
+<circle cx="64" cy="64" r="52" fill="none" stroke="#4E7A2E" stroke-width="2.6" opacity=".6"/>
+</g>
+</svg>
