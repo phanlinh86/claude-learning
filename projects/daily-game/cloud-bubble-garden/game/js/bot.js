@@ -82,7 +82,7 @@
     var side = H.x >= worst.x ? 1 : -1;
     var gap = H.r + worst.r + 0.7 * u;
     var nx = worst.x + side * gap;
-    if (nx < H.r || nx > L.width - H.r) { side = -side; nx = worst.x + side * gap; }
+    if (nx < L.left + H.r || nx > L.right - H.r) { side = -side; nx = worst.x + side * gap; }
     // keep her height but never move up into the burr's path
     w.setTarget(nx, M.max(H.y, H.ty));
     return true;

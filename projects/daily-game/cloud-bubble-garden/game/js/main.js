@@ -45,7 +45,7 @@
     makeWorld(seed, forTitle, level) {
       const s = seed != null ? seed : (this.seed != null ? this.seed + this.stats.games : (Math.random() * 1e9) | 0);   // seeded soak runs still vary game to game
       const R = this.renderer;
-      return new NB.World({ seed: s, difficulty: forTitle ? 'normal' : this.difficulty(), width: R.VW, height: R.VH, level: level || 0 });
+      return new NB.World({ seed: s, difficulty: forTitle ? 'normal' : this.difficulty(), width: R.VW, height: R.VH, level: level || 0, insets: R.playInsets() });
     },
     readInsets() {
       const el = document.getElementById('safeProbe'); if (!el) return null;
@@ -53,7 +53,7 @@
       return { top: parseFloat(cs.paddingTop) || 0, right: parseFloat(cs.paddingRight) || 0, bottom: parseFloat(cs.paddingBottom) || 0, left: parseFloat(cs.paddingLeft) || 0 };
     },
     relayout() { this.renderer.resize(this.readInsets()); },
-    makeWeather() { const wx = new NB.Weather({ width: this.renderer.VW, height: this.renderer.VH, seed: 5 }); const L = NB.World.computeLayout(this.renderer.VW, this.renderer.VH); if (wx.setGround) wx.setGround(L.groundY, L.unit); return wx; },
+    makeWeather() { const wx = new NB.Weather({ width: this.renderer.VW, height: this.renderer.VH, seed: 5 }); const L = NB.World.computeLayout(this.renderer.VW, this.renderer.VH, this.renderer.playInsets()); if (wx.setGround) wx.setGround(L.groundY, L.unit); return wx; },
     _setLevelVisuals(zone, instant) {
       this.weather.setLevel(zone, { instant });
       this.renderer.setLevel(zone, instant);

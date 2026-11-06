@@ -85,6 +85,8 @@
     puddleJitter: 0.2,      // unit   ± around a puddle centre
     maxBubbles: 14,         // —      alive at once (≈ what fits a landscape screen without clutter)
     maxBurrs: 3,            // —      non-gone burrs at once
+    burrRefW: 9.6,          // unit   burr rate is per 9.6 units of width: a narrow portrait field gets fewer per second (playtest)
+    boxK: 1.15,             // ×      Nimbus's centre keeps r·boxK from the sides/top so her arms and curl stay on screen (visual P2)
 
     // ---- scoring ----
     gemPoints: 10,          // pts × size
@@ -97,7 +99,7 @@
     popK: 0.85,             // ×      pop when dist < hero.r + b.r·popK·difficulty.popK
 
     // ---- levels ----
-    goal: { easy: 48, normal: 48, hard: 52 },   // gems per level (+2 per loop): ≈2 showers per level, 60–80 s for a casual player
+    goal: { easy: 40, normal: 48, hard: 52 },   // gems per level (+2 per loop): ≈2 showers per level, 60–80 s for a casual player
     loopRise: 0.08,         // ×/loop each round after Night: bubbles 8 % faster…
     loopBurr: 0.1,          // ×/loop …burrs 10 % more often…
     loopCap: 4,             // loops  …up to loop 4
@@ -108,13 +110,13 @@
     //  hearts · rise = × zone rise speed · spawn = × zone bubbles/s · burrEvery = × zone burr interval ·
     //  hangTime = s of dangling before the drop · burrR = × burr hit radius · popK = × pop reach
     difficulty: {
-      easy:   { hearts: 5, rise: 0.75, spawn: 1.05, burrEvery: 1.5,  hangTime: 1.6,  burrR: 0.85, popK: 1.25 },
-      normal: { hearts: 3, rise: 1.0,  spawn: 1.0,  burrEvery: 1.0,  hangTime: 1.1,  burrR: 1.0,  popK: 1.0 },
+      easy:   { hearts: 5, rise: 0.6,  spawn: 1.1,  burrEvery: 1.8,  hangTime: 1.6,  burrR: 0.75, popK: 1.45 },
+      normal: { hearts: 3, rise: 1.0,  spawn: 1.0,  burrEvery: 1.15, hangTime: 1.1,  burrR: 1.0,  popK: 1.0 },
       hard:   { hearts: 3, rise: 1.2,  spawn: 0.95, burrEvery: 0.72, hangTime: 0.85, burrR: 1.0,  popK: 0.95 }
     },
     //  rise = unit/s terminal rise · spawn = bubbles/s · burrEvery = s between burrs · windMax = unit/s (DESIGN)
     zones: [
-      { rise: 0.85, spawn: 0.80, burrEvery: 6.0, windMax: 0.1 },   // dawn   (Easy: 0.64 u/s, 0.84/s, a burr every 9 s)
+      { rise: 0.85, spawn: 0.80, burrEvery: 6.0, windMax: 0.1 },   // dawn   (Easy: 0.51 u/s, 0.88/s, a burr every 10.8 s)
       { rise: 0.95, spawn: 0.82, burrEvery: 5.0, windMax: 0.35 },  // noon
       { rise: 1.05, spawn: 0.84, burrEvery: 4.2, windMax: 0.6 },   // sunset
       { rise: 1.12, spawn: 0.86, burrEvery: 3.5, windMax: 0.3 }    // night  (Hard: a burr every 2.5 s)
@@ -127,12 +129,18 @@
   World.CONFIG = CONFIG;
 
   /** DESIGN §2 layout. */
-  World.computeLayout = function (w, h) {
+  /* ins (optional, logical px): {top, left, right} space the HUD / safe area keeps for itself. topY never sits
+   * under the HUD (burrs dangle below it, Nimbus stays below it) and x stays clear of a notch (QA F1/F2, visual P1). */
+  World.computeLayout = function (w, h, ins) {
+    ins = ins || {};
     var portrait = h > w;
     var unit = portrait ? M.min(w / 6, h / 8) : M.min(w / 9.6, h / 5.4);
-    var groundY = h - 0.95 * unit, topY = 0.85 * unit;
+    var groundY = h - 0.95 * unit, topY = M.max(0.85 * unit, +ins.top || 0);
+    topY = M.min(topY, groundY - 2.4 * unit);           // always keep a real play band
+    var left = M.max(0, +ins.left || 0), right = w - M.max(0, +ins.right || 0);
     return { width: w, height: h, portrait: portrait, unit: unit, groundY: groundY, topY: topY,
-      minY: topY, maxY: groundY - 0.1 * unit };
+      minY: topY, maxY: groundY - 0.1 * unit, left: left, right: right,
+      ins: { top: +ins.top || 0, left: left, right: M.max(0, +ins.right || 0) } };
   };
 
   World.prototype.reset = function (opts) {
@@ -142,7 +150,7 @@
     this.rngFx = this.rng.fork('fx');          // cosmetic only (blink): never shifts the gameplay stream
     this.difficulty = CONFIG.difficulty[opts.difficulty] ? opts.difficulty : 'normal';
     this.D = CONFIG.difficulty[this.difficulty];
-    this.layout = World.computeLayout(opts.width || 960, opts.height || 540);
+    this.layout = World.computeLayout(opts.width || 960, opts.height || 540, opts.insets);
     var L = this.layout, u = L.unit;
     this.time = 0; this.acc = 0; this.alpha = 0;
     this.phase = 'play';
@@ -181,7 +189,10 @@
   };
 
   /** Mean seconds between burrs in this level. */
-  World.prototype.burrInterval = function () { return this.Z.burrEvery * this.D.burrEvery / this._burrK; };
+  World.prototype.burrInterval = function () {   // narrow (portrait) fields get burrs less often per second: the same per column (playtest P1)
+    var L = this.layout, wu = (L.right - L.left) / L.unit;
+    return this.Z.burrEvery * this.D.burrEvery / this._burrK * M.max(1, CONFIG.burrRefW / wu);
+  };
   /** Terminal rise speed (px/s) of an average bubble in this level. */
   World.prototype.riseSpeed = function () { return this.Z.rise * this.D.rise * this._riseK * this.layout.unit; };
 
@@ -191,7 +202,8 @@
   // ---------------------------------------------------------------- input
   World.prototype._box = function (r) {
     var L = this.layout;
-    var x0 = r, x1 = L.width - r, y0 = L.minY + r, y1 = L.maxY - r;
+    var rs = r * CONFIG.boxK;                           // the drawn sprite (arms, curl) is bigger than the hit circle
+    var x0 = L.left + rs, x1 = L.right - rs, y0 = L.minY + rs, y1 = L.maxY - r;
     if (x1 < x0) x0 = x1 = L.width / 2;
     if (y1 < y0) y0 = y1 = (L.minY + L.maxY) / 2;
     return { x0: x0, x1: x1, y0: y0, y1: y1 };
@@ -214,7 +226,7 @@
     for (var n = 0; n * 960 * k < L.width; n++) {
       for (var i = 0; i < 4; i++) {
         var x = (120 + 240 * i + 960 * n) * k;
-        if (x > 0.45 * u && x < L.width - 0.45 * u) out.push(x);
+        if (x > L.left + 0.45 * u && x < L.right - 0.45 * u) out.push(x);
       }
     }
     return out;
@@ -225,7 +237,7 @@
     if (x === undefined || x === null) {
       var P = this._puddles();
       if (P.length >= 2) x = r.pick(P) + r.range(-1, 1) * CONFIG.puddleJitter * u;
-      else x = r.range(0.5 * u, L.width - 0.5 * u);
+      else x = r.range(L.left + 0.5 * u, L.right - 0.5 * u);
     }
     var rr = CONFIG.bubbleR[0] + (CONFIG.bubbleR[1] - CONFIG.bubbleR[0]) * M.sqrt(r.next());
     var small = (CONFIG.bubbleR[1] - rr) / (CONFIG.bubbleR[1] - CONFIG.bubbleR[0]);
@@ -244,12 +256,12 @@
     if (x === undefined || x === null) {
       var clear = CONFIG.burrClear[this.difficulty] * u, hx = this.hero.x, best = null, bd = -1;
       for (var k = 0; k < 10; k++) {
-        var c = r.range(0.5 * u, L.width - 0.5 * u), d = M.abs(c - hx);
+        var c = r.range(L.left + 0.5 * u, L.right - 0.5 * u), d = M.abs(c - hx);
         if (d >= clear) { best = c; break; }
         if (d > bd) { bd = d; best = c; }
       }
       if (M.abs(best - hx) < clear) {       // narrow screen: take the far side
-        best = hx < L.width / 2 ? M.min(L.width - 0.5 * u, hx + clear) : M.max(0.5 * u, hx - clear);
+        best = hx < (L.left + L.right) / 2 ? M.min(L.right - 0.5 * u, hx + clear) : M.max(L.left + 0.5 * u, hx - clear);
       }
       x = best;
     }
@@ -531,6 +543,9 @@
           c.rot += c.vx / (CONFIG.burrRest * u) * h;     // rolling without slipping
           c.spin = c.vx / (CONFIG.burrRest * u);
           if (c.t > CONFIG.rollLife - 0.4) c.fade = clamp((CONFIG.rollLife - c.t) / 0.4, 0, 1);
+          // the garden's side edges: a rolling burr bumps softly off them instead of rolling off screen
+          var er = CONFIG.burrRest * u;
+          if ((c.x < L.left + er && c.vx < 0) || (c.x > L.right - er && c.vx > 0)) c.vx = -0.5 * c.vx;
         }
         c.x += c.vx * h; c.y += c.vy * h;
         if (c.y >= rest) {
@@ -625,9 +640,9 @@
   };
 
   // ---------------------------------------------------------------- resize / rotate
-  World.prototype.setLayout = function (w, h) {
-    var O = this.layout, L = World.computeLayout(w, h);
-    if (O.width === L.width && O.height === L.height) return;
+  World.prototype.setLayout = function (w, h, ins) {
+    var O = this.layout, L = World.computeLayout(w, h, ins === undefined ? O.ins : ins);
+    if (O.width === L.width && O.height === L.height && O.topY === L.topY && O.left === L.left && O.right === L.right) return;
     var kx = L.width / O.width, ku = L.unit / O.unit;
     var ky = (L.groundY - L.topY) / (O.groundY - O.topY);
     function mx(x) { return x * kx; }

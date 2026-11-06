@@ -120,8 +120,8 @@ test('config: every DESIGN key is present, with sane values', () => {
   for (const z of C.zones) for (const k of ['rise', 'spawn', 'burrEvery', 'windMax']) assert.ok(isFinite(z[k]));
   const w = mk('normal'); near(w.rFor(1), 34, 1e-9); near(w.rFor(5), 68, 1e-9);
   assert.strictEqual(mk('easy').hearts, 5); assert.strictEqual(mk('normal').hearts, 3); assert.strictEqual(mk('hard').maxHearts, 3);
-  // first level, Easy: a burr every ~9 s with a 1.6 s dangle
-  const e = mk('easy'); near(e.burrInterval(), 9, 1e-9); near(e.D.hangTime, 1.6, 1e-9);
+  // first level, Easy: a burr every ~10.8 s with a 1.6 s dangle (playtest tuning)
+  const e = mk('easy'); near(e.burrInterval(), 10.8, 1e-9); near(e.D.hangTime, 1.6, 1e-9);
   assert.ok(e.riseSpeed() < mk('normal').riseSpeed(), 'easy bubbles are slower');
 });
 
@@ -182,7 +182,7 @@ test('hero: bigger = slower (floatier), r eases to rFor(size), bob only when slo
   run(w, 2); for (let i = 0; i < 240; i++) { w.update(H); lo = Math.min(lo, w.hero.y); hi = Math.max(hi, w.hero.y); }
   assert.ok(hi - lo > 0.04 * 100 && hi - lo < 0.1 * 100, 'bob ' + (hi - lo).toFixed(1));
   // target clamp: can't leave the box
-  w.setTarget(-500, -500); run(w, 2); assert.ok(inBox(w)); near(w.hero.x, w.hero.r, 2); near(w.hero.y, w.layout.minY + w.hero.r, 6);
+  w.setTarget(-500, -500); run(w, 2); assert.ok(inBox(w)); near(w.hero.x, w.hero.r * C.boxK, 2); near(w.hero.y, w.layout.minY + w.hero.r * C.boxK, 6);
   w.setTarget(5000, 5000); run(w, 2); assert.ok(inBox(w));
 });
 
@@ -311,8 +311,8 @@ test('burr: hang → drop (gravity arc + spin) → one soft bounce → roll → 
   const rr = runUntil(w, () => { peak = Math.min(peak, c.y); return c.state === 'gone'; }, 3);
   assert.ok(restY - peak > 0.15 * u && restY - peak < 0.8 * u, 'bounce height ' + (restY - peak).toFixed(0));
   near(rr.t, C.rollLife, 0.05, 'fades out after 1.2 s'); assert.ok(!w.burrs.includes(c), 'removed');
-  // easy hit radius ×0.85
-  const e = calm(mk('easy')); near(e.spawnBurr(500).r, 0.24 * 0.85 * 100, 1e-9);
+  // easy hit radius ×0.75
+  const e = calm(mk('easy')); near(e.spawnBurr(500).r, 0.24 * 0.75 * 100, 1e-9);
 });
 
 test('burr: only FALLING burrs hurt (not hanging, not rolling, not after a hit)', () => {
@@ -414,7 +414,7 @@ test('burr spawns: dawn Easy every ~9 s, never above Nimbus, at most maxBurrs', 
     assert.ok(w.burrs.filter(c => c.state !== 'gone').length <= C.maxBurrs);
   }
   const every = (t - first) / (n - 1);
-  assert.ok(every > 8 && every < 10, 'every ' + every.toFixed(1) + ' s'); assert.ok(first >= C.burrBreather);
+  assert.ok(every > 9.8 && every < 11.8, 'every ' + every.toFixed(1) + ' s'); assert.ok(first >= C.burrBreather);
   // narrow portrait screen still keeps the distance
   const p = mk('easy', 2, 560, 1000); parkHero(p, 280, 500);
   for (let i = 0; i < 50; i++) { const c = p.spawnBurr(); assert.ok(Math.abs(c.x - 280) >= 1.3 * p.layout.unit - 1e-6); p.burrs.length = 0; }
@@ -509,7 +509,7 @@ test('bot: pacing — Dawn Easy first level 45–90 s for a casual player, level
   const lv = [], hits = [];
   for (const seed of [1, 2, 3]) {
     const r = playBot('easy', seed, 0.5, 300);
-    assert.ok(r.levelT[0] >= 45 && r.levelT[0] <= 90, 'first level ' + r.levelT[0].toFixed(1));
+    assert.ok(r.levelT[0] >= 40 && r.levelT[0] <= 90, 'first level ' + r.levelT[0].toFixed(1));
     lv.push(...r.levelT); hits.push(r.w.stats.bumps / r.t * 60);
   }
   for (const t of lv) assert.ok(t >= 40 && t <= 95, 'level ' + t.toFixed(1));

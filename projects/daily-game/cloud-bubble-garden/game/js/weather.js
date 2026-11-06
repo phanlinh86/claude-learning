@@ -217,12 +217,14 @@
     var spread = opts.spread === undefined ? M.PI * 2 : opts.spread;
     var spin = opts.spin === undefined ? 3 : opts.spin;
     var dir = opts.up ? -M.PI / 2 : (opts.angle || 0);
+    var flat = sprite === 'ripple' || sprite === 'splash';   // rings lie flat on the lawn: never rotated (visual P2)
     if (opts.up && opts.spread === undefined) spread = M.PI * 0.9;
     for (var i = 0; i < n; i++) {
       var a = dir + r.range(-spread / 2, spread / 2), v = speed * r.range(0.45, 1);
       this.particles.push(new Particle({ kind: 'burst', sprite: sprite, layer: opts.layer || 'front',
         x: x + r.range(-3, 3) * u, y: y + r.range(-3, 3) * u, vx: M.cos(a) * v, vy: M.sin(a) * v,
-        size: size * r.range(0.7, 1.25), rot: r.range(0, 6.28), spin: r.range(-spin, spin), flipX: r.chance(0.5),
+        size: size * r.range(0.7, 1.25), rot: flat ? 0 : r.range(0, 6.28), spin: flat ? 0 : r.range(-spin, spin), flipX: r.chance(0.5),
+        grow: (opts.grow || 0) * size,
         aspect: sprite === 'streak' ? 1 / 6 : sprite === 'mist' ? 2 : 1,
         g: gr, drag: opts.drag === undefined ? 1.6 : opts.drag, life: life * r.range(0.75, 1.15), base: 1, fadeIn: 0.001 }));
     }
@@ -257,7 +259,7 @@
         case 'burst': {
           var k = M.exp(-p.drag * dt);
           p.vx *= k; p.vy = p.vy * k + p.g * dt;
-          p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.spin * dt;
+          p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.spin * dt; if (p.grow) p.size += p.grow * dt;
           var lf = p.age / p.life;
           p.alpha = clamp(lf < 0.65 ? 1 : 1 - (lf - 0.65) / 0.35, 0, 1);
           if (lf >= 1) kill = true;

@@ -210,7 +210,13 @@ func main() {
 	}
 	// A fixed port keeps the page origin stable between runs (matters for the browser fallback);
 	// fall back to any free port if it is taken.
-	ln, err := net.Listen("tcp", "127.0.0.1:47623")
+	// Try a few fixed ports first so the browser fallback keeps the same origin (and its saved data).
+	var ln net.Listener
+	for _, p := range []string{"47623", "47633", "47643", "47653"} {
+		if ln, err = net.Listen("tcp", "127.0.0.1:"+p); err == nil {
+			break
+		}
+	}
 	if err != nil {
 		ln, err = net.Listen("tcp", "127.0.0.1:0")
 	}

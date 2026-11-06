@@ -86,7 +86,7 @@
       const I = v.ins, S = v.s;
       if (hud) { hud.style.top = (v.top + (I.top + 10) * S) + 'px'; hud.style.right = (v.left + (I.right + 10) * S) + 'px'; }
       if (toast) toast.style.bottom = (v.top + (I.bottom + 40) * S) + 'px';
-      if (this.world && this.world.setLayout && (this.world.layout.width !== v.VW || this.world.layout.height !== v.VH)) this.world.setLayout(v.VW, v.VH);
+      if (this.world && this.world.setLayout) this.world.setLayout(v.VW, v.VH, this.playInsets());
       this._syncWeather();
       this._measureHud();
       NB.Assets.setScale(this.px);
@@ -97,7 +97,13 @@
       const L = this._layout();
       if (wx.setGround) wx.setGround(L.groundY, L.unit);
     }
-    _layout() { return this.world ? this.world.layout : NB.World.computeLayout(this.VW, this.VH); }
+    _layout() { return this.world ? this.world.layout : NB.World.computeLayout(this.VW, this.VH, this.playInsets()); }
+    /* Space the HUD and the safe area keep for themselves (logical px): the play area starts below the HUD panels
+     * (landscape: one row, 98 px; portrait: two rows, down to 186 px) and keeps clear of a notch at the sides. */
+    playInsets() {
+      const I = this.ins || { top: 0, left: 0, right: 0 }, portrait = this.VH > this.VW;
+      return { top: I.top + 12 + (portrait ? 186 : 98) + 8, left: I.left, right: I.right };
+    }
     _measureHud() {
       const hud = document.getElementById('hud'); if (!hud) return;
       const r = hud.getBoundingClientRect(), c = this.canvas.getBoundingClientRect();
@@ -108,7 +114,7 @@
       this.world = world; this.weather = weather; this.fx.length = 0; this.texts.length = 0; this.flyers.length = 0;
       this.banner = null; this.shake = 0; this.flash = 0; this.heartPulse = 0; this.jarPulse = 0; this.sizePulse = 0; this.rainbow = 0;
       this.hintOn = !!world && (world.level || 0) === 0; this._hintT = 0;
-      if (world && world.setLayout && world.layout && (world.layout.width !== this.VW || world.layout.height !== this.VH)) world.setLayout(this.VW, this.VH);
+      if (world && world.setLayout) world.setLayout(this.VW, this.VH, this.playInsets());
       this._syncWeather();
     }
     setLevel(i, instant) {
@@ -146,7 +152,10 @@
         const [c, g] = full();
         if (this._custom(b)) {
           const im = A.custom[this._slot(b)], s = Math.max(VW / im.width, VH / im.height);
+          g.filter = 'saturate(0.7)';   // calmer than the gems; tinted to the time of day below
           g.drawImage(im, (VW - im.width * s) / 2, (VH - im.height * s) / 2, im.width * s, im.height * s);
+          g.filter = 'none';
+          g.globalAlpha = b === 3 ? 0.45 : 0.18; g.fillStyle = b === 3 ? '#141c46' : info.top; g.fillRect(0, 0, VW, VH); g.globalAlpha = 1;
           bg.custom = true;
         } else {
           const gr = g.createLinearGradient(0, 0, 0, L.groundY); gr.addColorStop(0, info.top); gr.addColorStop(1, info.bottom);
@@ -211,8 +220,10 @@
             if (!quiet) {
               this.flyers.push({ gem: e.gem, x, y, sx: x, sy: y, vx: (Math.random() - 0.5) * 120 * u, vy: -260 * u, t: 0 });
               if (this.flyers.length > 30) this.flyers.shift();
-              const H = w.hero, top = H.y - H.r * NIM_K - 14 * u;   // above Nimbus's head, never over her face
+              const H = w.hero; let top = H.y - H.r * NIM_K - 14 * u;   // above Nimbus's head, never over her face…
+              if (top < L.topY - 0.2 * L.unit) top = H.y + H.r * NIM_K + 16 * u;   // …or under her when there's no room above
               this.pop('+' + e.points, e.by === 'rain' ? x : H.x, e.by === 'rain' ? y - r - 10 * u : top, c, 18 + Math.min(8, e.size * 1.5));
+              if (e.by !== 'rain') { const t = this.texts[this.texts.length - 1]; if (t) { t.follow = top > H.y ? 1 : -1; t.dy = 0; } }   // rides along with Nimbus
             }
             break;
           }
@@ -241,7 +252,7 @@
           case 'hang': break;
           case 'drop': break;
           case 'land': {
-            this.shake = Math.max(this.shake, 1.2);
+            this.shake = Math.max(this.shake, 0.6);
             if (wx && e.burr) wx.burst('splash', e.burr.x, L.groundY, 1, { speed: 0, life: 0.4, size: 26, gravity: 0, layer: 'front' });
             break;
           }
@@ -256,7 +267,7 @@
           case 'levelUp': {
             this.showBanner(e.zone); this.rainbow = 1; this.jarPulse = 1;
             this.texts = this.texts.filter(t => !t.big);
-            if (e.bonus) { this.flash = 0.35; this.flashCol = '#fff6d8'; this.pop('+' + e.bonus, this.VW / 2, L.topY + 1.3 * L.unit, '#ffe27a', 28); }
+            if (e.bonus) { this.flash = 0.35; this.flashCol = '#fff6d8'; this.pop('+' + e.bonus, this.VW / 2, this._bannerY() + 70, '#ffe27a', 28); }
             if (wx) wx.burst('sparkle', this.VW / 2, L.topY + 1.6 * L.unit, 18, { speed: 280, life: 1.0, size: 16, gravity: 120, spread: TAU, layer: 'front' });
             break;
           }
@@ -295,8 +306,25 @@
       if (this.banner) { this.banner.t += dt; if (this.banner.t > 2.4) this.banner = null; }
       for (const f of this.fx) f.t += dt;
       this.fx = this.fx.filter(f => f.t < f.life);
-      for (const t of this.texts) { t.t += dt; t.y += t.vy * dt; t.x += t.vx * dt; }
+      const hw = this.world && this.world.hero, ul = this.world ? this.world.layout.unit / 100 : 1;
+      for (const t of this.texts) {
+        t.t += dt;
+        if (t.follow && hw) {   // hero pops stay just above (or below) her while she moves
+          t.dy += t.vy * dt;
+          t.x = hw.x; t.y = t.follow < 0 ? hw.y - hw.r * NIM_K - 14 * ul + t.dy : hw.y + hw.r * NIM_K + 16 * ul + t.dy * 0.3;
+        } else { t.y += t.vy * dt; t.x += t.vx * dt; }
+      }
       this.texts = this.texts.filter(t => t.t < t.life);
+      // rain shower: drops pour from under Nimbus
+      const w = this.world;
+      if (w && w.hero.rainT > 0 && this.weather) {
+        this._rainAcc = (this._rainAcc || 0) + dt;
+        const H = w.hero;
+        while (this._rainAcc > 0.04) {
+          this._rainAcc -= 0.04;
+          this.weather.burst('drop', H.x + (Math.random() - 0.5) * H.r * 1.4, H.y + H.r * 0.7, 1, { speed: 60, life: 0.7, size: 11, gravity: 900, spread: 0.5, angle: Math.PI / 2, layer: 'front', spin: 0 });
+        }
+      }
       // gems: pop up with an impulse, then home into the jar
       const J = this._jar || { x: this.VW / 2, y: 40 };
       for (const f of this.flyers) {
@@ -316,6 +344,7 @@
       if (v.t < 1) { this.drawScene(g, v.prev, 1); this.drawScene(g, v.cur, v.t); }
       else this.drawScene(g, v.cur, 1);
       g.setTransform(px, 0, 0, px, 0, 0);
+      if (this.VH > this.VW * 1.4) this.drawMidClouds(g);
       if (this.rainbow > 0) this.drawRainbow(g, w);
       if (this._bloom > 0 && w) this.drawBloom(g, w);
       this.drawParticles(g, 'back');
@@ -353,6 +382,19 @@
       const cols = ['#ff8a8a', '#ffc27a', '#fff08a', '#9fe79a', '#8fd0ff', '#b9a2ff'], bw = Math.max(7, R * 0.045);
       g.globalAlpha = a * 0.42; g.lineWidth = bw;
       cols.forEach((c, i) => { g.strokeStyle = c; g.beginPath(); g.arc(cx, cy, R - i * bw, Math.PI, TAU); g.stroke(); });
+      g.globalAlpha = 1;
+    }
+    drawMidClouds(g) {   // tall portrait: a few faint drifting clouds so the middle sky isn't empty
+      const L = this._layout(), u = L.unit, y0 = L.topY + 1.2 * u, y1 = L.groundY - 4.2 * u;
+      if (y1 <= y0) return;
+      const night = this.vis.cur === 3;
+      g.globalAlpha = night ? 0.12 : 0.22;
+      for (let i = 0; i < 3; i++) {
+        const span = this.VW + 3 * u, x = ((i * 0.37 * span + this.time * (6 + i * 3)) % span) - 1.5 * u;
+        const y = y0 + (y1 - y0) * (0.15 + 0.35 * i), r = (0.9 + 0.3 * i) * u;
+        this._cloud(g, x, y, r, night ? '#9aa6d8' : '#ffffff');
+        this._cloud(g, x + r * 1.1, y + r * 0.15, r * 0.75, night ? '#9aa6d8' : '#ffffff');
+      }
       g.globalAlpha = 1;
     }
     drawBloom(g, w) {   // after a rain shower: soft glowing flower heads pop up along the lawn
@@ -433,10 +475,11 @@
           rot = sw;
           g.save(); g.translate(ex + Math.sin(sw) * S * 0.36, ey + Math.cos(sw) * S * 0.36); g.rotate(-sw);
         } else { g.save(); g.translate(x, y); g.rotate(rot); }
-        if (night) { g.fillStyle = 'rgba(210,225,255,.20)'; g.beginPath(); g.arc(0, 0, S * 0.55, 0, TAU); g.fill(); }
         const im = this.spr('burr_' + (b.variant || 0), S, S);
+        if (night) { g.shadowColor = 'rgba(255,150,60,.85)'; g.shadowBlur = 14 * this.px; }   // warm "avoid" glow, not a pale bubble disc
         if (im) g.drawImage(im, -S / 2, -S / 2, S, S);
         else { g.fillStyle = '#8a5a3a'; g.beginPath(); g.arc(0, 0, b.r, 0, TAU); g.fill(); }
+        g.shadowBlur = 0; g.shadowColor = 'transparent';
         g.restore();
       }
       g.globalAlpha = 1;
@@ -479,15 +522,16 @@
       const rain = h.rainT > 0, puff = rain ? '#d6e6fb' : '#ffffff', line = '#5a7aa6';
       const n = 9;
       g.fillStyle = puff; g.strokeStyle = line; g.lineWidth = Math.max(2, r * 0.06);
-      for (let i = 0; i < n; i++) { const an = i * TAU / n + Math.sin(this.time * 1.5 + i) * 0.05; g.beginPath(); g.arc(Math.cos(an) * r * 0.95, Math.sin(an) * r * 0.95, r * 0.36, 0, TAU); g.fill(); g.stroke(); }
-      for (let i = 0; i < n; i++) { const an = i * TAU / n; g.beginPath(); g.arc(Math.cos(an) * r * 0.95, Math.sin(an) * r * 0.95, r * 0.34, 0, TAU); g.fill(); }
-      const im = this.spr('custom:hero', r * 2, r * 2);
-      g.save(); g.beginPath(); g.arc(0, 0, r * 0.92, 0, TAU); g.clip();
+      const R0 = 0.8, PR = 0.3;   // ring reaches ≈1.1·r, inside the box margin (QA F3)
+      for (let i = 0; i < n; i++) { const an = i * TAU / n + Math.sin(this.time * 1.5 + i) * 0.05; g.beginPath(); g.arc(Math.cos(an) * r * R0, Math.sin(an) * r * R0, r * PR, 0, TAU); g.fill(); g.stroke(); }
+      for (let i = 0; i < n; i++) { const an = i * TAU / n; g.beginPath(); g.arc(Math.cos(an) * r * R0, Math.sin(an) * r * R0, r * (PR - 0.02), 0, TAU); g.fill(); }
+      const im = this.spr('custom:hero', r * 2, r * 2), cr = r * 0.8;
+      g.save(); g.beginPath(); g.arc(0, 0, cr, 0, TAU); g.clip();
       g.fillStyle = puff; g.fill();
-      if (im) { const [fw, fh] = NB.Assets.fit('hero', r * 1.9, r * 1.9); g.drawImage(im, -fw / 2, -fh / 2, fw, fh); }
+      if (im) { const [fw, fh] = NB.Assets.fit('hero', cr * 2.05, cr * 2.05); g.drawImage(im, -fw / 2, -fh / 2, fw, fh); }
       g.restore();
-      g.beginPath(); g.arc(0, 0, r * 0.92, 0, TAU); g.lineWidth = Math.max(2, r * 0.05); g.strokeStyle = line; g.stroke();
-      if (h.mood === 'ouch') { g.fillStyle = 'rgba(255,120,120,.25)'; g.beginPath(); g.arc(0, 0, r * 0.92, 0, TAU); g.fill(); }
+      g.beginPath(); g.arc(0, 0, cr, 0, TAU); g.lineWidth = Math.max(2, r * 0.05); g.strokeStyle = line; g.stroke();
+      if (h.mood === 'ouch') { g.fillStyle = 'rgba(255,120,120,.25)'; g.beginPath(); g.arc(0, 0, cr, 0, TAU); g.fill(); }
     }
 
     drawParticles(g, layer) {
@@ -616,19 +660,23 @@
     isTouchHint() { return !!(NB.Game && NB.Game.isTouch); }
     _cloud(g, x, y, r, col) {
       g.fillStyle = col;
-      g.beginPath(); g.arc(x - r * 0.55, y + r * 0.15, r * 0.6, 0, TAU); g.arc(x + r * 0.55, y + r * 0.15, r * 0.6, 0, TAU); g.arc(x, y - r * 0.2, r * 0.75, 0, TAU); g.fill();
+      g.beginPath();   // separate sub-paths (moveTo) so the arcs don't get joined by wedges
+      for (const [dx, dy, k] of [[-0.55, 0.15, 0.6], [0.55, 0.15, 0.6], [0, -0.2, 0.75]]) { g.moveTo(x + dx * r + k * r, y + dy * r); g.arc(x + dx * r, y + dy * r, k * r, 0, TAU); }
+      g.fill();
     }
     /* A line low on the lawn (never over the play area). */
     _lowY() { const L = this._layout(); return Math.min(this.VH - 22 - this.ins.bottom, L.groundY + Math.max(30, (this.VH - L.groundY) * 0.5)); }
 
+    _bannerY() { const L = this._layout(); return L.topY + (L.portrait ? 1.6 : 0.75) * L.unit; }
     drawBanner(g) {
       const b = this.banner, info = ZONE_INFO[b.s % 4], t = b.t, L = this._layout();
       const a = t < 0.3 ? t / 0.3 : t > 2.0 ? Math.max(0, (2.4 - t) / 0.4) : 1;
-      const h = 76, cx = this.VW / 2, y = L.portrait ? L.topY + 2.6 * L.unit : L.topY + 1.55 * L.unit - (1 - a) * 16;
+      const h = 76, cx = this.VW / 2, y = this._bannerY() - (1 - a) * 16;
       const w = Math.min(this.VW - 40, 420);
-      g.globalAlpha = a * 0.85;
+      this._banA = this._banA == null ? 1 : this._banA + ((this.world ? this._fadeFor(this.world, cx - w / 2, y - h / 2, w, h) : 1) - this._banA) * 0.15;
+      g.globalAlpha = a * 0.85 * this._banA;
       this._panel(g, cx - w / 2, y - h / 2, w, h, 22);
-      g.globalAlpha = a;
+      g.globalAlpha = a * this._banA;
       this._text(g, info.name + (b.loop ? '  ★' + (b.loop + 1) : ''), cx, y - 14, 26, info.color, 'center');
       this._text(g, b.s === 0 && !b.loop ? 'Good morning, Nimbus!' : 'Fill the gem jar!', cx, y + 18, 17, '#fff', 'center', '800');
       g.globalAlpha = 1;

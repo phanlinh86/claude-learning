@@ -112,3 +112,8 @@ SFX: pop "bloop" (pitch by bubble size, + a tiny rising step with the streak), g
 - Pointer Events on the stage (not on UI): `pointerdown`/`pointermove` set the target (touch: `y − touchLift·unit`). UI buttons fire on click; the ghost click is swallowed.
 - iOS: audio unlock in the first `touchend`; `visibilitychange` pauses and suspends audio; kid-proofing (no zoom, no rubber-band, no callouts, no text selection, `touch-action: none` on the stage).
 - Home screen: `manifest.webmanifest` plus 180/192/512 PNG icons from `tools/render_mobile_icons.js`.
+
+## 9. Changes after build and QA (2026-11-06)
+- Layout: `World.computeLayout(w, h, insets)` takes `{top, left, right}` from `Renderer.playInsets()` (HUD bottom + safe area). `topY = max(0.85u, insets.top)`, x bounds are `layout.left … layout.right`; Nimbus keeps `r·boxK` (1.15) from the sides/top so her arms and curl stay on screen.
+- Mechanics (playtest): Easy `rise 0.6, spawn 1.1, burrEvery 1.8, burrR 0.75, popK 1.45`, `goal.easy 40`; Normal `burrEvery 1.15`; the burr interval is scaled by `max(1, burrRefW 9.6 / field width in units)` so portrait fields aren't 1.6× more dangerous.
+- Renderer: "+N" sits above Nimbus (below her when there's no room), burrs get a warm glow at night, ripples/splashes lie flat (no rotation) and grow, the shower pours visible drops from under Nimbus, the level banner sits just under the play-area top and fades when Nimbus is under it, custom backgrounds are desaturated and tinted to the time of day, tall portrait screens get faint drifting mid-sky clouds, the custom-hero puff ring reaches ≈1.1·r.

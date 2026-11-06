@@ -1,0 +1,14 @@
+{
+  "portraitBurrs": [
+    ["    burrBreather: 3.5,      // s      no burr during the first 3.5 s of a level\n",
+     "    burrBreather: 3.5,      // s      no burr during the first 3.5 s of a level\n    burrRefW: 9.6,          // unit   burr interval is for a field this wide; narrower (portrait) fields get proportionally fewer burrs\n"],
+    ["World.prototype.burrInterval = function () { return this.Z.burrEvery * this.D.burrEvery / this._burrK; };",
+     "World.prototype.burrInterval = function () { return this.Z.burrEvery * this.D.burrEvery / this._burrK * M.max(1, CONFIG.burrRefW / (this.layout.width / this.layout.unit)); };"]
+  ],
+  "floorGap": [
+    ["      minY: topY, maxY: groundY - 0.1 * unit };",
+     "      minY: topY, maxY: groundY - CONFIG.floorGap * unit };"],
+    ["    hangDY: 0.15,           // unit   burrs dangle at topY + 0.15 u\n",
+     "    hangDY: 0.15,           // unit   burrs dangle at topY + 0.15 u\n    floorGap: 0.45,         // unit   Nimbus's lowest point is this far above the lawn: a bubble is out of the puddle before she can reach it\n"]
+  ]
+}

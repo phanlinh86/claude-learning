@@ -139,3 +139,10 @@ All DESIGN field, method and event names are used as written. Extras (optional):
 - `burrClear` (no spawn above Nimbus) also applies a 0.5 u margin on Normal (DESIGN says Easy only).
 - Weather particles have `aspect` (w/h: streak 1/6, mist 2, others 1), and `size` is the long side. `setShower(on, x, y)` takes an
   optional position. `update(dt, wind)` takes the wind as px/s (a number or `{x}`).
+
+## 9. Changes after the playtest (2026-11-06)
+The numbers in the tables above were measured before these changes; see `docs/reports/playtest.md` for the before/after sims.
+- Easy: `rise 0.75 → 0.6`, `spawn 1.05 → 1.1`, `burrEvery 1.5 → 1.8`, `burrR 0.85 → 0.75`, `popK 1.25 → 1.45`; `goal.easy 48 → 40`. Dawn Easy now: bubbles rise at ≈0.51 u/s, 0.88 per second, a burr every 10.8 s. The kid model's first level: 111 s → 79 s median; 10-minute game-over rate 25 % → 3 %.
+- Normal: `burrEvery 1.0 → 1.15` (casual adult 10-min game over 88 % → 68 %).
+- New `burrRefW: 9.6`: `burrInterval × max(1, 9.6 / field width in units)` — a 6-unit-wide portrait field had 1.6× the burrs per column (kid portrait game over 73 % → 0 %).
+- New `boxK: 1.15` and layout insets (`computeLayout(w, h, {top, left, right})`): Nimbus keeps `r·1.15` from the sides and the top, and the play area starts under the HUD / clear of the notch.

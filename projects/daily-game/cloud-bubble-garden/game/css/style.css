@@ -329,3 +329,7 @@ body.touch .tagline{font-size:max(15px, calc(var(--u)*2.2))}body.touch .best-lin
   #scrHow .menu{margin-top:6px}
   #scrHow .menu .btn{min-height:40px;padding-top:0;padding-bottom:0}
 }
+
+/* ---------- Nimbus's Bubble Garden QA fixes (docs/reports/visual.md) ---------- */
+.logo{font-size:min(calc(var(--u)*7.4), 9.4vw);padding:0 2vw}            /* logo never touches the screen edges */
+.new-best{position:static!important;display:inline-block;vertical-align:middle;margin-left:calc(var(--u)*.6)}  /* NEW! sits beside the digits, not on them */

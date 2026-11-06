@@ -1,0 +1,33 @@
+{
+ "suite": "size",
+ "nSeeds": 30,
+ "maxTime": 600,
+ "overrides": {
+  "goal": {
+   "easy": 40
+  },
+  "difficulty": {
+   "easy": {
+    "rise": 0.6,
+    "spawn": 1.1,
+    "burrEvery": 1.8,
+    "burrR": 0.75,
+    "popK": 1.45
+   },
+   "normal": {
+    "burrEvery": 1.15
+   }
+  },
+  "__patches": [
+   [
+    "    burrBreather: 3.5,      // s      no burr during the first 3.5 s of a level\n",
+    "    burrBreather: 3.5,      // s      no burr during the first 3.5 s of a level\n    burrRefW: 9.6,          // unit   burr interval is for a field this wide; narrower (portrait) fields get proportionally fewer burrs\n"
+   ],
+   [
+    "World.prototype.burrInterval = function () { return this.Z.burrEvery * this.D.burrEvery / this._burrK; };",
+    "World.prototype.burrInterval = function () { return this.Z.burrEvery * this.D.burrEvery / this._burrK * M.max(1, CONFIG.burrRefW / (this.layout.width / this.layout.unit)); };"
+   ]
+  ]
+ },
+ "results": {}
+}
