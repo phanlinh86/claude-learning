@@ -1,0 +1,861 @@
+--- session 3 en (6.7 min)
+   0.1   1.9/1.9 Chapter 1. Colour Cars
+   2.1   1.7/1.7 Good morning, train!
+   4.8   3.5/3.5 Every colour has its own car! Load them all!
+  10.7   1.4/1.4 Yellow car, yes!
+  13.2   1.4/1.4 Purple car, yes!
+  14.6   2.9/2.9 The train is ready! Tap the whistle!
+  17.9   2.1/2.1 Off we go! Bye-bye, toys!
+  20.1   1.2/1.2 What a train!
+  22.7   4.0/4.0 Match the colours! Each toy goes in its colour car!
+  27.1   2.0/2.0 Yes! Red goes with red!
+  30.9   2.4/2.4 Yes! Orange goes with orange!
+  34.0   1.2/1.2 Red car, yes!
+  35.2   2.4/2.4 All loaded! Toot the whistle!
+  39.0   1.7/1.7 Choo choo! Bye-bye!
+  40.9 X 0.5/1.6 You are so clever!
+  41.5   2.8/2.8 Look, a balloon is riding with us!
+  44.3   4.0/4.0 Match the colours! Each toy goes in its colour car!
+  49.6   2.1/2.1 Yes! Blue goes with blue!
+  52.5   2.1/2.1 Yes! Blue goes with blue!
+  55.4 X 2.6/3.2 Bounce! The red toy goes in the red car!
+  58.0   2.0/2.0 Yes! Red goes with red!
+  60.2 X 0.3/2.3 Red block! Where does it go?
+  60.5   1.2/1.2 Red car, yes!
+  61.8   2.9/2.9 The train is ready! Tap the whistle!
+  65.3   2.1/2.1 Chugga chugga, choo choo!
+  67.5   1.0/1.0 Well done!
+  70.3   3.5/3.5 Every colour has its own car! Load them all!
+  76.0   1.7/1.7 Yes! The green car!
+  80.0   1.4/1.4 Green car, yes!
+  83.0   1.4/1.4 Purple car, yes!
+  86.5   2.4/2.4 Yes! Purple goes with purple!
+  88.9 X 2.1/2.4 All aboard! Pull the whistle!
+  91.0   2.1/2.1 Chugga chugga, choo choo!
+  93.2   1.6/1.6 You are so clever!
+  94.8   2.5/2.5 Talk time! What colour is this?
+  99.5   1.5/1.5 Wow, you know it!
+ 102.8   1.8/1.8 Chapter 2. Shape Cars
+ 104.7   1.1/1.1 Sunny noon!
+ 107.6   3.4/3.4 Match the shapes! Load each one in its car!
+ 112.0   1.6/1.6 Triangle car, yes!
+ 115.3   1.3/1.3 Star car, yes!
+ 116.7 X 2.9/2.9 The train is ready! Tap the whistle!
+ 119.7   2.1/2.1 Off we go! Bye-bye, toys!
+ 121.8   1.2/1.2 What a train!
+ 124.5   3.4/3.4 Match the shapes! Load each one in its car!
+ 129.9   3.1/3.1 Bounce! The heart wants the heart car!
+ 133.2   1.4/1.4 Circle car, yes!
+ 136.5 X 0.3/0.7 Heart!
+ 136.8   1.4/1.4 Yes! Same shape!
+ 140.3   1.4/1.4 Circle car, yes!
+ 141.7   2.4/2.4 All aboard! Pull the whistle!
+ 145.8   2.1/2.1 Chugga chugga, choo choo!
+ 147.9   1.1/1.1 You got it!
+ 150.6   3.7/3.7 Put each shape in the car with the same shape!
+ 154.3 X 1.0/2.7 A little bunny hops on the train!
+ 155.3 X 0.0/1.4 Yes! Same shape!
+ 155.4   1.9/1.9 Hee hee! Hello, bunny!
+ 158.3   1.6/1.6 Yes! The star car!
+ 160.7 X 2.9/3.1 Bounce! The star goes in the star car!
+ 163.7   1.4/1.4 Yes! Same shape!
+ 165.1   2.4/2.4 All loaded! Toot the whistle!
+ 169.1   2.1/2.1 Chugga chugga, choo choo!
+ 171.2   0.5/0.5 Yes!
+ 173.9   3.7/3.7 Find the car with the same shape for each one!
+ 178.6   1.4/1.4 Square car, yes!
+ 180.8 X 2.7/3.8 Bounce! Let’s take the square to the square car!
+ 183.7   1.4/1.4 Square car, yes!
+ 187.2 X 3.1/3.4 Bounce! The circle goes in the circle car!
+ 190.3 X 2.9/3.1 Boing! The circle wants the circle car!
+ 193.3   1.4/1.4 Yes! Same shape!
+ 194.8   2.4/2.4 All aboard! Pull the whistle!
+ 197.4   1.7/1.7 Choo choo! Bye-bye!
+ 199.3   1.0/1.0 Well done!
+ 200.3   2.5/2.5 Talk time! What shape is this?
+ 205.9   1.7/1.7 Yes! You are right!
+ 209.3   2.0/2.0 Chapter 3. Big and Small
+ 211.4   1.5/1.5 Look, the sunset!
+ 214.1   4.4/4.4 Big ones go in the big car, small ones in the small car!
+ 218.8   1.7/1.7 Yes! The small car!
+ 222.8   1.5/1.5 Yes! The big car!
+ 224.3   2.4/2.4 All aboard! Pull the whistle!
+ 228.1   2.1/2.1 Chugga chugga, choo choo!
+ 230.2   1.7/1.7 Super train driver!
+ 232.9   3.5/3.5 Which car is big? Which is small? Load them!
+ 237.2   2.2/2.2 Yes! Small toy, small car!
+ 240.6   2.2/2.2 Yes! Small toy, small car!
+ 243.8 X 2.9/3.8 Bounce! Let’s take the big block to the big car!
+ 246.8   1.5/1.5 Yes! The big car!
+ 248.4 X 2.4/2.4 All loaded! Toot the whistle!
+ 250.8   1.7/1.7 Choo choo! Bye-bye!
+ 252.7 X 0.5/0.7 Super!
+ 253.3   2.0/2.0 A balloon on our train!
+ 255.6   3.5/3.5 Which car is big? Which is small? Load them!
+ 259.1 X 1.0/1.8 Boop! A sparkle star!
+ 260.3 X 2.9/3.6 Boing! The small block goes in the small car!
+ 263.3   1.7/1.7 Yes! The small car!
+ 267.1 X 2.2/3.8 Bounce! Let’s take the big block to the big car!
+ 269.4 X 3.5/3.7 Boing! Let’s take the big block to the big car!
+ 272.9   1.9/1.9 Yes! Big toy, big car!
+ 275.3   1.9/1.9 Yes! Big toy, big car!
+ 277.2   2.4/2.4 All aboard! Pull the whistle!
+ 279.9   2.1/2.1 Chugga chugga, choo choo!
+ 282.1   1.1/1.1 You got it!
+ 284.6   4.4/4.4 Big ones go in the big car, small ones in the small car!
+ 289.4   1.2/1.2 Big car, yes!
+ 292.8   2.2/2.2 Yes! Small toy, small car!
+ 295.0 X 2.0/2.4 All loaded! Toot the whistle!
+ 297.1   2.1/2.1 Off we go! Bye-bye, toys!
+ 299.2   1.8/1.8 Hooray! Train loaded!
+ 301.0   2.3/2.3 Talk time! Which one is big?
+ 306.1   1.4/1.4 Correct! Hooray!
+ 309.4   2.0/2.0 Chapter 4. Animal Homes
+ 311.4   2.4/2.4 Good night, stars! Lights on!
+ 314.2   3.7/3.7 Help the animals ride home! Find each home car!
+ 318.3 X 2.1/2.5 Home in the pond, little fish!
+ 320.4   3.0/3.0 Baaa! Home in the barn, little sheep!
+ 323.5 X 1.0/2.9 The train is ready! Tap the whistle!
+ 324.6   2.1/2.1 Off we go! Bye-bye, toys!
+ 326.7   1.6/1.6 You are so clever!
+ 329.4   4.0/4.0 Who lives where? Take each animal to its home car!
+ 335.1 X 2.9/3.1 Ribbit! Home in the pond, little frog!
+ 338.1 X 2.1/2.5 Yes! The fish goes in the pond!
+ 340.3   2.3/2.3 The fox lives in the burrow!
+ 342.6 X 2.0/2.4 All loaded! Toot the whistle!
+ 344.8   2.1/2.1 Off we go! Bye-bye, toys!
+ 346.9   1.7/1.7 Super train driver!
+ 349.6   4.0/4.0 Who lives where? Take each animal to its home car!
+ 353.6 X 0.4/2.7 A little bunny hops on the train!
+ 354.1 X 0.1/2.8 Ribbit! The frog lives in the pond!
+ 354.3   1.7/1.7 Bunny waves at you!
+ 357.8   2.5/2.5 Yes! The fish goes in the pond!
+ 360.9   3.4/3.4 Squeak! Yes! The mouse goes in the burrow!
+ 364.4 X 0.9/2.4 All loaded! Toot the whistle!
+ 365.4   1.7/1.7 Choo choo! Bye-bye!
+ 367.3   1.2/1.2 What a train!
+ 370.3   3.4/3.4 Each animal wants its home car. Load them!
+ 375.4   3.0/3.0 Baaa! Home in the barn, little sheep!
+ 378.9 X 2.2/3.0 Quack! Home in the pond, little duck!
+ 381.1 X 2.2/2.5 Home in the pond, little fish!
+ 383.4 X 2.6/3.0 Bounce! The cow goes in the barn car!
+ 386.1   2.8/2.8 Moo! Home in the barn, little cow!
+ 389.0 X 1.9/2.4 All aboard! Pull the whistle!
+ 390.9   2.1/2.1 Chugga chugga, choo choo!
+ 393.1   0.7/0.7 Super!
+ 393.8   3.0/3.0 Talk time! Where does the mouse live?
+ 398.1   2.7/2.7 It lives in the burrow! Good try!
+ 401.4   1.6/1.6 What a train ride!
+ 403.1   2.9/2.9 What a train ride! 42 stars! Hooray!
+--- session 3 vi (6.5 min)
+   0.1   2.1/2.1 Chương 1. Toa tàu sắc màu
+   2.3   2.0/2.0 Chào buổi sáng, tàu ơi!
+   4.8   3.6/3.6 Bé tìm toa cùng màu cho từng món đồ chơi nhé!
+  10.7 X 2.4/3.7 Đúng rồi! Màu xanh dương đi với màu xanh dương!
+  13.2   2.2/2.2 Toa màu xanh lá, đúng rồi!
+  15.4   2.5/2.5 Chất xong rồi! Bé kéo còi nhé!
+  17.9   3.1/3.1 Tàu chạy rồi! Tạm biệt các bạn đồ chơi!
+  21.1   1.6/1.6 Bé thông minh quá!
+  22.8   3.2/3.2 Bé ơi, xếp đồ chơi vào toa cùng màu nhé!
+  27.1   1.9/1.9 Toa màu tím, đúng rồi!
+  30.9   2.0/2.0 Đúng rồi! Toa màu vàng!
+  34.0   1.9/1.9 Toa màu tím, đúng rồi!
+  35.9   2.5/2.5 Chất xong rồi! Bé kéo còi nhé!
+  39.0 X 2.3/2.3 Xình xịch, xình xịch, tu tu!
+  41.5   2.4/2.4 Có bóng bay trên tàu mình nè!
+  43.9   3.6/3.6 Bé tìm toa cùng màu cho từng món đồ chơi nhé!
+  49.5   1.8/1.8 Toa màu đỏ, đúng rồi!
+  52.4   1.8/1.8 Đúng rồi! Toa màu đỏ!
+  55.3 X 2.6/3.3 Tưng! Đồ chơi màu tím đi toa màu tím nhé!
+  58.0   2.7/2.7 Đúng rồi! Màu tím đi với màu tím!
+  60.7 X 2.2/3.1 Tàu sẵn sàng rồi! Bé chạm vào còi nhé!
+  63.0   2.3/2.3 Xình xịch, xình xịch, tu tu!
+  65.3   1.0/1.0 Tuyệt vời!
+  67.8   3.6/3.6 Bé tìm toa cùng màu cho từng món đồ chơi nhé!
+  73.0   1.8/1.8 Đúng rồi! Toa màu đỏ!
+  76.8   2.0/2.0 Toa màu vàng, đúng rồi!
+  80.8   1.8/1.8 Toa màu đỏ, đúng rồi!
+  82.6   2.5/2.5 Chất xong rồi! Bé kéo còi nhé!
+  86.2   2.3/2.3 Xình xịch, xình xịch, tu tu!
+  88.5   1.5/1.5 Đoàn tàu đẹp quá!
+  90.1 X 2.5/2.8 Giờ trò chuyện! Cái này màu gì nhỉ?
+  92.7   1.6/1.6 Bé thông minh quá!
+  96.0   2.3/2.3 Chương 2. Toa tàu hình khối
+  98.3   2.0/2.0 Buổi trưa nắng đẹp quá!
+ 100.8   3.7/3.7 Bé ghép hình nào! Mỗi hình lên toa của nó nhé!
+ 105.8 X 3.2/3.9 Tưng tưng! Hình vuông muốn lên toa hình vuông cơ!
+ 109.0 X 1.9/2.1 Đúng rồi! Cùng hình luôn!
+ 111.0 X 3.1/4.0 Tưng! Hình tam giác muốn lên toa hình tam giác cơ!
+ 114.3   2.3/2.3 Toa hình tam giác, đúng rồi!
+ 116.6   2.3/2.3 Lên tàu nào! Bé kéo còi đi!
+ 119.3   3.1/3.1 Tàu chạy rồi! Tạm biệt các bạn đồ chơi!
+ 122.5   0.9/0.9 Đúng rồi!
+ 124.1   3.1/3.1 Bé tìm toa cùng hình cho từng khối nhé!
+ 129.6 X 2.8/4.3 Tưng tưng! Hình trái tim muốn lên toa hình trái tim cơ!
+ 132.4 X 3.8/4.0 Tưng! Hình trái tim muốn lên toa hình trái tim cơ!
+ 136.3   2.3/2.3 Toa hình trái tim, đúng rồi!
+ 138.8   2.3/2.3 Toa hình trái tim, đúng rồi!
+ 141.8   2.3/2.3 Đúng rồi! Toa hình ngôi sao!
+ 144.2 X 2.2/2.5 Chất xong rồi! Bé kéo còi nhé!
+ 146.6   2.3/2.3 Xình xịch, xình xịch, tu tu!
+ 148.9   0.9/0.9 Giỏi quá!
+ 151.3   3.7/3.7 Bé ghép hình nào! Mỗi hình lên toa của nó nhé!
+ 155.0 X 0.5/2.8 Nhìn kìa! Bạn thỏ muốn đi nhờ tàu!
+ 155.6 X 0.3/2.3 Toa hình ngôi sao, đúng rồi!
+ 155.9   1.7/1.7 Hi hi! Chào bạn thỏ!
+ 157.8   2.3/2.3 Đúng rồi! Toa hình trái tim!
+ 160.2 X 2.0/3.1 Tàu sẵn sàng rồi! Bé chạm vào còi nhé!
+ 162.3   3.1/3.1 Tàu chạy rồi! Tạm biệt các bạn đồ chơi!
+ 165.5   1.6/1.6 Bé thông minh quá!
+ 167.2   3.1/3.1 Bé tìm toa cùng hình cho từng khối nhé!
+ 172.7   2.1/2.1 Đúng rồi! Cùng hình luôn!
+ 175.3   2.3/2.3 Đúng rồi! Toa hình tam giác!
+ 178.8   2.3/2.3 Toa hình tam giác, đúng rồi!
+ 181.1 X 1.8/3.1 Tàu sẵn sàng rồi! Bé chạm vào còi nhé!
+ 183.1   1.7/1.7 Xình xịch! Tạm biệt!
+ 185.0   1.5/1.5 Đoàn tàu đẹp quá!
+ 186.5   2.9/2.9 Giờ trò chuyện! Cái này hình gì nhỉ?
+ 190.7   1.7/1.7 Chính xác! Hoan hô!
+ 194.1   1.7/1.7 Chương 3. To và nhỏ
+ 195.7   1.7/1.7 Nhìn kìa, hoàng hôn!
+ 198.8   4.0/4.0 Bé ơi, cái to vào toa to, cái nhỏ vào toa nhỏ nhé!
+ 204.6   1.6/1.6 Toa nhỏ, đúng rồi!
+ 207.3   2.4/2.4 Đúng rồi! Đồ chơi to, toa to!
+ 209.7 X 2.2/3.1 Tàu sẵn sàng rồi! Bé chạm vào còi nhé!
+ 211.9   3.1/3.1 Tàu chạy rồi! Tạm biệt các bạn đồ chơi!
+ 215.1   1.5/1.5 Đoàn tàu đẹp quá!
+ 216.7   4.0/4.0 Đồ chơi to vào toa to, đồ chơi nhỏ vào toa nhỏ nhé!
+ 221.7   2.4/2.4 Đúng rồi! Đồ chơi to, toa to!
+ 224.8   1.5/1.5 Toa to, đúng rồi!
+ 228.1   3.1/3.1 Tưng! Khối gỗ nhỏ muốn lên toa nhỏ cơ!
+ 231.6   1.6/1.6 Toa nhỏ, đúng rồi!
+ 233.2   2.5/2.5 Chất xong rồi! Bé kéo còi nhé!
+ 237.3   1.7/1.7 Xình xịch! Tạm biệt!
+ 239.2 X 0.5/1.1 Bé giỏi lắm!
+ 239.8   2.9/2.9 Nhìn kìa, bóng bay đi tàu cùng mình!
+ 242.7   2.9/2.9 Toa nào to? Toa nào nhỏ? Bé xếp nhé!
+ 245.7 X 1.1/2.3 Búp! Một ngôi sao lấp lánh!
+ 246.8   1.5/1.5 Đúng rồi! Toa to!
+ 250.2   1.5/1.5 Toa to, đúng rồi!
+ 252.4   2.5/2.5 Đúng rồi! Đồ chơi nhỏ, toa nhỏ!
+ 256.1   1.6/1.6 Đúng rồi! Toa nhỏ!
+ 257.8 X 2.8/3.1 Tàu sẵn sàng rồi! Bé chạm vào còi nhé!
+ 260.6   1.7/1.7 Xình xịch! Tạm biệt!
+ 262.6   1.6/1.6 Bé thông minh quá!
+ 265.5   4.0/4.0 Đồ chơi to vào toa to, đồ chơi nhỏ vào toa nhỏ nhé!
+ 270.4   2.4/2.4 Đúng rồi! Đồ chơi to, toa to!
+ 273.9   2.5/2.5 Đúng rồi! Đồ chơi nhỏ, toa nhỏ!
+ 277.4   2.5/2.5 Đúng rồi! Đồ chơi nhỏ, toa nhỏ!
+ 280.0   2.3/2.3 Lên tàu nào! Bé kéo còi đi!
+ 283.1   3.1/3.1 Tàu chạy rồi! Tạm biệt các bạn đồ chơi!
+ 286.2   2.2/2.2 Hoan hô, tàu chất đầy rồi!
+ 288.4 X 1.8/3.1 Giờ trò chuyện! Bé chỉ cái nào nhỏ nhé?
+ 290.4   1.7/1.7 Chính xác! Hoan hô!
+ 293.8   2.4/2.4 Chương 4. Nhà của các con vật
+ 296.2   3.1/3.1 Chúc ngủ ngon, các vì sao! Bật đèn nào!
+ 299.4   3.4/3.4 Bé ơi, giúp các con vật đi tàu về nhà nhé!
+ 303.8 X 2.1/3.3 Be be! Đúng rồi! Con cừu về trong chuồng!
+ 305.9   2.8/2.8 Chíp chíp! Con chim sống trên cây!
+ 308.8 X 1.1/2.3 Lên tàu nào! Bé kéo còi đi!
+ 309.9   1.7/1.7 Xình xịch! Tạm biệt!
+ 311.8   1.6/1.6 Bé thông minh quá!
+ 314.7   3.4/3.4 Bé ơi, giúp các con vật đi tàu về nhà nhé!
+ 319.8   2.5/2.5 Hoan hô! Con cá về dưới ao rồi!
+ 323.4 X 2.5/2.7 Hoan hô! Con sóc về trên cây rồi!
+ 325.9   2.8/2.8 Hoan hô! Con bướm về trên cây rồi!
+ 328.8 X 2.8/3.1 Tàu sẵn sàng rồi! Bé chạm vào còi nhé!
+ 331.6   1.7/1.7 Xình xịch! Tạm biệt!
+ 333.6   1.6/1.6 Bé thông minh quá!
+ 336.6   4.3/4.3 Bạn nào sống ở đâu? Bé đưa các con vật về toa nhà nhé!
+ 340.9 X 0.6/2.5 Bạn thỏ bông nhảy lên tàu rồi!
+ 341.6 X 2.3/2.8 Hoan hô! Con thỏ về trong hang rồi!
+ 343.9   2.0/2.0 Con cáo sống trong hang!
+ 347.6 X 2.9/3.3 Ụt ịt! Đúng rồi! Con heo về trong chuồng!
+ 350.6   2.5/2.5 Ò ò! Con bò sống trong chuồng!
+ 353.2   2.3/2.3 Lên tàu nào! Bé kéo còi đi!
+ 355.6   1.7/1.7 Xình xịch! Tạm biệt!
+ 357.5   1.6/1.6 Bé thông minh quá!
+ 360.4 X 4.1/4.3 Bạn nào sống ở đâu? Bé đưa các con vật về toa nhà nhé!
+ 364.6 X 2.5/3.3 Ụt ịt! Đúng rồi! Con heo về trong chuồng!
+ 367.1   2.5/2.5 Đúng rồi! Con sóc về trên cây!
+ 370.9   3.6/3.6 Chíp chíp! Hoan hô! Con chim về trên cây rồi!
+ 374.5 X 1.4/2.5 Chất xong rồi! Bé kéo còi nhé!
+ 375.9   2.3/2.3 Xình xịch, xình xịch, tu tu!
+ 378.3   2.1/2.1 Bé là bác lái tàu tí hon!
+ 380.5   3.2/3.2 Giờ trò chuyện! Con chim sống ở đâu nhỉ?
+ 384.6   1.7/1.7 Chính xác! Hoan hô!
+ 387.9   3.1/3.1 Hoan hô! Đồ chơi nào cũng được đi tàu!
+ 391.1   2.6/2.6 Chuyến tàu vui quá! 46 ngôi sao!
+COUNT 4en needs [2]: 1✓ 2✓
+COUNT 4en needs [4]: 1✓ 2✓ 3✓ 4✓
+COUNT 4en needs [3]: 1✗0.11 2✓ 3✓
+COUNT 4en needs [2,4]: 1✓ 2✓ 1✓ 2✓ 3✓ 4✓
+--- session 4 en (6.2 min)
+   0.1   1.9/1.9 Chapter 1. Colour Cars
+   2.1   1.7/1.7 Good morning, train!
+   4.8   3.5/3.5 Every colour has its own car! Load them all!
+  10.7   1.2/1.2 Red car, yes!
+  13.2   2.4/2.4 Yes! Purple goes with purple!
+  15.6 X 2.3/2.4 All loaded! Toot the whistle!
+  17.9   2.1/2.1 Chugga chugga, choo choo!
+  20.1   1.8/1.8 Hooray! Train loaded!
+  22.8   3.4/3.4 Put each toy in the car of the same colour!
+  27.3   1.5/1.5 Yes! The red car!
+  30.9   1.4/1.4 Orange car, yes!
+  34.0   1.5/1.5 Yes! The red car!
+  37.4 X 2.0/3.6 Boing! The purple toy goes in the purple car!
+  39.5   1.4/1.4 Purple car, yes!
+  40.9   2.4/2.4 All aboard! Pull the whistle!
+  44.8   2.1/2.1 Chugga chugga, choo choo!
+  46.9   1.0/1.0 Wonderful!
+  49.8   3.4/3.4 Put each toy in the car of the same colour!
+  53.3 X 1.2/2.7 A little bunny hops on the train!
+  54.5 X 0.0/1.7 Yes! The green car!
+  54.6   1.8/1.8 Hold on tight, bunny!
+  57.4   2.4/2.4 Yes! Yellow goes with yellow!
+  59.9   1.7/1.7 Yes! The yellow car!
+  63.5 X 3.0/3.7 Boing! Let’s take the blue toy to the blue car!
+  66.7 X 3.7/3.7 Boing! Let’s take the blue toy to the blue car!
+  70.5   1.6/1.6 Yes! The blue car!
+  72.1 X 2.7/2.9 The train is ready! Tap the whistle!
+  74.8   2.1/2.1 Off we go! Bye-bye, toys!
+  77.0   1.0/1.0 Wonderful!
+  78.0   2.5/2.5 Talk time! What colour is this?
+  83.7   1.5/1.5 Wow, you know it!
+  87.0   1.8/1.8 Chapter 2. Shape Cars
+  88.9   1.1/1.1 Sunny noon!
+  91.8   3.7/3.7 Find the car with the same shape for each one!
+  96.8   1.4/1.4 Yes! Same shape!
+  99.8   1.4/1.4 Square car, yes!
+ 101.3   2.4/2.4 All loaded! Toot the whistle!
+ 105.3   2.1/2.1 Off we go! Bye-bye, toys!
+ 107.4   1.6/1.6 You are so clever!
+ 110.2   3.4/3.4 Match the shapes! Load each one in its car!
+ 115.3   1.9/1.9 Yes! The triangle car!
+ 119.0   3.2/3.2 Bounce! The heart goes in the heart car!
+ 123.0   1.7/1.7 Yes! The heart car!
+ 125.1 X 0.4/2.0 Heart! Where does it go?
+ 125.5   3.1/3.1 Bounce! The heart wants the heart car!
+ 128.7 X 0.0/2.1 Momo will help! This way!
+ 128.8   3.1/3.1 Bounce! The heart wants the heart car!
+ 131.9 X 0.3/2.0 Heart! Where does it go?
+ 132.3   1.4/1.4 Heart car, yes!
+ 135.3   1.4/1.4 Yes! Same shape!
+ 136.8 X 2.1/2.4 All aboard! Pull the whistle!
+ 139.1   1.7/1.7 Choo choo! Bye-bye!
+ 141.1 X 0.5/0.7 Super!
+ 141.7   2.8/2.8 Look, a balloon is riding with us!
+ 144.5   3.4/3.4 Match the shapes! Load each one in its car!
+ 147.9 X 0.1/1.8 Sparkles! Up it bobs!
+ 148.2 X 2.9/3.1 Boing! The heart goes in the heart car!
+ 151.2   1.7/1.7 Yes! The heart car!
+ 154.6   1.7/1.7 Yes! The square car!
+ 157.7   1.4/1.4 Yes! Same shape!
+ 159.1   2.9/2.9 The train is ready! Tap the whistle!
+ 163.1   1.7/1.7 Choo choo! Bye-bye!
+ 165.1   0.9/0.9 Nice one!
+ 166.1   2.5/2.5 Talk time! What shape is this?
+ 172.2   1.7/1.7 Yes! You are right!
+ 175.6   2.1/2.1 Chapter 3. Counting Cargo
+ 177.7   1.5/1.5 Look, the sunset!
+ 180.6   3.2/3.2 Let’s count! Put 2 toy drums in the car!
+ 186.4   0.5/0.5 One!
+ 189.3   0.5/0.5 Two!
+ 189.8   2.1/2.1 That makes two toy drums!
+ 192.0 X 1.5/2.9 The train is ready! Tap the whistle!
+ 193.6   1.7/1.7 Choo choo! Bye-bye!
+ 195.3   1.6/1.6 You are so clever!
+ 198.6   2.6/2.6 Load 4 teddy bears into the car!
+ 204.4   0.5/0.5 One!
+ 208.3   0.5/0.5 Two!
+ 211.1   1.6/1.6 Pop it into a car!
+ 213.3   0.7/0.7 Three!
+ 215.9   0.6/0.6 Four!
+ 216.6   2.3/2.3 That makes four teddy bears!
+ 219.0 X 2.6/2.9 The train is ready! Tap the whistle!
+ 221.7   2.1/2.1 Chugga chugga, choo choo!
+ 223.8   1.2/1.2 What a train!
+ 226.7   3.2/3.2 Let’s count! Put 3 toy drums in the car!
+ 230.0 X 1.1/2.1 Look! Bunny wants a ride!
+ 231.2 X 0.1/0.5 One!
+ 231.3   1.7/1.7 Bunny waves at you!
+ 234.3   0.5/0.5 Two!
+ 237.9   0.7/0.7 Three!
+ 238.7   2.3/2.3 That makes three toy drums!
+ 241.0 X 1.8/2.9 The train is ready! Tap the whistle!
+ 242.8   1.7/1.7 Choo choo! Bye-bye!
+ 244.6   1.7/1.7 Super train driver!
+ 248.1   3.4/3.4 Count them in! 2 toy rockets here, 4 there!
+ 252.3   0.5/0.5 One!
+ 255.9   0.5/0.5 Two!
+ 256.5 X 2.3/2.5 Two toy rockets! Well counted!
+ 258.9   0.5/0.5 One!
+ 262.8   2.8/2.8 This car is full! Try another one.
+ 268.6   0.5/0.5 Two!
+ 270.9   0.7/0.7 Three!
+ 273.6   0.6/0.6 Four!
+ 274.2   2.5/2.5 Four toy rockets! Well counted!
+ 276.8 X 0.8/2.4 All loaded! Toot the whistle!
+ 277.6   1.7/1.7 Choo choo! Bye-bye!
+ 279.5   1.7/1.7 Super train driver!
+ 281.2   2.6/2.6 Talk time! How many teddy bears?
+ 286.4   1.6/1.6 That is it! Super!
+ 289.9   2.0/2.0 Chapter 4. Animal Homes
+ 291.8   2.4/2.4 Good night, stars! Lights on!
+ 294.6   3.4/3.4 Each animal wants its home car. Load them!
+ 298.4   2.8/2.8 Oink! Home in the barn, little pig!
+ 302.1   3.0/3.0 Quack! Home in the pond, little duck!
+ 305.1 X 2.0/2.4 All aboard! Pull the whistle!
+ 307.1   2.1/2.1 Chugga chugga, choo choo!
+ 309.3   1.7/1.7 Super train driver!
+ 312.1 X 3.9/4.0 Who lives where? Take each animal to its home car!
+ 316.1   2.8/2.8 Quack! The duck lives in the pond!
+ 319.6 X 2.1/2.5 Moo! The cow lives in the barn!
+ 321.8   3.1/3.1 Boing! The mouse wants the burrow car!
+ 325.1   2.9/2.9 Oink! Yes! The pig goes in the barn!
+ 328.2 X 0.3/2.5 The mouse! Where does it live?
+ 328.6   3.4/3.4 Squeak! Yes! The mouse goes in the burrow!
+ 332.0 X 2.1/2.4 All loaded! Toot the whistle!
+ 334.1   2.1/2.1 Chugga chugga, choo choo!
+ 336.3 X 0.4/1.1 You got it!
+ 336.8   2.8/2.8 Look, a balloon is riding with us!
+ 339.6   4.0/4.0 Who lives where? Take each animal to its home car!
+ 343.6 X 0.2/1.8 Sparkles! Up it bobs!
+ 343.9   2.6/2.6 Yes! The fox goes in the burrow!
+ 347.4 X 2.6/3.4 Boing! Let’s take the fish to the pond car!
+ 350.1 X 2.9/2.9 Oink! Yes! The pig goes in the barn!
+ 353.1 X 2.4/2.8 Yes! The bunny goes in the burrow!
+ 355.6   2.5/2.5 Home in the pond, little fish!
+ 359.3   2.5/2.5 Moo! The cow lives in the barn!
+ 361.8 X 1.2/2.4 All aboard! Pull the whistle!
+ 363.1   2.1/2.1 Chugga chugga, choo choo!
+ 365.3   1.0/1.0 Wonderful!
+ 366.3   2.8/2.8 Talk time! Where does the cow live?
+ 370.9   2.5/2.5 It lives in the barn! Good try!
+ 374.4   1.6/1.6 Night train party!
+ 376.0   2.9/2.9 What a train ride! 34 stars! Hooray!
+COUNT 4vi needs [1]: 1✓
+COUNT 4vi needs [2]: 1✓ 2✓
+COUNT 4vi needs [4]: 1✓ 2✓ 3✓ 4✓
+COUNT 4vi needs [1,5]: 1✓ 1✓ 2✓ 3✓ 4✓ 5✓
+--- session 4 vi (6.6 min)
+   0.1   2.1/2.1 Chương 1. Toa tàu sắc màu
+   2.3   2.0/2.0 Chào buổi sáng, tàu ơi!
+   4.8   3.6/3.6 Bé tìm toa cùng màu cho từng món đồ chơi nhé!
+  10.7 X 2.4/3.7 Đúng rồi! Màu xanh dương đi với màu xanh dương!
+  13.2   1.9/1.9 Toa màu cam, đúng rồi!
+  15.1   2.5/2.5 Chất xong rồi! Bé kéo còi nhé!
+  17.9   3.1/3.1 Tàu chạy rồi! Tạm biệt các bạn đồ chơi!
+  21.1   1.6/1.6 Bé thông minh quá!
+  22.8   3.2/3.2 Bé ơi, xếp đồ chơi vào toa cùng màu nhé!
+  27.3   1.9/1.9 Đúng rồi! Toa màu cam!
+  30.9   1.8/1.8 Đúng rồi! Toa màu đỏ!
+  34.0 X 3.2/3.7 Đúng rồi! Màu xanh dương đi với màu xanh dương!
+  37.4 X 2.0/3.9 Tưng tưng! Đồ chơi màu đỏ muốn lên toa màu đỏ cơ!
+  39.5   2.5/2.5 Đúng rồi! Màu đỏ đi với màu đỏ!
+  42.0   2.5/2.5 Chất xong rồi! Bé kéo còi nhé!
+  44.8   1.7/1.7 Xình xịch! Tạm biệt!
+  46.8   0.8/0.8 Hay lắm!
+  49.9   3.2/3.2 Bé ơi, xếp đồ chơi vào toa cùng màu nhé!
+  53.2 X 1.5/2.8 Nhìn kìa! Bạn thỏ muốn đi nhờ tàu!
+  54.8   1.9/1.9 Bám chắc nhé, bạn thỏ!
+  57.5 X 2.4/2.5 Đúng rồi! Màu đỏ đi với màu đỏ!
+  60.0   2.7/2.7 Đúng rồi! Màu cam đi với màu cam!
+  63.6 X 3.0/4.0 Tưng tưng! Đồ chơi màu tím muốn lên toa màu tím cơ!
+  66.8 X 3.7/4.0 Tưng! Mình đưa đồ chơi màu tím lên toa màu tím nhé!
+  70.5   2.7/2.7 Đúng rồi! Màu tím đi với màu tím!
+  73.7   1.9/1.9 Toa màu tím, đúng rồi!
+  75.6   2.3/2.3 Lên tàu nào! Bé kéo còi đi!
+  78.5   2.3/2.3 Xình xịch, xình xịch, tu tu!
+  80.8   0.9/0.9 Giỏi quá!
+  81.8   2.8/2.8 Giờ trò chuyện! Cái này màu gì nhỉ?
+  87.5   1.7/1.7 Đúng luôn! Siêu quá!
+  91.0   2.3/2.3 Chương 2. Toa tàu hình khối
+  93.2   2.0/2.0 Buổi trưa nắng đẹp quá!
+  95.7   3.1/3.1 Bé tìm toa cùng hình cho từng khối nhé!
+ 100.7   2.3/2.3 Toa hình trái tim, đúng rồi!
+ 104.5   2.1/2.1 Đúng rồi! Cùng hình luôn!
+ 106.6 X 3.0/3.1 Tàu sẵn sàng rồi! Bé chạm vào còi nhé!
+ 109.7   3.1/3.1 Tàu chạy rồi! Tạm biệt các bạn đồ chơi!
+ 112.8   2.2/2.2 Hoan hô, tàu chất đầy rồi!
+ 115.0   3.9/3.9 Bé ơi, xếp mỗi hình vào toa có hình giống nó nhé!
+ 120.3 X 3.8/4.3 Tưng! Mình đưa hình tam giác lên toa hình tam giác nhé!
+ 124.3   2.1/2.1 Đúng rồi! Cùng hình luôn!
+ 126.4 X 0.4/2.5 Hình tam giác! Đi toa nào nhỉ?
+ 126.8 X 3.1/4.0 Tưng! Hình tam giác muốn lên toa hình tam giác cơ!
+ 130.1 X 3.4/4.0 Tưng tưng! Hình tam giác đi toa hình tam giác nhé!
+ 133.6   2.3/2.3 Toa hình tam giác, đúng rồi!
+ 136.7   2.0/2.0 Đúng rồi! Toa hình tròn!
+ 138.9   2.3/2.3 Đúng rồi! Toa hình ngôi sao!
+ 141.3   2.3/2.3 Lên tàu nào! Bé kéo còi đi!
+ 144.7   2.3/2.3 Xình xịch, xình xịch, tu tu!
+ 147.0 X 0.1/0.8 Hay lắm!
+ 147.3   2.9/2.9 Nhìn kìa, bóng bay đi tàu cùng mình!
+ 150.2   3.9/3.9 Bé ơi, xếp mỗi hình vào toa có hình giống nó nhé!
+ 154.1 X 0.1/2.4 Lấp lánh! Bóng bay nhún nhảy!
+ 154.3   2.1/2.1 Đúng rồi! Cùng hình luôn!
+ 157.8 X 3.0/4.3 Tưng! Mình đưa hình ngôi sao lên toa hình ngôi sao nhé!
+ 160.9   2.1/2.1 Đúng rồi! Cùng hình luôn!
+ 163.1 X 0.3/2.5 Hình ngôi sao! Đi toa nào nhỉ?
+ 163.4 X 3.7/4.3 Tưng tưng! Hình ngôi sao muốn lên toa hình ngôi sao cơ!
+ 167.3   2.1/2.1 Đúng rồi! Cùng hình luôn!
+ 169.4   3.1/3.1 Tàu sẵn sàng rồi! Bé chạm vào còi nhé!
+ 172.9   1.7/1.7 Xình xịch! Tạm biệt!
+ 175.0   0.9/0.9 Giỏi quá!
+ 176.0   2.9/2.9 Giờ trò chuyện! Cái này hình gì nhỉ?
+ 181.3   1.4/1.4 Oa, bé biết rồi!
+ 184.7   2.2/2.2 Chương 3. Đếm hàng lên tàu
+ 186.9   1.7/1.7 Nhìn kìa, hoàng hôn!
+ 189.6   2.9/2.9 Bé ơi, chất 1 cái trống lên toa nhé!
+ 194.2   0.5/0.5 Một!
+ 194.7   1.8/1.8 Đủ một cái trống rồi!
+ 196.6 X 2.2/2.5 Chất xong rồi! Bé kéo còi nhé!
+ 198.8   3.1/3.1 Tàu chạy rồi! Tạm biệt các bạn đồ chơi!
+ 202.0   2.1/2.1 Bé là bác lái tàu tí hon!
+ 204.2   2.8/2.8 Bé đếm 2 chiếc tên lửa lên toa nào!
+ 208.7   0.5/0.5 Một!
+ 211.8   0.5/0.5 Hai!
+ 212.3   2.1/2.1 Đủ hai chiếc tên lửa rồi!
+ 214.5 X 2.5/3.1 Tàu sẵn sàng rồi! Bé chạm vào còi nhé!
+ 217.1   3.1/3.1 Tàu chạy rồi! Tạm biệt các bạn đồ chơi!
+ 220.2   2.2/2.2 Hoan hô, tàu chất đầy rồi!
+ 222.4   2.5/2.5 Bé đếm 4 cái trống lên toa nào!
+ 225.0 X 1.3/2.5 Bạn thỏ bông nhảy lên tàu rồi!
+ 226.4   0.5/0.5 Một!
+ 230.1   0.5/0.5 Hai!
+ 233.2   0.5/0.5 Ba!
+ 236.7   0.5/0.5 Bốn!
+ 237.2   1.8/1.8 Đủ bốn cái trống rồi!
+ 239.1 X 1.6/2.5 Chất xong rồi! Bé kéo còi nhé!
+ 240.8   2.3/2.3 Xình xịch, xình xịch, tu tu!
+ 243.1   2.1/2.1 Bé là bác lái tàu tí hon!
+ 246.0   3.9/3.9 Bé xếp 1 quả bóng vào một toa, 5 vào toa kia nhé!
+ 250.8   1.5/1.5 Mang lên tàu nào!
+ 253.3   0.5/0.5 Một!
+ 253.8   1.7/1.7 Đủ một quả bóng rồi!
+ 256.9   2.8/2.8 Đầy ắp rồi! Mình tìm toa khác nhé.
+ 260.0 X 0.3/1.9 Lên tàu nào, quả bóng!
+ 260.4   0.5/0.5 Một!
+ 263.9   0.5/0.5 Hai!
+ 266.1   0.5/0.5 Ba!
+ 269.8   0.5/0.5 Bốn!
+ 272.1   0.5/0.5 Năm!
+ 272.6   2.5/2.5 Năm quả bóng! Bé đếm giỏi quá!
+ 275.1 X 1.6/2.5 Chất xong rồi! Bé kéo còi nhé!
+ 276.9   2.3/2.3 Xình xịch, xình xịch, tu tu!
+ 279.2   2.2/2.2 Hoan hô, tàu chất đầy rồi!
+ 281.4 X 2.1/3.2 Giờ trò chuyện! Có mấy con gấu bông nào?
+ 283.6   1.7/1.7 Chính xác! Hoan hô!
+ 287.1   2.4/2.4 Chương 4. Nhà của các con vật
+ 289.5   3.1/3.1 Chúc ngủ ngon, các vì sao! Bật đèn nào!
+ 292.7   3.0/3.0 Mỗi con vật lên toa nhà của mình nhé!
+ 296.1   1.7/1.7 Con cá sống dưới ao!
+ 298.1   2.6/2.6 Đúng rồi! Con cáo về trong hang!
+ 300.8 X 2.3/2.5 Chất xong rồi! Bé kéo còi nhé!
+ 303.3   1.7/1.7 Xình xịch! Tạm biệt!
+ 305.1   1.5/1.5 Đoàn tàu đẹp quá!
+ 308.1   3.4/3.4 Bé ơi, giúp các con vật đi tàu về nhà nhé!
+ 312.3 X 2.0/3.4 Chíp chíp! Đúng rồi! Con chim về trên cây!
+ 314.4   3.1/3.1 Ộp ộp! Hoan hô! Con ếch về dưới ao rồi!
+ 317.9 X 2.0/2.8 Hoan hô! Con cáo về trong hang rồi!
+ 320.1   2.6/2.6 Tưng tưng! Con cá đi toa ao nhé!
+ 323.1 X 0.3/1.9 Con cá! Nhà ở đâu nhỉ?
+ 323.4   1.7/1.7 Con cá sống dưới ao!
+ 325.2   2.5/2.5 Chất xong rồi! Bé kéo còi nhé!
+ 328.9   1.7/1.7 Xình xịch! Tạm biệt!
+ 331.0 X 0.5/1.1 Bé giỏi lắm!
+ 331.6   2.9/2.9 Nhìn kìa, bóng bay đi tàu cùng mình!
+ 334.5   3.0/3.0 Mỗi con vật lên toa nhà của mình nhé!
+ 337.5 X 0.9/2.3 Búp! Một ngôi sao lấp lánh!
+ 338.6 X 2.7/2.8 Tưng! Con cáo muốn lên toa hang cơ!
+ 341.4   3.2/3.2 Tưng tưng! Con cáo muốn lên toa hang cơ!
+ 344.6 X 0.3/2.5 Nhìn nè! Toa này đang sáng lên.
+ 344.9   2.8/2.8 Hoan hô! Con bướm về trên cây rồi!
+ 347.9 X 3.0/3.5 Be be! Hoan hô! Con cừu về trong chuồng rồi!
+ 350.9   2.6/2.6 Đúng rồi! Con cáo về trong hang!
+ 354.4   2.5/2.5 Ò ò! Con bò sống trong chuồng!
+ 357.0 X 2.3/2.5 Chất xong rồi! Bé kéo còi nhé!
+ 359.4   1.7/1.7 Xình xịch! Tạm biệt!
+ 361.4   0.9/0.9 Giỏi quá!
+ 364.3   3.0/3.0 Mỗi con vật lên toa nhà của mình nhé!
+ 369.4   2.3/2.3 Đúng rồi! Con cá về dưới ao!
+ 372.4   2.0/2.0 Con bướm sống trên cây!
+ 375.9   2.6/2.6 Đúng rồi! Con cáo về trong hang!
+ 378.5 X 3.0/3.1 Tàu sẵn sàng rồi! Bé chạm vào còi nhé!
+ 381.6   1.7/1.7 Xình xịch! Tạm biệt!
+ 383.7   1.5/1.5 Đoàn tàu đẹp quá!
+ 385.2   3.2/3.2 Giờ trò chuyện! Con bướm sống ở đâu nhỉ?
+ 389.9   3.2/3.2 Bạn ấy sống trên cây đó! Bé cố gắng lắm!
+ 393.3   3.1/3.1 Hoan hô! Đồ chơi nào cũng được đi tàu!
+ 396.4   3.1/3.1 Chất bao nhiêu là đồ chơi! 35 ngôi sao!
+COUNT 5en needs [1]: 1✓
+COUNT 5en needs [4]: 1✓ 2✓ 3✓ 4✓
+COUNT 5en needs [5]: 1✓ 2✓ 3✓ 4✓ 5✓
+--- session 5 en (6.0 min)
+   0.1   1.8/1.8 Chapter 1. Shape Cars
+   2.0   1.7/1.7 Good morning, train!
+   4.8   3.7/3.7 Put each shape in the car with the same shape!
+  10.7   1.6/1.6 Triangle car, yes!
+  13.2   1.4/1.4 Yes! Same shape!
+  14.6   2.4/2.4 All loaded! Toot the whistle!
+  17.9   2.1/2.1 Chugga chugga, choo choo!
+  20.1   1.2/1.2 What a train!
+  22.8   3.7/3.7 Put each shape in the car with the same shape!
+  27.3   1.4/1.4 Circle car, yes!
+  30.9   1.3/1.3 Oval car, yes!
+  34.0   1.4/1.4 Yes! Same shape!
+  37.4 X 2.0/4.8 Bounce! That’s the square car. The oval goes in the oval car!
+  39.5   1.6/1.6 Yes! The oval car!
+  41.1   2.4/2.4 All loaded! Toot the whistle!
+  44.8   2.1/2.1 Chugga chugga, choo choo!
+  46.9   1.0/1.0 Wonderful!
+  50.0   3.7/3.7 Find the car with the same shape for each one!
+  53.7 X 1.0/2.7 A little bunny hops on the train!
+  54.8   1.9/1.9 Hee hee! Hello, bunny!
+  57.5   1.4/1.4 Yes! Same shape!
+  60.0   1.4/1.4 Circle car, yes!
+  63.8 X 2.9/5.7 Boing! That’s the oval car. Let’s take the rectangle to the rectangle car!
+  66.8 X 3.7/6.0 Bounce! That’s the circle car. Let’s take the rectangle to the rectangle car!
+  70.5   2.0/2.0 Yes! The rectangle car!
+  73.7   2.0/2.0 Yes! The rectangle car!
+  75.6 X 2.8/2.9 The train is ready! Tap the whistle!
+  78.5   2.1/2.1 Off we go! Bye-bye, toys!
+  80.7   0.8/0.8 Hooray!
+  81.5   2.5/2.5 Talk time! What shape is this?
+  87.7   1.5/1.5 Wow, you know it!
+  91.0   2.1/2.1 Chapter 2. Counting Cargo
+  93.2   1.1/1.1 Sunny noon!
+  96.0   2.5/2.5 Count 1 toy drum into the car!
+ 101.0   0.5/0.5 One!
+ 101.5   2.3/2.3 One toy drum! Well counted!
+ 103.8 X 2.4/2.9 The train is ready! Tap the whistle!
+ 106.3   2.1/2.1 Chugga chugga, choo choo!
+ 108.5   1.6/1.6 You are so clever!
+ 111.4   3.2/3.2 Let’s count! Put 4 toy boats in the car!
+ 116.5   0.5/0.5 One!
+ 120.4   1.6/1.6 Pop it into a car!
+ 122.5 X 0.2/0.9 Toy boat!
+ 122.8   0.5/0.5 Two!
+ 128.6 X 0.3/0.9 Toy boat!
+ 128.9   0.7/0.7 Three!
+ 132.1   0.6/0.6 Four!
+ 132.7   2.4/2.4 Four toy boats! Well counted!
+ 135.1 X 1.7/2.4 All loaded! Toot the whistle!
+ 136.9   2.1/2.1 Chugga chugga, choo choo!
+ 139.1 X 0.1/1.7 Super train driver!
+ 139.3   2.8/2.8 Look, a balloon is riding with us!
+ 142.1   2.5/2.5 Load 5 toy boats into the car!
+ 144.6 X 1.6/1.8 Sparkles! Up it bobs!
+ 146.3   0.5/0.5 One!
+ 148.4   0.5/0.5 Two!
+ 152.3   0.7/0.7 Three!
+ 155.8   0.6/0.6 Four!
+ 159.3   0.6/0.6 Five!
+ 160.0   2.4/2.4 Five toy boats! Well counted!
+ 162.4 X 1.6/2.4 All loaded! Toot the whistle!
+ 164.2   1.7/1.7 Choo choo! Bye-bye!
+ 165.9   1.6/1.6 You are so clever!
+ 167.5   2.6/2.6 Talk time! How many teddy bears?
+ 172.8   1.7/1.7 Yes! You are right!
+ 176.2   1.8/1.8 Chapter 3. ABC Blocks
+ 178.0   1.5/1.5 Look, the sunset!
+ 180.9   4.3/4.3 Put each letter block in the car with the same letter!
+ 186.6   1.7/1.7 Yes! T goes with T!
+ 189.1   1.4/1.4 Yes! Letter see!
+ 190.5   2.4/2.4 All loaded! Toot the whistle!
+ 193.9   1.7/1.7 Choo choo! Bye-bye!
+ 195.9   1.7/1.7 Super train driver!
+ 198.9   4.3/4.3 Put each letter block in the car with the same letter!
+ 203.8 X 2.9/5.5 Bounce! That’s the letter see car. Letter ay goes in the letter ay car!
+ 206.8   1.4/1.4 Yes! Letter ay!
+ 210.3   1.7/1.7 Yes! C goes with C!
+ 213.9   1.4/1.4 Letter oh, yes!
+ 217.0 X 0.2/2.3 Letter ay! Where does it go?
+ 217.3   1.4/1.4 Yes! Letter ay!
+ 218.7   2.4/2.4 All aboard! Pull the whistle!
+ 222.8   1.7/1.7 Choo choo! Bye-bye!
+ 224.9   0.7/0.7 Super!
+ 228.1   4.3/4.3 Put each letter block in the car with the same letter!
+ 232.4 X 1.4/2.1 Look! Bunny wants a ride!
+ 233.8 X 3.3/5.7 Bounce! That’s the letter ess car. Letter dee goes in the letter dee car!
+ 237.3   1.4/1.4 Letter tee, yes!
+ 240.4 X 3.0/6.1 Bounce! That’s the letter tee car. Let’s take letter ess to the letter ess car!
+ 243.6   1.7/1.7 Yes! D goes with D!
+ 245.8   1.7/1.7 Yes! M goes with M!
+ 249.3 X 0.3/1.1 Letter ess!
+ 249.7   1.4/1.4 Yes! Letter ess!
+ 252.6   1.4/1.4 Letter em, yes!
+ 254.0   2.9/2.9 The train is ready! Tap the whistle!
+ 258.3   2.1/2.1 Off we go! Bye-bye, toys!
+ 260.4   0.8/0.8 Hooray!
+ 261.2   2.6/2.6 Talk time! Which letter is this?
+ 267.4   1.5/1.5 Wow, you know it!
+ 270.9   2.0/2.0 Chapter 4. Animal Homes
+ 272.8   2.4/2.4 Good night, stars! Lights on!
+ 275.6   3.7/3.7 Help the animals ride home! Find each home car!
+ 279.6 X 3.5/4.3 Boing! That’s the tree car. The pig wants the barn car!
+ 283.3 X 2.2/2.8 Oink! Home in the barn, little pig!
+ 285.6   2.8/2.8 Home in the tree, little squirrel!
+ 288.4 X 1.8/2.4 All aboard! Pull the whistle!
+ 290.3   2.1/2.1 Off we go! Bye-bye, toys!
+ 292.4   1.0/1.0 Great job!
+ 295.2   4.0/4.0 Who lives where? Take each animal to its home car!
+ 299.9   3.1/3.1 Baaa! Yes! The sheep goes in the barn!
+ 303.3   3.1/3.1 Ribbit! Yes! The frog goes in the pond!
+ 306.9 X 2.2/5.0 Bounce! That’s the pond car. Let’s take the pig to the barn car!
+ 309.3 X 2.1/2.6 Oink! The pig lives in the barn!
+ 311.4   2.3/2.3 The fox lives in the burrow!
+ 313.8 X 1.6/2.9 The train is ready! Tap the whistle!
+ 315.6   2.1/2.1 Chugga chugga, choo choo!
+ 317.7 X 0.4/1.0 Great job!
+ 318.1   2.0/2.0 A balloon on our train!
+ 320.8   3.4/3.4 Each animal wants its home car. Load them!
+ 324.2   1.8/1.8 Boop! A sparkle star!
+ 326.6   2.7/2.7 Home in the burrow, little bunny!
+ 329.6 X 2.1/2.8 Quack! The duck lives in the pond!
+ 331.8   2.8/2.8 Tweet! The bird lives in the tree!
+ 334.9 X 2.4/2.8 Oink! Home in the barn, little pig!
+ 337.4   2.8/2.8 Ribbit! The frog lives in the pond!
+ 341.1   3.0/3.0 Baaa! Home in the barn, little sheep!
+ 344.1 X 2.0/2.9 The train is ready! Tap the whistle!
+ 346.1   2.1/2.1 Off we go! Bye-bye, toys!
+ 348.3   1.6/1.6 You are so clever!
+ 349.9   2.8/2.8 Talk time! Where does the fox live?
+ 353.6   1.5/1.5 Wow, you know it!
+ 357.1   1.6/1.6 What a train ride!
+ 358.7   2.5/2.5 So many toys loaded! 32 stars!
+COUNT 5vi needs [1]: 1✓
+COUNT 5vi needs [4]: 1✓ 2✓ 3✓ 4✓
+COUNT 5vi needs [5]: 1✓ 2✓ 3✓ 4✓ 5✓
+--- session 5 vi (6.0 min)
+   0.1   2.3/2.3 Chương 1. Toa tàu hình khối
+   2.4   2.0/2.0 Chào buổi sáng, tàu ơi!
+   4.8   3.7/3.7 Bé ghép hình nào! Mỗi hình lên toa của nó nhé!
+  10.7   2.3/2.3 Toa hình trái tim, đúng rồi!
+  13.2   2.1/2.1 Đúng rồi! Cùng hình luôn!
+  15.3   2.5/2.5 Chất xong rồi! Bé kéo còi nhé!
+  17.9   3.1/3.1 Tàu chạy rồi! Tạm biệt các bạn đồ chơi!
+  21.1   2.2/2.2 Hoan hô, tàu chất đầy rồi!
+  23.3   3.1/3.1 Bé tìm toa cùng hình cho từng khối nhé!
+  27.3   2.1/2.1 Toa hình vuông, đúng rồi!
+  30.9   2.3/2.3 Đúng rồi! Toa hình chữ nhật!
+  34.0   2.3/2.3 Đúng rồi! Toa hình chữ nhật!
+  37.4 X 2.0/6.0 Tưng tưng! Đây là toa hình vuông. Hình trái tim muốn lên toa hình trái tim cơ!
+  39.5   2.1/2.1 Đúng rồi! Cùng hình luôn!
+  41.6   3.1/3.1 Tàu sẵn sàng rồi! Bé chạm vào còi nhé!
+  44.8   2.3/2.3 Xình xịch, xình xịch, tu tu!
+  47.1   0.9/0.9 Đúng rồi!
+  49.9   3.9/3.9 Bé ơi, xếp mỗi hình vào toa có hình giống nó nhé!
+  53.8 X 0.8/2.5 Bạn thỏ bông nhảy lên tàu rồi!
+  54.8   1.9/1.9 Bám chắc nhé, bạn thỏ!
+  57.5   2.1/2.1 Đúng rồi! Cùng hình luôn!
+  60.0   2.0/2.0 Đúng rồi! Toa hình tròn!
+  63.6 X 3.0/6.0 Tưng tưng! Đây là toa hình tròn. Hình trái tim muốn lên toa hình trái tim cơ!
+  66.8 X 3.7/5.6 Tưng! Đây là toa hình thoi. Hình trái tim muốn lên toa hình trái tim cơ!
+  70.5   2.1/2.1 Đúng rồi! Cùng hình luôn!
+  73.7   2.0/2.0 Đúng rồi! Toa hình tròn!
+  75.7   2.5/2.5 Chất xong rồi! Bé kéo còi nhé!
+  78.5   2.3/2.3 Xình xịch, xình xịch, tu tu!
+  80.8   0.9/0.9 Siêu quá!
+  81.8   2.9/2.9 Giờ trò chuyện! Cái này hình gì nhỉ?
+  87.5   1.9/1.9 Đúng rồi! Bé giỏi quá!
+  91.0   2.2/2.2 Chương 2. Đếm hàng lên tàu
+  93.2   2.0/2.0 Buổi trưa nắng đẹp quá!
+  96.0   3.5/3.5 Mình đếm nhé! Bé xếp 1 con gấu bông vào toa!
+ 100.8   0.5/0.5 Một!
+ 101.4   2.8/2.8 Một con gấu bông! Bé đếm giỏi quá!
+ 104.2 X 2.0/3.1 Tàu sẵn sàng rồi! Bé chạm vào còi nhé!
+ 106.3   2.3/2.3 Xình xịch, xình xịch, tu tu!
+ 108.7   2.1/2.1 Bé là bác lái tàu tí hon!
+ 111.4   3.6/3.6 Mình đếm nhé! Bé xếp 4 chiếc tên lửa vào toa!
+ 116.5   0.5/0.5 Một!
+ 120.4   2.0/2.0 Bé thả vào toa tàu nhé!
+ 122.4 X 0.3/1.4 Tên lửa đồ chơi!
+ 122.8   0.5/0.5 Hai!
+ 128.5 X 0.4/2.4 Lên tàu nào, tên lửa đồ chơi!
+ 128.9   0.5/0.5 Ba!
+ 132.1   0.5/0.5 Bốn!
+ 132.6   2.1/2.1 Đủ bốn chiếc tên lửa rồi!
+ 134.8 X 2.0/3.1 Tàu sẵn sàng rồi! Bé chạm vào còi nhé!
+ 136.8 X 2.2/2.3 Xình xịch, xình xịch, tu tu!
+ 139.2   2.4/2.4 Có bóng bay trên tàu mình nè!
+ 142.0   2.8/2.8 Bé đếm 5 chiếc thuyền lên toa nào!
+ 144.8 X 1.3/2.3 Búp! Một ngôi sao lấp lánh!
+ 146.2   0.5/0.5 Một!
+ 148.3   0.5/0.5 Hai!
+ 152.3   0.5/0.5 Ba!
+ 155.8   0.5/0.5 Bốn!
+ 159.3   0.5/0.5 Năm!
+ 159.9   2.0/2.0 Đủ năm chiếc thuyền rồi!
+ 162.0 X 2.1/2.3 Lên tàu nào! Bé kéo còi đi!
+ 164.2   1.7/1.7 Xình xịch! Tạm biệt!
+ 165.9   2.2/2.2 Hoan hô, tàu chất đầy rồi!
+ 168.1   3.3/3.3 Giờ trò chuyện! Có mấy chiếc tên lửa nào?
+ 172.8   1.7/1.7 Đúng luôn! Siêu quá!
+ 176.2   1.9/1.9 Chương 3. Khối chữ cái
+ 178.1   1.7/1.7 Nhìn kìa, hoàng hôn!
+ 180.9   3.1/3.1 Bé tìm toa cùng chữ cho từng khối nhé!
+ 186.4   1.5/1.5 Đúng rồi! Chữ xờ!
+ 189.1   1.5/1.5 Chữ mờ, đúng rồi!
+ 190.6   2.3/2.3 Lên tàu nào! Bé kéo còi đi!
+ 193.9   3.1/3.1 Tàu chạy rồi! Tạm biệt các bạn đồ chơi!
+ 197.1   2.2/2.2 Hoan hô, tàu chất đầy rồi!
+ 199.3   3.1/3.1 Bé tìm toa cùng chữ cho từng khối nhé!
+ 203.8 X 2.9/5.1 Tưng tưng! Đây là toa chữ sờ. Mình đưa chữ vờ lên toa chữ vờ nhé!
+ 206.8   2.5/2.5 Đúng rồi! Chữ cờ đi với chữ cờ!
+ 210.2   1.5/1.5 Đúng rồi! Chữ sờ!
+ 213.8   2.5/2.5 Đúng rồi! Chữ sờ đi với chữ sờ!
+ 217.0 X 0.2/2.0 Chữ vờ! Đi toa nào nhỉ?
+ 217.3   1.5/1.5 Chữ vờ, đúng rồi!
+ 218.8   2.5/2.5 Chất xong rồi! Bé kéo còi nhé!
+ 222.8   1.7/1.7 Xình xịch! Tạm biệt!
+ 224.9   1.1/1.1 Bé giỏi lắm!
+ 228.0   4.1/4.1 Bé ơi, xếp mỗi khối chữ vào toa có chữ giống nó nhé!
+ 232.1 X 1.5/2.5 Bạn thỏ bông nhảy lên tàu rồi!
+ 233.8 X 3.4/4.8 Tưng tưng! Đây là toa chữ i. Mình đưa chữ u lên toa chữ u nhé!
+ 237.3   1.4/1.4 Chữ i, đúng rồi!
+ 240.4 X 2.9/3.9 Tưng! Đây là toa chữ u. Chữ gờ đi toa chữ gờ nhé!
+ 243.4 X 2.3/2.4 Đúng rồi! Chữ u đi với chữ u!
+ 245.8   1.5/1.5 Chữ dờ, đúng rồi!
+ 249.3 X 0.2/0.8 Chữ gờ!
+ 249.6   1.5/1.5 Đúng rồi! Chữ gờ!
+ 252.6   1.4/1.4 Chữ u, đúng rồi!
+ 254.0   3.1/3.1 Tàu sẵn sàng rồi! Bé chạm vào còi nhé!
+ 258.3   3.1/3.1 Tàu chạy rồi! Tạm biệt các bạn đồ chơi!
+ 261.4   0.9/0.9 Giỏi quá!
+ 262.4   2.8/2.8 Giờ trò chuyện! Đây là chữ gì nào?
+ 267.4   1.9/1.9 Đúng rồi! Bé giỏi quá!
+ 270.8   2.4/2.4 Chương 4. Nhà của các con vật
+ 273.2   3.1/3.1 Chúc ngủ ngon, các vì sao! Bật đèn nào!
+ 276.4   3.0/3.0 Mỗi con vật lên toa nhà của mình nhé!
+ 279.6 X 3.5/4.3 Tưng tưng! Đây là toa hang. Con ếch muốn lên toa ao cơ!
+ 283.1 X 2.2/2.3 Ộp ộp! Con ếch sống dưới ao!
+ 285.4   2.8/2.8 Hoan hô! Con thỏ về trong hang rồi!
+ 288.3 X 1.8/2.5 Chất xong rồi! Bé kéo còi nhé!
+ 290.3   1.7/1.7 Xình xịch! Tạm biệt!
+ 292.1   0.8/0.8 Hay lắm!
+ 295.1   3.0/3.0 Mỗi con vật lên toa nhà của mình nhé!
+ 299.9   2.0/2.0 Con thỏ sống trong hang!
+ 303.3   3.1/3.1 Cạp cạp! Đúng rồi! Con vịt về dưới ao!
+ 306.9 X 2.2/4.4 Tưng tưng! Đây là toa chuồng. Con cá muốn lên toa ao cơ!
+ 309.3   1.7/1.7 Con cá sống dưới ao!
+ 311.4   2.7/2.7 Be be! Con cừu sống trong chuồng!
+ 314.1 X 1.3/2.5 Chất xong rồi! Bé kéo còi nhé!
+ 315.4   2.3/2.3 Xình xịch, xình xịch, tu tu!
+ 317.8 X 0.1/0.8 Hay lắm!
+ 318.1   2.4/2.4 Có bóng bay trên tàu mình nè!
+ 320.8   4.3/4.3 Bạn nào sống ở đâu? Bé đưa các con vật về toa nhà nhé!
+ 325.1 X 1.4/2.4 Lấp lánh! Bóng bay nhún nhảy!
+ 326.6   2.8/2.8 Chíp chíp! Con chim sống trên cây!
+ 329.6 X 2.1/3.3 Be be! Đúng rồi! Con cừu về trong chuồng!
+ 331.8   2.8/2.8 Hoan hô! Con thỏ về trong hang rồi!
+ 334.9 X 2.3/3.3 Ò ò! Hoan hô! Con bò về trong chuồng rồi!
+ 337.3   2.7/2.7 Hoan hô! Con sóc về trên cây rồi!
+ 340.9   3.3/3.3 Cạp cạp! Hoan hô! Con vịt về dưới ao rồi!
+ 344.3 X 1.8/3.1 Tàu sẵn sàng rồi! Bé chạm vào còi nhé!
+ 346.1   3.1/3.1 Tàu chạy rồi! Tạm biệt các bạn đồ chơi!
+ 349.3   2.1/2.1 Bé là bác lái tàu tí hon!
+ 351.5 X 2.1/3.1 Giờ trò chuyện! Con cừu sống ở đâu nhỉ?
+ 353.6   1.4/1.4 Oa, bé biết rồi!
+ 357.1   3.1/3.1 Hoan hô! Đồ chơi nào cũng được đi tàu!
+ 360.2   2.6/2.6 Chuyến tàu vui quá! 32 ngôi sao!

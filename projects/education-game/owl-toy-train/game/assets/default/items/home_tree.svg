@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="160" height="160" viewBox="0 0 160 160">
+<defs><clipPath id="home_tree_clip"><circle cx="64" cy="64" r="52"/></clipPath><clipPath id="home_tree_c1"><path d="M 50 108 C 56 94 56 74 54 58 L 74 58 C 72 74 72 94 78 108 C 70 110 58 110 50 108 Z" /></clipPath><clipPath id="home_tree_c2"><circle cx="64" cy="44" r="36" /></clipPath></defs>
+<g transform="translate(0 -1.5) scale(1.25)">
+<circle cx="64" cy="66.5" r="58" fill="#2A2420" opacity=".16"/>
+<circle cx="64" cy="64" r="58" fill="#FFFFFF" stroke="#26781F" stroke-width="3"/>
+<g clip-path="url(#home_tree_clip)">
+<rect x="0" y="0" width="128" height="128" rx="0" fill="#CDEBFA"/>
+<path d="M 0 104 C 30 98 98 98 128 104 L 128 128 L 0 128 Z" fill="#8ED05E"/>
+<path d="M 50 108 C 56 94 56 74 54 58 L 74 58 C 72 74 72 94 78 108 C 70 110 58 110 50 108 Z" fill="#915B2E"/>
+<g clip-path="url(#home_tree_c1)"><g transform="translate(-3 0)"><path d="M 50 108 C 56 94 56 74 54 58 L 74 58 C 72 74 72 94 78 108 C 70 110 58 110 50 108 Z" fill="#A86B3A"/></g>
+</g>
+<path d="M 50 108 C 56 94 56 74 54 58 L 74 58 C 72 74 72 94 78 108 C 70 110 58 110 50 108 Z" fill="none" stroke="#663C18" stroke-width="2.4" stroke-linejoin="round"/>
+<ellipse cx="64" cy="84" rx="8.5" ry="10" fill="#B98250" stroke="#663C18" stroke-width="2" stroke-linejoin="round"/>
+<ellipse cx="64" cy="85" rx="6" ry="7.5" fill="#3E2412"/>
+<circle cx="64" cy="44" r="36" fill="#3E9D37"/>
+<g clip-path="url(#home_tree_c2)"><g transform="translate(-5 -6)"><circle cx="64" cy="44" r="36" fill="#4FB848"/></g>
+<circle cx="48" cy="32" r="10" fill="#7AD35E" opacity=".7"/><circle cx="76" cy="26" r="7" fill="#7AD35E" opacity=".7"/><circle cx="86" cy="48" r="5" fill="#7AD35E" opacity=".6"/>
+</g>
+<circle cx="64" cy="44" r="36" fill="none" stroke="#26781F" stroke-width="2.4" stroke-linejoin="round"/>
+<path d="M 44 50 Q 50 54 56 50 M 72 54 Q 78 58 84 54 M 58 30 Q 64 34 70 30" fill="none" stroke="#26781F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+<path d="M 34 116 L 31 109 M 38 116 L 39 110" fill="none" stroke="#4E9A2E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 96 114 L 93 107 M 100 114 L 101 108" fill="none" stroke="#4E9A2E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<circle cx="64" cy="64" r="52" fill="none" stroke="#26781F" stroke-width="2.6" opacity=".6"/>
+</g>
+</svg>

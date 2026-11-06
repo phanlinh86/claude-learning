@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="160" height="160" viewBox="0 0 160 160">
+<defs><clipPath id="home_barn_clip"><circle cx="64" cy="64" r="52"/></clipPath><clipPath id="home_barn_c1"><path d="M 28 104 L 28 60 L 40 40 L 64 26 L 88 40 L 100 60 L 100 104 Z" /></clipPath><clipPath id="home_barn_c2"><rect x="56" y="40" width="16" height="13" rx="2.5" /></clipPath><clipPath id="home_barn_c3"><rect x="44" y="66" width="40" height="38" rx="3" /></clipPath></defs>
+<g transform="translate(0 -1.5) scale(1.25)">
+<circle cx="64" cy="66.5" r="58" fill="#2A2420" opacity=".16"/>
+<circle cx="64" cy="64" r="58" fill="#FFFFFF" stroke="#86372A" stroke-width="3"/>
+<g clip-path="url(#home_barn_clip)">
+<rect x="0" y="0" width="128" height="128" rx="0" fill="#CDEBFA"/>
+<path d="M 0 96 C 30 90 98 90 128 96 L 128 128 L 0 128 Z" fill="#8ED05E"/>
+<path d="M 28 104 L 28 60 L 40 40 L 64 26 L 88 40 L 100 60 L 100 104 Z" fill="#B45744"/>
+<g clip-path="url(#home_barn_c1)"><g transform="translate(-4 -3)"><path d="M 28 104 L 28 60 L 40 40 L 64 26 L 88 40 L 100 60 L 100 104 Z" fill="#C8654F"/></g>
+<path d="M 40 64 L 40 104 M 52 64 L 52 104 M 76 64 L 76 104 M 88 64 L 88 104" fill="none" stroke="#86372A" stroke-width="1.6" opacity=".35"/>
+</g>
+<path d="M 28 104 L 28 60 L 40 40 L 64 26 L 88 40 L 100 60 L 100 104 Z" fill="none" stroke="#86372A" stroke-width="3" stroke-linejoin="round"/>
+<path d="M 24 62 L 38 38 L 64 22 L 90 38 L 104 62" fill="none" stroke="#5E2C22" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 24 62 L 38 38 L 64 22 L 90 38 L 104 62" fill="none" stroke="#FFFFFF" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="56" y="40" width="16" height="13" rx="2.5" fill="#FFE7A3"/>
+<g clip-path="url(#home_barn_c2)">
+</g>
+<rect x="56" y="40" width="16" height="13" rx="2.5" fill="none" stroke="#B8873A" stroke-width="2.2" stroke-linejoin="round"/>
+<path d="M 64 40 L 64 53" fill="none" stroke="#B8873A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="44" y="66" width="40" height="38" rx="3" fill="#C8654F"/>
+<g clip-path="url(#home_barn_c3)">
+</g>
+<rect x="44" y="66" width="40" height="38" rx="3" fill="none" stroke="#86372A" stroke-width="2.6" stroke-linejoin="round"/>
+<rect x="44" y="66" width="40" height="38" rx="3" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+<path d="M 46 68 L 82 102 M 82 68 L 46 102" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="44" y="66" width="40" height="38" rx="3" fill="none" stroke="#86372A" stroke-width="1.6"/>
+<path d="M 16 112 L 14 104 M 20 112 L 22 103 M 108 112 L 106 104 M 112 112 L 114 104" fill="none" stroke="#4E9A2E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<circle cx="64" cy="64" r="52" fill="none" stroke="#86372A" stroke-width="2.6" opacity=".6"/>
+</g>
+</svg>
