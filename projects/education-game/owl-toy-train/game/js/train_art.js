@@ -217,7 +217,7 @@
   function dotRows(ctx, n, cx, cy, maxW, maxH, litN) {
     n = Math.max(0, Math.min(12, n | 0)); if (!n) return;
     var per = n > 5 ? Math.ceil(n / 2) : n, rows = n > 5 ? 2 : 1;
-    var r = Math.min(maxW / (per * 2.7), maxH / (rows * 2.7)), gap = r * 2.7, k = 0;
+    var r = Math.min(maxW / (per * 2.35), maxH / (rows * 2.3)), gap = r * 2.35, k = 0;
     for (var row = 0; row < rows; row++) {
       var cnt = row ? n - per : per, y = cy + (rows > 1 ? (row - 0.5) * r * 2.6 : 0);
       for (var i = 0; i < cnt; i++, k++) {
@@ -565,7 +565,7 @@
     if (c) return { base: c.base, dark: c.dark, light: c.light, rim: c.dark, inner: mix(c.base, c.dark, 0.6), line: mix(c.dark, '#000000', 0.18), wood: false };
     return { base: WOOD.base, dark: WOOD.rim, light: WOOD.light, rim: WOOD.rim, inner: WOOD.inner, line: WOOD.dark, wood: true };
   }
-  function sizeK(label) { return label && label.type === 'size' && label.value === 'small' ? 0.8 : 1; }
+  function sizeK(label) { void label; return 1; }   // the world lays the small car out smaller (smallCarK) — no extra scale here
   function withSize(ctx, w, label, fn) {
     var k = sizeK(label);
     if (k === 1) { fn(); return; }
@@ -644,8 +644,8 @@
         var dots = need > 0 ? need : (L.showDots ? (+L.value | 0) : 0);
         var col = L.color && pal(L.color) ? pal(L.color).dark : INK;
         if (dots > 0) {
-          glyph(g, L.value, cx, P.y + ph * 0.36, ph * 0.6, pw * 0.8, col, lineCol);
-          dotRows(g, dots, cx, P.y + ph * (dots > 5 ? 0.8 : 0.82), pw * 0.86, ph * (dots > 5 ? 0.32 : 0.2), need > 0 ? (car.filled | 0) : null);
+          glyph(g, L.value, cx, P.y + ph * 0.32, ph * 0.54, pw * 0.8, col, lineCol);   // bigger dots (visual QA P3-14)
+          dotRows(g, dots, cx, P.y + ph * (dots > 5 ? 0.78 : 0.79), pw * 0.94, ph * (dots > 5 ? 0.38 : 0.3), need > 0 ? (car.filled | 0) : null);
         } else glyph(g, L.value, cx, cy, ph * 0.86, pw * 0.8, col, lineCol);
         break;
       }

@@ -1,0 +1,1858 @@
+[
+ {
+  "vp": "ip-p",
+  "lang": "en",
+  "notch": false,
+  "title": {
+   "play": {
+    "x": 138,
+    "y": 264,
+    "w": 118,
+    "h": 118
+   },
+   "gear": {
+    "x": 321,
+    "y": 14,
+    "w": 60,
+    "h": 60
+   },
+   "en": {
+    "x": 17,
+    "y": 19,
+    "w": 102,
+    "h": 48
+   },
+   "vi": {
+    "x": 125,
+    "y": 19,
+    "w": 129,
+    "h": 48
+   },
+   "logo": {
+    "x": 39,
+    "y": 108,
+    "w": 314,
+    "h": 84
+   },
+   "tagline": {
+    "x": 12,
+    "y": 202,
+    "w": 369,
+    "h": 52
+   },
+   "vw": 393,
+   "vh": 852
+  },
+  "settings": {
+   "panel": [
+    12,
+    53,
+    369,
+    747
+   ],
+   "scrolls": false,
+   "overflowText": [],
+   "chip": [
+    56,
+    48
+   ],
+   "doneVisible": true,
+   "done": [
+    333,
+    64
+   ]
+  },
+  "play": {
+   "s": 0.5458039718129404,
+   "W": 720,
+   "H": 1561,
+   "ins": {
+    "top": 0,
+    "bottom": 0,
+    "left": 0,
+    "right": 0
+   },
+   "hud": {
+    "x": 132.59375,
+    "y": 10,
+    "w": 250.40625,
+    "h": 56,
+    "r": 383,
+    "b": 66
+   },
+   "bub": {
+    "x": 13.109375,
+    "y": 74,
+    "w": 367.875,
+    "h": 72.65625,
+    "r": 380.984375,
+    "b": 146.65625
+   },
+   "pauseCss": [
+    56,
+    56
+   ],
+   "pauseLogical": 103,
+   "bubOverHud": false,
+   "itemsUnderHud": 0,
+   "itemsUnderBubble": 0,
+   "itemsOff": 0,
+   "itemHitLogical": 178,
+   "itemSizeLogical": 125,
+   "itemCss": 97,
+   "bubbleClipped": false,
+   "bubbleText": "Match the colours! Each toy goes in its colour car!",
+   "cars": [
+    [
+     118,
+     622,
+     82,
+     32
+    ],
+    [
+     209,
+     622,
+     82,
+     32
+    ],
+    [
+     300,
+     622,
+     82,
+     32
+    ]
+   ],
+   "whistle": [
+    56,
+    86,
+    545
+   ],
+   "momo": [
+    82,
+    607,
+    77,
+    111
+   ],
+   "layout": {
+    "trackY": 1231,
+    "groundY": 1531,
+    "rug": {
+     "x0": 102.5,
+     "x1": 617.5,
+     "y0": 363,
+     "y1": 975,
+     "top": 363
+    },
+    "bubble": {
+     "x": 24,
+     "y": 110,
+     "w": 672,
+     "h": 124
+    },
+    "S": 125,
+    "carScale": 0.55
+   }
+  },
+  "pause": [
+   [
+    "btnResume",
+    333,
+    78,
+    false
+   ],
+   [
+    "btnVolDown",
+    64,
+    64,
+    false
+   ],
+   [
+    "btnVolUp",
+    64,
+    64,
+    false
+   ],
+   [
+    "btnHome",
+    333,
+    64,
+    false
+   ]
+  ],
+  "talk": {
+   "panel": [
+    12,
+    102,
+    369,
+    648
+   ],
+   "fits": true,
+   "q": "What colour is this?",
+   "choices": [
+    [
+     112,
+     134
+    ],
+    [
+     112,
+     134
+    ],
+    [
+     112,
+     134
+    ]
+   ]
+  },
+  "done": [
+   [
+    "doneTitle",
+    30,
+    497,
+    333,
+    62,
+    "So many toys loaded! 22 stars!"
+   ],
+   [
+    "btnAgain",
+    90,
+    659,
+    213,
+    78,
+    "Play again"
+   ],
+   [
+    "btnDoneHome",
+    125,
+    749,
+    144,
+    64,
+    "Home"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "vp": "ip-p",
+  "lang": "vi",
+  "notch": false,
+  "title": {
+   "play": {
+    "x": 138,
+    "y": 264,
+    "w": 117,
+    "h": 117
+   },
+   "gear": {
+    "x": 321,
+    "y": 14,
+    "w": 60,
+    "h": 60
+   },
+   "en": {
+    "x": 17,
+    "y": 19,
+    "w": 102,
+    "h": 48
+   },
+   "vi": {
+    "x": 125,
+    "y": 19,
+    "w": 129,
+    "h": 48
+   },
+   "logo": {
+    "x": 39,
+    "y": 108,
+    "w": 314,
+    "h": 84
+   },
+   "tagline": {
+    "x": 12,
+    "y": 202,
+    "w": 369,
+    "h": 52
+   },
+   "vw": 393,
+   "vh": 852
+  },
+  "settings": {
+   "panel": [
+    12,
+    53,
+    369,
+    747
+   ],
+   "scrolls": false,
+   "overflowText": [],
+   "chip": [
+    56,
+    48
+   ],
+   "doneVisible": true,
+   "done": [
+    333,
+    64
+   ]
+  },
+  "play": {
+   "s": 0.5458039718129404,
+   "W": 720,
+   "H": 1561,
+   "ins": {
+    "top": 0,
+    "bottom": 0,
+    "left": 0,
+    "right": 0
+   },
+   "hud": {
+    "x": 132.59375,
+    "y": 10,
+    "w": 250.40625,
+    "h": 56,
+    "r": 383,
+    "b": 66
+   },
+   "bub": {
+    "x": 13.109375,
+    "y": 74,
+    "w": 367.875,
+    "h": 72.65625,
+    "r": 380.984375,
+    "b": 146.65625
+   },
+   "pauseCss": [
+    56,
+    56
+   ],
+   "pauseLogical": 103,
+   "bubOverHud": false,
+   "itemsUnderHud": 0,
+   "itemsUnderBubble": 0,
+   "itemsOff": 0,
+   "itemHitLogical": 178,
+   "itemSizeLogical": 125,
+   "itemCss": 97,
+   "bubbleClipped": false,
+   "bubbleText": "Mỗi màu có một toa riêng! Bé xếp hết nhé!",
+   "cars": [
+    [
+     118,
+     622,
+     82,
+     32
+    ],
+    [
+     209,
+     622,
+     82,
+     32
+    ],
+    [
+     300,
+     622,
+     82,
+     32
+    ]
+   ],
+   "whistle": [
+    56,
+    86,
+    545
+   ],
+   "momo": [
+    82,
+    607,
+    77,
+    111
+   ],
+   "layout": {
+    "trackY": 1231,
+    "groundY": 1531,
+    "rug": {
+     "x0": 102.5,
+     "x1": 617.5,
+     "y0": 363,
+     "y1": 975,
+     "top": 363
+    },
+    "bubble": {
+     "x": 24,
+     "y": 110,
+     "w": 672,
+     "h": 124
+    },
+    "S": 125,
+    "carScale": 0.55
+   }
+  },
+  "pause": [
+   [
+    "btnResume",
+    333,
+    78,
+    false
+   ],
+   [
+    "btnVolDown",
+    64,
+    64,
+    false
+   ],
+   [
+    "btnVolUp",
+    64,
+    64,
+    false
+   ],
+   [
+    "btnHome",
+    333,
+    64,
+    false
+   ]
+  ],
+  "talk": {
+   "panel": [
+    12,
+    100,
+    369,
+    652
+   ],
+   "fits": true,
+   "q": "Cái này màu gì nhỉ?",
+   "choices": [
+    [
+     155,
+     134
+    ],
+    [
+     112,
+     134
+    ],
+    [
+     119,
+     134
+    ]
+   ]
+  },
+  "done": [
+   [
+    "doneTitle",
+    30,
+    497,
+    333,
+    62,
+    "Chất bao nhiêu là đồ chơi! 22 ngôi sao!"
+   ],
+   [
+    "btnAgain",
+    107,
+    659,
+    179,
+    78,
+    "Chơi lại"
+   ],
+   [
+    "btnDoneHome",
+    104,
+    749,
+    185,
+    64,
+    "Trang chủ"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "vp": "ip-l",
+  "lang": "en",
+  "notch": false,
+  "title": {
+   "play": {
+    "x": 373,
+    "y": 192,
+    "w": 106,
+    "h": 106
+   },
+   "gear": {
+    "x": 780,
+    "y": 14,
+    "w": 60,
+    "h": 60
+   },
+   "en": {
+    "x": 17,
+    "y": 19,
+    "w": 102,
+    "h": 48
+   },
+   "vi": {
+    "x": 125,
+    "y": 19,
+    "w": 129,
+    "h": 48
+   },
+   "logo": {
+    "x": 250,
+    "y": 111,
+    "w": 352,
+    "h": 36
+   },
+   "tagline": {
+    "x": 208,
+    "y": 153,
+    "w": 437,
+    "h": 32
+   },
+   "vw": 852,
+   "vh": 393
+  },
+  "settings": {
+   "panel": [
+    106,
+    12,
+    640,
+    369
+   ],
+   "scrolls": true,
+   "overflowText": [],
+   "chip": [
+    56,
+    40
+   ],
+   "doneVisible": true,
+   "done": [
+    596,
+    52
+   ]
+  },
+  "play": {
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "ins": {
+    "top": 0,
+    "bottom": 0,
+    "left": 0,
+    "right": 0
+   },
+   "hud": {
+    "x": 610.28125,
+    "y": 10,
+    "w": 231.71875,
+    "h": 48,
+    "r": 842,
+    "b": 58
+   },
+   "bub": {
+    "x": 13.09375,
+    "y": 9.828125,
+    "w": 305.640625,
+    "h": 71.90625,
+    "r": 318.734375,
+    "b": 81.734375
+   },
+   "pauseCss": [
+    48,
+    48
+   ],
+   "pauseLogical": 88,
+   "bubOverHud": false,
+   "itemsUnderHud": 0,
+   "itemsUnderBubble": 0,
+   "itemsOff": 0,
+   "itemHitLogical": 153,
+   "itemSizeLogical": 104,
+   "itemCss": 83,
+   "bubbleClipped": false,
+   "bubbleText": "Put each toy in the car of the same colour!",
+   "cars": [
+    [
+     275,
+     291,
+     142,
+     51
+    ],
+    [
+     425,
+     291,
+     142,
+     51
+    ],
+    [
+     576,
+     291,
+     142,
+     51
+    ]
+   ],
+   "whistle": [
+    65,
+    234,
+    192
+   ],
+   "momo": [
+    229,
+    281,
+    97,
+    142
+   ],
+   "layout": {
+    "trackY": 662,
+    "groundY": 702,
+    "rug": {
+     "x0": 92,
+     "x1": 1469,
+     "y0": 232,
+     "y1": 352,
+     "top": 70
+    },
+    "bubble": {
+     "x": 24,
+     "y": 18,
+     "w": 560,
+     "h": 122
+    },
+    "S": 104,
+    "carScale": 0.85
+   }
+  },
+  "pause": [
+   [
+    "btnResume",
+    596,
+    60,
+    false
+   ],
+   [
+    "btnVolDown",
+    64,
+    64,
+    false
+   ],
+   [
+    "btnVolUp",
+    64,
+    64,
+    false
+   ],
+   [
+    "btnHome",
+    596,
+    54,
+    false
+   ]
+  ],
+  "talk": {
+   "panel": [
+    46,
+    55,
+    760,
+    283
+   ],
+   "fits": true,
+   "q": "What colour is this?",
+   "choices": [
+    [
+     124,
+     134
+    ],
+    [
+     124,
+     134
+    ],
+    [
+     124,
+     134
+    ]
+   ]
+  },
+  "done": [
+   [
+    "doneTitle",
+    470,
+    47,
+    348,
+    62,
+    "What a train ride! 22 stars! Hooray!"
+   ],
+   [
+    "btnAgain",
+    538,
+    203,
+    213,
+    60,
+    "Play again"
+   ],
+   [
+    "btnDoneHome",
+    572,
+    275,
+    144,
+    54,
+    "Home"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "vp": "ip-l",
+  "lang": "vi",
+  "notch": false,
+  "title": {
+   "play": {
+    "x": 374,
+    "y": 193,
+    "w": 104,
+    "h": 104
+   },
+   "gear": {
+    "x": 780,
+    "y": 14,
+    "w": 60,
+    "h": 60
+   },
+   "en": {
+    "x": 17,
+    "y": 19,
+    "w": 102,
+    "h": 48
+   },
+   "vi": {
+    "x": 125,
+    "y": 19,
+    "w": 129,
+    "h": 48
+   },
+   "logo": {
+    "x": 210,
+    "y": 111,
+    "w": 432,
+    "h": 36
+   },
+   "tagline": {
+    "x": 212,
+    "y": 153,
+    "w": 429,
+    "h": 32
+   },
+   "vw": 852,
+   "vh": 393
+  },
+  "settings": {
+   "panel": [
+    106,
+    12,
+    640,
+    369
+   ],
+   "scrolls": true,
+   "overflowText": [],
+   "chip": [
+    56,
+    40
+   ],
+   "doneVisible": true,
+   "done": [
+    596,
+    52
+   ]
+  },
+  "play": {
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "ins": {
+    "top": 0,
+    "bottom": 0,
+    "left": 0,
+    "right": 0
+   },
+   "hud": {
+    "x": 610.28125,
+    "y": 10,
+    "w": 231.71875,
+    "h": 48,
+    "r": 842,
+    "b": 58
+   },
+   "bub": {
+    "x": 13.09375,
+    "y": 9.828125,
+    "w": 305.640625,
+    "h": 71.90625,
+    "r": 318.734375,
+    "b": 81.734375
+   },
+   "pauseCss": [
+    48,
+    48
+   ],
+   "pauseLogical": 88,
+   "bubOverHud": false,
+   "itemsUnderHud": 0,
+   "itemsUnderBubble": 0,
+   "itemsOff": 0,
+   "itemHitLogical": 153,
+   "itemSizeLogical": 104,
+   "itemCss": 83,
+   "bubbleClipped": false,
+   "bubbleText": "Bé tìm toa cùng màu cho từng món đồ chơi nhé!",
+   "cars": [
+    [
+     275,
+     291,
+     142,
+     51
+    ],
+    [
+     425,
+     291,
+     142,
+     51
+    ],
+    [
+     576,
+     291,
+     142,
+     51
+    ]
+   ],
+   "whistle": [
+    65,
+    234,
+    192
+   ],
+   "momo": [
+    229,
+    281,
+    97,
+    142
+   ],
+   "layout": {
+    "trackY": 662,
+    "groundY": 702,
+    "rug": {
+     "x0": 92,
+     "x1": 1469,
+     "y0": 232,
+     "y1": 352,
+     "top": 70
+    },
+    "bubble": {
+     "x": 24,
+     "y": 18,
+     "w": 560,
+     "h": 122
+    },
+    "S": 104,
+    "carScale": 0.85
+   }
+  },
+  "pause": [
+   [
+    "btnResume",
+    596,
+    60,
+    false
+   ],
+   [
+    "btnVolDown",
+    64,
+    64,
+    false
+   ],
+   [
+    "btnVolUp",
+    64,
+    64,
+    false
+   ],
+   [
+    "btnHome",
+    596,
+    54,
+    false
+   ]
+  ],
+  "talk": {
+   "panel": [
+    46,
+    55,
+    760,
+    283
+   ],
+   "fits": true,
+   "q": "Cái này màu gì nhỉ?",
+   "choices": [
+    [
+     167,
+     134
+    ],
+    [
+     124,
+     134
+    ],
+    [
+     131,
+     134
+    ]
+   ]
+  },
+  "done": [
+   [
+    "doneTitle",
+    470,
+    47,
+    348,
+    62,
+    "Chất bao nhiêu là đồ chơi! 22 ngôi sao!"
+   ],
+   [
+    "btnAgain",
+    555,
+    203,
+    179,
+    60,
+    "Chơi lại"
+   ],
+   [
+    "btnDoneHome",
+    551,
+    275,
+    185,
+    54,
+    "Trang chủ"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "vp": "pad-p",
+  "lang": "en",
+  "notch": false,
+  "title": {
+   "play": {
+    "x": 320,
+    "y": 354,
+    "w": 180,
+    "h": 180
+   },
+   "gear": {
+    "x": 748,
+    "y": 14,
+    "w": 60,
+    "h": 60
+   },
+   "en": {
+    "x": 17,
+    "y": 19,
+    "w": 102,
+    "h": 48
+   },
+   "vi": {
+    "x": 125,
+    "y": 19,
+    "w": 129,
+    "h": 48
+   },
+   "logo": {
+    "x": 82,
+    "y": 121,
+    "w": 656,
+    "h": 171
+   },
+   "tagline": {
+    "x": 101,
+    "y": 303,
+    "w": 618,
+    "h": 42
+   },
+   "vw": 820,
+   "vh": 1180
+  },
+  "settings": {
+   "panel": [
+    90,
+    318,
+    640,
+    545
+   ],
+   "scrolls": false,
+   "overflowText": [],
+   "chip": [
+    56,
+    48
+   ],
+   "doneVisible": true,
+   "done": [
+    584,
+    64
+   ]
+  },
+  "play": {
+   "s": 1.1388888888888888,
+   "W": 720,
+   "H": 1036,
+   "ins": {
+    "top": 0,
+    "bottom": 0,
+    "left": 0,
+    "right": 0
+   },
+   "hud": {
+    "x": 559.59375,
+    "y": 10,
+    "w": 250.40625,
+    "h": 56,
+    "r": 810,
+    "b": 66
+   },
+   "bub": {
+    "x": 27.328125,
+    "y": 20.546875,
+    "w": 519.171875,
+    "h": 141.21875,
+    "r": 546.5,
+    "b": 161.765625
+   },
+   "pauseCss": [
+    56,
+    56
+   ],
+   "pauseLogical": 49,
+   "bubOverHud": false,
+   "itemsUnderHud": 0,
+   "itemsUnderBubble": 0,
+   "itemsOff": 0,
+   "itemHitLogical": 153,
+   "itemSizeLogical": 104,
+   "itemCss": 174,
+   "bubbleClipped": false,
+   "bubbleText": "Every colour has its own car! Load them all!",
+   "cars": [
+    [
+     246,
+     868,
+     172,
+     68
+    ],
+    [
+     436,
+     868,
+     172,
+     68
+    ],
+    [
+     626,
+     868,
+     172,
+     68
+    ]
+   ],
+   "whistle": [
+    117,
+    179,
+    708
+   ],
+   "momo": [
+    170,
+    837,
+    161,
+    231
+   ],
+   "layout": {
+    "trackY": 854.3333333333334,
+    "groundY": 1006,
+    "rug": {
+     "x0": 92,
+     "x1": 628,
+     "y0": 234,
+     "y1": 598.3333333333334,
+     "top": 234
+    },
+    "bubble": {
+     "x": 24,
+     "y": 18,
+     "w": 522,
+     "h": 124
+    },
+    "S": 104,
+    "carScale": 0.6298773690078038
+   }
+  },
+  "pause": [
+   [
+    "btnResume",
+    584,
+    78,
+    false
+   ],
+   [
+    "btnVolDown",
+    64,
+    64,
+    false
+   ],
+   [
+    "btnVolUp",
+    64,
+    64,
+    false
+   ],
+   [
+    "btnHome",
+    584,
+    64,
+    false
+   ]
+  ],
+  "talk": {
+   "panel": [
+    50,
+    280,
+    720,
+    621
+   ],
+   "fits": true,
+   "q": "What colour is this?",
+   "choices": [
+    [
+     140,
+     150
+    ],
+    [
+     140,
+     150
+    ],
+    [
+     140,
+     150
+    ]
+   ]
+  },
+  "done": [
+   [
+    "doneTitle",
+    158,
+    854,
+    504,
+    98,
+    "So many toys loaded! 22 stars!"
+   ],
+   [
+    "btnAgain",
+    182,
+    1052,
+    268,
+    78,
+    "Play again"
+   ],
+   [
+    "btnDoneHome",
+    462,
+    1052,
+    176,
+    78,
+    "Home"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "vp": "pad-p",
+  "lang": "vi",
+  "notch": false,
+  "title": {
+   "play": {
+    "x": 319,
+    "y": 353,
+    "w": 181,
+    "h": 181
+   },
+   "gear": {
+    "x": 748,
+    "y": 14,
+    "w": 60,
+    "h": 60
+   },
+   "en": {
+    "x": 17,
+    "y": 19,
+    "w": 102,
+    "h": 48
+   },
+   "vi": {
+    "x": 125,
+    "y": 19,
+    "w": 129,
+    "h": 48
+   },
+   "logo": {
+    "x": 82,
+    "y": 121,
+    "w": 656,
+    "h": 171
+   },
+   "tagline": {
+    "x": 107,
+    "y": 303,
+    "w": 606,
+    "h": 42
+   },
+   "vw": 820,
+   "vh": 1180
+  },
+  "settings": {
+   "panel": [
+    90,
+    318,
+    640,
+    545
+   ],
+   "scrolls": false,
+   "overflowText": [],
+   "chip": [
+    56,
+    48
+   ],
+   "doneVisible": true,
+   "done": [
+    584,
+    64
+   ]
+  },
+  "play": {
+   "s": 1.1388888888888888,
+   "W": 720,
+   "H": 1036,
+   "ins": {
+    "top": 0,
+    "bottom": 0,
+    "left": 0,
+    "right": 0
+   },
+   "hud": {
+    "x": 559.59375,
+    "y": 10,
+    "w": 250.40625,
+    "h": 56,
+    "r": 810,
+    "b": 66
+   },
+   "bub": {
+    "x": 27.328125,
+    "y": 20.546875,
+    "w": 519.171875,
+    "h": 141.21875,
+    "r": 546.5,
+    "b": 161.765625
+   },
+   "pauseCss": [
+    56,
+    56
+   ],
+   "pauseLogical": 49,
+   "bubOverHud": false,
+   "itemsUnderHud": 0,
+   "itemsUnderBubble": 0,
+   "itemsOff": 0,
+   "itemHitLogical": 153,
+   "itemSizeLogical": 104,
+   "itemCss": 174,
+   "bubbleClipped": false,
+   "bubbleText": "Bé ơi, xếp đồ chơi vào toa cùng màu nhé!",
+   "cars": [
+    [
+     246,
+     868,
+     172,
+     68
+    ],
+    [
+     436,
+     868,
+     172,
+     68
+    ],
+    [
+     626,
+     868,
+     172,
+     68
+    ]
+   ],
+   "whistle": [
+    117,
+    179,
+    708
+   ],
+   "momo": [
+    170,
+    837,
+    161,
+    231
+   ],
+   "layout": {
+    "trackY": 854.3333333333334,
+    "groundY": 1006,
+    "rug": {
+     "x0": 92,
+     "x1": 628,
+     "y0": 234,
+     "y1": 598.3333333333334,
+     "top": 234
+    },
+    "bubble": {
+     "x": 24,
+     "y": 18,
+     "w": 522,
+     "h": 124
+    },
+    "S": 104,
+    "carScale": 0.6298773690078038
+   }
+  },
+  "pause": [
+   [
+    "btnResume",
+    584,
+    78,
+    false
+   ],
+   [
+    "btnVolDown",
+    64,
+    64,
+    false
+   ],
+   [
+    "btnVolUp",
+    64,
+    64,
+    false
+   ],
+   [
+    "btnHome",
+    584,
+    64,
+    false
+   ]
+  ],
+  "talk": {
+   "panel": [
+    50,
+    280,
+    720,
+    621
+   ],
+   "fits": true,
+   "q": "Cái này màu gì nhỉ?",
+   "choices": [
+    [
+     167,
+     150
+    ],
+    [
+     140,
+     150
+    ],
+    [
+     140,
+     150
+    ]
+   ]
+  },
+  "done": [
+   [
+    "doneTitle",
+    158,
+    854,
+    504,
+    98,
+    "Chất bao nhiêu là đồ chơi! 22 ngôi sao!"
+   ],
+   [
+    "btnAgain",
+    176,
+    1052,
+    221,
+    78,
+    "Chơi lại"
+   ],
+   [
+    "btnDoneHome",
+    410,
+    1052,
+    234,
+    78,
+    "Trang chủ"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "vp": "pad-l",
+  "lang": "en",
+  "notch": false,
+  "title": {
+   "play": {
+    "x": 495,
+    "y": 369,
+    "w": 190,
+    "h": 190
+   },
+   "gear": {
+    "x": 1108,
+    "y": 14,
+    "w": 60,
+    "h": 60
+   },
+   "en": {
+    "x": 17,
+    "y": 19,
+    "w": 102,
+    "h": 48
+   },
+   "vi": {
+    "x": 125,
+    "y": 19,
+    "w": 129,
+    "h": 48
+   },
+   "logo": {
+    "x": 183,
+    "y": 213,
+    "w": 813,
+    "h": 86
+   },
+   "tagline": {
+    "x": 281,
+    "y": 311,
+    "w": 618,
+    "h": 42
+   },
+   "vw": 1180,
+   "vh": 820
+  },
+  "settings": {
+   "panel": [
+    270,
+    138,
+    640,
+    545
+   ],
+   "scrolls": false,
+   "overflowText": [],
+   "chip": [
+    56,
+    48
+   ],
+   "doneVisible": true,
+   "done": [
+    584,
+    64
+   ]
+  },
+  "play": {
+   "s": 1.1388888888888888,
+   "W": 1036,
+   "H": 720,
+   "ins": {
+    "top": 0,
+    "bottom": 0,
+    "left": 0,
+    "right": 0
+   },
+   "hud": {
+    "x": 919.59375,
+    "y": 10,
+    "w": 250.40625,
+    "h": 56,
+    "r": 1170,
+    "b": 66
+   },
+   "bub": {
+    "x": 27.375,
+    "y": 20.5,
+    "w": 637.765625,
+    "h": 138.9375,
+    "r": 665.140625,
+    "b": 159.4375
+   },
+   "pauseCss": [
+    56,
+    56
+   ],
+   "pauseLogical": 49,
+   "bubOverHud": false,
+   "itemsUnderHud": 0,
+   "itemsUnderBubble": 0,
+   "itemsOff": 0,
+   "itemHitLogical": 153,
+   "itemSizeLogical": 104,
+   "itemCss": 174,
+   "bubbleClipped": false,
+   "bubbleText": "Match the colours! Each toy goes in its colour car!",
+   "cars": [
+    [
+     280,
+     606,
+     280,
+     106
+    ],
+    [
+     579,
+     606,
+     280,
+     106
+    ],
+    [
+     877,
+     606,
+     280,
+     106
+    ]
+   ],
+   "whistle": [
+    126,
+    205,
+    444
+   ],
+   "momo": [
+    195,
+    602,
+    182,
+    264
+   ],
+   "layout": {
+    "trackY": 662,
+    "groundY": 702,
+    "rug": {
+     "x0": 92,
+     "x1": 944,
+     "y0": 232,
+     "y1": 352,
+     "top": 70
+    },
+    "bubble": {
+     "x": 24,
+     "y": 18,
+     "w": 560,
+     "h": 122
+    },
+    "S": 104,
+    "carScale": 0.85
+   }
+  },
+  "pause": [
+   [
+    "btnResume",
+    584,
+    78,
+    false
+   ],
+   [
+    "btnVolDown",
+    64,
+    64,
+    false
+   ],
+   [
+    "btnVolUp",
+    64,
+    64,
+    false
+   ],
+   [
+    "btnHome",
+    584,
+    64,
+    false
+   ]
+  ],
+  "talk": {
+   "panel": [
+    230,
+    100,
+    720,
+    621
+   ],
+   "fits": true,
+   "q": "What colour is this?",
+   "choices": [
+    [
+     140,
+     150
+    ],
+    [
+     140,
+     150
+    ],
+    [
+     140,
+     150
+    ]
+   ]
+  },
+  "done": [
+   [
+    "doneTitle",
+    726,
+    92,
+    414,
+    98,
+    "What a train ride! 22 stars! Hooray!"
+   ],
+   [
+    "btnAgain",
+    799,
+    290,
+    268,
+    78,
+    "Play again"
+   ],
+   [
+    "btnDoneHome",
+    845,
+    380,
+    176,
+    64,
+    "Home"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "vp": "pad-l",
+  "lang": "vi",
+  "notch": false,
+  "title": {
+   "play": {
+    "x": 493,
+    "y": 410,
+    "w": 193,
+    "h": 193
+   },
+   "gear": {
+    "x": 1108,
+    "y": 14,
+    "w": 60,
+    "h": 60
+   },
+   "en": {
+    "x": 17,
+    "y": 19,
+    "w": 102,
+    "h": 48
+   },
+   "vi": {
+    "x": 125,
+    "y": 19,
+    "w": 129,
+    "h": 48
+   },
+   "logo": {
+    "x": 118,
+    "y": 171,
+    "w": 944,
+    "h": 171
+   },
+   "tagline": {
+    "x": 287,
+    "y": 354,
+    "w": 606,
+    "h": 42
+   },
+   "vw": 1180,
+   "vh": 820
+  },
+  "settings": {
+   "panel": [
+    270,
+    138,
+    640,
+    545
+   ],
+   "scrolls": false,
+   "overflowText": [],
+   "chip": [
+    56,
+    48
+   ],
+   "doneVisible": true,
+   "done": [
+    584,
+    64
+   ]
+  },
+  "play": {
+   "s": 1.1388888888888888,
+   "W": 1036,
+   "H": 720,
+   "ins": {
+    "top": 0,
+    "bottom": 0,
+    "left": 0,
+    "right": 0
+   },
+   "hud": {
+    "x": 919.59375,
+    "y": 10,
+    "w": 250.40625,
+    "h": 56,
+    "r": 1170,
+    "b": 66
+   },
+   "bub": {
+    "x": 27.375,
+    "y": 20.5,
+    "w": 637.765625,
+    "h": 138.9375,
+    "r": 665.140625,
+    "b": 159.4375
+   },
+   "pauseCss": [
+    56,
+    56
+   ],
+   "pauseLogical": 49,
+   "bubOverHud": false,
+   "itemsUnderHud": 0,
+   "itemsUnderBubble": 0,
+   "itemsOff": 0,
+   "itemHitLogical": 153,
+   "itemSizeLogical": 104,
+   "itemCss": 174,
+   "bubbleClipped": false,
+   "bubbleText": "Bé ơi, xếp đồ chơi vào toa cùng màu nhé!",
+   "cars": [
+    [
+     280,
+     606,
+     280,
+     106
+    ],
+    [
+     579,
+     606,
+     280,
+     106
+    ],
+    [
+     877,
+     606,
+     280,
+     106
+    ]
+   ],
+   "whistle": [
+    126,
+    205,
+    444
+   ],
+   "momo": [
+    195,
+    602,
+    182,
+    264
+   ],
+   "layout": {
+    "trackY": 662,
+    "groundY": 702,
+    "rug": {
+     "x0": 92,
+     "x1": 944,
+     "y0": 232,
+     "y1": 352,
+     "top": 70
+    },
+    "bubble": {
+     "x": 24,
+     "y": 18,
+     "w": 560,
+     "h": 122
+    },
+    "S": 104,
+    "carScale": 0.85
+   }
+  },
+  "pause": [
+   [
+    "btnResume",
+    584,
+    78,
+    false
+   ],
+   [
+    "btnVolDown",
+    64,
+    64,
+    false
+   ],
+   [
+    "btnVolUp",
+    64,
+    64,
+    false
+   ],
+   [
+    "btnHome",
+    584,
+    64,
+    false
+   ]
+  ],
+  "talk": {
+   "panel": [
+    230,
+    100,
+    720,
+    621
+   ],
+   "fits": true,
+   "q": "Cái này màu gì nhỉ?",
+   "choices": [
+    [
+     167,
+     150
+    ],
+    [
+     140,
+     150
+    ],
+    [
+     140,
+     150
+    ]
+   ]
+  },
+  "done": [
+   [
+    "doneTitle",
+    726,
+    92,
+    414,
+    98,
+    "Chất bao nhiêu là đồ chơi! 22 ngôi sao!"
+   ],
+   [
+    "btnAgain",
+    822,
+    290,
+    221,
+    78,
+    "Chơi lại"
+   ],
+   [
+    "btnDoneHome",
+    816,
+    380,
+    234,
+    64,
+    "Trang chủ"
+   ]
+  ],
+  "errors": []
+ }
+]

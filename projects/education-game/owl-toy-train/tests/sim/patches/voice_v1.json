@@ -1,0 +1,32 @@
+[
+ {
+  "file": "main.js",
+  "old": "if (c && c.need) speak(line('sayCarDone'",
+  "new": "if (c && c.need && lastAsk && lastAsk.mode === 'count') speak(line('sayCarDone'"
+ },
+ {
+  "file": "main.js",
+  "old": "const ev = Object.assign({}, e, { got: c ? c.label : e.got,",
+  "new": "const ev = Object.assign({}, e, { got: curAge() >= 5 ? (c ? c.label : e.got) : null,"
+ },
+ {
+  "file": "main.js",
+  "old": "if (canInterrupt()) sayName(line('sayGrab', Object.assign({}, e, { item: it })), performance.now());",
+  "new": "if (canInterrupt() && (itemById(e.id) || {}).misses > 0) sayName(line('sayGrab', Object.assign({}, e, { item: it })), performance.now());"
+ },
+ {
+  "file": "main.js",
+  "old": "if ((e.round % (world.roundsPerLevel || 4)) === 0) { const d = T('deal'); TT.UI.say(d); speak(d); }",
+  "new": "if ((e.round % (world.roundsPerLevel || 4)) === 0) { const d = T('deal'); TT.UI.say(d); }"
+ },
+ {
+  "file": "i18n.js",
+  "old": "'talk.intro': 'Talk time! Momo has a question.',",
+  "new": "'talk.intro': 'Talk time!',"
+ },
+ {
+  "file": "i18n.js",
+  "old": "'talk.intro': 'Gi\u1edd tr\u00f2 chuy\u1ec7n! Momo h\u1ecfi b\u00e9 nh\u00e9.',",
+  "new": "'talk.intro': 'Gi\u1edd tr\u00f2 chuy\u1ec7n!',"
+ }
+]

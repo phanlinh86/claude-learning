@@ -124,16 +124,22 @@ full size); count rounds with 12–14 cargo on short landscapes (iPad with inset
 | flow | `roundsPerLevel 4`, `chapterTimeLimit 75`, `chapterMinRounds 3`, `introTime 2.5`, `clearTime 0.5`, `levelDoneTime 1.8`, `talkAfterAnswer 1.6`, `talkAskTime 12`, `talkGlowAfterAsks 2` | skill rules |
 | short trains | `shortBudget [∞, 30, 52, 70]` | a sort round starting later than this many s into the chapter carries 1 cargo per car (slow-3 chapters 170 → 140 s; typical children never hit it before round 3) |
 | packing | `minSpacing 1.1`, `bandShrink 0.85`, `minShrink 0.6`, `shrinkStep 0.05`, `packJitter 4` | crowded count rounds use the space beside the bubble before shrinking below 0.85 |
-| touch | `hitFrac 0.6`, `hitPad 14` (targets ≥ 100 px), `zoneSide 30`, `zoneUp 90`, `zoneDown 20`, `tapMovePx 24`, `tapTime 0.35`, `momoTapTime 0.6`, `stillDragTime 6`, `stillPx 8` | DESIGN §2 / skill |
+| touch | `hitFrac 0.6`, `hitPad 14` (targets ≥ 100 px), `zoneSide 30`, `zoneUp 90`, `zoneDown 20`, `zoneUpFar 130` + `aimTravel 120` (a release up to 130 px above a car lands once the toy moved ≥ 120 px — playtest P2-4: drops-high misses 63 → 36 %), `tapHintAfter 2`, `tapAssistAfter 4` (ages ≤ `tapAssistMaxAge 4`: the 4th tap glides the toy into its car — playtest P1-1, a tap-only child was stuck), `tapMovePx 24`, `tapTime 0.35`, `momoTapTime 0.6`, `stillDragTime 6`, `stillPx 8` | DESIGN §2 / skill |
 | drag | `dragOmega 28`, `grabKeep 0.5`, `liftPx 10`, `liftScale 1.1`, `tiltK 0.0016`, `tiltMax 0.45`, `tiltOmega 9`, `tiltZeta 0.35` | proven (snow garden) |
 | fly | `flyBase 0.3`, `flyPerPx 1/2000`, `flyMin 0.35`, `flyMax 0.5`, `flyApex 60`, `flyApexMax 140`, `flyInherit 0.25`, `landSquash 0.2`, `carSquash 0.08` | DESIGN: apex ≥ 60, 0.35–0.5 s |
 | wrong / miss | `shakeTime 0.5`, `shakePx 10`, `wrongReturnTime 0.55`, `wrongApex 45`, `missReturnTime 0.5`, `tapReturnTime 0.25`, `fullReturnTime 0.5` | |
 | deal / done | `dealStagger 0.12`, `popTime 0.4`, `loadedSettle 0.4`, `byeTime 0.6` | |
 | train | `arriveTime 1.6`, `arriveFrom 120`, `coupleOmega 9`, `coupleZeta 0.35`, `coupleGain 0.75`, `coupleLag 0.07`, `wheelR 22`, `railJoint 150`, `departKick 120`, `departAccel 900`, `departVmax 900`, `whistleLead 0.55`, `whistleTime 0.8`, `tootGap 0.3` | gain 0.6 → 0.75: the bunch-up was only 6 px at 960 wide |
-| whistle help | `whistleNudge 6`, `whistleAuto 12` | DESIGN |
+| whistle help | `whistleNudge 6`, `whistleAuto 9` | playtest P2-5: 12 → 9 (a child who never taps waits less; nudge 4 / auto 8 nagged in 61 % of trains) |
 | puffs | `puffSlow 0.25`, `puffFast 0.12` (by speed), `puffIdle 2.6` (parked, small) | |
 | help | `hintAfterMisses 2` (wrong or miss on the same cargo), `hintTime 3`, `hintCooldown 6`, `hintCycle 1.4`, `idleTime 12`, `idleBackoff 1.5`, `idleMax 30`, `idleHintFrom 2` | skill rules |
 | surprises | `surpriseRound 2`, `surpriseTypes ['hitch','balloon']` (rotate per chapter from a random start), `hitchAt 2.5` s into load | never the warm-up |
+
+| layout (QA round 1) | `engineWPort 150`, `engineX 8`, `portMaxCars 3` (portrait shows ≤ 3 cars: content `maxCars`), `smallCarK 0.7` (size topic: the small car is laid out smaller), `momoDy 72`, `momoHFrac 0.8` (Momo raised in the cab), `trackTall 230` (was 300), tunnel keep-out box for resting cargo | visual QA P1-2 / P2-4 / P2-5 / P3-12 |
+
+**Content rules added in QA round 1:** `makeRound(…, { maxCars, warm3, prevToy })` — never the same set of car labels twice in a row
+(except size / oddeven), never the same counting toy twice in a row, warm-up rounds of chapters 2–4 carry 3 toys at age ≥ 4;
+`topicsFor` opens a session with the topic left out last time.
 
 ## 7. Content (`TT.Content`, DESIGN §5.1)
 - Cars: sort age 3: 2; 4: 3; 5: 3 (4 from round 2); 6–7: 3; `size` / `oddeven`: 2; warm-up round 0: 2 cars × 1 cargo. Count:

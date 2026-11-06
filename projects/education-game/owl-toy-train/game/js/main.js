@@ -11,7 +11,10 @@
     debug: Q.get('debug') === '1', age: Q.has('age') ? qn('age', 4) : null, lang: Q.get('lang'), level: Q.has('level') ? qn('level', 0) : null,
     novoice: Q.get('novoice') === '1', botSkill: qn('skill', 0.8)
   };
-  const T = (key, p) => (TT.I18N ? TT.I18N.t(curLang(), key, Object.assign({ child: S.name || '' }, p || {})) : key);
+  let lastSpoken = '';
+  const T1 = (key, p) => (TT.I18N ? TT.I18N.t(curLang(), key, Object.assign({ child: S.name || '' }, p || {})) : key);
+  // never the same wording twice in a row (playtest P3): re-roll a variant that repeats the line just spoken
+  const T = (key, p) => { let r = T1(key, p); for (let k = 0; k < 3 && r && r === lastSpoken; k++) r = T1(key, p); return r; };
   const NAME = (kind, v) => (TT.I18N ? TT.I18N.name(curLang(), kind, v) : String(v));
 
   /* ---------- settings (URL flags never saved) ---------- */
@@ -108,6 +111,7 @@
   const voiceOn = () => S.voice && !FLAGS.novoice && speed <= 1.01 && !FLAGS.mute;
   function speak(text, opt) {
     if (!text) return;
+    lastSpoken = text;
     if (TT.Voice) TT.Voice.say(text, opt || {});
   }
   function applyAudio() {
@@ -243,7 +247,7 @@
         lastRoundEvt = e; stats.rounds++; idleSaid = 0; lastAsk = null; lastPromptText = '';
         TT.UI.setDots(world.roundsPerLevel || 4, e.round % (world.roundsPerLevel || 4));
         surpriseLine = e.surprise ? T('surprise.' + e.surprise) : '';
-        if ((e.round % (world.roundsPerLevel || 4)) === 0) { const d = T('deal'); TT.UI.say(d); speak(d); }
+        TT.UI.say(T('deal'));   // shown, not spoken (Momo talked too much, playtest P1-2); also clears the old depart line (QA P2-1)
         TT.Audio.play('whoosh');
         break;
       }
@@ -263,7 +267,8 @@
         TT.Audio.play('grab');
         const it = roundItem(e);
         if (it && it.kind === 'sprite' && animalOf(it) && it.nameKind === 'animal') TT.Audio.play('animal', { animal: animalOf(it) });
-        if (canInterrupt()) sayName(line('sayGrab', Object.assign({}, e, { item: it })), performance.now());
+        const wi = itemById(e.id);   // names only once a toy has missed (playtest P1-2: fewer lines)
+        if (wi && wi.misses > 0 && canInterrupt()) sayName(line('sayGrab', Object.assign({}, e, { item: it })), performance.now());
         break;
       }
       case 'tap': {   // a tap is not a drop: the toy hops home; Momo names it and (now and then) shows how to drag
@@ -286,7 +291,7 @@
         const c = carById(e.carId), it = roundItem(e) || {};
         momoMood('happy', 1.0);
         const ev = Object.assign({}, e, { item: it });
-        if (e.count) speak(countWord(e.count.i), { interrupt: true });   // the count word is the most important word
+        if (e.count) { speak(countWord(e.count.i), { interrupt: true }); promptUntil = performance.now() + 900; }   // the count word is the most important word: nothing cuts it (playtest P1-3)
         else speak(line('sayCorrect', Object.assign(ev, { label: c && c.label })), { interrupt: true });
         const tp = carTop(c);
         if (e.count) render.burst('count', tp.x, tp.y - 30, { n: e.count.i });
@@ -305,7 +310,7 @@
         const c = carById(e.carId), tp = carTop(c);
         TT.Audio.play('carDone');
         render.burst('sparkles', tp.x, tp.y, { n: 12 });
-        if (c && c.need) speak(line('sayCarDone', Object.assign({}, e, { item: (itemById((c.items || [])[0]) || {}).item, label: c.label })));
+        if (c && c.need && world.cur && world.cur.mode === 'count') speak(line('sayCarDone', Object.assign({}, e, { item: (itemById((c.items || [])[0]) || {}).item, label: c.label })));
         break;
       }
       case 'full': {
@@ -324,7 +329,7 @@
         const nowW = performance.now();
         if (nowW - lastWrongSay > 1500) {
           lastWrongSay = nowW;
-          const ev = Object.assign({}, e, { got: c ? c.label : e.got, item: Object.assign({}, roundItem(e) || {}, e.item || {}) });
+          const ev = Object.assign({}, e, { got: curAge() <= 4 ? null : (c ? c.label : e.got), item: Object.assign({}, roundItem(e) || {}, e.item || {}) });   // ≤ 4: no "That's the X car." (shorter)
           speak(line('sayWrong', ev, 'hint'), { interrupt: canInterrupt() });
         }
         break;
@@ -370,7 +375,12 @@
         break;
       }
       case 'toot': TT.Audio.play('toot'); momoMood('whistle', 0.5); if (Math.random() < 0.25 && canInterrupt()) speak(T('toot')); break;
-      case 'depart': momoMood('wave', 3); TT.Audio.play('hiss'); break;
+      case 'depart': {   // a bigger send-off: Momo cheers, a second TOOT as the train pulls away
+        momoMood('cheer', 1.4); setTimeout(() => momoMood('wave', 2), 1400 / Math.max(0.25, speed));
+        TT.Audio.play('hiss');
+        setTimeout(() => { if (mode === 'play') { TT.Audio.play('toot'); if (world.train) world.train.whistle = 1; } }, 650 / Math.max(0.25, speed));
+        break;
+      }
       case 'puff': if (weather.addPuff) weather.addPuff(e.x, e.y, e.v, e.small); if (!e.small) TT.Audio.play('puff'); break;
       case 'departed': break;
       case 'roundDone': {

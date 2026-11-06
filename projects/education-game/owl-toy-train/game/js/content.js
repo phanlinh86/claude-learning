@@ -160,21 +160,24 @@
   function carById(r, id) { for (var i = 0; i < r.cars.length; i++) if (r.cars[i].id === id) return r.cars[i]; return null; }
 
   /** Cars per round (DESIGN §5.1). */
-  function carsFor(topic, age, ri) {
+  function carsFor(topic, age, ri, cap) {
     age = ageOf(age); ri = ri | 0;
-    if (topic === 'count') return ri <= 2 || age === 5 ? 1 : 2;
-    if (ri === 0 || topic === 'size' || topic === 'oddeven' || age <= 3) return 2;
-    if (age === 5 && ri >= 2) return 4;
-    return 3;
+    var k;
+    if (topic === 'count') k = ri <= 2 || age === 5 ? 1 : 2;
+    else if (ri === 0 || topic === 'size' || topic === 'oddeven' || age <= 3) k = 2;
+    else if (age === 5 && ri >= 2) k = 4;
+    else k = 3;
+    return cap ? Math.min(k, Math.max(2, cap | 0)) : k;   // cap: iPhone portrait shows at most 3 readable cars (visual QA P1-2)
   }
   function modeFor(topic) { return topic === 'count' ? 'count' : 'sort'; }
   /** The most cars any round of this age / topic list has (layout planning before the first round). */
   function maxCars(age) { return ageOf(age) === 5 ? 4 : ageOf(age) <= 3 ? 2 : 3; }
 
   /** How many cargo items each car of a sort round gets (round 0: 1 each; later 1–2 each, total ≤ ITEM_CAP). */
-  function perCar(rng, age, ri, k, short) {
+  function perCar(rng, age, ri, k, short, warm3) {
     var out = [], i;
     for (i = 0; i < k; i++) out.push(1);
+    if (ri === 0 && warm3) { out[rng.int(0, k - 1)]++; return out; }   // later chapters' warm-up: 3 toys (playtest P3)
     if (ri === 0 || short) return out;
     var cap = Math.min(ITEM_CAP[age], k * PER_CAR_MAX);
     var total = ri === 1 ? Math.min(cap, k + 1) : rng.int(Math.min(cap, k + 1), cap);
@@ -208,10 +211,13 @@
     if (ALL_TOPICS.indexOf(topic) < 0) throw new Error('TT.Content: unknown topic ' + topic);
     var r = null, err = null;
     for (var attempt = 0; attempt < 80; attempt++) {
-      r = buildRound(topic, age, lang, rng, ri, !!o.short);
+      r = buildRound(topic, age, lang, rng, ri, !!o.short, o.maxCars || 0, !!o.warm3 && age >= 4);
       r.surprise = ri === 0 ? null : (o.surprise || null);
       err = validate(r);
       if (!err && o.prevKey && r.key === o.prevKey && attempt < 79) { err = 'same train as the previous round'; continue; }
+      // never the same set of cars twice in a row (size / oddeven only have one set), never the same counting toy twice
+      if (!err && attempt < 60 && o.prevKey && topic !== 'size' && topic !== 'oddeven' && r.key.split('#')[0] === String(o.prevKey).split('#')[0]) { err = 'same cars as the previous round'; continue; }
+      if (!err && attempt < 60 && o.prevToy && r.mode === 'count' && r.params && r.params.cargo === o.prevToy) { err = 'same counting toy'; continue; }
       if (!err) break;
     }
     if (err) throw new Error('TT.Content: invalid round (' + topic + ', age ' + age + ', round ' + ri + '): ' + err);
@@ -219,12 +225,12 @@
     return r;
   }
 
-  function buildRound(topic, age, lang, rng, ri, short) {
-    var mode = modeFor(topic), k = carsFor(topic, age, ri), cars = [], items = [], i, j, per, promptKey = 'p.' + topic, params = {};
+  function buildRound(topic, age, lang, rng, ri, short, capCars, warm3) {
+    var mode = modeFor(topic), k = carsFor(topic, age, ri, capCars), cars = [], items = [], i, j, per, promptKey = 'p.' + topic, params = {};
     function add(carIdx, it) { it.answer = carIdx === null ? null : 'k' + carIdx; items.push(it); }
     switch (topic) {
       case 'colors': {
-        var cs = colourSet(rng, age, k); per = perCar(rng, age, ri, k, short);
+        var cs = colourSet(rng, age, k); per = perCar(rng, age, ri, k, short, warm3);
         for (i = 0; i < k; i++) {
           cars.push(carOf({ type: 'color', value: cs[i], color: cs[i] }, 'color', cs[i]));
           var toys = rng.shuffle(TT.TOYS.slice());
@@ -233,7 +239,7 @@
         break;
       }
       case 'shapes': {
-        var sp = rng.sample(shapesFor(age), k), sc = age <= 4 ? colourSet(rng, age, k) : null; per = perCar(rng, age, ri, k, short);
+        var sp = rng.sample(shapesFor(age), k), sc = age <= 4 ? colourSet(rng, age, k) : null; per = perCar(rng, age, ri, k, short, warm3);
         for (i = 0; i < k; i++) {
           var signC = sc ? sc[i] : rng.pick(COLORS5);
           cars.push(carOf({ type: 'shape', value: sp[i], color: signC }, 'shape', sp[i]));
@@ -242,7 +248,7 @@
         break;
       }
       case 'size': {
-        var col = rng.pick(age < COLOR_SAFE_BELOW ? COLORS : COLORS5), sz = rng.shuffle(['big', 'small']); per = perCar(rng, age, ri, 2, short);
+        var col = rng.pick(age < COLOR_SAFE_BELOW ? COLORS : COLORS5), sz = rng.shuffle(['big', 'small']); per = perCar(rng, age, ri, 2, short, warm3);
         for (i = 0; i < 2; i++) {
           cars.push(carOf({ type: 'size', value: sz[i], color: col }, 'size', sz[i]));
           for (j = 0; j < per[i]; j++) add(i, iSize(sz[i], col));
@@ -251,7 +257,7 @@
         break;
       }
       case 'homes': {
-        var hs = rng.sample(HOME_LIST, k); per = perCar(rng, age, ri, k, short);
+        var hs = rng.sample(HOME_LIST, k); per = perCar(rng, age, ri, k, short, warm3);
         for (i = 0; i < k; i++) {
           cars.push(carOf({ type: 'home', value: hs[i] }, 'home', hs[i]));
           var an = rng.sample(TT.HOMES[hs[i]], per[i]);
@@ -262,7 +268,7 @@
       case 'initial': {   // letters that have enough animals; distinct animals
         var byL = {};
         TT.WORDS[lang].forEach(function (w) { (byL[w.initial] = byL[w.initial] || []).push(w.animal); });
-        var Ls = rng.sample(Object.keys(byL), k); per = perCar(rng, age, ri, k, short);
+        var Ls = rng.sample(Object.keys(byL), k); per = perCar(rng, age, ri, k, short, warm3);
         for (i = 0; i < k; i++) {
           cars.push(carOf({ type: 'letter', value: Ls[i] }, 'letter', Ls[i]));
           var pool = rng.shuffle(byL[Ls[i]].slice());
@@ -271,7 +277,7 @@
         break;
       }
       case 'letters': case 'lower': {
-        var LL = rng.sample(letterPool(lang, topic), k); per = perCar(rng, age, ri, k, short);
+        var LL = rng.sample(letterPool(lang, topic), k); per = perCar(rng, age, ri, k, short, warm3);
         for (i = 0; i < k; i++) {
           cars.push(carOf({ type: 'letter', value: LL[i] }, 'letter', LL[i]));
           for (j = 0; j < per[i]; j++) add(i, iLetter(topic === 'lower' ? LL[i].toLowerCase() : LL[i], rng.pick(BLOCK_TINTS)));
@@ -279,7 +285,7 @@
         break;
       }
       case 'add': {
-        var top = ADD_MAX[age] || 10, hiA = ri === 0 ? Math.min(6, top) : top, sums = rng.sample(range(2, hiA), k); per = perCar(rng, age, ri, k, short);
+        var top = ADD_MAX[age] || 10, hiA = ri === 0 ? Math.min(6, top) : top, sums = rng.sample(range(2, hiA), k); per = perCar(rng, age, ri, k, short, warm3);
         for (i = 0; i < k; i++) {
           var a1 = rng.int(1, sums[i] - 1), b1 = sums[i] - a1, t1 = a1 + '+' + b1;
           cars.push(carOf({ type: 'text', value: t1, a: a1, b: b1, op: '+' }, 'sum', t1));
@@ -288,7 +294,7 @@
         break;
       }
       case 'sub': {
-        var res = rng.sample(range(0, ri === 0 ? 5 : SUB_MAX - 1), k); per = perCar(rng, age, ri, k, short);
+        var res = rng.sample(range(0, ri === 0 ? 5 : SUB_MAX - 1), k); per = perCar(rng, age, ri, k, short, warm3);
         for (i = 0; i < k; i++) {
           var kk = rng.int(1, SUB_MAX - res[i]), big = res[i] + kk, t2 = big + MINUS + kk;
           cars.push(carOf({ type: 'text', value: t2, a: big, b: kk, op: MINUS }, 'diff', t2));
@@ -297,7 +303,7 @@
         break;
       }
       case 'oddeven': {
-        var hiO = ODDEVEN_MAX[age] || 12, par = rng.shuffle(['odd', 'even']); per = perCar(rng, age, ri, 2, short);
+        var hiO = ODDEVEN_MAX[age] || 12, par = rng.shuffle(['odd', 'even']); per = perCar(rng, age, ri, 2, short, warm3);
         for (i = 0; i < 2; i++) {
           cars.push(carOf({ type: 'parity', value: par[i] }, 'parity', par[i]));
           var nums = rng.sample(range(1, hiO).filter(function (x) { return parityOf(x) === par[i]; }), per[i]);
@@ -322,7 +328,7 @@
     rng.shuffle(items);
     items.forEach(function (it, ii) { it.id = 'i' + ii; });
     var r = { topic: topic, age: age, lang: lang, roundIndex: ri, mode: mode, promptKey: promptKey, params: params, surprise: null,
-      cars: cars, items: items, short: !!short && mode === 'sort' };
+      cars: cars, items: items, short: !!short && mode === 'sort', maxCars: capCars || 0, warm3: !!warm3 && mode === 'sort' };
     r.key = roundKey(r);
     return r;
   }
@@ -353,7 +359,7 @@
   function validate(r) {
     if (!r || !r.cars || !r.items) return 'no cars / items';
     var k = r.cars.length, n = r.items.length, i, j;
-    if (k !== carsFor(r.topic, r.age, r.roundIndex)) return k + ' cars, want ' + carsFor(r.topic, r.age, r.roundIndex);
+    if (k !== carsFor(r.topic, r.age, r.roundIndex, r.maxCars)) return k + ' cars, want ' + carsFor(r.topic, r.age, r.roundIndex, r.maxCars);
     if (k < 1 || k > MAX_CARS) return k + ' cars';
     if (n < 1 || n > MAX_ITEMS) return n + ' items';
     var ids = {}, labels = {}, cs = [];
@@ -419,7 +425,7 @@
     for (j = 0; j < k; j++) {
       var m = cnt[r.cars[j].id] || 0;
       if (m < 1) return 'car ' + r.cars[j].id + ' gets no cargo';
-      if (m > (r.roundIndex === 0 ? 1 : PER_CAR_MAX)) return 'car ' + r.cars[j].id + ' gets ' + m;
+      if (m > (r.roundIndex === 0 && !r.warm3 ? 1 : PER_CAR_MAX)) return 'car ' + r.cars[j].id + ' gets ' + m;
     }
     if (n > ITEM_CAP[r.age]) return n + ' items > ' + ITEM_CAP[r.age];
     if (r.topic === 'size' && (r.cars[0].label.color !== r.cars[1].label.color || r.cars[0].label.value === r.cars[1].label.value)) return 'size cars';
@@ -521,8 +527,10 @@
     last = Array.isArray(last) ? last : [];
     if (!rng || !last.length) return TT.AGE_TOPICS[age].slice();
     var pool = TT.AGE_POOLS[age].slice(), ord = function (a, b) { return pool.indexOf(a) - pool.indexOf(b); };
-    var first = pool[0];
-    for (var i = 0; i < pool.length; i++) if (pool[i] !== last[0]) { first = pool[i]; break; }
+    // the topic left out last time opens this session (playtest P2-6: chapter 1 alternated between two topics)
+    var unused = pool.filter(function (t) { return last.indexOf(t) < 0; });
+    var first = unused.length ? unused[0] : pool[0];
+    if (!unused.length) for (var i = 0; i < pool.length; i++) if (pool[i] !== last[0]) { first = pool[i]; break; }
     var rest = pool.filter(function (t) { return t !== first; });
     var fresh = rng.shuffle(rest.filter(function (t) { return last.indexOf(t) < 0; }));
     var old = rng.shuffle(rest.filter(function (t) { return last.indexOf(t) >= 0; }));

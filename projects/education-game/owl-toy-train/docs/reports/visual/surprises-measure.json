@@ -1,0 +1,162 @@
+[
+ {
+  "vp": "ip-p",
+  "sp": "hitch",
+  "box": {
+   "x0": 330,
+   "x1": 406,
+   "y0": 538,
+   "y1": 615
+  },
+  "vw": 393,
+  "vh": 852,
+  "hitCss": 76,
+  "hitLogical": 140,
+  "overHud": false,
+  "overBubble": false,
+  "overItems": 0,
+  "offRight": 13,
+  "offTop": -538,
+  "errors": []
+ },
+ {
+  "vp": "ip-p",
+  "sp": "balloon",
+  "box": {
+   "x0": 339,
+   "x1": 418,
+   "y0": 494,
+   "y1": 573
+  },
+  "vw": 393,
+  "vh": 852,
+  "hitCss": 79,
+  "hitLogical": 144,
+  "overHud": false,
+  "overBubble": false,
+  "overItems": 0,
+  "offRight": 25,
+  "offTop": -494,
+  "errors": []
+ },
+ {
+  "vp": "ip-l",
+  "sp": "hitch",
+  "box": {
+   "x0": 655,
+   "x1": 732,
+   "y0": 204,
+   "y1": 280
+  },
+  "vw": 852,
+  "vh": 393,
+  "hitCss": 76,
+  "hitLogical": 140,
+  "overHud": false,
+  "overBubble": false,
+  "overItems": 0,
+  "offRight": -120,
+  "offTop": -204,
+  "errors": []
+ },
+ {
+  "vp": "ip-l",
+  "sp": "balloon",
+  "box": {
+   "x0": 674,
+   "x1": 742,
+   "y0": 172,
+   "y1": 240
+  },
+  "vw": 852,
+  "vh": 393,
+  "hitCss": 68,
+  "hitLogical": 125,
+  "overHud": false,
+  "overBubble": false,
+  "overItems": 0,
+  "offRight": -110,
+  "offTop": -172,
+  "errors": []
+ },
+ {
+  "vp": "pad-p",
+  "sp": "hitch",
+  "box": {
+   "x0": 688,
+   "x1": 848,
+   "y0": 705,
+   "y1": 865
+  },
+  "vw": 820,
+  "vh": 1180,
+  "hitCss": 159,
+  "hitLogical": 140,
+  "overHud": false,
+  "overBubble": false,
+  "overItems": 0,
+  "offRight": 28,
+  "offTop": -705,
+  "errors": []
+ },
+ {
+  "vp": "pad-p",
+  "sp": "balloon",
+  "box": {
+   "x0": 702,
+   "x1": 844,
+   "y0": 640,
+   "y1": 782
+  },
+  "vw": 820,
+  "vh": 1180,
+  "hitCss": 142,
+  "hitLogical": 125,
+  "overHud": false,
+  "overBubble": false,
+  "overItems": 0,
+  "offRight": 24,
+  "offTop": -640,
+  "errors": []
+ },
+ {
+  "vp": "pad-l",
+  "sp": "hitch",
+  "box": {
+   "x0": 1030,
+   "x1": 1189,
+   "y0": 425,
+   "y1": 584
+  },
+  "vw": 1180,
+  "vh": 820,
+  "hitCss": 159,
+  "hitLogical": 140,
+  "overHud": false,
+  "overBubble": false,
+  "overItems": 0,
+  "offRight": 9,
+  "offTop": -425,
+  "errors": []
+ },
+ {
+  "vp": "pad-l",
+  "sp": "balloon",
+  "box": {
+   "x0": 1065,
+   "x1": 1207,
+   "y0": 359,
+   "y1": 501
+  },
+  "vw": 1180,
+  "vh": 820,
+  "hitCss": 142,
+  "hitLogical": 125,
+  "overHud": false,
+  "overBubble": false,
+  "overItems": 0,
+  "offRight": 27,
+  "offTop": -359,
+  "errors": []
+ }
+]

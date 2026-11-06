@@ -214,6 +214,7 @@ G.lang = async check => {
   const en = await waitAsk(P);
   check('EN game: bubble prompt in English', en.bubble && !VI_RE.test(en.bubble) && !badText(en.bubble), en.bubble);
   await tapEl(P, '#btnPause'); await tapEl(P, '#btnHome');
+  await until(P, () => TT.debug.mode === 'title', null, 5000).catch(() => {});
   check('Home from pause → title', (await P.page.evaluate(() => TT.debug.mode)) === 'title');
   await tapEl(P, '.title-top [data-lang="vi"]');
   await startByTap(P);
@@ -325,7 +326,8 @@ G.drag = async check => {
   // wrong car
   t0 = await now(P);
   it = J.items.find(i => i.id === it.id);
-  await dragTo(P, it.box, carDrop(wrong)); await sleep(1000);
+  await dragTo(P, it.box, carDrop(wrong));
+  await until(P, id => { const q = TT.debug.world.itemById(id); return q && q.state === 'rest'; }, it.id, 8000).catch(() => {});
   E = await ev(P, t0); J = await info(P);
   check('wrong car → wrong event, toy goes home', E.some(e => e.type === 'wrong' && e.carId === wrong.id) && J.items.find(i => i.id === it.id).state === 'rest', E.map(e => e.type));
   const lines = (await vlog(P)).slice(-4);
@@ -625,6 +627,7 @@ G.extra = async check => {
   check('Play again → a new session (mode play, HUD stars reset)', ag.mode === 'play' && ag.stars === '0', ag);
   check('Play again: chapters rotate (first topic differs)', ag.levels[0] !== lv1[0] || ag.levels.join() !== lv1.join(), { lv1, lv2: ag.levels });
   await tapEl(D, '#btnPause'); await tapEl(D, '#btnHome');
+  await until(D, () => TT.debug.mode === 'title', null, 5000).catch(() => {});
   check('pause → Home → title', (await D.page.evaluate(() => TT.debug.mode)) === 'title' && await visible(D, 'scrTitle'));
   await closeP(D, check, 'extra again');
 };

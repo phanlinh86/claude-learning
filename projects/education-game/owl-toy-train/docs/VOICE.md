@@ -82,7 +82,7 @@ All helpers never throw and never return '' or a raw `{x}`; `rng` is optional (`
 | `wrong` | `sayWrong(lang, {…e, got: car.label})`; `hint` → `t('hint')` |
 | `miss` | optional `t('miss')` "Pop it into a car!" |
 | `idle {n}` | `t('idle') + ' ' + prompt` |
-| `loaded` | `t('loaded')` "All aboard! Pull the whistle!" |
+| `loaded` | `t('loaded')` "All aboard! Tap the whistle!" |
 | `whistleHint` / `whistle {auto}` | `t('whistleHint')` / auto: `t('whistleAuto')` "Toot toot! Off we go!" |
 | `whistle` (child) / `depart` | `t('depart')` "Choo choo! Bye-bye!"; extra taps `toot` → `t('toot')` (rarely) |
 | `hitchTap` / `balloonTap` | `t('hitch.tap')` / `t('balloon.tap')` |

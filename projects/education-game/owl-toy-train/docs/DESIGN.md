@@ -269,7 +269,7 @@ toys cube "block" / "khối gỗ", ball, cone "cone" / "khối nón", cylinder "
 - `say.grab` names the item ("Red block!" / "Khối màu đỏ!"; animal: "The cow!" / "Con bò!"), `say.correct.<labelType>` with
   the label ("Red car — yes!", "Moo! The cow goes to the barn!"), counting on each correct drop in count mode ("One!", "Two!"
   … = `count.<n>`), `full[]` ("This car is full! Try another one." — never negative), `wrong[]` with `{item}` and `{want}`
-  ("Boing! That's the blue car. The red block wants the red car!"), `loaded[]` ("All aboard! Pull the whistle!" / "Lên tàu
+  ("Boing! That's the blue car. The red block wants the red car!"), `loaded[]` ("All aboard! Tap the whistle!" / "Lên tàu
   nào! Bé kéo còi đi!"), `whistleHint[]`, `whistleAuto[]` ("Toot toot! Off we go!"), `depart[]` ("Choo choo! Bye-bye!"),
   `toot[]`, `hint[]`, `idle[]`, `praise[]`, `great[]` with `{child}`, `talk.*`, `weather.0..3` ("Good morning, train!",
   "Sunny noon!", "Look, the sunset!", "Good night, stars! Lights on!"), `surprise.hitch` ("Look! Bunny wants a ride!"),

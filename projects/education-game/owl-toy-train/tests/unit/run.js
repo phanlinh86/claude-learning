@@ -248,7 +248,7 @@ test('layout: every viewport × 1–4 cars: on screen, rug clear of drop zones /
   for (const v of VIEWPORTS) for (let n = 1; n <= 4; n++) for (const caps of [[1, 1, 1, 1], [2, 2, 2, 2], [12, 3, 2, 2]]) {
     const L = TT.World.computeLayout(v.W, v.H, v.ins, {}, { n, caps: caps.slice(0, n) });
     const ins = L.ins, tag = v.name + ' n' + n + ' caps ' + caps;
-    assert.ok(L.engine.x0 >= ins.left + 20 - 1e-6, tag + ': engine left');
+    assert.ok(L.engine.x0 >= ins.left + CFG.engineX - 1e-6, tag + ': engine left');
     const last = L.cars[n - 1];
     assert.ok(last.x1 <= v.W - ins.right - 20 + 1e-6, tag + ': cars fit');
     for (let i = 1; i < n; i++) assert.ok(Math.abs(L.cars[i].x0 - L.cars[i - 1].x1 - 16) < 1e-6, tag + ': gap 16');
@@ -505,7 +505,7 @@ test('world: count — correct counts i/n, full car → full (not a mistake), sp
   assert.strictEqual(w2.answerCarId(extra.id), w2.cars[1].id);
 });
 
-test('world: whistle nudge at 6 s (ghost hand taps), Momo toots it herself at 12 s', () => {
+test('world: whistle nudge at 6 s (ghost hand taps), Momo toots it herself at CONFIG.whistleAuto (9 s)', () => {
   const w = mkWorld({ age: 3 });
   roundOf(w, 'colors', 0);
   for (const it of rest(w).slice()) dropOn(w, it, w.carById(w.answerCarId(it.id)));
@@ -513,7 +513,7 @@ test('world: whistle nudge at 6 s (ghost hand taps), Momo toots it herself at 12
   evs(w);
   run(w, 5.9); assert.ok(!types(evs(w)).includes('whistleHint'));
   run(w, 0.2); assert.ok(types(evs(w)).includes('whistleHint')); assert.ok(w.hintHand && w.hintHand.kind === 'tap');
-  run(w, 5.8); assert.strictEqual(w.phase, 'whistle');
+  run(w, CFG.whistleAuto - 6.2); assert.strictEqual(w.phase, 'whistle');
   run(w, 0.3);
   const e = evs(w).find(x => x.type === 'whistle');
   assert.ok(e && e.auto === true); assert.strictEqual(w.phase, 'depart'); assert.strictEqual(w.momo.mood, 'whistle');
@@ -635,7 +635,7 @@ test('world: surprises — hitch bunny hops onto the last car and rides away; ba
   const wh = w.whistleHit(); w.pointerDown(wh.x, wh.y); w.pointerUp();
   until(w, () => w.train.x < -300);
   assert.ok(w.hitch.x < last.x1 + w.layout.W, 'rides along');
-  assert.ok(Math.abs(w.hitch.x - (last.x1 + last.ox - 0.17 * last.w)) < 1e-6);
+  assert.ok(Math.abs(w.hitch.x - (last.x1 + last.ox - 0.3 * last.w)) < 1e-6);
   const w2 = mkWorld({ age: 4, surprise: true });
   roundOf(w2, 'shapes', 2, 'balloon');
   assert.ok(w2.balloon);
@@ -766,6 +766,89 @@ test('bot: drives only the input API; skill 1 makes no mistakes; skill 0.3 still
   assert.strictEqual(S2.w.state, 'sessionDone');
   assert.ok(S2.bot.stats.wrong > 0);
   assert.ok(S2.events.some(e => e.type === 'hint'));
+});
+
+// ---------------------------------------------------------------------- QA round 1 rules
+test('QA1: two taps (no drag) in a round → hint; ages ≤ 4: the 4th tap glides the toy into its car', () => {
+  const w = mkWorld({ age: 4, seed: 5 });
+  roundOf(w, 'colors', 1);
+  const tap = it => { w.pointerDown(it.x, it.y); w.update(1 / 60); return w.pointerUp(it.x, it.y); };
+  evs(w);
+  let it = rest(w)[0];
+  assert.strictEqual(tap(it), 'tap'); settle(w, 0.5);
+  it = rest(w)[0]; assert.strictEqual(tap(it), 'tap');
+  assert.ok(types(evs(w)).includes('hint'), 'hint after 2 taps');
+  settle(w, 0.5); it = rest(w)[0]; tap(it); settle(w, 0.5);
+  it = rest(w)[0]; const r = tap(it);
+  assert.strictEqual(r, 'correct', 'the 4th tap loads the toy');
+  settle(w, 1); assert.strictEqual(it.state, 'in');
+  assert.strictEqual(w.misses, 0);
+});
+test('QA1: a release up to zoneUpFar above a car lands once the toy travelled ≥ aimTravel', () => {
+  const w = mkWorld({ age: 4, seed: 7 });
+  roundOf(w, 'colors', 1);
+  const it = rest(w)[0], c = w.carById(w.answerCarId(it.id)), b = w.carBox(c);
+  const y = c.y0 - CFG.zoneUp - 25;   // above the normal zone, inside zoneUpFar
+  assert.strictEqual(w.pointerDown(it.x, it.y), it.id);
+  const x0 = it.x, y0 = it.y, tx = x0 + (b.x > x0 ? -1 : 1) * 140;   // a wide swing first (travel ≥ aimTravel), then above the car
+  for (let k = 1; k <= 8; k++) { w.pointerMove(x0 + (tx - x0) * k / 8, y0); w.update(1 / 60); }
+  for (let k = 1; k <= 10; k++) { w.pointerMove(tx + (b.x - tx) * k / 10, y0 + (y - y0) * k / 10); w.update(1 / 60); }
+  assert.strictEqual(w.pointerUp(b.x, y), 'correct');
+  // a short release up there (no travel) is still a miss
+  const w2 = mkWorld({ age: 4, seed: 7 });
+  roundOf(w2, 'colors', 1);
+  const it2 = rest(w2)[0], c2 = w2.carById(w2.answerCarId(it2.id)), b2 = w2.carBox(c2);
+  if (Math.hypot(b2.x - it2.x, c2.y0 - CFG.zoneUp - 25 - it2.y) < CFG.aimTravel) assert.strictEqual(drag(w2, it2, b2.x, c2.y0 - CFG.zoneUp - 25, 6), 'miss');
+});
+test('QA1: spare count toys waving goodbye cannot be grabbed', () => {
+  const w = mkWorld({ age: 4, seed: 2 });
+  roundOf(w, 'count', 1);
+  const need = w.cars.reduce((a, c) => a + c.need, 0);
+  for (let k = 0; k < need; k++) { const it = rest(w)[0]; dropOn(w, it, w.carById(w.answerCarId(it.id))); }
+  const spare = w.items.find(i => i._bye && (i.state === 'rest' || i.state === 'home'));
+  if (spare) assert.notStrictEqual(w.pointerDown(spare.x, spare.y), spare.id);
+});
+test('QA1: balloon head stays on screen while parked (every viewport, after taps)', () => {
+  for (const vp of VIEWPORTS) {
+    const w = mkWorld({ age: 4, seed: 3, vp, surprise: true });
+    roundOf(w, 'colors', 2, 'balloon');
+    for (let k = 0; k < 5; k++) { const h = w._balloonHead(); w.pointerDown(h.x, h.y); w.pointerUp(h.x, h.y); run(w, 0.4, () => {
+      const q = w._balloonHead();
+      assert.ok(q.x + 0.3 * w.balloon.size <= vp.W - ((vp.ins && vp.ins.right) || 0) - 12 + 1e-6, vp.name + ': balloon head off screen ' + q.x);
+    }); }
+  }
+});
+test('QA1: portrait → ≤ 3 cars (age 5); size topic: the small car is visibly smaller', () => {
+  const w = mkWorld({ age: 5, seed: 4, vp: VIEWPORTS[2] });
+  for (const ri of [2, 3]) { roundOf(w, 'shapes', ri); assert.ok(w.cars.length <= 3, 'portrait cars ' + w.cars.length); }
+  const w2 = mkWorld({ age: 5, seed: 4 });
+  roundOf(w2, 'shapes', 2); assert.strictEqual(w2.cars.length, 4);
+  const w3 = mkWorld({ age: 3, seed: 6 });
+  roundOf(w3, 'size', 1);
+  const big = w3.cars.find(c => c.label.value === 'big'), small = w3.cars.find(c => c.label.value === 'small');
+  assert.ok(small.w < 0.8 * big.w && small.h < big.h, 'small car ' + small.w + ' vs ' + big.w);
+});
+test('QA1: content — no repeated car set / counting toy in a row; later warm-ups carry 3 toys at age ≥ 4; topic opener rotates', () => {
+  const R = TT.RNG;
+  for (const topic of ['colors', 'shapes', 'homes', 'count']) for (let seed = 1; seed <= 40; seed++) {
+    const rng = new R(seed);
+    let prev = null, toy = null;
+    for (let ri = 0; ri < 4; ri++) {
+      const r = C.makeRound(topic, { age: 4, lang: 'en', rng, roundIndex: ri, prevKey: prev, prevToy: toy });
+      if (prev && ri > 0) assert.notStrictEqual(r.key.split('#')[0], prev.split('#')[0], topic + ' same cars');
+      if (r.mode === 'count') { if (toy) assert.notStrictEqual(r.params.cargo, toy); toy = r.params.cargo; }
+      prev = r.key;
+    }
+  }
+  const r3 = C.makeRound('colors', { age: 4, rng: new R(3), roundIndex: 0, warm3: true });
+  assert.strictEqual(r3.items.length, 3);
+  const r0 = C.makeRound('colors', { age: 4, rng: new R(3), roundIndex: 0 });
+  assert.strictEqual(r0.items.length, 2);
+  const openers = new Set();
+  let last = null;
+  const rng = new R(9);
+  for (let k = 0; k < 12; k++) { const t = C.topicsFor(4, rng, last); openers.add(t[0]); last = t; }
+  assert.ok(openers.size >= 3, 'openers ' + [...openers]);
 });
 
 // ---------------------------------------------------------------------- runner

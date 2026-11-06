@@ -41,10 +41,10 @@
 
     // ---- layout (DESIGN §2; px)
     shortSide: 720, minLong: 960, maxLong: 1600, tallRatio: 1.6,
-    groundLand: 18, groundPort: 30, trackLand: 40, trackPort: 220, trackTall: 300, trackPortShort: 120, portShortH: 960, portFullH: 1200,
+    groundLand: 18, groundPort: 30, trackLand: 40, trackPort: 220, trackTall: 230, trackPortShort: 120, portShortH: 960, portFullH: 1200,
     cargoS: 104, tallScale: 1.2,
-    engineW: 240, engineWSmall: 210, smallW: 1100, engineWPort: 180, engineX: 20, engineHFrac: 1.15, cabFrac: 0.45,
-    momoDy: 34, momoHFrac: 0.95, whistleR: 34, whistlePad: 26, enginePad: 20,
+    engineW: 240, engineWSmall: 210, smallW: 1100, engineWPort: 150, engineX: 8, portMaxCars: 3, smallCarK: 0.7, engineHFrac: 1.15, cabFrac: 0.45,
+    momoDy: 72, momoHFrac: 0.8, whistleR: 34, whistlePad: 26, enginePad: 20,
     carGap: 16, carMaxW: 260, carEdge: 20, carHFrac: 0.62, carHMin: 96, carHMax: 150, wheelH: 26, floorFrac: 0.62,
     rowRaise: 0.28, slotMinGap: 0.45, slotSpan: 0.86, carScaleK: 2.3, carScaleMin: 0.55, carScaleMax: 0.85, bigNeed: 6, carScaleFloor: 0.42,
     centreTrain: true,
@@ -55,7 +55,8 @@
 
     // ---- touch
     hitFrac: 0.6, hitPad: 14,  // cargo hit: centre ± (0.6·S + 14)
-    zoneSide: 30, zoneUp: 90, zoneDown: 20,
+    zoneSide: 30, zoneUp: 90, zoneDown: 20, zoneUpFar: 130, aimTravel: 120,   // a release up to 130 px above a car still lands once the toy travelled ≥ 120 px
+    tapHintAfter: 2, tapAssistAfter: 4, tapAssistMaxAge: 4,   // taps (not drags) per round → hint / glide the toy in (ages ≤ 4)
     tapMovePx: 24, tapTime: 0.35, momoTapTime: 0.6, momoHalfW: 0.32, momoPad: 16,
     stillDragTime: 6, stillPx: 8,
 
@@ -82,7 +83,7 @@
     arriveTime: 1.6, arriveFrom: 120,
     coupleOmega: 9, coupleZeta: 0.35, coupleGain: 0.75, coupleLag: 0.07, clackMin: 2, coupleRestitution: 0.3,
     wheelR: 22, railJoint: 150,
-    whistleTime: 0.8, whistleLead: 0.55, whistleNudge: 6, whistleAuto: 12, tootGap: 0.3,
+    whistleTime: 0.8, whistleLead: 0.55, whistleNudge: 6, whistleAuto: 9, tootGap: 0.3,
     departKick: 120, departAccel: 900, departVmax: 900,
     puffSlow: 0.25, puffFast: 0.12, puffIdle: 2.6, chimneyDx: 0.18,
     hopG: 2200, hopRest: 0.35, hopKick: [70, 150], joltKick: [140, 230], cargoTiltK: 0.00025, cargoTiltOmega: 10, cargoTiltZeta: 0.3,
@@ -188,10 +189,12 @@
     var chimney = { x: ex0 + g.chimney.x, y: trackY + g.chimney.y };
     var carH = clamp(cfg.carHFrac * carW, cfg.carHMin, cfg.carHMax);
     var carScale = clamp(carW / (cfg.carScaleK * S), cfg.carScaleMin, cfg.carScaleMax);
-    var cars = [], minTop = 1e9;
+    var cars = [], minTop = 1e9, xc = engine.x1 + gap;
     for (i = 0; i < n; i++) {
-      var x0 = engine.x1 + gap + i * (carW + gap), y0 = trackY - cfg.wheelH - carH;
-      var c = { index: i, x0: x0, x1: x0 + carW, y0: y0, y1: trackY, w: carW, h: carH, floorY: y0 + cfg.floorFrac * carH };
+      var kk = (plan.ks && plan.ks[i]) || 1, cw = carW * kk, chh = Math.max(cfg.carHMin * kk, carH * kk);   // size topic: the small car is smaller
+      var x0 = xc + (carW - cw) / 2, y0 = trackY - cfg.wheelH - chh;
+      xc += carW + gap;
+      var c = { index: i, x0: x0, x1: x0 + cw, y0: y0, y1: trackY, w: cw, h: chh, floorY: y0 + cfg.floorFrac * chh };
       var cap = Math.max(1, (plan.caps && plan.caps[i]) || 2);
       c.scale = cap > cfg.bigNeed ? Math.max(cfg.carScaleFloor, carScale * Math.sqrt(cfg.bigNeed / cap)) : carScale;
       c.slots = carSlots(c, cap, S, S * c.scale, cfg);
@@ -218,6 +221,9 @@
       { x: engine.x0, y: Math.min(engine.y0, whistle.y - whistle.r - cfg.whistlePad, momo.y - momo.h), w: E, h: trackY - Math.min(engine.y0, whistle.y - whistle.r - cfg.whistlePad, momo.y - momo.h), pad: S / 2 + cfg.keepPad, kind: 'engine' }
     ];
     keepBoxes(hudKeep).forEach(function (b) { b.pad = S / 2 + 8; b.kind = 'hudKeep'; keep.push(b); });
+    // the toy-block tunnel at the left edge (render: x = min(tunnelX, engine.x0 − 0.11E − 0.29E − 6), far side to +0.61E): no cargo on it
+    var tunR = Math.min(ins.left - cfg.tunnelDx, ex0 - 0.4 * E - 6) + 0.42 * 1.45 * E;
+    if (tunR > 0) keep.push({ x: -400, y: 0, w: tunR + 400, h: trackY, pad: S / 2 + 6, kind: 'tunnel' });
     if (plan.surprise && n) {   // the bunny on the last car's rim / the balloon above it
       var lc = cars[n - 1], hgt = plan.surprise === 'balloon' ? cfg.balloonSize * S : cfg.hitchSize * S;
       keep.push({ x: lc.x1 - 0.45 * carW, y: lc.y0 - hgt, w: 0.45 * carW + 30, h: hgt, pad: S / 2, kind: plan.surprise });
@@ -354,9 +360,9 @@
     var x0 = c.x0 + c.ox + c.shake;
     return { x: x0 + c.w / 2, y: (c.y0 + c.floorY) / 2, w: c.w, h: c.floorY - c.y0, x0: x0, x1: x0 + c.w, y0: c.y0, floorY: c.floorY };
   };
-  P._zone = function (c) {
+  P._zone = function (c, up) {
     var cfg = this.cfg, x0 = c.x0 + c.ox;
-    return { l: x0 - cfg.zoneSide, r: x0 + c.w + cfg.zoneSide, t: c.y0 - cfg.zoneUp, b: c.y1 + cfg.zoneDown };
+    return { l: x0 - cfg.zoneSide, r: x0 + c.w + cfg.zoneSide, t: c.y0 - (up || cfg.zoneUp), b: c.y1 + cfg.zoneDown };
   };
   P._whistlePos = function () { var Wh = this.layout.whistle; return { x: Wh.x + this.train.x, y: Wh.y, r: Wh.r }; };
   P.whistleHit = function () { var Wh = this._whistlePos(), r = Wh.r + this.cfg.whistlePad; return { x: Wh.x, y: Wh.y, w: 2 * r, h: 2 * r }; };
@@ -369,13 +375,14 @@
     return { x: M.x + this.train.x - hw - p, y: M.y - M.h - p, w: 2 * (hw + p), h: M.h + 2 * p };
   };
   P.momoHit = function () { var b = this._momoBox(); return { x: b.x + b.w / 2, y: b.y + b.h / 2, w: b.w, h: b.h }; };
-  P.hitchHit = function () { var h = this.hitch; if (!h) return null; var r = this.cfg.hitchR; return { x: h.x, y: h.y - 0.45 * h.size, w: 2 * r, h: 2 * r }; };
+  P._onScreenX = function (x, r) { var L = this.layout; return L && this.phase !== 'depart' ? Math.min(x, L.W - L.ins.right - r) : x; };   // tap targets inside the screen
+  P.hitchHit = function () { var h = this.hitch; if (!h) return null; var r = this.cfg.hitchR; return { x: this._onScreenX(h.x, r), y: h.y - 0.45 * h.size, w: 2 * r, h: 2 * r }; };
   P._balloonHead = function () {
     var B = this.balloon; if (!B) return null;
     var L = 0.72 * B.size;
     return { x: B.x + Math.sin(B.sway) * L, y: B.y - Math.cos(B.sway) * L - B.bob, r: this.cfg.balloonR * B.size + this.cfg.hitPad };
   };
-  P.balloonHit = function () { var h = this._balloonHead(); return h ? { x: h.x, y: h.y, w: 2 * h.r, h: 2 * h.r } : null; };
+  P.balloonHit = function () { var h = this._balloonHead(); return h ? { x: this._onScreenX(h.x, h.r), y: h.y, w: 2 * h.r, h: 2 * h.r } : null; };
   /** Id of a right car for this cargo now (count: the first count car with room), null when none. */
   P.answerCarId = function (itemId) {
     var it = typeof itemId === 'object' ? itemId : this.itemById(itemId);
@@ -387,10 +394,10 @@
     return it.answer || null;
   };
   /** Car whose drop zone contains (px, py); overlapping zones → the car whose centre x is nearest. */
-  P.carAt = function (px, py) {
+  P.carAt = function (px, py, up) {
     var best = null, bd = 1e9;
     for (var i = 0; i < this.cars.length; i++) {
-      var c = this.cars[i], z = this._zone(c);
+      var c = this.cars[i], z = this._zone(c, up);
       if (px < z.l || px > z.r || py < z.t || py > z.b) continue;
       var d = Math.abs(px - (z.l + z.r) / 2);
       if (d < bd) { bd = d; best = c; }
@@ -405,8 +412,13 @@
   };
   P._plan = function () {
     var n = this.cars.length || TT.Content.maxCars(this.age), caps = [];
-    for (var i = 0; i < this.cars.length; i++) caps.push(this.cars[i].cap);
-    return { n: n, caps: caps, surprise: this.surprise };
+    var ks = [];
+    for (var i = 0; i < this.cars.length; i++) {
+      caps.push(this.cars[i].cap);
+      var lb = this.cars[i].label;
+      ks.push(lb && lb.type === 'size' && lb.value === 'small' ? this.cfg.smallCarK : 1);
+    }
+    return { n: n, caps: caps, ks: ks, surprise: this.surprise };
   };
   P._relayout = function (force) {
     var v = this._view, pl = this._plan();
@@ -505,10 +517,13 @@
     var rr = new TT.RNG((this.rng.next() * 4294967296) >>> 0);
     var ST = cfg.surpriseTypes, sp = ST && ST.length && this.round === cfg.surpriseRound && this.round > 0 ? ST[(this.level + this._surpriseOff) % ST.length] : null;
     var el = this.time - this.levelStartTime, sb = cfg.shortBudget, short = !!(sb && this.round > 0 && el > (sb[Math.min(this.round, sb.length - 1)]));
-    var cur = TT.Content.makeRound(this.topic, { age: this.age, lang: this.lang, rng: rr, roundIndex: this.round, surprise: sp, prevKey: this._prevKey || null, short: short });
+    var V = this._view || this.layout, portrait = !!(V && V.H > V.W);
+    var cur = TT.Content.makeRound(this.topic, { age: this.age, lang: this.lang, rng: rr, roundIndex: this.round, surprise: sp, prevKey: this._prevKey || null, short: short,
+      maxCars: portrait ? cfg.portMaxCars : 0, warm3: this.level >= 1, prevToy: this._prevToy || null });
     this._prevKey = cur.key;
+    if (cur.mode === 'count' && cur.params && cur.params.cargo) this._prevToy = cur.params.cargo;
     this.cur = cur; this.surprise = sp;
-    this.misses = 0; this.streak = 0;
+    this.misses = 0; this.streak = 0; this._taps = 0;
     this._clearRound();
     var idMap = {};
     this.cars = cur.cars.map(function (c, i) {
@@ -590,7 +605,7 @@
 
   // ---------------------------------------------------------------- input (logical px; ONE active pointer)
   P._touch = function () { this._idleT = 0; this._idleGap = this.cfg.idleTime; };
-  P._grabbable = function (it) { return it.state === 'rest' || it.state === 'home'; };
+  P._grabbable = function (it) { return (it.state === 'rest' || it.state === 'home') && !it._bye; };
   /** → item id | 'whistle' | 'toot' | 'momo' | 'hitch' | 'balloon' | null */
   P.pointerDown = function (x, y) {
     this.finger.x = x; this.finger.y = y;
@@ -621,8 +636,8 @@
     // surprises (immediate)
     var hh = this.hitchHit();
     if (hh && this.hitch.state !== 'in' && boxHit({ x: hh.x - hh.w / 2, y: hh.y - hh.h / 2, w: hh.w, h: hh.h }, x, y) && hyp(x - hh.x, y - hh.y) <= cfg.hitchR) { this._tapHitch(); this.finger.down = false; return 'hitch'; }
-    var bh = this._balloonHead();
-    if (bh && hyp(x - bh.x, y - bh.y) <= bh.r) { this._tapBalloon(); this.finger.down = false; return 'balloon'; }
+    var bh = this.balloonHit();
+    if (bh && hyp(x - bh.x, y - bh.y) <= bh.w / 2) { this._tapBalloon(); this.finger.down = false; return 'balloon'; }
     // the whistle fires on the press (kids hold it); in the whistle phase the whole engine counts
     var Wh = this._whistlePos(), onWhistle = hyp(x - Wh.x, y - Wh.y) <= Wh.r + cfg.whistlePad;
     if (this.phase === 'whistle' && this._whistleT < 0 && (onWhistle || boxHit(this._engineBox(), x, y))) { this._doWhistle(false); this.finger.down = false; return 'whistle'; }
@@ -658,9 +673,20 @@
     if (!it || it.state !== 'drag') return null;
     var d = this._down, cfg = this.cfg, mv = Math.max(d.maxD, hyp(this.finger.x - d.x, this.finger.y - d.y));
     if (mv < this._tapMove() && this.time - d.t < cfg.tapTime) {
-      // a tap is "what is this?", never a drop: hop home quietly, Momo names it (no drop / miss / wrong / hint)
+      // a tap is "what is this?", never a drop: hop home quietly, Momo names it (no drop / miss / wrong)
+      this._taps = (this._taps || 0) + 1;
+      if (this.phase === 'load' && this.age <= cfg.tapAssistMaxAge && this._taps >= cfg.tapAssistAfter) {
+        // a child who only taps: the toy glides into its car by itself (playtest P1-1)
+        var ac = this.carById(this.answerCarId(it));
+        if (ac) {
+          this._emit({ type: 'tap', id: it.id, nameKind: it.nameKind, nameValue: it.nameValue, item: it.item, x: it.x, y: it.y, assist: true });
+          this._taps = 0;
+          return this._drop(it, (ac.x0 + ac.x1) / 2 + ac.ox, ac.floorY - 10);
+        }
+      }
       this._planReturn(it, 'tap');
       this._emit({ type: 'tap', id: it.id, nameKind: it.nameKind, nameValue: it.nameValue, item: it.item, x: it.x, y: it.y });
+      if (this.phase === 'load' && this._taps >= cfg.tapHintAfter) this._autoHint(it, true);   // show how to drag
       return 'tap';
     }
     return this._drop(it, this.finger.x, this.finger.y);
@@ -711,6 +737,7 @@
   P._drop = function (it, fx, fy) {
     // the finger's car wins (a fast flick leaves the cargo lagging over a neighbour); the cargo centre catches 'beside' drops
     var c = this.carAt(fx, fy) || this.carAt(it.x, it.y), mode = this.cur.mode;
+    if (!c && this._down && this._down.maxD >= this.cfg.aimTravel) c = this.carAt(fx, fy, this.cfg.zoneUpFar) || this.carAt(it.x, it.y, this.cfg.zoneUpFar);
     this._emit({ type: 'drop', id: it.id, carId: c ? c.id : null });
     if (!c) {
       it.misses++;
@@ -1284,7 +1311,7 @@
   P._lastCar = function () { return this.cars[this.cars.length - 1] || null; };
   P._hitchSeat = function () {
     var c = this._lastCar(); if (!c) return { x: this.layout.W + 100, y: this.layout.trackY };
-    return { x: c.x1 + c.ox - 0.17 * c.w, y: c.y0 + 6 };
+    return { x: c.x1 + c.ox - 0.3 * c.w, y: c.y0 + 6 };
   };
   P._hitchIn = function () {
     this._hitchDone = true;
@@ -1299,7 +1326,7 @@
     this.balloon = { x: 0, y: 0, _px: 0, _py: 0, size: this.cfg.balloonSize * S, sway: 0, _psway: 0, swayV: 0, bob: 0, bobV: 0, t: 0, popped: false, taps: 0 };
     this._surpriseGeo(true);
   };
-  P._balloonTie = function () { var c = this._lastCar(); return c ? { x: c.x1 + c.ox - 0.08 * c.w, y: c.y0 + 8 } : { x: 0, y: 0 }; };
+  P._balloonTie = function () { var c = this._lastCar(); return c ? { x: c.x1 + c.ox - 0.35 * c.w, y: c.y0 + 8 } : { x: 0, y: 0 }; };   // tied in from the end: stays on screen (QA P1-1)
   P._surpriseGeo = function (snap) {
     var H = this.hitch, B = this.balloon;
     if (B) { var t = this._balloonTie(); B.x = t.x; B.y = t.y; if (snap) { B._px = B.x; B._py = B.y; B._psway = B.sway; } }
@@ -1348,9 +1375,14 @@
       B.t += h;
       var tie = this._balloonTie(); B.x = tie.x; B.y = tie.y;
       // a pendulum: the string leans back against the train's speed (drag) and swings with its acceleration; idle sway
-      var tgt = clamp(-T.v * cfg.balloonDrag, -cfg.balloonMax, cfg.balloonMax) + 0.06 * Math.sin(TAU * 0.35 * B.t), w = cfg.balloonOmega;
+      var tgt = clamp(-T.v * cfg.balloonDrag, -cfg.balloonMax, cfg.balloonMax) - 0.12 + 0.06 * Math.sin(TAU * 0.35 * B.t), w = cfg.balloonOmega;
       B.swayV += (w * w * (tgt - B.sway) - 2 * cfg.balloonZeta * w * B.swayV + T.a * 0.0004) * h;
       B.sway = clamp(B.sway + B.swayV * h, -1.1, 1.1);
+      if (this.phase !== 'depart' && this.layout) {   // parked: the head (and its tap target) never swings past the right edge
+        var Lb = this.layout, room = (Lb.W - Lb.ins.right - 12 - 0.3 * B.size - B.x) / (0.72 * B.size);
+        var smax = room >= 1 ? 1.1 : room <= -1 ? -1.1 : Math.asin(room);
+        if (B.sway > smax) { B.sway = smax; if (B.swayV > 0) B.swayV = -0.3 * B.swayV; }
+      }
       var wb = 7;
       B.bobV += (-wb * wb * B.bob - 2 * 0.3 * wb * B.bobV) * h;
       B.bob += B.bobV * h;

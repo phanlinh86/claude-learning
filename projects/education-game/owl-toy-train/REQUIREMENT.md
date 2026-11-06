@@ -31,7 +31,7 @@ Animal homes: barn (cow, pig, sheep), pond (duck, frog, fish), tree (bird, squir
 
 ## Core loop
 Train arrives → cargo pops onto the rug → child drags cargo into cars (sort mode; count mode = fill the "N" car with N
-teddies, counted aloud) → all loaded → Momo: "All aboard! Pull the whistle!" → child taps the whistle (or after 6 s it
+teddies, counted aloud) → all loaded → Momo: "All aboard! Tap the whistle!" → child taps the whistle (or after 6 s it
 glows; after 12 s Momo toots it herself) → the train departs → stars → next train. 4 rounds per chapter, warm-up first
 (1 cargo per car), then Talk time (one spoken question, picture choices + mic), next chapter.
 

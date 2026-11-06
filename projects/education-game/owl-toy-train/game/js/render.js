@@ -17,8 +17,11 @@
   const FLOOR = { morning: '#D8B88E', noon: '#DBBD96', sunset: '#DCB48A', night: '#5E5A78' };
   const SLICES = { A: [0, 96], B: [96, 104], C: [104, 168], D: [168, 184], E: [184, 260] };
   const MOMO = { w: 300, h: 300, ax: 150, ay: 292, cordX: 214, cordY: 0 };
+  const MOMO_H = 0.8, MOMO_LIFT = 0.16;   // Momo's height and lift in the cab (× engine width)
   const ip = (o, k, a) => { const p = o['_p' + k]; return p == null || o[k] == null ? o[k] : p + (o[k] - p) * a; };
   const TA = () => TT.TrainArt;
+  // the world already sizes 'size' toys (S × item.scale): draw them at 1 so the small ones are not shrunk twice (QA round 1)
+  const sizedItem = it => (it && it.kind === 'size' ? Object.assign({}, it, { scale: 1, size: 'big', value: 'big' }) : (it || {}));
   const imgOf = name => (TT.Assets && TT.Assets.images ? TT.Assets.images[name] || null : null);
 
   function roundRect(g, x, y, w, h, r) {
@@ -221,17 +224,6 @@
       g.lineWidth = 6; g.strokeStyle = night ? '#8C9DB6' : '#F7EEF8'; g.setLineDash([14, 12]);
       g.beginPath(); g.ellipse(cx, cy, rx - 16, ry - 14, 0, 0, TAU); g.stroke(); g.setLineDash([]);
       g.fillStyle = night ? '#7A8CA8' : '#DCC6E2'; g.beginPath(); g.ellipse(cx, cy, rx * 0.5, ry * 0.45, 0, 0, TAU); g.fill();
-      // calm wooden toys resting on the mat (never answer-bright)
-      const toys = [[-0.62, -0.1, '#E7C590', 'cube'], [0.6, 0.05, '#CFE3D8', 'ball'], [0.15, 0.55, '#E9D2B4', 'cone']];
-      for (const [u, v, col, k] of toys) {
-        const x = cx + u * rx, y = cy + v * ry, r = 26;
-        g.fillStyle = 'rgba(80,50,30,0.15)'; g.beginPath(); g.ellipse(x, y + r * 0.9, r * 0.9, 6, 0, 0, TAU); g.fill();
-        g.globalAlpha = night ? 0.6 : 0.9; g.fillStyle = col; g.strokeStyle = '#B99A72'; g.lineWidth = 3; g.beginPath();
-        if (k === 'ball') g.arc(x, y + 2, r * 0.85, 0, TAU);
-        else if (k === 'cone') { g.moveTo(x, y - r); g.lineTo(x + r * 0.85, y + r * 0.85); g.lineTo(x - r * 0.85, y + r * 0.85); g.closePath(); }
-        else roundRect(g, x - r * 0.8, y - r * 0.7, r * 1.6, r * 1.6, 8);
-        g.fill(); g.stroke(); g.globalAlpha = 1;
-      }
       g.restore();
     }
     _track(L) {
@@ -265,8 +257,8 @@
       g.restore();
       // Momo in the cab
       const geo = art && art.engineGeom ? art.engineGeom(E) : { cab: { x0: 0.42 * E, x1: 1.02 * E, floorY: -0.14 * E }, whistle: { x: 0.76 * E, y: -1.295 * E, r: 0.14 * E } };
-      const m = w.momo || {}, mh = 0.88 * E, k = mh / MOMO.h;
-      const mx = ex + (geo.cab.x0 + geo.cab.x1) / 2, my = ty + geo.cab.floorY;
+      const m = w.momo || {}, mh = MOMO_H * E, k = mh / MOMO.h;
+      const mx = ex + (geo.cab.x0 + geo.cab.x1) / 2, my = ty + geo.cab.floorY - MOMO_LIFT * E;   // raised: her face clears the cab wall (visual QA P2-4)
       const nm = this._momoFrame(m.mood, m.blink || this._blinking(this._dt));
       const bob = Math.sin(this.time * 2.2) * 2 + (Math.abs(tr.v || 0) > 40 ? Math.sin(this.time * 18) * 1.5 : 0);
       if (nm === 'momo_whistle') {   // the cord from her wing up to the whistle lever
@@ -289,6 +281,9 @@
         const sq = ip(c, 'sq', a) || 0;
         const carObj = { label: c.label, need: c.need, filled: c.filled != null ? c.filled : (c.items ? c.items.length : 0) };
         const copt = { wheelRot: wheel, glow: Math.max(c.glow || 0, (c.done || 0) * 0.35 * (0.6 + 0.4 * Math.sin(this.time * 5))), img: imgOf, dpr: this.rs, t: this.time };
+        if (night > 0.05) {   // night: a soft moonlit rim behind the car so it reads on the dark room (visual QA P2-9)
+          g.save(); g.fillStyle = `rgba(255,244,214,${0.42 * night})`; g.beginPath(); roundRect(g, cx0 - 6, ty - 26 - ch - 6, cw + 12, ch + 26, 16); g.fill(); g.restore();
+        }
         g.save(); g.translate(cx0, ty); if (sq) g.scale(1, 1 - sq);
         if (art && art.drawCar) { try { art.drawCar(g, carObj, cw, ch, copt, 'back'); } catch (e) { } }
         else { g.fillStyle = '#E7C590'; g.fillRect(0, -26 - ch, cw, ch); }
@@ -312,20 +307,27 @@
       }
     }
     _itemShadow(it, a) {
-      const g = this.g, x = ip(it, 'x', a), y = ip(it, 'y', a), s = ip(it, 'size', a) || 100;
+      const g = this.g, x = ip(it, 'x', a), y = ip(it, 'y', a), s = ip(it, 'size', a);
+      if (!(s > 1)) return;   // not dealt yet (size 0): never draw the next train's toys early (visual QA P1-1)
       const al = (it.alpha == null ? 1 : it.alpha) * 0.2;
       g.fillStyle = `rgba(60,40,20,${al})`; g.beginPath(); g.ellipse(x, y + s * 0.47, s * 0.36, Math.max(4, s * 0.07), 0, 0, TAU); g.fill();
     }
     _item(it, a) {
-      const g = this.g, x = ip(it, 'x', a), y = ip(it, 'y', a), s = ip(it, 'size', a) || 100, rot = ip(it, 'rot', a) || 0;
+      const g = this.g, x = ip(it, 'x', a), y = ip(it, 'y', a), s = ip(it, 'size', a), rot = ip(it, 'rot', a) || 0;
       const al = it.alpha == null ? 1 : it.alpha; if (al <= 0.01 || !(s > 1)) return;
       if (it.state === 'drag') {   // a lifted shadow on the floor under the held toy
         g.fillStyle = 'rgba(60,40,20,0.16)'; g.beginPath(); g.ellipse(x, y + s * 0.62, s * 0.3, s * 0.06, 0, 0, TAU); g.fill();
       }
+      const nt = clamp((this._amb && this._amb.lamp) || 0, 0, 1);
+      if (nt > 0.05) {   // night: a soft light halo so dark colours (purple, blue) still read
+        const rg = g.createRadialGradient(x, y, s * 0.2, x, y, s * 0.62);
+        rg.addColorStop(0, `rgba(255,244,214,${0.55 * nt * al})`); rg.addColorStop(1, 'rgba(255,244,214,0)');
+        g.fillStyle = rg; g.beginPath(); g.arc(x, y, s * 0.62, 0, TAU); g.fill();
+      }
       g.save(); g.globalAlpha *= al; g.translate(x, y); if (rot) g.rotate(rot);
       let ok = false;
       if (TA() && TA().drawCargo) {
-        try { TA().drawCargo(g, it.item || {}, s, { glow: it.glow || 0, dpr: this.rs, img: imgOf, squash: { sx: it.sx || 1, sy: it.sy || 1 }, t: this.time }); ok = true; } catch (e) { ok = false; }
+        try { TA().drawCargo(g, sizedItem(it.item), s, { glow: it.glow || 0, dpr: this.rs, img: imgOf, squash: { sx: it.sx || 1, sy: it.sy || 1 }, t: this.time }); ok = true; } catch (e) { ok = false; }
       }
       if (!ok) { const c = it.item && it.item.color && TT.PALETTE && TT.PALETTE[it.item.color]; g.fillStyle = c ? c.base : '#E7C590'; g.beginPath(); roundRect(g, -s * 0.4, -s * 0.4, s * 0.8, s * 0.8, s * 0.12); g.fill(); }
       g.restore();
@@ -352,6 +354,7 @@
         g.beginPath(); g.moveTo(H.x0, H.y0); g.quadraticCurveTo((H.x0 + H.x1) / 2, Math.min(H.y0, H.y1) - 60, H.x1, H.y1); g.stroke(); g.restore();
       }
       g.save(); g.globalAlpha *= al; g.translate(H.x, H.y);
+      if (H.kind === 'tap') g.rotate(-0.75);   // whistle hint: the hand reaches in from the lower right, off Momo's face
       let ok = false;
       if (TA() && TA().drawGhostHand) { try { TA().drawGhostHand(g, S * 0.8, H.t != null ? H.t : (this.time % 1)); ok = true; } catch (e) { } }
       if (!ok) { g.fillStyle = 'rgba(255,255,255,.85)'; g.beginPath(); g.arc(0, 20, 22, 0, TAU); g.fill(); }
@@ -370,8 +373,8 @@
       const g = this.g, art = TA(); if (!art) return;
       const opt = { wheelRot: 0, whistle: 0, lamp: clamp(amb.lamp || 0, 0, 1), glow: 0, night: clamp(amb.lamp || 0, 0, 1), dpr: this.rs, t };
       g.save(); g.translate(x0, trackY); try { art.drawEngine(g, E, opt, 'back'); } catch (e) { } g.restore();
-      const geo = art.engineGeom(E), mh = 0.88 * E, k = mh / MOMO.h;
-      const mx = x0 + (geo.cab.x0 + geo.cab.x1) / 2, my = trackY + geo.cab.floorY + Math.sin(t * 2.2) * 2;
+      const geo = art.engineGeom(E), mh = MOMO_H * E, k = mh / MOMO.h;
+      const mx = x0 + (geo.cab.x0 + geo.cab.x1) / 2, my = trackY + geo.cab.floorY - MOMO_LIFT * E + Math.sin(t * 2.2) * 2;
       const nm = TT.Assets.has('momo_' + mood) ? 'momo_' + mood : 'momo_idle';
       this._img(nm, mx - MOMO.ax * k, my - MOMO.ay * k, MOMO.w * k, MOMO.h * k);
       g.save(); g.translate(x0, trackY); try { art.drawEngine(g, E, opt, 'front'); } catch (e) { } g.restore();
@@ -405,7 +408,7 @@
         { w: cw, label: { type: 'color', value: 'blue', color: 'blue' }, load: [blk('blue', 'cylinder'), blk('blue', 'ball')] }];
       // landscape: the train waits LEFT of the centred Play button / star line (never under them)
       const room = W / 2 - 200 - (ins.left || 0) - 24;
-      const n = portrait ? 2 : clamp(Math.floor((room - E) / (cw + 16)), 0, 3);
+      const n = portrait ? 2 : clamp(Math.floor((room - E) / (cw + 16)), 1, 3);   // at least one car (iPad landscape, visual QA P2-8)
       const total = E + n * (cw + 16);
       const x0 = portrait ? (W - total) / 2 + 10 : (ins.left || 0) + 24 + Math.max(0, (room - total) / 2);
       this._showTrain(x0, ty, E, cars.slice(0, n), 'wave', this.time, amb);
@@ -419,10 +422,12 @@
       const cars = [{ w: cw, label: { type: 'color', value: 'red', color: 'red' }, load: [sp('cargo_teddy'), sp('cargo_duckie')] },
         { w: cw, label: { type: 'home', value: 'barn' }, load: [sp('animal_cow'), sp('animal_pig')] },
         { w: cw, label: { type: 'shape', value: 'star', color: 'yellow' }, load: [{ kind: 'shape', shape: 'star', color: 'yellow', scale: 1 }, sp('cargo_boat')] },
-        { w: cw, label: { type: 'number', value: 3 }, load: [sp('cargo_ball'), sp('cargo_rocket')] }];
-      const n = portrait ? 3 : Math.max(2, Math.min(4, Math.floor((W - E - 80) / (cw + 16))));
+        { w: cw, label: { type: 'number', value: 3, showDots: true }, load: [sp('cargo_ball'), sp('cargo_rocket'), sp('cargo_drum')] }];
+      // landscape: the done panel takes the right ~42 %: the train parks in the free left part (visual QA P2-6)
+      const free = portrait ? W : W * 0.57 - (ins.left || 0);
+      const n = portrait ? 3 : Math.max(2, Math.min(4, Math.floor((free - E - 40) / (cw + 16))));
       const total = E + n * (cw + 16);
-      const x0 = (W - total) / 2;
+      const x0 = portrait ? (W - total) / 2 : (ins.left || 0) + Math.max(16, (free - total) / 2);
       this._showTrain(x0, ty, E, cars.slice(0, n), Math.sin(t * 3) > 0 ? 'cheer' : 'happy', t, amb);
       this._noteT = (this._noteT || 0) - (o.dt || 0);
       if (this._noteT <= 0) { this._noteT = 0.5; this.burst('sparkles', W * (0.1 + Math.random() * 0.8), H * (0.15 + Math.random() * 0.35), { n: 8 }); }
