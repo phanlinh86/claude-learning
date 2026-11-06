@@ -1,0 +1,7 @@
+{
+ "suite": "size",
+ "nSeeds": 30,
+ "maxTime": 600,
+ "overrides": null,
+ "results": {}
+}

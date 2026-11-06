@@ -1,0 +1,278 @@
+//go:build windows
+
+// Nimbus's Bubble Garden — native Windows wrapper.
+//
+// The game itself is an HTML5 canvas game (../game). It is embedded into this
+// executable and shown in a native window through Microsoft Edge WebView2,
+// which ships with Windows 11. Player data (custom pictures, best score,
+// settings) is stored as small files in %APPDATA%\NimbusBubbleGarden\data.
+package main
+
+import (
+	"embed"
+	"io/fs"
+	"net"
+	"net/http"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"regexp"
+	"strings"
+	"sync"
+	"syscall"
+	"unsafe"
+
+	webview2 "github.com/jchv/go-webview2"
+)
+
+//go:embed all:web
+var webFS embed.FS
+
+var (
+	user32               = syscall.NewLazyDLL("user32.dll")
+	procMessageBoxW      = user32.NewProc("MessageBoxW")
+	procGetWindowLongPtr = user32.NewProc("GetWindowLongPtrW")
+	procSetWindowLongPtr = user32.NewProc("SetWindowLongPtrW")
+	procSetWindowPos     = user32.NewProc("SetWindowPos")
+	procMonitorFromWnd   = user32.NewProc("MonitorFromWindow")
+	procGetMonitorInfo   = user32.NewProc("GetMonitorInfoW")
+	procGetWindowPlace   = user32.NewProc("GetWindowPlacement")
+	procSetWindowPlace   = user32.NewProc("SetWindowPlacement")
+	procFindWindowW      = user32.NewProc("FindWindowW")
+	procSetForeground    = user32.NewProc("SetForegroundWindow")
+	kernel32             = syscall.NewLazyDLL("kernel32.dll")
+	procCreateMutexW     = kernel32.NewProc("CreateMutexW")
+	procShowWindow       = user32.NewProc("ShowWindow")
+)
+
+const (
+	gwlStyle          = -16
+	wsOverlappedWnd   = 0x00CF0000
+	wsPopup           = 0x80000000
+	wsVisible         = 0x10000000
+	swpNoSize         = 0x0001
+	swpNoMove         = 0x0002
+	swpNoZOrder       = 0x0004
+	swpFrameChanged   = 0x0020
+	swpNoOwnerZOrder  = 0x0200
+	monitorDefNearest = 2
+	swMaximize        = 3
+	swRestore         = 9
+	errAlreadyExists  = 183
+)
+
+type rect struct{ Left, Top, Right, Bottom int32 }
+type point struct{ X, Y int32 }
+
+// WINDOWPLACEMENT: remembers the normal rect AND the maximized state, so leaving full screen
+// restores a maximized window correctly (GetWindowRect on a maximized window did not).
+type windowPlacement struct {
+	Length           uint32
+	Flags            uint32
+	ShowCmd          uint32
+	PtMinPosition    point
+	PtMaxPosition    point
+	RcNormalPosition rect
+}
+type monitorInfo struct {
+	CbSize    uint32
+	RcMonitor rect
+	RcWork    rect
+	DwFlags   uint32
+}
+
+func messageBox(title, text string) {
+	t, _ := syscall.UTF16PtrFromString(title)
+	m, _ := syscall.UTF16PtrFromString(text)
+	procMessageBoxW.Call(0, uintptr(unsafe.Pointer(m)), uintptr(unsafe.Pointer(t)), 0x40)
+}
+
+// ---------- tiny key/value store on disk ----------
+var keyRe = regexp.MustCompile(`^[a-zA-Z0-9_\-]{1,64}$`)
+
+type store struct {
+	dir string
+	mu  sync.Mutex
+}
+
+func (s *store) path(k string) string { return filepath.Join(s.dir, k+".txt") }
+
+func (s *store) Set(k, v string) bool {
+	if !keyRe.MatchString(k) || len(v) > 12<<20 {
+		return false
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	tmp := s.path(k) + ".tmp"
+	if err := os.WriteFile(tmp, []byte(v), 0o644); err != nil {
+		return false
+	}
+	return os.Rename(tmp, s.path(k)) == nil
+}
+
+func (s *store) Del(k string) bool {
+	if !keyRe.MatchString(k) {
+		return false
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	err := os.Remove(s.path(k))
+	return err == nil || os.IsNotExist(err)
+}
+
+func (s *store) All() map[string]string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	out := map[string]string{}
+	entries, _ := os.ReadDir(s.dir)
+	for _, e := range entries {
+		n := e.Name()
+		if e.IsDir() || filepath.Ext(n) != ".txt" {
+			continue
+		}
+		k := n[:len(n)-4]
+		if !keyRe.MatchString(k) {
+			continue
+		}
+		if b, err := os.ReadFile(filepath.Join(s.dir, n)); err == nil {
+			out[k] = string(b)
+		}
+	}
+	return out
+}
+
+// ---------- full screen toggle (borderless, covers the monitor) ----------
+type fullscreen struct {
+	on        bool
+	prevStyle uintptr
+	prevPlace windowPlacement
+}
+
+func (f *fullscreen) set(hwnd uintptr, on bool) {
+	if on == f.on || hwnd == 0 {
+		return
+	}
+	if on {
+		s, _, _ := procGetWindowLongPtr.Call(hwnd, toIdx(gwlStyle))
+		f.prevStyle = s
+		f.prevPlace = windowPlacement{Length: uint32(unsafe.Sizeof(windowPlacement{}))}
+		procGetWindowPlace.Call(hwnd, uintptr(unsafe.Pointer(&f.prevPlace)))
+		mon, _, _ := procMonitorFromWnd.Call(hwnd, monitorDefNearest)
+		mi := monitorInfo{CbSize: uint32(unsafe.Sizeof(monitorInfo{}))}
+		procGetMonitorInfo.Call(mon, uintptr(unsafe.Pointer(&mi)))
+		procSetWindowLongPtr.Call(hwnd, toIdx(gwlStyle), (s&^wsOverlappedWnd)|wsPopup|wsVisible)
+		r := mi.RcMonitor
+		procSetWindowPos.Call(hwnd, 0, uintptr(r.Left), uintptr(r.Top), uintptr(r.Right-r.Left), uintptr(r.Bottom-r.Top),
+			swpNoZOrder|swpNoOwnerZOrder|swpFrameChanged)
+	} else {
+		procSetWindowLongPtr.Call(hwnd, toIdx(gwlStyle), f.prevStyle)
+		procSetWindowPos.Call(hwnd, 0, 0, 0, 0, 0, swpNoZOrder|swpNoOwnerZOrder|swpFrameChanged|swpNoMove|swpNoSize)
+		procSetWindowPlace.Call(hwnd, uintptr(unsafe.Pointer(&f.prevPlace)))
+	}
+	f.on = on
+}
+
+func toIdx(i int) uintptr { return uintptr(int64(i)) }
+
+// singleInstance returns false if the game is already running; it then brings that window to the front.
+// (Two copies would share one save folder and race each other's writes.)
+func singleInstance() bool {
+	name, _ := syscall.UTF16PtrFromString("Local\\NimbusBubbleGarden.SingleInstance")
+	h, _, err := procCreateMutexW.Call(0, 0, uintptr(unsafe.Pointer(name)))
+	if h != 0 && err == syscall.Errno(errAlreadyExists) {
+		title, _ := syscall.UTF16PtrFromString("Nimbus's Bubble Garden")
+		if hwnd, _, _ := procFindWindowW.Call(0, uintptr(unsafe.Pointer(title))); hwnd != 0 {
+			procShowWindow.Call(hwnd, swRestore)
+			procSetForeground.Call(hwnd)
+		}
+		return false
+	}
+	return true // the mutex handle is kept open for the life of the process
+}
+
+func main() {
+	if !singleInstance() {
+		return
+	}
+	appData := os.Getenv("APPDATA")
+	if appData == "" {
+		appData = os.TempDir()
+	}
+	base := filepath.Join(appData, "NimbusBubbleGarden")
+	st := &store{dir: filepath.Join(base, "data")}
+	_ = os.MkdirAll(st.dir, 0o755)
+
+	// Serve the embedded game on a private loopback port.
+	sub, err := fs.Sub(webFS, "web")
+	if err != nil {
+		messageBox("Nimbus's Bubble Garden", "Game files are missing: "+err.Error())
+		return
+	}
+	// A fixed port keeps the page origin stable between runs (matters for the browser fallback);
+	// fall back to any free port if it is taken.
+	// Try a few fixed ports first so the browser fallback keeps the same origin (and its saved data).
+	var ln net.Listener
+	for _, p := range []string{"47623", "47633", "47643", "47653"} {
+		if ln, err = net.Listen("tcp", "127.0.0.1:"+p); err == nil {
+			break
+		}
+	}
+	if err != nil {
+		ln, err = net.Listen("tcp", "127.0.0.1:0")
+	}
+	if err != nil {
+		messageBox("Nimbus's Bubble Garden", "Could not start: "+err.Error())
+		return
+	}
+	mux := http.NewServeMux()
+	fileServer := http.FileServer(http.FS(sub))
+	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store")
+		fileServer.ServeHTTP(w, r)
+	}))
+	go http.Serve(ln, mux)
+	url := "http://" + ln.Addr().String() + "/index.html?app=1"
+
+	localAppData := os.Getenv("LOCALAPPDATA")
+	if localAppData == "" {
+		localAppData = base
+	}
+	w := webview2.NewWithOptions(webview2.WebViewOptions{
+		Debug:     false,
+		AutoFocus: true,
+		DataPath:  filepath.Join(localAppData, "NimbusBubbleGarden", "WebView2"),
+		WindowOptions: webview2.WindowOptions{
+			Title:  "Nimbus's Bubble Garden",
+			Width:  1280,
+			Height: 760,
+			IconId: 2, // rsrc: 1 = manifest, 2 = icon group (see tools/build.sh)
+			Center: true,
+		},
+	})
+	if w == nil {
+		// WebView2 runtime missing (very rare on Windows 11): fall back to the default browser.
+		exec.Command("rundll32", "url.dll,FileProtocolHandler", strings.TrimSuffix(url, "?app=1")).Start()
+		messageBox("Nimbus's Bubble Garden", "Nimbus's Bubble Garden opened in your web browser.\n\nKeep this message open while you play; press OK to quit.\n\n(To play in its own window, install the free Microsoft Edge WebView2 Runtime.)")
+		return
+	}
+	defer w.Destroy()
+
+	hwnd := uintptr(w.Window())
+	// Start maximized: the logical 1280×760 size looks small on high-DPI laptop screens.
+	procShowWindow.Call(hwnd, swMaximize)
+	fsc := &fullscreen{}
+
+	w.Bind("ffStoreAll", func() map[string]string { return st.All() })
+	w.Bind("ffStoreSet", func(k, v string) bool { return st.Set(k, v) })
+	w.Bind("ffStoreDel", func(k string) bool { return st.Del(k) })
+	w.Bind("ffFullscreen", func(on bool) bool {
+		w.Dispatch(func() { fsc.set(hwnd, on) })
+		return on
+	})
+	w.Bind("ffQuit", func() {
+		w.Dispatch(func() { w.Terminate() })
+	})
+
+	w.Navigate(url)
+	w.Run()
+}
