@@ -1,0 +1,30 @@
+{
+  "dawn": {
+    "skyTop": "#c9b4e6",
+    "skyBottom": "#ffd3c4",
+    "lawn": "#87a37f",
+    "lawnDark": "#6f8b6c",
+    "haze": "#e9cbdc"
+  },
+  "noon": {
+    "skyTop": "#8fc9ef",
+    "skyBottom": "#dff1f7",
+    "lawn": "#7eac6c",
+    "lawnDark": "#669359",
+    "haze": "#cfe8f1"
+  },
+  "sunset": {
+    "skyTop": "#7a5aa8",
+    "skyBottom": "#ffb07a",
+    "lawn": "#7e8853",
+    "lawnDark": "#656d44",
+    "haze": "#eba08a"
+  },
+  "night": {
+    "skyTop": "#141c46",
+    "skyBottom": "#34407a",
+    "lawn": "#2a4558",
+    "lawnDark": "#213847",
+    "haze": "#3b4884"
+  }
+}
