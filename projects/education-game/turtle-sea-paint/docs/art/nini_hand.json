@@ -1,0 +1,80 @@
+{
+ "_about": "Nini right (near) front flipper grip point per frame, in the 0 0 300 300 viewBox (feet anchor 150,292). angle = suggested brush direction in degrees, canvas convention (0 = pointing right, -90 = up), from the grip towards the bristle tip. The handle may stick out ~16 px behind the grip; bristle tip ~60 px ahead at in-SVG scale.",
+ "idle": {
+  "hand": [
+   223,
+   246
+  ],
+  "angle": -62
+ },
+ "blink": {
+  "hand": [
+   223,
+   246
+  ],
+  "angle": -62
+ },
+ "talk": {
+  "hand": [
+   234,
+   240
+  ],
+  "angle": -58
+ },
+ "happy": {
+  "hand": [
+   245,
+   229
+  ],
+  "angle": -50
+ },
+ "cheer": {
+  "hand": [
+   234,
+   149
+  ],
+  "angle": -70
+ },
+ "think": {
+  "hand": [
+   200,
+   175
+  ],
+  "angle": -15
+ },
+ "oops": {
+  "hand": [
+   250,
+   208
+  ],
+  "angle": -55
+ },
+ "wave": {
+  "hand": [
+   222,
+   141
+  ],
+  "angle": -40
+ },
+ "paint": {
+  "hand": [
+   254,
+   182
+  ],
+  "angle": -18
+ },
+ "point": {
+  "hand": [
+   244,
+   157
+  ],
+  "angle": -40
+ },
+ "full_wave": {
+  "hand": [
+   222,
+   141
+  ],
+  "angle": -40
+ }
+}

@@ -1,0 +1,1447 @@
+PROMPT CUT 3en after 0.8/2.3 s: Look! Tap the shining arms!
+PROMPT CUT 3en after 1.9/2.2 s: Look! Tap the shining fin!
+PROMPT CUT 3en after 1.5/2.3 s: Look! Tap the shining roof!
+PROMPT CUT 3en after 0.9/2.1 s: Now tap the shining bell!
+PROMPT CUT 3en after 2.7/3.1 s: Which octopus is big? Paint it purple!
+PROMPT CUT 3en after 2.7/3.2 s: Which jellyfish is small? Paint it blue!
+--- session 3 en (5.3 min)
+   0.1   2.2/2.2 Chapter 1. Colour Painting
+   2.4   2.3/2.3 Spring petals on the water!
+   4.7   2.2/2.2 Can you make the arms red?
+   9.2   1.4/1.4 Yummy red paint!
+  10.6 X 0.8/2.3 Look! Tap the shining arms!
+  11.6   1.4/1.4 Lovely red arms!
+  13.0   2.0/2.0 Nini finishes the rest!
+  15.0   1.9/1.9 Bye-bye! Bobbing away!
+  16.9   2.3/2.3 Hooray! The picture is done!
+  19.3   2.3/2.3 Let’s paint the body orange!
+  21.7 X 1.2/2.5 A clam is sleeping on the sand!
+  22.9   0.8/0.8 Orange!
+  23.8 X 1.3/2.3 Look! Tap the shining body!
+  25.1   1.7/1.7 Lovely orange body!
+  26.8   3.5/3.5 Paint the fin purple! Find the purple paint!
+  31.4   0.8/0.8 Purple!
+  32.2 X 1.9/2.2 Look! Tap the shining fin!
+  34.1   1.6/1.6 Lovely purple fin!
+  35.8   2.8/2.8 Swish, swish! Nini paints the rest!
+  38.7   1.9/1.9 Bye-bye! Off it swims!
+  40.6   2.3/2.3 Hooray! The picture is done!
+  42.9   2.4/2.4 Can you make the rock orange?
+  45.4   1.2/1.2 Orange paint!
+  46.6 X 0.3/2.3 Now paint the sparkly rock!
+  47.0   1.7/1.7 Lovely orange rock!
+  48.7   3.1/3.1 Paint the roof red! Find the red paint!
+  53.6   1.0/1.0 Red paint!
+  54.7 X 1.5/2.3 Look! Tap the shining roof!
+  56.3   1.7/1.7 Red roof, beautiful!
+  58.0   2.2/2.2 Let me finish the picture!
+  60.2   1.9/1.9 Bye-bye! Bobbing away!
+  62.2   1.6/1.6 You are so clever!
+  63.8   2.7/2.7 Let’s paint the tentacles yellow!
+  68.0 X 1.6/2.9 Hmm, that’s purple. Where is yellow?
+  69.8   1.2/1.2 Yellow paint!
+  71.0 X 1.2/2.5 Now tap the shining tentacles!
+  72.3   2.4/2.4 Look at the yellow tentacles!
+  74.7   2.3/2.3 Let’s paint the bell purple!
+  79.0   1.2/1.2 Purple paint!
+  80.2 X 0.9/2.1 Now tap the shining bell!
+  81.2   2.0/2.0 Purple bell, beautiful!
+  83.1   2.0/2.0 Nini finishes the rest!
+  85.1   1.8/1.8 Up, up, up it floats!
+  87.0   0.7/0.7 Super!
+  87.7   2.5/2.5 Talk time! Which one is purple?
+  91.0   2.0/2.0 It is purple! Good try!
+  94.3   2.1/2.1 Chapter 2. Shape Painting
+  96.5   1.5/1.5 Sunny summer sea!
+  98.0   2.8/2.8 Find the circle and make it yellow!
+ 103.8   1.9/1.9 The circle! Beautiful!
+ 105.7   2.8/2.8 Swish, swish! Nini paints the rest!
+ 108.6   1.7/1.7 Look, it bobs away!
+ 110.2   2.3/2.3 Hooray! The picture is done!
+ 112.6 X 1.5/2.0 Paint the circle yellow!
+ 114.3   2.0/2.0 A yellow circle! Lovely!
+ 116.3   2.8/2.8 Where is the square? Paint it red!
+ 121.0   1.8/1.8 A red square! Lovely!
+ 122.9   2.8/2.8 Swish, swish! Nini paints the rest!
+ 125.8   1.7/1.7 Bye-bye! Sail away!
+ 127.5   1.4/1.4 What a picture!
+ 128.9   2.0/2.0 Paint the heart purple!
+ 131.4   1.7/1.7 You found the heart!
+ 133.2   2.8/2.8 Find the circle and make it orange!
+ 137.3   2.1/2.1 An orange circle! Lovely!
+ 139.5   2.0/2.0 Nini finishes the rest!
+ 141.5   1.7/1.7 Look, it bobs away!
+ 143.2   1.3/1.3 Super painter!
+ 144.5   3.0/3.0 Where is the square? Paint it orange!
+ 147.5 X 2.4/3.1 That’s the star! Let’s find the square!
+ 150.1   1.9/1.9 The square! Beautiful!
+ 152.0   2.7/2.7 Find the star and make it purple!
+ 156.1   1.7/1.7 You found the star!
+ 157.7   2.8/2.8 Swish, swish! Nini paints the rest!
+ 160.6   1.8/1.8 Bob, bob! Up it goes!
+ 162.5   1.1/1.1 You got it!
+ 163.6   2.5/2.5 Talk time! Where is the square?
+ 166.3   1.5/1.5 Wow, you know it!
+ 169.8   2.0/2.0 Chapter 3. Big and Small
+ 171.8   2.6/2.6 Autumn leaves are drifting down!
+ 174.5   3.1/3.1 Find the small crab and paint it blue!
+ 178.2   2.3/2.3 You painted the small crab!
+ 180.4   2.8/2.8 Swish, swish! Nini paints the rest!
+ 183.3   1.8/1.8 Swish! It swims away!
+ 185.2   3.4/3.4 Find the small octopus and paint it yellow!
+ 188.6 X 0.6/2.5 A clam is sleeping on the sand!
+ 189.3   2.3/2.3 What a yellow small octopus!
+ 191.7 X 2.7/3.1 Which octopus is big? Paint it purple!
+ 194.6   2.0/2.0 The big octopus! Hooray!
+ 196.6   2.0/2.0 Nini finishes the rest!
+ 198.6   1.7/1.7 Look, it’s swimming!
+ 200.4   1.6/1.6 You are so clever!
+ 202.0 X 3.1/3.4 Find the big jellyfish and paint it yellow!
+ 205.2   2.3/2.3 What a yellow big jellyfish!
+ 207.5 X 2.7/3.2 Which jellyfish is small? Paint it blue!
+ 210.3   2.6/2.6 You painted the small jellyfish!
+ 213.0   2.8/2.8 Swish, swish! Nini paints the rest!
+ 215.9   1.8/1.8 Swish! It swims away!
+ 217.7   2.3/2.3 Hooray! The picture is done!
+ 220.1 X 1.0/2.0 Paint the big crab red!
+ 221.2   1.8/1.8 The big crab! Hooray!
+ 223.0   2.3/2.3 Paint the small crab yellow!
+ 226.8   2.0/2.0 The small crab! Hooray!
+ 228.7   2.2/2.2 Let me finish the picture!
+ 231.0   1.8/1.8 Swish! It swims away!
+ 232.8   1.6/1.6 You are so clever!
+ 234.4   2.5/2.5 Talk time! Which fish is small?
+ 237.4   1.4/1.4 Correct! Hooray!
+ 240.8   1.9/1.9 Chapter 4. Sea Animals
+ 242.8   2.0/2.0 Brr, winter! Ice on top!
+ 244.8   2.8/2.8 Can you paint the starfish orange?
+ 249.8   2.0/2.0 What an orange starfish!
+ 251.8   2.0/2.0 Nini finishes the rest!
+ 253.8   1.8/1.8 Swish! It swims away!
+ 255.7   1.4/1.4 What a picture!
+ 257.1   2.0/2.0 Paint the whale orange!
+ 259.9 X 2.3/3.4 That’s the starfish! Let’s find the whale!
+ 262.4   1.8/1.8 What an orange whale!
+ 264.2   2.8/2.8 Can you paint the starfish purple?
+ 268.1   2.1/2.1 You painted the starfish!
+ 270.2   2.8/2.8 Swish, swish! Nini paints the rest!
+ 273.1   1.8/1.8 Swish! It swims away!
+ 274.9   0.5/0.5 Yes!
+ 275.5   2.0/2.0 Paint the octopus green!
+ 278.8   1.8/1.8 What a green octopus!
+ 280.6   2.8/2.8 Can you paint the starfish purple?
+ 284.6   2.0/2.0 What a purple starfish!
+ 286.6   2.0/2.0 Nini finishes the rest!
+ 288.6   1.9/1.9 Bye-bye! Off it swims!
+ 290.6   1.6/1.6 You are so clever!
+ 292.2   2.8/2.8 Can you paint the seahorse yellow?
+ 295.1   1.8/1.8 The seahorse! Hooray!
+ 297.0   2.1/2.1 Paint the octopus purple!
+ 301.9   2.0/2.0 You painted the octopus!
+ 303.9   2.0/2.0 Nini finishes the rest!
+ 305.9   1.7/1.7 Look, it’s swimming!
+ 307.7   2.3/2.3 Hooray! The picture is done!
+ 310.0   2.7/2.7 Talk time! Where is the starfish?
+ 313.9   2.4/2.4 It is the starfish! Good try!
+ 317.4   2.1/2.1 Look at all our pictures!
+ 319.5   3.3/3.3 What a sea of pictures! 47 stars! Hooray!
+PROMPT CUT 3vi after 0.5/2.5 s: Bé tô mấy cái đốm lấp lánh nào!
+PROMPT CUT 3vi after 0.3/2.9 s: Bé chạm vào phần thân đang sáng nhé!
+PROMPT CUT 3vi after 1.0/2.8 s: Bé chạm vào cái mai đang sáng nhé!
+PROMPT CUT 3vi after 1.0/2.8 s: Bé tô mấy cái xúc tu lấp lánh nào!
+--- session 3 vi (5.4 min)
+   0.1   1.7/1.7 Chương 1. Tô màu sắc
+   1.9   3.1/3.1 Mùa xuân, cánh hoa trôi trên mặt nước!
+   5.0   4.5/4.5 Mình tô mấy cái đốm màu tím nào! Bé tìm vỏ sò màu tím nhé!
+   9.6   1.4/1.4 Lấy màu tím nào!
+  11.1 X 0.5/2.5 Bé tô mấy cái đốm lấp lánh nào!
+  11.7   2.5/2.5 Mấy cái đốm có màu tím rồi nè!
+  14.2   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+  17.0   1.9/1.9 Bập bềnh! Lên cao nào!
+  19.0   1.6/1.6 Bức tranh đẹp quá!
+  20.6   3.0/3.0 Bé ơi, tô cái vây màu xanh dương nhé!
+  23.6 X 1.0/2.0 Lấy màu xanh dương nào!
+  24.8   2.6/2.6 Cái vây màu xanh dương, đẹp quá!
+  27.4   3.2/3.2 Bé ơi, phần thân muốn được tô màu đỏ đó!
+  30.7   0.8/0.8 Màu đỏ!
+  31.5 X 0.3/2.9 Bé chạm vào phần thân đang sáng nhé!
+  31.9   2.2/2.2 Phần thân màu đỏ, đẹp quá!
+  34.1   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+  36.6   2.1/2.1 Nhìn kìa, nó bay lên rồi!
+  38.7   3.5/3.5 Bé ơi, đôi càng muốn được tô màu xanh lá đó!
+  42.3 X 1.2/2.5 Có bạn sò đang ngủ trên cát nè!
+  43.5   1.4/1.4 Màu xanh lá nè!
+  45.0 X 0.6/2.8 Bé chạm vào đôi càng đang sáng nhé!
+  45.6   2.5/2.5 Đôi càng có màu xanh lá rồi nè!
+  48.2   4.3/4.3 Mình tô cái mai màu tím nào! Bé tìm vỏ sò màu tím nhé!
+  52.5   1.1/1.1 Màu tím nè!
+  53.6 X 1.0/2.8 Bé chạm vào cái mai đang sáng nhé!
+  54.8   2.2/2.2 Cái mai có màu tím rồi nè!
+  57.0   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+  59.5   2.4/2.4 Nhìn kìa, nó bò ngang đi rồi!
+  61.9   1.6/1.6 Bé thông minh quá!
+  63.5 X 4.0/4.5 Mình tô mấy cái đốm màu tím nào! Bé tìm vỏ sò màu tím nhé!
+  67.7   2.4/2.4 Mấy cái đốm màu tím, đẹp quá!
+  70.1   3.7/3.7 Bé ơi, mấy cái xúc tu muốn được tô màu vàng đó!
+  74.3   1.5/1.5 Lấy màu vàng nào!
+  75.8 X 1.0/2.8 Bé tô mấy cái xúc tu lấp lánh nào!
+  76.8   2.7/2.7 Mấy cái xúc tu màu vàng, đẹp quá!
+  79.6   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+  81.9   2.4/2.4 Nhìn kìa, nó dập dềnh đi rồi!
+  84.4   2.0/2.0 Bé là họa sĩ siêu giỏi!
+  86.4 X 1.4/3.4 Giờ trò chuyện! Cái nào màu xanh dương nhỉ?
+  87.8   1.7/1.7 Chính xác! Hoan hô!
+  91.3   1.9/1.9 Chương 2. Tô hình khối
+  93.2   2.2/2.2 Mùa hè, biển nắng đẹp quá!
+  95.4   3.4/3.4 Bé ơi, tô hình trái tim màu xanh dương nhé!
+ 100.3 X 2.3/3.7 Đây là hình ngôi sao. Hình trái tim ở đâu nhỉ?
+ 102.8   3.1/3.1 Hình trái tim màu xanh dương xinh quá!
+ 105.9   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+ 108.2   1.9/1.9 Bập bềnh! Lên cao nào!
+ 110.1   0.8/0.8 Hoan hô!
+ 111.0 X 2.8/3.4 Hình ngôi sao ở đâu nhỉ? Bé tô màu đỏ nào!
+ 114.0   2.0/2.0 Hình ngôi sao! Đẹp quá!
+ 115.9   2.9/2.9 Bé ơi, tô hình tam giác màu cam nhé!
+ 119.2   2.5/2.5 Bé chạm vào chỗ đang sáng nhé!
+ 121.7 X 2.0/2.3 Nhìn kìa, cái này sáng lên!
+ 123.8   2.5/2.5 Hình tam giác màu cam xinh quá!
+ 126.3   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+ 129.2   2.4/2.4 Nhìn kìa, nó dập dềnh đi rồi!
+ 131.7   1.6/1.6 Bức tranh đẹp quá!
+ 133.3 X 1.0/3.1 Bé ơi, tô hình tròn màu xanh dương nhé!
+ 134.3   1.7/1.7 Hình tròn! Đẹp quá!
+ 136.0   3.4/3.4 Hình tam giác ở đâu nhỉ? Bé tô màu đỏ nào!
+ 141.1   2.3/2.3 Bé tìm ra hình tam giác rồi!
+ 143.4   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+ 146.3   1.8/1.8 Vù vù! Thuyền đi rồi!
+ 148.1   1.6/1.6 Bé thông minh quá!
+ 149.8 X 1.7/2.7 Bé ơi, tô hình vuông màu tím nhé!
+ 151.6   1.7/1.7 Hình vuông! Đẹp quá!
+ 153.3   3.2/3.2 Hình tròn ở đâu nhỉ? Bé tô màu vàng nào!
+ 157.4   2.0/2.0 Bé tìm ra hình tròn rồi!
+ 159.5   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+ 162.4   1.8/1.8 Tạm biệt! Bơi đi nào!
+ 164.2   1.6/1.6 Bé thông minh quá!
+ 165.9 X 1.2/3.0 Giờ trò chuyện! Hình vuông ở đâu nhỉ?
+ 167.2   1.6/1.6 Bé thông minh quá!
+ 170.6   1.7/1.7 Chương 3. To và nhỏ
+ 172.2   2.6/2.6 Mùa thu, lá vàng rơi xuống biển!
+ 174.9   3.0/3.0 Bé tìm con sứa to rồi tô màu cam nhé!
+ 179.9   1.7/1.7 Con sứa to! Hoan hô!
+ 181.7   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+ 184.2   1.4/1.4 Vút! Bơi đi rồi!
+ 185.7   2.0/2.0 Hoan hô, tranh xong rồi!
+ 187.8   3.4/3.4 Con sứa nào to nhỉ? Bé tô màu xanh lá nào!
+ 191.6   1.7/1.7 Con sứa to! Hoan hô!
+ 193.3   3.3/3.3 Bé ơi, tô con sứa nhỏ màu xanh dương nhé!
+ 198.1   1.8/1.8 Con sứa nhỏ! Hoan hô!
+ 199.9   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+ 202.4   1.8/1.8 Tạm biệt! Bơi đi nào!
+ 204.3   1.6/1.6 Bé thông minh quá!
+ 205.9 X 3.1/3.5 Con bạch tuộc nào to nhỉ? Bé tô màu tím nào!
+ 209.1   2.7/2.7 Con bạch tuộc to màu tím đẹp quá!
+ 211.8 X 3.2/3.5 Con bạch tuộc nào nhỏ nhỉ? Bé tô màu đỏ nào!
+ 215.1   2.7/2.7 Con bạch tuộc nhỏ màu đỏ đẹp quá!
+ 217.8   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+ 220.3   1.8/1.8 Tạm biệt! Bơi đi nào!
+ 222.1   2.0/2.0 Hoan hô, tranh xong rồi!
+ 224.2 X 2.5/3.0 Bé ơi, tô con cá voi nhỏ màu cam nhé!
+ 226.8   2.0/2.0 Con cá voi nhỏ! Hoan hô!
+ 228.8   3.1/3.1 Bé tìm con cá voi to rồi tô màu đỏ nhé!
+ 232.6   2.0/2.0 Con cá voi to! Hoan hô!
+ 234.5   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+ 236.9   1.8/1.8 Tạm biệt! Bơi đi nào!
+ 238.8   2.0/2.0 Hoan hô, tranh xong rồi!
+ 240.8 X 1.9/3.2 Giờ trò chuyện! Con cá ngựa nào nhỏ nhỉ?
+ 242.8   1.9/1.9 Đúng rồi! Bé giỏi quá!
+ 246.3   2.2/2.2 Chương 4. Các con vật biển
+ 248.5   2.8/2.8 Brr, mùa đông! Trên kia có băng nè!
+ 251.3   3.1/3.1 Con cua ở đâu nhỉ? Bé tô màu vàng nhé!
+ 255.6   1.5/1.5 Con cua! Hoan hô!
+ 257.1   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+ 259.5   1.8/1.8 Tạm biệt! Bơi đi nào!
+ 261.3   2.0/2.0 Hoan hô, tranh xong rồi!
+ 263.4 X 2.8/3.2 Bé ơi, tô con cá voi màu xanh dương nhé!
+ 266.3   1.7/1.7 Con cá voi! Hoan hô!
+ 268.0   2.9/2.9 Bé tô con sứa màu đỏ được không nào?
+ 273.3   1.5/1.5 Con sứa! Hoan hô!
+ 274.8   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+ 277.2   1.8/1.8 Nhìn kìa, nó bơi rồi!
+ 279.0   1.6/1.6 Bức tranh đẹp quá!
+ 280.6   2.9/2.9 Bé tô con cua màu đỏ được không nào?
+ 285.3   2.0/2.0 Con cua màu đỏ đẹp quá!
+ 287.2   3.1/3.1 Con sứa ở đâu nhỉ? Bé tô màu vàng nhé!
+ 290.6   2.1/2.1 Con sứa màu vàng đẹp quá!
+ 292.7   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+ 295.6   1.8/1.8 Nhìn kìa, nó bơi rồi!
+ 297.4   1.6/1.6 Bức tranh đẹp quá!
+ 299.0 X 2.3/3.8 Con cá ngựa ở đâu nhỉ? Bé tô màu xanh dương nhé!
+ 301.4   2.8/2.8 Con cá ngựa màu xanh dương đẹp quá!
+ 304.3   2.8/2.8 Bé ơi, tô con sao biển màu đỏ nhé!
+ 307.8   1.9/1.9 Con sao biển! Hoan hô!
+ 309.7   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+ 312.6   1.4/1.4 Vút! Bơi đi rồi!
+ 314.0   2.0/2.0 Bé là họa sĩ siêu giỏi!
+ 316.0 X 1.8/2.7 Giờ trò chuyện! Con cá ở đâu nhỉ?
+ 317.9   1.7/1.7 Chính xác! Hoan hô!
+ 321.4   2.2/2.2 Hoan hô! Biển đầy màu sắc!
+ 323.6 X -325.9/3.1 Bé tô bao nhiêu là tranh! 51 ngôi sao!
+PROMPT CUT 4en after 1.7/2.3 s: Now paint the sparkly rock!
+PROMPT CUT 4en after 0.4/2.1 s: Now tap the shining flag!
+PROMPT CUT 4en after 1.6/2.1 s: Now tap the shining body!
+PROMPT CUT 4en after 1.5/2.3 s: Now paint the sparkly shell!
+--- session 4 en (5.8 min)
+   0.1   2.2/2.2 Chapter 1. Colour Painting
+   2.4   2.3/2.3 Spring petals on the water!
+   4.7   2.3/2.3 Can you make the rock green?
+   9.2   0.7/0.7 Green!
+   9.9 X 1.7/2.3 Now paint the sparkly rock!
+  11.7   1.6/1.6 Lovely green rock!
+  13.3   2.0/2.0 Nini finishes the rest!
+  15.3   1.7/1.7 Look, it bobs away!
+  17.0   1.6/1.6 You are so clever!
+  18.6   2.2/2.2 Can you make the boat red?
+  21.4 X 1.4/2.5 Splish! Paint dots everywhere!
+  22.9   1.0/1.0 Red paint!
+  24.0 X 0.7/2.3 Now paint the sparkly boat!
+  24.8   1.4/1.4 Lovely red boat!
+  26.2   2.3/2.3 Can you make the flag blue?
+  29.9   1.5/1.5 Yummy blue paint!
+  31.5 X 0.4/2.1 Now tap the shining flag!
+  31.9   1.5/1.5 Lovely blue flag!
+  33.5   2.2/2.2 Let me finish the picture!
+  35.7   2.0/2.0 Look, it’s sailing away!
+  37.8   1.3/1.3 Super painter!
+  39.1   2.2/2.2 Can you make the fin blue?
+  43.5   1.1/1.1 Blue paint!
+  44.7 X 0.6/2.0 Now tap the shining fin!
+  45.4   1.4/1.4 Lovely blue fin!
+  46.8   2.4/2.4 Can you make the body orange?
+  51.1   0.8/0.8 Orange!
+  52.0 X 1.6/2.1 Now tap the shining body!
+  53.6   2.0/2.0 Orange body, beautiful!
+  55.6   2.2/2.2 Let me finish the picture!
+  57.9   2.0/2.0 Bye-bye! Floating away!
+  59.9   2.3/2.3 Hooray! The picture is done!
+  62.2   2.2/2.2 Let’s paint the claws red!
+  65.5 X 1.9/2.5 Hmm, that’s blue. Where is red?
+  67.5   1.0/1.0 Red paint!
+  68.5 X 0.5/2.3 Now paint the sparkly claws!
+  69.0   1.9/1.9 Look at the red claws!
+  71.0   2.4/2.4 Can you make the legs yellow?
+  73.8   0.8/0.8 Yellow!
+  74.7 X 0.7/2.3 Now paint the sparkly legs!
+  75.5   2.0/2.0 Yellow legs, beautiful!
+  77.4   2.3/2.3 Let’s paint the shell blue!
+  81.2   1.1/1.1 Blue paint!
+  82.3 X 1.5/2.3 Now paint the sparkly shell!
+  83.8   2.0/2.0 Look at the blue shell!
+  85.8   2.0/2.0 Nini finishes the rest!
+  87.8   2.0/2.0 Look, it scuttles away!
+  89.8   0.7/0.7 Super!
+  90.6   2.5/2.5 Talk time! Which one is green?
+  94.2   1.7/1.7 Yes! You are right!
+  97.5   2.1/2.1 Chapter 2. Shape Painting
+  99.7   1.5/1.5 Sunny summer sea!
+ 101.2   2.7/2.7 Find the square and make it blue!
+ 105.7   1.9/1.9 The square! Beautiful!
+ 107.6   2.0/2.0 Nini finishes the rest!
+ 109.6   1.8/1.8 Swish! It swims away!
+ 111.4   1.6/1.6 You are so clever!
+ 113.0   3.0/3.0 Find the triangle and make it yellow!
+ 117.2   2.0/2.0 The triangle! Beautiful!
+ 119.2   1.8/1.8 Paint the circle red!
+ 123.5 X 2.2/3.1 That’s the square. Where is the circle?
+ 125.8   1.9/1.9 The circle! Beautiful!
+ 127.8   2.8/2.8 Swish, swish! Nini paints the rest!
+ 130.7   1.8/1.8 Bob, bob! Up it goes!
+ 132.5   2.8/2.8 Find the square and make it yellow!
+ 135.4 X 1.9/2.5 A clam is sleeping on the sand!
+ 137.3 X 2.0/3.1 That’s the star! Let’s find the square!
+ 139.4 X 2.1/3.3 That’s the triangle. Where is the square?
+ 141.7   1.9/1.9 The square! Beautiful!
+ 143.6   1.7/1.7 Paint the star red!
+ 147.3   1.7/1.7 You found the star!
+ 148.9   3.0/3.0 Find the triangle and make it purple!
+ 153.8   2.0/2.0 The triangle! Beautiful!
+ 155.8   2.2/2.2 Let me finish the picture!
+ 158.0   1.7/1.7 Look, it bobs away!
+ 159.7   1.0/1.0 Well done!
+ 160.8   2.8/2.8 Find the heart and make it purple!
+ 165.3   1.7/1.7 You found the heart!
+ 167.0   2.1/2.1 Paint the triangle green!
+ 170.8   2.1/2.1 A green triangle! Lovely!
+ 172.9   3.0/3.0 Where is the circle? Paint it yellow!
+ 175.9   2.0/2.0 Paint the shining part!
+ 178.3   1.9/1.9 The circle! Beautiful!
+ 180.2   2.0/2.0 Nini finishes the rest!
+ 182.2   1.7/1.7 Look, it’s swimming!
+ 183.9   1.4/1.4 What a picture!
+ 185.3   2.5/2.5 Talk time! Where is the heart?
+ 189.3   1.7/1.7 Yes! You are right!
+ 192.7   2.3/2.3 Chapter 3. Counting Bubbles
+ 194.9   2.6/2.6 Autumn leaves are drifting down!
+ 197.6   2.4/2.4 Let’s count! Paint 2 bubbles!
+ 202.0   0.5/0.5 One!
+ 204.1   0.5/0.5 Two!
+ 205.3   2.0/2.0 Nini finishes the rest!
+ 207.3   1.8/1.8 Bob, bob! Up it goes!
+ 209.1   1.6/1.6 You are so clever!
+ 210.8   1.9/1.9 Paint 2 pearls orange!
+ 212.9   2.5/2.5 A little fish swims by! Tap it!
+ 215.5   0.5/0.5 One!
+ 216.8   0.5/0.5 Two!
+ 218.0   2.0/2.0 Nini finishes the rest!
+ 220.0   1.7/1.7 Look, it floats up!
+ 221.7   1.3/1.3 Super painter!
+ 223.2   2.3/2.3 Let’s count! Paint 4 pearls!
+ 228.9   0.5/0.5 One!
+ 231.0   0.5/0.5 Two!
+ 233.5   0.7/0.7 Three!
+ 234.8   2.2/2.2 Look for the sparkly part!
+ 237.3   0.6/0.6 Four!
+ 238.5   2.8/2.8 Swish, swish! Nini paints the rest!
+ 241.4   1.9/1.9 Bye-bye! Off it swims!
+ 243.3   1.6/1.6 You are so clever!
+ 244.9   2.4/2.4 Let’s count! Paint 4 bubbles!
+ 247.9   0.5/0.5 One!
+ 249.8   0.5/0.5 Two!
+ 251.3   0.7/0.7 Three!
+ 252.8   0.6/0.6 Four!
+ 254.0   2.2/2.2 Let me finish the picture!
+ 256.2   1.8/1.8 Swish! It swims away!
+ 258.1   2.3/2.3 Hooray! The picture is done!
+ 260.4 X 1.7/3.1 Talk time! How many bubbles are there?
+ 262.3   1.7/1.7 Yes! You are right!
+ 265.6   1.9/1.9 Chapter 4. Sea Animals
+ 267.6   2.0/2.0 Brr, winter! Ice on top!
+ 269.6   1.7/1.7 Paint the crab red!
+ 274.6   1.4/1.4 What a red crab!
+ 276.0   2.0/2.0 Nini finishes the rest!
+ 278.0   1.8/1.8 Swish! It swims away!
+ 279.9   1.6/1.6 You are so clever!
+ 281.5   2.5/2.5 Can you paint the seahorse red?
+ 284.1 X 2.0/2.5 A clam is sleeping on the sand!
+ 286.1   1.8/1.8 The seahorse! Hooray!
+ 288.0   2.6/2.6 Can you paint the starfish blue?
+ 292.1   1.8/1.8 What a blue starfish!
+ 293.9   2.2/2.2 Let me finish the picture!
+ 296.1   1.9/1.9 Bye-bye! Off it swims!
+ 298.0   1.6/1.6 You are so clever!
+ 299.7   1.9/1.9 Paint the whale green!
+ 302.1 X 1.8/3.2 That’s the seahorse. Where is the whale?
+ 303.9   1.9/1.9 You painted the whale!
+ 305.9   3.1/3.1 Where is the jellyfish? Paint it blue!
+ 309.6   2.2/2.2 You painted the jellyfish!
+ 311.9   2.2/2.2 Let me finish the picture!
+ 314.1   1.7/1.7 Look, it’s swimming!
+ 315.9   1.0/1.0 Well done!
+ 316.9   3.0/3.0 Where is the octopus? Paint it green!
+ 321.1 X 1.9/3.2 That’s the crab! Let’s find the octopus!
+ 323.1   1.8/1.8 What a green octopus!
+ 325.0   2.5/2.5 Can you paint the crab purple?
+ 328.9 X 1.6/3.1 That’s the starfish. Where is the crab?
+ 330.6 X 2.7/3.1 That’s the starfish. Where is the crab?
+ 333.4   1.8/1.8 You painted the crab!
+ 335.3   2.8/2.8 Swish, swish! Nini paints the rest!
+ 338.2   1.9/1.9 Bye-bye! Off it swims!
+ 340.1   0.7/0.7 Super!
+ 340.8   2.4/2.4 Talk time! Where is the fish?
+ 344.8   2.1/2.1 It is the fish! Good try!
+ 348.1   2.1/2.1 Look at all our pictures!
+ 350.3   3.3/3.3 What a sea of pictures! 44 stars! Hooray!
+PROMPT CUT 4vi after 1.4/2.8 s: Bé chạm vào cái đầu đang sáng nhé!
+PROMPT CUT 4vi after 0.1/3.4 s: Giờ bé chạm vào mái nhà đang lấp lánh nhé!
+PROMPT CUT 4vi after 0.8/3.5 s: Giờ bé chạm vào cánh buồm đang lấp lánh nhé!
+PROMPT CUT 4vi after 0.0/3.3 s: Bé chạm vào mấy cái xúc tu đang sáng nhé!
+--- session 4 vi (5.7 min)
+   0.1   1.7/1.7 Chương 1. Tô màu sắc
+   1.9   3.1/3.1 Mùa xuân, cánh hoa trôi trên mặt nước!
+   5.0   4.2/4.3 Mình tô cái đầu màu tím nào! Bé tìm vỏ sò màu tím nhé!
+   9.3   0.8/0.8 Màu tím!
+  10.2 X 1.4/2.8 Bé chạm vào cái đầu đang sáng nhé!
+  11.7   2.2/2.2 Cái đầu có màu tím rồi nè!
+  13.9   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+  16.2   1.9/1.9 Bập bềnh! Lên cao nào!
+  18.1   2.0/2.0 Hoan hô, tranh xong rồi!
+  20.2 X 4.5/4.9 Mình tô cái tháp màu xanh lá nào! Bé tìm vỏ sò màu xanh lá nhé!
+  24.9   2.5/2.5 Cái tháp màu xanh lá, đẹp quá!
+  27.4   4.2/4.3 Mình tô tảng đá màu tím nào! Bé tìm vỏ sò màu tím nhé!
+  31.7 X 0.2/0.8 Màu tím!
+  31.9   2.1/2.1 Tảng đá màu tím, đẹp quá!
+  34.1   4.4/4.4 Mình tô mái nhà màu vàng nào! Bé tìm vỏ sò màu vàng nhé!
+  38.6 X 1.5/3.2 Cái này là màu tím! Bé tìm màu vàng nào!
+  40.3   1.5/1.5 Lấy màu vàng nào!
+  41.8 X 0.1/3.4 Giờ bé chạm vào mái nhà đang lấp lánh nhé!
+  42.0   2.2/2.2 Mái nhà màu vàng xinh quá!
+  44.2   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+  47.0   2.4/2.4 Tạm biệt! Dập dềnh, dập dềnh!
+  49.5   1.1/1.1 Bé giỏi lắm!
+  50.7   3.3/3.3 Bé ơi, lá cờ muốn được tô màu xanh lá đó!
+  54.0   1.7/1.7 Lấy màu xanh lá nào!
+  55.8   2.1/2.1 Bé tô lá cờ lấp lánh nào!
+  57.9 X 2.5/2.5 Bé tô lá cờ đang lấp lánh nhé!
+  60.5   2.3/2.3 Lá cờ có màu xanh lá rồi nè!
+  62.8   2.7/2.7 Bé ơi, tô cánh buồm màu vàng nhé!
+  65.8   1.1/1.1 Màu vàng nè!
+  67.0 X 0.8/3.5 Giờ bé chạm vào cánh buồm đang lấp lánh nhé!
+  68.0   2.3/2.3 Cánh buồm màu vàng, đẹp quá!
+  70.3   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+  73.2   2.4/2.4 Nhìn kìa, thuyền ra khơi rồi!
+  75.6   1.6/1.6 Bức tranh đẹp quá!
+  77.3   3.1/3.1 Bé ơi, tô mấy cái xúc tu màu vàng nhé!
+  80.4   0.9/0.9 Màu vàng!
+  81.3 X 0.0/3.3 Bé chạm vào mấy cái xúc tu đang sáng nhé!
+  81.5   2.7/2.7 Mấy cái xúc tu màu vàng xinh quá!
+  84.2   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+  86.5   2.4/2.4 Nhìn kìa, nó dập dềnh đi rồi!
+  89.0   2.0/2.0 Hoan hô, tranh xong rồi!
+  91.1 X 0.6/2.9 Giờ trò chuyện! Cái nào màu cam nhỉ?
+  91.8   1.4/1.4 Oa, bé biết rồi!
+  95.2   1.9/1.9 Chương 2. Tô hình khối
+  97.1   2.2/2.2 Mùa hè, biển nắng đẹp quá!
+  99.3   3.4/3.4 Mình tìm hình tam giác rồi tô màu cam nhé!
+ 103.3   2.0/2.0 Hình tam giác! Đẹp quá!
+ 105.2   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+ 107.8   1.8/1.8 Nhìn kìa, nó bơi rồi!
+ 109.6   2.0/2.0 Hoan hô, tranh xong rồi!
+ 111.7 X 3.0/3.7 Mình tìm hình vuông rồi tô màu xanh dương nhé!
+ 114.8   2.1/2.1 Bé tìm ra hình vuông rồi!
+ 116.9   3.4/3.4 Mình tìm hình trái tim rồi tô màu vàng nhé!
+ 121.2 X 2.2/3.9 Đây là hình tam giác! Mình tìm hình trái tim nhé!
+ 123.5   2.6/2.6 Hình trái tim màu vàng xinh quá!
+ 126.1   3.2/3.2 Bé ơi, tô hình tam giác màu xanh lá nhé!
+ 129.9   2.5/2.5 Bé chạm vào chỗ đang sáng nhé!
+ 132.5   2.3/2.3 Nhìn kìa, cái này sáng lên!
+ 135.3   2.8/2.8 Hình tam giác màu xanh lá xinh quá!
+ 138.1   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+ 140.5   2.4/2.4 Nhìn kìa, thuyền ra khơi rồi!
+ 142.9   3.5/3.5 Hình vuông ở đâu nhỉ? Bé tô màu xanh lá nào!
+ 146.5 X 0.8/2.8 Lấp lánh! Viên ngọc trai nhỏ xinh!
+ 147.3   1.7/1.7 Hình vuông! Đẹp quá!
+ 149.1   3.4/3.4 Mình tìm hình ngôi sao rồi tô màu vàng nhé!
+ 153.6   2.3/2.3 Bé tìm ra hình ngôi sao rồi!
+ 155.9   3.4/3.4 Mình tìm hình trái tim rồi tô màu tím nhé!
+ 160.3 X 1.8/2.0 Bé tìm chỗ lấp lánh nào!
+ 162.2   2.5/2.5 Hình trái tim màu tím xinh quá!
+ 164.7   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+ 167.1   2.4/2.4 Tạm biệt! Dập dềnh, dập dềnh!
+ 169.5   0.8/0.8 Hoan hô!
+ 170.4 X 3.7/4.0 Hình tam giác ở đâu nhỉ? Bé tô màu xanh dương nào!
+ 174.3   2.0/2.0 Hình tam giác! Đẹp quá!
+ 176.2   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+ 178.8   1.8/1.8 Nhìn kìa, nó bơi rồi!
+ 180.6   1.6/1.6 Bé thông minh quá!
+ 182.2 X 1.6/3.2 Giờ trò chuyện! Hình trái tim ở đâu nhỉ?
+ 183.9   1.4/1.4 Oa, bé biết rồi!
+ 187.3   2.0/2.0 Chương 3. Đếm bong bóng
+ 189.3   2.6/2.6 Mùa thu, lá vàng rơi xuống biển!
+ 192.0   3.4/3.4 Bé tô 1 viên ngọc trai nhé! Mình cùng đếm!
+ 196.3   0.5/0.5 Một!
+ 197.5   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+ 199.9   1.9/1.9 Lên, lên, lên cao nào!
+ 201.8   1.6/1.6 Bức tranh đẹp quá!
+ 203.4   2.8/2.8 Bé ơi, tô 3 bong bóng màu vàng nhé!
+ 207.9   0.5/0.5 Một!
+ 210.4   0.5/0.5 Hai!
+ 211.8   2.3/2.3 Bé tô chỗ đang lấp lánh nhé!
+ 214.2   0.5/0.5 Ba!
+ 215.4   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+ 217.8   1.4/1.4 Vút! Bơi đi rồi!
+ 219.2   2.0/2.0 Hoan hô, tranh xong rồi!
+ 221.3   3.4/3.4 Bé tô 3 viên ngọc trai nhé! Mình cùng đếm!
+ 224.7   2.8/2.8 Hi hi! Bạn cá nhỏ cười khúc khích!
+ 227.5   0.5/0.5 Một!
+ 228.1   0.5/0.5 Hai!
+ 228.7   0.5/0.5 Ba!
+ 229.4   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+ 232.3   1.8/1.8 Nhìn kìa, nó bơi rồi!
+ 234.1   2.0/2.0 Bé là họa sĩ siêu giỏi!
+ 236.1   2.8/2.8 Bé ơi, tô 4 bong bóng màu cam nhé!
+ 240.3   0.5/0.5 Một!
+ 241.6   0.5/0.5 Hai!
+ 243.4   0.5/0.5 Ba!
+ 245.7   0.5/0.5 Bốn!
+ 246.9   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+ 249.4   1.9/1.9 Bập bềnh! Lên cao nào!
+ 251.3   2.0/2.0 Hoan hô, tranh xong rồi!
+ 253.4   3.0/3.0 Giờ trò chuyện! Có mấy bong bóng nào?
+ 257.1   2.4/2.4 Là số bốn đó! Bé cố gắng lắm!
+ 260.4   2.2/2.2 Chương 4. Các con vật biển
+ 262.7   2.8/2.8 Brr, mùa đông! Trên kia có băng nè!
+ 265.5 X 3.4/3.4 Bé ơi, tô con bạch tuộc màu xanh dương nhé!
+ 269.1   3.0/3.0 Con bạch tuộc màu xanh dương đẹp quá!
+ 272.1   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+ 274.4   1.4/1.4 Vút! Bơi đi rồi!
+ 275.9   2.0/2.0 Bé là họa sĩ siêu giỏi!
+ 277.9   2.8/2.8 Bé ơi, tô con cá ngựa màu cam nhé!
+ 280.7 X 1.1/3.1 Đây là con sứa. Con cá ngựa ở đâu nhỉ?
+ 281.9   2.3/2.3 Con cá ngựa màu cam đẹp quá!
+ 284.3   3.5/3.5 Con sứa ở đâu nhỉ? Bé tô màu xanh dương nhé!
+ 288.8   2.5/2.5 Con sứa màu xanh dương đẹp quá!
+ 291.3   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+ 293.8   1.4/1.4 Vút! Bơi đi rồi!
+ 295.3   2.8/2.8 Bé ơi, tô con bạch tuộc màu đỏ nhé!
+ 298.2 X 1.4/3.4 Nhìn kìa! Một con sò! Bên trong có gì nhỉ?
+ 299.6   2.4/2.4 Con bạch tuộc màu đỏ đẹp quá!
+ 302.1   2.8/2.8 Bé ơi, tô con sao biển màu cam nhé!
+ 305.6   1.9/1.9 Con sao biển! Hoan hô!
+ 307.5   2.9/2.9 Bé ơi, tô con cá màu xanh dương nhé!
+ 311.1   1.7/1.7 Bé tô con cá rồi nè!
+ 312.9   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+ 315.8   1.8/1.8 Tạm biệt! Bơi đi nào!
+ 317.6   1.6/1.6 Bức tranh đẹp quá!
+ 319.3 X 2.9/3.8 Con cá ngựa ở đâu nhỉ? Bé tô màu xanh dương nhé!
+ 322.3   2.1/2.1 Bé tô con cá ngựa rồi nè!
+ 324.4   3.5/3.5 Con cá voi ở đâu nhỉ? Bé tô màu xanh lá nhé!
+ 329.1   1.7/1.7 Con cá voi! Hoan hô!
+ 330.9   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+ 333.8   1.8/1.8 Nhìn kìa, nó bơi rồi!
+ 335.6   1.6/1.6 Bức tranh đẹp quá!
+ 337.3 X 1.5/3.2 Giờ trò chuyện! Con bạch tuộc ở đâu nhỉ?
+ 338.9   1.7/1.7 Đúng luôn! Siêu quá!
+ 342.3   2.0/2.0 Bao nhiêu là tranh đẹp!
+ 344.2   2.6/2.6 Biển tranh đẹp quá! 47 ngôi sao!
+--- session 5 en (6.0 min)
+   0.1   2.1/2.1 Chapter 1. Shape Painting
+   2.3   2.3/2.3 Spring petals on the water!
+   4.6   2.4/2.4 Let’s make the circle yellow!
+   9.2   0.8/0.8 Yellow!
+  11.6   1.8/1.8 You found the circle!
+  13.4   2.2/2.2 Let me finish the picture!
+  15.6   1.8/1.8 Swish! It swims away!
+  17.5   1.4/1.4 What a picture!
+  18.9   3.4/3.4 Find the green paint, then paint the oval!
+  22.9   1.1/1.1 Green paint!
+  24.6   1.7/1.7 You found the oval!
+  26.3   4.1/4.1 Paint the rectangle pink! Pick the pink paint first!
+  30.5   1.1/1.1 Pink paint!
+  31.9   2.1/2.1 The rectangle! Beautiful!
+  34.0   2.8/2.8 Swish, swish! Nini paints the rest!
+  36.9   1.9/1.9 Bye-bye! Bobbing away!
+  38.8   1.4/1.4 What a picture!
+  40.2   3.7/3.7 Find the orange paint, then paint the triangle!
+  44.0 X 1.1/1.2 Orange paint!
+  45.1   2.3/2.3 An orange triangle! Lovely!
+  47.4   3.6/3.6 Find the yellow paint, then paint the circle!
+  51.1   1.2/1.2 Yellow paint!
+  53.5   2.0/2.0 A yellow circle! Lovely!
+  55.5   2.5/2.5 A little fish swims by! Tap it!
+  58.1   3.5/3.5 Find the purple paint, then paint the heart!
+  61.7 X 2.3/3.4 That one is yellow! Let’s look for purple!
+  64.0   0.8/0.8 Purple!
+  65.8   2.0/2.0 A purple heart! Lovely!
+  67.8   2.2/2.2 Let me finish the picture!
+  70.1   1.7/1.7 Bye-bye! Sail away!
+  71.8   1.0/1.0 Great job!
+  72.8   2.3/2.3 Let’s make the circle blue!
+  77.3   1.5/1.5 Yummy blue paint!
+  79.0 X 2.0/3.1 That’s the star! Let’s find the circle!
+  81.0   1.9/1.9 The circle! Beautiful!
+  83.0   3.6/3.6 Find the orange paint, then paint the square!
+  86.6   0.8/0.8 Orange!
+  88.3   1.9/1.9 The square! Beautiful!
+  90.2   2.8/2.8 Swish, swish! Nini paints the rest!
+  93.1   1.9/1.9 Bye-bye! Bobbing away!
+  95.0   0.5/0.5 Yes!
+  95.6 X 2.4/2.6 Talk time! Where is the diamond?
+  98.0   1.7/1.7 Yes! You are right!
+ 101.5   2.3/2.3 Chapter 2. Counting Bubbles
+ 103.7   1.5/1.5 Sunny summer sea!
+ 105.3   1.9/1.9 Paint 1 bubble purple!
+ 110.2   0.5/0.5 One!
+ 111.4   2.0/2.0 Nini finishes the rest!
+ 113.4   1.9/1.9 Bye-bye! Off it swims!
+ 115.3   1.6/1.6 You are so clever!
+ 116.9   1.8/1.8 Paint 3 bubbles pink!
+ 122.1   0.5/0.5 One!
+ 123.6   0.5/0.5 Two!
+ 125.6   0.7/0.7 Three!
+ 126.8   2.0/2.0 Nini finishes the rest!
+ 128.8   1.9/1.9 Bye-bye! Bobbing away!
+ 130.7   1.3/1.3 Super painter!
+ 132.0   2.3/2.3 Let’s count! Paint 6 pearls!
+ 134.4   2.5/2.5 A clam is sleeping on the sand!
+ 137.0   0.5/0.5 One!
+ 139.1   0.5/0.5 Two!
+ 141.1   0.7/0.7 Three!
+ 143.3   0.6/0.6 Four!
+ 145.5   0.6/0.6 Five!
+ 147.8   0.5/0.5 Six!
+ 149.0   2.8/2.8 Swish, swish! Nini paints the rest!
+ 151.9   1.7/1.7 Look, it’s swimming!
+ 153.7   1.6/1.6 You are so clever!
+ 155.3   2.0/2.0 Paint 9 starfish green!
+ 158.4   0.5/0.5 One!
+ 159.7   0.5/0.5 Two!
+ 162.2   0.7/0.7 Three!
+ 163.5   0.6/0.6 Four!
+ 165.6   0.6/0.6 Five!
+ 168.1   0.5/0.5 Six!
+ 170.6   0.7/0.7 Seven!
+ 172.9   0.7/0.7 Eight!
+ 175.2   0.6/0.6 Nine!
+ 176.4   2.2/2.2 Let me finish the picture!
+ 178.6   1.7/1.7 Look, it bobs away!
+ 180.3   2.3/2.3 Hooray! The picture is done!
+ 182.7   3.1/3.1 Talk time! How many bubbles are there?
+ 186.2   1.7/1.7 Yes! You are right!
+ 189.6   1.9/1.9 Chapter 3. ABC Bubbles
+ 191.5   2.6/2.6 Autumn leaves are drifting down!
+ 194.1   2.4/2.4 Find letter eye and paint it!
+ 198.7   1.8/1.8 You found letter eye!
+ 200.5   2.2/2.2 Let me finish the picture!
+ 202.7   2.0/2.0 Bye-bye! Floating away!
+ 204.7   2.3/2.3 Hooray! The picture is done!
+ 207.1   2.3/2.3 Find letter ay and paint it!
+ 209.7 X 2.4/3.1 That’s letter ar! Let’s find letter ay!
+ 212.2   1.5/1.5 Letter ay! Super!
+ 213.7   1.7/1.7 Paint the letter ar!
+ 218.8   1.5/1.5 Letter ar! Super!
+ 220.3   1.7/1.7 Paint the letter en!
+ 224.8   1.7/1.7 You found letter en!
+ 226.6   2.8/2.8 Swish, swish! Nini paints the rest!
+ 229.5   1.7/1.7 Look, it’s swimming!
+ 231.3   0.7/0.7 Super!
+ 232.0   2.7/2.7 Where is the letter en? Paint it!
+ 235.9   1.5/1.5 Letter en! Super!
+ 237.5   2.8/2.8 Where is the letter bee? Paint it!
+ 240.8   1.7/1.7 Letter bee! Lovely!
+ 242.5   2.2/2.2 Let me finish the picture!
+ 244.8   1.9/1.9 Bye-bye! Off it swims!
+ 246.7   1.4/1.4 What a picture!
+ 248.1   2.8/2.8 Where is the letter ess? Paint it!
+ 252.9   1.6/1.6 Letter ess! Super!
+ 254.6   2.7/2.7 Where is the letter oh? Paint it!
+ 258.8   1.6/1.6 Letter oh! Lovely!
+ 260.4   1.8/1.8 Paint the letter bee!
+ 264.6   1.6/1.6 Letter bee! Super!
+ 266.2   2.8/2.8 Swish, swish! Nini paints the rest!
+ 269.1   1.7/1.7 Look, it floats up!
+ 270.8   1.3/1.3 Super painter!
+ 272.1   2.8/2.8 Talk time! Where is the letter kay?
+ 275.9   2.5/2.5 It is the letter kay! Good try!
+ 279.3   1.9/1.9 Chapter 4. Sea Animals
+ 281.2   2.0/2.0 Brr, winter! Ice on top!
+ 283.2   1.9/1.9 Paint the crab purple!
+ 287.9   1.5/1.5 The crab! Hooray!
+ 289.4   2.2/2.2 Let me finish the picture!
+ 291.6   1.8/1.8 Swish! It swims away!
+ 293.5   1.3/1.3 Super painter!
+ 294.8   3.0/3.0 Where is the seahorse? Paint it blue!
+ 297.8 X 0.5/2.5 A clam is sleeping on the sand!
+ 298.4   2.1/2.1 You painted the seahorse!
+ 300.6   2.8/2.8 Where is the fish? Paint it purple!
+ 303.5 X 1.5/3.0 That’s the crab! Let’s find the fish!
+ 305.1   1.7/1.7 What a purple fish!
+ 306.7   2.3/2.3 Can you paint the crab red?
+ 311.6   1.5/1.5 The crab! Hooray!
+ 313.1   2.8/2.8 Swish, swish! Nini paints the rest!
+ 316.0   1.8/1.8 Swish! It swims away!
+ 317.8   1.0/1.0 Well done!
+ 318.9   2.8/2.8 Can you paint the jellyfish orange?
+ 321.9   2.1/2.1 What an orange jellyfish!
+ 324.0   2.6/2.6 Can you paint the dolphin green?
+ 328.4   2.0/2.0 You painted the dolphin!
+ 330.5   2.8/2.8 Swish, swish! Nini paints the rest!
+ 333.4   1.8/1.8 Swish! It swims away!
+ 335.2   1.6/1.6 You are so clever!
+ 336.9 X 2.6/2.6 Can you paint the starfish pink?
+ 339.6   2.1/2.1 You painted the starfish!
+ 341.7   2.0/2.0 Paint the octopus blue!
+ 344.9   2.0/2.0 You painted the octopus!
+ 347.0   2.0/2.0 Nini finishes the rest!
+ 349.0   1.8/1.8 Swish! It swims away!
+ 350.9   1.3/1.3 Super painter!
+ 352.2   2.4/2.4 Talk time! Where is the fish?
+ 356.3   2.1/2.1 It is the fish! Good try!
+ 359.6   2.5/2.5 Hooray! What a sea of colours!
+ 362.2 X -365.8/3.3 What a sea of pictures! 45 stars! Hooray!
+--- session 5 vi (5.5 min)
+   0.1   1.9/1.9 Chương 1. Tô hình khối
+   2.1   3.1/3.1 Mùa xuân, cánh hoa trôi trên mặt nước!
+   5.2   3.2/3.2 Bé tìm màu đỏ, rồi tô hình ngôi sao nhé!
+   9.2   1.0/1.0 Màu đỏ nè!
+  11.7   2.3/2.3 Bé tìm ra hình ngôi sao rồi!
+  14.0   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+  16.9   2.4/2.4 Nhìn kìa, thuyền ra khơi rồi!
+  19.3   2.0/2.0 Bé là họa sĩ siêu giỏi!
+  21.3 X 3.3/4.8 Bé ơi, tô hình chữ nhật màu đỏ nhé! Bé chọn màu đỏ trước nha!
+  24.8   2.3/2.3 Bé tìm ra hình chữ nhật rồi!
+  27.1   3.0/3.0 Mình tô hình tròn màu xanh dương nào!
+  30.1   1.6/1.6 Màu xanh dương nè!
+  31.9   2.8/2.8 Hình tròn màu xanh dương xinh quá!
+  34.7   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+  37.0   1.8/1.8 Tạm biệt! Bơi đi nào!
+  38.9   1.6/1.6 Bé thông minh quá!
+  40.5   2.8/2.8 Mình tô hình tam giác màu vàng nào!
+  43.5   1.1/1.1 Màu vàng nè!
+  45.3   2.0/2.0 Hình tam giác! Đẹp quá!
+  47.2   2.8/2.8 Mình tô hình ngôi sao màu hồng nào!
+  51.0   0.9/0.9 Màu hồng!
+  53.5   2.0/2.0 Hình ngôi sao! Đẹp quá!
+  55.5   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+  58.1   2.4/2.4 Nhìn kìa, nó dập dềnh đi rồi!
+  60.5   2.0/2.0 Bé là họa sĩ siêu giỏi!
+  62.5 X 4.8/4.8 Bé ơi, tô hình vuông màu vàng nhé! Bé chọn màu vàng trước nha!
+  67.3   0.9/0.9 Màu vàng!
+  69.0   1.7/1.7 Hình vuông! Đẹp quá!
+  70.7   3.1/3.1 Bé tìm màu hồng, rồi tô hình thoi nhé!
+  73.8   1.5/1.5 Lấy màu hồng nào!
+  75.5   2.0/2.0 Bé tìm ra hình thoi rồi!
+  77.5   3.1/3.1 Mình tô hình tam giác màu xanh lá nào!
+  81.0   1.4/1.4 Màu xanh lá nè!
+  83.8   2.0/2.0 Hình tam giác! Đẹp quá!
+  85.8   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+  88.2   1.8/1.8 Vù vù! Thuyền đi rồi!
+  90.1   0.9/0.9 Giỏi quá!
+  91.0 X 3.0/3.2 Giờ trò chuyện! Hình trái tim ở đâu nhỉ?
+  94.2   1.9/1.9 Đúng rồi! Bé giỏi quá!
+  97.5   2.0/2.0 Chương 2. Đếm bong bóng
+  99.5   2.2/2.2 Mùa hè, biển nắng đẹp quá!
+ 101.8   2.8/2.8 Bé ơi, tô 1 bong bóng màu hồng nhé!
+ 105.5   0.5/0.5 Một!
+ 106.7   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+ 109.6   2.4/2.4 Nhìn kìa, nó dập dềnh đi rồi!
+ 112.0   3.0/3.0 Bé tô 2 bong bóng nhé! Mình cùng đếm!
+ 115.1   2.5/2.5 Có bạn sò đang ngủ trên cát nè!
+ 117.6   0.5/0.5 Một!
+ 119.0   0.5/0.5 Hai!
+ 120.2   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+ 123.1   1.8/1.8 Nhìn kìa, nó bơi rồi!
+ 124.9   2.0/2.0 Hoan hô, tranh xong rồi!
+ 127.0   2.9/2.9 Bé ơi, tô 7 con sao biển màu đỏ nhé!
+ 130.2   0.5/0.5 Một!
+ 132.6   0.5/0.5 Hai!
+ 134.6   0.5/0.5 Ba!
+ 136.6   0.5/0.5 Bốn!
+ 138.2   0.5/0.5 Năm!
+ 139.4   0.5/0.5 Sáu!
+ 141.5   0.5/0.5 Bảy!
+ 142.7   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+ 145.1   2.4/2.4 Nhìn kìa, nó dập dềnh đi rồi!
+ 147.5   1.6/1.6 Bé thông minh quá!
+ 149.1   3.4/3.4 Bé tô 4 viên ngọc trai nhé! Mình cùng đếm!
+ 152.5   0.5/0.5 Một!
+ 154.7   0.5/0.5 Hai!
+ 157.0   0.5/0.5 Ba!
+ 159.4   0.5/0.5 Bốn!
+ 160.6   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+ 163.1   1.8/1.8 Tạm biệt! Bơi đi nào!
+ 165.0   1.6/1.6 Bé thông minh quá!
+ 166.6   3.0/3.0 Giờ trò chuyện! Có mấy bong bóng nào?
+ 170.3   1.4/1.4 Oa, bé biết rồi!
+ 173.8   2.3/2.3 Chương 3. Bong bóng chữ cái
+ 176.0   2.6/2.6 Mùa thu, lá vàng rơi xuống biển!
+ 178.7   1.8/1.8 Bé ơi, tô chữ cờ nhé!
+ 182.8   1.8/1.8 Bé tìm ra chữ cờ rồi!
+ 184.6   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+ 187.0   2.3/2.3 Tạm biệt! Bồng bềnh bay lên!
+ 189.3   1.6/1.6 Bé thông minh quá!
+ 190.9   1.8/1.8 Bé ơi, tô chữ gờ nhé!
+ 193.8 X 2.4/2.9 Ồ, đây là chữ bờ. Bé tìm chữ gờ nào!
+ 196.3   1.8/1.8 Bé tìm ra chữ gờ rồi!
+ 198.2   2.0/2.0 Bé tìm chữ a rồi tô nhé!
+ 202.9   1.7/1.7 Bé tìm ra chữ a rồi!
+ 204.7   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+ 207.1   1.4/1.4 Vút! Bơi đi rồi!
+ 208.6   0.9/0.9 Đúng rồi!
+ 209.5   1.8/1.8 Bé ơi, tô chữ pờ nhé!
+ 214.1   1.4/1.4 Chữ pờ! Đẹp quá!
+ 215.5   2.0/2.0 Bé tìm chữ o rồi tô nhé!
+ 220.1   1.4/1.4 Chữ o! Giỏi quá!
+ 221.5   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+ 223.9   1.4/1.4 Vút! Bơi đi rồi!
+ 225.4   1.6/1.6 Bức tranh đẹp quá!
+ 227.0   2.3/2.3 Chữ xờ ở đâu nhỉ? Bé tô nào!
+ 229.9 X 1.5/2.8 Đây là chữ pờ! Mình tìm chữ xờ nhé!
+ 231.6   1.5/1.5 Chữ xờ! Giỏi quá!
+ 233.1   1.7/1.7 Bé ơi, tô chữ e nhé!
+ 237.4   1.4/1.4 Chữ e! Đẹp quá!
+ 238.9   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+ 241.7   1.9/1.9 Lên, lên, lên cao nào!
+ 243.7   0.9/0.9 Siêu quá!
+ 244.6   2.7/2.7 Giờ trò chuyện! Chữ pờ ở đâu nhỉ?
+ 247.8   1.7/1.7 Chính xác! Hoan hô!
+ 251.2   2.2/2.2 Chương 4. Các con vật biển
+ 253.4   2.8/2.8 Brr, mùa đông! Trên kia có băng nè!
+ 256.2   3.0/3.0 Bé ơi, tô con sứa màu xanh dương nhé!
+ 260.1   1.8/1.8 Bé tô con sứa rồi nè!
+ 262.0   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+ 264.9   1.8/1.8 Tạm biệt! Bơi đi nào!
+ 266.7   2.8/2.8 Bé ơi, tô con cá voi màu vàng nhé!
+ 269.5 X 1.2/3.4 Nhìn kìa! Một con sò! Bên trong có gì nhỉ?
+ 270.9   1.7/1.7 Con cá voi! Hoan hô!
+ 272.6   3.2/3.2 Con cá ở đâu nhỉ? Bé tô màu xanh lá nhé!
+ 275.9 X 1.5/2.9 Đây là con cua! Mình tìm con cá nhé!
+ 277.4   1.4/1.4 Con cá! Hoan hô!
+ 278.9   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+ 281.8   1.4/1.4 Vút! Bơi đi rồi!
+ 283.3   1.0/1.0 Tuyệt vời!
+ 284.3   3.4/3.4 Con sao biển ở đâu nhỉ? Bé tô màu tím nhé!
+ 287.7 X 1.7/3.1 Đây là con cá. Con sao biển ở đâu nhỉ?
+ 289.6   2.4/2.4 Con sao biển màu tím đẹp quá!
+ 292.0   3.2/3.2 Con cá ở đâu nhỉ? Bé tô màu xanh lá nhé!
+ 296.1   1.4/1.4 Con cá! Hoan hô!
+ 297.6   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+ 300.0   1.8/1.8 Tạm biệt! Bơi đi nào!
+ 301.8   1.1/1.1 Bé giỏi lắm!
+ 303.0   3.6/3.6 Bé tô con cá ngựa màu xanh lá được không nào?
+ 307.1   1.8/1.8 Con cá ngựa! Hoan hô!
+ 309.0   2.9/2.9 Bé ơi, tô con sao biển màu vàng nhé!
+ 312.6   2.5/2.5 Con sao biển màu vàng đẹp quá!
+ 315.1   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+ 317.6   1.4/1.4 Vút! Bơi đi rồi!
+ 319.0   1.6/1.6 Bức tranh đẹp quá!
+ 320.7   3.1/3.1 Giờ trò chuyện! Con cá ngựa ở đâu nhỉ?
+ 323.9   2.8/2.8 Là con cá ngựa đó! Bé cố gắng lắm!
+ 327.3   2.0/2.0 Bao nhiêu là tranh đẹp!
+ 329.2   2.6/2.6 Biển tranh đẹp quá! 46 ngôi sao!
+--- session 6 en (5.5 min)
+   0.1   2.6/2.6 Chapter 1. Big and Small Letters
+   2.8   2.3/2.3 Spring petals on the water!
+   5.1   3.3/3.3 Where is small see? It goes with big see!
+   9.4   1.6/1.6 Small see! Lovely!
+  11.1   2.2/2.2 Let me finish the picture!
+  13.3   2.0/2.0 Bye-bye! Floating away!
+  15.3   1.3/1.3 Super painter!
+  16.6   3.4/3.4 Big oh has a little friend. Paint small oh!
+  20.1 X -0.0/2.4 Look! A clam! What is inside?
+  20.1   1.7/1.7 You found small oh!
+  21.8   3.6/3.6 Big see has a little friend. Paint small see!
+  26.6   1.5/1.5 Small see! Super!
+  28.1   2.0/2.0 Nini finishes the rest!
+  30.1   1.9/1.9 Bye-bye! Off it swims!
+  32.0   1.3/1.3 Super painter!
+  33.3   3.6/3.6 Big kay has a little friend. Paint small kay!
+  38.4   1.7/1.7 You found small kay!
+  40.1   3.1/3.1 Where is small oh? It goes with big oh!
+  44.9   1.4/1.4 Small oh! Super!
+  46.3   2.0/2.0 Nini finishes the rest!
+  48.3   1.9/1.9 Bye-bye! Off it swims!
+  50.2   2.3/2.3 Hooray! The picture is done!
+  52.6   2.3/2.3 Find small you and paint it!
+  55.0 X 2.4/3.1 That’s small pee! Let’s find small you!
+  57.5   1.5/1.5 Small you! Super!
+  59.0   3.6/3.6 Big ess has a little friend. Paint small ess!
+  63.4 X 2.4/3.7 Hmm, that’s small bee. Can you find small ess?
+  65.8   1.7/1.7 You found small ess!
+  67.6   2.8/2.8 Swish, swish! Nini paints the rest!
+  70.5   2.0/2.0 Bye-bye! Floating away!
+  72.5   0.9/0.9 Nice one!
+  73.5 X 3.9/4.0 Talk time! Where is small en? It goes with big en!
+  77.5   1.1/1.1 Clever you!
+  80.8   2.0/2.0 Chapter 2. First Letters
+  82.9   1.5/1.5 Sunny summer sea!
+  84.5   4.4/4.4 Listen: double you! Which animal starts with double you?
+  90.3   2.0/2.0 double you is for whale!
+  92.3   2.0/2.0 Nini finishes the rest!
+  94.3   1.7/1.7 Look, it’s swimming!
+  96.1   1.6/1.6 You are so clever!
+  97.7   2.5/2.5 Who starts with jay? Paint it!
+ 100.5 X 2.2/3.4 Dolphin starts with dee! Let’s look again!
+ 102.8 X 2.3/3.4 Dolphin starts with dee! Let’s look again!
+ 105.3   1.8/1.8 jay is for jellyfish!
+ 107.1   3.1/3.1 Paint the animal that starts with dee!
+ 112.0   2.0/2.0 Yes! dee is for dolphin!
+ 114.1   2.2/2.2 Let me finish the picture!
+ 116.3   1.8/1.8 Swish! It swims away!
+ 118.2   1.1/1.1 You got it!
+ 119.3   3.1/3.1 Paint the animal that starts with ess!
+ 122.4 X 1.5/2.5 Splish! Paint dots everywhere!
+ 124.0   2.1/2.1 Yes! ess is for starfish!
+ 126.1   3.4/3.4 Listen: eff! Which animal starts with eff?
+ 129.8   1.4/1.4 eff is for fish!
+ 131.3   2.2/2.2 Let me finish the picture!
+ 133.5   1.8/1.8 Swish! It swims away!
+ 135.4   1.4/1.4 What a picture!
+ 136.8   3.1/3.1 Paint the animal that starts with jay!
+ 140.9   2.2/2.2 Yes! jay is for jellyfish!
+ 143.2 X 3.0/3.4 Listen: eff! Which animal starts with eff?
+ 146.3   1.4/1.4 eff is for fish!
+ 147.7   2.8/2.8 Swish, swish! Nini paints the rest!
+ 150.6   1.7/1.7 Look, it’s swimming!
+ 152.4   1.6/1.6 You are so clever!
+ 154.0   3.7/3.7 Talk time! Which letter does whale start with?
+ 158.2   3.1/3.1 It is the letter double you! Good try!
+ 161.6   1.7/1.7 Chapter 3. Adding Up
+ 163.3   2.6/2.6 Autumn leaves are drifting down!
+ 166.0   2.8/2.8 What is 1 plus 1? Paint the answer!
+ 169.8   1.4/1.4 1 plus 1 is two!
+ 171.3   2.2/2.2 Let me finish the picture!
+ 173.5   1.7/1.7 Look, it floats up!
+ 175.2   1.6/1.6 You are so clever!
+ 176.9   2.8/2.8 What is 4 plus 4? Paint the answer!
+ 181.4   2.0/2.0 Yes! 4 plus 4 is eight!
+ 183.4   2.8/2.8 What is 9 plus 1? Paint the answer!
+ 187.9   1.4/1.4 9 plus 1 is ten!
+ 189.4   2.8/2.8 Swish, swish! Nini paints the rest!
+ 192.3   1.9/1.9 Bye-bye! Off it swims!
+ 194.2   2.8/2.8 What is 7 plus 3? Paint the answer!
+ 197.1 X 0.1/2.5 A clam is sleeping on the sand!
+ 197.3 X 2.3/2.4 Ooh! The clam opens! A pearl!
+ 199.7   1.4/1.4 7 plus 3 is ten!
+ 201.1   4.0/4.0 Let’s add! 1 plus 1. Find the answer and paint it!
+ 205.1 X 1.0/3.1 That’s number eight. Let’s count again!
+ 206.3   1.4/1.4 1 plus 1 is two!
+ 207.7   2.8/2.8 Swish, swish! Nini paints the rest!
+ 210.6   1.9/1.9 Bye-bye! Off it swims!
+ 212.5   0.9/0.9 Nice one!
+ 213.5   3.2/3.2 Count it up: 1 plus 1! Paint the answer!
+ 216.7 X 1.5/3.5 Hmm, number nine. Let’s count one more time!
+ 218.3   1.4/1.4 1 plus 1 is two!
+ 219.8   4.0/4.0 Let’s add! 5 plus 4. Find the answer and paint it!
+ 224.8   1.5/1.5 5 plus 4 is nine!
+ 226.4   2.2/2.2 Let me finish the picture!
+ 228.6   1.7/1.7 Look, it floats up!
+ 230.3   0.9/0.9 Nice one!
+ 231.3   2.3/2.3 Talk time! What is 2 plus 4?
+ 235.7   1.7/1.7 Yes! You are right!
+ 239.1   2.3/2.3 Chapter 4. Counting Bubbles
+ 241.3   2.0/2.0 Brr, winter! Ice on top!
+ 243.4   2.9/2.9 Can you paint 2 pearls? Let’s count!
+ 247.5   0.5/0.5 One!
+ 248.9   0.5/0.5 Two!
+ 250.2   2.2/2.2 Let me finish the picture!
+ 252.4   1.8/1.8 Swish! It swims away!
+ 254.3   1.3/1.3 Super painter!
+ 255.6   2.4/2.4 Let’s count! Paint 2 bubbles!
+ 259.4   0.5/0.5 One!
+ 261.4   2.7/2.7 Hee hee! The little fish giggles!
+ 264.1   0.5/0.5 Two!
+ 265.1   2.2/2.2 Let me finish the picture!
+ 267.3   1.9/1.9 Bye-bye! Off it swims!
+ 269.2   1.3/1.3 Super painter!
+ 270.6   3.1/3.1 Can you paint 6 starfish? Let’s count!
+ 275.4   0.5/0.5 One!
+ 277.0   0.5/0.5 Two!
+ 278.3   0.7/0.7 Three!
+ 280.2   0.6/0.6 Four!
+ 281.6   0.6/0.6 Five!
+ 282.9   2.2/2.2 Look for the sparkly part!
+ 285.2   0.5/0.5 Six!
+ 285.9   2.8/2.8 Swish, swish! Nini paints the rest!
+ 288.8   1.8/1.8 Bob, bob! Up it goes!
+ 290.6   1.3/1.3 Super painter!
+ 292.0   1.8/1.8 Paint 10 pearls blue!
+ 296.2   0.5/0.5 One!
+ 297.7   0.5/0.5 Two!
+ 298.9   2.0/2.0 Paint the shining part!
+ 301.3   0.7/0.7 Three!
+ 303.3   0.6/0.6 Four!
+ 304.6   0.6/0.6 Five!
+ 306.1   0.5/0.5 Six!
+ 307.8   0.7/0.7 Seven!
+ 310.1   0.7/0.7 Eight!
+ 312.3   0.6/0.6 Nine!
+ 314.5   0.5/0.5 Ten!
+ 315.7   2.8/2.8 Swish, swish! Nini paints the rest!
+ 318.6   1.7/1.7 Look, it floats up!
+ 320.3   1.4/1.4 What a picture!
+ 321.7   3.1/3.1 Talk time! How many bubbles are there?
+ 325.8   1.4/1.4 Correct! Hooray!
+ 329.1   1.5/1.5 So many pictures!
+ 330.7   3.3/3.3 What a sea of pictures! 45 stars! Hooray!
+PROMPT CUT 6vi after 3.7/4.4 s: Bé ơi, chữ u hoa có một bạn nhỏ. Bé tô chữ u thường nhé!
+--- session 6 vi (5.4 min)
+   0.1   2.4/2.4 Chương 1. Chữ hoa, chữ thường
+   2.6   3.1/3.1 Mùa xuân, cánh hoa trôi trên mặt nước!
+   5.7 X 3.7/4.4 Bé ơi, chữ u hoa có một bạn nhỏ. Bé tô chữ u thường nhé!
+   9.4   2.3/2.3 Bé tìm ra chữ u thường rồi!
+  11.7   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+  14.1   1.8/1.8 Nhìn kìa, nó bơi rồi!
+  15.9   2.0/2.0 Hoan hô, tranh xong rồi!
+  18.0 X 1.9/4.5 Bé ơi, chữ cờ hoa có một bạn nhỏ. Bé tô chữ cờ thường nhé!
+  20.1   2.0/2.0 Chữ cờ thường! Đẹp quá!
+  22.0 X 3.4/4.3 Chữ pờ thường ở đâu nhỉ? Bạn ấy đi cùng chữ pờ hoa đó!
+  25.6   2.3/2.3 Bé tìm ra chữ pờ thường rồi!
+  27.9   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+  30.4   1.9/1.9 Lên, lên, lên cao nào!
+  32.3   1.6/1.6 Bé thông minh quá!
+  34.0 X 2.4/4.4 Bé ơi, chữ e hoa có một bạn nhỏ. Bé tô chữ e thường nhé!
+  36.5   2.0/2.0 Chữ e thường! Giỏi quá!
+  38.4 X 3.4/4.4 Bé ơi, chữ u hoa có một bạn nhỏ. Bé tô chữ u thường nhé!
+  42.0   1.9/1.9 Chữ u thường! Đẹp quá!
+  43.9   4.3/4.3 Chữ pờ thường ở đâu nhỉ? Bạn ấy đi cùng chữ pờ hoa đó!
+  48.8   2.0/2.0 Chữ pờ thường! Đẹp quá!
+  50.7   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+  53.3   1.8/1.8 Nhìn kìa, nó bơi rồi!
+  55.1   1.6/1.6 Bé thông minh quá!
+  56.7 X 3.1/4.3 Chữ mờ thường ở đâu nhỉ? Bạn ấy đi cùng chữ mờ hoa đó!
+  60.0   2.3/2.3 Bé tìm ra chữ mờ thường rồi!
+  62.3   2.6/2.6 Bé tìm chữ nờ thường rồi tô nào!
+  66.8   2.3/2.3 Bé tìm ra chữ nờ thường rồi!
+  69.2   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+  71.7   1.8/1.8 Tạm biệt! Bơi đi nào!
+  73.6   1.6/1.6 Bé thông minh quá!
+  75.2 X 2.8/4.9 Giờ trò chuyện! Chữ sờ thường ở đâu nhỉ? Bạn của chữ sờ hoa đó!
+  78.0   2.9/2.9 Là chữ sờ thường đó! Bé cố gắng lắm!
+  81.5   2.2/2.2 Chương 2. Chữ cái đầu tiên
+  83.7   2.2/2.2 Mùa hè, biển nắng đẹp quá!
+  85.9 X 2.9/3.1 Bạn nào bắt đầu bằng chữ bờ? Bé tô nào!
+  88.8   2.3/2.3 Đúng rồi! Chữ bờ, bạch tuộc!
+  91.2   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+  93.7   1.8/1.8 Tạm biệt! Bơi đi nào!
+  95.6 X 3.6/4.1 Bé nghe nè, chữ bờ! Con vật nào bắt đầu bằng chữ bờ?
+  99.3   2.3/2.3 Đúng rồi! Chữ bờ, bạch tuộc!
+ 101.6 X 3.9/4.1 Bé nghe nè, chữ cờ! Con vật nào bắt đầu bằng chữ cờ?
+ 105.7   1.4/1.4 Chữ cờ, cá ngựa!
+ 107.1   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+ 109.5   1.4/1.4 Vút! Bơi đi rồi!
+ 111.0   2.0/2.0 Bé là họa sĩ siêu giỏi!
+ 113.0   4.1/4.1 Bé nghe nè, chữ cờ! Con vật nào bắt đầu bằng chữ cờ?
+ 117.5   2.1/2.1 Đúng rồi! Chữ cờ, cá voi!
+ 119.6   3.4/3.4 Bé ơi, tô con vật bắt đầu bằng chữ bờ nhé!
+ 123.8   1.6/1.6 Chữ bờ, bạch tuộc!
+ 125.5   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+ 127.8   1.4/1.4 Vút! Bơi đi rồi!
+ 129.3   2.0/2.0 Hoan hô, tranh xong rồi!
+ 131.4   3.1/3.1 Bạn nào bắt đầu bằng chữ bờ? Bé tô nào!
+ 134.6 X 1.8/3.7 Cá ngựa bắt đầu bằng chữ cờ! Mình tìm lại nhé!
+ 136.4   2.3/2.3 Đúng rồi! Chữ bờ, bạch tuộc!
+ 138.8   3.4/3.4 Bé ơi, tô con vật bắt đầu bằng chữ cờ nhé!
+ 142.3 X 2.4/3.4 Sứa bắt đầu bằng chữ sờ! Mình tìm lại nhé!
+ 144.8   1.4/1.4 Chữ cờ, cá ngựa!
+ 146.3   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+ 148.8   1.8/1.8 Nhìn kìa, nó bơi rồi!
+ 150.7   0.9/0.9 Giỏi quá!
+ 151.6   3.5/3.5 Giờ trò chuyện! Cua bắt đầu bằng chữ gì nhỉ?
+ 156.4   1.6/1.6 Bé thông minh quá!
+ 159.8   1.7/1.7 Chương 3. Phép cộng
+ 161.5   2.6/2.6 Mùa thu, lá vàng rơi xuống biển!
+ 164.2   4.0/4.0 Mình cộng nào! 1 cộng 1. Bé tìm đáp án rồi tô nhé!
+ 169.3   1.6/1.6 1 cộng 1 bằng hai!
+ 170.9   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+ 173.8   1.8/1.8 Nhìn kìa, nó bơi rồi!
+ 175.6   1.6/1.6 Bức tranh đẹp quá!
+ 177.2   3.4/3.4 Bé ơi, 4 cộng 6 bằng mấy? Bé tô đáp án nhé!
+ 180.7 X 1.1/2.8 Ồ, số sáu. Bé đếm thêm lần nữa nào!
+ 181.8 X 2.2/2.9 Ồ, số chín. Bé đếm thêm lần nữa nào!
+ 184.2   1.7/1.7 4 cộng 6 bằng mười!
+ 185.8   3.0/3.0 Bé tính nhé: 6 cộng 3! Tô đáp án nào!
+ 191.2   1.7/1.7 6 cộng 3 bằng chín!
+ 192.8   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+ 195.7   1.4/1.4 Vút! Bơi đi rồi!
+ 197.2   1.1/1.1 Bé giỏi lắm!
+ 198.4   3.0/3.0 Bé tính nhé: 5 cộng 2! Tô đáp án nào!
+ 201.4 X 1.5/1.8 Bụp! Chấm màu đủ màu!
+ 203.1   1.6/1.6 5 cộng 2 bằng bảy!
+ 204.7   3.4/3.4 Bé ơi, 1 cộng 1 bằng mấy? Bé tô đáp án nhé!
+ 208.9   1.6/1.6 1 cộng 1 bằng hai!
+ 210.6   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+ 213.1   2.3/2.3 Tạm biệt! Bồng bềnh bay lên!
+ 215.4   2.0/2.0 Hoan hô, tranh xong rồi!
+ 217.5 X 2.4/3.4 Bé ơi, 6 cộng 1 bằng mấy? Bé tô đáp án nhé!
+ 220.1   1.6/1.6 6 cộng 1 bằng bảy!
+ 221.7 X 3.6/4.0 Mình cộng nào! 3 cộng 2. Bé tìm đáp án rồi tô nhé!
+ 225.3   2.3/2.3 Đúng rồi! 3 cộng 2 bằng năm!
+ 227.7   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+ 230.6   2.0/2.0 Bé là họa sĩ siêu giỏi!
+ 232.6   3.1/3.1 Giờ trò chuyện! 1 cộng 2 bằng mấy nhỉ?
+ 237.3   2.3/2.3 Là số ba đó! Bé cố gắng lắm!
+ 240.7   2.0/2.0 Chương 4. Đếm bong bóng
+ 242.6   2.8/2.8 Brr, mùa đông! Trên kia có băng nè!
+ 245.5   3.3/3.3 Mình đếm nhé! Bé tô 2 viên ngọc trai nào!
+ 248.9   0.5/0.5 Một!
+ 251.1   0.5/0.5 Hai!
+ 252.3   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+ 254.8   1.9/1.9 Lên, lên, lên cao nào!
+ 256.7   1.6/1.6 Bức tranh đẹp quá!
+ 258.4   3.1/3.1 Mình đếm nhé! Bé tô 2 con sao biển nào!
+ 262.2   0.5/0.5 Một!
+ 264.5   0.5/0.5 Hai!
+ 265.7   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+ 268.2   2.4/2.4 Tạm biệt! Dập dềnh, dập dềnh!
+ 270.7   2.0/2.0 Hoan hô, tranh xong rồi!
+ 272.7   2.9/2.9 Mình đếm nhé! Bé tô 7 bong bóng nào!
+ 275.7   2.5/2.5 Có bạn sò đang ngủ trên cát nè!
+ 278.3   0.5/0.5 Một!
+ 278.8   0.5/0.5 Hai!
+ 279.4   0.5/0.5 Ba!
+ 280.3   0.5/0.5 Bốn!
+ 282.1   0.5/0.5 Năm!
+ 284.4   0.5/0.5 Sáu!
+ 287.0   0.5/0.5 Bảy!
+ 288.2   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+ 291.1   1.9/1.9 Bập bềnh! Lên cao nào!
+ 293.0   1.6/1.6 Bức tranh đẹp quá!
+ 294.6   2.7/2.7 Bé ơi, tô 6 bong bóng màu đỏ nhé!
+ 298.9   0.5/0.5 Một!
+ 300.9   0.5/0.5 Hai!
+ 302.8   0.5/0.5 Ba!
+ 304.9   0.5/0.5 Bốn!
+ 307.1   0.5/0.5 Năm!
+ 309.3   0.5/0.5 Sáu!
+ 310.5   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+ 313.0   1.8/1.8 Nhìn kìa, nó bơi rồi!
+ 314.9   2.0/2.0 Bé là họa sĩ siêu giỏi!
+ 316.9 X 2.5/3.0 Giờ trò chuyện! Có mấy bong bóng nào?
+ 319.4   1.7/1.7 Đúng luôn! Siêu quá!
+ 322.9   2.0/2.0 Bao nhiêu là tranh đẹp!
+ 324.8 X -326.9/2.6 Biển tranh đẹp quá! 46 ngôi sao!
+--- session 7 en (5.3 min)
+   0.1   2.0/2.0 Chapter 1. First Letters
+   2.2   2.3/2.3 Spring petals on the water!
+   4.5   2.5/2.5 Who starts with dee? Paint it!
+   9.4   1.7/1.7 dee is for dolphin!
+  11.1   2.2/2.2 Let me finish the picture!
+  13.4   1.8/1.8 Swish! It swims away!
+  15.2   1.6/1.6 You are so clever!
+  16.8   3.0/3.0 Paint the animal that starts with oh!
+  19.9 X 0.1/2.5 A clam is sleeping on the sand!
+  20.1   1.6/1.6 oh is for octopus!
+  21.7   2.5/2.5 Who starts with dee? Paint it!
+  26.6   2.0/2.0 Yes! dee is for dolphin!
+  28.6   2.0/2.0 Nini finishes the rest!
+  30.6   1.8/1.8 Swish! It swims away!
+  32.5   1.3/1.3 Super painter!
+  33.8 X 4.4/4.4 Listen: double you! Which animal starts with double you?
+  38.3   2.4/2.4 Yes! double you is for whale!
+  40.7   2.5/2.5 Who starts with dee? Paint it!
+  44.8   2.0/2.0 Yes! dee is for dolphin!
+  46.8   2.8/2.8 Swish, swish! Nini paints the rest!
+  49.7   1.9/1.9 Bye-bye! Off it swims!
+  51.6   2.3/2.3 Hooray! The picture is done!
+  54.0   3.1/3.1 Paint the animal that starts with see!
+  57.1 X 0.1/3.7 Octopus starts with oh. Let’s find another one!
+  57.3   1.8/1.8 Yes! see is for crab!
+  59.1   2.5/2.5 Who starts with eff? Paint it!
+  63.3 X 2.3/3.3 Octopus starts with oh! Let’s look again!
+  65.7   1.4/1.4 eff is for fish!
+  67.1   2.8/2.8 Swish, swish! Nini paints the rest!
+  70.0   1.8/1.8 Swish! It swims away!
+  71.9   1.1/1.1 You got it!
+  73.0   3.7/3.7 Talk time! Which letter does whale start with?
+  77.3   1.1/1.1 Clever you!
+  80.7   1.7/1.7 Chapter 2. Adding Up
+  82.4   1.5/1.5 Sunny summer sea!
+  84.2   3.2/3.2 Count it up: 5 plus 1! Paint the answer!
+  90.0   1.8/1.8 Yes! 5 plus 1 is six!
+  91.9   2.0/2.0 Nini finishes the rest!
+  93.9   1.7/1.7 Look, it’s swimming!
+  95.7   1.3/1.3 Super painter!
+  97.0   4.0/4.0 Let’s add! 9 plus 1. Find the answer and paint it!
+ 101.0 X 1.5/3.5 Hmm, number nine. Let’s count one more time!
+ 102.5 X 2.3/3.8 Hmm, number nineteen. Let’s count one more time!
+ 105.0   1.4/1.4 9 plus 1 is ten!
+ 106.4   2.9/2.9 What is 13 plus 6? Paint the answer!
+ 111.8   2.3/2.3 Yes! 13 plus 6 is nineteen!
+ 114.1   2.8/2.8 Swish, swish! Nini paints the rest!
+ 117.0   1.9/1.9 Bye-bye! Off it swims!
+ 118.9   0.9/0.9 Nice one!
+ 119.9   2.9/2.9 What is 12 plus 7? Paint the answer!
+ 122.9 X 0.8/2.7 Hee hee! The little fish giggles!
+ 123.8   1.9/1.9 12 plus 7 is nineteen!
+ 125.7 X 3.9/4.0 Let’s add! 4 plus 14. Find the answer and paint it!
+ 129.7   1.9/1.9 4 plus 14 is eighteen!
+ 131.6   2.8/2.8 Swish, swish! Nini paints the rest!
+ 134.5   1.7/1.7 Look, it floats up!
+ 136.1   1.4/1.4 What a picture!
+ 137.6 X 3.0/4.0 Let’s add! 4 plus 5. Find the answer and paint it!
+ 140.7   1.5/1.5 4 plus 5 is nine!
+ 142.2   3.2/3.2 Count it up: 3 plus 4! Paint the answer!
+ 146.1   2.0/2.0 Yes! 3 plus 4 is seven!
+ 148.0   2.8/2.8 Swish, swish! Nini paints the rest!
+ 150.9   1.8/1.8 Swish! It swims away!
+ 152.8   1.4/1.4 What a picture!
+ 154.2   2.4/2.4 Talk time! What is 3 plus 10?
+ 157.8   2.1/2.1 It is thirteen! Good try!
+ 161.3   1.7/1.7 Chapter 3. Take Away
+ 163.0   2.6/2.6 Autumn leaves are drifting down!
+ 165.7   3.5/3.5 Start with 3, take away 2! Paint the answer!
+ 169.7   1.5/1.5 3 minus 2 is one!
+ 171.2   2.0/2.0 Nini finishes the rest!
+ 173.2   1.7/1.7 Look, it’s swimming!
+ 175.0   1.3/1.3 Super painter!
+ 176.3   4.0/4.0 Take away! 3 minus 3. Find the answer and paint it!
+ 180.4 X 0.7/2.4 Look! A clam! What is inside?
+ 181.2   2.0/2.0 Yes! 3 minus 3 is zero!
+ 183.1   2.9/2.9 What is 5 minus 1? Paint the answer!
+ 187.8   2.0/2.0 Yes! 5 minus 1 is four!
+ 189.8   2.2/2.2 Let me finish the picture!
+ 192.1   2.0/2.0 Bye-bye! Floating away!
+ 194.1   2.3/2.3 Hooray! The picture is done!
+ 196.4   2.9/2.9 What is 6 minus 2? Paint the answer!
+ 199.6   1.6/1.6 6 minus 2 is four!
+ 201.2   2.9/2.9 What is 9 minus 6? Paint the answer!
+ 206.2   1.7/1.7 9 minus 6 is three!
+ 207.8   2.0/2.0 Nini finishes the rest!
+ 209.8   1.7/1.7 Look, it’s swimming!
+ 211.6   1.3/1.3 Super painter!
+ 212.9   3.5/3.5 Start with 6, take away 6! Paint the answer!
+ 218.2   1.6/1.6 6 minus 6 is zero!
+ 219.8   3.5/3.5 Start with 5, take away 4! Paint the answer!
+ 224.1   1.5/1.5 5 minus 4 is one!
+ 225.6   2.2/2.2 Let me finish the picture!
+ 227.8   1.7/1.7 Look, it’s swimming!
+ 229.6   2.3/2.3 Hooray! The picture is done!
+ 232.0   2.4/2.4 Talk time! What is 4 minus 2?
+ 236.3   1.6/1.6 That is it! Super!
+ 239.7   2.0/2.0 Chapter 4. Odd and Even
+ 241.6   2.0/2.0 Brr, winter! Ice on top!
+ 243.7   2.8/2.8 Find every odd number and paint it!
+ 247.8 X 1.5/3.6 Fourteen is even. Let’s find a different one!
+ 249.4   3.4/3.4 Twenty is even. Let’s find a different one!
+ 252.9   1.9/1.9 The shiny one! Tap it!
+ 254.8   2.2/2.2 Let me finish the picture!
+ 257.1   1.7/1.7 Look, it floats up!
+ 258.8   0.9/0.9 Nice one!
+ 259.7   2.9/2.9 Find every even number and paint it!
+ 263.5   0.5/0.5 One!
+ 265.6   0.5/0.5 Two!
+ 267.6   3.2/3.2 Five is odd! Let’s look for another one!
+ 270.8   0.7/0.7 Three!
+ 271.5   2.0/2.0 Nini finishes the rest!
+ 273.5   1.7/1.7 Look, it’s swimming!
+ 275.3   0.8/0.8 Hooray!
+ 276.2   2.4/2.4 Let’s paint the even numbers!
+ 278.7   2.5/2.5 A little fish swims by! Tap it!
+ 281.9   0.5/0.5 One!
+ 283.6   0.5/0.5 Two!
+ 284.8   2.2/2.2 Let me finish the picture!
+ 287.0   1.9/1.9 Bye-bye! Off it swims!
+ 288.9   1.4/1.4 What a picture!
+ 290.3   2.2/2.2 Paint all the odd numbers!
+ 295.3   0.5/0.5 One!
+ 297.8   0.5/0.5 Two!
+ 300.4   0.7/0.7 Three!
+ 301.6   2.0/2.0 Nini finishes the rest!
+ 303.6   1.7/1.7 Look, it floats up!
+ 305.3   2.3/2.3 Hooray! The picture is done!
+ 307.7   2.5/2.5 Talk time! Which number is odd?
+ 311.8   1.6/1.6 That is it! Super!
+ 315.1   1.5/1.5 So many pictures!
+ 316.7   2.8/2.8 So many pictures painted! 44 stars!
+--- session 7 vi (5.2 min)
+   0.1   2.2/2.2 Chương 1. Chữ cái đầu tiên
+   2.4   3.1/3.1 Mùa xuân, cánh hoa trôi trên mặt nước!
+   5.5 X 3.9/4.1 Bé nghe nè, chữ sờ! Con vật nào bắt đầu bằng chữ sờ?
+   9.4   1.5/1.5 Chữ sờ, sao biển!
+  11.0   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+  13.9   1.8/1.8 Tạm biệt! Bơi đi nào!
+  15.7   2.0/2.0 Bé là họa sĩ siêu giỏi!
+  17.7 X 2.2/3.4 Bé ơi, tô con vật bắt đầu bằng chữ cờ nhé!
+  20.1   1.4/1.4 Chữ cờ, cá ngựa!
+  21.5   3.1/3.1 Bạn nào bắt đầu bằng chữ sờ? Bé tô nào!
+  25.6   2.3/2.3 Đúng rồi! Chữ sờ, sao biển!
+  27.8   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+  30.7   1.8/1.8 Nhìn kìa, nó bơi rồi!
+  32.6   2.0/2.0 Hoan hô, tranh xong rồi!
+  34.6 X 1.7/4.1 Bé nghe nè, chữ cờ! Con vật nào bắt đầu bằng chữ cờ?
+  36.5   1.1/1.1 Chữ cờ, cá!
+  37.6   3.4/3.4 Bé ơi, tô con vật bắt đầu bằng chữ bờ nhé!
+  42.0   1.6/1.6 Chữ bờ, bạch tuộc!
+  43.7   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+  46.0   1.8/1.8 Nhìn kìa, nó bơi rồi!
+  47.9   1.6/1.6 Bé thông minh quá!
+  49.5 X 2.9/4.1 Bé nghe nè, chữ cờ! Con vật nào bắt đầu bằng chữ cờ?
+  52.5   1.8/1.8 Đúng rồi! Chữ cờ, cá!
+  54.3   3.1/3.1 Bạn nào bắt đầu bằng chữ sờ? Bé tô nào!
+  58.5   1.1/1.1 Chữ sờ, sứa!
+  59.7   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+  62.1   1.8/1.8 Nhìn kìa, nó bơi rồi!
+  63.9   1.6/1.6 Bức tranh đẹp quá!
+  65.6   4.0/4.0 Giờ trò chuyện! Bạch tuộc bắt đầu bằng chữ gì nhỉ?
+  70.5   1.7/1.7 Chính xác! Hoan hô!
+  74.0   1.7/1.7 Chương 2. Phép cộng
+  75.6   2.2/2.2 Mùa hè, biển nắng đẹp quá!
+  77.9   3.4/3.4 Bé ơi, 2 cộng 2 bằng mấy? Bé tô đáp án nhé!
+  83.0 X 2.2/2.8 Ồ, số hai. Bé đếm thêm lần nữa nào!
+  85.3   1.6/1.6 2 cộng 2 bằng bốn!
+  86.9   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+  89.4   1.9/1.9 Lên, lên, lên cao nào!
+  91.3   0.9/0.9 Siêu quá!
+  92.3 X 3.1/4.0 Mình cộng nào! 2 cộng 6. Bé tìm đáp án rồi tô nhé!
+  95.5   1.6/1.6 2 cộng 6 bằng tám!
+  97.1   3.4/3.4 Bé ơi, 2 cộng 2 bằng mấy? Bé tô đáp án nhé!
+ 101.3   1.6/1.6 2 cộng 2 bằng bốn!
+ 102.9   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+ 105.4   1.8/1.8 Tạm biệt! Bơi đi nào!
+ 107.2   1.6/1.6 Bức tranh đẹp quá!
+ 108.9 X 3.8/4.0 Mình cộng nào! 1 cộng 3. Bé tìm đáp án rồi tô nhé!
+ 112.8   1.6/1.6 1 cộng 3 bằng bốn!
+ 114.4 X 3.3/3.4 Bé ơi, 9 cộng 1 bằng mấy? Bé tô đáp án nhé!
+ 117.8 X 1.5/2.8 Ồ, số hai. Bé đếm thêm lần nữa nào!
+ 119.3   1.7/1.7 9 cộng 1 bằng mười!
+ 121.0   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+ 123.6   1.8/1.8 Nhìn kìa, nó bơi rồi!
+ 125.4   0.8/0.8 Hoan hô!
+ 126.3   3.0/3.0 Bé tính nhé: 8 cộng 9! Tô đáp án nào!
+ 130.8   2.7/2.7 Đúng rồi! 8 cộng 9 bằng mười bảy!
+ 133.6   3.4/3.4 Bé ơi, 6 cộng 5 bằng mấy? Bé tô đáp án nhé!
+ 137.3 X 2.3/3.3 Ồ, số mười chín. Bé đếm thêm lần nữa nào!
+ 139.7   2.0/2.0 6 cộng 5 bằng mười một!
+ 141.6   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+ 144.0   1.9/1.9 Lên, lên, lên cao nào!
+ 145.9   0.9/0.9 Đúng rồi!
+ 146.9   3.1/3.1 Giờ trò chuyện! 5 cộng 10 bằng mấy nhỉ?
+ 151.6   2.8/2.8 Là số mười lăm đó! Bé cố gắng lắm!
+ 154.9   1.6/1.6 Chương 3. Phép trừ
+ 156.6   2.6/2.6 Mùa thu, lá vàng rơi xuống biển!
+ 159.2   3.4/3.4 Bé ơi, 7 trừ 2 bằng mấy? Bé tô đáp án nhé!
+ 164.1 X 2.1/2.6 Đây là số hai. Mình đếm lại nhé!
+ 166.3   1.5/1.5 7 trừ 2 bằng năm!
+ 167.8   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+ 170.7   1.8/1.8 Nhìn kìa, nó bơi rồi!
+ 172.5   0.8/0.8 Hay lắm!
+ 173.4   2.8/2.8 Có 10, bớt đi 2! Bé tô đáp án nào!
+ 177.8   1.6/1.6 10 trừ 2 bằng tám!
+ 179.5   2.7/2.7 Có 9, bớt đi 5! Bé tô đáp án nào!
+ 184.4   2.3/2.3 Đúng rồi! 9 trừ 5 bằng bốn!
+ 186.7   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+ 189.6   1.8/1.8 Tạm biệt! Bơi đi nào!
+ 191.5   2.0/2.0 Bé là họa sĩ siêu giỏi!
+ 193.5 X 1.6/3.8 Mình trừ nào! 8 trừ 6. Bé tìm đáp án rồi tô nhé!
+ 195.2   1.5/1.5 8 trừ 6 bằng hai!
+ 196.7   3.8/3.8 Mình trừ nào! 9 trừ 6. Bé tìm đáp án rồi tô nhé!
+ 200.5 X 2.1/2.8 Ồ, số sáu. Bé đếm thêm lần nữa nào!
+ 202.8   1.4/1.4 9 trừ 6 bằng ba!
+ 204.2   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+ 206.7   2.1/2.1 Nhìn kìa, nó bay lên rồi!
+ 208.9   0.8/0.8 Hoan hô!
+ 209.8   3.9/3.9 Mình trừ nào! 10 trừ 1. Bé tìm đáp án rồi tô nhé!
+ 214.6 X 1.9/2.8 Ồ, số sáu. Bé đếm thêm lần nữa nào!
+ 216.6   1.7/1.7 10 trừ 1 bằng chín!
+ 218.2   2.7/2.7 Có 7, bớt đi 1! Bé tô đáp án nào!
+ 222.8 X 1.7/2.8 Ồ, số bảy. Bé đếm thêm lần nữa nào!
+ 224.7   2.3/2.3 Đúng rồi! 7 trừ 1 bằng sáu!
+ 226.9   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+ 229.3   1.4/1.4 Vút! Bơi đi rồi!
+ 230.8   1.1/1.1 Bé giỏi lắm!
+ 232.0   3.0/3.0 Giờ trò chuyện! 5 trừ 3 bằng mấy nhỉ?
+ 235.1   1.7/1.7 Chính xác! Hoan hô!
+ 238.4   2.0/2.0 Chương 4. Số chẵn, số lẻ
+ 240.5   2.8/2.8 Brr, mùa đông! Trên kia có băng nè!
+ 243.4   1.9/1.9 Mình tô các số lẻ nhé!
+ 247.1 X 2.0/3.4 Mười bốn là số chẵn! Mình tìm số khác nhé!
+ 249.2   3.4/3.4 Mười sáu là số chẵn! Mình tìm số khác nhé!
+ 252.6   2.5/2.5 Ni Ni giúp bé nhé! Cái này nè!
+ 255.1   2.5/2.5 Ni Ni tô nốt phần còn lại nhé!
+ 257.6   1.8/1.8 Nhìn kìa, nó bơi rồi!
+ 259.4   0.9/0.9 Siêu quá!
+ 260.4   1.9/1.9 Mình tô các số lẻ nhé!
+ 263.4   0.5/0.5 Một!
+ 264.9   0.5/0.5 Hai!
+ 266.8   0.5/0.5 Ba!
+ 268.0   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+ 270.9   2.1/2.1 Nhìn kìa, nó bay lên rồi!
+ 273.0   2.0/2.0 Bé là họa sĩ siêu giỏi!
+ 275.0   2.8/2.8 Bé tìm hết các số chẵn rồi tô nào!
+ 277.8 X 0.6/2.8 Ồ! Bạn sò mở ra rồi! Ngọc trai nè!
+ 278.6   2.6/2.6 Ba là số lẻ. Bé tìm số khác nào!
+ 281.2   0.5/0.5 Hai!
+ 281.8   0.5/0.5 Ba!
+ 282.8   2.8/2.8 Để Ni Ni tô cho xong bức tranh nhé!
+ 285.7   1.4/1.4 Vút! Bơi đi rồi!
+ 287.2   1.0/1.0 Tuyệt vời!
+ 288.2   2.7/2.7 Bé ơi, tô tất cả các số chẵn nhé!
+ 292.4   0.5/0.5 Một!
+ 294.7   0.5/0.5 Hai!
+ 297.0   0.5/0.5 Ba!
+ 298.2   2.3/2.3 Quẹt, quẹt! Ni Ni tô nốt nè!
+ 300.6   1.8/1.8 Nhìn kìa, nó bơi rồi!
+ 302.4   2.0/2.0 Bé là họa sĩ siêu giỏi!
+ 304.4   3.1/3.1 Giờ trò chuyện! Số nào là số chẵn nhỉ?
+ 307.9   1.9/1.9 Đúng rồi! Bé giỏi quá!
+ 311.4   2.0/2.0 Nhìn tranh của mình nè!
+ 313.3   2.6/2.6 Biển tranh đẹp quá! 41 ngôi sao!

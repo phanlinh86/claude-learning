@@ -1,0 +1,308 @@
+/* Nini's Sea Painting — mobile-first shell (iPhone / iPad Safari, portrait + landscape). Sea palette: sea-foam rims,
+ * deep-teal ink, cream panels (answer colours stay for the paint only). */
+:root {
+  --ink: #23455a;
+  --cream: #fbfdff;
+  --green: #45b864; --green-d: #2a8343;
+  --orange: #ff9a2e; --orange-d: #c4650c;
+  --blue: #3c8de8; --blue-d: #1f5ba8;
+  --sky: #2E8FA8;
+  --rim: #8FD0D2; --rim-d: #4E9EA4; --deep: #1F6E8C; --foam: #EAF8F6;
+  --sa-t: env(safe-area-inset-top, 0px); --sa-r: env(safe-area-inset-right, 0px);
+  --sa-b: env(safe-area-inset-bottom, 0px); --sa-l: env(safe-area-inset-left, 0px);
+  --u: min(1vw, 1vh);            /* 1 % of the short side */
+  --font: ui-rounded, "SF Pro Rounded", "Arial Rounded MT Bold", "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  margin: 0; height: 100%; overflow: hidden; background: var(--sky);
+  overscroll-behavior: none; touch-action: none;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+  -webkit-text-size-adjust: 100%;
+  font-family: var(--font); color: var(--ink);
+}
+#stage { position: fixed; inset: 0; height: 100dvh; overflow: hidden; }
+#game { position: absolute; left: 0; top: 0; display: block; touch-action: none; }
+#safeProbe { position: absolute; visibility: hidden; pointer-events: none; inset: 0;
+  padding: var(--sa-t) var(--sa-r) var(--sa-b) var(--sa-l); }
+.hidden { display: none !important; }
+button { font-family: inherit; color: inherit; border: 0; background: none; cursor: pointer; touch-action: manipulation; }
+
+/* ---------- screens & panels ---------- */
+.screen { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  padding: calc(var(--sa-t) + 12px) calc(var(--sa-r) + 12px) calc(var(--sa-b) + 12px) calc(var(--sa-l) + 12px); z-index: 10; }
+.screen.dim { background: rgba(10, 50, 70, .4); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+.panel { background: var(--cream); border-radius: 28px; padding: 22px 24px; max-width: min(640px, 100%); width: 100%;
+  max-height: 100%; box-shadow: 0 8px 0 rgba(40, 60, 110, .22), 0 18px 40px rgba(0, 0, 0, .22);
+  border: 4px solid var(--rim); text-align: center; animation: pop .32s cubic-bezier(.3, 1.6, .5, 1); }
+.panel h2 { margin: 0 0 14px; font-size: clamp(26px, 5.2 * var(--u), 40px); font-weight: 800; letter-spacing: .5px; }
+.scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
+@keyframes pop { from { transform: scale(.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.menu { display: flex; flex-direction: column; gap: 12px; align-items: stretch; }
+.menu.row { flex-direction: row; justify-content: center; flex-wrap: wrap; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 64px; padding: 10px 26px;
+  border-radius: 22px; font-size: clamp(20px, 3.4 * var(--u), 28px); font-weight: 800; color: #fff;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, .18); transition: transform .08s; }
+.btn:active { transform: translateY(4px) scale(.98); }
+.btn .i { width: 1.2em; height: 1.2em; fill: currentColor; }
+.btn-big { min-height: 78px; font-size: clamp(24px, 4 * var(--u), 34px); }
+.btn-green { background: var(--green); box-shadow: 0 6px 0 var(--green-d); }
+.btn-orange { background: var(--orange); box-shadow: 0 6px 0 var(--orange-d); }
+.btn-blue { background: var(--blue); box-shadow: 0 6px 0 var(--blue-d); }
+.btn:active.btn-green { box-shadow: 0 2px 0 var(--green-d); }
+.btn:active.btn-orange { box-shadow: 0 2px 0 var(--orange-d); }
+
+/* ---------- title ---------- */
+.title-screen { flex-direction: column; justify-content: space-between; padding-top: calc(var(--sa-t) + 14px); }
+.title-top { width: 100%; display: flex; justify-content: space-between; align-items: flex-start; }
+.title-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  padding-bottom: 6vh; }
+.logo { margin: 0; max-width: 80vw; text-align: center; line-height: .95; font-weight: 900; font-size: clamp(44px, 11 * var(--u), 108px);
+  color: #fff; letter-spacing: 1px;
+  text-shadow: 0 4px 0 var(--deep), 0 8px 0 rgba(0, 0, 0, .14), 0 0 24px rgba(255, 255, 255, .5);
+  -webkit-text-stroke: 2px var(--deep); paint-order: stroke fill; }
+.logo span { display: inline-block; }
+#logo2 { color: #ffd23f; }
+.tagline { margin: 4px 0 8px; font-size: clamp(17px, 3 * var(--u), 26px); font-weight: 700; color: var(--ink);
+  background: rgba(255, 255, 255, .72); padding: 6px 16px; border-radius: 99px; text-align: center; }
+.btn-play { width: clamp(120px, 24 * var(--u), 190px); aspect-ratio: 1; border-radius: 50%; background: var(--green);
+  box-shadow: 0 9px 0 var(--green-d), 0 16px 30px rgba(0, 0, 0, .25); display: grid; place-items: center;
+  animation: breathe 1.8s ease-in-out infinite; border: 6px solid #fff; }
+.btn-play svg { width: 56%; fill: #fff; margin-left: 9%; }
+.btn-play:active { transform: translateY(6px) scale(.96); box-shadow: 0 3px 0 var(--green-d); animation: none; }
+@keyframes breathe { 50% { transform: scale(1.07); } }
+.title-info { margin: 10px 0 0; font-size: clamp(18px, 3 * var(--u), 26px); font-weight: 800; display: flex; align-items: center; gap: 6px;
+  background: rgba(255, 255, 255, .72); padding: 4px 16px; border-radius: 99px; }
+.title-info img { width: 1.4em; }
+#titleAge { opacity: .7; font-weight: 700; margin-left: 8px; }
+
+.lang-switch { display: flex; gap: 6px; background: rgba(255, 255, 255, .6); padding: 5px; border-radius: 99px; }
+.chip { min-height: 48px; min-width: 56px; padding: 6px 16px; border-radius: 99px; font-size: 19px; font-weight: 800;
+  background: #fff; color: var(--ink); box-shadow: 0 3px 0 rgba(0, 0, 0, .15); }
+.chip.on { background: var(--blue); color: #fff; box-shadow: 0 3px 0 var(--blue-d); }
+
+.gear-btn { position: relative; width: 60px; height: 60px; border-radius: 50%; background: rgba(255, 255, 255, .7); display: grid; place-items: center; }
+.gear-btn .gear { width: 30px; fill: #3f6b78; }
+.gear-btn .ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.gear-btn .ring circle { fill: none; stroke: var(--orange); stroke-width: 5; stroke-linecap: round;
+  stroke-dasharray: 132; stroke-dashoffset: calc(132 * (1 - var(--p, 0))); }
+.gear-tip { position: absolute; top: 64px; right: 0; white-space: nowrap; font-size: 13px; font-weight: 700;
+  background: rgba(255, 255, 255, .8); padding: 2px 8px; border-radius: 8px; opacity: 0; transition: opacity .2s; }
+.gear-btn.holding .gear-tip, .gear-btn.tip .gear-tip { opacity: 1; }
+
+/* ---------- settings ---------- */
+.settings-panel { text-align: left; }
+.settings-panel h2 { text-align: center; }
+.set-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 10px 0; flex-wrap: wrap; }
+.set-row label { font-size: 20px; font-weight: 800; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+#inpName { font: 700 20px var(--font); padding: 10px 14px; border-radius: 14px; border: 3px solid var(--rim); min-width: 0; width: 220px;
+  user-select: text; -webkit-user-select: text; touch-action: manipulation; }
+.set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; margin: 14px 0; }
+.toggle { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; background: #fff; padding: 10px 12px; border-radius: 14px; }
+.toggle input { width: 26px; height: 26px; accent-color: var(--green); }
+.small-note { font-size: 14px; opacity: .75; margin: 4px 0 12px; }
+.settings-panel > .btn { width: 100%; position: sticky; bottom: -22px; box-shadow: 0 6px 0 var(--green-d), 0 -10px 16px var(--cream); }
+@media (max-height: 500px) {
+  .settings-panel h2 { margin-bottom: 6px; }
+  .set-row { margin: 6px 0; }
+  .set-grid { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin: 8px 0; gap: 6px; }
+  .toggle { padding: 6px 10px; }
+  .settings-panel > .btn { bottom: -12px; min-height: 52px; }
+}
+
+/* ---------- HUD ---------- */
+#hud { position: absolute; top: calc(var(--sa-t) + 10px); right: calc(var(--sa-r) + 10px); display: flex; align-items: center; gap: 10px; z-index: 5; }
+#stage.talking #hud { z-index: 12; }   /* the pause button stays reachable during Talk time */
+.hud-stars { display: flex; align-items: center; gap: 4px; background: rgba(255, 255, 255, .85); border-radius: 99px; padding: 4px 14px 4px 6px;
+  font-size: 26px; font-weight: 900; box-shadow: 0 3px 0 rgba(0, 0, 0, .12); }
+.hud-stars img { width: 38px; height: 38px; }
+.hud-stars.bump { animation: bump .45s cubic-bezier(.3, 1.8, .5, 1); }
+@keyframes bump { 40% { transform: scale(1.28); } }
+.hud-dots { display: flex; gap: 5px; background: rgba(255, 255, 255, .6); padding: 8px 10px; border-radius: 99px; }
+.hud-dots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(20, 70, 90, .22); }
+.hud-dots i.done { background: #ffc531; box-shadow: 0 0 0 2px #fff inset; }
+.hud-dots i.now { background: #fff; box-shadow: 0 0 0 3px #ffc531 inset; }
+.icon-btn { width: 56px; height: 56px; border-radius: 50%; background: rgba(255, 255, 255, .85); display: grid; place-items: center;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, .12); }
+.icon-btn svg { width: 26px; fill: #2f5c6c; }
+
+/* ---------- speech bubble ---------- */
+.bubble { position: absolute; z-index: 4; display: flex; align-items: center; background: #fff; border-radius: 26px;
+  padding: 10px 20px; border: 3px solid var(--rim); box-shadow: 0 5px 0 rgba(10, 50, 70, .16);
+  font-weight: 800; line-height: 1.15; color: var(--ink); transform-origin: 0 60%; cursor: pointer; }
+/* a little tail down-left, towards Nini on the sand */
+.bubble::before { content: ""; position: absolute; left: 38px; bottom: -21px; border: 11px solid transparent; border-top: 18px solid var(--rim); border-bottom: 0; }
+.bubble::after { content: ""; position: absolute; left: 41px; bottom: -15px; border: 8px solid transparent; border-top: 14px solid #fff; border-bottom: 0; }
+.bubble.say { animation: say .35s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes say { from { transform: scale(.85); } }
+
+/* ---------- talk time ---------- */
+.talk-panel #talkShow { width: min(300px, 70vw); height: auto; aspect-ratio: 5 / 3; display: block; margin: 0 auto 4px; }
+.talk-q { font-size: clamp(20px, 3.4 * var(--u), 28px); font-weight: 800; margin: 4px 0 14px; }
+.talk-choices { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.talk-choices button { min-width: 108px; min-height: 96px; padding: 8px 14px; border-radius: 22px; background: #fff;
+  border: 4px solid var(--rim); box-shadow: 0 6px 0 rgba(10, 60, 80, .2); font-size: 34px; font-weight: 900;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.talk-choices button small { font-size: 16px; font-weight: 800; }
+.talk-choices button canvas { width: 88px; height: 88px; }
+.talk-choices button.right { border-color: var(--green); background: #e5f8e9; animation: bump .5s; }
+.talk-choices button.glow { border-color: #ffc531; box-shadow: 0 0 0 6px rgba(255,197,49,.45), 0 6px 0 rgba(40,60,110,.2); animation: breathe 1s ease-in-out infinite; }
+.talk-choices button.wrongpick { opacity: .45; }
+.talk-choices button:active { transform: translateY(4px); }
+.mic-btn { margin-top: 16px; display: inline-flex; align-items: center; gap: 10px; min-height: 60px; padding: 8px 22px; border-radius: 99px;
+  background: #ff6f91; color: #fff; font-size: 20px; font-weight: 800; box-shadow: 0 5px 0 #c0405f; }
+.mic-btn svg { width: 30px; fill: #fff; }
+.mic-btn.listening { animation: breathe 1s ease-in-out infinite; background: #ff3d6e; }
+
+/* ---------- done ---------- */
+#scrDone { align-items: flex-end; padding-bottom: calc(var(--sa-b) + 4vh); }
+/* every landscape screen: panel on the right so Nini and the gallery stay visible */
+@media (orientation: landscape) {
+  #scrDone { align-items: flex-start; justify-content: flex-end; padding-top: calc(var(--sa-t) + 8vh); padding-bottom: 0; }
+  #scrDone .done-panel { max-width: min(470px, 46vw); }
+}
+@media (orientation: portrait) {
+  #scrDone { padding-bottom: calc(var(--sa-b) + 2vh); }
+  /* portrait title: logo + ▶ at the top, Nini and her painting below */
+  .title-wrap { justify-content: flex-start; padding-top: 4vh; padding-bottom: 0; gap: 6px; }
+  .btn-play { width: clamp(110px, 22 * var(--u), 170px); }
+}
+.done-panel { background: rgba(250, 254, 253, .94); max-width: 560px; }
+.done-sub { margin: -6px 0 10px; font-size: 18px; font-weight: 800; color: var(--deep); }
+.done-stars { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 56px; font-weight: 900; margin: 0 0 14px; }
+.done-stars img { width: 72px; }
+
+/* ---------- loading ---------- */
+#loading { background: var(--sky); z-index: 50; }
+.loader { width: 64px; height: 64px; border-radius: 50%; border: 8px solid rgba(255, 255, 255, .5); border-top-color: #fff; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* compact phones in landscape */
+@media (max-height: 430px) {
+  .panel { padding: 12px 18px; border-radius: 22px; }
+  .panel h2 { margin-bottom: 8px; }
+  .btn { min-height: 54px; }
+  .btn-big { min-height: 60px; }
+  /* landscape phones: Talk time in two columns (preview left, question + answers right) */
+  .talk-panel { display: grid; grid-template-columns: 170px minmax(0, 1fr); grid-template-rows: auto auto 1fr auto;
+    column-gap: 16px; align-items: center; max-width: min(760px, 100%); padding: 10px 16px; }
+  .talk-panel h2 { grid-column: 1 / -1; font-size: 24px; margin: 0 0 4px; }
+  .talk-panel #talkShow { grid-column: 1; grid-row: 2 / 5; width: 170px; }
+  .talk-q { grid-column: 2; margin: 0 0 8px; font-size: 20px; }
+  .talk-choices { grid-column: 2; }
+  .mic-btn { grid-column: 2; justify-self: center; margin-top: 8px; min-height: 48px; }
+  .talk-choices button { min-height: 72px; min-width: 88px; font-size: 26px; }
+  .hud-stars img { width: 30px; height: 30px; } .hud-stars { font-size: 22px; }
+  .talk-panel.noshow { grid-template-columns: minmax(0, 1fr); }
+  .talk-panel.noshow > * { grid-column: 1; }
+  .logo { font-size: 38px; max-width: 70vw; } .title-wrap { padding-bottom: 0; gap: 4px; } .btn-play { width: 104px; } .tagline { margin: 2px 0 4px; }
+  .icon-btn { width: 48px; height: 48px; }
+}
+@media (max-width: 430px) {
+  .talk-choices { gap: 8px; }
+  .talk-choices button { min-width: 90px; padding: 8px 8px; }
+  .panel { padding: 18px 14px; }
+}
+@media (min-width: 768px) and (min-height: 700px) {   /* iPad: larger Talk time */
+  .talk-panel { max-width: 720px; }
+  .talk-panel #talkShow { width: 380px; }
+  .talk-choices button { min-width: 140px; min-height: 120px; font-size: 44px; }
+  .talk-choices button canvas { width: 104px; height: 104px; }
+}
+@media (prefers-reduced-motion: reduce) { .btn-play { animation: none; } }
+/* the smallest landscape phones (SE): no room for the tagline */
+@media (orientation: landscape) and (max-height: 380px) { .tagline { display: none; } }
+
+/* volume: slider in settings, big − / + in the pause menu (kid-reachable) */
+#optVolume { width: 220px; height: 36px; accent-color: var(--green); }
+.vol-row { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 4px 0; }
+.vol-btn { width: 64px !important; height: 64px !important; }
+.vol-btn svg { width: 34px; }
+.vol-level { min-width: 64px; font-size: 24px; font-weight: 900; text-align: center; }
+
+/* short landscape phones: tighter settings so every toggle shows above the sticky Done button */
+@media (orientation: landscape) and (max-height: 430px) {
+  .settings-panel h2 { margin: 0 0 4px; font-size: 22px; }
+  .set-row { margin: 2px 0; gap: 8px; }
+  .set-row .chip, .chips .chip { min-height: 40px; padding: 4px 12px; }
+  #inpName { padding: 6px 10px; font-size: 17px; }
+  .set-grid { gap: 4px 10px; }
+  .toggle { min-height: 40px; }
+}
+
+/* the HUD keeps a visible edge over pale skies and snow */
+.hud-stars, .hud-dots, #hud .icon-btn { border: 3px solid var(--rim); }
+
+/* ---------- QA round 1 fixes ---------- */
+/* pause: the tap target reaches ≥ 100 logical px on every phone (visual QA P3-11) */
+#btnPause { position: relative; }
+#btnPause::after { content: ""; position: absolute; inset: -12px; border-radius: 50%; }
+@media (max-height: 430px) { #hud .icon-btn#btnPause { width: 56px; height: 56px; } }
+/* portrait: Talk time starts below the HUD (with a notch the panel overlapped it, visual QA P2-7) */
+@media (orientation: portrait) {
+  #scrTalk { padding-top: calc(var(--sa-t) + 86px); align-items: flex-start; }
+  /* the done panel sits at the top so the gallery below stays visible */
+  #scrDone { align-items: flex-start; padding-top: calc(var(--sa-t) + 10vh); padding-bottom: 0; }
+}
+@media (orientation: landscape) {
+  #scrDone .done-panel { max-width: min(400px, 40vw); padding: 14px 18px; }
+  #scrDone .done-stars { font-size: 44px; margin-bottom: 8px; } #scrDone .done-stars img { width: 56px; }
+}
+/* landscape phones: settings fit without scrolling (4 toggles in one row, no note) (visual QA P3-13) */
+@media (orientation: landscape) and (max-height: 430px) {
+  .settings-panel { max-width: min(820px, 100%); padding: 10px 16px; }
+  .settings-panel .set-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 4px 0; }
+  .settings-panel .toggle { font-size: 14px; padding: 4px 8px; gap: 6px; }
+  .settings-panel .toggle input { width: 22px; height: 22px; }
+  .settings-panel .small-note { display: none; }
+  .settings-panel .set-row label { font-size: 17px; }
+  #optVolume { height: 28px; }
+}
+
+/* ---------- QA round 2 fixes ---------- */
+/* the alive phase: the picture swims / floats through the bubble's corner — the bubble steps back (visual P2-1) */
+.bubble { transition: opacity .25s; }
+.bubble.fade { opacity: .32; }
+/* phones in portrait: the 3 Talk choices in ONE row (the 2 + 1 stacking cost a whole row) (visual P1-1) */
+@media (max-width: 430px) and (orientation: portrait) {
+  .talk-choices { flex-wrap: nowrap; gap: 8px; }
+  .talk-choices button { min-width: 0; flex: 1 1 0; max-width: 124px; padding: 6px 4px; }
+  .talk-choices button canvas { width: 76px; height: 76px; }
+}
+/* short portrait phones (iPhone SE 375×667): smaller show canvas, buttons and mic so everything fits (visual P1-1) */
+@media (max-height: 760px) and (orientation: portrait) {
+  #scrTalk { padding-top: calc(var(--sa-t) + 74px); padding-bottom: calc(var(--sa-b) + 8px); }
+  .talk-panel { padding: 12px 12px 14px; }
+  .talk-panel h2 { font-size: 24px; margin-bottom: 4px; }
+  .talk-panel #talkShow { width: min(210px, 56vw); margin-bottom: 2px; }
+  .talk-q { font-size: 19px; margin: 2px 0 10px; }
+  .talk-choices button { min-height: 84px; font-size: 28px; }
+  .talk-choices button canvas { width: 68px; height: 68px; }
+  .mic-btn { margin-top: 10px; min-height: 50px; font-size: 17px; padding: 6px 16px; }
+  .mic-btn svg { width: 24px; }
+}
+/* the Talk panel scrolls only as a last resort (class "scroll" in index.html) */
+.talk-panel.scroll { overflow-y: auto; }
+/* phones in portrait: settings toggles in 2 columns, nothing hidden under the sticky Done button (visual P2-7) */
+@media (max-width: 430px) and (orientation: portrait) {
+  .settings-panel { padding: 14px 14px 18px; }
+  .settings-panel h2 { margin-bottom: 6px; font-size: 28px; }
+  .settings-panel .set-row { margin: 6px 0; gap: 8px; }
+  .settings-panel .set-row label { font-size: 18px; }
+  .settings-panel .chip { min-height: 44px; padding: 4px 12px; font-size: 17px; }
+  #inpName { width: 100%; padding: 8px 12px; font-size: 18px; }
+  #optVolume { width: 100%; }
+  .settings-panel .set-grid { grid-template-columns: 1fr 1fr; gap: 6px; margin: 8px 0; }
+  .settings-panel .toggle { font-size: 15px; padding: 6px 8px; gap: 6px; min-height: 48px; line-height: 1.1; }
+  .settings-panel .toggle input { width: 22px; height: 22px; flex: none; }
+  .settings-panel .small-note { margin-bottom: 18px; font-size: 13px; }
+  .settings-panel > .btn { bottom: -18px; min-height: 56px; }
+}
+/* phone landscape settings: readable 15 px toggle labels (visual P3-7) */
+@media (orientation: landscape) and (max-height: 430px) {
+  .settings-panel .toggle { font-size: 15px; line-height: 1.1; }
+}
+/* the done panel: "Our pictures" is drawn on the water right above the gallery now (visual P3-5) */
+.done-sub { display: none; }
