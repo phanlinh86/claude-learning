@@ -178,12 +178,12 @@
           el.querySelectorAll('.shape button').forEach(b => {
             b.classList.toggle('on', b.dataset.shape === shape);
             b.disabled = !custom; if (!custom) b.style.opacity = .5;
-            b.addEventListener('click', e => { e.stopPropagation(); A.setShape(s.id, b.dataset.shape); this.renderSlots(); });
+            b.addEventListener('click', e => { e.stopPropagation(); A.setShape(s.id, b.dataset.shape); this.game.picturesChanged(); this.renderSlots(); });
           });
         }
         el.querySelector('[data-act=pick]').addEventListener('click', e => { e.stopPropagation(); this._pickSlot = s.id; this.filePick.click(); });
         el.querySelector('[data-act=reset]').addEventListener('click', e => {
-          e.stopPropagation(); A.clearCustom(s.id); this.renderSlots(); this.toast(title + ' reset');
+          e.stopPropagation(); A.clearCustom(s.id); this.game.picturesChanged(); this.renderSlots(); this.toast(title + ' reset');
         });
         prev.addEventListener('click', () => { this._pickSlot = s.id; this.filePick.click(); });
         prev.style.cursor = 'pointer';
@@ -202,7 +202,7 @@
     async applyFile(slotId, file) {
       try {
         this.toast('Saving picture…', 4000);
-        await PO.Assets.setCustom(slotId, file);
+        await PO.Assets.setCustom(slotId, file); this.game.picturesChanged();
         this.renderSlots();
         this.toast('Picture saved on this device!');
       } catch (e) {

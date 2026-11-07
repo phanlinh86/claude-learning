@@ -339,17 +339,17 @@ test('pillow: true ballistic arc (y ≥ 0, constant 2nd difference), lands withi
   }
 });
 
-test('pillows: Easy aims ≈ half at a random lane, Normal at Pebble\'s lane', () => {
+test('pillows: Easy aims mostly at a random lane (aimRandom 0.7), Normal at Pebble\'s lane', () => {
   const count = (diff) => {
     let hits = 0, n = 0;
-    for (let s = 1; s <= 12; s++) {
+    for (let s = 1; s <= 40; s++) {
       const w = clean(diff, s); w.setLane(-1); w.summonBoss();
       run(w, 8, (e, ww) => { ww.hero.invuln = 1; if (e.type === 'throw') { n++; if (e.o.landX === -1) hits++; } });
     }
     return hits / n;
   };
   const e = count('easy'), nn = count('normal');
-  assert.ok(e > 0.5 && e < 0.85, 'easy aimed share ' + e);    // 50 % aimed + 1/3 of the random ones
+  assert.ok(e > 0.38 && e < 0.72, 'easy aimed share ' + e);    // 30 % aimed + 1/3 of the random ones ≈ 0.53
   assert.strictEqual(nn, 1);
 });
 

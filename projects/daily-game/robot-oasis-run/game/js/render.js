@@ -27,6 +27,7 @@
   const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
   const lerp = (a, b, t) => a + (b - a) * t;
   const hex = c => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
+  const clear = c => { if (c[0] === '#') { const v = hex(c); return 'rgba(' + v.join(',') + ',0)'; } return c.replace('rgb(', 'rgba(').replace(')', ',0)'); };
   const mix = (a, b, t) => { const A = hex(a), B = hex(b); return 'rgb(' + A.map((v, i) => Math.round(lerp(v, B[i], t))).join(',') + ')'; };
   const hash = n => { const h = Math.sin(n * 127.1 + 311.7) * 43758.5453; return h - Math.floor(h); };
   // sprite boxes [viewBox w, h, anchor x, anchor y (feet/base line)]
@@ -34,7 +35,7 @@
     pebble: [128, 128, 64, 120], pots: [128, 160, 64, 154], log: [160, 80, 80, 74], tumble: [96, 96, 48, 48],
     pillow: [128, 96, 64, 88], fizz: [192, 160, 96, 130], shell: [64, 64, 32, 34], prop: [160, 220, 80, 214]
   };
-  const WIDTH = { pebble: 0.95, pots: 0.86, log: 0.95, tumble: 0.62, pillow: 0.8, fizz: 2.0, shell: 0.42 };
+  const WIDTH = { pebble: 0.95, pots: 0.86, log: 0.95, tumble: 0.62, pillow: 0.8, fizz: 2.6, shell: 0.42 };
 
   class Renderer {
     constructor(canvas) {
@@ -179,7 +180,7 @@
         }
         const sg = g.createLinearGradient(0, hy, 0, VH); sg.addColorStop(0, P.sandFar); sg.addColorStop(1, P.sandNear);
         g.fillStyle = sg; g.fillRect(0, hy, VW, VH - hy);
-        if (bg.custom) { const fg = g.createLinearGradient(0, hy - 24, 0, hy + 4); fg.addColorStop(0, 'rgba(0,0,0,0)'); fg.addColorStop(1, P.sandFar); g.fillStyle = fg; g.fillRect(0, hy - 24, VW, 28); }
+        if (bg.custom) { const fg = g.createLinearGradient(0, hy - 24, 0, hy + 4); fg.addColorStop(0, clear(P.sandFar)); fg.addColorStop(1, P.sandFar); g.fillStyle = fg; g.fillRect(0, hy - 24, VW, 28); }
         // soft dune ripples on the plain (static)
         g.globalAlpha = 0.14; g.strokeStyle = b === 3 ? '#8d97c4' : '#fff4d8'; g.lineWidth = 2;
         for (let i = 0; i < 9; i++) {
@@ -208,10 +209,12 @@
       g.globalAlpha = alpha;
       g.drawImage(bg.base, 0, 0);
       const cw = this.canvas.width;
-      if (bg.sky) {
+      if (bg.sky) {   // clipped to the sky: on wide screens the scaled tile's low clouds would land on the sand
+        g.save(); g.beginPath(); g.rect(0, 0, cw, Math.round(this.horizonY * px)); g.clip();
         const tw = bg.sky.width;
         let x = -Math.round(((this.time * 4 * px) % tw + tw) % tw);
         for (; x < cw; x += tw) g.drawImage(bg.sky, x, 0);
+        g.restore();
       }
       if (bg.far) {
         const tw = bg.far.width, sh = this.weather && this.weather.ambient ? this.weather.ambient.shimmer || 0 : 0;
@@ -253,7 +256,7 @@
       }
       // haze toward the horizon
       const hy = this.horizonY, fh = (this.footY - hy) * 0.16;
-      const fg = g.createLinearGradient(0, hy, 0, hy + fh); fg.addColorStop(0, P.sandFar); fg.addColorStop(1, 'rgba(0,0,0,0)');
+      const fg = g.createLinearGradient(0, hy, 0, hy + fh); fg.addColorStop(0, P.sandFar); fg.addColorStop(1, clear(P.sandFar));
       g.fillStyle = fg; g.fillRect(0, hy, this.VW, fh);
     }
 
@@ -267,7 +270,9 @@
           const hsh = hash(i * 2 + (side > 0 ? 1 : 0)); if (hsh < 0.35) continue;
           const z = i * SEG + hash(i * 3.3 + side) * 1.2 - dist; if (z > ZMAX || z < ZMIN) continue;
           const idx = Math.floor(hash(i * 5.7 + side * 9) * 4) % 4;
-          items.push({ t: 'prop', z, x: side * (2.05 + hash(i * 1.9 + side) * 1.5), idx, zone: zi });
+          const pz = (w.endS != null && i * SEG > w.endS) ? (zi + 1) % 4 : zi;   // past the arch: the next chapter's look
+          const pw = ZONE_INFO[pz].props[idx];
+          items.push({ t: 'prop', z, x: side * (1.7 + 0.45 * pw + hash(i * 1.9 + side) * 1.2), idx, zone: pz });
         }
       }
       for (const o of w.objects) {
@@ -311,6 +316,9 @@
         const al = f;
         if (o.state === 'live' && it.y < 0.6) this.shadow(g, it.x, it.z, 0.3, cx, 0.16);
         const bob = Math.sin(this.time * 3 + o.id) * 0.03 * p.u;
+        { const hr = W * 0.56, hg = g.createRadialGradient(p.sx, p.sy + bob, 0, p.sx, p.sy + bob, hr);   // pearly halo: shells pop on any sand
+          hg.addColorStop(0, 'rgba(255,255,255,0.55)'); hg.addColorStop(0.7, 'rgba(255,255,255,0.35)'); hg.addColorStop(1, 'rgba(255,255,255,0)');
+          g.globalAlpha = f; g.fillStyle = hg; g.beginPath(); g.arc(p.sx, p.sy + bob, hr, 0, TAU); g.fill(); g.globalAlpha = 1; }
         if (PO.Assets.hasCustom('shell')) {
           const col = SHELL_COL[o.variant % 3];
           g.save(); g.globalAlpha = al; g.fillStyle = '#fff';
@@ -324,10 +332,13 @@
         // the landing shadow grows as it comes down: the warning
         const lz = o.landS - this._dist, pp = o.p || 0;
         if (lz > ZMIN && lz < ZMAX) {
-          const q = this.proj(o.landX, 0, lz, cx), r = 0.45 * q.u, gr = 0.6 + 0.4 * pp;
+          const q = this.proj(o.landX, 0, lz, cx), r = 0.55 * q.u, gr = 0.6 + 0.4 * pp;
           g.save(); g.globalAlpha = (0.2 + 0.4 * pp) * f; g.fillStyle = this.vis.cur === 3 ? '#121633' : '#5b3a20';
           g.beginPath(); g.ellipse(q.sx, q.sy, r * gr, r * 0.3 * gr, 0, 0, TAU); g.fill();
-          g.globalAlpha = 0.6 * f * (0.5 + 0.5 * Math.sin(this.time * 12)); g.strokeStyle = '#fff6e8'; g.lineWidth = Math.max(1, q.u * 0.03);
+          const pulse = 0.85 * f * (0.6 + 0.4 * Math.sin(this.time * 12));
+          g.globalAlpha = pulse * 0.6; g.strokeStyle = '#4a2c18'; g.lineWidth = Math.max(2, q.u * 0.075);
+          g.beginPath(); g.ellipse(q.sx, q.sy, r * 1.05, r * 0.32, 0, 0, TAU); g.stroke();
+          g.globalAlpha = pulse; g.strokeStyle = '#ffffff'; g.lineWidth = Math.max(1.5, q.u * 0.05);
           g.beginPath(); g.ellipse(q.sx, q.sy, r * 1.05, r * 0.32, 0, 0, TAU); g.stroke(); g.restore();
         }
       }
@@ -587,7 +598,7 @@
         g.globalAlpha = 1;
       }
       if (this.bossBanner > 0 && !this.banner) {
-        const a = Math.min(1, this.bossBanner / 0.4), y = topY + 30;
+        const a = Math.min(1, this.bossBanner / 0.4), y = this.portrait ? topY + 30 : this.ins.top + 116;
         const s = this._seenBossMsg ? 'Here comes Fizz!' : (VW < 700 ? 'Fizz throws pillows! Dodge them!' : 'Fizz throws pillows! Watch the shadows and dodge!');
         g.globalAlpha = a; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = '900 ' + (VW < 700 ? 20 : 24) + 'px ' + FONT;
         g.lineWidth = 6; g.lineJoin = 'round'; g.strokeStyle = 'rgba(21,88,102,.9)'; g.fillStyle = '#ffe9b0';

@@ -1,0 +1,8555 @@
+{
+ "name": "baseline",
+ "patch": null,
+ "seeds": 100,
+ "maxT": 480,
+ "runs": 4200,
+ "secs": 137.429,
+ "agg": {
+  "easy/bot0.3": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 2,
+   "survival": {
+    "p10": 155.07,
+    "p50": 224.74,
+    "p90": 335.93
+   },
+   "score": {
+    "p10": 2508,
+    "p50": 4060,
+    "p90": 7255
+   },
+   "reached": {
+    "ch2": 99,
+    "ch3": 90,
+    "ch4": 55,
+    "ch5": 24
+   },
+   "firstShell": {
+    "p50": 3.03,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 14.44,
+    "p50": 37.35,
+    "p90": 96.61,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 99,
+     "dur": {
+      "p10": 71.97,
+      "p50": 72.23,
+      "p90": 72.77
+     },
+     "hitsPerEntered": {
+      "pots": 0.5,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.89
+     },
+     "hitsTotal": 1.39,
+     "visits": 2,
+     "deaths": 1
+    },
+    {
+     "ch": 2,
+     "entered": 99,
+     "completed": 90,
+     "dur": {
+      "p10": 67.68,
+      "p50": 67.95,
+      "p90": 68.5
+     },
+     "hitsPerEntered": {
+      "pots": 0.232,
+      "log": 1.01,
+      "tumble": 0,
+      "pillow": 0.525
+     },
+     "hitsTotal": 1.767,
+     "visits": 2,
+     "deaths": 9.1
+    },
+    {
+     "ch": 3,
+     "entered": 90,
+     "completed": 55,
+     "dur": {
+      "p10": 64.32,
+      "p50": 64.58,
+      "p90": 64.87
+     },
+     "hitsPerEntered": {
+      "pots": 0.244,
+      "log": 1.4,
+      "tumble": 0.144,
+      "pillow": 0.711
+     },
+     "hitsTotal": 2.499,
+     "visits": 2,
+     "deaths": 38.9
+    },
+    {
+     "ch": 4,
+     "entered": 55,
+     "completed": 24,
+     "dur": {
+      "p10": 61.07,
+      "p50": 61.33,
+      "p90": 61.62
+     },
+     "hitsPerEntered": {
+      "pots": 0.236,
+      "log": 1.836,
+      "tumble": 0.036,
+      "pillow": 0.418
+     },
+     "hitsTotal": 2.526,
+     "visits": 2,
+     "deaths": 56.4
+    },
+    {
+     "ch": 5,
+     "entered": 24,
+     "completed": 9,
+     "dur": {
+      "p10": 71.68,
+      "p50": 71.95,
+      "p90": 72.28
+     },
+     "hitsPerEntered": {
+      "pots": 0.5,
+      "log": 0.042,
+      "tumble": 0,
+      "pillow": 1.292
+     },
+     "hitsTotal": 1.834,
+     "visits": 3,
+     "deaths": 62.5
+    },
+    {
+     "ch": 6,
+     "entered": 9,
+     "completed": 6,
+     "dur": {
+      "p10": 68.22,
+      "p50": 68.3,
+      "p90": 68.57
+     },
+     "hitsPerEntered": {
+      "pots": 0.333,
+      "log": 0.556,
+      "tumble": 0,
+      "pillow": 1.111
+     },
+     "hitsTotal": 2,
+     "visits": 2,
+     "deaths": 33.3
+    }
+   ],
+   "pillowDodge": 87.9,
+   "perfectVisit": 65.5,
+   "bossShare": 0.235,
+   "hitsByCause": {
+    "pots": 124,
+    "log": 339,
+    "tumble": 18,
+    "pillow": 273
+   }
+  },
+  "easy/bot0.5": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 98,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 12120,
+    "p50": 13000,
+    "p90": 13533
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 100,
+    "ch5": 100
+   },
+   "firstShell": {
+    "p50": 3.03,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 35.1,
+    "p50": 154.27,
+    "p90": 351.44,
+    "never": 4
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 71.97,
+      "p50": 71.97,
+      "p90": 72.23
+     },
+     "hitsPerEntered": {
+      "pots": 0.17,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.19
+     },
+     "hitsTotal": 0.36,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 67.68,
+      "p50": 67.68,
+      "p90": 67.95
+     },
+     "hitsPerEntered": {
+      "pots": 0.04,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.19
+     },
+     "hitsTotal": 0.23,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 64.05,
+      "p50": 64.05,
+      "p90": 64.32
+     },
+     "hitsPerEntered": {
+      "pots": 0.05,
+      "log": 0.08,
+      "tumble": 0.03,
+      "pillow": 0.28
+     },
+     "hitsTotal": 0.44,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 4,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 60.8,
+      "p50": 60.8,
+      "p90": 61.07
+     },
+     "hitsPerEntered": {
+      "pots": 0.04,
+      "log": 0.05,
+      "tumble": 0.03,
+      "pillow": 0.11
+     },
+     "hitsTotal": 0.23,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 100,
+     "completed": 99,
+     "dur": {
+      "p10": 71.68,
+      "p50": 71.68,
+      "p90": 71.97
+     },
+     "hitsPerEntered": {
+      "pots": 0.1,
+      "log": 0,
+      "tumble": 0.01,
+      "pillow": 0.43
+     },
+     "hitsTotal": 0.54,
+     "visits": 3,
+     "deaths": 1
+    },
+    {
+     "ch": 6,
+     "entered": 99,
+     "completed": 99,
+     "dur": {
+      "p10": 68.02,
+      "p50": 68.03,
+      "p90": 68.3
+     },
+     "hitsPerEntered": {
+      "pots": 0.081,
+      "log": 0.111,
+      "tumble": 0,
+      "pillow": 0.333
+     },
+     "hitsTotal": 0.525,
+     "visits": 2,
+     "deaths": 0
+    }
+   ],
+   "pillowDodge": 96.6,
+   "perfectVisit": 88.7,
+   "bossShare": 0.258,
+   "hitsByCause": {
+    "pots": 55,
+    "log": 35,
+    "tumble": 11,
+    "pillow": 178
+   }
+  },
+  "easy/bot0.7": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 100,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 12407,
+    "p50": 12900,
+    "p90": 13436
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 100,
+    "ch5": 100
+   },
+   "firstShell": {
+    "p50": 3.03,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 73.93,
+    "p50": 335.78,
+    "p90": 417.55,
+    "never": 86
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 71.97,
+      "p50": 71.97,
+      "p90": 71.97
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.02
+     },
+     "hitsTotal": 0.02,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 67.68,
+      "p50": 67.68,
+      "p90": 67.68
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0.01,
+      "tumble": 0,
+      "pillow": 0
+     },
+     "hitsTotal": 0.01,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 64.05,
+      "p50": 64.05,
+      "p90": 64.05
+     },
+     "hitsPerEntered": {
+      "pots": 0.01,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.01
+     },
+     "hitsTotal": 0.02,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 4,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 60.8,
+      "p50": 60.8,
+      "p90": 60.8
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0
+     },
+     "hitsTotal": 0,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 71.68,
+      "p50": 71.68,
+      "p90": 71.68
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.02
+     },
+     "hitsTotal": 0.02,
+     "visits": 3,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 68.03,
+      "p50": 68.03,
+      "p90": 68.03
+     },
+     "hitsPerEntered": {
+      "pots": 0.01,
+      "log": 0.01,
+      "tumble": 0,
+      "pillow": 0.03
+     },
+     "hitsTotal": 0.05,
+     "visits": 2,
+     "deaths": 0
+    }
+   ],
+   "pillowDodge": 99.8,
+   "perfectVisit": 99.3,
+   "bossShare": 0.258,
+   "hitsByCause": {
+    "pots": 2,
+    "log": 2,
+    "tumble": 0,
+    "pillow": 10
+   }
+  },
+  "easy/bot0.9": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 100,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 11967,
+    "p50": 12395,
+    "p90": 12905
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 100,
+    "ch5": 100
+   },
+   "firstShell": {
+    "p50": 3.03,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 145.32,
+    "p50": 207.98,
+    "p90": 397.19,
+    "never": 92
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 71.97,
+      "p50": 71.97,
+      "p90": 71.97
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0
+     },
+     "hitsTotal": 0,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 67.68,
+      "p50": 67.68,
+      "p90": 67.68
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.01
+     },
+     "hitsTotal": 0.01,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 64.05,
+      "p50": 64.05,
+      "p90": 64.05
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.03
+     },
+     "hitsTotal": 0.03,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 4,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 60.8,
+      "p50": 60.8,
+      "p90": 60.8
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0.01,
+      "pillow": 0
+     },
+     "hitsTotal": 0.01,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 71.68,
+      "p50": 71.68,
+      "p90": 71.68
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0
+     },
+     "hitsTotal": 0,
+     "visits": 3,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 68.03,
+      "p50": 68.03,
+      "p90": 68.03
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.03
+     },
+     "hitsTotal": 0.03,
+     "visits": 2,
+     "deaths": 0
+    }
+   ],
+   "pillowDodge": 99.9,
+   "perfectVisit": 99.5,
+   "bossShare": 0.258,
+   "hitsByCause": {
+    "pots": 0,
+    "log": 0,
+    "tumble": 1,
+    "pillow": 7
+   }
+  },
+  "easy/bot1": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 100,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 11722,
+    "p50": 12140,
+    "p90": 12600
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 100,
+    "ch5": 100
+   },
+   "firstShell": {
+    "p50": 3.03,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 95.95,
+    "p50": 177.25,
+    "p90": 400.33,
+    "never": 89
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 71.97,
+      "p50": 71.97,
+      "p90": 71.97
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0
+     },
+     "hitsTotal": 0,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 67.68,
+      "p50": 67.68,
+      "p90": 67.68
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.04
+     },
+     "hitsTotal": 0.04,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 64.05,
+      "p50": 64.05,
+      "p90": 64.05
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0.01,
+      "pillow": 0.02
+     },
+     "hitsTotal": 0.03,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 4,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 60.8,
+      "p50": 60.8,
+      "p90": 60.8
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0.01,
+      "pillow": 0
+     },
+     "hitsTotal": 0.01,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 71.68,
+      "p50": 71.68,
+      "p90": 71.68
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.02
+     },
+     "hitsTotal": 0.02,
+     "visits": 3,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 68.03,
+      "p50": 68.03,
+      "p90": 68.03
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.01
+     },
+     "hitsTotal": 0.01,
+     "visits": 2,
+     "deaths": 0
+    }
+   ],
+   "pillowDodge": 99.8,
+   "perfectVisit": 99.3,
+   "bossShare": 0.258,
+   "hitsByCause": {
+    "pots": 0,
+    "log": 0,
+    "tumble": 3,
+    "pillow": 10
+   }
+  },
+  "easy/kid": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 95.81,
+    "p50": 128.09,
+    "p90": 185.78
+   },
+   "score": {
+    "p10": 776,
+    "p50": 1355,
+    "p90": 2265
+   },
+   "reached": {
+    "ch2": 92,
+    "ch3": 38,
+    "ch4": 6,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 3.58,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 13.76,
+    "p50": 34.91,
+    "p90": 65.82,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 92,
+     "dur": {
+      "p10": 72.23,
+      "p50": 72.5,
+      "p90": 73
+     },
+     "hitsPerEntered": {
+      "pots": 0.92,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 1.42
+     },
+     "hitsTotal": 2.34,
+     "visits": 2,
+     "deaths": 8
+    },
+    {
+     "ch": 2,
+     "entered": 92,
+     "completed": 38,
+     "dur": {
+      "p10": 67.68,
+      "p50": 68.22,
+      "p90": 68.75
+     },
+     "hitsPerEntered": {
+      "pots": 0.446,
+      "log": 1.261,
+      "tumble": 0,
+      "pillow": 1.261
+     },
+     "hitsTotal": 2.968,
+     "visits": 2,
+     "deaths": 58.7
+    },
+    {
+     "ch": 3,
+     "entered": 38,
+     "completed": 6,
+     "dur": {
+      "p10": 64.46,
+      "p50": 64.73,
+      "p90": 65
+     },
+     "hitsPerEntered": {
+      "pots": 0.474,
+      "log": 0.763,
+      "tumble": 0.447,
+      "pillow": 1.105
+     },
+     "hitsTotal": 2.789,
+     "visits": 2,
+     "deaths": 84.2
+    },
+    {
+     "ch": 4,
+     "entered": 6,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 1.167,
+      "tumble": 0.333,
+      "pillow": 0.667
+     },
+     "hitsTotal": 2.167,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": 74.5,
+   "perfectVisit": 41.3,
+   "bossShare": 0.221,
+   "hitsByCause": {
+    "pots": 151,
+    "log": 152,
+    "tumble": 19,
+    "pillow": 304
+   }
+  },
+  "easy/adult": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 100,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 9079,
+    "p50": 9580,
+    "p90": 10291
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 100,
+    "ch5": 100
+   },
+   "firstShell": {
+    "p50": 3.03,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 38.92,
+    "p50": 147.68,
+    "p90": 313.66,
+    "never": 6
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 71.97,
+      "p50": 71.97,
+      "p90": 72.23
+     },
+     "hitsPerEntered": {
+      "pots": 0.12,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.11
+     },
+     "hitsTotal": 0.23,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 67.68,
+      "p50": 67.68,
+      "p90": 67.95
+     },
+     "hitsPerEntered": {
+      "pots": 0.11,
+      "log": 0.13,
+      "tumble": 0,
+      "pillow": 0.09
+     },
+     "hitsTotal": 0.33,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 64.05,
+      "p50": 64.05,
+      "p90": 64.58
+     },
+     "hitsPerEntered": {
+      "pots": 0.09,
+      "log": 0.25,
+      "tumble": 0.07,
+      "pillow": 0.15
+     },
+     "hitsTotal": 0.56,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 4,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 60.8,
+      "p50": 60.8,
+      "p90": 61.07
+     },
+     "hitsPerEntered": {
+      "pots": 0.14,
+      "log": 0.18,
+      "tumble": 0.05,
+      "pillow": 0.08
+     },
+     "hitsTotal": 0.45,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 71.68,
+      "p50": 71.68,
+      "p90": 71.97
+     },
+     "hitsPerEntered": {
+      "pots": 0.29,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.09
+     },
+     "hitsTotal": 0.38,
+     "visits": 3,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 68.02,
+      "p50": 68.03,
+      "p90": 68.32
+     },
+     "hitsPerEntered": {
+      "pots": 0.18,
+      "log": 0.14,
+      "tumble": 0,
+      "pillow": 0.2
+     },
+     "hitsTotal": 0.52,
+     "visits": 2,
+     "deaths": 0
+    }
+   ],
+   "pillowDodge": 98.2,
+   "perfectVisit": 93.9,
+   "bossShare": 0.257,
+   "hitsByCause": {
+    "pots": 101,
+    "log": 99,
+    "tumble": 17,
+    "pillow": 93
+   }
+  },
+  "easy/jumpSpam": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 28.23,
+    "p50": 44.9,
+    "p90": 61.93
+   },
+   "score": {
+    "p10": 50,
+    "p50": 220,
+    "p90": 431
+   },
+   "reached": {
+    "ch2": 3,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 4.05,
+    "never": 1
+   },
+   "firstHit": {
+    "p10": 3.02,
+    "p50": 7.99,
+    "p90": 21.72,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 3,
+     "dur": {
+      "p10": 72.77,
+      "p50": 72.77,
+      "p90": 72.98
+     },
+     "hitsPerEntered": {
+      "pots": 4.33,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.62
+     },
+     "hitsTotal": 4.95,
+     "visits": 2,
+     "deaths": 97
+    },
+    {
+     "ch": 2,
+     "entered": 3,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 1.667,
+      "log": 1,
+      "tumble": 0,
+      "pillow": 0
+     },
+     "hitsTotal": 2.667,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": 76.4,
+   "perfectVisit": 30.7,
+   "bossShare": 0.14,
+   "hitsByCause": {
+    "pots": 438,
+    "log": 3,
+    "tumble": 0,
+    "pillow": 62
+   }
+  },
+  "easy/zigzag": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 18.91,
+    "p50": 28.87,
+    "p90": 41.76
+   },
+   "score": {
+    "p10": 99,
+    "p50": 295,
+    "p90": 530
+   },
+   "reached": {
+    "ch2": 0,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 3.2,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 3.02,
+    "p50": 5.55,
+    "p90": 13.75,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 4.63,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.37
+     },
+     "hitsTotal": 5,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 2,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": 44.8,
+   "perfectVisit": 6.3,
+   "bossShare": 0.059,
+   "hitsByCause": {
+    "pots": 463,
+    "log": 0,
+    "tumble": 0,
+    "pillow": 37
+   }
+  },
+  "easy/zigJump": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 18.91,
+    "p50": 28.87,
+    "p90": 45.55
+   },
+   "score": {
+    "p10": 59,
+    "p50": 160,
+    "p90": 351
+   },
+   "reached": {
+    "ch2": 0,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 3.2,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 3.02,
+    "p50": 5.55,
+    "p90": 13.75,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 4.95,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.05
+     },
+     "hitsTotal": 5,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 2,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": 94,
+   "perfectVisit": 42.9,
+   "bossShare": 0.063,
+   "hitsByCause": {
+    "pots": 495,
+    "log": 0,
+    "tumble": 0,
+    "pillow": 5
+   }
+  },
+  "easy/idleMid": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 28.23,
+    "p50": 37.35,
+    "p90": 56.78
+   },
+   "score": {
+    "p10": 70,
+    "p50": 285,
+    "p90": 574
+   },
+   "reached": {
+    "ch2": 1,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 4.05,
+    "never": 1
+   },
+   "firstHit": {
+    "p10": 3.02,
+    "p50": 7.99,
+    "p90": 21.72,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 1,
+     "dur": {
+      "p10": 72.77,
+      "p50": 72.77,
+      "p90": 72.77
+     },
+     "hitsPerEntered": {
+      "pots": 3.73,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 1.25
+     },
+     "hitsTotal": 4.98,
+     "visits": 2,
+     "deaths": 99
+    },
+    {
+     "ch": 2,
+     "entered": 1,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 2,
+      "log": 1,
+      "tumble": 0,
+      "pillow": 0
+     },
+     "hitsTotal": 3,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": 44.9,
+   "perfectVisit": 5.3,
+   "bossShare": 0.142,
+   "hitsByCause": {
+    "pots": 375,
+    "log": 1,
+    "tumble": 0,
+    "pillow": 125
+   }
+  },
+  "easy/idleSide": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 30.09,
+    "p50": 37.31,
+    "p90": 64.32
+   },
+   "score": {
+    "p10": 50,
+    "p50": 230,
+    "p90": 450
+   },
+   "reached": {
+    "ch2": 2,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 4.81,
+    "never": 2
+   },
+   "firstHit": {
+    "p10": 3.02,
+    "p50": 9.51,
+    "p90": 24.46,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 2,
+     "dur": {
+      "p10": 72.77,
+      "p50": 72.77,
+      "p90": 72.77
+     },
+     "hitsPerEntered": {
+      "pots": 3.72,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 1.24
+     },
+     "hitsTotal": 4.96,
+     "visits": 2,
+     "deaths": 98
+    },
+    {
+     "ch": 2,
+     "entered": 2,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 1.5,
+      "log": 1,
+      "tumble": 0,
+      "pillow": 0.5
+     },
+     "hitsTotal": 3,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": 43.4,
+   "perfectVisit": 3.7,
+   "bossShare": 0.141,
+   "hitsByCause": {
+    "pots": 375,
+    "log": 2,
+    "tumble": 0,
+    "pillow": 125
+   }
+  },
+  "easy/botAlwaysJump": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 12,
+   "survival": {
+    "p10": 169.61,
+    "p50": 237.97,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 2315,
+    "p50": 3580,
+    "p90": 9136
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 94,
+    "ch4": 63,
+    "ch5": 33
+   },
+   "firstShell": {
+    "p50": 3.18,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 37.45,
+    "p50": 78.97,
+    "p90": 114.03,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 71.97,
+      "p50": 71.97,
+      "p90": 72.23
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.41
+     },
+     "hitsTotal": 0.41,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 100,
+     "completed": 94,
+     "dur": {
+      "p10": 67.95,
+      "p50": 68.22,
+      "p90": 68.49
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 2.08,
+      "tumble": 0,
+      "pillow": 0.16
+     },
+     "hitsTotal": 2.24,
+     "visits": 2,
+     "deaths": 6
+    },
+    {
+     "ch": 3,
+     "entered": 94,
+     "completed": 63,
+     "dur": {
+      "p10": 64.32,
+      "p50": 64.58,
+      "p90": 64.87
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 2.096,
+      "tumble": 0,
+      "pillow": 0.16
+     },
+     "hitsTotal": 2.256,
+     "visits": 2,
+     "deaths": 33
+    },
+    {
+     "ch": 4,
+     "entered": 63,
+     "completed": 33,
+     "dur": {
+      "p10": 61.07,
+      "p50": 61.35,
+      "p90": 61.62
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 2.127,
+      "tumble": 0,
+      "pillow": 0.19
+     },
+     "hitsTotal": 2.317,
+     "visits": 2,
+     "deaths": 47.6
+    },
+    {
+     "ch": 5,
+     "entered": 33,
+     "completed": 28,
+     "dur": {
+      "p10": 71.68,
+      "p50": 71.84,
+      "p90": 71.97
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0.061,
+      "tumble": 0,
+      "pillow": 0.758
+     },
+     "hitsTotal": 0.819,
+     "visits": 3,
+     "deaths": 15.2
+    },
+    {
+     "ch": 6,
+     "entered": 28,
+     "completed": 19,
+     "dur": {
+      "p10": 68.03,
+      "p50": 68.57,
+      "p90": 68.57
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 1.679,
+      "tumble": 0,
+      "pillow": 0.286
+     },
+     "hitsTotal": 1.965,
+     "visits": 2,
+     "deaths": 32.1
+    }
+   ],
+   "pillowDodge": 95.5,
+   "perfectVisit": 84.9,
+   "bossShare": 0.24,
+   "hitsByCause": {
+    "pots": 0,
+    "log": 628,
+    "tumble": 0,
+    "pillow": 122
+   }
+  },
+  "easy/botNeverJump": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 99.94,
+    "p50": 122.41,
+    "p90": 153.01
+   },
+   "score": {
+    "p10": 1528,
+    "p50": 1955,
+    "p90": 2542
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 20,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 3.03,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 34.35,
+    "p50": 67.33,
+    "p90": 87.49,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 71.97,
+      "p50": 72.23,
+      "p90": 72.5
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.75
+     },
+     "hitsTotal": 0.75,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 100,
+     "completed": 20,
+     "dur": {
+      "p10": 68.48,
+      "p50": 68.75,
+      "p90": 68.75
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 4.18,
+      "tumble": 0,
+      "pillow": 0.31
+     },
+     "hitsTotal": 4.49,
+     "visits": 2,
+     "deaths": 80
+    },
+    {
+     "ch": 3,
+     "entered": 20,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 2.3,
+      "tumble": 0,
+      "pillow": 0.1
+     },
+     "hitsTotal": 2.4,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": 89.7,
+   "perfectVisit": 69.9,
+   "bossShare": 0.216,
+   "hitsByCause": {
+    "pots": 0,
+    "log": 464,
+    "tumble": 0,
+    "pillow": 108
+   }
+  },
+  "normal/bot0.3": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 54.37,
+    "p50": 96.78,
+    "p90": 155.19
+   },
+   "score": {
+    "p10": 959,
+    "p50": 1995,
+    "p90": 3336
+   },
+   "reached": {
+    "ch2": 75,
+    "ch3": 11,
+    "ch4": 1,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 2.43,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 11.12,
+    "p50": 35.48,
+    "p90": 83.07,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 75,
+     "dur": {
+      "p10": 73.08,
+      "p50": 73.35,
+      "p90": 73.62
+     },
+     "hitsPerEntered": {
+      "pots": 0.63,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 1.06
+     },
+     "hitsTotal": 1.69,
+     "visits": 2,
+     "deaths": 25
+    },
+    {
+     "ch": 2,
+     "entered": 75,
+     "completed": 11,
+     "dur": {
+      "p10": 69.02,
+      "p50": 69.28,
+      "p90": 69.28
+     },
+     "hitsPerEntered": {
+      "pots": 0.2,
+      "log": 1.6,
+      "tumble": 0,
+      "pillow": 0.56
+     },
+     "hitsTotal": 2.36,
+     "visits": 2,
+     "deaths": 85.3
+    },
+    {
+     "ch": 3,
+     "entered": 11,
+     "completed": 1,
+     "dur": {
+      "p10": 65.33,
+      "p50": 65.33,
+      "p90": 65.33
+     },
+     "hitsPerEntered": {
+      "pots": 0.091,
+      "log": 1.636,
+      "tumble": 0,
+      "pillow": 0.364
+     },
+     "hitsTotal": 2.091,
+     "visits": 2,
+     "deaths": 90.9
+    },
+    {
+     "ch": 4,
+     "entered": 1,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 2,
+      "tumble": 0,
+      "pillow": 0
+     },
+     "hitsTotal": 2,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": 86,
+   "perfectVisit": 51,
+   "bossShare": 0.202,
+   "hitsByCause": {
+    "pots": 79,
+    "log": 140,
+    "tumble": 0,
+    "pillow": 152
+   }
+  },
+  "normal/bot0.5": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 71,
+   "survival": {
+    "p10": 302,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 7578,
+    "p50": 13885,
+    "p90": 14665
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 99,
+    "ch4": 96,
+    "ch5": 91
+   },
+   "firstShell": {
+    "p50": 2.43,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 34.9,
+    "p50": 96.36,
+    "p90": 213.91,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 73.08,
+      "p50": 73.08,
+      "p90": 73.35
+     },
+     "hitsPerEntered": {
+      "pots": 0.07,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.34
+     },
+     "hitsTotal": 0.41,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 100,
+     "completed": 99,
+     "dur": {
+      "p10": 68.75,
+      "p50": 68.75,
+      "p90": 69.28
+     },
+     "hitsPerEntered": {
+      "pots": 0.03,
+      "log": 0.21,
+      "tumble": 0,
+      "pillow": 0.38
+     },
+     "hitsTotal": 0.62,
+     "visits": 2,
+     "deaths": 1
+    },
+    {
+     "ch": 3,
+     "entered": 99,
+     "completed": 96,
+     "dur": {
+      "p10": 65.05,
+      "p50": 65.33,
+      "p90": 65.6
+     },
+     "hitsPerEntered": {
+      "pots": 0.081,
+      "log": 0.212,
+      "tumble": 0.02,
+      "pillow": 0.384
+     },
+     "hitsTotal": 0.697,
+     "visits": 2,
+     "deaths": 3
+    },
+    {
+     "ch": 4,
+     "entered": 96,
+     "completed": 91,
+     "dur": {
+      "p10": 61.75,
+      "p50": 62.02,
+      "p90": 62.28
+     },
+     "hitsPerEntered": {
+      "pots": 0.073,
+      "log": 0.146,
+      "tumble": 0.052,
+      "pillow": 0.479
+     },
+     "hitsTotal": 0.75,
+     "visits": 2,
+     "deaths": 5.2
+    },
+    {
+     "ch": 5,
+     "entered": 91,
+     "completed": 85,
+     "dur": {
+      "p10": 72.8,
+      "p50": 73.08,
+      "p90": 73.35
+     },
+     "hitsPerEntered": {
+      "pots": 0.066,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.791
+     },
+     "hitsTotal": 0.857,
+     "visits": 3,
+     "deaths": 6.6
+    },
+    {
+     "ch": 6,
+     "entered": 85,
+     "completed": 80,
+     "dur": {
+      "p10": 69.08,
+      "p50": 69.23,
+      "p90": 69.63
+     },
+     "hitsPerEntered": {
+      "pots": 0.094,
+      "log": 0.153,
+      "tumble": 0,
+      "pillow": 0.506
+     },
+     "hitsTotal": 0.753,
+     "visits": 2,
+     "deaths": 5.9
+    }
+   ],
+   "pillowDodge": 94.9,
+   "perfectVisit": 79.1,
+   "bossShare": 0.248,
+   "hitsByCause": {
+    "pots": 48,
+    "log": 88,
+    "tumble": 12,
+    "pillow": 314
+   }
+  },
+  "normal/bot0.7": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 100,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 13369,
+    "p50": 13970,
+    "p90": 14483
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 100,
+    "ch5": 100
+   },
+   "firstShell": {
+    "p50": 2.43,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 78.28,
+    "p50": 334.88,
+    "p90": 454.05,
+    "never": 75
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 73.08,
+      "p50": 73.08,
+      "p90": 73.08
+     },
+     "hitsPerEntered": {
+      "pots": 0.01,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.02
+     },
+     "hitsTotal": 0.03,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 68.75,
+      "p50": 68.75,
+      "p90": 68.75
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0.03,
+      "tumble": 0,
+      "pillow": 0.01
+     },
+     "hitsTotal": 0.04,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 65.05,
+      "p50": 65.05,
+      "p90": 65.05
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0.01,
+      "tumble": 0,
+      "pillow": 0.02
+     },
+     "hitsTotal": 0.03,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 4,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 61.75,
+      "p50": 61.75,
+      "p90": 61.75
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.02
+     },
+     "hitsTotal": 0.02,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 72.82,
+      "p50": 72.82,
+      "p90": 72.82
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.02
+     },
+     "hitsTotal": 0.02,
+     "visits": 3,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 69.08,
+      "p50": 69.08,
+      "p90": 69.1
+     },
+     "hitsPerEntered": {
+      "pots": 0.01,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.04
+     },
+     "hitsTotal": 0.05,
+     "visits": 2,
+     "deaths": 0
+    }
+   ],
+   "pillowDodge": 99.7,
+   "perfectVisit": 98.9,
+   "bossShare": 0.25,
+   "hitsByCause": {
+    "pots": 2,
+    "log": 10,
+    "tumble": 0,
+    "pillow": 17
+   }
+  },
+  "normal/bot0.9": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 100,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 12841,
+    "p50": 13320,
+    "p90": 13891
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 100,
+    "ch5": 100
+   },
+   "firstShell": {
+    "p50": 2.43,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 94.81,
+    "p50": 246.54,
+    "p90": 444.74,
+    "never": 86
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 73.08,
+      "p50": 73.08,
+      "p90": 73.08
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0
+     },
+     "hitsTotal": 0,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 68.75,
+      "p50": 68.75,
+      "p90": 68.75
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0.01,
+      "tumble": 0,
+      "pillow": 0.03
+     },
+     "hitsTotal": 0.04,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 65.05,
+      "p50": 65.05,
+      "p90": 65.05
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0.01,
+      "tumble": 0,
+      "pillow": 0.01
+     },
+     "hitsTotal": 0.02,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 4,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 61.75,
+      "p50": 61.75,
+      "p90": 61.75
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0.01,
+      "pillow": 0.02
+     },
+     "hitsTotal": 0.03,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 72.82,
+      "p50": 72.82,
+      "p90": 72.82
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.01
+     },
+     "hitsTotal": 0.01,
+     "visits": 3,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 69.08,
+      "p50": 69.08,
+      "p90": 69.08
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0.01,
+      "tumble": 0,
+      "pillow": 0
+     },
+     "hitsTotal": 0.01,
+     "visits": 2,
+     "deaths": 0
+    }
+   ],
+   "pillowDodge": 99.8,
+   "perfectVisit": 99.3,
+   "bossShare": 0.25,
+   "hitsByCause": {
+    "pots": 0,
+    "log": 3,
+    "tumble": 1,
+    "pillow": 11
+   }
+  },
+  "normal/bot1": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 100,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 12490,
+    "p50": 12925,
+    "p90": 13550
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 100,
+    "ch5": 100
+   },
+   "firstShell": {
+    "p50": 2.43,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 52.65,
+    "p50": 251.06,
+    "p90": 398.1,
+    "never": 86
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 73.08,
+      "p50": 73.08,
+      "p90": 73.08
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.02
+     },
+     "hitsTotal": 0.02,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 68.75,
+      "p50": 68.75,
+      "p90": 68.75
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.03
+     },
+     "hitsTotal": 0.03,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 65.05,
+      "p50": 65.05,
+      "p90": 65.05
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0.01,
+      "pillow": 0
+     },
+     "hitsTotal": 0.01,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 4,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 61.75,
+      "p50": 61.75,
+      "p90": 61.75
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0.02,
+      "pillow": 0.01
+     },
+     "hitsTotal": 0.03,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 72.82,
+      "p50": 72.82,
+      "p90": 72.82
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0
+     },
+     "hitsTotal": 0,
+     "visits": 3,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 69.08,
+      "p50": 69.08,
+      "p90": 69.08
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.04
+     },
+     "hitsTotal": 0.04,
+     "visits": 2,
+     "deaths": 0
+    }
+   ],
+   "pillowDodge": 99.8,
+   "perfectVisit": 99.2,
+   "bossShare": 0.25,
+   "hitsByCause": {
+    "pots": 0,
+    "log": 0,
+    "tumble": 3,
+    "pillow": 12
+   }
+  },
+  "normal/kid": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 33.81,
+    "p50": 48.69,
+    "p90": 67.2
+   },
+   "score": {
+    "p10": 279,
+    "p50": 515,
+    "p90": 853
+   },
+   "reached": {
+    "ch2": 7,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 2.87,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 5.81,
+    "p50": 24.93,
+    "p90": 34.9,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 7,
+     "dur": {
+      "p10": 73.24,
+      "p50": 73.62,
+      "p90": 73.62
+     },
+     "hitsPerEntered": {
+      "pots": 1.26,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 1.63
+     },
+     "hitsTotal": 2.89,
+     "visits": 2,
+     "deaths": 93
+    },
+    {
+     "ch": 2,
+     "entered": 7,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 0.857,
+      "log": 1,
+      "tumble": 0,
+      "pillow": 0.571
+     },
+     "hitsTotal": 2.428,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": 61.8,
+   "perfectVisit": 11.4,
+   "bossShare": 0.161,
+   "hitsByCause": {
+    "pots": 132,
+    "log": 7,
+    "tumble": 0,
+    "pillow": 167
+   }
+  },
+  "normal/adult": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 54,
+   "survival": {
+    "p10": 174.24,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 2649,
+    "p50": 9810,
+    "p90": 10741
+   },
+   "reached": {
+    "ch2": 97,
+    "ch3": 92,
+    "ch4": 83,
+    "ch5": 71
+   },
+   "firstShell": {
+    "p50": 2.43,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 25.29,
+    "p50": 82.09,
+    "p90": 212.57,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 97,
+     "dur": {
+      "p10": 73.08,
+      "p50": 73.08,
+      "p90": 73.35
+     },
+     "hitsPerEntered": {
+      "pots": 0.35,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.24
+     },
+     "hitsTotal": 0.59,
+     "visits": 2,
+     "deaths": 3
+    },
+    {
+     "ch": 2,
+     "entered": 97,
+     "completed": 92,
+     "dur": {
+      "p10": 68.75,
+      "p50": 69.02,
+      "p90": 69.28
+     },
+     "hitsPerEntered": {
+      "pots": 0.196,
+      "log": 0.474,
+      "tumble": 0,
+      "pillow": 0.206
+     },
+     "hitsTotal": 0.876,
+     "visits": 2,
+     "deaths": 5.2
+    },
+    {
+     "ch": 3,
+     "entered": 92,
+     "completed": 83,
+     "dur": {
+      "p10": 65.05,
+      "p50": 65.33,
+      "p90": 65.33
+     },
+     "hitsPerEntered": {
+      "pots": 0.13,
+      "log": 0.315,
+      "tumble": 0.12,
+      "pillow": 0.196
+     },
+     "hitsTotal": 0.761,
+     "visits": 2,
+     "deaths": 9.8
+    },
+    {
+     "ch": 4,
+     "entered": 83,
+     "completed": 71,
+     "dur": {
+      "p10": 61.75,
+      "p50": 61.75,
+      "p90": 62.03
+     },
+     "hitsPerEntered": {
+      "pots": 0.229,
+      "log": 0.349,
+      "tumble": 0.024,
+      "pillow": 0.205
+     },
+     "hitsTotal": 0.807,
+     "visits": 2,
+     "deaths": 14.5
+    },
+    {
+     "ch": 5,
+     "entered": 71,
+     "completed": 70,
+     "dur": {
+      "p10": 72.8,
+      "p50": 72.82,
+      "p90": 73.35
+     },
+     "hitsPerEntered": {
+      "pots": 0.338,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.268
+     },
+     "hitsTotal": 0.606,
+     "visits": 3,
+     "deaths": 1.4
+    },
+    {
+     "ch": 6,
+     "entered": 70,
+     "completed": 61,
+     "dur": {
+      "p10": 69.08,
+      "p50": 69.37,
+      "p90": 69.63
+     },
+     "hitsPerEntered": {
+      "pots": 0.214,
+      "log": 0.529,
+      "tumble": 0,
+      "pillow": 0.3
+     },
+     "hitsTotal": 1.043,
+     "visits": 2,
+     "deaths": 12.9
+    }
+   ],
+   "pillowDodge": 97.5,
+   "perfectVisit": 89.2,
+   "bossShare": 0.243,
+   "hitsByCause": {
+    "pots": 136,
+    "log": 159,
+    "tumble": 23,
+    "pillow": 133
+   }
+  },
+  "normal/jumpSpam": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 11.49,
+    "p50": 18.41,
+    "p90": 30.78
+   },
+   "score": {
+    "p10": 10,
+    "p50": 80,
+    "p90": 210
+   },
+   "reached": {
+    "ch2": 0,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 3.85,
+    "never": 7
+   },
+   "firstHit": {
+    "p10": 2.42,
+    "p50": 6.08,
+    "p90": 15.33,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 2.94,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.06
+     },
+     "hitsTotal": 3,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 2,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": 60,
+   "perfectVisit": 0,
+   "bossShare": 0.013,
+   "hitsByCause": {
+    "pots": 294,
+    "log": 0,
+    "tumble": 0,
+    "pillow": 6
+   }
+  },
+  "normal/zigzag": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 8.72,
+    "p50": 13.46,
+    "p90": 19.25
+   },
+   "score": {
+    "p10": 30,
+    "p50": 125,
+    "p90": 281
+   },
+   "reached": {
+    "ch2": 0,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 2.67,
+    "never": 1
+   },
+   "firstHit": {
+    "p10": 2.42,
+    "p50": 4.46,
+    "p90": 9.05,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 3,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0
+     },
+     "hitsTotal": 3,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 2,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": null,
+   "perfectVisit": null,
+   "bossShare": 0,
+   "hitsByCause": {
+    "pots": 300,
+    "log": 0,
+    "tumble": 0,
+    "pillow": 0
+   }
+  },
+  "normal/zigJump": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 8.72,
+    "p50": 13.46,
+    "p90": 19.25
+   },
+   "score": {
+    "p10": 20,
+    "p50": 60,
+    "p90": 151
+   },
+   "reached": {
+    "ch2": 0,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 2.67,
+    "never": 1
+   },
+   "firstHit": {
+    "p10": 2.42,
+    "p50": 4.46,
+    "p90": 9.05,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 3,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0
+     },
+     "hitsTotal": 3,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 2,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": null,
+   "perfectVisit": null,
+   "bossShare": 0,
+   "hitsByCause": {
+    "pots": 300,
+    "log": 0,
+    "tumble": 0,
+    "pillow": 0
+   }
+  },
+  "normal/idleMid": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 11.49,
+    "p50": 18.41,
+    "p90": 30.78
+   },
+   "score": {
+    "p10": 30,
+    "p50": 135,
+    "p90": 362
+   },
+   "reached": {
+    "ch2": 0,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 3.67,
+    "never": 7
+   },
+   "firstHit": {
+    "p10": 2.42,
+    "p50": 6.08,
+    "p90": 15.33,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 2.92,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.08
+     },
+     "hitsTotal": 3,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 2,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": 20,
+   "perfectVisit": 0,
+   "bossShare": 0.011,
+   "hitsByCause": {
+    "pots": 292,
+    "log": 0,
+    "tumble": 0,
+    "pillow": 8
+   }
+  },
+  "normal/idleSide": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 9.92,
+    "p50": 18.36,
+    "p90": 33.73
+   },
+   "score": {
+    "p10": 0,
+    "p50": 110,
+    "p90": 293
+   },
+   "reached": {
+    "ch2": 0,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 3.33,
+    "never": 12
+   },
+   "firstHit": {
+    "p10": 2.42,
+    "p50": 5.59,
+    "p90": 15.26,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 2.86,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.14
+     },
+     "hitsTotal": 3,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 2,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": 22.2,
+   "perfectVisit": 0,
+   "bossShare": 0.016,
+   "hitsByCause": {
+    "pots": 286,
+    "log": 0,
+    "tumble": 0,
+    "pillow": 14
+   }
+  },
+  "normal/botAlwaysJump": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 95.98,
+    "p50": 133.64,
+    "p90": 197.97
+   },
+   "score": {
+    "p10": 1038,
+    "p50": 1675,
+    "p90": 2808
+   },
+   "reached": {
+    "ch2": 98,
+    "ch3": 36,
+    "ch4": 8,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 2.52,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 34.9,
+    "p50": 70.44,
+    "p90": 107.32,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 98,
+     "dur": {
+      "p10": 73.08,
+      "p50": 73.08,
+      "p90": 73.43
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.64
+     },
+     "hitsTotal": 0.64,
+     "visits": 2,
+     "deaths": 2
+    },
+    {
+     "ch": 2,
+     "entered": 98,
+     "completed": 36,
+     "dur": {
+      "p10": 68.88,
+      "p50": 69.28,
+      "p90": 69.28
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 2.245,
+      "tumble": 0,
+      "pillow": 0.102
+     },
+     "hitsTotal": 2.347,
+     "visits": 2,
+     "deaths": 63.3
+    },
+    {
+     "ch": 3,
+     "entered": 36,
+     "completed": 8,
+     "dur": {
+      "p10": 65.33,
+      "p50": 65.33,
+      "p90": 65.41
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 1.556,
+      "tumble": 0.194,
+      "pillow": 0.306
+     },
+     "hitsTotal": 2.056,
+     "visits": 2,
+     "deaths": 77.8
+    },
+    {
+     "ch": 4,
+     "entered": 8,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 2.125,
+      "tumble": 0.125,
+      "pillow": 0.25
+     },
+     "hitsTotal": 2.5,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": 94.7,
+   "perfectVisit": 76.5,
+   "bossShare": 0.214,
+   "hitsByCause": {
+    "pots": 0,
+    "log": 293,
+    "tumble": 8,
+    "pillow": 87
+   }
+  },
+  "normal/botNeverJump": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 79.86,
+    "p50": 90.95,
+    "p90": 109.28
+   },
+   "score": {
+    "p10": 1337,
+    "p50": 1665,
+    "p90": 1993
+   },
+   "reached": {
+    "ch2": 91,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 2.43,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 33.75,
+    "p50": 63.73,
+    "p90": 80.55,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 91,
+     "dur": {
+      "p10": 73.08,
+      "p50": 73.35,
+      "p90": 73.62
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 1.11
+     },
+     "hitsTotal": 1.11,
+     "visits": 2,
+     "deaths": 9
+    },
+    {
+     "ch": 2,
+     "entered": 91,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 2.659,
+      "tumble": 0,
+      "pillow": 0.121
+     },
+     "hitsTotal": 2.78,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": 87,
+   "perfectVisit": 52,
+   "bossShare": 0.194,
+   "hitsByCause": {
+    "pots": 0,
+    "log": 242,
+    "tumble": 0,
+    "pillow": 122
+   }
+  },
+  "hard/bot0.3": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 40.34,
+    "p50": 91.8,
+    "p90": 110.7
+   },
+   "score": {
+    "p10": 872,
+    "p50": 2155,
+    "p90": 2882
+   },
+   "reached": {
+    "ch2": 65,
+    "ch3": 1,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 2.07,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 10.15,
+    "p50": 35.3,
+    "p90": 68.11,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 65,
+     "dur": {
+      "p10": 73.55,
+      "p50": 73.82,
+      "p90": 74.08
+     },
+     "hitsPerEntered": {
+      "pots": 0.63,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 1.27
+     },
+     "hitsTotal": 1.9,
+     "visits": 2,
+     "deaths": 35
+    },
+    {
+     "ch": 2,
+     "entered": 65,
+     "completed": 1,
+     "dur": {
+      "p10": 69.72,
+      "p50": 69.72,
+      "p90": 69.72
+     },
+     "hitsPerEntered": {
+      "pots": 0.246,
+      "log": 1.769,
+      "tumble": 0,
+      "pillow": 0.538
+     },
+     "hitsTotal": 2.553,
+     "visits": 2,
+     "deaths": 98.5
+    },
+    {
+     "ch": 3,
+     "entered": 1,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 1,
+      "tumble": 0,
+      "pillow": 1
+     },
+     "hitsTotal": 2,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": 85,
+   "perfectVisit": 39.3,
+   "bossShare": 0.19,
+   "hitsByCause": {
+    "pots": 79,
+    "log": 116,
+    "tumble": 0,
+    "pillow": 163
+   }
+  },
+  "hard/bot0.5": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 19,
+   "survival": {
+    "p10": 138.82,
+    "p50": 307.65,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 3676,
+    "p50": 8760,
+    "p90": 14680
+   },
+   "reached": {
+    "ch2": 97,
+    "ch3": 88,
+    "ch4": 72,
+    "ch5": 54
+   },
+   "firstShell": {
+    "p50": 2.07,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 33.38,
+    "p50": 68.49,
+    "p90": 157.18,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 97,
+     "dur": {
+      "p10": 73.55,
+      "p50": 73.55,
+      "p90": 73.92
+     },
+     "hitsPerEntered": {
+      "pots": 0.12,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.55
+     },
+     "hitsTotal": 0.67,
+     "visits": 2,
+     "deaths": 3
+    },
+    {
+     "ch": 2,
+     "entered": 97,
+     "completed": 88,
+     "dur": {
+      "p10": 69.17,
+      "p50": 69.43,
+      "p90": 69.72
+     },
+     "hitsPerEntered": {
+      "pots": 0.144,
+      "log": 0.278,
+      "tumble": 0,
+      "pillow": 0.515
+     },
+     "hitsTotal": 0.937,
+     "visits": 2,
+     "deaths": 9.3
+    },
+    {
+     "ch": 3,
+     "entered": 88,
+     "completed": 72,
+     "dur": {
+      "p10": 65.47,
+      "p50": 65.75,
+      "p90": 66.02
+     },
+     "hitsPerEntered": {
+      "pots": 0.216,
+      "log": 0.261,
+      "tumble": 0.159,
+      "pillow": 0.614
+     },
+     "hitsTotal": 1.25,
+     "visits": 2,
+     "deaths": 18.2
+    },
+    {
+     "ch": 4,
+     "entered": 72,
+     "completed": 54,
+     "dur": {
+      "p10": 62.14,
+      "p50": 62.4,
+      "p90": 62.68
+     },
+     "hitsPerEntered": {
+      "pots": 0.097,
+      "log": 0.458,
+      "tumble": 0.264,
+      "pillow": 0.583
+     },
+     "hitsTotal": 1.402,
+     "visits": 3,
+     "deaths": 25
+    },
+    {
+     "ch": 5,
+     "entered": 54,
+     "completed": 35,
+     "dur": {
+      "p10": 73.27,
+      "p50": 73.55,
+      "p90": 73.81
+     },
+     "hitsPerEntered": {
+      "pots": 0.204,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 1.241
+     },
+     "hitsTotal": 1.445,
+     "visits": 2,
+     "deaths": 35.2
+    },
+    {
+     "ch": 6,
+     "entered": 35,
+     "completed": 28,
+     "dur": {
+      "p10": 69.53,
+      "p50": 69.8,
+      "p90": 70.07
+     },
+     "hitsPerEntered": {
+      "pots": 0.086,
+      "log": 0.314,
+      "tumble": 0,
+      "pillow": 0.743
+     },
+     "hitsTotal": 1.143,
+     "visits": 2,
+     "deaths": 20
+    }
+   ],
+   "pillowDodge": 93.8,
+   "perfectVisit": 70.6,
+   "bossShare": 0.239,
+   "hitsByCause": {
+    "pots": 71,
+    "log": 105,
+    "tumble": 41,
+    "pillow": 314
+   }
+  },
+  "hard/bot0.7": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 100,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 14639,
+    "p50": 15315,
+    "p90": 15961
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 100,
+    "ch5": 100
+   },
+   "firstShell": {
+    "p50": 2.07,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 125.31,
+    "p50": 245.7,
+    "p90": 425.63,
+    "never": 51
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 73.55,
+      "p50": 73.55,
+      "p90": 73.55
+     },
+     "hitsPerEntered": {
+      "pots": 0.01,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0
+     },
+     "hitsTotal": 0.01,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 69.17,
+      "p50": 69.17,
+      "p90": 69.17
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0.06,
+      "tumble": 0,
+      "pillow": 0.02
+     },
+     "hitsTotal": 0.08,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 65.47,
+      "p50": 65.47,
+      "p90": 65.47
+     },
+     "hitsPerEntered": {
+      "pots": 0.01,
+      "log": 0.05,
+      "tumble": 0.02,
+      "pillow": 0.02
+     },
+     "hitsTotal": 0.1,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 4,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 62.15,
+      "p50": 62.15,
+      "p90": 62.42
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0.1,
+      "tumble": 0,
+      "pillow": 0.05
+     },
+     "hitsTotal": 0.15,
+     "visits": 3,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 73.27,
+      "p50": 73.27,
+      "p90": 73.27
+     },
+     "hitsPerEntered": {
+      "pots": 0.01,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.01
+     },
+     "hitsTotal": 0.02,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 69.53,
+      "p50": 69.53,
+      "p90": 69.8
+     },
+     "hitsPerEntered": {
+      "pots": 0.03,
+      "log": 0.06,
+      "tumble": 0,
+      "pillow": 0.03
+     },
+     "hitsTotal": 0.12,
+     "visits": 2,
+     "deaths": 0
+    }
+   ],
+   "pillowDodge": 99.8,
+   "perfectVisit": 98.9,
+   "bossShare": 0.247,
+   "hitsByCause": {
+    "pots": 6,
+    "log": 36,
+    "tumble": 2,
+    "pillow": 17
+   }
+  },
+  "hard/bot0.9": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 100,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 14169,
+    "p50": 14695,
+    "p90": 15346
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 100,
+    "ch5": 100
+   },
+   "firstShell": {
+    "p50": 2.07,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 155.46,
+    "p50": 306.51,
+    "p90": 447.26,
+    "never": 74
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 73.55,
+      "p50": 73.55,
+      "p90": 73.55
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0
+     },
+     "hitsTotal": 0,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 69.17,
+      "p50": 69.17,
+      "p90": 69.17
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0.01,
+      "tumble": 0,
+      "pillow": 0.02
+     },
+     "hitsTotal": 0.03,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 65.47,
+      "p50": 65.47,
+      "p90": 65.47
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.01
+     },
+     "hitsTotal": 0.01,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 4,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 62.15,
+      "p50": 62.15,
+      "p90": 62.15
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0.05,
+      "tumble": 0,
+      "pillow": 0.04
+     },
+     "hitsTotal": 0.09,
+     "visits": 3,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 73.27,
+      "p50": 73.27,
+      "p90": 73.27
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0
+     },
+     "hitsTotal": 0,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 69.53,
+      "p50": 69.53,
+      "p90": 69.53
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0.04,
+      "tumble": 0,
+      "pillow": 0.04
+     },
+     "hitsTotal": 0.08,
+     "visits": 2,
+     "deaths": 0
+    }
+   ],
+   "pillowDodge": 99.8,
+   "perfectVisit": 99.1,
+   "bossShare": 0.246,
+   "hitsByCause": {
+    "pots": 0,
+    "log": 14,
+    "tumble": 2,
+    "pillow": 14
+   }
+  },
+  "hard/bot1": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 100,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 13870,
+    "p50": 14380,
+    "p90": 14992
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 100,
+    "ch5": 100
+   },
+   "firstShell": {
+    "p50": 2.07,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 98.36,
+    "p50": 238.23,
+    "p90": 437.31,
+    "never": 78
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 73.55,
+      "p50": 73.55,
+      "p90": 73.55
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0
+     },
+     "hitsTotal": 0,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 69.17,
+      "p50": 69.17,
+      "p90": 69.17
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.05
+     },
+     "hitsTotal": 0.05,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 65.47,
+      "p50": 65.47,
+      "p90": 65.47
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.02
+     },
+     "hitsTotal": 0.02,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 4,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 62.15,
+      "p50": 62.15,
+      "p90": 62.15
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0.01,
+      "pillow": 0.04
+     },
+     "hitsTotal": 0.05,
+     "visits": 3,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 73.27,
+      "p50": 73.27,
+      "p90": 73.27
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.01
+     },
+     "hitsTotal": 0.01,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 69.53,
+      "p50": 69.53,
+      "p90": 69.53
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0.01,
+      "tumble": 0,
+      "pillow": 0.05
+     },
+     "hitsTotal": 0.06,
+     "visits": 2,
+     "deaths": 0
+    }
+   ],
+   "pillowDodge": 99.8,
+   "perfectVisit": 98.8,
+   "bossShare": 0.246,
+   "hitsByCause": {
+    "pots": 0,
+    "log": 2,
+    "tumble": 3,
+    "pillow": 18
+   }
+  },
+  "hard/kid": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 26.71,
+    "p50": 35.25,
+    "p90": 58.09
+   },
+   "score": {
+    "p10": 229,
+    "p50": 445,
+    "p90": 790
+   },
+   "reached": {
+    "ch2": 0,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 2.38,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 4.85,
+    "p50": 18.59,
+    "p90": 34.33,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 1.5,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 1.5
+     },
+     "hitsTotal": 3,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 2,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": 51.8,
+   "perfectVisit": 0,
+   "bossShare": 0.127,
+   "hitsByCause": {
+    "pots": 150,
+    "log": 0,
+    "tumble": 0,
+    "pillow": 150
+   }
+  },
+  "hard/adult": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 43,
+   "survival": {
+    "p10": 127.03,
+    "p50": 434.18,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 2103,
+    "p50": 9525,
+    "p90": 11221
+   },
+   "reached": {
+    "ch2": 97,
+    "ch3": 87,
+    "ch4": 71,
+    "ch5": 66
+   },
+   "firstShell": {
+    "p50": 2.07,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 14.17,
+    "p50": 82,
+    "p90": 170.33,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 97,
+     "dur": {
+      "p10": 73.55,
+      "p50": 73.55,
+      "p90": 74.08
+     },
+     "hitsPerEntered": {
+      "pots": 0.39,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.28
+     },
+     "hitsTotal": 0.67,
+     "visits": 2,
+     "deaths": 3
+    },
+    {
+     "ch": 2,
+     "entered": 97,
+     "completed": 87,
+     "dur": {
+      "p10": 69.17,
+      "p50": 69.43,
+      "p90": 69.72
+     },
+     "hitsPerEntered": {
+      "pots": 0.278,
+      "log": 0.371,
+      "tumble": 0,
+      "pillow": 0.33
+     },
+     "hitsTotal": 0.979,
+     "visits": 2,
+     "deaths": 10.3
+    },
+    {
+     "ch": 3,
+     "entered": 87,
+     "completed": 71,
+     "dur": {
+      "p10": 65.47,
+      "p50": 65.75,
+      "p90": 65.75
+     },
+     "hitsPerEntered": {
+      "pots": 0.276,
+      "log": 0.31,
+      "tumble": 0.138,
+      "pillow": 0.276
+     },
+     "hitsTotal": 1,
+     "visits": 2,
+     "deaths": 18.4
+    },
+    {
+     "ch": 4,
+     "entered": 71,
+     "completed": 66,
+     "dur": {
+      "p10": 62.13,
+      "p50": 62.4,
+      "p90": 62.68
+     },
+     "hitsPerEntered": {
+      "pots": 0.268,
+      "log": 0.254,
+      "tumble": 0.028,
+      "pillow": 0.31
+     },
+     "hitsTotal": 0.86,
+     "visits": 3,
+     "deaths": 7
+    },
+    {
+     "ch": 5,
+     "entered": 66,
+     "completed": 61,
+     "dur": {
+      "p10": 73.27,
+      "p50": 73.53,
+      "p90": 73.8
+     },
+     "hitsPerEntered": {
+      "pots": 0.5,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.273
+     },
+     "hitsTotal": 0.773,
+     "visits": 2,
+     "deaths": 7.6
+    },
+    {
+     "ch": 6,
+     "entered": 61,
+     "completed": 53,
+     "dur": {
+      "p10": 69.53,
+      "p50": 69.8,
+      "p90": 70.07
+     },
+     "hitsPerEntered": {
+      "pots": 0.279,
+      "log": 0.475,
+      "tumble": 0,
+      "pillow": 0.328
+     },
+     "hitsTotal": 1.082,
+     "visits": 2,
+     "deaths": 13.1
+    }
+   ],
+   "pillowDodge": 97,
+   "perfectVisit": 86.2,
+   "bossShare": 0.241,
+   "hitsByCause": {
+    "pots": 170,
+    "log": 123,
+    "tumble": 17,
+    "pillow": 173
+   }
+  },
+  "hard/jumpSpam": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 9.51,
+    "p50": 15.56,
+    "p90": 24.78
+   },
+   "score": {
+    "p10": 0,
+    "p50": 70,
+    "p90": 191
+   },
+   "reached": {
+    "ch2": 0,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 3.18,
+    "never": 11
+   },
+   "firstHit": {
+    "p10": 2.05,
+    "p50": 4.98,
+    "p90": 12.55,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 2.97,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.03
+     },
+     "hitsTotal": 3,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 2,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": 76.9,
+   "perfectVisit": 0,
+   "bossShare": 0.006,
+   "hitsByCause": {
+    "pots": 297,
+    "log": 0,
+    "tumble": 0,
+    "pillow": 3
+   }
+  },
+  "hard/zigzag": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 6.37,
+    "p50": 10.41,
+    "p90": 19.97
+   },
+   "score": {
+    "p10": 20,
+    "p50": 110,
+    "p90": 310
+   },
+   "reached": {
+    "ch2": 0,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 2.13,
+    "never": 4
+   },
+   "firstHit": {
+    "p10": 2.05,
+    "p50": 3.63,
+    "p90": 9.48,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 3,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0
+     },
+     "hitsTotal": 3,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 2,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": null,
+   "perfectVisit": null,
+   "bossShare": 0,
+   "hitsByCause": {
+    "pots": 300,
+    "log": 0,
+    "tumble": 0,
+    "pillow": 0
+   }
+  },
+  "hard/zigJump": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 6.37,
+    "p50": 10.41,
+    "p90": 19.97
+   },
+   "score": {
+    "p10": 10,
+    "p50": 60,
+    "p90": 160
+   },
+   "reached": {
+    "ch2": 0,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 2.67,
+    "never": 7
+   },
+   "firstHit": {
+    "p10": 2.05,
+    "p50": 3.63,
+    "p90": 9.48,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 3,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0
+     },
+     "hitsTotal": 3,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 2,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": null,
+   "perfectVisit": null,
+   "bossShare": 0,
+   "hitsByCause": {
+    "pots": 300,
+    "log": 0,
+    "tumble": 0,
+    "pillow": 0
+   }
+  },
+  "hard/idleMid": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 9.51,
+    "p50": 15.56,
+    "p90": 24.78
+   },
+   "score": {
+    "p10": 30,
+    "p50": 150,
+    "p90": 351
+   },
+   "reached": {
+    "ch2": 0,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 3.07,
+    "never": 8
+   },
+   "firstHit": {
+    "p10": 2.05,
+    "p50": 4.98,
+    "p90": 12.55,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 2.96,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.04
+     },
+     "hitsTotal": 3,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 2,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": 20,
+   "perfectVisit": 0,
+   "bossShare": 0.004,
+   "hitsByCause": {
+    "pots": 296,
+    "log": 0,
+    "tumble": 0,
+    "pillow": 4
+   }
+  },
+  "hard/idleSide": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 8.28,
+    "p50": 15.15,
+    "p90": 25.97
+   },
+   "score": {
+    "p10": 0,
+    "p50": 110,
+    "p90": 294
+   },
+   "reached": {
+    "ch2": 0,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 2.83,
+    "never": 11
+   },
+   "firstHit": {
+    "p10": 2.05,
+    "p50": 4.59,
+    "p90": 11.97,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 2.96,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.04
+     },
+     "hitsTotal": 3,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 2,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": 20,
+   "perfectVisit": 0,
+   "bossShare": 0.006,
+   "hitsByCause": {
+    "pots": 296,
+    "log": 0,
+    "tumble": 0,
+    "pillow": 4
+   }
+  },
+  "hard/botAlwaysJump": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 95.19,
+    "p50": 124.06,
+    "p90": 183.73
+   },
+   "score": {
+    "p10": 1190,
+    "p50": 1620,
+    "p90": 2821
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 29,
+    "ch4": 6,
+    "ch5": 1
+   },
+   "firstShell": {
+    "p50": 2.07,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 36.25,
+    "p50": 67.2,
+    "p90": 106.05,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 100,
+     "dur": {
+      "p10": 73.55,
+      "p50": 73.82,
+      "p90": 74.08
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 0.68
+     },
+     "hitsTotal": 0.68,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 100,
+     "completed": 29,
+     "dur": {
+      "p10": 69.43,
+      "p50": 69.72,
+      "p90": 69.72
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 2.03,
+      "tumble": 0,
+      "pillow": 0.43
+     },
+     "hitsTotal": 2.46,
+     "visits": 2,
+     "deaths": 71
+    },
+    {
+     "ch": 3,
+     "entered": 29,
+     "completed": 6,
+     "dur": {
+      "p10": 65.73,
+      "p50": 65.88,
+      "p90": 66.02
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 1.655,
+      "tumble": 0.034,
+      "pillow": 0.345
+     },
+     "hitsTotal": 2.034,
+     "visits": 2,
+     "deaths": 79.3
+    },
+    {
+     "ch": 4,
+     "entered": 6,
+     "completed": 1,
+     "dur": {
+      "p10": 62.4,
+      "p50": 62.4,
+      "p90": 62.4
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 1.667,
+      "tumble": 0,
+      "pillow": 0.333
+     },
+     "hitsTotal": 2,
+     "visits": 3,
+     "deaths": 83.3
+    },
+    {
+     "ch": 5,
+     "entered": 1,
+     "completed": 1,
+     "dur": {
+      "p10": 73.55,
+      "p50": 73.55,
+      "p90": 73.55
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 1
+     },
+     "hitsTotal": 1,
+     "visits": 2,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 1,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 1,
+      "tumble": 0,
+      "pillow": 1
+     },
+     "hitsTotal": 2,
+     "visits": null,
+     "deaths": 100
+    }
+   ],
+   "pillowDodge": 93.5,
+   "perfectVisit": 65.2,
+   "bossShare": 0.213,
+   "hitsByCause": {
+    "pots": 0,
+    "log": 262,
+    "tumble": 1,
+    "pillow": 125
+   }
+  },
+  "hard/botNeverJump": {
+   "n": 100,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 65.28,
+    "p50": 85.34,
+    "p90": 100.73
+   },
+   "score": {
+    "p10": 1220,
+    "p50": 1780,
+    "p90": 2182
+   },
+   "reached": {
+    "ch2": 79,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstShell": {
+    "p50": 2.07,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 33.38,
+    "p50": 36.25,
+    "p90": 67.2,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 100,
+     "completed": 79,
+     "dur": {
+      "p10": 73.55,
+      "p50": 74.08,
+      "p90": 74.08
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 0,
+      "tumble": 0,
+      "pillow": 1.76
+     },
+     "hitsTotal": 1.76,
+     "visits": 2,
+     "deaths": 21
+    },
+    {
+     "ch": 2,
+     "entered": 79,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": 0,
+      "log": 2.291,
+      "tumble": 0,
+      "pillow": 0.165
+     },
+     "hitsTotal": 2.456,
+     "visits": null,
+     "deaths": 100
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "pots": null,
+      "log": null,
+      "tumble": null,
+      "pillow": null
+     },
+     "hitsTotal": 0,
+     "visits": null,
+     "deaths": null
+    }
+   ],
+   "pillowDodge": 82.3,
+   "perfectVisit": 32.3,
+   "bossShare": 0.19,
+   "hitsByCause": {
+    "pots": 0,
+    "log": 181,
+    "tumble": 0,
+    "pillow": 189
+   }
+  }
+ },
+ "skill1Hits": [
+  {
+   "diff": "easy",
+   "seed": 12,
+   "t": 184.27,
+   "kind": "pillow",
+   "level": 2,
+   "lane": 0,
+   "heroX": -0.52,
+   "heroY": 0.29,
+   "objX": 0.02,
+   "dist": 1102.4,
+   "boss": "hover"
+  },
+  {
+   "diff": "easy",
+   "seed": 21,
+   "t": 124.3,
+   "kind": "pillow",
+   "level": 1,
+   "lane": 0,
+   "heroX": -0.52,
+   "heroY": 0.29,
+   "objX": 0.02,
+   "dist": 724.4,
+   "boss": "hover"
+  },
+  {
+   "diff": "easy",
+   "seed": 21,
+   "t": 279,
+   "kind": "pillow",
+   "level": 4,
+   "lane": 0,
+   "heroX": 0.52,
+   "heroY": 0,
+   "objX": -0.02,
+   "dist": 1727.2,
+   "boss": "leave"
+  },
+  {
+   "diff": "easy",
+   "seed": 30,
+   "t": 177.25,
+   "kind": "tumble",
+   "level": 2,
+   "lane": 0,
+   "heroX": -0.7,
+   "heroY": 0,
+   "objX": -0.23,
+   "dist": 1057,
+   "boss": "away"
+  },
+  {
+   "diff": "easy",
+   "seed": 31,
+   "t": 230.1,
+   "kind": "tumble",
+   "level": 3,
+   "lane": 0,
+   "heroX": 0.7,
+   "heroY": 0,
+   "objX": 0.26,
+   "dist": 1404.3,
+   "boss": "away"
+  },
+  {
+   "diff": "easy",
+   "seed": 42,
+   "t": 95.95,
+   "kind": "pillow",
+   "level": 1,
+   "lane": 0,
+   "heroX": 0.52,
+   "heroY": 0,
+   "objX": -0.02,
+   "dist": 551.8,
+   "boss": "hover"
+  },
+  {
+   "diff": "easy",
+   "seed": 44,
+   "t": 400.33,
+   "kind": "pillow",
+   "level": 5,
+   "lane": 0,
+   "heroX": 0.52,
+   "heroY": 0.29,
+   "objX": -0.02,
+   "dist": 2515.5,
+   "boss": "leave"
+  },
+  {
+   "diff": "easy",
+   "seed": 48,
+   "t": 126.05,
+   "kind": "pillow",
+   "level": 1,
+   "lane": 0,
+   "heroX": -0.52,
+   "heroY": 0,
+   "objX": 0.02,
+   "dist": 735.2,
+   "boss": "hover"
+  },
+  {
+   "diff": "easy",
+   "seed": 48,
+   "t": 427.25,
+   "kind": "pillow",
+   "level": 6,
+   "lane": 0,
+   "heroX": 0,
+   "heroY": 0.38,
+   "objX": 0,
+   "dist": 2697.1,
+   "boss": "hover"
+  },
+  {
+   "diff": "easy",
+   "seed": 61,
+   "t": 95.9,
+   "kind": "pillow",
+   "level": 1,
+   "lane": -1,
+   "heroX": -1,
+   "heroY": 0.38,
+   "objX": -1,
+   "dist": 551.5,
+   "boss": "hover"
+  },
+  {
+   "diff": "easy",
+   "seed": 76,
+   "t": 469.38,
+   "kind": "tumble",
+   "level": 7,
+   "lane": 0,
+   "heroX": -0.7,
+   "heroY": 0,
+   "objX": -0.25,
+   "dist": 2996.7,
+   "boss": "away"
+  },
+  {
+   "diff": "easy",
+   "seed": 77,
+   "t": 154.27,
+   "kind": "pillow",
+   "level": 2,
+   "lane": 0,
+   "heroX": 0,
+   "heroY": 0.12,
+   "objX": 0,
+   "dist": 911,
+   "boss": "hover"
+  },
+  {
+   "diff": "easy",
+   "seed": 86,
+   "t": 277.48,
+   "kind": "pillow",
+   "level": 4,
+   "lane": 0,
+   "heroX": -0.52,
+   "heroY": 0,
+   "objX": 0.02,
+   "dist": 1719.6,
+   "boss": "hover"
+  },
+  {
+   "diff": "normal",
+   "seed": 10,
+   "t": 95.92,
+   "kind": "pillow",
+   "level": 1,
+   "lane": 0,
+   "heroX": 0,
+   "heroY": 0.38,
+   "objX": 0,
+   "dist": 701.6,
+   "boss": "hover"
+  },
+  {
+   "diff": "normal",
+   "seed": 21,
+   "t": 398.47,
+   "kind": "pillow",
+   "level": 5,
+   "lane": 0,
+   "heroX": -0.52,
+   "heroY": 0,
+   "objX": 0.02,
+   "dist": 3181.1,
+   "boss": "leave"
+  },
+  {
+   "diff": "normal",
+   "seed": 21,
+   "t": 426.03,
+   "kind": "pillow",
+   "level": 6,
+   "lane": 1,
+   "heroX": 1,
+   "heroY": 0.02,
+   "objX": 1,
+   "dist": 3417.4,
+   "boss": "hover"
+  },
+  {
+   "diff": "normal",
+   "seed": 27,
+   "t": 168.25,
+   "kind": "tumble",
+   "level": 2,
+   "lane": -1,
+   "heroX": -0.49,
+   "heroY": 0,
+   "objX": -0.89,
+   "dist": 1270.5,
+   "boss": "away"
+  },
+  {
+   "diff": "normal",
+   "seed": 43,
+   "t": 34.93,
+   "kind": "pillow",
+   "level": 0,
+   "lane": 0,
+   "heroX": 0.52,
+   "heroY": 0.29,
+   "objX": -0.03,
+   "dist": 247.5,
+   "boss": "hover"
+  },
+  {
+   "diff": "normal",
+   "seed": 53,
+   "t": 35.05,
+   "kind": "pillow",
+   "level": 0,
+   "lane": 0,
+   "heroX": 0.52,
+   "heroY": 0,
+   "objX": -0.02,
+   "dist": 248.3,
+   "boss": "hover"
+  },
+  {
+   "diff": "normal",
+   "seed": 55,
+   "t": 453.7,
+   "kind": "pillow",
+   "level": 6,
+   "lane": 0,
+   "heroX": 0,
+   "heroY": 0.1,
+   "objX": 0,
+   "dist": 3664.2,
+   "boss": "hover"
+  },
+  {
+   "diff": "normal",
+   "seed": 58,
+   "t": 246.35,
+   "kind": "pillow",
+   "level": 3,
+   "lane": 0,
+   "heroX": -0.37,
+   "heroY": 0.02,
+   "objX": -1.02,
+   "dist": 1924.2,
+   "boss": "hover"
+  },
+  {
+   "diff": "normal",
+   "seed": 61,
+   "t": 367.2,
+   "kind": "pillow",
+   "level": 5,
+   "lane": 0,
+   "heroX": 0,
+   "heroY": 0.38,
+   "objX": 0,
+   "dist": 2915.3,
+   "boss": "hover"
+  },
+  {
+   "diff": "normal",
+   "seed": 78,
+   "t": 126.05,
+   "kind": "pillow",
+   "level": 1,
+   "lane": 0,
+   "heroX": 0.52,
+   "heroY": 0.29,
+   "objX": -0.03,
+   "dist": 934.8,
+   "boss": "hover"
+  },
+  {
+   "diff": "normal",
+   "seed": 80,
+   "t": 260.28,
+   "kind": "tumble",
+   "level": 3,
+   "lane": -1,
+   "heroX": -1,
+   "heroY": 0,
+   "objX": -0.42,
+   "dist": 2046.1,
+   "boss": "away"
+  },
+  {
+   "diff": "normal",
+   "seed": 84,
+   "t": 367.6,
+   "kind": "pillow",
+   "level": 5,
+   "lane": 0,
+   "heroX": 0,
+   "heroY": 0.1,
+   "objX": 0,
+   "dist": 2918.7,
+   "boss": "hover"
+  },
+  {
+   "diff": "normal",
+   "seed": 92,
+   "t": 397.23,
+   "kind": "pillow",
+   "level": 5,
+   "lane": 0,
+   "heroX": 0,
+   "heroY": 0.38,
+   "objX": 0,
+   "dist": 3170.4,
+   "boss": "hover"
+  },
+  {
+   "diff": "normal",
+   "seed": 96,
+   "t": 255.77,
+   "kind": "tumble",
+   "level": 3,
+   "lane": 0,
+   "heroX": -0.7,
+   "heroY": 0,
+   "objX": -0.25,
+   "dist": 2006.3,
+   "boss": "away"
+  },
+  {
+   "diff": "normal",
+   "seed": 97,
+   "t": 93.73,
+   "kind": "pillow",
+   "level": 1,
+   "lane": -1,
+   "heroX": -1,
+   "heroY": 0.38,
+   "objX": -1,
+   "dist": 685,
+   "boss": "hover"
+  },
+  {
+   "diff": "hard",
+   "seed": 1,
+   "t": 453.38,
+   "kind": "pillow",
+   "level": 6,
+   "lane": 1,
+   "heroX": 1,
+   "heroY": 0.1,
+   "objX": 0.97,
+   "dist": 4390.6,
+   "boss": "hover"
+  },
+  {
+   "diff": "hard",
+   "seed": 6,
+   "t": 126.32,
+   "kind": "pillow",
+   "level": 1,
+   "lane": -1,
+   "heroX": -1,
+   "heroY": 0.38,
+   "objX": -1,
+   "dist": 1123.9,
+   "boss": "hover"
+  },
+  {
+   "diff": "hard",
+   "seed": 7,
+   "t": 398.23,
+   "kind": "pillow",
+   "level": 5,
+   "lane": 0,
+   "heroX": -0.52,
+   "heroY": 0.29,
+   "objX": 0.02,
+   "dist": 3812.9,
+   "boss": "leave"
+  },
+  {
+   "diff": "hard",
+   "seed": 10,
+   "t": 215.27,
+   "kind": "pillow",
+   "level": 3,
+   "lane": 0,
+   "heroX": 0,
+   "heroY": 0.3,
+   "objX": -0.02,
+   "dist": 1990.7,
+   "boss": "hover"
+  },
+  {
+   "diff": "hard",
+   "seed": 15,
+   "t": 454.75,
+   "kind": "log",
+   "level": 6,
+   "lane": -1,
+   "heroX": -1,
+   "heroY": 0.2,
+   "objX": -1.02,
+   "dist": 4405.3,
+   "boss": "hover"
+  },
+  {
+   "diff": "hard",
+   "seed": 27,
+   "t": 394.35,
+   "kind": "pillow",
+   "level": 5,
+   "lane": -1,
+   "heroX": -1,
+   "heroY": 0.38,
+   "objX": -1,
+   "dist": 3772.8,
+   "boss": "hover"
+  },
+  {
+   "diff": "hard",
+   "seed": 28,
+   "t": 415.5,
+   "kind": "tumble",
+   "level": 6,
+   "lane": 0,
+   "heroX": 0.52,
+   "heroY": 0.29,
+   "objX": 0.34,
+   "dist": 3992.8,
+   "boss": "away"
+  },
+  {
+   "diff": "hard",
+   "seed": 35,
+   "t": 367.32,
+   "kind": "pillow",
+   "level": 5,
+   "lane": 1,
+   "heroX": 1,
+   "heroY": 0.38,
+   "objX": 1,
+   "dist": 3498.4,
+   "boss": "hover"
+  },
+  {
+   "diff": "hard",
+   "seed": 36,
+   "t": 439.73,
+   "kind": "tumble",
+   "level": 6,
+   "lane": -1,
+   "heroX": -1,
+   "heroY": 0.45,
+   "objX": -1.39,
+   "dist": 4245.2,
+   "boss": "away"
+  },
+  {
+   "diff": "hard",
+   "seed": 37,
+   "t": 276.32,
+   "kind": "pillow",
+   "level": 4,
+   "lane": 0,
+   "heroX": -0.52,
+   "heroY": 0.29,
+   "objX": 0.02,
+   "dist": 2616.3,
+   "boss": "hover"
+  },
+  {
+   "diff": "hard",
+   "seed": 42,
+   "t": 215.27,
+   "kind": "pillow",
+   "level": 3,
+   "lane": 1,
+   "heroX": 1,
+   "heroY": 0.2,
+   "objX": 1.03,
+   "dist": 1990.7,
+   "boss": "hover"
+  },
+  {
+   "diff": "hard",
+   "seed": 50,
+   "t": 125.65,
+   "kind": "pillow",
+   "level": 1,
+   "lane": -1,
+   "heroX": -1,
+   "heroY": 0,
+   "objX": -1.03,
+   "dist": 1117.6,
+   "boss": "hover"
+  },
+  {
+   "diff": "hard",
+   "seed": 53,
+   "t": 156.03,
+   "kind": "pillow",
+   "level": 2,
+   "lane": 1,
+   "heroX": 0.48,
+   "heroY": 0.29,
+   "objX": 1.02,
+   "dist": 1406.4,
+   "boss": "hover"
+  },
+  {
+   "diff": "hard",
+   "seed": 55,
+   "t": 95.33,
+   "kind": "pillow",
+   "level": 1,
+   "lane": 1,
+   "heroX": 1,
+   "heroY": 0.38,
+   "objX": 1,
+   "dist": 836.4,
+   "boss": "hover"
+  },
+  {
+   "diff": "hard",
+   "seed": 56,
+   "t": 366,
+   "kind": "pillow",
+   "level": 5,
+   "lane": 0,
+   "heroX": 0,
+   "heroY": 0.38,
+   "objX": 0,
+   "dist": 3485.3,
+   "boss": "hover"
+  },
+  {
+   "diff": "hard",
+   "seed": 56,
+   "t": 367.85,
+   "kind": "log",
+   "level": 5,
+   "lane": 1,
+   "heroX": 1,
+   "heroY": 0.02,
+   "objX": 1,
+   "dist": 3501.1,
+   "boss": "hover"
+  },
+  {
+   "diff": "hard",
+   "seed": 60,
+   "t": 245.63,
+   "kind": "pillow",
+   "level": 3,
+   "lane": 0,
+   "heroX": 0,
+   "heroY": 0,
+   "objX": 0,
+   "dist": 2300,
+   "boss": "hover"
+  },
+  {
+   "diff": "hard",
+   "seed": 68,
+   "t": 93.37,
+   "kind": "pillow",
+   "level": 1,
+   "lane": 0,
+   "heroX": 0,
+   "heroY": 0.38,
+   "objX": 0,
+   "dist": 818.5,
+   "boss": "hover"
+  },
+  {
+   "diff": "hard",
+   "seed": 70,
+   "t": 395.68,
+   "kind": "pillow",
+   "level": 5,
+   "lane": 0,
+   "heroX": 0,
+   "heroY": 0,
+   "objX": -0.03,
+   "dist": 3786.6,
+   "boss": "hover"
+  },
+  {
+   "diff": "hard",
+   "seed": 72,
+   "t": 215.63,
+   "kind": "pillow",
+   "level": 3,
+   "lane": -1,
+   "heroX": -1,
+   "heroY": 0.38,
+   "objX": -1,
+   "dist": 1994.4,
+   "boss": "hover"
+  },
+  {
+   "diff": "hard",
+   "seed": 89,
+   "t": 153.43,
+   "kind": "pillow",
+   "level": 2,
+   "lane": 0,
+   "heroX": 0,
+   "heroY": 0.38,
+   "objX": 0,
+   "dist": 1381.6,
+   "boss": "hover"
+  },
+  {
+   "diff": "hard",
+   "seed": 91,
+   "t": 94.42,
+   "kind": "pillow",
+   "level": 1,
+   "lane": 0,
+   "heroX": 0,
+   "heroY": 0.38,
+   "objX": 0,
+   "dist": 828.1,
+   "boss": "hover"
+  },
+  {
+   "diff": "hard",
+   "seed": 93,
+   "t": 230.83,
+   "kind": "tumble",
+   "level": 3,
+   "lane": 1,
+   "heroX": 1,
+   "heroY": 0.12,
+   "objX": 0.57,
+   "dist": 2147.8,
+   "boss": "away"
+  }
+ ],
+ "kidEasy": [
+  {
+   "seed": 1,
+   "reached": 3,
+   "survival": 170.77,
+   "hits": [
+    "94.3s pillow ch2",
+    "97.03s pillow ch2",
+    "124.27s pillow ch2",
+    "155.77s pillow ch3",
+    "166.52s log ch3",
+    "170.77s log ch3"
+   ]
+  },
+  {
+   "seed": 2,
+   "reached": 3,
+   "survival": 170.63,
+   "hits": [
+    "74.23s log ch2",
+    "95.82s pillow ch2",
+    "97.58s pillow ch2",
+    "139.62s pots ch2",
+    "156.37s pots ch3",
+    "170.63s log ch3"
+   ]
+  },
+  {
+   "seed": 3,
+   "reached": 2,
+   "survival": 91.28,
+   "hits": [
+    "24.28s pots ch1",
+    "34.35s pillow ch1",
+    "67.33s pillow ch1",
+    "74.18s log ch2",
+    "79.75s pots ch2",
+    "91.28s log ch2"
+   ]
+  },
+  {
+   "seed": 4,
+   "reached": 1,
+   "survival": 68.28,
+   "hits": [
+    "14.75s pots ch1",
+    "37.35s pillow ch1",
+    "48.1s pots ch1",
+    "50.58s pots ch1",
+    "68.28s pots ch1"
+   ]
+  },
+  {
+   "seed": 5,
+   "reached": 3,
+   "survival": 184.23,
+   "hits": [
+    "35.42s pots ch1",
+    "47.27s pots ch1",
+    "64.32s pillow ch1",
+    "143.5s log ch3",
+    "157.28s pillow ch3",
+    "163.75s log ch3",
+    "184.23s pillow ch3"
+   ]
+  },
+  {
+   "seed": 6,
+   "reached": 2,
+   "survival": 126.03,
+   "hits": [
+    "16.98s pots ch1",
+    "22.78s pots ch1",
+    "35.85s pillow ch1",
+    "67.33s pillow ch1",
+    "123.35s log ch2",
+    "126.03s pillow ch2"
+   ]
+  },
+  {
+   "seed": 7,
+   "reached": 4,
+   "survival": 231.12,
+   "hits": [
+    "35.85s pillow ch1",
+    "38.63s pots ch1",
+    "80.82s pots ch2",
+    "91.9s log ch2",
+    "127.78s pillow ch2",
+    "155.78s pillow ch3",
+    "220.48s log ch4",
+    "231.12s log ch4"
+   ]
+  },
+  {
+   "seed": 8,
+   "reached": 2,
+   "survival": 97.2,
+   "hits": [
+    "3.02s pots ch1",
+    "28.2s pots ch1",
+    "48.15s pots ch1",
+    "64.32s pillow ch1",
+    "93.63s log ch2",
+    "97.2s log ch2"
+   ]
+  },
+  {
+   "seed": 9,
+   "reached": 3,
+   "survival": 157.17,
+   "hits": [
+    "64.32s pillow ch1",
+    "67.05s pillow ch1",
+    "85.4s pots ch2",
+    "117.77s log ch2",
+    "127.28s pillow ch2",
+    "153.85s pots ch3",
+    "157.17s pillow ch3"
+   ]
+  },
+  {
+   "seed": 10,
+   "reached": 2,
+   "survival": 125.78,
+   "hits": [
+    "35.85s pillow ch1",
+    "37.8s pillow ch1",
+    "94.45s pillow ch2",
+    "96.07s pillow ch2",
+    "115.85s log ch2",
+    "125.78s pillow ch2"
+   ]
+  },
+  {
+   "seed": 11,
+   "reached": 2,
+   "survival": 111.43,
+   "hits": [
+    "37.35s pillow ch1",
+    "40.28s pots ch1",
+    "64.32s pillow ch1",
+    "91.33s log ch2",
+    "108.95s log ch2",
+    "111.43s pots ch2"
+   ]
+  },
+  {
+   "seed": 12,
+   "reached": 2,
+   "survival": 127.55,
+   "hits": [
+    "35.23s pots ch1",
+    "37.72s pillow ch1",
+    "67.72s pots ch1",
+    "121.73s log ch2",
+    "125.77s pillow ch2",
+    "127.55s pillow ch2"
+   ]
+  },
+  {
+   "seed": 13,
+   "reached": 3,
+   "survival": 183.32,
+   "hits": [
+    "37.35s pillow ch1",
+    "97.32s log ch2",
+    "125.78s pillow ch2",
+    "150.02s log ch3",
+    "157.98s pillow ch3",
+    "176.43s tumble ch3",
+    "183.32s log ch3"
+   ]
+  },
+  {
+   "seed": 14,
+   "reached": 2,
+   "survival": 106.1,
+   "hits": [
+    "37.35s pillow ch1",
+    "78.82s log ch2",
+    "91.57s pots ch2",
+    "95.8s pillow ch2",
+    "103.17s log ch2",
+    "106.1s log ch2"
+   ]
+  },
+  {
+   "seed": 15,
+   "reached": 2,
+   "survival": 97.27,
+   "hits": [
+    "35.85s pillow ch1",
+    "64.45s pillow ch1",
+    "67.17s pillow ch1",
+    "89.9s pots ch2",
+    "92.98s log ch2",
+    "97.27s log ch2"
+   ]
+  },
+  {
+   "seed": 16,
+   "reached": 2,
+   "survival": 125.9,
+   "hits": [
+    "34.35s pillow ch1",
+    "64.32s pillow ch1",
+    "91.35s log ch2",
+    "96.8s pots ch2",
+    "111.17s log ch2",
+    "125.9s pillow ch2"
+   ]
+  },
+  {
+   "seed": 17,
+   "reached": 3,
+   "survival": 166.55,
+   "hits": [
+    "65.82s pillow ch1",
+    "121.33s log ch2",
+    "127.22s pillow ch2",
+    "128.92s pots ch2",
+    "154.42s pillow ch3",
+    "164.47s tumble ch3",
+    "166.55s tumble ch3"
+   ]
+  },
+  {
+   "seed": 18,
+   "reached": 2,
+   "survival": 140.38,
+   "hits": [
+    "78.2s log ch2",
+    "100.37s log ch2",
+    "125.78s pillow ch2",
+    "127.55s pillow ch2",
+    "140.38s pots ch2"
+   ]
+  },
+  {
+   "seed": 19,
+   "reached": 2,
+   "survival": 124.55,
+   "hits": [
+    "36.03s pillow ch1",
+    "43.85s pots ch1",
+    "83.4s log ch2",
+    "87.73s pots ch2",
+    "99.27s log ch2",
+    "124.55s pots ch2"
+   ]
+  },
+  {
+   "seed": 20,
+   "reached": 2,
+   "survival": 116.68,
+   "hits": [
+    "65.1s pots ch1",
+    "68.98s pots ch1",
+    "82.5s log ch2",
+    "94.5s pillow ch2",
+    "97.33s pots ch2",
+    "116.68s log ch2"
+   ]
+  },
+  {
+   "seed": 21,
+   "reached": 3,
+   "survival": 186,
+   "hits": [
+    "30.2s pots ch1",
+    "37.35s pillow ch1",
+    "94.82s log ch2",
+    "124.27s pillow ch2",
+    "126.05s pillow ch2",
+    "184.23s pillow ch3",
+    "186s pillow ch3"
+   ]
+  },
+  {
+   "seed": 22,
+   "reached": 2,
+   "survival": 107.93,
+   "hits": [
+    "18.15s pots ch1",
+    "37.35s pillow ch1",
+    "54.8s pots ch1",
+    "90.32s log ch2",
+    "92.82s log ch2",
+    "107.93s log ch2"
+   ]
+  },
+  {
+   "seed": 23,
+   "reached": 2,
+   "survival": 124.28,
+   "hits": [
+    "34.35s pillow ch1",
+    "36.12s pillow ch1",
+    "65.97s pillow ch1",
+    "86.93s log ch2",
+    "106.25s log ch2",
+    "124.28s pillow ch2"
+   ]
+  },
+  {
+   "seed": 24,
+   "reached": 2,
+   "survival": 132.22,
+   "hits": [
+    "35.85s pillow ch1",
+    "64.32s pillow ch1",
+    "66.08s pillow ch1",
+    "74.38s log ch2",
+    "113.48s log ch2",
+    "132.22s log ch2"
+   ]
+  },
+  {
+   "seed": 25,
+   "reached": 3,
+   "survival": 154.27,
+   "hits": [
+    "34.35s pillow ch1",
+    "36.12s pillow ch1",
+    "67.33s pillow ch1",
+    "97.32s pillow ch2",
+    "126.88s pillow ch2",
+    "144.22s log ch3",
+    "154.27s pillow ch3"
+   ]
+  },
+  {
+   "seed": 26,
+   "reached": 2,
+   "survival": 99.12,
+   "hits": [
+    "37.35s pillow ch1",
+    "55.78s pots ch1",
+    "65.82s pillow ch1",
+    "94.3s pillow ch2",
+    "97.03s pillow ch2",
+    "99.12s log ch2"
+   ]
+  },
+  {
+   "seed": 27,
+   "reached": 4,
+   "survival": 219.95,
+   "hits": [
+    "16.17s pots ch1",
+    "148.5s log ch3",
+    "167.67s pots ch3",
+    "184.23s pillow ch3",
+    "186s pillow ch3",
+    "215.87s pillow ch4",
+    "219.95s log ch4"
+   ]
+  },
+  {
+   "seed": 28,
+   "reached": 2,
+   "survival": 128.95,
+   "hits": [
+    "37.35s pillow ch1",
+    "87.12s log ch2",
+    "94.3s pillow ch2",
+    "96.07s pillow ch2",
+    "110.12s log ch2",
+    "128.95s log ch2"
+   ]
+  },
+  {
+   "seed": 29,
+   "reached": 2,
+   "survival": 108.73,
+   "hits": [
+    "64.42s pillow ch1",
+    "66.08s pillow ch1",
+    "80.33s log ch2",
+    "94.33s pillow ch2",
+    "101.8s log ch2",
+    "108.73s log ch2"
+   ]
+  },
+  {
+   "seed": 30,
+   "reached": 3,
+   "survival": 156.95,
+   "hits": [
+    "37.35s pillow ch1",
+    "72.65s pots ch2",
+    "97.32s pillow ch2",
+    "101.18s log ch2",
+    "127.28s pillow ch2",
+    "154.27s pillow ch3",
+    "156.95s pillow ch3"
+   ]
+  },
+  {
+   "seed": 31,
+   "reached": 2,
+   "survival": 98.03,
+   "hits": [
+    "7.85s pots ch1",
+    "34.35s pillow ch1",
+    "78.18s log ch2",
+    "92.13s log ch2",
+    "96.12s pillow ch2",
+    "98.03s pillow ch2"
+   ]
+  },
+  {
+   "seed": 32,
+   "reached": 3,
+   "survival": 156.03,
+   "hits": [
+    "5.37s pots ch1",
+    "34.93s pots ch1",
+    "38.37s pots ch1",
+    "67.33s pillow ch1",
+    "108.07s log ch2",
+    "154.27s pillow ch3",
+    "156.03s pillow ch3"
+   ]
+  },
+  {
+   "seed": 33,
+   "reached": 1,
+   "survival": 64.45,
+   "hits": [
+    "34.35s pillow ch1",
+    "37.1s pillow ch1",
+    "45.98s pots ch1",
+    "50.92s pots ch1",
+    "64.45s pillow ch1"
+   ]
+  },
+  {
+   "seed": 34,
+   "reached": 2,
+   "survival": 128.05,
+   "hits": [
+    "5.9s pots ch1",
+    "35.85s pillow ch1",
+    "82.18s log ch2",
+    "95.82s pillow ch2",
+    "124.27s pillow ch2",
+    "128.05s pillow ch2"
+   ]
+  },
+  {
+   "seed": 35,
+   "reached": 3,
+   "survival": 173.6,
+   "hits": [
+    "28.78s pots ch1",
+    "143.43s pots ch3",
+    "149.4s pots ch3",
+    "155.77s pillow ch3",
+    "171.43s pots ch3",
+    "173.6s tumble ch3"
+   ]
+  },
+  {
+   "seed": 36,
+   "reached": 3,
+   "survival": 178.45,
+   "hits": [
+    "60.58s pots ch1",
+    "140.6s log ch3",
+    "142.95s tumble ch3",
+    "154.27s pillow ch3",
+    "156.95s pillow ch3",
+    "178.45s tumble ch3"
+   ]
+  },
+  {
+   "seed": 37,
+   "reached": 3,
+   "survival": 169.33,
+   "hits": [
+    "64.32s pillow ch1",
+    "66.08s pillow ch1",
+    "97.32s pillow ch2",
+    "154.97s pots ch3",
+    "157.55s pillow ch3",
+    "166.47s tumble ch3",
+    "169.33s tumble ch3"
+   ]
+  },
+  {
+   "seed": 38,
+   "reached": 3,
+   "survival": 156.95,
+   "hits": [
+    "65.82s pillow ch1",
+    "91.72s pots ch2",
+    "100.92s log ch2",
+    "125.78s pillow ch2",
+    "136.33s log ch2",
+    "154.27s pillow ch3",
+    "156.95s pillow ch3"
+   ]
+  },
+  {
+   "seed": 39,
+   "reached": 2,
+   "survival": 106.58,
+   "hits": [
+    "11.72s pots ch1",
+    "35.92s pillow ch1",
+    "44.93s pots ch1",
+    "65.82s pillow ch1",
+    "94.3s pillow ch2",
+    "106.58s pots ch2"
+   ]
+  },
+  {
+   "seed": 40,
+   "reached": 2,
+   "survival": 140.77,
+   "hits": [
+    "41.75s pots ch1",
+    "66.6s pots ch1",
+    "84.08s pots ch2",
+    "124.27s pillow ch2",
+    "127.12s pillow ch2",
+    "140.77s log ch2"
+   ]
+  },
+  {
+   "seed": 41,
+   "reached": 2,
+   "survival": 119.35,
+   "hits": [
+    "13.22s pots ch1",
+    "36.8s pots ch1",
+    "64.32s pillow ch1",
+    "66.12s pillow ch1",
+    "97.32s pillow ch2",
+    "119.35s log ch2"
+   ]
+  },
+  {
+   "seed": 42,
+   "reached": 4,
+   "survival": 237.72,
+   "hits": [
+    "94.3s pillow ch2",
+    "96.07s pillow ch2",
+    "124.52s pillow ch2",
+    "173.62s tumble ch3",
+    "185.75s pillow ch3",
+    "232.17s log ch4",
+    "237.72s log ch4"
+   ]
+  },
+  {
+   "seed": 43,
+   "reached": 1,
+   "survival": 66.08,
+   "hits": [
+    "35.02s pots ch1",
+    "37.72s pillow ch1",
+    "42.75s pots ch1",
+    "64.32s pillow ch1",
+    "66.08s pillow ch1"
+   ]
+  },
+  {
+   "seed": 44,
+   "reached": 3,
+   "survival": 184.23,
+   "hits": [
+    "37.5s pots ch1",
+    "75.23s log ch2",
+    "97.32s pillow ch2",
+    "146.38s log ch3",
+    "157.93s log ch3",
+    "174.4s pots ch3",
+    "184.23s pillow ch3"
+   ]
+  },
+  {
+   "seed": 45,
+   "reached": 2,
+   "survival": 136.98,
+   "hits": [
+    "34.8s pots ch1",
+    "65.82s pillow ch1",
+    "96.02s pots ch2",
+    "124.27s pillow ch2",
+    "126.05s pillow ch2",
+    "136.98s pots ch2"
+   ]
+  },
+  {
+   "seed": 46,
+   "reached": 3,
+   "survival": 184.23,
+   "hits": [
+    "35.85s pillow ch1",
+    "37.77s pillow ch1",
+    "59.97s pots ch1",
+    "97.32s pillow ch2",
+    "155.77s pillow ch3",
+    "157.98s pillow ch3",
+    "184.23s pillow ch3"
+   ]
+  },
+  {
+   "seed": 47,
+   "reached": 2,
+   "survival": 139.7,
+   "hits": [
+    "34.35s pillow ch1",
+    "37.22s pillow ch1",
+    "95.92s pillow ch2",
+    "125.62s log ch2",
+    "130.27s log ch2",
+    "139.7s log ch2"
+   ]
+  },
+  {
+   "seed": 48,
+   "reached": 3,
+   "survival": 195.75,
+   "hits": [
+    "34.35s pillow ch1",
+    "67.33s pillow ch1",
+    "108.78s log ch2",
+    "127.28s pillow ch2",
+    "145.32s tumble ch3",
+    "154.27s pillow ch3",
+    "195.75s pots ch3"
+   ]
+  },
+  {
+   "seed": 49,
+   "reached": 3,
+   "survival": 167.9,
+   "hits": [
+    "35.85s pillow ch1",
+    "76.92s log ch2",
+    "125.78s pillow ch2",
+    "141.37s log ch3",
+    "159.9s log ch3",
+    "162.93s pots ch3",
+    "167.9s log ch3"
+   ]
+  },
+  {
+   "seed": 50,
+   "reached": 2,
+   "survival": 124.28,
+   "hits": [
+    "26.05s pots ch1",
+    "34.35s pillow ch1",
+    "60.28s pots ch1",
+    "67.33s pillow ch1",
+    "74.95s log ch2",
+    "124.28s pillow ch2"
+   ]
+  },
+  {
+   "seed": 51,
+   "reached": 2,
+   "survival": 96.15,
+   "hits": [
+    "20.32s pots ch1",
+    "34.35s pillow ch1",
+    "36.88s pots ch1",
+    "82.5s pots ch2",
+    "94.3s pillow ch2",
+    "96.15s pillow ch2"
+   ]
+  },
+  {
+   "seed": 52,
+   "reached": 2,
+   "survival": 124.28,
+   "hits": [
+    "15.9s pots ch1",
+    "78.22s log ch2",
+    "80.87s log ch2",
+    "95.82s pillow ch2",
+    "103.02s log ch2",
+    "124.28s pillow ch2"
+   ]
+  },
+  {
+   "seed": 53,
+   "reached": 2,
+   "survival": 128.4,
+   "hits": [
+    "67.33s pillow ch1",
+    "85.12s log ch2",
+    "95.82s pillow ch2",
+    "124.27s pillow ch2",
+    "126.53s pillow ch2",
+    "128.4s log ch2"
+   ]
+  },
+  {
+   "seed": 54,
+   "reached": 2,
+   "survival": 138.62,
+   "hits": [
+    "35.85s pillow ch1",
+    "64.32s pillow ch1",
+    "67.05s pillow ch1",
+    "127.28s pillow ch2",
+    "136.7s log ch2",
+    "138.62s pots ch2"
+   ]
+  },
+  {
+   "seed": 55,
+   "reached": 2,
+   "survival": 113.02,
+   "hits": [
+    "34.35s pillow ch1",
+    "64.32s pillow ch1",
+    "66.08s pillow ch1",
+    "95.82s pillow ch2",
+    "97.58s pillow ch2",
+    "113.02s log ch2"
+   ]
+  },
+  {
+   "seed": 56,
+   "reached": 3,
+   "survival": 178.75,
+   "hits": [
+    "34.4s pillow ch1",
+    "37.22s pillow ch1",
+    "64.32s pillow ch1",
+    "149.13s pots ch3",
+    "157.28s pillow ch3",
+    "174.28s tumble ch3",
+    "178.75s pots ch3"
+   ]
+  },
+  {
+   "seed": 57,
+   "reached": 2,
+   "survival": 98.88,
+   "hits": [
+    "23.62s pots ch1",
+    "26.63s pots ch1",
+    "35.85s pillow ch1",
+    "80.23s pots ch2",
+    "94.3s pillow ch2",
+    "98.88s log ch2"
+   ]
+  },
+  {
+   "seed": 58,
+   "reached": 2,
+   "survival": 104.38,
+   "hits": [
+    "34.35s pillow ch1",
+    "65.82s pillow ch1",
+    "86.53s log ch2",
+    "93.88s log ch2",
+    "96.08s pillow ch2",
+    "104.38s log ch2"
+   ]
+  },
+  {
+   "seed": 59,
+   "reached": 2,
+   "survival": 137.82,
+   "hits": [
+    "30s pots ch1",
+    "34.33s pillow ch1",
+    "36.12s pillow ch1",
+    "91.83s log ch2",
+    "118.98s log ch2",
+    "137.82s pots ch2"
+   ]
+  },
+  {
+   "seed": 60,
+   "reached": 3,
+   "survival": 185.75,
+   "hits": [
+    "35.85s pillow ch1",
+    "67.33s pillow ch1",
+    "101.5s log ch2",
+    "123.8s log ch2",
+    "126.63s log ch2",
+    "157.28s pillow ch3",
+    "185.75s pillow ch3"
+   ]
+  },
+  {
+   "seed": 61,
+   "reached": 1,
+   "survival": 64.32,
+   "hits": [
+    "20.95s pots ch1",
+    "34.35s pillow ch1",
+    "37.1s pillow ch1",
+    "43.85s pots ch1",
+    "64.32s pillow ch1"
+   ]
+  },
+  {
+   "seed": 62,
+   "reached": 2,
+   "survival": 97.58,
+   "hits": [
+    "29.42s pots ch1",
+    "45.18s pots ch1",
+    "65.82s pillow ch1",
+    "67.58s pillow ch1",
+    "95.4s pillow ch2",
+    "97.58s pillow ch2"
+   ]
+  },
+  {
+   "seed": 63,
+   "reached": 2,
+   "survival": 124.28,
+   "hits": [
+    "39.35s pots ch1",
+    "50.2s pots ch1",
+    "94.3s pillow ch2",
+    "96.07s pillow ch2",
+    "104.62s log ch2",
+    "124.28s pillow ch2"
+   ]
+  },
+  {
+   "seed": 64,
+   "reached": 2,
+   "survival": 95.73,
+   "hits": [
+    "25.08s pots ch1",
+    "35.85s pillow ch1",
+    "75.52s log ch2",
+    "79.97s pots ch2",
+    "92.97s log ch2",
+    "95.73s log ch2"
+   ]
+  },
+  {
+   "seed": 65,
+   "reached": 3,
+   "survival": 157.28,
+   "hits": [
+    "93.57s log ch2",
+    "108.48s log ch2",
+    "126.38s log ch2",
+    "136.25s log ch2",
+    "149.93s log ch3",
+    "157.28s pillow ch3"
+   ]
+  },
+  {
+   "seed": 66,
+   "reached": 3,
+   "survival": 178.83,
+   "hits": [
+    "37.35s pillow ch1",
+    "64.58s pots ch1",
+    "97.32s pillow ch2",
+    "126.65s pillow ch2",
+    "174.48s pots ch3",
+    "176.5s pots ch3",
+    "178.83s tumble ch3"
+   ]
+  },
+  {
+   "seed": 67,
+   "reached": 2,
+   "survival": 95.98,
+   "hits": [
+    "27.3s pots ch1",
+    "35.85s pillow ch1",
+    "64.32s pillow ch1",
+    "67.05s pillow ch1",
+    "74.5s log ch2",
+    "95.98s pillow ch2"
+   ]
+  },
+  {
+   "seed": 68,
+   "reached": 3,
+   "survival": 155.78,
+   "hits": [
+    "13.82s pots ch1",
+    "59.33s pots ch1",
+    "65.28s pots ch1",
+    "95.65s log ch2",
+    "133.82s log ch2",
+    "144.38s log ch3",
+    "155.78s pillow ch3"
+   ]
+  },
+  {
+   "seed": 69,
+   "reached": 2,
+   "survival": 109.55,
+   "hits": [
+    "5.88s pots ch1",
+    "34.35s pillow ch1",
+    "56s pots ch1",
+    "64.32s pillow ch1",
+    "97.32s pillow ch2",
+    "109.55s pots ch2"
+   ]
+  },
+  {
+   "seed": 70,
+   "reached": 2,
+   "survival": 126.97,
+   "hits": [
+    "28.23s pots ch1",
+    "34.35s pillow ch1",
+    "36.12s pillow ch1",
+    "118.88s pots ch2",
+    "124.27s pillow ch2",
+    "126.97s pillow ch2"
+   ]
+  },
+  {
+   "seed": 71,
+   "reached": 1,
+   "survival": 67.58,
+   "hits": [
+    "17.85s pots ch1",
+    "20.75s pots ch1",
+    "37.52s pillow ch1",
+    "65.92s pillow ch1",
+    "67.58s pillow ch1"
+   ]
+  },
+  {
+   "seed": 72,
+   "reached": 4,
+   "survival": 232.57,
+   "hits": [
+    "35.85s pillow ch1",
+    "87s log ch2",
+    "94.3s pillow ch2",
+    "155.77s pillow ch3",
+    "163.13s pots ch3",
+    "187.25s pillow ch3",
+    "223.72s log ch4",
+    "232.57s tumble ch4"
+   ]
+  },
+  {
+   "seed": 73,
+   "reached": 2,
+   "survival": 138.4,
+   "hits": [
+    "34.35s pillow ch1",
+    "94.3s pillow ch2",
+    "96.07s pillow ch2",
+    "125.78s pillow ch2",
+    "127.55s pillow ch2",
+    "138.4s pots ch2"
+   ]
+  },
+  {
+   "seed": 74,
+   "reached": 3,
+   "survival": 175.43,
+   "hits": [
+    "10.68s pots ch1",
+    "79.18s pots ch2",
+    "95.82s pillow ch2",
+    "139.3s log ch2",
+    "146.73s log ch3",
+    "155.78s pillow ch3",
+    "175.43s log ch3"
+   ]
+  },
+  {
+   "seed": 75,
+   "reached": 2,
+   "survival": 118.65,
+   "hits": [
+    "34.35s pillow ch1",
+    "73.63s pots ch2",
+    "87.85s pots ch2",
+    "94.3s pillow ch2",
+    "96.08s pillow ch2",
+    "118.65s log ch2"
+   ]
+  },
+  {
+   "seed": 76,
+   "reached": 3,
+   "survival": 187.97,
+   "hits": [
+    "34.52s pillow ch1",
+    "67.37s pillow ch1",
+    "94.3s pillow ch2",
+    "104.03s log ch2",
+    "118.4s log ch2",
+    "156.27s pots ch3",
+    "187.97s log ch3"
+   ]
+  },
+  {
+   "seed": 77,
+   "reached": 1,
+   "survival": 67.05,
+   "hits": [
+    "22.68s pots ch1",
+    "34.48s pillow ch1",
+    "58.07s pots ch1",
+    "64.32s pillow ch1",
+    "67.05s pillow ch1"
+   ]
+  },
+  {
+   "seed": 78,
+   "reached": 3,
+   "survival": 198.6,
+   "hits": [
+    "37.4s pillow ch1",
+    "67.33s pillow ch1",
+    "95.07s pillow ch2",
+    "124.42s log ch2",
+    "126.37s pillow ch2",
+    "157.28s pillow ch3",
+    "198.6s tumble ch3"
+   ]
+  },
+  {
+   "seed": 79,
+   "reached": 3,
+   "survival": 172.13,
+   "hits": [
+    "37.35s pillow ch1",
+    "48.98s pots ch1",
+    "86.18s log ch2",
+    "98.38s log ch2",
+    "125.78s pillow ch2",
+    "160.92s log ch3",
+    "172.13s tumble ch3"
+   ]
+  },
+  {
+   "seed": 80,
+   "reached": 2,
+   "survival": 125.77,
+   "hits": [
+    "35.85s pillow ch1",
+    "38.7s pots ch1",
+    "66.23s pots ch1",
+    "110.78s pots ch2",
+    "121.42s log ch2",
+    "125.77s pillow ch2"
+   ]
+  },
+  {
+   "seed": 81,
+   "reached": 3,
+   "survival": 154.05,
+   "hits": [
+    "79.13s log ch2",
+    "95.95s pillow ch2",
+    "124.27s pillow ch2",
+    "137.57s log ch2",
+    "151.1s log ch3",
+    "154.05s pillow ch3"
+   ]
+  },
+  {
+   "seed": 82,
+   "reached": 3,
+   "survival": 154.27,
+   "hits": [
+    "51.27s pots ch1",
+    "86.38s log ch2",
+    "94.3s pillow ch2",
+    "124.58s log ch2",
+    "126.52s pillow ch2",
+    "143.12s log ch3",
+    "154.27s pillow ch3"
+   ]
+  },
+  {
+   "seed": 83,
+   "reached": 2,
+   "survival": 114.33,
+   "hits": [
+    "94.33s pillow ch2",
+    "96.07s pillow ch2",
+    "97.97s log ch2",
+    "107.43s pots ch2",
+    "114.33s pots ch2"
+   ]
+  },
+  {
+   "seed": 84,
+   "reached": 2,
+   "survival": 103.55,
+   "hits": [
+    "34.35s pillow ch1",
+    "37.1s pillow ch1",
+    "82.73s pots ch2",
+    "94.3s pillow ch2",
+    "97.65s pots ch2",
+    "103.55s log ch2"
+   ]
+  },
+  {
+   "seed": 85,
+   "reached": 2,
+   "survival": 124.28,
+   "hits": [
+    "12.65s pots ch1",
+    "51.32s pots ch1",
+    "65.02s pots ch1",
+    "87.67s pots ch2",
+    "97.32s pillow ch2",
+    "124.28s pillow ch2"
+   ]
+  },
+  {
+   "seed": 86,
+   "reached": 4,
+   "survival": 229.68,
+   "hits": [
+    "35.85s pillow ch1",
+    "65.03s pots ch1",
+    "107.82s log ch2",
+    "154.42s log ch3",
+    "184.23s pillow ch3",
+    "214.23s pillow ch4",
+    "216.97s pillow ch4",
+    "229.68s log ch4"
+   ]
+  },
+  {
+   "seed": 87,
+   "reached": 1,
+   "survival": 64.32,
+   "hits": [
+    "21.83s pots ch1",
+    "34.35s pillow ch1",
+    "37.1s pillow ch1",
+    "50.33s pots ch1",
+    "64.32s pillow ch1"
+   ]
+  },
+  {
+   "seed": 88,
+   "reached": 2,
+   "survival": 128.12,
+   "hits": [
+    "37.35s pillow ch1",
+    "64.43s pillow ch1",
+    "76.93s pots ch2",
+    "94.3s pillow ch2",
+    "125.78s pillow ch2",
+    "128.12s pillow ch2"
+   ]
+  },
+  {
+   "seed": 89,
+   "reached": 2,
+   "survival": 124.28,
+   "hits": [
+    "56.07s pots ch1",
+    "80.87s log ch2",
+    "95.05s pillow ch2",
+    "97.58s pillow ch2",
+    "110.18s log ch2",
+    "124.28s pillow ch2"
+   ]
+  },
+  {
+   "seed": 90,
+   "reached": 2,
+   "survival": 95.82,
+   "hits": [
+    "17.88s pots ch1",
+    "34.35s pillow ch1",
+    "64.32s pillow ch1",
+    "67.05s pillow ch1",
+    "85.77s pots ch2",
+    "95.82s pillow ch2"
+   ]
+  },
+  {
+   "seed": 91,
+   "reached": 2,
+   "survival": 96.08,
+   "hits": [
+    "37.35s pillow ch1",
+    "65.82s pillow ch1",
+    "67.58s pillow ch1",
+    "89s log ch2",
+    "94.3s pillow ch2",
+    "96.08s pillow ch2"
+   ]
+  },
+  {
+   "seed": 92,
+   "reached": 3,
+   "survival": 180.15,
+   "hits": [
+    "34.35s pillow ch1",
+    "37.1s pillow ch1",
+    "124.72s log ch2",
+    "127.37s pillow ch2",
+    "129.98s log ch2",
+    "167.47s log ch3",
+    "180.15s pots ch3"
+   ]
+  },
+  {
+   "seed": 93,
+   "reached": 4,
+   "survival": 214.23,
+   "hits": [
+    "35.85s pillow ch1",
+    "67.33s pillow ch1",
+    "85.9s log ch2",
+    "172.3s tumble ch3",
+    "174.6s log ch3",
+    "184.23s pillow ch3",
+    "206.07s tumble ch4",
+    "214.23s pillow ch4"
+   ]
+  },
+  {
+   "seed": 94,
+   "reached": 2,
+   "survival": 124.28,
+   "hits": [
+    "6.05s pots ch1",
+    "64.32s pillow ch1",
+    "67.05s pillow ch1",
+    "81.88s log ch2",
+    "97.32s pillow ch2",
+    "124.28s pillow ch2"
+   ]
+  },
+  {
+   "seed": 95,
+   "reached": 3,
+   "survival": 158.67,
+   "hits": [
+    "35.85s pillow ch1",
+    "67.33s pillow ch1",
+    "99.3s log ch2",
+    "149.45s tumble ch3",
+    "154.28s log ch3",
+    "156.98s log ch3",
+    "158.67s pillow ch3"
+   ]
+  },
+  {
+   "seed": 96,
+   "reached": 3,
+   "survival": 154.52,
+   "hits": [
+    "58.63s pots ch1",
+    "65.82s pillow ch1",
+    "107.97s log ch2",
+    "125.95s pillow ch2",
+    "147.62s log ch3",
+    "149.67s tumble ch3",
+    "154.52s pots ch3"
+   ]
+  },
+  {
+   "seed": 97,
+   "reached": 2,
+   "survival": 125.78,
+   "hits": [
+    "24.55s pots ch1",
+    "64.32s pillow ch1",
+    "67.05s pillow ch1",
+    "107.45s log ch2",
+    "120.27s log ch2",
+    "125.78s pillow ch2"
+   ]
+  },
+  {
+   "seed": 98,
+   "reached": 1,
+   "survival": 67.05,
+   "hits": [
+    "13.85s pots ch1",
+    "35.33s pots ch1",
+    "38.88s pots ch1",
+    "64.32s pillow ch1",
+    "67.05s pillow ch1"
+   ]
+  },
+  {
+   "seed": 99,
+   "reached": 2,
+   "survival": 136.4,
+   "hits": [
+    "27.53s pots ch1",
+    "67.75s pots ch1",
+    "86.88s pots ch2",
+    "97.32s pillow ch2",
+    "106.78s log ch2",
+    "136.4s pots ch2"
+   ]
+  },
+  {
+   "seed": 100,
+   "reached": 2,
+   "survival": 126.97,
+   "hits": [
+    "67.33s pillow ch1",
+    "73.08s pots ch2",
+    "84.42s log ch2",
+    "99.77s log ch2",
+    "124.27s pillow ch2",
+    "126.97s pillow ch2"
+   ]
+  }
+ ]
+}

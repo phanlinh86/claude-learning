@@ -333,3 +333,6 @@ body.touch .tagline{font-size:max(15px, calc(var(--u)*2.2))}body.touch .best-lin
 /* ---------- Pebble's Oasis Run QA fixes (docs/reports/visual.md) ---------- */
 .logo{font-size:min(calc(var(--u)*7.4), 9.4vw);padding:0 2vw}            /* logo never touches the screen edges */
 .new-best{position:static!important;display:inline-block;vertical-align:middle;margin-left:calc(var(--u)*.6)}  /* NEW! sits beside the digits, not on them */
+.sc b{margin-left:auto}                                                    /* Score and Best numbers line up */
+.how-ico img{width:calc(var(--u)*6)}
+@media (max-aspect-ratio: 1/1){ #scrHow .how-ico img{width:calc(var(--u)*5)} }

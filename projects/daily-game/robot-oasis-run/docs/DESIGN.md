@@ -120,3 +120,9 @@ SFX: lane "zip" (short filtered swish, pitch by direction), jump "boing" (spring
 - Pointer Events on the stage (not on UI): a swipe (≥ 24 css px within 350 ms; dominant axis) → move/jump on the **move**, as soon as the threshold is crossed (not on release), so it feels instant; a tap (< 24 px) → left third / right third = move, middle third = jump. UI buttons fire on click; the ghost click is swallowed.
 - iOS: audio unlock in the first `touchend`; `visibilitychange` pauses and suspends audio; kid-proofing (no zoom, no rubber-band, no callouts, no text selection, `touch-action: none` on the stage).
 - Home screen: `manifest.webmanifest` plus 180/192/512 PNG icons from `tools/render_mobile_icons.js`.
+
+## 9. Changes after build and QA (2026-11-07)
+- Mechanics (from the engineer): Fizz's timer restarts when he **enters** (visits at 30, 60, 90 s, ≥ 12 s after he left); he leaves 0.5 s after the last pillow has passed; pillows turn exactly once in flight and keep clear of pots / other low obstacles; a swipe opposite to a lane change in progress reverses at once. Extra fields: `endS` (chapter arch), hero `queued/buffer/airT`, boss `windup/tilt/perfect`, objects `vs/spin/squash/airborne`, pillow `T/p/s0/x0/h0/vy0/visit/done`.
+- Playtest: Easy `pillows 3 → 2`, `aimRandom 0.5 → 0.7`. `bossEvery` stays 30 s (the twist).
+- Renderer: `WIDTH.fizz 2.6`, pillow landing shadow r 0.55 u with a white + dark pulsing ring, white halo behind shells, sky décor clipped above `horizonY`, haze fades to `sandFar`, props at `x = ±(1.7 + 0.45·propW + 0–1.2)`, props past `endS` already show the next chapter, Fizz banner under the HUD pills in landscape.
+- Input: swipe window 350 ms; a hold > 450 ms is not a tap.

@@ -157,7 +157,7 @@
       else if (!on && document.fullscreenElement) document.exitFullscreen().catch(() => {});
       setTimeout(() => this.renderer.resize(), 150);
     },
-    picturesChanged() { PO.Assets._ver = (PO.Assets._ver || 0) + 1; },
+    picturesChanged() { PO.Assets._ver = (PO.Assets._ver || 0) + 1; if (this.renderer) this.renderer._spr.clear(); },
     quit() { if (typeof window.ffQuit === 'function') window.ffQuit(); else window.close(); },
 
     // ---------------- input: swipes, tap zones (left / middle / right third) and keys ----------------
@@ -201,7 +201,7 @@
         const s = this._swipe; if (!s || s.id !== e.pointerId || s.done || this.mode !== 'playing') return;
         const dx = e.clientX - s.x, dy = e.clientY - s.y, th = 24;
         if (Math.max(Math.abs(dx), Math.abs(dy)) < th) return;
-        if (performance.now() - s.t > 600) { s.done = true; return; }
+        if (performance.now() - s.t > 350) { s.done = true; return; }
         s.done = true;
         if (Math.abs(dx) > Math.abs(dy)) this.act(dx > 0 ? 1 : -1);
         else if (dy < 0) this.act('jump');
@@ -209,7 +209,7 @@
       const up = e => {
         const s = this._swipe; if (!s || s.id !== e.pointerId) return;
         this._swipe = null;
-        if (s.done || e.type === 'pointercancel' || this.mode !== 'playing') return;
+        if (s.done || e.type === 'pointercancel' || this.mode !== 'playing' || performance.now() - s.t > 450) return;   // a long hold is not a tap
         const [x] = this.renderer.toLogical(s.x, s.y), VW = this.renderer.VW;
         this.act(x < VW / 3 ? -1 : x > VW * 2 / 3 ? 1 : 'jump');
       };

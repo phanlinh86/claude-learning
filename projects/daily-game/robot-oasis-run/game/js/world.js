@@ -59,7 +59,7 @@
     tumbleSpeed: [1.2, 1.8], tumbleWake: [1.5, 3.0], tumbleHopV: 1.7,
     goal: { easy: 410, normal: 530, hard: 640 },
     difficulty: {
-      easy:   { hearts: 5, speed: 5.5, react: 1.1,  pillows: 3, pillowEvery: 1.5,  zLand: 7.5, flightT: 1.3,  aimRandom: 0.5 },
+      easy:   { hearts: 5, speed: 5.5, react: 1.1,  pillows: 2, pillowEvery: 1.5,  zLand: 7.5, flightT: 1.3,  aimRandom: 0.7 },
       normal: { hearts: 3, speed: 7.0, react: 0.8,  pillows: 4, pillowEvery: 1.15, zLand: 6.5, flightT: 1.1,  aimRandom: 0 },
       hard:   { hearts: 3, speed: 8.4, react: 0.62, pillows: 5, pillowEvery: 0.95, zLand: 5.8, flightT: 0.95, aimRandom: 0 }
     },
