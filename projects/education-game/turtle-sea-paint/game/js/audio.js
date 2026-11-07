@@ -147,7 +147,7 @@
     play(name, opt = {}) {
       if (!this.ctx || this.muted || !this.sfxOn) return;
       const now = this.ctx.currentTime;
-      const gap = { pop: 0.05, plip: 0.04, whoosh: 0.06, bubbles: 0.12, sweep: 0.05, hop: 0.06, shellPop: 0.05 }[name];
+      const gap = { pop: 0.05, plip: 0.04, whoosh: 0.06, bubbles: 0.12, sweep: 0.05, hop: 0.06, shellPop: 0.05, pat: 0.25 }[name];
       if (gap && now - (this._lastPlay[name] || 0) < gap) return;   // staggered, never a buzz
       this._lastPlay[name] = now;
       const r = 1 + (Math.random() - 0.5) * 0.08;
@@ -174,6 +174,9 @@
         case 'stepDone': [0, 4, 7].forEach((n, i) => this.mallet(NOTE(79 + n), 0.3, { vol: 0.17, at: i * 0.07 })); break;
         case 'boing': this.tone(180 * r, 0.42, { type: 'triangle', vol: 0.24, slideTo: 520 * r }); this.tone(360 * r, 0.3, { type: 'sine', vol: 0.08, at: 0.05, slideTo: 260 * r }); break;
         case 'soft': this.tone(500 * r, 0.16, { vol: 0.1, slideTo: 380 * r }); break;                 // notThis / needPaint / already
+        case 'pat':   // a long press / drag (world 'soft' event): a gentle muffled pat, no words
+          this.tone(210 * r, 0.12, { type: 'sine', vol: 0.14, slideTo: 150 * r, attack: 0.004 });
+          this.noise(0.06, { vol: 0.05, type: 'lowpass', f0: 700, q: 0.7 }); break;
         case 'wobble': for (let i = 0; i < 3; i++) this.tone(300 + i * 40, 0.08, { type: 'triangle', vol: 0.08, at: i * 0.07 }); break;
         case 'hint': [0, 4, 7, 12].forEach((n, i) => this.tone(NOTE(88 + n), 0.2, { vol: 0.1, at: i * 0.07 })); break;
         case 'sweep': this.tone(NOTE(76 + (opt.i || 0) * 2), 0.18, { type: 'sine', vol: 0.12, slideTo: NOTE(79 + (opt.i || 0) * 2) }); break;   // one note per part: a glissando

@@ -197,7 +197,7 @@ eq(I.t('en', 'no.such.key'), 'no.such.key', 'unknown key → the key');
 section('prompts: DESIGN examples, every param filled, plurals, fallbacks');
 eq(I.t('en', 'p.colors', { part: 'tail', color: 'blue' }, r0), 'Let’s paint the tail blue!', 'p.colors en');
 eq(I.t('vi', 'p.colors', { part: 'tail', color: 'blue' }, r0), 'Bé ơi, tô cái đuôi màu xanh dương nhé!', 'p.colors vi');
-eq(I.t('vi', 'p.colors', { part: 'sail', color: 'red' }, () => 0.5), 'Mình tô cánh buồm màu đỏ nào! Bé tìm vỏ sò màu đỏ nhé!', 'p.colors vi [1]');
+eq(I.t('vi', 'p.colors', { part: 'sail', color: 'red' }, () => 0.5), 'Mình tô cánh buồm màu đỏ nào! Bé chọn màu đỏ nhé!', 'p.colors vi [1]');
 eq(I.t('en', 'p.tapPart', { part: 'tail' }, r0), 'Now tap the shining tail!', 'p.tapPart en');
 eq(I.t('en', 'p.shapes', { shape: 'triangle', color: 'yellow' }, r0), 'Paint the triangle yellow!', 'p.shapes en');
 eq(I.t('vi', 'p.shapes', { shape: 'triangle', color: 'yellow' }, r0), 'Bé ơi, tô hình tam giác màu vàng nhé!', 'p.shapes vi');
@@ -437,6 +437,19 @@ eq(I.sayNotThis('en', { target: { nameKind: 'part', nameValue: 'tail' } }, r0), 
 eq(I.sayNotThis('en', { partId: 'x' }, r0), 'Paint the shining part!', 'notThis without a target');
 for (const a of ALIVE) for (const lang of I.langs) ok(clean(I.sayAlive(lang, a, r0)), `${lang} alive ${a}`);
 eq(I.sayAlive('en', 'zzz', r0), I.t('en', 'alive.swim', null, r0), 'unknown alive kind → swim');
+// the alive line names the picture (playtest P2-3), short enough for the 2.4 s alive phase
+for (const id of Object.keys(I.THINGS)) for (const lang of I.langs) for (const a of ALIVE) for (const rv of [0, 0.4, 0.8]) {
+  const s = I.t(lang, 'alive.' + a + '.thing', { thing: I.thingName(lang, id), child: 'Mai' }, () => rv);
+  ok(clean(s) && s.toLowerCase().includes(I.thingName(lang, id).toLowerCase()) && s.length <= 48, `${lang} alive ${a} names ${id}: ${s}`);
+  ok(!/con con|\bthe the\b/i.test(s), `${lang} alive ${a} ${id}: no doubled classifier/article: ${s}`);
+}
+eq(I.sayAlive('en', { kind: 'sail', templateId: 'sailboat' }, () => 0), 'Bye-bye, boat! Sail away!', 'alive names the boat');
+eq(I.sayAlive('vi', { kind: 'scuttle', templateId: 'crab' }, () => 0), 'Tạm biệt con cua! Bò ngang, bò ngang!', 'vi alive names the crab');
+eq(I.sayAlive('en', { kind: 'swim', templateId: 'nope' }, r0), I.t('en', 'alive.swim', null, r0), 'unknown picture → generic alive line');
+// the paint pots are "paint" in EN, never "shell" (a crab / count shell is a picture part) — visual P2-3
+for (const k of I.keys('en')) for (const s of [].concat(I.raw('en', k))) ok(!/paint shell/i.test(s), `en ${k}: pots are "paint", not "paint shell"`);
+for (const k of I.keys('vi')) for (const s of [].concat(I.raw('vi', k))) ok(!/vỏ sò (\{color\}|màu)/.test(s), `vi ${k}: pots are "màu", not "vỏ sò"`);
+eq(I.name('en', 'part', 'shell'), 'body', 'crab shell part is "body" in EN');
 for (let i = 0; i <= 20; i++) { eq(I.sayCount('en', i), I.t('en', 'count.' + i), 'sayCount ' + i); ok(clean(I.sayCount('vi', i)), 'vi count ' + i); }
 eq(I.sayCount('en', 3), 'Three!', 'Three!');
 eq(I.sayCount('vi', 15), 'Mười lăm!', 'Mười lăm!');

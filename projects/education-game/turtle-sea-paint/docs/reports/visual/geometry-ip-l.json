@@ -1,0 +1,4460 @@
+{
+ "ip-l-en": {
+  "01-title": {
+   "mode": "title",
+   "state": "menu",
+   "phase": null,
+   "topic": null,
+   "age": 4,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "",
+   "bubbleOverflow": 0,
+   "hud": null,
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": [
+    "logo1:Nini’s",
+    "logo2:Sea Painting"
+   ]
+  },
+  "02-settings": {
+   "mode": "title",
+   "state": "menu",
+   "phase": null,
+   "topic": null,
+   "age": 4,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "",
+   "bubbleOverflow": 0,
+   "hud": null,
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "03-banner": {
+   "mode": "play",
+   "state": "intro",
+   "phase": null,
+   "topic": "colors",
+   "age": 4,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 66.6
+   },
+   "bubbleText": "Colour Painting",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 542.4,
+    "y": 10,
+    "w": 240.6,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "04-colors": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "jellyfish",
+   "alive": "float",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Let’s paint the tentacles blue!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 542.4,
+    "y": 10,
+    "w": 240.6,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "05-brush-fly": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "jellyfish",
+   "alive": "float",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.2,
+    "w": 310.3,
+    "h": 73
+   },
+   "bubbleText": "Look! Tap the shining tentacles!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 542.4,
+    "y": 10,
+    "w": 240.6,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "06-fill": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "jellyfish",
+   "alive": "float",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Look! Tap the shining tentacles!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 542.4,
+    "y": 10,
+    "w": 240.6,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "07-hint": {
+   "mode": "play",
+   "state": "round",
+   "phase": "finish",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "jellyfish",
+   "alive": "float",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 66.6
+   },
+   "bubbleText": "Let me finish the picture!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 542.4,
+    "y": 10,
+    "w": 240.6,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "08-pause": {
+   "mode": "paused",
+   "state": "round",
+   "phase": "alive",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "jellyfish",
+   "alive": "float",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 66.6
+   },
+   "bubbleText": "Look, it floats up!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 542.4,
+    "y": 10,
+    "w": 240.6,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "09-finish": {
+   "mode": "play",
+   "state": "round",
+   "phase": "finish",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "sailboat",
+   "alive": "sail",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 66.6
+   },
+   "bubbleText": "Let me finish the picture!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "10-alive": {
+   "mode": "play",
+   "state": "round",
+   "phase": "alive",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "sailboat",
+   "alive": "sail",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 66.6
+   },
+   "bubbleText": "Bye-bye! Sail away!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "11-step-shapes": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "shapes",
+   "age": 4,
+   "tpl": "rock_wall",
+   "alive": "bob",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Where is the star? Paint it red!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "11-step-count": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "count",
+   "age": 4,
+   "tpl": "whale_bubbles",
+   "alive": "swim",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Let’s count! Paint 1 bubble!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "11-step-animals": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "animals",
+   "age": 4,
+   "tpl": "reef",
+   "alive": "swim",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Can you paint the crab green?",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "11-step-size": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "size",
+   "age": 3,
+   "tpl": "kelp",
+   "alive": "swim",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Paint the big seahorse red!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "11-step-letters": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "letters",
+   "age": 5,
+   "tpl": "buoy_balloons",
+   "alive": "float",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 66.6
+   },
+   "bubbleText": "Paint the letter U!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "11-step-add": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "add",
+   "age": 6,
+   "tpl": "fish_bubbles",
+   "alive": "swim",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Let’s add! 4 + 2. Find the answer and paint it!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "11-step-oddeven": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "oddeven",
+   "age": 7,
+   "tpl": "whale_spout",
+   "alive": "swim",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 66.6
+   },
+   "bubbleText": "Paint all the odd numbers!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "11-step-initial": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "initial",
+   "age": 7,
+   "tpl": "kelp",
+   "alive": "swim",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Paint the animal that starts with W!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "11-step-sub": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "sub",
+   "age": 7,
+   "tpl": "buoy_balloons",
+   "alive": "float",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Take away! 5 − 3. Find the answer and paint it!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "11-step-lower": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "lower",
+   "age": 6,
+   "tpl": "whale_spout",
+   "alive": "swim",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 66.6
+   },
+   "bubbleText": "Find small h and paint it!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "12-season-spring": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "crab",
+   "alive": "scuttle",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Can you make the claws blue?",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "12-season-summer": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "submarine",
+   "alive": "swim",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Can you make the body orange?",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "12-season-autumn": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "snail",
+   "alive": "scuttle",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Can you make the head blue?",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "12-season-winter": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "fish",
+   "alive": "swim",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Let’s paint the body yellow!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "13-alive-swim": {
+   "mode": "play",
+   "state": "round",
+   "phase": "alive",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "whale",
+   "alive": "swim",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 66.6
+   },
+   "bubbleText": "Swish! It swims away!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "13-alive-swim-b": {
+   "mode": "play",
+   "state": "round",
+   "phase": "alive",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "whale",
+   "alive": "swim",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 66.6
+   },
+   "bubbleText": "Swish! It swims away!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "13-alive-scuttle": {
+   "mode": "play",
+   "state": "round",
+   "phase": "alive",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "crab",
+   "alive": "scuttle",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 66.6
+   },
+   "bubbleText": "Look, it scuttles away!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "13-alive-scuttle-b": {
+   "mode": "play",
+   "state": "round",
+   "phase": "alive",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "crab",
+   "alive": "scuttle",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 66.6
+   },
+   "bubbleText": "Look, it scuttles away!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "13-alive-sail": {
+   "mode": "play",
+   "state": "round",
+   "phase": "alive",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "sailboat",
+   "alive": "sail",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 66.6
+   },
+   "bubbleText": "Look, it’s sailing away!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "13-alive-sail-b": {
+   "mode": "play",
+   "state": "round",
+   "phase": "alive",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "sailboat",
+   "alive": "sail",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 66.6
+   },
+   "bubbleText": "Look, it’s sailing away!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "13-alive-float": {
+   "mode": "play",
+   "state": "round",
+   "phase": "alive",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "seahorse",
+   "alive": "float",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 66.6
+   },
+   "bubbleText": "Look, it floats up!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "13-alive-float-b": {
+   "mode": "play",
+   "state": "round",
+   "phase": "alive",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "seahorse",
+   "alive": "float",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 66.6
+   },
+   "bubbleText": "Look, it floats up!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "13-alive-bob": {
+   "mode": "play",
+   "state": "round",
+   "phase": "alive",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "lighthouse",
+   "alive": "bob",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 66.6
+   },
+   "bubbleText": "Bob, bob! Up it goes!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "13-alive-bob-b": {
+   "mode": "play",
+   "state": "round",
+   "phase": "alive",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "lighthouse",
+   "alive": "bob",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 66.6
+   },
+   "bubbleText": "Bob, bob! Up it goes!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "14-pearl": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "animals",
+   "age": 4,
+   "tpl": "reef",
+   "alive": "swim",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 66.6
+   },
+   "bubbleText": "Paint the dolphin yellow!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": {
+    "x": 553.5,
+    "y": 307.6,
+    "w": 61.1,
+    "h": 53.5
+   },
+   "talkBox": null,
+   "overflowText": []
+  },
+  "14-fishy": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "animals",
+   "age": 4,
+   "tpl": "rocks",
+   "alive": "swim",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Where is the crab? Paint it blue!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "15-talk-colors": {
+   "mode": "talk",
+   "state": "talk",
+   "phase": null,
+   "topic": "colors",
+   "age": 4,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "Look, a new picture is here!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": {
+    "x": 71,
+    "y": 44.5,
+    "w": 710,
+    "h": 283
+   },
+   "overflowText": []
+  },
+  "15-talk-shapes": {
+   "mode": "talk",
+   "state": "talk",
+   "phase": null,
+   "topic": "shapes",
+   "age": 4,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "Here comes a picture to paint!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": {
+    "x": 71,
+    "y": 44.5,
+    "w": 710,
+    "h": 283
+   },
+   "overflowText": []
+  },
+  "15-talk-size": {
+   "mode": "talk",
+   "state": "talk",
+   "phase": null,
+   "topic": "size",
+   "age": 3,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "A new picture!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": {
+    "x": 71,
+    "y": 44.5,
+    "w": 710,
+    "h": 283
+   },
+   "overflowText": []
+  },
+  "15-talk-animals": {
+   "mode": "talk",
+   "state": "talk",
+   "phase": null,
+   "topic": "animals",
+   "age": 4,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "Here comes a picture to paint!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": {
+    "x": 71,
+    "y": 44.5,
+    "w": 710,
+    "h": 283
+   },
+   "overflowText": []
+  },
+  "15-talk-count": {
+   "mode": "talk",
+   "state": "talk",
+   "phase": null,
+   "topic": "count",
+   "age": 4,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "A new picture!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": {
+    "x": 71,
+    "y": 55.5,
+    "w": 710,
+    "h": 261
+   },
+   "overflowText": []
+  },
+  "15-talk-letters": {
+   "mode": "talk",
+   "state": "talk",
+   "phase": null,
+   "topic": "letters",
+   "age": 5,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "Here comes a picture to paint!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": {
+    "x": 71,
+    "y": 55.5,
+    "w": 710,
+    "h": 261
+   },
+   "overflowText": []
+  },
+  "15-talk-lower": {
+   "mode": "talk",
+   "state": "talk",
+   "phase": null,
+   "topic": "lower",
+   "age": 6,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "Look, a new picture is here!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": {
+    "x": 71,
+    "y": 55.5,
+    "w": 710,
+    "h": 261
+   },
+   "overflowText": []
+  },
+  "15-talk-initial": {
+   "mode": "talk",
+   "state": "talk",
+   "phase": null,
+   "topic": "initial",
+   "age": 6,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "Here comes a picture to paint!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": {
+    "x": 71,
+    "y": 55.5,
+    "w": 710,
+    "h": 261
+   },
+   "overflowText": []
+  },
+  "15-talk-add": {
+   "mode": "talk",
+   "state": "talk",
+   "phase": null,
+   "topic": "add",
+   "age": 6,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "Here comes a picture to paint!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": {
+    "x": 71,
+    "y": 55.5,
+    "w": 710,
+    "h": 261
+   },
+   "overflowText": []
+  },
+  "15-talk-sub": {
+   "mode": "talk",
+   "state": "talk",
+   "phase": null,
+   "topic": "sub",
+   "age": 7,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "A new picture!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": {
+    "x": 71,
+    "y": 55.5,
+    "w": 710,
+    "h": 261
+   },
+   "overflowText": []
+  },
+  "15-talk-oddeven": {
+   "mode": "talk",
+   "state": "talk",
+   "phase": null,
+   "topic": "oddeven",
+   "age": 7,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "Find every odd number and paint it!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": {
+    "x": 71,
+    "y": 55.5,
+    "w": 710,
+    "h": 261
+   },
+   "overflowText": []
+  },
+  "16-done": {
+   "mode": "done",
+   "state": "sessionDone",
+   "phase": null,
+   "topic": "animals",
+   "age": 4,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "Bye-bye! Off it swims!",
+   "bubbleOverflow": 0,
+   "hud": null,
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  }
+ },
+ "ip-l-vi": {
+  "01-title": {
+   "mode": "title",
+   "state": "menu",
+   "phase": null,
+   "topic": null,
+   "age": 4,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "",
+   "bubbleOverflow": 0,
+   "hud": null,
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": [
+    "logo1:Rùa Nini",
+    "logo2:Tô Màu Đại Dương"
+   ]
+  },
+  "02-settings": {
+   "mode": "title",
+   "state": "menu",
+   "phase": null,
+   "topic": null,
+   "age": 4,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "",
+   "bubbleOverflow": 0,
+   "hud": null,
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "03-banner": {
+   "mode": "play",
+   "state": "intro",
+   "phase": null,
+   "topic": "colors",
+   "age": 4,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 66.6
+   },
+   "bubbleText": "Tô màu sắc",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 542.4,
+    "y": 10,
+    "w": 240.6,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "04-colors": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "jellyfish",
+   "alive": "float",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Bé ơi, tô mấy cái tua màu xanh dương nhé!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 542.4,
+    "y": 10,
+    "w": 240.6,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "05-brush-fly": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "jellyfish",
+   "alive": "float",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.3,
+    "w": 309.6,
+    "h": 72.8
+   },
+   "bubbleText": "Bé chạm vào mấy cái tua đang sáng nhé!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 542.4,
+    "y": 10,
+    "w": 240.6,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "06-fill": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "jellyfish",
+   "alive": "float",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Bé chạm vào mấy cái tua đang sáng nhé!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 542.4,
+    "y": 10,
+    "w": 240.6,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "07-hint": {
+   "mode": "play",
+   "state": "round",
+   "phase": "finish",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "jellyfish",
+   "alive": "float",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Nini tô nốt phần còn lại nhé!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 542.4,
+    "y": 10,
+    "w": 240.6,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "08-pause": {
+   "mode": "paused",
+   "state": "round",
+   "phase": "finish",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "jellyfish",
+   "alive": "float",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Nini tô nốt phần còn lại nhé!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 542.4,
+    "y": 10,
+    "w": 240.6,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "09-finish": {
+   "mode": "play",
+   "state": "round",
+   "phase": "finish",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "sailboat",
+   "alive": "sail",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.7,
+    "h": 66.6
+   },
+   "bubbleText": "Quẹt, quẹt! Nini tô nốt nè!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "10-alive": {
+   "mode": "play",
+   "state": "round",
+   "phase": "alive",
+   "topic": "colors",
+   "age": 4,
+   "tpl": "sailboat",
+   "alive": "sail",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Tạm biệt! Thuyền ra khơi nào!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "11-step-shapes": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "shapes",
+   "age": 4,
+   "tpl": "rock_wall",
+   "alive": "bob",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Mình tìm hình ngôi sao rồi tô màu đỏ nhé!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "11-step-count": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "count",
+   "age": 4,
+   "tpl": "whale_bubbles",
+   "alive": "swim",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Bé tô 1 bong bóng nhé! Mình cùng đếm!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "11-step-animals": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "animals",
+   "age": 4,
+   "tpl": "reef",
+   "alive": "swim",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Bé ơi, tô con cua màu xanh lá nhé!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "11-step-size": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "size",
+   "age": 3,
+   "tpl": "kelp",
+   "alive": "swim",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Bé tìm con cá ngựa to rồi tô màu đỏ nhé!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "11-step-letters": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "letters",
+   "age": 5,
+   "tpl": "buoy_balloons",
+   "alive": "float",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 66.6
+   },
+   "bubbleText": "Bé tìm chữ X rồi tô nhé!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "11-step-add": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "add",
+   "age": 6,
+   "tpl": "fish_bubbles",
+   "alive": "swim",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Bé tính nhé: 4 + 2! Tô đáp án nào!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "11-step-oddeven": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "oddeven",
+   "age": 7,
+   "tpl": "whale_spout",
+   "alive": "swim",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 66.6
+   },
+   "bubbleText": "Mình tô các số lẻ nhé!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "11-step-initial": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "initial",
+   "age": 7,
+   "tpl": "reef",
+   "alive": "swim",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Bé ơi, tô con vật bắt đầu bằng chữ B nhé!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "11-step-sub": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "sub",
+   "age": 7,
+   "tpl": "buoy_balloons",
+   "alive": "float",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Bé ơi, 5 − 3 bằng mấy? Bé tô đáp án nhé!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "11-step-lower": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "lower",
+   "age": 6,
+   "tpl": "whale_spout",
+   "alive": "swim",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Bé tìm chữ k thường rồi tô nào!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "14-pearl": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "animals",
+   "age": 4,
+   "tpl": "reef",
+   "alive": "swim",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Bé ơi, tô con sứa màu đỏ nhé!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": {
+    "x": 553.5,
+    "y": 307.6,
+    "w": 61.1,
+    "h": 53.5
+   },
+   "talkBox": null,
+   "overflowText": []
+  },
+  "14-fishy": {
+   "mode": "play",
+   "state": "round",
+   "phase": "paint",
+   "topic": "animals",
+   "age": 4,
+   "tpl": "kelp",
+   "alive": "swim",
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": {
+    "x": 72.1,
+    "y": 9.8,
+    "w": 305.6,
+    "h": 71.9
+   },
+   "bubbleText": "Bé ơi, tô con cá ngựa màu xanh lá nhé!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  },
+  "15-talk-colors": {
+   "mode": "talk",
+   "state": "talk",
+   "phase": null,
+   "topic": "colors",
+   "age": 4,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "Nhìn kìa, tranh mới tới rồi!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [
+    {
+     "x": 392.2,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 477.3,
+     "y": 326.2,
+     "r": 31.7
+    },
+    {
+     "x": 562.5,
+     "y": 326.2,
+     "r": 31.7
+    }
+   ],
+   "clam": null,
+   "talkBox": {
+    "x": 71,
+    "y": 44.5,
+    "w": 710,
+    "h": 283
+   },
+   "overflowText": []
+  },
+  "15-talk-shapes": {
+   "mode": "talk",
+   "state": "talk",
+   "phase": null,
+   "topic": "shapes",
+   "age": 4,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "Một bức tranh mới nè!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": {
+    "x": 71,
+    "y": 44.5,
+    "w": 710,
+    "h": 283
+   },
+   "overflowText": []
+  },
+  "15-talk-size": {
+   "mode": "talk",
+   "state": "talk",
+   "phase": null,
+   "topic": "size",
+   "age": 3,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "Nhìn kìa, tranh mới tới rồi!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": {
+    "x": 71,
+    "y": 44.5,
+    "w": 710,
+    "h": 283
+   },
+   "overflowText": []
+  },
+  "15-talk-animals": {
+   "mode": "talk",
+   "state": "talk",
+   "phase": null,
+   "topic": "animals",
+   "age": 4,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "Con bạch tuộc ở đâu nhỉ? Bé tô màu xanh dương nhé!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": {
+    "x": 71,
+    "y": 44.5,
+    "w": 710,
+    "h": 283
+   },
+   "overflowText": []
+  },
+  "15-talk-count": {
+   "mode": "talk",
+   "state": "talk",
+   "phase": null,
+   "topic": "count",
+   "age": 4,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "Mình đếm nhé! Bé tô 2 con sao biển nào!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": {
+    "x": 71,
+    "y": 55.5,
+    "w": 710,
+    "h": 261
+   },
+   "overflowText": []
+  },
+  "15-talk-letters": {
+   "mode": "talk",
+   "state": "talk",
+   "phase": null,
+   "topic": "letters",
+   "age": 5,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "Nhìn kìa, tranh mới tới rồi!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": {
+    "x": 71,
+    "y": 55.5,
+    "w": 710,
+    "h": 261
+   },
+   "overflowText": []
+  },
+  "15-talk-lower": {
+   "mode": "talk",
+   "state": "talk",
+   "phase": null,
+   "topic": "lower",
+   "age": 6,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "Tranh mới để tô đây rồi!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": {
+    "x": 71,
+    "y": 55.5,
+    "w": 710,
+    "h": 261
+   },
+   "overflowText": []
+  },
+  "15-talk-initial": {
+   "mode": "talk",
+   "state": "talk",
+   "phase": null,
+   "topic": "initial",
+   "age": 6,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "Tranh mới để tô đây rồi!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": {
+    "x": 71,
+    "y": 55.5,
+    "w": 710,
+    "h": 261
+   },
+   "overflowText": []
+  },
+  "15-talk-add": {
+   "mode": "talk",
+   "state": "talk",
+   "phase": null,
+   "topic": "add",
+   "age": 6,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "Tranh mới để tô đây rồi!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": {
+    "x": 71,
+    "y": 55.5,
+    "w": 710,
+    "h": 261
+   },
+   "overflowText": []
+  },
+  "15-talk-sub": {
+   "mode": "talk",
+   "state": "talk",
+   "phase": null,
+   "topic": "sub",
+   "age": 7,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "Nhìn kìa, tranh mới tới rồi!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": {
+    "x": 71,
+    "y": 55.5,
+    "w": 710,
+    "h": 261
+   },
+   "overflowText": []
+  },
+  "15-talk-oddeven": {
+   "mode": "talk",
+   "state": "talk",
+   "phase": null,
+   "topic": "oddeven",
+   "age": 7,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "Tranh mới để tô đây rồi!",
+   "bubbleOverflow": 0,
+   "hud": {
+    "x": 543.3,
+    "y": 10,
+    "w": 239.7,
+    "h": 56
+   },
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": {
+    "x": 71,
+    "y": 55.5,
+    "w": 710,
+    "h": 261
+   },
+   "overflowText": []
+  },
+  "16-done": {
+   "mode": "done",
+   "state": "sessionDone",
+   "phase": null,
+   "topic": "animals",
+   "age": 4,
+   "tpl": null,
+   "alive": null,
+   "ins": {
+    "top": 0,
+    "bottom": 38.455985915492924,
+    "left": 108.09741784037548,
+    "right": 108.09741784037548
+   },
+   "s": 0.5458039718129404,
+   "W": 1561,
+   "H": 720,
+   "bubble": null,
+   "bubbleText": "Nhìn kìa, nó bơi rồi!",
+   "bubbleOverflow": 0,
+   "hud": null,
+   "canvas": {
+    "x": 331.2,
+    "y": 85.2,
+    "w": 292.2,
+    "h": 200.6
+   },
+   "nini": {
+    "x": 228.6,
+    "y": 222.4,
+    "w": 98.2,
+    "h": 136.5
+   },
+   "niniUp": false,
+   "shells": [],
+   "clam": null,
+   "talkBox": null,
+   "overflowText": []
+  }
+ }
+}

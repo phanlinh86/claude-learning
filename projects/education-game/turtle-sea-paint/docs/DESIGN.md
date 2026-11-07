@@ -30,8 +30,11 @@ make sense, hint cooldown / idle backoff). Target: iPhone + iPad Safari first, p
                         //   = canvas inner area. Landscape: right of Nini, between bubble bottom + 16 and palette top − 20,
                         //   w ≤ W − Nini column − margins; keep 3:2 (letterbox inside). Portrait: full width − 40, below the
                         //   bubble; tall portrait gets a larger s.
-    palette: { y, slots:[{x, y, r}] },   // paint shells row under the canvas, centred on the canvas; shell radius r = 58
-                        //   (≥ 116 px wide), gap ≥ 24; up to 5 slots (age 5+: 4–5 colours); hit radius = r + 18
+    palette: { y, slots:[{x, y, r}], column },   // paint shells row under the canvas, centred on the canvas; shell radius
+                        //   r = 58 (≥ 116 px wide), gap ≥ 24; up to 5 slots (age 5+: 4–5 colours); hit radius = r + 18.
+                        //   Landscape: when it gives a larger canvas (phones ≈ 2.2:1, iPad Air) the shells stand in a
+                        //   vertical COLUMN right of the canvas instead (column: true; centred between the canvas frame
+                        //   and the right safe edge, below the HUD); the canvas then uses the full height bubble → sand
     nini: { x, y, h },  // FEET point and height: landscape bottom-left (x = ins.left + 130, y = groundY - 6, h = 250);
                         //   portrait bottom-left beside the palette (h = 210). Nini must not cover the canvas or the palette.
     brush:  { x, y },   // resting brush tip position (Nini's right flipper + brush) — render draws the brush by code
@@ -110,7 +113,10 @@ make sense, hint cooldown / idle backoff). Target: iPhone + iPad Safari first, p
     slot]`, `opt.sizes?` (['big','small'] for size rounds: the same animal twice, big ≈ 1.6× small) → each animal is ONE
     paintable part (`role:'animal'`, its body silhouette) + its deco (eyes, lines). `SP.SEA_ANIMALS = ['fish','crab',
     'octopus','starfish','jellyfish','seahorse','whale','dolphin']` — each readable as a line drawing at ≥ 120 px.
-  - **labels** (letters / numbers / sums): ≥ 2 templates (a fish blowing 3–5 big bubbles, balloons tied to a buoy) with
+    A scene's `alive` follows its animals (majority: crab → scuttle, jellyfish / seahorse → float, octopus / starfish →
+    bob, others swim; a tie keeps the template's own motion). Templates: reef, kelp, rocks (default scuttle), lagoon.
+  - **labels** (letters / numbers / sums): ≥ 2 templates (a fish blowing 3–5 big bubbles, balloons tied to a buoy, a whale
+    spout, lanterns held by a jellyfish) with
     `opt.labels = [text per bubble]` → parts `role:'label'`, `text`, r ≥ 52, nameKind given by `opt.kind`.
   `SP.Pictures.hit(pic, x, y, pad)` → part id | null (pure; smallest-area rule). `SP.Pictures.validate(pic)` → null | reason
   (sizes, overlaps, all parts inside 600 × 400). Default fills `def`: pleasant sea colours that are NOT used as targets.
@@ -177,7 +183,10 @@ round = { topic, age, lang, roundIndex, surprise: null|'fishy'|'pearl', pic /* S
              promptKey, params, nameKind, nameValue } ] }
 ```
 - Steps per round: warm-up (round 0) 1 step; later 2–3 steps (age 3: ≤ 2). Every step's targets exist and are unpainted;
-  a part is painted at most once. Content varies every round (template, colours, shapes, animals).
+  a part is painted at most once. Content varies every round (template, colours, shapes, animals); a session does not
+  repeat a picture template while its pool has an unused one, and never back-to-back when the pool has ≥ 2.
+- Easiest first: the first chapter of a session (level 0) has ≤ 2 steps per round up to age 5, and rounds 0–1 show fewer
+  shells (2 at ages ≤ 4, 3 at age 5).
 - `colors` (mode `pickColor`): template kind `parts`; palette = 2 (age 3) / 3 (age 4) colours (age 5+: 4); steps paint
   different parts in different palette colours ("Paint the tail BLUE!"). The child taps the right shell (wrong shell = a
   mistake), then taps the glowing part (tapping any other part = `notThis`, not a mistake).
@@ -210,8 +219,10 @@ levelDone | sessionDone`.
     `bubbles {x,y}` event); shells pop in staggered (back-overshoot, 0.1 s apart). Then event `ask {promptKey, params,
     mode, step, first}` → `paint`.
   - **paint**: `w.step` = current step index, `w.brush = { color|null, x, y, _px, _py, angle, dip 0..1, state 'rest'|
-    'fly'|'dab' }`. Input is a **tap** (down + up within 0.6 s and < 40 px move; a drag is ignored — just treat the press
-    position at release). Events:
+    'fly'|'dab' }`. Input is a **tap** (down + up within 1.0 s and < 64 px move; handled at the press position). A longer
+    press or a drag paints nothing but answers softly: event `soft {kind:'hold'|'drag', target:'shell'|'part'|null, …}`
+    and a tiny wobble of what is under the finger. While a step is interactive a shell or an unpainted part under the
+    finger wins over the fishy swimming across it. Events:
     - shell tap: right → `pick {color}` (shell `lift` spring, brush flies to the shell, dips, comes back loaded); in
       `pickColor` then `ask {promptKey:'p.tapPart', …, follow:true}`; wrong → `wrong {kind:'color', got:{nameKind:'color',
       nameValue}, want:{…}, streak}` (shell wobble, a small grey-free splash). Tapping a shell while the brush is already
@@ -224,15 +235,18 @@ levelDone | sessionDone`.
       mistake. Tap on a non-target part in `pickColor` → `notThis {partId}`, not a mistake. Tap on a wrong part in
       `tapPart` / `pickTap` → part `wob` (damped ±6 px), `wrong {kind:'part', got:{nameKind,nameValue}, want:{…}, streak}`.
       `count`: tap on an unpainted spot → `paint` with count; on a painted spot → `already` (not a mistake).
-    - tap on Nini → `pokeNini` (main repeats the prompt). Tap on empty canvas / water → nothing.
+    - tap on Nini → `pokeNini` (main repeats the prompt). Tap on empty canvas / sand / water → no line, not a mistake, but
+      it counts as a tap without progress (2 → hint, 6 at ages ≤ 4 / 5 at ages 5+ → `assist`: the next tap does the right
+      thing).
     - after 2 misses in a step, or `hint()`: `hint {target: 'shell'|'part', id}` — it glows, ghost hand taps it
       (`w.hintHand = {x, y, t, alpha}`); cooldown 6 s; idle nudges after 12 s, backoff ×1.5 up to 30 s (`idle {n}`; the
       2nd idle also hints).
   - **finish** (≈ 1.2 s): Nini `paint` mood; every still-white part fills with its `def` colour in a sweep (left → right,
     0.12 s apart, `sweep` event per part); sparkles.
   - **alive** (≈ 2.4 s): the whole picture comes off the canvas: `w.pic = {x, y, rot, sx, sy, alpha, wig}` animated per
-    `pic.alive` (swim: wiggle squash + leave right with bubbles; scuttle: hop sideways; sail: rock and glide; bob: up and
-    away; float: rise with bubbles) — event `alive {kind}`; the canvas shows empty for a beat, then `roundDone {round, stars,
+    `pic.alive` (swim: wiggle squash + leave right with bubbles; scuttle: hop sideways; sail: rock and glide; bob: dip, then
+    drift off up-right; float: drift off to the right, rising a little, with bubbles — float / bob keep out from behind the
+    bubble / HUD) — event `alive {kind}`; the canvas shows empty for a beat, then `roundDone {round, stars,
     misses}` (3 / 2 / 1 stars for 0 / 1 / ≥ 2 misses), **clear** (0.4 s), next round or Talk time after round 4 / once the
     chapter passes 75 s with ≥ 3 rounds done.
 - `w.parts` = the round's pic parts + state: `{ id, color, t, _pt, ox, oy, glow, wob, _pwob, sparkle, painted }`

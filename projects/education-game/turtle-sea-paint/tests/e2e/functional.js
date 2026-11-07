@@ -130,8 +130,9 @@ const G = {
     await touch(P, 'touchStart', a.x, a.y); for (let i = 1; i <= 8; i++) { await touch(P, 'touchMove', a.x, a.y - i * 12); await sleep(20); } await touch(P, 'touchEnd');
     await sleep(300);
     check('a drag is not a tap', (await evs(P, 'pick')).length === 0);
-    await touch(P, 'touchStart', a.x, a.y); await sleep(900); await touch(P, 'touchEnd'); await sleep(200);
+    await touch(P, 'touchStart', a.x, a.y); await sleep(1500); await touch(P, 'touchEnd'); await sleep(200);   // > CONFIG.tapTime (1.0 s)
     check('a long press is not a tap', (await evs(P, 'pick')).length === 0);
+    check('a long press gets a soft answer (world soft event)', (await evs(P, 'soft')).length >= 1);
     await P.ctx.close();
   },
   async count(check) {

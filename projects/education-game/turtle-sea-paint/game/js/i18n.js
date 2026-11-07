@@ -43,7 +43,7 @@
   var PARTS = {
     body: ['body', 'phần thân'], tail: ['tail', 'cái đuôi'], fin: ['fin', 'cái vây'], fins: ['fins', 'mấy cái vây'],
     sail: ['sail', 'cánh buồm'], hull: ['boat', 'thân thuyền'], flag: ['flag', 'lá cờ'], mast: ['mast', 'cột buồm'],
-    shell: ['shell', 'cái mai'], snailshell: ['shell', 'vỏ ốc'], claws: ['claws', 'đôi càng'], claw: ['claw', 'cái càng'],
+    shell: ['body', 'cái mai'], snailshell: ['shell', 'vỏ ốc'], claws: ['claws', 'đôi càng'], claw: ['claw', 'cái càng'],
     legs: ['legs', 'mấy cái chân'], bell: ['bell', 'đầu sứa'], tentacles: ['tentacles', 'mấy cái tua'],
     head: ['head', 'cái đầu'], arms: ['arms', 'mấy cái xúc tu'], hat: ['hat', 'cái mũ'], belly: ['belly', 'cái bụng'],
     tower: ['tower', 'cái tháp'], window: ['window', 'ô cửa sổ'], windows: ['windows', 'mấy ô cửa sổ'],
@@ -236,7 +236,7 @@
       'ui.tapOrSay': 'Tap or say the answer!',
       'ui.listening': 'Nini is listening…',
       'ui.tapNini': 'Tap Nini to hear it again',
-      'ui.tapHint': 'Tap a paint shell, then tap the picture',
+      'ui.tapHint': 'Tap a paint, then tap the picture',
       'ui.skip': 'Skip',
       'ui.gallery': 'Our pictures',
       'ui.langName.en': 'English',
@@ -302,8 +302,8 @@
       'wrong.initial': ['{word} starts with {first}! Let’s look again!', '{word} starts with {first}. Let’s find another one!'],
       'wrong.any': ['Let’s look again!', 'Let’s try another one!', 'Hmm, let’s think again!', 'Keep going, you can do it!'],
       'needPaint': ['First pick the {color} paint!', 'Let’s get {color} paint on the brush first!',
-        'Tap the {color} paint shell first!'],
-      'needPaint.any': ['First pick a paint!', 'Tap a paint shell first!', 'The brush needs paint first!'],
+        'Tap the {color} paint first!'],
+      'needPaint.any': ['First pick a paint!', 'Tap a paint first!', 'The brush needs paint first!'],
       'notThis': ['Paint the shining {part}!', 'Look for the sparkly {part}!', 'Tap the shining {part}!'],
       'notThis.any': ['Paint the shining part!', 'Look for the sparkly part!', 'Tap the part that shines!'],
       'already': ['That one is painted! Find another one!', 'Already painted! Let’s find a white one!',
@@ -315,6 +315,12 @@
       'alive.sail': ['Look, it’s sailing away!', 'Whoosh! Off it sails!', 'Bye-bye! Sail away!'],
       'alive.bob': ['Look, it bobs away!', 'Bob, bob! Up it goes!', 'Bye-bye! Bobbing away!'],
       'alive.float': ['Look, it floats up!', 'Up, up, up it floats!', 'Bye-bye! Floating away!'],
+      // the same, naming the picture (and the child): a reward, said while it moves (playtest P2-3)
+      'alive.swim.thing': ['Bye-bye, {thing}! Off it swims!', 'Look, your {thing} is swimming, {child}!', 'Swish! The {thing} swims away!'],
+      'alive.scuttle.thing': ['Bye-bye, {thing}! Scuttle, scuttle!', 'Look, your {thing} runs away, {child}!', 'Click, click! The {thing} scuttles off!'],
+      'alive.sail.thing': ['Bye-bye, {thing}! Sail away!', 'Look, your {thing} is sailing, {child}!', 'Whoosh! The {thing} sails away!'],
+      'alive.bob.thing': ['Bye-bye, {thing}! Bob, bob!', 'Look, your {thing} bobs away, {child}!', 'Bob, bob! Up goes the {thing}!'],
+      'alive.float.thing': ['Bye-bye, {thing}! Up it floats!', 'Look, your {thing} floats up, {child}!', 'Up, up! The {thing} floats away!'],
       'surprise.fishy': ['Look! A little fish with a paint bubble!', 'A little fish swims by! Tap it!'],
       'fishy.tap': ['Splish! Paint dots everywhere!', 'Hee hee! The little fish giggles!', 'Pop! Colourful dots!'],
       'surprise.pearl': ['A clam is sleeping on the sand!', 'Look! A clam! What is inside?'],
@@ -390,7 +396,7 @@
       'ui.quieter': 'Nhỏ hơn',
       'ui.louder': 'To hơn',
       'ui.voice': 'Giọng của Nini',
-      'ui.mic': 'Trả lời bằng giọng nói',
+      'ui.mic': 'Nói để trả lời',
       'ui.done': 'Xong',
       'ui.stars': 'Ngôi sao',
       'ui.chapter': 'Chương {n}',
@@ -403,7 +409,7 @@
       'ui.tapOrSay': 'Bé chạm hoặc nói đáp án nhé!',
       'ui.listening': 'Nini đang nghe…',
       'ui.tapNini': 'Chạm vào Nini để nghe lại nhé',
-      'ui.tapHint': 'Bé chạm vào vỏ sò màu, rồi chạm vào tranh nhé',
+      'ui.tapHint': 'Bé chạm vào một màu, rồi chạm vào tranh nhé',
       'ui.skip': 'Bỏ qua',
       'ui.gallery': 'Tranh của bé',
       'ui.langName.en': 'English',
@@ -429,7 +435,7 @@
       'enter': ['Một bức tranh mới nè!', 'Nhìn kìa, tranh mới tới rồi!', 'Tranh mới để tô đây rồi!'],
 
       'p.any': ['Bé ơi, mình tô tranh nhé!', 'Bé chọn màu rồi chạm vào tranh nào!', 'Tới giờ tô màu rồi!'],
-      'p.colors': ['Bé ơi, tô {part} {color} nhé!', 'Mình tô {part} {color} nào! Bé tìm vỏ sò {color} nhé!',
+      'p.colors': ['Bé ơi, tô {part} {color} nhé!', 'Mình tô {part} {color} nào! Bé chọn {color} nhé!',
         'Bé ơi, {part} muốn được tô {color} đó!'],
       'p.tapPart': ['Giờ bé chạm vào {part} đang lấp lánh nhé!', 'Bé tô {part} lấp lánh nào!', 'Bé chạm vào {part} đang sáng nhé!'],
       'p.shapes': ['Bé ơi, tô {shape} {color} nhé!', '{shape} ở đâu nhỉ? Bé tô {color} nào!', 'Mình tìm {shape} rồi tô {color} nhé!'],
@@ -468,8 +474,8 @@
       'wrong.parity': ['{num} là số {parity}! Mình tìm số khác nhé!', '{num} là số {parity}. Bé tìm số khác nào!'],
       'wrong.initial': ['{word} bắt đầu bằng chữ {first}! Mình tìm lại nhé!', '{word} bắt đầu bằng chữ {first}. Bé tìm bạn khác nào!'],
       'wrong.any': ['Mình tìm lại nhé!', 'Bé thử cái khác nào!', 'Bé nghĩ thêm chút nữa nhé!', 'Cố lên, bé làm được mà!'],
-      'needPaint': ['Bé chọn {color} trước nhé!', 'Mình chấm {color} lên cọ trước nào!', 'Bé chạm vào vỏ sò {color} trước nhé!'],
-      'needPaint.any': ['Bé chọn màu trước nhé!', 'Bé chạm vào vỏ sò màu trước nào!', 'Cọ cần có màu trước nhé!'],
+      'needPaint': ['Bé chọn {color} trước nhé!', 'Mình chấm {color} lên cọ trước nào!', 'Bé chạm vào {color} trước nhé!'],
+      'needPaint.any': ['Bé chọn màu trước nhé!', 'Bé chạm vào một màu trước nào!', 'Cọ cần có màu trước nhé!'],
       'notThis': ['Bé tô {part} đang lấp lánh nhé!', 'Bé tìm {part} lấp lánh nào!', '{part} đang sáng kìa! Bé chạm vào nhé!'],
       'notThis.any': ['Bé tô chỗ đang lấp lánh nhé!', 'Bé tìm chỗ lấp lánh nào!', 'Bé chạm vào chỗ đang sáng nhé!'],
       'already': ['Chỗ này tô rồi! Bé tìm chỗ khác nhé!', 'Tô rồi nè! Mình tìm chỗ còn trắng nhé!',
@@ -481,6 +487,11 @@
       'alive.sail': ['Nhìn kìa, thuyền ra khơi rồi!', 'Vù vù! Thuyền đi rồi!', 'Tạm biệt! Thuyền ra khơi nào!'],
       'alive.bob': ['Nhìn kìa, nó dập dềnh đi rồi!', 'Bập bềnh! Lên cao nào!', 'Tạm biệt! Dập dềnh, dập dềnh!'],
       'alive.float': ['Nhìn kìa, nó bay lên rồi!', 'Lên, lên, lên cao nào!', 'Tạm biệt! Bồng bềnh bay lên!'],
+      'alive.swim.thing': ['Tạm biệt {thing}! Bơi đi nào!', 'Nhìn kìa bé {child}, {thing} bơi đi rồi!', 'Vút! {thing} bơi đi rồi!'],
+      'alive.scuttle.thing': ['Tạm biệt {thing}! Bò ngang, bò ngang!', 'Nhìn kìa bé {child}, {thing} chạy mất rồi!', 'Lạch cạch! {thing} bò đi rồi!'],
+      'alive.sail.thing': ['Tạm biệt {thing}! Ra khơi nào!', 'Nhìn kìa bé {child}, {thing} ra khơi rồi!', 'Vù vù! {thing} đi xa rồi!'],
+      'alive.bob.thing': ['Tạm biệt {thing}! Dập dềnh, dập dềnh!', 'Nhìn kìa bé {child}, {thing} dập dềnh rồi!', 'Bập bềnh! {thing} lên cao nào!'],
+      'alive.float.thing': ['Tạm biệt {thing}! Bay lên nào!', 'Nhìn kìa bé {child}, {thing} bay lên rồi!', 'Lên, lên! {thing} bay lên cao!'],
       'surprise.fishy': ['Nhìn kìa! Bạn cá nhỏ mang bong bóng màu!', 'Bạn cá nhỏ bơi qua kìa! Bé chạm vào nhé!'],
       'fishy.tap': ['Tách! Chấm màu bay khắp nơi!', 'Hi hi! Bạn cá nhỏ cười khúc khích!', 'Bụp! Chấm màu đủ màu!'],
       'surprise.pearl': ['Có bạn sò đang ngủ trên cát nè!', 'Nhìn kìa! Một con sò! Bên trong có gì nhỉ?'],
@@ -552,6 +563,8 @@
     'talk.count': ['spot'], 'talk.animals': ['animal'], 'talk.letters': ['letter'], 'talk.lower': ['letter'],
     'talk.initial': ['word'], 'talk.add': ['a', 'b'], 'talk.sub': ['a', 'b'], 'talk.oddeven': ['parity'],
     'talk.wrong': ['answer'], 'talk.wrong.a': ['answer'], 'talk.wrong.animal': ['answer'], 'talk.wrong.size': ['answer'],
+    'alive.swim.thing': ['thing'], 'alive.scuttle.thing': ['thing'], 'alive.sail.thing': ['thing'], 'alive.bob.thing': ['thing'],
+    'alive.float.thing': ['thing'],
     'talk.wrong.letter': ['letter'], 'talk.wrong.small': ['letter'], 'talk.wrong.number': ['answer']
   };
   Object.keys(PROMPTS).forEach(function (k) { NEEDS[k] = PROMPTS[k]; });
@@ -1169,10 +1182,29 @@
     var v = tp.k === 'part' || !tp.k ? tp.v : null;
     return I18N.t(lang, 'notThis', { part: v }, rng);
   };
+  // the finished picture, as a child would call it ("the boat", "con thuyền"): template id → [en, vi]
+  var THINGS = {
+    fish: ['fish', 'con cá'], crab: ['crab', 'con cua'], sailboat: ['boat', 'con thuyền'], jellyfish: ['jellyfish', 'con sứa'],
+    whale: ['whale', 'con cá voi'], octopus: ['octopus', 'con bạch tuộc'], submarine: ['submarine', 'thuyền ngầm'],
+    seahorse: ['seahorse', 'con cá ngựa'], snail: ['snail', 'con ốc sên'], starfish: ['starfish', 'con sao biển'],
+    lighthouse: ['lighthouse', 'ngọn hải đăng'], dolphin: ['dolphin', 'con cá heo'], sub_windows: ['submarine', 'thuyền ngầm'],
+    sandcastle: ['sandcastle', 'lâu đài cát'], rock_wall: ['rock wall', 'bức tường đá'], flag_boat: ['boat', 'con thuyền'],
+    whale_bubbles: ['whale', 'con cá voi'], fish_pearls: ['fish', 'con cá'], octopus_bubbles: ['octopus', 'con bạch tuộc'],
+    chest_pearls: ['treasure chest', 'cái rương báu'], rock_starfish: ['starfish', 'con sao biển'], reef: ['picture', 'bức tranh'],
+    kelp: ['picture', 'bức tranh'], rocks: ['picture', 'bức tranh'], fish_bubbles: ['fish', 'con cá'],
+    buoy_balloons: ['buoy', 'cái phao'], whale_spout: ['whale', 'con cá voi'], lagoon: ['picture', 'bức tranh'],
+    jelly_lanterns: ['jellyfish', 'con sứa']
+  };
+  I18N.THINGS = THINGS;
+  I18N.thingName = function (lang, templateId) { var t = THINGS[templateId]; return t ? t[L(lang) === 'vi' ? 1 : 0] : ''; };
+  // sayAlive(lang, kind) or sayAlive(lang, {kind, templateId?, thing?}): names the picture when it is known
   I18N.sayAlive = function (lang, kind, rng) {
-    if (kind && typeof kind === 'object') kind = kind.kind;
+    var thing = '';
+    if (kind && typeof kind === 'object') { thing = kind.thing || I18N.thingName(lang, kind.templateId); kind = kind.kind; }
     var k = 'alive.' + kind;
-    return I18N.t(lang, STR.en[k] ? k : 'alive.swim', null, rng);
+    if (!STR.en[k]) k = 'alive.swim';
+    if (thing && STR.en[k + '.thing']) return I18N.t(lang, k + '.thing', { thing: thing }, rng);
+    return I18N.t(lang, k, null, rng);
   };
 
   // Counting aloud: i → "One!" … "Twenty!" (beyond: the digits)

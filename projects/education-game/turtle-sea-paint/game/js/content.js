@@ -139,15 +139,20 @@
     CAP[key] = c;
     return c;
   }
-  /** Template ids of a kind that take exactly k items (parts / count: at least k) (and sizes when asked); avoids the
-   *  previous pictures when another one fits. */
+  /** Template ids of a kind that take exactly k items (parts / count: at least k) (and sizes when asked). `prev` = the
+   *  templates used so far (the world passes the whole session, oldest first): the unused ones when there are any, else
+   *  the least-recently used half of the pool (never the one just played when the pool has ≥ 2). */
   function templatesFor(kind, k, needSizes, prev) {
     var all = Pics().list(kind).filter(function (id) {
       var c = capOf(id, kind);
       return (kind === 'parts' || kind === 'count' ? c.n >= k : c.counts.indexOf(k) >= 0) && (!needSizes || c.sizes);
     });
-    var fresh = all.filter(function (id) { return !prev || prev.indexOf(id) < 0; });
-    return fresh.length ? fresh : all;
+    if (!prev || !prev.length || all.length < 2) return all;
+    var fresh = all.filter(function (id) { return prev.indexOf(id) < 0; });
+    if (fresh.length) return fresh;
+    var used = all.map(function (id, i) { return { id: id, at: prev.lastIndexOf(id), i: i }; });
+    used.sort(function (a, b) { return a.at - b.at || a.i - b.i; });
+    return used.slice(0, Math.max(1, Math.min(used.length - 1, Math.ceil(used.length / 2)))).map(function (u) { return u.id; });
   }
   function pickTemplate(rng, kind, k, needSizes, prev) {
     var ids = templatesFor(kind, k, needSizes, prev);
@@ -165,10 +170,21 @@
   // ---------------- steps ----------------
   /** Steps per round: warm-up 1; later 2–3 (age 3: 2), never more than `max`. */
   var SHORT_MAX = 3;   // set per round by buildRound from opt.short (a long chapter): ages ≤ 4 → 1 step, 5+ → 2
+  var EASY_MAX = 3;    // set per round by buildRound: the first chapter of a session at ages ≤ 5 → ≤ 2 steps (playtest P2-2 / P3-1)
   function stepsFor(rng, age, ri, max) {
     if (ri === 0) return 1;
     var k = age <= 3 ? 2 : rng.int(2, 3);
-    return Math.max(1, Math.min(k, max, MAX_STEPS, SHORT_MAX));
+    return Math.max(1, Math.min(k, max, MAX_STEPS, SHORT_MAX, EASY_MAX));
+  }
+  /** "Easiest first" (playtest P2-2 / P3-1): in the first chapter of a session (level 0) rounds 0–1 show fewer shells —
+   *  ages ≤ 4: 2, age 5: 3 (colours and the age-5 pickTap shapes); 0 = the normal palette. */
+  function easyPalette(level, age, ri) { return level === 0 && ri <= 1 ? (age <= 4 ? 2 : age === 5 ? 3 : 0) : 0; }
+  function stepCap(level, age) { return level === 0 && age <= 5 ? 2 : MAX_STEPS; }   // first chapter: ≤ 2 steps up to age 5
+  function paletteSize(topic, age, ri, level) {
+    var e = easyPalette(level, age, ri);
+    if (topic === 'colors') return e || (age <= 3 ? 2 : age === 4 ? 3 : 4);
+    if (topic === 'shapes' && age >= 5) return e || 4;
+    return 0;
   }
   function S(mode, targets, color, promptKey, params, nameKind, nameValue, role, extra) {
     var s = { mode: mode, targets: targets, color: color, promptKey: promptKey, params: params, nameKind: nameKind, nameValue: nameValue, role: role };
@@ -194,12 +210,13 @@
     return c.slice(0, k);
   }
 
-  function buildRound(topic, age, lang, rng, ri, prev, short) {
+  function buildRound(topic, age, lang, rng, ri, prev, short, level) {
     SHORT_MAX = short ? (age <= 4 ? 1 : 2) : MAX_STEPS;
+    EASY_MAX = stepCap(level, age);
     var steps = [], palette = null, kind = KIND_OF[topic], tid, pic, k, i, cols, ps, t;
     switch (topic) {
       case 'colors': {
-        var P = age <= 3 ? 2 : age === 4 ? 3 : 4;
+        var P = paletteSize('colors', age, ri, level);
         tid = pickTemplate(rng, 'parts', 2, false, prev); pic = Pics().build(tid, {});
         ps = rng.shuffle(uniqueParts(pic, 'part').slice());
         palette = colourSet(rng, age, P);
@@ -213,8 +230,8 @@
         tid = pickTemplate(rng, 'shapes', nS, false, prev); pic = Pics().build(tid, { shapes: shp });
         ps = rng.shuffle(uniqueParts(pic, 'shape').slice());
         if (age >= 5) {
-          palette = colourSet(rng, age, 4);
-          k = stepsFor(rng, age, ri, ps.length); cols = rng.sample(palette, k);
+          palette = colourSet(rng, age, paletteSize('shapes', age, ri, level));
+          k = stepsFor(rng, age, ri, Math.min(ps.length, palette.length)); cols = rng.sample(palette, k);
           for (i = 0; i < k; i++) steps.push(S('pickTap', [ps[i].id], cols[i], 'p.shapes5', { shape: ps[i].nameValue, color: cols[i] }, 'shape', ps[i].nameValue, 'shape'));
         } else {
           k = stepsFor(rng, age, ri, ps.length); cols = colourSet(rng, age, k);
@@ -312,7 +329,8 @@
       }
       default: throw new Error('SP.Content: unknown topic ' + topic);
     }
-    var r = { topic: topic, age: age, lang: lang, roundIndex: ri, surprise: null, templateId: tid, kind: kind, pic: pic, palette: palette, steps: steps, short: !!short };
+    var r = { topic: topic, age: age, lang: lang, roundIndex: ri, surprise: null, templateId: tid, kind: kind, pic: pic, palette: palette, steps: steps, short: !!short,
+      level: level === undefined ? null : level };
     r.key = roundKey(r);
     return r;
   }
@@ -322,9 +340,11 @@
   }
 
   /**
-   * makeRound(topic, { age, lang, rng, roundIndex, surprise, prevPics?, short? }) → round. `prevPics` = template ids of the
-   * last rounds (consecutive rounds never repeat a template when another one fits). `short` (the world sets it when the
-   * chapter runs long): 1 step at ages ≤ 4, ≤ 2 steps from age 5.
+   * makeRound(topic, { age, lang, rng, roundIndex, surprise, prevPics?, short?, level? }) → round. `prevPics` = template ids
+   * used so far this session, oldest first (unused templates first, else the least-recently used; never back-to-back when
+   * the pool allows). `short` (the world sets it when the chapter runs long): 1 step at ages ≤ 4, ≤ 2 steps from age 5.
+   * `level` = the chapter index: level 0 is the easy first chapter (ages ≤ 5: ≤ 2 steps; shells in rounds 0–1: 2 at ages ≤ 4,
+   * 3 at age 5).
    */
   function makeRound(topic, o) {
     o = o || {};
@@ -332,7 +352,7 @@
     if (ALL_TOPICS.indexOf(topic) < 0) throw new Error('SP.Content: unknown topic ' + topic);
     var r = null, err = null, prev = o.prevPics || null;
     for (var attempt = 0; attempt < 60; attempt++) {
-      try { r = buildRound(topic, age, lang, rng, ri, attempt < 40 ? prev : null, !!o.short); err = validate(r); }
+      try { r = buildRound(topic, age, lang, rng, ri, attempt < 40 ? prev : null, !!o.short, o.level === undefined || o.level === null ? undefined : o.level | 0); err = validate(r); }
       catch (e) { r = null; err = e.message; }
       if (!err) break;
     }
@@ -368,6 +388,7 @@
     if (r.age <= 3 && n > 2) return 'age 3: ' + n + ' steps';
     if (r.roundIndex > 0 && n < 2 && r.steps[0].mode !== 'count' && !(r.short && r.age <= 4)) return 'later round with 1 step';
     if (r.short && n > (r.age <= 4 ? 1 : 2)) return 'short round with ' + n + ' steps';
+    if (n > stepCap(r.level, r.age)) return 'first chapter round with ' + n + ' steps at age ' + r.age;
     var wantMode = r.topic === 'shapes' ? (r.age >= 5 ? 'pickTap' : 'tapPart') : MODES[r.topic];
     var painted = {};
     for (i = 0; i < n; i++) {
@@ -431,7 +452,7 @@
       if (r.palette.length < 2 || r.palette.length > 5) return 'palette size';
       for (i = 0; i < r.palette.length; i++) { if (!SP.PALETTE[r.palette[i]]) return 'bad palette colour'; if (r.palette.indexOf(r.palette[i]) !== i) return 'palette repeats'; }
       for (i = 0; i < cs.length; i++) if (r.palette.indexOf(cs[i]) < 0) return 'step colour not in the palette';
-      var wantP = r.topic === 'colors' ? (r.age <= 3 ? 2 : r.age === 4 ? 3 : 4) : 4;
+      var wantP = paletteSize(r.topic, r.age, r.roundIndex, r.level);
       if (r.palette.length !== wantP) return 'palette ' + r.palette.length + ' ≠ ' + wantP;
       cs = cs.concat(r.palette);
     } else if (wantMode === 'pickColor' || wantMode === 'pickTap') return 'pick round without palette';
@@ -566,7 +587,7 @@
   SP.Content = {
     makeRound: makeRound, makeTalk: makeTalk, validate: validate, roundKey: roundKey, topicsFor: topicsFor, ageOf: ageOf, langOf: langOf,
     clash: clash, safeSetsOf: safeSetsOf, shapesFor: shapesFor, parityOf: parityOf, letterPool: letterPool, initialOf: initialOf,
-    capOf: capOf, templatesFor: templatesFor, countN: countN, spotsFor: spotsFor,
+    capOf: capOf, templatesFor: templatesFor, countN: countN, spotsFor: spotsFor, paletteSize: paletteSize, easyPalette: easyPalette,
     /** Most shells a round of this age can show (layout planning). */
     maxShells: function (age) { return ageOf(age) >= 5 ? 4 : ageOf(age) === 4 ? 3 : 2; },
     TOPICS: ALL_TOPICS, KIND_OF: KIND_OF, COLORS: COLORS, COLORS5: COLORS5, SHAPES4: SHAPES4, LETTER_POOL: LETTER_POOL, CLASH: CLASH,

@@ -31,7 +31,7 @@
     purple: { base: '#8E44AD', dark: '#6840A8', light: '#D2BDF3' },
     pink:   { base: '#FF8FC0', dark: '#C9558A', light: '#FFCCE2' }
   };
-  var NAVY = '#33405E', CREAM = '#FFF8EC', LW = 6;
+  var NAVY = '#33405E', NAVY_DK = '#1E2740', CREAM = '#F8EAD3', LW = 6;   // warmer board: white parts stand out (visual P3-1)
   var FONT = 'ui-rounded, "SF Pro Rounded", "Arial Rounded MT Bold", "Nunito", system-ui, sans-serif';
   var TAU = Math.PI * 2;
 
@@ -44,6 +44,10 @@
   }
   function rgba(h, a) { var c = rgb(h); return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + (+a).toFixed(3) + ')'; }
   function clamp01(v) { v = +v || 0; return v < 0 ? 0 : v > 1 ? 1 : v; }
+  function lum(h) {   // relative luminance (WCAG) of a #rrggbb colour
+    var c = rgb(h).map(function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  }
   function smooth01(v) { v = clamp01(v); return v * v * (3 - 2 * v); }
   function nowSec() { return (typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now()) / 1000; }
   function pal(c) {
@@ -155,10 +159,20 @@
       var wob = +s.wob || 0; wobOf[p.id] = wob;
       ctx.save();
       if (wob) ctx.translate(wob, 0);
-      ctx.lineWidth = LW * 2; ctx.strokeStyle = NAVY; ctx.stroke(path);
+      var c = pal(s.color), dark = !!(c && s.t > 0.4 && lum(c.base) < 0.2);
+      // purple / blue / red fills: a darker outline + a thin light inner line so the shape still reads (visual P2-6)
+      ctx.lineWidth = LW * 2; ctx.strokeStyle = dark ? NAVY_DK : NAVY; ctx.stroke(path);
       ctx.fillStyle = '#FFFFFF'; ctx.fill(path);
-      var c = pal(s.color);
+      if (!(c && s.t >= 1)) {   // unpainted: a faint inner shadow lifts the white part off the cream board
+        ctx.save(); ctx.clip(path); ctx.lineWidth = 14; ctx.strokeStyle = 'rgba(51,64,94,0.09)'; ctx.stroke(path); ctx.restore();
+      }
       if (c && s.t > 0) paintFill(ctx, p, path, s, c, time);
+      if (dark) {
+        ctx.save(); ctx.clip(path); ctx.lineWidth = 4 + LW * 2;
+        ctx.strokeStyle = 'rgba(255,255,255,' + (0.55 * smooth01((s.t - 0.4) / 0.6)).toFixed(3) + ')'; ctx.stroke(path);
+        ctx.lineWidth = LW * 2; ctx.strokeStyle = NAVY_DK; ctx.stroke(path);
+        ctx.restore();
+      }
       ctx.restore();
     }
     // glow rims (the target that shines)
@@ -166,10 +180,11 @@
       p = parts[i]; s = S[p.id];
       if (!s || !(s.glow > 0)) continue;
       path = P2(p.d);
-      var gl = clamp01(s.glow), pulse = 0.5 + 0.5 * Math.sin(time * 6);
+      // a steady target glow reads strong on big parts too (visual P2-5): boosted level + a soft gold fill over the whole area
+      var gl = clamp01(s.glow * 1.3), pulse = 0.5 + 0.5 * Math.sin(time * 6);
       ctx.save();
       if (wobOf[p.id]) ctx.translate(wobOf[p.id], 0);
-      if (!(s.t > 0)) { ctx.fillStyle = 'rgba(255,226,120,' + (0.16 * gl * (0.6 + 0.4 * pulse)).toFixed(3) + ')'; ctx.fill(path); }
+      ctx.fillStyle = 'rgba(255,214,90,' + ((s.t > 0 ? 0.12 : 0.26) * gl * (0.6 + 0.4 * pulse)).toFixed(3) + ')'; ctx.fill(path);
       ctx.lineWidth = 26; ctx.strokeStyle = 'rgba(255,206,70,' + (0.30 * gl * (0.55 + 0.45 * pulse)).toFixed(3) + ')'; ctx.stroke(path);
       ctx.lineWidth = 15; ctx.strokeStyle = 'rgba(255,236,150,' + (0.45 * gl).toFixed(3) + ')'; ctx.stroke(path);
       if (ctx.setLineDash) { ctx.setLineDash([18, 12]); ctx.lineDashOffset = -time * 40; }
@@ -326,13 +341,15 @@
     ctx.restore(); ctx.restore();
     // the paint blob
     var bs = 1 + 0.06 * sel;
-    ctx.save(); ctx.translate(0, -r * 0.02); ctx.scale(bs * 1.05, bs * 1.25);
+    // a big blob (≈ 1.3× the first version) with a dark rim: the colour reads, also yellow on sand (visual P2-9)
+    var bx = bs * 1.36, by = bs * 1.6;
+    ctx.save(); ctx.translate(0, -r * 0.02); ctx.scale(bx, by);
     ctx.beginPath();
     ctx.moveTo(-r * 0.7, r * 0.06);
     ctx.bezierCurveTo(-r * 0.72, -r * 0.3, -r * 0.3, -r * 0.42, 0, -r * 0.38);
     ctx.bezierCurveTo(r * 0.36, -r * 0.44, r * 0.74, -r * 0.28, r * 0.7, r * 0.06);
     ctx.closePath();
-    ctx.fillStyle = c.base; ctx.fill(); ctx.lineWidth = r * 0.06; ctx.strokeStyle = c.dark; ctx.stroke();
+    ctx.fillStyle = c.base; ctx.fill(); ctx.lineWidth = Math.max(2.5, r * 0.08) / bx; ctx.strokeStyle = c.dark; ctx.stroke();
     ctx.fillStyle = 'rgba(255,255,255,0.6)';
     ctx.beginPath(); ctx.ellipse(-r * 0.28, -r * 0.22, r * 0.18, r * 0.08, -0.3, 0, TAU); ctx.fill();
     ctx.beginPath(); ctx.arc(r * 0.05, -r * 0.3, r * 0.045, 0, TAU); ctx.fill();
@@ -351,10 +368,12 @@
     ctx.beginPath(); ctx.moveTo(r * 0.2, r * 0.04); ctx.quadraticCurveTo(r * 0.21, r * 0.28, r * 0.28, r * 0.3); ctx.quadraticCurveTo(r * 0.36, r * 0.28, r * 0.36, r * 0.04); ctx.fill(); ctx.stroke();
     // hinge
     ctx.fillStyle = '#E7C3AE'; ctx.beginPath(); rr(ctx, -r * 0.16, r * 0.6, r * 0.32, r * 0.16, r * 0.07); ctx.fill(); ctx.lineWidth = r * 0.05; ctx.strokeStyle = SHELL.line; ctx.stroke();
-    if (sel > 0) {
-      ctx.strokeStyle = 'rgba(232,160,20,' + (0.95 * sel).toFixed(3) + ')'; ctx.lineWidth = r * 0.08;
-      if (ctx.setLineDash) { ctx.setLineDash([r * 0.2, r * 0.14]); ctx.lineDashOffset = -time * 30; }
-      ctx.beginPath(); ctx.ellipse(0, r * 0.12, r * 1.12, r * 0.92, 0, 0, TAU); ctx.stroke();
+    if (sel > 0) {   // selected: a white ring with a navy edge (gold looked like the yellow paint)
+      ctx.beginPath(); ctx.ellipse(0, r * 0.12, r * 1.14, r * 0.94, 0, 0, TAU);
+      ctx.strokeStyle = 'rgba(51,64,94,' + (0.9 * sel).toFixed(3) + ')'; ctx.lineWidth = r * 0.16; ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,' + sel.toFixed(3) + ')'; ctx.lineWidth = r * 0.09;
+      if (ctx.setLineDash) { ctx.setLineDash([r * 0.26, r * 0.1]); ctx.lineDashOffset = -time * 30; }
+      ctx.stroke();
       if (ctx.setLineDash) ctx.setLineDash([]);
     }
     ctx.restore();
@@ -488,13 +507,17 @@
       case 'letter': bubbleBack(ctx, s * 0.44); bigText(ctx, String(thing.text), s); break;
       case 'dots': {
         var n = Math.max(0, Math.min(20, thing.n | 0)), per = n <= 3 ? n : n <= 4 ? 2 : n <= 6 ? 3 : n <= 10 ? 5 : 5;
-        var rows = Math.ceil(n / Math.max(1, per)), gap = s * 0.8 / Math.max(per, rows, 3), r = gap * 0.36;
+        // big sea bubbles (light blue, white rim, a shine) — the same look as the count pictures (visual P2-8)
+        var rows = Math.ceil(n / Math.max(1, per)), gap = s * 0.86 / Math.max(per, rows, 2), r = gap * 0.42;
         for (var i = 0; i < n; i++) {
           var row = Math.floor(i / per), inRow = Math.min(per, n - row * per), col = i - row * per;
           var x = (col - (inRow - 1) / 2) * gap, y = (row - (rows - 1) / 2) * gap;
-          ctx.fillStyle = '#5B79B0'; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
-          ctx.lineWidth = Math.max(1.5, r * 0.18); ctx.strokeStyle = NAVY; ctx.stroke();
-          ctx.fillStyle = 'rgba(255,255,255,0.55)'; ctx.beginPath(); ctx.arc(x - r * 0.32, y - r * 0.34, r * 0.3, 0, TAU); ctx.fill();
+          var bg = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.1, x, y, r);
+          bg.addColorStop(0, '#D4E8FB'); bg.addColorStop(1, '#A6CCF5');
+          ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
+          ctx.lineWidth = Math.max(2, r * 0.14); ctx.strokeStyle = NAVY; ctx.stroke();
+          ctx.lineWidth = Math.max(1.5, r * 0.1); ctx.strokeStyle = '#FFFFFF'; ctx.beginPath(); ctx.arc(x, y, r * 0.84, 0, TAU); ctx.stroke();
+          ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.beginPath(); ctx.ellipse(x - r * 0.34, y - r * 0.36, r * 0.22, r * 0.13, -0.6, 0, TAU); ctx.fill();
         }
         break;
       }
@@ -524,6 +547,11 @@
       ctx.ellipse(-s * 0.27, s * 0.46, s * 0.07, s * 0.15, -0.6, 0, TAU);
     }
     ctx.globalAlpha *= 0.95;
+    // a navy edge + soft shadow: the cream hand reads on the cream shells and the sand (visual P2-4)
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 3;
+    hand(); ctx.lineWidth = s * 0.07 + 6; ctx.strokeStyle = NAVY; ctx.stroke();
+    ctx.restore();
     hand(); ctx.lineWidth = s * 0.07; ctx.strokeStyle = L; ctx.stroke();
     hand(); ctx.fillStyle = F; ctx.fill();
     ctx.strokeStyle = SH; ctx.lineWidth = s * 0.03;
@@ -533,6 +561,7 @@
     // cuff: Nini's sea-foam teal with a cream beret stripe
     ctx.fillStyle = '#5FB3B3'; ctx.strokeStyle = '#2C6467'; ctx.lineWidth = s * 0.04;
     ctx.beginPath(); rr(ctx, -s * 0.24, s * 0.76, s * 0.44, s * 0.14, s * 0.05); ctx.fill(); ctx.stroke();
+    ctx.lineWidth = 3; ctx.strokeStyle = NAVY; ctx.stroke();
     ctx.fillStyle = '#F4EBDD'; ctx.fillRect(-s * 0.2, s * 0.81, s * 0.36, s * 0.035);
     ctx.restore();
   }

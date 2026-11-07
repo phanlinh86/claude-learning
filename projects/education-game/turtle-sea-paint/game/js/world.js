@@ -46,10 +46,14 @@
     shellR: 58, shellHitPad: 18, shellGap: 24, shellGapMax: 40, shellDrop: 14, shellDropLand: 8, shellsPlan: 4,
     niniHLand: 250, niniHPort: 210, niniHPortMin: 170, niniWFrac: 0.72, niniXLand: 130, niniGap: 8, niniFeet: 6, niniCanvasGap: 10,
     clamW: 112, clamH: 98, clamGap: 14, clamR: 66,
+    landColumn: true,          // landscape: paint shells in a column right of the canvas when that gives a larger canvas
+    columnMinGain: 1.02,       // … the column must beat the row's canvas scale by ≥ 2 %
+    fishLaneBandLand: 120, fishLaneBandPort: 150,   // water band above the canvas this tall → the fishy swims there
 
     // ---- picture / touch
     hitPad: 14,                // picture px around every part's hit shape
-    tapTime: 0.6, tapMovePx: 40, niniPad: 10,
+    tapTime: 1.0, tapMovePx: 64, niniPad: 10,   // playtest P2-1: nothing is a drag here, so a loose tap only helps
+    softWob: 3, softShellWob: 4,                 // a too-long press / a drag: a tiny wobble of what is under the finger (event 'soft')
 
     // ---- brush
     brushFlyMin: 0.16, brushFlyMax: 0.3, brushFlyPerPx: 1 / 3500, brushArc: 34, brushArcPerPx: 0.06,
@@ -69,8 +73,8 @@
     aliveTime: 2.4, aliveMove: 2.0, aliveBubbleGap: 0.22,
 
     // ---- help
-    hintAfterMisses: 2,        // taps without progress in a step (wrong / needPaint / notThis / empty canvas) → hint
-    assistAfter: 6, assistAfterOld: 7, assistMaxAge: 4,   // … this many → the next canvas / shell tap does the right thing
+    hintAfterMisses: 2,        // taps without progress in a step (wrong / needPaint / notThis / empty canvas / empty sand + water) → hint
+    assistAfter: 6, assistAfterOld: 5, assistMaxAge: 4,   // … this many → the next canvas / shell tap does the right thing
     hintTime: 3, hintCooldown: 6, hintCycle: 1.2,
     idleTime: 12, idleBackoff: 1.5, idleMax: 30, idleHintFrom: 2,
 
@@ -131,6 +135,94 @@
    *   bubble, hud, groundY, keep[] (debug: what the child must touch stays out of these boxes).
    */
   function computeLayout(W, H, ins, cfg, plan, hudKeep) {
+    var row = rowLayout(W, H, ins, cfg, plan, hudKeep);
+    if (row.portrait || !cfg.landColumn) return row;
+    var col = columnLayout(W, H, ins, cfg, plan, hudKeep, row);
+    return col && col.canvas.s > row.canvas.s * (cfg.columnMinGain || 1) ? col : row;
+  }
+  /** The fishy's lane: the open water band above the canvas when it is tall enough, else across the top of the picture
+   *  (there the picture and the shells win every press while a step is interactive — World.pointerDown). */
+  function fishLane(portrait, canvas, F, bubble, hud, cfg) {
+    var above = portrait ? bubble.y + bubble.h : Math.max(bubble.y + bubble.h, hud.y + hud.h);
+    var band = canvas.y - F - above, need = portrait ? cfg.fishLaneBandPort : cfg.fishLaneBandLand;
+    return band >= need ? above + band / 2 : canvas.y + 0.13 * canvas.h;
+  }
+  function layoutOut(W, H, ins, portrait, tall, groundY, bubble, hud, hk, canvas, F, palette, nini, clam, cfg) {
+    var brush = { x: nini.x + 0.3 * nini.h, y: nini.y - 0.5 * nini.h };
+    var keep = [{ x: bubble.x, y: bubble.y, w: bubble.w, h: bubble.h, kind: 'bubble' }, { x: hud.x, y: hud.y, w: hud.w, h: hud.h, kind: 'hud' }];
+    hk.forEach(function (b) { b.kind = 'hudKeep'; keep.push(b); });
+    return {
+      W: W, H: H, ins: ins, portrait: portrait, tall: tall, groundY: groundY, bubble: bubble, hud: hud, canvas: canvas, frame: F,
+      palette: palette, nini: nini, brush: brush, clam: clam, fishY: fishLane(portrait, canvas, F, bubble, hud, cfg), keep: keep,
+      safe: { x: ins.left, y: ins.top, w: W - ins.left - ins.right, h: H - ins.top - ins.bottom }
+    };
+  }
+  /** n slots of radius r stacked vertically at x, centred on cy inside [lo, hi] (gap shellGap … shellGapMax) → slots | null */
+  function shellCol(n, x, cy, lo, hi, cfg) {
+    var r = cfg.shellR, out = [];
+    if (!n) return out;
+    var room = hi - lo, gap = n > 1 ? clamp((room - 2 * r * n) / (n - 1), cfg.shellGap, cfg.shellGapMax) : 0;
+    var h = 2 * r * n + gap * (n - 1);
+    if (h > room + 1e-6) return null;
+    var y0 = clamp(cy - h / 2, lo, hi - h);
+    for (var i = 0; i < n; i++) out.push({ x: x, y: y0 + r + i * (2 * r + gap), r: r });
+    return out;
+  }
+  /**
+   * Landscape alternative (visual P2-2, phones ≈ 2.2:1): the paint shells stand in a vertical column RIGHT of the canvas
+   * (centred between the canvas frame and the right safe edge, below the HUD keep-out), so the canvas can use the full
+   * height between the bubble / HUD and the sand; Nini stays on the left. The clam goes under the column when it fits,
+   * else on the sand left of Nini (the canvas gives up the width). Planned for max(n, shellsPlan) shells like the row, so
+   * the canvas keeps its size between rounds. → layout | null (does not fit).
+   */
+  function columnLayout(W, H, ins, cfg, plan, hudKeep, row) {
+    ins = insOf(ins); plan = plan || {};
+    var F = cfg.frame, r = cfg.shellR, hk = keepBoxes(hudKeep), i;
+    var groundY = row.groundY, bubble = row.bubble, hud = row.hud;
+    var n = clamp(plan.n | 0, 0, 5), nPlan = Math.max(n, cfg.shellsPlan);
+    var top = Math.max(bubble.y + bubble.h + cfg.canvasGapTop + F, hud.y + hud.h + 8 + F);
+    var colTop = hud.y + hud.h + 8, colBot = groundY - cfg.shellDropLand;
+    for (i = 0; i < hk.length; i++) if (hk[i].y + hk[i].h < H / 2) { top = Math.max(top, hk[i].y + hk[i].h + 8 + F); colTop = Math.max(colTop, hk[i].y + hk[i].h + 8); }
+    var bottom = groundY - cfg.canvasGapBottomLand - F;
+    if (colBot - colTop < nPlan * 2 * r + (nPlan - 1) * cfg.shellGap - 1e-6) return null;
+    var niniH = cfg.niniHLand, nW = cfg.niniWFrac * niniH, cl = cfg.clamW;
+    var xL = ins.left + cfg.sideM, xR = W - ins.right, colW = cfg.shellGap + 2 * r + cfg.sideM;
+    var best = null;
+    [false, true].forEach(function (clamLeft) {
+      if (clamLeft && !plan.clam) return;
+      var extra = clamLeft ? cl + cfg.clamGap : 0;
+      var s = Math.min((bottom - top) / 400, (xR - colW - xL - extra - nW - cfg.niniGap - 2 * F) / 600, cfg.sMax);
+      if (!(s > 0)) return;
+      var cw = 600 * s, ch = 400 * s, groupW = extra + nW + cfg.niniGap + 2 * F + cw;
+      var gx = xL + Math.max(0, (xR - colW - xL - groupW) / 2);
+      var canvas = { x: gx + extra + nW + cfg.niniGap + F, y: top + Math.max(0, (bottom - top - ch) / 2), w: cw, h: ch, s: s };
+      var nx = Math.max(ins.left + (clamLeft ? extra : 0) + cfg.niniXLand - 0.0001, gx + extra + nW / 2);
+      nx = Math.min(nx, canvas.x - F - cfg.niniGap - nW / 2);
+      var nini = { x: nx, y: groundY - cfg.niniFeet, h: niniH, w: nW };
+      var outerR = canvas.x + cw + F, colX = (outerR + xR) / 2;
+      colX = clamp(colX, outerR + cfg.shellGap + r, xR - cfg.sideM - r);
+      var cy = canvas.y + ch / 2, slots, clam = null;
+      if (plan.clam && !clamLeft) {   // the clam on the sand under the column
+        var hiC = groundY - 2 - cfg.clamH - cfg.clamGap;
+        slots = shellCol(n, colX, cy, colTop, hiC, cfg);
+        if (!slots) return;
+        clam = { x: colX, y: groundY - 2, w: cl, h: cfg.clamH };
+      } else {
+        slots = shellCol(n, colX, cy, colTop, colBot, cfg);
+        if (!slots) return;
+        if (clamLeft) {
+          var cx0 = nini.x - nW / 2 - cfg.clamGap - cl / 2;
+          if (cx0 - cl / 2 < ins.left + 8) return;
+          clam = { x: cx0, y: groundY - 2, w: cl, h: cfg.clamH };
+        }
+      }
+      if (!best || s > best.canvas.s) best = { canvas: canvas, nini: nini, slots: slots, clam: clam, colX: colX };
+    });
+    if (!best) return null;
+    var palette = { y: best.slots.length ? best.slots[0].y : groundY - r, x: best.colX, slots: best.slots, hitR: r + cfg.shellHitPad, n: n, column: true };
+    return layoutOut(W, H, ins, false, H / W > cfg.tallRatio, groundY, bubble, hud, hk, best.canvas, F, palette, best.nini, best.clam, cfg);
+  }
+  function rowLayout(W, H, ins, cfg, plan, hudKeep) {
     ins = insOf(ins); plan = plan || {};
     var portrait = H > W, tall = H / W > cfg.tallRatio, F = cfg.frame, r = cfg.shellR;
     var groundY = H - ins.bottom - (portrait ? cfg.groundPort : cfg.groundLand);
@@ -203,17 +295,8 @@
         clam = { x: Math.min(hi - cl / 2, Math.max(right + cfg.clamGap + cl / 2, n ? 0 : cx + canvas.w / 2 - cl / 2)), y: groundY - 2, w: cl, h: cfg.clamH };
       }
     }
-    var palette = { y: shellY, slots: slots, hitR: r + cfg.shellHitPad, n: n };
-    var brush = { x: nini.x + 0.3 * nini.h, y: nini.y - 0.5 * nini.h };
-    // the fishy's lane: open water above the canvas when there is a band, else across the top of the picture
-    var band = canvas.y - F - (bubble.y + bubble.h), fishY = portrait && band >= 150 ? bubble.y + bubble.h + band / 2 : canvas.y + 0.13 * canvas.h;
-    var keep = [{ x: bubble.x, y: bubble.y, w: bubble.w, h: bubble.h, kind: 'bubble' }, { x: hud.x, y: hud.y, w: hud.w, h: hud.h, kind: 'hud' }];
-    hk.forEach(function (b) { b.kind = 'hudKeep'; keep.push(b); });
-    return {
-      W: W, H: H, ins: ins, portrait: portrait, tall: tall, groundY: groundY, bubble: bubble, hud: hud, canvas: canvas, frame: F,
-      palette: palette, nini: nini, brush: brush, clam: clam, fishY: fishY, keep: keep,
-      safe: { x: ins.left, y: ins.top, w: W - ins.left - ins.right, h: H - ins.top - ins.bottom }
-    };
+    var palette = { y: shellY, slots: slots, hitR: r + cfg.shellHitPad, n: n, column: false };
+    return layoutOut(W, H, ins, portrait, tall, groundY, bubble, hud, hk, canvas, F, palette, nini, clam, cfg);
   }
 
   // ------------------------------------------------------------------ picture geometry helpers (picture px)
@@ -414,7 +497,7 @@
     var rr = new SP.RNG((this.rng.next() * 4294967296) >>> 0);
     var ST = cfg.surpriseTypes, sp = ST && ST.length && this.round === this._surpriseRound && this.round > 0 ? ST[(this.level + this._surpriseOff) % ST.length] : null;
     var el = this.time - this.levelStartTime, sb = cfg.shortBudget, short = !!(sb && this.round > 0 && el > sb[Math.min(this.round, sb.length - 1)]);
-    var cur = SP.Content.makeRound(this.topic, { age: this.age, lang: this.lang, rng: rr, roundIndex: this.round, surprise: sp, prevPics: this._prevPics.slice(-2), short: short });
+    var cur = SP.Content.makeRound(this.topic, { age: this.age, lang: this.lang, rng: rr, roundIndex: this.round, surprise: sp, prevPics: this._prevPics.slice(), short: short, level: this.level });
     this._prevPics.push(cur.templateId);
     this._clearRound();
     this.cur = cur; this.surprise = sp;
@@ -486,11 +569,28 @@
 
   // ---------------------------------------------------------------- input (logical px; ONE active pointer)
   P._touch = function () { this._idleT = 0; this._idleGap = this.cfg.idleTime; };
-  /** → 'fishy' | 'clam' | 'press' | null.  The fishy and the clam react on the press (a moving / small target). */
+  /** What is under (x, y): {kind:'shell', shell} | {kind:'part', part} | null (nearest shell within the hit radius first,
+   *  then the picture part, hitPad included). */
+  P._under = function (x, y) {
+    var best = null, bd = 1e9, R = this.layout.palette.hitR, i;
+    for (i = 0; i < this.shells.length; i++) { var sh = this.shells[i], d = hyp(x - sh.x, y - sh.y); if (d <= R && d < bd) { bd = d; best = sh; } }
+    if (best) return { kind: 'shell', shell: best };
+    if (!this.picture) return null;
+    var C = this.layout.canvas, F = this.layout.frame;
+    if (x < C.x - F || x > C.x + C.w + F || y < C.y - F || y > C.y + C.h + F) return null;
+    var q = this.screenToPic(x, y), id = SP.Pictures.hit(this.picture, q.x, q.y, this.cfg.hitPad);
+    return id && this.st[id] ? { kind: 'part', part: this.st[id] } : null;
+  };
+  /** → 'fishy' | 'clam' | 'press' | null.  The fishy and the clam react on the press (a moving / small target).
+   *  While a step is interactive a shell or an unpainted part under the finger wins over the fishy swimming across it
+   *  (functional P2-2: a counting child never loses a right tap to the surprise). */
   P.pointerDown = function (x, y) {
     if (this.state !== 'round' || this._press) return null;
     var fh = this.fishyHit();
-    if (fh && hyp(x - fh.x, y - fh.y) <= fh.r) { this._tapFishy(); return 'fishy'; }
+    if (fh && hyp(x - fh.x, y - fh.y) <= fh.r) {
+      var u = this.interactive ? this._under(x, y) : null;
+      if (!u || (u.kind === 'part' && u.part.painted)) { this._tapFishy(); return 'fishy'; }
+    }
     var ch = this.clamHit();
     if (ch && hyp(x - ch.x, y - ch.y) <= ch.r) { this._tapClam(); return 'clam'; }
     this._press = { x: x, y: y, t: this.time, maxD: 0 };
@@ -504,8 +604,16 @@
     this._press = null;
     if (!p || this.state !== 'round') return null;
     var mv = Math.max(p.maxD, x === undefined ? 0 : hyp(x - p.x, y - p.y));
-    if (mv >= this._tapMove() || this.time - p.t > this.cfg.tapTime) return null;
+    if (mv >= this._tapMove() || this.time - p.t > this.cfg.tapTime) { this._soft(p.x, p.y, mv >= this._tapMove() ? 'drag' : 'hold'); return null; }
     return this.tap(p.x, p.y);
+  };
+  /** A press that was not a tap (held > tapTime or moved ≥ tapMovePx): no paint, but a soft answer — what is under the
+   *  press point gives a tiny wobble and the event 'soft' lets main.js play the soft sound (functional P3-1). */
+  P._soft = function (x, y, kind) {
+    var u = this._under(x, y), cfg = this.cfg, ev = { type: 'soft', kind: kind, target: null, x: x, y: y };
+    if (u && u.kind === 'shell') { u.shell.wv += kickFor(cfg.softShellWob, cfg.shellWobOmega, cfg.shellWobZeta); ev.target = 'shell'; ev.color = u.shell.color; }
+    else if (u && u.kind === 'part') { u.part.wv += kickFor(cfg.softWob, cfg.partOmega, cfg.partZeta); ev.target = 'part'; ev.partId = u.part.id; }
+    this._emit(ev);
   };
   P.cancelDrag = function () { this._press = null; };
   /** One tap at (x, y) (logical px), already classified as a tap. */
@@ -529,6 +637,10 @@
       return null;
     }
     if (onNini) return this._pokeNini();
+    // empty sand / water (the HUD and bubble never reach the world): no mistake, no star lost, but it counts as a tap
+    // without progress toward the hint and the assist (playtest P1-3: a child who never touches the picture still finishes)
+    if (this._noProg >= this._assistAfter()) return this._assist(x, y);
+    this._noProgress();
     return null;
   };
 
@@ -987,7 +1099,10 @@
   P._startAlive = function () {
     this._sweepTarget = null;
     var L = this.layout, C = L.canvas;
-    this._alive = { kind: this.picture.alive || 'swim', dx: L.W - C.x + 80, dy: C.y + C.h + 80, nextBubble: 0.2, hopN: -1 };
+    // float / bob leave to the RIGHT / top-right (visual P2-1): a limited rise so the picture does not sit behind the bubble /
+    // HUD — at most a quarter of its height above the bubble's bottom by the time it is off the right edge
+    var B = L.bubble, rise = clamp(C.y - L.frame - (B.y + B.h) + 0.25 * C.h, 60, 0.35 * (C.y + C.h + 80));
+    this._alive = { kind: this.picture.alive || 'swim', dx: L.W - C.x + 80, dy: C.y + C.h + 80, rise: rise, nextBubble: 0.2, hopN: -1 };
     this._setPhase('alive');
     this._mood('cheer', this.cfg.aliveTime);
     this._emit({ type: 'alive', kind: this._alive.kind, x: C.x + C.w / 2, y: C.y + C.h / 2 });
@@ -1023,18 +1138,19 @@
         pc.x = A.dx * Math.pow(Math.max(0, (t - 0.15) / (T - 0.25)), 2.2);
         break;
       }
-      case 'bob': {   // a buoyant dip-and-bob, then it rises away (accelerating), pulsing
+      case 'bob': {   // a buoyant dip-and-bob, then it drifts away up-right (accelerating), pulsing
         var tb = 0.45;
         pc.sy = 1 + 0.06 * Math.sin(TAU * 1.6 * t); pc.sx = 1 - 0.04 * Math.sin(TAU * 1.6 * t);
         if (t < tb) pc.y = 14 * Math.sin(Math.PI * t / tb);
-        else pc.y = -A.dy * Math.pow((t - tb) / (T - tb - 0.1), 2) - 8 * Math.sin(TAU * 1.6 * (t - tb));
-        pc.rot = 0.04 * Math.sin(TAU * 0.8 * t);
+        else { k = Math.pow((t - tb) / (T - tb - 0.1), 2); pc.x = A.dx * k; pc.y = -A.rise * k - 8 * Math.sin(TAU * 1.6 * (t - tb)); }
+        pc.rot = 0.04 * Math.sin(TAU * 0.8 * t) + 0.05 * Math.min(1, Math.max(0, t - tb) / 0.6);   // leans into the drift
         break;
       }
-      default: {   // 'float': rises slowly with a sideways drift and sway
+      default: {   // 'float': drifts off to the right, rising a little, with a sideways sway
         u = Math.max(0, t / (T - 0.1));
-        pc.y = -A.dy * Math.pow(u, 1.6);
-        pc.x = 36 * Math.sin(TAU * 0.55 * t);
+        k = Math.pow(u, 1.6);
+        pc.x = A.dx * k + 36 * Math.sin(TAU * 0.55 * t) * (1 - 0.5 * u);
+        pc.y = -A.rise * k;
         pc.rot = 0.07 * Math.sin(TAU * 0.55 * t + 0.6);
         break;
       }

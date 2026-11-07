@@ -337,7 +337,7 @@
       const g = this.g, al = H.alpha == null ? 1 : H.alpha;
       if (al <= 0.01) return;
       g.save(); g.globalAlpha *= al; g.translate(H.x, H.y);
-      try { PA().drawGhostHand(g, 92, H.t != null ? H.t : (this.time % 1)); } catch (e) { /* skip */ }
+      try { PA().drawGhostHand(g, 130, H.t != null ? H.t : (this.time % 1)); } catch (e) { /* skip */ }
       g.restore();
     }
 
@@ -390,25 +390,42 @@
       // the free area (landscape: left of the panel; portrait: below it)
       const fx0 = (ins.left || 0) + 16, fx1 = portrait ? W - (ins.right || 0) - 16 : (panel ? panel.x - 16 : W * 0.58);
       const fy0 = portrait ? (panel ? panel.y + panel.h + 16 : H * 0.4) : (ins.top || 0) + 20, fy1 = gy;
-      const cx = (fx0 + fx1) / 2, nh = clamp((fy1 - fy0) * 0.42, 170, 300);
       const ny = fy1 - 4;
       const pics = this.gallery.length ? this.gallery : (this._titlePic ? [Object.assign({ ph: 0 }, this._titlePic)] : []);
-      // a gently floating grid of the session's pictures (above Nini's head where possible), Nini cheering in front
-      const n = pics.length, gw = fx1 - fx0, gh = Math.max(160, (portrait ? ny - nh * 0.85 : ny - nh * 0.35) - fy0);
+      // Nini gets her own space so she never covers a picture (visual P1-2): landscape → a column on the left,
+      // portrait → a band under the grid (her beret reaches ≈ 1.02 h)
+      let nh, nx, gx0, gx1 = fx1, gy0 = fy0, gy1;
+      if (portrait) {
+        nh = clamp((fy1 - fy0) * 0.34, 130, 260);
+        nx = (fx0 + fx1) / 2; gx0 = fx0; gy1 = ny - nh * 1.04;
+      } else {
+        nh = clamp((fy1 - fy0) * 0.5, 150, 300);
+        const nW = nh * 0.75;
+        nx = fx0 + nW / 2; gx0 = fx0 + nW + 12; gy1 = fy1 - 10;
+      }
+      // "Our pictures" sits right above the gallery (visual P3-5), on the water in outlined text
+      const I = SP.I18N, label = I ? I.t(this.lang, 'ui.gallery') : 'Our pictures';
+      const lh = clamp((gy1 - gy0) * 0.09, 22, 34);
+      if (label && label !== 'ui.gallery' && gy1 - gy0 > 140) {
+        outlinedText(this.g, label, (gx0 + gx1) / 2, gy0 + lh * 0.6, lh, '#ffffff', '#1F6E8C', gx1 - gx0 - 20);
+        gy0 += lh * 1.3;
+      }
+      const n = pics.length, gw = gx1 - gx0, gh = Math.max(portrait ? 80 : 160, gy1 - gy0);
       let best = null;
       for (let cols = 1; cols <= n; cols++) {
-        const rows = Math.ceil(n / cols), s = Math.min(gw / cols / 690, gh / rows / 520);
-        if (!best || s > best.s) best = { cols, rows, s };
+        const rows = Math.ceil(n / cols), sc = Math.min((gw / cols - 44) / 600, (gh / rows - 40) / 400);   // the rope frame (≥ 14 px a side) + a gap fit too
+        if (!best || sc > best.s) best = { cols, rows, s: sc };
       }
-      const s = clamp(best ? best.s : 0.3, 0.1, 0.42), cw = gw / best.cols, chh = gh / best.rows;
+      const sc = clamp(best ? best.s : 0.3, 0.06, 0.42), cw = best ? gw / best.cols : gw, chh = best ? gh / best.rows : gh;
       pics.forEach((P, i) => {
         const r = Math.floor(i / best.cols), c = i % best.cols, inRow = Math.min(best.cols, n - r * best.cols);
-        const bw = 600 * s, bh = 400 * s, x0 = fx0 + (gw - inRow * cw) / 2;
-        const bob = Math.sin(t * 1.3 + (P.ph || i)) * 5;
-        const x = x0 + c * cw + (cw - bw) / 2, y = fy0 + r * chh + (chh - bh) / 2 + bob;
-        if (PA()) this._framedPic(P, x, y, s, { rot: Math.sin(t * 0.9 + i * 1.7) * 0.04 });
+        const bw = 600 * sc, bh = 400 * sc, x0 = gx0 + (gw - inRow * cw) / 2;
+        const bob = Math.sin(t * 1.3 + (P.ph || i)) * Math.min(5, (chh - bh) / 2);
+        const x = x0 + c * cw + (cw - bw) / 2, y = gy0 + r * chh + (chh - bh) / 2 + bob;
+        if (PA()) this._framedPic(P, x, y, sc, { rot: Math.sin(t * 0.9 + i * 1.7) * 0.04 });
       });
-      this._nini({ blink: false }, Math.sin(t * 3) > 0 ? 'cheer' : 'happy', { x: cx, y: ny, h: nh });
+      this._nini({ blink: false }, Math.sin(t * 3) > 0 ? 'cheer' : 'happy', { x: nx, y: ny, h: nh });
+      this._doneGeom = { nini: { x: nx - nh * 0.375, y: ny - nh * 1.02, w: nh * 0.75, h: nh * 1.02 }, grid: { x: gx0, y: gy0, w: gw, h: gh }, s: sc };
       this._noteT = (this._noteT || 0) - (o.dt || 0);
       if (this._noteT <= 0) { this._noteT = 0.5; this.burst('sparkles', fx0 + Math.random() * (fx1 - fx0), fy0 + Math.random() * (gy - fy0) * 0.6, { n: 8 }); }
     }

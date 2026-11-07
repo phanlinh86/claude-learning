@@ -32,7 +32,7 @@
   let speed = FLAGS.speed, autoRestart = FLAGS.autorestart;
   let view = { W: 960, H: 720, s: 1, left: 0, top: 0, ins: { top: 0, right: 0, bottom: 0, left: 0 } };
   const stats = { sessions: 0, rounds: 0, correct: 0, wrong: 0, picks: 0, pictures: 0, talks: 0, talkRight: 0, hints: 0, frames: 0, slowFrames: 0 };
-  let surpriseLine = '', promptUntil = 0, lastWrongSay = 0, idleSaid = 0, shownStars = 0, lastRoundEvt = null, lastPraise = 0, lastSoftSay = 0, finishSaid = false;
+  let surpriseLine = '', promptUntil = 0, lastWrongSay = -1e9, idleSaid = 0, shownStars = 0, lastRoundEvt = null, lastPraise = -1e9, lastSoftSay = -1e9, finishSaid = false;   // -1e9: a line in the first 2.5 s after page load is not rate-limited
 
   /* ---------- sizing ---------- */
   function readInsets() {
@@ -111,9 +111,9 @@
   /* ---------- voice ---------- */
   const voiceOn = () => S.voice && !FLAGS.novoice && speed <= 1.01 && !FLAGS.mute;
   function speak(text, opt) {
-    if (!text) return;
+    if (!text) return null;
     lastSpoken = text;
-    if (SP.Voice) SP.Voice.say(text, opt || {});
+    return SP.Voice ? SP.Voice.say(text, opt || {}) : null;
   }
   function applyAudio() {
     SP.Audio.setOptions({ sfx: S.sfx, music: S.music, muted: FLAGS.mute, volume: S.volume == null ? 1 : S.volume });
@@ -127,7 +127,9 @@
     // guard until the prompt has started AND finished: queued praise must not cut it off
     pendingPrompt = txt || null; promptStart = performance.now();
     promptUntil = performance.now() + 6000 + 72 * (txt || '').length;
-    speak(txt, opt);
+    const p = speak(txt, opt);
+    // the line ended (or was dropped / failed / interrupted) without ever starting: lift the guard so a Nini tap repeats it
+    if (p && p.then) p.then(() => { if (pendingPrompt === txt) { pendingPrompt = null; promptUntil = Math.min(promptUntil, performance.now() + 300); } }, () => {});
     if (!voiceOn()) { pendingPrompt = null; promptUntil = performance.now() + 300 + 72 * (txt || '').length; }
   }
   function onVoiceStart(display) {
@@ -209,6 +211,8 @@
     if (I && typeof I[fn] === 'function') { try { const t = I[fn](curLang(), e); if (t) return t; } catch (err) { /* fall back */ } }
     return fallbackKey ? T(fallbackKey) : '';
   }
+  // the alive line names the finished picture ("Bye-bye, crab!") — the template comes from the world's current round
+  const aliveArg = e => ({ kind: e.kind, templateId: e.templateId || (world.cur && world.cur.templateId) || (lastRoundEvt && lastRoundEvt.templateId) });
   function countWord(i) {
     const I = SP.I18N;
     if (I && typeof I.sayCount === 'function') { try { const t = I.sayCount(curLang(), i); if (t) return t; } catch (err) { /* fall back */ } }
@@ -229,6 +233,7 @@
         render.prewarm(world.layout, e.weather != null ? e.weather : e.level);
         break;
       case 'round': {
+        SP.UI.fadeBubble(false);
         lastRoundEvt = e; stats.rounds++; idleSaid = 0; lastAsk = null; lastPromptText = ''; finishSaid = false;
         SP.UI.setDots(world.roundsPerLevel || 4, e.round % (world.roundsPerLevel || 4));
         surpriseLine = e.surprise === 'pearl' ? T('surprise.pearl') : '';   // the fishy is announced when it swims in
@@ -307,9 +312,14 @@
         if (++idleSaid <= 4) speak(T('idle') + ' ' + currentPrompt());   // then stay quiet: maybe nobody is there
         else if (idleSaid >= 5 && !bot) pause();   // ≈ 2 min without a touch: nobody is playing — pause
         break;
-      case 'pokeNini':
-        if (performance.now() - promptStart > 3000 && !pendingPrompt) repeatPrompt();
+      case 'pokeNini': {
+        const since = performance.now() - promptStart;
+        const stuck = pendingPrompt && since > 6000;   // the prompt never started (no voice / dropped): don't wait forever
+        if (since > 3000 && (!pendingPrompt || stuck)) repeatPrompt();
+        else if (world.nini && world.nini.mood === 'talk') niniMood('idle', 0);   // no line follows: no silent mouth flaps
         break;
+      }
+      case 'soft': SP.Audio.play('pat'); break;   // a long press / drag: a gentle pat, no words
       case 'fishy':
         SP.Audio.play('fishy');
         if (canInterrupt()) speak(T('surprise.fishy'));
@@ -327,7 +337,8 @@
         break;
       case 'finish':
         SP.Audio.play('finish');
-        if (!finishSaid) { finishSaid = true; const f = T('finish'); SP.UI.say(f); speak(f); }   // queued after the last paint line
+        // shown, not spoken: the sweep says it visually and the alive line stays in sync (playtest P1-1)
+        if (!finishSaid) { finishSaid = true; SP.UI.say(T('finish')); }
         break;
       case 'sweep': SP.Audio.play('sweep', { i: e.i || 0 }); break;
       case 'alive': {
@@ -335,8 +346,9 @@
         SP.Audio.play('alive');
         render.keepPicture(world.picture, world.st);
         if (weather.addBubbles) weather.addBubbles(e.x, e.y, 8);
-        const al = line('sayAlive', e.kind) || T('praise');
+        const al = line('sayAlive', aliveArg(e)) || T('praise');
         SP.UI.say(al); speak(al);
+        SP.UI.fadeBubble(true);   // the picture rises / swims through the bubble's corner: let it show (visual P2-1)
         break;
       }
       case 'hop': SP.Audio.play('hop'); break;
@@ -350,7 +362,7 @@
         if (now - lastPraise > 1200) { lastPraise = now; speak(T(e.stars >= 3 ? 'great' : 'praise')); }   // queued
         break;
       }
-      case 'talk': SP.UI.say(''); SP.UI.setDots(world.roundsPerLevel || 4, world.roundsPerLevel || 4); openTalk(e.talk || world.talk); break;
+      case 'talk': SP.UI.fadeBubble(false); SP.UI.say(''); SP.UI.setDots(world.roundsPerLevel || 4, world.roundsPerLevel || 4); openTalk(e.talk || world.talk); break;
       case 'talkAsk': {   // no answer yet: ask again, and from the 2nd re-ask glow the right answer
         const tk = e.talk || world.talk;
         if (tk && e.n <= 3) speak(T(tk.promptKey, tk.params || {}), { priority: true });

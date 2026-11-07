@@ -67,7 +67,7 @@ class Finger {
  * (p = pDistract). Taps the right thing with p = skill (a glowing hint: p = followHint), else a plausible wrong one (another
  * shell / another part of the asked kind). Curiosity: p = pPoke taps a part that is not asked for (notThis / needPaint in
  * colour rounds: taps the picture before the paint); p = pAlready re-taps a painted spot. Fingers: hold U(hold) s with a
- * U(0, wobble) px drift; p = pDrag drags > 40 px (ignored by the game), p = pLong holds > 0.6 s (ignored). Tap points: the
+ * U(0, wobble) px drift; p = pDrag drags 45–120 px (≥ 64 px: not a tap → soft), p = pLong holds 0.7–1.4 s (> 1 s: not a tap). Tap points: the
  * part's safe point + U(±jitter) px (in picture px it stays inside the part + hitPad). Surprises: taps the fishy / the clam
  * with p = pSurprise. Talk: answers after U(talk) s, right with p = talkRight. */
 const SKILL = { 3: 0.72, 4: 0.82, 5: 0.86, 6: 0.9, 7: 0.92 };

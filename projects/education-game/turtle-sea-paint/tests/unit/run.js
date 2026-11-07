@@ -190,6 +190,44 @@ test('content: short rounds (long chapter) — 1 step at ages ≤ 4, ≤ 2 from 
   }
 });
 
+test('content: easy first chapter — level 0 ages ≤ 5: ≤ 2 steps; rounds 0–1: 2 shells (ages ≤ 4), 3 shells (age 5)', () => {
+  for (const age of AGES) for (const topic of SP.AGE_POOLS[age]) for (let ri = 0; ri < 4; ri++) for (let seed = 1; seed <= 8; seed++) {
+    const r = C.makeRound(topic, { age, lang: seed % 2 ? 'en' : 'vi', rng: rngFor(seed * 31 + ri), roundIndex: ri, level: 0 }), tag = `${topic} ${age} r${ri} s${seed}`;
+    assert.strictEqual(C.validate(r), null, tag);
+    if (age <= 5) assert.ok(r.steps.length <= 2, tag + ' ≤ 2 steps');
+    if (r.palette && ri <= 1 && age <= 5) assert.strictEqual(r.palette.length, age <= 4 ? 2 : 3, tag + ' easy palette');
+    if (r.palette && ri >= 2) assert.strictEqual(r.palette.length, topic === 'colors' ? (age <= 3 ? 2 : age === 4 ? 3 : 4) : 4, tag + ' normal palette');
+    const later = C.makeRound(topic, { age, lang: 'en', rng: rngFor(seed * 31 + ri), roundIndex: ri, level: 1 });
+    if (later.palette) assert.strictEqual(later.palette.length, topic === 'colors' ? (age <= 3 ? 2 : age === 4 ? 3 : 4) : 4, tag + ' chapter 2 normal');
+  }
+});
+
+test('content: a session never repeats a picture template while the pool has unused ones; never back-to-back', () => {
+  for (const age of AGES) for (let seed = 1; seed <= 20; seed++) {
+    const w = new SP.World({ seed: seed * 7 + age, age }), bot = new SP.Bot(w, { skill: 1, seed });
+    w.setViewport(1036, 720); w.newSession();
+    const seq = []; let n = 0;
+    while (w.state !== 'sessionDone' && n++ < 40000) { bot.step(1 / 15); w.update(1 / 15); for (const e of w.drainEvents()) if (e.type === 'round') seq.push([e.templateId, e.topic]); }
+    for (let i = 1; i < seq.length; i++) {
+      const [id, topic] = seq[i], kind = C.KIND_OF[topic], pool = SP.Pictures.list(kind), prev = seq.slice(0, i).map(x => x[0]);
+      const unused = pool.filter(t => !prev.includes(t));
+      if (prev.includes(id) && unused.length && topic !== 'size' && topic !== 'animals' && topic !== 'initial' && topic !== 'shapes')
+        assert.fail(`age ${age} seed ${seed}: ${id} repeated while ${unused.join(',')} unused`);
+      if (pool.length >= 2 && topic !== 'size') assert.notStrictEqual(id, seq[i - 1][0], `age ${age} seed ${seed}: ${id} back-to-back`);
+    }
+  }
+});
+
+test('pictures: scene alive follows the animals (crab → scuttle, jellyfish → float, else swim); every alive kind is valid', () => {
+  for (const id of SP.Pictures.list('scene')) {
+    assert.strictEqual(SP.Pictures.build(id, { animals: ['crab', 'crab'], sizes: ['big', 'small'] }).alive, 'scuttle', id);
+    assert.strictEqual(SP.Pictures.build(id, { animals: ['jellyfish'] }).alive, 'float', id);
+    assert.strictEqual(SP.Pictures.build(id, { animals: ['fish', 'whale', 'crab'] }).alive, 'swim', id);
+    assert.strictEqual(SP.Pictures.build(id, { animals: ['crab', 'fish', 'crab'] }).alive, 'scuttle', id);
+  }
+  assert.ok(SP.Pictures.list('scene').length >= 4 && SP.Pictures.list('labels').length >= 4);
+});
+
 test('content: deterministic by seed; consecutive rounds differ (template / targets)', () => {
   for (const topic of TOPICS) {
     const a = C.makeRound(topic, { age: 5, lang: 'en', rng: rngFor(5), roundIndex: 2 }), b = C.makeRound(topic, { age: 5, lang: 'en', rng: rngFor(5), roundIndex: 2 });
@@ -275,10 +313,13 @@ test('layout: every viewport × 0–5 shells × clam: 3:2 canvas, nothing under 
       assert.strictEqual(s.r, 58);
       assert.ok(s.x - (n <= 4 ? R : s.r) >= ins.left - 2 && s.x + s.r <= v.W - ins.right && s.y + s.r <= v.H - ins.bottom, tag + ' shell on screen');
       if (n <= 4 || v.H < v.W) assert.ok(!overlap(box, nb), tag + ' shell under Nini');
-      assert.ok(s.y - R > C2.y + C2.h && s.y - s.r > outer.y + outer.h, tag + ' shell hit clear of the picture');
-      assert.ok(!overlap(box, L.bubble) && !overlap(box, L.hud));
-      if (i) assert.ok(s.x - sl[i - 1].x - 2 * s.r >= (n <= 4 ? 24 : 12) - 1e-6, tag + ' gap ' + (s.x - sl[i - 1].x - 2 * s.r));
+      if (L.palette.column) assert.ok(s.x - R > C2.x + C2.w && s.x - s.r >= outer.x + outer.w + 24 - 1e-6, tag + ' column shell hit clear of the picture');
+      else assert.ok(s.y - R > C2.y + C2.h && s.y - s.r > outer.y + outer.h, tag + ' shell hit clear of the picture');
+      assert.ok(!overlap(box, L.bubble) && !overlap(box, L.hud), tag + ' shell under the bubble / HUD');
+      assert.ok(s.y - s.r >= ins.top && s.x + s.r <= v.W - ins.right - 8, tag + ' shell inside the safe area');
+      if (i) { const g = Math.hypot(s.x - sl[i - 1].x, s.y - sl[i - 1].y) - 2 * s.r; assert.ok(g >= (n <= 4 ? 24 : 12) - 1e-6, tag + ' gap ' + g); }
     }
+    if (L.palette.column) assert.ok(!v.H || v.W > v.H, tag + ' column only in landscape');
     if (n <= 4 && v.H < v.W) assert.ok(!clam || L.clam, tag + ' landscape always fits the clam');
     if (L.clam) {
       const cb = { x: L.clam.x - L.clam.w / 2, y: L.clam.y - L.clam.h, w: L.clam.w, h: L.clam.h };
@@ -288,6 +329,28 @@ test('layout: every viewport × 0–5 shells × clam: 3:2 canvas, nothing under 
     }
     assert.ok(L.fishY > L.bubble.y + L.bubble.h + 20 && L.fishY < C2.y + C2.h / 2, tag + ' fish lane');
   }
+});
+
+test('layout: phone landscape puts the shells in a column right of the canvas (canvas ≥ +25 %); iPad 4:3 keeps the row', () => {
+  const OLD = { '1561x720': 0.935, '1036x720': 0.855 };   // canvas scale of the row layout before the column (MECHANICS §4)
+  for (const [W, H, ins, want] of [[1561, 720, null, 'column'], [1556, 720, { top: 0, right: 108, bottom: 38, left: 108 }, 'column'],
+    [1036, 720, { top: 18, right: 0, bottom: 14, left: 0 }, 'column'], [960, 720, null, 'row'], [720, 1556, null, 'row']]) {
+    for (let n = 0; n <= 4; n++) for (const clam of [false, true]) {
+      const L = SP.World.computeLayout(W, H, ins, {}, { n, clam }), tag = `${W}x${H} n${n}${clam ? ' clam' : ''}`;
+      const row = SP.World.computeLayout(W, H, ins, { landColumn: false }, { n, clam });
+      assert.ok(L.canvas.s >= row.canvas.s - 1e-9, tag + ' never smaller than the row');
+      if (want === 'row') { assert.strictEqual(L.palette.column, false, tag); continue; }
+      if (n <= 3 || !clam) assert.strictEqual(L.palette.column, true, tag + ' column');
+      const old = OLD[W + 'x' + H];
+      if (old && L.palette.column) assert.ok(L.canvas.s >= old * 1.25 - 1e-9 || W === 1036, tag + ' scale ' + L.canvas.s.toFixed(3));
+      if (L.palette.column) {
+        const xs = new Set(L.palette.slots.map(q => q.x)); assert.ok(xs.size <= 1, tag + ' one column');
+        assert.ok(L.nini.x < L.canvas.x, tag + ' Nini on the left');
+      }
+    }
+  }
+  const p = SP.World.computeLayout(1561, 720, null, {}, { n: 3, clam: true }), q = SP.World.computeLayout(1561, 720, null, { landColumn: false }, { n: 3, clam: true });
+  assert.ok(p.canvas.s / q.canvas.s >= 1.25, 'iPhone landscape canvas ' + q.canvas.s.toFixed(3) + ' → ' + p.canvas.s.toFixed(3));
 });
 
 test('layout: every part of real rounds has a safe tap point that hits it (all viewports); hooks map back', () => {
@@ -349,17 +412,32 @@ test('world: phases enter → paint → finish → alive → clear; events in or
   assert.strictEqual(w.round, 1);
 });
 
-test('world: a tap paints; a drag (≥ 40 px) or a long press (> 0.6 s) does nothing', () => {
+test('world: a tap paints; a drag (≥ 64 px) or a long press (> 1 s) paints nothing but answers softly (event soft + wobble)', () => {
+  assert.strictEqual(CFG.tapMovePx, 64); assert.strictEqual(CFG.tapTime, 1.0);
   const w = roundOf(mkWorld({ age: 4 }), 'animals', 1);
   const a = w.answer(), p = w.partTap(a.part);
   evs(w);
-  w.pointerDown(p.x, p.y); w.pointerMove(p.x + 45, p.y); assert.strictEqual(w.pointerUp(p.x + 45, p.y), null, 'drag ignored');
-  w.pointerDown(p.x, p.y); run(w, 0.65); assert.strictEqual(w.pointerUp(p.x, p.y), null, 'long press ignored');
-  assert.ok(!w.st[a.part].painted && types(evs(w)).filter(t => t !== 'whoosh').every(t => !['paint', 'wrong'].includes(t)));
-  w.pointerDown(p.x, p.y); w.pointerMove(p.x + 20, p.y + 10); run(w, 0.3);
-  assert.strictEqual(w.pointerUp(p.x + 20, p.y + 10), 'paint', 'a small wobble is still a tap (at the press point)');
+  w.pointerDown(p.x, p.y); w.pointerMove(p.x + 70, p.y); assert.strictEqual(w.pointerUp(p.x + 70, p.y), null, 'drag ignored');
+  let e = evs(w), so = e.find(x => x.type === 'soft');
+  assert.ok(so && so.kind === 'drag' && so.target === 'part' && so.partId === a.part && so.x === p.x, 'soft drag on the part');
+  run(w, 0.05); assert.ok(Math.abs(w.st[a.part].wob) > 0.5 && Math.abs(w.st[a.part].wob) < 4, 'tiny wobble ' + w.st[a.part].wob);
+  w.pointerDown(p.x, p.y); run(w, 1.05); assert.strictEqual(w.pointerUp(p.x, p.y), null, 'long press ignored');
+  e = evs(w); so = e.find(x => x.type === 'soft'); assert.ok(so && so.kind === 'hold' && so.target === 'part');
+  assert.ok(!w.st[a.part].painted && types(e).every(t => !['paint', 'wrong'].includes(t)));
+  assert.strictEqual(w.misses, 0); assert.strictEqual(w._noProg, 0, 'soft is not a no-progress tap');
+  w.pointerDown(10, w.layout.H / 2); run(w, 1.1); w.pointerUp(10, w.layout.H / 2);
+  so = evs(w).find(x => x.type === 'soft'); assert.ok(so && so.target === null, 'soft on the empty water');
+  w.pointerDown(p.x, p.y); run(w, 0.8); assert.strictEqual(w.pointerUp(p.x + 50, p.y), 'paint', '0.8 s + 50 px is still a tap');
   assert.ok(w.st[a.part].painted);
-  w.cancelDrag(); assert.strictEqual(w.pointerUp(1, 1), null);
+  const w2 = roundOf(mkWorld({ age: 4 }), 'colors', 1), sh = w2.shellHit(w2.stepInfo.color); evs(w2);
+  w2.pointerDown(sh.x, sh.y); run(w2, 1.1); w2.pointerUp(sh.x, sh.y);
+  so = evs(w2).find(x => x.type === 'soft'); assert.ok(so && so.target === 'shell' && so.color === w2.stepInfo.color);
+  run(w2, 0.03); assert.ok(Math.abs(w2.shellByColor(w2.stepInfo.color).wob) > 0.3, 'shell wobbles'); assert.strictEqual(w2.brush.color, null, 'not picked');
+  const w3 = roundOf(mkWorld({ age: 4 }), 'animals', 1), a3 = w3.answer(), p3 = w3.partTap(a3.part);
+  w3.pointerDown(p3.x, p3.y); w3.pointerMove(p3.x + 20, p3.y + 10); run(w3, 0.3);
+  assert.strictEqual(w3.pointerUp(p3.x + 20, p3.y + 10), 'paint', 'a small wobble is still a tap (at the press point)');
+  assert.ok(w3.st[a3.part].painted);
+  w3.cancelDrag(); assert.strictEqual(w3.pointerUp(1, 1), null);
 });
 
 test('world: pickColor — needPaint / wrong shell / pick + follow ask / notThis / paint fills in 0.7 s / already', () => {
@@ -477,7 +555,7 @@ test('world: oddeven — wrong parity is a mistake, need = number of right label
   assert.ok(e.find(x => x.type === 'stepDone'));
 });
 
-test('world: tapPart — wrong animal / size wobble; Nini repeats the prompt; empty water does nothing', () => {
+test('world: tapPart — wrong animal / size wobble; Nini repeats the prompt; empty water = no progress (not a mistake)', () => {
   const w = roundOf(mkWorld({ age: 3, seed: 2 }), 'size', 1);
   const s = w.stepInfo, other = w.parts.find(p => p.role === 'animal' && p.id !== s.targets[0]);
   evs(w);
@@ -487,8 +565,53 @@ test('world: tapPart — wrong animal / size wobble; Nini repeats the prompt; em
   const nh = w.niniHit();
   assert.strictEqual(tapAt(w, nh.x, nh.y), 'pokeNini');
   e = evs(w); const pk = e.find(x => x.type === 'pokeNini'); assert.strictEqual(pk.promptKey, 'p.size'); assert.strictEqual(pk.params.size, s.params.size);
+  run(w, CFG.hintCooldown); evs(w);
   assert.strictEqual(tapAt(w, w.layout.W - 30, w.layout.H / 2), null);
+  assert.strictEqual(w.misses, 1, 'the water is not a mistake');
+  assert.strictEqual(tapAt(w, w.layout.W - 30, w.layout.H / 2), null);
+  e = evs(w); const h = e.find(x => x.type === 'hint'); assert.ok(h && h.id === s.targets[0], 'taps on the water lead to the hint');
   assert.strictEqual(w.misses, 1);
+});
+
+test('world: a child who only taps the sand / water still finishes (no-progress taps → hint → assist); stars kept', () => {
+  for (const [age, topic] of [[4, 'animals'], [4, 'colors'], [6, 'add']]) {
+    const w = roundOf(mkWorld({ age, seed: 8 }), topic, 1);
+    let k = 0;
+    while (w.state === 'round' && k++ < 400) { if (w.interactive) tapAt(w, w.layout.W - 20, w.layout.H / 2); run(w, 0.5); }
+    assert.notStrictEqual(w.state, 'round', `${age} ${topic} finished`);
+    assert.strictEqual(w.roundStars, 3, 'water taps cost no star');
+  }
+});
+
+test('world: the swimming fishy never steals a press on a shell or an unpainted part; painted parts / water → fishy', () => {
+  for (const v of [VIEWPORTS[0], VIEWPORTS[4], VIEWPORTS[8]]) {
+    const w = roundOf(mkWorld({ age: 4, surprise: true, vp: v, seed: 3 }), 'count', 2, 'fishy');
+    const s = w.stepInfo;
+    evs(w); until(w, () => w.fishyHit());
+    let hitOne = false;
+    for (let k = 0; k < 3000 && w.fishy && w.interactive; k++) {
+      const fh = w.fishyHit();
+      if (fh) {
+        const spot = s.targets.find(id => { const q = w.partTap(id); return !w.st[id].painted && Math.hypot(q.x - fh.x, q.y - fh.y) <= fh.r - 4; });
+        if (spot) {
+          const q = w.partTap(spot), before = w._claimedCount();
+          assert.strictEqual(w.pointerDown(q.x, q.y), 'press', v.name + ' a right spot under the fishy wins');
+          assert.strictEqual(w.pointerUp(q.x, q.y), 'paint');
+          assert.strictEqual(w._claimedCount(), before + 1); assert.strictEqual(w.fishy.state, 'swim');
+          hitOne = true; if (process.env.SP_DBG) console.log("fishy-steal checked on", v.name); break;
+        }
+      }
+      w.update(H);
+    }
+    if (v === VIEWPORTS[0] || v === VIEWPORTS[4]) assert.ok(hitOne || w.layout.fishY < w.layout.canvas.y, v.name + ' found a spot under the fishy');
+    // the fishy itself (over the water / a painted part) still reacts to a press
+    until(w, () => w.fishyHit() || !w.interactive || w._fishyNext < 0 && !w.fishy, 20000);
+    const fh = w.fishyHit();
+    if (fh && w.interactive) {
+      const u = w._under(fh.x, fh.y);
+      if (!u || (u.kind === 'part' && u.part.painted)) assert.strictEqual(w.pointerDown(fh.x, fh.y), 'fishy');
+    }
+  }
 });
 
 test('world: idle nudges 12 s → ×1.5 → … ≤ 30 s; the 2nd idle hints; a tap resets', () => {
@@ -691,8 +814,9 @@ test('world: brush — flies in an arc to the shell, dips, loads; flies to the p
   run(w, 0.8); assert.ok(Math.abs(w.brush.x - R.x) < 6 && w.brush.state === 'rest', 'back in Nini\'s flipper');
 });
 
-test('world: assist — 2 taps without progress hint; after 6 (age ≤ 4) / 7 (age ≥ 5) the next canvas tap does the right thing', () => {
-  for (const [age, n] of [[3, 6], [6, 7]]) {
+test('world: assist — 2 taps without progress hint; after 6 (age ≤ 4) / 5 (age ≥ 5) the next canvas tap does the right thing', () => {
+  assert.strictEqual(CFG.assistAfterOld, 5);
+  for (const [age, n] of [[3, 6], [6, 5]]) {
     const w = roundOf(mkWorld({ age, seed: 4 }), 'animals', 1), C2 = w.layout.canvas, s = w.stepInfo;
     evs(w);
     const empty = () => { for (let y = C2.y + 4; y < C2.y + C2.h; y += 9) for (let x = C2.x + 4; x < C2.x + C2.w; x += 9) { const q = w.screenToPic(x, y); if (!SP.Pictures.hit(w.picture, q.x, q.y, CFG.hitPad)) return { x, y }; } return null; };

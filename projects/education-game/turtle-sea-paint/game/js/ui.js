@@ -69,11 +69,14 @@
     /* ---------- bubble ---------- */
     say(text) {
       const b = $('bubble'), t = $('bubbleText');
+      b.classList.remove('fade');
       if (!text) { b.classList.add('hidden'); return; }
       t.textContent = text;
       b.classList.remove('hidden', 'say'); void b.offsetWidth; b.classList.add('say');
       this._fitBubble();
     },
+    // the alive phase: the picture swims / floats through the bubble's corner — the bubble steps back (visual P2-1)
+    fadeBubble(on) { $('bubble').classList.toggle('fade', !!on); },
     placeBubble(rect) { // CSS px rect
       const b = $('bubble');
       b.style.left = rect.x + 'px'; b.style.top = rect.y + 'px';
@@ -120,7 +123,7 @@
     /** a small caption under a Talk picture (names the colour / shape / animal / size; numbers and letters speak for themselves) */
     _choiceLabel(lang, th) {
       switch (th.kind) {
-        case 'blob': return NAME(lang, 'color', th.color);
+        case 'blob': return '';   // colour questions: no printed name under the blob — it gave the answer away (visual P3-6)
         case 'shape': return NAME(lang, 'shape', th.shape);
         case 'animal': return NAME(lang, 'animal', th.animal);
         case 'size': return NAME(lang, 'size', th.size);

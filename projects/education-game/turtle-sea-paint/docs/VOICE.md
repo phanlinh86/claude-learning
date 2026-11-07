@@ -17,8 +17,10 @@ The engine (voice queue, iOS fixes, matcher, kid-proofing) is the proven one fro
   Title "Nini’s Sea Painting" / "Rùa Nini — Tô Màu Đại Dương"; logo lines "Nini’s" / "Sea Painting", "Rùa Nini" /
   "Tô Màu Đại Dương". **TTS**: English voices say "Nini" as written; Vietnamese voices get **"Ni Ni"** (`I18N.speech`;
   the Latin "Nini" is read as one clipped syllable) — display text keeps "Nini".
-- **Painting vocabulary**: paint / pick the paint / tap the shining … / beautiful — vi **tô / chọn màu / vỏ sò màu /
-  chạm vào … đang lấp lánh / đẹp quá**.
+- **Painting vocabulary**: paint / pick the paint / tap the shining … / beautiful — vi **tô / chọn màu /
+  chạm vào … đang lấp lánh / đẹp quá**. The paint pots are **"paint"** (EN) and **"màu"** (VI) in every line, never
+  "shell" / "vỏ sò": a shell is a picture part (the crab's part is EN **"body"**, vi "cái mai"; the snail's "shell" / "vỏ
+  ốc"; the count spot "shell" / "vỏ sò") — QA round 2, visual P2-3.
 - **Classifiers**: animals "con cá", shapes "hình tròn", letters "chữ B", numbers "số năm", parts with a kid word ("cái đuôi",
   "đôi càng", "mấy cái chân", "cánh buồm"), counted spots "3 viên ngọc trai / 3 vỏ sò / 3 bong bóng / 3 con sao biển".
 - **Colours**: `name('vi','color','red')` = **"màu đỏ"**; VI lines put `{color}` right after the noun ("tô cái đuôi
@@ -44,7 +46,7 @@ All helpers never throw and never return '' or a raw `{x}`; `rng` is optional (`
 | `sayWrong(lang, ev)` | `wrong` → colour "That’s yellow. Let’s find blue!" / "Đây là màu vàng. Mình tìm màu xanh dương nhé!"; part "That’s the circle. Where is the triangle?"; size "That’s the small fish. Where is the big fish?"; maths "That’s number six. Let’s count again!"; parity "Four is even! Let’s look for another one!"; initial "Whale starts with W! Let’s look again!" |
 | `sayNeedPaint(lang, {color})` | "First pick the blue paint!" (no colour → "First pick a paint!") |
 | `sayNotThis(lang, {target})` | "Paint the shining tail!" (target = the glowing part `{nameKind:'part', nameValue}`) |
-| `sayAlive(lang, kind)` | `alive {kind}` swim / scuttle / sail / bob / float → "Look, it’s swimming!" |
+| `sayAlive(lang, kind \| {kind, templateId})` | `alive {kind}` swim / scuttle / sail / bob / float. With the round's `templateId` it names the picture (`I18N.THINGS`, `thingName`): "Bye-bye, crab! Scuttle, scuttle!", "Look, your boat is sailing, Mai!" / "Tạm biệt con cua! Bò ngang, bò ngang!" (`alive.<kind>.thing {thing}`, ≤ 45 chars); unknown picture → "Look, it’s swimming!" |
 | `sayCount(lang, i)` | "Zero!" … "Twenty!" (= `count.<i>`; beyond 20 the digits) |
 | `talkWrong(lang, kind, value)` | missed Talk answer: "It is an oval! Good try!", "It is the big one! Good try!", "Là số bảy đó! Bé cố gắng lắm!" |
 | `speech(lang, text)` | TTS text (Voice.say calls it): letter names ("letter D" → "letter dee", "C is for", "starts with C", "Big B / small b"), + − =, " — " → ", ", vi "chữ B" → "chữ bờ", vi "Nini" → "Ni Ni" |
@@ -74,11 +76,12 @@ All helpers never throw and never return '' or a raw `{x}`; `rng` is optional (`
 | `wrong` | `sayWrong`; `hint` → `t('hint')` |
 | `needPaint` / `notThis` / `already` | `sayNeedPaint(lang, {color})` / `sayNotThis(lang, {target})` / `t('already')` |
 | `idle {n}` | `t('idle') + ' ' + prompt` |
-| finish / `sweep` | `t('finish')` once |
-| `alive {kind}` | `sayAlive(lang, kind)` |
+| finish / `sweep` | `t('finish')` once, **bubble only, not spoken** — the sweep says it visually and the alive line stays in sync (playtest P1-1: lag 2 s → 0) |
+| `alive {kind}` | `sayAlive(lang, {kind, templateId})`; the bubble fades to 0.32 while the picture moves through it (cleared by the next `say` / `round` / `talk`) |
+| `soft` (long press / drag on a target) | the `pat` sound only, no words |
 | `fishyTap` / `pearlTap` | `t('fishy.tap')` / `t('pearl.tap')` |
 | `roundDone` | `t('great')` / `t('praise')` (queued — never cut the last count) |
-| `pokeNini` | repeat the prompt |
+| `pokeNini` | repeat the prompt (> 3 s after it was asked and not still waiting to be spoken). The wait ends when the prompt starts, OR when its `Voice.say` promise resolves without starting (no voice for the language, dropped, failed — headless Chromium fails at once), OR 6 s after it was asked. When nothing is repeated Nini's mouth does not flap (mood back to idle). |
 | `talk` / `talkResult` | `t('talk.intro') + ' ' + t(talk.promptKey, talk.params)`; `t('talk.right')` / `talkWrong(lang, kind, value)` |
 | `sessionDone {stars}` | `t('party')`, `t('session.done', {stars})` |
 
@@ -98,7 +101,7 @@ All helpers never throw and never return '' or a raw `{x}`; `rng` is optional (`
   animal {animal,color}, label {label}, parity {num,parity}, initial {letter,word}, sum {expr,ans}, any}`, `wrong.color
   {got,want}`, `wrong.part {got,want}`, `wrong.math {got}`, `wrong.parity {num,parity}`, `wrong.initial {word,first}`,
   `wrong.any`, `needPaint {color}` (+ `.any`), `notThis {part}` (+ `.any`), `already`, `stepDone`, `finish`, `enter`,
-  `alive.{swim, scuttle, sail, bob, float}`, `surprise.fishy`, `fishy.tap`, `surprise.pearl`, `pearl.tap`, `hint`, `idle`,
+  `alive.{swim, scuttle, sail, bob, float}` (+ `.thing {thing}` for each), `surprise.fishy`, `fishy.tap`, `surprise.pearl`, `pearl.tap`, `hint`, `idle`,
   `praise`, `great {child}`, `party`, `session.done {stars}`, `weather.0..3`, `count.0..20`.
 - **Talk**: `talk.intro, talk.right, talk.colors, talk.shapes, talk.size {size}` (→ `talk.sizeAny`), `talk.count {spot}`
   (always plural; → `talk.countAny`), `talk.animals, talk.letters, talk.lower, talk.initial, talk.add {a,b}, talk.sub {a,b}`

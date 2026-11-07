@@ -665,8 +665,18 @@
     [[14, 252, 572, 144], [10, 10, 188, 236], [402, 10, 188, 236]], '#F9DDB8');
 
   // ---- scene: up to 4 sea animals on a backdrop. slots[n] = [[cx, cy, fitW, fitH, facing]…]
-  function sceneTpl(id, under, slots) {
-    tpl({ id: id, kind: 'scene', alive: 'swim', maxSlots: 4, slots: slots, make: function (opt) {
+  /* How the finished scene comes alive follows the animals in it (majority; a tie keeps the template's own motion when it
+     is among the tied ones, else 'swim'): crabs scuttle, jellyfish and seahorses float, octopus / starfish bob, the rest swim. */
+  var ANIMAL_ALIVE = { crab: 'scuttle', jellyfish: 'float', seahorse: 'float', octopus: 'bob', starfish: 'bob' };
+  function aliveOf(animals, dflt) {
+    var votes = {}, best = 0, kinds = [];
+    animals.forEach(function (a) { var k = ANIMAL_ALIVE[a] || 'swim'; votes[k] = (votes[k] || 0) + 1; });
+    for (var k in votes) { if (votes[k] > best) { best = votes[k]; kinds = [k]; } else if (votes[k] === best) kinds.push(k); }
+    return kinds.length === 1 ? kinds[0] : kinds.indexOf(dflt) >= 0 ? dflt : kinds.indexOf('swim') >= 0 ? 'swim' : kinds.sort()[0];
+  }
+  function sceneTpl(id, under, slots, alive) {
+    alive = alive || 'swim';
+    tpl({ id: id, kind: 'scene', alive: alive, maxSlots: 4, slots: slots, make: function (opt) {
       var an = (opt && opt.animals) || SEA_ANIMALS.slice(0, 2), sizes = opt && opt.sizes, set = slots[an.length];
       if (!set) throw new Error('pictures: ' + id + ' has no layout for ' + an.length + ' animals');
       if (sizes && sizes.length !== an.length) throw new Error('pictures: sizes must match animals');
@@ -678,7 +688,7 @@
         var f = figure(d, 'a' + i, X, { role: 'animal', nameKind: 'animal', nameValue: a, size: sizes ? sizes[i] : null });
         parts.push(f.part); deco = deco.concat(f.deco);
       });
-      return { parts: parts, deco: deco, under: decoOut(under) };
+      return { parts: parts, deco: deco, under: decoOut(under), alive: aliveOf(an, alive) };
     } });
   }
   var SAND = '#F4E7CB', WEED = '#DDEBDD', ROCKC = '#E7E2EA', CORAL = '#F4DDD6';
@@ -697,7 +707,12 @@
     { sh: S([[0, 220], [30, 210], [44, 260], [40, 330], [0, 340]]), fill: ROCKC }, { sh: S([[600, 200], [572, 196], [556, 250], [566, 320], [600, 330]]), fill: ROCKC }], {
     1: [[300, 190, 420, 300, 1]], 2: [[174, 230, 240, 220, 1], [430, 168, 240, 220, -1]],
     3: [[116, 140, 180, 150, 1], [300, 268, 180, 150, 1], [486, 140, 180, 150, -1]],
-    4: [[148, 110, 210, 150, 1], [452, 116, 210, 150, -1], [170, 290, 210, 150, 1], [430, 288, 210, 150, -1]] });
+    4: [[148, 110, 210, 150, 1], [452, 116, 210, 150, -1], [170, 290, 210, 150, 1], [430, 288, 210, 150, -1]] }, 'scuttle');
+  sceneTpl('lagoon', [sandBand(356), kelp(300, 64, -1), { sh: S([[0, 372], [12, 318], [52, 300], [84, 340], [76, 376]]), fill: CORAL },
+    { sh: S([[600, 230], [574, 226], [560, 290], [570, 350], [600, 356]]), fill: ROCKC }, kelp(560, 150, 1)], {
+    1: [[300, 196, 420, 300, -1]], 2: [[176, 232, 240, 220, -1], [430, 150, 240, 220, 1]],
+    3: [[300, 108, 180, 150, -1], [118, 270, 180, 150, 1], [482, 268, 180, 150, -1]],
+    4: [[160, 112, 210, 150, -1], [440, 106, 210, 150, 1], [150, 294, 210, 150, -1], [446, 290, 210, 150, 1]] });
 
   // ---- labels: big bubbles / balloons with text. pos[n] = [[cx, cy, r]…]
   function labelsTpl(id, alive, fig, pos, def, trail) {
@@ -729,6 +744,11 @@
     2: [[210, 120, 66], [390, 120, 66]], 3: [[150, 116, 62], [300, 90, 62], [450, 116, 62]],
     4: [[90, 120, 56], [230, 88, 56], [370, 88, 56], [510, 120, 56]],
     5: [[80, 110, 54], [205, 70, 54], [330, 70, 54], [455, 110, 54], [300, 196, 54]] }, '#E2F3F8');
+  labelsTpl('jelly_lanterns', 'float', designFig('jellyfish', 'jellyfish', [236, 262, 364, 396]), {
+    2: [[180, 124, 64], [420, 124, 64]], 3: [[130, 136, 60], [300, 92, 60], [470, 136, 60]],
+    4: [[100, 156, 56], [232, 88, 56], [368, 88, 56], [500, 156, 56]],
+    5: [[76, 204, 54], [178, 86, 54], [300, 64, 54], [422, 86, 54], [524, 204, 54]] }, '#F4E6F8',
+    function (s) { return decoOut([{ sh: L([[s[0], s[1] + s[2]], [(s[0] + 300) / 2 + (s[0] < 300 ? 14 : s[0] > 300 ? -14 : 0), (s[1] + s[2] + 264) / 2 + 6], [300, 264]], true), stroke: NAVY, width: 3 }]); });
 
   // ================================================================ build / validate
   function build(id, opt) {
@@ -736,7 +756,7 @@
     if (!t) throw new Error('pictures: unknown template ' + id);
     var o = t.make(opt || {});
     var parts = o.parts.slice().sort(function (a, b) { return b.area - a.area; });
-    var pic = { id: id, kind: t.kind, alive: t.alive, w: W, h: H, parts: parts, deco: o.deco || [], under: o.under || [] };
+    var pic = { id: id, kind: t.kind, alive: o.alive || t.alive, w: W, h: H, parts: parts, deco: o.deco || [], under: o.under || [] };
     if (t.spotName) pic.spotName = t.spotName;
     if (o.onBody) pic.onBody = true;
     return pic;

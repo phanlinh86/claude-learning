@@ -260,3 +260,49 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
   .settings-panel .set-row label { font-size: 17px; }
   #optVolume { height: 28px; }
 }
+
+/* ---------- QA round 2 fixes ---------- */
+/* the alive phase: the picture swims / floats through the bubble's corner — the bubble steps back (visual P2-1) */
+.bubble { transition: opacity .25s; }
+.bubble.fade { opacity: .32; }
+/* phones in portrait: the 3 Talk choices in ONE row (the 2 + 1 stacking cost a whole row) (visual P1-1) */
+@media (max-width: 430px) and (orientation: portrait) {
+  .talk-choices { flex-wrap: nowrap; gap: 8px; }
+  .talk-choices button { min-width: 0; flex: 1 1 0; max-width: 124px; padding: 6px 4px; }
+  .talk-choices button canvas { width: 76px; height: 76px; }
+}
+/* short portrait phones (iPhone SE 375×667): smaller show canvas, buttons and mic so everything fits (visual P1-1) */
+@media (max-height: 760px) and (orientation: portrait) {
+  #scrTalk { padding-top: calc(var(--sa-t) + 74px); padding-bottom: calc(var(--sa-b) + 8px); }
+  .talk-panel { padding: 12px 12px 14px; }
+  .talk-panel h2 { font-size: 24px; margin-bottom: 4px; }
+  .talk-panel #talkShow { width: min(210px, 56vw); margin-bottom: 2px; }
+  .talk-q { font-size: 19px; margin: 2px 0 10px; }
+  .talk-choices button { min-height: 84px; font-size: 28px; }
+  .talk-choices button canvas { width: 68px; height: 68px; }
+  .mic-btn { margin-top: 10px; min-height: 50px; font-size: 17px; padding: 6px 16px; }
+  .mic-btn svg { width: 24px; }
+}
+/* the Talk panel scrolls only as a last resort (class "scroll" in index.html) */
+.talk-panel.scroll { overflow-y: auto; }
+/* phones in portrait: settings toggles in 2 columns, nothing hidden under the sticky Done button (visual P2-7) */
+@media (max-width: 430px) and (orientation: portrait) {
+  .settings-panel { padding: 14px 14px 18px; }
+  .settings-panel h2 { margin-bottom: 6px; font-size: 28px; }
+  .settings-panel .set-row { margin: 6px 0; gap: 8px; }
+  .settings-panel .set-row label { font-size: 18px; }
+  .settings-panel .chip { min-height: 44px; padding: 4px 12px; font-size: 17px; }
+  #inpName { width: 100%; padding: 8px 12px; font-size: 18px; }
+  #optVolume { width: 100%; }
+  .settings-panel .set-grid { grid-template-columns: 1fr 1fr; gap: 6px; margin: 8px 0; }
+  .settings-panel .toggle { font-size: 15px; padding: 6px 8px; gap: 6px; min-height: 48px; line-height: 1.1; }
+  .settings-panel .toggle input { width: 22px; height: 22px; flex: none; }
+  .settings-panel .small-note { margin-bottom: 18px; font-size: 13px; }
+  .settings-panel > .btn { bottom: -18px; min-height: 56px; }
+}
+/* phone landscape settings: readable 15 px toggle labels (visual P3-7) */
+@media (orientation: landscape) and (max-height: 430px) {
+  .settings-panel .toggle { font-size: 15px; line-height: 1.1; }
+}
+/* the done panel: "Our pictures" is drawn on the water right above the gallery now (visual P3-5) */
+.done-sub { display: none; }
