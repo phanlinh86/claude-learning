@@ -1,0 +1,42 @@
+{
+  "grove": {
+    "skyTop": "#8ccbe3",
+    "skyBottom": "#f4ecd2",
+    "sandFar": "#e3d5a4",
+    "sandNear": "#cbb978",
+    "path": "#e0c38e",
+    "pathEdge": "#a8875a",
+    "divider": "#f6e7c4",
+    "vig": "rgba(70,60,30,0.16)"
+  },
+  "dunes": {
+    "skyTop": "#73b9e6",
+    "skyBottom": "#eef1e6",
+    "sandFar": "#efd59a",
+    "sandNear": "#d9a764",
+    "path": "#e3c38c",
+    "pathEdge": "#b08355",
+    "divider": "#f8e8c4",
+    "vig": "rgba(90,60,20,0.16)"
+  },
+  "bazaar": {
+    "skyTop": "#8c86c6",
+    "skyBottom": "#ffc99a",
+    "sandFar": "#ecbf92",
+    "sandNear": "#cc9469",
+    "path": "#e2bf95",
+    "pathEdge": "#a67658",
+    "divider": "#f6e2c4",
+    "vig": "rgba(80,40,40,0.18)"
+  },
+  "night": {
+    "skyTop": "#18204a",
+    "skyBottom": "#47578c",
+    "sandFar": "#56628f",
+    "sandNear": "#3a4470",
+    "path": "#979fbd",
+    "pathEdge": "#5f6892",
+    "divider": "#cfd5e8",
+    "vig": "rgba(6,8,30,0.34)"
+  }
+}
