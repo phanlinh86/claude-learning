@@ -1,0 +1,245 @@
+{
+ "_about": "Bun per frame, in the 0 0 300 300 viewBox (feet anchor 150,292). paw = centre of the near (right) paw; tip = the paw / finger tip (point: the pointing finger tip, use it for the hint direction); earTop = y of the highest ear tip; hatTop = y of the hat crown top (use it for a speech-bubble tail / stars over the head); eye = near eye centre; bbox = measured opaque box (added by tools/bun_sheet.js).",
+ "idle": {
+  "paw": [
+   202,
+   251
+  ],
+  "tip": [
+   204,
+   261
+  ],
+  "earTop": 7,
+  "hatTop": 58,
+  "eye": [
+   148,
+   152
+  ],
+  "bbox": [
+   65,
+   7,
+   246,
+   293
+  ]
+ },
+ "blink": {
+  "paw": [
+   202,
+   251
+  ],
+  "tip": [
+   204,
+   261
+  ],
+  "earTop": 7,
+  "hatTop": 58,
+  "eye": [
+   148,
+   152
+  ],
+  "bbox": [
+   65,
+   7,
+   246,
+   293
+  ]
+ },
+ "talk": {
+  "paw": [
+   211,
+   247
+  ],
+  "tip": [
+   216,
+   256
+  ],
+  "earTop": 7,
+  "hatTop": 58,
+  "eye": [
+   148,
+   152
+  ],
+  "bbox": [
+   65,
+   7,
+   246,
+   293
+  ]
+ },
+ "happy": {
+  "paw": [
+   224,
+   236
+  ],
+  "tip": [
+   233,
+   241
+  ],
+  "earTop": 5,
+  "hatTop": 58,
+  "eye": [
+   148,
+   152
+  ],
+  "bbox": [
+   65,
+   5,
+   246,
+   293
+  ]
+ },
+ "cheer": {
+  "paw": [
+   239,
+   160
+  ],
+  "tip": [
+   245,
+   152
+  ],
+  "earTop": 5,
+  "hatTop": 58,
+  "eye": [
+   148,
+   152
+  ],
+  "bbox": [
+   35,
+   5,
+   277,
+   293
+  ]
+ },
+ "think": {
+  "paw": [
+   197,
+   195
+  ],
+  "tip": [
+   196,
+   185
+  ],
+  "earTop": 4,
+  "hatTop": 61,
+  "eye": [
+   148,
+   152
+  ],
+  "bbox": [
+   65,
+   4,
+   257,
+   293
+  ]
+ },
+ "oops": {
+  "paw": [
+   225,
+   225
+  ],
+  "tip": [
+   234,
+   228
+  ],
+  "earTop": 24,
+  "hatTop": 61,
+  "eye": [
+   148,
+   152
+  ],
+  "bbox": [
+   61,
+   24,
+   267,
+   293
+  ]
+ },
+ "wave": {
+  "paw": [
+   240,
+   167
+  ],
+  "tip": [
+   246,
+   159
+  ],
+  "earTop": 5,
+  "hatTop": 58,
+  "eye": [
+   148,
+   152
+  ],
+  "bbox": [
+   65,
+   5,
+   294,
+   293
+  ]
+ },
+ "point": {
+  "paw": [
+   231,
+   205
+  ],
+  "tip": [
+   255,
+   197
+  ],
+  "earTop": 5,
+  "hatTop": 58,
+  "eye": [
+   148,
+   152
+  ],
+  "bbox": [
+   65,
+   5,
+   258,
+   293
+  ]
+ },
+ "dig": {
+  "paw": [
+   233,
+   233
+  ],
+  "tip": [
+   243,
+   235
+  ],
+  "earTop": 5,
+  "hatTop": 58,
+  "eye": [
+   148,
+   152
+  ],
+  "bbox": [
+   65,
+   5,
+   274,
+   293
+  ]
+ },
+ "full_wave": {
+  "paw": [
+   240,
+   167
+  ],
+  "tip": [
+   246,
+   159
+  ],
+  "earTop": 5,
+  "hatTop": 58,
+  "eye": [
+   148,
+   152
+  ],
+  "bbox": [
+   36,
+   5,
+   294,
+   293
+  ]
+ }
+}
