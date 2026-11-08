@@ -1,0 +1,16 @@
+{
+  "*": {
+    "maxVx": 5.0,
+    "landPad": 0.32,
+    "lanternSize": 15,
+    "difficulty.easy.widthK": 1.5,
+    "difficulty.easy.maxDx": 2.6,
+    "difficulty.normal.widthK": 1.2,
+    "difficulty.hard.widthK": 0.95,
+    "goal.normal": 125,
+    "sideDx": [
+      2.5,
+      5.0
+    ]
+  }
+}

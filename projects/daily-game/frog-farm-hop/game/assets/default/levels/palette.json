@@ -1,0 +1,26 @@
+{
+  "sunny": {
+    "skyTop": "#8fd3ff",
+    "skyBottom": "#e8f7ff",
+    "tint": "#fffaf0",
+    "snow": false
+  },
+  "rain": {
+    "skyTop": "#9fb3b8",
+    "skyBottom": "#dfe8e4",
+    "tint": "#7f979c",
+    "snow": false
+  },
+  "wind": {
+    "skyTop": "#f2b7a4",
+    "skyBottom": "#fff1e4",
+    "tint": "#e9a08c",
+    "snow": false
+  },
+  "snow": {
+    "skyTop": "#b7a6d9",
+    "skyBottom": "#f6e3ec",
+    "tint": "#a796cf",
+    "snow": true
+  }
+}
