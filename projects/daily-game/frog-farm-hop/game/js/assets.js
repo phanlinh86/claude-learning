@@ -124,6 +124,7 @@
     },
 
     async loadCustom() {
+      this._thumbs = {};
       const S = FH.Storage;
       await Promise.all(SLOTS.map(async s => {
         const data = S.get('img_' + s.id);
@@ -152,6 +153,7 @@
       this._cache.clear();
     },
     clearCustom(slotId) {
+      if (this._thumbs) delete this._thumbs[slotId];
       FH.Storage.del('img_' + slotId); FH.Storage.del('shape_' + slotId);
       delete this.customSrc[slotId]; delete this.custom[slotId];
       this._cache.clear();

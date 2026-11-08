@@ -1,0 +1,3 @@
+easy {"pairs":22875,"maxDy":2.24,"impossibleNoWind":0,"impossibleWorstGust":0,"minMarginWorstGust":3.08,"fromCentreNoWind":0,"fromCentreWorstGust":0,"level1CentreNeed":{"med":0,"p90":0.45,"max":1,"zeroShare":0.68},"worst":[]}
+normal {"pairs":19636,"maxDy":2.64,"impossibleNoWind":0,"impossibleWorstGust":0,"minMarginWorstGust":2.11,"fromCentreNoWind":0,"fromCentreWorstGust":0,"level1CentreNeed":{"med":0.66,"p90":1.95,"max":2.65,"zeroShare":0.3},"worst":[]}
+hard {"pairs":18238,"maxDy":2.7,"impossibleNoWind":0,"impossibleWorstGust":0,"minMarginWorstGust":1.78,"fromCentreNoWind":0,"fromCentreWorstGust":0,"level1CentreNeed":{"med":0.77,"p90":1.95,"max":2.63,"zeroShare":0.24},"worst":[]}

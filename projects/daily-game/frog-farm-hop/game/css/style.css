@@ -336,3 +336,11 @@ body.touch .tagline{font-size:max(15px, calc(var(--u)*2.2))}body.touch .best-lin
 .sc b{margin-left:auto}                                                    /* Score and Best numbers line up */
 .how-ico img{width:calc(var(--u)*6)}
 @media (max-aspect-ratio: 1/1){ #scrHow .how-ico img{width:calc(var(--u)*5)} }
+
+/* ---------- Clover's Farm Hop QA fixes (docs/reports/visual.md, functional.md) ---------- */
+#scrTitle{background:radial-gradient(ellipse at 50% 42%,rgba(255,255,255,.42),rgba(255,255,255,.12) 55%,rgba(255,255,255,0) 75%)}
+@media (orientation:portrait){
+  .over-body{flex-direction:column;gap:calc(var(--u)*1.2)}
+  .stats{text-align:center}
+}
+.how-ico{margin-right:calc(var(--u)*.6)}

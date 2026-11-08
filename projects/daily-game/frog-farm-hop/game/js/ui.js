@@ -90,7 +90,7 @@
     syncSettings() {
       const s = this.game.settings;
       $('setSfx').checked = s.sfx; $('setMusic').checked = s.music; $('setFull').checked = !!this.game.fullscreen;
-      $('setDifficulty').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === this.game.difficulty()));
+      $('setDifficulty').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === this.game.settings.difficulty));
       this.syncMute();
     },
     syncMute() {

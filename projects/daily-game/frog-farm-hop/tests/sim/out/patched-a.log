@@ -1,0 +1,16 @@
+humans/easy/kid4               n=200 surv 57.4s score 431 lvl1 nulls (0.2) f/min 6.68 unfair 0/1416  8147ms
+humans/easy/kid5               n=200 surv 104.2s score 910.5 lvl1 85.1s (0.67) f/min 5.46 unfair 0/1830  11906ms
+humans/easy/kid6               n=200 surv 247.1s score 2513 lvl1 76s (0.98) f/min 3.52 unfair 0/3411  28114ms
+humans/easy/casual             n=200 surv 900s score 16700.5 lvl1 59.4s (1) f/min 0.47 unfair 0/1401  81918ms
+humans/easy/lagBot0.25         n=200 surv 900s score 10901 lvl1 79.9s (0.98) f/min 1.94 unfair 0/5591  96230ms
+humans/normal/kid4             n=200 surv 25.2s score 135.5 lvl1 nulls (0) f/min 6.77 unfair 0/650  3023ms
+humans/normal/kid5             n=200 surv 33.7s score 170.5 lvl1 nulls (0.01) f/min 5.67 unfair 0/699  3373ms
+humans/normal/kid6             n=200 surv 50.2s score 306 lvl1 nulls (0.14) f/min 4.27 unfair 0/815  5051ms
+humans/normal/casual           n=200 surv 350.1s score 3740 lvl1 77.1s (0.88) f/min 1.9 unfair 0/2607  39775ms
+humans/normal/lagBot0.25       n=200 surv 291.3s score 1985.5 lvl1 122s (0.7) f/min 1.63 unfair 0/2058  40888ms
+humans/hard/kid4               n=200 surv 21.6s score 102.5 lvl1 nulls (0) f/min 7.73 unfair 0/614  2874ms
+humans/hard/kid5               n=200 surv 24.1s score 112 lvl1 nulls (0) f/min 7.16 unfair 0/627  2448ms
+humans/hard/kid6               n=200 surv 29.8s score 153 lvl1 nulls (0) f/min 5.98 unfair 0/684  3132ms
+humans/hard/casual             n=200 surv 74.8s score 528 lvl1 nulls (0.36) f/min 3.44 unfair 0/1134  8971ms
+humans/hard/lagBot0.25         n=200 surv 69.7s score 529.5 lvl1 nulls (0.34) f/min 2.8 unfair 0/1159  13784ms
+wrote out/patched-a.json

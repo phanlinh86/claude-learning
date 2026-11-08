@@ -124,3 +124,8 @@ SFX: bounce "boing" (pitch rises a little with height in the level), spring "BOI
 - Pointer Events on the stage (not on UI): **hold** the left half → steer −1, right half → +1; multiple pointers: the latest one wins; release → 0 (or the remaining pointer's side). Keys: ←/A, →/D held; releasing one key falls back to the other if still held.
 - iOS: audio unlock in the first `touchend`; `visibilitychange` pauses and suspends audio; kid-proofing (no zoom, no rubber-band, no callouts, no text selection, `touch-action: none` on the stage).
 - Home screen: `manifest.webmanifest` plus 180/192/512 PNG icons from `tools/render_mobile_icons.js`.
+
+## 9. Changes after build and QA (2026-11-08)
+- Mechanics (engineer): `world.fireflies` is the array (count in `fireflyCount`); puffs grow back 3.5 s after a poof; Easy goal 115; `gotoLevel` gives no bonus. Extra fields: platforms `xm, hr, om, ph, path, lvl, regrown`; hero `started`; wind `ax`.
+- Playtest patch: `maxVx 6.5 → 5.0`, `landPad 0.22 → 0.32`, `lanternSize 20 → 15`, `sideDx [3,6] → [2.5,5]`, `goal.normal 140 → 125`, widthK Easy 1.5 / Normal 1.2 / Hard 0.95, Easy `maxDx 2.6`. Rescue trampoline aimed under the nearest reachable platform; no springs on side platforms; side platforms never overlap others. Note: bot skill 0.5 (0.15 s delay) plays better than a casual adult; the human-like models are in `tests/sim/lib.js`.
+- Renderer: `FLY_W 0.85` with a plum backing disc, hay drawn 20 % flatter, hero ×1.25 / fireflies ×1.2 in portrait, merged "+N" beside Clover, banner at `ins.top + 58` and faded when Clover is under it, yellow wind chevrons, "Wind coming" / "Wind blowing" label.

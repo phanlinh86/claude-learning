@@ -28,7 +28,7 @@
     clover: [128, 128, 64, 118], hay: [192, 96, 96, 14], plank: [160, 48, 80, 8], cart: [224, 128, 112, 22], puff: [192, 96, 96, 18],
     trampoline: [256, 96, 128, 26], spring: [64, 80, 32, 78], firefly: [64, 64, 32, 34], ground: [1280, 420, 640, 330]
   };
-  const HERO_W = 1.35, FLY_W = 0.75, BOTTOM_PAD = 1.0;   // u; the screen bottom shows world y = camY − BOTTOM_PAD
+  const HERO_W = 1.35, FLY_W = 0.85, BOTTOM_PAD = 1.0;   // u; the screen bottom shows world y = camY − BOTTOM_PAD
 
   class Renderer {
     constructor(canvas) {
@@ -218,7 +218,7 @@
       if (p.kind === 'rescue' && p.bounces > 0) alpha = Math.max(0, 1 - (p.t || 0) / 0.5);
       if (alpha <= 0.01) return;
       const key = p.kind === 'rescue' ? 'trampoline' : p.kind, B = BOX[key] || BOX.hay;
-      const H = W * B[1] / B[0];
+      const H = W * B[1] / B[0] * (p.kind === 'hay' ? 0.8 : 1);   // bales drawn a little flatter (visual QA)
       // soft drop shadow for depth
       if (p.kind !== 'puff') { g.globalAlpha = 0.12 * alpha; g.fillStyle = '#203040'; g.beginPath(); g.ellipse(x, y + H * 0.85 + 3, W * 0.42, Math.max(3, H * 0.12), 0, 0, TAU); g.fill(); g.globalAlpha = 1; }
       if (p.kind === 'cart') {
@@ -256,17 +256,20 @@
       if (f.state !== 'live') return;
       const x = this.sx(lerp(f.prevX, f.x, a)), y = this.sy(lerp(f.prevY, f.y, a), cam);
       if (y < -40 || y > this.VH + 40) return;
-      const s = FLY_W * this.unit, pulse = 0.85 + 0.15 * Math.sin(this.time * 5 + f.id);
-      // warm halo (additive)
+      const s = FLY_W * this.unit * (this.portrait ? 1.2 : 1), pulse = 0.85 + 0.15 * Math.sin(this.time * 5 + f.id);
+      // a soft plum backing disc with a bright rim (reads over hay and pale sky), then the warm additive halo
+      g.globalAlpha = 0.35; g.fillStyle = '#5a3d5c'; g.beginPath(); g.arc(x, y, s * 0.46, 0, TAU); g.fill();
+      g.globalAlpha = 0.55 * pulse; g.strokeStyle = '#fff6b0'; g.lineWidth = 2; g.stroke();
       g.globalCompositeOperation = 'lighter'; g.globalAlpha = 0.35 * pulse;
       this.drawSpr(g, 'p_glow', x, y, s * 1.5, s * 1.5, 0.5, 0.5);
       g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
       const custom = FH.Assets.hasCustom('firefly');
       const fr = Math.floor(this.time * 10 + f.id) % 2;
       const flip = this.world && this.world.wind.strength > 0.2 ? this.world.wind.dir < 0 : Math.sin(this.time * 0.8 + f.id) < 0;
-      if (custom) this.drawSpr(g, 'custom:firefly', x, y, s * 0.8, s * 0.8, 0.5, 0.5, Math.sin(this.time * 3 + f.id) * 0.15);
+      if (custom) this.drawSpr(g, 'custom:firefly', x, y, s, s, 0.5, 0.5, Math.sin(this.time * 3 + f.id) * 0.15);
       else this.drawSpr(g, 'firefly_' + fr, x, y, s * pulse, s * pulse, 0.5, 34 / 64, Math.sin(this.time * 3 + f.id) * 0.12, flip ? -1 : 1, 1);
     }
+    hs() { return this.portrait ? 1.25 : 1; }   // hero draw scale (hit boxes unchanged)
     heroKey(h) {
       switch (h.mood) {
         case 'crouch': return 'clover_crouch';
@@ -280,7 +283,7 @@
     drawHero(g, cam, a) {
       const w = this.world, h = w.hero, u = this.unit;
       const x = this.sx(lerp(h.prevX, h.x, a)), y = this.sy(lerp(h.prevY, h.y, a), cam);
-      const S = HERO_W * u;
+      const S = HERO_W * u * this.hs();
       if (h.invuln > 0 && w.phase === 'play' && Math.floor(this.time * 12) % 2 === 0 && h.rescueT <= 0) g.globalAlpha = 0.55;
       const sq = h.squash || 0, st = h.stretch || 0;
       const kx = (1 + 0.24 * sq - 0.07 * st), ky = (1 - 0.24 * sq + 0.13 * st);
@@ -301,7 +304,7 @@
       g.globalAlpha = 1;
       if (h.rescueT > 0) {   // a rescue bubble
         const k = clamp(h.rescueT / 1.2, 0, 1), r = S * 0.62;
-        g.globalAlpha = 0.6 * k; g.strokeStyle = '#ffffff'; g.lineWidth = 3; g.fillStyle = 'rgba(190,230,255,0.25)';
+        g.globalAlpha = 0.9 * k; g.strokeStyle = '#ffffff'; g.lineWidth = 4; g.fillStyle = 'rgba(170,220,255,0.4)';
         g.beginPath(); g.arc(x, y - S * 0.42, r, 0, TAU); g.fill(); g.stroke();
         g.globalAlpha = 0.8 * k; g.beginPath(); g.arc(x - r * 0.4, y - S * 0.42 - r * 0.45, r * 0.12, 0, TAU); g.fillStyle = '#fff'; g.fill();
         g.globalAlpha = 1;
@@ -321,9 +324,9 @@
               if (e.kind === 'hay' || e.kind === 'cart') wx.burst('straw', x, y, e.spring ? 6 : 3, { speed: 110, life: 0.55, size: 0.28 * u, spread: Math.PI * 0.9, angle: -Math.PI / 2, gravity: 260, spin: 6, layer: 'front' });
               else if (e.kind === 'puff') wx.burst('puff', x, y, 4, { speed: 70, life: 0.5, size: 0.4 * u, spread: Math.PI, angle: -Math.PI / 2, drag: 2.5, layer: 'front' });
               else if (e.kind === 'plank') wx.burst('dust', x, y, 3, { speed: 70, life: 0.4, size: 0.3 * u, spread: Math.PI * 0.8, angle: -Math.PI / 2, drag: 3, layer: 'front' });
-              if (e.spring) { wx.burst('sparkle', x, y - 0.4 * u, 8, { speed: 200, life: 0.6, size: 0.26 * u, spread: TAU, layer: 'front', drag: 2 }); this.texts.push({ x, y: y - u * 1.6, s: 'BOING!', t: 0, col: '#ff5a5f' }); }
+              if (e.spring) { wx.burst('sparkle', x, y - 0.4 * u, 8, { speed: 200, life: 0.6, size: 0.26 * u, spread: TAU, layer: 'front', drag: 2 }); this.texts.push({ x, y: y + u * 0.7, s: 'BOING!', t: 0, col: '#ff5a5f', down: true }); }
             }
-            if (e.kind === 'rescue') { this.texts.push({ x, y: y - u * 1.8, s: 'Boing! Up you go!', t: 0, col: '#ffffff' }); }
+            if (e.kind === 'rescue') { this.texts.push({ x, y: y + u * 0.8, s: 'Boing! Up you go!', t: 0, col: '#ffffff', down: true }); }
             break;
           }
           case 'poof': {
@@ -335,16 +338,20 @@
             const x = this.sx(e.x), y = this.sy(e.y, cam);
             if (wx) wx.burst('sparkle', x, y, 5, { speed: 130, life: 0.45, size: 0.22 * u, spread: TAU, layer: 'front' });
             this.rings.push({ x, y, t: 0 });
-            this.texts.push({ x, y: y - 0.5 * u, s: '+10', t: 0, col: '#fff27a', off: (this._txtOff = ((this._txtOff || 0) + 1) % 3) });
+            // one "+N" beside Clover (the side away from the nearer wall), merged instead of stacking on her face
+            const side = w.hero.x < (FH.World.CONFIG.COLW / 2) ? 1 : -1, hx = this.sx(w.hero.x) + side * (0.75 * this.hs() * u + 18);
+            const last = this.texts.find(t => t.plus && t.t < 0.45);
+            if (last) { last.n += 10; last.s = '+' + last.n; last.t = 0.05; last.x = hx; last.y = this.sy(w.hero.y, cam) - 0.6 * u; }
+            else this.texts.push({ x: hx, y: this.sy(w.hero.y, cam) - 0.6 * u, s: '+10', n: 10, plus: true, t: 0, col: '#fff27a' });
             this.flyers.push({ x, y, t: 0 });
             break;
           }
-          case 'lantern': this.texts.push({ x: this.VW / 2, y: this.VH * 0.4, s: 'Lantern full! +1 heart', t: 0, col: '#fff27a', big: true }); this.flash = 0.3; this.flashCol = '#fff6c0'; break;
+          case 'lantern': this.texts.push({ x: this.VW / 2, y: this.VH * 0.4, s: 'Lantern full! +1 heart', t: 0, col: '#fff27a', big: true, ay: 0.26 }); this.flash = 0.3; this.flashCol = '#fff6c0'; break;
           case 'heartGain': case 'fall': this.heartPulse = 1; if (e.type === 'fall') { this.shake = Math.max(this.shake, 0.3); this.flash = 0.2; this.flashCol = '#d6ecff'; } break;
           case 'rescue': { const x = this.sx(e.x), y = this.sy(e.y, cam); if (wx) wx.burst('sparkle', x, this.VH - 30, 10, { speed: 220, life: 0.7, size: 0.26 * u, spread: Math.PI, angle: -Math.PI / 2, layer: 'front' }); break; }
           case 'windWarn': this.vanePulse = 1; this._windMsg = this._seenWind ? 1.6 : 3.2; this._seenWind = true; break;
           case 'windStart': if (wx) { for (let i = 0; i < 3; i++) wx.burst('gust', e.dir > 0 ? -40 : this.VW + 40, this.VH * (0.25 + 0.2 * i), 1, { speed: 520, life: 1.6, size: 2.2 * u, angle: e.dir > 0 ? 0 : Math.PI, spread: 0.1, layer: 'front', drag: 0.4 }); } break;
-          case 'levelUp': this.showBanner(e.zone); this.flash = 0.45; this.flashCol = '#fffaf0'; if (e.bonus) this.texts.push({ x: this.VW / 2, y: this.VH * 0.62, s: 'Weather bonus +' + e.bonus, t: 0, col: '#fff3c4', big: true }); break;
+          case 'levelUp': this.showBanner(e.zone); this.flash = 0.45; this.flashCol = '#fffaf0'; if (e.bonus) this.texts.push({ x: this.VW / 2, y: this.VH * 0.8, s: 'Weather bonus +' + e.bonus, t: 0, col: '#fff3c4', big: true }); break;
           case 'gameOver': this.shake = 0.25; break;
         }
       }
@@ -395,7 +402,7 @@
         this.drawParticles(g, 'front');
         if (wx.ambient && wx.ambient.tint) { g.fillStyle = wx.ambient.tint; g.fillRect(0, 0, VW, VH); }
       }
-      if (w) this.drawJuice(g);
+      if (w && mode !== 'title') this.drawJuice(g);
       if (this.flash > 0) { g.globalAlpha = Math.min(0.55, this.flash); g.fillStyle = this.flashCol; g.fillRect(0, 0, VW, VH); g.globalAlpha = 1; }
       g.setTransform(px, 0, 0, px, 0, 0);
       if (w && (mode === 'playing' || mode === 'paused' || mode === 'over')) this.drawHud(g, mode);
@@ -419,8 +426,10 @@
       g.textAlign = 'center'; g.textBaseline = 'middle';
       for (const t of this.texts) {
         const life = t.big ? 1.8 : 0.8, k = t.t / life, a = k < 0.7 ? 1 : 1 - (k - 0.7) / 0.3;
-        const y = t.y - (t.big ? 18 : 36) * Math.min(1, t.t / 0.5) - (t.off || 0) * 16, fs = t.big ? 28 : 21, pop = 1 + 0.3 * Math.max(0, 1 - t.t / 0.15);
-        g.globalAlpha = Math.max(0, a); g.font = '900 ' + Math.round(fs * pop) + 'px ' + FONT;
+        const by = t.ay ? this.VH * t.ay + (this.ins.top || 0) : t.y;
+        const y = by + (t.down ? 14 : -(t.big ? 18 : 30)) * Math.min(1, t.t / 0.5), fs = t.big ? 28 : 21, pop = 1 + 0.3 * Math.max(0, 1 - t.t / 0.15);
+        const H = this._heroScr, over = H && Math.abs(t.x - H.x) < (t.big ? 200 : 60) && Math.abs(y - H.y) < 0.9 * this.unit * this.hs() + 14;
+        g.globalAlpha = Math.max(0, a) * (over ? 0.35 : 1); g.font = '900 ' + Math.round(fs * pop) + 'px ' + FONT;
         g.lineWidth = 5; g.lineJoin = 'round'; g.strokeStyle = 'rgba(40,40,70,.75)'; g.strokeText(t.s, t.x, y);
         g.fillStyle = t.col; g.fillText(t.s, t.x, y);
       }
@@ -476,30 +485,34 @@
       const W = w.wind;
       if (W && W.state !== 'calm' && w.phase === 'play') {
         const vs = 64, vx = this.VW / 2, vy = by + (this.portrait ? 92 : 84);
+        const Hh = this._heroScr, under = Hh && Math.abs(Hh.x - vx) < 150 && Hh.y < vy + 90;
+        g.save(); if (under) g.globalAlpha = 0.35;
         const warn = W.state === 'warn', blink = warn ? (Math.sin(this.time * 14) * 0.5 + 0.5) : 1;
         g.globalAlpha = 0.85; g.fillStyle = 'rgba(255,253,245,.75)'; g.beginPath(); g.arc(vx, vy, vs * 0.55, 0, TAU); g.fill(); g.globalAlpha = 1;
         const wob = warn ? Math.sin(this.time * 9) * 0.25 * (1 - W.t / Math.max(0.1, W.dur || 1.6)) : Math.sin(this.time * 20) * 0.05 * W.strength;
         this.drawSpr(g, 'vane', vx, vy, vs, vs, 0.5, 0.5, wob, W.dir < 0 ? -1 : 1, 1, 0.6 + 0.4 * blink);
         // big chevrons pointing where the wind will push
-        g.fillStyle = warn ? 'rgba(255,255,255,' + (0.5 + 0.5 * blink) + ')' : '#ffffff'; g.strokeStyle = 'rgba(47,59,82,.55)'; g.lineWidth = 2.5;
+        g.fillStyle = warn ? 'rgba(255,214,63,' + (0.55 + 0.45 * blink) + ')' : '#ffd63f'; g.strokeStyle = '#3a2f1a'; g.lineWidth = 3; g.lineJoin = 'round';
         for (let i = 0; i < 3; i++) {
           const cx = vx + W.dir * (vs * 0.75 + i * 18 + (this.time * 40 % 18)), cy = vy;
           g.beginPath(); g.moveTo(cx - W.dir * 7, cy - 10); g.lineTo(cx + W.dir * 5, cy); g.lineTo(cx - W.dir * 7, cy + 10); g.lineTo(cx - W.dir * 2, cy); g.closePath(); g.fill(); g.stroke();
         }
         if (this._windMsg > 0 && !this.banner) {
-          const a = Math.min(1, this._windMsg / 0.4), s = W.dir > 0 ? 'Wind blowing →' : '← Wind blowing';
+          const a = Math.min(1, this._windMsg / 0.4), lab = warn ? 'Wind coming' : 'Wind blowing', s = W.dir > 0 ? lab + ' →' : '← ' + lab;
           g.globalAlpha = a; g.textAlign = 'center'; g.font = '900 18px ' + FONT; g.lineWidth = 5; g.lineJoin = 'round';
           g.strokeStyle = 'rgba(40,50,80,.85)'; g.fillStyle = '#ffffff'; g.strokeText(s, vx, vy + 46); g.fillText(s, vx, vy + 46); g.globalAlpha = 1;
         }
+        g.restore();
       }
     }
     drawBanner(g) {
       if (!this.banner) return;
       const VW = this.VW, b = this.banner, t = b.t, a = t < 0.35 ? t / 0.35 : t > 2.4 ? Math.max(0, 1 - (t - 2.4) / 0.6) : 1;
-      const topY = this.portrait ? this.ins.top + 190 : this.ins.top + 72;
+      const topY = this.portrait ? this.ins.top + 190 : this.ins.top + 58;
       const y = topY - (1 - Math.min(1, t / 0.35)) * 20;
       const info = ZONE_INFO[b.s], bw = Math.min(VW - 40, 420), bh = 72;
-      g.globalAlpha = a;
+      const H = this._heroScr, under = H && Math.abs(H.x - VW / 2) < bw / 2 + 40 && H.y < y + bh + 0.9 * this.unit * this.hs();
+      g.globalAlpha = a * (under ? 0.3 : 1);
       g.fillStyle = '#fffdf5'; g.strokeStyle = info.pal.bar; g.lineWidth = 4;
       this._rr(g, VW / 2 - bw / 2, y, bw, bh, 22); g.fill(); g.stroke();
       g.textAlign = 'center'; g.textBaseline = 'middle';

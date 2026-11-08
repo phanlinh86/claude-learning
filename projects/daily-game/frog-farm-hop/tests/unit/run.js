@@ -149,7 +149,7 @@ test('platforms are one-way (pass through from below, land from above)', () => {
   assert.notStrictEqual(ev[0].id, up.id, 'first landing is the low plank');
   assert.strictEqual(ev[1].id, up.id, 'rising through the upper plank, then landing on it');
   // outside the landing width → no landing
-  const w2 = clean('normal'); w2.spawn('plank', 6, 0, { w: 1.7 }); w2.hero.x = 6 + 0.85 + 0.3; w2.hero.y = 0.5;
+  const w2 = clean('normal'); w2.spawn('plank', 6, 0, { w: 1.7 }); w2.hero.x = 6 + 0.85 + FH.World.CONFIG.landPad + 0.1; w2.hero.y = 0.5;
   const e2 = run(w2, 1.0);
   assert.strictEqual(of(e2, 'bounce').length, 0);
 });
@@ -370,19 +370,19 @@ test('wind: actually pushes Clover (acceleration, may exceed maxVx a little), sc
 
 // ---------- levels, score ----------
 test('level up at the goal: bonus, +1 heart, happy, loop scaling', () => {
-  const w = clean('normal'); w.hearts = 2; w.spawn('hay', 6, 139.5, { w: 6 }); w.camY = 135; w.hero.y = 140.2; w.hero.vy = 1; w.maxY = 139.9;
+  const w = clean('normal'); w.hearts = 2; const G = C.goal.normal; w.spawn('hay', 6, G - 0.5, { w: 6 }); w.camY = G - 5; w.hero.y = G + 0.2; w.hero.vy = 1; w.maxY = G - 0.1;
   const s0 = w.score;
   const ev = run(w, 0.05);
   const lu = of(ev, 'levelUp')[0];
   assert.ok(lu && lu.level === 1 && lu.zone === 1 && lu.bonus === 100);
   assert.strictEqual(w.hearts, 3); assert.strictEqual(of(ev, 'heartGain').length, 1);
   assert.ok(w.score >= s0 + 100); assert.strictEqual(w.hero.mood, 'happy');
-  near(w.levelY0, 140, 0.3); assert.strictEqual(w.goal, 140);
+  near(w.levelY0, G, 0.3); assert.strictEqual(w.goal, G);
   w.gotoLevel(3); let e2 = w.drainEvents(); assert.strictEqual(of(e2, 'levelUp')[0].zone, 3);
-  w.maxY = w.levelY0 + 140.01; w.hero.y = w.maxY + 0.1; w.hero.vy = 1;
+  w.maxY = w.levelY0 + G + 0.01; w.hero.y = w.maxY + 0.1; w.hero.vy = 1;
   e2 = run(w, 0.02); const l4 = of(e2, 'levelUp')[0];
   assert.ok(l4 && l4.level === 4 && l4.zone === 0 && l4.bonus === 400, JSON.stringify(l4));
-  assert.strictEqual(w.loop, 1); near(w.goal, 154, 1e-9);
+  assert.strictEqual(w.loop, 1); near(w.goal, G * 1.1, 1e-9);
   assert.deepStrictEqual([mk('easy').goal, mk('normal').goal, mk('hard').goal], [C.goal.easy, C.goal.normal, C.goal.hard]);
   const lv5 = mk('normal', 1, { level: 5 }); assert.strictEqual(lv5.zone, 1); assert.strictEqual(lv5.loop, 1);
   const bonusL5 = C.levelBonus * (lv5.zone + 1) * (lv5.loop + 1); assert.strictEqual(bonusL5, 400);
@@ -428,7 +428,7 @@ test('setX, spawn, alpha and prev* for interpolation', () => {
   w.setX(-5); assert.strictEqual(w.hero.x, 0.55);
   w.update(H * 2.5); near(w.alpha, 0.5, 1e-6);
   assert.ok(w.hero.prevY !== w.hero.y);
-  const p = w.spawn('plank', 5, 5); assert.ok(p.id && w.platforms.includes(p) && p.w === 1.7);
+  const p = w.spawn('plank', 5, 5); assert.ok(p.id && w.platforms.includes(p) && Math.abs(p.w - 1.7 * FH.World.CONFIG.difficulty.normal.widthK) < 1e-9);
   w.setLayout(960, 540);
 });
 

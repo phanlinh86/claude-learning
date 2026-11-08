@@ -115,7 +115,7 @@
     gameOver() {
       const w = this.world, key = 'best_' + (this.runDifficulty || this.difficulty());
       const prev = parseInt(FH.Storage.get(key, '0'), 10) || 0, newBest = w.score > prev;
-      if (newBest) FH.Storage.set(key, String(w.score));
+      if (newBest && !this.botMode) FH.Storage.set(key, String(w.score));   // bot / test runs never overwrite a child's best
       this.mode = 'over'; this.overAt = performance.now();
       this.clearInput();
       FH.Audio.stopMusic();
@@ -185,10 +185,10 @@
           if (ui === 'scrHow' || ui === 'scrSettings' || ui === 'scrCustom') { FH.UI.back(); e.preventDefault(); return; }
           return;
         }
-        if (this.mode === 'playing' && STEER_KEYS[e.code]) { e.preventDefault(); if (!e.repeat) this._press('k' + e.code, STEER_KEYS[e.code]); return; }
+        if (this.mode === 'playing' && STEER_KEYS[e.code]) { e.preventDefault(); if (!e.repeat || !(this._order || []).some(o => o.id === 'k' + e.code)) this._press('k' + e.code, STEER_KEYS[e.code]); return; }   // a key still held after Resume steers again on its auto-repeat
         if (this.mode === 'playing' && ['Space', 'Enter', 'ArrowUp', 'ArrowDown', 'KeyW', 'KeyS'].includes(e.code)) { e.preventDefault(); return; }
         if (this.mode === 'over' && (e.code === 'Enter' || e.code === 'Space')) { const f = document.activeElement; if (f && f.tagName === 'BUTTON' && f.id !== 'btnAgain') return; e.preventDefault(); if (!e.repeat && this.canRestart()) this.startGame(); return; }
-        if (this.mode === 'title' && ui === 'scrTitle' && e.code === 'Space') {
+        if (this.mode === 'title' && ui === 'scrTitle' && (e.code === 'Space' || e.code === 'Enter')) {
           const f = document.activeElement;
           if (f && f.tagName === 'BUTTON' && f.id !== 'btnPlay') return;
           e.preventDefault(); this.startGame();
@@ -329,7 +329,7 @@
     getState() {
       const w = Game.world; if (!w) return null;
       const st = w.getState();
-      st.mode = Game.mode; st.particles = Game.weather ? Game.weather.particles.length : 0; st.fx = Game.renderer.fx.length;
+      st.mode = Game.mode; st.particles = Game.weather ? Game.weather.particles.length : 0; st.fx = Game.renderer.texts.length + Game.renderer.rings.length + Game.renderer.flyers.length;
       return st;
     },
     setSpeed(n) { Game.speed = n; },

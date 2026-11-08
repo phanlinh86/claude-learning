@@ -58,24 +58,24 @@
     step: 1 / 120,
     COLW: 12, heroR: 0.55, wallBounce: -0.35,
     g: 26, bounceV: 12.4, springK: 1.6, rescueK: 1.45, maxFall: 16,
-    maxVx: 6.5, accel: 34, drag: 8,
-    landPad: 0.22, springPad: 0.45,
+    maxVx: 5.0, accel: 34, drag: 8,
+    landPad: 0.32, springPad: 0.45,
     squashT: 0.18, stretchRate: 14, tiltMax: 0.22, tiltRate: 10, crouchT: 0.1, startDelay: 0.6,
     camLead: 4.2, camRate: 6, genAhead: 24, removeBelow: 2, fallLine: 1.2,
-    catchR: 0.8, bodyY: 0.55, lanternSize: 20, flyPoints: 10, comboT: 1.2,
+    catchR: 0.8, bodyY: 0.55, lanternSize: 15, flyPoints: 10, comboT: 1.2,
     flyAmp: 0.15, flyPeriod: 1.5, flyWind: 0.8, flyHome: 0.6,
     firstGust: 6, gustInK: 0.4, gustOutK: 0.5, windOverK: 0.35, flipChance: 0.7,
     rescueY: 0.6, rescueHeroY: -0.4, rescueW: 3.0, rescueT: 1.2, rescueLife: 2.0, rescueAfter: 0.5,
     invuln: 1.6, ouchT: 0.7, happyT: 1.0, puffT: 0.35, puffRegrow: 3.5, springShow: 0.25,
-    sideChance: 0.35, sideDx: [3, 6], springChance: 0.08, springFrom: 20,
+    sideChance: 0.35, sideDx: [2.5, 5], springChance: 0.08, springFrom: 20,
     maxGap: 2.7, loopGap: 0.08, reachSafety: 0.8, edgeMargin: 0.3,
     widths: { hay: 2.4, plank: 1.7, cart: 2.3, puff: 2.1 },
     meterEvery: 25, levelBonus: 100,
-    goal: { easy: 115, normal: 140, hard: 160 },
+    goal: { easy: 115, normal: 125, hard: 160 },
     difficulty: {
-      easy:   { hearts: 5, gap: [1.3, 2.0], maxDx: 3.0, widthK: 1.35, windK: 0.6,  warnT: 2.0, cartSpeed: 0.7,  flyEvery: [5, 7] },
-      normal: { hearts: 3, gap: [1.5, 2.4], maxDx: 4.0, widthK: 1.0,  windK: 1.0,  warnT: 1.6, cartSpeed: 1.0,  flyEvery: [6, 9] },
-      hard:   { hearts: 3, gap: [1.7, 2.6], maxDx: 4.6, widthK: 0.88, windK: 1.25, warnT: 1.3, cartSpeed: 1.25, flyEvery: [7, 10] }
+      easy:   { hearts: 5, gap: [1.3, 2.0], maxDx: 2.6, widthK: 1.5,  windK: 0.6,  warnT: 2.0, cartSpeed: 0.7,  flyEvery: [5, 7] },
+      normal: { hearts: 3, gap: [1.5, 2.4], maxDx: 4.0, widthK: 1.2,  windK: 1.0,  warnT: 1.6, cartSpeed: 1.0,  flyEvery: [6, 9] },
+      hard:   { hearts: 3, gap: [1.7, 2.6], maxDx: 4.6, widthK: 0.95, windK: 1.25, warnT: 1.3, cartSpeed: 1.25, flyEvery: [7, 10] }
     },
     zones: [
       { key: 'sunny', kinds: { hay: 0.6, plank: 0.4 },                           wind: { every: [11, 15], blow: [2.2, 3.0], ax: 5 },  cartSpeed: 1.0, cartRange: [0.8, 1.2] },
@@ -268,8 +268,9 @@
         var sw = C.widths[sk] * D.widthK, sdx = r.range(C.sideDx[0], C.sideDx[1]) * r.sign();
         var sx = x + sdx, slo = sw / 2 + C.edgeMargin, shi = C.COLW - sw / 2 - C.edgeMargin;
         if (sx < slo || sx > shi) sx = x - sdx;
-        if (sx >= slo && sx <= shi && M.abs(sx - x) >= (sw + w) / 2 + hr + 0.4) {
-          var sp = this._mkPlat(sk, sx, y + r.range(-0.35, 0.35), { w: sw, spring: sk === 'hay' && y > C.springFrom && r.chance(C.springChance * 0.5) });
+        var sy = y + r.range(-0.35, 0.35);
+        if (sx >= slo && sx <= shi && M.abs(sx - x) >= (sw + w) / 2 + hr + 0.4 && !this._overlaps(sx, sy, sw)) {
+          var sp = this._mkPlat(sk, sx, sy, { w: sw, spring: false });   // no springs on side platforms (playtest: a launch could land nowhere)
           sp.lvl = L; this.platforms.push(sp);
         }
       }
@@ -277,6 +278,15 @@
       G.lastPuff = kind === 'puff';
       G.top = y;
     }
+  };
+  /** true when a platform of width w at (x, y) would touch another one within 1.5 u of height (visual overlap) */
+  World.prototype._overlaps = function (x, y, w) {
+    for (var i = this.platforms.length - 1; i >= 0; i--) {
+      var q = this.platforms[i]; if (q.kind === 'ground') continue;
+      if (M.abs(q.y - y) < 1.5 && M.abs(q.x - x) < (q.w + w) / 2 + (q.hr || 0) + 0.3) return true;
+      if (q.y < y - 3) break;
+    }
+    return false;
   };
   World.prototype._cartSpeedFor = function (zone, loop) {
     return CONFIG.zones[zone].cartSpeed * this.D.cartSpeed * (1 + 0.1 * loop);
@@ -559,7 +569,17 @@
     }
     // remove any older rescue mat, spawn a fresh one and throw Clover up through it
     for (var i = this.platforms.length - 1; i >= 0; i--) if (this.platforms[i].kind === 'rescue') this.platforms.splice(i, 1);
-    var x = clamp(h.x, 1.6, C.COLW - 1.6);
+    // aim the trampoline under the nearest platform Clover can reach from its throw (playtest: hands-off rescues
+    // used to throw her into nothing a third of the time)
+    var x = clamp(h.x, 1.6, C.COLW - 1.6), best = null, bd = 1e9;
+    for (var j = 0; j < this.platforms.length; j++) {
+      var q = this.platforms[j];
+      if (q.kind === 'rescue' || q.kind === 'ground' || q.state !== 'live' || q.kind === 'puff') continue;
+      if (q.y < this.camY + 1.6 || q.y > this.camY + 5.0) continue;
+      var d = M.abs(q.x - h.x) + (q.kind === 'cart' ? 1 : 0);
+      if (d < bd) { bd = d; best = q; }
+    }
+    if (best) x = clamp(best.kind === 'cart' ? best.xm : best.x, 1.6, C.COLW - 1.6);
     var p = this._mkPlat('rescue', x, this.camY + C.rescueY, { w: C.rescueW });
     this.platforms.push(p);
     h.y = h.prevY = this.camY + C.rescueHeroY;

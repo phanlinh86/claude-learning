@@ -1,0 +1,6308 @@
+{
+ "patch": {},
+ "quick": false,
+ "groups": {
+  "bots/easy/bot1": {
+   "diff": "easy",
+   "player": "bot1",
+   "unlimited": false,
+   "n": 40,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 40
+   },
+   "score": {
+    "p10": 11847.1,
+    "med": 12081.5,
+    "p90": 12303
+   },
+   "climb": 2.36,
+   "levels": {
+    "med": 11,
+    "p90": 11
+   },
+   "level1": {
+    "reach": 1,
+    "med": 47.6
+   },
+   "perLevel": {
+    "med": 54.2,
+    "p10": 46.9,
+    "p90": 59.1,
+    "n": 440
+   },
+   "byZone": [
+    {
+     "med": 54.3,
+     "n": 120,
+     "fallsPerMin": 0,
+     "gustFallShare": null,
+     "gustFallsPerGust": 0,
+     "minutes": 107
+    },
+    {
+     "med": 54.5,
+     "n": 120,
+     "fallsPerMin": 0,
+     "gustFallShare": null,
+     "gustFallsPerGust": 0,
+     "minutes": 107.5
+    },
+    {
+     "med": 54.2,
+     "n": 120,
+     "fallsPerMin": 0.01,
+     "gustFallShare": 0,
+     "gustFallsPerGust": 0,
+     "minutes": 107.1
+    },
+    {
+     "med": 51.5,
+     "n": 80,
+     "fallsPerMin": 0,
+     "gustFallShare": null,
+     "gustFallsPerGust": 0,
+     "minutes": 78.4
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1.6,
+   "firstFlyP90": 3.5,
+   "stall": {
+    "p90": 5.2,
+    "max": 9.9,
+    "over30": 0
+   },
+   "fallsPerMin": 0,
+   "gustFallShare": 0,
+   "postRescueShare": 0,
+   "springFallShare": 0,
+   "fallKinds": {
+    "cart": 1
+   },
+   "fireflyPerMin": 58.9,
+   "lanternsPerMin": 2.89,
+   "heartsGainedPerMin": 2.89,
+   "oracle": {
+    "checked": 1,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "bots/easy/bot0.85": {
+   "diff": "easy",
+   "player": "bot0.85",
+   "unlimited": false,
+   "n": 40,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 40
+   },
+   "score": {
+    "p10": 12073.2,
+    "med": 12305.5,
+    "p90": 12541.7
+   },
+   "climb": 2.35,
+   "levels": {
+    "med": 11,
+    "p90": 11
+   },
+   "level1": {
+    "reach": 1,
+    "med": 47.5
+   },
+   "perLevel": {
+    "med": 54.2,
+    "p10": 47.3,
+    "p90": 59.2,
+    "n": 438
+   },
+   "byZone": [
+    {
+     "med": 55.3,
+     "n": 120,
+     "fallsPerMin": 0,
+     "gustFallShare": null,
+     "gustFallsPerGust": 0,
+     "minutes": 107.6
+    },
+    {
+     "med": 54.8,
+     "n": 120,
+     "fallsPerMin": 0,
+     "gustFallShare": null,
+     "gustFallsPerGust": 0,
+     "minutes": 108.3
+    },
+    {
+     "med": 54.1,
+     "n": 118,
+     "fallsPerMin": 0.01,
+     "gustFallShare": 0,
+     "gustFallsPerGust": 0,
+     "minutes": 107.2
+    },
+    {
+     "med": 51.7,
+     "n": 80,
+     "fallsPerMin": 0.01,
+     "gustFallShare": 0,
+     "gustFallsPerGust": 0,
+     "minutes": 76.9
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1.7,
+   "firstFlyP90": 3.8,
+   "stall": {
+    "p90": 4.4,
+    "max": 6.3,
+    "over30": 0
+   },
+   "fallsPerMin": 0,
+   "gustFallShare": 0,
+   "postRescueShare": 0,
+   "springFallShare": 0,
+   "fallKinds": {
+    "plank": 1,
+    "puff": 1
+   },
+   "fireflyPerMin": 61.2,
+   "lanternsPerMin": 3.02,
+   "heartsGainedPerMin": 3.02,
+   "oracle": {
+    "checked": 2,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "bots/easy/bot0.7": {
+   "diff": "easy",
+   "player": "bot0.7",
+   "unlimited": false,
+   "n": 40,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 40
+   },
+   "score": {
+    "p10": 11391.9,
+    "med": 11807.5,
+    "p90": 12719.5
+   },
+   "climb": 2.29,
+   "levels": {
+    "med": 10,
+    "p90": 11
+   },
+   "level1": {
+    "reach": 1,
+    "med": 48.6
+   },
+   "perLevel": {
+    "med": 54.6,
+    "p10": 47.8,
+    "p90": 60.8,
+    "n": 417
+   },
+   "byZone": [
+    {
+     "med": 55.5,
+     "n": 120,
+     "fallsPerMin": 0.03,
+     "gustFallShare": 0.33,
+     "gustFallsPerGust": 0.003,
+     "minutes": 109.7
+    },
+    {
+     "med": 55.8,
+     "n": 120,
+     "fallsPerMin": 0.06,
+     "gustFallShare": 0.43,
+     "gustFallsPerGust": 0.007,
+     "minutes": 110.8
+    },
+    {
+     "med": 53.7,
+     "n": 97,
+     "fallsPerMin": 0.04,
+     "gustFallShare": 1,
+     "gustFallsPerGust": 0.008,
+     "minutes": 107.2
+    },
+    {
+     "med": 53.2,
+     "n": 80,
+     "fallsPerMin": 0.04,
+     "gustFallShare": 0.33,
+     "gustFallsPerGust": 0.003,
+     "minutes": 72.3
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1.7,
+   "firstFlyP90": 3.4,
+   "stall": {
+    "p90": 5.7,
+    "max": 11.3,
+    "over30": 0
+   },
+   "fallsPerMin": 0.04,
+   "gustFallShare": 0.53,
+   "postRescueShare": 0,
+   "springFallShare": 0,
+   "fallKinds": {
+    "cart": 6,
+    "plank": 4,
+    "hay": 5,
+    "puff": 2
+   },
+   "fireflyPerMin": 63.4,
+   "lanternsPerMin": 3.12,
+   "heartsGainedPerMin": 3.13,
+   "oracle": {
+    "checked": 17,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "bots/easy/bot0.5": {
+   "diff": "easy",
+   "player": "bot0.5",
+   "unlimited": false,
+   "n": 40,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 39
+   },
+   "score": {
+    "p10": 6387.8,
+    "med": 7353.5,
+    "p90": 7754.1
+   },
+   "climb": 1.46,
+   "levels": {
+    "med": 7,
+    "p90": 7
+   },
+   "level1": {
+    "reach": 1,
+    "med": 80.7
+   },
+   "perLevel": {
+    "med": 80.8,
+    "p10": 62.7,
+    "p90": 102.7,
+    "n": 271
+   },
+   "byZone": [
+    {
+     "med": 91,
+     "n": 80,
+     "fallsPerMin": 1.35,
+     "gustFallShare": 0.19,
+     "gustFallsPerGust": 0.076,
+     "minutes": 121.8
+    },
+    {
+     "med": 82.8,
+     "n": 80,
+     "fallsPerMin": 1.53,
+     "gustFallShare": 0.26,
+     "gustFallsPerGust": 0.102,
+     "minutes": 111.5
+    },
+    {
+     "med": 71.8,
+     "n": 71,
+     "fallsPerMin": 1.56,
+     "gustFallShare": 0.39,
+     "gustFallsPerGust": 0.124,
+     "minutes": 98
+    },
+    {
+     "med": 71.2,
+     "n": 40,
+     "fallsPerMin": 1.53,
+     "gustFallShare": 0.31,
+     "gustFallsPerGust": 0.109,
+     "minutes": 68.4
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1.8,
+   "firstFlyP90": 4.5,
+   "stall": {
+    "p90": 25.1,
+    "max": 40.7,
+    "over30": 1
+   },
+   "fallsPerMin": 1.49,
+   "gustFallShare": 0.28,
+   "postRescueShare": 0,
+   "springFallShare": 0,
+   "fallKinds": {
+    "plank": 178,
+    "hay": 245,
+    "cart": 89,
+    "puff": 82
+   },
+   "fireflyPerMin": 43.3,
+   "lanternsPerMin": 2.11,
+   "heartsGainedPerMin": 2.41,
+   "oracle": {
+    "checked": 594,
+    "doomed": 1,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "bots/easy/bot0.3": {
+   "diff": "easy",
+   "player": "bot0.3",
+   "unlimited": false,
+   "n": 40,
+   "maxT": 600,
+   "survival": {
+    "p10": 91.7,
+    "med": 370.6,
+    "p90": 600,
+    "censored": 9
+   },
+   "score": {
+    "p10": 693.9,
+    "med": 4055,
+    "p90": 7317.3
+   },
+   "climb": 1.37,
+   "levels": {
+    "med": 4,
+    "p90": 7
+   },
+   "level1": {
+    "reach": 0.88,
+    "med": 90.2
+   },
+   "perLevel": {
+    "med": 81.9,
+    "p10": 66.8,
+    "p90": 102.4,
+    "n": 144
+   },
+   "byZone": [
+    {
+     "med": 90.2,
+     "n": 50,
+     "fallsPerMin": 3.02,
+     "gustFallShare": 0.25,
+     "gustFallsPerGust": 0.22,
+     "minutes": 88.2
+    },
+    {
+     "med": 81.6,
+     "n": 42,
+     "fallsPerMin": 2.85,
+     "gustFallShare": 0.25,
+     "gustFallsPerGust": 0.181,
+     "minutes": 65.6
+    },
+    {
+     "med": 76,
+     "n": 31,
+     "fallsPerMin": 3.01,
+     "gustFallShare": 0.41,
+     "gustFallsPerGust": 0.254,
+     "minutes": 51.1
+    },
+    {
+     "med": 78,
+     "n": 21,
+     "fallsPerMin": 2.68,
+     "gustFallShare": 0.37,
+     "gustFallsPerGust": 0.226,
+     "minutes": 36.1
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1.8,
+   "firstFlyP90": 2.8,
+   "stall": {
+    "p90": 25.4,
+    "max": 72.7,
+    "over30": 4
+   },
+   "fallsPerMin": 2.92,
+   "gustFallShare": 0.3,
+   "postRescueShare": 0,
+   "springFallShare": 0,
+   "fallKinds": {
+    "plank": 243,
+    "hay": 289,
+    "cart": 93,
+    "puff": 78,
+    "rescue": 1
+   },
+   "fireflyPerMin": 40.7,
+   "lanternsPerMin": 1.94,
+   "heartsGainedPerMin": 2.43,
+   "oracle": {
+    "checked": 704,
+    "doomed": 1,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "humans/easy/kid4": {
+   "diff": "easy",
+   "player": "kid4",
+   "unlimited": false,
+   "n": 200,
+   "maxT": 900,
+   "survival": {
+    "p10": 23.2,
+    "med": 33.7,
+    "p90": 52.1,
+    "censored": 0
+   },
+   "score": {
+    "p10": 107.9,
+    "med": 174,
+    "p90": 302.2
+   },
+   "climb": 0.97,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 8.6,
+     "gustFallShare": 0.2,
+     "gustFallsPerGust": 0.495,
+     "minutes": 121.4
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 2.8,
+   "firstFlyP90": 7,
+   "stall": {
+    "p90": 15.8,
+    "max": 63.1,
+    "over30": 6
+   },
+   "fallsPerMin": 8.6,
+   "gustFallShare": 0.2,
+   "postRescueShare": 0.04,
+   "springFallShare": 0,
+   "fallKinds": {
+    "plank": 361,
+    "hay": 640,
+    "rescue": 42,
+    "ground": 1
+   },
+   "fireflyPerMin": 25.3,
+   "lanternsPerMin": 0.36,
+   "heartsGainedPerMin": 0.36,
+   "oracle": {
+    "checked": 1044,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "humans/easy/kid5": {
+   "diff": "easy",
+   "player": "kid5",
+   "unlimited": false,
+   "n": 200,
+   "maxT": 900,
+   "survival": {
+    "p10": 23.4,
+    "med": 37.3,
+    "p90": 58.1,
+    "censored": 0
+   },
+   "score": {
+    "p10": 123,
+    "med": 208,
+    "p90": 371
+   },
+   "climb": 1.07,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 8.12,
+     "gustFallShare": 0.21,
+     "gustFallsPerGust": 0.486,
+     "minutes": 133.4
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 2.7,
+   "firstFlyP90": 6.2,
+   "stall": {
+    "p90": 11,
+    "max": 66.1,
+    "over30": 2
+   },
+   "fallsPerMin": 8.12,
+   "gustFallShare": 0.21,
+   "postRescueShare": 0.02,
+   "springFallShare": 0,
+   "fallKinds": {
+    "plank": 385,
+    "hay": 674,
+    "rescue": 24,
+    "ground": 1
+   },
+   "fireflyPerMin": 28.7,
+   "lanternsPerMin": 0.63,
+   "heartsGainedPerMin": 0.63,
+   "oracle": {
+    "checked": 1084,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "humans/easy/kid6": {
+   "diff": "easy",
+   "player": "kid6",
+   "unlimited": false,
+   "n": 200,
+   "maxT": 900,
+   "survival": {
+    "p10": 28.3,
+    "med": 52.5,
+    "p90": 75.8,
+    "censored": 0
+   },
+   "score": {
+    "p10": 160.8,
+    "med": 337,
+    "p90": 549.3
+   },
+   "climb": 1.1,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0.01,
+    "med": null
+   },
+   "perLevel": {
+    "med": 90.6,
+    "p10": 87.9,
+    "p90": 91.9,
+    "n": 3
+   },
+   "byZone": [
+    {
+     "med": 90.6,
+     "n": 3,
+     "fallsPerMin": 6.55,
+     "gustFallShare": 0.24,
+     "gustFallsPerGust": 0.441,
+     "minutes": 176.1
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 12.12,
+     "gustFallShare": 0.25,
+     "gustFallsPerGust": 0.75,
+     "minutes": 1
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 2.6,
+   "firstFlyP90": 5.2,
+   "stall": {
+    "p90": 12.1,
+    "max": 20.6,
+    "over30": 0
+   },
+   "fallsPerMin": 6.58,
+   "gustFallShare": 0.24,
+   "postRescueShare": 0.01,
+   "springFallShare": 0,
+   "fallKinds": {
+    "plank": 430,
+    "hay": 713,
+    "rescue": 17,
+    "cart": 4,
+    "puff": 1
+   },
+   "fireflyPerMin": 31.4,
+   "lanternsPerMin": 0.92,
+   "heartsGainedPerMin": 0.94,
+   "oracle": {
+    "checked": 1165,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "humans/easy/casual": {
+   "diff": "easy",
+   "player": "casual",
+   "unlimited": false,
+   "n": 200,
+   "maxT": 900,
+   "survival": {
+    "p10": 361.9,
+    "med": 900,
+    "p90": 900,
+    "censored": 112
+   },
+   "score": {
+    "p10": 4474.3,
+    "med": 11938,
+    "p90": 13474
+   },
+   "climb": 1.56,
+   "levels": {
+    "med": 10,
+    "p90": 11
+   },
+   "level1": {
+    "reach": 0.99,
+    "med": 72.3
+   },
+   "perLevel": {
+    "med": 78.4,
+    "p10": 65.6,
+    "p90": 93.2,
+    "n": 1737
+   },
+   "byZone": [
+    {
+     "med": 79.6,
+     "n": 506,
+     "fallsPerMin": 1.58,
+     "gustFallShare": 0.22,
+     "gustFallsPerGust": 0.102,
+     "minutes": 685.7
+    },
+    {
+     "med": 79.2,
+     "n": 485,
+     "fallsPerMin": 2.14,
+     "gustFallShare": 0.3,
+     "gustFallsPerGust": 0.162,
+     "minutes": 668.2
+    },
+    {
+     "med": 77.5,
+     "n": 426,
+     "fallsPerMin": 2.3,
+     "gustFallShare": 0.44,
+     "gustFallsPerGust": 0.207,
+     "minutes": 617.1
+    },
+    {
+     "med": 77.3,
+     "n": 320,
+     "fallsPerMin": 2.41,
+     "gustFallShare": 0.34,
+     "gustFallsPerGust": 0.19,
+     "minutes": 479.4
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1.8,
+   "firstFlyP90": 3.9,
+   "stall": {
+    "p90": 17.3,
+    "max": 45,
+    "over30": 3
+   },
+   "fallsPerMin": 2.08,
+   "gustFallShare": 0.33,
+   "postRescueShare": 0,
+   "springFallShare": 0.01,
+   "fallKinds": {
+    "plank": 1652,
+    "hay": 1502,
+    "cart": 949,
+    "puff": 965,
+    "rescue": 22
+   },
+   "fireflyPerMin": 46.3,
+   "lanternsPerMin": 2.27,
+   "heartsGainedPerMin": 2.68,
+   "oracle": {
+    "checked": 5090,
+    "doomed": 1,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "humans/easy/lagBot0.25": {
+   "diff": "easy",
+   "player": "lagBot0.25",
+   "unlimited": false,
+   "n": 200,
+   "maxT": 900,
+   "survival": {
+    "p10": 64.1,
+    "med": 196.5,
+    "p90": 542.2,
+    "censored": 8
+   },
+   "score": {
+    "p10": 446.5,
+    "med": 1431,
+    "p90": 4471.5
+   },
+   "climb": 1.15,
+   "levels": {
+    "med": 1,
+    "p90": 4
+   },
+   "level1": {
+    "reach": 0.73,
+    "med": 90.1
+   },
+   "perLevel": {
+    "med": 76.4,
+    "p10": 62.5,
+    "p90": 110.8,
+    "n": 389
+   },
+   "byZone": [
+    {
+     "med": 79.9,
+     "n": 164,
+     "fallsPerMin": 2.36,
+     "gustFallShare": 0.22,
+     "gustFallsPerGust": 0.15,
+     "minutes": 474.8
+    },
+    {
+     "med": 73.3,
+     "n": 104,
+     "fallsPerMin": 3.59,
+     "gustFallShare": 0.27,
+     "gustFallsPerGust": 0.239,
+     "minutes": 182.8
+    },
+    {
+     "med": 72.5,
+     "n": 76,
+     "fallsPerMin": 3.44,
+     "gustFallShare": 0.38,
+     "gustFallsPerGust": 0.272,
+     "minutes": 116.6
+    },
+    {
+     "med": 71.8,
+     "n": 45,
+     "fallsPerMin": 3.75,
+     "gustFallShare": 0.33,
+     "gustFallsPerGust": 0.281,
+     "minutes": 89.6
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1.8,
+   "firstFlyP90": 2.7,
+   "stall": {
+    "p90": 135.1,
+    "max": 894,
+    "over30": 59
+   },
+   "fallsPerMin": 2.91,
+   "gustFallShare": 0.27,
+   "postRescueShare": 0,
+   "springFallShare": 0.01,
+   "fallKinds": {
+    "hay": 1024,
+    "plank": 898,
+    "puff": 285,
+    "cart": 302,
+    "rescue": 5,
+    "ground": 1
+   },
+   "fireflyPerMin": 33.6,
+   "lanternsPerMin": 1.54,
+   "heartsGainedPerMin": 1.95,
+   "oracle": {
+    "checked": 2515,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "rates/easy/bot0.7": {
+   "diff": "easy",
+   "player": "bot0.7",
+   "unlimited": true,
+   "n": 20,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 20
+   },
+   "score": {
+    "p10": 11561.8,
+    "med": 12345.5,
+    "p90": 12773.1
+   },
+   "climb": 2.3,
+   "levels": {
+    "med": 11,
+    "p90": 11
+   },
+   "level1": {
+    "reach": 1,
+    "med": 48
+   },
+   "perLevel": {
+    "med": 54.8,
+    "p10": 48,
+    "p90": 60.6,
+    "n": 211
+   },
+   "byZone": [
+    {
+     "med": 55.2,
+     "n": 60,
+     "fallsPerMin": 0.02,
+     "gustFallShare": 0,
+     "gustFallsPerGust": 0,
+     "minutes": 54.7
+    },
+    {
+     "med": 55.9,
+     "n": 60,
+     "fallsPerMin": 0.04,
+     "gustFallShare": 0,
+     "gustFallsPerGust": 0,
+     "minutes": 54.9
+    },
+    {
+     "med": 54.3,
+     "n": 51,
+     "fallsPerMin": 0.07,
+     "gustFallShare": 0.25,
+     "gustFallsPerGust": 0.004,
+     "minutes": 54
+    },
+    {
+     "med": 52.2,
+     "n": 40,
+     "fallsPerMin": 0.11,
+     "gustFallShare": 0.5,
+     "gustFallsPerGust": 0.013,
+     "minutes": 36.4
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1.7,
+   "firstFlyP90": 1.9,
+   "stall": {
+    "p90": 5.4,
+    "max": 5.5,
+    "over30": 0
+   },
+   "fallsPerMin": 0.05,
+   "gustFallShare": 0.27,
+   "postRescueShare": 0,
+   "springFallShare": 0,
+   "fallKinds": {
+    "puff": 2,
+    "cart": 3,
+    "plank": 4,
+    "hay": 2
+   },
+   "fireflyPerMin": 64.2,
+   "lanternsPerMin": 3.16,
+   "heartsGainedPerMin": 3.16,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "rates/easy/bot0.5": {
+   "diff": "easy",
+   "player": "bot0.5",
+   "unlimited": true,
+   "n": 20,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 20
+   },
+   "score": {
+    "p10": 6718.9,
+    "med": 7499,
+    "p90": 7950.6
+   },
+   "climb": 1.47,
+   "levels": {
+    "med": 7,
+    "p90": 7
+   },
+   "level1": {
+    "reach": 1,
+    "med": 78.6
+   },
+   "perLevel": {
+    "med": 78.4,
+    "p10": 63.7,
+    "p90": 103,
+    "n": 137
+   },
+   "byZone": [
+    {
+     "med": 91.3,
+     "n": 40,
+     "fallsPerMin": 1.31,
+     "gustFallShare": 0.16,
+     "gustFallsPerGust": 0.061,
+     "minutes": 62
+    },
+    {
+     "med": 77.5,
+     "n": 40,
+     "fallsPerMin": 1.55,
+     "gustFallShare": 0.27,
+     "gustFallsPerGust": 0.106,
+     "minutes": 52.9
+    },
+    {
+     "med": 72,
+     "n": 36,
+     "fallsPerMin": 1.67,
+     "gustFallShare": 0.43,
+     "gustFallsPerGust": 0.146,
+     "minutes": 49.2
+    },
+    {
+     "med": 76.1,
+     "n": 21,
+     "fallsPerMin": 1.87,
+     "gustFallShare": 0.33,
+     "gustFallsPerGust": 0.142,
+     "minutes": 35.8
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1.7,
+   "firstFlyP90": 2,
+   "stall": {
+    "p90": 25,
+    "max": 25.9,
+    "over30": 0
+   },
+   "fallsPerMin": 1.56,
+   "gustFallShare": 0.29,
+   "postRescueShare": 0,
+   "springFallShare": 0,
+   "fallKinds": {
+    "hay": 123,
+    "puff": 49,
+    "cart": 50,
+    "plank": 90
+   },
+   "fireflyPerMin": 44.9,
+   "lanternsPerMin": 2.2,
+   "heartsGainedPerMin": 2.2,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "rates/easy/kid5": {
+   "diff": "easy",
+   "player": "kid5",
+   "unlimited": true,
+   "n": 20,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 20
+   },
+   "score": {
+    "p10": 4509.4,
+    "med": 4716,
+    "p90": 4930.9
+   },
+   "climb": 1.09,
+   "levels": {
+    "med": 5,
+    "p90": 5
+   },
+   "level1": {
+    "reach": 1,
+    "med": 108
+   },
+   "perLevel": {
+    "med": 104.4,
+    "p10": 90.2,
+    "p90": 134,
+    "n": 101
+   },
+   "byZone": [
+    {
+     "med": 121,
+     "n": 40,
+     "fallsPerMin": 9.23,
+     "gustFallShare": 0.21,
+     "gustFallsPerGust": 0.557,
+     "minutes": 79.1
+    },
+    {
+     "med": 100.5,
+     "n": 21,
+     "fallsPerMin": 10.85,
+     "gustFallShare": 0.27,
+     "gustFallsPerGust": 0.748,
+     "minutes": 54.6
+    },
+    {
+     "med": 97.3,
+     "n": 20,
+     "fallsPerMin": 11.65,
+     "gustFallShare": 0.39,
+     "gustFallsPerGust": 0.943,
+     "minutes": 32.8
+    },
+    {
+     "med": 101.1,
+     "n": 20,
+     "fallsPerMin": 11.42,
+     "gustFallShare": 0.31,
+     "gustFallsPerGust": 0.814,
+     "minutes": 33.5
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 3.8,
+   "firstFlyP90": 5.7,
+   "stall": {
+    "p90": 19.1,
+    "max": 36.4,
+    "over30": 1
+   },
+   "fallsPerMin": 10.43,
+   "gustFallShare": 0.28,
+   "postRescueShare": 0.03,
+   "springFallShare": 0.01,
+   "fallKinds": {
+    "hay": 941,
+    "plank": 571,
+    "puff": 194,
+    "cart": 308,
+    "rescue": 73
+   },
+   "fireflyPerMin": 28.6,
+   "lanternsPerMin": 1.38,
+   "heartsGainedPerMin": 1.38,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "rates/easy/kid6": {
+   "diff": "easy",
+   "player": "kid6",
+   "unlimited": true,
+   "n": 20,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 20
+   },
+   "score": {
+    "p10": 4848.2,
+    "med": 5061.5,
+    "p90": 5263.3
+   },
+   "climb": 1.11,
+   "levels": {
+    "med": 5,
+    "p90": 5
+   },
+   "level1": {
+    "reach": 1,
+    "med": 105.2
+   },
+   "perLevel": {
+    "med": 105.1,
+    "p10": 86.9,
+    "p90": 123.2,
+    "n": 101
+   },
+   "byZone": [
+    {
+     "med": 109.4,
+     "n": 40,
+     "fallsPerMin": 7.33,
+     "gustFallShare": 0.2,
+     "gustFallsPerGust": 0.429,
+     "minutes": 73.1
+    },
+    {
+     "med": 105.1,
+     "n": 21,
+     "fallsPerMin": 9.01,
+     "gustFallShare": 0.28,
+     "gustFallsPerGust": 0.655,
+     "minutes": 59.6
+    },
+    {
+     "med": 98.5,
+     "n": 20,
+     "fallsPerMin": 9.16,
+     "gustFallShare": 0.39,
+     "gustFallsPerGust": 0.736,
+     "minutes": 33.3
+    },
+    {
+     "med": 99.2,
+     "n": 20,
+     "fallsPerMin": 9.03,
+     "gustFallShare": 0.31,
+     "gustFallsPerGust": 0.649,
+     "minutes": 34
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 2.7,
+   "firstFlyP90": 5.1,
+   "stall": {
+    "p90": 15.6,
+    "max": 19.5,
+    "over30": 0
+   },
+   "fallsPerMin": 8.42,
+   "gustFallShare": 0.28,
+   "postRescueShare": 0.01,
+   "springFallShare": 0.01,
+   "fallKinds": {
+    "hay": 778,
+    "plank": 473,
+    "cart": 256,
+    "puff": 153,
+    "rescue": 25
+   },
+   "fireflyPerMin": 31.9,
+   "lanternsPerMin": 1.54,
+   "heartsGainedPerMin": 1.54,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "rates/easy/casual": {
+   "diff": "easy",
+   "player": "casual",
+   "unlimited": true,
+   "n": 20,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 20
+   },
+   "score": {
+    "p10": 7597.6,
+    "med": 7861.5,
+    "p90": 8648.7
+   },
+   "climb": 1.57,
+   "levels": {
+    "med": 7,
+    "p90": 8
+   },
+   "level1": {
+    "reach": 1,
+    "med": 71.4
+   },
+   "perLevel": {
+    "med": 75.1,
+    "p10": 64.4,
+    "p90": 88.3,
+    "n": 145
+   },
+   "byZone": [
+    {
+     "med": 74.7,
+     "n": 40,
+     "fallsPerMin": 1.58,
+     "gustFallShare": 0.3,
+     "gustFallsPerGust": 0.139,
+     "minutes": 50.6
+    },
+    {
+     "med": 75.6,
+     "n": 40,
+     "fallsPerMin": 2.37,
+     "gustFallShare": 0.32,
+     "gustFallsPerGust": 0.19,
+     "minutes": 51
+    },
+    {
+     "med": 78.8,
+     "n": 40,
+     "fallsPerMin": 2.57,
+     "gustFallShare": 0.47,
+     "gustFallsPerGust": 0.256,
+     "minutes": 51.7
+    },
+    {
+     "med": 74.5,
+     "n": 25,
+     "fallsPerMin": 2.35,
+     "gustFallShare": 0.36,
+     "gustFallsPerGust": 0.193,
+     "minutes": 46.7
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1.7,
+   "firstFlyP90": 2.3,
+   "stall": {
+    "p90": 14.2,
+    "max": 22.5,
+    "over30": 0
+   },
+   "fallsPerMin": 2.22,
+   "gustFallShare": 0.37,
+   "postRescueShare": 0,
+   "springFallShare": 0.01,
+   "fallKinds": {
+    "hay": 131,
+    "plank": 152,
+    "puff": 94,
+    "cart": 65,
+    "rescue": 2
+   },
+   "fireflyPerMin": 46.6,
+   "lanternsPerMin": 2.28,
+   "heartsGainedPerMin": 2.28,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/easy/idle": {
+   "diff": "easy",
+   "player": "idle",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 324.3,
+    "med": 600,
+    "p90": 600,
+    "censored": 37
+   },
+   "score": {
+    "p10": 21.6,
+    "med": 78,
+    "p90": 204.4
+   },
+   "climb": 0.05,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 0.25,
+     "gustFallShare": 0.58,
+     "gustFallsPerGust": 0.042,
+     "minutes": 445.7
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 12.7,
+   "firstFlyP90": 209.6,
+   "stall": {
+    "p90": 573.2,
+    "max": 598.3,
+    "over30": 50
+   },
+   "fallsPerMin": 0.25,
+   "gustFallShare": 0.58,
+   "postRescueShare": 0.43,
+   "springFallShare": 0.02,
+   "fallKinds": {
+    "hay": 34,
+    "rescue": 47,
+    "plank": 29
+   },
+   "fireflyPerMin": 0.8,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/easy/holdLeft": {
+   "diff": "easy",
+   "player": "holdLeft",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 48
+   },
+   "score": {
+    "p10": 2,
+    "med": 2,
+    "p90": 2.2
+   },
+   "climb": 0.01,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 0.02,
+     "gustFallShare": 0.2,
+     "gustFallsPerGust": 0.001,
+     "minutes": 480.4
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.3,
+   "firstFly": 1,
+   "firstFlyP90": 1,
+   "stall": {
+    "p90": 599.2,
+    "max": 599.2,
+    "over30": 48
+   },
+   "fallsPerMin": 0.02,
+   "gustFallShare": 0.2,
+   "postRescueShare": 0.7,
+   "springFallShare": 0,
+   "fallKinds": {
+    "ground": 1,
+    "hay": 1,
+    "rescue": 7,
+    "plank": 1
+   },
+   "fireflyPerMin": 0,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/easy/holdRight": {
+   "diff": "easy",
+   "player": "holdRight",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 50
+   },
+   "score": {
+    "p10": 2,
+    "med": 2,
+    "p90": 4.8
+   },
+   "climb": 0.01,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 0,
+     "gustFallShare": 0,
+     "gustFallsPerGust": 0,
+     "minutes": 500
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.3,
+   "firstFly": 1,
+   "firstFlyP90": 3.7,
+   "stall": {
+    "p90": 599.2,
+    "max": 599.2,
+    "over30": 50
+   },
+   "fallsPerMin": 0,
+   "gustFallShare": 0,
+   "postRescueShare": 0,
+   "springFallShare": 0,
+   "fallKinds": {
+    "plank": 1,
+    "hay": 1
+   },
+   "fireflyPerMin": 0,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/easy/altFast": {
+   "diff": "easy",
+   "player": "alt0.1",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 20.2,
+    "med": 37.1,
+    "p90": 53.7,
+    "censored": 0
+   },
+   "score": {
+    "p10": 38.8,
+    "med": 96.5,
+    "p90": 197.1
+   },
+   "climb": 0.85,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 8.32,
+     "gustFallShare": 0.24,
+     "gustFallsPerGust": 0.592,
+     "minutes": 30.4
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 8.9,
+   "firstFlyP90": 19,
+   "stall": {
+    "p90": 15.8,
+    "max": 24.4,
+    "over30": 0
+   },
+   "fallsPerMin": 8.32,
+   "gustFallShare": 0.24,
+   "postRescueShare": 0.39,
+   "springFallShare": 0,
+   "fallKinds": {
+    "hay": 82,
+    "rescue": 98,
+    "plank": 72,
+    "ground": 1
+   },
+   "fireflyPerMin": 13.8,
+   "lanternsPerMin": 0.1,
+   "heartsGainedPerMin": 0.1,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/easy/altSlow": {
+   "diff": "easy",
+   "player": "alt0.5",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 69.2,
+    "med": 192.4,
+    "p90": 456.6,
+    "censored": 2
+   },
+   "score": {
+    "p10": 50.3,
+    "med": 178,
+    "p90": 400.2
+   },
+   "climb": 0.21,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0.02,
+    "med": null
+   },
+   "perLevel": {
+    "med": 221.2,
+    "p10": 221.2,
+    "p90": 221.2,
+    "n": 1
+   },
+   "byZone": [
+    {
+     "med": 221.2,
+     "n": 1,
+     "fallsPerMin": 1.33,
+     "gustFallShare": 0.31,
+     "gustFallsPerGust": 0.119,
+     "minutes": 193.7
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 24.08,
+     "gustFallShare": 0,
+     "gustFallsPerGust": null,
+     "minutes": 0.1
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 10.5,
+   "firstFlyP90": 90.3,
+   "stall": {
+    "p90": 294.6,
+    "max": 596.3,
+    "over30": 32
+   },
+   "fallsPerMin": 1.34,
+   "gustFallShare": 0.3,
+   "postRescueShare": 0.21,
+   "springFallShare": 0.01,
+   "fallKinds": {
+    "hay": 110,
+    "plank": 96,
+    "rescue": 54
+   },
+   "fireflyPerMin": 4.2,
+   "lanternsPerMin": 0.1,
+   "heartsGainedPerMin": 0.11,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/easy/mash": {
+   "diff": "easy",
+   "player": "mash",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 21.7,
+    "med": 29.6,
+    "p90": 48.1,
+    "censored": 0
+   },
+   "score": {
+    "p10": 46.9,
+    "med": 99.5,
+    "p90": 163.5
+   },
+   "climb": 0.82,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 9.49,
+     "gustFallShare": 0.18,
+     "gustFallsPerGust": 0.478,
+     "minutes": 26.3
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 2.4,
+   "firstFly": 6.7,
+   "firstFlyP90": 17.1,
+   "stall": {
+    "p90": 17.1,
+    "max": 33,
+    "over30": 2
+   },
+   "fallsPerMin": 9.49,
+   "gustFallShare": 0.18,
+   "postRescueShare": 0.31,
+   "springFallShare": 0,
+   "fallKinds": {
+    "hay": 108,
+    "rescue": 78,
+    "plank": 63,
+    "ground": 1
+   },
+   "fireflyPerMin": 14.6,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/easy/wallHug": {
+   "diff": "easy",
+   "player": "wallHug",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 31.8,
+    "med": 47.8,
+    "p90": 71.3,
+    "censored": 0
+   },
+   "score": {
+    "p10": 202.7,
+    "med": 344.5,
+    "p90": 539.4
+   },
+   "climb": 1.34,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0.02,
+    "med": null
+   },
+   "perLevel": {
+    "med": 69.1,
+    "p10": 69.1,
+    "p90": 69.1,
+    "n": 1
+   },
+   "byZone": [
+    {
+     "med": 69.1,
+     "n": 1,
+     "fallsPerMin": 6.7,
+     "gustFallShare": 0.4,
+     "gustFallsPerGust": 0.758,
+     "minutes": 43.6
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 6.03,
+     "gustFallShare": 0.67,
+     "gustFallsPerGust": 1,
+     "minutes": 0.5
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1.8,
+   "firstFlyP90": 3.8,
+   "stall": {
+    "p90": 8.2,
+    "max": 12.9,
+    "over30": 0
+   },
+   "fallsPerMin": 6.69,
+   "gustFallShare": 0.4,
+   "postRescueShare": 0.25,
+   "springFallShare": 0.01,
+   "fallKinds": {
+    "hay": 120,
+    "rescue": 73,
+    "plank": 101,
+    "cart": 1
+   },
+   "fireflyPerMin": 33.4,
+   "lanternsPerMin": 1.02,
+   "heartsGainedPerMin": 1.04,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/easy/fallFarm": {
+   "diff": "easy",
+   "player": "fallFarm",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 82.7,
+    "med": 253.2,
+    "p90": 600,
+    "censored": 11
+   },
+   "score": {
+    "p10": 2,
+    "med": 1053,
+    "p90": 2878.9
+   },
+   "climb": 0.65,
+   "levels": {
+    "med": 1,
+    "p90": 3
+   },
+   "level1": {
+    "reach": 0.58,
+    "med": 159.2
+   },
+   "perLevel": {
+    "med": 86.7,
+    "p10": 69.3,
+    "p90": 142.8,
+    "n": 60
+   },
+   "byZone": [
+    {
+     "med": 104.6,
+     "n": 30,
+     "fallsPerMin": 1.23,
+     "gustFallShare": 0.26,
+     "gustFallsPerGust": 0.094,
+     "minutes": 185.9
+    },
+    {
+     "med": 80.6,
+     "n": 20,
+     "fallsPerMin": 3.3,
+     "gustFallShare": 0.32,
+     "gustFallsPerGust": 0.26,
+     "minutes": 36.4
+    },
+    {
+     "med": 78.6,
+     "n": 8,
+     "fallsPerMin": 4.22,
+     "gustFallShare": 0.45,
+     "gustFallsPerGust": 0.391,
+     "minutes": 19
+    },
+    {
+     "med": 82.3,
+     "n": 2,
+     "fallsPerMin": 4.51,
+     "gustFallShare": 0.47,
+     "gustFallsPerGust": 0.471,
+     "minutes": 7.5
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 5.4,
+   "firstFlyP90": 45.8,
+   "stall": {
+    "p90": 599.2,
+    "max": 599.2,
+    "over30": 27
+   },
+   "fallsPerMin": 1.86,
+   "gustFallShare": 0.32,
+   "postRescueShare": 0.03,
+   "springFallShare": 0.01,
+   "fallKinds": {
+    "hay": 195,
+    "plank": 156,
+    "puff": 44,
+    "cart": 55,
+    "rescue": 13
+   },
+   "fireflyPerMin": 17.9,
+   "lanternsPerMin": 0.79,
+   "heartsGainedPerMin": 1.03,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "bots/normal/bot1": {
+   "diff": "normal",
+   "player": "bot1",
+   "unlimited": false,
+   "n": 40,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 40
+   },
+   "score": {
+    "p10": 11017.2,
+    "med": 11240,
+    "p90": 11483.1
+   },
+   "climb": 2.69,
+   "levels": {
+    "med": 10,
+    "p90": 10
+   },
+   "level1": {
+    "reach": 1,
+    "med": 54.5
+   },
+   "perLevel": {
+    "med": 56.3,
+    "p10": 53.4,
+    "p90": 59.4,
+    "n": 400
+   },
+   "byZone": [
+    {
+     "med": 56.4,
+     "n": 120,
+     "fallsPerMin": 0,
+     "gustFallShare": null,
+     "gustFallsPerGust": 0,
+     "minutes": 112.9
+    },
+    {
+     "med": 56.7,
+     "n": 120,
+     "fallsPerMin": 0,
+     "gustFallShare": null,
+     "gustFallsPerGust": 0,
+     "minutes": 113.5
+    },
+    {
+     "med": 55.6,
+     "n": 80,
+     "fallsPerMin": 0.01,
+     "gustFallShare": 1,
+     "gustFallsPerGust": 0.002,
+     "minutes": 99.3
+    },
+    {
+     "med": 55.6,
+     "n": 80,
+     "fallsPerMin": 0,
+     "gustFallShare": null,
+     "gustFallsPerGust": 0,
+     "minutes": 74.4
+    }
+   ],
+   "firstPlat": 1.3,
+   "firstFly": 1.5,
+   "firstFlyP90": 2,
+   "stall": {
+    "p90": 3.7,
+    "max": 8.2,
+    "over30": 0
+   },
+   "fallsPerMin": 0,
+   "gustFallShare": 1,
+   "postRescueShare": 0,
+   "springFallShare": 0,
+   "fallKinds": {
+    "hay": 1
+   },
+   "fireflyPerMin": 57.3,
+   "lanternsPerMin": 2.82,
+   "heartsGainedPerMin": 2.82,
+   "oracle": {
+    "checked": 1,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "bots/normal/bot0.85": {
+   "diff": "normal",
+   "player": "bot0.85",
+   "unlimited": false,
+   "n": 40,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 40
+   },
+   "score": {
+    "p10": 11276.3,
+    "med": 11551,
+    "p90": 11747.7
+   },
+   "climb": 2.7,
+   "levels": {
+    "med": 10,
+    "p90": 10
+   },
+   "level1": {
+    "reach": 1,
+    "med": 54.5
+   },
+   "perLevel": {
+    "med": 56.3,
+    "p10": 53.5,
+    "p90": 59.4,
+    "n": 400
+   },
+   "byZone": [
+    {
+     "med": 56.6,
+     "n": 120,
+     "fallsPerMin": 0,
+     "gustFallShare": null,
+     "gustFallsPerGust": 0,
+     "minutes": 113.4
+    },
+    {
+     "med": 56.7,
+     "n": 120,
+     "fallsPerMin": 0,
+     "gustFallShare": null,
+     "gustFallsPerGust": 0,
+     "minutes": 113.5
+    },
+    {
+     "med": 55.5,
+     "n": 80,
+     "fallsPerMin": 0.01,
+     "gustFallShare": 0,
+     "gustFallsPerGust": 0,
+     "minutes": 98.8
+    },
+    {
+     "med": 55.7,
+     "n": 80,
+     "fallsPerMin": 0,
+     "gustFallShare": null,
+     "gustFallsPerGust": 0,
+     "minutes": 74.3
+    }
+   ],
+   "firstPlat": 1.3,
+   "firstFly": 1.4,
+   "firstFlyP90": 1.9,
+   "stall": {
+    "p90": 4.4,
+    "max": 5.4,
+    "over30": 0
+   },
+   "fallsPerMin": 0,
+   "gustFallShare": 0,
+   "postRescueShare": 0,
+   "springFallShare": 0,
+   "fallKinds": {
+    "hay": 1
+   },
+   "fireflyPerMin": 60.1,
+   "lanternsPerMin": 2.95,
+   "heartsGainedPerMin": 2.95,
+   "oracle": {
+    "checked": 1,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "bots/normal/bot0.7": {
+   "diff": "normal",
+   "player": "bot0.7",
+   "unlimited": false,
+   "n": 40,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 40
+   },
+   "score": {
+    "p10": 10454.7,
+    "med": 11099,
+    "p90": 11390
+   },
+   "climb": 2.53,
+   "levels": {
+    "med": 10,
+    "p90": 10
+   },
+   "level1": {
+    "reach": 1,
+    "med": 57.1
+   },
+   "perLevel": {
+    "med": 59.2,
+    "p10": 55.1,
+    "p90": 64.2,
+    "n": 386
+   },
+   "byZone": [
+    {
+     "med": 59.4,
+     "n": 120,
+     "fallsPerMin": 0.12,
+     "gustFallShare": 0.43,
+     "gustFallsPerGust": 0.014,
+     "minutes": 119.1
+    },
+    {
+     "med": 59.3,
+     "n": 106,
+     "fallsPerMin": 0.14,
+     "gustFallShare": 0.29,
+     "gustFallsPerGust": 0.01,
+     "minutes": 118.7
+    },
+    {
+     "med": 59.4,
+     "n": 80,
+     "fallsPerMin": 0.19,
+     "gustFallShare": 0.69,
+     "gustFallsPerGust": 0.026,
+     "minutes": 82.7
+    },
+    {
+     "med": 58.7,
+     "n": 80,
+     "fallsPerMin": 0.16,
+     "gustFallShare": 0.69,
+     "gustFallsPerGust": 0.025,
+     "minutes": 79.4
+    }
+   ],
+   "firstPlat": 1.3,
+   "firstFly": 1.4,
+   "firstFlyP90": 2,
+   "stall": {
+    "p90": 8.3,
+    "max": 17.4,
+    "over30": 0
+   },
+   "fallsPerMin": 0.15,
+   "gustFallShare": 0.52,
+   "postRescueShare": 0,
+   "springFallShare": 0,
+   "fallKinds": {
+    "hay": 19,
+    "puff": 12,
+    "plank": 23,
+    "cart": 6
+   },
+   "fireflyPerMin": 57.8,
+   "lanternsPerMin": 2.84,
+   "heartsGainedPerMin": 2.86,
+   "oracle": {
+    "checked": 60,
+    "doomed": 1,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "bots/normal/bot0.5": {
+   "diff": "normal",
+   "player": "bot0.5",
+   "unlimited": false,
+   "n": 40,
+   "maxT": 600,
+   "survival": {
+    "p10": 41.8,
+    "med": 67.9,
+    "p90": 184,
+    "censored": 0
+   },
+   "score": {
+    "p10": 249.6,
+    "med": 413,
+    "p90": 1566.2
+   },
+   "climb": 1.41,
+   "levels": {
+    "med": 0,
+    "p90": 1.1
+   },
+   "level1": {
+    "reach": 0.25,
+    "med": null
+   },
+   "perLevel": {
+    "med": 89.5,
+    "p10": 74,
+    "p90": 116.1,
+    "n": 15
+   },
+   "byZone": [
+    {
+     "med": 92.6,
+     "n": 10,
+     "fallsPerMin": 3.19,
+     "gustFallShare": 0.26,
+     "gustFallsPerGust": 0.231,
+     "minutes": 45.2
+    },
+    {
+     "med": 84.9,
+     "n": 4,
+     "fallsPerMin": 2.99,
+     "gustFallShare": 0.19,
+     "gustFallsPerGust": 0.14,
+     "minutes": 10.4
+    },
+    {
+     "med": 88.9,
+     "n": 1,
+     "fallsPerMin": 2.82,
+     "gustFallShare": 0.58,
+     "gustFallsPerGust": 0.333,
+     "minutes": 4.3
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 3.83,
+     "gustFallShare": 0.4,
+     "gustFallsPerGust": 0.333,
+     "minutes": 1.3
+    }
+   ],
+   "firstPlat": 1.3,
+   "firstFly": 1.4,
+   "firstFlyP90": 2,
+   "stall": {
+    "p90": 14.2,
+    "max": 20.6,
+    "over30": 0
+   },
+   "fallsPerMin": 3.14,
+   "gustFallShare": 0.27,
+   "postRescueShare": 0,
+   "springFallShare": 0.02,
+   "fallKinds": {
+    "plank": 74,
+    "hay": 99,
+    "puff": 11,
+    "cart": 7,
+    "ground": 1
+   },
+   "fireflyPerMin": 34.1,
+   "lanternsPerMin": 1.34,
+   "heartsGainedPerMin": 1.52,
+   "oracle": {
+    "checked": 192,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "bots/normal/bot0.3": {
+   "diff": "normal",
+   "player": "bot0.3",
+   "unlimited": false,
+   "n": 40,
+   "maxT": 600,
+   "survival": {
+    "p10": 17.9,
+    "med": 31.4,
+    "p90": 90.8,
+    "censored": 0
+   },
+   "score": {
+    "p10": 112.9,
+    "med": 235.5,
+    "p90": 561.3
+   },
+   "climb": 1.38,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0.07,
+    "med": null
+   },
+   "perLevel": {
+    "med": 84.5,
+    "p10": 84.2,
+    "p90": 119.6,
+    "n": 3
+   },
+   "byZone": [
+    {
+     "med": 84.5,
+     "n": 3,
+     "fallsPerMin": 4.72,
+     "gustFallShare": 0.27,
+     "gustFallsPerGust": 0.35,
+     "minutes": 28.4
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 4.02,
+     "gustFallShare": 0.3,
+     "gustFallsPerGust": 0.3,
+     "minutes": 2.5
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1.4,
+   "firstFlyP90": 2.8,
+   "stall": {
+    "p90": 10.3,
+    "max": 22.3,
+    "over30": 0
+   },
+   "fallsPerMin": 4.66,
+   "gustFallShare": 0.27,
+   "postRescueShare": 0,
+   "springFallShare": 0,
+   "fallKinds": {
+    "plank": 77,
+    "hay": 62,
+    "cart": 3,
+    "puff": 2
+   },
+   "fireflyPerMin": 33.2,
+   "lanternsPerMin": 0.94,
+   "heartsGainedPerMin": 1,
+   "oracle": {
+    "checked": 144,
+    "doomed": 1,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "humans/normal/kid4": {
+   "diff": "normal",
+   "player": "kid4",
+   "unlimited": false,
+   "n": 200,
+   "maxT": 900,
+   "survival": {
+    "p10": 14.1,
+    "med": 22.5,
+    "p90": 40.9,
+    "censored": 0
+   },
+   "score": {
+    "p10": 48.7,
+    "med": 77,
+    "p90": 116.2
+   },
+   "climb": 0.65,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 6.78,
+     "gustFallShare": 0.21,
+     "gustFallsPerGust": 0.407,
+     "minutes": 88.5
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 2.3,
+   "firstFly": 3.3,
+   "firstFlyP90": 8,
+   "stall": {
+    "p90": 24.5,
+    "max": 139.2,
+    "over30": 17
+   },
+   "fallsPerMin": 6.78,
+   "gustFallShare": 0.21,
+   "postRescueShare": 0.07,
+   "springFallShare": 0,
+   "fallKinds": {
+    "plank": 200,
+    "hay": 355,
+    "rescue": 45
+   },
+   "fireflyPerMin": 14.7,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 600,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "humans/normal/kid5": {
+   "diff": "normal",
+   "player": "kid5",
+   "unlimited": false,
+   "n": 200,
+   "maxT": 900,
+   "survival": {
+    "p10": 13.4,
+    "med": 21.6,
+    "p90": 38,
+    "censored": 0
+   },
+   "score": {
+    "p10": 49.9,
+    "med": 93,
+    "p90": 151
+   },
+   "climb": 0.77,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 7.27,
+     "gustFallShare": 0.24,
+     "gustFallsPerGust": 0.473,
+     "minutes": 82.5
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 2.9,
+   "firstFlyP90": 7.3,
+   "stall": {
+    "p90": 19.5,
+    "max": 173.4,
+    "over30": 9
+   },
+   "fallsPerMin": 7.27,
+   "gustFallShare": 0.24,
+   "postRescueShare": 0.05,
+   "springFallShare": 0,
+   "fallKinds": {
+    "plank": 218,
+    "hay": 351,
+    "rescue": 31
+   },
+   "fireflyPerMin": 18.2,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 600,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "humans/normal/kid6": {
+   "diff": "normal",
+   "player": "kid6",
+   "unlimited": false,
+   "n": 200,
+   "maxT": 900,
+   "survival": {
+    "p10": 14.4,
+    "med": 22.6,
+    "p90": 35.1,
+    "censored": 0
+   },
+   "score": {
+    "p10": 60.9,
+    "med": 99,
+    "p90": 161.2
+   },
+   "climb": 0.9,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 7.46,
+     "gustFallShare": 0.25,
+     "gustFallsPerGust": 0.512,
+     "minutes": 80.7
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 2.6,
+   "firstFlyP90": 6.1,
+   "stall": {
+    "p90": 13.8,
+    "max": 40.8,
+    "over30": 2
+   },
+   "fallsPerMin": 7.46,
+   "gustFallShare": 0.25,
+   "postRescueShare": 0.03,
+   "springFallShare": 0,
+   "fallKinds": {
+    "plank": 224,
+    "hay": 360,
+    "rescue": 18
+   },
+   "fireflyPerMin": 21.7,
+   "lanternsPerMin": 0.02,
+   "heartsGainedPerMin": 0.02,
+   "oracle": {
+    "checked": 602,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "humans/normal/casual": {
+   "diff": "normal",
+   "player": "casual",
+   "unlimited": false,
+   "n": 200,
+   "maxT": 900,
+   "survival": {
+    "p10": 16.7,
+    "med": 34,
+    "p90": 67.2,
+    "censored": 0
+   },
+   "score": {
+    "p10": 117.4,
+    "med": 214,
+    "p90": 464
+   },
+   "climb": 1.4,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0.03,
+    "med": null
+   },
+   "perLevel": {
+    "med": 86.5,
+    "p10": 83.1,
+    "p90": 109.8,
+    "n": 5
+   },
+   "byZone": [
+    {
+     "med": 86.5,
+     "n": 5,
+     "fallsPerMin": 5.17,
+     "gustFallShare": 0.24,
+     "gustFallsPerGust": 0.339,
+     "minutes": 130.9
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 7.6,
+     "gustFallShare": 0.33,
+     "gustFallsPerGust": 0.714,
+     "minutes": 2
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1.7,
+   "firstFlyP90": 4.1,
+   "stall": {
+    "p90": 8.9,
+    "max": 34.6,
+    "over30": 1
+   },
+   "fallsPerMin": 5.2,
+   "gustFallShare": 0.24,
+   "postRescueShare": 0.01,
+   "springFallShare": 0,
+   "fallKinds": {
+    "plank": 301,
+    "hay": 376,
+    "rescue": 7,
+    "cart": 7
+   },
+   "fireflyPerMin": 32.3,
+   "lanternsPerMin": 0.74,
+   "heartsGainedPerMin": 0.77,
+   "oracle": {
+    "checked": 691,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "humans/normal/lagBot0.25": {
+   "diff": "normal",
+   "player": "lagBot0.25",
+   "unlimited": false,
+   "n": 200,
+   "maxT": 900,
+   "survival": {
+    "p10": 16.6,
+    "med": 41.9,
+    "p90": 106.4,
+    "censored": 0
+   },
+   "score": {
+    "p10": 119,
+    "med": 303.5,
+    "p90": 669.2
+   },
+   "climb": 1.36,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0.07,
+    "med": null
+   },
+   "perLevel": {
+    "med": 88.5,
+    "p10": 76,
+    "p90": 103.1,
+    "n": 13
+   },
+   "byZone": [
+    {
+     "med": 88.5,
+     "n": 13,
+     "fallsPerMin": 4.28,
+     "gustFallShare": 0.23,
+     "gustFallsPerGust": 0.278,
+     "minutes": 164.6
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 5.14,
+     "gustFallShare": 0.42,
+     "gustFallsPerGust": 0.526,
+     "minutes": 9.3
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1.6,
+   "firstFlyP90": 2.8,
+   "stall": {
+    "p90": 20.4,
+    "max": 157,
+    "over30": 11
+   },
+   "fallsPerMin": 4.33,
+   "gustFallShare": 0.24,
+   "postRescueShare": 0.02,
+   "springFallShare": 0.02,
+   "fallKinds": {
+    "plank": 324,
+    "hay": 403,
+    "rescue": 13,
+    "puff": 5,
+    "cart": 8
+   },
+   "fireflyPerMin": 32.6,
+   "lanternsPerMin": 0.95,
+   "heartsGainedPerMin": 1.01,
+   "oracle": {
+    "checked": 753,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "rates/normal/bot0.7": {
+   "diff": "normal",
+   "player": "bot0.7",
+   "unlimited": true,
+   "n": 20,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 20
+   },
+   "score": {
+    "p10": 10490,
+    "med": 11251,
+    "p90": 11505.1
+   },
+   "climb": 2.52,
+   "levels": {
+    "med": 10,
+    "p90": 10
+   },
+   "level1": {
+    "reach": 1,
+    "med": 57.4
+   },
+   "perLevel": {
+    "med": 58.9,
+    "p10": 54.9,
+    "p90": 65.2,
+    "n": 192
+   },
+   "byZone": [
+    {
+     "med": 59.3,
+     "n": 60,
+     "fallsPerMin": 0.12,
+     "gustFallShare": 0.57,
+     "gustFallsPerGust": 0.019,
+     "minutes": 59.6
+    },
+    {
+     "med": 58.4,
+     "n": 52,
+     "fallsPerMin": 0.17,
+     "gustFallShare": 0.3,
+     "gustFallsPerGust": 0.013,
+     "minutes": 57.9
+    },
+    {
+     "med": 59.8,
+     "n": 40,
+     "fallsPerMin": 0.35,
+     "gustFallShare": 0.87,
+     "gustFallsPerGust": 0.061,
+     "minutes": 43
+    },
+    {
+     "med": 58.4,
+     "n": 40,
+     "fallsPerMin": 0.23,
+     "gustFallShare": 0.44,
+     "gustFallsPerGust": 0.023,
+     "minutes": 39.5
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1.4,
+   "firstFlyP90": 1.8,
+   "stall": {
+    "p90": 9.4,
+    "max": 57.1,
+    "over30": 1
+   },
+   "fallsPerMin": 0.2,
+   "gustFallShare": 0.59,
+   "postRescueShare": 0,
+   "springFallShare": 0,
+   "fallKinds": {
+    "hay": 13,
+    "plank": 13,
+    "puff": 11,
+    "cart": 4
+   },
+   "fireflyPerMin": 58.7,
+   "lanternsPerMin": 2.89,
+   "heartsGainedPerMin": 2.89,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "rates/normal/bot0.5": {
+   "diff": "normal",
+   "player": "bot0.5",
+   "unlimited": true,
+   "n": 20,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 20
+   },
+   "score": {
+    "p10": 5420.8,
+    "med": 6123.5,
+    "p90": 6682.9
+   },
+   "climb": 1.51,
+   "levels": {
+    "med": 6,
+    "p90": 6
+   },
+   "level1": {
+    "reach": 1,
+    "med": 95
+   },
+   "perLevel": {
+    "med": 92.8,
+    "p10": 77.8,
+    "p90": 120.9,
+    "n": 114
+   },
+   "byZone": [
+    {
+     "med": 101.8,
+     "n": 40,
+     "fallsPerMin": 3.23,
+     "gustFallShare": 0.26,
+     "gustFallsPerGust": 0.245,
+     "minutes": 70.6
+    },
+    {
+     "med": 88.9,
+     "n": 34,
+     "fallsPerMin": 2.73,
+     "gustFallShare": 0.38,
+     "gustFallsPerGust": 0.25,
+     "minutes": 59.6
+    },
+    {
+     "med": 86.1,
+     "n": 20,
+     "fallsPerMin": 2.9,
+     "gustFallShare": 0.41,
+     "gustFallsPerGust": 0.239,
+     "minutes": 37.6
+    },
+    {
+     "med": 94.8,
+     "n": 20,
+     "fallsPerMin": 2.57,
+     "gustFallShare": 0.39,
+     "gustFallsPerGust": 0.229,
+     "minutes": 32.2
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1.4,
+   "firstFlyP90": 3.6,
+   "stall": {
+    "p90": 28.5,
+    "max": 33.6,
+    "over30": 2
+   },
+   "fallsPerMin": 2.91,
+   "gustFallShare": 0.34,
+   "postRescueShare": 0,
+   "springFallShare": 0.01,
+   "fallKinds": {
+    "hay": 269,
+    "plank": 209,
+    "puff": 56,
+    "cart": 49
+   },
+   "fireflyPerMin": 37,
+   "lanternsPerMin": 1.79,
+   "heartsGainedPerMin": 1.79,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "rates/normal/kid5": {
+   "diff": "normal",
+   "player": "kid5",
+   "unlimited": true,
+   "n": 20,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 20
+   },
+   "score": {
+    "p10": 3327.2,
+    "med": 3786.5,
+    "p90": 4018.6
+   },
+   "climb": 1,
+   "levels": {
+    "med": 4,
+    "p90": 4
+   },
+   "level1": {
+    "reach": 1,
+    "med": 144.3
+   },
+   "perLevel": {
+    "med": 139.5,
+    "p10": 122,
+    "p90": 155.1,
+    "n": 77
+   },
+   "byZone": [
+    {
+     "med": 144.3,
+     "n": 20,
+     "fallsPerMin": 11.92,
+     "gustFallShare": 0.24,
+     "gustFallsPerGust": 0.804,
+     "minutes": 63.9
+    },
+    {
+     "med": 137.8,
+     "n": 20,
+     "fallsPerMin": 13.41,
+     "gustFallShare": 0.28,
+     "gustFallsPerGust": 0.956,
+     "minutes": 45.3
+    },
+    {
+     "med": 138,
+     "n": 20,
+     "fallsPerMin": 13.88,
+     "gustFallShare": 0.42,
+     "gustFallsPerGust": 1.15,
+     "minutes": 46.2
+    },
+    {
+     "med": 136.6,
+     "n": 17,
+     "fallsPerMin": 14.31,
+     "gustFallShare": 0.32,
+     "gustFallsPerGust": 1,
+     "minutes": 44.7
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 3,
+   "firstFlyP90": 7.9,
+   "stall": {
+    "p90": 22.1,
+    "max": 86.7,
+    "over30": 2
+   },
+   "fallsPerMin": 13.24,
+   "gustFallShare": 0.31,
+   "postRescueShare": 0.08,
+   "springFallShare": 0.01,
+   "fallKinds": {
+    "hay": 1090,
+    "plank": 718,
+    "rescue": 206,
+    "puff": 279,
+    "cart": 356
+   },
+   "fireflyPerMin": 22.1,
+   "lanternsPerMin": 1.05,
+   "heartsGainedPerMin": 1.05,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "rates/normal/kid6": {
+   "diff": "normal",
+   "player": "kid6",
+   "unlimited": true,
+   "n": 20,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 20
+   },
+   "score": {
+    "p10": 3827.1,
+    "med": 4051,
+    "p90": 4253.5
+   },
+   "climb": 1.05,
+   "levels": {
+    "med": 4,
+    "p90": 4
+   },
+   "level1": {
+    "reach": 1,
+    "med": 134
+   },
+   "perLevel": {
+    "med": 131.4,
+    "p10": 119.8,
+    "p90": 151.2,
+    "n": 80
+   },
+   "byZone": [
+    {
+     "med": 134,
+     "n": 20,
+     "fallsPerMin": 10.88,
+     "gustFallShare": 0.21,
+     "gustFallsPerGust": 0.662,
+     "minutes": 68
+    },
+    {
+     "med": 129.7,
+     "n": 20,
+     "fallsPerMin": 12.21,
+     "gustFallShare": 0.28,
+     "gustFallsPerGust": 0.843,
+     "minutes": 43.5
+    },
+    {
+     "med": 130,
+     "n": 20,
+     "fallsPerMin": 13.02,
+     "gustFallShare": 0.42,
+     "gustFallsPerGust": 1.086,
+     "minutes": 44.1
+    },
+    {
+     "med": 131.8,
+     "n": 20,
+     "fallsPerMin": 12.53,
+     "gustFallShare": 0.35,
+     "gustFallsPerGust": 0.985,
+     "minutes": 44.5
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 3.1,
+   "firstFlyP90": 5.5,
+   "stall": {
+    "p90": 13.5,
+    "max": 32.6,
+    "over30": 1
+   },
+   "fallsPerMin": 12.01,
+   "gustFallShare": 0.31,
+   "postRescueShare": 0.06,
+   "springFallShare": 0.01,
+   "fallKinds": {
+    "plank": 672,
+    "rescue": 147,
+    "hay": 994,
+    "cart": 330,
+    "puff": 259
+   },
+   "fireflyPerMin": 24.3,
+   "lanternsPerMin": 1.15,
+   "heartsGainedPerMin": 1.15,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "rates/normal/casual": {
+   "diff": "normal",
+   "player": "casual",
+   "unlimited": true,
+   "n": 20,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 20
+   },
+   "score": {
+    "p10": 5152.7,
+    "med": 5318,
+    "p90": 5575.1
+   },
+   "climb": 1.4,
+   "levels": {
+    "med": 5,
+    "p90": 5
+   },
+   "level1": {
+    "reach": 1,
+    "med": 100.2
+   },
+   "perLevel": {
+    "med": 102.4,
+    "p10": 89,
+    "p90": 116.7,
+    "n": 101
+   },
+   "byZone": [
+    {
+     "med": 104.9,
+     "n": 40,
+     "fallsPerMin": 5.84,
+     "gustFallShare": 0.21,
+     "gustFallsPerGust": 0.346,
+     "minutes": 68.8
+    },
+    {
+     "med": 103.1,
+     "n": 21,
+     "fallsPerMin": 5.83,
+     "gustFallShare": 0.26,
+     "gustFallsPerGust": 0.369,
+     "minutes": 63.9
+    },
+    {
+     "med": 97.1,
+     "n": 20,
+     "fallsPerMin": 5.74,
+     "gustFallShare": 0.42,
+     "gustFallsPerGust": 0.485,
+     "minutes": 33.1
+    },
+    {
+     "med": 100.9,
+     "n": 20,
+     "fallsPerMin": 6.74,
+     "gustFallShare": 0.32,
+     "gustFallsPerGust": 0.468,
+     "minutes": 34.1
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1.9,
+   "firstFlyP90": 3.2,
+   "stall": {
+    "p90": 14.8,
+    "max": 15.6,
+    "over30": 0
+   },
+   "fallsPerMin": 5.97,
+   "gustFallShare": 0.28,
+   "postRescueShare": 0.02,
+   "springFallShare": 0.01,
+   "fallKinds": {
+    "plank": 430,
+    "hay": 449,
+    "puff": 127,
+    "cart": 161,
+    "rescue": 28
+   },
+   "fireflyPerMin": 32.9,
+   "lanternsPerMin": 1.59,
+   "heartsGainedPerMin": 1.59,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/normal/idle": {
+   "diff": "normal",
+   "player": "idle",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 113.9,
+    "med": 465.9,
+    "p90": 600,
+    "censored": 18
+   },
+   "score": {
+    "p10": 33,
+    "med": 46.5,
+    "p90": 97.2
+   },
+   "climb": 0.04,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 0.3,
+     "gustFallShare": 0.69,
+     "gustFallsPerGust": 0.059,
+     "minutes": 324.6
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 10,
+   "firstFly": 26.3,
+   "firstFlyP90": 352.1,
+   "stall": {
+    "p90": 574.1,
+    "max": 599.2,
+    "over30": 47
+   },
+   "fallsPerMin": 0.3,
+   "gustFallShare": 0.69,
+   "postRescueShare": 0.32,
+   "springFallShare": 0,
+   "fallKinds": {
+    "hay": 39,
+    "rescue": 31,
+    "plank": 27
+   },
+   "fireflyPerMin": 0.6,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/normal/holdLeft": {
+   "diff": "normal",
+   "player": "holdLeft",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 49
+   },
+   "score": {
+    "p10": 2,
+    "med": 2,
+    "p90": 12
+   },
+   "climb": 0.01,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 0.01,
+     "gustFallShare": 0,
+     "gustFallsPerGust": 0,
+     "minutes": 490.1
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.3,
+   "firstFly": 0.9,
+   "firstFlyP90": 1,
+   "stall": {
+    "p90": 599.2,
+    "max": 599.2,
+    "over30": 49
+   },
+   "fallsPerMin": 0.01,
+   "gustFallShare": 0,
+   "postRescueShare": 0.33,
+   "springFallShare": 0,
+   "fallKinds": {
+    "hay": 2,
+    "rescue": 1
+   },
+   "fireflyPerMin": 0,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/normal/holdRight": {
+   "diff": "normal",
+   "player": "holdRight",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 50
+   },
+   "score": {
+    "p10": 2,
+    "med": 2,
+    "p90": 14
+   },
+   "climb": 0.01,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 0,
+     "gustFallShare": null,
+     "gustFallsPerGust": 0,
+     "minutes": 500
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1,
+   "firstFlyP90": 1.1,
+   "stall": {
+    "p90": 599.2,
+    "max": 599.2,
+    "over30": 50
+   },
+   "fallsPerMin": 0,
+   "gustFallShare": 0,
+   "postRescueShare": 0,
+   "springFallShare": 0,
+   "fallKinds": {},
+   "fireflyPerMin": 0,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/normal/altFast": {
+   "diff": "normal",
+   "player": "alt0.1",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 13.5,
+    "med": 27.4,
+    "p90": 55.2,
+    "censored": 0
+   },
+   "score": {
+    "p10": 40.9,
+    "med": 56,
+    "p90": 105.2
+   },
+   "climb": 0.47,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 5.28,
+     "gustFallShare": 0.25,
+     "gustFallsPerGust": 0.369,
+     "minutes": 28.4
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 2.3,
+   "firstFly": 8.6,
+   "firstFlyP90": 14.7,
+   "stall": {
+    "p90": 38.9,
+    "max": 100.7,
+    "over30": 8
+   },
+   "fallsPerMin": 5.28,
+   "gustFallShare": 0.25,
+   "postRescueShare": 0.25,
+   "springFallShare": 0,
+   "fallKinds": {
+    "hay": 58,
+    "rescue": 37,
+    "plank": 55
+   },
+   "fireflyPerMin": 8.5,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/normal/altSlow": {
+   "diff": "normal",
+   "player": "alt0.5",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 30.4,
+    "med": 75.7,
+    "p90": 234.1,
+    "censored": 0
+   },
+   "score": {
+    "p10": 44,
+    "med": 88,
+    "p90": 142.7
+   },
+   "climb": 0.2,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 1.73,
+     "gustFallShare": 0.44,
+     "gustFallsPerGust": 0.214,
+     "minutes": 86.5
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 3.8,
+   "firstFly": 6.8,
+   "firstFlyP90": 57.4,
+   "stall": {
+    "p90": 122.9,
+    "max": 475.5,
+    "over30": 23
+   },
+   "fallsPerMin": 1.73,
+   "gustFallShare": 0.44,
+   "postRescueShare": 0.1,
+   "springFallShare": 0.01,
+   "fallKinds": {
+    "plank": 52,
+    "rescue": 15,
+    "hay": 83
+   },
+   "fireflyPerMin": 3.9,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/normal/mash": {
+   "diff": "normal",
+   "player": "mash",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 12.2,
+    "med": 22.9,
+    "p90": 46.8,
+    "censored": 0
+   },
+   "score": {
+    "p10": 30.2,
+    "med": 54,
+    "p90": 95.3
+   },
+   "climb": 0.55,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 6.74,
+     "gustFallShare": 0.25,
+     "gustFallsPerGust": 0.457,
+     "minutes": 22.3
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 4.3,
+   "firstFly": 5.1,
+   "firstFlyP90": 14.7,
+   "stall": {
+    "p90": 30.9,
+    "max": 72.2,
+    "over30": 6
+   },
+   "fallsPerMin": 6.74,
+   "gustFallShare": 0.25,
+   "postRescueShare": 0.25,
+   "springFallShare": 0,
+   "fallKinds": {
+    "hay": 74,
+    "rescue": 37,
+    "plank": 39
+   },
+   "fireflyPerMin": 9.9,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/normal/wallHug": {
+   "diff": "normal",
+   "player": "wallHug",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 10.9,
+    "med": 19.2,
+    "p90": 27.8,
+    "censored": 0
+   },
+   "score": {
+    "p10": 41.8,
+    "med": 98.5,
+    "p90": 155.2
+   },
+   "climb": 1.15,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 9.08,
+     "gustFallShare": 0.35,
+     "gustFallsPerGust": 0.883,
+     "minutes": 16.5
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1.4,
+   "firstFlyP90": 3,
+   "stall": {
+    "p90": 7.3,
+    "max": 20.5,
+    "over30": 0
+   },
+   "fallsPerMin": 9.08,
+   "gustFallShare": 0.35,
+   "postRescueShare": 0.21,
+   "springFallShare": 0,
+   "fallKinds": {
+    "plank": 48,
+    "rescue": 31,
+    "hay": 71
+   },
+   "fireflyPerMin": 22.6,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/normal/fallFarm": {
+   "diff": "normal",
+   "player": "fallFarm",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 18.1,
+    "med": 37.4,
+    "p90": 129.6,
+    "censored": 1
+   },
+   "score": {
+    "p10": 66,
+    "med": 142,
+    "p90": 307.7
+   },
+   "climb": 0.52,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 2.63,
+     "gustFallShare": 0.27,
+     "gustFallsPerGust": 0.197,
+     "minutes": 58.6
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1.5,
+   "firstFlyP90": 10.8,
+   "stall": {
+    "p90": 109.5,
+    "max": 597.5,
+    "over30": 11
+   },
+   "fallsPerMin": 2.63,
+   "gustFallShare": 0.27,
+   "postRescueShare": 0.01,
+   "springFallShare": 0.01,
+   "fallKinds": {
+    "hay": 84,
+    "plank": 68,
+    "rescue": 2
+   },
+   "fireflyPerMin": 11.2,
+   "lanternsPerMin": 0.12,
+   "heartsGainedPerMin": 0.12,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "bots/hard/bot1": {
+   "diff": "hard",
+   "player": "bot1",
+   "unlimited": false,
+   "n": 40,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 40
+   },
+   "score": {
+    "p10": 11379.9,
+    "med": 11561.5,
+    "p90": 11732.8
+   },
+   "climb": 3.02,
+   "levels": {
+    "med": 10,
+    "p90": 10
+   },
+   "level1": {
+    "reach": 1,
+    "med": 54.6
+   },
+   "perLevel": {
+    "med": 56.4,
+    "p10": 53.4,
+    "p90": 60.2,
+    "n": 395
+   },
+   "byZone": [
+    {
+     "med": 56.4,
+     "n": 119,
+     "fallsPerMin": 0,
+     "gustFallShare": null,
+     "gustFallsPerGust": 0,
+     "minutes": 112.8
+    },
+    {
+     "med": 57,
+     "n": 118,
+     "fallsPerMin": 0,
+     "gustFallShare": null,
+     "gustFallsPerGust": 0,
+     "minutes": 117.6
+    },
+    {
+     "med": 56.4,
+     "n": 79,
+     "fallsPerMin": 0.07,
+     "gustFallShare": 0.86,
+     "gustFallsPerGust": 0.012,
+     "minutes": 96
+    },
+    {
+     "med": 56.1,
+     "n": 79,
+     "fallsPerMin": 0.04,
+     "gustFallShare": 0.67,
+     "gustFallsPerGust": 0.006,
+     "minutes": 73.6
+    }
+   ],
+   "firstPlat": 1.3,
+   "firstFly": 1.4,
+   "firstFlyP90": 4,
+   "stall": {
+    "p90": 6.5,
+    "max": 312,
+    "over30": 1
+   },
+   "fallsPerMin": 0.02,
+   "gustFallShare": 0.8,
+   "postRescueShare": 0,
+   "springFallShare": 0,
+   "fallKinds": {
+    "plank": 2,
+    "cart": 2,
+    "hay": 5,
+    "puff": 1
+   },
+   "fireflyPerMin": 57.6,
+   "lanternsPerMin": 2.83,
+   "heartsGainedPerMin": 2.84,
+   "oracle": {
+    "checked": 10,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "bots/hard/bot0.85": {
+   "diff": "hard",
+   "player": "bot0.85",
+   "unlimited": false,
+   "n": 40,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 40
+   },
+   "score": {
+    "p10": 11505.1,
+    "med": 11725,
+    "p90": 12085.1
+   },
+   "climb": 3.04,
+   "levels": {
+    "med": 10,
+    "p90": 10
+   },
+   "level1": {
+    "reach": 1,
+    "med": 54.7
+   },
+   "perLevel": {
+    "med": 56.6,
+    "p10": 53.6,
+    "p90": 60.7,
+    "n": 399
+   },
+   "byZone": [
+    {
+     "med": 56.8,
+     "n": 120,
+     "fallsPerMin": 0.01,
+     "gustFallShare": 1,
+     "gustFallsPerGust": 0.002,
+     "minutes": 114.6
+    },
+    {
+     "med": 57,
+     "n": 119,
+     "fallsPerMin": 0.01,
+     "gustFallShare": 1,
+     "gustFallsPerGust": 0.002,
+     "minutes": 114.8
+    },
+    {
+     "med": 56.2,
+     "n": 80,
+     "fallsPerMin": 0.08,
+     "gustFallShare": 1,
+     "gustFallsPerGust": 0.016,
+     "minutes": 95.9
+    },
+    {
+     "med": 56.4,
+     "n": 80,
+     "fallsPerMin": 0.01,
+     "gustFallShare": 1,
+     "gustFallsPerGust": 0.003,
+     "minutes": 74.8
+    }
+   ],
+   "firstPlat": 1.3,
+   "firstFly": 1.4,
+   "firstFlyP90": 1.5,
+   "stall": {
+    "p90": 5.3,
+    "max": 62.5,
+    "over30": 1
+   },
+   "fallsPerMin": 0.03,
+   "gustFallShare": 1,
+   "postRescueShare": 0,
+   "springFallShare": 0,
+   "fallKinds": {
+    "puff": 2,
+    "hay": 4,
+    "plank": 3,
+    "cart": 2
+   },
+   "fireflyPerMin": 60.3,
+   "lanternsPerMin": 2.96,
+   "heartsGainedPerMin": 2.97,
+   "oracle": {
+    "checked": 11,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "bots/hard/bot0.7": {
+   "diff": "hard",
+   "player": "bot0.7",
+   "unlimited": false,
+   "n": 40,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 40
+   },
+   "score": {
+    "p10": 10054.8,
+    "med": 10507,
+    "p90": 10915.6
+   },
+   "climb": 2.73,
+   "levels": {
+    "med": 9,
+    "p90": 9
+   },
+   "level1": {
+    "reach": 1,
+    "med": 58.5
+   },
+   "perLevel": {
+    "med": 61.8,
+    "p10": 56.9,
+    "p90": 68.9,
+    "n": 359
+   },
+   "byZone": [
+    {
+     "med": 61.9,
+     "n": 118,
+     "fallsPerMin": 0.14,
+     "gustFallShare": 0.28,
+     "gustFallsPerGust": 0.011,
+     "minutes": 124.3
+    },
+    {
+     "med": 60.6,
+     "n": 81,
+     "fallsPerMin": 0.36,
+     "gustFallShare": 0.5,
+     "gustFallsPerGust": 0.044,
+     "minutes": 106.4
+    },
+    {
+     "med": 63.8,
+     "n": 80,
+     "fallsPerMin": 0.56,
+     "gustFallShare": 0.73,
+     "gustFallsPerGust": 0.079,
+     "minutes": 85.2
+    },
+    {
+     "med": 62.4,
+     "n": 80,
+     "fallsPerMin": 0.44,
+     "gustFallShare": 0.7,
+     "gustFallsPerGust": 0.067,
+     "minutes": 84.2
+    }
+   ],
+   "firstPlat": 1.3,
+   "firstFly": 1.4,
+   "firstFlyP90": 1.8,
+   "stall": {
+    "p90": 10,
+    "max": 59,
+    "over30": 1
+   },
+   "fallsPerMin": 0.35,
+   "gustFallShare": 0.6,
+   "postRescueShare": 0.01,
+   "springFallShare": 0,
+   "fallKinds": {
+    "hay": 55,
+    "cart": 17,
+    "plank": 35,
+    "puff": 32,
+    "rescue": 2
+   },
+   "fireflyPerMin": 55.6,
+   "lanternsPerMin": 2.72,
+   "heartsGainedPerMin": 2.79,
+   "oracle": {
+    "checked": 141,
+    "doomed": 1,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "bots/hard/bot0.5": {
+   "diff": "hard",
+   "player": "bot0.5",
+   "unlimited": false,
+   "n": 40,
+   "maxT": 600,
+   "survival": {
+    "p10": 19.8,
+    "med": 50.2,
+    "p90": 190.6,
+    "censored": 0
+   },
+   "score": {
+    "p10": 159.5,
+    "med": 364.5,
+    "p90": 1529.1
+   },
+   "climb": 1.61,
+   "levels": {
+    "med": 0,
+    "p90": 1
+   },
+   "level1": {
+    "reach": 0.17,
+    "med": null
+   },
+   "perLevel": {
+    "med": 98.6,
+    "p10": 81.7,
+    "p90": 122.9,
+    "n": 13
+   },
+   "byZone": [
+    {
+     "med": 98.6,
+     "n": 7,
+     "fallsPerMin": 3.62,
+     "gustFallShare": 0.24,
+     "gustFallsPerGust": 0.238,
+     "minutes": 39.3
+    },
+    {
+     "med": 100.2,
+     "n": 3,
+     "fallsPerMin": 2.63,
+     "gustFallShare": 0.25,
+     "gustFallsPerGust": 0.158,
+     "minutes": 9.1
+    },
+    {
+     "med": 82.4,
+     "n": 2,
+     "fallsPerMin": 2.41,
+     "gustFallShare": 0.75,
+     "gustFallsPerGust": 0.333,
+     "minutes": 3.3
+    },
+    {
+     "med": 81.1,
+     "n": 1,
+     "fallsPerMin": 2.53,
+     "gustFallShare": 0.4,
+     "gustFallsPerGust": 0.222,
+     "minutes": 2
+    }
+   ],
+   "firstPlat": 1.3,
+   "firstFly": 1.4,
+   "firstFlyP90": 2,
+   "stall": {
+    "p90": 12,
+    "max": 25.4,
+    "over30": 0
+   },
+   "fallsPerMin": 3.33,
+   "gustFallShare": 0.27,
+   "postRescueShare": 0,
+   "springFallShare": 0.01,
+   "fallKinds": {
+    "plank": 76,
+    "hay": 90,
+    "puff": 6,
+    "cart": 7
+   },
+   "fireflyPerMin": 34.2,
+   "lanternsPerMin": 1.23,
+   "heartsGainedPerMin": 1.38,
+   "oracle": {
+    "checked": 179,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "bots/hard/bot0.3": {
+   "diff": "hard",
+   "player": "bot0.3",
+   "unlimited": false,
+   "n": 40,
+   "maxT": 600,
+   "survival": {
+    "p10": 15.8,
+    "med": 25.5,
+    "p90": 57.1,
+    "censored": 0
+   },
+   "score": {
+    "p10": 87.5,
+    "med": 167.5,
+    "p90": 403.8
+   },
+   "climb": 1.5,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 5.94,
+     "gustFallShare": 0.2,
+     "gustFallsPerGust": 0.325,
+     "minutes": 21.9
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.3,
+   "firstFly": 1.4,
+   "firstFlyP90": 2.4,
+   "stall": {
+    "p90": 7.6,
+    "max": 32.9,
+    "over30": 1
+   },
+   "fallsPerMin": 5.94,
+   "gustFallShare": 0.2,
+   "postRescueShare": 0.02,
+   "springFallShare": 0.02,
+   "fallKinds": {
+    "plank": 59,
+    "rescue": 3,
+    "hay": 68
+   },
+   "fireflyPerMin": 30.8,
+   "lanternsPerMin": 0.5,
+   "heartsGainedPerMin": 0.5,
+   "oracle": {
+    "checked": 130,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "humans/hard/kid4": {
+   "diff": "hard",
+   "player": "kid4",
+   "unlimited": false,
+   "n": 200,
+   "maxT": 900,
+   "survival": {
+    "p10": 11.6,
+    "med": 19,
+    "p90": 39,
+    "censored": 0
+   },
+   "score": {
+    "p10": 42,
+    "med": 72,
+    "p90": 107
+   },
+   "climb": 0.68,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 7.51,
+     "gustFallShare": 0.24,
+     "gustFallsPerGust": 0.482,
+     "minutes": 79.9
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 3.2,
+   "firstFly": 3.4,
+   "firstFlyP90": 7.8,
+   "stall": {
+    "p90": 20.8,
+    "max": 152,
+    "over30": 11
+   },
+   "fallsPerMin": 7.51,
+   "gustFallShare": 0.24,
+   "postRescueShare": 0.07,
+   "springFallShare": 0,
+   "fallKinds": {
+    "hay": 355,
+    "plank": 195,
+    "rescue": 42,
+    "ground": 8
+   },
+   "fireflyPerMin": 14.4,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 600,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "humans/hard/kid5": {
+   "diff": "hard",
+   "player": "kid5",
+   "unlimited": false,
+   "n": 200,
+   "maxT": 900,
+   "survival": {
+    "p10": 12.9,
+    "med": 20.5,
+    "p90": 41,
+    "censored": 0
+   },
+   "score": {
+    "p10": 43.9,
+    "med": 78.5,
+    "p90": 111.2
+   },
+   "climb": 0.73,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 7.42,
+     "gustFallShare": 0.22,
+     "gustFallsPerGust": 0.445,
+     "minutes": 81
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 2.3,
+   "firstFly": 3.3,
+   "firstFlyP90": 7.9,
+   "stall": {
+    "p90": 23.4,
+    "max": 95.6,
+    "over30": 11
+   },
+   "fallsPerMin": 7.42,
+   "gustFallShare": 0.22,
+   "postRescueShare": 0.06,
+   "springFallShare": 0,
+   "fallKinds": {
+    "ground": 8,
+    "plank": 186,
+    "hay": 371,
+    "rescue": 36
+   },
+   "fireflyPerMin": 15.5,
+   "lanternsPerMin": 0.01,
+   "heartsGainedPerMin": 0.01,
+   "oracle": {
+    "checked": 601,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "humans/hard/kid6": {
+   "diff": "hard",
+   "player": "kid6",
+   "unlimited": false,
+   "n": 200,
+   "maxT": 900,
+   "survival": {
+    "p10": 12.4,
+    "med": 19.4,
+    "p90": 29.9,
+    "censored": 0
+   },
+   "score": {
+    "p10": 47.7,
+    "med": 81,
+    "p90": 125.1
+   },
+   "climb": 0.9,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 8.66,
+     "gustFallShare": 0.26,
+     "gustFallsPerGust": 0.592,
+     "minutes": 69.3
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 2.4,
+   "firstFlyP90": 6.7,
+   "stall": {
+    "p90": 12.9,
+    "max": 40.4,
+    "over30": 2
+   },
+   "fallsPerMin": 8.66,
+   "gustFallShare": 0.26,
+   "postRescueShare": 0.05,
+   "springFallShare": 0,
+   "fallKinds": {
+    "plank": 196,
+    "hay": 369,
+    "rescue": 28,
+    "ground": 7
+   },
+   "fireflyPerMin": 19.4,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 600,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "humans/hard/casual": {
+   "diff": "hard",
+   "player": "casual",
+   "unlimited": false,
+   "n": 200,
+   "maxT": 900,
+   "survival": {
+    "p10": 14.4,
+    "med": 23.1,
+    "p90": 42.4,
+    "censored": 0
+   },
+   "score": {
+    "p10": 75.9,
+    "med": 134,
+    "p90": 291.6
+   },
+   "climb": 1.36,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 7.17,
+     "gustFallShare": 0.22,
+     "gustFallsPerGust": 0.429,
+     "minutes": 87.8
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.3,
+   "firstFly": 1.8,
+   "firstFlyP90": 4.4,
+   "stall": {
+    "p90": 7.8,
+    "max": 21.2,
+    "over30": 0
+   },
+   "fallsPerMin": 7.17,
+   "gustFallShare": 0.22,
+   "postRescueShare": 0.04,
+   "springFallShare": 0.01,
+   "fallKinds": {
+    "hay": 341,
+    "plank": 264,
+    "rescue": 24
+   },
+   "fireflyPerMin": 28.9,
+   "lanternsPerMin": 0.33,
+   "heartsGainedPerMin": 0.33,
+   "oracle": {
+    "checked": 629,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "humans/hard/lagBot0.25": {
+   "diff": "hard",
+   "player": "lagBot0.25",
+   "unlimited": false,
+   "n": 200,
+   "maxT": 900,
+   "survival": {
+    "p10": 13.1,
+    "med": 21.5,
+    "p90": 51.9,
+    "censored": 0
+   },
+   "score": {
+    "p10": 77,
+    "med": 151.5,
+    "p90": 339.9
+   },
+   "climb": 1.43,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 6.86,
+     "gustFallShare": 0.24,
+     "gustFallsPerGust": 0.452,
+     "minutes": 91.9
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1.8,
+   "firstFlyP90": 2.9,
+   "stall": {
+    "p90": 10.4,
+    "max": 127.2,
+    "over30": 5
+   },
+   "fallsPerMin": 6.86,
+   "gustFallShare": 0.24,
+   "postRescueShare": 0.03,
+   "springFallShare": 0.01,
+   "fallKinds": {
+    "hay": 359,
+    "rescue": 17,
+    "plank": 254,
+    "ground": 1
+   },
+   "fireflyPerMin": 30.4,
+   "lanternsPerMin": 0.39,
+   "heartsGainedPerMin": 0.39,
+   "oracle": {
+    "checked": 631,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "rates/hard/bot0.7": {
+   "diff": "hard",
+   "player": "bot0.7",
+   "unlimited": true,
+   "n": 20,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 20
+   },
+   "score": {
+    "p10": 10043.5,
+    "med": 10486,
+    "p90": 10808.4
+   },
+   "climb": 2.68,
+   "levels": {
+    "med": 9,
+    "p90": 9
+   },
+   "level1": {
+    "reach": 1,
+    "med": 60.3
+   },
+   "perLevel": {
+    "med": 61.1,
+    "p10": 56.9,
+    "p90": 69.1,
+    "n": 177
+   },
+   "byZone": [
+    {
+     "med": 62.1,
+     "n": 58,
+     "fallsPerMin": 0.1,
+     "gustFallShare": 0.33,
+     "gustFallsPerGust": 0.009,
+     "minutes": 61.2
+    },
+    {
+     "med": 59,
+     "n": 41,
+     "fallsPerMin": 0.17,
+     "gustFallShare": 0.22,
+     "gustFallsPerGust": 0.009,
+     "minutes": 52.1
+    },
+    {
+     "med": 63.8,
+     "n": 39,
+     "fallsPerMin": 0.75,
+     "gustFallShare": 0.62,
+     "gustFallsPerGust": 0.091,
+     "minutes": 45.1
+    },
+    {
+     "med": 60.1,
+     "n": 39,
+     "fallsPerMin": 0.38,
+     "gustFallShare": 0.69,
+     "gustFallsPerGust": 0.058,
+     "minutes": 41.6
+    }
+   ],
+   "firstPlat": 1.3,
+   "firstFly": 1.4,
+   "firstFlyP90": 2.4,
+   "stall": {
+    "p90": 36.3,
+    "max": 208.5,
+    "over30": 3
+   },
+   "fallsPerMin": 0.32,
+   "gustFallShare": 0.55,
+   "postRescueShare": 0,
+   "springFallShare": 0,
+   "fallKinds": {
+    "cart": 8,
+    "hay": 20,
+    "plank": 18,
+    "puff": 19
+   },
+   "fireflyPerMin": 54.8,
+   "lanternsPerMin": 2.68,
+   "heartsGainedPerMin": 2.68,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "rates/hard/bot0.5": {
+   "diff": "hard",
+   "player": "bot0.5",
+   "unlimited": true,
+   "n": 20,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 20
+   },
+   "score": {
+    "p10": 5374.4,
+    "med": 5783,
+    "p90": 6285.3
+   },
+   "climb": 1.63,
+   "levels": {
+    "med": 5,
+    "p90": 6
+   },
+   "level1": {
+    "reach": 1,
+    "med": 108.3
+   },
+   "perLevel": {
+    "med": 100.3,
+    "p10": 82.1,
+    "p90": 116.7,
+    "n": 106
+   },
+   "byZone": [
+    {
+     "med": 107.4,
+     "n": 40,
+     "fallsPerMin": 4.61,
+     "gustFallShare": 0.25,
+     "gustFallsPerGust": 0.322,
+     "minutes": 71.8
+    },
+    {
+     "med": 91.5,
+     "n": 26,
+     "fallsPerMin": 4,
+     "gustFallShare": 0.28,
+     "gustFallsPerGust": 0.267,
+     "minutes": 61.8
+    },
+    {
+     "med": 88.2,
+     "n": 20,
+     "fallsPerMin": 3.76,
+     "gustFallShare": 0.5,
+     "gustFallsPerGust": 0.367,
+     "minutes": 33.2
+    },
+    {
+     "med": 95.6,
+     "n": 20,
+     "fallsPerMin": 4.1,
+     "gustFallShare": 0.4,
+     "gustFallsPerGust": 0.353,
+     "minutes": 33.2
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1.4,
+   "firstFlyP90": 4,
+   "stall": {
+    "p90": 27.2,
+    "max": 51.2,
+    "over30": 2
+   },
+   "fallsPerMin": 4.19,
+   "gustFallShare": 0.32,
+   "postRescueShare": 0,
+   "springFallShare": 0.01,
+   "fallKinds": {
+    "plank": 325,
+    "hay": 373,
+    "puff": 65,
+    "cart": 72,
+    "rescue": 4
+   },
+   "fireflyPerMin": 34.9,
+   "lanternsPerMin": 1.69,
+   "heartsGainedPerMin": 1.69,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "rates/hard/kid5": {
+   "diff": "hard",
+   "player": "kid5",
+   "unlimited": true,
+   "n": 20,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 20
+   },
+   "score": {
+    "p10": 2983.6,
+    "med": 3144.5,
+    "p90": 3663.6
+   },
+   "climb": 1,
+   "levels": {
+    "med": 3,
+    "p90": 4
+   },
+   "level1": {
+    "reach": 1,
+    "med": 166.1
+   },
+   "perLevel": {
+    "med": 156.8,
+    "p10": 144.3,
+    "p90": 180,
+    "n": 63
+   },
+   "byZone": [
+    {
+     "med": 166.1,
+     "n": 20,
+     "fallsPerMin": 12.71,
+     "gustFallShare": 0.23,
+     "gustFallsPerGust": 0.816,
+     "minutes": 57.6
+    },
+    {
+     "med": 157.4,
+     "n": 20,
+     "fallsPerMin": 14.46,
+     "gustFallShare": 0.29,
+     "gustFallsPerGust": 1.028,
+     "minutes": 53
+    },
+    {
+     "med": 153.5,
+     "n": 20,
+     "fallsPerMin": 15.18,
+     "gustFallShare": 0.42,
+     "gustFallsPerGust": 1.228,
+     "minutes": 52.4
+    },
+    {
+     "med": 148.1,
+     "n": 3,
+     "fallsPerMin": 15.02,
+     "gustFallShare": 0.32,
+     "gustFallsPerGust": 1.06,
+     "minutes": 37.1
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 2.8,
+   "firstFlyP90": 4.8,
+   "stall": {
+    "p90": 35.9,
+    "max": 72.2,
+    "over30": 3
+   },
+   "fallsPerMin": 14.25,
+   "gustFallShare": 0.32,
+   "postRescueShare": 0.12,
+   "springFallShare": 0.01,
+   "fallKinds": {
+    "plank": 737,
+    "hay": 1102,
+    "rescue": 332,
+    "puff": 284,
+    "cart": 394,
+    "ground": 1
+   },
+   "fireflyPerMin": 19.4,
+   "lanternsPerMin": 0.92,
+   "heartsGainedPerMin": 0.92,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "rates/hard/kid6": {
+   "diff": "hard",
+   "player": "kid6",
+   "unlimited": true,
+   "n": 20,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 20
+   },
+   "score": {
+    "p10": 3175.5,
+    "med": 3329.5,
+    "p90": 3792.6
+   },
+   "climb": 1.03,
+   "levels": {
+    "med": 3,
+    "p90": 4
+   },
+   "level1": {
+    "reach": 1,
+    "med": 157.8
+   },
+   "perLevel": {
+    "med": 154.4,
+    "p10": 141.8,
+    "p90": 173.2,
+    "n": 65
+   },
+   "byZone": [
+    {
+     "med": 157.8,
+     "n": 20,
+     "fallsPerMin": 12.71,
+     "gustFallShare": 0.19,
+     "gustFallsPerGust": 0.68,
+     "minutes": 54.8
+    },
+    {
+     "med": 149.3,
+     "n": 20,
+     "fallsPerMin": 14.43,
+     "gustFallShare": 0.26,
+     "gustFallsPerGust": 0.918,
+     "minutes": 50.4
+    },
+    {
+     "med": 157,
+     "n": 20,
+     "fallsPerMin": 14.58,
+     "gustFallShare": 0.42,
+     "gustFallsPerGust": 1.187,
+     "minutes": 53.1
+    },
+    {
+     "med": 144.4,
+     "n": 5,
+     "fallsPerMin": 14.1,
+     "gustFallShare": 0.37,
+     "gustFallsPerGust": 1.124,
+     "minutes": 41.8
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 2.4,
+   "firstFlyP90": 4.8,
+   "stall": {
+    "p90": 14.2,
+    "max": 30.9,
+    "over30": 1
+   },
+   "fallsPerMin": 13.93,
+   "gustFallShare": 0.31,
+   "postRescueShare": 0.11,
+   "springFallShare": 0.01,
+   "fallKinds": {
+    "hay": 1058,
+    "plank": 751,
+    "rescue": 302,
+    "cart": 371,
+    "puff": 304
+   },
+   "fireflyPerMin": 21.1,
+   "lanternsPerMin": 1.01,
+   "heartsGainedPerMin": 1.01,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "rates/hard/casual": {
+   "diff": "hard",
+   "player": "casual",
+   "unlimited": true,
+   "n": 20,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 20
+   },
+   "score": {
+    "p10": 4245.4,
+    "med": 4723,
+    "p90": 5057.3
+   },
+   "climb": 1.34,
+   "levels": {
+    "med": 4,
+    "p90": 5
+   },
+   "level1": {
+    "reach": 1,
+    "med": 119.3
+   },
+   "perLevel": {
+    "med": 120,
+    "p10": 106.7,
+    "p90": 133.8,
+    "n": 88
+   },
+   "byZone": [
+    {
+     "med": 120.5,
+     "n": 28,
+     "fallsPerMin": 8.43,
+     "gustFallShare": 0.23,
+     "gustFallsPerGust": 0.548,
+     "minutes": 78.2
+    },
+    {
+     "med": 117.6,
+     "n": 20,
+     "fallsPerMin": 8.15,
+     "gustFallShare": 0.28,
+     "gustFallsPerGust": 0.558,
+     "minutes": 41.7
+    },
+    {
+     "med": 115.5,
+     "n": 20,
+     "fallsPerMin": 7.59,
+     "gustFallShare": 0.49,
+     "gustFallsPerGust": 0.73,
+     "minutes": 39.5
+    },
+    {
+     "med": 120.7,
+     "n": 20,
+     "fallsPerMin": 9.13,
+     "gustFallShare": 0.36,
+     "gustFallsPerGust": 0.722,
+     "minutes": 40.5
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 1.8,
+   "firstFlyP90": 5.9,
+   "stall": {
+    "p90": 18.8,
+    "max": 74.5,
+    "over30": 1
+   },
+   "fallsPerMin": 8.34,
+   "gustFallShare": 0.32,
+   "postRescueShare": 0.04,
+   "springFallShare": 0.01,
+   "fallKinds": {
+    "plank": 567,
+    "hay": 709,
+    "rescue": 70,
+    "cart": 198,
+    "puff": 125
+   },
+   "fireflyPerMin": 28.2,
+   "lanternsPerMin": 1.35,
+   "heartsGainedPerMin": 1.35,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/hard/idle": {
+   "diff": "hard",
+   "player": "idle",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 59,
+    "med": 229.8,
+    "p90": 600,
+    "censored": 12
+   },
+   "score": {
+    "p10": 24,
+    "med": 46,
+    "p90": 86.3
+   },
+   "climb": 0.05,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 0.46,
+     "gustFallShare": 0.62,
+     "gustFallsPerGust": 0.08,
+     "minutes": 245.4
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 9.1,
+   "firstFly": 19.9,
+   "firstFlyP90": 279.8,
+   "stall": {
+    "p90": 575.1,
+    "max": 599.2,
+    "over30": 43
+   },
+   "fallsPerMin": 0.46,
+   "gustFallShare": 0.62,
+   "postRescueShare": 0.32,
+   "springFallShare": 0.01,
+   "fallKinds": {
+    "hay": 49,
+    "rescue": 37,
+    "plank": 27,
+    "ground": 1
+   },
+   "fireflyPerMin": 0.8,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/hard/holdLeft": {
+   "diff": "hard",
+   "player": "holdLeft",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 50
+   },
+   "score": {
+    "p10": 2,
+    "med": 2,
+    "p90": 12
+   },
+   "climb": 0.01,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 0,
+     "gustFallShare": null,
+     "gustFallsPerGust": 0,
+     "minutes": 500
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.3,
+   "firstFly": 1,
+   "firstFlyP90": 1.2,
+   "stall": {
+    "p90": 599.2,
+    "max": 599.2,
+    "over30": 50
+   },
+   "fallsPerMin": 0,
+   "gustFallShare": 0,
+   "postRescueShare": 0,
+   "springFallShare": 0,
+   "fallKinds": {},
+   "fireflyPerMin": 0,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/hard/holdRight": {
+   "diff": "hard",
+   "player": "holdRight",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 600,
+    "med": 600,
+    "p90": 600,
+    "censored": 50
+   },
+   "score": {
+    "p10": 2,
+    "med": 2,
+    "p90": 14.1
+   },
+   "climb": 0.01,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 0,
+     "gustFallShare": null,
+     "gustFallsPerGust": 0,
+     "minutes": 500
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.3,
+   "firstFly": 1.1,
+   "firstFlyP90": 2,
+   "stall": {
+    "p90": 599.2,
+    "max": 599.2,
+    "over30": 50
+   },
+   "fallsPerMin": 0,
+   "gustFallShare": 0,
+   "postRescueShare": 0,
+   "springFallShare": 0,
+   "fallKinds": {},
+   "fireflyPerMin": 0,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/hard/altFast": {
+   "diff": "hard",
+   "player": "alt0.1",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 11.3,
+    "med": 28.6,
+    "p90": 194.1,
+    "censored": 1
+   },
+   "score": {
+    "p10": 32.9,
+    "med": 54,
+    "p90": 90.9
+   },
+   "climb": 0.23,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 2.73,
+     "gustFallShare": 0.32,
+     "gustFallsPerGust": 0.236,
+     "minutes": 53.9
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 3.2,
+   "firstFly": 6.2,
+   "firstFlyP90": 18.9,
+   "stall": {
+    "p90": 159.4,
+    "max": 590.7,
+    "over30": 8
+   },
+   "fallsPerMin": 2.73,
+   "gustFallShare": 0.32,
+   "postRescueShare": 0.24,
+   "springFallShare": 0,
+   "fallKinds": {
+    "hay": 58,
+    "plank": 51,
+    "ground": 3,
+    "rescue": 35
+   },
+   "fireflyPerMin": 4,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/hard/altSlow": {
+   "diff": "hard",
+   "player": "alt0.5",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 26,
+    "med": 51.1,
+    "p90": 137,
+    "censored": 0
+   },
+   "score": {
+    "p10": 41.9,
+    "med": 66,
+    "p90": 106.1
+   },
+   "climb": 0.23,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 2.39,
+     "gustFallShare": 0.45,
+     "gustFallsPerGust": 0.297,
+     "minutes": 62.6
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 9,
+   "firstFly": 9.2,
+   "firstFlyP90": 41.6,
+   "stall": {
+    "p90": 91.9,
+    "max": 401.6,
+    "over30": 15
+   },
+   "fallsPerMin": 2.39,
+   "gustFallShare": 0.45,
+   "postRescueShare": 0.11,
+   "springFallShare": 0,
+   "fallKinds": {
+    "plank": 65,
+    "rescue": 17,
+    "hay": 67,
+    "ground": 1
+   },
+   "fireflyPerMin": 4.2,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/hard/mash": {
+   "diff": "hard",
+   "player": "mash",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 12.5,
+    "med": 22.5,
+    "p90": 50.9,
+    "censored": 0
+   },
+   "score": {
+    "p10": 31,
+    "med": 59,
+    "p90": 99
+   },
+   "climb": 0.55,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 6.24,
+     "gustFallShare": 0.22,
+     "gustFallsPerGust": 0.371,
+     "minutes": 24
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 4.7,
+   "firstFly": 4.8,
+   "firstFlyP90": 18.9,
+   "stall": {
+    "p90": 32.7,
+    "max": 173,
+    "over30": 6
+   },
+   "fallsPerMin": 6.24,
+   "gustFallShare": 0.22,
+   "postRescueShare": 0.17,
+   "springFallShare": 0,
+   "fallKinds": {
+    "hay": 68,
+    "plank": 53,
+    "rescue": 26,
+    "ground": 3
+   },
+   "fireflyPerMin": 9.7,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/hard/wallHug": {
+   "diff": "hard",
+   "player": "wallHug",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 10,
+    "med": 17.5,
+    "p90": 26.2,
+    "censored": 0
+   },
+   "score": {
+    "p10": 42.7,
+    "med": 79,
+    "p90": 151.1
+   },
+   "climb": 1.21,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 9.71,
+     "gustFallShare": 0.43,
+     "gustFallsPerGust": 1.048,
+     "minutes": 15.5
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.3,
+   "firstFly": 1.9,
+   "firstFlyP90": 3.8,
+   "stall": {
+    "p90": 9.3,
+    "max": 16.5,
+    "over30": 0
+   },
+   "fallsPerMin": 9.71,
+   "gustFallShare": 0.43,
+   "postRescueShare": 0.21,
+   "springFallShare": 0,
+   "fallKinds": {
+    "hay": 62,
+    "rescue": 31,
+    "plank": 57
+   },
+   "fireflyPerMin": 21.6,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  },
+  "exploits/hard/fallFarm": {
+   "diff": "hard",
+   "player": "fallFarm",
+   "unlimited": false,
+   "n": 50,
+   "maxT": 600,
+   "survival": {
+    "p10": 14.8,
+    "med": 29.5,
+    "p90": 123.2,
+    "censored": 0
+   },
+   "score": {
+    "p10": 52.7,
+    "med": 95,
+    "p90": 166.7
+   },
+   "climb": 0.44,
+   "levels": {
+    "med": 0,
+    "p90": 0
+   },
+   "level1": {
+    "reach": 0,
+    "med": null
+   },
+   "perLevel": null,
+   "byZone": [
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": 3.15,
+     "gustFallShare": 0.25,
+     "gustFallsPerGust": 0.224,
+     "minutes": 47.6
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    },
+    {
+     "med": null,
+     "n": 0,
+     "fallsPerMin": null,
+     "gustFallShare": null,
+     "gustFallsPerGust": null,
+     "minutes": 0
+    }
+   ],
+   "firstPlat": 1.4,
+   "firstFly": 3,
+   "firstFlyP90": 12.8,
+   "stall": {
+    "p90": 106.9,
+    "max": 454.6,
+    "over30": 13
+   },
+   "fallsPerMin": 3.15,
+   "gustFallShare": 0.25,
+   "postRescueShare": 0.03,
+   "springFallShare": 0,
+   "fallKinds": {
+    "hay": 81,
+    "plank": 63,
+    "rescue": 4,
+    "ground": 2
+   },
+   "fireflyPerMin": 8.6,
+   "lanternsPerMin": 0,
+   "heartsGainedPerMin": 0,
+   "oracle": {
+    "checked": 0,
+    "doomed": 0,
+    "unavoidable": 0
+   },
+   "unfair": []
+  }
+ }
+}

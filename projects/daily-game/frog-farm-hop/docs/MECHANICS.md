@@ -136,3 +136,6 @@ Survival check: skill 1 over 10 min × 10 seeds had 0 falls on Easy and Normal (
 5. Rescue mat after its bounce: it is no longer landable but stays drawn for 0.5 s (mat wobble). `state` stays `'live'` until removal, so check `bounces > 0` to fade it.
 6. `gotoLevel(i)` emits `levelUp` with `bonus: 0` (no points for the test hook), but still gives +1 heart.
 7. **Weather particles** have `ar` (height/width; raindrop 4, gust 1/3, otherwise 1), and `size` is the drawn **width** in px. Butterflies have `flap` (0.25–1, wing opening; squash x by it). Snowflakes have `depth` 0–2. There is a no-op `setHorizon()` for the sister games' main.js. `update(dt, climbVy)` takes the camera speed in px/s (+ = climbing).
+
+## Update after the playtest (2026-11-08)
+The playtester's patch (`tests/sim/patch.json`, `docs/reports/playtest.md`) is applied: `maxVx` 5.0, `landPad` 0.32, `lanternSize` 15, `sideDx` [2.5, 5], `goal.normal` 125, widthK Easy 1.5 / Normal 1.2 / Hard 0.95, Easy `maxDx` 2.6. Casual-adult levels now take 63–79 s; a 6-year-old model finishes the Sunny Meadow on Easy 98 % of the time. Also: the rescue trampoline is aimed under the nearest reachable platform, side platforms carry no springs and never overlap. Some CONFIG numbers in the header comment above predate this patch; the values in `CONFIG` are the truth.
