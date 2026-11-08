@@ -205,14 +205,6 @@
         mg.addColorStop(0, 'rgba(255,255,255,0)'); mg.addColorStop(0.6, `rgba(255,252,240,${0.35 * mist})`); mg.addColorStop(1, 'rgba(255,255,255,0)');
         g.fillStyle = mg; g.fillRect(0, E.sandY - 90, W, 130);
       }
-      // the warm lantern glow over the dig field at night
-      const glow = clamp(amb.glow || 0, 0, 1), L = this._L;
-      if (glow > 0.02 && L && L.field) {
-        const F = L.field, cx = (F.x0 + F.x1) / 2, cy = ((F.y0 || F.y1) + (F.y1 || L.groundY)) / 2 + 20, r = Math.max(F.x1 - F.x0, (F.y1 - (F.y0 || F.y1)) + 200) * 0.75;
-        const lg = g.createRadialGradient(cx, cy, 20, cx, cy, r);
-        lg.addColorStop(0, `rgba(255,214,140,${0.34 * glow})`); lg.addColorStop(0.6, `rgba(255,200,120,${0.14 * glow})`); lg.addColorStop(1, 'rgba(255,200,120,0)');
-        g.fillStyle = lg; g.fillRect(0, 0, W, H);
-      }
     }
 
     /* ---------- the round ---------- */
@@ -227,12 +219,25 @@
       this._bun(w.bun, L.bun);
       for (const m of ms) if (!(m.y < bunY - 40)) this._mound(m, a, night);
       for (const m of ms) this._riseOver(m, a, night);
+      this._lantern();
       this._eggBits(w.eggBits, a, night);
       this._sand(w.sand, a, night);
       this._shovel(w.shovel, a, night);
       this._flying(w.flying, a, night);
       this._ptero(w.ptero, a);
       this._hintHand(w.hintHand);
+    }
+    /** the warm lantern glow over the dig field at night — drawn OVER the mounds so the sand reads warm (visual P1-2) */
+    _lantern() {
+      const g = this.g, amb = this._amb || {}, glow = clamp(amb.glow || 0, 0, 1), L = this._L;
+      if (glow <= 0.02 || !L || !L.field) return;
+      const F = L.field, y0 = F.y0 != null ? F.y0 : F.y1, y1 = L.groundY;
+      const cx = (F.x0 + F.x1) / 2, cy = (y0 + y1) / 2, r = Math.max(F.x1 - F.x0, y1 - y0 + 200) * 0.72;
+      g.save(); g.globalCompositeOperation = 'lighter';
+      const lg = g.createRadialGradient(cx, cy, 20, cx, cy, r);
+      lg.addColorStop(0, `rgba(120,80,30,${0.32 * glow})`); lg.addColorStop(0.65, `rgba(90,60,20,${0.12 * glow})`); lg.addColorStop(1, 'rgba(90,60,20,0)');
+      g.fillStyle = lg; g.fillRect(0, 0, this.W, this.H);
+      g.restore();
     }
     _thing(thing, dino, size, opt) {   // origin = bottom centre
       if (dino) {

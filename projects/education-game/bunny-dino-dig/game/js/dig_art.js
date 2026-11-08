@@ -51,19 +51,35 @@
   function hash(s) { var h = 7; s = String(s == null ? '' : s); for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h % 1000) / 1000; }
 
   // night tint: every colour drawn goes through T(); `night` is set per draw call (0 = untouched)
-  // `dimV` (wrong things left in their hole) mixes every colour toward a soft sand-grey instead of making it see-through
-  var night = 0, dimV = 0, tintCache = {}, DIM = '#C9BCA4';
+  // Night: THINGS (answers) only take a light 12 % blue mix and keep their highlights, so red / orange / yellow stay
+  // themselves; scene props (shelf, shovel) take 42 %; the mound sand has its own warm "lantern-lit" night table (SAND_N).
+  // `dimV` (a wrong thing left in its hole): desaturates toward a warm grey of the SAME lightness (outlines stay dark, so the
+  // shape still reads) and lifts a little toward sand-grey — clearly "not this one", never see-through.
+  var night = 0, dimV = 0, tMode = 'scene', tintCache = {}, DIM = '#C9BCA4';
+  function hiN() { return tMode === 'thing' ? 0 : night; }   // how much night dims highlights
+  function dimCol(hex, d) {
+    var c = rgb(hex), L = 0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2];
+    var gq = function (v) { v = Math.round(Math.max(0, Math.min(255, v))); return (v < 16 ? '0' : '') + v.toString(16); };
+    var grey = ('#' + gq(L + 7) + gq(L + 2) + gq(L - 9)).toUpperCase();
+    return mix(mix(hex, grey, 0.86 * d), DIM, 0.22 * d);
+  }
   function T(hex) {
     if (!(night > 0.01) && !(dimV > 0.01)) return hex;
-    var n = Math.round(night * 20), d = Math.round(dimV * 20), k = hex + n + '/' + d, v = tintCache[k];
+    var n = Math.round(night * 20), d = Math.round(dimV * 20), k = hex + tMode + n + '/' + d, v = tintCache[k];
     if (!v) {
-      v = n ? mix(hex, NIGHT, 0.42 * n / 20) : hex;
-      if (d) v = mix(v, DIM, 0.55 * d / 20);
+      v = n ? mix(hex, NIGHT, (tMode === 'thing' ? 0.12 : 0.42) * n / 20) : hex;
+      if (d) v = dimCol(v, d / 20);
       tintCache[k] = v;
     }
     return v;
   }
   function TA(hex, a) { var c = rgb(T(hex)); return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + (+a).toFixed(3) + ')'; }
+  function lum(h) { var c = rgb(h).map(function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; }
+  function lineOf(c) { return lum(c.base) > 0.5 ? mix(c.dark, '#4A3200', 0.5) : c.dark; }   // yellow: a darker outline (#8A6609) so it reads on sand
+  // sand by day (DESIGN §3) and by night (warm lantern-lit; ΔE ≥ 47 to every answer colour at night, ≥ 32 to the bone)
+  var SAND_N = { base: '#917C66', shade: '#76634F', line: '#4E3F2E', hi: '#B59C7C', hole: '#5E4A34', holeDeep: '#33271B' };
+  function S(name) { return night > 0.01 ? mix(SAND[name], SAND_N[name], Math.round(night * 20) / 20) : SAND[name]; }
+  function SA(name, a) { var c = rgb(S(name)); return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + (+a).toFixed(3) + ')'; }
   function pal(c) {
     if (!c) return null;
     var P = DD.PALETTE || FALLBACK_PALETTE, p = (P && P[c]) || FALLBACK_PALETTE[c];
@@ -118,13 +134,13 @@
     ctx.translate(dx == null ? -4.5 : dx, dy == null ? -4 : dy); fillK(ctx, key, build, T(base)); ctx.translate(-(dx == null ? -4.5 : dx), -(dy == null ? -4 : dy));
     if (hr > 0) {
       var g = ctx.createRadialGradient(hx, hy, 0, hx, hy, hr);
-      g.addColorStop(0, 'rgba(255,255,255,' + (0.55 * (1 - 0.6 * night)).toFixed(3) + ')'); g.addColorStop(0.5, 'rgba(255,255,255,0.16)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+      g.addColorStop(0, 'rgba(255,255,255,' + (0.55 * (1 - 0.6 * hiN())).toFixed(3) + ')'); g.addColorStop(0.5, 'rgba(255,255,255,0.16)'); g.addColorStop(1, 'rgba(255,255,255,0)');
       ctx.fillStyle = g; ctx.fillRect(hx - hr, hy - hr, hr * 2, hr * 2);
     }
     ctx.restore();
   }
   function shinyDot(ctx, x, y, rx, ry, rot, a) {
-    ctx.fillStyle = 'rgba(255,255,255,' + ((a || 0.75) * (1 - 0.5 * night)).toFixed(3) + ')';
+    ctx.fillStyle = 'rgba(255,255,255,' + ((a || 0.75) * (1 - 0.5 * hiN())).toFixed(3) + ')';
     ctx.beginPath(); ctx.ellipse(x, y, rx, ry, rot || 0, 0, TAU); ctx.fill();
   }
   function eye(ctx, x, y, r) {
@@ -181,11 +197,11 @@
       }
     }
     ctx.restore();
-    strokeK(ctx, 'egg', eggB, T(c.dark), LW);
+    strokeK(ctx, 'egg', eggB, T(lineOf(c)), LW);
     if (part) {   // the jagged edge outline
       ctx.save(); clipK(ctx, 'egg', eggB);
       ctx.beginPath(); for (i = 0; i <= 8; i++) { if (i) ctx.lineTo(ZIG[i][0], ZIG[i][1]); else ctx.moveTo(ZIG[i][0], ZIG[i][1]); }
-      ctx.lineJoin = 'round'; ctx.strokeStyle = T(c.dark); ctx.lineWidth = LW * 2; ctx.stroke();
+      ctx.lineJoin = 'round'; ctx.strokeStyle = T(lineOf(c)); ctx.lineWidth = LW * 2; ctx.stroke();
       ctx.restore();
     }
     ctx.restore();
@@ -235,7 +251,7 @@
     var k = 0.76;
     ctx.save(); clipK(ctx, key, b);
     ctx.translate(cx, cy + 1.6); ctx.scale(k, k); ctx.translate(-cx, -cy);   // light bevel just under the groove
-    strokeK(ctx, key, b, TA('#FFFFFF', 0.45 * (1 - 0.5 * night)), 2.4 / k);
+    strokeK(ctx, key, b, TA('#FFFFFF', 0.45 * (1 - 0.5 * hiN())), 2.4 / k);
     ctx.restore();
     ctx.save(); clipK(ctx, key, b);
     ctx.translate(cx, cy); ctx.scale(k, k); ctx.translate(-cx, -cy);         // the dark groove
@@ -247,7 +263,7 @@
     ctx.beginPath();
     for (var i = 0; i <= 40; i++) { var t = i / 40, an = t * 3.4 * Math.PI, r = R * (0.12 + 0.88 * t); var x = sw[0] + Math.cos(an) * r, y = sw[1] + Math.sin(an) * r; if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); }
     ctx.strokeStyle = TA(c.dark, 0.6); ctx.lineWidth = 2.2; ctx.stroke();
-    ctx.translate(0.9, 1.1); ctx.strokeStyle = TA('#FFFFFF', 0.3 * (1 - 0.5 * night)); ctx.lineWidth = 1.1; ctx.stroke();
+    ctx.translate(0.9, 1.1); ctx.strokeStyle = TA('#FFFFFF', 0.3 * (1 - 0.5 * hiN())); ctx.lineWidth = 1.1; ctx.stroke();
     ctx.restore();
     // pits + a soft upper-left shine (stones are smooth, not glossy) — both kept inside the silhouette
     ctx.save(); clipK(ctx, key, b);
@@ -257,7 +273,7 @@
     var SH = { triangle: [-8, -58], diamond: [-12, -70], star: [-7, -66], heart: [-26, -80] }[shape] || [-bx.w * 0.22, -bx.h * 0.74];
     shinyDot(ctx, SH[0], SH[1], 6, 3, -0.6, 0.55);
     ctx.restore();
-    strokeK(ctx, key, b, T(c.dark), LW);
+    strokeK(ctx, key, b, T(lineOf(c)), LW);
   }
 
   // ================================================================ BONE
@@ -266,7 +282,7 @@
   function drawBone(ctx) {
     ctx.save();
     ctx.translate(0, -50); ctx.rotate(0.2); ctx.translate(0, 50);
-    strokeK(ctx, 'bone', boneB, T(BONE.line), LW * 2);
+    strokeK(ctx, 'bone', boneB, T(mix(BONE.line, '#4A3B26', 0.55 * night)), LW * 2);
     celFill(ctx, 'bone', boneB, BONE.base, BONE.shade, -14, -88, 18, -4, -3);
     ctx.strokeStyle = TA(BONE.line, 0.55); ctx.lineWidth = 1.6; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(4, -64); ctx.lineTo(1, -58); ctx.lineTo(4, -53); ctx.moveTo(-3, -36); ctx.lineTo(0, -31); ctx.stroke();
@@ -277,7 +293,7 @@
   // ================================================================ TOYS (painted wooden figurines)
   var WOOD = { base: '#D9AC72', line: '#9A6D3C', top: '#EBC690' };
   var TOY = {
-    duck: { base: '#F7D35A', line: '#B58A1E', w: 70 },
+    duck: { base: '#F7D35A', line: '#7E5A08', w: 70 },
     cat: { base: '#B0AAB6', line: '#6E6878', w: 70 },
     dog: { base: '#C99160', line: '#7F5432', w: 78 },
     cow: { base: '#F7F2EA', line: '#8D857A', w: 76 },
@@ -459,7 +475,7 @@
     ctx.restore();
     // a carved frame line around the face
     ctx.save(); ctx.translate(0, -50); ctx.scale(0.84, 0.86); ctx.translate(0, 50);
-    strokeK(ctx, 'tab', tabletB, TA('#FFFFFF', 0.35 * (1 - 0.5 * night)), 2.6);
+    strokeK(ctx, 'tab', tabletB, TA('#FFFFFF', 0.35 * (1 - 0.5 * hiN())), 2.6);
     ctx.translate(-0.8, -1); strokeK(ctx, 'tab', tabletB, TA(TAB.line, 0.5), 1.8);
     ctx.restore();
     strokeK(ctx, 'tab', tabletB, T(TAB.line), LW);
@@ -473,7 +489,7 @@
   // ================================================================ DINO (code fallback; the game uses the SVG hatchlings)
   function drawDinoUnit(ctx, c) {   // 100 box, bottom centre, facing RIGHT
     c = c || pal('green');
-    var line = c.dark, shade = shadeOf(c);
+    var line = lineOf(c), shade = shadeOf(c);
     ctx.save(); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     var tail = function (p) { p.moveTo(-18, -34); p.quadraticCurveTo(-44, -30, -50, -12); p.quadraticCurveTo(-36, -16, -16, -16); p.closePath(); };
     piece(ctx, 'dino:tail', tail, c.base, line);
@@ -512,7 +528,7 @@
   function drawThing(ctx, thing, size, opt) {
     if (!thing || !(size > 0)) return;
     opt = opt || {};
-    var prevNight = night, prevDim = dimV; night = clamp01(opt.night); dimV = clamp01(opt.dim);
+    var prevNight = night, prevDim = dimV, prevMode = tMode; night = clamp01(opt.night); dimV = clamp01(opt.dim); tMode = 'thing';
     var k = size / 100, wob = +opt.wob || 0, time = opt.time == null ? nowSec() : opt.time;
     ctx.save();
     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
@@ -541,7 +557,7 @@
       default: break;
     }
     ctx.restore();
-    night = prevNight; dimV = prevDim;
+    night = prevNight; dimV = prevDim; tMode = prevMode;
   }
 
   // ================================================================ MOUND
@@ -630,21 +646,21 @@
     // contact shadow on the ground
     ctx.fillStyle = 'rgba(70,50,25,' + (0.2 * (1 - 0.3 * night)).toFixed(3) + ')';
     ctx.beginPath(); ctx.ellipse(0.03 * g.w, 0.02 * g.w, 0.56 * g.w, 0.07 * g.w, 0, 0, TAU); ctx.fill();
-    silhouette(ctx, g); ctx.lineJoin = 'round'; ctx.lineWidth = lw * 2; ctx.strokeStyle = glow > 0 ? mix(T(SAND.line), '#E8A014', 0.6 * glow) : T(SAND.line); ctx.stroke();
+    silhouette(ctx, g); ctx.lineJoin = 'round'; ctx.lineWidth = lw * 2; ctx.strokeStyle = glow > 0 ? mix(S('line'), '#E8A014', 0.6 * glow) : S('line'); ctx.stroke();
     ctx.save();
     silhouette(ctx, g); ctx.clip();
-    ctx.fillStyle = T(SAND.shade); ctx.fillRect(-g.w, -2 * g.h0 - 20, 2 * g.w, 2 * g.h0 + 0.2 * g.w + 40);
-    ctx.save(); ctx.translate(-0.045 * g.w, -0.1 * g.h0 - 2); silhouette(ctx, g); ctx.fillStyle = T(SAND.base); ctx.fill(); ctx.restore();
+    ctx.fillStyle = S('shade'); ctx.fillRect(-g.w, -2 * g.h0 - 20, 2 * g.w, 2 * g.h0 + 0.2 * g.w + 40);
+    ctx.save(); ctx.translate(-0.045 * g.w, -0.1 * g.h0 - 2); silhouette(ctx, g); ctx.fillStyle = S('base'); ctx.fill(); ctx.restore();
     var hx = -0.16 * g.w, hy = Math.min(-8, g.pileTop * 0.7 - 6), hr = 0.32 * g.w;
     var hg = ctx.createRadialGradient(hx, hy, 0, hx, hy, hr);
-    hg.addColorStop(0, TA(SAND.hi, 0.85)); hg.addColorStop(0.6, TA(SAND.hi, 0.25)); hg.addColorStop(1, TA(SAND.hi, 0));
+    hg.addColorStop(0, SA('hi', 0.85)); hg.addColorStop(0.6, SA('hi', 0.25)); hg.addColorStop(1, SA('hi', 0));
     ctx.fillStyle = hg; ctx.fillRect(hx - hr, hy - hr, 2 * hr, 2 * hr);
     // grains and pebbles (deterministic per mound)
     for (var i = 0; i < 12; i++) {
       var a = (g.seed * 997 + i * 61.7) % 1, b = (g.seed * 571 + i * 37.3) % 1, x = (a - 0.5) * 0.8 * g.w, top = -heapH(g, x);
       var y = top + (0.18 + 0.7 * b) * (0 - top) + 2;
       if (top > -6) continue;
-      ctx.fillStyle = i % 3 ? TA(SAND.line, 0.42) : TA(SAND.hi, 0.9);
+      ctx.fillStyle = i % 3 ? SA('line', 0.42) : SA('hi', 0.9);
       ctx.beginPath(); ctx.ellipse(x, y, i % 4 ? 1.6 : 2.6, i % 4 ? 1.3 : 2, 0, 0, TAU); ctx.fill();
     }
     ctx.restore();
@@ -654,7 +670,7 @@
     opt = opt || {};
     var g = moundGeom(mound);
     if (!g.hole) return;
-    var prevNight = night; night = clamp01(opt.night);
+    var prevNight = night, prevMode = tMode; night = clamp01(opt.night); tMode = 'scene';
     var time = opt.time == null ? nowSec() : opt.time, h = g.hole;
     ctx.save();
     if (moundSetup(ctx, g, opt)) {
@@ -665,19 +681,19 @@
       // the hole: lit back wall at the top, deep at the front
       ctx.save();
       ctx.beginPath(); ctx.ellipse(0, h.cy, h.rx, h.ry, 0, 0, TAU);
-      ctx.fillStyle = T(SAND.holeDeep); ctx.fill();
+      ctx.fillStyle = S('holeDeep'); ctx.fill();
       ctx.clip();
       var gg = ctx.createLinearGradient(0, h.cy - h.ry, 0, h.cy + h.ry);
-      gg.addColorStop(0, T(SAND.hole)); gg.addColorStop(0.55, TA(SAND.hole, 0.55)); gg.addColorStop(1, TA(SAND.hole, 0));
+      gg.addColorStop(0, S('hole')); gg.addColorStop(0.55, SA('hole', 0.55)); gg.addColorStop(1, SA('hole', 0));
       ctx.fillStyle = gg; ctx.beginPath(); ctx.ellipse(0, h.cy - h.ry * 0.45, h.rx * 1.02, h.ry * 0.95, 0, 0, TAU); ctx.fill();
-      ctx.lineWidth = 4; ctx.strokeStyle = TA(SAND.holeDeep, 0.8);
+      ctx.lineWidth = 4; ctx.strokeStyle = SA('holeDeep', 0.8);
       ctx.beginPath(); ctx.ellipse(0, h.cy + 1.5, h.rx, h.ry, 0, Math.PI, 0); ctx.stroke();
       ctx.restore();
-      ctx.lineWidth = 2.4; ctx.strokeStyle = T(SAND.line);
+      ctx.lineWidth = 2.4; ctx.strokeStyle = S('line');
       ctx.beginPath(); ctx.ellipse(0, h.cy, h.rx, h.ry, 0, Math.PI, 0); ctx.stroke();
     }
     ctx.restore();
-    night = prevNight;
+    night = prevNight; tMode = prevMode;
   }
   function sparkleStar(ctx, x, y, r, a) {
     ctx.save(); ctx.translate(x, y); ctx.rotate(a);
@@ -688,7 +704,7 @@
   function drawMound(ctx, mound, opt) {
     if (!mound) return;
     opt = opt || {};
-    var prevNight = night; night = clamp01(opt.night);
+    var prevNight = night, prevMode = tMode; night = clamp01(opt.night); tMode = 'scene';
     var g = moundGeom(mound), time = opt.time == null ? nowSec() : opt.time, h = g.hole;
     ctx.save();
     if (moundSetup(ctx, g, opt)) {
@@ -698,9 +714,9 @@
       ctx.restore();
       if (h) {   // the front lip of the hole
         ctx.lineCap = 'round';
-        ctx.lineWidth = 2.6; ctx.strokeStyle = T(SAND.line);
+        ctx.lineWidth = 2.6; ctx.strokeStyle = S('line');
         ctx.beginPath(); ctx.ellipse(0, h.cy, h.rx, h.ry, 0, Math.PI, 0, true); ctx.stroke();
-        ctx.lineWidth = 2.2; ctx.strokeStyle = TA(SAND.hi, 0.9);
+        ctx.lineWidth = 2.2; ctx.strokeStyle = SA('hi', 0.9);
         ctx.beginPath(); ctx.ellipse(0, h.cy + 3, h.rx * 0.9, h.ry, 0, Math.PI * 0.85, Math.PI * 0.15, true); ctx.stroke();
       }
       var sp = clamp01(opt.sparkle);
@@ -713,7 +729,7 @@
       }
     }
     ctx.restore();
-    night = prevNight;
+    night = prevNight; tMode = prevMode;
   }
 
   // ================================================================ SHOVEL, SAND BIT, SHELF
@@ -724,7 +740,7 @@
   }
   function drawShovel(ctx, angle, size, opt) {
     opt = opt || {};
-    var prevNight = night; night = clamp01(opt.night);
+    var prevNight = night, prevMode = tMode; night = clamp01(opt.night); tMode = 'scene';
     var k = (size || 100) / 100, sand = clamp01(opt.sand);
     ctx.save(); ctx.rotate(angle || 0); ctx.scale(k, k); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     // handle shaft + T grip (wood)
@@ -745,17 +761,17 @@
       ctx.bezierCurveTo(-wd * 0.9, -20 - hgt * 0.9, -wd * 0.2, -20 - hgt * 1.1, 2, -20 - hgt);
       ctx.bezierCurveTo(wd * 0.5, -20 - hgt * 0.95, wd, -20 - hgt * 0.5, wd, -20);
       ctx.quadraticCurveTo(0, -14, -wd, -20); ctx.closePath();
-      ctx.fillStyle = T(SAND.base); ctx.fill(); ctx.lineWidth = 2.2; ctx.strokeStyle = T(SAND.line); ctx.stroke();
-      ctx.fillStyle = TA(SAND.hi, 0.9); ctx.beginPath(); ctx.ellipse(-wd * 0.3, -20 - hgt * 0.6, wd * 0.3, hgt * 0.16, -0.3, 0, TAU); ctx.fill();
-      ctx.fillStyle = TA(SAND.line, 0.5); ctx.beginPath(); circ(ctx,wd * 0.35, -22 - hgt * 0.3, 1.4); circ(ctx,-wd * 0.5, -22, 1.2); ctx.fill();
+      ctx.fillStyle = S('base'); ctx.fill(); ctx.lineWidth = 2.2; ctx.strokeStyle = S('line'); ctx.stroke();
+      ctx.fillStyle = SA('hi', 0.9); ctx.beginPath(); ctx.ellipse(-wd * 0.3, -20 - hgt * 0.6, wd * 0.3, hgt * 0.16, -0.3, 0, TAU); ctx.fill();
+      ctx.fillStyle = SA('line', 0.5); ctx.beginPath(); circ(ctx,wd * 0.35, -22 - hgt * 0.3, 1.4); circ(ctx,-wd * 0.5, -22, 1.2); ctx.fill();
     }
     ctx.restore();
-    night = prevNight;
+    night = prevNight; tMode = prevMode;
   }
   function drawSandBit(ctx, r, rot, opt) {
     opt = opt || {};
     if (!(r > 0)) return;
-    var prevNight = night; night = clamp01(opt.night);
+    var prevNight = night, prevMode = tMode; night = clamp01(opt.night); tMode = 'scene';
     var seed = opt.seed == null ? 0.37 : +opt.seed, n = 7;
     ctx.save(); ctx.rotate(rot || 0);
     if (opt.alpha != null) ctx.globalAlpha *= clamp01(opt.alpha);
@@ -766,18 +782,18 @@
       if (!i) ctx.moveTo(Math.cos(a) * q, Math.sin(a) * q); else ctx.quadraticCurveTo(Math.cos(am) * qm, Math.sin(am) * qm, Math.cos(a) * q, Math.sin(a) * q);
     }
     ctx.closePath();
-    ctx.fillStyle = T(SAND.base); ctx.fill();
-    ctx.lineWidth = Math.max(1, r * 0.2); ctx.strokeStyle = T(SAND.line); ctx.stroke();
-    ctx.fillStyle = T(SAND.shade); ctx.beginPath(); ctx.ellipse(r * 0.25, r * 0.3, r * 0.5, r * 0.32, 0, 0, TAU); ctx.fill();
-    ctx.fillStyle = TA(SAND.hi, 0.95); ctx.beginPath(); ctx.ellipse(-r * 0.3, -r * 0.32, r * 0.32, r * 0.2, -0.5, 0, TAU); ctx.fill();
+    ctx.fillStyle = S('base'); ctx.fill();
+    ctx.lineWidth = Math.max(1, r * 0.2); ctx.strokeStyle = S('line'); ctx.stroke();
+    ctx.fillStyle = S('shade'); ctx.beginPath(); ctx.ellipse(r * 0.25, r * 0.3, r * 0.5, r * 0.32, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = SA('hi', 0.95); ctx.beginPath(); ctx.ellipse(-r * 0.3, -r * 0.32, r * 0.32, r * 0.2, -0.5, 0, TAU); ctx.fill();
     ctx.restore();
-    night = prevNight;
+    night = prevNight; tMode = prevMode;
   }
   var SHELF = { wood: '#B8875A', dark: '#7E5634', light: '#D9AE7E', top: '#CFA071', flag: '#C79A84', flagDk: '#8F6A58' };
   function drawShelf(ctx, shelf, opt) {
     if (!shelf) return;
     opt = opt || {};
-    var prevNight = night; night = clamp01(opt.night);
+    var prevNight = night, prevMode = tMode; night = clamp01(opt.night); tMode = 'scene';
     var x = shelf.x, y = shelf.y, w = shelf.w, h = shelf.h, py = y + h - 30, th = 16;
     ctx.save(); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     // soft shadow
@@ -812,7 +828,7 @@
       shelf.slots.forEach(function (s) { ctx.beginPath(); ctx.ellipse(s.x, s.y + 1, (shelf.size || 64) * 0.32, 3, 0, 0, TAU); ctx.fill(); });
     }
     ctx.restore();
-    night = prevNight;
+    night = prevNight; tMode = prevMode;
   }
 
   // ================================================================ ICONS

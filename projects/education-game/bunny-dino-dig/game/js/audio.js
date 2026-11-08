@@ -19,7 +19,7 @@
   const SCALE_C = [0, 0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19];
 
   const A = {
-    ctx: null, master: null, user: null, sfx: null, music: null, amb: null, noiseBuf: null,
+    ctx: null, master: null, comp: null, user: null, sfx: null, music: null, amb: null, noiseBuf: null,
     sfxOn: true, musicOn: true, muted: false, ducked: false, volume: 1,
     mood: 0, _timer: null, _next: 0, _step: 0, _phrase: null, _playing: false, _hum: null, _lastPlay: {}, _bubT: 0,
 
@@ -32,6 +32,7 @@
       this.master = c.createGain(); this.master.gain.value = 1;
       const comp = c.createDynamicsCompressor();
       comp.threshold.value = -18; comp.knee.value = 12; comp.ratio.value = 4; comp.attack.value = 0.004; comp.release.value = 0.18;
+      this.comp = comp;   // exposed for QA (DD.debug.audio().comp)
       this.user = c.createGain(); this.user.gain.value = this.volume * 1.6;
       this.master.connect(comp); comp.connect(this.user); this.user.connect(c.destination);
       this.sfx = c.createGain(); this.sfx.gain.value = 0.9; this.sfx.connect(this.master);

@@ -21,7 +21,9 @@ assert.deepStrictEqual = ((orig) => (a, b, m) => orig(J(a), J(b), m))(assert.dee
 // independent copies of the DESIGN tables (§3, §5.1)
 const AGE_TOPICS = { 3: ['colors', 'shapes', 'size', 'animals'], 4: ['colors', 'shapes', 'count', 'animals'],
   5: ['shapes', 'count', 'letters', 'animals'], 6: ['lower', 'initial', 'add', 'count'], 7: ['initial', 'add', 'sub', 'oddeven'] };
-const CLASH = [['blue', 'purple'], ['red', 'green'], ['yellow', 'orange'], ['green', 'orange']];
+const CLASH = [['blue', 'purple'], ['red', 'green'], ['yellow', 'orange'], ['green', 'orange'], ['red', 'orange']];
+const NIGHT = [['red', 'pink'], ['blue', 'purple'], ['red', 'orange']];
+const pairsOf = (age, level) => (age < 5 ? CLASH : []).concat(level % 4 === 3 ? NIGHT : []);
 const HEX = { red: '#E84A4A', blue: '#3C8DE8', yellow: '#FFD23F', green: '#4CC26B', orange: '#FF9A2E', purple: '#8E44AD', pink: '#FF8FC0' };
 const SKY = { morning: ['#BFE6F2', '#FBE9C9'], noon: ['#7CC7EE', '#CDEBF6'], night: ['#1F2A55', '#3E4C7E'] };
 const ICON_KINDS = ['egg', 'blob', 'stone', 'toy', 'bone', 'number', 'letter', 'dots', 'size', 'dino'];
@@ -146,16 +148,24 @@ test('layout: DESIGN §2 boxes (bubble, hud, shelf + 12 slots, Bun, item size)',
     assert.strictEqual(L.portrait, P);
     assert.strictEqual(L.groundY, v.H - ins.bottom - (P ? 26 : 14));
     assert.strictEqual(L.bubble.x, ins.left + 24);
-    if (P) { assert.strictEqual(L.bubble.y, ins.top + 110); assert.strictEqual(L.bubble.h, 124); assert.strictEqual(L.shelf.y, L.bubble.y + L.bubble.h + 14); }
+    if (P) { assert.strictEqual(L.bubble.y, ins.top + 110); assert.strictEqual(L.bubble.h, 124); assert.strictEqual(L.shelf.y, L.bubble.y + L.bubble.h + (L.tall ? 52 : 24)); }
     else { assert.strictEqual(L.bubble.y, ins.top + 18); assert.strictEqual(L.bubble.h, 122); assert.ok(L.bubble.w <= 560); assert.strictEqual(L.shelf.y, ins.top + 152); }
-    assert.strictEqual(L.shelf.x, ins.left + 24); assert.strictEqual(L.shelf.w, v.W - ins.left - ins.right - 48); assert.strictEqual(L.shelf.h, 92);
-    assert.strictEqual(L.shelf.slots.length, 12); assert.strictEqual(L.shelf.size, 64);
-    for (const s of L.shelf.slots) { assert.ok(s.x - 32 >= L.shelf.x - 1e-6 && s.x + 32 <= L.shelf.x + L.shelf.w + 1e-6, 'slot on the plank ' + v.name); assert.strictEqual(s.y, L.shelf.y + 92 - 30); }
-    assert.ok(L.shelf.slots[1].x - L.shelf.slots[0].x <= 76 + 1e-9);
+    const phone = (P ? v.H / v.W : v.W / v.H) > 1.9, big = L.shelf.size === 84;
+    assert.strictEqual(L.phone, phone);
+    assert.ok(!big || phone, 'big shelf only on phones');
+    assert.strictEqual(L.shelf.x, ins.left + 24); assert.strictEqual(L.shelf.w, v.W - ins.left - ins.right - 48); assert.strictEqual(L.shelf.h, big ? 112 : 92);
+    assert.strictEqual(L.shelf.slots.length, big && P ? 8 : 12); assert.strictEqual(L.shelf.size, big ? 84 : 64);
+    if (phone && P) assert.ok(big, v.name + ': phone portrait gets the 84 px / 8-slot shelf');
+    const hs = L.shelf.size / 2;
+    for (const s of L.shelf.slots) { assert.ok(s.x - hs >= L.shelf.x - 1e-6 && s.x + hs <= L.shelf.x + L.shelf.w + 1e-6, 'slot on the plank ' + v.name); assert.strictEqual(s.y, L.shelf.y + L.shelf.h - 30); }
+    const d = Math.abs(L.shelf.slots[1].x - L.shelf.slots[0].x);
+    assert.ok(d >= L.shelf.size - 1e-6 || !big, 'phone shelf items do not overlap'); assert.ok(d <= Math.max(76, L.shelf.size + 12) + 1e-9);
+    assert.strictEqual(L.shelf.slots[1].x < L.shelf.slots[0].x, !P, 'landscape fills from the right');
     assert.strictEqual(L.hud.x, v.W - ins.right - 160);
     assert.strictEqual(L.bun.x, ins.left + (P ? 104 : 118)); assert.strictEqual(L.bun.y, L.groundY - 4); assert.strictEqual(L.bun.h, P ? 200 : 230);
-    const base = age <= 4 ? 112 : age === 5 ? 104 : 96;
-    assert.strictEqual(L.item, Math.round(base * (L.tall ? 1.15 : 1)));
+    const base = age <= 4 ? 112 : age === 5 ? 104 : 96, ks = phone ? [P ? 1.35 : 1.2, L.tall ? 1.15 : 1] : [L.tall ? 1.15 : 1];
+    assert.ok(ks.map(k => Math.round(base * k)).includes(L.item), v.name + ' item ' + L.item);
+    if (phone) assert.strictEqual(L.item, Math.round(base * ks[0]), v.name + ': phones get the bigger item at age ' + age);
     assert.ok(L.item >= 96, 'items ≥ 96 px');
   }
 });
@@ -249,6 +259,7 @@ test('content: tables (palette hex, topics per age, shapes, animals)', () => {
   for (const a of AGES) { assert.deepStrictEqual(DD.AGE_TOPICS[a], AGE_TOPICS[a]); assert.deepStrictEqual(C.topicsFor(a), AGE_TOPICS[a]); }
   for (const a of AGES) for (const t of DD.AGE_TOPICS[a]) assert.ok(DD.AGE_POOLS[a].includes(t));
   assert.deepStrictEqual(C.safeSetsOf(4), [], 'no clash-free set of 4 colours');
+  assert.strictEqual(C.maxSafe(4, 0), 3); assert.strictEqual(C.maxSafe(5, 3), 5); assert.strictEqual(C.maxSafe(5, 1), 7);
 });
 
 function checkRound(r, label) {
@@ -256,12 +267,13 @@ function checkRound(r, label) {
   assert.strictEqual(err, null, label + ': ' + err);
   const age = r.age, nM = r.mounds.length;
   assert.ok(nM >= 2 && nM <= C.MAX_MOUNDS, label + ' mounds');
-  assert.strictEqual(r.scoops, age <= 3 ? 2 : 3);
+  assert.strictEqual(r.scoops, age <= 3 || r.topic === 'count' ? 2 : 3);
   if (r.roundIndex === 0) { assert.strictEqual(r.steps.length, 1, label + ' warm-up 1 step'); if (r.steps[0].mode === 'find') assert.strictEqual(nM, r.topic === 'size' ? 2 : age <= 4 ? 2 : 3, label + ' warm-up mounds'); }
   if (r.level === 0 && age <= 4) { assert.strictEqual(r.steps.length, 1, label + ' level 0: 1 step'); if (r.steps[0].mode === 'find') assert.ok(nM <= 3, label + ' level 0 ≤ 3 mounds'); }
   if (r.roundIndex === 0) assert.strictEqual(r.surprise, null);
   const cs = [...new Set(r.mounds.map(m => m.thing.color).filter(Boolean))];
-  if (age < 5) { for (const [a, b] of CLASH) assert.ok(!(cs.includes(a) && cs.includes(b)), label + ' clash ' + a + '+' + b); assert.ok(!cs.includes('pink'), label + ' pink < 5'); }
+  for (const [a, b] of pairsOf(age, r.level)) assert.ok(!(cs.includes(a) && cs.includes(b)), label + ' clash ' + a + '+' + b);
+  if (age < 5) assert.ok(!cs.includes('pink'), label + ' pink < 5');
   const shapes = [...new Set(r.mounds.map(m => m.thing.shape).filter(Boolean))];
   for (const [a, b] of [['square', 'rect'], ['circle', 'oval'], ['square', 'diamond']]) assert.ok(!(shapes.includes(a) && shapes.includes(b)), label + ' shapes ' + a + '+' + b);
   const used = new Set();
@@ -289,10 +301,15 @@ function checkRound(r, label) {
 test('content: every topic × age 3–7 × 200 seeds × rounds 0–3 × level 0/1 × EN/VI is valid with exactly one match per find ask', () => {
   let n = 0;
   for (const topic of TOPICS) for (const age of AGES) for (let s = 0; s < 200; s++) {
-    const lang = LANGS[s % 2], level = s % 3 === 0 ? 0 : 1, rng = new DD.RNG(s * 31 + age);
-    let prevKey = null, prevN = 0;
+    const lang = LANGS[s % 2], level = [0, 1, 2, 3][s % 4], rng = new DD.RNG(s * 31 + age);
+    let prevKey = null, prevN = 0, prevAns = null, run = 0;
     for (let ri = 0; ri < 4; ri++) {
-      const r = C.makeRound(topic, { age, lang, rng, roundIndex: ri, level, surprise: ri ? 'mole' : null, short: ri === 3 && s % 4 === 0, prevKey, prevN });
+      const r = C.makeRound(topic, { age, lang, rng, roundIndex: ri, level, surprise: ri ? 'mole' : null, short: ri === 3 && s % 4 === 0, prevKey, prevN, prevAns, prevAnsRun: run });
+      const s0 = r.steps[0];
+      if (prevAns !== null && s0.mode !== 'count' && s0.promptKey !== 'p.shapes5' && String(s0.nameValue) === String(prevAns))
+        assert.ok(['size', 'oddeven'].includes(topic) && run < 2, `${topic} age ${age}: the same answer ${prevAns} again (run ${run})`);
+      const ls = r.steps[r.steps.length - 1];
+      if (ls.mode !== 'count') { run = String(ls.nameValue) === String(prevAns) ? run + 1 : 1; prevAns = ls.nameValue; }
       checkRound(r, `${topic} age ${age} seed ${s} r${ri} L${level}`);
       if (prevKey) assert.notStrictEqual(r.key, prevKey, `${topic} age ${age}: the same set twice in a row`);
       if (r.steps[0].mode === 'count') { if (prevN && C.countRange(age, ri, level)[1] > C.countRange(age, ri, level)[0]) assert.notStrictEqual(r.steps[0].need, prevN, 'count N repeats'); prevN = r.steps[0].need; }
@@ -335,7 +352,7 @@ test('content: variety — many different sets per topic and age; shapes5 / size
   for (const topic of TOPICS) for (const age of AGES) {
     const keys = new Set();
     for (let s = 0; s < 120; s++) keys.add(C.makeRound(topic, { age, lang: 'en', rng: new DD.RNG(s + 5), roundIndex: 2, level: 1 }).key);
-    const want = topic === 'count' ? 3 : topic === 'size' ? 8 : topic === 'colors' && age === 3 ? 12 : topic === 'colors' && age === 4 ? 6 : topic === 'shapes' && age === 3 ? 15 : 20;
+    const want = topic === 'count' ? 3 : topic === 'size' ? 8 : topic === 'colors' && age === 3 ? 12 : topic === 'colors' && age === 4 ? 4 : topic === 'shapes' && age === 3 ? 15 : 20;
     assert.ok(keys.size >= want, `${topic} age ${age}: only ${keys.size} different sets`);
   }
   for (let s = 0; s < 200; s++) {
@@ -354,7 +371,7 @@ test('content: variety — many different sets per topic and age; shapes5 / size
 
 test('content: Talk time for every topic × age (picture choices, answer among them, 2 choices at age 3)', () => {
   for (const topic of TOPICS) for (const age of AGES) for (let s = 0; s < 60; s++) {
-    const t = C.makeTalk(topic, { age, lang: LANGS[s % 2], rng: new DD.RNG(s) });
+    const t = C.makeTalk(topic, { age, lang: LANGS[s % 2], rng: new DD.RNG(s), level: s % 4 }); t._level = s % 4;
     assert.strictEqual(t.promptKey, 'talk.' + topic);
     assert.ok(t.choices.length >= 2 && t.choices.length <= 3);
     if (age <= 3 && ['colors', 'shapes', 'animals', 'size', 'count'].includes(topic)) assert.strictEqual(t.choices.length, 2, topic + ' 2 choices at age 3');
@@ -362,7 +379,7 @@ test('content: Talk time for every topic × age (picture choices, answer among t
     assert.strictEqual(new Set(t.choices.map(c => JSON.stringify(c.value))).size, t.choices.length, 'distinct choices');
     for (const c of t.choices) assert.ok(ICON_KINDS.includes(c.thing.kind), 'icon kind ' + c.thing.kind);
     if (t.show) assert.ok(ICON_KINDS.includes(t.show.kind));
-    if (age < 5) { const cs = t.choices.map(c => c.thing.color).filter(Boolean).concat(t.show && t.show.color ? [t.show.color] : []); for (const [a, b] of CLASH) assert.ok(!(cs.includes(a) && cs.includes(b))); }
+    { const cs = t.choices.map(c => c.thing.color).filter(Boolean).concat(t.show && t.show.color ? [t.show.color] : []); for (const [a, b] of pairsOf(age, t._level)) assert.ok(!(cs.includes(a) && cs.includes(b)), 'talk clash'); }
     const ans = t.choices.find(c => c.id === t.answer);
     if (topic === 'colors') { assert.strictEqual(t.show.kind, 'egg'); assert.strictEqual(ans.value, t.show.color); }
     if (topic === 'count') { assert.strictEqual(t.show.kind, 'dots'); assert.strictEqual(ans.value, t.show.n); }
@@ -438,7 +455,7 @@ test('world: extra taps on the digging mound queue scoops (max 2) and dig faster
   assert.ok(Math.abs(fast - (CFG.shovelIn + 3 * CFG.scoopFast)) < 0.03, 'queued scoops run back to back at scoopFast (' + fast.toFixed(3) + ')');
 });
 
-test('world: wrong dig — wiggle, stays open, dims to 0.35, a miss; tapping it again is "already" (no miss); stars 3/2/1', () => {
+test('world: wrong dig — wiggle, stays open, dims fully, sinks back to rise 0.55, a miss; tapping it again is "already" (no miss); stars 3/2/1', () => {
   const w = roundWhere({ age: 4 }, 'colors', 2, r => r.steps.length === 1 && r.mounds.length >= 3);
   const m = wrongMound(w);
   tapMound(w, m.id);
@@ -453,7 +470,8 @@ test('world: wrong dig — wiggle, stays open, dims to 0.35, a miss; tapping it 
   let maxWob = 0; run(w, 0.4, () => { maxWob = Math.max(maxWob, Math.abs(m.twob)); });
   assert.ok(maxWob > 5 && maxWob <= 8.5, 'wiggle ±8 px (' + maxWob.toFixed(1) + ')');
   run(w, 2.5);
-  assert.ok(Math.abs(m.dim - 0.35) < 0.02, 'dim ' + m.dim);
+  assert.ok(Math.abs(m.dim - 1) < 0.02, 'dim ' + m.dim);
+  assert.ok(Math.abs(m.rise - 0.55) < 0.03, 'sinks back partly (rise ' + m.rise.toFixed(2) + ')');
   assert.ok(Math.abs(m.twob) < 0.5, 'wiggle damped');
   assert.strictEqual(tapMound(w, m.id), 'already');
   assert.strictEqual(w.misses, 1);
@@ -525,7 +543,9 @@ test('world: hop to the shelf — ballistic arc, apex 140 px above the higher en
     if (w.flying.length) { minY = Math.min(minY, f.y); maxRot = Math.max(maxRot, Math.abs(f.rot)); if (last) acc.push(f.y - last); last = f.y; }
     return w.shelfItems.length === 1;
   });
-  assert.ok(Math.abs(minY - (Math.min(y0, y1) - 140)) < 2, 'apex ' + minY.toFixed(1));
+  assert.ok(Math.abs(minY - f.path.yA) < 2 && f.path.yA <= Math.min(y0, y1) - 12, 'apex ' + minY.toFixed(1));
+  assert.ok(f.path.yA >= Math.min(y0, y1) - 140 - 1e-6, 'apex at most 140 px above the higher end');
+  assert.ok(f.path.yA === Math.min(y0, y1) - 140 || f.path.yA - 64 >= 10 - 1e-6, 'clamped below the top edge');
   assert.ok(maxRot <= 2 * Math.PI + 1e-6 && maxRot > 5, 'one turn for a stone');
   const d2 = acc.slice(1).map((v, i) => v - acc[i]).filter(Number.isFinite);
   const g = d2.reduce((s, v) => s + v, 0) / d2.length / (H * H);
@@ -601,7 +621,7 @@ test('world: a 2-step round — stepDone, "Now…" ask after 0.6 s; a step whose
   until(w2, () => w2.state === 'roundDone');
 });
 
-test('world: empty sand taps — dust (sandTap), the 2nd shows a hint; hint cooldown 6 s; assist after 6 (age ≤ 4) / 5 (age 5+)', () => {
+test('world: empty sand taps — dust (sandTap), the 2nd shows a hint; hint cooldown 6 s; assist after 4 (age ≤ 4) / 5 (age 5+)', () => {
   for (const age of [4, 6]) {
     const w = roundOf(mkWorld({ age }), age <= 4 ? 'animals' : 'initial', 2), L = w.layout;
     const sx = L.field.x0 + 10, sy = L.groundY - 4;   // a sand point with no mound
@@ -616,7 +636,7 @@ test('world: empty sand taps — dust (sandTap), the 2nd shows a hint; hint cool
     run(w, 0.3); assert.ok(w.moundById(hId).glow > 0.5);
     tapAt(w, sx, sy); tapAt(w, sx, sy);
     assert.ok(!types(evs(w)).includes('hint'), 'cooldown');
-    const need = age <= 4 ? 6 : 5;
+    const need = age <= 4 ? 4 : 5;
     while (w._noProg < need) tapAt(w, sx, sy);
     evs(w);
     const wrong = wrongMound(w);
@@ -722,7 +742,7 @@ test('world: rotation / resize mid-dig — mounds re-placed (state kept), flight
     w.setViewport(v.W, v.H, v.ins);
     assert.strictEqual(w.flying.length, 0, 'flights land instantly');
     assert.deepStrictEqual(w.mounds.map(m => m.state), st);
-    w.mounds.forEach((m, i) => assert.ok(Math.abs(m.dig - dg[i]) < 0.35));
+    w.mounds.forEach((m, i) => { assert.ok(m.dig >= dg[i] - 1e-6, 'dig progress kept'); dg[i] = m.dig; });
     const L = w.layout;
     for (let i = 0; i < w.mounds.length; i++) {
       const m = w.mounds[i];
@@ -792,6 +812,87 @@ test('world: deterministic — same seed + same inputs → the same events at an
   for (let i = 0; i < 2400; i++) w2.update(1 / 120);
   assert.deepStrictEqual(types(w1.drainEvents()), types(w2.drainEvents()));
   assert.strictEqual(w1.cur.key, w2.cur.key);
+});
+
+test('layout: the measured HUD pushes the portrait bubble; the shelf stays clear of a 150 px VI bubble + tail; capacity ≥ 8 (iPhone 15, SE)', () => {
+  // QA visual P1-1: logical viewports + the HUD keep box main.js measures (HUD bottom + 8 = 222 on iPhone 15, 181 on SE)
+  for (const c of [{ W: 720, H: 1561, ins: { top: 86, right: 0, bottom: 62, left: 0 }, hud: 214, name: 'iPhone 15' },
+    { W: 720, H: 1280, ins: { top: 37, right: 0, bottom: 0, left: 0 }, hud: 173, name: 'iPhone SE' },
+    { W: 720, H: 960, ins: { top: 32, right: 0, bottom: 27, left: 0 }, hud: 110, name: 'iPad portrait' }]) for (const age of AGES) {
+    const hk = [{ x: c.W - 330, y: 0, w: 330, h: c.hud }, { x: 18, y: 0, w: 684, h: c.ins.top + 110 + 124 + 6 }];
+    const L = DD.World.computeLayout(c.W, c.H, c.ins, null, age, hk);
+    assert.strictEqual(L.bubble.y, Math.max(c.ins.top + 110, c.hud + 8), c.name + ' bubble y');
+    const itemTop = L.shelf.slots[0].y - L.shelf.size;
+    if (c.H / c.W > 1.6) assert.ok(itemTop >= L.bubble.y + 150 + 21, `${c.name}: shelf items (${itemTop}) under a 150 px bubble + tail (${L.bubble.y + 171})`);
+    else assert.ok(itemTop >= L.bubble.y + L.bubble.h + 21, c.name + ': items below the bubble tail');
+    assert.ok(L.capacity >= 8, `${c.name} age ${age}: capacity ${L.capacity}`);
+    for (let n = 2; n <= 8; n++) checkPlacement(L, n, n * 7 + age, `${c.name} age ${age} n ${n}`);
+  }
+  // landscape: a measured HUD wider than the logical one makes the bubble narrower (≥ 220) instead of covering the HUD
+  const L2 = DD.World.computeLayout(960, 720, null, null, 4, [{ x: 960 - 420, y: 0, w: 420, h: 100 }]);
+  assert.ok(L2.bubble.x + L2.bubble.w <= 960 - 420 - 12 + 1e-9 && L2.bubble.w >= 220);
+});
+
+test('layout: rows spread over the free height (front row stays on the ground, only upward, ≤ 1.7 row gaps)', () => {
+  const L = DD.World.computeLayout(720, 1561, { top: 86, right: 0, bottom: 62, left: 0 }, null, 4);
+  const pos = DD.World.placeMounds(L, 4, null, 3), ys = [...new Set(pos.map(p => p.row))].map(r => Math.max(...pos.filter(p => p.row === r).map(p => p.y)));
+  assert.ok(ys.length >= 2);
+  const g = (Math.max(...pos.map(p => p.y)) - Math.min(...pos.map(p => p.y)));
+  assert.ok(g > L.rowGap * 1.2 && g <= 1.7 * L.rowGap * (ys.length - 1) + 20, 'spread ' + g.toFixed(0));
+  assert.ok(Math.min(...pos.map(p => p.y)) >= L.limit - 8);
+  assert.ok(Math.max(...pos.map(p => p.y)) >= L.rows[0].y - 8, 'front row on the ground');
+});
+
+test('world: a hop never goes above ins.top + 10 (iPhone landscape); landscape finds land from the right end', () => {
+  const v = { W: 1561, H: 720, ins: { top: 0, right: 108, bottom: 38, left: 108 } };
+  const w = roundOf(mkWorld({ age: 4, vp: v }), 'count', 2);
+  let minTop = 1e9;
+  for (let k = 0; k < 2; k++) {
+    until(w, () => w.interactive);
+    const a = w.answer(); tapMound(w, a.mound);
+    until(w, () => { for (const f of w.flying) minTop = Math.min(minTop, f.y - f.s); return w.shelfItems.length === k + 1; });
+  }
+  assert.ok(minTop >= v.ins.top + 10 - 1, 'top of the hopping thing ' + minTop.toFixed(1));
+  const sl = w.layout.shelf.slots;
+  assert.strictEqual(w.shelfItems[0].x, sl[0].x); assert.ok(sl[0].x > w.layout.W / 2 && sl[1].x < sl[0].x);
+  assert.ok(DD.World.hopPath(0, 600, 100, 200, 140, 3000, 120).yA >= 120 - 1e-9);
+});
+
+test('world: a tap while the mounds pop up (enter) is kept and digs when the dig phase opens; elsewhere soft {kind:"early"}', () => {
+  const w = mkWorld({ age: 4 });
+  w.levels = ['animals', 'animals', 'animals', 'animals']; w.startLevel(1); w.round = 1; w._beginRound(); evs(w);
+  run(w, 0.6);
+  assert.strictEqual(w.phase, 'enter');
+  const m = w.mounds[1], p = w.moundTap(m.id);
+  assert.strictEqual(tapAt(w, p.x, p.y), null);
+  let e = evs(w).find(x => x.type === 'soft'); assert.ok(e && e.kind === 'early' && e.held && e.id === m.id);
+  const L = w.layout; assert.strictEqual(tapAt(w, L.field.x0 + 10, L.groundY - 4), null);
+  e = evs(w).find(x => x.type === 'soft'); assert.ok(e && e.kind === 'early' && !e.held);
+  until(w, () => w.phase === 'dig');
+  assert.ok(w.dig && w.dig.id === m.id, 'the early tap digs');
+  e = evs(w); assert.ok(types(e).indexOf('ask') < types(e).indexOf('dig'), 'after the ask');
+});
+
+test('world: thingTopPad — a tap 35 px above the tip of a peeking thing digs it', () => {
+  const w = roundOf(mkWorld({ age: 4 }), 'letters', 1);
+  for (const m of w.mounds) { const tipY = m.thingY - m.size; assert.strictEqual(w._moundAt(m.x, tipY - 35), m, 'above the tip of ' + m.id); }
+  assert.strictEqual(CFG.thingTopPad, 40);
+});
+
+test('world: the next round does not open with the answer asked last (prevAns)', () => {
+  for (const [topic, age] of [['colors', 3], ['animals', 4], ['shapes', 4], ['letters', 5], ['initial', 6]]) {
+    const w = mkWorld({ age, seed: 9 });
+    w.levels = [topic, topic, topic, topic]; w.startLevel(1);
+    let last = null, rep = 0;
+    for (let r = 0; r < 12; r++) {
+      until(w, () => w.interactive || w.state === 'talk');
+      if (w.state === 'talk') { w.skipTalk(); until(w, () => w.state === 'intro'); w.levels = [topic, topic, topic, topic]; continue; }
+      if (last !== null && String(w.stepInfo.nameValue) === String(last)) rep++;
+      solveRound(w); last = w._prevAns;
+      until(w, () => w.state !== 'round');
+    }
+    assert.strictEqual(rep, 0, topic + ' repeated its answer');
+  }
 });
 
 // ---------------------------------------------------------------- bot

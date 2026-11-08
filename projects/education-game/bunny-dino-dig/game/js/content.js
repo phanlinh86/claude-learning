@@ -8,7 +8,7 @@
  *   DD.Content.matches(round, step, thing) → bool (does this thing answer this step)
  *   DD.Content.retarget(round, stepIndex, buriedIds) → a replacement find step for a still-buried mound | null
  *
- * round = { topic, age, lang, roundIndex, level, surprise: null|'mole'|'ptero', short, scoops (2 at age 3, else 3),
+ * round = { topic, age, lang, roundIndex, level, surprise: null|'mole'|'ptero', short, scoops (2 at age 3 and in count rounds, else 3),
  *           mounds: [{ id: 'm0'…, thing }]  (order = slot order), steps: [step], key (the set, order-free), seed }
  * thing = { kind 'egg'|'stone'|'bone'|'toy'|'tablet', color?, shape?, animal?, text?, size? ('big'|'small', size topic only),
  *           nameKind, nameValue }   — nameKind / nameValue name the thing the way this round's question is about:
@@ -88,23 +88,34 @@
     return LETTER_POOL[langOf(lang)].indexOf(c) >= 0 ? c : null;
   }
 
-  /* Colour-blind / toddler safety (DESIGN §3): below age 5 one round never holds blue+purple, red+green, yellow+orange or
-   * green+orange (every coloured thing: eggs, stones), and no pink. */
+  /* Colour-blind / toddler safety (DESIGN §3 + QA visual P1-3): below age 5 one round never holds blue+purple, red+green,
+   * yellow+orange, green+orange or red+orange (every coloured thing: eggs, stones), and no pink. In the night chapter (level
+   * % 4 = 3, the colours darken) at ANY age also never red+pink, blue+purple or red+orange. */
   var COLOR_SAFE_BELOW = 5;
-  var CLASH = [['blue', 'purple'], ['red', 'green'], ['yellow', 'orange'], ['green', 'orange']];
-  function clash(cs) {
-    for (var i = 0; i < CLASH.length; i++) if (cs.indexOf(CLASH[i][0]) >= 0 && cs.indexOf(CLASH[i][1]) >= 0) return true;
+  var CLASH = [['blue', 'purple'], ['red', 'green'], ['yellow', 'orange'], ['green', 'orange'], ['red', 'orange']];
+  var NIGHT_CLASH = [['red', 'pink'], ['blue', 'purple'], ['red', 'orange']];
+  function isNight(level) { return level !== undefined && level !== null && level % 4 === 3; }
+  function pairsFor(age, level) { return (age < COLOR_SAFE_BELOW ? CLASH : []).concat(isNight(level) ? NIGHT_CLASH : []); }
+  function clash(cs, pairs) {
+    pairs = pairs || CLASH;
+    for (var i = 0; i < pairs.length; i++) if (cs.indexOf(pairs[i][0]) >= 0 && cs.indexOf(pairs[i][1]) >= 0) return true;
     return false;
   }
-  function safeSetsOf(n) {
-    var out = [];
-    for (var m = 1; m < 64; m++) {
-      var cs = COLORS.filter(function (c, i) { return m & (1 << i); });
-      if (cs.length === n && !clash(cs)) out.push(cs);
+  var SETS = {};
+  /** Every clash-free set of n colours for this age / chapter (cached). */
+  function safeSets(age, level, n) {
+    var key = (age < COLOR_SAFE_BELOW ? 'y' : 'o') + (isNight(level) ? 'n' : 'd') + n;
+    if (SETS[key]) return SETS[key];
+    var pool = age < COLOR_SAFE_BELOW ? COLORS : COLORS5, pr = pairsFor(age, level), out = [];
+    for (var m = 1; m < (1 << pool.length); m++) {
+      var cs = pool.filter(function (c, i) { return m & (1 << i); });
+      if (cs.length === n && !clash(cs, pr)) out.push(cs);
     }
-    return out;
+    return (SETS[key] = out);
   }
-  var SAFE = { 1: safeSetsOf(1), 2: safeSetsOf(2), 3: safeSetsOf(3) };   // no clash-free set of 4 exists
+  function safeSetsOf(n) { return safeSets(3, 0, n); }
+  /** The most distinct colours one round can hold (3 below age 5; 5 at night from age 5; 7 otherwise). */
+  function maxSafe(age, level) { var n = 1; while (n < 7 && safeSets(age, level, n + 1).length) n++; return n; }
   var SAFE_MAX = 3;
 
   function ageOf(a) { a = Math.round(+a || 4); return a < 3 ? 3 : a > 7 ? 7 : a; }
@@ -124,10 +135,10 @@
     return topic === 'lower' ? P.filter(function (c) { return LOWER_SKIP.indexOf(c) < 0; }) : P;
   }
   function parityOf(n) { return n % 2 ? 'odd' : 'even'; }
-  /** k distinct colours; below age 5 a clash-free set (k ≤ 3), never pink. */
-  function colourSet(rng, age, k) {
-    if (age < COLOR_SAFE_BELOW) return rng.shuffle(rng.pick(SAFE[Math.min(SAFE_MAX, k)]).slice()).slice(0, k);
-    return rng.sample(COLORS5, k);
+  /** k distinct colours, clash-free for this age and chapter (below age 5: k ≤ 3, never pink). */
+  function colourSet(rng, age, k, level) {
+    var n = Math.min(k, maxSafe(age, level));
+    return rng.shuffle(rng.pick(safeSets(age, level, n)).slice()).slice(0, k);
   }
 
   // ---------------- things ----------------
@@ -229,7 +240,7 @@
   // ---------------- rounds ----------------
   function buildRound(topic, age, lang, rng, ri, level, short, prevN) {
     var things = [], steps = [], n, k, i, cols, picks;
-    var r = { topic: topic, age: age, lang: lang, roundIndex: ri, level: level, short: !!short, surprise: null, scoops: age <= 3 ? 2 : 3, mounds: null, steps: steps };
+    var r = { topic: topic, age: age, lang: lang, roundIndex: ri, level: level, short: !!short, surprise: null, scoops: age <= 3 || topic === 'count' ? 2 : 3, mounds: null, steps: steps };
     function finish(order) {
       r.mounds = ids(things.length).map(function (id, j) { return { id: id, thing: things[j] }; });
       // find rounds: the targets are chosen among the mounds (order = picks), then the steps follow from the things
@@ -238,8 +249,8 @@
     switch (topic) {
       case 'colors': {
         n = moundsFor(rng, age, ri, level);
-        if (age < COLOR_SAFE_BELOW) n = Math.min(n, SAFE_MAX);
-        cols = colourSet(rng, age, n);
+        n = Math.min(n, maxSafe(age, level));
+        cols = colourSet(rng, age, n, level);
         things = cols.map(egg);
         k = stepsFor(rng, age, ri, level, short, n);
         finish(rng.sample(range(0, n - 1), k));
@@ -248,12 +259,12 @@
       case 'shapes': {
         n = moundsFor(rng, age, ri, level);
         if (age < 5) {
-          var col = colourSet(rng, age, 1)[0];
+          var col = colourSet(rng, age, 1, level)[0];
           things = shapeSet(rng, age, n).map(function (s) { return stone(s, col); });
           k = stepsFor(rng, age, ri, level, short, n);
           finish(rng.sample(range(0, n - 1), k));
         } else {   // shapes5: a 2 × 2 grid of shapes × colours (+ an extra stone) → the answer needs both
-          var sh = shapeSet(rng, age, 3), cs = colourSet(rng, age, 3);
+          var sh = shapeSet(rng, age, 3), cs = colourSet(rng, age, 3, level);
           var grid = [stone(sh[0], cs[0]), stone(sh[0], cs[1]), stone(sh[1], cs[0]), stone(sh[1], cs[1])];
           var gridT = [0, 1, 2, 3];
           if (n === 3) { grid.pop(); gridT = [0]; }
@@ -267,7 +278,7 @@
         break;
       }
       case 'size': {
-        var kind = rng.pick(['bone', 'egg', 'toy']), c1 = colourSet(rng, age, 1)[0], an = rng.pick(DD.ANIMALS);
+        var kind = rng.pick(['bone', 'egg', 'toy']), c1 = colourSet(rng, age, 1, level)[0], an = rng.pick(DD.ANIMALS);
         things = rng.shuffle(['big', 'small']).map(function (sz) {
           var t = kind === 'bone' ? bone() : kind === 'egg' ? egg(c1) : toy(an);
           t.size = sz; t.nameKind = 'size'; t.nameValue = sz;
@@ -368,6 +379,7 @@
         r = buildRound(topic, age, lang, rng, ri, level, !!o.short, o.prevN || 0);
         err = validate(r);
         if (!err && o.prevKey && r.key === o.prevKey && attempt < 60) err = 'same set as the previous round';
+        if (!err && attempt < 40 && sameAnswer(r, o.prevAns, o.prevAnsRun)) err = 'the same answer as the previous round';
       } catch (e) { r = null; err = e.message; }
       if (!err) break;
     }
@@ -375,6 +387,15 @@
     r.surprise = ri === 0 ? null : (o.surprise || null);
     r.seed = (rng.next() * 4294967296) >>> 0;
     return r;
+  }
+
+  /** QA playtest P2-1: the first ask of a round is not the answer asked last (size / odd-even have 2 answers: at most 2 in a row;
+   *  shapes5 is exempt — its grid repeats shapes on purpose; count uses prevN). */
+  function sameAnswer(r, prevAns, run) {
+    var s = r.steps[0];
+    if (prevAns === undefined || prevAns === null || !s || s.mode === 'count' || s.promptKey === 'p.shapes5') return false;
+    if (String(s.nameValue) !== String(prevAns)) return false;
+    return r.topic === 'size' || r.topic === 'oddeven' ? (run || 1) >= 2 : true;
   }
 
   /** A replacement for step `si` when its target was dug open earlier (a wrong dig in a previous step): the first still-buried
@@ -416,7 +437,7 @@
       if (t.kind === 'tablet' && !(t.text && t.text.length)) return 'tablet text';
       if (t.size && !SIZE_K[t.size]) return 'thing size';
     }
-    if (r.scoops !== (age <= 3 ? 2 : 3)) return 'scoops ' + r.scoops;
+    if (r.scoops !== (age <= 3 || r.topic === 'count' ? 2 : 3)) return 'scoops ' + r.scoops;
     var n = r.steps.length, mode0 = r.steps[0] && r.steps[0].mode;
     if (n < 1 || n > 2) return n + ' steps';
     if (ri === 0 && n !== 1) return 'warm-up has ' + n + ' steps';
@@ -426,7 +447,7 @@
       var lo = ri === 0 ? (age <= 4 ? 2 : 3) : age <= 3 ? 2 : age === 4 ? 3 : 4, hi = ri === 0 ? lo : age <= 3 ? 3 : age === 4 ? 4 : age === 5 ? 5 : 6;
       if (lvl0) hi = Math.min(hi, 3);
       if (r.topic === 'size') { lo = hi = 2; }
-      if (r.topic === 'colors' && age < COLOR_SAFE_BELOW) hi = Math.min(hi, SAFE_MAX), lo = Math.min(lo, hi);
+      if (r.topic === 'colors') hi = Math.min(hi, maxSafe(age, r.level)), lo = Math.min(lo, hi);
       if (r.topic === 'letters' && ri > 0 && age === 5) lo = hi = 4;
       if (nM < lo || nM > hi) return nM + ' mounds not in ' + lo + '–' + hi;
       if (n >= nM) return n + ' steps with ' + nM + ' mounds';
@@ -469,7 +490,7 @@
     // colours (DESIGN §3): every coloured thing of the round
     var cs = [];
     r.mounds.forEach(function (q) { if (q.thing.color && cs.indexOf(q.thing.color) < 0) cs.push(q.thing.color); });
-    if (age < COLOR_SAFE_BELOW && (clash(cs) || cs.indexOf('pink') >= 0)) return 'colour clash in ' + cs.join('+');
+    if (clash(cs, pairsFor(age, r.level)) || (age < COLOR_SAFE_BELOW && cs.indexOf('pink') >= 0)) return 'colour clash in ' + cs.join('+');
     var keys = r.mounds.map(function (q) { return thingKey(q.thing); });
     var shapes = [], kinds = {};
     r.mounds.forEach(function (q) { kinds[q.thing.kind] = 1; if (q.thing.shape && shapes.indexOf(q.thing.shape) < 0) shapes.push(q.thing.shape); });
@@ -543,15 +564,15 @@
     var show = null, params = {}, ch, a, nC = age <= 3 ? 2 : 3;
     switch (topic) {
       case 'colors': {
-        var set = colourSet(rng, age, 3); a = set[0]; params = { color: a }; show = { kind: 'egg', color: a };
+        var set = colourSet(rng, age, 3, o.level); a = set[0]; params = { color: a }; show = { kind: 'egg', color: a };
         ch = choicesFrom(rng, a, set, nC, function (c) { return { kind: 'blob', color: c }; }); break;
       }
       case 'shapes': {
-        var col = colourSet(rng, age, 1)[0], shs = shapeSet(rng, age, 3); a = shs[0]; params = { shape: a };
+        var col = colourSet(rng, age, 1, o.level)[0], shs = shapeSet(rng, age, 3); a = shs[0]; params = { shape: a };
         ch = choicesFrom(rng, a, shs, nC, function (s) { return { kind: 'stone', shape: s, color: col }; }); break;
       }
       case 'size': {
-        var kind = rng.pick(['bone', 'egg']), c2 = colourSet(rng, age, 1)[0]; a = rng.pick(['big', 'small']); params = { size: a, kind: kind };
+        var kind = rng.pick(['bone', 'egg']), c2 = colourSet(rng, age, 1, o.level)[0]; a = rng.pick(['big', 'small']); params = { size: a, kind: kind };
         // icon {kind:'size', size, of:'bone'|'egg', color?} — `of` names the thing (icon.kind is the drawIcon dispatch key)
         ch = choicesFrom(rng, a, ['big', 'small'], 2, function (s) { var t = { kind: 'size', size: s, of: kind }; if (kind === 'egg') t.color = c2; return t; });
         break;
@@ -618,10 +639,10 @@
 
   DD.Content = {
     makeRound: makeRound, makeTalk: makeTalk, validate: validate, topicsFor: topicsFor, matches: matches, retarget: retarget, stepFor: stepFor,
-    ageOf: ageOf, langOf: langOf, clash: clash, safeSetsOf: safeSetsOf, shapesFor: shapesFor, parityOf: parityOf, letterPool: letterPool,
+    ageOf: ageOf, langOf: langOf, clash: clash, safeSetsOf: safeSetsOf, safeSets: safeSets, maxSafe: maxSafe, pairsFor: pairsFor, isNight: isNight, sameAnswer: sameAnswer, shapesFor: shapesFor, parityOf: parityOf, letterPool: letterPool,
     initialOf: initialOf, countRange: countRange, setKey: setKey, roundKey: roundKey, thingKey: thingKey,
     TOPICS: ALL_TOPICS, COLORS: COLORS, COLORS5: COLORS5, SHAPES3: SHAPES3, SHAPE_PAIRS: SHAPE_PAIRS, LOWER_PAIRS: LOWER_PAIRS,
-    LETTER_POOL: LETTER_POOL, CLASH: CLASH, COLOR_SAFE_BELOW: COLOR_SAFE_BELOW, MAX_MOUNDS: MAX_MOUNDS, ADD_MAX: ADD_MAX, SUB_MAX: SUB_MAX,
+    LETTER_POOL: LETTER_POOL, CLASH: CLASH, NIGHT_CLASH: NIGHT_CLASH, COLOR_SAFE_BELOW: COLOR_SAFE_BELOW, MAX_MOUNDS: MAX_MOUNDS, ADD_MAX: ADD_MAX, SUB_MAX: SUB_MAX,
     ODDEVEN_MAX: ODDEVEN_MAX, SIZE_K: SIZE_K, P_TWO: P_TWO
   };
 })(window.DD = window.DD || {});

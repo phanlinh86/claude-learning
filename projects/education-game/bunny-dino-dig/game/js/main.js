@@ -91,14 +91,8 @@
   function placeBubble() {
     const B = world.layout && world.layout.bubble;
     if (!B) return;
+    // the world already moved / narrowed the bubble beside or below the measured HUD (computeLayout + hudKeep)
     const r = { x: view.left + B.x * view.s, y: view.top + B.y * view.s, w: B.w * view.s, h: B.h * view.s };
-    // the HUD is sized in CSS px, the bubble in logical px: keep them apart on narrow screens
-    const hud = $('hud').getBoundingClientRect();
-    if (hud.width > 0 && r.x + r.w > hud.left - 10 && r.y < hud.bottom) {
-      const roomRight = hud.left - 12 - r.x;
-      if (roomRight >= 220) r.w = roomRight;
-      else { r.y = hud.bottom + 8; r.w = Math.min(window.innerWidth - r.x - 12 - view.ins.right * view.s, 560); }
-    }
     DD.UI.placeBubble(r);
   }
   function updateHudStarTarget() {
@@ -246,7 +240,7 @@
       }
       case 'puff': DD.Audio.play('puff'); if (weather.addDust) weather.addDust(e.x, e.y, 4); break;
       case 'ask': {
-        lastAsk = e; idleSaid = 0;
+        lastAsk = e; idleSaid = 0; DD.UI.fadeBubble(false);
         const txt = askText(e);
         lastPromptText = txt;
         DD.UI.say(txt); speakPrompt(txt, { priority: true });
@@ -282,7 +276,7 @@
         if (performance.now() - lastFoundAt > 1800 || !(DD.Voice && DD.Voice.isSpeaking && DD.Voice.isSpeaking())) speak(line('sayHatch', e));
         break;
       }
-      case 'hop': DD.Audio.play('hopUp'); break;
+      case 'hop': DD.Audio.play('hopUp'); DD.UI.fadeBubble(true); break;   // the find may fly past the bubble (visual P2-3)
       case 'shelved': DD.Audio.play('clonk'); render.burst('sparkles', e.x, e.y - 30, { n: 5 }); break;
       case 'stepDone': {
         if (!e.last) DD.Audio.play('stepDone');
@@ -321,6 +315,8 @@
         else if (idleSaid >= 5 && !bot) pause();   // ≈ 2 min without a touch: nobody is playing — pause
         break;
       case 'pokeBun': {
+        // never restart the prompt while Bun is still saying it (playtest P2)
+        if (DD.Voice && DD.Voice.isSpeaking && DD.Voice.isSpeaking() && lastSpoken === lastPromptText) { bunMood('idle', 0); break; }
         const since = performance.now() - promptStart;
         const stuck = pendingPrompt && since > 6000;   // the prompt never started (no voice / dropped): don't wait forever
         if (since > 3000 && (!pendingPrompt || stuck)) repeatPrompt();

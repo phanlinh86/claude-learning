@@ -1,7 +1,7 @@
 # Bun's Dino Dig — Mechanics (`DD.CONFIG`, layout, motion, render contract, events, playtest tuning)
 
 Owner: mechanics engineer. Code: `game/js/{rng,content,world,weather,bot}.js`. Contract: `docs/DESIGN.md` §2, §5.1–5.5.
-Tests: `node tests/unit/run.js` (38 tests, ≈ 10 s: layouts on 15 named viewports + 400 fuzzed ones, ≈ 45 000 generated rounds,
+Tests: `node tests/unit/run.js` (44 tests, ≈ 10 s: layouts on 15 named viewports + 400 fuzzed ones, ≈ 45 000 generated rounds,
 world flows, full bot sessions; `node tests/unit/run.js <name part>` runs a subset).
 Sims (report-only, `tests/sim/`): `node tests/sim/hs_playtest.js [--n 100] [--ages 3,4] [--models typical,slow3,…] [--jobs 2]
 [--config '{…}'] [--tag x]` (→ `tests/sim/out/hs_<tag>.md`; exit 1 on a stuck round / NaN), `node tests/sim/content_stats.js
@@ -54,9 +54,9 @@ An absent child never finishes a round (no fail state, no auto-play): idle nudge
 ## 3. Render contract (what render.js reads; everything else is internal)
 ```
 w.layout   W, H, ins, portrait, tall (H/W > 1.6), groundY, bubble {x,y,w,h}, hud {x,y,w,h},
-           shelf {x, y, w, h, slots[12]{x, y (plank top, item bottom centre)}, size 64, spacing}, bun {x, y (FEET), h, w},
+           shelf {x, y, w, h, slots[8|12]{x, y (plank top, item bottom centre)}, size 64|84, spacing, fromRight}, bun {x, y (FEET), h, w},
            satchel {x, y} (where chapter-end items fly), field {x0, x1, y0 (back row y), y1 (front row y)}, rows[] {y, x0, x1, lo, hi, cap},
-           item (thing base size), moundW, moundH, spacing, hitR, capacity, pteroY, keep[] (debug boxes), safe
+           item (thing base size), moundW, moundH, spacing, rowGap, jitterY, hitR, capacity, limit, phone, pteroY, keep[] (debug), safe
 w.mounds[] { id, x, y (bottom centre), w, h0, row, thing, size (thing height px), state 'buried'|'digging'|'open'|'found'|'empty',
            dig 0..1, rise 0..~1.2, peek, thingY (thing bottom centre y), clipY, tsx, tsy (thing squash), twob (px, wiggle x),
            trot (rad, tilt about the thing's bottom), glow 0..1, wob (px, mound jiggle x), pop 0..~1.1 (mound scale about its bottom
@@ -74,7 +74,7 @@ w.shovel   { x, y (blade TIP), angle (rad; 0 = blade down, handle up; + = clockw
 w.sand[]   { x, y, r, rot, alpha, landed, _px, _py, _prot } (≤ 80) → DigArt.drawSandBit(ctx, r, rot, {}) — in FRONT of the mounds
 w.flying[] { thing, dino (colour | null), x, y (bottom centre), rot, s (drawn size px), sx, sy, _px, _py, _prot, _ps } → drawThing
            (or the dino SVG) at (x, y), rotate(rot), scale(sx, sy), size s — drawn above everything but the HUD
-w.shelfItems[] { thing, dino, slot, x, y (bottom centre; bounce included), s (64; shrinks while leaving), sx, sy, bounce 0..1,
+w.shelfItems[] { thing, dino, slot, x, y (bottom centre; bounce included), s (shelf size 64 | 84; shrinks while leaving), sx, sy, bounce 0..1,
            leave 0..1, alpha, _px, _py } → on the plank after DigArt.drawShelf(ctx, layout.shelf)
 w.eggBits[] { kind 'eggTop'|'eggBottom', color, x, y, rot, size, alpha, _px, _py, _prot } → drawThing({kind, color}, size)
 w.hintHand null | { x, y (fingertip now), x0, y0 (target), t 0..1 (1.2 s cycle), press 0..1, alpha, id } → DigArt.drawGhostHand(ctx, size, press)
@@ -89,7 +89,27 @@ w.talk     { topic, promptKey, params, show: icon | null, choices [{id, thing: i
            letter {text} · dots {n} · size {size, of 'bone'|'egg', color?} · dino {color}
 ```
 
-## 4. Layout (DESIGN §2) — `computeLayout(W, H, ins, cfg, age)`
+## 4. Layout (DESIGN §2) — `computeLayout(W, H, ins, cfg, age, hudKeep)`
+**QA round 1 changes (2026-11-08):**
+- **Measured HUD → bubble → shelf (visual P1-1).** `hudKeep` = the boxes main.js measures: `[HUD, bubble]`; the HUD box is the one in
+  the right half. Portrait: `bubble.y = max(ins.top + 110, HUD bottom + 8)`. Landscape: the bubble gets narrower beside the HUD
+  when ≥ `bubbleMinW` 220 logical px are left, else it moves below it. Shelf: portrait `bubble.y + 124 + shelfGapPort` **52** on tall
+  screens (H/W > 1.6: the tail 21 px + a 2-line Vietnamese bubble up to 150 px + 3) and `shelfGapPad` **24** on iPads; landscape
+  `max(ins.top + 152, bubble bottom + 12)`. **main.js should now place the DOM bubble exactly at `layout.bubble`** (its own push is
+  then never needed). Checked: iPhone 15 (720×1561, HUD keep bottom 214 → bubble 222, shelf items from 396 ≥ 222 + 171) and SE
+  (720×1280, 173 → 181) keep capacity ≥ 8 at every age.
+- **Phone tier (visual P2-1 / P2-2).** `phone` = long / short side > `phoneRatio` 1.9 (iPhones; not SE 1.78, not iPads). Phone
+  portrait items × `phoneItemPort` **1.35** (151 px at ages ≤ 4), phone landscape × `phoneItemLand` **1.2** (134); the shelf shows
+  `shelfItemPhone` 84 px finds on a `shelfHPhone` 112 px shelf, `shelfSlotsPhonePort` **8** slots in portrait (12 in landscape;
+  spacing = min(max(76, size + 12), (w − size) / (n − 1)) → 84 on a 720-wide portrait). Each step falls back to the DESIGN sizes when
+  the field would hold fewer than `minCapacity` 8 mounds. `layout.phone`; the shelf's slot count = `layout.shelf.slots.length`
+  (8 or 12; when full the oldest slides into the satchel; a rotation to 8 slots drops the oldest and closes the gaps).
+- **Rows spread (visual P2-1):** `placeMounds` spreads the USED rows upward over the free height: gap =
+  clamp((front y − limit) / used, rowGap, `rowSpreadY` 1.7 × rowGap); the front row stays on the ground. `field.y0` is now
+  min(back row, limit). Row gap = max(170, spacing + 2·`jitterYMin` 3 + 1) and the vertical jitter shrinks to fit it
+  (`layout.jitterY`, ±3.8 px at item 112 — this keeps the 720×960 iPad portrait at 3 rows / 8 mounds with the bigger shelf gap).
+- **Landscape shelf fills from the RIGHT end** (`shelf.fromRight`; slot 0 is the rightmost), away from the bubble (visual P2-3).
+
 - groundY = H − ins.bottom − (portrait 26 : 14). Bubble / HUD as DESIGN. Shelf: x = ins.left + 24, w = W − insets − 48, h = 92,
   landscape y = ins.top + 152, portrait y = bubble bottom + 14; 12 slots centred, spacing = min(76, (w − 64) / 11) (the end items
   stay on the plank; 56 px on a 720-wide portrait), slot y = plank top = shelf.y + 62.
@@ -122,10 +142,10 @@ w.talk     { topic, promptKey, params, show: icon | null, choices [{id, thing: i
 | sand clumps | 10 per scoop from the blade: 70 % to the fling side (vx 110–360), 30 % back over the mound (× 0.6), 28 % towards the camera (land 12–48 px lower, slower); vy −360…−620; gravity 1400 px/s²; one bounce (restitution 0.25) when hitting the ground faster than 260 px/s; fade 0.7 s after landing; `sandLand` events (≥ 0.07 s apart) | ≤ 80 clumps |
 | dig time | age 3 (2 scoops): reveal 1.05 s after the tap, judged at 1.50 s; ages 4+ (3 scoops): 1.60 / 2.05 s; tapping along: 0.82 / 1.27 s | |
 | reveal | `rise` spring 0 → 1 (ω 16, ζ 0.5: peak 1.16 at ≈ 0.22 s); stretch = rv·0.016 (−0.14…+0.18) while shooting up; when it stops at the top a squash spring is kicked (peak 0.12, ω 22, ζ 0.35); tsx = 1/√tsy (volume kept); judged at 0.45 s | thing stands at y − 0.12 h0, clipY → y + 2 |
-| wrong | horizontal wiggle spring (peak 8 px, ω 18, ζ 0.12 → about 6 visible swings), stays open; after 1 s `dim` → 0.35 | |
+| wrong | horizontal wiggle spring (peak 8 px, ω 18, ζ 0.12 → about 6 visible swings), stays open; after 1 s `dim` → **1.0** (`dimTo`; dig_art desaturates fully toward sand-grey); after `wrongSinkAfter` 0.9 s it sinks back partly: the rise spring targets `wrongRise` **0.55** | |
 | found (not an egg) | anticipation crouch 0.32 s (tsy 1 − 0.14·sin), then the hop | prepTime 0.32 |
 | egg hatch | 0.9 s: tilt wobble 3 cycles (0.16 rad, growing), `crack` smoothstep 0 → 1 over 0.75 s, then `hatch`: `hatched` = true, two shell halves fly (top: ballistic up-sideways with spin; bottom: a small hop), fade 0.8 s after landing; the baby dino jumps 46 px (0.35 s air, stretch at take-off) and lands with a squash (0.15 s), then hops to the shelf | hatchTime 0.9, dinoJump 46, dinoJumpTime 0.5 |
-| hop to the shelf | true ballistic arc: x linear in t, y = yA + c(u − u*)², apex yA = 140 px above the higher end, gravity 3000 px/s² (T ≈ 0.94 s from the front row of a 960×720 iPad, ≈ 1.2 s from the front row of an iPhone portrait); stones / bones / tablets spin exactly one turn, eggs / toys / dinos lean ±0.2 rad; size → 64 (smoothstep); take-off stretch 0.18·(1 − u)³; landing squash 0.28 (spring ω 22, ζ 0.35) | hopG 3000, hopApex 140 |
+| hop to the shelf | true ballistic arc: x linear in t, y = yA + c(u − u*)², apex yA = 140 px above the higher end **but the thing's top (its drawn size at the apex) never above ins.top + `hopTopPad` 10** (visual P2-3), gravity 3000 px/s² (T ≈ 0.94 s from the front row of a 960×720 iPad, ≈ 1.2 s from the front row of an iPhone portrait); stones / bones / tablets spin exactly one turn, eggs / toys / dinos lean ±0.2 rad; size → 64 (smoothstep); take-off stretch 0.18·(1 − u)³; landing squash 0.28 (spring ω 22, ζ 0.35) | hopG 3000, hopApex 140 |
 | shelf | items slide to their slot (10 /s); cheer: a bounce wave (0.42 s each, 0.07 s stagger, 22 px) with a small landing squash; a tap on the shelf bounces the nearest item; 12 full → the oldest slides away into the satchel and the rest shift left | |
 | clear | mounds and things sink (pop, rise, peekIn → 0, 0.4 s, sand `puff` per mound); at a chapter end the shelf items fly in a 60 px arc into Bun's satchel, staggered 0.04 s, shrinking to 0.4, fading in the last 30 % (clear lasts until they are in) | clearTime 0.7, leaveTime 0.45 |
 | mole | pops out of a free sand spot (≥ 1.25 item from every hit centre, clear of Bun and keep-outs; else the pterosaur comes) 3–8 s after the first ask; `up` spring (ω 14, ζ 0.42), stays 4 s; tap → happy twirl (one turn, easeOut 0.6 s) + squash, then ducks; untapped → a 2nd appearance 4 s later | moleR 62 |
@@ -138,9 +158,13 @@ w.talk     { topic, promptKey, params, show: icon | null, choices [{id, thing: i
   re-targeted at ask time (`Content.retarget`: a still-buried mound that is asked uniquely); with nothing left the round ends.
 - Count: every mound holds a bone (no wrong dig possible), the step ends at N, the spares stay buried. findAll (odd / even): a dig of
   the other parity is a mistake.
+- Hit box of a peeking thing: from `thingTopPad` **40** px above its tip (was 8; playtest P1-1: children tap what they see, a bit high).
+- **Early taps (functional P3-2):** a mound tap during `enter` is kept and replayed through `tap()` right after the first `ask`
+  (if the mound is still buried) → `soft {kind: 'early', id, held: true}` at the tap + a small wobble; any other early tap →
+  `soft {kind: 'early', id: null, held: false}`.
 - Help: taps without progress in a step = wrong digs + empty sand taps (busy / already / shelf / Bun / soft are not). The 2nd → hint
   (`hint {id, x, y}`: the mound glows 3 s, the ghost hand taps its hit centre; cooldown 6 s; no new hint while one glows). The 6th
-  (ages ≤ 4) / 5th (5+) → **assist**: the next tap on any mound **or on the sand of the dig site** digs the right mound
+  (ages ≤ 4; `assistAfter` **6 → 4**, playtest P2-2) / 5th (5+) → **assist**: the next tap on any mound **or on the sand of the dig site** digs the right mound
   (`assist {id}`). A right find resets the counter. Idle (no dig, no press) 12 s → `idle {n}`, ×1.5 up to 30 s; the 2nd idle also
   hints. Misses (wrong digs only) give 3 / 2 / 1 stars for 0 / 1 / ≥ 2; +1 for a right Talk answer.
 - Surprises: one round per chapter (round 1 or 2, never the warm-up), type `mole` / `ptero` rotating per chapter.
@@ -169,7 +193,7 @@ w.talk     { topic, promptKey, params, show: icon | null, choices [{id, thing: i
 | `busy` | id, x, y | another mound tapped while digging (soft, nothing said) |
 | `sandTap` | x, y | empty sand (dust puff) |
 | `shelfTap` | x, y, hit | the shelf tapped |
-| `soft` | kind 'drag'|'hold', id (mound or null), x, y | a press that was not a tap |
+| `soft` | kind 'drag'|'hold'|'early', id (mound or null), held? (early: kept for the dig phase), x, y | a press that was not a tap / a tap while the mounds pop up |
 | `pokeBun` | promptKey, params, mode, step, x, y | Bun tapped (main repeats the prompt) |
 | `hint` | id, x, y, want, idle? | hint |
 | `assist` | id, x, y, fromX, fromY | the shovel digs the right mound for the child |
@@ -188,8 +212,13 @@ w.talk     { topic, promptKey, params, show: icon | null, choices [{id, thing: i
   at ages ≤ 4: ≤ 3 mounds, 1 step. Steps 1–2 at ages 3–4 (p(2 steps) = 0.35 / 0.5, and only with ≥ 3 mounds), 2 from age 5;
   always at least one more mound than steps. `scoops` 2 at age 3, else 3. The same set (order-free key; count: + N) never twice in
   a row; count N never repeats in a row.
-- colors: eggs, all colours different; below age 5 clash-free sets only (no blue+purple, red+green, yellow+orange, green+orange, no
-  pink) → at most 3 eggs below age 5 (no clash-free set of 4 exists). shapes ≤ 4: one colour, different shapes (age 3: circle,
+- colors: eggs, all colours different; below age 5 clash-free sets only (no blue+purple, red+green, yellow+orange, green+orange,
+  **red+orange**, no pink) → at most 3 eggs below age 5 (4 possible 3-sets, all with yellow); **in the night chapter (level % 4 = 3) at
+  any age also never red+pink, blue+purple, red+orange** (visual P1-3; from age 5 at most 5 eggs at night). `pairsFor(age, level)`,
+  `maxSafe(age, level)`; the same rule for stones and Talk choices (`makeTalk` takes `level`).
+- **prevAns (playtest P2-1):** the world passes the answer asked last (`prevAns`, `prevAnsRun`) and `makeRound` re-rolls (≤ 40
+  tries) while the first ask equals it; size / odd-even (2 answers) allow at most 2 in a row; shapes5 is exempt; count uses `prevN`.
+- **Counting rounds dig with 2 scoops** at every age (snappier counting chapters: typical age 4 count chapter 87.8 → 82.5 s). shapes ≤ 4: one colour, different shapes (age 3: circle,
   square, triangle, star, heart; 4: all 8), never square+rect, circle+oval, square+diamond. shapes5: a 2 × 2 grid of 2 shapes ×
   2 colours (+ one extra stone for 5 mounds) — the answer always has a same-colour and a same-shape partner. size: 2 mounds, one
   kind (bone / egg / toy), big ×1.25 and small ×0.72 (1 step). animals: different toys. count: bones, N: round 0 1–2, round 1 2–3,
@@ -219,7 +248,13 @@ feather. No DOM.
 (always when the hint glows), else another buried mound; while its dig runs it re-taps the same mound (p = 0.5 every 0.25 s);
 Talk right with p = skill (always when glowing); taps the mole / pterosaur once with p = 0.6.
 
-## 11. Playtest numbers (`hs_playtest.js --n 100`, 4 300 sessions, 1/30 s frames, 5 viewports, EN / VI; 2026-11-08)
+### QA round 1 regression (`hs_playtest.js --n 60`, 2 700 sessions, after all QA fixes)
+0 stuck rounds (max round 100 s), 0 stuck states, 0 NaN, 0 off-screen, 0 "2 wrong digs without a hint" for every model × age.
+typical age 3 / 4 chapter 65.8 [56.8–77.3] / 73.3 [59.9–88.1] s, session 4.5 / 5.0 min (p90 4.9 / 5.3); slow 3-year-old 88.7 /
+97.2 s (session p90 6.4 / 7.2 min); tapper 82.9 / 89.8 s (was 91.4 / 95.8, assist after 4); spammer 51.4 / 60.4 s; typical ages
+5–7 77.7–83.6 s.
+
+## 11. Playtest numbers before QA (`hs_playtest.js --n 100`, 4 300 sessions, 1/30 s frames, 5 viewports, EN / VI; 2026-11-08)
 Targets: a toddler chapter 60–100 s, a session ≤ 8 min, 0 stuck rounds (> 120 s), 0 stuck states, 0 NaN.
 
 | model | age | session min (p90) | chapter s mean [p10–p90] | round s (p90) | stars 3/2/1 % | wrong / round | hint rounds % | stuck rounds / states / NaN |
@@ -247,10 +282,12 @@ an explicit squash at its stop (the velocity-only squash was 2 %, invisible). `s
 3-year-old's chapters ≤ 103 s (p90) while typical children almost never get a shortened round (0.3–2.8 % cut chapters).
 
 ## 12. Deviations from DESIGN (agreed / to note)
+- Phone tier, measured-HUD bubble, shelf gaps 52 / 24, right-filled landscape shelf, spread rows, hop top clamp, red+orange and night
+  pairs, wrong dim 1.0 + sink 0.55, early taps, 2-scoop counting (QA round 1, §4–§8).
 - **≤ 8 mounds** (DESIGN says ≤ 10): with the DESIGN rows, item sizes and spacing a 960×720 iPad holds 8 (2 rows × 4) and so does a
   720×960 portrait (2 + 3 + 3). Count rounds therefore use N ≤ 7 with min(8, N + 2) mounds (ages 6–7: 5–7 instead of 5–10).
 - Portrait **back rows start right of Bun** when they reach his height band (otherwise the hit areas sit on his ears).
-- Shelf slot spacing = min(76, (w − 64) / 11) instead of w / 12 (keeps the end items on the plank).
+- Shelf slot spacing = min(max(76, size + 12), (w − size) / (n − 1)) instead of w / 12 (keeps the end items on the plank).
 - A tap is judged at the **release** point (DESIGN §5.2); the mole / pterosaur react on the press.
 - Assist also triggers from a sand tap inside the dig site (DESIGN: "the next tap on any mound").
 - During cheer / clear the state is `roundDone` (phase `cheer` / `clear`), like the paint game's `roundDone` + `clear`.

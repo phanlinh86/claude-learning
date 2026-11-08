@@ -79,7 +79,7 @@ started < 1.2 s ago*. Speech is disabled for `speed > 1` (log only).
 | `level {level, topic, weather}` | `t('ui.chapter',{n:level+1}) + ' ' + t('topic.'+topic)` (banner + voice), then `t('weather.'+weather)` | interrupt (new chapter), weather queued |
 | `round {round, surprise}` | `t('enter')` (not on round 0 of a chapter: the level line already speaks) | queue; dropped when the `ask` comes |
 | `puff {x, y}` | — (sound only) | |
-| `ask {promptKey, params, mode, step, first}` | `ask(lang, promptKey, params, {next: !first})` — bubble + voice; remember it for `pokeBun` / `idle` | **protected prompt**: `Voice.dropQueued()`, then say with interrupt; nothing may cut it until it started |
+| `ask {promptKey, params, mode, step, first}` | `ask(lang, promptKey, params, {next: !first})` — bubble + voice; remember it for `pokeBun` / `idle` | **protected prompt**: main.js `speakPrompt` says it with `{priority: true}` (jumps the queue); the guard lasts until it has actually been spoken |
 | `scoop {id, i, n}` | `t('scoop')` **only** on the first scoop of the first dig of a chapter (or ~1 in 5 first scoops), never while the prompt is protected | queue, low priority (drop if anything waits) |
 | `reveal {id, thing}` | — (the "pop" sound; the line comes with `found` / `wrong`) | |
 | `found {id, thing, count?}` | `sayFound(lang, {...e, topic, params})`; count steps → "One!", "Two!" … | interrupt (feedback); **count words queue** (no interrupt) |

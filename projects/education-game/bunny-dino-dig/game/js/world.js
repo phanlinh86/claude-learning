@@ -43,18 +43,22 @@
     shortSide: 720, minLong: 960, maxLong: 1600, tallRatio: 1.6,
     groundLand: 14, groundPort: 26,
     bubbleX: 24, bubbleYLand: 18, bubbleMaxW: 560, bubbleRight: 200, bubbleHLand: 122, bubbleYPort: 110, bubbleHPort: 124,
-    hudW: 160, hudH: 96,
-    shelfYLand: 152, shelfGapPort: 14, shelfH: 92, shelfSide: 24, shelfSlots: 12, shelfSpacing: 76, shelfItem: 64, shelfPlank: 30,
+    hudW: 160, hudH: 96, bubbleMinW: 220,
+    shelfYLand: 152, shelfGapPort: 52, shelfGapPad: 24,   // portrait gap bubble → shelf: tail 21 + a 2-line VI prompt (h 124 → 150) + 3 (QA visual P1-1)
+    shelfH: 92, shelfSide: 24, shelfSlots: 12, shelfSpacing: 76, shelfItem: 64, shelfPlank: 30,
+    // phones (long / short side > phoneRatio): bigger things and finds (QA visual P2-1 / P2-2), only while ≥ minCapacity mounds fit
+    phoneRatio: 1.9, phoneItemPort: 1.35, phoneItemLand: 1.2, shelfItemPhone: 84, shelfHPhone: 112, shelfSlotsPhonePort: 8, minCapacity: 8,
     bunXLand: 118, bunXPort: 104, bunHLand: 230, bunHPort: 200, bunFeet: 4, bunWFrac: 0.62, bunPad: 10,
     satchelX: 0.17, satchelY: 0.36,       // Bun's satchel (× bun.h from the feet point): where the shelf items go at a chapter end
     fieldX0Land: 250, fieldX0Port: 30, fieldX0Front: 220, fieldRight: 30, frontRow: 18, rowGap: 170, rowsLand: 2, rowsPort: 4, backRowGap: 40,
     item: { 3: 112, 4: 112, 5: 104, 6: 96, 7: 96 }, tallItem: 1.15,
-    moundW: 1.55, moundH: 0.62, moundSpacing: 1.45, rowSpread: 2.1, jitterX: 14, jitterY: 8,
+    moundW: 1.55, moundH: 0.62, moundSpacing: 1.45, rowSpread: 2.1, rowSpreadY: 1.7, jitterX: 14, jitterY: 8, jitterYMin: 3,
     hitCY: 0.45, hitK: 0.6, hitPad: 14,                                          // hit circle (x, y − 0.45 item), r = 0.6 item + 14
     peek: { egg: 0.38, stone: 0.42, toy: 0.48, bone: 0.40, tablet: 0.62 }, peekOld: 0.85, peekDig: 0.15,
     thingW: { egg: 0.78, stone: 1.0, toy: 0.8, bone: 0.62, tablet: 0.84 },     // visible width / size (hit box; DigArt.thingBox ≈)
     sizeK: { big: 1.25, small: 0.72 },
-    standY: 0.12,                                                                 // a risen thing stands 0.12 h0 above the mound bottom
+    standY: 0.12,
+    thingTopPad: 40,             // the thing's hit box reaches 40 px above its tip (children tap what they see, a bit high: QA playtest P1-1)                                                                 // a risen thing stands 0.12 h0 above the mound bottom
 
     // ---- touch
     tapTime: 1.0, tapMovePx: 64, softWob: 3,
@@ -68,10 +72,10 @@
 
     // ---- reveal / judge
     riseTime: 0.45, riseOmega: 16, riseZeta: 0.5, riseStretch: 0.016, riseSquashMin: -0.14, riseSquashMax: 0.18, riseSquash: 0.12,
-    wrongWob: 8, wrongOmega: 18, wrongZeta: 0.12, dimAfter: 1.0, dimTo: 0.35, dimRate: 3,
+    wrongWob: 8, wrongOmega: 18, wrongZeta: 0.12, dimAfter: 1.0, dimTo: 1.0, dimRate: 3, wrongRise: 0.55, wrongSinkAfter: 0.9,
     prepTime: 0.32, prepSquash: 0.14,
     hatchTime: 0.9, crackTime: 0.75, hatchWobs: 3, hatchTilt: 0.16, dinoJumpTime: 0.5, dinoJump: 46, dinoScale: 1.0,
-    hopG: 3000, hopApex: 140, hopStretch: 0.18, landSquash: 0.28, itemOmega: 22, itemZeta: 0.35, slideRate: 10,
+    hopG: 3000, hopApex: 140, hopTopPad: 10, hopStretch: 0.18, landSquash: 0.28, itemOmega: 22, itemZeta: 0.35, slideRate: 10,
     bitG: 1400, bitLife: 0.8,
     askGap: 0.6,
 
@@ -83,7 +87,7 @@
 
     // ---- help
     hintAfterMisses: 2,        // taps without progress in a step (wrong digs / empty sand) → hint
-    assistAfter: 6, assistAfterOld: 5, assistMaxAge: 4,   // … this many → the next mound tap digs the right one
+    assistAfter: 4, assistAfterOld: 5, assistMaxAge: 4,   // … this many → the next mound tap digs the right one
     hintTime: 3, hintCooldown: 6, hintCycle: 1.2,
     idleTime: 12, idleBackoff: 1.5, idleMax: 30, idleHintFrom: 2,
 
@@ -118,8 +122,10 @@
   function spring(o, k, kv, target, w, z, h) { o[kv] += (w * w * (target - o[k]) - 2 * z * w * o[kv]) * h; o[k] += o[kv] * h; }
   /** Ballistic hop from (x0, y0) to (x1, y1) whose apex is `apex` px above the higher end, under gravity g:
    *  y(u) = yA + c (u − u*)², x linear in u, u = t / T (constant horizontal speed, constant vertical acceleration 2c/T² = g). */
-  function hopPath(x0, y0, x1, y1, apex, g) {
-    var yA = Math.min(y0, y1) - apex, a = Math.sqrt(y0 - yA), b = Math.sqrt(y1 - yA), c = (a + b) * (a + b);
+  function hopPath(x0, y0, x1, y1, apex, g, yMin) {
+    var yA = Math.min(y0, y1) - apex;
+    if (yMin !== undefined && yA < yMin) yA = Math.min(yMin, Math.min(y0, y1) - 12);   // never above the top edge (QA visual P2-3)
+    var a = Math.sqrt(y0 - yA), b = Math.sqrt(y1 - yA), c = (a + b) * (a + b);
     return { x0: x0, y0: y0, x1: x1, y1: y1, yA: yA, c: c, us: a / (a + b), T: Math.sqrt(2 * c / g) };
   }
 
@@ -130,29 +136,58 @@
     if (cssW >= cssH) return { W: clamp(Math.round(S * aspect), cfg.minLong, cfg.maxLong), H: S };
     return { W: S, H: clamp(Math.round(S / aspect), cfg.minLong, cfg.maxLong) };
   }
-  function itemFor(age, tall, cfg) { var a = clamp(Math.round(+age || 4), 3, 7); return Math.round(cfg.item[a] * (tall ? cfg.tallItem : 1)); }
 
   /**
    * DESIGN §2 layout: { W, H, ins, portrait, tall, groundY, bubble, hud, shelf {x, y, w, h, slots[{x, y}], size, spacing},
    *   bun {x, y (feet), h, w}, satchel {x, y}, field {x0, x1, y0, y1}, rows [{y, x0, x1, lo, hi, cap}] (front first), item,
    *   moundW, moundH, spacing, hitR, capacity, pteroY, keep [boxes the child never has to touch], safe }
    */
+  /** DESIGN §2 layout with the phone tier (QA visual P2-1 / P2-2): on phones (long / short > phoneRatio) the items grow
+   *  (portrait × phoneItemPort, landscape × phoneItemLand) and the shelf shows bigger finds (84 px, 8 slots in portrait) — each
+   *  step falls back to the plain DESIGN sizes when the field would hold fewer than minCapacity mounds. */
   function computeLayout(W, H, ins, cfg, age, hudKeep) {
+    var portrait = H > W, phone = (portrait ? H / W : W / H) > cfg.phoneRatio, tall = H / W > cfg.tallRatio;
+    var base = tall ? cfg.tallItem : 1, L = null;
+    var tiers = phone ? [{ k: portrait ? cfg.phoneItemPort : cfg.phoneItemLand, shelf: true }, { k: base, shelf: true }, { k: base, shelf: false }] : [{ k: base, shelf: false }];
+    for (var t = 0; t < tiers.length; t++) {
+      L = layoutTier(W, H, ins, cfg, age, hudKeep, tiers[t].k, tiers[t].shelf);
+      L.phone = phone;
+      if (L.capacity >= cfg.minCapacity) break;
+    }
+    return L;
+  }
+  /** The HUD's measured box among the hudKeep boxes (the one in the right half; main.js passes [HUD, bubble]). */
+  function hudBox(hk, W) { var best = null; for (var i = 0; i < hk.length; i++) { var b = hk[i]; if (b.x + b.w / 2 > W / 2 && (!best || b.y + b.h > best.y + best.h)) best = b; } return best; }
+  function layoutTier(W, H, ins, cfg, age, hudKeep, itemK, phoneShelf) {
     ins = insOf(ins);
     var portrait = H > W, tall = H / W > cfg.tallRatio, i;
     var groundY = H - ins.bottom - (portrait ? cfg.groundPort : cfg.groundLand);
+    var hk = keepBoxes(hudKeep), hb = hudBox(hk, W);
     var bx = ins.left + cfg.bubbleX, bubble;
     if (portrait) bubble = { x: bx, y: ins.top + cfg.bubbleYPort, w: W - bx - ins.right - cfg.bubbleX, h: cfg.bubbleHPort };
     else bubble = { x: bx, y: ins.top + cfg.bubbleYLand, w: Math.min(cfg.bubbleMaxW, W - ins.right - cfg.bubbleRight - bx), h: cfg.bubbleHLand };
+    // the real (measured) HUD: the bubble gets out of its way like main.js placeBubble does (narrower, else below it)
+    if (hb && bubble.x + bubble.w > hb.x - 10 && bubble.y < hb.y + hb.h) {
+      var room = hb.x - 12 - bubble.x;
+      if (!portrait && room >= cfg.bubbleMinW) bubble.w = room;   // landscape: narrower, beside the HUD
+      else bubble.y = Math.max(bubble.y, hb.y + hb.h + 8);        // portrait (QA visual P1-1): below the measured HUD
+    }
     bubble.w = Math.max(0, bubble.w);
     var hud = { x: W - ins.right - cfg.hudW, y: 0, w: cfg.hudW + ins.right, h: ins.top + cfg.hudH };
     var sx = ins.left + cfg.shelfSide, sw = W - ins.left - ins.right - 2 * cfg.shelfSide;
-    var shelf = { x: sx, y: portrait ? bubble.y + bubble.h + cfg.shelfGapPort : ins.top + cfg.shelfYLand, w: sw, h: cfg.shelfH, slots: [], size: cfg.shelfItem };
-    shelf.spacing = Math.min(cfg.shelfSpacing, (sw - cfg.shelfItem) / (cfg.shelfSlots - 1));   // the end items stay on the plank
+    var sSize = phoneShelf ? cfg.shelfItemPhone : cfg.shelfItem, sH = phoneShelf ? cfg.shelfHPhone : cfg.shelfH;
+    var nSlots = phoneShelf && portrait ? cfg.shelfSlotsPhonePort : cfg.shelfSlots;
+    // portrait: under the bubble with room for its tail + a 2-line Vietnamese prompt; landscape: under the bubble too
+    var gapP = tall ? cfg.shelfGapPort : cfg.shelfGapPad;
+    var shelf = { x: sx, y: portrait ? bubble.y + bubble.h + gapP : Math.max(ins.top + cfg.shelfYLand, bubble.y + bubble.h + 12), w: sw, h: sH, slots: [], size: sSize };
+    shelf.spacing = Math.min(Math.max(cfg.shelfSpacing, sSize + 12), (sw - sSize) / (nSlots - 1));   // the end items stay on the plank
+    shelf.fromRight = !portrait;   // landscape: the first finds land at the RIGHT end, away from the bubble (QA visual P2-3)
     var plank = shelf.y + shelf.h - cfg.shelfPlank;
-    for (i = 0; i < cfg.shelfSlots; i++) shelf.slots.push({ x: sx + sw / 2 + (i - (cfg.shelfSlots - 1) / 2) * shelf.spacing, y: plank });
-    var hk = keepBoxes(hudKeep);
-    var item = itemFor(age, tall, cfg), mw = cfg.moundW * item, mh = cfg.moundH * item, sp = cfg.moundSpacing * item;
+    for (i = 0; i < nSlots; i++) {
+      var k = shelf.fromRight ? (nSlots - 1) / 2 - i : i - (nSlots - 1) / 2;
+      shelf.slots.push({ x: sx + sw / 2 + k * shelf.spacing, y: plank });
+    }
+    var item = Math.round(cfg.item[clamp(Math.round(+age || 4), 3, 7)] * itemK), mw = cfg.moundW * item, mh = cfg.moundH * item, sp = cfg.moundSpacing * item;
     var hitR = cfg.hitK * item + cfg.hitPad, hitUp = cfg.hitCY * item + hitR;   // the hit circle reaches hitUp above the mound bottom
     var bh = portrait ? cfg.bunHPort : cfg.bunHLand;
     var bun = { x: ins.left + (portrait ? cfg.bunXPort : cfg.bunXLand), y: groundY - cfg.bunFeet, h: bh, w: cfg.bunWFrac * bh };
@@ -162,7 +197,8 @@
       { x: shelf.x, y: shelf.y, w: shelf.w, h: shelf.h, kind: 'shelf' }];
     hk.forEach(function (b) { b.kind = 'hudKeep'; keep.push(b); });
     for (i = 0; i < keep.length; i++) if (keep[i].y + keep[i].h < H / 2) limit = Math.max(limit, keep[i].y + keep[i].h + hitUp + 8);
-    var gap = Math.max(cfg.rowGap, sp + 2 * cfg.jitterY + 1), rows = [], nRows = portrait ? cfg.rowsPort : cfg.rowsLand;
+    // row gap ≥ spacing (two rows never bring centres closer than 1.45 item); the vertical jitter shrinks to what the gap allows
+    var gap = Math.max(cfg.rowGap, sp + 2 * cfg.jitterYMin + 1), jy = Math.min(cfg.jitterY, (gap - sp - 1) / 2), rows = [], nRows = portrait ? cfg.rowsPort : cfg.rowsLand;
     var xR = W - ins.right - cfg.fieldRight, half = Math.max(mw / 2, hitR);
     var bb = { x: bun.x - bun.w / 2 - cfg.bunPad, y: bun.y - bh - cfg.bunPad, w: bun.w + 2 * cfg.bunPad, h: bh + 2 * cfg.bunPad };
     for (i = 0; i < nRows; i++) {
@@ -171,17 +207,17 @@
       var x0 = portrait ? ins.left + (i === 0 ? cfg.fieldX0Front : cfg.fieldX0Port) : ins.left + cfg.fieldX0Land;
       var lo = x0 + mw / 2, hi = xR - mw / 2;
       // a row whose mounds (or hit circles) reach Bun's height band starts right of Bun (portrait back rows vs his ears)
-      var rTop = y - Math.max(hitUp, 1.25 * item), rBot = y - cfg.hitCY * item + hitR + cfg.jitterY;
+      var rTop = y - Math.max(hitUp, 1.25 * item), rBot = y - cfg.hitCY * item + hitR + jy;
       if (rBot > bb.y && rTop < bb.y + bb.h) lo = Math.max(lo, bb.x + bb.w + half + 6);
       rows.push({ y: y, x0: x0, x1: xR, lo: lo, hi: hi, cap: hi >= lo ? Math.floor((hi - lo) / sp + 1e-9) + 1 : 0 });
     }
     var cap = rows.reduce(function (s, r) { return s + r.cap; }, 0);
     var y0 = rows[rows.length - 1].y, fieldTop = y0 - hitUp, sb = shelf.y + shelf.h;
-    var field = { x0: Math.min.apply(null, rows.map(function (r) { return r.x0; })), x1: xR, y0: y0, y1: rows[0].y };
+    var field = { x0: Math.min.apply(null, rows.map(function (r) { return r.x0; })), x1: xR, y0: Math.min(y0, limit), y1: rows[0].y };   // y0: spread rows may use up to the limit
     return {
       W: W, H: H, ins: ins, portrait: portrait, tall: tall, groundY: groundY, bubble: bubble, hud: hud, shelf: shelf, bun: bun,
       satchel: { x: bun.x + cfg.satchelX * bh, y: bun.y - cfg.satchelY * bh }, field: field, rows: rows, item: item, moundW: mw,
-      moundH: mh, spacing: sp, rowGap: gap, hitR: hitR, capacity: cap, pteroY: Math.max(sb + 56, (sb + fieldTop) / 2), keep: keep,
+      moundH: mh, spacing: sp, rowGap: gap, jitterY: jy, hitR: hitR, capacity: cap, limit: limit, pteroY: Math.max(sb + 56, (sb + fieldTop) / 2), keep: keep,
       safe: { x: ins.left, y: ins.top, w: W - ins.left - ins.right, h: H - ins.top - ins.bottom }
     };
   }
@@ -205,14 +241,18 @@
     left = n - share.reduce(function (a, b) { return a + b; }, 0);
     for (k = 0; left > 0 && k < used * 4; k++) { var j = k % used; if (share[j] < caps[j]) { share[j]++; left--; } }
     for (k = used - 1; left < 0 && k >= 0; k--) while (left < 0 && share[k] > 1) { share[k]--; left++; }
+    // the used rows spread over the free height between the back-row limit and the front row (QA visual P2-1): the front row
+    // stays on the ground, the gap grows up to rowSpreadY × the row gap; rows only move UP (further from Bun, still ≥ limit)
+    var gU = used > 1 ? clamp((rows[0].y - L.limit) / used, L.rowGap, cfg.rowSpreadY * L.rowGap) : L.rowGap;
     for (k = 0; k < used; k++) {
-      var r = rows[k], c = share[k], span = Math.max(0, r.hi - r.lo), g = c > 1 ? Math.min(span / (c - 1), cfg.rowSpread * sp) : 0;
+      var r = rows[k], c = share[k], ry = rows[0].y - k * gU, span = Math.max(0, r.hi - r.lo), g = c > 1 ? Math.min(span / (c - 1), cfg.rowSpread * sp) : 0;
       var x0 = (r.lo + r.hi) / 2 - g * (c - 1) / 2;
       if (k % 2 === 1 && c > 1) x0 = clamp(x0 + g * 0.25 * (rng.chance(0.5) ? 1 : -1), r.lo, r.hi - g * (c - 1));
       var jx = c > 1 ? clamp((g - sp) / 2 - 0.5, 0, cfg.jitterX) : cfg.jitterX;
       for (i = 0; i < c; i++) {
         var x = clamp(x0 + i * g + rng.float(-jx, jx), r.lo, r.hi);
-        var y = r.y + (k === 0 ? rng.float(-cfg.jitterY, cfg.jitterY / 2) : rng.float(-cfg.jitterY, cfg.jitterY));
+        var JY = L.jitterY === undefined ? cfg.jitterY : L.jitterY;
+        var y = ry + (k === 0 ? rng.float(-JY, JY / 2) : rng.float(-JY, JY));
         out.push({ x: x, y: Math.min(y, L.groundY - 8), row: k });
       }
     }
@@ -291,7 +331,7 @@
       if (m.pop < 0.3) continue;
       var c = this._hitC(m), d = hyp(x - c.x, y - c.y), hit = d <= c.r;
       if (!hit && m.state !== 'empty') {
-        var bw = (cfg.thingW[m.thing.kind] || 0.8) * m.size / 2 + 8, top = m.thingY - m.size - 8;
+        var bw = (cfg.thingW[m.thing.kind] || 0.8) * m.size / 2 + 8, top = m.thingY - m.size - cfg.thingTopPad;
         hit = x >= m.x - bw && x <= m.x + bw && y >= top && y <= m.y;
       }
       if (hit && d < bd) { bd = d; best = m; }
@@ -351,6 +391,9 @@
       for (i = 0; i < this.mounds.length; i++) this._placeMound(this.mounds[i], pos[i]);
     }
     while (this.flying.length) this._land(this.flying[0]);
+    var nS = L.shelf.slots.length, on = this.shelfItems.filter(function (q) { return !q.leaving && q.leave <= 0; }).sort(function (a, b) { return a.slot - b.slot; });
+    if (on.length > nS) { var drop = on.splice(0, on.length - nS); this.shelfItems = this.shelfItems.filter(function (q) { return drop.indexOf(q) < 0; }); }
+    on.forEach(function (q, k) { q.slot = k; });   // a rotation to a phone portrait (8 slots): the oldest go, the rest close up
     for (i = 0; i < this.shelfItems.length; i++) {
       var it = this.shelfItems[i], sl = L.shelf.slots[it.slot];
       if (sl && it.leave <= 0) { it.x = it._px = sl.x; it.y = it._py = sl.y; it.s = L.shelf.size; }
@@ -382,14 +425,14 @@
     var last = (opts && opts.lastTopics) || this.lastTopics || null;
     this.levels = DD.Content.topicsFor(this.age, this.rng, last);
     this._surpriseOff = this.rng.int(0, Math.max(0, this.cfg.surpriseTypes.length - 1));
-    this.stars = 0; this.treasures = []; this._prevKey = null; this._prevN = 0;
+    this.stars = 0; this.treasures = []; this._prevKey = null; this._prevN = 0; this._prevAns = null; this._prevAnsRun = 0;
     this.weather = 0;
     this._emit({ type: 'session', levels: this.levels.slice() });
     this.startLevel(0);
   };
   P._clearRound = function () {
     this.mounds = []; this.dig = null; this.sand = []; this.flying = []; this.eggBits = []; this.step = -1; this._press = null;
-    this.mole = null; this.ptero = null; this.hintHand = null; this._stepDone = false; this._waitAsk = -1; this._claimed = [];
+    this.mole = null; this.ptero = null; this.hintHand = null; this._stepDone = false; this._waitAsk = -1; this._claimed = []; this._early = null;
     this._moleNext = -1; this._pteroNext = -1; this._moleTimes = 0; this._pteroPasses = 0;
     var S = this.shovel; S.state = 'off'; S.alpha = 0; S.sand = 0;
   };
@@ -415,7 +458,7 @@
     var ST = cfg.surpriseTypes, sp = ST && ST.length && this.round === this._surpriseRound && this.round > 0 ? ST[(this.level + this._surpriseOff) % ST.length] : null;
     var el = this.time - this.levelStartTime, sb = cfg.shortBudget, short = !!(sb && this.round > 0 && el > sb[Math.min(this.round, sb.length - 1)]);
     var cur = DD.Content.makeRound(this.topic, { age: this.age, lang: this.lang, rng: rr, roundIndex: this.round, surprise: sp, short: short, level: this.level,
-      prevKey: this._prevKey, prevN: this._prevN });
+      prevKey: this._prevKey, prevN: this._prevN, prevAns: this._prevAns, prevAnsRun: this._prevAnsRun });
     this._prevKey = cur.key; if (cur.steps[0].mode === 'count') this._prevN = cur.steps[0].need;
     this._clearRound();
     this.cur = cur; this.surprise = sp;
@@ -466,7 +509,7 @@
 
   P._startTalk = function () {
     var rr = new DD.RNG((this.rng.next() * 4294967296) >>> 0);
-    this.talk = DD.Content.makeTalk(this.topic, { age: this.age, lang: this.lang, rng: rr });
+    this.talk = DD.Content.makeTalk(this.topic, { age: this.age, lang: this.lang, rng: rr, level: this.level });
     this.talk.glowAnswer = false;
     this.talkAnswered = null; this._talkAskT = 0; this._talkAsks = 0;
     this.cur = null; this.phase = null;
@@ -523,6 +566,12 @@
     if (this.state !== 'round') return null;
     var m = this._moundAt(x, y), b = this._bunBox(), onBun = inBox(b, x, y);
     if (!m && onBun) return this._pokeBun();
+    if (this.phase === 'enter') {   // the mounds are still popping up: keep a mound tap for the dig phase, else a soft answer
+      var ev = { type: 'soft', kind: 'early', id: null, held: false, x: x, y: y };
+      if (m) { this._early = m.id; ev.id = m.id; ev.held = true; m.wv += kickFor(this.cfg.softWob, this.cfg.moundOmega, this.cfg.moundZeta); }
+      this._emit(ev);
+      return null;
+    }
     if (this.phase !== 'dig') return null;
     if (m) {
       if (this.dig) {
@@ -793,7 +842,7 @@
   };
   /** The next free shelf slot (when all 12 are used the oldest item slides away into the satchel and everyone shifts left). */
   P._reserveSlot = function () {
-    var n = this.cfg.shelfSlots, on = this.shelfItems.filter(function (q) { return q.leave <= 0 && !q.leaving; });
+    var n = this.layout.shelf.slots.length, on = this.shelfItems.filter(function (q) { return q.leave <= 0 && !q.leaving; });
     var k = on.length + this.flying.length;
     if (k < n) return k;
     if (on.length) {
@@ -806,7 +855,9 @@
   };
   P._launch = function (m, dino) {
     var L = this.layout, cfg = this.cfg, slot = this._reserveSlot(), sl = L.shelf.slots[slot];
-    var path = hopPath(m.x, m.thingY, sl.x, sl.y, cfg.hopApex, cfg.hopG);
+    var s0 = m.size * (dino ? cfg.dinoScale : 1), p0 = hopPath(m.x, m.thingY, sl.x, sl.y, cfg.hopApex, cfg.hopG);
+    var sA = lerp(s0, L.shelf.size, smooth(p0.us));   // the thing's drawn size at the apex: its top stays ≥ ins.top + 10
+    var path = hopPath(m.x, m.thingY, sl.x, sl.y, cfg.hopApex, cfg.hopG, L.ins.top + cfg.hopTopPad + sA + 2);
     var spin = (m.thing.kind === 'stone' || m.thing.kind === 'bone' || m.thing.kind === 'tablet') && !dino ? 1 : 0;
     var f = { id: m.id, thing: m.thing, dino: dino || null, slot: slot, path: path, t: 0, T: path.T, x: m.x, y: m.thingY, _px: m.x, _py: m.thingY,
       rot: 0, _prot: 0, s: m.size * (dino ? cfg.dinoScale : 1), _ps: m.size, s0: m.size * (dino ? cfg.dinoScale : 1), sx: 1, sy: 1, spin: spin, dir: sl.x >= m.x ? 1 : -1 };
@@ -982,7 +1033,12 @@
     var cfg = this.cfg;
     switch (this.phase) {
       case 'enter':
-        if (this.phaseTime >= this._enterTime) { this._setPhase('dig'); this.step = 0; this._ask(true); }
+        if (this.phaseTime >= this._enterTime) {
+          this._setPhase('dig'); this.step = 0; this._ask(true);
+          var em = this._early && this.moundById(this._early);
+          this._early = null;
+          if (em && em.state === 'buried' && this.interactive) { var tp = this.moundTap(em.id); this.tap(tp.x, tp.y); }   // the held early tap digs now
+        }
         break;
       case 'dig': {
         if (this._stepDone) {
@@ -1022,7 +1078,10 @@
   };
   P._starsFor = function (m) { return m <= 0 ? 3 : m === 1 ? 2 : 1; };
   P._startCheer = function () {
-    var st = this._starsFor(this.misses);
+    var st = this._starsFor(this.misses), ls = this.cur && this.cur.steps[this.cur.steps.length - 1];
+    if (ls && ls.mode !== 'count') {   // the answer asked last (QA playtest P2-1: the next round asks something else first)
+      this._prevAnsRun = ls.nameValue === this._prevAns ? (this._prevAnsRun || 1) + 1 : 1; this._prevAns = ls.nameValue;
+    }
     this.roundStars = st; this.stars += st; this.levelStars += st;
     this._press = null; this.hintHand = null; this.dig = null;
     this._setState('roundDone'); this._setPhase('cheer');
@@ -1103,7 +1162,7 @@
         (m.state === 'digging' && !!this.dig && this.dig.id === m.id && this.dig.phase === 'rise');
       if (!clear && rising) {
         var rv0 = m.rv;
-        spring(m, 'rise', 'rv', 1, cfg.riseOmega, cfg.riseZeta, h);
+        spring(m, 'rise', 'rv', m.state === 'open' && m.openT >= cfg.wrongSinkAfter ? cfg.wrongRise : 1, cfg.riseOmega, cfg.riseZeta, h);   // a wrong thing sinks back partly
         if (rv0 > 0 && m.rv <= 0 && !m._sqd) { m._sqd = true; m.qv += kickFor(cfg.riseSquash, cfg.itemOmega, cfg.itemZeta); }   // it stops at the top: squash
         spring(m, 'q', 'qv', 0, cfg.itemOmega, cfg.itemZeta, h);
         if (m.state !== 'found') {   // stretch while shooting up, squash when it stops and settles (found: prep / hatch own it)
