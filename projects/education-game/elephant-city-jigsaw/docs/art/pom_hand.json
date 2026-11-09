@@ -1,0 +1,234 @@
+{
+ "_about": "Pom per frame, in the 0 0 300 300 viewBox (feet anchor 150,292). trunkTip = the end of the trunk (point: aim the hint from here; toot: where the trumpet puff starts); foot = centre of the near front foot; headTop = y of the hair tuft top (speech-bubble tail / stars over the head); eye = near eye centre; bbox = measured opaque box (added by tools/pom_sheet.js).",
+ "idle": {
+  "trunkTip": [
+   239,
+   141
+  ],
+  "foot": [
+   200,
+   245
+  ],
+  "headTop": 60,
+  "eye": [
+   152,
+   138
+  ],
+  "bbox": [
+   53,
+   58,
+   264,
+   293
+  ]
+ },
+ "blink": {
+  "trunkTip": [
+   239,
+   141
+  ],
+  "foot": [
+   200,
+   245
+  ],
+  "headTop": 60,
+  "eye": [
+   152,
+   138
+  ],
+  "bbox": [
+   53,
+   58,
+   264,
+   293
+  ]
+ },
+ "talk": {
+  "trunkTip": [
+   242,
+   127
+  ],
+  "foot": [
+   209,
+   242
+  ],
+  "headTop": 60,
+  "eye": [
+   152,
+   138
+  ],
+  "bbox": [
+   53,
+   58,
+   268,
+   293
+  ]
+ },
+ "happy": {
+  "trunkTip": [
+   241,
+   110
+  ],
+  "foot": [
+   222,
+   232
+  ],
+  "headTop": 60,
+  "eye": [
+   152,
+   138
+  ],
+  "bbox": [
+   49,
+   58,
+   271,
+   293
+  ]
+ },
+ "cheer": {
+  "trunkTip": [
+   234,
+   86
+  ],
+  "foot": [
+   234,
+   181
+  ],
+  "headTop": 60,
+  "eye": [
+   152,
+   138
+  ],
+  "bbox": [
+   25,
+   52,
+   287,
+   293
+  ]
+ },
+ "think": {
+  "trunkTip": [
+   193,
+   183
+  ],
+  "foot": [
+   200,
+   245
+  ],
+  "headTop": 63,
+  "eye": [
+   152,
+   138
+  ],
+  "bbox": [
+   62,
+   49,
+   273,
+   293
+  ]
+ },
+ "oops": {
+  "trunkTip": [
+   254,
+   176
+  ],
+  "foot": [
+   221,
+   227
+  ],
+  "headTop": 63,
+  "eye": [
+   152,
+   138
+  ],
+  "bbox": [
+   55,
+   48,
+   271,
+   293
+  ]
+ },
+ "wave": {
+  "trunkTip": [
+   226,
+   67
+  ],
+  "foot": [
+   202,
+   245
+  ],
+  "headTop": 60,
+  "eye": [
+   152,
+   138
+  ],
+  "bbox": [
+   49,
+   46,
+   292,
+   293
+  ]
+ },
+ "point": {
+  "trunkTip": [
+   290,
+   116
+  ],
+  "foot": [
+   209,
+   242
+  ],
+  "headTop": 60,
+  "eye": [
+   152,
+   138
+  ],
+  "bbox": [
+   49,
+   58,
+   294,
+   293
+  ]
+ },
+ "toot": {
+  "trunkTip": [
+   259,
+   62
+  ],
+  "foot": [
+   220,
+   235
+  ],
+  "headTop": 60,
+  "eye": [
+   152,
+   138
+  ],
+  "bbox": [
+   31,
+   28,
+   296,
+   293
+  ]
+ },
+ "full_wave": {
+  "trunkTip": [
+   226,
+   67
+  ],
+  "foot": [
+   227,
+   229
+  ],
+  "headTop": 60,
+  "eye": [
+   152,
+   138
+  ],
+  "bbox": [
+   49,
+   46,
+   292,
+   293
+  ]
+ }
+}
