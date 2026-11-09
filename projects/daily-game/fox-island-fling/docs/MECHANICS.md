@@ -107,3 +107,15 @@ Easy sits in the 45–90 s target band; normal/hard Lantern Bay runs long for a 
 - The flutter is strong on purpose (≈ +3 u of reach when used on the way down): a short shot can be saved by one tap.
 - `flop` exists so a tiny accidental fling never costs a heart.
 - Weather: ambient ≤ 120 (CAP 160 − RESERVE 40 for bursts); counts scale with screen area; night (light < 0.6) fades in stars (layer `sky`) and fireflies with darkness.
+
+## Playtest patch (applied 2026-11-09, see docs/reports/playtest.md)
+| Change | Before | After |
+|---|---|---|
+| flutter | `vy = max(vy,0) + 3.2` | ignored while `vy ≥ 3.2`; else `vy = 3.2` |
+| flop | new raft + leaves (free re-roll) | same shot again (`_retryShot`) |
+| heart refill | every 20 leaves | easy 12 / normal 20 / hard 25 (`DIFF.heartEvery`) |
+| raft x ranges | cove 8–12.5, jungle 8–13.5, lagoon 8.5–14, lantern 9–14.3 | 7.3–13.8, 7.4–14, 7.8–14.3, 8.3–14.5 |
+| Easy | hw ×1.15, drift ×0.7, preview ×1.25 | hw ×1.4, drift ×0.5, preview ×1.6 |
+| leaf arc | could run through a gull | re-rolled if it passes a gull 0.5–3 s after the shot appears |
+
+Result (4–5-year-old model, Easy): runs 86 → 124 s, stuck on island 1 52.8 % → 16.5 %, time per level 91/109/158/206 → 69/76/104/135 s. Bot skill 1 unchanged; bot 0.85 normal 86 → 91 %.

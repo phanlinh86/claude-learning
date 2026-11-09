@@ -86,16 +86,16 @@
   };
 
   var DIFF = {
-    easy:   { hearts: 5, hwK: 1.15, bullK: 1.2, ampK: 0.7,  previewK: 1.25, gullK: 0, gullSpeedK: 0.8 },
-    normal: { hearts: 3, hwK: 1.0,  bullK: 1.0, ampK: 1.0,  previewK: 1.0,  gullK: 0, gullSpeedK: 1.0 },
-    hard:   { hearts: 3, hwK: 0.85, bullK: 0.85, ampK: 1.25, previewK: 0.75, gullK: 1, gullSpeedK: 1.2 }
+    easy:   { hearts: 5, hwK: 1.4,  bullK: 1.2, ampK: 0.5,  previewK: 1.6, heartEvery: 12, gullK: 0, gullSpeedK: 0.8 },
+    normal: { hearts: 3, heartEvery: 20, hwK: 1.0,  bullK: 1.0, ampK: 1.0,  previewK: 1.0,  gullK: 0, gullSpeedK: 1.0 },
+    hard:   { hearts: 3, heartEvery: 25, hwK: 0.85, bullK: 0.85, ampK: 1.25, previewK: 0.75, gullK: 1, gullSpeedK: 1.2 }
   };
 
   var LEVELS = [
-    { key: 'cove',    name: 'Sunny Cove',   x: [8.0, 12.5], hw: 1.7,  bull: 0.45, amp: 0,   period: 7.0, gulls: 0, PREVIEW: 34 },
-    { key: 'jungle',  name: 'Jungle Isle',  x: [8.0, 13.5], hw: 1.5,  bull: 0.4,  amp: 0.7, period: 6.5, gulls: 0, PREVIEW: 24 },
-    { key: 'lagoon',  name: 'Coral Lagoon', x: [8.5, 14.0], hw: 1.3,  bull: 0.35, amp: 0.85, period: 5.5, gulls: 1, PREVIEW: 18 },
-    { key: 'lantern', name: 'Lantern Bay',  x: [9.0, 14.3], hw: 1.2,  bull: 0.32, amp: 0.95, period: 5.2, gulls: 2, PREVIEW: 13 }
+    { key: 'cove',    name: 'Sunny Cove',   x: [7.3, 13.8], hw: 1.7,  bull: 0.45, amp: 0,   period: 7.0, gulls: 0, PREVIEW: 34 },
+    { key: 'jungle',  name: 'Jungle Isle',  x: [7.4, 14.0], hw: 1.5,  bull: 0.4,  amp: 0.7, period: 6.5, gulls: 0, PREVIEW: 24 },
+    { key: 'lagoon',  name: 'Coral Lagoon', x: [7.8, 14.3], hw: 1.3,  bull: 0.35, amp: 0.85, period: 5.5, gulls: 1, PREVIEW: 18 },
+    { key: 'lantern', name: 'Lantern Bay',  x: [8.3, 14.5], hw: 1.2,  bull: 0.32, amp: 0.95, period: 5.2, gulls: 2, PREVIEW: 13 }
   ];
 
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
@@ -273,6 +273,29 @@
     if (!first) this._emit({ type: 'newShot' });
   };
 
+  /** does the analytic arc s pass within R_FOX + GULL_R + 0.2 of a gull for a release 0.5–3 s from now? */
+  World.prototype._arcHitsGull = function (s) {
+    var C = CONFIG, R = C.R_FOX + C.GULL_R + 0.15, p = { x: 0, y: 0 };
+    for (var i = 0; i < this.gulls.length; i++) {
+      var g = this.gulls[i];
+      for (var w = 0.5; w <= 3.01; w += 0.5) for (var t = 0; t <= s.T; t += 0.04) {
+        gullPos(g, g.t + w + t, p);
+        var dx = s.x0 + s.vx * t - p.x, dy = s.y0 + s.vy * t - 0.5 * C.G * t * t - p.y;
+        if (dx * dx + dy * dy < R * R) return true;
+      }
+    }
+    return false;
+  };
+
+  /** after a flop: Finn hops back into the sling; raft (still drifting) and the remaining leaves stay */
+  World.prototype._retryShot = function () {
+    var C = CONFIG, fox = this.fox;
+    this.phase = 'aim'; this.phaseT = 0; this.pull = null; this.fluttered = false; this._pulled = false;
+    fox.x = fox.px = this.sling.x; fox.y = fox.py = this.sling.y;
+    fox.vx = fox.vy = 0; fox.rot = fox.prot = 0; fox.spin = 0; fox.bonkT = 0; fox.flutT = 0; fox.flightT = 0; fox.state = 'sit';
+    this._emit({ type: 'newShot', retry: true });
+  };
+
   World.prototype._makeLeaves = function () {
     var C = CONFIG, r = this.rLeaf, raft = this.raft, yc = raft.top + C.FOOT, moon = this.isNight;
     this.leaves = [];
@@ -280,7 +303,7 @@
     while (!sol && tries++ < 24) {
       var ang = r.range(C.ARC_ANG[0], C.ARC_ANG[1]) * DEG, X = raft.baseX + r.range(-0.35, 0.35) * raft.hw;
       var s = solveSpeed(ang, X, yc);
-      if (s && s.pull && s.apex <= C.ARC_APEX && s.v <= C.VMAX * 0.97) sol = s;
+      if (s && s.pull && s.apex <= C.ARC_APEX && s.v <= C.VMAX * 0.97 && (tries > 20 || !this._arcHitsGull(s))) sol = s;
     }
     if (!sol) sol = solveSpeed(45 * DEG, raft.baseX, yc);
     this.solution = sol ? { pull: sol.pull, angle: M.atan2(sol.vy, sol.vx), T: sol.T, landX: raft.baseX } : null;
@@ -345,7 +368,8 @@
   World.prototype.flutter = function () {
     if (this.phase !== 'fly' || this.fluttered) return false;
     var fox = this.fox;
-    fox.vy = M.max(fox.vy, 0) + CONFIG.FLUTTER_VY;
+    if (fox.vy >= CONFIG.FLUTTER_VY) return false;                          // still shooting up: tap ignored, not used up
+    fox.vy = CONFIG.FLUTTER_VY;
     fox.flutT = CONFIG.FLUTTER_T; if (fox.bonkT <= 0) fox.state = 'flutter';
     this.fluttered = true; this.stats.flutters++;
     this._emit({ type: 'flutter' });
@@ -493,7 +517,7 @@
       }
     } else if (this.phase === 'flop') {
       fox.vx *= M.exp(-8 * h); fox.x += fox.vx * h; fox.rot *= M.exp(-8 * h);
-      if (this.phaseT >= C.FLOP_T) this._newShot(false);
+      if (this.phaseT >= C.FLOP_T) this._retryShot();
     }
   };
 
@@ -504,7 +528,7 @@
       this.leafCount++; this.score += o.value;
       this.stats.leaves++; if (o.kind === 'moon') this.stats.moonLeaves++;
       this._emit({ type: 'leaf', x: o.x, y: o.y, value: o.value, kind: o.kind, count: this.leafCount, id: o.id });
-      if (this.leafCount % C.HEART_EVERY === 0 && this.hearts < this.maxHearts) {
+      if (this.leafCount % (this.D.heartEvery || C.HEART_EVERY) === 0 && this.hearts < this.maxHearts) {
         this.hearts++; this.stats.hearts++;
         this._emit({ type: 'heartGain', hearts: this.hearts });
       }
@@ -581,7 +605,7 @@
     var res = { leaves: 0, bumps: 0, value: 0 }, ft = 0;
     var hit = function (kind, o) { if (kind === 'leaf') { res.leaves++; res.value += o.value; } else res.bumps++; };
     for (var s = 0; s < 1500; s++) {
-      if (flutterAt !== undefined && flutterAt !== null && !fluttered && ft >= flutterAt) { f.vy = M.max(f.vy, 0) + C.FLUTTER_VY; fluttered = true; }
+      if (flutterAt !== undefined && flutterAt !== null && !fluttered && ft >= flutterAt && f.vy < C.FLUTTER_VY) { f.vy = C.FLUTTER_VY; fluttered = true; }
       stepMovers(ctx, h); t += h; ft += h;
       var o = stepFlight(ctx, h, hit);
       if (o) {

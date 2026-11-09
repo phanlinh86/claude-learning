@@ -29,7 +29,7 @@ const OUT = path.resolve(__dirname, '../out'); fs.mkdirSync(OUT, { recursive: tr
   await p.mouse.up();
   const ph = await p.evaluate(() => FIF.debug.world.phase);
   if (ph !== 'fly') errs.push('release did not fling: ' + ph);
-  await p.waitForTimeout(250);
+  await p.waitForFunction(() => FIF.debug.world.fox.vy < 3, null, { timeout: 6000 }).catch(() => {});
   await p.mouse.click(640, 300);
   const fl = await p.evaluate(() => FIF.debug.world.fluttered);
   if (!fl) errs.push('tap did not flutter');

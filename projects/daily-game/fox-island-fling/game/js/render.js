@@ -23,7 +23,7 @@
   const TAU = Math.PI * 2;
   const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
   const lerp = (a, b, t) => a + (b - a) * t;
-  const HERO = 1.3, LEAF = 0.8;
+  const HERO = 1.3, LEAF = 0.8;   // drawn sizes in u (× this.big in portrait)
   // JSON-free copy of palette.json "lights" (glow spots on the far / near art, art px) so file:// works
   const LIGHTS = {"cove":{"near":[],"far":[]},"jungle":{"near":[[371,131,16],[414,151,14]],"far":[]},"lagoon":{"near":[[790,59,22]],"far":[]},"lantern":{"near":[[382,116,14],[412,78,14],[472,67,14],[494,74,14],[528,104,14],[410,176,12],[450,176,12],[490,176,12],[554,131,14],[679,139,16],[831,143,15],[738,175,12],[765,181,12],[792,175,12],[188,129,16]],"far":[[250,288,10],[276,285,10],[300,276,10],[326,281,10],[288,285,10],[730,288,10],[756,285,10],[782,276,10],[520,211,12]]}};
 
@@ -73,7 +73,13 @@
       this.portrait = v.VH > v.VW;
       // world → screen (DESIGN §2): x = 0 at the left edge (landscape) so the beach rock is always flush left
       if (this.portrait) { this.unit = v.VW / 16.4; this.ox = 0.2 * this.unit; this.seaPx = Math.round(v.VH * 0.64); }
-      else { this.unit = v.VH / 9; this.ox = 0; this.seaPx = Math.round(v.VH - 1.2 * this.unit); }
+      else {   // landscape: fit 9 u of height, but never cut the 16-u field on 4:3 / 16:10 screens (iPad)
+        this.unit = Math.min(v.VH / 9, v.VW / 16.4);
+        const spare = v.VH - 9 * this.unit;
+        this.ox = v.VW >= 16 * this.unit + 0.4 * this.unit && this.unit < v.VH / 9 ? (v.VW - 16 * this.unit) / 2 : 0;
+        this.seaPx = Math.round(v.VH - 1.2 * this.unit - spare * 0.35);
+      }
+      this.big = this.portrait ? 1.35 : 1;   // portrait: Finn, leaves and dots a bit bigger than the field scale
       this.k = this.unit / 60;   // art scale: the art was drawn for 60 px per unit
       this.dark.width = Math.ceil(v.VW / 4); this.dark.height = Math.ceil(v.VH / 4);
       const hud = document.getElementById('hud'), toast = document.getElementById('toast');
@@ -149,7 +155,7 @@
       gs.fillStyle = gr; gs.fillRect(0, 0, W, H);
       const custom = this._custom(b) ? A.custom[this._slot(b)] : null;
       const cover = (g, img, iw, ih, bottom) => { const s = Math.max(W / iw, bottom / ih); g.drawImage(img, (W - iw * s) / 2, bottom - ih * s, iw * s, ih * s); };
-      if (custom) cover(gs, custom, custom.width, custom.height, sea);
+      if (custom) { cover(gs, custom, custom.width, custom.height, sea); gs.fillStyle = 'rgba(235,248,255,0.35)'; gs.fillRect(0, 0, W, sea); }   // a pale veil keeps a busy photo behind the play
       else if (A.img[n + '_sky']) cover(gs, A.img[n + '_sky'], 960, 540, sea + 20 * k);
       // land: transparent above the islands
       const tile = (img, iw, ih, bottom) => {
@@ -299,21 +305,21 @@
         g.fillStyle = gr; g.fillRect(lx - R, ly - R, R * 2, R * 2); g.restore();
       }
       // gently mark the bullseye while aiming on the first island so kids learn what X means
-      if (this.world.phase === 'aim' && this.world.level === 0 && this.world.shots < 3) {
+      if (this.world.phase === 'aim' && this.world.level === 0) {
         const p = 0.5 + 0.5 * Math.sin(this.time * 4);
         g.save(); g.globalAlpha = 0.25 + 0.35 * p; g.strokeStyle = '#fff6b0'; g.lineWidth = 3 * this.k;
         g.beginPath(); g.ellipse(cx, cy - 2 * this.k, r.bull * this.unit + 6 * this.k, 9 * this.k, 0, 0, TAU); g.stroke(); g.restore();
       }
     }
     drawLeaves(g, a) {
-      const w = this.world, s = LEAF * this.unit, custom = FIF.Assets.hasCustom('leaf'), nk = this.nightK();
+      const w = this.world, s = LEAF * this.unit * this.big, custom = FIF.Assets.hasCustom('leaf'), nk = this.nightK();
       for (const l of w.leaves) {
         const x = this.sx(lerp(l.px, l.x, a)), y = this.sy(lerp(l.py, l.y, a));
         const rot = Math.sin(this.time * 1.7 + l.id) * 0.25;
         if (l.kind === 'moon' || nk > 0.3) {   // glow halo (moon leaves always; any leaf at night)
-          g.save(); g.globalCompositeOperation = 'lighter'; g.globalAlpha = l.kind === 'moon' ? 0.75 : 0.45 * nk;
+          g.save(); g.globalCompositeOperation = l.kind === 'moon' && nk < 0.3 ? 'source-over' : 'lighter'; g.globalAlpha = l.kind === 'moon' ? 0.75 : 0.45 * nk;
           const R = s * (l.kind === 'moon' ? 0.95 : 0.75) * (1 + 0.08 * Math.sin(this.time * 3 + l.id));
-          const gr = g.createRadialGradient(x, y, 0, x, y, R); gr.addColorStop(0, l.kind === 'moon' ? 'rgba(200,245,255,0.9)' : 'rgba(190,255,150,0.8)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+          const gr = g.createRadialGradient(x, y, 0, x, y, R); gr.addColorStop(0, l.kind === 'moon' ? (nk < 0.3 ? 'rgba(40,120,190,0.55)' : 'rgba(200,245,255,0.9)') : 'rgba(190,255,150,0.8)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
           g.fillStyle = gr; g.fillRect(x - R, y - R, R * 2, R * 2); g.restore();
         }
         if (custom) { const [cw, ch] = FIF.Assets.fit('leaf', s, s); this.drawSpr(g, 'custom:leaf', x, y, cw, ch, 0.5, 0.5, rot); if (l.kind === 'moon') this.drawSpr(g, 'leaf_moon', x + s * 0.3, y - s * 0.3, s * 0.45, s * 0.45, 0.5, 0.5); }
@@ -365,10 +371,10 @@
       const n = pts.length;
       for (let i = 0; i < n; i++) {
         const p = pts[i], fade = 1 - i / (n + 2);
-        const r = (4.2 - 1.6 * i / n) * this.k;
-        g.globalAlpha = 0.9 * fade;
-        g.fillStyle = 'rgba(40,60,80,0.45)'; g.beginPath(); g.arc(this.sx(p.x), this.sy(p.y) + 1.5 * this.k, r + 1.4 * this.k, 0, TAU); g.fill();
-        g.fillStyle = i % 2 ? '#ffffff' : '#fff3b0'; g.beginPath(); g.arc(this.sx(p.x), this.sy(p.y), r, 0, TAU); g.fill();
+        const dk = Math.max(this.k, 0.8) * this.big, r = (5 - 1.8 * i / n) * dk;
+        g.globalAlpha = 0.95 * fade;
+        g.fillStyle = i % 2 ? '#ffffff' : '#ffe14d'; g.strokeStyle = 'rgba(30,45,70,0.8)'; g.lineWidth = 2 * dk;
+        g.beginPath(); g.arc(this.sx(p.x), this.sy(p.y), r, 0, TAU); g.fill(); g.stroke();
       }
       g.restore();
     }
@@ -378,15 +384,16 @@
       return ({ sit: 'sit', pull: 'pull', fly: 'fly', flutter: 'flutter', land: 'land', splash: 'splash', bonk: 'bonk' })[st] || 'fly';
     }
     drawHero(g, a) {
-      const w = this.world, f = w.fox, P = this.foxPos(a), s = HERO * this.unit;
-      let x = this.sx(P.x), y = this.sy(P.y), rot = -P.rot, sx = 1, sy = 1;
+      const w = this.world, f = w.fox, P = this.foxPos(a), s = HERO * this.unit * this.big;
+      let x = this.sx(P.x), y = this.sy(P.y), rot = clamp(-P.rot, -0.75, 0.75), sx = 1, sy = 1;
       const key = this.heroKey(f.state);
       if (key === 'sit') { sy = 1 + 0.03 * Math.sin(this.time * 3); sx = 2 - sy; rot = 0; }
       if (key === 'pull') rot = 0;
-      if (key === 'land') { const t = w.phaseT || 0; const sq = Math.exp(-t * 7) * Math.cos(t * 22) * 0.18; sx = 1 + sq; sy = 1 - sq; rot = 0; }
+      if (key === 'land') { const t = w.phaseT || 0; const sq = Math.exp(-t * 7) * Math.cos(t * 22) * 0.18; sx = 1 + sq; sy = 1 - sq; rot = (this._flyRot || 0) * Math.exp(-t * 12); }   // ease upright, no snap
       if (key === 'splash') { rot = 0; y = this.sy(0) - 0.25 * s + Math.sin(this.time * 6) * 2 * this.k; }
       // squash / stretch along the flight (a bit of cartoon feel)
       if (key === 'fly') { const v = Math.hypot(f.vx, f.vy); sx = 1 + Math.min(0.12, v * 0.006); sy = 2 - sx; }
+      if (key === 'fly' || key === 'flutter' || key === 'bonk') this._flyRot = rot;
       const custom = FIF.Assets.hasCustom('hero');
       if (custom) {
         const [cw, ch] = FIF.Assets.fit('hero', s * 0.95, s * 0.95);
@@ -406,10 +413,10 @@
           case 'launch': this.shake = Math.max(this.shake, 2 * (e.power || 0.5)); break;
           case 'leaf':
             if (wx) wx.burst('leaf', X, Y, 7);
-            if (!title) { this.text('+' + e.value, X, Y - 0.5 * u, e.kind === 'moon' ? '#c9f6ff' : '#d4ff9e'); this.flyers.push({ x: X, y: Y, t: 0, moon: e.kind === 'moon' }); }
+            if (!title) { this.text('+' + e.value, X + 0.8 * u, Y - 0.9 * u, e.kind === 'moon' ? '#c9f6ff' : '#d4ff9e'); this.flyers.push({ x: X, y: Y, t: 0, moon: e.kind === 'moon' }); }
             break;
           case 'flutter': { const P = this.foxPos(1); if (wx) wx.burst('flutter', this.sx(P.x) - 0.3 * u, this.sy(P.y) + 0.2 * u, 5); this._flutterHinted = true; if (this.hint === 'flutter') this.hint = null; break; }
-          case 'bump': if (wx) wx.burst('bump', X, Y, 6); this.shake = Math.max(this.shake, 5); if (!title) this.text('Bonk!', X, Y - 0.6 * u, '#ffffff'); break;
+          case 'bump': if (wx) wx.burst('bump', X, Y, 6); this.shake = Math.max(this.shake, 5); if (!title) this.text('Bonk!', X + 0.9 * u, Y - 1.1 * u, '#ffffff'); break;
           case 'land':
             if (wx) wx.burst('land', X, this.sy(w.raft ? w.raft.top : 0.35), 8);
             this.rings.push({ x: X, y: this.sy(w.raft ? w.raft.top : 0.35), t: 0, col: e.bull ? '#ffe36a' : '#ffffff' });
@@ -422,11 +429,11 @@
           case 'splash': if (wx) wx.burst('splash', X, this.seaPx, 12); this.shake = Math.max(this.shake, 3); if (!title) this.text('Splash!', X, this.seaPx - 1.3 * u, '#d8f6ff'); break;
           case 'flop': if (wx) wx.burst('land', X, this.sy(1.2), 5); if (!title) this.text('Oops! Pull further', X + 0.6 * u, Y - 1.1 * u, '#ffffff', 0.85); break;
           case 'heartLost': this.heartPulse = -1; break;
-          case 'heartGain': this.heartPulse = 1; if (!title) this.text('+1 ♥', this.VW / 2, this.VH * 0.32, '#ff8fa0', 1.2); break;
+          case 'heartGain': this.heartPulse = 1; if (!title) this.text('+1 ♥', 110, 200, '#ff8fa0', 1.2); break;
           case 'newShot': if (!this._flutterHinted && w.shots >= 2 && w.level === 0 && !title) this.hint = 'flutterSoon'; break;
           case 'levelUp': this.showBanner(e.zone); break;
-          case 'night': if (!title && !this._nightHinted) { this._nightHinted = true; this.text('Night falls… follow the glowing leaves!', this.VW / 2, this.VH * 0.38, '#c9f6ff', 0.95, 3); } break;
-          case 'dawn': if (!title) this.text('Good morning!', this.VW / 2, this.VH * 0.38, '#fff2a8', 1.05, 2); break;
+          case 'night': if (!title && !this._nightHinted) { this._nightHinted = true; this.text('Night falls… follow the glowing leaves!', this.VW / 2, this.VH * 0.87, '#c9f6ff', 0.95, 3); } break;
+          case 'dawn': if (!title) this.text('Good morning!', this.VW / 2, this.VH * 0.87, '#fff2a8', 1.05, 2); break;
         }
       }
       if (w && w.phase === 'fly' && this.hint === 'flutterSoon') this.hint = 'flutter';
@@ -593,7 +600,7 @@
       } else if (this.hint === 'flutter' && w.phase === 'fly' && !w.fluttered) {
         const msg = touch ? 'Tap to flutter higher!' : 'Tap / Space to flutter!';
         g.font = `900 24px ${FONT}`; g.lineWidth = 6; g.strokeStyle = 'rgba(20,35,60,0.7)';
-        g.strokeText(msg, this.VW / 2, this.VH * 0.2); g.fillStyle = '#ffe9a8'; g.fillText(msg, this.VW / 2, this.VH * 0.2);
+        const hy = this.VH * 0.88; g.strokeText(msg, this.VW / 2, hy); g.fillStyle = '#ffe9a8'; g.fillText(msg, this.VW / 2, hy);
       }
       g.restore();
     }

@@ -31,6 +31,7 @@ var webFS embed.FS
 var (
 	user32               = syscall.NewLazyDLL("user32.dll")
 	procMessageBoxW      = user32.NewProc("MessageBoxW")
+	procIsIconic         = user32.NewProc("IsIconic")
 	procGetWindowLongPtr = user32.NewProc("GetWindowLongPtrW")
 	procSetWindowLongPtr = user32.NewProc("SetWindowLongPtrW")
 	procSetWindowPos     = user32.NewProc("SetWindowPos")
@@ -182,7 +183,9 @@ func singleInstance() bool {
 	if h != 0 && err == syscall.Errno(errAlreadyExists) {
 		title, _ := syscall.UTF16PtrFromString("Finn's Island Fling")
 		if hwnd, _, _ := procFindWindowW.Call(0, uintptr(unsafe.Pointer(title))); hwnd != 0 {
-			procShowWindow.Call(hwnd, swRestore)
+			if minimized, _, _ := procIsIconic.Call(hwnd); minimized != 0 { // only un-minimize; never shrink a maximized window
+				procShowWindow.Call(hwnd, swRestore)
+			}
 			procSetForeground.Call(hwnd)
 		}
 		return false

@@ -91,3 +91,10 @@ Rules: leaf pickup when distance fox→leaf < `R_FOX + R_LEAF`; landing when the
 ## 6. Test hooks
 URL: `?speed=N&bot=1&skill=S&autostart=1&autorestart=1&seed=N&mute=1&debug=1&diff=easy|normal|hard&level=N&day=T` (`day` sets the starting `dayT`; flags never saved).
 `window.FIF.debug`: `world, weather, mode, stats, getState(), setSpeed(n), startGame(), setBot(on, skill), setAutoRestart(on), gotoLevel(i), setDay(t), aim(dx, dy), release(), flutter()`.
+
+## 7. Changes after QA (2026-11-09)
+- **Flutter** only works once Finn is no longer rising faster than `FLUTTER_VY`; then `vy = FLUTTER_VY` (a tap while still shooting up is ignored and NOT used up). Fixes "tap-spam ruins every shot".
+- **Flop** (a weak fling onto the beach rock) is a free *retry of the same shot* (`_retryShot`, `newShot {retry: true}`): same raft, the leaves not yet taken stay. No more free re-rolls.
+- **Hearts back** every `DIFF.<d>.heartEvery` leaves: easy 12, normal 20, hard 25.
+- Leaf arcs avoid passing through a gull (`_arcHitsGull`); wider raft x-ranges per island; Easy: raft ×1.4, drift ×0.5, preview ×1.6.
+- Renderer: landscape `unit = min(VH/9, VW/16.4)` (iPad 4:3 shows the whole field); portrait phones get a "turn sideways" card (can be dismissed) and ×1.35 sprites; dots with a dark ring; tilt clamped to ±0.75 rad and eased upright on landing; pop-ups beside Finn; centre messages at 0.87·VH; a pale veil over custom background photos.

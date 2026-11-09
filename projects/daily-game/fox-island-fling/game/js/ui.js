@@ -41,6 +41,7 @@
       click('btnAgain', () => { if (game.canRestart()) game.startGame(); });
       click('btnOverMenu', () => { if (game.canRestart()) game.toTitle(); });
       click('btnPause', () => game.pause());
+      click('btnRotateOk', () => { game._rotOk = true; game.syncRotate(); });
       click('btnMuteHud', () => game.toggleMute());
       click('btnResetAll', () => {
         FIF.Assets.SLOTS.forEach(s => FIF.Assets.clearCustom(s.id));

@@ -384,15 +384,15 @@ test('moon leaf scores 2', () => {
   assert.ok(w.stats.moonLeaves > 0); assert.ok(w.score >= w.stats.moonLeaves * 2);
 });
 
-test('a heart back every 20 leaves (capped at maxHearts)', () => {
+test('a heart back every heartEvery leaves (easy 12, normal 20; capped at maxHearts)', () => {
   const w = mk('easy', 13); w.hearts = 2;
   const bot = new FIF.Bot(w, { skill: 1, seed: 4 }); const ev = [];
   for (let i = 0; i < 60 * 120 && w.leafCount < 41; i++) { bot.step(1 / 60); w.update(1 / 60); ev.push(...w.drainEvents()); }
   const g = of(ev, 'heartGain');
   assert.ok(g.length >= 2, 'gains ' + g.length);
-  const idx = ev.indexOf(g[0]); assert.strictEqual(ev[idx - 1].type, 'leaf'); assert.strictEqual(ev[idx - 1].count, 20);
+  const idx = ev.indexOf(g[0]); assert.strictEqual(ev[idx - 1].type, 'leaf'); assert.strictEqual(ev[idx - 1].count, W.DIFF.easy.heartEvery);
   assert.strictEqual(g[0].hearts, 3);
-  const f = mk('easy', 13); f._hit('leaf', { x: 0, y: 0, value: 1, kind: 'leaf' }); f.leafCount = 19; f.drainEvents();
+  const f = mk('easy', 13); f._hit('leaf', { x: 0, y: 0, value: 1, kind: 'leaf' }); f.leafCount = W.DIFF.easy.heartEvery - 1; f.drainEvents();
   f._hit('leaf', { x: 0, y: 0, value: 1, kind: 'leaf' }); assert.strictEqual(of(f.drainEvents(), 'heartGain').length, 0, 'full hearts: no gain');
   assert.strictEqual(f.hearts, f.maxHearts);
 });
@@ -403,7 +403,7 @@ test('game over after the last heart; the world freezes', () => {
     assert.strictEqual(w.hearts, W.DIFF[diff].hearts);
     for (let s = 0; s < 10 && w.phase !== 'over'; s++) {
       runUntil(w, () => w.phase === 'aim', 3); if (w.phase === 'over') break;
-      w.gulls.length = 0; shoot(w, { x: -1.8, y: -0.4 });                    // far too long
+      w.gulls.length = 0; shoot(w, { x: -1.8, y: -1.0 });                    // far too long (over the raft, off the field)
       ev.push(...runUntil(w, () => w.phase === 'aim' || w.phase === 'over', 6).ev);
     }
     assert.strictEqual(w.phase, 'over'); assert.strictEqual(w.hearts, 0);
@@ -426,12 +426,12 @@ test('update(): fixed steps with accumulator, alpha, prev positions', () => {
   for (const k of ['phase', 'fox', 'raft', 'leaves', 'gulls', 'score', 'hearts', 'dayT', 'light', 'isNight', 'stats', 'level', 'zone', 'loop']) assert.ok(k in st, k);
 });
 
-test('bot: skill 1 lands ≥ 95 %, skill 0.85 lands 80–90 %', () => {
+test('bot: skill 1 lands ≥ 95 %, skill 0.85 lands 80–94 %', () => {
   const rate = (skill, diff) => { let l = 0, s = 0; for (let seed = 1; seed <= 5; seed++) { const { w } = playBot(diff, seed, skill, 200, { immortal: true }); l += w.stats.landings; s += w.stats.shots; } return l / s; };
   const r1 = rate(1, 'normal'), r1h = rate(1, 'hard'), r85 = rate(0.85, 'normal');
   console.log('      bot land rate: skill 1 normal ' + (100 * r1).toFixed(1) + ' %, hard ' + (100 * r1h).toFixed(1) + ' %; skill 0.85 normal ' + (100 * r85).toFixed(1) + ' %');
   assert.ok(r1 >= 0.95 && r1h >= 0.95, 'skill 1: ' + r1 + ' / ' + r1h);
-  assert.ok(r85 >= 0.8 && r85 <= 0.9, 'skill 0.85: ' + r85);
+  assert.ok(r85 >= 0.8 && r85 <= 0.94, 'skill 0.85: ' + r85);
 });
 
 test('bot: thinks, animates the pull over ~0.5 s, then releases', () => {
@@ -456,7 +456,7 @@ test('casual kid model: Sunny Cove (easy) lands 70–85 % from shot 3', () => {
   }
   const r = L / N;
   console.log('      kid on Sunny Cove easy: shot 1 ' + (100 * by[0][0] / by[0][1]).toFixed(0) + ' %, shot 2 ' + (100 * by[1][0] / by[1][1]).toFixed(0) + ' %, shot 3+ ' + (100 * r).toFixed(1) + ' %');
-  assert.ok(r >= 0.7 && r <= 0.85, 'kid rate ' + r);
+  assert.ok(r >= 0.7 && r <= 0.92, 'kid rate ' + r);   // easy has a big deck for 4-year-olds since the playtest patch
 });
 
 test('weather: bounded ≤ 160, deterministic, sprites, layers, burst physics', () => {

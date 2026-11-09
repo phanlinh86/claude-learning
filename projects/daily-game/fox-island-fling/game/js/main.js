@@ -53,7 +53,13 @@
       const cs = getComputedStyle(el);
       return { top: parseFloat(cs.paddingTop) || 0, right: parseFloat(cs.paddingRight) || 0, bottom: parseFloat(cs.paddingBottom) || 0, left: parseFloat(cs.paddingLeft) || 0 };
     },
-    relayout() { this.renderer.resize(this.readInsets()); },
+    relayout() { this.renderer.resize(this.readInsets()); this.syncRotate(); },
+    /* phones held upright: the 16-unit sea is tiny, so ask to turn sideways (once dismissed, never again this session) */
+    syncRotate() {
+      const el = document.getElementById('rotate'); if (!el) return;
+      const on = this.isTouch && this.renderer.portrait && this.mode === 'playing' && !this._rotOk && !this.botMode;
+      this._rotOn = on; el.classList.toggle('hidden', !on);
+    },
     makeWeather() { return new FIF.Weather({ width: this.renderer.VW, height: this.renderer.VH, seed: 5 }); },
     _setLevelVisuals(zone, instant) {
       this.weather.setLevel(zone, { instant });
@@ -91,7 +97,7 @@
       this.mode = 'playing';
       this.deadT = -1; this.runT = 0; this.clearInput();
       FIF.UI.hideAll(); FIF.UI.setHud(true);
-      if (this.renderer.portrait && !this._rotTip && this.isTouch) { this._rotTip = true; FIF.UI.toast('Tip: turn your device sideways for a bigger view!', 3500); }
+      this.syncRotate();
       this.canvasFocus();
     },
 
@@ -115,7 +121,7 @@
 
     gameOver() {
       const w = this.world, key = 'best_' + (this.runDifficulty || this.difficulty());
-      const prev = parseInt(FIF.Storage.get(key, '0'), 10) || 0, newBest = w.score > prev;
+      const prev = parseInt(FIF.Storage.get(key, '0'), 10) || 0, newBest = w.score > prev && !this.botMode;
       if (newBest && !this.botMode) FIF.Storage.set(key, String(w.score));   // bot / test runs never overwrite a child's best
       this.mode = 'over'; this.overAt = performance.now();
       this.clearInput();
@@ -123,7 +129,7 @@
       FIF.UI.setHud(false);
       const s = w.stats || {}, names = FIF.Renderer.ZONE_INFO.map(z => z.name);
       FIF.UI.showGameOver({
-        score: w.score, best: Math.max(prev, w.score), newBest: newBest && w.score > 0, cleared: w.level || 0,
+        score: w.score, best: this.botMode ? prev : Math.max(prev, w.score), newBest: newBest && w.score > 0, cleared: w.level || 0,
         leaves: w.leafCount || 0, moon: s.moonLeaves || 0, landings: s.landings || 0, bulls: s.bulls || 0, shots: s.shots || 0,
         streak: s.maxStreak || w.bestStreak || 0, bumps: s.bumps || 0, flutters: s.flutters || 0,
         reached: names[(w.zone || 0) % 4] + ((w.loop || 0) > 0 ? ' (round ' + (w.loop + 1) + ')' : '')
@@ -207,7 +213,7 @@
       });
       window.addEventListener('keyup', e => { delete this.keys[e.code]; });
       const stage = document.getElementById('stage');
-      const onUi = e => e.target.closest && e.target.closest('button, .screen, #hud, input, label');
+      const onUi = e => e.target.closest && e.target.closest('button, .screen, #hud, #rotate, input, label');
       const logical = e => this.renderer.toLogical(e.clientX, e.clientY);
       stage.addEventListener('pointerdown', e => {
         FIF.Audio.unlock();
@@ -219,14 +225,15 @@
         if (w.phase !== 'aim' || this.drag) return;
         try { stage.setPointerCapture(e.pointerId); } catch (_) {}
         const [x, y] = logical(e);
-        this.drag = { id: e.pointerId, x0: x, y0: y };
+        if (w.pull) w.cancelAim();   // a keyboard aim must not turn a plain tap into a fling
+        this.drag = { id: e.pointerId, x0: x, y0: y, moved: false };
       });
       stage.addEventListener('pointermove', e => {
         const d = this.drag; if (!d || d.id !== e.pointerId || !this.playerCanAct() || this.world.phase !== 'aim') return;
         const [x, y] = logical(e), u = this.renderer.unit;
         // finger movement maps 1:1.15 to the pull (in world units, y up); a short drag is enough on a phone
         const k = 1.15 / u, dx = (x - d.x0) * k, dy = -(y - d.y0) * k;
-        if (Math.hypot(dx, dy) > 0.06 || this.world.pull) this.world.aim(dx, dy);
+        if (d.moved || Math.hypot(dx, dy) > 0.06) { d.moved = true; this.world.aim(dx, dy); }
       });
       const up = e => {
         const d = this.drag; if (!d || d.id !== e.pointerId) return;
@@ -340,11 +347,12 @@
 
     frame(ts) {
       const t0 = performance.now();
+      if (this.isTouch) this.syncRotate();
       try {
         const real = Math.min(0.1, Math.max(0, (ts - this.last) / 1000));
         this.last = ts;
         const dt = real * this.speed;
-        if (this.mode !== 'paused' && this.world) {
+        if (this.mode !== 'paused' && this.world && !this._rotOn) {
           const n = Math.max(1, Math.ceil(dt / (1 / 60))), h = dt / n;
           for (let i = 0; i < n; i++) this.step(h);
           this.renderer.update(dt);
