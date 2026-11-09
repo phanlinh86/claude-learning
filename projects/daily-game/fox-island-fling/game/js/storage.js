@@ -1,5 +1,5 @@
 /* FIF.Storage — tiny key/value store.
- * In the Windows app it is backed by files in %APPDATA%\CloversFarmHop\data (via functions the
+ * In the Windows app it is backed by files in %APPDATA%\FinnsIslandFling\data (via functions the
  * Go host binds: ffStoreAll / ffStoreSet / ffStoreDel). In a plain browser it falls back to
  * localStorage. Values are strings; helpers for JSON. All reads come from an in-memory cache. */
 (function (FIF) {

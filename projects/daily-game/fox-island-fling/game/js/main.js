@@ -1,13 +1,13 @@
-/* main.js — game controller: boot, loop, input (hold ← / → or the left / right half of the screen to steer Clover;
- * she bounces by herself), modes, settings, test hooks. Modes: 'title' (bot demo) → 'playing' ⇄ 'paused' → 'over'.
- * The run lives in FIF.World. */
+/* main.js — game controller: boot, loop, input (drag back anywhere and let go to fling Finn; tap in the air to
+ * flutter; keyboard ← → power, ↑ ↓ angle, Space fire / flutter), modes, settings, test hooks.
+ * Modes: 'title' (bot demo) → 'playing' ⇄ 'paused' → 'over'. The run lives in FIF.World. */
 (function (FIF) {
   'use strict';
   const params = new URLSearchParams(location.search);
   const num = (k, d) => { const v = parseFloat(params.get(k)); return isFinite(v) ? v : d; };
   const DIFFS = ['easy', 'normal', 'hard'];
   const isTouch = window.matchMedia ? window.matchMedia('(pointer:coarse)').matches : (('ontouchstart' in window) || navigator.maxTouchPoints > 0);
-  const STEER_KEYS = { ArrowLeft: -1, KeyA: -1, ArrowRight: 1, KeyD: 1 };
+  const AIM_KEYS = { ArrowLeft: 'p-', KeyA: 'p-', ArrowRight: 'p+', KeyD: 'p+', ArrowUp: 'a+', KeyW: 'a+', ArrowDown: 'a-', KeyS: 'a-' };
 
   const Game = {
     mode: 'boot', isTouch,
@@ -20,8 +20,8 @@
     world: null, weather: null, bot: null, renderer: null,
     settings: { sfx: true, music: true, muted: false, difficulty: 'easy' },   // a family game: first run on Easy
     fullscreen: false, overAt: 0, deadT: -1,
-    stats: { games: 0, scores: [], times: [], levels: [], heights: [], fireflies: 0, falls: 0, errors: [] },
-    keys: {}, pointers: new Map(),
+    stats: { games: 0, scores: [], times: [], levels: [], leaves: 0, splashes: 0, landings: 0, shots: 0, errors: [] },
+    keys: {}, drag: null, kb: { ang: 45, pow: 0.62 },
 
     async boot() {
       await FIF.Storage.init();
@@ -46,7 +46,7 @@
     difficulty() { return this.urlDiff || this.settings.difficulty; },
     makeWorld(seed, forTitle, level) {
       const s = seed != null ? seed : (this.seed != null ? this.seed + this.stats.games : (Math.random() * 1e9) | 0);   // seeded soak runs still vary game to game
-      return new FIF.World({ seed: s, difficulty: forTitle ? 'normal' : this.difficulty(), level: level || 0 });
+      return new FIF.World({ seed: s, difficulty: forTitle ? 'normal' : this.difficulty(), level: level || 0, day: forTitle ? 0.2 : (params.has('day') ? num('day', 0.12) : null) });
     },
     readInsets() {
       const el = document.getElementById('safeProbe'); if (!el) return null;
@@ -91,6 +91,7 @@
       this.mode = 'playing';
       this.deadT = -1; this.runT = 0; this.clearInput();
       FIF.UI.hideAll(); FIF.UI.setHud(true);
+      if (this.renderer.portrait && !this._rotTip && this.isTouch) { this._rotTip = true; FIF.UI.toast('Tip: turn your device sideways for a bigger view!', 3500); }
       this.canvasFocus();
     },
 
@@ -123,14 +124,14 @@
       const s = w.stats || {}, names = FIF.Renderer.ZONE_INFO.map(z => z.name);
       FIF.UI.showGameOver({
         score: w.score, best: Math.max(prev, w.score), newBest: newBest && w.score > 0, cleared: w.level || 0,
-        height: Math.floor(w.maxY || 0), fireflies: w.fireflyCount || 0, lanterns: s.lanterns || 0, bounces: s.bounces || 0,
-        springs: s.springs || 0, gusts: s.gusts || 0, falls: s.falls || 0,
+        leaves: w.leafCount || 0, moon: s.moonLeaves || 0, landings: s.landings || 0, bulls: s.bulls || 0, shots: s.shots || 0,
+        streak: s.maxStreak || w.bestStreak || 0, bumps: s.bumps || 0, flutters: s.flutters || 0,
         reached: names[(w.zone || 0) % 4] + ((w.loop || 0) > 0 ? ' (round ' + (w.loop + 1) + ')' : '')
       });
       if (newBest && w.score > 0) FIF.Audio.play('best');
       const st = this.stats;
       st.games++; st.scores.push(w.score); st.times.push(+(this.runT || 0).toFixed(2)); st.levels.push(w.level || 0);
-      st.heights.push(Math.floor(w.maxY || 0)); st.fireflies += w.fireflyCount || 0; st.falls += s.falls || 0;
+      st.leaves += w.leafCount || 0; st.splashes += s.splashes || 0; st.landings += s.landings || 0; st.shots += s.shots || 0;
       if (this.autoRestart) setTimeout(() => this.startGame(), 50);
     },
 
@@ -163,17 +164,23 @@
     picturesChanged() { FIF.Assets._ver = (FIF.Assets._ver || 0) + 1; if (this.renderer) this.renderer._spr.clear(); },
     quit() { if (typeof window.ffQuit === 'function') window.ffQuit(); else window.close(); },
 
-    // ---------------- input: hold keys / hold the left or right half of the screen ----------------
+    // ---------------- input: drag back anywhere + release; tap in flight = flutter; keys aim ----------------
     playerCanAct() { return this.mode === 'playing' && this.world && this.world.phase !== 'over' && this.deadT < 0 && !this.bot; },
-    clearInput() { this.keys = {}; this.pointers.clear(); this._order = []; if (this.world && !this.bot) this.world.steer(0); },
-    /* the held direction: the most recent key or pointer still down wins */
-    applySteer() {
-      if (!this.playerCanAct()) return;
-      const o = this._order || [];
-      this.world.steer(o.length ? o[o.length - 1].d : 0);
+    clearInput() {
+      this.keys = {};
+      if (this.drag && this.world && !this.bot && this.world.phase === 'aim') this.world.cancelAim();
+      this.drag = null;
     },
-    _press(id, d) { this._order = (this._order || []).filter(e => e.id !== id); this._order.push({ id, d }); this.applySteer(); },
-    _release(id) { this._order = (this._order || []).filter(e => e.id !== id); this.applySteer(); },
+    /* keyboard aim: angle 15–80°, power 0.2–1 → a pull opposite the launch direction */
+    kbAim() {
+      const w = this.world, C = FIF.World.CONFIG, a = this.kb.ang * Math.PI / 180, L = this.kb.pow * C.PULL_MAX;
+      w.aim(-Math.cos(a) * L, -Math.sin(a) * L);
+    },
+    fire() {
+      const w = this.world; if (!this.playerCanAct()) return;
+      if (w.phase === 'aim') { if (!w.pull) this.kbAim(); w.release(); }
+      else if (w.phase === 'fly') w.flutter();
+    },
     bindInput() {
       window.addEventListener('keydown', e => {
         if (e.code === 'F11') { e.preventDefault(); this.setFullscreen(!this.fullscreen); FIF.UI.syncSettings(); return; }
@@ -185,8 +192,12 @@
           if (ui === 'scrHow' || ui === 'scrSettings' || ui === 'scrCustom') { FIF.UI.back(); e.preventDefault(); return; }
           return;
         }
-        if (this.mode === 'playing' && STEER_KEYS[e.code]) { e.preventDefault(); if (!e.repeat || !(this._order || []).some(o => o.id === 'k' + e.code)) this._press('k' + e.code, STEER_KEYS[e.code]); return; }   // a key still held after Resume steers again on its auto-repeat
-        if (this.mode === 'playing' && ['Space', 'Enter', 'ArrowUp', 'ArrowDown', 'KeyW', 'KeyS'].includes(e.code)) { e.preventDefault(); return; }
+        if (this.mode === 'playing' && AIM_KEYS[e.code]) {
+          e.preventDefault(); this.keys[e.code] = true;
+          if (this.playerCanAct() && this.world.phase === 'aim' && !this.drag) this.kbAim();
+          return;
+        }
+        if (this.mode === 'playing' && (e.code === 'Space' || e.code === 'Enter')) { e.preventDefault(); if (!e.repeat) this.fire(); return; }
         if (this.mode === 'over' && (e.code === 'Enter' || e.code === 'Space')) { const f = document.activeElement; if (f && f.tagName === 'BUTTON' && f.id !== 'btnAgain') return; e.preventDefault(); if (!e.repeat && this.canRestart()) this.startGame(); return; }
         if (this.mode === 'title' && ui === 'scrTitle' && (e.code === 'Space' || e.code === 'Enter')) {
           const f = document.activeElement;
@@ -194,26 +205,36 @@
           e.preventDefault(); this.startGame();
         }
       });
-      window.addEventListener('keyup', e => { if (STEER_KEYS[e.code]) this._release('k' + e.code); });
+      window.addEventListener('keyup', e => { delete this.keys[e.code]; });
       const stage = document.getElementById('stage');
       const onUi = e => e.target.closest && e.target.closest('button, .screen, #hud, input, label');
-      const side = e => { const [x] = this.renderer.toLogical(e.clientX, e.clientY); return x < this.renderer.VW / 2 ? -1 : 1; };
+      const logical = e => this.renderer.toLogical(e.clientX, e.clientY);
       stage.addEventListener('pointerdown', e => {
         FIF.Audio.unlock();
         if (onUi(e)) return;
-        if (this.mode !== 'playing' || e.button === 2) return;
+        if (!this.playerCanAct() || e.button === 2) return;
         e.preventDefault();
+        const w = this.world;
+        if (w.phase === 'fly') { w.flutter(); return; }
+        if (w.phase !== 'aim' || this.drag) return;
         try { stage.setPointerCapture(e.pointerId); } catch (_) {}
-        this.pointers.set(e.pointerId, side(e));
-        this._press('p' + e.pointerId, side(e));
+        const [x, y] = logical(e);
+        this.drag = { id: e.pointerId, x0: x, y0: y };
       });
-      stage.addEventListener('pointermove', e => {   // sliding a finger across the middle switches direction
-        if (!this.pointers.has(e.pointerId) || this.mode !== 'playing') return;
-        const d = side(e);
-        if (d !== this.pointers.get(e.pointerId)) { this.pointers.set(e.pointerId, d); this._press('p' + e.pointerId, d); }
+      stage.addEventListener('pointermove', e => {
+        const d = this.drag; if (!d || d.id !== e.pointerId || !this.playerCanAct() || this.world.phase !== 'aim') return;
+        const [x, y] = logical(e), u = this.renderer.unit;
+        // finger movement maps 1:1.15 to the pull (in world units, y up); a short drag is enough on a phone
+        const k = 1.15 / u, dx = (x - d.x0) * k, dy = -(y - d.y0) * k;
+        if (Math.hypot(dx, dy) > 0.06 || this.world.pull) this.world.aim(dx, dy);
       });
-      const up = e => { if (!this.pointers.has(e.pointerId)) return; this.pointers.delete(e.pointerId); this._release('p' + e.pointerId); };
-      stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up); stage.addEventListener('lostpointercapture', up);
+      const up = e => {
+        const d = this.drag; if (!d || d.id !== e.pointerId) return;
+        this.drag = null;
+        if (!this.playerCanAct() || this.world.phase !== 'aim') return;
+        if (e.type === 'pointerup') this.world.release(); else this.world.cancelAim();
+      };
+      stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up);
       window.addEventListener('blur', () => { this.clearInput(); if (this.mode === 'playing') this.pause(); });
       document.addEventListener('visibilitychange', () => {
         if (document.hidden) { this.clearInput(); if (this.mode === 'playing') this.pause(); FIF.Audio.suspend(); }
@@ -247,18 +268,22 @@
     },
 
     handleEvents(evts) {
-      const sound = this.mode !== 'title', A = FIF.Audio, w = this.world;
+      const sound = this.mode !== 'title', A = FIF.Audio;
       for (const e of evts) {
         switch (e.type) {
-          case 'bounce': if (sound) A.play(e.kind === 'rescue' ? 'rescue' : e.spring ? 'spring' : 'bounce', { h: w ? w.maxY - w.levelY0 : 0 }); break;
-          case 'poof': if (sound) A.play('poof'); break;
-          case 'firefly': if (sound) A.play('firefly', { combo: e.combo }); break;
-          case 'lantern': if (sound) A.play('lantern'); break;
-          case 'wall': if (sound) A.play('wall'); break;
-          case 'fall': if (sound) A.play('fall'); break;
-          case 'windWarn': if (sound) A.play('windWarn'); break;
-          case 'windStart': if (sound) A.play('windStart'); break;
+          case 'pull': if (sound) A.play('pull'); break;
+          case 'launch': if (sound) A.play('launch', { power: e.power }); break;
+          case 'leaf': if (sound) A.play('leaf', { count: e.count, kind: e.kind }); break;
+          case 'flutter': if (sound) A.play('flutter'); break;
+          case 'bump': if (sound) A.play('bump'); break;
+          case 'land': if (sound) { A.play('land'); if (e.bull) A.play('bull'); } break;
+          case 'splash': if (sound) A.play('splash'); break;
+          case 'flop': if (sound) A.play('flop'); break;
+          case 'heartLost': if (sound) A.play('heartLost'); break;
           case 'heartGain': if (sound) A.play('heartGain'); break;
+          case 'night': if (sound) A.play('night'); break;
+          case 'dawn': if (sound) A.play('dawn'); break;
+          case 'newShot': this.drag = null; break;
           case 'levelUp': this._setLevelVisuals(e.zone, false); if (sound) setTimeout(() => A.play('level'), 200); break;
           case 'gameOver': if (sound) A.play('over'); A.stopMusic(); this.deadT = 0; this.clearInput(); break;
         }
@@ -269,15 +294,29 @@
     step(h) {
       const w = this.world;
       if (this.bot && (this.mode === 'playing' || this.mode === 'title')) this.bot.step(h);
+      // held arrow keys adjust the keyboard aim (only while no finger / mouse is dragging)
+      if (this.playerCanAct() && w.phase === 'aim' && !this.drag) {
+        const K = this.keys; let ch = false;
+        const any = c => AIM_KEYS[c] && K[c];
+        for (const c in K) {
+          if (!any(c)) continue;
+          const m = AIM_KEYS[c];
+          if (m === 'p+') this.kb.pow = Math.min(1, this.kb.pow + h * 0.6);
+          if (m === 'p-') this.kb.pow = Math.max(0.2, this.kb.pow - h * 0.6);
+          if (m === 'a+') this.kb.ang = Math.min(80, this.kb.ang + h * 40);
+          if (m === 'a-') this.kb.ang = Math.max(15, this.kb.ang - h * 40);
+          ch = true;
+        }
+        if (ch) this.kbAim();
+      }
       w.update(h);
       const ev = w.drainEvents();
       if (ev.length) this.handleEvents(ev);
-      this.weather.update(h, this.mode === 'paused' ? 0 : (this.renderer._climbVy || 0));
-      if (this.mode === 'playing') FIF.Audio.setWind(w.wind.dir, w.wind.state === 'blow' ? w.wind.strength : 0);
+      this.weather.update(h);
       if (this.mode === 'playing') this.runT += h;
       if (this.deadT >= 0) this.deadT += h;
       if (this.mode === 'playing' && this.deadT > 1.6) this.gameOver();
-      if (this.mode === 'title' && (w.phase === 'over' || (w.level || 0) >= 1 || w.maxY > 90) && (this.deadT < 0 || this.deadT > 1.5)) {
+      if (this.mode === 'title' && (w.phase === 'over' || (w.level || 0) >= 1 || w.time > 70) && (this.deadT < 0 || this.deadT > 1.5)) {
         this.world = this.makeWorld(null, true);
         this.bot = new FIF.Bot(this.world, { skill: 0.85, seed: (Math.random() * 1e6) | 0 });
         this.renderer.attach(this.world, this.weather); this.deadT = -1;
@@ -334,8 +373,10 @@
     },
     setSpeed(n) { Game.speed = n; },
     startGame() { Game.startGame(); },
-    steer(d) { if (Game.playerCanAct()) Game.world.steer(d); },
-    gust(d) { if (Game.world) Game.world.gust(d); },
+    aim(dx, dy) { if (Game.playerCanAct()) Game.world.aim(dx, dy); },
+    release() { if (Game.playerCanAct()) return Game.world.release(); },
+    flutter() { if (Game.playerCanAct()) return Game.world.flutter(); },
+    setDay(t) { if (Game.world) Game.world.setDay(t); },
     setBot(on, skill) { Game.botMode = on; Game.bot = on ? new FIF.Bot(Game.world, { skill: skill == null ? 1 : skill, seed: 11 }) : null; },
     setAutoRestart(on) { Game.autoRestart = on; },
     gotoLevel(i) { Game.world.gotoLevel(i); }   // emits levelUp → visuals, music, banner

@@ -1,13 +1,13 @@
 {
-  "name": "Clover's Farm Hop",
-  "short_name": "Farm Hop",
-  "description": "Bounce up the farm into the sky with Clover the frog!",
+  "name": "Finn's Island Fling",
+  "short_name": "Island Fling",
+  "description": "Fling Finn the pirate fox across the islands!",
   "start_url": "./",
   "scope": "./",
   "display": "fullscreen",
   "orientation": "any",
-  "background_color": "#8fd3ff",
-  "theme_color": "#8fd3ff",
+  "background_color": "#5fd6cc",
+  "theme_color": "#5fd6cc",
   "icons": [
     { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },

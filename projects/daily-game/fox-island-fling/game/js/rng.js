@@ -1,4 +1,4 @@
-/* Clover's Farm Hop — FIF.RNG (same API as the sister games)
+/* Finn's Island Fling — FIF.RNG (same API as the sister games)
  * Small, fast, seeded PRNG (mulberry32). Same seed => same sequence on every
  * platform, which is what makes FIF.World / FIF.Weather / FIF.Bot deterministic.
  *

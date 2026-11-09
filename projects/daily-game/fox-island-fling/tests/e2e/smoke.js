@@ -1,5 +1,5 @@
-// Smoke test: boot, title (bot demo), real keys / held pointer steer Clover, bot play at speed, a wind gust, every
-// weather level, level change, game over; zero console errors. Screenshots in tests/out/.
+// Smoke test: boot, title (bot demo), a real mouse drag-and-release fling, a tap-to-flutter, keyboard aim + Space,
+// bot play at speed, every island, night, game over; zero console errors. Screenshots in tests/out/.
 const { chromium } = require('playwright');
 const path = require('path'), fs = require('fs');
 const GAME = 'file://' + path.resolve(__dirname, '../../game/index.html');
@@ -18,57 +18,65 @@ const OUT = path.resolve(__dirname, '../out'); fs.mkdirSync(OUT, { recursive: tr
   await p.waitForFunction(() => FIF.debug && FIF.debug.mode === 'playing');
   await p.waitForTimeout(900);
   await p.screenshot({ path: OUT + '/smoke_banner.png' });
-  // a real player: hold keys to steer
-  const x0 = await p.evaluate(() => FIF.debug.world.hero.x);
-  await p.keyboard.down('ArrowLeft'); await p.waitForTimeout(400); await p.keyboard.up('ArrowLeft');
-  const x1 = await p.evaluate(() => FIF.debug.world.hero.x);
-  await p.keyboard.down('ArrowRight'); await p.waitForTimeout(600); await p.keyboard.up('ArrowRight');
-  const x2 = await p.evaluate(() => FIF.debug.world.hero.x);
-  if (!(x1 < x0 - 1 && x2 > x1 + 1)) errs.push('keys did not steer ' + [x0, x1, x2]);
-  // hold the left half with the mouse
-  await p.mouse.move(200, 400); await p.mouse.down(); await p.waitForTimeout(400);
-  const d1 = await p.evaluate(() => FIF.debug.world.hero.dir);
-  await p.mouse.up(); await p.waitForTimeout(50);
-  const d2 = await p.evaluate(() => FIF.debug.world.hero.dir);
-  if (!(d1 === -1 && d2 === 0)) errs.push('pointer hold did not steer ' + [d1, d2]);
-  await p.screenshot({ path: OUT + '/smoke_steer.png' });
-  await p.evaluate(() => { FIF.debug.startGame(); FIF.debug.setBot(true, 1); FIF.debug.setSpeed(4); });
-  await p.waitForFunction(() => FIF.debug.world.maxY >= 40, null, { timeout: 40000 }).catch(() => errs.push('bot climbed < 40 m'));
-  await p.evaluate(() => FIF.debug.setSpeed(1));
-  await p.waitForTimeout(500);
-  await p.screenshot({ path: OUT + '/smoke_play.png' });
-  await p.evaluate(() => FIF.debug.gust(1));
-  await p.waitForTimeout(800);
-  await p.screenshot({ path: OUT + '/smoke_warn.png' });
-  await p.waitForFunction(() => FIF.debug.world.wind.state === 'blow', null, { timeout: 8000 }).catch(() => errs.push('no gust'));
-  await p.waitForTimeout(700);
-  await p.screenshot({ path: OUT + '/smoke_gust.png' });
-  await p.evaluate(() => FIF.debug.setSpeed(8));
+  await p.waitForTimeout(1800);
+  await p.screenshot({ path: OUT + '/smoke_hint.png' });
+  // a real player: drag back with the mouse
+  await p.mouse.move(640, 300); await p.mouse.down();
+  for (let i = 1; i <= 10; i++) { await p.mouse.move(640 - i * 9, 300 + i * 8); await p.waitForTimeout(16); }
+  const pull = await p.evaluate(() => FIF.debug.world.pull);
+  if (!pull || !(pull.x < -0.5 && pull.y < -0.5)) errs.push('drag did not pull ' + JSON.stringify(pull));
+  await p.screenshot({ path: OUT + '/smoke_aim.png' });
+  await p.mouse.up();
+  const ph = await p.evaluate(() => FIF.debug.world.phase);
+  if (ph !== 'fly') errs.push('release did not fling: ' + ph);
+  await p.waitForTimeout(250);
+  await p.mouse.click(640, 300);
+  const fl = await p.evaluate(() => FIF.debug.world.fluttered);
+  if (!fl) errs.push('tap did not flutter');
+  await p.waitForTimeout(150);
+  await p.screenshot({ path: OUT + '/smoke_fly.png' });
+  await p.waitForFunction(() => FIF.debug.world.phase === 'aim', null, { timeout: 8000 }).catch(() => errs.push('no next shot'));
+  // keyboard: aim with arrows, Space to fling
+  await p.keyboard.down('ArrowUp'); await p.waitForTimeout(300); await p.keyboard.up('ArrowUp');
+  const kp = await p.evaluate(() => FIF.debug.world.pull);
+  if (!kp) errs.push('arrow keys did not aim');
+  await p.keyboard.press('Space');
+  if ((await p.evaluate(() => FIF.debug.world.phase)) !== 'fly') errs.push('Space did not fling');
+  // bot play
+  await p.evaluate(() => { FIF.debug.startGame(); FIF.debug.setBot(true, 1); FIF.debug.setSpeed(6); });
   await p.waitForFunction(() => FIF.debug.world.level >= 1, null, { timeout: 60000 }).catch(() => errs.push('no level 2'));
   await p.evaluate(() => FIF.debug.setSpeed(1));
   await p.waitForTimeout(900);
   await p.screenshot({ path: OUT + '/smoke_levelup.png' });
   for (const lv of [1, 2, 3]) {
     await p.evaluate(l => { FIF.debug.gotoLevel(l); FIF.debug.setSpeed(3); }, lv);
-    await p.waitForTimeout(3000);
+    await p.waitForTimeout(2500);
     await p.evaluate(() => FIF.debug.setSpeed(1));
-    await p.waitForTimeout(400);
+    await p.waitForTimeout(300);
     await p.screenshot({ path: OUT + '/smoke_zone' + lv + '.png' });
   }
-  // game over: no bot, steer into the wall and let her fall
-  await p.evaluate(() => { FIF.debug.setBot(false); FIF.debug.setSpeed(4); window._t = setInterval(() => { const w = FIF.debug.world; if (w && w.phase === 'play') { w.platforms.forEach(q => { if (q.y < w.hero.y + 30) q.y -= 1000; }); } }, 200); });
+  // night
+  await p.evaluate(() => { FIF.debug.setDay(0.8); });
+  await p.waitForTimeout(1500);
+  await p.screenshot({ path: OUT + '/smoke_night.png' });
+  await p.evaluate(() => { FIF.debug.setDay(0.62); });
+  await p.waitForTimeout(800);
+  await p.screenshot({ path: OUT + '/smoke_dusk.png' });
+  // game over: no bot, fling weakly-but-far into the sea until the hearts run out
+  await p.evaluate(() => { FIF.debug.setBot(false); FIF.debug.setSpeed(4); window._t = setInterval(() => { const w = FIF.debug.world; if (w && w.phase === 'aim') { FIF.debug.aim(-0.4, -1.4); FIF.debug.release(); } }, 100); });
   await p.waitForFunction(() => FIF.debug.mode === 'over', null, { timeout: 90000 }).catch(() => errs.push('no game over'));
   await p.evaluate(() => { clearInterval(window._t); FIF.debug.setSpeed(1); });
-  await p.waitForTimeout(700);
+  await p.waitForTimeout(800);
   await p.screenshot({ path: OUT + '/smoke_over.png' });
-  const q = await b.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true });
-  q.on('pageerror', e => errs.push('portrait: ' + e));
-  await q.goto(GAME + '?mute=1&seed=3&autostart=1&bot=1&skill=0.9&speed=2');
-  await q.waitForTimeout(8000);
-  await q.screenshot({ path: OUT + '/smoke_portrait.png' });
+  // portrait phone
+  const m = await b.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true });
+  m.on('pageerror', e => errs.push('mobile: ' + e));
+  await m.goto(GAME + '?mute=1&seed=3&autostart=1&bot=1&speed=2');
+  await m.waitForTimeout(4000);
+  await m.screenshot({ path: OUT + '/smoke_portrait.png' });
   const st = await p.evaluate(() => FIF.debug.stats);
-  console.log('stats', JSON.stringify({ games: st.games, scores: st.scores, levels: st.levels, heights: st.heights, errors: st.errors }));
-  console.log(errs.length ? 'ERRORS:\n' + errs.join('\n') : 'no console errors');
+  if (st.errors.length) errs.push(...st.errors);
   await b.close();
-  process.exit(errs.length || st.errors.length ? 1 : 0);
+  if (errs.length) { console.log('FAIL\n' + errs.join('\n')); process.exit(1); }
+  console.log('PASS smoke');
 })();

@@ -1,29 +1,26 @@
-/* FIF.Assets — loads default SVG art, player-chosen pictures, and caches pre-rasterized sprites.
+/* FIF.Assets — loads default SVG art (Finn's Island Fling), player-chosen pictures, and caches pre-rasterized sprites.
  * Sprites are rasterized once at (logical size × render scale) so drawing stays fast and crisp. */
 (function (FIF) {
   'use strict';
-  const SEASONS = ['sunny', 'rain', 'wind', 'snow'];   // the four weather levels
-  const LAYERS = ['sky', 'far'];
+  const SEASONS = ['cove', 'jungle', 'lagoon', 'lantern'];   // the four islands (zones)
+  const LAYERS = ['sky', 'far', 'near'];
   const D = 'assets/default/';
-  const files = { icon: D + 'icon.svg', heart: D + 'heart.svg', heart_empty: D + 'heart_empty.svg', jar: D + 'jar.svg', vane: D + 'vane.svg',
-    hay: D + 'hay.svg', plank: D + 'plank.svg', cart: D + 'cart.svg', wheel: D + 'wheel.svg', puff: D + 'puff.svg',
-    spring: D + 'spring.svg', spring_up: D + 'spring_up.svg', trampoline: D + 'trampoline.svg',
-    ground: D + 'levels/ground.svg', pole: D + 'levels/pole.svg' };
-  ['idle', 'crouch', 'up', 'fall', 'ouch', 'happy'].forEach(f => { files['clover_' + f] = D + 'clover_' + f + '.svg'; });
-  [0, 1].forEach(i => { files['firefly_' + i] = D + 'firefly_' + i + '.svg'; });
-  ['petal', 'butterfly', 'raindrop', 'splash', 'leaf', 'gust', 'snowflake', 'sparkle', 'straw', 'puff', 'glow', 'dust']
+  const files = { icon: D + 'icon.svg', heart: D + 'heart.svg', heart_empty: D + 'heart_empty.svg', leaf: D + 'leaf.svg', leaf_moon: D + 'leaf_moon.svg',
+    raft: D + 'raft.svg', sling: D + 'sling.svg', rock: D + 'rock.svg', gull_0: D + 'gull_0.svg', gull_1: D + 'gull_1.svg', sea: D + 'levels/sea.svg' };
+  ['sit', 'pull', 'fly', 'flutter', 'land', 'splash', 'bonk'].forEach(f => { files['finn_' + f] = D + 'finn_' + f + '.svg'; });
+  ['sparkle', 'bubble', 'drop', 'ripple', 'star', 'firefly', 'petal', 'butterfly', 'puff', 'leafbit', 'glow']
     .forEach(p => { files['p_' + p] = D + 'particles/' + p + '.svg'; });
   SEASONS.forEach(s => LAYERS.forEach(l => { files[s + '_' + l] = D + 'levels/' + s + '/' + l + '.svg'; }));
-  const LAYER_SIZE = { sky: [960, 540], far: [960, 1080] };
+  const LAYER_SIZE = { sky: [960, 540], far: [960, 300], near: [960, 200] };
   const COLORS = [];
 
   const SLOTS = [
-    { id: 'hero', name: 'Clover', kind: 'char', box: [96, 96] },
-    { id: 'firefly', name: 'Firefly', kind: 'char', box: [64, 64] },
-    { id: 'bg_sunny', name: 'Sunny Meadow', kind: 'bg', season: 0 },
-    { id: 'bg_rain', name: 'Rainy Orchard', kind: 'bg', season: 1 },
-    { id: 'bg_wind', name: 'Windy Hill', kind: 'bg', season: 2 },
-    { id: 'bg_snow', name: 'Snowy Rooftops', kind: 'bg', season: 3 }
+    { id: 'hero', name: 'Finn', kind: 'char', box: [96, 96] },
+    { id: 'leaf', name: 'Leaf', kind: 'char', box: [64, 64] },
+    { id: 'bg_cove', name: 'Sunny Cove', kind: 'bg', season: 0 },
+    { id: 'bg_jungle', name: 'Jungle Isle', kind: 'bg', season: 1 },
+    { id: 'bg_lagoon', name: 'Coral Lagoon', kind: 'bg', season: 2 },
+    { id: 'bg_lantern', name: 'Lantern Bay', kind: 'bg', season: 3 }
   ];
 
   function loadImage(src) {
@@ -115,7 +112,7 @@
     /* Only what the first screen needs blocks start-up; the deeper zones' art streams in behind the title. */
     async loadAll(onProgress) {
       const keys = Object.keys(files);
-      const later = k => /^(rain|wind|snow)_/.test(k);
+      const later = k => /^(jungle|lagoon|lantern)_/.test(k);
       let done = 0;
       const one = async k => { this.img[k] = await loadImage(files[k]); done++; if (onProgress) onProgress(done / keys.length); };
       this.restLoaded = Promise.all(keys.filter(later).map(one)).then(() => { this.restDone = true; if (FIF.Game && FIF.Game.renderer) FIF.Game.renderer.prewarm(1); });

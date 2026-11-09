@@ -1,7 +1,7 @@
 :root{
   --ink:#2f3b52;
   --panel:#fff6e3;
-  --panel-edge:#9fc8e8;
+  --panel-edge:#8fd0d6;
   --green:#5cc65a; --green-d:#3c9a3d;
   --orange:#ff9f43; --orange-d:#d9771c;
   --blue:#2ec4b6; --blue-d:#1a8f84;
@@ -24,12 +24,12 @@ canvas#game{display:block;background:#26476b;touch-action:none;cursor:pointer}
 
 .panel{background:var(--panel);border:calc(var(--u)*.5) solid var(--panel-edge);border-radius:calc(var(--u)*2.6);
   padding:calc(var(--u)*2.4) calc(var(--u)*3.2);min-width:calc(var(--u)*34);max-width:94vw;max-height:94vh;overflow:auto;
-  box-shadow:0 calc(var(--u)*.8) 0 #8a74cf, 0 calc(var(--u)*2) calc(var(--u)*4) rgba(0,0,0,.35);
+  box-shadow:0 calc(var(--u)*.8) 0 #3a8f9b, 0 calc(var(--u)*2) calc(var(--u)*4) rgba(0,0,0,.35);
   text-align:center;animation:pop .32s cubic-bezier(.2,.9,.3,1.2)}
 .panel.wide{width:calc(var(--u)*80)}
 .panel.xwide{width:calc(var(--u)*84)}
-.panel h2{margin:0 0 calc(var(--u)*1.4);font-size:calc(var(--u)*4.2);color:#3c8a35;
-  text-shadow:0 calc(var(--u)*.3) 0 #e6dbff;letter-spacing:.02em}
+.panel h2{margin:0 0 calc(var(--u)*1.4);font-size:calc(var(--u)*4.2);color:#d9661a;
+  text-shadow:0 calc(var(--u)*.3) 0 #ffe2c4;letter-spacing:.02em}
 .small{font-size:calc(var(--u)*1.55);font-family:"Segoe UI",system-ui,sans-serif;font-weight:600;line-height:1.4;margin:calc(var(--u)*.8) 0}
 .hint{opacity:.75}
 kbd{display:inline-block;padding:0 .45em;border-radius:.35em;background:#fff;border:1px solid #9fc4d8;border-bottom-width:3px;
@@ -62,7 +62,7 @@ kbd{display:inline-block;padding:0 .45em;border-radius:.35em;background:#fff;bor
 .logo{margin:calc(var(--u)*.5) 0 0;font-size:calc(var(--u)*8.5);line-height:1;letter-spacing:.01em;
   -webkit-text-stroke:calc(var(--u)*.45) #24502a;paint-order:stroke fill;
   text-shadow:0 calc(var(--u)*.7) 0 #24502a, 0 calc(var(--u)*1.2) calc(var(--u)*1.4) rgba(0,0,0,.35)}
-.logo .l1{color:#a6f07f}.logo .l2{color:#ffd23f}
+.logo .l1{color:#ffb15c}.logo .l2{color:#ffe36a}
 .tagline{margin:calc(var(--u)*1) 0 0;font-size:calc(var(--u)*2.2);color:#fff;
   text-shadow:0 2px 0 #3b2a6e,0 0 calc(var(--u)*1) rgba(0,0,0,.4)}
 .best-line{margin-top:calc(var(--u)*1.8);color:#fff;font-size:calc(var(--u)*2);text-shadow:0 2px 0 #3b2a6e}
@@ -176,9 +176,9 @@ kbd{display:inline-block;padding:0 .45em;border-radius:.35em;background:#fff;bor
 /* ---------- theme ---------- */
 html,body{background:#0f2347}
 canvas#game{background:#1d3a6b}
-.logo .l1{color:#a6f07f}.logo .l2{color:#ffd23f}
+.logo .l1{color:#ffb15c}.logo .l2{color:#ffe36a}
 .logo{font-size:calc(var(--u)*8)}
-.panel h2{color:#3c8a35}
+.panel h2{color:#d9661a}
 .panel.wide{width:calc(var(--u)*80)}
 .action-btn{position:absolute;z-index:4;width:calc(var(--u)*11);height:calc(var(--u)*11);border-radius:50%;border:calc(var(--u)*.5) solid #fff;
   background:conic-gradient(rgba(255,211,77,.80) var(--charge,100%), rgba(98,67,191,.62) 0);color:#fff;font-size:calc(var(--u)*5);font-family:var(--font);box-shadow:0 calc(var(--u)*.5) calc(var(--u)*1.2) rgba(0,0,0,.3);
@@ -274,7 +274,7 @@ body.touch .tagline{font-size:max(15px, calc(var(--u)*2.2))}body.touch .best-lin
 .slot .tag,.slot .shape button{font-size:max(11px, 1em)}
 
 /* ---------- additions ---------- */
-.logo{-webkit-text-stroke-color:#24502a;text-shadow:0 calc(var(--u)*.7) 0 #24502a, 0 calc(var(--u)*1.2) calc(var(--u)*1.4) rgba(0,0,0,.35)}
+.logo{-webkit-text-stroke-color:#14505a;text-shadow:0 calc(var(--u)*.7) 0 #14505a, 0 calc(var(--u)*1.2) calc(var(--u)*1.4) rgba(0,0,0,.35)}
 .tagline,.best-line{text-shadow:0 2px 0 #24502a,0 0 calc(var(--u)*.6) #24502a}
 .best-line{background:rgba(20,50,90,.6)}
 .how-ico img{width:calc(var(--u)*4.2)}
@@ -337,7 +337,7 @@ body.touch .tagline{font-size:max(15px, calc(var(--u)*2.2))}body.touch .best-lin
 .how-ico img{width:calc(var(--u)*6)}
 @media (max-aspect-ratio: 1/1){ #scrHow .how-ico img{width:calc(var(--u)*5)} }
 
-/* ---------- Clover's Farm Hop QA fixes (docs/reports/visual.md, functional.md) ---------- */
+/* ---------- inherited QA fixes (docs/reports/visual.md, functional.md) ---------- */
 #scrTitle{background:radial-gradient(ellipse at 50% 42%,rgba(255,255,255,.42),rgba(255,255,255,.12) 55%,rgba(255,255,255,0) 75%)}
 @media (orientation:portrait){
   .over-body{flex-direction:column;gap:calc(var(--u)*1.2)}

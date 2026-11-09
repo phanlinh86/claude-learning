@@ -122,11 +122,11 @@
       $('overScore').textContent = info.score;
       $('overBest').textContent = info.best;
       $('newBest').classList.toggle('hidden', !info.newBest);
-      const c = info.cleared;   // weather levels finished: 1 bronze, 2 silver, 3 gold, 4+ platinum
+      const c = info.cleared;   // islands finished: 1 bronze, 2 silver, 3 gold, 4+ platinum
       const m = c >= 4 ? 'platinum' : c >= 3 ? 'gold' : c >= 2 ? 'silver' : c >= 1 ? 'bronze' : 'none';
       $('medal').className = 'medal ' + m;
-      $('medalName').textContent = m === 'none' ? 'Climb past the Sunny Meadow for a medal' : m[0].toUpperCase() + m.slice(1) + ' medal';
-      $('overStats').innerHTML = `Climbed: <b>${info.height} m</b> · Fireflies: <b>${info.fireflies}</b> · Full lanterns: <b>${info.lanterns}</b><br>Bounces: <b>${info.bounces}</b> · Springs: <b>${info.springs}</b> · Wind gusts: <b>${info.gusts}</b> · Falls: <b>${info.falls}</b><br>Reached: <b>${info.reached}</b>`;
+      $('medalName').textContent = m === 'none' ? 'Land 5 times on Sunny Cove for a medal' : m[0].toUpperCase() + m.slice(1) + ' medal';
+      $('overStats').innerHTML = `Leaves: <b>${info.leaves}</b>${info.moon ? ` (moon: <b>${info.moon}</b>)` : ''} · Landings: <b>${info.landings}</b> / ${info.shots} flings · Bullseyes: <b>${info.bulls}</b><br>Best streak: <b>${info.streak}</b> · Flutters: <b>${info.flutters}</b> · Gull bonks: <b>${info.bumps}</b><br>Reached: <b>${info.reached}</b>`;
       this.show('scrOver');
     },
 
@@ -141,7 +141,7 @@
     renderSlots() {
       const A = FIF.Assets, grid = $('slotGrid');
       grid.innerHTML = '';
-      const defaultPreview = s => s.id === 'hero' ? A.files.clover_happy : s.id === 'firefly' ? A.files.firefly_0 : null;
+      const defaultPreview = s => s.id === 'hero' ? A.files.finn_land : s.id === 'leaf' ? A.files.leaf : null;
       A.SLOTS.forEach(s => {
         const custom = A.hasCustom(s.id);
         const el = document.createElement('div');
@@ -161,10 +161,12 @@
           c.style.width = '100%'; c.style.height = '100%';
           const g = c.getContext('2d'); const n = A.SEASONS[s.season];
           { const im = A.img[n + '_sky']; if (im) g.drawImage(im, 0, 0, 320, 180); }
-          { const im = A.img[n + '_far']; if (im) g.drawImage(im, 0, 0, 320, 360); }
-          { const im = A.img.hay; if (im) g.drawImage(im, 40, 120, 96, 48); }
-          { const im = A.img.plank; if (im) g.drawImage(im, 190, 70, 80, 24); }
-          { const im = A.img.clover_up; if (im) g.drawImage(im, 64, 64, 56, 56); }
+          { const im = A.img[n + '_far']; if (im) g.drawImage(im, 0, 156 - 100, 320, 100); }
+          { const im = A.img[n + '_near']; if (im) g.drawImage(im, 0, 178 - 67, 320, 67); }
+          { const im = A.img.sea; if (im) g.drawImage(im, 0, 150, 320, 80); }
+          { const im = A.img.rock; if (im) g.drawImage(im, 0, 140, 96, 44); }
+          { const im = A.img.raft; if (im) g.drawImage(im, 220, 146, 80, 35); }
+          { const im = A.img.finn_fly; if (im) g.drawImage(im, 120, 60, 50, 50); }
           prev.appendChild(c);
         } else {
           const img = new Image(); img.src = defaultPreview(s); prev.appendChild(img);

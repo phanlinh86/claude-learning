@@ -1,16 +1,16 @@
 /* FIF.Audio — every sound is synthesized with WebAudio (no audio files, nothing to license).
- * SFX for bounces (rising a little with height), springs, puffs, fireflies (climbing the scale within a group), the wind
- * (a warning whistle and a panned noise swell while a gust blows), falls and the trampoline; a soft generative loop per
- * weather level (DESIGN §7), scheduled ahead with a lookahead timer. Unlocks on the first user gesture (iOS). */
+ * SFX: the band stretching (pitch rises with the pull), the fling whoosh, leaf chimes (climbing the scale within a flight),
+ * tail flutter, a gull "honk-bonk", the landing thump + bullseye fanfare, a soft "bloop" splash; a sea-wave bed and a
+ * soft generative island tune per level, scheduled ahead with a lookahead timer. Unlocks on the first gesture (iOS). */
 (function (FIF) {
   'use strict';
   const NOTE = n => 440 * Math.pow(2, (n - 69) / 12);
   // per weather level: root (MIDI), bar chords (semitones), tempo (beats/min), beats per bar, lead wave, extras
   const ZONE_MUSIC = [
-    { root: 67, prog: [[0, 4, 7], [5, 9, 12], [0, 4, 7], [7, 11, 14]], bpm: 100, beats: 4, lead: 'triangle', plink: true, bounce: true }, // Sunny Meadow: banjo-ish plucks, G
-    { root: 65, prog: [[0, 4, 7], [-3, 0, 4], [-7, -3, 0], [-5, -1, 2]], bpm: 92, beats: 4, lead: 'sine', plink: true, bell: true },     // Rainy Orchard: soft marimba, F
-    { root: 69, prog: [[0, 4, 7], [5, 9, 12], [7, 11, 14], [5, 9, 12]], bpm: 108, beats: 4, lead: 'triangle', bounce: true, whistle: true }, // Windy Hill: bouncy, A
-    { root: 72, prog: [[0, 4, 7], [-3, 0, 4], [5, 9, 12], [7, 11, 14]], bpm: 84, beats: 3, lead: 'sine', bell: true, plink: true }  // Snowy Rooftops: music box in 3/4, C
+    { root: 67, prog: [[0, 4, 7], [5, 9, 12], [7, 11, 14], [0, 4, 7]], bpm: 104, beats: 4, lead: 'triangle', plink: true, bounce: true },  // Sunny Cove: calypso plucks, G
+    { root: 65, prog: [[0, 4, 7], [-3, 0, 4], [-7, -3, 0], [-5, -1, 2]], bpm: 96, beats: 4, lead: 'sine', plink: true, bell: true },     // Jungle Isle: marimba, F
+    { root: 69, prog: [[0, 4, 7], [5, 9, 12], [-3, 0, 4], [7, 11, 14]], bpm: 90, beats: 4, lead: 'sine', bell: true, whistle: true },     // Coral Lagoon: dreamy bells, A
+    { root: 62, prog: [[0, 3, 7], [-2, 2, 5], [-4, 0, 3], [-5, -1, 2]], bpm: 132, beats: 6, lead: 'triangle', bounce: true }            // Lantern Bay: a gentle shanty in 6/8, D minor
   ];
   const PENTA = [0, 2, 4, 7, 9, 12, 14, 16];
 
@@ -92,16 +92,17 @@
       switch (name) {
         case 'click': T(880, 0.06, { type: 'triangle', vol: 0.18 }); break;
         case 'start': [0, 4, 7, 12].forEach((s, i) => T(NOTE(72 + s), 0.18, { type: 'triangle', vol: 0.2, at: i * 0.07 })); break;
-        case 'bounce': { const k = 1 + Math.min(0.5, (o.h || 0) * 0.004); T(200 * k, 0.2, { type: 'sine', vol: 0.12, slideTo: 560 * k }); T(300 * k, 0.12, { type: 'triangle', vol: 0.035, at: 0.02, slideTo: 760 * k }); break; }   // boing
-        case 'spring': T(180, 0.5, { type: 'sine', vol: 0.15, slideTo: 1100 }); T(240, 0.45, { type: 'triangle', vol: 0.05, at: 0.05, slideTo: 1500 }); [0, 1, 2, 3].forEach(i => T(600 + i * 90, 0.06, { type: 'sine', vol: 0.03, at: 0.12 + i * 0.07 })); break;   // BOING-oing
-        case 'rescue': T(150, 0.6, { type: 'sine', vol: 0.15, slideTo: 820 }); T(225, 0.5, { type: 'triangle', vol: 0.05, at: 0.06, slideTo: 1100 }); break;
-        case 'poof': this.noise(0.3, { vol: 0.1, freq: 900, slideTo: 300, q: 0.6, type: 'lowpass' }); T(520, 0.12, { type: 'sine', vol: 0.04, slideTo: 300 }); break;
-        case 'firefly': { const c = Math.min(7, Math.max(0, (o.combo || 1) - 1)) % 8; const n = 86 + PENTA[c]; T(NOTE(n), 0.2, { type: 'sine', vol: 0.09 }); T(NOTE(n + 12), 0.14, { type: 'sine', vol: 0.03, at: 0.03 }); break; }   // twinkle
-        case 'lantern': [0, 4, 7, 12, 16].forEach((s, i) => T(NOTE(84 + s), 0.22, { type: 'sine', vol: 0.1, at: i * 0.06 })); break;
-        case 'wall': T(420, 0.06, { type: 'triangle', vol: 0.08, slideTo: 300 }); this.noise(0.04, { vol: 0.04, freq: 1800, q: 3 }); break;   // tok on the fence post
-        case 'fall': T(900, 0.7, { type: 'sine', vol: 0.1, slideTo: 220 }); break;   // wheee
-        case 'windWarn': T(700, 0.5, { type: 'sine', vol: 0.05, slideTo: 1150 }); T(1050, 0.4, { type: 'sine', vol: 0.025, at: 0.25, slideTo: 1500 }); break;   // a soft rising whistle
-        case 'windStart': this.noise(0.6, { vol: 0.07, freq: 400, slideTo: 1400, q: 0.8 }); break;
+        case 'pull': T(180, 0.35, { type: 'sawtooth', vol: 0.025, slideTo: 260 }); T(90, 0.3, { type: 'sine', vol: 0.05, slideTo: 130 }); break;   // creak of the band
+        case 'launch': { const k = 0.7 + (o.power || 0.6) * 0.6; T(140 * k, 0.16, { type: 'sine', vol: 0.18, slideTo: 420 * k }); this.noise(0.4, { vol: 0.09 * k, freq: 600, slideTo: 2600, q: 0.7 }); break; }   // thwang + whoosh
+        case 'leaf': { const c = Math.min(7, Math.max(0, (o.count || 1) - 1)); const n = 81 + PENTA[c]; T(NOTE(n), 0.22, { type: 'sine', vol: 0.11 }); T(NOTE(n + 12), 0.16, { type: 'sine', vol: 0.035, at: 0.03 }); if (o.kind === 'moon') T(NOTE(n + 19), 0.4, { type: 'sine', vol: 0.05, at: 0.07 }); break; }
+        case 'flutter': [0, 1, 2, 3, 4].forEach(i => T(300 + i * 40, 0.05, { type: 'triangle', vol: 0.05, at: i * 0.045 })); this.noise(0.25, { vol: 0.05, freq: 1500, q: 1.5 }); break;   // brrrp
+        case 'bump': T(520, 0.09, { type: 'square', vol: 0.04, slideTo: 380 }); T(390, 0.12, { type: 'square', vol: 0.035, at: 0.1, slideTo: 300 }); T(700, 0.08, { type: 'sine', vol: 0.06, at: 0.02, slideTo: 1200 }); break;   // honk-bonk
+        case 'land': T(120, 0.18, { type: 'sine', vol: 0.2, slideTo: 70 }); this.noise(0.12, { vol: 0.06, freq: 500, q: 0.8, type: 'lowpass' }); [0, 4, 7].forEach((s, i) => T(NOTE(76 + s), 0.16, { type: 'triangle', vol: 0.1, at: 0.08 + i * 0.06 })); break;
+        case 'bull': [0, 4, 7, 12, 16].forEach((s, i) => T(NOTE(79 + s), 0.2, { type: 'triangle', vol: 0.13, at: 0.25 + i * 0.06 })); this.noise(0.35, { vol: 0.05, freq: 5000, q: 0.5, at: 0.25 }); break;
+        case 'splash': T(420, 0.25, { type: 'sine', vol: 0.16, slideTo: 140 }); T(260, 0.2, { type: 'sine', vol: 0.1, at: 0.12, slideTo: 520 }); this.noise(0.5, { vol: 0.1, freq: 900, slideTo: 300, q: 0.6, type: 'lowpass' }); break;   // bloop
+        case 'flop': T(200, 0.12, { type: 'triangle', vol: 0.1, slideTo: 120 }); this.noise(0.15, { vol: 0.05, freq: 700, q: 0.7, type: 'lowpass' }); break;   // a soft pat on the sand
+        case 'night': [12, 7, 4, 0].forEach((s, i) => T(NOTE(84 + s), 0.5, { type: 'sine', vol: 0.05, at: i * 0.18 })); break;
+        case 'dawn': [0, 4, 7, 12].forEach((s, i) => T(NOTE(79 + s), 0.25, { type: 'triangle', vol: 0.07, at: i * 0.1 })); T(NOTE(96), 0.1, { type: 'sine', vol: 0.04, at: 0.5, slideTo: NOTE(100) }); break;
         case 'heartLost': T(NOTE(69), 0.18, { type: 'sine', vol: 0.1 }); T(NOTE(65), 0.3, { type: 'sine', vol: 0.1, at: 0.16 }); break;
         case 'heartGain': [0, 4, 7].forEach((s, i) => T(NOTE(79 + s), 0.18, { type: 'sine', vol: 0.1, at: 0.4 + i * 0.07 })); break;
         case 'level': this.noise(0.45, { vol: 0.07, freq: 2500, slideTo: 900, q: 0.6 }); [0, 4, 7, 12, 7, 12, 16].forEach((s, i) => T(NOTE(72 + s), 0.24, { type: 'triangle', vol: 0.18, at: 0.3 + i * 0.1 })); break;
@@ -112,38 +113,26 @@
 
     // ---------- music ----------
     setLevel(zone, loop) { this.zone = ((zone || 0) % 4 + 4) % 4; this.loop = loop || 0; },
-    _rainBed() {   // a quiet looping breeze under the music, plus the gust bed (SFX bus, panned by the wind direction)
-      const c = this.ctx; if (!c || this._rain) return;
+    _waveBed() {   // the sea: low noise that swells and ebbs like waves (music bus)
+      const c = this.ctx; if (!c || this._waves) return;
       const s = c.createBufferSource(); s.buffer = this.noiseBuf; s.loop = true;
-      const f = c.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 700; f.Q.value = 0.5;
-      const g = c.createGain(); g.gain.value = 0.03;
+      const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 520; f.Q.value = 0.4;
+      const g = c.createGain(); g.gain.value = 0.05;
+      const lfo = c.createOscillator(), lg = c.createGain(); lfo.frequency.value = 0.13; lg.gain.value = 0.04;
+      lfo.connect(lg); lg.connect(g.gain); lfo.start();
       s.connect(f); f.connect(g); g.connect(this.music); s.start();
-      this._rain = s;
-      const w = c.createBufferSource(); w.buffer = this.noiseBuf; w.loop = true;
-      const wf = c.createBiquadFilter(); wf.type = 'bandpass'; wf.frequency.value = 500; wf.Q.value = 0.7;
-      const wg = c.createGain(); wg.gain.value = 0;
-      const pan = c.createStereoPanner ? c.createStereoPanner() : null;
-      w.connect(wf); wf.connect(wg); if (pan) { wg.connect(pan); pan.connect(this.sfx); } else wg.connect(this.sfx);
-      w.start(); this._wind = { f: wf, g: wg, pan };
-    },
-    /* the gust bed: strength 0..1, dir −1|+1 (called every frame while playing) */
-    setWind(dir, strength) {
-      const W = this._wind; if (!W || !this.ctx) return;
-      const t = this.ctx.currentTime, k = Math.max(0, Math.min(1, strength || 0));
-      W.g.gain.setTargetAtTime(this._musicPlaying ? k * 0.16 : 0, t, 0.12);
-      W.f.frequency.setTargetAtTime(380 + k * 900, t, 0.2);
-      if (W.pan) W.pan.pan.setTargetAtTime((dir || 0) * 0.6 * k, t, 0.2);
+      this._waves = s;
     },
     startMusic() {
       if (!this.ensure()) return;
-      this._rainBed();
+      this._waveBed();
       this._musicPlaying = true; this.applyMute();
       if (this._timer) return;
       this._next = null; this._beat = 0;
       this._timer = setInterval(() => this._schedule(), 90);
     },
     stopMusic() {
-      this._musicPlaying = false; this.applyMute(); this.setWind(0, 0);
+      this._musicPlaying = false; this.applyMute();
       if (this._timer) { clearInterval(this._timer); this._timer = null; }
     },
     _tek(t, vol) {

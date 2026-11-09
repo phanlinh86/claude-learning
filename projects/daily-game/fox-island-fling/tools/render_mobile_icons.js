@@ -12,7 +12,7 @@ const fs = require('fs'), path = require('path');
     await p.setViewportSize({ width: s, height: s });
     const k = name === 'icon-512.png' ? 0.92 : 1.16;   // home-screen icons: full-bleed (iOS rounds the corners); the maskable 512 keeps the badge in the safe zone
     await p.setContent(`<html><body style="margin:0;width:${s}px;height:${s}px;display:grid;place-items:center;overflow:hidden;
-      background:radial-gradient(circle at 50% 38%,#d8f3ff,#8fd3ff 55%,#4a90c4)">
+      background:radial-gradient(circle at 50% 38%,#c9f7f2,#5fd6cc 55%,#13838c)">
       <img src="data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}" style="width:${s * k}px;height:${s * k}px;display:block"></body></html>`);
     await p.waitForTimeout(80);
     await p.screenshot({ path: path.join(out, name) });

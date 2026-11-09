@@ -6,19 +6,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Farm Hop">
+<meta name="apple-mobile-web-app-title" content="Island Fling">
 <meta name="format-detection" content="telephone=no">
-<meta name="theme-color" content="#8fd3ff">
-<meta name="description" content="Clover the little frog bounces up from the farmyard into the sky, catching fireflies while the wind changes direction! A family game for iPhone, iPad and the browser.">
+<meta name="theme-color" content="#86c6e6">
+<meta name="description" content="Fling Finn the little pirate fox from a palm-tree slingshot, catch magic leaves and land on the raft, from sunny day to lantern-lit night! A family game for iPhone, iPad and the browser.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
-<title>Clover's Farm Hop</title>
+<title>Finn's Island Fling</title>
 <link rel="icon" href="assets/default/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <div id="stage">
-  <canvas id="game" aria-label="Clover's Farm Hop game"></canvas>
+  <canvas id="game" aria-label="Finn's Island Fling game"></canvas>
   <div id="safeProbe" aria-hidden="true"></div>
 
   <!-- In-game HUD buttons -->
@@ -33,8 +33,8 @@
   <section id="scrTitle" class="screen">
     <div class="title-wrap">
       <img id="titleIcon" class="title-icon" src="assets/default/icon.svg" alt="">
-      <h1 class="logo"><span class="l1">Clover's</span> <span class="l2">Farm Hop</span></h1>
-      <p class="tagline">Bounce up into the sky, catch the fireflies and ride the wind!</p>
+      <h1 class="logo"><span class="l1">Finn's</span> <span class="l2">Island Fling</span></h1>
+      <p class="tagline">Fling Finn across the sea, grab the magic leaves and land on the raft!</p>
       <div class="menu">
         <button id="btnPlay" class="btn btn-big btn-green"><svg class="i" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg>&nbsp; Play</button>
         <button id="btnCustomize" class="btn btn-orange">🖼️&nbsp; Change Pictures</button>
@@ -64,7 +64,7 @@
   <!-- Game over -->
   <section id="scrOver" class="screen hidden dim">
     <div class="panel over-panel">
-      <h2 class="over-title">What a climb!</h2>
+      <h2 class="over-title">What a voyage!</h2>
       <div class="over-body">
         <div class="medal-box"><div id="medal" class="medal none"></div><div id="medalName" class="medal-name"></div></div>
         <div class="scores">
@@ -86,12 +86,12 @@
     <div class="panel wide">
       <h2>How to Play</h2>
       <div class="how-grid">
-        <div class="how"><div class="how-ico"><img src="assets/default/clover_up.svg" alt=""></div><p>Clover <b>bounces by herself</b>! <span class="touch-only"><b>Hold</b> the left or right side of the screen</span><span class="kb-only">Hold <kbd>←</kbd> <kbd>→</kbd></span> to steer her onto the next hay bale.</p></div>
-        <div class="how"><div class="how-ico"><img src="assets/default/firefly_0.svg" alt=""><img src="assets/default/jar.svg" alt=""></div><p>Catch the <b>fireflies</b> for points. <b>20 fireflies</b> fill the lantern and give you a <b>heart</b>.</p></div>
-        <div class="how"><div class="how-ico"><img src="assets/default/vane.svg" alt=""></div><p>When the <b>weather vane</b> spins, the <b>wind</b> is coming! Steer against it. It can blow either way.</p></div>
-        <div class="how"><div class="how-ico"><img src="assets/default/puff.svg" alt=""><img src="assets/default/spring.svg" alt=""></div><p><b>Puff clouds</b> go poof after one bounce. <b>Springs</b> throw you high! If you fall, a <b>trampoline</b> catches you but you lose a heart.</p></div>
+        <div class="how"><div class="how-ico"><img src="assets/default/finn_pull.svg" alt=""><img src="assets/default/sling.svg" alt=""></div><p><span class="touch-only"><b>Drag back</b> anywhere on the screen</span><span class="kb-only"><b>Drag back</b> with the mouse</span> and <b>let go</b> to fling Finn. The dots show where he will fly.</p></div>
+        <div class="how"><div class="how-ico"><img src="assets/default/leaf.svg" alt=""><img src="assets/default/leaf_moon.svg" alt=""></div><p>Catch the <b>magic leaves</b> in the air. <b>20 leaves</b> give you a <b>heart</b>. Glowing <b>moon leaves</b> at night are worth 2!</p></div>
+        <div class="how"><div class="how-ico"><img src="assets/default/raft.svg" alt=""></div><p>Land on the <b>raft</b> for points, on the <b>red X</b> for a bullseye! Splashing into the sea costs a heart.</p></div>
+        <div class="how"><div class="how-ico"><img src="assets/default/finn_flutter.svg" alt=""><img src="assets/default/gull_0.svg" alt=""></div><p><b>Tap</b> once while flying to <b>flutter</b> a little higher. Seagulls bonk you away. At <b>night</b> only the lanterns light the way!</p></div>
       </div>
-      <p class="small kb-only"><kbd>←</kbd><kbd>→</kbd> / <kbd>A</kbd><kbd>D</kbd> steer · <kbd>Esc</kbd>/<kbd>P</kbd> pause · <kbd>M</kbd> sound · <kbd>F11</kbd> full screen</p>
+      <p class="small kb-only"><kbd>←</kbd><kbd>→</kbd> power · <kbd>↑</kbd><kbd>↓</kbd> angle · <kbd>Space</kbd> fling / flutter · <kbd>Esc</kbd>/<kbd>P</kbd> pause · <kbd>M</kbd> sound · <kbd>F11</kbd> full screen</p>
       <div class="menu"><button class="btn btn-green btn-back">OK, let's play!</button></div>
     </div>
   </section>
