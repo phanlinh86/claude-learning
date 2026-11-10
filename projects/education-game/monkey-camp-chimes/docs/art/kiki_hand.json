@@ -1,0 +1,267 @@
+{
+ "_about": "Kiki per frame, in the 0 0 300 300 viewBox (feet anchor 150,292). hand = tip of the NEAR hand (point: the fingertip — aim the hint / sparkle from here; wave: the waving palm top); farHand = tip of the far hand; headTop = [x, y] of the hair-curl top (speech-bubble tail / stars over the head; the round head itself starts at y 64); eye = near eye centre; bbox = measured opaque box (added by tools/kiki_sheet.js).",
+ "idle": {
+  "hand": [
+   191,
+   269
+  ],
+  "farHand": [
+   112,
+   269
+  ],
+  "headTop": [
+   154,
+   38
+  ],
+  "eye": [
+   144,
+   128
+  ],
+  "bbox": [
+   32,
+   33,
+   246,
+   294
+  ]
+ },
+ "blink": {
+  "hand": [
+   191,
+   269
+  ],
+  "farHand": [
+   112,
+   269
+  ],
+  "headTop": [
+   154,
+   38
+  ],
+  "eye": [
+   144,
+   128
+  ],
+  "bbox": [
+   32,
+   33,
+   246,
+   294
+  ]
+ },
+ "talk": {
+  "hand": [
+   237,
+   213
+  ],
+  "farHand": [
+   112,
+   269
+  ],
+  "headTop": [
+   154,
+   38
+  ],
+  "eye": [
+   144,
+   128
+  ],
+  "bbox": [
+   32,
+   33,
+   246,
+   294
+  ]
+ },
+ "happy": {
+  "hand": [
+   236,
+   207
+  ],
+  "farHand": [
+   70,
+   212
+  ],
+  "headTop": [
+   154,
+   38
+  ],
+  "eye": [
+   144,
+   128
+  ],
+  "bbox": [
+   32,
+   33,
+   246,
+   294
+  ]
+ },
+ "cheer": {
+  "hand": [
+   237,
+   136
+  ],
+  "farHand": [
+   43,
+   160
+  ],
+  "headTop": [
+   154,
+   38
+  ],
+  "eye": [
+   144,
+   128
+  ],
+  "bbox": [
+   23,
+   33,
+   283,
+   294
+  ]
+ },
+ "think": {
+  "hand": [
+   201,
+   186
+  ],
+  "farHand": [
+   112,
+   269
+  ],
+  "headTop": [
+   174,
+   39
+  ],
+  "eye": [
+   153,
+   128
+  ],
+  "bbox": [
+   32,
+   35,
+   266,
+   294
+  ]
+ },
+ "oops": {
+  "hand": [
+   227,
+   135
+  ],
+  "farHand": [
+   110,
+   269
+  ],
+  "headTop": [
+   137,
+   39
+  ],
+  "eye": [
+   136,
+   129
+  ],
+  "bbox": [
+   32,
+   33,
+   266,
+   294
+  ]
+ },
+ "wave": {
+  "hand": [
+   245,
+   131
+  ],
+  "farHand": [
+   112,
+   269
+  ],
+  "headTop": [
+   154,
+   38
+  ],
+  "eye": [
+   144,
+   128
+  ],
+  "bbox": [
+   32,
+   33,
+   287,
+   294
+  ]
+ },
+ "point": {
+  "hand": [
+   266,
+   164
+  ],
+  "farHand": [
+   112,
+   269
+  ],
+  "headTop": [
+   154,
+   38
+  ],
+  "eye": [
+   144,
+   128
+  ],
+  "bbox": [
+   32,
+   33,
+   270,
+   294
+  ]
+ },
+ "dance": {
+  "hand": [
+   261,
+   180
+  ],
+  "farHand": [
+   45,
+   195
+  ],
+  "headTop": [
+   154,
+   38
+  ],
+  "eye": [
+   144,
+   128
+  ],
+  "bbox": [
+   32,
+   33,
+   280,
+   294
+  ]
+ },
+ "full_wave": {
+  "hand": [
+   229,
+   219
+  ],
+  "farHand": [
+   34,
+   157
+  ],
+  "headTop": [
+   154,
+   38
+  ],
+  "eye": [
+   144,
+   128
+  ],
+  "bbox": [
+   16,
+   33,
+   246,
+   294
+  ]
+ }
+}
