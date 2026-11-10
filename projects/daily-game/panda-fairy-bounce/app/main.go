@@ -203,7 +203,11 @@ func main() {
 	}
 	base := filepath.Join(appData, "MochisFairyBounce")
 	st := &store{dir: filepath.Join(base, "data")}
-	_ = os.MkdirAll(st.dir, 0o755)
+	if err := os.MkdirAll(st.dir, 0o755); err != nil {
+		// fall back to a temp folder so saves still work this session
+		st.dir = filepath.Join(os.TempDir(), "MochisFairyBounce", "data")
+		_ = os.MkdirAll(st.dir, 0o755)
+	}
 
 	// Serve the embedded game on a private loopback port.
 	sub, err := fs.Sub(webFS, "web")

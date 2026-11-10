@@ -74,7 +74,7 @@
         if (f && this._pickSlot) this.applyFile(this._pickSlot, f);
         this.filePick.value = '';
       });
-      if (game.isApp) $('btnQuit').classList.remove('hidden');
+      if (typeof window.mfQuit === 'function') $('btnQuit').classList.remove('hidden');
       if (game.isTouch) document.body.classList.add('touch');
       if (!game.isApp && !document.fullscreenEnabled) $('rowFull').classList.add('hidden');
       this.renderSlots();

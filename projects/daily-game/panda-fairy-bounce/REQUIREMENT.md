@@ -26,7 +26,7 @@ Move Mochi left and right → the ball bounces off the mushroom cap → it break
 - Block +10 (a tough block takes 2 hits: +10 each). Falling star caught +50. Ball hits Hoot +30, and 3 hits in one season "tickles" him for +100. Clearing a season gives +100, plus +20 for each heart left.
 - A combo: every block after the 2nd one before the ball comes back to the cap gives +5 extra.
 - If the ball falls past Mochi you lose a heart and serve again. You start with 3 hearts (max 5), and get +1 heart for every 10 stars and +1 for every season cleared. With 0 hearts the game is over.
-- On Easy, a glowing fairy vine saves the ball twice per season (once on Normal, never on Hard).
+- On Easy, a glowing fairy vine saves the ball up to 8 times per season (once on Normal, never on Hard).
 
 ## Levels: four seasons
 1. **Spring Meadow:** blossom-bud blocks, falling petals, a pale morning sky.

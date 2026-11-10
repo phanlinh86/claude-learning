@@ -230,7 +230,7 @@
         if (!this.playerCanAct() || e.type !== 'pointerup' || d.type === 'mouse') return;
         // a touch: a short tap serves (a long slide just moves Mochi)
         const moved = Math.abs(e.clientX - d.x0) / Math.max(1, this.renderer.canvas.getBoundingClientRect().width) * 16;
-        if (moved < 1.2 || performance.now() - d.t0 < 260) this.serve();
+        if (moved < 0.6 || (moved < 1.2 && performance.now() - d.t0 < 260)) this.serve();
       };
       stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up);
       window.addEventListener('blur', () => { this.clearInput(); if (this.mode === 'playing') this.pause(); });

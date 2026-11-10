@@ -9,7 +9,7 @@ Every module below must use these exact names. If you need to deviate, say so in
 | One paddle, one ball, a wall of blocks | The paddle is Mochi carrying a bouncy mushroom cap, so it has a face and reacts |
 | The hit point on the paddle steers the ball | Max 60° from vertical; the ball never goes near-horizontal (\|vy\| ≥ 0.38·speed) |
 | Clear the wall → next level | The levels are the four seasons, each with its own layout and look |
-| Ball lost → life lost | Kid-friendly: Easy has a fairy-vine safety net (2 saves per season), you serve again with a tap, auto-serve after 3 s |
+| Ball lost → life lost | Kid-friendly: Easy has a fairy-vine safety net (8 saves per season, tuned by the playtest), you serve again with a tap, auto-serve after 3 s |
 | Power-ups fall from blocks | Only stars fall (the item); catch them for points and hearts. Keep it simple |
 | Speed creeps up | Gently: +4 % per season, +6 % per round, +1 % per 8 paddle hits (cap +15 % per life) |
 | — | Twist: Hoot the owl boss throws a soft pillow every 30 s; a hit makes Mochi sleepy (slow) for 2 s, never costs a heart |
@@ -115,7 +115,7 @@ Rules (details are the mechanics engineer's call, documented in `docs/MECHANICS.
 - Stars fall at ~2.4 u/s with a gentle sway, caught when they touch the cap or Mochi (box x ±(w/2 + 0.25), y 0…1.7).
 - Pillows: thrown from Hoot with a small sideways velocity aimed near Mochi (never perfectly), gravity ~3 u/s² to a terminal ~3.2 u/s, sway + tumble; hitting Mochi/cap → `sleepy = SLEEPY_TIME`. The ball pops a pillow it touches (+10, and the ball keeps going).
 - Hoot drifts left–right (a slow sine plus noise) in the band x 2…14 at y 8.0 ± 0.15; he's a circle of r 0.55 for ball hits (the ball bounces off him).
-- First season on Easy must be easy for a 6-year-old (wide cap 3.0 u, slow ball 6.2 u/s, vine saves).
+- First season on Easy must be easy for a 6-year-old (wide cap 3.6 u, slow ball 5.4 u/s, 8 vine saves — playtest-tuned).
 
 ### `weather.js` — `MFB.Weather` (ambient decoration in logical screen px)
 ```

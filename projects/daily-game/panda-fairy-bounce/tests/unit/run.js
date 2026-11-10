@@ -126,7 +126,7 @@ test('round 2 (loop ≥ 1) turns some buds tough; same seed → same layout', ()
 });
 
 test('difficulty table: cap width, ball speed, vine saves, pillow interval, sleepy time', () => {
-  const exp = { easy: [3.0, 6.2, 2, 35, 1.6], normal: [2.5, 7.6, 1, 30, 2.0], hard: [2.1, 9.0, 0, 25, 2.4] };
+  const exp = { easy: [3.6, 5.4, 8, 35, 1.6], normal: [2.5, 7.6, 1, 30, 2.0], hard: [2.1, 9.0, 0, 25, 2.4] };
   for (const d in exp) {
     const w = mk(d, 1), e = exp[d];
     assert.strictEqual(w.paddle.w, e[0]); assert.strictEqual(w.ball.speed, e[1]); assert.strictEqual(w.net.saves, e[2]);
@@ -362,12 +362,12 @@ test('hearts: lose one when the ball is lost (serve again), game over at 0', () 
   assert.strictEqual(w.serve(), false);
 });
 
-test('hearts: the fairy vine saves the ball twice per season on Easy (once on Normal)', () => {
-  const w = empty('easy', 1); park(w, 2);
-  for (let i = 0; i < 2; i++) {
+test('hearts: the fairy vine saves the ball DIFF.easy.netSaves (8) times per season on Easy (once on Normal)', () => {
+  const w = empty('easy', 1); park(w, 2); const N = C.DIFF.easy.netSaves;
+  for (let i = 0; i < N; i++) {
     shoot(w, 12, 2, 0, -6.2);
     const r = runUntil(w, e => e.some(x => x.type === 'net' || x.type === 'ballLost'), 2);
-    const n = of(r.ev, 'net')[0]; assert.ok(n, 'save ' + i); assert.strictEqual(n.savesLeft, 1 - i);
+    const n = of(r.ev, 'net')[0]; assert.ok(n, 'save ' + i); assert.strictEqual(n.savesLeft, N - 1 - i);
     assert.ok(w.ball.vy > 0); assert.strictEqual(w.hearts, 3);
   }
   shoot(w, 12, 2, 0, -6.2);

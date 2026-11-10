@@ -85,14 +85,14 @@
     PILLOW_SPIN: [1.5, 3.5],// rad/s — tumble (± random), with a wobble
     PILLOW_GROUND: 0.28,    // u — pillow centre at this height = it landed
     PILLOW_HIT_TOP: 1.6,    // u — Mochi + cap hit box top (box x ±w/2, y 0 … 1.6)
-    ANTI_STALL: 12,         // s — no block hit for 12 s → the next cap bounce aims halfway to the nearest block
+    ANTI_STALL: 5,          // s — no block hit for 5 s → cap bounces steer toward the nearest block (playtest: 12 s let stalls run to 28 s)
     CLEAR_T: 2.0,           // s — the 'clear' celebration
     OOPS_T: 1.0, CHEER_T: 0.8, CLEAR_CHEER_T: 2.0, // s — Mochi face timers
     FACE_MOVE_V: 1.5,       // u/s — faster than this shows the left/right frame
     PTS: { brick: 10, combo: 5, star: 50, boss: 30, tickle: 100, clear: 100, clearHeart: 20, pillow: 10 },
     COMBO_FROM: 3,          // the 3rd block before the ball comes back to the cap starts the +5 bonus
     DIFF: {
-      easy:   { paddleW: 3.0, ballSpeed: 6.2, netSaves: 2, pillowEvery: 35, sleepyTime: 1.6, budStar: 0.15 },
+      easy:   { paddleW: 3.6, ballSpeed: 5.4, netSaves: 8, pillowEvery: 35, sleepyTime: 1.6, budStar: 0.15 },   // playtest: a 5-year-old model clears spring 0 % → 73 %
       normal: { paddleW: 2.5, ballSpeed: 7.6, netSaves: 1, pillowEvery: 30, sleepyTime: 2.0, budStar: 0.10 },
       hard:   { paddleW: 2.1, ballSpeed: 9.0, netSaves: 0, pillowEvery: 25, sleepyTime: 2.4, budStar: 0.08 }
     },
@@ -584,9 +584,10 @@
     if (M.abs(xc - p.x) > reach) return;
     var off = clamp((xc - p.x) / reach, -1, 1);
     var ang = off * C.MAX_ANGLE + clamp(p.vx * C.NUDGE_K, -C.NUDGE_MAX, C.NUDGE_MAX);
-    if (this.noBrickT > C.ANTI_STALL) {
+    if (this.noBrickT > C.ANTI_STALL) {   // steer toward the nearest block: 50 % at ANTI_STALL, growing to 100 % at 2×
       var tgt = this._nearestBrickAngle(xc, line);
-      if (tgt !== null) ang = 0.5 * ang + 0.5 * tgt;
+      var kk = M.min(1, 0.5 + 0.5 * (this.noBrickT - C.ANTI_STALL) / C.ANTI_STALL);
+      if (tgt !== null) ang = (1 - kk) * ang + kk * tgt;
     }
     ang = clamp(ang, -C.MAX_ANGLE, C.MAX_ANGLE) * DEG;
     this.lifeHits++; this.stats.paddleHits++;
@@ -598,8 +599,11 @@
     this._emit({ type: 'paddle', x: xc, y: C.PADDLE_Y, off: off });
   };
 
+  /* Angle (°, from vertical) that sends the ball at the nearest block's underside. Out of reach (> MAX_ANGLE)?
+   * Bank it off the near wall (aim at the mirror image); still out of reach → a random 18–54° toward it, because a
+   * fixed angle can lock a steady player into a periodic orbit (playtest: a 175 s stall on a corner block). */
   World.prototype._nearestBrickAngle = function (x, y) {
-    var best = null, bd = 1e9;
+    var C = CONFIG, best = null, bd = 1e9;
     for (var i = 0; i < this.bricks.length; i++) {
       var k = this.bricks[i];
       if (!k.alive) continue;
@@ -607,7 +611,14 @@
       if (d < bd) { bd = d; best = k; }
     }
     if (!best) return null;
-    return M.atan2(best.x - x, best.y - y) / DEG;
+    var r = C.BALL_R, ty = best.y - best.h / 2 - r - y;
+    var a = M.atan2(best.x - x, ty) / DEG;
+    if (M.abs(a) > C.MAX_ANGLE) {
+      var mirror = a > 0 ? 2 * (C.FIELD_W - r) - best.x : 2 * r - best.x;
+      a = M.atan2(mirror - x, ty) / DEG;
+    }
+    if (M.abs(a) > C.MAX_ANGLE) a = (a > 0 ? 1 : -1) * this.rng.range(0.3, 0.9) * C.MAX_ANGLE;
+    return a;
   };
 
   World.prototype._checkLost = function (b) {

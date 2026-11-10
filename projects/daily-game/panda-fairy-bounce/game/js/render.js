@@ -69,7 +69,7 @@
       c.width = Math.round(v.VW * this.px); c.height = Math.round(v.VH * this.px);
       this._bg.clear(); this._spr.clear();
       this.portrait = v.VH > v.VW;
-      if (this.portrait) { this.unit = v.VW / 16.4; this.groundPx = Math.round(v.VH / 2 + 4.6 * this.unit); }
+      if (this.portrait) { this.unit = v.VW / 16.4; this.groundPx = Math.round(v.VH - Math.max(0.4 * this.unit, 0.14 * v.VH)); }
       else { this.unit = Math.min(v.VH / 9.1, v.VW / 16.4); this.groundPx = Math.round(v.VH - 0.4 * this.unit); }
       this.ox = (v.VW - 16 * this.unit) / 2;
       this.k = this.unit / 60;   // the art was drawn for 60 px per unit
@@ -163,14 +163,14 @@
         for (let x = x0; x < W; x += w) g.drawImage(img, x, top, w + 1 / P, h);
       };
       if (custom) {
-        cover(custom, custom.width, custom.height, gy + 10 * k);
-        g.fillStyle = 'rgba(250,245,255,0.38)'; g.fillRect(0, 0, W, gy);   // a pale veil keeps a busy photo behind the play
+        g.filter = 'blur(2px) saturate(.8)'; cover(custom, custom.width, custom.height, gy + 10 * k); g.filter = 'none';
+        g.fillStyle = 'rgba(250,245,255,0.55)'; g.fillRect(0, 0, W, gy);   // a pale veil keeps a busy photo behind the play
         g.fillStyle = pal.ground; g.fillRect(0, gy, W, H - gy);
         g.fillStyle = 'rgba(255,255,255,0.35)'; g.fillRect(0, gy, W, 3 * k);
       } else {
         if (A.img[n + '_sky']) cover(A.img[n + '_sky'], 960, 540, Math.max(gy + 24 * k, H * 0.9));
         tile(A.img[n + '_far'], 960, 300, gy - 56 * k - 300 * k);
-        g.fillStyle = pal.ground; g.fillRect(0, gy + 40 * k, W, H);
+        { const gg = g.createLinearGradient(0, gy + 40 * k, 0, H); gg.addColorStop(0, pal.ground); gg.addColorStop(1, b === 3 ? '#9fb2d8' : '#4e3a30'); g.fillStyle = gg; g.fillRect(0, gy + 40 * k, W, H); }
         tile(A.img[n + '_near'], 960, 200, gy - 150 * k);
       }
       bg = { c, b };
@@ -204,10 +204,10 @@
             this.starPulse = 1; this.popup(this.sx(e.x), this.sy(e.y + 0.6), '+' + e.pts, '#ffe36a', 1.15);
             this.sparkle(this.sx(e.x), this.sy(e.y), 9, '#ffe36a'); break;
           case 'bossHit':
-            this.popup(this.sx(e.x), this.sy(e.y - 0.7), e.pts ? '+' + e.pts : 'Hoo!', '#ffffff', 1);
+            this.popup(this.sx(e.x), this.sy(e.y - 1.3), e.pts ? '+' + e.pts : 'Hoo!', '#ffffff', 1);
             this.feathers(this.sx(e.x), this.sy(e.y), 4); break;
           case 'bossTickled':
-            this.popup(this.sx(e.x), this.sy(e.y - 1.1), 'Tickled! +' + e.pts, '#ffcf3f', 1.4);
+            this.popup(this.sx(e.x), this.sy(e.y - 1.9), 'Tickled! +' + e.pts, '#ffcf3f', 1.4);
             this.feathers(this.sx(e.x), this.sy(e.y), 12); this.flash = 0.35; this.flashCol = '#fff6d8'; break;
           case 'pillowHit':
             this.feathers(this.sx(e.x), this.sy(1.4), 10); this.shake = Math.max(this.shake, 0.25);
@@ -225,7 +225,16 @@
         }
       }
     }
-    popup(x, y, s, col, sc) { if (this.texts.length > 30) this.texts.shift(); this.texts.push({ x, y, s, col, sc: sc || 1, t: 0, life: 1.1 }); }
+    popup(x, y, s, col, sc) {
+      if (this.texts.length > 30) this.texts.shift();
+      // never pile up: a new popup near a recent one goes below it
+      const u = this.unit;
+      for (let n = 0; n < 4; n++) {
+        const hit = this.texts.some(t => t.t < 0.5 && Math.abs(t.x - x) < 1.8 * u && Math.abs(t.y - y) < 0.45 * u);
+        if (!hit) break; y += 0.5 * u;
+      }
+      this.texts.push({ x, y, s, col, sc: sc || 1, t: 0, life: 1.1 });
+    }
     sparkle(x, y, n, col) {
       const u = this.unit;
       for (let i = 0; i < n; i++) { const a = Math.random() * TAU, v = (1.5 + Math.random() * 2.5) * u; this.flyers.push({ key: 'p_sparkle', x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - u, g: 3 * u, drag: 2.5, rot: 0, spin: 3, size: (0.22 + Math.random() * 0.2) * u, life: 0.7, t: 0 }); }
@@ -246,7 +255,7 @@
       this.starPulse = Math.max(0, this.starPulse - dt * 3);
       this.heartPulse = this.heartPulse > 0 ? Math.max(0, this.heartPulse - dt * 2) : Math.min(0, this.heartPulse + dt * 2);
       this.brickIn += dt;
-      if (this.banner) { this.banner.t += dt; if (this.banner.t > 2.6) this.banner = null; }
+      if (this.banner) { this.banner.t += dt; if (this.world && this.world.phase === 'play' && this.banner.t < 2.1) this.banner.t = 2.1; if (this.banner.t > 2.6) this.banner = null; }
       for (const f of this.flyers) {
         f.t += dt; f.vy += (f.g || 0) * dt;
         if (f.drag) { const d = Math.exp(-f.drag * dt); f.vx *= d; f.vy *= d; }
@@ -299,7 +308,14 @@
       g.setTransform(P, 0, 0, P, 0, 0);
       if (w) this.drawTexts(g);
       if (this.flash > 0) { g.save(); g.globalAlpha = Math.min(0.6, this.flash); g.fillStyle = this.flashCol; g.fillRect(0, 0, this.VW, this.VH); g.restore(); }
-      if (w && mode !== 'title') { this.drawHud(g, w); this.drawHints(g, w, mode); }
+      if (w && mode !== 'title') {
+        this.drawHud(g, w);
+        // Hoot flies in front of the score pill (it shares his strip), and the pause / sound buttons fade when he's under them
+        if (w.boss && this._hudW && this.sx(w.boss.x) - 0.8 * this.unit < this._hudW) { g.setTransform(P, 0, 0, P, shx * P, shy * P); this.drawBoss(g, w, w.alpha || 0); g.setTransform(P, 0, 0, P, 0, 0); }
+        this.drawHints(g, w, mode);
+      }
+      const ghost = !!(w && w.boss && mode === 'playing' && this.sx(w.boss.x) + 0.8 * this.unit > this.VW - 120 - this.ins.right);
+      if (ghost !== this._ghost) { this._ghost = ghost; const h = document.getElementById('hud'); if (h) h.classList.toggle('ghost', ghost); }
       if (this.banner && mode !== 'title') this.drawBanner(g);
     }
 
@@ -474,6 +490,7 @@
       const sc = String(w.score), tw = g.measureText(sc).width;
       const heartsW = w.maxHearts * 22 * s, starW = 80 * s;
       const W = 18 * s + tw + 14 * s + heartsW + starW;
+      this._hudW = x0 + W;
       g.globalAlpha = 0.86; this.pill(g, x0, y0, W, h, pal.bar); g.globalAlpha = 1;
       g.fillStyle = '#3a2a4a'; g.fillText(sc, x0 + 14 * s, y0 + h / 2 + 1);
       let hx = x0 + 14 * s + tw + 14 * s;
@@ -496,7 +513,7 @@
     drawHints(g, w, mode) {
       if (mode !== 'playing') return;
       const u = this.unit, touch = !!(MFB.Game && MFB.Game.isTouch);
-      if (w.phase === 'serve' && w.ball) {
+      if (w.phase === 'serve' && w.ball && !this.banner) {
         const x = this.sx(w.paddle.x), y = this.sy(w.paddle.y + 1.25);
         const msg = touch ? 'Tap to serve!' : 'Click or Space to serve!';
         g.save(); g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
@@ -507,7 +524,8 @@
         if (this.hint) {
           const m2 = touch ? '← slide to move Mochi →' : '← move the mouse or use the arrow keys →';
           g.font = '800 ' + (size * 0.75).toFixed(1) + 'px ' + FONT; g.lineWidth = size * 0.18;
-          g.strokeText(m2, this.VW / 2, this.sy(2.9)); g.fillStyle = '#fff6c8'; g.fillText(m2, this.VW / 2, this.sy(2.9));
+          const hx = clamp(x, 4.2 * u, this.VW - 4.2 * u), hy = y + bob - size * 1.15;
+          g.strokeText(m2, hx, hy); g.fillStyle = '#fff6c8'; g.fillText(m2, hx, hy);
         }
         g.restore();
       }
@@ -527,11 +545,12 @@
       const al = t < 0.3 ? t / 0.3 : t > 2.1 ? Math.max(0, (2.6 - t) / 0.5) : 1;
       const y = this.sy(3.0);
       const name = z.name + (b.loop > 0 ? ' · round ' + (b.loop + 1) : '');
+      const hint = b.s % 4 === 0 && !(MFB.Game && MFB.Game.isTouch) ? 'Move the mouse · click to serve!' : z.hint;
       this.bigText(g, name, this.VW / 2, y, 0.75 * u * (this.portrait ? 1.1 : 1), '#ffffff', al);
       g.save(); g.globalAlpha = al * 0.95; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
       const s2 = 0.34 * u * (this.portrait ? 1.15 : 1);
       g.font = '800 ' + s2.toFixed(1) + 'px ' + FONT; g.lineWidth = s2 * 0.22; g.strokeStyle = 'rgba(58,42,74,0.85)';
-      g.strokeText(z.hint, this.VW / 2, y + 0.7 * u); g.fillStyle = '#fff6c8'; g.fillText(z.hint, this.VW / 2, y + 0.7 * u);
+      g.strokeText(hint, this.VW / 2, y + 0.7 * u); g.fillStyle = '#fff6c8'; g.fillText(hint, this.VW / 2, y + 0.7 * u);
       g.restore();
     }
     drawDebug(g, w) {
