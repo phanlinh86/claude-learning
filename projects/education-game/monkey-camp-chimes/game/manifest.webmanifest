@@ -1,0 +1,29 @@
+{
+  "name": "Kiki's Camp Chimes · Chuông Gió Lửa Trại Của Khỉ Kiki",
+  "short_name": "Camp Chimes",
+  "description": "Music learning game with Kiki the little monkey: tap the wind chime Kiki asks for — it swings, rings and lights a lantern. Colours, shapes, counting, animals, letters. English & Vietnamese.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#F7D9C4",
+  "theme_color": "#F7D9C4",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
