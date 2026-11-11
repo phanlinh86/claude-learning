@@ -1,0 +1,26 @@
+{
+  "riverbank": {
+    "sky": "#bfe6ee",
+    "ground": "#9fc27a",
+    "accent": "#5f9a54",
+    "banner": "#2f5d3a"
+  },
+  "bamboo": {
+    "sky": "#eef1c6",
+    "ground": "#b7b680",
+    "accent": "#7f9a3c",
+    "banner": "#4a5a1e"
+  },
+  "canopy": {
+    "sky": "#a9dcf0",
+    "ground": "#9cb67c",
+    "accent": "#4f8f5a",
+    "banner": "#24513c"
+  },
+  "ruins": {
+    "sky": "#6a557f",
+    "ground": "#8f9582",
+    "accent": "#e9a46f",
+    "banner": "#3a2f4e"
+  }
+}
