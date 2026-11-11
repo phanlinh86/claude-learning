@@ -174,3 +174,38 @@ finger gets the wrong block and can loop (P1-2) — the one gesture that is new 
 finger in a trail and the crack sound grows as you rub, so rubbing is a delight rather than a fast tap; 3) count the fish aloud
 as they leap (counting with the reward, not before it); 4) let the 3rd round's surprise be announced in the prompt (P1-1 f) so
 a slide surprise is understood; 5) P2-2 so the counted fish are always seen.
+
+## 4. Re-test against the real code (commit 6a84a07: voice v3 a–g, rubPathK / rubRevealOnUp, idle reset, roundDoneFishMax)
+No sim patches this time: `pt_tuk_kids.js --name retest` (3 160 sessions, all models × ages 3–7) and `--name retest_typ`
+(3 600: typical / toddler / careful4 × 240 per age); the voice *model* uses the v3 options (= the new main.js policy); the
+real page was re-checked with `pt_tuk_voice_browser.js AB` (the event hook now also wraps `evs.forEach`, which main.js uses now).
+
+| check | before | after (real code) |
+|---|---|---|
+| real page, fake TTS: lines started / min (4 en · 4 vi · 3 vi · 7 en) | 43.0 · 43.5 · 41.1 · 46.4 | **28.8 · 26.9 · 25.1 · 29.9** |
+| real page: 1st name heard fully | 19 · 12 · 3 · 33 % | **80 · 68 · 72 · 73 %** (bot 0.8 is faster than a child; model typical 4: 98 %) |
+| real page: count lines heard (4 en · 7 en) | 0 · 9 % | **100 · 80 %** |
+| real page: match line heard | 38 · 40 · 44 · 25 % | 60 · 53 · 53 · 38 % |
+| real page: 2nd-name requests / prompts cut | 39–66 per session / 0 | **0 / 0** |
+| real page speed 8: requests per game minute (all ages, en + vi) | 41–47 | **28–34**; vi "Túc" 4/4; child's name in 4–11 praise lines; surprise now in the prompt; 0 errors, 8/8 sessions done |
+| model typical 3 / 4 / 7: lines / min · Tuk talking | 32.0 / 35.4 / 43.4 · 83–90 % | 22.4 / 24.5 / 26.5 · 75–83 % |
+| prompts cut (model, typical, 240 / age) | 0–5 | 11–48 per 240 sessions (age 7 most; ≤ 0.2 per session) |
+| idle false auto-pauses (dreamy, 240 sessions) | 240 | **0**; absent child still pauses at ≈ 117 s into play, 40/40 |
+| rubT unfinished / aimed block revealed | 16 of 96 (rub_base) / 21 % | **0 of 240 / 100 %**; rubT chapters 83–93 s at every age; rubR reveals 0 / 1 / 2 = 0 / 90 / 10 % |
+| fish that never jumped before Talk (ages 5–7) | 21–132 per 32 sessions | **0** everywhere; 0–20 per 80 sessions still have the *last* fish in the air when Talk opens (P3) |
+| NaN / errors / stuck / order errors | 0 | 0 |
+
+Durations (s, mean / p90 / max, 240 sessions per cell):
+| model | 3 | 4 | 5 | 6 | 7 |
+|---|---|---|---|---|---|
+| typical | 393 / 418 / 449 | 374 / 395 / 427 | 390 / 415 / 449 | 398 / 424 / **446** | 380 / 400 / 448 |
+| toddler (chapter 92 / 95 at 3 / 4 ✓) | 378 / 407 / 435 | 388 / 413 / 451 | 403 / 438 / 504 | 418 / 456 / 522 | 449 / 496 / 566 |
+| careful4 | 415 / 444 / 482 | 402 / 434 / 477 | 444 / 479 / 548 | 487 / 528 / 585 | 542 / 595 / 667 |
+Typical age 6: max 446 s in 240 sessions (the 486 s sample is a rare tail; one 48-session run had a 510 s typical-5 outlier).
+The 8-min target is met by every age-appropriate model (typical 3–7, toddler 3–4, careful4 3–4). Over target only for slow
+child models playing older content (toddler / careful4 profiles at 6–7, slow3) — **no CONFIG change proposed**. If the parent
+wants a hard cap anyway, the lever is `chapterTimeLimit: 75 → 65` (cuts the 4th round more often; not re-simulated as needed).
+
+**Verdict: no P1/P2 left.** P3: Tuk still talks 75–88 % of the time for fast players (one name + one match line per pair is
+the floor); 1st name heard 70 % for a typical 7-year-old (fast next tap); the last fish can still be mid-air when Talk opens
+(`_fishLeft() + 0.2` → `+ 0.6` would cover it); counting the fish aloud on `leap` is still open.

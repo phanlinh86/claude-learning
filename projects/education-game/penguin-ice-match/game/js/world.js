@@ -94,6 +94,7 @@
     gapFrac: 0.12, gapMin: 14, // gap = max(14, 0.12·cw)
     cardMin: { 3: 120, 4: 120, 5: 104, 6: 104, 7: 104 },   // smallest allowed block width per age
     cardMax: 210,
+    portraitPreferA: 0.7,      // portrait: board A wins while its block ≥ 0.7 × board B's (and ≥ the age minimum)
     hitPad: 10,                // hit test = block rect grown by min(10, gap/2 − 3) px (zones never overlap); nearest wins (unmatched first)
     rubPathK: 1.6,             // a swipe reveals a frosted block only after ≥ 1.6 × its long side of finger path inside it (a rub) …
     rubRevealOnUp: true,       // … or when the stroke ENDS on it (drag-to); crossing a block on the way does nothing
@@ -140,6 +141,10 @@
     skyStep: 44,               // sky candidate grid (denser than the shore: stars spread out)
     perchSep: 0.9,             // QA visual P2-8: reward centres ≥ 0.9 × the mean of the two sizes apart …
     crowdShrink: 0.8,          // … when no spot allows that, the reward shrinks to 0.8× and tries again
+    groundPerchDyPort: [-56, -88, -120],   // portrait: extra shore rows in the band under board A (beside Tuk, never on him)
+    crowdFrom: 10,             // more than 10 resting rewards → new ones start at crowdShrink size (homes in portrait: > 3)
+    crowdShrink2: 0.65,        // last try before the least-overlapping fallback …
+    crowdShrink3: 0.55,        // … (crowded chapters only)
     groundPerchDy: [72, 40, 8, -24],   // shore rows: bottom anchor at groundY + 72 (front), + 40, + 8, − 24 (back rows; render by y)
     seaCount: 2,               // the 2 rightmost front-row shore perches are 'sea' (the water's edge: whale / seal / walrus)
     sizes: { fish: 40, sculpture: 58, animal: 70, star: 52, piece: 34, badge: 72 },
@@ -236,8 +241,9 @@
     return Math.max(0, cw);
   }
   function chooseGrid(L, n, age, cfg) {
-    var best = null;
+    var best = null, bestA = null;
     for (var bi = 0; bi < L.boards.length; bi++) {
+      if (bi === 1 && best) bestA = best;
       var b = L.boards[bi];
       for (var cols = 1; cols <= n; cols++) {
         var rows = Math.ceil(n / cols);
@@ -253,6 +259,9 @@
         if (better) best = { sc: sc, raw: raw, cols: cols, rows: rows, bi: bi };
       }
     }
+    // portrait: board A (above Tuk) leaves the snow band beside Tuk free for the rewards (QA visual P2) → keep A while its
+    // blocks are ≥ the age minimum and ≥ portraitPreferA × board B's
+    if (bestA && best.bi === 1 && bestA.sc >= Math.max(cfg.cardMin[age] || cfg.cardMin[5], cfg.portraitPreferA * best.sc) - 1e-9) best = bestA;
     var B = L.boards[best.bi], cw = best.sc, ch = cw / cfg.cardAspect, gap = Math.max(cfg.gapMin, cfg.gapFrac * cw);
     var gw = best.cols * cw + (best.cols - 1) * gap, gh = best.rows * ch + (best.rows - 1) * gap;
     var x0 = B.x + (B.w - gw) / 2, y0 = B.y + (B.h - gh) / 2, slots = [];
@@ -311,7 +320,7 @@
   function perchCandidates(L, cfg) {
     var out = [], ins = L.ins, st = cfg.perchStep, x, y, i, j;
     var jr = new IM.RNG((Math.imul(L.W | 0, 7919) ^ Math.imul(L.H | 0, 104729) ^ 0x51ed) >>> 0), JX = cfg.perchJitter[0], JY = cfg.perchJitter[1];
-    var gdy = [].concat(cfg.groundPerchDy);
+    var gdy = [].concat(cfg.groundPerchDy, L.portrait ? (cfg.groundPerchDyPort || []) : []);
     for (j = 0; j < gdy.length; j++) {
       var gx = [];
       for (x = ins.left + 44 + (j % 2) * st / 2; x <= L.W - ins.right - 44 + 1e-6; x += st) gx.push(x);
@@ -625,7 +634,7 @@
     this._setState('roundDone'); this.phase = 'done';
     this._rdTime = this.cfg.roundDoneTime;
     var nr = this.round + 1, toTalk = nr >= this.roundsPerLevel || (nr >= this.cfg.chapterMinRounds && this.time + this.cfg.roundDoneTime - this.levelStartTime > this.cfg.chapterTimeLimit);
-    if (toTalk) this._rdTime = Math.min(this.cfg.roundDoneTime + this.cfg.roundDoneFishMax, Math.max(this.cfg.roundDoneTime, this._fishLeft() + 0.2));
+    if (toTalk) this._rdTime = Math.min(this.cfg.roundDoneTime + this.cfg.roundDoneFishMax, Math.max(this.cfg.roundDoneTime, this._fishLeft() + 0.6));
     this._mood('cheer');
     this.tuk._slT = 0;   // belly slide
     this._emit({ type: 'roundDone', round: this.round, stars: st, mismatches: m });
@@ -947,7 +956,10 @@
     var L = this.layout, cfg = this.cfg, pref = prefFor(r), others = [], i, j;
     for (i = 0; i < this.rewards.length; i++) { var o = this.rewards[i]; if (o !== r && o.target && o.target.box) others.push(o.target); }
     function ctr(B) { return { x: B.x + B.w / 2, y: B.y + B.h / 2 }; }
-    var best = null, bestScore = 1e18, free = [], scales = [1, cfg.crowdShrink || 1];
+    // crowded (> crowdFrom resting rewards, or a home pair — its box is 2 rewards wide — on a portrait shore): start smaller
+    var crowded = others.length >= (cfg.crowdFrom || 1e9) || (L.portrait && r.home && others.length >= 3);
+    var k1 = cfg.crowdShrink || 1, k2 = cfg.crowdShrink2 || k1;
+    var best = null, bestScore = 1e18, free = [], scales = crowded ? [k1, k2, cfg.crowdShrink3 || k2] : [1, k1, k2];
     for (var si = 0; si < scales.length && !free.length; si++) {
       for (j = 0; j < pref.length; j++) {
         free = [];
@@ -967,7 +979,7 @@
           pl.kind = p.kind;
           if (ov === 0 && sepOk) { pl._gap = gap; free.push(pl); }
           var score = ov * 10 + j + (sepOk ? 0 : 5) + si * 2;
-          if (si === 0 && score < bestScore) { bestScore = score; best = pl; }
+          if (si === (crowded ? 2 : 2) && score < bestScore) { bestScore = score; best = pl; }
         }
         if (free.length) break;
       }

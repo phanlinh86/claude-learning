@@ -39,7 +39,7 @@ const FAKE_TTS = `(() => {
 // tag every say() with the event main.js is handling + its fate (the promise result)
 const HOOK = `(() => {
   const w = IM.debug.world, orig = w.drainEvents.bind(w);
-  w.drainEvents = function () { const a = orig(); a[Symbol.iterator] = function* () { for (let i = 0; i < a.length; i++) { window.__ev = a[i]; yield a[i]; } window.__ev = null; }; return a; };
+  w.drainEvents = function () { const a = orig(); a[Symbol.iterator] = function* () { for (let i = 0; i < a.length; i++) { window.__ev = a[i]; yield a[i]; } window.__ev = null; }; a.forEach = function (fn, th) { for (let i = 0; i < a.length; i++) { window.__ev = a[i]; fn.call(th, a[i], i, a); } window.__ev = null; }; return a; };
   const rec = window.__say = []; const os = IM.Voice.say.bind(IM.Voice);
   IM.Voice.say = function (text, opts) {
     const e = window.__ev, r = { t: performance.now(), gt: w.time, text: String(text), ev: e ? e.type : (IM.debug.mode || '?'), open: e && e.open, dots: !!(e && e.face && e.face.kind === 'dots'),

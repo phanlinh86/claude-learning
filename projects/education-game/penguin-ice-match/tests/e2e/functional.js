@@ -96,11 +96,12 @@ async function installEv(page) {
     const pm = w.pointerMove;
     w.pointerMove = function (x, y) { window.__moves++; const r = pm.call(this, x, y); (window.__pmT = window.__pmT || []).push([x | 0, y | 0, r, this.finger.down, this.open.length, this.phase, this.state]); if (window.__pmT.length > 80) window.__pmT.shift(); return r; };
     // every reveal/tap name line the game asks for, and a copy of every voice line (+ what TTS would really say)
-    window.__flipLines = []; window.__said = [];
+    window.__flipLines = []; window.__said = []; window.__pairLines = [];
     if (!IM.I18N.__hooked) {
       IM.I18N.__hooked = true;
       const sf = IM.I18N.sayFlip;
       IM.I18N.sayFlip = function (lang, ev) { const l = sf.apply(this, arguments); window.__flipLines.push({ id: ev && ev.id, type: ev && ev.type, via: ev && ev.via, lang, line: l }); return l; };
+      ['sayMatch', 'sayMismatch'].forEach(fn => { const o = IM.I18N[fn]; if (o) IM.I18N[fn] = function (lang, ev) { const l = o.apply(this, arguments); (window.__pairLines = window.__pairLines || []).push({ fn, a: ev && ev.a, b: ev && ev.b, line: l }); return l; }; });
     }
     if (IM.Voice && !IM.Voice.__hooked) {
       IM.Voice.__hooked = true;
@@ -527,131 +528,141 @@ async function gFlip() {
 
 /* REAL touch swipes (CDP touchStart / touchMove / touchEnd) — the rub gesture. */
 async function gRub() {
+  // Rub rules (QA fix 6a84a07): a swipe reveals the block it STARTS on (down) and the block it ENDS on (up); a block it only
+  // crosses stays frosted; ≥ rubPathK (1.6) × the long side of finger path inside a block reveals it mid-stroke; a pair
+  // check ends the stroke (no chaining); a rub into a 3rd block during a shown mismatch resets like a tap.
+  const flips = page => evOf(page, 'flip');
+  const fid = fl => fl.map(e => e.id + ':' + e.via);
+  const settle = async c => {   // close anything left open (tap partners), then wait for play
+    await c.page.waitForFunction(() => IM.debug.world.phase === 'play' || IM.debug.world.state !== 'round', null, { timeout: 5000 }).catch(() => {});
+    await sleep(100);
+    for (let k = 0; k < 2; k++) {
+      const st = await wstate(c.page);
+      if (st.open.length !== 1) break;
+      const all = await cards(c.page), o = all.find(x => x.id === st.open[0]), pp = o && all.find(x => x.key === o.key && x.id !== o.id && x.state !== 'gone');
+      if (pp) { await tapCard(c, pp.id); await sleep(400); }
+    }
+    return waitPlay(c.page, 10000).then(() => true, () => false);
+  };
   for (const d of ALL) {
     const c = await open(d, 'mute=1&seed=31&age=6');
     await startGame(c, 1); await waitPlay(c.page);   // age 6 round 1: 3 pairs → a line of ≥ 3 blocks
     const tag = `rub/${d.name}`;
-    let rows = await rowsDown(c.page);
-    let row;
-    // a line (row, or column in portrait) of 3 frosted blocks whose first two do NOT match (so the swipe must stop at 2)
     const lines = await linesDown(c.page);
-    let A, B, C, L3 = null;
-    for (const ln of lines) for (let i = 0; i + 2 < ln.length && !L3; i++) if (ln[i].key !== ln[i + 1].key) L3 = ln.slice(i, i + 3);
-    check(`${tag}: a line of ≥ 3 frosted blocks (first two different) for the swipe`, !!L3, lines.map(r => r.length));
-    if (!L3) { await c.close(); continue; }
-    [A, B, C] = L3;
+    let L3 = null;
+    for (const ln of lines) for (let i = 0; i + 2 < ln.length && !L3; i++) if (ln[i].key !== ln[i + 2].key) L3 = ln.slice(i, i + 3);
+    if (!L3) L3 = (lines.find(l => l.length >= 3) || []).slice(0, 3);
+    check(`${tag}: a line of ≥ 3 frosted blocks for the swipe`, L3.length === 3, lines.map(r => r.length));
+    if (L3.length < 3) { await c.close(); continue; }
+    const [A, B, C] = L3;
+    // (1) start ON A, cross B, end ON C → A (tap) + C (rub, stroke end); the crossed B stays frosted
     await clearEv(c.page);
     const m0 = await c.page.evaluate(() => window.__moves);
-    const ex = C.sx + (C.sx - B.sx) * 0.25, ey = C.sy + (C.sy - B.sy) * 0.25;
-    const ts = Date.now();
-    await swipe(c, [{ x: A.sx, y: A.sy }, { x: ex, y: ey }], { step: 40, dt: 0 });
-    const swMs = Date.now() - ts;
+    await swipe(c, [{ x: A.sx, y: A.sy }, { x: C.sx, y: C.sy }], { step: 30, dt: 0 });
     await sleep(80);
-    let fl = await evOf(c.page, 'flip');
-    const nMoves = (await c.page.evaluate(() => window.__moves)) - m0;
-    check(`${tag}: swipe delivers pointer moves to the world`, nMoves >= 5, nMoves);
-    check(`${tag}: swipe from A across B and C reveals exactly A (tap) and B (rub)`, fl.length === 2 && fl[0].id === A.id && fl[0].via === 'tap' && fl[1].id === B.id && fl[1].via === 'rub',
-      fl.map(e => e.id + ':' + e.via));
-    let cs = await cards(c.page);
-    check(`${tag}: C is never revealed (2 blocks up max; swipe took ${swMs} ms)`, cs.find(x => x.id === C.id).state === 'down', cs.find(x => x.id === C.id).state);
-    const L1 = await c.page.evaluate(() => window.__flipLines.filter(f => f.type === 'flip').map(f => f.id + ':' + f.line));
-    check(`${tag}: both revealed blocks are named (rub-revealed too)`, [A.id, B.id].every(id => L1.some(l => l.startsWith(id + ':') && l.length > (id + ':').length + 1)), L1);
+    let fl = await flips(c.page);
+    check(`${tag}: swipe delivers pointer moves to the world`, (await c.page.evaluate(() => window.__moves)) - m0 >= 5);
+    check(`${tag}: swipe A → (across B) → C reveals A (down) and C (stroke ends on it)`, fl.length === 2 && fl[0].id === A.id && fl[0].via === 'tap' && fl[1].id === C.id && fl[1].via === 'rub', fid(fl));
+    check(`${tag}: the crossed block B is never revealed`, (await cards(c.page)).find(x => x.id === B.id).state === 'down');
+    const nm = await c.page.evaluate(() => window.__flipLines.filter(f => f.type === 'flip').map(f => f.id));
+    check(`${tag}: the 1st block of the pair is named, the 2nd is left to the match/mismatch line`, nm.includes(A.id) && !nm.includes(C.id), nm);
     await c.page.waitForFunction(() => window.__ev.some(e => e.type === 'match' || e.type === 'mismatch'), null, { timeout: 3000 }).catch(() => {});
     const res = await c.page.evaluate(() => window.__ev.filter(e => e.type === 'match' || e.type === 'mismatch').map(e => e.type));
-    check(`${tag}: the swiped pair resolves once (mismatch)`, res.length === 1 && res[0] === 'mismatch', res);
-    // (2) while the mismatch / match shows, a new swipe over a frosted block does nothing
-    const D0 = (await cards(c.page)).find(x => x.state === 'down');
-    if (D0 && (await wstate(c.page)).phase === 'resolve') {
+    check(`${tag}: the pair resolves once`, res.length === 1, res);
+    // (2) a mismatch shows: a rub that ENDS on a 3rd block after ≥ 0.5 s resets like a tap (A, C frost over, the new one opens)
+    if (res[0] === 'mismatch') {
+      await sleep(600);
+      const E = (await cards(c.page)).find(x => x.state === 'down' && x.id !== B.id) || (await cards(c.page)).find(x => x.state === 'down');
       await clearEv(c.page);
-      await swipe(c, [{ x: D0.sx - D0.sw * 0.7, y: D0.sy }, { x: D0.sx + D0.sw * 0.7, y: D0.sy }], { step: 40, dt: 0 });
-      const rf = await evOf(c.page, 'flip');
-      check(`${tag}: a rub while the mismatch shows reveals nothing (reveals only after the frost is back)`, rf.filter(e => e.phase === 'resolve' || e.open > 2).length === 0, rf.map(e => e.id + '@' + e.phase));
+      const gm = await c.page.evaluate(() => IM.debug.world.layout.grid.gap * IM.debug.view().s / 2);
+      const s0 = { x: E.sx - E.sw / 2 - gm, y: E.sy };   // starts on the ice in the gap left of E (no block under the finger)
+      const dE = await downs(c.page);
+      await swipe(c, [s0, { x: E.sx, y: E.sy }], { step: 30, dt: 0 });
+      check(`${tag}: (the stroke started on the ice)`, (await c.page.evaluate(() => window.__ev.filter(e => e.type === 'flip' && e.via === 'tap').length)) === 0, await flips(c.page));
+      await sleep(60);
+      fl = await flips(c.page);
+      const st = await wstate(c.page), cs = await cards(c.page), S = id => cs.find(x => x.id === id).state;
+      check(`${tag}: during a shown mismatch a rub stroke ending on a 3rd block resets A, C and opens it`, fl.length === 1 && fl[0].id === E.id && S(A.id) === 'down' && S(C.id) === 'down' && st.open.join() === E.id, { fl: fid(fl), open: st.open, a: S(A.id), c: S(C.id) });
+      // rub-only variant: start on the ice, end on F while a fresh mismatch shows
     }
-    // leave a clean board for the next swipe: a block left open → tap its partner
-    await c.page.waitForFunction(() => IM.debug.world.phase === 'play', null, { timeout: 5000 }).catch(() => {});
-    await sleep(100);
-    {
-      const st = await wstate(c.page);
-      if (st.open.length === 1) { const o = (await cards(c.page)).find(x => x.id === st.open[0]), pp = (await cards(c.page)).find(x => x.key === o.key && x.id !== o.id); if (pp) await tapCard(c, pp.id); }
-    }
-    await waitPlay(c.page, 8000).catch(() => {});
-    // (3) start on the ice (not on a block), swipe into D, back and forth over D 3×, then into E → D once, E once
-    rows = await rowsDown(c.page); row = rows.find(r => r.length >= 2) || null;
-    if (row) {
-      const [D, E] = row;
-      await c.page.evaluate(() => window.__flipLines = []);
-      const s0 = { x: D.sx - D.sw / 2 - Math.max(12, (await c.page.evaluate(() => IM.debug.view().s)) * 14), y: D.sy };
+    let ok = await settle(c);
+    // (3) a LONG rub back and forth inside D (starting on the ice) reveals D mid-stroke; the stroke then ends on the ice
+    let D = ok && (await linesDown(c.page)).map(l => l[0]).find(Boolean);
+    if (D) {
+      const sc = await c.page.evaluate(() => IM.debug.view().s);
+      const s0 = { x: D.sx - D.sw / 2 - (await c.page.evaluate(() => IM.debug.world.layout.grid.gap)) * sc / 2, y: D.sy };
       await clearEv(c.page);
       const d0 = await downs(c.page);
-      await touch(c.cdp, 'touchStart', [s0]); await sleep(30);
-      const path = [s0, { x: D.sx, y: D.sy }, { x: s0.x, y: D.sy }, { x: D.sx, y: D.sy }, { x: s0.x, y: D.sy }, { x: D.sx, y: D.sy }, { x: E.sx, y: E.sy }];
-      for (let i = 1; i < path.length; i++) {
-        const a = path[i - 1], b = path[i], n = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 30));
-        for (let k = 1; k <= n; k++) await touch(c.cdp, 'touchMove', [{ x: a.x + (b.x - a.x) * k / n, y: a.y + (b.y - a.y) * k / n }]);
+      await touch(c.cdp, 'touchStart', [s0]);
+      const pts = [{ x: D.sx - D.sw * 0.4, y: D.sy }];
+      for (let k = 0; k < 6; k++) pts.push({ x: D.sx + (k % 2 ? -0.4 : 0.4) * D.sw, y: D.sy + (k % 2 ? 6 : -6) });
+      let at = s0, revealedAfter = null;
+      for (const p of pts) {
+        const n = Math.max(1, Math.ceil(Math.hypot(p.x - at.x, p.y - at.y) / 20));
+        for (let k = 1; k <= n; k++) await touch(c.cdp, 'touchMove', [{ x: at.x + (p.x - at.x) * k / n, y: at.y + (p.y - at.y) * k / n }]);
+        at = p;
+        if (revealedAfter == null && (await flips(c.page)).length) revealedAfter = pts.indexOf(p);
       }
-      await touch(c.cdp, 'touchEnd', []); await sleep(80);
-      fl = await evOf(c.page, 'flip');
-      const startHit = (await downs(c.page)) - d0;
-      check(`${tag}: swipe from the ice: D and E each revealed exactly once by rub (D crossed 3×)`, fl.length === 2 && fl[0].id === D.id && fl[1].id === E.id && fl.every(e => e.via === 'rub') && startHit === 1,
-        { flips: fl.map(e => e.id + ':' + e.via), D: D.id, E: E.id, startHit });
-      const taps = await evOf(c.page, 'tap');
-      check(`${tag}: rubbing over an UP block does not repeat its name (no tap events)`, taps.length === 0, taps.length);
-      await c.page.waitForFunction(() => window.__ev.some(e => e.type === 'match' || e.type === 'mismatch'), null, { timeout: 3000 }).catch(() => {});
-      await waitPlay(c.page, 8000).catch(() => {});
-    } else check(`${tag}: a row of ≥ 2 frosted blocks for swipe (3)`, false, rows.map(r => r.length));
-    // (4) a FAST flick: only 2 CDP moves over a whole row (big jumps) still reveals the first two blocks on the path
-    rows = await rowsDown(c.page); row = rows.find(r => r.length >= 2);
-    if (row) {
-      const [F, G] = row, Z = row[row.length - 1];
-      await clearEv(c.page); await c.page.evaluate(() => window.__pmT = []);
-      const fp = [{ x: F.sx, y: F.sy }, { x: (F.sx + Z.sx) / 2 + 1, y: (F.sy + Z.sy) / 2 }, { x: Z.sx + Z.sw * 0.3, y: Z.sy }];
-      await swipe(c, fp, { step: 0, dt: 16 });
-      await sleep(60);
-      fl = await evOf(c.page, 'flip');
-      check(`${tag}: fast flick (2 big moves) reveals F (tap) + G (rub) — the input fills the jump`, fl.length === 2 && fl[0].id === F.id && fl[1].id === G.id, { fl: fl.map(e => e.id + ':' + e.via + '@' + e.phase), F: F.id, G: G.id, row: row.map(k => k.id + ':' + k.state), fp, pm: await c.page.evaluate(() => window.__pmT), st: await wstate(c.page) });
-      await c.page.waitForFunction(() => window.__ev.some(e => e.type === 'match' || e.type === 'mismatch'), null, { timeout: 3000 }).catch(() => {});
-    }
-    // (4b) observation: a pair matched mid-swipe, the finger stays down and moves on into another frosted block
-    await waitPlay(c.page, 8000).catch(() => {});
-    {
-      const lns = await linesDown(c.page);
-      let T = null;
-      for (const ln of lns) for (let i = 0; i + 2 < ln.length && !T; i++) if (ln[i].key === ln[i + 1].key) T = ln.slice(i, i + 3);
-      if (!T) { const p = await pairDown(c.page), o = p && (await cards(c.page)).find(x => x.state === 'down' && x.key !== p[0].key); if (p && o) T = [p[0], p[1], o]; }
-      if (T) {
+      const mid = await flips(c.page);
+      await touch(c.cdp, 'touchMove', [s0]); await touch(c.cdp, 'touchEnd', []); await sleep(80);
+      fl = await flips(c.page);
+      check(`${tag}: a long rub (≥ 1.6× long side) inside D reveals it mid-stroke, once (via rub)`, mid.length === 1 && mid[0].id === D.id && mid[0].via === 'rub' && fl.length === 1 && (await downs(c.page)) - d0 === 1,
+        { mid: fid(mid), all: fid(fl), afterPass: revealedAfter });
+      check(`${tag}: a short pass (< 1.6× long side) does not reveal yet`, revealedAfter == null || revealedAfter >= 2, revealedAfter);
+      check(`${tag}: rubbing on over the UP block says nothing more (no tap events)`, (await evOf(c.page, 'tap')).length === 0);
+      // (4) one stroke never chains pairs: down on D's partner P (pair checked) → long rub in Q → end on R: nothing more
+      const all = await cards(c.page), P = all.find(x => x.key === D.key && x.id !== D.id && x.state === 'down');
+      const others = all.filter(x => x.state === 'down' && x.id !== (P && P.id));
+      if (P && others.length >= 2) {
+        const [Q, R] = others;
         await clearEv(c.page);
-        await swipe(c, [{ x: T[0].sx, y: T[0].sy }, { x: T[1].sx, y: T[1].sy }], { step: 16, dt: 12, end: false });
-        await sleep(900);   // match + resolve (0.4 s) are over, finger still down
-        const cx = T[2].sx, cy = T[2].sy, bx = T[1].sx, by = T[1].sy, n = Math.ceil(Math.hypot(cx - bx, cy - by) / 16);
-        for (let k = 1; k <= n; k++) { await touch(c.cdp, 'touchMove', [{ x: bx + (cx - bx) * k / n, y: by + (cy - by) * k / n }]); await sleep(12); }
+        await touch(c.cdp, 'touchStart', [{ x: P.sx, y: P.sy }]); await sleep(500);   // match checked, resolve over
+        const path = [{ x: Q.sx, y: Q.sy }];
+        for (let k = 0; k < 6; k++) path.push({ x: Q.sx + (k % 2 ? -0.4 : 0.4) * Q.sw, y: Q.sy });
+        path.push({ x: R.sx, y: R.sy });
+        at = { x: P.sx, y: P.sy };
+        for (const p of path) { const n = Math.max(1, Math.ceil(Math.hypot(p.x - at.x, p.y - at.y) / 20)); for (let k = 1; k <= n; k++) await touch(c.cdp, 'touchMove', [{ x: at.x + (p.x - at.x) * k / n, y: at.y + (p.y - at.y) * k / n }]); at = p; }
+        await sleep(500);
         await touch(c.cdp, 'touchEnd', []); await sleep(80);
-        const f3 = await evOf(c.page, 'flip'), mt = await evOf(c.page, 'match');
-        info(`${tag}: same finger keeps rubbing after a mid-swipe match`, { matched: mt.length, flips: f3.map(e => e.id + ':' + e.via), thirdRevealed: f3.some(e => e.id === T[2].id) });
-        await waitPlay(c.page, 8000).catch(() => {});
+        fl = await flips(c.page);
+        const mt = await evOf(c.page, 'match');
+        check(`${tag}: one stroke cannot chain into the next pair (after the match: long rub in Q + end on R reveal nothing)`, mt.length === 1 && fl.length === 1 && fl[0].id === P.id, { fl: fid(fl), match: mt.length });
       }
-    }
-    // (5) reveal animation: crack lines first, then the frost clears
-    let clean = await waitPlay(c.page, 10000).then(() => true, () => false);
-    if (!clean) {   // something still open from the observation swipe: close it by tapping its partner
-      const st = await wstate(c.page);
-      for (const id of st.open) { const o = (await cards(c.page)).find(x => x.id === id), pp = o && (await cards(c.page)).find(x => x.key === o.key && x.id !== o.id && x.state !== 'gone'); if (pp) { await tapCard(c, pp.id); await sleep(300); } }
-      clean = await waitPlay(c.page, 10000).then(() => true, () => false);
-    }
-    const K = clean && (await cards(c.page)).find(x => x.state === 'down');
+    } else check(`${tag}: board ready for the long-rub test`, false, await wstate(c.page));
+    ok = await settle(c);
+    // (6) reveal animation: crack lines first, then the frost clears
+    ok = await settle(c);
+    const K = ok && (await cards(c.page)).find(x => x.state === 'down');
     if (K) {
       await clearEv(c.page);
       await tapCard(c, K.id);
       const sm = [];
       for (let i = 0; i < 8; i++) { sm.push(await c.page.evaluate(id => { const k = IM.debug.world.cardById(id); return [+k.crack.toFixed(2), +k.flip.toFixed(2)]; }, K.id)); await sleep(25); }
-      const fk = await evOf(c.page, 'flip');
-      check(`${tag}: reveal = crack 0→1 first, then frost clears (flip ↑)`, fk.length === 1 && fk[0].id === K.id && sm.some(s => s[0] > 0 && s[0] < 1 && s[1] < 0.3) || sm.some(s => s[0] === 1 && s[1] < 0.5), sm);
+      const fk = await flips(c.page);
+      check(`${tag}: reveal = crack 0→1 first, then frost clears (flip ↑)`, fk.length === 1 && fk[0].id === K.id && (sm.some(s => s[0] > 0 && s[0] < 1 && s[1] < 0.3) || sm.some(s => s[0] === 1 && s[1] < 0.5)), sm);
     }
     check(`${tag}: no NaN`, (await nanCheck(c.page)).length === 0, await nanCheck(c.page));
     check(`${tag}: zero console errors`, c.errors.length === 0, c.errors);
     if (results.some(r => !r.ok && r.name.startsWith(tag))) await shot(c, 'rub-fail');
     await c.close();
   }
-  // (6) rub during deal / peek / hide does nothing
+  // (5) a FAST flick with 2 big CDP moves across a fresh line of 3: F → (across G) → Z reveals F + Z, never G
+  for (const d of ALL) {
+    const c = await open(d, 'mute=1&seed=32&age=6');
+    await startGame(c, 1); await waitPlay(c.page);
+    const tag = `rub/${d.name} flick`;
+    const row = (await linesDown(c.page)).find(r => r.length >= 3);
+    if (!row) { check(`${tag}: a line of 3`, false); await c.close(); continue; }
+    const F = row[0], G = row[1], Z = row[2];
+    await clearEv(c.page);
+    await swipe(c, [{ x: F.sx, y: F.sy }, { x: (F.sx + Z.sx) / 2 + 1, y: (F.sy + Z.sy) / 2 + 1 }, { x: Z.sx, y: Z.sy }], { step: 0, dt: 16 });
+    await sleep(60);
+    const fl = await evOf(c.page, 'flip');
+    check(`${tag}: 2-move flick F → Z reveals F (tap) + Z (stroke end) only, never the crossed G`, fl.length === 2 && fl[0].id === F.id && fl[1].id === Z.id && !fl.some(e => e.id === G.id), { fl: fl.map(e => e.id + ':' + e.via), F: F.id, G: G.id, Z: Z.id });
+    check(`${tag}: zero console errors`, c.errors.length === 0, c.errors);
+    await c.close();
+  }
+  // (7) rub during peek / hide does nothing (also not on stroke end)
   const c = await open(DEV.iphoneL, 'mute=1&seed=33&age=4');
   await startGame(c, 1);
   const seen = {};
@@ -662,7 +673,7 @@ async function gRub() {
       seen[s.phase] = true;
       const r = (await rowsDown(c.page))[0] || (await cards(c.page));
       await clearEv(c.page);
-      if (r.length >= 2) await swipe(c, [{ x: r[0].sx - r[0].sw, y: r[0].sy }, { x: r[r.length - 1].sx, y: r[0].sy }], { step: 24, dt: 4 });
+      if (r.length >= 2) await swipe(c, [{ x: r[0].sx - r[0].sw, y: r[0].sy }, { x: r[r.length - 1].sx, y: r[0].sy }], { step: 40, dt: 0 });
       const ev = await c.page.evaluate(() => window.__ev.filter(e => e.type === 'flip' && !['play', 'resolve'].includes(e.phase)).length);
       check(`rub: a swipe during ${s.phase} reveals nothing`, ev === 0, ev);
     }
@@ -1452,15 +1463,23 @@ async function gBot() {
     check(`${tag}: stars ≤ 52 and shown on the done screen`, stars > 0 && stars <= 52 && +res.ds === stars, { stars, ds: res.ds });
     // ---- voice log (IM.debug.voiceLog, copied per line by the installEv hook so the 600-line cap cannot hide anything)
     const V = await c.page.evaluate(() => {
-      const flips = window.__ev.filter(e => e.type === 'flip').map(e => e.id + '@' + e.wt.toFixed(3));
+      const fe = window.__ev.filter(e => e.type === 'flip');
       const fl = window.__flipLines.filter(f => f.type === 'flip');
-      return { said: window.__said, flips: flips.length, flipLines: fl.map(f => ({ id: f.id, lang: f.lang, line: f.line })), logN: IM.debug.voiceLog.length };
+      const pl = window.__pairLines || [];
+      return { said: window.__said, flips: fe.filter(e => e.open === 1).length, second: fe.filter(e => e.open === 2).map(e => e.id), flipLines: fl.map(f => ({ id: f.id, lang: f.lang, line: f.line })),
+        matches: window.__ev.filter(e => e.type === 'match').length, matchLines: pl.filter(p => p.fn === 'sayMatch').map(p => p.line), misLines: pl.filter(p => p.fn === 'sayMismatch').map(p => p.line),
+        mismatches: window.__ev.filter(e => e.type === 'mismatch').length, logN: IM.debug.voiceLog.length };
     });
     const saidTexts = new Set(V.said.map(s => s.text));
     const wrongLang = V.said.filter(s => s.lang !== lang);
     check(`${tag}: voice log: every line in ${lang}`, V.said.length > 20 && wrongLang.length === 0, { n: V.said.length, wrong: wrongLang.slice(0, 4) });
     const unnamed = V.flipLines.filter(f => !f.line || badText(f.line) || !saidTexts.has(f.line));
-    check(`${tag}: voice log: every reveal is named (${V.flips} reveals → ${V.flipLines.length} name lines, all spoken)`, V.flips > 0 && V.flipLines.length === V.flips && unnamed.length === 0, unnamed.slice(0, 4));
+    check(`${tag}: voice log: every 1st block of a pair is named (${V.flips} → ${V.flipLines.length} name lines, all spoken)`, V.flips > 0 && V.flipLines.length === V.flips && unnamed.length === 0, unnamed.slice(0, 4));
+    check(`${tag}: voice log: the 2nd block gets no name line of its own (${V.second.length} 2nd reveals)`, V.second.length > 0 && V.flipLines.every(f => true) && V.flipLines.length === V.flips, { second: V.second.length, lines: V.flipLines.length });
+    const mOk = V.matchLines.filter(l => l && !badText(l) && saidTexts.has(l));
+    check(`${tag}: voice log: every match line (names both blocks) is spoken (${V.matches} matches)`, V.matchLines.length === V.matches && mOk.length === V.matches, { matches: V.matches, lines: V.matchLines.length, spoken: mOk.length });
+    const mmSpoken = V.misLines.filter(l => saidTexts.has(l));
+    check(`${tag}: voice log: mismatch lines are clean and spoken (${mmSpoken.length}/${V.mismatches}, throttled ≤ 1 per 1.5 s)`, V.misLines.every(l => l && !badText(l)) && (V.mismatches === 0 || mmSpoken.length >= 1), { mm: V.mismatches, lines: V.misLines.length, spoken: mmSpoken.length });
     const neg = V.said.filter(s => negWord(lang, s.text));
     check(`${tag}: voice log: no negative words`, neg.length === 0, neg.slice(0, 5).map(s => s.text));
     if (lang === 'vi') {
@@ -1473,7 +1492,7 @@ async function gBot() {
       const viL = V.said.filter(s => VI_RE.test(s.text) && !/Mầm/.test(s.text));
       check(`${tag}: voice log: no Vietnamese in English lines`, viL.length === 0, viL.slice(0, 4).map(s => s.text));
     }
-    table.push({ age, lang, dev: d.name, secs: ((Date.now() - t0) / 1000).toFixed(0), stars, topics: topics.join('/'), lines: V.said.length, reveals: V.flips });
+    table.push({ age, lang, dev: d.name, secs: ((Date.now() - t0) / 1000).toFixed(0), stars, topics: topics.join('/'), lines: V.said.length, named: V.flips, second: V.second.length });
     if (age === 4 || age === 7) {
       await clearEv(c.page);
       await c.page.evaluate(() => { IM.debug.setBot(false); IM.debug.setSpeed(1); });

@@ -367,9 +367,11 @@ test('grid: largest card wins; ties (both at the 210 px cap) prefer the squarer 
   const P = IM.World.computeLayout(720, 1600, null), gp = IM.World.chooseGrid(P, 4, 4);
   assert.strictEqual(gp.cw, CFG.cardMax); assert.strictEqual(gp.cols, 2); assert.strictEqual(gp.boardIndex, 0, 'board A');
   for (const v of VIEWPORTS) { const Lv = IM.World.computeLayout(v.W, v.H, v.ins); for (const n of [4, 6]) { const gv = IM.World.chooseGrid(Lv, n, 4); assert.ok(gv.cols > 1 && gv.rows < n, v.name + ' no single column'); } }
-  // the iPad portrait with insets needs board B (right of Dee) for 12 cards
+  // portrait prefers board A (above Tuk) while its block ≥ the age minimum and ≥ 0.7 × board B's (keeps the shore free);
+  // the iPad portrait with insets: 12 blocks still fit on A at 106 px (≥ 104)
   const Q = IM.World.computeLayout(720, 960, { top: 32, bottom: 27 }), gq = IM.World.chooseGrid(Q, 12, 6);
-  assert.strictEqual(gq.boardIndex, 1); assert.ok(gq.cw >= 104);
+  assert.strictEqual(gq.boardIndex, 0); assert.ok(gq.cw >= 104);
+  const gq7 = IM.World.chooseGrid(Q, 12, 6, { portraitPreferA: 2 }); assert.strictEqual(gq7.boardIndex, 1, 'B when A is not good enough');
 });
 
 test('layout: colour rounds never put a red block within 40 px of Tuk (12 viewports × 40 seeds)', () => {
@@ -780,6 +782,16 @@ test('rewards: one per match, kind per topic; they settle on the shore / sky ins
     for (let i = 0; i < R.length; i++) for (let j = 0; j < i; j++) { pairsN++; if (IM.World.overlapArea(R[i], R[j]) > 0.4 * Math.min(R[i].w * R[i].h, R[j].w * R[j].h)) heavy++; }
   }
   console.log('      crowded reward pairs (> 40 % overlap): ' + heavy + ' / ' + pairsN);
+  // iPhone portrait (QA visual P2): 15 shore rewards spread over the band beside Tuk, ≤ 3 overlapping pairs, never on Tuk
+  for (const [topic, age] of [['animals', 6], ['shapes', 6], ['initial', 7], ['homes', 5]]) for (let sd = 1; sd <= 3; sd++) {
+    const w = mkWorld({ vp: VIEWPORTS[3], age, seed: sd }); w.levels = [topic, topic, topic, topic]; w.startLevel(0); run(w, 2.6);
+    for (let ri = 0; ri < 4 && w.state === 'round'; ri++) { solveRound(w); run(w, 1.9); }
+    const B = w.rewards.map(r => r.target.box); let ov = 0;
+    for (let i = 0; i < B.length; i++) for (let j = 0; j < i; j++) if (IM.World.overlapArea(B[i], B[j]) > 0) ov++;
+    assert.ok(ov <= (topic === 'homes' ? 6 : 3), `iPhone portrait ${topic} overlapping pairs ${ov}`);
+    assert.ok(B.every(b => !rectsOverlap(b, w.layout.tukRect)), 'never on Tuk');
+    if (topic !== 'homes') { const ys = w.rewards.map(r => r.y); assert.ok(Math.max(...ys) - Math.min(...ys) > 0.08 * w.layout.H, 'spread over rows'); }
+  }
   // stars at age 7 spread out: centres ≥ 0.9 × size apart unless shrunk
   for (const v of [VIEWPORTS[4], VIEWPORTS[3]]) {
     const w = mkWorld({ vp: v, age: 7, seed: 9 }); w.levels = ['add', 'add', 'add', 'add']; w.startLevel(0); run(w, 2.6);

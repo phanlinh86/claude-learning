@@ -121,3 +121,46 @@ and observations to `tests/out/functional/infos.json`.
 - The suite hooks `world._emit`, `pointerDown`, `pointerMove`, `IM.I18N.sayFlip` and `IM.Voice.say`. An init script records
   `AudioNode.connect` edges and `speechSynthesis.speak` utterances. No game file is touched.
 - Run only some groups like this: `node tests/e2e/functional.js rub ice match`. `IM_GAME_ROOT=<dir>` tests another build.
+
+## Re-run after the QA fixes (commit 6a84a07)
+
+**Result: 879 / 879 checks PASS, exit 0** (full suite, about 28 min). **P1: none. P2: none. P3-1 … P3-5 are all fixed.**
+
+What changed in the game, and how the suite now tests it:
+- **Rub rules (P3-2, P3-3).** All of these PASS on 4 viewports; the rub group grew from 55 to 65 checks.
+  - A swipe reveals the block it **starts on** (`tap`) and the block it **ends on** (`rub`, on stroke end).
+  - A block it only **crosses** stays frosted. This is checked for A → (B) → C, and for a 2-move fast flick F → (G) → Z on a fresh board.
+  - A **long rub back and forth inside D** (more than 1.6 × its long side, starting on the ice) reveals D mid-stroke, once. One pass alone
+    does not reveal it, and there is no `tap` spam afterwards.
+  - **One stroke cannot chain pairs.** The stroke starts on D's partner (match), then rubs a long time in Q and ends on R: nothing more is revealed.
+  - A rub that **ends on a 3rd block while a mismatch shows** (≥ 0.5 s) resets like a tap: A and C frost over, and the new block opens.
+- **Hit pad (P3-1).** It is now `min(10, gap/2 − 3)`. The two dense-iPad gap taps (10 blocks, gaps of 14.7 and 16.9 px) now do nothing,
+  so the ice group passes 23 / 23.
+- **playAtHide 0.15 (P3-4).** Every block is frosted at play start; there was no INFO this run.
+- **Topics (P3-5).** The age-4 and age-5 bot sessions all included `homes`.
+- **Voice diet.** Names are expected only for the 1st block of a pair. In every bot session the number of name lines equals the number of
+  1st reveals (37–67 per session). The 2nd block of a pair gets no name line of its own. **Every match line** (which names both blocks) is
+  spoken. Mismatch lines are clean and spoken (they are throttled to one per 1.5 s). No negative words. The Vietnamese speech still says
+  "Túc", both in the log and in the real `speechSynthesis.speak` calls.
+
+| age | lang | device | s | stars | chapters | voice lines | 1st reveals (named) | 2nd reveals |
+|---|---|---|---|---|---|---|---|---|
+| 3 | en | iPhone P | 32 | 51 | colors/animals/shapes/count | 124 | 37 | 37 |
+| 3 | vi | iPhone L | 33 | 51 | colors/size/shapes/count | 129 | 39 | 39 |
+| 4 | en | iPad P | 33 | 51 | colors/animals/shapes/homes | 145 | 42 | 42 |
+| 4 | vi | iPad L | 33 | 51 | colors/animals/count/homes | 146 | 42 | 42 |
+| 5 | en | iPhone P | 38 | 52 | colors/letters/count/homes | 168 | 52 | 52 |
+| 5 | vi | iPhone L | 38 | 51 | colors/shapes/count/homes | 167 | 51 | 51 |
+| 6 | en | iPad P | 39 | 50 | letters/lower/initial/add | 176 | 63 | 63 |
+| 6 | vi | iPad L | 38 | 51 | letters/count/initial/add | 168 | 59 | 59 |
+| 7 | en | iPhone P | 44 | 52 | count/add/sub/oddeven | 184 | 67 | 67 |
+| 7 | vi | iPhone L | 40 | 51 | count/initial/add/sub | 173 | 61 | 61 |
+
+Pass counts per group in this run:
+- 28 – 29 checks: boot 28
+- 20 – 27 checks: ice 23, talk 22, flip 24
+- 10 – 19 checks: settings 10, volume 17, repeat 13, pause 16, hud 16
+- 9 or fewer checks: lang 9, gate 8, audio 6, flags 7, phases 7, third 9, tapup 7, multi 7, stars 7, hint 8
+- 30 or more checks: rub 65, match 236, mismatch 32, rotate 134, bot 168
+
+In every group, fail = 0.

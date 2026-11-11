@@ -88,3 +88,21 @@ runs, 120 shots); 4 weather stages × 4 devices (frozen and live); 3 surprises �
 15. iPhone SE landscape VI Talk "shapes" overflows 20 px (scrolls).
 16. Aurora golden pair has no visible cue before it is matched (by design?); the rainbow reward arc draws over frosted blocks for
     ~1 s (`surprise/ipadL-a7-aurora-golden.png`).
+
+## Re-check after commit 6a84a07 (QA fixes)
+Re-ran `capture.js screens rewards notch phases surprise`, `measure.js`, `analyze.js` and the deal / talk / splash scripts
+(`tests/out/visual/{deal,talk,phases,surprise,rewards,notch,screens}`) on the 4 viewports.
+
+| # | Item | Result |
+|---|---|---|
+| 1 (P1) | Talk "homes" | **Fixed.** Each answer now shows the home badge picture and a translated label ("tổ sỏi / hang tuyết / biển", "pebble nest / snow den / the sea") (`talk/iphoneP-vi-homes.png`, `talk/iphoneL-*-homes.png`). |
+| 2 | Blocks sliding over Tuk during the deal | **Fixed.** The block still crosses Tuk's area (130–154 px on landscape/iPad P) but is now drawn behind him, so he stays visible (`deal/*.png`). |
+| 3 | Fish diving into the snow | **Fixed.** `layout.sea` y = 575 on iPhone L / iPad L, inside the visible water (549–604); 1416 / 891 in portrait. |
+| 4 | Home badge | **Fixed.** Badge now sits fully beside the animal with a rim: 39 css on iPhone, 82 css on iPad (`phases/iphoneL-a4-homes-z-late.png`). |
+| 5 | Lake panel edges | **Fixed.** Panel is inside the screen on iPad P 3×2 and iPhone L (the grid is now 3×2) (`screens/*-05-peek.png`). Smallest block is still ≥ the age minimum: 116.8 at age 7, iPad P. |
+| 6 | Floes cut by the screen edge | **Fixed.** All 4 viewports stay on screen (`surprise/*-a7-floes-peek.png`). |
+| 7 | Rainbow party | **Fixed.** In landscape the friends row stays left of the done panel; in portrait Tuk is above the panel (`screens/*-14-done.png`). |
+| 8 | Crowded rewards | **iPad L age 7 fixed:** spread 0.84 × 0.32, 3 overlapping pairs (was 28). **Still P2 on iPhone portrait:** 15 shore rewards still pile up in one row, spread 0.61 × 0.02, 28 overlapping box pairs (`notch/iphoneP-en-rewards.png`: bear behind whale, owl over fox, puffin over penguin). Fix: in portrait also use the shore band left of / under Tuk and a second row (`groundPerchDy`), or shrink shore rewards to 0.8× when there are more than 10. |
+| 9 | Talk buttons on short screens | **Fixed.** 96×64 css = 117 logical on iPhone L and iPhone SE L. `measure.js` "btn45" readings were taken during the button pop-in animation. |
+
+Still open P3: a star particle passes over Tuk's hat in the late-round frames; the bubble overlaps the top row by 0.7 px on iPhone P 2×5 and by 9.6 px on iPhone SE P (the `topics` section was not re-run); items 10 and 12–16 above.

@@ -28,6 +28,11 @@ Units: logical px (short side 720), seconds, radians, y down; rot > 0 = clockwis
 - **Reward spacing (P2):** a free perch also needs its centre ≥ `perchSep` 0.9 × the mean size from every other reward; sky grid
   44 px (`skyStep`), a 4th shore row (groundY − 24); no free spot → the reward tries again at `crowdShrink` 0.8× (`r.size`
   smaller, `r.shrunk` true). Age-7 stars (16 per chapter): 0 too-close pairs on iPad L and iPhone P; crowding 47 / 3 420.
+- **Portrait shore (QA round 2):** extra shore rows at groundY − 56 / − 88 / − 120 in portrait (beside Tuk, never on him);
+  portrait prefers board A (above Tuk) while its block ≥ 0.7 × board B's and ≥ the age minimum (`portraitPreferA`), so the band
+  stays free; > 10 resting rewards (homes in portrait: > 3) → new ones start at 0.8× and may go to 0.65× / 0.55×. iPhone
+  portrait, 15 rewards: 0 overlapping pairs (was 28), vertical spread 0.12 H; homes (2-wide boxes) ≤ 5. Fish hold before Talk =
+  time to the last splash + 0.6 s (≤ 3 s).
 - **Hit pad (P3):** `min(hitPad 10, gap/2 − 3)` → neighbours' touch zones never overlap. **`playAtHide` 0.5 → 0.15** (play never
   starts while a picture still shows through the frost).
 - **Homes (P3):** ages 4–5 always play the `homes` chapter (`IM.Content.ALWAYS`); the other chapters still rotate.
