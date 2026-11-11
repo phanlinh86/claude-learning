@@ -220,7 +220,8 @@ test('content: topic rotation — 4 of the ≥ 5 pool topics, chapter 1 = easies
   }
   // the world: newSession({ lastTopics }) and w.lastTopics
   const w = mkWorld({ age: 4 }); w.newSession({ lastTopics: ['colors', 'shapes', 'count', 'homes'] });
-  assert.strictEqual(w.levels[0], 'animals'); assert.ok(w.levels.includes('colors'));
+  assert.strictEqual(w.levels[0], 'animals'); assert.ok(w.levels.includes('homes'));
+  for (const age of [4, 5]) for (let s2 = 0; s2 < 300; s2++) assert.ok(IM.Content.topicsFor(age, new IM.RNG(s2), s2 % 2 ? ['homes'] : null).includes('homes'), 'homes every session at ' + age);
   const w2 = mkWorld({ age: 4 }); w2.lastTopics = w.levels.slice(); w2.newSession(); assert.notStrictEqual(w2.levels[0], w.levels[0]);
 });
 
@@ -318,7 +319,7 @@ test('layout: §2 formulas (groundY, Dee, bubble, board, HUD, short-side rule)',
   assert.ok(P.boards[1].x >= P.deeRect.x + P.deeRect.w + 40 - 1e-9);
   assert.strictEqual(L.tuk, L.dee, 'layout.dee is an alias of layout.tuk'); assert.deepStrictEqual(L.tukRect, L.deeRect);
   assert.deepStrictEqual(L.shore, { x: 0, y: 620, w: 1280, h: 60 });
-  assert.deepStrictEqual(L.sea, { x: 1190, y: 664, w: 120 });
+  assert.deepStrictEqual(L.sea, { x: 1210, y: 575, w: 100, overBoard: false });
   assert.ok(L.perches.length > 20 && L.perches.every(p => ['shore', 'sky', 'sea'].includes(p.kind)));
   for (const v of VIEWPORTS) { const Lv = IM.World.computeLayout(v.W, v.H, v.ins);
     const s = Lv.sea; assert.ok(!rectsOverlap({ x: s.x - s.w / 2, y: s.y - 10, w: s.w, h: 20 }, Lv.hud) && !rectsOverlap({ x: s.x - s.w / 2, y: s.y - 10, w: s.w, h: 20 }, Lv.bubble), v.name + ' sea clear of HUD/bubble');
@@ -462,46 +463,55 @@ test('reveal: tap → crack 0→1 in 0.12 s, then the frost clears (spring ω 18
   assert.ok(tb > 0.4 && tb < 0.55, 'frost back in ' + tb);
 });
 
-test('rub: while the finger is down, entering a frosted block reveals it (via rub) until 2 are up; never twice per rub; nothing over up/matched blocks or the ice', () => {
-  const w = mkWorld({ age: 5 }); roundOf(w, 'animals', 3); untilPhase(w, 'play'); ev(w);
-  const g = w.layout.grid, byCol = w.cards.slice().sort((a, b) => (a.hy - b.hy) || (a.hx - b.hx));
-  const A = byCol[0], B = byCol[1], C = byCol[2];   // three blocks in the top row, left to right
+test('rub: crossing a block reveals nothing; a rub (≥ 1.6 × long side inside it) or ending the stroke on it reveals it (via rub); ≤ 2 up; never twice per stroke; a checked pair ends the stroke', () => {
+  const w = mkWorld({ age: 5 }); roundOf(w, 'animals', 3); untilPhase(w, 'play'); run(w, 0.5); ev(w);
+  const byRow = w.cards.slice().sort((a, b) => (a.hy - b.hy) || (a.hx - b.hx));
+  const A = byRow[0], B = byRow[1], C = byRow[2];
   assert.ok(Math.abs(A.hy - C.hy) < 1e-6, 'top row has ≥ 3 blocks');
-  // a stroke from A across B and on to C
+  const line = (x0, x1, y, st) => { const o = []; for (let x = x0; st > 0 ? x <= x1 : x >= x1; x += st) o.push([x, y]); return o; };
+  // 1. a swipe A → C crosses B: only A (tap) and C (stroke ends on it) open
   assert.strictEqual(w.pointerDown(A.x, A.y), A.id);
-  const path = []; for (let x = A.x; x <= C.x; x += 6) path.push(x);
-  const flips = [];
-  for (const x of path) { const id = w.pointerMove(x, A.y); if (id) flips.push(id); }
+  const moved = []; for (const [x, y] of line(A.x, C.x, A.y, 6)) { const id = w.pointerMove(x, y); if (id) moved.push(id); }
+  assert.deepStrictEqual(moved, [], 'crossing B reveals nothing');
+  assert.strictEqual(B.state, 'down');
+  assert.strictEqual(w.pointerUp(C.x, C.y), C.id, 'the stroke ends on C → C opens');
   let E = ev(w);
-  assert.deepStrictEqual(flips, [B.id], 'only B (2 up after it)');
-  assert.deepStrictEqual(E.filter(e => e.type === 'flip').map(e => [e.id, e.via]), [[A.id, 'tap'], [B.id, 'rub']]);
-  assert.ok(!E.some(e => e.type === 'tap'), 'no name spam while rubbing over up blocks');
-  // back and forth over A and B while still down: nothing
-  for (let k = 0; k < 3; k++) for (const x of path.slice().reverse().concat(path)) w.pointerMove(x, A.y);
-  assert.strictEqual(ev(w).filter(e => e.type === 'flip' || e.type === 'tap').length, 0);
-  // the pair is checked once; if it mismatched, after the frost is back re-entering A/B in the SAME stroke does nothing
-  run(w, 2.0); E = ev(w);
-  const mis = E.filter(e => e.type === 'mismatch').length, mat = E.filter(e => e.type === 'match').length;
-  assert.strictEqual(mis + mat, 1, 'counted once');
-  if (mis) {
-    assert.strictEqual(A.state, 'down');
-    for (const x of path) w.pointerMove(x, A.y);
-    assert.ok(!ev(w).some(e => e.type === 'flip' && (e.id === A.id || e.id === B.id)), 'never twice per rub');
-    assert.ok(w.open.every(id => id !== A.id && id !== B.id));
-    w.pointerUp(C.x, A.y);
-    // a new stroke may reveal them again
-    run(w, 2); w.pointerDown(-50, -50); const fresh = downCards(w)[0]; assert.strictEqual(w.pointerMove(fresh.x, fresh.y), fresh.id); w.pointerUp();
-  }
-  // moves without the finger down never reveal
+  assert.deepStrictEqual(E.filter(e => e.type === 'flip').map(e => [e.id, e.via]), [[A.id, 'tap'], [C.id, 'rub']]);
+  assert.ok(!E.some(e => e.type === 'tap'), 'no name spam over up blocks');
+  run(w, 2.2); ev(w);
+  // 2. rubbing back and forth over one block reveals it once the path inside reaches 1.6 × its long side
+  const D = downCards(w)[0], L1 = CFG.rubPathK * Math.max(D.w, D.h);
+  w.pointerDown(-60, -60); let path = 0, got = null, px = D.x - D.w * 0.3, k = 0;
+  w.pointerMove(px, D.y);
+  while (!got && k++ < 400) { const nx = D.x + (k % 2 ? 0.3 : -0.3) * D.w; got = w.pointerMove(nx, D.y); path += Math.abs(nx - px); px = nx; }
+  assert.strictEqual(got, D.id); assert.ok(path >= L1 - 1e-6 && path < L1 + 0.6 * D.w + 1e-6, 'after ' + path.toFixed(0) + ' px (need ' + L1.toFixed(0) + ')');
+  // never twice in one stroke: after its partner check frosts it back, rubbing it again does nothing
+  const E2 = downCards(w).find(c => c.key !== D.key); w.pointerUp(); w.pointerDown(-60, -60); w.pointerMove(E2.x, E2.y); w.pointerUp(E2.x, E2.y);
+  run(w, 2.2); ev(w);
+  // 3. a checked pair ends the running stroke (no chaining into the next pair)
+  const pr = downCards(w), P0 = pr[0], P1 = pr.find(c => c !== P0);
+  w.pointerDown(P0.x, P0.y); let k3 = 0, got3 = null; w.pointerMove(P1.x, P1.y);
+  while (!got3 && k3++ < 400) got3 = w.pointerMove(P1.x + (k3 % 2 ? 0.3 : -0.3) * P1.w, P1.y);
+  assert.strictEqual(got3, P1.id); run(w, 0.6);
+  assert.ok(w._rubbed === null, 'stroke ended by the check');
+  const Q = downCards(w).find(c => c !== P0 && c !== P1);
+  if (Q) { for (const [x, y] of line(Q.x - Q.w * 0.3, Q.x + Q.w * 0.3, Q.y, 4).concat(line(Q.x + Q.w * 0.3, Q.x - Q.w * 0.3, Q.y, -4))) w.pointerMove(x, y);
+    assert.strictEqual(w.pointerUp(Q.x, Q.y), null, 'nothing after the check'); assert.notStrictEqual(Q.state, 'up'); }
+  // 4. moves without the finger down never reveal; not during the peek
   const w2 = mkWorld({ age: 5 }); roundOf(w2, 'animals', 3); untilPhase(w2, 'play'); ev(w2);
   for (const c of w2.cards) assert.strictEqual(w2.pointerMove(c.x, c.y), null);
   assert.strictEqual(ev(w2).length, 0);
-  // a stroke starting on the ice between blocks reveals the first block it enters
-  const c2 = w2.cards[0]; assert.strictEqual(w2.pointerDown(-50, -50), null);
-  assert.strictEqual(w2.pointerMove(c2.x, c2.y), c2.id);
-  // not during the peek / a shown mismatch
   const w3 = mkWorld({ age: 5 }); roundOf(w3, 'animals', 3); untilPhase(w3, 'peek'); w3.pointerDown(0, 0);
-  assert.ok(w3.cards.every(c => w3.pointerMove(c.x, c.y) === null));
+  assert.ok(w3.cards.every(c => w3.pointerMove(c.x, c.y) === null)); assert.strictEqual(w3.pointerUp(w3.cards[0].x, w3.cards[0].y), null);
+  // 5. during a shown mismatch a rub into a 3rd block = the same fast reset as a tap (after thirdTapAfter)
+  const w4 = mkWorld({ age: 5 }); roundOf(w4, 'animals', 3); untilPhase(w4, 'play'); run(w4, 0.5); ev(w4);
+  const [a4, b4] = twoDifferent(w4); tap(w4, a4); tap(w4, b4); run(w4, 0.45);
+  assert.ok(w4._mis && w4._mis.t < CFG.thirdTapAfter);
+  const c4 = downCards(w4).find(x => x !== a4 && x !== b4);
+  w4.pointerDown(-60, -60); w4.pointerMove(c4.x, c4.y); assert.strictEqual(w4.pointerUp(c4.x, c4.y), null, 'too early: ignored like a tap');
+  run(w4, 0.5); assert.ok(w4._mis && w4._mis.t >= CFG.thirdTapAfter);
+  w4.pointerDown(-60, -60); w4.pointerMove(c4.x, c4.y); assert.strictEqual(w4.pointerUp(c4.x, c4.y), c4.id);
+  assert.strictEqual(a4.state, 'down'); assert.strictEqual(b4.state, 'down'); assert.deepStrictEqual(w4.open, [c4.id]); assert.strictEqual(w4.mismatches, 1);
 });
 
 test('rub: no double counts — a rubbing bot plays full sessions; open never repeats an id, every flip id is unique per stroke', () => {
@@ -607,8 +617,10 @@ test('taps: only in play / mismatch resolve; matched → tap; misses → null; j
   untilPhase(w, 'peek'); assert.strictEqual(w.pointerDown(c0.x, c0.y), null, 'not during the peek');
   untilPhase(w, 'play'); ev(w);
   const g = w.layout.grid;
-  // +10 px outside the edge still hits, +12 does not (unless the neighbour)
-  assert.strictEqual(w.pointerDown(c0.x + g.cw / 2 + 9, c0.y), c0.id); ev(w);
+  // pad = min(10, gap/2 − 3) outside the edge still hits; the pads of neighbours never overlap
+  const pad = Math.min(CFG.hitPad, g.gap / 2 - 3);
+  assert.strictEqual(w.pointerDown(c0.x + g.cw / 2 + pad - 1, c0.y), c0.id); ev(w);
+  assert.ok(2 * pad < g.gap);
   const far = w.pointerDown(w.layout.W - 2, 2); assert.strictEqual(far, null);
   const [a, b] = pairOf(w, c0.key);
   const other = downCards(w).find(c => c.key !== c0.key);
@@ -768,6 +780,16 @@ test('rewards: one per match, kind per topic; they settle on the shore / sky ins
     for (let i = 0; i < R.length; i++) for (let j = 0; j < i; j++) { pairsN++; if (IM.World.overlapArea(R[i], R[j]) > 0.4 * Math.min(R[i].w * R[i].h, R[j].w * R[j].h)) heavy++; }
   }
   console.log('      crowded reward pairs (> 40 % overlap): ' + heavy + ' / ' + pairsN);
+  // stars at age 7 spread out: centres ≥ 0.9 × size apart unless shrunk
+  for (const v of [VIEWPORTS[4], VIEWPORTS[3]]) {
+    const w = mkWorld({ vp: v, age: 7, seed: 9 }); w.levels = ['add', 'add', 'add', 'add']; w.startLevel(0); run(w, 2.6);
+    for (let ri = 0; ri < 4 && w.state === 'round'; ri++) { solveRound(w); run(w, 1.9); }
+    const T = w.rewards.map(r => r.target); let close = 0;
+    for (let i = 0; i < T.length; i++) for (let j = 0; j < i; j++) { const a = T[i].box, b = T[j].box;
+      if (hyp(a.x + a.w / 2 - b.x - b.w / 2, a.y + a.h / 2 - b.y - b.h / 2) < CFG.perchSep * (T[i].size + T[j].size) / 2 - 1e-6) close++; }
+    console.log('      ' + v.name + ' age 7 stars: ' + T.length + ', too close ' + close + ', shrunk ' + w.rewards.filter(r => r.shrunk).length);
+    assert.ok(close <= 1, 'stars clump ' + close);
+  }
   assert.ok(heavy / pairsN < 0.02, 'crowding ' + heavy);
   for (const k of ['colors:fish', 'shapes:sculpture', 'count:fishes', 'animals:animal', 'homes:animal', 'letters:star', 'size:animal', 'initial:animal', 'oddeven:fishes']) assert.ok(kinds[k], k);
 });
@@ -822,7 +844,9 @@ test('rewards motion: fish leap on a g = 1400 parabola into the sea (splash), fi
       if (r.state === 'idle') break; }
     assert.strictEqual(ups, 2, 'two bounces between 3 hops'); assert.strictEqual(land, 1); assert.strictEqual(r.anchor, 'bottom');
     if (topic === 'homes') { assert.ok(home && home.home === r.home && IM.HOMES[r.sprite.replace('animal_', '')] === r.home);
-      assert.ok(r.badge && r.badge.alpha === 1 && Math.abs(r.badge.x - (r.x + CFG.badgeDx)) < 1e-9); }
+      assert.ok(r.badge && r.badge.alpha === 1 && Math.abs(r.badge.x - (r.x + CFG.badgeDx * r.size / CFG.sizes.animal)) < 1e-9);
+      const bq = { x: r.badge.x - r.badge.size / 2, y: r.badge.y - r.badge.size / 2, w: r.badge.size, h: r.badge.size };
+      assert.ok(IM.World.overlapArea(bq, { x: r.x - r.size / 2, y: r.y - r.size, w: r.size, h: r.size }) <= 0.15 * bq.w * bq.h, 'animal covers ≤ 15 % of its badge'); }
     else assert.ok(!home && !r.badge);
   }
   // star rises and twinkles in the sky
@@ -903,6 +927,25 @@ test('interpolation: _px/_py/_prot/_pflip are the previous sub-step; alpha in [0
   const p = pairOf(w, c.key).find(x => x !== c); tap(w, p);
   let n = 0; while (!(w.rewards[0] && w.rewards[0].pieces[0].state === 'air') && n++ < 1000) w.update(H);
   const pc = w.rewards[0].pieces[0], x1 = pc.x, r1 = pc.rot; w.update(H); assert.strictEqual(pc._px, x1); assert.strictEqual(pc._prot, r1);
+});
+
+test('fish hold: a roundDone that leads to Talk lasts until the last fish dived (≤ roundDone + 3 s); other round ends keep 1.6 s', () => {
+  for (const age of [4, 6, 7]) {
+    const w = mkWorld({ age, seed: 21 }); w.levels = ['count', 'count', 'count', 'count']; w.startLevel(0); run(w, 2.6);
+    const ends = [];
+    while (w.state !== 'talk' && w.time < 400) {
+      solveRound(w);
+      if (w.state === 'roundDone') { const t0 = w.time; let lastSplash = null, n = 0;
+        while (w.state === 'roundDone' && n++ < 2000) { w.update(H); for (const e of ev(w)) if (e.type === 'splash') lastSplash = w.time; }
+        const fishInAir = w.rewards.some(r => r.pieces && r.pieces.some(p => p.state !== 'done'));
+        ends.push([w.time - t0, w.state, fishInAir, lastSplash !== null ? lastSplash - t0 : null]); }
+    }
+    const last = ends[ends.length - 1];
+    assert.strictEqual(last[1], 'talk');
+    assert.ok(!last[2] || last[0] >= CFG.roundDoneTime + CFG.roundDoneFishMax - 0.02, 'age ' + age + ': every fish dived before Talk ' + JSON.stringify(last));
+    assert.ok(last[0] <= CFG.roundDoneTime + CFG.roundDoneFishMax + 0.02);
+    ends.slice(0, -1).forEach(e => assert.ok(Math.abs(e[0] - CFG.roundDoneTime) < 0.02, 'normal round end ' + e[0]));
+  }
 });
 
 test('Tuk: w.dee is w.tuk; happy hop on a match; belly slide at round end (out 70 px with friction, hold, back to 0)', () => {
@@ -996,7 +1039,8 @@ test('surprise floes: blocks on little floes (arc + staggered rows) inside the b
     const tag = `${v.name} age ${age} ${pairs}`;
     assert.ok(g.cw >= Math.min(g0.cw, CFG.cardMin[age]) - 1e-9 && g.cw <= g0.cw + 1e-9, tag + ' size');
     const R = g.slots.map(q => ({ x: q.x - g.cw / 2, y: q.y - g.ch / 2, w: g.cw, h: g.ch }));
-    R.forEach(r => { assert.ok(insideR({ x: r.x - g.driftAmp, y: r.y - g.bobAmp, w: r.w + 2 * g.driftAmp, h: r.h + 2 * g.bobAmp }, g0.board), tag + ' inside the board (with bob)'); });
+    R.forEach(r => { assert.ok(insideR({ x: r.x - g.driftAmp, y: r.y - g.bobAmp, w: r.w + 2 * g.driftAmp, h: r.h + 2 * g.bobAmp }, g0.board), tag + ' inside the board (with bob)');
+      const m = g.floeMargin + g.driftAmp; assert.ok(r.x - m >= L.safe.x - 1e-6 && r.x + r.w + m <= L.safe.x + L.safe.w + 1e-6, tag + ' floe inside the screen'); });
     for (let i = 0; i < R.length; i++) for (let j = i + 1; j < R.length; j++) assert.ok(IM.World.rectGap(R[i], R[j]) >= 14 - 1e-6, tag + ' gap');
     if (g0.rows > 1 && g0.cols > 2) assert.ok(new Set(g.slots.map(q => Math.round(q.y))).size > g0.rows, tag + ' not a plain grid');
   }

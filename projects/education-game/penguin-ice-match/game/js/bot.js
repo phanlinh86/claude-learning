@@ -13,7 +13,7 @@
  * first tap of a round), eased path at 900–1300 px/s, pointerDown at the card ± 0.25·size, pointerUp 0.06–0.12 s later.
  * It waits while a mismatch is shown or a pair is being checked. Talk: answers after 1.0–2.2 s, right with p = skill.
  * Rub (p = opts.rub, default 0.3): after revealing the 1st block it keeps the finger down and swipes to the 2nd one
- * (pointerMove at 700–1000 px/s, then pointerUp) — only when the straight path crosses no other frosted block. The 2nd
+ * (pointerMove at 700–1000 px/s, then pointerUp ON it: the world reveals it on the stroke end) — only when the straight path crosses no other frosted block. The 2nd
  * block is the remembered partner, or (it has not seen the 1st face yet) the bot's normal pick for a known pair, else a
  * random clear-path neighbour.
  */
@@ -194,7 +194,11 @@
         var n1 = w.events.length;
         w.pointerMove(this.finger.x, this.finger.y);
         for (var j = n1; j < w.events.length; j++) if (w.events[j].type === 'flip') this.stats.flips++;
-        if (done || !rt || w.state !== 'round') { w.pointerUp(this.finger.x, this.finger.y); this.finger.down = false; this.phase = 'wait'; this._t = this._reaction(); }
+        if (done || !rt || w.state !== 'round') {   // the stroke ends on the 2nd block → the world reveals it (rubRevealOnUp)
+          var n2 = w.events.length;
+          w.pointerUp(this.finger.x, this.finger.y); this.finger.down = false; this.phase = 'wait'; this._t = this._reaction();
+          for (var j2 = n2; j2 < w.events.length; j2++) if (w.events[j2].type === 'flip') this.stats.flips++;
+        }
         break;
       }
       case 'up':

@@ -5,10 +5,35 @@ number lives in `IM.CONFIG` (`game/js/world.js`, commented) and can be overridde
 Content tables (the DESIGN values) are `IM.Content.PAIRS / PEEK`; the playtest-tuned values the game uses are
 `IM.CONFIG.pairsByAge / peekByAge`. The renderer contract (fields, anchors, draw order) is the CONVENTIONS block at the top
 of `world.js` — read it first.
-Tests: `node tests/unit/run.js` (44 tests, ≈ 45 s; `node tests/unit/run.js rub` runs the tests whose name contains "rub").
+Tests: `node tests/unit/run.js` (45 tests, ≈ 45 s; `node tests/unit/run.js rub` runs the tests whose name contains "rub").
 Playtests: `node tests/sim/playtest.js` (2 400 sessions + verdicts), `node tests/sim/tune.js --n 4 --config '{…}' --drivers …`
 (quick CONFIG comparisons), `node tests/sim/determinism.js`, `node tests/sim/content_stats.js`.
 Units: logical px (short side 720), seconds, radians, y down; rot > 0 = clockwise.
+
+## 0. QA round 1 changes (docs/reports/{playtest,visual,functional}.md) — these override the sections below
+- **Rub aiming (P1):** crossing a frosted block on the way to another no longer opens it. A rubbed block opens only after the
+  finger moved ≥ `rubPathK` 1.6 × its long side INSIDE it, or when the stroke ENDS on it (`rubRevealOnUp`; `pointerUp` now
+  returns the id it revealed or null). pointerDown on a block still reveals at once. `_check` ends the running stroke (one rub
+  never chains into the next pair, P3-2). While a mismatch shows ≥ `thirdTapAfter` 0.5 s, a rub into a 3rd block does the SAME
+  fast reset as a tap (P3-3; earlier it is ignored, like a tap). The bot ends its swipe on the target (revealed on up).
+- **Fish before Talk (P2):** a roundDone that leads to Talk lasts until the last fish dived, ≤ `roundDoneFishMax` 3 s extra
+  (that wait does not count against the chapter limit). Other round ends keep 1.6 s.
+- **Sea (P2):** `layout.sea = (W − ins.right − 70, groundY − 55, w 100)` = the visible open water of `mid_*`. Each round
+  (`_placeSea`) it moves right of the grid when ≥ 40 px are free; otherwise it stays and `layout.sea.overBoard = true` →
+  the renderer should draw the splash ripple / a water hole over the lake panel there.
+- **Home badge (P2):** `badgeDx −70`, `sizes.badge 72` → the animal covers ≤ 2 % of its badge (test: ≤ 15 %).
+- **Board margin (P2):** `boardSide 24 → 40` (lake panel pad ≤ 36 px stays on screen). Floes: `floesLayout` keeps
+  `grid.floeMargin` (0.18·w + 10) + drift inside the safe screen (column pitch / block size shrink if needed, never below the age
+  minimum). Block widths age 4 / 4 pairs: iPad landscape 156, iPad portrait 147, iPhone landscape 194 (notch 178), portrait 210.
+- **Reward spacing (P2):** a free perch also needs its centre ≥ `perchSep` 0.9 × the mean size from every other reward; sky grid
+  44 px (`skyStep`), a 4th shore row (groundY − 24); no free spot → the reward tries again at `crowdShrink` 0.8× (`r.size`
+  smaller, `r.shrunk` true). Age-7 stars (16 per chapter): 0 too-close pairs on iPad L and iPhone P; crowding 47 / 3 420.
+- **Hit pad (P3):** `min(hitPad 10, gap/2 − 3)` → neighbours' touch zones never overlap. **`playAtHide` 0.5 → 0.15** (play never
+  starts while a picture still shows through the frost).
+- **Homes (P3):** ages 4–5 always play the `homes` chapter (`IM.Content.ALWAYS`); the other chapters still rotate.
+- Re-sim (`tune.js --n 4`, 1 200 sessions): toddler chapter 95 / 96 s (ages 3 / 4), typical 4 94 s, typical sessions p90 ≤ 433 s
+  (one age-6 outlier 486 s), careful4 3–5 p90 454 / 428 / 468 s, bots 0.3 / 0.6 / 0.9 chapters 77–101 / 66–88 / 61–78 s.
+  Unit tests: 45.
 
 ## 1. What changed versus Dee's Forest Memory (for main.js / render.js)
 | Dee | Tuk | notes |

@@ -1,4 +1,4 @@
-// Shared helpers for the visual QA scripts of Dee's Forest Memory (Playwright, phone/tablet contexts, frozen world).
+// Shared helpers for the visual QA scripts of Tuk's Ice Match (Playwright, phone/tablet contexts, frozen world).
 // The world is frozen by swapping world.update for a no-op (the renderer keeps drawing); D.adv(s) steps it by hand
 // (setSpeed() clamps to ≥ 0.1, so it cannot freeze a frame). D.sync() copies x→_px, flip→_pflip … so the
 // interpolation never smears a hand-set state.
@@ -22,8 +22,8 @@ const NOTCH = {
   L: ':root{--sa-l:59px !important;--sa-r:59px !important;--sa-b:21px !important}',
   PAD: ':root{--sa-t:24px !important;--sa-b:20px !important}'
 };
-const AGE_TOPICS = { 3: ['colors', 'size', 'shapes', 'animals'], 4: ['colors', 'shapes', 'count', 'animals'],
-  5: ['shapes', 'count', 'letters', 'animals'], 6: ['lower', 'initial', 'add', 'count'], 7: ['initial', 'add', 'sub', 'oddeven'] };
+const AGE_TOPICS = { 3: ['colors', 'size', 'shapes', 'animals'], 4: ['colors', 'shapes', 'count', 'homes'],
+  5: ['shapes', 'count', 'letters', 'homes'], 6: ['lower', 'initial', 'add', 'count'], 7: ['initial', 'add', 'sub', 'oddeven'] };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const jl = (f, o) => fs.appendFileSync(f, JSON.stringify(o) + '\n');
 
@@ -106,9 +106,9 @@ const geom = page => page.evaluate(() => {
   const bt = document.getElementById('bubbleText'), bb = document.getElementById('bubble');
   return { W: L.W, H: L.H, s: v.s, ins: L.ins, portrait: L.portrait, age: w.age, topic: w.topic, round: w.round, pairs: w.pairs,
     grid: G && { cols: G.cols, rows: G.rows, cw: G.cw, ch: G.ch, gap: G.gap, rect: G.rect, boardIndex: G.boardIndex, minOk: G.minOk, cssW: G.cw * v.s },
-    cards, dee: L.deeRect, deeAnchor: L.dee, groundY: L.groundY, layoutBubble: L.bubble,
+    cards, dee: L.tukRect, deeAnchor: L.tuk, shore: L.shore, sea: L.sea, board: L.board, boards: L.boards, surprise: w.surprise, groundY: L.groundY, layoutBubble: L.bubble,
     bubble: R('bubble'), hud: R('hud'), bubbleFont: parseFloat(bt.style.fontSize) || null, bubbleOverflow: bb.scrollHeight - bb.clientHeight, bubbleText: bt.textContent,
-    rewards: w.rewards.map(r => ({ id: r.id, kind: r.kind, color: r.color, sprite: r.sprite, state: r.state, x: r.x, y: r.y, perch: r.perch && r.perch.kind, box: r.target && r.target.box })) };
+    rewards: w.rewards.map(r => ({ id: r.id, kind: r.kind, color: r.color, sprite: r.sprite, state: r.state, x: r.x, y: r.y, perch: r.perch && r.perch.kind, box: r.target && r.target.box, badge: r.badge || null, home: r.home || null })) };
 });
 // background probe: redraw with no cards / rewards / particles and sample the pixels where they sit
 const bgProbe = page => page.evaluate(() => {

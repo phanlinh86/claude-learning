@@ -62,6 +62,8 @@
     6: ['lower', 'initial', 'add', 'count', 'letters'],
     7: ['initial', 'add', 'sub', 'oddeven', 'count']
   };
+  // QA functional P3: the new headline topic is in every session at ages 4–5 (the other chapters still rotate)
+  var ALWAYS = { 4: ['homes'], 5: ['homes'] };
   // easiest first (a chapter list is always sorted by this)
   var DIFFICULTY = ['colors', 'animals', 'size', 'shapes', 'letters', 'count', 'homes', 'lower', 'initial', 'add', 'sub', 'oddeven'];
   var HOMES_MAX = { 3: 3, 4: 3, 5: 4, 6: 5, 7: 5 };                 // DESIGN §5.1: age 4 up to 3 pairs, age 5 up to 4
@@ -501,15 +503,17 @@
     var first = pool[0];
     for (var i = 0; i < pool.length; i++) if (pool[i] !== last[0]) { first = pool[i]; break; }
     var rest = pool.filter(function (t) { return t !== first; });
+    var must = (ALWAYS[age] || []).filter(function (t) { return t !== first && rest.indexOf(t) >= 0; });
+    rest = rest.filter(function (t) { return must.indexOf(t) < 0; });
     var fresh = rng.shuffle(rest.filter(function (t) { return last.indexOf(t) < 0; }));
     var old = rng.shuffle(rest.filter(function (t) { return last.indexOf(t) >= 0; }));
-    var pick = fresh.concat(old).slice(0, 3).sort(function (a, b) { return DIFFICULTY.indexOf(a) - DIFFICULTY.indexOf(b); });
+    var pick = must.concat(fresh, old).slice(0, 3).sort(function (a, b) { return DIFFICULTY.indexOf(a) - DIFFICULTY.indexOf(b); });
     return [first].concat(pick);
   }
 
   IM.Content = {
     makeRound: makeRound, makeTalk: makeTalk, validate: validate, facesMatch: facesMatch,
-    topicsFor: topicsFor, DIFFICULTY: DIFFICULTY, COLOR_SAFE_MAX_AGE: COLOR_SAFE_MAX_AGE,
+    topicsFor: topicsFor, DIFFICULTY: DIFFICULTY, ALWAYS: ALWAYS, COLOR_SAFE_MAX_AGE: COLOR_SAFE_MAX_AGE,
     pairsFor: pairsFor, maxPairs: maxPairs,
     TOPICS: ALL_TOPICS, COLORS: COLORS, COLORS5: COLORS5, SHAPES: SHAPES.concat(['rect']), ANIMALS: IM.ANIMALS,
     HOMES: IM.HOMES, HOME_ANIMALS: HOME_ANIMALS, HOME_LIST: HOME_LIST, HOMES_MAX: HOMES_MAX,

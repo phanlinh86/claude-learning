@@ -45,6 +45,7 @@
     chapterMinRounds: 3,
     introTime: 2.5,            // chapter banner + weather line + the 2.5 s weather crossfade
     roundEndDelay: 0.4,        // s after the last pair melted → roundDone (the last reward leaps on during roundDone)
+    roundDoneFishMax: 3,       // a roundDone that leads to Talk lasts until the last fish dived (≤ +3 s; QA playtest P2-2)
     roundDoneTime: 1.6,        // stars + Tuk's belly slide (1.56 s) + short praise, then the next round (Dee 1.8)
     talkAfterAnswer: 2.0,      // the Talk panel stays after an answer
     levelDoneTime: 2.0,        // chapter stars
@@ -82,16 +83,20 @@
     bubbleX: 24, bubbleY: 20, bubbleMaxW: 640, bubbleRightGap: 160, bubbleH: 122,   // landscape bubble
     bubbleHPort: 124, bubbleGapPort: 24,   // portrait: the bubble sits BELOW the HUD: y = ins.top + hudH + 24
     hudW: 160, hudH: 96,       // DOM buttons top-right: x > W − ins.right − 160, y < ins.top + 96
-    boardTopGap: 24, boardGroundGap: 10, boardDeeGapLand: 130, boardSide: 24, boardDeeHeadGap: 10, boardDeeSideGap: 40,
+    boardTopGap: 24, boardGroundGap: 10, boardDeeGapLand: 130, boardSide: 40,   // QA visual P2-5: 24 → 40 (the lake panel pads the grid by ≤ 36 px)
+    boardDeeHeadGap: 10, boardDeeSideGap: 40,
     shoreTop: -10, shoreH: 60, // layout.shore = groundY − 10 … groundY + 50
-    seaDx: 90, seaDy: 34, seaW: 120,   // layout.sea centre (W − ins.right − 90, groundY + 34), width 120
+    seaDx: 70, seaDy: -55, seaW: 100,  // layout.sea centre (W − ins.right − 70, groundY − 55) = the visible open water of mid_*;
+    seaGap: 12, seaMinW: 40,           // each round it moves right of the grid when there is room (≥ 40 px), see _placeSea
 
     // ---- blocks / grid
     cardAspect: 0.9,           // w : h (chunky, nearly square ice blocks)
     gapFrac: 0.12, gapMin: 14, // gap = max(14, 0.12·cw)
     cardMin: { 3: 120, 4: 120, 5: 104, 6: 104, 7: 104 },   // smallest allowed block width per age
     cardMax: 210,
-    hitPad: 10,                // hit test = block rect grown by 10 px; nearest rect wins (unmatched blocks first)
+    hitPad: 10,                // hit test = block rect grown by min(10, gap/2 − 3) px (zones never overlap); nearest wins (unmatched first)
+    rubPathK: 1.6,             // a swipe reveals a frosted block only after ≥ 1.6 × its long side of finger path inside it (a rub) …
+    rubRevealOnUp: true,       // … or when the stroke ENDS on it (drag-to); crossing a block on the way does nothing
     sameTapHint: 3,            // 3 taps on the one open block (no idle reset) → auto hint (partner glows)
     thirdTapAfter: 0.5,        // the third-tap reset needs both mismatched faces shown ≥ 0.5 s
     tukColor: 'red', tukColorGap: 40,   // colour rounds: no red block within 40 px of Tuk's box (Tuk's hat is red)
@@ -107,7 +112,7 @@
     flipOmega: 18,             // … critically damped ω 18 (0 → 0.95 in ≈ 0.26 s)
     hideOmega: 10,             // frost grows back slower (ω 10: 1 → 0.05 in ≈ 0.47 s)
     liftPx: 8,
-    peekStagger: 0.05, playAtHide: 0.5,
+    peekStagger: 0.05, playAtHide: 0.15,   // play starts when every block's flip < 0.15 (QA P3-4: was 0.5)
     squashOmega: 20, squashZeta: 0.35,
     glintEvery: [3, 6], glintTime: 0.5, glintAmp: 0.35,   // idle: a faint sparkle on frosted blocks every 3–6 s
     // match: glide together (exponential friction), clink (restitution), melt into a hole
@@ -132,16 +137,19 @@
     // ---- rewards (one per match)
     maxRewards: 30,            // per chapter (DESIGN §8)
     perchStep: 52, perchJitter: [18, 12], perchMinGap: 24, perchMargin: 10,
-    groundPerchDy: [72, 40, 8],   // shore rows: bottom anchor at groundY + 72 (front), + 40, + 8 (back rows; render by y)
+    skyStep: 44,               // sky candidate grid (denser than the shore: stars spread out)
+    perchSep: 0.9,             // QA visual P2-8: reward centres ≥ 0.9 × the mean of the two sizes apart …
+    crowdShrink: 0.8,          // … when no spot allows that, the reward shrinks to 0.8× and tries again
+    groundPerchDy: [72, 40, 8, -24],   // shore rows: bottom anchor at groundY + 72 (front), + 40, + 8, − 24 (back rows; render by y)
     seaCount: 2,               // the 2 rightmost front-row shore perches are 'sea' (the water's edge: whale / seal / walrus)
-    sizes: { fish: 40, sculpture: 58, animal: 70, star: 52, piece: 34, badge: 58 },
+    sizes: { fish: 40, sculpture: 58, animal: 70, star: 52, piece: 34, badge: 72 },
     emergeTime: 0.22,          // a reward pops out of the hole (scale 0.35 → 1)
     fishG: 1400,               // fish: ballistic parabola (g px/s²) from the hole to layout.sea …
     fishApex: [120, 200],      // … apex 120–200 px above the higher end (kept ≥ ins.top + 40)
     fishStagger: 0.35,         // fishes: one fish every 0.35 s (counted aloud: leap.k)
     fishWagHz: 6,
     sculptFriction: 900,       // sculpture slides on the ice with constant friction μ (v0 = sqrt(2μd), stops exactly)
-    badgeDx: -36, badgeDy: -30, badgeFade: 0.4,   // home badge centre relative to the animal's feet anchor
+    badgeDx: -70, badgeDy: -30, badgeFade: 0.4,   // home badge centre relative to the animal's feet anchor (QA: −36 → −70, badge 58 → 72: the animal covers ≤ 2 %)
     flyTime: [0.9, 1.8], flySpeed: 900, flyArc: 0.35, flyArcMax: 170,   // stars rise on a bezier
     settleTime: 0.6,
     hopG: 2600, hopApex: [80, 46, 30], animalHops: 3, hopSquash: 0.18,
@@ -210,7 +218,7 @@
       W: W, H: H, ins: ins, portrait: portrait, tall: tall, groundY: groundY, tuk: tuk, dee: tuk, tukRect: tukRect, deeRect: tukRect,
       bubble: bubble, hud: hud, boards: boards, board: boards[0],
       shore: { x: ins.left, y: groundY + cfg.shoreTop, w: W - ins.left - ins.right, h: cfg.shoreH },
-      sea: { x: W - ins.right - cfg.seaDx, y: groundY + cfg.seaDy, w: cfg.seaW },
+      sea: { x: W - ins.right - cfg.seaDx, y: groundY + cfg.seaDy, w: cfg.seaW, overBoard: false },
       stack: portrait ? { x: W / 2, y: H + 40 } : { x: ins.left - 60, y: groundY - 60 },   // where the deal comes from (info)
       safe: { x: ins.left, y: ins.top, w: W - ins.left - ins.right, h: H - ins.top - ins.bottom },
       grid: null, perches: []
@@ -254,35 +262,45 @@
       slots.push({ x: x0 + off + c * (cw + gap) + cw / 2, y: y0 + r * (ch + gap) + ch / 2 });
     }
     return { cols: best.cols, rows: best.rows, cw: cw, ch: ch, gap: gap, x0: x0, y0: y0, n: n, slots: slots, boardIndex: best.bi,
-      board: B, rect: { x: x0, y: y0, w: gw, h: gh }, minOk: cw >= (cfg.cardMin[age] || cfg.cardMin[5]) - 1e-9 };
+      board: B, safe: L.safe, rect: { x: x0, y: y0, w: gw, h: gh }, minOk: cw >= (cfg.cardMin[age] || cfg.cardMin[5]) - 1e-9 };
   }
 
   /** Floes surprise: the slots become little ice floes — blocks 0.92× (≥ the age minimum), columns on an arc, rows staggered
    * sideways; neighbours keep ≥ gapMin + 2·floeDrift (they drift); the result is re-centred in the board. */
   function floesLayout(g, age, cfg) {
-    var B = g.board, minW = cfg.cardMin[age] || cfg.cardMin[5];
+    var B = g.board, minW = cfg.cardMin[age] || cfg.cardMin[5], keep = cfg.gapMin + 2 * cfg.floeDrift;
     var cw = Math.min(g.cw, Math.max(minW, g.cw * cfg.floesScale)), ch = cw / cfg.cardAspect;
-    var px = g.cw + g.gap, py = g.ch + g.gap, gapX = px - cw, keep = cfg.gapMin + 2 * cfg.floeDrift;
-    var gw = (g.cols - 1) * px + cw, gh = (g.rows - 1) * py + ch;
-    var S = Math.max(0, Math.min((gapX - keep) / 2, (B.w - gw) / 2 - cfg.floeDrift, 0.25 * cw));
+    var px = g.cw + g.gap, py = g.ch + g.gap;
+    // QA visual P2-6: the floe drawn under a block reaches 0.18·w + 10 px beyond it → keep that inside the safe screen
+    var sf = g.safe || { x: -1e9, w: 2e9 }, m = 0.18 * cw + 10 + cfg.floeDrift;
+    var bx0 = Math.max(B.x, sf.x + m), bx1 = Math.min(B.x + B.w, sf.x + sf.w - m), Bw = Math.max(0, bx1 - bx0);
+    if (g.cols > 1 && (g.cols - 1) * px + cw > Bw) {
+      px = (Bw - cw) / (g.cols - 1);
+      if (px - cw < keep) { cw = Math.min(cw, Math.max(minW, (Bw - keep * (g.cols - 1)) / g.cols)); ch = cw / cfg.cardAspect; px = Math.max(cw + keep, (Bw - cw) / (g.cols - 1)); }
+    } else if (g.cols === 1 && cw > Bw) { cw = Math.max(minW, Bw); ch = cw / cfg.cardAspect; }
+    var gapX = px - cw, gw = (g.cols - 1) * px + cw, gh = (g.rows - 1) * py + ch;
+    var S = Math.max(0, Math.min((gapX - keep) / 2, (Bw - gw) / 2 - cfg.floeDrift, 0.25 * cw));
     var A = Math.max(0, Math.min(B.h - gh - 2 * cfg.floeBob, cfg.floesArc * ch));
+    var opx = g.cw + g.gap;
     var pts = g.slots.map(function (s, k) {
-      var r = Math.floor(k / g.cols), c = Math.round((s.x - g.x0 - g.cw / 2) / px * 1e6) / 1e6;
+      var r = Math.floor(k / g.cols), c = Math.round((s.x - g.x0 - g.cw / 2) / opx * 1e6) / 1e6;
       var arc = function (cc) { return Math.sin(Math.PI * (clamp(cc, 0, g.cols - 1) + 0.5) / g.cols); };
       var lift = Math.abs(c - Math.round(c)) > 1e-3 ? Math.min(arc(c - 0.5), arc(c + 0.5)) : arc(c);
-      return { x: s.x + (r % 2 ? S : -S) * (g.rows > 1 ? 1 : 0), y: s.y - A * lift };
+      return { x: c * px + (r % 2 ? S : -S) * (g.rows > 1 ? 1 : 0), y: s.y - A * lift };
     });
     var x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
     pts.forEach(function (q) { x0 = Math.min(x0, q.x - cw / 2); x1 = Math.max(x1, q.x + cw / 2); y0 = Math.min(y0, q.y - ch / 2); y1 = Math.max(y1, q.y + ch / 2); });
-    var dx = B.x + (B.w - (x1 - x0)) / 2 - x0, dy = B.y + (B.h - (y1 - y0)) / 2 - y0;
+    var dx = bx0 + (Bw - (x1 - x0)) / 2 - x0, dy = B.y + (B.h - (y1 - y0)) / 2 - y0;
     pts.forEach(function (q) { q.x += dx; q.y += dy; });
     var o = {}; for (var k in g) o[k] = g[k];
     o.cw = cw; o.ch = ch; o.slots = pts; o.style = 'floes';
     o.rect = { x: x0 + dx, y: y0 + dy, w: x1 - x0, h: y1 - y0 };
     o.minOk = cw >= minW - 1e-9;
+    o.floeMargin = 0.18 * cw + 10;
     // motion room: bob / drift never push a block out of the board nor two blocks closer than gapMin
     o.bobAmp = Math.max(0, Math.min(cfg.floeBob, (B.h - o.rect.h) / 2, (py - ch - cfg.gapMin) / 2));
-    o.driftAmp = Math.max(0, Math.min(cfg.floeDrift, (B.w - o.rect.w) / 2, (gapX - cfg.gapMin) / 2));
+    o.driftAmp = Math.max(0, Math.min(cfg.floeDrift, (Bw - o.rect.w) / 2 + cfg.floeDrift, (gapX - cfg.gapMin) / 2,
+      o.rect.x - B.x, B.x + B.w - o.rect.x - o.rect.w));
     return o;
   }
 
@@ -300,9 +318,9 @@
       for (i = 0; i < gx.length; i++) out.push({ x: clamp(gx[i] + jr.float(-JX, JX), ins.left + 40, L.W - ins.right - 40), y: L.groundY + gdy[j] + jr.float(-4, 4),
         kind: j === 0 && i >= gx.length - cfg.seaCount ? 'sea' : 'shore', row: j });
     }
-    var row = 0;
-    for (y = ins.top + 40; y <= L.groundY - 50; y += st * 0.85, row++)
-      for (x = ins.left + 36 + (row % 2) * st / 2; x <= L.W - ins.right - 36; x += st) out.push({ x: x + jr.float(-JX, JX), y: y + jr.float(-JY, JY), kind: 'sky' });
+    var row = 0, ss = cfg.skyStep || st;
+    for (y = ins.top + 40; y <= L.groundY - 50; y += ss * 0.85, row++)
+      for (x = ins.left + 36 + (row % 2) * ss / 2; x <= L.W - ins.right - 36; x += ss) out.push({ x: x + jr.float(-JX, JX), y: y + jr.float(-JY, JY), kind: 'sky' });
     return out;
   }
   var PREF = {
@@ -314,27 +332,28 @@
     return PREF[r.kind] || PREF.animal;
   }
   /** Final placement of reward kind at perch point p → { x, y, box, badge? }. home → the animal stands beside its badge. */
-  function placeAt(kind, p, cfg, n, home) {
-    var S = cfg.sizes, s, o = { ax: null, ay: null };
+  function placeAt(kind, p, cfg, n, home, scale) {
+    var S = cfg.sizes, s, o = { ax: null, ay: null }, k = scale || 1;
     switch (kind) {
       case 'animal': {
-        s = S.animal; o.x = p.x; o.y = p.y; o.box = { x: p.x - s / 2, y: p.y - s, w: s, h: s };
+        s = S.animal * k; o.x = p.x; o.y = p.y; o.box = { x: p.x - s / 2, y: p.y - s, w: s, h: s };
         if (home) {
-          var bs = S.badge, bx = p.x + cfg.badgeDx, by = p.y + cfg.badgeDy;
+          var bs = S.badge * k, bx = p.x + cfg.badgeDx * k, by = p.y + cfg.badgeDy * k;
           o.badge = { x: bx, y: by, size: bs };
           o.box = union(o.box, { x: bx - bs / 2, y: by - bs / 2, w: bs, h: bs });
         }
         break;
       }
-      case 'sculpture': s = S.sculpture; o.x = p.x; o.y = p.y; o.box = { x: p.x - s / 2, y: p.y - s, w: s, h: s }; break;
+      case 'sculpture': s = S.sculpture * k; o.x = p.x; o.y = p.y; o.box = { x: p.x - s / 2, y: p.y - s, w: s, h: s }; break;
       default: {   // star: hovers in the sky (a sky point) or sits on the snow bank
-        s = S[kind] || 44;
+        s = (S[kind] || 44) * k;
         var dy = p.kind === 'shore' || p.kind === 'sea' ? -s * 0.6 : 0;
         o.x = p.x; o.y = p.y + dy;
         var pad = s * 0.12;
         o.box = { x: o.x - s / 2 - pad, y: o.y - s / 2 - pad, w: s + 2 * pad, h: s + 2 * pad };
       }
     }
+    o.size = s; o.scale = k;
     return o;
   }
   function boxFree(box, L, cfg) {
@@ -382,7 +401,7 @@
   World.logicalSize = logicalSize;
   World.computeLayout = function (W, H, ins, cfg) { return computeLayout(W, H, ins, merge(CONFIG, cfg)); };
   World.chooseGrid = function (L, n, age, cfg) { return chooseGrid(L, n, IM.Content.ageOf(age || 4), merge(CONFIG, cfg)); };
-  World.placeAt = function (kind, p, cfg, n, home) { return placeAt(kind, p, merge(CONFIG, cfg), n, home); };
+  World.placeAt = function (kind, p, cfg, n, home, scale) { return placeAt(kind, p, merge(CONFIG, cfg), n, home, scale); };
   World.floesLayout = function (g, age, cfg) { return floesLayout(g, IM.Content.ageOf(age || 4), merge(CONFIG, cfg)); };
   World.pondLayout = World.floesLayout;   // old name
   World.rectGap = rectGap; World.overlapArea = overlapArea;
@@ -424,6 +443,7 @@
     var L = this.layout, g = chooseGrid(L, this.cards.length, this.age, this.cfg), i;
     if (this.surprise === 'floes') g = floesLayout(g, this.age, this.cfg);
     L.grid = g; L.board = g.board;
+    this._placeSea();
     for (i = 0; i < this.cards.length; i++) {
       var c = this.cards[i], s = g.slots[c.slot];
       c.hx = s.x; c.hy = s.y; c.w = g.cw; c.h = g.ch;
@@ -507,6 +527,7 @@
     var g = chooseGrid(L, cur.cards.length, this.age, cfg);
     if (sp === 'floes') g = floesLayout(g, this.age, cfg);
     L.grid = g; L.board = g.board;
+    this._placeSea();
     this.cards = cur.cards.map(function (s, k) {
       return { id: s.id, key: s.key, face: s.face, nameKind: s.nameKind, nameValue: s.nameValue, size: s.size || null, word: s.word || null,
         slot: k, state: 'deal', t: 0, x: 0, y: 0, _px: 0, _py: 0, rot: 0, _prot: 0, w: g.cw, h: g.ch,
@@ -602,9 +623,28 @@
     this._hard = st === 1 || this.time - this._playStart > this.cfg.adaptSlowPlay; this._lastPairs = N;
     this.interactive = false;
     this._setState('roundDone'); this.phase = 'done';
+    this._rdTime = this.cfg.roundDoneTime;
+    var nr = this.round + 1, toTalk = nr >= this.roundsPerLevel || (nr >= this.cfg.chapterMinRounds && this.time + this.cfg.roundDoneTime - this.levelStartTime > this.cfg.chapterTimeLimit);
+    if (toTalk) this._rdTime = Math.min(this.cfg.roundDoneTime + this.cfg.roundDoneFishMax, Math.max(this.cfg.roundDoneTime, this._fishLeft() + 0.2));
     this._mood('cheer');
     this.tuk._slT = 0;   // belly slide
     this._emit({ type: 'roundDone', round: this.round, stars: st, mismatches: m });
+  };
+
+  /** Extra roundDone time spent waiting for fish (not counted against the chapter limit, so the decision stays the same). */
+  P._rdExtra = function () { return Math.max(0, (this._rdTime || this.cfg.roundDoneTime) - this.cfg.roundDoneTime); };
+  /** Seconds until the last fish in the air / waiting to leap has dived. */
+  P._fishLeft = function () {
+    var t = 0;
+    for (var i = 0; i < this.rewards.length; i++) {
+      var r = this.rewards[i]; if (!r.pieces) continue;
+      for (var j = 0; j < r.pieces.length; j++) {
+        var pc = r.pieces[j];
+        if (pc.state === 'air') t = Math.max(t, pc.traj.T - pc.traj.t);
+        else if (pc.state === 'wait') t = Math.max(t, Math.max(0, pc.delay) + this._fishTraj(pc).T + (r.state === 'emerge' ? this.cfg.emergeTime : 0));
+      }
+    }
+    return t;
   };
 
   P._startTalk = function () {
@@ -636,7 +676,8 @@
   /** The block under (x, y): rect grown by hitPad; inside several → nearest centre; unmatched blocks win over a gliding
    * matched pair. 'gone' / dealing blocks never hit. matchedOk = false → matched blocks are ignored (rub). */
   P._hit = function (x, y, matchedOk) {
-    var best = null, bd = 1e9, bestM = null, bdm = 1e9, pad = this.cfg.hitPad;
+    var g = this.layout.grid, pad = g ? Math.min(this.cfg.hitPad, Math.max(0, g.gap / 2 - 3)) : this.cfg.hitPad;   // QA P3-1: zones never overlap
+    var best = null, bd = 1e9, bestM = null, bdm = 1e9;
     for (var i = 0; i < this.cards.length; i++) {
       var c = this.cards[i];
       if (c.state === 'gone' || c.state === 'deal') continue;
@@ -651,7 +692,7 @@
 
   P.pointerDown = function (x, y) {
     this.finger.x = x; this.finger.y = y; this.finger.down = true;
-    this._rubbed = {}; this._rubLast = null;
+    this._rubbed = {}; this._rubLast = null; this._rubIn = 0;
     if (this.state !== 'round' || this.solved) return null;
     var ph = this.phase;
     if (ph !== 'play' && ph !== 'resolve') return null;
@@ -674,25 +715,48 @@
     this._flipUp(c, 'tap');
     return c.id;
   };
-  /** While the finger is down, ENTERING a frosted block reveals it (a rub), until 2 unmatched blocks are up. A rub never
-   * reveals a block twice and does nothing over an up / matched block. Returns the revealed id or null. */
-  P.pointerMove = function (x, y) {
-    this.finger.x = x; this.finger.y = y;
-    if (!this.finger.down || !this._rubbed) return null;
-    if (this.state !== 'round' || this.solved || this.phase !== 'play' || this._mis) return null;
-    var c = this._hit(x, y, false), id = c ? c.id : null;
-    if (id === this._rubLast) return null;
-    this._rubLast = id;
-    if (!c || c.state !== 'down' || this._rubbed[id] || this.open.length >= 2) return null;
-    this._rubbed[id] = 1;
+  /** Rub (while the finger is down): a frosted block is revealed once the finger has moved ≥ rubPathK × its long side
+   * INSIDE it (a real rub), or when the stroke ENDS on it (rubRevealOnUp) — crossing a block on the way to another does
+   * nothing. Only in play with < 2 unmatched blocks up; while a mismatch shows ≥ thirdTapAfter s a rub does the same fast
+   * reset as a tap. One stroke reveals a block at most once, says nothing over up / matched blocks, and ends when a pair is
+   * checked (_check clears it: one rub never chains into the next pair). Returns the revealed id or null. */
+  P._rubOk = function () {
+    if (this.state !== 'round' || this.solved) return false;
+    if (this._mis) return this.phase === 'resolve' && this.cfg.fastReset && this._mis.t >= this.cfg.thirdTapAfter;
+    return this.phase === 'play' && this.open.length < 2;
+  };
+  P._rubReveal = function (c) {
+    this._rubbed[c.id] = 1;
     this._idleT = 0; this._idleGap = this.cfg.idleTime; this._sameN = 0;
     this._lookId = c.id; this._lookT = this.time; this._lastTapId = c.id;
+    if (this._mis) {   // the same fast reset as a third tap
+      var a = this.cardById(this._mis.a), b = this.cardById(this._mis.b);
+      this._flipDown(a); this._flipDown(b); this.open = []; this._mis = null; this._setPhase('play');
+    }
     this._flipUp(c, 'rub');
     return c.id;
   };
+  P.pointerMove = function (x, y) {
+    var fx = this.finger.x, fy = this.finger.y;
+    this.finger.x = x; this.finger.y = y;
+    if (!this.finger.down || !this._rubbed) return null;
+    var c = this._hit(x, y, false), id = c ? c.id : null;
+    if (id !== this._rubLast) { this._rubLast = id; this._rubIn = 0; }
+    else if (c) this._rubIn += hyp(x - fx, y - fy);
+    if (!this._rubOk() || !c || c.state !== 'down' || this._rubbed[id]) return null;
+    if (this._rubIn < this.cfg.rubPathK * Math.max(c.w, c.h)) return null;
+    return this._rubReveal(c);
+  };
+  /** Ends the stroke; with rubRevealOnUp a stroke that ends on a frosted block reveals it (drag-to). Returns that id or null. */
   P.pointerUp = function (x, y) {
     if (x !== undefined) { this.finger.x = x; this.finger.y = y; }
-    this.finger.down = false; this._rubbed = null; this._rubLast = null;
+    var out = null;
+    if (this.cfg.rubRevealOnUp && this.finger.down && this._rubbed && this._rubOk()) {
+      var c = this._hit(this.finger.x, this.finger.y, false);
+      if (c && c.state === 'down' && !this._rubbed[c.id]) out = this._rubReveal(c);
+    }
+    this.finger.down = false; this._rubbed = null; this._rubLast = null; this._rubIn = 0;
+    return out;
   };
 
   P._emitTap = function (c) { this._emit({ type: 'tap', id: c.id, nameKind: c.nameKind, nameValue: c.nameValue, face: c.face, size: c.size }); };
@@ -711,6 +775,7 @@
   };
 
   P._check = function () {
+    this._rubbed = null; this._rubIn = 0;   // QA P3-2: a pair resolved → the running stroke reveals nothing more
     var a = this.cardById(this.open[0]), b = this.cardById(this.open[1]);
     if (a.key === b.key) this._match(a, b); else this._mismatch(a, b, true);
     this.open = a.key === b.key ? [] : this.open;
@@ -875,30 +940,37 @@
     return { x0: pc.x, y0: pc.y, vx: (pc.tx - pc.x) / T, vy: vy, T: T, g: g, t: 0 };
   };
 
-  /** Picks a free perch for r (tiers by kind preference; least overlap with other rewards) and starts its motion. */
+  /** Picks a free perch for r: tiers by kind preference; a spot is free when its box overlaps no other reward and its centre is
+   * ≥ perchSep × the mean size from every other reward (QA visual P2-8); random pick weighted by the gap. No free spot at full
+   * size → try again at crowdShrink (0.8×, r.size shrinks); still none → the least-overlapping spot. */
   P._perch = function (r, snap) {
-    var L = this.layout, cfg = this.cfg, pref = prefFor(r), boxes = [], i, j;
-    for (i = 0; i < this.rewards.length; i++) { var o = this.rewards[i]; if (o !== r && o.target && o.target.box) boxes.push(o.target.box); }
-    var best = null, bestScore = 1e18, free = [];
-    for (j = 0; j < pref.length; j++) {
-      free = [];
-      for (i = 0; i < L.perchCands.length; i++) {
-        var p = L.perchCands[i];
-        if (p.kind !== pref[j]) continue;
-        var pl = placeAt(r.kind, p, cfg, r.n, r.home);
-        if (!boxFree(pl.box, L, cfg)) continue;
-        var ov = 0;
-        for (var b = 0; b < boxes.length; b++) ov += overlapArea(pl.box, boxes[b]);
-        pl.kind = p.kind;
-        if (ov === 0) {
-          var gap = 1e9;
-          for (var b2 = 0; b2 < boxes.length; b2++) gap = Math.min(gap, rectGap(pl.box, boxes[b2]));
-          pl._gap = gap; free.push(pl);
+    var L = this.layout, cfg = this.cfg, pref = prefFor(r), others = [], i, j;
+    for (i = 0; i < this.rewards.length; i++) { var o = this.rewards[i]; if (o !== r && o.target && o.target.box) others.push(o.target); }
+    function ctr(B) { return { x: B.x + B.w / 2, y: B.y + B.h / 2 }; }
+    var best = null, bestScore = 1e18, free = [], scales = [1, cfg.crowdShrink || 1];
+    for (var si = 0; si < scales.length && !free.length; si++) {
+      for (j = 0; j < pref.length; j++) {
+        free = [];
+        for (i = 0; i < L.perchCands.length; i++) {
+          var p = L.perchCands[i];
+          if (p.kind !== pref[j]) continue;
+          var pl = placeAt(r.kind, p, cfg, r.n, r.home, scales[si]);
+          if (!boxFree(pl.box, L, cfg)) continue;
+          var ov = 0, sepOk = true, gap = 1e9, c0 = ctr(pl.box);
+          for (var b = 0; b < others.length; b++) {
+            var T = others[b];
+            ov += overlapArea(pl.box, T.box);
+            var c1 = ctr(T.box);
+            if (hyp(c0.x - c1.x, c0.y - c1.y) < cfg.perchSep * (pl.size + (T.size || pl.size)) / 2) sepOk = false;
+            gap = Math.min(gap, rectGap(pl.box, T.box));
+          }
+          pl.kind = p.kind;
+          if (ov === 0 && sepOk) { pl._gap = gap; free.push(pl); }
+          var score = ov * 10 + j + (sepOk ? 0 : 5) + si * 2;
+          if (si === 0 && score < bestScore) { bestScore = score; best = pl; }
         }
-        var score = ov * 10 + j;
-        if (score < bestScore) { bestScore = score; best = pl; }
+        if (free.length) break;
       }
-      if (free.length) break;
     }
     var pick = best;
     if (free.length) {
@@ -911,8 +983,22 @@
     }
     if (!pick) { pick = placeAt(r.kind, { x: L.W / 2, y: L.groundY + [].concat(cfg.groundPerchDy)[0], kind: 'shore' }, cfg, r.n, r.home); pick.kind = 'shore'; }
     r.target = pick; r.perch = { kind: pick.kind, x: pick.x, y: pick.y };
+    r.size = pick.size; r.shrunk = pick.scale < 1;
     if (r.home) { var bd = pick.badge; r.badge = { x: bd.x, y: bd.y, size: bd.size, alpha: snap || r.badge ? 1 : 0 }; }
     if (snap) this._snapReward(r); else if (r.state !== 'emerge') this._fly(r);
+  };
+
+  /** layout.sea: the visible open water (groundY − 55) at the right; each round it moves right of the block grid when
+   * there is ≥ seaMinW px of room, else it stays and sea.overBoard = true (draw the splash ripple over the lake panel). */
+  P._placeSea = function () {
+    var L = this.layout, cfg = this.cfg, S = L.sea, g = L.grid;
+    S.x = L.W - L.ins.right - cfg.seaDx; S.y = L.groundY + cfg.seaDy; S.w = cfg.seaW; S.overBoard = false;
+    if (!g) return;
+    var R = inflate(g.rect, g.gap / 2), box = { x: S.x - S.w / 2, y: S.y - 14, w: S.w, h: 28 };
+    if (!overlapArea(box, R)) return;
+    var x0 = g.rect.x + g.rect.w + cfg.seaGap, room = L.W - L.ins.right - 6 - x0;
+    if (room >= cfg.seaMinW) { S.w = Math.min(cfg.seaW, room); S.x = x0 + S.w / 2; }
+    else S.overBoard = true;
   };
 
   P._reperchAll = function (snap) {
@@ -1125,9 +1211,9 @@
       case 'intro': if (this.stateTime >= cfg.introTime) this._beginRound(); break;
       case 'round': this._stepRound(h); break;
       case 'roundDone':
-        if (this.stateTime >= cfg.roundDoneTime) {
+        if (this.stateTime >= (this._rdTime || cfg.roundDoneTime)) {
           this.round++;
-          var long = this.round >= cfg.chapterMinRounds && this.time - this.levelStartTime > cfg.chapterTimeLimit;
+          var long = this.round >= cfg.chapterMinRounds && this.time - this._rdExtra() - this.levelStartTime > cfg.chapterTimeLimit;
           if (this.round < this.roundsPerLevel && !long) this._beginRound(); else this._startTalk();
         }
         break;

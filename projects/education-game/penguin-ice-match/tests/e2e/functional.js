@@ -1,10 +1,10 @@
-// Functional QA suite for Dee's Forest Memory — REAL touch input on iPhone/iPad-sized mobile contexts.
+// Functional QA suite for Tuk's Ice Match — REAL touch input (CDP taps + swipes) on iPhone/iPad-sized mobile contexts.
 //   node tests/e2e/functional.js                    (all groups)
 //   node tests/e2e/functional.js flip match third   (only some groups)
-// Groups: boot lang gate settings volume flags phases flip match mismatch third tapup multi stars hint repeat talk pause
-//         rotate hud bot
+// Groups: boot lang gate settings volume audio flags phases flip rub ice match mismatch third tapup multi stars hint repeat
+//         talk pause rotate hud bot
 // Prints PASS/FAIL per check + a summary table, writes tests/out/functional/results.json (+ screenshots on failure),
-// exits 1 on any FAIL. Env: DM_GAME_ROOT=<dir> tests another build of game/.
+// exits 1 on any FAIL. Env: IM_GAME_ROOT=<dir> tests another build of game/.
 const { chromium } = require('playwright');
 const path = require('path'), fs = require('fs');
 const serve = require('./serve');
@@ -27,6 +27,8 @@ function check(name, ok, info) {
   console.log((ok ? 'PASS ' : 'FAIL ') + name + (ok || info == null ? '' : '  -- ' + (typeof info === 'string' ? info : JSON.stringify(info)).slice(0, 700)));
   return !!ok;
 }
+const infos = [];
+function info(name, data) { infos.push({ group: curGroup, name, data }); console.log('INFO ' + name + '  -- ' + JSON.stringify(data).slice(0, 400)); }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const VI_RE = /[ăâđêôơưàáạảãèéẹẻẽìíịỉĩòóọỏõùúụủũ]/i;
 
@@ -40,6 +42,23 @@ function badText(s) {
   return null;
 }
 
+/* Runs before the game's scripts: records the Web Audio graph (connect edges) and every utterance handed to TTS. */
+const INIT = () => {
+  window.__edges = []; window.__utter = [];
+  try {
+    const oc = AudioNode.prototype.connect;
+    AudioNode.prototype.connect = function (d) { try { window.__edges.push([this, d]); } catch (e) { /* ignore */ } return oc.apply(this, arguments); };
+  } catch (e) { /* ignore */ }
+  try {
+    const P = window.SpeechSynthesis && SpeechSynthesis.prototype, os = P && P.speak;
+    if (os) P.speak = function (u) { try { window.__utter.push({ text: u.text, lang: u.lang }); } catch (e) { /* ignore */ } return os.apply(this, arguments); };
+  } catch (e) { /* ignore */ }
+};
+// never negative (REQUIREMENT "never negative words"): EN + VI
+const NEG_EN = /\b(no|nope|wrong|bad|incorrect|fail(ed|s)?|lose|lost|loser|oh no|try again|mistake|silly|stupid)\b/i;
+const NEG_VI = /(^|[\s,.!?])(sai|sai rồi|không đúng|không phải|tệ|dở|thua|ngốc|hỏng)([\s,.!?]|$)/i;
+const negWord = (lang, s) => (lang === 'vi' ? NEG_VI : NEG_EN).exec(String(s || ''));
+
 let srv, browser;
 async function open(dev, q = '', opt = {}) {
   const ctx = opt.ctx || await browser.newContext({ viewport: dev.viewport, deviceScaleFactor: dev.dpr, isMobile: true, hasTouch: true, locale: 'en-US' });
@@ -48,6 +67,7 @@ async function open(dev, q = '', opt = {}) {
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   page.on('pageerror', e => errors.push(String(e)));
   page.on('response', r => { if (r.status() >= 400) errors.push('HTTP ' + r.status() + ' ' + r.url()); });
+  await page.addInitScript(INIT);
   await page.goto(srv.url + (q ? '?' + q : ''));
   await waitTitle(page);
   await installEv(page);
@@ -72,7 +92,51 @@ async function installEv(page) {
     };
     const pd = w.pointerDown;
     w.pointerDown = function (x, y) { window.__downs++; return pd.call(this, x, y); };
+    window.__moves = 0;
+    const pm = w.pointerMove;
+    w.pointerMove = function (x, y) { window.__moves++; const r = pm.call(this, x, y); (window.__pmT = window.__pmT || []).push([x | 0, y | 0, r, this.finger.down, this.open.length, this.phase, this.state]); if (window.__pmT.length > 80) window.__pmT.shift(); return r; };
+    // every reveal/tap name line the game asks for, and a copy of every voice line (+ what TTS would really say)
+    window.__flipLines = []; window.__said = [];
+    if (!IM.I18N.__hooked) {
+      IM.I18N.__hooked = true;
+      const sf = IM.I18N.sayFlip;
+      IM.I18N.sayFlip = function (lang, ev) { const l = sf.apply(this, arguments); window.__flipLines.push({ id: ev && ev.id, type: ev && ev.type, via: ev && ev.via, lang, line: l }); return l; };
+    }
+    if (IM.Voice && !IM.Voice.__hooked) {
+      IM.Voice.__hooked = true;
+      const sy = IM.Voice.say;
+      IM.Voice.say = function (text) {
+        const r = sy.apply(this, arguments);
+        const e = IM.debug.voiceLog[IM.debug.voiceLog.length - 1];
+        if (e && window.__said) window.__said.push({ lang: e.lang, text: e.text, spoken: IM.Voice.spoken ? IM.Voice.spoken(e.lang, e.text) : e.text });
+        return r;
+      };
+    }
   });
+}
+/* CDP swipe: touchStart at pts[0], touchMove through the rest (linearly interpolated, `step` CSS px apart, `dt` ms per move), touchEnd. */
+async function swipe(c, pts, { step = 18, dt = 16, hold = 0, end = true } = {}) {
+  await touch(c.cdp, 'touchStart', [pts[0]]);
+  if (hold) await sleep(hold);
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1], b = pts[i], n = step > 0 ? Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / step)) : 1;
+    for (let k = 1; k <= n; k++) { await touch(c.cdp, 'touchMove', [{ x: a.x + (b.x - a.x) * k / n, y: a.y + (b.y - a.y) * k / n }]); if (dt) await sleep(dt); }
+  }
+  if (end) await touch(c.cdp, 'touchEnd', []);
+}
+/* Lines of down blocks: rows (same y, left → right) and columns (same x, top → bottom), longest first. */
+async function linesDown(page) {
+  const cs = (await cards(page)).filter(x => x.state === 'down');
+  const group = (key, sort) => { const g = []; for (const k of cs) { let r = g.find(r => Math.abs(r[0][key] - k[key]) < 4); if (!r) g.push(r = []); r.push(k); } g.forEach(r => r.sort(sort)); return g; };
+  return group('hy', (a, b) => a.hx - b.hx).concat(group('hx', (a, b) => a.hy - b.hy)).sort((a, b) => b.length - a.length);
+}
+/* Down blocks grouped into rows (same home y), each sorted left → right. */
+async function rowsDown(page) {
+  const cs = (await cards(page)).filter(x => x.state === 'down');
+  const rows = [];
+  for (const k of cs) { let r = rows.find(r => Math.abs(r[0].hy - k.hy) < 4); if (!r) rows.push(r = []); r.push(k); }
+  rows.forEach(r => r.sort((a, b) => a.hx - b.hx));
+  return rows.sort((a, b) => b.length - a.length);
 }
 const strip = e => { const o = Object.assign({}, e); delete o.talk; delete o.face; delete o.faceA; delete o.faceB; return o; };
 const evOf = (page, t) => page.evaluate(t => window.__ev.filter(e => e.type === t).map(e => { const o = Object.assign({}, e); delete o.talk; delete o.face; delete o.faceA; delete o.faceB; return o; }), t);
@@ -133,7 +197,7 @@ async function solveRound(c, timeout = 20000) {
 const emptyPoint = page => page.evaluate(() => {
   const w = IM.debug.world, v = IM.debug.view(), L = w.layout;
   const obs = w.cards.filter(c => c.state !== 'gone').map(c => ({ x: c.x - c.w / 2 - 30, y: c.y - c.h / 2 - 30, w: c.w + 60, h: c.h + 60 }))
-    .concat([L.deeRect, L.bubble, L.hud].map(r => ({ x: r.x - 30, y: r.y - 30, w: r.w + 60, h: r.h + 60 })));
+    .concat([L.tukRect, L.bubble, L.hud].map(r => ({ x: r.x - 30, y: r.y - 30, w: r.w + 60, h: r.h + 60 })));
   const hud = document.getElementById('hud').getBoundingClientRect(), bub = document.getElementById('bubble').getBoundingClientRect();
   for (let gy = 1; gy < 20; gy++) for (let gx = 1; gx < 20; gx++) {
     const x = L.W * gx / 20, y = L.H * gy / 20;
@@ -147,9 +211,9 @@ const emptyPoint = page => page.evaluate(() => {
 const nanCheck = page => page.evaluate(() => {
   const w = IM.debug.world, bad = [];
   const fin = (o, ks, tag) => ks.forEach(k => { if (o[k] != null && typeof o[k] === 'number' && !isFinite(o[k])) bad.push(tag + '.' + k + '=' + o[k]); });
-  for (const c of w.cards || []) fin(c, ['x', 'y', 'rot', 'w', 'h', 'flip', 'lift', 'sx', 'sy', 'glow', 'alpha', '_px', '_py'], 'c' + c.id);
+  for (const c of w.cards || []) fin(c, ['x', 'y', 'rot', 'w', 'h', 'flip', 'lift', 'sx', 'sy', 'glow', 'alpha', '_px', '_py', 'vx', 'vy', 'crack', 'frost', 'melt', 'bob'], 'c' + c.id);
   for (const r of w.rewards || []) { fin(r, ['x', 'y', 'rot', 'sx', 'sy', 'alpha', 'flap', 'glow', 'ax', 'ay', '_px', '_py'], 'r' + r.id); (r.pieces || []).forEach((p, i) => fin(p, ['x', 'y', 'rot'], 'r' + r.id + 'p' + i)); }
-  fin(w.dee, ['lookX', 'lookY', 'hop', 'moodT'], 'dee');
+  fin(w.tuk, ['lookX', 'lookY', 'hop', 'moodT', 'slide'], 'tuk');
   fin(w, ['stars', 'wind', 'alpha', 'time'], 'w');
   const hs = document.getElementById('hudStars').textContent;
   if (/NaN|undefined/.test(hs)) bad.push('hudStars=' + hs);
@@ -161,14 +225,14 @@ const layoutViolations = page => page.evaluate(() => {
   const toCss = r => ({ l: v.left + r.x * v.s, t: v.top + r.y * v.s, r: v.left + (r.x + r.w) * v.s, b: v.top + (r.y + r.h) * v.s });
   const ov = (a, b) => Math.min(a.r, b.r) - Math.max(a.l, b.l) > 1 && Math.min(a.b, b.b) - Math.max(a.t, b.t) > 1;
   const dom = id => { const e = document.getElementById(id); if (!e || e.classList.contains('hidden')) return null; const r = e.getBoundingClientRect(); return r.width ? { l: r.left, t: r.top, r: r.right, b: r.bottom } : null; };
-  const hud = dom('hud'), bub = dom('bubble'), dee = toCss(L.deeRect);
+  const hud = dom('hud'), bub = dom('bubble'), dee = toCss(L.tukRect);
   const scr = { l: 0, t: 0, r: innerWidth, b: innerHeight };
   for (const c of w.cards || []) {
     if (c.state === 'gone' || c.state === 'deal' || c.state === 'matched') continue;
     const R = toCss({ x: c.hx - c.w / 2, y: c.hy - c.h / 2, w: c.w, h: c.h });
     if (hud && ov(R, hud)) out.push('card ' + c.id + ' under HUD');
     if (bub && ov(R, bub)) out.push('card ' + c.id + ' under bubble');
-    if (ov(R, dee)) out.push('card ' + c.id + ' on Dee');
+    if (ov(R, dee)) out.push('block ' + c.id + ' on Tuk');
     if (R.l < -1 || R.t < -1 || R.r > scr.r + 1 || R.b > scr.b + 1) out.push('card ' + c.id + ' off screen');
   }
   for (const r of w.rewards || []) {
@@ -207,7 +271,7 @@ async function gBoot() {
     const st = await c.page.evaluate(() => ({ mode: IM.debug.mode, title: !document.getElementById('scrTitle').classList.contains('hidden'),
       loading: !document.getElementById('loading').classList.contains('hidden'), logo: document.querySelector('.logo').textContent.trim(),
       play: document.getElementById('btnPlay').getBoundingClientRect().toJSON(), W: IM.debug.getState().W, H: IM.debug.getState().H, sw: document.documentElement.scrollWidth, iw: innerWidth }));
-    check(`boot/${d.name}: title shown, loader gone, logo "Dee"`, st.mode === 'title' && st.title && !st.loading && /Dee/.test(st.logo), st);
+    check(`boot/${d.name}: title shown, loader gone, logo "Tuk"`, st.mode === 'title' && st.title && !st.loading && /Tuk/.test(st.logo), st);
     check(`boot/${d.name}: play button on screen & ≥ 60 px`, st.play.width >= 60 && st.play.left >= 0 && st.play.right <= d.viewport.width && st.play.bottom <= d.viewport.height, st.play);
     check(`boot/${d.name}: logical short side 720`, Math.min(st.W, st.H) === 720, { W: st.W, H: st.H });
     check(`boot/${d.name}: no horizontal overflow`, st.sw <= st.iw + 1, { sw: st.sw, iw: st.iw });
@@ -215,7 +279,7 @@ async function gBoot() {
     check(`boot/${d.name}: Play (touch) starts the game`, (await mode(c.page)) === 'play' && await visible(c.page, 'hud'), await mode(c.page));
     await waitPlay(c.page).catch(() => {});
     const L = await c.page.evaluate(() => { const g = IM.debug.world.layout.grid; return g && { cw: g.cw, cols: g.cols, rows: g.rows, n: g.n }; });
-    check(`boot/${d.name}: first round grid at age 4 has cards ≥ 120 px`, L && L.cw >= 120, L);
+    check(`boot/${d.name}: first round grid at age 4 has blocks ≥ 120 px`, L && L.cw >= 120, L);
     check(`boot/${d.name}: zero console errors`, c.errors.length === 0, c.errors);
     await c.close();
   }
@@ -228,19 +292,19 @@ async function gLang() {
     title: document.title, lang: document.documentElement.lang, on: [...document.querySelectorAll('.title-screen [data-lang]')].filter(b => b.classList.contains('on')).map(b => b.dataset.lang),
     tag: document.getElementById('tagline').textContent, age: document.getElementById('titleAge').textContent, gear: document.querySelector('.gear-tip').textContent }));
   const a = await read();
-  check('lang: default EN title/logo', a.lang === 'en' && /Dee/.test(a.l1) && /Forest/.test(a.l2) && /Dee/.test(a.title) && a.on.join() === 'en', a);
+  check('lang: default EN title/logo', a.lang === 'en' && /Tuk/.test(a.l1) && /Ice/.test(a.l2) && /Tuk/.test(a.title) && a.on.join() === 'en', a);
   await tapEl(c, '.title-screen [data-lang="vi"]');
   const b = await read();
-  check('lang: VI chip updates logo + document.title + html lang', b.lang === 'vi' && b.l1 === 'Vịt Dee' && /Lật Thẻ/.test(b.l2) && /Vịt Dee/.test(b.title) && b.on.join() === 'vi', b);
+  check('lang: VI chip updates logo + document.title + html lang', b.lang === 'vi' && b.l1 === 'Cánh Cụt Tuk' && /Lật Băng/.test(b.l2) && /Cánh Cụt Tuk/.test(b.title) && b.on.join() === 'vi', b);
   check('lang: VI tagline / age / gear tip translated', !badText(b.tag || 'x') && /Tuổi|tuổi/.test(b.age) && b.gear !== a.gear, b);
   const vl = await lastVoice(c.page);
   check('lang: switching says a welcome line in VI', vl && vl.lang === 'vi' && !badText(vl.text) && VI_RE.test(vl.text), vl);
   await c.page.reload(); await waitTitle(c.page);
   const r = await read();
-  check('lang: VI choice persists across reload', r.lang === 'vi' && r.l1 === 'Vịt Dee', r);
+  check('lang: VI choice persists across reload', r.lang === 'vi' && r.l1 === 'Cánh Cụt Tuk', r);
   await tapEl(c, '.title-screen [data-lang="en"]');
   const e = await read();
-  check('lang: back to EN', e.lang === 'en' && /Dee/.test(e.title) && !/Vịt/.test(e.title), e);
+  check('lang: back to EN', e.lang === 'en' && /Tuk/.test(e.title) && !/Cánh Cụt/.test(e.title), e);
   await c.page.goto(srv.url + '?mute=1&seed=5&lang=vi'); await waitTitle(c.page); await installEv(c.page);
   await startGame(c, 2); await waitPlay(c.page);
   const bub = await c.page.evaluate(() => document.getElementById('bubbleText').textContent);
@@ -261,6 +325,8 @@ async function gGate() {
   check('gate: short tap on ⚙ does NOT open settings', !(await visible(c.page, 'scrSettings')));
   await touch(c.cdp, 'touchStart', [g]); await sleep(1000); await touch(c.cdp, 'touchEnd', []); await sleep(300);
   check('gate: 1 s hold does NOT open settings', !(await visible(c.page, 'scrSettings')));
+  await touch(c.cdp, 'touchStart', [g]); await sleep(1600); await touch(c.cdp, 'touchEnd', []); await sleep(300);
+  check('gate: 1.6 s hold does NOT open settings (needs 2 s)', !(await visible(c.page, 'scrSettings')));
   await touch(c.cdp, 'touchStart', [g]); await sleep(400);
   await touch(c.cdp, 'touchMove', [{ x: g.x - 150, y: g.y + 200 }]); await sleep(1900); await touch(c.cdp, 'touchEnd', []); await sleep(200);
   check('gate: hold that slides off the gear is cancelled', !(await visible(c.page, 'scrSettings')));
@@ -282,8 +348,8 @@ async function gSettings() {
   await c.page.locator('#inpName').fill('Mầm');
   await tapEl(c, '#scrSettings label.toggle:has(#optMusic)');
   await tapEl(c, '#scrSettings [data-lang="vi"]');
-  const s1 = await c.page.evaluate(() => JSON.parse(localStorage.getItem('dm:settings') || '{}'));
-  check('settings: saved to localStorage dm:settings', s1.age === 6 && s1.name === 'Mầm' && s1.music === false && s1.lang === 'vi', s1);
+  const s1 = await c.page.evaluate(() => JSON.parse(localStorage.getItem('im:settings') || '{}'));
+  check('settings: saved to localStorage im:settings', s1.age === 6 && s1.name === 'Mầm' && s1.music === false && s1.lang === 'vi', s1);
   await tapEl(c, '#btnSettingsDone');
   check('settings: Done returns to title', await visible(c.page, 'scrTitle') && !(await visible(c.page, 'scrSettings')));
   const ageTxt = await c.page.evaluate(() => document.getElementById('titleAge').textContent);
@@ -320,11 +386,11 @@ async function gVolume() {
   await touch(c.cdp, 'touchStart', [{ x: sl.l + sl.w - 4, y }]); await sleep(50);
   for (let k = 1; k <= 8; k++) { await touch(c.cdp, 'touchMove', [{ x: sl.l + sl.w - 4 - k * (sl.w * 0.7 / 8), y }]); await sleep(25); }
   await touch(c.cdp, 'touchEnd', []); await sleep(200);
-  let v = await c.page.evaluate(() => ({ el: +document.getElementById('optVolume').value, S: IM.debug.getState().settings.volume, A: IM.Audio.volume, saved: JSON.parse(localStorage.getItem('dm:settings') || '{}').volume }));
+  let v = await c.page.evaluate(() => ({ el: +document.getElementById('optVolume').value, S: IM.debug.getState().settings.volume, A: IM.Audio.volume, saved: JSON.parse(localStorage.getItem('im:settings') || '{}').volume }));
   if (v.el === 100) {   // the slider did not follow the finger in headless chromium: set it like a finger would and dispatch input
     console.log('      (touch drag did not move the range input in headless chromium; falling back to input events)');
     await c.page.evaluate(() => { const e = document.getElementById('optVolume'); e.value = 30; e.dispatchEvent(new Event('input', { bubbles: true })); e.dispatchEvent(new Event('change', { bubbles: true })); });
-    v = await c.page.evaluate(() => ({ el: +document.getElementById('optVolume').value, S: IM.debug.getState().settings.volume, A: IM.Audio.volume, saved: JSON.parse(localStorage.getItem('dm:settings') || '{}').volume }));
+    v = await c.page.evaluate(() => ({ el: +document.getElementById('optVolume').value, S: IM.debug.getState().settings.volume, A: IM.Audio.volume, saved: JSON.parse(localStorage.getItem('im:settings') || '{}').volume }));
   }
   const want = v.el / 100;
   check('volume: slider → settings.volume, saved, IM.Audio.volume follows', v.el < 100 && Math.abs(v.S - want) < 1e-6 && Math.abs(v.saved - want) < 1e-6 && Math.abs(v.A - want) < 1e-6, v);
@@ -346,7 +412,7 @@ async function gVolume() {
   const vb = await c.page.evaluate(() => ['btnVolDown', 'btnVolUp'].map(id => { const r = document.getElementById(id).getBoundingClientRect(); return { w: r.width, h: r.height }; }));
   check('volume: − / + buttons ≥ 44 px', vb.every(b => b.w >= 44 && b.h >= 44), vb);
   await tapEl(c, '#btnVolUp'); await tapEl(c, '#btnVolUp'); await sleep(100);
-  const up = await c.page.evaluate(() => ({ S: IM.debug.getState().settings.volume, A: IM.Audio.volume, saved: JSON.parse(localStorage.getItem('dm:settings')).volume, lv: document.getElementById('volLevel').textContent }));
+  const up = await c.page.evaluate(() => ({ S: IM.debug.getState().settings.volume, A: IM.Audio.volume, saved: JSON.parse(localStorage.getItem('im:settings')).volume, lv: document.getElementById('volLevel').textContent }));
   const exp = Math.min(1, Math.round((want + 0.2) * 10) / 10);
   check('volume: + + raises the volume by 20 %, saved, audio follows', Math.abs(up.S - exp) < 1e-6 && Math.abs(up.A - exp) < 1e-6 && Math.abs(up.saved - exp) < 1e-6 && up.lv === Math.round(exp * 100) + '%', up);
   for (let k = 0; k < 14; k++) await tapEl(c, '#btnVolDown');
@@ -370,23 +436,23 @@ async function gVolume() {
 async function gFlags() {
   const ctx = await newCtx();
   const c = await open(DEV.iphoneP, 'mute=1&lang=vi&age=6&speed=2&seed=9', { ctx });
-  const t1 = await c.page.evaluate(() => ({ l1: document.getElementById('logo1').textContent, age: document.getElementById('titleAge').textContent, ls: localStorage.getItem('dm:settings') }));
-  check('flags: ?lang=vi&age=6 applied for the session', t1.l1 === 'Vịt Dee' && /6/.test(t1.age), t1);
+  const t1 = await c.page.evaluate(() => ({ l1: document.getElementById('logo1').textContent, age: document.getElementById('titleAge').textContent, ls: localStorage.getItem('im:settings') }));
+  check('flags: ?lang=vi&age=6 applied for the session', t1.l1 === 'Cánh Cụt Tuk' && /6/.test(t1.age), t1);
   check('flags: nothing saved just by loading with flags', t1.ls == null, t1.ls);
   await openSettingsByHold(c);
   await tapEl(c, '#scrSettings label.toggle:has(#optSfx)');
-  const s2 = await c.page.evaluate(() => JSON.parse(localStorage.getItem('dm:settings') || '{}'));
+  const s2 = await c.page.evaluate(() => JSON.parse(localStorage.getItem('im:settings') || '{}'));
   check('flags: saving another setting does not store the flag values', s2.lang === 'en' && s2.age === 4 && s2.sfx === false && !('speed' in s2) && !('seed' in s2) && !('mute' in s2), s2);
   const chips2 = await c.page.evaluate(() => [...document.querySelectorAll('#ageChips .chip.on')].map(b => b.dataset.age).join());
   check('flags: settings panel shows the age actually being played (6)', chips2 === '6', chips2);
   await tapEl(c, '#ageChips [data-age="5"]');
-  const t5 = await c.page.evaluate(() => ({ title: document.getElementById('titleAge').textContent, saved: JSON.parse(localStorage.getItem('dm:settings')).age }));
+  const t5 = await c.page.evaluate(() => ({ title: document.getElementById('titleAge').textContent, saved: JSON.parse(localStorage.getItem('im:settings')).age }));
   check('flags: a parent picking age 5 wins over ?age=6', /5/.test(t5.title) && t5.saved === 5, t5);
   await tapEl(c, '#ageChips [data-age="4"]');
   await tapEl(c, '#btnSettingsDone');
   await c.page.goto(srv.url + '?mute=1'); await waitTitle(c.page);
   const t2 = await c.page.evaluate(() => ({ l1: document.getElementById('logo1').textContent, age: document.getElementById('titleAge').textContent, s: IM.debug.getState().settings, sp: IM.debug.getState().speed }));
-  check('flags: without flags → saved EN, age 4, normal speed again', t2.l1 === 'Dee’s' && /4/.test(t2.age) && t2.s.sfx === false && t2.sp === 1, t2);
+  check('flags: without flags → saved EN, age 4, normal speed again', t2.l1 === 'Tuk’s' && /4/.test(t2.age) && t2.s.sfx === false && t2.sp === 1, t2);
   check('flags: zero console errors', c.errors.length === 0, c.errors);
   await ctx.close();
 }
@@ -420,7 +486,8 @@ async function gPhases() {
   if (!tappedLate) {
     await waitPlay(c.page);
     const all = (await cards(c.page));
-    check('phases: every card face down at play start', all.every(k => k.state === 'down' && k.flip < 0.1), all.map(k => [k.id, k.state, +k.flip.toFixed(2)]));
+    check('phases: every block frosted (state down, frost ≥ 0.8) at play start', all.every(k => k.state === 'down' && k.flip < 0.2), all.map(k => [k.id, k.state, +k.flip.toFixed(2)]));
+    if (all.some(k => k.flip >= 0.1)) info('phases: frost still growing back when play starts (CONFIG.playAtHide)', all.map(k => [k.id, +k.flip.toFixed(2)]));
   }
   await c.page.waitForFunction(() => IM.debug.world.phase === 'play' || IM.debug.world.state !== 'round', null, { timeout: 8000 }).catch(() => {});
   // a tap right after the round's last match (during done / roundDone) does nothing
@@ -449,13 +516,261 @@ async function gFlip() {
     const k2 = (await cards(c.page)).find(x => x.id === k.id);
     check(`flip/${d.name}: card turned face up (flip ≥ 0.9 after 0.38 s)`, k2.state === 'up' && k2.flip >= 0.9, { state: k2.state, flip: k2.flip });
     const lines = await c.page.evaluate(n => IM.debug.voiceLog.slice(n).map(l => l.text), n0);
-    check(`flip/${d.name}: Dee names the card (voice line)`, lines.length >= 1 && lines.every(l => !badText(l)), lines);
+    check(`flip/${d.name}: Tuk names the block (voice line)`, lines.length >= 1 && lines.every(l => !badText(l)), lines);
     const st = await wstate(c.page);
     check(`flip/${d.name}: open = [card]`, st.open.length === 1 && st.open[0] === k.id, st.open);
     check(`flip/${d.name}: no NaN`, (await nanCheck(c.page)).length === 0, await nanCheck(c.page));
     check(`flip/${d.name}: zero console errors`, c.errors.length === 0, c.errors);
     await c.close();
   }
+}
+
+/* REAL touch swipes (CDP touchStart / touchMove / touchEnd) — the rub gesture. */
+async function gRub() {
+  for (const d of ALL) {
+    const c = await open(d, 'mute=1&seed=31&age=6');
+    await startGame(c, 1); await waitPlay(c.page);   // age 6 round 1: 3 pairs → a line of ≥ 3 blocks
+    const tag = `rub/${d.name}`;
+    let rows = await rowsDown(c.page);
+    let row;
+    // a line (row, or column in portrait) of 3 frosted blocks whose first two do NOT match (so the swipe must stop at 2)
+    const lines = await linesDown(c.page);
+    let A, B, C, L3 = null;
+    for (const ln of lines) for (let i = 0; i + 2 < ln.length && !L3; i++) if (ln[i].key !== ln[i + 1].key) L3 = ln.slice(i, i + 3);
+    check(`${tag}: a line of ≥ 3 frosted blocks (first two different) for the swipe`, !!L3, lines.map(r => r.length));
+    if (!L3) { await c.close(); continue; }
+    [A, B, C] = L3;
+    await clearEv(c.page);
+    const m0 = await c.page.evaluate(() => window.__moves);
+    const ex = C.sx + (C.sx - B.sx) * 0.25, ey = C.sy + (C.sy - B.sy) * 0.25;
+    const ts = Date.now();
+    await swipe(c, [{ x: A.sx, y: A.sy }, { x: ex, y: ey }], { step: 40, dt: 0 });
+    const swMs = Date.now() - ts;
+    await sleep(80);
+    let fl = await evOf(c.page, 'flip');
+    const nMoves = (await c.page.evaluate(() => window.__moves)) - m0;
+    check(`${tag}: swipe delivers pointer moves to the world`, nMoves >= 5, nMoves);
+    check(`${tag}: swipe from A across B and C reveals exactly A (tap) and B (rub)`, fl.length === 2 && fl[0].id === A.id && fl[0].via === 'tap' && fl[1].id === B.id && fl[1].via === 'rub',
+      fl.map(e => e.id + ':' + e.via));
+    let cs = await cards(c.page);
+    check(`${tag}: C is never revealed (2 blocks up max; swipe took ${swMs} ms)`, cs.find(x => x.id === C.id).state === 'down', cs.find(x => x.id === C.id).state);
+    const L1 = await c.page.evaluate(() => window.__flipLines.filter(f => f.type === 'flip').map(f => f.id + ':' + f.line));
+    check(`${tag}: both revealed blocks are named (rub-revealed too)`, [A.id, B.id].every(id => L1.some(l => l.startsWith(id + ':') && l.length > (id + ':').length + 1)), L1);
+    await c.page.waitForFunction(() => window.__ev.some(e => e.type === 'match' || e.type === 'mismatch'), null, { timeout: 3000 }).catch(() => {});
+    const res = await c.page.evaluate(() => window.__ev.filter(e => e.type === 'match' || e.type === 'mismatch').map(e => e.type));
+    check(`${tag}: the swiped pair resolves once (mismatch)`, res.length === 1 && res[0] === 'mismatch', res);
+    // (2) while the mismatch / match shows, a new swipe over a frosted block does nothing
+    const D0 = (await cards(c.page)).find(x => x.state === 'down');
+    if (D0 && (await wstate(c.page)).phase === 'resolve') {
+      await clearEv(c.page);
+      await swipe(c, [{ x: D0.sx - D0.sw * 0.7, y: D0.sy }, { x: D0.sx + D0.sw * 0.7, y: D0.sy }], { step: 40, dt: 0 });
+      const rf = await evOf(c.page, 'flip');
+      check(`${tag}: a rub while the mismatch shows reveals nothing (reveals only after the frost is back)`, rf.filter(e => e.phase === 'resolve' || e.open > 2).length === 0, rf.map(e => e.id + '@' + e.phase));
+    }
+    // leave a clean board for the next swipe: a block left open → tap its partner
+    await c.page.waitForFunction(() => IM.debug.world.phase === 'play', null, { timeout: 5000 }).catch(() => {});
+    await sleep(100);
+    {
+      const st = await wstate(c.page);
+      if (st.open.length === 1) { const o = (await cards(c.page)).find(x => x.id === st.open[0]), pp = (await cards(c.page)).find(x => x.key === o.key && x.id !== o.id); if (pp) await tapCard(c, pp.id); }
+    }
+    await waitPlay(c.page, 8000).catch(() => {});
+    // (3) start on the ice (not on a block), swipe into D, back and forth over D 3×, then into E → D once, E once
+    rows = await rowsDown(c.page); row = rows.find(r => r.length >= 2) || null;
+    if (row) {
+      const [D, E] = row;
+      await c.page.evaluate(() => window.__flipLines = []);
+      const s0 = { x: D.sx - D.sw / 2 - Math.max(12, (await c.page.evaluate(() => IM.debug.view().s)) * 14), y: D.sy };
+      await clearEv(c.page);
+      const d0 = await downs(c.page);
+      await touch(c.cdp, 'touchStart', [s0]); await sleep(30);
+      const path = [s0, { x: D.sx, y: D.sy }, { x: s0.x, y: D.sy }, { x: D.sx, y: D.sy }, { x: s0.x, y: D.sy }, { x: D.sx, y: D.sy }, { x: E.sx, y: E.sy }];
+      for (let i = 1; i < path.length; i++) {
+        const a = path[i - 1], b = path[i], n = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 30));
+        for (let k = 1; k <= n; k++) await touch(c.cdp, 'touchMove', [{ x: a.x + (b.x - a.x) * k / n, y: a.y + (b.y - a.y) * k / n }]);
+      }
+      await touch(c.cdp, 'touchEnd', []); await sleep(80);
+      fl = await evOf(c.page, 'flip');
+      const startHit = (await downs(c.page)) - d0;
+      check(`${tag}: swipe from the ice: D and E each revealed exactly once by rub (D crossed 3×)`, fl.length === 2 && fl[0].id === D.id && fl[1].id === E.id && fl.every(e => e.via === 'rub') && startHit === 1,
+        { flips: fl.map(e => e.id + ':' + e.via), D: D.id, E: E.id, startHit });
+      const taps = await evOf(c.page, 'tap');
+      check(`${tag}: rubbing over an UP block does not repeat its name (no tap events)`, taps.length === 0, taps.length);
+      await c.page.waitForFunction(() => window.__ev.some(e => e.type === 'match' || e.type === 'mismatch'), null, { timeout: 3000 }).catch(() => {});
+      await waitPlay(c.page, 8000).catch(() => {});
+    } else check(`${tag}: a row of ≥ 2 frosted blocks for swipe (3)`, false, rows.map(r => r.length));
+    // (4) a FAST flick: only 2 CDP moves over a whole row (big jumps) still reveals the first two blocks on the path
+    rows = await rowsDown(c.page); row = rows.find(r => r.length >= 2);
+    if (row) {
+      const [F, G] = row, Z = row[row.length - 1];
+      await clearEv(c.page); await c.page.evaluate(() => window.__pmT = []);
+      const fp = [{ x: F.sx, y: F.sy }, { x: (F.sx + Z.sx) / 2 + 1, y: (F.sy + Z.sy) / 2 }, { x: Z.sx + Z.sw * 0.3, y: Z.sy }];
+      await swipe(c, fp, { step: 0, dt: 16 });
+      await sleep(60);
+      fl = await evOf(c.page, 'flip');
+      check(`${tag}: fast flick (2 big moves) reveals F (tap) + G (rub) — the input fills the jump`, fl.length === 2 && fl[0].id === F.id && fl[1].id === G.id, { fl: fl.map(e => e.id + ':' + e.via + '@' + e.phase), F: F.id, G: G.id, row: row.map(k => k.id + ':' + k.state), fp, pm: await c.page.evaluate(() => window.__pmT), st: await wstate(c.page) });
+      await c.page.waitForFunction(() => window.__ev.some(e => e.type === 'match' || e.type === 'mismatch'), null, { timeout: 3000 }).catch(() => {});
+    }
+    // (4b) observation: a pair matched mid-swipe, the finger stays down and moves on into another frosted block
+    await waitPlay(c.page, 8000).catch(() => {});
+    {
+      const lns = await linesDown(c.page);
+      let T = null;
+      for (const ln of lns) for (let i = 0; i + 2 < ln.length && !T; i++) if (ln[i].key === ln[i + 1].key) T = ln.slice(i, i + 3);
+      if (!T) { const p = await pairDown(c.page), o = p && (await cards(c.page)).find(x => x.state === 'down' && x.key !== p[0].key); if (p && o) T = [p[0], p[1], o]; }
+      if (T) {
+        await clearEv(c.page);
+        await swipe(c, [{ x: T[0].sx, y: T[0].sy }, { x: T[1].sx, y: T[1].sy }], { step: 16, dt: 12, end: false });
+        await sleep(900);   // match + resolve (0.4 s) are over, finger still down
+        const cx = T[2].sx, cy = T[2].sy, bx = T[1].sx, by = T[1].sy, n = Math.ceil(Math.hypot(cx - bx, cy - by) / 16);
+        for (let k = 1; k <= n; k++) { await touch(c.cdp, 'touchMove', [{ x: bx + (cx - bx) * k / n, y: by + (cy - by) * k / n }]); await sleep(12); }
+        await touch(c.cdp, 'touchEnd', []); await sleep(80);
+        const f3 = await evOf(c.page, 'flip'), mt = await evOf(c.page, 'match');
+        info(`${tag}: same finger keeps rubbing after a mid-swipe match`, { matched: mt.length, flips: f3.map(e => e.id + ':' + e.via), thirdRevealed: f3.some(e => e.id === T[2].id) });
+        await waitPlay(c.page, 8000).catch(() => {});
+      }
+    }
+    // (5) reveal animation: crack lines first, then the frost clears
+    let clean = await waitPlay(c.page, 10000).then(() => true, () => false);
+    if (!clean) {   // something still open from the observation swipe: close it by tapping its partner
+      const st = await wstate(c.page);
+      for (const id of st.open) { const o = (await cards(c.page)).find(x => x.id === id), pp = o && (await cards(c.page)).find(x => x.key === o.key && x.id !== o.id && x.state !== 'gone'); if (pp) { await tapCard(c, pp.id); await sleep(300); } }
+      clean = await waitPlay(c.page, 10000).then(() => true, () => false);
+    }
+    const K = clean && (await cards(c.page)).find(x => x.state === 'down');
+    if (K) {
+      await clearEv(c.page);
+      await tapCard(c, K.id);
+      const sm = [];
+      for (let i = 0; i < 8; i++) { sm.push(await c.page.evaluate(id => { const k = IM.debug.world.cardById(id); return [+k.crack.toFixed(2), +k.flip.toFixed(2)]; }, K.id)); await sleep(25); }
+      const fk = await evOf(c.page, 'flip');
+      check(`${tag}: reveal = crack 0→1 first, then frost clears (flip ↑)`, fk.length === 1 && fk[0].id === K.id && sm.some(s => s[0] > 0 && s[0] < 1 && s[1] < 0.3) || sm.some(s => s[0] === 1 && s[1] < 0.5), sm);
+    }
+    check(`${tag}: no NaN`, (await nanCheck(c.page)).length === 0, await nanCheck(c.page));
+    check(`${tag}: zero console errors`, c.errors.length === 0, c.errors);
+    if (results.some(r => !r.ok && r.name.startsWith(tag))) await shot(c, 'rub-fail');
+    await c.close();
+  }
+  // (6) rub during deal / peek / hide does nothing
+  const c = await open(DEV.iphoneL, 'mute=1&seed=33&age=4');
+  await startGame(c, 1);
+  const seen = {};
+  const t0 = Date.now();
+  while (Date.now() - t0 < 12000) {
+    const s = await wstate(c.page);
+    if (s.state === 'round' && ['peek', 'hide'].includes(s.phase) && !seen[s.phase]) {
+      seen[s.phase] = true;
+      const r = (await rowsDown(c.page))[0] || (await cards(c.page));
+      await clearEv(c.page);
+      if (r.length >= 2) await swipe(c, [{ x: r[0].sx - r[0].sw, y: r[0].sy }, { x: r[r.length - 1].sx, y: r[0].sy }], { step: 24, dt: 4 });
+      const ev = await c.page.evaluate(() => window.__ev.filter(e => e.type === 'flip' && !['play', 'resolve'].includes(e.phase)).length);
+      check(`rub: a swipe during ${s.phase} reveals nothing`, ev === 0, ev);
+    }
+    if (s.phase === 'play') break;
+    await sleep(30);
+  }
+  check('rub: zero console errors (phases)', c.errors.length === 0, c.errors);
+  await c.close();
+}
+
+/* Taps on the frozen lake between / beside blocks do nothing. */
+async function gIce() {
+  for (const d of ALL) {
+    const c = await open(d, 'mute=1&seed=41&age=4');
+    await startGame(c, 1); await c.page.evaluate(() => IM.debug.gotoLevel(2)); await waitPlay(c.page);
+    const tag = `ice/${d.name}`;
+    // a point on the lake (inside layout.board) ≥ hitPad + 12 px from every block, off Tuk / bubble / HUD
+    const p = await c.page.evaluate(() => {
+      const w = IM.debug.world, v = IM.debug.view(), L = w.layout, B = L.board, m = w.cfg.hitPad + 12;
+      const obs = w.cards.filter(c => c.state !== 'gone').map(c => ({ x: c.x - c.w / 2 - m, y: c.y - c.h / 2 - m, w: c.w + 2 * m, h: c.h + 2 * m })).concat([L.tukRect, L.bubble, L.hud]);
+      for (let gy = 1; gy < 30; gy++) for (let gx = 1; gx < 30; gx++) {
+        const x = B.x + B.w * gx / 30, y = B.y + B.h * gy / 30;
+        if (obs.some(r => x > r.x && x < r.x + r.w && y > r.y && y < r.y + r.h)) continue;
+        return { x: v.left + x * v.s, y: v.top + y * v.s, lx: x, ly: y };
+      }
+      return null;
+    });
+    await clearEv(c.page);
+    const n0 = await voiceN(c.page);
+    if (p) { await c.page.touchscreen.tap(p.x, p.y); await sleep(150); }
+    check(`${tag}: tap on the open ice (lake, away from blocks) does nothing`, p && (await c.page.evaluate(() => window.__ev.filter(e => ['flip', 'tap', 'match', 'mismatch'].includes(e.type)).length)) === 0 && (await wstate(c.page)).open.length === 0, p);
+    check(`${tag}: … and Tuk stays quiet`, (await voiceN(c.page)) === n0, await c.page.evaluate(n => IM.debug.voiceLog.slice(n).map(l => l.text), n0));
+    // the gap between two neighbouring blocks in a row: centre of the gap
+    const rows = await rowsDown(c.page), r = rows.find(r => r.length >= 2);
+    if (r) {
+      const [A, B] = r;
+      const gap = await c.page.evaluate(([a, b]) => { const w = IM.debug.world, A = w.cardById(a), B = w.cardById(b); return { gap: (B.hx - B.w / 2) - (A.hx + A.w / 2), pad: w.cfg.hitPad, s: IM.debug.view().s }; }, [A.id, B.id]);
+      const gx = (A.sx + A.sw / 2 + B.sx - B.sw / 2) / 2;
+      await clearEv(c.page);
+      await c.page.touchscreen.tap(gx, A.sy); await sleep(150);
+      const f = await evOf(c.page, 'flip');
+      check(`${tag}: tap in the middle of the ${gap.gap.toFixed(1)} px gap between two blocks does nothing (hitPad ${gap.pad})`, f.length === 0, { flipped: f.map(e => e.id), gap });
+      await waitPlay(c.page, 6000).catch(() => {});
+      // a vertical gap (between rows) as well
+      const all = (await cards(c.page)).filter(x => x.state === 'down');
+      const below = all.find(x => Math.abs(x.hx - A.hx) < 4 && x.hy > A.hy + 4);
+      if (below) {
+        const top = await c.page.evaluate(id => IM.debug.world.cardById(id), A.id);
+        const gy = (A.sy + A.sh / 2 + below.sy - below.sh / 2) / 2;
+        await clearEv(c.page);
+        await c.page.touchscreen.tap(A.sx, gy); await sleep(150);
+        const f2 = await evOf(c.page, 'flip');
+        const vg = (below.hy - below.h / 2) - (A.hy + A.h / 2);
+        check(`${tag}: tap in the middle of the ${vg.toFixed(1)} px row gap does nothing`, f2.length === 0, { flipped: f2.map(e => e.id), vg, top: !!top });
+      }
+    }
+    check(`${tag}: zero console errors`, c.errors.length === 0, c.errors);
+    await c.close();
+  }
+  // dense boards: ≥ 8 blocks on iPad (age 5+, later rounds) have the smallest gaps — play there with the bot, then tap the gap
+  for (const d of [DEV.ipadP, DEV.ipadL]) {
+    const c = await open(d, 'mute=1&seed=43&age=7');
+    const tag = `ice/${d.name} dense`;
+    await c.page.evaluate(() => { IM.debug.setBot(true, 1); IM.debug.setSpeed(6); IM.debug.startGame(); });
+    const ok = await c.page.waitForFunction(() => { const w = IM.debug.world; return w.state === 'round' && w.cards.length >= 10 && w.phase === 'deal'; }, null, { timeout: 120000 }).then(() => true, () => false);
+    await c.page.evaluate(() => { IM.debug.setBot(false); IM.debug.setSpeed(1); });
+    if (!ok) { check(`${tag}: reached a round with 10 blocks`, false, await wstate(c.page)); await c.close(); continue; }
+    await waitPlay(c.page, 15000).catch(() => {});
+    const r = (await rowsDown(c.page)).find(r => r.length >= 2);
+    const [A, B] = r;
+    const g = await c.page.evaluate(([a, b]) => { const w = IM.debug.world, A = w.cardById(a), B = w.cardById(b); return { cw: +A.w.toFixed(1), gap: +((B.hx - B.w / 2) - (A.hx + A.w / 2)).toFixed(1), pad: w.cfg.hitPad, cssGap: +(((B.hx - B.w / 2) - (A.hx + A.w / 2)) * IM.debug.view().s).toFixed(1) }; }, [A.id, B.id]);
+    await clearEv(c.page);
+    await c.page.touchscreen.tap((A.sx + A.sw / 2 + B.sx - B.sw / 2) / 2, A.sy); await sleep(150);
+    const f = await evOf(c.page, 'flip');
+    check(`${tag}: tap in the middle of the ${g.gap} px gap (cw ${g.cw}, hitPad ${g.pad}) does nothing`, f.length === 0, { flipped: f.map(e => e.id), g });
+    check(`${tag}: zero console errors`, c.errors.length === 0, c.errors);
+    await c.close();
+  }
+}
+
+/* IM.debug.audio(): master → DynamicsCompressor → user gain (= volume × 1.6) → destination; sfx/music/amb → master. */
+async function gAudio() {
+  const c = await open(DEV.ipadL, 'seed=5');
+  await tapEl(c, '#btnPlay'); await sleep(600);   // a user gesture unlocks the audio
+  const r = await c.page.evaluate(() => {
+    const A = IM.debug.audio && IM.debug.audio();
+    if (!A || !A.ctx) return { ok: false, why: 'no IM.debug.audio().ctx' };
+    const E = window.__edges, to = (s) => E.filter(e => e[0] === s).map(e => e[1]);
+    const comp = to(A.master).find(n => n instanceof DynamicsCompressorNode);
+    const user = comp && to(comp).find(n => n === A.user);
+    const dest = A.user && to(A.user).some(n => n === A.ctx.destination);
+    return { ok: true, comp: !!comp, user: !!user, dest, sfx: to(A.sfx).includes(A.master), music: to(A.music).includes(A.master), amb: to(A.amb).includes(A.master),
+      cfg: comp && { th: comp.threshold.value, ratio: comp.ratio.value }, gain: A.user.gain.value, vol: A.volume, st: A.ctx.state };
+  });
+  check('audio: IM.debug.audio() has a live AudioContext after the first tap', r.ok && r.st === 'running', r);
+  check('audio: master → DynamicsCompressor → user gain → destination', r.comp && r.user && r.dest, r);
+  check('audio: sfx, music and ambience buses feed master', r.sfx && r.music && r.amb, r);
+  check('audio: user gain = volume × 1.6 makeup (loud default)', Math.abs(r.gain - r.vol * 1.6) < 0.05 && r.vol === 1, r);
+  const played = await c.page.evaluate(async () => {
+    const A = IM.Audio, names = ['crack', 'clink', 'melt', 'leap', 'splash', 'hmm', 'deal', 'frost', 'home', 'star', 'fanfare', 'round', 'tapcard', 'golden', 'swap', 'reward', 'land'];
+    const errs = [];
+    for (const n of names) { try { A.play(n, { kind: 'fish', i: 1, count: 2 }); } catch (e) { errs.push(n + ': ' + e); } }
+    await new Promise(r => setTimeout(r, 300));
+    return errs;
+  });
+  check('audio: every game SFX plays without throwing', played.length === 0, played);
+  check('audio: zero console errors', c.errors.length === 0, c.errors);
+  await c.close();
 }
 
 /* Flip a matching pair → match, reward lands on a perch on screen, off the board, not under HUD/bubble/Dee. */
@@ -475,16 +790,49 @@ async function gMatch() {
       const m = await evOf(c.page, 'match');
       check(`${tag} (${topic}): match event for the pair`, m.length === 1 && [m[0].a, m[0].b].sort().join() === [a.id, b.id].sort().join() && m[0].found === 1, m);
       check(`${tag}: no mismatch`, (await evOf(c.page, 'mismatch')).length === 0);
-      await c.page.waitForFunction(() => window.__ev.some(e => e.type === 'reward'), null, { timeout: 3000 }).catch(() => {});
+      // the two blocks glide towards each other on the ice (distance shrinks), then clink and melt
+      const dist = () => c.page.evaluate(([a, b]) => { const w = IM.debug.world, A = w.cardById(a), B = w.cardById(b); return A && B && A.state === 'matched' ? Math.hypot(A.x - B.x, A.y - B.y) : null; }, [a.id, b.id]);
+      const d0 = Math.hypot(a.hx - b.hx, a.hy - b.hy);
+      await c.page.waitForFunction(() => window.__ev.some(e => e.type === 'clink'), null, { timeout: 3500 }).catch(() => {});
+      const d1 = await dist();
+      check(`${tag}: matched blocks glide together (centre distance shrinks before the clink)`, d1 != null && d1 < d0 - 5, { d0, d1 });
+      await c.page.waitForFunction(() => window.__ev.some(e => e.type === 'reward'), null, { timeout: 4000 }).catch(() => {});
+      const ev = await c.page.evaluate(() => window.__ev.filter(e => ['match', 'clink', 'melt', 'reward'].includes(e.type)).map(e => ({ t: e.type, wt: e.wt, id: e.id, a: e.a, b: e.b })));
+      const seq = ev.map(e => e.t).join(',');
+      check(`${tag}: event order match → clink → melt ×2 → reward`, seq === 'match,clink,melt,melt,reward', seq);
+      const cl = ev.find(e => e.t === 'clink'), rwE = ev.find(e => e.t === 'reward');
+      check(`${tag}: clink names the pair`, cl && [cl.a, cl.b].sort().join() === [a.id, b.id].sort().join(), cl);
+      check(`${tag}: reward 0.3–3 s after the match (hold + glide + melt)`, rwE && rwE.wt - m[0].wt > 0.3 && rwE.wt - m[0].wt < 3.0, rwE && m[0] && rwE.wt - m[0].wt);
       const rw = await evOf(c.page, 'reward');
-      check(`${tag}: reward spawned ≈ 0.85 s after the match`, rw.length === 1 && rw[0].wt - m[0].wt > 0.6 && rw[0].wt - m[0].wt < 1.2, rw[0] && m[0] && rw[0].wt - m[0].wt);
       const gone = (await cards(c.page)).filter(x => x.id === a.id || x.id === b.id).map(x => x.state);
-      check(`${tag}: matched cards are gone after the burst`, gone.every(s => s === 'gone'), gone);
-      await c.page.waitForFunction(() => window.__ev.some(e => e.type === 'land'), null, { timeout: 6000 }).catch(() => {});
+      check(`${tag}: matched blocks are gone after the melt`, gone.every(s => s === 'gone'), gone);
+      const isFish = rw[0] && (rw[0].kind === 'fish' || rw[0].kind === 'fishes');
+      const wantKind = { colors: 'fish', shapes: 'sculpture', count: 'fishes', homes: 'animal', animals: 'animal', size: 'animal' }[topic];
+      check(`${tag}: reward kind fits the topic (${topic} → ${wantKind || '?'})`, !wantKind || (rw[0] && rw[0].kind === wantKind), rw[0] && rw[0].kind);
+      await c.page.waitForFunction(() => window.__ev.some(e => e.type === 'land'), null, { timeout: 8000 }).catch(() => {});
+      if (isFish) {
+        const lp = await evOf(c.page, 'leap'), sp = await evOf(c.page, 'splash'), n = rw[0].n || 1;
+        check(`${tag}: ${n} fish leap${n > 1 ? ' (counted)' : ''} and splash into the sea`, lp.length === n && sp.length === n && lp.every((e, i) => e.k === i + 1), { leaps: lp.map(e => e.k), splashes: sp.length, n });
+        await sleep(400);
+        const left = await c.page.evaluate(id => IM.debug.world.rewards.some(r => r.id === id), rw[0].id);
+        check(`${tag}: the fish reward is gone after diving`, !left);
+        const lv = await layoutViolations(c.page);
+        check(`${tag}: blocks clear of the real DOM HUD & bubble`, lv.length === 0, lv);
+        check(`${tag}: no NaN`, (await nanCheck(c.page)).length === 0, await nanCheck(c.page));
+        check(`${tag}: zero console errors`, c.errors.length === 0, c.errors);
+        if (results.some(r => !r.ok && r.name.startsWith(tag))) await shot(c, `match-L${lvl}-fail`);
+        await c.close();
+        continue;
+      }
+      if (topic === 'homes') {
+        await c.page.waitForFunction(() => window.__ev.some(e => e.type === 'homeArrive'), null, { timeout: 6000 }).catch(() => {});
+        const ha = await evOf(c.page, 'homeArrive');
+        check(`${tag}: the animal hops to its home badge (homeArrive)`, ha.length === 1 && !!ha[0].home, ha);
+      }
       await sleep(900);
       const R = await c.page.evaluate(() => {
         const w = IM.debug.world, L = w.layout, r = w.rewards[0];
-        return r && { kind: r.kind, state: r.state, x: r.x, y: r.y, perch: r.perch, box: r.target && r.target.box, W: L.W, H: L.H, safe: L.safe, grid: L.grid && L.grid.rect, dee: L.deeRect, bubble: L.bubble, hud: L.hud };
+        return r && { kind: r.kind, state: r.state, x: r.x, y: r.y, perch: r.perch, box: r.target && r.target.box, W: L.W, H: L.H, safe: L.safe, grid: L.grid && L.grid.rect, dee: L.tukRect, bubble: L.bubble, hud: L.hud };
       });
       const lands = await evOf(c.page, 'land');
       check(`${tag}: reward lands (land event, state settle/idle)`, R && lands.length >= 1 && (R.state === 'idle' || R.state === 'settle'), { R: R && R.state, lands: lands.length });
@@ -520,11 +868,15 @@ async function gMismatch() {
       await c.page.waitForFunction(() => window.__ev.some(e => e.type === 'mismatch'), null, { timeout: 3000 }).catch(() => {});
       const mm = await evOf(c.page, 'mismatch');
       check(`${tag}: mismatch event`, mm.length === 1 && mm[0].mismatches === 1 && mm[0].streak === 1, mm);
-      await sleep(400);
+      // wobble: sample the rotation of both blocks for 0.4 s
+      const rots = [];
+      for (let k = 0; k < 10; k++) { rots.push(await c.page.evaluate(([a, b]) => { const w = IM.debug.world; return Math.max(Math.abs(w.cardById(a).rot || 0), Math.abs(w.cardById(b).rot || 0)); }, [a.id, b.id])); await sleep(30); }
+      const mx = Math.max(...rots);
+      check(`${tag}: both blocks wobble (|rot| peaks 0.02–0.09 rad)`, mx > 0.02 && mx < 0.09, { max: +mx.toFixed(3) });
       const mid = (await cards(c.page)).filter(x => x.id === a.id || x.id === b.id).map(x => x.state + ':' + x.flip.toFixed(2));
       check(`${tag}: both stay face up while the mismatch shows`, mid.every(s => s.startsWith('up')), mid);
       const lines = await c.page.evaluate(n => IM.debug.voiceLog.slice(n).map(l => l.text), n0);
-      check(`${tag}: kind voice line (no negative words)`, lines.length >= 2 && lines.every(l => !badText(l) && !/\b(no|wrong|bad|sai|không đúng)\b/i.test(l)), lines);
+      check(`${tag}: kind voice line (no negative words)`, lines.length >= 2 && lines.every(l => !badText(l) && !negWord('en', l)), lines);
       const show = age === 3 ? 1.2 : 1.0;
       const t0 = mm[0].wt;
       await c.page.waitForFunction(([a, b]) => IM.debug.world.cardById(a).state === 'down' && IM.debug.world.cardById(b).state === 'down', [a.id, b.id], { timeout: 5000 }).catch(() => {});
@@ -533,7 +885,7 @@ async function gMismatch() {
       await sleep(450);
       const end = (await cards(c.page)).filter(x => x.id === a.id || x.id === b.id).map(x => x.state + ':' + x.flip.toFixed(2));
       const st = await wstate(c.page);
-      check(`${tag}: both face down again, open empty, phase play`, end.every(s => s.startsWith('down') && parseFloat(s.split(':')[1]) < 0.1) && st.open.length === 0 && st.phase === 'play', { end, st });
+      check(`${tag}: frost grew back on both (down, frost > 0.9), open empty, phase play`, end.every(s => s.startsWith('down') && parseFloat(s.split(':')[1]) < 0.1) && st.open.length === 0 && st.phase === 'play', { end, st });
       // the next tap works normally
       await clearEv(c.page);
       await tapCard(c, a.id); await sleep(50);
@@ -621,7 +973,7 @@ async function gTapUp() {
   check('tapup: tap on a face-up card → tap event', tp2.length === 1 && tp2[0].id === k.id, tp2);
   check('tapup: state unchanged (still up, still the only open card)', kk.state === 'up' && st.open.join() === k.id + '' && (await evOf(c.page, 'flip')).length === 0, { kk: kk.state, open: st.open });
   const lines = await c.page.evaluate(n => IM.debug.voiceLog.slice(n).map(l => l.text), n0);
-  check('tapup: Dee says its name again', lines.length >= 1 && lines.every(l => !badText(l)), lines);
+  check('tapup: Tuk says its name again', lines.length >= 1 && lines.every(l => !badText(l)), lines);
   // tap on a matched card (spinning away) → tap only
   const partner = (await cards(c.page)).find(x => x.key === k.key && x.id !== k.id);
   await tapCard(c, partner.id);
@@ -747,14 +1099,14 @@ async function gRepeat() {
   const info = await c.page.evaluate(() => ({ en: IM.Voice.isEnabled(), sup: IM.Voice.isSupported ? IM.Voice.isSupported() : null }));
   check('repeat: voice enabled at speed 1 without flags', info.en === true, info);
   const prompt = await c.page.evaluate(() => document.getElementById('bubbleText').textContent);
-  const L = await c.page.evaluate(() => { const v = IM.debug.view(), m = IM.debug.world.layout.dee; return { x: v.left + m.x * v.s, y: v.top + (m.y - m.h * 0.5) * v.s }; });
+  const L = await c.page.evaluate(() => { const v = IM.debug.view(), m = (IM.debug.world.layout.tuk || IM.debug.world.layout.dee); return { x: v.left + m.x * v.s, y: v.top + (m.y - m.h * 0.5) * v.s }; });
   const n0 = await voiceN(c.page);
   await clearEv(c.page);
   await c.page.touchscreen.tap(L.x, L.y); await sleep(300);
   const lines = await c.page.evaluate(n => IM.debug.voiceLog.slice(n).map(l => l.text), n0);
-  check('repeat: tap on Dee repeats the prompt (voice line = bubble)', lines.length === 1 && lines[0] === prompt, { lines, prompt });
-  check('repeat: tap on Dee flips nothing', (await evOf(c.page, 'flip')).length === 0);
-  check('repeat: Dee looks thoughtful', (await c.page.evaluate(() => IM.debug.world.dee.mood)) === 'think');
+  check('repeat: tap on Tuk repeats the prompt (voice line = bubble)', lines.length === 1 && lines[0] === prompt, { lines, prompt });
+  check('repeat: tap on Tuk flips nothing', (await evOf(c.page, 'flip')).length === 0);
+  check('repeat: Tuk looks thoughtful', (await c.page.evaluate(() => IM.debug.world.tuk.mood)) === 'think');
   const n1 = await voiceN(c.page);
   const d0 = await downs(c.page);
   await tapEl(c, '#bubble'); await sleep(300);
@@ -762,11 +1114,31 @@ async function gRepeat() {
   check('repeat: tap on the bubble repeats the prompt', l2.length === 1 && l2[0] === prompt, l2);
   check('repeat: bubble tap never reaches the world', (await downs(c.page)) === d0);
   for (let i = 0; i < 8; i++) { await c.page.touchscreen.tap(L.x, L.y); await sleep(40); }
-  check('repeat: rapid Dee taps → no errors', c.errors.length === 0, c.errors);
+  check('repeat: rapid Tuk taps → no errors', c.errors.length === 0, c.errors);
   await c.page.evaluate(() => IM.debug.setSpeed(4));
   check('repeat: voice disabled at speed > 1', (await c.page.evaluate(() => IM.Voice.isEnabled())) === false);
   check('repeat: zero console errors', c.errors.length === 0, c.errors);
   await c.close();
+  // Vietnamese: what is REALLY handed to speechSynthesis.speak says "Túc", never "Tuk" (bubble keeps "Tuk")
+  const ctx = await newCtx(DEV.iphoneL);
+  const v = await open(DEV.iphoneL, 'seed=62&age=4', { ctx });
+  await tapEl(v, '.title-screen [data-lang="vi"]'); await sleep(600);       // welcome line: "… Mình là cánh cụt Tuk …"
+  await tapEl(v, '#btnPlay'); await waitPlay(v.page);
+  const Lv = await v.page.evaluate(() => { const vv = IM.debug.view(), m = IM.debug.world.layout.tuk; return { x: vv.left + m.x * vv.s, y: vv.top + (m.y - m.h * 0.5) * vv.s }; });
+  await v.page.touchscreen.tap(Lv.x, Lv.y); await sleep(500);
+  const k = (await cards(v.page)).find(x => x.state === 'down'); if (k) { await tapCard(v, k.id); await sleep(500); }
+  const U = await v.page.evaluate(() => ({ utter: window.__utter, log: IM.debug.voiceLog.map(l => l.lang + ':' + l.text), bubble: document.getElementById('bubbleText').textContent, sup: !!window.speechSynthesis }));
+  const viU = U.utter.filter(u => /^vi/i.test(u.lang || ''));
+  const logTuk = U.log.filter(l => l.startsWith('vi:') && /\bTuk\b/.test(l));
+  if (U.utter.length) {
+    check('voice/vi: utterances reach speechSynthesis.speak with lang vi-VN', viU.length >= 1 && viU.every(u => /^vi-VN$/i.test(u.lang)), U.utter.slice(0, 6));
+    check('voice/vi: spoken text says "Túc", never "Tuk"', viU.every(u => !/\bTuk\b/.test(u.text)) && (logTuk.length === 0 || viU.some(u => /Túc/.test(u.text))), { utter: viU.map(u => u.text).slice(0, 6), logTuk });
+  } else {
+    check('voice/vi: (headless has no TTS) IM.Voice.spoken maps every logged "Tuk" to "Túc"', U.log.filter(l => l.startsWith('vi:')).every(l => { return true; }) && await v.page.evaluate(() => IM.debug.voiceLog.filter(l => l.lang === 'vi').every(l => !/\bTuk\b/.test(IM.Voice.spoken('vi', l.text)))), { sup: U.sup, log: U.log.slice(0, 5) });
+  }
+  check('voice/vi: the welcome line names Tuk in the log (display text keeps "Tuk")', logTuk.length >= 1, U.log.slice(0, 5));
+  check('voice/vi: zero console errors', v.errors.length === 0, v.errors);
+  await ctx.close();
 }
 
 async function toTalk(c) {
@@ -833,7 +1205,7 @@ async function gTalk() {
   await sleep(300);
   await c.page.evaluate(() => IM.debug.setSpeed(1));
   const nAsk = (await evOf(c.page, 'talkAsk')).length, spoken = (await voiceN(c.page)) - vl0;
-  check('talk: after 4 silent re-asks Dee has spoken only 3 of them', nAsk === 4 && spoken === 3, { nAsk, spoken });
+  check('talk: after 4 silent re-asks Tuk has spoken only 3 of them', nAsk === 4 && spoken === 3, { nAsk, spoken });
   check('talk: nobody answering → the game pauses itself after the 4th re-ask, Talk time still open', (await mode(c.page)) === 'paused' && (await c.page.evaluate(() => IM.debug.world.state)) === 'talk' && await visible(c.page, 'scrPause'));
   const t0 = await c.page.evaluate(() => IM.debug.world.time); await sleep(400);
   check('talk: world frozen while self-paused', (await c.page.evaluate(() => IM.debug.world.time)) === t0);
@@ -927,7 +1299,7 @@ async function gRotate() {
         return { W: L.W, H: L.H, cw: g && g.cw, overlaps, state: w.state, round: w.round, level: w.level, found: w.found, open: w.open.slice(),
           cards: live.map(c => ({ id: c.id, state: c.state, flip: c.flip })),
           out: live.filter(c => { const r = rect(c); return r.x < S.x - 1 || r.y < S.y - 1 || r.x + r.w > S.x + S.w + 1 || r.y + r.h > S.y + S.h + 1; }).map(c => c.id),
-          onDee: live.filter(c => ov(rect(c), L.deeRect)).map(c => c.id),
+          onDee: live.filter(c => ov(rect(c), L.tukRect)).map(c => c.id),
           rewardsOut: w.rewards.filter(r => r.target && r.target.box && (r.target.box.x < 0 || r.target.box.y < 0 || r.target.box.x + r.target.box.w > L.W || r.target.box.y + r.target.box.h > L.H)).map(r => r.id),
           rewardsAt: w.rewards.map(r => ({ id: r.id, x: r.x | 0, y: r.y | 0, inside: r.x > 0 && r.x < L.W && r.y > 0 && r.y < L.H })) };
       });
@@ -937,12 +1309,12 @@ async function gRotate() {
       check(`${tag}: cards inside the screen`, st.out.length === 0, st.out);
       check(`${tag}: cards ≥ 120 px at age 4`, st.cw >= 120, st.cw);
       check(`${tag}: no overlapping cards`, st.overlaps.length === 0, st.overlaps);
-      check(`${tag}: no card on Dee`, st.onDee.length === 0, st.onDee);
+      check(`${tag}: no block on Tuk`, st.onDee.length === 0, st.onDee);
       check(`${tag}: open card keeps its state`, st.open.join() === op.id + '' && st.cards.find(x => x.id === op.id).state === 'up' && st.cards.find(x => x.id === op.id).flip > 0.9, { open: st.open, op: op.id });
       check(`${tag}: other cards stay face down`, st.cards.filter(x => x.id !== op.id).every(x => x.state === 'down'), st.cards);
       check(`${tag}: rewards inside the new screen`, st.rewardsOut.length === 0 && st.rewardsAt.every(r => r.inside), st.rewardsAt);
       const lv = await layoutViolations(c.page);
-      check(`${tag}: cards / rewards clear of DOM HUD, bubble, Dee`, lv.length === 0, lv);
+      check(`${tag}: cards / rewards clear of DOM HUD, bubble, Tuk`, lv.length === 0, lv);
       // tap the partner with a real touch at the new place → match
       await clearEv(c.page);
       const partner = (await cards(c.page)).find(x => x.key === op.key && x.id !== op.id);
@@ -968,14 +1340,64 @@ async function gRotate() {
   await waitPlay(c.page);
   const s = await c.page.evaluate(() => IM.debug.world.cards.map(c => ({ id: c.id, d: Math.hypot(c.x - c.hx, c.y - c.hy), st: c.state })));
   check('rotate/during deal: every card lands on its new slot', s.every(x => x.d < 2 && x.st === 'down'), s);
-  const p = await pairDown(c.page);
+  // colours (L0) rewards are fish that dive away; a resize while they leap finishes them (land event)
+  let p = await pairDown(c.page);
+  await clearEv(c.page);
   await tapCard(c, p[0].id); await sleep(60); await tapCard(c, p[1].id);
-  await c.page.waitForFunction(() => IM.debug.world.rewards.some(r => r.state === 'fly'), null, { timeout: 4000 }).catch(() => {});
-  await c.page.setViewportSize(DEV.iphoneL.viewport); await sleep(2500);
-  const f = await c.page.evaluate(() => { const w = IM.debug.world, L = w.layout; return w.rewards.map(r => ({ st: r.state, x: r.x | 0, y: r.y | 0, ok: isFinite(r.x) && r.x > 0 && r.x < L.W && r.y > 0 && r.y < L.H })); });
-  check('rotate/during reward flight: reward ends inside the new screen', f.length >= 1 && f.every(x => x.ok && x.st !== 'fly'), f);
+  await c.page.waitForFunction(() => window.__ev.some(e => e.type === 'leap'), null, { timeout: 5000 }).catch(() => {});
+  await c.page.setViewportSize(DEV.iphoneL.viewport); await sleep(800);
+  const ff = await c.page.evaluate(() => ({ n: IM.debug.world.rewards.filter(r => r.kind === 'fish' || r.kind === 'fishes').length, land: window.__ev.filter(e => e.type === 'land').length }));
+  check('rotate/during fish leap: the fish finish (land event, no fish left in flight)', ff.n === 0 && ff.land >= 1, ff);
   check('rotate/during deal: zero console errors', c.errors.length === 0, c.errors);
   await c.close();
+  // shapes (L1) rewards are snow sculptures that slide to the shore: rotate while one slides
+  const c2 = await open(DEV.iphoneL, 'mute=1&seed=98&age=4');
+  await startGame(c2, 1); await c2.page.evaluate(() => IM.debug.gotoLevel(1)); await waitPlay(c2.page);
+  p = await pairDown(c2.page);
+  await tapCard(c2, p[0].id); await sleep(60); await tapCard(c2, p[1].id);
+  await c2.page.waitForFunction(() => IM.debug.world.rewards.some(r => r.state === 'fly'), null, { timeout: 5000 }).catch(() => {});
+  const was = await c2.page.evaluate(() => IM.debug.world.rewards.map(r => r.kind + ':' + r.state));
+  await c2.page.setViewportSize(DEV.iphoneP.viewport); await sleep(2500);
+  const f = await c2.page.evaluate(() => { const w = IM.debug.world, L = w.layout; return w.rewards.map(r => ({ k: r.kind, st: r.state, x: r.x | 0, y: r.y | 0, ok: isFinite(r.x) && r.x > 0 && r.x < L.W && r.y > 0 && r.y < L.H })); });
+  check('rotate/during sculpture slide: reward ends inside the new screen', f.length >= 1 && f.every(x => x.ok && x.st !== 'fly'), { was, f });
+  check('rotate/during sculpture slide: zero console errors', c2.errors.length === 0, c2.errors);
+  await c2.close();
+  // rotate MID-RUB: the finger is down on A (revealed), the screen turns, the finger moves on over the new blocks → nothing
+  for (const [a, b] of [[DEV.iphoneP, DEV.iphoneL], [DEV.ipadL, DEV.ipadP]]) {
+    const c3 = await open(a, 'mute=1&seed=99&age=4');
+    await startGame(c3, 1); await c3.page.evaluate(() => IM.debug.gotoLevel(2)); await waitPlay(c3.page);
+    const tag = `rotate/mid-rub ${a.name}→${b.name}`;
+    const A = (await cards(c3.page)).find(x => x.state === 'down');
+    await clearEv(c3.page);
+    await touch(c3.cdp, 'touchStart', [{ x: A.sx, y: A.sy }]); await sleep(60);
+    await touch(c3.cdp, 'touchMove', [{ x: A.sx + 3, y: A.sy + 2 }]); await sleep(30);
+    await c3.page.setViewportSize(b.viewport); await sleep(500);
+    const after = (await cards(c3.page)).filter(x => x.state === 'down');
+    // sweep the (still-down) finger across every frosted block at its new place
+    for (const k of after) { await touch(c3.cdp, 'touchMove', [{ x: k.sx, y: k.sy }]); await sleep(20); await touch(c3.cdp, 'touchMove', [{ x: k.sx + 6, y: k.sy + 4 }]); await sleep(20); }
+    await touch(c3.cdp, 'touchEnd', []); await sleep(150);
+    const fl = await evOf(c3.page, 'flip'), st = await wstate(c3.page);
+    check(`${tag}: rub cancelled by the rotation (only A revealed, nothing after)`, fl.length === 1 && fl[0].id === A.id && st.open.join() === A.id + '', { fl: fl.map(e => e.id + ':' + e.via), open: st.open });
+    const out = await c3.page.evaluate(() => { const w = IM.debug.world, S = w.layout.safe; return w.cards.filter(c => c.state !== 'gone').filter(c => c.x - c.w / 2 < S.x - 1 || c.y - c.h / 2 < S.y - 1 || c.x + c.w / 2 > S.x + S.w + 1 || c.y + c.h / 2 > S.y + S.h + 1).map(c => c.id); });
+    check(`${tag}: every block inside the new screen`, out.length === 0, out);
+    // the next real tap works: tap A's partner → match
+    const partner = (await cards(c3.page)).find(x => x.key === A.key && x.id !== A.id);
+    await clearEv(c3.page);
+    await tapCard(c3, partner.id);
+    await c3.page.waitForFunction(() => window.__ev.some(e => e.type === 'match'), null, { timeout: 3000 }).catch(() => {});
+    check(`${tag}: the next tap at the new place matches A's partner`, (await evOf(c3.page, 'match')).length === 1);
+    // and a fresh swipe works again after the rotation
+    await waitPlay(c3.page, 8000).catch(() => {});
+    const r = (await rowsDown(c3.page)).find(r => r.length >= 2);
+    if (r) {
+      await clearEv(c3.page);
+      await swipe(c3, [{ x: r[0].sx, y: r[0].sy }, { x: r[1].sx, y: r[1].sy }], { step: 14, dt: 12 });
+      await sleep(60);
+      check(`${tag}: a new swipe after the rotation reveals 2 blocks`, (await evOf(c3.page, 'flip')).length === 2, (await evOf(c3.page, 'flip')).map(e => e.id + ':' + e.via));
+    }
+    check(`${tag}: zero console errors`, c3.errors.length === 0, c3.errors);
+    await c3.close();
+  }
 }
 
 async function gHud() {
@@ -1025,10 +1447,33 @@ async function gBot() {
     check(`${tag}: all bubble/voice text clean`, bad.length === 0 && badLines.length === 0, bad.concat(badLines).slice(0, 5));
     if (lang === 'vi') check(`${tag}: done title in Vietnamese`, VI_RE.test(res.done), res.done);
     check(`${tag}: cards never below the age minimum`, small.size === 0, [...small]);
-    check(`${tag}: cards / resting rewards never under DOM HUD / bubble / Dee`, lv.size === 0, [...lv]);
+    check(`${tag}: cards / resting rewards never under DOM HUD / bubble / Tuk`, lv.size === 0, [...lv]);
     const stars = res.st.stars;
     check(`${tag}: stars ≤ 52 and shown on the done screen`, stars > 0 && stars <= 52 && +res.ds === stars, { stars, ds: res.ds });
-    table.push({ age, lang, dev: d.name, secs: ((Date.now() - t0) / 1000).toFixed(0), stars, topics: topics.join('/') });
+    // ---- voice log (IM.debug.voiceLog, copied per line by the installEv hook so the 600-line cap cannot hide anything)
+    const V = await c.page.evaluate(() => {
+      const flips = window.__ev.filter(e => e.type === 'flip').map(e => e.id + '@' + e.wt.toFixed(3));
+      const fl = window.__flipLines.filter(f => f.type === 'flip');
+      return { said: window.__said, flips: flips.length, flipLines: fl.map(f => ({ id: f.id, lang: f.lang, line: f.line })), logN: IM.debug.voiceLog.length };
+    });
+    const saidTexts = new Set(V.said.map(s => s.text));
+    const wrongLang = V.said.filter(s => s.lang !== lang);
+    check(`${tag}: voice log: every line in ${lang}`, V.said.length > 20 && wrongLang.length === 0, { n: V.said.length, wrong: wrongLang.slice(0, 4) });
+    const unnamed = V.flipLines.filter(f => !f.line || badText(f.line) || !saidTexts.has(f.line));
+    check(`${tag}: voice log: every reveal is named (${V.flips} reveals → ${V.flipLines.length} name lines, all spoken)`, V.flips > 0 && V.flipLines.length === V.flips && unnamed.length === 0, unnamed.slice(0, 4));
+    const neg = V.said.filter(s => negWord(lang, s.text));
+    check(`${tag}: voice log: no negative words`, neg.length === 0, neg.slice(0, 5).map(s => s.text));
+    if (lang === 'vi') {
+      const tukLines = V.said.filter(s => /\bTuk\b/.test(s.text));
+      const badSp = V.said.filter(s => /\bTuk\b/.test(s.spoken) || (/\bTuk\b/.test(s.text) && !/Túc/.test(s.spoken)));
+      check(`${tag}: voice log: Vietnamese speech says "Túc" (${tukLines.length} lines name Tuk), never "Tuk"`, badSp.length === 0, badSp.slice(0, 4));
+      const engl = V.said.filter(s => /\b(the|and|find|look|great|match|pair|let’s|let's)\b/i.test(s.text));
+      check(`${tag}: voice log: no English words in Vietnamese lines`, engl.length === 0, engl.slice(0, 4).map(s => s.text));
+    } else {
+      const viL = V.said.filter(s => VI_RE.test(s.text) && !/Mầm/.test(s.text));
+      check(`${tag}: voice log: no Vietnamese in English lines`, viL.length === 0, viL.slice(0, 4).map(s => s.text));
+    }
+    table.push({ age, lang, dev: d.name, secs: ((Date.now() - t0) / 1000).toFixed(0), stars, topics: topics.join('/'), lines: V.said.length, reveals: V.flips });
     if (age === 4 || age === 7) {
       await clearEv(c.page);
       await c.page.evaluate(() => { IM.debug.setBot(false); IM.debug.setSpeed(1); });
@@ -1048,10 +1493,10 @@ async function gBot() {
 }
 
 (async () => {
-  srv = await serve(process.env.DM_GAME_ROOT || undefined);
+  srv = await serve(process.env.IM_GAME_ROOT || process.env.DM_GAME_ROOT || undefined);
   browser = await chromium.launch();
-  const groups = [['boot', gBoot], ['lang', gLang], ['gate', gGate], ['settings', gSettings], ['volume', gVolume], ['flags', gFlags],
-    ['phases', gPhases], ['flip', gFlip], ['match', gMatch], ['mismatch', gMismatch], ['third', gThird], ['tapup', gTapUp], ['multi', gMulti],
+  const groups = [['boot', gBoot], ['lang', gLang], ['gate', gGate], ['settings', gSettings], ['volume', gVolume], ['audio', gAudio], ['flags', gFlags],
+    ['phases', gPhases], ['flip', gFlip], ['rub', gRub], ['ice', gIce], ['match', gMatch], ['mismatch', gMismatch], ['third', gThird], ['tapup', gTapUp], ['multi', gMulti],
     ['stars', gStars], ['hint', gHint], ['repeat', gRepeat], ['talk', gTalk], ['pause', gPause], ['rotate', gRotate], ['hud', gHud], ['bot', gBot]];
   const unknown = ONLY.filter(g => !groups.some(x => x[0] === g));
   if (unknown.length) { console.log('unknown group(s): ' + unknown.join(', ') + '\ngroups: ' + groups.map(g => g[0]).join(' ')); process.exit(2); }
@@ -1067,6 +1512,8 @@ async function gBot() {
   for (const r of results) { const g = byGroup[r.group] = byGroup[r.group] || { group: r.group, pass: 0, fail: 0 }; r.ok ? g.pass++ : g.fail++; }
   console.log('\n== summary');
   console.table(Object.values(byGroup).map(g => ({ group: g.group, pass: g.pass, fail: g.fail, result: g.fail ? 'FAIL' : 'PASS' })));
+  fs.writeFileSync(path.join(OUT, 'infos.json'), JSON.stringify(infos, null, 1));
+  if (infos.length) { console.log('\n== observations (not failures)'); infos.forEach(i => console.log('INFO ' + i.name + '  -- ' + JSON.stringify(i.data).slice(0, 300))); }
   const fails = results.filter(r => !r.ok);
   console.log(`${results.length - fails.length}/${results.length} checks passed`);
   fails.forEach(f => console.log('FAIL ' + f.name));

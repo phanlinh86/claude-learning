@@ -116,7 +116,7 @@
   const voiceOn = () => S.voice && !FLAGS.novoice && speed <= 1.01 && !FLAGS.mute;
   function speak(text, opt) {
     if (!text) return;
-    if (IM.Voice) IM.Voice.say(text, opt || {});
+    if (IM.Voice) return IM.Voice.say(text, opt || {});
   }
   function applyAudio() {
     IM.Audio.setOptions({ sfx: S.sfx, music: S.music, muted: FLAGS.mute, volume: S.volume == null ? 1 : S.volume });
@@ -125,8 +125,17 @@
     const vs = $('optVolume'); if (vs && document.activeElement !== vs) vs.value = Math.round((S.volume == null ? 1 : S.volume) * 100);
   }
   // the instruction is the most important line: praise / wrong lines must not cut it off (playtest P1-2)
-  function speakPrompt(txt, opt) { promptUntil = performance.now() + 300 + 72 * (txt || '').length; speak(txt, opt); }
+  // protected until the prompt has really ended (say() resolves), not just until it was requested (playtest P2-3)
+  function speakPrompt(txt, opt) {
+    promptUntil = Infinity;
+    const p = speak(txt, opt);
+    if (p && p.then) p.then(() => { promptUntil = performance.now() + 150; }, () => { promptUntil = 0; });
+    else promptUntil = performance.now() + 300 + 72 * (txt || '').length;
+  }
   const canInterrupt = () => performance.now() > promptUntil;
+  // the first block's name is the lesson: the match / mismatch line queues behind it (playtest P1-1)
+  let nameUntil = 0, matchUntil = 0;
+  const canCutName = () => performance.now() > nameUntil;
   function promptText(e) {
     return T(e.promptKey, e.params || {});
   }
@@ -186,11 +195,11 @@
   }
   function handleEvents() {
     const evs = world.drainEvents();
-    for (const e of evs) onEvent(e);
+    evs.forEach((e, i) => onEvent(e, evs[i + 1]));
   }
   function cardById(id) { return (world.cards || []).find(c => c.id === id); }
 
-  function onEvent(e) {
+  function onEvent(e, next) {
     const L = world.layout;
     switch (e.type) {
       case 'level':
@@ -207,22 +216,21 @@
         IM.UI.setDots(world.roundsPerLevel || 5, e.round % (world.roundsPerLevel || 5));
         const txt = promptText(e);
         lastPromptText = txt; rewardSaid = false;
-        IM.UI.say(txt); speakPrompt(txt, { priority: true });
-        if (e.surprise) {   // one surprise round per chapter: shuffle / golden pair / lily-pond layout
-          IM.Audio.play('surprise');
-          speak(T('surprise.' + e.surprise));
-        }
+        IM.UI.say(txt);
+        // one surprise round per chapter (slide / aurora pair / floes): announced inside the prompt so it is never dropped
+        speakPrompt(txt + (e.surprise ? ' ' + T('surprise.' + e.surprise) : ''), { priority: true });
+        if (e.surprise) IM.Audio.play('surprise');
         break;
       }
       case 'slide': case 'shuffle': IM.Audio.play('swap'); break;
       case 'golden': {   // the aurora pair
         IM.Audio.play('golden');
         render.burst('rainbow', e.x, e.y);
-        speak(T('golden'), { interrupt: true });
+        speak(T('golden'), { interrupt: canInterrupt() });
         break;
       }
       case 'deal': IM.Audio.play('deal'); break;
-      case 'peek': IM.Audio.play('peek'); speak(T('peek')); break;          // queued after the prompt
+      case 'peek': IM.Audio.play('peek'); break;          // no line: the prompt already says what to do (playtest P1-1e)
       case 'hide': IM.Audio.play('frost'); break;
       case 'clink': IM.Audio.play('clink', { count: world.found || 1 }); render.burst('sparkle', e.x, e.y); break;
       case 'melt': { const n = performance.now(); if (n - lastMeltAt > 150) { lastMeltAt = n; IM.Audio.play('melt'); } break; }
@@ -235,13 +243,17 @@
       case 'flip': {
         IM.Audio.play('crack');
         if (e.x != null) render.burst('shards', e.x, e.y, { size: (cardById(e.id) || {}).w || 110 });
-        if (e.open === 2) lastPraise = 0;
+        idleSaid = 0;   // a child who is playing is never auto-paused (playtest P2-1)
+        if (e.open === 2) { lastPraise = 0; break; }   // no 2nd name: the match / mismatch line names both blocks
         const line = IM.I18N.sayFlip ? IM.I18N.sayFlip(curLang(), Object.assign({ topic: world.topic }, e)) : '';
-        speak(line, { interrupt: canInterrupt() });   // the card's name is the lesson; it never cuts the instruction
+        nameUntil = performance.now() + 300 + 72 * line.length;
+        // the block's name is the lesson; it never cuts the instruction nor the start of a match line
+        speak(line, { interrupt: canInterrupt() && performance.now() > matchUntil });
         break;
       }
       case 'tap': {
         const now = performance.now();
+        idleSaid = 0;
         if (now - lastGrabSay < 900) break;
         lastGrabSay = now;
         IM.Audio.play('tapcard');
@@ -253,18 +265,16 @@
         IM.Audio.play('match', { count: e.found || 0 });
         const ca = cardById(e.a), cb = cardById(e.b);
         if (ca && cb) render.burst('glint', (ca.x + cb.x) / 2, (ca.y + cb.y) / 2, { size: ca.w });
-        lastMatchAt = performance.now();
-        speak(IM.I18N.sayMatch ? IM.I18N.sayMatch(curLang(), Object.assign({ topic: world.topic }, e)) : T('praise'), { interrupt: true });
+        lastMatchAt = performance.now(); matchUntil = lastMatchAt + 1200;
+        speak(IM.I18N.sayMatch ? IM.I18N.sayMatch(curLang(), Object.assign({ topic: world.topic }, e)) : T('praise'), { interrupt: canInterrupt() && canCutName() });
         break;
       }
       case 'mismatch': {
         stats.wrong++;
         IM.Audio.play('hmm');
-        const nowW = performance.now();
-        if (nowW - lastWrongSay > 1500) {
-          lastWrongSay = nowW;
-          speak(IM.I18N.sayMismatch ? IM.I18N.sayMismatch(curLang(), Object.assign({ topic: world.topic }, e)) : T('wrong'), { interrupt: canInterrupt() });
-        }
+        if (next && next.type === 'hint' && !next.idle) break;   // the hint line replaces it
+        lastWrongSay = performance.now();
+        speak(IM.I18N.sayMismatch ? IM.I18N.sayMismatch(curLang(), Object.assign({ topic: world.topic }, e)) : T('wrong'), { interrupt: canInterrupt() && canCutName() });
         break;
       }
       case 'reward': {
@@ -283,7 +293,7 @@
       case 'hint': {
         IM.Audio.play('hint');
         for (const id of [e.a, e.b]) { const c = cardById(id); if (c) render.burst('hint', c.x, c.y, { size: c.w }); }
-        if (!e.idle) speak(T('hint'));
+        if (!e.idle) speak(T('hint'), { interrupt: canInterrupt() && canCutName(), priority: true });
         break;
       }
       case 'idle':

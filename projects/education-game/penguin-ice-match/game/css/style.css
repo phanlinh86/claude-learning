@@ -189,7 +189,7 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
   .talk-q { grid-column: 2; margin: 0 0 8px; font-size: 20px; }
   .talk-choices { grid-column: 2; }
   .mic-btn { grid-column: 2; justify-self: center; margin-top: 8px; min-height: 48px; }
-  .talk-choices button { min-height: 72px; min-width: 88px; font-size: 26px; }
+  .talk-choices button { min-height: 64px; min-width: 96px; font-size: 26px; }
   .hud-stars img { width: 30px; height: 30px; } .hud-stars { font-size: 22px; }
   .talk-panel.noshow { grid-template-columns: minmax(0, 1fr); }
   .talk-panel.noshow > * { grid-column: 1; }

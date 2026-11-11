@@ -172,8 +172,12 @@
       for (const c of w.cards || []) if (c.state === 'gone' && c.hole) this._hole(c);
       const rws = (w.rewards || []).slice().sort((p, q) => p.y - q.y);   // back row first
       for (const r of rws) if (r.kind === 'animal' && r.badge) this._badge(r);
-      this._dee(w, o, a);
       const cards = (w.cards || []).filter(c => c.state !== 'gone');
+      // blocks sliding in pass BEHIND Tuk (visual QA P2-2): draw them first
+      for (const c of cards) if (c.state === 'deal') this._card(c, a);
+      if (L.sea && L.sea.overBoard) this._seaHole(L.sea);
+      this._dee(w, o, a);
+      for (let i = cards.length - 1; i >= 0; i--) if (cards[i].state === 'deal') cards.splice(i, 1);
       // resting blocks first, lifted ones next, matched (gliding) blocks last
       const ord = c => (c.state === 'matched' ? 2 : 0) + (c.lift || 0);
       cards.sort((p, q) => ord(p) - ord(q));
@@ -205,7 +209,9 @@
       const g = this.g, R = G.rect, pad = Math.max(20, G.gap * 1.4), st = this._season || 0;
       const k = this._panelA == null ? 1 : this._panelA;
       if (k <= 0.01) return;
-      const x = R.x - pad, y = R.y - pad, ww = R.w + pad * 2, hh = R.h + pad * 2;
+      const ins = L.ins || { left: 0, right: 0 };
+      const x0 = Math.max(R.x - pad, ins.left + 6), x1 = Math.min(R.x + R.w + pad, this.W - ins.right - 6);
+      const x = x0, y = R.y - pad, ww = x1 - x0, hh = R.h + pad * 2;
       g.save(); g.globalAlpha = k * 0.92;
       g.fillStyle = 'rgba(70,110,150,.16)'; g.beginPath(); roundRect(g, x + 2, y + 8, ww, hh, 48); g.fill();
       const gr = g.createLinearGradient(x, y, x + ww * 0.4, y + hh);
@@ -236,6 +242,15 @@
       }
       g.restore();
       g.restore();
+    }
+    _seaHole(S) {   // no open water beside the lake: a round fishing hole in the ice where the fish dive
+      const g = this.g, r = (S.w || 100) * 0.42, y = S.y;
+      g.fillStyle = 'rgba(255,255,255,.85)'; g.beginPath(); g.ellipse(S.x, y, r + 8, r * 0.42 + 5, 0, 0, TAU); g.fill();
+      const gr = g.createLinearGradient(0, y - r * 0.4, 0, y + r * 0.4);
+      gr.addColorStop(0, '#3E7FB0'); gr.addColorStop(1, '#6FB2DA');
+      g.fillStyle = gr; g.beginPath(); g.ellipse(S.x, y, r, r * 0.42, 0, 0, TAU); g.fill();
+      g.strokeStyle = 'rgba(255,255,255,.5)'; g.lineWidth = 2;
+      const u = (this.time * 0.5) % 1; g.beginPath(); g.ellipse(S.x, y, r * (0.3 + 0.6 * u), r * 0.42 * (0.3 + 0.6 * u), 0, 0, TAU); g.stroke();
     }
     _hole(c) {   // the melt hole left by a matched pair (until its reward has left)
       const art = CA(); if (!art || !art.drawHole) return;
@@ -399,7 +414,8 @@
       const col = w.collected || [];
       const an = col.filter(r => r.kind === 'animal').map(r => r.sprite);
       const friends = an.length ? an : (IM.ANIMALS || []).map(a => 'animal_' + a);
-      const x0 = L.ins.left + 40, x1 = W - L.ins.right - 40, n = Math.min(friends.length, 10);
+      const x0 = L.ins.left + 40, x1 = (o && o.compact) ? Math.min(W - L.ins.right - 40, W * 0.52 - 20) : W - L.ins.right - 40;
+      const n = Math.min(friends.length, o && o.compact ? 6 : 10);
       const step = Math.min(100, (x1 - x0) / Math.max(1, n)), s = Math.min(76, step * 0.95);
       const sx = (x0 + x1) / 2 - step * (n - 1) / 2;
       if (art) {   // snow sculptures on the far snow line

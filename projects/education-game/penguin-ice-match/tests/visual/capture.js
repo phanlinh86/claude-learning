@@ -1,4 +1,4 @@
-// Visual QA capture for Dee's Forest Memory: every screen × device × language, every topic × age (peek frame, biggest
+// Visual QA capture for Tuk's Ice Match (inherited from Dee's Forest Memory): every screen × device × language, every topic × age (peek frame, biggest
 // round), the 4 seasons, rewards late in a chapter, notch insets, short landscape phones, half-flipped cards.
 //   node tests/visual/capture.js [section ...]   sections: screens topics seasons rewards notch short flip  (default: all)
 // Output: tests/out/visual/<section>/*.png + *.jsonl (geometry + background samples). Analyse: node tests/visual/analyze.js
@@ -8,11 +8,11 @@ const { OUT, mk, AGE_TOPICS, sleep, jl, open, shot, geom, bgProbe } = V;
 const want = process.argv.slice(2);
 const on = s => !want.length || want.includes(s);
 const reset = f => { try { fs.unlinkSync(f); } catch (e) {} };
-const RICH = [   // a full session's worth of rewards for the winter party
-  ...['fox', 'deer', 'hedgehog', 'squirrel', 'bunny', 'frog', 'bear', 'owl', 'mouse'].map(a => ({ kind: 'animal', sprite: 'animal_' + a })),
-  ...['red', 'blue', 'yellow', 'green', 'purple'].map(c => ({ kind: 'butterfly', color: c })),
-  ...[['heart', 'red'], ['star', 'yellow'], ['circle', 'blue'], ['triangle', 'green']].map(([s, c]) => ({ kind: 'lantern', shape: s, color: c })),
-  { kind: 'acorns', n: 3 }, { kind: 'star', text: 'A' }];
+const RICH = [   // a full session's worth of rewards for the rainbow party
+  ...['bear', 'seal', 'fox', 'owl', 'whale', 'puffin', 'penguin', 'hare', 'walrus'].map(a => ({ kind: 'animal', sprite: 'animal_' + a })),
+  ...['red', 'blue', 'yellow', 'green', 'purple'].map(c => ({ kind: 'fish', color: c })),
+  ...[['heart', 'red'], ['star', 'yellow'], ['circle', 'blue'], ['triangle', 'green']].map(([s, c]) => ({ kind: 'sculpture', shape: s, color: c })),
+  { kind: 'fishes', n: 3 }, { kind: 'star', text: 'A' }, { kind: 'animal', sprite: 'animal_seal', home: 'floe' }];
 
 async function screens() {
   const dir = mk(path.join(OUT, 'screens')), J = path.join(dir, 'screens.jsonl'); reset(J);
@@ -193,6 +193,51 @@ async function short() {
   console.log('short done');
 }
 
+
+// match phases slowed down: glide, clink/melt, fish leaping (colors), fishes (count), animal hopping to its badge (homes)
+async function phases() {
+  const dir = mk(path.join(OUT, 'phases')), J = path.join(dir, 'phases.jsonl'); reset(J);
+  for (const dev of ['iphoneP', 'iphoneL', 'ipadP', 'ipadL']) for (const [age, lv, topic] of [[4, 0, 'colors'], [4, 2, 'count'], [4, 3, 'homes'], [3, 1, 'size']]) {
+    const { ctx, page } = await open(dev, `age=${age}&lang=en`, { seed: 9 });
+    await page.evaluate(([lv, t]) => { const D = IM.debug, w = D.world; D.toRound(lv, t, 3); D.toPlay();
+      const a = w.cards.find(c => c.state === 'down'), b = w.cards.find(c => c !== a && c.key === a.key);
+      D.tap(a); D.adv(0.35); D.tap(b); D.until(() => w._anims.length, 3); D.sync(); }, [lv, topic]);
+    const steps = [['a-glide', 0.25], ['b-clink', 0.25], ['c-melt', 0.25], ['d-emerge', 0.2], ['e-fly1', 0.25], ['f-fly2', 0.3], ['g-fly3', 0.4], ['h-settled', 1.5]];
+    for (const [n, dt] of steps) {
+      await page.evaluate(dt => { const D = IM.debug; D.adv(dt); D.sync(); }, dt);
+      await sleep(120); await shot(page, path.join(dir, `${dev}-a${age}-${topic}-${n}.png`));
+      jl(J, { dev, age, topic, step: n, ...(await geom(page)), pieces: await page.evaluate(() => IM.debug.world.rewards.map(r => ({ kind: r.kind, state: r.state, badge: r.badge, pieces: (r.pieces || []).filter(p => p.state === 'air').map(p => [Math.round(p.x), Math.round(p.y)]) }))) });
+    }
+    // late chapter for this topic: rewards on the shore
+    await page.evaluate(() => { const D = IM.debug; D.playTo(3, 1); });
+    await sleep(200); await shot(page, path.join(dir, `${dev}-a${age}-${topic}-z-late.png`));
+    jl(J, { dev, age, topic, step: 'late', ...(await geom(page)) });
+    await ctx.close();
+  }
+  console.log('phases done');
+}
+
+// the 3 surprise rounds (slide mid-glide, aurora, floes) on all 4 viewports
+async function surprise() {
+  const dir = mk(path.join(OUT, 'surprise')), J = path.join(dir, 'surprise.jsonl'); reset(J);
+  for (const dev of ['iphoneP', 'iphoneL', 'ipadP', 'ipadL']) for (const sp of ['slide', 'aurora', 'floes']) for (const age of [4, 7]) {
+    const { ctx, page } = await open(dev, `age=${age}&lang=en`, { seed: 9 });
+    await page.evaluate(sp => { const D = IM.debug, w = D.world; D.startGame(); D.freeze(); w.cfg.surpriseTypes = [sp]; w.startLevel(1); D.adv(2.6);
+      w.round = 2; w._beginRound(); D.weather.setWeather(1, { instant: true }); D.peekUp(); }, sp);
+    await sleep(200); await shot(page, path.join(dir, `${dev}-a${age}-${sp}-peek.png`));
+    jl(J, { dev, age, sp, step: 'peek', ...(await geom(page)) });
+    if (sp === 'slide') { await page.evaluate(() => { const D = IM.debug, w = D.world; D.until(() => w.phase === 'slide', 5); D.adv(0.45); D.sync(); });
+      await sleep(150); await shot(page, path.join(dir, `${dev}-a${age}-slide-mid.png`)); jl(J, { dev, age, sp, step: 'mid', ...(await geom(page)) }); }
+    if (sp === 'aurora') { await page.evaluate(() => { const D = IM.debug, w = D.world; D.toPlay(); const g = w.cards.filter(c => c.key === w.cur.golden);
+      if (g.length === 2) { D.tap(g[0]); D.adv(0.35); D.tap(g[1]); D.adv(1.4); } D.sync(); });
+      await sleep(150); await shot(page, path.join(dir, `${dev}-a${age}-aurora-golden.png`)); }
+    if (sp === 'floes') { await page.evaluate(() => { const D = IM.debug; D.toPlay(); D.adv(1.2); D.sync(); });
+      await sleep(150); await shot(page, path.join(dir, `${dev}-a${age}-floes-play.png`)); jl(J, { dev, age, sp, step: 'play', ...(await geom(page)) }); }
+    await ctx.close();
+  }
+  console.log('surprise done');
+}
+
 async function flip() {   // half-flipped cards close up + hint glow
   const dir = mk(path.join(OUT, 'flip'));
   for (const dev of ['ipadL', 'iphoneP']) {
@@ -219,6 +264,8 @@ async function flip() {   // half-flipped cards close up + hint glow
     if (on('notch')) await notch();
     if (on('short')) await short();
     if (on('flip')) await flip();
+    if (on('phases')) await phases();
+    if (on('surprise')) await surprise();
   } catch (e) { console.error(e); process.exitCode = 1; }
   await V.stop();
 })();

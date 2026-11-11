@@ -1,11 +1,11 @@
-// Text-fit checks for Dee's Forest Memory (EN + VI) on every device:   node tests/visual/measure.js
+// Text-fit checks for Tuk's Ice Match (EN + VI) on every device:   node tests/visual/measure.js
 // - the speech bubble with every prompt (p.*), the longest feedback lines, idle/hint lines: font size after _fitBubble,
 //   overflow, real bottom vs the top of the tallest grid of that age (logical px; < 0 = covers cards)
 // - the chapter banner: topic names are squeezed by fitText to bw − 60 → effective font px (62 nominal)
 // - the Talk panel for every topic: overflow, rows of choices, clipped labels
 const V = require('./lib');
 const DEVS = ['iphoneP', 'iphoneL', 'ipadP', 'ipadL', 'seL'];
-const TOPICS = ['colors', 'size', 'shapes', 'count', 'animals', 'letters', 'lower', 'initial', 'add', 'sub', 'oddeven'];
+const TOPICS = ['colors', 'size', 'shapes', 'count', 'animals', 'homes', 'letters', 'lower', 'initial', 'add', 'sub', 'oddeven'];
 (async () => {
   await V.start();
   for (const dev of DEVS) for (const lang of ['en', 'vi']) {
@@ -16,7 +16,7 @@ const TOPICS = ['colors', 'size', 'shapes', 'count', 'animals', 'letters', 'lowe
       const D = IM.debug, v = D.view(), w = D.world, I = IM.I18N, b = document.getElementById('bubble'), t = document.getElementById('bubbleText');
       const lines = TOPICS.map(k => ['p.' + k, I.t(lang, 'p.' + k, { n: 5 })]);
       for (const k of ['hint', 'idle', 'peek', 'hide', 'great', 'praise']) { const s = I.t(lang, k); if (s && s !== k) lines.push([k, s]); }
-      if (I.sayMismatch) lines.push(['mismatch', I.sayMismatch(lang, { topic: 'initial', nameKindA: 'animal', nameValueA: 'hedgehog', nameKindB: 'animal', nameValueB: 'squirrel', faceA: {}, faceB: {} })]);
+      if (I.sayMismatch) lines.push(['mismatch', I.sayMismatch(lang, { topic: 'initial', nameKindA: 'animal', nameValueA: 'walrus', nameKindB: 'animal', nameValueB: 'puffin', faceA: {}, faceB: {} })]);
       const gridTop = w.layout.grid.rect.y;
       const out = lines.map(([k, s]) => { IM.UI.say(s); const q = b.getBoundingClientRect();
         return { k, len: s.length, font: +parseFloat(t.style.fontSize).toFixed(1), overflow: b.scrollHeight - b.clientHeight, clear: +(gridTop - (q.bottom - v.top) / v.s).toFixed(1) }; });

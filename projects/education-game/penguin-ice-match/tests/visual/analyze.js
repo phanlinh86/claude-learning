@@ -1,4 +1,4 @@
-// Analyse tests/out/visual/**/*.jsonl from capture.js (Dee's Forest Memory): card size / gap / keep-out checks, rewards
+// Analyse tests/out/visual/**/*.jsonl from capture.js (Tuk's Ice Match): card size / gap / keep-out checks, rewards
 // placement, bubble fit, ΔE00 contrast (card back + front vs the clearing, clearing vs forest, butterflies vs what is
 // behind them, answer colours vs the cream card front, normal + deuteranopia + protanopia).   node tests/visual/analyze.js
 const fs = require('fs'), path = require('path');
@@ -8,7 +8,7 @@ const read = f => { try { return fs.readFileSync(path.join(OUT, f), 'utf8').trim
 const { hex, lab, de00 } = require('./colour');
 const mean = s => [0, 1, 2].map(i => s.reduce((a, c) => a + c[i], 0) / s.length);
 const PAL = { red: '#E84A4A', blue: '#3C8DE8', yellow: '#FFD23F', green: '#4CC26B', orange: '#FF9A2E', purple: '#9B6BE0', pink: '#FF8FC0' };
-const CREAM = '#FFF8EA', TEAL = '#2F7D73', DEE = '#FFE27A';
+const CREAM = '#DDF1FB', TEAL = '#F2F8FC', DEE = '#C9454F';   // clear ice, frost, Tuk's hat stripe
 const f1 = v => (Math.round(v * 10) / 10).toFixed(1);
 
 /* ---------- geometry ---------- */
@@ -47,6 +47,8 @@ for (const r of read('topics/topics.jsonl')) checkGeom(`topics ${r.dev}-${r.lang
 for (const r of read('seasons/seasons.jsonl')) if (r.screen === 'peek') checkGeom(`season ${r.dev} s${r.season}`, r, rows);
 for (const r of read('rewards/rewards.jsonl')) checkGeom(`rewards ${r.dev} a${r.age} ${r.topic}`, r, rows);
 for (const r of read('notch/notch.jsonl')) checkGeom(`notch ${r.dev}-${r.lang} ${r.screen}`, r, rows);
+for (const r of read('phases/phases.jsonl')) if (r.step === 'late' || r.step === 'h-settled') checkGeom(`phases ${r.dev} a${r.age} ${r.topic} ${r.step}`, r, rows);
+for (const r of read('surprise/surprise.jsonl')) checkGeom(`surprise ${r.dev} a${r.age} ${r.sp} ${r.step}`, r, rows);
 for (const r of read('short/short.jsonl')) if (r.cards) checkGeom(`short ${r.dev}-${r.lang} ${r.screen}`, r, rows);
 
 console.log('== geometry (logical px; css = CSS px on the device) ==');
@@ -66,9 +68,9 @@ for (const r of probes) {
   const P = mean(p.panel), A = mean(p.around), k = bySeason[s] || (bySeason[s] = { back: [], front: [], panel: [], bf: [] });
   k.back.push(de00(lab(hex(TEAL)), lab(P))); k.front.push(de00(lab(hex(CREAM)), lab(P))); k.panel.push(de00(lab(P), lab(A)));
   k.P = P;
-  for (const q of p.rewards) if (q.kind === 'butterfly' && q.color) { const d = q.samples.map(c => de00(lab(hex(PAL[q.color])), lab(c))).sort((a, b) => a - b); k.bf.push({ c: q.color, med: d[d.length >> 1], min: d[0] }); }
+  for (const q of p.rewards) if ((q.kind === 'fish' || q.kind === 'sculpture') && q.color) { const d = q.samples.map(c => de00(lab(hex(PAL[q.color])), lab(c))).sort((a, b) => a - b); k.bf.push({ c: q.color, med: d[d.length >> 1], min: d[0] }); }
 }
-const SN = ['spring', 'summer', 'autumn', 'winter'];
+const SN = ['sunny', 'breezy', 'rain', 'rainbow'];
 for (const [s, k] of Object.entries(bySeason)) {
   const mn = a => Math.min(...a), avg = a => a.reduce((x, y) => x + y, 0) / a.length;
   console.log(`${SN[s].padEnd(7)} panel rgb(${k.P.map(Math.round)}) back↔panel ${f1(mn(k.back))} cream↔panel ${f1(mn(k.front))} panel↔forest ${f1(avg(k.panel))} (min ${f1(mn(k.panel))})` +
