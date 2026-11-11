@@ -63,7 +63,7 @@ MECHANICS = [
     ('build', 'jigsaw: drag pieces into the matching shadow to complete a picture'),
 ]
 FAMILY_KEYWORDS = [   # how a free-text Mechanic column maps back to a family (first match wins)
-    ('memory', ['memory', 'flip']), ('trace', ['trace', 'connect', 'paint', 'draw']), ('music', ['tune', 'xylophone', 'drum', 'music', 'rhythm', 'band']),
+    ('memory', ['memory', 'flip']), ('trace', ['trace', 'connect', 'paint', 'draw']), ('music', ['tune', 'xylophone', 'drum', 'music', 'rhythm', 'band', 'chime', 'bell', 'sing']),
     ('path', ['stepping', 'stone', 'maze', 'rocket']), ('build', ['tower', 'stack', 'jigsaw', 'puzzle']),
     ('seek', ['hide', 'peek', 'dig', 'odd one']), ('pop', ['pop', 'fishing', 'peekaboo', 'whack']),
     ('container', ['sort', 'nest', 'basket', 'catch', 'feed', 'cargo', 'plant', 'pot', 'chest', 'into', 'dress']),
@@ -111,7 +111,7 @@ def history():
             cells = [c.strip() for c in line.strip().strip('|').split('|')]
             if len(cells) < 4 or not re.match(r'\d{4}-\d\d-\d\d', cells[0]):
                 continue
-            rows.append((cells[0][:10], cells[2], cells[3], cells[1]))
+            rows.append((cells[0][:10], cells[2], cells[3] + ' ' + (cells[5] if len(cells) > 5 else ''), cells[1]))
     seen, out = set(), []
     for r in sorted(rows, key=lambda r: r[0]):
         if r[3] in seen:          # a Mầm game listed in both files counts once

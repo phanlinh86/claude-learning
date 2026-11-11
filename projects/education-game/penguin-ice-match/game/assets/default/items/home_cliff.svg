@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><clipPath id="cliff_c1"><circle cx="64" cy="62.5" r="50" /></clipPath><clipPath id="cliff_c2"><rect x="0" y="98" width="128" height="40" rx="0" /></clipPath><clipPath id="cliff_c3"><path d="M 0 34 L 60 30 C 76 30 86 40 88 54 L 92 78 L 100 84 L 104 132 L 0 132 Z" /></clipPath><clipPath id="cliff_c4"><path d="M 0 32 L 60 28 C 72 28 80 32 84 38 C 76 42 66 40 60 42 C 50 44 40 40 30 44 C 20 46 10 42 0 44 Z" /></clipPath><clipPath id="cliff_c5"><ellipse cx="52" cy="68" rx="12" ry="10" /></clipPath><clipPath id="cliff_c6"><path d="M 36 78 C 44 76 62 76 70 78 C 66 82 42 82 36 78 Z" /></clipPath><g id="cliff_sil"><circle cx="64" cy="62.5" r="50" /></g></defs>
+<use href="#cliff_sil" xlink:href="#cliff_sil" transform="translate(0 3)" fill="#1E3550" stroke="#1E3550" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>
+<use href="#cliff_sil" xlink:href="#cliff_sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="64" cy="62.5" r="50" fill="#DCEBF5"/>
+<g clip-path="url(#cliff_c1)">
+<circle cx="46" cy="36.5" r="30" fill="#FFFFFF" opacity=".22"/>
+<rect x="0" y="98" width="128" height="40" rx="0" fill="#4C88BC"/>
+<g clip-path="url(#cliff_c2)">
+</g>
+<path d="M 96 108 q 5 -3 10 0 q 5 3 10 0" fill="none" stroke="#9FC8EA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 0 34 L 60 30 C 76 30 86 40 88 54 L 92 78 L 100 84 L 104 132 L 0 132 Z" fill="#8E7460"/>
+<g clip-path="url(#cliff_c3)"><g transform="translate(-6 -4)"><path d="M 0 34 L 60 30 C 76 30 86 40 88 54 L 92 78 L 100 84 L 104 132 L 0 132 Z" fill="#A88E78"/></g>
+<ellipse cx="28" cy="50" rx="12" ry="3" transform="rotate(-4 28 50)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M 0 34 L 60 30 C 76 30 86 40 88 54 L 92 78 L 100 84 L 104 132 L 0 132 Z" fill="none" stroke="#6B5848" stroke-width="2.4" stroke-linejoin="round"/>
+<path d="M 6 58 L 40 56 L 52 60" fill="none" stroke="#7E6654" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 54 78 L 86 76" fill="none" stroke="#7E6654" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 10 92 L 36 90" fill="none" stroke="#7E6654" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 50 108 L 96 106" fill="none" stroke="#7E6654" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 14 118 L 40 116" fill="none" stroke="#7E6654" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 0 32 L 60 28 C 72 28 80 32 84 38 C 76 42 66 40 60 42 C 50 44 40 40 30 44 C 20 46 10 42 0 44 Z" fill="#68A458"/>
+<g clip-path="url(#cliff_c4)"><g transform="translate(0 -3)"><path d="M 0 32 L 60 28 C 72 28 80 32 84 38 C 76 42 66 40 60 42 C 50 44 40 40 30 44 C 20 46 10 42 0 44 Z" fill="#7CB86A"/></g>
+</g>
+<path d="M 0 32 L 60 28 C 72 28 80 32 84 38 C 76 42 66 40 60 42 C 50 44 40 40 30 44 C 20 46 10 42 0 44 Z" fill="none" stroke="#4E8040" stroke-width="2.2" stroke-linejoin="round"/>
+<path d="M 12 30 l -2 -6 M 15 30 l 2 -7" fill="none" stroke="#4E8040" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 26 30 l -2 -6 M 29 30 l 2 -7" fill="none" stroke="#4E8040" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 44 30 l -2 -6 M 47 30 l 2 -7" fill="none" stroke="#4E8040" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 62 30 l -2 -6 M 65 30 l 2 -7" fill="none" stroke="#4E8040" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 76 30 l -2 -6 M 79 30 l 2 -7" fill="none" stroke="#4E8040" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse cx="52" cy="68" rx="12" ry="10" fill="#3A2A22"/>
+<g clip-path="url(#cliff_c5)">
+<ellipse cx="55" cy="72" rx="8" ry="6" fill="#24170F"/>
+</g>
+<ellipse cx="52" cy="68" rx="12" ry="10" fill="none" stroke="#2A1C14" stroke-width="2.2" stroke-linejoin="round"/>
+<path d="M 36 78 C 44 76 62 76 70 78 C 66 82 42 82 36 78 Z" fill="#C2AA92"/>
+<g clip-path="url(#cliff_c6)">
+</g>
+<path d="M 36 78 C 44 76 62 76 70 78 C 66 82 42 82 36 78 Z" fill="none" stroke="#6B5848" stroke-width="1.8" stroke-linejoin="round"/>
+</g>
+<circle cx="64" cy="62.5" r="47.4" fill="none" stroke="#FFFFFF" stroke-width="2" opacity=".55"/>
+<circle cx="64" cy="62.5" r="50" fill="none" stroke="#6B5848" stroke-width="3"/>
+</svg>

@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><clipPath id="sea_c1"><circle cx="64" cy="62.5" r="50" /></clipPath><clipPath id="sea_c2"><path d="M 0 72 Q 16 62 32 72 T 64 72 T 96 72 T 128 72 L 128 130 L 0 130 Z" /></clipPath><clipPath id="sea_c3"><path d="M 42 88 C 38 74 42 62 48 56 C 52 52 57 55 57 61 C 57 49 60 38 66 34 C 72 38 75 49 75 61 C 75 55 80 52 84 56 C 90 62 94 74 90 88 Z" /></clipPath><clipPath id="sea_c4"><circle cx="40" cy="44" r="3.2" /></clipPath><clipPath id="sea_c5"><circle cx="90" cy="42" r="3.2" /></clipPath><clipPath id="sea_c6"><circle cx="54" cy="30" r="2.6" /></clipPath><clipPath id="sea_c7"><circle cx="80" cy="28" r="2.6" /></clipPath><clipPath id="sea_c8"><circle cx="66" cy="20" r="3" /></clipPath><clipPath id="sea_c9"><circle cx="34" cy="58" r="2.2" /></clipPath><clipPath id="sea_c10"><circle cx="96" cy="58" r="2.2" /></clipPath><clipPath id="sea_c11"><path d="M 0 88 Q 16 76 32 88 T 64 88 T 96 88 T 128 88 L 128 130 L 0 130 Z" /></clipPath><clipPath id="sea_c12"><path d="M 0 108 Q 16 98 32 108 T 64 108 T 96 108 T 128 108 L 128 130 L 0 130 Z" /></clipPath><g id="sea_sil"><circle cx="64" cy="62.5" r="50" /></g></defs>
+<use href="#sea_sil" xlink:href="#sea_sil" transform="translate(0 3)" fill="#1E3550" stroke="#1E3550" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>
+<use href="#sea_sil" xlink:href="#sea_sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="64" cy="62.5" r="50" fill="#D6ECFA"/>
+<g clip-path="url(#sea_c1)">
+<circle cx="46" cy="36.5" r="30" fill="#FFFFFF" opacity=".22"/>
+<circle cx="30" cy="34" r="8" fill="#FFE9A8" opacity=".9"/>
+<path d="M 0 72 Q 16 62 32 72 T 64 72 T 96 72 T 128 72 L 128 130 L 0 130 Z" fill="#6FAEE0"/>
+<g clip-path="url(#sea_c2)">
+</g>
+<path d="M 0 72 Q 16 62 32 72 T 64 72 T 96 72 T 128 72 L 128 130 L 0 130 Z" fill="none" stroke="#2F6FA8" stroke-width="2.2" stroke-linejoin="round"/>
+<path d="M 42 88 C 38 74 42 62 48 56 C 52 52 57 55 57 61 C 57 49 60 38 66 34 C 72 38 75 49 75 61 C 75 55 80 52 84 56 C 90 62 94 74 90 88 Z" fill="#CBE6F8"/>
+<g clip-path="url(#sea_c3)"><g transform="translate(-3 -3)"><path d="M 42 88 C 38 74 42 62 48 56 C 52 52 57 55 57 61 C 57 49 60 38 66 34 C 72 38 75 49 75 61 C 75 55 80 52 84 56 C 90 62 94 74 90 88 Z" fill="#FFFFFF"/></g>
+</g>
+<path d="M 42 88 C 38 74 42 62 48 56 C 52 52 57 55 57 61 C 57 49 60 38 66 34 C 72 38 75 49 75 61 C 75 55 80 52 84 56 C 90 62 94 74 90 88 Z" fill="none" stroke="#3C7FB8" stroke-width="2.4" stroke-linejoin="round"/>
+<circle cx="40" cy="44" r="3.2" fill="#FFFFFF"/>
+<g clip-path="url(#sea_c4)">
+</g>
+<circle cx="40" cy="44" r="3.2" fill="none" stroke="#3C7FB8" stroke-width="1.6" stroke-linejoin="round"/>
+<circle cx="90" cy="42" r="3.2" fill="#FFFFFF"/>
+<g clip-path="url(#sea_c5)">
+</g>
+<circle cx="90" cy="42" r="3.2" fill="none" stroke="#3C7FB8" stroke-width="1.6" stroke-linejoin="round"/>
+<circle cx="54" cy="30" r="2.6" fill="#FFFFFF"/>
+<g clip-path="url(#sea_c6)">
+</g>
+<circle cx="54" cy="30" r="2.6" fill="none" stroke="#3C7FB8" stroke-width="1.6" stroke-linejoin="round"/>
+<circle cx="80" cy="28" r="2.6" fill="#FFFFFF"/>
+<g clip-path="url(#sea_c7)">
+</g>
+<circle cx="80" cy="28" r="2.6" fill="none" stroke="#3C7FB8" stroke-width="1.6" stroke-linejoin="round"/>
+<circle cx="66" cy="20" r="3" fill="#FFFFFF"/>
+<g clip-path="url(#sea_c8)">
+</g>
+<circle cx="66" cy="20" r="3" fill="none" stroke="#3C7FB8" stroke-width="1.6" stroke-linejoin="round"/>
+<circle cx="34" cy="58" r="2.2" fill="#FFFFFF"/>
+<g clip-path="url(#sea_c9)">
+</g>
+<circle cx="34" cy="58" r="2.2" fill="none" stroke="#3C7FB8" stroke-width="1.6" stroke-linejoin="round"/>
+<circle cx="96" cy="58" r="2.2" fill="#FFFFFF"/>
+<g clip-path="url(#sea_c10)">
+</g>
+<circle cx="96" cy="58" r="2.2" fill="none" stroke="#3C7FB8" stroke-width="1.6" stroke-linejoin="round"/>
+<path d="M 0 88 Q 16 76 32 88 T 64 88 T 96 88 T 128 88 L 128 130 L 0 130 Z" fill="#2F78CC"/>
+<g clip-path="url(#sea_c11)"><g transform="translate(0 -5)"><path d="M 0 88 Q 16 76 32 88 T 64 88 T 96 88 T 128 88 L 128 130 L 0 130 Z" fill="#3C8DE8"/></g>
+</g>
+<path d="M 0 88 Q 16 76 32 88 T 64 88 T 96 88 T 128 88 L 128 130 L 0 130 Z" fill="none" stroke="#1F5BA8" stroke-width="2.4" stroke-linejoin="round"/>
+<path d="M 8 86 Q 18 79 28 82" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 40 86 Q 50 79 60 82" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 72 86 Q 82 79 92 82" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 104 86 Q 114 79 124 82" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 0 108 Q 16 98 32 108 T 64 108 T 96 108 T 128 108 L 128 130 L 0 130 Z" fill="#2F78CC"/>
+<g clip-path="url(#sea_c12)">
+</g>
+<path d="M 0 108 Q 16 98 32 108 T 64 108 T 96 108 T 128 108 L 128 130 L 0 130 Z" fill="none" stroke="#1F5BA8" stroke-width="2.2" stroke-linejoin="round"/>
+<path d="M 22 106 Q 30 100 38 103" fill="none" stroke="#9FD0F5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 54 106 Q 62 100 70 103" fill="none" stroke="#9FD0F5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 86 106 Q 94 100 102 103" fill="none" stroke="#9FD0F5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<circle cx="64" cy="62.5" r="47.4" fill="none" stroke="#FFFFFF" stroke-width="2" opacity=".55"/>
+<circle cx="64" cy="62.5" r="50" fill="none" stroke="#1F5BA8" stroke-width="3"/>
+</svg>

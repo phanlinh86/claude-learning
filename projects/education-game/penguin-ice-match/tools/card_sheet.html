@@ -1,0 +1,133 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Card sheet</title>
+<style>body{margin:0;background:#666;font:14px system-ui}canvas{display:block}</style></head>
+<body>
+<!-- Test sheet for IM.CardArt. #cards (default): every face kind at 104 px and 150 px on the spring / autumn / winter
+     clearings, half-flipped cards (scaleX 0.4), backs side by side (code-drawn AND card_back.svg: must be identical),
+     glow examples. #rewards: butterflies (flap 0 / .5 / .9), lanterns with glow 0 / 1, acorns, stars, at 1x and 3x.
+     Open directly, or render with: node tools/art_dee_sheet.js  (writes docs/art/cards_sheet.png + rewards_sheet.png) -->
+<canvas id="c"></canvas>
+<script src="../game/js/card_art.js"></script>
+<script>
+(function () {
+  var C = IM.CardArt, COLS = Object.keys(C.COLORS), dpr = window.devicePixelRatio || 1;
+  var ANIMALS = ['fox', 'deer', 'hedgehog', 'squirrel', 'bunny', 'frog', 'bear', 'owl', 'mouse'];
+  var imgs = {}, mode = location.hash === '#rewards' ? 'rewards' : 'cards';
+  var cv = document.getElementById('c'), ctx = cv.getContext('2d');
+  function size(W, H) { cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+  function load(n) {
+    return new Promise(function (res) {
+      var im = new Image(); im.onload = function () { imgs[n] = im; res(); }; im.onerror = function () { res(); };
+      im.src = '../game/assets/default/' + n;
+    });
+  }
+  // renderer-style sprite callback: animal sticker if artist B delivered it, else a labelled placeholder
+  function sprite(name, x, y, s) {
+    var im = imgs['items/animal_' + name + '.svg'];
+    if (im) { ctx.drawImage(im, x - s / 2, y - s / 2, s, s); return; }
+    ctx.beginPath(); ctx.arc(x, y, s * 0.4, 0, Math.PI * 2); ctx.fillStyle = '#C9B79C'; ctx.fill();
+    ctx.fillStyle = '#4A3A2A'; ctx.font = 'bold ' + Math.round(s * 0.16) + 'px system-ui'; ctx.textAlign = 'center'; ctx.fillText(name, x, y + 4);
+  }
+  function bg(y, h, a, b, W) { var g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, a); g.addColorStop(1, b); ctx.fillStyle = g; ctx.fillRect(0, y, W, h); }
+  function label(t, x, y, light) { ctx.font = '600 13px system-ui'; ctx.textAlign = 'left'; ctx.fillStyle = light ? '#fff' : '#33402c'; ctx.fillText(t, x, y); }
+  function shadow(x, y, w, h) {
+    ctx.save(); ctx.fillStyle = 'rgba(40,60,30,0.22)';
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x - w / 2 + 2, y - h / 2 + 5, w, h, 0.12 * w) : ctx.rect(x - w / 2 + 2, y - h / 2 + 5, w, h); ctx.fill(); ctx.restore();
+  }
+  function front(x, y, w, face, opt) { var h = w / 0.78; shadow(x, y, w, h); ctx.save(); ctx.translate(x, y); C.drawFront(ctx, w, h, face, Object.assign({ sprite: sprite }, opt || {})); ctx.restore(); }
+  function back(x, y, w, opt) { var h = w / 0.78; shadow(x, y, w, h); ctx.save(); ctx.translate(x, y); C.drawBack(ctx, w, h, opt); ctx.restore(); }
+
+  var FACES = [];
+  COLS.forEach(function (c) { FACES.push({ kind: 'color', value: c, color: c }); });
+  C.SHAPES.forEach(function (s, i) { FACES.push({ kind: 'shape', value: s, shape: s, color: COLS[i % 7] }); });
+  for (var n = 1; n <= 12; n++) FACES.push({ kind: 'dots', value: n, n: n });
+  [0, 3, 7, 10, 12].forEach(function (n) { FACES.push({ kind: 'number', value: n }); });
+  ['A', 'M', 'W', 'Q', 'a', 'g', 'Đ', 'Ư'].forEach(function (l) { FACES.push({ kind: 'letter', value: l }); });
+  ['2 + 3', '9 + 8', '12 − 7', '10 - 4'].forEach(function (t) { FACES.push({ kind: 'text', value: t, text: t }); });
+  [7, 8].forEach(function (n) { FACES.push({ kind: 'parity', value: n, n: n }); FACES.push({ kind: 'parity', value: n, n: n, dots: true }); });
+  FACES.push({ kind: 'parity', value: 11, n: 11, dots: true }, { kind: 'parity', value: 12, n: 12 });
+  ['fox', 'owl', 'frog'].forEach(function (a) { FACES.push({ kind: 'animal', value: a, sprite: a }); });
+  FACES.push({ kind: 'animal', value: 'bear', sprite: 'bear', scale: 1 }, { kind: 'animal', value: 'bear', sprite: 'bear', scale: 0.6 });
+
+  function cards() {
+    var W = 1400, per = 11, cw = 104, ch = cw / 0.78, gx = 124, rowsN = Math.ceil(FACES.length / per);
+    var secA = rowsN * (ch + 22) + 40;
+    var big = 150, bh = big / 0.78, perB = 8, bigFaces = [0, 3, 7, 8, 11, 14, 18, 20, 23, 24, 31, 33, 39, 41, 42, 44, 46, 47];
+    var secB = Math.ceil(bigFaces.length / perB) * (bh + 26) + 40;
+    var secC = 2 * (bh + 40) + 60;
+    size(W, secA + secB + secC);
+    var y = 0;
+    bg(y, secA, '#DCEBC9', '#C8DDB0', W); label('104 px — spring clearing', 12, y + 18);
+    FACES.forEach(function (f, i) { front(20 + cw / 2 + (i % per) * gx, y + 34 + ch / 2 + Math.floor(i / per) * (ch + 22), cw, f); });
+    y += secA;
+    bg(y, secB, '#EADBBD', '#E3CFA8', W); label('150 px — autumn clearing', 12, y + 18);
+    bigFaces.forEach(function (fi, i) { front(24 + big / 2 + (i % perB) * 172, y + 34 + bh / 2 + Math.floor(i / perB) * (bh + 26), big, FACES[fi]); });
+    y += secB;
+    bg(y, secC, '#EEF4F9', '#DCE8F2', W); label('backs: code ×3 | card_back.svg ×2 (identical) | half-flipped 0.4 | glow', 12, y + 18);
+    var yy = y + 40 + bh / 2;
+    for (var i = 0; i < 3; i++) back(24 + big / 2 + i * 168, yy, big);
+    // SVG back exactly as the renderer would get it from IM.Assets
+    IM.Assets = { has: function (n) { return n === 'card_back' && !!imgs['items/card_back.svg']; }, sprite: function () { return imgs['items/card_back.svg']; } };
+    for (i = 3; i < 5; i++) back(24 + big / 2 + i * 168, yy, big);
+    IM.Assets = null;
+    yy += bh + 40;
+    var hx = 24 + big / 2;
+    [['back', 0.3], ['back', 0.4], ['front', 0.6], ['front', 0.7]].forEach(function (p, i) {
+      var x = hx + i * 130;
+      ctx.save(); ctx.translate(x, yy);
+      C.drawCard(ctx, big, bh, FACES[i === 2 ? 3 : 8], p[1]);
+      ctx.restore();
+    });
+    ctx.save(); ctx.translate(hx + 4 * 130 + 20, yy); ctx.scale(0.4, 1); C.drawFront(ctx, big, bh, FACES[24], {}); ctx.restore();
+    back(hx + 5 * 130 + 60, yy, big, { glow: 1 });
+    front(hx + 6 * 130 + 110, yy, big, FACES[1], { glow: 0.8 });
+    front(hx + 7 * 130 + 160, yy, big, FACES[40], { glow: 0.5, glowColor: '#9FE0FF', alpha: 0.6 });
+    // contrast report
+    var r = C._contrast(C.CARD.ink, C.CARD.face), r2 = C._contrast(C.CARD.ink, C.CARD.face2);
+    console.log('ink contrast on cream: ' + r.toFixed(2) + ' / ' + r2.toFixed(2));
+  }
+
+  function rewards() {
+    var W = 1400, k3 = 3;
+    size(W, 1700);
+    bg(0, 300, '#E9F3DC', '#CFE3B8', W); label('butterflies — flap 0 / 0.5 / 0.9 at 64 px', 12, 18);
+    COLS.forEach(function (c, i) {
+      [0, 0.5, 0.9].forEach(function (fl, j) { ctx.save(); ctx.translate(50 + i * 190 + j * 58, 70 + j * 0); C.drawButterfly(ctx, c, 54, fl); ctx.restore(); });
+      ctx.save(); ctx.translate(100 + i * 190, 200); C.drawButterfly(ctx, c, 96, 0.15); ctx.restore();
+    });
+    bg(300, 340, '#3E6E4E', '#2E5A40', W); label('lanterns — glow 0 (top) / 1 (bottom) at 72 px, forest dusk', 12, 318, true);
+    C.SHAPES.forEach(function (s, i) {
+      [0, 1].forEach(function (g, j) {
+        var x = 80 + i * 210, y = 400 + j * 150;
+        ctx.strokeStyle = '#5B4630'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x, y - 70); ctx.lineTo(x, y + C.lanternTop(s, 72)); ctx.stroke();
+        ctx.save(); ctx.translate(x, y); C.drawLantern(ctx, s, COLS[(i + j * 3) % 7], 72, g); ctx.restore();
+      });
+    });
+    bg(640, 230, '#F4E7CC', '#E6D3AE', W); label('acorns 14 / 22 / 34 / 60 px, stars 48 / 80 px with text', 12, 658);
+    [14, 22, 34, 60].forEach(function (s, i) { ctx.save(); ctx.translate(60 + i * 90, 760); C.drawAcorn(ctx, s); ctx.restore(); });
+    ctx.save(); ctx.translate(440, 760); C.drawAcorn(ctx, 40, { gold: true }); ctx.restore();
+    [[48, null], [48, 'A'], [80, '5'], [80, '2 + 3'], [80, 'Ư'], [80, null, 1]].forEach(function (p, i) {
+      ctx.save(); ctx.translate(560 + i * 130, 760); C.drawStar(ctx, p[0], p[1], { twinkle: p[2] || 0 }); ctx.restore();
+    });
+    // 3x
+    bg(870, 830, '#EAF2F8', '#DDE9F2', W); label('3x', 12, 888);
+    ctx.save(); ctx.translate(0, 870); ctx.scale(k3, k3);
+    ctx.save(); ctx.translate(60, 60); C.drawButterfly(ctx, 'purple', 80, 0.2); ctx.restore();
+    ctx.save(); ctx.translate(160, 60); C.drawButterfly(ctx, 'blue', 80, 0.6); ctx.restore();
+    ctx.save(); ctx.translate(260, 60); C.drawLantern(ctx, 'heart', 'red', 70, 1); ctx.restore();
+    ctx.save(); ctx.translate(360, 60); C.drawLantern(ctx, 'star', 'yellow', 70, 0.5); ctx.restore();
+    ctx.save(); ctx.translate(60, 190); C.drawLantern(ctx, 'square', 'green', 70, 0); ctx.restore();
+    ctx.save(); ctx.translate(160, 190); C.drawLantern(ctx, 'rect', 'orange', 70, 0); ctx.restore();
+    ctx.save(); ctx.translate(250, 195); C.drawAcorn(ctx, 50); ctx.restore();
+    ctx.save(); ctx.translate(360, 190); C.drawStar(ctx, 80, 'B', { twinkle: 1 }); ctx.restore();
+    ctx.restore();
+  }
+
+  var files = ['items/card_back.svg'].concat(ANIMALS.map(function (a) { return 'items/animal_' + a + '.svg'; }));
+  Promise.all(files.map(load)).then(function () {
+    (mode === 'rewards' ? rewards : cards)();
+    document.title = 'done';
+  });
+})();
+</script>
+</body></html>

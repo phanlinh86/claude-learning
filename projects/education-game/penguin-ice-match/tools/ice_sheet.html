@@ -1,0 +1,126 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Ice sheet</title>
+<style>body{margin:0;background:#666;font:14px system-ui}canvas{display:block}</style></head>
+<body>
+<!-- Contact sheet for IM.IceArt (game/js/ice_art.js).
+     #blocks (default): block states (clear / frosted / frost .5 / frost .2 / crack .25 .5 1 / crack+clear) and every face
+     kind at 104 px and 160 px on the sunny (#CFE6F2) and rain (#C3D6E3) lake colours.
+     #rewards: fish in every colour + wag frames, sculptures for every shape/colour, dots 1-12, stars, shards, holes.
+     Render with: node tools/ice_sheet.js   (writes docs/art/ice_blocks_sheet.png + ice_rewards_sheet.png) -->
+<canvas id="c"></canvas>
+<script src="../game/js/ice_art.js"></script>
+<script>
+(function () {
+  var C = IM.IceArt, COLS = Object.keys(C.COLORS), dpr = window.devicePixelRatio || 1;
+  var LAKES = [['sunny #CFE6F2', '#CFE6F2'], ['rain #C3D6E3', '#C3D6E3']];
+  var ANIMALS = ['bear', 'seal', 'fox', 'owl', 'whale', 'puffin', 'penguin', 'hare', 'walrus'];
+  var HOMES = ['den', 'floe', 'burrow', 'nest', 'sea', 'cliff', 'pebbles'];
+  var imgs = {}, mode = location.hash === '#rewards' ? 'rewards' : 'blocks';
+  var cv = document.getElementById('c'), ctx = cv.getContext('2d');
+  function size(W, H) { cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+  function load(n) {
+    return new Promise(function (res) {
+      var im = new Image(); im.onload = function () { imgs[n] = im; res(); }; im.onerror = function () { res(); };
+      im.src = '../game/assets/default/items/' + n + '.svg';
+    });
+  }
+  function sprite(name, x, y, s) {
+    var n = name.indexOf('_') > 0 ? name : 'animal_' + name, im = imgs[n];
+    if (im) { ctx.drawImage(im, x - s / 2, y - s / 2, s, s); return; }
+    ctx.beginPath(); ctx.arc(x, y, s * 0.4, 0, Math.PI * 2); ctx.fillStyle = '#C9B79C'; ctx.fill();
+  }
+  function label(t, x, y) { ctx.font = '600 13px system-ui'; ctx.textAlign = 'left'; ctx.fillStyle = '#28445c'; ctx.fillText(t, x, y); }
+  function shadow(w, h) { ctx.fillStyle = 'rgba(40,80,110,0.2)'; ctx.beginPath(); ctx.ellipse(2, h / 2 - 2, w * 0.52, 8, 0, 0, Math.PI * 2); ctx.fill(); }
+  function block(x, y, w, face, frost, opt) {
+    var h = w / 0.9; ctx.save(); ctx.translate(x, y); shadow(w, h);
+    C.drawIce(ctx, w, h, face, frost, Object.assign({ sprite: sprite, seed: 7 }, opt || {})); ctx.restore();
+  }
+
+  var FACES = [];
+  COLS.forEach(function (c) { FACES.push({ kind: 'color', value: c, color: c }); });
+  C.SHAPES.forEach(function (s, i) { FACES.push({ kind: 'shape', value: s, shape: s, color: COLS[i % 7] }); });
+  C.SHAPES.forEach(function (s) { FACES.push({ kind: 'shape', value: s, shape: s, color: 'blue' }); });
+  for (var n = 1; n <= 12; n++) FACES.push({ kind: 'dots', value: n, n: n });
+  [0, 3, 7, 10, 12, 20].forEach(function (n) { FACES.push({ kind: 'number', value: n, n: n, text: String(n) }); });
+  ['A', 'M', 'W', 'Q', 'a', 'g', 'Đ', 'Ư'].forEach(function (l) { FACES.push({ kind: 'letter', value: l, text: l }); });
+  ['2 + 3', '9 + 8', '12 − 7'].forEach(function (t) { FACES.push({ kind: 'text', value: t, text: t }); });
+  [7, 8].forEach(function (n) { FACES.push({ kind: 'number', value: n, n: n, text: String(n), parity: n % 2 ? 'odd' : 'even' }); FACES.push({ kind: 'dots', value: n, n: n, parity: n % 2 ? 'odd' : 'even' }); });
+  FACES.push({ kind: 'parity', value: 11, n: 11, dots: true });
+  ANIMALS.forEach(function (a) { FACES.push({ kind: 'animal', value: a, sprite: 'animal_' + a, scale: 1 }); });
+  FACES.push({ kind: 'animal', value: 'bear', sprite: 'animal_bear', scale: 0.6, size: 'small' });
+  HOMES.forEach(function (h) { FACES.push({ kind: 'home', value: h, sprite: 'home_' + h }); });
+
+  function blocks() {
+    var W = 1600, cw = 104, ch = cw / 0.9, gx = 122, per = 12, rowsN = Math.ceil(FACES.length / per);
+    var states = [['clear', 0, 0], ['frosted', 1, 0], ['frosted', 1, 0], ['frost .8', 0.8, 0], ['frost .5', 0.5, 0], ['frost .2', 0.2, 0],
+      ['crack .25', 1, 0.25], ['crack .5', 1, 0.5], ['crack 1', 1, 1], ['crack+.6', 0.6, 1], ['crack+.3', 0.3, 1], ['glow', 1, 0]];
+    var secS = (ch + 50) + 30, secA = rowsN * (ch + 18) + 40;
+    var big = 160, bh = big / 0.9, bigIdx = [1, 3, 7, 13, 16, 20, 25, 28, 32, 39, 42, 45, 49, 52, 60];
+    var secB = Math.ceil(bigIdx.length / 8) * (bh + 26) + 40;
+    var sec = secS + secA + secB;
+    size(W, sec * 2);
+    var y = 0;
+    LAKES.forEach(function (L) {
+      ctx.fillStyle = L[1]; ctx.fillRect(0, y, W, sec);
+      label('block states — 104 px — lake ' + L[0], 12, y + 18);
+      states.forEach(function (s, i) {
+        block(70 + i * gx, y + 34 + ch / 2, cw, FACES[i * 5 % FACES.length], s[1], { crack: s[2], seed: 3 + i, glow: s[0] === 'glow' ? 1 : 0 });
+        label(s[0], 70 + i * gx - 40, y + 34 + ch + 24);
+      });
+      y += secS;
+      label('every face — 104 px', 12, y + 14);
+      FACES.forEach(function (f, i) {
+        block(70 + (i % per) * gx, y + 26 + ch / 2 + Math.floor(i / per) * (ch + 18), cw, f, 0);
+      });
+      y += secA;
+      label('160 px', 12, y + 14);
+      bigIdx.forEach(function (fi, i) {
+        block(100 + (i % 8) * 190, y + 26 + bh / 2 + Math.floor(i / 8) * (bh + 26), big, FACES[fi], 0);
+      });
+      y += secB;
+    });
+  }
+
+  function rewards() {
+    var W = 1600, H = 1300; size(W, H);
+    ctx.fillStyle = '#CFE6F2'; ctx.fillRect(0, 0, W, H / 2); ctx.fillStyle = '#C3D6E3'; ctx.fillRect(0, H / 2, W, H / 2);
+    var y = 20;
+    label('fish 90 px, every colour', 12, y); y += 60;
+    COLS.forEach(function (c, i) { ctx.save(); ctx.translate(70 + i * 120, y); C.drawFish(ctx, c, 90, 0); ctx.restore(); });
+    label('wag 0 .125 .25 .375 .5 .75 (blue 120)', 900, y - 50);
+    [0, 0.125, 0.25, 0.375, 0.5, 0.75].forEach(function (wg, i) { ctx.save(); ctx.translate(950 + i * 110, y); C.drawFish(ctx, 'blue', 100, wg); ctx.restore(); });
+    y += 70;
+    label('fish 40 px / 24 px', 12, y); y += 34;
+    COLS.forEach(function (c, i) { ctx.save(); ctx.translate(40 + i * 60, y); C.drawFish(ctx, c, 40, 0.1); ctx.restore(); ctx.save(); ctx.translate(500 + i * 40, y); C.drawFish(ctx, c, 24, 0); ctx.restore(); });
+    y += 50;
+    label('sculptures 80 px (each shape in answer colours, glow on the last)', 12, y); y += 60;
+    C.SHAPES.forEach(function (s, i) {
+      ctx.save(); ctx.translate(70 + i * 105, y); C.drawSculpture(ctx, s, COLS[i % 7], 80, 0); ctx.restore();
+      ctx.save(); ctx.translate(730 + i * 105, y); C.drawSculpture(ctx, s, 'blue', 80, i === 5 ? 1 : 0); ctx.restore();
+    });
+    y += 110;
+    COLS.forEach(function (c, i) { ctx.save(); ctx.translate(70 + i * 105, y); C.drawSculpture(ctx, 'heart', c, 70, 0); ctx.restore(); });
+    y += 90;
+    label('stars 110 / 60 px', 12, y); y += 70;
+    ['', 'A', '7', '12', 'Ư'].forEach(function (t, i) { ctx.save(); ctx.translate(70 + i * 130, y); C.drawStar(ctx, 110, t, { twinkle: i === 2 ? 1 : 0 }); ctx.restore(); });
+    ['B', '20'].forEach(function (t, i) { ctx.save(); ctx.translate(760 + i * 80, y); C.drawStar(ctx, 60, t); ctx.restore(); });
+    y += 90;
+    label('shards 30 px · holes 110×60 t = .05 .15 .3 .5 .8 1', 12, y); y += 50;
+    for (var i = 0; i < 6; i++) { ctx.save(); ctx.translate(40 + i * 45, y); C.drawShard(ctx, 30, i * 0.9, { variant: i }); ctx.restore(); }
+    [0.05, 0.15, 0.3, 0.5, 0.8, 1].forEach(function (t, i) { ctx.save(); ctx.translate(400 + i * 140, y); C.drawHole(ctx, 110, 60, t); ctx.restore(); });
+    y += 70;
+    label('rain lake: fish + sculptures + dots blocks 1–12 at 104 px', 12, y); y += 60;
+    COLS.forEach(function (c, i) { ctx.save(); ctx.translate(70 + i * 120, y); C.drawFish(ctx, c, 90, 0.2); ctx.restore(); });
+    C.SHAPES.forEach(function (s, i) { ctx.save(); ctx.translate(900 + i * 110, y); C.drawSculpture(ctx, s, COLS[(i + 3) % 7], 80, 0); ctx.restore(); });
+    y += 90;
+    for (var n = 1; n <= 12; n++) block(65 + (n - 1) * 125, y + 60, 104, { kind: 'dots', value: n, n: n }, 0);
+  }
+
+  var names = ANIMALS.map(function (a) { return 'animal_' + a; }).concat(HOMES.map(function (h) { return 'home_' + h; }));
+  Promise.all(names.map(load)).then(function () {
+    (mode === 'rewards' ? rewards : blocks)();
+    document.title = 'done';
+  }).catch(function (e) { console.log('sheet error', e && e.stack); document.title = 'done'; });
+})();
+</script>
+</body></html>
