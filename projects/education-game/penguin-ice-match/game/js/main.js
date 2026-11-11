@@ -1,4 +1,4 @@
-/* IM main (Dee's Forest Memory) — boots the game, sizes the canvas for any phone/tablet shape, runs the loop and turns
+/* IM main (Tuk's Ice Match) — boots the game, sizes the canvas for any phone/tablet shape, runs the loop and turns
  * world events into voice, sound, effects and UI. */
 (function (IM) {
   'use strict';
@@ -171,13 +171,13 @@
     IM.Audio.startMusic();
   }
 
-  let lastPromptText = '';
-  function currentPrompt() {   // prompts have several wordings: repeat the one Dee said, word for word
+  let lastPromptText = '', lastMeltAt = 0;
+  function currentPrompt() {   // prompts have several wordings: repeat the one Tuk said, word for word
     if (lastPromptText) return lastPromptText;
     const p = world.prompt ? world.prompt() : null;
     return p ? promptText(p) : (lastRoundEvt ? promptText(lastRoundEvt) : '');
   }
-  // names: only when Dee is quiet, and not the same name again within 3 s (playtest M2)
+  // names: only when Tuk is quiet, and not the same name again within 3 s (playtest M2)
   function sayName(txt, now) {
     if (!txt || (IM.Voice && IM.Voice.isSpeaking())) return;
     if (now - lastGrabSay < 700 || (txt === lastName && now - lastGrabSay < 3000)) return;
@@ -214,8 +214,8 @@
         }
         break;
       }
-      case 'shuffle': IM.Audio.play('swap'); break;
-      case 'golden': {
+      case 'slide': case 'shuffle': IM.Audio.play('swap'); break;
+      case 'golden': {   // the aurora pair
         IM.Audio.play('golden');
         render.burst('rainbow', e.x, e.y);
         speak(T('golden'), { interrupt: true });
@@ -223,9 +223,18 @@
       }
       case 'deal': IM.Audio.play('deal'); break;
       case 'peek': IM.Audio.play('peek'); speak(T('peek')); break;          // queued after the prompt
-      case 'hide': IM.Audio.play('shuffle'); break;
+      case 'hide': IM.Audio.play('frost'); break;
+      case 'clink': IM.Audio.play('clink', { count: world.found || 1 }); render.burst('sparkle', e.x, e.y); break;
+      case 'melt': { const n = performance.now(); if (n - lastMeltAt > 150) { lastMeltAt = n; IM.Audio.play('melt'); } break; }
+      case 'leap': IM.Audio.play('leap', { i: e.k || 0 }); break;
+      case 'splash': IM.Audio.play('splash'); render.burst('splash', e.x, e.y); break;
+      case 'homeArrive':
+        IM.Audio.play('home');
+        if (IM.I18N.sayHome && !(IM.Voice && IM.Voice.isSpeaking())) speak(IM.I18N.sayHome(curLang(), e));
+        break;
       case 'flip': {
-        IM.Audio.play('flip');
+        IM.Audio.play('crack');
+        if (e.x != null) render.burst('shards', e.x, e.y, { size: (cardById(e.id) || {}).w || 110 });
         if (e.open === 2) lastPraise = 0;
         const line = IM.I18N.sayFlip ? IM.I18N.sayFlip(curLang(), Object.assign({ topic: world.topic }, e)) : '';
         speak(line, { interrupt: canInterrupt() });   // the card's name is the lesson; it never cuts the instruction
@@ -243,7 +252,7 @@
         stats.correct++;
         IM.Audio.play('match', { count: e.found || 0 });
         const ca = cardById(e.a), cb = cardById(e.b);
-        if (ca && cb) render.burst('pop', (ca.x + cb.x) / 2, (ca.y + cb.y) / 2, { color: (ca.face && ca.face.color) || null, size: ca.w * 1.4, delay: 0 });
+        if (ca && cb) render.burst('glint', (ca.x + cb.x) / 2, (ca.y + cb.y) / 2, { size: ca.w });
         lastMatchAt = performance.now();
         speak(IM.I18N.sayMatch ? IM.I18N.sayMatch(curLang(), Object.assign({ topic: world.topic }, e)) : T('praise'), { interrupt: true });
         break;
@@ -264,7 +273,7 @@
       }
       case 'land': {
         IM.Audio.play('land', { kind: e.kind });
-        // once per round, when Dee is quiet and the match line is over: name what joined the forest
+        // once per round, when Tuk is quiet and the match line is over: name what came out of the ice
         const now = performance.now();
         if (!rewardSaid && e.kind && !(IM.Voice && IM.Voice.isSpeaking()) && now - lastMatchAt > 4000) {
           rewardSaid = true; speak(T('reward.' + e.kind));
@@ -284,7 +293,7 @@
       case 'roundDone': {
         IM.Audio.play('round');
         const n = e.stars || 1;
-        const from = L.dee;
+        const from = L.tuk || L.dee;
         for (let i = 0; i < n; i++) {
           render.burst('star', from.x + 60, from.y - from.h * 0.7, {
             delay: i * 0.22, onDone: () => { shownStars++; IM.UI.setStars(shownStars, true); IM.Audio.play('star', { i }); }
@@ -404,9 +413,9 @@
   function toLogical(cx, cy) { return { x: (cx - view.left) / view.s, y: (cy - view.top) / view.s }; }
   function onDown(p) {
     if (mode !== 'play' || bot) return;
-    if (world.pointerDown(p.x, p.y) != null) return;           // cards win over Dee's tap zone
-    const L = world.layout.dee;
-    // tapping Dee (or the bubble) repeats the instruction
+    if (world.pointerDown(p.x, p.y) != null) return;           // blocks win over Tuk's tap zone
+    const L = world.layout.tuk || world.layout.dee;
+    // tapping Tuk (or the bubble) repeats the instruction
     if (Math.abs(p.x - L.x) < L.h * 0.5 && p.y < L.y + 10 && p.y > L.y - L.h * 1.05) repeatPrompt();
   }
   function repeatPrompt() {

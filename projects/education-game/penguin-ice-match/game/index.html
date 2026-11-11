@@ -6,11 +6,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Forest Memory">
+<meta name="apple-mobile-web-app-title" content="Ice Match">
 <meta name="format-detection" content="telephone=no">
 <meta name="theme-color" content="#9FD3F0">
-<meta name="description" content="A gentle memory-card learning game for kids 3–7 with Dee the duckling — find pairs of colours, shapes, numbers and forest animals through the seasons. English and Vietnamese, with voice.">
-<title>Dee's Forest Memory · Vịt Dee Lật Thẻ</title>
+<meta name="description" content="A gentle memory learning game for kids 3–7 with Tuk the penguin chick — crack the frost off ice blocks and find pairs of colours, shapes, numbers and polar animals with their homes. English and Vietnamese, with voice.">
+<title>Tuk's Ice Match · Cánh Cụt Tuk Lật Băng</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="assets/default/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
@@ -18,10 +18,10 @@
 </head>
 <body>
 <div id="stage">
-  <canvas id="game" aria-label="Dee's Forest Memory"></canvas>
+  <canvas id="game" aria-label="Tuk's Ice Match"></canvas>
   <div id="safeProbe" aria-hidden="true"></div>
 
-  <!-- Dee's speech bubble (positioned from world.layout.bubble) -->
+  <!-- Tuk's speech bubble (positioned from world.layout.bubble) -->
   <div id="bubble" class="bubble hidden no-game-input" role="status" aria-live="polite"><span id="bubbleText"></span></div>
 
   <!-- In-game HUD -->
@@ -47,7 +47,7 @@
       </button>
     </div>
     <div class="title-wrap">
-      <h1 class="logo"><span id="logo1">Dee's</span> <span id="logo2">Forest Memory</span></h1>
+      <h1 class="logo"><span id="logo1">Tuk's</span> <span id="logo2">Ice Match</span></h1>
       <p id="tagline" class="tagline"></p>
       <button id="btnPlay" class="btn-play" aria-label="Play">
         <svg viewBox="0 0 24 24"><path d="M8 4.8v14.4c0 .8.9 1.3 1.6.8l11-7.2a1 1 0 0 0 0-1.6l-11-7.2C8.9 3.5 8 4 8 4.8z"/></svg>
@@ -76,7 +76,7 @@
       <div class="set-grid">
         <label class="toggle"><input type="checkbox" id="optSfx"><span data-i18n="ui.sound">Sound effects</span></label>
         <label class="toggle"><input type="checkbox" id="optMusic"><span data-i18n="ui.music">Music</span></label>
-        <label class="toggle"><input type="checkbox" id="optVoice"><span data-i18n="ui.voice">Dee's voice</span></label>
+        <label class="toggle"><input type="checkbox" id="optVoice"><span data-i18n="ui.voice">Tuk's voice</span></label>
         <label class="toggle"><input type="checkbox" id="optMic"><span data-i18n="ui.mic">Answer by talking</span></label>
       </div>
       <p id="voiceInfo" class="small-note"></p>
@@ -140,7 +140,7 @@
 <script src="js/audio.js"></script>
 <script src="js/voice.js"></script>
 <script src="js/input.js"></script>
-<script src="js/card_art.js"></script>
+<script src="js/ice_art.js"></script>
 <script src="js/render.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/main.js"></script>

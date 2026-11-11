@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Dee's Forest Memory — headless unit tests for rng / content / world / weather / bot.
-// Run from projects/education-game/duckling-forest-memory:   node tests/unit/run.js
+// Tuk's Ice Match — headless unit tests for rng / content / world / weather / bot.
+// Run from projects/education-game/penguin-ice-match:   node tests/unit/run.js
 // (tests/unit/i18n_voice.test.js is the voice engineer's suite and runs on its own.)
 'use strict';
 const assert = require('assert');
@@ -69,6 +69,7 @@ function solveRound(w) {
   }
 }
 const ev = (w) => w.drainEvents();
+function inflate(R, m) { return { x: R.x - m, y: R.y - m, w: R.w + 2 * m, h: R.h + 2 * m }; }
 function rectsOverlap(a, b) { return a.x < b.x + b.w - 1e-6 && b.x < a.x + a.w - 1e-6 && a.y < b.y + b.h - 1e-6 && b.y < a.y + a.h - 1e-6; }
 function insideR(a, b) { return a.x >= b.x - 1e-6 && a.y >= b.y - 1e-6 && a.x + a.w <= b.x + b.w + 1e-6 && a.y + a.h <= b.y + b.h + 1e-6; }
 function cardR(c, g) { return { x: c.x - g.cw / 2, y: c.y - g.ch / 2, w: g.cw, h: g.ch }; }
@@ -77,7 +78,7 @@ function playSession(seed, age, skill, opts) {
   const w = new IM.World({ seed, age, lang: opts.lang || 'en', config: opts.config });
   const v = opts.vp || VIEWPORTS[8];
   w.setViewport(v.W, v.H, v.ins);
-  const bot = new IM.Bot(w, { skill, seed: seed * 3 + 1 });
+  const bot = new IM.Bot(w, { skill, seed: seed * 3 + 1, rub: opts.rub });
   w.newSession();
   const dt = opts.dt || 1 / 30, evs = [];
   let t = 0;
@@ -111,23 +112,26 @@ test('rng: deterministic, ranges, shuffle is a permutation', () => {
 });
 
 // ======================================================= content
-test('content: palette, animals, age topics, pairs and peek tables exactly as DESIGN §3/§5.1', () => {
+test('content: palette, polar animals, homes, age topics, pairs and peek tables exactly as DESIGN §3/§5.1', () => {
   assert.strictEqual(IM.PALETTE.red.fill, '#E84A4A'); assert.strictEqual(IM.PALETTE.pink.dark, '#C9558A');
   assert.strictEqual(IM.PALETTE.yellow.fill, '#FFD23F'); assert.strictEqual(IM.PALETTE.purple.dark, '#6840A8');
-  assert.deepStrictEqual(IM.ANIMALS, ['fox', 'deer', 'hedgehog', 'squirrel', 'bunny', 'frog', 'bear', 'owl', 'mouse']);
+  assert.deepStrictEqual(IM.ANIMALS, ['bear', 'seal', 'fox', 'owl', 'whale', 'puffin', 'penguin', 'hare', 'walrus']);
+  assert.deepStrictEqual(IM.HOMES, { bear: 'den', seal: 'floe', fox: 'burrow', owl: 'nest', whale: 'sea', puffin: 'cliff', penguin: 'pebbles' });
   assert.deepStrictEqual(IM.AGE_TOPICS[3], ['colors', 'size', 'shapes', 'animals']);
-  assert.deepStrictEqual(IM.AGE_TOPICS[4], ['colors', 'shapes', 'count', 'animals']);
-  assert.deepStrictEqual(IM.AGE_TOPICS[5], ['shapes', 'count', 'letters', 'animals']);
+  assert.deepStrictEqual(IM.AGE_TOPICS[4], ['colors', 'shapes', 'count', 'homes']);
+  assert.deepStrictEqual(IM.AGE_TOPICS[5], ['shapes', 'count', 'letters', 'homes']);
   assert.deepStrictEqual(IM.AGE_TOPICS[6], ['lower', 'initial', 'add', 'count']);
   assert.deepStrictEqual(IM.AGE_TOPICS[7], ['initial', 'add', 'sub', 'oddeven']);
   assert.deepStrictEqual(IM.Content.PAIRS, { 3: [2, 2, 3, 3], 4: [2, 3, 4, 4], 5: [3, 4, 5, 5], 6: [3, 4, 5, 6], 7: [3, 4, 5, 6] });
+  assert.deepStrictEqual(CFG.pairsByAge[4], [2, 2, 3, 3], 'age 4: 2, 2, 3, 3');
   assert.deepStrictEqual(IM.Content.PEEK, { 3: 3.5, 4: 2.5, 5: 2.0, 6: 1.5, 7: 1.5 });
   assert.deepStrictEqual(IM.Content.topicsFor(2), IM.AGE_TOPICS[3]); assert.deepStrictEqual(IM.Content.topicsFor(9), IM.AGE_TOPICS[7]);
   for (const a of AGES) { assert.ok(IM.AGE_POOLS[a].length >= 5, 'pool ' + a); IM.AGE_TOPICS[a].forEach(t => assert.ok(IM.AGE_POOLS[a].includes(t))); }
-  assert.deepStrictEqual(IM.AGE_POOLS[4], ['colors', 'animals', 'shapes', 'count', 'size']);
+  assert.deepStrictEqual(IM.AGE_POOLS[4], ['colors', 'animals', 'shapes', 'count', 'homes']);
   for (const l of LANGS) for (const w of IM.WORDS[l]) { assert.ok(IM.ANIMALS.includes(w.animal)); assert.strictEqual(w.sprite, 'animal_' + w.animal);
-    assert.strictEqual(w.word[0].toUpperCase().normalize('NFD').replace(/[\u0300\u0301\u0303\u0309\u0323]/g, '').normalize('NFC'), w.initial, w.word); }
+    assert.strictEqual(w.word[0].toUpperCase().normalize('NFD').replace(/[̣̀́̃̉]/g, '').normalize('NFC'), w.initial, w.word); }
   assert.ok(!IM.WORDS.vi.some(w => /^(th|nh|ch)/.test(w.word)), 'vi skips digraph words');
+  assert.strictEqual(CFG.cardAspect, 0.9);
 });
 
 test('content: every topic × age 3–7 × en/vi × 200 seeds → valid, solvable chapters within the §5.1 rules', () => {
@@ -151,7 +155,7 @@ test('content: every topic × age 3–7 × en/vi × 200 seeds → valid, solvabl
       assert.strictEqual(new Set(r.cards.map(c => c.id)).size, r.cards.length);
       assert.notStrictEqual(r.sum.set, prevSet, tag + ' identical consecutive rounds'); prevSet = r.sum.set;
       const info = r.pairInfo, ks = Object.keys(info);
-      const rk = { colors: 'butterfly', shapes: 'lantern', size: 'animal', animals: 'animal', count: 'acorns', oddeven: 'acorns',
+      const rk = { colors: 'fish', shapes: 'sculpture', size: 'animal', animals: 'animal', homes: 'animal', count: 'fishes', oddeven: 'fishes',
         letters: 'star', lower: 'star', initial: 'animal', add: 'star', sub: 'star' }[topic];
       assert.strictEqual(r.reward.kind, rk); ks.forEach(k => assert.strictEqual(info[k].reward.kind, rk));
       const pairs = ks.map(k => r.cards.filter(c => c.key === k));
@@ -169,6 +173,11 @@ test('content: every topic × age 3–7 × en/vi × 200 seeds → valid, solvabl
           } else pairs.forEach(p => assert.notStrictEqual(p[0].face.color, p[1].face.color, tag + ' age 5: real shape matching'));
           break;
         case 'size': pairs.forEach(p => assert.deepStrictEqual(p.map(c => c.face.scale).sort(), [0.6, 1])); break;
+        case 'homes': pairs.forEach(p => { const A = p.find(c => c.face.kind === 'animal'), Hm = p.find(c => c.face.kind === 'home');
+          assert.ok(A && Hm, tag); assert.strictEqual(IM.HOMES[A.face.value], Hm.face.value); assert.strictEqual(Hm.face.sprite, 'home_' + Hm.face.value);
+          assert.strictEqual(A.nameKind, 'animal'); assert.strictEqual(Hm.nameKind, 'home'); });
+          ks.forEach(k => { assert.strictEqual(info[k].reward.home, IM.HOMES[info[k].nameValue]); assert.strictEqual(info[k].home, info[k].reward.home); });
+          assert.ok(r.pairs <= IM.Content.HOMES_MAX[age]); break;
         case 'count': case 'oddeven': {
           const hi = topic === 'oddeven' ? 12 : IM.Content.COUNT_RANGE[age][1];
           pairs.forEach(p => { const n = p[0].face.n; assert.ok(n >= 1 && n <= hi, tag + ' n ' + n); assert.deepStrictEqual(p.map(c => c.face.kind).sort(), ['dots', 'number']); });
@@ -190,7 +199,7 @@ test('content: every topic × age 3–7 × en/vi × 200 seeds → valid, solvabl
       }
     });
   }
-  assert.ok(rounds >= 88000);
+  assert.ok(rounds >= 96000);
 });
 
 test('content: topic rotation — 4 of the ≥ 5 pool topics, chapter 1 = easiest not first last time, 2–4 easiest first, prefer topics left out last time', () => {
@@ -210,18 +219,46 @@ test('content: topic rotation — 4 of the ≥ 5 pool topics, chapter 1 = easies
     assert.strictEqual(seen.size, IM.AGE_POOLS[age].length, 'every pool topic is played'); assert.ok(firsts.size >= 2);
   }
   // the world: newSession({ lastTopics }) and w.lastTopics
-  const w = mkWorld({ age: 4 }); w.newSession({ lastTopics: ['colors', 'shapes', 'count', 'animals'] });
-  assert.strictEqual(w.levels[0], 'animals'); assert.ok(w.levels.includes('size'));
+  const w = mkWorld({ age: 4 }); w.newSession({ lastTopics: ['colors', 'shapes', 'count', 'homes'] });
+  assert.strictEqual(w.levels[0], 'animals'); assert.ok(w.levels.includes('colors'));
   const w2 = mkWorld({ age: 4 }); w2.lastTopics = w.levels.slice(); w2.newSession(); assert.notStrictEqual(w2.levels[0], w.levels[0]);
 });
 
-test('content: deviations are bounded — colours ≤ 3 pairs up to age 5, vi initial ≤ 5 pairs', () => {
+test('content: deviations are bounded — colours ≤ 3 pairs up to age 5, vi initial ≤ 3 pairs, homes ≤ 3 (age 4) / 4 (age 5)', () => {
   assert.strictEqual(IM.Content.maxPairs('colors', 4, 'en'), 3);
   assert.strictEqual(IM.Content.maxPairs('colors', 5, 'en'), 3);
   assert.strictEqual(IM.Content.maxPairs('colors', 6, 'en'), 7);
-  assert.strictEqual(IM.Content.maxPairs('initial', 7, 'vi'), 5);
+  assert.strictEqual(IM.Content.maxPairs('initial', 7, 'vi'), 3);
   assert.strictEqual(IM.Content.maxPairs('initial', 7, 'en'), 7);
+  assert.strictEqual(IM.Content.maxPairs('homes', 4, 'en'), 3);
+  assert.strictEqual(IM.Content.maxPairs('homes', 5, 'vi'), 4);
   assert.strictEqual(IM.Content.SAFE_SETS.length, 6);
+});
+
+test('content: homes — animal ↔ home pairs solvable for ages 3–7 × en/vi × 500 seeds (every round valid, unambiguous, fresh)', () => {
+  let n = 0;
+  for (const age of AGES) for (const lang of LANGS) for (let s = 0; s < 500; s++) {
+    const ch = chapter('homes', age, lang, s * 104729 + age * 31 + (lang === 'vi' ? 7 : 0));
+    let prev = null;
+    ch.forEach((r, ri) => {
+      n++;
+      assert.strictEqual(IM.Content.validate(r), null);
+      assert.ok(r.pairs >= 2 && r.pairs <= IM.Content.HOMES_MAX[age]);
+      const animals = r.cards.filter(c => c.face.kind === 'animal'), homes = r.cards.filter(c => c.face.kind === 'home');
+      assert.strictEqual(animals.length, r.pairs); assert.strictEqual(homes.length, r.pairs);
+      // every animal's home is on the board exactly once, and no animal's home belongs to another pair
+      for (const a of animals) assert.strictEqual(homes.filter(h => h.face.value === IM.HOMES[a.face.value]).length, 1);
+      for (const a of animals) for (const h of homes) assert.strictEqual(IM.Content.facesMatch('homes', a, h), a.key === h.key);
+      assert.ok(!animals.some(a => a.face.value === 'hare' || a.face.value === 'walrus'), 'animals without a home never appear');
+      assert.notStrictEqual(r.sum.set, prev); prev = r.sum.set;
+    });
+  }
+  assert.strictEqual(n, 5 * 2 * 500 * 4);
+  // and a world really solves them (rubbing allowed): every age, 20 sessions-worth of homes rounds
+  for (const age of AGES) for (let s = 0; s < 20; s++) {
+    const w = mkWorld({ age, seed: 300 + s }); roundOf(w, 'homes', s % 4); solveRound(w);
+    assert.strictEqual(w.state, 'roundDone', 'age ' + age + ' seed ' + s);
+  }
 });
 
 test('content: validate() rejects broken rounds (self-check works)', () => {
@@ -232,6 +269,9 @@ test('content: validate() rejects broken rounds (self-check works)', () => {
   const bad3 = J(r); bad3.cards.pop(); assert.ok(IM.Content.validate(bad3));
   const bad4 = J(IM.Content.makeRound('colors', { age: 3, rng: new IM.RNG(1), roundIndex: 3 }));
   bad4.cards[0].face.color = 'teal'; assert.ok(IM.Content.validate(bad4));
+  const bad6 = J(IM.Content.makeRound('homes', { age: 4, rng: new IM.RNG(2), roundIndex: 2 }));
+  const hc = bad6.cards.find(c => c.face.kind === 'home'), other = IM.Content.HOME_LIST.find(h => h !== hc.face.value && !bad6.cards.some(c => c.face.value === h));
+  hc.face.value = other; hc.face.sprite = 'home_' + other; assert.ok(IM.Content.validate(bad6), 'animal with a wrong home');
   const bad5 = J(IM.Content.makeRound('lower', { age: 6, rng: new IM.RNG(1), roundIndex: 1 }));
   const lo = bad5.cards.find(c => c.face.text === c.face.text.toLowerCase()); lo.face.text = lo.face.text.toUpperCase(); assert.ok(IM.Content.validate(bad5), 'lower pair = 2 capitals');
 });
@@ -251,6 +291,8 @@ test('talk: every topic × age × lang × 300 seeds → distinct choices incl. t
     assert.strictEqual(new Set(vals).size, vals.length, t);
     assert.ok(k.choices.length >= 2 && k.choices.length <= 3);
     const ans = k.choices.find(c => c.id === k.answerId); assert.ok(ans, 'answer present');
+    if (t === 'homes') { assert.strictEqual(k.show.kind, 'animal'); assert.strictEqual(ans.value, IM.HOMES[k.show.value]); assert.strictEqual(k.params.home, ans.value);
+      assert.ok(k.choices.every(c => c.kind === 'home' && c.sprite === 'home_' + c.value)); assert.strictEqual(k.choices.length, 3); }
     if (t === 'animals') { assert.strictEqual(k.show, null); assert.strictEqual(k.params.animal, ans.value); assert.strictEqual(k.choices.length, 3); assert.ok(k.choices.every(c => c.kind === 'animal')); }
     else { assert.ok(k.show && k.show.kind, t + ' shows a card face'); }
     if (t === 'colors' && age <= 5) assert.ok(!IM.Content.clash(vals) && !vals.includes('pink'), 'talk colours safe');
@@ -274,6 +316,13 @@ test('layout: §2 formulas (groundY, Dee, bubble, board, HUD, short-side rule)',
   assert.strictEqual(P.bubble.y, 108 + 96 + 24); assert.strictEqual(P.bubble.h, 124); assert.strictEqual(P.bubble.w, 640);
   assert.strictEqual(P.boards.length, 2); assert.ok(P.boards[0].y + P.boards[0].h <= P.dee.y - P.dee.h - 10 + 1e-9);
   assert.ok(P.boards[1].x >= P.deeRect.x + P.deeRect.w + 40 - 1e-9);
+  assert.strictEqual(L.tuk, L.dee, 'layout.dee is an alias of layout.tuk'); assert.deepStrictEqual(L.tukRect, L.deeRect);
+  assert.deepStrictEqual(L.shore, { x: 0, y: 620, w: 1280, h: 60 });
+  assert.deepStrictEqual(L.sea, { x: 1190, y: 664, w: 120 });
+  assert.ok(L.perches.length > 20 && L.perches.every(p => ['shore', 'sky', 'sea'].includes(p.kind)));
+  for (const v of VIEWPORTS) { const Lv = IM.World.computeLayout(v.W, v.H, v.ins);
+    const s = Lv.sea; assert.ok(!rectsOverlap({ x: s.x - s.w / 2, y: s.y - 10, w: s.w, h: 20 }, Lv.hud) && !rectsOverlap({ x: s.x - s.w / 2, y: s.y - 10, w: s.w, h: 20 }, Lv.bubble), v.name + ' sea clear of HUD/bubble');
+    assert.ok(s.x + s.w / 2 <= Lv.W - Lv.ins.right + 1e-6 && s.y < Lv.H - Lv.ins.bottom, v.name + ' sea on screen'); }
   assert.deepStrictEqual(IM.World.logicalSize(852, 393), { W: 1561, H: 720 });
   assert.deepStrictEqual(IM.World.logicalSize(393, 852), { W: 720, H: 1561 });
   assert.deepStrictEqual(IM.World.logicalSize(1024, 768), { W: 960, H: 720 });
@@ -286,7 +335,7 @@ test('grid: 12 viewports × 2–6 pairs × ages → cards inside the board + scr
     const n = 2 * pairs, L = IM.World.computeLayout(v.W, v.H, v.ins), g = IM.World.chooseGrid(L, n, age);
     const tag = `${v.name} age ${age} ${pairs} pairs`;
     assert.ok(g.cols * g.rows >= n && g.cols * g.rows - n <= 1, tag + ' at most one empty slot');
-    assert.ok(Math.abs(g.ch - g.cw / 0.78) < 1e-9);
+    assert.ok(Math.abs(g.ch - g.cw / 0.9) < 1e-9);
     assert.ok(g.gap >= 14 - 1e-9 && g.gap >= 0.12 * g.cw - 1e-9, tag + ' gap');
     const maxP = Math.max(...IM.Content.PAIRS[age]);
     if (pairs <= maxP) assert.ok(g.cw >= CFG.cardMin[age] - 1e-9, tag + ' card ' + g.cw.toFixed(1) + ' < ' + CFG.cardMin[age]);
@@ -322,50 +371,58 @@ test('grid: largest card wins; ties (both at the 210 px cap) prefer the squarer 
   assert.strictEqual(gq.boardIndex, 1); assert.ok(gq.cw >= 104);
 });
 
-test('layout: colour rounds never put a yellow card within 40 px of Dee (12 viewports × 40 seeds)', () => {
+test('layout: colour rounds never put a red block within 40 px of Tuk (12 viewports × 40 seeds)', () => {
   let swaps = 0;
   for (const v of VIEWPORTS) for (let s = 0; s < 40; s++) for (const age of [3, 4]) {
     const w = mkWorld({ vp: v, seed: s + 1, age });
     roundOf(w, 'colors', s % 4);
     const L = w.layout;
-    for (const c of w.cards) if (c.face.color === 'yellow') {
+    for (const c of w.cards) if (c.face.color === 'red') {
       const r = { x: c.hx - c.w / 2, y: c.hy - c.h / 2, w: c.w, h: c.h };
-      assert.ok(IM.World.rectGap(r, L.deeRect) >= 40 - 1e-6, v.name + ' yellow near Dee');
+      assert.ok(IM.World.rectGap(r, L.tukRect) >= 40 - 1e-6, v.name + ' red near Tuk');
     }
     if (w.cards.some(c => c.slot !== +c.id.slice(1))) swaps++;
   }
-  console.log('      rounds with a yellow swap: ' + swaps);
+  console.log('      rounds with a red swap: ' + swaps);
 });
 
 // ======================================================= round flow / motion
-test('deal → peek → hide → play: staggered ballistic deal with spin + landing squash, peek wave, hold = peek time, hide wave', () => {
-  const w = mkWorld({ age: 4 });
-  roundOf(w, 'animals', 2);
-  assert.strictEqual(w.phase, 'deal');
-  const E = ev(w).filter(e => e.type === 'round'); assert.strictEqual(E[0].pairs, CFG.pairsByAge[4][2]);
-  const c3 = w.cards[3], S = w.layout.stack;
-  assert.strictEqual(c3.x, S.x); assert.ok(c3.sx < 0.5, 'small on the deck');
-  const deals = [], peekAt = [], hideAt = [], playAt = [];
-  let maxAbove = 0, rotStart = null, lastSquash = 0, n = 0;
-  while (w.phase !== 'play' && n++ < 20000) {
-    w.update(H);
-    for (const e of ev(w)) { if (e.type === 'deal') deals.push([e.id, w.time]); if (e.type === 'peek') peekAt.push(w.time); if (e.type === 'hide') hideAt.push(w.time); if (e.type === 'play') playAt.push(w.time); }
-    if (c3.state === 'deal' && c3.t > 0) {
-      if (rotStart === null) rotStart = c3.rot;
-      const u = c3.t / c3._dT, ly = S.y + (c3.hy - S.y) * u; maxAbove = Math.max(maxAbove, ly - c3.y);
+test('deal: blocks slide in on the ice (landscape from the left, portrait from the bottom) with friction, stop exactly in their slot (v0 = √(2μD)), tiny bump, never overlap, stagger 0.07 s', () => {
+  for (const vp of [VIEWPORTS[8], VIEWPORTS[3], VIEWPORTS[5]]) {
+    const w = mkWorld({ age: 4, vp });
+    roundOf(w, 'animals', 2);
+    assert.strictEqual(w.phase, 'deal');
+    const L = w.layout, deals = [], peekAt = [], hideAt = [], playAt = [];
+    const E = ev(w).filter(e => e.type === 'round'); assert.strictEqual(E[0].pairs, CFG.pairsByAge[4][2]);
+    const c0 = w.cards[0], v0 = c0._dv0;
+    assert.ok(Math.abs(v0 - Math.sqrt(2 * CFG.dealFriction * c0._dD)) < 1e-9);
+    if (L.portrait) assert.ok(w.cards.every(c => c.y > L.H && c.x === c.hx), 'start below the screen');
+    else assert.ok(w.cards.every(c => c.x < L.ins.left && c.y === c.hy), 'start left of the screen');
+    let n = 0, maxBump = 0, stopped = {}, prevD = {};
+    while (w.phase !== 'play' && n++ < 20000) {
+      w.update(H);
+      for (const e of ev(w)) { if (e.type === 'deal') deals.push([e.id, w.time]); if (e.type === 'peek') peekAt.push(w.time); if (e.type === 'hide') hideAt.push(w.time); if (e.type === 'play') playAt.push(w.time); }
+      for (const c of w.cards) {
+        const d = hyp(c.hx - c.x, c.hy - c.y);
+        if (c.state === 'deal' && c.t > 0) { if (prevD[c.id] !== undefined) assert.ok(d <= prevD[c.id] + 1e-9, 'moves monotonically'); prevD[c.id] = d; }
+        if (c.state === 'down' && !stopped[c.id]) { stopped[c.id] = 1; assert.ok(d < 1e-9 || c._bo !== 0, 'exactly in the slot'); }
+        if (c.state === 'down') maxBump = Math.max(maxBump, Math.abs(c._bo));
+      }
+      const R = w.cards.map(c => w.cardRect(c));
+      for (let i = 0; i < R.length; i++) for (let j = i + 1; j < R.length; j++) assert.ok(!rectsOverlap(R[i], R[j]), vp.name + ' blocks overlap during the deal');
     }
-    if (c3.state === 'down' && !lastSquash) lastSquash = c3.sx - 1;
+    const nC = 2 * CFG.pairsByAge[4][2];
+    assert.strictEqual(deals.length, nC);
+    for (let i = 1; i < nC; i++) assert.ok(Math.abs(deals[i][1] - deals[i - 1][1] - 0.07) < 0.011, 'stagger 0.07 s');
+    const T = c0._dT; assert.ok(T > 0.3 && T < 1.0, 'slide time ' + T);
+    assert.ok(maxBump > 2 && maxBump < 7, 'bump ' + maxBump);
+    assert.strictEqual(peekAt.length, 1); assert.strictEqual(hideAt.length, 1); assert.strictEqual(playAt.length, 1);
+    const hold = hideAt[0] - peekAt[0], pk = CFG.peekByAge[4] * (0.6 + 0.1 * nC);
+    assert.ok(hold > pk && hold < pk + 0.7, 'peek ≈ wave + peek time ' + hold);
+    assert.ok(w.cards.every(c => c.flip < 0.5 && c.state === 'down'));
+    assert.ok(playAt[0] - hideAt[0] < 0.9);
+    for (const c of w.cards) { assert.ok(Math.abs(c.x - c.hx) < 0.05 && Math.abs(c.y - c.hy) < 0.05, 'rest in the slot'); }
   }
-  const nC = 2 * CFG.pairsByAge[4][2];
-  assert.strictEqual(deals.length, nC);
-  for (let i = 1; i < nC; i++) assert.ok(Math.abs(deals[i][1] - deals[i - 1][1] - 0.07) < 0.011, 'stagger 0.07 s');
-  assert.ok(maxAbove > 20, 'arc rises above the straight line ' + maxAbove);
-  assert.ok(Math.abs(rotStart) > 2, 'spins in flight'); assert.ok(lastSquash > 0.05, 'landing squash');
-  assert.strictEqual(peekAt.length, 1); assert.strictEqual(hideAt.length, 1); assert.strictEqual(playAt.length, 1);
-  const hold = hideAt[0] - peekAt[0];
-  const pk = CFG.peekByAge[4] * (0.6 + 0.1 * nC); assert.ok(hold > pk && hold < pk + 0.7, 'peek ≈ wave + peek time ' + hold);
-  assert.ok(w.cards.every(c => c.flip < 0.5 && c.state === 'down'));
-  assert.ok(playAt[0] - hideAt[0] < 0.8);
 });
 
 test('peek: cards flip up in a 0.05 s wave (slot order); peek = peekByAge · (0.6 + 0.1·cards)', () => {
@@ -384,46 +441,126 @@ test('peek: cards flip up in a 0.05 s wave (slot order); peek = peekByAge · (0.
   }
 });
 
-test('flip: critically damped spring (95 % in ≈ 0.26 s, no overshoot), lift peaks at flip 0.5, flip event with the name', () => {
-  const w = mkWorld(); roundOf(w, 'colors', 1); untilPhase(w, 'play'); ev(w);
+test('reveal: tap → crack 0→1 in 0.12 s, then the frost clears (spring ω 18, no overshoot); frost grows back slower (ω 10); flip event with name, via, x, y', () => {
+  const w = mkWorld(); roundOf(w, 'colors', 1); untilPhase(w, 'play'); run(w, 1); ev(w);
   const c = downCards(w)[0];
   assert.strictEqual(tap(w, c), c.id);
-  const E = ev(w); assert.strictEqual(E[0].type, 'flip'); assert.strictEqual(E[0].nameKind, 'color'); assert.strictEqual(E[0].nameValue, c.face.color); assert.ok(E[0].face);
-  let t = 0, maxF = 0, liftAtHalf = null;
-  while (c.flip < 0.95) { w.update(H); t += H; maxF = Math.max(maxF, c.flip); if (liftAtHalf === null && c.flip >= 0.5) liftAtHalf = c.lift; }
-  assert.ok(t > 0.2 && t < 0.33, 'flip time ' + t);
-  assert.ok(liftAtHalf > 0.98, 'lift peaks mid-turn');
-  run(w, 0.6); assert.ok(c.flip <= 1 && c.flip > 0.999 && c.lift < 0.02);
+  const E = ev(w); assert.strictEqual(E[0].type, 'flip'); assert.strictEqual(E[0].nameKind, 'color'); assert.strictEqual(E[0].nameValue, c.face.color);
+  assert.ok(E[0].face); assert.strictEqual(E[0].via, 'tap'); assert.strictEqual(E[0].x, c.x); assert.strictEqual(E[0].y, c.y);
+  let t = 0, crackDone = null, maxF = 0;
+  while (c.flip < 0.95) { w.update(H); t += H; maxF = Math.max(maxF, c.flip); if (crackDone === null && c.crack >= 1) crackDone = t;
+    if (c.crack < 1) assert.ok(c.flip < 0.02, 'frost holds while cracking'); assert.ok(Math.abs(c.frost - (1 - c.flip)) < 1e-12); }
+  assert.ok(Math.abs(crackDone - CFG.crackTime) < 0.011, 'crack ' + crackDone);
+  assert.ok(t - crackDone > 0.2 && t - crackDone < 0.33, 'clear time ' + (t - crackDone));
+  run(w, 0.6); assert.ok(c.flip <= 1 && c.flip > 0.999);
   assert.strictEqual(c.state, 'up');
-  // tapping the face-up card says its name again
   tap(w, c); const E2 = ev(w); assert.strictEqual(E2[0].type, 'tap'); assert.strictEqual(E2[0].id, c.id);
+  // re-frost after a mismatch: slower spring
+  const d = downCards(w).find(x => x.key !== c.key); tap(w, d); let n = 0;
+  while (c.state === 'up' && n++ < 1000) w.update(H);
+  assert.strictEqual(c.crack, 0); let tb = 0; while (c.flip > 0.05) { w.update(H); tb += H; }
+  assert.ok(tb > 0.4 && tb < 0.55, 'frost back in ' + tb);
 });
 
-test('match: check at flip ≥ 0.95 → match event; cards lift, slide together, spin a full turn with overshoot, squash, burst → gone + one reward', () => {
-  const w = mkWorld(); roundOf(w, 'animals', 2); untilPhase(w, 'play'); ev(w);
-  const [a, b] = pairOf(w, w.cards[0].key);
-  tap(w, a); tap(w, b);
-  let matchT = null, n = 0, maxSpin = 0, minDist = 1e9, burstT = null, rewardEv = null;
-  const t0 = w.time, d0 = hyp(a.x - b.x, a.y - b.y);
-  while (n++ < 400) {
-    w.update(H);
-    for (const e of ev(w)) {
-      if (e.type === 'match') { matchT = w.time; assert.strictEqual(e.key, a.key); assert.strictEqual(e.found, 1); assert.strictEqual(e.pairs, w.pairs); assert.strictEqual(e.nameKind, 'animal');
-        assert.ok(a.flip >= 0.95 && b.flip >= 0.95); }
-      if (e.type === 'reward') { rewardEv = e; burstT = w.time; }
-    }
-    if (a.state === 'matched') { maxSpin = Math.max(maxSpin, a.rot); minDist = Math.min(minDist, hyp(a.x - b.x, a.y - b.y)); }
+test('rub: while the finger is down, entering a frosted block reveals it (via rub) until 2 are up; never twice per rub; nothing over up/matched blocks or the ice', () => {
+  const w = mkWorld({ age: 5 }); roundOf(w, 'animals', 3); untilPhase(w, 'play'); ev(w);
+  const g = w.layout.grid, byCol = w.cards.slice().sort((a, b) => (a.hy - b.hy) || (a.hx - b.hx));
+  const A = byCol[0], B = byCol[1], C = byCol[2];   // three blocks in the top row, left to right
+  assert.ok(Math.abs(A.hy - C.hy) < 1e-6, 'top row has ≥ 3 blocks');
+  // a stroke from A across B and on to C
+  assert.strictEqual(w.pointerDown(A.x, A.y), A.id);
+  const path = []; for (let x = A.x; x <= C.x; x += 6) path.push(x);
+  const flips = [];
+  for (const x of path) { const id = w.pointerMove(x, A.y); if (id) flips.push(id); }
+  let E = ev(w);
+  assert.deepStrictEqual(flips, [B.id], 'only B (2 up after it)');
+  assert.deepStrictEqual(E.filter(e => e.type === 'flip').map(e => [e.id, e.via]), [[A.id, 'tap'], [B.id, 'rub']]);
+  assert.ok(!E.some(e => e.type === 'tap'), 'no name spam while rubbing over up blocks');
+  // back and forth over A and B while still down: nothing
+  for (let k = 0; k < 3; k++) for (const x of path.slice().reverse().concat(path)) w.pointerMove(x, A.y);
+  assert.strictEqual(ev(w).filter(e => e.type === 'flip' || e.type === 'tap').length, 0);
+  // the pair is checked once; if it mismatched, after the frost is back re-entering A/B in the SAME stroke does nothing
+  run(w, 2.0); E = ev(w);
+  const mis = E.filter(e => e.type === 'mismatch').length, mat = E.filter(e => e.type === 'match').length;
+  assert.strictEqual(mis + mat, 1, 'counted once');
+  if (mis) {
+    assert.strictEqual(A.state, 'down');
+    for (const x of path) w.pointerMove(x, A.y);
+    assert.ok(!ev(w).some(e => e.type === 'flip' && (e.id === A.id || e.id === B.id)), 'never twice per rub');
+    assert.ok(w.open.every(id => id !== A.id && id !== B.id));
+    w.pointerUp(C.x, A.y);
+    // a new stroke may reveal them again
+    run(w, 2); w.pointerDown(-50, -50); const fresh = downCards(w)[0]; assert.strictEqual(w.pointerMove(fresh.x, fresh.y), fresh.id); w.pointerUp();
   }
-  assert.ok(matchT !== null && matchT - t0 < 0.4);
-  assert.strictEqual(w.phase, 'play');
-  assert.ok(maxSpin > 2 * Math.PI * 1.05 && maxSpin < 2 * Math.PI * 1.45, 'overshoot ' + (maxSpin / 2 / Math.PI));
-  assert.ok(minDist < 0.35 * d0, 'slid together');
-  assert.ok(Math.abs(burstT - matchT - CFG.matchBurstAt) < 0.02);
-  assert.strictEqual(a.state, 'gone'); assert.strictEqual(b.state, 'gone');
-  assert.strictEqual(rewardEv.kind, 'animal'); assert.strictEqual(w.rewards.length, 1); assert.strictEqual(w.rewards[0].sprite, a.face.sprite);
+  // moves without the finger down never reveal
+  const w2 = mkWorld({ age: 5 }); roundOf(w2, 'animals', 3); untilPhase(w2, 'play'); ev(w2);
+  for (const c of w2.cards) assert.strictEqual(w2.pointerMove(c.x, c.y), null);
+  assert.strictEqual(ev(w2).length, 0);
+  // a stroke starting on the ice between blocks reveals the first block it enters
+  const c2 = w2.cards[0]; assert.strictEqual(w2.pointerDown(-50, -50), null);
+  assert.strictEqual(w2.pointerMove(c2.x, c2.y), c2.id);
+  // not during the peek / a shown mismatch
+  const w3 = mkWorld({ age: 5 }); roundOf(w3, 'animals', 3); untilPhase(w3, 'peek'); w3.pointerDown(0, 0);
+  assert.ok(w3.cards.every(c => w3.pointerMove(c.x, c.y) === null));
 });
 
-test('mismatch: no-no shake (±0.08 rad, 3 wiggles), faces stay 1.0 s (age 3: 1.2 s), flip down; streak; the third-tap fast reset', () => {
+test('rub: no double counts — a rubbing bot plays full sessions; open never repeats an id, every flip id is unique per stroke', () => {
+  for (const age of [3, 4, 6]) {
+    let rubs = 0, dupes = 0, flipsPerStroke = 0;
+    const r = playSession(70 + age, age, 0.6, { rub: 1, each: (w, e) => {
+      if (new Set(w.open).size !== w.open.length) dupes++;
+      if (w.open.length > 2) dupes++;
+      for (const x of e) if (x.type === 'flip' && x.via === 'rub') rubs++;
+    } });
+    assert.strictEqual(r.w.state, 'sessionDone'); assert.strictEqual(dupes, 0);
+    assert.ok(rubs > 10, 'rubs ' + rubs); assert.strictEqual(r.bot.stats.rubs >= rubs * 0.5, true);
+  }
+});
+
+test('match: glide together with friction (exact e^(−2.2 t)), touch exactly at the midpoint → clink (restitution 0.3) → melt ×2 → hole + reward; event order', () => {
+  for (const vp of [VIEWPORTS[8], VIEWPORTS[2]]) {
+    const w = mkWorld({ vp }); roundOf(w, 'colors', 2); untilPhase(w, 'play'); ev(w);
+    // the two blocks of a pair that are far apart (exercise the glide)
+    const keys = [...new Set(w.cards.map(c => c.key))];
+    const k = keys.sort((p, q) => { const d = k2 => { const [a, b] = pairOf(w, k2); return hyp(a.x - b.x, a.y - b.y); }; return d(q) - d(p); })[0];
+    const [a, b] = pairOf(w, k);
+    const mx = (a.hx + b.hx) / 2, my = (a.hy + b.hy) / 2;
+    tap(w, a); tap(w, b);
+    const order = []; let clink = null, n = 0, glideV = [], minGap = 1e9, contactSep = null, M = null;
+    while (n++ < 1200 && !order.includes('splash')) {
+      w.update(H);
+      for (const e of ev(w)) {
+        order.push(e.type === 'melt' ? 'melt:' + (e.id === a.id ? 'a' : 'b') : e.type);
+        if (e.type === 'clink') { clink = e; M = w._anims[0]; contactSep = (b.x - a.x) * M.ux + (b.y - a.y) * M.uy;
+          assert.ok(Math.abs(e.x - mx) < 1e-6 && Math.abs(e.y - my) < 1e-6, 'clink at the midpoint');
+          assert.ok(Math.abs((a.x + b.x) / 2 - mx) < 1e-6 && Math.abs((a.y + b.y) / 2 - my) < 1e-6, 'pair centred on the midpoint');
+          assert.ok(Math.abs(e.v - CFG.glideContactV) < 0.05 * CFG.glideContactV + 2, 'contact speed ' + e.v); }
+        if (e.type === 'reward') { assert.ok(Math.abs(e.x - mx) < 1e-6 && Math.abs(e.y - my) < 1e-6, 'reward from the hole at the midpoint'); assert.strictEqual(e.kind, 'fish'); }
+      }
+      if (a.state === 'matched' && w._anims[0] && w._anims[0].stage === 'glide') glideV.push(hyp(a.vx, a.vy));
+      if (a.state === 'matched') { const R1 = w.cardRect(a), R2 = w.cardRect(b); minGap = Math.min(minGap, IM.World.overlapArea(R1, R2)); }
+    }
+    const want = ['match', 'clink', 'melt:a', 'melt:b', 'reward', 'leap', 'splash'];
+    assert.deepStrictEqual(order.filter(t => want.includes(t)), want, vp.name + ' ' + order.join(','));
+    assert.ok(Math.abs(contactSep - M.sc) < 1e-6, 'touching, not overlapping');
+    assert.strictEqual(minGap, 0, 'never overlap');
+    for (let i = 1; i < glideV.length; i++) assert.ok(Math.abs(glideV[i] / glideV[i - 1] - Math.exp(-CFG.glideFriction * H)) < 1e-9, 'exponential friction');
+    assert.strictEqual(a.state, 'gone'); assert.strictEqual(b.state, 'gone');
+    assert.ok(a.hole && !b.hole, 'one hole per pair'); assert.ok(Math.abs(a.x - mx) < 1e-9 && Math.abs(a.y - my) < 1e-9);
+  }
+  // after the clink both rest symmetric about the midpoint (exponential friction → v → 0)
+  const w = mkWorld(); roundOf(w, 'animals', 1); untilPhase(w, 'play'); ev(w);
+  const [a, b] = pairOf(w, w.cards[0].key), mx = (a.hx + b.hx) / 2, my = (a.hy + b.hy) / 2;
+  tap(w, a); tap(w, b);
+  let n = 0; while (!ev(w).some(e => e.type === 'clink') && n++ < 600) w.update(H);
+  const M = w._anims[0], v1 = hyp(a.vx, a.vy);
+  assert.ok(Math.abs(v1 / M.vContact - CFG.clinkRest) < 1e-9, 'restitution ' + v1 / M.vContact);
+  run(w, CFG.meltDelay + CFG.meltTime * 0.9);
+  assert.ok(Math.abs((a.x + b.x) / 2 - mx) < 1e-9 && Math.abs((a.y + b.y) / 2 - my) < 1e-9, 'glide stops exactly at the midpoint');
+  assert.ok(a.melt > 0.8 && a.sx < 0.4 && a.alpha < 0.3, 'melting');
+});
+
+test('mismatch: wobble (±0.07 rad, 3 wiggles), faces stay 1.0 s (age 3: 1.2 s), flip down; streak; the third-tap fast reset', () => {
   for (const [age, show] of [[4, CFG.mismatchShow], [3, CFG.mismatchShowByAge[3]]]) {
     const w = mkWorld({ age }); roundOf(w, 'animals', 3); untilPhase(w, 'play'); ev(w);
     const [a, b] = twoDifferent(w);
@@ -436,17 +573,17 @@ test('mismatch: no-no shake (±0.08 rad, 3 wiggles), faces stay 1.0 s (age 3: 1.
       if (misT !== null && a.state === 'down') downT = w.time;
     }
     assert.ok(Math.abs(downT - misT - show) < 0.02, 'show ' + (downT - misT));
-    assert.ok(maxRot > 0.05 && maxRot <= 0.0801, 'shake ' + maxRot); assert.ok(signs >= 4 && signs <= 6, 'wiggles ' + signs);
+    assert.ok(maxRot > 0.04 && maxRot <= 0.0701, 'wobble ' + maxRot); assert.ok(signs >= 4 && signs <= 6, 'wiggles ' + signs);
     assert.strictEqual(w.phase, 'play'); assert.strictEqual(w.mismatches, 1);
   }
   // fast reset: 2 mismatched up, a third tap flips them down at once and the new one up — one mistake only
   const w = mkWorld({ age: 4 }); roundOf(w, 'animals', 3); untilPhase(w, 'play'); ev(w);
   const [a, b] = twoDifferent(w);
-  tap(w, a); tap(w, b); run(w, 0.5); ev(w);
+  tap(w, a); tap(w, b); run(w, 0.6); ev(w);
   assert.strictEqual(w.phase, 'resolve');
   const c = downCards(w).find(x => x.id !== a.id && x.id !== b.id);
   assert.strictEqual(tap(w, c), null, 'faces shown < 0.5 s: the third tap waits (QA P2-1)');
-  run(w, 0.35); ev(w);
+  run(w, 0.4); ev(w);
   assert.strictEqual(tap(w, c), c.id);
   const E = ev(w);
   assert.strictEqual(a.state, 'down'); assert.strictEqual(b.state, 'down'); assert.strictEqual(c.state, 'up');
@@ -460,7 +597,7 @@ test('mismatch: no-no shake (±0.08 rad, 3 wiggles), faces stay 1.0 s (age 3: 1.
   // a pending MATCH is never broken by a third tap
   const w3 = mkWorld({ age: 4 }); roundOf(w3, 'animals', 3); untilPhase(w3, 'play');
   const p3 = pairOf(w3, w3.cards[0].key); tap(w3, p3[0]); tap(w3, p3[1]);
-  const o3 = downCards(w3)[0]; assert.strictEqual(tap(w3, o3), null); run(w3, 1.6); assert.strictEqual(p3[0].state, 'gone'); assert.strictEqual(w3.found, 1);
+  const o3 = downCards(w3)[0]; assert.strictEqual(tap(w3, o3), null); run(w3, 3); assert.strictEqual(p3[0].state, 'gone'); assert.strictEqual(w3.found, 1);
 });
 
 test('taps: only in play / mismatch resolve; matched → tap; misses → null; just after a match flips wait; hit rect +10 px, nearest wins', () => {
@@ -582,12 +719,15 @@ test('talk: re-ask every 12 s without an answer; glowAnswer from the 2nd re-ask;
 // ======================================================= rewards
 function rewardBox(r) {
   const s = r.size;
-  if (r.kind === 'animal') return { x: r.x - s / 2, y: r.y - s, w: s, h: s };
-  if (r.kind === 'acorns') { const xs = r.pieces.map(p => p.x), ys = r.pieces.map(p => p.y), R = r.pieceSize / 2;
-    return { x: Math.min(...xs) - R, y: Math.min(...ys) - R, w: Math.max(...xs) - Math.min(...xs) + 2 * R, h: Math.max(...ys) - Math.min(...ys) + 2 * R }; }
+  if (r.kind === 'animal' || r.kind === 'sculpture') {
+    let B = { x: r.x - s / 2, y: r.y - s, w: s, h: s };
+    if (r.badge) { const b = r.badge, q = { x: b.x - b.size / 2, y: b.y - b.size / 2, w: b.size, h: b.size };
+      const x = Math.min(B.x, q.x), y = Math.min(B.y, q.y); B = { x, y, w: Math.max(B.x + B.w, q.x + q.w) - x, h: Math.max(B.y + B.h, q.y + q.h) - y }; }
+    return B;
+  }
   return { x: r.x - s / 2, y: r.y - s / 2, w: s, h: s };
 }
-test('rewards: one per match, kind per topic; they settle on perches inside the screen, off the cards, the bubble, the HUD and Dee (12 viewports × all topics)', () => {
+test('rewards: one per match, kind per topic; they settle on the shore / sky inside the screen, off the blocks, the bubble, the HUD and Tuk (12 viewports × all topics)', () => {
   let checked = 0;
   const kinds = {};
   for (const v of VIEWPORTS) for (const topic of TOPICS) {
@@ -598,17 +738,19 @@ test('rewards: one per match, kind per topic; they settle on perches inside the 
     run(w, 2.6);
     for (let ri = 0; ri < 4; ri++) {
       solveRound(w);
+      for (const e of w.events) if (e.type === 'reward') kinds[topic + ':' + e.kind] = 1;
       if (w.state === 'roundDone') { run(w, 1.9); }
       const L = w.layout, safe = { x: L.ins.left, y: L.ins.top, w: L.W - L.ins.left - L.ins.right, h: L.H - L.ins.top - L.ins.bottom };
       // let flights finish (the next round's deal is running; the grid may push rewards off)
       run(w, 2.5);
+      for (const e of w.events) if (e.type === 'reward') kinds[topic + ':' + e.kind] = 1;
       for (const r of w.rewards) {
-        kinds[topic + ':' + r.kind] = 1;
-        if (r.state === 'fly') continue;
+        if (r.state === 'fly' || r.state === 'emerge' || r.kind === 'fish' || r.kind === 'fishes') continue;
         const B = rewardBox(r), tag = `${v.name} ${topic} r${ri} ${r.kind} ${r.perch.kind}`;
         assert.ok(Number.isFinite(B.x + B.y + B.w + B.h), tag + ' NaN');
         assert.ok(insideR(B, safe), tag + ' inside the screen ' + JSON.stringify(B));
-        assert.ok(!rectsOverlap(B, L.bubble) && !rectsOverlap(B, L.hud) && !rectsOverlap(B, L.deeRect), tag + ' clear of bubble/HUD/Dee');
+        assert.ok(!rectsOverlap(B, L.bubble) && !rectsOverlap(B, L.hud) && !rectsOverlap(B, L.tukRect), tag + ' clear of bubble/HUD/Tuk');
+        assert.ok(r.kind === 'star' ? r.perch.kind === 'sky' : ['shore', 'sea'].includes(r.perch.kind), tag + ' perch kind');
         if (L.hudKeep) assert.ok(!rectsOverlap(r.target.box, L.hudKeep), tag + ' under the real HUD');
         if (w.state === 'round' && L.grid && w.phase !== 'deal') for (const c of w.cards) if (c.state !== 'gone' && c.state !== 'deal') assert.ok(!rectsOverlap(B, cardR(c, L.grid)), tag + ' on a card');
         checked++;
@@ -616,10 +758,10 @@ test('rewards: one per match, kind per topic; they settle on perches inside the 
       if (w.state !== 'round') break;
     }
   }
-  assert.ok(checked > 1500, 'checked ' + checked);
+  assert.ok(checked > 900, 'checked ' + checked);
   // crowding: resting rewards whose target boxes overlap > 40 % of the smaller one, at chapter end (every viewport × topic)
   let pairsN = 0, heavy = 0;
-  for (const v of VIEWPORTS) for (const topic of ['colors', 'animals', 'count', 'shapes', 'add']) {
+  for (const v of VIEWPORTS) for (const topic of ['homes', 'animals', 'size', 'shapes', 'add']) {
     const w = mkWorld({ vp: v, age: topic === 'add' ? 6 : 4, seed: 3 }); w.levels = [topic, topic, topic, topic]; w.startLevel(0); run(w, 2.6);
     for (let ri = 0; ri < 4 && w.state === 'round'; ri++) { solveRound(w); run(w, 1.9); }
     const R = w.rewards.map(r => r.target.box);
@@ -627,52 +769,71 @@ test('rewards: one per match, kind per topic; they settle on perches inside the 
   }
   console.log('      crowded reward pairs (> 40 % overlap): ' + heavy + ' / ' + pairsN);
   assert.ok(heavy / pairsN < 0.02, 'crowding ' + heavy);
-  for (const k of ['colors:butterfly', 'shapes:lantern', 'count:acorns', 'animals:animal', 'letters:star', 'size:animal', 'initial:animal', 'oddeven:acorns']) assert.ok(kinds[k], k);
+  for (const k of ['colors:fish', 'shapes:sculpture', 'count:fishes', 'animals:animal', 'homes:animal', 'letters:star', 'size:animal', 'initial:animal', 'oddeven:fishes']) assert.ok(kinds[k], k);
 });
 
-test('rewards motion: butterflies flutter + flap and land, animals hop 3 parabolic hops, acorns tumble and bounce (e = 0.4), lanterns swing like pendulums, stars twinkle', () => {
-  function oneReward(topic, age) {
-    const w = mkWorld({ age, seed: 5 }); roundOf(w, topic, 1); untilPhase(w, 'play'); ev(w);
+test('rewards motion: fish leap on a g = 1400 parabola into the sea (splash), fishes 0.35 s apart counted k = 1..n, sculptures slide and stop exactly, animals hop 3 hops (homes → homeArrive), stars twinkle', () => {
+  function oneReward(topic, age, vp, ri) {
+    const w = mkWorld({ age, seed: 5, vp }); roundOf(w, topic, ri === undefined ? 1 : ri); untilPhase(w, 'play'); ev(w);
     const p = pairOf(w, w.cards[0].key); tap(w, p[0]); tap(w, p[1]);
-    let n = 0; while (!w.rewards.length && n++ < 400) w.update(H);
+    let n = 0; while (!w.rewards.length && n++ < 800) w.update(H);
     return w;
   }
-  // butterfly
-  let w = oneReward('colors', 4), r = w.rewards[0], flaps = new Set(), lands = 0, offPath = 0;
-  const B = r._bz;
-  for (let i = 0; i < 360; i++) { w.update(H); flaps.add(Math.round(r.flap * 10)); for (const e of ev(w)) if (e.type === 'land') lands++;
-    if (r.state === 'fly') { const u = r.t / B.T, sx = B.x0 + (B.x1 - B.x0) * u; offPath = Math.max(offPath, Math.abs(r.x - sx)); } }
-  assert.ok(flaps.size >= 8, 'wing flaps'); assert.strictEqual(lands, 1); assert.notStrictEqual(r.state, 'fly');
-  assert.ok(Math.abs(r.x - r.target.x) < 1e-6 && Math.abs(r.y - r.target.y) < 1e-6);
-  // animal: 3 hops (2 squashes before landing + land)
-  w = oneReward('animals', 4); r = w.rewards[0];
-  let ups = 0, prevVy = 0, py = r.y, land = 0;
-  for (let i = 0; i < 400; i++) { w.update(H); const vy = r.y - py; if (prevVy > 0 && vy < 0) ups++; prevVy = vy; py = r.y; for (const e of ev(w)) if (e.type === 'land') land++; if (r.state !== 'fly') break; }
-  assert.strictEqual(ups, 2, 'two bounces between 3 hops'); assert.strictEqual(land, 1); assert.strictEqual(r.anchor, 'bottom');
-  // acorns: pieces = n, bounce with restitution 0.4, end at rest on the ground line
-  w = oneReward('count', 4); r = w.rewards[0];
-  assert.strictEqual(r.pieces.length, r.n);
-  const p0 = r.pieces[0]; let vIn = null, vOut = null, last = 0;
-  for (let i = 0; i < 600; i++) { const pv = p0.vy; w.update(H); if (vIn === null && p0.state === 'bounce' && pv > 0) { vIn = pv; vOut = p0.vy; } last = i; if (r.state === 'idle') break; }
-  assert.ok(vIn > 0 && Math.abs(-vOut / vIn - 0.4) < 0.06, 'restitution ' + (-vOut / vIn));
-  assert.strictEqual(r.state, 'idle'); assert.ok(r.pieces.every(p => p.state === 'rest'));
-  // lantern: hangs from a branch (or floats) and swings, damped
-  w = oneReward('shapes', 4); r = w.rewards[0];
-  run(w, 2.2);
-  if (r.ax !== null) {
-    let lo = 1, hi = -1; run(w, 2, () => { lo = Math.min(lo, r._th); hi = Math.max(hi, r._th); });
-    assert.ok(hi > 0.03 && lo < -0.03, 'swings ' + lo + ' ' + hi);
-    const Lp = IM.CONFIG.lanternString + r.size / 2; assert.ok(Math.abs(hyp(r.x - r.ax, r.y - r.ay) - Lp) < 1e-6, 'string length kept');
-    w.wind = 0; run(w, 12); assert.ok(Math.abs(r._th) < 0.03, 'damped');
+  for (const vp of [VIEWPORTS[8], VIEWPORTS[3], VIEWPORTS[4]]) {
+    // fish
+    let w = oneReward('colors', 4, vp), r = w.rewards[0], pc = r.pieces[0], S = w.layout.sea;
+    assert.strictEqual(r.kind, 'fish'); assert.strictEqual(r.pieces.length, 1); assert.strictEqual(pc.color, r.color);
+    const ys = [], E = []; let n = 0;
+    while (w.rewards.includes(r) && n++ < 1000) { w.update(H); for (const e of ev(w)) E.push(e); if (pc.state === 'air') ys.push([pc.x, pc.y, pc.rot, pc.traj.t]); }
+    const types = E.map(e => e.type).filter(t => ['leap', 'splash', 'land'].includes(t));
+    assert.deepStrictEqual(types, ['leap', 'splash', 'land']);
+    const sp = E.find(e => e.type === 'splash');
+    assert.ok(Math.abs(sp.y - S.y) < 1e-9 && Math.abs(sp.x - S.x) <= S.w / 2, vp.name + ' fish lands in the sea');
+    let gs = []; for (let i = 2; i < ys.length - 1; i++) gs.push((ys[i][1] - 2 * ys[i - 1][1] + ys[i - 2][1]) / (H * H));
+    assert.ok(gs.every(g => Math.abs(g - CFG.fishG) < 1), 'g = 1400');
+    const top = Math.min(...ys.map(q => q[1])); assert.ok(top >= w.layout.ins.top + 40 - 1e-6, 'apex on screen');
+    for (let i = 1; i < ys.length - 1; i++) { const vx = (ys[i + 1][0] - ys[i - 1][0]), vy = (ys[i + 1][1] - ys[i - 1][1]);
+      const d = Math.atan2(vy, vx) - ys[i][2]; assert.ok(Math.abs(Math.atan2(Math.sin(d), Math.cos(d))) < 0.05, 'spin follows the velocity'); }
+    const hc = w.cards.find(c => c.hole); assert.ok(hc, 'a hole while the fish is out'); run(w, 1.8); assert.ok(!hc.hole, 'hole gone after the fish left');
   }
-  // star twinkles
-  w = oneReward('letters', 5); r = w.rewards[0]; run(w, 2.5);
+  // fishes: n fish, 0.35 s apart, k = 1..n in order
+  let w = oneReward('count', 4, VIEWPORTS[8], 2), r = w.rewards[0];
+  assert.strictEqual(r.kind, 'fishes'); assert.strictEqual(r.pieces.length, r.n);
+  const leaps = [], spl = []; let n = 0;
+  while (w.rewards.includes(r) && n++ < 3000) { w.update(H); for (const e of ev(w)) { if (e.type === 'leap') leaps.push([e.k, e.n, w.time]); if (e.type === 'splash') spl.push(e.k); } }
+  assert.deepStrictEqual(leaps.map(l => l[0]), Array.from({ length: r.n }, (_, i) => i + 1));
+  assert.ok(leaps.every(l => l[1] === r.n));
+  for (let i = 1; i < leaps.length; i++) assert.ok(Math.abs(leaps[i][2] - leaps[i - 1][2] - CFG.fishStagger) < 0.011, 'stagger');
+  assert.strictEqual(spl.length, r.n);
+  // sculpture: emerges, slides with constant friction, stops exactly on its shore spot
+  w = oneReward('shapes', 4); r = w.rewards[0];
+  assert.strictEqual(r.state, 'emerge'); assert.ok(r.sx < 0.5);
+  let lands = 0, maxV = 0, px = r.x, py = r.y, decel = true, lastV = 1e9; n = 0;
+  while (r.state !== 'idle' && n++ < 1200) { w.update(H); for (const e of ev(w)) if (e.type === 'land') lands++;
+    if (r.state === 'fly' && r.t > 1.5 * H) { const v = hyp(r.x - px, r.y - py) / H; maxV = Math.max(maxV, v); if (v > lastV + 1e-6) decel = false; lastV = v; } px = r.x; py = r.y; }
+  assert.strictEqual(lands, 1); assert.ok(decel, 'decelerates'); assert.strictEqual(r.x, r.target.x); assert.strictEqual(r.y, r.target.y);
+  assert.ok(['shore', 'sea'].includes(r.perch.kind));
+  // animal: 3 hops; homes → homeArrive with the home, badge placed and faded in
+  for (const topic of ['animals', 'homes']) {
+    w = oneReward(topic, 4); r = w.rewards[0];
+    let ups = 0, prevVy = 0, py2 = r.y, land = 0, home = null; n = 0;
+    while (n++ < 800) { w.update(H); const vy = r.y - py2; if (r.state === 'fly' && prevVy > 0 && vy < 0) ups++; prevVy = vy; py2 = r.y;
+      for (const e of ev(w)) { if (e.type === 'land') land++; if (e.type === 'homeArrive') { home = e; assert.strictEqual(land, 1, 'homeArrive after land'); } }
+      if (r.state === 'idle') break; }
+    assert.strictEqual(ups, 2, 'two bounces between 3 hops'); assert.strictEqual(land, 1); assert.strictEqual(r.anchor, 'bottom');
+    if (topic === 'homes') { assert.ok(home && home.home === r.home && IM.HOMES[r.sprite.replace('animal_', '')] === r.home);
+      assert.ok(r.badge && r.badge.alpha === 1 && Math.abs(r.badge.x - (r.x + CFG.badgeDx)) < 1e-9); }
+    else assert.ok(!home && !r.badge);
+  }
+  // star rises and twinkles in the sky
+  w = oneReward('letters', 5); r = w.rewards[0]; run(w, 2.8);
+  assert.strictEqual(r.perch.kind, 'sky');
   let smin = 9, smax = 0; run(w, 1, () => { smin = Math.min(smin, r.sx); smax = Math.max(smax, r.sx); });
   assert.ok(smax - smin > 0.1, 'twinkle');
 });
 
 test('rewards: stay for the whole chapter, fly off a bigger grid at a round start, fade in levelDone, cleared at the next chapter; ≤ 30', () => {
-  const w = mkWorld({ age: 6, vp: VIEWPORTS[4] }); w.newSession();
+  const w = mkWorld({ age: 6, vp: VIEWPORTS[4] }); w.levels = ['letters', 'initial', 'add', 'lower']; w.startLevel(0);
   let maxR = 0, faded = false, n = 0, refly = 0;
   while (w.state !== 'sessionDone' && n++ < 400000) {
     if (w.state === 'round' && w.phase === 'play' && !w.open.length) { const d = downCards(w); if (d.length) { const p = pairOf(w, d[0].key); tap(w, p[0]); tap(w, p[1]); } }
@@ -683,14 +844,13 @@ test('rewards: stay for the whole chapter, fly off a bigger grid at a round star
     maxR = Math.max(maxR, w.rewards.length);
     if (w.state === 'levelDone' && w.stateTime > 1.3) { faded = w.rewards.every(r => r.alpha === 0); }
   }
-  const most = Math.max(...[0, 1, 2, 3].map(l => CFG.pairsByAge[6].reduce((a, b) => a + b, 0)));
-  assert.ok(maxR === most && maxR <= 30, 'max ' + maxR); assert.ok(faded); assert.ok(refly > 0, 'rewards made room for a bigger grid');
+  assert.ok(maxR >= 8 && maxR <= 30, 'max ' + maxR); assert.ok(faded); assert.ok(refly > 0, 'rewards made room for a bigger grid');
   assert.strictEqual(w.collected.length, w.events.length ? w.collected.length : w.collected.length);
 });
 
-test('resize mid-round: cards move to the new grid, rewards to new perches (no NaN, inside the screen)', () => {
+test('resize mid-round: blocks move to the new grid, rewards to new perches (no NaN, inside the screen)', () => {
   const w = mkWorld({ age: 4 }); roundOf(w, 'animals', 3); untilPhase(w, 'play');
-  const p = pairOf(w, w.cards[0].key); tap(w, p[0]); tap(w, p[1]); run(w, 3);
+  const p = pairOf(w, w.cards[0].key); tap(w, p[0]); tap(w, p[1]); run(w, 4);
   const up = downCards(w)[0]; tap(w, up); run(w, 0.3);
   w.setViewport(720, 1556, { top: 108, bottom: 62 });
   const L = w.layout, g = L.grid;
@@ -701,12 +861,63 @@ test('resize mid-round: cards move to the new grid, rewards to new perches (no N
   run(w, 1); solveRound(w); assert.strictEqual(w.state, 'roundDone');
 });
 
+test('rotation / resize mid-glide and mid-melt, during the deal and while fish fly: everything stays inside, the pair still meets at the (new) midpoint', () => {
+  const vps = [VIEWPORTS[8], VIEWPORTS[3], VIEWPORTS[1], VIEWPORTS[7], VIEWPORTS[4]];
+  for (const stage of ['hold', 'glide', 'clink', 'melt']) for (let k = 0; k < vps.length; k++) {
+    const w = mkWorld({ age: 5, vp: vps[k] }); roundOf(w, 'colors', 2); untilPhase(w, 'play'); ev(w);
+    const [a, b] = pairOf(w, w.cards[0].key); tap(w, a); tap(w, b);
+    let n = 0; while (n++ < 1500 && !(w._anims[0] && w._anims[0].stage === stage)) w.update(H);
+    assert.ok(w._anims[0] && w._anims[0].stage === stage, 'reached ' + stage);
+    const v = vps[(k + 1) % vps.length]; w.setViewport(v.W, v.H, v.ins);
+    const L = w.layout, safe = L.safe, g = L.grid;
+    for (const c of w.cards) if (c.state !== 'gone') {
+      assert.ok(Number.isFinite(c.x + c.y + c.vx + c.vy), 'NaN'); assert.ok(insideR(w.cardRect(c), g.board), v.name + ' ' + stage + ' block inside the board');
+    }
+    let rewardEv = null; n = 0;
+    while (!rewardEv && n++ < 1500) {
+      w.update(H);
+      for (const c of w.cards) if (c.state !== 'gone') assert.ok(insideR(w.cardRect(c), g.board), stage + ' leaves the board');
+      for (const e of ev(w)) if (e.type === 'reward') rewardEv = e;
+    }
+    const mx = (a.hx + b.hx) / 2, my = (a.hy + b.hy) / 2;
+    assert.ok(rewardEv && Math.abs(rewardEv.x - mx) < 1e-6 && Math.abs(rewardEv.y - my) < 1e-6, stage + ' new midpoint');
+    // a fish in the air when the screen turns: it dives at once (land), nothing stuck off-screen
+    let landed = false; run(w, 0.5); w.setViewport(vps[k].W, vps[k].H, vps[k].ins);
+    for (const e of ev(w)) if (e.type === 'land') landed = true;
+    assert.ok(landed || !w.rewards.some(r => r.kind === 'fish'));
+    for (const r of w.rewards) if (r.pieces) r.pieces.forEach(q => assert.ok(insideR({ x: q.x, y: q.y, w: 0, h: 0 }, { x: 0, y: 0, w: w.layout.W, h: w.layout.H })));
+    solveRound(w); assert.strictEqual(w.state, 'roundDone');
+  }
+  // during the deal
+  const w = mkWorld({ age: 4 }); roundOf(w, 'animals', 3); run(w, 0.3); w.setViewport(720, 1556, VIEWPORTS[3].ins);
+  untilPhase(w, 'peek'); for (const c of w.cards) assert.ok(insideR(w.cardRect(c), w.layout.grid.board) && Math.abs(c.x - c.hx) < 0.05);
+});
+
 test('interpolation: _px/_py/_prot/_pflip are the previous sub-step; alpha in [0,1)', () => {
   const w = mkWorld(); roundOf(w, 'colors', 1); run(w, 0.2);
   const c = w.cards[0]; const x0 = c.x, y0 = c.y;
   w.update(H); assert.strictEqual(c._px, x0); assert.strictEqual(c._py, y0);
   w.update(H * 0.4); assert.ok(w.alpha > 0.35 && w.alpha < 0.45);
-  untilPhase(w, 'play'); tap(w, c); const f0 = c.flip; w.update(H); assert.strictEqual(c._pflip, f0);
+  untilPhase(w, 'play'); tap(w, c); run(w, 0.2); const f0 = c.flip; w.update(H); assert.strictEqual(c._pflip, f0);
+  // reward pieces (fish) too
+  const p = pairOf(w, c.key).find(x => x !== c); tap(w, p);
+  let n = 0; while (!(w.rewards[0] && w.rewards[0].pieces[0].state === 'air') && n++ < 1000) w.update(H);
+  const pc = w.rewards[0].pieces[0], x1 = pc.x, r1 = pc.rot; w.update(H); assert.strictEqual(pc._px, x1); assert.strictEqual(pc._prot, r1);
+});
+
+test('Tuk: w.dee is w.tuk; happy hop on a match; belly slide at round end (out 70 px with friction, hold, back to 0)', () => {
+  const w = mkWorld({ age: 4 }); assert.strictEqual(w.dee, w.tuk); assert.strictEqual(w.miu, w.tuk);
+  roundOf(w, 'animals', 0); untilPhase(w, 'play');
+  const keys = ['mood', 'moodT', 'lookX', 'lookY', 'hop', 'slide']; keys.forEach(k => assert.ok(k in w.tuk, k));
+  solveRound(w); assert.strictEqual(w.state, 'roundDone');
+  let mx = 0, belly = false, prev = 0, mono = true; const tr = [];
+  run(w, 1.75, () => { mx = Math.max(mx, w.tuk.slide); belly = belly || w.tuk.belly; tr.push(w.tuk.slide); });
+  assert.ok(Math.abs(mx - CFG.tukSlidePx) < 1e-6, 'slides ' + mx); assert.ok(belly);
+  const iMax = tr.indexOf(mx); for (let i = 1; i <= iMax; i++) if (tr[i] < tr[i - 1] - 1e-9) mono = false; assert.ok(mono);
+  // speed falls linearly on the way out (constant friction)
+  const v = []; for (let i = 1; i < iMax; i++) if (tr[i] > 0) v.push((tr[i] - tr[i - 1]) / H);
+  for (let i = 2; i < v.length; i++) assert.ok(Math.abs((v[i] - v[i - 1]) / H + CFG.tukSlideFriction) < 1, 'μ');
+  assert.strictEqual(w.tuk.slide, 0); assert.strictEqual(w.tuk.belly, false); void prev;
 });
 
 // ======================================================= QA round 1: variety + help
@@ -739,59 +950,68 @@ test('surprise round: round index 2 of every chapter, the type rotates per chapt
   assert.strictEqual(offs.size, 3);
 });
 
-test('surprise shuffle: after the hide two face-down cards (different keys) swap along opposite arcs in 0.9 s, lifted; shuffle {a, b}; still solvable', () => {
+test('surprise slide: after the hide two frosted blocks (different keys) glide to swap places along opposite curves in 1.0 s, stop exactly; slide {a, b}; still solvable', () => {
   for (const age of [4, 5]) {
     const w = mkWorld({ age, surprise: true }); w.levels = ['animals', 'colors', 'shapes', 'count']; w._surpriseOff = 0; w.startLevel(0); w.round = 2; w._beginRound();
-    assert.strictEqual(w.surprise, 'shuffle');
+    assert.strictEqual(w.surprise, 'slide');
     const before = {}; let sh = [], n = 0, maxLift = 0, phases = new Set(), t0 = null, t1 = null;
     untilPhase(w, 'hide'); w.cards.forEach(c => { before[c.id] = [c.hx, c.hy]; });
     while (w.phase !== 'play' && n++ < 2000) {
       w.update(H); phases.add(w.phase);
-      for (const e of ev(w)) if (e.type === 'shuffle') { sh.push(e); t0 = w.time; }
-      for (const c of w.cards) if (c._sw) { maxLift = Math.max(maxLift, c.lift); assert.ok(c.flip < 0.05, 'face hidden while moving'); t1 = w.time; }
-      if (w.phase === 'shuffle') assert.strictEqual(w.pointerDown(w.cards[0].x, w.cards[0].y), null, 'no taps while shuffling');
+      for (const e of ev(w)) if (e.type === 'slide') { sh.push(e); t0 = w.time; }
+      for (const c of w.cards) if (c._sw) { maxLift = Math.max(maxLift, c.lift); assert.ok(c.flip < 0.05, 'frosted while moving'); t1 = w.time; }
+      if (w.phase === 'slide') assert.strictEqual(w.pointerDown(w.cards[0].x, w.cards[0].y), null, 'no taps while sliding');
     }
-    assert.ok(phases.has('shuffle')); assert.strictEqual(sh.length, age >= 5 ? 2 : 1);
+    assert.ok(phases.has('slide')); assert.strictEqual(sh.length, age >= 5 ? 2 : 1);
     for (const e of sh) {
       const a = w.cardById(e.a), b = w.cardById(e.b);
       assert.notStrictEqual(a.key, b.key);
       assert.deepStrictEqual([a.hx, a.hy], before[b.id]); assert.deepStrictEqual([b.hx, b.hy], before[a.id]);
-      assert.strictEqual(a.x, a.hx);
+      assert.ok(Math.abs(a.x - a.hx) < 1e-6);
     }
-    assert.ok(Math.abs(t1 - t0 - CFG.shuffleTime) < 0.02); assert.ok(maxLift > 0.98);
+    assert.ok(Math.abs(t1 - t0 - CFG.slideTime) < 0.02); assert.ok(maxLift > 0.3 && maxLift <= 0.35 + 1e-9);
     solveRound(w); assert.strictEqual(w.state, 'roundDone');
   }
 });
 
-test('surprise golden: one secret pair; its match → match.golden + golden {a, b} + Dee cheers; the other pairs are normal', () => {
+test('surprise aurora: one secret golden pair; its match → match.golden + golden {a, b, aurora} + Tuk cheers; w.aurora shimmer rises and peaks after the golden match', () => {
   const w = mkWorld({ age: 4, surprise: true }); w.levels = ['animals', 'colors', 'shapes', 'count']; w._surpriseOff = 1; w.startLevel(0); w.round = 2; w._beginRound();
-  assert.strictEqual(w.surprise, 'golden'); const G = w.cur.golden; assert.ok(w.cur.pairInfo[G]);
-  untilPhase(w, 'play'); ev(w);
-  const other = w.cards.find(c => c.key !== G), po = pairOf(w, other.key); tap(w, po[0]); tap(w, po[1]); run(w, 1.2);
+  assert.strictEqual(w.surprise, 'aurora'); const G = w.cur.golden; assert.ok(w.cur.pairInfo[G]);
+  untilPhase(w, 'play'); ev(w); assert.ok(w.aurora > 0.99 && w.aurora <= 1, 'aurora up ' + w.aurora);
+  const other = w.cards.find(c => c.key !== G), po = pairOf(w, other.key); tap(w, po[0]); tap(w, po[1]); run(w, 2.5);
   let E = ev(w); assert.ok(!E.some(e => e.type === 'golden'));
-  const pg = pairOf(w, G); tap(w, pg[0]); tap(w, pg[1]); run(w, 0.4);
+  const pg = pairOf(w, G); tap(w, pg[0]); tap(w, pg[1]); run(w, 0.5);
   E = ev(w); const m = E.find(e => e.type === 'match'), g = E.find(e => e.type === 'golden');
-  assert.ok(m.golden && g && g.key === G); assert.strictEqual(w.dee.mood, 'cheer');
-  run(w, 0.8); const r = w.rewards[w.rewards.length - 1]; assert.ok(r.golden);
-  // the backs give no cue: golden cards carry no visible field
+  assert.ok(m.golden && g && g.key === G && g.aurora); assert.strictEqual(w.tuk.mood, 'cheer');
+  run(w, 0.8); assert.ok(w.aurora > 1.2, 'boost ' + w.aurora);
+  run(w, 1.5); const r = w.rewards[w.rewards.length - 1]; assert.ok(!r || r.golden || w.collected.length);
   assert.ok(pg.every(c => c.golden === undefined && c.glow === 0));
+  // a normal round: no shimmer
+  const w2 = mkWorld({ age: 4 }); roundOf(w2, 'animals', 1); untilPhase(w2, 'play'); assert.strictEqual(w2.aurora, 0);
 });
 
-test('surprise pond: cards on lily pads (arc + staggered rows) inside the board, ≥ the age minimum, gaps ≥ 14, bobbing ±3 px (12 viewports × 2–6 pairs)', () => {
+test('surprise floes: blocks on little floes (arc + staggered rows) inside the board, ≥ the age minimum; they bob ±3 px and drift ±2 px and never come closer than 14 px (12 viewports)', () => {
   for (const v of VIEWPORTS) for (const age of [3, 4, 5, 7]) for (let pairs = 2; pairs <= 5; pairs++) {
-    const L = IM.World.computeLayout(v.W, v.H, v.ins), g0 = IM.World.chooseGrid(L, 2 * pairs, age), g = IM.World.pondLayout(g0, age);
+    const L = IM.World.computeLayout(v.W, v.H, v.ins), g0 = IM.World.chooseGrid(L, 2 * pairs, age), g = IM.World.floesLayout(g0, age);
     const tag = `${v.name} age ${age} ${pairs}`;
     assert.ok(g.cw >= Math.min(g0.cw, CFG.cardMin[age]) - 1e-9 && g.cw <= g0.cw + 1e-9, tag + ' size');
     const R = g.slots.map(q => ({ x: q.x - g.cw / 2, y: q.y - g.ch / 2, w: g.cw, h: g.ch }));
-    R.forEach(r => { assert.ok(insideR(r, g0.board), tag + ' inside the board'); assert.ok(insideR(r, g.rect)); });
-    for (let i = 0; i < R.length; i++) for (let j = i + 1; j < R.length; j++) assert.ok(IM.World.rectGap(R[i], R[j]) >= 14 - 1e-6, tag + ' gap ' + IM.World.rectGap(R[i], R[j]));
+    R.forEach(r => { assert.ok(insideR({ x: r.x - g.driftAmp, y: r.y - g.bobAmp, w: r.w + 2 * g.driftAmp, h: r.h + 2 * g.bobAmp }, g0.board), tag + ' inside the board (with bob)'); });
+    for (let i = 0; i < R.length; i++) for (let j = i + 1; j < R.length; j++) assert.ok(IM.World.rectGap(R[i], R[j]) >= 14 - 1e-6, tag + ' gap');
     if (g0.rows > 1 && g0.cols > 2) assert.ok(new Set(g.slots.map(q => Math.round(q.y))).size > g0.rows, tag + ' not a plain grid');
   }
-  const w = mkWorld({ age: 4, surprise: true }); w.levels = ['animals', 'colors', 'shapes', 'count']; w._surpriseOff = 2; w.startLevel(0); w.round = 2; w._beginRound();
-  assert.strictEqual(w.surprise, 'pond'); assert.strictEqual(w.layout.grid.style, 'pond');
-  untilPhase(w, 'play'); const c = w.cards[0]; let lo = 1e9, hi = -1e9; run(w, 3, () => { lo = Math.min(lo, c.y - c.hy); hi = Math.max(hi, c.y - c.hy); });
-  assert.ok(hi - lo > 4 && hi <= 3.01 && lo >= -3.01, 'bob');
-  solveRound(w); assert.strictEqual(w.state, 'roundDone');
+  for (const v of [VIEWPORTS[8], VIEWPORTS[3], VIEWPORTS[5]]) {
+    const w = mkWorld({ age: 4, surprise: true, vp: v }); w.levels = ['animals', 'colors', 'shapes', 'count']; w._surpriseOff = 2; w.startLevel(0); w.round = 2; w._beginRound();
+    assert.strictEqual(w.surprise, 'floes'); assert.strictEqual(w.layout.grid.style, 'floes');
+    untilPhase(w, 'play'); const c = w.cards[0]; let lo = 1e9, hi = -1e9, dxl = 1e9, dxh = -1e9, minGap = 1e9;
+    run(w, 8, () => { lo = Math.min(lo, c.y - c.hy); hi = Math.max(hi, c.y - c.hy); dxl = Math.min(dxl, c.x - c.hx); dxh = Math.max(dxh, c.x - c.hx);
+      const R = w.cards.map(q => w.cardRect(q)); for (let i = 0; i < R.length; i++) for (let j = i + 1; j < R.length; j++) minGap = Math.min(minGap, IM.World.rectGap(R[i], R[j])); });
+    const G = w.layout.grid; assert.ok(G.bobAmp > 1.5, v.name + ' bob room ' + G.bobAmp);
+    assert.ok(hi - lo > 1.8 * G.bobAmp - 0.1 && hi <= 3.01 && lo >= -3.01, 'bob'); assert.ok(dxh - dxl > 1.5 * G.driftAmp - 0.1 && dxh <= 2.01 && dxl >= -2.01, 'drift');
+    assert.ok(Math.abs(c.bob - (c.y - c.hy)) < 1e-9);
+    assert.ok(minGap >= 14 - 1e-6, v.name + ' gap ' + minGap);
+    solveRound(w); assert.strictEqual(w.state, 'roundDone');
+  }
 });
 
 test('hudKeep: rewards keep out of the REAL HUD box main.js measures (403 × 106 px on an iPhone landscape)', () => {
@@ -801,7 +1021,7 @@ test('hudKeep: rewards keep out of the REAL HUD box main.js measures (403 × 106
     assert.deepStrictEqual(w.layout.hudKeep, keep);
     const bot = new IM.Bot(w, { skill: 1, seed: s }); w.newSession();
     while (w.state !== 'sessionDone') { bot.step(1 / 30); w.update(1 / 30); w.drainEvents();
-      for (const r of w.rewards) if (r.target) assert.ok(!rectsOverlap(r.target.box, keep), 'under the HUD ' + r.kind); }
+      for (const r of w.rewards) if (r.target && r.target.box) assert.ok(!rectsOverlap(r.target.box, keep), 'under the HUD ' + r.kind); }
   }
 });
 
@@ -813,16 +1033,20 @@ test('determinism: same seed + same bot → identical events; the dt split does 
   const w1 = mkWorld({ seed: 4, age: 4 }), rec = [], evA = [];
   const bot = new IM.Bot(w1, { skill: 0.5, seed: 9 });
   const orig = w1.pointerDown.bind(w1);
-  w1.pointerDown = (x, y) => { rec.push([Math.round(w1.time / CFG.step), x, y]); return orig(x, y); };
+  w1.pointerDown = (x, y) => { rec.push([Math.round(w1.time / CFG.step), 'down', x, y]); return orig(x, y); };
+  const origM = w1.pointerMove.bind(w1), origU = w1.pointerUp.bind(w1);
+  w1.pointerMove = (x, y) => { rec.push([Math.round(w1.time / CFG.step), 'move', x, y]); return origM(x, y); };
+  w1.pointerUp = (x, y) => { rec.push([Math.round(w1.time / CFG.step), 'up', x, y]); return origU(x, y); };
   const origT = w1.talkAnswer.bind(w1);
   w1.talkAnswer = (id) => { rec.push([Math.round(w1.time / CFG.step), 'talk', id]); return origT(id); };
   w1.newSession();
   for (let i = 0; i < 30 * 200; i++) { bot.step(1 / 30); w1.update(1 / 30); for (const e of w1.drainEvents()) evA.push(e.type + (e.id || e.a || '')); }
+  assert.ok(evA.some(e => e.startsWith('flip')) && rec.some(q => q[1] === 'move'));
   const w2 = mkWorld({ seed: 4, age: 4 }), evB = []; w2.newSession();
   let k = 0;
   while (w2.time < w1.time - 1e-9) {
     const s = Math.round(w2.time / CFG.step);
-    while (k < rec.length && rec[k][0] <= s) { if (rec[k][1] === 'talk') w2.talkAnswer(rec[k][2]); else w2.pointerDown(rec[k][1], rec[k][2]); k++; }
+    while (k < rec.length && rec[k][0] <= s) { const q = rec[k]; if (q[1] === 'talk') w2.talkAnswer(q[2]); else if (q[1] === 'down') w2.pointerDown(q[2], q[3]); else if (q[1] === 'move') w2.pointerMove(q[2], q[3]); else w2.pointerUp(q[2], q[3]); k++; }
     w2.update(CFG.step); for (const e of w2.drainEvents()) evB.push(e.type + (e.id || e.a || ''));
   }
   assert.deepStrictEqual(evB, evA);
@@ -864,68 +1088,73 @@ test('performance: 10 full sessions simulated in < 6 s', () => {
   assert.ok(ms < 6000, ms + ' ms');
 });
 
-// ======================================================= weather (seasons)
+// ======================================================= weather (stages)
 const AMB = [
-  { skyTop: '#A9D8F0', season: 0, darkness: 0, sun: 1 },
-  { skyTop: '#7EC4EE', season: 1, darkness: 0, sun: 1, tint: null },
-  { skyTop: '#E9C9A0', season: 2, darkness: 0 },
-  { skyTop: '#C5D7E6', season: 3, darkness: 0 }
+  { skyTop: '#8CCBF0', stage: 0, season: 0, darkness: 0, sun: 1, rainbow: 0, tint: null },
+  { skyTop: '#B9B8D8', stage: 1, darkness: 0, rainbow: 0 },
+  { skyTop: '#9DB2C6', stage: 2, rainbow: 0 },
+  { skyTop: '#A3D8F4', stage: 3, darkness: 0, rainbow: 1 }
 ];
-const AMB_KEYS = ['skyTop', 'skyBottom', 'horizon', 'tint', 'wind', 'sway', 'sun', 'sunX', 'sunY', 'darkness', 'season', 'gust', 'windBase'];
-test('weather: ambient per season, 2.5 s crossfade, darkness 0, gusty wind within ±40 px/s (autumn the windiest)', () => {
+const AMB_KEYS = ['skyTop', 'skyBottom', 'horizon', 'tint', 'wind', 'sway', 'sun', 'sunX', 'sunY', 'darkness', 'stage', 'rainbow', 'season', 'gust', 'windBase'];
+test('weather: ambient per stage (sunny / breezy / rain / rainbow), 2.5 s crossfade incl. rainbow 0..1, gusty wind within ±40 px/s (breezy the windiest)', () => {
   const wx = new IM.Weather({ width: 1280, height: 720, seed: 1 });
   for (let m = 0; m < 4; m++) {
     wx.setWeather(m, { instant: true });
     const a = wx.ambient, e = AMB[m];
     for (const k of AMB_KEYS) assert.ok(k in a, 'ambient.' + k);
-    for (const k in e) assert.strictEqual(a[k], e[k], 'season ' + m + ' ' + k);
+    for (const k in e) assert.strictEqual(a[k], e[k], 'stage ' + m + ' ' + k);
     assert.ok(/^#[0-9A-F]{6}$/.test(a.horizon));
   }
-  assert.strictEqual(IM.Weather.FADE_TIME, 2.5);
-  wx.setWeather(1, { instant: true }); wx.setWeather(3);
+  assert.ok(wx.ambient.darkness === 0); wx.setWeather(2, { instant: true }); assert.ok(wx.ambient.darkness > 0 && wx.ambient.darkness < 0.1, 'rain is a little darker');
+  assert.strictEqual(IM.Weather.FADE_TIME, 2.5); assert.deepStrictEqual(IM.Weather.STAGES, ['sunny', 'breezy', 'rain', 'rainbow']);
+  wx.setWeather(2, { instant: true }); wx.setWeather(3);
   wx.update(0.6, { groundY: 630 }); wx.update(0.65, { groundY: 630 });
-  assert.notStrictEqual(wx.ambient.skyTop, '#7EC4EE'); assert.notStrictEqual(wx.ambient.skyTop, '#C5D7E6');
-  wx.update(0.65, { groundY: 630 }); wx.update(0.65, { groundY: 630 }); assert.strictEqual(wx.ambient.skyTop, '#C5D7E6'); assert.strictEqual(wx.ambient.season, 3);
+  assert.ok(wx.ambient.rainbow > 0.2 && wx.ambient.rainbow < 0.8, 'rainbow fades in ' + wx.ambient.rainbow);
+  assert.notStrictEqual(wx.ambient.skyTop, '#9DB2C6'); assert.notStrictEqual(wx.ambient.skyTop, '#A3D8F4');
+  wx.update(0.65, { groundY: 630 }); wx.update(0.65, { groundY: 630 }); assert.strictEqual(wx.ambient.skyTop, '#A3D8F4'); assert.strictEqual(wx.ambient.stage, 3); assert.strictEqual(wx.ambient.rainbow, 1);
   for (let m = 0; m < 4; m++) {
     const w2 = new IM.Weather({ width: 1280, height: 720, seed: 5 + m }); w2.setWeather(m, { instant: true });
     let lo = 1e9, hi = -1e9;
     for (let i = 0; i < 1800; i++) { w2.update(1 / 30, { groundY: 630 }); lo = Math.min(lo, w2.ambient.wind); hi = Math.max(hi, w2.ambient.wind); }
     assert.ok(lo >= -40 && hi <= 40);
-    if (m === 2) assert.ok(hi > 30, 'autumn gusts ' + hi); else assert.ok(hi < 30, 'calm season ' + m + ' ' + hi);
+    if (m === 1) assert.ok(hi > 30, 'breezy gusts ' + hi); else assert.ok(hi < 30, 'calm stage ' + m + ' ' + hi);
   }
 });
 
-test('weather: particles per season (petals + butterflies, sparkles + fireflies, leaves, snow), cap 120, deterministic, resize', () => {
+test('weather: particles per stage (sparkles · snow + streaks in gusts · rain drops + splash rings at the lake · sparkles + gentle snow), cap 120, bursts (shard, splash), deterministic, resize', () => {
   const kinds = [];
   for (let m = 0; m < 4; m++) {
     const wx = new IM.Weather({ width: 1600, height: 720, seed: 3 }); wx.setWeather(m, { instant: true });
-    const seen = {}; let maxN = 0;
+    const seen = {}; let maxN = 0, streakGust = 0, streakCalm = 1;
     for (let i = 0; i < 900; i++) {
-      wx.update(1 / 30, { groundY: 630 });
-      if (i % 50 === 0) wx.burst(800, 300, { kind: 'confetti', n: 40, color: 'red' });
+      wx.update(1 / 30, { groundY: 630, lakeTop: 300 });
+      if (i % 50 === 0) { wx.burst(800, 300, { kind: 'confetti', n: 40, color: 'red' }); wx.burst(700, 400, { kind: 'shard' }); wx.burst(1500, 660, { kind: 'splash' }); }
       maxN = Math.max(maxN, wx.particles.length);
       for (const p of wx.particles) {
         seen[p.kind] = 1;
         assert.ok(Number.isFinite(p.x + p.y + p.alpha + p.size + p.rot + p.flipX), 'finite');
         assert.ok(['sky', 'back', 'front'].includes(p.layer));
         assert.ok(IM.Weather.SPRITES.includes(p.sprite), p.sprite);
-        if (p.kind === 'butterfly') { assert.ok(p.color && p.flap >= 0 && p.flap <= 1); assert.ok(Math.abs(p.flipX) === 1); }
-        if (p.kind === 'firefly') assert.ok(p.glow === true);
-        if (['petal', 'leaf', 'snow'].includes(p.kind)) assert.ok(p.y < 630 + 61);
+        if (p.kind === 'snow') assert.ok(p.y < 630 + 61);
+        if (p.kind === 'splash' && p.mood === -1 && p.size < 40) { assert.ok(p.scaleY === 0.4); if (p.a0 < 0.8) assert.ok(p.y >= 300 - 1e-6 && p.y <= 630 + 1e-6, 'ring on the lake ' + p.y); }
+        if (p.kind === 'streak') { assert.ok(p.stretch >= 1.5 && p.stretch <= 4); if (wx.gust > 0.6) streakGust = Math.max(streakGust, p.alpha / p.a0); else if (wx.gust < 0.05) streakCalm = Math.min(streakCalm, p.alpha / p.a0); }
       }
     }
     assert.ok(maxN <= IM.Weather.CAP);
+    if (m === 1) assert.ok(streakGust > 0.95 && streakCalm < 0.4, 'streaks brighten in gusts ' + streakGust + ' ' + streakCalm);
     kinds.push(seen);
   }
-  assert.ok(kinds[0].petal && kinds[0].butterfly && !kinds[0].snow && !kinds[0].leaf, 'spring');
-  assert.ok(kinds[1].sparkle && kinds[1].firefly && !kinds[1].snow, 'summer');
-  assert.ok(kinds[2].leaf && !kinds[2].snow && !kinds[2].butterfly, 'autumn');
-  assert.ok(kinds[3].snow && !kinds[3].leaf && !kinds[3].butterfly, 'winter');
-  // autumn leaves are blown sideways in gusts; snow falls slowly
-  const wa = new IM.Weather({ width: 1280, height: 720, seed: 2 }); wa.setWeather(2, { instant: true });
-  let vxMax = 0; for (let i = 0; i < 900; i++) { wa.update(1 / 30, { groundY: 630 }); for (const p of wa.particles) if (p.kind === 'leaf') vxMax = Math.max(vxMax, p.vx); }
-  assert.ok(vxMax > 50, 'gust-blown leaves ' + vxMax);
+  assert.ok(kinds[0].sparkle && !kinds[0].snow && !kinds[0].drop && !kinds[0].streak, 'sunny');
+  assert.ok(kinds[1].snow && kinds[1].streak && !kinds[1].drop, 'breezy');
+  assert.ok(kinds[2].drop && kinds[2].splash && !kinds[2].snow && !kinds[2].streak, 'rain');
+  assert.ok(kinds[3].sparkle && kinds[3].snow && !kinds[3].drop, 'rainbow');
+  assert.ok(kinds[0].shard && kinds[0].spray && kinds[0].confetti, 'bursts');
+  // rain rings: every drop that reaches the ice leaves a ring there
+  const wr = new IM.Weather({ width: 1280, height: 720, seed: 9 }); wr.setWeather(2, { instant: true });
+  let rings = 0; for (let i = 0; i < 300; i++) { const n0 = wr.particles.filter(p => p.kind === 'splash').length; wr.update(1 / 60, { groundY: 630, lakeTop: 320 }); rings += Math.max(0, wr.particles.filter(p => p.kind === 'splash').length - n0); }
+  assert.ok(rings > 50, 'rings ' + rings);
   const a = new IM.Weather({ width: 1280, height: 720, seed: 4 }), b = new IM.Weather({ width: 1280, height: 720, seed: 4 });
+  a.setWeather(2, { instant: true }); b.setWeather(2, { instant: true });
   for (let i = 0; i < 120; i++) a.update(1 / 30, { groundY: 630 });
   for (let i = 0; i < 240; i++) b.update(1 / 60, { groundY: 630 });
   assert.deepStrictEqual(a.particles.map(p => [p.kind, Math.round(p.x * 100)]), b.particles.map(p => [p.kind, Math.round(p.x * 100)]));

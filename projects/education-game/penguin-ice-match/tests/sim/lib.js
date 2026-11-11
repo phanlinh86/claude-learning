@@ -1,4 +1,4 @@
-// Dee's Forest Memory — headless playtest harness (report-only; never edits game code).
+// Tuk's Ice Match — headless playtest harness (report-only; never edits game code).
 //   const L = require('./lib'); const m = L.runSession({ age, lang, vp, driver: 'typical', seed, config });
 // Loads rng/content/world/bot into a node vm (same pattern as tests/unit/load.js), drives ONLY the public input API
 // (pointerDown/Up, talkAnswer, hint) and measures round / chapter / session times, mismatches, hints, idles, stars,
@@ -205,9 +205,12 @@ function makeDriver(name, w, age, seed) {
 /* ---------------------------------------------------------------- session runner */
 function rewardBox(r) {
   const s = r.size;
-  if (r.kind === 'animal') return { x: r.x - s / 2, y: r.y - s, w: s, h: s };
-  if (r.kind === 'acorns' && r.pieces) { const xs = r.pieces.map(p => p.x), ys = r.pieces.map(p => p.y), R = r.pieceSize / 2;
-    return { x: Math.min(...xs) - R, y: Math.min(...ys) - R, w: Math.max(...xs) - Math.min(...xs) + 2 * R, h: Math.max(...ys) - Math.min(...ys) + 2 * R }; }
+  if (r.kind === 'animal' || r.kind === 'sculpture') {
+    let B = { x: r.x - s / 2, y: r.y - s, w: s, h: s };
+    if (r.badge) { const q = { x: r.badge.x - r.badge.size / 2, y: r.badge.y - r.badge.size / 2, w: r.badge.size, h: r.badge.size };
+      const x = Math.min(B.x, q.x), y = Math.min(B.y, q.y); B = { x, y, w: Math.max(B.x + B.w, q.x + q.w) - x, h: Math.max(B.y + B.h, q.y + q.h) - y }; }
+    return B;
+  }
   return { x: r.x - s / 2, y: r.y - s / 2, w: s, h: s };
 }
 const ovl = (a, b) => a.x < b.x + b.w - 1e-6 && b.x < a.x + a.w - 1e-6 && a.y < b.y + b.h - 1e-6 && b.y < a.y + a.h - 1e-6;
@@ -227,7 +230,7 @@ function runSession(o) {
   function checkRewards() {   // at each round start: every resting reward inside the screen, clear of bubble / HUD / Dee
     const L = w.layout, safe = { x: L.ins.left, y: L.ins.top, w: L.W - L.ins.left - L.ins.right, h: L.H - L.ins.top - L.ins.bottom };
     for (const r of w.rewards) {
-      if (r.state === 'fly') continue;
+      if (r.state === 'fly' || r.state === 'emerge' || r.kind === 'fish' || r.kind === 'fishes') continue;
       m.homesSeen++;
       const B = rewardBox(r);
       const inside = B.x >= safe.x - 1e-6 && B.y >= safe.y - 1e-6 && B.x + B.w <= safe.x + safe.w + 1e-6 && B.y + B.h <= safe.y + safe.h + 1e-6;
@@ -237,7 +240,7 @@ function runSession(o) {
   function checkCards() {   // when play starts: card size vs the age minimum, cards clear of the rewards
     const g = w.layout.grid; if (!g) return;
     m.packShrinkMin = Math.min(m.packShrinkMin, g.cw); if (!g.minOk) m.packFail++;
-    for (const r of w.rewards) if (r.state !== 'fly' && ovl(rewardBox(r), g.rect)) m.offscreen++;
+    for (const r of w.rewards) if (r.state !== 'fly' && r.state !== 'emerge' && !r.pieces && ovl(rewardBox(r), g.rect)) m.offscreen++;
   }
   const handle = (e) => {
     switch (e.type) {

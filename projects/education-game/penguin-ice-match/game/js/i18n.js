@@ -1,35 +1,41 @@
-/* Dee's Forest Memory — IM.I18N (English + Vietnamese). Dee the duckling talks to the child about memory cards.
+/* Tuk's Ice Match — IM.I18N (English + Vietnamese). Tuk the penguin chick talks to the child about ice blocks on a
+ * frozen lake: each block has a picture frozen inside, the frost cracks off (tap or rub) and grows back.
  *
  *   IM.I18N.t(lang, key, params, rng?)     → string (variants picked with rng.next()/rng()/Math.random)
  *   IM.I18N.name(lang, kind, value)        → display + spoken name ("red"/"màu đỏ", 7 → "seven"/"bảy",
- *                                            fox → "fox"/"con cáo", dots 3 → "three acorns"/"ba hạt dẻ")
+ *                                            seal → "seal"/"con hải cẩu", dots 3 → "three fish"/"ba con cá",
+ *                                            home floe → "ice floe"/"tảng băng trôi")
  *   IM.I18N.words(lang, kind, value)       → accepted spoken forms for speech recognition (lower-case, + no-diacritic forms)
- *   IM.I18N.speech(lang, text)             → text tuned for TTS (letter names, + − =). ("Dee" → "Đi" happens in voice.js)
+ *   IM.I18N.speech(lang, text)             → text tuned for TTS (letter names, + − =). ("Tuk" → "Túc" happens in voice.js)
  *
- *   Card lines (memory game). Every function copes with a missing / partial event and never returns '' or "{x}":
- *   IM.I18N.sayFlip(lang, ev, rng)         → name of the turned face: "Red!", "A red heart!", "One, two, three acorns!",
- *                                            "Three!", "A fox!", "A little fox!", "The letter B!", "Two plus three!"
- *   IM.I18N.sayMatch(lang, ev, rng)        → "Two foxes! A pair!", "Three and three acorns! A match!",
- *                                            "Seven and seven acorns! Seven is odd!", "Fox starts with the letter F! A pair!"
- *   IM.I18N.sayMismatch(lang, ev, rng)     → "A fox and an owl. Let's look again!" — kind, never negative
- *   IM.I18N.sayReward(lang, ev, rng)       → optional line for a `reward` event (ev.kind butterfly|lantern|acorns|animal|star)
- *   IM.I18N.sayCount(lang, n, need)        → "Two!" … at need "Three! Three acorns!"
- *   IM.I18N.cardPhrase(lang, card)         → "a fox" / "con cáo", "three acorns" / "ba hạt dẻ" (what mismatch lines use)
+ *   Block lines (memory game). Every function copes with a missing / partial event and never returns '' or "{x}":
+ *   IM.I18N.sayFlip(lang, ev, rng)         → name of the revealed face: "Red!", "A red heart!", "One, two, three fish!",
+ *                                            "Three!", "A seal!", "A little seal!", "An ice floe!", "The letter B!"
+ *   IM.I18N.sayMatch(lang, ev, rng)        → "Two seals! A pair!", "Three and three fish! A match!",
+ *                                            "The seal lives on the ice floe!", "Seven is odd!", "Bear starts with …"
+ *   IM.I18N.sayMismatch(lang, ev, rng)     → "A seal and a nest! Let's find the seal's home." — kind, never negative
+ *   IM.I18N.sayReward(lang, ev, rng)       → optional line for a `reward`/`land` event (ev.kind fish|sculpture|fishes|
+ *                                            animal|star|home; old butterfly|lantern|acorns still answer)
+ *   IM.I18N.sayHome(lang, ev, rng)         → line for a `homeArrive` event ({id, home, animal?}) "The seal is home!"
+ *   IM.I18N.sayCount(lang, n, need)        → "Two!" … at need "Three! Three fish!"
+ *   IM.I18N.cardPhrase(lang, card)         → "a seal" / "con hải cẩu", "three fish" / "ba con cá", "an ice floe"
  *   IM.I18N.talkWrong(lang, kind, value)   → gentle "it's X" line for a missed Talk-time answer
+ *   IM.I18N.homeOf(animal) → 'den'|… |null   IM.I18N.HOMES (default = DESIGN §5.1; IM.HOMES from content.js wins)
  *   IM.I18N.setChild(name)                 → default {child} for every t() call
  *   IM.I18N.langs = ['en', 'vi'];  has(lang, key);  keys(lang);  raw(lang, key);  PARAMS (required params per key)
  *
  * Event fields read by sayFlip / sayMatch / sayMismatch (all optional):
  *   ev.nameKind, ev.nameValue, ev.face {kind, value, color, shape, sprite, text, n, scale, parity}, ev.topic, ev.parity,
- *   ev.size ('big'|'small', size rounds), ev.word (initial match);
- *   per card: ev.nameKindA/nameValueA/faceA/sizeA + …B (what IM.World sends), or ev.cardA / ev.cardB (card objects
+ *   ev.size ('big'|'small', size rounds), ev.word (initial match), ev.animal / ev.home (homes match);
+ *   per block: ev.nameKindA/nameValueA/faceA/sizeA + …B (what IM.World sends), or ev.cardA / ev.cardB (block objects
  *   {nameKind, nameValue, face, size}), or ev.nameA / ev.nameB as {kind, value}; also ev.cards = [cardA, cardB].
  *
- * Name kinds: color, shape, size, animal, number, dots, letter, text, sum, diff, parity, word.
- * Params: values may be RAW ({animal:'fox'}, {color:'red'}) — keys named like a name kind (color, shape, size, animal,
- * parity) are named automatically; an object {kind, value} is always replaced by name(lang, kind, value).
+ * Name kinds: color, shape, size, animal, number, dots, letter, text, sum, diff, parity, word, home.
+ * Params: values may be RAW ({animal:'seal'}, {color:'red'}, {home:'den'}) — keys named like a name kind (color, shape,
+ * size, animal, parity, home) are named automatically; an object {kind, value} is always replaced by name(lang, kind, value).
  * Derived params: {letter}/{lower} from letter|text, {word} from word|animal|sprite, {expr} from expr|text|a,b,
- * {acorns} ("acorn"/"acorns", vi "hạt dẻ") and {num} (number word) from n, {animal} from a bare animal id in {sound}.
+ * {fish} ("fish", vi "con cá"; {acorns} kept as an alias) and {num} (number word) from n, {animal} from a bare animal id
+ * in {sound}/{sprite}, {at} ("on the ice floe" / "trên tảng băng trôi") from home (or the animal's home).
  * Keys with required params (PARAMS) fall back to a generic key when a param is missing (never "the !" on screen);
  * an unknown prompt key `p.<x>` falls back to `p.any`. {child}: if the child's name is empty, variants containing
  * {child} are skipped; if every variant has it, {child} becomes "friend" / "bé". Missing params are removed.
@@ -41,10 +47,12 @@
   'use strict';
 
   var LANGS = ['en', 'vi'];
-  var ANIMALS = ['fox', 'deer', 'hedgehog', 'squirrel', 'bunny', 'frog', 'bear', 'owl', 'mouse'];
+  var ANIMALS = ['bear', 'seal', 'fox', 'owl', 'whale', 'puffin', 'penguin', 'hare', 'walrus'];
+  var HOME_LIST = ['den', 'floe', 'burrow', 'nest', 'sea', 'cliff', 'pebbles'];
+  var HOMES_DEFAULT = { bear: 'den', seal: 'floe', fox: 'burrow', owl: 'nest', whale: 'sea', puffin: 'cliff', penguin: 'pebbles' };
 
   // ---------------------------------------------------------------- names
-  // Vietnamese animal names carry their classifier ("con cáo"), as a kindergarten teacher says them.
+  // Vietnamese animal names carry their classifier ("con hải cẩu"); birds are "chim …" (chim cánh cụt).
   var NAMES = {
     en: {
       color: { red: 'red', blue: 'blue', yellow: 'yellow', green: 'green', orange: 'orange', purple: 'purple', pink: 'pink',
@@ -52,8 +60,10 @@
       shape: { circle: 'circle', square: 'square', triangle: 'triangle', star: 'star', heart: 'heart', rect: 'rectangle',
         rectangle: 'rectangle', oval: 'oval', diamond: 'diamond' },
       size: { big: 'big', small: 'little', little: 'little' },
-      animal: { fox: 'fox', deer: 'deer', hedgehog: 'hedgehog', squirrel: 'squirrel', bunny: 'bunny', frog: 'frog',
-        bear: 'bear', owl: 'owl', mouse: 'mouse' },
+      animal: { bear: 'polar bear', seal: 'seal', fox: 'arctic fox', owl: 'snowy owl', whale: 'whale', puffin: 'puffin',
+        penguin: 'penguin', hare: 'arctic hare', walrus: 'walrus' },
+      home: { den: 'snow den', floe: 'ice floe', burrow: 'burrow', nest: 'nest', sea: 'the sea', cliff: 'cliff',
+        pebbles: 'pebble nest' },
       parity: { odd: 'odd', even: 'even' }
     },
     vi: {
@@ -63,19 +73,35 @@
         heart: 'hình trái tim', rect: 'hình chữ nhật', rectangle: 'hình chữ nhật', oval: 'hình bầu dục',
         diamond: 'hình thoi' },
       size: { big: 'to', small: 'nhỏ', little: 'nhỏ' },
-      animal: { fox: 'con cáo', deer: 'con hươu', hedgehog: 'con nhím', squirrel: 'con sóc', bunny: 'con thỏ',
-        frog: 'con ếch', bear: 'con gấu', owl: 'con cú', mouse: 'con chuột' },
+      animal: { bear: 'con gấu Bắc Cực', seal: 'con hải cẩu', fox: 'con cáo tuyết', owl: 'con cú tuyết',
+        whale: 'con cá voi', puffin: 'chim hải âu cổ rụt', penguin: 'chim cánh cụt', hare: 'con thỏ tuyết',
+        walrus: 'con hải mã' },
+      home: { den: 'hang tuyết', floe: 'tảng băng trôi', burrow: 'hang đất', nest: 'tổ chim', sea: 'biển',
+        cliff: 'vách đá', pebbles: 'tổ sỏi' },
       parity: { odd: 'lẻ', even: 'chẵn' }
     }
+  };
+  // Shorter Vietnamese names for lines that name two blocks ("Chim hải âu và tổ chim…" stays ≤ 15 words)
+  var SHORT_VI = { bear: 'gấu Bắc Cực', seal: 'hải cẩu', fox: 'cáo tuyết', owl: 'cú tuyết', whale: 'cá voi',
+    puffin: 'hải âu', penguin: 'cánh cụt', hare: 'thỏ tuyết', walrus: 'hải mã' };
+  var PHRASE_VI = { puffin: 'chim hải âu' };          // phrase() override (mismatch lines)
+  // English article for a home ("a snow den", "an ice floe", "the sea" — the name already has "the")
+  var HOME_ART_EN = { sea: '' };
+  // where the animal lives, for "The seal lives on the ice floe!" / "Con hải cẩu sống trên tảng băng trôi!"
+  var HOME_AT = {
+    en: { den: 'in the snow den', floe: 'on the ice floe', burrow: 'in the burrow', nest: 'in the nest', sea: 'in the sea',
+      cliff: 'on the cliff', pebbles: 'in the pebble nest' },
+    vi: { den: 'trong hang tuyết', floe: 'trên tảng băng trôi', burrow: 'trong hang đất', nest: 'trong tổ chim',
+      sea: 'dưới biển', cliff: 'trên vách đá', pebbles: 'trong tổ sỏi' }
   };
   var PLURAL_EN = {
     shape: { circle: 'circles', square: 'squares', triangle: 'triangles', star: 'stars', heart: 'hearts',
       rect: 'rectangles', rectangle: 'rectangles', oval: 'ovals', diamond: 'diamonds' },
-    animal: { fox: 'foxes', deer: 'deer', hedgehog: 'hedgehogs', squirrel: 'squirrels', bunny: 'bunnies', frog: 'frogs',
-      bear: 'bears', owl: 'owls', mouse: 'mice' }
+    animal: { bear: 'polar bears', seal: 'seals', fox: 'arctic foxes', owl: 'snowy owls', whale: 'whales',
+      puffin: 'puffins', penguin: 'penguins', hare: 'arctic hares', walrus: 'walruses' }
   };
-  // The dots on count cards are acorns. vi "hạt dẻ" is what Vietnamese children call an acorn (Scrat's "hạt dẻ").
-  var ACORN = { en: ['acorn', 'acorns'], vi: ['hạt dẻ', 'hạt dẻ'] };
+  // The dots on count blocks are little fish. vi "con cá" (classifier kept: "ba con cá").
+  var FISH = { en: ['fish', 'fish'], vi: ['con cá', 'con cá'] };
 
   var NUM = {
     en: ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve',
@@ -114,7 +140,9 @@
     'T': ['tê', 'tơ'], 'U': ['u'], 'Ư': ['ư'], 'V': ['vê', 'vơ'], 'X': ['ích xì', 'xơ'], 'Y': ['i dài', 'i cờ rét'],
     'F': ['ép'], 'J': ['gi'], 'W': ['vê kép'], 'Z': ['dét'] };
 
-  // extra accepted spoken forms per kind/value (names are always accepted automatically)
+  // extra accepted spoken forms per kind/value (names are always accepted automatically).
+  // Rules: a bare word shared by two answers of the SAME kind ("hang", "chim", "white") is never listed, so it stays
+  // ambiguous (→ no match) instead of picking one at random.
   var WORDS = {
     en: {
       color: { red: ['red', 'read', 'reds'], blue: ['blue', 'blew', 'blues'], yellow: ['yellow', 'yello'],
@@ -127,15 +155,23 @@
       size: { big: ['big', 'large', 'huge', 'bigger', 'giant'], small: ['little', 'small', 'tiny', 'smaller', 'baby'],
         little: ['little', 'small', 'tiny', 'smaller', 'baby'] },
       animal: {
-        fox: ['fox', 'foxy', 'fox cub', 'foxes', 'foxie'],
-        deer: ['deer', 'fawn', 'baby deer', 'dear', 'deers'],
-        hedgehog: ['hedgehog', 'hedgie', 'hedge hog', 'hedgehogs', 'porcupine'],
-        squirrel: ['squirrel', 'squirrels', 'squirrely', 'squirl', 'chipmunk'],
-        bunny: ['bunny', 'rabbit', 'bunnies', 'bunny rabbit', 'bun'],
-        frog: ['frog', 'froggy', 'frogs', 'froggie', 'toad'],
-        bear: ['bear', 'teddy', 'teddy bear', 'bear cub', 'bears', 'bare'],
-        owl: ['owl', 'owlet', 'owls', 'hoot owl', 'baby owl'],
-        mouse: ['mouse', 'mice', 'mousey', 'mousie', 'little mouse'] },
+        bear: ['polar bear', 'bear', 'white bear', 'bear cub', 'polar bears', 'bears', 'polar'],
+        seal: ['seal', 'seals', 'seal pup', 'baby seal', 'sea lion'],
+        fox: ['arctic fox', 'fox', 'white fox', 'snow fox', 'foxes', 'foxy'],
+        owl: ['snowy owl', 'owl', 'snow owl', 'white owl', 'owls', 'owlet'],
+        whale: ['whale', 'whales', 'baby whale', 'blue whale', 'whale calf'],
+        puffin: ['puffin', 'puffins', 'puffin bird', 'puffy'],
+        penguin: ['penguin', 'penguins', 'baby penguin', 'penguin chick', 'pengy'],
+        hare: ['arctic hare', 'hare', 'bunny', 'rabbit', 'snow bunny', 'hair', 'snow hare'],
+        walrus: ['walrus', 'walruses', 'walrus calf', 'baby walrus'] },
+      home: {
+        den: ['snow den', 'den', 'snow cave', 'cave', 'bear den', 'ice cave'],
+        floe: ['ice floe', 'floe', 'ice flow', 'ice', 'flow', 'iceberg', 'ice raft'],
+        burrow: ['burrow', 'burrows', 'borough', 'burro', 'hole', 'fox hole', 'snow hole'],
+        nest: ['nest', 'twig nest', 'bird nest', 'nests', 'next'],
+        sea: ['the sea', 'sea', 'ocean', 'water', 'waves', 'see'],
+        cliff: ['cliff', 'cliffs', 'rock', 'rocky cliff', 'cliff hole', 'mountain'],
+        pebbles: ['pebble nest', 'pebbles', 'pebble', 'stones', 'stone nest', 'pebble ring'] },
       parity: { odd: ['odd', 'odds'], even: ['even', 'evens'] }
     },
     vi: {
@@ -150,32 +186,43 @@
       size: { big: ['to', 'lớn', 'bự', 'to lắm', 'to hơn'], small: ['nhỏ', 'bé', 'nhỏ xíu', 'nhỏ hơn', 'tí hon'],
         little: ['nhỏ', 'bé', 'nhỏ xíu', 'nhỏ hơn', 'tí hon'] },
       animal: {
-        fox: ['con cáo', 'cáo', 'cáo con', 'chú cáo'],
-        deer: ['con hươu', 'hươu', 'con nai', 'nai', 'hươu con', 'nai con', 'hươu sao'],
-        hedgehog: ['con nhím', 'nhím', 'nhím con', 'chú nhím'],
-        squirrel: ['con sóc', 'sóc', 'sóc con', 'chú sóc'],
-        bunny: ['con thỏ', 'thỏ', 'thỏ con', 'thỏ trắng'],
-        frog: ['con ếch', 'ếch', 'ếch con', 'con nhái', 'ếch xanh'],
-        bear: ['con gấu', 'gấu', 'gấu con', 'gấu bông', 'gấu nâu'],
-        owl: ['con cú', 'cú', 'cú mèo', 'con cú mèo', 'cú con'],
-        mouse: ['con chuột', 'chuột', 'chuột con', 'chuột nhắt'] },
+        bear: ['con gấu bắc cực', 'gấu bắc cực', 'gấu trắng', 'gấu', 'con gấu', 'gấu con', 'gấu bông'],
+        seal: ['con hải cẩu', 'hải cẩu', 'hải cẩu con', 'chó biển'],
+        fox: ['con cáo tuyết', 'cáo tuyết', 'cáo', 'con cáo', 'cáo trắng', 'cáo bắc cực', 'cáo con'],
+        owl: ['con cú tuyết', 'cú tuyết', 'cú', 'con cú', 'cú mèo', 'cú trắng'],
+        whale: ['con cá voi', 'cá voi', 'cá voi con', 'cá voi xanh'],
+        puffin: ['chim hải âu cổ rụt', 'hải âu cổ rụt', 'hải âu', 'chim hải âu', 'puffin', 'chim cổ rụt'],
+        penguin: ['chim cánh cụt', 'cánh cụt', 'con chim cánh cụt', 'cánh cụt con', 'chim cụt'],
+        hare: ['con thỏ tuyết', 'thỏ tuyết', 'thỏ', 'con thỏ', 'thỏ trắng', 'thỏ con'],
+        walrus: ['con hải mã', 'hải mã', 'hải mã con'] },
+      home: {
+        den: ['hang tuyết', 'cái hang tuyết', 'hang băng', 'động tuyết', 'hang gấu'],
+        floe: ['tảng băng trôi', 'tảng băng', 'băng trôi', 'băng', 'tảng băng nổi'],
+        burrow: ['hang đất', 'cái hang đất', 'hang cáo', 'lỗ', 'cái lỗ'],
+        nest: ['tổ chim', 'tổ', 'cái tổ', 'tổ cú'],
+        sea: ['biển', 'nước biển', 'sóng biển', 'sóng', 'dưới biển', 'đại dương'],
+        cliff: ['vách đá', 'vách núi', 'đá', 'núi đá', 'tảng đá'],
+        pebbles: ['tổ sỏi', 'sỏi', 'đá sỏi', 'tổ đá sỏi', 'vòng sỏi'] },
       parity: { odd: ['lẻ', 'số lẻ', 'lẽ', 'lẹ'], even: ['chẵn', 'số chẵn', 'chặn', 'chắn'] }
     }
   };
 
   // Default IM.WORDS (DESIGN §5.1) — word lists for the 'initial' topic. content.js loads later and may replace it.
-  // vi: nhím (nh), thỏ (th), chuột (ch) are skipped — Vietnamese phonics teaches nh / th / ch as their own sounds.
+  // en uses the short word that starts with the letter ("bear" → B, not "polar bear").
+  // vi: thỏ (th), chim cánh cụt / chim hải âu (ch) are skipped — Vietnamese phonics teaches th / ch as their own sounds.
   var WORD_LIST = {
-    en: [['fox', 'animal_fox', 'F'], ['deer', 'animal_deer', 'D'], ['hedgehog', 'animal_hedgehog', 'H'],
-      ['squirrel', 'animal_squirrel', 'S'], ['bunny', 'animal_bunny', 'B'], ['frog', 'animal_frog', 'F'],
-      ['bear', 'animal_bear', 'B'], ['owl', 'animal_owl', 'O'], ['mouse', 'animal_mouse', 'M']],
-    vi: [['cáo', 'animal_fox', 'C'], ['hươu', 'animal_deer', 'H'], ['sóc', 'animal_squirrel', 'S'],
-      ['ếch', 'animal_frog', 'Ê'], ['gấu', 'animal_bear', 'G'], ['cú', 'animal_owl', 'C']]
+    en: [['bear', 'animal_bear', 'B'], ['seal', 'animal_seal', 'S'], ['fox', 'animal_fox', 'F'], ['owl', 'animal_owl', 'O'],
+      ['whale', 'animal_whale', 'W'], ['puffin', 'animal_puffin', 'P'], ['penguin', 'animal_penguin', 'P'],
+      ['hare', 'animal_hare', 'H'], ['walrus', 'animal_walrus', 'W']],
+    vi: [['gấu', 'animal_bear', 'G'], ['cáo', 'animal_fox', 'C'], ['cú', 'animal_owl', 'C'], ['cá voi', 'animal_whale', 'C'],
+      ['hải cẩu', 'animal_seal', 'H'], ['hải mã', 'animal_walrus', 'H']]
   };
   if (!IM.WORDS) {
     IM.WORDS = {};
     LANGS.forEach(function (l) {
-      IM.WORDS[l] = WORD_LIST[l].map(function (w) { return { word: w[0], sprite: w[1], initial: w[2] }; });
+      IM.WORDS[l] = WORD_LIST[l].map(function (w) {
+        return { word: w[0], sprite: w[1], animal: w[1].slice(7), initial: w[2] };
+      });
     });
   }
   function spriteOfWord(lang, w) {        // looks in content's IM.WORDS first, then the default list
@@ -190,24 +237,39 @@
     for (i = 0; i < WORD_LIST[lang].length; i++) if (WORD_LIST[lang][i][1] === spr) return WORD_LIST[lang][i][0];
     return null;
   }
-  function animalOf(v) {                  // 'fox' | 'animal_fox' | {kind:'animal', value:'fox'} → 'fox' | null
+  function animalOf(v) {                  // 'seal' | 'animal_seal' | {kind:'animal', value:'seal'} → 'seal' | null
     if (v && typeof v === 'object') v = v.value != null ? v.value : v.sprite;
     if (v == null) return null;
     var s = String(v).replace(/^animal_/, '').replace(/\.svg$/, '');
     return ANIMALS.indexOf(s) >= 0 ? s : null;
   }
+  function homeOf(v) {                    // 'den' | 'home_den' | {kind:'home', value:'den'} → 'den' | null
+    if (v && typeof v === 'object') v = v.value != null ? v.value : v.sprite;
+    if (v == null) return null;
+    var s = String(v).replace(/^home_/, '').replace(/\.svg$/, '');
+    return HOME_LIST.indexOf(s) >= 0 ? s : null;
+  }
+  function homesTable() { return (IM.HOMES && typeof IM.HOMES === 'object') ? IM.HOMES : HOMES_DEFAULT; }
+  function homeOfAnimal(a) { var h = homesTable()[a]; return homeOf(h) || HOMES_DEFAULT[a] || null; }
+  function animalOfHome(h) {
+    var t = homesTable(), k;
+    for (k in t) if (Object.prototype.hasOwnProperty.call(t, k) && t[k] === h && ANIMALS.indexOf(k) >= 0) return k;
+    for (k in HOMES_DEFAULT) if (HOMES_DEFAULT[k] === h) return k;
+    return null;
+  }
 
   // ---------------------------------------------------------------- strings
-  var TOPICS = ['colors', 'size', 'shapes', 'count', 'animals', 'letters', 'lower', 'initial', 'add', 'sub', 'oddeven'];
-  var NAME_KINDS = ['color', 'shape', 'size', 'animal', 'number', 'dots', 'letter', 'text', 'sum', 'diff', 'parity', 'word'];
+  var TOPICS = ['colors', 'size', 'shapes', 'count', 'animals', 'letters', 'lower', 'initial', 'add', 'sub', 'oddeven', 'homes'];
+  var NAME_KINDS = ['color', 'shape', 'size', 'animal', 'number', 'dots', 'letter', 'text', 'sum', 'diff', 'parity', 'word',
+    'home'];
 
   var STR = {
     en: {
-      'ui.title': 'Dee’s Forest Memory',
-      'ui.logo1': 'Dee’s',
-      'ui.logo2': 'Forest Memory',
-      'ui.subtitle': 'Flip, match and learn with Dee!',
-      'ui.tagline': 'Flip, match and learn with Dee!',
+      'ui.title': 'Tuk’s Ice Match',
+      'ui.logo1': 'Tuk’s',
+      'ui.logo2': 'Ice Match',
+      'ui.subtitle': 'Crack the frost, match and learn with Tuk!',
+      'ui.tagline': 'Crack the frost, match and learn with Tuk!',
       'ui.play': 'Play',
       'ui.playAgain': 'Play again',
       'ui.home': 'Home',
@@ -223,66 +285,73 @@
       'ui.sound': 'Sound effects',
       'ui.music': 'Music',
       'ui.volume': 'Volume',
-      'ui.voice': 'Dee’s voice',
+      'ui.voice': 'Tuk’s voice',
       'ui.mic': 'Answer by voice',
       'ui.done': 'Done',
       'ui.stars': 'Stars',
       'ui.chapter': 'Chapter {n}',
       'ui.allDone': 'All done! {stars} stars',
-      'ui.welcome': ['Hi {child}! I am Dee. Let’s find the pairs!', 'Hi! I am Dee. Let’s find the pairs!'],
+      'ui.welcome': ['Hi {child}! I am Tuk. Let’s find the pairs in the ice!', 'Hi! I am Tuk. Let’s find the pairs in the ice!'],
       'ui.micUnsupported': 'Voice answers are not available here. Tap the pictures!',
       'ui.micDenied': 'The microphone is off. Tap the pictures instead!',
       'ui.voiceMissing': 'Tip for parents: add a voice in Settings › Accessibility › Spoken Content › Voices.',
       'ui.tapOrSay': 'Tap or say the answer!',
-      'ui.listening': 'Dee is listening…',
-      'ui.tapDee': 'Tap Dee to hear it again',
+      'ui.listening': 'Tuk is listening…',
+      'ui.tapTuk': 'Tap Tuk to hear it again',
+      'ui.tapDee': 'Tap Tuk to hear it again',
       'ui.skip': 'Skip',
       'ui.langName.en': 'English',
       'ui.langName.vi': 'Tiếng Việt',
 
-      'topic.colors': 'Colour Butterflies',
+      'topic.colors': 'Colour Fish',
       'topic.size': 'Big and Little',
-      'topic.shapes': 'Shape Lanterns',
-      'topic.count': 'Counting Acorns',
-      'topic.animals': 'Forest Friends',
+      'topic.shapes': 'Snow Shapes',
+      'topic.count': 'Counting Fish',
+      'topic.animals': 'Polar Friends',
       'topic.letters': 'Letter Pairs',
       'topic.lower': 'Big and Small Letters',
       'topic.initial': 'First Letters',
       'topic.add': 'Adding Up',
       'topic.sub': 'Take Away',
       'topic.oddeven': 'Odd and Even',
+      'topic.homes': 'Animal Homes',
 
-      'weather.0': 'Spring is here! Look, blossoms!',
-      'weather.1': 'Hello, summer! The sun is warm!',
-      'weather.2': 'Autumn leaves! Red and gold!',
-      'weather.3': 'Snowy winter! Brrr, so cold!',
+      'weather.0': 'Sunny morning on the ice!',
+      'weather.1': 'Whoosh, a snowy breeze!',
+      'weather.2': 'Pitter-patter, a soft rain!',
+      'weather.3': 'Look, a rainbow!',
 
-      'p.any': ['Find two cards that match!', 'Which two cards are the same?', 'Let’s find the matching pairs!'],
-      'p.colors': ['Find the colour pairs!', 'Find two butterflies of the same colour!', 'Which colours go together?'],
+      'p.any': ['Find two blocks that match!', 'Which two ice blocks go together?', 'Let’s find the matching pairs!'],
+      'p.colors': ['Find the colour pairs!', 'Find two fish of the same colour!', 'Which colours go together?'],
       'p.size': ['Find the big one and the little one!', 'Match each big animal with its little one!', 'Big and little friends go together!'],
-      'p.shapes': ['Find the shape pairs!', 'Find two lanterns with the same shape!', 'Which shapes go together?'],
-      'p.count': ['Match each number with its acorns!', 'Count the acorns and find the number!', 'Which number goes with the acorns?'],
-      'p.animals': ['Find two of each animal!', 'Find the forest friends that match!', 'Every animal has a twin. Find them!'],
-      'p.letters': ['Find the letter pairs!', 'Find two cards with the same letter!', 'Which letters are the same?'],
+      'p.shapes': ['Find the shape pairs!', 'Find two blocks with the same shape!', 'Which shapes go together?'],
+      'p.count': ['Match each number with its fish!', 'Count the fish and find the number!', 'Which number goes with the fish?'],
+      'p.animals': ['Find two of each animal!', 'Find the polar friends that match!', 'Every animal has a twin. Find them!'],
+      'p.letters': ['Find the letter pairs!', 'Find two blocks with the same letter!', 'Which letters are the same?'],
       'p.lower': ['Match each big letter with its small letter!', 'Find the big and small letter pairs!', 'Every big letter has a small friend!'],
       'p.initial': ['Match each letter with an animal that starts with it!', 'Which animal starts with this letter?', 'Find the letter and its animal!'],
       'p.add': ['Match each sum with its answer!', 'Add them up and find the answer!', 'Which number is the answer?'],
       'p.sub': ['Match each take-away with its answer!', 'Take away and find the answer!', 'How many are left? Find the pair!'],
-      'p.oddeven': ['Match each number with its acorns! Odd or even?', 'Count the acorns and find the number!', 'Find the number pairs! Odd or even?'],
+      'p.oddeven': ['Match each number with its fish! Odd or even?', 'Count the fish and find the number!', 'Find the number pairs! Odd or even?'],
+      'p.homes': ['Find each animal’s home!', 'Which home goes with each animal?', 'Help the animals find their homes!'],
 
-      'surprise.shuffle': ['Oh! Two cards are swapping places. Watch!', 'Whoosh! Two cards are moving. Keep your eyes on them!'],
-      'surprise.golden': ['One pair is magic! Can you find it?', 'Psst! A magic pair is hiding here!'],
-      'surprise.pond': ['The cards are floating on lily pads!', 'Splash! The cards are on the pond today!'],
-      'golden': ['A rainbow! You found the magic pair!', 'Wow, the magic pair! Look at the rainbow!'],
-      'peek': ['Look carefully!', 'Look at all the cards!', 'Remember where they are!', 'Peek! Look closely!',
+      'surprise.slide': ['Oh! Two blocks are sliding on the ice. Watch!', 'Whoosh! Two blocks glide away. Keep your eyes on them!'],
+      'surprise.aurora': ['A golden pair glows under the sky lights! Find it!', 'Psst! A golden pair is hiding in the ice!'],
+      'surprise.floes': ['The blocks are on little ice floes today!', 'Bob, bob! The blocks float on ice floes!'],
+      'surprise.shuffle': ['Oh! Two blocks are sliding on the ice. Watch!', 'Whoosh! Two blocks glide away. Keep your eyes on them!'],
+      'surprise.golden': ['A golden pair glows under the sky lights! Find it!', 'Psst! A golden pair is hiding in the ice!'],
+      'surprise.pond': ['The blocks are on little ice floes today!', 'Bob, bob! The blocks float on ice floes!'],
+      'golden': ['Wow! You found the golden pair!', 'The golden pair! Look at the dancing sky lights!'],
+      'peek': ['Look inside the ice!', 'Look at all the blocks!', 'Remember where they are!', 'Peek! Look closely!',
         'Watch carefully, {child}!'],
-      'hide': ['Now they hide!', 'Flip! They are hiding!', 'Now find the pairs!', 'Hide and seek! Your turn!',
-        'They are hiding. Tap two cards!'],
+      'hide': ['Brrr, the frost is back!', 'The frost is creeping back!', 'Now find the pairs!', 'Frosty again! Your turn!',
+        'They are hiding. Tap or rub two blocks!'],
 
-      'flip.color': ['{name}!', 'A {name} butterfly!'],
+      'flip.color': ['{name}!', 'A {name} fish!'],
       'flip.shape': 'A {name}!',
       'flip.shapeColor': 'A {color} {shape}!',
       'flip.animal': ['A {name}!', 'Hello, {name}!'],
+      'flip.home': ['{name}!', 'Look, {name}!'],
       'flip.number': ['{num}!', 'Number {num}!'],
       'flip.letter': ['The letter {letter}!', 'Letter {letter}!'],
       'flip.capital': 'Big letter {letter}!',
@@ -290,47 +359,57 @@
       'flip.expr': '{expr}!',
       'flip.word': '{word}!',
 
-      'match.color': ['{name} and {name}! A pair!', 'Two {name} butterflies! A pair!'],
+      'match.color': ['{name} and {name}! A pair!', 'Two {name} fish! A pair!'],
       'match.shape': ['Two {plural}! A pair!', 'Two {plural}! They match!'],
       'match.animal': ['Two {plural}! A pair!', 'Two {plural}! Hooray!'],
+      'match.home': ['The {animal} lives {at}!', 'Yes! The {animal} lives {at}!', 'Home sweet home! The {animal} lives {at}!'],
       'match.size': ['A big {beast} and a little {beast}! A pair!'],
-      'match.count': ['{num} and {num} {acorns}! A match!', '{num} {acorns}! Number {num}! A pair!'],
+      'match.count': ['{num} and {num} {fish}! A match!', '{num} {fish}! Number {num}! A pair!'],
       'match.number': ['{num} and {num}! A pair!'],
-      'match.oddeven': ['{num} and {num} {acorns}! {num} is {parity}!', '{num} is {parity}! A pair!'],
+      'match.oddeven': ['{num} and {num} {fish}! {num} is {parity}!', '{num} is {parity}! A pair!'],
       'match.letter': ['Letter {letter} and letter {letter}! A pair!'],
       'match.lower': ['Big letter {letter} and small letter {lower}! A pair!'],
       'match.initial': ['{word} starts with the letter {letter}! A pair!'],
       'match.math': ['{expr} is {num}! A match!', 'Yes! {expr} makes {num}!'],
-      'match.any': ['A pair!', 'A match! Hooray!', 'You found a pair!', 'They match!', 'Two the same! Yay!'],
+      'match.any': ['A pair!', 'A match! Hooray!', 'You found a pair!', 'They match!', 'Two that go together! Yay!'],
 
       'mismatch.two': ['{A} and {B}. Let’s look again!', '{A} and {B}. Let’s remember them!',
-        '{A} and {B}! Try two more cards!'],
-      'wrong': ['Let’s look again!', 'Almost! Try two more!', 'Let’s remember those two!', 'Hmm, try another card!',
+        '{A} and {B}! Try two more blocks!'],
+      'mismatch.home': ['{A} and {B}! Let’s find the {beast}’s home.', '{A} and {B}. Where does the {beast} live?'],
+      'wrong': ['Let’s look again!', 'Almost! Try two more!', 'Let’s remember those two!', 'Hmm, try another block!',
         'So close! One more try!', 'Let’s think again!', 'Keep trying, you can do it!'],
-      'miss': ['Tap a card!', 'The cards are over here!', 'Try a card!', 'Touch a card to flip it!', 'Flip a card!'],
+      'miss': ['Tap an ice block!', 'The blocks are over here!', 'Try a block!', 'Touch a block to crack the frost!',
+        'Rub a frosty block!'],
 
-      'reward.butterfly': ['Flutter, butterfly!', 'A butterfly for the forest!'],
-      'reward.lantern': ['A lantern lights up!', 'Look, a glowing lantern!'],
-      'reward.acorns': ['Acorns for the forest!', 'Tumble, acorns!'],
-      'reward.animal': ['A new forest friend!', 'Hop, hop! Hello, friend!'],
-      'reward.star': ['A twinkly star!', 'Look, a little star!'],
-      'say.countDone': '{num}! {num} {acorns}!',
+      'reward.fish': ['Splash! Swim, little fish!', 'Leap, fish! Into the sea!'],
+      'reward.sculpture': ['A snow sculpture!', 'Look, a shiny snow shape!'],
+      'reward.fishes': ['Jump, jump! Splash!', 'So many fish! Splash!'],
+      'reward.animal': ['A new polar friend!', 'Hop, hop! Hello, friend!'],
+      'reward.home': ['Home, sweet home!', 'Back home! Hooray!'],
+      'reward.star': ['A twinkly snowflake star!', 'Look, a little star!'],
+      'reward.butterfly': ['Splash! Swim, little fish!', 'Leap, fish! Into the sea!'],
+      'reward.lantern': ['A snow sculpture!', 'Look, a shiny snow shape!'],
+      'reward.acorns': ['Jump, jump! Splash!', 'So many fish! Splash!'],
+      'say.home': ['The {animal} is home!', 'Home, sweet home, {animal}!'],
+      'say.countDone': '{num}! {num} {fish}!',
 
       'praise': ['Yes!', 'Great job!', 'You got it!', 'Super!', 'Wonderful!', 'Nice one!', 'Hooray!', 'Well done!'],
       'great': ['Great job, {child}!', 'You did it, {child}!', 'You found all the pairs!', 'Wow, {child}, what a memory!',
         'Super finding!', 'Hooray! All pairs found!', 'You are so clever!'],
-      'hint': ['Psst! Look at the glowing cards!', 'Here is a clue! Watch these two!', 'Dee will help! Look here!',
-        'Look! These two are wiggling!', 'Try the sparkly cards!'],
-      'idle': ['Tap a card to flip it!', 'Want to play? Tap a card!', 'Dee is waiting! Your turn!',
-        'The cards are waiting for you!', 'Let’s find a pair! Tap one!', 'I am here, {child}! Let’s play!'],
+      'hint': ['Psst! Look at the glowing blocks!', 'Here is a clue! Watch these two!', 'Tuk will help! Look here!',
+        'Look! These two are wiggling!', 'Try the sparkly blocks!'],
+      'idle': ['Tap a block to crack the frost!', 'Want to play? Tap a block!', 'Tuk is waiting! Your turn!',
+        'The ice blocks are waiting for you!', 'Let’s find a pair! Tap one!', 'I am here, {child}! Let’s play!'],
 
-      'talk.intro': 'Talk time! Dee has a question.',
-      'talk.colors': 'What colour is this butterfly?',
+      'talk.intro': 'Talk time! Tuk has a question.',
+      'talk.colors': 'What colour is this fish?',
       'talk.size': 'Is it big or little?',
-      'talk.shapes': 'What shape is this lantern?',
-      'talk.count': 'How many acorns?',
+      'talk.shapes': 'What shape is this snow sculpture?',
+      'talk.count': 'How many fish?',
       'talk.animals': 'Where is the {animal}?',
       'talk.animalsAny': 'Which animal is this?',
+      'talk.homes': 'Where does the {animal} live?',
+      'talk.homesAny': 'Which home is the right one?',
       'talk.letters': 'Which letter is this?',
       'talk.lower': 'Which letter is this?',
       'talk.initial': 'Which letter does it start with?',
@@ -342,19 +421,20 @@
       'talk.wrong': 'It is {answer}! Good try!',
       'talk.wrong.a': 'It is a {answer}! Good try!',
       'talk.wrong.animal': 'It is the {answer}! Good try!',
+      'talk.wrong.home': 'It lives {at}! Good try!',
       'talk.wrong.size': 'It is {answer}! Good try!',
       'talk.wrong.letter': 'It is the letter {letter}! Good try!',
       'talk.wrong.number': 'It is {answer}! Good try!',
 
       'session.done': ['You did it all! {stars} stars! Hooray!', 'Amazing, {child}! {stars} stars!',
-        'What a forest party! {stars} stars!']
+        'What a rainbow party! {stars} stars!']
     },
     vi: {
-      'ui.title': 'Vịt Dee Lật Thẻ Rừng Xanh',
-      'ui.logo1': 'Vịt Dee',
-      'ui.logo2': 'Lật Thẻ Rừng Xanh',
-      'ui.subtitle': 'Cùng vịt Dee lật thẻ, ghép cặp và học nhé!',
-      'ui.tagline': 'Cùng vịt Dee lật thẻ, ghép cặp và học nhé!',
+      'ui.title': 'Cánh Cụt Tuk Lật Băng',
+      'ui.logo1': 'Cánh Cụt Tuk',
+      'ui.logo2': 'Lật Băng',
+      'ui.subtitle': 'Cùng cánh cụt Tuk phá băng, ghép cặp và học nhé!',
+      'ui.tagline': 'Cùng cánh cụt Tuk phá băng, ghép cặp và học nhé!',
       'ui.play': 'Chơi',
       'ui.playAgain': 'Chơi lại',
       'ui.home': 'Trang chủ',
@@ -370,67 +450,74 @@
       'ui.sound': 'Âm thanh',
       'ui.music': 'Nhạc nền',
       'ui.volume': 'Âm lượng',
-      'ui.voice': 'Giọng của Dee',
+      'ui.voice': 'Giọng của Tuk',
       'ui.mic': 'Trả lời bằng giọng nói',
       'ui.done': 'Xong',
       'ui.stars': 'Ngôi sao',
       'ui.chapter': 'Chương {n}',
       'ui.allDone': 'Hoàn thành! {stars} ngôi sao',
-      'ui.welcome': ['Chào bé {child}! Mình là vịt Dee. Mình cùng lật thẻ nhé!',
-        'Chào bé! Mình là vịt Dee. Mình cùng lật thẻ nhé!'],
+      'ui.welcome': ['Chào bé {child}! Mình là cánh cụt Tuk. Mình cùng tìm cặp trong băng nhé!',
+        'Chào bé! Mình là cánh cụt Tuk. Mình cùng tìm cặp trong băng nhé!'],
       'ui.micUnsupported': 'Máy này chưa nghe được giọng nói. Bé chạm vào hình nhé!',
       'ui.micDenied': 'Micrô đang tắt. Bé chạm vào hình nhé!',
       'ui.voiceMissing': 'Mẹo cho bố mẹ: thêm giọng tiếng Việt trong Cài đặt › Trợ năng › Nội dung được đọc › Giọng nói.',
       'ui.tapOrSay': 'Bé chạm hoặc nói đáp án nhé!',
-      'ui.listening': 'Dee đang nghe…',
-      'ui.tapDee': 'Chạm vào Dee để nghe lại nhé',
+      'ui.listening': 'Tuk đang nghe…',
+      'ui.tapTuk': 'Chạm vào Tuk để nghe lại nhé',
+      'ui.tapDee': 'Chạm vào Tuk để nghe lại nhé',
       'ui.skip': 'Bỏ qua',
       'ui.langName.en': 'English',
       'ui.langName.vi': 'Tiếng Việt',
 
-      'topic.colors': 'Bướm sắc màu',
+      'topic.colors': 'Cá sắc màu',
       'topic.size': 'To và nhỏ',
-      'topic.shapes': 'Đèn lồng hình khối',
-      'topic.count': 'Đếm hạt dẻ',
-      'topic.animals': 'Bạn thú trong rừng',
+      'topic.shapes': 'Tượng tuyết hình khối',
+      'topic.count': 'Đếm cá',
+      'topic.animals': 'Bạn thú xứ băng',
       'topic.letters': 'Cặp chữ cái',
       'topic.lower': 'Chữ hoa, chữ thường',
       'topic.initial': 'Chữ cái đầu tiên',
       'topic.add': 'Phép cộng',
       'topic.sub': 'Phép trừ',
       'topic.oddeven': 'Số chẵn, số lẻ',
+      'topic.homes': 'Nhà của bạn thú',
 
-      'weather.0': 'Mùa xuân đến rồi! Hoa nở nè!',
-      'weather.1': 'Chào mùa hè! Nắng ấm quá!',
-      'weather.2': 'Mùa thu rồi! Lá vàng rơi nè!',
-      'weather.3': 'Mùa đông tuyết rơi! Lạnh quá!',
+      'weather.0': 'Buổi sáng nắng đẹp trên băng!',
+      'weather.1': 'Vù vù, gió thổi tuyết bay!',
+      'weather.2': 'Lộp độp, mưa nhẹ rơi rồi!',
+      'weather.3': 'Nhìn kìa, cầu vồng!',
 
-      'p.any': ['Bé ơi, tìm hai thẻ giống nhau nhé!', 'Hai thẻ nào giống nhau nhỉ?', 'Mình cùng tìm các cặp giống nhau nào!'],
-      'p.colors': ['Bé ơi, tìm hai thẻ cùng màu nhé!', 'Bé tìm hai chú bướm cùng màu nhé!', 'Màu nào đi cùng màu nào nhỉ?'],
+      'p.any': ['Bé ơi, tìm hai khối băng giống nhau nhé!', 'Hai khối băng nào đi với nhau nhỉ?', 'Mình cùng tìm các cặp giống nhau nào!'],
+      'p.colors': ['Bé ơi, tìm hai khối cùng màu nhé!', 'Bé tìm hai chú cá cùng màu nhé!', 'Màu nào đi cùng màu nào nhỉ?'],
       'p.size': ['Bé ơi, tìm bạn to và bạn nhỏ nhé!', 'Bé ghép bạn thú to với bạn nhỏ nhé!', 'Bạn to tìm bạn nhỏ nào!'],
-      'p.shapes': ['Bé ơi, tìm hai thẻ cùng hình nhé!', 'Bé tìm hai đèn lồng cùng hình nhé!', 'Hình nào đi cùng hình nào nhỉ?'],
-      'p.count': ['Bé ơi, ghép số với số hạt dẻ nhé!', 'Bé đếm hạt dẻ rồi tìm số nhé!', 'Số nào đi với hạt dẻ nhỉ?'],
+      'p.shapes': ['Bé ơi, tìm hai khối cùng hình nhé!', 'Bé tìm hai tượng tuyết cùng hình nhé!', 'Hình nào đi cùng hình nào nhỉ?'],
+      'p.count': ['Bé ơi, ghép số với đàn cá nhé!', 'Bé đếm cá rồi tìm số nhé!', 'Số nào đi với đàn cá nhỉ?'],
       'p.animals': ['Bé ơi, tìm hai bạn thú giống nhau nhé!', 'Bé tìm các bạn thú sinh đôi nhé!', 'Bạn thú nào giống nhau nhỉ?'],
-      'p.letters': ['Bé ơi, tìm hai chữ cái giống nhau nhé!', 'Bé tìm hai thẻ cùng chữ nhé!', 'Chữ nào giống chữ nào nhỉ?'],
+      'p.letters': ['Bé ơi, tìm hai chữ cái giống nhau nhé!', 'Bé tìm hai khối cùng chữ nhé!', 'Chữ nào giống chữ nào nhỉ?'],
       'p.lower': ['Bé ơi, ghép chữ hoa với chữ thường nhé!', 'Bé tìm cặp chữ hoa, chữ thường nhé!', 'Chữ hoa nào đi với chữ thường nào?'],
       'p.initial': ['Bé ghép chữ cái với tên con vật nhé!', 'Con vật nào bắt đầu bằng chữ này?', 'Bé tìm chữ cái và con vật nhé!'],
       'p.add': ['Bé ơi, ghép phép cộng với đáp số nhé!', 'Bé cộng lại rồi tìm đáp số nhé!', 'Đáp số là số nào nhỉ?'],
       'p.sub': ['Bé ơi, ghép phép trừ với đáp số nhé!', 'Bé bớt đi rồi tìm đáp số nhé!', 'Còn lại mấy nhỉ? Bé tìm cặp nhé!'],
-      'p.oddeven': ['Bé ghép số với hạt dẻ! Chẵn hay lẻ nhỉ?', 'Bé đếm hạt dẻ rồi tìm số nhé!', 'Bé tìm cặp số nhé! Chẵn hay lẻ?'],
+      'p.oddeven': ['Bé ghép số với đàn cá! Chẵn hay lẻ nhỉ?', 'Bé đếm cá rồi tìm số nhé!', 'Bé tìm cặp số nhé! Chẵn hay lẻ?'],
+      'p.homes': ['Bé ơi, tìm nhà cho các bạn thú nhé!', 'Bạn thú nào sống ở đâu nhỉ?', 'Bé giúp các bạn thú về nhà nào!'],
 
-      'surprise.shuffle': ['Ồ! Hai thẻ đang đổi chỗ kìa. Bé nhìn nhé!', 'Vèo vèo! Hai thẻ chạy đi đâu đó. Bé nhìn kỹ nhé!'],
-      'surprise.golden': ['Có một cặp thẻ thần kỳ! Bé tìm được không?', 'Suỵt! Một cặp thẻ thần kỳ đang trốn đây nè!'],
-      'surprise.pond': ['Các thẻ đang nổi trên lá sen nè!', 'Tõm! Hôm nay các thẻ nằm trên mặt hồ đó!'],
-      'golden': ['Cầu vồng nè! Bé tìm được cặp thẻ thần kỳ rồi!', 'Oa, cặp thẻ thần kỳ! Bé nhìn cầu vồng kìa!'],
-      'peek': ['Bé nhìn kỹ nhé!', 'Bé nhớ kỹ các thẻ nhé!', 'Nhìn kỹ nào bé ơi!', 'Bé nhớ chỗ các thẻ nhé!',
+      'surprise.slide': ['Ồ! Hai khối băng đang trượt đi kìa. Bé nhìn nhé!', 'Vèo vèo! Hai khối băng đổi chỗ. Bé nhìn kỹ nhé!'],
+      'surprise.aurora': ['Có một cặp khối vàng thần kỳ! Bé tìm được không?', 'Suỵt! Một cặp khối vàng đang trốn trong băng!'],
+      'surprise.floes': ['Hôm nay các khối nằm trên tảng băng nhỏ!', 'Bập bềnh! Các khối băng nổi trên mặt nước!'],
+      'surprise.shuffle': ['Ồ! Hai khối băng đang trượt đi kìa. Bé nhìn nhé!', 'Vèo vèo! Hai khối băng đổi chỗ. Bé nhìn kỹ nhé!'],
+      'surprise.golden': ['Có một cặp khối vàng thần kỳ! Bé tìm được không?', 'Suỵt! Một cặp khối vàng đang trốn trong băng!'],
+      'surprise.pond': ['Hôm nay các khối nằm trên tảng băng nhỏ!', 'Bập bềnh! Các khối băng nổi trên mặt nước!'],
+      'golden': ['Oa! Bé tìm được cặp khối vàng rồi!', 'Cặp khối vàng! Bé nhìn ánh sáng nhảy múa trên trời kìa!'],
+      'peek': ['Bé nhìn vào trong băng nhé!', 'Bé nhớ kỹ các khối nhé!', 'Nhìn kỹ nào bé ơi!', 'Bé nhớ chỗ các hình nhé!',
         'Bé {child} nhìn kỹ nhé!'],
-      'hide': ['Giờ các thẻ trốn rồi!', 'Úp lại rồi! Đến lượt bé nhé!', 'Trốn tìm nào! Bé lật hai thẻ nhé!',
-        'Các thẻ đi trốn rồi!', 'Bé tìm các cặp nhé!'],
+      'hide': ['Ui lạnh, sương giá phủ lại rồi!', 'Băng đóng lại rồi! Đến lượt bé nhé!', 'Trốn tìm nào! Bé chạm hai khối nhé!',
+        'Các hình đi trốn trong băng rồi!', 'Bé tìm các cặp nhé!'],
 
-      'flip.color': ['{name}!', 'Bướm {name}!'],
+      'flip.color': ['{name}!', 'Cá {name}!'],
       'flip.shape': '{name}!',
       'flip.shapeColor': '{shape} {color}!',
       'flip.animal': ['{name}!', '{name} nè!'],
+      'flip.home': ['{name}!', '{name} nè!'],
       'flip.number': ['Số {num}!'],
       'flip.letter': ['Chữ {letter}!'],
       'flip.capital': 'Chữ {letter} in hoa!',
@@ -438,49 +525,58 @@
       'flip.expr': '{expr}!',
       'flip.word': '{word}!',
 
-      'match.color': ['{name} và {name}! Một cặp rồi!', 'Hai con bướm {name}! Một cặp rồi!'],
+      'match.color': ['{name} và {name}! Một cặp rồi!', 'Hai chú cá {name}! Một cặp rồi!'],
       'match.shape': ['Hai {name}! Một cặp rồi!', 'Hai {name} giống nhau! Giỏi quá!'],
       'match.animal': ['Hai {name}! Một cặp rồi!', 'Hai {name} giống nhau! Giỏi quá!'],
+      'match.home': ['{animal} sống {at}!', 'Đúng rồi! {animal} sống {at}!', 'Về nhà rồi! {animal} sống {at}!'],
       'match.size': ['{beast} to và {beast} nhỏ! Một cặp rồi!'],
-      'match.count': ['Số {num} và {num} {acorns}! Đúng một cặp!', '{num} {acorns}! Số {num}! Một cặp rồi!'],
+      'match.count': ['Số {num} và {num} {fish}! Đúng một cặp!', '{num} {fish}! Số {num}! Một cặp rồi!'],
       'match.number': ['Số {num} và số {num}! Một cặp rồi!'],
-      'match.oddeven': ['Số {num} và {num} {acorns}! {num} là số {parity}!', '{num} là số {parity}! Một cặp rồi!'],
+      'match.oddeven': ['Số {num} và {num} {fish}! {num} là số {parity}!', '{num} là số {parity}! Một cặp rồi!'],
       'match.letter': ['Chữ {letter} và chữ {letter}! Một cặp rồi!'],
       'match.lower': ['Chữ {letter} in hoa và chữ {lower} thường! Một cặp rồi!'],
       'match.initial': ['{word} bắt đầu bằng chữ {letter}! Một cặp rồi!'],
       'match.math': ['{expr} bằng {num}! Đúng rồi!', 'Đúng rồi! {expr} bằng {num}!'],
-      'match.any': ['Một cặp rồi!', 'Giống nhau rồi! Hoan hô!', 'Bé tìm được một cặp!', 'Đúng một cặp rồi!',
-        'Hai thẻ giống nhau! Giỏi quá!'],
+      'match.any': ['Một cặp rồi!', 'Ghép đúng rồi! Hoan hô!', 'Bé tìm được một cặp!', 'Đúng một cặp rồi!',
+        'Hai khối đi với nhau! Giỏi quá!'],
 
       'mismatch.two': ['{A} và {B}. Mình nhìn lại nhé!', '{A} và {B}. Bé nhớ kỹ nhé!',
-        '{A} và {B}! Bé thử hai thẻ khác nào!'],
-      'wrong': ['Mình nhìn lại nhé!', 'Gần đúng rồi! Thử lại nào!', 'Bé nhớ hai thẻ đó nhé!', 'Hì, bé thử thẻ khác nào!',
+        '{A} và {B}! Bé thử hai khối khác nào!'],
+      'mismatch.home': ['{A} và {B}! Tìm nhà cho {beast} nào.', '{A} và {B}. {beast} sống ở đâu nhỉ?'],
+      'wrong': ['Mình nhìn lại nhé!', 'Gần đúng rồi! Thử lại nào!', 'Bé nhớ hai khối đó nhé!', 'Hì, bé thử khối khác nào!',
         'Suýt nữa thôi! Thử tiếp nhé!', 'Không sao đâu, thử lại nhé!', 'Bé nghĩ thêm chút nữa nhé!'],
-      'miss': ['Bé chạm vào một thẻ nhé!', 'Các thẻ ở đây nè!', 'Bé thử lật một thẻ nào!', 'Chạm vào thẻ để lật nhé!',
-        'Lật một thẻ nào bé ơi!'],
+      'miss': ['Bé chạm vào một khối băng nhé!', 'Các khối băng ở đây nè!', 'Bé thử một khối nào!',
+        'Chạm vào khối băng cho băng vỡ nhé!', 'Bé xoa một khối băng nào!'],
 
-      'reward.butterfly': ['Bướm bay rồi nè!', 'Một chú bướm cho khu rừng!'],
-      'reward.lantern': ['Đèn lồng sáng rồi!', 'Nhìn kìa, đèn lồng lung linh!'],
-      'reward.acorns': ['Hạt dẻ lăn nè!', 'Hạt dẻ cho khu rừng!'],
+      'reward.fish': ['Tõm! Cá bơi đi rồi!', 'Cá nhảy xuống biển nè!'],
+      'reward.sculpture': ['Tượng tuyết đẹp quá!', 'Nhìn kìa, tượng tuyết lấp lánh!'],
+      'reward.fishes': ['Nhảy nhảy! Tõm tõm!', 'Nhiều cá quá! Tõm!'],
       'reward.animal': ['Thêm một bạn thú nè!', 'Nhảy nhảy! Chào bạn nhé!'],
-      'reward.star': ['Ngôi sao lấp lánh!', 'Nhìn kìa, một ngôi sao nhỏ!'],
-      'say.countDone': '{num}! {num} {acorns}!',
+      'reward.home': ['Về nhà rồi nè!', 'Nhà ấm áp quá! Hoan hô!'],
+      'reward.star': ['Ngôi sao bông tuyết lấp lánh!', 'Nhìn kìa, một ngôi sao nhỏ!'],
+      'reward.butterfly': ['Tõm! Cá bơi đi rồi!', 'Cá nhảy xuống biển nè!'],
+      'reward.lantern': ['Tượng tuyết đẹp quá!', 'Nhìn kìa, tượng tuyết lấp lánh!'],
+      'reward.acorns': ['Nhảy nhảy! Tõm tõm!', 'Nhiều cá quá! Tõm!'],
+      'say.home': ['{animal} về nhà rồi!', '{animal} về tới nhà rồi nè!'],
+      'say.countDone': '{num}! {num} {fish}!',
 
       'praise': ['Đúng rồi!', 'Giỏi quá!', 'Tuyệt vời!', 'Hoan hô!', 'Bé giỏi lắm!', 'Chính xác!', 'Siêu quá!', 'Hay lắm!'],
       'great': ['Bé {child} giỏi quá!', 'Hoan hô bé {child}!', 'Bé tìm được hết các cặp rồi!', 'Oa, bé {child} nhớ giỏi quá!',
-        'Bé lật thẻ giỏi quá!', 'Hoan hô, tìm hết rồi!', 'Bé thông minh quá!'],
-      'hint': ['Nhìn nè! Hai thẻ này đang sáng.', 'Bé thử hai thẻ lấp lánh nhé!', 'Dee gợi ý nè: nhìn hai thẻ này!',
-        'Vịt Dee giúp bé nhé, nhìn đây!', 'Hai thẻ đang lắc lư đó bé!'],
-      'idle': ['Bé ơi, lật thẻ tiếp nào!', 'Bé chạm vào một thẻ nhé!', 'Vịt Dee đang chờ bé nè!', 'Đến lượt bé rồi đó!',
-        'Bé {child} ơi, mình chơi tiếp nhé!', 'Các thẻ đang chờ bé nè!'],
+        'Bé tìm cặp giỏi quá!', 'Hoan hô, tìm hết rồi!', 'Bé thông minh quá!'],
+      'hint': ['Nhìn nè! Hai khối này đang sáng.', 'Bé thử hai khối lấp lánh nhé!', 'Tuk gợi ý nè: nhìn hai khối này!',
+        'Cánh cụt Tuk giúp bé nhé, nhìn đây!', 'Hai khối đang lắc lư đó bé!'],
+      'idle': ['Bé ơi, chạm khối băng tiếp nào!', 'Bé chạm vào một khối nhé!', 'Cánh cụt Tuk đang chờ bé nè!',
+        'Đến lượt bé rồi đó!', 'Bé {child} ơi, mình chơi tiếp nhé!', 'Các khối băng đang chờ bé nè!'],
 
-      'talk.intro': 'Giờ trò chuyện! Vịt Dee hỏi bé nhé.',
-      'talk.colors': 'Con bướm này màu gì nhỉ?',
+      'talk.intro': 'Giờ trò chuyện! Cánh cụt Tuk hỏi bé nhé.',
+      'talk.colors': 'Chú cá này màu gì nhỉ?',
       'talk.size': 'Bạn này to hay nhỏ nhỉ?',
-      'talk.shapes': 'Chiếc đèn lồng này hình gì nhỉ?',
-      'talk.count': 'Có mấy hạt dẻ nào?',
+      'talk.shapes': 'Tượng tuyết này hình gì nhỉ?',
+      'talk.count': 'Có mấy con cá nào?',
       'talk.animals': '{animal} đâu rồi nhỉ?',
       'talk.animalsAny': 'Đây là con gì nhỉ?',
+      'talk.homes': '{animal} sống ở đâu nhỉ?',
+      'talk.homesAny': 'Nhà của bạn này ở đâu nhỉ?',
       'talk.letters': 'Đây là chữ gì nào?',
       'talk.lower': 'Đây là chữ gì nào?',
       'talk.initial': 'Hình này bắt đầu bằng chữ gì nhỉ?',
@@ -492,37 +588,39 @@
       'talk.wrong': 'Là {answer} đó! Bé cố gắng lắm!',
       'talk.wrong.a': 'Là {answer} đó! Bé cố gắng lắm!',
       'talk.wrong.animal': 'Là {answer} đó! Bé cố gắng lắm!',
+      'talk.wrong.home': 'Bạn ấy sống {at} đó! Bé cố gắng lắm!',
       'talk.wrong.size': 'Bạn này {answer} đó! Bé cố gắng lắm!',
       'talk.wrong.letter': 'Là chữ {letter} đó! Bé cố gắng lắm!',
       'talk.wrong.number': 'Là số {answer} đó! Bé cố gắng lắm!',
 
       'session.done': ['Bé làm xong hết rồi! {stars} ngôi sao! Hoan hô!', 'Bé {child} giỏi quá! {stars} ngôi sao!',
-        'Tiệc rừng xanh vui quá! {stars} ngôi sao!']
+        'Tiệc cầu vồng vui quá! {stars} ngôi sao!']
     }
   };
 
   // required params → fallback key when one is missing (checked AFTER derived params are filled in)
   var NEEDS = {
-    'talk.animals': ['animal'], 'say.countDone': ['num'],
+    'talk.animals': ['animal'], 'talk.homes': ['animal'], 'say.countDone': ['num'], 'say.home': ['animal'],
     'flip.color': ['name'], 'flip.shape': ['name'], 'flip.shapeColor': ['shape', 'color'], 'flip.animal': ['name'],
-    'flip.number': ['num'], 'flip.letter': ['letter'], 'flip.capital': ['letter'], 'flip.small': ['lower'],
-    'flip.expr': ['expr'], 'flip.word': ['word'],
+    'flip.home': ['name'], 'flip.number': ['num'], 'flip.letter': ['letter'], 'flip.capital': ['letter'],
+    'flip.small': ['lower'], 'flip.expr': ['expr'], 'flip.word': ['word'],
     'match.color': ['name'], 'match.shape': ['name', 'plural'], 'match.animal': ['name', 'plural'],
-    'match.size': ['beast'], 'match.count': ['num', 'acorns'], 'match.number': ['num'],
-    'match.oddeven': ['num', 'acorns', 'parity'], 'match.letter': ['letter'], 'match.lower': ['letter', 'lower'],
+    'match.home': ['animal', 'at'],
+    'match.size': ['beast'], 'match.count': ['num', 'fish'], 'match.number': ['num'],
+    'match.oddeven': ['num', 'fish', 'parity'], 'match.letter': ['letter'], 'match.lower': ['letter', 'lower'],
     'match.initial': ['word', 'letter'], 'match.math': ['expr', 'num'],
-    'mismatch.two': ['A', 'B'],
-    'talk.wrong': ['answer'], 'talk.wrong.a': ['answer'], 'talk.wrong.animal': ['answer'],
+    'mismatch.two': ['A', 'B'], 'mismatch.home': ['A', 'B', 'beast'],
+    'talk.wrong': ['answer'], 'talk.wrong.a': ['answer'], 'talk.wrong.animal': ['answer'], 'talk.wrong.home': ['at'],
     'talk.wrong.letter': ['letter'], 'talk.wrong.number': ['answer'], 'talk.wrong.size': ['answer']
   };
-  var FALLBACK = { 'talk.animals': 'talk.animalsAny', 'say.countDone': 'praise', 'mismatch.two': 'wrong',
-    'flip.shapeColor': 'flip.shape' };
-  ['flip.color', 'flip.shape', 'flip.animal', 'flip.number', 'flip.letter', 'flip.capital', 'flip.small', 'flip.expr',
-    'flip.word'].forEach(function (k) { FALLBACK[k] = 'praise'; });
-  ['match.color', 'match.shape', 'match.animal', 'match.size', 'match.count', 'match.number', 'match.oddeven',
-    'match.letter', 'match.lower', 'match.initial', 'match.math'].forEach(function (k) { FALLBACK[k] = 'match.any'; });
-  ['talk.wrong', 'talk.wrong.a', 'talk.wrong.animal', 'talk.wrong.letter', 'talk.wrong.number', 'talk.wrong.size']
-    .forEach(function (k) { FALLBACK[k] = 'wrong'; });
+  var FALLBACK = { 'talk.animals': 'talk.animalsAny', 'talk.homes': 'talk.homesAny', 'say.countDone': 'praise',
+    'say.home': 'reward.home', 'mismatch.two': 'wrong', 'mismatch.home': 'mismatch.two', 'flip.shapeColor': 'flip.shape' };
+  ['flip.color', 'flip.shape', 'flip.animal', 'flip.home', 'flip.number', 'flip.letter', 'flip.capital', 'flip.small',
+    'flip.expr', 'flip.word'].forEach(function (k) { FALLBACK[k] = 'praise'; });
+  ['match.color', 'match.shape', 'match.animal', 'match.home', 'match.size', 'match.count', 'match.number',
+    'match.oddeven', 'match.letter', 'match.lower', 'match.initial', 'match.math'].forEach(function (k) { FALLBACK[k] = 'match.any'; });
+  ['talk.wrong', 'talk.wrong.a', 'talk.wrong.animal', 'talk.wrong.home', 'talk.wrong.letter', 'talk.wrong.number',
+    'talk.wrong.size'].forEach(function (k) { FALLBACK[k] = 'wrong'; });
 
   var CHILD_FALLBACK = { en: 'friend', vi: 'bé' };
   // keys whose {child} variant is always used when a name is known
@@ -576,7 +674,7 @@
     if (!p) return null;
     return p[1] === '+' ? +p[0] + +p[2] : +p[0] - +p[2];
   }
-  function acorns(lang, n) { return ACORN[lang][n === 1 ? 0 : 1]; }
+  function fishWord(lang, n) { return FISH[lang][n === 1 ? 0 : 1]; }
   function isLetter(s) { return typeof s === 'string' && /^\p{L}$/u.test(s); }
 
   function sizeOf(v) {                     // 'big' | 'small' | 'little' | 'fox_small' | 'small:fox' → 'big'|'small'|null
@@ -602,7 +700,7 @@
       case 'number': return numberName(lang, value);
       case 'dots': {
         var n = num(value);
-        return n == null ? String(value) : numberName(lang, n) + ' ' + acorns(lang, n);
+        return n == null ? String(value) : numberName(lang, n) + ' ' + fishWord(lang, n);
       }
       case 'letter': {
         var s = String(value);
@@ -616,6 +714,7 @@
         if (num(tx) != null) return numberName(lang, num(tx));
         if (isLetter(tx)) return name(lang, 'letter', tx);
         if (animalOf(tx)) return NAMES[lang].animal[animalOf(tx)];
+        if (homeOf(tx)) return NAMES[lang].home[homeOf(tx)];
         return tx;
       }
       case 'word': {
@@ -627,9 +726,13 @@
         var a = animalIn(value);
         return a ? NAMES[lang].animal[a] : String(value);
       }
+      case 'home': {
+        var hm = homeOf(value);
+        return hm ? NAMES[lang].home[hm] : String(value);
+      }
       case 'size': {
         var sz = sizeOf(value), an = animalIn(value);
-        if (sz && an) return lang === 'vi' ? NAMES.vi.animal[an] + ' ' + NAMES.vi.size[sz] : NAMES.en.size[sz] + ' ' + an;
+        if (sz && an) return lang === 'vi' ? NAMES.vi.animal[an] + ' ' + NAMES.vi.size[sz] : NAMES.en.size[sz] + ' ' + NAMES.en.animal[an];
         if (sz) return NAMES[lang].size[sz];
         return String(value);
       }
@@ -675,7 +778,9 @@
       case 'dots': {
         var dn = num(value);
         out = numberWords(lang, value);
-        if (dn != null) addForms(out, [name(lang, 'dots', dn), dn + ' ' + acorns(lang, dn)]);
+        if (dn != null) addForms(out, [name(lang, 'dots', dn), dn + ' ' + fishWord(lang, dn)].concat(lang === 'vi' ?
+          [numberName('vi', dn) + ' cá', dn + ' cá', numberName('vi', dn) + ' chú cá'] :
+          [numberName('en', dn) + ' fishes', dn + ' fishes', numberName('en', dn) + ' fishies']));
         return out;
       }
       case 'parity': {
@@ -688,6 +793,7 @@
         if (num(tx) != null) return numberWords(lang, num(tx));
         if (isLetter(tx)) return words(lang, 'letter', tx);
         if (animalOf(tx)) return words(lang, 'animal', tx);
+        if (homeOf(tx)) return words(lang, 'home', tx);
         return addForms(out, [tx]);
       }
       case 'letter': {
@@ -726,6 +832,11 @@
         if (!an) return addForms(out, [String(value)]);
         return addForms(out, [NAMES[lang].animal[an]].concat(WORDS[lang].animal[an] || []));
       }
+      case 'home': {
+        var hw = homeOf(value);
+        if (!hw) return addForms(out, [String(value)]);
+        return addForms(out, [NAMES[lang].home[hw]].concat(WORDS[lang].home[hw] || []));
+      }
       case 'size': {
         var sz = sizeOf(value);
         if (!sz) return addForms(out, [String(value)]);
@@ -744,7 +855,7 @@
   // ---------------------------------------------------------------- t()
   var I18N = { langs: LANGS.slice(), child: '' };
 
-  // Fill in the derived params ({letter}, {lower}, {word}, {expr}, {acorns}, {num}, {animal}) from what the caller passed.
+  // Fill in the derived params ({letter}, {lower}, {word}, {expr}, {fish}, {num}, {animal}, {at}) from what the caller passed.
   function derive(lang, params) {
     var p = {}, k;
     if (params && typeof params === 'object') for (k in params) if (Object.prototype.hasOwnProperty.call(params, k)) p[k] = params[k];
@@ -776,9 +887,16 @@
     } else if (typeof p.expr !== 'string' || splitOp(p.expr)) p.expr = exprText(rawVal(p.expr));
     // {parity} may come as value
     if (!present(p.parity) && (rawVal(p.value) === 'odd' || rawVal(p.value) === 'even')) p.parity = rawVal(p.value);
-    // {acorns} + {num} from n
+    // {fish} (+ old alias {acorns}) + {num} from n
     var c = present(p.n) ? num(p.n) : null;
-    if (!present(p.acorns)) p.acorns = acorns(lang, c === 1 ? 1 : 2);
+    if (!present(p.fish)) p.fish = present(p.acorns) ? p.acorns : fishWord(lang, c === 1 ? 1 : 2);
+    if (!present(p.acorns)) p.acorns = p.fish;
+    // {at} ("on the ice floe" / "trên tảng băng trôi") from {home}, else from the animal's home
+    if (!present(p.at)) {
+      var hh = present(p.home) ? homeOf(rawVal(p.home)) : null;
+      if (!hh && present(p.animal) && animalOf(rawVal(p.animal))) hh = homeOfAnimal(animalOf(rawVal(p.animal)));
+      if (hh) p.at = HOME_AT[lang][hh];
+    }
     if (!present(p.num) && c != null) p.num = numberName(lang, c);
     return p;
   }
@@ -788,7 +906,7 @@
     if (typeof val === 'object' && val.kind) return name(lang, val.kind, val.value);
     if (typeof val === 'object') return '';
     switch (key) {
-      case 'color': case 'shape': case 'size': case 'animal': case 'parity':
+      case 'color': case 'shape': case 'size': case 'animal': case 'parity': case 'home':
         return name(lang, key, val);
       default: return String(val);
     }
@@ -846,7 +964,7 @@
   I18N.words = words;
   I18N.numberName = numberName;
   I18N.stripMarks = stripMarks;
-  I18N.sound = function () { return ''; };          // forest animals have no "says …" questions (kept for old callers)
+  I18N.sound = function () { return ''; };          // polar animals have no "says …" questions (kept for old callers)
   I18N.hasSound = function () { return false; };
   I18N.has = function (lang, key) { return STR[L(lang)][key] != null; };
   I18N.keys = function (lang) { return Object.keys(STR[L(lang)]); };
@@ -859,9 +977,13 @@
   I18N.NAME_TABLE = NAMES;       // read-only use (tests / UI)
   I18N.LETTER_VI = LETTER_VI;
   I18N.WORD_LIST = WORD_LIST;
+  I18N.HOME_LIST = HOME_LIST.slice();
+  I18N.HOMES = HOMES_DEFAULT;    // DESIGN §5.1 default; IM.HOMES (content.js) wins at run time
+  I18N.homeOf = function (a) { a = animalOf(a); return a ? homeOfAnimal(a) : null; };
+  I18N.animalOfHome = function (h) { h = homeOf(h); return h ? animalOfHome(h) : null; };
 
   // ---------------------------------------------------------------- cards → meaning
-  // sem = { k: 'color'|'shape'|'animal'|'dots'|'number'|'letter'|'expr'|'word'|'parity'|null, … }
+  // sem = { k: 'color'|'shape'|'animal'|'home'|'dots'|'number'|'letter'|'expr'|'word'|'parity'|null, … }
   function semOf(kind, value, face, ctx, size) {
     face = (face && typeof face === 'object') ? face : {};
     ctx = ctx || {};
@@ -900,6 +1022,11 @@
         if (sz) s.size = sz;
         break;
       }
+      case 'home': {
+        var hm = homeOf(value) || homeOf(face.sprite) || homeOf(face.value) || homeOf(face.home);
+        if (hm) s = { k: 'home', home: hm };
+        break;
+      }
       case 'dots': {
         var dn = num(value); if (dn == null) dn = num(face.n);
         if (dn != null) s = { k: 'dots', n: dn };
@@ -934,6 +1061,7 @@
         else if (num(tx) != null) s = { k: 'number', n: num(tx) };
         else if (isLetter(tx)) return semOf('letter', tx, face, ctx);
         else if (animalIn(tx)) return semOf('animal', tx, face, ctx, size);
+        else if (homeOf(tx)) s = { k: 'home', home: homeOf(tx) };
         else if (tx) s = { k: 'word', word: tx };
         break;
       }
@@ -951,6 +1079,7 @@
         if (value != null && value !== '') {
           if (num(value) != null) s = { k: 'number', n: num(value) };
           else if (animalIn(value)) s = { k: 'animal', animal: animalIn(value) };
+          else if (homeOf(value)) s = { k: 'home', home: homeOf(value) };
           else if (NAMES.en.color[value] != null) s = { k: 'color', color: value };
           else if (NAMES.en.shape[value] != null) s = { k: 'shape', shape: value };
           else if (splitOp(value)) s = { k: 'expr', expr: String(value) };
@@ -974,7 +1103,8 @@
     return { k: null };
   }
   function ctxOf(ev, lang) {
-    return { topic: ev.topic || (ev.round && ev.round.topic) || null, parity: ev.parity, animal: ev.animal, lang: lang };
+    return { topic: ev.topic || (ev.round && ev.round.topic) || null, parity: ev.parity, animal: ev.animal, home: ev.home,
+      word: ev.word, lang: lang };
   }
   // the two cards of a match / mismatch event, as sems (0, 1 or 2 entries)
   function twoCards(ev, lang) {
@@ -992,23 +1122,26 @@
     return out;
   }
 
-  // "a fox" / "con cáo", "three acorns" / "ba hạt dẻ", "letter B" / "chữ B" …
+  function homePhraseEn(h) { var art = HOME_ART_EN[h] != null ? HOME_ART_EN[h] : 'a'; return (art ? art + ' ' : '') + NAMES.en.home[h]; }
+  function viAnimal(a) { return PHRASE_VI[a] || NAMES.vi.animal[a]; }
+  // "a seal" / "con hải cẩu", "three fish" / "ba con cá", "an ice floe" / "tảng băng trôi", "letter B" / "chữ B" …
   function phrase(lang, s) {
     var vi = lang === 'vi';
     switch (s.k) {
       case 'color': return name(lang, 'color', s.color);
       case 'shape': return vi ? name(lang, 'shape', s.shape) : 'a ' + name(lang, 'shape', s.shape);
       case 'animal':
-        if (vi) return NAMES.vi.animal[s.animal] + (s.size ? ' ' + NAMES.vi.size[s.size] : '');
+        if (vi) return viAnimal(s.animal) + (s.size ? ' ' + NAMES.vi.size[s.size] : '');
         return 'a ' + (s.size ? NAMES.en.size[s.size] + ' ' : '') + NAMES.en.animal[s.animal];
-      case 'dots': return numberName(lang, s.n) + ' ' + acorns(lang, s.n);
+      case 'home': return vi ? NAMES.vi.home[s.home] : homePhraseEn(s.home);
+      case 'dots': return numberName(lang, s.n) + ' ' + fishWord(lang, s.n);
       case 'number': return vi ? 'số ' + numberName(lang, s.n) : numberName(lang, s.n);
       case 'letter':
         if (vi) return 'chữ ' + s.letter + (s.small ? ' thường' : s.capital ? ' in hoa' : '');
         return (s.small ? 'small letter ' : s.capital ? 'big letter ' : 'letter ') + s.letter;
       case 'expr': return exprWords(lang, s.expr);
       case 'word':
-        if (s.animal) return vi ? NAMES.vi.animal[s.animal] : 'a ' + NAMES.en.animal[s.animal];
+        if (s.animal) return vi ? viAnimal(s.animal) : 'a ' + NAMES.en.animal[s.animal];
         return String(s.word);
       case 'parity': return name(lang, 'parity', s.parity);
       default: return '';
@@ -1020,14 +1153,14 @@
     return lang === 'en' ? anFix(s) : s;
   };
 
-  function countLine(lang, n) {               // "One, two, three acorns!" (n ≤ 5) · "Seven acorns!"
+  function countLine(lang, n) {               // "One, two, three fish!" (n ≤ 5) · "Seven fish!" · vi "Một, hai, ba con cá!"
     var head;
     if (n >= 1 && n <= 5) {
       var parts = [];
       for (var i = 1; i <= n; i++) parts.push(numberName(lang, i));
       head = parts.join(', ');
     } else head = numberName(lang, n);
-    return capFirst(head + ' ' + acorns(lang, n) + '!');
+    return capFirst(head + ' ' + fishWord(lang, n) + '!');
   }
 
   // Name of a turned card: `flip` and `tap` events { nameKind, nameValue, face, topic? }
@@ -1041,9 +1174,16 @@
         if (s.color) return I18N.t(lang, 'flip.shapeColor', { shape: s.shape, color: s.color }, rng);
         return I18N.t(lang, 'flip.shape', { name: name(lang, 'shape', s.shape) }, rng);
       case 'animal': {
-        var nm = lang === 'vi' ? phrase(lang, s) : (s.size ? NAMES.en.size[s.size] + ' ' : '') + NAMES.en.animal[s.animal];
+        var nm;
+        if (ctxOf(ev, lang).topic === 'initial') {     // say the word the letter is about ("A bear!", not "A polar bear!")
+          var iw = present(ev.word) && typeof rawVal(ev.word) === 'string' ? rawVal(ev.word) : wordOfSprite(lang, 'animal_' + s.animal);
+          if (iw) nm = lang === 'vi' ? 'con ' + iw : iw;
+        }
+        if (!nm) nm = lang === 'vi' ? NAMES.vi.animal[s.animal] + (s.size ? ' ' + NAMES.vi.size[s.size] : '') :
+          (s.size ? NAMES.en.size[s.size] + ' ' : '') + NAMES.en.animal[s.animal];
         return I18N.t(lang, 'flip.animal', { name: nm }, rng);
       }
+      case 'home': return I18N.t(lang, 'flip.home', { name: phrase(lang, s) }, rng);
       case 'dots': return countLine(lang, s.n);
       case 'number': return I18N.t(lang, 'flip.number', { num: numberName(lang, s.n) }, rng);
       case 'letter':
@@ -1052,7 +1192,10 @@
         return I18N.t(lang, 'flip.letter', { letter: s.letter }, rng);
       case 'expr': return I18N.t(lang, 'flip.expr', { expr: exprWords(lang, s.expr) }, rng);
       case 'word':
-        if (s.animal) return I18N.t(lang, 'flip.animal', { name: NAMES[lang].animal[s.animal] }, rng);
+        if (s.animal) {
+          var ww = wordOfSprite(lang, 'animal_' + s.animal);
+          return I18N.t(lang, 'flip.animal', { name: ww ? (lang === 'vi' ? 'con ' + ww : ww) : NAMES[lang].animal[s.animal] }, rng);
+        }
         return I18N.t(lang, 'flip.word', { word: String(s.word) }, rng);
       case 'parity': return capFirst(name(lang, 'parity', s.parity)) + '!';
       default: return I18N.t(lang, 'praise', null, rng);
@@ -1070,7 +1213,15 @@
     if (main.k) cs.push(main);
     function find(k) { for (var i = 0; i < cs.length; i++) if (cs[i].k === k) return cs[i]; return null; }
     var dots = find('dots'), numb = find('number'), expr = find('expr'), letter = find('letter'), word = find('word'),
-      animal = find('animal'), color = find('color'), shape = find('shape'), par = find('parity');
+      animal = find('animal'), color = find('color'), shape = find('shape'), par = find('parity'), home = find('home');
+    // homes: "The seal lives on the ice floe!"
+    if (home || topic === 'homes' || present(ev.home)) {
+      var hA = (animal && animal.animal) || animalOf(rawVal(ev.animal)) || null;
+      var hH = (home && home.home) || homeOf(rawVal(ev.home)) || null;
+      if (!hH && hA) hH = homeOfAnimal(hA);
+      if (!hA && hH) hA = animalOfHome(hH);
+      if (hA && hH) return I18N.t(lang, 'match.home', { animal: hA, at: HOME_AT[lang][hH] }, rng);
+    }
     var n = dots ? dots.n : numb ? numb.n : null;
     var odd = topic === 'oddeven' || (dots && dots.parity) || (numb && numb.parity) || par ||
       ev.parity === 'odd' || ev.parity === 'even';
@@ -1083,10 +1234,10 @@
     if (topic === 'add' || topic === 'sub') return I18N.t(lang, 'match.any', null, rng);
     if (odd && n != null) {
       var parity = n % 2 ? 'odd' : 'even';
-      return I18N.t(lang, 'match.oddeven', { num: numberName(lang, n), acorns: acorns(lang, n), parity: parity }, rng);
+      return I18N.t(lang, 'match.oddeven', { num: numberName(lang, n), fish: fishWord(lang, n), parity: parity }, rng);
     }
     if ((dots || topic === 'count') && n != null)
-      return I18N.t(lang, 'match.count', { num: numberName(lang, n), acorns: acorns(lang, n) }, rng);
+      return I18N.t(lang, 'match.count', { num: numberName(lang, n), fish: fishWord(lang, n) }, rng);
     if (numb) return I18N.t(lang, 'match.number', { num: numberName(lang, numb.n) }, rng);
     // initial: letter ↔ animal picture
     if (letter && (word || animal || topic === 'initial')) {
@@ -1108,7 +1259,7 @@
       var sized = cs.some(function (c) { return c.k === 'animal' && c.size; });
       if (topic === 'size' || (sized && cs.some(function (c) { return c.size === 'small'; }) &&
           (cs.some(function (c) { return c.size === 'big'; }) || topic === 'size' || ev.nameKind === 'size')))
-        return I18N.t(lang, 'match.size', { beast: lang === 'vi' ? NAMES.vi.animal[a] : NAMES.en.animal[a] }, rng);
+        return I18N.t(lang, 'match.size', { beast: lang === 'vi' ? SHORT_VI[a] : NAMES.en.animal[a] }, rng);
       return I18N.t(lang, 'match.animal', { name: NAMES[lang].animal[a], plural: PLURAL_EN.animal[a] }, rng);
     }
     if (color) return I18N.t(lang, 'match.color', { name: name(lang, 'color', color.color) }, rng);
@@ -1124,10 +1275,15 @@
     if (cs.length < 2) return I18N.t(lang, 'wrong', null, rng);
     var A = phrase(lang, cs[0]), B = phrase(lang, cs[1]);
     if (!A || !B) return I18N.t(lang, 'wrong', null, rng);
+    // an animal and a home that is not its own: "A seal and a nest! Let's find the seal's home."
+    var an = cs[0].k === 'animal' && cs[1].k === 'home' ? cs[0] : cs[1].k === 'animal' && cs[0].k === 'home' ? cs[1] : null;
+    if (an) return I18N.t(lang, 'mismatch.home', { A: A, B: B,
+      beast: lang === 'vi' ? SHORT_VI[an.animal] : NAMES.en.animal[an.animal] }, rng);
     return I18N.t(lang, 'mismatch.two', { A: A, B: B }, rng);
   };
 
-  // optional: a short line when a reward flies out (ev.kind = butterfly | lantern | acorns | animal | star)
+  // optional: a short line when a reward flies out (ev.kind = fish | sculpture | fishes | animal | star | home;
+  // the old butterfly | lantern | acorns answer with the fish lines)
   I18N.sayReward = function (lang, ev, rng) {
     lang = L(lang);
     var k = ev && typeof ev === 'object' ? ev.kind : ev;
@@ -1135,7 +1291,15 @@
     return I18N.t(lang, 'reward.' + k, null, rng);
   };
 
-  // Counting aloud (acorns): n < need → "Two!"; n ≥ need → "Three! Three acorns!" / "Ba! Ba hạt dẻ!"
+  // `homeArrive` {id, home, animal?}: "The seal is home!" (animal from the event, else the one that lives there)
+  I18N.sayHome = function (lang, ev, rng) {
+    lang = L(lang);
+    ev = (ev && typeof ev === 'object') ? ev : {};
+    var a = animalOf(rawVal(ev.animal)) || animalOf(ev.sprite) || (homeOf(rawVal(ev.home)) ? animalOfHome(homeOf(rawVal(ev.home))) : null);
+    return a ? I18N.t(lang, 'say.home', { animal: a }, rng) : I18N.t(lang, 'reward.home', null, rng);
+  };
+
+  // Counting aloud (fish): n < need → "Two!"; n ≥ need → "Three! Three fish!" / "Ba! Ba con cá!"
   I18N.sayCount = function (lang, n, need, rng) {
     lang = L(lang);
     var c = num(n);
@@ -1158,6 +1322,11 @@
       var a = animalIn(value);
       if (!a) return I18N.t(lang, 'talk.wrong', { answer: String(value) });
       return I18N.t(lang, 'talk.wrong.animal', { answer: { kind: kind, value: value } });
+    }
+    if (kind === 'home') {
+      var hw = homeOf(value);
+      if (!hw) return I18N.t(lang, 'talk.wrong', { answer: String(value) });
+      return I18N.t(lang, 'talk.wrong.home', { at: HOME_AT[lang][hw] });
     }
     if (kind === 'shape') return I18N.t(lang, lang === 'en' ? 'talk.wrong.a' : 'talk.wrong', ans);
     if (kind === 'size') return I18N.t(lang, 'talk.wrong.size', ans);

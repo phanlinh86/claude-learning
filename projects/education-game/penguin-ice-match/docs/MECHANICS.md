@@ -1,279 +1,193 @@
-# Dee's Forest Memory — Mechanics (rng · content · world · weather · bot)
+# Tuk's Ice Match — Mechanics (rng · content · world · weather · bot)
 
-Owner: mechanics engineer. Contract: `DESIGN.md` §2, §5.1–§5.5. Every tuned number lives in `IM.CONFIG` (`game/js/world.js`,
-commented) and can be overridden per world: `new IM.World({ config: { roundDoneTime: 2.5 } })`. Content tables (the DESIGN
-values) are `IM.Content.PAIRS / PEEK`; the playtest-tuned values the game uses are `IM.CONFIG.pairsByAge / peekByAge`.
-Tests: `node tests/unit/run.js` (32 tests, ≈ 30 s; `node tests/unit/run.js grid` runs the tests whose name contains "grid").
-Playtests: `node tests/sim/playtest.js` (2 400 sessions, ≈ 8 min on 2 cores), `node tests/sim/tune.js --config '{…}'` (quick
-CONFIG comparisons), `node tests/sim/determinism.js`, `node tests/sim/content_stats.js`, `node tests/sim/run_matrix.js` → `summarize.js`.
+Owner: mechanics engineer. Contract: `DESIGN.md` §1, §2, §5.1–§5.5 (+ Dee's `../duckling-forest-memory/docs/DESIGN.md`). Every tuned
+number lives in `IM.CONFIG` (`game/js/world.js`, commented) and can be overridden per world: `new IM.World({ config: { … } })`.
+Content tables (the DESIGN values) are `IM.Content.PAIRS / PEEK`; the playtest-tuned values the game uses are
+`IM.CONFIG.pairsByAge / peekByAge`. The renderer contract (fields, anchors, draw order) is the CONVENTIONS block at the top
+of `world.js` — read it first.
+Tests: `node tests/unit/run.js` (44 tests, ≈ 45 s; `node tests/unit/run.js rub` runs the tests whose name contains "rub").
+Playtests: `node tests/sim/playtest.js` (2 400 sessions + verdicts), `node tests/sim/tune.js --n 4 --config '{…}' --drivers …`
+(quick CONFIG comparisons), `node tests/sim/determinism.js`, `node tests/sim/content_stats.js`.
 Units: logical px (short side 720), seconds, radians, y down; rot > 0 = clockwise.
 
-## 0. QA round 1 changes (docs/reports/{functional,visual,playtest}_report.md) — variety first
-- **Topic rotation (P1-1):** `IM.AGE_POOLS` (≥ 5 topics per age: 3 colors/animals/size/shapes/count · 4 colors/animals/shapes/count/size ·
-  5 shapes/count/letters/animals/colors · 6 lower/initial/add/count/letters · 7 initial/add/sub/oddeven/count), `IM.Content.DIFFICULTY`.
-  `IM.Content.topicsFor(age, rng, lastTopics)`: chapter 1 = the easiest pool topic that was not chapter 1 last time; chapters 2–4 =
-  3 others, topics left out last time first, sorted easiest first (no rng → the fixed `IM.AGE_TOPICS`). `w.newSession({ lastTopics })`
-  or `w.lastTopics = […]` before `newSession()`; `w.levels` = the session's topics (main.js stores `dm:lastTopics`). Count at age 3: 1–4.
-- **Surprise round (P1-2):** round index `surpriseRound 2` of every chapter; type `surpriseTypes[(level + offset) % 3]`, offset random per
-  session (`w._surpriseOff`). `w.surprise`, `cur.surprise`, `round.surprise` (null otherwise).
-  - `shuffle`: after the hide (faces fully down) phase `'shuffle'`: 1 swap (2 from age 5) of face-down cards with different keys
-    (never a yellow card next to Dee); each card flies a smooth-step quadratic bezier bulging 0.35·d + 30 px to its own side (they
-    pass each other), lift 1 mid-way, rot ±0.12, landing squash; `shuffleTime 0.9`, then 0.15 s → `play`. Event `shuffle {a, b}` per swap.
-    No taps during the shuffle. Children in the sim lose track of a moved card with p = 1 − track (typical 0.6–0.9).
-  - `golden`: `cur.golden` = one pair key (no visible cue on the cards). Its match → `match.golden = true`, event `golden {a, b, key, x, y}`,
-    Dee `cheer` (3 hops), the reward carries `golden: true` (also on the `reward` event) → rainbow burst in render / main.
-  - `pond`: `IM.World.pondLayout(grid)` → `grid.style 'pond'`: cards 0.92× (never below the age minimum), column pitch kept, columns
-    lifted on a sine arc (≤ 0.4·card h, limited by the board), rows staggered ± ≤ (gap' − 14)/2, a centred last-row card never lifted
-    above its neighbours → every pair of cards ≥ 14 px apart (test, 12 viewports); `grid.rect` = the real bounding box; face-down /
-    face-up cards bob ±3 px at 0.4 Hz (`pondBob`).
-  - Cost in the sims: ≈ +1 s per chapter (shuffle). Typical 4-year-old chapter 93.8 → 95.3 s.
-- **Same card again and again (P1-4):** a tap on the one open card (no mismatch showing) does NOT reset the idle timer; `sameTapHint 3`
-  such taps → auto hint (cooldown rules apply) on that card's partner; another card resets the count (`w._sameN`).
-- **Third tap (P2-1):** `thirdTapAfter 0.5` — the fast reset only once the mismatch has shown ≥ 0.5 s; earlier third taps return `null`
-  (before the check the mismatch is now always shown and counted normally).
-- **Peek per card (P2-2):** `peek = peekByAge[age] · (0.6 + 0.1·cards)` (`peekPerCard`): age 4, 4 cards 2.2 s, 6 → 2.6 s.
-- **Rewards (P2-3, visual P2-1/P2-4, functional P2-1):** `perchStep 52`, candidates jittered ±18 / ±12 px (ground ±4 y, fixed per layout);
-  pick = random among free perches ≥ 24 px (`perchMinGap`) from other rewards, weighted by that gap (≤ 160) — no lattice; every 2nd
-  butterfly prefers flowers (ground) first; animals / acorns fall back to `branch`; 2 ground rows (`groundPerchDy [72, 40]`, perch
-  `row` 0 front / 1 back — render the back row first, i.e. sort rewards by y); sizes star 52, acorn 28; acorn piles in rows of
-  4/3/3/2, 0.6·size apart (`acornSpread 24` = minimum half-width). **`w.hudKeep = {x, y, w, h}`** (logical px, set by main before
-  `setViewport`) → `layout.hudKeep`, an extra keep-out for reward perches only. Crowding (> 40 % overlap) in the unit check:
-  7 / 3 420 reward pairs (was 12–28 % of rewards on portrait).
-- **Grid ties (P2-4):** within 0.5 px (both at the 210 px cap) → the squarer grid (smaller |cols − rows|), then board A (above Dee),
-  then wider (landscape) / taller (portrait). No single card column on any test viewport.
-- **Talk size (visual P2-5):** `talk.params.animal` = the shown animal; each choice has `sprite` (= `talk.show.sprite`) and `scale` 1 / 0.6.
-- **Colour safety (visual P3-10):** the clash rule and "no pink" now hold up to age 5 (`COLOR_SAFE_MAX_AGE`) → age-5 colour rounds ≤ 3 pairs.
-- Quick playtest after the changes (`pt_qa1`, 800 sessions): typical 4-year-old chapter 95.3 s ✔, typical sessions max 440 s ✔,
-  child models p90 454 s ✔, careful4 p90 467 s ✔, 0 stuck / NaN / errors, 0 / 42 183 bad reward placements, smallest card 123 px;
-  spammer age 4 chapter 54 → 64 s (it now sees each mismatch). Unit tests: 39.
+## 1. What changed versus Dee's Forest Memory (for main.js / render.js)
+| Dee | Tuk | notes |
+|---|---|---|
+| `w.dee`, `layout.dee`, `layout.deeRect` | **`w.tuk`**, **`layout.tuk`**, **`layout.tukRect`** | the old names are aliases of the SAME objects (`w.dee === w.tuk`) |
+| `w.dee {mood, moodT, lookX, lookY, hop}` | `w.tuk {…, slide, belly}` | `slide` px to the right of the feet anchor, `belly` = draw the belly-slide pose |
+| card aspect 0.78 | **0.9** | blocks ≥ 120 px wide (≤ 4), ≥ 104 px (5+) |
+| deal arcs from `layout.stack` | slide-in on the ice | draw `deal` blocks at `(x, y)` like any block (they start off-screen); `layout.stack` is info only |
+| `flip` (3D card turn) | `flip` 0 frosted … 1 clear, `frost = 1 − flip`, **`crack`** 0..1, `melt`, `hole/holeT/holeA`, `glint`, `bob` | no scaleX turn: draw the frost overlay with `frost` and `crack` |
+| `flip {id, …, open}` | `flip {…, via:'tap'|'rub', x, y}` | x, y = block centre (shard burst) |
+| — | **`clink {a, b, x, y, v}`**, **`melt {id, x, y}`** (one per block, a then b), **`leap {id, k, n, x, y, color}`**, **`splash {id, k, x, y}`**, **`homeArrive {id, home, sprite, x, y}`** | |
+| `shuffle {a, b}`, phase `shuffle` | **`slide {a, b}`**, phase **`slide`** | main.js: play the swap sound on `slide` |
+| surprise `golden` / `pond` | **`aurora`** (event `golden` stays, now with `aurora: true`) / **`floes`** (`grid.style 'floes'`) | `w.aurora` 0..1.5 shimmer strength |
+| rewards butterfly / lantern / acorns / animal / star | **fish / sculpture / fishes / animal (+ home badge) / star** | fish never perch: they dive into `layout.sea` and are removed |
+| perches ground / lily / branch / air | **shore / sea / sky** | `layout.shore`, `layout.sea` new |
+| `IM.World.pondLayout` | `IM.World.floesLayout` (old name kept) | |
+| weather seasons, `ambient.season` | stages 0 sunny · 1 breezy · 2 rain · 3 rainbow, **`ambient.stage`**, **`ambient.rainbow`** 0..1 (`season` kept) | particles snow / streak / drop / splash / sparkle; bursts `shard`, `splash` |
 
-## 1. API (DESIGN §5.2) — names kept from Kitten so `main.js` keeps working
-`setViewport(W, H, ins)`, `setAge`, `setLang`, `newSession`, `startLevel(i)`, `update(dt)`, `drainEvents()`,
-`pointerDown(x, y)` → card id or `null` (flips happen **on touch-down**), `pointerMove`, `pointerUp`, `cancelDrag()` (no-op),
-`hint()` → card id (manual: tap on Dee / the bubble), `talkAnswer(choiceId)` → bool, `skipTalk()`, `prompt()` → `{promptKey, params}`.
-Helpers: `cardById(id)` (= `itemById`), `rewardById(id)`, `cardRect(c)`, `IM.World.logicalSize`, `IM.World.computeLayout(W, H, ins)`,
-`IM.World.chooseGrid(L, n, age)`, `IM.World.placeAt(kind, perch)`, `IM.World.rectGap`, `IM.World.overlapArea`.
-
-Fields: `layout, state, phase, phaseTime, level, levels, topic, weather (= level = season), round, roundsPerLevel, stars,
-levelStars, roundStars, mismatches, streak, found, pairs, open (ids of the face-up unmatched cards, ≤ 2), cur (the round),
-talk, talkAnswered, alpha, stateTime, time, interactive, solved, wind, cards, rewards, collected (every reward of the session,
-for the winter party), dee, pairsHeld`. Aliases: `items` → `cards`, `miu` → `dee`; `held` is always `null`.
-States: `menu → intro → round → roundDone → … → talk → levelDone → … → sessionDone`.
-Phases inside `round`: `deal → peek → hide → play ⇄ resolve → done`.
+## 2. API (DESIGN §5.2) — names kept from Dee so `main.js` keeps working
+`setViewport(W, H, ins)`, `setAge`, `setLang`, `newSession({lastTopics})`, `startLevel(i)`, `update(dt)`, `drainEvents()`,
+`pointerDown(x, y)` → block id or `null` (reveals happen **on touch-down**), **`pointerMove(x, y)` → id revealed by a rub or
+`null`**, `pointerUp()`, `cancelDrag()` (ends a rub), `hint()`, `talkAnswer(choiceId)`, `skipTalk()`, `prompt()`.
+Helpers: `cardById(id)` (= `itemById` = `blockById`), `rewardById(id)`, `cardRect(c)`, `IM.World.logicalSize / computeLayout /
+chooseGrid / floesLayout / placeAt(kind, perch, cfg, n, home) / rectGap / overlapArea`.
+Fields as Dee (`layout, state, phase, phaseTime, level, levels, topic, weather, round, roundsPerLevel, stars, levelStars,
+roundStars, mismatches, streak, found, pairs, open, cur, talk, talkAnswered, alpha, stateTime, time, interactive, solved, wind,
+cards, rewards, collected, surprise, pairsHeld`) + `tuk`, `aurora`, `finger`. States `menu → intro → round → roundDone → … →
+talk → levelDone → … → sessionDone`; phases `deal → peek → hide → (slide) → play ⇄ resolve → done`.
 
 ### Events
 | event | fields |
 |---|---|
-| `session` | `levels` |
-| `level` | `level, topic` |
-| `round` | `round, topic, promptKey, params {n: pairs}, pairs, held` (held = the adaptive rule kept the grid size) |
-| `deal` | `id` (a card leaves the deck; staggered 0.07 s) |
-| `peek` / `hide` / `play` | — (all faces up in a wave / down in a reverse wave / the child may tap) |
-| `flip` | `id, nameKind, nameValue, face, size, open` (the child turned a card; open = 1 or 2) |
-| `tap` | `id, nameKind, nameValue, face, size` (a face-up or matched card was tapped → say its name again) |
-| `match` | `a, b, key, nameKind, nameValue, found, pairs, nameKindA, nameValueA, faceA, sizeA, nameKindB, nameValueB, faceB, sizeB` + `parity` (oddeven), `animal, word` (initial), `text` (add/sub: "2 + 3"), `lower` (lower: "a") |
-| `mismatch` | `a, b, streak, mismatches, nameKindA, nameValueA, faceA, sizeA, nameKindB, nameValueB, faceB, sizeB` |
-| `reward` | `id, kind, x, y, color, shape, sprite, n, text` (the pair burst at x, y) |
-| `land` | `id, kind, x, y` (a reward reached its perch; again after a re-perch) |
-| `hint` | `a, b, nameKind, nameValue` (+ `idle: true` from an idle nudge) |
-| `idle` | `n, promptKey, params` |
-| `roundDone` | `round, stars, mismatches` |
-| `talk` / `talkAsk` / `talkResult` | `talk` / `talk, n, glowAnswer` / `correct, choiceId, answerId` |
-| `levelDone` / `sessionDone` | `level, stars` / `stars, rewards` |
+| `session` / `level` / `round` | `levels` / `level, topic` / `round, topic, promptKey, params {n}, pairs, held, surprise` |
+| `deal` | `id` (a block starts sliding in; 0.07 s apart) |
+| `peek` / `hide` / `play` | — |
+| `flip` | `id, nameKind, nameValue, face, size, open, via ('tap'|'rub'), x, y` |
+| `tap` | `id, nameKind, nameValue, face, size` (an up / matched block was tapped → say its name again; never from a rub) |
+| `match` | as Dee + `home` (homes), `animal`, `golden`, `aurora` |
+| `clink` | `a, b, x, y` (the midpoint), `v` (contact speed px/s → clink loudness) |
+| `melt` | `id, x, y` — twice per pair (a, then b), `meltDelay` 0.1 s after the clink |
+| `reward` | `id, kind, x, y` (the hole), `color, shape, sprite, n, text, home, golden` |
+| `leap` | `id, k (1..n), n, x, y, color` — one per fish, in order k = 1, 2, … (count aloud on these) |
+| `splash` | `id, k, x, y` (a fish dived into the sea) |
+| `land` | `id, kind, x, y` — a reward settled (fish: after the last splash; again after a re-perch) |
+| `homeArrive` | `id, home, sprite, x, y` — right after `land` of an animal that has a home badge |
+| `slide` | `a, b` (slide surprise: two frosted blocks swap places) |
+| `golden` | `a, b, key, x, y, aurora: true` |
+| `mismatch`, `hint`, `idle`, `roundDone`, `talk`, `talkAsk`, `talkResult`, `levelDone`, `sessionDone` | as Dee |
 
-### Renderer contract
-- **Card** `c` (skip `gone`): centre `(x, y)`, size `w × h` (= grid size) × `(sx, sy)`, `rot`, `alpha`. `flip` 0 back … 1 face:
-  draw scaleX·|cos(π·flip)|, the face when flip > 0.5; `lift` 0..1 → draw `CONFIG.liftPx` (8) px higher with a bigger, softer
-  shadow; `glow` 0..1 hint halo. `deal` cards with `t < 0` sit on the deck at `layout.stack` (1.5 px apart, `sx = sy = 0.45`).
-  Interpolate `_px, _py, _prot, _pflip` with `w.alpha`. `c.face` is what `IM.CardArt.drawFront` draws.
-- **Reward** `r` (`state fly | settle | idle`, `alpha` fades in `levelDone`), interpolate `_px/_py/_prot`:
-  `butterfly` centre, width `size` 46, `flap` 0..1 (wings), `face` ±1, `rot` · `lantern` centre, `size` 52, string from `(ax, ay)`
-  when `ax !== null`, `glow`, `rot` (pendulum) · `star` centre, `size` 44 × `sx`, `glow`, `text` · `animal` **bottom-centre** anchor,
-  `size` 70, `face` ±1, squash `sx, sy` about the anchor · `acorns` `pieces[] {x, y, rot, _px, _py, _prot}` acorn centres, each
-  `pieceSize` 22. `r.perch.kind` = `ground | lily | branch | air`.
-- **Dee** `{mood, moodT, lookX, lookY, hop}`: moods `happy` (match, 1 hop of 14 px), `cheer` (last pair / round done, 3 hops of
-  26 px × 0.7ⁿ), `oops` (mismatch), `think` (hint, idle). Looks at the last tapped card for 3 s, else at the grid centre.
-- `layout.perches` lists the candidate perches (debug overlay); `layout.grid = {cols, rows, cw, ch, gap, x0, y0, slots, rect, board,
-  boardIndex, minOk}` for the current round (`null` outside a round).
+Order for one colour match (unit-tested): `match → clink → melt(a) → melt(b) → reward → leap → splash → land`.
 
-## 2. Content (DESIGN §5.1) — `IM.Content.makeRound(topic, {age, lang, rng, roundIndex, history, pairs?, pairsByAge?, peekByAge?})`
-Pure and deterministic. `validate()` re-derives every pair from the faces alone (`facesMatch`) and rejects a round when a key is
-not on exactly 2 cards, a pair does not really match, **any card also matches a card of another pair** (ambiguity), or a colour
-round below age 5 has a confusable pair; `makeRound` throws on a broken round (never happened in 88 000 test rounds). The world
-passes `history` (earlier `round.sum`s of the chapter): a round never shows exactly the previous round's set of faces (re-roll ≤ 40×)
-and prefers values the previous round did not use.
+## 3. Content (DESIGN §5.1) — `IM.Content.makeRound(topic, {age, lang, rng, roundIndex, history, pairs?, peekByAge?})`
+Pure and deterministic; `validate()` re-derives every pair from the faces alone (`facesMatch`) and rejects a round when a key is
+not on exactly 2 blocks, a pair does not match, any block also matches another pair (ambiguity) or a colour round up to age 5
+has a confusable pair. A round never repeats the previous round's face set (re-roll ≤ 40×) and prefers fresh values.
+
+`IM.ANIMALS = bear seal fox owl whale puffin penguin hare walrus`; `IM.HOMES = {bear: den, seal: floe, fox: burrow, owl: nest,
+whale: sea, puffin: cliff, penguin: pebbles}` (hare, walrus: no home → never in `homes`).
+`IM.AGE_TOPICS` as DESIGN; pools (≥ 5 per age, rotation as Dee): 3 colors/animals/size/shapes/count · 4 colors/animals/shapes/
+count/homes · 5 shapes/count/letters/homes/colors · 6 lower/initial/add/count/letters · 7 initial/add/sub/oddeven/count.
+Difficulty order: colors, animals, size, shapes, letters, count, **homes**, lower, initial, add, sub, oddeven.
 
 | topic | pair (key) | faces | reward |
 |---|---|---|---|
-| colors | same colour (`c:red`) | 2 × `color` (code-drawn butterfly) | butterfly of that colour |
-| size (3) | same animal big ↔ small (`z:fox`) | `animal` scale 1 (`size:'big'`) + 0.6 (`'small'`) | the animal |
-| shapes | same shape (`s:star`) | ≤ 4: each shape its own colour, the pair shares it; 5: the two cards differ in colour; `rect` from 5 | lantern (shape, colour) |
-| count | numeral ↔ that many acorns (`n:3`) | `number` + `dots`; 1–5 (3–4, warm-up 1–3), 1–10 (5), 1–12 (6–7) | `n` acorns |
-| animals | two identical animals (`a:owl`) | 2 × `animal` | the animal |
-| letters | same capital (`L:A`) | 2 × `letter` | star with the letter |
-| lower | capital ↔ small (`L:A`), never I / L | `letter` 'A' + 'a' | star |
-| initial | letter ↔ animal whose word starts with it (`I:F`) | `letter` + `animal` (card.word) — one word per initial in a round | the animal |
-| add / sub | "2 + 3" ↔ 5 (`v:5`) | `text` + `number`; sums 2–10 (6) / 2–20 (7), differences 0–9 within 10; warm-up ≤ 6 / ≤ 4 | star with the answer |
-| oddeven | numeral ↔ dots, n ≤ 12, both parities every round | `number` + `dots` with `face.parity` (frame colour: odd blue, even orange) | `n` acorns |
+| colors | same colour (`c:red`) | 2 × `color` (fish drawn in the ice) | `fish` of that colour |
+| size (3) | animal big ↔ small (`z:seal`) | `animal` scale 1 / 0.6 | `animal` |
+| shapes | same shape (`s:star`) | ≤ 4: each shape its colour, pair shares it; 5: pair in two colours | `sculpture` (shape, colour) |
+| count | numeral ↔ that many fish (`n:3`) | `number` + `dots` (small fish, dice layout); 1–4 (3), 1–5 (4, warm-up 1–3), 1–10 (5), 1–12 | `fishes` (n) |
+| animals | two identical animals (`a:owl`) | 2 × `animal` | `animal` |
+| **homes** | animal ↔ its home (`h:seal`) | `animal` (nameKind `animal`) + `home` `{kind:'home', value:'floe', sprite:'home_floe'}` (nameKind `home`) | `animal` with `home` |
+| letters / lower | capital / capital ↔ small | `letter` | `star` |
+| initial | letter ↔ animal starting with it | `letter` + `animal` (`card.word`) | `animal` |
+| add / sub | "2 + 3" ↔ 5 | `text` + `number` | `star` |
+| oddeven | numeral ↔ fish dots, both parities | `number` + `dots` with `parity` | `fishes` (n) |
 
-Word lists (`IM.WORDS`): en fox F, deer D, hedgehog H, squirrel S, bunny B, frog F, bear B, owl O, mouse M (7 initials);
-vi cáo C, hươu H, sóc S, gấu G, cú C, ếch **Ê** (5 initials; thỏ / nhím / chuột skipped — th, nh, ch are their own sounds).
-Colour safety below age 5: no blue+purple, red+green, yellow+orange, green+orange in a round or a Talk question → the largest
-safe sets have **3 colours** (6 such sets), so a colour round below age 5 has ≤ 3 pairs. Pink is an answer colour from age 5.
-Name kinds on a card: `color, shape, animal` (+ `card.size` big/small in size rounds), `dots` (n: "one, two, three acorns"),
-`number, letter` (as shown), `sum` ('2 + 3'), `diff` ('5 − 2'). `round.pairInfo[key]` names the pair (count / oddeven / add / sub:
-`number`, initial: `letter` + `animal, word`, lower: `letter` + `lower`).
+`pairInfo[key]` for homes: `{nameKind:'animal', nameValue:'seal', animal:'seal', home:'floe', reward:{kind:'animal', sprite, home}}`
+→ the match line can say "The seal lives on the ice floe!". Homes rounds hold ≤ `HOMES_MAX` pairs (3: 3, 4: 3, 5: 4, 6–7: 5).
+Talk `homes`: show the animal, `params {animal, home}`, 3 `home` choices (each with `sprite`), answer = its home.
+Word lists (`IM.WORDS`): en bear B, seal S, fox F, owl O, whale W, puffin P, penguin P, hare H, walrus W (7 initials);
+vi head words gấu G, hải cẩu H, cáo C, cú C, cá voi C, hải âu H, hải mã H (thỏ tuyết / chim cánh cụt / chim hải âu cổ rụt
+start with th / ch digraphs: left out) → **3 vi initials, vi `initial` rounds have ≤ 3 pairs**.
+Colour safety as Dee (≤ age 5: no blue+purple, red+green, yellow+orange, green+orange, no pink → ≤ 3 colour pairs). Tuk's hat
+is red: colour rounds swap red blocks to slots ≥ 40 px from Tuk's box (`tukColor`, `tukColorGap`).
 
-Talk (`makeTalk`) — `show` is a card face (`null` for animals): colours (3 safe colours), shapes, size (big/small of an animal),
-count (dots; k ≤ 5 at ages ≤ 4), letters / lower (capital choices), initial (`params {word, animal}`), add / sub, oddeven
-(`parity`), **animals "Where is the {animal}?"** (`params.animal` = the answer, 3 animal picture choices).
+## 4. Layout (DESIGN §2)
+As Dee (groundY, Tuk anchor = Dee's numbers, bubble, HUD, boards A/B, grid fitting, hit rect + 10 px, ties) with block aspect
+0.9. New: `layout.shore = {x: ins.left, y: groundY − 10, w, h: 60}`, `layout.sea = {x: W − ins.right − 90, y: groundY + 34,
+w: 120}` (open water at the right end of the snow bank, never under the HUD / bubble — tested on 12 viewports),
+`layout.perches[] {x, y, kind}`: `shore` (3 rows, bottom anchors at groundY + 72 / + 40 / + 8, jittered), `sea` (the 2
+rightmost front-row points: whale, seal, walrus go there first), `sky` (a jittered grid above, for stars). A reward box must be
+inside the safe area − 6 px and ≥ 10 px from the bubble, HUD (`hudKeep` too), Tuk and the current grid.
+Block widths, age 4 / 4 pairs: iPhone landscape 4×2 194 px (notch 178) · iPhone portrait 2×4 210 · iPad landscape 4×2 160 ·
+iPad portrait 4×2 154 · 16:9 194 · iPad Pro landscape insets 167. Every grid ≥ the age minimum (unit test, 12 viewports × 2–6 pairs).
 
-## 3. Layout and grid (DESIGN §2)
-`groundY = H − ins.bottom − 90`; Dee landscape `(ins.left + 110, groundY + 16)`, h 180; portrait `(ins.left + 100, groundY + 20)`,
-h 170; Dee's keep-out box = h × h above the feet. Bubble landscape `(ins.left + 24, ins.top + 20)`, w = min(640, W − x − ins.right − 160),
-h 122; portrait `y = ins.top + 96 + 24`, h 124, w = min(640, W − x − ins.right − 24). HUD x > W − ins.right − 160, y < ins.top + 96.
-Deck: `(dee.x + 72, groundY + 30)`.
-**Boards**: from bubble bottom + 24 to groundY − 10. Landscape x from dee.x + 130 (≥ 120 per DESIGN; +10 so cards are ≥ 40 px from
-Dee's box) to W − ins.right − 24. Portrait two candidates: **A** full width (24 px margins) with the bottom ≤ Dee's head − 10, **B**
-right of Dee (x ≥ Dee box right + 40) down to groundY − 10.
-**Grid**: every cols × rows with cols·rows − n ∈ {0, 1} (one empty slot → last row centred) on every board; card w:h = 0.78,
-gap = max(14, 0.12·cw); the largest card wins (capped at 210 px), ties (< 0.5 px) → more columns in landscape, more rows in portrait.
-Hit test: the card rect + 10 px; several hits → nearest centre. Colour rounds swap yellow cards to slots ≥ 40 px from Dee.
-
-Card widths (px) at the 12 test viewports, worst cases (all ≥ the 120 / 104 px minimum):
-
-| viewport | 2 pairs | 3 | 4 | 5 | 6 |
-|---|---|---|---|---|---|
-| iPhone portrait notch 720×1556 | 2×2 210 | 2×3 210 | 3×3 207 | 2×5 148 (B) | 3×4 158 |
-| iPhone landscape notch 1556×720 | 4×1 210 | 6×1 163 | 4×2 155 | 5×2 155 | 6×2 155 |
-| iPad landscape insets 960×720 | 4×1 160 | 3×2 147 | 4×2 147 | 5×2 127 | 6×2 104 |
-| iPad portrait insets 720×960 | 2×2 199 (B) | 3×2 145 (B) | 4×2 143 | 5×2 123 | 4×3 107 (B) |
-| 16:9 1280×720 | 4×1 210 | 3×2 169 | 4×2 169 | 5×2 169 | 6×2 154 |
-
-The tuned game never deals more than 5 pairs (age 6–7 last round) → smallest card in 2 400 playtest sessions: 123 px.
-
-**Perches** (`layout.perchCands`): ground points every 64 px at groundY + 72 (bottom anchor; the 2 rightmost are lily pads), branch
-rows at groundY − 420 / − 360 / − 300 (`CONFIG.branchDy`, to be replaced by the env artist's branch heights) + a canopy row at
-ins.top + 26, and an air grid (64 × 54 px). A reward's box (per kind: animal 70², butterfly 46² sitting 0.6·size above a flower /
-0.45·size above a branch, star 44² + twinkle pad, lantern hanging 36 px string + 52 body with ±18 px swing room, acorn pile 92 × 48)
-must be inside the safe area − 6 px and ≥ 10 px from the bubble, HUD, Dee and the current card grid. Preference per kind:
-butterfly branch → ground → air; lantern branch → air; star air → branch; acorns ground → lily; animals ground → lily (frog lily
-first, owl / squirrel branch first). The pick is random among the 3 free perches tightest to the other rewards; with no free perch
-the least-overlapping one is used (crowded chapters on portrait phones at ages 6–7). At every round start rewards whose box the new
-(bigger) grid covers fly to a new perch; `setViewport` re-perches every reward at once (snap).
-
-## 4. Motion (fixed 1/120 s sub-steps, semi-implicit Euler)
+## 5. Motion (fixed 1/120 s sub-steps)
 | element | model and numbers |
 |---|---|
-| deal | ballistic arc from the deck: T = 0.42 + d/2400 s (≤ 0.62), g 2600 px/s², spin 0.5–1 turn (random sign) ending at rot 0, scale 0.45 → 1; stagger 0.07 s (`deal` event); landing squash q 0.12 (spring ω 20, ζ 0.35); peek 0.15 s after the last landing |
-| peek / hide | flipT → 1 in slot order every 0.05 s; hold `peekByAge` s after the last card is ≥ 0.95; reverse wave down; `play` once every flip < 0.5 |
-| flip | critically damped spring ω 18 on `flip` → 95 % in 0.26 s, no overshoot; `lift = sin(π·flip)` (peaks mid-turn) |
-| idle | face-down cards breathe ±1.2 % at 0.35 Hz (random phase) during play |
-| match | check when both flips ≥ 0.95. Hold 0.25 s (faces shown, lift → 1), then slide to the midpoint (spring ω 11, ζ 0.8), spin to 2π from 0.35 s (spring ω 9, ζ 0.45 → ≈ 1.2 turns peak, measured 1.05–1.45), shrink to 0.86×, squash 0.2 at 0.7 s, **burst at 0.85 s** → `gone` + reward. Phase back to `play` 0.4 s after the check (other cards can be turned while the pair spins away) |
-| mismatch | both shake rot = 0.08·sin(2π·3u)·(1−u)², u = t/0.5 s; faces stay `mismatchShow` 1.0 s (age 3: 1.2 s), then flip down |
-| hint peek | the hinted face-down cards turn to flip 0.75 (face at 70 % width) from 0.2 s to 0.65 s, glow 2.5 s (in 0.2 s, out 0.4 s) |
-| butterfly | quadratic bezier (control point 0.35·d ≤ 170 px above), T = 0.7 + d/900 s in [0.9, 1.8], smooth-step speed, sideways flutter 26·sin(πu)·(sin(2π·2.2t) + 0.4 sin(2π·3.7t)), wings 9 Hz; sits (settle 0.6 s, slowing flaps), then a lazy 0.5 s flap every 2–4 s |
-| star | same bezier, spins in flight; idle twinkle scale 1 ± 0.1 at 1.4 Hz, bob 4 px, glow 0.65 ± 0.35 |
-| lantern | floats up the bezier; on a branch a pendulum: θ″ = −(g/L) sin θ − 0.8 θ′ + 0.0025·9.8·wind, g 980, L = 36 + 26 px (period ≈ 1.6 s), first swing 0.32 rad in the flight direction; string length exact (test); in the air it bobs |
-| animal | 3 parabolic hops (g 2600, apex 80 / 46 / 30 px, kept below ins.top + 30), the first from the burst down to the ground line at 55 % of the way; landing squash 0.18·v/700 (spring ω 18, ζ 0.3); resting: breathes ±2 %, a 10 px hop every 4–8 s |
-| acorns | n pieces (≤ 12, 2 rows of ≤ 6), launched 0.04 s apart on parabolic hops (apex 60–130 px, g 2000) to spots across the pile; bounce with restitution 0.4 (measured 0.40), friction 0.75, then roll (rate 6 /s) with rot = x/r until at rest |
+| deal | the blocks slide in as a "train": every block travels the same distance D (landscape from the left edge: D = max slot x − ins.left + w/2 + 20; portrait from below: D = H + h/2 + 20 − min slot y) with constant ice friction μ = `dealFriction` 5000 px/s²: v0 = √(2μD), s(t) = v0·t − ½μt², stops **exactly** in the slot at T = √(2D/μ) (0.55–0.8 s); far side first, 0.07 s stagger (equal D + equal profile → blocks never overlap, unit-tested); arrival bump: spring offset along the slide (v 140 px/s, ω 28, ζ 0.45 → ≈ 4 px) + squash 0.06 |
+| peek / hide | as Dee (wave 0.05 s; hold `peekByAge · (0.6 + 0.1·blocks)`); the frost clears with ω 18 and grows back with **ω 10** (1 → 0.05 in 0.47 s) |
+| reveal (tap / rub) | `crack` 0 → 1 in `crackTime` 0.12 s (frost holds), then `flipT` → 1 (critically damped ω 18: clear in 0.26 s). Match check at flip ≥ 0.95 (≈ 0.38 s after the touch) |
+| match | hold 0.15 s, then both glide toward each other on the centre line u with **exponential ice friction** k = 2.2 /s, integrated exactly per step (v·e^(−kh), x += v(1 − e^(−kh))/k). Launch v0 = k·s + 180 px/s (s = each block's way to touching) → they touch at 180 px/s exactly when their rects meet (contact separation along u: min(w/|ux|, h/|uy|)) **centred on the midpoint**; `clink` → bounce with restitution 0.3, then friction stops them (pair centre stays exactly at the midpoint); `melt` 0.1 s later, 0.4 s: scale 1 → 0.15, alpha → 0; then `gone`, block a gets `hole` (ripple `holeT` over 1.2 s, fades 0.4 s once the reward has left) and the reward pops out at the midpoint. Glide time 0.3–1.0 s (max 2.5 s safety) |
+| resize mid-glide | the pair restarts its glide from the new slots (or, after the clink, touches at the new midpoint with the new size) → always inside the board (unit test: 4 stages × 5 rotations) |
+| mismatch | wobble rot = 0.07·sin(2π·3u)·(1 − u)², u = t/0.55 s; pictures stay 1.0 s (age 3: 1.2 s), frost grows back |
+| idle | frosted blocks glint (`glint` ≤ 0.35 for 0.5 s every 3–6 s, phase per block, no rng) |
+| fish | emerges 0.22 s (scale 0.35 → 1), then a ballistic parabola g = 1400 px/s² to a point on `layout.sea` (±0.4·sea.w), apex 120–200 px above the higher end (≥ ins.top + 40); `rot` = heading atan2(vy, vx) (face ±1 = direction); `splash` at the sea line, then the reward is removed |
+| fishes | n fish (≤ 12, colours cycle), leaps 0.35 s apart (`leap.k` = 1..n in order), spread over the sea width |
+| sculpture | emerges, then slides on the ice with constant friction μ 900 px/s² straight to its shore spot (v0 = √(2μd), stops exactly; small wobble), settle squash |
+| animal | emerges, then 3 parabolic hops (g 2600, apex 80 / 46 / 30) to its shore spot; homes: the spot is next to its **home badge** (`r.badge {x, y, size 58, alpha}`, centre = feet + (−36, −30), fades in 0.4 s) → `land`, `homeArrive` |
+| star | emerges, rises on a bezier to a sky point (T 0.9–1.8 s), twinkles ±10 % at 1.4 Hz |
+| Tuk | happy hop 14 px on a match, cheer 3 hops; **belly slide** at round end: 0.25 s after `roundDone`, out 70 px with constant friction 500 px/s² (v0 = 265 px/s, 0.53 s), hold 0.25 s, back the same way (total 1.56 s ≤ roundDoneTime 1.6) |
+| slide surprise | after the hide 1 swap (2 from age 5) of frosted blocks with different keys; each follows a quadratic curve bulging max(0.35·d + 30, 1.05·block size) to opposite sides with ice deceleration u = 1 − (1 − t/T)², T 1.0 s, lift ≤ 0.35; 0.15 s → play |
+| aurora surprise | one secret golden pair (`cur.golden`); `w.aurora` rises to 1 over 1.2 s in that round, +0.5 for 1.5 s after the golden match |
+| floes surprise | `floesLayout`: blocks 0.92× (≥ age minimum), columns on an arc, rows staggered; each floe bobs ±`grid.bobAmp` (≤ 3 px, 0.4 Hz) and drifts ±`grid.driftAmp` (≤ 2 px, 0.13 Hz) — the amplitudes shrink when the board is tight so blocks stay in the board and ≥ 14 px apart (unit test with live positions) |
 
-## 5. Rules
-- Taps count only in `play` and while a **mismatch** shows; during the deal / peek / hide nothing happens. A face-down card flips up
-  (≤ 2 open); a face-up or matched card → `tap` (name again); a tap just after a match (≤ 0.4 s) on a face-down card is ignored.
-- **Third tap:** with 2 mismatched cards up (shown or not yet checked), tapping a third card flips both down at once and the new one up;
-  the mismatch counts once. A pending *match* is never broken (the third tap is ignored).
-- Stars per round: mismatches ≤ max(1, pairs − 1) → 3, ≤ 2·pairs → 2, else 1; Talk right → +1. Max 52 per session.
-- Hints: 3 mismatches in a row → `hint` on one pair (the partner of a single open card, else the pair of the last tapped card, else a
-  random unfound pair), streak resets; no auto-hint while one glows or within 6 s of the last. Idle nudges after 12 s without a tap
-  in play (any `pointerDown` resets), gap ×1.5 to 30 s (12, 30, 57, 87 … s); from the 2nd nudge a hint too (`idle: true`).
-- Chapter: 4 rounds, **Talk time after ≥ 3 rounds once the chapter passed 80 s**; `talkAsk` every 12 s, `glowAnswer` from the 2nd.
-- **Adaptive hold:** after a hard round (only 1 star, or > 40 s of play) the next round keeps the last round's pair count instead of
-  growing (`round.held`); a new chapter starts fresh.
-- Rewards stay for the whole chapter (≤ 30), fade over 1.2 s in `levelDone`, are cleared at the next `level`; `w.collected` keeps
-  every reward of the session for the winter party.
+## 6. Rules
+As Dee: reveals count in `play` and while a mismatch shows (third-tap fast reset after 0.5 s); stars 3/2/1; hints after 3
+mismatches in a row (cooldown 6 s); idle nudges 12, 30, 57, 87 … s; same-block taps ×3 → hint; adaptive hold; Talk after ≥ 3
+rounds once the chapter passed **75 s**.
+**Rub** (`pointerMove` while down): entering a frosted block reveals it (`flip via 'rub'`) only in `play`, with < 2 unmatched
+blocks up and no mismatch showing. Each stroke (pointerDown → pointerUp) remembers what it touched: a block is never revealed
+twice in one stroke (even after it froze again), rubbing over up / matched blocks says nothing (no `tap` spam), the ice between
+blocks does nothing. Matched blocks gliding over the board never steal a touch (hit test prefers unmatched blocks).
 
-## 6. Timing (playtest-tuned)
-`introTime 2.5`, `dealSettle 0.15` (0.25), `peekByAge 2.8 / 2.2 / 2.0 / 1.5 / 1.5` (DESIGN 3.5 / 2.5 / 2.0 / 1.5 / 1.5),
-`pairsByAge` 3: 2, 2, 2, 3 · 4: 2, 2, 3, 3 · 5: 2, 3, 4, 4 · 6: 3, 3, 4, 5 · 7: 3, 4, 4, 5 (DESIGN 2,2,3,3 · 2,3,4,4 · 3,4,5,5 · 3,4,5,6),
-`mismatchShow 1.0` (age 3: 1.2; DESIGN 1.4), `matchBurstAt 0.85` (0.95), `matchResolveTime 0.4` (0.5), `roundEndDelay 0.4` (0.7),
-`roundDoneTime 1.8` (2.2), `talkAfterAnswer 2.0`, `levelDoneTime 2.0` (2.4), `chapterTimeLimit 80` (DESIGN 90).
-With the DESIGN values a typical 4-year-old chapter was **119 s** and typical sessions reached **527 s**; see §9.
-
-## 7. Weather (`IM.Weather`, fixed 1/60 s steps → independent of the dt split; cap 120 particles)
-| season | sky top → bottom (horizon), tint | ambient | particles |
+## 7. Weather (`IM.Weather`, fixed 1/60 s steps, cap 120)
+| stage | sky top → bottom (horizon), tint | ambient | particles |
 |---|---|---|---|
-| 0 spring | `#A9D8F0 → #EEF7EE` (`#F6F2E2`), blossom pink .06 | wind 8, gust +10, sun (0.8, 0.16) | 16 + 3 front falling petals, 3 butterflies, 3 sky sparkles |
-| 1 summer | `#7EC4EE → #DFF2FA` (`#F2F6E2`) | wind 6, gust +8, sun (0.68, 0.1) | 10 sun sparkles, 6 fireflies (`glow`), 2 butterflies |
-| 2 autumn | `#E9C9A0 → #FBEBD6` (`#F6DDB8`), apricot .06 | wind 14, gust +26 (peaks 30–40) | 9 `leaf_a` + 9 `leaf_b` + 2 front tumbling leaves |
-| 3 winter | `#C5D7E6 → #EEF4F8` (`#F7FAFC`), cold blue .08 | wind 5, gust +8, pale sun 0.55 | 26 `snow1` + 14 `snow2` + 4 front flakes |
-`ambient`: `skyTop, skyBottom, horizon, tint, wind, sway, sun, sunX, sunY, darkness (0), season, gust, windBase` (+ `moon, stars` = 0
-for the shared renderer); `setWeather(i)` crossfades sky / numbers / particle counts over 2.5 s.
-Fallers (petal / leaf / snow): fall speed 26–44 / 38–62 / 30–55 px/s (× depth for front ones), sideways sway 24 / 34 / 14 px/s,
-wind drift ×0.9 / ×1.6 / ×0.5, gusts lift leaves 70 px/s (petals 25) — autumn leaves are blown across at > 50 px/s; leaves and petals
-tumble (`flipX = cos`, fractional = 3D turn), wrap from the top (in strong wind some re-enter from the left). Butterflies: heading
-random walk + steering into the meadow box, 35–60 px/s, `flap` 0..1 at 7–9 Hz, `color` (draw with `IM.CardArt.drawButterfly`),
-`flipX` = facing. Fireflies blink (0.12 → 1). `burst(x, y, {kind: confetti | puff | sparkle})` unchanged from Kitten.
+| 0 sunny | `#8CCBF0 → #E8F6FC` (`#F4FAFD`) | wind 6 (+6 gusts), sun 1 | 8 + 4 sky sparkles |
+| 1 breezy | `#B9B8D8 → #ECEBF4` (`#F3F1F7`), lilac .06 | wind 16 (+22 gusts, peaks > 30), sun 0.8 | 16 snow1 + 8 snow2 blowing (drift 0.9·wind) + 14 + 3 front **streaks** (150–240 px/s + 3·wind, × (0.7 + 0.9·gust), `stretch` 1.5–4, alpha 0.3 → 1 when gust > 0.6) |
+| 2 rain | `#9DB2C6 → #DCE5ED` (`#E8EEF3`), grey .08, darkness 0.06 | wind 8 (+10), sun 0.25 | 40 + 6 front **drops** (520–700 px/s, slanted 1.2·wind) — every back drop hits the ice at a random y in [lakeTop, groundY] and leaves a **splash ring** (`scaleY` 0.4, 6 → 20 px in 0.3–0.4 s) |
+| 3 rainbow | `#A3D8F4 → #F0F8FC` (`#FBFDFE`), pink .05 | wind 5 (+6), sun 1, **rainbow 1** | 10 + 4 sparkles, 12 gentle snow1 (22–38 px/s) |
+`ambient.rainbow` crossfades with the stage (2.5 s). `burst(x, y, {kind})`: `confetti`, `puff`, `sparkle`, **`shard`** (10 ice
+shards, g 1400, spin; for a frost crack), **`splash`** (8 spray drops g 1200 + a big ring; for a fish dive). Pass
+`update(dt, {groundY, lakeTop})` (lakeTop = top of the lake panel). Deterministic for any dt split (unit test).
 
 ## 8. Bot (§5.4)
-Memory model: every exposure of a face (peek, flips, hint peeks) is remembered with p = skill; plays a known pair first, else the
-remembered partner of the open card, else an unseen card. Reaction (0.9 − 0.5·skill)·U(0.8, 1.25) s (+0.6 s at a round start),
-finger path 900–1300 px/s, tap at the card ± 0.25·size; waits while a pair is checked or a mismatch shows. Talk right with p = skill.
-`bot.stats {taps, grabs, flips, matches, mismatches, misses, talks, talkRight}`; `bot.memory`. skill 1 never mismatches (test).
+Memory model as Dee (each exposure remembered with p = skill, known pairs first). **Rub** (`opts.rub`, default 0.3): after
+revealing a block by pointerDown it keeps the finger down and swipes (pointerMove each frame, 700–1000 px/s, straight) to a 2nd
+block, then pointerUp — the remembered partner when it knows the first face, else (first face unseen) a random unseen block;
+only when the straight path crosses no other frosted block (exact segment × hit-rect test). `bot.stats.rubs`. Skill 1 still
+never mismatches (unit test).
 
-## 9. Playtest results (`tests/sim/playtest.js`, 2 400 sessions = 10 drivers × 5 ages × 2 langs × 4 viewports × 6)
-Child models (`tests/sim/lib.js`, all with memory): a face is remembered with p = peekRecall (peek) / flipRecall (own flips) and
-forgotten with an exponential lifetime tau; the child plays a remembered pair, else the remembered partner, else an unseen card, but
-taps a random card with p = pRandom; taps a glowing hint card with p = 0.8; waits `afterFlip` after its own flip (Dee says the name)
-and `reaction` between turns; while a mismatch shows it waits with p = patience (else the third-tap reset).
-**typical(age)** peek 0.30 → 0.60, flip 0.55 → 0.85, tau 30 → 90 s, reaction 1.3–2.6 → 0.8–1.5 s, distracted 15 → 7 % of rounds;
-**careful4** (careful 4-year-old, weak memory: peek 0.2, flip 0.45, tau 25 s, always waits, reaction 1.6–3.0 s);
-**toddler** (impulsive 3-year-old, patience 0.3); **slow3** (dreamy 3-year-old: 2.5–4.5 s between taps, distracted 30 % for 5–15 s);
-**tapper** (random taps); **spammer** (5–20 taps/s); IM.Bot memory skills 0.3 / 0.6 / 0.9 / 1.
+## 9. Playtests and tuning
+Harness `tests/sim/lib.js` (child models as Dee: typical(age), careful4, toddler, slow3, tapper, spammer + `IM.Bot` skills,
+rub 0.3). Full report: `tests/sim/out/pt_tuk.md` (`node tests/sim/playtest.js --name tuk`, 2 400 sessions, 239 s wall).
+Bot matrix: `node tests/sim/tune.js --n 50 --drivers bot0.3,bot0.6,bot0.9` = **6 000 sessions (1 200 per age, 400 per skill
+per age)** × 2 langs × 4 viewports.
 
-| driver / age | session mean (p90, max) | chapter mean (p10–p90) | round | mismatch / round | rounds with hint | stars (of 52) |
-|---|---|---|---|---|---|---|
-| typical 3 | 392 s (419, 483) | 98 s (85–109) | 20.4 s | 0.8 | 5.8 % | 48 |
-| **typical 4** | **375 s (400, 413)** | **94 s (81–106)** | 19.2 s | 0.8 | 5.0 % | 49 |
-| typical 5 / 6 / 7 | 401 / 401 / 372 s (p90 ≤ 427, max 453) | 100 / 100 / 93 s | 19–21 s | 0.6–1.0 | 1–5 % | 50–52 |
-| careful4 3 / **4** / 5 | 432 / **431** / 453 s (p90 465 / **462** / 502) | 108 / 108 / 113 s (40 % of the age-4 chapters cut to 3 rounds) | 23–32 s | 1.1 / 1.4 / 2.2 | 11 / 15 / 25 % | 45 / 42 / 35 |
-| toddler 3 / 4 | 378 / 394 s (p90 398 / 417) | 94 / 98 s | 20–21 s | 1.3 / 1.6 | 16 / 19 % | 45 / 44 |
-| slow3 3 / 4 | 469 / 505 s (p90 516 / 554, max 636) | 117 / 126 s (79 / 95 % cut) | 31–36 s | 1.3 / 1.8 | 19 / 24 % | 36 / 34 |
-| tapper 3 → 7 | 408 → 577 s | 102 → 144 s | 23–44 s | 2.8 → 8.7 | 38 → 75 % | 37 → 22 |
-| spammer 3 → 7 | 211 → 298 s | 53 → 75 s | 10–15 s | 2.7 → 10.8 | 59 → 91 % | 39 → 28 |
-| bot 0.3 / 0.6 / 1 | 298–413 / 259–333 / 240–292 s | 75–103 / 65–83 / 60–73 s | 11–23 s | 0.6–1.7 / 0.1–0.3 / 0 | 5–15 / ≤ 1 / 0 % | 45–47 / 50 / 52 |
+| driver / age | session mean (p90, max) | chapter mean (p10–p90) | round | mismatch / round |
+|---|---|---|---|---|
+| bot 0.3 · 3 / 4 / 5 / 6 / 7 | 303 / 315 / 369 / 396 / 388 s (p90 324–430, max 479) | 76 / 79 / 92 / 99 / 97 s | 15–24 s | 0.8 → 2.1 |
+| bot 0.6 · 3 / 4 / 5 / 6 / 7 | 262 / 267 / 307 / 335 / 350 s (p90 ≤ 371, max 393) | 65 / 67 / 77 / 84 / 88 s | 13–18 s | 0.2 → 0.6 |
+| bot 0.9 · 3 / 4 / 5 / 6 / 7 | 242 / 244 / 275 / 294 / 306 s (p90 ≤ 321, max 333) | 60 / 61 / 69 / 73 / 77 s | 11.5–15.5 s | 0.0 |
+| **toddler 3 / 4** | **378 / 384 s (p90 401 / 409, max 455)** | **95 / 96 s (82–109)** | 20–21 s | 1.3 / 1.6 |
+| typical 3 / **4** / 5 / 6 / 7 | 388 / **369** / 387 / 398 / 376 s (p90 ≤ 418, max 436) | 97 / **92** / 97 / 100 / 94 s | 19–22 s | 0.6–0.9 |
+| careful4 3 / 4 / 5 | 410 / 408 / 438 s (p90 439 / 438 / 465) | 102 / 102 / 109 s (23 / 54 / 97 % cut to 3 rounds) | 23–31 s | 1.1–2.1 |
+| slow3 3 / 4 (INFO) | 449 / 484 s (p90 498 / 530) | 112 / 121 s (88 / 99 % cut) | 31–35 s | 1.2–1.6 |
+| tapper / spammer 3 → 7 | 420 → 633 / 255 → 390 s | 105 → 158 / 64 → 98 s | | |
 
-Typical-child round time by topic: 19–21 s everywhere (age 4: colours 18.8, shapes 19.4, count 19.6, animals 19.2 s), 4.5 → 8 cards.
-Verdict: typical 4-year-old chapter **93.8 s ✔** (60–100); child models at their ages (typical 3–7, careful4 3–5, toddler 3–4)
-session p90 **453 s ✔** (≤ 8 min); careful 4-year-old p90 **462 s ✔**; typical sessions max **483 s ✗ by 3 s** (one distracted
-age-3 session of 240; p90 419 s); 2 400 / 2 400 finished, 0 stuck rounds, 0 NaN, 0 errors, 1 round > 180 s (slow3 at age 7);
-0 / 128 725 resting-reward checks off-screen or on the cards / bubble / HUD / Dee; smallest card 123 px (0 grids below the age
-minimum). Slow dreamy 3-year-old (INFO, not a gate): p90 549 s at ages 3–4 even with 79–95 % of its chapters cut to 3 rounds —
-its 2.5–4.5 s between taps dominate. Absent child: 11 idle nudges in 5 min (12, 30, 57, 87 … s), 10 Talk re-asks in 2 min
-(main.js should stop speaking after the 3rd). Determinism (`determinism.js`): 10 / 10 cases replay identically at 1/30, 1/60
-and 1/120 s frames. Content (`content_stats.js`, 300 chapters per cell): 0 identical consecutive rounds; 0–42 % of a round's values
-carried over from the previous round (more in tiny pools: shapes, colours, vi initial 77 %); Talk answers spread over every value.
+Typical round time by topic (age 4): colours 19.0, shapes 19.7, count 19.1, **homes 19.0**, animals 19.6 s.
+Verdicts (all PASS): typical 4-year-old chapter **92.2 s** (60–100) · toddler chapter **95 / 96 s** at ages 3 / 4 (60–100) ·
+typical sessions max **436 s** (≤ 480) · child models at their ages (typical 3–7, careful4 3–5, toddler 3–4) session p90
+**435 s** · careful 4-year-old p90 438 s · 2 400 / 2 400 + 6 000 / 6 000 finished · 0 stuck rounds / NaN / errors ·
+0 / 76 153 resting-reward checks off-screen or on blocks / bubble / HUD / Tuk · smallest block 123 px, 0 grids below the age
+minimum. Determinism (`determinism.js`): every case identical at 1/30, 1/60, 1/120 s frames. Absent child: 11 idle nudges in
+5 min, 10 Talk re-asks in 2 min (main.js should stop speaking after the 3rd).
 
-Tuning history (typical 4-year-old chapter / typical session max): DESIGN numbers 119 s / 527 s → shorter overheads
-(roundDone 1.8, burst 0.85, roundEnd 0.4, dealSettle 0.15, levelDone 2.0) and pairs 2,2,3,3 at age 4 → 94 s / 489 s →
-+ adaptive hold + chapter limit 80 s → 94 s / 483 s, careful4 p90 494 → 462 s.
-Reward crowding (perch overlap > 40 % of a box, end of chapter, bot sessions): 0 % on landscape phones, 0 % (age 4) – 12 % (age 6) on iPad landscape,
-12 % (age 4) – 28 % (age 6) on portrait screens (15 rewards around a 5-pair grid) — they then stand in little clusters.
+Tuning history (typical 4 chapter / toddler 3–4 chapter / careful4 age 5 p90): Dee's CONFIG with the new motion (deal slide
+μ 4000, glide contact 150 px/s, melt 0.45, roundDone 1.8, limit 80 s) → 96 / 96–98 / 488 s (✗ > 480) → `roundDoneTime 1.6`,
+`dealFriction 5000`, `glideContactV 180`, `meltTime 0.4` → 94 / 94–99 / 489 s → + `chapterTimeLimit 75` → **92 / 95–96 / 465 s**.
+The ice motion costs ≈ +1.5 s per round versus Dee (crack 0.12 s before every reveal, 0.3–1.0 s glide); the shorter round-end and
+chapter limit pay for it.
 
 ## 10. Deviations from / additions to DESIGN.md
-- **Tuned numbers** (§6): pairs per round, peek times, mismatchShow at age 3 (1.2, not 1.4), chapter time limit **80 s** (not 90),
-  burst at 0.85 s. DESIGN tables stay in `IM.Content.PAIRS / PEEK`; CONFIG `pairsByAge: null, peekByAge: null` restores them.
-- **Colour rounds below age 5 have ≤ 3 pairs**: only 3 colours are pairwise safe with DESIGN's four confusable pairs.
-- **vi `initial`** has 5 distinct initials (cáo/cú C, hươu H, sóc S, gấu G, ếch **Ê**) → ≤ 5 pairs; i18n must speak the letter Ê.
-  en has 7 (fox/frog F, bunny/bear B: one word per initial in a round).
-- **oddeven** uses face kinds `number` / `dots` with `face.parity` (no separate `parity` face kind).
-- **size** cards are `animal` faces with `scale` 1 / 0.6 and `size: 'big' | 'small'` (also on the card and the flip / tap events).
-- **Hint peek** turns the cards to flip 0.75 (DESIGN "0.5" would show the card edge-on).
-- **Adaptive hold** (new): after a hard round the grid does not grow; `round` event `held`, `w.pairsHeld`.
-- New events / fields: `play` event, `flip.open`, `match.lower/text/word/animal/parity`, `sessionDone.rewards`; `w.open`,
-  `w.collected`, `w.found`, `w.streak`, `layout.deeRect / boards / stack / safe / perchCands`, reward `size, anchor, face, perch,
-  target, pieces, pieceSize, ax, ay, glow`.
-- Landscape board starts at dee.x + 130 (DESIGN ≥ 120); portrait has a second board candidate right of Dee (needed for 12 cards on
-  an iPad portrait with insets, 107 px).
-- Weather butterflies carry `color` + `flap` (sprite `'butterfly'` is drawn by `IM.CardArt.drawButterfly`); `ambient.moon/stars` stay 0.
-- `tests/sim/out/` holds generated reports (JSON + md): consider git-ignoring it.
+- vi `initial` has 3 distinct initials (G, H, C) → ≤ 3 pairs (the polar animal head words); i18n must accept them.
+- `glideContactV`: the blocks touch with 180 px/s (so the clink is audible) instead of stopping on their own; after the
+  restitution-0.3 bounce, friction stops them a few px apart, centred on the midpoint.
+- One hole per pair (on block a, moved to the midpoint), not one per block.
+- Fish rewards are transient (removed after the last splash); `w.collected` keeps them for the rainbow party.
+- Shore has 3 rows (+ 8 px row behind) because animals and sculptures no longer use branches: crowding (> 40 % box overlap)
+  44 / 3 420 reward pairs in the unit check.
+- Floes bob / drift amplitudes are per layout (`grid.bobAmp`, `grid.driftAmp`), ≤ DESIGN's ±3 px.
+- `w.aurora` (shimmer strength) and `layout.shore / sea` are new fields; `layout.stack` is info only.

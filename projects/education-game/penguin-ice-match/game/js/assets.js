@@ -1,18 +1,18 @@
-/* IM.Assets (Dee's Forest Memory) — loads the SVG art and keeps pre-rasterized copies so drawing stays fast on phones.
+/* IM.Assets (Tuk's Ice Match) — loads the SVG art and keeps pre-rasterized copies so drawing stays fast on phones.
  * sprite(name, px) returns a canvas whose longest side is ≥ px device pixels (rounded up to a size
  * bucket, so a handful of bitmaps serve every zoom level). */
 (function (IM) {
   'use strict';
   const D = 'assets/default/';
   const files = {};
-  ['idle', 'blink', 'talk', 'happy', 'cheer', 'think', 'oops'].forEach(f => { files['dee_' + f] = D + 'characters/dee_' + f + '.svg'; });
-  files.card_back = D + 'items/card_back.svg';
-  (IM.ANIMALS || ['fox', 'deer', 'hedgehog', 'squirrel', 'bunny', 'frog', 'bear', 'owl', 'mouse'])
+  ['idle', 'blink', 'talk', 'happy', 'cheer', 'think', 'oops'].forEach(f => { files['tuk_' + f] = D + 'characters/tuk_' + f + '.svg'; });
+  (IM.ANIMALS || ['bear', 'seal', 'fox', 'owl', 'whale', 'puffin', 'penguin', 'hare', 'walrus'])
     .forEach(a => { files['animal_' + a] = D + 'items/animal_' + a + '.svg'; });
+  ['den', 'floe', 'burrow', 'nest', 'sea', 'cliff', 'pebbles'].forEach(h => { files['home_' + h] = D + 'items/home_' + h + '.svg'; });
   files.star = D + 'ui/star.svg'; files.star_empty = D + 'ui/star_empty.svg'; files.icon = D + 'icon.svg';
-  ['spring', 'summer', 'autumn', 'winter'].forEach(se => ['far', 'mid', 'ground'].forEach(l => { files[l + '_' + se] = D + 'env/' + l + '_' + se + '.svg'; }));
-  ['sun', 'cloud1', 'cloud2', 'cloud3'].forEach(e => { files[e] = D + 'env/' + e + '.svg'; });
-  ['petal', 'leaf_a', 'leaf_b', 'snow1', 'snow2', 'sparkle', 'star', 'firefly', 'puff', 'confetti_a', 'confetti_b']
+  ['sunny', 'breezy', 'rain', 'rainbow'].forEach(se => ['far', 'mid', 'ground'].forEach(l => { files[l + '_' + se] = D + 'env/' + l + '_' + se + '.svg'; }));
+  ['sun', 'cloud1', 'cloud2', 'cloud3', 'rainbow'].forEach(e => { files[e] = D + 'env/' + e + '.svg'; });
+  ['snow1', 'snow2', 'drop', 'splash', 'sparkle', 'star', 'shard', 'puff', 'confetti_a', 'confetti_b']
     .forEach(p => { files[p === 'star' ? 'pstar' : p] = D + 'particles/' + p + '.svg'; });
 
   function loadImage(src) {

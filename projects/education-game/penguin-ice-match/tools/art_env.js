@@ -1,14 +1,15 @@
-// Dee's Forest Memory: environment + particle art generator (original, procedurally laid out flat-cartoon SVGs).
-// Writes game/assets/default/env/{far,mid,ground}_{spring,summer,autumn,winter}.svg, sun.svg, cloud1..3.svg and
-// particles/*.svg.   Usage: node tools/art_env.js      Preview scenes + seam proof: node tools/env_scenes.js
-// Tiling: every ridge / bank / pond edge is a sum of sines with INTEGER periods over W (so f(0) = f(W)), and every object
+// Tuk's Ice Match: environment + particle art generator (original, procedurally laid out flat-cartoon SVGs).
+// Writes game/assets/default/env/{far,mid,ground}_{sunny,breezy,rain,rainbow}.svg, sun.svg, cloud1..3.svg, rainbow.svg
+// and particles/*.svg.   Usage: node tools/art_env.js      Preview scenes + seam proof: node tools/env_scenes.js
+// Theme: a cartoon polar ice land — faceted icy mountains + tabular icebergs (far), snow hills, an igloo, ice pressure
+// ridges, snow-tipped pines and the open sea edge with little icebergs (mid), a snow bank (ground).
+// Tiling: every ridge / bank / sea edge is a sum of sines with INTEGER periods over W (so f(0) = f(W)), and every object
 // near an edge is drawn again at x±W (wrap()), so the left and right edges of each layer match exactly.
-// Seasons share ONE layout (same seeds, same shapes); only the palette and the seasonal details change.
-// Colour rule (DESIGN §3): everything is calmer, lighter and less saturated than the answer colours (red #E84A4A,
-// orange #FF9A2E, yellow #FFD23F, green #4CC26B ...). Autumn canopies are dusty apricot / rose / straw, never vivid.
+// Stages share ONE layout (same seeds, same shapes); only the palette and the weather details change.
+// Colour rule (DESIGN §3): icy blues, whites, soft lilac — lighter and less saturated than every answer colour, so the
+// coloured ice-block pictures pop. Pines are a dusty teal (never answer green), the igloo door a blue-grey (never black).
 //
-// Branch tips where lanterns can hang (mid_* svg coordinates, 0 0 1200 360) are exported as BRANCHES at the bottom
-// of this file and printed when it runs.
+// Sea edge (mid_* svg coordinates, 0 0 1200 360): exported as SEA and printed when it runs — fish dive at y ≈ SEA.y.
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -27,395 +28,322 @@ const ell = (x, y, rx, ry, fill, extra = '') => `<ellipse cx="${f(x)}" cy="${f(y
 const rect = (x, y, w, h, fill, rx = 0, extra = '') => `<rect x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(h)}"${rx ? ` rx="${f(rx)}"` : ''} fill="${fill}"${extra}/>`;
 const strokeP = (d, col, w, extra = '') => `<path d="${d}" fill="none" stroke="${col}" stroke-width="${f(w)}" stroke-linecap="round" stroke-linejoin="round"${extra}/>`;
 const poly = pts => 'M' + pts.map(p => f(p[0]) + ' ' + f(p[1])).join('L') + 'Z';
-const cpath = (x, y, r) => `M${f(x - r)} ${f(y)}a${f(r)} ${f(r)} 0 1 0 ${f(2 * r)} 0a${f(r)} ${f(r)} 0 1 0 ${f(-2 * r)} 0`;   // circle as a path piece (batched fills)
 const line = pts => 'M' + pts.map(p => f(p[0]) + ' ' + f(p[1])).join('L');
 function svg(w, h, body, defs = '') {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${defs ? `<defs>${defs}</defs>` : ''}${body}</svg>\n`;
 }
 function wrap(x, half, fn) { let o = fn(x); if (x + half > W) o += fn(x - W); if (x - half < 0) o += fn(x + W); return o; }
 function bandD(yf, bottom, step = 6) { const pts = [[0, bottom]]; for (let x = 0; x <= W; x += step) pts.push([x, yf(x)]); pts.push([W, bottom]); return poly(pts); }
-function edgeD(yf, step = 6) { const pts = []; for (let x = 0; x <= W; x += step) pts.push([x, yf(x)]); return line(pts); }
+function edgeD(yf, step = 6, x0 = 0, x1 = W) { const pts = []; for (let x = x0; x <= x1; x += step) pts.push([x, yf(x)]); return line(pts); }
 function between(top, bot, step = 6) { const pts = []; for (let x = 0; x <= W; x += step) pts.push([x, top(x)]); for (let x = W; x >= 0; x -= step) pts.push([x, bot(x)]); return poly(pts); }
 const lg = (id, x1, y1, x2, y2, stops) => `<linearGradient id="${id}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}">` + stops.map(([o, c, a = 1]) => `<stop offset="${o}" stop-color="${c}"${a !== 1 ? ` stop-opacity="${a}"` : ''}/>`).join('') + '</linearGradient>';
 const rg = (id, stops, extra = '') => `<radialGradient id="${id}"${extra}>` + stops.map(([o, c, a = 1]) => `<stop offset="${o}" stop-color="${c}"${a !== 1 ? ` stop-opacity="${a}"` : ''}/>`).join('') + '</radialGradient>';
+const spark4 = (x, y, r, col, extra = '') => P(`M${f(x)} ${f(y - r)}Q${f(x + r * 0.16)} ${f(y - r * 0.16)} ${f(x + r)} ${f(y)}Q${f(x + r * 0.16)} ${f(y + r * 0.16)} ${f(x)} ${f(y + r)}Q${f(x - r * 0.16)} ${f(y + r * 0.16)} ${f(x - r)} ${f(y)}Q${f(x - r * 0.16)} ${f(y - r * 0.16)} ${f(x)} ${f(y - r)}Z`, col, extra);
 
-// ---------------- palettes (per season; calm, lighter + less saturated than the answer palette) ----------------
+// ---------------- palettes (per weather stage) ----------------
 const BASE = {
-  trunk: '#A88B6E', trunkSh: '#8F7459', trunkLine: '#7C6450',
-  shroomStem: '#F3E7D0', shroomStemSh: '#E0D0B2', shroomDoor: '#B48C6A', shroomWin: '#F6E7B8', shroomLine: '#A88566', shroomDot: '#FFF8EC',
+  snow: '#FFFFFF', trunk: '#A99A8C', trunkSh: '#8E8072',
+  doorDark: '#8DA6BC', doorDeep: '#7891A8',
 };
-const SEASONS = {
-  spring: {
-    farBack: '#CFE2D6', farBackSh: '#C2D9CC', farFront: '#BFDAC0', farFrontSh: '#B1CFB2', farTree: '#AFCFB0', farTreeSh: '#A0C3A2', farTree2: '#BCD7BB', mist: '#F3F8F2', farCap: null, farBlossom: '#F2D3DD',
-    hillBack: '#B9D9A8', hillBackSh: '#AACD98', hillBackHi: '#CCE5BB', bank: '#A9D193', bankSh: '#9AC584', bankHi: '#C1E0AA',
-    tree: ['#A3D08E', '#97C681', '#BCDDA8'], tree2: ['#B1D79C', '#A2CC8D', '#C6E3B4'], blossom: ['#F7D3DF', '#FBE4EB', '#EDBACB'], blossomN: 1,
-    fern: '#94C47E', fernSh: '#80B36C', bush: '#A9D396', bushSh: '#97C584',
-    cap: '#E3A39A', capSh: '#CF8D85', capHi: '#F0BEB6', snow: null,
-    water: '#BFE0E6', waterSh: '#A9D3DB', waterHi: '#E4F4F5', shore: '#C7B996', pad: '#9FCB86', padSh: '#88B872', padFlower: '#FBE1EA', ice: false,
-    grassTop: '#C3E3A6', grass: '#B6DB97', grassLow: '#A3CF84', rim: '#97C477', lipHi: '#D3EBBC', tuft: '#9BC97B', tuftHi: '#CBE7B0', moss: '#ADD58E',
-    fl: ['#FFFFFF', '#FBE4EC', '#FFF5D8', '#ECE3F7'], flC: '#F2DB9A', flStem: '#88BA6C', litter: ['#F7D3DF', '#FBE4EB'], litterN: 26, fill: '#A3CF84',
+const STAGES = {
+  sunny: {
+    // far
+    mBack: '#D3E6F3', mBackSh: '#BDD7EA', mFront: '#C4DEF0', mFrontSh: '#A9CBE3', cap: '#FFFFFF', capSh: '#E3EFF8', mist: '#F2FAFF',
+    berg: '#E8F4FB', bergSh: '#C6DFEE', bergLine: '#B4D3E6',
+    // mid
+    hill: '#EAF4FA', hillSh: '#D4E6F1', hillHi: '#FFFFFF', shelf: '#F4F9FC', shelfSh: '#DCEAF3', cliff: '#BFDDEE', cliffSh: '#A3CCE3', cliffHi: '#E6F3FA',
+    pine: '#86AFA6', pineSh: '#719C93', pineSnow: '#FFFFFF',
+    igloo: '#F8FBFE', iglooSh: '#D3E3EF', iglooLine: '#A9C6DA',
+    ridge: '#D7EDF8', ridgeSh: '#AFD3E8', ridgeHi: '#FFFFFF',
+    seaTop: '#9CCFE6', sea: '#B4DCEE', seaLow: '#C6E5F2', seaHi: '#EAF6FB', seaLine: '#86BEDA',
+    // ground
+    gTop: '#FDFEFF', g: '#F0F6FB', gLow: '#E1EDF5', gRim: '#C9DDEB', gLipHi: '#FFFFFF', gDip: '#D3E4F0', gChunk: '#D9EDF8', gChunkSh: '#B6D6E9',
+    pebble: '#B9BFCB', fill: '#E1EDF5', sparkle: 1, bend: 0,
   },
-  summer: {
-    farBack: '#C7DDCF', farBackSh: '#B9D3C3', farFront: '#B3D2B3', farFrontSh: '#A4C7A5', farTree: '#9CC39F', farTreeSh: '#8DB792', farTree2: '#AACDAB', mist: '#F1F7F1', farCap: null, farBlossom: null,
-    hillBack: '#A9CF96', hillBackSh: '#9AC386', hillBackHi: '#BEDDA9', bank: '#9BC883', bankSh: '#8CBB74', bankHi: '#B4D99B',
-    tree: ['#8FC07A', '#7FB26B', '#A9D293'], tree2: ['#9DCA87', '#8DBC77', '#B6DAA0'], blossom: null,
-    fern: '#86B870', fernSh: '#73A65E', bush: '#98C885', bushSh: '#86B873',
-    cap: '#DE9C92', capSh: '#C9867D', capHi: '#ECB8AF', snow: null,
-    water: '#B4DBE2', waterSh: '#9CCDD6', waterHi: '#DFF2F4', shore: '#C4B48F', pad: '#93C47A', padSh: '#7CB165', padFlower: '#FFF6F0', ice: false,
-    grassTop: '#B7DD98', grass: '#A9D488', grassLow: '#96C677', rim: '#8ABA6B', lipHi: '#C9E6AF', tuft: '#8EC06F', tuftHi: '#C1E1A3', moss: '#A0CD82',
-    fl: ['#FFFFFF', '#ECE3F7', '#FFF5D8', '#DCEBFA'], flC: '#F2DB9A', flStem: '#7FB062', litter: null, litterN: 0, fill: '#96C677',
+  breezy: {
+    mBack: '#DAD9EA', mBackSh: '#C6C4DD', mFront: '#CDCCE2', mFrontSh: '#B5B3D2', cap: '#F9F9FD', capSh: '#E6E5F1', mist: '#F3F1F8',
+    berg: '#ECEBF5', bergSh: '#CFCDE3', bergLine: '#BDBBD6',
+    hill: '#ECEBF4', hillSh: '#D9D7E8', hillHi: '#FBFBFE', shelf: '#F4F3F9', shelfSh: '#E0DEEC', cliff: '#C9CCE2', cliffSh: '#B1B4D2', cliffHi: '#E7E8F3',
+    pine: '#8EA9A7', pineSh: '#7A9593', pineSnow: '#F9F9FD',
+    igloo: '#F7F7FB', iglooSh: '#D6D4E6', iglooLine: '#B5B2CF',
+    ridge: '#DEDEEF', ridgeSh: '#BFBEDA', ridgeHi: '#FAFAFE',
+    seaTop: '#A6B5CF', sea: '#BAC5DA', seaLow: '#C9D2E3', seaHi: '#EBEEF6', seaLine: '#97A6C3',
+    gTop: '#FBFBFE', g: '#EFEEF6', gLow: '#E2E0EE', gRim: '#CDCBE0', gLipHi: '#FFFFFF', gDip: '#D9D7E8', gChunk: '#E1E1F0', gChunkSh: '#C3C2DB',
+    pebble: '#B8B5C8', fill: '#E2E0EE', sparkle: 0.5, bend: 1, drift: true,
   },
-  autumn: {
-    farBack: '#DCD9C8', farBackSh: '#D0CCB9', farFront: '#D3CFAE', farFrontSh: '#C7C29F', farTree: '#D7C49E', farTreeSh: '#CBB490', farTree2: '#C9C8A3', mist: '#F8F4EA', farCap: null, farBlossom: null,
-    hillBack: '#CFCC9C', hillBackSh: '#C3BE8E', hillBackHi: '#DED9B1', bank: '#C3C48F', bankSh: '#B5B681', bankHi: '#D5D5A6',
-    tree: ['#E6BC8E', '#D8A97C', '#F1D1AA'], tree2: ['#E5C88C', '#D6B67C', '#F0DBAA'], treeAlt: ['#DDA597', '#CC9285', '#EBC0B5'], blossom: null,
-    fern: '#C5AD7C', fernSh: '#B39A6A', bush: '#D3B98A', bushSh: '#C2A779',
-    cap: '#D99A8A', capSh: '#C58676', capHi: '#E9B8AC', snow: null,
-    water: '#C3DCDD', waterSh: '#AFCFD1', waterHi: '#E6F2F1', shore: '#C8B48E', pad: '#B9C483', padSh: '#A4B070', padFlower: null, ice: false,
-    grassTop: '#D1D7A2', grass: '#C6CD95', grassLow: '#B5BE85', rim: '#AAB27A', lipHi: '#E0E4BA', tuft: '#B2BA7D', tuftHi: '#DCE0B0', moss: '#BBC48B',
-    fl: ['#FFFFFF', '#FFF2DC', '#F5E6F0', '#FFF5D8'], flC: '#E8CF96', flStem: '#A2AE6E', litter: ['#E6BC8E', '#DDA597', '#E5C88C', '#D6AE86'], litterN: 70, fill: '#B5BE85',
+  rain: {
+    mBack: '#CBD6E0', mBackSh: '#B6C4D2', mFront: '#BCCAD7', mFrontSh: '#A4B5C6', cap: '#EEF3F7', capSh: '#D9E2EA', mist: '#E6ECF1',
+    berg: '#DDE7EF', bergSh: '#BCCCDA', bergLine: '#A9BCCC',
+    hill: '#DCE5EC', hillSh: '#C7D4DF', hillHi: '#EEF3F7', shelf: '#E5ECF2', shelfSh: '#CFDBE5', cliff: '#B2C6D6', cliffSh: '#9BB2C5', cliffHi: '#D6E2EC',
+    pine: '#7F9E99', pineSh: '#6C8A86', pineSnow: '#EEF3F7',
+    igloo: '#EDF2F6', iglooSh: '#C8D5E0', iglooLine: '#A0B4C5',
+    ridge: '#CFDDE8', ridgeSh: '#A9BED0', ridgeHi: '#EEF4F8',
+    seaTop: '#93ADC2', sea: '#A8BFD0', seaLow: '#B9CCDA', seaHi: '#DDE7EF', seaLine: '#839EB5',
+    gTop: '#EFF4F8', g: '#E3EAF0', gLow: '#D5DFE8', gRim: '#BCCBD8', gLipHi: '#F6F9FB', gDip: '#C9D6E1', gChunk: '#D2E0EA', gChunkSh: '#AFC3D3',
+    pebble: '#A6ADBA', fill: '#D5DFE8', sparkle: 0.2, bend: 0, wet: true,
+    puddle: '#B4C8D7', puddleSh: '#9DB5C8', puddleHi: '#E9F0F5',
   },
-  winter: {
-    farBack: '#DCE6EE', farBackSh: '#CFDCE6', farFront: '#E6EEF4', farFrontSh: '#D6E2EC', farTree: '#B5C8C9', farTreeSh: '#A6BBBD', farTree2: '#C3D3D5', mist: '#F6F9FC', farCap: '#F7FAFC', farBlossom: null,
-    hillBack: '#E3ECF2', hillBackSh: '#D3E0EA', hillBackHi: '#F4F8FB', bank: '#EDF3F7', bankSh: '#DCE7EF', bankHi: '#FAFCFD',
-    tree: ['#AFC5BD', '#9DB6AE', '#C2D4CD'], tree2: ['#BACDC6', '#A8BEB7', '#CCDCD6'], blossom: null, bare: true,
-    fern: '#A9BFB5', fernSh: '#97AFA4', bush: '#B9CCC5', bushSh: '#A7BDB5',
-    cap: '#D59A90', capSh: '#C1867D', capHi: '#E6B7AF', snow: '#FBFDFF', snowSh: '#DDE8F1',
-    water: '#DCEEF5', waterSh: '#C6E1EC', waterHi: '#F6FBFD', shore: '#D7E2EA', pad: '#C9D9D2', padSh: '#B6C9C1', padFlower: null, ice: true,
-    grassTop: '#F6F9FC', grass: '#EDF3F8', grassLow: '#DFE9F1', rim: '#CBDAE6', lipHi: '#FFFFFF', tuft: '#B5C7B4', tuftHi: '#D4E0D2', moss: '#E3ECF3',
-    fl: ['#FFFFFF'], flC: '#E8EEF4', flStem: '#A9BBA8', litter: null, litterN: 0, fill: '#DFE9F1',
+  rainbow: {
+    mBack: '#D8ECF6', mBackSh: '#C6DEEE', mFront: '#CBE4F3', mFrontSh: '#B6D3EA', cap: '#FFFFFF', capSh: '#EEE6F4', mist: '#FBF6FA',
+    berg: '#EEF7FC', bergSh: '#D1E5F2', bergLine: '#BFD9EA',
+    hill: '#EFF7FB', hillSh: '#DCEBF4', hillHi: '#FFFFFF', shelf: '#F7FBFD', shelfSh: '#E3EEF6', cliff: '#C8E3F1', cliffSh: '#B0D3E7', cliffHi: '#EDF7FC',
+    pine: '#8DB8AD', pineSh: '#78A498', pineSnow: '#FFFFFF',
+    igloo: '#FBFDFF', iglooSh: '#DAE7F2', iglooLine: '#B3CDE0',
+    ridge: '#DDF0FA', ridgeSh: '#B8DAEC', ridgeHi: '#FFFFFF',
+    seaTop: '#A4D6EA', sea: '#BCE2F1', seaLow: '#CDEAF5', seaHi: '#F0F9FC', seaLine: '#8FC5DE',
+    gTop: '#FFFFFF', g: '#F3F8FC', gLow: '#E6F0F7', gRim: '#CFE1EE', gLipHi: '#FFFFFF', gDip: '#DAE8F2', gChunk: '#DEF0FA', gChunkSh: '#BDDBEC',
+    pebble: '#BEC3D0', fill: '#E6F0F7', sparkle: 1.6, bend: 0, pastel: ['#FBE3EC', '#E9E2F8', '#DFF3EA', '#FFF3D6'],
   },
 };
-for (const k in SEASONS) SEASONS[k] = Object.assign({}, BASE, SEASONS[k]);
+for (const k in STAGES) STAGES[k] = Object.assign({}, BASE, STAGES[k]);
 
-// ================= far_<s>.svg (0 0 1200 420): misty hills + distant tall trees =================
-function tallTree(x, base, s, C, kind) {
-  // distant tall tree: kind 0 = rounded column (poplar-like), 1 = soft spire (fir-like). Flat, two tones.
-  let o = rect(x - 1.8 * s, base - 10 * s, 3.6 * s, 10 * s, '#B3A496', 1);
-  if (kind === 0) {
-    o += P(`M${f(x - 10 * s)} ${f(base - 8 * s)}C${f(x - 13 * s)} ${f(base - 40 * s)} ${f(x - 7 * s)} ${f(base - 66 * s)} ${f(x)} ${f(base - 74 * s)}C${f(x + 7 * s)} ${f(base - 66 * s)} ${f(x + 13 * s)} ${f(base - 40 * s)} ${f(x + 10 * s)} ${f(base - 8 * s)}Z`, C.farTree);
-    o += P(`M${f(x + 1 * s)} ${f(base - 8 * s)}C${f(x + 4 * s)} ${f(base - 40 * s)} ${f(x + 3 * s)} ${f(base - 62 * s)} ${f(x)} ${f(base - 74 * s)}C${f(x + 7 * s)} ${f(base - 66 * s)} ${f(x + 13 * s)} ${f(base - 40 * s)} ${f(x + 10 * s)} ${f(base - 8 * s)}Z`, C.farTreeSh);
-    if (C.farCap) o += P(`M${f(x - 6.5 * s)} ${f(base - 58 * s)}C${f(x - 4 * s)} ${f(base - 68 * s)} ${f(x - 1 * s)} ${f(base - 73 * s)} ${f(x)} ${f(base - 74 * s)}C${f(x + 3 * s)} ${f(base - 71 * s)} ${f(x + 6 * s)} ${f(base - 66 * s)} ${f(x + 7.5 * s)} ${f(base - 58 * s)}Q${f(x)} ${f(base - 62 * s)} ${f(x - 6.5 * s)} ${f(base - 58 * s)}Z`, C.farCap);
-    if (C.farBlossom) for (const [u, v] of [[-4, 30], [3, 46], [-2, 58], [5, 22]]) o += circ(x + u * s, base - v * s, 2.4 * s, C.farBlossom, ' opacity="0.9"');
-  } else {
-    const pts = []; const tiers = 4;
-    for (let i = 0; i < tiers; i++) { const yb = base - 8 * s - i * 15 * s, w = (12 - i * 2.4) * s; pts.push([x - w, yb], [x - w * 0.45, yb - 8 * s]); }
-    pts.push([x, base - 76 * s]);
-    for (let i = tiers - 1; i >= 0; i--) { const yb = base - 8 * s - i * 15 * s, w = (12 - i * 2.4) * s; pts.push([x + w * 0.45, yb - 8 * s], [x + w, yb]); }
-    o += P(poly(pts), C.farTree2);
-    o += P(poly([[x, base - 76 * s], [x + 2 * s, base - 8 * s], [x + 12 * s, base - 8 * s], [x + 5 * s, base - 30 * s], [x + 8 * s, base - 32 * s]]), C.farTreeSh, ' opacity="0.55"');
-    if (C.farCap) for (let i = 0; i < tiers; i++) { const yb = base - 8 * s - i * 15 * s, w = (12 - i * 2.4) * s; o += P(`M${f(x - w)} ${f(yb)}Q${f(x - w * 0.6)} ${f(yb - 4 * s)} ${f(x - w * 0.45)} ${f(yb - 8 * s)}L${f(x - w * 0.1)} ${f(yb - 5 * s)}Q${f(x - w * 0.5)} ${f(yb - 1 * s)} ${f(x - w)} ${f(yb)}Z`, C.farCap); }
-  }
+// ================= far_<s>.svg (0 0 1200 420): faceted icy mountains + tabular icebergs =================
+// Visible part: above ≈ y 340 (the mid layer's back hills cover the rest).
+function mountain(x, base, w, h, skew, C, front) {
+  const L = [x - w / 2, base], R = [x + w / 2, base], pk = [x + skew, base - h];
+  const fill = front ? C.mFront : C.mBack, sh = front ? C.mFrontSh : C.mBackSh;
+  const r = Math.min(18, h * 0.08);   // soft rounded tip
+  const along = (a, b, d) => { const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy); return [a[0] + dx / l * d, a[1] + dy / l * d]; };
+  const pl = along(pk, L, r), pr = along(pk, R, r);
+  let o = P(`M${f(L[0])} ${f(L[1])}L${f(pl[0])} ${f(pl[1])}Q${f(pk[0])} ${f(pk[1])} ${f(pr[0])} ${f(pr[1])}L${f(R[0])} ${f(R[1])}Z`, fill);
+  // shadow facet: right flank, with a crease line down from the peak
+  const cx = pk[0] + w * 0.06, cyy = base - h * 0.42;
+  o += P(poly([pr, R, [x + w * 0.1, base], [cx, cyy], [pk[0] + 2, pk[1] + r * 0.6]]), sh);
+  // a second, smaller facet on the left flank for a crisp crystal look
+  o += P(poly([[pk[0] - w * 0.14, base - h * 0.5], [pk[0] - w * 0.24, base - h * 0.2], [pk[0] - w * 0.12, base - h * 0.08], [pk[0] - w * 0.06, base - h * 0.3]]), sh, ' opacity="0.45"');
+  // snow cap with a zig-zag lower edge (follows the two flanks)
+  const t = 0.34, n = 5, pts = [];
+  const lx = pk[0] + (L[0] - pk[0]) * t, rx = pk[0] + (R[0] - pk[0]) * t, cyCap = pk[1] + h * t;
+  pts.push(pl, [lx, cyCap]);
+  for (let i = 1; i < n; i++) { const u = i / n; pts.push([lx + (rx - lx) * u, cyCap + (i % 2 ? -h * 0.1 : h * 0.03)]); }
+  pts.push([rx, cyCap], pr);
+  o += P(`M${f(pl[0])} ${f(pl[1])}` + pts.slice(1).map(p => `L${f(p[0])} ${f(p[1])}`).join('') + `Q${f(pk[0])} ${f(pk[1])} ${f(pl[0])} ${f(pl[1])}Z`, C.cap);
+  // cap shadow on the right half
+  o += P(poly([[pk[0] + 2, pk[1] + r * 0.6], pr, [rx, cyCap], [lx + (rx - lx) * 0.8, cyCap - h * 0.1], [lx + (rx - lx) * 0.6, cyCap + h * 0.03]]), C.capSh);
   return o;
 }
-function genFar(C) {
+function tabBerg(x, base, w, h, C) {
+  // distant tabular iceberg: flat top, steep sides, vertical striations, a shadow side
+  const tl = x - w / 2 + h * 0.25, tr = x + w / 2 - h * 0.18;
+  let o = P(poly([[x - w / 2, base], [tl, base - h], [tr, base - h], [x + w / 2, base]]), C.berg);
+  o += P(poly([[x + w * 0.18, base], [x + w * 0.22, base - h], [tr, base - h], [x + w / 2, base]]), C.bergSh);
+  let st = ''; for (let i = 1; i < 6; i++) { const u = i / 6, xx = tl + (tr - tl) * u * 0.7; st += `M${f(xx)} ${f(base - h + 4)}L${f(xx - 2)} ${f(base - h * 0.45)}`; }
+  o += strokeP(st, C.bergLine, 1.4, ' opacity="0.6"');
+  o += strokeP(`M${f(tl + 2)} ${f(base - h + 1.5)}L${f(tr - 2)} ${f(base - h + 1.5)}`, '#FFFFFF', 2.4, ' opacity="0.9"');
+  return o;
+}
+function genFar(C, s) {
   PREC = 1;
-  const backY = x => 250 + wave([[26, 1, 0.5], [14, 2, 2.2], [7, 3, 4.0], [3, 7, 1.0]])(x);
-  const frontY = x => 318 + wave([[16, 1, 3.4], [10, 2, 0.9], [5, 5, 2.1]])(x);
-  const defs = lg('mist', 0, 0, 0, 1, [[0, C.mist, 0], [0.55, C.mist, 0.45], [1, C.mist, 0.9]]);
+  const defs = lg('mist', 0, 0, 0, 1, [[0, C.mist, 0], [0.55, C.mist, 0.5], [1, C.mist, 0.95]]);
+  const baseY = x => 372 + wave([[6, 1, 0.4], [4, 3, 2.1]])(x);
   let o = '';
-  // back ridge + a row of distant tall trees on it
-  o += P(bandD(backY, 420), C.farBack);
-  const r = rng(5);
-  for (let i = 0; i < 26; i++) {
-    const x = (i + 0.15 + r() * 0.7) * W / 26, s = 0.62 + r() * 0.4, kind = r() < 0.55 ? 0 : 1;
-    o += wrap(x, 14 * s, xx => tallTree(xx, backY(xx) + 10, s, C, kind));
-  }
-  o += P(bandD(x => backY(x) + 24 + wave([[6, 4, 0.7]])(x), 420), C.farBackSh, ' opacity="0.75"');
-  o += `<rect x="0" y="200" width="${W}" height="220" fill="url(#mist)" opacity="0.65"/>`;
-  // front far hill with taller trees in clumps
-  for (const [cx, n] of [[160, 4], [520, 3], [880, 5], [1110, 2]]) for (let k = 0; k < n; k++) {
-    const x = cx + (k - n / 2) * 22 + r() * 8, s = 0.95 + r() * 0.45, kind = (k + n) % 3 === 0 ? 1 : 0;
-    o += wrap(x, 16 * s, xx => tallTree(xx, frontY(xx) + 12, s, C, kind));
-  }
-  o += P(bandD(frontY, 420), C.farFront);
-  o += P(bandD(x => frontY(x) + 28 + wave([[5, 6, 2.2]])(x), 420), C.farFrontSh, ' opacity="0.6"');
-  if (C.farCap) o += strokeP(edgeD(x => frontY(x) + 3), '#FFFFFF', 5, ' opacity="0.8"');
-  o += `<rect x="0" y="300" width="${W}" height="120" fill="url(#mist)" opacity="0.85"/>`;
+  const r = rng(7);
+  // back range: tall, hazy peaks (sorted so overlapping order is stable)
+  const back = [];
+  for (let i = 0; i < 7; i++) { const x = (i + 0.2 + r() * 0.6) * W / 7; back.push([x, 190 + r() * 120, 270 + r() * 120, (r() - 0.5) * 70]); }
+  for (const [x, h, w, sk] of back) o += wrap(x, w / 2 + 2, xx => mountain(xx, 392, w, h, sk, C, false));
+  o += `<rect x="0" y="180" width="${W}" height="240" fill="url(#mist)" opacity="0.55"/>`;
+  // front range: lower, crisper peaks
+  const front = [];
+  for (let i = 0; i < 5; i++) { const x = (i + 0.15 + r() * 0.7) * W / 5; front.push([x, 105 + r() * 75, 290 + r() * 110, (r() - 0.5) * 80]); }
+  for (const [x, h, w, sk] of front) o += wrap(x, w / 2 + 2, xx => mountain(xx, 400, w, h, sk, C, true));
+  // a soft snow field joining the bases
+  o += P(bandD(x => baseY(x) - 20, 420), C.mFront);
+  o += P(bandD(x => baseY(x) - 12, 420), C.berg);
+  // breezy: snow plumes blowing off the front peaks
+  if (C.drift) for (const [x, h, , sk] of front) o += wrap(x, 120, xx => P(`M${f(xx + sk)} ${f(400 - h + 4)}Q${f(xx + sk + 40)} ${f(400 - h - 14)} ${f(xx + sk + 110)} ${f(400 - h - 4)}Q${f(xx + sk + 50)} ${f(400 - h + 2)} ${f(xx + sk + 6)} ${f(400 - h + 14)}Z`, '#FFFFFF', ' opacity="0.55"'));
+  // tabular icebergs along the distant shore
+  for (const [x, w, h] of [[90, 120, 34], [400, 160, 44], [700, 100, 28], [980, 150, 40]]) o += wrap(x, w / 2 + 2, xx => tabBerg(xx, baseY(xx) - 8, w, h, C));
+  o += `<rect x="0" y="300" width="${W}" height="120" fill="url(#mist)" opacity="0.8"/>`;
+  // rainbow / sunny: a few glints on the caps
+  if (C.sparkle >= 1) for (const [x, h, , sk] of front.slice(0, C.sparkle > 1 ? 7 : 3)) o += wrap(x, 10, xx => spark4(xx + sk - 6, 400 - h + 16, 6, '#FFFFFF', ' opacity="0.95"'));
   PREC = 10;
   return svg(1200, 420, o, defs);
 }
 
-// ================= mid_<s>.svg (0 0 1200 360): big round trees with low branches, mushroom houses, ferns, pond =================
-// Ground lip covers mid y > ~340 (mid bottom gy-10, ground lip gy-30), so all detail lives above y 340.
-const BRANCHES = [];   // [{x, y}] lantern hang points (branch tips / under-branch), mid svg coordinates
-const BIG_TREES = [   // x, base, height, seed, canopy palette ('tree' | 'tree2' | 'treeAlt'), branch spans [left, right]
-  [150, 300, 292, 11, 'tree', [96, 104]],
-  [560, 292, 270, 12, 'treeAlt', [92, 100]],
-  [960, 302, 300, 13, 'tree2', [102, 96]],
-];
-const SMALL_TREES = [[350, 282, 168, 21, 'tree2'], [760, 280, 150, 22, 'tree'], [1110, 286, 160, 23, 'treeAlt']];
-function canopyPal(C, key) { return C[key] || C.tree; }
-function bigTree(x, base, h, seed, key, spans, C, record) {
-  const r = rng(seed); const cr = h * 0.31, cy = base - h + cr * 1.02;
-  const [cf, cs, ch] = canopyPal(C, key);
-  let o = '';
-  o += ell(x + h * 0.03, base + 2, h * 0.3, h * 0.035, C.bankSh, ' opacity="0.9"');
-  // trunk with flared roots
-  const tw = h * 0.065, tTop = cy + cr * 0.2;
-  o += P(`M${f(x - tw * 1.9)} ${f(base + 2)}Q${f(x - tw)} ${f(base - 8)} ${f(x - tw)} ${f(base - h * 0.12)}L${f(x - tw * 0.8)} ${f(tTop)}L${f(x + tw * 0.8)} ${f(tTop)}L${f(x + tw)} ${f(base - h * 0.12)}Q${f(x + tw)} ${f(base - 8)} ${f(x + tw * 2)} ${f(base + 2)}Z`, C.trunk);
-  o += P(`M${f(x + tw * 0.15)} ${f(base + 2)}L${f(x + tw * 0.15)} ${f(tTop)}L${f(x + tw * 0.8)} ${f(tTop)}L${f(x + tw)} ${f(base - h * 0.12)}Q${f(x + tw)} ${f(base - 8)} ${f(x + tw * 2)} ${f(base + 2)}Z`, C.trunkSh);
-  o += strokeP(`M${f(x - tw * 0.4)} ${f(base - h * 0.08)}q${f(-2)} ${f(-14)} ${f(1)} ${f(-26)}M${f(x - tw * 0.2)} ${f(base - h * 0.2)}q${f(3)} ${f(-8)} ${f(0)} ${f(-14)}`, C.trunkLine, 1.6, ' opacity="0.55"');
-  // a tiny arched fairy door at the root (with a knob) — a fairy-forest hint, small enough to stay background
-  const dx = x - tw * 0.55, dw = tw * 0.78, dh = tw * 1.25;
-  o += P(`M${f(dx - dw / 2)} ${f(base - 1)}V${f(base - dh + dw / 2)}A${f(dw / 2)} ${f(dw / 2)} 0 0 1 ${f(dx + dw / 2)} ${f(base - dh + dw / 2)}V${f(base - 1)}Z`, C.trunkLine, ' opacity="0.75"');
-  o += P(`M${f(dx - dw / 2 + 3)} ${f(base - 1)}V${f(base - dh + dw / 2)}A${f(dw / 2 - 3)} ${f(dw / 2 - 3)} 0 0 1 ${f(dx + dw / 2 - 3)} ${f(base - dh + dw / 2)}V${f(base - 1)}Z`, C.shroomDoor);
-  o += circ(dx + dw * 0.22, base - dh * 0.42, 1.6, C.shroomWin);
-  // LOW BRANCHES: one on each side, leaving the trunk below the canopy and reaching out past it, nearly level
-  const by = cy + cr * 0.86;   // where branches leave the trunk (just under the canopy)
-  const sides = [[-1, spans[0]], [1, spans[1]]];
-  let branchSvg = '', leafSvg = '';
-  sides.forEach(([sd, span], i) => {
-    const y0 = by + (i ? 6 : 0), tipX = x + sd * (cr + span * 0.28 + tw), tipY = y0 - 10;
-    const midX = x + sd * (cr * 0.55), midY = y0 + 8;
-    const thick = tw * 0.72;
-    // tapered limb as a filled shape
-    branchSvg += P(`M${f(x + sd * tw * 0.6)} ${f(y0 - thick)}Q${f(midX)} ${f(midY - thick * 0.9)} ${f(tipX)} ${f(tipY - 2.5)}Q${f(tipX + sd * 4)} ${f(tipY)} ${f(tipX)} ${f(tipY + 2.5)}Q${f(midX)} ${f(midY + thick * 0.6)} ${f(x + sd * tw * 0.6)} ${f(y0 + thick)}Z`, C.trunk);
-    branchSvg += strokeP(`M${f(x + sd * tw)} ${f(y0 + thick * 0.55)}Q${f(midX)} ${f(midY + thick * 0.35)} ${f(tipX - sd * 6)} ${f(tipY + 1.5)}`, C.trunkSh, 2.4, ' opacity="0.9"');
-    // a short twig up near the tip
-    branchSvg += strokeP(`M${f(tipX - sd * 26)} ${f(tipY + 0)}q${f(sd * 4)} ${f(-10)} ${f(sd * 12)} ${f(-16)}`, C.trunk, 3.2);
-    // leaf tuft on the tip (spring/summer/autumn); winter: snow line on top
-    if (!C.bare) leafSvg += circ(tipX - sd * 14, tipY - 18, 11, cf) + circ(tipX - sd * 4, tipY - 12, 8, cf) + circ(tipX - sd * 8, tipY - 13, 6, cs, ' opacity="0.8"');
-    else leafSvg += strokeP(`M${f(x + sd * cr * 0.6)} ${f(y0 - thick * 0.75 + 3)}Q${f(midX + sd * 10)} ${f(midY - thick * 0.9)} ${f(tipX - sd * 3)} ${f(tipY - 2.5)}`, C.snow, 3.6);
-    // lantern hang points: the tip (hook just under it) and a second spot half-way along the limb
-    if (record) {
-      BRANCHES.push({ x: Math.round(tipX - sd * 10), y: Math.round(tipY + 4), tree: seed, side: sd < 0 ? 'L' : 'R' });
-      BRANCHES.push({ x: Math.round(x + sd * (cr * 0.55 + 18)), y: Math.round(midY + 2), tree: seed, side: sd < 0 ? 'L' : 'R' });
+// ================= mid_<s>.svg (0 0 1200 360): snow hills, igloo, ice ridges, pines, sea edge with icebergs =================
+// The ground lip covers mid y > ~340 (mid bottom gy-10, ground lip gy-30), so detail lives above y 340.
+const backY = x => 206 + wave([[14, 1, 0.3], [9, 2, 2.0], [5, 5, 4.1]])(x);
+const shelfY = x => 266 + wave([[6, 1, 2.6], [5, 3, 0.8], [2, 7, 1.7]])(x);
+const seaY = x => 300 + wave([[1.5, 2, 0.4], [1, 5, 1.3]])(x);   // open water from here down
+const SEA = { y: 300, top: 298, bottom: 340, note: 'open sea band in mid_* svg coords; visible y 300..340 (ground lip hides the rest)' };
+
+function pine(x, base, s, C, bend) {
+  // snow-tipped fir: 4 tiers; bend > 0 leans the top to the right (wind)
+  const tiers = 4; let o = ''; const bendIn = bend; bend = 0;
+  o += rect(x - 3 * s, base - 12 * s, 6 * s, 12 * s, C.trunk, 1.5 * s);
+  o += rect(x, base - 12 * s, 3 * s, 12 * s, C.trunkSh);
+  const lean = i => bend * 4 * s * (i * i) / 3;
+  for (let i = 0; i < tiers; i++) {
+    const yb = base - 9 * s - i * 15 * s, w = (24 - i * 5) * s, top = yb - (22 - i * 1.5) * s, cx = x + lean(i), tx = x + lean(i + 0.9) + bend * 3 * s;
+    o += P(`M${f(cx - w)} ${f(yb)}Q${f(cx - w * 0.5)} ${f(yb - 6 * s)} ${f(tx)} ${f(top)}Q${f(cx + w * 0.5)} ${f(yb - 6 * s)} ${f(cx + w)} ${f(yb)}Q${f(cx)} ${f(yb + 4 * s)} ${f(cx - w)} ${f(yb)}Z`, C.pine);
+    o += P(`M${f(tx)} ${f(top)}Q${f(cx + w * 0.5)} ${f(yb - 6 * s)} ${f(cx + w)} ${f(yb)}Q${f(cx + w * 0.4)} ${f(yb + 3 * s)} ${f(cx + 2 * s)} ${f(yb + 2 * s)}Q${f(cx + w * 0.2)} ${f(yb - 8 * s)} ${f(tx)} ${f(top)}Z`, C.pineSh);
+    // snow on the tier: a scalloped band hugging the upper edge
+    const sy = yb - 4 * s;
+    o += P(`M${f(cx - w * 0.92)} ${f(yb - 1 * s)}Q${f(cx - w * 0.45)} ${f(yb - 8 * s)} ${f(tx)} ${f(top)}Q${f(cx + w * 0.45)} ${f(yb - 8 * s)} ${f(cx + w * 0.92)} ${f(yb - 1 * s)}Q${f(cx + w * 0.6)} ${f(sy - 1 * s)} ${f(cx + w * 0.35)} ${f(sy + 1.5 * s)}Q${f(cx + w * 0.1)} ${f(sy - 3 * s)} ${f(cx - w * 0.15)} ${f(sy + 1 * s)}Q${f(cx - w * 0.45)} ${f(sy - 2.5 * s)} ${f(cx - w * 0.92)} ${f(yb - 1 * s)}Z`, C.pineSnow, ' opacity="0.97"');
+  }
+  // wind: lean the whole tree from its base (shear), the top more than the bottom
+  if (bendIn) o = `<g transform="translate(${f(x)} ${f(base)}) skewX(${f(-20 * bendIn)}) translate(${f(-x)} ${f(-base)})">${o}</g>`;
+  return o;
+}
+function igloo(x, base, s, C) {
+  const rx = 50 * s, ry = 42 * s;
+  let o = ell(x + 6 * s, base + 2 * s, rx * 1.12, 6 * s, C.shelfSh);
+  // dome
+  o += P(`M${f(x - rx)} ${f(base)}A${f(rx)} ${f(ry)} 0 0 1 ${f(x + rx)} ${f(base)}Z`, C.igloo, ` stroke="${C.iglooLine}" stroke-width="${f(3 * s)}"`);
+  o += P(`M${f(x + rx * 0.25)} ${f(base - ry * 0.97)}A${f(rx)} ${f(ry)} 0 0 1 ${f(x + rx)} ${f(base)}L${f(x + rx * 0.45)} ${f(base)}Q${f(x + rx * 0.72)} ${f(base - ry * 0.55)} ${f(x + rx * 0.25)} ${f(base - ry * 0.97)}Z`, C.iglooSh);
+  // block courses: elliptic rows + staggered joints
+  let ln = '';
+  const rows = [0.22, 0.45, 0.66, 0.84];
+  rows.forEach((v, i) => {
+    const yy = base - ry * v, half = rx * Math.sqrt(1 - v * v);
+    ln += `M${f(x - half)} ${f(yy)}Q${f(x)} ${f(yy + 4 * s)} ${f(x + half)} ${f(yy)}`;
+    const lo = i ? rows[i - 1] : 0, nb = 6 - i;
+    for (let k = 0; k < nb; k++) {
+      const u = (k + (i % 2 ? 0.5 : 0.25)) / nb * 2 - 1; if (Math.abs(u) > 0.92) continue;
+      const hl = rx * Math.sqrt(1 - lo * lo);
+      ln += `M${f(x + u * half)} ${f(yy + 1.5 * s)}L${f(x + u * hl)} ${f(base - ry * lo + (i ? 1.5 * s : 0))}`;
     }
   });
-  o += branchSvg;
-  // canopy
-  const puffs = [[0, 0, 1], [-0.66, 0.3, 0.64], [0.66, 0.28, 0.68], [-0.3, -0.46, 0.6], [0.34, -0.42, 0.6], [0, 0.48, 0.58]]
-    .map(([u, v, k]) => [x + u * cr * (0.95 + r() * 0.1), cy + v * cr, cr * k]);
-  if (C.bare) {
-    // winter: thinner, airy canopy (smaller puffs) with visible bare twigs in front
-    o += puffs.map(([px, py, pr]) => circ(px, py, pr * 0.86, cf)).join('');
-    o += puffs.filter((_, i) => i === 0 || i === 2 || i === 5).map(([px, py, pr]) => circ(px + pr * 0.25, py + pr * 0.28, pr * 0.62, cs, ' opacity="0.9"')).join('');
-    let tw2 = '';
-    for (const [ax, ay, bx, bY] of [[0, 0.7, -0.42, -0.1], [0, 0.6, 0.48, -0.05], [0, 0.4, 0.05, -0.55], [-0.2, 0.2, -0.62, 0.22], [0.2, 0.15, 0.6, 0.3]]) tw2 += `M${f(x + ax * cr)} ${f(cy + ay * cr)}Q${f(x + (ax + bx) * 0.5 * cr)} ${f(cy + (ay + bY) * 0.5 * cr - 8)} ${f(x + bx * cr)} ${f(cy + bY * cr)}`;
-    o += strokeP(tw2, C.trunk, 4) + strokeP(tw2, C.trunkSh, 1.4, ' opacity="0.6"');
-    // snow caps on the upper puffs
-    for (const [px, py, pr] of [puffs[3], puffs[4], puffs[0], puffs[1], puffs[2]]) {
-      const rr = pr * 0.86;
-      o += P(`M${f(px - rr * 0.92)} ${f(py - rr * 0.32)}A${f(rr)} ${f(rr)} 0 0 1 ${f(px + rr * 0.92)} ${f(py - rr * 0.32)}Q${f(px + rr * 0.45)} ${f(py - rr * 0.48)} ${f(px + rr * 0.1)} ${f(py - rr * 0.36)}Q${f(px - rr * 0.35)} ${f(py - rr * 0.5)} ${f(px - rr * 0.92)} ${f(py - rr * 0.32)}Z`, C.snow);
-    }
-  } else {
-    o += puffs.map(([px, py, pr]) => circ(px, py, pr, cf)).join('');
-    o += `<g>${puffs.filter((_, i) => i === 0 || i === 2 || i === 5).map(([px, py, pr]) => circ(px + pr * 0.28, py + pr * 0.3, pr * 0.74, cs)).join('')}</g>`;
-    o += puffs.slice(3, 5).map(([px, py, pr]) => circ(px, py, pr * 0.9, cf)).join('');
-    o += ell(x - cr * 0.45, cy - cr * 0.52, cr * 0.32, cr * 0.18, ch, ` opacity="0.95" transform="rotate(-25 ${f(x - cr * 0.45)} ${f(cy - cr * 0.52)})"`);
-    o += ell(x - cr * 0.95, cy + cr * 0.02, cr * 0.16, cr * 0.1, ch, ` opacity="0.8" transform="rotate(-35 ${f(x - cr * 0.95)} ${f(cy)})"`);
-    // a few leaf curls for texture
-    let curls = '';
-    for (let i = 0; i < 7; i++) { const a = r() * Math.PI * 2, d = cr * (0.25 + r() * 0.6), px = x + Math.cos(a) * d, py = cy + Math.sin(a) * d * 0.9; if (i < 4) curls += `M${f(px - 8)} ${f(py + 3)}q${f(8)} ${f(5)} ${f(16)} 0`; }
-    o += strokeP(curls, cs, 2.2, ' opacity="0.55"');
-    if (C.blossom) { // spring: pink blossom clusters on the canopy
-      const bd = ['', '', ''], cd = [];
-      for (let i = 0; i < 18; i++) {
-        const a = r() * Math.PI * 2, d = cr * Math.sqrt(r()) * 1.05, px = x + Math.cos(a) * d * 1.15, py = cy + Math.sin(a) * d * 0.95 - 4;
-        const s = 3.4 + r() * 2.4;
-        for (let k = 0; k < 5; k++) { const b = k * 1.2566 + r() * 0.2; bd[i % 3] += cpath(px + Math.cos(b) * s * 0.9, py + Math.sin(b) * s * 0.9, s * 0.62); }
-        cd.push(cpath(px, py, s * 0.36));
-      }
-      o += bd.map((d, i) => P(d, C.blossom[i])).join('') + P(cd.join(''), '#FFF4D6');
-    }
+  o += strokeP(ln, C.iglooLine, 2 * s, ' opacity="0.85"');
+  // entrance tunnel (front-left) with a blue-grey arched opening
+  const ex = x - rx * 0.38, ew = 19 * s, eh = 22 * s;
+  o += P(`M${f(ex - ew)} ${f(base)}V${f(base - eh + ew * 0.55)}Q${f(ex - ew)} ${f(base - eh - 4 * s)} ${f(ex)} ${f(base - eh - 4 * s)}Q${f(ex + ew)} ${f(base - eh - 4 * s)} ${f(ex + ew)} ${f(base - eh + ew * 0.55)}V${f(base)}Z`, C.igloo);
+  o += strokeP(`M${f(ex - ew)} ${f(base)}V${f(base - eh + ew * 0.55)}Q${f(ex - ew)} ${f(base - eh - 4 * s)} ${f(ex)} ${f(base - eh - 4 * s)}Q${f(ex + ew)} ${f(base - eh - 4 * s)} ${f(ex + ew)} ${f(base - eh + ew * 0.55)}V${f(base)}`, C.iglooLine, 2 * s);
+  const dw = 11 * s, dh = 16 * s;
+  o += P(`M${f(ex - dw)} ${f(base)}V${f(base - dh + dw)}A${f(dw)} ${f(dw)} 0 0 1 ${f(ex + dw)} ${f(base - dh + dw)}V${f(base)}Z`, C.doorDark);
+  o += P(`M${f(ex - dw + 4 * s)} ${f(base)}V${f(base - dh + dw)}A${f(dw - 4 * s)} ${f(dw - 4 * s)} 0 0 1 ${f(ex + dw - 4 * s)} ${f(base - dh + dw)}V${f(base)}Z`, C.doorDeep);
+  // highlight upper-left
+  o += P(`M${f(x - rx * 0.78)} ${f(base - ry * 0.5)}Q${f(x - rx * 0.6)} ${f(base - ry * 0.95)} ${f(x - rx * 0.1)} ${f(base - ry * 1.0)}`, 'none', ` stroke="#FFFFFF" stroke-width="${f(5 * s)}" stroke-linecap="round" opacity="0.9"`);
+  // snow along the base
+  o += P(`M${f(x - rx * 1.1)} ${f(base + 1)}Q${f(x - rx * 0.9)} ${f(base - 7 * s)} ${f(x - rx * 0.6)} ${f(base - 2 * s)}L${f(x + rx * 0.6)} ${f(base - 2 * s)}Q${f(x + rx * 0.95)} ${f(base - 8 * s)} ${f(x + rx * 1.15)} ${f(base + 1)}Z`, C.shelf);
+  return o;
+}
+function ridge(x, base, s, seed, C) {
+  // ice pressure ridge: a cluster of tilted angular slabs with a light face + shadow face + white top edge
+  const r = rng(seed); let o = '';
+  const n = 5;
+  for (let i = 0; i < n; i++) {
+    const cx = x + (i - (n - 1) / 2) * 15 * s + (r() - 0.5) * 6 * s, h = (18 + r() * 22) * s * (i === 2 ? 1.25 : 1), w = (12 + r() * 6) * s, tilt = (r() - 0.5) * 14 * s;
+    const pts = [[cx - w, base], [cx - w * 0.55 + tilt, base - h * 0.8], [cx + tilt * 1.3, base - h - 4 * s], [cx + w, base]];
+    o += P(poly(pts), C.ridge);
+    o += P(poly([[cx + w * 0.1 + tilt * 0.3, base], [cx + tilt * 1.3, base - h - 4 * s], [cx + w, base]]), C.ridgeSh);
+    o += strokeP(line([pts[1], pts[2]]), C.ridgeHi, 2.4 * s);
   }
-  o += leafSvg;
+  o += P(`M${f(x - 50 * s)} ${f(base + 1)}Q${f(x)} ${f(base - 10 * s)} ${f(x + 52 * s)} ${f(base + 1)}Z`, C.shelf);
   return o;
 }
-function smallTree(x, base, h, seed, key, C) {
-  const r = rng(seed); const cr = h * 0.33, cy = base - h + cr * 1.05; const [cf, cs, ch] = canopyPal(C, key);
-  let o = ell(x + h * 0.04, base + 1, h * 0.26, h * 0.04, C.hillBackSh, ' opacity="0.8"');
-  o += P(`M${f(x - h * 0.045)} ${f(base)}L${f(x - h * 0.03)} ${f(cy + cr * 0.4)}L${f(x + h * 0.03)} ${f(cy + cr * 0.4)}L${f(x + h * 0.045)} ${f(base)}Z`, C.trunk);
-  const puffs = [[0, 0, 1], [-0.62, 0.32, 0.66], [0.62, 0.3, 0.7], [-0.25, -0.42, 0.62], [0.32, -0.38, 0.6]].map(([u, v, k]) => [x + u * cr * (0.95 + r() * 0.1), cy + v * cr, cr * k * (C.bare ? 0.86 : 1)]);
-  o += puffs.map(([px, py, pr]) => circ(px, py, pr, cf)).join('');
-  o += puffs.filter((_, i) => i === 0 || i === 2).map(([px, py, pr]) => circ(px + pr * 0.28, py + pr * 0.3, pr * 0.76, cs)).join('');
-  o += puffs.slice(3).map(([px, py, pr]) => circ(px, py, pr * 0.9, cf)).join('');
-  if (C.bare) for (const [px, py, pr] of puffs.slice(3).concat([puffs[0]])) o += P(`M${f(px - pr * 0.85)} ${f(py - pr * 0.25)}A${f(pr * 0.9)} ${f(pr * 0.9)} 0 0 1 ${f(px + pr * 0.85)} ${f(py - pr * 0.25)}Q${f(px)} ${f(py - pr * 0.5)} ${f(px - pr * 0.85)} ${f(py - pr * 0.25)}Z`, C.snow);
-  else o += ell(x - cr * 0.42, cy - cr * 0.5, cr * 0.3, cr * 0.18, ch, ` opacity="0.9" transform="rotate(-25 ${f(x - cr * 0.42)} ${f(cy - cr * 0.5)})"`);
-  if (C.blossom) for (let i = 0; i < 8; i++) { const a = r() * 6.28, d = cr * Math.sqrt(r()), px = x + Math.cos(a) * d * 1.1, py = cy + Math.sin(a) * d * 0.9; o += circ(px, py, 3.2, C.blossom[i % 3]) + circ(px + 3, py + 2, 2.4, C.blossom[(i + 1) % 3]); }
+function iceberg(x, wl, s, seed, C) {
+  // small floating iceberg: faceted top above the waterline, a pale submerged hint + waterline highlight
+  const r = rng(seed); const h = (22 + r() * 16) * s, w = (30 + r() * 14) * s;
+  const pts = [[x - w, wl], [x - w * 0.78, wl - h * 0.55], [x - w * 0.35, wl - h], [x + w * 0.15, wl - h * 0.88], [x + w * 0.55, wl - h * 0.5], [x + w, wl]];
+  let o = ell(x, wl + 4 * s, w * 0.95, 5 * s, C.seaLow, ' opacity="0.9"');
+  o += P(poly(pts), C.berg);
+  o += P(poly([[x - w * 0.05, wl], [x + w * 0.05, wl - h * 0.6], [x + w * 0.15, wl - h * 0.88], [x + w * 0.55, wl - h * 0.5], [x + w, wl]]), C.bergSh);
+  o += strokeP(line([pts[1], pts[2], pts[3]]), '#FFFFFF', 2.4 * s, ' opacity="0.95"');
+  o += strokeP(`M${f(x - w * 1.05)} ${f(wl + 0.5)}L${f(x + w * 1.05)} ${f(wl + 0.5)}`, C.seaHi, 2.6 * s);
   return o;
 }
-function mushroomHouse(x, base, s, C) {
-  // cream stem house with a round door + window, dome cap with pale dots; winter: snow on the cap
-  let o = ell(x + 4 * s, base + 2, 34 * s, 5 * s, C.bankSh, ' opacity="0.9"');
-  const sw0 = 22 * s, sw1 = 17 * s, sh = 44 * s;
-  o += P(`M${f(x - sw0)} ${f(base)}Q${f(x - sw0 - 2 * s)} ${f(base - sh * 0.5)} ${f(x - sw1)} ${f(base - sh)}L${f(x + sw1)} ${f(base - sh)}Q${f(x + sw0 + 2 * s)} ${f(base - sh * 0.5)} ${f(x + sw0)} ${f(base)}Z`, C.shroomStem);
-  o += P(`M${f(x + 6 * s)} ${f(base)}L${f(x + 6 * s)} ${f(base - sh)}L${f(x + sw1)} ${f(base - sh)}Q${f(x + sw0 + 2 * s)} ${f(base - sh * 0.5)} ${f(x + sw0)} ${f(base)}Z`, C.shroomStemSh);
-  // door
-  o += P(`M${f(x - 9 * s)} ${f(base)}V${f(base - 16 * s)}A${f(8 * s)} ${f(8 * s)} 0 0 1 ${f(x + 7 * s)} ${f(base - 16 * s)}V${f(base)}Z`, C.shroomDoor);
-  o += strokeP(`M${f(x - 1 * s)} ${f(base - 22 * s)}V${f(base)}`, C.shroomLine, 1.2 * s, ' opacity="0.6"');
-  o += circ(x + 3.5 * s, base - 10 * s, 1.3 * s, C.shroomWin);
-  // round window
-  o += circ(x + 13 * s, base - 30 * s, 4.6 * s, C.shroomLine) + circ(x + 13 * s, base - 30 * s, 3.4 * s, C.shroomWin);
-  // step stones
-  o += ell(x - 1 * s, base + 2 * s, 9 * s, 2.6 * s, '#D9CDB4');
-  // cap
-  const cw = 40 * s, ch = 34 * s, cb = base - sh + 6 * s;
-  o += P(`M${f(x - cw)} ${f(cb)}C${f(x - cw)} ${f(cb - ch * 1.25)} ${f(x + cw)} ${f(cb - ch * 1.25)} ${f(x + cw)} ${f(cb)}Q${f(x)} ${f(cb + 8 * s)} ${f(x - cw)} ${f(cb)}Z`, C.cap);
-  o += P(`M${f(x + 6 * s)} ${f(cb + 5 * s)}C${f(x + 26 * s)} ${f(cb - 4 * s)} ${f(x + 30 * s)} ${f(cb - ch * 0.7)} ${f(x + 14 * s)} ${f(cb - ch * 0.92)}C${f(x + cw)} ${f(cb - ch * 0.75)} ${f(x + cw)} ${f(cb - 4 * s)} ${f(x + cw)} ${f(cb)}Q${f(x + 24 * s)} ${f(cb + 6 * s)} ${f(x + 6 * s)} ${f(cb + 5 * s)}Z`, C.capSh);
-  o += strokeP(`M${f(x - cw + 2)} ${f(cb + 1)}Q${f(x)} ${f(cb + 8 * s)} ${f(x + cw - 2)} ${f(cb + 1)}`, C.capSh, 2.4 * s);
-  for (const [u, v, rr] of [[-22, -12, 5.5], [-4, -24, 6.5], [16, -14, 5], [-28, -2, 3.2], [28, -2, 3], [4, -8, 3.4]]) o += circ(x + u * s, cb + v * s, rr * s, C.shroomDot, ' opacity="0.95"');
-  o += ell(x - 18 * s, cb - 22 * s, 9 * s, 4.5 * s, C.capHi, ` opacity="0.9" transform="rotate(-28 ${f(x - 18 * s)} ${f(cb - 22 * s)})"`);
-  if (C.snow) o += P(`M${f(x - cw * 0.86)} ${f(cb - ch * 0.42)}C${f(x - cw * 0.7)} ${f(cb - ch * 1.08)} ${f(x + cw * 0.7)} ${f(cb - ch * 1.08)} ${f(x + cw * 0.88)} ${f(cb - ch * 0.4)}Q${f(x + cw * 0.6)} ${f(cb - ch * 0.62)} ${f(x + cw * 0.36)} ${f(cb - ch * 0.5)}Q${f(x + 2 * s)} ${f(cb - ch * 0.72)} ${f(x - cw * 0.3)} ${f(cb - ch * 0.52)}Q${f(x - cw * 0.6)} ${f(cb - ch * 0.6)} ${f(x - cw * 0.86)} ${f(cb - ch * 0.42)}Z`, C.snow);
-  // chimney-ish tiny lamp by the door (soft, not an answer colour)
-  o += rect(x - 20 * s, base - 14 * s, 2 * s, 14 * s, C.shroomLine) + circ(x - 19 * s, base - 16 * s, 3.4 * s, '#FFF1C9');
-  return o;
-}
-function fern(x, base, s, flip, C) {
-  // a fan of 5 curved fronds with little leaflets
-  let o = '';
-  const angs = [-1.25, -0.75, -0.3, 0.2, 0.7];
-  angs.forEach((a0, i) => {
-    const a = (flip ? -1 : 1) * a0, L = (26 + (i % 2 ? 6 : 12)) * s;
-    const tx = x + Math.sin(a) * L, ty = base - Math.cos(a) * L;
-    const mx = x + Math.sin(a) * L * 0.5 + (flip ? -1 : 1) * 3 * s, my = base - Math.cos(a) * L * 0.6;
-    const col = i % 2 ? C.fernSh : C.fern;
-    o += strokeP(`M${f(x)} ${f(base)}Q${f(mx)} ${f(my)} ${f(tx)} ${f(ty)}`, col, 2.2 * s);
-    let lf = '';   // leaflets: short round-capped strokes on both sides of the frond, one path per frond
-    for (let k = 1; k <= 4; k++) {
-      const t = k / 5, px = x + (tx - x) * t, py = base + (ty - base) * t, lw = (1 - t * 0.6) * 6.5 * s;
-      for (const da of [1.22, -1.22]) { const b = -Math.PI / 2 + a + da * 0.85; lf += `M${f(px)} ${f(py)}l${f(Math.cos(b) * lw)} ${f(Math.sin(b) * lw)}`; }
-    }
-    o += strokeP(lf, col, 4 * s);
-  });
-  if (C.snow) o += ell(x, base - 2, 16 * s, 5 * s, C.snow);
-  return o;
-}
-function bush(x, base, s, C) {
-  let o = circ(x - 12 * s, base - 9 * s, 12 * s, C.bush) + circ(x + 2 * s, base - 15 * s, 15 * s, C.bush) + circ(x + 16 * s, base - 8 * s, 11 * s, C.bush);
-  o += circ(x + 8 * s, base - 8 * s, 10 * s, C.bushSh, ' opacity="0.9"');
-  o += rect(x - 24 * s, base - 9 * s, 50 * s, 9 * s, C.bush, 4 * s);
-  if (C.snow) o += P(`M${f(x - 22 * s)} ${f(base - 14 * s)}Q${f(x - 12 * s)} ${f(base - 26 * s)} ${f(x)} ${f(base - 28 * s)}Q${f(x + 14 * s)} ${f(base - 28 * s)} ${f(x + 26 * s)} ${f(base - 12 * s)}Q${f(x + 10 * s)} ${f(base - 20 * s)} ${f(x - 22 * s)} ${f(base - 14 * s)}Z`, C.snow);
-  else if (C.blossom) o += circ(x - 6 * s, base - 16 * s, 2.6 * s, C.blossom[1]) + circ(x + 10 * s, base - 20 * s, 2.6 * s, C.blossom[0]) + circ(x + 18 * s, base - 10 * s, 2.4 * s, C.blossom[1]);
-  return o;
-}
-function lilyPad(x, y, s, C, flower) {
-  // seen at a low angle: flattened disc with a notch
-  const rx = 16 * s, ry = 5.4 * s;
-  let o = ell(x + 1, y + 1.6 * s, rx, ry, C.waterSh, ' opacity="0.9"');
-  o += P(`M${f(x)} ${f(y)}L${f(x + rx * 0.95)} ${f(y - ry * 0.3)}A${f(rx)} ${f(ry)} 0 1 1 ${f(x + rx * 0.7)} ${f(y - ry * 0.75)}Z`, C.pad);
-  o += P(`M${f(x - rx)} ${f(y)}A${f(rx)} ${f(ry)} 0 0 0 ${f(x + rx)} ${f(y)}A${f(rx)} ${f(ry * 0.5)} 0 0 1 ${f(x - rx)} ${f(y)}Z`, C.padSh, ' opacity="0.7"');
-  if (C.ice) o += ell(x - 2 * s, y - 1.4 * s, rx * 0.72, ry * 0.55, C.snow, ' opacity="0.95"');
-  if (flower && C.padFlower) {
-    for (let k = 0; k < 6; k++) { const a = -Math.PI + k * Math.PI / 5; o += ell(x - 3 * s + Math.cos(a) * 4 * s, y - 4 * s + Math.sin(a) * 2.6 * s, 3 * s, 1.8 * s, C.padFlower, ` transform="rotate(${f(a * 57.3)} ${f(x - 3 * s + Math.cos(a) * 4 * s)} ${f(y - 4 * s + Math.sin(a) * 2.6 * s)})"`); }
-    o += circ(x - 3 * s, y - 5 * s, 2 * s, '#F3DDA0');
-  }
-  return o;
-}
-function genMid(C, record) {
+function genMid(C) {
   PREC = 1;
-  const backY = x => 214 + wave([[16, 1, 0.3], [10, 2, 2.0], [5, 5, 4.1]])(x);
-  const bankY = x => 288 + wave([[7, 1, 2.6], [5, 3, 0.8], [2, 7, 1.7]])(x);
-  // pond: a long shallow band at the bottom, its top edge dips and rises (integer periods), with two shallow bays
-  const pondTop = x => 308 + wave([[7, 1, 0.9], [6, 2, 3.3], [3, 5, 0.2]])(x);
+  const defs = lg('sea', 0, 0, 0, 1, [[0, C.seaTop], [0.35, C.sea], [1, C.seaLow]]);
   let o = '';
-  const defs = lg('wat', 0, 0, 0, 1, [[0, C.waterSh], [0.5, C.water], [1, C.water]]);
-  // back hill with bushes + small trees
-  o += P(bandD(backY, 360), C.hillBack);
-  o += P(bandD(x => backY(x) + 24 + wave([[7, 3, 1.0]])(x), 360), C.hillBackSh, ' opacity="0.6"');
-  o += strokeP(edgeD(x => backY(x) + 3), C.hillBackHi, 5);
-  SMALL_TREES.forEach(([x, , h, sd, key]) => { o += wrap(x, h * 0.4, xx => smallTree(xx, backY(xx) + 16 + (h > 160 ? 6 : 0), h, sd, key, C)); });
-  [[260, 0.9], [470, 1.0], [690, 0.85], [870, 0.95], [1040, 0.8]].forEach(([x, s]) => { o += wrap(x, 30 * s, xx => bush(xx, backY(xx) + 18, s, C)); });
-  // the bank (front) the big trees stand on
-  o += P(bandD(bankY, 360), C.bank);
-  o += P(bandD(x => bankY(x) + 14 + wave([[3, 4, 2.0]])(x), 360), C.bankSh, ' opacity="0.55"');
-  o += strokeP(edgeD(x => bankY(x) + 3), C.bankHi, 5);
-  // big trees
-  BIG_TREES.forEach(([x, base, h, sd, key, spans]) => { o += wrap(x, h * 0.55, xx => bigTree(xx, base, h, sd, key, spans, C, record && xx === x)); });
-  // mushroom houses + ferns
-  [[355, 300, 1.0], [800, 296, 0.85], [1100, 302, 0.7]].forEach(([x, b, s]) => { o += wrap(x, 50 * s, xx => mushroomHouse(xx, b, s, C)); });
-  [[60, 312, 1.0, 0], [262, 310, 1.1, 1], [452, 306, 0.9, 0], [672, 308, 1.0, 1], [880, 312, 0.95, 0], [1050, 314, 0.85, 1], [1178, 310, 1.0, 0]].forEach(([x, b, s, fl]) => { o += wrap(x, 46 * s, xx => fern(xx, b, s, fl, C)); });
-  // pond
-  o += P(between(x => pondTop(x) - 4, () => 362), C.shore);
-  o += P(bandD(pondTop, 362), 'url(#wat)');
-  o += strokeP(edgeD(x => pondTop(x) + 1.5), C.waterSh, 3, ' opacity="0.9"');
-  const r = rng(77);
-  if (C.ice) {
-    // frozen: pale sheen streaks, a few soft crack lines, snow drifts on the edge
-    for (let i = 0; i < 9; i++) { const x = (i + r()) * W / 9, y = 326 + r() * 14; o += wrap(x, 50, xx => strokeP(`M${f(xx - 34)} ${f(y)}L${f(xx + 30)} ${f(y - 3)}`, C.waterHi, 4, ' opacity="0.9"')); }
-    for (let i = 0; i < 5; i++) { const x = (i + 0.3 + r() * 0.4) * W / 5, y = 330 + r() * 8; o += wrap(x, 40, xx => strokeP(`M${f(xx - 26)} ${f(y + 3)}L${f(xx - 8)} ${f(y)}L${f(xx + 4)} ${f(y + 4)}L${f(xx + 22)} ${f(y + 1)}M${f(xx - 8)} ${f(y)}L${f(xx - 4)} ${f(y - 5)}`, '#B7D3E0', 1.2, ' opacity="0.8"')); }
-    o += P(between(x => pondTop(x) - 6 + wave([[2, 9, 0.4]])(x), x => pondTop(x) + 4 + wave([[3, 6, 1.4], [2, 13, 0.3]])(x)), C.snow);
-  } else {
-    // ripples + reflections
-    for (let i = 0; i < 12; i++) { const x = (i + r()) * W / 12, y = 326 + r() * 14, l = 18 + r() * 22; o += wrap(x, l, xx => strokeP(`M${f(xx - l)} ${f(y)}Q${f(xx)} ${f(y - 2)} ${f(xx + l)} ${f(y)}`, C.waterHi, 2.4, ' opacity="0.85"')); }
-  }
-  // lily pads (also perch spots: tops reported as lily perches)
-  [[210, 330, 1.0, 1], [252, 336, 0.75, 0], [520, 328, 1.1, 0], [640, 334, 0.9, 1], [930, 330, 1.05, 1], [978, 337, 0.7, 0], [1150, 331, 0.9, 0]].forEach(([x, y, s, fl]) => { o += wrap(x, 18 * s, xx => lilyPad(xx, y, s, C, fl)); });
-  // reeds at the pond edge
-  const reed = C.ice ? '#BFCBB8' : C.fernSh;
-  [[96, 318], [420, 316], [742, 320], [1016, 318]].forEach(([x, y]) => {
-    o += wrap(x, 14, xx => strokeP(`M${f(xx)} ${f(y)}q-2 -22 -6 -36M${f(xx + 5)} ${f(y)}q1 -26 4 -42M${f(xx + 10)} ${f(y)}q3 -16 8 -26`, reed, 2.6) + rect(xx + 3.2, y - 46, 4.4, 12, C.trunkSh, 2.2) + rect(xx - 9, y - 40, 4, 10, C.trunkSh, 2));
+  // back snow hills with small pines
+  o += P(bandD(backY, 360), C.hill);
+  o += P(bandD(x => backY(x) + 26 + wave([[7, 3, 1.0]])(x), 360), C.hillSh, ' opacity="0.7"');
+  o += strokeP(edgeD(x => backY(x) + 3), C.hillHi, 5);
+  [[86, 0.55], [118, 0.48], [478, 0.6], [508, 0.5], [536, 0.56], [884, 0.5], [1012, 0.58], [1044, 0.5]].forEach(([x, s]) => {
+    o += wrap(x, 30 * s, xx => pine(xx, backY(xx) + 14, s, C, C.bend * 0.8));
   });
+  if (C.drift) o += [[260, 1], [700, 0.8], [1120, 0.9]].map(([x, s]) => wrap(x, 120, xx => P(`M${f(xx - 70 * s)} ${f(backY(xx) + 4)}Q${f(xx)} ${f(backY(xx) - 16 * s)} ${f(xx + 110 * s)} ${f(backY(xx) - 4)}Q${f(xx + 20 * s)} ${f(backY(xx) - 2)} ${f(xx - 70 * s)} ${f(backY(xx) + 4)}Z`, '#FFFFFF', ' opacity="0.6"'))).join('');
+  // the front snow shelf (the far shore of the channel)
+  o += P(between(shelfY, x => seaY(x) + 2), C.shelf);
+  o += P(between(x => shelfY(x) + 12 + wave([[3, 4, 2.0]])(x), x => seaY(x) + 2), C.shelfSh, ' opacity="0.7"');
+  o += strokeP(edgeD(x => shelfY(x) + 2.5), C.hillHi, 4);
+  // ice cliff face down to the water
+  const cliffTop = x => seaY(x) - 11 + wave([[2.5, 9, 0.5], [1.5, 17, 1.1]])(x);
+  o += P(between(cliffTop, x => seaY(x) + 2), C.cliff);
+  let cr = ''; { const rc = rng(31); for (let x = 14; x < W - 14; x += 34 + rc() * 40) cr += `M${f(x)} ${f(cliffTop(x) + 4)}L${f(x + 3)} ${f(seaY(x) - 2)}`; }
+  o += strokeP(cr, C.cliffSh, 2.2, ' opacity="0.45"');
+  o += P(between(x => seaY(x) - 4, x => seaY(x) + 2), C.cliffSh, ' opacity="0.55"');
+  o += strokeP(edgeD(x => cliffTop(x) + 1, 6), C.cliffHi, 2.4);
+  // ice ridges, igloo, pines on the shelf (back to front)
+  [[600, 1.0, 41], [990, 0.85, 42], [40, 0.7, 43]].forEach(([x, s, sd]) => { o += wrap(x, 60 * s, xx => ridge(xx, shelfY(xx) + 10, s, sd, C)); });
+  o += wrap(330, 70, xx => igloo(xx, shelfY(330) + 12, 1.0, C));
+  [[176, 1.0], [214, 0.82], [712, 0.92], [748, 1.08], [782, 0.78], [1130, 0.95]].forEach(([x, s]) => {
+    o += wrap(x, 34 * s, xx => pine(xx, shelfY(xx) + 12, s, C, C.bend));
+  });
+  // snow drifts in front of things
+  [[150, 70], [460, 60], [760, 80], [1060, 64]].forEach(([x, w]) => { o += wrap(x, w, xx => P(`M${f(xx - w)} ${f(shelfY(xx) + 18)}Q${f(xx - w * 0.3)} ${f(shelfY(xx) + 6)} ${f(xx + w)} ${f(shelfY(xx) + 18)}Z`, C.shelf)); });
+  if (C.wet) for (const [x, w] of [[90, 40], [520, 54], [880, 46]]) o += wrap(x, w, xx => strokeP(`M${f(xx - w)} ${f(shelfY(xx) + 22)}L${f(xx + w)} ${f(shelfY(xx) + 20)}`, C.cliffHi, 3, ' opacity="0.9"'));
+  // the open sea
+  o += P(bandD(seaY, 362), 'url(#sea)');
+  o += strokeP(edgeD(x => seaY(x) + 1.5), C.seaLine, 2.4, ' opacity="0.8"');
+  const r = rng(77);
+  let rip = '';
+  for (let i = 0; i < 16; i++) { const x = (i + r()) * W / 16, y = 310 + r() * 26, l = 14 + r() * 20; if (x - l > 0 && x + l < W) rip += `M${f(x - l)} ${f(y)}Q${f(x)} ${f(y - 2.5)} ${f(x + l)} ${f(y)}`; }
+  o += strokeP(rip, C.seaHi, 2.2, ' opacity="0.85"');
+  if (C.wet) { let rr = ''; for (let i = 0; i < 12; i++) { const x = 40 + (i + r() * 0.6) * (W - 80) / 12, y = 312 + r() * 22, rx = 7 + r() * 6; rr += `M${f(x - rx)} ${f(y)}A${f(rx)} ${f(rx * 0.3)} 0 1 0 ${f(x + rx)} ${f(y)}A${f(rx)} ${f(rx * 0.3)} 0 1 0 ${f(x - rx)} ${f(y)}`; } o += strokeP(rr, C.seaHi, 1.4, ' opacity="0.9"'); }
+  // little icebergs
+  [[120, 330, 0.8, 51], [430, 326, 1.15, 52], [655, 333, 0.6, 53], [905, 328, 1.0, 54], [1095, 334, 0.7, 55]].forEach(([x, wl, s, sd]) => { o += wrap(x, 46 * s, xx => iceberg(xx, wl, s, sd, C)); });
+  if (C.sparkle >= 1) for (const [x, y, sr] of [[420, 300, 6], [900, 304, 5], [596, 248, 5], [340, 230, 4], [1004, 254, 4]].slice(0, C.sparkle > 1 ? 5 : 3)) o += spark4(x, y, sr, '#FFFFFF');
+  if (C.pastel) [[200, 196], [640, 186], [1080, 200], [770, 238]].forEach(([x, y], i) => { o += spark4(x, y, 4, C.pastel[i % 4]); });
   PREC = 10;
   return svg(1200, 360, o, defs);
 }
 
-// ================= ground_<s>.svg (0 0 1200 260): moss/grass, tiny flowers, leaves or snow; top edge ≈ y 40 =================
-function flower(x, y, s, petal, C) {
-  let o = strokeP(`M${f(x)} ${f(y + 2 * s)}q${f(-1 * s)} ${f(5 * s)} ${f(0.5 * s)} ${f(9 * s)}`, C.flStem, 1.6 * s);
-  for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + i * 2 * Math.PI / 5; o += circ(x + Math.cos(a) * 3.4 * s, y + Math.sin(a) * 3.4 * s, 2.9 * s, petal); }
-  return o + circ(x, y, 2.1 * s, C.flC);
+// ================= ground_<s>.svg (0 0 1200 260): snow bank; top edge ≈ y 40 =================
+function chunk(x, y, s, C) {
+  const pts = [[x - 9 * s, y], [x - 6 * s, y - 7 * s], [x + 2 * s, y - 10 * s], [x + 9 * s, y - 4 * s], [x + 8 * s, y]];
+  return ell(x, y + 1, 11 * s, 2.6 * s, C.gDip) + P(poly(pts), C.gChunk) + P(poly([[x + 1 * s, y], [x + 2 * s, y - 10 * s], [x + 9 * s, y - 4 * s], [x + 8 * s, y]]), C.gChunkSh) + strokeP(line([pts[1], pts[2]]), '#FFFFFF', 1.6 * s);
 }
-function tuft(x, y, s, C) {
-  const d = `M${f(x - 7 * s)} ${f(y)}Q${f(x - 7 * s)} ${f(y - 7 * s)} ${f(x - 10 * s)} ${f(y - 12 * s)}Q${f(x - 3 * s)} ${f(y - 8 * s)} ${f(x - 2 * s)} ${f(y - 3 * s)}Q${f(x - 1 * s)} ${f(y - 11 * s)} ${f(x + 1 * s)} ${f(y - 16 * s)}Q${f(x + 4 * s)} ${f(y - 9 * s)} ${f(x + 3 * s)} ${f(y - 3 * s)}Q${f(x + 6 * s)} ${f(y - 9 * s)} ${f(x + 11 * s)} ${f(y - 11 * s)}Q${f(x + 8 * s)} ${f(y - 5 * s)} ${f(x + 8 * s)} ${f(y)}Z`;
-  return P(d, C.tuft) + strokeP(`M${f(x - 1.5 * s)} ${f(y - 4 * s)}Q${f(x - 0.5 * s)} ${f(y - 10 * s)} ${f(x + 1 * s)} ${f(y - 14 * s)}`, C.tuftHi, 1.3 * s, ' opacity="0.8"');
-}
-function fallenLeaf(x, y, s, rot, col) {
-  return `<g transform="translate(${f(x)} ${f(y)}) rotate(${f(rot)}) scale(${f(s)} ${f(s * 0.55)})">${P('M0 -7C5 -4 5 4 0 7C-5 4 -5 -4 0 -7Z', col)}${strokeP('M0 -6L0 6', '#00000022', 0.9)}</g>`;
-}
-function petalBit(x, y, s, rot, col) {
-  return `<g transform="translate(${f(x)} ${f(y)}) rotate(${f(rot)}) scale(${f(s)} ${f(s * 0.6)})">${P('M0 -4C3 -2 3 2 0 4C-3 2 -3 -2 0 -4Z', col)}</g>`;
-}
+function pebble(x, y, s, C) { return ell(x, y, 6 * s, 4 * s, C.pebble) + ell(x - 1.6 * s, y - 1.6 * s, 2.6 * s, 1.4 * s, '#FFFFFF', ' opacity="0.55"') + P(`M${f(x - 6 * s)} ${f(y - 1 * s)}Q${f(x)} ${f(y - 7 * s)} ${f(x + 6 * s)} ${f(y - 1 * s)}Q${f(x)} ${f(y - 3.5 * s)} ${f(x - 6 * s)} ${f(y - 1 * s)}Z`, C.gTop); }
 function genGround(C) {
-  const defs = lg('gfill', 0, 0, 0, 1, [[0, C.grassTop], [0.3, C.grass], [1, C.grassLow]]);
+  const defs = lg('gfill', 0, 0, 0, 1, [[0, C.gTop], [0.3, C.g], [1, C.gLow]]);
   const lip = x => 40 + wave([[3, 2, 0.7], [2, 5, 2.2], [1, 11, 0.4]])(x);
   let o = '';
   o += P(bandD(lip, 260, 4), 'url(#gfill)');
-  o += P(between(lip, x => lip(x) + 10 + wave([[3, 4, 1.2], [2, 9, 0.3]])(x)), C.grassLow, ' opacity="0.4"');
-  o += strokeP(edgeD(x => lip(x) + 1, 6), C.rim, 3);
-  o += strokeP(edgeD(x => lip(x) + 5, 6), C.lipHi, 2.5, ' opacity="0.9"');
+  // the bank's front edge: a soft blue shadow just under the rounded lip, then the white lip highlight
+  o += P(between(x => lip(x) + 6, x => lip(x) + 14 + wave([[3, 4, 1.2], [2, 9, 0.3]])(x)), C.gDip, ' opacity="0.65"');
+  o += strokeP(edgeD(x => lip(x) + 1, 6), C.gRim, 3);
+  o += strokeP(edgeD(x => lip(x) + 4.5, 6), C.gLipHi, 3, ' opacity="0.95"');
   const r = rng(21);
-  // soft moss patches (rounded, slightly darker / lighter) to break up the flat fill
-  for (const [x, y, rx, k] of [[150, 196, 130, 0], [520, 226, 160, 1], [860, 190, 120, 0], [1120, 232, 130, 1], [340, 92, 100, 1], [980, 96, 110, 0], [690, 132, 90, 0], [40, 120, 80, 1]]) {
-    o += wrap(x, rx, xx => ell(xx, y, rx, rx * 0.17, k ? C.lipHi : C.moss, ` opacity="${k ? 0.5 : 0.55}"`));
+  // soft snow lumps: shadowed dips under rounded swells
+  for (let i = 0; i < 11; i++) { const x = (i + r()) * W / 11, y = 80 + r() * 160, rx = 50 + r() * 60; o += wrap(x, rx, xx => P(`M${f(xx - rx)} ${f(y)}Q${f(xx)} ${f(y - 12)} ${f(xx + rx)} ${f(y)}Q${f(xx)} ${f(y + 7)} ${f(xx - rx)} ${f(y)}Z`, C.gDip, ' opacity="0.7"') + strokeP(`M${f(xx - rx * 0.7)} ${f(y - 5)}Q${f(xx)} ${f(y - 12)} ${f(xx + rx * 0.6)} ${f(y - 6)}`, '#FFFFFF', 2.4, ' opacity="0.9"')); }
+  // ice chunks + a few pebbles poking out
+  for (let i = 0; i < 9; i++) { const x = (i + 0.2 + r() * 0.6) * W / 9, y = 70 + r() * 170, s = 0.8 + r() * 0.7; o += wrap(x, 14 * s, xx => chunk(xx, y, s, C)); }
+  for (let i = 0; i < 6; i++) { const x = (i + r()) * W / 6, y = 90 + r() * 150, s = 0.8 + r() * 0.5; o += wrap(x, 8 * s, xx => pebble(xx, y, s, C)); }
+  if (C.drift) {
+    // wind ripples in the snow + a drift curling off the lip
+    for (let i = 0; i < 14; i++) { const x = (i + r()) * W / 14, y = 64 + r() * 180, l = 30 + r() * 40; o += wrap(x, l + 4, xx => strokeP(`M${f(xx - l)} ${f(y)}Q${f(xx - l * 0.3)} ${f(y - 6)} ${f(xx)} ${f(y - 1)}T${f(xx + l)} ${f(y - 2)}`, C.gRim, 2, ' opacity="0.7"') + strokeP(`M${f(xx - l)} ${f(y - 2.5)}Q${f(xx - l * 0.3)} ${f(y - 8.5)} ${f(xx)} ${f(y - 3.5)}`, '#FFFFFF', 1.8)); }
+    for (const x of [180, 620, 1010]) o += wrap(x, 90, xx => P(`M${f(xx - 60)} ${f(lip(xx - 60) + 2)}Q${f(xx)} ${f(lip(xx) - 12)} ${f(xx + 80)} ${f(lip(xx + 80) - 4)}Q${f(xx + 10)} ${f(lip(xx) - 2)} ${f(xx - 60)} ${f(lip(xx - 60) + 2)}Z`, '#FFFFFF', ' opacity="0.9"'));
   }
-  if (C.ice) {
-    // snow: blue-grey shadow dips + sparkle dots, a few grass blades and twigs poking out
-    for (let i = 0; i < 10; i++) { const x = (i + r()) * W / 10, y = 80 + r() * 160, rx = 50 + r() * 60; o += wrap(x, rx, xx => P(`M${f(xx - rx)} ${f(y)}Q${f(xx)} ${f(y - 12)} ${f(xx + rx)} ${f(y)}Q${f(xx)} ${f(y + 6)} ${f(xx - rx)} ${f(y)}Z`, C.rim, ' opacity="0.45"')); }
-    for (let i = 0; i < 22; i++) { const x = (i + 0.2 + r() * 0.6) * W / 22, y = 60 + r() * 190, s = 0.6 + r() * 0.5; o += wrap(x, 12, xx => tuft(xx, y, s, C) + ell(xx, y, 9 * s, 2.5 * s, C.grassTop)); }
-    for (let i = 0; i < 50; i++) { const x = r() * W, y = 50 + r() * 205; o += wrap(x, 3, xx => circ(xx, y, 1.2 + r(), '#FFFFFF', ' opacity="0.95"')); }
-    for (let i = 0; i < 6; i++) { const x = (i + r()) * W / 6, y = 110 + r() * 120; o += wrap(x, 22, xx => strokeP(`M${f(xx - 16)} ${f(y)}L${f(xx + 14)} ${f(y - 4)}M${f(xx + 2)} ${f(y - 2)}l6 -7`, '#B59F86', 2.2)); }
-  } else {
-    for (let i = 0; i < 36; i++) { const x = (i + 0.2 + r() * 0.6) * W / 36, y = 62 + r() * 190, s = 0.7 + r() * 0.6; o += wrap(x, 16 * s, xx => tuft(xx, y, s, C)); }
-    // tiny flowers in clusters (pale only)
-    const nCl = C.litter && C.litterN > 40 ? 8 : 18;
-    for (let i = 0; i < nCl; i++) {
-      const cx = (i + 0.5) * W / nCl + (r() - 0.5) * 30, cy = 66 + r() * 180, n = 1 + Math.floor(r() * 3), col = C.fl[i % C.fl.length];
-      for (let k = 0; k < n; k++) { const x = cx + (k - 1) * 12 + r() * 4, y = cy + (k % 2) * 6, s = 0.85 + r() * 0.35; o += wrap(x, 8, xx => flower(xx, y, s, col, C)); }
+  if (C.wet) {
+    // puddles (meltwater on the snow bank) with sky reflections, and a wet sheen
+    for (const [x, y, rx] of [[120, 120, 70], [430, 200, 90], [660, 104, 54], [880, 176, 80], [1130, 226, 60]]) {
+      o += wrap(x, rx + 4, xx => ell(xx, y + 2, rx + 4, rx * 0.17 + 3, C.gRim, ' opacity="0.7"') + ell(xx, y, rx, rx * 0.17, C.puddle) + ell(xx + rx * 0.15, y + rx * 0.05, rx * 0.7, rx * 0.09, C.puddleSh, ' opacity="0.6"') +
+        strokeP(`M${f(xx - rx * 0.6)} ${f(y - rx * 0.05)}L${f(xx - rx * 0.1)} ${f(y - rx * 0.07)}M${f(xx + rx * 0.1)} ${f(y + rx * 0.02)}L${f(xx + rx * 0.4)} ${f(y)}`, C.puddleHi, 2.4));
     }
-    // clover dots
-    for (let i = 0; i < 40; i++) { const x = r() * W, y = 70 + r() * 185; o += wrap(x, 4, xx => circ(xx, y, 1.6 + r(), C.tuftHi, ' opacity="0.7"')); }
-    // little round stones
-    for (let i = 0; i < 7; i++) { const x = (i + r()) * W / 7, y = 90 + r() * 150, s = 4 + r() * 4; o += wrap(x, 10, xx => ell(xx, y, s * 1.4, s, '#D7CFBE') + ell(xx - s * 0.4, y - s * 0.4, s * 0.6, s * 0.3, '#F1EBDD')); }
-    // seasonal litter: petals (spring) / fallen leaves (autumn)
-    if (C.litter) for (let i = 0; i < C.litterN; i++) {
-      const x = r() * W, y = 52 + r() * 200, rot = r() * 360, col = C.litter[i % C.litter.length], s = C.litterN > 40 ? 1.1 + r() * 0.7 : 1 + r() * 0.6;
-      o += wrap(x, 10, xx => (C.litterN > 40 ? fallenLeaf : petalBit)(xx, y, s, rot, col));
-    }
+    for (let i = 0; i < 10; i++) { const x = (i + r()) * W / 10, y = 60 + r() * 190, l = 18 + r() * 24; o += wrap(x, l, xx => strokeP(`M${f(xx - l)} ${f(y)}L${f(xx + l)} ${f(y - 1.5)}`, C.puddleHi, 2.2, ' opacity="0.9"')); }
   }
+  // sparkle dots (more on sunny / rainbow)
+  const nS = Math.round(40 * C.sparkle);
+  let dots = '';
+  for (let i = 0; i < nS; i++) { const x = r() * W, y = 52 + r() * 205, rr = 1.1 + r() * 1.1; if (x > 4 && x < W - 4) dots += `M${f(x - rr)} ${f(y)}a${f(rr)} ${f(rr)} 0 1 0 ${f(2 * rr)} 0a${f(rr)} ${f(rr)} 0 1 0 ${f(-2 * rr)} 0`; }
+  if (dots) o += P(dots, '#FFFFFF');
+  if (C.sparkle >= 1) for (let i = 0; i < Math.round(6 * C.sparkle); i++) { const x = 30 + r() * (W - 60), y = 60 + r() * 180; o += spark4(x, y, 4 + r() * 3, C.pastel ? C.pastel[i % 4] : '#FFFFFF', C.pastel ? '' : ' opacity="0.95"') + (C.pastel ? spark4(x, y, 2, '#FFFFFF') : ''); }
   return svg(1200, 260, o, defs);
 }
 
-// ================= sun, clouds =================
+// ================= sun, clouds, rainbow =================
 function genSun() {
   // pale buttery disc (much lighter than the yellow answer #FFD23F) + soft rounded rays, no face
-  const defs = rg('glow', [[0, '#FFF8DE', 0.9], [0.45, '#FFF0C2', 0.45], [1, '#FFF0C2', 0]]) + rg('disc', [[0, '#FFFBE4'], [0.7, '#FFF1BC'], [1, '#FCE8A6']], ' cx="0.4" cy="0.38" r="0.65"');
+  const defs = rg('glow', [[0, '#FFF8DE', 0.9], [0.45, '#FFF2C8', 0.45], [1, '#FFF2C8', 0]]) + rg('disc', [[0, '#FFFCEA'], [0.7, '#FFF3C4'], [1, '#FBEAB0']], ' cx="0.4" cy="0.38" r="0.65"');
   let o = circ(100, 100, 100, 'url(#glow)');
   let rays = ''; for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6 + Math.PI / 12, r0 = 64, r1 = i % 2 ? 80 : 88; rays += `M${f(100 + Math.cos(a) * r0)} ${f(100 + Math.sin(a) * r0)}L${f(100 + Math.cos(a) * r1)} ${f(100 + Math.sin(a) * r1)}`; }
-  o += strokeP(rays, '#FFEDB4', 9, ' opacity="0.9"');
-  o += circ(100, 100, 55, '#F6E1A0') + circ(100, 100, 51, 'url(#disc)');
-  o += ell(84, 80, 16, 10, '#FFFEF6', ' opacity="0.85" transform="rotate(-30 84 80)"');
+  o += strokeP(rays, '#FFEFC0', 9, ' opacity="0.9"');
+  o += circ(100, 100, 55, '#F5E3A8') + circ(100, 100, 51, 'url(#disc)');
+  o += ell(84, 80, 16, 10, '#FFFFFA', ' opacity="0.85" transform="rotate(-30 84 80)"');
   return svg(200, 200, o, defs);
 }
 function genClouds() {
@@ -429,48 +357,58 @@ function genClouds() {
     o += puffs.slice(0, 3).map(([x, y, r]) => ell(x - r * 0.25, y - r * 0.45, r * 0.4, r * 0.2, hi, ' opacity="0.95"')).join('');
     return svg(300, 160, o);
   };
-  out.cloud1 = mk([[66, 106, 32], [116, 84, 44], [174, 74, 50], [228, 98, 38], [150, 110, 34]], '#FFFFFF', '#E1E9EE', '#FFFFFF', 132);
-  out.cloud2 = mk([[58, 112, 26], [102, 94, 36], [152, 98, 34], [200, 106, 28], [244, 116, 22]], '#FFFFFF', '#E3EAEF', '#FFFFFF', 134);
-  out.cloud3 = mk([[76, 100, 38], [136, 70, 52], [194, 84, 42], [236, 110, 28], [128, 112, 34]], '#FFFFFF', '#DEE6EC', '#FFFFFF', 136);
+  out.cloud1 = mk([[66, 106, 32], [116, 84, 44], [174, 74, 50], [228, 98, 38], [150, 110, 34]], '#FFFFFF', '#DCE6EF', '#FFFFFF', 132);
+  out.cloud2 = mk([[58, 112, 26], [102, 94, 36], [152, 98, 34], [200, 106, 28], [244, 116, 22]], '#FFFFFF', '#DFE7F0', '#FFFFFF', 134);
+  out.cloud3 = mk([[76, 100, 38], [136, 70, 52], [194, 84, 42], [236, 110, 28], [128, 112, 34]], '#FFFFFF', '#D9E3ED', '#FFFFFF', 136);
   return out;
+}
+function genRainbow() {
+  // soft pastel arc, centre below the image; legs fade out at the bottom (mask), transparent elsewhere
+  const cx = 600, cy = 560, bands = ['#F7B9BE', '#FAD3AE', '#F8EAAE', '#C9E8BE', '#B9DAF2', '#D2C4EE'], bw = 22, r0 = 530;
+  const defs = lg('fade', 0, 0, 0, 1, [[0, '#FFFFFF'], [0.62, '#FFFFFF'], [1, '#FFFFFF', 0]]) +
+    `<mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="1200" height="500"><rect x="0" y="0" width="1200" height="500" fill="url(#fade)"/></mask>`;
+  const arc = r => `M${f(cx - r)} ${f(cy)}A${f(r)} ${f(r)} 0 0 1 ${f(cx + r)} ${f(cy)}`;
+  const band = (r, col, w, a) => `<path d="${arc(r)}" fill="none" stroke="${col}" stroke-width="${f(w)}" opacity="${a}"/>`;
+  let o = band(r0 - bw * 2.5, '#FFFFFF', bw * 8, 0.22);
+  bands.forEach((c, i) => { o += band(r0 - i * bw, c, bw + 1, 0.8); });
+  o += band(r0 + bw / 2 - 2, '#FFFFFF', 3, 0.5);
+  return svg(1200, 500, `<g mask="url(#m)">${o}</g>`, defs);
 }
 
 // ================= particles (0 0 32 32, centred) =================
 function genParticles() {
   const p = {};
   const S = (body, defs) => svg(32, 32, body, defs);
-  p.sparkle = S(`${P('M16 1Q17.6 14.4 31 16Q17.6 17.6 16 31Q14.4 17.6 1 16Q14.4 14.4 16 1Z', '#FFF3D0')}${P('M16 7Q16.9 15.1 25 16Q16.9 16.9 16 25Q15.1 16.9 7 16Q15.1 15.1 16 7Z', '#FFFFFF')}`);
+  p.sparkle = S(`${P('M16 1Q17.6 14.4 31 16Q17.6 17.6 16 31Q14.4 17.6 1 16Q14.4 14.4 16 1Z', '#F3F9FF')}${P('M16 7Q16.9 15.1 25 16Q16.9 16.9 16 25Q15.1 16.9 7 16Q15.1 15.1 16 7Z', '#FFFFFF')}`);
   const sp = []; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 6.4 : 14; sp.push([16 + Math.cos(a) * r, 17 + Math.sin(a) * r]); }
   p.star = S(`<path d="${poly(sp)}" fill="#FFEBAE" stroke="#FFEBAE" stroke-width="3" stroke-linejoin="round"/>` + `<path d="${poly(sp.map(([x, y]) => [16 + (x - 16) * 0.55, 17 + (y - 17) * 0.55]))}" fill="#FFFCEA"/>`);
-  p.firefly = S(circ(16, 16, 16, 'url(#ff)') + circ(16, 16, 4.2, '#F4FFB8') + circ(15, 15, 2, '#FFFFF0'), rg('ff', [[0, '#EFFF9A', 0.95], [0.3, '#D8F57A', 0.55], [1, '#C8F06A', 0]]));
-  // blossom petal (spring): blush pink, a notch at the tip
-  p.petal = S(`<g transform="rotate(-20 16 16)">${P('M16 4C22 7 24 17 16 28C8 17 10 7 16 4Z', '#FBDCE6')}${P('M16 4C22 7 24 17 16 28C19 18 19 9 16 4Z', '#F2C5D4')}${P('M13.6 4.6L16 8L18.4 4.6Q16 3 13.6 4.6Z', '#FFFFFF', ' opacity="0.9"')}${ell(13.5, 12, 2, 4, '#FFF3F7', ' opacity="0.9"')}</g>`);
-  // autumn leaves: dusty apricot (a) and soft rose-brown (b) — muted, never answer orange/red
-  const leaf = (c1, c2, vein, rot) => S(`<g transform="rotate(${rot} 16 16)">${P('M16 3C24 8 25 20 16 29C7 20 8 8 16 3Z', c1)}${P('M16 3C24 8 25 20 16 29C19 20 20 10 16 3Z', c2)}${strokeP('M16 6L16 30M16 13l4 -3M16 19l-4 -3M16 22l4 -3', vein, 1.3)}</g>`);
-  p.leaf_a = leaf('#E8BC8A', '#D9A776', '#C08E61', -30);
-  // leaf_b: a rounded maple-ish 5-lobe leaf
-  const lobes = []; for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + (i - 2) * 0.62; lobes.push([16 + Math.cos(a) * 12, 15 + Math.sin(a) * 12]); }
-  p.leaf_b = S(`<g transform="rotate(18 16 16)">${lobes.map(([x, y]) => circ(x, y, 5.2, '#D9A193')).join('')}${circ(16, 16, 8.5, '#D9A193')}${circ(18, 18, 6, '#C98D80', ' opacity="0.8"')}${strokeP('M16 30L16 16M16 16L9 9M16 16L23 9M16 16L16 5', '#B47A6E', 1.3)}</g>`);
   // snowflakes: snow1 = soft round flake, snow2 = little six-arm crystal
   p.snow1 = S(circ(16, 16, 11, 'url(#sn)') + circ(16, 16, 6.5, '#FFFFFF') + circ(14, 14, 2.2, '#FFFFFF'), rg('sn', [[0, '#FFFFFF', 0.9], [0.6, '#F1F7FC', 0.6], [1, '#E6F0F8', 0]]));
   let arms = ''; for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3, c = Math.cos(a), s = Math.sin(a); arms += `M16 16L${f(16 + c * 12)} ${f(16 + s * 12)}M${f(16 + c * 7)} ${f(16 + s * 7)}L${f(16 + c * 7 + Math.cos(a + 0.8) * 4)} ${f(16 + s * 7 + Math.sin(a + 0.8) * 4)}M${f(16 + c * 7)} ${f(16 + s * 7)}L${f(16 + c * 7 + Math.cos(a - 0.8) * 4)} ${f(16 + s * 7 + Math.sin(a - 0.8) * 4)}`; }
-  p.snow2 = S(strokeP(arms, '#DCE9F4', 3.6) + strokeP(arms, '#FFFFFF', 2) + circ(16, 16, 2.6, '#FFFFFF'));
-  p.puff = S(`${circ(11, 18, 8, 'url(#pf)')}${circ(19, 14, 10, 'url(#pf)')}${circ(21, 21, 7, 'url(#pf)')}`, rg('pf', [[0, '#FFFDF6', 0.95], [0.7, '#EEF0E6', 0.8], [1, '#E0E4D6', 0]]));
+  p.snow2 = S(strokeP(arms, '#CFE0EE', 3.6) + strokeP(arms, '#FFFFFF', 2) + circ(16, 16, 2.6, '#FFFFFF'));
+  // rain drop: a slim falling streak with a rounded head (pale blue-white, reads on grey-blue sky); points DOWN
+  p.drop = S(`${P('M16 3Q19.6 13 21.2 20.2A5.3 5.3 0 0 1 10.8 20.2Q12.4 13 16 3Z', '#DCEAF5', ' stroke="#9DB9CF" stroke-width="1.4" stroke-linejoin="round"')}${P('M16 3Q19.6 13 21.2 20.2A5.3 5.3 0 0 1 16 25.5Q19 17 16 3Z', '#BFD5E6')}${ell(13.8, 19.5, 1.4, 3, '#FFFFFF', ' opacity="0.95"')}`);
+  // splash: a little crown ring on the ice + two flying droplets (thin blue-grey edge so it reads on white snow too)
+  const ed = ' stroke="#9DB9CF" stroke-width="1.1" stroke-linejoin="round"';
+  p.splash = S(`<ellipse cx="16" cy="23" rx="11" ry="4" fill="none" stroke="#9DB9CF" stroke-width="3.6"/><ellipse cx="16" cy="23" rx="11" ry="4" fill="none" stroke="#E6F0F8" stroke-width="2"/>${P('M7 22Q8 14 10.5 12Q10 17 11 22Z', '#E6F0F8', ed)}${P('M25 22Q24 14 21.5 12Q22 17 21 22Z', '#E6F0F8', ed)}${P('M14.4 21Q15 12 16 9Q17 12 17.6 21Z', '#F1F7FC', ed)}${circ(9, 7.5, 1.9, '#E6F0F8', ed)}${circ(23.5, 6.5, 1.7, '#E6F0F8', ed)}`);
+  // ice shard: an angular translucent splinter with a bright facet
+  p.shard = S(`${P('M8 26L5 13L15 3L27 9L22 24Z', '#D3ECF8', ' opacity="0.95"')}${P('M15 3L27 9L22 24L15 15Z', '#A9D2E8')}${P('M8 26L5 13L15 3L15 15Z', '#EAF7FD')}${strokeP('M5.6 12.6L14.6 4', '#FFFFFF', 1.8)}${strokeP('M8 26L5 13L15 3L27 9L22 24Z', '#8FBFDA', 1.2, ' opacity="0.8"')}`);
+  p.puff = S(`${circ(11, 18, 8, 'url(#pf)')}${circ(19, 14, 10, 'url(#pf)')}${circ(21, 21, 7, 'url(#pf)')}`, rg('pf', [[0, '#FFFFFF', 0.95], [0.7, '#EEF4F9', 0.8], [1, '#DFE9F1', 0]]));
   p.confetti_a = S(`<g transform="rotate(20 16 16)"><rect x="8" y="11" width="16" height="10" rx="2.5" fill="#FFFFFF"/><rect x="8" y="16.5" width="16" height="4.5" rx="2" fill="#D9D9D9"/></g>`);
   p.confetti_b = S(`${strokeP('M5 20Q9 10 13 18T21 16T27 10', '#DADADA', 4.4)}${strokeP('M5 19.4Q9 9.4 13 17.4T21 15.4T27 9.4', '#FFFFFF', 2.6)}`);
   return p;
 }
 
 // ---------------- write ----------------
+const FILL = {}; for (const k in STAGES) FILL[k] = STAGES[k].fill;   // render.js colour below the ground art
 if (require.main === module) {
   const env = path.join(A, 'env'), par = path.join(A, 'particles');
   fs.mkdirSync(env, { recursive: true }); fs.mkdirSync(par, { recursive: true });
-  const files = { sun: genSun(), ...genClouds() };
-  let first = true;
-  for (const s of Object.keys(SEASONS)) {
-    const C = SEASONS[s];
-    files['far_' + s] = genFar(C); files['mid_' + s] = genMid(C, first); files['ground_' + s] = genGround(C); first = false;
-  }
+  // forest-only leftovers
+  for (const s of ['spring', 'summer', 'autumn', 'winter']) for (const l of ['far', 'mid', 'ground']) { try { fs.unlinkSync(path.join(env, `${l}_${s}.svg`)); } catch (e) { /* gone */ } }
+  for (const n of ['petal', 'leaf_a', 'leaf_b', 'firefly']) { try { fs.unlinkSync(path.join(par, n + '.svg')); } catch (e) { /* gone */ } }
+  const files = { sun: genSun(), ...genClouds(), rainbow: genRainbow() };
+  for (const s of Object.keys(STAGES)) { const C = STAGES[s]; files['far_' + s] = genFar(C, s); files['mid_' + s] = genMid(C); files['ground_' + s] = genGround(C); }
   for (const [k, v] of Object.entries(files)) fs.writeFileSync(path.join(env, k + '.svg'), v);
   const parts = genParticles();
   for (const [k, v] of Object.entries(parts)) fs.writeFileSync(path.join(par, k + '.svg'), v);
@@ -479,9 +417,8 @@ if (require.main === module) {
     const blur = (v.match(/feGaussianBlur/g) || []).length;
     const m = v.match(/width="(\d+)" height="(\d+)" viewBox="0 0 (\d+) (\d+)"/);
     const okBox = m && m[1] === m[3] && m[2] === m[4];
-    console.log(`${k.padEnd(22)} ${kb.toFixed(1)} KB${kb > 90 ? '  TOO BIG' : ''}${/<text|<script|href=|@import|font|NaN/.test(v) || blur > 1 ? '  FORBIDDEN' : ''}${okBox ? '' : '  BAD VIEWBOX'}`);
+    console.log(`${k.padEnd(22)} ${kb.toFixed(1)} KB${kb > 90 ? '  TOO BIG' : ''}${/<text|<script|href=|@import|font|NaN|undefined/.test(v) || blur > 1 ? '  FORBIDDEN' : ''}${okBox ? '' : '  BAD VIEWBOX'}`);
   }
-  console.log('BRANCHES (mid svg coords, lantern hang points):', JSON.stringify(BRANCHES.map(b => [b.x, b.y])));
+  console.log('SEA (mid svg coords):', JSON.stringify(SEA), ' FILL:', JSON.stringify(FILL));
 }
-function branches() { if (!BRANCHES.length) genMid(SEASONS.spring, true); return BRANCHES; }
-module.exports = { SEASONS, branches, BIG_TREES };
+module.exports = { STAGES, SEA, FILL, seaY, shelfY };

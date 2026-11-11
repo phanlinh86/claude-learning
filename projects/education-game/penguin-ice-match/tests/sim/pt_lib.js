@@ -1,4 +1,4 @@
-// Dee's Forest Memory — high-speed playtest harness v2 (report-only; never edits game code).
+// Tuk's Ice Match — high-speed playtest harness v2 (report-only; never edits game code).
 // Adds to tests/sim/lib.js: extra child models (weak4, impatient4, repeat4, spam4 anywhere, spam4c on cards, stuck1),
 // a per-phase time ledger (waiting vs playing), reward crowding at the end of each chapter (final perch boxes),
 // card size per round, wasted taps (taps while the game is not listening).

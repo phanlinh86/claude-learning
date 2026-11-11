@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Dee's Forest Memory — determinism: (1) same seed + same driver + same frame dt → identical event stream;
+// Tuk's Ice Match — determinism: (1) same seed + same driver + same frame dt → identical event stream;
 // (2) inputs recorded at 1/30 s frames and replayed at 1/120 s (and 1/60 s) frames → identical event stream
 //     (inputs land on the same fixed sub-step, so the world must not depend on how dt is split).
 'use strict';

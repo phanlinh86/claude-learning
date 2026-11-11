@@ -1,29 +1,28 @@
-/* Dee's Forest Memory — IM.Weather (headless, deterministic forest seasons; DESIGN §5.3)
+/* Tuk's Ice Match — IM.Weather (headless, deterministic polar weather stages; DESIGN §5.3)
  *
  *   const wx = new IM.Weather({ width, height, seed });
  *   wx.resize(W, H);
- *   wx.setWeather(i, { instant });   // 0 spring, 1 summer, 2 autumn, 3 winter (2.5 s crossfade)
- *   wx.update(dt, { groundY });      // fixed 1/60 s sub-steps (accumulator) → same result for any dt split
- *   wx.burst(x, y, { kind:'confetti'|'puff'|'sparkle', n, color })   // one-shot effects (same cap)
- *   wx.particles[] { sprite, x, y, size, rot, flipX, alpha, layer:'sky'|'back'|'front', kind, glow?, color?, flap? }
+ *   wx.setWeather(i, { instant });   // 0 sunny, 1 breezy, 2 rain, 3 rainbow (2.5 s crossfade)
+ *   wx.update(dt, { groundY, lakeTop });   // fixed 1/60 s sub-steps → same result for any dt split. lakeTop = top of the
+ *                                    // frozen lake (rain splash rings land between lakeTop and groundY; default 0.5·groundY)
+ *   wx.burst(x, y, { kind:'confetti'|'puff'|'sparkle'|'shard'|'splash', n, color })   // one-shot effects (same cap)
+ *   wx.particles[] { sprite, x, y, size, rot, flipX, scaleY?, stretch?, alpha, layer:'sky'|'back'|'front', kind, color? }
  *   wx.clouds[]    { sprite:'cloud1..3', x, y, scale, alpha }   // drawn width 300·scale, centre x,y
- *   wx.stars[]     { x, y, r, phase, tw }   // unused by the seasons (ambient.stars = 0), kept for the shared renderer
- *   wx.ambient     { skyTop, skyBottom, horizon, tint, wind, sway, sun, sunX, sunY, moon, moonX, moonY, stars, darkness (0),
- *                    gust, windBase, season (0..3, = the target season) }
+ *   wx.ambient     { skyTop, skyBottom, horizon, tint, wind, sway, sun, sunX, sunY, darkness, stage (0..3), rainbow (0..1),
+ *                    gust (0..1), windBase, season (= stage, old name), moon, stars (0) }
  *       wind      px/s, gusty, −40..40 (positive = blowing right). main copies it into world.wind every frame.
- *       sway      0..1 for grass / trees;   sunX/sunY 0..1 of the screen.
+ *       rainbow   0..1 opacity of env/rainbow.svg (crossfades with the stage).
  *
- * Draw a particle: translate(x,y) → rotate(rot) → scale(flipX, 1) → sprite of width `size` centred, globalAlpha = alpha.
- * sprite 'butterfly' has no SVG: draw IM.CardArt.drawButterfly(ctx, p.color, p.size, p.flap) (flap 0..1).
- * glow:true → soft additive halo (fireflies). Layers: 'sky' (behind the hills), 'back' (in front of the scenery, behind
- * the cards / Dee), 'front' (over everything; few, faint).
+ * Draw a particle: translate(x,y) → rotate(rot) → scale(flipX · (stretch || 1), scaleY || 1) → sprite of width `size`
+ * centred, globalAlpha = alpha. Streaks (breezy) have stretch 1.5–4 along their heading (rot = heading); rain drops have
+ * rot = heading − π/2 (sprite drawn vertical); splash rings have scaleY 0.4 (a flat ellipse on the ice).
  *
- * Seasons (docs/MECHANICS.md §7):
- *  0 spring : falling petals (flutter down, sway, wrap) + butterflies (wander, flap 7–9 Hz) + a few sparkles
- *  1 summer : sun sparkles (glints in the air) + a few fireflies (glow, blink) + 2 butterflies
- *  2 autumn : tumbling leaves (leaf_a / leaf_b) that fall and are blown across by strong gusts
- *  3 winter : snowflakes (snow1 / snow2) falling with a slow sway, a few bigger front flakes
- *  gusts    : every 4–7 s (0.6 s rise, 0.8 s hold, 1.5 s decay) push wind and sway, scaled by the season's gustiness.
+ * Stages (docs/MECHANICS.md §7):
+ *  0 sunny  : a few sparkles glinting in the air
+ *  1 breezy : blowing snow (snow1 / snow2) + snow streaks that brighten and speed up in gusts (gust > 0.6)
+ *  2 rain   : falling drops (slanted by the wind) + tiny splash rings on the ice at the lake level
+ *  3 rainbow: sparkles + gentle falling snow1, ambient.rainbow → 1
+ *  gusts    : every 4–7 s (0.6 s rise, 0.8 s hold, 1.5 s decay) push wind and sway, scaled by the stage's gustiness.
  */
 (function (IM) {
   'use strict';
@@ -37,47 +36,44 @@
 
   // ---- sky per season (light and less saturated than every answer colour)
   var SKY = [
-    { top: '#A9D8F0', bottom: '#EEF7EE', horizon: '#F6F2E2', tint: 'rgba(255,200,225,0.06)' },   // 0 spring: soft blue → mint, blossom tint
-    { top: '#7EC4EE', bottom: '#DFF2FA', horizon: '#F2F6E2', tint: null },                        // 1 summer: clear blue
-    { top: '#E9C9A0', bottom: '#FBEBD6', horizon: '#F6DDB8', tint: 'rgba(255,170,90,0.06)' },     // 2 autumn: warm apricot haze
-    { top: '#C5D7E6', bottom: '#EEF4F8', horizon: '#F7FAFC', tint: 'rgba(205,222,255,0.08)' }     // 3 winter: pale grey-blue
+    { top: '#8CCBF0', bottom: '#E8F6FC', horizon: '#F4FAFD', tint: null },                        // 0 sunny: bright, crisp blue
+    { top: '#B9B8D8', bottom: '#ECEBF4', horizon: '#F3F1F7', tint: 'rgba(200,190,235,0.06)' },   // 1 breezy: lilac-grey
+    { top: '#9DB2C6', bottom: '#DCE5ED', horizon: '#E8EEF3', tint: 'rgba(120,140,170,0.08)' },   // 2 rain: soft grey-blue
+    { top: '#A3D8F4', bottom: '#F0F8FC', horizon: '#FBFDFE', tint: 'rgba(255,240,250,0.05)' }    // 3 rainbow: fresh, light
   ];
-  var NUM_KEYS = ['windBase', 'gusty', 'sway', 'sun', 'sunX', 'sunY', 'moon', 'moonX', 'moonY', 'stars', 'darkness'];
-  var BF_COLORS = ['yellow', 'pink', 'blue', 'orange', 'purple'];   // ambient butterflies (IM.CardArt.drawButterfly colour keys)
+  var NUM_KEYS = ['windBase', 'gusty', 'sway', 'sun', 'sunX', 'sunY', 'moon', 'moonX', 'moonY', 'stars', 'darkness', 'rainbow'];
 
   var MOODS = [
-    { name: 'spring',
-      amb: { windBase: 8, gusty: 10, sway: 0.2, sun: 1, sunX: 0.8, sunY: 0.16, moon: 0, moonX: 0.86, moonY: 0.3, stars: 0, darkness: 0 },
+    { name: 'sunny',
+      amb: { windBase: 6, gusty: 6, sway: 0.15, sun: 1, sunX: 0.8, sunY: 0.14, moon: 0, moonX: 0.86, moonY: 0.3, stars: 0, darkness: 0, rainbow: 0 },
       clouds: { n: 3, speed: [5, 10], alpha: 0.9, scale: [0.55, 0.85] },
       emitters: [
-        { kind: 'petal', layer: 'back', count: 16, size: [12, 18], alpha: [0.8, 1], sprite: 'petal' },
-        { kind: 'petal', layer: 'front', count: 3, size: [18, 24], alpha: [0.55, 0.7], sprite: 'petal', depth: 1.4 },
-        { kind: 'butterfly', layer: 'back', count: 3, size: [26, 34], alpha: [0.9, 1], sprite: 'butterfly' },
-        { kind: 'sparkle', layer: 'sky', count: 3, size: [10, 16], alpha: [0.5, 0.8], sprite: 'sparkle' }
+        { kind: 'sparkle', layer: 'back', count: 8, size: [10, 18], alpha: [0.55, 0.85], sprite: 'sparkle' },
+        { kind: 'sparkle', layer: 'sky', count: 4, size: [10, 16], alpha: [0.5, 0.8], sprite: 'sparkle' }
       ] },
-    { name: 'summer',
-      amb: { windBase: 6, gusty: 8, sway: 0.18, sun: 1, sunX: 0.68, sunY: 0.1, moon: 0, moonX: 0.86, moonY: 0.3, stars: 0, darkness: 0 },
-      clouds: { n: 4, speed: [6, 12], alpha: 0.95, scale: [0.6, 0.95] },
+    { name: 'breezy',
+      amb: { windBase: 16, gusty: 22, sway: 0.4, sun: 0.8, sunX: 0.76, sunY: 0.18, moon: 0, moonX: 0.86, moonY: 0.3, stars: 0, darkness: 0, rainbow: 0 },
+      clouds: { n: 4, speed: [10, 18], alpha: 0.9, scale: [0.6, 0.95] },
       emitters: [
-        { kind: 'sparkle', layer: 'back', count: 10, size: [10, 18], alpha: [0.55, 0.85], sprite: 'sparkle' },
-        { kind: 'firefly', layer: 'back', count: 6, size: [14, 20], alpha: [0.7, 0.95], sprite: 'firefly' },
-        { kind: 'butterfly', layer: 'back', count: 2, size: [26, 34], alpha: [0.9, 1], sprite: 'butterfly' }
+        { kind: 'snow', layer: 'back', count: 16, size: [8, 14], alpha: [0.8, 1], sprite: 'snow1' },
+        { kind: 'snow', layer: 'back', count: 8, size: [10, 16], alpha: [0.8, 1], sprite: 'snow2' },
+        { kind: 'streak', layer: 'back', count: 14, size: [10, 16], alpha: [0.6, 0.9], sprite: 'snow1' },
+        { kind: 'streak', layer: 'front', count: 3, size: [16, 22], alpha: [0.45, 0.6], sprite: 'snow1', depth: 1.4 }
       ] },
-    { name: 'autumn',
-      amb: { windBase: 14, gusty: 26, sway: 0.35, sun: 1, sunX: 0.76, sunY: 0.24, moon: 0, moonX: 0.86, moonY: 0.3, stars: 0, darkness: 0 },
-      clouds: { n: 3, speed: [8, 14], alpha: 0.9, scale: [0.6, 0.95] },
+    { name: 'rain',
+      amb: { windBase: 8, gusty: 10, sway: 0.2, sun: 0.25, sunX: 0.8, sunY: 0.16, moon: 0, moonX: 0.86, moonY: 0.3, stars: 0, darkness: 0.06, rainbow: 0 },
+      clouds: { n: 5, speed: [6, 12], alpha: 0.95, scale: [0.7, 1.05] },
       emitters: [
-        { kind: 'leaf', layer: 'back', count: 9, size: [16, 24], alpha: [0.85, 1], sprite: 'leaf_a' },
-        { kind: 'leaf', layer: 'back', count: 9, size: [16, 24], alpha: [0.85, 1], sprite: 'leaf_b' },
-        { kind: 'leaf', layer: 'front', count: 2, size: [26, 32], alpha: [0.55, 0.7], sprite: 'leaf_a', depth: 1.4 }
+        { kind: 'drop', layer: 'back', count: 40, size: [10, 16], alpha: [0.55, 0.8], sprite: 'drop' },
+        { kind: 'drop', layer: 'front', count: 6, size: [16, 22], alpha: [0.4, 0.55], sprite: 'drop', depth: 1.4 }
       ] },
-    { name: 'winter',
-      amb: { windBase: 5, gusty: 8, sway: 0.12, sun: 0.55, sunX: 0.8, sunY: 0.18, moon: 0, moonX: 0.86, moonY: 0.3, stars: 0, darkness: 0 },
-      clouds: { n: 4, speed: [3, 7], alpha: 0.85, scale: [0.6, 1.0] },
+    { name: 'rainbow',
+      amb: { windBase: 5, gusty: 6, sway: 0.12, sun: 1, sunX: 0.82, sunY: 0.12, moon: 0, moonX: 0.86, moonY: 0.3, stars: 0, darkness: 0, rainbow: 1 },
+      clouds: { n: 3, speed: [4, 8], alpha: 0.85, scale: [0.55, 0.9] },
       emitters: [
-        { kind: 'snow', layer: 'back', count: 26, size: [8, 14], alpha: [0.8, 1], sprite: 'snow1' },
-        { kind: 'snow', layer: 'back', count: 14, size: [10, 16], alpha: [0.8, 1], sprite: 'snow2' },
-        { kind: 'snow', layer: 'front', count: 4, size: [18, 24], alpha: [0.5, 0.65], sprite: 'snow2', depth: 1.5 }
+        { kind: 'sparkle', layer: 'back', count: 10, size: [10, 18], alpha: [0.55, 0.9], sprite: 'sparkle' },
+        { kind: 'sparkle', layer: 'sky', count: 4, size: [10, 16], alpha: [0.5, 0.8], sprite: 'sparkle' },
+        { kind: 'snow', layer: 'back', count: 12, size: [8, 12], alpha: [0.7, 0.9], sprite: 'snow1', gentle: true }
       ] }
   ];
   function parseTint(t) {
@@ -99,7 +95,7 @@
     this.particles = []; this.clouds = []; this.stars = [];
     this.mood = 0; this.weather = 0;
     this.ramp = [0, 0, 0, 0];
-    this.groundY = this.height - 96;
+    this.groundY = this.height - 96; this.lakeTop = null;
     this.gust = 0; this._gustT = this.rng.float(4, 7); this._gustAge = -1; this._gustAmp = 1;
     this._fadeU = 1; this._from = null;
     this.ambient = {};
@@ -110,8 +106,9 @@
   Weather.SKY = SKY;
   Weather.CAP = HARD_CAP;
   Weather.FADE_TIME = FADE_TIME;
-  Weather.SPRITES = ['petal', 'leaf_a', 'leaf_b', 'snow1', 'snow2', 'sparkle', 'star', 'firefly', 'puff', 'confetti_a', 'confetti_b', 'butterfly'];
-  Weather.SEASONS = ['spring', 'summer', 'autumn', 'winter'];
+  Weather.SPRITES = ['snow1', 'snow2', 'drop', 'splash', 'sparkle', 'star', 'shard', 'puff', 'confetti_a', 'confetti_b'];
+  Weather.STAGES = ['sunny', 'breezy', 'rain', 'rainbow'];
+  Weather.SEASONS = Weather.STAGES;   // old name
   Weather.CLOUD_SPRITES = ['cloud1', 'cloud2', 'cloud3'];
 
   var P = Weather.prototype;
@@ -130,7 +127,7 @@
 
   P.resize = function (W, H) {
     var sx = W / this.width, sy = H / this.height, i;
-    for (i = 0; i < this.particles.length; i++) { this.particles[i].x *= sx; this.particles[i].y *= sy; if (this.particles[i].hy !== undefined) this.particles[i].hy *= sy; }
+    for (i = 0; i < this.particles.length; i++) { this.particles[i].x *= sx; this.particles[i].y *= sy; if (this.particles[i].landY !== undefined) this.particles[i].landY *= sy; }
     for (i = 0; i < this.clouds.length; i++) { this.clouds[i].x *= sx; this.clouds[i].y *= sy; }
     for (i = 0; i < this.stars.length; i++) { this.stars[i].x *= sx; this.stars[i].y *= sy; }
     this.groundY *= sy;
@@ -187,7 +184,8 @@
     a.sway = clamp(a._sway + 0.3 * this.gust, 0, 1);
     a.darkness = clamp(a._darkness, 0, 0.28);
     a.gust = this.gust;
-    a.season = this.mood;
+    a.rainbow = clamp(a._rainbow, 0, 1);
+    a.stage = this.mood; a.season = this.mood;
     delete a.gusty;
   };
 
@@ -248,56 +246,57 @@
     }
   };
 
-  /** Meadow box for wanderers: x 4–96 % of W, y from 30 % of the ground line down to just above the grass. */
-  P._box = function (kind) {
-    var gY = this.groundY, W = this.width;
-    if (kind === 'firefly') return { x0: 0.03 * W, x1: 0.97 * W, y0: 0.45 * gY, y1: gY + 40 };
-    return { x0: 0.04 * W, x1: 0.96 * W, y0: 0.3 * gY, y1: gY - 10 };
-  };
+  P._lakeTop = function () { return this.lakeTop !== null ? this.lakeTop : 0.5 * this.groundY; };
 
   P._spawn = function (m, e, anywhere) {
     var em = MOODS[m].emitters[e], r = this.rng, W = this.width, gY = this.groundY;
     var p = { sprite: em.sprite, x: 0, y: 0, size: r.float(em.size[0], em.size[1]), rot: 0, flipX: 1, alpha: 0,
       layer: em.layer, kind: em.kind, mood: m, emitter: e, a0: r.float(em.alpha[0], em.alpha[1]), fade: anywhere ? 1 : 0,
       dying: false, age: 0, vx: 0, vy: 0, depth: em.depth || 1 };
-    var B;
     switch (em.kind) {
-      case 'butterfly':
-      case 'firefly':
-        B = this._box(em.kind);
-        p.x = r.float(B.x0, B.x1); p.y = r.float(B.y0, B.y1);
-        if (!anywhere && em.kind === 'butterfly') { p.x = r.chance(0.5) ? -20 : W + 20; p.fade = 1; }
-        p.head = r.float(0, TAU); p.turn = 0; p.sp = em.kind === 'butterfly' ? r.float(35, 60) : r.float(10, 22);
-        p.ph = r.float(0, TAU); p.flapW = r.float(7, 9) * TAU; p.bobW = r.float(1.5, 2.5);
-        p.blink = r.float(2, 4); p.blinkPh = r.float(0, 1);
-        if (em.kind === 'firefly') p.glow = true;
-        else { p.color = r.pick(BF_COLORS); p.flap = 1; }
-        break;
-      case 'petal':
-      case 'leaf':
       case 'snow':
-        // fallers: start anywhere (instant) or just above the top edge; vy0 = fall speed, sway phase/rate, spin
+        // fallers: start anywhere (instant) or just above the top edge; fall speed, sway phase/rate, spin
         p.ph = r.float(0, TAU); p.w = r.float(0.6, 1.4); p.spin = r.float(-1.5, 1.5);
-        p.fall = em.kind === 'snow' ? r.float(30, 55) : em.kind === 'leaf' ? r.float(38, 62) : r.float(26, 44);
-        p.fall *= p.depth;
+        p.fall = (em.gentle ? r.float(22, 38) : r.float(30, 55)) * p.depth;
+        p.gentle = !!em.gentle;
         p.x = r.float(-0.05, 1.05) * W;
         p.y = anywhere ? r.float(-0.05, 1) * (gY + 40) : -r.float(10, 60);
+        p.fade = 1;
+        break;
+      case 'streak':
+        // blowing snow streaks: fast, nearly horizontal, re-enter from the windward edge
+        p.ph = r.float(0, TAU); p.sp = r.float(150, 240) * p.depth; p.fall = r.float(18, 40);
+        p.x = anywhere ? r.float(-0.05, 1.05) * W : -r.float(20, 120);
+        p.y = r.float(0.05, 0.95) * (gY + 30);
+        p.fade = 1;
+        break;
+      case 'drop':
+        p.fall = r.float(520, 700) * p.depth; p.x = r.float(-0.05, 1.05) * W;
+        p.y = anywhere ? r.float(-0.05, 1) * gY : -r.float(10, 80);
+        p.landY = r.float(this._lakeTop(), gY);
         p.fade = 1;
         break;
       case 'sparkle':
       case 'star':
         p.x = r.float(0.04, 0.96) * W;
-        p.y = (em.kind === 'star' ? r.float(0.05, 0.5) : r.float(0.25, 0.8)) * gY;
+        p.y = (em.kind === 'star' ? r.float(0.05, 0.5) : em.layer === 'sky' ? r.float(0.05, 0.35) : r.float(0.25, 0.8)) * gY;
         p.life = em.kind === 'star' ? r.float(2, 4) : r.float(1, 2);
         p.age = anywhere ? r.float(0, p.life) : 0;
-        p.vx = em.kind === 'sparkle' ? r.float(-6, 6) : 0; p.vy = em.kind === 'sparkle' ? r.float(-8, 2) : 0;
+        p.vx = r.float(-6, 6); p.vy = r.float(-8, 2);
         p.fade = 1; p.rotV = r.float(-1, 1); p.s0 = p.size;
         break;
-      case 'mist':
-        p.x = r.float(-0.1, 1.1) * W; p.y = gY + r.float(-60, 10);
-        p.vx = r.float(4, 10) * r.sign(); p.ph = r.float(0, TAU);
-        break;
     }
+    this.particles.push(p);
+    return p;
+  };
+
+  /** A splash ring on the ice (rain) — counts toward the hard cap; skipped when full. */
+  P._ring = function (x, y, big) {
+    if (this.particles.length >= HARD_CAP) return null;
+    var r = this.rng, s0 = big ? r.float(16, 22) : r.float(6, 9);
+    var p = { sprite: 'splash', x: x, y: y, size: s0, s0: s0, s1: s0 * (big ? 3 : 3.2), rot: 0, flipX: 1, scaleY: 0.4, alpha: 0,
+      layer: 'back', kind: 'splash', mood: -1, emitter: -1, a0: big ? 0.9 : r.float(0.5, 0.75), fade: 1, dying: false, age: 0,
+      vx: 0, vy: 0, depth: 1, life: big ? 0.6 : r.float(0.3, 0.42) };
     this.particles.push(p);
     return p;
   };
@@ -309,10 +308,13 @@
     return null;
   };
 
-  /** One-shot effect particles (count toward the hard cap). color = palette key (renderer tints confetti). */
+  /** One-shot effect particles (count toward the hard cap). color = palette key (renderer tints confetti).
+   *  shard: ice shards fly up and fall (frost crack) · splash: water spray + one big ring (a fish dives) */
   P.burst = function (x, y, o) {
     o = o || {};
-    var kind = o.kind || 'confetti', n = o.n || 24, r = this.rng;
+    var kind = o.kind || 'confetti', r = this.rng;
+    var n = o.n || (kind === 'shard' ? 10 : kind === 'splash' ? 8 : 24);
+    if (kind === 'splash') this._ring(x, y, true);
     for (var i = 0; i < n && this.particles.length < HARD_CAP; i++) {
       var p = { sprite: 'confetti_a', x: x, y: y, size: 14, rot: r.float(0, TAU), flipX: 1, alpha: 1, layer: 'front', kind: kind,
         mood: -1, emitter: -1, a0: 1, fade: 1, dying: false, age: 0, vx: 0, vy: 0, depth: 1, color: o.color || null };
@@ -323,6 +325,14 @@
       } else if (kind === 'puff') {
         p.sprite = 'puff'; p.size = r.float(18, 28); p.layer = 'back';
         var a2 = r.float(-Math.PI, 0); p.vx = Math.cos(a2) * r.float(30, 80); p.vy = Math.sin(a2) * r.float(10, 40); p.life = r.float(0.45, 0.7); p.rotV = r.float(-2, 2);
+      } else if (kind === 'shard') {
+        p.sprite = 'shard'; p.size = r.float(10, 18); p.g = 1400;
+        var a4 = r.float(-Math.PI * 0.92, -Math.PI * 0.08), s4 = r.float(160, 420);
+        p.vx = Math.cos(a4) * s4; p.vy = Math.sin(a4) * s4; p.rotV = r.float(-12, 12); p.life = r.float(0.55, 0.85);
+      } else if (kind === 'splash') {
+        p.sprite = 'drop'; p.kind = 'spray'; p.size = r.float(8, 13); p.g = 1200;
+        var a5 = r.float(-Math.PI * 0.8, -Math.PI * 0.2), s5 = r.float(140, 320);
+        p.vx = Math.cos(a5) * s5; p.vy = Math.sin(a5) * s5; p.rotV = 0; p.life = r.float(0.45, 0.65);
       } else {
         p.sprite = 'sparkle'; p.size = r.float(12, 20); p.kind = 'sparkle'; p.life = r.float(0.5, 0.9);
         var a3 = r.float(0, TAU), s3 = r.float(60, 200); p.vx = Math.cos(a3) * s3; p.vy = Math.sin(a3) * s3; p.rotV = r.float(-3, 3); p.burst = true;
@@ -334,6 +344,7 @@
 
   P.update = function (dt, env) {
     if (env && env.groundY !== undefined) this.groundY = env.groundY;
+    if (env && env.lakeTop !== undefined) this.lakeTop = env.lakeTop;
     if (!(dt > 0)) return;
     this._acc += Math.min(dt, 1);
     while (this._acc >= this.stepH - 1e-12) { this._acc -= this.stepH; this._step(this.stepH); }
@@ -358,53 +369,59 @@
   };
 
   P._stepP = function (p, h) {
-    var W = this.width, H = this.height, gY = this.groundY, a = this.ambient, u, B;
+    var W = this.width, H = this.height, gY = this.groundY, a = this.ambient, u;
     p.age += h;
     if (p.dying) p.fade -= h / 0.8; else if (p.fade < 1) p.fade = Math.min(1, p.fade + h / 0.8);
     if (p.dying && p.fade <= 0) { this.particles.splice(this.particles.indexOf(p), 1); return; }
     switch (p.kind) {
-      case 'butterfly':
-      case 'firefly': {
-        B = this._box(p.kind);
-        // smooth random walk of the heading + steering back into the box
-        p.turn += (this.rng.float(-1, 1) * 3 - p.turn * 1.5) * h;
-        var cx = (B.x0 + B.x1) / 2, cy = (B.y0 + B.y1) / 2;
-        var out = p.x < B.x0 || p.x > B.x1 || p.y < B.y0 || p.y > B.y1;
-        var want = Math.atan2(cy - p.y, cx - p.x), dh = Math.atan2(Math.sin(want - p.head), Math.cos(want - p.head));
-        p.head += (p.turn + (out ? 2.5 * dh : 0.15 * dh)) * h;
-        var bf = p.kind === 'butterfly';
-        p.vx = Math.cos(p.head) * p.sp + a.wind * (bf ? 0.35 : 0.1);
-        p.vy = Math.sin(p.head) * p.sp * 0.6 + (bf ? Math.cos(p.ph + p.bobW * TAU * p.age) * 18 : 0);
-        p.x += p.vx * h; p.y += p.vy * h;
-        if (bf) {
-          var face = p.vx >= 0 ? 1 : -1;
-          p.flap = Math.abs(Math.cos(p.ph + p.flapW * p.age));   // wings: IM.CardArt.drawButterfly(ctx, p.color, p.size, p.flap)
-          p.flipX = face;                                          // facing only (the wing beat is in flap)
-          p.rot = clamp(p.vy * 0.004, -0.35, 0.35);
-          p.alpha = p.a0 * p.fade;
-        } else {
-          var bu = ((p.age / p.blink) + p.blinkPh) % 1, on = bu < 0.35 ? Math.sin(Math.PI * bu / 0.35) : 0;
-          p.alpha = p.a0 * p.fade * (0.12 + 0.88 * on * on);
-        }
-        if (p.x < -60 || p.x > W + 60) { p.x = clamp(p.x, -60, W + 60); p.head = Math.atan2(Math.sin(p.head), -Math.cos(p.head)); }
-        break;
-      }
-      case 'petal':
-      case 'leaf':
       case 'snow': {
-        // terminal-speed fall + sideways flutter (sway) + wind drift; gusts lift leaves and blow them across
-        var k = p.kind, sw = k === 'snow' ? 14 : k === 'leaf' ? 34 : 24, windK = k === 'snow' ? 0.5 : k === 'leaf' ? 1.6 : 0.9;
-        p.vx = (a.wind * windK) * p.depth + sw * Math.cos(p.ph + p.age * p.w * 2.2);
-        p.vy = p.fall - (k === 'leaf' ? 70 : k === 'petal' ? 25 : 10) * this.gust + (k === 'leaf' ? 18 * Math.sin(p.ph + p.age * 3.1) : 0);
+        // terminal-speed fall + sideways sway + wind drift (breezy: strong drift, gusts carry the flakes across)
+        var windK = p.gentle ? 0.4 : 0.9;
+        p.vx = a.wind * windK * p.depth + 14 * Math.cos(p.ph + p.age * p.w * 2.2);
+        p.vy = p.fall - 10 * this.gust;
         p.x += p.vx * h; p.y += p.vy * h;
-        p.rot += p.spin * (k === 'leaf' ? 2.5 : k === 'petal' ? 1.4 : 0.5) * h;
-        if (k !== 'snow') p.flipX = Math.cos(p.ph + p.age * (k === 'leaf' ? 3.4 : 2.6));   // tumbling (fractional = 3D turn)
+        p.rot += p.spin * 0.5 * h;
         p.alpha = p.a0 * p.fade;
         if (p.y > gY + 60 || p.x > W + 60 || p.x < -60) {
           if (p.dying || this.mood !== p.mood) { this._respawn(p); return; }
           p.y = -r0(this.rng, 10, 50); p.x = this.rng.float(-0.05, 1.05) * W; p.age = 0;
           if (a.wind > 20 && this.rng.chance(0.5)) { p.x = -30; p.y = this.rng.float(0.05, 0.6) * gY; }
         }
+        break;
+      }
+      case 'streak': {
+        var g = this.gust, gs = g * g * (3 - 2 * g);
+        p.vx = (p.sp + a.wind * 3) * (0.7 + 0.9 * gs);
+        p.vy = p.fall + 12 * Math.sin(p.ph + p.age * 2.3);
+        p.x += p.vx * h; p.y += p.vy * h;
+        p.rot = Math.atan2(p.vy, p.vx);
+        p.stretch = clamp(Math.abs(p.vx) / 100, 1.5, 4);
+        p.alpha = p.a0 * p.fade * (0.3 + 0.7 * (g > 0.6 ? 1 : gs));
+        if (p.x > W + 80 || p.y > gY + 60) {
+          if (p.dying || this.mood !== p.mood) { this._respawn(p); return; }
+          p.x = -this.rng.float(20, 120); p.y = this.rng.float(0.05, 0.95) * (gY + 30); p.age = 0;
+        }
+        break;
+      }
+      case 'drop': {
+        p.vx = a.wind * 1.2 * p.depth; p.vy = p.fall;
+        p.x += p.vx * h; p.y += p.vy * h;
+        p.rot = Math.atan2(p.vy, p.vx) - Math.PI / 2;
+        p.alpha = p.a0 * p.fade;
+        var landY = p.layer === 'front' ? gY + 50 : p.landY;
+        if (p.y >= landY) {
+          if (p.layer !== 'front') this._ring(p.x, landY, false);
+          if (p.dying || this.mood !== p.mood) { this._respawn(p); return; }
+          p.y = -this.rng.float(10, 80); p.x = this.rng.float(-0.05, 1.05) * W; p.age = 0;
+          p.landY = this.rng.float(this._lakeTop(), gY);
+        }
+        break;
+      }
+      case 'splash': {
+        u = p.age / p.life;
+        if (u >= 1) { this.particles.splice(this.particles.indexOf(p), 1); return; }
+        p.size = p.s0 + (p.s1 - p.s0) * Math.sqrt(u);
+        p.alpha = p.a0 * (1 - u);
         break;
       }
       case 'sparkle':
@@ -420,12 +437,15 @@
         p.alpha = p.a0 * p.fade * Math.sin(Math.PI * u);
         break;
       }
-      case 'mist':
-        p.x += (p.vx + a.wind * 0.15) * h;
-        p.y += Math.sin(p.ph + p.age * 0.4) * 2 * h;
-        if (p.x - p.size > W) p.x = -p.size; else if (p.x + p.size < 0) p.x = W + p.size;
-        p.alpha = p.a0 * p.fade * (0.8 + 0.2 * Math.sin(p.ph + p.age * 0.6));
+      case 'shard':
+      case 'spray': {
+        u = p.age / p.life;
+        if (u >= 1 || p.y > H + 30) { this.particles.splice(this.particles.indexOf(p), 1); return; }
+        p.vy += p.g * h; p.vx *= Math.pow(0.6, h);
+        p.x += p.vx * h; p.y += p.vy * h; p.rot = p.kind === 'spray' ? Math.atan2(p.vy, p.vx) - Math.PI / 2 : p.rot + p.rotV * h;
+        p.alpha = u > 0.6 ? (1 - u) / 0.4 : 1;
         break;
+      }
       case 'confetti': {
         u = p.age / p.life;
         if (u >= 1 || p.y > H + 30) { this.particles.splice(this.particles.indexOf(p), 1); return; }

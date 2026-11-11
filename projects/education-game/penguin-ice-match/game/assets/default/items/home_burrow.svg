@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><clipPath id="burrow_c1"><circle cx="64" cy="62.5" r="50" /></clipPath><clipPath id="burrow_c2"><path d="M 0 78 C 30 74 98 74 128 78 L 128 130 L 0 130 Z" /></clipPath><clipPath id="burrow_c3"><path d="M 0 108 C 8 66 40 50 66 50 C 92 50 120 66 128 108 Z" /></clipPath><clipPath id="burrow_c4"><path d="M 0 106 C 30 102 98 102 128 106 L 128 130 L 0 130 Z" /></clipPath><clipPath id="burrow_c5"><ellipse cx="66" cy="90" rx="23" ry="18" /></clipPath><clipPath id="burrow_c6"><ellipse cx="67" cy="93" rx="16" ry="13" /></clipPath><clipPath id="burrow_c7"><path d="M 40 82 C 48 72 58 68 66 68 C 76 68 86 72 92 82 C 82 76 50 76 40 82 Z" /></clipPath><g id="burrow_sil"><circle cx="64" cy="62.5" r="50" /></g></defs>
+<use href="#burrow_sil" xlink:href="#burrow_sil" transform="translate(0 3)" fill="#1E3550" stroke="#1E3550" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>
+<use href="#burrow_sil" xlink:href="#burrow_sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="64" cy="62.5" r="50" fill="#FBE3CC"/>
+<g clip-path="url(#burrow_c1)">
+<circle cx="46" cy="36.5" r="30" fill="#FFFFFF" opacity=".22"/>
+<circle cx="96" cy="30" r="9" fill="#FFD9A0" opacity=".9"/>
+<path d="M 0 78 C 30 74 98 74 128 78 L 128 130 L 0 130 Z" fill="#C9B48A"/>
+<g clip-path="url(#burrow_c2)">
+</g>
+<path d="M 0 78 C 30 74 98 74 128 78 L 128 130 L 0 130 Z" fill="none" stroke="#8E7650" stroke-width="2" stroke-linejoin="round"/>
+<path d="M 0 108 C 8 66 40 50 66 50 C 92 50 120 66 128 108 Z" fill="#DDE6EE"/>
+<g clip-path="url(#burrow_c3)"><g transform="translate(-5 -5)"><path d="M 0 108 C 8 66 40 50 66 50 C 92 50 120 66 128 108 Z" fill="#FFFFFF"/></g>
+<ellipse cx="44" cy="70" rx="12" ry="4" transform="rotate(-15 44 70)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M 0 108 C 8 66 40 50 66 50 C 92 50 120 66 128 108 Z" fill="none" stroke="#8E9AA6" stroke-width="3" stroke-linejoin="round"/>
+<path d="M 0 106 C 30 102 98 102 128 106 L 128 130 L 0 130 Z" fill="#DDE6EE"/>
+<g clip-path="url(#burrow_c4)"><g transform="translate(0 -3)"><path d="M 0 106 C 30 102 98 102 128 106 L 128 130 L 0 130 Z" fill="#F4F8FB"/></g>
+</g>
+<path d="M 0 106 C 30 102 98 102 128 106 L 128 130 L 0 130 Z" fill="none" stroke="#8E9AA6" stroke-width="2" stroke-linejoin="round"/>
+<ellipse cx="66" cy="90" rx="23" ry="18" fill="#8A5C38"/>
+<g clip-path="url(#burrow_c5)"><g transform="translate(-2 -3)"><ellipse cx="66" cy="90" rx="23" ry="18" fill="#A4724A"/></g>
+</g>
+<ellipse cx="66" cy="90" rx="23" ry="18" fill="none" stroke="#6E4628" stroke-width="2.4" stroke-linejoin="round"/>
+<ellipse cx="67" cy="93" rx="16" ry="13" fill="#3E2818"/>
+<g clip-path="url(#burrow_c6)">
+<ellipse cx="70" cy="97" rx="11" ry="7.5" fill="#2A1A0E"/>
+</g>
+<ellipse cx="67" cy="93" rx="16" ry="13" fill="none" stroke="#2A1A0E" stroke-width="1.6" stroke-linejoin="round"/>
+<path d="M 40 82 C 48 72 58 68 66 68 C 76 68 86 72 92 82 C 82 76 50 76 40 82 Z" fill="#FFFFFF"/>
+<g clip-path="url(#burrow_c7)">
+</g>
+<path d="M 40 82 C 48 72 58 68 66 68 C 76 68 86 72 92 82 C 82 76 50 76 40 82 Z" fill="none" stroke="#8E9AA6" stroke-width="1.6" stroke-linejoin="round"/>
+<path d="M 20 76 l -3 -9 M 22 76 l 0 -11 M 24 76 l 3 -9" fill="none" stroke="#B08A4A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 104 72 l -3 -9 M 106 72 l 0 -11 M 108 72 l 3 -9" fill="none" stroke="#B08A4A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 36 60 l -3 -9 M 38 60 l 0 -11 M 40 60 l 3 -9" fill="none" stroke="#B08A4A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 84 56 l -3 -9 M 86 56 l 0 -11 M 88 56 l 3 -9" fill="none" stroke="#B08A4A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<circle cx="64" cy="62.5" r="47.4" fill="none" stroke="#FFFFFF" stroke-width="2" opacity=".55"/>
+<circle cx="64" cy="62.5" r="50" fill="none" stroke="#B07A52" stroke-width="3"/>
+</svg>

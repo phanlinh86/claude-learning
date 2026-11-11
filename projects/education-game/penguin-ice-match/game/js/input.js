@@ -1,11 +1,16 @@
-/* Dee's Forest Memory — IM.Input: one-finger tap-to-flip input + kid-proofing + parent hold-gate.
+/* Tuk's Ice Match — IM.Input: one-finger tap-or-rub input + kid-proofing + parent hold-gate.
  *
- * Tap-to-flip: `down(x, y, ev)` fires SYNCHRONOUSLY inside pointerdown (no tap-vs-drag wait, no click delay), so the
- * world flips the card on touch-down. move/up are still delivered (harmless for a tap game, useful for tests).
+ * Tap: `down(x, y, ev)` fires SYNCHRONOUSLY inside pointerdown (no tap-vs-drag wait, no click delay), so the world
+ * cracks the frost on touch-down. Rub: while that finger stays down every pointermove is delivered as `move(x, y, ev)`
+ * → main.js calls world.pointerMove(x, y), which reveals a frosted block the finger ENTERS. To make a fast swipe
+ * reliable, a move uses the browser's coalesced points (getCoalescedEvents, when present) and fills long jumps with
+ * points at most `moveStep` logical px apart (default 32 px — a block is ≥ 104 px wide, so a finger can never jump
+ * over one). Set moveStep: 0 to get exactly one move per DOM event.
  *
  *   const detach = IM.Input.attach(canvas, {
  *     toLogical(clientX, clientY) → {x, y},
- *     down(x, y, ev), move(x, y, ev), up(x, y, ev), cancel(), hover?(x, y)   // hover: mouse without a button
+ *     down(x, y, ev), move(x, y, ev), up(x, y, ev), cancel(), hover?(x, y),  // hover: mouse without a button
+ *     moveStep?: 32                                                          // logical px between delivered moves
  *   });
  *
  * CALLBACK SIGNATURE: every handler receives two NUMBERS (x, y) in LOGICAL px (whatever toLogical returned),
@@ -56,7 +61,30 @@
       hover: safe(function (p) { if (h.hover && okp(p)) h.hover(+p.x, +p.y); }),
       cancel: safe(function () { if (h.cancel) h.cancel(); })
     };
-    function cancelActive() { if (active !== null) { active = null; fire.cancel(); } }
+    function cancelActive() { if (active !== null) { active = null; last = null; fire.cancel(); } }
+    // rub support: deliver the path, not only the newest point
+    var STEP = h.moveStep == null ? 32 : Math.max(0, +h.moveStep || 0);
+    var last = null;                   // last delivered logical point of the active pointer
+    function moveTo(p, e) {
+      if (!okp(p)) return;
+      if (STEP > 0 && last) {
+        var dx = p.x - last.x, dy = p.y - last.y, d = Math.sqrt(dx * dx + dy * dy);
+        var n = Math.min(40, Math.floor(d / STEP));
+        for (var i = 1; i <= n; i++) {
+          var f = i / (n + 1);
+          fire.move({ x: last.x + dx * f, y: last.y + dy * f }, e);
+        }
+      }
+      last = { x: +p.x, y: +p.y };
+      fire.move(p, e);
+    }
+    function startAt(p) { last = okp(p) ? { x: +p.x, y: +p.y } : null; return p; }
+    function coalesced(e) {
+      var list = null;
+      try { if (typeof e.getCoalescedEvents === 'function') list = e.getCoalescedEvents(); } catch (err) { list = null; }
+      if (!list || !list.length) return [e];
+      return list.length > 24 ? Array.prototype.slice.call(list, list.length - 24) : list;
+    }
 
     if (canvas.style) { canvas.style.touchAction = 'none'; canvas.style.webkitUserSelect = 'none'; canvas.style.userSelect = 'none'; }
 
@@ -74,17 +102,18 @@
         active = e.pointerId; activeType = e.pointerType;
         try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
         if (e.cancelable) e.preventDefault();
-        fire.down(pt(e.clientX, e.clientY), e);
+        fire.down(startAt(pt(e.clientX, e.clientY)), e);
       });
       on(canvas, 'pointermove', function (e) {
         if (active === null) { if (e.pointerType === 'mouse') fire.hover(pt(e.clientX, e.clientY)); return; }
         if (e.pointerId !== active) return;
         if (e.cancelable) e.preventDefault();
-        fire.move(pt(e.clientX, e.clientY), e);
+        var list = coalesced(e);
+        for (var i = 0; i < list.length; i++) moveTo(pt(list[i].clientX, list[i].clientY), e);
       });
       var end = function (e) {
         if (e.pointerId !== active) return;
-        active = null;
+        active = null; last = null;
         try { canvas.releasePointerCapture(e.pointerId); } catch (err) { /* ignore */ }
         fire.up(pt(e.clientX, e.clientY), e);
       };
@@ -106,20 +135,20 @@
         }
         var t = e.changedTouches[0];
         active = 'touch:' + t.identifier;
-        fire.down(pt(t.clientX, t.clientY), e);
+        fire.down(startAt(pt(t.clientX, t.clientY)), e);
       }, { passive: false });
       on(canvas, 'touchmove', function (e) {
         if (active === null) return;
         var t = findTouch(e.changedTouches, active);
         if (!t) return;
         if (e.cancelable) e.preventDefault();
-        fire.move(pt(t.clientX, t.clientY), e);
+        moveTo(pt(t.clientX, t.clientY), e);
       }, { passive: false });
       on(canvas, 'touchend', function (e) {
         var t = findTouch(e.changedTouches, active);
         if (!t) return;
         if (e.cancelable) e.preventDefault();   // no synthetic mouse events afterwards
-        active = null;
+        active = null; last = null;
         fire.up(pt(t.clientX, t.clientY), e);
       }, { passive: false });
       on(canvas, 'touchcancel', function (e) { if (findTouch(e.changedTouches, active)) cancelActive(); }, { passive: false });
@@ -128,15 +157,15 @@
         if (ignored(e.target) || e.button !== 0 || active !== null) return;
         active = 'mouse';
         e.preventDefault();
-        fire.down(pt(e.clientX, e.clientY), e);
+        fire.down(startAt(pt(e.clientX, e.clientY)), e);
       });
       on(W, 'mousemove', function (e) {
-        if (active === 'mouse') fire.move(pt(e.clientX, e.clientY), e);
+        if (active === 'mouse') moveTo(pt(e.clientX, e.clientY), e);
         else if (active === null && e.target === canvas) fire.hover(pt(e.clientX, e.clientY));
       });
       on(W, 'mouseup', function (e) {
         if (active !== 'mouse') return;
-        active = null;
+        active = null; last = null;
         fire.up(pt(e.clientX, e.clientY), e);
       });
     }

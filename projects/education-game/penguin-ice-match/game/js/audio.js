@@ -1,14 +1,14 @@
 /* IM.Audio — every sound is synthesized with WebAudio (no files to license or download).
  * Soft toddler-friendly SFX, a gentle generative music loop per weather, night breeze ambience,
- * and ducking while Dee speaks. iOS: call unlock() inside the first touchend/click. */
+ * and ducking while Tuk speaks. iOS: call unlock() inside the first touchend/click. */
 (function (IM) {
   'use strict';
   const NOTE = n => 440 * Math.pow(2, (n - 69) / 12);
   const MUSIC = [
-    { root: 60, tempo: 96, prog: [[0, 4, 7], [5, 9, 12], [7, 11, 14], [0, 4, 7]], lead: 'triangle' },    // spring: C major, waking up
-    { root: 62, tempo: 108, prog: [[0, 4, 7], [7, 11, 14], [9, 12, 16], [5, 9, 12]], lead: 'triangle' },  // summer: D major, bright
-    { root: 65, tempo: 88, prog: [[0, 4, 7], [-3, 0, 4], [5, 9, 12], [7, 11, 14]], lead: 'sine' },        // autumn: F major, warm
-    { root: 67, tempo: 76, prog: [[0, 4, 7], [-5, -1, 2], [-3, 0, 4], [-7, -3, 0]], lead: 'sine' }        // winter: G music box
+    { root: 60, tempo: 96, prog: [[0, 4, 7], [5, 9, 12], [7, 11, 14], [0, 4, 7]], lead: 'triangle' },    // sunny: C major, crisp morning
+    { root: 62, tempo: 108, prog: [[0, 4, 7], [7, 11, 14], [9, 12, 16], [5, 9, 12]], lead: 'triangle' },  // breezy: D major, skipping
+    { root: 65, tempo: 88, prog: [[0, 4, 7], [-3, 0, 4], [5, 9, 12], [7, 11, 14]], lead: 'sine' },        // rain: F major, soft
+    { root: 67, tempo: 76, prog: [[0, 4, 7], [-5, -1, 2], [-3, 0, 4], [-7, -3, 0]], lead: 'sine' }        // rainbow: G music box
   ];
   const SCALE = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24];
 
@@ -58,7 +58,8 @@
       this.sfx.gain.setTargetAtTime(this.sfxOn ? 0.9 : 0, t, 0.03);
       const mv = this.musicOn && this._playing ? (this.ducked ? 0.07 : 0.22) : 0;
       this.music.gain.setTargetAtTime(mv, t, this.ducked ? 0.08 : 0.5);
-      const av = this.sfxOn && this._playing && this.mood === 3 ? (this.ducked ? 0.02 : 0.05) : 0;   // soft winter wind
+      const base = this.mood === 1 ? 0.06 : this.mood === 2 ? 0.08 : 0;   // breezy: wind · rain: soft patter
+      const av = this.sfxOn && this._playing ? (this.ducked ? base * 0.35 : base) : 0;
       this.amb.gain.setTargetAtTime(av, t, 0.8);
     },
     setVolume(v) { this.setOptions({ volume: v }); },
@@ -160,11 +161,24 @@
           this.tone(330, 0.16, { type: 'sine', vol: 0.2, slideTo: 300 });
           this.tone(300, 0.22, { type: 'sine', vol: 0.18, at: 0.18, slideTo: 340 });
           break;
+        case 'crack':    // frost cracking off: a crunchy noise burst + an icy tick
+          this.noise(0.09, { vol: 0.22, type: 'highpass', f0: 2500 });
+          this.noise(0.05, { vol: 0.14, type: 'bandpass', f0: 5200, q: 2, at: 0.04 });
+          this.tone(NOTE(91) * r, 0.14, { type: 'triangle', vol: 0.12, at: 0.05 }); break;
+        case 'frost':    // frost growing back: a soft rising shimmer
+          this.noise(0.35, { vol: 0.08, type: 'bandpass', f0: 3000, f1: 6500, q: 1.4 }); break;
+        case 'clink': {  // two ice blocks touch: a glassy two-note ping
+          const n = SCALE[Math.min(SCALE.length - 1, Math.max(0, (opt.count || 1) - 1))];
+          this.tone(NOTE(91 + n), 0.35, { type: 'sine', vol: 0.24 }); this.tone(NOTE(98 + n), 0.3, { type: 'sine', vol: 0.12, at: 0.02 }); break;
+        }
+        case 'melt': this.noise(0.4, { vol: 0.07, type: 'lowpass', f0: 1800, f1: 600 }); this.tone(NOTE(84), 0.4, { type: 'sine', vol: 0.06, slideTo: NOTE(79) }); break;
+        case 'leap': this.tone(300 * r, 0.14, { type: 'sine', vol: 0.2, slideTo: 760 * r }); break;   // fish "bloop"
+        case 'splash': this.noise(0.28, { vol: 0.16, type: 'bandpass', f0: 1600, f1: 500, q: 0.8 }); this.tone(180, 0.1, { type: 'sine', vol: 0.1, slideTo: 90 }); break;
+        case 'home': [0, 4, 7].forEach((n, i) => this.tone(NOTE(81 + n), 0.2, { type: 'triangle', vol: 0.14, at: i * 0.07 })); break;
         case 'reward': {
           const k = opt.kind;
-          if (k === 'butterfly') [0, 4, 7, 12, 16].forEach((n, i) => this.tone(NOTE(86 + n), 0.12, { type: 'sine', vol: 0.09, at: i * 0.04 }));
-          else if (k === 'lantern') { this.tone(NOTE(88), 0.6, { type: 'sine', vol: 0.12 }); this.tone(NOTE(95), 0.6, { type: 'sine', vol: 0.06, at: 0.05 }); }
-          else if (k === 'acorns') for (let i = 0; i < 4; i++) this.tone(520 + i * 80, 0.06, { type: 'triangle', vol: 0.12, at: i * 0.07 });
+          if (k === 'fish' || k === 'fishes') [0, 7, 12].forEach((n, i) => this.tone(NOTE(84 + n), 0.12, { type: 'sine', vol: 0.1, at: i * 0.05 }));
+          else if (k === 'sculpture') this.noise(0.3, { vol: 0.12, type: 'bandpass', f0: 900, f1: 2600, q: 0.7 });
           else if (k === 'animal') { this.tone(330 * r, 0.14, { type: 'triangle', vol: 0.16, slideTo: 620 * r }); this.tone(400 * r, 0.14, { type: 'triangle', vol: 0.14, at: 0.2, slideTo: 700 * r }); }
           else this.tone(NOTE(96), 0.4, { type: 'sine', vol: 0.12 });
           break;
@@ -189,6 +203,11 @@
       this.mood = i;
       this._phrase = this._makePhrase(i);
       this._ensureRain();
+      if (this._rainF) {   // breezy = low whooshing wind, rain = brighter patter
+        const t = this.ctx.currentTime;
+        this._rainF.frequency.setTargetAtTime(i === 2 ? 3200 : 700, t, 0.5);
+        this._rainF2.frequency.setTargetAtTime(i === 2 ? 900 : 180, t, 0.5);
+      }
       this.apply();
     },
     _makePhrase(i) {
@@ -209,7 +228,7 @@
       const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 1400;
       const f2 = c.createBiquadFilter(); f2.type = 'highpass'; f2.frequency.value = 300;
       s.connect(f); f.connect(f2); f2.connect(this.amb); s.start();
-      this._rain = s;
+      this._rain = s; this._rainF = f; this._rainF2 = f2;
     },
     startMusic() {
       if (!this.ensure()) return;

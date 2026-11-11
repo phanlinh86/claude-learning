@@ -1,35 +1,50 @@
-# Dee's Forest Memory · Vịt Dee Lật Thẻ
+# Tuk's Ice Match · Cánh Cụt Tuk Lật Băng
 
-A memory-card learning game for children aged 3–7. Dee, a fluffy duckling in a leaf cape, lives by a pond in a fairy
-forest. Cards lie face down on a mossy clearing: Dee shows them for a moment, then turns them over, and the child taps two
-cards to find a pair. Dee names every card that turns (in English or Vietnamese), and each pair found comes alive in the
-forest — a butterfly flutters out, a shape lantern lights up on a branch, acorns tumble out, or the animal hops out and
-stays to watch. The seasons change as you play: spring blossoms, summer, autumn leaves and a snowy winter party.
+A memory learning game for children aged 3–7 (default 4). Tuk, a round little penguin chick in a cherry-striped knitted hat,
+plays on a frozen lake. Frosty **ice blocks** sit on the ice, each with a picture frozen inside. Tuk lets the frost melt
+for a moment so the child can peek, then the frost grows back. The child **taps a block — or rubs it with a finger — and
+the frost cracks off** in a spray of ice shards while Tuk says what is inside. Two blocks that match **glide together across
+the ice, clink and melt**, and the picture comes alive: a fish of that colour leaps out and splashes into the sea, a snow
+sculpture of the shape slides to the shore, fish jump out one by one to be counted, or an animal hops off to its home.
+The weather changes as you play: a sunny morning, a snowy breeze, a soft rain, and a rainbow party at the end.
 
-Made after parents' feedback that the earlier games all felt like "dropping something into a basket": here there is no
-dragging at all, every chapter has a **surprise round** (two cards swap places, a hidden magic pair with a rainbow, or
-cards floating on lily pads), and the chapters rotate between sessions.
+Made on 2026-11-11 with `/build-education-game random 4` (mechanic family *memory*; see `REQUIREMENT.md` for the roll, the
+one swap — koala → penguin — and how it differs from yesterday's Kiki's Camp Chimes and from Dee's Forest Memory).
 
-**Play:** https://phanlinh86.github.io/claude-learning/projects/education-game/duckling-forest-memory/game/
+**Play:** https://phanlinh86.github.io/claude-learning/projects/education-game/penguin-ice-match/game/
+
+## Ages and topics (4 chapters per session, easiest first)
+| age | chapters |
+|---|---|
+| 3 | colours · big & small · shapes · animals (two of the same) |
+| 4 (default) | colours · shapes · counting 1–5 (numeral ↔ fish) · animal homes (animal ↔ its home) |
+| 5 | shapes in mixed colours · counting 1–10 · capital letters · animal homes |
+| 6 | capital ↔ small letter · first letter · adding within 10 · counting to 12 |
+| 7+ | first letter · adding within 20 · taking away within 10 · odd & even |
+
+Polar friends and homes: polar bear ↔ snow den, seal ↔ ice floe, arctic fox ↔ burrow, snowy owl ↔ nest, whale ↔ sea,
+puffin ↔ cliff, penguin chick ↔ pebble nest (plus an arctic hare and a walrus calf).
+
+## How to play
+- Listen to Tuk (or read the bubble). Tap a frosty block — or rub across blocks with one finger — to crack the frost off.
+- Find two blocks that go together. A match glides together, clinks and melts; no match wobbles and frosts over again with
+  kind words. After three tries in a row without a pair, one pair glows and peeks. No losing, no timers. Stars: 3 / 2 / 1.
+- Surprise round each chapter: a frosty block glides to a new spot, a golden pair under the aurora, or blocks on bobbing ice floes.
+- After each chapter: **Talk time** — one question with 2–3 picture answers (tap, or say the answer if the mic is on).
 
 ## On iPhone / iPad
-1. Open the link in Safari and tap once anywhere (iOS only allows sound after the first tap).
+1. Open the link in Safari and tap once (iOS only allows sound after the first tap).
 2. Sound is loud by default and plays through the media volume; adjust it in settings or with − / + in the pause menu.
 3. Optional: **Share → Add to Home Screen** for a full-screen icon.
 4. Vietnamese voice: Settings → Accessibility → Spoken Content → Voices → Vietnamese → download "Linh".
 
 ## For parents
 Hold ⚙ on the title screen for 2 seconds: age (3, 4, 5, 6, 7+), language, child's name, volume, sound effects, music,
-Dee's voice, answering by talking. No losing, no timers; after three misses in a row Dee shows where a pair is.
-Nothing leaves the device. If nobody taps for about two minutes the game pauses itself.
-
-Topics (four per session, picked from a pool so sessions differ): colours, shapes, counting (number ↔ acorns), forest
-animals, big & small (age 3–4); capital letters (5); small letters, first letters, adding (6); taking away, odd & even (7+).
-Forest friends: fox, deer, hedgehog, squirrel, bunny, frog, bear, owl, mouse.
+Tuk's voice, answering by talking. Nothing leaves the device. If nobody taps for about two minutes the game pauses itself.
 
 ## Develop
 ```bash
-cd projects/education-game/duckling-forest-memory
+cd projects/education-game/penguin-ice-match
 python3 -m http.server -d game 8000        # then open http://localhost:8000
 node tests/unit/run.js                     # mechanics unit tests
 node tests/unit/i18n_voice.test.js         # language + voice tests

@@ -23,7 +23,7 @@
       const parts = [T(lang, 'ui.logo1'), T(lang, 'ui.logo2')];
       $('logo1').textContent = parts[0]; $('logo2').textContent = parts[1];
       const sub = T(lang, 'ui.subtitle'); $('tagline').textContent = sub === 'ui.subtitle' ? '' : sub;
-      document.title = title === 'ui.title' ? "Dee's Forest Memory" : title;
+      document.title = title === 'ui.title' ? "Tuk's Ice Match" : title;
       $('inpName').placeholder = T(lang, 'ui.namePlaceholder');
       $('btnPlay').setAttribute('aria-label', T(lang, 'ui.play'));
     },

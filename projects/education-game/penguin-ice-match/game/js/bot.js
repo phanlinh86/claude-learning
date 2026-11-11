@@ -1,8 +1,8 @@
-/* Dee's Forest Memory — IM.Bot (autoplay for tests / demo / ?bot=1; DESIGN §5.4)
+/* Tuk's Ice Match — IM.Bot (autoplay for tests / demo / ?bot=1; DESIGN §5.4)
  *
- *   const bot = new IM.Bot(world, { skill: 0.8, seed: 1 });
+ *   const bot = new IM.Bot(world, { skill: 0.8, seed: 1, rub: 0.3 });
  *   bot.step(dt);        // call every frame BEFORE world.update(dt) (same dt)
- *   bot.stats            // { taps, grabs (= taps), flips, matches, mismatches, misses, talks, talkRight }
+ *   bot.stats            // { taps, grabs (= taps), flips, rubs, matches, mismatches, misses, talks, talkRight }
  *   bot.finger           // { x, y, down } virtual finger (debug overlay)
  *   bot.memory           // { cardId: key } what the bot remembers
  *
@@ -12,6 +12,10 @@
  * Plays ONLY through the public input API, like a finger: reaction (0.9 − 0.5·skill)·U(0.8, 1.25) s (+0.6 s before the
  * first tap of a round), eased path at 900–1300 px/s, pointerDown at the card ± 0.25·size, pointerUp 0.06–0.12 s later.
  * It waits while a mismatch is shown or a pair is being checked. Talk: answers after 1.0–2.2 s, right with p = skill.
+ * Rub (p = opts.rub, default 0.3): after revealing the 1st block it keeps the finger down and swipes to the 2nd one
+ * (pointerMove at 700–1000 px/s, then pointerUp) — only when the straight path crosses no other frosted block. The 2nd
+ * block is the remembered partner, or (it has not seen the 1st face yet) the bot's normal pick for a known pair, else a
+ * random clear-path neighbour.
  */
 (function (IM) {
   'use strict';
@@ -25,7 +29,8 @@
     this.skill = clamp(opts.skill !== undefined ? +opts.skill : 0.8, 0, 1);
     this.rng = new IM.RNG(opts.seed !== undefined ? opts.seed : 99);
     this.enabled = true;
-    this.stats = { taps: 0, grabs: 0, flips: 0, matches: 0, mismatches: 0, misses: 0, talks: 0, talkRight: 0 };
+    this.rub = clamp(opts.rub !== undefined ? +opts.rub : 0.3, 0, 1);
+    this.stats = { taps: 0, grabs: 0, flips: 0, rubs: 0, matches: 0, mismatches: 0, misses: 0, talks: 0, talkRight: 0 };
     this.finger = { x: world.layout.W / 2, y: world.layout.H / 2, down: false };
     this.memory = {}; this._vis = {}; this._roundKey = null;
     this.phase = 'wait'; this._t = this._reaction(); this._first = true;
@@ -79,6 +84,37 @@
     for (i = 0; i < down.length; i++) { var k = mem[down[i].id]; if (k !== undefined) (byKey[k] = byKey[k] || []).push(down[i]); }
     for (var key in byKey) if (byKey[key].length >= 2) return byKey[key][0];
     return this.rng.pick(unknown.length ? unknown : down);
+  };
+
+  /** Is the straight finger path from the finger to (x, y) free of other frosted blocks? Exact segment × hit-rect test
+   * (Liang–Barsky on each block's rect grown by hitPad + 2 px), so a corner is never clipped between samples. */
+  Bot.prototype._clearPath = function (a, b, x, y) {
+    var w = this.world, x0 = this.finger.x, y0 = this.finger.y, dx = x - x0, dy = y - y0, pad = w.cfg.hitPad + 2;
+    for (var i = 0; i < w.cards.length; i++) {
+      var c = w.cards[i];
+      if (c === a || c === b || c.state !== 'down') continue;
+      var hw = c.w / 2 + pad, hh = c.h / 2 + pad, t0 = 0, t1 = 1;
+      var P = [-dx, dx, -dy, dy], Q = [x0 - (c.x - hw), (c.x + hw) - x0, y0 - (c.y - hh), (c.y + hh) - y0], hit = true;
+      for (var k = 0; k < 4 && hit; k++) {
+        if (Math.abs(P[k]) < 1e-12) { if (Q[k] < 0) hit = false; continue; }
+        var r = Q[k] / P[k];
+        if (P[k] < 0) { if (r > t1) hit = false; else if (r > t0) t0 = r; }
+        else { if (r < t0) hit = false; else if (r < t1) t1 = r; }
+      }
+      if (hit) return false;
+    }
+    return true;
+  };
+  /** The block to rub to after revealing `a` (or null): partner if known, else a random clear-path frosted block. */
+  Bot.prototype._rubTarget = function (a) {
+    var w = this.world, mem = this.memory, self = this, r = this.rng;
+    var down = w.cards.filter(function (c) { return c.state === 'down' && c !== a; });
+    if (!down.length) return null;
+    var want = mem[a.id] !== undefined ? down.filter(function (c) { return mem[c.id] === mem[a.id]; }) : [];
+    var pool = want.length ? want : (mem[a.id] !== undefined ? [] : down.filter(function (c) { return mem[c.id] === undefined; }));
+    if (!pool.length) return null;
+    var ok = pool.filter(function (c) { return self._clearPath(a, c, c.x, c.y); });
+    return ok.length ? r.pick(ok) : null;
   };
 
   /** Should the bot wait (a mismatch showing, a pair being checked, a pair just found)? */
@@ -143,8 +179,22 @@
             if (e.type === 'flip') this.stats.flips++;
           }
           this.phase = 'up'; this._t = r.float(0.06, 0.12);
+          var tgt = id && w.open.length === 1 && w.open[0] === id && r.chance(this.rub) ? this._rubTarget(tc) : null;
+          if (tgt) {
+            this.phase = 'rub'; this._target = tgt; this._ox = 0; this._oy = 0;
+            this._startPath(tgt.x, tgt.y); this._path.bend = 0; this._path.T = Math.max(0.08, hyp(this._path.x1 - this._path.x0, this._path.y1 - this._path.y0) / r.float(700, 1000));
+            this.stats.rubs++;
+          }
         }
         w.pointerMove(this.finger.x, this.finger.y);
+        break;
+      }
+      case 'rub': {   // finger stays down and swipes to the 2nd block; the world reveals it on entering
+        var rt = this._target, done = this._move(dt);
+        var n1 = w.events.length;
+        w.pointerMove(this.finger.x, this.finger.y);
+        for (var j = n1; j < w.events.length; j++) if (w.events[j].type === 'flip') this.stats.flips++;
+        if (done || !rt || w.state !== 'round') { w.pointerUp(this.finger.x, this.finger.y); this.finger.down = false; this.phase = 'wait'; this._t = this._reaction(); }
         break;
       }
       case 'up':

@@ -1,14 +1,14 @@
-/* Dee's Forest Memory — IM.Voice: Dee the duckling talks (Web Speech TTS) and listens (SpeechRecognition).
+/* Tuk's Ice Match — IM.Voice: Tuk the penguin chick talks (Web Speech TTS) and listens (SpeechRecognition).
  *
  *   IM.Voice.init({ lang, enabled })      call once at boot (safe without speechSynthesis)
  *   IM.Voice.unlock()                     call inside the FIRST touchend/click (iOS + Chrome need a gesture)
  *   IM.Voice.setLang('en'|'vi')  setEnabled(bool)  stop()  isSpeaking()  hasVoice(lang)  voiceName(lang?)
  *   IM.Voice.say(text, { interrupt, priority, rate, pitch, lang }) → Promise<{ spoken, reason }>
  *   IM.Voice.sayKey(key, params, opts) → Promise (promise.text = the display text, for the speech bubble)
- *   IM.Voice.onStart = fn(text)  IM.Voice.onEnd = fn(text)   (Dee's talk frames, music ducking; text = display text)
+ *   IM.Voice.onStart = fn(text)  IM.Voice.onEnd = fn(text)   (Tuk's talk frames, music ducking; text = display text)
  *   IM.Voice.onVoicesChanged(fn) → off()   fn() runs whenever the voice list changes (iOS fills it late)
- *   IM.Voice.log  — every line Dee said (also when muted): { t, lang, text }; mirrored to IM.debug.voiceLog
- *   IM.Voice.spoken(lang, text) → the text actually sent to TTS (I18N.speech + vi "Dee" → "Đi"); pure, unit-tested
+ *   IM.Voice.log  — every line Tuk said (also when muted): { t, lang, text }; mirrored to IM.debug.voiceLog
+ *   IM.Voice.spoken(lang, text) → the text actually sent to TTS (I18N.speech + vi "Tuk" → "Túc"); pure, unit-tested
  *   IM.Voice.setVolume(0..1)    → utterance volume (follows the game's volume setting)
  *
  *   IM.Voice.canListen()  → bool (false when unsupported, iOS home-screen app, or permission denied this session)
@@ -40,12 +40,13 @@
     'superstar', 'trinoids', 'whisper', 'wobble', 'zarvox', 'fred', 'junior', 'ralph', 'kathy', 'grandma', 'grandpa',
     'eddy', 'flo', 'reed', 'rocko', 'sandy', 'shelley', 'deranged', 'hysterical', 'pipe organ'];
 
-  // Dee is a playful little duckling: pitch 1.3 (bright, young — the top of what iOS voices take before they get
+  // Tuk is a playful penguin chick: pitch 1.3 (bright, young — the top of what iOS voices take before they get
   // squeaky) and an unhurried rate 0.92 so a 3–5-year-old can follow; below ~0.85 Vietnamese tones get smeared.
   var RATE = 0.92, PITCH = 1.3, MAXQ = 2, STALE_MS = 5000;
-  // The helper is written "Dee" in both languages. A Vietnamese voice reads "Dee" as "đê"/"đi-i"; the name is
-  // pronounced "Đi", so the SPOKEN text is changed (the bubble and the log keep "Dee").
-  var NAME_SPOKEN = { vi: [/\bDee\b/g, 'Đi'] };
+  // The helper is written "Tuk" in both languages. A Vietnamese voice spells "Tuk" letter by letter or reads it with a
+  // flat, cut-off "tuk"; the name is pronounced "Túc" (rising tone), so the SPOKEN text is changed — only in
+  // Vietnamese, never in the bubble, the log or onStart/onEnd. ("Tuk’s" never appears in Vietnamese lines.)
+  var NAME_SPOKEN = { vi: [/\bTuk\b/g, 'Túc'] };
 
   var V = {
     log: [], onStart: null, onEnd: null, onListen: null,
@@ -485,7 +486,7 @@
         resolve({ id: null, transcript: '', reason: denied ? 'not-allowed' : 'unsupported' }); return;
       }
       if (listenFinish) listenFinish({ id: null, transcript: '', reason: 'aborted' });
-      V.stop();                                   // Dee must not talk into the mic
+      V.stop();                                   // Tuk must not talk into the mic
       var restoreSession = sessionFor('play-and-record');
       var lang = opts.lang === 'vi' || opts.lang === 'en' ? opts.lang : V._lang;
       var choices = prepChoices(opts.choices, lang);
