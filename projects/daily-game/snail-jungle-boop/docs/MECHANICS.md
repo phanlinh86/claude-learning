@@ -17,11 +17,11 @@ All numbers live in `ZJB.World.CONFIG`; this page explains them. Units: logical 
 | `MULT_AT` | [5, 10] | combo | ×2 from combo 5, ×3 from combo 10 (DESIGN §5) |
 | `CLEAR_BONUS` | 50 | pts | per biome cleared |
 | `LEVEL_GOAL` | 15 | boops | per biome |
-| `START_LEAVES` / `MAX_LEAVES` / `LEAF_EVERY` | 3 / 5 / 12 | leaves, boops | +1 leaf every 12 boops (total), never above 5 |
+| `START_LEAVES` / `MAX_LEAVES` / `LEAF_EVERY` | 4 / 5 / 12 (was 3; playtest) | leaves, boops | +1 leaf every 12 boops (total), never above 5 |
 | `COLOUR_EVERY` | 6 | boops | colour changes after 6 boops… |
 | `COLOUR_TIME` | 14 | s | …or after 14 s without a boop (so a stuck kid gets a fresh colour) |
 | `COLOUR_WARN` | 1.0 | s | `colourWarn {to}` fires 1 s before the change (render pulses the antenna / voice says the new colour) |
-| `GRACE` | 0.8 | s | the previous colour still counts as a match for 0.8 s after the change (no "gotcha" taps) |
+| `GRACE` | 1.5 (was 0.8; playtest) | s | the previous colour still counts as a match for 1.5 s after the change (no "gotcha" taps) |
 | `FAIR_T` / `FAIR_HURRY` | 1.7 / 0.35 | s | no matching critter visible for 1.7 s → the next pop matches and comes within 0.35 s (it may exceed max-up by one). A matching critter is therefore never missing for more than ≈ 2.05 s. |
 | `MAX_MATCH_STREAK` | 2 | pops | after 2 matching pops in a row while no decoy is up, the next pop is a decoy (there is always a real choice) |
 | `HIT_MIN_H` | 0.25 | h | a critter is tappable in `rise`/`up` once it is a quarter out |
@@ -32,7 +32,7 @@ All numbers live in `ZJB.World.CONFIG`; this page explains them. Units: logical 
 ### Difficulty presets (`CONFIG.DIFFICULTY`)
 | preset | `up` (s) | `interval` (s) | `maxUp` per zone L0/L1/L2/L3 | `missCosts` | `matchP` |
 |---|---|---|---|---|---|
-| easy (default) | 2.6 | 2.4 | 2 / 3 / 3 / 3 | no | 0.65 |
+| easy (default) | 2.8 | 3.0 | 2 / 3 / 3 / 3 | no | 0.75 |
 | normal | 1.9 | 1.8 | 3 / 3 / 4 / 4 | yes | 0.50 |
 | hard | 1.35 | 1.3 | 3 / 4 / 4 / 5 | yes | 0.42 |
 
@@ -135,3 +135,9 @@ Reading it:
 - `gotoLevel(i)` drops queued events, then emits `levelUp`. `debugSpawn(i, colour)` replaces whatever is in burrow i (colour defaults to Zippy's).
 - Weather: `Weather.CAP` (60), `Weather.WATERFALL` (spray origin — move it to match the ruins art), particles also carry `kind` and internal fields.
 - Hit zones of neighbouring rows overlap a little (e.g. riverbank back/front); the nearest centre wins, as specified.
+
+## Post-QA changes (2026-11-11)
+- Playtest (`docs/reports/playtest.md`): `START_LEAVES` 3→4, `GRACE` 0.8→1.5, Easy up 2.6→2.8 s, interval 2.4→3.0 s, matchP 0.65→0.75. A 4-year-old model clears Riverbank on Easy 26 % → 83 %.
+- Mash guard: `MASH_N` 3 empty taps within `MASH_WINDOW` 1 s → Zippy naps `MASH_NAP` 1.5 s (taps answer 'busy', combo resets, no leaf lost; event `nap`). Mashing no longer beats looking.
+- `TARGET_DY` 120→160: Zippy boops from above the friend's head instead of covering its face (visual QA).
+- The sweep tables above were measured before these changes.

@@ -56,7 +56,7 @@
     /* phones held upright: the jungle is tiny, so ask to turn sideways (once dismissed, never again this session) */
     syncRotate() {
       const el = document.getElementById('rotate'); if (!el) return;
-      const on = this.isTouch && this.renderer.portrait && this.mode === 'playing' && !this._rotOk && !this.botMode;
+      const on = this.isTouch && this.renderer.portrait && Math.min(window.innerWidth, window.innerHeight) < 600 && this.mode === 'playing' && !this._rotOk && !this.botMode;
       this._rotOn = on; el.classList.toggle('hidden', !on);
     },
     makeWeather() { return new ZJB.Weather({ width: this.renderer.VW, height: this.renderer.VH, seed: 5 }); },
@@ -86,6 +86,8 @@
       const lv = params.has('level') ? Math.max(0, num('level', 0) | 0) : 0;
       this.world = this.makeWorld(null, false, lv);
       this.bot = this.botMode ? new ZJB.Bot(this.world, { skill: num('skill', 1), seed: 11 }) : null;
+      // a run touched by the bot or by test flags never saves a best score
+      this.runTainted = this.botMode || params.has('speed') || params.has('level') || !!this.urlDiff;
       if (!this.weather) this.weather = this.makeWeather();
       const z = this.world.zone || 0;
       this.renderer.attach(this.world, this.weather);
@@ -120,15 +122,15 @@
 
     gameOver() {
       const w = this.world, key = 'best_' + (this.runDifficulty || this.difficulty());
-      const prev = parseInt(ZJB.Storage.get(key, '0'), 10) || 0, newBest = w.score > prev && !this.botMode;
-      if (newBest && !this.botMode) ZJB.Storage.set(key, String(w.score));   // bot / test runs never overwrite a child's best
+      const prev = parseInt(ZJB.Storage.get(key, '0'), 10) || 0, newBest = w.score > prev && !this.botMode && !this.runTainted;
+      if (newBest) ZJB.Storage.set(key, String(w.score));   // bot / test runs never overwrite a child's best
       this.mode = 'over'; this.overAt = performance.now();
       this.clearInput();
       ZJB.Audio.stopMusic();
       ZJB.UI.setHud(false);
       const s = w.stats || {}, names = ZJB.Renderer.ZONE_INFO.map(z => z.name);
       ZJB.UI.showGameOver({
-        score: w.score, best: this.botMode ? prev : Math.max(prev, w.score), newBest: newBest && w.score > 0, cleared: (w.level || 0) - (w.startLevel || 0),
+        score: w.score, best: (this.botMode || this.runTainted) ? prev : Math.max(prev, w.score), newBest: newBest && w.score > 0, cleared: (w.level || 0) - (w.startLevel || 0),
         boops: s.boops || 0, wrong: s.wrong || 0, missed: s.missed || 0, combo: s.bestCombo || 0,
         reached: names[(w.zone || 0) % 4] + ((w.loop || 0) > 0 ? ' (round ' + (w.loop + 1) + ')' : '')
       });
@@ -254,6 +256,7 @@
           case 'leafGained': if (sound) A.play('leafGained'); break;
           case 'levelClear': if (sound) A.play('clear'); break;
           case 'levelUp': this._setLevelVisuals(e.zone, false); if (sound) setTimeout(() => A.play('level'), 200); break;
+          case 'nap': if (sound) A.play('nap'); break;
           case 'gameOver': if (sound) A.play('over'); A.stopMusic(); this.deadT = 0; this.clearInput(); break;
         }
       }
@@ -326,12 +329,12 @@
       st.mode = Game.mode; st.particles = Game.weather ? Game.weather.particles.length : 0; st.fx = Game.renderer.texts.length + Game.renderer.rings.length + Game.renderer.flyers.length;
       return st;
     },
-    setSpeed(n) { Game.speed = n; },
+    setSpeed(n) { Game.speed = n; if (n !== 1) Game.runTainted = true; },
     startGame() { Game.startGame(); },
     tap(i) { return Game.tapHole(i); },
     tapAt(x, y) { return Game.tapAt(x, y); },
     spawn(i, colour) { if (Game.world) Game.world.debugSpawn(i, colour); },
-    setBot(on, skill) { Game.botMode = on; Game.bot = on ? new ZJB.Bot(Game.world, { skill: skill == null ? 1 : skill, seed: 11 }) : null; },
+    setBot(on, skill) { Game.botMode = on; if (on) Game.runTainted = true; Game.bot = on ? new ZJB.Bot(Game.world, { skill: skill == null ? 1 : skill, seed: 11 }) : null; },
     setAutoRestart(on) { Game.autoRestart = on; },
     gotoLevel(i) { Game.world.gotoLevel(i); }   // emits levelUp → visuals, music, banner
   };

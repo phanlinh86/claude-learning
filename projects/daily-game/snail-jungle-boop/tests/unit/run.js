@@ -97,7 +97,7 @@ test('world: contract statics, initial state and a JSON-able getState()', () => 
   for (const k of ['boops', 'wrong', 'missed', 'bestCombo', 'byColour', 'leavesGained']) assert.ok(k in s.stats, 'stats.' + k);
   const c = s.holes.find(h => h.critter).critter;
   for (const k of ['kind', 'colour', 'state', 'h', 'hPrev', 't', 'upFor', 'id']) assert.ok(k in c, 'critter.' + k);
-  assert.strictEqual(s.phase, 'play'); assert.strictEqual(s.leaves, 3); assert.strictEqual(s.maxLeaves, 5);
+  assert.strictEqual(s.phase, 'play'); assert.strictEqual(s.leaves, C.START_LEAVES); assert.strictEqual(s.maxLeaves, 5);
   assert.strictEqual(s.levelGoal, 15); assert.strictEqual(s.colours.length, 2);
 });
 
@@ -140,11 +140,11 @@ test('pop: up holds for upFor, then sinks in ≈0.2 s; booped bounces then sinks
 });
 
 // ---------- Zippy ----------
-test('zippy: launches on tap, arcs to (bx, by−120s) in 0.18–0.3 s, boops 0.18 s, returns home; tilt bounded', () => {
+test('zippy: launches on tap, arcs to (bx, by−TARGET_DY·s) in 0.18–0.3 s, boops 0.18 s, returns home; tilt bounded', () => {
   for (const hi of [0, 3, 5]) {
     const w = quiet('easy'); w._quiet = true;
     popUp(w, hi, w.colour);
-    const h = w.holes[hi], tx = h.x, ty = h.y - 120 * h.s;
+    const h = w.holes[hi], tx = h.x, ty = h.y - C.TARGET_DY * h.s;
     assert.strictEqual(w.tapHole(hi), 'match');
     w.update(H); const vy0 = w.zippy.vy;
     const ev0 = w.drainEvents(); const L = of(ev0, 'zippyLaunch')[0];
@@ -200,7 +200,7 @@ test('scoring: 10 × mult, ×2 from combo 5, ×3 from combo 10; combo events; +1
   }
   assert.deepStrictEqual(pts, [10, 10, 10, 10, 20, 20, 20, 20, 20, 30, 30, 30, 30]);
   assert.deepStrictEqual(combos, [5, 10]);
-  assert.strictEqual(gained.length, 1); assert.strictEqual(gained[0].leaves, 4); assert.strictEqual(w.leaves, 4);
+  assert.strictEqual(gained.length, 1); assert.strictEqual(gained[0].leaves, C.START_LEAVES + 1); assert.strictEqual(w.leaves, C.START_LEAVES + 1);
   assert.strictEqual(w.score, 10 * 4 + 20 * 5 + 30 * 4);
   assert.strictEqual(w.stats.bestCombo, 13); assert.strictEqual(w.mult, 3);
   assert.strictEqual(w.stats.byColour.reduce((a, b) => a + b, 0), 13);
@@ -214,8 +214,8 @@ test('wrong tap: −1 leaf, combo resets, critter says wow, Zippy dizzy 0.6 s; t
   popUp(w, 3, bad); popUp(w, 4, w.colour); w.drainEvents();
   assert.strictEqual(w.tapHole(3), 'wrong');
   const ev = w.drainEvents();
-  assert.strictEqual(of(ev, 'wrong').length, 1); assert.strictEqual(of(ev, 'leafLost')[0].leaves, 2);
-  assert.strictEqual(w.leaves, 2); assert.strictEqual(w.combo, 0); assert.strictEqual(w.mult, 1);
+  assert.strictEqual(of(ev, 'wrong').length, 1); assert.strictEqual(of(ev, 'leafLost')[0].leaves, C.START_LEAVES - 1);
+  assert.strictEqual(w.leaves, C.START_LEAVES - 1); assert.strictEqual(w.combo, 0); assert.strictEqual(w.mult, 1);
   assert.strictEqual(w.zippy.state, 'dizzy'); assert.strictEqual(w.stats.wrong, 1);
   secs(w, 0.2); assert.strictEqual(w.tapHole(4), 'busy');
   secs(w, 0.17); assert.strictEqual(w.tapHole(4), 'match');
@@ -233,7 +233,7 @@ test('taps: empty hole / sinking critter → empty (no penalty); outside every z
   const c = popUp(w, 1, w.colours.find(x => x !== w.colour)); c.state = 'sink'; c.t = 0; c.h0 = 1;
   assert.strictEqual(w.tapHole(1), 'empty');
   assert.strictEqual(w.tapAt(10, 10), 'none'); assert.strictEqual(w.tapHole(42), 'none');
-  assert.strictEqual(w.leaves, 3); assert.strictEqual(w.stats.wrong, 0);
+  assert.strictEqual(w.leaves, C.START_LEAVES); assert.strictEqual(w.stats.wrong, 0);
   // too low in the rise (h < 0.25) does not count yet
   w.debugSpawn(2, w.colour); w.update(H);
   assert.ok(w.holes[2].critter.h < C.HIT_MIN_H); assert.strictEqual(w.tapHole(2), 'empty');
@@ -245,7 +245,7 @@ test('miss rule: a matching critter ducking un-booped costs a leaf on Normal/Har
     w.debugSpawn(0, w.colour);
     const ev = runUntil(w, e => e.some(x => x.type === 'miss'), 6).ev;
     assert.strictEqual(of(ev, 'miss').length, 1, diff);
-    assert.strictEqual(of(ev, 'leafLost').length, cost, diff); assert.strictEqual(w.leaves, 3 - cost, diff);
+    assert.strictEqual(of(ev, 'leafLost').length, cost, diff); assert.strictEqual(w.leaves, C.START_LEAVES - cost, diff);
     assert.strictEqual(w.combo, cost ? 0 : 4, diff); assert.strictEqual(w.stats.missed, 1);
     // a decoy ducking is never a miss
     w.debugSpawn(1, w.colours.find(x => x !== w.colour));
@@ -253,8 +253,21 @@ test('miss rule: a matching critter ducking un-booped costs a leaf on Normal/Har
   }
 });
 
+test('mash guard: 3 empty taps within 1 s → Zippy naps 1.5 s (busy), no leaf lost', () => {
+  const w = quiet('easy'); w._quiet = true;
+  const l0 = w.leaves;
+  for (let k = 0; k < 3; k++) { assert.strictEqual(w.tapHole(k), 'empty'); secs(w, 0.1); }
+  assert.ok(w.napT > 1.2, 'nap ' + w.napT); assert.strictEqual(w.leaves, l0);
+  popUp(w, 4, w.colour); assert.strictEqual(w.tapHole(4), 'busy');
+  secs(w, 1.5); popUp(w, 5, w.colour); assert.strictEqual(w.tapHole(5), 'match');
+  // slow empty taps never nap
+  const w2 = quiet('easy'); w2._quiet = true;
+  for (let k = 0; k < 6; k++) { w2.tapHole(k % 6); secs(w2, 0.6); }
+  assert.strictEqual(w2.napT, 0);
+});
+
 // ---------- colour cadence ----------
-test('colour: changes after 6 boops with a 1 s colourWarn; old colour accepted for 0.8 s grace', () => {
+test('colour: changes after 6 boops with a 1 s colourWarn; old colour accepted for GRACE s', () => {
   const w = quiet('normal'); w._quiet = true;
   const c0 = w.colour;
   for (let k = 0; k < 6; k++) { assert.strictEqual(w.nextColourIn, 6 - k); popUp(w, k, w.colour); w.tapHole(k); secs(w, 0.7); }
@@ -269,7 +282,7 @@ test('colour: changes after 6 boops with a 1 s colourWarn; old colour accepted f
   // grace
   w.debugSpawn(0, c0); secs(w, 0.25);
   assert.strictEqual(w.tapHole(0), 'match', 'old colour inside grace');
-  w.debugSpawn(1, c0); secs(w, 0.6);
+  w.debugSpawn(1, c0); secs(w, C.GRACE - 0.25 + 0.05);
   assert.strictEqual(w.graceColour, -1);
   w.zippy.state = 'home';
   assert.strictEqual(w.tapHole(1), 'wrong', 'old colour after grace');
@@ -342,14 +355,14 @@ test('fairness: a matching critter is visible again within ≈2 s (no taps, ever
   }
 });
 
-test('level 0 on Easy is gentle: ≈2.6 s up time, ≤ 2 up, ≈65 % matching, first pop matches, misses free', () => {
+test('level 0 on Easy is gentle: ≈2.8 s up time, ≤ 2 up, ≈75 % matching, first pop matches, misses free', () => {
   const w = mk('easy', 9); w.drainEvents();
   const ev = secs(w, 2.0);
   const first = of(ev, 'pop')[0];
   assert.ok(first && first.colour === w.colour, 'first pop matches');
   const up = w.holes.find(h => h.critter).critter.upFor;
   assert.ok(up > 2.2 && up < 3.0, 'upFor ' + up);
-  assert.strictEqual(C.DIFFICULTY.easy.maxUp[0], 2); near(C.DIFFICULTY.easy.matchP, 0.65, 0.001);
+  assert.strictEqual(C.DIFFICULTY.easy.maxUp[0], 2); near(C.DIFFICULTY.easy.matchP, 0.75, 0.001);
   assert.strictEqual(C.DIFFICULTY.easy.missCosts, false);
 });
 
@@ -393,7 +406,7 @@ test('game over: leaves hit 0 → phase over, gameOver once, no more scoring', (
   const w = quiet('normal'); w._quiet = true;
   const bad = w.colours.find(x => x !== w.colour);
   const all = [];
-  for (let k = 0; k < 3; k++) { popUp(w, k, bad); w.zippy.state = 'home'; assert.strictEqual(w.tapHole(k), 'wrong'); all.push(...w.drainEvents()); }
+  for (let k = 0; k < C.START_LEAVES; k++) { popUp(w, k, bad); w.zippy.state = 'home'; assert.strictEqual(w.tapHole(k), 'wrong'); all.push(...w.drainEvents()); }
   assert.strictEqual(w.phase, 'over'); assert.strictEqual(w.leaves, 0);
   popUp(w, 4, w.colour);
   const score = w.score;
@@ -401,7 +414,7 @@ test('game over: leaves hit 0 → phase over, gameOver once, no more scoring', (
   all.push(...secs(w, 10));
   assert.strictEqual(of(all, 'gameOver').length, 1); assert.strictEqual(of(all, 'gameOver')[0].score, score);
   assert.strictEqual(w.score, score); assert.strictEqual(of(all, 'pop').length, 0);
-  assert.strictEqual(of(all, 'leafLost').length, 3);
+  assert.strictEqual(of(all, 'leafLost').length, C.START_LEAVES);
 });
 
 // ---------- hit zone ----------

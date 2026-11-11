@@ -367,3 +367,6 @@ body.touch .tagline{font-size:max(15px, calc(var(--u)*2.2))}body.touch .best-lin
   .slot:nth-child(n+3){grid-column:span 3}
 }
 @media (max-height:430px){ #scrCustom .panel{padding-top:6px;padding-bottom:6px} #scrCustom .panel h2{margin-bottom:0} .slot-grid{margin-top:4px} }
+
+/* QA: HUD buttons clear the notch / status bar / home indicator */
+#hud{top:max(calc(var(--u)*1.4), calc(env(safe-area-inset-top) + 6px))!important;right:max(calc(var(--u)*1.4), calc(env(safe-area-inset-right) + 6px))!important}

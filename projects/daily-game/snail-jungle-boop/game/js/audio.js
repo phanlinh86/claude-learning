@@ -101,6 +101,7 @@
           break; }
         case 'wrong': T(300, 0.16, { type: 'sine', vol: 0.14, slideTo: 200 }); T(NOTE(60), 0.12, { type: 'triangle', vol: 0.06, at: 0.14 }); T(NOTE(58), 0.2, { type: 'triangle', vol: 0.06, at: 0.26, slideTo: NOTE(55) }); break;   // "boing-oh"
         case 'empty': T(520, 0.05, { type: 'sine', vol: 0.05, slideTo: 420 }); break;
+        case 'nap': T(NOTE(67), 0.5, { type: 'sine', vol: 0.08, slideTo: NOTE(60), attack: 0.08 }); this.noise(0.5, { vol: 0.03, freq: 500, q: 0.5, type: 'lowpass', at: 0.1 }); break;   // a sleepy yawn
         case 'miss': T(NOTE(79), 0.1, { type: 'sine', vol: 0.05, slideTo: NOTE(72) }); break;
         case 'colourWarn': [0, 0].forEach((s, i) => T(NOTE(88), 0.06, { type: 'sine', vol: 0.06, at: i * 0.16 })); break;
         case 'colour': [0, 4, 7, 11, 14].forEach((s, i) => T(NOTE(79 + s), 0.12, { type: 'sine', vol: 0.08, at: i * 0.035 })); this.noise(0.3, { vol: 0.03, freq: 6000, q: 0.5 }); break;   // magic sparkle

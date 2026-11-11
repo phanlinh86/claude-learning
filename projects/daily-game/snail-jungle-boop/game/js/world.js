@@ -30,14 +30,15 @@
     COMBO_EVENT_EVERY: 5,     // 'combo' event at 5, 10, 15…
     CLEAR_BONUS: 50,
     LEVEL_GOAL: 15,           // boops per biome
-    START_LEAVES: 3, MAX_LEAVES: 5, LEAF_EVERY: 12,
+    START_LEAVES: 4, MAX_LEAVES: 5, LEAF_EVERY: 12,
     COLOUR_EVERY: 6,          // boops per colour
     COLOUR_TIME: 14,          // s without a boop → colour changes anyway
     COLOUR_WARN: 1.0,         // s of warning before a change
-    GRACE: 0.8,               // s the previous colour is still accepted
+    GRACE: 1.5,               // s the previous colour is still accepted
     FAIR_T: 1.7,              // s without a visible matching critter → the next spawn matches…
     FAIR_HURRY: 0.35,         // …and comes within 0.35 s (may exceed max up by one)
     MAX_MATCH_STREAK: 2,      // after 2 matching spawns in a row with no decoy up, the next is a decoy
+    MASH_N: 3, MASH_WINDOW: 1.0, MASH_NAP: 1.5,   // 3 empty taps within 1 s → Zippy naps 1.5 s (no leaf lost): mashing never beats looking
     HIT_MIN_H: 0.25,          // a critter is tappable in 'rise'/'up' once h ≥ this
     START_DELAY: 1.5,         // s from level start to the first pop
     CLEAR_T: 1.2,             // s of empty field between levelClear and levelUp
@@ -51,7 +52,7 @@
     WOW_HOLD: 0.4,            // s
     // --- Zippy ---
     HOME: { x: 480, y: 112 },
-    TARGET_DY: 120,           // he boops at (bx, by − 120·s)
+    TARGET_DY: 160,           // he boops at (bx, by − 160·s): above the friend's head, not over its face
     FLY_MIN: 0.18, FLY_MAX: 0.30, FLY_PER_PX: 0.00028,   // flight time = clamp(MIN + dist·PER_PX)
     LIFT: 260,                // px/s, upward kick added at launch (fades as he is already fast)
     ARRIVE_K: 0.35,           // end speed as a fraction of chord speed
@@ -66,7 +67,7 @@
     UP_MIN: 0.8, INTERVAL_MIN: 0.4,
     DIFFICULTY: {
       //        up s  spawn s   max up per zone  misses cost  P(match)
-      easy:   { up: 2.6, interval: 2.4,  maxUp: [2, 3, 3, 3], missCosts: false, matchP: 0.65 },
+      easy:   { up: 2.8, interval: 3.0,  maxUp: [2, 3, 3, 3], missCosts: false, matchP: 0.75 },
       normal: { up: 1.9, interval: 1.8,  maxUp: [3, 3, 4, 4], missCosts: true,  matchP: 0.5 },
       hard:   { up: 1.35, interval: 1.3,  maxUp: [3, 4, 4, 5], missCosts: true,  matchP: 0.42 }
     },
@@ -110,7 +111,7 @@
     this.time = 0; this.acc = 0; this.alpha = 0;
     this.score = 0;
     this.leaves = CONFIG.START_LEAVES; this.maxLeaves = CONFIG.MAX_LEAVES;
-    this.combo = 0; this.mult = 1; this.boops = 0;
+    this.combo = 0; this.mult = 1; this.boops = 0; this.napT = 0; this._empties = [];
     this.levelGoal = CONFIG.LEVEL_GOAL;
     this.stats = { boops: 0, wrong: 0, missed: 0, bestCombo: 0, byColour: [0, 0, 0, 0], leavesGained: 0, levelTimes: [] };
     this.nextId = 1;
@@ -167,6 +168,7 @@
 
   P._step = function (dt) {
     this.time += dt;
+    if (this.napT > 0) this.napT = M.max(0, this.napT - dt);
     var playing = this.phase === 'play';
     // previous values for render interpolation
     var z = this.zippy; z.px = z.x; z.py = z.y;
@@ -425,9 +427,17 @@
     if (this.clearing) return 'busy';
     var z = this.zippy, C = CONFIG;
     if (z.state === 'dizzy' && z.t < C.DIZZY_LOCK) return 'busy';
+    if (this.napT > 0) return 'busy';
     var c = hole.critter, sx = hole.x, sy = hole.y - 29 * hole.s;   // (sx, sy) = where the star sits
     if (!c || !(c.state === 'rise' || c.state === 'up') || c.h < C.HIT_MIN_H) {
       this._ev({ type: 'empty', x: hole.x, y: hole.y - 45 * hole.s });
+      var now = this.time, em = this._empties;
+      em.push(now); while (em.length && now - em[0] > C.MASH_WINDOW) em.shift();
+      if (em.length >= C.MASH_N) {   // mashing: a short nap (no leaf lost)
+        em.length = 0; this.napT = C.MASH_NAP; this._resetCombo();
+        z.state = 'dizzy'; z.t = 0; z.target = null; this._fl = null;
+        this._ev({ type: 'nap', t: C.MASH_NAP });
+      }
       return 'empty';
     }
     if (this._isMatch(c.colour)) {
@@ -497,7 +507,7 @@
       level: this.level, zone: this.zone, loop: this.loop, levelBoops: this.levelBoops, levelGoal: this.levelGoal,
       combo: this.combo, mult: this.mult, boops: this.boops,
       colour: this.colour, colours: this.colours.slice(), nextColourIn: this.nextColourIn, colourWarn: this.colourWarn,
-      graceColour: this.graceColour, graceT: this.graceT, clearing: this.clearing,
+      graceColour: this.graceColour, graceT: this.graceT, clearing: this.clearing, napT: this.napT,
       holes: this.holes.map(function (h) {
         var c = h.critter;
         return { x: h.x, y: h.y, s: h.s, critter: c ? { kind: c.kind, colour: c.colour, state: c.state, h: c.h, hPrev: c.hPrev,

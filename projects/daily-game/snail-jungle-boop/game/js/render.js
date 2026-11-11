@@ -55,8 +55,8 @@
       this.W = W; this.H = H; this.portrait = H > W * 1.05;
       this.cssScale = Math.min(W / LW, H / LH);
       // device px per logical px, rounded to 1/64 so cached layers stay pixel-exact
-      this.k = Math.round(this.cssScale * px * 64) / 64;
-      this.ox = Math.round((bw - LW * this.k) / 2); this.oy = Math.round((bh - LH * this.k) / 2);
+      this.k = Math.floor(this.cssScale * px * 64) / 64;
+      this.ox = Math.floor((bw - LW * this.k) / 2); this.oy = Math.round((bh - LH * this.k) / 2);
       // portrait phones/tablets: keep the stage nearer the bottom thumb area but leave sky above
       if (this.portrait) this.oy = Math.round((bh - LH * this.k) * 0.55);
       ZJB.Assets.setScale(this.k);
@@ -122,8 +122,8 @@
           const tw = 1920 * k, x0 = ox + (480 - 960) * k;   // stage x480 = file x960
           for (let x = x0 - Math.ceil((x0 + 1) / tw) * tw; x < bw; x += tw) {
             fg.drawImage(fl, Math.round(x), oy, Math.round(tw), Math.round(LH * k));
-            // tall screens: stretch the floor's last 30 px down to the bottom so there is no flat band
-            if (oy + LH * k < bh - 1) fg.drawImage(fl, 0, 510, 1920, 30, Math.round(x), oy + (LH - 1) * k, Math.round(tw), bh - (oy + (LH - 1) * k));
+            // tall screens: repeat the floor's lower band (file y 380–540) downward so there is no flat band or streaks
+            for (let y = oy + (LH - 1) * k; y < bh; y += 160 * k - 1) fg.drawImage(fl, 0, 380, 1920, 160, Math.round(x), Math.round(y), Math.round(tw), Math.round(160 * k));
           }
         }
       }
@@ -136,20 +136,25 @@
           fg.fillStyle = 'rgba(30,40,20,.28)'; fg.beginPath(); fg.ellipse(ox + h.x * k, oy + (h.y + 14 * h.s) * k, 82 * h.s * k, 30 * h.s * k, 0, 0, Math.PI * 2); fg.fill();
         }
         if (bb) fg.drawImage(bb, x, y, w, hh);
-        if (bf) frg.drawImage(bf, x, y, w, hh);
-      }
+      }   // the burrow fronts are drawn per hole right after its critter (so a back-row lip never covers a front-row face)
       const nr = !custom && A.img[n + '_near'];
       if (nr) {
-        if (oy > 2) {   // tall screens: the top half of the frame hangs from the screen top, the bottom half sits on the screen bottom
-          const half = LH / 2;
-          frg.drawImage(nr, 0, 0, LW, half, ox, 0, LW * k, half * k);
-          frg.drawImage(nr, 0, half, LW, half, ox, bh - half * k, LW * k, half * k);
-        } else frg.drawImage(nr, ox, oy, LW * k, LH * k);
+        // each quarter of the foliage frame hugs its own screen corner (wide phones, tall iPads); the gaps between
+        // quarters are bridged by stretching the frame's middle row / column, so vines and stalks run on unbroken
+        const hw = LW / 2, hh = LH / 2, qw = hw * k, qh = hh * k;
+        const xl = ox > 2 ? 0 : ox, xr = ox > 2 ? bw - qw : ox + qw, yt = oy > 2 ? 0 : oy, yb = oy > 2 ? bh - qh : oy + qh;
+        frg.drawImage(nr, 0, 0, hw, hh, xl, yt, qw, qh); frg.drawImage(nr, hw, 0, hw, hh, xr, yt, qw, qh);
+        frg.drawImage(nr, 0, hh, hw, hh, xl, yb, qw, qh); frg.drawImage(nr, hw, hh, hw, hh, xr, yb, qw, qh);
+        if (yb > yt + qh + 1) { frg.drawImage(nr, 0, hh - 1, hw, 2, xl, yt + qh - 1, qw, yb - yt - qh + 2); frg.drawImage(nr, hw, hh - 1, hw, 2, xr, yt + qh - 1, qw, yb - yt - qh + 2); }
+        if (xr > xl + qw + 1) { frg.drawImage(nr, hw - 1, 0, 2, hh, xl + qw - 1, yt, xr - xl - qw + 2, qh); frg.drawImage(nr, hw - 1, hh, 2, hh, xl + qw - 1, yb, xr - xl - qw + 2, qh); }
       }
       // compose sky + floor into one canvas when the far layer is static (one fewer full-screen draw)
       L = { back, far, floor: floorC, front, w: bw, h: bh, k, ver: A._ver, zone };
       if (!far || !info.drift) {
-        if (far) { for (let x = ox + (480 - 960) * k; x < bw; x += far.width) bg.drawImage(far, Math.round(x), oy); let x = ox + (480 - 960) * k; while (x > 0) { x -= far.width; bg.drawImage(far, Math.round(x), oy); } }
+        if (far) {
+          let x = ox + (480 - 960) * k; while (x > 0) x -= far.width;
+          for (; x < bw; x += far.width) { bg.drawImage(far, Math.round(x), oy); if (oy > 0) bg.drawImage(far, 0, 0, far.width, 1, Math.round(x), 0, far.width, oy + 1); }
+        }
         bg.drawImage(floorC, 0, 0); L.far = null; L.floor = null;
       }
       this._bg.set(zone, L);
@@ -163,7 +168,7 @@
         const tw = L.far.width, off = ((this.drift * this.k) % tw + tw) % tw;
         let x = Math.round(this.ox + (480 - 960) * this.k - off);
         while (x > 0) x -= tw;
-        for (; x < L.w; x += tw) g.drawImage(L.far, x, this.oy);
+        for (; x < L.w; x += tw) { g.drawImage(L.far, x, this.oy); if (this.oy > 0) g.drawImage(L.far, 0, 0, tw, 1, x, 0, tw, this.oy + 1); }
       }
       if (L.floor) g.drawImage(L.floor, 0, 0);
       g.globalAlpha = 1;
@@ -176,23 +181,24 @@
         switch (e.type) {
           case 'boop': {
             this.rings.push({ x: e.x, y: e.y, t: 0, col: COL[e.colour].fill, max: 0.45 });
-            this.texts.push({ x: e.x, y: e.y - 40, t: 0, text: '+' + e.points, col: COL[e.colour].fill, size: e.mult > 1 ? 34 : 28, sub: e.mult > 1 ? '×' + e.mult : '' });
+            this.texts.push({ x: e.x, y: Math.max(96, e.y - 175), t: 0, text: '+' + e.points, col: COL[e.colour].fill, size: e.mult > 1 ? 34 : 28, sub: e.mult > 1 ? '×' + e.mult : '' });
             if (this.weather) this.weather.burst('sparkle', e.x, e.y);
             this.flyers.push({ x: e.x, y: e.y, t: 0, colour: e.colour });   // star flies to the target badge
             this.scorePulse = 1;
             break;
           }
-          case 'wrong': this.texts.push({ x: e.x, y: e.y - 40, t: 0, text: 'Oops!', col: '#ffffff', size: 28 }); this.shake = 0.25; break;
+          case 'wrong': this.texts.push({ x: e.x, y: e.y - 115, t: 0, text: 'Oops!', col: '#ffffff', size: 28 }); this.shake = 0.25; break;
           case 'empty': this.rings.push({ x: e.x, y: e.y, t: 0, col: 'rgba(255,255,255,.8)', max: 0.3, small: true }); break;
           case 'miss': break;
           case 'leafLost': this.leafPulse = -1; break;
           case 'leafGained': this.leafPulse = 1; this.texts.push({ x: 300, y: 80, t: 0, text: '+1 🍃', col: '#63d449', size: 24 }); break;
           case 'colourWarn': this.warnTo = e.to; break;
           case 'colour': this.warnTo = -1; this.colourPulse = 1; this.texts.push({ x: 480, y: 168, t: 0, text: 'New colour!', col: COL[e.to].fill, size: 30, big: true }); break;
-          case 'combo': this.texts.push({ x: 480, y: 200, t: 0, text: 'Combo ' + e.n + '!', col: '#fff6c8', size: 32, big: true }); break;
-          case 'levelClear': this.flash = 0.6; this.texts.push({ x: 480, y: 220, t: 0, text: 'Biome cleared! +' + e.bonus, col: '#fff6c8', size: 36, big: true, life: 1.6 }); break;
+          case 'combo': this.texts.push({ x: 480, y: 172, t: 0, text: 'Combo ' + e.n + '!', col: '#fff6c8', size: 32, big: true }); break;
+          case 'levelClear': this.flash = 0.6; this.texts.push({ x: 480, y: 150, t: 0, text: 'Biome cleared! +' + e.bonus, col: '#fff6c8', size: 36, big: true, life: 1.6 }); break;
           case 'levelUp': this.showBanner(e.zone); this.warnTo = -1; break;
           case 'gameOver': this.shake = 0.15; break;
+          case 'nap': this.texts.push({ x: 480, y: 172, t: 0, text: 'Zzz… look for the stars!', col: '#ffffff', size: 26, big: true, life: 1.6 }); break;
         }
       }
       if (this.texts.length > 14) this.texts.splice(0, this.texts.length - 14);
@@ -214,7 +220,7 @@
       this.colourPulse = Math.max(0, this.colourPulse - dt * 1.5);
       this.scorePulse = Math.max(0, this.scorePulse - dt * 4);
       if (this.leafPulse) this.leafPulse = this.leafPulse > 0 ? Math.max(0, this.leafPulse - dt * 2) : Math.min(0, this.leafPulse + dt * 2);
-      if (this.banner) { this.banner.t += dt; if (this.banner.t > 2.6) this.banner = null; }
+      if (this.banner) { this.banner.t += dt; if (this.banner.t > 2.0) this.banner = null; }
     }
 
     // ---------- drawing ----------
@@ -273,9 +279,16 @@
       const okColour = c => c === w.colour || c === w.graceColour;
       const customC = A.custom.critter;
       for (const hole of w.holes) {
-        const c = hole.critter; if (!c) continue;
+        this._critter(w, hole, a, easy, okColour, customC);
+        this._img(A.SEASONS[w.zone % 4] + '_burrow_front', hole.x - 85 * hole.s, hole.y - 45 * hole.s, 170 * hole.s, 90 * hole.s);
+      }
+    }
+    _critter(w, hole, a, easy, okColour, customC) {
+      const g = this.g, A = ZJB.Assets;
+      {
+        const c = hole.critter; if (!c) return;
         const s = hole.s, h = lerp(c.hPrev == null ? c.h : c.hPrev, c.h, a);
-        if (h <= 0.01) continue;
+        if (h <= 0.01) return;
         const bottom = hole.y + 25 * s + (1 - h) * 140 * s;
         const cw = 140 * s, ch = 150 * s, x0 = hole.x - cw / 2, y0 = bottom - ch;
         // squash/stretch: a happy wobble when booped, a pop stretch while rising
@@ -298,7 +311,7 @@
           this._img('custom:critter', hole.x - fw / 2, bottom - 18 * s - fh, fw, fh);
         } else this._img(c.kind + '_' + face, x0, y0, cw, ch);
         if (c.state !== 'booped') {   // the star is handed over on a boop (it flies to the badge)
-          const ss = 62 * s, scx = hole.x, scy = y0 + 96 * s - 2 * s;
+          const ss = 68 * s, scx = hole.x, scy = y0 + 96 * s - 2 * s;
           const wig = c.state === 'up' || c.state === 'rise' ? Math.sin(this.time * 5 + c.id) * 0.06 : 0;
           g.save(); g.translate(scx, scy); g.rotate(wig);
           this._img('star_' + c.colour, -ss / 2, -ss / 2 - 2 * s, ss, ss);
@@ -312,7 +325,7 @@
     _zippy(w) {
       const g = this.g, z = w.zippy, a = w.alpha || 0, A = ZJB.Assets;
       const x = lerp(z.px, z.x, a), y = lerp(z.py, z.y, a);
-      const colour = this.warnTo >= 0 && (Math.floor(this.time * 8) % 2) ? this.warnTo : w.colour;
+      const colour = this.warnTo >= 0 && (Math.floor(this.time * 3) % 2) ? this.warnTo : w.colour;
       const C = COL[colour] || COL[0];
       const st = z.state;
       const sp = Math.hypot(z.vx || 0, z.vy || 0);
@@ -344,7 +357,9 @@
       const key = st === 'fly' ? 'zippy_fly' : st === 'boop' ? 'zippy_boop' : st === 'dizzy' ? 'zippy_dizzy' : 'zippy_idle';
       if (A.custom.hero) {
         const [fw, fh] = A.fit('hero', 100, 100);
+        g.strokeStyle = C.fill; g.lineWidth = 7; g.beginPath(); g.arc(0, 0, Math.max(fw, fh) / 2 + 6, 0, Math.PI * 2); g.stroke();
         this._img('custom:hero', -fw / 2, -fh / 2, fw, fh);
+        this._img('star_' + colour, Math.max(fw, fh) / 2 - 16, -Math.max(fw, fh) / 2 - 10, 30, 30);
       } else this._img(key, -80 * sc, -82 * sc, W, H);
       // antenna bulbs glow in the current colour
       if (!A.custom.hero) {
@@ -419,7 +434,7 @@
       g.strokeStyle = 'rgba(255,255,255,.25)'; g.lineWidth = 6; g.beginPath(); g.arc(cx, cy, R - 2, 0, Math.PI * 2); g.stroke();
       const prog = clamp((w.levelBoops || 0) / (w.levelGoal || 15), 0, 1);
       if (prog > 0) { g.strokeStyle = '#8ef07a'; g.lineCap = 'round'; g.beginPath(); g.arc(cx, cy, R - 2, -Math.PI / 2, -Math.PI / 2 + prog * Math.PI * 2); g.stroke(); g.lineCap = 'butt'; }
-      const warn = this.warnTo >= 0 && Math.floor(this.time * 8) % 2;
+      const warn = this.warnTo >= 0 && Math.floor(this.time * 3) % 2;
       const sc = 44 * (1 + this.colourPulse * 0.25);
       this._img('star_' + (warn ? this.warnTo : w.colour), cx - sc / 2, cy - sc / 2 - 1, sc, sc);
       void C;
@@ -428,16 +443,17 @@
     _banner() {
       const b = this.banner; if (!b) return;
       const g = this.g, t = b.t;
-      const a = t < 0.3 ? t / 0.3 : t > 2.1 ? Math.max(0, 1 - (t - 2.1) / 0.5) : 1;
-      const y = 200 - (t < 0.3 ? (1 - t / 0.3) * 20 : 0);
+      const a = t < 0.3 ? t / 0.3 : t > 1.5 ? Math.max(0, 1 - (t - 1.5) / 0.5) : 1;
+      if (a <= 0) return;
+      const y = 150 - (t < 0.3 ? (1 - t / 0.3) * 16 : 0);
+      const text = b.text + (b.sub ? ' · ' + b.sub : '');
       g.globalAlpha = a;
-      g.font = '900 44px "Baloo 2", "Trebuchet MS", system-ui, sans-serif';
-      const tw = g.measureText(b.text).width;
-      this._pill(480 - tw / 2 - 30, y - 34, tw + 60, b.sub ? 92 : 68);
+      g.font = '900 38px "Baloo 2", "Trebuchet MS", system-ui, sans-serif';
+      const tw = g.measureText(text).width;
+      this._pill(480 - tw / 2 - 26, y - 28, tw + 52, 56);
       g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.lineWidth = 6; g.strokeStyle = ZONE_INFO[b.zone].banner; g.strokeText(b.text, 480, y);
-      g.fillStyle = '#fffbe6'; g.fillText(b.text, 480, y);
-      if (b.sub) { g.font = '800 22px system-ui, sans-serif'; g.fillStyle = '#ffe27a'; g.fillText(b.sub, 480, y + 36); }
+      g.lineWidth = 6; g.strokeStyle = ZONE_INFO[b.zone].banner; g.strokeText(text, 480, y + 1);
+      g.fillStyle = '#fffbe6'; g.fillText(text, 480, y + 1);
       g.globalAlpha = 1;
     }
 
