@@ -1,0 +1,29 @@
+{
+  "name": "Bo's Farm Parade · Cún Bo Tìm Bạn Lạc Đàn",
+  "short_name": "Farm Parade",
+  "description": "Odd-one-out learning game with Bo the puppy: tap the one in the parade that is different, open the barn and march inside. Colours, shapes, counting apples, farm animals, letters, numbers. English & Vietnamese.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#F8DCC6",
+  "theme_color": "#F8DCC6",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

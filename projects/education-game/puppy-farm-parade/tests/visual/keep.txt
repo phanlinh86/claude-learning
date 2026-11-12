@@ -1,0 +1,13 @@
+# The most useful visual-QA shots (tests/out/visual/, regenerate with `node tests/visual/screens.js`)
+ip-p-en-04-play.png            # iPhone portrait: 61 css px chimes, ~217 css px of empty sky, bubble tail points at the sun
+ip-p-en-age6-2-add.png         # iPhone portrait age 6: 5 glyph tags at 52 css px (hit 78)
+ip-p-en-15-counting.png        # iPhone portrait counting: tiny brass bells, numerals "3" and "2" overlap
+pad-l-mood2-age4-count.png     # brass bell strings vs the sunset meadow / tents (low contrast)
+ip-l-en-04-play.png            # iPhone landscape: 70 css px chimes (hit exactly 100), notch insets 59 px L/R
+pad-p-vi-01-title.png          # iPad portrait VI title: 3-line logo pushes the star pill onto the mini garland
+pad-l-mood3-age5-colors.png    # night: all 5 answer colours readable (reference for "good")
+pad-l-mood3-age5-shapes.png    # night: purple plates readable thanks to the rim light
+ip-p-vi-17-talk.png            # Talk time, Vietnamese (2-line mic button)
+ip-p-en-13-cascade.png         # song cascade: right chime swings over the right post
+pad-l-en-03-banner.png         # chapter banner + the bubble saying the same topic name
+pad-l-en-20-done.png           # session done: lantern garland + panel (reference for "good")
