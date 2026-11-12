@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 200" width="120" height="200">
+<circle cx="60" cy="13" r="5.5" fill="none" stroke="#596773" stroke-width="7"/>
+<circle cx="60" cy="13" r="5.5" fill="none" stroke="#b9c5ce" stroke-width="2.6"/>
+<rect fill="#d98a5a" stroke="#7a4222" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" x="54.5" y="17" width="11" height="115" rx="5.5"/>
+<rect x="61.5" y="21" width="2.6" height="107" rx="1.3" fill="#b56a3f"/>
+<rect x="56.9" y="23" width="2" height="58" rx="1" fill="#f6c9a0"/>
+<circle cx="60" cy="26" r="2.4" fill="#596773" opacity="0.6"/>
+<clipPath id="ladb"><path d="M18,128 C18,162 38,180 60,180 C82,180 102,162 102,128 Z"/></clipPath>
+<path d="M18,128 C18,162 38,180 60,180 C82,180 102,162 102,128 Z" fill="#b9c5ce"/>
+<g clip-path="url(#ladb)"><ellipse cx="78" cy="170" rx="40" ry="34" fill="#93a2ad"/></g>
+<path d="M18,128 C18,162 38,180 60,180 C82,180 102,162 102,128 Z" fill="none" stroke="#596773" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M30,140 Q34,160 48,168" fill="none" stroke="#eef4f8" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+<ellipse fill="#b9c5ce" stroke="#596773" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" cx="60" cy="128" rx="42" ry="10"/>
+<ellipse cx="60" cy="129" rx="35" ry="6" fill="#6e7a84"/>
+<rect fill="#d98a5a" stroke="#7a4222" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" x="53" y="112" width="14" height="14" rx="4"/>
+<circle cx="60" cy="119" r="2.2" fill="#7a4222"/>
+</svg>

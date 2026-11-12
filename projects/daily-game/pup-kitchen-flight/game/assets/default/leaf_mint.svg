@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<radialGradient id="mintcliph"><stop offset="0.55" stop-color="#fffbe0" stop-opacity="0.45"/><stop offset="1" stop-color="#fffbe0" stop-opacity="0"/></radialGradient>
+<circle cx="32" cy="32" r="32" fill="url(#mintcliph)"/>
+<path d="M14,51 L7,58" fill="none" stroke="#1c7436" stroke-width="9.31" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M14,51 L7,58" fill="none" stroke="#32a352" stroke-width="3.49" stroke-linejoin="round" stroke-linecap="round"/>
+<clipPath id="mintclip"><path d="M57.2,11.85 L57.47,18.3 L61.25,22.35 L58.14,28.39 L60.09,33 L55.64,37.17 L56.65,41.97 L51.58,44.3 L51.16,49.07 L45.76,49.39 L43.9,53.6 L38.91,51.98 L35.93,55.31 L32,52.15 L28.23,54.39 L25.72,50.26 L21.44,51.28 L20.46,46.75 L15.99,46.43 L16.45,41.98 L12.16,40.22 L13.91,36.19 L10.28,33 L13.14,29.67 L10.72,25.25 L14.5,22.9 L13.77,17.71 L18.24,16.61 L19.5,11.34 L24.27,11.76 L27.45,7.17 L32,9 L36.88,5.34 L41.08,8.06 L47.57,6.04 L50.9,10.47 Z"/></clipPath>
+<path d="M57.2,11.85 L57.47,18.3 L61.25,22.35 L58.14,28.39 L60.09,33 L55.64,37.17 L56.65,41.97 L51.58,44.3 L51.16,49.07 L45.76,49.39 L43.9,53.6 L38.91,51.98 L35.93,55.31 L32,52.15 L28.23,54.39 L25.72,50.26 L21.44,51.28 L20.46,46.75 L15.99,46.43 L16.45,41.98 L12.16,40.22 L13.91,36.19 L10.28,33 L13.14,29.67 L10.72,25.25 L14.5,22.9 L13.77,17.71 L18.24,16.61 L19.5,11.34 L24.27,11.76 L27.45,7.17 L32,9 L36.88,5.34 L41.08,8.06 L47.57,6.04 L50.9,10.47 Z" fill="#49c76a"/>
+<g clip-path="url(#mintclip)"><path d="M14,51 L49,16 C58,30 54,48 38,54 C28,58 18,56 14,51 Z" fill="#32a352"/></g>
+<path d="M14,51 L49,16" fill="none" stroke="#d2f7cf" stroke-width="4.36" stroke-linejoin="round" stroke-linecap="round" opacity="0.95"/>
+<path d="M24,41 L18,31" fill="none" stroke="#d2f7cf" stroke-width="2.62" stroke-linejoin="round" stroke-linecap="round" opacity="0.95"/>
+<path d="M24,41 L34,47" fill="none" stroke="#d2f7cf" stroke-width="2.62" stroke-linejoin="round" stroke-linecap="round" opacity="0.95"/>
+<path d="M32,33 L27,22" fill="none" stroke="#d2f7cf" stroke-width="2.62" stroke-linejoin="round" stroke-linecap="round" opacity="0.95"/>
+<path d="M32,33 L43,38" fill="none" stroke="#d2f7cf" stroke-width="2.62" stroke-linejoin="round" stroke-linecap="round" opacity="0.95"/>
+<path d="M40,25 L44,32" fill="none" stroke="#d2f7cf" stroke-width="2.62" stroke-linejoin="round" stroke-linecap="round" opacity="0.95"/>
+<path d="M57.2,11.85 L57.47,18.3 L61.25,22.35 L58.14,28.39 L60.09,33 L55.64,37.17 L56.65,41.97 L51.58,44.3 L51.16,49.07 L45.76,49.39 L43.9,53.6 L38.91,51.98 L35.93,55.31 L32,52.15 L28.23,54.39 L25.72,50.26 L21.44,51.28 L20.46,46.75 L15.99,46.43 L16.45,41.98 L12.16,40.22 L13.91,36.19 L10.28,33 L13.14,29.67 L10.72,25.25 L14.5,22.9 L13.77,17.71 L18.24,16.61 L19.5,11.34 L24.27,11.76 L27.45,7.17 L32,9 L36.88,5.34 L41.08,8.06 L47.57,6.04 L50.9,10.47 Z" fill="none" stroke="#1c7436" stroke-width="5.82" stroke-linejoin="round" stroke-linecap="round"/>
+<ellipse cx="22" cy="22" rx="5" ry="2.2" fill="#ffffff" opacity="0.55" transform="rotate(-45 22 22)"/>
+</svg>

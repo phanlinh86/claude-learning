@@ -1,0 +1,16 @@
+{
+  "name": "Biscuit's Kitchen Flight",
+  "short_name": "Kitchen Flight",
+  "description": "Fly Biscuit the robot pup through Grandma's kitchen!",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#3fb8b0",
+  "theme_color": "#3fb8b0",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
