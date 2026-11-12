@@ -164,18 +164,19 @@
   };
 
   var DIFFICULTY = {
-    easy: {
-      scrollSpeed: 150, beatGap: 380, gapMin: 230,
-      gravity: 1250, flapVy: -420, maxFall: 520,    // rise 70.6 px, apex 0.34 s
+    easy: {   // floaty and forgiving (playtest: a 4-year-old model finishes Sunny Morning 2 % → 71 %)
+      scrollSpeed: 140, beatGap: 380, gapMin: 230,
+      gravity: 850, flapVy: -350, maxFall: 290, tiltVyFull: 300,   // rise ≈ 72 px, apex 0.41 s, slow parachute fall
+      hurtTime: 2.5, counterBounceVy: -520, batteries: 4, maxBatteries: 4, leavesPerBattery: 6,
       lampRadius: 215, gustAccel: 150, hitForgive: 4, leafForgive: 8,
       weights: { hang: 0.36, stack: 0.42, gate: 0.2, kettle: 0.18 },
       leafGroupChance: 0.8, hangDrive: 0.06
     },
-    normal: {},
+    normal: { gapMin: 180, leavesPerBattery: 25 },   // playtest: a casual adult reached day 2 in 94 % of runs → 44 %
     hard: {
       scrollSpeed: 220, beatGap: 300, gapMin: 175,
       gravity: 1350, flapVy: -440, maxFall: 600,    // rise 71.7 px, apex 0.33 s
-      lampRadius: 160, gustAccel: 230, hitForgive: 0, leafForgive: 2,
+      lampRadius: 160, gustAccel: 230, hitForgive: 0, leafForgive: 2, leavesPerBattery: 30,
       weights: { hang: 0.28, stack: 0.32, gate: 0.4, kettle: 0.22 },
       leafGroupChance: 0.55
     }

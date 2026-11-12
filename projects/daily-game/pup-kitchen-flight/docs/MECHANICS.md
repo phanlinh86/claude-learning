@@ -15,11 +15,13 @@ Tests: `node tests/unit/run.js` (27 tests, about 9 s). Add `--stats` for a bot d
 ## 2. Biscuit's flight: a soft helicopter hop
 | | Easy | Normal | Hard |
 |---|---|---|---|
-| gravity (px/s²) | 1250 | 1300 | 1350 |
-| tap sets vy to (px/s) | −420 | −430 | −440 |
-| rise per tap = v²/2g | 70.6 px | 71.1 px | 71.7 px |
-| time to the top = v/g | 0.34 s | 0.33 s | 0.33 s |
-| terminal fall | 520 | 560 | 600 |
+| gravity (px/s²) | 850 | 1300 | 1350 |
+| tap sets vy to (px/s) | −350 | −430 | −440 |
+| rise per tap = v²/2g | 72.1 px | 71.1 px | 71.7 px |
+| time to the top = v/g | 0.41 s | 0.33 s | 0.33 s |
+| terminal fall | 290 | 560 | 600 |
+
+**Playtest tuning (2026-11-12, `docs/reports/playtest.md`):** Easy is floatier (above), blinks 2.5 s after a bump, bounces higher off the counter (−520), starts with 4 batteries and gets one back every 6 leaves, and scrolls at 140 px/s. Normal: gapMin 180, a battery every 25 leaves. Hard: a battery every 30 leaves.
 
 - A tap **sets** vy (not adds), so every tap feels the same whatever Biscuit was doing: the most important
   rule for a one-button game. Gravity is lower than Flappy Bird's and the fall speed is capped, so the arc is

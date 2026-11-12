@@ -26,7 +26,7 @@ P = {
     # leaves
     "mint": "#49c76a", "mint_sh": "#32a352", "mint_ln": "#1c7436", "mint_vein": "#d2f7cf",
     "basil": "#2fae4a", "basil_sh": "#228c3a", "basil_ln": "#145f26", "basil_vein": "#c8f0b8",
-    "bay": "#78c23c", "bay_sh": "#5ea12b", "bay_ln": "#3a6f17", "bay_vein": "#e6f7bd",
+    "bay": "#5fae2e", "bay_sh": "#4a8f22", "bay_ln": "#2f6a1a", "bay_vein": "#e6f7bd",
     "halo": "#fffbe0",
     # metals
     "copper": "#d98a5a", "copper_sh": "#b56a3f", "copper_ln": "#7a4222", "copper_hi": "#f6c9a0",

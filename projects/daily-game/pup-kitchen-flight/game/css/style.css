@@ -326,6 +326,10 @@ body.touch .tagline{font-size:max(15px, calc(var(--u)*2.2))}body.touch .best-lin
   #scrHow .how p{font-size:max(12px, calc(var(--u)*1.35));margin:0;line-height:1.3}
   #scrHow .how-ico img{width:calc(var(--u)*3.2)}
   #scrHow .small{display:none}
+  #scrHow .how p{font-size:11px !important;line-height:1.2 !important}
+  #scrHow .how{padding:4px 6px !important}
+  #scrHow .how-grid{gap:4px !important}
+  #scrHow .panel{padding:6px 12px !important}
   #scrHow .menu{margin-top:6px}
   #scrHow .menu .btn{min-height:44px;padding-top:0;padding-bottom:0}
 }
@@ -370,3 +374,34 @@ body.touch .tagline{font-size:max(15px, calc(var(--u)*2.2))}body.touch .best-lin
 
 /* QA: HUD buttons clear the notch / status bar / home indicator */
 #hud{top:max(calc(var(--u)*1.4), calc(env(safe-area-inset-top) + 6px))!important;right:max(calc(var(--u)*1.4), calc(env(safe-area-inset-right) + 6px))!important}
+
+/* ---------- Biscuit's Kitchen Flight: 3 picture slots, game over beside the napping pup ---------- */
+.slot-grid,.slot-grid{grid-template-columns:repeat(3,minmax(0,1fr)) !important}
+.slot,.slot:nth-child(n+3),.slot:nth-child(n+4){grid-column:auto !important}
+.slot:nth-child(n+4) .tag{display:block}
+@media (max-height:430px){
+  .slot .shape button{padding:2px 6px;font-size:12px}
+  .slot .btns .btn{padding-left:8px;padding-right:8px}
+  #scrCustom .menu{margin-top:6px}
+}
+@media (max-height:380px){   /* iPhone SE landscape (375 px) */
+  .panel{padding:6px 14px}
+  .panel h2{margin-bottom:2px;font-size:22px}
+  .how-grid{gap:6px}
+  .how{padding:6px}
+  .title-icon{max-height:52px}
+  .logo{font-size:calc(var(--u)*6.4)}
+  .menu{margin-top:6px;gap:6px}
+  .how p{font-size:12px;line-height:1.25;margin:0}
+  .how-ico img,.how-ico svg{max-height:34px}
+  #scrHow .small{display:none}
+  #scrHow .how p{font-size:11px !important;line-height:1.2 !important}
+  #scrHow .how{padding:4px 6px !important}
+  #scrHow .how-grid{gap:4px !important}
+  #scrHow .panel{padding:6px 12px !important}
+}
+@media (orientation:landscape){
+  #scrOver{justify-content:flex-end;padding-right:max(3vw, env(safe-area-inset-right))}
+}
+.sc{align-items:center}
+.how-ico img.arrow{width:calc(var(--u)*5)}

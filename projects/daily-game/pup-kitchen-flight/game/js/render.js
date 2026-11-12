@@ -37,6 +37,7 @@
       this._spr = { clear: () => BKF.Assets._cache.clear() };
       this.dk = document.createElement('canvas'); this.dg = this.dk.getContext('2d');
       this.custom = null;
+      this._bgCache = {};
     }
     static get ZONE_INFO() { return ZONE_INFO; }
 
@@ -50,7 +51,7 @@
       if (this.maxPx) px = Math.min(px, this.maxPx);
       this.px = px;
       this.VW = W / this.cssScale; this.VH = H / this.cssScale;
-      this.ox = (this.VW - LW) / 2; this.oy = (this.VH - LH) / 2;
+      this.ox = (this.VW - LW) / 2; this.oy = (this.VH - LH) * (H > W ? 0.65 : 0.5);   // portrait: more wall above, kitchen nearer the thumb
       this.c.width = Math.round(this.VW * px); this.c.height = Math.round(this.VH * px);
       this.c.style.width = W + 'px'; this.c.style.height = H + 'px';
       this.portrait = H > W;
@@ -93,14 +94,19 @@
       const ric = window.requestIdleCallback || (f => setTimeout(f, 30));
       ric(go, { timeout: 400 });
     }
+    /* A player's wall picture: scaled to the stage height and tiled with every second copy mirrored (seamless). */
     _customWall() {
       const A = BKF.Assets, src = A.custom.wall;
       if (!src) return null;
-      const ck = 'cw@' + this.px.toFixed(4) + '|' + this.VW.toFixed(1) + '|' + this.VH.toFixed(1) + '|' + (A._ver || 0);
+      const ck = 'cw@' + this.px.toFixed(4) + '|' + (A._ver || 0);
       if (this._bgCache[ck]) return this._bgCache[ck];
-      const c = document.createElement('canvas'); c.width = this.c.width; c.height = this.c.height;
-      const g = c.getContext('2d'), k = Math.max(c.width / src.width, c.height / src.height);
-      g.drawImage(src, (c.width - src.width * k) / 2, (c.height - src.height * k) / 2, src.width * k, src.height * k);
+      for (const k in this._bgCache) if (k.startsWith('cw@')) delete this._bgCache[k];   // only keep the current one
+      const tw = Math.max(480, Math.round(src.width * LH / src.height)), p = this.px;
+      const c = document.createElement('canvas'); c.width = Math.round(tw * 2 * p); c.height = Math.round(LH * p);
+      const g = c.getContext('2d'), half = Math.round(tw * p);
+      g.drawImage(src, 0, 0, half, c.height);
+      g.save(); g.translate(c.width, 0); g.scale(-1, 1); g.drawImage(src, 0, 0, c.width - half, c.height); g.restore();
+      c.tw = tw * 2;
       this._bgCache[ck] = c;
       return c;
     }
@@ -109,10 +115,12 @@
       const wx = this.weather, w = this.world;
       for (const e of evts) {
         switch (e.type) {
-          case 'flap': this.rings.push({ x: e.x - 8, y: e.y - 52, r: 10, t: 0, life: 0.3, col: '255,255,255', w: 3 }); break;
+          case 'flap': this.rings.push({ x: e.x, y: e.y - 44, r: 10, t: 0, life: 0.3, col: '255,255,255', w: 3, flat: true }); break;
           case 'leaf':
             if (wx) { wx.burst('sparkle', e.x, e.y, 7); wx.burst('bit', e.x, e.y, 4); }
-            this.texts.push({ x: e.x, y: e.y - 26, text: '+1', t: 0, life: 0.8, col: '#3fae4a', size: 30 });
+            { const live = this.texts.find(t => t.plus && t.t < 0.6);   // leaves caught a few frames apart: one "+N", not "+11"
+              if (live) { live.plus++; live.text = '+' + live.plus; live.t = 0; live.size = Math.min(38, live.size + 2); }
+              else this.texts.push({ x: e.x, y: e.y - 40, text: '+1', plus: 1, t: 0, life: 0.8, col: '#3fae4a', size: 30 }); }
             this.rings.push({ x: e.x, y: e.y, r: 16, t: 0, life: 0.35, col: '255,236,140', w: 4 });
             this.flyers.push({ x: e.x, y: e.y, sprite: e.sprite, t: 0, life: 0.55 });
             break;
@@ -121,7 +129,7 @@
             if (e.type === 'counter' && e.cost === false) break;
             this.shake = 0.28; this.flash = 0.18;
             if (wx) wx.burst('dust', e.x, e.y, 8);
-            this.texts.push({ x: e.x, y: e.y - 40, text: e.type === 'counter' ? 'Boing!' : 'Bonk!', t: 0, life: 0.9, col: '#e5483c', size: 32 });
+            this.texts.push({ x: w.pup.x + 30, y: Math.max(-this.oy + 100, w.pup.y - 105), text: e.type === 'counter' ? 'Boing!' : 'Bonk!', t: 0, life: 0.9, col: '#e5483c', size: 32 });
             break;
           case 'battery': this.texts.push({ x: w.pup.x, y: w.pup.y - 70, text: 'Battery +1!', t: 0, life: 1.3, col: '#2f9e44', size: 30 }); break;
           case 'steam': break;
@@ -144,7 +152,7 @@
       if (this.banner) { this.banner.t += dt; if (this.banner.t > 2.4) this.banner = null; }
       if (this.gustWarn) this.gustWarn.t += dt;
       // kettle steam puffs (the world counts them; we turn them into particles)
-      if (w && wx) for (const o of w.obstacles) if (o.kind === 'kettle' && o.puffs !== o._seen) { o._seen = o.puffs; if (o.x > -100 && o.x < LW + this.ox + 100) wx.steam(o.x + 50, COUNTER_Y - 82); }
+      if (w && wx) for (const o of w.obstacles) if (o.kind === 'kettle' && o.puffs !== o._seen) { o._seen = o.puffs; if (o.x > -100 && o.x < LW + this.ox + 100) { o._pn = (o._pn || 0) + 1; if (o._pn % 4 === 0) wx.steam(o.x + 50, COUNTER_Y - 82); else wx.steam(o.x + (Math.random() * 24 - 12), COUNTER_Y - 122); } }
     }
 
     // ------------------------------------------------------------------ drawing helpers
@@ -152,15 +160,16 @@
     _logical() { const p = this.px; this.g.setTransform(p, 0, 0, p, Math.round(this.ox * p), Math.round(this.oy * p)); }
 
     /* A tileable layer, pixel-exact: scroll in logical px, tile width tw, drawn at logical y. */
-    _tile(key, tw, th, scroll, y, alpha) {
-      const L = this._layer(key, tw, th); if (!L) return false;
+    _tile(key, tw, th, scroll, y, alpha) { return this._tileC(this._layer(key, tw, th), tw, scroll, y, alpha); }
+    _tileC(L, tw, scroll, y, alpha) {
+      if (!L) return false;
       const g = this.g, p = this.px;
       g.setTransform(1, 0, 0, 1, 0, 0);
       if (alpha != null) g.globalAlpha = alpha;
       let start = -mod(scroll, tw);
       while (start > -this.ox) start -= tw;
       const yy = Math.round((this.oy + y) * p);
-      for (let x = start; (x + this.ox) * p < this.c.width; x += tw) g.drawImage(L, Math.round((x + this.ox) * p), yy);
+      for (let X = Math.round((start + this.ox) * p); X < this.c.width; X += L.width) g.drawImage(L, X, yy);
       g.globalAlpha = 1;
       return true;
     }
@@ -188,15 +197,15 @@
         this._particles('outside');
         // 2. wall with transparent windows
         this._tile('room_wall', 1200, 540, scroll * PAR.wall, 0);
-        if (this.oy > 0) {   // tall screens: extend the wallpaper above the stage
-          g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = zi.wall; g.fillRect(0, 0, this.c.width, Math.ceil(this.oy * this.px));
-        }
         this._logical();
         this._windowDecor(scroll * PAR.wall);
       } else {
-        g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(cw, 0, 0);
+        this._tileC(cw, cw.tw, scroll * PAR.wall, 0);
         this._logical();
+        g.globalAlpha = 0.5; this._particles('outside'); g.globalAlpha = 1;   // the weather still shows over a photo
       }
+      if (this.oy > 0.5) this._bandTop(scroll * PAR.wall);
+      this._logical();
       this._particles('room');
       // 3. rail (drawn over a custom wall too; the default wall already has it)
       if (cw) this._rail();
@@ -223,7 +232,7 @@
       // 7. counter
       {
         this._tile('room_counter', 600, 70, scroll * PAR.counter, COUNTER_Y);
-        if (this.oy > 0) { g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = '#7f9a6c'; g.fillRect(0, Math.floor((this.oy + LH) * this.px), this.c.width, this.c.height); }
+        if (this.VH - this.oy - LH > 0.5) this._bandBottom(scroll * PAR.counter);
         this._logical();
       }
       // 8. darkness + lamp, tint
@@ -246,19 +255,19 @@
 
     _particles(layer) {
       const wx = this.weather; if (!wx) return;
-      const g = this.g;
+      const g = this.g, base = g.globalAlpha;
       for (const p of wx.particles) {
         if (p.layer !== layer || p.alpha <= 0.01) continue;
         const ar = PART_AR[p.sprite] || 1, w = p.size, h = p.size * ar;
         const s = BKF.Assets.sprite('p_' + p.sprite, p.sprite === 'wind' ? 120 : p.sprite === 'raindrop' ? 10 : 32, p.sprite === 'wind' ? 16 : p.sprite === 'raindrop' ? 30 : 32);
         if (!s) continue;
-        g.globalAlpha = Math.min(1, p.alpha);
+        g.globalAlpha = Math.min(1, p.alpha) * base;
         if (p.rot || p.flipX) {
           g.save(); g.translate(p.x, p.y); if (p.rot) g.rotate(p.rot); if (p.flipX) g.scale(-1, 1);
           g.drawImage(s, -w / 2, -h / 2, w, h); g.restore();
         } else g.drawImage(s, p.x - w / 2, p.y - h / 2, w, h);
       }
-      g.globalAlpha = 1;
+      g.globalAlpha = base;
     }
 
     /* Curtains at every window edge (sway in the wind) and frost corners at night. */
@@ -292,6 +301,35 @@
     _mir(x, y, w, h, fx, fy) {
       const g = this.g; g.save(); g.translate(x, y); g.scale(fx, fy); this._draw('room_frost', 0, 0, w, h); g.restore();
     }
+    /* Tall screens (iPad portrait): wallpaper above the stage, drawers below — never flat colour bands. */
+    _bandTop(s) {
+      // plain wallpaper (same 60 px stripe + sprig pattern as room/wall.svg), scrolling with the wall
+      if (!this._paper) {
+        const c = document.createElement('canvas'); c.width = c.height = 60; const q = c.getContext('2d');
+        q.fillStyle = '#e8d7a2'; q.fillRect(0, 0, 60, 60); q.fillStyle = '#e1cd92'; q.fillRect(0, 0, 18, 60);
+        q.fillStyle = '#b9c08e'; q.fill(new Path2D('M39 14 q3 -6 0 -10 q-3 4 0 10z M39 14 q6 -2 8 -7 q-6 0 -8 7z M39 14 q-6 -2 -8 -7 q6 0 8 7z'));
+        q.fillStyle = '#d9b98a'; q.beginPath(); q.arc(39, 46, 2.2, 0, TAU); q.arc(9, 30, 1.6, 0, TAU); q.fill();
+        this._paper = c;
+      }
+      const g = this.g, pat = g.createPattern(this._paper, 'repeat');
+      this._logical();
+      g.save(); g.translate(-mod(s, 60), 0);
+      g.fillStyle = pat; g.fillRect(-this.ox - 60, -this.oy - 2, this.VW + 120, this.oy + 2);
+      g.restore();
+      g.fillStyle = '#7a4222'; g.fillRect(-this.ox, -4, this.VW, 6);   // crown moulding
+    }
+    _bandBottom(s) {
+      const L = this._layer('room_counter', 600, 70); if (!L) return;
+      const g = this.g, p = this.px, sh = Math.round(40 * p), sy = Math.round(30 * p);
+      let start = -mod(s, 600); while (start > -this.ox) start -= 600;
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      const y0 = Math.round((this.oy + LH) * p);
+      for (let Y = y0; Y < this.c.height; Y += sh)
+        for (let X = Math.round((start + this.ox) * p); X < this.c.width; X += L.width) g.drawImage(L, 0, sy, L.width, sh, X, Y, L.width, sh);
+      const gr = g.createLinearGradient(0, y0, 0, y0 + 120 * p);
+      gr.addColorStop(0, 'rgba(79,102,68,0)'); gr.addColorStop(1, 'rgba(79,102,68,.85)');
+      g.fillStyle = gr; g.fillRect(0, y0, this.c.width, this.c.height - y0);
+    }
     _rail() {
       const g = this.g, x0 = -this.ox - 10, x1 = LW + this.ox + 10;
       g.fillStyle = '#7a4222'; g.fillRect(x0, 34, x1 - x0, 12);
@@ -299,10 +337,11 @@
       g.fillStyle = '#f6c9a0'; g.fillRect(x0, 37, x1 - x0, 2);
     }
 
-    _hanger(o, x, a) {
+    _hanger(o, x, a, only) {
       const g = this.g, w = this.world;
       const ang = lerp(o.prevAng != null ? o.prevAng : o.ang, o.ang, a);
       const hx = x + Math.sin(ang) * o.len, hy = RAIL_Y + Math.cos(ang) * o.len;
+      if (only) { g.save(); g.translate(hx, hy); g.rotate(-ang); this._draw('hang_' + o.sprite, -60, -6, 120, 200); g.restore(); return; }
       // ring on the rail + chain links
       g.lineCap = 'round';
       if (o.len > 0) {
@@ -320,20 +359,30 @@
       this._draw('hang_' + o.sprite, -60, -6, 120, 200);
       g.restore();
     }
-    _stack(o, x) {
+    _stack(o, x, only) {
       const g = this.g;
+      if (only) { for (const p of o.pieces) this._draw('stack_' + p.sprite, x + (p.dx || 0) - p.w / 2, p.y - p.h, p.w, p.h); return; }
       // contact shadow on the counter
       g.fillStyle = 'rgba(60,40,20,.18)'; g.beginPath(); g.ellipse(x, COUNTER_Y + 3, o.halfW * 0.9, 6, 0, 0, TAU); g.fill();
       for (const p of o.pieces) this._draw('stack_' + p.sprite, x + (p.dx || 0) - p.w / 2, p.y - p.h, p.w, p.h);
     }
-    _kettle(o, x) {
+    _kettle(o, x, only) {
       const g = this.g;
+      if (only) { this._draw('kettle', x - 70, COUNTER_Y - 120, 140, 120); return; }
       g.fillStyle = 'rgba(60,40,20,.18)'; g.beginPath(); g.ellipse(x, COUNTER_Y + 3, 58, 6, 0, 0, TAU); g.fill();
       // faint warm column so the steam reads as a lift zone, even between puffs
       const top = COUNTER_Y - 120 - o.steamH;
       const gr = g.createLinearGradient(0, COUNTER_Y - 120, 0, top);
-      gr.addColorStop(0, 'rgba(255,255,255,.22)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+      gr.addColorStop(0, 'rgba(225,240,250,.38)'); gr.addColorStop(1, 'rgba(225,240,250,0)');
       g.fillStyle = gr; g.fillRect(x - 40, top, 80, o.steamH);
+      // rising chevrons: "this lifts you up"
+      g.strokeStyle = 'rgba(122,160,185,.55)'; g.lineWidth = 2.5; g.lineCap = 'round'; g.lineJoin = 'round';
+      const off = (this.t * 40) % 60;
+      for (let yy = COUNTER_Y - 140 - off; yy > top + 20; yy -= 60) {
+        g.globalAlpha = Math.min(1, (yy - top) / 80);
+        g.beginPath(); g.moveTo(x - 10, yy + 6); g.lineTo(x, yy - 4); g.lineTo(x + 10, yy + 6); g.stroke();
+      }
+      g.globalAlpha = 1;
       this._draw('kettle', x - 70, COUNTER_Y - 120, 140, 120);
     }
 
@@ -343,17 +392,17 @@
       // shadow on the counter: smaller and fainter the higher he flies
       const hgt = Math.max(0, COUNTER_Y - y - 40), k = Math.max(0.25, 1 - hgt / 420);
       g.fillStyle = 'rgba(50,35,20,' + (0.22 * k).toFixed(3) + ')'; g.beginPath(); g.ellipse(x, COUNTER_Y + 4, 34 * k + 6, 6 * k + 1, 0, 0, TAU); g.fill();
-      if (p.hurtT > 0 && p.state !== 'sleep' && Math.floor(p.hurtT * 10) % 2 === 1) g.globalAlpha = 0.45;
+      if (p.hurtT > 0 && p.state !== 'sleep' && Math.floor(p.hurtT * 10) % 2 === 1) g.globalAlpha = 0.6;
       const sq = p.squash || 1, sxk = 1 + (1 - sq) * 0.8;
       g.save(); g.translate(x, y); g.rotate(rot); g.scale(sxk, sq);
       if (A.custom.pup) {
         const [fw, fh] = A.fit('pup', 96, 96), bob = Math.sin(this.t * 6) * 2;
         this._draw('custom:pup', -fw / 2, -fh / 2 + 6 + bob, fw, fh);
         // a little procedural propeller so a photo still flies
-        const ph = (p.prop || 0) * TAU, top = -fh / 2 + 2 + bob, bw = 34 * Math.abs(Math.cos(ph));
-        g.fillStyle = '#87241b'; g.fillRect(-3, top - 10, 6, 12);
-        g.fillStyle = '#e5483c'; g.beginPath(); g.ellipse(0, top - 12, Math.max(4, bw), 5, 0, 0, TAU); g.fill();
-        g.fillStyle = '#3fb8b0'; g.beginPath(); g.arc(0, top - 12, 4, 0, TAU); g.fill();
+        const ph = (p.prop || 0) * TAU, top = -fh / 2 + 2 + bob, bw = 46 * Math.abs(Math.cos(ph));
+        g.fillStyle = '#87241b'; g.fillRect(-3, top - 14, 6, 16);
+        g.fillStyle = '#e5483c'; g.beginPath(); g.ellipse(0, top - 16, Math.max(5, bw), 7, 0, 0, TAU); g.fill();
+        g.fillStyle = '#3fb8b0'; g.beginPath(); g.arc(0, top - 16, 6, 0, TAU); g.fill();
       } else {
         const key = p.state === 'sleep' ? 'pup_sleep' : p.state === 'hurt' || p.hurtT > 1.1 ? 'pup_hurt' : 'pup_' + (Math.floor((p.prop || 0) * 3) % 3);
         this._draw(key, -60, -64, 120, 110);
@@ -391,16 +440,15 @@
       glow(L.x + (x - p.x), L.y + (y - p.y), L.r * 0.7, '255,214,120', (0.16 * k).toFixed(3));
       for (const l of w.leaves) glow(lerp(l.prevX, l.x, a), lerp(l.prevY, l.y, a), 34, '170,255,150', (0.32 * k).toFixed(3));
       g.globalCompositeOperation = 'source-over';
-      if (k > 0.3) {
-        g.strokeStyle = 'rgba(255,236,190,' + (0.32 * (k - 0.3) / 0.7).toFixed(3) + ')'; g.lineWidth = 2.5; g.lineJoin = 'round';
-        for (const sh of w.hitShapes()) {
-          if (sh.tag === 'pup' || sh.tag === 'leaf' || sh.tag === 'steam') continue;
-          g.beginPath();
-          if (sh.kind === 'circle') g.arc(sh.x, sh.y, sh.r + 3, 0, TAU);
-          else if (sh.kind === 'rect') { if (g.roundRect) g.roundRect(sh.x - 3, sh.y - 3, sh.w + 6, sh.h + 6, 12); else g.rect(sh.x - 3, sh.y - 3, sh.w + 6, sh.h + 6); }
-          else { g.moveTo(sh.x1, sh.y1); g.lineTo(sh.x2, sh.y2); }
-          g.stroke();
+      if (k > 0.3) {   // obstacles get a soft warm glow that follows their shape, so they stay readable in the dark
+        g.shadowColor = 'rgba(255,230,170,' + (0.55 * k).toFixed(3) + ')'; g.shadowBlur = 10 * this.px;
+        g.globalAlpha = 0.35 * (k - 0.3) / 0.7;
+        for (const o of w.obstacles) {
+          const ox = lerp(o.prevX != null ? o.prevX : o.x, o.x, a);
+          if (ox < -this.ox - 200 || ox > LW + this.ox + 200) continue;
+          if (o.kind === 'hang') this._hanger(o, ox, a, true); else if (o.kind === 'stack') this._stack(o, ox, true); else this._kettle(o, ox, true);
         }
+        g.shadowBlur = 0; g.globalAlpha = 1;
       }
     }
     _tint() {
@@ -425,7 +473,9 @@
       for (const r of this.rings) {
         const k = r.t / r.life;
         g.strokeStyle = 'rgba(' + r.col + ',' + (1 - k).toFixed(3) + ')'; g.lineWidth = r.w * (1 - k) + 0.5;
-        g.beginPath(); g.arc(r.x, r.y, r.r + k * 26, 0, TAU); g.stroke();
+        g.beginPath();
+        if (r.flat) g.ellipse(r.x, r.y, (r.r + k * 26) * 1.7, (r.r + k * 26) * 0.35, 0, 0, TAU); else g.arc(r.x, r.y, r.r + k * 26, 0, TAU);
+        g.stroke();
       }
       for (const f of this.flyers) {   // the caught leaf zips to the score
         const k = f.t / f.life, e = k * k, tx = 480, ty = 34 - this.oy * 0;
@@ -443,19 +493,25 @@
     _gustArrow(w, a) {
       const gw = this.gustWarn, wd = w.wind; if (!gw || !wd) return;
       if (wd.phase !== 'warn' && wd.phase !== 'gust') return;
-      const g = this.g, up = (wd.dir || gw.dir) === 'up', x = w.pup.x + 90, y = w.pup.y + (up ? -60 : 60);
+      const g = this.g, up = (wd.dir || gw.dir) === 'up', x = w.pup.x + 110, y = w.pup.y + (up ? -60 : 60);
       const al = wd.phase === 'warn' ? 0.5 + 0.5 * Math.sin(this.t * 14) : Math.max(0, 0.7 * (wd.k || 0));
-      g.save(); g.translate(x, y); if (!up) g.scale(1, -1);
+      g.save(); g.translate(x, y); g.scale(1.6, up ? 1.6 : -1.6);
       g.globalAlpha = Math.max(0, al);
-      g.fillStyle = '#ffffff'; g.strokeStyle = '#5c8db8'; g.lineWidth = 4; g.lineJoin = 'round';
+      g.shadowColor = 'rgba(0,0,0,.25)'; g.shadowBlur = 6 * this.px;
+      g.fillStyle = '#ffffff'; g.strokeStyle = '#1d6763'; g.lineWidth = 3.5; g.lineJoin = 'round';
       g.beginPath(); g.moveTo(0, -22); g.lineTo(18, 0); g.lineTo(7, 0); g.lineTo(7, 20); g.lineTo(-7, 20); g.lineTo(-7, 0); g.lineTo(-18, 0); g.closePath();
-      g.fill(); g.stroke();
+      g.fill(); g.shadowBlur = 0; g.stroke();
       g.restore(); g.globalAlpha = 1;
     }
 
     _hud(w) {
       const g = this.g, sf = this.safe || { l: 0, r: 0, t: 0 };
       const left = Math.max(-this.ox + 14 + sf.l, -this.ox + 14), top = -this.oy + 12 + sf.t;
+      const pill = (x, y, ww, hh) => {
+        g.fillStyle = 'rgba(255,247,230,.72)'; g.strokeStyle = 'rgba(122,66,34,.35)'; g.lineWidth = 2;
+        g.beginPath(); if (g.roundRect) g.roundRect(x, y, ww, hh, hh / 2); else g.rect(x, y, ww, hh); g.fill(); g.stroke();
+      };
+      pill(left - 8, top - 6, w.maxBatteries * 54 + 8, 42);
       // batteries
       for (let i = 0; i < w.maxBatteries; i++) {
         const full = i < w.batteries, x = left + i * 54, low = w.batteries === 1 && full && Math.floor(this.t * 3) % 2 === 0;
@@ -467,8 +523,9 @@
       this._text(String(w.score), 480, top + 26, 48, '#e0662a', 1, '#fff7e6');
       // day bar under the score: 4 zone segments + Biscuit's position in the day
       const bw = 200, bx = 480 - bw / 2, by = top + 58;
+      pill(bx - 14, by - 7, bw + 28, 22);
       for (let i = 0; i < 4; i++) {
-        g.fillStyle = ZONE_INFO[i].banner; g.globalAlpha = i === w.zone ? 1 : 0.45;
+        g.fillStyle = ZONE_INFO[i].banner; g.globalAlpha = i === w.zone ? 1 : 0.7;
         g.beginPath(); g.roundRect ? g.roundRect(bx + i * 50 + 2, by, 46, 8, 4) : g.rect(bx + i * 50 + 2, by, 46, 8); g.fill();
       }
       g.globalAlpha = 1;
@@ -477,12 +534,12 @@
       // leaves until the next battery (only when a battery is missing)
       if (w.batteries < w.maxBatteries) {
         const per = (w.cfg && w.cfg.leavesPerBattery) || 15, left2 = per - (w.leafCount % per);
-        this._text('🔋 in ' + left2 + ' leaves', left + 80, top + 46, 15, '#2f6e3a', 0.9, '#fff7e6');
+        this._text('🔋 in ' + left2 + ' leaves', left + w.maxBatteries * 27 - 4, top + 50, 15, '#2f6e3a', 0.9, '#fff7e6');
       }
     }
     _banner() {
       const b = this.banner, k = b.t, al = k < 0.25 ? k / 0.25 : k > 1.8 ? Math.max(0, 1 - (k - 1.8) / 0.6) : 1;
-      const col = ZONE_INFO[b.zone].banner, y = 150 - this.oy * 0;
+      const col = ZONE_INFO[b.zone].banner, y = 170;
       const sz = Math.round(44 * (0.85 + 0.15 * Math.min(1, k / 0.25)));
       this._text(b.text, 600, y, sz, col, al, '#fffaf0');
       if (b.sub) this._text(b.sub, 600, y + 40, 24, '#7a4222', al, '#fffaf0');

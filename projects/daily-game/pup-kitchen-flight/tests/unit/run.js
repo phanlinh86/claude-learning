@@ -78,7 +78,7 @@ test('contract: CONFIG / DIFFICULTY / state fields', () => {
   for (const k of ['gy', 'target', 'warnT', 'dir']) assert.ok(k in s.wind, 'wind.' + k);
   for (const k of ['flaps', 'leaves', 'bumps', 'passed', 'steam', 'cleanLevels', 'bestRun']) assert.ok(k in s.stats, 'stats.' + k);
   for (const k of ['x', 'y', 'r']) assert.ok(k in s.lamp);
-  assert.strictEqual(s.maxBatteries, 3); assert.strictEqual(s.batteries, 3);
+  assert.strictEqual(s.maxBatteries, 4); assert.strictEqual(s.batteries, 4);   // easy: 4 (playtest)
   // obstacle / leaf fields once a few beats exist
   secs(w, 12, fly);
   const kinds = {};
@@ -346,7 +346,7 @@ test('scoring: leaf +1, pass +1, clean level +5 (and no bonus after a bump)', ()
 });
 
 test('batteries: one back every 15 leaves, never above 3', () => {
-  const w = quiet('normal', { gravity: 0 });
+  const w = quiet('normal', { gravity: 0, leavesPerBattery: 15 });
   w.batteries = 1;
   const got = [];
   for (let i = 0; i < 45; i++) {
@@ -404,7 +404,7 @@ test('levels: change every levelLen s, zone cycles, round 2 is ≈8 % faster', (
   assert.strictEqual(w.loop, 1); assert.strictEqual(w.zone, 0);
   near(w._targetSpeed() / w.cfg.scrollSpeed, 1.08, 1e-9);
   near(w.scrollSpeed, w.cfg.scrollSpeed * 1.08, 2);
-  const w2 = quiet('easy'); near(w2._targetSpeed(), 150, 1e-9);
+  const w2 = quiet('easy'); near(w2._targetSpeed(), 140, 1e-9);
   const w3 = quiet('hard'); near(w3._targetSpeed(), 220, 1e-9);
   w.gotoLevel(6); assert.strictEqual(w.zone, 2); assert.strictEqual(w.levelT, 0);
   assert.strictEqual(of(w.drainEvents(), 'levelUp').length, 1);

@@ -162,7 +162,7 @@
         this._streakAcc -= 1;
         this._add({ sprite: 'wind', layer: 'room', kind: 'streak', x: W + PAD * 0.5, y: r.range(70, 440),
           vx: -r.range(420, 560), vy: this.windDir * r.range(40, 80), size: r.range(80, 130), life: 0, maxLife: r.range(1.4, 2.0),
-          a0: r.range(0.35, 0.6), alpha: 0, rot: 0, par: 0, flipX: 1 });
+          a0: r.range(0.55, 0.8), alpha: 0, rot: 0, par: 0, flipX: 1 });
       }
     } else this._streakAcc = 0;
 

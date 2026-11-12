@@ -759,16 +759,17 @@ def gen_particles():
         '<circle cx="32" cy="36" r="26" fill="url(#g)"/>'
         '<circle cx="22" cy="28" r="16" fill="url(#g)"/>'
         '<circle cx="42" cy="26" r="15" fill="url(#g)"/>'
-        '<circle cx="32" cy="20" r="13" fill="url(#g)"/>',
-        '<radialGradient id="g"><stop offset="0" stop-color="#ffffff" stop-opacity="0.75"/>'
-        '<stop offset="0.55" stop-color="#ffffff" stop-opacity="0.35"/>'
-        '<stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient>'))
+        '<circle cx="32" cy="20" r="13" fill="url(#g)"/>'
+        '<circle cx="32" cy="32" r="22" fill="none" stroke="#9db8c9" stroke-opacity=".45" stroke-width="2"/>',
+        '<radialGradient id="g"><stop offset="0" stop-color="#eef6fb" stop-opacity="0.85"/>'
+        '<stop offset="0.55" stop-color="#e2eef6" stop-opacity="0.45"/>'
+        '<stop offset="1" stop-color="#d8e7f1" stop-opacity="0"/></radialGradient>'))
     write("particles/wind.svg", svg(120, 16,
-        '<path d="M4 10 C30 4 60 14 86 8 C100 5 108 6 112 9 C116 12 110 15 106 12" fill="none" stroke="url(#g)" stroke-width="3" stroke-linecap="round"/>'
+        '<path d="M4 10 C30 4 60 14 86 8 C100 5 108 6 112 9 C116 12 110 15 106 12" fill="none" stroke="url(#g)" stroke-width="4" stroke-linecap="round"/>'
         '<path d="M24 13 C44 10 60 14 76 12" fill="none" stroke="url(#g)" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/>',
         '<linearGradient id="g" x1="0" y1="0" x2="1" y2="0">'
-        '<stop offset="0" stop-color="#ffffff" stop-opacity="0"/><stop offset="0.5" stop-color="#ffffff" stop-opacity="0.9"/>'
-        '<stop offset="1" stop-color="#ffffff" stop-opacity="0.6"/></linearGradient>'))
+        '<stop offset="0" stop-color="#6f9fc0" stop-opacity="0"/><stop offset="0.5" stop-color="#6f9fc0" stop-opacity="0.9"/>'
+        '<stop offset="1" stop-color="#6f9fc0" stop-opacity="0.6"/></linearGradient>'))
     star = "M16 2 Q18.5 13.5 30 16 Q18.5 18.5 16 30 Q13.5 18.5 2 16 Q13.5 13.5 16 2Z"
     write("particles/sparkle.svg", svg(32, 32,
         '<circle cx="16" cy="16" r="15" fill="url(#g)"/>'

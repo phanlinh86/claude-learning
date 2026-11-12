@@ -103,7 +103,7 @@
 
     pause() {
       if (this.mode !== 'playing' && this.mode !== 'ready') return;
-      if (this.world && (this.world.phase === 'over' || this.deadT >= 0)) return;
+      if (this.world && (this.world.phase === 'over' || this.world.phase === 'down' || this.deadT >= 0)) return;
       this.clearInput();
       this._pausedFrom = this.mode;
       this.mode = 'paused';
@@ -252,7 +252,7 @@
           case 'gustWarn': if (sound) A.play('gustWarn'); break;
           case 'gust': if (sound) A.play('gust'); break;
           case 'levelUp': this._setLevelVisuals(e.zone, false); if (sound) setTimeout(() => A.play('level'), 200); break;
-          case 'down': if (sound) A.play('down'); A.stopMusic(); this.clearInput(); break;
+          case 'down': if (sound) A.play('down'); A.stopMusic(); this.clearInput(); if (this.mode !== 'title') BKF.UI.setHud(false); break;
           case 'gameOver': if (sound) A.play('over'); this.deadT = 0; break;
         }
       }
@@ -268,7 +268,7 @@
       if (this.mode === 'playing') this.runT += h;
       if (w.phase === 'over' && this.deadT < 0) this.deadT = 0;
       if (this.deadT >= 0) this.deadT += h;
-      if ((this.mode === 'playing' || this.mode === 'ready') && this.deadT > 0.5) this.gameOver();
+      if ((this.mode === 'playing' || this.mode === 'ready') && this.deadT > 1.1) this.gameOver();   // let the nap be seen first
       if (this.mode === 'title' && (w.phase === 'over' || (w.level || 0) >= 1 || w.t > 50) && (this.deadT < 0 || this.deadT > 1)) {
         this.world = this.makeWorld(null, true);
         this.bot = new BKF.Bot(this.world, { skill: 0.85, seed: (Math.random() * 1e6) | 0 });

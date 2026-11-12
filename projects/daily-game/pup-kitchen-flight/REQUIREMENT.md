@@ -25,8 +25,8 @@ Tap → Biscuit puffs up; let go → he glides down in a gentle arc. Steer throu
 
 ## Score and lose
 - Each leaf: +1. Each obstacle passed: +1. A clean level (no bumps): +5.
-- Bumping into a utensil, a stack, a kettle or the counter: lose one battery, bounce back, blink safely for 1.5 s.
-- Start with 3 batteries (max 3); every 15 leaves give one back. 0 batteries: Biscuit powers down and floats to the counter → game over.
+- Bumping into a utensil, a stack, a kettle or the counter: lose one battery, bounce back, blink safely for 1.5 s (2.5 s on Easy).
+- Batteries: Easy starts with 4 and gets one back every 6 leaves; Normal 3 / every 25; Hard 3 / every 30 (tuned by the playtest). 0 batteries: Biscuit powers down and floats to the counter → game over.
 - Kettles puff up a column of steam that gently lifts Biscuit (it never hurts).
 
 ## Levels (about 60 s each), with the twist

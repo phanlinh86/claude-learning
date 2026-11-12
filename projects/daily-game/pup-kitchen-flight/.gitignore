@@ -7,3 +7,4 @@ node_modules/
 tests/out/
 tools/art-environment/out/
 tools/art-characters/out/
+tests/sim/out/
