@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 120" width="140" height="120">
+<path d="M34,54 C30,16 94,16 90,54" fill="none" stroke="#6e4521" stroke-width="13" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M34,54 C30,16 94,16 90,54" fill="none" stroke="#c98f55" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M42,30 C50,22 62,20 72,21" fill="none" stroke="#f1c592" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M98,88 C114,82 120,62 125,45" fill="none" stroke="#8a2a1c" stroke-width="16" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M98,88 C114,82 120,62 125,45" fill="none" stroke="#e8553f" stroke-width="8.5" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M108,82 C116,74 120,62 123,52" fill="none" stroke="#c33f2d" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<ellipse fill="#c33f2d" stroke="#8a2a1c" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" cx="127" cy="41.5" rx="6.5" ry="3.6" transform="rotate(-62 127 41.5)"/>
+<rect fill="#c33f2d" stroke="#8a2a1c" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" x="30" y="108" width="64" height="10" rx="4"/>
+<clipPath id="ketb"><ellipse cx="62" cy="80" rx="48" ry="34"/></clipPath>
+<ellipse cx="62" cy="80" rx="48" ry="34" fill="#e8553f"/>
+<g clip-path="url(#ketb)"><ellipse cx="74" cy="98" rx="52" ry="26" fill="#c33f2d"/><path d="M10,84 Q62,96 114,84" fill="none" stroke="#fff3dc" stroke-width="7"/><circle cx="62" cy="88" r="7" fill="#fff3dc"/><circle cx="62" cy="88" r="3.5" fill="#e8553f"/></g>
+<ellipse cx="62" cy="80" rx="48" ry="34" fill="none" stroke="#8a2a1c" stroke-width="4"/>
+<ellipse cx="36" cy="66" rx="10" ry="5" fill="#ffb3a3" transform="rotate(-35 36 66)"/>
+<circle cx="28" cy="78" r="2.5" fill="#ffb3a3"/>
+<path fill="#e8553f" stroke="#8a2a1c" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" d="M40,50 Q42,38 62,37 Q82,38 84,50 Z"/>
+<path d="M48,44 Q54,40 62,40" fill="none" stroke="#ffb3a3" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<ellipse fill="#3a3f5c" stroke="#22263a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" cx="62" cy="34" rx="7" ry="5"/>
+</svg>

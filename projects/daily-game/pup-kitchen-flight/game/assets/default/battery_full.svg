@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 40" width="64" height="40">
+<rect fill="#2f6e3a" stroke="#2f6e3a" stroke-width="4.27" stroke-linejoin="round" stroke-linecap="round" x="52" y="14" width="8" height="12" rx="3"/>
+<rect fill="#f4f7f9" stroke="#2f6e3a" stroke-width="5.33" stroke-linejoin="round" stroke-linecap="round" x="5" y="5" width="48" height="30" rx="8"/>
+<rect x="11" y="11" width="11" height="18" rx="3" fill="#5fd16a"/>
+<rect x="11" y="22" width="11" height="7" rx="3" fill="#41ad4e"/>
+<rect x="13" y="13" width="3" height="6" rx="1.5" fill="#ffffff" opacity="0.7"/>
+<rect x="24.5" y="11" width="11" height="18" rx="3" fill="#5fd16a"/>
+<rect x="24.5" y="22" width="11" height="7" rx="3" fill="#41ad4e"/>
+<rect x="26.5" y="13" width="3" height="6" rx="1.5" fill="#ffffff" opacity="0.7"/>
+<rect x="38" y="11" width="11" height="18" rx="3" fill="#5fd16a"/>
+<rect x="38" y="22" width="11" height="7" rx="3" fill="#41ad4e"/>
+<rect x="40" y="13" width="3" height="6" rx="1.5" fill="#ffffff" opacity="0.7"/>
+<rect x="10" y="7.5" width="22" height="2.4" rx="1.2" fill="#ffffff" opacity="0.9"/>
+</svg>
