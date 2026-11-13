@@ -1,0 +1,66 @@
+{
+ "date": "2026-11-13T13:34:39.083Z",
+ "secs": 86,
+ "results": [
+  {
+   "device": "iphone-portrait",
+   "test": "bot age 3 en",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "device": "iphone-landscape",
+   "test": "bot age 3 vi",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "device": "ipad-portrait",
+   "test": "bot age 4 vi",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "device": "iphone-landscape",
+   "test": "bot age 4 en",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "device": "iphone-portrait",
+   "test": "bot age 6 vi",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "device": "ipad-portrait",
+   "test": "bot age 5 en",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "device": "ipad-landscape",
+   "test": "bot age 5 vi",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "device": "ipad-landscape",
+   "test": "bot age 6 en",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "device": "iphone-landscape",
+   "test": "bot age 7 vi",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "device": "iphone-portrait",
+   "test": "bot age 7 en",
+   "ok": true,
+   "detail": ""
+  }
+ ]
+}
