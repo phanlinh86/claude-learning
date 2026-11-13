@@ -56,4 +56,4 @@ away).
   things flew into them; in portrait the whole arch was hidden. `render.js` draws the rainbow after the ground with a soft
   cloud mist (`_rainbowMist`) melting its feet into the floor, and `world.computeLayout` lifts the arch in portrait to just
   above Bao's head (`cfg.rainbowPortraitLift 24`; landscape unchanged, DESIGN §2). The matching unit assertion in
-  `tests/unit/run.js` was updated. Full note in `docs/reports/integration.md`.
+  `tests/unit/run.js` was updated (superseded in fix round 1 by the mechanics rewrite: lift −6, arch below the field). Full note in `docs/reports/integration.md`.

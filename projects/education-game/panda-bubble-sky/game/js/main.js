@@ -94,6 +94,13 @@
     weather.resize(view.W, view.H, world.layout && world.layout.groundY);
     placeBubble();
     updateHudStarTarget();
+    if (mode === 'done') requestAnimationFrame(measureDonePanel);
+  }
+  /** the celebration panel's bottom in logical px: the done-scene rainbow keeps clear of it (visual QA P2-7) */
+  function measureDonePanel() {
+    const p = document.querySelector('#scrDone .done-panel');
+    const r = p && mode === 'done' ? p.getBoundingClientRect() : null;
+    render.donePanel = r && r.height ? { x: (r.left - view.left) / view.s, y: (r.top - view.top) / view.s, w: r.width / view.s, h: r.height / view.s } : null;
   }
   function placeBubble() {
     const B = world.layout && world.layout.bubble;
@@ -131,13 +138,21 @@
     promptUntil = performance.now() + 6000 + lineMs(txt);
     const p = speak(txt, opt);
     // the line ended (or was dropped / failed) without ever starting: lift the guard so a Bao tap repeats it
-    if (p && p.then) p.then(() => { if (pendingPrompt === txt) { pendingPrompt = null; promptUntil = Math.min(promptUntil, performance.now() + 300); } }, () => {});
-    if (!voiceOn()) { pendingPrompt = null; promptUntil = performance.now() + lineMs(txt); }
+    if (p && p.then) p.then(() => { promptQueued = false; if (pendingPrompt === txt) { pendingPrompt = null; promptUntil = Math.min(promptUntil, performance.now() + 300); } }, () => { promptQueued = false; });
+    if (!voiceOn()) { pendingPrompt = null; promptQueued = false; promptUntil = performance.now() + lineMs(txt); }
   }
   function onVoiceStart(display) {
-    if (pendingPrompt && display === pendingPrompt) { promptStart = performance.now(); promptUntil = promptStart + lineMs(display); pendingPrompt = null; }
+    if (pendingPrompt && display === pendingPrompt) { promptStart = performance.now(); promptUntil = promptStart + lineMs(display); pendingPrompt = null; promptQueued = false; }
   }
-  const canInterrupt = () => performance.now() > promptUntil;
+  // count lines (countPop "One!", the countSel run) have their own guard: a repeated question never lowers it (VOICE §1.1 rule 2)
+  let countUntil = 0, promptQueued = false;
+  const canInterrupt = () => performance.now() > promptUntil && performance.now() > countUntil;
+  /** a count line: priority, never interrupting, never interrupted — queued lines stack their guards */
+  function speakCount(txt, extraMs) {
+    const now = performance.now();
+    countUntil = Math.max(countUntil, now) + lineMs(txt) + (extraMs || 0);
+    speak(txt, { priority: true });
+  }
   /** feedback (right / wrong) interrupts — but never the prompt while it is protected (then it queues) */
   const feedback = txt => speak(txt, { interrupt: canInterrupt() });
   /** the wrong line carries the goal ("… find a red one!"): protect it like a prompt */
@@ -151,6 +166,7 @@
     world.newSession({ lastTopics: world.lastTopics });
     if (world.levels) PB.Storage.setJSON('lastTopics', world.levels);
     if (FLAGS.level != null) world.startLevel(Math.max(0, Math.min(3, FLAGS.level | 0)));
+    countUntil = 0; promptUntil = 0; promptQueued = false;
     shownStars = 0; PB.UI.setStars(0); lastAsk = null; lastPromptText = ''; sessionThings = []; lastRight = null; blowSaid = -1;
     blockInput();
     render.clearGallery();
@@ -177,6 +193,7 @@
   function pause() {
     if (mode !== 'play' && mode !== 'talk') return;
     mode = 'paused';
+    countUntil = 0; promptQueued = false;   // Voice.stop below ends every line: no guard outlives it
     if (inputCancel && inputCancel.cancel) inputCancel.cancel();
     if (world.cancelDrag) world.cancelDrag();
     if (PB.Voice) { PB.Voice.stop(); if (PB.Voice.stopListening) PB.Voice.stopListening(); }
@@ -193,6 +210,7 @@
     PB.Audio.startMusic();
     // say the question again so a returning child knows what to do
     if (mode === 'talk' && world.talk && !world.talkAnswered) speak(T(world.talk.promptKey, world.talk.params || {}), { priority: true });
+    else if (world.state === 'intro') speak(T('ui.chapter', { n: world.level + 1 }) + '. ' + T('topic.' + world.topic), { priority: true });
     else if (world.interactive) setTimeout(repeatPrompt, 300);
     else if (world.state === 'round' && world.phase === 'play' && lastRight && lastRight.text) {
       // the pause cut the right line while the thing flies to the rainbow: say it again (short)
@@ -275,16 +293,17 @@
       case 'bubbleIn': PB.Audio.play('blup'); break;
       case 'bump': stats.bumps++; PB.Audio.play('bump', { v: e.v }); break;
       case 'ask': {
-        lastAsk = e; idleSaid = 0; PB.UI.fadeBubble(false); roundMissed = false; hintBySay = false;
-        // the long "Look at the bubbles! …" form only in a chapter's first round (the world sets first only there)
-        const txt = askText(Object.assign({}, e, { first: !!e.first && e.round === 0 }));
+        lastAsk = e; idleSaid = 0; PB.UI.fadeBubble(false); roundMissed = false; hintBySay = false; promptQueued = false;
+        // the long "Look at the bubbles! …" form: the world sets first in a chapter's round 0 and the count chapter's first
+        // countSel round (MECHANICS fix round 1) — passed straight through
+        const txt = askText(Object.assign({}, e, { first: !!e.first }));
         lastPromptText = txt;
         PB.UI.say(txt); speakPrompt(txt, { priority: true });
         break;
       }
       case 'right': {
         stats.correct++;
-        promptUntil = Math.min(promptUntil, performance.now()); pendingPrompt = null;
+        // VOICE §1.1 rule 1: the prompt stays protected until heard once — the right line queues behind it
         const th = e.thing || {};
         PB.Audio.play('right');
         render.burst('sparkles', e.x, e.y, { n: 14, color: th.color });
@@ -296,10 +315,10 @@
           render.burst('count', e.x, e.y - (L ? L.R * 0.2 : 20), { n: e.count });
           PB.Audio.play('pip', { i: e.count || 1 });
           stats.counts++;
-          speak(txt, { priority: true }); protect(txt);
+          speakCount(txt);
         } else if (e.mode === 'countSel' && th.kind === 'stars') {
           // the count run ("One, two, three, four! Four stars!") is said while the world lights the stars: never cut
-          speak(txt, { interrupt: canInterrupt(), priority: true }); protect(txt, 400);
+          speakCount(txt, 400);
         } else { feedback(txt); protect(txt); }
         PB.UI.say(txt);
         break;
@@ -312,8 +331,9 @@
       case 'count': {   // a star lights up on the freed thing: a rising pip + the numeral (the words are the right line's count run)
         stats.counts++;
         PB.Audio.play('pip', { i: e.i });
-        const L = world.layout;
-        render.burst('count', e.x, e.y - (L ? L.thingSize * 0.75 : 80), { n: e.i });
+        // the numeral sits above the (enlarged, fs up to 2.2) star group, never on it
+        const L = world.layout, b = bubbleOf(e.id), fs = b && b.fs > 0 ? b.fs : 1;
+        render.burst('count', e.x, e.y - (L ? L.thingSize * (0.5 * fs + 0.45) : 80), { n: e.i });
         break;
       }
       case 'fly': break;
@@ -359,11 +379,7 @@
         // only a question that can still be answered is repeated: during the blow / rainbow / whoosh / a count run Bao just
         // giggles — and never over another line, so nothing is cut
         if (e.busy || !world.interactive || !lastAsk) { if (!speaking() && canInterrupt()) speak(T('poke')); break; }
-        // never restart the prompt while Bao is still saying it
-        if (speaking() && lastSpoken === lastPromptText) break;
-        const since = performance.now() - promptStart;
-        const stuck = pendingPrompt && since > 6000;   // the prompt never started (no voice / dropped): don't wait forever
-        if (since > 3000 && (!pendingPrompt || stuck)) repeatPrompt();
+        askAgain();
         break;
       }
       case 'roundDone': {
@@ -378,9 +394,9 @@
         setTimeout(() => PB.Audio.setFanfare(false), 1500 / Math.max(1, speed));
         if (weather.burst) weather.burst(e.x, e.y, { kind: 'stars', n: 12 });
         render.burst('sparkles', e.x, e.y, { n: 18 });
-        // ONE praise, only in the chapter's last round or after a round with a miss; droppable
+        // ONE praise, only after a round with a miss, the chapter's 2nd round or its last round (playtest P2-5); droppable
         const lr = lastRound || {};
-        if ((lr.missed || lastRoundOfChapter()) && !speaking() && canInterrupt() && performance.now() - lastPraise > 1200) {
+        if ((lr.missed || lastRoundOfChapter() || world.round === 1) && !speaking() && canInterrupt() && performance.now() - lastPraise > 1200) {
           lastPraise = performance.now(); speak(T(lr.stars >= 3 && Math.random() < 0.5 ? 'great' : 'rainbow'));
         }
         break;
@@ -454,6 +470,7 @@
         speak(T('session.done', { stars: e.stars || 0 }));
         mode = 'done';
         PB.UI.only('scrDone'); PB.UI.show('hud', false); PB.UI.say('');
+        requestAnimationFrame(measureDonePanel);
         if (autoRestart) setTimeout(() => { if (mode === 'done') startGame(); }, 1500 / speed);
         break;
       }
@@ -525,11 +542,13 @@
     render.draw(world, weather, { dt: dt * Math.min(speed, 4), lang: curLang(), title: mode === 'title' || mode === 'loading', speaking: sp, done: mode === 'done', debug: FLAGS.debug });
     adapt(raw);
   }
-  function adapt(raw) {  // adaptive quality: step the render scale down when frames stay slow
+  let fastAcc = 0;
+  function adapt(raw) {  // adaptive quality: step the render scale down when frames stay slow, back up after 10 s of fast ones
     if (raw > 0.5) return;
-    if (raw > 0.022) { slowAcc += raw; stats.slowFrames++; } else slowAcc = Math.max(0, slowAcc - raw * 0.5);
-    // only the backing store shrinks: World.setViewport would cancel the child's gesture
-    if (slowAcc > 1.5 && quality > 0.6) { quality *= 0.85; render.quality = Math.max(0.5, quality); slowAcc = 0; pendingResize = true; }
+    if (raw > 0.022) { slowAcc += raw; stats.slowFrames++; fastAcc = 0; } else { slowAcc = Math.max(0, slowAcc - raw * 0.5); fastAcc += raw; }
+    // only the backing store changes: World.setViewport would cancel the child's gesture
+    if (slowAcc > 1.5 && quality > 0.6) { quality *= 0.85; render.quality = Math.max(0.5, quality); slowAcc = 0; fastAcc = 0; pendingResize = true; }
+    else if (fastAcc > 10 && quality < 1) { quality = Math.min(1, quality / 0.85); render.quality = quality; fastAcc = 0; pendingResize = true; }
   }
 
   /* ---------- input ---------- */
@@ -541,10 +560,28 @@
     baoMood('talk', 1.0);
     const cp = currentPrompt(); promptUntil = 0; PB.UI.say(cp); speakPrompt(cp, { interrupt: true });
   }
-  function bubbleTap() { if (world.interactive) repeatPrompt(); }
+  /** a Bao / speech-bubble tap while the question can be answered (VOICE §1.1 rule 4): never cut a protected prompt, wrong or
+   *  count line — queue the question ONCE to follow it; never restart the question while Bao is still saying it */
+  function askAgain() {
+    if (!world.interactive || !lastAsk) return;
+    if (speaking() && lastSpoken === lastPromptText) return;
+    if (!canInterrupt()) {
+      if (pendingPrompt || promptQueued) return;   // the question is still to come
+      const now = performance.now();
+      if (now - promptStart < 3000) return;
+      promptQueued = true; baoMood('talk', 1.0);
+      const cp = currentPrompt(); PB.UI.say(cp); speakPrompt(cp, { priority: true });
+      return;
+    }
+    const since = performance.now() - promptStart;
+    const stuck = pendingPrompt && since > 6000;   // the prompt never started (no voice / dropped): don't wait forever
+    if (since > 3000 && (!pendingPrompt || stuck)) repeatPrompt();
+  }
+  function bubbleTap() { askAgain(); }
 
   function bindUI() {
     PB.Input.kidProof();
+    PB.UI.guardScreenClicks();   // a finger held on the canvas never clicks a screen that opens under it (QA-F P2-1)
     // Input passes two NUMBERS in logical px (never a point object) — VOICE §4
     inputCancel = PB.Input.attach($('game'), {
       toLogical,

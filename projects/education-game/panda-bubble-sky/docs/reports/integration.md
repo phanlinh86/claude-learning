@@ -76,3 +76,31 @@ fixes outside my files.
   carried over from the sister games (VOICE §3), not bugs.
 - `tests/sim/*` are the mechanics engineer's headless playtest sims; `hs_browser.js` drives the real page via `?bot=1` and
   works now that `main.js` is wired, but the sims are not part of the required run command.
+
+## Fix round 1 (QA reports qa_functional / qa_visual / qa_playtest)
+- **Voice (VOICE §1.1 rules 1, 2, 4):** a right pop no longer lowers the prompt guard (feedback queues until the question was
+  heard once); countPop counts and the countSel run go through `speakCount` with their own `countUntil` guard (priority, never
+  interrupting, never lowered by a repeated question); Bao and speech-bubble taps use `askAgain()` — while a protected / count
+  line plays they queue the question ONCE (`promptQueued`), never cut it (QA-F P2-2, P3-1). `ask.first` is passed straight
+  through (count chapter's first countSel round). Praise at `rainbowDone` also after the chapter's 2nd round (playtest P2-5).
+  Resume during the chapter intro re-says the chapter line (P3-3).
+- **Held finger never clicks a new screen (QA-F P2-1):** `PB.UI.guardScreenClicks()` records each `.screen`'s open time and the
+  last pointerdown; a click on a screen control is swallowed when its press began before that screen opened or outside it
+  (keyboard clicks, `detail 0`, pass).
+- **Audio:** partials ≥ 0.45 × sampleRate are skipped / slide targets clamped (P3-2). **Adaptive quality** steps back up after
+  10 s of fast frames (P3-4). **`cleanName`** now removes tag content as documented (P3-5).
+- **Render:** freed things drawn at `fs × thingSize` (count ×2.2, badge ×1.4); things in bubbles at 1.55·r (stars) / 1.45·r
+  (tiles) / 1.2·r; the counting numeral sits above the enlarged star group; `field.archBehind` → arch alpha × 0.6; title
+  arch alpha 0.55 on landscape phones; celebration: 2 of 3 bars, every 0.14 s, cap 26, life 2.4–4.5 s, some bubbles rise from
+  the bottom (portrait: half, across the width), and the done-scene arch shrinks to stay under the `#scrDone` panel (main
+  measures it into `render.donePanel`).
+- **CSS:** `#logo2` nowrap (+ .8em for VI portrait), `text-wrap: balance` on `#bubbleText` / `#doneTitle`, Talk time 200 px
+  picture column + centred question on landscape phones, a centred big Talk panel on iPad portrait.
+- **world.js CONFIG:** `bubbleMaxW 560 → 700` (the only value changed there; all 40 unit tests pass). My earlier
+  `rainbowPortraitLift` is superseded by the mechanics engineer's rewrite (now −6).
+- **Tests:** stale `tests/visual/screens.js` deleted (the QA team's `tests/qa/visual_*.js` replace it); `swipe_right` runs the
+  world at 0.2× during the swipe (load-proof); `bao_repeat` waits the 3 s rule before the bubble tap; surprise tests poll for a
+  free tappable point. QA repros `held_into_talk` (also HOLD_MS=100), `held_release_menu`, `poke_during_count` (VIA=bao and
+  bubble) now PASS.
+- Results: unit 40 · i18n_voice 57 605 · bubble_art 11 021 · smoke PASS · functional iPhone portrait 24/24, iPhone landscape
+  11/11, iPad portrait 24/24, iPad landscape 11/11, bots 10/10 — 0 console errors.

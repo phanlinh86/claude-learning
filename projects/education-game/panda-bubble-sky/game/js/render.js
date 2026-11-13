@@ -131,6 +131,9 @@
     { kind: 'shape', shape: 'heart', color: 'pink' }, { kind: 'toy', obj: 'car', color: 'blue' }, { kind: 'animal', animal: 'sheep' },
     { kind: 'shape', shape: 'triangle', color: 'green' }, { kind: 'toy', obj: 'umbrella', color: 'purple' }, { kind: 'toy', obj: 'kite', color: 'orange' }];
 
+  /** the thing's box inside a bubble of radius r: stars 1.55·r (countable on phones, visual QA P1-1), number / letter tiles
+   *  1.45·r (the card is 84 of 100 units wide, P3-3), everything else 1.2·r (bubble_art's recommendation) */
+  const thingBox = (thing, r) => r * (thing && thing.kind === 'stars' ? 1.55 : thing && thing.kind === 'tile' ? 1.45 : 1.2);
   function roundRect(g, x, y, w, h, r) {
     g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r);
     g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r);
@@ -181,7 +184,7 @@
       x.setTransform(this.rs, 0, 0, this.rs, 0, 0);
       const R = world.layout ? world.layout.R : 70, mx = this._maxN(world);
       try {
-        for (const b of world.bubbles) { P.drawThing(x, b.thing, 1.2 * R, { maxN: mx }); }
+        for (const b of world.bubbles) { P.drawThing(x, b.thing, thingBox(b.thing, R), { maxN: mx }); }
         P.drawBubble(x, R, { part: 'back' }); P.drawBubble(x, R, { part: 'front' });
       } catch (e) { /* cache only */ }
     }
@@ -308,8 +311,10 @@
       this._floor(null);
       // rainbow (behind the bubbles, rising out of the cloud floor — see _rainbowMist)
       if (P && rb && rb.alpha > 0.01 && rb.k) {
-        try { P.drawRainbow(g, rb, rb.k, ip(rb, 'filled', a) || 0, { shine: ip(rb, 'shine', a) || 0, alpha: ip(rb, 'alpha', a), guide: rb.guide == null ? 1 : rb.guide }); } catch (e) { /* skip */ }
-        this._rainbowMist(rb, ip(rb, 'alpha', a));
+        // a squat portrait where the arch must stand behind the field (layout.field.archBehind): a softer arch
+        const ra = ip(rb, 'alpha', a) * (L.field && L.field.archBehind ? 0.6 : 1);
+        try { P.drawRainbow(g, rb, rb.k, ip(rb, 'filled', a) || 0, { shine: ip(rb, 'shine', a) || 0, alpha: ra, guide: rb.guide == null ? 1 : rb.guide }); } catch (e) { /* skip */ }
+        this._rainbowMist(rb, ra);
       }
       this._cushion(L.bao);
       this._bao(w.bao, L.bao, {});
@@ -344,11 +349,11 @@
         if (b.state === 'pop') {
           P.drawBubble(g, r, Object.assign({ part: 'back' }, opt));
           // a soft pop at the top edge (the thing was never freed): it fades with the film
-          if (!b.fstate) { g.save(); g.globalAlpha *= 1 - opt.pop; g.rotate(ip(b, 'rot', a) || 0); P.drawThing(g, b.thing, 1.2 * r, { maxN }); g.restore(); }
+          if (!b.fstate) { g.save(); g.globalAlpha *= 1 - opt.pop; g.rotate(ip(b, 'rot', a) || 0); P.drawThing(g, b.thing, thingBox(b.thing, r), { maxN }); g.restore(); }
         } else {
           P.drawBubble(g, r, Object.assign({ part: 'back' }, opt));
           g.save(); g.globalAlpha *= al; g.rotate(ip(b, 'rot', a) || 0);
-          P.drawThing(g, b.thing, 1.2 * r, { glow: b.glow || 0, maxN });
+          P.drawThing(g, b.thing, thingBox(b.thing, r), { glow: b.glow || 0, maxN });
           g.restore();
           P.drawBubble(g, r, Object.assign({ part: 'front' }, opt));
         }
@@ -358,7 +363,7 @@
     _freed(b, a, maxN, L) {
       const P = BA(), g = this.g;
       const fx = ip(b, 'fx', a), fy = ip(b, 'fy', a), fs = ip(b, 'fs', a) || 1, fr = ip(b, 'fr', a) || 0, fq = ip(b, 'fq', a) || 0;
-      const size = 1.2 * (L.R || L.d / 2);
+      const size = L.thingSize || 1.2 * (L.R || L.d / 2);   // drawn at fs × thingSize (fs > 1 while counting / showing its home)
       if (b.badge && b.badge.a > 0.01) {
         g.save(); g.translate(b.badge.x, b.badge.y);
         try { P.drawHomeBadge(g, b.badge.home, b.badge.r, { a: b.badge.a, pop: easeOutBack(clamp(b.badge.a, 0, 1)) }); } catch (e) { /* skip */ }
@@ -459,7 +464,8 @@
       const box = { x: (ins.left || 0) + (portrait ? 40 : 46) + bh * 0.42, y: L.groundY - 4, h: bh };
       this._floor(null);
       // a full pastel rainbow over the field
-      if (P && L.rainbow) { try { P.drawRainbow(g, L.rainbow, 7, 7, { shine: (this.time * 0.18) % 1, alpha: 0.85, guide: 0 }); } catch (e) { /* skip */ } this._rainbowMist(L.rainbow, 0.85); }
+      const ta = L.phone && !portrait ? 0.55 : 0.85;   // landscape phones: the arch runs behind the logo — keep it soft (visual P3-7)
+      if (P && L.rainbow) { try { P.drawRainbow(g, L.rainbow, 7, 7, { shine: (this.time * 0.18) % 1, alpha: ta, guide: 0 }); } catch (e) { /* skip */ } this._rainbowMist(L.rainbow, ta); }
       this._cushion(box);
       // drifting bubbles: rise from below, wobble, some with a friend inside; pop softly at the top
       const list = this._titleB, frost = clamp(this._amb.frost || 0, 0, 1);
@@ -481,25 +487,38 @@
     _doneScene(w, o) {
       const P = BA(), g = this.g, L = this._L, t = this.time, dt = this._dt || 0;
       this._floor(null);
-      if (P && L.rainbow) { try { P.drawRainbow(g, L.rainbow, 7, 7, { shine: (t * 0.3) % 1, alpha: 0.9, guide: 0 }); } catch (e) { /* skip */ } this._rainbowMist(L.rainbow, 0.9); }
+      // the arch stays clear of the #scrDone panel (main measures it into this.donePanel; visual QA P2-7)
+      let rb = L.rainbow;
+      const dp = this.donePanel;
+      if (rb && dp && dp.x < rb.cx + rb.r && dp.x + dp.w > rb.cx - rb.r) {
+        const r = Math.min(rb.r, rb.cy - (dp.y + dp.h) - 24);
+        rb = r > 120 ? Object.assign({}, rb, { r, w: clamp(0.16 * r, 34, 70) }) : null;
+      }
+      if (P && rb) { try { P.drawRainbow(g, rb, 7, 7, { shine: (t * 0.3) % 1, alpha: 0.9, guide: 0 }); } catch (e) { /* skip */ } this._rainbowMist(rb, 0.9); }
       this._cushion(L.bao);
       const beat = Math.floor(t * 2.6) % 2;
-      const blowing = Math.floor(t / 1.8) % 3 === 0;   // every third beat-bar Bao blows a fresh stream of bubbles
+      const blowing = Math.floor(t / 1.8) % 3 !== 2;   // 2 of every 3 bars Bao blows a fresh stream of bubbles (a sky full of them)
       this._bao({ bounce: blowing ? 0 : Math.max(0, Math.sin(t * 2.6 * Math.PI)) * 0.8 }, L.bao, { frame: blowing ? 'characters/bao_blow' : beat ? 'characters/bao_dance' : 'characters/bao_cheer' });
       const ring = L.bao.blowRing || { x: L.bao.x + 60, y: L.bao.y - 180 };
       const list = this._doneB, frost = clamp(this._amb.frost || 0, 0, 1), things = this.gallery.length ? this.gallery : TITLE_THINGS;
       this._doneT -= dt;
-      if (P && blowing && this._doneT <= 0 && list.length < 16) {
-        this._doneT = 0.22;
-        this._spawnFloat(list, { r0: 30, r1: 62, x: () => ring.x + 10, y: () => ring.y, vx: () => 160 + Math.random() * 220, vy: () => -(60 + Math.random() * 170),
-          life: [1.6, 3.4], pThing: 0.6, thing: () => things[(Math.random() * things.length) | 0] });
+      if (P && blowing && this._doneT <= 0 && list.length < 26) {
+        this._doneT = 0.14;
+        const port = this.H > this.W;
+        // some rise from the bottom of the sky too (portrait: half of them, across the whole width — the stream from the wand
+        // alone would bunch up at the right edge of a narrow screen)
+        if (Math.random() < (port ? 0.5 : 0.3))
+          this._spawnFloat(list, { r0: 28, r1: 56, x: () => 50 + Math.random() * (this.W - 100), y: () => this.H + 40, vx: () => (Math.random() - 0.5) * 50, vy: () => -(120 + Math.random() * 100),
+            life: [2.4, 4.5], pThing: 0.5, thing: () => things[(Math.random() * things.length) | 0] });
+        else this._spawnFloat(list, { r0: 30, r1: 62, x: () => ring.x + 10, y: () => ring.y, vx: () => port ? 50 + Math.random() * 160 : 160 + Math.random() * 220,
+          vy: () => port ? -(140 + Math.random() * 200) : -(60 + Math.random() * 170), life: [2.4, 4.5], pThing: 0.6, thing: () => things[(Math.random() * things.length) | 0] });
       }
       for (let i = list.length - 1; i >= 0; i--) {
         const b = list[i]; b.age += dt; b.t += dt;
         if (b.pop > 0) { b.pop += dt / 0.22; if (b.pop >= 1) { list.splice(i, 1); continue; } continue; }
         b.vx *= 1 - 0.8 * dt; b.vy = b.vy * (1 - 0.5 * dt) - 18 * dt;
         b.x += (b.vx + 12 * Math.sin(b.t * 1.1 + b.ph)) * dt; b.y += b.vy * dt;
-        const out = b.x - b.r > this.W || b.y + b.r < 0;
+        const out = b.x - b.r > this.W || b.y + b.r < 0 || (b.vy > 0 && b.y - b.r > this.H);
         if (out) { list.splice(i, 1); continue; }
         if (b.age >= b.life) {
           b.pop = 0.01;

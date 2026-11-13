@@ -358,3 +358,27 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 .btn-play { background: #5CC97A; }
 .panel { border-color: var(--rim); }
 .talk-choices button { border-color: var(--rim); }
+
+/* ---------- fix round 1 (visual QA 2026-11-13) ---------- */
+/* P3-1: the Vietnamese logo never leaves "Bóng" alone on a third line */
+#logo2 { white-space: nowrap; }
+@media (orientation: portrait) { html[lang=vi] #logo2 { font-size: .8em; } }
+/* P3-2: no orphan word in the speech bubble or the done title */
+#bubbleText, #doneTitle { text-wrap: balance; }
+/* P3-4: Talk time on landscape phones — a bigger picture column, the question centred over the answers */
+@media (max-height: 430px) {
+  .talk-panel { grid-template-columns: 200px minmax(0, 1fr); }
+  .talk-panel #talkShow { width: 200px; }
+  .talk-q { text-align: center; }
+}
+/* P3-4: iPad portrait — Talk time centred on the screen with a big picture and big cards */
+@media (min-width: 768px) and (min-height: 1000px) and (orientation: portrait) {
+  #scrTalk { align-items: center; padding-top: calc(var(--sa-t) + 96px); }
+  .talk-panel { max-width: 680px; padding: 28px 28px 30px; }
+  .talk-panel h2 { font-size: 40px; }
+  .talk-panel #talkShow { width: 380px; margin-bottom: 10px; }
+  .talk-q { font-size: 32px; margin: 8px 0 22px; }
+  .talk-choices { gap: 18px; }
+  .talk-choices button { min-width: 160px; min-height: 150px; }
+  .talk-choices button canvas { width: 124px; height: 124px; }
+}

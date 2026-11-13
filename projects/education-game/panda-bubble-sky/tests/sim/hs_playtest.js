@@ -53,7 +53,7 @@ function runOne(o) {
           R = { topic: w.topic, ri: e.round, t0: w.time, n: e.n, k: e.k, mode: e.mode, short: e.short, wrong: 0, soft: 0, assist: 0, hintMiss: 0, hintIdle: 0, idle: 0, squish: 0,
             surprise: e.surprise, surpriseTap: 0, surpriseShown: 0, firstAsk: 0, playT: 0, stepWrong: 0, stepHint: 0, level: w.level, blowT: 0, rightT: [], doneT: 0 };
           if (S.keys.includes(e.key)) S.repKey++; S.keys.push(e.key); break;
-        case 'ask': if (R && e.first) { R.firstAsk = w.time; R.blowT = w.time - R.t0; } break;
+        case 'ask': if (R && !R.firstAsk) { R.firstAsk = w.time; R.blowT = w.time - R.t0; } break;   // the round's (only) ask; e.first = the long wording
         case 'wrong': if (R) { R.wrong++; R.stepWrong++; if (R.stepWrong >= 2 && !R.stepHint && !w.hintHand && w.time - w._lastHintT > 6.01 + dt) S.miss2NoHint++; } break;   // (+ dt: the press came up to one frame before w.time)
         case 'squish': if (R) R.squish++; break;
         case 'soft': if (R) R.soft++; break;

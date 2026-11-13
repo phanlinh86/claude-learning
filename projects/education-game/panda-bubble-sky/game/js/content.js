@@ -214,17 +214,17 @@
     age = ageOf(age);
     var nk = short && ri > 0 ? [4, 1] : tableNK(age, ri, level), n = nk[0], k = nk[1];
     if (topic === 'count') {
-      if (countMode(ri) === 'countSel') return { n: short ? 3 : (ri % 4 === 1 ? 3 : 4), k: 1, mode: 'countSel' };
+      if (countMode(ri) === 'countSel') return { n: short || age <= 4 ? 3 : (ri % 4 === 1 ? 3 : 4), k: 1, mode: 'countSel' };   // ≤ 4: 4 bubbles with gaps ≥ 2 allow only 2 sets
       return { n: n, k: 0, mode: 'countPop' };   // k / n from countPopK
     }
     if (topic === 'lower') { k = Math.max(2, k); n = Math.max(n, k + 2); }
     return { n: n, k: k, mode: 'match' };
   }
-  /** countPop: the asked number k and the bubble count n (> k). Age ≤ 4: round 0 → 2, round 2 → 3 | 4; age 5: round 0 → 3,
+  /** countPop: the asked number k and the bubble count n (> k). Age ≤ 4: round 0 → 2 | 3, round 2 → 3 | 4; age 5: round 0 → 3,
    *  round 2 → 4–6; age 6+: round 0 → 4, round 2 → 5–8 (n ≤ 9); short: k 3 (2 when the last ask was 3), n 4. */
   function countPopChoices(age, ri, short) {
     if (short && ri > 0) return [3, 2];
-    if (age <= 4) return ri === 0 ? [2] : [3, 4];
+    if (age <= 4) return ri === 0 ? [2, 3] : [3, 4];
     if (age === 5) return ri === 0 ? [3] : [4, 5, 6];
     return ri === 0 ? [4] : [5, 6, 7, 8];
   }
@@ -342,7 +342,7 @@
       case 'count': {
         if (nk.mode === 'countPop') {
           var ch = countPopChoices(age, ri, nk.short), kk = pickFresh(rng, ch, avoid), nn = countPopN(age, ri, nk.level, nk.short, kk);
-          var th = rng.chance(0.5) ? stars(1) : toy(rng.pick(PB.TOYS), rng.pick(colorPool(age)));
+          var th = toy(rng.pick(PB.TOYS), rng.pick(colorPool(age)));   // toys only: in a count chapter "stars" only means counting stars
           for (i = 0; i < nn; i++) tg.push(JSON.parse(JSON.stringify(th)));
           rule = R('pop', kk, 'number'); pk = 'p.countPop'; pr = { n: kk };
           return { rule: rule, promptKey: pk, params: pr, targets: tg, others: [], k: kk, n: nn };
@@ -561,7 +561,7 @@
       if (r.k >= n || n !== countPopN(age, ri, r.level, r.short, r.k)) return 'countPop n ' + n;
       var k0 = thingKey(bs[0].thing);
       if (bs.some(function (q) { return thingKey(q.thing) !== k0; })) return 'countPop: the same thing';
-      if (!(bs[0].thing.kind === 'toy' || (bs[0].thing.kind === 'stars' && bs[0].thing.n === 1))) return 'countPop thing';
+      if (bs[0].thing.kind !== 'toy') return 'countPop thing';
     } else {
       if (n !== nk.n || r.k !== nk.k) return 'n / k ' + n + '/' + r.k + ' (want ' + nk.n + '/' + nk.k + ')';
       if (tg.length !== r.k) return tg.length + ' targets (k ' + r.k + ')';

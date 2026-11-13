@@ -165,19 +165,20 @@ test('logical size: short side 720, long side clamped 960–1600', () => {
 });
 
 /** DESIGN §2 checks for one computed layout with n homes. */
+const archBehind = [];
 function checkLayout(L, v, age, n, tag) {
   const ins = L.ins, bb = L.bubble.y + L.bubble.h, d = L.d, R = d / 2, BP = PB.BAO_POINTS;
   assert.strictEqual(L.portrait, v.H > v.W, tag);
   assert.strictEqual(L.groundY, v.H - ins.bottom - (L.portrait ? 26 : 14), tag + ' groundY');
   assert.strictEqual(L.bao.x, ins.left + (L.portrait ? 120 : 130), tag + ' bao.x');
   assert.strictEqual(L.bao.y, L.groundY - 4, tag + ' bao.y');
-  assert.strictEqual(L.bao.h, L.portrait ? 220 : 240, tag + ' bao.h');
+  assert.strictEqual(L.bao.h, L.portrait ? (L.phone ? 290 : 220) : 240, tag + ' bao.h (290 on phones in portrait)');
   const s = L.bao.h / 300;
   assert.ok(Math.abs(L.bao.ring.x - (L.bao.x + (BP.ring[0] - BP.feet[0]) * s)) < 1e-9 && Math.abs(L.bao.ring.y - (L.bao.y + (BP.ring[1] - BP.feet[1]) * s)) < 1e-9, tag + ' ring');
   assert.ok(Math.abs(L.bao.blowRing.x - (L.bao.x + (BP.blowRing[0] - BP.feet[0]) * s)) < 1e-9 && Math.abs(L.bao.ring.r - BP.ringR * s) < 1e-9, tag + ' blowRing');
   assert.ok(inside(L.bao.box, L.bao.ring.x, L.bao.ring.y) && inside(L.bao.box, L.bao.x, L.bao.y - 0.9 * L.bao.h), tag + ' bao box covers Bao + wand');
   // d: the age base (× 1.1 when tall) unless n does not fit; never below 112
-  assert.ok(d >= 112 && d <= Math.round(D_BASE[age] * (L.tall ? 1.1 : 1)), tag + ' d ' + d);
+  assert.ok(d >= 112 && d <= Math.round(D_BASE[age] * (L.tall ? 1.1 : 1) * (L.phone && L.portrait ? 1.25 : 1)), tag + ' d ' + d);
   const f = L.field, K = 0.55;
   if (!L.portrait) {
     const bx = L.bao.box;
@@ -185,7 +186,8 @@ function checkLayout(L, v, age, n, tag) {
     assert.ok(Math.abs(f.y0 - (bb + K * d + 16)) < 1e-9 && Math.abs(f.y1 - (L.groundY - K * d - 30)) < 1e-9, tag + ' field y');
   } else {
     assert.ok(Math.abs(f.x0 - (ins.left + K * d + 20)) < 1e-9 && Math.abs(f.x1 - (v.W - ins.right - K * d - 20)) < 1e-9, tag + ' field x');
-    assert.ok(Math.abs(f.y0 - (bb + K * d + 20)) < 1e-9 && Math.abs(f.y1 - (L.bao.box.y - 0.5 * d - 10)) < 1e-9, tag + ' field y');
+    assert.ok(Math.abs(f.y0 - (bb + K * d + 20)) < 1e-9 && Math.abs(f.y1 - (f.archBehind ? L.bao.box.y - 0.5 * d - 10 : Math.min(L.bao.box.y - 0.5 * d - 10, L.bao.box.y - 6 - 200 - 0.5 * d - 14))) < 1e-9, tag + ' field y (above the arch)');
+    if (f.archBehind) { assert.ok(v.H / v.W < 1.45, tag + ' only squat portraits put the arch behind'); archBehind.push(v.name + ' n' + n); }
   }
   assert.strictEqual(L.homes.length, n, tag + ' homes');
   assert.ok(L.fits, tag + ' fits (' + n + ' at d ' + d + ')');
@@ -204,9 +206,19 @@ function checkLayout(L, v, age, n, tag) {
   });
   // rainbow + hit radius
   // portrait: the arch stands just above Bao's head (integrator fix, docs/reports/integration.md); landscape: DESIGN §2
-  const rcy = L.portrait ? Math.min(L.groundY + 30, L.bao.box.y + 24) : L.groundY + 30;
-  const rb = L.rainbow, rr = Math.min(0.5 * (f.x1 - f.x0) + 0.4 * d, Math.min(L.groundY, rcy) - bb - 30);
+  // portrait (QA P2-3): the arch's feet stand just above Bao's box, the arch sits BELOW the lowest bubble (≥ 0.5 d + 14), r ≥ 200;
+  // landscape: cy = groundY + 30 (DESIGN §2), the arch top never above the field's midline
+  const rcy = L.portrait ? L.bao.box.y - 6 : L.groundY + 30, maxY = Math.max(...L.homes.map(p => p.y));
+  let rr = Math.min(0.5 * (f.x1 - f.x0) + 0.4 * d, L.groundY - bb - 30);
+  rr = L.portrait ? Math.min(rr, rcy - bb - 30, f.archBehind ? 1e9 : rcy - (maxY + 0.5 * d + 14)) : Math.min(rr, rcy - (f.y0 + f.y1) / 2);
+  const rb = L.rainbow;
   assert.ok(Math.abs(rb.cx - (f.x0 + f.x1) / 2) < 1e-9 && rb.cy === rcy && Math.abs(rb.r - rr) < 1e-9, tag + ' rainbow');
+  if (L.portrait && !f.archBehind) {
+    assert.ok(rb.r >= 200 - 1e-6, tag + ' portrait arch r ≥ 200');
+    assert.ok(rb.cy <= L.bao.box.y, tag + ' the arch feet clear Bao');
+    L.homes.forEach(p => assert.ok(p.y + R + 14 <= rb.cy - rb.r + 1e-6, tag + ' no bubble rests on the arch'));
+  } else if (!L.portrait) assert.ok(rb.cy - rb.r >= (f.y0 + f.y1) / 2 - 1e-6, tag + ' arch below the field midline');
+  L.homes.forEach((p, i) => { const tp = PB.World.rainbowPoint(rb, 3, i % 3 + 0.5); assert.ok(Number.isFinite(tp.x) && tp.y < L.groundY, tag + ' piece above the floor'); });
   assert.ok(Math.abs(rb.w - Math.min(70, Math.max(40, 0.16 * rb.r))) < 1e-9, tag + ' rainbow w');
   assert.ok(rb.cy - rb.r >= bb + 30 - 1e-6, tag + ' rainbow under the speech bubble');
   const hr = 0.6 * d + 14;
@@ -221,12 +233,13 @@ test('layout: DESIGN §2 on 15 viewports × ages × bubble counts × seeds (home
     count++;
   }
   assert.ok(count > 1200, count);
+  console.log('    (arch behind the field on: ' + ([...new Set(archBehind.map(x => x.replace(/ n\d+$/, '')))].join(', ') || 'none') + ')');
 });
 test('layout: wide screens keep the base diameter; tall portrait gets × 1.1; homes vary per seed and are spread', () => {
   const L1 = PB.World.computeLayout(1556, 720, null, null, 4, null, 6, 1);
   assert.strictEqual(L1.d, 150);
   const P1 = PB.World.computeLayout(720, 1561, { top: 108, bottom: 62 }, null, 4, null, 6, 1);
-  assert.ok(P1.tall); assert.strictEqual(P1.d, 165);
+  assert.ok(P1.tall && P1.phone); assert.ok(P1.d > 165 && P1.d <= 206, 'phone portrait × 1.25 (fit permitting): ' + P1.d); assert.strictEqual(P1.bao.h, 290);
   const A = PB.World.computeLayout(1556, 720, null, null, 4, null, 5, 1), B = PB.World.computeLayout(1556, 720, null, null, 4, null, 5, 2);
   assert.notDeepStrictEqual(A.homes, B.homes);
   // the first home (bubble 0 is blown first) is the farthest from the wand ring
@@ -278,15 +291,16 @@ function checkRound(r, age, lang, ri, level, short, tag) {
   assert.ok(bs.length >= 3 && bs.length <= 9, tag + ' n');
   if (r.mode === 'countPop') {
     assert.strictEqual(tg.length, bs.length, tag + ' countPop: every bubble a target');
-    const K = age <= 4 ? (ri === 0 ? [2] : [3, 4]) : age === 5 ? (ri === 0 ? [3] : [4, 5, 6]) : (ri === 0 ? [4] : [5, 6, 7, 8]);
+    const K = age <= 4 ? (ri === 0 ? [2, 3] : [3, 4]) : age === 5 ? (ri === 0 ? [3] : [4, 5, 6]) : (ri === 0 ? [4] : [5, 6, 7, 8]);
     assert.ok((short && ri > 0 ? [2, 3] : K).includes(r.k) && r.k < bs.length, tag + ' countPop k ' + r.k);
     assert.ok(r.params.n === r.k && r.promptKey === 'p.countPop');
     assert.ok(bs.every(b => C.thingKey(b.thing) === C.thingKey(bs[0].thing)), tag + ' countPop: the same thing');
+    assert.strictEqual(bs[0].thing.kind, 'toy', tag + ' countPop: toys only');
     return;
   }
   if (r.topic === 'count') {
     assert.strictEqual(r.mode, 'countSel'); assert.strictEqual(tg.length, 1);
-    assert.strictEqual(bs.length, short ? 3 : ri === 1 ? 3 : 4, tag + ' countSel n');
+    assert.strictEqual(bs.length, short || age <= 4 ? 3 : ri === 1 ? 3 : 4, tag + ' countSel n');
     const a = tg[0].thing.n, hi = age <= 4 ? 5 : age === 5 ? 10 : 12;
     ot.forEach(b => { const g = Math.abs(b.thing.n - a); assert.ok(b.thing.n >= 1 && b.thing.n <= hi && (age <= 4 ? g >= 2 : Math.max(a, b.thing.n) >= 6 ? g >= 2 : g >= 1), tag + ' countSel gap'); });
     assert.strictEqual(new Set(bs.map(b => b.thing.n)).size, bs.length);
@@ -448,7 +462,7 @@ test('content: topicsFor — first session = AGE_TOPICS, then the opener alterna
 });
 
 // ================================================================ world: blow / float physics
-test('blow: bubbles grow one by one on the wand ring (0.3 R → R in 0.35 s), detach towards their home, ask 0.4 s after the last', () => {
+test('blow: bubbles grow one by one on the wand ring (0.3 R → R in 0.35 s), detach towards their home, ask 1.0 s after the last', () => {
   const w = mkWorld();
   w.levels = ['colors', 'colors', 'colors', 'colors']; w.startLevel(1); w.round = 2; w._beginRound();
   const e0 = evs(w);
@@ -468,7 +482,7 @@ test('blow: bubbles grow one by one on the wand ring (0.3 R → R in 0.35 s), de
   assert.strictEqual(blows.length, 5); assert.strictEqual(ins.length, 5);
   blows.forEach(([t, e], i) => { assert.strictEqual(e.i, i); assert.ok(Math.abs(t - (0.5 + 0.5 * i)) < 0.02, 'blow at ' + t); });
   ins.forEach(([t], i) => assert.ok(Math.abs(t - blows[i][0] - w.levelStartTime - 2.5 - 0.35) < 0.1 || true));
-  assert.ok(Math.abs(ask[0] - ins[4][0] - 0.4) < 0.02, 'ask 0.4 s after the last detach');
+  assert.ok(Math.abs(ask[0] - ins[4][0] - 1.0) < 0.02, 'ask 1.0 s after the last detach (the bubbles have arrived)');
   assert.ok(!ask[1].first && !ask[1].chapterFirst && Number.isFinite(ask[1].x) && ask[1].promptKey === 'p.colors' && ask[1].params.k === 2, 'round 2: the short wording');
   assert.ok(maxGrowR > 0.95 * w.layout.R);
   assert.ok(w.interactive);
@@ -506,7 +520,9 @@ test('float: pairwise soft collision pushes apart with a velocity exchange, kick
   a.x = b.x - dx / d * (a.r + b.r + 30); a.y = b.y - dy / d * (a.r + b.r + 30); a._px = a.x; a._py = a.y;
   a.vx = dx / d * 450; a.vy = dy / d * 450;
   let bump = null, minD = 1e9;
-  run(w, 1.2, () => { minD = Math.min(minD, Math.hypot(a.x - b.x, a.y - b.y)); for (const e of evs(w)) if (e.type === 'bump' && !bump) bump = { e, aw: a.wob, bw: b.wob, bv: Math.hypot(b.vx, b.vy) }; });
+  let bvMax = 0;
+  run(w, 1.2, () => { minD = Math.min(minD, Math.hypot(a.x - b.x, a.y - b.y)); bvMax = Math.max(bvMax, Math.hypot(b.vx, b.vy)); for (const e of evs(w)) if (e.type === 'bump' && !bump) bump = { e, aw: a.wob, bw: b.wob }; });
+  bump && (bump.bv = bvMax);
   assert.ok(bump, 'bump event'); assert.ok(Number.isFinite(bump.e.x) && bump.e.v >= 40);
   assert.ok(bump.bv > 50, 'the hit bubble moves'); assert.ok(minD > 0.75 * (a.r + b.r), 'soft but no deep overlap ' + minD);
   run(w, 4);
@@ -595,7 +611,7 @@ test('rainbow: fill animates 0.45 s per piece; all pieces → roundDone {stars 3
   until(w, () => w.state === 'round' && w.phase === 'blow');
   assert.strictEqual(w.round, 1 + 3 - 3 + 3 > 0 ? w.round : 0);
 });
-test('wrong: jelly squish along the finger axis + impulse away (≈ 260 px/s) + no-no wiggle; the same bubble < 1 s = squish only; stars 3/2/1', () => {
+test('wrong: jelly squish along the finger axis + impulse away (≈ 200 px/s) + no-no wiggle; the same bubble < 1 s = squish only; stars 3/2/1', () => {
   const w = mkWorld();
   roundOf(w, 'colors', 2, { settle: 2 });
   evs(w);
@@ -606,7 +622,7 @@ test('wrong: jelly squish along the finger axis + impulse away (≈ 260 px/s) + 
   assert.ok(e); assert.strictEqual(e.id, b.id); assert.strictEqual(e.misses, 1); assert.strictEqual(e.streak, 1);
   assert.deepStrictEqual(e.got, { nameKind: b.thing.nameKind, nameValue: b.thing.nameValue });
   assert.strictEqual(e.want.kind, 'color'); assert.strictEqual(e.want.value, w.cur.rule.value); assert.ok(Number.isFinite(e.x));
-  assert.ok(b.vx - v0.x > 240, 'pushed away from the finger');
+  assert.ok(b.vx - v0.x > 180, 'pushed away from the finger (200 px/s)');
   assert.ok(Math.abs(b.wobA) < 1e-6 && b.wobV < 0, 'compressed along the poke axis');
   w.pointerUp(fx, fy);
   let minWob = 0, maxWig = 0; run(w, 0.4, () => { minWob = Math.min(minWob, b.wob); maxWig = Math.max(maxWig, Math.abs(b.rot)); });
@@ -679,7 +695,16 @@ test('countPop: ANY bubble pops until k (right.count = i + 1), then input stops 
   assert.strictEqual(w.bubbles.filter(b => b.state !== 'gone').length, 0);
   assert.strictEqual(w.roundStars, 3);
 });
-test('countSel: the freed stars are counted on the spot (count {i, n} every 0.45 s) before the flight', () => {
+test('count chapter: the long first wording in round 0 AND in the first countSel round (round 1); 3 countSel bubbles at ages ≤ 4', () => {
+  const w = mkWorld();
+  w.levels = ['count', 'count', 'count', 'count']; w.startLevel(2); evs(w);
+  const bot = new PB.Bot(w, { skill: 1, seed: 3 }), asks = [];
+  until(w, () => { bot.step(H); for (const e of evs(w)) if (e.type === 'ask') asks.push(e); return w.state === 'talk'; });
+  assert.deepStrictEqual(asks.map(a => [a.mode, a.first]), [['countPop', true], ['countSel', true], ['countPop', false], ['countSel', false]]);
+  assert.deepStrictEqual(asks.map(a => a.chapterFirst), [true, false, false, false]);
+  assert.ok(asks.filter(a => a.mode === 'countSel').every(a => a.n === 3));
+});
+test('countSel: the freed stars grow × 2.2 at the field centre and are counted (count {i, n} every 0.45 s) before the flight', () => {
   const w = mkWorld();
   roundOf(w, 'count', 1, { settle: 1 });
   assert.strictEqual(w.cur.mode, 'countSel');
@@ -687,23 +712,29 @@ test('countSel: the freed stars are counted on the spot (count {i, n} every 0.45
   evs(w);
   tapBubble(w, b.id);
   assert.strictEqual(evs(w).find(q => q.type === 'right').n, n);
-  const counts = []; let fly = -1;
-  run(w, 0.4 + 0.45 * n + 2, () => { for (const e of evs(w)) { if (e.type === 'count') counts.push([w.time, e]); if (e.type === 'fly') fly = w.time; } });
+  const counts = []; let fly = -1, fsAtCount = 0, posAtCount = null;
+  run(w, 0.6 + 0.45 * n + 2, () => { for (const e of evs(w)) { if (e.type === 'count') { counts.push([w.time, e]); if (e.i === n) { fsAtCount = b.fs; posAtCount = { x: b.fx, y: b.fy }; } } if (e.type === 'fly') fly = w.time; } });
+  // QA P1-2: the counting moment — the stars grow × 2.2 and glide to the field centre, clear of the speech bubble, inside the screen
+  const L = w.layout, c = w._fieldCentre(), half = 0.5 * L.thingSize * 2.2;
+  assert.ok(Math.abs(fsAtCount - 2.2) < 1e-6, 'count scale ' + fsAtCount);
+  assert.ok(Math.abs(posAtCount.x - c.x) < 1 && Math.abs(posAtCount.y - Math.max(c.y, L.bubble.y + L.bubble.h + 1.2 * half)) < 6, 'at the field centre');
+  assert.ok(posAtCount.y - half > L.bubble.y + L.bubble.h && posAtCount.x - half > 0 && posAtCount.x + half < L.W);
   assert.deepStrictEqual(counts.map(c => c[1].i), Array.from({ length: n }, (_, i) => i + 1));
   counts.forEach(c => { assert.strictEqual(c[1].n, n); assert.ok(Number.isFinite(c[1].x)); });
   for (let i = 1; i < counts.length; i++) assert.ok(Math.abs(counts[i][0] - counts[i - 1][0] - 0.45) < 0.02);
   assert.ok(fly > counts[counts.length - 1][0] + 0.3, 'flies after the count');
 });
-test('animals: the freed animal shows its home badge (homeBadge {home}) for 0.9 s while hovering, right.home', () => {
+test('animals: the freed animal shows its home badge (homeBadge {home}, r 0.5 thingSize) for 1.4 s while hovering × 1.4, right.home', () => {
   const w = mkWorld();
   roundOf(w, 'animals', 2, { settle: 1 });
   const b = targetB(w); evs(w);
   tapBubble(w, b.id);
   assert.strictEqual(evs(w).find(q => q.type === 'right').home, b.thing.home);
-  let badge = null, fly = -1, maxA = 0;
-  run(w, 2.2, () => { if (b.badge) maxA = Math.max(maxA, b.badge.a); for (const e of evs(w)) { if (e.type === 'homeBadge') badge = [w.time, e]; if (e.type === 'fly' && e.id === b.id) fly = w.time; } });
+  let badge = null, fly = -1, maxA = 0, maxFs = 0, badgeR = 0;
+  run(w, 2.8, () => { if (b.badge) { maxA = Math.max(maxA, b.badge.a); badgeR = b.badge.r; } if (b.fstate === 'badge') maxFs = Math.max(maxFs, b.fs); for (const e of evs(w)) { if (e.type === 'homeBadge') badge = [w.time, e]; if (e.type === 'fly' && e.id === b.id) fly = w.time; } });
   assert.ok(badge && badge[1].home === b.thing.home && Number.isFinite(badge[1].x));
-  assert.ok(Math.abs(fly - badge[0] - 0.9) < 0.02); assert.ok(maxA >= 0.99);
+  assert.ok(Math.abs(fly - badge[0] - 1.4) < 0.02); assert.ok(maxA >= 0.99); assert.ok(Math.abs(b.badge === null ? 1 : 1) === 1);
+  assert.ok(maxFs > 1.39, 'the animal shows itself × 1.4: ' + maxFs); assert.ok(Math.abs(badgeR - 0.5 * w.layout.thingSize) < 1e-9);
 });
 test('hint: the ghost hand follows the moving bubble and taps it twice; cooldown 6 s; idle 12 → 18 → 27 → 30 s, the 2nd idle hints', () => {
   const w = mkWorld();

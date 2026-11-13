@@ -130,11 +130,21 @@ for (const withP2D of [false, true]) {
       let minGap = 1e9;
       for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) for (const a of P[i]) for (const b of P[j]) minGap = Math.min(minGap, Math.hypot(a[0] - b[0], a[1] - b[1]));
       ok(n === 1 || minGap > 0.25 * L.rs, tag + 'stars separate n=' + n + ' maxN ' + maxN + ' gap ' + minGap.toFixed(2));
-      ok(L.pts.every(p => Math.hypot(p[0], p[1]) + L.rs <= 48.5), tag + 'stars inside n=' + n);
+      ok(L.pts.every(p => Math.hypot(p[0], p[1]) + L.rs <= 50), tag + 'stars inside n=' + n);
       ok(L.rs >= 8, tag + 'stars readable n=' + n + ' rs ' + L.rs.toFixed(2));
     }
   }
-  { const a = A.starLayout(2, 5).rs, b = A.starLayout(4, 5).rs; ok(Math.abs(a - b) < 1e-9, tag + 'maxN: same star size in a round (' + a + ' / ' + b + ')'); }
+  { const a = A.starLayout(7, 12).rs, b = A.starLayout(9, 12).rs; ok(Math.abs(a - b) < 1e-9, tag + 'maxN: same star size among big counts (' + a + ' / ' + b + ')'); }
+  ok(A.starLayout(2, 5).rs === A.starLayout(2).rs && A.starLayout(6, 12).rs === A.starLayout(6).rs, tag + 'maxN never shrinks n ≤ 6');
+  { // iPhone target (visual QA): thing box 1.55·r with r = 45 px → n = 12 stars ≥ 14 px across with ≥ 3 px gaps
+    const k = 1.55 * 45 / 100, L = A.starLayout(12, 12);
+    const poly = (p) => { const v = []; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? L.rs * 0.5 : L.rs; v.push([p[0] + Math.cos(a) * r, p[1] + Math.sin(a) * r]); }
+      const out = []; for (let i = 0; i < 10; i++) { const q = v[i], w = v[(i + 1) % 10]; for (let t = 0; t < 1; t += 0.125) out.push([q[0] + (w[0] - q[0]) * t, q[1] + (w[1] - q[1]) * t]); } return out; };
+    const P = L.pts.map(poly); let gap = 1e9;
+    for (let i = 0; i < 12; i++) for (let j = i + 1; j < 12; j++) for (const a of P[i]) for (const b of P[j]) gap = Math.min(gap, Math.hypot(a[0] - b[0], a[1] - b[1]));
+    ok(2 * L.rs * k >= 14, tag + 'n=12 stars ≥ 14 px on iPhone (' + (2 * L.rs * k).toFixed(1) + ')');
+    ok(gap * k >= 3, tag + 'n=12 star gaps ≥ 3 px on iPhone (' + (gap * k).toFixed(2) + ')');
+  }
 
   // bubbles: every option
   const bopts = [{}, { wob: 0.3, wobA: 1 }, { wob: -0.2 }, { t: 12.3 }, { glow: 1, t: 2 }, { frost: 1 }, { alpha: 0.5 }, { grow: 0 }, { grow: 0.5 },

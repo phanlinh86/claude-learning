@@ -35,7 +35,7 @@ function pageSheet({ name }) {
   function bub(x, y, r, th, bo, to) {
     g.save(); g.translate(x, y);
     A.drawBubble(g, r, Object.assign({ part: 'back' }, bo || {}));
-    if (th && !(bo && bo.pop)) A.drawThing(g, th, r * 1.2, to || {});
+    if (th && !(bo && bo.pop)) A.drawThing(g, th, r * (th.kind === 'stars' ? 1.55 : 1.2), to || {});   // integrator: stars at 1.55·r, others 1.2·r
     A.drawBubble(g, r, Object.assign({ part: 'front' }, bo || {}));
     g.restore();
   }
@@ -45,7 +45,7 @@ function pageSheet({ name }) {
     toys: () => { const r = []; A.TOYS.forEach(o => COLORS.forEach(c => r.push({ kind: 'toy', obj: o, color: c }))); return { list: r, cols: 7 }; },
     shapes: () => ({ list: A.SHAPES.map((s, i) => ({ kind: 'shape', shape: s, color: COLORS[(i * 3) % 7] })).concat(A.SHAPES.map((s, i) => ({ kind: 'shape', shape: s, color: COLORS[(i * 3 + 4) % 7] }))), cols: 8 }),
     stars: () => ({ list: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(n => ({ kind: 'stars', n })), cols: 12, opt: (t, row) => row % 2 ? { maxN: t.n <= 5 ? 5 : 12 } : {} }),
-    tiles: () => ({ list: ['A', 'a', 'M', 'g', 'Q', '3+2', '7−4', '10+10', '9', '20'].map(text => ({ kind: 'tile', text })).concat(A.ANIMALS.map(a => ({ kind: 'animal', animal: a }))), cols: 11 })
+    tiles: () => ({ list: ['A', 'a', 'M', 'g', 'Q', '3+2', '7−4', '14+6', '10+10', '9', '20'].map(text => ({ kind: 'tile', text })).concat(A.ANIMALS.map(a => ({ kind: 'animal', animal: a }))), cols: 12 })
   };
 
   if (sets[name]) {

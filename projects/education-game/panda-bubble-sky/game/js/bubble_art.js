@@ -71,7 +71,7 @@
     var P = PB.PALETTE, c = P && P[name] && okHex(P[name].base) && okHex(P[name].dark) && okHex(P[name].light) ? P[name] : FALLBACK[name];
     return c || null;
   }
-  function lineOf(c) { return c.base === '#FFD23F' ? '#B0850A' : c.base === '#FF8FC0' ? '#B84A7E' : c.dark; }
+  function lineOf(c) { return c.base === '#FFD23F' ? '#9A6F00' : c.base === '#FF9A2E' ? '#A85A00' : c.base === '#FF8FC0' ? '#B84A7E' : c.dark; }   // ≥ 3:1 on every season sky
   function shadeOf(c) { return mix(c.base, c.dark, 0.34); }
   function hash(i) { var x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
 
@@ -384,7 +384,7 @@
     1: [[1]], 2: [[2]], 3: [[1, 2]], 4: [[2, 2]], 5: ['dice'], 6: [[3, 3], [2, 2, 2]], 7: [[2, 3, 2]], 8: [[3, 2, 3], [4, 4]],
     9: [[3, 3, 3]], 10: [[3, 4, 3], [2, 3, 3, 2]], 11: [[4, 3, 4], [3, 4, 4]], 12: [[4, 4, 4], [2, 4, 4, 2], [3, 3, 3, 3]]
   };
-  var HX = 2.36, HY = 2.18, RC = 45;   // centre spacing in star radii (gap ≥ 0.36 rs: every star clearly separate)
+  var HX = 2.36, HY = 2.25, RC = 49;   // centre spacing in star radii (gap ≥ 0.44 rs: every star clearly separate); RC = usable radius of the 100 box
   var lcache = {};
   function unitPts(rows) {
     if (rows === 'dice') { var d = 1.72; return [[-d, -d], [d, -d], [0, 0], [-d, d], [d, d]]; }
@@ -403,8 +403,9 @@
   }
   function starLayout(n, maxN) {
     var L = starLayoutU(n), rs = L.rs;
-    if (num(maxN, 0) >= 1 && L.n > 1) rs = Math.min(rs, starLayoutU(Math.max(2, maxN)).rs);
-    if (num(maxN, 0) >= 2 && L.n === 1) rs = Math.min(rs, starLayoutU(maxN).rs * 1.25);
+    // maxN (the round's largest n) evens out star sizes only among the big counts (n > 6); small counts keep their own,
+    // bigger stars so they stay easy to count on a phone
+    if (L.n > 6 && num(maxN, 0) > L.n) rs = Math.min(rs, starLayoutU(maxN).rs);
     return { n: L.n, rs: rs, pts: L.u.map(function (p) { return [p[0] * rs, p[1] * rs]; }) };
   }
   function starPath(L) {
@@ -465,7 +466,7 @@
     oval(ctx, -20, -30, 10, 4, -0.4, 'rgba(255,255,255,1)');
     ctx.restore();
     var n = txt.length;
-    signText(ctx, txt, 0, 1, n <= 1 ? 60 : n <= 2 ? 72 : 82, n <= 1 ? 42 : n <= 2 ? 36 : n <= 3 ? 30 : 24, INK);
+    signText(ctx, txt, 0, 1, n <= 1 ? 60 : n <= 2 ? 72 : n <= 3 ? 82 : 88, n <= 1 ? 42 : n <= 2 ? 36 : n <= 3 ? 30 : 28, INK);
   }
 
   // ================================================================= ANIMALS (images by the animal artist; placeholder)
@@ -598,10 +599,11 @@
     gg.addColorStop(0, 'rgba(255,255,255,0.22)'); gg.addColorStop(1, 'rgba(255,255,255,0)');
     g.fillStyle = gg; g.beginPath(); circ(g, 0, 0, R * 0.98); g.fill();
     // big curved crescent
-    var a0 = Math.PI * 1.02, a1 = Math.PI * 1.44, ro = 0.84 * R, am = (a0 + a1) / 2;
+    // kept in the outer ring (≥ 0.77·R) so it never covers counting stars drawn at 1.55·r
+    var a0 = Math.PI * 1.02, a1 = Math.PI * 1.44, ro = 0.87 * R, am = (a0 + a1) / 2;
     g.fillStyle = 'rgba(255,255,255,0.92)';
     g.beginPath(); g.moveTo(Math.cos(a0) * ro, Math.sin(a0) * ro); g.arc(0, 0, ro, a0, a1, false);
-    g.quadraticCurveTo(Math.cos(am) * R * 0.6, Math.sin(am) * R * 0.6, Math.cos(a0) * ro, Math.sin(a0) * ro); g.closePath(); g.fill();
+    g.quadraticCurveTo(Math.cos(am) * R * 0.67, Math.sin(am) * R * 0.67, Math.cos(a0) * ro, Math.sin(a0) * ro); g.closePath(); g.fill();
     // small round highlight just inside the crescent's curve
     var ad = Math.PI * 1.505; dot(g, Math.cos(ad) * R * 0.82, Math.sin(ad) * R * 0.82, R * 0.055, 'rgba(255,255,255,0.9)');
     // small lower-right glint
@@ -733,12 +735,13 @@
     // unpainted guide: faint white fill + dotted edges + dotted piece separators
     if (guide > 0.01 && f < k) {
       ctx.save(); ctx.globalAlpha *= guide;
-      ctx.fillStyle = 'rgba(255,255,255,0.10)';
+      ctx.fillStyle = 'rgba(185,178,238,0.16)';
       ctx.beginPath(); ctx.arc(cx, cy, r, ae, 2 * Math.PI); ctx.arc(cx, cy, ri, 2 * Math.PI, ae, true); ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = Math.max(2, w * 0.07);
-      if (ctx.setLineDash) ctx.setLineDash([0.1, Math.max(8, w * 0.28)]);
-      ctx.beginPath(); ctx.arc(cx, cy, r - 1, ae, 2 * Math.PI); ctx.stroke();
-      ctx.beginPath(); ctx.arc(cx, cy, ri + 1, ae, 2 * Math.PI); ctx.stroke();
+      var dw = Math.max(3, w * 0.1);
+      ctx.strokeStyle = 'rgba(142,134,200,0.55)'; ctx.lineWidth = dw;
+      if (ctx.setLineDash) ctx.setLineDash([0.1, Math.max(10, w * 0.3)]);
+      ctx.beginPath(); ctx.arc(cx, cy, r - dw / 2, ae, 2 * Math.PI); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx, cy, ri + dw / 2, ae, 2 * Math.PI); ctx.stroke();
       for (var j = Math.ceil(f + 1e-6); j < k; j++) {
         var aj = A0 + Math.PI * j / k, cj = Math.cos(aj), sj = Math.sin(aj);
         ctx.beginPath(); ctx.moveTo(cx + cj * (ri + 2), cy + sj * (ri + 2)); ctx.lineTo(cx + cj * (r - 2), cy + sj * (r - 2)); ctx.stroke();

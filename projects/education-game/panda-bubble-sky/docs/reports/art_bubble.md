@@ -81,3 +81,14 @@ Files: `game/js/bubble_art.js`, `tools/bubble_sheet.js` (→ `docs/art/bubble_*.
 Research (reference only, all art original): cartoon soap-bubble tutorials (artincontext.org, easydrawingguides.com) and
 how thin-film colours work (exploratorium.edu bubble colours, explainthatstuff.com): almost no colour in the middle, pastel
 interference bands at the rim, one big window highlight plus a small one opposite.
+
+## Fix round (visual QA, docs/reports/qa_visual.md)
+- **Counting stars bigger:** the stars now use more of the box (usable radius 45 → 49 units, row spacing 2.25·rs). `maxN` now
+  evens out sizes only when n > 6; n ≤ 6 always uses its own bigger stars. The integrator draws kind 'stars' at **1.55·r**.
+  At r = 45 px, n = 12 gives stars 14.4 px across with gaps ≥ 3 px (the unit test checks both). n = 9 → 15.7 px,
+  n = 5 → 19.5 px, n = 2 → 30.7 px.
+- **The highlight crescent is now slimmer** (it only covers 0.77–0.87·R), so it no longer covers the top-left star at 1.55·r.
+- **The rainbow guide is easier to see:** lilac dots `rgba(142,134,200,.55)`, size max(3, w·0.1), and a faint band fill
+  `rgba(185,178,238,.16)`.
+- **Darker outlines:** yellow outline `#9A6F00`, orange outline `#A85A00` (≥ 3:1 contrast on all season skies).
+- **Bigger tile glyphs:** texts of 4 or more characters now get glyph height 28 (was 24) and width up to 88, so "14+6" reads.

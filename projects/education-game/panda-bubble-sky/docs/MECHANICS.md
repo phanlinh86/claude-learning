@@ -1,24 +1,49 @@
 # Bao's Bubble Sky — Mechanics (`PB.CONFIG`, layout, motion, render contract, events, playtest numbers)
 
 Owner: mechanics engineer. Code: `game/js/{rng,content,world,weather,bot}.js` (+ `bao_points.js` from character artist A, read at layout
-time). Contract: `docs/DESIGN.md` §2, §5.1–5.5. Tests: `node tests/unit/run.js` (39 tests, ≈ 18 s; `node tests/unit/run.js <name part>` runs a subset). Sims (report-only, `tests/sim/`):
+time). Contract: `docs/DESIGN.md` §2, §5.1–5.5. Tests: `node tests/unit/run.js` (40 tests, ≈ 18 s; `node tests/unit/run.js <name part>` runs a subset). Sims (report-only, `tests/sim/`):
 `node tests/sim/hs_playtest.js [--n 300] [--ages 3,4] [--models typical,kid0.3,…] [--jobs 2] [--config '{…}'] [--tag x]`
 (→ `tests/sim/out/hs_<tag>.md`, exit 1 on a stuck round / stuck state / NaN / bubble off screen), `node tests/sim/content_stats.js [chapters]`,
 `hs_browser.js` drives the real page in Playwright (`?bot=1`) once main.js is wired.
 
 ## 0. Deviations from DESIGN (read this first, integrator)
+**Fix round 1 (QA reports `docs/reports/qa_*.md`) — what changed for render.js / main.js:**
+- **Portrait layout:** the rainbow arch now stands on the clouds just ABOVE Bao's box (`rainbow.cy = bao.box.y + rainbowPortraitLift (−6)`)
+  and BELOW the bubble field: `field.y1 ≤ cy − rainbowPortMin (200) − 0.5 d − 14`, and `rainbow.r = min(width rule, cy − (lowest home
+  + 0.5 d + 14))` (≥ 200), so no bubble rests on the arch and its feet are not behind Bao. The portrait "bonus row" right of Bao is gone.
+  A squat portrait where n bubbles cannot fit above the arch even at 112 px (only 720×960 with insets, iPad 4:3) falls back to the arch
+  behind the field: **`layout.field.archBehind = true`** (render may lower the arch alpha there).
+- **Landscape:** cy = groundY + 30 as before, r additionally ≤ cy − field midline, so the arch top never rises above the middle of the
+  field (it reads behind / below the bubbles).
+- **iPhone portrait (`layout.phone && portrait`)**: bubble diameter × `phoneK 1.25` (the fit loop still shrinks it, in 4 px steps, e.g.
+  202 px for 6 bubbles on 393×852 with the notch), Bao height `baoHPhonePort 290` (was 220).
+- **Freed thing, counting moment:** in `fstate 'count'` the stars grow to `fs = countScale 2.2` and glide to the field centre (clamped
+  inside the safe screen, ≥ 1.2 × half its height below the speech bubble) over `countMove 0.45 s`; the first `count` comes at 0.5 s;
+  the flight starts from there (fs 2.2 → `flyScale 0.6`). **render.js must draw the freed thing with `fs` (it can be > 1 now).**
+- **Home badge:** `fstate 'badge'` holds `badgeHold 1.4 s`, the animal grows to `fs = badgeScale 1.4` (clamped clear of the speech
+  bubble), the badge sits beside it on the side with room; **`badge.r = layout.badgeR = 0.5 × thingSize`** (was 0.32) — render already
+  reads `b.badge.r`.
+- **`ask.first`** is true in a chapter's round 0 AND in the count chapter's first countSel round (round 1), so the long "Count the stars!
+  Pop the bubble with {n} stars!" intro is heard; `chapterFirst` stays round 0 only.
+- **Content:** countPop bubbles hold toys only (never 1-star things: "stars" only means counting stars); countPop ages ≤ 4 round 0 asks
+  2 or 3; countSel has 3 bubbles at ages ≤ 4 (and in short rounds), 4 bubbles in round 3 from age 5.
+- **Timing / physics:** `askAfterBlow 1.0` (the bubbles have arrived before the question), `wrongImpulse 200`, `wallK 200`,
+  `shortBudget [∞, 22, 38, 52]`; new: floaters trade homes every 0.25 s when that shortens their combined way home by > 40 px
+  (`homeSwapEvery`, `homeSwapGain`) — no deadlock when two bubbles want each other's spot (e.g. after a rotation).
+
+**Original deviations:**
 Nothing in DESIGN §5.2 was renamed or removed. Everything below is an **addition** or a **precision**:
 1. **`round.mode` has a third value, `'countSel'`** (count rounds 1 and 3: one target among `stars` bubbles). It behaves exactly like
    `'match'` (k = 1); only the freed stars are counted before the flight. Treat `mode !== 'countPop'` as "match".
 2. **n / k table**: chapter 0 round 0 (the session warm-up) is (3, 1) at every age (DESIGN "warm-up n 3, k 1"); other chapters' round 0
    use the age table. `lower` always has both cases → k = max(2, k), n = max(n, k + 2). countPop: n = max(table n, k + 1) (≤ 9);
-   short countPop = (4, k 3 — or 2 when the last ask was 3). countSel: 3 bubbles in round 1 (and short), 4 in round 3, all ages.
+   short countPop = (4, k 3 — or 2 when the last ask was 3). countSel: 3 bubbles at ages ≤ 4 and in short rounds, else 3 in round 1 / 4 in round 3.
 3. **Freed things fly to the CENTRE of rainbow piece i** (`World.rainbowPoint(rainbow, k, i + 0.5)`), not its start: the arch's feet
    are under the cloud floor (cy = groundY + 30). `paint.x, y` is that point.
 4. **Extra events**: `bump` (bubble collisions, for the soft wet tick), `fly` (a freed thing starts its flight), `homeBadge` (the
    badge pops), `squish` (DESIGN mentions it: same bubble again < 1 s → `repeat: true`; a bubble pressed outside play → `early: true`).
    Extra fields are listed in §6 (e.g. `round.n / k / mode`, `ask.chapterFirst`, `right.mode / rule / misses / n`, `pop.soft`,
-   `away.forced / popped`, `idle.x, y`). **`ask.first` is true only in a chapter's round 0** (= `chapterFirst`): pass it straight to
+   `away.forced / popped`, `idle.x, y`). **`ask.first` is true in a chapter's round 0 (and the count chapter's first countSel round, fix round 1)**: pass it straight to
    `I18N.ask(…, {first})` for the long "Look at the bubbles! Pop the RED one!" wording (there is one `ask` per round).
 5. **Wind**: the world owns the deterministic `PB.WindModel` (`world.wind`, `world.gust`) and emits `gust {dir}`. On the bubbles the
    force is `wind × windK (2.5)` — with the soft home spring (ω 2.4) a raw ±60 px/s² gust would move them only 10 px; × 2.5 gives the
@@ -86,31 +111,32 @@ the speech bubble / HUD / Bao — or null, `answer()`.
 |---|---|---|
 | `groundY` | H − ins.bottom − 14 | H − ins.bottom − 26 |
 | `bubble` / `hud` | exactly the parade's speech bubble + HUD band (measured `hudKeep` HUD: narrower beside it, else below it) | same |
-| `bao` {x, y feet, h, s = h/300} | ins.left + 130, groundY − 4, 240 | ins.left + 120, groundY − 4, 220 |
+| `bao` {x, y feet, h, s = h/300} | ins.left + 130, groundY − 4, 240 | ins.left + 120, groundY − 4, 220 (phones: 290) |
 | `bao.ring / blowRing / mouth` | `PB.BAO_POINTS` (− feet) × s + (x, y); r = ringR × s | same |
 | `bao.box` | x: bao.x − 0.38 h − 10 → max(bao.x + 0.42 h, ring right) + 10; y: min(bao.y − 0.94 h, ring top) − 10 → bao.y + 10 | same |
-| `field` (centres) | x0 = box right + 0.55 d, x1 = W − ins.right − 0.55 d − 20, y0 = bubble bottom + 0.55 d + 16, y1 = groundY − 0.55 d − 30 | x0 = ins.left + 0.55 d + 20, x1 = W − ins.right − 0.55 d − 20, y0 = bubble bottom + 0.55 d + 20, y1 = box top − 0.5 d − 10; bonus row to y1 + 0.3 d for x ≥ box right + 0.55 d |
-| `d` | ages ≤ 4: 150, 5: 138, 6+: 126; × 1.1 when tall (H/W > 1.6); −4 px steps to 112 until n fit | same |
+| `field` (centres) | x0 = box right + 0.55 d, x1 = W − ins.right − 0.55 d − 20, y0 = bubble bottom + 0.55 d + 16, y1 = groundY − 0.55 d − 30 | x0 = ins.left + 0.55 d + 20, x1 = W − ins.right − 0.55 d − 20, y0 = bubble bottom + 0.55 d + 20, y1 = min(box top − 0.5 d − 10, rainbow cy − 200 − 0.5 d − 14) (`archBehind`: without the arch term) |
+| `d` | ages ≤ 4: 150, 5: 138, 6+: 126; × 1.1 when tall (H/W > 1.6); −4 px steps to 112 until n fit | same, × 1.25 more on phones |
 | `homes[n]` | valid centres (10 px grid): circle r + 14 clear of the speech bubble / HUD / hudKeep and of Bao's box (≥ the ± 10 px wander + ≈ 2.5 px bob, so a resting bubble never touches them — unit-tested while floating), ≥ 44 px above the bottom keep-outs, on the safe screen; n ≥ d + 22 apart: a seeded best-of-14-candidates sample (fallback: farthest-point / a seeded square or hex lattice in tight fields, e.g. 9 at age 6 on an iPad with insets); sorted farthest-from-the-wand first (bubble i → homes[i]) | same |
-| `rainbow` {cx, cy, r, w} | cx = field centre, cy = groundY + 30, r = min(0.5 (x1 − x0) + 0.4 d, groundY − bubble bottom − 30), w = clamp(0.16 r, 40, 70) | same |
+| `rainbow` {cx, cy, r, w} | cx = field centre, cy = groundY + 30, r = min(0.5 (x1 − x0) + 0.4 d, groundY − bubble bottom − 30, cy − field midline), w = clamp(0.16 r, 40, 70) | cy = Bao's box top − 6; r = min(width rule, cy − bubble bottom − 30, cy − (lowest home + 0.5 d + 14)) ≥ 200 |
 | `hitR` | 0.6 d + 14; phones (long/short > 1.9): ≥ 92 | same |
-| `thingSize` | 0.62 d (box height of the thing inside) | same |
-Examples (age 4): 960×720 n 6 → d 150, field x 323–857, y 250–593, rainbow r 327; 1556×720 → d 150, rainbow r 524; 720×1561 (iPhone
-portrait, notch) → d 165 (tall); age 6, 960×720 with insets, n 9 → d 112 on a lattice. Unit-tested on 15 viewports (1556×720 ± notch,
+| `thingSize` / `badgeR` | 0.62 d (box height of the thing inside) / 0.5 × thingSize | same |
+Examples (age 4): 960×720 n 6 → d 150, field x 323–857, y 250–593, rainbow r 314; 1556×720 → d 150, rainbow r 314 (the midline rule; was 524); 720×1561
+(iPhone portrait, notch) n 6 → d 202, Bao 290, field y 473–865, arch cy 1180, r ≈ 256 (below every bubble); age 6, 960×720 with insets, n 9 → d 112 on a lattice. Unit-tested on 15 viewports (1556×720 ± notch,
 1280×720, 960×720 ± insets, 720×1556 notch, 720×960, iPhone 852×393 / 393×852 notch, iPad Air 820×1180 / 1180×820, iPad mini,
 iPhone SE both ways, 1600×720) × 5 ages × n 3 … 9 × 3 seeds, + 400 fuzzed viewports.
 
 ## 4. `PB.CONFIG` (all tunable via `new PB.World({config})`)
 | group | values |
 |---|---|
-| flow | step 1/120, roundsPerLevel 4, chapterTimeLimit 75 s (after ≥ chapterMinRounds 3), **shortBudget [∞, 26, 44, 60] s** (a round starting later into the chapter is short: 4 bubbles, k 1), introTime 2.5, levelDoneTime 3.6, talkAfterAnswer 1.6, talkAskTime 12, talkGlowAfterAsks 2, talkMaxAsks 3, talkGiveUp 2 |
+| flow | step 1/120, roundsPerLevel 4, chapterTimeLimit 75 s (after ≥ chapterMinRounds 3), **shortBudget [∞, 22, 38, 52] s** (a round starting later into the chapter is short: 4 bubbles, k 1), introTime 2.5, levelDoneTime 3.6, talkAfterAnswer 1.6, talkAskTime 12, talkGlowAfterAsks 2, talkMaxAsks 3, talkGiveUp 2 |
 | floating | homing spring ω 2.4, ζ 0.55, accel cap 650 px/s², speed cap 560 px/s (hard 1500); wandering home ± 10 px Lissajous, periods 3–5 s; buoyancy bob ± 14 px/s² at 0.45–0.75 Hz; wind × 2.5 |
-| collisions | contact at r_a + r_b + 6: push-apart 90 px/s² per px overlap, velocity exchange e 0.35; contact start kicks both membranes 0.0007 × approach speed (≤ 0.12) and emits `bump` (≥ 40 px/s, ≥ 0.12 s apart); soft walls 120 px/s² per px (+ damping 6) at the safe screen, the speech-bubble bottom + 6, the cloud floor − 4 and Bao's box |
+| homes | trade homes every 0.25 s when the combined way home shrinks by > 40 px |
+| collisions | contact at r_a + r_b + 6: push-apart 90 px/s² per px overlap, velocity exchange e 0.35; contact start kicks both membranes 0.0007 × approach speed (≤ 0.12) and emits `bump` (≥ 40 px/s, ≥ 0.12 s apart); soft walls 200 px/s² per px (+ damping 6) at the safe screen, the speech-bubble bottom + 6, the cloud floor − 4 and Bao's box |
 | membrane / thing | wob spring ω 13, ζ 0.12, \|wob\| ≤ 0.3; thing counter-rotation `rot0` → −0.0005 × vx (≤ 0.2 rad), ω 6, ζ 0.3; wiggle ω 16, ζ 0.22 |
-| blow | lead 0.5 s, 0.5 s per bubble, grow 0.35 s (r 0.3 R → R, ease-out; centre pushed out along the blow direction so the back edge stays on the ring; a 0.06 flattening), detach 380–520 px/s towards home + wob 0.22, ask 0.4 s after the last detach; rainbow guide fades in 0.5 s |
+| blow | lead 0.5 s, 0.5 s per bubble, grow 0.35 s (r 0.3 R → R, ease-out; centre pushed out along the blow direction so the back edge stays on the ring; a 0.06 flattening), detach 380–520 px/s towards home + wob 0.22, ask 1.0 s after the last detach (QA: a child tapping right after the question must not hit a bubble still flying in); rainbow guide fades in 0.5 s |
 | pop | popTime 0.22 s, 14 droplets (160–340 px/s radial + 30 % of the bubble's velocity, gravity 900, life 0.6 s ± 15 %, r 4–9, cap 60) |
-| freed thing | hop 46 px in 0.28 s (ease-out) with a squash 0.16 (spring ω 16 ζ 0.4); countSel: first count 0.3 s after the hop, then every 0.45 s, 0.35 s tail; animals: badge (r 0.32 thingSize, beside the thing) pops in at 6 /s, holds 0.9 s; flight 0.75 s smoothstep, apex ≥ max(80, 0.22 × chord) px, scale 1 → 0.35, spin ± 0.5 rad; paint: rainbow.filled → +1 over 0.45 s |
-| wrong | squish −0.28 along the finger → centre axis, impulse 260 px/s away from the finger, wiggle 0.25 rad; same bubble < 1 s = `squish {repeat}` (no miss); brush (outside play) 0.12 / 120 px/s |
+| freed thing | hop 46 px in 0.28 s (ease-out) with a squash 0.16 (spring ω 16 ζ 0.4); countSel: the stars glide to the field centre growing to × 2.2 in 0.45 s, first count 0.5 s after the hop, then every 0.45 s, 0.35 s tail; animals: × 1.4, badge (r 0.5 thingSize, beside the thing on the side with room) pops in at 6 /s, holds 1.4 s; flight 0.75 s smoothstep, apex ≥ max(80, 0.22 × chord) px, scale (1 | 1.4 | 2.2) → 0.6, spin ± 0.5 rad; paint: rainbow.filled → +1 over 0.45 s |
+| wrong | squish −0.28 along the finger → centre axis, impulse 200 px/s away from the finger, wiggle 0.25 rad; same bubble < 1 s = `squish {repeat}` (no miss); brush (outside play) 0.12 / 120 px/s |
 | soft / poke | 5 mini bubbles at the finger (life 0.6–1.1 s, r 5–11, rise 60 px/s², cap 40); Bao poke: 3 minis from the wand ring |
 | help | hint after 2 misses (each further miss too) or 3 no-progress presses; assist after 6; hintTime 3.2 s, cooldown 6 s, hand cycle 1.6 s (taps twice, follows the bubble); idle 12 s × 1.5 up to 30 s (12, 30, 57, 87, 117 s after the ask), the 2nd idle hints |
 | rainbow / whoosh / out | rainbow 1.4 s (shine 0 → 1 in 1.2 s); whoosh: up-right wind a_y = −max(600, 1.7 × the way out), a_x = 0.45 \|a_y\|, ramp 0.3 s, stagger by distance from the wand (÷ 2600, ≤ 0.45 s), drag 0.5 /s; one leftover pops softly at the top edge with p 0.5; phase ends when all left (≥ 1.0 s, ≤ 2.2 s): **measured 1.5 s median, ≤ 1.8 s, 0 forced exits on all viewports**; out 0.6 s (rainbow fades) |
@@ -152,7 +178,7 @@ iPhone SE both ways, 1600×720) × 5 ages × n 3 … 9 × 3 seeds, + 400 fuzzed 
 | `round` | `{round, topic, surprise, n, k, mode, short, key}` the blow starts | (rarely) a `blow[]` line |
 | `blow` | `{i, id}` a bubble starts growing on the wand (x, y = the ring) | soft breathy noise swell |
 | `bubbleIn` | `{id, i}` it detaches | little "blup" |
-| `ask` | `{promptKey, params, rule, first (chapter round 0 only), chapterFirst (= first), round, n, k, mode}` (x, y = Bao's mouth) | `speakPrompt(I18N.ask(lang, promptKey, params, {first}))`, bubble text |
+| `ask` | `{promptKey, params, rule, first (chapter round 0, and round 1 of a count chapter = its first countSel), chapterFirst (round 0 only), round, n, k, mode}` (x, y = Bao's mouth) | `speakPrompt(I18N.ask(lang, promptKey, params, {first}))`, bubble text |
 | `right` | `{id, thing, rule, mode, i (0-based pop index), k, left, misses, count? (countPop: i + 1), n? (countSel: stars), home? (animals)}` | pop sound; countPop: `sayCount(count)` (+ `sayCountRun` when left = 0); else `sayRight` (names the thing; `left > 0` → "One more!") |
 | `pop` | `{id, r, soft}` the film ruptures (x, y = its centre) | bright click + airy splash (pitch varies); `soft` = quieter |
 | `homeBadge` | `{id, home}` | small pop; the line "The penguin lives on the ice!" is part of sayRight |
@@ -185,7 +211,7 @@ iPhone SE both ways, 1600×720) × 5 ages × n 3 … 9 × 3 seeds, + 400 fuzzed 
   and no distractor does (an independent check per kind, e.g. sums parsed from the tile text), distinct non-target values ≤ the table,
   CVD pairs + no pink below 5, topic rules (warm-up colours = one toy; later mixed toys, different toys among the targets from age 4, a
   distractor always wears a target's toy so the toy is no cue; shapes never square/rect, circle/oval, square/diamond, heart/circle in one
-  round, one colour ≤ 4 / every bubble its own colour at 5; size = one toy in one colour; countPop = n identical bubbles, k in its range;
+  round, one colour ≤ 4 / every bubble its own colour at 5; size = one toy in one colour; countPop = n identical TOY bubbles, k in its range (ages ≤ 4: round 0 2 | 3, round 2 3 | 4);
   countSel = all different star counts, gaps ≥ 2 at ≤ 4, ≥ 1 (≥ 2 from 6) later; animals p.animal = farm animals at age 3 / round 0,
   p.home: sea k ≤ 2, ice / savanna / jungle k 1; letters never look-alike (also among the distractors); lower: both cases, no I / L, no
   b d p q / n u / m w / c o together; initial from the names; distinct tiles).
@@ -202,6 +228,13 @@ iPhone SE both ways, 1600×720) × 5 ages × n 3 … 9 × 3 seeds, + 400 fuzzed 
   use all 6 colours (orange too).
 
 ## 8. Playtest numbers
+**Fix round 1 re-check** (`hs_playtest.js --n 100`, all models, then typical / slow3 / kid0.3 / bot1 again after the sim's first-ask fix):
+typical age 4 chapter **77.1 s [70.8–84.1]**, session 5.4 min (p90 5.6, max 5.8), round 17.1 s (blow 3.4 s incl. the 1.0 s settle,
+first pop 6.4 s after the ask), 3★ 77 %; typical 3–7: chapters 73.8–78.1 s, sessions 5.2–5.4 min; slow3 ages 3–4: 95–97.5 s, sessions
+6.6–6.7 (max 7.7, was 8.0); kid0.3: 84–88 s; bot1 47–56 s. Every model: 0 stuck rounds, 0 stuck states, 0 NaN, 0 off screen, 0 "2 misses
+without a hint". The numbers below are the pre-fix full run (6 320 sessions); the shifts are ≈ +0.6 s per round from the later ask and
+the longer count / badge moments, offset by the earlier short rounds.
+
 `node tests/sim/hs_playtest.js --n 300 --jobs 2 --tag final`: **6 320 sessions, 0 failed, 605 s**; 1/30 s frames through the real input
 API on 5 viewports (iPhone portrait / landscape with notch, iPad 4:3 with insets, iPad portrait, iPad Air landscape), EN / VI alternating.
 Child models (`tests/sim/lib.js`): after an `ask` the kid listens 2.6 s (3.4 s for the chapter's long first prompt) + thinks; it decides on

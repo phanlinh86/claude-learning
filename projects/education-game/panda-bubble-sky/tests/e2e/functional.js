@@ -290,9 +290,12 @@ T.swipe_right = async ({ page, cdp, url }) => {
   }, i.a);
   check(sw, 'no empty start point next to the target');
   const n0 = await evLen(page);
+  // slow motion: the 0.25 s swipe window is WORLD time, so the CDP swipe fits it whatever the CPU load (QA-F P3-7)
+  await page.evaluate(() => PB.debug.setSpeed(0.2));
   const at = await page.evaluate(id => PB.debug.bubbleScreen(id), i.a);
   await swipe(cdp, page, sw.s, at, { n: 5, ms: 80 });
   await page.waitForTimeout(400);
+  await page.evaluate(() => PB.debug.setSpeed(1));
   const evs = await evSince(page, n0);
   check(evs.some(e => e.type === 'right' && e.id === i.a), 'swipe onto the target: ' + types(evs));
   check(await page.evaluate(() => PB.debug.world.misses) === 0, 'the swipe counted a miss');
@@ -353,7 +356,9 @@ T.bao_repeat = async ({ page, cdp, url }) => {
   check(evs.some(e => e.type === 'pokeBao'), 'no pokeBao on a Bao tap: ' + types(evs));
   check(log.includes(prompt), 'Bao tap did not repeat the prompt in voiceLog: ' + JSON.stringify({ prompt, log }));
   check(!evs.some(e => e.type === 'soft' || e.type === 'wrong'), 'Bao tap softed / judged: ' + types(evs));
-  // tapping the speech bubble also repeats it (and never reaches the canvas)
+  // tapping the speech bubble also repeats it (and never reaches the canvas) — once the repeated question had its 3 s
+  // (VOICE §1.1 rule 4: a tap never restarts a question that was just asked)
+  await page.waitForTimeout(3400);
   const v1 = await page.evaluate(() => PB.debug.voiceLog.length), n1 = await evLen(page);
   await tapEl(page, '#bubble');
   await page.waitForTimeout(300);
@@ -388,7 +393,9 @@ async function surpriseTest({ page, cdp, url, d }, kind, level) {
   }, fn);
   check(chk.bad.length === 0, kind + ': ' + chk.bad.join('; '));
   await shot(page, d, '9-' + kind);
-  const s2 = await page.evaluate(f => PB.debug[f](), fn);
+  // the surprise moves (and may pass behind a bubble for a moment): wait for a free tappable point
+  let s2 = null;
+  try { await page.waitForFunction(f => !!PB.debug[f](), fn, { timeout: 4000, polling: 'raf' }); s2 = await page.evaluate(f => PB.debug[f](), fn); } catch (e) { /* checked below */ }
   check(s2, kind + ' no longer tappable');
   const n0 = await evLen(page);
   await tap(cdp, page, s2, 60);

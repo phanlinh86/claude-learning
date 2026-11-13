@@ -138,6 +138,10 @@
     /* ---------- building blocks ---------- */
     tone(freq, dur, { type = 'sine', vol = 0.3, at = 0, slideTo = null, attack = 0.006, dest = null, vib = 0, vibHz = 0 } = {}) {
       const c = this.ctx; if (!c) return;
+      // partials above 0.45 × sampleRate are inaudible and out of the oscillator's nominal range (QA-F P3-2): skip / clamp
+      const fmax = 0.45 * c.sampleRate;
+      if (!(freq > 0) || freq >= fmax) return;
+      if (slideTo) slideTo = Math.min(slideTo, fmax);
       const t = c.currentTime + at;
       const o = c.createOscillator(), g = c.createGain();
       o.type = type; o.frequency.setValueAtTime(freq, t);

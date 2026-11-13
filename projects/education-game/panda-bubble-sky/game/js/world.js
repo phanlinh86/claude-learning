@@ -21,40 +21,40 @@
     // ---- timing / state machine (s)
     step: 1 / 120, maxFrame: 1.0,
     roundsPerLevel: 4, chapterTimeLimit: 75, chapterMinRounds: 3,
-    shortBudget: [1e9, 26, 44, 60],   // s into the chapter: a round starting later than this is short (4 bubbles, k 1)
+    shortBudget: [1e9, 22, 38, 52],   // s into the chapter: a round starting later than this is short (4 bubbles, k 1)
     introTime: 2.5, levelDoneTime: 3.6,
     talkAfterAnswer: 1.6, talkAskTime: 12, talkGlowAfterAsks: 2, talkMaxAsks: 3, talkGiveUp: 2,
 
     // ---- layout (DESIGN §2; px)
     shortSide: 720, minLong: 960, maxLong: 1600, tallRatio: 1.6, phoneRatio: 1.9,
     groundLand: 14, groundPort: 26,
-    bubbleX: 24, bubbleYLand: 18, bubbleMaxW: 560, bubbleRight: 200, bubbleHLand: 134, bubbleYPort: 110, bubbleHPort: 124,
+    bubbleX: 24, bubbleYLand: 18, bubbleMaxW: 700, bubbleRight: 200, bubbleHLand: 134, bubbleYPort: 110, bubbleHPort: 124,
     hudW: 160, hudH: 96, bubbleMinW: 220,
-    baoXLand: 130, baoXPort: 120, baoHLand: 240, baoHPort: 220, baoFeet: 4, baoPad: 10, baoBoxL: 0.38, baoBoxR: 0.42, baoBoxTop: 0.94,
+    baoXLand: 130, baoXPort: 120, baoHLand: 240, baoHPort: 220, baoHPhonePort: 290, phoneK: 1.25, baoFeet: 4, baoPad: 10, baoBoxL: 0.38, baoBoxR: 0.42, baoBoxTop: 0.94,
     dBase: { 3: 150, 4: 150, 5: 138, 6: 126, 7: 126 }, dMin: 112, dStep: 4, tallK: 1.1, homeGap: 22, keepGap: 44, homeGrid: 10,
     fieldK: 0.55, fieldTopLand: 16, fieldBotLand: 30, fieldSide: 20, fieldTopPort: 20, fieldBaoK: 0.5, fieldBaoGap: 10, fieldBonusK: 0.3,
     keepPad: 14, baoKeepPad: 14, homeTries: 8, homeBest: 14,   // ≥ wander 10 + bob ≈ 2.5 px: a resting bubble never touches them
-    rainbowDy: 30, rainbowPortraitLift: 24, rainbowPadK: 0.4, rainbowTopGap: 30, rainbowWK: 0.16, rainbowW: [40, 70],
+    rainbowDy: 30, rainbowPortraitLift: -6, rainbowPortMin: 200, rainbowPortGap: 14, rainbowPadK: 0.4, rainbowTopGap: 30, rainbowWK: 0.16, rainbowW: [40, 70],
     hitK: 0.6, hitPad: 14, hitPhone: 92, thingK: 0.62,
 
     // ---- floating (a speed-capped soft spring to a wandering home + buoyancy + wind + soft collisions + walls)
     homeOmega: 2.4, homeZeta: 0.55, homeAccMax: 650, floatVMax: 560, vHard: 1500,
     wander: 10, wanderP: [3, 5], bobAcc: 14, bobHz: [0.45, 0.75], windK: 2.5,
     collGap: 6, collK: 90, collE: 0.35, collWobK: 0.0007, collWobMax: 0.12, bumpMinV: 40, bumpEvery: 0.12,
-    wallK: 120, wallDamp: 6,
+    wallK: 200, wallDamp: 6, homeSwapEvery: 0.25, homeSwapGain: 40,
     wobOmega: 13, wobZeta: 0.12, wobMax: 0.3, rotOmega: 6, rotZeta: 0.3, rotLag: 0.0005, rotMax: 0.2,
     wigOmega: 16, wigZeta: 0.22,
 
     // ---- blow (DESIGN §5.2)
-    blowLead: 0.5, blowEach: 0.5, growTime: 0.35, growR0: 0.3, detachV: [380, 520], detachWob: 0.22, askAfterBlow: 0.4, rainbowIn: 0.5,
+    blowLead: 0.5, blowEach: 0.5, growTime: 0.35, growR0: 0.3, detachV: [380, 520], detachWob: 0.22, askAfterBlow: 1.0, rainbowIn: 0.5,
 
     // ---- right: pop, freed thing, rainbow
     popTime: 0.22, dropN: 14, dropV: [160, 340], dropG: 900, dropLife: 0.6, dropR: [4, 9], dropCap: 60,
-    hopH: 46, hopTime: 0.28, hopSquash: 0.16, flyTime: 0.75, flyApex: 80, flyScale: 0.35, flySpin: 0.5,
-    countDelay: 0.3, countStep: 0.45, countTail: 0.35, badgeHold: 0.9, badgeRate: 6, paintTime: 0.45,
+    hopH: 46, hopTime: 0.28, hopSquash: 0.16, flyTime: 0.75, flyApex: 80, flyScale: 0.6, flySpin: 0.5,
+    countDelay: 0.5, countStep: 0.45, countTail: 0.35, countScale: 2.2, countMove: 0.45, badgeHold: 1.4, badgeRate: 6, badgeScale: 1.4, badgeK: 0.5, paintTime: 0.45,
 
     // ---- wrong / soft / Bao poke
-    wrongWob: 0.28, wrongImpulse: 260, wrongRot: 0.25, sameWrongWindow: 1.0, brushWob: 0.12, brushImpulse: 120,
+    wrongWob: 0.28, wrongImpulse: 200, wrongRot: 0.25, sameWrongWindow: 1.0, brushWob: 0.12, brushImpulse: 120,
     miniN: 5, miniLife: [0.6, 1.1], miniR: [5, 11], miniCap: 40, pokeMinis: 3,
 
     // ---- help (DESIGN §5.2 / skill rules)
@@ -181,7 +181,7 @@
     }
     bubble.w = Math.max(0, bubble.w);
     var hud = { x: W - ins.right - cfg.hudW, y: 0, w: cfg.hudW + ins.right, h: ins.top + cfg.hudH };
-    var bh = portrait ? cfg.baoHPort : cfg.baoHLand, s = bh / 300, BP = baoPoints();
+    var bh = portrait ? (phone ? cfg.baoHPhonePort : cfg.baoHPort) : cfg.baoHLand, s = bh / 300, BP = baoPoints();
     var bao = { x: ins.left + (portrait ? cfg.baoXPort : cfg.baoXLand), y: groundY - cfg.baoFeet, h: bh, s: s };
     function pt(p, r) { return { x: bao.x + (p[0] - BP.feet[0]) * s, y: bao.y + (p[1] - BP.feet[1]) * s, r: r }; }
     bao.ring = pt(BP.ring, BP.ringR * s); bao.blowRing = pt(BP.blowRing, BP.ringR * s); bao.mouth = pt(BP.mouth, 0);
@@ -196,12 +196,16 @@
     L.lowKeep = hk.filter(function (b) { return b.y > H / 2; });
     return L;
   }
-  function fieldFor(L, d, cfg) {
+  function fieldFor(L, d, cfg, behind) {
     var b = L.bao.box, bb = L.bubble.y + L.bubble.h, K = cfg.fieldK, ins = L.ins, f;
     if (!L.portrait) f = { x0: b.x + b.w + K * d, x1: L.W - ins.right - K * d - cfg.fieldSide, y0: bb + K * d + cfg.fieldTopLand, y1: L.groundY - K * d - cfg.fieldBotLand };
     else {
       f = { x0: ins.left + K * d + cfg.fieldSide, x1: L.W - ins.right - K * d - cfg.fieldSide, y0: bb + K * d + cfg.fieldTopPort, y1: b.y - cfg.fieldBaoK * d - cfg.fieldBaoGap };
-      f.bonusX0 = b.x + b.w + K * d; f.bonusY1 = f.y1 + cfg.fieldBonusK * d;   // the bottom row may come down right of Bao
+      // QA P2-3: the rainbow arch stands on the clouds just ABOVE Bao's box (its feet clear of Bao) and BELOW the field: the
+      // lowest bubble row stays ≥ 0.5 d + 14 px above an arch of at least rainbowPortMin radius (no bubble floats on the arch)
+      // (a squat portrait, e.g. iPad 4:3 with insets, where n do not fit above even at 112 px: the arch stays behind the field)
+      f.rcy = b.y + cfg.rainbowPortraitLift; f.archBehind = !!behind;
+      if (!behind) f.y1 = Math.min(f.y1, f.rcy - cfg.rainbowPortMin - 0.5 * d - cfg.rainbowPortGap);
     }
     return f;
   }
@@ -277,15 +281,15 @@
   function sizeTier(L, cfg, a, n, hkKey) {
     var key = cfgKey(cfg) + '|' + L.W + 'x' + L.H + '|' + JSON.stringify(L.ins) + '|' + a + '|' + n + '|' + hkKey;
     if (_cache[key]) return _cache[key];
-    var base = cfg.dBase[a], tiers = [];
-    if (L.tall) tiers.push(Math.round(base * cfg.tallK));
-    for (var d = base; d >= cfg.dMin; d -= cfg.dStep) tiers.push(d);
+    var base = cfg.dBase[a], tiers = [], top = Math.round(base * (L.tall ? cfg.tallK : 1) * (L.phone && L.portrait ? cfg.phoneK : 1));
+    for (var d = top; d > base; d -= cfg.dStep) tiers.push(d);
+    for (d = base; d >= cfg.dMin; d -= cfg.dStep) tiers.push(d);
     if (tiers[tiers.length - 1] !== cfg.dMin) tiers.push(cfg.dMin);
-    var res = null;
-    for (var t = 0; t < tiers.length && !res; t++) {
-      var f = fieldFor(L, tiers[t], cfg), c = candidates(L, f, tiers[t], cfg), p = fitsN(c, n, tiers[t] + cfg.homeGap), lat = null;
-      if (!p) { lat = lattices(L, f, tiers[t], n, tiers[t] + cfg.homeGap, cfg); if (lat.length) p = fps(lat[0], cornerStarts(lat[0])[0], n, 0); }
-      if (p) res = { d: tiers[t], field: f, cands: c, fits: true, fallback: p, lattices: lat };
+    var res = null, passes = L.portrait ? [false, true] : [false];   // portrait: above the arch first, else the arch behind
+    for (var ps = 0; ps < passes.length && !res; ps++) for (var t = 0; t < tiers.length && !res; t++) {
+      var dd = tiers[t], f = fieldFor(L, dd, cfg, passes[ps]), c = candidates(L, f, dd, cfg), p = fitsN(c, n, dd + cfg.homeGap), lat = null;
+      if (!p) { lat = lattices(L, f, dd, n, dd + cfg.homeGap, cfg); if (lat.length) p = fps(lat[0], cornerStarts(lat[0])[0], n, 0); }
+      if (p) res = { d: dd, field: f, cands: c, fits: true, fallback: p, lattices: lat };
     }
     if (!res) {   // an odd viewport: the smallest tier, spread as far as possible (never an Apple device; unit-tested)
       var dm = cfg.dMin, fm = fieldFor(L, dm, cfg), cm = candidates(L, fm, dm, cfg);
@@ -341,14 +345,19 @@
     // integrator fix (docs/reports/integration.md): in portrait the arch's feet stand on the clouds just above Bao's head
     // (cy = Bao's box top + rainbowPortraitLift) — at groundY + 30 the whole arch hid in the tall cloud floor and the first
     // piece's landing point sat behind Bao. Landscape is unchanged (DESIGN §2).
-    var rcy = L.groundY + cfg.rainbowDy;
-    if (L.portrait && cfg.rainbowPortraitLift != null) rcy = Math.min(rcy, L.bao.box.y + cfg.rainbowPortraitLift);
-    var rr = Math.min(0.5 * (f.x1 - f.x0) + cfg.rainbowPadK * d, Math.min(L.groundY, rcy) - bb - cfg.rainbowTopGap);
+    // landscape: cy = groundY + 30 (DESIGN), the arch top never above the field's midline (it reads behind / below the field);
+    // portrait: cy just above Bao's box, r = the room between the lowest home and the feet (≥ rainbowPortMin by the field clamp)
+    var rcy = L.groundY + cfg.rainbowDy, rr = Math.min(0.5 * (f.x1 - f.x0) + cfg.rainbowPadK * d, L.groundY - bb - cfg.rainbowTopGap);
+    if (L.portrait) {
+      var maxY = -1e9; homes.forEach(function (p) { maxY = Math.max(maxY, p.y); });
+      rcy = f.rcy; rr = Math.min(rr, rcy - bb - cfg.rainbowTopGap);
+      if (!f.archBehind) rr = Math.min(rr, rcy - (maxY + 0.5 * d + cfg.rainbowPortGap));
+    } else rr = Math.min(rr, rcy - (f.y0 + f.y1) / 2);
     L.field = f; L.homes = homes; L.d = d; L.R = d / 2; L.n = n; L.fits = T.fits; L.seed = seed;
     L.rainbow = { cx: (f.x0 + f.x1) / 2, cy: rcy, r: rr, w: clamp(cfg.rainbowWK * rr, cfg.rainbowW[0], cfg.rainbowW[1]) };
     L.hitR = cfg.hitK * d + cfg.hitPad;
     if (L.phone) L.hitR = Math.max(L.hitR, cfg.hitPhone);
-    L.thingSize = cfg.thingK * d;
+    L.thingSize = cfg.thingK * d; L.badgeR = cfg.badgeK * L.thingSize;
     L.walls = { x0: L.ins.left + 4, x1: W - L.ins.right - 4, y0: Math.max(L.ins.top + 4, bb + 6), y1: L.groundY - 4 };
     return L;
   }
@@ -529,7 +538,7 @@
           var T = Math.max(0.25, b._f.T - b.ft), tp = rainbowPoint(self.rainbow, self.rainbow.k, b.piece + 0.5);
           b._f = flight(b.fx, b.fy, tp.x, tp.y, T, cfgApex(self)); b.ft = 0; b._fs0 = b.fs;
         } else { b._fy0 = b.fy; b._fx0 = b.fx; }
-        if (b.badge) { b.badge.x = b.fx + b.badge.dx; b.badge.y = b.fy - 0.55 * L.thingSize; }
+        if (b.badge) { b.badge.x = b.fx + b.badge.dx; b.badge.y = b.fy - 0.25 * L.thingSize; b.badge.r = L.badgeR; }
       }
       self._twin(b);
     });
@@ -636,7 +645,7 @@
     this._mood('talk', 1.0);
     var M = this.layout.bao.mouth;
     // first = the long "Look at the bubbles! …" wording: only the chapter's round 0 (DESIGN §6); chapterFirst = the same (alias)
-    this._emit({ type: 'ask', promptKey: cur.promptKey, params: cur.params, rule: cur.rule, first: !!first && this.round === 0, chapterFirst: !!first && this.round === 0,
+    this._emit({ type: 'ask', promptKey: cur.promptKey, params: cur.params, rule: cur.rule, first: !!first && (this.round === 0 || (cur.mode === 'countSel' && this.round === 1)), chapterFirst: !!first && this.round === 0,
       round: this.round, n: cur.n, k: cur.k, mode: cur.mode, x: M.x, y: M.y });
     if (first && this.surprise) this._surpriseAt = this.time + this._crng.float(cfg.surpriseAt[0], cfg.surpriseAt[1]);
   };
@@ -1115,6 +1124,18 @@
         if (b.popT >= 1) { b.state = b.fstate ? 'freed' : 'gone'; b.alpha = 0; if (b.state === 'gone' && b.soft) this._emit({ type: 'away', id: b.id, popped: true, x: b.x, y: b.y }); }
       }
     }
+    // home swap (2-opt, every 0.25 s): two floaters trade homes when that shortens their combined way home by > 40 px — a
+    // bubble never has to push through another one (e.g. after a rotation the new homes may lie across the field)
+    this._swapT = (this._swapT || 0) + h;
+    if (this._swapT >= cfg.homeSwapEvery) {
+      this._swapT = 0;
+      for (i = 0; i < bs.length; i++) for (var j2 = i + 1; j2 < bs.length; j2++) {
+        var p1 = bs[i], p2 = bs[j2];
+        if (p1.state !== 'float' || p2.state !== 'float') continue;
+        var now = hyp(p1.x - p1.hx, p1.y - p1.hy) + hyp(p2.x - p2.hx, p2.y - p2.hy), sw = hyp(p1.x - p2.hx, p1.y - p2.hy) + hyp(p2.x - p1.hx, p2.y - p1.hy);
+        if (sw < now - cfg.homeSwapGain) { var tx = p1.hx, ty = p1.hy; p1.hx = p2.hx; p1.hy = p2.hy; p2.hx = tx; p2.hy = ty; }
+      }
+    }
     // pairwise soft collisions between floating bubbles (growing ones push but do not move)
     for (i = 0; i < bs.length; i++) {
       var a = bs[i];
@@ -1184,15 +1205,17 @@
         if (cur && cur.mode === 'countSel' && b.thing.kind === 'stars') { b.fstate = 'count'; b.count = 0; }
         else if (b.thing.kind === 'animal') {
           b.fstate = 'badge';
-          var dx = (b.fx > L.W - L.ins.right - 160 ? -1 : 1) * 0.75 * L.thingSize;
-          b.badge = { home: b.thing.home, a: 0, dx: dx, x: b.fx + dx, y: b.fy - 0.55 * L.thingSize, r: 0.32 * L.thingSize };
+          var bt = this._showSpot(b, cfg.badgeScale, true);
+          b.badge = { home: b.thing.home, a: 0, dx: bt.dx, x: bt.x + bt.dx, y: bt.y - 0.25 * L.thingSize, r: L.badgeR };
           this._emit({ type: 'homeBadge', id: b.id, home: b.thing.home, x: b.badge.x, y: b.badge.y });
         } else this._fly(b);
       }
       return;
     }
     if (b.fstate === 'count' || b.fstate === 'badge') {
-      b.fx = b._fx0; b.fy = b._fy0 - 4 * Math.sin(TAU * 0.9 * b.ft);   // hovering above the pop spot
+      // QA P1-2 / P2-5: the thing grows (count ×2.2, badge ×1.4) and glides to a clear spot (count: the field centre), then hovers
+      var sc = b.fstate === 'count' ? cfg.countScale : cfg.badgeScale, spot = this._showSpot(b, sc, b.fstate === 'badge'), um = smooth(b.ft / cfg.countMove);
+      b.fx = lerp(b._fx0, spot.x, um); b.fy = lerp(b._fy0, spot.y, um) - 4 * Math.sin(TAU * 0.9 * b.ft); b.fs = lerp(1, sc, um);
       if (b.fstate === 'count') {
         var n = b.thing.n, kk = Math.min(n, Math.floor((b.ft - cfg.countDelay) / cfg.countStep + 1e-9) + 1);
         if (b.ft >= cfg.countDelay && kk > b.count) {
@@ -1201,7 +1224,7 @@
         }
         if (b.count >= n && b.ft >= cfg.countDelay + (n - 1) * cfg.countStep + cfg.countTail) this._fly(b);
       } else {
-        b.badge.a = Math.min(1, b.badge.a + h * cfg.badgeRate); b.badge.x = b.fx + b.badge.dx; b.badge.y = b.fy - 0.55 * L.thingSize;
+        b.badge.a = Math.min(1, b.badge.a + h * cfg.badgeRate); b.badge.dx = spot.dx; b.badge.x = b.fx + spot.dx; b.badge.y = b.fy - 0.25 * L.thingSize;
         if (b.ft >= cfg.badgeHold) this._fly(b);
       }
       return;
@@ -1209,13 +1232,25 @@
     if (b.fstate === 'fly') {
       var f = b._f, s = smooth(b.ft / f.T), p = flightAt(f, s);
       b.fx = p.x; b.fy = p.y; b.fs = lerp(b._fs0, cfg.flyScale, s); b.fr = cfg.flySpin * Math.sin(Math.PI * s) * (f.x1 >= f.x0 ? 1 : -1);
-      if (b.badge) { b.badge.a = Math.max(0, b.badge.a - h * 5); b.badge.x = b.fx + b.badge.dx; b.badge.y = b.fy - 0.55 * L.thingSize; if (b.badge.a <= 0) b.badge = null; }
+      if (b.badge) { b.badge.a = Math.max(0, b.badge.a - h * 5); b.badge.x = b.fx + b.badge.dx; b.badge.y = b.fy - 0.25 * L.thingSize; if (b.badge.a <= 0) b.badge = null; }
       if (b.ft >= f.T - 1e-9) {
         b.fstate = 'done'; b.state = 'gone'; b.badge = null; b.fx = f.x1; b.fy = f.y1;
         this.rainbow.arrived++;
         this._emit({ type: 'paint', id: b.id, i: b.piece, k: this.rainbow.k, x: f.x1, y: f.y1 });
       }
     }
+  };
+  /** Where a freed thing shows itself at scale sc: count → the field centre, badge → where it popped; clamped inside the safe screen
+   *  and ≥ 0.6 × its height below the speech bubble. badge: dx = the badge's offset (the side with room). */
+  P._showSpot = function (b, sc, stay) {
+    var L = this.layout, half = 0.5 * L.thingSize * sc, c = this._fieldCentre(), x = stay ? b._fx0 : c.x, y = stay ? b._fy0 : c.y, dx = 0;
+    if (stay) {
+      var off = half + L.badgeR + 8, need = off + L.badgeR + 6;
+      dx = x + need <= L.W - L.ins.right ? off : -off;
+      x = clamp(x, L.ins.left + need * (dx < 0 ? 1 : 0) + half + 6, L.W - L.ins.right - need * (dx > 0 ? 1 : 0) - half - 6);
+    } else x = clamp(x, L.ins.left + half + 10, L.W - L.ins.right - half - 10);
+    y = clamp(y, L.bubble.y + L.bubble.h + 1.2 * half, L.groundY - half - 10);
+    return { x: x, y: y, dx: dx };
   };
   P._fly = function (b) {
     var tp = rainbowPoint(this.rainbow, this.rainbow.k, b.piece + 0.5);

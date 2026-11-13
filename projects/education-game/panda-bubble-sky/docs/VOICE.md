@@ -49,7 +49,7 @@ All helpers never throw and never return a raw `{x}`; `rng` is optional (`rng.ne
 | function | returns |
 |---|---|
 | `t(lang, key, params?, rng?)` | a random variant. Raw params are named: `{color:'red'}`, `{shape:'star'}` (+ `{shapes}` plural), `{animal:'cow'}` (+ `{animals}`), `{size:'big'}` / `{big:true}`, `{parity:'odd'}`, `{home:'ice'}` → "on the ice" / "ở xứ băng", `{season:2}`, `{who:'penguin'}` → "the penguin", `{n:3}` → `{n}` "3", `{num}` "three", `{starWord}`, `{bubbleWord}`; `{thing:{…}}` → "a red ball" |
-| `ask(lang, promptKey, params, {first, rng})` | the question. `params.k > 1` → `.many` ("Pop the red ones!" / "Bé chọc các bong bóng màu đỏ nhé!"); `first` → `.first` / `.many.first` ("Look at the bubbles! Pop the red one!"). Missing param → `p.any`. `p.countPop {n}` "Pop 3 bubbles!", `p.countSel {n}` "Pop the bubble with 4 stars!" (1 star), `p.home {home, k}` k = 1 "Pop the one who lives on the ice!", k > 1 "Who lives on the farm? Pop them!" |
+| `ask(lang, promptKey, params, {first, rng})` | the question. `params.k > 1` → `.many` ("Pop the red ones!" / "Bé chọc các bong bóng màu đỏ nhé!"); `first` → `.first` / `.many.first` ("Look at the bubbles! Pop the red one!"). Missing param → `p.any`. `p.countPop {n}` "Pop 3 bubbles!" (toys only, talks about bubbles only), `p.countSel {n}` "Which bubble has 4 stars inside? Pop it!" / "Bé tìm bong bóng có 4 ngôi sao rồi chọc nhé!" (1 star; `.first` "Count the stars in each bubble! Which bubble has 4 stars inside? Pop it!"), `p.home {home, k}` k = 1 "Pop the one who lives on the ice!", k > 1 "Who lives on the farm? Pop them!" |
 | `sayRight(lang, e, rng?)` | `e = {thing, left, k, i, home?, count?, mode, rule, topic, promptKey, params}`. toy / shape / tile / animal → "A red ball!", "Letter W!", "Small w!" (+ more line); **home rule** → "The penguin lives on the ice!" / "Chim cánh cụt sống ở xứ băng!"; initial → "A horse! Horse starts with H!"; sum / diff → "9 + 1 makes 10!"; parity → "8 is even!"; **countSel (stars thing)** → the count run "One, two, three, four! Four stars!"; **countPop** (`mode:'countPop'` or rule `count`) → `sayCount(count)` "Two!", the last pop (`left 0`) "Three! Three bubbles!" |
 | `sayWrong(lang, e, rng?)` | `e = {got:{nameKind,nameValue}, thing?, want:{rule} \| want \| rule, streak, …}` → names it + the goal (see §0). Without `thing` the thing is rebuilt from `got`; without a rule it comes from promptKey + params |
 | `sayWrongHint(lang, e, rng?)` | the miss that brings the hint: "That’s a little orange car. Look at the shiny one!" |
@@ -83,13 +83,22 @@ switches to the `lower` wording when topic is `lower` or promptKey `p.lower`.
   surprise.kite, kite.tap, surprise.snow, snow.tap, ui.tapBao` (ui.tapBo kept).
 
 ### 1.1 World event → line (DESIGN §5.2) — what main.js should do
-**Speech policy** (proven in the sister games): *prompts are protected* (`speakPrompt`: the guard lasts until the prompt has
-been spoken — from its `onStart` 600 ms + 95 ms × chars); *feedback (right / wrong) interrupts* unless the prompt is still
-protected (then queue); *the wrong line is protected the same way*; *the count run is never cut* (queued + protected, the
-world's `count` events light the stars while it is said); the hint is priority; **praise rate limit**: skip a new praise if
-one started < 1.2 s ago, and say praise only where the table says; speech is log-only for `speed > 1`. **A question is only
-repeated while it can be answered** (`world.interactive`, phase `play`). Sound-only events (no line): `blow`, `bubbleIn`,
-`pop`, `paint`, `squish`, `soft`, `away`, `gust`, `count`.
+**Speech policy** (proven in the sister games; restated after functional QA 13 Nov 2026 found main.js letting a right pop
+cut the protected prompt and a Bao tap cut "One!"):
+1. **Prompts are protected** (`speakPrompt`): the guard lasts until the prompt has been heard once — from its `onStart`
+   600 ms + 95 ms × chars (if it never starts, 6 s after it was queued). While protected, **feedback queues behind it**
+   (`interrupt: false`); a right pop never cuts the question. Only after the guard ends may feedback interrupt.
+2. **Count lines are never cut**: every countPop count ("One!", "Two!", "Three! Three bubbles!") and the countSel run are
+   spoken `priority: true`, `interrupt: false` and are themselves protected (600 ms + 95 ms × chars). The next pop's count
+   queues behind the previous one (queue ≤ 2 — that is enough: ≥ 0.4 s between pops); nothing else interrupts them.
+3. **The wrong line is protected** the same way once it starts; ≤ 1 wrong line per 1.5 s.
+4. **Bao / bubble / surprise taps never cut a protected or count line**: while one is playing, `pokeBao` only giggles visually
+   (no voice) and the question is **queued** (once, not repeated) to follow it; a tap line (`bird.tap`, `kite.tap`,
+   `snow.tap`, `poke`) is spoken only when nothing is speaking.
+5. The hint is priority; **praise rate limit**: skip a new praise if one started < 1.2 s ago, and say praise only where the
+   table says; speech is log-only for `speed > 1`.
+6. **A question is only repeated while it can be answered** (`world.interactive`, phase `play`). Sound-only events (no line):
+   `blow`, `bubbleIn`, `pop`, `paint`, `squish`, `soft`, `away`, `gust`, `count`.
 
 | world event | line | how |
 |---|---|---|
@@ -97,13 +106,13 @@ repeated while it can be answered** (`world.interactive`, phase `play`). Sound-o
 | `round {round, surprise}` | bubble text `t('blow')` (not spoken) | — |
 | `blow {i}` (first bubble of a chapter's round 0 only, **rarely**) | `t('blow')` ("Here come the bubbles!") — at most once per chapter, only if nothing speaks; never in later rounds | queue, droppable |
 | `ask {promptKey, params, first}` | `ask(lang, promptKey, params, {first: first && round === 0})`; bubble + voice; remember the text for `pokeBao` / `idle` | **protected prompt** (`priority`) |
-| `right {id, thing, i, k, left, home?, count?}` | `sayRight(lang, e + {mode, rule, topic, promptKey, params})`. countPop: one count line per pop ("Two!"), last "Three! Three bubbles!"; countSel: the count run | interrupt (feedback) unless the prompt is protected (then queue); **countPop counts and the countSel run are queued + protected, never cut** (a later pop's count queues behind) |
+| `right {id, thing, i, k, left, home?, count?}` | `sayRight(lang, e + {mode, rule, topic, promptKey, params})`. countPop: one count line per pop ("Two!"), last "Three! Three bubbles!"; countSel: the count run | interrupt (feedback) only once the prompt guard has ended — else queue; **countPop counts and the countSel run: priority, never interrupt, protected, never cut** (rule 2) |
 | `count {id, i}` | — (rising pip; the run says the numbers — do **not** also speak `sayCount`) | |
 | `wrong {id, got, want, streak, x, y}` | `sayWrong(lang, e + {thing: world.bubbleById(e.id).thing, rule, topic, promptKey, params})`; the miss that brings the hint (`e.hint` or the 2nd miss): `sayWrongHint`; ≤ 1 wrong line per 1.5 s (`squish` = same bubble again: no line) | interrupt unless protected; then protected |
 | `soft {x, y}` | — (tiny bubbling) | no line |
 | `hint {id}` | nothing when the wrong line already pointed at it; else `t('hint')` | **priority** |
 | `idle {n}` | `t('idle') + ' ' + currentPromptText` (≤ 4 times, then pause after the 5th) | queue |
-| `pokeBao` | play: repeat the current prompt (> 3 s after it was asked, not while it is still spoken); otherwise (blow / rainbow / whoosh / a count run) `t('poke')` ("Hee hee! That tickles!") **only when nothing is speaking** | interrupt (prompt), queue (giggle) |
+| `pokeBao` | play: repeat the current prompt (> 3 s after it was asked, not while it is still spoken); while a protected / count line plays: **queue** the prompt once (rule 4); otherwise (blow / rainbow / whoosh) `t('poke')` ("Hee hee! That tickles!") **only when nothing is speaking** | interrupt the prompt only when nothing protected plays; else queue |
 | `roundDone {stars, misses}` | **no line** (the right line just named the last thing) | — |
 | `rainbowDone {x, y}` | `t('rainbow')` **only** in the chapter's last round or after a round with a miss — and then it *is* the praise (rate limit 1.2 s); otherwise silent (the shimmer chime says it) | queue, droppable |
 | `whoosh {}` | `t('whoosh')` **rarely**: chapter 1 round 0 (to name the gesture) and then ≤ 1 in 4 rounds, only when nothing speaks | queue, droppable |

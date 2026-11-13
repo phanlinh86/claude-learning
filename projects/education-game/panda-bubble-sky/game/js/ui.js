@@ -6,14 +6,33 @@
   'use strict';
   const $ = id => document.getElementById(id);
   /** the child's name: tags removed WITH their content, no braces, spaces trimmed and collapsed, ≤ 16 letters (diacritics kept) */
-  const cleanName = v => String(v || '').replace(/<[^>]*>?/g, '').replace(/\{[^}]*\}?/g, '').replace(/[<>{}]/g, '').replace(/\s+/g, ' ').trim().slice(0, 16).trim();
+  const cleanName = v => String(v || '').replace(/<([a-z][a-z0-9]*)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, '').replace(/<[^>]*>?/g, '')
+    .replace(/\{[^}]*\}?/g, '').replace(/[<>{}]/g, '').replace(/\s+/g, ' ').trim().slice(0, 16).trim();
   const T = (lang, key, p) => (PB.I18N ? PB.I18N.t(lang, key, p) : key);
   const NAME = (lang, kind, v) => (PB.I18N ? PB.I18N.name(lang, kind, v) : String(v));
   const SCREENS = ['scrTitle', 'scrSettings', 'scrPause', 'scrTalk', 'scrDone', 'loading'];
 
   const UI = {
     lang: 'en',
-    show(id, on = true) { $(id).classList.toggle('hidden', !on); },
+    show(id, on = true) {
+      const el = $(id), was = !el.classList.contains('hidden');
+      el.classList.toggle('hidden', !on);
+      if (on && !was) this._openedAt[id] = performance.now();
+    },
+    _openedAt: {},
+    /** QA-F P2-1: a press that began BEFORE a screen opened (or outside it — a finger held on the canvas while Talk time /
+     *  the pause menu / the done panel opens under it) never clicks that screen's buttons. Keyboard clicks (detail 0) pass. */
+    guardScreenClicks() {
+      let downT = -1e9, downScreen = null;
+      const scr = t => (t && t.closest ? t.closest('.screen') : null);
+      document.addEventListener('pointerdown', e => { downT = performance.now(); downScreen = scr(e.target); }, true);
+      document.addEventListener('click', e => {
+        const s = scr(e.target);
+        if (!s || e.detail === 0 || !e.target.closest('button, label, input')) return;
+        const opened = this._openedAt[s.id] || 0;
+        if (downT < opened || downScreen !== s) { e.stopImmediatePropagation(); e.preventDefault(); }
+      }, true);
+    },
     only(...ids) { SCREENS.forEach(s => this.show(s, ids.includes(s))); },
 
     applyLang(lang) {

@@ -215,8 +215,10 @@ eq(I.ask('en', 'p.colors', { color: 'red', k: 2 }, { rng: r0 }), 'Pop the red on
 eq(I.ask('vi', 'p.colors', { color: 'red', k: 2 }, { rng: r0 }), 'Bé chọc các bong bóng màu đỏ nhé!', 'vi plural colours');
 eq(I.ask('en', 'p.countPop', { n: 3, k: 3 }, { rng: r0 }), 'Pop 3 bubbles!', 'en countPop');
 eq(I.ask('vi', 'p.countPop', { n: 3, k: 3 }, { rng: r0 }), 'Bé chọc 3 bong bóng nhé!', 'vi countPop');
-eq(I.ask('en', 'p.countSel', { n: 4, k: 1 }, { rng: r0 }), 'Pop the bubble with 4 stars!', 'en countSel');
-eq(I.ask('en', 'p.countSel', { n: 1, k: 1 }, { rng: r0 }), 'Pop the bubble with 1 star!', 'en countSel singular star');
+eq(I.ask('en', 'p.countSel', { n: 4, k: 1 }, { rng: r0 }), 'Which bubble has 4 stars inside? Pop it!', 'en countSel asks for the bubble');
+eq(I.ask('vi', 'p.countSel', { n: 4, k: 1 }, { rng: r0 }), 'Bé tìm bong bóng có 4 ngôi sao rồi chọc nhé!', 'vi countSel');
+eq(I.ask('en', 'p.countSel', { n: 4, k: 1 }, { first: true }), 'Count the stars in each bubble! Which bubble has 4 stars inside? Pop it!', 'en countSel first introduces counting stars');
+eq(I.ask('en', 'p.countSel', { n: 1, k: 1 }, { rng: r0 }), 'Which bubble has 1 star inside? Pop it!', 'en countSel singular star');
 eq(I.ask('en', 'p.animal', { animal: 'cow', k: 1 }, { rng: r0 }), 'Pop the cow!', 'en animal');
 eq(I.ask('en', 'p.home', { home: 'farm', k: 2 }, { rng: r0 }), 'Who lives on the farm? Pop them!', 'en home plural');
 eq(I.ask('en', 'p.home', { home: 'ice', k: 1 }, { rng: r0 }), 'Pop the one who lives on the ice!', 'en home k = 1');
@@ -243,6 +245,9 @@ for (const pk of PROMPT_KEYS) for (const l of I.langs) for (const base of PROMPT
   if (pk === 'p.shapes' && l === 'en' && k > 1) ok(s.includes(I.name('en', 'shapes', base.shape)), `en shapes plural noun: ${s}`);
   if (pk === 'p.home') ok(s.includes(l === 'en' ? EN_HOME_AT[base.home] : 'sống ở ' + VI_NAMES.home[base.home]), `${l} home preposition: ${s}`);
   if (pk === 'p.countSel' && l === 'en') ok(/\b1 star\b/.test(s) === (base.n === 1), `en countSel star/stars: ${s}`);
+  if (pk === 'p.countSel') ok(/bubble|bong bóng/i.test(s) && /star|sao/.test(s), `${l} countSel asks for the bubble with n stars: ${s}`);
+  if (pk === 'p.countSel' && first) ok(/Count the stars|đếm sao/.test(s), `${l} countSel first introduces counting: ${s}`);
+  if (pk === 'p.countPop') ok(/bubble|bong bóng/i.test(s) && !/star|sao/.test(s), `${l} countPop talks about bubbles only: ${s}`);
 }
 // the three wordings differ
 for (const pk of PROMPT_KEYS) for (const l of I.langs) {
