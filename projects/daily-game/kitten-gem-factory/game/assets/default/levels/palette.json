@@ -1,0 +1,53 @@
+{
+  "spring": {
+    "tint": "#ffd6e6",
+    "tintAlpha": 0.08,
+    "bench": "#dcb9a8",
+    "accent": "#ff6f9f"
+  },
+  "summer": {
+    "tint": "#ffe38a",
+    "tintAlpha": 0.08,
+    "bench": "#d6b27c",
+    "accent": "#ffad1f"
+  },
+  "autumn": {
+    "tint": "#ffb062",
+    "tintAlpha": 0.12,
+    "bench": "#c9976c",
+    "accent": "#e8642c"
+  },
+  "winter": {
+    "tint": "#6f78c8",
+    "tintAlpha": 0.16,
+    "bench": "#aeb5d8",
+    "accent": "#7fc8ff"
+  },
+  "gears": [
+    {
+      "x": 36,
+      "y": 250,
+      "r": 32
+    },
+    {
+      "x": 934,
+      "y": 408,
+      "r": 40
+    },
+    {
+      "x": 1062,
+      "y": 392,
+      "r": 54
+    }
+  ],
+  "vents": [
+    {
+      "x": 32,
+      "y": 318
+    },
+    {
+      "x": 935,
+      "y": 330
+    }
+  ]
+}
