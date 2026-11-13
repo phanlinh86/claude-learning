@@ -1,0 +1,239 @@
+diff --git a/projects/daily-game/kitten-gem-factory/game/js/assets.js b/projects/daily-game/kitten-gem-factory/game/js/assets.js
+index 3a6e4c2..d61a631 100644
+--- a/projects/daily-game/kitten-gem-factory/game/js/assets.js
++++ b/projects/daily-game/kitten-gem-factory/game/js/assets.js
+@@ -208,7 +208,8 @@
+           if (this._cache.has(ck)) continue;
+           const c = this._raster(key, w, h, ck);
+           // force the recorded SVG draw to actually rasterize now (canvas 2D defers work until the canvas is read)
+-          if (c) { const p = this._probe || (this._probe = makeCanvas(1, 1).getContext('2d')); p.drawImage(c, 0, 0, 1, 1); }
++          // (drawing it into another deferred canvas does not; reading one pixel back does)
++          if (c) { try { c.getContext('2d').getImageData(0, 0, 1, 1); } catch (e) { /* ignore */ } }
+         } while (this._wq.length && dl.timeRemaining() > 12);
+         this._pump();
+       }, { timeout: 250 });   // a busy machine never goes idle: still finish within ~1-2 s, one layer per frame
+diff --git a/projects/daily-game/kitten-gem-factory/game/js/main.js b/projects/daily-game/kitten-gem-factory/game/js/main.js
+index f2f0e97..23ff7cb 100644
+--- a/projects/daily-game/kitten-gem-factory/game/js/main.js
++++ b/projects/daily-game/kitten-gem-factory/game/js/main.js
+@@ -286,25 +286,36 @@
+       }
+     },
+ 
+-    /* Adaptive quality: judge the time spent on OUR work (simulate + draw), not the time between frames. */
+-    adapt(work) {
+-      if (params.get('adaptive') === '0' || this.mode === 'paused' || this.mode === 'boot' || this.speed !== 1) return;
++    /* Adaptive quality: judge the time spent on OUR work (simulate + draw) AND the real frame interval.
++     * Canvas 2D records our draw calls and rasterizes them after the script returns, so JS time alone stays
++     * at ~1–5 ms while the frame really takes 30–100 ms on a slow device. The interval is compared with the
++     * fastest interval seen, so a 30 Hz Low Power Mode cap or a 120 Hz screen never counts as "slow". */
++    adapt(work, iv) {
++      if (params.get('adaptive') === '0' || this.mode === 'paused' || this.mode === 'boot' || this.speed !== 1 || document.hidden) return;
+       if (this._adaptHold > 0) { this._adaptHold--; return; }
+       this._wt = this._wt == null ? work : this._wt + (work - this._wt) * 0.05;
++      if (iv > 0.004 && iv < 0.25) {
++        this._ivMin = Math.min(iv, this._ivMin == null ? iv : this._ivMin + 0.00002);   // relaxes ~1 ms/s
++        this._iv = this._iv == null ? iv : this._iv + (iv - this._iv) * 0.05;
++      }
++      const ivSlow = this._iv != null && this._iv > Math.max(1.5 * this._ivMin, 0.025);
++      const ivFast = this._iv == null || this._iv < 1.2 * this._ivMin + 0.002;
+       const R = this.renderer, natural = R.cssScale * (window.devicePixelRatio || 1);
+       const floor = Math.max(1, this.isTouch ? natural * 0.67 : 1);
+-      if (this._wt > 0.014) { this._slowN = (this._slowN || 0) + 1; this._fastN = 0; }
+-      else if (this._wt < 0.006) { this._fastN = (this._fastN || 0) + 1; this._slowN = 0; }
++      if (this._wt > 0.014 || ivSlow) { this._slowN = (this._slowN || 0) + 1; this._fastN = 0; }
++      else if (this._wt < 0.006 && ivFast) { this._fastN = (this._fastN || 0) + 1; this._slowN = 0; }
+       else { this._slowN = 0; this._fastN = 0; }
+-      if (this._slowN > 90 && R.px > floor + 0.01) { R.maxPx = Math.max(floor, R.px * 0.8); R.resize(); this._slowN = 0; this._wt = null; this._adaptHold = 60; }
+-      else if (this._fastN > 300 && R.maxPx && R.px < natural - 0.01) { R.maxPx = Math.min(natural, R.px * 1.2); if (R.maxPx >= natural) R.maxPx = 0; R.resize(); this._fastN = 0; this._wt = null; this._adaptHold = 60; }
++      if (this._slowN > 90 && R.px > floor + 0.01) { R.maxPx = Math.max(floor, R.px * 0.8); R.resize(); this._slowN = 0; this._wt = null; this._iv = null; this._adaptHold = 60; }
++      else if (this._fastN > 300 && R.maxPx && R.px < natural - 0.01) { R.maxPx = Math.min(natural, R.px * 1.2); if (R.maxPx >= natural) R.maxPx = 0; R.resize(); this._fastN = 0; this._wt = null; this._iv = null; this._adaptHold = 60; }
+     },
+ 
+     frame(ts) {
+       const t0 = performance.now();
+       if (this.isTouch) this.syncRotate();
++      let iv = 0;
+       try {
+-        const real = Math.min(0.1, Math.max(0, (ts - this.last) / 1000));
++        iv = Math.max(0, (ts - this.last) / 1000);
++        const real = Math.min(0.1, iv);
+         this.last = ts;
+         const dt = real * this.speed;
+         if (this.mode !== 'paused' && this.world && !this._rotOn) {
+@@ -313,7 +324,7 @@
+           this.renderer.update(dt);
+         }
+         this.renderer.draw(this.mode);
+-        this.adapt((performance.now() - t0) / 1000);
++        this.adapt((performance.now() - t0) / 1000, iv);
+       } catch (err) {
+         console.error(err);
+         if (this.stats.errors.length < 20) this.stats.errors.push(String(err && err.stack || err));
+diff --git a/projects/daily-game/kitten-gem-factory/game/js/render.js b/projects/daily-game/kitten-gem-factory/game/js/render.js
+index d671f5c..edd9094 100644
+--- a/projects/daily-game/kitten-gem-factory/game/js/render.js
++++ b/projects/daily-game/kitten-gem-factory/game/js/render.js
+@@ -62,7 +62,7 @@
+       CGF.Assets.setScale(px);
+       this._bgCache = {}; this._plates = {};
+       this._measureHud();
+-      this.prewarm(this.vis.cur);
++      this.prewarm(this.vis.cur); this.prewarm(this.vis.cur + 1);
+     }
+     _measureHud() {
+       const k = 1 / this.cssScale, i = this.insets || {};
+@@ -99,11 +99,40 @@
+       this._bgCache[ck] = c;
+       return c;
+     }
++    /* Pre-warm everything a season needs (layers, bench, card plates, gem + particle sprites) in idle time,
++     * ONE job per idle callback (an SVG layer costs ~20–30 ms at 1920×1080 on a desktop CPU, 3–4× that on a
++     * phone), and force each raster now: canvas 2D defers the SVG draw until the canvas is first used, which
++     * would otherwise land the cost in the first frame of the new season. */
+     prewarm(season) {
+-      const go = () => { this._layer('outside_' + SEASON_INFO[season].key, 960, 540); this._layer('room_wall', 1200, 540); this._layer('room_floor', 600, 70); };
+-      const ric = window.requestIdleCallback || (f => setTimeout(f, 30));
+-      ric(go, { timeout: 400 });
+-    }
++      season = mod(season, 4);
++      const key = SEASON_INFO[season].key, jobs = this._warmJobs || (this._warmJobs = []);
++      const add = (id, fn) => { if (!jobs.some(j => j.id === id)) jobs.push({ id, fn }); };
++      add('outside_' + key, () => this._force(this._layer('outside_' + key, 960, 540)));
++      add('wall', () => this._force(this._layer('room_wall', 1200, 540)));
++      add('floor', () => this._force(this._layer('room_floor', 600, 70)));
++      add('bench_' + key, () => this._force(this._benchPlate(season)));
++      const w = this.world, L = CGF.LEVELS && CGF.LEVELS[season];
++      if (w && L && w.layoutFor) {
++        const lay = w.layoutFor(L.cols, L.rows), cw = lay.cardW, ch = lay.cardH, s = Math.min(cw, ch) * 0.74;
++        add('plates_' + cw + 'x' + ch, () => { this._force(this._plate('back', cw, ch)); this._force(this._plate('face', cw, ch)); });
++        add('gems_' + cw + 'x' + ch, () => CGF.Assets.warm(CGF.Assets.GEM_KINDS.map(k => ['gem_' + k, s, s]).concat(CGF.Assets.GEM_KINDS.map(k => ['gem_' + k, 56, 56]))));
++      }
++      const ps = { spring: ['blossom'], summer: ['sunmote', 'butterfly'], autumn: ['leaf'], winter: ['snowflake'] }[key].concat(['steam', 'sparkle', 'spark']);
++      add('parts_' + key, () => CGF.Assets.warm(ps.map(p => ['p_' + p, PSIZE[p][0] * 1.5, PSIZE[p][1] * 1.5])));
++      this._pumpWarm();
++    }
++    _pumpWarm() {
++      if (this._warmT || !this._warmJobs || !this._warmJobs.length) return;
++      const ric = window.requestIdleCallback ? (f => window.requestIdleCallback(f, { timeout: 300 }))
++                                             : (f => setTimeout(() => f({ timeRemaining: () => 0 }), 40));   // iOS Safari: no rIC
++      this._warmT = ric(dl => {
++        this._warmT = 0;
++        do { const j = this._warmJobs.shift(); if (!j) break; try { j.fn(); } catch (e) { /* missing art: renderer has fallbacks */ } }
++        while (this._warmJobs.length && dl.timeRemaining() > 12);
++        this._pumpWarm();
++      });
++    }
++    _force(c) { if (c) { try { c.getContext('2d').getImageData(0, 0, 1, 1); } catch (e) { /* tainted / lost: ignore */ } } return c; }
+     _customWall() {
+       const A = CGF.Assets, src = A.custom.wall;
+       if (!src) return null;
+@@ -316,9 +345,28 @@
+       one(vis.cur, vis.prev >= 0 ? vis.k : 1);
+     }
+ 
++    /* The bench (big translucent rounded rects + strokes) is static per season: draw it once per scale and blit. */
+     _bench(w) {
+-      const g = this.g, pal = CGF.Assets.palette || CGF.Assets.DEFAULT_PALETTE, p = pal[SEASON_INFO[this.vis.cur].key] || {};
+-      const x = BOARD.x - 12, y = BOARD.y - 10, ww = BOARD.w + 24, hh = BOARD.h + 18;
++      const pl = this._benchPlate(this.vis.cur), p = this.px;
++      if (!pl) return;
++      // blit 1:1 on whole device pixels (a sub-pixel or scaled blit is resampled, which costs more than the paths)
++      this.g.setTransform(1, 0, 0, 1, 0, 0);
++      this.g.drawImage(pl, Math.round((this.ox + BOARD.x - 12 - 4) * p), Math.round((this.oy + BOARD.y - 10 - 4) * p));
++      this._logical();
++    }
++    _benchPlate(season) {
++      const k = 'bench' + season + '@' + this.px.toFixed(3);
++      if (this._plates[k]) return this._plates[k];
++      const ww = BOARD.w + 24, hh = BOARD.h + 18, pad = 4, p = this.px, c = document.createElement('canvas');
++      c.lw = ww + pad * 2 + 4; c.lh = hh + pad * 2 + 8;
++      c.width = Math.ceil(c.lw * p); c.height = Math.ceil(c.lh * p);
++      const g = c.getContext('2d'); g.scale(p, p); g.translate(pad, pad);
++      this._benchDraw(g, season, 0, 0, ww, hh);
++      this._plates[k] = c;
++      return c;
++    }
++    _benchDraw(g, season, x, y, ww, hh) {
++      const pal = CGF.Assets.palette || CGF.Assets.DEFAULT_PALETTE, p = pal[SEASON_INFO[season].key] || {};
+       g.fillStyle = 'rgba(14,79,80,.20)'; rr(g, x + 4, y + 8, ww, hh, 22); g.fill();
+       g.fillStyle = p.bench || '#f6e7c8'; g.globalAlpha = 0.88; rr(g, x, y, ww, hh, 22); g.fill(); g.globalAlpha = 1;
+       g.lineWidth = 4; g.strokeStyle = '#b8936a'; rr(g, x, y, ww, hh, 22); g.stroke();
+@@ -371,12 +419,14 @@
+       g.globalAlpha = 1;
+     }
+     _cards(w, mode) {
+-      const g = this.g, cfg = w.cfg || (CGF.CONFIG || {}), popTime = cfg.popTime || 0.6, wigT = cfg.wiggleTime || 0.4;
++      const g = this.g, cfg = w.cfg || (CGF.CONFIG || {}), popTime = cfg.popTime || 0.6, wigT = cfg.wiggleTime || 0.4, a = w.alpha || 0;
+       const cur = w.cursorOn && w.phase === 'playing' && mode !== 'title' ? w.cards[w.cursor] : null;
+       for (const c of w.cards) {
+         if (c.state === 'gone') continue;
+         const ccx = c.cx != null ? c.cx : c.x + c.w / 2, ccy = c.cy != null ? c.cy : c.y + c.h / 2;
+-        let x = ccx + (c.dealX || 0), y = ccy, scale = 1, alpha = 1;
++        // the deal slide is fast (~3000 px/s): interpolate it between 1/120 s steps like the comet, or it judders
++        const dx = c.prevDealX != null ? lerp(c.prevDealX, c.dealX || 0, a) : (c.dealX || 0);
++        let x = ccx + dx, y = ccy, scale = 1, alpha = 1;
+         if (x - c.w / 2 > LW + this.ox + 20) continue;   // still waiting on the conveyor, off screen
+         if (c.wiggleX != null) x += c.wiggleX; else if (c.wiggleT > 0) x += Math.sin(c.wiggleT * 48) * 6 * Math.min(1, c.wiggleT / wigT);
+         const f = clamp(c.flip || 0, 0, 1), sxF = Math.max(0.02, Math.abs(Math.cos(Math.PI * f)));
+@@ -395,17 +445,23 @@
+         g.fillStyle = '#0e3a3c';
+         rr(g, x - cw * sxF * scale / 2 + 3 + liftPx * 0.6, y - ch * scale / 2 + 5 + liftPx, cw * sxF * scale, ch * scale, Math.min(cw, ch) * 0.14); g.fill();
+         g.globalAlpha = 1;
+-        g.save(); g.translate(x, y - liftPx); if (c.wiggleRot) g.rotate(c.wiggleRot); g.scale(sxF * scale, scale);
+-        if (glow > 0) { g.globalAlpha = 0.55 * glow * alpha; g.fillStyle = CARD.glow; rr(g, -cw / 2 - 7, -ch / 2 - 7, cw + 14, ch + 14, Math.min(cw, ch) * 0.2); g.fill(); g.globalAlpha = 1; }
+-        const face = f > 0.5, pl = this._plate(face ? 'face' : 'back', cw, ch);
+-        g.globalAlpha = alpha;
+-        g.drawImage(pl, -cw / 2 - 2, -ch / 2 - 2, cw + 4, ch + 4);
+-        g.globalAlpha = 1;
+-        if (face) {
+-          const s = Math.min(cw, ch) * 0.74;
+-          this._gemOnCard(c.kind, s, alpha * (c.state === 'matched' ? Math.max(0.25, 1 - (c.popT || 0) / (popTime * 0.4)) : 1));
++        const face = f > 0.5, pl = this._plate(face ? 'face' : 'back', cw, ch), p = this.px, A = CGF.Assets;
++        const gs = Math.min(cw, ch) * 0.74, gem = face && c.kind !== 'custom' && Math.abs(A.scale - p) < 0.01 ? A.sprite('gem_' + c.kind, gs, gs) : null;
++        if ((f === 0 || f === 1) && scale === 1 && glow === 0 && alpha === 1 && !c.wiggleRot && (!face || gem)) {
++          // a resting card: blit plate and gem 1:1 on whole device pixels (no resampling: ~4-6x cheaper on a CPU canvas)
++          g.setTransform(1, 0, 0, 1, 0, 0);
++          g.drawImage(pl, Math.round((this.ox + x - cw / 2 - 2) * p), Math.round((this.oy + y - liftPx - ch / 2 - 2) * p));
++          if (gem) g.drawImage(gem, Math.round((this.ox + x - gs / 2) * p), Math.round((this.oy + y - liftPx - gs / 2) * p));
++          this._logical();
++        } else {
++          g.save(); g.translate(x, y - liftPx); if (c.wiggleRot) g.rotate(c.wiggleRot); g.scale(sxF * scale, scale);
++          if (glow > 0) { g.globalAlpha = 0.55 * glow * alpha; g.fillStyle = CARD.glow; rr(g, -cw / 2 - 7, -ch / 2 - 7, cw + 14, ch + 14, Math.min(cw, ch) * 0.2); g.fill(); g.globalAlpha = 1; }
++          g.globalAlpha = alpha;
++          g.drawImage(pl, -cw / 2 - 2, -ch / 2 - 2, cw + 4, ch + 4);
++          g.globalAlpha = 1;
++          if (face) this._gemOnCard(c.kind, gs, alpha * (c.state === 'matched' ? Math.max(0.25, 1 - (c.popT || 0) / (popTime * 0.4)) : 1));
++          g.restore();
+         }
+-        g.restore();
+         if (cur === c) {
+           const pulse = 0.5 + 0.5 * Math.sin(this.t * 6);
+           g.lineWidth = 4 + pulse * 2; g.strokeStyle = CARD.ring;
+@@ -434,9 +490,11 @@
+       const g = this.g;
+       for (const f of (w.flyers || [])) {
+         const x = ip(f, 'x', a), y = ip(f, 'y', a), r = ip(f, 'rot', a) || 0;
+-        const k = f.T ? clamp(f.t / f.T, 0, 1) : 0, s = 56 * (1 - 0.45 * k);
+-        g.save(); g.translate(x, y); g.rotate(r);
+-        this._gemOnCard(f.kind, s, 1);
++        // shrink with the transform, not the sprite size: a size that changes every frame meant a fresh SVG
++        // rasterization per flyer per frame and a sprite cache that kept growing
++        const k = f.T ? clamp(f.t / f.T, 0, 1) : 0, sc = 1 - 0.45 * k;
++        g.save(); g.translate(x, y); g.rotate(r); g.scale(sc, sc);
++        this._gemOnCard(f.kind, 56, 1);
+         g.restore();
+       }
+     }
+diff --git a/projects/daily-game/kitten-gem-factory/game/js/world.js b/projects/daily-game/kitten-gem-factory/game/js/world.js
+index 77bc791..6b3db0f 100644
+--- a/projects/daily-game/kitten-gem-factory/game/js/world.js
++++ b/projects/daily-game/kitten-gem-factory/game/js/world.js
+@@ -483,6 +483,7 @@
+     var c = this.cfg, rate = dt / c.flipTime;
+     for (var i = 0; i < this.cards.length; i++) {
+       var k = this.cards[i];
++      k.prevDealX = k.dealX;                          // renderer interpolates the slide with w.alpha
+       if (k.dealT > 0) {
+         k.dealT -= dt;
+         var p = 1 - Math.max(0, k.dealT) / c.dealSlide;
