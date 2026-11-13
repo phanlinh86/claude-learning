@@ -1,0 +1,29 @@
+{
+  "name": "Bao's Bubble Sky · Gấu Trúc Bảo Thổi Bong Bóng",
+  "short_name": "Bubble Sky",
+  "description": "Bubble-popping learning game with Bao the little panda: pop the bubbles Bao asks for and paint a rainbow. Colours, shapes, counting, animal homes, letters, numbers. English & Vietnamese.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#CFE6FA",
+  "theme_color": "#CFE6FA",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

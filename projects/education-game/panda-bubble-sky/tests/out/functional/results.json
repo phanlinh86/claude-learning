@@ -1,0 +1,24 @@
+{
+ "date": "2026-11-13T15:33:51.831Z",
+ "secs": 27,
+ "results": [
+  {
+   "device": "ipad-portrait",
+   "test": "audio_chain_volume",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "device": "ipad-portrait",
+   "test": "release_over_hud",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "device": "ipad-portrait",
+   "test": "url_age_shown",
+   "ok": true,
+   "detail": ""
+  }
+ ]
+}
