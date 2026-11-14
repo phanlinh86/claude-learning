@@ -1,0 +1,16 @@
+{
+  "name": "Tofu's Volcano Melody",
+  "short_name": "Volcano Melody",
+  "description": "Help Tofu the panda collect the musical notes the friendly volcano puffs out!",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#2f9fb5",
+  "theme_color": "#2f9fb5",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

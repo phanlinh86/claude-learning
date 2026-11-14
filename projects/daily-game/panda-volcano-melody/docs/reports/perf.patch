@@ -1,0 +1,231 @@
+--- a/projects/daily-game/panda-volcano-melody/game/js/render.js
++++ b/projects/daily-game/panda-volcano-melody/game/js/render.js
+@@ -28,6 +28,8 @@
+   function ix(o, a) { return o.prevX != null ? lerp(o.prevX, o.x, a) : o.x; }
+   function iy(o, a) { return o.prevY != null ? lerp(o.prevY, o.y, a) : o.y; }
+   function iz(o, a) { return o.z == null ? 0 : (o.prevZ != null ? lerp(o.prevZ, o.z, a) : o.z); }
++  /* the few raster sizes a particle sprite is cached at (prewarm and draw must ask for the same key) */
++  function partBox(sprite, w) { const ps = PSIZE[sprite] || [16, 16], bw = Math.ceil(ps[0] * 1.5 / 8) * 8 * (w > ps[0] * 1.5 ? 2 : 1); return [bw, bw * ps[1] / ps[0]]; }
+   function pal(season) { const P = PVM.Assets.palette || PVM.Assets.DEFAULT_PALETTE; return P[SEASON_INFO[mod(season, 4)].key] || PVM.Assets.DEFAULT_PALETTE.spring; }
+ 
+   class Renderer {
+@@ -41,7 +43,7 @@
+       this.comboPop = 9; this.meterPop = 9; this.heartPop = 9; this.dispGot = 0;
+       this.insets = { top: 0, right: 0, bottom: 0, left: 0 };
+       this.hudRight = LW - 110;
+-      this._spr = { clear: () => { PVM.Assets._cache.clear(); this._bgCache = {}; } };
++      this._spr = { clear: () => { PVM.Assets._cache.clear(); PVM.Assets._stale = null; this._bgCache = {}; this._bgStale = null; } };
+       this._bgCache = {};
+     }
+     static get SEASON_INFO() { return SEASON_INFO; }
+@@ -49,6 +51,8 @@
+     resize(insets) {
+       if (insets) this.insets = insets;
+       const W = Math.max(1, window.innerWidth), H = Math.max(1, window.innerHeight), dpr = window.devicePixelRatio || 1;
++      const stale = Object.assign({}, this._bgStale);
++      for (let s = 0; s < 4; s++) { const L = this._cachedGround(s); if (L) stale[s] = L; }
+       this.cssScale = Math.min(W / LW, H / LH);
+       let px = this.cssScale * dpr;
+       const cap = Math.sqrt((1920 * 1080) / (W * H * dpr * dpr));   // backing store ≈ ≤ 1920×1080 device px
+@@ -61,7 +65,7 @@
+       this.c.style.width = W + 'px'; this.c.style.height = H + 'px';
+       this.portrait = H > W;
+       PVM.Assets.setScale(px);
+-      this._bgCache = {}; this._seaPat = null;
++      this._bgCache = {}; this._seaPat = null; this._bgStale = stale;
+       this._measureHud();
+       this.prewarm(this.vis.cur); this.prewarm(this.vis.cur + 1);
+     }
+@@ -86,6 +90,12 @@
+       season = mod(season, 4);
+       if (instant || season === this.vis.cur) this.vis = { cur: season, prev: -1, k: 1 };
+       else this.vis = { cur: season, prev: this.vis.cur, k: 0 };
++      const keep = [season, mod(season + 1, 4), this.vis.prev];
++      for (const k in this._bgCache) {
++        const m = /^(?:ground_(\w+)|cg(\d))@/.exec(k); if (!m) continue;
++        const s = m[1] ? SEASON_INFO.findIndex(i => i.key === m[1]) : +m[2];
++        if (!keep.includes(s)) delete this._bgCache[k];
++      }
+       this.prewarm(season); this.prewarm(season + 1);
+     }
+ 
+@@ -121,6 +131,14 @@
+       this._bgCache[ck] = c;
+       return c;
+     }
++    /* the ground layer if it is already rasterized at the current scale (never rasterizes) */
++    _cachedGround(season) {
++      season = mod(season, 4);
++      const A = PVM.Assets, px = this.px.toFixed(4);
++      return this._bgCache[A.custom.ground ? 'cg' + season + '@' + px + '|' + (A._ver || 0) : 'ground_' + SEASON_INFO[season].key + '@' + px] || null;
++    }
++    /* for the frame: current-scale layer, else the old-scale stand-in after a resize, else rasterize now */
++    _groundNow(season) { return this._cachedGround(season) || (this._bgStale && this._bgStale[mod(season, 4)]) || this._ground(season); }
+     _sea() {
+       if (this._seaPat) return this._seaPat;
+       const L = this._layer('sea', 240, 240); if (!L) return null;
+@@ -142,16 +160,17 @@
+         const list = [];
+         ['idle', 'walk1', 'walk2', 'happy', 'hurt', 'sleep'].forEach(f => list.push(['tofu_' + f, 72, 72]));
+         ['1', '2', 'dizzy'].forEach(f => list.push(['crab_' + f, 56, 45]));
+-        list.push(['coco_1', 64, 53], ['coco_2', 64, 53], ['mango', 36, 36], ['heart_full', 26, 24], ['heart_empty', 26, 24]);
++        list.push(['coco_1', 64, 53], ['coco_2', 64, 53], ['coco_1', 40, 33], ['mango', 36, 36], ['heart_full', 26, 24], ['heart_empty', 26, 24], ['p_sparkle', 24, 24]);
+         [0, 1, 2, 3].forEach(k => list.push(['note_' + k, 40, 40], ['note_' + k, 22, 22]));
+         PVM.Assets.warm(list);
+       });
+       const ps = { spring: ['blossom'], summer: ['sunmote', 'butterfly'], autumn: ['leaf'], winter: ['snowflake'] }[key];
+-      add('parts_' + key, () => PVM.Assets.warm(ps.map(p => ['p_' + p, PSIZE[p][0] * 1.5, PSIZE[p][1] * 1.5])));
++      add('parts_' + key, () => PVM.Assets.warm(ps.concat(['smoke', 'dust', 'ripple', 'sparkle', 'spark']).map(p => ['p_' + p].concat(partBox(p, 0)))));
+       this._pumpWarm();
+     }
+     _pumpWarm() {
+-      if (this._warmT || !this._warmJobs || !this._warmJobs.length) return;
++      if (!this._warmJobs || !this._warmJobs.length) { if (!this._warmT) this._bgStale = null; return; }   // all new layers ready
++      if (this._warmT) return;
+       const ric = window.requestIdleCallback ? (f => window.requestIdleCallback(f, { timeout: 300 }))
+                                              : (f => setTimeout(() => f({ timeRemaining: () => 0 }), 40));   // iOS Safari: no rIC
+       this._warmT = ric(dl => {
+@@ -227,22 +246,25 @@
+       const g = this.g, p = this.px, w = this.world;
+       const a = w && w.alpha != null ? w.alpha : 0;
+       g.setTransform(1, 0, 0, 1, 0, 0);
+-      // 1. sea everywhere (letterbox included), drifting slowly
+-      const pat = this._sea();
+-      if (pat) {
+-        const dx = (this.t * 6) % 240, dy = Math.sin(this.t * 0.4) * 6;
+-        g.setTransform(1, 0, 0, 1, Math.round((this.ox - dx) * p), Math.round((this.oy + dy) * p));
+-        g.fillStyle = pat; g.fillRect(-(this.ox - dx + 240) * p, -(this.oy + 240) * p, this.c.width + 480 * p, this.c.height + 480 * p);
+-        g.setTransform(1, 0, 0, 1, 0, 0);
+-      } else { g.fillStyle = pal(this.vis.cur).sea || '#4cb8c4'; g.fillRect(0, 0, this.c.width, this.c.height); }
+-
+       let sx = 0, sy = 0;
+       if (this.shake > 0) { const m = (this._shakeAmp || 4) * Math.min(1, this.shake / 0.25); sx = Math.sin(this.t * 71) * m; sy = Math.cos(this.t * 53) * m; }
++      const gx = Math.round((this.ox + sx) * p), gy = Math.round((this.oy + sy) * p), gw = Math.round(LW * p), gh = Math.round(LH * p);
++      const cur = this._groundNow(this.vis.cur), CW = this.c.width, CH = this.c.height;
++      // 1. sea, drifting slowly — only where the opaque ground will not cover it (the pattern fill was ~⅓ of the frame)
++      if (!cur || gx > 0 || gy > 0 || gx + gw < CW || gy + gh < CH) {
++        g.save();
++        if (cur) { g.beginPath(); g.rect(0, 0, CW, CH); g.rect(gx + 1, gy + 1, gw - 2, gh - 2); g.clip('evenodd'); }
++        const pat = this._sea();
++        if (pat) {
++          const dx = (this.t * 6) % 240, dy = Math.sin(this.t * 0.4) * 6;
++          g.setTransform(1, 0, 0, 1, Math.round((this.ox - dx) * p), Math.round((this.oy + dy) * p));
++          g.fillStyle = pat; g.fillRect(-(this.ox - dx + 240) * p, -(this.oy + 240) * p, CW + 480 * p, CH + 480 * p);
++        } else { g.fillStyle = pal(this.vis.cur).sea || '#4cb8c4'; g.fillRect(0, 0, CW, CH); }
++        g.restore();
++      }
+       // 2. ground (pixel-exact), crossfading between seasons
+-      const gx = Math.round((this.ox + sx) * p), gy = Math.round((this.oy + sy) * p);
+-      const cur = this._ground(this.vis.cur);
+-      if (cur) g.drawImage(cur, gx, gy);
+-      if (this.vis.prev >= 0 && this.vis.k < 1) { const pr = this._ground(this.vis.prev); if (pr) { g.globalAlpha = 1 - this.vis.k; g.drawImage(pr, gx, gy); g.globalAlpha = 1; } }
++      if (cur) g.drawImage(cur, gx, gy, gw, gh);
++      if (this.vis.prev >= 0 && this.vis.k < 1) { const pr = this._groundNow(this.vis.prev); if (pr) { g.globalAlpha = 1 - this.vis.k; g.drawImage(pr, gx, gy, gw, gh); g.globalAlpha = 1; } }
+ 
+       g.setTransform(p, 0, 0, p, (this.ox + sx) * p, (this.oy + sy) * p);
+       const P = pal(this.vis.cur);
+@@ -276,8 +298,8 @@
+           continue;
+         }
+         const ps = PSIZE[q.sprite] || [16, 16], w = q.size, h = q.size * ps[1] / ps[0];
+-        const bw = Math.ceil(ps[0] * 1.5 / 8) * 8 * (w > ps[0] * 1.5 ? 2 : 1);   // cache a few raster sizes only
+-        const s = PVM.Assets.sprite('p_' + q.sprite, bw, bw * ps[1] / ps[0]);
++        const bb = partBox(q.sprite, w);   // cache a few raster sizes only
++        const s = PVM.Assets.sprite('p_' + q.sprite, bb[0], bb[1]);
+         if (!s) continue;
+         if (q.color && q.sprite === 'sparkle') { /* tinted stars: draw a soft dot of the colour behind */ g.fillStyle = q.color; g.beginPath(); g.arc(q.x, q.y, w * 0.18, 0, TAU); g.fill(); }
+         if ((q.rot || 0) !== 0 || (q.flipX || 1) !== 1) {
+@@ -379,8 +401,8 @@
+       if (n.src === 'pop' && age < 0.35) { const k = age / 0.35; s = 1 + Math.sin(k * Math.PI) * 0.25 - (1 - k) * 0.6; s = Math.max(0.2, s); }
+       const bob = n.state === 'ground' ? Math.sin(this.t * 3 + n.id * 1.7) * 3 : 0;
+       const sway = n.state === 'ground' ? Math.sin(this.t * 2.2 + n.id) * 0.08 : (n.vx || 0) * 0.0015;
+-      const sz = 40 * s;
+-      g.save(); g.translate(x, y - 22 - z - bob); g.rotate(sway);
++      const sz = 40;
++      g.save(); g.translate(x, y - 22 - z - bob); g.rotate(sway); if (s !== 1) g.scale(s, s);
+       if (PVM.Assets.hasCustom('note')) { const [fw, fh] = PVM.Assets.fit('note', sz, sz); this._draw('custom:note', -fw / 2, -fh / 2, fw, fh); }
+       else if (!this._draw('note_' + (n.kind || 0), -sz / 2, -sz / 2, sz, sz)) { g.fillStyle = NOTE_COL[n.kind || 0]; g.beginPath(); g.arc(0, 6, 10, 0, TAU); g.fill(); g.fillRect(6, -16, 4, 22); }
+       g.restore();
+--- a/projects/daily-game/panda-volcano-melody/game/js/assets.js
++++ b/projects/daily-game/panda-volcano-melody/game/js/assets.js
+@@ -139,7 +139,7 @@
+         this.customSrc[s.id] = img;
+         this.custom[s.id] = processCustom(img, s.kind === 'bg' ? 'fit' : S.get('shape_' + s.id, s.id === 'note' ? 'circle' : 'fit'));
+       }));
+-      this._cache.clear();
++      this._cache.clear(); this._stale = null;
+     },
+ 
+     async setCustom(slotId, file) {
+@@ -155,13 +155,13 @@
+       PVM.Storage.set('shape_' + slotId, shape);
+       const src = this.customSrc[slotId];
+       if (src) this.custom[slotId] = processCustom(src, shape);
+-      this._cache.clear();
++      this._cache.clear(); this._stale = null;
+     },
+     clearCustom(slotId) {
+       if (this._thumbs) delete this._thumbs[slotId];
+       PVM.Storage.del('img_' + slotId); PVM.Storage.del('shape_' + slotId);
+       delete this.customSrc[slotId]; delete this.custom[slotId];
+-      this._cache.clear();
++      this._cache.clear(); this._stale = null;
+     },
+     /* Small preview image (data URL) for the Change Pictures cards — cached, cheap to redraw. */
+     thumb(slotId) {
+@@ -181,7 +181,9 @@
+     setScale(s) {
+       s = Math.max(0.5, Math.min(4, s));
+       if (Math.abs(s - this.scale) > 0.01) {
+-        this.scale = s; this._cache.clear(); this._wq.length = 0;
++        // keep the old-scale sprites as stand-ins (drawn at the same logical size, re-rasterized in idle time)
++        // so a resize / quality step never rasterizes every sprite inside one frame
++        this.scale = s; this._stale = this._stale ? new Map([...this._stale, ...this._cache]) : this._cache; this._cache = new Map(); this._wq.length = 0;
+       }
+     },
+ 
+@@ -196,6 +198,7 @@
+     },
+     warmSeason(s) { /* backgrounds are pre-rendered whole by the renderer (Renderer.prewarm) */ },
+     _pump() {
++      if (!this._wq.length) this._stale = null;   // every stand-in has been replaced (or was never needed)
+       if (this._wt || !this._wq.length) return;
+       const ric = window.requestIdleCallback || (f => setTimeout(() => f({ timeRemaining: () => 10 }), 50));
+       this._wt = ric(dl => {
+@@ -219,6 +222,8 @@
+       const ck = key + '|' + Math.round(w * 4) + '|' + Math.round(h * 4);
+       let c = this._cache.get(ck);
+       if (c) return c;
++      c = this._stale && this._stale.get(ck);
++      if (c) { if (!this._wq.some(q => q[3] === ck)) { this._wq.push([key, w, h, ck]); this._pump(); } return c; }
+       return this._raster(key, w, h, ck);
+     },
+     _raster(key, w, h, ck) {
+--- a/projects/daily-game/panda-volcano-melody/game/js/main.js
++++ b/projects/daily-game/panda-volcano-melody/game/js/main.js
+@@ -315,7 +315,8 @@
+      * fastest interval seen, so a 30 Hz Low Power Mode cap or a 120 Hz screen never counts as "slow". */
+     adapt(work, iv) {
+       if (params.get('adaptive') === '0' || this.mode === 'paused' || this.mode === 'boot' || this.speed !== 1 || document.hidden) return;
+-      if (this._adaptHold > 0) { this._adaptHold--; return; }
++      if (this._adaptHold > 0) { this._adaptHold -= Math.min(iv, 0.1); return; }   // counters are in seconds, not frames:
++      const fdt = Math.min(Math.max(iv, 0), 0.1);                                    // at 10 fps 90 frames was 9 s per step
+       this._wt = this._wt == null ? work : this._wt + (work - this._wt) * 0.05;
+       if (iv > 0.004 && iv < 0.25) {
+         this._ivMin = Math.min(iv, this._ivMin == null ? iv : this._ivMin + 0.00002);   // relaxes ~1 ms/s
+@@ -325,11 +326,11 @@
+       const ivFast = this._iv == null || this._iv < 1.2 * this._ivMin + 0.002;
+       const R = this.renderer, natural = R.cssScale * (window.devicePixelRatio || 1);
+       const floor = Math.max(1, this.isTouch ? natural * 0.67 : 1);
+-      if (this._wt > 0.014 || ivSlow) { this._slowN = (this._slowN || 0) + 1; this._fastN = 0; }
+-      else if (this._wt < 0.006 && ivFast) { this._fastN = (this._fastN || 0) + 1; this._slowN = 0; }
++      if (this._wt > 0.014 || ivSlow) { this._slowN = (this._slowN || 0) + fdt; this._fastN = 0; }
++      else if (this._wt < 0.006 && ivFast) { this._fastN = (this._fastN || 0) + fdt; this._slowN = 0; }
+       else { this._slowN = 0; this._fastN = 0; }
+-      if (this._slowN > 90 && R.px > floor + 0.01) { R.maxPx = Math.max(floor, R.px * 0.8); R.resize(); this._slowN = 0; this._wt = null; this._iv = null; this._adaptHold = 60; }
+-      else if (this._fastN > 300 && R.maxPx && R.px < natural - 0.01) { R.maxPx = Math.min(natural, R.px * 1.2); if (R.maxPx >= natural) R.maxPx = 0; R.resize(); this._fastN = 0; this._wt = null; this._iv = null; this._adaptHold = 60; }
++      if (this._slowN > 1.5 && R.px > floor + 0.01) { R.maxPx = Math.max(floor, R.px * 0.8); R.resize(); this._slowN = 0; this._wt = null; this._iv = null; this._adaptHold = 1; }
++      else if (this._fastN > 5 && R.maxPx && R.px < natural - 0.01) { R.maxPx = Math.min(natural, R.px * 1.2); if (R.maxPx >= natural) R.maxPx = 0; R.resize(); this._fastN = 0; this._wt = null; this._iv = null; this._adaptHold = 1; }
+     },
+ 
+     frame(ts) {
