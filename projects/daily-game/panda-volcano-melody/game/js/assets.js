@@ -139,7 +139,7 @@
         this.customSrc[s.id] = img;
         this.custom[s.id] = processCustom(img, s.kind === 'bg' ? 'fit' : S.get('shape_' + s.id, s.id === 'note' ? 'circle' : 'fit'));
       }));
-      this._cache.clear();
+      this._cache.clear(); this._stale = null;
     },
 
     async setCustom(slotId, file) {
@@ -155,13 +155,13 @@
       PVM.Storage.set('shape_' + slotId, shape);
       const src = this.customSrc[slotId];
       if (src) this.custom[slotId] = processCustom(src, shape);
-      this._cache.clear();
+      this._cache.clear(); this._stale = null;
     },
     clearCustom(slotId) {
       if (this._thumbs) delete this._thumbs[slotId];
       PVM.Storage.del('img_' + slotId); PVM.Storage.del('shape_' + slotId);
       delete this.customSrc[slotId]; delete this.custom[slotId];
-      this._cache.clear();
+      this._cache.clear(); this._stale = null;
     },
     /* Small preview image (data URL) for the Change Pictures cards — cached, cheap to redraw. */
     thumb(slotId) {
@@ -181,7 +181,9 @@
     setScale(s) {
       s = Math.max(0.5, Math.min(4, s));
       if (Math.abs(s - this.scale) > 0.01) {
-        this.scale = s; this._cache.clear(); this._wq.length = 0;
+        // keep the old-scale sprites as stand-ins (drawn at the same logical size, re-rasterized in idle time)
+        // so a resize / quality step never rasterizes every sprite inside one frame
+        this.scale = s; this._stale = this._stale ? new Map([...this._stale, ...this._cache]) : this._cache; this._cache = new Map(); this._wq.length = 0;
       }
     },
 
@@ -196,6 +198,7 @@
     },
     warmSeason(s) { /* backgrounds are pre-rendered whole by the renderer (Renderer.prewarm) */ },
     _pump() {
+      if (!this._wq.length) this._stale = null;   // every stand-in has been replaced (or was never needed)
       if (this._wt || !this._wq.length) return;
       const ric = window.requestIdleCallback || (f => setTimeout(() => f({ timeRemaining: () => 10 }), 50));
       this._wt = ric(dl => {
@@ -219,6 +222,8 @@
       const ck = key + '|' + Math.round(w * 4) + '|' + Math.round(h * 4);
       let c = this._cache.get(ck);
       if (c) return c;
+      c = this._stale && this._stale.get(ck);
+      if (c) { if (!this._wq.some(q => q[3] === ck)) { this._wq.push([key, w, h, ck]); this._pump(); } return c; }
       return this._raster(key, w, h, ck);
     },
     _raster(key, w, h, ck) {

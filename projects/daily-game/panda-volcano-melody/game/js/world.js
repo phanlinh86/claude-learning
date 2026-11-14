@@ -55,8 +55,8 @@
     hurtTime: 0.8,          // s; dizzy after a pinch (input ignored while the knock-back slides out)
     knockBack: 260,         // px/s; push away from the crab on a pinch
     hurtBrake: 800,         // px/s²; friction during the knock-back → ≈42 px slide
-    invulnTime: 2.0,        // s; safe blink after a pinch
-    hitForgive: 4,          // px; crab and Tofu must overlap this much before a pinch (kind hitbox for kids)
+    invulnTime: 2.5,        // s; safe blink after a pinch
+    hitForgive: 10,          // px; crab and Tofu must overlap this much before a pinch (kind hitbox for kids)
     steerPad: 4,            // px; extra clearance when Tofu auto-steers around an obstacle towards the finger
 
     // --- notes
@@ -70,7 +70,7 @@
     bounce: 0.35,           // restitution of the one small bounce of a volcano note (≈25 px hop)
     bounceSlide: 0.25,      // × horizontal speed kept through the bounce (rolls ≈15 px further, then rests)
     popVz: 170,             // px/s; small hop when a note pops up on the meadow (≈16 px, 0.38 s)
-    popDelay: 1.3,          // s; between two pop-ups (the field refills gently: walking, not vacuuming)
+    popDelay: 3.6,          // s; between two pop-ups (the field refills gently: walking, not vacuuming)
     noteSpacing: 56,        // px; min distance between two notes
     noteEdge: 26,           // px; notes stay this far inside ARENA (sprite 40 px never clipped by the beach)
     noteTop: 116,           // px; min ground y of a note (keeps it well clear of the HUD band, y < 92)
@@ -85,24 +85,24 @@
 
     // --- volcano
     rumbleTime: 0.9,        // s; warning wobble before an eruption
-    eruptCount: [3, 5],     // notes per eruption (inclusive)
+    eruptCount: [2, 4],     // notes per eruption (inclusive)
     eruptJitter: 0.2,       // ±20 % on the eruption interval
     firstErupt: 0.55,       // × interval; the first eruption of a season comes a bit sooner
     puffTime: 0.6,          // s; `volcano.puffT` after an eruption (renderer: squash + glow)
 
     // --- combo / Coco the parrot
     helperAt: 5,            // reaching this combo summons Coco (or refreshes her if she is still around)
-    helperTime: 10,         // s; Coco helps this long
+    helperTime: 7,          // s; Coco helps this long
     cocoInTime: 1.6,        // s; max time flying in before she starts helping
-    cocoSeekR: 260,         // px; she goes for notes within this of Tofu
+    cocoSeekR: 200,         // px; she goes for notes within this of Tofu
     cocoReach: 30,          // px; ground distance for her to collect a note
     cocoReachZ: 45,         // px; height difference allowed for a collect
     cocoK: 38,              // 1/s²; spring stiffness of her steering (ω ≈ 6.2 rad/s)
     cocoDamp: 0.7,          // damping ratio (< 1: a little overshoot = a swoop)
     cocoMaxSpeed: 560,      // px/s
-    cocoOrbitR: 72,         // px; circle radius around Tofu (×0.6 vertically: an ellipse in 3/4 view)
+    cocoOrbitR: 96,         // px; circle radius around Tofu (×0.6 vertically: an ellipse in 3/4 view)
     cocoOrbitW: 2.4,        // rad/s; orbit angular speed
-    cocoZ: 60,              // px; flight height while circling
+    cocoZ: 100,              // px; flight height while circling
     cocoDiveZ: 10,          // px; height when swooping onto a note
     cocoKz: 30,             // 1/s²; vertical spring stiffness
 
@@ -134,7 +134,7 @@
     noteMaxCombo: 10,       // combo bonus caps at +20
     clearBonus: 50,         // season finished
     perfectBonus: 50,       // … without losing a heart
-    mangoLife: 9            // s; a mango waits this long
+    mangoLife: 14            // s; a mango waits this long
   };
 
   /* Difficulty presets (season index 0 spring … 3 winter). */
@@ -142,25 +142,27 @@
     easy: {
       hearts: 5,
       speed: 230,                       // px/s Tofu max speed
-      crabSpeed: [45, 52, 58, 64],      // px/s (≈ 1/5 – 1/4 of Tofu)
-      crabs: [1, 1, 2, 2],
-      goal: [10, 12, 14, 16],           // notes in the song
-      erupt: [9, 8, 8, 7],              // s between eruptions
+      crabSpeed: [36, 40, 44, 48],      // px/s (≈ 1/6 – 1/5 of Tofu)          (playtest: was 45/52/58/64)
+      crabs: [1, 1, 1, 2],              //                                      (playtest: was 1/1/2/2)
+      goal: [12, 14, 16, 18],           // notes in the song (≈ 45–60 s for a 4-year-old)
+      erupt: [10, 9, 9, 8],             // s between eruptions
       notesOnField: 3,                  // pop-up notes kept on the meadow
       noteLife: 14,                     // s before a resting note fades
-      comboWindow: 3.2,                 // s to keep a chain going (generous for small kids)
-      chaseFrac: 0.4,                   // probability a crab's next spell is a chase (else wander)
-      mangoEvery: [14, 22]              // s between mango chances (only while a heart is missing)
+      comboWindow: 6,                   // s to keep a chain going (small kids walk slowly: Coco must be reachable)
+      chaseFrac: 0.2,                   // probability a crab's next spell is a chase (else wander)
+      mangoEvery: [8, 12],              // s between mango chances (only while a heart is missing)
+      wanderPinch: false,               // a wandering crab only bumps Tofu aside; only a chasing one pinches
+      loopCrabs: 0                      // extra crabs per year after winter (none on Easy)
     },
     normal: {
       hearts: 3, speed: 230,
-      crabSpeed: [60, 68, 76, 84], crabs: [1, 2, 2, 3], goal: [14, 16, 18, 20], erupt: [8, 7, 7, 6],
-      notesOnField: 2, noteLife: 12, comboWindow: 2.4, chaseFrac: 0.6, mangoEvery: [18, 28]
+      crabSpeed: [50, 56, 62, 68], crabs: [1, 1, 2, 2], goal: [24, 26, 28, 30], erupt: [10, 9, 9, 8],
+      notesOnField: 2, noteLife: 12, comboWindow: 2.4, chaseFrac: 0.45, mangoEvery: [16, 24], wanderPinch: true, loopCrabs: 1
     },
     hard: {
       hearts: 3, speed: 235,
-      crabSpeed: [78, 88, 96, 104], crabs: [2, 3, 3, 4], goal: [16, 18, 20, 22], erupt: [7, 6, 6, 5],
-      notesOnField: 2, noteLife: 10, comboWindow: 2.0, chaseFrac: 0.75, mangoEvery: [24, 36]
+      crabSpeed: [66, 74, 82, 90], crabs: [2, 2, 3, 3], goal: [25, 27, 29, 30], erupt: [9, 8, 8, 7],
+      notesOnField: 2, noteLife: 10, comboWindow: 2.0, chaseFrac: 0.6, mangoEvery: [20, 30], wanderPinch: true, loopCrabs: 1
     }
   };
 
@@ -321,7 +323,7 @@
     this.notes = []; this.crabs = []; this.coco = null; this.mango = null;
     this.obstacles = buildObstacles(level);
     this.crabSpeed = Math.min(d.crabSpeed[this.season] * Math.min(1.35, Math.pow(1.1, this.loop)), c.crabCapFrac * d.speed);
-    this._crabsLeft = d.crabs[this.season];
+    this._crabsLeft = d.crabs[this.season] + Math.min(2, (d.loopCrabs || 0) * Math.max(0, this.loop - 1));   // years 3+: one more crab per year (max +2)
     this._crabTimer = c.crabFirstDelay;
     this._popTimer = 0.2;
     this._mangoT = this.rng.range(d.mangoEvery[0], d.mangoEvery[1]);
@@ -823,7 +825,7 @@
     for (var i = 0; i < this.crabs.length; i++) {
       var k = this.crabs[i], dx = T.x - k.x, dy = T.y - k.y, d = hyp(dx, dy), touch = T.r + k.r;
       if (d >= touch) continue;
-      var harmful = k.state === 'chase' || k.state === 'wander';
+      var harmful = k.state === 'chase' || (k.state === 'wander' && this.diff.wanderPinch !== false);
       if (harmful && this.invulnT <= 0 && d < touch - c.hitForgive) {
         var ux = d > 1e-6 ? dx / d : 0, uy = d > 1e-6 ? dy / d : 1;
         this.hearts--;
@@ -853,6 +855,12 @@
     this.target = null;
     this._setTofuState('sleep');
     this._cocoLeave();
+    // the crabs doze off too, a little away from the napping panda (never on top of him)
+    for (var i = 0; i < this.crabs.length; i++) {
+      var k = this.crabs[i], dx = k.x - this.tofu.x, dy = k.y - this.tofu.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
+      if (d < 80) { var nx = this.tofu.x + dx / d * 80, ny = this.tofu.y + dy / d * 80; k.x = nx; k.y = Math.max(ARENA.y, Math.min(ARENA.y + ARENA.h, ny)); k.prevX = k.x; k.prevY = k.y; }
+      k.vx = 0; k.vy = 0; k.state = 'dizzy'; k.stateT = 0;
+    }
     this._emit('gameOver', { score: this.score });
   };
 
@@ -900,7 +908,7 @@
         co.goal = 0;
         co.ang += c.cocoOrbitW * dt;
         tx = T.x + Math.cos(co.ang) * c.cocoOrbitR;
-        ty = T.y + Math.sin(co.ang) * c.cocoOrbitR * 0.6;
+        ty = T.y + Math.sin(co.ang) * c.cocoOrbitR * 0.25;   // flat ellipse: she never sits on Tofu's face
       }
       if (co.state === 'in' && (co.t >= c.cocoInTime || hyp(tx - co.x, ty - co.y) < 60)) { co.state = 'help'; co.t = 0; }
     }

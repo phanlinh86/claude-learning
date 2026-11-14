@@ -28,6 +28,8 @@
   function ix(o, a) { return o.prevX != null ? lerp(o.prevX, o.x, a) : o.x; }
   function iy(o, a) { return o.prevY != null ? lerp(o.prevY, o.y, a) : o.y; }
   function iz(o, a) { return o.z == null ? 0 : (o.prevZ != null ? lerp(o.prevZ, o.z, a) : o.z); }
+  /* the few raster sizes a particle sprite is cached at (prewarm and draw must ask for the same key) */
+  function partBox(sprite, w) { const ps = PSIZE[sprite] || [16, 16], bw = Math.ceil(ps[0] * 1.5 / 8) * 8 * (w > ps[0] * 1.5 ? 2 : 1); return [bw, bw * ps[1] / ps[0]]; }
   function pal(season) { const P = PVM.Assets.palette || PVM.Assets.DEFAULT_PALETTE; return P[SEASON_INFO[mod(season, 4)].key] || PVM.Assets.DEFAULT_PALETTE.spring; }
 
   class Renderer {
@@ -41,7 +43,7 @@
       this.comboPop = 9; this.meterPop = 9; this.heartPop = 9; this.dispGot = 0;
       this.insets = { top: 0, right: 0, bottom: 0, left: 0 };
       this.hudRight = LW - 110;
-      this._spr = { clear: () => { PVM.Assets._cache.clear(); this._bgCache = {}; } };
+      this._spr = { clear: () => { PVM.Assets._cache.clear(); PVM.Assets._stale = null; this._bgCache = {}; this._bgStale = null; } };
       this._bgCache = {};
     }
     static get SEASON_INFO() { return SEASON_INFO; }
@@ -49,6 +51,8 @@
     resize(insets) {
       if (insets) this.insets = insets;
       const W = Math.max(1, window.innerWidth), H = Math.max(1, window.innerHeight), dpr = window.devicePixelRatio || 1;
+      const stale = Object.assign({}, this._bgStale);
+      for (let s = 0; s < 4; s++) { const L = this._cachedGround(s); if (L) stale[s] = L; }
       this.cssScale = Math.min(W / LW, H / LH);
       let px = this.cssScale * dpr;
       const cap = Math.sqrt((1920 * 1080) / (W * H * dpr * dpr));   // backing store ≈ ≤ 1920×1080 device px
@@ -61,7 +65,7 @@
       this.c.style.width = W + 'px'; this.c.style.height = H + 'px';
       this.portrait = H > W;
       PVM.Assets.setScale(px);
-      this._bgCache = {}; this._seaPat = null;
+      this._bgCache = {}; this._seaPat = null; this._bgStale = stale;
       this._measureHud();
       this.prewarm(this.vis.cur); this.prewarm(this.vis.cur + 1);
     }
@@ -86,6 +90,12 @@
       season = mod(season, 4);
       if (instant || season === this.vis.cur) this.vis = { cur: season, prev: -1, k: 1 };
       else this.vis = { cur: season, prev: this.vis.cur, k: 0 };
+      const keep = [season, mod(season + 1, 4), this.vis.prev];
+      for (const k in this._bgCache) {
+        const m = /^(?:ground_(\w+)|cg(\d))@/.exec(k); if (!m) continue;
+        const s = m[1] ? SEASON_INFO.findIndex(i => i.key === m[1]) : +m[2];
+        if (!keep.includes(s)) delete this._bgCache[k];
+      }
       this.prewarm(season); this.prewarm(season + 1);
     }
 
@@ -116,11 +126,23 @@
       const src = A.custom.ground, bx = 28, by = 80, bw = LW - 56, bh = LH - 80 - 18;
       const k = Math.max(bw / src.width, bh / src.height), dw = src.width * k, dh = src.height * k;
       g.save(); g.scale(p, p); rr(g, bx, by, bw, bh, 26); g.clip();
+      // soften a photo so Tofu, the crabs and the notes stay readable on it (filter where supported + a light wash)
+      try { g.filter = 'saturate(.55) contrast(.7) brightness(1.1)'; } catch (e) { /* old Safari */ }
       g.drawImage(src, bx + (bw - dw) / 2, by + (bh - dh) / 2, dw, dh);
+      g.filter = 'none';
+      g.fillStyle = 'rgba(255,250,235,.28)'; g.fillRect(bx, by, bw, bh);
       g.restore();
       this._bgCache[ck] = c;
       return c;
     }
+    /* the ground layer if it is already rasterized at the current scale (never rasterizes) */
+    _cachedGround(season) {
+      season = mod(season, 4);
+      const A = PVM.Assets, px = this.px.toFixed(4);
+      return this._bgCache[A.custom.ground ? 'cg' + season + '@' + px + '|' + (A._ver || 0) : 'ground_' + SEASON_INFO[season].key + '@' + px] || null;
+    }
+    /* for the frame: current-scale layer, else the old-scale stand-in after a resize, else rasterize now */
+    _groundNow(season) { return this._cachedGround(season) || (this._bgStale && this._bgStale[mod(season, 4)]) || this._ground(season); }
     _sea() {
       if (this._seaPat) return this._seaPat;
       const L = this._layer('sea', 240, 240); if (!L) return null;
@@ -142,16 +164,17 @@
         const list = [];
         ['idle', 'walk1', 'walk2', 'happy', 'hurt', 'sleep'].forEach(f => list.push(['tofu_' + f, 72, 72]));
         ['1', '2', 'dizzy'].forEach(f => list.push(['crab_' + f, 56, 45]));
-        list.push(['coco_1', 64, 53], ['coco_2', 64, 53], ['mango', 36, 36], ['heart_full', 26, 24], ['heart_empty', 26, 24]);
+        list.push(['coco_1', 64, 53], ['coco_2', 64, 53], ['coco_1', 40, 33], ['mango', 36, 36], ['heart_full', 26, 24], ['heart_empty', 26, 24], ['p_sparkle', 24, 24]);
         [0, 1, 2, 3].forEach(k => list.push(['note_' + k, 40, 40], ['note_' + k, 22, 22]));
         PVM.Assets.warm(list);
       });
       const ps = { spring: ['blossom'], summer: ['sunmote', 'butterfly'], autumn: ['leaf'], winter: ['snowflake'] }[key];
-      add('parts_' + key, () => PVM.Assets.warm(ps.map(p => ['p_' + p, PSIZE[p][0] * 1.5, PSIZE[p][1] * 1.5])));
+      add('parts_' + key, () => PVM.Assets.warm(ps.concat(['smoke', 'dust', 'ripple', 'sparkle', 'spark']).map(p => ['p_' + p].concat(partBox(p, 0)))));
       this._pumpWarm();
     }
     _pumpWarm() {
-      if (this._warmT || !this._warmJobs || !this._warmJobs.length) return;
+      if (!this._warmJobs || !this._warmJobs.length) { if (!this._warmT) this._bgStale = null; return; }   // all new layers ready
+      if (this._warmT) return;
       const ric = window.requestIdleCallback ? (f => window.requestIdleCallback(f, { timeout: 300 }))
                                              : (f => setTimeout(() => f({ timeRemaining: () => 0 }), 40));   // iOS Safari: no rIC
       this._warmT = ric(dl => {
@@ -227,25 +250,30 @@
       const g = this.g, p = this.px, w = this.world;
       const a = w && w.alpha != null ? w.alpha : 0;
       g.setTransform(1, 0, 0, 1, 0, 0);
-      // 1. sea everywhere (letterbox included), drifting slowly
-      const pat = this._sea();
-      if (pat) {
-        const dx = (this.t * 6) % 240, dy = Math.sin(this.t * 0.4) * 6;
-        g.setTransform(1, 0, 0, 1, Math.round((this.ox - dx) * p), Math.round((this.oy + dy) * p));
-        g.fillStyle = pat; g.fillRect(-(this.ox - dx + 240) * p, -(this.oy + 240) * p, this.c.width + 480 * p, this.c.height + 480 * p);
-        g.setTransform(1, 0, 0, 1, 0, 0);
-      } else { g.fillStyle = pal(this.vis.cur).sea || '#4cb8c4'; g.fillRect(0, 0, this.c.width, this.c.height); }
-
       let sx = 0, sy = 0;
       if (this.shake > 0) { const m = (this._shakeAmp || 4) * Math.min(1, this.shake / 0.25); sx = Math.sin(this.t * 71) * m; sy = Math.cos(this.t * 53) * m; }
+      const gx = Math.round((this.ox + sx) * p), gy = Math.round((this.oy + sy) * p), gw = Math.round(LW * p), gh = Math.round(LH * p);
+      const cur = this._groundNow(this.vis.cur), CW = this.c.width, CH = this.c.height;
+      // 1. sea, drifting slowly — only where the opaque ground will not cover it (the pattern fill was ~⅓ of the frame)
+      if (!cur || gx > 0 || gy > 0 || gx + gw < CW || gy + gh < CH) {
+        g.save();
+        if (cur) { g.beginPath(); g.rect(0, 0, CW, CH); g.rect(gx + 1, gy + 1, gw - 2, gh - 2); g.clip('evenodd'); }
+        const pat = this._sea();
+        if (pat) {
+          const dx = (this.t * 6) % 240, dy = Math.sin(this.t * 0.4) * 6;
+          g.setTransform(1, 0, 0, 1, Math.round((this.ox - dx) * p), Math.round((this.oy + dy) * p));
+          g.fillStyle = pat; g.fillRect(-(this.ox - dx + 240) * p, -(this.oy + 240) * p, CW + 480 * p, CH + 480 * p);
+        } else { g.fillStyle = pal(this.vis.cur).sea || '#4cb8c4'; g.fillRect(0, 0, CW, CH); }
+        g.restore();
+      }
       // 2. ground (pixel-exact), crossfading between seasons
-      const gx = Math.round((this.ox + sx) * p), gy = Math.round((this.oy + sy) * p);
-      const cur = this._ground(this.vis.cur);
-      if (cur) g.drawImage(cur, gx, gy);
-      if (this.vis.prev >= 0 && this.vis.k < 1) { const pr = this._ground(this.vis.prev); if (pr) { g.globalAlpha = 1 - this.vis.k; g.drawImage(pr, gx, gy); g.globalAlpha = 1; } }
+      if (cur) g.drawImage(cur, gx, gy, gw, gh);
+      if (this.vis.prev >= 0 && this.vis.k < 1) { const pr = this._groundNow(this.vis.prev); if (pr) { g.globalAlpha = 1 - this.vis.k; g.drawImage(pr, gx, gy, gw, gh); g.globalAlpha = 1; } }
 
       g.setTransform(p, 0, 0, p, (this.ox + sx) * p, (this.oy + sy) * p);
       const P = pal(this.vis.cur);
+      // letterbox: blend the island picture's flat sea edge into the wavy tiled sea (no visible band)
+      if (cur && (this.ox > 1 || this.oy > 1)) this._seaBlend(P.sea || '#4cb8c4');
       if (P.tintAlpha > 0) { g.globalAlpha = P.tintAlpha; g.fillStyle = P.tint; g.fillRect(0, 0, LW, LH); g.globalAlpha = 1; }
       if (w) {
         this._particles('ground');
@@ -262,6 +290,7 @@
       g.setTransform(p, 0, 0, p, this.ox * p, this.oy * p);
       if (mode !== 'title' && w) this._hud(w);
       this._banners(mode);
+      if (mode === 'over') this._napBeside();
     }
 
     _particles(layer) {
@@ -276,8 +305,8 @@
           continue;
         }
         const ps = PSIZE[q.sprite] || [16, 16], w = q.size, h = q.size * ps[1] / ps[0];
-        const bw = Math.ceil(ps[0] * 1.5 / 8) * 8 * (w > ps[0] * 1.5 ? 2 : 1);   // cache a few raster sizes only
-        const s = PVM.Assets.sprite('p_' + q.sprite, bw, bw * ps[1] / ps[0]);
+        const bb = partBox(q.sprite, w);   // cache a few raster sizes only
+        const s = PVM.Assets.sprite('p_' + q.sprite, bb[0], bb[1]);
         if (!s) continue;
         if (q.color && q.sprite === 'sparkle') { /* tinted stars: draw a soft dot of the colour behind */ g.fillStyle = q.color; g.beginPath(); g.arc(q.x, q.y, w * 0.18, 0, TAU); g.fill(); }
         if ((q.rot || 0) !== 0 || (q.flipX || 1) !== 1) {
@@ -327,9 +356,16 @@
       for (const n of flying) this._note(n, a, w);
     }
 
+    /* 1 normally; lower when Tofu stands behind this obstacle (so a child never loses sight of him) */
+    _seeThrough(o, w, halfW, height, al) {
+      const T = w.tofu, dx = Math.abs(T.x - o.x), dy = o.y - T.y;
+      if (dy > 0 && dy < height && dx < halfW) return al;
+      return 1;
+    }
     _obstacle(o, w) {
       const g = this.g, key = SEASON_INFO[this.vis.cur].key;
       if (o.kind === 'volcano') {
+        g.globalAlpha = this._seeThrough(o, w, 96, 150, 0.6);
         const V = w.volcano || {}, x = PVM.VOLCANO.x, y = PVM.VOLCANO.y;
         let sxk = 1, syk = 1, rot = 0;
         if (V.rumbleT > 0) { const k = V.rumbleT; rot = Math.sin(this.t * 38) * 0.02; sxk = 1 + 0.02 * Math.sin(this.t * 31); syk = 1 - 0.015 * Math.sin(this.t * 31) + 0.02 * (1 - k); }
@@ -345,9 +381,18 @@
           rg.addColorStop(0, 'rgba(255,200,150,' + (0.55 * glow).toFixed(3) + ')'); rg.addColorStop(1, 'rgba(255,160,140,0)');
           g.fillStyle = rg; g.beginPath(); g.arc(C.x, C.y, 46, 0, TAU); g.fill();
         }
+        g.globalAlpha = 1;
         return;
       }
       const S = PROP_SIZE[o.kind] || [70, 56];
+      const pop = this.vis.k < 1 ? clamp(this.vis.k * 1.6, 0, 1) : 1;   // the new season's props grow in with the crossfade
+      g.globalAlpha = this._seeThrough(o, w, S[0] * 0.62, S[1] * 0.95, o.kind === 'palm' ? 0.5 : 0.6) * pop;
+      if (pop < 1) { const sc = 0.6 + 0.4 * pop; g.save(); g.translate(o.x, o.y); g.scale(sc, sc); g.translate(-o.x, -o.y); this._propDraw(o, S, key); g.restore(); }
+      else this._propDraw(o, S, key);
+      g.globalAlpha = 1;
+    }
+    _propDraw(o, S, key) {
+      const g = this.g;
       let rot = 0;
       if (o.kind === 'palm') rot = Math.sin(this.t * 0.9 + o.x * 0.01) * 0.025;
       if (rot) { g.save(); g.translate(o.x, o.y); g.rotate(rot); this._draw(o.kind + '_' + key, -S[0] / 2, -S[1], S[0], S[1]); g.restore(); }
@@ -379,8 +424,8 @@
       if (n.src === 'pop' && age < 0.35) { const k = age / 0.35; s = 1 + Math.sin(k * Math.PI) * 0.25 - (1 - k) * 0.6; s = Math.max(0.2, s); }
       const bob = n.state === 'ground' ? Math.sin(this.t * 3 + n.id * 1.7) * 3 : 0;
       const sway = n.state === 'ground' ? Math.sin(this.t * 2.2 + n.id) * 0.08 : (n.vx || 0) * 0.0015;
-      const sz = 40 * s;
-      g.save(); g.translate(x, y - 22 - z - bob); g.rotate(sway);
+      const sz = 40;
+      g.save(); g.translate(x, y - 22 - z - bob); g.rotate(sway); if (s !== 1) g.scale(s, s);
       if (PVM.Assets.hasCustom('note')) { const [fw, fh] = PVM.Assets.fit('note', sz, sz); this._draw('custom:note', -fw / 2, -fh / 2, fw, fh); }
       else if (!this._draw('note_' + (n.kind || 0), -sz / 2, -sz / 2, sz, sz)) { g.fillStyle = NOTE_COL[n.kind || 0]; g.beginPath(); g.arc(0, 6, 10, 0, TAU); g.fill(); g.fillRect(6, -16, 4, 22); }
       g.restore();
@@ -472,7 +517,7 @@
     }
     _hud(w) {
       const g = this.g, sf = this.safe || { l: 0, r: 0, t: 0 }, P = pal(this.vis.cur), F = this._font();
-      const top = Math.max(-this.oy + sf.t, -64) + 8;
+      const top = (this.portrait ? -this.oy + sf.t : Math.max(-this.oy + sf.t, -64)) + 8;
       const left = Math.max(12, -this.ox + sf.l + 12);
       const right = Math.min(LW + this.ox - sf.r - 12, this.hudRight != null ? this.hudRight : LW - 110);
       g.textBaseline = 'middle';
@@ -510,10 +555,10 @@
       if ((w.combo || 0) >= 2 && w.comboT > 0) {
         const cx = mx0 + mw / 2, cy = top + 66, pk2 = this.comboPop < 0.3 ? 1 + Math.sin(this.comboPop / 0.3 * Math.PI) * 0.25 : 1;
         g.save(); g.translate(cx, cy); g.scale(pk2, pk2);
-        this._pill(-52, -16, 104, 32, '#e0662a');
+        this._pill(-68, -16, 136, 32, '#e0662a');
         const k = clamp(w.comboT / (w.comboWindow || 2.4), 0, 1);
-        g.strokeStyle = '#ffe066'; g.lineWidth = 3; g.beginPath(); g.arc(-34, 0, 9, -Math.PI / 2, -Math.PI / 2 + TAU * k); g.stroke();
-        g.font = '900 17px ' + F; g.textAlign = 'center'; g.fillStyle = '#fff'; g.fillText('Combo ×' + w.combo, 8, 1);
+        g.strokeStyle = '#ffe066'; g.lineWidth = 3; g.beginPath(); g.arc(-50, 0, 9, -Math.PI / 2, -Math.PI / 2 + TAU * k); g.stroke();
+        g.font = '900 17px ' + F; g.textAlign = 'center'; g.fillStyle = '#fff'; g.fillText('Combo ×' + w.combo, 12, 1);
         g.restore();
       }
       if (w.coco && w.coco.state !== 'out') {
@@ -546,6 +591,35 @@
       // banners sit in the top third, above the volcano (Tofu starts at the bottom)
       if (this.banner) draw(this.banner, 128, true);
       else if (this.ribbon) draw(this.ribbon, 126, false);
+    }
+
+    _seaBlend(col) {
+      const g = this.g, F = 48;
+      const grad = (x0, y0, x1, y1) => { const q = g.createLinearGradient(x0, y0, x1, y1); q.addColorStop(0, col); q.addColorStop(1, 'rgba(76,184,196,0)'); return q; };
+      if (this.oy > 1) {
+        g.fillStyle = grad(0, 0, 0, -F); g.fillRect(-this.ox, -F, this.VW, F);
+        g.fillStyle = grad(0, LH, 0, LH + F); g.fillRect(-this.ox, LH, this.VW, F);
+      }
+      if (this.ox > 1) {
+        g.fillStyle = grad(0, 0, -F, 0); g.fillRect(-F, -this.oy, F, this.VH);
+        g.fillStyle = grad(LW, 0, LW + F, 0); g.fillRect(LW, -this.oy, F, this.VH);
+      }
+    }
+    /* the game-over panel covers the island centre: show Tofu's nap in the free strip left of it */
+    _napBeside() {
+      const el = document.querySelector('#scrOver .panel'); if (!el) return;
+      const r = el.getBoundingClientRect(), k = 1 / this.cssScale;
+      const panelL = r.left * k - this.ox, room = panelL + this.ox;   // logical px between the screen edge and the panel
+      if (room < 120) return;
+      const s = Math.min(144, room * 0.8), x = panelL - room / 2, y = Math.min(LH - 40, (r.bottom * k - this.oy) - 10);
+      const g = this.g, b = Math.sin(this.t * 2) * 0.02;
+      g.fillStyle = 'rgba(28,40,24,.22)'; g.beginPath(); g.ellipse(x, y, s * 0.32, s * 0.08, 0, 0, TAU); g.fill();
+      g.save(); g.translate(x, y); g.scale(1 + b, 1 - b);
+      if (PVM.Assets.hasCustom('hero')) { const [fw, fh] = PVM.Assets.fit('hero', s, s); this._draw('custom:hero', -fw / 2, -fh, fw, fh); }
+      else this._draw('tofu_sleep', -s / 2, -s * 0.95, s, s);
+      g.restore();
+      g.fillStyle = 'rgba(255,255,255,.9)'; g.font = '900 ' + Math.round(s * 0.18) + 'px ' + this._font(); g.textAlign = 'center';
+      const q = (this.t * 0.6) % 1; g.globalAlpha = 1 - q; g.fillText('z', x + s * 0.35 + q * 12, y - s * 0.9 - q * 30); g.globalAlpha = 1;
     }
 
     _debug(w, a) {

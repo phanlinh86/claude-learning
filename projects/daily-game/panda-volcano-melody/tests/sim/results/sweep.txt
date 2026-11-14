@@ -1,0 +1,169 @@
+
+=== 2026-11-14T12:29:07.140Z n=30
+before        
+   kid4/easy: sp 83% yr 0% t 40s coco 9% p/m 3.80
+   adult/normal: sp 100% yr 83% t 17s coco 50% p/m 0.83
+   adult/hard: sp 100% yr 37% t 18s coco 44% p/m 2.58
+   bot0.4/normal: sp 100% yr 63% t 17s coco 47% p/m 1.68
+   bot1/hard: sp 100% yr 100% t 18s coco 50% p/m 0.31
+   bot0.8/hard: sp 100% yr 100% t 18s coco 49% p/m 0.60
+   idle/easy: sp 0% yr 0% t NaNs coco 0% p/m 3.75
+   zigzag/normal: sp 7% yr 0% t 64s coco 0% p/m 6.51
+after         
+   kid4/easy: sp 60% yr 0% t 70s coco 6% p/m 3.55
+   adult/normal: sp 100% yr 43% t 28s coco 40% p/m 2.01
+   adult/hard: sp 83% yr 13% t 28s coco 37% p/m 3.09
+   bot0.4/normal: sp 100% yr 30% t 28s coco 36% p/m 2.64
+   bot1/hard: sp 100% yr 93% t 29s coco 36% p/m 0.77
+   bot0.8/hard: sp 100% yr 87% t 28s coco 40% p/m 0.89
+   idle/easy: sp 0% yr 0% t NaNs coco 0% p/m 3.59
+   zigzag/normal: sp 0% yr 0% t NaNs coco 0% p/m 6.52
+
+=== 2026-11-14T12:31:46.771Z n=60
+before        
+   kid4/easy: sp 88% yr 2% t 39s coco 10% p/m 3.64
+after         
+   kid4/easy: sp 67% yr 2% t 62s coco 8% p/m 3.28
+e_chase25     
+   kid4/easy: sp 93% yr 3% t 38s coco 11% p/m 3.26
+e_spd36       
+   kid4/easy: sp 92% yr 2% t 41s coco 10% p/m 3.44
+e_both        
+   kid4/easy: sp 95% yr 8% t 41s coco 10% p/m 2.82
+e_both_inv3   
+   kid4/easy: sp 100% yr 7% t 39s coco 14% p/m 2.78
+e_mango       
+   kid4/easy: sp 93% yr 10% t 36s coco 12% p/m 3.67
+
+=== 2026-11-14T12:33:23.120Z n=30
+g_only        
+   adult/normal: sp 100% yr 80% t 24s coco 49% p/m 1.26
+   kid4/easy: sp 83% yr 0% t 44s coco 11% p/m 3.86
+   adult/hard: sp 100% yr 30% t 24s coco 48% p/m 2.06
+   bot1/hard: sp 100% yr 90% t 24s coco 48% p/m 0.65
+g_pd2.4       
+   adult/normal: sp 100% yr 80% t 28s coco 44% p/m 1.31
+   kid4/easy: sp 87% yr 0% t 41s coco 11% p/m 3.79
+   adult/hard: sp 100% yr 30% t 27s coco 47% p/m 2.25
+   bot1/hard: sp 100% yr 97% t 28s coco 46% p/m 0.29
+g_pd2.4_c6    
+   adult/normal: sp 100% yr 57% t 29s coco 29% p/m 1.66
+   kid4/easy: sp 87% yr 0% t 47s coco 7% p/m 3.85
+   adult/hard: sp 97% yr 13% t 29s coco 34% p/m 2.55
+   bot1/hard: sp 100% yr 93% t 29s coco 30% p/m 0.77
+g_pd3_c6_e24  
+   adult/normal: sp 97% yr 27% t 34s coco 24% p/m 2.30
+   kid4/easy: sp 83% yr 0% t 45s coco 5% p/m 3.76
+   adult/hard: sp 87% yr 0% t 33s coco 23% p/m 3.77
+   bot1/hard: sp 97% yr 83% t 36s coco 25% p/m 0.88
+
+=== 2026-11-14T12:35:09.105Z n=30
+N0_pd2.4_c7   
+   adult/normal: sp 100% yr 53% t 28s coco 33% p/m 1.98
+   kid4/easy: sp 87% yr 0% t 45s coco 7% p/m 3.86
+   adult/hard: sp 97% yr 7% t 28s coco 34% p/m 2.82
+   bot1/hard: sp 100% yr 93% t 28s coco 35% p/m 0.67
+   bot0.4/normal: sp 100% yr 37% t 28s coco 33% p/m 2.34
+N1_softer     
+   adult/normal: sp 100% yr 93% t 29s coco 34% p/m 0.95
+   kid4/easy: sp 93% yr 7% t 47s coco 10% p/m 2.62
+   adult/hard: sp 93% yr 23% t 28s coco 36% p/m 2.40
+   bot1/hard: sp 100% yr 90% t 28s coco 36% p/m 0.64
+   bot0.4/normal: sp 100% yr 63% t 28s coco 34% p/m 1.51
+N2_fewer      
+   adult/normal: sp 100% yr 93% t 28s coco 34% p/m 0.75
+   kid4/easy: sp 93% yr 7% t 47s coco 11% p/m 2.44
+   adult/hard: sp 93% yr 23% t 28s coco 36% p/m 2.40
+   bot1/hard: sp 100% yr 90% t 28s coco 36% p/m 0.64
+   bot0.4/normal: sp 100% yr 90% t 28s coco 35% p/m 1.11
+
+=== 2026-11-14T12:36:44.740Z n=30
+S_pd3.2       
+   adult/normal: sp 100% yr 63% t 46s coco 25% p/m 1.35
+   kid4/easy: sp 97% yr 0% t 54s coco 4% p/m 2.41
+   adult/hard: sp 83% yr 3% t 45s coco 21% p/m 3.17
+   bot1/hard: sp 100% yr 63% t 47s coco 20% p/m 1.05
+   bot0.8/hard: sp 100% yr 60% t 46s coco 22% p/m 1.28
+   bot0.4/normal: sp 93% yr 47% t 44s coco 28% p/m 1.56
+S_pd4.0       
+   adult/normal: sp 100% yr 80% t 50s coco 23% p/m 1.12
+   kid4/easy: sp 90% yr 0% t 55s coco 4% p/m 2.64
+   adult/hard: sp 67% yr 0% t 48s coco 12% p/m 3.26
+   bot1/hard: sp 100% yr 57% t 51s coco 18% p/m 1.10
+   bot0.8/hard: sp 100% yr 33% t 50s coco 16% p/m 1.47
+   bot0.4/normal: sp 100% yr 43% t 50s coco 22% p/m 1.84
+
+=== 2026-11-14T12:38:09.692Z n=40
+k1_c1         
+   kid4/easy: sp 95% yr 13% t 55s coco 4% p/m 2.31
+k2_hf11       
+   kid4/easy: sp 98% yr 8% t 54s coco 6% p/m 2.22
+k3_ch15       
+   kid4/easy: sp 98% yr 15% t 58s coco 6% p/m 2.19
+k4_mango      
+   kid4/easy: sp 90% yr 8% t 60s coco 7% p/m 2.64
+k5_all        
+   kid4/easy: sp 98% yr 15% t 57s coco 6% p/m 2.29
+
+=== 2026-11-14T12:40:09.434Z n=40
+ws_ch25       
+   kid4/easy: sp 100% yr 48% t 57s coco 9% p/m 1.45
+   idle/easy: sp 0% yr 0% t NaNs coco 0% p/m 2.36
+ws_ch35       
+   kid4/easy: sp 100% yr 3% t 53s coco 7% p/m 2.28
+   idle/easy: sp 0% yr 0% t NaNs coco 0% p/m 3.16
+ws_orig_spd   
+   kid4/easy: sp 98% yr 8% t 56s coco 6% p/m 2.38
+   idle/easy: sp 0% yr 0% t NaNs coco 0% p/m 3.13
+
+=== 2026-11-14T12:41:37.859Z n=40
+H1            
+   adult/normal: sp 98% yr 85% t 45s coco 27% p/m 1.03
+   bot0.4/normal: sp 98% yr 63% t 45s coco 28% p/m 1.42
+   adult/hard: sp 90% yr 5% t 45s coco 21% p/m 2.74
+   bot1/hard: sp 100% yr 100% t 46s coco 22% p/m 0.64
+   bot0.8/hard: sp 100% yr 78% t 46s coco 25% p/m 0.87
+   kid4/easy: sp 88% yr 8% t 60s coco 6% p/m 2.37
+H2            
+   adult/normal: sp 98% yr 85% t 46s coco 27% p/m 1.10
+   bot0.4/normal: sp 98% yr 43% t 44s coco 26% p/m 1.81
+   adult/hard: sp 83% yr 13% t 45s coco 24% p/m 2.70
+   bot1/hard: sp 100% yr 95% t 46s coco 25% p/m 0.68
+   bot0.8/hard: sp 98% yr 80% t 46s coco 27% p/m 0.95
+   kid4/easy: sp 88% yr 8% t 60s coco 6% p/m 2.37
+
+=== 2026-11-14T12:45:11.169Z n=50
+F             
+   kid4/easy: sp 98% yr 16% t 57s coco 7% p/m 2.25
+   adult/normal: sp 100% yr 92% t 49s coco 25% p/m 0.89
+   bot0.4/normal: sp 100% yr 76% t 48s coco 25% p/m 1.37
+   adult/hard: sp 84% yr 4% t 48s coco 18% p/m 2.58
+   bot1/hard: sp 100% yr 94% t 48s coco 21% p/m 0.63
+   bot0.8/hard: sp 100% yr 80% t 48s coco 21% p/m 0.91
+   idle/easy: sp 0% yr 0% t NaNs coco 0% p/m 2.02
+   zigzag/easy: sp 88% yr 0% t 52s coco 9% p/m 3.53
+   circleWide/normal: sp 2% yr 0% t 121s coco 0% p/m 3.48
+F_ws          
+   kid4/easy: sp 100% yr 54% t 59s coco 7% p/m 1.59
+   adult/normal: sp 100% yr 92% t 49s coco 25% p/m 0.89
+   bot0.4/normal: sp 100% yr 76% t 48s coco 25% p/m 1.37
+   adult/hard: sp 84% yr 4% t 48s coco 18% p/m 2.58
+   bot1/hard: sp 100% yr 94% t 48s coco 21% p/m 0.63
+   bot0.8/hard: sp 100% yr 80% t 48s coco 21% p/m 0.91
+   idle/easy: sp 0% yr 0% t NaNs coco 0% p/m 1.95
+   zigzag/easy: sp 100% yr 72% t 57s coco 9% p/m 1.47
+   circleWide/normal: sp 2% yr 0% t 121s coco 0% p/m 3.48
+
+=== 2026-11-14T13:16:47.776Z n=60
+before        
+   kid4/easy: sp 88% yr 2% t 39s coco 10% p/m 3.64
+   adult/easy: sp 100% yr 100% t 14s coco 44% p/m 0.71
+after         
+   kid4/easy: sp 98% yr 15% t 58s coco 7% p/m 2.23
+   adult/easy: sp 100% yr 100% t 27s coco 28% p/m 0.26
+easy_cw4.5    
+   kid4/easy: sp 98% yr 28% t 56s coco 13% p/m 2.10
+   adult/easy: sp 100% yr 100% t 27s coco 24% p/m 0.30
+easy_cw6      
+   kid4/easy: sp 98% yr 37% t 55s coco 19% p/m 2.00
+   adult/easy: sp 100% yr 100% t 28s coco 23% p/m 0.25

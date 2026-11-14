@@ -8,3 +8,7 @@ tests/out/
 tools/art-environment/out/
 tools/art-characters/out/
 tests/sim/out/
+tests/visual/out/
+tests/sim/results/**/*.json
+tests/perf/out/
+tests/perf/scratch/

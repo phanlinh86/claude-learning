@@ -140,3 +140,13 @@ which is its reaction delay. Its goal is the note with the lowest cost: distance
 note, plus a big penalty if the note will fade first. Flying volcano notes count at their landing spot. A mango
 wins when a heart is missing. Harmful crabs inside the danger radius (60 → 130 px) push the steering direction
 away (weight 0.15 → 2.4). It ignores crabs while blinking safe, and aim noise goes up to 24 px at skill 0.
+
+## v1.0 retune after the playtest (2026-11-14)
+The tables above are the engineer's first tuning. After `docs/reports/playtest.md` (≈18 000 simulated rounds) the shipped values in `game/js/world.js` are:
+- CONFIG: `popDelay` 3.6, `eruptCount` [2,4], `helperTime` 7, `cocoSeekR` 200, `invulnTime` 2.5, `hitForgive` 10, `mangoLife` 14; Coco orbits higher and flatter (`cocoOrbitR` 96, `cocoZ` 100, vertical factor 0.25) so she never covers Tofu's face.
+- Easy: goal 12/14/16/18, crabSpeed 36/40/44/48, crabs 1/1/1/2, erupt 10/9/9/8, chaseFrac 0.2, comboWindow 6, mangoEvery [8,12], `wanderPinch: false` (only a chasing crab pinches; a wandering one just bumps).
+- Normal: goal 24/26/28/30, crabSpeed 50/56/62/68, crabs 1/1/2/2, erupt 10/9/9/8, chaseFrac 0.45, mangoEvery [16,24].
+- Hard: goal 25/27/29/30, crabSpeed 66/74/82/90, crabs 2/2/3/3, erupt 9/8/8/7, chaseFrac 0.6, mangoEvery [20,30].
+- `loopCrabs` 1 on Normal/Hard: from year 3 one more crab per year (max +2), so a strong player eventually meets a real challenge.
+- At game over the crabs doze at least 80 px away from the napping panda.
+Measured (sim): 4-year-old model on Easy clears spring 98 %, a season takes ≈46–59 s; casual adult on Normal ≈45–51 s per season, year cleared 88 %.

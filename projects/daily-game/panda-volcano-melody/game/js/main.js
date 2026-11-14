@@ -42,7 +42,7 @@
       window.addEventListener('resize', onResize);
       window.addEventListener('orientationchange', onResize);
       if (window.visualViewport) window.visualViewport.addEventListener('resize', onResize);
-      if (params.get('autostart') === '1') this.startGame(); else this.toTitle();
+      if (params.get('autostart') === '1' || this.botMode) this.startGame(); else this.toTitle();   // ?bot=1 always plays a real game
       this.last = performance.now();
       requestAnimationFrame(t => this.frame(t));
     },
@@ -315,7 +315,8 @@
      * fastest interval seen, so a 30 Hz Low Power Mode cap or a 120 Hz screen never counts as "slow". */
     adapt(work, iv) {
       if (params.get('adaptive') === '0' || this.mode === 'paused' || this.mode === 'boot' || this.speed !== 1 || document.hidden) return;
-      if (this._adaptHold > 0) { this._adaptHold--; return; }
+      if (this._adaptHold > 0) { this._adaptHold -= Math.min(iv, 0.1); return; }   // counters are in seconds, not frames:
+      const fdt = Math.min(Math.max(iv, 0), 0.1);                                    // at 10 fps 90 frames was 9 s per step
       this._wt = this._wt == null ? work : this._wt + (work - this._wt) * 0.05;
       if (iv > 0.004 && iv < 0.25) {
         this._ivMin = Math.min(iv, this._ivMin == null ? iv : this._ivMin + 0.00002);   // relaxes ~1 ms/s
@@ -325,11 +326,11 @@
       const ivFast = this._iv == null || this._iv < 1.2 * this._ivMin + 0.002;
       const R = this.renderer, natural = R.cssScale * (window.devicePixelRatio || 1);
       const floor = Math.max(1, this.isTouch ? natural * 0.67 : 1);
-      if (this._wt > 0.014 || ivSlow) { this._slowN = (this._slowN || 0) + 1; this._fastN = 0; }
-      else if (this._wt < 0.006 && ivFast) { this._fastN = (this._fastN || 0) + 1; this._slowN = 0; }
+      if (this._wt > 0.014 || ivSlow) { this._slowN = (this._slowN || 0) + fdt; this._fastN = 0; }
+      else if (this._wt < 0.006 && ivFast) { this._fastN = (this._fastN || 0) + fdt; this._slowN = 0; }
       else { this._slowN = 0; this._fastN = 0; }
-      if (this._slowN > 90 && R.px > floor + 0.01) { R.maxPx = Math.max(floor, R.px * 0.8); R.resize(); this._slowN = 0; this._wt = null; this._iv = null; this._adaptHold = 60; }
-      else if (this._fastN > 300 && R.maxPx && R.px < natural - 0.01) { R.maxPx = Math.min(natural, R.px * 1.2); if (R.maxPx >= natural) R.maxPx = 0; R.resize(); this._fastN = 0; this._wt = null; this._iv = null; this._adaptHold = 60; }
+      if (this._slowN > 1.5 && R.px > floor + 0.01) { R.maxPx = Math.max(floor, R.px * 0.8); R.resize(); this._slowN = 0; this._wt = null; this._iv = null; this._adaptHold = 1; }
+      else if (this._fastN > 5 && R.maxPx && R.px < natural - 0.01) { R.maxPx = Math.min(natural, R.px * 1.2); if (R.maxPx >= natural) R.maxPx = 0; R.resize(); this._fastN = 0; this._wt = null; this._iv = null; this._adaptHold = 1; }
     },
 
     frame(ts) {

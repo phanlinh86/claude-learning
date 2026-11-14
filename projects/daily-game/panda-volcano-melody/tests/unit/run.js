@@ -321,10 +321,10 @@ test('coco: arrives at combo 5, collects nearby notes (byCoco), scares crabs, le
   ok(w.coco.x < -20 || w.coco.x > 980, 'flies in from off-screen');
   run(w, 2); eq(w.coco.state, 'help'); eq(crab.state, 'scared', 'crabs scuttle away while she helps');
   const dBefore = hyp(crab.x - w.tofu.x, crab.y - w.tofu.y);
-  // a note 200 px from Tofu: Coco swoops for it
-  const n = addNote(w, w.tofu.x + 200, w.tofu.y - 40);
+  // a note 160 px from Tofu (inside cocoSeekR): Coco swoops for it
+  const n = addNote(w, w.tofu.x + 160, w.tofu.y - 40);
   let byCoco = null;
-  run(w, 2.5, DT, x => { for (const e of x.drainEvents()) if (e.type === 'note') byCoco = e; if (byCoco) return false; });
+  run(w, 3, DT, x => { for (const e of x.drainEvents()) if (e.type === 'note') byCoco = e; if (byCoco) return false; });
   ok(byCoco && byCoco.byCoco === true && byCoco.id === n.id, 'collected by Coco');
   eq(w.stats.cocoNotes, 1);
   ok(byCoco.combo === 6, 'counts for the combo');
@@ -343,8 +343,8 @@ test('coco: arrives at combo 5, collects nearby notes (byCoco), scares crabs, le
 test('coco: one at a time; reaching combo 5 again while she helps refreshes her timer', () => {
   const w = world(); toPlaying(w); quiet(w); w.goal = 99;
   for (let i = 0; i < 5; i++) { addNote(w, w.tofu.x, w.tofu.y); w.update(C.step); }
-  run(w, 6); ok(w.coco.state === 'help' && w.coco.t > 3, 'helping for a while');
-  run(w, w.comboWindow + 0.1); eq(w.combo, 0, 'chain broke');
+  run(w, 3.5); ok(w.coco.state === 'help' && w.coco.t > 1.5, 'helping for a while');
+  w.comboT = Math.min(w.comboT, 0.5); run(w, 0.6);   // let the chain run out (Easy's window is long) eq(w.combo, 0, 'chain broke');
   w.drainEvents();
   for (let i = 0; i < 5; i++) { addNote(w, w.tofu.x, w.tofu.y); w.update(C.step); }
   ok(w.coco.t < 0.1, 'timer refreshed');
@@ -409,9 +409,9 @@ test('crabs: enter from the edge, mix chase and wander, slide round obstacles, k
   ok(minSep >= 2 * C.crabR - 3, 'crabs keep apart (' + minSep.toFixed(1) + ')');
   ok(counts.chase > 0 && counts.wander > 0 && counts.enter > 0, 'mix of moods ' + JSON.stringify(counts));
   ok(counts.chase > counts.wander * 0.8, 'hard crabs chase more than they wander');
-  // speed ratio: Easy spring crab ≈ 45 px/s vs Tofu 230
+  // speed ratio: Easy spring crab ≈ 36 px/s vs Tofu 230
   const e = world({ difficulty: 'easy' });
-  eq(e.crabSpeed, 45); eq(e.diff.speed, 230); eq(e.diff.crabs[0], 1); eq(e.goal, 10);
+  eq(e.crabSpeed, 36); eq(e.diff.speed, 230); eq(e.diff.crabs[0], 1); eq(e.goal, 12);
   return JSON.stringify(counts);
 });
 

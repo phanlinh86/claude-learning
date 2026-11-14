@@ -634,6 +634,8 @@ def bush_svg(season):
                 aa = a * 2 * math.pi / 5 + 0.3
                 b.append(circle(x + 3 * math.cos(aa), y + 3 * math.sin(aa), 2.5, pc, stroke(po, 0.9)))
             b.append(circle(x, y, 1.6, cc))
+    # lift the bush 8 units (the shadow stays on the ground) so the bottom outline is never cut by the viewBox
+    b = [b[0], '<g transform="translate(0,-8)">'] + b[1:] + ['</g>']
     return svg(100, 80, b, defs)
 
 
