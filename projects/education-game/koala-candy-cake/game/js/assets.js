@@ -1,17 +1,17 @@
-/* CK.Assets (Lulu's Jungle Tower) — loads the SVG art and keeps pre-rasterized copies so drawing stays fast on phones.
+/* CK.Assets (Koko's Cake Tower) — loads the SVG art and keeps pre-rasterized copies so drawing stays fast on phones.
  * sprite(name, px) returns a canvas whose longest side is ≥ px device pixels (rounded up to a size
  * bucket, so a handful of bitmaps serve every zoom level). */
 (function (CK) {
   'use strict';
   const D = 'assets/default/';
   const files = {};
-  ['idle', 'blink', 'talk', 'happy', 'cheer', 'think', 'oops', 'hold', 'full_wave'].forEach(f => { files['lulu_' + f] = D + 'characters/lulu_' + f + '.svg'; });
-  ['monkey_swing', 'monkey_grab', 'monkey_cheer', 'bananas', 'butterfly', 'butterfly_up'].forEach(f => { files[f] = D + 'characters/' + f + '.svg'; });
-  (CK.ANIMALS || ['monkey', 'elephant', 'tiger', 'parrot', 'lion', 'frog', 'snake', 'hippo']).forEach(a => { files['animal_' + a] = D + 'items/animal_' + a + '.svg'; });
+  ['idle', 'blink', 'talk', 'happy', 'cheer', 'think', 'oops', 'hold', 'blow', 'full_wave'].forEach(f => { files['koko_' + f] = D + 'characters/koko_' + f + '.svg'; });
+  ['cherry', 'bee', 'bee_up', 'candle'].forEach(f => { files[f] = D + 'characters/' + f + '.svg'; });
+  (CK.ANIMALS || ['bunny', 'bear', 'cat', 'dog', 'duck', 'pig', 'cow', 'sheep']).forEach(a => { files['animal_' + a] = D + 'items/animal_' + a + '.svg'; });
   files.star = D + 'ui/star.svg'; files.star_empty = D + 'ui/star_empty.svg'; files.icon = D + 'icon.svg';
-  ['morning', 'noon', 'sunset', 'night'].forEach(m => ['far', 'mid', 'ground'].forEach(l => { files[l + '_' + m] = D + 'env/' + l + '_' + m + '.svg'; }));
-  ['stump', 'branch', 'vine', 'sun', 'moon', 'cloud_a', 'cloud_b', 'cloud_c'].forEach(e => { files[e] = D + 'env/' + e + '.svg'; });
-  ['leaf_a', 'leaf_b', 'petal', 'firefly', 'pollen', 'sparkle', 'star', 'puff', 'dust', 'confetti_a', 'confetti_b']
+  ['sunny', 'breezy', 'rain', 'rainbow'].forEach(m => ['far', 'mid', 'ground'].forEach(l => { files[l + '_' + m] = D + 'env/' + l + '_' + m + '.svg'; }));
+  ['stand', 'cloud_candy', 'sun', 'rainbow', 'cloud_a', 'cloud_b', 'cloud_c', 'cloud_rain'].forEach(e => { files[e] = D + 'env/' + e + '.svg'; });
+  ['sparkle', 'sugar', 'wrapper_a', 'wrapper_b', 'blossom', 'raindrop', 'splash', 'puff', 'dust', 'confetti_a', 'confetti_b', 'star']
     .forEach(p => { files[p === 'star' ? 'pstar' : p] = D + 'particles/' + p + '.svg'; });
 
   function loadImage(src) {

@@ -1,8 +1,8 @@
-/* CK.Render (Lulu's Jungle Tower) — draws the jungle clearing on one canvas: sky, sun/moon and the far / mid / ground jungle
- * of the time of day (crossfaded), the old stump with the wobbling block tower (CK.World.blockPose), the branch with the
- * hanging bananas, Lulu the giraffe calf, the choice blocks (CK.BlockArt), the monkey, the butterfly, the ghost-hand hint,
- * weather particles and juice. Logical coordinates (short side 720) × render scale `rs` = device pixels. No camera.
- * Missing art is tolerated (simple placeholders) so the game boots while the artists are still drawing. */
+/* CK.Render (Koko's Cake Tower) — draws Candy Village on one canvas: sky, sun, rainbow, clouds and the far / mid / ground
+ * layers of the weather (crossfaded), the cake stand with the wobbling cake (CK.World.blockPose), the cherry on its
+ * cotton-candy cloud, candles, Koko the koala baker, the choice layers (CK.BlockArt), the bee, the ghost-hand hint, weather
+ * particles and juice. Logical coordinates (short side 720) × render scale `rs` = device pixels. No camera.
+ * Missing art is tolerated (simple placeholders). */
 (function (CK) {
   'use strict';
   const TAU = Math.PI * 2;
@@ -11,8 +11,8 @@
   const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
   const easeOutBack = t => { const c = 1.6; t -= 1; return 1 + (c + 1) * t * t * t + c * t * t; };
   const CONF = ['#E84A4A', '#3C8DE8', '#FFD23F', '#4CC26B', '#FF9A2E', '#8E44AD', '#FF8FC0'];
-  const FARFILL = { morning: '#C0D3C2', noon: '#A7C6BC', sunset: '#BBBB9D', night: '#43626E' };
-  const GROUNDFILL = { morning: '#A9C98D', noon: '#A6C788', sunset: '#AEC185', night: '#6A9275' };
+  const FARFILL = { sunny: '#E6E8CB', breezy: '#E6E8D0', rain: '#C2C8C1', rainbow: '#E6E9CD' };
+  const GROUNDFILL = { sunny: '#F3E2C0', breezy: '#F2E3C2', rain: '#DFD3BB', rainbow: '#F3E3C2' };
   const PAL = c => (CK.PALETTE && CK.PALETTE[c]) || { base: c || '#ccc', dark: '#555', light: '#eee' };
 
   function roundRect(g, x, y, w, h, r) {
@@ -51,8 +51,8 @@
   function starPath(g, r) { g.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.45 : r; g.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } g.closePath(); }
   const DICE = { 1: [[0, 0]], 2: [[-1, -1], [1, 1]], 3: [[-1, -1], [0, 0], [1, 1]], 4: [[-1, -1], [1, -1], [-1, 1], [1, 1]], 5: [[-1, -1], [1, -1], [0, 0], [-1, 1], [1, 1]],
     6: [[-1, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [1, 1]] };
-  const MOODS = ['morning', 'noon', 'sunset', 'night'];
-  const LULU = { w: 300, h: 440, ax: 150, ay: 432 };
+  const MOODS = ['sunny', 'breezy', 'rain', 'rainbow'];
+  const KOKO = { w: 300, h: 400, ax: 150, ay: 392 };
   const ip = (o, k, a) => { const p = o['_p' + k]; return p == null ? o[k] : p + (o[k] - p) * a; };
   const BA = () => CK.BlockArt;
   const imgOf = name => (CK.Assets && CK.Assets.images ? CK.Assets.images[name] || null : null);
@@ -62,7 +62,7 @@
       this.canvas = canvas; this.g = canvas.getContext('2d');
       this.W = 960; this.H = 720; this.rs = 1; this.lang = 'en';
       this.fx = []; this.time = 0; this.quality = 1; this.hudStar = { x: 900, y: 40 };
-      this._blinkT = 2; this._blink = 0; this._fwT = 0; this._luluDx = 0; this._talkT = 0;
+      this._blinkT = 2; this._blink = 0; this._fwT = 0; this._kokoDx = 0; this._talkT = 0;
     }
     resize(W, H, rs) {
       this.W = W; this.H = H; this.rs = rs;
@@ -100,10 +100,10 @@
       if (o.debug && !o.title && !o.done) this._debug(world);
     }
     _fallbackLayout() {
-      const W = this.W, H = this.H, portrait = H > W, groundY = H - (portrait ? 40 : 28), S = 112;
-      const tx = portrait ? 0.58 * W : Math.max(0.45 * W, 360), baseTop = portrait ? groundY - S - 150 : groundY - 64;
-      return { W, H, portrait, ins: { top: 0, right: 0, bottom: 0, left: 0 }, groundY, S, tower: { x: tx, baseTop, baseW: S + 70 },
-        goalY: baseTop - 3 * S - 8, lulu: { x: portrait ? 115 : 120, y: portrait ? baseTop + 70 : groundY - 4, h: portrait ? 400 : 420 }, slots: [] };
+      const W = this.W, H = this.H, portrait = H > W, groundY = H - (portrait ? 40 : 28), S = 124, LW = 161, LH = 97;
+      const tx = portrait ? 0.58 * W : Math.max(0.42 * W, 400), baseTop = portrait ? groundY - LH - 150 : groundY - 96;
+      return { W, H, portrait, ins: { top: 0, right: 0, bottom: 0, left: 0 }, groundY, S, LW, LH, tower: { x: tx, baseTop, baseW: LW + 60 },
+        goalY: baseTop - 3 * LH - 8, koko: { x: portrait ? 110 : 120, y: portrait ? baseTop + 70 : groundY - 4, h: portrait ? 300 : 330 }, slots: [] };
     }
 
     /* ---------- backdrop: sky, sun/moon, clouds, far / mid / ground jungle (time-of-day crossfade) ---------- */
@@ -131,174 +131,164 @@
     }
     _backdrop(weather, amb) {
       const g = this.g, W = this.W, H = this.H, portrait = H > W;
-      const to = amb.env || 'morning', from = amb.envFrom || to, mix = amb.envMix == null ? 1 : amb.envMix;
+      const to = amb.env || amb.mood || 'sunny', from = amb.envFrom || to, mix = amb.envMix == null ? 1 : amb.envMix;
       const sky = g.createLinearGradient(0, 0, 0, H * (portrait ? 0.6 : 0.7));
-      sky.addColorStop(0, amb.skyTop || '#BFE6F2');
+      sky.addColorStop(0, amb.skyTop || '#A9DDF5');
       if (amb.skyMid) sky.addColorStop(0.55, amb.skyMid);
-      sky.addColorStop(1, amb.skyBottom || '#F4EFD6');
+      sky.addColorStop(1, amb.skyBottom || '#FFF4DA');
       g.fillStyle = sky; g.fillRect(0, 0, W, H);
-      this._particles(weather.particles, 'sky');
       const ins = this._L.ins || {};
       const sunA = amb.sun || 0;
       if (sunA > 0.01) this._sprite('sun', W * (amb.sunX == null ? 0.2 : amb.sunX), Math.max((ins.top || 0) + 80, H * (amb.sunY || 0.2)), portrait ? 190 : 170, this.time * 0.05, sunA);
-      const moonA = amb.moon || 0;
-      if (moonA > 0.01) this._sprite('moon', W * (amb.moonX == null ? 0.8 : amb.moonX), Math.max((ins.top || 0) + 80, H * (amb.moonY || 0.15)), portrait ? 170 : 150, 0, moonA);
+      const rbA = amb.rainbow || 0;
+      if (rbA > 0.01 && CK.Assets.has('rainbow')) {   // a soft arc behind the village, centred near the cake
+        const rw = portrait ? 1.25 * W : 0.95 * W, rh = rw / 2, cx = (this._L.tower && this._L.tower.x) || W / 2;
+        const fb = this._layerDims('far').bottom;
+        g.save(); g.globalAlpha = clamp(rbA, 0, 1); this._img('rainbow', cx - rw / 2, fb - rh * 0.92, rw, rh); g.restore();
+      }
       for (const c of weather.clouds || []) {
-        if (c.alpha <= 0.01) continue;
-        this._sprite(CK.Assets.has(c.sprite) ? c.sprite : 'cloud_a', c.x, c.y, 320 * (c.scale || 1), 0, clamp(c.alpha, 0, 1) * 0.9);
+        if (!(c.alpha > 0.01)) continue;
+        const nm = c.kind === 'rain' ? 'cloud_rain' : 'cloud_' + (c.kind || 'a');
+        this._sprite(CK.Assets.has(nm) ? nm : 'cloud_a', c.x, c.y, 320 * (c.s || c.scale || 1) * (portrait ? 1.2 : 1), 0, clamp(c.alpha, 0, 1) * 0.92);
       }
       const farD = this._layerDims('far'), midD = this._layerDims('mid');
-      if (!this._layer('far', from, to, mix)) { g.fillStyle = '#9FC3B5'; g.fillRect(0, farD.bottom - 160, W, 160); }
-      g.fillStyle = FARFILL[to] || '#A7C6BC'; g.fillRect(0, farD.bottom - 1, W, H - farD.bottom + 1);
-      for (const m of weather.mist || []) {
-        if (!(m.alpha > 0.01)) continue;
-        const spr = CK.Assets.sprite(m.sprite, 320 * (m.scale || 1) * this.rs);
-        if (!spr) continue;
-        const w = 320 * (m.scale || 1) * 1.6, h = 170 * (m.scale || 1) * 0.55;
-        g.save(); g.globalAlpha = clamp(m.alpha, 0, 1) * 0.8; g.drawImage(spr, m.x - w / 2, m.y - h / 2, w, h); g.restore();
-      }
-      if (!this._layer('mid', from, to, mix)) { g.fillStyle = '#4F8A63'; g.fillRect(0, midD.bottom - 200, W, 200); }
-      g.fillStyle = GROUNDFILL[to] || '#A6C788'; g.fillRect(0, midD.bottom - 2, W, H - midD.bottom + 2);
+      if (!this._layer('far', from, to, mix)) { g.fillStyle = '#DCE3C4'; g.fillRect(0, farD.bottom - 160, W, 160); }
+      g.fillStyle = FARFILL[to] || '#E6E8CB'; g.fillRect(0, farD.bottom - 1, W, H - farD.bottom + 1);
+      if (!this._layer('mid', from, to, mix)) { g.fillStyle = '#E9D6B6'; g.fillRect(0, midD.bottom - 200, W, 200); }
+      g.fillStyle = GROUNDFILL[to] || '#F3E2C0'; g.fillRect(0, midD.bottom - 2, W, H - midD.bottom + 2);
       this._layer('ground', from, to, mix);
+      if (amb.darkness > 0.01) { g.fillStyle = `rgba(70,80,110,${clamp(amb.darkness, 0, 0.5)})`; g.fillRect(0, 0, W, H); }
       if (amb.tint) { g.fillStyle = typeof amb.tint === 'string' ? amb.tint : `rgba(${amb.tint.join(',')})`; g.fillRect(0, 0, W, H); }
     }
 
     /* ---------- the round ---------- */
+    _dims() { const L = this._L, S = L.S || 124; return { S, LW: L.LW || Math.round(1.3 * S), LH: L.LH || Math.round(0.78 * S) }; }
     _game(w, o, a) {
-      const g = this.g, L = this._L, S = L.S || 112, T = w.tower || { x: L.tower.x, baseTop: L.tower.baseTop, blocks: [] };
-      const night = (this._amb && this._amb.mood === 'night');
-      this._stump(T.x, T.baseTop, (L.tower && L.tower.baseW) || S + 70, night);
-      this._goal(w, a, night);
-      this._lulu(w, o);
-      // leaf pads under the second tray row
-      if (BA() && BA().drawLeafPad) for (const sl of L.slots || []) if (sl.row === 1) { g.save(); g.translate(sl.x, sl.y + S / 2); try { BA().drawLeafPad(g, S * 1.5, S * 0.34); } catch (e) { } g.restore(); }
+      const g = this.g, L = this._L, D = this._dims(), T = w.tower || { x: L.tower.x, baseTop: L.tower.baseTop, blocks: [] };
+      this._stand(T.x, T.baseTop, (L.tower && L.tower.baseW) || D.LW + 60);
+      this._cloud(w, a);
+      this._koko(w, o);
+      // cake boards under the second tray row
+      const used = new Set((w.pieces || []).filter(p => p.state !== 'gone' && p.state !== 'out' && p.row === 1).map(p => p.slot));
+      if (BA() && BA().drawPlate) for (let si = 0; si < (L.slots || []).length; si++) { const sl = L.slots[si]; if (sl.row !== 1 || !used.has(si)) continue; g.save(); g.translate(sl.x, sl.y + D.LH / 2); try { BA().drawPlate(g, D.LW * 1.25, D.LH * 0.3); } catch (e) { } g.restore(); }
       const order = w.drawOrder ? w.drawOrder() : (w.pieces || []);
-      for (const p of order) if ((p.z || 0) <= 3) this._piece(w, p, a, S);
-      this._tower(w, a, S);
-      this._monkey(w.monkey, a);
-      this._butterfly(w.butterfly, a);
-      for (const p of order) if ((p.z || 0) > 3) this._piece(w, p, a, S);
-      this._hintHand(w.hintHand, w, S);
+      for (const p of order) if ((p.z || 0) <= 3) this._piece(w, p, a, D);
+      this._tower(w, a, D);
+      this._candles(w, a, D);
+      this._cherry(w, a);
+      this._bee(w.bee, a);
+      for (const p of order) if ((p.z || 0) > 3) this._piece(w, p, a, D);
+      this._hintHand(w.hintHand, w, D);
     }
     _shadow(x, y, w, al) {
-      const g = this.g; g.fillStyle = `rgba(30,50,25,${0.22 * (al == null ? 1 : al)})`; g.beginPath(); g.ellipse(x, y, w / 2, Math.max(4, w * 0.09), 0, 0, TAU); g.fill();
+      const g = this.g; g.fillStyle = `rgba(90,60,30,${0.2 * (al == null ? 1 : al)})`; g.beginPath(); g.ellipse(x, y, w / 2, Math.max(4, w * 0.09), 0, 0, TAU); g.fill();
     }
-    _stump(x, top, baseW, night) {
-      const ks = baseW / 180, w = 240 * ks, h = 120 * ks;
-      this._shadow(x, top + (116 - 18) * ks, w * 0.9, 1);
-      if (CK.Assets.has('stump')) this._img('stump', x - 120 * ks, top - 18 * ks, w, h);
-      else { const g = this.g; g.fillStyle = '#8B5E3C'; g.fillRect(x - baseW / 2, top, baseW, 90 * ks); g.fillStyle = '#D9B27C'; g.beginPath(); g.ellipse(x, top, baseW / 2, 12 * ks, 0, 0, TAU); g.fill(); }
-      void night;
+    _stand(x, top, baseW) {
+      const ks = baseW / 220, w = 260 * ks, h = 120 * ks;
+      this._shadow(x, top + (116 - 18) * ks, w * 0.8, 1);
+      if (CK.Assets.has('stand')) this._img('stand', x - 130 * ks, top - 18 * ks, w, h);
+      else { const g = this.g; g.fillStyle = '#FFF8EC'; g.fillRect(x - 20 * ks, top, 40 * ks, 90 * ks); g.beginPath(); g.ellipse(x, top, baseW / 2, 10 * ks, 0, 0, TAU); g.fill(); }
     }
-    _block(block, x, y, rot, sx, sy, S, opt, alpha) {
+    _block(block, x, y, rot, sx, sy, D, opt, alpha) {
       const g = this.g;
       if (alpha != null && alpha <= 0.01) return;
       g.save(); g.translate(x, y); if (rot) g.rotate(rot); g.scale(sx || 1, sy || 1);
       if (alpha != null && alpha < 1) g.globalAlpha *= alpha;
-      if (BA()) { try { BA().drawBlock(g, block, S, Object.assign({ dpr: this.rs, img: imgOf, t: this.time }, opt || {})); } catch (e) { this._placeholderBlock(g, block, S); } }
-      else this._placeholderBlock(g, block, S);
+      if (BA()) { try { BA().drawBlock(g, block, D.LW, D.LH, Object.assign({ dpr: this.rs, img: imgOf, t: this.time }, opt || {})); } catch (e) { this._placeholderBlock(g, block, D); } }
+      else this._placeholderBlock(g, block, D);
       g.restore();
     }
-    _placeholderBlock(g, b, S) {
-      const c = PAL(b.color || 'yellow'); g.fillStyle = b.kind === 'color' ? c.base : '#F1D3A1'; g.strokeStyle = '#A8743F'; g.lineWidth = 4;
-      g.beginPath(); roundRect(g, -S / 2, -S / 2, S, S, S * 0.14); g.fill(); g.stroke();
+    _placeholderBlock(g, b, D) {
+      const c = PAL(b.color || 'yellow'); g.fillStyle = b.kind === 'color' ? c.base : '#F6DFAE'; g.strokeStyle = '#B98A4E'; g.lineWidth = 4;
+      g.beginPath(); roundRect(g, -D.LW / 2, -D.LH / 2, D.LW, D.LH, D.LH * 0.18); g.fill(); g.stroke();
     }
-    _piece(w, p, a, S) {
+    _piece(w, p, a, D) {
       if (p.state === 'gone') return;
       const x = ip(p, 'x', a), y = ip(p, 'y', a), rot = ip(p, 'rot', a) || 0, sc = p.scale || 1, al = p.alpha == null ? 1 : p.alpha;
       if (al <= 0.01) return;
-      const side = (p.side || S) * sc;
-      // shadow on the ground under the block (it shrinks while the block is lifted high)
-      const L = this._L, gy = (p.row === 1 ? (p.homeY + side / 2 + 2) : (p.homeY != null ? p.homeY + (p.side || S) / 2 : L.groundY - 6));
-      const lift = clamp((gy - (y + side / 2)) / 260, 0, 1);
-      if (p.state !== 'fall' || lift < 0.98) this._shadow(x, gy, side * (0.95 - 0.45 * lift), al * (1 - 0.6 * lift));
-      this._block(p.block, x, y, rot, p.sx, p.sy, S * sc, { glow: p.glow || 0, lift: p.state === 'drag' ? 1 : 0 }, al);
+      const small = p.block && p.block.size === 'small' ? 0.72 : 1;
+      const bw = (p.bw || D.LW) * sc, bh = (p.bh || D.LH) * sc;
+      const L = this._L, gy = (p.homeY != null ? p.homeY + (p.bh || D.LH) / 2 + 2 : L.groundY - 6);
+      const lift = clamp((gy - (y + bh / 2)) / 260, 0, 1);
+      if (p.state !== 'fall' || lift < 0.98) this._shadow(x, gy, bw * small * (0.95 - 0.45 * lift), al * (1 - 0.6 * lift));
+      this._block(p.block, x, y, rot, p.sx, p.sy, { S: D.S, LW: D.LW * sc, LH: D.LH * sc }, { glow: p.glow || 0, lift: p.state === 'drag' ? 1 : 0, id: p.block && p.block.id != null ? p.block.id : p.id }, al);
     }
-    _tower(w, a, S) {
+    _tower(w, a, D) {
       const T = w.tower; if (!T || !T.blocks) return;
-      const g = this.g, n = T.blocks.length;
+      const n = T.blocks.length;
       for (let i = 0; i < n; i++) {
         const b = T.blocks[i], P = w.blockPose ? w.blockPose(i, a) : null; if (!P) continue;
-        this._block(b.block, P.x, P.y, P.rot, P.sx, P.sy, S, { glow: b.glow || 0 }, P.alpha);
-        if (b.bloom > 0 && !b.fly && BA() && BA().drawFlower) {
-          const side = b.side || S, sgn = i % 2 ? 1 : -1;
-          g.save(); g.translate(P.x, P.y); g.rotate(P.rot || 0);
-          g.translate(sgn * side * 0.5, side * 0.18);
-          try { BA().drawFlower(g, S * 0.42, b.bloom, i % 3); } catch (e) { }
-          g.translate(-sgn * side * 0.06, -side * 0.42);
-          try { BA().drawFlower(g, S * 0.28, clamp(b.bloom * 1.3 - 0.3, 0, 1), (i + 1) % 3); } catch (e) { }
-          g.restore();
-        }
+        this._block(b.block, P.x, P.y, P.rot, P.sx, P.sy, D, { glow: b.glow || 0, id: b.id }, P.alpha);
       }
     }
-    _goal(w, a, night) {
-      const G = w.goal, L = this._L, g = this.g;
-      // the branch: its stem point (110, 140) sits at the bananas' branch point
-      const sx = G ? (G.stemX != null ? G.stemX : G.x) : L.tower.x, sy = G ? (G.stemY != null ? G.stemY : (L.ins.top || 0) + 16) : (L.ins.top || 0) + 16;
-      const kb = clamp((this.W - sx) / 490, 1, 1.9);
-      if (CK.Assets.has('branch')) {
-        this._img('branch', sx - 110 * kb, sy - 140 * kb, 600 * kb, 160 * kb);
-      }
-      if (!G || G.state === 'taken') return;
-      const gx = G.x, gy = ip(G, 'y', a), sw = ip(G, 'swing', a) || 0, h = G.h || 104, wdt = h * 120 / 130;
-      g.strokeStyle = '#5F8A3A'; g.lineWidth = 6; g.lineCap = 'round';
-      g.beginPath(); g.moveTo(sx, sy - 4); g.quadraticCurveTo(sx + Math.sin(sw) * 20, (sy + gy) / 2, gx + Math.sin(sw) * 4, gy + 4); g.stroke();
-      g.save(); g.translate(gx, gy); g.rotate(sw);
-      if (CK.Assets.has('bananas')) this._img('bananas', -60 * wdt / 120, -6 * h / 130, wdt, h);
-      else { g.fillStyle = '#F6D45A'; g.beginPath(); g.ellipse(0, h * 0.45, wdt * 0.35, h * 0.4, 0, 0, TAU); g.fill(); }
+    _cloud(w, a) {
+      const C = w.cloudPose ? w.cloudPose(a) : null; if (!C || !(C.alpha > 0.01)) return;
+      const g = this.g, s = C.s || 1;
+      g.save(); g.globalAlpha *= clamp(C.alpha, 0, 1);
+      if (CK.Assets.has('cloud_candy')) this._img('cloud_candy', C.x - 100 * 0.9 * s, C.y - 22 * 0.91 * s, 180 * s, 100 * s);
+      else { g.fillStyle = '#F6D9EA'; g.beginPath(); g.ellipse(C.x, C.y + 30 * s, 80 * s, 36 * s, 0, 0, TAU); g.fill(); }
       g.restore();
     }
-    _luluFrame(w) {
-      const m = (w.lulu && w.lulu.mood) || 'idle';
+    _cherry(w, a) {
+      const C = w.cherryPose ? w.cherryPose(a) : null; if (!C || !(C.alpha > 0.01)) return;
+      const g = this.g, h = 72, wd = 64;
+      g.save(); g.globalAlpha *= clamp(C.alpha, 0, 1); g.translate(C.x, C.y); if (C.rot) g.rotate(C.rot); g.scale(C.sx || 1, C.sy || 1);
+      if (CK.Assets.has('cherry')) this._img('cherry', -40 * wd / 80, -86 * h / 90, wd, h);
+      else { g.fillStyle = '#C8243A'; g.beginPath(); g.arc(0, -h * 0.3, h * 0.3, 0, TAU); g.fill(); }
+      g.restore();
+    }
+    _candles(w, a, D) {
+      if (!w.candles || !w.candlePose || !BA() || !BA().drawCandle) return;
+      const g = this.g, h = 0.55 * D.LH;
+      const lean = clamp((w.blowT || 0) * 0.6 + (w.breeze || 0) * 0.15, 0, 0.8);
+      for (let j = 0; j < w.candles.length; j++) {
+        const P = w.candlePose(j, a); if (!P || !(P.alpha > 0.01)) continue;
+        g.save(); g.globalAlpha *= clamp(P.alpha, 0, 1); g.translate(P.x, P.y); g.rotate((P.rot || 0) + lean * 0.15);
+        try { BA().drawCandle(g, h * (P.s || 1), P.lit || 0, P.out || 0, this.time + j * 0.37); } catch (e) { }
+        g.restore();
+      }
+    }
+    _kokoFrame(w) {
+      const m = (w.koko && w.koko.mood) || 'idle';
       if (m === 'idle' || m === 'talk') {
-        if (this._blinking(this._dt)) return 'lulu_blink';
-        if (this._speaking || m === 'talk') { this._talkT += this._dt; return (this._talkT % 0.3) < 0.15 ? 'lulu_talk' : 'lulu_idle'; }
-        return 'lulu_idle';
+        if (this._blinking(this._dt)) return 'koko_blink';
+        if (this._speaking || m === 'talk') { this._talkT += this._dt; return (this._talkT % 0.3) < 0.15 ? 'koko_talk' : 'koko_idle'; }
+        return 'koko_idle';
       }
-      return 'lulu_' + m;
+      return 'koko_' + m;
     }
-    _lulu(w, o) {
-      const L = this._L, Q = L.lulu; if (!Q) return;
-      const g = this.g, h = Q.h, k = h / LULU.h, wd = LULU.w * k;
-      const nm = this._luluFrame(w);
-      // hold: slide Lulu towards the tower so her horn touches it (the art pushes at x ≈ 285)
+    _koko(w, o) {
+      const L = this._L, Q = L.koko || L.lulu; if (!Q) return;
+      const g = this.g, h = Q.h, k = h / KOKO.h, wd = KOKO.w * k, D = this._dims();
+      const nm = this._kokoFrame(w);
+      // hold: Koko waddles to the cake so his paws touch it (the art's palm is at x ≈ 280)
       let want = 0;
-      if (nm === 'lulu_hold' && L.tower) want = clamp(L.tower.x - (L.S || 112) / 2 - 2 - (Q.x + (285 - LULU.ax) * k), 0, 380);
-      this._luluDx += (want - this._luluDx) * clamp((this._dt || 0) * 4, 0, 1);
-      const x = Q.x + this._luluDx;
-      const cheer = nm === 'lulu_cheer' || nm === 'lulu_happy';
-      const walking = Math.abs(want - this._luluDx) > 4;
+      if (nm === 'koko_hold' && L.tower) want = clamp(L.tower.x - D.LW / 2 - 2 - (Q.x + (280 - KOKO.ax) * k), 0, 380);
+      this._kokoDx += (want - this._kokoDx) * clamp((this._dt || 0) * 4, 0, 1);
+      const x = Q.x + this._kokoDx;
+      const cheer = nm === 'koko_cheer' || nm === 'koko_happy';
+      const walking = Math.abs(want - this._kokoDx) > 4;
       const bob = cheer ? Math.abs(Math.sin(this.time * 7)) * 8 : walking ? Math.abs(Math.sin(this.time * 12)) * 7 : Math.sin(this.time * 1.6) * 1.5;
-      this._shadow(x, Q.y + 2, wd * 0.62, 1);
-      const name = CK.Assets.has(nm) ? nm : 'lulu_idle';
-      if (CK.Assets.has(name)) this._img(name, x - LULU.ax * k, Q.y - LULU.ay * k - bob, wd, h);
-      else { g.fillStyle = '#EDCB92'; g.fillRect(x - 40, Q.y - h, 80, h); }
+      this._shadow(x, Q.y + 2, wd * 0.55, 1);
+      const name = CK.Assets.has(nm) ? nm : 'koko_idle';
+      if (CK.Assets.has(name)) this._img(name, x - KOKO.ax * k, Q.y - KOKO.ay * k - bob, wd, h);
+      else { g.fillStyle = '#A9B1BC'; g.fillRect(x - 50, Q.y - h, 100, h); }
+      void o;
     }
-    _monkey(M, a) {
-      if (!M) return;
-      const g = this.g, x = ip(M, 'x', a), y = ip(M, 'y', a), rot = ip(M, 'rot', a) || 0;
-      g.strokeStyle = '#4E7A34'; g.lineWidth = 7; g.lineCap = 'round';
-      g.beginPath(); g.moveTo(M.vx, M.vy); g.lineTo(x, y); g.stroke();
-      g.strokeStyle = '#6FA048'; g.lineWidth = 3; g.beginPath(); g.moveTo(M.vx + 2, M.vy); g.lineTo(x + 2, y); g.stroke();
-      const nm = M.state === 'in' ? 'monkey_swing' : 'monkey_grab', h = 200 * 0.9, wd = 160 * 0.9;
-      g.save(); g.translate(x, y); g.rotate(rot);
-      if (CK.Assets.has(nm)) this._img(nm, -80 * 0.9, -6 * 0.9, wd, h);
-      g.restore();
-    }
-    _butterfly(B, a) {
+    _bee(B, a) {
       if (!B) return;
-      const x = ip(B, 'x', a), y = ip(B, 'y', a), nm = (B.flap || 0) < 0.5 ? 'butterfly' : 'butterfly_up';
-      this._sprite(CK.Assets.has(nm) ? nm : 'butterfly', x, y, 64, B.rot || 0, 1, null, (B.flip || 1) < 0);
+      const x = ip(B, 'x', a), y = ip(B, 'y', a), nm = (B.flap || 0) < 0.5 ? 'bee' : 'bee_up';
+      this._sprite(CK.Assets.has(nm) ? nm : 'bee', x, y, 96, B.rot || 0, 1, null, (B.flip || 1) < 0);
     }
-    _hintHand(H, w, S) {
+    _hintHand(H, w, D) {
       if (!H || !(H.alpha > 0.01) || !BA() || !BA().drawGhostHand) return;
       const g = this.g;
       if (H.press) {
         const p = w.pieceById ? w.pieceById(H.pieceId) : null;
-        if (p) this._block(p.block, H.x, H.y + S * 0.15, 0, 1, 1, S, { glow: 0.4 }, 0.35 * H.alpha);
+        if (p) this._block(p.block, H.x, H.y + D.LH * 0.2, 0, 1, 1, D, { glow: 0.4 }, 0.35 * H.alpha);
       }
       g.save(); g.globalAlpha *= H.alpha; g.translate(H.x, H.y);
-      try { BA().drawGhostHand(g, S * 0.85, H.t || 0); } catch (e) { }
+      try { BA().drawGhostHand(g, D.S * 0.85, H.t || 0); } catch (e) { }
       g.restore();
     }
     _blinking(dt) {
@@ -309,58 +299,59 @@
     }
 
     /* ---------- title & celebration ---------- */
+    _miniCake(tx, baseTop, LW, LH, cols, t, opt) {   // a decorative cake on the stand (title / party)
+      opt = opt || {};
+      const D = { S: LW / 1.3, LW, LH };
+      this._stand(tx, baseTop, LW + 60);
+      const n = cols.length;
+      for (let i = 0; i < n; i++) {
+        const sway = Math.sin(t * 1.7 + i * 0.3) * 0.015 * (i + 1);
+        const glow = opt.glow ? Math.max(0, Math.sin(t * 3 - i * 0.7)) * 0.6 : 0;
+        this._block({ kind: 'color', value: cols[i], color: cols[i] }, tx + Math.sin(sway) * (i + 0.5) * LH, baseTop - LH / 2 - i * LH, sway, 1, 1, D, { glow, id: i * 3 + 1 }, 1);
+      }
+      const topY = baseTop - n * LH, g = this.g;
+      if (opt.candles && BA() && BA().drawCandle) {
+        for (let j = 0; j < opt.candles; j++) {
+          const cx = tx + (opt.candles === 1 ? 0 : (j / (opt.candles - 1) - 0.5) * 0.7 * LW);
+          g.save(); g.translate(cx, topY + 4); try { BA().drawCandle(g, 0.55 * LH, 1, 0, t + j * 0.37); } catch (e) { } g.restore();
+        }
+      }
+      const bob = opt.float ? Math.sin(t * 2) * 3 : 0;
+      const cb = opt.cloud ? topY - 70 + bob : topY + 4;   // the cherry's bottom
+      if (opt.cloud && CK.Assets.has('cloud_candy')) this._img('cloud_candy', tx - 90, cb - 20, 180, 100);
+      if (CK.Assets.has('cherry')) this._img('cherry', tx - 32, cb - 69, 64, 72);
+      return topY;
+    }
     _titleScene(w, o) {
       const L = this._L, W = this.W, H = this.H, portrait = H > W, ins = L.ins || {};
       const gy = H - (ins.bottom || 0) - (portrait ? 60 : 30);
-      let S = portrait ? 110 : 96;
-      const tx = portrait ? W * 0.72 : W - (ins.right || 0) - Math.max(170, W * 0.15);
+      let LW = portrait ? 150 : 132;
+      const tx = portrait ? W * 0.7 : W - (ins.right || 0) - Math.max(180, W * 0.16);
       const lg = o.boxes && o.boxes.logo;
-      // keep the bananas under the logo when the tower stands below it (iPad landscape, visual QA P2-2)
-      if (!portrait && lg && tx + S * 0.6 > lg.x && tx - S * 0.6 < lg.x + lg.w) S = clamp((gy - 64 - 26 - 100 - (lg.y + lg.h + 8)) / 3, 60, 96);
-      this._stump(tx, gy - 64, S + 70, false);
-      const cols = ['red', 'blue', 'yellow'];
-      for (let i = 0; i < 3; i++) {
-        const sway = Math.sin(this.time * 1.7 + i * 0.3) * 0.02 * (i + 1);
-        this._block({ kind: 'color', value: cols[i], color: cols[i] }, tx + Math.sin(sway) * (i + 0.5) * S, gy - 64 - S / 2 - i * S, sway, 1, 1, S, {}, 1);
-      }
-      // bananas above the tower
-      const by = gy - 64 - 3 * S - 26 + Math.sin(this.time * 2) * 3;
-      const g0 = this.g; g0.strokeStyle = '#5F8A3A'; g0.lineWidth = 6; g0.lineCap = 'round';
-      if (portrait) { g0.beginPath(); g0.moveTo(tx, by - 300); g0.lineTo(tx, by - 92); g0.stroke(); }
-      if (CK.Assets.has('bananas')) this._img('bananas', tx - 46, by - 100, 92, 100);
-      const lh = portrait ? 430 : Math.min(400, H * 0.58), k = lh / LULU.h;
+      // keep the cake + cherry under the logo when it stands below it (iPad landscape)
+      if (!portrait && lg && tx + LW * 0.6 > lg.x && tx - LW * 0.6 < lg.x + lg.w) LW = clamp(((gy - 72 - 130 - (lg.y + lg.h + 8)) / 3) / 0.6, 80, 132);
+      this._miniCake(tx, gy - 72, LW, Math.round(LW * 0.6), ['red', 'yellow', 'blue'], this.time, { cloud: true, float: true });
+      const lh = portrait ? 380 : Math.min(360, H * 0.54), k = lh / KOKO.h;
       const lx = portrait ? W * 0.26 : (ins.left || 0) + Math.max(150, W * 0.14);
       const hop = (this.time % 2.6) < 0.5 ? Math.sin((this.time % 2.6) / 0.5 * Math.PI) * 14 : 0;
-      this._shadow(lx, gy + 2, LULU.w * k * 0.6, 1);
-      const nm = CK.Assets.has('lulu_full_wave') ? 'lulu_full_wave' : 'lulu_happy';
-      if (CK.Assets.has(nm)) this._img(nm, lx - LULU.ax * k, gy - LULU.ay * k - hop, LULU.w * k, lh);
+      this._shadow(lx, gy + 2, KOKO.w * k * 0.55, 1);
+      const nm = CK.Assets.has('koko_full_wave') ? 'koko_full_wave' : 'koko_happy';
+      if (CK.Assets.has(nm)) this._img(nm, lx - KOKO.ax * k, gy - KOKO.ay * k - hop, KOKO.w * k, lh);
     }
-    _doneScene(w, o, amb) {   // the starry-night party: fireflies, fireworks, a rainbow tower, the monkey and Lulu cheering
-      const g = this.g, L = this._L, W = this.W, H = this.H, t = this.time, portrait = H > W, ins = L.ins || {};
+    _doneScene(w, o, amb) {   // the rainbow party: sprinkles, a big rainbow cake with lit candles, Koko cheering
+      const L = this._L, W = this.W, H = this.H, t = this.time, portrait = H > W, ins = L.ins || {};
       this._fwT -= o.dt || 0;
-      if (this._fwT <= 0) { this._fwT = 0.8 + Math.random() * 0.7; this.burst('firework', W * (0.12 + Math.random() * 0.76), H * (0.1 + Math.random() * 0.25)); }
+      if (this._fwT <= 0) { this._fwT = 0.9 + Math.random() * 0.7; this.burst('firework', W * (0.12 + Math.random() * 0.76), H * (0.1 + Math.random() * 0.25)); }
       const dp = o.boxes && o.boxes.done;
       const gy = portrait ? Math.min(H * 0.62, dp ? dp.y - 20 : H) : H - (ins.bottom || 0) - 30;
-      const S = portrait ? 84 : 72, tx = portrait ? W * 0.62 : (ins.left || 0) + Math.max(330, W * 0.33);
-      this._stump(tx, gy - 56, S + 60, true);
-      const cols = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
-      for (let i = 0; i < 6; i++) {
-        const sway = Math.sin(t * 2 + i * 0.4) * 0.025 * (i + 1) / 3;
-        const glow = Math.max(0, Math.sin(t * 3 - i * 0.7));
-        this._block({ kind: 'color', value: cols[i], color: cols[i] }, tx + Math.sin(sway) * (i + 0.5) * S, gy - 56 - S / 2 - i * S, sway, 1, 1, S, { glow: glow * 0.6 }, 1);
-      }
-      // the monkey swinging above the tower top
-      const topY = gy - 56 - 6 * S, vx = tx + 60, vy = -20, Lv = Math.max(60, topY - vy - 150), ph = Math.sin(t * 2.2) * 0.45;
-      const mx = vx + Math.sin(ph) * Lv, my = vy + Math.cos(ph) * Lv;
-      this._monkey({ x: mx, y: my, vx, vy, rot: -ph * 0.6, state: 'grab' }, 1);
-      const nmM = 'monkey_cheer';
-      if (CK.Assets.has(nmM) && Math.sin(t * 4) > 0.3) { /* keep the grab frame: the cheer frame flickers in */ g.save(); g.translate(mx, my); g.rotate(-ph * 0.6); this._img(nmM, -72, -5.4, 144, 180); g.restore(); }
-      const lh = portrait ? Math.min(400, gy - 120) : Math.min(400, H * 0.56), k = lh / LULU.h;
-      const lx = portrait ? (ins.left || 0) + 140 : tx - S - LULU.w * k * 0.45;
+      const LW = portrait ? 140 : 120, LH = Math.round(LW * 0.6), tx = portrait ? W * 0.62 : (ins.left || 0) + Math.max(340, W * 0.34);
+      this._miniCake(tx, gy - 64, LW, LH, ['red', 'orange', 'yellow', 'green', 'blue'], t, { glow: true, candles: 5 });
+      const lh = portrait ? Math.min(340, gy - 120) : Math.min(360, H * 0.52), k = lh / KOKO.h;
+      const lx = portrait ? (ins.left || 0) + 130 : tx - LW * 0.6 - KOKO.w * k * 0.42;
       const hop = Math.max(0, Math.sin(t * 4)) * 16;
-      this._shadow(lx, gy + 2, LULU.w * k * 0.6, 1);
-      const nm = CK.Assets.has('lulu_cheer') ? 'lulu_cheer' : 'lulu_idle';
-      if (CK.Assets.has(nm)) this._img(nm, lx - LULU.ax * k, gy - LULU.ay * k - hop, LULU.w * k, lh);
+      this._shadow(lx, gy + 2, KOKO.w * k * 0.55, 1);
+      const nm = CK.Assets.has('koko_cheer') ? 'koko_cheer' : 'koko_idle';
+      if (CK.Assets.has(nm)) this._img(nm, lx - KOKO.ax * k, gy - KOKO.ay * k - hop, KOKO.w * k, lh);
       void amb;
     }
     _banner(w) {
@@ -372,20 +363,20 @@
       const s = easeOutBack(clamp(k, 0, 1));
       const bw = Math.min(620, W - 80), bh = 170, cx = W / 2, cy = H * 0.42;
       g.save(); g.translate(cx, cy); g.scale(s, s); g.globalAlpha = clamp(k * 1.5, 0, 1);
-      g.fillStyle = 'rgba(40,60,30,.25)'; g.beginPath(); roundRect(g, -bw / 2, -bh / 2 + 8, bw, bh, 34); g.fill();
+      g.fillStyle = 'rgba(90,50,60,.22)'; g.beginPath(); roundRect(g, -bw / 2, -bh / 2 + 8, bw, bh, 34); g.fill();
       g.fillStyle = '#FFFBF2'; g.beginPath(); roundRect(g, -bw / 2, -bh / 2, bw, bh, 34); g.fill();
-      g.lineWidth = 5; g.strokeStyle = '#C9D8A8'; g.stroke();
+      g.lineWidth = 5; g.strokeStyle = '#F2C6D8'; g.stroke();
       const I = CK.I18N, lang = this.lang;
       if (w.state === 'intro') {
         const top = I ? I.t(lang, 'ui.chapter', { n: (w.level | 0) + 1 }) : 'Chapter ' + ((w.level | 0) + 1);
         const name = I ? I.t(lang, 'topic.' + w.topic) : w.topic;
         outlinedText(g, top, 0, -bh * 0.22, 30, '#6a6a4a', null, bw - 60);
-        outlinedText(g, name, 0, bh * 0.14, 62, '#3E7F57', '#ffffff', bw - 60);
+        outlinedText(g, name, 0, bh * 0.14, 62, '#B5547A', '#ffffff', bw - 60);
       } else {
         const s1 = I ? I.t(lang, 'ui.stars') : 'Stars';
         outlinedText(g, s1, 0, -bh * 0.24, 34, '#6a6a4a', null, bw - 60);
         this._sprite('star', -48, bh * 0.14, 84, Math.sin(this.time * 3) * 0.12);
-        outlinedText(g, '× ' + (w.levelStars || 0), 44, bh * 0.16, 62, '#3E7F57', '#ffffff', 160);
+        outlinedText(g, '× ' + (w.levelStars || 0), 44, bh * 0.16, 62, '#B5547A', '#ffffff', 160);
       }
       g.restore();
     }
@@ -409,7 +400,7 @@
           fx.push({ k: 'p', sprite: 'sparkle', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, g: 0, t: 0, life: 0.5 + R() * 0.2, size: 20 + R() * 12, rot: R() * TAU, vr: 4 });
         }
       } else if (type === 'rustle' || type === 'leaves') {   // a puff of leaves / snow / petals off a hiding place
-        const sprites = opt.petals ? ['petal', 'pollen'] : ['leaf_a', 'leaf_b', 'puff'];
+        const sprites = opt.petals ? ['blossom', 'sugar'] : ['puff', 'sugar', 'blossom'];
         const n = Math.round((opt.n || 8) * this.quality);
         for (let i = 0; i < n; i++) {
           const a = -Math.PI / 2 + (R() - 0.5) * 2.4, sp = 90 + R() * 160;
@@ -424,9 +415,12 @@
           const a = R() * TAU, sp = 120 + R() * 300;
           fx.push({ k: 'p', sprite: R() < 0.5 ? 'sparkle' : 'pstar', tint: CONF[i % CONF.length], x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 100, g: 220, t: 0, life: 1 + R() * 0.6, size: 20 + R() * 16, rot: R() * TAU, vr: 5 });
         }
-      } else if (type === 'butterfly') {
-        const col = CONF[(R() * CONF.length) | 0];
-        for (let i = 0; i < (opt.n || 1); i++) fx.push({ k: 'bfly', x: x + (R() - 0.5) * 30, y, vx: (R() < 0.5 ? -1 : 1) * (50 + R() * 40), vy: -90 - R() * 40, t: 0, life: 2.4, size: 34, color: i ? CONF[(R() * CONF.length) | 0] : col, ph: R() * TAU });
+      } else if (type === 'smoke') {   // candles go out: little grey curls drift up
+        for (let i = 0; i < (opt.n || 4); i++) fx.push({ k: 'p', sprite: 'puff', tint: '#C9C4CF', x: x + (i - ((opt.n || 4) - 1) / 2) * (opt.gap || 26) + (R() - 0.5) * 6, y, vx: (R() - 0.5) * 20, vy: -60 - R() * 30,
+          g: -20, drag: 1.2, t: 0, life: 1.1 + R() * 0.4, size: 22 + R() * 10, rot: R() * TAU, vr: (R() - 0.5) * 2, sway: R() * TAU });
+      } else if (type === 'breath') {   // Koko's blow: soft puffs travel from the lips to the cake top
+        const tx = opt.tx == null ? x + 200 : opt.tx, ty = opt.ty == null ? y : opt.ty;
+        for (let i = 0; i < 9; i++) { const k = 0.9 + R() * 0.5; fx.push({ k: 'p', sprite: 'puff', x, y: y + (R() - 0.5) * 10, vx: (tx - x) * k, vy: (ty - y) * k + (R() - 0.5) * 40, g: 0, drag: 1.0, t: -i * 0.06, life: 0.8, size: 18 + R() * 12, rot: 0, vr: 1 }); }
       } else if (type === 'firework') {
         const col = CONF[(R() * CONF.length) | 0];
         for (let i = 0; i < 28 * this.quality; i++) {
@@ -483,7 +477,7 @@
         } else if (f.k === 'num') {
           const s = easeOutBack(clamp(u * 3, 0, 1)), al = u > 0.6 ? (1 - u) / 0.4 : 1;
           g.save(); g.globalAlpha *= al; g.translate(f.x, f.y - u * 40); g.scale(s, s);
-          outlinedText(g, f.text, 0, 0, 84, '#FFF6D8', '#3E7F57', 200); g.restore();
+          outlinedText(g, f.text, 0, 0, 84, '#FFF6D8', '#B5547A', 200); g.restore();
         } else if (f.k === 'star') {
           const e = u * u * (3 - 2 * u);
           const x = lerp(f.x0, f.x1, e), y = lerp(f.y0, f.y1, e) - Math.sin(u * Math.PI) * 140;
@@ -499,17 +493,10 @@
     }
     _particles(list, layer) {
       if (!list) return;
-      const g = this.g;
       for (const p of list) {
-        if ((p.layer || 'back') !== layer || p.alpha <= 0.01 || p.kind === 'streak') continue;
-        if (p.glow) {   // firefly halo
-          const r = (p.size || 10) * 1.6, rg = g.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
-          rg.addColorStop(0, `rgba(230,255,150,${0.45 * p.alpha * p.glow})`); rg.addColorStop(1, 'rgba(230,255,150,0)');
-          g.fillStyle = rg; g.beginPath(); g.arc(p.x, p.y, r, 0, TAU); g.fill();
-        }
-        const nm = p.sprite === 'star' ? 'pstar' : p.sprite;
-        if (p.color) this._tinted(nm, p.color, p.x, p.y, p.size, p.rot || 0, p.alpha);
-        else this._sprite(nm, p.x, p.y, p.size, p.rot || 0, p.alpha);
+        if ((p.layer || 'back') !== layer || !(p.a > 0.01)) continue;
+        if (p.tint) this._tinted(p.kind, p.tint, p.x, p.y, p.s, p.rot || 0, p.a);
+        else this._sprite(p.kind, p.x, p.y, p.s, p.rot || 0, p.a, null, !!p.flipX);
       }
     }
 
@@ -537,19 +524,19 @@
       g.strokeStyle = 'rgba(255,0,0,.6)'; g.lineWidth = 2;
       for (const p of w.pieces || []) { const b = w.pieceHit && w.pieceHit(p.id); if (b) g.strokeRect(b.x - b.w / 2, b.y - b.h / 2, b.w, b.h); }
       if (L.drop) { g.strokeStyle = 'rgba(0,160,0,.7)'; g.strokeRect(L.drop.x0, 0, L.drop.x1 - L.drop.x0, L.drop.y1); }
-      const lb = w.luluHit && w.luluHit(); if (lb) { g.strokeStyle = 'rgba(255,0,255,.6)'; g.strokeRect(lb.x - lb.w / 2, lb.y - lb.h / 2, lb.w, lb.h); }
+      const lb = (w.kokoHit && w.kokoHit()) || (w.luluHit && w.luluHit()); if (lb) { g.strokeStyle = 'rgba(255,0,255,.6)'; g.strokeRect(lb.x - lb.w / 2, lb.y - lb.h / 2, lb.w, lb.h); }
       g.strokeStyle = 'rgba(0,0,255,.5)';
       for (const k of [].concat(w.hudKeep || [])) if (k) g.strokeRect(k.x, k.y, k.w, k.h);
     }
-    /* A Talk-time picture (question or answer button): the same wooden block the child stacks. */
+    /* A Talk-time picture (question or answer button): the same cake layer the child stacks. */
     drawItemBody(g, it, s) {
       const b = Object.assign({}, it.token || it);
       if (b.kind === 'stars') b.kind = 'dots';
       if (b.kind === 'number' && this._talkDots) b.showDots = b.n <= 10;
-      const S = s * 0.78;
+      const LW = s * 0.92, LH = LW * 0.6;
       g.save();
-      if (BA()) { try { BA().drawBlock(g, b, S, { dpr: this.rs, img: imgOf, cache: false }); } catch (e) { this._placeholderBlock(g, b, S); } }
-      else this._placeholderBlock(g, b, S);
+      if (BA()) { try { BA().drawBlock(g, b, LW, LH, { dpr: this.rs, img: imgOf, cache: false, id: 3 }); } catch (e) { this._placeholderBlock(g, b, { LW, LH }); } }
+      else this._placeholderBlock(g, b, { LW, LH });
       g.restore();
     }
   }

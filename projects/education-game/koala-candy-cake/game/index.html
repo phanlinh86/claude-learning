@@ -6,11 +6,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Jungle Tower">
+<meta name="apple-mobile-web-app-title" content="Cake Tower">
 <meta name="format-detection" content="telephone=no">
-<meta name="theme-color" content="#BFE6F2">
-<meta name="description" content="A gentle learning game for kids 3–7: build wobbly block towers with Lulu the baby giraffe in the jungle — stack the right block by colour, shape, dots and animal from morning to a starry night. English and Vietnamese, with voice.">
-<title>Lulu's Jungle Tower · Hươu Lulu Xếp Tháp</title>
+<meta name="theme-color" content="#A9DDF5">
+<meta name="description" content="A gentle learning game for kids 3–7: bake a wobbly layer cake with Koko the koala in Candy Village — stack the right layer by colour, shape, candy dots and animal cookie, from sunshine to a rainbow. English and Vietnamese, with voice.">
+<title>Koko's Cake Tower · Tháp Bánh Kem Của Koala Koko</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="assets/default/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
@@ -18,10 +18,10 @@
 </head>
 <body>
 <div id="stage">
-  <canvas id="game" aria-label="Lulu's Jungle Tower"></canvas>
+  <canvas id="game" aria-label="Koko's Cake Tower"></canvas>
   <div id="safeProbe" aria-hidden="true"></div>
 
-  <!-- Lulu's speech bubble (positioned from world.layout.bubble) -->
+  <!-- Koko's speech bubble (positioned from world.layout.bubble) -->
   <div id="bubble" class="bubble hidden no-game-input" role="status" aria-live="polite"><span id="bubbleText"></span></div>
 
   <!-- In-game HUD -->
@@ -47,7 +47,7 @@
       </button>
     </div>
     <div class="title-wrap">
-      <h1 class="logo"><span id="logo1">Lulu's</span> <span id="logo2">Jungle Tower</span></h1>
+      <h1 class="logo"><span id="logo1">Koko's</span> <span id="logo2">Cake Tower</span></h1>
       <p id="tagline" class="tagline"></p>
       <button id="btnPlay" class="btn-play" aria-label="Play">
         <svg viewBox="0 0 24 24"><path d="M8 4.8v14.4c0 .8.9 1.3 1.6.8l11-7.2a1 1 0 0 0 0-1.6l-11-7.2C8.9 3.5 8 4 8 4.8z"/></svg>
@@ -76,7 +76,7 @@
       <div class="set-grid">
         <label class="toggle"><input type="checkbox" id="optSfx"><span data-i18n="ui.sound">Sound effects</span></label>
         <label class="toggle"><input type="checkbox" id="optMusic"><span data-i18n="ui.music">Music</span></label>
-        <label class="toggle"><input type="checkbox" id="optVoice"><span data-i18n="ui.voice">Lulu's voice</span></label>
+        <label class="toggle"><input type="checkbox" id="optVoice"><span data-i18n="ui.voice">Koko's voice</span></label>
         <label class="toggle"><input type="checkbox" id="optMic"><span data-i18n="ui.mic">Answer by talking</span></label>
       </div>
       <p id="voiceInfo" class="small-note"></p>

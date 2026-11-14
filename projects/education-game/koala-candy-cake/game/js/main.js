@@ -1,4 +1,4 @@
-/* CK main (Lulu's Jungle Tower) — boots the game, sizes the canvas for any phone/tablet shape, runs the loop and turns
+/* CK main (Koko's Cake Tower) — boots the game, sizes the canvas for any phone/tablet shape, runs the loop and turns
  * world events into voice, sound, effects and UI. */
 (function (CK) {
   'use strict';
@@ -81,6 +81,7 @@
     world.setViewport(view.W, view.H, view.ins);
     // the world re-lays out the tray, the tower and the goal itself in setViewport (rotation mid-drag is safe)
     weather.resize(view.W, view.H);
+    if (world.layout && world.layout.groundY) weather.groundY = world.layout.groundY;
     placeBubble();
     updateHudStarTarget();
   }
@@ -155,7 +156,7 @@
     CK.Audio.stopMusic();
     CK.UI.only('scrTitle'); CK.UI.show('hud', false); CK.UI.say('');
     CK.UI.setTitleInfo(progress.totalStars, curAge(), curLang());
-    weather.setWeather(0, {}); if (weather.setNight) weather.setNight(false);
+    weather.setWeather(0, {}); if (weather.party) weather.party(false);
   }
   function pause() {
     if (mode !== 'play' && mode !== 'talk') return;
@@ -178,12 +179,12 @@
   }
 
   let lastPromptText = '';
-  function currentPrompt() {   // prompts have several wordings: repeat the one Lulu said, word for word
+  function currentPrompt() {   // prompts have several wordings: repeat the one Koko said, word for word
     if (lastPromptText) return lastPromptText;
     const p = world.prompt ? world.prompt() : null;
     return p ? promptText(p) : (lastRoundEvt ? promptText(lastRoundEvt) : '');
   }
-  // names: only when Lulu is quiet, and not the same name again within 3 s (playtest M2)
+  // names: only when Koko is quiet, and not the same name again within 3 s (playtest M2)
   function sayName(txt, now) {
     if (!txt || (CK.Voice && CK.Voice.isSpeaking())) return;
     if (now - lastGrabSay < 700 || (txt === lastName && now - lastGrabSay < 3000)) return;
@@ -209,7 +210,7 @@
     switch (e.type) {
       case 'level':
         weather.setWeather(e.level, {});
-        weather.setNight && weather.setNight(false);
+        if (weather.party) weather.party(false);
         CK.Audio.setMood(e.level); CK.Audio.play('chapter');
         CK.UI.setDots(world.roundsPerLevel || 4, 0);
         speak(T('ui.chapter', { n: e.level + 1 }) + '. ' + T('topic.' + e.topic), { interrupt: true });
@@ -230,7 +231,7 @@
         const txt = T(e.promptKey, e.params || {});
         lastPromptText = txt;
         CK.UI.say(txt); speakPrompt(txt, { priority: true });
-        if (surpriseLine && lastRoundEvt && lastRoundEvt.surprise === 'butterfly' && e.first) { /* said when it lands */ }
+        if (surpriseLine && lastRoundEvt && lastRoundEvt.surprise === 'bee' && e.first) { /* said when it lands */ }
         break;
       }
       case 'grab': {
@@ -251,25 +252,25 @@
         break;
       }
       case 'land': {
-        CK.Audio.play('clonk', { i: e.n || 1 }); if ((e.impact || 0) > 0.25) CK.Audio.play('creak');
+        CK.Audio.play('flump', { i: e.n || 1 }); if ((e.impact || 0) > 0.25) CK.Audio.play('wobble');
         render.burst('land', e.x, e.y, {});
         break;
       }
       case 'stack': {
         stats.correct++;
         promptUntil = 0; pendingPrompt = null;
-        render.burst('pop', e.x, e.y - (L.S || 112) * 0.5, { size: L.S || 112, color: e.block && e.block.kind === 'color' ? e.block.color : null });
-        if (world.lulu) { world.lulu.mood = 'happy'; world.lulu.moodT = 1.1; }
+        render.burst('pop', e.x, e.y - (L.LH || 97) * 0.5, { size: L.S || 124, color: e.block && e.block.kind === 'color' ? e.block.color : null });
+        if (world.koko) { world.koko.mood = 'happy'; world.koko.moodT = 1.1; }
         const last = world.tower && e.n >= (world.tower.n || 99);
-        if (last && CK.I18N.sayTowerDone) speak(CK.I18N.sayTowerDone(curLang(), e.n), { interrupt: true });   // one line: count + bananas
+        if (last && CK.I18N.sayTowerDone) speak(CK.I18N.sayTowerDone(curLang(), e.n), { interrupt: true });   // one line: count + cherry
         else speak(line('sayStack', e, 'praise'), { interrupt: true });
         break;
       }
       case 'wrong': {
         stats.wrong++;
         CK.Audio.play('boing');
-        render.burst('wrong', e.x, e.y, { size: (L.S || 112) * 0.9 });
-        if (world.lulu) { world.lulu.mood = 'oops'; world.lulu.moodT = 1.0; }
+        render.burst('wrong', e.x, e.y, { size: (L.LW || 161) * 0.8 });
+        if (world.koko) { world.koko.mood = 'oops'; world.koko.moodT = 1.0; }
         const nowW = performance.now();
         if (nowW - lastWrongSay > 1500) { lastWrongSay = nowW; speak(line('sayWrong', e, 'hint'), { interrupt: canInterrupt() }); }
         break;
@@ -277,7 +278,7 @@
       case 'locked': { const nl = performance.now(); if (nl - lastBoop > 400) { lastBoop = nl; CK.Audio.play('boop'); } break; }
       case 'hint': {
         CK.Audio.play('hint');
-        render.burst('hint', e.x, e.y, { size: L.S || 112 });
+        render.burst('hint', e.x, e.y, { size: L.LW || 161 });
         if (!e.idle) speak(T('hint'));
         break;
       }
@@ -285,30 +286,35 @@
         if (++idleSaid <= 4) speak(T('idle') + ' ' + currentPrompt());   // then stay quiet: maybe nobody is there
         else if (idleSaid >= 5 && !bot) pause();   // ≈ 2 min without a grab: nobody is playing — pause
         break;
-      case 'pokeLulu': if (performance.now() - promptStart > 3000 && !pendingPrompt) repeatPrompt(); else if (world.lulu) { world.lulu.mood = 'happy'; world.lulu.moodT = 0.6; } break;
+      case 'pokeKoko': if (performance.now() - promptStart > 3000 && !pendingPrompt) repeatPrompt(); else if (world.koko) { world.koko.mood = 'happy'; world.koko.moodT = 0.6; } break;
       case 'stillDrag': { const sl = T('stillDrag'); if (sl && sl !== 'stillDrag') { CK.UI.say(sl); speak(sl, { interrupt: canInterrupt() }); } break; }
       case 'towerDone': {
         CK.Audio.play('round');
         const t = CK.I18N.sayTowerDone ? CK.I18N.sayTowerDone(curLang(), e.n) : T('towerDone'); if (t) CK.UI.say(t);
-        if (world.lulu) { world.lulu.mood = 'cheer'; world.lulu.moodT = 3; }
+        if (world.koko) { world.koko.mood = 'cheer'; world.koko.moodT = 3; }
         break;
       }
       case 'count': {
         CK.Audio.play('count', { i: e.i });
-        render.burst('count', e.x + (L.S || 112) * 0.95, e.y, { n: e.i });
+        if (e.cx != null) { CK.Audio.play('candle'); render.burst('hint', e.cx, e.cy - 20, { size: 40 }); }
+        render.burst('count', e.x + (L.LW || 161) * 0.75, e.y, { n: e.i });
         break;
       }
-      case 'bloom': CK.Audio.play('bloom', { i: 1 }); CK.Audio.play('sparkle'); break;
-      case 'monkey': {
-        CK.Audio.play('monkey');
+      case 'cherry': CK.Audio.play('drop'); render.burst('land', e.x, e.y + 30, {}); break;
+      case 'cherryOn': CK.Audio.play('plop'); render.burst('sparkles', e.x, e.y - 20); break;
+      case 'blow': {
+        CK.Audio.play('blow');
+        render.burst('breath', e.x, e.y, { tx: e.tx, ty: e.ty });
+        if (world.koko) { world.koko.mood = 'blow'; world.koko.moodT = 0.9; }
+        const bl = T('blow'); if (bl && bl !== 'blow') speak(bl);
         break;
       }
-      case 'bananas': {
-        CK.Audio.play('monkey'); CK.Audio.play('collect', { i: 3 });
-        render.burst('sparkles', e.x, e.y);
-        const m = T('monkey'); if (m && m !== 'monkey') speak(m);
+      case 'candlesOut': { CK.Audio.play('puffOut'); const n = e.n || 3; render.burst('smoke', e.x, e.y, { n, gap: (L.LW || 161) * 0.7 / Math.max(1, n - 1) }); break; }
+      case 'sprinkles':
+        CK.Audio.play('sparkle'); CK.Audio.play('collect', { i: 3 });
+        if (weather.burst) weather.burst(e.x, e.y, { kind: 'sprinkles', n: 40 });
+        if (world.koko) { world.koko.mood = 'cheer'; world.koko.moodT = 1.4; }
         break;
-      }
       case 'roundDone': {
         const n = e.stars || 1, fx = e.x || (world.tower ? world.tower.x : view.W / 2), fy = e.y || (L.goalY || view.H / 3);
         for (let i = 0; i < n; i++) {
@@ -317,22 +323,22 @@
         CK.UI.setDots(world.roundsPerLevel || 4, ((e.round != null ? e.round : world.round) % (world.roundsPerLevel || 4)) + 1);
         break;
       }
-      case 'clearBlock': CK.Audio.play('hop'); render.burst('leaves', e.x, e.y, { n: 5, size: L.S || 112 }); break;
+      case 'clearBlock': CK.Audio.play('hop'); render.burst('rustle', e.x, e.y, { n: 5, size: L.LW || 161 }); break;
       case 'gust': {
         CK.Audio.play('gust');
-        if (world.lulu) { world.lulu.mood = 'hold'; world.lulu.moodT = 1.8; }
+        if (world.koko) { world.koko.mood = 'hold'; world.koko.moodT = 1.8; }
         const gl = T('gust'); if (gl && gl !== 'gust') speak(gl, { interrupt: canInterrupt() });
         break;
       }
-      case 'butterfly': {
-        CK.Audio.play('butterfly');
-        const bl = T('butterfly.land'); if (bl && bl !== 'butterfly.land') speak(bl, { interrupt: canInterrupt() });
+      case 'bee': {
+        CK.Audio.play('buzz');
+        const bl = T('bee'); if (bl && bl !== 'bee') speak(bl, { interrupt: canInterrupt() });
         break;
       }
-      case 'butterflyTap': {
-        CK.Audio.play('sparkle'); CK.Audio.play('butterfly');
+      case 'beeTap': {
+        CK.Audio.play('sparkle'); CK.Audio.play('buzz');
         render.burst('sparkles', e.x, e.y);
-        speak(T('butterfly.tap'), { interrupt: canInterrupt() });
+        speak(T('bee.tap'), { interrupt: canInterrupt() });
         break;
       }
       case 'talk': CK.UI.say(''); CK.UI.setDots(world.roundsPerLevel || 4, world.roundsPerLevel || 4); openTalk(e.talk || world.talk); break;
@@ -363,8 +369,8 @@
         break;
       case 'sessionDone': {
         CK.Audio.play('fanfare');
-        weather.setWeather(3, {});                 // the starry-night party
-        if (weather.setNight) weather.setNight(true);
+        weather.setWeather(3, {});                 // the rainbow party
+        if (weather.party) weather.party(true);
         render.burst('confetti', 0, 0);
         progress.totalStars += e.stars || 0; progress.sessions++;
         CK.Storage.setJSON('progress', progress);
@@ -430,7 +436,7 @@
     stats.frames++;
     if (mode === 'play' || mode === 'talk' || mode === 'done') {
       let left = dt * speed;
-      world.wind = (weather.ambient && weather.ambient.wind) || 0;
+      if (world.setBreeze) world.setBreeze((weather.ambient && weather.ambient.wind) || 0);
       while (left > 1e-6) {
         const step = Math.min(left, 1 / 30);
         if (bot && (mode === 'play' || mode === 'talk')) bot.step(step);
@@ -456,12 +462,12 @@
   function toLogical(cx, cy) { return { x: (cx - view.left) / view.s, y: (cy - view.top) / view.s }; }
   function onDown(p) {
     if (mode !== 'play' || bot) return;
-    world.pointerDown(p.x, p.y);   // blocks, Lulu (repeat), the butterfly
+    world.pointerDown(p.x, p.y);   // layers, Koko (repeat), the bee
   }
   function repeatPrompt() {
     if (!lastAsk || world.state !== 'round') return;
     CK.Audio.play('click');
-    if (world.lulu) { world.lulu.mood = 'think'; world.lulu.moodT = 1.2; }
+    if (world.koko) { world.koko.mood = 'think'; world.koko.moodT = 1.2; }
     const cp = currentPrompt(); promptUntil = 0; speakPrompt(cp, { interrupt: true });
   }
 
@@ -557,8 +563,9 @@
         return { x: view.left + b.x * view.s, y: view.top + b.y * view.s, w: b.w * view.s, h: b.h * view.s };
       },
       dropScreen() { const p = world.dropPoint ? world.dropPoint() : null; return p ? { x: view.left + p.x * view.s, y: view.top + p.y * view.s } : null; },
-      luluScreen() {
-        const b = world.luluHit ? world.luluHit() : null; if (!b) return null;
+      beeScreen() { const b = world.beePos ? world.beePos() : (world.bee ? { x: world.bee.x, y: world.bee.y } : null); return b ? { x: view.left + b.x * view.s, y: view.top + b.y * view.s } : null; },
+      kokoScreen() {
+        const b = world.kokoHit ? world.kokoHit() : null; if (!b) return null;
         return { x: view.left + b.x * view.s, y: view.top + b.y * view.s, w: b.w * view.s, h: b.h * view.s };
       },
       answerId() { return world.answerId ? world.answerId() : null; },

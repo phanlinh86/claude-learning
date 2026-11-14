@@ -1,14 +1,14 @@
-/* CK.Audio (Lulu's Jungle Tower) — every sound is synthesized with WebAudio (no files to license or download).
- * Soft toddler-friendly SFX (wooden clonk rising with the tower, creak, boing, count chimes, monkey ooh-ooh), a gentle
- * generative music loop per time of day, jungle birds / night insects ambience, and ducking while Lulu speaks. iOS: call unlock() inside the first touchend/click. */
+/* CK.Audio (Koko's Cake Tower) — every sound is synthesized with WebAudio (no files to license or download).
+ * Soft toddler-friendly SFX (squishy cake flump rising with the cake, jelly wobble, boing, count chimes, candle fwip, blow,
+ * bee buzz), a gentle generative music loop per weather, birds / wind / rain-patter ambience, and ducking while Koko speaks. iOS: call unlock() inside the first touchend/click. */
 (function (CK) {
   'use strict';
   const NOTE = n => 440 * Math.pow(2, (n - 69) / 12);
   const MUSIC = [
-    { root: 60, tempo: 96, prog: [[0, 4, 7], [5, 9, 12], [7, 11, 14], [0, 4, 7]], lead: 'triangle' },    // morning: C major, waking up
-    { root: 62, tempo: 108, prog: [[0, 4, 7], [7, 11, 14], [9, 12, 16], [5, 9, 12]], lead: 'triangle' },  // noon: D major, bright
-    { root: 65, tempo: 88, prog: [[0, 4, 7], [-3, 0, 4], [5, 9, 12], [7, 11, 14]], lead: 'sine' },        // sunset: F major, warm
-    { root: 67, tempo: 76, prog: [[0, 4, 7], [-5, -1, 2], [-3, 0, 4], [-7, -3, 0]], lead: 'sine' }        // night: G music box
+    { root: 62, tempo: 108, prog: [[0, 4, 7], [7, 11, 14], [9, 12, 16], [5, 9, 12]], lead: 'triangle' },  // sunny: D major, bright
+    { root: 60, tempo: 100, prog: [[0, 4, 7], [5, 9, 12], [7, 11, 14], [0, 4, 7]], lead: 'triangle' },    // breezy: C major, skipping
+    { root: 65, tempo: 84, prog: [[0, 4, 7], [-3, 0, 4], [5, 9, 12], [7, 11, 14]], lead: 'sine' },        // rain: F major, cosy
+    { root: 67, tempo: 96, prog: [[0, 4, 7], [-5, -1, 2], [-3, 0, 4], [2, 5, 9]], lead: 'triangle' }      // rainbow: G music box
   ];
   const SCALE = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24];
   const SCALE_C = [0, 0, 2, 4, 5, 7, 9, 11, 12, 14, 16];
@@ -59,7 +59,7 @@
       this.sfx.gain.setTargetAtTime(this.sfxOn ? 0.9 : 0, t, 0.03);
       const mv = this.musicOn && this._playing ? (this.ducked ? 0.07 : 0.22) : 0;
       this.music.gain.setTargetAtTime(mv, t, this.ducked ? 0.08 : 0.5);
-      const av = this.sfxOn && this._playing ? (this.ducked ? 0.012 : (this.mood === 3 ? 0.03 : 0.022)) : 0;   // soft leaf rustle bed
+      const av = this.sfxOn && this._playing ? (this.ducked ? 0.012 : (this.mood === 2 ? 0.07 : this.mood === 1 ? 0.04 : 0.016)) : 0;   // rain patter / wind bed
       this.amb.gain.setTargetAtTime(av, t, 0.8);
     },
     setVolume(v) { this.setOptions({ volume: v }); },
@@ -227,7 +227,17 @@
         case 'pick': this.tone(NOTE(79) * r, 0.08, { type: 'triangle', vol: 0.18, slideTo: NOTE(86) * r }); break;
         case 'drop': this.noise(0.22, { vol: 0.1, f0: 1600, f1: 500, q: 0.9 }); break;
         case 'count': { const k = Math.min(opt.i || 1, 10); this.tone(NOTE(SCALE_C[k % SCALE_C.length] + 72), 0.3, { type: 'triangle', vol: 0.24 }); this.tone(NOTE(SCALE_C[k % SCALE_C.length] + 84), 0.22, { vol: 0.08, at: 0.03 }); break; }
-        case 'monkey': [0, 5, 0, 7].forEach((n, i) => this.tone(NOTE(76 + n), 0.16, { type: 'sine', vol: 0.16, at: i * 0.17, slideTo: NOTE(80 + n) })); break;
+        case 'flump': {  // soft sponge cake lands: a squishy low "flump", pitch climbs with the cake height
+          const k = Math.min(opt.i || 1, 8); const f = NOTE(52 + k * 2) * r;
+          this.tone(f, 0.22, { type: 'sine', vol: 0.34, slideTo: f * 0.62 }); this.tone(f * 2, 0.1, { type: 'triangle', vol: 0.08, slideTo: f * 1.3 });
+          this.noise(0.12, { vol: 0.12, type: 'lowpass', f0: 700, f1: 200, q: 0.7 }); break;
+        }
+        case 'wobble': [0, 1, 2].forEach(i => this.tone((200 + i * 14) * r, 0.12, { type: 'sine', vol: 0.09, at: i * 0.09, slideTo: (240 - i * 10) * r })); break;
+        case 'plop': this.tone(520 * r, 0.12, { type: 'sine', vol: 0.26, slideTo: 260 * r }); this.tone(NOTE(88), 0.18, { type: 'triangle', vol: 0.1, at: 0.06 }); break;
+        case 'candle': this.noise(0.12, { vol: 0.12, f0: 2400, f1: 900, q: 1.1 }); this.tone(NOTE(91) * r, 0.14, { type: 'sine', vol: 0.07, at: 0.04 }); break;
+        case 'blow': this.noise(0.9, { vol: 0.24, type: 'bandpass', f0: 900, f1: 500, q: 0.6 }); break;
+        case 'puffOut': [0, 1, 2].forEach(i => this.noise(0.1, { vol: 0.08, f0: 1800 - i * 300, q: 1.4, at: i * 0.07 })); [0, 4, 7].forEach((n, i) => this.tone(NOTE(84 + n), 0.2, { vol: 0.08, at: 0.2 + i * 0.06 })); break;
+        case 'buzz': this.tone(220 * r, 0.5, { type: 'sawtooth', vol: 0.04, slideTo: 250 * r }); this.tone(224 * r, 0.5, { type: 'square', vol: 0.02, slideTo: 210 * r }); break;
         case 'gust': this.noise(1.2, { vol: 0.14, type: 'bandpass', f0: 400, f1: 1200, q: 0.5 }); break;
         case 'click': this.tone(900, 0.05, { vol: 0.14, slideTo: 1300 }); break;
         case 'talkRight': [0, 4, 7, 12].forEach((n, i) => this.tone(NOTE(76 + n), 0.3, { type: 'triangle', vol: 0.23, at: i * 0.08 })); break;
@@ -281,10 +291,10 @@
       if (c.state !== 'running') { this._next = c.currentTime + 0.1; return; }
       const m = MUSIC[this.mood];
       const eighth = 60 / m.tempo / 2;
-      // jungle ambience: a far bird chirp by day, a cricket trill at night (quiet, ducked with speech)
+      // village ambience: a far bird chirp (sunny / rainbow), a drip "plink" in the rain (quiet, ducked with speech)
       if (this.sfxOn && !this.ducked && Math.random() < 0.018) {
-        if (this.mood === 3) { const f = 4200 + Math.random() * 800; for (let k = 0; k < 6; k++) this.tone(f, 0.035, { vol: 0.03, at: k * 0.06 }); }
-        else { const f = 1800 + Math.random() * 1400; this.tone(f, 0.09, { vol: 0.04, slideTo: f * 1.5 }); this.tone(f * 1.2, 0.08, { vol: 0.035, at: 0.12, slideTo: f * 0.9 }); }
+        if (this.mood === 2) { const f = 1500 + Math.random() * 900; this.tone(f, 0.06, { vol: 0.035, slideTo: f * 0.7 }); }
+        else if (this.mood !== 1) { const f = 1800 + Math.random() * 1400; this.tone(f, 0.09, { vol: 0.04, slideTo: f * 1.5 }); this.tone(f * 1.2, 0.08, { vol: 0.035, at: 0.12, slideTo: f * 0.9 }); }
       }
       while (this._next < c.currentTime + 0.2) {
         this._playStep(this._step, this._next, m, eighth);

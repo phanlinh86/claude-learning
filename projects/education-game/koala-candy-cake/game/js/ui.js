@@ -1,4 +1,4 @@
-/* CK.UI — DOM screens: title, parent settings, HUD, Lulu's speech bubble, pause, Talk time, celebration. */
+/* CK.UI — DOM screens: title, parent settings, HUD, Koko's speech bubble, pause, Talk time, celebration. */
 (function (CK) {
   'use strict';
   const $ = id => document.getElementById(id);
@@ -23,7 +23,7 @@
       const parts = [T(lang, 'ui.logo1'), T(lang, 'ui.logo2')];
       $('logo1').textContent = parts[0]; $('logo2').textContent = parts[1];
       const sub = T(lang, 'ui.subtitle'); $('tagline').textContent = sub === 'ui.subtitle' ? '' : sub;
-      document.title = title === 'ui.title' ? "Lulu's Jungle Tower" : title;
+      document.title = title === 'ui.title' ? "Koko's Cake Tower" : title;
       $('inpName').placeholder = T(lang, 'ui.namePlaceholder');
       $('btnPlay').setAttribute('aria-label', T(lang, 'ui.play'));
     },

@@ -1,11 +1,11 @@
-/* Lulu's Jungle Tower — mobile-first shell (iPhone / iPad Safari, portrait + landscape). */
+/* Koko's Cake Tower — mobile-first shell (iPhone / iPad Safari, portrait + landscape). */
 :root {
   --ink: #33364f;
   --cream: #fbfdff;
   --green: #45b864; --green-d: #2a8343;
   --orange: #ff9a2e; --orange-d: #c4650c;
   --blue: #3c8de8; --blue-d: #1f5ba8;
-  --sky: #bfe6f2;
+  --sky: #a9ddf5;
   --sa-t: env(safe-area-inset-top, 0px); --sa-r: env(safe-area-inset-right, 0px);
   --sa-b: env(safe-area-inset-bottom, 0px); --sa-l: env(safe-area-inset-left, 0px);
   --u: min(1vw, 1vh);            /* 1 % of the short side */
@@ -154,15 +154,15 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 
 /* ---------- done ---------- */
 #scrDone { align-items: flex-end; padding-bottom: calc(var(--sa-b) + 4vh); }
-/* short landscape phones: panel on the right so the cheering Lulu (left) stays visible */
-/* every landscape screen: panel on the right so the cheering Lulu (left) and the friends on the grass stay visible */
+/* short landscape phones: panel on the right so the cheering Koko (left) stays visible */
+/* every landscape screen: panel on the right so the cheering Koko (left) and the friends on the grass stay visible */
 @media (orientation: landscape) {
   #scrDone { align-items: flex-start; justify-content: flex-end; padding-top: calc(var(--sa-t) + 8vh); padding-bottom: 0; }
   #scrDone .done-panel { max-width: min(470px, 46vw); }
 }
 @media (orientation: portrait) {
   #scrDone { padding-bottom: calc(var(--sa-b) + 2vh); }
-  /* portrait title: logo + ▶ at the top, Lulu and the tower below (visual QA P1-2) */
+  /* portrait title: logo + ▶ at the top, Koko and the tower below (visual QA P1-2) */
   .title-wrap { justify-content: flex-start; padding-top: 4vh; padding-bottom: 0; gap: 6px; }
   .btn-play { width: clamp(110px, 22 * var(--u), 170px); }
 }
@@ -208,7 +208,7 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
   .talk-choices button canvas { width: 84px; height: 84px; }
 }
 @media (prefers-reduced-motion: reduce) { .btn-play { animation: none; } }
-/* the smallest landscape phones (SE): no room for the tagline next to Lulu */
+/* the smallest landscape phones (SE): no room for the tagline next to Koko */
 @media (orientation: landscape) and (max-height: 380px) { .tagline { display: none; } }
 
 /* volume: slider in settings, big − / + in the pause menu (kid-reachable) */
