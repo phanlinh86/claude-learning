@@ -22,6 +22,7 @@ After winter the reef starts again with less air.
 ## Play
 - **Windows 11:** double-click `FoxyReefMemory.exe`. It's portable, with nothing to install. Data is saved in `%APPDATA%\FoxyReefMemory\data`. SmartScreen may warn about an unsigned file: click **More info → Run anyway**.
 - **Browser:** open `game/index.html`, or use GitHub Pages: `https://phanlinh86.github.io/claude-learning/projects/daily-game/foxy-reef-memory/game/`.
+- **iPhone / iPad:** open the GitHub Pages link in Safari, tap **Share → Add to Home Screen**, then start it from the new Reef Memory icon. It runs full screen like an app, in landscape or portrait. Tap the shells with a finger; the ⏸ and 🔊 buttons sit in the top-right corner, clear of the notch. Small phones work best turned sideways. Held upright, the game asks you to turn the phone, and **Play upright anyway** lets you keep playing. If you hear no sound, turn up the volume, check the side switch, or open Settings → Volume.
 
 ## Build & test
 ```bash
@@ -31,5 +32,7 @@ node tests/unit/run.js                           # simulation tests
 (cd game && python3 -m http.server 8790) &
 node tests/e2e/smoke.js http://127.0.0.1:8790/index.html
 node tests/e2e/functional.js http://127.0.0.1:8790/index.html
+node tests/e2e/mobile.js                          # iPhone / iPad sizes with real touch (serves game/ itself)
+node tools/render_mobile_icons.js                 # re-render the home-screen icons from assets/default/icon.svg
 ```
 URL switches: `?speed=8&bot=1&autostart=1&autorestart=1&seed=42&mute=1&debug=1&level=N`; automation API is `window.RF.debug`.

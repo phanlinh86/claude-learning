@@ -5,6 +5,7 @@
   const params = new URLSearchParams(location.search);
   const num = (k, d) => { const v = parseFloat(params.get(k)); return isFinite(v) ? v : d; };
   const SEASON_NAMES = ['Spring', 'Summer', 'Autumn', 'Winter'];
+  const isTouch = window.matchMedia ? window.matchMedia('(pointer:coarse)').matches : (('ontouchstart' in window) || navigator.maxTouchPoints > 0);
 
   /* Difficulty presets → CONFIG overrides (see docs/MECHANICS.md). Unknown keys are skipped safely. */
   function difficultyOverrides(d, peek) {
@@ -14,7 +15,7 @@
   }
 
   const Game = {
-    mode: 'boot',
+    mode: 'boot', isTouch,
     isApp: params.get('app') === '1' || typeof window.ffStoreSet === 'function',
     speed: Math.max(0.1, Math.min(64, num('speed', 1))),
     botMode: params.get('bot') === '1',
@@ -32,10 +33,15 @@
       RF.Audio.setOptions({ sfx: this.settings.sfx, music: this.settings.music, muted: this.settings.muted || this.urlMute });
       this.renderer = new RF.Renderer(document.getElementById('game'));
       await RF.Assets.loadAll();
-      this.renderer.resize();
+      if (isTouch) document.body.classList.add('touch');
       RF.UI.init(this);
       this.bindInput();
-      window.addEventListener('resize', () => { clearTimeout(this._rsz); this._rsz = setTimeout(() => this.renderer.resize(), 120); });
+      this.relayout();
+      // rotation, Split View, the Safari toolbar showing / hiding: re-fit once things settle (debounced)
+      const onResize = () => { clearTimeout(this._rsz); this._rsz = setTimeout(() => this.relayout(), 120); };
+      window.addEventListener('resize', onResize);
+      window.addEventListener('orientationchange', onResize);
+      if (window.visualViewport) window.visualViewport.addEventListener('resize', onResize);
       if (params.get('autostart') === '1') this.startGame(); else this.toTitle();
       this.last = performance.now();
       requestAnimationFrame(t => this.frame(t));
@@ -47,6 +53,24 @@
       const w = new RF.World({ seed: s, config: cfg });
       w.reset();
       return w;
+    },
+    /* safe-area insets (notch, home indicator) in CSS px, from the hidden #safeProbe's env() padding */
+    readInsets() {
+      const el = document.getElementById('safeProbe'); if (!el) return null;
+      const cs = getComputedStyle(el);
+      return { top: parseFloat(cs.paddingTop) || 0, right: parseFloat(cs.paddingRight) || 0, bottom: parseFloat(cs.paddingBottom) || 0, left: parseFloat(cs.paddingLeft) || 0 };
+    },
+    relayout() {
+      this.renderer.resize(this.readInsets()); this.syncRotate();
+      // resizing clears the canvas: paint right away so a rotation never flashes black until the next frame
+      if (this.world && this.mode !== 'boot') { try { this.renderer.draw(this.mode); } catch (e) { /* next frame retries */ } }
+    },
+    /* small phones held upright: the cards get tiny, so ask to turn sideways (once dismissed, not again this session) */
+    syncRotate() {
+      const el = document.getElementById('rotate'); if (!el) return;
+      const on = this.isTouch && this.renderer.portrait && Math.min(window.innerWidth, window.innerHeight) < 600 && this.mode === 'playing' && !this._rotOk && !this.botMode;
+      if (on && !this._rotOn) this.last = performance.now();
+      this._rotOn = on; el.classList.toggle('hidden', !on);
     },
     makeWeather() { return new RF.Weather({ width: 960, height: 540, seed: 5 }); },
 
@@ -63,6 +87,7 @@
       this.deadAt = -1;
       RF.UI.setHud(false);
       RF.UI.show('scrTitle');
+      this.syncRotate();
     },
 
     startGame() {
@@ -83,6 +108,7 @@
       this.mode = 'playing';
       this.deadAt = -1;
       RF.UI.hideAll(); RF.UI.setHud(true);
+      this.syncRotate();
       this.canvasFocus();
     },
 
@@ -92,12 +118,14 @@
       this.mode = 'paused';
       RF.UI.setHud(false);
       RF.UI.show('scrPause');
+      this.syncRotate();
     },
     resume() {
       if (this.mode !== 'paused') return;
       this.mode = 'playing';
       RF.UI.hideAll(); RF.UI.setHud(true);
       this.last = performance.now();
+      this.syncRotate();
       this.canvasFocus();
     },
     canvasFocus() { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); },
@@ -112,6 +140,7 @@
       this.mode = 'over';
       this.overAt = performance.now();
       RF.UI.setHud(false);
+      this.syncRotate();
       RF.UI.showGameOver({
         score: w.score, best: Math.max(prev, w.score), newBest: newBest && w.score > 0,
         matches: w.matches || 0, mistakes: w.mistakes || 0, bestCombo: w.bestCombo || 0, cupcakes: w.cupcakesEaten || 0,
@@ -143,7 +172,7 @@
       if (typeof window.ffFullscreen === 'function') window.ffFullscreen(on);
       else if (on && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
       else if (!on && document.fullscreenElement) document.exitFullscreen().catch(() => {});
-      setTimeout(() => this.renderer.resize(), 150);
+      setTimeout(() => this.relayout(), 150);
     },
     picturesChanged() { RF.Assets._ver = (RF.Assets._ver || 0) + 1; },
     quit() { if (typeof window.ffQuit === 'function') window.ffQuit(); else window.close(); },
@@ -189,12 +218,20 @@
         }
       });
       const stage = document.getElementById('stage');
+      // Pointer Events: mouse, pen and every finger (two fingers may flip two cards at once). A tap flips on
+      // pointerdown, so it feels instant on a touch screen; the canvas has touch-action:none (no scroll / zoom).
       stage.addEventListener('pointerdown', e => {
+        RF.Audio.unlock();
         if (e.button !== undefined && e.button > 0) return;
-        if (e.target.closest && e.target.closest('button, .screen, #hud, input, label')) return;   // HUD/menu clicks never flip cards
-        if (this.mode === 'playing') { e.preventDefault(); this.tapAt(e.clientX, e.clientY); }
+        if (e.target.closest && e.target.closest('button, .screen, #hud, #rotate, input, label')) return;   // HUD/menu taps never flip cards
+        if (this.mode === 'playing' && !this._rotOn) {
+          e.preventDefault();
+          if (e.pointerType !== 'mouse') { this.renderer.showCursor = false; this.renderer.hoverId = null; }
+          this.tapAt(e.clientX, e.clientY);
+        }
       });
       stage.addEventListener('pointermove', e => {
+        if (e.pointerType !== 'mouse') return;   // fingers have no hover
         if (this.mode !== 'playing' || !this.world) { this.renderer.hoverId = null; return; }
         const [x, y] = this.renderer.toLogical(e.clientX, e.clientY);
         const id = this.world.cardAt(x, y);
@@ -202,7 +239,25 @@
         document.getElementById('game').style.cursor = id != null ? 'pointer' : 'default';
       });
       window.addEventListener('blur', () => { if (this.mode === 'playing') this.pause(); });
-      document.addEventListener('visibilitychange', () => { if (document.hidden && this.mode === 'playing') this.pause(); });
+      // app switch / lock screen / tab hidden: pause the game, silence and suspend the audio; resume audio on return
+      document.addEventListener('visibilitychange', () => {
+        const A = RF.Audio;
+        if (document.hidden) {
+          if (this.mode === 'playing') this.pause();
+          A._hidden = true;
+          if (A.ctx && A.ctx.state === 'running') A.ctx.suspend().catch(() => {});
+        } else {
+          A._hidden = false;
+          if (A.ctx && A.ctx.state !== 'running' && A._kicked) A.ctx.resume().catch(() => {});
+          this.last = performance.now();
+          this.relayout();
+        }
+      });
+      window.addEventListener('pagehide', () => { if (this.mode === 'playing') this.pause(); });
+      // iOS unlocks Web Audio only inside a user gesture: try on every early touch / click / key
+      const unlock = () => RF.Audio.unlock();
+      ['touchend', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, unlock, { capture: true, passive: true }));
+      this.kidProof();
       window.addEventListener('dragover', e => e.preventDefault());
       window.addEventListener('drop', e => e.preventDefault());
       window.addEventListener('contextmenu', e => e.preventDefault());
@@ -211,7 +266,22 @@
         const k = e.key;
         if (k === 'F5' || ((e.ctrlKey || e.metaKey) && ['r', 'R', '+', '=', '-', '_', '0', 'p', 'P', 'f', 'F', 'g', 'G', 'u', 'U'].includes(k))) e.preventDefault();
       }, true);
-      document.addEventListener('fullscreenchange', () => { this.fullscreen = !!document.fullscreenElement || (this.fullscreen && typeof window.ffFullscreen === 'function'); this.renderer.resize(); RF.UI.syncSettings(); });
+      document.addEventListener('fullscreenchange', () => { this.fullscreen = !!document.fullscreenElement || (this.fullscreen && typeof window.ffFullscreen === 'function'); this.relayout(); RF.UI.syncSettings(); });
+    },
+    /* small hands on a big glass: no pinch zoom, no double-tap zoom, no rubber-band page scroll, no long-press
+     * callout. Scrollable panels (.panel / .scroll) still scroll. */
+    kidProof() {
+      const NP = { passive: false }, prevent = e => { if (e.cancelable) e.preventDefault(); };
+      const scrolly = t => t && t.closest && t.closest('input, textarea, select, .scroll, .panel');
+      ['gesturestart', 'gesturechange', 'gestureend'].forEach(t => document.addEventListener(t, prevent, NP));
+      document.addEventListener('touchmove', e => { if (e.touches && e.touches.length > 1) { prevent(e); return; } if (!scrolly(e.target)) prevent(e); }, NP);
+      let lastEnd = 0;
+      document.addEventListener('touchend', e => {
+        const t = Date.now();
+        if (t - lastEnd < 320 && !(e.target.closest && e.target.closest('button, a, input, label, select, .scroll, .prev, .slot'))) prevent(e);
+        lastEnd = t;
+      }, NP);
+      document.addEventListener('dblclick', e => { if (!scrolly(e.target)) prevent(e); }, NP);
     },
 
     handleEvents(evts) {
@@ -269,14 +339,14 @@
         const real = Math.min(0.1, Math.max(0, (ts - this.last) / 1000));
         this.last = ts;
         const dt = real * this.speed;
-        if (this.mode !== 'paused' && this.world) {
+        if (this.mode !== 'paused' && this.world && !this._rotOn) {
           const n = Math.max(1, Math.ceil(dt / (1 / 60)));
           const h = dt / n;
           for (let i = 0; i < n; i++) this.step(h);
           this.renderer.update(dt);
         }
+        this.adapt(real);   // before draw: a quality step resizes (= clears) the canvas
         this.renderer.draw(this.mode);
-        this.adapt(real);
       } catch (err) {
         console.error(err);
         if (this.stats.errors.length < 20) this.stats.errors.push(String(err && err.stack || err));

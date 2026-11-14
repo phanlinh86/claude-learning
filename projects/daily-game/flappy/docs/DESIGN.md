@@ -136,6 +136,19 @@ Keeps the bird alive and times flaps so drops land on turtles; `skill` < 1 adds 
 
 Additive fields/events, tunables and physics rationale for 5.1–5.3: see `docs/MECHANICS.md`.
 
+### 5.3b Screen view (mobile layer)
+- `Renderer.computeView(vw, vh, insetsCss)` → `{ VW, VH, s, SX, SY, ins, viewL, viewR, ceilingY }`. The canvas always fills
+  the screen; its logical size is VW×VH: wider than 16:9 → VH 540, VW = 540·aspect (scene centred); 16:9…1:1 → VW 960, taller;
+  portrait → VW 600 (phones) / 760 (tablets) with the bird at 30 % from the left. The 960×540 scene is drawn at (SX, SY),
+  bottom-anchored; the extra room is sky (continued from the season's sky, extra cloud bands) and tiled far/mid/ground layers.
+  `ins` = safe-area insets in logical px (read from `#safeProbe`); the canvas HUD and the DOM `#hud` stay inside them.
+- `World.setView(viewL, viewR, ceilingY)` (cfg `viewL`, `viewR` (null → width), `ceilingY` (≤ 0)): turtles spawn at
+  `viewR + turtleSpawnX`, despawn below `viewL + turtleDespawnX`, drops die below `viewL − 80`; the soft ceiling is `ceilingY`
+  (at most 300 px above 0, on tall screens). Defaults reproduce the 960×540 desktop game exactly.
+- `Weather.setView(x0, x1, y0)`: particles enter/leave at the visible edges, counts scale with the visible area (`density`).
+- `main.js relayout()` (debounced on resize / orientationchange / visualViewport) re-reads insets, resizes and calls both.
+- Modes: `'title' → 'playing' ⇄ 'paused' → 'over'`; a new round is `'playing'` with `world.state === 'ready'` until the first flap.
+
 ### 5.4 Test hooks (main.js)
 URL params: `?speed=N` (time scale, e.g. 8), `?bot=1` (autopilot), `?seed=N`, `?mute=1`.
 `window.FF.debug` → `{ world, weather, getState(), setSpeed(n), flap(), startGame() }`.

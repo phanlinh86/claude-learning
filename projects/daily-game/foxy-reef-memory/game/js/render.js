@@ -29,35 +29,89 @@
       this.vis = { cur: 0, prev: 0, t: 1 };
       this.banner = null;
       this.hoverId = null; this.showCursor = false;
-      this._ox = 0; this._oy = 0;
+      this._ox = 0; this._oy = 0; this._bx = 0; this._by = 0;
+      this.OX = 0; this.OY = 0; this.VW = W; this.VH = H;
+      this.insets = { top: 0, right: 0, bottom: 0, left: 0 };
       this.debug = /[?&]debug=1/.test(location.search);
       const mp = /[?&]maxpx=([\d.]+)/.exec(location.search); this.maxPx = mp ? +mp[1] : 2;
       this.resize();
     }
 
-    resize() {
-      const vw = window.innerWidth, vh = window.innerHeight;
+    /* The canvas covers the whole screen (phones and tablets, any aspect, portrait or landscape).
+     * The 960×540 stage is fitted with "contain" and centred; OX/OY = logical size of the side / top bands,
+     * which are filled with the reef itself (mirrored water, tiled kelp and seabed, a sky above the surface,
+     * deeper sand below). insets = CSS-px safe-area insets read from #safeProbe (notch, home indicator). */
+    resize(insets) {
+      if (insets) this.insets = insets;
+      const vw = Math.max(1, window.innerWidth), vh = Math.max(1, window.innerHeight);
       const s = Math.min(vw / W, vh / H);
       const dpr = window.devicePixelRatio || 1;
       this.cssScale = s;
-      this.canvas.style.width = Math.round(W * s) + 'px';
-      this.canvas.style.height = Math.round(H * s) + 'px';
-      this.px = Math.min(s * dpr, this.maxPx || 2);   // backing store capped (≤1920×1080 by default)
-      this.canvas.width = Math.round(W * this.px);
-      this.canvas.height = Math.round(H * this.px);
-      const ox = (vw - W * s) / 2, oy = (vh - H * s) / 2;
-      const hud = document.getElementById('hud'), toast = document.getElementById('toast');
-      if (hud) { hud.style.top = (oy + 14 * s) + 'px'; hud.style.right = (ox + 14 * s) + 'px'; }
-      if (toast) toast.style.bottom = (oy + 30 * s) + 'px';
+      this.VW = vw / s; this.VH = vh / s;
+      this.OX = (this.VW - W) / 2;
+      this.OY = (this.VH - H) * (vh > vw ? 0.62 : 0.5);   // portrait: more sky above the surface, less sand below
+      this.portrait = vh > vw;
+      let px = Math.min(s * dpr, this.maxPx || 2);
+      const touch = navigator.maxTouchPoints > 0;
+      const cap = Math.sqrt((touch ? 3.2e6 : 1920 * 1080) / (this.VW * this.VH));   // backing store ≤ 1920×1080 (desktop) / 3.2 MP (iPhone, iPad)
+      if (px > cap) px = cap;
+      this.px = px;
+      this.canvas.width = Math.round(this.VW * px);
+      this.canvas.height = Math.round(this.VH * px);
+      this.canvas.style.width = vw + 'px';
+      this.canvas.style.height = vh + 'px';
+      this._bx = Math.round(this.OX * px); this._by = Math.round(this.OY * px);
+      this.layoutHud(vw, vh, s);
       RF.Assets.setScale(this.px);
-      this._tray = null;
+      this._tray = null; this._sand = null; this._sky = null;
       if (this.vis) RF.Assets.warmSeason(this.vis.cur);
     }
 
-    /* map a client (mouse) position to logical coordinates */
+    /* HTML buttons sit in the screen's top-right corner, inside the safe area; the canvas HUD keeps clear of
+     * them and of the notch. All results in stage (logical) coordinates. */
+    layoutHud(vw, vh, s) {
+      const i = this.insets || { top: 0, right: 0, bottom: 0, left: 0 }, k = 1 / s;
+      const sf = this.safe = { l: (i.left || 0) * k, r: (i.right || 0) * k, t: (i.top || 0) * k, b: (i.bottom || 0) * k };
+      const u = Math.min(vw / 100, vh * 1.78 / 100);
+      const hb = Math.max(44, 5 * u), gap = 0.8 * u;
+      const top = Math.max(14 * Math.min(s, 1.6), (i.top || 0) + 6), right = Math.max(14 * Math.min(s, 1.6), (i.right || 0) + 6);
+      const hud = document.getElementById('hud'), toast = document.getElementById('toast');
+      if (hud) { hud.style.top = top + 'px'; hud.style.right = right + 'px'; hud.style.setProperty('--hb', hb + 'px'); hud.style.gap = gap + 'px'; }
+      if (toast) toast.style.bottom = Math.max((i.bottom || 0) + 12, (vh - (this.OY + H) * s) + 30 * s) + 'px';
+      // buttons rect in stage coords
+      const br = (vw - right) * k - this.OX, bl = br - (2 * hb + gap) * k, bt = top * k - this.OY, bb = bt + hb * k;
+      this.btnRect = { l: bl, r: br, t: bt, b: bb };
+      // canvas HUD: when the sky band above the stage is tall enough it moves up into the sky (just above the
+      // waves) so the reef stays clear; otherwise it stays on the stage, pushed down only by a notch
+      // (HUD content spans stage y 16..104; lifted, its bottom sits at y −14 and it may grow up to 1.3× on small
+      // screens, where the sky is tall and the text would otherwise be tiny)
+      const room = this.OY - sf.t - 22, lifted = room >= 104 - 16 + 6 + 16;
+      let hs = 1;
+      if (lifted) { hs = clamp(0.62 / s, 1, 1.3); hs = Math.min(hs, (room - 6) / 88); }
+      const hy = lifted ? -118 : Math.max(0, sf.t - this.OY), hx = Math.max(0, -this.OX + sf.l);
+      const rightEdge = Math.min(944, W + this.OX - sf.r - 16);
+      let mw = 232, mx = rightEdge - mw, my = 68 + hy;
+      const hits = (x, y, w, h) => x < br + 6 && x + w > bl - 6 && y < bb + 6 && y + h > bt - 6;
+      if (hits(mx - 16, my - 4, mw + 16, 30)) {
+        const nx = bl - 14 - mw;
+        if (nx >= 600) mx = nx; else my = bb + 10;   // slide left beside the buttons, else drop below them
+      }
+      if (lifted && hs > 1) {   // grown HUD: keep the buttons clear of its top edge
+        const topY = -14 - 88 * hs;
+        if (bb + 6 > topY && mx + mw > bl - 6) hs = Math.max(1, (-14 - bb - 6) / 88);
+      }
+      this.hudLayout = { hx, hy, mx, my, mw, hs: lifted ? hs : 1 };
+    }
+
+    /* map a client (mouse / finger) position to logical stage coordinates */
     toLogical(clientX, clientY) {
-      const r = this.canvas.getBoundingClientRect();
-      return [(clientX - r.left) / r.width * W, (clientY - r.top) / r.height * H];
+      const r = this.canvas.getBoundingClientRect(), k = r.width / (this.VW || W);
+      return [(clientX - r.left) / k - (this.OX || 0), (clientY - r.top) / k - (this.OY || 0)];
+    }
+    /* client rect of the 960×540 stage (tests, layout checks) */
+    stageRect() {
+      const r = this.canvas.getBoundingClientRect(), k = r.width / (this.VW || W);
+      return { left: r.left + (this.OX || 0) * k, top: r.top + (this.OY || 0) * k, width: W * k, height: H * k, k };
     }
 
     attach(world, weather) { this.world = world; this.weather = weather; this.fx.length = 0; this.texts.length = 0; this.banner = null; this.shake = 0; this.flash = 0; this._tray = null; }
@@ -91,7 +145,7 @@
             break;
           }
           case 'mismatch': for (const id of (e.ids || [])) { const c = this.card(id); if (c) { this.bubbles(c.x, c.y + CH / 2 + 6, 3, 0.5); c._miss = 0.9; } } break;
-          case 'penalty': this.texts.push({ text: '-' + Math.round(e.amount) + 's air', x: 830, y: 108, life: 0, max: 1.2, size: 18, color: '#ff8a8a' }); break;
+          case 'penalty': { const L = this.hudLayout || { mx: 712, my: 68, mw: 232 }; this.texts.push({ text: '-' + Math.round(e.amount) + 's air', x: L.mx + L.mw / 2, y: L.my + 40, life: 0, max: 1.2, size: 18, color: '#ff8a8a' }); break; }
           case 'eat': this.sparks(e.x, e.y, 8, '#ffd1e8'); this.texts.push({ text: 'Yum!', x: e.x, y: Math.max(150, e.y - 40), life: 0, max: 0.9, size: 20, color: '#ffffff' }); break;
           case 'cupcake': this.bubbles(e.x, e.y, 4, 0.8); break;
           case 'airlow': { const f = w && w.fox; this.texts.push({ text: 'Air is low!', x: f ? f.x : 140, y: f ? Math.max(150, f.y - 70) : 200, life: 0, max: 1.8, size: 24, color: '#ff6b6b' }); break; }
@@ -160,29 +214,115 @@
 
     // ---------------- drawing helpers ----------------
     /* Blit a full-width layer at exact device pixels (no resampling), wrapping horizontally. */
-    tile(key, off, y, w, h, alpha, additive) {
+    /* It covers the whole canvas width (the side bands too). mirror: every other copy is flipped, so a layer
+     * that is not tileable (the water gradient with its sun glow, the rays) still joins without a seam. */
+    tile(key, off, y, w, h, alpha, additive, mirror) {
       const spr = RF.Assets.sprite(key, w, h);
       if (!spr) return false;
-      const g = this.ctx, sw = spr.width, cw = g.canvas.width;
-      let x = -Math.round((((off % w) + w) % w) * sw / w);
-      g.setTransform(1, 0, 0, 1, this._ox, this._oy);
+      const g = this.ctx, sw = spr.width, cw = g.canvas.width, ox = this._ox;
+      const start = -Math.round(off * sw / w);
+      const k0 = Math.floor((-ox - start) / sw), yd = Math.round(y * this.px);
       if (alpha < 1) g.globalAlpha = alpha;
       if (additive) g.globalCompositeOperation = 'lighter';
-      for (const yd = Math.round(y * this.px); x < cw; x += sw) g.drawImage(spr, x, yd);
+      for (let k = k0, x = start + k0 * sw; x < cw - ox; k++, x += sw) {
+        if (mirror && (k & 1)) { g.setTransform(-1, 0, 0, 1, ox + x + sw, this._oy); g.drawImage(spr, 0, yd); }
+        else { g.setTransform(1, 0, 0, 1, ox, this._oy); g.drawImage(spr, x, yd); }
+      }
       g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
       g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
       return true;
     }
     customBg(slot, alpha) {
       const c = RF.Assets.custom[slot]; if (!c) return false;
-      const g = this.ctx;
-      const k = Math.max(W * 1.08 / c.width, H / c.height);
+      const g = this.ctx, VW = this.VW || W, OX = this.OX || 0;
+      const k = Math.max(VW * 1.08 / c.width, H / c.height);
       const dw = c.width * k, dh = c.height * k;
-      const x = -(dw - W) * (0.5 + 0.5 * Math.sin(this.time * 0.05));   // slow sway: we're floating, not travelling
+      const x = -OX - (dw - VW) * (0.5 + 0.5 * Math.sin(this.time * 0.05));   // slow sway: we're floating, not travelling
       g.globalAlpha = alpha;
       g.drawImage(RF.Assets.sprite('custom:' + slot, dw, dh), x, (H - dh) / 2, dw, dh);
       g.globalAlpha = 1;
       return true;
+    }
+    /* portrait / 4:3 screens: the band above the stage is the sky over the sea surface (cached per season + size) */
+    skyBand(s, alpha) {
+      const OY = this.OY || 0; if (OY < 0.5) return;
+      const g = this.ctx, key = s + '|' + this.px + '|' + this.canvas.width + '|' + this._by;
+      let c = this._sky && this._sky[s];
+      if (!c || c.key !== key) {
+        const SKY = [['#7fc8f5', '#d4f1ff', '#fff3c4'], ['#4fb4f0', '#bdeaff', '#fff6b0'], ['#f0a56a', '#ffd9a0', '#ffe9b8'], ['#8a9fd0', '#d6e0f5', '#f4f7ff']][s];
+        const cv = document.createElement('canvas'); cv.width = this.canvas.width; cv.height = this._by + 2;
+        const q = cv.getContext('2d'); q.scale(this.px, this.px);
+        const hgt = cv.height / this.px, vw = cv.width / this.px;
+        const gr = q.createLinearGradient(0, 0, 0, hgt); gr.addColorStop(0, SKY[0]); gr.addColorStop(1, SKY[1]);
+        q.fillStyle = gr; q.fillRect(0, 0, vw, hgt);
+        // a soft sun and a few round cartoon clouds (deterministic)
+        const sx = vw * 0.78, sy = Math.max(40, hgt * 0.35), sr = Math.min(60, hgt * 0.22);
+        const sg = q.createRadialGradient(sx, sy, 0, sx, sy, sr * 2.6); sg.addColorStop(0, SKY[2]); sg.addColorStop(0.35, SKY[2] + 'aa'); sg.addColorStop(1, SKY[2] + '00');
+        q.fillStyle = sg; q.fillRect(0, 0, vw, hgt);
+        q.fillStyle = SKY[2]; q.beginPath(); q.arc(sx, sy, sr, 0, TAU); q.fill();
+        let seed = 7 + s * 13; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+        const n = Math.max(2, Math.round(vw / 360));
+        q.fillStyle = s === 3 ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.92)';
+        for (let i = 0; i < n; i++) {
+          const cx = (i + 0.3 + rnd() * 0.4) * vw / n, cy = hgt * (0.2 + rnd() * 0.5), r = 18 + rnd() * 14;
+          if (Math.abs(cx - sx) < sr * 1.6 && Math.abs(cy - sy) < sr * 1.6) continue;
+          q.beginPath(); q.arc(cx, cy, r, 0, TAU); q.arc(cx + r * 1.1, cy + r * 0.25, r * 0.8, 0, TAU); q.arc(cx - r * 1.05, cy + r * 0.3, r * 0.7, 0, TAU);
+          q.ellipse(cx, cy + r * 0.55, r * 2, r * 0.5, 0, 0, TAU); q.fill();
+        }
+        c = { key, cv };
+        (this._sky || (this._sky = []))[s] = c;
+      }
+      g.setTransform(1, 0, 0, 1, this._ox - this._bx, this._oy - this._by);
+      if (alpha < 1) g.globalAlpha = alpha;
+      g.drawImage(c.cv, 0, 0);
+      g.globalAlpha = 1;
+      g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
+      // the sea surface: little waves rolling along the water line
+      const top = this.waterTop(s), t = this.time;
+      g.globalAlpha = alpha;
+      g.fillStyle = top; g.beginPath(); g.moveTo(-this.OX - 2, 1);
+      for (let x = -this.OX - 2; x <= W + this.OX + 24; x += 24) g.lineTo(x, -5 - 3 * Math.sin(x * 0.045 + t * 1.6));
+      g.lineTo(W + this.OX + 24, 1); g.closePath(); g.fill();
+      g.strokeStyle = 'rgba(255,255,255,0.75)'; g.lineWidth = 2.5; g.lineJoin = 'round'; g.beginPath();
+      for (let x = -this.OX - 2; x <= W + this.OX + 24; x += 24) { const yy = -5 - 3 * Math.sin(x * 0.045 + t * 1.6); if (x === -this.OX - 2) g.moveTo(x, yy); else g.lineTo(x, yy); }
+      g.stroke(); g.globalAlpha = 1;
+    }
+    waterTop(s) { return ['#9beee6', '#a8f4f6', '#f4cc7e', '#6f8fd0'][s] || '#9beee6'; }
+    /* tall screens: the seabed continues below the stage — deeper sand with pebbles, shells and sea grass */
+    sandBand(s, alpha) {
+      const below = (this.VH || H) - (this.OY || 0) - H; if (below < 0.5) return;
+      const key = s + '|' + this.px + '|' + this.canvas.width + '|' + this.canvas.height + '|' + this._by;
+      let c = this._sand && this._sand[s];
+      if (!c || c.key !== key) {
+        const SAND = [['#f3dfb2', '#d9bb83'], ['#fbe7b8', '#e2c58d'], ['#e8c890', '#b8935a'], ['#b7c3e3', '#8a97bd']][s];
+        const vw = this.VW, hgt = below + 2;
+        const cv = document.createElement('canvas'); cv.width = this.canvas.width; cv.height = Math.ceil(hgt * this.px);
+        const q = cv.getContext('2d'); q.scale(this.px, this.px);
+        const gr = q.createLinearGradient(0, 0, 0, hgt); gr.addColorStop(0, SAND[0]); gr.addColorStop(1, SAND[1]);
+        q.fillStyle = gr; q.fillRect(0, 0, vw, hgt);
+        let seed = 11 + s * 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+        const n = Math.round(vw * hgt / 2600);
+        for (let i = 0; i < n; i++) {
+          const x = rnd() * vw, y = 8 + rnd() * (hgt - 12), r = 2 + rnd() * 5, kind = rnd();
+          if (kind < 0.62) { q.fillStyle = 'rgba(120,90,50,' + (0.12 + rnd() * 0.12).toFixed(2) + ')'; q.beginPath(); q.ellipse(x, y, r * 1.3, r, 0, 0, TAU); q.fill(); }
+          else if (kind < 0.84) { q.fillStyle = 'rgba(255,255,255,0.35)'; q.beginPath(); q.ellipse(x, y, r * 1.1, r * 0.8, 0, 0, TAU); q.fill(); }
+          else if (kind < 0.94) {   // tiny scallop shell
+            q.fillStyle = ['#ffb3c7', '#ffd27a', '#ffc49a', '#cfe3ff'][s]; q.strokeStyle = 'rgba(120,70,50,0.45)'; q.lineWidth = 1.2;
+            q.beginPath(); q.moveTo(x, y + r); q.arc(x, y + r, r * 1.6, Math.PI * 1.15, Math.PI * 1.85); q.closePath(); q.fill(); q.stroke();
+          } else {   // sea grass tuft
+            q.strokeStyle = ['#5fbf6a', '#59c48a', '#c06a2a', '#7fa9c9'][s]; q.lineWidth = 2.2; q.lineCap = 'round';
+            for (let b = -1; b <= 1; b++) { q.beginPath(); q.moveTo(x + b * 3, y + 6); q.quadraticCurveTo(x + b * 6, y - 4, x + b * 9, y - 12 - r); q.stroke(); }
+          }
+        }
+        c = { key, cv };
+        (this._sand || (this._sand = []))[s] = c;
+      }
+      const g = this.ctx;
+      g.setTransform(1, 0, 0, 1, this._ox - this._bx, this._oy + Math.round(H * this.px) - 1);
+      if (alpha < 1) g.globalAlpha = alpha;
+      g.drawImage(c.cv, 0, 0);
+      g.globalAlpha = 1;
+      g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
     }
     backdrop(s, alpha) {
       const n = RF.Assets.SEASONS[s], t = this.time;
@@ -190,18 +330,21 @@
       if (this.customBg('bg_' + n, alpha)) {
         const g = this.ctx;
         const wash = this._wash || (this._wash = (() => { const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, 'rgba(40,170,210,0.28)'); gr.addColorStop(1, 'rgba(10,60,110,0.38)'); return gr; })());
-        g.globalAlpha = alpha; g.fillStyle = wash; g.fillRect(0, 0, W, H); g.globalAlpha = 1;   // keep a photo feeling underwater
-        this.tile(n + '_rays', Math.sin(t * 0.07) * 30, 0, W, H, alpha * 0.6, true);
+        g.globalAlpha = alpha; g.fillStyle = wash; g.fillRect(-this.OX, 0, this.VW, H); g.globalAlpha = 1;   // keep a photo feeling underwater
+        this.tile(n + '_rays', Math.sin(t * 0.07) * 30, 0, W, H, alpha * 0.6, true, true);
+        this.skyBand(s, alpha);
         return;
       }
-      if (!this.tile(n + '_water', 0, 0, W, H, alpha)) { const g = this.ctx; g.fillStyle = '#2c8fb0'; g.fillRect(0, 0, W, H); }
+      if (!this.tile(n + '_water', 0, 0, W, H, alpha, false, true)) { const g = this.ctx; g.fillStyle = '#2c8fb0'; g.fillRect(-this.OX, 0, this.VW, H); }
       this.tile(n + '_far', Math.sin(t * 0.08) * 14 * sway + t * 2 * (sway - 1), 0, W, H, alpha);
-      this.tile(n + '_rays', Math.sin(t * 0.07) * 30, 0, W, H, alpha * (0.75 + 0.25 * Math.sin(t * 0.6)), true);
+      this.tile(n + '_rays', Math.sin(t * 0.07) * 30, 0, W, H, alpha * (0.75 + 0.25 * Math.sin(t * 0.6)), true, true);
       this.tile(n + '_mid', Math.sin(t * 0.12 + 1) * 22 * sway + t * 5 * (sway - 1), 0, W, H, alpha);
+      this.skyBand(s, alpha);
     }
     floor(s, alpha) {
       const n = RF.Assets.SEASONS[s];
-      if (!this.tile(n + '_floor', 0, FLOOR_Y, W, 90, alpha)) { this.ctx.fillStyle = '#e6cf9a'; this.ctx.fillRect(0, FLOOR_Y, W, 90); }
+      if (!this.tile(n + '_floor', 0, FLOOR_Y, W, 90, alpha)) { this.ctx.fillStyle = '#e6cf9a'; this.ctx.fillRect(-this.OX, FLOOR_Y, this.VW, 90); }
+      this.sandBand(s, alpha);
     }
     text(str, x, y, size, fill, stroke, align = 'center', lw) {
       const g = this.ctx;
@@ -222,11 +365,12 @@
     fadeLayer(fn, a) {
       const o = this._off || (this._off = document.createElement('canvas'));
       if (o.width !== this.canvas.width || o.height !== this.canvas.height) { o.width = this.canvas.width; o.height = this.canvas.height; }
-      const g0 = this.ctx, ox = this._ox, oy = this._oy;
-      this.ctx = o.getContext('2d'); this._ox = 0; this._oy = 0;
-      this.ctx.setTransform(this.px, 0, 0, this.px, 0, 0); this.ctx.imageSmoothingQuality = 'high';
-      try { fn(); } finally { this.ctx = g0; this._ox = ox; this._oy = oy; }
-      g0.save(); g0.setTransform(1, 0, 0, 1, ox, oy); g0.globalAlpha = a; g0.drawImage(o, 0, 0); g0.restore();
+      const g0 = this.ctx;
+      this.ctx = o.getContext('2d');   // same size + same stage offset as the main canvas: the bands cross-fade too
+      this.ctx.setTransform(1, 0, 0, 1, 0, 0); this.ctx.clearRect(0, 0, o.width, o.height);
+      this.ctx.setTransform(this.px, 0, 0, this.px, this._ox, this._oy); this.ctx.imageSmoothingQuality = 'high';
+      try { fn(); } finally { this.ctx = g0; }
+      g0.save(); g0.setTransform(1, 0, 0, 1, 0, 0); g0.globalAlpha = a; g0.drawImage(o, 0, 0); g0.restore();
     }
 
     // ---------------- render interpolation ----------------
@@ -246,8 +390,9 @@
     // ---------------- main draw ----------------
     draw(mode) {
       const g = this.ctx, w = this.world;
-      this._ox = 0; this._oy = 0;
-      if (this.shake > 0) { const m = this.shake * 10 * this.px; this._ox = Math.round((Math.random() - .5) * m); this._oy = Math.round((Math.random() - .5) * m); }
+      this._ox = this._bx; this._oy = this._by;   // device-px origin of the stage inside the full-screen canvas
+      if (this.shake > 0) { const m = this.shake * 10 * this.px; this._ox += Math.round((Math.random() - .5) * m); this._oy += Math.round((Math.random() - .5) * m); }
+      if (this.shake > 0) { g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = '#0d2a40'; g.fillRect(0, 0, g.canvas.width, g.canvas.height); }
       g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
       g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
       const v = this.vis;
@@ -271,8 +416,8 @@
       if (this.weather) this.particles('front');
       this.drawFx();
       g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
-      if (this.flash > 0) { g.fillStyle = `rgba(255,255,255,${(this.flash * 0.55).toFixed(3)})`; g.fillRect(0, 0, W, H); }
-      if (w && w.state === 'dead') { g.fillStyle = 'rgba(10,30,60,0.25)'; g.fillRect(0, 0, W, H); }
+      if (this.flash > 0) { g.fillStyle = `rgba(255,255,255,${(this.flash * 0.55).toFixed(3)})`; g.fillRect(-this.OX - 4, -this.OY - 4, this.VW + 8, this.VH + 8); }
+      if (w && w.state === 'dead') { g.fillStyle = 'rgba(10,30,60,0.25)'; g.fillRect(-this.OX - 4, -this.OY - 4, this.VW + 8, this.VH + 8); }
       if (w && (mode === 'playing' || mode === 'paused')) this.hud();
       if (w && mode === 'playing' && w.state === 'ready') this.readyOverlay();
       if (this.banner) this.drawBanner();
@@ -283,29 +428,43 @@
     ambient(a) {
       if (!a) return;
       const g = this.ctx;
-      if (a.tint) { g.fillStyle = a.tint; g.fillRect(0, 0, W, H); }
+      const below = this.VH - this.OY;   // the water (stage + side bands + sand below), not the sky
+      if (a.tint) { g.fillStyle = a.tint; g.fillRect(-this.OX - 4, 0, this.VW + 8, below + 4); }
       if (a.fog > 0) {
         const grd = this._fogGrad || (this._fogGrad = (() => { const gr = g.createLinearGradient(0, 200, 0, 540); gr.addColorStop(0, 'rgba(200,225,255,0)'); gr.addColorStop(1, 'rgba(200,225,255,0.5)'); return gr; })());
-        g.globalAlpha = clamp(a.fog, 0, 1); g.fillStyle = grd; g.fillRect(0, 200, W, 340); g.globalAlpha = 1;
+        g.globalAlpha = clamp(a.fog, 0, 1); g.fillStyle = grd; g.fillRect(-this.OX - 4, 200, this.VW + 8, 340);
+        if (below > H) { g.fillStyle = 'rgba(200,225,255,0.5)'; g.fillRect(-this.OX - 4, H, this.VW + 8, below - H + 4); }
+        g.globalAlpha = 1;
       }
     }
 
     particles(layer) {
-      const g = this.ctx, A = RF.Assets;
-      for (const p of this.weather.particles) {
-        if (p.layer !== layer || p.alpha <= 0.01) continue;
-        g.globalAlpha = clamp(p.alpha, 0, 1);
+      const g = this.ctx, A = RF.Assets, OX = this.OX || 0;
+      // the side bands show the same sea: particles that are near one stage edge are also drawn beyond the other
+      const one = (p, x) => {
         if (p.sprite === 'dot') {
           g.fillStyle = p.color || '#ffffff';
-          g.beginPath(); g.arc(p.x, p.y, p.size * 0.5, 0, TAU); g.fill();
-          continue;
+          g.beginPath(); g.arc(x, p.y, p.size * 0.5, 0, TAU); g.fill();
+          return;
         }
         const spr = A.sprite('p_' + p.sprite, 32, 32);
-        if (!spr) continue;
+        if (!spr) return;
         const fx = p.flipX == null ? 1 : (Math.abs(p.flipX) < 0.22 ? 0.22 * Math.sign(p.flipX || 1) : p.flipX);
         g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
-        g.translate(p.x, p.y); g.rotate(p.rot || 0); g.scale(fx, 1);
+        g.translate(x, p.y); g.rotate(p.rot || 0); g.scale(fx, 1);
         g.drawImage(spr, -p.size / 2, -p.size / 2, p.size, p.size);
+        g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
+      };
+      for (const p of this.weather.particles) {
+        if (p.layer !== layer || p.alpha <= 0.01) continue;
+        if (p.y < -p.size) continue;   // never in the sky
+        g.globalAlpha = clamp(p.alpha, 0, 1);
+        one(p, p.x);
+        if (OX > 1) {
+          const m = p.size;
+          if (p.x - W < m && p.x - W > -OX - m && p.x > W - OX - m) one(p, p.x - W);
+          if (p.x + W > W - m && p.x + W < W + OX + m && p.x < OX + m) one(p, p.x + W);
+        }
       }
       g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
       g.globalAlpha = 1;
@@ -505,12 +664,24 @@
       if (this._lastScore !== w.score) { this._scorePop = 1; this._lastScore = w.score; }
       this._scorePop = Math.max(0, (this._scorePop || 0) - 0.06);
       const s = 1 + 0.22 * this._scorePop;
-      g.save(); g.translate(W / 2, 46); g.scale(s, s);
+      const L = this.hudLayout || { hx: 0, hy: 0, mx: 712, my: 68, mw: 232, hs: 1 };
+      const hs = L.hs || 1, by = 104 + L.hy;   // groups grow around their bottom edge (stays above the waves)
+      const grow = (ax) => { g.translate(ax, by); g.scale(hs, hs); g.translate(-ax, -by); };
+      g.save(); grow(W / 2);
+      g.save(); g.translate(W / 2, 46 + L.hy); g.scale(s, s);
       this.text(String(w.score), 0, 0, 52, '#ffffff', '#123a55', 'center', 9);
       g.restore();
       const left = w.cards.filter(c => c.state !== 'gone' && c.state !== 'matched').length / 2;
-      this.text('Pairs left: ' + Math.ceil(left) + (w.combo >= 2 ? '   Combo x' + w.combo : ''), W / 2, 84, 16, w.combo >= 2 ? '#ffe14d' : '#e8fbff', '#123a55', 'center', 5);
-      // season pill
+      this.text('Pairs left: ' + Math.ceil(left) + (w.combo >= 2 ? '   Combo x' + w.combo : ''), W / 2, 84 + L.hy, 16, w.combo >= 2 ? '#ffe14d' : '#e8fbff', '#123a55', 'center', 5);
+      g.restore();
+      // season pill + cupcakes (top-left, shifted clear of a notch / into the band above the stage)
+      g.save(); grow(L.hx); g.translate(L.hx, L.hy);
+      this.hudLeft(w);
+      g.restore();
+      g.save(); grow(L.mx + L.mw); this.airMeter(w, L.mx, L.my, L.mw); g.restore();
+    }
+    hudLeft(w) {
+      const g = this.ctx;
       const si = SEASON_INFO[w.season] || SEASON_INFO[0];
       g.fillStyle = 'rgba(255,255,255,0.88)'; this.roundRect(16, 16, 214, 46, 23); g.fill();
       g.lineWidth = 3; g.strokeStyle = si.color; g.stroke();
@@ -524,9 +695,11 @@
       g.fillStyle = 'rgba(255,255,255,0.88)'; this.roundRect(16, 70, 96, 34, 17); g.fill();
       if (cup) { const [cw, ch] = RF.Assets.hasCustom('treat') ? RF.Assets.fit('treat', 26, 26) : [26, 26]; g.drawImage(cup, 24, 87 - ch / 2, cw, ch); }
       this.text('× ' + (w.cupcakesEaten || 0), 56, 87, 17, '#b8336d', null, 'left');
-      // air meter (a row of bubbles inside a pill)
+    }
+    /* air meter (a row of bubbles inside a pill) */
+    airMeter(w, x0, y0, mw) {
+      const g = this.ctx, mh = 22;
       const frac = clamp(w.air / (w.airMax || 1), 0, 1), low = frac < 0.25;
-      const x0 = 712, y0 = 68, mw = 232, mh = 22;
       g.fillStyle = 'rgba(10,40,70,0.55)'; this.roundRect(x0, y0, mw, mh, 13); g.fill();
       const pulse = low ? 0.6 + 0.4 * Math.sin(this.time * 10) : 1;
       g.fillStyle = low ? `rgba(255,120,120,${pulse})` : '#7fe3ff';
@@ -569,9 +742,10 @@
       const g = this.ctx, b = this.banner, si = SEASON_INFO[b.s];
       const t = b.t;
       let x;
-      if (t < 0.45) x = lerp(-W, 0, easeOutBack(t / 0.45));
+      const off = W + (this.OX || 0);   // start / end fully off the (wider) screen
+      if (t < 0.45) x = lerp(-off, 0, easeOutBack(t / 0.45));
       else if (t < 1.0) x = 0;
-      else x = lerp(0, W, Math.pow((t - 1.0) / 0.35, 2));
+      else x = lerp(0, off, Math.pow((t - 1.0) / 0.35, 2));
       g.save(); g.translate(x, 0);
       g.fillStyle = si.color; g.globalAlpha = 0.93;
       g.beginPath(); g.moveTo(W / 2 - 280, 190); g.lineTo(W / 2 + 280, 182); g.lineTo(W / 2 + 298, 290); g.lineTo(W / 2 - 262, 300); g.closePath(); g.fill();

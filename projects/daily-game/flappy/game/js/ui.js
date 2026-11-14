@@ -11,7 +11,24 @@
 
     init(game) {
       this.game = game;
-      const click = (id, fn) => $(id).addEventListener('click', e => { e.stopPropagation(); FF.Audio.unlock(); FF.Audio.play('click'); fn(e); });
+      // Buttons answer a touch on pointerup as well: iOS sends no 'click' for a second finger, so a child flapping
+      // with one thumb could not otherwise tap Pause. The click that follows a handled touch is skipped.
+      const tap = (el, fn) => {
+        el.addEventListener('pointerup', e => {
+          if (e.pointerType !== 'touch' || el.disabled) return;
+          const hit = document.elementFromPoint(e.clientX, e.clientY);
+          if (!hit || !el.contains(hit)) return;   // finger slid off: cancelled
+          el._tapAt = performance.now(); UI._ghostUntil = el._tapAt + 600; e.stopPropagation(); fn(e);
+        });
+        el.addEventListener('click', e => { if (el._tapAt && performance.now() - el._tapAt < 600) { e.stopPropagation(); return; } fn(e); });
+      };
+      this.tap = tap;
+      // ghost click: after a touch tap opened a new screen, the browser's delayed 'click' would land on whatever
+      // button is now under the finger (e.g. "OK" on How to Play). Swallow that one click, anywhere.
+      document.addEventListener('click', e => {
+        if (UI._ghostUntil && performance.now() < UI._ghostUntil) { UI._ghostUntil = 0; e.stopPropagation(); e.preventDefault(); }
+      }, true);
+      const click = (id, fn) => tap($(id), e => { e.stopPropagation(); FF.Audio.unlock(); FF.Audio.play('click'); fn(e); });
       click('btnPlay', () => game.startGame());
       click('btnCustomize', () => this.open('scrCustom', 'scrTitle'));
       click('btnHow', () => this.open('scrHow', 'scrTitle'));
@@ -30,7 +47,7 @@
         this.renderSlots(); game.picturesChanged(); this.toast('All pictures reset to the originals');
       });
       click('btnResetBest', () => { game.resetBest(); this.toast('Best scores cleared'); });
-      document.querySelectorAll('.btn-back').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); FF.Audio.play('click'); this.back(); }));
+      document.querySelectorAll('.btn-back').forEach(b => tap(b, e => { e.stopPropagation(); FF.Audio.play('click'); this.back(); }));
 
       // settings controls
       $('setSfx').addEventListener('change', e => game.setSetting('sfx', e.target.checked));
@@ -47,12 +64,15 @@
         this.filePick.value = '';
       });
       if (game.isApp) $('btnQuit').classList.remove('hidden');
+      // phones / tablets: full screen is not available in iPhone Safari (Add to Home Screen is) — hide the toggle
+      const fsOk = game.isApp || (document.fullscreenEnabled && !game.isTouch);
+      const fsRow = $('setFull').closest('.set'); if (fsRow) fsRow.classList.toggle('hidden', !fsOk);
       this.renderSlots();
       this.syncSettings();
     },
 
     seg(id, onPick) {
-      $(id).querySelectorAll('button').forEach(b => b.addEventListener('click', e => {
+      $(id).querySelectorAll('button').forEach(b => this.tap(b, e => {
         e.stopPropagation(); FF.Audio.play('click');
         onPick(b.dataset.v); this.syncSettings();
       }));
@@ -144,11 +164,11 @@
           el.querySelectorAll('.shape button').forEach(b => {
             b.classList.toggle('on', b.dataset.shape === shape);
             b.disabled = !custom; if (!custom) b.style.opacity = .5;
-            b.addEventListener('click', e => { e.stopPropagation(); A.setShape(s.id, b.dataset.shape); this.renderSlots(); });
+            this.tap(b, e => { e.stopPropagation(); A.setShape(s.id, b.dataset.shape); this.renderSlots(); });
           });
         }
-        el.querySelector('[data-act=pick]').addEventListener('click', e => { e.stopPropagation(); this._pickSlot = s.id; this.filePick.click(); });
-        el.querySelector('[data-act=reset]').addEventListener('click', e => {
+        this.tap(el.querySelector('[data-act=pick]'), e => { e.stopPropagation(); this._pickSlot = s.id; this.filePick.click(); });
+        this.tap(el.querySelector('[data-act=reset]'), e => {
           e.stopPropagation(); A.clearCustom(s.id); this.renderSlots(); this.toast(title + ' reset');
         });
         prev.addEventListener('click', () => { this._pickSlot = s.id; this.filePick.click(); });

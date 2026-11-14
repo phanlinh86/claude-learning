@@ -1,0 +1,16 @@
+{
+  "name": "Foxy's Reef Memory",
+  "short_name": "Reef Memory",
+  "description": "Find the matching sea friends with Foxy the diving fox!",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#1d6f94",
+  "theme_color": "#1d6f94",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

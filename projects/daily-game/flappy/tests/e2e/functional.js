@@ -42,6 +42,8 @@ async function boot(page, q) {
 }
 const ev = (page, fn, arg) => page.evaluate(fn, arg);
 const mode = page => ev(page, () => FF.debug.mode);
+// a fresh round is mode 'playing' with the world in 'ready' (Get Ready hover) until the first flap
+const isReady = page => ev(page, () => FF.debug.mode === 'playing' && FF.debug.world.state === 'ready');
 const shot = (page, name) => page.screenshot({ path: path.join(OUT, name + '.png') });
 async function visible(page, sel) {
   return ev(page, s => { const e = document.querySelector(s); if (!e) return false; const r = e.getBoundingClientRect(); return !e.closest('.hidden') && r.width > 0 && r.height > 0; }, sel);
@@ -179,7 +181,7 @@ async function testReadyFlapDeath() {
   await hookEvents(page);
   await page.click('#btnPlay'); await page.waitForTimeout(400);
   let s = await ev(page, () => FF.debug.getState());
-  check('Play → READY mode', s.mode === 'ready' && s.state === 'ready', s.mode + '/' + s.state);
+  check('Play → READY mode', s.mode === 'playing' && s.state === 'ready', s.mode + '/' + s.state);
   const ys = [];
   for (let i = 0; i < 8; i++) { ys.push(await ev(page, () => FF.debug.world.bird.y)); await page.waitForTimeout(120); }
   const spread = Math.max(...ys) - Math.min(...ys);
@@ -225,14 +227,14 @@ async function testReadyFlapDeath() {
   check('game over: Space within 0.7 s lock is ignored', (await mode(page)) === 'over');
   await page.waitForTimeout(800);
   await page.keyboard.press('Space'); await page.waitForTimeout(150);
-  check('game over: Space after lock → Play Again (READY)', (await mode(page)) === 'ready');
+  check('game over: Space after lock → Play Again (READY)', await isReady(page));
 
   // Enter path
   await page.keyboard.press('Space');
   await page.waitForFunction(() => FF.debug.mode === 'over', null, { timeout: 6000 });
   await page.waitForTimeout(800);
   await page.keyboard.press('Enter'); await page.waitForTimeout(150);
-  check('game over: Enter after lock → Play Again', (await mode(page)) === 'ready');
+  check('game over: Enter after lock → Play Again', await isReady(page));
 
   // Enter within lock (Play Again button has keyboard focus → native activation bypasses the lock)
   await page.keyboard.press('Space');
@@ -246,7 +248,7 @@ async function testReadyFlapDeath() {
   if ((await mode(page)) !== 'over') { await page.keyboard.press('Space'); await page.waitForFunction(() => FF.debug.mode === 'over', null, { timeout: 6000 }); }
   await page.waitForTimeout(800);
   await page.click('#btnAgain'); await page.waitForTimeout(150);
-  check('game over: Play Again button → READY', (await mode(page)) === 'ready');
+  check('game over: Play Again button → READY', await isReady(page));
   // Space held while dying (key repeat) must not restart
   await page.keyboard.press('Space');
   await page.waitForFunction(() => FF.debug.mode === 'over', null, { timeout: 6000 });
@@ -261,7 +263,7 @@ async function testDropsScoring() {
   const page = await newPage();
   await boot(page, 'seed=3&autostart=1');
   await hookEvents(page);
-  check('autostart → READY', (await mode(page)) === 'ready');
+  check('autostart → READY', await isReady(page));
   await page.keyboard.press('Space'); await page.waitForTimeout(50);
   await freeze(page);
   await ev(page, () => { const w = FF.debug.world; w.bird.y = 200; w.bird.vy = 0; window._evLog.length = 0; });
@@ -448,12 +450,12 @@ async function testPause() {
   // Restart from pause (autopilot off, otherwise the bot starts the new round by itself)
   await ev(page, () => { FF.debug.setBot(false); FF.debug.world.score = 4; });
   await page.click('#btnRestart'); await page.waitForTimeout(200);
-  check('pause → Restart: fresh round in READY with score 0', await ev(page, () => FF.debug.mode === 'ready' && FF.debug.world.score === 0));
+  check('pause → Restart: fresh round in READY with score 0', await ev(page, () => FF.debug.mode === 'playing' && FF.debug.world.state === 'ready' && FF.debug.world.score === 0));
   // pause in READY and resume back to READY
   await page.keyboard.press('Escape'); await page.waitForTimeout(100);
   const pr = await mode(page);
   await page.keyboard.press('Escape'); await page.waitForTimeout(100);
-  check('pause from READY resumes into READY', pr === 'paused' && (await mode(page)) === 'ready', pr + '→' + await mode(page));
+  check('pause from READY resumes into READY', pr === 'paused' && await isReady(page), pr + '→' + await mode(page));
   // Settings from pause, then back to pause
   await page.keyboard.press('Escape'); await page.waitForTimeout(100);
   await page.click('#btnPauseSettings'); await page.waitForTimeout(150);
@@ -698,10 +700,9 @@ async function testLayout() {
       await boot(page, 'seed=1');
       const tag = `${w}x${h}@${dsf}`;
       const cv = await ev(page, () => { const c = document.getElementById('game'), r = c.getBoundingClientRect(); return { w: r.width, h: r.height, l: r.left, t: r.top, bw: c.width, bh: c.height }; });
-      const aspect = cv.w / cv.h;
-      const fits = cv.w <= w + 1 && cv.h <= h + 1 && (Math.abs(cv.w - w) < 2 || Math.abs(cv.h - h) < 2);
-      const centered = Math.abs(cv.l - (w - cv.w) / 2) < 2 && Math.abs(cv.t - (h - cv.h) / 2) < 2;
-      check(`layout ${tag}: canvas letterboxed 16:9, fills one axis, centred`, Math.abs(aspect - 16 / 9) < 0.01 && fits && centered, cv);
+      // mobile layer: the canvas fills the whole window at any aspect (the extra room is scenery, no letterbox bars)
+      const fills = Math.abs(cv.w - w) < 2 && Math.abs(cv.h - h) < 2 && Math.abs(cv.l) < 1 && Math.abs(cv.t) < 1;
+      check(`layout ${tag}: canvas fills the window (scenery, no bars)`, fills, cv);
       { const k = Math.min(1, 1920 / (cv.w * dsf));   // render resolution is capped at 1920×1080 (performance fix P3)
         check(`layout ${tag}: backing store = css size × dpr (capped at 1920×1080)`, Math.abs(cv.bw - cv.w * dsf * k) < 2 && Math.abs(cv.bh - cv.h * dsf * k) < 2, [cv.bw, cv.bh]); }
       const issues = [];
@@ -738,7 +739,7 @@ async function testFocus() {
   await page.waitForTimeout(100);
   const f = await ev(page, () => document.activeElement && document.activeElement.id);
   await page.keyboard.press('Space'); await page.waitForTimeout(200);
-  check('focus: Space on title with Play focused starts exactly once', await ev(page, () => window._starts) === 1 && (await mode(page)) === 'ready', 'focused=' + f);
+  check('focus: Space on title with Play focused starts exactly once', await ev(page, () => window._starts) === 1 && await isReady(page), 'focused=' + f);
   await page.keyboard.press('Space'); await page.waitForTimeout(60);
   check('focus: the next Space is a flap (ready→playing), not a restart', await ev(page, () => window._starts) === 1 && (await mode(page)) === 'playing');
   // Enter on focused Play

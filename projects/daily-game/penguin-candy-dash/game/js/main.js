@@ -5,12 +5,15 @@
   const params = new URLSearchParams(location.search);
   const num = (k, d) => { const v = parseFloat(params.get(k)); return isFinite(v) ? v : d; };
   const BIOMES = ['Gumdrop Meadow', 'Chocolate River', 'Cotton Candy Clouds', 'Ice-Cream Glacier'];
-  const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  // phone / tablet (coarse pointer); a Windows touch laptop with a mouse keeps the desktop layout
+  const isTouch = window.matchMedia ? window.matchMedia('(pointer:coarse)').matches : (('ontouchstart' in window) || navigator.maxTouchPoints > 0);
+  // a finger aims Pip's feet this far (logical px) ABOVE the fingertip, so the finger never hides him
+  const TOUCH_AIM = -30;
 
   function difficultyOverrides(d) { return Object.assign({}, (CD.DIFFICULTY && CD.DIFFICULTY[d]) || {}); }
 
   const Game = {
-    mode: 'boot', isTouch,
+    mode: 'boot', isTouch, TOUCH_AIM,
     isApp: params.get('app') === '1' || typeof window.ffStoreSet === 'function',
     speed: Math.max(0.1, Math.min(64, num('speed', 1))),
     botMode: params.get('bot') === '1',
@@ -27,12 +30,18 @@
       Object.assign(this.settings, CD.Storage.getJSON('settings', {}));
       this.urlMute = params.get('mute') === '1';
       CD.Audio.setOptions({ sfx: this.settings.sfx, music: this.settings.music, muted: this.settings.muted || this.urlMute });
+      document.body.classList.toggle('touch', isTouch);
       this.renderer = new CD.Renderer(document.getElementById('game'));
       await CD.Assets.loadAll();
-      this.renderer.resize();
       CD.UI.init(this);
       this.bindInput();
-      window.addEventListener('resize', () => { clearTimeout(this._rsz); this._rsz = setTimeout(() => this.renderer.resize(), 120); });
+      this.relayout();
+      // rotation / resize / Safari toolbar changes / Split View: re-layout (debounced). The world keeps its
+      // 960×540 arena; only the view around it changes. A finger that was steering is released so Pip doesn't jump.
+      const onResize = () => { clearTimeout(this._rsz); this._rsz = setTimeout(() => this.relayout(), 120); };
+      window.addEventListener('resize', onResize);
+      window.addEventListener('orientationchange', () => { this.releasePointer(); onResize(); });
+      if (window.visualViewport) window.visualViewport.addEventListener('resize', onResize);
       if (params.get('autostart') === '1') this.startGame(); else this.toTitle();
       this.last = performance.now();
       requestAnimationFrame(t => this.frame(t));
@@ -43,6 +52,31 @@
       const w = new CD.World({ seed: s, config: forTitle ? {} : difficultyOverrides(this.settings.difficulty) });
       w.reset();
       return w;
+    },
+    /* safe-area insets (CSS px) read from a hidden element padded with env(safe-area-inset-*) */
+    readInsets() {
+      const el = document.getElementById('safeProbe'); if (!el) return null;
+      const cs = getComputedStyle(el);
+      return { top: parseFloat(cs.paddingTop) || 0, right: parseFloat(cs.paddingRight) || 0, bottom: parseFloat(cs.paddingBottom) || 0, left: parseFloat(cs.paddingLeft) || 0 };
+    },
+    relayout() {
+      if (this._lastW != null && this._lastW !== window.innerWidth) this.releasePointer();   // rotation / Split View
+      this._lastW = window.innerWidth;
+      this.renderer.resize(this.readInsets());
+      this.syncRotate();
+    },
+    releasePointer() {
+      this.pointerDown = false; this._steerId = null;
+      if (this._touches) this._touches.clear();
+      if (this.renderer) this.renderer.pointer = null;
+      if (this.world && this.world.setTarget) this.world.setTarget(null);
+    },
+    /* phones held upright: the 16:9 Candy Land gets small, so ask to turn sideways (dismissable for the session) */
+    syncRotate() {
+      const el = document.getElementById('rotate'); if (!el || !this.renderer) return;
+      const on = this.isTouch && this.renderer.portrait && Math.min(window.innerWidth, window.innerHeight) < 600 && this.mode === 'playing' && !this._rotOk && !this.botMode;
+      if (on && !this._rotOn) { this.releasePointer(); this.keys = {}; }
+      this._rotOn = on; el.classList.toggle('hidden', !on);
     },
     makeWeather() { return new CD.Weather({ width: 960, height: 540, seed: 5 }); },
 
@@ -80,6 +114,7 @@
       this.deadAt = -1; this.run = { gems: 0, pops: 0, bumps: 0, maxSize: 1 };
       this.keys = {}; this.pointerDown = false; this.renderer.pointer = null;
       CD.UI.hideAll(); CD.UI.setHud(true); this.showAction(true);
+      this.syncRotate();
       this.canvasFocus();
     },
     showAction(on) { const b = document.getElementById('btnAction'); if (b) b.classList.toggle('hidden', !(on && isTouch)); },
@@ -87,7 +122,7 @@
     pause() {
       if (this.mode !== 'playing') return;
       if (this.world && this.world.state === 'dead') return;
-      this.mode = 'paused'; this.keys = {}; this.pointerDown = false;
+      this.mode = 'paused'; this.keys = {}; this.releasePointer();
       CD.UI.setHud(false); this.showAction(false);
       CD.UI.show('scrPause');
     },
@@ -179,23 +214,55 @@
       });
       window.addEventListener('keyup', e => { delete this.keys[e.code]; });
       const stage = document.getElementById('stage');
-      const setPtr = e => { this.renderer.pointer = this.renderer.toLogical(e.clientX, e.clientY); };
+      // the finger aims a bit above itself (Pip stays visible); the mouse aims exactly at the cursor
+      const setPtr = e => {
+        const p = this.renderer.toLogical(e.clientX, e.clientY);
+        if (e.pointerType === 'touch' || e.pointerType === 'pen') p[1] += TOUCH_AIM;
+        this.renderer.pointer = p;
+      };
       stage.addEventListener('pointerdown', e => {
-        if (e.target.closest && e.target.closest('button, .screen, #hud, input, label')) return;   // HUD/menu clicks never move Pip
-        if (this.mode !== 'playing') return;
+        if (e.target.closest && e.target.closest('button, .screen, #hud, #rotate, input, label')) return;   // HUD/menu taps never move Pip
+        if (this.mode !== 'playing' || this._rotOn) return;
         e.preventDefault(); CD.Audio.unlock();
         if (e.button === 2) { this.action(); return; }
         if (e.pointerType === 'touch' && this._touches && this._touches.size >= 1) { this.action(); return; }   // second finger = action
         (this._touches = this._touches || new Set()).add(e.pointerId);
+        this._steerId = e.pointerId;   // only this finger / button steers Pip
         this.pointerDown = true; setPtr(e);
+        // keep receiving moves even if the finger slides over the ★ / HUD or off the screen edge
+        try { if (e.pointerType === 'touch') stage.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
       });
-      stage.addEventListener('pointermove', e => { if (this.mode === 'playing' && (this.pointerDown || e.pointerType === 'mouse')) setPtr(e); });
-      const up = e => { if (this._touches) this._touches.delete(e.pointerId); if (!this._touches || !this._touches.size) { this.pointerDown = false; if (e.pointerType !== 'mouse') this.renderer.pointer = null; } };
+      stage.addEventListener('pointermove', e => {
+        if (this.mode !== 'playing') return;
+        if (e.pointerType === 'mouse') { if (!this.pointerDown || e.pointerId === this._steerId) setPtr(e); return; }
+        if (this.pointerDown && e.pointerId === this._steerId) setPtr(e);
+      });
+      const up = e => {
+        if (this._touches) this._touches.delete(e.pointerId);
+        // the steering finger lifted: Pip stops following, even if a second (action) finger is still down
+        if (e.pointerId === this._steerId || !this._touches || !this._touches.size) {
+          this._steerId = null; this.pointerDown = false; if (e.pointerType !== 'mouse') this.renderer.pointer = null;
+        }
+      };
       window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
       const act = document.getElementById('btnAction');
       if (act) act.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); this.action(); });
       window.addEventListener('blur', () => { this.keys = {}; this.pointerDown = false; if (this.mode === 'playing') this.pause(); });
-      document.addEventListener('visibilitychange', () => { if (document.hidden && this.mode === 'playing') this.pause(); });
+      // home button / app switch / screen lock: pause, let go of the finger, and stop the audio clock
+      document.addEventListener('visibilitychange', () => {
+        const A = CD.Audio;
+        if (document.hidden) {
+          if (this.mode === 'playing') this.pause();
+          this.releasePointer();
+          A._hidden = true; if (A.ctx && A.ctx.state === 'running') A.ctx.suspend().catch(() => {});
+        } else {
+          A._hidden = false; if (A.ctx && A.ctx.state !== 'running') A.ctx.resume().catch(() => {});
+        }
+      });
+      // iOS: audio may only start inside a gesture: unlock on the first touchend / click / key
+      const unlock = () => CD.Audio.unlock();
+      ['touchend', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, unlock, { capture: true, passive: true }));
+      this.kidProof();
       window.addEventListener('dragover', e => e.preventDefault());
       window.addEventListener('drop', e => e.preventDefault());
       window.addEventListener('contextmenu', e => e.preventDefault());
@@ -205,6 +272,22 @@
         if (k === 'F5' || ((e.ctrlKey || e.metaKey) && ['r', 'R', '+', '=', '-', '_', '0', 'p', 'P', 'f', 'F', 'g', 'G', 'u', 'U'].includes(k))) e.preventDefault();
       }, true);
       document.addEventListener('fullscreenchange', () => { this.fullscreen = !!document.fullscreenElement || (this.fullscreen && typeof window.ffFullscreen === 'function'); this.renderer.resize(); CD.UI.syncSettings(); });
+    },
+
+    /* Touch kid-proofing (iPhone / iPad): no pinch or double-tap zoom, no long-press callout, no rubber-band
+     * scroll or pull-to-refresh. Menu panels (which may scroll on a small phone) opt back in. */
+    kidProof() {
+      const NP = { passive: false }, prevent = e => { if (e.cancelable) e.preventDefault(); };
+      const formy = t => t && t.closest && t.closest('input, textarea, select, .scroll, .panel');
+      ['gesturestart', 'gesturechange', 'gestureend'].forEach(t => document.addEventListener(t, prevent, NP));
+      document.addEventListener('touchmove', e => { if (!formy(e.target) || e.touches.length > 1) prevent(e); }, NP);
+      let lastEnd = 0;
+      document.addEventListener('touchend', e => {
+        const t = Date.now();
+        if (t - lastEnd < 320 && !(e.target.closest && e.target.closest('button, a, input, label, select, .scroll, .prev, .slot'))) prevent(e);
+        lastEnd = t;
+      }, NP);
+      document.addEventListener('dblclick', e => { if (!formy(e.target)) prevent(e); }, NP);
     },
 
     handleEvents(evts) {
@@ -264,7 +347,8 @@
         const real = Math.min(0.1, Math.max(0, (ts - this.last) / 1000));
         this.last = ts;
         const dt = real * this.speed;
-        if (this.mode !== 'paused' && this.world) {
+        if (this.isTouch) this.syncRotate();
+        if (this.mode !== 'paused' && this.world && !this._rotOn) {
           const n = Math.max(1, Math.ceil(dt / (1 / 60))), h = dt / n;
           for (let i = 0; i < n; i++) this.step(h);
           this.renderer.update(dt);
