@@ -1,0 +1,16 @@
+{
+  "name": "Koko's Cake Tower · Tháp Bánh Kem Của Koala Koko",
+  "short_name": "Cake Tower",
+  "description": "Bake a wobbly layer cake with Koko the koala: colours, shapes, counting and animal cookies. English & Vietnamese.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#A9DDF5",
+  "theme_color": "#A9DDF5",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

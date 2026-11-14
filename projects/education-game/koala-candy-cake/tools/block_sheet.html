@@ -1,0 +1,110 @@
+<!doctype html>
+<!-- Contact sheet for CK.BlockArt cake layers (character artist B). Open directly or via `node tools/block_sheet.js`.
+     ?panel=cream|pastel|dark draws one panel only (default: all three stacked). ?dpr=2 for retina. -->
+<html><head><meta charset="utf-8"><title>Layer sheet</title>
+<style>body{margin:0;background:#222}canvas{display:block}</style></head>
+<body><canvas id="c"></canvas>
+<script src="../game/js/content.js"></script>
+<script src="../game/js/block_art.js"></script>
+<script>
+(function () {
+  var BA = CK.BlockArt;
+  var ANIMALS = CK.ANIMALS || ['bunny', 'bear', 'cat', 'dog', 'duck', 'pig', 'cow', 'sheep'];
+  var COLORS = ['red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink'];
+  var SHAPES = CK.SHAPES || ['circle', 'square', 'triangle', 'star', 'heart', 'rect', 'diamond', 'oval'];
+  var PANELS = { cream: '#F3E2C0', pastel: '#BFDDEB', dark: '#3A2A30' };
+  var qp = new URLSearchParams(location.search), only = qp.get('panel');
+  var LW = 161, LH = 97, W = 1800;
+  var imgs = {};
+  function img(name) { var i = imgs[name]; return i && i.complete && i.naturalWidth ? i : null; }
+  var loads = ANIMALS.map(function (a) {
+    return new Promise(function (res) { var i = new Image(); i.onload = i.onerror = res; i.src = '../game/assets/default/items/animal_' + a + '.svg'; imgs['animal_' + a] = i; });
+  });
+
+  function rows() {
+    var R = [];
+    R.push(COLORS.map(function (c) { return { kind: 'color', value: c, color: c }; }));
+    R.push(SHAPES.map(function (s, i) { return { kind: 'shape', value: s, shape: s, color: COLORS[i % 7] }; }));
+    R.push(SHAPES.map(function (s, i) { return { kind: 'shape', value: s, shape: s, color: COLORS[(i + 3) % 7] }; }));
+    R.push([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (n) { return { kind: 'dots', value: n, n: n }; }));
+    R.push([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (n) { return { kind: 'number', value: n, n: n, text: String(n), showDots: true }; }));
+    R.push([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 20].map(function (n) { return { kind: 'number', value: n, n: n, text: String(n) }; }));
+    R.push(ANIMALS.map(function (a) { return { kind: 'animal', value: a, animal: a }; }).concat([{ kind: 'animal', value: 'zebra', animal: 'zebra' }]));
+    R.push(['A', 'B', 'M', 'W', 'a', 'b', 'g', 'Đ', 'ă', 'ơ'].map(function (l) { return { kind: 'letter', value: l, text: l }; }));
+    R.push(['2 + 3', '5 − 2', '10 − 4', '7', 'odd', 'chẵn'].map(function (t) { return { kind: 'text', value: t, text: t }; })
+      .concat([{ kind: 'parity', value: 'odd' }, { kind: 'parity', value: 'even' }]));
+    R.push([{ kind: 'size', value: 'big', size: 'big', color: 'orange' }, { kind: 'size', value: 'small', size: 'small', color: 'orange', scale: 0.72 },
+            { kind: 'size', value: 'big', size: 'big', color: 'blue' }, { kind: 'size', value: 'small', size: 'small', color: 'blue' },
+            { kind: 'size', value: 'big', size: 'big', animal: 'bear' }, { kind: 'size', value: 'small', size: 'small', animal: 'bear' }]);
+    return R;
+  }
+
+  function cell(g, b, cx, cy, s, o) {
+    var w = LW * s, h = LH * s, sc = BA.blockScale(b);
+    g.fillStyle = 'rgba(60,30,10,0.18)'; g.beginPath(); g.ellipse(cx, cy + h / 2 + 3, w * 0.5 * sc, 5 * s, 0, 0, 7); g.fill();
+    g.save(); g.translate(cx, cy + (h - h * sc) / 2);       // a small layer rests on the same line
+    BA.drawBlock(g, b, w, h, Object.assign({ dpr: DPR, img: img, id: o && o.id }, o || {}));
+    g.restore();
+  }
+
+  function drawPanel(g, x0, y0, bg) {
+    var y = y0, pad = 16, step = LW + 14;
+    g.fillStyle = bg; g.fillRect(x0, y0, W, 99999);
+    rows().forEach(function (row) {
+      row.forEach(function (b, i) { cell(g, b, x0 + pad + LW / 2 + (i % 10) * step, y + 10 + LH / 2 + Math.floor(i / 10) * (LH + 22), 1, { id: i }); });
+      y += Math.ceil(row.length / 10) * (LH + 22) + 4;
+    });
+    // a stacked cake (drip seeds vary by id) on the plate, with candles; states glow / lift
+    var bx = x0 + pad + 120, by = y + 6 * (LH - 2) + 30;
+    g.save(); g.translate(bx, by + 2); BA.drawPlate(g, LW + 90, 60); g.restore();
+    ['red', 'yellow', 'blue', 'green', 'purple', 'orange'].forEach(function (c, i) {
+      g.save(); g.translate(bx, by - LH / 2 - i * (LH - 4)); BA.drawBlock(g, { kind: 'color', value: c, color: c }, LW, LH, { dpr: DPR, id: i }); g.restore();
+    });
+    var topY = by - 6 * (LH - 4) + LH * 0.12;
+    [-0.3, -0.1, 0.1, 0.3].forEach(function (f, i) { g.save(); g.translate(bx + f * LW, topY); BA.drawCandle(g, 46, 1, i === 3 ? 0.3 : 0, 0.4 + i); g.restore(); });
+    // candle states: lit 0→1, out 0→1
+    var cx = x0 + 330;
+    [0, 0.3, 0.6, 1].forEach(function (l, i) { g.save(); g.translate(cx + i * 46, by - 300); BA.drawCandle(g, 54, l, 0, i * 0.37); g.restore(); });
+    [0.1, 0.3, 0.5, 0.75, 0.95].forEach(function (o, i) { g.save(); g.translate(cx + (i + 4) * 46, by - 300); BA.drawCandle(g, 54, 1, o, 0.2); g.restore(); });
+    // 3x candle + flame at several times
+    [0, 0.13, 0.27].forEach(function (t, i) { g.save(); g.translate(cx + 470 + i * 70, by - 300); g.scale(2, 2); BA.drawCandle(g, 40, 1, 0, t); g.restore(); });
+    // glow / lift states + small
+    [{ glow: 0.5 }, { glow: 1 }, { lift: 1 }, { glow: 1, lift: 1 }].forEach(function (o, i) {
+      g.save(); g.translate(cx + 30 + LW / 2 + i * (LW + 50), by - 140); if (o.lift) g.scale(1.08, 1.08);
+      BA.drawBlock(g, { kind: 'color', value: 'pink', color: 'pink' }, LW, LH, Object.assign({ dpr: DPR, t: 0.3, id: 3 }, o)); g.restore();
+    });
+    // old API: drawBlock(ctx, block, S, opt)
+    g.save(); g.translate(cx + 30 + LW / 2, by - 10); BA.drawBlock(g, { kind: 'dots', value: 4, n: 4 }, 124, { dpr: DPR }); g.restore();
+    // sprinkles, ghost hand, glow
+    var sx = cx + 260;
+    COLORS.forEach(function (c, i) { g.save(); g.translate(sx + i * 30, by - 20); BA.drawSprinkle(g, 22, c, i * 0.7); g.restore(); });
+    ['#FFF4DC', '#BFE8D8', '#DCCDF3'].forEach(function (c, i) { g.save(); g.translate(sx + (i + 7) * 30, by - 20); BA.drawSprinkle(g, 22, c, i); g.restore(); });
+    g.save(); g.translate(sx + 360, by - 60); BA.drawGhostHand(g, 90, 0.2); g.restore();
+    g.save(); g.translate(sx + 560, by - 20); BA.drawGlow(g, 120, 72, 0, 1); g.strokeStyle = 'rgba(255,255,255,.5)'; g.strokeRect(-60, -36, 120, 72); g.restore();
+    y = by + 60;
+    // 3x row: colour, shape, dots 7, number+dots 8, animal
+    var big = [{ kind: 'color', value: 'red', color: 'red' }, { kind: 'shape', value: 'star', shape: 'star', color: 'yellow' },
+      { kind: 'dots', value: 7, n: 7 }, { kind: 'number', value: 8, n: 8, text: '8', showDots: true }, { kind: 'animal', value: 'pig', animal: 'pig' }];
+    var s3 = 3;
+    var per = Math.floor(W / (LW * s3 + 30));
+    big.forEach(function (b, i) {
+      var col = i % per, rw = Math.floor(i / per);
+      cell(g, b, x0 + 20 + LW * s3 / 2 + col * (LW * s3 + 30), y + 20 + LH * s3 / 2 + rw * (LH * s3 + 40), s3, { id: i + 2 });
+    });
+    y += Math.ceil(big.length / per) * (LH * s3 + 40) + 30;
+    return y - y0;
+  }
+
+  var DPR = +(qp.get('dpr') || 1);
+  Promise.all(loads).then(function () {
+    var cv = document.getElementById('c'), names = only ? [only] : Object.keys(PANELS);
+    var H = 3200 * names.length;
+    cv.width = W * DPR; cv.height = H * DPR; cv.style.width = W + 'px'; cv.style.height = H + 'px';
+    var g = cv.getContext('2d'); g.scale(DPR, DPR);
+    var y = 0;
+    names.forEach(function (n) { y += drawPanel(g, 0, y, PANELS[n]); });
+    window.SHEET_H = y; window.SHEET_W = W;
+    document.title = 'done';
+  });
+})();
+</script></body></html>
