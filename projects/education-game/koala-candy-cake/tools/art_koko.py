@@ -299,13 +299,18 @@ def body():
 # ---------------------------------------------------------------- arms
 def arm(sh, el, paw, far=False, claws_dir=None):
     fill = P['shade'] if far else P['fur']
-    d = f'M{f(sh[0])},{f(sh[1])} Q{f(el[0])},{f(el[1])} {f(paw[0])},{f(paw[1])}'
-    out = path(d, stroke(P['line'], ARM_W + 2 * LW))
-    out += path(d, stroke(fill, ARM_W))
-    # paw (round, slightly bigger) with two claw marks
     palm = len(paw) > 2
-    if palm:     # flat paw pressed forward (steadying): taller than wide
-        out += ell(paw[0], paw[1], 13, 19, filled(fill, P['line']), -8)
+    # a flat palm sits at the side of the wrist (wrist bent back, palm facing right)
+    end = (paw[0] - 15, paw[1] + 10) if palm else paw
+    d = f'M{f(sh[0])},{f(sh[1])} Q{f(el[0])},{f(el[1])} {f(end[0])},{f(end[1])}'
+    w = ARM_W - 2 if palm else ARM_W
+    out = path(d, stroke(P['line'], w + 2 * LW))
+    out += path(d, stroke(fill, w))
+    # paw (round, slightly bigger) with two claw marks
+    if palm:     # flat paw pressed forward (steadying): taller than wide, roughly vertical
+        out += ell(paw[0], paw[1], 14.5, 23, filled(fill, P['line']), -6)
+        out += ell(paw[0] + 4, paw[1] + 2, 6.5, 13, f'fill="{P["nose"]}" opacity="0.4"', -6)
+        out += ell(paw[0] - 4, paw[1] - 8, 4, 7, f'fill="{P["hi"]}" opacity="0.6"', -6)
     else:
         out += circ(paw[0], paw[1], 17.5, filled(fill, P['line']))
     a = claws_dir if claws_dir is not None else math.degrees(math.atan2(paw[1] - el[1], paw[0] - el[0]))
@@ -315,7 +320,7 @@ def arm(sh, el, paw, far=False, claws_dir=None):
         c, s = math.cos(math.radians(a) + k), math.sin(math.radians(a) + k)
         out += path(f'M{f(paw[0] + 8 * c)},{f(paw[1] + 8 * s)} L{f(paw[0] + 14 * c)},{f(paw[1] + 14 * s)}',
                     stroke(P['claw'], 2.6))
-    if not far:
+    if not far and not palm:
         out += circ(paw[0] - 5, paw[1] - 6, 5, f'fill="{P["hi"]}" opacity="0.6"')
     return out
 
@@ -355,7 +360,7 @@ TF = {
     'think': (-2, 2, -8),
     'oops': (2, 0, 9),
     'blow': (24, -14, -14),
-    'hold': (6, -2, -4),
+    'hold': (-16, 6, 7),
     'cheer': (0, -4, -3),
 }
 
@@ -380,8 +385,8 @@ def koko():
     })
     # hold: both paws forward-right steadying the cake (near palm ≈ (285,150))
     frames['hold'] = frame({'eyes': 'open', 'look': (3, -2), 'mouth': 'talk', 'turn': 6}, TF['hold'], {
-        'far': ((196, 250), (240, 206), (268, 118, 'palm'), 'mid'),
-        'near': (SH_NEAR, (260, 238), (280, 152, 'palm'), 'front'),
+        'far': ((210, 246), (232, 168), (272, 128, 'palm'), 'mid'),
+        'near': (SH_NEAR, (284, 264), (280, 152, 'palm'), 'front'),
     })
     frames['blow'] = frame({'eyes': 'shut', 'mouth': 'o', 'puff': 7, 'turn': 10}, TF['blow'], {
         'far': ARMS_REST['far'] + ('back',),

@@ -109,8 +109,8 @@ test('content: every topic × age × lang × round over 150 seeds — exactly on
   assert.strictEqual(n, 5 * 11 * 2 * 4 * 150);
 });
 
-test('content: blocks per round 3: 2,2,3,3 · 4: 2,3,3,4 · 5: 3,4,4,5 · 6–7: 4,5,5,5; choices 2 / 3 / 3 (6–7: 4 from round 2), warm-up 2, size 2', () => {
-  const T = { 3: [2, 2, 3, 3], 4: [2, 3, 3, 4], 5: [3, 4, 4, 5], 6: [4, 5, 5, 5], 7: [4, 5, 5, 5] };
+test('content: layers per cake 3: 2,2,3,3 · 4: 2,2,3,4 · 5: 3,3,4,5 · 6–7: 3,4,4,5; choices 2 / 3 / 3 (6–7: 4 from round 2), warm-up 2, size 2', () => {
+  const T = { 3: [2, 2, 3, 3], 4: [2, 2, 3, 4], 5: [3, 3, 4, 5], 6: [3, 4, 4, 5], 7: [3, 4, 4, 5] };
   for (const age of AGES) for (const topic of TOPICS) for (let ri = 0; ri < 4; ri++) {
     const r = C.makeRound(topic, { age, lang: 'en', rng: new CK.RNG(ri + 1), roundIndex: ri });
     assert.strictEqual(r.n, T[age][ri]); assert.strictEqual(r.asks.length, T[age][ri]);
@@ -285,6 +285,7 @@ test('layout: DESIGN §2 numbers (S 124/110, LW/LH, stand, drop zone, Koko, bubb
   assert.ok(L.portrait && L.tall); assert.strictEqual(L.groundY, 1556 - 62 - 40); assert.strictEqual(L.tower.x, 0.58 * 720);
   assert.strictEqual(L.tower.baseTop, L.groundY - L.LH - 150); assert.ok(4 * L.LH <= L.tower.baseTop - (108 + 364));
   assert.deepStrictEqual(L.koko, { x: 110, y: L.tower.baseTop + 70, h: 300 });
+  assert.strictEqual(CK.World.computeLayout(720, 1036, { top: 21, right: 0, bottom: 18, left: 0 }, {}, 4).koko.y, CK.World.computeLayout(720, 1036, { top: 21, right: 0, bottom: 18, left: 0 }, {}, 4).tower.baseTop + 40, 'short portrait: Koko 30 px higher');
   assert.deepStrictEqual(L.bubble, { x: 24, y: 218, w: 720 - 48, h: 124 });
   L = CK.World.computeLayout(720, 1036, { top: 21, right: 0, bottom: 18, left: 0 }, {}, 4);   // iPad 820×1180
   assert.ok(L.portrait && !L.tall); assert.deepStrictEqual(L.bubble, { x: 24, y: 21 + 18, w: 720 - 160 - 14 - 24, h: 124 });
@@ -324,6 +325,9 @@ test('layout: every viewport (iPhone 393×852 / iPad 820×1180 both ways, insets
     assert.ok(!ovl(gbox(L), kbox(L.bubble)), v.name + ' age ' + age + ' bubble covers the cherry');
     assert.ok(!ovl(gbox(L), hud), v.name + ' HUD covers the cherry');
     if (!L.portrait) assert.ok(L.drop.x0 > kb.r + 20, v.name + ' Koko left of the drop zone');
+    else for (const s of CK.World.slotsFor(L, w.cfg, age === 3 ? 2 : age <= 5 ? 3 : 4)) {   // Koko's feet ≥ 16 px above any tray layer under him
+      if (s.x + LW / 2 > L.koko.x - 0.38 * L.koko.h && s.x - LW / 2 < L.koko.x + 0.38 * L.koko.h) assert.ok(L.koko.y + 16 <= s.y - LH / 2, v.name + ' age ' + age + ' Koko on the tray (' + (s.y - LH / 2 - L.koko.y).toFixed(0) + ' px)');
+    }
     assert.ok(L.drop.x1 < L.W - ins.right && L.drop.x0 > ins.left, 'drop zone on screen');
     assert.ok(L.tower.baseW === LW + 60);
   }
@@ -371,11 +375,11 @@ test('world: full scripted session per age through the pointer — taps, misses,
           assert.strictEqual(dragToTower(w, X), 'drop');
           until(w, () => X.state === 'bounce' || X.state === 'home');
           drainAll(); assert.ok(all.some(e => e.type === 'wrong' && e.pieceId === X.id));
-          until(w, () => w.phase === 'ask' && X.state === 'rest');
+          until(w, () => w.phase === 'ask' && (X.state === 'rest' || !w.pieces.includes(X)));
           w.update(CFG.wrongLock);
         }
         if (askN % 7 === 5 && wrongP(w)) {
-          for (let k = 0; k < 2; k++) { const X = wrongP(w); if (!X) break; dragToTower(w, X); until(w, () => w.phase === 'ask' && X.state === 'rest'); w.update(CFG.wrongLock); }
+          for (let k = 0; k < 2; k++) { const X = wrongP(w); if (!X) break; dragToTower(w, X); until(w, () => w.phase === 'ask' && (X.state === 'rest' || !w.pieces.includes(X))); w.update(CFG.wrongLock); }
           drainAll(); assert.ok(w.hintHand || all.some(e => e.type === 'hint'));
         }
         const Rp = rightP(w), n0 = w._liveCount();
@@ -392,7 +396,7 @@ test('world: full scripted session per age through the pointer — taps, misses,
     const seq = all.map(e => e.type), r0 = seq.indexOf('round');
     const want = ['round', 'deal', 'ask', 'grab', 'drop', 'land', 'stack', 'towerDone', 'cherry', 'cherryOn', 'count', 'blow', 'candlesOut', 'sprinkles', 'roundDone', 'clearBlock'];
     let k = r0; for (const t of want) { k = seq.indexOf(t, k); assert.ok(k >= 0, 'event ' + t + ' in order'); }
-    for (const t of ['tapPiece', 'miss', 'wrong', 'hint', 'talk', 'talkResult', 'levelDone', 'sessionDone', 'bee'].concat(age >= 4 ? ['gust'] : [])) assert.ok(cnt[t] > 0, 'age ' + age + ' saw ' + t);
+    for (const t of ['tapPiece', 'miss', 'wrong', 'hint', 'talk', 'talkResult', 'levelDone', 'sessionDone'].concat(age >= 4 ? ['gust'] : [])) assert.ok(cnt[t] > 0, 'age ' + age + ' saw ' + t);
     for (const t of ['cherry', 'cherryOn', 'blow', 'candlesOut', 'sprinkles']) assert.strictEqual(cnt[t], cnt.towerDone, t + ' once per cake');
     assert.strictEqual(cnt.towerDone, cnt.roundDone);
     assert.strictEqual(cnt.count, all.filter(e => e.type === 'towerDone').reduce((s, e) => s + e.n, 0));
@@ -617,14 +621,14 @@ test('world: wrong → bounce off (restitution 0.45, kick towards home, spin), a
   const g = R; w.pointerDown(g.x, g.y); w.pointerMove(g.x, g.y - 40); assert.strictEqual(w.hintHand, null); w.cancelDrag();
 });
 
-test('world: stars per cake 3 / 2 / 1 for 0 / 1 / ≥ 2 wrong drops; cakes of ≥ 4 layers forgive one slip', () => {
-  for (const [ri, wrongN, want] of [[1, 0, 3], [1, 1, 2], [1, 2, 1], [1, 3, 1], [3, 1, 3], [3, 2, 2], [3, 3, 1]]) {
+test('world: stars per cake 3 / 2 / 1 for 0 / 1 / ≥ 2 wrong drops; cakes of ≥ 3 layers forgive one slip (2-layer cakes do not)', () => {
+  for (const [ri, wrongN, want] of [[0, 0, 3], [0, 1, 2], [0, 2, 1], [2, 0, 3], [2, 1, 3], [2, 2, 2], [2, 3, 1], [3, 1, 3], [3, 2, 2], [3, 3, 1]]) {
     const w = mkWorld({ age: 4 }); roundOf(w, 'colors', ri);
-    assert.strictEqual(w.cur.n, ri === 3 ? 4 : 3);
+    assert.strictEqual(w.cur.n, [2, 2, 3, 4][ri]);
     let left = wrongN;
     while (w.phase !== 'done') {
       untilPhase(w, 'ask');
-      if (left > 0 && wrongP(w)) { const X = wrongP(w); dragToTower(w, X); until(w, () => X.state === 'rest'); run(w, CFG.wrongLock + 0.05); left--; continue; }
+      if (left > 0 && wrongP(w)) { const X = wrongP(w); dragToTower(w, X); until(w, () => (X.state === 'rest' || !w.pieces.includes(X))); run(w, CFG.wrongLock + 0.05); left--; continue; }
       dragToTower(w, rightP(w)); until(w, () => w.phase === 'deal' || w.phase === 'done');
     }
     until(w, () => w.events.some(e => e.type === 'roundDone'));
@@ -634,11 +638,12 @@ test('world: stars per cake 3 / 2 / 1 for 0 / 1 / ≥ 2 wrong drops; cakes of �
   }
 });
 
-test('world: idle nudges at 12 s, then ×1.5 up to 20 s; every idle hints; a real grab resets; Koko taps do not (3rd glows); resetNudges', () => {
+test('world: idle nudges at 12 s, then ×1.5 up to 30 s (12, 18, 27, 30); every idle hints; a real grab resets; Koko taps do not (3rd glows); resetNudges', () => {
   const w = mkWorld({ age: 4 }); roundOf(w, 'colors', 2); evs(w);
   run(w, 12.05); let e = evs(w); assert.ok(e.some(x => x.type === 'idle' && x.n === 1)); assert.ok(e.some(x => x.type === 'hint' && x.idle), 'the 1st idle hints');
   run(w, 18); e = evs(w); assert.ok(e.some(x => x.type === 'idle' && x.n === 2)); assert.ok(e.some(x => x.type === 'hint' && x.idle));
-  run(w, 20); assert.ok(evs(w).some(x => x.type === 'idle' && x.n === 3), 'gap capped at 20 s');
+  run(w, 27); assert.ok(evs(w).some(x => x.type === 'idle' && x.n === 3), 'gap 27 s');
+  run(w, 29.5); assert.ok(!evs(w).some(x => x.type === 'idle')); run(w, 0.6); assert.ok(evs(w).some(x => x.type === 'idle' && x.n === 4), 'gap capped at 30 s');
   w.resetNudges(); run(w, 11); assert.ok(!evs(w).some(x => x.type === 'idle'));
   const p = wrongP(w); w.pointerDown(p.x, p.y); w.pointerMove(p.x, p.y - 50); run(w, 0.2); w.cancelDrag();
   run(w, 11); assert.ok(!evs(w).some(x => x.type === 'idle'), 'the grab reset the clock');
@@ -676,7 +681,7 @@ test('world: a child who only taps — layer taps are soft taps (3rd hints); a t
   until(w, () => w._liveCount() === n2 + 1 || w.phase === 'done');
   while (w.phase !== 'done') { untilPhase(w, 'ask', 20000); dragToTower(w, rightP(w)); until(w, () => w.phase === 'deal' || w.phase === 'done'); }
   until(w, () => w.events.some(x => x.type === 'roundDone'), 40000);
-  const rd = w.drainEvents().find(x => x.type === 'roundDone'); assert.ok(rd.assists >= 2 && rd.stars === 1, 'assisted stacks count like misses');
+  const rd = w.drainEvents().find(x => x.type === 'roundDone'); assert.ok(rd.assists >= 2 && rd.stars <= 2 && rd.stars === w._starsFor(rd.misses + rd.assists), 'assisted stacks count like misses');
   const w3 = mkWorld({ age: 4 }); roundOf(w3, 'colors', 2); evs(w3);
   const Q3 = rightP(w3), L3 = w3.layout;
   assert.strictEqual(drag(w3, Q3, L3.koko.x + 40, L3.groundY - 300), 'miss', 'not hinted yet: a plain miss');
@@ -727,7 +732,7 @@ test('world: cake done — towerDone → cherry plops on (squash, the cloud puff
     if (G) minCsy = Math.min(minCsy, G.csy);
     if (w.koko.mood === 'blow') sawBlowMood = true;
     if (G && G.state === 'on' && G.cloudA === 0) cloudGone = true;
-    if (G && G.state === 'on' && w.phase === 'done') { const c = w.cherryPose(1), t = w.towerTop(); cherryOnTop = Math.min(cherryOnTop, -Math.abs(c.y - t.y) - Math.abs(c.x - t.x)); }
+    if (G && G.state === 'on' && w.phase === 'done') { const c = w.cherryPose(1), t = w._onTop(w.layout.cherryOff, 0, 1); cherryOnTop = Math.min(cherryOnTop, -Math.abs(c.y - t.y) - Math.abs(c.x - t.x)); }
     if (!st.blowSeen && L.some(x => x[0] === 'blow')) { st.blowSeen = true; litAtBlow = w.candles.map(c => c.lit); }
     if (w.phase === 'clear' && G) { const c = w.cherryPose(1); if (c) cherryFlyX.push(c.x); }
   });
@@ -754,8 +759,8 @@ test('world: cake done — towerDone → cherry plops on (squash, the cloud puff
   assert.strictEqual(w.goal.state, 'float', 'the next cake has a new cherry'); assert.strictEqual(w.candles.length, 0);
 });
 
-test('world: candles — one per layer (n = 2…5), evenly across 0.7·LW, pop with an overshoot, light, go out after the blow', () => {
-  for (const [age, ri, n] of [[3, 0, 2], [4, 1, 3], [5, 2, 4], [6, 1, 5]]) {
+test('world: candles — one per layer (n = 2…5) at World.candleOffsets, pop with an overshoot, light, go out after the blow', () => {
+  for (const [age, ri, n] of [[3, 0, 2], [4, 2, 3], [5, 2, 4], [6, 3, 5]]) {
     const w = mkWorld({ age, seed: 2 + n });
     let maxPop = 0, outEnd = 0, cand = null;
     const log = doneLog(w, ri, age >= 6 ? 'add' : 'colors', () => {
@@ -763,12 +768,74 @@ test('world: candles — one per layer (n = 2…5), evenly across 0.7·LW, pop w
     });
     assert.strictEqual(log[0][2].n, n);
     assert.strictEqual(cand.length, n, 'candles = layers');
-    const LW = w.layout.LW, span = 0.7 * LW;
-    if (n > 1) { assert.ok(Math.abs(cand[0] + span / 2) < 1e-9 && Math.abs(cand[n - 1] - span / 2) < 1e-9); for (let j = 1; j < n; j++) assert.ok(Math.abs(cand[j] - cand[j - 1] - span / (n - 1)) < 1e-9); }
+    assert.deepStrictEqual(cand, CK.World.candleOffsets(n, w.layout));
     assert.ok(maxPop > 1.1 && maxPop < 1.4, 'pop overshoot ' + maxPop.toFixed(2));
     assert.ok(outEnd > 0.5, 'candles going out before the clear (' + outEnd.toFixed(2) + ')');
     assert.strictEqual(log.filter(x => x[0] === 'count').length, n);
   }
+});
+
+test('world: candles are never hidden by the cherry — n = 1…5 × every viewport × age: clear of the cherry (64 px) and of each other, ≥ 0.2·LW from its centre, on the top', () => {
+  for (const v of VIEWPORTS) for (const age of AGES) {
+    const L = CK.World.computeLayout(v.W, v.H, v.ins, {}, age), LW = L.LW, cx = L.cherryOff;
+    assert.ok(cx + 32 <= LW / 2 + 1, v.name + ' cherry on the top');
+    for (let n = 1; n <= 5; n++) {
+      const xs = CK.World.candleOffsets(n, L), tag = v.name + ' age ' + age + ' n ' + n;
+      const cw = xs.h / 3; assert.ok(xs.h >= 0.85 * L.candleH && xs.h <= L.candleH, tag + ' candle height ' + xs.h);
+      assert.strictEqual(xs.length, n);
+      xs.forEach((x, j) => {
+        assert.ok(x + cw / 2 <= cx - 32 - 1.99, tag + ' candle ' + j + ' behind the cherry');
+        assert.ok(cx - x >= 0.2 * LW, tag + ' in the ±0.2·LW band');
+        assert.ok(x - cw / 2 >= -LW / 2, tag + ' off the top');
+        if (j) assert.ok(x - xs[j - 1] >= cw + 2, tag + ' candles overlap (' + (x - xs[j - 1] - cw).toFixed(1) + ' px)');
+      });
+    }
+  }
+  const w = mkWorld({ age: 4, config: { blocksByRound: [1, 1, 1, 1] } });
+  const log = doneLog(w, 0, 'colors');
+  assert.strictEqual(log[0][2].n, 1); assert.ok(log.some(x => x[0] === 'blow'));
+});
+
+test('world: errorless fade — from the 3rd wrong drop on one ask the wrong layers puff away (fadeWrong), only the right one is left; hints as before; the next ask has all its choices', () => {
+  const w = mkWorld({ age: 5 }); roundOf(w, 'colors', 2); evs(w);
+  assert.strictEqual(w.pieces.filter(p => p.askIdx === w.ask).length, 3);
+  const R = rightP(w); let hints = 0;
+  for (let k = 0; k < 3; k++) {
+    const X = wrongP(w); assert.ok(X, 'a wrong layer ' + k);
+    if (k === 2) { const others = w.pieces.filter(p => p !== X && !p.right && p.askIdx === w.ask); assert.ok(others.length >= 1); }
+    dragToTower(w, X); until(w, () => w.phase === 'ask' && (X.state === 'rest' || !w.pieces.includes(X))); run(w, CFG.wrongLock + 0.05);
+    const e = evs(w); hints += e.filter(x => x.type === 'hint').length;
+    if (k < 2) { assert.ok(X.state === 'rest', 'no fade before the 3rd'); assert.ok(!e.some(x => x.type === 'fadeWrong')); }
+    else assert.ok(e.some(x => x.type === 'fadeWrong' && x.ask === w.ask), 'fadeWrong event');
+  }
+  run(w, 0.5);
+  assert.deepStrictEqual(w.pieces.filter(p => p.askIdx === w.ask).map(p => p.id), [R.id], 'only the right layer is left');
+  assert.ok(hints >= 1 && R._hinted, 'hinted');
+  assert.strictEqual(w.misses, 3);
+  dragToTower(w, R); until(w, () => w.phase === 'deal' || w.phase === 'done'); untilPhase(w, 'ask');
+  assert.strictEqual(w.pieces.filter(p => p.askIdx === w.ask && p.state === 'rest').length, 3, 'the next ask is complete');
+  // a child who always picks a wrong layer still finishes the session
+  const v = mkWorld({ age: 3, seed: 21 }); let t = 0;
+  while (v.state !== 'sessionDone' && t < 1500) {
+    if (v.state === 'talk' && !v.talkAnswered && v.stateTime > 1) v.talkAnswer(v.talk.answerId);
+    if (v.state === 'round' && v.phase === 'ask' && v.phaseTime > 0.8 && v.time > v._lockUntil) {
+      const ps = v.pieces.filter(p => p.state === 'rest' && p.askIdx === v.ask), X = ps.find(p => !p.right) || ps.find(p => p.right);
+      if (X) { const d = v.dropPoint(); drag(v, X, d.x, d.y, { steps: 4, dt: 0.03, hold: 0.05 }); }
+    }
+    v.update(1 / 30); t += 1 / 30; v.drainEvents();
+  }
+  assert.strictEqual(v.state, 'sessionDone', 'wrong-always child finishes (' + t.toFixed(0) + ' s)');
+});
+
+test('world: dropCatch — a release up to 40 px beside the drop zone still drops; farther is a miss; the layout keeps dropPad 60', () => {
+  const w = mkWorld({ age: 4 }); roundOf(w, 'colors', 2);
+  const D = w.layout.drop, L = w.layout;
+  assert.strictEqual(D.x1 - D.x0, L.LW + 120);
+  const X = rightP(w);
+  assert.strictEqual(drag(w, X, D.x1 + 30, D.y1 - 200, { hold: 0.4 }), 'drop', '30 px beside');
+  until(w, () => w.phase === 'deal' || w.phase === 'done'); untilPhase(w, 'ask');
+  const Y = rightP(w);
+  assert.strictEqual(drag(w, Y, D.x1 + 75, D.y1 - 200, { hold: 0.4 }), 'miss', '75 px beside');
 });
 
 test('world: chapter time limit — after ≥ 2 cakes and > 80 s (or a predicted > 100 s) → Talk time; Talk re-asks every 12 s, glow from the 2nd', () => {
@@ -794,7 +861,7 @@ test('world: breeze surprise — gust after the 2nd stack, Koko holds (1.5 s), t
   assert.ok(gust, 'gust event'); assert.ok(peak > 0.05 && peak <= 0.12 + 1e-9, 'gust sway ' + peak);
   assert.ok(Math.abs(held - CFG.holdTime) < 0.05, 'Koko holds ' + held.toFixed(2));
   assert.ok(Math.abs(w.tower.theta) < 0.02 && w.wind === 0, 'calm again');
-  const w2 = mkWorld({ age: 4 }); roundOf(w2, 'colors', 1);
+  const w2 = mkWorld({ age: 4 }); roundOf(w2, 'colors', 2);
   for (let k = 0; k < 3; k++) { dragToTower(w2, rightP(w2)); untilPhase(w2, k < 2 ? 'ask' : 'done', 20000); }
   assert.ok(!evs(w2).some(e => e.type === 'gust'));
 });

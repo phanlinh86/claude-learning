@@ -1,10 +1,10 @@
-// Functional QA suite for Lulu's Jungle Tower — REAL touch input (CDP Input.dispatchTouchEvent) on iPhone/iPad-sized
+// Functional QA suite for Koko's Cake Tower — REAL touch input (CDP Input.dispatchTouchEvent) on iPhone/iPad-sized
 // mobile contexts (isMobile + hasTouch).
 //   node tests/e2e/functional.js                        (all groups)
 //   node tests/e2e/functional.js drag wrong rotate      (only some groups)
 //   JOBS=2 node tests/e2e/functional.js                 (groups run in parallel pages; default 2)
 // Groups: boot lang gate settings flags volume drag wrong miss tap poke multi talk pause visibility rotate idle countup
-//         bot done layout
+//         bot done layout bee
 // Prints PASS/FAIL per check + a per-group summary, writes tests/out/functional/results.json (+ screenshots),
 // exits 1 on any FAIL. Never edits the game: it only reads CK.debug / world state and touches the screen.
 const { chromium } = require('playwright');
@@ -41,7 +41,7 @@ function badText(s) {
   if (!s.trim()) return 'empty';
   if (/[{}]/.test(s)) return 'brace';
   if (/\bundefined\b|\bNaN\b|\bnull\b|\[object/.test(s)) return 'undefined/NaN/null';
-  if (/\b(p|ui|topic|talk|say|session|weather|surprise|stack|count|butterfly)\.[a-zA-Z0-9]/.test(s)) return 'raw i18n key';
+  if (/\b(p|ui|topic|talk|say|session|weather|surprise|stack|count|bee|blow|cherry)\.[a-zA-Z0-9]/.test(s)) return 'raw i18n key';
   return null;
 }
 
@@ -68,6 +68,7 @@ async function waitTitle(page) {
  * is trimmed at 600), every world.pointerDown call and every setViewport. */
 async function installEv(page) {
   await page.evaluate(() => {
+    const DONE_T = new Set(['towerDone', 'cherry', 'cherryOn', 'count', 'blow', 'candlesOut', 'sprinkles', 'roundDone']);
     window.__ev = window.__ev || []; window.__downs = window.__downs || 0; window.__vl = window.__vl || [];
     window.__downLog = window.__downLog || []; window.__vpLog = window.__vpLog || [];
     if (CK.Voice && !CK.Voice.__hooked) {
@@ -81,11 +82,13 @@ async function installEv(page) {
     const o = w._emit;
     w._emit = function (e) {
       const c = Object.assign({ at: performance.now(), wt: this.time, ph: this.phase, st: this.state, lv: this.level, rd: this.round, vl: window.__vl.length }, e);
+      if (DONE_T.has(e.type)) { c.nc = this.candles ? this.candles.length : -1; c.nt = this.tower ? this.tower.blocks.length : -1; c.lit = (this.candles || []).filter(k => k.lit > 0.5).length; }
       if (e.talk) c.tk = { promptKey: e.talk.promptKey, params: e.talk.params, answerId: e.talk.answerId };
       delete c.talk; delete c.block; delete c.want;
       window.__ev.push(c);
       if (window.__ev.length > 20000) window.__ev.splice(0, 5000);
       if (e.type === 'talk' && window.__stopBotOnTalk) { CK.debug.setBot(false); CK.debug.setSpeed(1); }
+      if (e.type === 'bee' && window.__stopBotOnBee) { window.__stopBotOnBee = false; CK.debug.setBot(false); CK.debug.setSpeed(1); this.cancelDrag(); }
       return o.call(this, e);
     };
     const pd = w.pointerDown;
@@ -105,6 +108,33 @@ async function installEv(page) {
     };
   });
 }
+/* The done sequence of every finished cake: towerDone → cherry → cherryOn → count 1…n → blow → candlesOut → sprinkles →
+ * roundDone (n = layers), candles = n (lit before the blow), total countAt + (n−1)·countStep + blow 0.45 + out 0.45 +
+ * sprinkles 0.3 + roundDone 0.4 = 1.8 + 0.45·n s game time (± 0.25; 3.6 s at n = 4 as the unit test). Returns problems. */
+const DONE_TYPES = ['towerDone', 'cherry', 'cherryOn', 'count', 'blow', 'candlesOut', 'sprinkles', 'roundDone'];
+const doneSeq = page => page.evaluate(T => {
+  const ev = window.__ev.filter(e => T.includes(e.type)), out = [];
+  let cakes = 0;
+  for (let i = 0; i < ev.length; i++) {
+    if (ev[i].type !== 'towerDone') continue;
+    const j = ev.findIndex((e, k) => k > i && e.type === 'roundDone');
+    if (j < 0) { if (i < ev.length - 1) out.push(`cake @${ev[i].lv}:${ev[i].rd}: no roundDone after towerDone`); continue; }
+    cakes++;
+    const seq = ev.slice(i, j + 1), n = ev[i].n, tag = `cake ${ev[i].lv}:${ev[i].rd} n=${n}`;
+    const want = ['towerDone', 'cherry', 'cherryOn'].concat(Array(n).fill('count'), ['blow', 'candlesOut', 'sprinkles', 'roundDone']);
+    const got = seq.map(e => e.type);
+    if (got.join() !== want.join()) out.push(`${tag}: order ${got.join('>')}`);
+    const cnt = seq.filter(e => e.type === 'count');
+    if (cnt.map(e => e.i).join() !== want.filter(t => t === 'count').map((_, k) => k + 1).join() || cnt.some(e => e.n !== n)) out.push(`${tag}: count i ${cnt.map(e => e.i + '/' + e.n).join()}`);
+    if (ev[i].nt !== n) out.push(`${tag}: towerDone n ≠ tower layers ${ev[i].nt}`);
+    const co = seq.find(e => e.type === 'candlesOut'), bl = seq.find(e => e.type === 'blow');
+    if (!co || co.n !== n || co.nc !== n) out.push(`${tag}: candlesOut n=${co && co.n}, candles=${co && co.nc}`);
+    if (bl && (bl.nc !== n || bl.lit !== n)) out.push(`${tag}: at blow candles=${bl.nc} lit=${bl.lit}`);
+    const dt = ev[j].wt - ev[i].wt, exp = 1.8 + 0.45 * n;
+    if (Math.abs(dt - exp) > 0.25) out.push(`${tag}: towerDone→roundDone ${dt.toFixed(2)} s (want ${exp.toFixed(2)})`);
+  }
+  return { cakes, out };
+}, DONE_TYPES);
 const evOf = (page, t) => page.evaluate(t => window.__ev.filter(e => e.type === t), t);
 const evTypes = page => page.evaluate(() => window.__ev.map(e => e.type));
 const clearEv = page => page.evaluate(() => { window.__ev = []; window.__downLog = []; });
@@ -157,10 +187,10 @@ async function dragPiece(c, id, to, o) {
   await drag(c, from, to || await dropPt(c.page), Object.assign({ arc: 20 }, o || {}));
 }
 async function dragRight(c, o) { const id = await c.page.evaluate(() => CK.debug.answerId()); await dragPiece(c, id, null, o); return id; }
-/* A point on the grass (CSS px) outside the drop zone, clear of Lulu, the blocks, HUD and bubble. */
+/* A point on the grass (CSS px) outside the drop zone, clear of Koko, the blocks, HUD and bubble. */
 const grassPt = page => page.evaluate(() => {
   const w = CK.debug.world, L = w.layout, D = L.drop;
-  const xs = L.portrait ? [D.x1 + 30, D.x0 - 30, L.W * 0.5] : [D.x1 + 22, (D.x0 + (L.lulu.x + 0.3 * L.lulu.h)) / 2];
+  const xs = L.portrait ? [D.x1 + 30, D.x0 - 30, L.W * 0.5] : [D.x1 + 22, (D.x0 + (L.koko.x + 0.3 * L.koko.h)) / 2];
   for (const x of xs) {
     const y = L.groundY - 8;
     if (x >= D.x0 && x <= D.x1 && y < D.y1) continue;
@@ -184,18 +214,18 @@ async function openSettingsByHold(c) {
 }
 const hidePage = (page, h) => page.evaluate(h => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => h }); Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => h ? 'hidden' : 'visible' }); document.dispatchEvent(new Event('visibilitychange')); }, h);
 async function begin(c, speed = 4) { await startGame(c, speed); await waitAsk(c.page); await setSpeed(c.page, 1); }
-/* Every resting choice block, the tower top and Lulu inside the screen. */
+/* Every resting choice layer, the cake top and Koko inside the screen. */
 const sceneAudit = page => page.evaluate(() => {
   const w = CK.debug.world, out = [], vw = innerWidth, vh = innerHeight;
   for (const p of w.pieces || []) {
     if (p.state === 'out' || p.state === 'in') continue;
-    const c0 = CK.debug.toScreen(p.homeX, p.homeY), sd = (p.side || w.layout.S) * CK.debug.view().s, b = { x: c0.x, y: c0.y, w: sd, h: sd };   // the drawn block at its slot (hit boxes are padded)
+    const c0 = CK.debug.toScreen(p.homeX, p.homeY), vs = CK.debug.view().s, b = { x: c0.x, y: c0.y, w: (p.bw || w.layout.LW) * vs, h: (p.bh || w.layout.LH) * vs };   // the drawn block at its slot (hit boxes are padded)
     if (!isFinite(b.x) || b.x - b.w / 2 < -2 || b.x + b.w / 2 > vw + 2 || b.y - b.h / 2 < -2 || b.y + b.h / 2 > vh + 2) out.push(`piece ${p.id} (${p.state}) off screen ${JSON.stringify(b && { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.w), h: Math.round(b.h), vw, vh, W: w.layout.W, H: w.layout.H, lx: Math.round(p.x), ly: Math.round(p.y), hx: Math.round(p.homeX), hy: Math.round(p.homeY) })}`);
   }
   const t = w.towerTop(), ts = CK.debug.toScreen(t.x, t.y);
   if (!isFinite(ts.x) || ts.x < 0 || ts.x > vw || ts.y < 0 || ts.y > vh) out.push('tower top off screen');
-  const l = CK.debug.luluScreen();
-  if (!l || l.x < 0 || l.x > vw || l.y < 0 || l.y > vh) out.push('Lulu off screen');
+  const l = CK.debug.kokoScreen();
+  if (!l || l.x < 0 || l.x > vw || l.y < 0 || l.y > vh) out.push('Koko off screen');
   return out;
 });
 
@@ -207,7 +237,7 @@ async function gBoot(check) {
     const st = await c.page.evaluate(() => ({ mode: CK.debug.mode, title: !document.getElementById('scrTitle').classList.contains('hidden'),
       loading: !document.getElementById('loading').classList.contains('hidden'), logo: document.querySelector('.logo').textContent.trim(),
       play: document.getElementById('btnPlay').getBoundingClientRect().toJSON(), W: CK.debug.getState().W, H: CK.debug.getState().H, sw: document.documentElement.scrollWidth, iw: innerWidth }));
-    check(`boot/${d.name}: title shown, loader gone, logo "Lulu… Jungle Tower"`, st.mode === 'title' && st.title && !st.loading && /Lulu/.test(st.logo) && /Jungle Tower/.test(st.logo), st);
+    check(`boot/${d.name}: title shown, loader gone, logo "Koko's Cake Tower"`, st.mode === 'title' && st.title && !st.loading && /Koko/.test(st.logo) && /Cake Tower/.test(st.logo), st);
     check(`boot/${d.name}: play button on screen & ≥ 60 px`, st.play.width >= 60 && st.play.left >= 0 && st.play.right <= d.viewport.width && st.play.bottom <= d.viewport.height, st.play);
     check(`boot/${d.name}: logical short side 720`, Math.min(st.W, st.H) === 720, { W: st.W, H: st.H });
     check(`boot/${d.name}: no horizontal overflow`, st.sw <= st.iw + 1, { sw: st.sw, iw: st.iw });
@@ -218,8 +248,10 @@ async function gBoot(check) {
     await waitAsk(c.page).catch(() => {});
     await setSpeed(c.page, 1);
     const pl = await piecesInfo(c.page);
+    // the DRAWN layer (bw × bh at its slot) must be on screen; the hit box is padded (h = 2·(0.6·S + 14)) and may poke out
+    const drawn = await c.page.evaluate(() => { const w = CK.debug.world, v = CK.debug.view(); return w.pieces.filter(p => p.askIdx === w.ask && p.state !== 'out').map(p => { const s = CK.debug.toScreen(p.homeX, p.homeY); return { id: p.id, x: s.x, y: s.y, w: p.bw * v.s, h: p.bh * v.s }; }); });
     const onS = b => b.x - b.w / 2 >= -2 && b.x + b.w / 2 <= d.viewport.width + 2 && b.y - b.h / 2 >= -2 && b.y + b.h / 2 <= d.viewport.height + 2;
-    check(`boot/${d.name}: first ask has ≥ 2 blocks, all on screen, exactly one right`, pl.length >= 2 && pl.filter(i => i.right).length === 1 && pl.every(onS), pl);
+    check(`boot/${d.name}: first ask has ≥ 2 layers, all drawn on screen, exactly one right`, pl.length >= 2 && pl.filter(i => i.right).length === 1 && drawn.length === pl.length && drawn.every(onS), { pl, drawn });
     check(`boot/${d.name}: block hit boxes ≥ 44 CSS px`, pl.every(b => b.w >= 44 && b.h >= 44), pl.map(b => [Math.round(b.w), Math.round(b.h)]));
     const bub = await c.page.evaluate(() => document.getElementById('bubbleText').textContent);
     check(`boot/${d.name}: bubble shows the prompt (clean)`, !badText(bub), bub);
@@ -236,20 +268,20 @@ async function gLang(check) {
     title: document.title, lang: document.documentElement.lang, on: [...document.querySelectorAll('.title-screen [data-lang]')].filter(b => b.classList.contains('on')).map(b => b.dataset.lang),
     tag: document.getElementById('tagline').textContent, age: document.getElementById('titleAge').textContent }));
   const a = await read();
-  check('lang: default EN title/logo (Lulu’s / Jungle Tower)', a.lang === 'en' && /Lulu/.test(a.l1) && /Jungle Tower/.test(a.l2) && /Jungle Tower/.test(a.title) && a.on.join() === 'en', a);
+  check('lang: default EN title/logo (Koko’s / Cake Tower)', a.lang === 'en' && /Koko/.test(a.l1) && /Cake Tower/.test(a.l2) && /Cake Tower/.test(a.title) && a.on.join() === 'en', a);
   await tapEl(c, '.title-screen [data-lang="vi"]');
   const b = await read();
-  check('lang: VI chip → logo "Hươu Lulu" / "Xếp Tháp", document.title, html lang', b.lang === 'vi' && b.l1 === 'Hươu Lulu' && b.l2 === 'Xếp Tháp' && /Xếp Tháp/.test(b.title) && b.on.join() === 'vi', b);
+  check('lang: VI chip → logo "Koala Koko" / "Tháp Bánh Kem", document.title, html lang', b.lang === 'vi' && b.l1 === 'Koala Koko' && b.l2 === 'Tháp Bánh Kem' && /Tháp Bánh Kem/.test(b.title) && b.on.join() === 'vi', b);
   check('lang: VI tagline / age translated (diacritics)', VI_RE.test(b.tag) && !badText(b.tag) && /Tuổi/.test(b.age), b);
   const vl = await c.page.evaluate(() => window.__vl.slice(-1)[0]);
   check('lang: switching says a welcome line in VI', vl && vl.lang === 'vi' && !badText(vl.text) && VI_RE.test(vl.text), vl);
   await c.page.reload(); await waitTitle(c.page);
   const r = await read();
-  check('lang: VI choice persists across reload', r.lang === 'vi' && r.l1 === 'Hươu Lulu', r);
+  check('lang: VI choice persists across reload', r.lang === 'vi' && r.l1 === 'Koala Koko', r);
   await installEv(c.page);
   await tapEl(c, '.title-screen [data-lang="en"]');
   const e = await read();
-  check('lang: back to EN', e.lang === 'en' && /Jungle Tower/.test(e.title) && e.l1 !== 'Hươu Lulu', e);
+  check('lang: back to EN', e.lang === 'en' && /Cake Tower/.test(e.title) && e.l1 !== 'Koala Koko', e);
   // in-game bubble language
   await c.page.goto(srv.url + '?mute=1&seed=5&lang=vi'); await waitTitle(c.page); await installEv(c.page);
   await begin(c);
@@ -323,7 +355,7 @@ async function gFlags(check) {
   const ctx = await browser.newContext(ctxOpts(DEV.iphoneP));
   const c = await open(DEV.iphoneP, 'mute=1&lang=vi&age=7&speed=2&seed=9', { ctx });
   const t1 = await c.page.evaluate(() => ({ l1: document.getElementById('logo1').textContent, age: document.getElementById('titleAge').textContent, ls: localStorage.getItem('ck:settings') }));
-  check('flags: ?lang=vi&age=7 applied for the session', t1.l1 === 'Hươu Lulu' && /7/.test(t1.age), t1);
+  check('flags: ?lang=vi&age=7 applied for the session', t1.l1 === 'Koala Koko' && /7/.test(t1.age), t1);
   check('flags: nothing saved just by loading with flags', t1.ls == null, t1.ls);
   await begin(c);
   check('flags: ?age=7 is played', (await c.page.evaluate(() => CK.debug.world.age)) === 7);
@@ -337,7 +369,7 @@ async function gFlags(check) {
   await tapEl(c, '#btnSettingsDone');
   await c.page.goto(srv.url + '?mute=1'); await waitTitle(c.page);
   const t2 = await c.page.evaluate(() => ({ l1: document.getElementById('logo1').textContent, age: document.getElementById('titleAge').textContent, s: CK.debug.getState().settings, sp: CK.debug.getState().speed }));
-  check('flags: without flags → saved EN, age 4, normal speed again', t2.l1 !== 'Hươu Lulu' && /Lulu/.test(t2.l1) && /4/.test(t2.age) && t2.s.sfx === false && t2.sp === 1, t2);
+  check('flags: without flags → saved EN, age 4, normal speed again', t2.l1 !== 'Koala Koko' && /Koko/.test(t2.l1) && /4/.test(t2.age) && t2.s.sfx === false && t2.sp === 1, t2);
   check('flags: zero console errors', c.errors.length === 0, c.errors);
   await ctx.close();
 }
@@ -406,8 +438,8 @@ async function gDrag(check) {
     const lines = await vsince(c.page, v0);
     check(`${tag}: a clean praise line is spoken`, lines.length >= 1 && lines.every(l => !badText(l)), lines);
     const land = (await evOf(c.page, 'land'))[0];
-    const off = await c.page.evaluate(() => { const w = CK.debug.world, T = w.tower, b = T.blocks[T.blocks.length - 1]; return Math.abs(b.dx) / w.layout.S; });
-    check(`${tag}: landing within ± 0.18·S of the axis, impact 0..1`, off <= 0.181 && land && land.impact >= 0 && land.impact <= 1, { off, impact: land && land.impact });
+    const off = await c.page.evaluate(() => { const w = CK.debug.world, T = w.tower, b = T.blocks[T.blocks.length - 1]; return Math.abs(b.dx) / w.layout.LW; });
+    check(`${tag}: landing within ± 0.18·LW of the axis, impact 0..1`, off <= 0.181 && land && land.impact >= 0 && land.impact <= 1, { off, impact: land && land.impact });
     if (s0.asks > 1) {
       await c.page.waitForFunction(() => CK.debug.world.ask === 1 && CK.debug.world.phase === 'ask', null, { timeout: 6000 }).catch(() => {});
       check(`${tag}: next ask follows`, (await wstate(c.page)).ask === 1, await wstate(c.page));
@@ -418,7 +450,8 @@ async function gDrag(check) {
     await c.page.waitForFunction(() => window.__ev.some(e => e.type === 'roundDone'), null, { timeout: 12000 }).catch(() => {});
     const rd = await evOf(c.page, 'roundDone'), cnt = (await evOf(c.page, 'count')).map(e => e.i);
     check(`${tag}: tower done → count 1…n bottom-up, roundDone 3 stars`, rd.length === 1 && rd[0].stars === 3 && cnt.join() === [...Array(s0.asks)].map((_, i) => i + 1).join(), { rd, cnt });
-    check(`${tag}: monkey grabs the bananas`, (await evOf(c.page, 'bananas')).length === 1, await evTypes(c.page));
+    const ds = await doneSeq(c.page);
+    check(`${tag}: done sequence towerDone→cherry→cherryOn→count×n→blow→candlesOut→sprinkles→roundDone, candles = layers, timing`, ds.cakes === 1 && ds.out.length === 0, ds);
     await shot(c, 'drag-done');
     await c.page.waitForFunction(() => CK.debug.world.round === 1 && CK.debug.world.phase === 'ask', null, { timeout: 15000 }).catch(() => {});
     await sleep(800);
@@ -564,39 +597,47 @@ async function gTap(check) {
   }
 }
 
-/* Tap on Lulu → pokeLulu, the prompt is repeated word for word; bubble tap too. */
+/* Tap on Koko → pokeKoko, the prompt is repeated word for word; bubble tap too. */
 async function gPoke(check) {
   for (const d of [DEV.iphoneL, DEV.ipadP, DEV.iphoneP]) {
     const c = await open(d, 'mute=1&seed=61&age=4');
     const tag = `poke/${d.name}`;
-    await begin(c); await sleep(3300);   // taps on Lulu < 3 s after the prompt started are ignored (playtest P1-1)
+    await begin(c); await sleep(3300);   // taps on Koko < 3 s after the prompt started are ignored (playtest P1-1)
     const prompt = await c.page.evaluate(() => document.getElementById('bubbleText').textContent);
-    // a point on Lulu that the DOM bubble does not cover
+    // a point on Koko that the DOM bubble does not cover
     const pp = await c.page.evaluate(() => {
-      const b = CK.debug.luluScreen();
-      for (const f of [0.25, 0.1, 0.35, 0, -0.15]) { const p = { x: b.x, y: b.y + f * b.h }; const e = document.elementFromPoint(p.x, p.y); if (e && e.id === 'game' && CK.debug.world._hit((p.x - CK.debug.view().left) / CK.debug.view().s, (p.y - CK.debug.view().top) / CK.debug.view().s) === 'lulu') return p; }
+      const b = CK.debug.kokoScreen();
+      for (const f of [0.25, 0.1, 0.35, 0, -0.15]) { const p = { x: b.x, y: b.y + f * b.h }; const e = document.elementFromPoint(p.x, p.y); if (e && e.id === 'game' && CK.debug.world._hit((p.x - CK.debug.view().left) / CK.debug.view().s, (p.y - CK.debug.view().top) / CK.debug.view().s) === 'koko') return p; }
       return { x: b.x, y: b.y, fallback: true };
     });
+    const grassP = await grassPt(c.page);
     const n0 = await vlen(c.page);
     await clearEv(c.page);
     await tapAt(c, pp); await sleep(300);
     const ev = await evTypes(c.page);
     const lines = await vsince(c.page, n0);
-    check(`${tag}: short tap on Lulu → pokeLulu event`, ev.includes('pokeLulu') && !ev.includes('grab') && !ev.includes('wrong'), { ev, pp });
+    check(`${tag}: short tap on Koko → pokeKoko event`, ev.includes('pokeKoko') && !ev.includes('grab') && !ev.includes('wrong'), { ev, pp });
     check(`${tag}: voice repeats the same prompt`, lines.includes(prompt), { lines, prompt });
     check(`${tag}: phase still ask`, (await wstate(c.page)).phase === 'ask');
-    // long press on Lulu → not a poke
+    // long press on Koko → not a poke
     await clearEv(c.page);
     await touch(c.cdp, 'touchStart', [pp]); await sleep(700); await touch(c.cdp, 'touchEnd', []); await sleep(150);
-    check(`${tag}: long press on Lulu is not a poke`, !(await evTypes(c.page)).includes('pokeLulu'), await evTypes(c.page));
-    // bubble tap repeats
+    check(`${tag}: long press on Koko is not a poke`, !(await evTypes(c.page)).includes('pokeKoko'), await evTypes(c.page));
+    // bubble tap repeats (wait > 320 ms after the last touchend: kidProof's double-tap-zoom guard eats a quick 2nd tap)
+    await sleep(450);
     const n1 = await vlen(c.page), d0 = await downs(c.page);
     await tapEl(c, '#bubble'); await sleep(300);
     const l2 = await vsince(c.page, n1);
     check(`${tag}: tap on the bubble repeats the prompt`, l2.includes(prompt), { l2, prompt });
     check(`${tag}: bubble tap never reaches the world`, (await downs(c.page)) === d0);
+    // a quick bubble tap right after a tap elsewhere (a child tapping Koko, then the bubble) must still repeat the prompt
+    await sleep(3300);
+    await tapAt(c, grassP, 40); await sleep(120);
+    const n2 = await vlen(c.page);
+    await tapEl(c, '#bubble'); await sleep(300);
+    check(`${tag}: bubble tapped 150 ms after another tap still repeats the prompt`, (await vsince(c.page, n2)).includes(prompt), { l: await vsince(c.page, n2), prompt });
     for (let i = 0; i < 8; i++) { await tapAt(c, pp, 30); await sleep(40); }
-    check(`${tag}: rapid Lulu taps → still asking, no crash`, (await wstate(c.page)).phase === 'ask');
+    check(`${tag}: rapid Koko taps → still asking, no crash`, (await wstate(c.page)).phase === 'ask');
     check(`${tag}: zero console errors`, c.errors.length === 0, c.errors);
     await c.close();
   }
@@ -806,7 +847,7 @@ async function gRotate(check) {
     check(`${tag}: the stale finger lifting drops nothing`, !ev.includes('drop') && !ev.includes('stack') && !ev.includes('wrong') && (await towerN(c.page)) === n0, ev);
     const v1 = await sceneAudit(c.page);
     const ps = await pieceState(c.page, r.id);
-    check(`${tag}: blocks / tower / Lulu inside the rotated screen, block home`, v1.length === 0 && ps.state === 'rest' && ps.atHome, { v1, ps });
+    check(`${tag}: layers / cake / Koko inside the rotated screen, block home`, v1.length === 0 && ps.state === 'rest' && ps.atHome, { v1, ps });
     const W = await c.page.evaluate(() => CK.debug.getState());
     check(`${tag}: logical size switched orientation`, (b.viewport.width > b.viewport.height) === (W.W > W.H), { W: W.W, H: W.H });
     await shot({ page: c.page, dev: b }, 'rotate-after-drag');
@@ -891,8 +932,10 @@ async function gBot(check) {
     const st = await c.page.evaluate(() => ({ s: CK.debug.getState(), stats: CK.debug.stats, age: CK.debug.world.age, levels: CK.debug.world.levels, t: CK.debug.world.time }));
     check(`${tag}: session reaches mode done`, ok, st);
     check(`${tag}: played at age ${age}`, st.age === age, st.age);
-    const cnt = await c.page.evaluate(() => { const n = t => window.__ev.filter(e => e.type === t).length; return { level: n('level'), talk: n('talk'), round: n('round'), roundDone: n('roundDone'), towerDone: n('towerDone'), sessionDone: n('sessionDone'), wrong: n('wrong'), stack: n('stack'), asks: n('ask'), bananas: n('bananas') }; });
-    check(`${tag}: 4 chapters, 4 talks, every tower done, one stack per ask`, cnt.level === 4 && cnt.talk === 4 && cnt.round === cnt.roundDone && cnt.round === cnt.towerDone && cnt.round >= 12 && cnt.sessionDone === 1 && cnt.stack === cnt.asks && cnt.bananas === cnt.round, cnt);
+    const cnt = await c.page.evaluate(() => { const n = t => window.__ev.filter(e => e.type === t).length; return { level: n('level'), talk: n('talk'), round: n('round'), roundDone: n('roundDone'), towerDone: n('towerDone'), sessionDone: n('sessionDone'), wrong: n('wrong'), stack: n('stack'), asks: n('ask'), cherryOn: n('cherryOn'), sprinkles: n('sprinkles'), candlesOut: n('candlesOut') }; });
+    check(`${tag}: 4 chapters, 4 talks, ≥ 2 cakes per chapter, every cake done, one stack per ask`, cnt.level === 4 && cnt.talk === 4 && cnt.round === cnt.roundDone && cnt.round === cnt.towerDone && cnt.round >= 8 && cnt.sessionDone === 1 && cnt.stack === cnt.asks && cnt.cherryOn === cnt.round && cnt.sprinkles === cnt.round && cnt.candlesOut === cnt.round, cnt);
+    const ds = await doneSeq(c.page);
+    check(`${tag}: every cake's done sequence in order, candles = layers, timing`, ds.cakes === cnt.round && ds.out.length === 0, { cakes: ds.cakes, out: ds.out.slice(0, 6) });
     // every ask's prompt spoken (one of the prompt's wordings, in the session language), chapter by chapter
     const pr = await c.page.evaluate(lang => {
       const vl = window.__vl, out = { perLevel: {}, missing: [] };
@@ -985,8 +1028,8 @@ const askAudit = page => page.evaluate(() => {
   const ps = all;
   const v = CK.debug.view();
   for (const p of ps) {
-    const b = CK.debug.pieceScreen(p.id), c0 = CK.debug.toScreen(p.homeX, p.homeY), sd = (p.side || w.layout.S) * v.s;
-    if (c0.x - sd / 2 < -2 || c0.y - sd / 2 < -2 || c0.x + sd / 2 > innerWidth + 2 || c0.y + sd / 2 > innerHeight + 2) out.push(`piece ${p.id} drawn off screen`);
+    const b = CK.debug.pieceScreen(p.id), c0 = CK.debug.toScreen(p.homeX, p.homeY), hw = (p.bw || w.layout.LW) * v.s / 2, hh = (p.bh || w.layout.LH) * v.s / 2;
+    if (c0.x - hw < -2 || c0.y - hh < -2 || c0.x + hw > innerWidth + 2 || c0.y + hh > innerHeight + 2) out.push(`piece ${p.id} drawn off screen`);
     if (b.x - b.w / 2 < -40 || b.y - b.h / 2 < -40 || b.x + b.w / 2 > innerWidth + 40 || b.y + b.h / 2 > innerHeight + 40) out.push(`piece ${p.id} hit box far off screen`);
     const e = document.elementFromPoint(b.x, b.y);
     if (!e || e.id !== 'game') out.push(`piece ${p.id} centre under #${e && (e.id || e.className)}`);
@@ -1054,6 +1097,45 @@ async function gIdle(check) {
   await c.close();
 }
 
+/* The bee surprise: a real tap on the bee (in / sit) → beeTap, loop-the-loop; a 2nd tap during the loop is ignored; the
+ * tap never grabs a layer nor counts as a mistake; the round continues. */
+async function gBee(check) {
+  for (const d of [DEV.iphoneP, DEV.ipadL, DEV.iphoneL]) {
+    const c = await open(d, 'mute=1&seed=41&age=3');
+    const tag = `bee/${d.name}`;
+    await c.page.evaluate(() => { window.__stopBotOnBee = true; CK.debug.setBot(true, 1); CK.debug.setSpeed(8); CK.debug.startGame(); });
+    const came = await c.page.waitForFunction(() => window.__ev.some(e => e.type === 'bee'), null, { timeout: 120000, polling: 100 }).then(() => true).catch(() => false);
+    check(`${tag}: a bee arrives during play (age 3 surprise cake)`, came, await wstate(c.page));
+    if (!came) { await c.close(); continue; }
+    await c.page.evaluate(() => { CK.debug.setBot(false); CK.debug.setSpeed(1); });
+    const sat = await c.page.waitForFunction(() => { const B = CK.debug.world.bee; return B && B.state === 'sit'; }, null, { timeout: 4000 }).then(() => true).catch(() => false);
+    const b0 = await c.page.evaluate(() => { const w = CK.debug.world; return { st: w.bee && w.bee.state, hit: w.beeHit(), misses: w.misses, tower: w.tower.blocks.length, phase: w.phase, scr: CK.debug.beeScreen(), under: (() => { const s = CK.debug.beeScreen(); const e = s && document.elementFromPoint(s.x, s.y); return e && (e.id || e.className); })() }; });
+    check(`${tag}: the bee sits on the cake, on screen, tappable (beeHit), on the canvas`, sat && b0.hit && b0.scr && b0.scr.x > 0 && b0.scr.x < d.viewport.width && b0.scr.y > 0 && b0.scr.y < d.viewport.height && b0.under === 'game', b0);
+    await clearEv(c.page);
+    const n0 = await vlen(c.page);
+    const p = await c.page.evaluate(() => CK.debug.beeScreen());
+    await tapAt(c, p, 60); await sleep(120);
+    const after = await c.page.evaluate(() => { const w = CK.debug.world; return { st: w.bee && w.bee.state, down: window.__lastDown, misses: w.misses }; });
+    const ev = await evTypes(c.page);
+    check(`${tag}: real tap on the bee → beeTap, bee loops`, ev.filter(t => t === 'beeTap').length === 1 && after.down === 'bee' && after.st === 'loop', { ev, after });
+    check(`${tag}: bee tap is not a grab / drop / wrong, misses unchanged`, !ev.some(t => ['grab', 'drop', 'wrong', 'miss', 'tapPiece'].includes(t)) && after.misses === b0.misses, { ev, after });
+    await sleep(300);
+    const lines = await vsince(c.page, n0);
+    check(`${tag}: a clean bee line is spoken`, lines.length >= 1 && lines.every(l => !badText(l)), lines);
+    const p2 = await c.page.evaluate(() => CK.debug.beeScreen());
+    if (p2) { await tapAt(c, p2, 50); await sleep(100); }
+    check(`${tag}: a 2nd tap during the loop gives no 2nd beeTap`, (await evTypes(c.page)).filter(t => t === 'beeTap').length === 1, await evTypes(c.page));
+    const gone = await c.page.waitForFunction(() => !CK.debug.world.bee, null, { timeout: 6000 }).then(() => true).catch(() => false);
+    check(`${tag}: the bee flies away afterwards`, gone, await c.page.evaluate(() => CK.debug.world.bee && CK.debug.world.bee.state));
+    await waitAsk(c.page, 8000).catch(() => {});
+    await clearEv(c.page);
+    await dragRight(c).catch(() => {});
+    check(`${tag}: play continues (real drag stacks after the bee)`, await waitEv(c.page, 'stack', 4000), await evTypes(c.page));
+    check(`${tag}: zero console errors`, c.errors.length === 0, c.errors);
+    await c.close();
+  }
+}
+
 async function pool(items, n, fn) {
   const q = items.slice(); const ws = [];
   for (let i = 0; i < Math.min(n, q.length); i++) ws.push((async () => { while (q.length) await fn(q.shift()); })());
@@ -1062,7 +1144,7 @@ async function pool(items, n, fn) {
 
 const GROUPS = { boot: gBoot, lang: gLang, gate: gGate, settings: gSettings, flags: gFlags, volume: gVolume, drag: gDrag, wrong: gWrong,
   miss: gMiss, tap: gTap, poke: gPoke, multi: gMulti, talk: gTalk, pause: gPause, visibility: gVisibility, rotate: gRotate,
-  idle: gIdle, countup: gCountUp, bot: gBot, done: gDone, layout: gLayout };
+  idle: gIdle, countup: gCountUp, bot: gBot, done: gDone, layout: gLayout, bee: gBee };
 
 (async () => {
   const bad = ONLY.filter(g => !GROUPS[g]);

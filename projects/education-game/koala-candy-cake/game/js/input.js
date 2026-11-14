@@ -228,7 +228,7 @@
     var lastEnd = 0;
     doc.addEventListener('touchend', function (e) {
       var t = Date.now();
-      if (t - lastEnd < 320 && !closest(e.target, 'button, a, input, textarea, select, label, .scroll, [role="button"]')) prevent(e);
+      if (t - lastEnd < 320 && !closest(e.target, 'button, a, input, textarea, select, label, .scroll, .bubble, #bubble, [role="button"]')) prevent(e);
       lastEnd = t;
     }, NP);
     doc.addEventListener('dblclick', function (e) { if (!inForm(e.target)) prevent(e); }, NP);

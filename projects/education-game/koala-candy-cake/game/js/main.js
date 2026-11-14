@@ -222,7 +222,7 @@
         lastRoundEvt = e; stats.rounds++; idleSaid = 0; lastAsk = null; lastPromptText = '';
         CK.UI.setDots(world.roundsPerLevel || 4, e.round % (world.roundsPerLevel || 4));
         surpriseLine = e.surprise ? T('surprise.' + e.surprise) : '';
-        if ((e.round % (world.roundsPerLevel || 4)) === 0) { const d = T('deal'); if (d && d !== 'deal') { CK.UI.say(d); speak(d); } }
+        if (stats.rounds === 1) { const d = T('deal'); if (d && d !== 'deal') { CK.UI.say(d); speak(d); } }
         break;
       }
       case 'deal': CK.Audio.play('appear'); break;
@@ -296,17 +296,18 @@
       }
       case 'count': {
         CK.Audio.play('count', { i: e.i });
-        if (e.cx != null) { CK.Audio.play('candle'); render.burst('hint', e.cx, e.cy - 20, { size: 40 }); }
+        if (e.cx != null) { CK.Audio.play('candle'); render.burst('flame', e.cx, e.cy - 30, {}); }
         render.burst('count', e.x + (L.LW || 161) * 0.75, e.y, { n: e.i });
         break;
       }
       case 'cherry': CK.Audio.play('drop'); render.burst('land', e.x, e.y + 30, {}); break;
-      case 'cherryOn': CK.Audio.play('plop'); render.burst('sparkles', e.x, e.y - 20); break;
+      case 'cherryOn': CK.Audio.play('plop'); render.burst('sparkles', e.x, e.y - 80); break;
+      case 'fadeWrong': CK.Audio.play('puffOut'); for (const id of e.pieces || []) { const p = world.pieceById && world.pieceById(id); if (p) render.burst('land', p.x, p.y + 20, {}); } break;
       case 'blow': {
         CK.Audio.play('blow');
         render.burst('breath', e.x, e.y, { tx: e.tx, ty: e.ty });
         if (world.koko) { world.koko.mood = 'blow'; world.koko.moodT = 0.9; }
-        const bl = T('blow'); if (bl && bl !== 'blow') speak(bl);
+        // no spoken line here: the blow sound + animation carry it (a TTS "fffff" arrived 2 s late — playtest P2-2)
         break;
       }
       case 'candlesOut': { CK.Audio.play('puffOut'); const n = e.n || 3; render.burst('smoke', e.x, e.y, { n, gap: (L.LW || 161) * 0.7 / Math.max(1, n - 1) }); break; }
@@ -314,6 +315,7 @@
         CK.Audio.play('sparkle'); CK.Audio.play('collect', { i: 3 });
         if (weather.burst) weather.burst(e.x, e.y, { kind: 'sprinkles', n: 40 });
         if (world.koko) { world.koko.mood = 'cheer'; world.koko.moodT = 1.4; }
+        { const gr = T('great'); if (gr && gr !== 'great') speak(gr); }   // praise with the child's name at every finished cake
         break;
       case 'roundDone': {
         const n = e.stars || 1, fx = e.x || (world.tower ? world.tower.x : view.W / 2), fy = e.y || (L.goalY || view.H / 3);

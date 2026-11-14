@@ -1,10 +1,11 @@
-// Shared helpers for the visual QA of Lulu's Jungle Tower (Playwright, phone/tablet contexts, hand-stepped world).
+// Shared helpers for the visual QA of Koko's Cake Tower (Playwright, phone/tablet contexts, hand-stepped world).
 // The world is "frozen" by swapping world.update for a no-op (main.js keeps drawing and draining events); D.adv(s) steps
 // it by hand. D.stack() drags the right block onto the tower through world.pointerDown/Move/Up (real input path).
 const { chromium } = require('playwright');
 const path = require('path'), fs = require('fs');
 const serve = require('../e2e/serve');
-const OUT = path.join(__dirname, '..', '..', 'docs', 'reports', 'visual');
+// raw captures go to $VQA_OUT (e.g. a scratch dir) so only contact sheets land in docs/reports/visual
+const OUT = process.env.VQA_OUT || path.join(__dirname, '..', '..', 'docs', 'reports', 'visual');
 const mk = d => { fs.mkdirSync(d, { recursive: true }); return d; };
 const DEV = {
   iphoneP: { viewport: { width: 393, height: 852 }, dpr: 3, notch: 'P' },
@@ -17,8 +18,8 @@ const NOTCH = {   // CSS px safe areas (iPhone 14/15 class: 47 px; iPad: status 
   L: ':root{--sa-l:47px !important;--sa-r:47px !important;--sa-b:21px !important}',
   PAD: ':root{--sa-t:24px !important;--sa-b:20px !important}'
 };
-const AGE_TOPICS = { 3: ['colors', 'shapes', 'size', 'animals'], 4: ['colors', 'shapes', 'count', 'animals'],
-  5: ['shapes', 'count', 'letters', 'animals'], 6: ['lower', 'initial', 'add', 'count'], 7: ['initial', 'add', 'sub', 'oddeven'] };
+const AGE_TOPICS = { 3: ['colors', 'shapes', 'size', 'animals', 'count'], 4: ['colors', 'shapes', 'count', 'animals', 'size'],
+  5: ['shapes', 'count', 'letters', 'animals', 'colors'], 6: ['lower', 'initial', 'add', 'count', 'letters'], 7: ['initial', 'add', 'sub', 'oddeven', 'count'] };   // = CK.AGE_POOLS
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const jl = (f, o) => fs.appendFileSync(f, JSON.stringify(o) + '\n');
 
@@ -106,11 +107,12 @@ const geom = page => page.evaluate(() => {
   const D = CK.debug, w = D.world, v = D.view(), L = w.layout;
   const R = id => { const e = document.getElementById(id); if (!e || e.classList.contains('hidden')) return null; const b = e.getBoundingClientRect(); if (!b.width) return null;
     return { x: (b.left - v.left) / v.s, y: (b.top - v.top) / v.s, w: b.width / v.s, h: b.height / v.s }; };
-  const pieces = (w.pieces || []).filter(p => p.state !== 'gone').map(p => ({ id: p.id, kind: p.block.kind, x: p.x, y: p.y, side: p.side, state: p.state, right: p.right, askIdx: p.askIdx }));
-  const tower = w.tower ? w.tower.blocks.map((b, i) => w.blockPose(i, 1)) : [];
+  const pieces = (w.pieces || []).filter(p => p.state !== 'gone').map(p => ({ id: p.id, kind: p.block.kind, x: p.x, y: p.y, bw: p.bw, bh: p.bh, state: p.state, askIdx: p.askIdx }));
+  const tower = w.tower ? w.tower.blocks.map((b, i) => Object.assign({ bw: b.bw, bh: b.bh }, w.blockPose(i, 1))) : [];
+  const cand = (w.candles || []).map((c, j) => w.candlePose(j, 1)).filter(Boolean);
   const bt = document.getElementById('bubbleText'), bb = document.getElementById('bubble');
   return { W: L.W, H: L.H, s: v.s, ins: L.ins, portrait: L.portrait, S: L.S, age: w.age, level: w.level, topic: w.topic, round: w.round, ask: w.ask, phase: w.phase, state: w.state,
-    pieces, tower, towerX: L.tower, goalY: L.goalY, goal: w.goal && { x: w.goal.x, y: w.goal.y }, lulu: L.lulu, luluHit: w.luluHit(), drop: L.drop, slots: L.slots, hudKeep: w.hudKeep, layoutBubble: L.bubble,
+    pieces, tower, towerX: L.tower, goalY: L.goalY, goal: w.goal && { x: w.goal.x, y: w.goal.y, state: w.goal.state }, cloud: w.cloudPose(1), cherry: w.cherryPose(1), candles: cand, koko: L.koko, kokoHit: w.kokoHit(), mood: w.koko && w.koko.mood, drop: L.drop, LW: L.LW, LH: L.LH, maxN: L.maxN, towerTop: w.towerTop(1), lay: L.tower, slots: L.slots, hudKeep: w.hudKeep, layoutBubble: L.bubble,
     bubble: R('bubble'), hud: R('hud'), bubbleFont: getComputedStyle(bt).fontSize, bubbleOverflow: [bb.scrollHeight - bb.clientHeight, bb.scrollWidth - bb.clientWidth], bubbleText: bt.textContent };
 });
 // DOM rects (CSS px) + text overflow for the given selectors

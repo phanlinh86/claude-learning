@@ -43,10 +43,10 @@
     layerW: 1.3, layerH: 0.78,                // LW = round(1.3·S), LH = round(0.78·S)
     topRoomLand: 150, topRoomPort: 364,       // the tallest cake top stays this far below ins.top (tall portrait: bubble bottom 234 + 12 + goalH 110 + 8)
     wideRatio: 1.9, topRoomWide: 116,         // phone landscape (W/H > 1.9): less sky → S 110 at ages 5–7
-    baseDyPortShort: 90, topRoomPortShort: 272,   // short portraits (iPad): bubble on the HUD row; sky = bubble bottom 142 + 12 + 110 + 8
+    baseDyPortShort: 90, topRoomPortShort: 272, kokoDyPortShort: 40,   // QA P3-9: iPad portrait feet 11 px over the tray → 41 px clearance   // short portraits (iPad): bubble on the HUD row; sky = bubble bottom 142 + 12 + 110 + 8
     towerFracLand: 0.40, towerMinLand: 400, towerFracPort: 0.58,   // 0.40 / 400: room for 2–3 wide layers right of the drop zone (iPad 4:3)
     baseDyLand: 96, baseDyPort: 150, baseExtra: 60,   // the stand is ≈ 98 px tall at baseW 221 → it stands on the ground in landscape
-    dropPad: 60, dropBelow: 10,
+    dropPad: 60, dropBelow: 10, dropCatch: 40,   // dropCatch: the RELEASE test reaches 40 px further to each side (QA P2-3: 78–88 % of side misses were within 40 px); the layout keeps dropPad
     goalGap: 8, goalH: 110, cloudLift: 18,    // cherry bottom = goalY; the cloud's top surface 18 px above it; cherry + cloud ≈ 110 px
     kokoXLand: 120, kokoHLand: 330, kokoHSmall: 300, kokoSmallW: 1100, kokoXPort: 110, kokoDyPort: 70, kokoHPort: 300,
     kokoHalfW: 0.38, kokoPad: 20,             // Koko's hit box: feet x ± 0.38·h, h tall (+ 20 px)
@@ -65,6 +65,7 @@
     landSquash: 0.25, squashOmega: 20, squashZeta: 0.25, belowSquash: 0.08,   // jelly: sy 0.75 → overshoot ≈ 1.11 → wobbles out (≈ 0.6 s)
     swayK: 26, swayC: 3.2, swayMax: 0.12,                    // tower: θ'' = −k·θ − c·ω + torque
     swayBase: 0.02, swayOffset: 0.03, swayImpact: 0.03, swayPeakMax: 0.07, centreRate: 0.6,   // centreRate × LW per s
+    swayRoom: 0.1,             // landing / bounce / cherry / blow kicks never push the rocking amplitude past 0.1 rad (a landing right after the gust)
     breezeTorque: 0.33, breezeHz: [0.3, 0.19], breezeMix: [0.75, 0.25], breezeTau: 1.2,   // setBreeze: |θ| from it ≤ ≈ 0.015 rad
     restitution: 0.45, bounceKick: 260, bounceSpin: 7, bounceSway: 0.025, bounceApex: 6,
     homeApex: 50, tapApex: 22,
@@ -78,19 +79,22 @@
     // ---- cake done → clear (DESIGN §5.2: ≈ 3.6 s for 4 layers)
     cherryAt: 0.15, cherryHop: 320, cherrySquash: 0.3, cherryOmega: 22, cherryZeta: 0.3, cherryKick: 0.012, cloudPuff: 0.35,
     countAt: 0.65, countStep: 0.45,  // count i at countAt + (i − 1)·countStep (room for a spoken number)
-    candleSpread: 0.7, candleBack: 0.06, popOmega: 18, popZeta: 0.4, litDelay: 0.1, litTime: 0.2,
+    // QA visual P2-1: the cherry sits at +min(0.28·LW, LW/2 − 32) (its 64 px stay on the top); candles (drawn candleH·LH tall, 1/3 as
+    // wide) evenly from −0.45·LW to (cherry half 32 + candle half + 2) px left of the cherry's centre: never behind it, ≥ 2 px apart
+    cherryOff: 0.28, cherryHalfW: 32, candleL: -0.45, candleGap: 2, candleH: 0.40, candleBack: 0.06, popOmega: 18, popZeta: 0.4, litDelay: 0.1, litTime: 0.2,
     blowAfter: 0.45, blowKick: 0.025, outAfter: 0.45, outTimeC: 0.4, sprinklesAfter: 0.3, roundDoneAfter: 0.4, doneMax: 7,
     clearStagger: 0.1, clearTime: 0.55, clearVy: -680, clearFade: 0.25, clearAfter: 0.1,
 
     // ---- help
     hintAfterMisses: 2, hintCooldown: 6, wrongLock: 0.7, hintTime: 4, hintStroke: 1.6,
-    idleTime: 12, idleBackoff: 1.5, idleMax: 20, idleHintFrom: 1,
-    graceAssist: true, freeSlipFrom: 4, softTapHint: 3, tapAssist: true,
+    idleTime: 12, idleBackoff: 1.5, idleMax: 30, idleHintFrom: 1,   // QA P3-3: gaps 12, 18, 27, 30, 30 (skill rule: back-off to 30 s)
+    graceAssist: true, freeSlipFrom: 3, softTapHint: 3, tapAssist: true,   // freeSlipFrom 3 (QA P3-1): cakes of ≥ 3 layers forgive one slip
+    fadeWrongAfter: 3,         // QA P1-1: from the 3rd wrong drop on one ask the wrong layers puff away (_out) — only the right one is left
 
     // ---- surprise round: one per chapter, the type rotates per chapter from a random start per session
     surpriseRound: 1,
     surpriseTypes: ['breeze', 'bee'],
-    gustAfter: 0.6, gustPeak: 0.1, gustDir: -1, holdDelay: 0.3, holdTime: 1.5, holdDamp: 3, holdStiff: 1.5, windDecay: 1.2,
+    gustAfter: 1.1, gustPeak: 0.1, gustDir: -1, holdDelay: 0.3, holdTime: 1.5, holdDamp: 3, holdStiff: 1.5, windDecay: 1.2,
     beeDelay: [1.0, 2.0], beeIn: 1.6, beeSit: 4, beeOut: 1.2, beeLoop: 0.8, beeLoopR: 46, beeR: 64,
 
     // ---- Koko
@@ -155,7 +159,7 @@
     var tower = { x: tx, baseTop: baseTop, baseW: LW + cfg.baseExtra };
     var drop = { x0: tx - (LW / 2 + cfg.dropPad), x1: tx + LW / 2 + cfg.dropPad, y1: baseTop + cfg.dropBelow };
     var koko = portrait
-      ? { x: ins.left + cfg.kokoXPort, y: baseTop + cfg.kokoDyPort, h: cfg.kokoHPort }
+      ? { x: ins.left + cfg.kokoXPort, y: baseTop + (tall ? cfg.kokoDyPort : cfg.kokoDyPortShort), h: cfg.kokoHPort }
       : { x: ins.left + cfg.kokoXLand, y: groundY - 4, h: W < cfg.kokoSmallW ? cfg.kokoHSmall : cfg.kokoHLand };
     var bx = ins.left + cfg.bubbleX;
     var bubble = portrait
@@ -166,6 +170,7 @@
     var hud = { x: W - ins.right - cfg.hudW, y: 0, w: cfg.hudW + ins.right, h: ins.top + cfg.hudH };
     var L = {
       W: W, H: H, ins: ins, portrait: portrait, tall: tall, groundY: groundY, S: S, LW: LW, LH: LH, maxN: maxN, tower: tower, drop: drop,
+      candleH: Math.round(cfg.candleH * LH), cherryOff: Math.round(Math.min(cfg.cherryOff * LW, LW / 2 - cfg.cherryHalfW)),
       koko: koko, bubble: bubble, hud: hud, goalH: cfg.goalH,
       safe: { x: ins.left, y: ins.top, w: W - ins.left - ins.right, h: H - ins.top - ins.bottom }
     };
@@ -176,6 +181,17 @@
   }
   function goalYFor(L, cfg, n) { return L.tower.baseTop - n * L.LH - cfg.goalGap; }
   function setGoalY(L, cfg, n) { L.goalY = goalYFor(L, cfg, n); L.goal = { x: L.tower.x, y: L.goalY, cloudY: L.goalY - cfg.cloudLift }; }
+
+  /** Candle offsets along the top layer (n = 1…5): the cherry sits at layout.cherryOff, the candles evenly from candleL·LW up to
+   *  just left of the cherry (n = 1: half-way), so none is behind the cherry (64 px wide). Pass the layout (or LW, LH). */
+  function candleOffsets(n, LW, LH, cfg) {
+    var cx = Math.round(Math.min(cfg.cherryOff * LW, LW / 2 - cfg.cherryHalfW)), cw = Math.round(cfg.candleH * LH) / 3;
+    var a = cfg.candleL * LW + cw / 2, b = cx - cfg.cherryHalfW - cw / 2 - cfg.candleGap, out = [];
+    for (var j = 0; j < n; j++) out.push(n > 1 ? a + (b - a) * j / (n - 1) : (a + b) / 2);
+    // drawn height: the layout's candleH, shorter only when the spacing would leave < 2 px between candles (5 on a small LW)
+    out.h = n > 1 ? Math.min(3 * cw, Math.floor(3 * ((b - a) / (n - 1) - 2))) : 3 * cw;
+    return out;
+  }
 
   /** Resting centres of k choice layers (full-size centres; a small layer sits lower, bottom-aligned). */
   function slotsFor(L, cfg, k) {
@@ -230,6 +246,7 @@
     return computeLayout(W, H, ins, c, a, CK.Content.maxBlocks(a));
   };
   World.slotsFor = slotsFor;
+  World.candleOffsets = function (n, L, cfg) { return candleOffsets(n, L.LW, L.LH, merge(CONFIG, cfg)); };   // → [x…] with .h (candle height px)
   World.kickFor = kickFor;
 
   var P = World.prototype;
@@ -336,7 +353,7 @@
     if (!G) return null;
     alpha = alpha === undefined ? this.alpha : alpha;
     if (G.state === 'on') {
-      var q = this._onTop(0, 0, alpha);
+      var q = this._onTop(this.layout.cherryOff, 0, alpha);
       if (!q) return null;
       return { x: q.x, y: q.y, rot: q.rot, sx: G.csx, sy: G.csy, alpha: q.alpha };
     }
@@ -348,7 +365,7 @@
     if (!C || C.pop <= 0.001) return null;
     var q = this._onTop(C.x, -this.cfg.candleBack * this.layout.LH, alpha === undefined ? this.alpha : alpha);
     if (!q) return null;
-    return { x: q.x, y: q.y, rot: q.rot, s: C.pop, lit: C.lit, out: C.out, alpha: q.alpha };
+    return { x: q.x, y: q.y, rot: q.rot, s: C.pop, h: this.candleH || this.layout.candleH, lit: C.lit, out: C.out, alpha: q.alpha };
   };
   /** Render order of the pieces: resting 2nd row, resting 1st row, moving, then the active (dragged / falling) one. */
   P.drawOrder = function () {
@@ -413,6 +430,7 @@
       }
       if (p.state === 'out') p.state = 'gone';
       if (p.state !== 'gone') self._rest(p, true);
+      if (p.state === 'rest' && p._fadeOut) { p._fadeOut = false; p.state = 'gone'; }   // a fading wrong layer just vanishes on a re-layout
     });
     this.pieces = this.pieces.filter(function (p) { return p.state !== 'gone'; });
     if (this.tower.blocks.some(function (b) { return b.fly; })) {
@@ -466,7 +484,11 @@
   P._beginRound = function () {
     var cfg = this.cfg;
     var rr = new CK.RNG((this.rng.next() * 4294967296) >>> 0);
-    var ST = cfg.surpriseTypes, sp = ST && ST.length && this.round === cfg.surpriseRound ? ST[(this.level + this._surpriseOff) % ST.length] : null;
+    // the chapter's surprise: the bee at cake surpriseRound; the breeze at the first cake from there with ≥ 3 layers (it needs a 3rd
+    // layer after the gust — age 4's cake 2 has 2 layers since QA P2-4)
+    var ST = cfg.surpriseTypes, type = ST && ST.length ? ST[(this.level + this._surpriseOff) % ST.length] : null, at = cfg.surpriseRound;
+    if (type === 'breeze' && !cfg.blocksByRound) while (at < 3 && CK.Content.blocksFor(this.topic, this.age, at) < 3) at++;
+    var sp = type && this.round === at ? type : null;
     this.cur = CK.Content.makeRound(this.topic, { age: this.age, lang: this.lang, rng: rr, roundIndex: this.round, surprise: sp,
       avoid: this._lastAskOf || null, blocks: cfg.blocksByRound ? cfg.blocksByRound[this.round] : undefined });
     if (sp === 'breeze' && this.cur.n < 3) sp = 'bee';   // the breeze needs a 3rd layer after the gust
@@ -506,7 +528,7 @@
     G.bob = cfg.goalBob * Math.sin(TAU * cfg.goalBobHz * this.time);
     G.cloudY = G.y - cfg.cloudLift + G.dy + G.bob;
     if (G.state === 'float') { G.cherryX = G.x; G.cherryY = G.y + G.dy + G.bob; }
-    else if (G.state === 'on') { var q = this._onTop(0, 0, 1); if (q) { G.cherryX = q.x; G.cherryY = q.y; } }
+    else if (G.state === 'on') { var q = this._onTop(this.layout.cherryOff, 0, 1); if (q) { G.cherryX = q.x; G.cherryY = q.y; } }
   };
 
   P._deal = function () {
@@ -668,8 +690,8 @@
       return 'tap';
     }
     this._confirmGrab(d);
-    var D = this.layout.drop, hx = d.fx - d.ox, hy = d.fy - d.oy;
-    if ((p.x >= D.x0 && p.x <= D.x1 && p.y < D.y1) || (hx >= D.x0 && hx <= D.x1 && hy < D.y1)) {
+    var D = this.layout.drop, hx = d.fx - d.ox, hy = d.fy - d.oy, c = this.cfg.dropCatch || 0, X0 = D.x0 - c, X1 = D.x1 + c;
+    if ((p.x >= X0 && p.x <= X1 && p.y < D.y1) || (hx >= X0 && hx <= X1 && hy < D.y1)) {
       this._startFall(p);
       this._emit({ type: 'drop', pieceId: p.id, x: p.x, y: p.y, right: p.right });
       return 'drop';
@@ -806,8 +828,9 @@
           p.x = A.x1; p.y = A.y1;
           p._q = cfg.landSquash * clamp(p.vy / 1400, 0.25, 1); p._qv = 0;
           this._rest(p, false); p.rot = 0;
-          if (this.phase === 'bounce' && !this.pieces.some(function (q) { return q.state === 'bounce' || (q.state === 'home' && q._wrong); })) this._setPhase('ask');
           p._wrong = false;
+          if (p._fadeOut && this.state === 'round') { p._fadeOut = false; this._out(p); }
+          if (this.phase === 'bounce' && !this.pieces.some(function (q) { return q.state === 'bounce' || (q.state === 'home' && q._wrong); })) this._setPhase('ask');
         }
         break;
       }
@@ -843,7 +866,7 @@
     var n = live + 1;
     var dir = Math.abs(off) > 0.02 * LW ? sgn(off) : (this._crng.chance(0.5) ? 1 : -1);
     var peak = Math.min(cfg.swayPeakMax, (cfg.swayBase + cfg.swayOffset * Math.abs(off) / (cfg.landWithin * LW) + cfg.swayImpact * impact) * (0.8 + 0.1 * n));
-    this._swayKick(dir * peak);
+    this._swayKick(dir * peak, true);
     // the cloud bumps up a little when the cake gets close
     var G = this.goal;
     if (G && G.state === 'float') {
@@ -881,7 +904,7 @@
     p.vy = -Math.abs(p.vy) * cfg.restitution;
     p.vx = dir * cfg.bounceKick; p.rv = dir * cfg.bounceSpin;
     p._q = cfg.landSquash * 0.7; p._qv = 0;
-    this._swayKick(-dir * cfg.bounceSway * (0.5 + impact));
+    this._swayKick(-dir * cfg.bounceSway * (0.5 + impact), true);
     var T = this.tower, live = this._liveCount();
     if (live) T.blocks[live - 1]._q += cfg.belowSquash * 0.6;
     this.misses++; this.askMisses++; this.streak++;
@@ -894,9 +917,25 @@
       streak: this.streak, misses: this.askMisses, x: p.x, y: p.y + p.bh / 2, promptKey: a.promptKey, params: a.params });
     if (this.askMisses === cfg.hintAfterMisses) this._doHint(false);
     else if (this.askMisses > cfg.hintAfterMisses) this._autoHint();
+    if (cfg.fadeWrongAfter && this.askMisses >= cfg.fadeWrongAfter) this._fadeWrong(p);
   };
-  P._swayKick = function (peak) {
+  /** Errorless fade: the wrong layers of this ask puff away (the bouncing one when it is home) — only the right one stays. */
+  P._fadeWrong = function (bouncing) {
+    var self = this, ids = [];
+    this.pieces.forEach(function (q) {
+      if (q.right || q.askIdx !== self.ask || q.state === 'out' || q.state === 'gone') return;
+      if (q === bouncing || q.state !== 'rest') q._fadeOut = true; else self._out(q);
+      ids.push(q.id);
+    });
+    if (!this._fadedAsk || this._fadedAsk !== this.ask + ':' + this.round) {
+      this._fadedAsk = this.ask + ':' + this.round;
+      this._emit({ type: 'fadeWrong', ask: this.ask, pieces: ids });
+    }
+  };
+  /** limit: shrink the kick so the rocking amplitude (θ, ω/ω₀) + peak stays ≤ swayRoom (the gust itself is not limited). */
+  P._swayKick = function (peak, limit) {
     var cfg = this.cfg, T = this.tower, w = Math.sqrt(cfg.swayK), z = cfg.swayC / (2 * w);
+    if (limit) { var A = hyp(T.theta, T.omega / w); peak = sgn(peak) * Math.min(Math.abs(peak), Math.max(0.004, cfg.swayRoom - A)); }
     T.omega += kickFor(peak, w, z);
   };
 
@@ -958,13 +997,13 @@
     return m <= free ? 3 : m <= free + 1 ? 2 : 1;
   };
   P._startDone = function () {
-    var cfg = this.cfg, n = this._liveCount(), LW = this.layout.LW, span = cfg.candleSpread * LW;
+    var cfg = this.cfg, n = this._liveCount(), xs = candleOffsets(n, this.layout.LW, this.layout.LH, cfg);
     this._setPhase('done');
     this.hintHand = null;
     this._done = { cherry: false, counted: 0, blowAt: -1, outAt: -1, sprAt: -1, rdAt: -1, blow: false, out: false, spr: false, roundDone: false };
-    this.candles = [];
+    this.candles = []; this.candleH = xs.h;
     for (var j = 0; j < n; j++) {
-      this.candles.push({ i: j + 1, x: n > 1 ? -span / 2 + span * j / (n - 1) : 0, pop: 0, _pv: 0, _popAt: -1, lit: 0, out: 0 });
+      this.candles.push({ i: j + 1, x: xs[j], pop: 0, _pv: 0, _popAt: -1, lit: 0, out: 0 });
     }
     if (this.goal) this.goal.onId = this.tower.blocks[n - 1].id;
     this._mood('cheer', 3);
@@ -993,7 +1032,7 @@
       D.blow = true; D.outAt = t + cfg.outAfter;
       this._mood('blow');
       this.blowT = 1;
-      this._swayKick(cfg.blowKick);   // the breath gust: the cake jiggles towards the right
+      this._swayKick(cfg.blowKick, true);   // the breath gust: the cake jiggles towards the right
       var top = this.towerTop(), mo = this.kokoMouth();
       this._emit({ type: 'blow', x: mo.x, y: mo.y, tx: top.x, ty: top.y });
     }
@@ -1027,7 +1066,7 @@
     G._cq = cfg.cherrySquash; G._cqv = 0;
     this._goalPose();
     if (kick) {
-      this._swayKick((this._crng.chance(0.5) ? 1 : -1) * cfg.cherryKick);
+      this._swayKick((this._crng.chance(0.5) ? 1 : -1) * cfg.cherryKick, true);
       if (live) this.tower.blocks[live - 1]._q += 0.06;
     }
     this._emit({ type: 'cherryOn', x: G.cherryX, y: G.cherryY });
@@ -1119,7 +1158,7 @@
     G.vy += (-w * w * G.dy - 2 * z * w * G.vy) * h; G.dy += G.vy * h;
     if (G._puffT >= 0) { G._puffT += h; var u = clamp(G._puffT / cfg.cloudPuff, 0, 1); G.cloudA = 1 - u; G.cloudS = 1 + 0.35 * u; }
     if (G.state === 'drop') {   // the cherry: a small hop, gravity, a magnet in x onto the cake top
-      var top = this.towerTop();
+      var top = this._onTop(this.layout.cherryOff, 0, 1) || this.towerTop();   // a little hop sideways to its place on the top
       G.cvy += cfg.g * h; G.cherryY += G.cvy * h;
       G.cherryX += (top.x - G.cherryX) * Math.min(1, 12 * h);
       if (G.cvy > 0 && G.cherryY >= top.y) { G.cherryY = top.y; this._cherryOn(true); }

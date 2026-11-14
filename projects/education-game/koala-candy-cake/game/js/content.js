@@ -61,7 +61,7 @@
   var DIFFICULTY = ['colors', 'animals', 'size', 'shapes', 'letters', 'count', 'lower', 'initial', 'add', 'sub', 'oddeven'];
 
   // ---- tables (DESIGN §5.1)
-  var BLOCKS = { 3: [2, 2, 3, 3], 4: [2, 3, 3, 4], 5: [3, 4, 4, 5], 6: [4, 5, 5, 5], 7: [4, 5, 5, 5] };   // blocks to stack per round (QA: the 4th tower is the big one)
+  var BLOCKS = { 3: [2, 2, 3, 3], 4: [2, 2, 3, 4], 5: [3, 3, 4, 5], 6: [3, 4, 4, 5], 7: [3, 4, 4, 5] };   // layers per cake (QA P2-4: the tallest 4th cake was cut in 61 % of age-4 and 88–98 % of age-5–7 chapters)   // blocks to stack per round (QA: the 4th tower is the big one)
   var MAX_BLOCKS = 5, MAX_CHOICES = 4;
   var COUNT_RANGE = { 3: [1, 4], 4: [1, 5], 5: [1, 10], 6: [2, 10], 7: [3, 10] };   // dots rounds (dice dots 1–10)
   var SMALL_SCALE = 0.72;                                                  // a small layer is 0.72 × LW and 0.72 × LH (DESIGN §4.2)

@@ -2,7 +2,7 @@
 
 Owner: mechanics engineer. Code: `game/js/{rng,content,world,weather,bot}.js`. Contract: `docs/DESIGN.md` §2, §5.1–5.5.
 Everything not listed here works as in `../giraffe-jungle-tower/docs/MECHANICS.md` (the tuned Lulu numbers were kept).
-Tests: `node tests/unit/run.js` (40 tests, ≈ 75 s, of which ≈ 58 s is the 1 000-session "never falls" test;
+Tests: `node tests/unit/run.js` (43 tests, ≈ 80 s, of which ≈ 60 s is the 1 000-session "never falls" test;
 `node tests/unit/run.js <name part>` runs a subset). Sims (report-only, `tests/sim/`): `node tests/sim/hs_playtest.js [--n 20]
 [--ages 3,4] [--models typical,slow3,…] [--jobs 2] [--config '{…}'] [--tag x]` (1 380 sessions at n = 20 ≈ 75 s on 2 cores →
 `tests/sim/out/hs_<tag>.md`), `node tests/sim/determinism.js`, `node tests/sim/content_stats.js [chapters]`,
@@ -21,6 +21,8 @@ lead's build). JSON reports are git-ignored.
 | events `bloom`, `monkey`, `bananas` | **`cherry`, `cherryOn`, `blow`, `candlesOut`, `sprinkles`** | `count` gains `cx, cy` |
 | `w.butterfly`, events `butterfly`, `butterflyTap` | **`w.bee`**, events **`bee`, `beeTap`**; `beeHit()`, `beePos()` | after a tap the bee loops once (`state 'loop'`) |
 | — | **`setBreeze(v)`**, `w.breeze`, `w.blowT` | main: `world.setBreeze(weather.ambient.wind)` every frame |
+| — | event **`fadeWrong {ask, pieces}`** (QA fix round) | from the 3rd wrong drop on one ask the wrong layers puff away (main: a soft poof; no line needed) |
+| — | `layout.cherryOff`, `layout.candleH`, `w.candleH`, `candlePose().h`, `World.candleOffsets(n, layout)` | the cherry sits off-centre, candles left of it, never behind it |
 | `dropPoint` 1.2·S above the top | 1.5·LH above the top | |
 | Weather: morning/noon/sunset/night, `setNight`, sprites `petal/leaf/pollen/firefly`, `mist[]` | sunny/breezy/rain/rainbow, **`party()`**, particle `{kind, x, y, rot, s, a, tint, layer, flipX}`, clouds `{kind, x, y, s, alpha}` | `burst()` kept (new kinds) |
 
@@ -54,6 +56,9 @@ flames), surprise, pieces, tower, goal, candles, bee, hintHand, koko, lastTopics
 `menu → intro (2.5 s) → round → roundDone → round … → talk → levelDone (1.8 s) → intro (next chapter = next weather) … →
 sessionDone`. After `done` the world is in **state `roundDone`, phase `'clear'`** while the layers hop off. Chapter = 4 cakes;
 Talk comes early after ≥ 2 cakes when the chapter is > 80 s old or its pace predicts > 100 s.
+**Deviation from the skill rule** ("Talk after ≥ 3 rounds once the chapter passes 75 s"): `chapterMinRounds` stays **2** / 80 s /
+budget 100 s. The QA playtest measured that ≥ 3 rounds pushes slow 4-year-olds past 8 minutes (slow3 age-4 session p90 579 s);
+instead the layers per cake were lowered (§7), so fewer chapters are cut.
 
 ## 3. Layout (`setViewport`, DESIGN §2) — `w.layout`
 | key | rule |
@@ -64,7 +69,7 @@ Talk comes early after ≥ 2 cakes when the chapter is > 80 s old or its pace pr
 | `tower {x, baseTop, baseW}` | landscape `x = max(ins.left + 0.40·(W − ins.l − ins.r), ins.left + 400)` (was 0.45 / 360: the wide layers need room for 2 slots right of the drop zone on a 4:3 iPad), `baseTop = groundY − 96` (the stand is ≈ 98 px tall at baseW 221, so it stands on the ground); portrait `x = 0.58·W`, `baseTop = groundY − LH − 150` (short portrait − 90); `baseW = LW + 60` |
 | `drop {x0, x1, y1}` | `tower.x ∓ (LW/2 + 60)`, `y < baseTop + 10` |
 | `goalY`, `goal {x, y, cloudY}`, `goalH` | cherry bottom `goalY = baseTop − N·LH − 8` (N = layers of this cake; maxN outside a round); `cloudY = goalY − 18` (the cloud's top surface, anchor (100, 22) of `cloud_candy.svg`); cherry + cloud top ≈ 110 px (`goalH`). The cloud body (180 × 100 drawn) hangs ≈ 60 px below goalY: draw it BEHIND the cake |
-| `koko {x, y, h}` | FEET: landscape `(ins.left + 120, groundY − 4)`, `h = 330` (W < 1100: 300); portrait `(ins.left + 110, baseTop + 70)`, `h = 300`. Hit box `x ± 0.38·h`, `y − h … y`, + 20 px |
+| `koko {x, y, h}` | FEET: landscape `(ins.left + 120, groundY − 4)`, `h = 330` (W < 1100: 300); portrait `(ins.left + 110, baseTop + 70)` (short portrait / iPad: `baseTop + 40`, QA P3-9: feet now ≥ 16 px above the tray — unit-checked on all 20 viewports; iPad 820×1180: 41 px), `h = 300`. Hit box `x ± 0.38·h`, `y − h … y`, + 20 px |
 | `slots` / `slotsFor(L, cfg, k)` | full-layer centres. Landscape: from `drop.x1 + 44 + LW/2` to `W − ins.right − LW/2 − 20` at `y = groundY − LH/2 − 6`, spacing ≥ LW + 26 (spread up to LW + 70, centred); what does not fit → 2nd row `LH + 40` higher (`row: 1`, `BlockArt.drawPlate` under it). Portrait: one row at `groundY − LH/2 − 8`, spread (≤ LW + 70, centred) over `ins.left + LW/2 + 20 … W − ins.right − LW/2 − 20`. Ages 3 / 4–5 / 6–7 get at most 2 / 3 / 4 choices: 4 wide age-4 layers would not fit one 720 px portrait row, and content never asks for that |
 | `bubble`, `hud`, `safe` | as Lulu |
 Unit-checked on 20 viewports (incl. iPhone 393×852 and iPad 820×1180 in both orientations, iPhone SE, safe-area insets) × 5 ages:
@@ -73,7 +78,11 @@ slots on screen, clear of the drop zone (± 44), HUD, bubble and (landscape) Kok
 A small layer rests bottom-aligned: `homeY = slot.y + (LH − bh)/2`.
 
 ## 4. Motion and round flow — every number is in `CK.CONFIG`
-Unchanged from Lulu (with S → LW for widths, LH for heights): deal (stagger 0.08 s, ≤ 0.45 s fall, one small bounce), rest bob,
+**QA fix round (2026-11-14):** `fadeWrongAfter 3` (errorless fade, below), `dropCatch 40` (a release up to 40 px beside the drop
+zone still drops — only the release test in `pointerUp`; the layout and tray keep `dropPad 60`), `freeSlipFrom 4 → 3` (cakes of ≥ 3
+layers forgive one slip), `gustAfter 0.6 → 1.1` (the gust line no longer cuts the layer praise), `idleMax 20 → 30` (gaps 12, 18,
+27, 30 …; the absent child auto-pauses at ≈ 121 s), `swayRoom 0.1` (below), the breeze surprise moved to the first cake with ≥ 3
+layers. Unchanged from Lulu (with S → LW for widths, LH for heights): deal (stagger 0.08 s, ≤ 0.45 s fall, one small bounce), rest bob,
 drag spring (ω 30, ζ 0.8, grab offset clamped to ± 0.35·LW / ± 0.35·LH), pendulum tilt, still drag (6 s), tap vs drag, drop / toss
 (apex 1.2·LH), magnet fall (land within ± 0.18·LW), miss arc, wrong bounce, out, sway pendulum (`θ'' = −26θ − 3.2ω + τ`, cap
 ± 0.12 rad, layer i bent θ·(i+1)/n, `dx` self-centres at ≤ 0.6·LW/s), help / idle / tap assist / grace assist, stars, breeze
@@ -81,10 +90,12 @@ surprise (gust 0.1 rad, Koko `hold` 1.5 s). New or changed:
 
 | what | how | numbers |
 |---|---|---|
+| **errorless fade** (QA P1-1) | on the `fadeWrongAfter`-th (3rd) wrong drop of one ask, every wrong layer of that ask puffs away with the normal `out` hop (0.35 s); the one that just bounced goes when it lands home (a layer still in the air / under a finger is flagged and goes when it gets home; on a re-layout it just vanishes). One `fadeWrong {ask, pieces}` event per ask. Hints work as before (the 2nd miss always hinted); the next ask deals its full choice set again. Stars still count every miss | a child who always picks a wrong layer was stuck 50/50 sessions → finishes every session (`hs_pt2 wrongAlways` 6/6 per age, ask mean 12–17 s) |
+| **sway room** | landing / bounce / cherry / blow kicks are shrunk so that the rocking amplitude `hypot(θ, ω/ω₀)` + kick stays ≤ 0.1 rad (≥ 0.004 always). Needed since the gust comes 1.1 s after the 2nd landing: a quick 3rd landing on top of it had reached the 0.12 cap | max |θ| 0.104 in 1 000 random sessions |
 | **jelly landing** | the landing layer squashes to `sy 0.75` (`landSquash 0.25`, was 0.18) and springs back with a low damping (`squashOmega 20`, `squashZeta 0.25`, was 22 / 0.32): overshoot to ≈ 1.11 (stretch), 2–3 wobbles, < 1 % after ≈ 0.6 s; `sx = 1 + 0.5·q`. The 4 layers below compress `0.08·(1 − 0.25·depth)·(0.5 + 0.5·impact)` (was 0.06) — soft sponge. Choice layers use the same jelly on their deal / home landings | unit: sy 0.75 ± 0.02 at contact, max 1.05–1.2, settled after 2.5 s |
 | **goal float-in** | at round start the cloud + cherry start ≈ (goalY + 140) px above their place and come in on a spring `ω 7, ζ 0.7` (≈ 4 % soft overshoot, 5–25 px), then bob `± 4 px` at 1.1 Hz. A landing within 1.5·LH of the cherry bumps the cloud up a little (`goalBump 60` px/s) | |
-| **done** (`towerDone`) | Koko `cheer`. 0.15 s: **`cherry`** — the cloud puffs away (alpha 1 → 0, scale 1 → 1.35 in 0.35 s), the cherry hops (`vy −320`) and falls (g 2600, x magnet onto the top) → **`cherryOn`**: squash `csy 0.7` (ω 22, ζ 0.3), a tiny sway kick (0.012) + top-layer dip 0.06; from then on it rides the top layer. 0.65 s + 0.45·(i−1): **`count {i}`** bottom → top — layer i glows (stays 0.3), candle i pops (spring ω 18, ζ 0.4: overshoot ≈ 1.25) and lights 0.1 s later over 0.2 s. Last count + 0.45 s: **`blow`** — Koko mood `blow` 0.9 s, `w.blowT` 1 → 0, a breath kick of +0.025 rad (the cake jiggles right, away from Koko). + 0.45 s: **`candlesOut`** (each candle `out` 0 → 1 in 0.4 s, `lit` follows `1 − out`: smoke). + 0.3 s: **`sprinkles`** (Koko `cheer`). + 0.4 s: **`roundDone`**, then the clear starts at once. Total `towerDone → roundDone` = 2.25 + 0.45·n s: 3.15 / 3.6 / 4.05 s for 2 / 4 / 5 layers (unit: 3.3–3.9 s at n = 4). `doneMax 7` s safety | Lulu's bloom + monkey took ≈ 3.0 s at n = 4 |
-| **candles** | `w.candles = [{ i (1…n), x (offset along the top layer), pop 0..≈1.25, lit 0..1, out 0..1 }]`, created at `towerDone` (pop 0 = invisible), offsets evenly across 0.7·LW (`−0.35·LW … +0.35·LW`; n = 1 → 0). They stand 0.06·LH behind the top's front edge (`candleBack`) | the middle candle of an odd n stands behind the cherry: draw candles first, the cherry in front |
+| **done** (`towerDone`) | Koko `cheer`. 0.15 s: **`cherry`** — the cloud puffs away (alpha 1 → 0, scale 1 → 1.35 in 0.35 s), the cherry hops (`vy −320`) and falls (g 2600, x magnet onto the top) → **`cherryOn`**: squash `csy 0.7` (ω 22, ζ 0.3), a tiny sway kick (0.012) + top-layer dip 0.06; from then on it rides the top layer. 0.65 s + 0.45·(i−1): **`count {i}`** bottom → top — layer i glows (stays 0.3), candle i pops (spring ω 18, ζ 0.4: overshoot ≈ 1.25) and lights 0.1 s later over 0.2 s. Last count + 0.45 s: **`blow`** — Koko mood `blow` 0.9 s, `w.blowT` 1 → 0, a breath kick of +0.025 rad (the cake jiggles right, away from Koko). + 0.45 s: **`candlesOut`** (each candle `out` 0 → 1 in 0.4 s, `lit` follows `1 − out`: smoke). + 0.3 s: **`sprinkles`** (Koko `cheer`). + 0.4 s: **`roundDone`**, then the clear starts at once. Total `towerDone → roundDone` = **1.8 + 0.45·n s**: 2.7 / 3.15 / 3.6 / 4.05 s for 2 / 3 / 4 / 5 layers (unit: 3.3–3.9 s at n = 4; `hs_pt2`: 2.74 s at n = 2). `doneMax 7` s safety | Lulu's bloom + monkey took ≈ 3.0 s at n = 4 |
+| **candles** | `w.candles = [{ i (1…n), x (offset along the top layer), pop 0..≈1.25, lit 0..1, out 0..1 }]`, created at `towerDone` (pop 0 = invisible), **QA visual P2-1 (the cherry hid the middle candles):** the cherry now sits off-centre at `layout.cherryOff = round(min(0.28·LW, LW/2 − 32))` (its 64 px stay on the top) and the cherry hops sideways onto that spot; the candles stand evenly from `−0.45·LW + cw/2` to `cherryOff − 32 − cw/2 − 2` (n = 1: half-way, beside the cherry), where cw = candle width = h/3 and h = `layout.candleH = round(0.40·LH)` — shorter for that cake only when 5 candles on a small LW would leave < 2 px between them (`w.candleH`, `candlePose().h`, ≥ 0.85·candleH). They stand 0.06·LH behind the top's front edge (`candleBack`). `World.candleOffsets(n, layout)` → offsets with `.h` | unit (n = 1…5 × 20 viewports × 5 ages): every candle ≥ 2 px clear of the cherry and of its neighbours, ≥ 0.2·LW from the cherry's centre, on the top. **Render: draw the candle `candlePose().h` tall (24:72 art → h/3 wide), the cherry 72 px tall (64 wide)** |
 | **clear** | as Lulu (top first, 0.1 s apart, ballistic towards `W + LW`, 0.55 s, fade 0.25 s). The cherry and the candles ride the top layer's flying pose; when that layer is gone `w.goal = null`, `w.candles = []` | |
 | **setBreeze(v)** | input clamped 0..1, smoothed (τ 1.2 s) into `w.breeze`; torque `τ = 0.33·breeze·(0.75·sin 2π·0.30 t + 0.25·sin(2π·0.19 t + 1))` — far below the 0.81 Hz resonance, so |θ| from it ≈ 0.012–0.015 rad steady at v = 1 (bound 0.02 tested, also toggling 0 ↔ 1 every 1.3 s). Calms < 0.002 rad 8 s after v = 0. Koko's `hold` (gust) stiffens as before | unit + sims: max θ with breeze + landings 0.104 rad |
 | **bee** (surprise, replaces the butterfly) | from the 2nd ask, 1–2 s after the ask (phase ask, a layer on the cake): buzzes in from a side on a curvy path (1.6 s, `flap = (14·t) % 1`), sits on the cake top (`top.y − 12`, follows the sway, `rot` = top rot) 4 s, flies away (1.2 s). **Tap** (radius 64, only `in` / `sit`) → `beeTap`, `state 'loop'`: one loop-the-loop of radius 46 above its spot (0.8 s), then `away`. A falling / tossed layer sends it away (no event). Once per surprise cake; a breeze surprise in a cake of < 3 layers becomes the bee | |
@@ -135,6 +146,7 @@ surprise (gust 0.1 rad, Koko `hold` 1.5 s). New or changed:
 | `hint` | `pieceId, x, y, idle?` | glow + ghost hand |
 | `idle` | `n, promptKey, params` | idle nudge |
 | `stillDrag` | `pieceId` | a still drag was cancelled |
+| `fadeWrong` | `ask, pieces [ids]` | the 3rd wrong drop on an ask: the wrong layers puff away (poof sfx) |
 | `pokeKoko` | `promptKey, params` | a tap on Koko (repeat the prompt) |
 | `towerDone` | `n` | the last layer landed |
 | `cherry` | `x, y` | the cloud puffs away, the cherry hops off it (puff + whoosh) |
@@ -158,7 +170,10 @@ Removed: `bloom`, `monkey`, `bananas`, `butterfly`, `butterflyTap`, `pokeLulu`.
 - `initial` words: en bunny B, bear B, cat C, dog D, duck D, pig P, cow C, sheep S; vi gấu G, mèo M, cún C, vịt V, heo H, bò B, cừu C
   ("thỏ" skipped: digraph th). Animals that share an initial are never distractors for each other, and **two consecutive asks
   never use the same letter** (new rule, `validate()` checks it).
-- `SMALL_SCALE = 0.72` (was 0.7). Everything else (blocks per cake 3: 2,2,3,3 · 4: 2,3,3,4 · 5: 3,4,4,5 · 6–7: 4,5,5,5, choices,
+- **Layers per cake (QA P2-4): 3: 2,2,3,3 · 4: 2,2,3,4 · 5: 3,3,4,5 · 6–7: 3,4,4,5** (was 4: 2,3,3,4 · 5: 3,4,4,5 · 6–7: 4,5,5,5).
+  The tallest 4th cake was cut in 61 % of typical age-4 and 64–100 % of age 5–7 chapters; age 4 now 40 %, typical 7 48 %, slow
+  6–7-year-olds' session p90 609 / 622 → 497 / 509 s. maxBlocks stays 5 (layout unchanged).
+- `SMALL_SCALE = 0.72` (was 0.7). Everything else (choices,
   colour-clash rules, count-up / ascending dots, size, letters, arithmetic, Talk) unchanged; the 66 000-round self-check runs in
   the unit suite.
 
@@ -184,7 +199,7 @@ poke: 0.03})`, `step(dt)` before `world.update(dt)`; drags to `dropPoint()` ± (
 bee (in / sit) with p = bee after 0.4–1.2 s. `stats {drags, right, wrong, drops, misses, locked, taps, talks, talkRight, pokes, bee}`.
 
 ## 10. Tests and playtest
-**Unit (`tests/unit/run.js`, 40 tests, all green):** content (66 000 rounds self-check + independent `matches`, animal cookies /
+**Unit (`tests/unit/run.js`, 43 tests, all green):** content (66 000 rounds self-check + independent `matches`, animal cookies /
 sounds / words, no repeated initial letter), layout numbers, all 20 viewports × ages (slots, drop zone, HUD, bubble, Koko, tallest
 cake + cherry under the room), hit boxes, scripted pointer sessions per age with the full event order
 (`… towerDone → cherry → cherryOn → count → blow → candlesOut → sprinkles → roundDone → clearBlock`), bot sessions with breeze,
@@ -193,24 +208,30 @@ layers 0.72, wrong bounce + hints, stars, idle / Koko pokes, tap / grace assist 
 timing (3.3–3.9 s at n = 4), cherry squash + rides the top + flies off with the top layer, candles = n evenly across 0.7·LW with
 pop overshoot / lit before the blow / out**, Talk cut, gust surprise, **setBreeze bound ≤ 0.02 rad (steady + toggled) and calm**,
 **bee in / sit / tap → loop circle → away / once / sent away by a drop**, rotation mid-drag / fall / deal / cherry drop / clear,
-sway physics, **the cake never falls in 1 000 random sessions** (random age, viewport, breeze, skill, fast flick drags, random taps,
-random rotations: 5 005 cakes, 18 474 layers, max |θ| 0.104 rad, every stacked layer kept, offsets ≤ 0.18·LW, centre within the
+errorless fade (3rd wrong drop → only the right layer left, wrong-always child finishes), dropCatch (30 px beside → drop, 75 px →
+miss), candles never behind the cherry (n = 1…5, all viewports, n = 1 through a full done sequence), Koko's feet ≥ 16 px above the
+tray (portrait viewports), sway physics, **the cake never falls in 1 000 random sessions** (random age, viewport, breeze, skill, fast flick drags, random taps,
+random rotations: 5 423 cakes, 17 982 layers, max |θ| 0.104 rad, every stacked layer kept, offsets ≤ 0.18·LW, centre within the
 stand — max 0.13·baseW), determinism (rerun + replay at 1/120 and 1/60), event fields, bot, weather.
 
-**High-speed playtest (`node tests/sim/hs_playtest.js --n 20`, 1 380 sessions, `tests/sim/out/hs_ck1.md`; main's breeze emulated:
-0.8 in breezy chapters):**
+**High-speed playtest after the QA fix round (`node tests/sim/hs_playtest.js --n 20 --tag ck2`, 1 380 sessions,
+`tests/sim/out/hs_ck2.md`; first pass: `hs_ck1.md`; main's breeze emulated: 0.8 in breezy chapters):**
 | age | typical chapter mean / p90 | typical session p90 / max | typical cake mean / p90 / max | typical ask mean / p90 | ★★★/★★/★ % | slow3 session p90 | spammer / tapper session |
 |---|---|---|---|---|---|---|---|
-| 3 | **92.1** / 103.5 s | 397 / 416 s | 22.4 / 30.5 / 43 s | 6.7 / 9.3 s | 29/49/22 | 405 s | 206 / 367 s |
-| 4 | **91.0** / 108.8 s | 418 / 424 s | 23.6 / 34.2 / 53 s | 5.9 / 10.8 s | 41/32/27 | 386 s | 240 / 361 s |
-| 5 | 87.7 / 101.1 s | 394 / 399 s | 25.1 / 33.5 / 41 s | 4.5 / 7.5 s | 66/24/10 | 504 s | 300 / 365 s |
-| 6 | 92.5 / 104.5 s | 397 / 411 s | 28.4 / 37.4 / 57 s | 3.9 / 6.6 s | 78/14/7 | 609 s | 356 / 372 s |
-| 7 | 92.1 / 106.3 s | 412 / 427 s | 25.7 / 33.0 / 49 s | 3.3 / 5.6 s | 92/6/2 | 622 s | 353 / 364 s |
-- Targets met: toddler chapters 60–100 s, every typical session ≤ 8 min (max 427 s); **no stuck ask (> 60 s) and no stuck cake
-  (> 120 s) for any engaged model** (longest cake: slow3 age 7, 104 s); every session of every active model reaches `sessionDone`
-  (random tapper / swiper / confused / spammer included); absent child → 5th idle ≈ 94 s, ignored Talk ≈ 132 s (main auto-pauses).
+| 3 | **92.9** / 105.2 s | 398 / 421 s | 22.4 / 30.2 / 42 s | 6.6 / 9.4 s | 50/39/11 | 378 s | 206 / 370 s |
+| 4 | **89.6** / 105.2 s | 400 / 401 s | 21.7 / 33.1 / 45 s | 5.8 / 10.4 s | 52/33/15 | 396 s | 228 / 362 s |
+| 5 | 88.9 / 109.7 s | 410 / 418 s | 23.3 / 33.0 / 46 s | 4.4 / 7.1 s | 82/13/5 | 437 s | 286 / 368 s |
+| 6 | 91.0 / 110.9 s | 398 / 404 s | 23.7 / 32.2 / 49 s | 3.9 / 6.7 s | 83/12/4 | 497 s | 309 / 369 s |
+| 7 | 88.9 / 101.6 s | 396 / 398 s | 21.9 / 29.0 / 41 s | 3.4 / 5.8 s | 91/7/2 | 509 s | 308 / 376 s |
+- Targets met: toddler chapters 60–100 s, every typical session ≤ 8 min (max 421 s); **no stuck ask (> 60 s) and no stuck cake
+  (> 120 s) for any engaged model** (longest cake: slow3 age 6, 94 s); every session of every active model reaches `sessionDone`
+  (random tapper / swiper / confused / spammer included); absent child → 5th idle ≈ 121 s (idleMax 30), ignored Talk ≈ 132 s (main auto-pauses).
 - No NaN; sway ≤ 0.104 rad (cap 0.12) incl. breeze; landing offset ≤ 0.175·LW; every 2nd wrong drop hinted.
-- Bees: 80 per 20 age-3 sessions (age-3 surprise cakes have 2 layers → always the bee); typical children tap ≈ 60 % at age 3.
+- Surprises: every age now gets both (typical children: 40 gust + 40 bee chapters of 80 at every age; the breeze waits for the first 3-layer
+  cake, so slow3 at ages 3–4 sees it in 13–17 of 40 chapters — the chapter is often cut before cake 3).
+- QA models (`node tests/sim/hs_pt2.js --models wrongAlways,dropSide`, native fade + dropCatch): wrongAlways finishes every session
+  at every age (ages 6–7: session 489–520 s — a child who is wrong 3× on EVERY ask; still never stuck); dropSide side-misses gone,
+  sessions 350–407 s. `hs_pt2`'s `--patch fadeWrong,catchPad` prototypes now skip themselves (native CONFIG keys exist).
 - Deterministic: `tests/sim/determinism.js` all 10 cases same (rerun, replay 1/120, 1/60).
 - Voice model (`hs_designer.js` smoke, age 4): a line on `cherryOn` ("Candles! Let's count them!") is mostly lost behind the
   `towerDone` line + count chimes (72–78 % dropped) — main should either fold it into the `towerDone` line or skip it; the `blow`
@@ -225,3 +246,6 @@ stand — max 0.13·baseW), determinism (rerun + replay at 1/120 and 1/60), even
   0.4 s → 3.6 s at n = 4 (the 0.6 s more than Lulu's monkey is absorbed by the chapter budget: chapter means unchanged).
 - Breeze torque 0.33 at 0.30 / 0.19 Hz → ≈ 0.012 rad steady (bound 0.02).
 - Content: no repeated initial letter in a row (the cookie set has 3 shared initials in English).
+- QA fix round (2026-11-14, `docs/reports/playtest_report.md`, `visual_report.md`): fadeWrongAfter 3, dropCatch 40, freeSlipFrom 3,
+  gustAfter 1.1, idleMax 30, swayRoom 0.1, layers per cake 4: 2,2,3,4 · 5: 3,3,4,5 · 6–7: 3,4,4,5 (age-4 cut 61 → 40 %), breeze at the
+  first ≥ 3-layer cake, off-centre cherry + candles beside it, iPad-portrait Koko 30 px higher (kokoDyPortShort 40).

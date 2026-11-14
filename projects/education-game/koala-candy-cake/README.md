@@ -1,17 +1,17 @@
-# Lulu's Jungle Tower · Hươu Lulu Xếp Tháp
+# Koko's Cake Tower · Tháp Bánh Kem Của Koala Koko
 
-A learning game for children aged 3–7 (default 4). Lulu, a baby giraffe with a seafoam neckerchief, builds towers in a
-jungle clearing. A bunch of bananas hangs from a branch above an old tree stump, and three wooden blocks wait on the
-grass. Lulu asks "Stack the RED block!" and the child drags the block up over the tower and lets go: it drops, lands with
-a *clonk* and a squash, and the whole tower sways and settles like a real stack of blocks. A wrong block boings off the
-top and hops back home ("Boing! That's blue. Find red!"). When the tower reaches the bananas the blocks light up and
-count "one, two, three!", flowers bloom up the tower and a cheeky monkey swings down on a vine to grab the bananas. The
-day passes from a misty morning to noon, a golden sunset and a starry night with fireflies.
+A learning game for children aged 3–7 (default 4). Koko, a little koala baker in a cream chef's hat and a mint apron,
+bakes the tallest cake in Candy Village. A cherry floats above the cake stand on a cotton-candy cloud, and soft cake
+layers wait on the plaza. Koko asks "Stack the RED layer!" and the child drags the layer up over the cake and lets go:
+it drops with a soft *flump*, squishes and the whole cake jiggles like real sponge. A wrong layer boings off the frosting
+and hops home ("Boing! That's the blue layer. Let's find red!"). When the cake reaches the cherry, the cherry plops on
+top, a candle lights for every layer while Koko counts, Koko blows them out and sprinkles rain down. The weather changes
+each chapter: sunny → breezy (the cake sways, Koko holds it steady) → sugar-drop rain → a rainbow party.
 
-Made on 2026-11-04 with `/build-education-game random 4`. Mechanic family *build*: drag up and let go to stack, with
-real wobble physics. No tapping hiding places, no rocket, no card grid, no popping, no catching into a basket.
+Made on 2026-11-14 with `/build-education-game random 4`. Mechanic family *build* (drag up and let go to stack, with
+squishy wobble physics). One swap from the roll: theme jungle → Candy Village (the roll repeated Lulu's Jungle Tower).
 
-**Play:** https://phanlinh86.github.io/claude-learning/projects/education-game/giraffe-jungle-tower/game/
+**Play:** https://phanlinh86.github.io/claude-learning/projects/education-game/koala-candy-cake/game/
 
 ## On iPhone / iPad
 1. Open the link in Safari and tap once (iOS only allows sound after the first tap).
@@ -21,17 +21,17 @@ real wobble physics. No tapping hiding places, no rocket, no card grid, no poppi
 
 ## For parents
 Hold ⚙ on the title screen for 2 seconds: age (3, 4, 5, 6, 7+), language, child's name, volume, sound effects, music,
-Lulu's voice, answering by talking. No losing, no timers. After two misses the right block glows and a ghost hand shows
-the drag; then even a tap on it stacks it. Nothing leaves the device. If nobody plays for about 1.5 minutes the game
-pauses itself.
+Koko's voice, answering by talking. No losing, no timers. After two misses the right layer glows and a ghost hand shows
+the drag; after three, the wrong layers puff away. Nothing leaves the device. If nobody plays for about 2 minutes the
+game pauses itself.
 
-Topics (four per session, one per time of day, rotating): colours, shapes, counting (count-up towers 1, 2, 3… then dice
-dots), jungle animals and their sounds ("Who says roar?"), big & small (age 3); capital letters (5); small letters,
+Topics (four per session, one per weather, rotating): colours, shapes, counting (count-up cakes 1, 2, 3… then candy
+dots), animal cookies and their sounds ("Who says moo?"), big & small (age 3); capital letters (5); small letters,
 first letters, adding (6); taking away, odd & even (7+).
 
 ## Develop
 ```bash
-cd projects/education-game/giraffe-jungle-tower
+cd projects/education-game/koala-candy-cake
 python3 -m http.server -d game 8000        # then open http://localhost:8000
 node tests/unit/run.js                     # mechanics unit tests
 node tests/unit/i18n_voice.test.js         # language + voice tests

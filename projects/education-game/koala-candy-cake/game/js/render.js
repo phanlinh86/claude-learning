@@ -244,7 +244,7 @@
       for (let j = 0; j < w.candles.length; j++) {
         const P = w.candlePose(j, a); if (!P || !(P.alpha > 0.01)) continue;
         g.save(); g.globalAlpha *= clamp(P.alpha, 0, 1); g.translate(P.x, P.y); g.rotate((P.rot || 0) + lean * 0.15);
-        try { BA().drawCandle(g, h * (P.s || 1), P.lit || 0, P.out || 0, this.time + j * 0.37); } catch (e) { }
+        try { BA().drawCandle(g, (P.h || w.candleH || h) * (P.s || 1), P.lit || 0, P.out || 0, this.time + j * 0.37); } catch (e) { }
         g.restore();
       }
     }
@@ -317,7 +317,7 @@
         }
       }
       const bob = opt.float ? Math.sin(t * 2) * 3 : 0;
-      const cb = opt.cloud ? topY - 70 + bob : topY + 4;   // the cherry's bottom
+      const cb = opt.cloud ? topY - 100 + bob : topY + 4;   // the cherry's bottom
       if (opt.cloud && CK.Assets.has('cloud_candy')) this._img('cloud_candy', tx - 90, cb - 20, 180, 100);
       if (CK.Assets.has('cherry')) this._img('cherry', tx - 32, cb - 69, 64, 72);
       return topY;
@@ -421,6 +421,8 @@
       } else if (type === 'breath') {   // Koko's blow: soft puffs travel from the lips to the cake top
         const tx = opt.tx == null ? x + 200 : opt.tx, ty = opt.ty == null ? y : opt.ty;
         for (let i = 0; i < 9; i++) { const k = 0.9 + R() * 0.5; fx.push({ k: 'p', sprite: 'puff', x, y: y + (R() - 0.5) * 10, vx: (tx - x) * k, vy: (ty - y) * k + (R() - 0.5) * 40, g: 0, drag: 1.0, t: -i * 0.06, life: 0.8, size: 18 + R() * 12, rot: 0, vr: 1 }); }
+      } else if (type === 'flame') {   // a candle lights: one small warm flash
+        fx.push({ k: 'flash', x, y, t: 0, life: 0.28, size: 34 });
       } else if (type === 'firework') {
         const col = CONF[(R() * CONF.length) | 0];
         for (let i = 0; i < 28 * this.quality; i++) {
@@ -441,7 +443,7 @@
         for (let i = 0; i < 8; i++) { const a = i / 8 * TAU; fx.push({ k: 'p', sprite: 'sparkle', x: x + Math.cos(a) * r0, y: y + Math.sin(a) * r0 * 0.6, vx: Math.cos(a) * 30, vy: Math.sin(a) * 30 - 20, g: 0, t: 0, life: 0.9, size: 22, rot: 0, vr: 3 }); }
       } else if (type === 'wrong') {
         fx.push({ k: 'ring', x, y, t: 0, life: 0.35, size: (opt.size || 110) * 1.1, color: '255,255,255' });
-      } else if (type === 'count') {   // a big numeral floats up while Pip counts
+      } else if (type === 'count') {   // a big numeral floats up while Koko counts
         fx.push({ k: 'num', x, y, t: 0, life: 0.85, text: String(opt.n || '') });
       }
     }
@@ -460,13 +462,6 @@
           const al = u > 0.7 ? (1 - u) / 0.3 : 1;
           if (f.tint) this._tinted(f.sprite, f.tint, f.x, f.y, f.size, f.rot, al);
           else this._sprite(f.sprite, f.x, f.y, f.size, f.rot, al);
-        } else if (f.k === 'bfly') {
-          f.ph += dt * 3; f.x += (f.vx + Math.sin(f.ph) * 60) * dt; f.y += (f.vy + Math.cos(f.ph * 1.3) * 40) * dt; f.vy *= 1 - 0.6 * dt;
-          const al = u > 0.75 ? (1 - u) / 0.25 : 1;
-          g.save(); g.globalAlpha *= al; g.translate(f.x, f.y);
-          if (CK.Assets.has('butterfly')) { this._sprite(Math.sin(this.time * 14 + f.ph) > 0 ? 'butterfly' : 'butterfly_up', 0, 0, f.size * 1.6, 0, 1); }
-          else { g.fillStyle = f.color; g.beginPath(); g.ellipse(-8, 0, 9, 13 * Math.abs(Math.sin(this.time * 14)), 0, 0, TAU); g.ellipse(8, 0, 9, 13 * Math.abs(Math.sin(this.time * 14)), 0, 0, TAU); g.fill(); }
-          g.restore();
         } else if (f.k === 'flash') {
           g.strokeStyle = `rgba(255,250,220,${0.9 * (1 - u)})`; g.lineWidth = 8 * (1 - u) + 1;
           g.beginPath(); g.arc(f.x, f.y, f.size * (0.25 + 0.6 * u), 0, TAU); g.stroke();
@@ -475,9 +470,9 @@
           g.strokeStyle = `rgba(${f.color || '255,240,150'},${0.8 * (1 - u)})`; g.lineWidth = 6 * (1 - u) + 1;
           g.beginPath(); g.arc(f.x, f.y, f.size * (0.3 + u * 0.5), 0, TAU); g.stroke();
         } else if (f.k === 'num') {
-          const s = easeOutBack(clamp(u * 3, 0, 1)), al = u > 0.6 ? (1 - u) / 0.4 : 1;
+          const s = easeOutBack(clamp(u * 3, 0, 1)), al = u > 0.7 ? (1 - u) / 0.3 : 1;
           g.save(); g.globalAlpha *= al; g.translate(f.x, f.y - u * 40); g.scale(s, s);
-          outlinedText(g, f.text, 0, 0, 84, '#FFF6D8', '#B5547A', 200); g.restore();
+          outlinedText(g, f.text, 0, 0, 84, '#B5547A', '#FFFFFF', 200); g.restore();
         } else if (f.k === 'star') {
           const e = u * u * (3 - 2 * u);
           const x = lerp(f.x0, f.x1, e), y = lerp(f.y0, f.y1, e) - Math.sin(u * Math.PI) * 140;
