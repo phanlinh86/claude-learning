@@ -83,6 +83,8 @@
     this.width = opts.width || 960;
     this.height = opts.height || 540;
     this.groundY = opts.groundY || 470;
+    // visible range (mobile: wider / taller screens, see setView); defaults = the 960×540 scene
+    this.x0 = 0; this.x1 = this.width; this.y0 = 0; this.density = 1;
     this.rng = new FF.RNG(opts.seed !== undefined ? opts.seed : 7);
     this.rampIn = opts.rampIn || 2;        // s for a new season to reach full density
     this.rampOut = opts.rampOut || 1;      // s for the old season to stop spawning
@@ -100,7 +102,17 @@
   Weather.SEASONS = SEASONS;
 
   Weather.prototype._count = function (season, em) {
-    return em.count === 'butterflies' ? this.butterflies : em.count;
+    if (em.count === 'butterflies') return this.butterflies;
+    return this.density === 1 ? em.count : Math.round(em.count * this.density);
+  };
+
+  /** setView(x0, x1, y0) — the screen shows world x0..x1 and the sky from y0 (≤ 0) down to the ground.
+   *  Particles enter / leave at these edges and the count scales with the visible area (same density). */
+  Weather.prototype.setView = function (x0, x1, y0) {
+    this.x0 = x0; this.x1 = Math.max(x0 + 200, x1); this.y0 = Math.min(0, y0 || 0);
+    var area = (this.x1 - this.x0) * (this.groundY - this.y0), base = this.width * this.groundY;
+    this.density = Math.max(0.6, Math.min(2.2, area / base));
+    if (Math.abs(this.density - 1) < 0.02) this.density = 1;
   };
 
   Weather.prototype.setSeason = function (i, opts) {
@@ -195,35 +207,35 @@
   };
 
   Weather.prototype._place = function (p, where) {
-    var r = this.rng, W = this.width, G = this.groundY, m = p.size + 10;
+    var r = this.rng, X0 = this.x0, X1 = this.x1, W = X1 - X0, Y0 = this.y0, G = this.groundY, m = p.size + 10;
     if (p.kind === 'butterfly') {
       p.y = r.range(130, G - 110);
-      if (where === 'inside') p.x = r.range(40, W - 40);
-      else p.x = this._netV(p).vx <= 0 ? W + m : -m;
-      p.heading = p.x > W ? r.range(Math.PI * 0.8, Math.PI * 1.2) : r.range(-0.4, 0.4);
+      if (where === 'inside') p.x = r.range(X0 + 40, X1 - 40);
+      else p.x = this._netV(p).vx <= 0 ? X1 + m : X0 - m;
+      p.heading = p.x > X1 ? r.range(Math.PI * 0.8, Math.PI * 1.2) : r.range(-0.4, 0.4);
       return;
     }
     if (where === 'inside') {
-      p.x = r.range(-10, W + 10);
-      p.y = r.range(-10, G - 10);
+      p.x = r.range(X0 - 10, X1 + 10);
+      p.y = r.range(Y0 - 10, G - 10);
       return;
     }
     var v = this._netV(p), ax = Math.abs(v.vx);
-    var pSide = ax * G / (ax * G + v.vy * W);
+    var pSide = ax * (G - Y0) / (ax * (G - Y0) + v.vy * W);
     if (ax > 3 && r.chance(pSide)) {
-      p.x = v.vx < 0 ? W + m : -m;
-      p.y = r.range(-m, G - 30);
+      p.x = v.vx < 0 ? X1 + m : X0 - m;
+      p.y = r.range(Y0 - m, G - 30);
     } else {
       // top edge, shifted upwind so particles drift into view
-      p.x = r.range(0, W) + (v.vx < 0 ? r.range(0, ax * 2) : -r.range(0, ax * 2));
-      p.y = -m;
+      p.x = r.range(X0, X1) + (v.vx < 0 ? r.range(0, ax * 2) : -r.range(0, ax * 2));
+      p.y = Y0 - m;
     }
   };
 
   Weather.prototype._outside = function (p) {
     var m = p.size + 20;
-    if (p.x < -m - 10 || p.x > this.width + m + 80) return true;
-    if (p.y < -m - 80) return true;
+    if (p.x < this.x0 - m - 10 || p.x > this.x1 + m + 80) return true;
+    if (p.y < this.y0 - m - 80) return true;
     var bottom = p.layer === 'back' ? this.groundY + 4 : this.height + m;
     return p.y > bottom;
   };
@@ -309,7 +321,7 @@
       // keep in the meadow band and (loosely) on screen
       if (p.y < 120) steer += hx >= 0 ? 2.2 : -2.2;          // turn downward
       if (p.y > G - 90) steer += hx >= 0 ? -2.2 : 2.2;        // turn upward
-      if (p.x < 60 && hx < 0) steer += hy >= 0 ? -2 : 2;      // turn right-ward
+      if (p.x < this.x0 + 60 && hx < 0) steer += hy >= 0 ? -2 : 2;      // turn right-ward
     }
     p.heading += (p.turn + steer) * h;
     var sp = p.speed * (p.leaving ? 1.6 : 1);

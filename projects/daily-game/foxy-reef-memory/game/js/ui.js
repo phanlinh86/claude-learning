@@ -11,7 +11,24 @@
 
     init(game) {
       this.game = game;
-      const click = (id, fn) => $(id).addEventListener('click', e => { e.stopPropagation(); RF.Audio.unlock(); RF.Audio.play('click'); fn(e); });
+      // Buttons answer a touch on pointerup as well: iOS sends no 'click' for a second finger, so a child holding
+      // one finger on the glass could not otherwise tap Pause. The click that follows a handled touch is skipped.
+      const tap = (el, fn) => {
+        el.addEventListener('pointerup', e => {
+          if (e.pointerType !== 'touch') return;
+          const hit = document.elementFromPoint(e.clientX, e.clientY);
+          if (!hit || !el.contains(hit)) return;   // finger slid off the button: cancelled
+          el._tapAt = performance.now(); UI._ghostUntil = el._tapAt + 600; e.stopPropagation(); fn(e);
+        });
+        el.addEventListener('click', e => { if (el._tapAt && performance.now() - el._tapAt < 600) { e.stopPropagation(); return; } fn(e); });
+      };
+      this.tap = tap;
+      // ghost click: after a touch tap opened a new screen, the browser's delayed 'click' would land on whatever
+      // is now under the finger (e.g. "OK" on How to Play, a Settings toggle). Swallow that one click, anywhere.
+      document.addEventListener('click', e => {
+        if (UI._ghostUntil && performance.now() < UI._ghostUntil) { UI._ghostUntil = 0; e.stopPropagation(); e.preventDefault(); }
+      }, true);
+      const click = (id, fn) => tap($(id), e => { e.stopPropagation(); RF.Audio.unlock(); RF.Audio.play('click'); fn(e); });
       click('btnPlay', () => game.startGame());
       click('btnCustomize', () => this.open('scrCustom', 'scrTitle'));
       click('btnHow', () => this.open('scrHow', 'scrTitle'));
@@ -25,12 +42,13 @@
       click('btnOverMenu', () => game.toTitle());
       click('btnPause', () => game.pause());
       click('btnMuteHud', () => game.toggleMute());
+      click('btnRotateOk', () => { game._rotOk = true; game.syncRotate(); });
       click('btnResetAll', () => {
         RF.Assets.SLOTS.forEach(s => RF.Assets.clearCustom(s.id));
         this.renderSlots(); game.picturesChanged(); this.toast('All pictures reset to the originals');
       });
       click('btnResetBest', () => { game.resetBest(); this.toast('Best scores cleared'); });
-      document.querySelectorAll('.btn-back').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); RF.Audio.play('click'); this.back(); }));
+      document.querySelectorAll('.btn-back').forEach(b => tap(b, e => { e.stopPropagation(); RF.Audio.play('click'); this.back(); }));
 
       // settings controls
       $('setSfx').addEventListener('change', e => game.setSetting('sfx', e.target.checked));
@@ -52,7 +70,7 @@
     },
 
     seg(id, onPick) {
-      $(id).querySelectorAll('button').forEach(b => b.addEventListener('click', e => {
+      $(id).querySelectorAll('button').forEach(b => this.tap(b, e => {
         e.stopPropagation(); RF.Audio.play('click');
         onPick(b.dataset.v); this.syncSettings();
       }));
@@ -81,7 +99,8 @@
       if (id === 'scrTitle') $('bestTitle').textContent = this.game.best();
       // focus the main button so keyboard users can press Enter
       const first = id && $(id).querySelector('.btn-big, .btn');
-      if (first) setTimeout(() => first.focus({ preventScroll: true }), 30);
+      if (first && !this.game.isTouch) setTimeout(() => first.focus({ preventScroll: true }), 30);
+      const p = id && $(id).querySelector('.panel'); if (p) p.scrollTop = 0;
     },
     open(id, backTo) { this.backTo = backTo; this.show(id); },
     back() {

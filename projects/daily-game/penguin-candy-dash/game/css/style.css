@@ -184,3 +184,125 @@ canvas#game{background:#bff0c9}
 .action-btn{position:absolute;z-index:4;width:calc(var(--u)*11);height:calc(var(--u)*11);border-radius:50%;border:calc(var(--u)*.5) solid #fff;
   background:rgba(255,120,190,.75);color:#fff;font-size:calc(var(--u)*5);font-family:var(--font);box-shadow:0 calc(var(--u)*.5) calc(var(--u)*1.2) rgba(0,0,0,.3);touch-action:none}
 .action-btn:active{transform:scale(.94)}
+
+/* ---------- mobile (iPhone / iPad): full-screen canvas, safe areas, portrait ---------- */
+html,body{overscroll-behavior:none;touch-action:none;-webkit-touch-callout:none;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#stage{display:block;height:100dvh}
+canvas#game{position:absolute;left:0;top:0;touch-action:none;background:#93d9ab}
+#safeProbe{position:absolute;visibility:hidden;pointer-events:none;inset:0;
+  padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+.screen{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+.panel{max-width:calc(100vw - 16px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px));
+  max-height:calc(100dvh - 16px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
+  -webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
+button{touch-action:manipulation}
+img,svg,canvas{-webkit-user-drag:none}
+input,textarea{-webkit-user-select:text;user-select:text}
+body.touch .kb-only{display:none !important}
+body:not(.touch) .touch-only{display:none !important}
+body.touch .btn:focus-visible,body.touch .btn:focus{outline:none}
+body.touch .btn:hover{filter:none;transform:none}
+
+/* fingers: menu buttons at least 44 px tall on touch screens (Apple HIG), readable text */
+@media (pointer:coarse){
+  .btn{min-height:44px}
+  .btn-big{min-height:52px}
+  .seg button,.slot .btn,.btn-tiny{min-height:40px}
+  .icon-btn{width:max(44px, calc(var(--u)*5));height:max(44px, calc(var(--u)*5))}
+  .action-btn{width:max(76px, calc(var(--u)*11));height:max(76px, calc(var(--u)*11));font-size:max(34px, calc(var(--u)*5))}
+  .how p{font-size:max(14px, calc(var(--u)*1.55))}
+  .btn-tiny,.slot .btn{font-size:max(14px, calc(var(--u)*1.5))}
+  .seg button{font-size:max(15px, calc(var(--u)*1.6));min-width:56px}
+  .slot h3{font-size:max(13px, calc(var(--u)*1.6))}
+  .slot .tag{font-size:12px}
+  .slot .shape button{font-size:12px;min-height:32px}
+  .set{font-size:max(16px, calc(var(--u)*2))}
+  .tog{width:max(52px, calc(var(--u)*6.4));height:max(28px, calc(var(--u)*3.4))}
+  .tog::after{width:max(22px, calc(var(--u)*2.7));height:max(22px, calc(var(--u)*2.7))}
+  .small,.stats{font-size:max(13px, calc(var(--u)*1.55))}
+  .btn-small{font-size:max(15px, calc(var(--u)*1.8))}
+  .btn{font-size:max(17px, calc(var(--u)*2.3))}
+  .btn-big{font-size:max(21px, calc(var(--u)*3.1))}
+  .toast{font-size:max(15px, calc(var(--u)*1.7))}
+  .tagline{font-size:max(15px, calc(var(--u)*2.2))}
+  .best-line{font-size:max(15px, calc(var(--u)*2))}
+  .sc span{font-size:max(15px, calc(var(--u)*2))}
+  .medal-name{font-size:max(13px, calc(var(--u)*1.6))}
+}
+
+/* portrait (iPad upright, or a phone with "Play upright anyway"): size the menus from the width */
+@media (orientation:portrait){
+  :root{--u:min(1.55vw, 1.05vh)}
+  .logo{font-size:min(calc(var(--u)*11), 13vw)}
+  .title-icon{width:calc(var(--u)*14);height:calc(var(--u)*14)}
+  .menu .row,.menu.row{flex-wrap:wrap;justify-content:center}
+  .panel.wide,.panel.xwide{width:auto}
+  .settings{min-width:0}
+  .how-grid{grid-template-columns:1fr !important}
+  .slot-grid{grid-template-columns:repeat(6,minmax(0,1fr)) !important}
+  .slot{grid-column:span 3 !important;min-width:0}
+  .slot:nth-child(n+4) .tag{display:block}
+  .slot .btns,.slot .shape{flex-wrap:wrap;justify-content:center;max-width:100%}
+  .slot .btn{padding-left:10px;padding-right:10px;min-width:0}
+  .over-body{flex-direction:column;gap:calc(var(--u)*1.4)}
+}
+@media (orientation:portrait) and (max-width:600px){
+  .panel{padding:16px 14px}
+  .btn{min-width:0}
+  .btn-big{min-width:min(70vw, 260px)}
+  .menu > .btn{min-width:min(70vw, 260px)}
+  .panel h2{font-size:28px}
+  .settings .set{gap:10px}
+}
+
+/* short landscape phones: compact title, menus and Change Pictures */
+@media (max-height:500px) and (orientation:landscape){
+  .title-wrap{margin-top:0}
+  .title-icon{width:calc(var(--u)*7);height:calc(var(--u)*7)}
+  .logo{font-size:calc(var(--u)*7)}
+  .tagline{margin-top:4px}
+  .best-line{margin-top:8px}
+  .menu{margin-top:calc(var(--u)*1)}
+  .panel{padding:calc(var(--u)*1.4) calc(var(--u)*2.4)}
+  .panel h2{margin-bottom:calc(var(--u)*.8)}
+  .how{padding:calc(var(--u)*.7)}
+  .slot .tag{display:none}
+  .slot .prev{height:calc(var(--u)*5.2)}
+  .slot{gap:calc(var(--u)*.3);padding:calc(var(--u)*.5)}
+  #scrCustom .small{display:none}
+  #scrCustom .menu .btn{min-height:40px;padding-top:0;padding-bottom:0}
+  .settings{gap:6px}
+  .set{padding-top:4px;padding-bottom:4px}
+}
+
+/* rotate-to-landscape card (phones held upright, in a game) */
+#rotate{position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;
+  background:rgba(59,35,64,.88);color:#fff;text-align:center;font-family:var(--font);
+  padding:env(safe-area-inset-top,0px) 16px env(safe-area-inset-bottom,0px)}
+#rotate.hidden{display:none !important}
+#rotate .box{max-width:84vw}
+#rotate .phone{width:64px;height:110px;border:6px solid #fff;border-radius:14px;margin:0 auto 24px;animation:rot 2.2s ease-in-out infinite;
+  background:linear-gradient(#93d9ab,#b9ead0)}
+@keyframes rot{0%,25%{transform:rotate(0)}55%,100%{transform:rotate(-90deg)}}
+#rotate p{font-size:22px;margin:0 0 22px;line-height:1.3;text-shadow:0 2px 0 #6a2d5c}
+#rotate .btn{font-size:18px;min-width:0}
+/* picture cards on touch screens: buttons shrink / wrap instead of spilling out of narrow cards */
+@media (pointer:coarse){
+  .slot{min-width:0}
+  .slot .btns,.slot .shape{flex-wrap:wrap;justify-content:center;max-width:100%}
+  .slot .btn{padding-left:8px;padding-right:8px;min-width:0}
+}
+@media (max-height:500px) and (orientation:landscape){
+  #scrCustom .panel{width:min(calc(100vw - 16px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px)), calc(var(--u)*110))}
+  #scrCustom .panel h2{font-size:calc(var(--u)*3)}
+  .slot .shape button{min-height:28px}
+}
+/* upright screens: the title floats over the small stage, so the tagline gets its own soft pill */
+@media (orientation:portrait){
+  .tagline{display:inline-block;max-width:min(90vw, 560px);background:rgba(106,45,92,.55);border-radius:16px;padding:4px 14px;line-height:1.3}
+  #scrCustom .panel{width:min(calc(100vw - 16px), 720px)}
+}
+@media (orientation:portrait) and (min-width:600px){
+  .slot{grid-column:span 2 !important}
+  .slot:nth-child(n+4){grid-column:span 3 !important}
+}

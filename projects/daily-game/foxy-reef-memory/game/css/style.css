@@ -185,3 +185,133 @@ canvas#game{background:#2c8fb0}
 
 .gchip{display:inline-grid;place-items:center;width:calc(var(--u)*2.8);height:calc(var(--u)*2.8);border-radius:50%;color:#fff;
   font-family:"Segoe UI",system-ui,sans-serif;font-weight:900;font-size:calc(var(--u)*1.8);text-shadow:0 1px 0 rgba(0,0,0,.3);border:2px solid #fff}
+
+/* ---------- mobile (iPhone / iPad): full-screen canvas, safe areas, portrait + landscape ---------- */
+html,body{overscroll-behavior:none;touch-action:none;-webkit-touch-callout:none;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#stage{display:block;height:100vh;height:100dvh}
+canvas#game{position:absolute;left:0;top:0;touch-action:none;-webkit-touch-callout:none}
+#safeProbe{position:absolute;visibility:hidden;pointer-events:none;inset:0;
+  padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+.screen{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+.panel{max-width:calc(100vw - 16px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px));
+  max-height:calc(100vh - 16px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
+  max-height:calc(100dvh - 16px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
+  overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
+button,label,.set{touch-action:manipulation}
+img,svg,canvas{-webkit-user-drag:none}
+input,textarea{-webkit-user-select:text;user-select:text}
+/* HUD buttons: position + size set by Renderer.layoutHud() (screen corner, inside the safe area, ≥ 44 px) */
+#hud{top:calc(var(--u)*1.4);right:calc(var(--u)*1.4)}
+#hud .icon-btn{width:var(--hb,calc(var(--u)*5));height:var(--hb,calc(var(--u)*5));min-width:44px;min-height:44px;background:rgba(20,50,80,.55)}
+.icon-btn svg{filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
+/* touch devices: hide keyboard-only wording and the Full screen switch (iOS has none; use Add to Home Screen) */
+body.touch .kb-only{display:none}
+body:not(.touch) .touch-only{display:none}
+body.touch .no-ios{display:none !important}
+body.touch .btn:focus-visible,body.touch .btn:focus{outline:none}
+body.touch .btn:hover{filter:none;transform:none}
+
+/* Settings: two columns so the Volume row added by extras.js fits on every screen */
+#scrSettings .settings{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--u)*.9);min-width:calc(var(--u)*62)}
+#scrSettings .set{min-height:calc(var(--u)*5.2)}
+#scrSettings .set-volume{grid-column:1 / -1}
+#scrSettings .set:has(#setDifficulty),#scrSettings .set:has(#setPeek){grid-column:1 / -1}
+
+/* fingers: every menu button at least 44 px tall on touch screens (Apple HIG), readable text */
+@media (pointer:coarse){
+  .btn{min-height:44px}
+  .btn-big{min-height:52px}
+  .seg button,.btn-tiny{min-height:40px}
+  .seg button{font-size:max(14px, calc(var(--u)*1.6));min-width:44px}
+  .how p{font-size:max(14px, calc(var(--u)*1.6))}
+  .set{font-size:max(15px, calc(var(--u)*1.9))}
+  .small{font-size:max(13px, calc(var(--u)*1.55))}
+  .btn-small{font-size:max(15px, calc(var(--u)*1.8))}
+  .btn-tiny{font-size:max(14px, calc(var(--u)*1.4))}
+  .stats{font-size:max(13px, calc(var(--u)*1.45))}
+  .medal-name,.sc span{font-size:max(13px, calc(var(--u)*1.6))}
+  .tagline,.best-line{font-size:max(15px, calc(var(--u)*2.1))}
+  .slot h3{font-size:max(13px, calc(var(--u)*1.6))}
+  .slot .tag{font-size:12px}
+  .slot .shape button{font-size:12px;min-height:36px}
+  .slot .btn{min-height:40px}
+}
+
+/* portrait: the menus are sized from the width instead of a 16:9 box */
+@media (orientation:portrait){
+  :root{--u:min(1.55vw, 1.05vh)}
+  .logo{font-size:min(calc(var(--u)*9), 12vw)}
+  .title-wrap{margin-top:0;padding:0 16px}
+  .menu .row{flex-wrap:wrap;justify-content:center}
+  .panel.wide,.panel.xwide{width:auto}
+  .how-grid{grid-template-columns:1fr !important}
+  .over-body{flex-direction:column;gap:calc(var(--u)*1.2)}
+  .stats{text-align:center}
+  .slot-grid{grid-template-columns:repeat(6,minmax(0,1fr)) !important}
+  .slot{grid-column:span 2 !important;min-width:0}
+  .slot:nth-child(n+4){grid-column:span 3 !important}
+  .slot:nth-child(n+4) .tag{display:block}
+  .slot .btns,.slot .shape{flex-wrap:wrap;justify-content:center;max-width:100%}
+  .slot .btn{padding-left:10px;padding-right:10px;min-width:0}
+  #scrSettings .settings{min-width:0;grid-template-columns:1fr}
+}
+@media (orientation:portrait) and (max-width:600px){
+  :root{--u:min(2vw, 1.05vh)}
+  .panel{padding:14px 14px}
+  .seg button{padding:6px 8px}
+  .menu.row{flex-wrap:wrap}
+  .btn,.btn-big{min-width:0}
+  .over-body{padding:10px 12px}
+}
+/* the tagline sits on its own soft pill (portrait puts it over the sea surface) */
+.tagline{display:inline-block;background:rgba(13,60,90,.5);border-radius:99px;padding:.2em .9em;margin-left:12px;margin-right:12px}
+
+/* short landscape phones (iPhone sideways): compact menus, everything reachable without scrolling */
+@media (max-height:500px){
+  .panel{padding:8px 16px}
+  .panel h2{margin-bottom:4px;font-size:calc(var(--u)*3.6)}
+  .menu{margin-top:8px;gap:8px}
+  .title-icon{width:calc(var(--u)*7);height:calc(var(--u)*7)}
+  .logo{font-size:calc(var(--u)*7)}
+  .title-wrap{margin-top:0}
+  .best-line{margin-top:8px}
+  #scrSettings .settings{gap:6px}
+  #scrSettings .set{padding:2px 12px;min-height:44px}
+  #scrSettings .menu .btn{min-height:44px;padding-top:0;padding-bottom:0}
+  #scrHow .how-grid{gap:6px}
+  #scrHow .how{padding:4px 8px}
+  #scrHow .how p{font-size:13px;line-height:1.25}
+  #scrHow .how-ico img{width:calc(var(--u)*4.4)}
+  #scrHow .menu .btn,#scrPause .menu .btn,#scrOver .menu .btn{min-height:44px;padding-top:0;padding-bottom:0}
+  #scrPause .menu{gap:6px}
+  .over-body{padding:8px 16px}
+  .slot .prev{height:calc(var(--u)*5)}
+  .slot .tag{display:none !important}
+  #scrCustom .small{display:none}
+  #scrCustom .panel h2{font-size:calc(var(--u)*3)}
+  #scrCustom .menu .btn{min-height:44px;padding-top:0;padding-bottom:0}
+}
+
+/* rotate-to-landscape card (small phones held upright, while playing) */
+#rotate{position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:rgba(8,40,64,.88);color:#fff;text-align:center;font-family:var(--font);
+  padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+#rotate.hidden{display:none}
+#rotate .box{max-width:80vw}
+#rotate .phone{width:64px;height:110px;border:6px solid #fff;border-radius:14px;margin:0 auto 24px;animation:rot 2.2s ease-in-out infinite}
+@keyframes rot{0%,25%{transform:rotate(0)}55%,100%{transform:rotate(-90deg)}}
+#rotate p{font-size:22px;margin:0 0 22px;line-height:1.3}
+#rotate .btn{font-size:18px;min-width:0}
+.toast{max-width:calc(100vw - 32px);text-align:center}
+/* Change Pictures: slot buttons stay inside their (narrow) cards */
+.slot{min-width:0}
+.slot .btns{max-width:100%;justify-content:center}
+.slot .btn{min-width:0}
+@media (max-height:500px){
+  .slot .btns{gap:4px}
+  .slot .btn{padding:0 8px !important;font-size:13px !important;min-height:40px}
+  .slot .shape button{padding:2px 6px}
+}
+/* "NEW!" badge beside the Best number, never on top of it */
+.sc{padding-right:calc(var(--u)*6.5)}
+.new-best{right:0 !important;top:50% !important;transform:translateY(-50%) rotate(8deg)}
+.sc b{margin-left:auto}

@@ -30,6 +30,10 @@
     width: 960,            // px, logical canvas width
     height: 540,           // px
     groundY: 470,          // px, top surface of ground
+    // visible part of the world on this screen (mobile: the canvas is wider / taller than 960×540, see
+    // World.setView). Turtles spawn just beyond viewR and despawn beyond viewL; the bird bounces at ceilingY.
+    viewL: 0, viewR: null, // px, world x at the screen's left / right edge (null → width)
+    ceilingY: 0,           // px, soft ceiling (negative = the bird may fly into the extra sky above the scene)
     step: 1 / 120,         // s, fixed simulation sub-step
 
     // --- bird
@@ -164,6 +168,7 @@
   function World(opts) {
     opts = opts || {};
     this.cfg = merge(CONFIG, opts.config);
+    if (this.cfg.viewR == null) this.cfg.viewR = this.cfg.width;
     this.seed = opts.seed !== undefined ? opts.seed : 1;
     this.width = this.cfg.width;
     this.height = this.cfg.height;
@@ -207,6 +212,17 @@
     // a friendly turtle is already on screen, another follows
     this._spawnTurtle(this.width * 0.62);
     this._turtleGap = this._nextGap();
+    return this;
+  };
+
+  /** setView(viewL, viewR, ceilingY) — the visible world range on this screen (rotation / resize safe). */
+  World.prototype.setView = function (viewL, viewR, ceilingY) {
+    var c = this.cfg;
+    if (isFinite(viewL)) c.viewL = viewL;
+    if (isFinite(viewR)) c.viewR = Math.max(c.viewL + 200, viewR);
+    if (isFinite(ceilingY)) c.ceilingY = Math.min(0, ceilingY);
+    var b = this.bird;
+    if (b && b.y - b.radius < c.ceilingY) b.y = c.ceilingY + b.radius;
     return this;
   };
 
@@ -291,7 +307,7 @@
     var minS = c.turtleSpeedMin + 5 * d;
     var t = {
       id: this._nextId++,
-      x: x !== undefined ? x : this.width + c.turtleSpawnX,
+      x: x !== undefined ? x : c.viewR + c.turtleSpawnX,
       y: this.groundY,
       dir: r.chance(c.turtleRightChance) ? 1 : -1,
       speed: r.range(minS, maxS),
@@ -365,21 +381,21 @@
     }
     // despawn
     for (i = this.turtles.length - 1; i >= 0; i--) {
-      if (this.turtles[i].x < c.turtleDespawnX || this.turtles[i].x > this.width + 400) this.turtles.splice(i, 1);
+      if (this.turtles[i].x < c.viewL + c.turtleDespawnX || this.turtles[i].x > c.viewR + 400) this.turtles.splice(i, 1);
     }
     // spawn by scrolled distance; plus a guarantee that the screen is never empty for long
     this._turtleGap -= this.scrollSpeed * h;
     var onScreen = 0, rightmost = -1e9;
     for (i = 0; i < this.turtles.length; i++) {
       t = this.turtles[i];
-      if (t.x > -t.w / 2 && t.x < this.width + t.w / 2) onScreen++;
+      if (t.x > c.viewL - t.w / 2 && t.x < c.viewR + t.w / 2) onScreen++;
       if (t.x > rightmost) rightmost = t.x;
     }
     this._emptyTime = onScreen === 0 ? this._emptyTime + h : 0;
-    var roomy = rightmost < this.width + c.turtleSpawnX - c.turtleMinGap;
+    var roomy = rightmost < c.viewR + c.turtleSpawnX - c.turtleMinGap;
     if (roomy && (this._turtleGap <= 0 || this._emptyTime > c.turtleMaxEmptyTime)) {
       // an empty screen gets a turtle that pops in right at the edge
-      this._spawnTurtle(this._emptyTime > c.turtleMaxEmptyTime ? this.width + 40 : undefined);
+      this._spawnTurtle(this._emptyTime > c.turtleMaxEmptyTime ? c.viewR + 40 : undefined);
       this._turtleGap = this._nextGap();
       this._emptyTime = 0;
     }
@@ -431,7 +447,7 @@
         d.alpha = Math.max(0, d.life);
         if (d.life <= 0) d.alive = false;
       }
-      if (d.x < -80) d.alive = false;
+      if (d.x < c.viewL - 80) d.alive = false;
     }
     for (i = this.drops.length - 1; i >= 0; i--) if (!this.drops[i].alive) this.drops.splice(i, 1);
   };
@@ -472,8 +488,8 @@
       b.vy = Math.min(b.vy + c.gravity * h, c.maxFall);
       b.y += b.vy * h;
       // ceiling: clamp + gentle bounce (no death)
-      if (b.y - b.radius < 0) {
-        b.y = b.radius;
+      if (b.y - b.radius < c.ceilingY) {
+        b.y = c.ceilingY + b.radius;
         if (b.vy < 0) {
           b.vy = c.ceilingBounce;
           this._emit({ type: 'ceiling', x: b.x, y: b.y });

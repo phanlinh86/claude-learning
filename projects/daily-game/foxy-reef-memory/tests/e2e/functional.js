@@ -87,13 +87,13 @@ async function hookSelect(page) {
 /* Screen (client) coords of a card centre, from its logical x,y and the canvas bounding rect. */
 async function cardXY(page, id, dx = 0, dy = 0) {
   return ev(page, ({ id, dx, dy }) => {
-    const c = RF.debug.world.card(id), r = document.getElementById('game').getBoundingClientRect();
+    const c = RF.debug.world.card(id), r = RF.Game.renderer.stageRect();   // the canvas is full-screen; the 960×540 stage sits inside it
     return { x: r.left + (c.x + dx) / 960 * r.width, y: r.top + (c.y + dy) / 540 * r.height };
   }, { id, dx, dy });
 }
 async function clickCard(page, id, dx, dy) { const p = await cardXY(page, id, dx, dy); await page.mouse.click(p.x, p.y); return p; }
 async function clickLogical(page, x, y) {
-  const p = await ev(page, ({ x, y }) => { const r = document.getElementById('game').getBoundingClientRect(); return { x: r.left + x / 960 * r.width, y: r.top + y / 540 * r.height }; }, { x, y });
+  const p = await ev(page, ({ x, y }) => { const r = RF.Game.renderer.stageRect(); return { x: r.left + x / 960 * r.width, y: r.top + y / 540 * r.height }; }, { x, y });
   await page.mouse.click(p.x, p.y);
 }
 /* face → [ids] of face-down live cards */
@@ -165,12 +165,13 @@ async function layoutReport(page) {
 
 /* Count pixels in a logical-rect of the canvas matching a colour predicate (as source string). Also returns the centroid. */
 const probe = (page, x, y, w, h, pred) => ev(page, ({ x, y, w, h, pred }) => {
-  const c = document.getElementById('game'), g = c.getContext('2d'), k = c.width / 960;
+  const c = document.getElementById('game'), g = c.getContext('2d'), R = RF.Game.renderer, k = R.px;
+  x += R.OX; y += R.OY;   // stage → full-screen canvas
   const X = Math.max(0, Math.round(x * k)), Y = Math.max(0, Math.round(y * k)), W = Math.round(w * k), H = Math.round(h * k);
   const d = g.getImageData(X, Y, W, H).data, f = new Function('r', 'g', 'b', 'return ' + pred);
   let n = 0, sx = 0, sy = 0;
   for (let i = 0, p = 0; i < d.length; i += 4, p++) if (f(d[i], d[i + 1], d[i + 2])) { n++; sx += p % W; sy += Math.floor(p / W); }
-  return { n, cx: n ? x + sx / n / k : null, cy: n ? y + sy / n / k : null };
+  return { n, cx: n ? x - R.OX + sx / n / k : null, cy: n ? y - R.OY + sy / n / k : null };
 }, { x, y, w, h, pred });
 
 /* Kill the current round (air → 0) and wait for the game-over panel (needs speed > 0). */
@@ -922,13 +923,15 @@ async function testLayout() {
     const page = await newPage({ viewport: { width: w, height: h }, dsf });
     await boot(page, 'seed=1');
     const tag = `${w}x${h}@${dsf}`;
-    const cv = await ev(page, () => { const c = document.getElementById('game'), r = c.getBoundingClientRect(); return { w: r.width, h: r.height, l: r.left, t: r.top, bw: c.width, bh: c.height }; });
-    const aspect = cv.w / cv.h;
-    const fits = cv.w <= w + 1 && cv.h <= h + 1 && (Math.abs(cv.w - w) < 2 || Math.abs(cv.h - h) < 2);
-    const centered = Math.abs(cv.l - (w - cv.w) / 2) < 2 && Math.abs(cv.t - (h - cv.h) / 2) < 2;
-    check(`layout ${tag}: canvas letterboxed 16:9, fills one axis, centred`, Math.abs(aspect - 16 / 9) < 0.01 && fits && centered, cv);
-    { const k = Math.min(1, 1920 / (cv.w * dsf));
-      check(`layout ${tag}: backing store = css × dpr, capped at 1920×1080`, Math.abs(cv.bw - cv.w * dsf * k) < 2 && Math.abs(cv.bh - cv.h * dsf * k) < 2 && cv.bw <= 1920 && cv.bh <= 1080, [cv.bw, cv.bh]); }
+    // mobile layer: the canvas fills the window; the 16:9 stage is fitted inside ("contain") and centred,
+    // the bands around it are drawn with scenery
+    const cv = await ev(page, () => { const c = document.getElementById('game'), r = c.getBoundingClientRect(), s = RF.Game.renderer.stageRect(); return { w: r.width, h: r.height, l: r.left, t: r.top, bw: c.width, bh: c.height, s }; });
+    const aspect = cv.s.width / cv.s.height;
+    const fits = cv.s.width <= w + 1 && cv.s.height <= h + 1 && (Math.abs(cv.s.width - w) < 2 || Math.abs(cv.s.height - h) < 2);
+    const centered = Math.abs(cv.s.left - (w - cv.s.width) / 2) < 2 && Math.abs(cv.s.top - (h - cv.s.height) / 2) < 2;
+    check(`layout ${tag}: canvas fills the window; stage 16:9, fills one axis, centred`, Math.abs(cv.w - w) < 2 && Math.abs(cv.h - h) < 2 && Math.abs(aspect - 16 / 9) < 0.01 && fits && centered, cv);
+    { const k = Math.min(1, Math.sqrt(1920 * 1080 / (cv.w * cv.h * dsf * dsf)), 2 / (cv.s.k * dsf));
+      check(`layout ${tag}: backing store = css × dpr, capped at 1920×1080 pixels`, Math.abs(cv.bw - cv.w * dsf * k) < 2 && Math.abs(cv.bh - cv.h * dsf * k) < 2 && cv.bw * cv.bh <= 1920 * 1080 + 4000, [cv.bw, cv.bh]); }
     const issues = [];
     for (const scr of ['scrTitle', 'scrSettings', 'scrCustom', 'scrHow', 'scrPause', 'scrOver']) {
       await ev(page, s => {
@@ -946,12 +949,12 @@ async function testLayout() {
     // in-game HUD inside the canvas, above the canvas-drawn air meter, and Winter board inside the canvas
     await ev(page, () => { RF.Game.startGame(); RF.debug.gotoLevel(3); RF.debug.setSpeed(0); const G = RF.Game; let i = 0; while (G.world.state !== 'playing' && i++ < 3000) G.step(1 / 60); G.renderer.banner = null; });
     await page.waitForTimeout(250);
-    const hud = await ev(page, () => { const c = document.getElementById('game').getBoundingClientRect(), b = document.getElementById('hud').getBoundingClientRect();
+    const hud = await ev(page, () => { const c = RF.Game.renderer.stageRect(), b = document.getElementById('hud').getBoundingClientRect(), L = RF.Game.renderer.hudLayout;
       const toL = (x, y) => [(x - c.left) / c.width * 960, (y - c.top) / c.height * 540];
       const [l, t] = toL(b.left, b.top), [r, bt] = toL(b.right, b.bottom);
       const tr = RF.debug.world.tray;
-      return { l: +l.toFixed(1), t: +t.toFixed(1), r: +r.toFixed(1), b: +bt.toFixed(1), trayTop: tr.y, trayBottom: tr.y + tr.h, trayRight: tr.x + tr.w }; });
-    check(`layout ${tag}: HUD buttons inside the canvas, above the air meter (y<78) and the board`, hud.l >= 0 && hud.t >= 0 && hud.r <= 960 && hud.b < 78 && hud.b < hud.trayTop, hud);
+      return { l: +l.toFixed(1), t: +t.toFixed(1), r: +r.toFixed(1), b: +bt.toFixed(1), sl: b.left, st: b.top, sr: b.right, vw: innerWidth, meterTop: L.my, meterL: L.mx, trayTop: tr.y, trayBottom: tr.y + tr.h, trayRight: tr.x + tr.w }; });
+    check(`layout ${tag}: HUD buttons on screen, clear of the air meter and above the board`, hud.sl >= 0 && hud.st >= 0 && hud.sr <= hud.vw + 0.5 && (hud.b < hud.meterTop - 2 || hud.l > hud.meterL + 232 + 2) && hud.b < hud.trayTop, hud);
     check(`layout ${tag}: Winter board fits in the canvas above the seabed edge`, hud.trayBottom <= 540 && hud.trayRight <= 960, hud);
     if (w === 800 || w === 2560 || w === 1366) await shot(page, `24_layout_${w}x${h}_winter`);
     check(`layout ${tag}: no errors`, page._errors.length === 0, page._errors.join(' | '));
@@ -963,8 +966,8 @@ async function testLayout() {
   await ev(page, () => RF.Game.setSetting('peek', 0));
   await page.click('#btnPlay'); await freeze(page); await toPlaying(page);
   for (const [w, h] of [[800, 600], [1920, 1080], [500, 900], [1100, 700]]) { await page.setViewportSize({ width: w, height: h }); await page.waitForTimeout(250); }
-  const cv = await ev(page, () => { const r = document.getElementById('game').getBoundingClientRect(); return [r.width, r.height]; });
-  check('live resize keeps a 16:9 canvas', Math.abs(cv[0] / cv[1] - 16 / 9) < 0.01, cv);
+  const cv = await ev(page, () => { const r = RF.Game.renderer.stageRect(), c = document.getElementById('game').getBoundingClientRect(); return [r.width, r.height, c.width, c.height, innerWidth, innerHeight]; });
+  check('live resize keeps a 16:9 stage in a full-window canvas', Math.abs(cv[0] / cv[1] - 16 / 9) < 0.01 && Math.abs(cv[2] - cv[4]) < 2 && Math.abs(cv[3] - cv[5]) < 2, cv);
   const id = await ev(page, () => RF.debug.world.cards[5].id);
   await clickCard(page, id, 30, 35);   // near the corner of the card
   check('after resize, a click near a card corner still flips that card', (await cardInfo(page, id)).state === 'up');

@@ -2,11 +2,16 @@
 
 Games made with `/build-game` (one folder each, no dates in folder names). `/build-game random` rolls a new game of the day and adds a row here.
 
+Every game plays in Safari on iPhone and iPad (portrait or landscape) and in any desktop browser. Tip: in Safari tap
+**Share → Add to Home Screen** for a full-screen app icon. Since 2026-11-14 every game also has a **Volume** slider in
+Settings (louder sound on phones; on iOS 16.4+ it uses the media volume, so it plays even with the side switch on silent) and a **Score Card** button on the
+game-over screen that makes a picture of your score to share. The shared layer lives in `shared/daily-mobile/`.
+
 | Date | Name | Genre | Theme | Folder | Link |
 |---|---|---|---|---|---|
-| 2026-10-28 | Family Flappy | one-button flyer, no pipes (requested by you) | four seasons | `projects/daily-game/flappy/` | [play in browser](https://phanlinh86.github.io/claude-learning/projects/daily-game/flappy/game/) · exe: built by `tools/build.sh` |
-| 2026-10-29 | Foxy's Reef Memory | memory-match cards with a timer | coral reef | `projects/daily-game/foxy-reef-memory/` | [play in browser](https://phanlinh86.github.io/claude-learning/projects/daily-game/foxy-reef-memory/game/) · exe: built by `tools/build.sh` |
-| 2026-10-29 (2nd roll) | Pip's Candy Dash | top-down collector with gentle chasers | candy land | `projects/daily-game/penguin-candy-dash/` | [play in browser](https://phanlinh86.github.io/claude-learning/projects/daily-game/penguin-candy-dash/game/) · exe: built by `tools/build.sh` |
+| 2026-10-28 | Family Flappy | one-button flyer, no pipes (requested by you) | four seasons | `projects/daily-game/flappy/` | [play on iPhone / iPad / browser](https://phanlinh86.github.io/claude-learning/projects/daily-game/flappy/game/) · exe: built by `tools/build.sh` |
+| 2026-10-29 | Foxy's Reef Memory | memory-match cards with a timer | coral reef | `projects/daily-game/foxy-reef-memory/` | [play on iPhone / iPad / browser](https://phanlinh86.github.io/claude-learning/projects/daily-game/foxy-reef-memory/game/) · exe: built by `tools/build.sh` |
+| 2026-10-29 (2nd roll) | Pip's Candy Dash | top-down collector with gentle chasers | candy land | `projects/daily-game/penguin-candy-dash/` | [play on iPhone / iPad / browser](https://phanlinh86.github.io/claude-learning/projects/daily-game/penguin-candy-dash/game/) · exe: built by `tools/build.sh` |
 | 2026-10-30 | Puff's Volcano Catch | catcher with a basket | volcano island | `projects/daily-game/puff-volcano-catch/` | [play on iPhone / iPad / browser](https://phanlinh86.github.io/claude-learning/projects/daily-game/puff-volcano-catch/game/) · exe: built by `tools/build.sh` |
 | 2026-10-31 | Spike's Dino Jam | snake-style trail grower | dinosaur valley | `projects/daily-game/spike-dino-jam/` | [play on iPhone / iPad / browser](https://phanlinh86.github.io/claude-learning/projects/daily-game/spike-dino-jam/game/) · exe: built by `tools/build.sh` |
 | 2026-11-01 | Kit's Toybox Beat | rhythm tap on the beat | toy room | `projects/daily-game/kit-toybox-beat/` | [play on iPhone / iPad / browser](https://phanlinh86.github.io/claude-learning/projects/daily-game/kit-toybox-beat/game/) · exe: built by `tools/build.sh` |

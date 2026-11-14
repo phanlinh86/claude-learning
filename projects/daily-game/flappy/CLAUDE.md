@@ -12,6 +12,12 @@ v1 built. Stack decided:
 - Windows app: Go + WebView2 (`github.com/jchv/go-webview2`, cgo-free) in `app/`, cross-compiled to `dist/FamilyFlappy.exe`.
 - Art: original hand-written SVG (generators in `tools/art-*`). Sound: synthesized with WebAudio (no audio files).
 - Tests: `tests/unit` (node, simulation) and `tests/e2e` (Playwright/Chromium).
+- Mobile (iPhone / iPad Safari, portrait + landscape) done: full-screen canvas at any aspect filled with the season's
+  scenery (no black bars), safe areas, tap-to-flap, touch buttons on pointerup + ghost-click guard, kid-proofing,
+  pause + audio suspend when hidden, manifest + home-screen icons (`tools/render_mobile_icons.js`). No rotate prompt:
+  portrait is playable (tall sky, bird may fly up to 300 px higher). Tests: `tests/e2e/mobile.js`,
+  `shared/daily-mobile/test_extras.js`.
+- A round starts in mode `'playing'` with `world.state === 'ready'` (Get Ready hover); there is no separate `'ready'` mode.
 
 ## Rules for this project
 - Keep all code for this project inside `projects/daily-game/flappy/`.

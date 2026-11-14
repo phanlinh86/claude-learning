@@ -1,5 +1,9 @@
 /* FF.Renderer — draws the world, parallax seasons, weather, juicy effects and the HUD on a canvas.
- * Logical space is 960×540; the canvas is letter-boxed to the window and rendered at device resolution. */
+ * The world ("scene") is 960×540 logical px. The canvas fills the whole screen at any aspect (phone / tablet,
+ * portrait / landscape, desktop window): its logical size is VW×VH (see computeView), the scene is drawn at
+ * offset (SX, SY), bottom-anchored, and the extra room is the season's own scenery (sky continued upwards and
+ * sideways, parallax hills and ground tiled across) — never black bars. The HUD is laid out in screen space
+ * inside the safe area (notch, home bar). */
 (function (FF) {
   'use strict';
   const W = 960, H = 540, GROUND_DRAW_Y = 460;
@@ -27,32 +31,72 @@
       this.vis = { cur: 0, prev: 0, t: 1 };
       this.banner = null;
       this.lines = [];
-      for (let i = 0; i < 7; i++) this.lines.push({ x: Math.random() * W, y: 40 + Math.random() * 260, len: 40 + Math.random() * 70, a: 0.1 + Math.random() * 0.15 });
+      for (let i = 0; i < 9; i++) this.lines.push({ x: Math.random() * W, y: 40 + Math.random() * 260, len: 40 + Math.random() * 70, a: 0.1 + Math.random() * 0.15 });
       this.debug = /[?&]debug=1/.test(location.search);
       const mp = /[?&]maxpx=([\d.]+)/.exec(location.search); this.maxPx = mp ? +mp[1] : 2;
       this.pointsPerSeason = 10;
+      this.VW = W; this.VH = H; this.SX = 0; this.SY = 0; this.ins = { top: 0, right: 0, bottom: 0, left: 0 };
+      this._ext = new Map();
+      this.touch = false;
       this.resize();
     }
 
-    resize() {
-      const vw = window.innerWidth, vh = window.innerHeight;
-      const s = Math.min(vw / W, vh / H);
-      const dpr = window.devicePixelRatio || 1;
-      this.cssScale = s;
-      this.canvas.style.width = Math.round(W * s) + 'px';
-      this.canvas.style.height = Math.round(H * s) + 'px';
-      // P3: cap the backing store (default 2 → at most 1920×1080 device px); the browser upscales the rest.
-      // Fill cost grows with pixels: 4K full screen is 4× the pixels of 1080p for ~no visible gain in a cartoon game.
-      this.px = Math.min(s * dpr, this.maxPx || 2); // device pixels per logical pixel
-      this.canvas.width = Math.round(W * this.px);
-      this.canvas.height = Math.round(H * this.px);
-      // keep the HUD buttons and toasts inside the game area even when the window is not 16:9
-      const ox = (vw - W * s) / 2, oy = (vh - H * s) / 2;
+    /* Logical canvas size for a screen of vw×vh CSS px (insets = safe-area insets in CSS px):
+     *  wider than 16:9 (phones in landscape) → height 540, wider world (more turtles in view), scene centred;
+     *  16:9 … square (iPad landscape, desktop) → width 960, taller sky above the scene;
+     *  portrait → width 600 (phones) / 760 (tablets) around the bird (bird at 30 % from the left), tall sky;
+     *  the scene is always bottom-anchored (ground at the bottom of the screen). */
+    static computeView(vw, vh, insetsCss) {
+      vw = Math.max(1, vw); vh = Math.max(1, vh);
+      const ar = vw / vh;
+      let VW, SX;
+      if (ar >= 16 / 9) { VW = H * ar; SX = (VW - W) / 2; }
+      else if (ar >= 1) { VW = W; SX = 0; }
+      else { VW = ar >= 0.6 ? 760 : 600; SX = 0.3 * VW - 260; }
+      const s = vw / VW, VH = Math.max(H, vh / s), SY = VH - H;
+      const sa = insetsCss || { top: 0, right: 0, bottom: 0, left: 0 };
+      const ins = { top: (sa.top || 0) / s, right: (sa.right || 0) / s, bottom: (sa.bottom || 0) / s, left: (sa.left || 0) / s };
+      // what the world needs to know: visible x range and how high the bird may fly (a soft ceiling a little
+      // below the top of the screen / the HUD, at most 300 px above the classic ceiling, so treats still fall a fair distance)
+      const ceilingY = SY > 0 ? Math.max(-SY + ins.top + 30, -300) : 0;
+      return { VW, VH, s, SX, SY, ins, viewL: -SX, viewR: VW - SX, ceilingY: Math.min(0, ceilingY) };
+    }
+
+    resize(insetsCss) {
+      if (insetsCss) this._insCss = insetsCss;
+      const stage = this.canvas.parentElement;
+      const vw = (stage && stage.clientWidth) || window.innerWidth, vh = (stage && stage.clientHeight) || window.innerHeight;
+      const v = Renderer.computeView(vw, vh, this._insCss);
+      const s = v.s, dpr = window.devicePixelRatio || 1;
+      Object.assign(this, { VW: v.VW, VH: v.VH, SX: v.SX, SY: v.SY, ins: v.ins, cssScale: s });
+      this.view = v;
+      this.canvas.style.width = vw + 'px';
+      this.canvas.style.height = vh + 'px';
+      // P3: cap the backing store (default 2 device px per logical px, and by area: ≈2.1 MP desktop, 2.8 MP
+      // phone / tablet); the browser upscales the rest. Fill cost grows with pixels for ~no visible gain here.
+      let px = Math.min(s * dpr, this.maxPx || 2);
+      const cap = this.touch ? 2.8e6 : 1920 * 1080 * 1.02;
+      if (v.VW * v.VH * px * px > cap) px = Math.sqrt(cap / (v.VW * v.VH));
+      this.px = Math.max(0.5, px); // device pixels per logical pixel
+      this.canvas.width = Math.round(v.VW * this.px);
+      this.canvas.height = Math.round(v.VH * this.px);
+      this._sxd = Math.round(this.SX * this.px); this._syd = Math.round(this.SY * this.px);
+      this._ext.clear();
+      // DOM pieces (CSS px) inside the safe area
+      const sa = this._insCss || { top: 0, right: 0, bottom: 0, left: 0 };
+      const m = Math.max(8, 14 * s);
       const hud = document.getElementById('hud'), toast = document.getElementById('toast');
-      if (hud) { hud.style.top = (oy + 14 * s) + 'px'; hud.style.right = (ox + 14 * s) + 'px'; }
-      if (toast) toast.style.bottom = (oy + 30 * s) + 'px';
+      if (hud) { hud.style.top = (sa.top + m) + 'px'; hud.style.right = (sa.right + m) + 'px'; }
+      if (toast) toast.style.bottom = (sa.bottom + Math.max(16, 30 * s)) + 'px';
+      this._hudBtn = null; this._measureHud();
       FF.Assets.setScale(this.px);
       if (this.vis) FF.Assets.warmSeason(this.vis.cur);
+    }
+    /* Where the DOM pause / sound buttons start (left edge, logical screen px), so the canvas HUD keeps clear. */
+    _measureHud() {
+      const hud = document.getElementById('hud'); if (!hud || hud.classList.contains('hidden')) return;
+      const r = hud.getBoundingClientRect();
+      if (r.width > 0) this._hudBtn = { l: r.left / this.cssScale, b: r.bottom / this.cssScale };
     }
 
     attach(world, weather) { this.world = world; this.weather = weather; this.fx.length = 0; this.texts.length = 0; this.banner = null; this.shake = 0; this.flash = 0; }
@@ -124,9 +168,11 @@
       if (this.fx.length > 400) this.fx.splice(0, this.fx.length - 400);
       for (const t of this.texts) { t.life += dt; t.y -= 38 * dt; }
       this.texts = this.texts.filter(t => t.life < t.max);
+      // speed lines: x in screen px, y in scene px (spread into the extra sky on tall screens)
+      const top = this.world && this.world.cfg ? Math.max(this.world.cfg.ceilingY || 0, -300) : 0;
       for (const l of this.lines) {
         l.x -= (sc * 2.4 + 60) * dt;
-        if (l.x + l.len < 0) { l.x = W + Math.random() * 200; l.y = 40 + Math.random() * 260; l.len = 40 + Math.random() * 70; }
+        if (l.x + l.len < 0) { l.x = this.VW + Math.random() * 200; l.y = top + 40 + Math.random() * (260 - top); l.len = 40 + Math.random() * 70; }
       }
     }
 
@@ -138,31 +184,78 @@
       // filtered/resampling path, which costs 10x more in software and extra texture taps on a GPU.
       const g = this.ctx, sw = spr.width, cw = g.canvas.width;
       let x = -Math.round((((off % w) + w) % w) * sw / w);
+      if (x + this._ox > 0) x -= sw * Math.ceil((x + this._ox) / sw);   // start at the screen's left edge
       g.setTransform(1, 0, 0, 1, this._ox, this._oy);
       if (alpha < 1) g.globalAlpha = alpha;
-      for (const yd = Math.round(y * this.px); x < cw; x += sw) g.drawImage(spr, x, yd);
+      for (const yd = Math.round(y * this.px); x + this._ox < cw; x += sw) g.drawImage(spr, x, yd);
       g.globalAlpha = 1;
       g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
       return true;
     }
     customBg(slot, alpha) {
       const c = FF.Assets.custom[slot]; if (!c) return false;
-      const g = this.ctx;
-      // cover-fit, then a slow one-way pan over mirrored copies (never reverses, no seam)
-      const k = Math.max(W / c.width, H / c.height);
-      const dw = c.width * k, dh = c.height * k, y = (H - dh) / 2 - 20;
+      const g = this.ctx, VW = this.VW, VH = this.VH;
+      // cover-fit the whole screen, then a slow one-way pan over mirrored copies (never reverses, no seam)
+      const k = Math.max(VW / c.width, VH / c.height);
+      const dw = c.width * k, dh = c.height * k, y = (VH - dh) / 2 - Math.min(20, (dh - VH) / 2);
       const scroll = this.world ? this.world.scroll : 0;
       const off = (scroll * 0.05) % (2 * dw);
       const spr = FF.Assets.sprite('custom:' + slot, dw, dh);
+      g.setTransform(this.px, 0, 0, this.px, this._ox - this._sxd, this._oy - this._syd);   // screen space
       g.globalAlpha = alpha;
       for (let i = 0; i < 3; i++) {
         const x = -off + i * dw;
-        if (x > W || x + dw < 0) continue;
+        if (x > VW || x + dw < 0) continue;
         if (i % 2 === 1) { g.save(); g.translate(x + dw, y); g.scale(-1, 1); g.drawImage(spr, 0, 0, dw + 1 / this.px, dh); g.restore(); }
         else g.drawImage(spr, x, y, dw + 1 / this.px, dh);
       }
       g.globalAlpha = 1;
+      g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
       return true;
+    }
+    /* The season's sky continued over the whole screen, built once per season / size into one device-pixel
+     * canvas so the per-frame draw stays a 1:1 blit. Landscape wider than 16:9: the 960×540 sky in the middle,
+     * its edge columns (averaged) stretched sideways. Portrait: the sky is right-aligned so the sun stays in view.
+     * Taller screens: the sky's top colour continues upwards, deepening slightly towards the zenith. */
+    skyExt(s) {
+      const key = s + '|' + Math.round(this.VW) + 'x' + Math.round(this.VH) + '|' + this.px.toFixed(3);
+      let c = this._ext.get(key);
+      if (c) return c;
+      const n = FF.Assets.SEASONS[s], spr = FF.Assets.sprite(n + '_sky', W, H);
+      if (!spr) return null;
+      c = document.createElement('canvas'); c.width = this.canvas.width; c.height = this.canvas.height;
+      const g = c.getContext('2d'), sw = spr.width, sh = spr.height, dy = c.height - sh;
+      g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+      const dx = this.SX >= 0 ? this._sxd : c.width - sw;
+      g.drawImage(spr, dx, dy);
+      const avg = (sx, sy, w, h) => { const t = document.createElement('canvas'); t.width = 1; t.height = Math.max(1, Math.round(h)); const tg = t.getContext('2d'); tg.imageSmoothingEnabled = true; tg.imageSmoothingQuality = 'high'; tg.drawImage(spr, sx, sy, w, h, 0, 0, 1, t.height); return t; };
+      if (dx > 0) {
+        const e = Math.round(96 * this.px);
+        g.drawImage(avg(0, 0, e, sh), 0, 0, 1, sh, 0, dy, dx + 1, sh);
+        g.drawImage(avg(sw - e, 0, e, sh), 0, 0, 1, sh, dx + sw - 1, dy, c.width - dx - sw + 1, sh);
+      }
+      if (dy > 0) {
+        // the sky's top rows (averaged vertically, kept per column so the sun's halo lines up) stretched upwards;
+        // then a gentle deepening towards the zenith
+        const t = document.createElement('canvas'); t.width = c.width; t.height = 1;
+        const tg = t.getContext('2d'); tg.imageSmoothingEnabled = true; tg.imageSmoothingQuality = 'high';
+        tg.drawImage(c, 0, dy + 1, c.width, Math.max(2, Math.round(4 * this.px)), 0, 0, c.width, 1);
+        g.drawImage(t, 0, 0, c.width, 1, 0, 0, c.width, dy + 1);
+        // feather the join: the band fades into the sky's top 70 px (no visible seam)
+        const fh = Math.round(70 * this.px), f = document.createElement('canvas'); f.width = c.width; f.height = fh;
+        const fg = f.getContext('2d'); fg.drawImage(t, 0, 0, c.width, 1, 0, 0, c.width, fh);
+        fg.globalCompositeOperation = 'destination-in';
+        const fgr = fg.createLinearGradient(0, 0, 0, fh); fgr.addColorStop(0, 'rgba(0,0,0,1)'); fgr.addColorStop(1, 'rgba(0,0,0,0)');
+        fg.fillStyle = fgr; fg.fillRect(0, 0, c.width, fh);
+        g.drawImage(f, 0, dy);
+        const k = Math.min(1, dy / (600 * this.px));
+        const grd = g.createLinearGradient(0, 0, 0, dy + 1);
+        grd.addColorStop(0, 'rgba(30,70,150,' + (0.22 * k).toFixed(3) + ')'); grd.addColorStop(1, 'rgba(30,70,150,0)');
+        g.fillStyle = grd; g.fillRect(0, 0, c.width, dy + 1);
+      }
+      if (this._ext.size > 4) this._ext.delete(this._ext.keys().next().value);
+      this._ext.set(key, c);
+      return c;
     }
     backdrop(s, alpha) {
       const name = FF.Assets.SEASONS[s];
@@ -173,11 +266,15 @@
         return;
       }
       const g = this.ctx;
-      const sky = FF.Assets.sprite(name + '_sky', W, H);
+      const sky = this.skyExt(s);
       g.globalAlpha = alpha;
-      if (sky) { g.setTransform(1, 0, 0, 1, this._ox, this._oy); g.drawImage(sky, 0, 0); g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy); }
-      else { g.fillStyle = '#9fd8f5'; g.fillRect(0, 0, W, H); }
+      if (sky) { g.setTransform(1, 0, 0, 1, this._ox - this._sxd, this._oy - this._syd); g.drawImage(sky, 0, 0); g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy); }
+      else { g.fillStyle = '#9fd8f5'; g.fillRect(-this.SX, -this.SY, this.VW, this.VH); }
       g.globalAlpha = 1;
+      // extra sky above the scene (tablets, portrait): fainter, slower cloud bands higher up
+      for (let k = 1; k < 6 && -k * 300 + 260 > -this.SY; k++) {
+        this.tile(name + '_clouds', scroll * PARALLAX.clouds * 0.6 + this.time * (7 - k) + 331 * k, -k * 300, W, H, alpha * Math.max(0.45, 0.85 - 0.1 * k));
+      }
       this.tile(name + '_clouds', scroll * PARALLAX.clouds + this.time * 7, 0, W, H, alpha);
       this.tile(name + '_far', scroll * PARALLAX.far, 0, W, H, alpha);
       this.tile(name + '_mid', scroll * PARALLAX.mid, 0, W, H, alpha);
@@ -186,7 +283,7 @@
       const name = FF.Assets.SEASONS[s];
       const scroll = this.world ? this.world.scroll : 0;
       if (!this.tile(name + '_ground', scroll * PARALLAX.ground, GROUND_DRAW_Y, W, 80, alpha)) {
-        this.ctx.fillStyle = '#7cc94f'; this.ctx.fillRect(0, GROUND_DRAW_Y, W, 80);
+        this.ctx.fillStyle = '#7cc94f'; this.ctx.fillRect(-this.SX, GROUND_DRAW_Y, this.VW, 80);
       }
     }
     text(str, x, y, size, fill, stroke, align = 'center', lw) {
@@ -218,10 +315,11 @@
     // ---------------- main draw ----------------
     draw(mode) {
       const g = this.ctx, w = this.world;
-      this._ox = this._oy = 0;
+      // scene → device: the scene's origin sits at (_sxd, _syd) device px; screen shake adds a few px
+      this._ox = this._sxd; this._oy = this._syd;
       if (this.shake > 0) {
         const m = this.shake * 14 * this.px;
-        this._ox = Math.round((Math.random() - .5) * m); this._oy = Math.round((Math.random() - .5) * m);
+        this._ox += Math.round((Math.random() - .5) * m); this._oy += Math.round((Math.random() - .5) * m);
       }
       g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
       g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
@@ -239,7 +337,7 @@
       // 3. speed lines sell the forward motion
       if (w && w.state === 'playing') {
         g.strokeStyle = '#ffffff'; g.lineCap = 'round'; g.lineWidth = 2;
-        for (const l of this.lines) { g.globalAlpha = l.a; g.beginPath(); g.moveTo(l.x, l.y); g.lineTo(l.x + l.len, l.y); g.stroke(); }
+        for (const l of this.lines) { const x = l.x - this.SX; g.globalAlpha = l.a; g.beginPath(); g.moveTo(x, l.y); g.lineTo(x + l.len, l.y); g.stroke(); }
         g.globalAlpha = 1;
       }
 
@@ -247,7 +345,7 @@
       if (v.t < 1 && v.prev !== v.cur) { this.ground(v.prev, 1); this.ground(v.cur, v.t); }
       else this.ground(v.cur, 1);
 
-      if (mode === 'ready' && w) this.readyOverlay();   // under the bird so it never hides it
+      if (mode === 'playing' && w && w.state === 'ready') this.readyOverlay();   // under the bird so it never hides it
       if (w) {
         this.drawTurtles();
         this.drawDrops();
@@ -258,19 +356,20 @@
       if (this.weather) this.particles('front');
       this.drawFx();
 
-      g.setTransform(this.px, 0, 0, this.px, 0, 0);
+      g.setTransform(this.px, 0, 0, this.px, this._sxd, this._syd);   // scene space, no shake
       if (this.weather && this.weather.ambient && this.weather.ambient.fog > 0) {
         const fog = this.weather.ambient.fog;
         const grd = g.createLinearGradient(0, 260, 0, 540);
         grd.addColorStop(0, 'rgba(255,255,255,0)'); grd.addColorStop(1, `rgba(240,246,255,${(0.35 * fog).toFixed(3)})`);
-        g.fillStyle = grd; g.fillRect(0, 260, W, 280);
+        g.fillStyle = grd; g.fillRect(-this.SX, 260, this.VW, 280);
       }
-      if (this.flash > 0) { g.fillStyle = `rgba(255,255,255,${(this.flash * 0.6).toFixed(3)})`; g.fillRect(0, 0, W, H); }
-
-      // 6. HUD
-      if (w && (mode === 'playing' || mode === 'paused' || mode === 'ready')) this.hud(mode);
       if (this.banner) this.drawBanner();
       if (this.debug && w) this.debugDraw();
+      g.setTransform(this.px, 0, 0, this.px, 0, 0);                    // screen space
+      if (this.flash > 0) { g.fillStyle = `rgba(255,255,255,${(this.flash * 0.6).toFixed(3)})`; g.fillRect(0, 0, this.VW, this.VH); }
+
+      // 6. HUD (screen space, inside the safe area)
+      if (w && (mode === 'playing' || mode === 'paused')) this.hud(mode);
       if (lerped) this.uninterp();
     }
 
@@ -310,20 +409,20 @@
     ambient(a) {
       if (!a) return;
       const g = this.ctx;
-      if (a.tint) { g.fillStyle = a.tint; g.fillRect(0, 0, W, H); }
+      if (a.tint) { g.fillStyle = a.tint; g.fillRect(-this.SX - 20, -this.SY - 20, this.VW + 40, this.VH + 40); }
       if (a.sunRays > 0) {
         g.save();
         g.globalCompositeOperation = 'lighter';
-        const cx = 820, cy = -40;
+        const cx = this.VW - this.SX - 140, cy = -this.SY - 40, rl = 1 + this.SY / 540;
         for (let i = 0; i < 6; i++) {
           const ang = 1.75 + i * 0.16 + Math.sin(this.time * 0.25 + i * 1.7) * 0.03;
           const alpha = a.sunRays * (0.05 + 0.03 * Math.sin(this.time * 0.6 + i * 2.1));
-          const grd = g.createLinearGradient(cx, cy, cx + Math.cos(ang) * 600, cy + Math.sin(ang) * 600);
+          const grd = g.createLinearGradient(cx, cy, cx + Math.cos(ang) * 600 * rl, cy + Math.sin(ang) * 600 * rl);
           grd.addColorStop(0, `rgba(255,240,180,${alpha.toFixed(3)})`); grd.addColorStop(1, 'rgba(255,240,180,0)');
           g.fillStyle = grd;
           g.beginPath(); g.moveTo(cx, cy);
-          g.lineTo(cx + Math.cos(ang - 0.05) * 700, cy + Math.sin(ang - 0.05) * 700);
-          g.lineTo(cx + Math.cos(ang + 0.05) * 700, cy + Math.sin(ang + 0.05) * 700);
+          g.lineTo(cx + Math.cos(ang - 0.05) * 700 * rl, cy + Math.sin(ang - 0.05) * 700 * rl);
+          g.lineTo(cx + Math.cos(ang + 0.05) * 700 * rl, cy + Math.sin(ang + 0.05) * 700 * rl);
           g.closePath(); g.fill();
         }
         g.restore();
@@ -343,11 +442,11 @@
         const spr = A.sprite('p_' + p.sprite, 32, 32);
         if (!spr) continue;
         const fx = p.flipX == null ? 1 : (Math.abs(p.flipX) < 0.22 ? 0.22 * Math.sign(p.flipX || 1) : p.flipX);
-        g.setTransform(this.px, 0, 0, this.px, 0, 0);
+        g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
         g.translate(p.x, p.y); g.rotate(p.rot || 0); g.scale(fx, 1);
         g.drawImage(spr, -p.size / 2, -p.size / 2, p.size, p.size);
-        g.setTransform(this.px, 0, 0, this.px, 0, 0);
       }
+      g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
       g.globalAlpha = 1;
     }
 
@@ -355,7 +454,7 @@
       const g = this.ctx, w = this.world, A = FF.Assets;
       const custom = A.hasCustom('turtle');
       for (const t of w.turtles) {
-        if (t.x < -200 || t.x > W + 200) continue;
+        if (t.x < -this.SX - 200 || t.x > this.VW - this.SX + 200) continue;
         const tw = t.w || 132, th = t.h || 79;
         this.shadow(t.x, 0, tw * 0.85, 0.32);
         g.save();
@@ -504,19 +603,26 @@
       }
     }
 
+    /* HUD in screen space (this.VW × this.VH), inside the safe-area insets; a little bigger on phones. */
     hud(mode) {
-      const g = this.ctx, w = this.world;
+      const g = this.ctx, w = this.world, I = this.ins;
+      const L = I.left, T = I.top, R = this.VW - I.right, cx = (L + R) / 2;
+      const k = this.cssScale < 0.8 ? 1.25 : 1;
+      if (!this._hudBtn) this._measureHud();
       // big score
       const bounce = this._lastScore !== w.score ? 1 : 0;
       if (bounce) { this._scorePop = 1; this._lastScore = w.score; }
       this._scorePop = Math.max(0, (this._scorePop || 0) - 0.06);
       const s = 1 + 0.25 * this._scorePop;
-      g.save(); g.translate(W / 2, 62); g.scale(s, s);
+      // narrow screens (portrait): the score goes under the season pill / buttons row instead of between them
+      const sy = T + (R - L < 700 ? 62 + 64 * k : 62);
+      g.save(); g.translate(cx, sy); g.scale(s, s);
       this.text(String(w.score), 0, 0, 64, '#ffffff', '#5a3416', 'center', 10);
       g.restore();
-      if (w.combo >= 2) this.text('Combo x' + w.combo, W / 2, 112, 22, '#ffe14d', '#5a3416');
+      if (w.combo >= 2) this.text('Combo x' + w.combo, cx, sy + 50, 22, '#ffe14d', '#5a3416');
 
       // season pill (top-left)
+      g.save(); g.translate(L, T); g.scale(k, k);
       const si = SEASON_INFO[w.season] || SEASON_INFO[0];
       const pps = this.pointsPerSeason;
       const prog = (w.score % pps) / pps;
@@ -529,21 +635,37 @@
       this.text(si.name + (lap > 0 ? ' · Lap ' + (lap + 1) : ''), 62, 32, 17, si.dark, null, 'left');
       g.fillStyle = 'rgba(0,0,0,0.1)'; this.roundRect(62, 45, 136, 8, 4); g.fill();
       g.fillStyle = si.color; this.roundRect(62, 45, Math.max(8, 136 * prog), 8, 4); g.fill();
+      g.restore();
     }
 
     readyOverlay() {
       const g = this.ctx, w = this.world;
-      const t = this.time;
-      this.text('Get Ready!', W / 2, 140, 58, '#ffd23f', '#5a3416', 'center', 10);
+      const t = this.time, cx = this.VW / 2 - this.SX;   // centre of the visible screen, scene px
+      const narrow = this.VW < 700, tall = this.SY > 150;
+      // tall screens: title + prompt in the sky above the bird, the tip between the bird and the turtles
+      const yT = tall ? 40 : 140, yP = tall ? 120 : 320, yTip = tall ? 316 : 362;
+      this.text('Get Ready!', cx, yT, 58, '#ffd23f', '#5a3416', 'center', 10);
       // tap prompt
       const pulse = 1 + 0.06 * Math.sin(t * 6);
-      g.save(); g.translate(W / 2, 320); g.scale(pulse, pulse);
-      g.fillStyle = 'rgba(255,255,255,0.92)'; this.roundRect(-210, -24, 420, 48, 24); g.fill();
-      this.text('Click, tap or press SPACE to flap', 0, 1, 20, '#3a5a7a', null);
+      g.save(); g.translate(cx, yP); g.scale(pulse, pulse);
+      if (this.touch) {
+        g.fillStyle = 'rgba(255,255,255,0.92)'; this.roundRect(-170, -27, 340, 54, 27); g.fill();
+        this.text('Tap anywhere to flap!', 0, 1, 26, '#3a5a7a', null);
+      } else {
+        g.fillStyle = 'rgba(255,255,255,0.92)'; this.roundRect(-210, -24, 420, 48, 24); g.fill();
+        this.text('Click, tap or press SPACE to flap', 0, 1, 20, '#3a5a7a', null);
+      }
       g.restore();
-      // tip
-      g.fillStyle = 'rgba(40,60,90,0.55)'; this.roundRect(W / 2 - 260, 362, 520, 36, 18); g.fill();
-      this.text('Every flap drops a treat — land it on a turtle\'s shell!', W / 2, 380, 16, '#ffffff', null);
+      // tip (two lines on narrow portrait screens)
+      g.fillStyle = 'rgba(40,60,90,0.55)';
+      if (narrow) {
+        this.roundRect(cx - 240, yTip, 480, 58, 20); g.fill();
+        this.text('Every flap drops a treat —', cx, yTip + 17, 19, '#ffffff', null);
+        this.text('land it on a turtle\'s shell!', cx, yTip + 41, 19, '#ffffff', null);
+      } else {
+        this.roundRect(cx - 260, yTip, 520, 36, 18); g.fill();
+        this.text('Every flap drops a treat — land it on a turtle\'s shell!', cx, yTip + 18, 16, '#ffffff', null);
+      }
       // tap ripple near bird
       const b = w.bird, rk = (t * 1.2) % 1;
       g.strokeStyle = `rgba(255,255,255,${(1 - rk).toFixed(3)})`; g.lineWidth = 3;
@@ -552,12 +674,12 @@
 
     drawBanner() {
       const g = this.ctx, b = this.banner, si = SEASON_INFO[b.s];
-      const t = b.t;
+      const t = b.t, VW = this.VW;
       let x;
-      if (t < 0.45) x = lerp(-W, 0, easeOutBack(t / 0.45));
+      if (t < 0.45) x = lerp(-VW, 0, easeOutBack(t / 0.45));
       else if (t < 1.6) x = 0;
-      else x = lerp(0, W, Math.pow((t - 1.6) / 0.5, 2));
-      g.save(); g.translate(x, 0);
+      else x = lerp(0, VW, Math.pow((t - 1.6) / 0.5, 2));
+      g.save(); g.translate(x + VW / 2 - this.SX - W / 2, 0);   // centred on the visible screen
       g.fillStyle = si.color; g.globalAlpha = 0.92;
       g.beginPath(); g.moveTo(W / 2 - 240, 120); g.lineTo(W / 2 + 240, 112); g.lineTo(W / 2 + 258, 184); g.lineTo(W / 2 - 222, 194); g.closePath(); g.fill();
       g.globalAlpha = 1;
@@ -572,7 +694,9 @@
       g.strokeStyle = 'red'; g.lineWidth = 1;
       for (const t of w.turtles) { const b = w.shellBox(t); g.strokeRect(b.x, b.y, b.w, b.h); }
       g.beginPath(); g.arc(w.bird.x, w.bird.y, w.bird.radius || 20, 0, TAU); g.stroke();
-      g.beginPath(); g.moveTo(0, w.groundY); g.lineTo(W, w.groundY); g.stroke();
+      g.beginPath(); g.moveTo(-this.SX, w.groundY); g.lineTo(this.VW - this.SX, w.groundY); g.stroke();
+      const cy = w.cfg.ceilingY || 0; g.strokeStyle = 'orange';
+      g.beginPath(); g.moveTo(-this.SX, cy); g.lineTo(this.VW - this.SX, cy); g.stroke();
     }
   }
   Renderer.SEASON_INFO = SEASON_INFO;

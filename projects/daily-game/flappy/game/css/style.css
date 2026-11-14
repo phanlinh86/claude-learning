@@ -172,3 +172,104 @@ kbd{display:inline-block;padding:0 .45em;border-radius:.35em;background:#fff;bor
 .medal::before{content:"★";position:absolute;inset:0;display:grid;place-items:center;font-size:calc(var(--u)*5);color:rgba(255,255,255,.8);z-index:1;font-family:"Segoe UI Symbol","Segoe UI",sans-serif}
 .medal.none::before{content:"?";color:#c9b48a}
 .medal-ribbon{position:relative}
+
+/* ---------- mobile (iPhone / iPad): full-screen canvas, safe areas, portrait + landscape ---------- */
+html,body{overscroll-behavior:none;touch-action:none;-webkit-touch-callout:none;-webkit-text-size-adjust:100%;background:#3fa8ea}
+#stage{display:block;height:100vh;height:100dvh}
+canvas#game{position:absolute;left:0;top:0;touch-action:none;-webkit-touch-callout:none}
+#safeProbe{position:absolute;visibility:hidden;pointer-events:none;inset:0;
+  padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+.screen{padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+.panel{max-width:calc(100vw - 16px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px));
+  max-height:calc(100vh - 16px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
+  max-height:calc(100dvh - 16px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
+  -webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
+button{touch-action:manipulation}
+img,svg,canvas{-webkit-user-drag:none}
+input,textarea{-webkit-user-select:text;user-select:text}
+.icon-btn{min-width:44px;min-height:44px}
+body.touch .kb-only{display:none}
+body:not(.touch) .touch-only{display:none}
+body.touch .btn:focus-visible,body.touch .btn:focus{outline:none}
+body.touch .btn:hover{filter:none;transform:none}
+/* the toast sits above the home bar */
+.toast{max-width:calc(100vw - 32px);text-align:center}
+
+/* portrait: the game is 600–760 logical px wide, so size the menus from the width instead of a 16:9 box */
+@media (orientation:portrait){
+  :root{--u:min(1.6vw, 1.05vh)}
+  .logo{font-size:calc(var(--u)*10)}
+  .title-icon{width:calc(var(--u)*14);height:calc(var(--u)*14)}
+  .tagline{font-size:calc(var(--u)*2.8)}
+  .best-line{font-size:calc(var(--u)*2.6)}
+  .menu .row{flex-wrap:wrap;justify-content:center}
+  .panel.wide,.panel.xwide{width:auto}
+  .how-grid{grid-template-columns:1fr !important}
+  .over-body{flex-direction:column;gap:calc(var(--u)*1.2)}
+  .slot-grid{grid-template-columns:repeat(6,minmax(0,1fr)) !important}
+  .slot{grid-column:span 2 !important;min-width:0}
+  .slot:nth-child(n+4){grid-column:span 3 !important}
+  .slot .btns,.slot .shape{flex-wrap:wrap;justify-content:center;max-width:100%}
+  .slot .btn{padding-left:10px;padding-right:10px;min-width:0}
+  .slot .shape button{padding:2px 6px}
+  .settings{min-width:0}
+}
+
+/* fingers: menu buttons at least 44 px tall and readable text on touch screens (Apple HIG) */
+@media (pointer:coarse){
+  .btn{min-height:44px;font-size:max(16px, calc(var(--u)*2.3))}
+  .btn-big{min-height:52px;font-size:max(20px, calc(var(--u)*3.1))}
+  .btn-small{font-size:max(15px, calc(var(--u)*1.8))}
+  .seg button,.slot .btn,.btn-tiny{min-height:40px}
+  .btn-tiny,.slot .btn{font-size:max(14px, calc(var(--u)*1.5))}
+  .seg button{font-size:max(15px, calc(var(--u)*1.6));min-width:48px}
+  .panel h2{font-size:max(24px, calc(var(--u)*4.2))}
+  .how p{font-size:max(14px, calc(var(--u)*1.55))}
+  .how-ico img{width:max(44px, calc(var(--u)*5.6))}
+  .how-ico.quad img{width:max(22px, calc(var(--u)*2.8))}
+  .slot h3{font-size:max(13px, calc(var(--u)*1.6))}
+  .slot .tag{font-size:11px}
+  .slot .shape button{font-size:12px;min-height:32px}
+  .set{font-size:max(16px, calc(var(--u)*2))}
+  .tog{width:max(48px, calc(var(--u)*6.4));height:max(26px, calc(var(--u)*3.4))}
+  .tog::after{width:max(20px, calc(var(--u)*2.7));height:max(20px, calc(var(--u)*2.7))}
+  .small,.stats{font-size:max(13px, calc(var(--u)*1.55))}
+  .sc span{font-size:max(15px, calc(var(--u)*2))}
+  .sc b{font-size:max(28px, calc(var(--u)*4.4))}
+  .medal-name{font-size:max(12px, calc(var(--u)*1.6))}
+  .tagline{font-size:max(15px, calc(var(--u)*2.2))}
+  .best-line{font-size:max(15px, calc(var(--u)*2))}
+  .toast{font-size:max(15px, calc(var(--u)*1.7))}
+  #hud{gap:10px}
+}
+/* short landscape phones: compact title, panels, Change Pictures */
+@media (max-height:500px){
+  .panel{padding:10px 18px}
+  .panel h2{margin-bottom:6px}
+  .menu{margin-top:8px;gap:8px}
+  .title-wrap{margin-top:0}
+  .title-icon{width:calc(var(--u)*7);height:calc(var(--u)*7)}
+  .logo{font-size:calc(var(--u)*7.5)}
+  .tagline{margin-top:4px}
+  .best-line{margin-top:8px}
+  .over-title{font-size:max(26px, calc(var(--u)*4)) !important;margin-bottom:6px !important}
+  .over-body{padding:8px 16px}
+  .medal{width:calc(var(--u)*8);height:calc(var(--u)*8)}
+  .how-grid{gap:6px}
+  .how{padding:6px 8px}
+  .settings{gap:6px}
+  .set{padding:4px 12px}
+  .slot .tag{display:none}
+  .slot .prev{height:calc(var(--u)*5)}
+  .slot{gap:calc(var(--u)*.3);padding:calc(var(--u)*.5)}
+  #scrCustom .small{display:none}
+  #scrCustom .panel h2{font-size:24px}
+}
+/* picture cards: buttons always fit inside their card (four narrow sky cards per row) */
+.slot{min-width:0}
+.slot .btns{max-width:100%;flex-wrap:wrap;justify-content:center}
+@media (pointer:coarse){
+  .panel.xwide{width:min(calc(var(--u)*84), calc(100vw - 24px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px)))}
+  .slot .btn{min-width:0;padding-left:10px;padding-right:10px}
+  .slot:nth-child(n+4) .btn{font-size:13px;padding-left:7px;padding-right:7px}
+}

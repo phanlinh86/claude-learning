@@ -1,10 +1,15 @@
 /* main.js — game controller: boot, game loop, input, modes, settings, test hooks.
- * Modes: 'title' (attract demo behind the menu) → 'ready' → 'playing' ⇄ 'paused' → 'over'. */
+ * Modes: 'title' (attract demo behind the menu) → 'playing' ⇄ 'paused' → 'over'.
+ * A new round starts in 'playing' with world.state === 'ready' (the bird hovers, "Get Ready!") until the first flap.
+ * Mobile (iPhone / iPad): full-screen canvas at any aspect, safe areas, one-finger tap = flap, kid-proofing,
+ * pause + audio suspend when the app is hidden. */
 (function (FF) {
   'use strict';
   const params = new URLSearchParams(location.search);
   const num = (k, d) => { const v = parseFloat(params.get(k)); return isFinite(v) ? v : d; };
   const SEASON_NAMES = ['Spring', 'Summer', 'Autumn', 'Winter'];
+  // phone / tablet (coarse pointer); a Windows touch laptop with a mouse keeps the desktop layout
+  const isTouch = window.matchMedia ? window.matchMedia('(pointer:coarse)').matches : (('ontouchstart' in window) || navigator.maxTouchPoints > 0);
 
   /* Difficulty presets → CONFIG overrides for FF.World (see docs/MECHANICS.md). */
   function difficultyOverrides(d) {
@@ -28,7 +33,7 @@
   }
 
   const Game = {
-    mode: 'boot',
+    mode: 'boot', isTouch,
     isApp: params.get('app') === '1' || typeof window.ffStoreSet === 'function',
     speed: Math.max(0.1, Math.min(64, num('speed', 1))),
     botMode: params.get('bot') === '1',
@@ -45,13 +50,19 @@
       Object.assign(this.settings, FF.Storage.getJSON('settings', {}));
       this.urlMute = params.get('mute') === '1';   // test switch: never saved into settings
       FF.Audio.setOptions({ sfx: this.settings.sfx, music: this.settings.music, muted: this.settings.muted || this.urlMute });
+      if (isTouch) document.body.classList.add('touch');
       this.renderer = new FF.Renderer(document.getElementById('game'));
+      this.renderer.touch = isTouch;
       await FF.Assets.loadAll();
-      this.renderer.resize();
       FF.UI.init(this);
       this.bindInput();
-      // P6: one resize per burst (dragging a window edge fires dozens of events; each one re-rasterizes every layer)
-      window.addEventListener('resize', () => { clearTimeout(this._rsz); this._rsz = setTimeout(() => this.renderer.resize(), 120); });
+      this.relayout();
+      // P6: one re-layout per burst (dragging a window edge, rotating a phone or Safari's toolbar sliding fire many
+      // events; each one re-rasterizes every layer). The round keeps running; the world learns its new visible range.
+      const onResize = () => { clearTimeout(this._rsz); this._rsz = setTimeout(() => this.relayout(), 120); };
+      window.addEventListener('resize', onResize);
+      window.addEventListener('orientationchange', onResize);
+      if (window.visualViewport) window.visualViewport.addEventListener('resize', onResize);
       if (params.get('autostart') === '1') this.startGame(); else this.toTitle();
       this.last = performance.now();
       requestAnimationFrame(t => this.frame(t));
@@ -61,12 +72,30 @@
       const s = seed != null ? seed : (this.seed != null ? this.seed : (Math.random() * 1e9) | 0);
       const cfg = Object.assign({ pointsPerSeason: this.settings.seasonPts }, difficultyOverrides(this.settings.difficulty));
       const w = new FF.World({ seed: s, config: cfg });
+      this.applyView(w);
       w.reset();
       return w;
     },
     makeWeather(seed) {
       const wx = new FF.Weather({ width: 960, height: 540, groundY: this.world.groundY, seed: seed || 7 });
+      this.applyView(null, wx);
       return wx;
+    },
+    /* safe-area insets (CSS px) read from a hidden element padded with env(safe-area-inset-*) */
+    readInsets() {
+      const el = document.getElementById('safeProbe'); if (!el) return null;
+      const cs = getComputedStyle(el);
+      return { top: parseFloat(cs.paddingTop) || 0, right: parseFloat(cs.paddingRight) || 0, bottom: parseFloat(cs.paddingBottom) || 0, left: parseFloat(cs.paddingLeft) || 0 };
+    },
+    relayout() {
+      this.renderer.resize(this.readInsets());
+      this.applyView(this.world, this.weather);
+    },
+    /* tell the world / weather which part of the scene this screen shows (wider, taller, portrait…) */
+    applyView(w, wx) {
+      const v = this.renderer && this.renderer.view; if (!v) return;
+      if (w && w.setView) w.setView(v.viewL, v.viewR, v.ceilingY);
+      if (wx && wx.setView) wx.setView(v.viewL, v.viewR, -v.SY);
     },
 
     toTitle() {
@@ -96,7 +125,7 @@
       this.renderer.setSeason(0, this.renderer.vis.cur === 0);
       FF.Audio.setSeason(0);
       if (this.settings.music) FF.Audio.startMusic();
-      this.mode = 'ready';
+      this.mode = 'playing';   // world.state is 'ready' until the first flap
       this.deadAt = -1; this.bestCombo = 0;
       FF.UI.hideAll();
       FF.UI.setHud(true);
@@ -105,13 +134,12 @@
 
     flapInput() {
       FF.Audio.unlock();
-      if (this.mode === 'ready') { this.mode = 'playing'; this.world.flap(); }
-      else if (this.mode === 'playing') this.world.flap();
+      if (this.mode === 'playing') this.world.flap();   // in world.state 'ready' the first flap starts the round
       else if (this.mode === 'over' && this.canRestart()) this.startGame();
     },
 
     pause() {
-      if (this.mode !== 'playing' && this.mode !== 'ready') return;
+      if (this.mode !== 'playing') return;
       if (this.world && this.world.state === 'dead') return;   // game-over panel is about to appear
       this.pausedFrom = this.mode;
       this.mode = 'paused';
@@ -171,7 +199,7 @@
       if (typeof window.ffFullscreen === 'function') window.ffFullscreen(on);
       else if (on && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
       else if (!on && document.fullscreenElement) document.exitFullscreen().catch(() => {});
-      setTimeout(() => this.renderer.resize(), 150);
+      setTimeout(() => this.relayout(), 150);
     },
     picturesChanged() { /* sprites are re-read every frame from FF.Assets; nothing else to rebuild */ },
     quit() {
@@ -185,14 +213,14 @@
         if (e.code === 'KeyM' && !e.repeat) { this.toggleMute(); return; }
         const ui = FF.UI.current;
         if (e.code === 'Escape' || e.code === 'KeyP') {
-          if (this.mode === 'playing' || this.mode === 'ready') { this.pause(); e.preventDefault(); return; }
+          if (this.mode === 'playing') { this.pause(); e.preventDefault(); return; }
           if (this.mode === 'paused' && ui === 'scrPause') { this.resume(); e.preventDefault(); return; }
           if (ui === 'scrHow' || ui === 'scrSettings' || ui === 'scrCustom') { FF.UI.back(); e.preventDefault(); return; }
           return;
         }
         if (isFlapKey(e)) {
           if (e.repeat) { e.preventDefault(); return; }
-          if (this.mode === 'ready' || this.mode === 'playing') { e.preventDefault(); this.flapInput(); return; }
+          if (this.mode === 'playing') { e.preventDefault(); this.flapInput(); return; }
           if (this.mode === 'over' && e.code === 'Space') { e.preventDefault(); this.flapInput(); return; }
           if (this.mode === 'title' && ui === 'scrTitle' && e.code === 'Space') {
             const f = document.activeElement;
@@ -202,14 +230,24 @@
         }
         if (e.code === 'Enter' && this.mode === 'over') { e.preventDefault(); if (this.canRestart()) this.startGame(); }
       });
+      // one finger (or the mouse) anywhere on the game = flap; every new finger is its own flap
       const stage = document.getElementById('stage');
       stage.addEventListener('pointerdown', e => {
-        if (e.button !== undefined && e.button > 0) return;
-        if (e.target.closest && e.target.closest('button, .screen, #hud, input, label')) return;   // HUD buttons must not flap
-        if (this.mode === 'ready' || this.mode === 'playing') { e.preventDefault(); this.flapInput(); }
+        if (e.pointerType === 'mouse' && e.button !== undefined && e.button > 0) return;
+        if (e.target.closest && e.target.closest('button, .screen, #hud, input, label, #scScreen')) return;   // HUD buttons must not flap
+        if (this.mode === 'playing') { e.preventDefault(); this.flapInput(); }
       });
       window.addEventListener('blur', () => { if (this.mode === 'playing') this.pause(); });
-      document.addEventListener('visibilitychange', () => { if (document.hidden && this.mode === 'playing') this.pause(); });
+      // home button / app switch / lock: pause the round and stop the audio clock; wake it when we're back
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) { if (this.mode === 'playing') this.pause(); FF.Audio.suspend(); }
+        else { FF.Audio.resume(); this.last = performance.now(); this.relayout(); }
+      });
+      window.addEventListener('pagehide', () => { if (this.mode === 'playing') this.pause(); FF.Audio.suspend(); });
+      // iOS: audio may only start inside a gesture — unlock on the first touchend / click / key
+      const unlock = () => FF.Audio.unlock();
+      ['touchend', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, unlock, { capture: true, passive: true }));
+      this.kidProof();
       // a picture dropped outside a slot must not navigate the window away
       window.addEventListener('dragover', e => e.preventDefault());
       window.addEventListener('drop', e => e.preventDefault());
@@ -220,7 +258,23 @@
         const k = e.key;
         if (k === 'F5' || ((e.ctrlKey || e.metaKey) && ['r', 'R', '+', '=', '-', '_', '0', 'p', 'P', 'f', 'F', 'g', 'G', 'u', 'U'].includes(k))) e.preventDefault();
       }, true);
-      document.addEventListener('fullscreenchange', () => { this.fullscreen = !!document.fullscreenElement || (this.fullscreen && typeof window.ffFullscreen === 'function'); this.renderer.resize(); FF.UI.syncSettings(); });
+      document.addEventListener('fullscreenchange', () => { this.fullscreen = !!document.fullscreenElement || (this.fullscreen && typeof window.ffFullscreen === 'function'); this.relayout(); FF.UI.syncSettings(); });
+    },
+
+    /* Touch kid-proofing (iPhone / iPad): no pinch or double-tap zoom, no long-press callout, no rubber-band
+     * scroll or pull-to-refresh. Scrollable panels (.panel / .scroll) still scroll. */
+    kidProof() {
+      const NP = { passive: false }, prevent = e => { if (e.cancelable) e.preventDefault(); };
+      const formy = t => t && t.closest && t.closest('input, textarea, select, .scroll, .panel');
+      ['gesturestart', 'gesturechange', 'gestureend'].forEach(t => document.addEventListener(t, prevent, NP));
+      document.addEventListener('touchmove', e => { if (!formy(e.target) || (e.touches && e.touches.length > 1)) prevent(e); }, NP);
+      let lastEnd = 0;
+      document.addEventListener('touchend', e => {
+        const t = Date.now();
+        if (t - lastEnd < 320 && !(e.target.closest && e.target.closest('button, a, input, label, select, .scroll, .prev, .slot'))) prevent(e);
+        lastEnd = t;
+      }, NP);
+      document.addEventListener('dblclick', e => { if (!formy(e.target)) prevent(e); }, NP);
     },
 
     handleEvents(evts) {
@@ -249,10 +303,7 @@
 
     step(h) {
       const w = this.world;
-      if (this.bot && (this.mode === 'playing' || this.mode === 'title' || (this.mode === 'ready' && this.botMode))) {
-        if (this.mode === 'ready') { this.mode = 'playing'; }
-        this.bot.step(h);
-      }
+      if (this.bot && (this.mode === 'playing' || this.mode === 'title')) this.bot.step(h);
       w.update(h);
       const ev = w.drainEvents();
       if (ev.length) this.handleEvents(ev);

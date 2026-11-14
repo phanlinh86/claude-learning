@@ -19,6 +19,13 @@
   const PIP_BIG = PIP * 1.6;                     // Pip's size at max growth: sprites are cached at this size
   const PIP_FOOT = 90 / 96, BEAR_FOOT = 76 / 80;  // feet anchor as a fraction of the sprite height
   const GEM_COLORS = { pink: '#ff7ab8', blue: '#5ab4ff', yellow: '#ffd23c', green: '#5fd38a' };
+  /* letterbox scenery per biome: base = the ground art's outer colour, top/far = its top band fading upward */
+  const LB_PAL = [
+    { base: '#93d9ab', top: '#b9ead0', far: '#d6f4e2', shadow: 'rgba(45,122,82,.22)', lolly: 0.28, drop: 0.32, puff: 0.2, deco: ['#ff8fc8', '#7fd3ff', '#ffd23c', '#c39af0', '#6cc58f', '#ff9a6e'] },
+    { base: '#b57d55', top: '#d2a27b', far: '#e6c4a3', shadow: 'rgba(90,52,24,.25)', lolly: 0.18, drop: 0.36, puff: 0.12, deco: ['#7a4428', '#5a2e1a', '#f4e4cd', '#ff8fc8', '#ffd23c'] },
+    { base: '#e7c4ee', top: '#d8e6fb', far: '#eef4ff', shadow: 'rgba(168,64,126,.16)', lolly: 0.16, drop: 0.16, puff: 0.5, deco: ['#ffffff', '#ffd2ea', '#f6b8e0', '#c8e0ff', '#fff3fb'] },
+    { base: '#f1dfbf', top: '#e2f0f8', far: '#f4fbff', shadow: 'rgba(120,150,180,.2)', lolly: 0.16, drop: 0.38, puff: 0.3, deco: ['#ffffff', '#b3e0f6', '#f9b3c8', '#fff1c9', '#d3effc'] }
+  ];
   const BEAR_COLORS = { red: '#ff5a6e', green: '#4fcf7a', orange: '#ff9a3d' };
 
   class Renderer {
@@ -30,32 +37,141 @@
       this.time = 0; this.shake = 0; this.flash = 0;
       this.vis = { cur: 0, prev: 0, t: 1 };
       this.banner = null; this.pointer = null;
-      this._ox = 0; this._oy = 0;
+      this._ox = 0; this._oy = 0; this._bx = 0; this._by = 0; this.ox = 0; this.oy = 0;
+      this.insets = { top: 0, right: 0, bottom: 0, left: 0 }; this.hudDy = 0; this.hudDl = 0; this.hudDr = 0;
       this._order = [];
       this.debug = /[?&]debug=1/.test(location.search);
       const mp = /[?&]maxpx=([\d.]+)/.exec(location.search); this.maxPx = mp ? +mp[1] : 2;
       this.resize();
     }
 
-    resize() {
-      const vw = window.innerWidth, vh = window.innerHeight;
+    /* The canvas fills the whole window (iPhone / iPad, any aspect). The 960×540 stage is fitted with "contain"
+     * and centred: (ox, oy) is its offset in logical px; the letterbox around it is painted with the biome's own
+     * scenery (cached, see letterbox()). insets = CSS safe-area insets (notch / home bar) from main.readInsets(). */
+    resize(insets) {
+      if (insets) this.insets = insets;
+      const vw = Math.max(1, window.innerWidth), vh = Math.max(1, window.innerHeight);
       const s = Math.min(vw / W, vh / H);
       const dpr = window.devicePixelRatio || 1;
       this.cssScale = s;
-      this.canvas.style.width = Math.round(W * s) + 'px';
-      this.canvas.style.height = Math.round(H * s) + 'px';
+      this.VW = vw / s; this.VH = vh / s;
+      this.ox = (this.VW - W) / 2; this.oy = (this.VH - H) / 2;
+      this.portrait = vh > vw;
+      this.canvas.style.width = vw + 'px';
+      this.canvas.style.height = vh + 'px';
       this.px = Math.min(s * dpr, this.maxPx || 2);
-      this.canvas.width = Math.round(W * this.px);
-      this.canvas.height = Math.round(H * this.px);
-      const ox = (vw - W * s) / 2, oy = (vh - H * s) / 2;
+      this.canvas.width = Math.round(this.VW * this.px);
+      this.canvas.height = Math.round(this.VH * this.px);
+      this._bx = Math.round(this.ox * this.px); this._by = Math.round(this.oy * this.px);   // stage origin, whole device px
+      const i = this.insets || {}, k = 1 / s;
+      this.safe = { l: (i.left || 0) * k, r: (i.right || 0) * k, t: (i.top || 0) * k, b: (i.bottom || 0) * k };
+      // HUD band (hearts · score · jar, 0..84 logical px tall): above the stage when the letterbox has room for it
+      // (iPad / phone held upright), otherwise on the stage, nudged out of the notch / status bar.
+      const room = this.oy - this.safe.t;
+      this.hudOut = room >= 92;
+      this.hudDy = this.hudOut ? -88 : Math.max(0, this.safe.t - this.oy);
+      this.hudDl = this.hudOut ? 0 : Math.max(0, this.safe.l - this.ox);
+      this.hudDr = this.hudOut ? 0 : Math.max(0, this.safe.r - this.ox);
       const hud = document.getElementById('hud'), toast = document.getElementById('toast'), act = document.getElementById('btnAction');
-      if (hud) { hud.style.top = (oy + 14 * s) + 'px'; hud.style.right = (ox + 14 * s) + 'px'; }
-      if (toast) toast.style.bottom = (oy + 30 * s) + 'px';
-      if (act) { act.style.right = (ox + 24 * s) + 'px'; act.style.bottom = (oy + 24 * s) + 'px'; }
+      const sx = x => (this.ox + x) * s, sy = y => (this.oy + y) * s;   // logical → CSS px
+      if (hud) { hud.style.top = Math.max(sy(this.hudDy + 14), (i.top || 0) + 6) + 'px'; hud.style.right = Math.max(vw - sx(W - 14), (i.right || 0) + 6) + 'px'; }
+      if (toast) toast.style.bottom = Math.max(vh - sy(H - 30), (i.bottom || 0) + 10) + 'px';
+      if (act) {
+        act.style.right = Math.max(vw - sx(W - 24), (i.right || 0) + 10) + 'px';
+        // upright screens with room under the stage: the ★ waits below Candy Land, never over the gate
+        const below = vh - sy(H) - (i.bottom || 0), size = act.offsetWidth || 90;
+        act.style.bottom = (below >= size + 24 ? Math.max((i.bottom || 0) + 10, vh - sy(H) - 16 - size - Math.min(40, (below - size) * 0.25)) : Math.max(vh - sy(H - 24), (i.bottom || 0) + 10)) + 'px';
+      }
+      this._hudL = null;   // HUD buttons' left edge (logical), measured on the next HUD frame
+      this._lb = null;
       CD.Assets.setScale(this.px);
       if (this.vis) CD.Assets.warmSeason(this.vis.cur);
     }
-    toLogical(cx, cy) { const r = this.canvas.getBoundingClientRect(); return [(cx - r.left) / r.width * W, (cy - r.top) / r.height * H]; }
+    /* client (CSS) px → logical stage px, and back */
+    toLogical(cx, cy) { const r = this.canvas.getBoundingClientRect(); return [(cx - r.left) / this.cssScale - this.ox, (cy - r.top) / this.cssScale - this.oy]; }
+    toClient(lx, ly) { const r = this.canvas.getBoundingClientRect(); return [r.left + (lx + this.ox) * this.cssScale, r.top + (ly + this.oy) * this.cssScale]; }
+    /* the 960×540 stage in client px */
+    stageRect() {
+      const r = this.canvas.getBoundingClientRect(), s = this.cssScale, left = r.left + this.ox * s, top = r.top + this.oy * s;
+      return { left, top, width: W * s, height: H * s, right: left + W * s, bottom: top + H * s };
+    }
+
+    /* ---------- letterbox: the biome continues past the stage edges (no black bars at any aspect) ---------- */
+    letterbox(b) {
+      const cw = this.canvas.width, ch = this.canvas.height;
+      if (this._bx <= 0 && this._by <= 0) return null;
+      const M = 24, key = b + '@' + cw + 'x' + ch;
+      if (this._lb && this._lb.key === key) return this._lb.c;
+      if (this._lb) this._lbPrev = this._lb;   // keep the old biome's scenery for the crossfade
+      const c = document.createElement('canvas');
+      c.width = cw + 2 * M; c.height = ch + 2 * M;
+      const g = c.getContext('2d'), P = LB_PAL[b] || LB_PAL[0], p = this.px;
+      const sx = this._bx + M, sy = this._by + M, sw = Math.round(W * p), sh = Math.round(H * p);
+      g.fillStyle = P.base; g.fillRect(0, 0, c.width, c.height);
+      if (sy > 0) {   // above the stage: the ground's light top band keeps going up, softly
+        const gr = g.createLinearGradient(0, 0, 0, sy); gr.addColorStop(0, P.far); gr.addColorStop(1, P.top);
+        g.fillStyle = gr; g.fillRect(0, 0, c.width, sy);
+      }
+      // scattered candy scenery, seeded so it never jumps between frames
+      let seed = 1234 + b * 977;
+      const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+      const area = (c.width * c.height - sw * sh) / (p * p), n = Math.min(160, Math.round(area / 8000));
+      const inStage = (x, y, r) => x > sx - r && x < sx + sw + r && y > sy - r && y < sy + sh + r;
+      g.lineJoin = 'round'; g.globalAlpha = 0.6;
+      for (let k = 0, tries = 0; k < n && tries < n * 8; tries++) {
+        const x = rnd() * c.width, y = rnd() * c.height, r = (8 + rnd() * 12) * p;
+        if (inStage(x, y, r * 2.2)) continue;
+        k++;
+        const col = P.deco[(rnd() * P.deco.length) | 0], kind = rnd();
+        if (kind < P.lolly) {             // lollipop with a swirl
+          g.strokeStyle = 'rgba(255,255,255,.9)'; g.lineWidth = 3 * p;
+          g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + r * 2.1); g.stroke();
+          g.fillStyle = col; g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill();
+          g.strokeStyle = 'rgba(255,255,255,.75)'; g.lineWidth = 2 * p; g.beginPath();
+          for (let a = 0; a < 9; a += 0.25) { const rr = r * a / 9.5; g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); }
+          g.stroke();
+        } else if (kind < P.lolly + P.drop) {   // gumdrop / scoop: dome with a highlight
+          g.fillStyle = P.shadow; g.beginPath(); g.ellipse(x, y + r * 0.15, r * 1.1, r * 0.3, 0, 0, TAU); g.fill();
+          g.fillStyle = col; g.beginPath(); g.arc(x, y, r, Math.PI, 0); g.closePath(); g.fill();
+          g.fillStyle = 'rgba(255,255,255,.45)'; g.beginPath(); g.ellipse(x - r * 0.35, y - r * 0.55, r * 0.22, r * 0.12, -0.5, 0, TAU); g.fill();
+        } else if (kind < P.lolly + P.drop + P.puff) {   // soft puff (cloud, bush or snow mound)
+          g.fillStyle = col;
+          for (let j = 0; j < 4; j++) { g.beginPath(); g.arc(x + (j - 1.5) * r * 0.7, y - (j % 2) * r * 0.35, r * 0.62, 0, TAU); g.fill(); }
+        } else {                           // sprinkles
+          g.strokeStyle = col; g.lineWidth = 3.2 * p; g.lineCap = 'round';
+          for (let j = 0; j < 3; j++) { const a = rnd() * TAU, x2 = x + (rnd() - 0.5) * r * 2, y2 = y + (rnd() - 0.5) * r * 2; g.beginPath(); g.moveTo(x2, y2); g.lineTo(x2 + Math.cos(a) * 6 * p, y2 + Math.sin(a) * 6 * p); g.stroke(); }
+        }
+      }
+      g.globalAlpha = 1;
+      // a soft shadow hugging the stage so Candy Land reads as one place, the arena slightly raised
+      const F = 22 * p, sh0 = 'rgba(60,20,60,0.16)', sh1 = 'rgba(60,20,60,0)';
+      const lin = (x0, y0, x1, y1) => { const q = g.createLinearGradient(x0, y0, x1, y1); q.addColorStop(0, sh0); q.addColorStop(1, sh1); return q; };
+      if (sy > M) { g.fillStyle = lin(0, sy, 0, sy - F); g.fillRect(sx, sy - F, sw, F); g.fillStyle = lin(0, sy + sh, 0, sy + sh + F); g.fillRect(sx, sy + sh, sw, F); }
+      if (sx > M) { g.fillStyle = lin(sx, 0, sx - F, 0); g.fillRect(sx - F, sy, F, sh); g.fillStyle = lin(sx + sw, 0, sx + sw + F, 0); g.fillRect(sx + sw, sy, F, sh); }
+      this._lb = { key, c, M };
+      return c;
+    }
+    drawLetterbox() {
+      const v = this.vis, c = this.letterbox(v.cur);
+      if (!c) return;
+      const g = this.ctx, M = this._lb.M, dx = this._ox - this._bx - M, dy = this._oy - this._by - M;
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      g.drawImage(c, dx, dy);
+      if (v.t < 1 && v.prev !== v.cur) {   // biome change: fade from the old scenery (rebuilt once, then cached)
+        const key = this._lb.key, pc = this._lbPrev && this._lbPrev.key === v.prev + key.slice(key.indexOf('@')) ? this._lbPrev.c : null;
+        if (pc) { g.globalAlpha = 1 - v.t; g.drawImage(pc, dx, dy); g.globalAlpha = 1; }
+      }
+      // bands that cross the whole arena (the chocolate river) keep flowing into the side letterbox
+      if (this._bx > 0 && v.cur === 1) {
+        const z = CD.Assets.sprite(CD.Assets.SEASONS[1] + '_zone', W, H);
+        if (z) {
+          const zx = this._ox, zy = this._oy, zw = z.width, zh = z.height;
+          g.drawImage(z, 1, 0, 1, zh, zx - this._bx - 24, zy, this._bx + 25, zh);
+          g.drawImage(z, 1, 0, 1, zh, zx + zw - 1, zy, this.canvas.width - (zx + zw) + 25, zh);
+        }
+      }
+      g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
+    }
     attach(world, weather) { this.world = world; this.weather = weather; this.fx.length = 0; this.texts.length = 0; this.banner = null; this.shake = 0; this.flash = 0; }
 
     setSeason(i, instant) {
@@ -209,8 +325,9 @@
     // ---------------- main draw ----------------
     draw(mode) {
       const g = this.ctx, w = this.world;
-      this._ox = 0; this._oy = 0;
-      if (this.shake > 0) { const m = this.shake * 10 * this.px; this._ox = Math.round((Math.random() - .5) * m); this._oy = Math.round((Math.random() - .5) * m); }
+      this._ox = this._bx; this._oy = this._by;
+      if (this.shake > 0) { const m = this.shake * 10 * this.px; this._ox += Math.round((Math.random() - .5) * m); this._oy += Math.round((Math.random() - .5) * m); }
+      this.drawLetterbox();
       g.setTransform(this.px, 0, 0, this.px, this._ox, this._oy);
       g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
       const v = this.vis;
@@ -453,8 +570,11 @@
       const g = this.ctx, w = this.world, A = CD.Assets;
       // hearts + size pips (top-left)
       const pt = w.pip ? w.pip.y - PIP * (w.pip.scale || 1) : 999;
-      const hudA = pt < 70 ? 0.45 : 1;   // fade the HUD if Pip walks up under it
+      const hudA = !this.hudOut && pt < 70 + this.hudDy ? 0.45 : 1;   // fade the HUD if Pip walks up under it
       g.globalAlpha = hudA;
+      // safe areas: the band moves above the stage (hudOut) or out of the notch / status bar
+      const dy = this.hudDy || 0;
+      g.save(); g.translate(this.hudDl || 0, dy);
       g.fillStyle = 'rgba(255,255,255,0.96)'; this.roundRect(14, 12, 40 + 30 * (w.heartsMax || 3), 46, 23); g.fill();
       const hf = A.sprite('heart_full', 28, 28), he = A.sprite('heart_empty', 28, 28);
       for (let i = 0; i < (w.heartsMax || 3); i++) { const s = i < w.hearts ? hf : he; if (s) g.drawImage(s, 26 + i * 30, 21, 28, 28); }
@@ -467,15 +587,20 @@
         if (i >= w.size) { g.strokeStyle = 'rgba(168,64,126,0.45)'; g.lineWidth = 1.5; g.stroke(); }
       }
       this.text('×' + w.size, sx0 + 48 + smax * 20, 35, 15, '#a8407e', null, 'left');
+      g.restore();
       // score
+      g.save(); g.translate(0, dy);
       if (this._lastScore !== w.score) { this._scorePop = 1; this._lastScore = w.score; }
       this._scorePop = Math.max(0, (this._scorePop || 0) - 0.06);
       const s = 1 + 0.2 * this._scorePop;
       g.save(); g.translate(W / 2, 38); g.scale(s, s); this.text(String(w.score), 0, 0, 46, '#ffffff', '#6a2d5c', 'center', 8); g.restore();
       const bi = BIOME_INFO[w.biome] || BIOME_INFO[0];
       this.text(bi.name + (w.lap > 0 ? ' · Lap ' + (w.lap + 1) : ''), W / 2, 72, 14, '#ffffff', '#6a2d5c', 'center', 4);
-      // gem jar (top-right, under the HUD buttons)
-      const jx = 700, jy = 4, jar = A.sprite('jar', 44, 55);   // jar lives in the top band, left of the HUD buttons
+      g.restore();
+      // gem jar (top-right, left of the HUD buttons)
+      g.save(); g.translate(-(this.hudDr || 0), dy);
+      if (this._hudL == null) { const hb = document.getElementById('hud'); if (hb && !hb.classList.contains('hidden')) { const r = hb.getBoundingClientRect(); if (r.width > 0) this._hudL = this.toLogical(r.left, r.top)[0] + (this.hudDr || 0); } }
+      const jx = Math.min(700, (this._hudL != null ? this._hudL : 836) - 136), jy = 4, jar = A.sprite('jar', 44, 55);   // jar lives in the top band, left of the HUD buttons
       g.fillStyle = 'rgba(255,255,255,0.96)'; this.roundRect(jx - 8, jy - 2, 136, 58, 18); g.fill();
       const frac = clamp(w.jar / (w.jarTarget || 1), 0, 1);
       if (frac > 0) {
@@ -485,7 +610,10 @@
       }
       if (jar) g.drawImage(jar, jx, jy, 44, 55);
       this.text(w.jar + '/' + w.jarTarget, jx + 54, jy + 28, 20, frac >= 1 ? '#2d9a52' : '#a8407e', null, 'left');
+      g.restore();
       g.globalAlpha = 1;
+      // where the HUD band ended up (logical px), for the layout tests
+      this._hudBox = { l: 14 + (this.hudDl || 0), t: jy - 2 + dy, r: jx - 8 + 136 - (this.hudDr || 0), b: 80 + dy };
       // dash cooldown dot
       if (w.pip && w.pip.dashCd > 0 && w.size < smax) {
         const cdMax = (w.cfg && w.cfg.dashCooldown) || 1.2, k = 1 - clamp(w.pip.dashCd / cdMax, 0, 1);

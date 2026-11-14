@@ -72,8 +72,8 @@ const placeGem = (page, x, y) => ev(page, ({ x, y }) => {
   const w = CD.debug.world, g = w._spawnGem(); g.x = g._px = x; g.y = g._py = y; g.appear = 1; g.life = 99; return g.id;
 }, { x, y });
 const pipInfo = page => ev(page, () => { const p = CD.debug.world.pip; return { x: p.x, y: p.y, vx: p.vx, vy: p.vy, sp: Math.hypot(p.vx, p.vy), frame: p.frame, onIce: p.onIce, inSlow: p.inSlow, inPuff: p.inPuff, z: p.z, invuln: p.invuln }; });
-/* Logical → client coords. */
-const toClient = (page, x, y) => ev(page, ({ x, y }) => { const r = document.getElementById('game').getBoundingClientRect(); return { x: r.left + x / 960 * r.width, y: r.top + y / 540 * r.height }; }, { x, y });
+/* Logical → client coords. The canvas fills the window (mobile layer); the 960×540 stage sits inside it. */
+const toClient = (page, x, y) => ev(page, ({ x, y }) => { const [cx, cy] = CD.Game.renderer.toClient(x, y); return { x: cx, y: cy }; }, { x, y });
 
 /* Log every event the world emits (wraps handleEvents). */
 async function hookEvents(page) {
@@ -161,8 +161,8 @@ async function layoutReport(page) {
 }
 /* Count canvas pixels in a logical rect matching a colour predicate (source string over r,g,b). */
 const probe = (page, x, y, w, h, pred) => ev(page, ({ x, y, w, h, pred }) => {
-  const c = document.getElementById('game'), g = c.getContext('2d'), k = c.width / 960;
-  const X = Math.max(0, Math.round(x * k)), Y = Math.max(0, Math.round(y * k)), W = Math.round(w * k), H = Math.round(h * k);
+  const c = document.getElementById('game'), g = c.getContext('2d'), R = CD.Game.renderer, k = R.px;
+  const X = Math.max(0, Math.round(x * k) + R._bx), Y = Math.max(0, Math.round(y * k) + R._by), W = Math.round(w * k), H = Math.round(h * k);
   const d = g.getImageData(X, Y, W, H).data, f = new Function('r', 'g', 'b', 'return ' + pred);
   let n = 0; for (let i = 0; i < d.length; i += 4) if (f(d[i], d[i + 1], d[i + 2])) n++;
   return n;
@@ -306,15 +306,15 @@ async function testTouch() {
   for (let i = 1; i <= 5; i++) await touch('touchMove', [{ x: A.x + (B.x - A.x) * i / 5, y: A.y + (B.y - A.y) * i / 5, id: 1 }]);
   await page.waitForTimeout(60);
   for (let i = 0; i < 30; i++) await simStep(page, 0.1);
-  const p = await pipInfo(page);
-  check('touch: dragging a finger makes Pip follow it and stop', Math.hypot(p.x - 640, p.y - 380) <= cfg.arriveStop + 2 && p.sp < 5, { x: +p.x.toFixed(1), y: +p.y.toFixed(1) });
+  const p = await pipInfo(page), aim = await ev(page, () => CD.Game.TOUCH_AIM);   // a finger aims Pip a bit above itself
+  check('touch: dragging a finger makes Pip follow it (just above the finger) and stop', aim < 0 && Math.hypot(p.x - 640, p.y - (380 + aim)) <= cfg.arriveStop + 2 && p.sp < 5, { x: +p.x.toFixed(1), y: +p.y.toFixed(1), aim });
   await clearLog(page);
   const F2 = await toClient(page, 800, 150);
   await touch('touchStart', [{ x: B.x, y: B.y, id: 1 }, { x: F2.x, y: F2.y, id: 2 }]);
   await page.waitForTimeout(60);
   check('touch: a second finger = action (dash)', (await evLog(page, 'dash')).length === 1, (await evLog(page)).map(e => e.type));
   const tgt = await ev(page, () => CD.debug.world._target);
-  check('touch: second finger does not steal the follow target', tgt && near(tgt.x, 640, 3) && near(tgt.y, 380, 3), tgt);
+  check('touch: second finger does not steal the follow target', tgt && near(tgt.x, 640, 3) && near(tgt.y, 380 + aim, 3), tgt);
   await touch('touchEnd', []); await page.waitForTimeout(60);
   check('touch: lifting all fingers stops following', (await ev(page, () => CD.Game.pointerDown)) === false);
   await simStep(page, cfg.dashCooldown + 0.1); await clearLog(page);
@@ -790,12 +790,14 @@ async function testLayout() {
     const page = await newPage({ viewport: { width: w, height: h }, dsf });
     await boot(page, 'seed=1');
     const tag = `${w}x${h}@${dsf}`;
-    const cv = await ev(page, () => { const c = document.getElementById('game'), r = c.getBoundingClientRect(); return { w: r.width, h: r.height, l: r.left, t: r.top, bw: c.width, bh: c.height }; });
+    // mobile layer: the canvas fills the window; the 16:9 stage is fitted inside it, centred (letterbox = scenery)
+    const cv = await ev(page, () => { const c = document.getElementById('game'), r = c.getBoundingClientRect(), R = CD.Game.renderer, s = R.stageRect();
+      return { cw: r.width, ch: r.height, w: s.width, h: s.height, l: s.left, t: s.top, bw: Math.round(960 * R.px), bh: Math.round(540 * R.px) }; });
     const fits = cv.w <= w + 1 && cv.h <= h + 1 && (Math.abs(cv.w - w) < 2 || Math.abs(cv.h - h) < 2);
     const centered = Math.abs(cv.l - (w - cv.w) / 2) < 2 && Math.abs(cv.t - (h - cv.h) / 2) < 2;
-    check(`layout ${tag}: canvas letterboxed 16:9, fills one axis, centred`, Math.abs(cv.w / cv.h - 16 / 9) < 0.01 && fits && centered, cv);
+    check(`layout ${tag}: canvas fills the window; 16:9 stage fills one axis, centred`, Math.abs(cv.cw - w) < 1 && Math.abs(cv.ch - h) < 1 && Math.abs(cv.w / cv.h - 16 / 9) < 0.01 && fits && centered, cv);
     { const k = Math.min(1, 1920 / (cv.w * dsf));
-      check(`layout ${tag}: backing store = css × dpr, capped at 1920×1080`, Math.abs(cv.bw - cv.w * dsf * k) < 3 && Math.abs(cv.bh - cv.h * dsf * k) < 3 && cv.bw <= 1920 && cv.bh <= 1080, [cv.bw, cv.bh]); }
+      check(`layout ${tag}: stage backing store = css × dpr, capped at 1920×1080`, Math.abs(cv.bw - cv.w * dsf * k) < 3 && Math.abs(cv.bh - cv.h * dsf * k) < 3 && cv.bw <= 1920 && cv.bh <= 1080, [cv.bw, cv.bh]); }
     const issues = [];
     for (const scr of ['scrTitle', 'scrSettings', 'scrCustom', 'scrHow', 'scrPause', 'scrOver']) {
       await ev(page, s => {
@@ -812,7 +814,7 @@ async function testLayout() {
     check(`layout ${tag}: every menu fits inside the window (no clipped / scrolled-away buttons)`, issues.length === 0, issues.join(' | '));
     await ev(page, () => { CD.Game.startGame(); CD.debug.setSpeed(0); const G = CD.Game; let i = 0; while (G.world.state !== 'playing' && i++ < 3000) G.step(1 / 60); G.renderer.banner = null; });
     await page.waitForTimeout(250);
-    const hud = await ev(page, () => { const c = document.getElementById('game').getBoundingClientRect(), b = document.getElementById('hud').getBoundingClientRect();
+    const hud = await ev(page, () => { const c = CD.Game.renderer.stageRect(), b = document.getElementById('hud').getBoundingClientRect();
       const toL = (x, y) => [(x - c.left) / c.width * 960, (y - c.top) / c.height * 540];
       const [l, t] = toL(b.left, b.top), [r, bt] = toL(b.right, b.bottom), jar = CD.debug.world.cfg.hudAvoid[1];
       return { l: +l.toFixed(1), t: +t.toFixed(1), r: +r.toFixed(1), b: +bt.toFixed(1), jarTop: jar.y }; });
@@ -827,7 +829,7 @@ async function testLayout() {
     const page = await newPage({ viewport: { width: w, height: h }, touch: true });
     await boot(page, 'seed=1');
     await startFrozen(page);
-    const a = await ev(page, () => { const c = document.getElementById('game').getBoundingClientRect(), b = document.getElementById('btnAction').getBoundingClientRect(); return { vis: !document.getElementById('btnAction').classList.contains('hidden') && b.width > 20, inside: b.left >= c.left && b.right <= c.right + 0.5 && b.top >= c.top && b.bottom <= c.bottom + 0.5, b: [b.left, b.top, b.right, b.bottom].map(Math.round) }; });
+    const a = await ev(page, () => { const c = CD.Game.renderer.stageRect(), b = document.getElementById('btnAction').getBoundingClientRect(); return { vis: !document.getElementById('btnAction').classList.contains('hidden') && b.width > 20, inside: b.left >= c.left && b.right <= c.right + 0.5 && b.top >= c.top && b.bottom <= c.bottom + 0.5, b: [b.left, b.top, b.right, b.bottom].map(Math.round) }; });
     check(`layout touch ${w}x${h}: ★ shown, inside the canvas`, a.vis && a.inside, a);
     await shot(page, `21_touch_${w}x${h}`);
     await page._ctx.close();
@@ -837,13 +839,13 @@ async function testLayout() {
   await boot(page, 'seed=1');
   await startFrozen(page); await isolate(page, 200, 300);
   for (const [w, h] of [[800, 600], [1920, 1080], [500, 900], [1100, 700]]) { await page.setViewportSize({ width: w, height: h }); await page.waitForTimeout(250); }
-  const cv = await ev(page, () => { const r = document.getElementById('game').getBoundingClientRect(); return [r.width, r.height]; });
-  check('live resize keeps a 16:9 canvas', Math.abs(cv[0] / cv[1] - 16 / 9) < 0.01, cv);
+  const cv = await ev(page, () => { const r = CD.Game.renderer.stageRect(); return [r.width, r.height]; });
+  check('live resize keeps a 16:9 stage', Math.abs(cv[0] / cv[1] - 16 / 9) < 0.01, cv);
   const c = await toClient(page, 700, 400);
   await page.mouse.move(c.x, c.y); await page.mouse.down(); await page.waitForTimeout(60);
   const tg = await ev(page, () => CD.debug.world._target); await page.mouse.up();
   check('after resize, a held mouse targets the right logical point', tg && near(tg.x, 700, 2) && near(tg.y, 400, 2), tg);
-  const hud = await ev(page, () => { const c = document.getElementById('game').getBoundingClientRect(), b = document.getElementById('hud').getBoundingClientRect(); return b.right <= c.right + 1 && b.top >= c.top - 1; });
+  const hud = await ev(page, () => { const s = CD.Game.renderer.stageRect(), b = document.getElementById('hud').getBoundingClientRect(); return b.right <= s.left + s.width + 1 && b.top >= s.top - 1; });
   check('after resize, HUD buttons still hug the canvas', hud);
   errorsOk(page, 'live resize');
   await page._ctx.close();

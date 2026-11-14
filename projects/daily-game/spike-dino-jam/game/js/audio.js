@@ -36,11 +36,14 @@
         this.ctx = new AC();
       } catch (e) { return false; }
       const c = this.ctx;
-      this.master = c.createGain(); this.master.gain.value = 0.9;
+      this.master = c.createGain(); this.master.gain.value = 1;
       const comp = c.createDynamicsCompressor();
       comp.threshold.value = -14; comp.ratio.value = 4;
-      this.master.connect(comp); comp.connect(c.destination);
-      this.sfx = c.createGain(); this.sfx.gain.value = 0.55; this.sfx.connect(this.master);
+      // phones are quiet: compressor (−18 dB, knee 12, 4:1) then a make-up gain = the player's volume × 1.7
+      comp.threshold.value = -18; comp.knee.value = 12; comp.ratio.value = 4; comp.attack.value = 0.004; comp.release.value = 0.18;
+      this.user = c.createGain(); this.user.gain.value = (this.volume == null ? 1 : this.volume) * 1.7;
+      this.master.connect(comp); comp.connect(this.user); this.user.connect(c.destination);
+      this.sfx = c.createGain(); this.sfx.gain.value = 0.8; this.sfx.connect(this.master);
       this.music = c.createGain(); this.music.gain.value = 0.0; this.music.connect(this.master);
       // white noise buffer for whooshes / munches
       const len = c.sampleRate;
@@ -52,7 +55,21 @@
     },
     /* Call inside a user gesture. iOS Safari only starts audio from a gesture: resume the context AND start one
      * silent sample in the same touchend/click (also wakes it after an interruption, e.g. a phone call). */
+    /* the player's volume 0..1 (Settings slider), applied after the compressor */
+    setVolume(v) {
+      this.volume = Math.max(0, Math.min(1, +v || 0));
+      if (this.user && this.ctx) this.user.gain.setTargetAtTime(this.volume * 1.7, this.ctx.currentTime, 0.03);
+    },
+    /* iOS Safari: Web Audio defaults to the quiet 'ambient' channel that the side switch silences; ask for 'playback'
+     * (Safari 16.4+) and play a silent buffer inside the gesture so the output really wakes up. */
+    _iosKick() {
+      try { if (navigator.audioSession && navigator.audioSession.type !== 'playback' && navigator.audioSession.type !== 'play-and-record') navigator.audioSession.type = 'playback'; } catch (e) { /* older Safari */ }
+      if (!this.ensure()) return;
+      if (this.ctx.state !== 'running' && !this._hidden) this.ctx.resume().catch(() => {});
+      if (!this._kicked) { try { const b = this.ctx.createBuffer(1, 1, 22050), s = this.ctx.createBufferSource(); s.buffer = b; s.connect(this.ctx.destination); s.start(0); this._kicked = true; } catch (e) { /* ignore */ } }
+    },
     unlock() {
+      this._iosKick();
       if (!this.ensure()) return;
       const c = this.ctx;
       if (c.state !== 'running' && !this._hidden) c.resume().catch(() => {});
@@ -66,8 +83,8 @@
     applyMute() {
       if (!this.ctx) return;
       const t = this.ctx.currentTime;
-      this.master.gain.setTargetAtTime(this.muted ? 0 : 0.9, t, 0.03);
-      this.sfx.gain.setTargetAtTime(this.sfxOn ? 0.55 : 0, t, 0.03);
+      this.master.gain.setTargetAtTime(this.muted ? 0 : 1, t, 0.03);
+      this.sfx.gain.setTargetAtTime(this.sfxOn ? 0.8 : 0, t, 0.03);
       this.music.gain.setTargetAtTime(this.musicOn && this._musicPlaying ? 0.16 : 0, t, 0.4);
     },
     setOptions({ sfx, music, muted }) {

@@ -10,6 +10,15 @@ A family-friendly, one-button flying game for Windows 11, inspired by Flappy Bir
 - Settings: sound effects, music, difficulty (Easy for little kids, Normal, Hard), points per season, full screen (<kbd>F11</kbd>).
 - Other keys: <kbd>Esc</kbd>/<kbd>P</kbd> pause, <kbd>M</kbd> mute.
 
+## Play on iPhone / iPad
+Open the game's web page in **Safari** and play in portrait or landscape: **tap anywhere** to flap.
+For a full-screen app with its own icon, tap **Share → Add to Home Screen**, then start *Family Flappy* from the home screen.
+
+- Portrait shows a tall sky (the bird may fly higher); landscape phones see a wider stretch of meadow (more turtles ahead).
+- The game pauses by itself (and the sound stops) when you switch apps or lock the phone; tap **Resume**.
+- Sound: if you hear nothing, check the volume (and the *Volume* slider in Settings) and tap the screen once.
+- *Change Pictures* → **Choose…** opens the photo library or the camera. Pictures are saved in Safari's storage on that device.
+
 ## Play (Windows 11)
 Double-click **`FamilyFlappy.exe`**. Nothing needs installing: it is one portable file.
 It uses Microsoft Edge WebView2, which is built into Windows 11.
@@ -35,6 +44,8 @@ node tests/unit/run.js                       # simulation / physics / weather / 
 node tests/e2e/smoke.js                      # browser smoke test + screenshots in tests/out/
 node tests/e2e/functional.js http://127.0.0.1:8765/index.html   # full functional test suite (menus, input, pictures, settings…)
 node tests/e2e/playtest.js http://127.0.0.1:8765/index.html     # high-speed bot play-test report
+node tests/e2e/mobile.js                     # iPhone / iPad sizes with real touch input (own server), screenshots in tests/out/mobile/
+node ../../../shared/daily-mobile/test_extras.js .   # volume slider + Score Card on desktop and phone sizes
 ```
 URL switches for testing: `?speed=8` (time scale), `?bot=1` (autopilot), `?autostart=1`, `?autorestart=1`, `?seed=42`, `?mute=1`, `?debug=1` (hit boxes).
 `window.FF.debug` exposes the world state to automation.
@@ -50,7 +61,7 @@ game/            the game (HTML5 canvas + plain JS, no build step)
   js/ui.js, main.js, assets.js, storage.js
   assets/default original SVG art
 app/             Go WebView2 wrapper → FamilyFlappy.exe
-tools/           build script, icon tools, art generators
+tools/           build script, icon tools (render_mobile_icons.js → home-screen icons), art generators
 tests/           unit + browser tests
 docs/            DESIGN.md (module contracts), MECHANICS.md (physics tuning), art sheets, test reports
 ```
