@@ -1,0 +1,16 @@
+{
+  "name": "Shelly's Sky Catch",
+  "short_name": "Sky Catch",
+  "description": "Zoom along the clouds on a tiny jetpack, catch the falling stars and fill the star jar!",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#2a5c8e",
+  "theme_color": "#4fb4ec",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
