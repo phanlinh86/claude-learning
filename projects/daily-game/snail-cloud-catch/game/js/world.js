@@ -97,7 +97,7 @@
     puffVT: 0.6, puffDrag: 2.6,    // × star vT (floaty cloud)
     zoneFall: [1, 1.15, 1, 0.85],  // rain: wet stars ×1.15; snow: slow and fluttery
     fallMul: 1,                    // difficulty multiplier on all terminal speeds
-    lapFall: 0.08, fallCap: 1.4,   // +8 % per loop, capped
+    lapFall: 0.12, fallCap: 1.7,   // +12 % per loop, capped (puffs ≈ 170 px/s, stars ≈ 280 by loop 6)
     windDragX: 1.1,                // 1/s, sideways drag → side drift = wind·windK/kx
     windK: { star: 1, gold: 0.55, puff: 1.3 },
     swayAmp: { star: 10, gold: 5, puff: 16 },   // px flutter half-width
@@ -115,10 +115,10 @@
     // --- drops (index = zone)
     dropGap: [2.1, 1.85, 1.75, 1.6],   // s between drops (lap 0); ±dropJitter
     dropJitter: 0.15,
-    lapGap: 0.06, gapMin: 0.9,     // −6 % per loop
+    lapGap: 0.08, gapMin: 0.8,     // −8 % per loop
     goldChance: 0.08,              // of stars (+ one guaranteed by mid-jar)
     puffChance: [0.08, 0.16, 0.14, 0.18],
-    lapPuff: 0.03, puffCap: 0.32,
+    lapPuff: 0.12, puffCap: 0.48,  // +12 % per loop (loop 2+): endless loops get puffier (playtest 2026-11-15)
     puffDelay: 20,                 // s, no puffs on sunny lap 0 before this
     maxPuffRun: 2,                 // never more than 2 puffs in a row
     puffAim: 0.4,                  // chance a puff aims near Shelly (±150 px): a threat to read, never a trap
@@ -126,7 +126,7 @@
     fairSpeed: 230,                // px/s a casual player sustains (60 % of maxSpeed)
     fairSlack: 36,                 // px ≈ catch half-width
     puffKeepDt: 0.7, puffKeepDx: 110,   // a puff never crosses within 110 px of a star within 0.7 s…
-    puffKeepLap: 25,               // …−25 px per loop from loop 2 on (endless loops get tighter, min 40 px)
+    puffKeepLap: 35,               // …−35 px per loop from loop 2 on (endless loops get tighter, min 40 px)
     fairTries: 40,
 
     // --- wind (only zones with windMax > 0)
@@ -142,7 +142,7 @@
     lapWind: 0.1,                  // +10 % per loop
 
     // --- scoring / jar
-    jarTargets: [18, 22, 26, 30],
+    jarTargets: [20, 22, 26, 30],  // sunny ≈ 47 s on Normal
     starPoints: 10,                // × value × mult
     starValue: 1, goldValue: 5,
     multThresholds: [0, 8, 20]     // combo needed for ×1..×3
@@ -152,11 +152,12 @@
   var DIFFICULTY = {
     easy: {
       heartsMax: 5, invulnTime: 1.6, jetRecharge: 2.0, healLaps: 2,
-      jarTargets: [12, 15, 18, 21],
+      jarTargets: [14, 17, 20, 23],  // sunny ≈ 45 s for little kids
       peekTime: 0.8,
       fallMul: 0.82,               // softer falls for 3–5 year olds
       catchHalfW: 44,              // wider basket
-      puffChance: [0.05, 0.1, 0.09, 0.12], puffCap: 0.22,
+      puffChance: [0.05, 0.1, 0.09, 0.12], puffCap: 0.30,
+      lapPuff: 0.06,               // half of Normal's per-loop puff ramp
       dropGap: [2.8, 2.5, 2.35, 2.2],  // calmer: one star at a time for little kids (sunny ≈ 40 s)
       windMax: [0, 0, 75, 0],
       multThresholds: [0, 5, 12],  // ×2 sooner so little kids feel the streak
@@ -168,6 +169,7 @@
       jarTargets: [22, 26, 30, 34],
       fallMul: 1.12,
       puffChance: [0.12, 0.2, 0.18, 0.22], puffDelay: 8,
+      puffAim: 0.6, puffCap: 0.52, // more puffs near Shelly; higher cap for the higher base
       dropGap: [1.7, 1.55, 1.45, 1.35],
       windMax: [0, 0, 140, 0],
       fairSpeed: 280

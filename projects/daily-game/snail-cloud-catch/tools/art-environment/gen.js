@@ -345,7 +345,9 @@ function castleRain() {
   let o = '';
   // drifting drippy rain islands, high (above the play band) and far
   { const cf = fadePal(c0, 0.36); o += tower(548, 196, 18, 40, cf, { roof: cf.roofB, windows: 1, lit: true }) + tower(578, 198, 14, 28, cf, { roof: cf.roofA, windows: 0 }); }
-  o += floatIsle(560, 214, 160, 50, 601, fadePal({ ...c0.isl, haze: c0.haze }, 0.2));
+  // the far drippy island is lightened ~8 % toward white so it can't be mistaken for a big thunder puff (visual QA P3-3)
+  { const fi = fadePal({ ...c0.isl, haze: c0.haze }, 0.2), li = {}; for (const [key, v] of Object.entries(fi)) li[key] = typeof v === 'string' && v[0] === '#' ? mix(v, '#ffffff', 0.08) : v;
+    o += floatIsle(560, 214, 160, 50, 601, li); }
   const isA = island(560, 960, 380, 611, ci, 0.7); o += isA.svg;
   o += castle(760, edgeAt(isA.top, 760) + 12, 1, c, { towers: [[-52, 26, 104, c.roofA], [52, 28, 116, c.roofB], [0, 22, 146, c.roofA, 'back']], lit: true });
   const isB = island(0, 330, 420, 612, ci, 0.7); o += isB.svg;
@@ -522,13 +524,14 @@ P.petal = ps(`<path d="M6 20C8 11 17 6 26 9C24 17 15 23 6 20Z" fill="#ffc6d6" st
 P.zap = ps(`<circle cx="16" cy="16" r="13" fill="url(#g)"/><path d="M18.5 3L9 17.5H15L12.5 29L23 13.5H16.8Z" fill="#ffe14a" stroke="#c48a10" stroke-width="1.6" stroke-linejoin="round"/><path d="M17 6.5L12 15" fill="none" stroke="#fff8c8" stroke-width="1.5" stroke-linecap="round"/>`, glow('g', '#fff2a0', 0.6));
 P.mote = ps(`<circle cx="16" cy="16" r="12" fill="url(#g)"/><circle cx="16" cy="16" r="3.2" fill="#fffbe8"/><circle cx="15" cy="15" r="1.2" fill="#ffffff"/>`, glow('g', '#fff4cc', 0.75));
 
-// ---------- palette.json (banner, accent, HUD pill background readable on that sky, average sky colour) ----------
+// ---------- palette.json (banner, accent, HUD pill background readable on that sky, average sky colour,
+//            bankTop = [body, highlight] of the cloud bank's top edge, for the puffy shelf on tall screens) ----------
 // "sky" = measured mean of sky.svg (printed by sheet.js)
 const PALETTE_JSON = {
-  sunny: { banner: '#3f8fd8', accent: '#ffc93c', hud: '#2f679c', sky: '#97caec' },
-  rain: { banner: '#6f68ae', accent: '#8fd0ff', hud: '#4d4a7e', sky: '#9b98bb' },
-  wind: { banner: '#e8835e', accent: '#2fa6aa', hud: '#2f7c84', sky: '#bebeb8' },
-  snow: { banner: '#5a49a8', accent: '#a8dcff', hud: '#2f2a66', sky: '#6e63a0' },
+  sunny: { banner: '#3f8fd8', accent: '#ffc93c', hud: '#2f679c', sky: '#97caec', bankTop: ['#f4f9ff', '#ffffff'] },
+  rain: { banner: '#6f68ae', accent: '#8fd0ff', hud: '#4d4a7e', sky: '#9b98bb', bankTop: ['#d9d8ea', '#ecebf6'] },
+  wind: { banner: '#e8835e', accent: '#2fa6aa', hud: '#2f7c84', sky: '#bebeb8', bankTop: ['#fbe9e2', '#fff6f0'] },
+  snow: { banner: '#5a49a8', accent: '#a8dcff', hud: '#2f2a66', sky: '#6e63a0', bankTop: ['#dfe2f6', '#f4f5ff'] },
 };
 
 // ---------- write ----------

@@ -15,7 +15,7 @@ Daily game for 2026-11-15, made with `/build-game random`. High above the rain, 
 
 **Jet Hop:** a jetpack burst lifts Shelly about 100 px for about 0.7 s, so she can grab a star early (before the wind steals it) and fly a bit faster sideways. It recharges in about 2.5 s after landing (the meter next to the hearts).
 
-**Scoring:** a star is worth 10 × the streak multiplier, a golden star 50 ×. The streak gives ×2 at 8 stars in a row and ×3 at 20. A star that falls into the clouds ends the streak (no heart lost). Clearing a level gives 100 per heart left. Medals by score: bronze 300, silver 1000, gold 2200, platinum 4000.
+**Scoring:** a star is worth 10 × the streak multiplier, a golden star 50 ×. The streak gives ×2 at 8 stars in a row and ×3 at 20. A star that falls into the clouds ends the streak (no heart lost). Clearing a level gives 100 per heart left. Medals by score: bronze 700, silver 3000, gold 8000, platinum 18000.
 
 **Settings:** sound, music, volume, difficulty (Easy: 5 hearts, a wider basket, slower peeks; Normal; Hard), level length (Short / Normal / Long scales the star jar), full screen. **Change Pictures** swaps Shelly, the star, the thunder puff and each weather's background for your own pictures.
 
@@ -27,16 +27,17 @@ Daily game for 2026-11-15, made with `/build-game random`. High above the rain, 
 
 ## Build and test
 ```bash
-node tests/unit/run.js            # mechanics unit tests
+node tests/unit/run.js            # mechanics unit tests (30)
 node tests/e2e/smoke.js           # boot + title + bot at speed 8 + game over, no console errors
-node tests/e2e/functional.js      # full functional suite (≈3 min; --quick, --only=name)
-node tests/e2e/mobile.js          # iPhone / iPad portrait + landscape with real touch
-node tests/e2e/mobile_qa.js       # mobile essentials: rotation, multi-touch, kid-proofing, audio unlock, drops in range (--quick)
+node tests/e2e/functional.js      # full functional suite, 308 checks (≈5 min; --quick, --only=name)
+node tests/e2e/mobile.js          # iPhone / iPad portrait + landscape with real touch (98 checks)
+node tests/e2e/mobile_qa.js       # mobile essentials: rotation, multi-touch, kid-proofing, audio unlock, drops in range (--quick: 59 checks)
 node tests/visual/capture.js      # screenshots and motion sheets → tests/out/visual/
 node tests/visual/mobile_capture.js   # phone / tablet screenshots → tests/out/visual_mobile/
 node tools/render_mobile_icons.js     # home-screen icons → game/assets/icons/
 node tests/sim/run.js             # bot balance sim
 node tests/sim/players.js         # human-like player models
+node tests/sim/playtest.js        # high-speed playtest: 13 player models × 3 difficulties (--overrides, --tag)
 GOPROXY=direct GOSUMDB=off bash tools/build.sh   # Windows exe (cross-compiles from Linux)
 ```
 **URL switches:** `?speed=N&bot=1&skill=S&autostart=1&autorestart=1&seed=N&mute=1&debug=1&level=N&diff=easy|normal|hard`. For tests, `window.SC.debug` exposes `{ world, weather, mode, stats, getState(), setSpeed(n), startGame(), setBot(on, skill), setAutoRestart(on), gotoLevel(i) }`.

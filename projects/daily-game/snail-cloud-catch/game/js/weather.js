@@ -62,8 +62,8 @@
     { // 2 wind
       ambient: { tint: [255, 205, 170, 0.035], fog: 0.02 },
       emitters: [
-        { kind: 'streak', layer: 'back', count: 7, size: [44, 70], alpha: [0.3, 0.5], sprite: 'streak', depth: 0.5, band: [130, 420] },
-        { kind: 'streak', layer: 'front', count: 6, size: [60, 92], alpha: [0.35, 0.6], sprite: 'streak', depth: 1, band: [150, 470] },
+        { kind: 'streak', layer: 'back', count: 7, size: [44, 70], alpha: [0.5, 0.75], sprite: 'streak', depth: 0.5, band: [130, 420] },
+        { kind: 'streak', layer: 'front', count: 6, size: [60, 92], alpha: [0.6, 0.9], sprite: 'streak', depth: 1, band: [150, 470] },
         { kind: 'petal', layer: 'back', count: 6, size: [9, 13], alpha: [0.6, 0.85], sprite: 'petal', depth: 0.55, fall: [18, 30] },
         { kind: 'petal', layer: 'front', count: 4, size: [14, 19], alpha: [0.8, 1], sprite: 'petal', depth: 1, fall: [28, 40] }
       ]
@@ -238,7 +238,7 @@
         if (p.x0 < -30) p.x0 += W + 60; else if (p.x0 > W + 30) p.x0 -= W + 60;
         break;
       case 'streak': {
-        var dir = this.windDir, lv = Math.max(this.windLevel, this.windWarn > 0 ? 0.35 : 0);
+        var dir = this.windDir, lv = Math.max(this.windLevel, this.windWarn > 0 ? 0.6 : 0);
         p.x += dir * (180 + 420 * lv) * (0.55 + 0.45 * p.depth) * p.speed * h;
         p.y += Math.sin(p.phase + p.age * 2) * 6 * h;
         p.flipX = dir;
@@ -287,7 +287,7 @@
       case 'mote': a *= 0.6 + 0.4 * Math.sin(p.phase); break;
       case 'streak': {
         u = clamp(p.age / p.life, 0, 1);
-        var lv = Math.max(this.windLevel, this.windWarn > 0 ? 0.35 : 0);
+        var lv = Math.max(this.windLevel, this.windWarn > 0 ? 0.6 : 0);
         a *= Math.sin(Math.PI * u) * clamp(0.15 + lv, 0, 1);
         break;
       }

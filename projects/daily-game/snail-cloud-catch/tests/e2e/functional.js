@@ -163,6 +163,19 @@ async function layoutReport(page) {
       const pr = panel.getBoundingClientRect();
       if (pr.top < -0.5 || pr.bottom > vh + 0.5 || pr.left < -0.5 || pr.right > vw + 0.5) bad.push('panel ' + [pr.left, pr.top, pr.right, pr.bottom].map(Math.round).join(','));
       for (const b of btns) { const r = b.getBoundingClientRect(); if (r.bottom > pr.bottom + 0.5 || r.top < pr.top - 0.5) hidden.push(b.id || b.textContent.trim().slice(0, 20)); }
+      // QA: a panel that scrolls is fine on small screens IF it really scrolls and every hidden button can be scrolled into view
+      const oy = getComputedStyle(panel).overflowY, scrollable = (oy === 'auto' || oy === 'scroll') && panel.scrollHeight > panel.clientHeight + 1;
+      if (overflow && scrollable && SC.Game.isTouch) {
+        const unreachable = [];
+        for (const b of btns) {
+          const r0 = b.getBoundingClientRect(); if (!(r0.bottom > pr.bottom + 0.5 || r0.top < pr.top - 0.5)) continue;
+          b.scrollIntoView({ block: 'nearest' }); const r = b.getBoundingClientRect();
+          if (r.bottom > pr.bottom + 1 || r.top < pr.top - 1) unreachable.push(b.id || b.textContent.trim().slice(0, 20));
+        }
+        panel.scrollTop = 0;
+        const wide = panel.scrollWidth > panel.clientWidth + 1;
+        return { bad, overflow: wide, hidden: unreachable, scrolls: true };
+      }
     }
     return { bad, overflow, hidden };
   });
@@ -305,9 +318,9 @@ async function testPointer() {
   // mute button toggles and does not move Shelly
   await isolate(page, 300);
   const mb = await ev(page, () => { const r = document.getElementById('btnMuteHud').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
-  const mu0 = await ev(page, () => SC.Game.settings.muted);
+  const mu0 = await ev(page, () => SC.Game.isMuted());   // effective mute (setting, ?mute=1 or a 0 % volume)
   await page.mouse.click(mb.x, mb.y); await page.waitForTimeout(80);
-  const mu1 = await ev(page, () => SC.Game.settings.muted);
+  const mu1 = await ev(page, () => SC.Game.isMuted());
   check('mouse: HUD mute button toggles sound and keeps playing', mu1 === !mu0 && (await mode(page)) === 'playing');
   await page.mouse.click(mb.x, mb.y); await page.waitForTimeout(80);
   errorsOk(page, 'pointer');
@@ -588,9 +601,14 @@ async function testGameOver() {
   await shot(page, '10_over');
   // restart lock: Enter spam
   await countStarts(page);
-  for (let i = 0; i < 6; i++) { await page.keyboard.press('Enter'); await page.waitForTimeout(40); }
+  // QA fix: the old loop pressed 6× with fixed waits and, on a loaded machine, ran past the 0.7 s lock (flaky FAIL).
+  // Spam only while < 600 ms have passed since game over (measured in the page), alternating Enter and Space.
+  const sinceOver = () => ev(page, () => performance.now() - SC.Game.overAt);
+  let pressed = 0;
+  await ev(page, () => { SC.Game.overAt = performance.now(); });   // restart the lock clock: the screenshot above may be slow
+  while ((await sinceOver()) < 600 && pressed < 30) { await page.keyboard.press(pressed % 2 ? 'Space' : 'Enter'); pressed++; await page.waitForTimeout(25); }
   const early = await starts(page);
-  check('over: Enter spam in the first 0.7 s does not restart', early === 0 && (await mode(page)) === 'over', early);
+  check('over: Enter/Space spam in the first 0.6 s does not restart (restart lock)', pressed > 0 && early === 0 && (await mode(page)) === 'over', { early, pressed });
   await page.waitForTimeout(700);
   for (let i = 0; i < 8; i++) { await page.keyboard.press('Enter'); await page.waitForTimeout(30); }
   await page.waitForTimeout(150);
@@ -793,7 +811,8 @@ async function testCustomPictures() {
 async function testLayout() {
   const vps = [
     [1280, 720, 1, false], [1280, 720, 2, false], [1920, 1080, 1, false], [800, 600, 1, false],
-    [1024, 768, 1, true], [1024, 768, 2, true], [844, 390, 2, true], [844, 390, 3, true], [390, 844, 3, true]
+    [1024, 768, 1, true], [1024, 768, 2, true], [844, 390, 2, true], [844, 390, 3, true], [390, 844, 3, true],
+    [390, 844, 2, true], [1366, 1024, 2, true], [1024, 1366, 2, true], [667, 375, 2, true]   // QA: + iPad Pro 12.9 both ways, iPhone SE landscape
   ];
   for (const [w, h, dsf, touchDev] of vps) {
     const page = await newPage({ viewport: { width: w, height: h }, dsf, touch: touchDev, mobile: touchDev });
@@ -927,9 +946,219 @@ async function testLongRun() {
   await close(page);
 }
 
+/* ===================== QA additions (functional QA pass, 2026-11-15) ===================== */
+
+/* Game over: keyboard focus on the other buttons must do what the button says, not "Play Again". */
+async function testOverKeys() {
+  const page = await newPage();
+  await boot(page, 'seed=5');
+  await page.click('#btnPlay'); await page.waitForTimeout(200);
+  await freeze(page); await killToOver(page, 100); await page.waitForTimeout(900);
+  await countStarts(page);
+  await page.focus('#btnOverMenu'); await page.keyboard.press('Enter'); await page.waitForTimeout(250);
+  const a = { mode: await mode(page), ui: await ui(page), starts: await starts(page) };
+  check('over keys: Enter on the focused Menu button goes to the title (not Play Again)', a.mode === 'title' && a.ui === 'scrTitle' && a.starts === 0, a);
+  if (a.mode !== 'over') { await ev(page, () => SC.Game.startGame()); await freeze(page); await killToOver(page, 100); await page.waitForTimeout(900); }
+  await countStarts(page);
+  await page.focus('#btnScoreCard'); await page.keyboard.press('Enter'); await page.waitForTimeout(600);
+  const b = { mode: await mode(page), starts: await starts(page), card: await ev(page, () => { const p = document.querySelector('.sc-panel'); return !!p && p.offsetParent !== null; }) };
+  check('over keys: Enter on the focused Score Card button opens the card (not Play Again)', b.card && b.starts === 0 && b.mode === 'over', b);
+  await page.keyboard.press('Escape'); await page.waitForTimeout(100);
+  // Tab order: Play Again is focused first after a (fresh) game over
+  await ev(page, () => SC.Game.startGame()); await freeze(page); await killToOver(page, 100);
+  await page.waitForTimeout(300);
+  check('over keys: Play Again has keyboard focus after game over', await ev(page, () => document.activeElement && document.activeElement.id === 'btnAgain'));
+  errorsOk(page, 'over keys');
+  await close(page);
+}
+
+/* Inputs not covered elsewhere: HUD right-click, the 🚀 finger never becomes the steering finger, Shift. */
+async function testInputExtras() {
+  const page = await newPage();
+  await boot(page, 'seed=5');
+  await startFrozen(page); await isolate(page, 480);
+  const pb = await ev(page, () => { const r = document.getElementById('btnPause').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+  const r0 = await jets(page);
+  await page.mouse.click(pb.x, pb.y, { button: 'right' }); await page.waitForTimeout(100);
+  check('input: right-click on the HUD pause button does not Jet Hop and does not pause', (await jets(page)) === r0 && (await mode(page)) === 'playing', { jets: (await jets(page)) - r0, mode: await mode(page) });
+  // mouse leaves the window: Shelly heads to the last cursor x and stays inside the range
+  await isolate(page, 480);
+  const a = await toClient(page, 300, 300);
+  await page.mouse.move(a.x + 10, a.y); await page.mouse.move(a.x, a.y, { steps: 3 }); await page.waitForTimeout(60);
+  await page.mouse.move(-50, a.y); await page.waitForTimeout(60);   // outside the page
+  await simStep(page, 2);
+  const s = await snail(page), cfg = await ev(page, () => SC.debug.world.cfg);
+  check('input: cursor leaving the window keeps Shelly inside her range (no NaN)', isFinite(s.x) && s.x >= cfg.xMin - 0.5 && s.x <= cfg.xMax + 0.5, Math.round(s.x));
+  // keyboard wins over the mouse; after the key is released the mouse only takes over again once it moves
+  await isolate(page, 480);
+  const m = await toClient(page, 800, 300);
+  await page.mouse.move(m.x - 5, m.y); await page.mouse.move(m.x, m.y, { steps: 3 }); await page.waitForTimeout(60);
+  await page.keyboard.down('ArrowLeft'); await page.waitForTimeout(40); await simStep(page, 0.6); await page.keyboard.up('ArrowLeft'); await page.waitForTimeout(40);
+  await simStep(page, 1.0);
+  const k = await snail(page);
+  check('input: keys override mouse-follow; Shelly does not snap back to a still cursor', k.x < 470, Math.round(k.x));
+  errorsOk(page, 'input extras');
+  await close(page);
+
+  // touch: a finger on 🚀 must not be counted as the steering finger (the next finger steers, not hops)
+  const tp = await newPage({ viewport: { width: 844, height: 390 }, dsf: 3, touch: true, mobile: true });
+  await boot(tp, 'seed=5');
+  await startFrozen(tp); await isolate(tp, 480);
+  const ab = await ev(tp, () => { const r = document.getElementById('btnAction').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+  const j0 = await jets(tp);
+  await touch(tp, 'touchStart', [{ x: ab.x, y: ab.y, id: 1 }]); await tp.waitForTimeout(60);
+  await touch(tp, 'touchEnd', []); await tp.waitForTimeout(60);
+  await isolate(tp, 480);
+  const fx = await ev(tp, () => { // client point over the scene at logical x=250, y=330 via the renderer's own inverse
+    const R = SC.Game.renderer; for (let cx = 0; cx < innerWidth; cx += 2) { const p = R.toLogical(cx, innerHeight * 0.6); if (p && p[0] >= 250) return { x: cx, y: innerHeight * 0.6 }; } return null; });
+  const j1 = await jets(tp);
+  await touch(tp, 'touchStart', [{ x: fx.x, y: fx.y, id: 2 }]); await tp.waitForTimeout(60);
+  await simStep(tp, 1.5);
+  const st = { jetsAfterButton: j1 - j0, jetsAfterFinger: (await jets(tp)) - j1, x: Math.round((await snail(tp)).x) };
+  await touch(tp, 'touchEnd', []);
+  check('touch: after a 🚀 tap, a single finger steers (is not taken as a second finger)', st.jetsAfterButton === 1 && st.jetsAfterFinger === 0 && Math.abs(st.x - 250) < 12, st);
+  errorsOk(tp, 'touch extras');
+  await close(tp);
+}
+
+/* Settings persistence corners: Level length, ?mute=1 + M, volume slider. */
+async function testSettingsExtra() {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+  const page = await newPage({}, ctx);
+  await boot(page, 'seed=5', false);
+  await ev(page, () => localStorage.clear()); await page.reload(); await page.waitForFunction(() => window.SC && SC.debug && SC.debug.mode === 'title');
+  await page.click('#btnSettings'); await page.click('#setLength button[data-v=long]'); await page.click('#scrSettings .btn-back');
+  await page.reload(); await page.waitForFunction(() => window.SC && SC.debug && SC.debug.mode === 'title');
+  check('settings+: Level length persists across reload and the segment shows it', await ev(page, () => SC.Game.settings.length === 'long'));
+  await ev(page, () => SC.Game.setSetting('length', 'normal'));
+  // volume: never written unless the player moves it
+  await page.click('#btnSettings'); await page.waitForTimeout(150);
+  const v0 = await ev(page, () => ({ stored: SC.Storage.get('volume'), ls: localStorage.getItem('ssc:volume'), slider: document.getElementById('setVolume').value }));
+  check('volume: default 100 %, nothing saved just by opening Settings', v0.stored == null && v0.ls == null && v0.slider === '100', v0);
+  await page.click('label.set:has(#setSfx)'); await page.click('label.set:has(#setMusic)'); await page.click('label.set:has(#setSfx)'); await page.click('label.set:has(#setMusic)');
+  await page.keyboard.press('KeyM'); await page.keyboard.press('KeyM');
+  check('volume: toggling sound / music / M never writes a volume', await ev(page, () => SC.Storage.get('volume') == null));
+  // − button down to 0, then reload: 0 is the player's explicit choice
+  for (let i = 0; i < 11; i++) await page.click('.vol-step[data-d="-1"]');
+  const v1 = await ev(page, () => ({ stored: SC.Storage.get('volume'), audio: SC.Audio.volume, gain: SC.Audio.user && SC.Audio.user.gain.value, label: document.getElementById('setVolumeVal').textContent }));
+  check('volume: − button reaches 0 %, saved as 0.00 and applied to the audio graph', v1.stored === '0.00' && v1.audio === 0 && v1.label === '0%', v1);
+  // a 0 % volume counts as muted: the HUD shows the muted speaker, and M (unmute) restores 50 %
+  const MUTED_ICON = () => document.getElementById('btnMuteHud').innerHTML.includes('M16 9l5 6');
+  const hz = await ev(page, MUTED_ICON);
+  check('volume: 0 % shows the muted speaker on the HUD', hz === true && await ev(page, () => SC.Game.isMuted()));
+  await page.keyboard.press('KeyM'); await page.waitForTimeout(80);
+  const hu = await ev(page, () => ({ icon: document.getElementById('btnMuteHud').innerHTML.includes('M16 9l5 6'), stored: SC.Storage.get('volume'), audio: SC.Audio.volume, muted: SC.Game.settings.muted, eff: SC.Game.isMuted() }));
+  check('volume: M at 0 % unmutes and restores 50 % (muted flag stays off)', !hu.icon && +hu.stored === 0.5 && hu.audio === 0.5 && !hu.muted && !hu.eff, hu);
+  await page.click('.vol-step[data-d="-1"]'); await page.waitForTimeout(50);   // the slider still reads 0 → back to 0 %
+  check('volume: moving the slider back to 0 % shows the muted speaker again', await ev(page, MUTED_ICON) && await ev(page, () => SC.Storage.get('volume') === '0.00'));
+  await page.click('.vol-step[data-d="1"]'); await page.waitForTimeout(80);
+  check('volume: + from 0 goes to 10 % (not stuck at 0)', await ev(page, () => SC.Storage.get('volume') === '0.10' && SC.Audio.volume === 0.1));
+  // slider drag to 0 then up again
+  await page.locator('#setVolume').fill('0'); await page.waitForTimeout(50);
+  await page.locator('#setVolume').fill('65'); await page.waitForTimeout(50);
+  await page.click('#scrSettings .btn-back');
+  await page.reload(); await page.waitForFunction(() => window.SC && SC.debug && SC.debug.mode === 'title');
+  await page.click('#btnPlay'); await page.waitForTimeout(200);   // gesture creates the AudioContext
+  const v2 = await ev(page, () => ({ stored: SC.Storage.get('volume'), audio: SC.Audio.volume, gain: SC.Audio.user && +SC.Audio.user.gain.value.toFixed(3) }));
+  check('volume: 65 % persists across reload and is applied once the AudioContext exists', v2.stored === '0.65' && near(v2.audio, 0.65, 1e-6) && v2.gain != null, v2);
+  // ?mute=1 must never write the volume or the muted flag, even when the player presses M
+  await page.goto(url('seed=5', true)); await page.waitForFunction(() => window.SC && SC.debug && SC.debug.mode === 'title');
+  await page.click('#btnSettings'); await page.waitForTimeout(100);
+  check('volume: ?mute=1 leaves the saved volume untouched', await ev(page, () => SC.Storage.get('volume') === '0.65' && document.getElementById('setVolume').value === '65'));
+  await page.click('#scrSettings .btn-back');
+  await page.keyboard.press('KeyM'); await page.waitForTimeout(80);
+  const mm = await ev(page, () => ({ saved: JSON.parse(SC.Storage.get('settings') || '{}').muted, toast: document.getElementById('toast').textContent, audio: SC.Audio.muted }));
+  check('settings+: with ?mute=1, pressing M does not save muted=true for the next normal launch', !mm.saved, mm);
+  check('settings+: with ?mute=1, M is a session-only unmute (toast "Sound on", audio unmuted)', /sound on/i.test(mm.toast) && !(await ev(page, () => SC.Game.isMuted())), mm);
+  await ev(page, () => { localStorage.clear(); });
+  errorsOk(page, 'settings extra');
+  await ctx.close();
+}
+
+/* Change Pictures: a custom background for every weather is drawn in that weather; star tints; reset. */
+async function testCustomWeather() {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+  const page = await newPage({}, ctx);
+  await boot(page, 'seed=5');
+  await page.click('#btnCustomize'); await page.waitForTimeout(150);
+  const colors = { bg_sunny: '#d01010', bg_rain: '#10c010', bg_wind: '#1010d0', bg_snow: '#d0d010' };
+  // the renderer softens custom backgrounds a little (ambient tint), so test colour dominance, not exact values
+  const preds = { bg_sunny: 'r > g + 60 && r > b + 60', bg_rain: 'g > r + 60 && g > b + 60', bg_wind: 'b > r + 60 && b > g + 60', bg_snow: 'r > b + 60 && g > b + 60' };
+  for (const [slot, col] of Object.entries(colors)) {
+    const buf = await ev(page, async col => { const c = document.createElement('canvas'); c.width = 1600; c.height = 900; const g = c.getContext('2d'); g.fillStyle = col; g.fillRect(0, 0, 1600, 900);
+      const b = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.95)); return await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(String(fr.result).split(',')[1]); fr.readAsDataURL(b); }); }, col);
+    await pickFile(page, slot, { name: slot + '.jpg', mimeType: 'image/jpeg', buffer: Buffer.from(buf, 'base64') });
+    const t = await waitToast(page, /saved/i, 8000);
+    const sz = await storedSize(page, 'img_' + slot);
+    check(`custom bg: ${slot} saved and downscaled (≤ 1280×720)`, /saved/i.test(t) && sz && sz[0] <= 1280 && sz[1] <= 720, { t, sz });
+  }
+  check('custom bg: all four weather cards show "Your picture"', await ev(page, () => [...document.querySelectorAll('#slotGrid .slot')].slice(3).every(s => /Your picture/.test(s.textContent))));
+  await page.click('#scrCustom .btn-back'); await page.waitForTimeout(100);
+  await page.click('#btnPlay'); await page.waitForTimeout(150);
+  await freeze(page); await toPlaying(page);
+  const zoneSlots = ['bg_sunny', 'bg_rain', 'bg_wind', 'bg_snow'];
+  for (let z = 0; z < 4; z++) {
+    await ev(page, z => { SC.debug.gotoLevel(z); SC.Game.renderer.setSeason(z, true); SC.debug.weather.setSeason(z, { instant: true }); }, z);
+    await ev(page, () => SC.debug.setSpeed(0.001)); await page.waitForTimeout(1200);
+    const n = await probe(page, 20, 150, 200, 90, preds[zoneSlots[z]]);
+    check(`custom bg: weather ${z} (${zoneSlots[z]}) draws its own custom picture`, n > 2000, n);
+    await shot(page, `16_custom_bg_${zoneSlots[z]}`);
+    await freeze(page);
+  }
+  await page.keyboard.press('Escape'); await page.click('#btnPauseMenu'); await page.waitForTimeout(100);
+  await page.click('#btnCustomize'); await page.click('#btnResetAll'); await page.waitForTimeout(100);
+  check('custom bg: Reset all clears the weather pictures', await ev(page, () => ['bg_sunny', 'bg_rain', 'bg_wind', 'bg_snow'].every(s => !SC.Assets.hasCustom(s) && !SC.Storage.get('img_' + s))));
+  // a huge PNG (6000×6000) for the hero: accepted and shrunk, page stays responsive
+  const huge = await makeImage(page, 6000, 6000, 'star', 'image/png');
+  const t0 = Date.now();
+  await pickFile(page, 'hero', { name: 'huge.png', mimeType: 'image/png', buffer: huge });
+  const t = await waitToast(page, /saved|room|could/i, 20000);
+  const hs = await storedSize(page, 'img_hero');
+  check('custom: 6000×6000 PNG for Shelly accepted and shrunk to ≤ 512 px', /saved/i.test(t) && hs && Math.max(hs[0], hs[1]) <= 512, { t, hs, ms: Date.now() - t0, bytes: huge.length });
+  // empty file and SVG
+  await pickFile(page, 'star', { name: 'empty.png', mimeType: 'image/png', buffer: Buffer.alloc(0) });
+  const te = await waitToast(page, /could|picture/i, 4000);
+  check('custom: empty file → friendly error, no crash', /could|picture/i.test(te) && !(await ev(page, () => SC.Assets.hasCustom('star'))), te);
+  await ev(page, () => SC.Assets.SLOTS.forEach(s => SC.Assets.clearCustom(s.id)));
+  errorsOk(page, 'custom weather');
+  await ctx.close();
+}
+
+/* Loudness while the bot plays (sfx + music, volume 100 %): AnalyserNode tapped after the make-up gain (what reaches
+ * the speakers). Target ≈ −24 dBFS RMS and ≈ −5 dBFS peak; pass band RMS −28…−20, peak ≤ −1 dBFS (no clipping). */
+async function testLoudness() {
+  const page = await newPage();
+  await boot(page, 'seed=7&bot=1', false);
+  await page.click('#btnPlay'); await page.waitForTimeout(300);
+  const secs = QUICK ? 10 : 25;
+  const r = await ev(page, async secs => {
+    const A = SC.Audio; A.unlock(); if (!A.ctx) return { error: 'no AudioContext' };
+    await A.ctx.resume(); if (A.ctx.state !== 'running') return { error: 'context ' + A.ctx.state };
+    const an = A.ctx.createAnalyser(); an.fftSize = 2048; A.user.connect(an);
+    const buf = new Float32Array(an.fftSize); let ss = 0, n = 0, peak = 0; const win = [];
+    const t0 = performance.now();
+    await new Promise(res => { const id = setInterval(() => {
+      an.getFloatTimeDomainData(buf); let s = 0; for (let i = 0; i < buf.length; i++) { const v = buf[i]; s += v * v; if (Math.abs(v) > peak) peak = Math.abs(v); }
+      ss += s; n += buf.length; win.push(Math.sqrt(s / buf.length));
+      if (performance.now() - t0 > secs * 1000) { clearInterval(id); res(); } }, 45); });
+    A.user.disconnect(an); A.user.connect(A.ctx.destination);
+    const db = x => +(20 * Math.log10(Math.max(1e-9, x))).toFixed(1); win.sort((a, b) => a - b);
+    return { rms: db(Math.sqrt(ss / n)), peak: db(peak), p95: db(win[Math.floor(win.length * 0.95)]), median: db(win[win.length >> 1]), windows: win.length, score: SC.debug.world.score };
+  }, secs);
+  info('loudness: ' + JSON.stringify(r));
+  if (r.error) { check('loudness: measurable (AudioContext running in headless Chromium)', false, r.error); }
+  else {
+    check('loudness: RMS within −28…−20 dBFS (target ≈ −24)', r.rms >= -28 && r.rms <= -20, r);
+    check('loudness: peak ≤ −1 dBFS (no clipping; target ≈ −5)', r.peak <= -1, r);
+  }
+  errorsOk(page, 'loudness');
+  await close(page);
+}
+
 /* =============================== MAIN =============================== */
 const TESTS = { boot: testBootAndScreens, keyboard: testKeyboard, pointer: testPointer, touch: testTouch, action: testAction, scoring: testScoring,
-  pause: testPause, over: testGameOver, settings: testSettings, custom: testCustomPictures, layout: testLayout, focus: testFocus, long: testLongRun };
+  pause: testPause, over: testGameOver, overkeys: testOverKeys, input: testInputExtras, settings: testSettings, settings2: testSettingsExtra,
+  custom: testCustomPictures, custombg: testCustomWeather, layout: testLayout, focus: testFocus, loudness: testLoudness, long: testLongRun };
 
 (async () => {
   browser = await chromium.launch({ args: ['--allow-file-access-from-files', '--autoplay-policy=no-user-gesture-required'] });

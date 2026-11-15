@@ -37,7 +37,7 @@ Flutter: `x = bx + A·sin(φ)`, where φ advances at ω while the item falls. `r
 | thunder puff (r 19) | 99 (×0.6) | 2.6 | 1.3 | 16 / 1.4 (bobbing) | 0 | heart −1 |
 
 - A star takes about **2.3 s** from the cloud bank (y 96) to the rim (y 384), after a 0.6 s peek (0.8 s on Easy). A gold star takes about 1.8 s and a puff about 3.3 s.
-- Weather multiplies the terminal speed: rain ×1.15 (wet stars), snow ×0.85 with sway ×1.8 (fluttery). Each loop adds +8 %, capped at ×1.4. Easy is ×0.82, Hard ×1.12.
+- Weather multiplies the terminal speed: rain ×1.15 (wet stars), snow ×0.85 with sway ×1.8 (fluttery). Each loop adds +12 %, capped at ×1.7. Easy is ×0.82, Hard ×1.12.
 - Side limits: the centre line bounces softly off the play range (restitution 0.35), so a blown star always stays where Shelly can reach.
 - On the floor, a star bounces once (restitution 0.4, g 400, a hop of about 5 px), then fades over 0.6 s and fires `miss`. A puff pops and fires `puffland`.
 - `World.predict(it, Y)` solves the same ODE exactly: Newton on `y(τ) = y0 + vT·τ + (v0 − vT)/k·(1 − e^{−kτ})`, plus the closed-form horizontal drift and the sway phase. It includes the remaining peek time. It matches the sim to within 2 px and 0.02 s in calm air, and within 6 px in wind (the gust turbulence is the only part it leaves out). `itemAt(it, τ)` gives the position at any time, and the bot uses it for hop planning.
@@ -46,19 +46,19 @@ Flutter: `x = bx + A·sin(φ)`, where φ advances at ω while the item falls. `r
 - **Catch test:** the item enters the basket opening from above during a sub-step. In coordinates relative to the moving rim, `y − rimY` goes from negative to ≥ 0, and the x interpolated at that crossing is within `36 + r·0.5` of the interpolated rimX (44 on Easy). Because the test uses the rim's own previous and current positions, a Jet Hop that rises into a star catches it.
 - **Scoring:** points = value × 10 × mult. The streak counts every star or gold, with thresholds `[0, 8, 20]` giving ×1 / ×2 / ×3 (Easy `[0, 5, 12]`), and `multup` fires on each step up. A missed star resets the streak and mult to ×1.
 - **Thunder puff caught:** `zap`, hearts −1, the streak resets, 1.2 s of invulnerability (1.6 s Easy, 1.0 s Hard) and the frame shows `zap`. A puff caught while invulnerable pops harmlessly (`pop`). At 0 hearts the state becomes `dead`.
-- **Jar:** every star or gold adds +1. Targets are 18/22/26/30 (Easy 12/15/18/21, Hard 22/26/30/34). When the jar is full: `jarfull`, then the grace second, then `cleared` with bonus = hearts × 100, and +1 heart on the first loop (two loops on Easy, never on Hard).
+- **Jar:** every star or gold adds +1. Targets are 20/22/26/30 (Easy 14/17/20/23, Hard 22/26/30/34). When the jar is full: `jarfull`, then the grace second, then `cleared` with bonus = hearts × 100, and +1 heart on the first loop (two loops on Easy, never on Hard).
 
 ## 5. Drops (scheduler + fairness)
-- **Gap between drops:** Normal 2.1 / 1.85 / 1.75 / 1.6 s (sunny / rain / wind / snow), Easy 2.8 / 2.5 / 2.35 / 2.2, Hard 1.7 / 1.55 / 1.45 / 1.35. Each gap is jittered ±15 %, and each loop shortens it by 6 % (minimum 0.9 s).
+- **Gap between drops:** Normal 2.1 / 1.85 / 1.75 / 1.6 s (sunny / rain / wind / snow), Easy 2.8 / 2.5 / 2.35 / 2.2, Hard 1.7 / 1.55 / 1.45 / 1.35. Each gap is jittered ±15 %, and each loop shortens it by 8 % (minimum 0.8 s).
   - These are slower than the "e.g." numbers in DESIGN (1.5 → 1.1 s). With those numbers an 18-star jar filled in about 30 s. The brief asked for levels of about 45–90 s, which these slower gaps give.
 - **Mix:**
   - Gold is 8 % of stars, and one is guaranteed by the time the jar is half full.
-  - Thunder puffs: sunny 8 % (none in the first 20 s of the first loop), rain 16 %, wind 14 %, snow 18 %. Each loop adds +3 %, capped at 32 %. Easy is about 60 % of these and Hard is higher.
-  - Never more than 2 puffs in a row. 40 % of puffs aim near Shelly (±150 px), so they are a threat to read, never a trap.
+  - Thunder puffs: sunny 8 % (none in the first 20 s of the first loop), rain 16 %, wind 14 %, snow 18 %. Each loop adds +12 %, capped at 48 % (loop 1 is untouched; the cap is reached on loop 4). Easy is about 60 % of these, +6 % per loop, capped at 30 %. Hard is higher, capped at 52 %.
+  - Never more than 2 puffs in a row. 40 % of puffs aim near Shelly (±150 px; 60 % on Hard), so they are a threat to read, never a trap.
 - **Fair aim:** up to 40 random candidates in the drop range. The new item itself is the probe (its flutter phase is part of the aim). Each candidate's crossing is predicted with the current wind. Its cost is:
   - Star: `|x − lastStar.x| − 36 − 230·Δt` (chainable at 230 px/s, about 60 % of max speed; Easy 150, Hard 280). When no star is pending, the reach from Shelly is used instead. Add 3 × (110 − d) when it crosses within 110 px and 0.7 s of a puff.
   - Puff: (110 − d) against every pending star.
-  - From loop 3 on, the keep-out shrinks by 25 px per loop (minimum 40), so endless runs eventually end.
+  - From loop 3 on, the keep-out shrinks by 35 px per loop (110 → 75 → 40 px, minimum 40), so endless runs eventually end.
 - Measured over 10 seeds × 4 levels: unfair star pairs < 1 % in calm weather (about 4 % in wind, where a later gust moves an earlier star; Jet Hop is the answer), and at most 2 puff/star conflicts. The test also checks that every level has a gold star.
 - `setPlayRange(xMin, xMax)` (mobile) sets Shelly's clamp. The drop range becomes `[max(80, xMin + 10), min(880, xMax − 10)]`. Peeking items are moved into the new range. Falling items whose centre line is outside are moved in; they start from vx = 0 and `_px` is reset, so there is no smear.
 
@@ -103,6 +103,8 @@ Flutter: `x = bx + A·sin(φ)`, where φ advances at ω while the item falls. `r
 `bot.stats` = { decisions, catches, gold, misses, zaps, jets, jetCatches, levels, deaths, maxLevel }.
 
 ## 10. Results
+> **Tuning update (playtest 2026-11-15, `docs/reports/playtest.md`).** The loop ramps, Easy/Normal jar targets and medals were changed after the tables below were measured. Loop 1 is untouched apart from the jar targets (sunny now ≈ 43–47 s). After the change, the casual adult on Normal survives a median **15.2 min** (was 22.8), bot1.0 Normal 17.9 min (was ≥ 30), kid4 on Easy 12.4 min with 99 % clearing loop 1, kid6 on Normal 8.7 min with 100 % clearing loop 1. Medals are now bronze 700 / silver 3000 / gold 8000 / platinum 18000 (before: 300 / 1000 / 2200 / 4000, which every model reached). Full before/after tables: `tests/sim/results/playtest_baseline.md` and `playtest_proposed2*.md`; re-run with `node tests/sim/playtest.js`.
+
 Run with `node tests/unit/run.js`: **30 unit tests, all passing.** Ten minutes of world + bot + weather simulate in about 1.1 s.
 
 ### Bot × difficulty

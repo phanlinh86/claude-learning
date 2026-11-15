@@ -10,7 +10,9 @@ package main
 
 import (
 	"embed"
+	"fmt"
 	"io/fs"
+	"log"
 	"net"
 	"net/http"
 	"os"
@@ -168,7 +170,8 @@ func main() {
 		return
 	}
 	// A fixed port keeps the page origin stable between runs (matters for the browser fallback);
-	// fall back to any free port if it is taken.
+	// fall back to any free port if it is taken. That changes the page origin, which is fine here: saves go
+	// through the file store (ffStore*), not localStorage.
 	ln, err := net.Listen("tcp", "127.0.0.1:47623")
 	if err != nil {
 		ln, err = net.Listen("tcp", "127.0.0.1:0")
@@ -183,8 +186,14 @@ func main() {
 		w.Header().Set("Cache-Control", "no-store")
 		fileServer.ServeHTTP(w, r)
 	}))
-	go http.Serve(ln, mux)
-	url := "http://" + ln.Addr().String() + "/index.html?app=1"
+	go func() {
+		// Serve only returns on failure (the process exit ends it otherwise): leave a trace in the log.
+		if err := http.Serve(ln, mux); err != nil {
+			log.Printf("Shelly's Sky Catch: local game server stopped: %v", err)
+		}
+	}()
+	origin := "http://" + ln.Addr().String()
+	url := origin + "/index.html?app=1"
 
 	localAppData := os.Getenv("LOCALAPPDATA")
 	if localAppData == "" {
@@ -225,6 +234,16 @@ func main() {
 	w.Bind("ffQuit", func() {
 		w.Dispatch(func() { w.Terminate() })
 	})
+
+	// The ffStore* bindings can write files, so they must only ever serve the game's own page.
+	// go-webview2 exposes no NavigationStarting hook, so an init script (runs before any page script on every
+	// navigation) removes the bindings and returns to the game if the WebView ever lands on another origin.
+	w.Init(fmt.Sprintf(`(function () {
+  var home = %q;
+  if (location.origin === home) return;
+  ["ffStoreAll", "ffStoreSet", "ffStoreDel", "ffFullscreen", "ffQuit"].forEach(function (k) { try { delete window[k]; } catch (e) { window[k] = undefined; } });
+  location.replace(home + "/index.html?app=1");
+})();`, origin))
 
 	w.Navigate(url)
 	w.Run()

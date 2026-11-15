@@ -6,7 +6,16 @@ A family-friendly basket catcher in a cloud kingdom: Shelly the jetpack snail ca
 ## Status
 v1.0 (2026-11-15), with the iPhone / iPad mobile layer from day one.
 - Tests at integration: clean smoke run (bot at speed 8, zero console errors); functional, mobile and mobile QA suites pass.
-- Not yet verified: the game hasn't been played on a real iPhone or iPad (touch was emulated in Chromium with real CDP touch events), and the exe hasn't been run on Windows.
+- QA round (2026-11-15), reports in `docs/reports/`: high-speed playtest (`playtest.md`, ~9,000 simulated games), visual QA (`visual.md`), functional QA (`functional.md`).
+- Fixes applied after QA:
+  - Balance (`tests/sim/tune/proposed2.json`): steeper loop ramps from loop 2 (`lapPuff` 0.12, `puffCap` 0.48, `puffKeepLap` 35, `lapFall` 0.12 / cap 1.7, `lapGap` 0.08 / min 0.8); Easy jar 14/17/20/23, `lapPuff` 0.06, cap 0.30; Normal jar 20/22/26/30; Hard `puffAim` 0.6, cap 0.52. Loop 1 is unchanged apart from the jar targets. Casual adult on Normal now lasts ≈ 15 min (was ≈ 23). Medals are 700 / 3000 / 8000 / 18000.
+  - Visual: one puffy cloud-shelf top instead of the doubled bank on portrait / 4:3, with 🚀 lifted clear of it; the portrait level banner sits in the upper sky and is scaled to fit; thunder puffs get a white back-glow (snow), and custom puffs get a disc + ring; Change Pictures fits iPhone landscape; the iPad tagline sits on a pill; the windsock moves under the jar on narrow portrait; Shelly's shadow is drawn over the floor; bigger peek twinkle with a backing disc; stronger gust streaks; items 1.35× on phones (visual only); more orange in the jet flame; basket drawn 5 px toward the shell; the rain drippy island is 8 % lighter.
+  - Functional: Enter on a focused Menu / Score Card button at game over no longer restarts; with `?mute=1`, M is a session-only unmute and is never saved; make-up gain ×2.2 (RMS ≈ −26.5 dBFS, peak ≈ −4 dBFS); a 0 % volume shows the muted speaker and unmuting restores 50 %; `app/main.go` logs a `http.Serve` failure, and an init script strips the file-store bindings and returns home if the WebView ever leaves `127.0.0.1:<port>` (go-webview2 has no NavigationStarting hook).
+- Tests after the fixes: unit 30/30, smoke PASS, functional 308/308, mobile 98/98, mobile QA (quick) 59/59, shared extras PASS.
+- Open items:
+  - The game hasn't been played on a real iPhone or iPad (touch was emulated in Chromium with real CDP touch events), and the exe hasn't been run on Windows (it builds on Linux with `GOPROXY=direct GOSUMDB=off bash tools/build.sh`: `dist/ShellysSkyCatch.exe`, PE32+ GUI x86-64).
+  - Visual P3s not done: a second faint cloud island in the empty portrait sky, anchoring a custom photo background on portrait, and the optional snow-puff rim in `thunder.svg`.
+  - The playtest notes that getting endless runs below ≈ 15 min would need a rule change (a growing `puffAim` per loop, or a heart lost after N misses in a row from loop 2).
 
 ## Stack
 Same as the other games in `projects/daily-game/`:

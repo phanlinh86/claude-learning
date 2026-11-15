@@ -69,7 +69,7 @@ test('world: initial state and every DESIGN §5.1 field / method', () => {
   for (const m of ['reset', 'startLevel', 'levelInfo', 'setMove', 'setTarget', 'setPlayRange', 'action', 'update', 'drainEvents', 'snapshot']) assert.strictEqual(typeof w[m], 'function', m);
   for (const k of ['level', 'zone', 'lap', 'time', 'levelTime', 'score', 'hearts', 'heartsMax', 'combo', 'mult', 'bestCombo',
     'jar', 'jarTarget', 'starsTotal', 'goldTotal', 'zaps', 'missed', 'puffsPopped', 'jet', 'wind', 'snail', 'items', 'cfg', '_acc']) assert.ok(k in w, k);
-  deq([w.level, w.zone, w.lap, w.score, w.hearts, w.heartsMax, w.combo, w.mult, w.jar, w.jarTarget], [0, 0, 0, 0, 3, 3, 0, 1, 0, 18]);
+  deq([w.level, w.zone, w.lap, w.score, w.hearts, w.heartsMax, w.combo, w.mult, w.jar, w.jarTarget], [0, 0, 0, 0, 3, 3, 0, 1, 0, 20]);
   for (const k of ['charge', 'air', 'cooldown']) assert.ok(k in w.jet, 'jet.' + k);
   for (const k of ['x', 'target', 'warn', 'nextDir', 't']) assert.ok(k in w.wind, 'wind.' + k);
   for (const k of ['x', 'y', 'vx', 'vy', 'hop', 'tilt', 'face', 'frame', 'invuln', 'squash', 'sway', 'rimX', 'rimY', 'flame', '_px', '_py']) assert.ok(k in w.snail, 'snail.' + k);
@@ -77,7 +77,7 @@ test('world: initial state and every DESIGN §5.1 field / method', () => {
   deq(w.drainEvents().map(e => e.type), ['start', 'zone']);
   assert.strictEqual(w.cfg.step, 1 / 120);
   const e = new SC.World({ config: SC.DIFFICULTY.easy }), hd = new SC.World({ config: SC.DIFFICULTY.hard });
-  deq([e.hearts, e.jarTarget, e.cfg.jetRecharge, e.cfg.peekTime, hd.jarTarget], [5, 12, 2.0, 0.8, 22]);
+  deq([e.hearts, e.jarTarget, e.cfg.jetRecharge, e.cfg.peekTime, hd.jarTarget], [5, 14, 2.0, 0.8, 22]);
   const w2 = world(3); run(w2, 6);
   assert.ok(w2.items.length > 0);
   for (const it of w2.items) {
@@ -352,16 +352,20 @@ test('jar full → jarfull, drops stop, puffs pop, 1 s grace for falling stars �
   deq([w.level, w.zone, w.jar, w.jarTarget, w.combo, w.score, w.items.length], [1, 1, 0, 22, combo, score, 0]);
 });
 
-test('levels: zone = i % 4, jar 18/22/26/30 (easy 12/15/18/21, hard 22/26/30/34), loop ramp capped', () => {
+test('levels: zone = i % 4, jar 20/22/26/30 (easy 14/17/20/23, hard 22/26/30/34), loop ramp (+12 % fall, +0.12 puff; easy +0.06) capped', () => {
   const w = new SC.World({ seed: 1 });
-  deq([0, 1, 2, 3].map(i => w.levelInfo(i).jarTarget), [18, 22, 26, 30]);
+  deq([0, 1, 2, 3].map(i => w.levelInfo(i).jarTarget), [20, 22, 26, 30]);
   deq([0, 1, 2, 3].map(i => w.levelInfo(i).zoneName), SC.ZONES);
   const e = new SC.World({ config: SC.DIFFICULTY.easy }), h = new SC.World({ config: SC.DIFFICULTY.hard });
-  deq([0, 1, 2, 3].map(i => e.levelInfo(i).jarTarget), [12, 15, 18, 21]);
+  deq([0, 1, 2, 3].map(i => e.levelInfo(i).jarTarget), [14, 17, 20, 23]);
   deq([0, 1, 2, 3].map(i => h.levelInfo(i).jarTarget), [22, 26, 30, 34]);
   const a = w.levelInfo(0), b = w.levelInfo(4), z = w.levelInfo(80);
   deq([b.zone, b.lap, a.puffDelay, b.puffDelay], [0, 1, 20, 0]);
-  near(b.fall / a.fall, 1.08, 1e-9);
+  near(b.fall / a.fall, 1.12, 1e-9);
+  near(b.puffChance - a.puffChance, 0.12, 1e-9);
+  near(e.levelInfo(4).puffChance - e.levelInfo(0).puffChance, 0.06, 1e-9);
+  deq([w.cfg.puffCap, e.cfg.puffCap, h.cfg.puffCap, w.cfg.puffAim, h.cfg.puffAim], [0.48, 0.30, 0.52, 0.4, 0.6]);
+  deq([z.puffChance, e.levelInfo(80).puffChance, h.levelInfo(80).puffChance], [0.48, 0.30, 0.52]);
   assert.ok(b.puffChance > a.puffChance && b.dropGap < a.dropGap);
   assert.ok(z.fall <= w.cfg.fallCap && z.puffChance <= w.cfg.puffCap && z.dropGap >= w.cfg.gapMin);
   assert.ok(e.levelInfo(0).fall < a.fall && h.levelInfo(0).fall > a.fall);

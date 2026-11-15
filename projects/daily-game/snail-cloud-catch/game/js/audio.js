@@ -3,6 +3,7 @@
 (function (SC) {
   'use strict';
   const NOTE = n => 440 * Math.pow(2, (n - 69) / 12); // MIDI → Hz
+  const MAKEUP = 2.2;   // make-up gain after the compressor (QA loudness at 100 % volume: RMS ≈ −26 dBFS, peaks ≈ −3 dBFS)
 
   const SEASON_MUSIC = [
     // Sunny Skies: bright G major, plucky triangle, light swing
@@ -30,10 +31,9 @@
       const c = this.ctx;
       this.master = c.createGain(); this.master.gain.value = 1;
       const comp = c.createDynamicsCompressor();
-      comp.threshold.value = -14; comp.ratio.value = 4;
-      // phones are quiet: compressor (−18 dB, knee 12, 4:1) then a make-up gain = the player's volume × 1.7
+      // phones are quiet: compressor (−18 dB, knee 12, 4:1) then a make-up gain = the player's volume × 2.3 (MAKEUP)
       comp.threshold.value = -18; comp.knee.value = 12; comp.ratio.value = 4; comp.attack.value = 0.004; comp.release.value = 0.18;
-      this.user = c.createGain(); this.user.gain.value = (this.volume == null ? 1 : this.volume) * 1.7;
+      this.user = c.createGain(); this.user.gain.value = (this.volume == null ? 1 : this.volume) * MAKEUP;
       this.master.connect(comp); comp.connect(this.user); this.user.connect(c.destination);
       this.sfx = c.createGain(); this.sfx.gain.value = 0.8; this.sfx.connect(this.master);
       this.music = c.createGain(); this.music.gain.value = 0.0; this.music.connect(this.master);
@@ -50,7 +50,7 @@
     /* the player's volume 0..1 (Settings slider), applied after the compressor */
     setVolume(v) {
       this.volume = Math.max(0, Math.min(1, +v || 0));
-      if (this.user && this.ctx) this.user.gain.setTargetAtTime(this.volume * 1.7, this.ctx.currentTime, 0.03);
+      if (this.user && this.ctx) this.user.gain.setTargetAtTime(this.volume * MAKEUP, this.ctx.currentTime, 0.03);
     },
     /* iOS Safari: Web Audio defaults to the quiet 'ambient' channel that the side switch silences; ask for 'playback'
      * (Safari 16.4+) and play a silent buffer inside the gesture so the output really wakes up. */

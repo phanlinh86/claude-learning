@@ -165,7 +165,16 @@
       SC.Audio.setOptions({ sfx: this.settings.sfx, music: this.settings.music, muted: this.settings.muted || this.urlMute });
       if (k === 'music') { if (v && this.mode !== 'title') SC.Audio.startMusic(); if (!v) SC.Audio.stopMusic(); }
     },
-    toggleMute() { this.setSetting('muted', !this.settings.muted); SC.UI.syncMute(); SC.UI.toast(this.settings.muted ? 'Sound off' : 'Sound on', 900); },
+    /* the volume slider at 0 % counts as muted (HUD icon + M), so a child who slid it to 0 sees why it is silent */
+    volumeZero() { return !!(window.DailyExtras && DailyExtras.volume && DailyExtras.volume() === 0); },
+    isMuted() { return !!(this.settings.muted || this.urlMute || this.volumeZero()); },
+    toggleMute() {
+      if (this.urlMute) { this.urlMute = false; SC.Audio.setOptions({ muted: this.settings.muted }); }   // ?mute=1: a session-only switch, never saved
+      else if (this.settings.muted) this.setSetting('muted', false);
+      else if (!this.volumeZero()) this.setSetting('muted', true);
+      if (!this.settings.muted && !this.urlMute && this.volumeZero()) DailyExtras.setVolume(0.5);   // unmuting a 0 % volume restores 50 %
+      SC.UI.syncMute(); SC.UI.toast(this.isMuted() ? 'Sound off' : 'Sound on', 900);
+    },
     setFullscreen(on) {
       this.fullscreen = on;
       if (typeof window.ffFullscreen === 'function') window.ffFullscreen(on);
@@ -209,7 +218,11 @@
           if (MOVE.includes(e.code)) { e.preventDefault(); this.keys[e.code] = true; SC.Audio.unlock(); return; }
           if (JET.includes(e.code)) { e.preventDefault(); if (!e.repeat) this.action(); return; }
         }
-        if (this.mode === 'over' && (e.code === 'Enter' || e.code === 'Space')) { e.preventDefault(); if (this.canRestart()) this.startGame(); return; }
+        if (this.mode === 'over' && (e.code === 'Enter' || e.code === 'Space')) {
+          const f = document.activeElement;
+          if (f && f.tagName === 'BUTTON' && f.id !== 'btnAgain') return;   // a focused Menu / Score Card button handles its own key
+          e.preventDefault(); if (this.canRestart()) this.startGame(); return;
+        }
         if (this.mode === 'title' && ui === 'scrTitle' && e.code === 'Space') {
           const f = document.activeElement;
           if (f && f.tagName === 'BUTTON' && f.id !== 'btnPlay') return;

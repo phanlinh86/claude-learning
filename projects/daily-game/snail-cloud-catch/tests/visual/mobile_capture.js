@@ -10,7 +10,7 @@ const OUT = path.resolve(__dirname, '../out/visual_mobile');
 fs.mkdirSync(OUT, { recursive: true });
 
 const DEVICES = [
-  ['iphone-p', 393, 852, 3], ['iphone-l', 852, 393, 3], ['se-p', 375, 667, 2],
+  ['iphone-p', 393, 852, 3], ['iphone-l', 852, 393, 3], ['se-p', 375, 667, 2], ['p390', 390, 844, 3], ['l844', 844, 390, 3], ['ipad-l1024', 1024, 768, 2],
   ['ipad-p', 820, 1180, 2], ['ipad-l', 1180, 820, 2], ['ipadpro-l', 1366, 1024, 2]
 ];
 const errs = [];

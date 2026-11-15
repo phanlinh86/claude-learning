@@ -17,6 +17,8 @@
   ];
   const FONT = '"Segoe UI Black","Segoe UI","Arial Rounded MT Bold","Trebuchet MS",system-ui,sans-serif';
   const TAU = Math.PI * 2;
+  // top colours (body / highlight) of each weather's cloud bank, for the puffy shelf top on tall screens (palette.json bankTop overrides)
+  const BANK_TOP = { sunny: ['#f4f9ff', '#ffffff'], rain: ['#d9d8ea', '#ecebf6'], wind: ['#fbe9e2', '#fff6f0'], snow: ['#dfe2f6', '#f4f5ff'] };
   const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
   const lerp = (a, b, t) => a + (b - a) * t;
   const easeOutBack = t => 1 + 2.70158 * Math.pow(t - 1, 3) + 1.70158 * Math.pow(t - 1, 2);
@@ -94,7 +96,7 @@
       // otherwise bottom-right, and then Shelly's range stops short of it so the button never covers her
       const B = Math.max(100, 66 / S);   // ≥ 66 CSS px: a small child's thumb
       let ab = null;
-      if (this.SY >= 150) ab = { x: this.VW - I.right - 20 - B, y: Math.max(I.top + 150, this.SY - B - 46), w: B, h: B, place: 'sky' };
+      if (this.SY >= 150) ab = { x: this.VW - I.right - 20 - B, y: Math.max(I.top + 150, this.SY - B - 68), w: B, h: B, place: 'sky' };
       else { ab = { x: this.VW - I.right - 16 - B, y: this.VH - I.bottom - 16 - B, w: B, h: B, place: 'corner' }; if (touch) playMax = Math.min(playMax, ab.x - this.SX - 58); }
       this.layout = { VW: v.VW, VH: v.VH, SX: this.SX, SY: this.SY, s: S, ins: I, visL, visR, playMin, playMax, act: ab };
       if (act) {
@@ -359,12 +361,23 @@
         this.tiled(cs, y, this._cloudOff * (k === 0 ? 1 : 0.6 + 0.1 * k) + 377 * k, a);
       }
     }
-    /* Cloud bank across the top (tileable). On tall screens a mirrored copy above it gives the bank a fluffy top edge. */
+    /* Cloud bank across the top (tileable). On tall screens (sky above the scene) a puffy shelf top in the bank's own
+       top colour makes it read as one floating cloud shelf (a mirrored copy looked like a doubled white wall). */
     bank(z, alpha) {
       if (alpha <= 0) return;
-      const spr = SC.Assets.sprite(SC.Assets.SEASONS[z] + '_bank', W, 150);
+      const n = SC.Assets.SEASONS[z], spr = SC.Assets.sprite(n + '_bank', W, 150);
       if (!spr) return;
-      if (this.SY > 0) this.tiled(spr, -132, this._bankOff + 211, alpha * 0.9, true);
+      if (this.SY > 0) {
+        const g = this.ctx, pal = SC.Assets.palette && SC.Assets.palette[n];
+        const [c0, c1] = (pal && pal.bankTop) || BANK_TOP[n] || BANK_TOP.sunny;
+        const x0 = -this.SX - 40, x1 = this.VW - this.SX + 40, off = ((this._bankOff % 120) + 120) % 120;
+        g.globalAlpha = alpha; g.fillStyle = c0;
+        for (let x = x0 - off, i = 0; x < x1 + 120; x += 60, i++) { const r = 34 + 7 * (i % 3); g.beginPath(); g.arc(x, 30 - r * 0.35, r, 0, TAU); g.fill(); }
+        g.fillStyle = c1; g.globalAlpha = alpha * 0.7;
+        for (let x = x0 - off + 30, i = 0; x < x1 + 120; x += 60, i++) { const r = 16 + 6 * (i % 2); g.beginPath(); g.arc(x, 20 - r * 0.6, r, 0, TAU); g.fill(); }
+        g.globalAlpha = alpha; g.fillStyle = c0; g.fillRect(x0, 20, x1 - x0, 30);
+        g.globalAlpha = 1;
+      }
       this.tiled(spr, 0, this._bankOff, alpha);
     }
     /* Cloud floor + mirrored copies to the sides on wide screens (seamless at the joins, pixel-exact). */
@@ -453,6 +466,7 @@
       }
       if (fading) { this.ground(v.prev, Math.min(1, 2 - 2 * v.t)); this.ground(v.cur, v.t); }
       else this.ground(v.cur, 1);
+      if (w) this.drawShadow();          // on top of the cloud floor, so Jet Hop keeps its height cue
       if (w) this.drawItems('floor');   // bouncing / fading stars and popping puffs sit on the cloud floor
       if (this.weather) this.particles('front');
       this.drawFx();
@@ -504,8 +518,11 @@
         if (it.state !== 'peek') continue;
         const k = clamp((it.t || 0) / pt, 0, 1), pulse = 0.85 + 0.15 * Math.sin(this.time * 14 + it.id);
         const col = it.kind === 'gold' ? GOLD_COLOR : it.kind === 'puff' ? '#8a8fb8' : STAR_COLORS[it.color || 0];
-        const r = (10 + 18 * k) * pulse * (it.kind === 'gold' ? 1.3 : 1), y = it.y != null ? it.y : PEEK_Y;
+        const r = (14 + 22 * k) * pulse * (it.kind === 'gold' ? 1.3 : 1), y = it.y != null ? it.y : PEEK_Y;
         g.save(); g.translate(it.x, y);
+        // soft blue-grey backing disc so the glow reads on the white cloud bank
+        g.globalAlpha = 0.4 + 0.6 * k; g.fillStyle = 'rgba(60,80,150,0.16)';
+        g.beginPath(); g.ellipse(0, 0, r * 1.1, r * 0.9, 0, 0, TAU); g.fill();
         g.globalAlpha = 0.35 + 0.5 * k; g.fillStyle = this.glow(col);
         g.save(); g.scale(r, r * 0.8); g.beginPath(); g.arc(0, 0, 1, 0, TAU); g.fill(); g.restore();
         if (it.kind === 'puff') {   // a little grey puff and a tiny zigzag peeking out
@@ -513,7 +530,7 @@
           g.beginPath(); g.arc(-5, 0, 6 + 3 * k, 0, TAU); g.arc(5, -2, 7 + 3 * k, 0, TAU); g.fill();
           g.strokeStyle = '#ffd84a'; g.lineWidth = 2; g.lineJoin = 'round'; g.beginPath(); g.moveTo(-2, 8); g.lineTo(2, 12); g.lineTo(-1, 14); g.lineTo(3, 19); g.stroke();
         } else if (tw) {
-          const s = (12 + 14 * k) * pulse; g.globalAlpha = 0.6 + 0.4 * k; g.rotate(this.time * 2 + it.id);
+          const s = (18 + 18 * k) * pulse; g.globalAlpha = 0.6 + 0.4 * k; g.rotate(this.time * 2 + it.id);
           g.drawImage(tw, -s / 2, -s / 2, s, s);
         }
         g.restore();
@@ -542,7 +559,7 @@
       let y = it.y;
       if (puff && it.state === 'fall') y += Math.sin(this.time * 3.2 + (it.id || 0)) * 3;   // grumpy bob
       g.translate(it.x, y);
-      let k = this.cssScale < 0.8 ? 1.2 : 1;   // phones: items drawn 20 % bigger (hitboxes unchanged)
+      let k = this.cssScale < 0.8 ? 1.35 : 1;   // phones: items drawn 35 % bigger (visual only, hitboxes unchanged)
       if (inBasket) k *= 1 - 0.35 * clamp((it.t || 0) / 0.25, 0, 1);
       if (it.state === 'pop') k *= 1 + 0.6 * clamp((it.t || 0) / 0.3, 0, 1);
       g.scale(k, k);
@@ -554,7 +571,16 @@
         g.rotate(it.rot || 0);
         const fl = 1 + 0.06 * Math.sin(it.sway || 0);   // flutter squish
         g.scale(fl, 2 - fl);
-      } else g.rotate(clamp(it.vx || 0, -60, 60) / 600);
+      } else {
+        // soft white back-glow: the only hazard must read at a glance on every sky (snow was ≈ 1 : 1)
+        const ga = g.globalAlpha; g.globalAlpha = ga * 0.55; g.fillStyle = this.glow('rgba(255,255,255,0.6)');
+        g.save(); g.scale(30, 26); g.beginPath(); g.arc(0, 0, 1, 0, TAU); g.fill(); g.restore(); g.globalAlpha = ga;
+        g.rotate(clamp(it.vx || 0, -60, 60) / 600);
+        if (d.zig) {   // custom puff picture: a white disc + ring, like the custom star, so it shows on dark backgrounds
+          g.fillStyle = 'rgba(255,255,255,0.8)'; g.beginPath(); g.arc(0, 0, d.s * 0.56, 0, TAU); g.fill();
+          g.strokeStyle = '#7a7fc0'; g.lineWidth = 3; g.beginPath(); g.arc(0, 0, d.s * 0.56, 0, TAU); g.stroke();
+        }
+      }
       if (d.ring) { g.fillStyle = 'rgba(255,255,255,0.85)'; g.beginPath(); g.arc(0, 0, d.s * 0.56, 0, TAU); g.fill(); g.strokeStyle = d.ring; g.lineWidth = 4; g.beginPath(); g.arc(0, 0, d.s * 0.56, 0, TAU); g.stroke(); }
       g.drawImage(d.spr, -d.w / 2, -d.h / 2, d.w, d.h);
       if (d.zig) {   // custom thunder puff: the code adds its little zigzag
@@ -579,16 +605,24 @@
       const g = this.ctx, face = s.face < 0 ? -1 : 1;
       const gr = this._flameGrad || (this._flameGrad = (() => {
         const q = g.createLinearGradient(0, 0, 1, 0);
-        q.addColorStop(0, 'rgba(255,255,240,1)'); q.addColorStop(0.25, 'rgba(255,230,120,0.95)'); q.addColorStop(0.6, 'rgba(255,150,70,0.75)'); q.addColorStop(1, 'rgba(255,110,90,0)');
+        q.addColorStop(0, 'rgba(255,255,240,1)'); q.addColorStop(0.25, 'rgba(255,230,120,0.95)'); q.addColorStop(0.45, 'rgba(255,140,50,0.9)'); q.addColorStop(0.6, 'rgba(255,150,70,0.75)'); q.addColorStop(1, 'rgba(255,110,90,0)');
         return q;
       })());
       const L = (10 + 34 * f) * (0.9 + 0.1 * Math.sin(this.time * 40)), Wd = 5 + 5 * f;
       const ang = Math.atan2(1, -0.5 * face) + (s.tilt || 0);   // points down and back (away from her face)
-      g.save(); g.translate(n[0], n[1]); g.rotate(ang); g.globalAlpha = 0.55 + 0.45 * f;
+      g.save(); g.translate(n[0], n[1]); g.rotate(ang); g.globalAlpha = 0.7 + 0.3 * f;
       g.scale(L, Wd); g.fillStyle = gr;
       g.beginPath(); g.moveTo(0, -0.6); g.quadraticCurveTo(0.5, -0.7, 1, 0); g.quadraticCurveTo(0.5, 0.7, 0, 0.6); g.closePath(); g.fill();
       g.restore();
       if (f > 0.4) { g.globalAlpha = 0.35 * f; g.fillStyle = this.glow('rgba(255,200,90,0.6)'); g.save(); g.translate(n[0], n[1]); g.scale(18 * f, 18 * f); g.beginPath(); g.arc(0, 0, 1, 0, TAU); g.fill(); g.restore(); g.globalAlpha = 1; }
+    }
+
+    /* Shelly's shadow on the cloud floor (drawn after the ground), shrinking and fading with hop height */
+    drawShadow() {
+      const g = this.ctx, s = this.world.snail;
+      if (!s) return;
+      const sk = clamp(1 - Math.max(0, s.hop || 0) / 220, 0.45, 1);
+      g.fillStyle = `rgba(60,60,120,${(0.22 * sk).toFixed(3)})`; g.beginPath(); g.ellipse(s.x, 486, 34 * sk, 7 * sk, 0, 0, TAU); g.fill();
     }
 
     drawShelly(mode) {
@@ -596,10 +630,6 @@
       if (!s) return;
       const bob = this._bob || 0, face = s.face < 0 ? -1 : 1;
       const blink = s.invuln > 0 && w.state !== 'dead' && Math.floor(this.time * 12) % 2 === 0, BA = 0.55;
-      const hop = Math.max(0, s.hop || 0);
-      // shadow on the cloud floor, shrinking with height
-      const sk = clamp(1 - hop / 220, 0.45, 1);
-      g.fillStyle = `rgba(60,60,120,${(0.18 * sk).toFixed(3)})`; g.beginPath(); g.ellipse(s.x, 494, 36 * sk, 7 * sk, 0, 0, TAU); g.fill();
       if (blink) g.globalAlpha = BA;
       // jet flame (behind Shelly): a small hover flicker, big while hopping
       const f = clamp(Math.max(s.flame || 0, w.state === 'dead' ? 0 : 0.12), 0, 1);
@@ -622,13 +652,16 @@
       }
       g.restore();
       // basket on the shell: back, caught items, front
-      const rimX = s.rimX != null ? s.rimX : s.x, rimY = (s.rimY != null ? s.rimY : s.y - 46) + bob;
+      // the basket is drawn 5 px towards the shell centre (visual only; the catch line stays at s.rimX)
+      const rimX = (s.rimX != null ? s.rimX : s.x) - 5 * face, rimY = (s.rimY != null ? s.rimY : s.y - 46) + bob;
       const rot = (s.tilt || 0) + (s.sway || 0) * 0.012;
       const bk = A.sprite('basket', BK_W, BK_H), bf = A.sprite('basket_front', BK_W, BK_H);
       g.save(); g.translate(rimX, rimY); g.rotate(rot); g.scale(1 + 0.1 * sq, 1 - 0.1 * sq);
       if (bk) g.drawImage(bk, -BK_RIM[0], -BK_RIM[1], BK_W, BK_H);
       g.restore();
+      g.save(); g.translate(-5 * face, 0);
       for (const it of w.items) if (it.state === 'caught') this.drawItem(it, true);
+      g.restore();
       g.save(); g.globalAlpha = blink ? BA : 1; g.translate(rimX, rimY); g.rotate(rot); g.scale(1 + 0.1 * sq, 1 - 0.1 * sq);
       if (bf) g.drawImage(bf, -BK_RIM[0], -BK_RIM[1], BK_W, BK_H);
       g.restore();
@@ -740,7 +773,11 @@
       const zi = this.zoneInfo(w.zone || 0);
       this.text(zi.name + (w.lap > 0 ? ' · Lap ' + (w.lap + 1) : ''), jx + 60, jy + 62, this.cssScale < 0.8 ? 19 : 16, '#ffffff', '#3a2550', 'center', 4);
       // windsock (wind level): turns + stretches with the wind; pulses during a gust warning
-      if ((w.zone || 0) === 2 && w.wind) this.windsock(second ? jx - 64 : jx - 70, second ? jy + 6 : jy + 4, w);
+      // (narrow portrait: if it would overlap the streak pill, it goes under the jar pill instead)
+      if ((w.zone || 0) === 2 && w.wind) {
+        if (second && jx - 64 < cx + 98) this.windsock(jx + 70, jy + 76, w);
+        else this.windsock(second ? jx - 64 : jx - 70, second ? jy + 6 : jy + 4, w);
+      }
     }
     /* HUD pill colour: the zone palette's hud colour (a dark tone of the sky) at 85 % so the sky shows through */
     pillColor(hex) {
@@ -777,13 +814,19 @@
       const g = this.ctx, b = this.banner, bi = this.zoneInfo(b.s), t = b.t, w = this.world;
       let x;
       if (t < 0.4) x = lerp(-W, 0, easeOutBack(t / 0.4)); else if (t < 1.25) x = 0; else x = lerp(0, W, Math.pow((t - 1.25) / 0.35, 2));
-      g.save(); g.translate(x, this.SY >= 150 ? -Math.min(this.SY * 0.5, 260) : 40);
+      // tall screens: high in the upper sky (clear of the 🚀 button); narrow screens: scaled to fit the visible width
+      g.save(); g.translate(x, this.SY >= 150 ? -Math.round(this.SY * 0.5) - 140 : 40);
+      const k = Math.min(1, (this.VW - 32) / 660);
+      if (k < 1) { g.translate(W / 2, 160); g.scale(k, k); g.translate(-W / 2, -160); }
       g.fillStyle = bi.color; g.globalAlpha = 0.94;
       g.beginPath(); g.moveTo(W / 2 - 310, 112); g.lineTo(W / 2 + 310, 104); g.lineTo(W / 2 + 328, 206); g.lineTo(W / 2 - 292, 214); g.closePath(); g.fill();
       g.globalAlpha = 1;
       const lv = w ? (w.level || 0) + 1 : 1;
       this.text('Level ' + lv + ': ' + bi.name + '!', W / 2, 142, 38, '#ffffff', bi.dark, 'center', 9);
-      this.text(bi.hint, W / 2, 184, 20, '#ffffff', bi.dark, 'center', 5);
+      let hs = 20;   // the hint must fit inside the visible width after scaling
+      g.font = `900 ${hs}px ${FONT}`;
+      while (hs > 14 && g.measureText(bi.hint).width * k > this.VW - 40) { hs--; g.font = `900 ${hs}px ${FONT}`; }
+      this.text(bi.hint, W / 2, 184, hs, '#ffffff', bi.dark, 'center', 5);
       g.restore();
     }
 

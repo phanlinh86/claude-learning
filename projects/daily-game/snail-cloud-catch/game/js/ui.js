@@ -42,6 +42,11 @@
       click('btnOverMenu', () => game.toTitle());
       click('btnPause', () => game.pause());
       click('btnMuteHud', () => game.toggleMute());
+      // the shared volume slider calls SC.Audio.setVolume: refresh the HUD speaker so 0 % shows as muted
+      if (SC.Audio.setVolume && !SC.Audio._volWrapped) {
+        const sv = SC.Audio.setVolume; SC.Audio._volWrapped = true;
+        SC.Audio.setVolume = function (v) { sv.call(this, v); if (UI.game) UI.syncMute(); };
+      }
       click('btnResetAll', () => {
         SC.Assets.SLOTS.forEach(s => SC.Assets.clearCustom(s.id));
         this.renderSlots(); game.picturesChanged(); this.toast('All pictures reset to the originals');
@@ -86,7 +91,7 @@
       this.syncMute();
     },
     syncMute() {
-      const m = this.game.settings.muted || this.game.urlMute;
+      const m = this.game.isMuted ? this.game.isMuted() : (this.game.settings.muted || this.game.urlMute);
       $('btnMuteHud').innerHTML = m
         ? '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9l5 6M21 9l-5 6" stroke="#fff" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>'
         : '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" stroke="#fff" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>';
@@ -121,8 +126,9 @@
       this.show('scrOver');
     },
 
-    /* medals by score: bronze ≈ the first level cleared, platinum ≈ the whole weather loop */
-    MEDALS: [['bronze', 300], ['silver', 1000], ['gold', 2200], ['platinum', 4000]],
+    /* medals by score (playtest 2026-11-15): bronze ≈ sunny cleared, silver ≈ a child's first weather loop,
+       gold ≈ two loops for an adult on Normal, platinum ≈ a long run (top ~20 % of casual adults) */
+    MEDALS: [['bronze', 700], ['silver', 3000], ['gold', 8000], ['platinum', 18000]],
     medalFor(score) { let m = 'none'; for (const [n, v] of UI.MEDALS) if (score >= v) m = n; return m; },
 
     toast(msg, ms = 2200) {
