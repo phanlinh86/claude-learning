@@ -1,0 +1,27 @@
+{
+ "all": {
+  "lapPuff": 0.12,
+  "puffCap": 0.48,
+  "puffKeepLap": 35,
+  "lapFall": 0.12,
+  "fallCap": 1.7,
+  "lapGap": 0.08,
+  "gapMin": 0.8
+ },
+ "easy": {
+  "lapPuff": 0.06,
+  "puffCap": 0.3
+ },
+ "normal": {
+  "jarTargets": [
+   20,
+   22,
+   26,
+   30
+  ]
+ },
+ "hard": {
+  "puffAim": 0.6,
+  "puffCap": 0.52
+ }
+}

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+<defs><clipPath id="sy"><path d="M21.9,7.5 Q24,3.6 26.1,7.5 L29.3,13.6 Q30.5,15.7 32.8,16.1 L39.6,17.3 Q44,18.1 40.9,21.3 L36.1,26.3 Q34.5,28 34.8,30.4 L35.7,37.2 Q36.3,41.6 32.4,39.7 L26.2,36.6 Q24,35.6 21.8,36.6 L15.6,39.7 Q11.7,41.6 12.3,37.2 L13.2,30.4 Q13.5,28 11.9,26.3 L7.1,21.3 Q4,18.1 8.4,17.3 L15.2,16.1 Q17.5,15.7 18.7,13.6 Z"/></clipPath></defs>
+<path d="M21.9,7.5 Q24,3.6 26.1,7.5 L29.3,13.6 Q30.5,15.7 32.8,16.1 L39.6,17.3 Q44,18.1 40.9,21.3 L36.1,26.3 Q34.5,28 34.8,30.4 L35.7,37.2 Q36.3,41.6 32.4,39.7 L26.2,36.6 Q24,35.6 21.8,36.6 L15.6,39.7 Q11.7,41.6 12.3,37.2 L13.2,30.4 Q13.5,28 11.9,26.3 L7.1,21.3 Q4,18.1 8.4,17.3 L15.2,16.1 Q17.5,15.7 18.7,13.6 Z" fill="#ffd23f"/>
+<g clip-path="url(#sy)"><path d="M45,14.1 C30.3,35.1 17.7,37.6 3,35.1 L3,45.6 L45,45.6 Z" fill="#f2a91c"/></g>
+<path d="M21.9,7.5 Q24,3.6 26.1,7.5 L29.3,13.6 Q30.5,15.7 32.8,16.1 L39.6,17.3 Q44,18.1 40.9,21.3 L36.1,26.3 Q34.5,28 34.8,30.4 L35.7,37.2 Q36.3,41.6 32.4,39.7 L26.2,36.6 Q24,35.6 21.8,36.6 L15.6,39.7 Q11.7,41.6 12.3,37.2 L13.2,30.4 Q13.5,28 11.9,26.3 L7.1,21.3 Q4,18.1 8.4,17.3 L15.2,16.1 Q17.5,15.7 18.7,13.6 Z" fill="none" stroke="#9a5a00" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M20.6,13 C21.6,10 23,8.2 24,7.6" fill="none" stroke="#fff6c2" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M11,20 L16,19.8" stroke="#fff6c2" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+<ellipse cx="19.6" cy="25.6" rx="1.9" ry="2.5" fill="#4a2a00"/>
+<ellipse cx="28.4" cy="25.6" rx="1.9" ry="2.5" fill="#4a2a00"/>
+<circle cx="20.2" cy="24.6" r="0.8" fill="#fff"/><circle cx="29" cy="24.6" r="0.8" fill="#fff"/>
+<path d="M21.8,29 C23,30.8 25,30.8 26.2,29" fill="none" stroke="#4a2a00" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+<ellipse cx="16.6" cy="28.6" rx="2" ry="1.3" fill="#ff6f91" opacity=".55"/>
+<ellipse cx="31.4" cy="28.6" rx="2" ry="1.3" fill="#ff6f91" opacity=".55"/>
+</svg>

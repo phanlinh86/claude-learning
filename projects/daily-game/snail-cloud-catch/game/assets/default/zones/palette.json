@@ -1,0 +1,42 @@
+{
+  "sunny": {
+    "banner": "#3f8fd8",
+    "accent": "#ffc93c",
+    "hud": "#2f679c",
+    "sky": "#97caec",
+    "bankTop": [
+      "#f4f9ff",
+      "#ffffff"
+    ]
+  },
+  "rain": {
+    "banner": "#6f68ae",
+    "accent": "#8fd0ff",
+    "hud": "#4d4a7e",
+    "sky": "#9b98bb",
+    "bankTop": [
+      "#d9d8ea",
+      "#ecebf6"
+    ]
+  },
+  "wind": {
+    "banner": "#e8835e",
+    "accent": "#2fa6aa",
+    "hud": "#2f7c84",
+    "sky": "#bebeb8",
+    "bankTop": [
+      "#fbe9e2",
+      "#fff6f0"
+    ]
+  },
+  "snow": {
+    "banner": "#5a49a8",
+    "accent": "#a8dcff",
+    "hud": "#2f2a66",
+    "sky": "#6e63a0",
+    "bankTop": [
+      "#dfe2f6",
+      "#f4f5ff"
+    ]
+  }
+}
