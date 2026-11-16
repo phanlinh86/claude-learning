@@ -1,0 +1,16 @@
+{
+  "name": "Momo's Dino Drums",
+  "short_name": "Dino Drums",
+  "description": "Drum on the beat with Momo the panda and catch hopping gems in the Dino Lookout tower!",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#2f5a24",
+  "theme_color": "#6cb84c",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
