@@ -31,11 +31,12 @@ once main.js is wired to this world.
 `new FT.World({seed, age, lang, width, height, ins, config, hudKeep})`, `setViewport(W, H, ins)` (no-op when nothing changed; set
 `world.hudKeep = [{x,y,w,h}…]` then call it again), `setAge` / `setLang` (apply at the next `newSession`), `newSession({lastTopics})`,
 `levels`, `startLevel(i)`, `update(dt)`, `drainEvents()`, **`setBreeze(wind 0..1)`** (pass `weather.ambient.wind` every frame),
-`skipTalk()`, `resetNudges()`, `talkAnswer(choiceId)` → bool, `hint()` → `{member}` | null, `prompt()` →
+`skipTalk()`, `resetNudges()`, `talkAnswer(choiceId)` → bool (false while locked: the first `talkLock` 1 s), `talkOpen()`,
+`setViewScale(cssPerLogical)` / `tapMoveMax()`, `hint()` → `{member}` | null, `prompt()` →
 `{promptKey, params, rule, nameKind, nameValue}` while `interactive` | null, `cancelDrag()`, `memberById(id)`, `answer()` →
 `{member: id}` (play, not answered) | null.
 Statics: `World.logicalSize(cssW, cssH)`, `World.computeLayout(W, H, ins, cfg, age, hudKeep, n)`, `World.slotsFor(L, k)`,
-`World.garlandY(g, u)` (the vine's y at u ∈ 0..1: `g.y + g.sag·4u(1−u)`), `World.kickFor`, `World.segHit`.
+`World.garlandY(g, u)` (the vine's y at u ∈ 0..1: `g.y + g.sag·4u(1−u)`), `World.kickFor`, `World.segHit`, `World.portraitCap(W, H, cfg, age)`.
 Fields: `layout, hudKeep, state, phase, level, topic, round, cur, roundsPerLevel, stars, levelStars, roundStars, misses, streak,
 talk, talkAnswered, alpha, time, stateTime, phaseTime, interactive, odd, weather (= level % 4), wind, members, mats, table,
 garland, fairy, moka, critter, puffs, hintHand, assistId, finger, surprise`.
@@ -66,36 +67,44 @@ and then starts Talk.
 | field | landscape | portrait |
 |---|---|---|
 | `groundY` | H − ins.bottom − 14 | H − ins.bottom − 26 |
-| `moka` {x, y seat, h, w = 0.7 h, cup, cupUp, mouth} | ins.left + 120, groundY − 10, 250 | ins.left + 110, groundY − 6, 220 |
+| `moka` {x, y seat, h, w = 0.7 h, cup, cupUp, mouth} | ins.left + 120, groundY − 10, 250 | ins.left + 110, groundY − 6, 260 on tall screens (H/W > 1.6, phones) else 220 |
 | `mokaBox` | moka ± w/2, h tall, + 10 px pad | same |
 | `garland` {x0, x1, y, sag 40, bottom, lanterns[4]} | x0 = ins.left + 70, x1 = W − ins.right − 70, y = bubble bottom + 46 | y = bubble bottom + 50 |
-| `garland.lanterns[i]` {x, y hang point on the vine, u, cx, cy bulb centre} | u = 0.2, 0.4, 0.6, 0.8; cy = y + 34 + 35 | same |
+| `garland.lanterns[i]` {x, y hang point on the vine, u, cx, cy bulb centre} | u = 0.2, 0.4, 0.6, 0.8; cy = y + (34 + 35)·lanternS; `garland.lanternS` = 1, 1.15 on landscape phones, `garland.lanternH` = 70·lanternS | lanternS 1.3 on phones |
 | `fairyHome` {x, y} | the vine at u = 0.08, 16 px above it (near the left trunk) | same |
-| `table` {y TOP surface = things' bottom, x0, x1, plankX0/X1 = x0 − 30 / x1 + 30, plankH 46, legs [x0 + 70, x1 − 70], legBottom = groundY} | y = groundY − 150, x0 = moka.x + 110, x1 = W − ins.right − 60 | y = max(moka.y − moka.h − 40, garland.bottom + 260), x0 = ins.left + 50, x1 = W − ins.right − 50 |
-| `slots[{x, y}]`, `sp` | n centres in [x0 + 40, x1 − 40], sp = clamp(span / n, spK·item, 1.7·item) | same |
+| `table` {y TOP surface = things' bottom, x0, x1, plankX0/X1 = x0 − 30 / x1 + 30, plankH 46, legs, legBottom} | y = groundY − 150, x0 = moka.x + 110, x1 = W − ins.right − 60, legs [x0 + 70, x1 − 70], legBottom = groundY | x0 = ins.left + 30, x1 = W − ins.right − 30; y = the things centred in the band between garland.bottom and Moka's head: round(g.bottom + ½(mokaTop − g.bottom) + ½ item), clamped to [g.bottom + item + 90, mokaTop − 46 − 24] (the plank never touches Moka); legs at 27 % / 88 % of the table (the left one right of Moka), legBottom = min(groundY, y + 46 + 150) (on the ground plane behind Moka) |
+| `slots[{x, y}]`, `sp` | n centres in [x0 + 40, x1 − 40], sp = clamp(span / n, spK·item, 1.7·item) | centres in [x0 + 24, x1 − 24], spK 1.2 |
+| `envTableY`, `envItem` | = table.y, — | the table y / item of the age's **cap** item: render anchors the env (horizon) on them, so it never moves between 3- and 5-thing rounds |
 | `entryY` | −140 (things' bottom at spawn) | same |
 Also `bubble, hud, item, spK, span, slotX0, slotX1, hitPad, hitR, band, keep[], safe, tall, phone, tier, fits, squeezed`.
 Bottom keep-out boxes in `hudKeep` (lower half) lift `table.y` so resting things stay ≥ 44 px above them; `table.y ≤ groundY − 60`.
-**Tiers** (first that fits = the n slot centres lie in [x0 + 40, x1 − 40]): item (124 at ages ≤ 4, 114 at 5, 106 at 6+) × 1.12 on
-tall screens at spacing 1.25 ×, the base item, itemMin 100 at 1.25 ×, 100 at 1.12 ×; odd viewports squeeze (never an Apple device).
+**Landscape tiers** (first that fits = the n slot centres lie in [x0 + 40, x1 − 40]): item (124 at ages ≤ 4, 114 at 5, 106 at 6+)
+× 1.12 on tall screens (× 1.15 on landscape **phones**, as long as the things' tops stay ≥ 14 px below the lanterns) at spacing
+1.25 ×, the base item, itemMin 100 at 1.25 ×, 100 at 1.12 ×; odd viewports squeeze (never an Apple device).
+**Portrait** (qa_visual P1-1): one item per round = min(cap, ⌊span / ((n − 1)·1.2)⌋, ⌊(W − 32) / ((n − 1)·1.2 + 1)⌋) — the outer
+things stay ≥ portEdge 16 px inside the screen; cap = base × 1.3 on tall screens (161 at ages ≤ 4, 148 at 5, 138 at 6+), × 1.08 otherwise
+(134 / 123 / 114); a too narrow screen falls back to spacing 1.12 ×, then squeezes to 72.
 Examples (age 4): 1280×720 table.y 556, n 3 item 124 sp 211, n 5 sp 182, lanterns cx 298 / 526 / 754 / 982, cy 293–305;
 960×720 (iPad) table.y 529, n 3 → 124, n 5 → item 100 sp 125; 1036×720 n 5 → 124 sp 155; 1561×720 (notch) n 5 → 124 sp 195;
-720×1561 (iPhone portrait) table.y 1207, garland.y 392, n 3 → 139 (tall), n 5 → 100; 720×1036 (iPad portrait) table.y 726.
+720×1561 (iPhone portrait, HUD measured) table.y 976 / 970 / 954 for n 3 / 4 / 5, item 161 / 149 / 118 (88 / 81 / 64 CSS px, was
+139 / 139 / 100), Moka 260 (head 1207, ≈ 185 px below the plank), legs 208 / 611 down to ≈ 1170, garland.bottom ≈ 575; 1561×720 (iPhone landscape) item 143; 720×1036 (iPad portrait)
+table.y 675, item 134 (n 5: 118).
 
 ## 4. `FT.CONFIG` (all tunable via `new FT.World({config})`)
 | group | values |
 |---|---|
-| flow | step 1/120, roundsPerLevel 4, chapterTimeLimit 75 s, chapterMinRounds 3, shortBudget [∞, 26, 42, 56] s (a later round is short: 3 things at ages ≤ 4, else 4), introTime 2.5, levelDoneTime 3.6, garlandFullTime 1.6, talkAfterAnswer 1.6, talkAskTime 12, talkGlowAfterAsks 2, talkMaxAsks 3, talkGiveUp 2 (Moka answers) |
-| fall (enter) | enterStagger 0.22 s (random order), enterMin 1.4 s, settleTime 0.3 s after the last landing → ask; terminal speed vT = clamp((table.y − entryY) / fallTime 1.25, 260, 900) px/s (≈ 530 landscape, 900 tall portrait), starts at 0.6 vT, first-order drag 7 /s; the fluff **flares** in the last 0.36·vT px (target speed eases to landV 150) → lands at ≈ 240 px/s (landRef); hang length Lh = size × 1.32, fluffR = size × 0.42 |
+| flow | step 1/120, roundsPerLevel 4, chapterTimeLimit 75 s, chapterMinRounds 3, **chapterHardLimit 110 s, chapterHardMinRounds 2** (a slow chapter goes to Talk once 2 rounds are done), shortBudget [∞, 26, 42, 56] s (a later round is short: 3 things at ages ≤ 4, else 4), introTime 2.5, levelDoneTime 3.6, garlandFullTime 1.6, talkAfterAnswer 1.6, **talkLock 1 s** (Talk choices ignored in the first second; main also waits for the question to start + 1 s), talkAskTime 12, talkGlowAfterAsks 2, talkMaxAsks 3, talkGiveUp 2 (Moka answers) |
+| layout (portrait / phones) | mokaHPortTall 260, tablePortSideP 30, slotInsetPort 24, itemPortK {tall 1.3, std 1.08}, spPort 1.2, tableMokaGap 24, riseRoomMin 90, portEdge 16, legDrop 150, legU [0.27, 0.12]; lanternSPhone 1.3 / lanternSPhoneLand 1.15, phoneLandK 1.15, lanternClear 14; bubbleHPortPhone 140, bubbleMaxWPhone 720 (3 lines at ≥ 15 CSS px) |
+| fall (enter) | enterStagger **0.16** s (random order), enterMin 1.4 s, settleTime 0.3 s after the last landing → ask; terminal speed vT = clamp((table.y − entryY) / fallTime 1.25, 260, 900) px/s (≈ 530 landscape, 900 tall portrait), starts at 0.6 vT, first-order drag 7 /s; the fluff **flares** in the last 0.36·vT px (target speed eases to landV 150) → lands at ≈ 240 px/s (landRef); hang length Lh = size × 1.32, fluffR = size × 0.42 |
 | sway | the fluff pivot drifts back over its placemat (spring ω 2.6 ζ 0.85, start ±60 px off), breeze pushes 40·wind px/s²; pendulum ω 3.2 ζ 0.15, start ±0.08–0.13 rad, driven by 0.3 rad/s² flutter at 0.35–0.6 Hz + 0.5·wind − 0.9·(pivot accel)/Lh → peak ≈ 0.12 rad; rot = −swing (rigid hanging body) |
 | landing | squash q-spring ω 16 ζ 0.4, kick 0.14 × clamp(v/240, 0.8, 1.15): sx = 1 + 0.86 q ≈ 1.12, sy = 1 − q ≈ 0.86; the swing becomes a tilt that settles (ω 10 ζ 0.5); table spring ω 14 ζ 0.3, kick 2.5 px × mass (guest 1, obj 0.8, plate 0.7, cookie 0.6, card 0.5) × clamp(v/240, 0.6, 1.5); placemat pop peak 1 (ω 14 ζ 0.35); the fluff lets go: (−46 + 0.3 vx − 30 wind, −64) px/s, rising, fades over 1.4 s |
-| sitting | slot spring ω 9 ζ 0.8 (cap 520 px/s; only after a re-layout), breathing ±1.5 px (sy) at 0.6 Hz per-thing phase, breeze tilt ≤ 0.04·wind rad at 0.45 Hz, look-around hop 8 px / 0.3 s every 3–7 s in play |
-| wrong | wiggle kick 0.18 rad, ω 18, ζ 0.25 + hop 14 px / 0.3 s; sameWrongWindow 1 s |
-| rise | fairy flies 0.45 s (Bézier, 80 px arc) → circles once in 0.7 s (radius ≈ 0.6·size + 8, 3 dust events) while the thing levitates 12 px (0.4 s, ±3 px bob); plates: count every 0.5 s after 0.2 s, tail 0.35 s; float: vy → −vR (vR = clamp(dist / 1.6, 220, 400)) with drag 2.6 /s, slowing in the last 90 px (≥ 0.3), sway 26 px at 1.1 Hz (fades as it rises), spin 0.18 rad at 0.7 Hz, scale 1 → 0.42 (smoothstep of the height progress), x eases to the lantern's cx; the thing's body centre ends at the lantern bulb centre |
+| sitting | slot spring ω 9 ζ 0.8 (cap 520 px/s; only after a re-layout, which keeps at most ±0.3·size of the old offset from the slot — things never pile up at the screen edge after a rotation), breathing ±1.5 px (sy) at 0.6 Hz per-thing phase, breeze tilt ≤ 0.04·wind rad at 0.45 Hz, look-around hop 8 px / 0.3 s every 3–7 s in play |
+| wrong | wiggle kick 0.18 rad, ω 18, ζ 0.25 + hop 14 px / 0.3 s; sameWrongWindow 1 s from the thing's last **counted** miss (a repeat wiggle does not slide the window, and counts as a press without progress) |
+| rise | fairy flies 0.45 s (Bézier, 80 px arc) → circles once in **0.55** s (radius ≈ 0.6·size + 8, 3 dust events) while the thing levitates 12 px (0.4 s, ±3 px bob); plates: count every 0.5 s after 0.2 s, tail 0.35 s; float: vy → −vR (vR = clamp(dist / 1.6, 220, 400)) with drag 2.6 /s, slowing in the last 90 px (≥ 0.3), sway 26 px at 1.1 Hz (fades as it rises), spin 0.18 rad at 0.7 Hz, scale 1 → 0.42 (smoothstep of the height progress), x eases to the lantern's cx; the thing's body centre ends at the lantern bulb centre |
 | lantern | `lit` spring → 1, ω 9 ζ 0.35 (overshoot ≈ 1.3); swing pendulum ω 4 ζ 0.12, kick 0.22 rad (+ breeze 0.25·wind); lanternHold 0.35 s → roundDone; home badge 2 s (fade 0.25 s) |
 | fairy | lead: spring ω 10 ζ 0.9 to 30 px above the rising thing; back home 0.8 s Bézier; cheers loop r 34 in 0.9 s; rest bob ±3 px at 0.8 Hz; flap 4 Hz resting / 12 Hz flying |
-| chime / cheers / clear | chimeGap 0.3 s, hop 26 px parabolic / 0.36 s (stretch at take-off, squash 0.08 on landing), `hop` frame held 0.15 s after landing, ring 1 → 0 in 0.5 s, chimeTail 0.4 s; cheersTime 1.1 s; clear 0.8 s: poofs sweep left → right 0.05 + 0.4·(x − xmin)/(xmax − xmin) s, each shrinks to 0 in 0.28 s (+10 px lift, alpha 1 − u²) |
-| help | hint after 2 misses or 3 no-progress presses; assist after 6; hintTime 3.2 s, hintCooldown 6 s, hintCycle 1.6 s (taps twice); idle 12 s × 1.5 up to 30 s, the 2nd idle hints; flickTime 0.25 s; puff 0.6 s |
+| chime / cheers / clear | chimeGap **0.22** s, hop 26 px parabolic / 0.36 s (stretch at take-off, squash 0.08 on landing), `hop` frame held 0.15 s after landing, ring 1 → 0 in 0.5 s, chimeTail **0.25** s; cheersTime **0.85** s; clear **0.65** s: poofs sweep left → right 0.05 + **0.3**·(x − xmin)/(xmax − xmin) s, each shrinks to 0 in 0.28 s (+10 px lift, alpha 1 − u²) |
+| help | hint after 2 misses or 3 no-progress presses (soft presses, repeat wiggles; not a press within critterSoftK 1.5 × r of a critter); assist after **4**, armed only once the round has been in play ≥ **assistMinPlay 10 s**; hintTime **10** s, hintCooldown 6 s, hintCycle 1.6 s (taps twice); idle 12 s × 1.5 up to 30 s, the **1st** idle hints (idleHintFrom 1); **any touch restarts the idle count** (`idle.n`; main pauses at n = 5); flickTime 0.25 s; Moka tap = moved < max(tapMovePx 24 logical, tapMoveCss 24 CSS px ÷ viewScale) (`setViewScale`); puff 0.6 s |
 | critters | one round per chapter: round 1 or 2 (seeded), kind by chapter index ladybug / butterfly / snail / fairies; appear 2–4.5 s after the first ask (also during rise / chime); ladybug 70 px/s along y = table.y + 20 from plankX1, stops 3 s in the middle gap, r 40 (centre 12 px above its feet), fly-off 1.1 s; butterfly r 38: flies in 1.6 s, sits 5 s on a friend's top (never the odd one), loop r 50 / 1.2 s, out 1.6 s; snail r 46 (centre 40 px above): slides 70 px out from behind the right toadstool leg in 2.2 s, stays 10 s, peek 1 s, back 1.6 s; fairies 4 × r 40 orbit the lanterns (r 46, ω 1.6), in 1.4 s, dance 14 s, twirl 0.9 s, out 1.2 s. When the clear starts, a critter still around leaves |
 | Moka | moods idle talk happy cheer think oops wave point sip (+ umbrella frame: main, rain chapter); moodTime happy 0.9 cheer 1.4 oops 0.8 think 1.4 talk 1.0 wave 1.4 point 1.2 sip 1.3; bounce 0.42 s; blink 2.2–5 s (0.13 s); look spring rate 6 |
 
@@ -164,14 +173,15 @@ Examples (age 4): 1280×720 table.y 556, n 3 item 124 sp 211, n 5 sp 182, lanter
   (text) · `guest` (FT.GUESTS animal + home). Members per round: age 3: 3 3 3 4; age 4: 3 4 4 5 (first chapter and every
   counting chapter 3 3 4 4); age 5: 3 4 5 5; 6+: 4 5 5 5; short rounds 3 (ages ≤ 4) / 4.
 - Warm-up (round 0): colours = the same object in two clash-free colours; shapes = very different outlines only (circle vs
-  triangle / star / square …); count ≤ 4 berries with a gap ≥ 2; animals = the same forest guest + another forest guest.
+  triangle / star / square …); count ≤ 4 berries with a gap ≥ 2 (ages ≤ 4); **every** count warm-up has a gap ≥ 2 (`countPairOk(a, b, age, ri)`); animals = the same forest guest + another forest guest.
 - `animals`: age 3 and every round 0 → `p.animal` (forest guests only); from round 1 at ages ≥ 4 → `p.forest` (different forest
   guests + one of penguin / crab / camel / lion, its home on the badge). **Goldfish is never the odd one of a forest round nor a
   Talk "where does it live" question** (it is a freshwater pet; its "sea" badge would teach a wrong fact) — it still appears in
   initial rounds.
 - `size`: the same obj (one colour) or the same forest guest; rounds 0 / 2 `p.size` (one little), 1 / 3 `p.sizeBig` (one big).
-- **Odd slot: uniform over the slots except the previous round's odd slot — never the same slot twice in a row** (world passes
-  `prevOddSlots`, reset per session). No non-forest guest / odd colour twice in a chapter (`usedOdd`).
+- **Odd slot: uniform over the slots except the previous round's odd slot when the count is unchanged — never the same place
+  twice in a row** (world passes `prevOddSlots` + `prevOddN`, reset per session). With a new count the placemats are re-laid out,
+  so the pick is uniform (excluding by index there biased the rightmost slot to 32–34 %). No non-forest guest / odd colour twice in a chapter (`usedOdd`).
 - `initial`: names from `FT.I18N.name(lang, 'obj'|'animal', value)` when loaded, else `FT.THING_NAMES` (en + vi); classifier /
   article dropped, VI tone marks dropped (Ă Â Ê Ô Ơ Ư Đ kept), VI digraph words (con thỏ, con chuột, con nhím, chim cánh cụt) never
   used. VI groups: B (bát, bánh), C (cáo, cú, cua, cá vàng), S (sóc, sư tử) …; EN: C (cup, cupcake, crab, camel), B (bowl, bunny) ….

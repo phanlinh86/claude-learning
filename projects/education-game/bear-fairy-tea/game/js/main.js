@@ -39,7 +39,7 @@
     rises: 0, lanterns: 0, lanternAuto: 0, chimes: 0, cheers: 0, poofs: 0, garlands: 0, talks: 0, talkRight: 0, critters: 0, critterTaps: 0,
     pokes: 0, frames: 0, slowFrames: 0 };
   const eventLog = [];             // the last 300 world events (type + id), for the e2e tests
-  let promptUntil = 0, lastWrongSay = -1e9, idleSaid = 0, shownStars = 0, lastPraise = -1e9, lastCritterSay = -1e9;
+  let promptUntil = 0, lastWrongSay = -1e9, shownStars = 0, lastPraise = -1e9, lastCritterSay = -1e9;
   let pendingStars = 0, sessionLanterns = [];
   let inputBlockUntil = 0;         // canvas presses right after Resume / Play / Play again are ignored (a double tap falls through)
   let lastRight = null;            // the right answer's line + thing: re-said (short) when a pause cut it during the rise
@@ -96,6 +96,7 @@
     render.resize(view.W, view.H, rs);
     world.hudKeep = measureHud();                   // the real HUD (CSS px) may reach lower than the logical keep-out
     world.setViewport(view.W, view.H, view.ins);    // table, slots, garland, Moka re-laid; things re-target their slots
+    if (world.setViewScale) world.setViewScale(view.s);   // the tap-vs-move threshold is 24 CSS px
     applyTable();
     placeBubble();
     updateHudStarTarget();
@@ -138,8 +139,11 @@
     // the line ended (or was dropped / failed) without ever starting: lift the guard so a Moka tap repeats it
     if (p && p.then) p.then(() => { if (pendingPrompt === txt) { pendingPrompt = null; promptUntil = Math.min(promptUntil, performance.now() + 300); } }, () => {});
     if (!voiceOn()) { pendingPrompt = null; promptUntil = performance.now() + lineMs(txt); }
+    return p;
   }
+  let talkGateUntil = 0, talkPromptText = '';
   function onVoiceStart(display) {
+    if (talkPromptText && display === talkPromptText) { talkGateUntil = performance.now() + 1000; talkPromptText = ''; }
     if (pendingPrompt && display === pendingPrompt) { promptStart = performance.now(); promptUntil = promptStart + lineMs(display); pendingPrompt = null; }
   }
   const canInterrupt = () => performance.now() > promptUntil;
@@ -192,7 +196,6 @@
     if (mode !== 'paused') return;
     mode = world.state === 'talk' ? 'talk' : 'play';
     blockInput();
-    idleSaid = 0;   // a returning child gets the nudges again before the next auto-pause
     if (world.resetNudges) world.resetNudges();
     FT.UI.only(mode === 'talk' ? 'scrTalk' : undefined);
     FT.Audio.startMusic();
@@ -256,7 +259,8 @@
         weather.setWeather(wi, {});
         FT.Audio.setMood(wi); FT.Audio.play('chapter');
         FT.UI.setDots(world.roundsPerLevel || 4, 0);
-        speak(T('ui.chapter', { n: e.level + 1 }) + '. ' + T('topic.' + e.topic), { interrupt: true });
+        // never cuts the chapter-end "Great!" (protected at levelDone): then it queues right behind it
+        speak(T('ui.chapter', { n: e.level + 1 }) + '. ' + T('topic.' + e.topic), { interrupt: canInterrupt(), priority: !canInterrupt() });
         speak(T('weather.' + wi));   // queued after the chapter name ("Pitter-patter, it's raining!")
         FT.UI.say('');   // the chapter banner shows the topic
         render.prewarm(world.layout, wi, world.age);
@@ -265,7 +269,7 @@
       case 'round': {
         flushStars();
         FT.UI.fadeBubble(false); FT.Audio.setFanfare(false);
-        stats.rounds++; idleSaid = 0; lastAsk = null; lastPromptText = '';
+        stats.rounds++; lastAsk = null; lastPromptText = '';
         FT.UI.setDots(world.roundsPerLevel || 4, e.round % (world.roundsPerLevel || 4));
         FT.UI.say(T('enter'));   // shown, not spoken: the prompt follows in a moment
         applyTable();
@@ -279,7 +283,7 @@
         break;
       }
       case 'ask': {
-        lastAsk = e; idleSaid = 0; FT.UI.fadeBubble(false); roundMissed = false; hintBySay = false;
+        lastAsk = e; FT.UI.fadeBubble(false); roundMissed = false; hintBySay = false;
         // the long "…but one!" form only in a chapter's first round; later rounds use the short wordings
         const txt = askText(Object.assign({}, e, { first: !!e.first && e.round === 0 }));
         lastPromptText = txt;
@@ -375,7 +379,9 @@
           lastWrongSay = now;
           const m = memberOf(e.id), ee = ev2(Object.assign({}, e, { thing: (m && m.thing) || e.thing }));
           // the miss that brings the hint: ONE short line that also points at the glowing one
-          const wt = e.hint ? line('sayWrongHint', ee, 'hint') : line('sayWrong', ee, 'hint');
+          const say = () => (e.hint ? line('sayWrongHint', ee, 'hint') : line('sayWrong', ee, 'hint'));
+          let wt = say();
+          for (let k = 0; k < 3 && wt === lastSpoken; k++) wt = say();   // never the same words twice in a row
           if (e.hint) hintBySay = true;
           feedback(wt); protect(wt); FT.UI.say(wt);
         }
@@ -393,10 +399,16 @@
       }
       case 'assistArmed': FT.Audio.play('hint'); break;
       case 'assist': stats.assists++; break;
-      case 'idle':
-        if (++idleSaid <= 4) speak(T('idle') + ' ' + currentPrompt());   // then stay quiet: maybe nobody is there
-        else if (idleSaid >= 5 && !bot) pause();   // ≈ 2 min without a touch: nobody is playing — pause
+      case 'idle': {
+        // the world counts the nudges since the last touch (any touch restarts the cycle): 4 nudges, then stay quiet
+        if (e.n <= 4) {
+          const cp = currentPrompt();
+          let il = T1('idle') + ' ' + cp;
+          for (let k = 0; k < 3 && il === lastSpoken; k++) il = T1('idle') + ' ' + cp;   // re-roll the prefix, not the question
+          speak(il);
+        } else if (!bot) pause();   // ≈ 2 min without a touch: nobody is playing — pause
         break;
+      }
       case 'pokeMoka': {
         stats.pokes++;
         FT.Audio.play('giggle');
@@ -452,7 +464,7 @@
         FT.Audio.play('level'); FT.UI.say('');
         if (mode === 'talk') { mode = 'play'; FT.UI.only(); }
         $('stage').classList.remove('talking');
-        speak(T('great'));
+        speakPrompt(T('great'));   // queued after the Talk result and guarded like a prompt from its start: the next chapter name waits for it
         break;
       case 'sessionDone': {
         FT.Audio.play('party'); FT.Audio.setFanfare(false);
@@ -464,7 +476,7 @@
         shownStars = e.stars || shownStars; FT.UI.setStars(shownStars);
         $('doneStars').textContent = e.stars || 0;
         $('doneTitle').textContent = T('session.done', { stars: e.stars || 0 });
-        speak(T('party'), { interrupt: true });
+        speak(T('party'), { interrupt: canInterrupt(), priority: !canInterrupt() });   // after the last chapter's "Great!" (protected)
         speak(T('session.done', { stars: e.stars || 0 }));
         mode = 'done';
         FT.UI.only('scrDone'); FT.UI.show('hud', false); FT.UI.say('');
@@ -482,9 +494,17 @@
     if (inputCancel && inputCancel.cancel) inputCancel.cancel();
     if (world.cancelDrag) world.cancelDrag();
     const canMic = S.mic && FT.Voice && FT.Voice.canListen && FT.Voice.canListen() && !FLAGS.bot;
-    FT.UI.openTalk(talk, curLang(), id => { FT.Audio.play('click'); world.talkAnswer(id); }, canMic, curAge());
+    // choices answer only once the question has started + 1 s (a finger still mashing from the last clear never answers it)
+    talkGateUntil = voiceOn() ? performance.now() + 8000 : 0;
+    FT.UI.openTalk(talk, curLang(), id => {
+      if (performance.now() < talkGateUntil || world.state !== 'talk' || world.talkAnswered || !world.talkOpen()) return;
+      FT.Audio.play('click'); world.talkAnswer(id);
+    }, canMic, curAge());
     const q = T(talk.promptKey, talk.params || {});
-    speakPrompt(T('talk.intro') + ' ' + q, { priority: true });   // queued after the round's praise, not cutting it off
+    talkPromptText = T('talk.intro') + ' ' + q;
+    const tp = speakPrompt(talkPromptText, { priority: true });   // queued after the round's praise, not cutting it off
+    const asked = talkPromptText;   // dropped / failed without ever starting: open the choices now
+    if (tp && tp.then) tp.then(() => { if (talkPromptText === asked) { talkPromptText = ''; talkGateUntil = 0; } }, () => { if (talkPromptText === asked) { talkPromptText = ''; talkGateUntil = 0; } });
   }
   function listen() {
     const talk = world.talk;

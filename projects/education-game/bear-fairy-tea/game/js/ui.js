@@ -92,11 +92,12 @@
       const r = this._bubbleRect; if (!r) return;
       const t = $('bubbleText'), b = $('bubble');
       // a short line gets a short bubble (min 55 % of the reserved box); a long line shrinks its font until the bubble
-      // fits the box the world reserved (layout = reality: nothing below the box is ever covered)
+      // fits the box the world reserved (layout = reality: nothing below the box is ever covered) — never below 15 CSS px
+      // (readable for a parent on a phone: phones reserve a taller / wider box with room for 3 lines at 15 px instead)
       b.style.minHeight = Math.round(r.h * 0.55) + 'px';
       let fs = Math.max(15, Math.min(34, r.h * 0.3));
       t.style.fontSize = fs + 'px';
-      for (let i = 0; i < 10 && b.offsetHeight > r.h + 1 && fs > 13; i++) { fs *= 0.92; t.style.fontSize = fs + 'px'; }
+      for (let i = 0; i < 12 && b.offsetHeight > r.h + 1 && fs > 15; i++) { fs = Math.max(15, fs * 0.92); t.style.fontSize = fs + 'px'; }
     },
 
     /* ---------- Talk time ---------- */

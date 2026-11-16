@@ -38,7 +38,7 @@ function child() {
     if (!at) { if (eager) at = listenFrom + U(600, 1600); else if (!talking() && now - listenFrom > 300) at = now + U(1300, 2600); }
     if (at && now > at) {
       let c = w.memberById(a.member);
-      if (R() > 0.82 && !w.hintHand && !w.assistId) { const o = w.members.filter(q => q.state === 'stand' && q.id !== c.id); if (o.length) c = o[Math.floor(R() * o.length)]; }
+      if (R() > 0.82 && !w.hintHand && !w.assistId) { const o = w.members.filter(q => q.state === 'sit' && q.id !== c.id); if (o.length) c = o[Math.floor(R() * o.length)]; }
       w.pointerDown(c.cx + U(-20, 20), c.cy + U(-20, 20)); up = now + U(60, 250); at = 1e15;
     }
   }, 33);

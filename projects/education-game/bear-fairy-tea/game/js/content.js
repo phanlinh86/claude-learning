@@ -2,7 +2,7 @@
  * FT.Content (pure + deterministic odd-one-out round generator; DESIGN §5.1)
  *
  *   FT.Content.makeRound(topic, { age, lang, rng, roundIndex, level, surprise, short?, usedKeys?, prevKey?, prevRule?,
- *                                 prevRuleRun?, prevOddSlots? ([last, beforeLast]), usedOdd? (odd values met this chapter) })  → round (self-checked with validate; retries, throws if impossible)
+ *                                 prevRuleRun?, prevOddSlots? ([last, beforeLast]), prevOddN? (last round's thing count), usedOdd? (odd values met this chapter) })  → round (self-checked with validate; retries, throws if impossible)
  *   FT.Content.makeTalk(topic, { age, lang, rng })  → talk
  *   FT.Content.validate(round)  → null | 'reason'
  *   FT.Content.topicsFor(age, rng?, lastTopics?)  → the 4 chapter topics (easiest first)
@@ -283,7 +283,7 @@
         for (var t = 0; t < 400; t++) {
           if (age <= 4 && ri === 0) { var wp = rng.pick([[1, 3], [3, 1], [2, 4], [4, 2]]); a = wp[0]; b = wp[1]; }
           else { var top = ri === 0 ? Math.min(hi, age <= 5 ? 5 : 6) : hi; a = rng.int(1, top); b = rng.int(1, top); }
-          if (countPairOk(a, b, age)) break;
+          if (countPairOk(a, b, age, ri)) break;
         }
         for (i = 0; i < k; i++) maj.push(plate(a));
         odd = plate(b);
@@ -374,10 +374,11 @@
     }
     return { rule: rule, promptKey: pk, params: pr, majority: maj, odd: odd, oddValue: oddValue };
   }
-  function countPairOk(a, b, age) {
+  /** ri === 0 (the chapter's warm-up): a gap ≥ 2 at every age, so the warm-up is never harder than the rounds after it. */
+  function countPairOk(a, b, age, ri) {
     var hi = COUNT_MAX[age] || 5, g = Math.abs(a - b);
     if (a < 1 || b < 1 || a > hi || b > hi || g < 1) return false;
-    if (age <= 4) return g >= 2;
+    if (age <= 4 || ri === 0) return g >= 2;
     return Math.max(a, b) >= 6 ? g >= 2 : g >= 1;
   }
   /** { letter: [{kind 'obj'|'guest', value}] } for 'initial' in this language. */
@@ -389,11 +390,13 @@
   }
   function groupSize(list) { return list.some(function (q) { return q.kind === 'obj'; }) ? 99 : list.length; }
 
-  function buildRound(topic, age, lang, rng, ri, level, short, prevOddSlots, src, usedOdd) {
+  function buildRound(topic, age, lang, rng, ri, level, short, prevOddSlots, src, usedOdd, prevN) {
     var n = countFor(age, ri, level, short, topic), set = buildSet(topic, age, lang, rng, ri, n - 1, src, usedOdd);
-    // the odd one's place is no clue: any slot, uniformly — only never the same slot twice in a row
-    var p0 = prevOddSlots[0];
-    var slots = range(0, n - 1).filter(function (s) { return !(p0 !== undefined && p0 !== null && s === p0); });
+    // the odd one's place is no clue: any slot, uniformly — only never the same slot twice in a row. The rule applies only when the
+    // count is unchanged (prevN unknown or === n): with a new count the placemats are re-laid out, so index equality is not "the
+    // same place", and excluding it would bias the rightmost slot (an n − 1 round can never exclude slot n − 1).
+    var p0 = prevOddSlots[0], keep = prevN === undefined || prevN === null || prevN === n;
+    var slots = range(0, n - 1).filter(function (s) { return !(keep && p0 !== undefined && p0 !== null && s === p0); });
     var oddSlot = rng.pick(slots);
     var maj = rng.shuffle(set.majority.slice()), members = [], j = 0;
     for (var s = 0; s < n; s++) {
@@ -407,7 +410,8 @@
   }
 
   /** makeRound(topic, o) → round. usedKeys / prevKey: never the same set twice in a chapter; prevRule (+ prevRuleRun): the asked
-   *  value differs from the last round's (forest / size have one value; parity at most 2 in a row); prevOddSlots[0]: never the same slot. */
+   *  value differs from the last round's (forest / size have one value; parity at most 2 in a row); prevOddSlots[0]: never the same slot
+   *  (only when prevOddN is unknown or equals this round's count). */
   function makeRound(topic, o) {
     o = o || {};
     var age = ageOf(o.age), lang = langOf(o.lang), rng = o.rng || new FT.RNG(1), ri = o.roundIndex || 0;
@@ -423,7 +427,7 @@
     var r = null, err = null;
     for (var attempt = 0; attempt < 120; attempt++) {
       try {
-        r = buildRound(topic, age, lang, rng, ri, level, !!o.short, pos, src, o.usedOdd || []);
+        r = buildRound(topic, age, lang, rng, ri, level, !!o.short, pos, src, o.usedOdd || [], o.prevOddN);
         err = validate(r);
         if (!err && attempt < 100 && used.indexOf(r.key) >= 0) err = 'the same set as an earlier round';
         if (!err && attempt < 80 && sameRule(r, o.prevRule, o.prevRuleRun)) err = 'the same ask as the previous round';
@@ -515,7 +519,7 @@
       }
       case 'count': {
         if (!kinds('plate') || rule.kind !== 'n' || r.params.n !== rule.value) return 'count prompt / kind';
-        if (!countPairOk(rule.value, O.n, age)) return 'count pair ' + rule.value + '/' + O.n + ' at age ' + age;
+        if (!countPairOk(rule.value, O.n, age, ri)) return 'count pair ' + rule.value + '/' + O.n + ' at age ' + age;
         if (age <= 4 && ri === 0 && Math.max(rule.value, O.n) > 4) return 'count warm-up';
         break;
       }

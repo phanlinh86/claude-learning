@@ -366,7 +366,8 @@
       'critter.fairies': ['Twirl!', 'Twinkle, twirl!', 'Sparkle, sparkle!'],
       'moka.poke': ['Hee hee! That tickles!', 'Hi there! Moka is happy!', 'Hello! Would you like some tea?'],
 
-      'praise': ['Yes!', 'Great job!', 'You got it!', 'Super!', 'Wonderful!', 'Lovely!', 'Hooray!', 'Well done!'],
+      'praise': ['Yes!', 'Great job!', 'You got it!', 'Super!', 'Wonderful!', 'Lovely!', 'Hooray!', 'Well done!',
+        'Yes, {child}!', 'Well done, {child}!', 'Super, {child}!'],
       'great': ['Great finding, {child}!', 'You did it, {child}!', 'What sharp eyes!', 'Wow, {child}, super finding!',
         'Hooray! Another lantern!', 'You are so clever!', 'Wonderful! Cheers!'],
       'party': ['Look at all our lanterns!', 'Hooray! What a lovely tea party!', 'Everyone is dancing!'],
@@ -602,7 +603,8 @@
       'critter.fairies': ['Xoay tròn!', 'Lấp lánh, xoay vòng!', 'Lung linh quá!'],
       'moka.poke': ['Hi hi! Nhột quá!', 'Chào bé nè! Moka vui quá!', 'Chào bé! Bé uống trà với Moka không?'],
 
-      'praise': ['Đúng rồi!', 'Giỏi quá!', 'Tuyệt vời!', 'Hoan hô!', 'Bé giỏi lắm!', 'Chính xác!', 'Hay quá!', 'Hay lắm!'],
+      'praise': ['Đúng rồi!', 'Giỏi quá!', 'Tuyệt vời!', 'Hoan hô!', 'Bé giỏi lắm!', 'Chính xác!', 'Hay quá!', 'Hay lắm!',
+        'Đúng rồi, bé {child}!', 'Bé {child} giỏi quá!', 'Hoan hô bé {child}!'],
       'great': ['Bé {child} tìm giỏi quá!', 'Hoan hô bé {child}!', 'Mắt bé tinh quá!', 'Oa, bé {child} tìm siêu giỏi!',
         'Hoan hô! Thêm một đèn hoa!', 'Bé thông minh quá!', 'Tuyệt vời! Cụng ly nào!'],
       'party': ['Nhìn đèn hoa của mình nè!', 'Hoan hô! Tiệc trà vui quá!', 'Các bạn cùng nhảy múa nè!'],
@@ -703,7 +705,8 @@
   });
 
   var CHILD_FALLBACK = { en: 'friend', vi: 'bé' };
-  var CHILD_PREFERRED = { 'ui.welcome': 1 };
+  // with a name set: the share of lines that use it (else a uniform pick among the variants with and without {child})
+  var CHILD_SHARE = { 'ui.welcome': 1, 'session.done': 1, 'praise': 1 / 3, 'great': 1 / 3 };
 
   // ---------------------------------------------------------------- helpers
   function L(lang) { return lang === 'vi' ? 'vi' : 'en'; }
@@ -1146,7 +1149,7 @@
       var noChild = v.filter(function (s) { return s.indexOf('{child}') < 0; });
       var pool = v;
       if (!child) { if (noChild.length) pool = noChild; }
-      else if (CHILD_PREFERRED[key] && withChild.length) pool = withChild;
+      else if (CHILD_SHARE[key] != null && withChild.length) pool = !noChild.length || rnd(rng) < CHILD_SHARE[key] ? withChild : noChild;
       v = pool[Math.min(pool.length - 1, Math.floor(rnd(rng) * pool.length))];
     }
     return fill(lang, v, p, child);

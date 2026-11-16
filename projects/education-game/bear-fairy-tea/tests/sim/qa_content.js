@@ -23,15 +23,15 @@ out.push('', '| age | n things | rounds | odd slot share % (left → right) | at
 for (const age of [3, 4, 5, 6, 7]) {
   const H = {}, prevBy = {};
   for (let c = 0; c < N / 4; c++) {
-    const rng = new FT.RNG(9100 + c * 7 + age); let prev = [], used = [];
+    const rng = new FT.RNG(9100 + c * 7 + age); let prev = [], used = [], prevN = null;
     for (const topic of FT.AGE_TOPICS[age]) for (let ri = 0; ri < 4; ri++) {
-      const r = C.makeRound(topic, { age, lang: 'en', rng, roundIndex: ri, level: c % 4, usedKeys: used, prevOddSlots: prev });
+      const r = C.makeRound(topic, { age, lang: 'en', rng, roundIndex: ri, level: c % 4, usedKeys: used, prevOddSlots: prev, prevOddN: prevN });
       used.push(r.key);
       const n = r.members.length, h = H[n] = H[n] || { n: 0, s: Array(n).fill(0), same: 0, step: 0 };
       h.n++; h.s[r.oddSlot]++;
-      if (prev.length && prev[0] === r.oddSlot) h.same++;
+      if (prev.length && prev[0] === r.oddSlot && prevN === n) h.same++;
       if (prev.length && Math.abs(prev[0] - r.oddSlot) === 1) h.step++;
-      prev = [r.oddSlot].concat(prev).slice(0, 2);
+      prev = [r.oddSlot].concat(prev).slice(0, 2); prevN = n;
       void prevBy;
     }
   }

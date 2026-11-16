@@ -93,10 +93,14 @@ Rule kinds `color, shape, size, n, animal, home, letter, lower, initial, sum, di
 
 ## 2. World event → line (DESIGN §5.2) — what main.js should do
 **Speech policy** (proven in the sister games): *prompts are protected* (`speakPrompt`: guard until the prompt has been spoken —
-from its `onStart` 600 ms + 95 ms × chars); *feedback (right / wrong) interrupts* unless the prompt is still protected (then
-queue); *the wrong line is protected the same way*; *the count run is never cut* (queued, protected; the world's `count`
+from its `onStart` 600 ms + 95 ms × chars); *the wrong line interrupts* unless the prompt is still protected (then queue);
+*the right line always cuts the prompt* — the question has just been answered, so main lifts the guard (`promptUntil = 0`)
+before the instant feedback (qa_playtest P2-5: the code's behaviour is the intended one); *the wrong line is protected the same way*; *the count run is never cut* (queued, protected; the world's `count`
 events light the berries while it is said); *praise / cheers / lantern queue and are droppable, the hint is priority*; skip a
-new praise if one started < 1.2 s ago. The long `.first` question only in a chapter's round 0; no line at `roundDone`.
+new praise if one started < 1.2 s ago. **Never the same words twice in a row**: `T()` re-rolls a key's variant; the composed
+wrong / wrong-hint line is re-composed (≤ 3 ×) while it equals the last spoken line; the idle line re-rolls its `idle` prefix
+(the question part stays word for word). **The child's name** (when set): `praise` / `great` use a `{child}` variant ≈ 1 in 3,
+`ui.welcome` / `session.done` always (`CHILD_SHARE`, i18n.js). The long `.first` question only in a chapter's round 0; no line at `roundDone`.
 **A question is repeated only while it can be answered** (`world.interactive`). Speech is log-only for `speed > 1`.
 
 | world event | line | how |
@@ -105,7 +109,7 @@ new praise if one started < 1.2 s ago. The long `.first` question only in a chap
 | `round {round, surprise}` | bubble `t('enter')` ("Here come the tea things!"), not spoken | — |
 | `land {id, i, x, y}` | — (plop + table thunk) | no line |
 | `ask {promptKey, params, first}` | `ask(lang, promptKey, params, {first: first && round === 0})`; bubble + voice; remember for `pokeMoka` / `idle` | **protected prompt** (`priority: true`) |
-| `right {id, thing, count?, home?, lantern}` | `sayRight(lang, e + {topic, promptKey, params, rule})` (plates: the count run; guests: "…lives on the ice.") | interrupt, never over a protected prompt (then queue); count run queued + protected |
+| `right {id, thing, count?, home?, lantern}` | `sayRight(lang, e + {topic, promptKey, params, rule})` (plates: the count run; guests: "…lives on the ice.") | interrupt — **cuts the prompt** (the guard is lifted: answered); count run queued + protected |
 | `fairyArrive`, `dust` | — (fairy chime, sparkle) | no line |
 | `count {id, i}` | — (rising "pip"; do **not** also speak `sayCount(i)`) | — |
 | `lantern {i, color}` | optional `t('lantern')` **only** in the chapter's round 0 or if nothing is speaking — never cuts the right line | queue, droppable |
@@ -113,7 +117,7 @@ new praise if one started < 1.2 s ago. The long `.first` question only in a chap
 | `wiggle` (same wrong thing again < 1 s) | — (wobble sound) | no line |
 | `soft {x, y}` | — (dust sparkle) | no line |
 | `hint {id}` | nothing if the wrong line already pointed at it; else `t('hint')` | **priority** |
-| `idle {n}` | `t('idle') + ' ' + currentPrompt` (≤ 4 times, then quiet) | queue |
+| `idle {n}` | `t('idle') + ' ' + currentPrompt` while `n ≤ 4`; `n ≥ 5` → auto-pause (the world restarts n at every touch, so a playing child is never paused) | queue |
 | `pokeMoka` | interactive: repeat the prompt (> 3 s after it was asked, not while still spoken); busy (enter / rise / chime): `t('moka.poke')` **only when nothing is speaking** | interrupt (prompt), queue (giggle) |
 | `roundDone {round, stars, misses}` | **no line** | — |
 | `chime {i, n}` | — (rising bell notes) | no line |
@@ -123,10 +127,10 @@ new praise if one started < 1.2 s ago. The long `.first` question only in a chap
 | `critter {kind}` | `t('surprise.'+kind)` | queue, never over a protected prompt |
 | `critterTap {kind}` | `t('critter.'+kind)` (≤ 1 per 2 s) | interrupt only when no prompt is protected |
 | pause → resume | play: the prompt; rise / count: the right line again (plates: the plate's name only); Talk: the question while unanswered | priority |
-| `talk` | `t('talk.intro') + ' ' + t(talk.promptKey, talk.params)`; mic choices = `talk.choices.map(c => ({id: c.id, words: choiceWords(lang, c)}))` | queued after the praise; protected |
+| `talk` | `t('talk.intro') + ' ' + t(talk.promptKey, talk.params)`; mic choices = `talk.choices.map(c => ({id: c.id, words: choiceWords(lang, c)}))`; **choice taps are ignored until this line has started + 1 s** (≤ 8 s if it never starts; the world also locks the first 1 s) | queued after the praise; protected |
 | `talkAsk {n}` | repeat the Talk question (n ≤ 3) | interrupt |
 | `talkResult {right, id}` | right → `t('talk.right')`; else `talkWrong(lang, answerChoice, talk)` | interrupt |
-| `levelDone` | `t('great')` | queue |
+| `levelDone` | `t('great')` | queue, then **protected** (the next chapter's name queues behind it — VI talkResult + great can outlast levelDoneTime) |
 | `sessionDone {stars}` | `t('party')`, then `t('session.done', {stars})` | interrupt, then queue |
 
 ## 3. Voice (`FT.Voice`) — the proven engine

@@ -124,29 +124,42 @@ test('layout: DESIGN §2 numbers (Moka, table, slots, garland, lanterns, fairy h
     const L = FT.World.computeLayout(W, Hh, ins, {}, age, null, n), I = Object.assign({ top: 0, right: 0, bottom: 0, left: 0 }, ins || {}), tag = `${name} age ${age} n ${n}`;
     const port = Hh > W;
     assert.strictEqual(L.groundY, Hh - I.bottom - (port ? 26 : 14), tag);
-    assert.strictEqual(L.moka.x, I.left + (port ? 110 : 120), tag); assert.strictEqual(L.moka.y, L.groundY - (port ? 6 : 10)); assert.strictEqual(L.moka.h, port ? 220 : 250);
+    assert.strictEqual(L.moka.x, I.left + (port ? 110 : 120), tag); assert.strictEqual(L.moka.y, L.groundY - (port ? 6 : 10)); assert.strictEqual(L.moka.h, port ? (L.tall ? 260 : 220) : 250);
+    const lS = L.phone ? (port ? 1.3 : 1.15) : 1;
+    assert.strictEqual(L.garland.lanternS, lS, tag + ' lantern scale (phones bigger)');
     const bb = L.bubble.y + L.bubble.h;
     assert.strictEqual(L.garland.y, bb + (port ? 50 : 46), tag); assert.strictEqual(L.garland.sag, 40);
     assert.strictEqual(L.garland.lanterns.length, 4);
     L.garland.lanterns.forEach((q, i) => {
       assert.ok(Math.abs(q.y - FT.World.garlandY(L.garland, q.u)) < 1e-9, 'lantern on the vine curve');
-      assert.ok(q.cy - q.y > 34 && q.cy - q.y < 34 + 70, 'lantern hangs 34 px below');
+      assert.ok(q.cy - q.y > 34 * lS && q.cy - q.y < (34 + 70) * lS, 'lantern hangs 34 px (× scale) below');
       if (i) assert.ok(q.x > L.garland.lanterns[i - 1].x + 50, 'lanterns spread');
     });
-    if (port) {
-      assert.strictEqual(L.table.x0, I.left + 50); assert.strictEqual(L.table.x1, W - I.right - 50);
-      assert.ok(L.table.y >= L.garland.bottom + 260 - 1e-9 || L.table.y === L.groundY - 60, tag + ' table ≥ garland + 260');
-      assert.ok(L.table.y <= L.moka.y - L.moka.h - 40 + 1e-9 || L.table.y === L.garland.bottom + 260, tag);
+    if (port) {   // qa_visual P1-1 / P1-2: full-width table centred in the free band; the plank never touches Moka; legs beside him
+      const mokaTop = L.moka.y - L.moka.h;
+      assert.strictEqual(L.table.x0, I.left + 30); assert.strictEqual(L.table.x1, W - I.right - 30);
+      assert.ok(L.table.y - L.item >= L.garland.bottom + 90 - 1e-9 || L.table.y === L.groundY - 60, tag + ' rise room under the lanterns');
+      assert.ok(L.table.y + 46 + 24 <= mokaTop + 1e-9 || L.table.y - L.item === L.garland.bottom + 90, tag + ' plank clear of Moka');
+      assert.ok(L.table.legs[0] > L.moka.x + L.moka.w / 2, tag + ' left leg right of Moka');
+      assert.ok(L.table.legBottom <= L.groundY && L.table.legBottom === Math.min(L.groundY, L.table.y + 46 + 150), tag + ' legs');
+      const cap = FT.World.portraitCap(W, Hh, {}, age);
+      assert.ok(L.item <= cap && L.envItem === cap, tag + ' item ≤ the age cap; env anchored on the cap');
+      if (n === 3) assert.strictEqual(L.item, cap, tag + ' 3 things: the cap');
+      const pe = FT.CONFIG.portEdge; assert.ok(L.slots[0].x - L.item / 2 >= I.left + pe - 0.5 && L.slots[n - 1].x + L.item / 2 <= W - I.right - pe + 0.5, tag + ' edge margin');
     } else {
       assert.strictEqual(L.table.y, L.groundY - 150, tag); assert.strictEqual(L.table.x0, L.moka.x + 110); assert.strictEqual(L.table.x1, W - I.right - 60);
     }
     const base = { 3: 124, 4: 124, 5: 114, 6: 106, 7: 106 }[age];
-    assert.ok([Math.round(base * 1.12), base, 100].includes(L.item) || L.squeezed, tag + ' item ' + L.item);
-    if (L.item === Math.round(base * 1.12)) assert.ok(L.tall);
+    if (!port) {
+      if (L.phone) assert.ok(L.item >= base && L.item <= Math.round(base * 1.15) && L.table.y - L.item >= L.garland.bottom + 14 - 1e-9, tag + ' phone item ' + L.item);
+      else assert.ok([Math.round(base * 1.12), base, 100].includes(L.item) || L.squeezed, tag + ' item ' + L.item);
+      if (L.item === Math.round(base * 1.12) && !L.phone) assert.ok(L.tall);
+    }
     assert.strictEqual(L.slots.length, n);
     for (let i = 0; i < n; i++) {
       const s = L.slots[i];
-      assert.ok(s.x >= L.table.x0 + 40 - 0.5 && s.x <= L.table.x1 - 40 + 0.5, tag + ' slot in the table');
+      const sIn = port ? 24 : 40;
+      assert.ok(s.x >= L.table.x0 + sIn - 0.5 && s.x <= L.table.x1 - sIn + 0.5, tag + ' slot in the table');
       assert.strictEqual(s.y, L.table.y);
       if (i) { const sp = s.x - L.slots[i - 1].x; assert.ok(sp >= 1.12 * L.item - 1e-6 && sp <= 1.7 * L.item + 1e-6, tag + ' spacing ' + sp); }
     }
@@ -232,8 +245,9 @@ test('content: chained chapters — never the same odd slot twice in a row, slot
     for (let c = 0; c < 300; c++) {
       const rng = new FT.RNG(c + age * 1000), used = [], prevSlots = []; let prevRule = null, run = 0, prev = null;
       for (let ri = 0; ri < 4; ri++) {
-        const r = C.makeRound(topic, { age, lang: c % 2 ? 'vi' : 'en', rng, roundIndex: ri, level: 1, usedKeys: used, prevRule, prevRuleRun: run, prevOddSlots: prevSlots.slice() });
-        if (prevSlots.length) assert.notStrictEqual(r.oddSlot, prevSlots[0], `${topic} age ${age}: odd slot twice in a row`);
+        const r = C.makeRound(topic, { age, lang: c % 2 ? 'vi' : 'en', rng, roundIndex: ri, level: 1, usedKeys: used, prevRule, prevRuleRun: run, prevOddSlots: prevSlots.slice(), prevOddN: prev ? prev.members.length : null });
+        // the same place twice in a row only matters while the placemats stay put (the same count)
+        if (prevSlots.length && prev.members.length === r.members.length) assert.notStrictEqual(r.oddSlot, prevSlots[0], `${topic} age ${age}: odd slot twice in a row`);
         assert.ok(!used.includes(r.key));
         if (prevRule && !['home', 'size', 'parity'].includes(r.rule.kind)) assert.ok(String(prevRule.value) !== String(r.rule.value) || r.rule.kind !== prevRule.kind, 'same ask');
         used.push(r.key); prevSlots.unshift(r.oddSlot);
@@ -295,7 +309,7 @@ test('content: topics — the first session plays FT.AGE_TOPICS; later sessions 
 });
 
 // ================================================================ world: enter
-test('enter: things spawn above their placemats (0.22 s apart) and float down under dandelion fluff — terminal speed, pendulum sway, soft landing squash, table spring, mat pop, fluff drifts away', () => {
+test('enter: things spawn above their placemats (enterStagger 0.16 s apart) and float down under dandelion fluff — terminal speed, pendulum sway, soft landing squash, table spring, mat pop, fluff drifts away', () => {
   const w = mkW(4);
   w.newSession(); w.levels[0] = 'colors'; w.startLevel(0);
   runUntil(w, () => w.state === 'round');
@@ -322,7 +336,8 @@ test('enter: things spawn above their placemats (0.22 s apart) and float down un
   assert.strictEqual(w.phase, 'play');
   const st = Object.values(spawn).sort((a, b) => a - b);
   assert.strictEqual(st.length, n);
-  for (let i = 1; i < n; i++) assert.ok(Math.abs(st[i] - st[i - 1] - 0.22) < 0.02, 'stagger 0.22 s');
+  assert.strictEqual(FT.CONFIG.enterStagger, 0.16);
+  for (let i = 1; i < n; i++) assert.ok(Math.abs(st[i] - st[i - 1] - 0.16) < 0.02, 'stagger 0.16 s');
   assert.ok(t >= 1.4 && t <= 2.8, 'enter ' + t.toFixed(2) + ' s');
   for (const m of w.members) {
     const sw = swings[m.id], mx = Math.max(...sw.map(Math.abs));
@@ -413,14 +428,15 @@ test('chime → cheers → clear: friends hop one after another left → right (
   const ch = ev.filter(e => e.type === 'chime');
   assert.strictEqual(ch.length, w.members.length - 0 ? ch.length : 0);
   assert.ok(ch.length >= 2);
-  for (let i = 0; i < ch.length; i++) { assert.strictEqual(ch[i].i, i); assert.strictEqual(ch[i].n, ch.length); if (i) { assert.ok(ch[i].x > ch[i - 1].x, 'left → right'); assert.ok(Math.abs(ch[i].t - ch[i - 1].t - 0.3) < 0.02); } }
+  for (let i = 0; i < ch.length; i++) { assert.strictEqual(ch[i].i, i); assert.strictEqual(ch[i].n, ch.length); if (i) { assert.ok(ch[i].x > ch[i - 1].x, 'left → right'); assert.ok(Math.abs(ch[i].t - ch[i - 1].t - 0.22) < 0.02, 'chimeGap 0.22'); } }
   assert.ok(hopSeen, 'guest hop frame');
   ch.forEach(e => assert.ok(lifts[e.id] > 24 && lifts[e.id] < 28, 'hop 26 px: ' + lifts[e.id]));
   const cheers = ev.find(e => e.type === 'cheers'), poofs = ev.filter(e => e.type === 'poof');
   assert.ok(cheers && cheers.t > ch[ch.length - 1].t && Number.isFinite(cheers.x + cheers.y));
   assert.strictEqual(poofs.length, ch.length);
   for (let i = 1; i < poofs.length; i++) assert.ok(poofs[i].x >= poofs[i - 1].x && poofs[i].t >= poofs[i - 1].t, 'poof sweep left → right');
-  assert.ok(poofs[0].t - cheers.t > 1.0, 'cheers ≈ 1.1 s');
+  assert.ok(poofs[0].t - cheers.t > 0.85 && poofs[0].t - cheers.t < 1.0, 'cheers 0.85 s (+ poofDelay)');
+  assert.ok(poofs[poofs.length - 1].t - poofs[0].t <= 0.3 + 0.02, 'poof sweep 0.3 s');
   assert.ok(ev.some(e => e.type === 'round' && e.round === 2));
   assert.ok(w.garland.lanterns[1].lit > 0.9, 'lanterns stay lit through the chapter');
 });
@@ -465,7 +481,12 @@ test('wrong: a "no-no" wiggle (±0.18 rad spring, ω 18) + a 14 px hop, a miss; 
 });
 
 test('hint: after 2 misses the odd one glows + the ghost hand taps it (1.6 s cycle); 6 s cooldown; 2 misses → 1★; manual hint()', () => {
-  const w = atPlay(4, 'colors', 2), others = w.members.filter(m => !m.odd);
+  { // default: the glow + hand stay hintTime 10 s, so a slow toddler who looks back still sees them
+    const w0 = atPlay(4, 'colors', 2), o0 = w0.members.filter(m => !m.odd);
+    tapM(w0, o0[0]); run(w0, 1.2); tapM(w0, o0[1] || o0[0]); w0.drainEvents();
+    run(w0, 9.5); assert.ok(w0.hintHand && w0.odd._glowT > 0, 'still glowing at 9.5 s'); run(w0, 0.7); assert.strictEqual(w0.hintHand, null);
+  }
+  const w = atPlay(4, 'colors', 2, { config: { hintTime: 3.2 } }), others = w.members.filter(m => !m.odd);
   tapM(w, others[0]); run(w, 1.2);
   tapM(w, others[1] || others[0]);
   const ev = evs(w), wr = ev.filter(e => e.type === 'wrong');
@@ -487,7 +508,7 @@ test('hint: after 2 misses the odd one glows + the ghost hand taps it (1.6 s cyc
   assert.strictEqual(rd.stars, 1);
 });
 
-test('idle: nudges at 12 → 18 → 27 → 30 s (backoff ×1.5, cap 30); the 2nd idle shows the hint; touches reset it', () => {
+test('idle: nudges at 12 → 18 → 27 → 30 s (backoff ×1.5, cap 30); the 1st idle shows the hint (idleHintFrom 1); touches reset it', () => {
   const w = atPlay(4, 'shapes', 1);
   const ev = collect(w, 125, 1 / 60), id = ev.filter(e => e.type === 'idle'), t0 = ev.length ? ev[0].t - 0 : 0; void t0;
   const start = w.time - 125, ts = id.map(e => +(e.t - start).toFixed(1));
@@ -496,14 +517,18 @@ test('idle: nudges at 12 → 18 → 27 → 30 s (backoff ×1.5, cap 30); the 2nd
   assert.strictEqual(w.interactive, true, 'waits for the child');
 });
 
-test('soft presses: dust sparkle, 3 → hint, 6 → assist armed (the next press anywhere in the table band picks the odd one, ≤ 2★); soft never a miss', () => {
+test('soft presses: dust sparkle, 3 → hint, 4 → assist armed once the round has been in play ≥ 10 s (the next press anywhere in the table band picks the odd one, ≤ 2★); soft never a miss', () => {
   const w = atPlay(4, 'colors', 1), L = w.layout;
   const px = L.W / 2, py = L.groundY - 4;
   for (let i = 0; i < 3; i++) { assert.strictEqual(tap(w, px, py), 'soft'); w.update(0.05); }
   let ev = evs(w);
   assert.strictEqual(ev.filter(e => e.type === 'soft').length, 3); assert.ok(ev.some(e => e.type === 'hint')); assert.strictEqual(w.misses, 0);
   assert.ok(w.puffs.length > 0);
-  for (let i = 0; i < 3; i++) { tap(w, px, py); w.update(0.05); }
+  for (let i = 0; i < 8; i++) { tap(w, px, py); w.update(0.05); }   // mashing in the first 10 s never arms the assist
+  assert.ok(!evs(w).some(e => e.type === 'assistArmed') && !w.assistId, 'no assist before 10 s of play');
+  run(w, 10);
+  w.drainEvents();
+  tap(w, px, py); w.update(0.05);
   ev = evs(w);
   const arm = ev.find(e => e.type === 'assistArmed');
   assert.ok(arm && arm.id === w.odd.id);
@@ -607,6 +632,8 @@ test('talk: answer → +1★ → levelDone; no answer → re-asked 3× (glow fro
   w._startTalk();
   assert.strictEqual(w.state, 'talk');
   const s0 = w.stars;
+  assert.strictEqual(w.talkAnswer(w.talk.answer), false, 'locked for the first talkLock 1 s'); assert.strictEqual(w.talkAnswered, null);
+  assert.ok(!w.talkOpen()); run(w, 1.02); assert.ok(w.talkOpen());
   assert.ok(w.talkAnswer(w.talk.answer)); assert.strictEqual(w.stars, s0 + 1);
   run(w, 1.7); assert.strictEqual(w.state, 'levelDone');
   w._startTalk(); w.drainEvents();
@@ -615,6 +642,70 @@ test('talk: answer → +1★ → levelDone; no answer → re-asked 3× (glow fro
   assert.ok(ev.filter(e => e.type === 'talkAsk')[1].glowAnswer);
   const tr = ev.find(e => e.type === 'talkResult'); assert.ok(tr.auto && !tr.correct, JSON.stringify(tr));
   w._startTalk(); w.skipTalk(); assert.strictEqual(w.state, 'levelDone');
+});
+
+test('fixes: a touch restarts the idle cycle (no auto-pause 12 s after a returning child taps) — qa_functional P1-1', () => {
+  const w = atPlay(4, 'shapes', 1), L = w.layout;
+  let ev = collect(w, 88, 1 / 60);
+  assert.strictEqual(ev.filter(e => e.type === 'idle').length, 4);
+  tap(w, L.W / 2, L.groundY - 4);
+  ev = collect(w, 13, 1 / 60);
+  const id = ev.filter(e => e.type === 'idle');
+  assert.strictEqual(id.length, 1); assert.strictEqual(id[0].n, 1, 'the count starts over');
+  ev = collect(w, 120, 1 / 60);
+  assert.deepStrictEqual(ev.filter(e => e.type === 'idle').map(e => e.n), [2, 3, 4, 5], 'the 5th (auto-pause) only ≈ 2 min after the touch');
+});
+
+test('fixes: hammering one wrong thing brings the hint and later the assist — qa_functional P2-1', () => {
+  const w = atPlay(5, 'colors', 1), m = wrongM(w);
+  const ev = [];
+  for (let k = 0; k < 40; k++) { tapM(w, m); ev.push(...collect(w, 0.4)); }   // every 0.4 s for 16 s
+  assert.ok(ev.some(e => e.type === 'hint'), 'a hint arrives');
+  assert.ok(ev.filter(e => e.type === 'hint')[0].t - (w.time - 16) < 2, 'within the first ~1.5 s');
+  assert.ok(ev.filter(e => e.type === 'wrong').length >= 2, 'a tap ≥ 1 s after the last counted miss counts again');
+  assert.ok(ev.some(e => e.type === 'assistArmed'), 'the assist arms after 10 s of play');
+});
+
+test('fixes: chapter hard limit — past 110 s, Talk once 2 rounds are done', () => {
+  const w = mkW(4); w.newSession(); const ev = [];
+  for (let k = 0; k < 400 * 60 && w.state !== 'talk'; k++) { w.update(1 / 60); ev.push(...w.drainEvents()); if (w.interactive && w.phaseTime > 52) tapM(w, w.odd); }
+  assert.strictEqual(ev.filter(e => e.type === 'roundDone').length, 2);
+  assert.strictEqual(w.roundsPerLevel, 2);
+  assert.strictEqual(ev.filter(e => e.type === 'lantern' && e.auto).length, 2);
+});
+
+test('fixes: soft presses near a critter are no "no progress"; the Moka tap threshold is 24 CSS px', () => {
+  const w = atPlay(4, 'colors', 1);
+  w.critter = { kind: 'butterfly', state: 'loop', x: w.layout.W / 2, y: w.layout.groundY - 30, t: 1, _px: 0, _py: 0 };
+  const c = w.critter, r = w.cfg.butterfly.r;
+  w._noProg = 0;
+  w.pointerDown(c.x + r * 1.3, c.y); w.pointerUp(c.x + r * 1.3, c.y);
+  assert.strictEqual(w._noProg, 0, 'a miss-aimed critter tap');
+  w.critter = null;
+  const L = w.layout; w.pointerDown(L.W / 2, L.groundY - 4); w.pointerUp(L.W / 2, L.groundY - 4);
+  assert.strictEqual(w._noProg, 1);
+  assert.strictEqual(w.tapMoveMax(), 24);
+  w.setViewScale(393 / 720); assert.ok(Math.abs(w.tapMoveMax() - 24 * 720 / 393) < 1e-9);
+  const b = w.mokaHit(); w.drainEvents();
+  w.pointerDown(b.cx, b.cy); w.pointerMove(b.cx + 30, b.cy); assert.strictEqual(w.pointerUp(b.cx + 30, b.cy), 'pokeMoka', '30 logical px = 16 CSS px is still a tap');
+  w.pointerDown(b.cx, b.cy); w.pointerMove(b.cx + 50, b.cy); assert.strictEqual(w.pointerUp(b.cx + 50, b.cy), 'up', '50 logical px = 27 CSS px is a slide');
+});
+
+test('fixes: content — the odd-slot rule only for the same count (no rightmost bias); count warm-up gap ≥ 2 at every age', () => {
+  const C = FT.Content;
+  for (const n0 of [3, 4]) {
+    const hist = {};
+    for (let s = 0; s < 3000; s++) {
+      const r = C.makeRound('colors', { age: 5, rng: new FT.RNG(s), roundIndex: 2, level: 1, prevOddSlots: [n0 - 1], prevOddN: n0 });
+      const n = r.members.length; (hist[n] = hist[n] || Array(n).fill(0))[r.oddSlot]++;
+      if (n === n0) assert.notStrictEqual(r.oddSlot, n0 - 1);
+    }
+    for (const n of Object.keys(hist)) if (+n !== n0) { const h = hist[n], tot = h.reduce((a, b) => a + b, 0); h.forEach(v => assert.ok(Math.abs(v / tot - 1 / n) < 0.05, `uniform with a new count ${n}: ${h}`)); }
+  }
+  for (const age of [5, 6, 7]) for (let s = 0; s < 1500; s++) {
+    const r = C.makeRound('count', { age, rng: new FT.RNG(s * 7 + age), roundIndex: 0, level: 1 });
+    assert.ok(Math.abs(r.rule.value - r.members.find(m => m.odd).thing.n) >= 2, 'warm-up gap ≥ 2 at age ' + age);
+  }
 });
 
 function botSession(age, skill, vp, seed, lang) {

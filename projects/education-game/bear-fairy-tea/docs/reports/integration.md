@@ -17,7 +17,7 @@
    trunk ties), and the lanterns hang on THAT curve. To keep the world untouched, `render.js` computes the RECIPE
    `trunkGeom(...)` and then slides each trunk sideways by `garland.x0 − tieL.x` / `garland.x1 − tieR.x`, so the vine is tied
    exactly at the branch stubs (verified in screenshots on all four device shapes). No world change was needed.
-2. **The env stack is anchored on a stable item size** (the age's base item × 1.12 on tall screens) instead of the
+2. **The env stack is anchored on a stable item size** (portrait since the QA fixes: the world's `envItem` / `envTableY` = the age's item cap; landscape: the age's base item × 1.12 on tall screens) instead of the
    per-round `layout.item`; otherwise `horizonY = table.y − 0.92·item` would jump up to 22 px between a 3-thing and a
    5-thing round.
 3. **Rising things are drawn after Moka** (and before the fairy), so a thing floating up is never hidden; the snail is drawn
@@ -64,5 +64,5 @@ Talk time, the rise, critters and session done on iPhone portrait / landscape an
 
 ## Known / unverified
 - Real-device TTS voices, the mic, and the iOS audio session can only be checked on a phone.
-- Portrait phones have a tall calm band of forest between the garland and the table (by the world's layout: the table sits
-  low near Moka's hands, the lanterns high); the rise fills it in play.
+- ~~Portrait phones have a tall calm band of forest between the garland and the table~~ — fixed after QA (portrait layout
+  centred, full-width table, env anchored on the item cap): see `fixes.md`.

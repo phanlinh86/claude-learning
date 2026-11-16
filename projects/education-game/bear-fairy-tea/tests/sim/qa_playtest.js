@@ -129,7 +129,7 @@ function runChain(o) {
     S.t0 = w.time;
     w.newSession({ lastTopics });
     const dt = 1 / 30, cap = 1800;
-    let R = null, chap = null, t = 0, prevSlot = -1;
+    let R = null, chap = null, t = 0, prevSlot = -1, prevN = -1;
     const endRound = () => { if (R) { R.dur = w.time - R.t0; S.rounds.push(R); if (chap) chap.rounds++; } R = null; };
     while (w.state !== 'sessionDone' && t < cap) {
       d.step(dt); w.update(dt); t += dt;
@@ -147,7 +147,7 @@ function runChain(o) {
             R = { t0: w.time, ri: e.round, level: w.level, topic: w.topic, n: e.n, oddSlot: c.oddSlot, play: 0, wrong: 0, hint: 0, hintIdle: 0, assist: 0, armed: 0,
               stars: 0, repSet: chap && chap.sets.includes(sig) ? 1 : 0, repKey: chap && chap.keys && chap.keys.includes(e.key) ? 1 : 0, viaAssist: 0, firstAsk: -1, solveT: -1 };
             if (chap) { chap.sets.push(sig); (chap.keys = chap.keys || []).push(e.key); }
-            if (c.oddSlot === prevSlot) S.sameSlot++; prevSlot = c.oddSlot;
+            if (c.oddSlot === prevSlot && e.n === prevN) S.sameSlot++; prevSlot = c.oddSlot; prevN = e.n;   // the same place (same count)
             const cs = [...new Set(c.members.map(m => m.thing.color).filter(Boolean))];
             if (o.age < 5 && (cs.includes('pink') || CLASH.some(p => cs.includes(p[0]) && cs.includes(p[1])))) { S.colourClash++; S.colourWhat = cs.join('+'); }
             break;

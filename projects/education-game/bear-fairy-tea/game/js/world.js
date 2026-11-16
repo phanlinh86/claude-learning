@@ -22,26 +22,32 @@
   var CONFIG = {
     // ---- timing / state machine (s)
     step: 1 / 120, maxFrame: 1.0,
-    roundsPerLevel: 4, chapterTimeLimit: 75, chapterMinRounds: 3,
+    roundsPerLevel: 4, chapterTimeLimit: 75, chapterMinRounds: 3, chapterHardLimit: 110, chapterHardMinRounds: 2,
     shortBudget: [1e9, 26, 42, 56],   // s into the chapter: a round starting later than this is short (3 / 4 things)
     introTime: 2.5, levelDoneTime: 3.6, garlandFullTime: 1.6,
-    talkAfterAnswer: 1.6, talkAskTime: 12, talkGlowAfterAsks: 2, talkMaxAsks: 3, talkGiveUp: 2,
+    talkAfterAnswer: 1.6, talkLock: 1, talkAskTime: 12, talkGlowAfterAsks: 2, talkMaxAsks: 3, talkGiveUp: 2,
 
     // ---- layout (DESIGN §2; px)
     shortSide: 720, minLong: 960, maxLong: 1600, tallRatio: 1.6, phoneRatio: 1.9,
     groundLand: 14, groundPort: 26,
     bubbleX: 24, bubbleYLand: 18, bubbleMaxW: 560, bubbleRight: 200, bubbleHLand: 134, bubbleYPort: 110, bubbleHPort: 124,
-    hudW: 160, hudH: 96, bubbleMinW: 220,
+    hudW: 160, hudH: 96, bubbleMinW: 220, bubbleHPortPhone: 140, bubbleMaxWPhone: 720,   // phones: room for 3 lines at ≥ 15 CSS px
     mokaXLand: 120, mokaXPort: 110, mokaHLand: 250, mokaHPort: 220, mokaFeetLand: 10, mokaFeetPort: 6, mokaWFrac: 0.7, mokaPad: 10,
     tableUp: 150, tableX0Moka: 110, tableRight: 60, tablePortSide: 50, tableAboveMoka: 40, tableBelowGarland: 260, tableMinUp: 60,
     slotInset: 40, plankOver: 30, plankH: 46, legInset: 70,
     item: { 3: 124, 4: 124, 5: 114, 6: 106, 7: 106 }, itemMin: 100, tallK: 1.12, spMin: 1.25, spMax: 1.7, spTight: 1.12, itemFloor: 72,
     garlandGapLand: 46, garlandGapPort: 50, garlandSag: 40, garlandSide: 70, lanternDrop: 34, lanternH: 70, lanternU: [0.2, 0.8], fairyHomeU: 0.08, fairyPerch: 16,
     entryY: -140, entryJitter: 60,
+    // portrait (qa_visual P1-1/P1-2): centred play area, full-width table, item as big as the span allows (one cap per age)
+    mokaHPortTall: 260, tablePortSideP: 30, slotInsetPort: 24, itemPortK: { tall: 1.3, std: 1.08 }, spPort: 1.2,
+    tableMokaGap: 24, riseRoomMin: 90, portEdge: 16, legDrop: 150, legU: [0.27, 0.12],
+    // phones: lanterns 1.3× in portrait / 1.15× in landscape (lit icon readable); landscape phone things 1.15× while their tops
+    // stay ≥ lanternClear below the lanterns (the short screen shares its height between the two)
+    lanternSPhone: 1.3, lanternSPhoneLand: 1.15, phoneLandK: 1.15, lanternClear: 14,
     hitK: 0.6, hitPad: 14, hitDiaPhone: 184, littleHitK: 0.85, keepGap: 44, littleK: 0.62,
 
     // ---- enter: dandelion-fluff fall (terminal-velocity descent + pendulum sway), landing squash, table spring
-    enterStagger: 0.22, enterMin: 1.4, fallTime: 1.25, fallV: [260, 900], fallV0: 0.6, fallDrag: 7, brakeK: 0.36, landV: 150, landRef: 240,
+    enterStagger: 0.16, enterMin: 1.4, fallTime: 1.25, fallV: [260, 900], fallV0: 0.6, fallDrag: 7, brakeK: 0.36, landV: 150, landRef: 240,
     stringK: 0.32, fluffK: 0.42,
     driftOmega: 2.6, driftZeta: 0.85, windPush: 40,
     swingOmega: 3.2, swingZeta: 0.15, swing0: 0.13, swingDrive: 0.3, swingHz: [0.35, 0.6], swingWind: 0.5, swingAccK: 0.9,
@@ -54,7 +60,7 @@
     lookHopEvery: [3, 7], lookHopH: 8, lookHopT: 0.3,
 
     // ---- rise: fairy flies in, circles + dust, berries counted, buoyant swaying rise into the lantern
-    fairyFly: 0.45, fairyArc: 80, fairyCircle: 0.7, dustN: 3, levitate: 12, levitateT: 0.4, levBob: 3,
+    fairyFly: 0.45, fairyArc: 80, fairyCircle: 0.55, dustN: 3, levitate: 12, levitateT: 0.4, levBob: 3,
     countDelay: 0.2, countStep: 0.5, countTail: 0.35,
     riseV: [220, 400], riseTime: 1.6, riseDrag: 2.6, swayAmp: 26, swayHz: 1.1, riseSpin: 0.18, riseScale: 0.42, arriveSlow: 90,
     lanternOmega: 9, lanternZeta: 0.35, lswingOmega: 4, lswingZeta: 0.12, lswingKick: 0.22, lswingWind: 0.25, lanternHold: 0.35,
@@ -62,13 +68,13 @@
     fairyLead: 30, fairyOmega: 10, fairyZeta: 0.9, fairyBack: 0.8, fairyBob: 3, flapRest: 4, flapFly: 12,
 
     // ---- chime wave / cheers / clear
-    chimeGap: 0.3, chimeTail: 0.4, chimeHop: 26, chimeHopT: 0.36, chimeRing: 0.5, chimeLand: 0.08, chimeHopHold: 0.15,
-    cheersTime: 1.1, loopTime: 0.9, loopR: 34,
-    clearTime: 0.8, poofDelay: 0.05, poofSweep: 0.4, poofTime: 0.28, poofLift: 10,
+    chimeGap: 0.22, chimeTail: 0.25, chimeHop: 26, chimeHopT: 0.36, chimeRing: 0.5, chimeLand: 0.08, chimeHopHold: 0.15,
+    cheersTime: 0.85, loopTime: 0.9, loopR: 34,
+    clearTime: 0.65, poofDelay: 0.05, poofSweep: 0.3, poofTime: 0.28, poofLift: 10,
 
     // ---- help (DESIGN §5.2 / skill rules)
-    hintAfterMisses: 2, hintAfterSoft: 3, assistAfter: 6, hintTime: 3.2, hintCooldown: 6, hintCycle: 1.6,
-    idleTime: 12, idleBackoff: 1.5, idleMax: 30, idleHintFrom: 2, flickTime: 0.25, tapMovePx: 24, puffTime: 0.6, critterK: 2,
+    hintAfterMisses: 2, hintAfterSoft: 3, assistAfter: 4, assistMinPlay: 10, hintTime: 10, hintCooldown: 6, hintCycle: 1.6,
+    idleTime: 12, idleBackoff: 1.5, idleMax: 30, idleHintFrom: 1, flickTime: 0.25, tapMovePx: 24, tapMoveCss: 24, puffTime: 0.6, critterK: 2, critterSoftK: 1.5,
 
     // ---- critters: one round per chapter (round 1 or 2, never the warm-up); kind by chapter index
     surpriseRounds: [1, 2], critters: ['ladybug', 'butterfly', 'snail', 'fairies'], surpriseAt: [2, 4.5],
@@ -125,9 +131,15 @@
    * tall screens) at spacing 1.25 × item, the base item, itemMin 100 at 1.25 ×, itemMin at 1.12 ×; an odd viewport finally
    * squeezes the item. "Fits" = the n slot centres lie in [table.x0 + 40, table.x1 − 40]. */
   function computeLayout(W, H, ins, cfg, age, hudKeep, n) {
-    var a = ageKey(age), tall = H / W > cfg.tallRatio;
+    var a = ageKey(age), tall = H / W > cfg.tallRatio, portrait = H > W, phone = (portrait ? H / W : W / H) > cfg.phoneRatio;
     n = clamp(Math.round(n || 5), 1, 5);
-    var base = cfg.item[a], big = tall ? Math.round(base * cfg.tallK) : base, lo = Math.min(cfg.itemMin, base), tiers = [], L, t;
+    var base = cfg.item[a], lo = Math.min(cfg.itemMin, base), tiers = [], L, t;
+    if (portrait) return portraitLayout(W, H, ins, cfg, a, hudKeep, n);
+    var big = tall ? Math.round(base * cfg.tallK) : base;
+    if (phone) {   // landscape phone: bigger things, as long as their tops stay clear of the lanterns
+      var P0 = layoutTier(W, H, ins, cfg, a, hudKeep, base, cfg.spMin, n);
+      big = Math.max(base, Math.min(Math.round(base * cfg.phoneLandK), Math.floor(P0.table.y - P0.garland.bottom - cfg.lanternClear)));
+    }
     if (big > base) tiers.push([big, cfg.spMin]);
     tiers.push([base, cfg.spMin]);
     if (lo < base) tiers.push([lo, cfg.spMin]);
@@ -143,6 +155,24 @@
     L.tier = tiers.length; L.squeezed = true;
     return L;
   }
+  /** Portrait item cap for the age (the env anchors on it, so the horizon never moves between 3- and 5-thing rounds). */
+  function portraitCap(W, H, cfg, a) { return Math.round(cfg.item[a] * (H / W > cfg.tallRatio ? cfg.itemPortK.tall : cfg.itemPortK.std)); }
+  /** Portrait: one item per round, as big as the screen width allows (≤ the age's cap): n things at spacing spPort × item,
+   *  the outer ones ≥ portEdge px inside the safe area, centres inside the slot span; an odd narrow viewport falls back to
+   *  spTight, then squeezes down to itemFloor. */
+  function portraitLayout(W, H, ins, cfg, a, hudKeep, n) {
+    var I = insOf(ins), x0 = I.left + cfg.tablePortSideP, x1 = W - I.right - cfg.tablePortSideP;
+    var span = x1 - x0 - 2 * cfg.slotInsetPort, avail = W - I.left - I.right - 2 * cfg.portEdge;
+    var cap = portraitCap(W, H, cfg, a), lo = Math.min(cfg.itemMin, cfg.item[a]), gaps = Math.max(1, n - 1), sp = cfg.spPort;
+    var fit = function (k) { return Math.floor(Math.min(span / (gaps * k), avail / (gaps * k + 1))); };
+    var item = Math.min(cap, fit(sp)), tier = 0, sq = false;
+    if (item < lo) { sp = cfg.spTight; item = Math.min(cap, fit(sp)); tier = 1; }
+    if (item < lo) { item = Math.max(cfg.itemFloor, item); tier = 2; sq = true; }
+    var L = layoutTier(W, H, ins, cfg, a, hudKeep, item, sp, n);
+    L.tier = tier; if (sq) L.squeezed = true;
+    L.itemCap = cap;
+    return L;
+  }
   /** The HUD's measured box among the hudKeep boxes (the one in the top-right). */
   function hudBox(hk, W, H) { var best = null; for (var i = 0; i < hk.length; i++) { var b = hk[i]; if (b.x + b.w / 2 > W / 2 && b.y < H / 2 && (!best || b.y + b.h > best.y + best.h)) best = b; } return best; }
   function garlandY(g, u) { return g.y + g.sag * 4 * u * (1 - u); }
@@ -152,8 +182,8 @@
     var groundY = H - ins.bottom - (portrait ? cfg.groundPort : cfg.groundLand);
     var hk = keepBoxes(hudKeep), hb = hudBox(hk, W, H);
     var bx = ins.left + cfg.bubbleX, bubble;
-    if (portrait) bubble = { x: bx, y: ins.top + cfg.bubbleYPort, w: W - bx - ins.right - cfg.bubbleX, h: cfg.bubbleHPort };
-    else bubble = { x: bx, y: ins.top + cfg.bubbleYLand, w: Math.min(cfg.bubbleMaxW, W - ins.right - cfg.bubbleRight - bx), h: cfg.bubbleHLand };
+    if (portrait) bubble = { x: bx, y: ins.top + cfg.bubbleYPort, w: W - bx - ins.right - cfg.bubbleX, h: phone ? cfg.bubbleHPortPhone : cfg.bubbleHPort };
+    else bubble = { x: bx, y: ins.top + cfg.bubbleYLand, w: Math.min(phone ? cfg.bubbleMaxWPhone : cfg.bubbleMaxW, W - ins.right - cfg.bubbleRight - bx), h: cfg.bubbleHLand };
     if (hb && bubble.x + bubble.w > hb.x - 10 && bubble.y < hb.y + hb.h) {   // the measured HUD: narrower beside it, else below
       var room = hb.x - 12 - bubble.x;
       if (!portrait && room >= cfg.bubbleMinW) bubble.w = room;
@@ -163,25 +193,32 @@
     var bb = bubble.y + bubble.h;
     var hud = { x: W - ins.right - cfg.hudW, y: 0, w: cfg.hudW + ins.right, h: ins.top + cfg.hudH };
     // Moka (seat point + height)
-    var mh = portrait ? cfg.mokaHPort : cfg.mokaHLand;
+    var mh = portrait ? (tall ? cfg.mokaHPortTall : cfg.mokaHPort) : cfg.mokaHLand;
     var moka = { x: ins.left + (portrait ? cfg.mokaXPort : cfg.mokaXLand), y: groundY - (portrait ? cfg.mokaFeetPort : cfg.mokaFeetLand), h: mh, w: cfg.mokaWFrac * mh };
     var mokaBox = { x: moka.x - moka.w / 2 - cfg.mokaPad, y: moka.y - mh - cfg.mokaPad, w: moka.w + 2 * cfg.mokaPad, h: mh + 2 * cfg.mokaPad };
     moka.cup = { x: moka.x + 0.26 * mh, y: moka.y - 0.5 * mh };          // the cup in the idle pose (main / render may refine)
     moka.cupUp = { x: moka.x + 0.24 * mh, y: moka.y - 0.92 * mh };       // the raised cup ("Cheers!")
     moka.mouth = { x: moka.x + 0.16 * mh, y: moka.y - 0.62 * mh };
     // the garland: a vine between the two trunks, below the bubble
-    var g = { x0: ins.left + cfg.garlandSide, x1: W - ins.right - cfg.garlandSide, y: bb + (portrait ? cfg.garlandGapPort : cfg.garlandGapLand), sag: cfg.garlandSag, lanterns: [] };
+    // lanterns 1.3× on phones (the whole lantern scales: stalk drop + flower)
+    var lS = phone ? (portrait ? cfg.lanternSPhone : cfg.lanternSPhoneLand) : 1, lDrop = cfg.lanternDrop * lS, lH = cfg.lanternH * lS;
+    var g = { x0: ins.left + cfg.garlandSide, x1: W - ins.right - cfg.garlandSide, y: bb + (portrait ? cfg.garlandGapPort : cfg.garlandGapLand), sag: cfg.garlandSag, lanterns: [], lanternS: lS, lanternH: lH };
     for (var i = 0; i < 4; i++) {
       var u = cfg.lanternU[0] + (cfg.lanternU[1] - cfg.lanternU[0]) * i / 3, lx = lerp(g.x0, g.x1, u), ly = garlandY(g, u);
-      g.lanterns.push({ x: lx, y: ly, u: u, cx: lx, cy: ly + cfg.lanternDrop + cfg.lanternH / 2 });
+      g.lanterns.push({ x: lx, y: ly, u: u, cx: lx, cy: ly + lDrop + lH / 2 });
     }
-    g.bottom = g.y + g.sag + cfg.lanternDrop + cfg.lanternH;
+    g.bottom = g.y + g.sag + lDrop + lH;
     var fu = cfg.fairyHomeU, fairyHome = { x: lerp(g.x0, g.x1, fu), y: garlandY(g, fu) - cfg.fairyPerch };
     // the table (y = top surface where the placemats lie = the things' bottom y)
-    var ty, x0, x1;
+    var ty, x0, x1, sIn = portrait ? cfg.slotInsetPort : cfg.slotInset, envTy = null, capI = null;
     if (portrait) {
-      ty = Math.max(moka.y - mh - cfg.tableAboveMoka, g.bottom + cfg.tableBelowGarland);
-      x0 = ins.left + cfg.tablePortSide; x1 = W - ins.right - cfg.tablePortSide;
+      // full-width table; the things centred in the free band between the lanterns and Moka's head; the plank never
+      // reaches Moka's head (tableMokaGap) and a rising thing has riseRoomMin px below the lanterns
+      x0 = ins.left + cfg.tablePortSideP; x1 = W - ins.right - cfg.tablePortSideP;
+      var mokaTop = moka.y - mh, tyMax = mokaTop - cfg.plankH - cfg.tableMokaGap;
+      var tyFor = function (it) { return Math.max(g.bottom + it + cfg.riseRoomMin, Math.min(tyMax, Math.round(g.bottom + 0.5 * (mokaTop - g.bottom) + 0.5 * it))); };
+      ty = tyFor(item);
+      capI = portraitCap(W, H, cfg, a); envTy = tyFor(capI);   // the env (horizon) anchors on the cap's table: stable between rounds
     } else {
       ty = groundY - cfg.tableUp;
       x0 = moka.x + cfg.tableX0Moka; x1 = W - ins.right - cfg.tableRight;
@@ -189,9 +226,11 @@
     // measured bottom keep-outs (toolbars): resting things stay ≥ 44 px above them
     hk.forEach(function (b) { if (b.y > H / 2 && b.y - cfg.keepGap < ty) ty = b.y - cfg.keepGap; });
     ty = Math.min(ty, groundY - cfg.tableMinUp);
+    // portrait: the left leg stands right of Moka and the legs end on the ground plane behind him (never a "hat" on his head)
+    var legs = portrait ? [x0 + cfg.legU[0] * (x1 - x0), x1 - cfg.legU[1] * (x1 - x0)] : [x0 + cfg.legInset, x1 - cfg.legInset];
     var table = { y: ty, x0: x0, x1: x1, top: ty, plankX0: x0 - cfg.plankOver, plankX1: x1 + cfg.plankOver, plankH: cfg.plankH,
-      legs: [x0 + cfg.legInset, x1 - cfg.legInset], legBottom: groundY };
-    var s0 = x0 + cfg.slotInset, s1 = x1 - cfg.slotInset, span = s1 - s0;
+      legs: legs, legBottom: portrait ? Math.min(groundY, ty + cfg.plankH + cfg.legDrop) : groundY };
+    var s0 = x0 + sIn, s1 = x1 - sIn, span = s1 - s0;
     var hitPad = (tall || phone) ? Math.max(cfg.hitPad, cfg.hitDiaPhone / 2 - cfg.hitK * item) : cfg.hitPad;
     var sp = clamp(span / n, spK * item, cfg.spMax * item);
     var L = { W: W, H: H, ins: ins, portrait: portrait, tall: tall, phone: phone, groundY: groundY, bubble: bubble, hud: hud,
@@ -199,6 +238,7 @@
       garland: g, fairyHome: fairyHome, entryY: cfg.entryY, hitPad: hitPad, hitR: cfg.hitK * item + hitPad,
       band: { x: x0 - cfg.plankOver, y: ty - item * 1.5, w: x1 - x0 + 2 * cfg.plankOver, h: item * 1.5 + 40 },
       safe: { x: ins.left, y: ins.top, w: W - ins.left - ins.right, h: H - ins.bottom - ins.top } };
+    L.envTableY = envTy != null ? Math.min(envTy, ty + capI - item) : ty; L.envItem = capI;   // (a toolbar keep-out moves both)
     L.keep = [{ x: bubble.x, y: bubble.y, w: bubble.w, h: bubble.h, kind: 'bubble' }, { x: hud.x, y: hud.y, w: hud.w, h: hud.h, kind: 'hud' }];
     hk.forEach(function (b) { b.kind = 'hudKeep'; L.keep.push(b); });
     L.fits = (n - 1) * sp <= span + 0.5;
@@ -238,7 +278,8 @@
     this.finger = { x: 0, y: 0, down: false };
     this.hudKeep = opts.hudKeep || null; this.lastTopics = null; this.surprise = null; this._surpriseRound = 1;
     this.events = []; this.sessions = 0;
-    this._idleN = 0; this._idleT = 0; this._idleGap = this.cfg.idleTime; this._lastHintT = -1e9; this.levelStartTime = 0;
+    this._idleN = 0; this._idleT = 0; this._idleGap = this.cfg.idleTime; this._lastHintT = -1e9; this.levelStartTime = 0; this._playT0 = 0; this._prevOddN = null;
+    this._viewScale = 1;   // CSS px per logical px (main: setViewScale); the tap-vs-move threshold is measured in CSS px
     this._talkAskT = 0; this._talkAsks = 0; this._g = null; this._noProg = 0; this._answered = false;
     this._usedKeys = []; this._usedOdd = []; this._prevRule = null; this._prevRuleRun = 0; this._prevOddSlots = [];
     this._view = null; this._vp = null; this._lookT = 0; this._lookX = 0; this._lookHopT = 3;
@@ -247,6 +288,7 @@
     this._fairyRest(true);
   }
   World.logicalSize = logicalSize;
+  World.portraitCap = function (W, H, cfg, age) { return portraitCap(W, H, merge(CONFIG, cfg), ageKey(age)); };
   World.computeLayout = function (W, H, ins, cfg, age, hudKeep, n) { return computeLayout(W, H, ins, merge(CONFIG, cfg), age === undefined ? 4 : age, hudKeep, n); };
   World.slotsFor = function (L, k, cfg) { return slotsFor(L, k, merge(CONFIG, cfg)); };
   World.kickFor = kickFor;
@@ -356,7 +398,7 @@
       var q = g.lanterns[i] || (g.lanterns[i] = { lit: 0, litV: 0, _plit: 0, color: null, thing: null, swing: 0, swingV: 0, _pswing: 0, home: null });
       q.x = G.lanterns[i].x; q.y = G.lanterns[i].y; q.cx = G.lanterns[i].cx; q.cy = G.lanterns[i].cy;
     }
-    if (g.badge) { var bl = G.lanterns[g.badge.i]; g.badge.x = bl.cx; g.badge.y = bl.cy + this.cfg.lanternH / 2 + 40; }
+    if (g.badge) { var bl = G.lanterns[g.badge.i]; g.badge.x = bl.cx; g.badge.y = bl.cy + G.lanternH / 2 + 40; }
     this._placeMats();
     if (had) this._snapAll();
     return true;
@@ -365,7 +407,7 @@
     var L = this.layout, n = this.cur ? this.cur.members.length : (this.mats.length || 3), sl = slotsFor(L, n, this.cfg), old = this.mats;
     this.mats = sl.map(function (s, i) { var o = old[i] || { pop: 0, popV: 0, _ppop: 0 }; return { x: s.x, y: L.table.y, w: L.item * 1.25, pop: o.pop, popV: o.popV, _ppop: o._ppop }; });
   };
-  /** Rotation / resize mid-round (DESIGN §5.2): cancel the gesture; slots re-placed; sitting things spring to the new slot;
+  /** Rotation / resize mid-round (DESIGN §5.2): cancel the gesture; slots re-placed; sitting things jump to the new slot (keeping ≤ ±0.3·size of their offset) and spring the rest;
    *  falling things drift to it and land on the new table; a rising thing retargets its lantern; everything clamped on screen. */
   P._snapAll = function () {
     var L = this.layout, cfg = this.cfg, self = this, sl = slotsFor(L, this.members.length, cfg);
@@ -375,7 +417,10 @@
       var hw = m.size * 0.5, otx = m.tx;
       m.tx = clamp(sl[m.slot] ? sl[m.slot].x : m.x, L.ins.left + hw, L.W - L.ins.right - hw);
       if (m.state === 'fall') m.fluffX += m.tx - otx;   // the whole scene re-laid out: a falling thing keeps its offset from its placemat
-      if (m.state === 'sit' || m.state === 'poof') { m.y = L.table.y; m.x = clamp(m.x, L.ins.left + hw, L.W - L.ins.right - hw); }
+      if (m.state === 'sit' || m.state === 'poof') {   // the whole table moved: keep only a small offset from the new placemat, so
+        // things never pile up at the screen edge after a rotation (landscape slots lie far beyond the portrait width)
+        m.y = L.table.y; m.x = clamp(m.tx + clamp(m.x - otx, -0.3 * m.size, 0.3 * m.size), L.ins.left + hw, L.W - L.ins.right - hw);
+      }
       else if (m.state === 'fall') {
         m.fluffX = clamp(m.fluffX, L.ins.left + hw, L.W - L.ins.right - hw);
         m._vT = self._fallV();
@@ -408,7 +453,7 @@
     this._clearRound(); this.state = 'menu';
     var last = (opts && opts.lastTopics) || this.lastTopics || null;
     this.levels = FT.Content.topicsFor(this.age, this.rng, last);
-    this.stars = 0; this._prevRule = null; this._prevRuleRun = 0; this._prevOddSlots = [];
+    this.stars = 0; this._prevRule = null; this._prevRuleRun = 0; this._prevOddSlots = []; this._prevOddN = null;
     this.weather = 0;
     this._emit({ type: 'session', levels: this.levels.slice() });
     this.startLevel(0);
@@ -469,7 +514,7 @@
     var sp = this.round === this._surpriseRound && this.round > 0 ? this._critterKind() : null;
     var el = this.time - this.levelStartTime, sb = cfg.shortBudget, short = !!(sb && this.round > 0 && el > sb[Math.min(this.round, sb.length - 1)]);
     var cur = FT.Content.makeRound(this.topic, { age: this.age, lang: this.lang, rng: rr, roundIndex: this.round, surprise: sp, short: short, level: this.level,
-      usedKeys: this._usedKeys, prevRule: this._prevRule, prevRuleRun: this._prevRuleRun, prevOddSlots: this._prevOddSlots.slice(), usedOdd: this._usedOdd });
+      usedKeys: this._usedKeys, prevRule: this._prevRule, prevRuleRun: this._prevRuleRun, prevOddSlots: this._prevOddSlots.slice(), prevOddN: this._prevOddN, usedOdd: this._usedOdd });
     this._usedKeys.push(cur.key);
     if (cur.oddValue != null) this._usedOdd.push(cur.oddValue);
     this._clearRound(true);
@@ -520,8 +565,11 @@
     var M = this._mouth();
     this._emit({ type: 'talk', talk: this.talk, x: M.x, y: M.y });
   };
+  /** true while a Talk choice can be answered (not in the first talkLock s: the question is heard first). */
+  P.talkOpen = function () { return this.state === 'talk' && !!this.talk && !this.talkAnswered && this.stateTime >= this.cfg.talkLock - 1e-9; };
   P.talkAnswer = function (choiceId, auto) {
     if (this.state !== 'talk' || this.talkAnswered || !this.talk) return false;
+    if (!auto && !this.talkOpen()) return false;   // a tap in the first talkLock s (a finger still mashing) never answers
     var ok = choiceId === this.talk.answer && !auto;
     this.talkAnswered = { choiceId: choiceId, correct: ok, auto: !!auto };
     if (ok) { this.stars += 1; this.levelStars += 1; this._mood('cheer'); this._bounce(); } else this._mood(auto ? 'happy' : 'think');
@@ -532,7 +580,8 @@
   P._levelDone = function () { this._setState('levelDone'); this.phase = null; this._emit({ type: 'levelDone', level: this.level, stars: this.levelStars }); };
 
   // ---------------------------------------------------------------- input (logical px; ONE active pointer; a gesture = down … up)
-  P._touch = function () { this._idleT = 0; this._idleGap = this.cfg.idleTime; };
+  /** Somebody is there: the idle cycle starts over (12 → 18 → 27 → 30 s), so the auto-pause needs another ≈ 2 min without a touch. */
+  P._touch = function () { this._idleT = 0; this._idleGap = this.cfg.idleTime; this._idleN = 0; };
   /**
    * pointerDown(x, y) → 'member' (play: the gesture's first contact, judged right / wrong) | 'brush' (a thing touched outside
    * play: a little hop) | 'critter' | 'moka' (poke fires on release) | 'soft' (nothing: a dust sparkle) | 'early' (enter, nothing
@@ -590,9 +639,21 @@
     if (!g) return null;
     if (x === undefined) { x = g.x; y = g.y; }
     var mv = Math.max(g.maxD, hyp(x - g.x0, y - g.y0));
-    if (g.soft && !g.contacted && this.interactive) this._noProgress(false);
-    if (g.kind === 'moka' && mv < this.cfg.tapMovePx && (this.state === 'round' || this.state === 'roundDone')) return this._pokeMoka() || 'up';
+    if (g.soft && !g.contacted && this.interactive && !this._nearCritter(g.x0, g.y0)) this._noProgress(false);   // a miss-aimed critter tap is no "no progress"
+    if (g.kind === 'moka' && mv < this.tapMoveMax() && (this.state === 'round' || this.state === 'roundDone')) return this._pokeMoka() || 'up';
     return 'up';
+  };
+  /** Tap-vs-move threshold in logical px: tapMoveCss CSS px (≥ tapMovePx logical). */
+  P.tapMoveMax = function () { return Math.max(this.cfg.tapMovePx, this.cfg.tapMoveCss / Math.max(0.05, this._viewScale)); };
+  P.setViewScale = function (s) { this._viewScale = +s > 0 ? +s : 1; };
+  /** true when (x, y) is within critterSoftK × r of the critter (any state but gone), e.g. a tap on a butterfly mid-loop. */
+  P._nearCritter = function (x, y) {
+    var c = this.critter, C = this.cfg, k;
+    if (!c) return false;
+    var r = C[c.kind].r * C.critterSoftK;
+    if (c.kind === 'fairies') { for (k = 0; k < (c.fairies || []).length; k++) if (hyp(x - c.fairies[k].x, y - c.fairies[k].y) <= r) return true; return false; }
+    var hy = c.y - (c.kind === 'ladybug' ? C.ladybug.lift : c.kind === 'snail' ? C.snail.lift : 0);
+    return hyp(x - c.x, y - hy) <= r;
   };
   /** The finger left (touchcancel / pause / rotation): the gesture ends without a judgement. */
   P.cancelDrag = function () { this._g = null; this.finger.down = false; };
@@ -623,9 +684,9 @@
     m.rotV += dir * kickFor(cfg.wigPeak, cfg.wigOmega, cfg.wigZeta);
     this._jump(m, cfg.wrongHop, cfg.wrongHopT);
     this._lookX = m.cx; this._lookT = 1.2;
-    if (this.time - m._lastWrongT < cfg.sameWrongWindow) {   // the same thing again within 1 s: just wiggles
-      m._lastWrongT = this.time;
+    if (this.time - m._lastWrongT < cfg.sameWrongWindow) {   // the same thing again within 1 s of its counted miss: just wiggles
       this._emit({ type: 'wiggle', id: m.id, repeat: true, x: m.cx, y: m.cy });
+      this._noProgress(false);   // still a press without progress: hammering one thing brings the hint (3) and the assist (4, ≥ 10 s)
       return;
     }
     m._lastWrongT = this.time;
@@ -642,7 +703,8 @@
     var cfg = this.cfg;
     this._noProg++;
     if ((miss && this.misses >= cfg.hintAfterMisses) || this._noProg >= cfg.hintAfterSoft) this._autoHint(false);
-    if (this._noProg >= cfg.assistAfter && !this.assistId) {
+    // the assist arms only once the round has been in play ≥ assistMinPlay s: mashing never buys a quick auto-solve
+    if (this._noProg >= cfg.assistAfter && !this.assistId && this.time - this._playT0 >= cfg.assistMinPlay - 1e-9) {
       var a = this.odd;
       if (a && a.state === 'sit') { this.assistId = a.id; this._emit({ type: 'assistArmed', id: a.id, x: a.cx, y: a.cy }); }
     }
@@ -770,7 +832,7 @@
       case 'enter': {
         var all = this.members.every(function (m) { return m.state === 'sit'; }), lastLand = -1e9;
         this.members.forEach(function (m) { lastLand = Math.max(lastLand, m._landT); });
-        if (this.phaseTime >= cfg.enterMin && all && this.time - lastLand >= cfg.settleTime - 1e-9) { this._setPhase('play'); this._ask(true); }
+        if (this.phaseTime >= cfg.enterMin && all && this.time - lastLand >= cfg.settleTime - 1e-9) { this._setPhase('play'); this._playT0 = this.time; this._ask(true); }
         break;
       }
       case 'play':
@@ -804,7 +866,7 @@
     this.roundStars = st; this.stars += st; this.levelStars += st;
     var rk = cur.rule;
     this._prevRuleRun = this._prevRule && this._prevRule.kind === rk.kind && String(this._prevRule.value) === String(rk.value) ? this._prevRuleRun + 1 : 1;
-    this._prevRule = { kind: rk.kind, value: rk.value }; this._prevOddSlots = [cur.oddSlot].concat(this._prevOddSlots).slice(0, 2);
+    this._prevRule = { kind: rk.kind, value: rk.value }; this._prevOddSlots = [cur.oddSlot].concat(this._prevOddSlots).slice(0, 2); this._prevOddN = cur.members.length;
     this.cancelDrag(); this.hintHand = null; this.assistId = null; this._lanternT = -1;
     this._setState('roundDone');
     var c = this._tableCentre();
@@ -858,10 +920,12 @@
       if (this.phaseTime >= cfg.clearTime - 1e-9 && this.members.every(function (q) { return q.state !== 'poof' && q.state !== 'sit'; })) this._afterClear();
     }
   };
-  /** After the clear: the next round, or (round 4 / the chapter ran past 75 s with ≥ 3 rounds) the garland twinkles, then Talk. */
+  /** After the clear: the next round, or (round 4 / the chapter ran past 75 s with ≥ 3 rounds / past 110 s with ≥ 2 rounds) the
+   *  garland twinkles, then Talk. */
   P._afterClear = function () {
     var cfg = this.cfg, g = this.garland, L = this.layout, self = this;
-    var nxt = this.round + 1, el = this.time - this.levelStartTime, long = nxt >= cfg.chapterMinRounds && el > cfg.chapterTimeLimit;
+    var nxt = this.round + 1, el = this.time - this.levelStartTime;
+    var long = (nxt >= cfg.chapterMinRounds && el > cfg.chapterTimeLimit) || (nxt >= cfg.chapterHardMinRounds && el > cfg.chapterHardLimit);
     if (nxt < this.roundsPerLevel && !long) { this._clearRound(true); this.cur = null; this.round = nxt; this._beginRound(); return; }
     if (this._garlandAt < 0) {
       this._garlandAt = this.time;
@@ -981,7 +1045,7 @@
     q.target = 1; q.color = t.color || null; q.thing = t; q.home = this.cur && this.cur.rule.kind === 'home' ? t.home : null;
     q.swingV += (m.x >= q.x ? 1 : -1) * kickFor(cfg.lswingKick, cfg.lswingOmega, cfg.lswingZeta);
     g.lit = Math.max(g.lit, i + 1);
-    if (q.home) g.badge = { home: q.home, i: i, a: 0, _pa: 0, t: 0, x: q.cx, y: q.cy + cfg.lanternH / 2 + 40 };
+    if (q.home) g.badge = { home: q.home, i: i, a: 0, _pa: 0, t: 0, x: q.cx, y: q.cy + this.layout.garland.lanternH / 2 + 40 };
     this._lanternT = this.time;
     this._fairyBack();
     this._emit({ type: 'lantern', i: i, x: q.cx, y: q.cy, color: q.color, thing: t, home: q.home || undefined });

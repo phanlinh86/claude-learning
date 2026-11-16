@@ -206,6 +206,7 @@ async function openTalk(page, topic) {   // jump straight to Talk time of the cu
   await page.evaluate(t => { const w = FT.debug.world; if (t) { w.topic = t; w.levels[w.level] = t; } w._startTalk(); }, topic);
   await page.waitForFunction(() => FT.debug.mode === 'talk' && !document.getElementById('scrTalk').classList.contains('hidden'), null, { timeout: 5000 });
   await page.waitForTimeout(250);
+  await page.waitForFunction(() => FT.debug.world.talkOpen(), null, { timeout: 5000 });   // Talk choices answer after talkLock 1 s
 }
 
 /* ================================================================ per-device tests */
@@ -246,7 +247,7 @@ T.warmup_easy = async ({ page, url, d }) => {
   f.done();
 };
 
-/** a press that moves < 24 px is still a tap (thing judged on contact; Moka poke on release < 24 px; ≥ 24 px no poke) */
+/** a press that moves < 24 CSS px is still a tap (thing judged on contact; Moka poke on release < 24 CSS px; ≥ 24 no poke) */
 T.tap_jitter = async ({ page, cdp, url }) => {
   const f = soft();
   await setupRound(page, url, { seed: 21 });
@@ -261,7 +262,7 @@ T.tap_jitter = async ({ page, cdp, url }) => {
   // Moka: 18 px wobble → poke; 40 px slide → no poke
   await nextAsk(page, n0);
   const mb = await page.evaluate(() => FT.debug.mokaScreen());
-  const v = await page.evaluate(() => FT.debug.view().s);   // the 24 px threshold is in LOGICAL px
+  const v = await page.evaluate(() => FT.debug.view().s);   // CSS px per logical px (the 24 px threshold is in CSS px since P3-3)
   n0 = await evLen(page);
   await touchStart(cdp, [tp(mb.cx, mb.cy)]);
   for (const k of [1, 2, 3]) { await page.waitForTimeout(20); await touchMove(cdp, [tp(mb.cx + 5 * k * v, mb.cy + 2 * k * v)]); }
@@ -277,6 +278,20 @@ T.tap_jitter = async ({ page, cdp, url }) => {
   await page.waitForTimeout(250);
   evs = await evSince(page, n0);
   f(!evs.some(e => e.type === 'pokeMoka'), 'a 48 px slide off Moka still poked: ' + types(evs));
+  // P3-3: a 20 CSS-px wobble (≈ 37 logical px on an iPhone) is still a tap
+  n0 = await evLen(page);
+  await touchStart(cdp, [tp(mb.cx, mb.cy)]);
+  for (const k of [1, 2, 3, 4]) { await page.waitForTimeout(20); await touchMove(cdp, [tp(mb.cx + 5 * k, mb.cy)]); }
+  await touchEnd(cdp);
+  await page.waitForTimeout(250);
+  evs = await evSince(page, n0);
+  f(evs.some(e => e.type === 'pokeMoka'), 'Moka tap with a 20 CSS-px wobble did not poke: ' + types(evs));
+  const n48 = await evLen(page);
+  await touchStart(cdp, [tp(mb.cx, mb.cy)]);
+  for (const k of [1, 2, 3, 4]) { await page.waitForTimeout(20); await touchMove(cdp, [tp(mb.cx, mb.cy - 8 * k)]); }
+  await touchEnd(cdp);
+  await page.waitForTimeout(250);
+  f(!(await evSince(page, n48)).some(e => e.type === 'pokeMoka'), 'a 32 CSS-px slide off Moka still poked');
   f(await page.evaluate(() => FT.debug.world.misses) === 0, 'misses after Moka taps');
   f.done();
 };
@@ -411,36 +426,32 @@ T.hammer_wrong = async ({ page, cdp, url, d }) => {
   await page.waitForTimeout(400);
   let evs = await evSince(page, n0);
   let s = await page.evaluate(() => { const w = FT.debug.world; return { m: w.misses, st: w.state, ph: w.phase, inter: w.interactive, ans: FT.debug.answer() }; });
-  f(s.m === 1 && s.inter && s.ans, '10 fast taps on one wrong thing: ' + JSON.stringify(s));
-  f(evs.filter(e => e.type === 'wrong').length === 1 && evs.filter(e => e.type === 'wiggle' && e.repeat).length === 9, 'wrong/wiggle split: ' + types(evs));
-  // a toddler keeps hammering the same wrong thing (every 0.7 s) for 10 s: the rules say help comes after 2 misses
-  n0 = await evLen(page);
+  // the 1 s window counts from the last COUNTED miss (qa P2-1): counted misses are ≥ 1 s apart in world time, every other tap wiggles
+  const W = evs.filter(e => e.type === 'wrong');
+  f(s.m === W.length && s.m >= 1 && s.inter && s.ans, '10 fast taps on one wrong thing: ' + JSON.stringify(s));
+  f(W.every((e, k) => k === 0 || e._t - W[k - 1]._t >= 1 - 1e-6), 'counted misses < 1 s apart: ' + W.map(e => e._t.toFixed(2)).join(','));
+  f(W.length + evs.filter(e => e.type === 'wiggle' && e.repeat).length === 10, 'wrong/wiggle split: ' + types(evs));
+  // a toddler keeps hammering the same wrong thing (every ~0.45 s world time) for ~10 s: help must come (hint glow; after
+  // 10 s of play the assist, which then answers for the child on the next press in the table band — an assisted round ≤ 2★)
   await page.evaluate(() => FT.debug.setSpeed(0.5));   // half-speed world: every gap stays < 1 s world time even under CPU load
   const tw0 = await page.evaluate(() => FT.debug.world.time);
-  for (let k = 0; k < 24; k++) { await tap(cdp, page, i.others[0].at, 30); await page.waitForTimeout(380); }
+  for (let k = 0; k < 24; k++) {
+    if (!(await page.evaluate(() => FT.debug.world.interactive))) break;
+    await tap(cdp, page, i.others[0].at, 30); await page.waitForTimeout(380);
+  }
   const tw1 = await page.evaluate(() => FT.debug.world.time);
   await page.evaluate(() => FT.debug.setSpeed(1));
   evs = await evSince(page, n0);
-  s = await page.evaluate(() => ({ m: FT.debug.world.misses, hand: !!FT.debug.world.hintHand, noProg: FT.debug.world._noProg }));
-  f(evs.some(e => e.type === 'hint'), `hammering the same wrong thing ~every 0.45 s for ${(tw1 - tw0).toFixed(1)} s world time never brings a hint (misses ${s.m}, noProg ${s.noProg}): ` + [...new Set(evs.map(e => e.type))].join(','));
-  // a 2nd different wrong thing → 2 misses → hint glow + ghost hand on the odd one
-  await page.waitForTimeout(1100);
-  n0 = await evLen(page);
-  await tap(cdp, page, i.others[1].at);
-  await page.waitForTimeout(400);
-  evs = await evSince(page, n0);
-  s = await page.evaluate(id => { const w = FT.debug.world, m = w.memberById(id); return { m: w.misses, hand: w.hintHand && w.hintHand.id, glow: m._glowT, cool: w.time - w._lastHintT }; }, i.a);
-  const hadHint = (await page.evaluate(() => window.__ev.some(e => e.type === 'hint')));
-  if (!hadHint) f(evs.some(e => e.type === 'hint' && e.id === i.a) && s.hand === i.a && s.glow > 0, '2nd miss: no hint glow / ghost hand: ' + JSON.stringify(s) + ' ' + types(evs));
-  f(s.m >= 2, 'misses after a 2nd different wrong thing: ' + s.m);
+  s = await page.evaluate(() => ({ m: FT.debug.world.misses, noProg: FT.debug.world._noProg, inter: FT.debug.world.interactive }));
+  f(evs.some(e => e.type === 'hint'), `hammering the same wrong thing for ${(tw1 - tw0).toFixed(1)} s world time never brought a hint (misses ${s.m}, noProg ${s.noProg}): ` + [...new Set(evs.map(e => e.type))].join(','));
+  f(evs.some(e => e.type === 'assistArmed'), 'hammering past 10 s of play never armed the assist: ' + [...new Set(evs.map(e => e.type))].join(','));
   await shot(page, d, 'hammer-hint');
-  n0 = await evLen(page);
-  await tap(cdp, page, i.at);
+  if (s.inter) { const n1 = await evLen(page); await tap(cdp, page, i.at); await waitEv(page, n1, 'right'); }
   await page.evaluate(() => FT.debug.setSpeed(3));
   await waitEv(page, n0, 'roundDone');
   await page.evaluate(() => FT.debug.setSpeed(1));
-  const rd = (await evSince(page, n0)).find(e => e.type === 'roundDone');
-  f(rd && rd.stars === 1, 'stars after 2 misses: ' + JSON.stringify(rd));
+  const all = await evSince(page, n0), rd = all.find(e => e.type === 'roundDone');
+  f(rd && rd.stars === 1, 'stars after ≥ 2 misses: ' + JSON.stringify(rd));
   f.done();
 };
 
@@ -463,12 +474,16 @@ T.non_answers = async ({ page, cdp, url }) => {
   const s = await page.evaluate(() => ({ m: FT.debug.world.misses, np: FT.debug.world._noProg, mode: FT.debug.mode, inter: FT.debug.world.interactive }));
   f(!evs.some(e => ['right', 'wrong', 'soft', 'assist'].includes(e.type)), 'Moka / bubble / HUD taps judged / softed: ' + types(evs));
   f(s.m === 0 && s.np === 0 && s.mode === 'play' && s.inter, 'after Moka / bubble / HUD taps: ' + JSON.stringify(s));
-  // assist armed (6 soft presses) — then a Moka tap must not answer for the child
+  // assist armed (4 soft presses once the round has been in play ≥ 10 s) — then a Moka tap must not answer for the child
   const pts = await page.evaluate(() => window.__qa.softPoint());
-  for (let k = 0; k < 6; k++) { const p = pts[k % Math.max(1, Math.min(3, pts.length))]; await tap(cdp, page, p, 40); await page.waitForTimeout(150); }
+  await page.evaluate(() => FT.debug.setSpeed(4));
+  await page.waitForFunction(() => FT.debug.world.time - FT.debug.world._playT0 >= 10.2, null, { timeout: 20000, polling: 'raf' });
+  await page.evaluate(() => FT.debug.setSpeed(1));
+  const off = pts.filter(p => !p.band).length ? pts.filter(p => !p.band) : pts;
+  for (let k = 0; k < 4; k++) { const p = off[k % Math.max(1, Math.min(3, off.length))]; await tap(cdp, page, p, 40); await page.waitForTimeout(150); }
   await page.waitForTimeout(200);
   const armed = await page.evaluate(() => FT.debug.world.assistId);
-  f(armed != null, 'assist not armed after 6 soft presses (noProg ' + (await page.evaluate(() => FT.debug.world._noProg)) + ')');
+  f(armed != null, 'assist not armed after 4 soft presses at ≥ 10 s of play (noProg ' + (await page.evaluate(() => FT.debug.world._noProg)) + ')');
   n0 = await evLen(page);
   await tap(cdp, page, { x: mb.cx, y: mb.cy });
   await page.waitForTimeout(300);
@@ -601,11 +616,17 @@ T.stars_rules = async ({ page, cdp, url }) => {
     f(rd && rd.stars === want, `round ${r} with ${plan[r]} misses: stars ${rd && rd.stars}, want ${want}`);
     if (r < plan.length - 1) { const k = await nextAsk(page, n0); if (k === 'talk') break; }
   }
-  // assisted round (6 soft presses, then a band press): ≤ 2★ even with 0 misses
+  // assisted round (soft presses before 10 s never arm it; 4 after 10 s of play do, then a band press): ≤ 2★ even with 0 misses
   await setupRound(page, url, { seed: 52, age: 4 });
   const i = await info(page);
   const pts = (await page.evaluate(() => window.__qa.softPoint())).filter(p => p.band).concat(await page.evaluate(() => window.__qa.softPoint()));
   for (let k = 0; k < 6; k++) { await tap(cdp, page, pts[k % Math.min(3, pts.length)], 40); await page.waitForTimeout(150); }
+  f(await page.evaluate(() => FT.debug.world.assistId) == null, 'assist armed by mashing in the first 10 s of play');
+  await page.evaluate(() => FT.debug.setSpeed(4));
+  await page.waitForFunction(() => FT.debug.world.time - FT.debug.world._playT0 >= 10.2, null, { timeout: 20000, polling: 'raf' });
+  await page.evaluate(() => FT.debug.setSpeed(1));
+  const offB = pts.filter(p => !p.band);   // one more soft press arms it (6 already counted); off the band so it is not consumed
+  await tap(cdp, page, offB[0] || pts[0], 40); await page.waitForTimeout(150);
   const armed = await page.evaluate(() => FT.debug.world.assistId);
   f(armed === i.a, 'assist not armed on the odd one: ' + armed);
   const bandPt = pts.find(p => p.band);
@@ -620,7 +641,7 @@ T.stars_rules = async ({ page, cdp, url }) => {
   f.done();
 };
 
-/** idle nudges: 12 s, ×1.5 backoff to 30 s, hint from the 2nd, voice says the prompt; ≈ 2 min → auto-pause */
+/** idle nudges: 12 s, ×1.5 backoff to 30 s, hint from the 1st (idleHintFrom 1), voice says the prompt; ≈ 2 min → auto-pause */
 T.idle_timing = async ({ page }) => {
   const f = soft();
   const url = page.__url;
@@ -635,7 +656,7 @@ T.idle_timing = async ({ page }) => {
   const want = [12, 30, 57, 87, 117];
   const got = r.idles.map(x => x.t);
   f(got.length >= 5 && want.every((w, k) => Math.abs(got[k] - w) < 0.6), 'idle times since the ask: ' + got.join(', ') + ' (want ' + want.join(', ') + ')');
-  f(r.hints.length >= 1 && Math.abs(r.hints[0].t - 30) < 0.6 && r.hints[0].idle, 'first idle hint: ' + JSON.stringify(r.hints));
+  f(r.hints.length >= 1 && Math.abs(r.hints[0].t - 12) < 0.6 && r.hints[0].idle, 'first idle hint: ' + JSON.stringify(r.hints));
   f(r.hints.every((h, k) => k === 0 || h.t - r.hints[k - 1].t >= 6 - 0.01), 'hint cooldown violated: ' + JSON.stringify(r.hints));
   f(r.mode === 'paused' && Math.abs(r.wt - 117) < 1.5, `auto-pause: mode ${r.mode} at ${r.wt.toFixed(1)} s`);
   const withPrompt = r.log.filter(t => t.includes(prompt)).length;
@@ -708,6 +729,28 @@ T.talk_topics = async ({ page }) => {
 };
 
 /** Talk re-asks every 12 s, glows the answer after the 2nd re-ask, stays silent after the 3rd, then Moka answers */
+/** Talk choices are locked for the first second (a finger still mashing from the last clear never answers the question) */
+T.talk_lock = async ({ page }) => {
+  const f = soft();
+  await gotoTitle(page, `${page.__url}?mute=1&seed=83&age=4&lang=en`);
+  await page.evaluate(() => { FT.debug.startGame(); });
+  await page.waitForFunction(() => FT.debug.world.state === 'round', null, { timeout: 10000 });
+  await page.evaluate(() => { FT.debug.setSpeed(0.25); FT.debug.world._startTalk(); });   // slow world: the lock lasts 4 s of wall time
+  await page.waitForFunction(() => FT.debug.mode === 'talk' && !document.getElementById('scrTalk').classList.contains('hidden'), null, { timeout: 5000 });
+  const ans = await page.evaluate(() => FT.debug.world.talk.answer);
+  const n0 = await evLen(page);
+  await tapEl(page, `#talkChoices button[data-id="${ans}"]`);
+  await page.waitForTimeout(150);
+  const early = await page.evaluate(() => ({ st: FT.debug.world.stateTime, answered: FT.debug.world.talkAnswered }));
+  f(!early.answered && !(await evSince(page, n0)).some(e => e.type === 'talkResult'), 'a Talk tap at ' + early.st.toFixed(2) + ' s answered: ' + JSON.stringify(early));
+  await page.evaluate(() => FT.debug.setSpeed(1));
+  await page.waitForFunction(() => FT.debug.world.talkOpen(), null, { timeout: 5000 });
+  await tapEl(page, `#talkChoices button[data-id="${ans}"]`);
+  await page.waitForTimeout(200);
+  const tr = (await evSince(page, n0)).find(e => e.type === 'talkResult');
+  f(tr && tr.correct, 'a Talk tap after the lock: ' + JSON.stringify(tr));
+  f.done();
+};
 T.talk_reask = async ({ page }) => {
   const f = soft();
   await gotoTitle(page, `${page.__url}?mute=1&seed=81&age=4&lang=en`);
@@ -744,6 +787,8 @@ T.pause_speech = async ({ page, cdp }) => {
   await tapEl(page, '#btnPlay');   // the unlock gesture
   await page.waitForFunction(READY, null, { timeout: 30000, polling: 'raf' });   // speed 1: the voice is on
   await page.waitForTimeout(300);
+  // the prompt may be queued behind the chapter / weather lines (the shorter enter of the playtest trims): allow the hand-over gap
+  await page.waitForFunction(() => speechSynthesis.speaking, null, { timeout: 1500, polling: 50 }).catch(() => {});
   let s = await page.evaluate(() => ({ sp: speechSynthesis.speaking, vs: FT.Voice.isSpeaking(), log: window.__synth.log.map(x => x.text) }));
   f(s.sp, 'fake voice not speaking right after the ask (log ' + JSON.stringify(s.log.slice(-3)) + ')');
   await tapEl(page, '#btnPause');
@@ -1021,7 +1066,7 @@ const FT_POOLS = { 3: ['colors', 'shapes', 'size', 'animals', 'count'], 4: ['col
 /* ================================================================ runner */
 const DEVICE_TESTS = ['warmup_easy', 'tap_jitter', 'slide_window', 'two_fingers', 'rapid_right', 'hammer_wrong', 'non_answers',
   'critter_ladybug', 'critter_butterfly', 'critter_snail', 'critter_fairies', 'rotate_phases'];
-const GLOBAL_TESTS = ['stars_rules', 'idle_timing', 'idle_after_touch', 'talk_topics', 'talk_reask', 'pause_speech', 'visibility', 'parent_gate',
+const GLOBAL_TESTS = ['stars_rules', 'idle_timing', 'idle_after_touch', 'talk_topics', 'talk_lock', 'talk_reask', 'pause_speech', 'visibility', 'parent_gate',
   'settings_persist', 'lang_switch_all', 'audio_chain', 'resize_extremes'];
 
 async function runList(browser, url, d, list) {

@@ -476,11 +476,17 @@
   }
   function glyphFont(px) { return 'bold ' + Math.round(px * 10) / 10 + 'px ' + FONT; }
   /** big rounded dark-brown text centred at (x, y) fitting maxW × maxH (cap height) */
-  function signText(ctx, txt, x, y, maxW, maxH, col) {
-    var px = maxH * 1.36;
+  /** Glyphs auto-fit to maxW; never below minPx (then the text is condensed horizontally instead of shrunk). */
+  function signText(ctx, txt, x, y, maxW, maxH, col, minPx) {
+    var px = maxH * 1.36, cx = 1;
     ctx.font = glyphFont(px);
     var m = ctx.measureText ? ctx.measureText(txt) : null, w = m && m.width > 0 ? m.width : px * 0.62 * txt.length;
-    if (w > maxW) { px *= maxW / w; ctx.font = glyphFont(px); m = ctx.measureText ? ctx.measureText(txt) : null; }
+    if (w > maxW) {
+      var fit = px * maxW / w;
+      if (minPx && fit < minPx) { cx = fit / minPx; fit = minPx; }
+      px = fit; ctx.font = glyphFont(px); m = ctx.measureText ? ctx.measureText(txt) : null;
+    }
+    ctx.save(); ctx.translate(x, 0); ctx.scale(cx, 1); x = 0;
     ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     var asc = m && m.actualBoundingBoxAscent > 0 ? m.actualBoundingBoxAscent : px * 0.72,
       desc = m && m.actualBoundingBoxDescent >= 0 && m.actualBoundingBoxAscent > 0 ? m.actualBoundingBoxDescent : 0;
@@ -489,6 +495,7 @@
     ctx.strokeStyle = col; ctx.lineWidth = Math.max(0.6, px * 0.045);
     ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fillText(txt, x + 0.8, by + 1.4);
     ctx.fillStyle = col; ctx.fillText(txt, x, by); if (ctx.strokeText) ctx.strokeText(txt, x, by);
+    ctx.restore();
   }
   function sprig(ctx, x, y, s) {
     ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
@@ -504,7 +511,8 @@
     ctx.restore();
   }
   function drawCard(ctx, th) {
-    var txt = cardText(th), n = txt.length;
+    var txt = cardText(th), n = txt.length, wide = n >= 4 ? 1.15 : 1;   // 4+ glyphs ("10+5"): a wider tent card, glyphs ≥ 30 units
+    ctx.save(); ctx.scale(wide, 1);
     cel(ctx, 'cd.side', cdSide, { base: '#E6D6B6', dark: '#C9B48E', light: '#F4EAD4' }, { s: 0.8, line: '#A88E64', lw: 2.4, hl: false });
     cel(ctx, 'cd.front', cdFront, CARD, { s: 2.6, shade: '#F0E2C6', line: '#A88E64', lw: 2.8, hl: false,
       inner: function (x) {
@@ -513,7 +521,8 @@
         x.beginPath(); rrect(x, -37, -73, 74, 63, 5); x.stroke();
       } });
     sprig(ctx, -36, -70, 1.15);
-    signText(ctx, txt, 0, -42, 70, n <= 1 ? 44 : n <= 2 ? 38 : 30, INK);
+    ctx.restore();
+    signText(ctx, txt, 0, -42, 70 * wide, n <= 1 ? 44 : n <= 2 ? 38 : 30, INK, n >= 4 ? 30 : 0);
   }
 
   // ================================================================= GUESTS (images by artist C; placeholder)
@@ -678,7 +687,8 @@
     // cream sticker outline behind the dark outline (warm rim light in the rain)
     if (sil) {
       ctx.strokeStyle = night > 0.01 ? mix('#FFF8EA', '#FFD38A', night) : '#FFF8EA';
-      ctx.save(); ctx.globalAlpha *= 0.92; ctx.lineWidth = LW + 6 + 2 * night; ctx.beginPath(); sil(ctx); ctx.stroke(); ctx.restore();
+      ctx.save(); if (k === 'card' && cardText(thing).length >= 4) ctx.scale(1.15, 1);   // the wide tent card
+      ctx.lineWidth = LW + 9 + 2 * night; ctx.beginPath(); sil(ctx); ctx.stroke(); ctx.restore();   // ≈ 4.5 units of cream outside the ink line
     }
     if (k === 'guest') drawGuest(ctx, thing, o, sizePx);
     else if (k === 'obj') OB[objOf(thing)].draw(ctx, colOf(thing));

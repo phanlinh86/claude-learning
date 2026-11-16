@@ -360,3 +360,8 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 .btn-play { background: var(--moss); box-shadow: 0 9px 0 var(--moss-d), 0 16px 30px rgba(0, 0, 0, .25); }
 .btn-play:active { box-shadow: 0 3px 0 var(--moss-d); }
 .tagline, .title-info { background: rgba(255, 251, 241, .8); }
+
+/* ---------- fixes 2026-11-16 (functional QA P3-1): phone bubbles keep ≥ 15 px text — slimmer padding gives 3 lines room ---------- */
+@media (max-width: 430px) and (orientation: portrait), (max-height: 430px) and (orientation: landscape) {
+  .bubble { padding: 6px 14px; border-radius: 20px; }
+}

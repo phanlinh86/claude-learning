@@ -146,13 +146,14 @@
     clearGallery() { this.gallery = []; }
 
     /* ---------- env ---------- */
-    _stableItem(L, age) {   // the age's base item (× 1.12 on tall screens): the env is anchored on it, never on the per-round item
+    _stableItem(L, age) {   // the env is anchored on a stable item, never on the per-round one: portrait = the world's item cap
+      if (L && L.envItem) return L.envItem;                 // (with L.envTableY = the cap's table y), else the age's base × 1.12 on tall
       const C = FT.CONFIG || {}, it = C.item || {}, a = clamp(Math.round(age || 4), 3, 7);
       return Math.round((it[a] || 124) * (L.tall ? (C.tallK || 1.12) : 1));
     }
     _envFor(L, age) {
       const ins = (L && L.ins) || { top: 0, left: 0, right: 0, bottom: 0 };
-      const item = this._stableItem(L, age), ty = Math.round(L.table.y), G0 = L.garland;
+      const item = this._stableItem(L, age), ty = Math.round(L.envTableY != null ? L.envTableY : L.table.y), G0 = L.garland;
       const key = [this.W, this.H, Math.round(ins.top), Math.round(ins.left), Math.round(ins.right), Math.round(ins.bottom), ty, item, Math.round(G0.y), Math.round(G0.x0), Math.round(G0.x1)].join(',');
       if (this._envKey === key && this._env) return this._env;
       this._env = envLayout(this.W, this.H, ins, ty, item);
@@ -303,7 +304,7 @@
       const lan = G.lanterns.map((q, i) => ({ x: q.x, y: q.y, lit: litAll != null ? litAll[i] : clamp(ip(q, 'lit', a) || 0, 0, 1.3),
         color: q.color, thing: q.thing, swing: (ip(q, 'swing', a) || 0) + Math.sin(this.time * 1.1 + i * 1.7) * 0.025 }));
       const b = G.badge && G.badge.a > 0.01 ? { home: G.badge.home, i: G.badge.i, a: G.badge.a, pop: easeOutBack(clamp(G.badge.a * 1.6, 0, 1)) } : null;
-      const g2 = { x0: G.x0, x1: G.x1, y: G.y, sag: G.sag, twinkle: clamp(tw == null ? (ip(G, 'twinkle', a) || 0) : tw, 0, 1), badge: b, lanternS: 1 };
+      const g2 = { x0: G.x0, x1: G.x1, y: G.y, sag: G.sag, twinkle: clamp(tw == null ? (ip(G, 'twinkle', a) || 0) : tw, 0, 1), badge: b, lanternS: (this._L && this._L.garland && this._L.garland.lanternS) || 1 };
       try { P.drawGarland(this.g, g2, lan, this.time); } catch (e) { /* skip */ }
     }
     _shadow(m, a, ty) {
@@ -456,7 +457,9 @@
       // the little tea set: two or three things on placemats, kept clear of the DOM title (▶ and the star pill)
       const size = Math.min(L.item, 120);
       const things = [{ kind: 'obj', obj: 'teapot', color: 'blue' }, { kind: 'cookie', shape: 'star', color: 'yellow' }, { kind: 'obj', obj: 'cup', color: 'red' }];
-      const n = 5, span = T.x1 - T.x0 - 80, sp = clamp(span / n, 1.25 * size, 1.7 * size), mid = (T.x0 + T.x1) / 2;
+      const n = 5, span = T.x1 - T.x0 - 80, mid = (T.x0 + T.x1) / 2, ins = L.ins || {};
+      // never past the screen edge (the portrait table runs nearly full width)
+      const sp = Math.min(clamp(span / n, 1.25 * size, 1.7 * size), (this.W - (ins.left || 0) - (ins.right || 0) - 32 - size) / (n - 1));
       const xs = []; for (let i = n - 1; i >= 0; i--) xs.push(mid + (i - (n - 1) / 2) * sp);
       const free = xs.filter(x => !boxes.some(b => x + size * 0.55 > b.x && x - size * 0.55 < b.x + b.w && T.y + 4 > b.y && T.y - size * 1.05 < b.y + b.h));
       const use = free.slice(0, 3).sort((p, q) => p - q);
@@ -478,17 +481,25 @@
       if (!L || !P) return;
       this._galleryT += o.dt || 0;
       const T = L.table;
-      this._garland(L.garland, 1, 0.6 + 0.4 * Math.sin(t * 2), [1, 1, 1, 1]);
-      try { P.drawTable(g, T.x0, T.x1, T.y, { wet: this._rain, spring: 0, legs: T.legs, groundY: T.legBottom || L.groundY }); } catch (e) { /* skip */ }
       const list = this.gallery.length ? this.gallery : [{ kind: 'obj', obj: 'cup', color: 'red' }, { kind: 'cookie', shape: 'heart', color: 'blue' }, { kind: 'guest', animal: 'penguin' }, { kind: 'plate', n: 3 }];
-      const pb = o.boxes && o.boxes.done, ins = L.ins || {}, bottom = T.y - 40;
+      // the garland keeps the last chapter's things in its 4 lit lanterns (else the session's last 4 things)
+      const WG = (w && w.garland && w.garland.lanterns) || [], last = list.slice(-4);
+      const lan = L.garland.lanterns.map((q, i) => { const s = WG[i] || {}, th = s.thing || last[i % last.length] || null; return { x: q.x, y: q.y, swing: 0, thing: th, color: s.thing ? s.color : (th && th.color) || null }; });
+      this._garland(Object.assign({}, L.garland, { lanterns: lan }), 1, 0.6 + 0.4 * Math.sin(t * 2), [1, 1, 1, 1]);
+      try { P.drawTable(g, T.x0, T.x1, T.y, { wet: this._rain, spring: 0, legs: T.legs, groundY: T.legBottom || L.groundY }); } catch (e) { /* skip */ }
+      // portrait: the table sits mid-screen, so the lanterns rise from the ground band (in front of the table) up to the panel
+      const pb = o.boxes && o.boxes.done, ins = L.ins || {}, bottom = H > W ? L.groundY - 40 : T.y - 40;
+      const M = L.moka, mTop = M.y - M.h, mRight = M.x + M.w * 0.5 + 80, xL = (ins.left || 0) + 50;
       // the lanterns rise in the open sky below the done panel (portrait) / beside and below it (landscape)
       const top = Math.min(bottom - 220, Math.max((ins.top || 0) + 60, pb && H > W ? pb.y + pb.h + 90 : 0));
       const n = Math.max(list.length, H > W ? 10 : 12), ls = H > W ? 1 : 0.9;
       for (let i = 0; i < n; i++) {
         const th = list[i % list.length], ph = i * 2.399;
         const rise = ((this._galleryT * 22 + i * (bottom - top) / n) % (bottom - top + 160));
-        const y = bottom + 80 - rise, x = (ins.left || 0) + 50 + ((i * 0.618034) % 1) * (W - (ins.left || 0) - (ins.right || 0) - 100) + Math.sin(t * 0.7 + ph) * 34;
+        const y = bottom + 80 - rise;
+        // beside Moka (never over his head / raised cup) while low, the whole width once above him (smooth, no jump)
+        const x0 = lerp(xL, Math.max(xL, mRight), clamp((y - (mTop - 120)) / 100, 0, 1));
+        const x = x0 + ((i * 0.618034) % 1) * Math.max(40, W - (ins.right || 0) - 50 - x0) + Math.sin(t * 0.7 + ph) * 34;
         const al = clamp(Math.min(rise / 60, (bottom - top + 160 - rise) / 60), 0, 1);
         if (al <= 0.01) continue;
         g.save(); g.globalAlpha *= al;

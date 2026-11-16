@@ -217,6 +217,14 @@ eq(I.t('vi', 'ui.welcome', { child: '' }, r0), 'Chào bé! Mình là gấu Moka.
 eq(I.t('vi', 'great', { child: 'Mai' }, r0), 'Bé Mai tìm giỏi quá!', 'vi great with the name');
 I.setChild('An'); eq(I.t('en', 'great', null, r0), 'Great finding, An!', 'setChild fills {child}'); I.setChild('');
 eq(I.t('en', 'great', { child: '' }, r0), 'What sharp eyes!', 'no-name: {child} variants skipped');
+// qa_functional P3-2: with a name set, ≈ 1 in 3 praise / great lines use it; session.done always does
+for (const l of ['en', 'vi']) for (const k of ['praise', 'great']) {
+  let withName = 0; const N = 3000;
+  for (let i = 0; i < N; i++) if (I.t(l, k, { child: 'Mai' }, () => Math.random()).includes('Mai')) withName++;
+  ok(withName / N > 0.27 && withName / N < 0.4, `${l} ${k}: ${(withName / N * 100).toFixed(0)} % with the name (≈ 33 %)`);
+  for (let i = 0; i < 200; i++) ok(!I.t(l, k, { child: '' }, () => Math.random()).includes('{'), `${l} ${k}: no name, no placeholder`);
+}
+for (const l of ['en', 'vi']) for (let i = 0; i < 50; i++) ok(I.t(l, 'session.done', { child: 'Mai', stars: 9 }, () => Math.random()).includes('Mai'), l + ' session.done names the child');
 eq(I.t('en', 'session.done', { stars: 14 }, r0), 'What a tea party! 14 stars! Hooray!', 'session.done');
 
 section('prompts: DESIGN examples, every value, first-time forms, fallbacks');
