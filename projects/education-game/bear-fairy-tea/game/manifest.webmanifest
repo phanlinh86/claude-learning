@@ -1,0 +1,29 @@
+{
+  "name": "Moka's Fairy Tea Party · Tiệc Trà Trong Rừng Của Gấu Moka",
+  "short_name": "Fairy Tea",
+  "description": "Odd-one-out learning game with Moka the bear cub at a fairy tea party: tap the tea thing that is different, the fairy lifts it into the garland and it lights a lantern. Colours, cookie shapes, big and little, counting berries, forest friends, letters, numbers. English & Vietnamese.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#CFE6DA",
+  "theme_color": "#CFE6DA",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

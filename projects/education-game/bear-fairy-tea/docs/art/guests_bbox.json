@@ -1,0 +1,600 @@
+{
+ "bunny": {
+  "geom": {
+   "x": 50,
+   "y": 6.1,
+   "w": 109,
+   "h": 187.9,
+   "bottom": 194
+  },
+  "art": {
+   "top": 6,
+   "bottom": 196,
+   "left": 48,
+   "right": 161,
+   "h": 190
+  },
+  "sticker": {
+   "top": 0.5,
+   "bottom": 200,
+   "left": 42,
+   "right": 167
+  },
+  "parses": true
+ },
+ "bunny_hop": {
+  "geom": {
+   "x": 20.5,
+   "y": 6.1,
+   "w": 159,
+   "h": 187.9,
+   "bottom": 194
+  },
+  "art": {
+   "top": 6,
+   "bottom": 196,
+   "left": 18.5,
+   "right": 181.5,
+   "h": 190
+  },
+  "sticker": {
+   "top": 0.5,
+   "bottom": 200,
+   "left": 12.5,
+   "right": 187.5
+  },
+  "parses": true
+ },
+ "fox": {
+  "geom": {
+   "x": 45,
+   "y": 13.1,
+   "w": 149.1,
+   "h": 180.9,
+   "bottom": 194
+  },
+  "art": {
+   "top": 11,
+   "bottom": 196,
+   "left": 43,
+   "right": 196.5,
+   "h": 185
+  },
+  "sticker": {
+   "top": 5,
+   "bottom": 200,
+   "left": 37,
+   "right": 200
+  },
+  "parses": true
+ },
+ "fox_hop": {
+  "geom": {
+   "x": 20.5,
+   "y": 13.1,
+   "w": 173.6,
+   "h": 180.9,
+   "bottom": 194
+  },
+  "art": {
+   "top": 11,
+   "bottom": 196,
+   "left": 18.5,
+   "right": 196.5,
+   "h": 185
+  },
+  "sticker": {
+   "top": 5,
+   "bottom": 200,
+   "left": 12.5,
+   "right": 200
+  },
+  "parses": true
+ },
+ "deer": {
+  "geom": {
+   "x": 15.1,
+   "y": 24,
+   "w": 169.7,
+   "h": 170,
+   "bottom": 194
+  },
+  "art": {
+   "top": 18.5,
+   "bottom": 196,
+   "left": 18,
+   "right": 182,
+   "h": 177.5
+  },
+  "sticker": {
+   "top": 12.5,
+   "bottom": 200,
+   "left": 12,
+   "right": 188
+  },
+  "parses": true
+ },
+ "deer_hop": {
+  "geom": {
+   "x": 15.1,
+   "y": 24,
+   "w": 169.7,
+   "h": 170,
+   "bottom": 194
+  },
+  "art": {
+   "top": 18.5,
+   "bottom": 196,
+   "left": 18,
+   "right": 182,
+   "h": 177.5
+  },
+  "sticker": {
+   "top": 12.5,
+   "bottom": 200,
+   "left": 12,
+   "right": 188
+  },
+  "parses": true
+ },
+ "squirrel": {
+  "geom": {
+   "x": 52,
+   "y": 14.7,
+   "w": 144.5,
+   "h": 179.3,
+   "bottom": 194
+  },
+  "art": {
+   "top": 12.5,
+   "bottom": 196,
+   "left": 50,
+   "right": 198.5,
+   "h": 183.5
+  },
+  "sticker": {
+   "top": 6.5,
+   "bottom": 200,
+   "left": 44,
+   "right": 200
+  },
+  "parses": true
+ },
+ "squirrel_hop": {
+  "geom": {
+   "x": 20.5,
+   "y": 14.7,
+   "w": 176,
+   "h": 179.3,
+   "bottom": 194
+  },
+  "art": {
+   "top": 12.5,
+   "bottom": 196,
+   "left": 18.5,
+   "right": 198.5,
+   "h": 183.5
+  },
+  "sticker": {
+   "top": 6.5,
+   "bottom": 200,
+   "left": 12.5,
+   "right": 200
+  },
+  "parses": true
+ },
+ "owl": {
+  "geom": {
+   "x": 18.3,
+   "y": 14.7,
+   "w": 163.5,
+   "h": 179.3,
+   "bottom": 194
+  },
+  "art": {
+   "top": 12.5,
+   "bottom": 196,
+   "left": 21.5,
+   "right": 178.5,
+   "h": 183.5
+  },
+  "sticker": {
+   "top": 6.5,
+   "bottom": 200,
+   "left": 15.5,
+   "right": 184.5
+  },
+  "parses": true
+ },
+ "owl_hop": {
+  "geom": {
+   "x": -0.6,
+   "y": 14.7,
+   "w": 201.2,
+   "h": 179.3,
+   "bottom": 194
+  },
+  "art": {
+   "top": 12.5,
+   "bottom": 196,
+   "left": 5.5,
+   "right": 194.5,
+   "h": 183.5
+  },
+  "sticker": {
+   "top": 6.5,
+   "bottom": 200,
+   "left": 0,
+   "right": 200
+  },
+  "parses": true
+ },
+ "raccoon": {
+  "geom": {
+   "x": 40,
+   "y": 30,
+   "w": 154,
+   "h": 164,
+   "bottom": 194
+  },
+  "art": {
+   "top": 28,
+   "bottom": 196,
+   "left": 38,
+   "right": 196,
+   "h": 168
+  },
+  "sticker": {
+   "top": 22,
+   "bottom": 200,
+   "left": 32,
+   "right": 200
+  },
+  "parses": true
+ },
+ "raccoon_hop": {
+  "geom": {
+   "x": 20.5,
+   "y": 30,
+   "w": 173.5,
+   "h": 164,
+   "bottom": 194
+  },
+  "art": {
+   "top": 28,
+   "bottom": 196,
+   "left": 18.5,
+   "right": 196,
+   "h": 168
+  },
+  "sticker": {
+   "top": 22,
+   "bottom": 200,
+   "left": 12.5,
+   "right": 200
+  },
+  "parses": true
+ },
+ "mouse": {
+  "geom": {
+   "x": 19,
+   "y": 21,
+   "w": 166.3,
+   "h": 173,
+   "bottom": 194
+  },
+  "art": {
+   "top": 19,
+   "bottom": 196,
+   "left": 17,
+   "right": 189.5,
+   "h": 177
+  },
+  "sticker": {
+   "top": 13,
+   "bottom": 200,
+   "left": 11,
+   "right": 195
+  },
+  "parses": true
+ },
+ "mouse_hop": {
+  "geom": {
+   "x": 19,
+   "y": 21,
+   "w": 166.3,
+   "h": 173,
+   "bottom": 194
+  },
+  "art": {
+   "top": 19,
+   "bottom": 196,
+   "left": 17,
+   "right": 189.5,
+   "h": 177
+  },
+  "sticker": {
+   "top": 13,
+   "bottom": 200,
+   "left": 11,
+   "right": 195
+  },
+  "parses": true
+ },
+ "hedgehog": {
+  "geom": {
+   "x": 10.7,
+   "y": 19.4,
+   "w": 178.7,
+   "h": 174.6,
+   "bottom": 194
+  },
+  "art": {
+   "top": 17,
+   "bottom": 196,
+   "left": 8.5,
+   "right": 191.5,
+   "h": 179
+  },
+  "sticker": {
+   "top": 11.5,
+   "bottom": 200,
+   "left": 2.5,
+   "right": 197.5
+  },
+  "parses": true
+ },
+ "hedgehog_hop": {
+  "geom": {
+   "x": 10.7,
+   "y": 19.4,
+   "w": 178.7,
+   "h": 174.6,
+   "bottom": 194
+  },
+  "art": {
+   "top": 17,
+   "bottom": 196,
+   "left": 8.5,
+   "right": 191.5,
+   "h": 179
+  },
+  "sticker": {
+   "top": 11.5,
+   "bottom": 200,
+   "left": 2.5,
+   "right": 197.5
+  },
+  "parses": true
+ },
+ "penguin": {
+  "geom": {
+   "x": 19.2,
+   "y": 21.7,
+   "w": 161.7,
+   "h": 172.3,
+   "bottom": 194
+  },
+  "art": {
+   "top": 19.5,
+   "bottom": 196,
+   "left": 22.5,
+   "right": 177.5,
+   "h": 176.5
+  },
+  "sticker": {
+   "top": 14,
+   "bottom": 200,
+   "left": 17,
+   "right": 183
+  },
+  "parses": true
+ },
+ "penguin_hop": {
+  "geom": {
+   "x": 3.5,
+   "y": 21.7,
+   "w": 193,
+   "h": 172.3,
+   "bottom": 194
+  },
+  "art": {
+   "top": 19.5,
+   "bottom": 196,
+   "left": 8.5,
+   "right": 191.5,
+   "h": 176.5
+  },
+  "sticker": {
+   "top": 14,
+   "bottom": 200,
+   "left": 3,
+   "right": 197
+  },
+  "parses": true
+ },
+ "crab": {
+  "geom": {
+   "x": 9,
+   "y": 45,
+   "w": 182,
+   "h": 145,
+   "bottom": 190
+  },
+  "art": {
+   "top": 43,
+   "bottom": 195.5,
+   "left": 6.5,
+   "right": 193.5,
+   "h": 152.5
+  },
+  "sticker": {
+   "top": 37,
+   "bottom": 200,
+   "left": 0.5,
+   "right": 199.5
+  },
+  "parses": true
+ },
+ "crab_hop": {
+  "geom": {
+   "x": 12,
+   "y": 39,
+   "w": 176,
+   "h": 151,
+   "bottom": 190
+  },
+  "art": {
+   "top": 37,
+   "bottom": 195.5,
+   "left": 6.5,
+   "right": 193.5,
+   "h": 158.5
+  },
+  "sticker": {
+   "top": 31,
+   "bottom": 200,
+   "left": 0.5,
+   "right": 199.5
+  },
+  "parses": true
+ },
+ "camel": {
+  "geom": {
+   "x": 12,
+   "y": 26.1,
+   "w": 179.6,
+   "h": 167.9,
+   "bottom": 194
+  },
+  "art": {
+   "top": 24,
+   "bottom": 196,
+   "left": 10,
+   "right": 190.5,
+   "h": 172
+  },
+  "sticker": {
+   "top": 18,
+   "bottom": 200,
+   "left": 4,
+   "right": 196.5
+  },
+  "parses": true
+ },
+ "camel_hop": {
+  "geom": {
+   "x": 12,
+   "y": 26.1,
+   "w": 184,
+   "h": 167.9,
+   "bottom": 194
+  },
+  "art": {
+   "top": 24,
+   "bottom": 196,
+   "left": 10,
+   "right": 198,
+   "h": 172
+  },
+  "sticker": {
+   "top": 18,
+   "bottom": 200,
+   "left": 4,
+   "right": 200
+  },
+  "parses": true
+ },
+ "goldfish": {
+  "geom": {
+   "x": 18,
+   "y": 33,
+   "w": 164,
+   "h": 161,
+   "bottom": 194
+  },
+  "art": {
+   "top": 31,
+   "bottom": 196,
+   "left": 16,
+   "right": 184,
+   "h": 165
+  },
+  "sticker": {
+   "top": 25,
+   "bottom": 200,
+   "left": 10,
+   "right": 190
+  },
+  "parses": true
+ },
+ "goldfish_hop": {
+  "geom": {
+   "x": 18,
+   "y": 33,
+   "w": 164,
+   "h": 161,
+   "bottom": 194
+  },
+  "art": {
+   "top": 14,
+   "bottom": 196,
+   "left": 16,
+   "right": 184,
+   "h": 182
+  },
+  "sticker": {
+   "top": 14,
+   "bottom": 200,
+   "left": 10,
+   "right": 190
+  },
+  "parses": true
+ },
+ "lion": {
+  "geom": {
+   "x": 32.1,
+   "y": 34.3,
+   "w": 160.3,
+   "h": 159.7,
+   "bottom": 194
+  },
+  "art": {
+   "top": 32,
+   "bottom": 196,
+   "left": 30,
+   "right": 194.5,
+   "h": 164
+  },
+  "sticker": {
+   "top": 26.5,
+   "bottom": 200,
+   "left": 24,
+   "right": 200
+  },
+  "parses": true
+ },
+ "lion_hop": {
+  "geom": {
+   "x": 14.5,
+   "y": 34.3,
+   "w": 177.9,
+   "h": 159.7,
+   "bottom": 194
+  },
+  "art": {
+   "top": 32,
+   "bottom": 196,
+   "left": 12.5,
+   "right": 194.5,
+   "h": 164
+  },
+  "sticker": {
+   "top": 26.5,
+   "bottom": 200,
+   "left": 6.5,
+   "right": 200
+  },
+  "parses": true
+ }
+}
