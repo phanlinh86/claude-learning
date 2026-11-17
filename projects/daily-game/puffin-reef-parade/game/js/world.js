@@ -139,7 +139,7 @@
     // ages 3–5: slow Dottie, 5 hearts, short songs, a forgiving parade, a slow and long-lived golden star
     easy: {
       speed0: 105, speedPerBiome: 4, heartsMax: 5,
-      songTargets: [8, 10, 12, 14], trailSpacing: 22, spawnMinDist: 160,
+      songTargets: [8, 10, 12, 14], songPerLap: 1, trailSpacing: 22, spawnMinDist: 140, pickPad: 22,   // playtest 2026-11-17: kinder for 3–5-year-olds
       jumpTime: 0.8, flipRecharge: 2.4,
       safeNeck: 7, bonkR: 12, edgeSafe: 40,
       looseLife: 5, invulnTime: 1.8,

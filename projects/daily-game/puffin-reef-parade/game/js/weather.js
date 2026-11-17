@@ -49,8 +49,8 @@
       schools: 2,
       ambient: { tint: [255, 214, 214, 0.05], fog: 0.03 },
       emitters: [
-        { kind: 'rise', layer: 'back', count: 16, size: [5, 9], alpha: [0.55, 0.85], sprite: 'spawn', depth: 0.55, rise: [9, 16] },
-        { kind: 'rise', layer: 'front', count: 4, size: [11, 15], alpha: [0.45, 0.65], sprite: 'spawn', depth: 1, rise: [16, 24] },
+        { kind: 'rise', layer: 'back', count: 16, size: [7, 12], alpha: [0.75, 0.95], sprite: 'spawn', depth: 0.55, rise: [9, 16] },
+        { kind: 'rise', layer: 'front', count: 4, size: [13, 18], alpha: [0.55, 0.75], sprite: 'spawn', depth: 1, rise: [16, 24] },
         { kind: 'rise', layer: 'back', count: 10, size: [2, 3.5], alpha: [0.3, 0.55], sprite: 'dot', color: 'rgba(255,214,228,1)', depth: 0.25, rise: [4, 8] }
       ]
     },

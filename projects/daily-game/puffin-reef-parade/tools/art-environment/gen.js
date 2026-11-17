@@ -556,8 +556,8 @@ const DECOR = {
 const P = {
   bubble: () => svg(32, 32, circ(16, 16, 13, 'url(#b)', OL('#bfe6f4', 1.6)) + stk('M8.5 13A8 8 0 0 1 14 7.6', '#ffffff', 2.4) + circ(21.5, 21, 1.6, '#ffffff', ' opacity="0.8"'),
     rad('b', [[0, '#ffffff', 0.05], [0.7, '#e6f8ff', 0.25], [1, '#ffffff', 0.6]])),
-  spawn: () => svg(32, 32, circ(16, 16, 15, 'url(#g)') + circ(16, 16, 4.2, '#ffd0dc') + circ(15, 15, 1.6, '#ffffff', ' opacity="0.9"'),
-    rad('g', [[0, '#ffc2d2', 0.9], [0.35, '#ffb0c4', 0.45], [1, '#ffb0c4', 0]])),
+  spawn: () => svg(32, 32, circ(16, 16, 15, 'url(#g)') + circ(16, 16, 4.2, '#f2789e') + circ(15, 15, 1.6, '#ffffff', ' opacity="0.9"'),
+    rad('g', [[0, '#f58aa8', 0.9], [0.35, '#f2789e', 0.45], [1, '#f2789e', 0]])),
   fish: () => svg(32, 32, pth('M7 16L1 10L2 22Z', '#ffc93a', OL('#a8741a', 1.4)) + ell(15, 16, 10, 6.4, '#ffd84a', OL('#a8741a', 1.6)) + pth('M12 10Q15 6 19 10Z', '#ffc93a', OL('#a8741a', 1.2)) +
     ell(13, 18.5, 6, 2.2, '#fff4c0', ' opacity="0.9"') + circ(20, 14.6, 2.1, '#1f2a44') + circ(19.4, 14, 0.7, '#ffffff')),
   ray: () => svg(64, 256, pth('M20 0L44 0L60 256L4 256Z', 'url(#r)', ' opacity="0.5"') + pth('M26 0L38 0L48 256L16 256Z', 'url(#r)', ' opacity="0.6"') + pth('M30 0L34 0L38 256L26 256Z', 'url(#r)', ' opacity="0.5"'),

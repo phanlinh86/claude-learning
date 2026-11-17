@@ -4,7 +4,7 @@
 <path d="M29.2,16.9 C34.3,16.1 39.5,15.3 41.1,14.8 C43.7,15.8 44.7,19.1 43.3,21.4 C41.6,21.9 37,24.3 32.4,26.7 C34.7,31.4 37,36 38.1,37.4 C37.9,40.2 35.1,42.2 32.4,41.5 C31.4,40.1 27.7,36.5 24,32.8 C20.3,36.5 16.6,40.1 15.6,41.5 C12.9,42.2 10.1,40.2 9.9,37.4 C11,36 13.3,31.4 15.6,26.7 C11,24.3 6.4,21.9 4.7,21.4 C3.3,19.1 4.3,15.8 6.9,14.8 C8.5,15.3 13.7,16.1 18.8,16.9 C19.7,11.7 20.5,6.6 20.5,4.9 C22.3,2.8 25.7,2.8 27.5,4.9 C27.5,6.6 28.3,11.7 29.2,16.9 Z" fill="#b48cff"/>
 <g clip-path="url(#s3)">
   <path d="M0,30 C12,36 34,36 48,26 L48,48 L0,48 Z" fill="#9168e6" opacity="0.75"/>
-  <circle cx="24" cy="7.1" r="5" fill="#f6f0ff"/><circle cx="40.1" cy="18.8" r="5" fill="#f6f0ff"/><circle cx="33.9" cy="37.7" r="5" fill="#f6f0ff"/><circle cx="14.1" cy="37.7" r="5" fill="#f6f0ff"/><circle cx="7.9" cy="18.8" r="5" fill="#f6f0ff"/>
+  <circle cx="24" cy="7.1" r="7" fill="#ffffff"/><circle cx="40.1" cy="18.8" r="7" fill="#ffffff"/><circle cx="33.9" cy="37.7" r="7" fill="#ffffff"/><circle cx="14.1" cy="37.7" r="7" fill="#ffffff"/><circle cx="7.9" cy="18.8" r="7" fill="#ffffff"/>
 </g>
 <path d="M22.4,14.43 C22.8,10.428 23.6,8.688 24.2,8.340000000000002" fill="none" stroke="#fff" stroke-width="2" opacity=".9" stroke-linejoin="round" stroke-linecap="round"/>
 <path d="M12.5,19.8 L16.7,20.9" stroke="#fff" stroke-width="1.8" opacity=".75" stroke-linejoin="round" stroke-linecap="round"/>

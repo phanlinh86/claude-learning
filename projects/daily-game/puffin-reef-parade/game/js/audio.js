@@ -43,7 +43,13 @@
       // phones are quiet: compressor (−18 dB, knee 12, 4:1) then a make-up gain = the player's volume × 1.7
       comp.threshold.value = -18; comp.knee.value = 12; comp.ratio.value = 4; comp.attack.value = 0.004; comp.release.value = 0.18;
       this.user = c.createGain(); this.user.gain.value = (this.volume == null ? 1 : this.volume) * 1.7;
-      this.master.connect(comp); comp.connect(this.user); this.user.connect(c.destination);
+      this.master.connect(comp); comp.connect(this.user);
+      // hard limiter after the make-up gain: overlapping plucks + chords + music can no longer reach 0 dBFS
+      const lim = c.createDynamicsCompressor();
+      lim.threshold.value = -6; lim.knee.value = 0; lim.ratio.value = 20; lim.attack.value = 0.001; lim.release.value = 0.1;
+      // the Web Audio compressor adds its own automatic make-up gain (≈ +3.4 dB here), so trim it back (−3.1 dB)
+      this.out = c.createGain(); this.out.gain.value = 0.7;
+      this.limiter = lim; this.user.connect(lim); lim.connect(this.out); this.out.connect(c.destination);
       this.sfx = c.createGain(); this.sfx.gain.value = 0.8; this.sfx.connect(this.master);
       this.music = c.createGain(); this.music.gain.value = 0.0; this.music.connect(this.master);
       // white noise buffer for whooshes / munches

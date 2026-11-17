@@ -185,15 +185,17 @@ func main() {
 	}))
 	go http.Serve(ln, mux)
 	url := "http://" + ln.Addr().String() + "/index.html?app=1"
+	// the browser fallback is a normal tab: no app=1, so the game does not show a Quit button that cannot close it
+	fallbackURL := "http://" + ln.Addr().String() + "/index.html"
 
-	localAppData := os.Getenv("LOCALAPPDATA")
-	if localAppData == "" {
-		localAppData = base
+	dataPath := filepath.Join(base, "WebView2") // base is already ...\DottiesReefParade
+	if localAppData := os.Getenv("LOCALAPPDATA"); localAppData != "" {
+		dataPath = filepath.Join(localAppData, "DottiesReefParade", "WebView2")
 	}
 	w := webview2.NewWithOptions(webview2.WebViewOptions{
 		Debug:     false,
 		AutoFocus: true,
-		DataPath:  filepath.Join(localAppData, "DottiesReefParade", "WebView2"),
+		DataPath:  dataPath,
 		WindowOptions: webview2.WindowOptions{
 			Title:  "Dottie's Reef Parade",
 			Width:  1280,
@@ -204,8 +206,8 @@ func main() {
 	})
 	if w == nil {
 		// WebView2 runtime missing (very rare on Windows 11): fall back to the default browser.
-		exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
-		messageBox("Dottie's Reef Parade", "Dottie's Reef Parade opened in your web browser.\n\nKeep this message open while you play; press OK to quit.\n\n(To play in its own window, install the free Microsoft Edge WebView2 Runtime.)")
+		exec.Command("rundll32", "url.dll,FileProtocolHandler", fallbackURL).Start()
+		messageBox("Dottie's Reef Parade", "Dottie's Reef Parade opened in your web browser.\n\nKeep this message open while you play; press OK to quit.\n\n(To play in its own window, install the free Microsoft Edge WebView2 Runtime.)\n\nIn the browser, best scores and pictures are kept only while this game gets its usual port.")
 		return
 	}
 	defer w.Destroy()

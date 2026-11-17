@@ -22,7 +22,7 @@
   const STAR_COLORS = ['#ff7aa8', '#5ec8ff', '#5fe0a8', '#b48cff'];
   const STAR_DARK = ['#b8406c', '#2b7fb8', '#2a9a68', '#7550c0'];
   const GOLD = '#ffd23f';
-  const HERO = 64, HERO_CX = 50 / 100 * HERO, HERO_CY = 52 / 100 * HERO, STAR = 30, STAR_G = 36;
+  const HERO = 64, HERO_CX = 50 / 100 * HERO, HERO_CY = 52 / 100 * HERO, STAR = 34, STAR_G = 36;
   const CRUISE = 12;            // px Dottie swims above the sand (her shadow sits below her)
   const HUD_H = 64, BORDER = 28, TILE = 384;
 
@@ -140,10 +140,6 @@
       this._hudBtn = (r.width > 0 && c.width > 0) ? { l: (r.left - c.left) * this.VW / c.width } : null;
     }
     toLogical(cx, cy) { const r = this.canvas.getBoundingClientRect(); return [(cx - r.left) / r.width * this.VW, (cy - r.top) / r.height * this.VH]; }
-    attach(world, weather) {
-      this.world = world; this.weather = weather; this.fx.length = 0; this.texts.length = 0; this.banner = null; this.shake = 0; this.flash = 0; this.redFlash = 0;
-      if (weather && weather.resize) weather.resize(this.VW, this.VH);
-    }
     attach(world, weather) {
       this.world = world; this.weather = weather; this.fx.length = 0; this.texts.length = 0; this.banner = null;
       this.shake = 0; this.flash = 0; this.redFlash = 0; this.goldFlash = 0; this._hide.clear();
@@ -268,8 +264,11 @@
       this._goldFxAt = this.time;
       this.goldFlash = 1; this.shake = Math.max(this.shake, 0.12);
       this.sparks(x, y - 10, 20, GOLD); this.ring(x, y - 8, GOLD, 0.55, true); this.ring(x, y - 8, '#fff6c2', 0.35, false);
-      this.texts.push({ text: '+5!', x, y: y - 62, life: 0, max: 1.4, size: 58, color: '#ffd84a', stroke: 'rgba(120,70,0,.9)', pop: true });
-      if (points) this.texts.push({ text: '+' + points, x, y: y - 22, life: 0, max: 1.1, size: 22, color: '#fff3b0' });
+      // pop-ups sit behind and above Dottie so she never swims under them
+      const h = (this.world && this.world.hero && this.world.hero.heading) || 0;
+      const ox = -Math.cos(h) * 46, oy = -Math.abs(Math.sin(h)) * 20;
+      this.texts.push({ text: '+5!', x: x + ox, y: y - 78 + oy, life: 0, max: 1.4, size: 58, color: '#ffd84a', stroke: 'rgba(120,70,0,.9)', pop: true });
+      if (points) this.texts.push({ text: '+' + points, x: x + ox, y: y - 44 + oy, life: 0, max: 1.1, size: 22, color: '#fff3b0' });
       this.burst('sparkle', x, y, 8);
       for (let i = 0; i < 8; i++) { const a = i / 8 * TAU; this.fx.push({ k: 'sprite', spr: 'p_sparkle', x: x + Math.cos(a) * 14, y: y - 8 + Math.sin(a) * 14, vx: Math.cos(a) * 120, vy: Math.sin(a) * 120, g: 0, life: 0, max: 0.7, size: 18, rot: 0, vr: 5 }); }
     }
@@ -282,7 +281,7 @@
             const col = STAR_COLORS[e.kind || 0];
             this.sparks(e.x, e.y - 10, 8, col);
             this.ring(e.x, e.y - 6, col, 0.4, false);
-            this.texts.push({ text: '+' + e.points, x: e.x, y: e.y - 40, life: 0, max: 0.9, size: 20, color: '#ffffff' });
+            this.texts.push({ text: '+' + e.points, x: e.x, y: e.y - 56, life: 0, max: 0.9, size: 20, color: '#ffffff' });
             this.bubbles(e.x, e.y, 2);
             break;
           }
@@ -290,7 +289,7 @@
           case 'goldspawn': {
             const hx = w && w.hero ? w.hero.x : this.VW / 2, ar = L.arena, W = ar.x1 - ar.x0;
             const tx = hx < (ar.x0 + ar.x1) / 2 ? ar.x0 + W * 0.74 : ar.x0 + W * 0.26;   // away from Dottie, just under the HUD
-            this.texts.push({ text: 'Golden star!', x: tx, y: ar.y0 + 30, life: 0, max: 1.8, size: 24, color: '#ffe066', stroke: 'rgba(110,60,0,.9)', still: true });
+            this.texts.push({ text: 'Golden star!', x: tx, y: ar.y0 + 30, life: 0, max: 1.8, size: 26, color: '#ffe066', stroke: 'rgba(70,35,0,.95)', still: true, pill: true });
             this.ring(e.x, e.y, GOLD, 0.6, true);
             this.puffs(e.x, e.y + 4, 6, 'rgba(240,215,160,.85)');
             this.burst('sand', e.x, e.y, 4); this.burst('sparkle', e.x, e.y, 4);
@@ -304,7 +303,7 @@
             this.stars(e.x, e.y - 40);
             this.bubbles(e.x, e.y - 10, 9); this.burst('bubble', e.x, e.y, 6);
             break;
-          case 'bounce': this.puffs(e.x, e.y, 5, 'rgba(235,215,170,.75)'); this.bubbles(e.x, e.y, 3); break;
+          case 'bounce': this.puffs(e.x, e.y + 14, 4, 'rgba(235,215,170,.75)'); this.bubbles(e.x, e.y, 3); break;
           case 'flip': this.bubbles(e.x, e.y - 8, 7); this.burst('bubble', e.x, e.y, 5); break;
           case 'land': this.puffs(e.x, e.y + 6, 4, 'rgba(235,215,170,.7)'); this.bubbles(e.x, e.y, 2); break;
           case 'flipready': this._flipPop = 1; break;
@@ -320,7 +319,7 @@
             this.bubbles(cx, cy, 10);
             break;
           }
-          case 'go': this.texts.push({ text: 'Swim!', x: this.VW / 2, y: this.VH * 0.3 + 92, life: 0, max: 0.8, size: 46, color: '#ffffff', big: true }); break;
+          case 'go': this.texts.push({ text: 'Swim!', x: this.VW / 2, y: this.VH * 0.66, life: 0, max: 0.8, size: 42, color: '#ffffff', big: true }); break;
           case 'biome': case 'season': { const z = e.biome != null ? e.biome : e.season; this.showBanner(z); this.setSeason(z); break; }
           case 'dead': this.flash = 0.4; this.shake = 0.3; this.texts.push({ text: 'Out of hearts!', x: this.VW / 2, y: this.VH * 0.45, life: 0, max: 2.5, size: 40, color: '#ffd1e6', big: true }); break;
         }
@@ -352,7 +351,7 @@
       if (s) {
         // Dottie's body: smooth facing (passes through 0 = a quick turn-round squash) and a tilt toward her heading (±0.5 rad)
         const hv = this._hv, f = s.facing < 0 ? -1 : 1, h = s.heading || 0;
-        hv.fx += (f - hv.fx) * Math.min(1, dt * 10);
+        hv.fx += (f - hv.fx) * Math.min(1, dt * 18);
         const tt = clamp(Math.atan2(Math.sin(h), Math.cos(h) * f), -0.5, 0.5);
         hv.tilt += (tt - hv.tilt) * Math.min(1, dt * 8);
         // bubble trail from the beak: a few now and then, more on hard turns
@@ -512,17 +511,20 @@
         if (n.state === 'loose') { rot = t * 1.6 + id; if (n.life < 1.2) a = (Math.floor(n.life * 8) % 2) ? 0.35 : 1; }
         if (n.gold) {
           rot = Math.sin(t * 7 + id) * 0.28;
-          if (n.state === 'flee' && n.life != null && n.life < (C.goldBlink || 2)) a = (Math.floor(n.life * 8) % 2) ? 0.4 : 1;
+          if (n.state === 'flee' && n.life != null && n.life < (C.goldBlink || 2)) a = (Math.floor(n.life * 5) % 2) ? 0.5 : 1;
           if (n.state === 'hide') {   // burrow: sink and shrink into a sand puff
             const k = C.goldHideTime && n.t != null ? clamp(n.t / C.goldHideTime, 0, 1) : clamp((t - (this._hide.get(id) != null ? this._hide.get(id) : t)) / 0.5, 0, 1);
             sc *= 1 - k * 0.85; dy = k * 7; a *= 1 - k * 0.6; rot += k * 3;
           }
+          // dark halo base so the additive glow pops on every sand colour (autumn amber too)
+          g.fillStyle = 'rgba(70,35,0,' + (0.22 * a) + ')';
+          g.beginPath(); g.arc(x, y - 2, 24 * sc, 0, TAU); g.fill();
           // glow ring
           const gr = 34 * sc * (1 + Math.sin(t * 5) * 0.08);
           g.globalCompositeOperation = 'lighter'; g.globalAlpha = 0.75 * a;
           g.drawImage(this.glow(), x - gr, y - gr, gr * 2, gr * 2);
           g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
-          g.strokeStyle = 'rgba(255,224,90,' + ((0.5 + 0.4 * Math.sin(t * 6)) * a) + ')'; g.lineWidth = 3;
+          g.strokeStyle = 'rgba(255,224,90,' + ((0.65 + 0.3 * Math.sin(t * 6)) * a) + ')'; g.lineWidth = 3;
           g.beginPath(); g.arc(x, y - 2, (22 + Math.sin(t * 6) * 3) * sc, 0, TAU); g.stroke();
         }
         this.shadow(g, x + 3, y + 5, 11 * sc, 4.5 * sc, 0.18 * a);
@@ -563,7 +565,7 @@
       const bob = jt ? 0 : Math.sin(t * 3.4) * 2;
       const k = 1 + z / 110;                                   // closer to the camera = a little bigger
       const jumpStretch = jt ? Math.sin(jt * Math.PI) * 0.08 : 0;
-      const fxs = Math.abs(hv.fx) < 0.12 ? (hv.fx < 0 ? -0.12 : 0.12) : hv.fx;
+      const fxs = Math.abs(hv.fx) < 0.45 ? (hv.fx < 0 ? -0.45 : 0.45) : hv.fx;   // quick squash-and-flip, never a paper-thin sliver
       g.save();
       g.translate(x, y - CRUISE - z + bob);
       g.scale(fxs * k, k);
@@ -633,7 +635,13 @@
         const k = t.life / t.max, a = k > 0.75 ? (1 - k) / 0.25 : 1;
         const sc = (t.big || t.pop) ? (t.life < 0.25 ? easeOutBack(t.life / 0.25) : 1) : 1;
         g.globalAlpha = clamp(a, 0, 1);
-        this.text(g, t.text, clamp(t.x, 90, this.VW - 90), Math.max(t.y, this.layout.arena.y0 + t.size * 0.6), Math.max(1, Math.round(t.size * sc)), t.color, 'center', t.stroke);
+        const tx = clamp(t.x, 90, this.VW - 90), ty = Math.max(t.y, this.layout.arena.y0 + t.size * 0.6), ts = Math.max(1, Math.round(t.size * sc));
+        if (t.pill) {   // soft plate behind the call-out, like the hearts plate (readable on light sand)
+          g.font = '900 ' + ts + 'px ' + FONT;
+          const pw = (g.measureText(t.text).width || ts * t.text.length * 0.55) + ts * 1.1, ph = ts * 1.45;
+          g.fillStyle = 'rgba(10,30,55,.35)'; this.rr(g, tx - pw / 2, ty - ph / 2, pw, ph, ph / 2); g.fill();
+        }
+        this.text(g, t.text, tx, ty, ts, t.color, 'center', t.stroke);
       }
       g.globalAlpha = 1;
     }

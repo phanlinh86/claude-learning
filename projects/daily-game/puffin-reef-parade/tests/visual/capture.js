@@ -11,12 +11,10 @@ fs.mkdirSync(FIX, { recursive: true });
 
 const TOUCH = { isMobile: true, hasTouch: true };
 const VIEWPORTS = {
-  '1280': { viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1 },
-  '1920': { viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 },
-  '800': { viewport: { width: 800, height: 600 }, deviceScaleFactor: 1 },
-  'iphoneP': Object.assign({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3 }, TOUCH),
+  '960': { viewport: { width: 960, height: 540 }, deviceScaleFactor: 1 },
   'iphoneL': Object.assign({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 3 }, TOUCH),
-  'ipad': Object.assign({ viewport: { width: 820, height: 1180 }, deviceScaleFactor: 2 }, TOUCH)
+  'iphoneP': Object.assign({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3 }, TOUCH),
+  'ipad': Object.assign({ viewport: { width: 1024, height: 1366 }, deviceScaleFactor: 2 }, TOUCH)
 };
 const errs = [];
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -125,11 +123,11 @@ async function screens(b) {
 
 async function play(b) {
   // each biome with a long trail: bot plays ~20 s real at speed 3, song never ends
-  for (const vp of ['1280', 'iphoneP', 'iphoneL', 'ipad']) {
+  for (const vp of ['960', 'iphoneP', 'iphoneL', 'ipad']) {
     for (let lv = 0; lv < 4; lv++) {
       const { ctx, p } = await open(b, vp, `&autostart=1&bot=1&speed=3&level=${lv}`);
       await p.evaluate(() => { QA.keepAlive(); });
-      await sleep(lv === 0 || vp === '1280' ? 20000 : 12000);
+      await sleep(lv === 0 || vp === '960' ? 20000 : 12000);
       const st = await p.evaluate(() => RP.debug.getState());
       console.log(`   ${vp} lv${lv} trail=${st.trail} state=${st.state} gold=${st.gold ? st.gold.state : '-'}`);
       await p.evaluate(() => RP.debug.setSpeed(0)); await raf(p);
@@ -138,12 +136,12 @@ async function play(b) {
     }
   }
   // debug overlay once
-  const { ctx, p } = await open(b, '1280', '&autostart=1&bot=1&speed=3&debug=1');
-  await p.evaluate(() => QA.keepAlive()); await sleep(8000); await shot(p, 'biome0_debug_1280'); await ctx.close();
+  const { ctx, p } = await open(b, '960', '&autostart=1&bot=1&speed=3&debug=1');
+  await p.evaluate(() => QA.keepAlive()); await sleep(8000); await shot(p, 'biome0_debug_960'); await ctx.close();
 }
 
 async function events(b) {
-  for (const vp of ['1280', 'iphoneP']) {
+  for (const vp of ['960', 'iphoneP']) {
     const { ctx, p } = await open(b, vp, '&autostart=1');
     // banners for every biome (frozen at 0.6 s)
     for (let lv = 0; lv < 4; lv++) {
@@ -186,7 +184,7 @@ async function events(b) {
 }
 
 async function bursts(b) {
-  const { ctx, p } = await open(b, '1280', '&autostart=1');
+  const { ctx, p } = await open(b, '960', '&autostart=1');
   await freeze(p, 0);
   const sp = () => { const s = RP.debug.world.hero; return [s.x - 130, s.y - 150, 260, 220]; };
   // build a medium trail for context
@@ -208,10 +206,10 @@ async function bursts(b) {
   await burst(b, p, 'burst_bounce', { title: 'Edge bounce (right reef wall)', dt: 0.06, frames: 8,
     region: `(()=>{const w=RP.debug.world,A=w.arena; return [A.x1-260, (A.y0+A.y1)/2-140, 300, 260];})()` });
   // bonk
-  await p.evaluate(() => { const w = RP.debug.world; w.setDir(-1, 0); QA.advance(1.2); QA.clearFx(); });
+  await p.evaluate(() => { const w = RP.debug.world; if (w.trail.length < 10) { RP.debug.setBot(true, 1); QA.longSong(); QA.advance(14); RP.debug.setBot(false); QA.noGold(); } w.setDir(-1, 0); QA.advance(1.2); QA.clearFx(); });
   await burst(b, p, 'burst_bonk', { title: 'Bonk (parade cut, stars scatter, Boing!, bubbles, shake, red flash)', dt: 0.06, frames: 8,
     region: `(()=>{const s=RP.debug.world.hero; return [s.x-220, s.y-200, 440, 340];})()`,
-    setup: `(()=>{const w=RP.debug.world; const n=w.trail.length; w._bonk(Math.max(w.cfg.safeNeck, Math.floor(n/2)));})()` });
+    setup: `(()=>{const w=RP.debug.world; const n=w.trail.length; if (n > w.cfg.safeNeck + 1) w._bonk(Math.max(w.cfg.safeNeck, Math.floor(n/2)));})()` });
   await p.evaluate(() => QA.advance(2));
   // golden star scooting away from Dottie, then burrowing
   await p.evaluate(() => { const w = RP.debug.world, A = w.arena; QA.place((A.x0 + A.x1) / 2 - 150, (A.y0 + A.y1) / 2, Math.PI); w.hero.facing = -1; w.setDir(-1, 0); w.hero.invuln = 0; QA.clearFx(); QA.gold((A.x0 + A.x1) / 2 + 20, (A.y0 + A.y1) / 2, 'flee', 3); });
@@ -223,7 +221,7 @@ async function bursts(b) {
 }
 
 async function lineup(b) {
-  const { ctx, p } = await open(b, '1280', '&autostart=1');
+  const { ctx, p } = await open(b, '960', '&autostart=1');
   await p.evaluate(() => {
     const s = '<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute"><filter id="deut"><feColorMatrix type="matrix" values="0.367 0.861 -0.228 0 0  0.280 0.673 0.047 0 0  -0.012 0.043 0.969 0 0  0 0 0 1 0"/></filter><filter id="prot"><feColorMatrix type="matrix" values="0.152 1.053 -0.205 0 0  0.115 0.786 0.099 0 0  -0.004 -0.048 1.052 0 0  0 0 0 1 0"/></filter><filter id="trit"><feColorMatrix type="matrix" values="1.256 -0.077 -0.179 0 0  -0.078 0.931 0.148 0 0  0.005 0.691 0.304 0 0  0 0 0 1 0"/></filter></svg>';
     document.body.insertAdjacentHTML('beforeend', s);
@@ -250,7 +248,7 @@ async function lineup(b) {
     // HUD crop with some state
     await p.evaluate(() => { const w = RP.debug.world; w.hearts = 2; w.song = 6; w.score = 4820; w.hero.flip = 0.55; QA.advance(1 / 60); });
     await raf(p);
-    await shot(p, `hud_biome${lv}_1280`, { clip: await clipL(p, 0, 0, 1280, 110) });
+    await shot(p, `hud_biome${lv}_960`, { clip: await clipL(p, 0, 0, (await p.evaluate(() => QA.L())).VW, 110) });
   }
   await sheet(b, 'lineup_colorblind', 'Sea stars (pink, blue, mint, lavender, gold) · Dottie facing right / left, per season & filter', rows, 0, 2);
   await ctx.close();
@@ -323,7 +321,7 @@ async function makeFixtures(p) {
 }
 
 async function custom(b) {
-  for (const vp of ['1280', 'iphoneP']) {
+  for (const vp of ['960', 'iphoneP']) {
     for (const pass of ['A', 'B']) {
       const { ctx, p } = await open(b, vp);
       const F = await makeFixtures(p);
@@ -360,7 +358,7 @@ async function custom(b) {
 (async () => {
   const want = process.argv.slice(2);
   const run = n => !want.length || want.includes(n);
-  const b = await chromium.launch({ args: ['--allow-file-access-from-files'] });
+  const b = await chromium.launch();
   try {
     if (run('screens')) await screens(b);
     if (run('play')) await play(b);

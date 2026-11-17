@@ -179,20 +179,20 @@ function pattern(kind, C, Ro) {
       const a = ARM(i);
       [[.52, 2.2], [.8, 1.7]].forEach(([u, r]) => { s += `<circle cx="${f1(CX + Math.cos(a) * Ro * u)}" cy="${f1(CY + Math.sin(a) * Ro * u)}" r="${r}" fill="${C.pat}"/>`; });
     }
-  } else if (kind === 1) { // two stripes across each arm
+  } else if (kind === 1) { // two stripes across each arm (bold, pure white: readable at phone size and for colour-blind players)
     for (let i = 0; i < 5; i++) {
       const a = ARM(i), n = [-Math.sin(a), Math.cos(a)];
       [.55, .78].forEach(u => {
         const m = [CX + Math.cos(a) * Ro * u, CY + Math.sin(a) * Ro * u], w = 7;
-        s += `<path d="M${P(m[0] - n[0] * w, m[1] - n[1] * w)} L${P(m[0] + n[0] * w, m[1] + n[1] * w)}" stroke="${C.pat}" stroke-width="2.2" ${R}/>`;
+        s += `<path d="M${P(m[0] - n[0] * w, m[1] - n[1] * w)} L${P(m[0] + n[0] * w, m[1] + n[1] * w)}" stroke="#ffffff" stroke-width="3.3" ${R}/>`;
       });
     }
   } else if (kind === 2) { // ring around the face
     s = `<circle cx="${CX}" cy="${CY}" r="11" fill="none" stroke="${C.pat}" stroke-width="2.6"/>`;
-  } else if (kind === 3) { // light caps on every arm tip
+  } else if (kind === 3) { // light caps on every arm tip (big, pure white)
     for (let i = 0; i < 5; i++) {
       const a = ARM(i);
-      s += `<circle cx="${f1(CX + Math.cos(a) * Ro * .97)}" cy="${f1(CY + Math.sin(a) * Ro * .97)}" r="5" fill="${C.pat}"/>`;
+      s += `<circle cx="${f1(CX + Math.cos(a) * Ro * .97)}" cy="${f1(CY + Math.sin(a) * Ro * .97)}" r="7" fill="#ffffff"/>`;
     }
   }
   return s;

@@ -353,8 +353,14 @@ async function testKeyboard() {
   await freeze(page);
   await ev(page, () => T.killToOver(100));
   await ev(page, () => T.countStarts());
-  for (let i = 0; i < 6; i++) { await page.keyboard.press('Enter'); await page.waitForTimeout(40); }
-  check('keys: Enter spam in the first 0.7 s after game over does not restart', (await starts(page)) === 0 && (await mode(page)) === 'over', await starts(page));
+  // QA: presses are timed in page time (performance.now() - overAt), so a slow machine can't push them past the lock
+  const early = [];
+  for (let i = 0; i < 6; i++) {
+    const dt = await ev(page, () => performance.now() - RP.Game.overAt);
+    if (dt > 620) break;
+    await page.keyboard.press('Enter'); early.push(Math.round(dt)); await page.waitForTimeout(40);
+  }
+  check('keys: Enter spam in the first 0.7 s after game over does not restart', early.length > 0 && (await starts(page)) === 0 && (await mode(page)) === 'over', { starts: await starts(page), early });
   await page.waitForTimeout(750);
   for (let i = 0; i < 8; i++) { await page.keyboard.press('Enter'); await page.waitForTimeout(30); }
   await page.waitForTimeout(150);
@@ -589,7 +595,7 @@ async function testScoring() {
   await simStep(page, 1 / 60);
   n = await ev(page, () => T.log('note'));
   const expG = (cfg.notePoints + cfg.notePerTrail * 3) * cfg.goldMul;
-  check('score: golden note = (10 + 2×trail) × 3', n.length === 1 && n[0].points === expG && n[0].gold, { got: n[0] && n[0].points, expG });
+  check('score: golden note = (10 + 2×trail) × goldMul (5)', n.length === 1 && n[0].points === expG && n[0].gold, { got: n[0] && n[0].points, expG });
   // regrab (loose note) = 5
   await ev(page, () => T.clearLog()); await isolate(page);
   await ev(page, () => { T.addTrail(2); const s = RP.debug.world.hero; T.addNote(s.x + 4, s.y, { state: 'loose', t: 1, life: 3 }); });

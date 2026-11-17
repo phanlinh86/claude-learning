@@ -4,10 +4,25 @@
 A family-friendly, snake-style parade grower on a coral reef: Dottie the puffin swims around collecting sea stars that follow her as a wiggly parade, with a rare golden sea star worth 5. Requirement: `REQUIREMENT.md`. Made with `/build-game random`.
 
 ## Status
-In progress (2026-11-17). Started as a copy of `spike-dino-jam` (same engine, mobile layer, Go wrapper and tests), reskinned for the reef; the boss and pillows were removed and the golden sea star added.
-- Integration (render, UI, audio, tests) done; smoke, functional (`--quick`) and `test_extras.js` pass.
-- Still to do: QA reports (functional, visual, playtest) in `docs/reports/`, play link in `DAILY_GAMES.md`.
-- Not yet verified: real iPhone / iPad (touch is emulated in Chromium), and the exe on Windows.
+QA done and fixes applied (2026-11-17). Started as a copy of `spike-dino-jam` (same engine, mobile layer, Go wrapper and tests), reskinned for the reef; the boss and pillows were removed and the golden sea star added.
+- QA reports are in `docs/reports/` (functional, visual, playtest). Their fixes are applied and listed in `docs/DESIGN.md` under "QA fixes applied":
+  - visual P2 1–4 and P3 6–13;
+  - audio limiter (peak −0.4 → ≈ −5 dBFS, RMS ≈ −25);
+  - kinder Easy preset;
+  - Go wrapper cleanups.
+- Skipped: the blurred Score Card backdrop. `extras.js` is overwritten by `shared/daily-mobile/apply.py`, so fix it in `shared/daily-mobile/extras.js`.
+- Tests (all green):
+  - unit 24/24
+  - smoke PASS
+  - functional 345/345
+  - mobile 103/103
+  - `test_extras.js` PASSED
+  - Windows exe: `GOOS=windows go vet` and `go build` are clean.
+- Play: https://phanlinh86.github.io/claude-learning/projects/daily-game/puffin-reef-parade/game/
+- Not yet verified:
+  - a real iPhone / iPad (touch is emulated in Chromium);
+  - the exe on Windows;
+  - the music and mix by ear (loudness was only measured).
 
 ## Stack
 Same as the other games in `projects/daily-game/`:

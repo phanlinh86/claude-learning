@@ -191,7 +191,10 @@ canvas#game{background:#1d5670}
 @keyframes flipReady{0%,100%{box-shadow:0 0 0 0 rgba(255,230,120,.0),0 4px 10px rgba(0,0,0,.3)}50%{box-shadow:0 0 0 8px rgba(255,230,120,.35),0 4px 10px rgba(0,0,0,.3)}}
 .action-btn.hidden{display:none}
 .icon-btn{min-width:44px;min-height:44px}
-.new-best{right:calc(var(--u)*-5.6);top:calc(var(--u)*-1.6)}
+/* NEW! badge sits in the Best row's flow (label · NEW! · number): never clipped, never on the digits, with or without a medal */
+.new-best{position:static;order:1;margin:0 auto 0 calc(var(--u)*.8);align-self:center;flex-shrink:0;white-space:nowrap}
+.sc span{order:0}.sc b{order:2}
+.sc{padding-right:calc(var(--u)*1)}
 /* touch devices: hide keyboard-only wording */
 body.touch .kb-only{display:none}
 body:not(.touch) .touch-only{display:none}
@@ -270,8 +273,10 @@ body.touch .btn:focus-visible,body.touch .btn:focus{outline:none}
 .icon-btn svg{filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
 #scrCustom:not(.hidden) ~ #toast{bottom:auto!important;top:calc(env(safe-area-inset-top,0px) + 12px)}
 .btn-small{font-size:max(15px, calc(var(--u)*1.8))}
-body.touch .tagline,body.touch .best-line{font-size:max(14px, 1em)}
-.slot .tag,.slot .shape button{font-size:max(11px, 1em)}
+body.touch .tagline{font-size:max(14px, calc(var(--u)*2.2));padding:0 16px;max-width:calc(100vw - 32px);margin-left:auto;margin-right:auto;box-sizing:border-box}
+body.touch .best-line{font-size:max(14px, calc(var(--u)*2))}
+.slot .tag{font-size:max(11px, calc(var(--u)*1.2))}
+.slot .shape button{font-size:max(11px, 1em)}
 
 /* ---------- underwater theme (Dottie's Reef Parade) ---------- */
 :root{--ink:#1d3a4f;--panel:#f2fcff;--panel-edge:#8fd6ea;--green:#3fc6a8;--green-d:#22917a;--blue:#4fa8e8;--blue-d:#2f78b8;--orange:#ff8a6b;--orange-d:#d65e44}

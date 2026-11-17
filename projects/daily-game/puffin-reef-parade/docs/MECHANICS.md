@@ -28,7 +28,7 @@ Internal names kept from the scaffold: `w.hero` = Dottie, `w.notes` / `note` eve
 - Every parade item carries **`worth`** (1, or 5 for a golden star). **`w.song` = sum of worth over the parade**, capped at `songTarget` (the song *is* the parade): a bonk lowers it, regrabs restore it.
 
 ## 4. Sea stars
-- `notesOnField` normal stars stay on the sand. A spawn spot is ≥ `spawnMinDist` from Dottie (capped at 0.4 × the short arena side + 40, so tiny arenas still work), ≥ 40 px inside, ≥ 30 px from the parade, ≥ 70 px from other stars, and outside every `avoid` circle. 3 passes × 30 tries with relaxing rules. `spawn` lasts 0.3 s, then `idle`. Pick radius = heroR + 16 = 30 px (also while flipping). `goldChance` = 0: normal stars are never gold.
+- `notesOnField` normal stars stay on the sand. A spawn spot is ≥ `spawnMinDist` from Dottie (capped at 0.4 × the short arena side + 40, so tiny arenas still work), ≥ 40 px inside, ≥ 30 px from the parade, ≥ 70 px from other stars, and outside every `avoid` circle. 3 passes × 30 tries with relaxing rules. `spawn` lasts 0.3 s, then `idle`. Pick radius = heroR + `pickPad` 16 = 30 px (Easy 22 → 36 px; also while flipping). `goldChance` = 0: normal stars are never gold.
 - **Points**: star = `10 + 2 × parade length before the pickup`; golden star ×`goldMul` (5); regrab = 5; season clear = hearts × 100.
 - **Loose stars** (cut off by a bonk) scatter outward (±0.6 rad, 70–140 px/s), hop ballistically (vz 150–230, g 700, apex 16–38 px) with one small bounce (restitution 0.35), slide to a stop (friction 5/s), stay inside the arena, can be re-grabbed after 0.35 s when z < 20, blink in their last 1.2 s and pop after `looseLife` (`loosegone`). They keep `gold` and `worth`, so a cut-off golden star re-grabbed is worth 5 again (for 5 points, and it is not counted as a new golden star).
 
@@ -80,8 +80,9 @@ Uses only `setDir` / `action`; thinks every 0.05 s + (1 − skill)·0.25 s.
 | trailSpacing / safeNeck / bonkR / edgeSafe | 22 / 6 / 14 / 36 px | 22 / 7 / 12 / 40 | 26 / 3 / 18 / 0 | forgiving tail; Hard has no soft strip |
 | heartsMax / invulnTime / healOnClear | 3 / 1.5 s / 1 | 5 / 1.8 | – / 1.2 / 0 | |
 | jumpTime / jumpHeight / flipRecharge | 0.65 s / 28 px / 3 s | 0.8 / – / 2.4 | | |
-| notesOnField / spawnMinDist | 2 / 200 px | – / 160 | 1 / 200 | REQUIREMENT: 2 stars; each one is a real swim (the golden star adds 5, so seasons were too short at 120) |
-| songTargets / songPerLap / songMax | 10, 12, 14, 16 / 2 / 40 | 8, 10, 12, 14 | 16, 20, 24, 28 / 3 | REQUIREMENT on Normal |
+| notesOnField / spawnMinDist | 2 / 200 px | – / 140 | 1 / 200 | REQUIREMENT: 2 stars; each one is a real swim (the golden star adds 5, so seasons were too short at 120). Easy 160 → 140 (playtest 2026-11-17): the first star comes sooner for toddlers |
+| pickPad | 16 px (pick radius 30) | 22 (radius 36) | | Easy (playtest 2026-11-17): wobbly 3–5-year-old aim still catches the star |
+| songTargets / songPerLap / songMax | 10, 12, 14, 16 / 2 / 40 | 8, 10, 12, 14 / 1 | 16, 20, 24, 28 / 3 | REQUIREMENT on Normal; Easy laps grow by 1 (playtest 2026-11-17) |
 | notePoints / notePerTrail / goldMul / regrabPoints / clearBonusPerHeart | 10 / 2 / 5 / 5 / 100 | | | REQUIREMENT |
 | looseLife | 4 s | 5 | 3.5 | |
 | goldFirst / goldEvery | 10 / 18 s | | | REQUIREMENT |
