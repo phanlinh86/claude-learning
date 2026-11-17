@@ -1,0 +1,73 @@
+{
+ "current": {},
+ "NG_nogold": {
+  "normal": {
+   "goldFirst": 99999
+  }
+ },
+ "N1_songs12": {
+  "normal": {
+   "songTargets": [
+    12,
+    14,
+    16,
+    18
+   ]
+  }
+ },
+ "N2_songs12-21": {
+  "normal": {
+   "songTargets": [
+    12,
+    15,
+    18,
+    21
+   ]
+  }
+ },
+ "N3_songs12_gold15": {
+  "normal": {
+   "songTargets": [
+    12,
+    14,
+    16,
+    18
+   ],
+   "goldFirst": 15
+  }
+ },
+ "N4_songs12_v140": {
+  "normal": {
+   "songTargets": [
+    12,
+    14,
+    16,
+    18
+   ],
+   "speed0": 140
+  }
+ },
+ "E1_lap1": {
+  "easy": {
+   "songPerLap": 1
+  }
+ },
+ "E2_pick22": {
+  "easy": {
+   "pickPad": 22
+  }
+ },
+ "E3_pick22_near140": {
+  "easy": {
+   "pickPad": 22,
+   "spawnMinDist": 140,
+   "songPerLap": 1
+  }
+ },
+ "E4_gold_kind": {
+  "easy": {
+   "goldSpeed": 0.26,
+   "goldPickPad": 28
+  }
+ }
+}

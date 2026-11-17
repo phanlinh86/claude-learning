@@ -1,0 +1,7 @@
+{
+  "current": {},
+  "N4_songs12_v140": { "normal": { "songTargets": [12, 14, 16, 18], "speed0": 140 } },
+  "N5_songs10-18_v140": { "normal": { "songTargets": [10, 13, 15, 18], "speed0": 140 } },
+  "N6_N4_gold12": { "normal": { "songTargets": [12, 14, 16, 18], "speed0": 140, "goldFirst": 12 } },
+  "E3_pick22_near140": { "easy": { "pickPad": 22, "spawnMinDist": 140, "songPerLap": 1 } }
+}

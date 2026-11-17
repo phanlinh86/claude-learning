@@ -1,0 +1,6 @@
+{
+  "N7_v135": { "normal": { "speed0": 135 } },
+  "N8_songs10-18_v140_neck8": { "normal": { "songTargets": [10, 13, 15, 18], "speed0": 140, "safeNeck": 8, "bonkR": 13 } },
+  "N9_songs12-18_v140_neck8": { "normal": { "songTargets": [12, 14, 16, 18], "speed0": 140, "safeNeck": 8, "bonkR": 12 } },
+  "N10_songs10-16_v135_neck7": { "normal": { "songTargets": [10, 12, 15, 17], "speed0": 135, "safeNeck": 7 } }
+}

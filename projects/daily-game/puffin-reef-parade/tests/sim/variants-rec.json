@@ -1,0 +1,7 @@
+{
+  "current": {},
+  "REC": {
+    "normal": { "songTargets": [10, 13, 15, 18], "speed0": 140, "safeNeck": 7 },
+    "easy": { "pickPad": 22, "spawnMinDist": 140, "songPerLap": 1 }
+  }
+}
