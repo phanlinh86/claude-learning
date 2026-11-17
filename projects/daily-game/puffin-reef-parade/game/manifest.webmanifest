@@ -1,0 +1,16 @@
+{
+  "name": "Dottie's Reef Parade",
+  "short_name": "Reef Parade",
+  "description": "Swim around the coral reef with Dottie the puffin and lead a wiggly parade of sea stars!",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#0f3550",
+  "theme_color": "#1d5670",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
