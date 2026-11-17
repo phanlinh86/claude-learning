@@ -1,0 +1,564 @@
+{
+ "_about": "viewBox px [x0,y0,x1,y1]. Tibo 0 0 300 300, seat anchor (150,292) = bottom centre (scale = h/300). grip = rod start (205,175): near paw centred on it, far paw = farPaw (15 px up the rest angle -1.05 rad), so the code rod from the grip runs across both paws (wave: only the far paw holds it, at the grip; title: rod + fish drawn in the file). mouth / eye / head / hatTop for the speech bubble and sparkles (tilt/lean applied). getBBox = geometry (no stroke), pixel = opaque box incl. outline. Critters: ptero centre (100,70); bronto bottom (130,296), legs end at the box bottom (knee-deep, soft ripple line at y≈280); frog bottom (60,96); firefly centre (24,24).",
+ "tibo_idle": {
+  "grip": [
+   205,
+   175
+  ],
+  "farPaw": [
+   212,
+   162
+  ],
+  "nearPaw": [
+   205,
+   175
+  ],
+  "mouth": [
+   200,
+   150
+  ],
+  "eye": [
+   148,
+   121
+  ],
+  "head": [
+   164,
+   114
+  ],
+  "hatTop": [
+   156,
+   26
+  ],
+  "getBBox": [
+   40,
+   22.9,
+   256.8,
+   296
+  ],
+  "pixel": [
+   38,
+   25.5,
+   257,
+   292.5
+  ]
+ },
+ "tibo_blink": {
+  "grip": [
+   205,
+   175
+  ],
+  "farPaw": [
+   212,
+   162
+  ],
+  "nearPaw": [
+   205,
+   175
+  ],
+  "mouth": [
+   200,
+   150
+  ],
+  "eye": [
+   148,
+   121
+  ],
+  "head": [
+   164,
+   114
+  ],
+  "hatTop": [
+   156,
+   26
+  ],
+  "getBBox": [
+   40,
+   22.9,
+   256.8,
+   296
+  ],
+  "pixel": [
+   38,
+   25.5,
+   257,
+   292.5
+  ]
+ },
+ "tibo_talk": {
+  "grip": [
+   205,
+   175
+  ],
+  "farPaw": [
+   212,
+   162
+  ],
+  "nearPaw": [
+   205,
+   175
+  ],
+  "mouth": [
+   200,
+   150
+  ],
+  "eye": [
+   148,
+   121
+  ],
+  "head": [
+   164,
+   114
+  ],
+  "hatTop": [
+   156,
+   26
+  ],
+  "getBBox": [
+   40,
+   22.9,
+   256.8,
+   296
+  ],
+  "pixel": [
+   38,
+   25.5,
+   257,
+   292.5
+  ]
+ },
+ "tibo_happy": {
+  "grip": [
+   205,
+   175
+  ],
+  "farPaw": [
+   212,
+   162
+  ],
+  "nearPaw": [
+   205,
+   175
+  ],
+  "mouth": [
+   200,
+   150
+  ],
+  "eye": [
+   148,
+   121
+  ],
+  "head": [
+   164,
+   114
+  ],
+  "hatTop": [
+   156,
+   26
+  ],
+  "getBBox": [
+   40,
+   22.9,
+   268,
+   296
+  ],
+  "pixel": [
+   38,
+   25.5,
+   269,
+   292.5
+  ]
+ },
+ "tibo_cheer": {
+  "grip": [
+   205,
+   175
+  ],
+  "farPaw": [
+   212,
+   162
+  ],
+  "nearPaw": [
+   205,
+   175
+  ],
+  "mouth": [
+   198,
+   144
+  ],
+  "eye": [
+   144,
+   118
+  ],
+  "head": [
+   160,
+   110
+  ],
+  "hatTop": [
+   146,
+   23
+  ],
+  "getBBox": [
+   40,
+   13.5,
+   268,
+   296
+  ],
+  "pixel": [
+   38,
+   22.5,
+   269,
+   292.5
+  ]
+ },
+ "tibo_think": {
+  "grip": [
+   205,
+   175
+  ],
+  "farPaw": [
+   212,
+   162
+  ],
+  "nearPaw": [
+   205,
+   175
+  ],
+  "mouth": [
+   203,
+   155
+  ],
+  "eye": [
+   155,
+   119
+  ],
+  "head": [
+   172,
+   114
+  ],
+  "hatTop": [
+   176,
+   26
+  ],
+  "getBBox": [
+   40,
+   9.9,
+   287,
+   296
+  ],
+  "pixel": [
+   38,
+   8,
+   290,
+   292.5
+  ]
+ },
+ "tibo_oops": {
+  "grip": [
+   205,
+   175
+  ],
+  "farPaw": [
+   212,
+   162
+  ],
+  "nearPaw": [
+   205,
+   175
+  ],
+  "mouth": [
+   196,
+   145
+  ],
+  "eye": [
+   140,
+   124
+  ],
+  "head": [
+   155,
+   115
+  ],
+  "hatTop": [
+   133,
+   29
+  ],
+  "getBBox": [
+   40,
+   11.9,
+   268.3,
+   296
+  ],
+  "pixel": [
+   38,
+   24,
+   272,
+   292.5
+  ]
+ },
+ "tibo_cast": {
+  "grip": [
+   205,
+   175
+  ],
+  "farPaw": [
+   212,
+   162
+  ],
+  "nearPaw": [
+   205,
+   175
+  ],
+  "mouth": [
+   210,
+   159
+  ],
+  "eye": [
+   162,
+   124
+  ],
+  "head": [
+   179,
+   119
+  ],
+  "hatTop": [
+   182,
+   31
+  ],
+  "getBBox": [
+   40,
+   16.3,
+   273.5,
+   296
+  ],
+  "pixel": [
+   38,
+   30.5,
+   267.5,
+   292.5
+  ]
+ },
+ "tibo_reel": {
+  "grip": [
+   205,
+   175
+  ],
+  "farPaw": [
+   212,
+   162
+  ],
+  "nearPaw": [
+   205,
+   175
+  ],
+  "mouth": [
+   190,
+   144
+  ],
+  "eye": [
+   135,
+   122
+  ],
+  "head": [
+   150,
+   113
+  ],
+  "hatTop": [
+   131,
+   26
+  ],
+  "getBBox": [
+   37.7,
+   12,
+   256.8,
+   296
+  ],
+  "pixel": [
+   38,
+   25,
+   257,
+   292.5
+  ]
+ },
+ "tibo_wave": {
+  "grip": [
+   205,
+   175
+  ],
+  "farPaw": [
+   205,
+   175
+  ],
+  "nearPaw": [
+   88,
+   150
+  ],
+  "mouth": [
+   200,
+   150
+  ],
+  "eye": [
+   148,
+   121
+  ],
+  "head": [
+   164,
+   114
+  ],
+  "hatTop": [
+   156,
+   26
+  ],
+  "getBBox": [
+   40,
+   22.9,
+   256.8,
+   296
+  ],
+  "pixel": [
+   38,
+   25.5,
+   257,
+   292.5
+  ]
+ },
+ "tibo_title": {
+  "grip": [
+   205,
+   175
+  ],
+  "farPaw": [
+   205,
+   175
+  ],
+  "nearPaw": [
+   88,
+   150
+  ],
+  "mouth": [
+   200,
+   150
+  ],
+  "eye": [
+   148,
+   121
+  ],
+  "head": [
+   164,
+   114
+  ],
+  "hatTop": [
+   156,
+   26
+  ],
+  "rod": "drawn in the file (tiny rod + cream fish)",
+  "getBBox": [
+   40,
+   22.9,
+   284.8,
+   296
+  ],
+  "pixel": [
+   38,
+   25.5,
+   286.5,
+   292.5
+  ]
+ },
+ "ptero": {
+  "getBBox": [
+   5,
+   12,
+   182.5,
+   110
+  ],
+  "pixel": [
+   6,
+   14,
+   184,
+   112.5
+  ]
+ },
+ "ptero_flap": {
+  "getBBox": [
+   17,
+   19,
+   182.5,
+   134
+  ],
+  "pixel": [
+   18,
+   17,
+   184,
+   136
+  ]
+ },
+ "bronto": {
+  "getBBox": [
+   17,
+   31,
+   258,
+   308
+  ],
+  "pixel": [
+   19.5,
+   34.5,
+   260,
+   298.5
+  ]
+ },
+ "bronto_spray": {
+  "getBBox": [
+   15.4,
+   17.9,
+   258,
+   308
+  ],
+  "pixel": [
+   14,
+   16.5,
+   260,
+   298.5
+  ]
+ },
+ "frog": {
+  "getBBox": [
+   12,
+   23,
+   108,
+   97.6
+  ],
+  "pixel": [
+   10,
+   24,
+   110,
+   97.5
+  ]
+ },
+ "frog_jump": {
+  "getBBox": [
+   15.6,
+   9,
+   104.4,
+   97
+  ],
+  "pixel": [
+   14,
+   10,
+   106,
+   100
+  ]
+ },
+ "firefly": {
+  "getBBox": [
+   5.6,
+   5,
+   42,
+   48
+  ],
+  "pixel": [
+   6.5,
+   4,
+   41.5,
+   47.5
+  ]
+ }
+}
