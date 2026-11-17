@@ -1,11 +1,11 @@
-/* TL.Assets (Moka's Fairy Tea Party) — loads the SVG art and keeps pre-rasterized copies so drawing stays fast on phones.
+/* TL.Assets (Tibo's Dino Lake Fishing) — loads the SVG art and keeps pre-rasterized copies so drawing stays fast on phones.
  * Keys are the file paths under assets/default/ without ".svg": 'characters/tibo_idle', 'characters/ptero_flap',
  * 'guests/fox', 'guests/fox_hop', 'env/far_morning', 'env/rock', 'particles/glint', 'ui/star', 'icon' … (fish_art.js looks up
  * 'guests/<a>' and 'guests/<a>_hop'). Short aliases for the HUD / render / weather: 'star' = ui/star, 'pstar' = particles/star,
  * '<particle>' = particles/<particle>.
  *   has(key)  img(key)  images[key]  sprite(key, px) → canvas whose longest side ≥ px device px (size buckets 32·1.25^k)
  *   exact(key, w, h) → one exact-size raster (tiled env layers)   tinted(key, colour, px)   dropExact()
- * Tea things, the table, placemats, lanterns, fluffs, badges and the hint hand are canvas code (tea_art.js), not files. */
+ * Fish, the lake, rod, line, hook, lilies, splashes, badges and the hint hand are canvas code (fish_art.js), not files. */
 (function (TL) {
   'use strict';
   const D = 'assets/default/';

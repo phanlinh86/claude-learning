@@ -185,6 +185,7 @@
   function pause() {
     if (mode !== 'play' && mode !== 'talk') return;
     mode = 'paused';
+    $('stage').classList.remove('talking');   // the HUD steps back under the pause menu (functional QA P3-1)
     if (inputCancel && inputCancel.cancel) inputCancel.cancel();
     if (world.cancelDrag) world.cancelDrag();
     if (TL.Voice) { TL.Voice.stop(); if (TL.Voice.stopListening) TL.Voice.stopListening(); }
@@ -194,6 +195,7 @@
   function resume() {
     if (mode !== 'paused') return;
     mode = world.state === 'talk' ? 'talk' : 'play';
+    if (mode === 'talk') $('stage').classList.add('talking');
     blockInput();
     if (world.resetNudges) world.resetNudges();
     TL.UI.only(mode === 'talk' ? 'scrTalk' : undefined);
@@ -313,13 +315,16 @@
         stats.counts++;
         TL.Audio.play('pip', { i: e.i });
         render.burst('count', e.x, e.y - 74, { n: e.i });
+        const th = lastCaught || {}, n = e.n || (th.mark && th.mark.n) || (world.cur && world.cur.rule && world.cur.rule.value) || 1;
         if (!countSaid) {
           countSaid = true;
-          const th = lastCaught || {}, n = e.n || (th.mark && th.mark.n) || (world.cur && world.cur.rule && world.cur.rule.value) || 1;
           const run = TL.I18N.sayCountRun ? TL.I18N.sayCountRun(curLang(), n) : String(n);
-          speak(run, { priority: true }); TL.UI.say(run);
+          speak(run, { priority: true });
           promptUntil = performance.now() + 900 + 650 * n;
         }
+        // the bubble counts along with the spots (1 → 1, 2 → …), the whole run once the last spot lights
+        if (e.i >= n && TL.I18N.sayCountRun) TL.UI.say(TL.I18N.sayCountRun(curLang(), n));
+        else TL.UI.say(Array.from({ length: e.i }, (_, k) => k + 1).join(', ') + '…');
         break;
       }
       case 'home': TL.Audio.play('badge'); break;
@@ -335,7 +340,8 @@
       case 'dive': {
         TL.Audio.play('splash', { big: true });
         const th = lastCaught || {};
-        if (!speaking() && canInterrupt()) speak(T(th.kind === 'bubble' ? 'releaseFriend' : 'release'));
+        // "Bye bye, little fish!" now and then, not every round (playtest P3)
+        if (!speaking() && canInterrupt() && (world.round % (world.roundsPerLevel || 4) === 0 || Math.random() < 0.3)) speak(T(th.kind === 'bubble' ? 'releaseFriend' : 'release'));
         break;
       }
       case 'lily': {
@@ -522,7 +528,7 @@
     return boxCache;
   }
   /* ---------- loop ---------- */
-  let last = 0, slowAcc = 0, pendingResize = false;
+  let last = 0, slowAcc = 0, fastT = 0, pendingResize = false;
   function frame(ts) {
     requestAnimationFrame(frame);
     if (document.hidden) { last = ts; return; }
@@ -552,9 +558,11 @@
   }
   function adapt(raw) {  // adaptive quality: step the render scale down when frames stay slow
     if (raw > 0.5) return;
-    if (raw > 0.022) { slowAcc += raw; stats.slowFrames++; } else slowAcc = Math.max(0, slowAcc - raw * 0.5);
-    // only the backing store shrinks: World.setViewport would cancel the child's gesture
-    if (slowAcc > 1.5 && quality > 0.6) { quality *= 0.85; render.quality = Math.max(0.5, quality); slowAcc = 0; pendingResize = true; }
+    if (raw > 0.022) { slowAcc += raw; stats.slowFrames++; fastT = 0; } else { slowAcc = Math.max(0, slowAcc - raw * 0.5); fastT += raw; }
+    // only the backing store changes: World.setViewport would cancel the child's gesture
+    if (slowAcc > 1.5 && quality > 0.6) { quality *= 0.85; render.quality = Math.max(0.5, quality); slowAcc = 0; fastT = 0; pendingResize = true; }
+    // and it steps back up after 8 s without a slow frame (playtest P2: a hiccup must not leave it blurry for good)
+    else if (fastT > 8 && quality < 1) { quality = Math.min(1, quality / 0.85); render.quality = quality; fastT = 0; pendingResize = true; }
   }
 
   /* ---------- input ---------- */

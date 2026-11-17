@@ -40,11 +40,11 @@
     rodLenLand: 170, rodLenPort: 150,
     rodRest: -1.05, rodWindup: -1.22, rodWhip: -0.62, rodCast: -0.85, rodReel: -1.0, rodShow: -0.75,
     bendCast: 0.15, bendReel: 0.8, bendShow: 0.4,
-    swimRockGap: 30, swimRightLand: 50, swimSidePort: 40, laneTopK: 0.75, laneBotK: 0.85, laneMinK: 1.0, laneTallK: 1.25,
+    swimRockGap: 30, swimRightLand: 50, swimSidePort: 40, laneTopK: 0.75, laneBotK: 0.85, laneMinK: 1.0, laneSqueezeK: 0.85, laneTallK: 1.25,
     lanesLand: 3, lanesPort: 4, lanesTall: 5, keepGap: 44, rockLaneGap: 20,
-    lilyInset: 40, lilyDy: 6, showLift: 24, lineShowMin: 60, lineShowMax: 160,
+    lilyEdge: 12, lilyK: 0.95, lilyPadW: 84, lilyGapMin: 110, lilyDy: 6, laneTopPad: 12, bedSand: 138, bedGap: 10, bedKPort: 1.15, bedKTall: 1.36, laneCapMax: 3, showLift: 24, lineShowMin: 60, lineShowMax: 160,
     size: { 3: 104, 4: 104, 5: 96, 6: 90, 7: 90 }, tallK: 1.12, lenK: 1.5, littleK: 0.6, bubbleD: 1.25,
-    hitK: 0.6, hitPad: 14, littleHitK: 0.85, bubbleHitK: 0.65,
+    hitK: 0.6, hitPad: 22, littleHitK: 0.85, bubbleHitK: 0.65,
     mouth: { x: 0.66, y: 0.04 }, hangRot: 0.42, bubbleHook: 0.6,   // the mouth in fish-local units of size (fish facing RIGHT)
 
     // ---- swimming (DESIGN §5.2)
@@ -79,7 +79,7 @@
     leaveV: 620, leaveVelK: 4, leaveTurn: 0.22, leaveMax: 1.8,
 
     // ---- help (DESIGN §5.2)
-    hintAfterMisses: 2, hintAfterSoft: 3, assistAfter: 6, assistMinPlay: 10, hintTime: 10, hintCooldown: 6, hintCycle: 1.6,
+    hintAfterMisses: 2, hintAfterSoft: 3, assistAfter: 6, assistMinPlay: 10, assistMaxStars: 1, assistTibo: true, pokeNoProgress: 2, hintTime: 10, hintCooldown: 6, hintCycle: 1.6,
     idleTime: 12, idleBackoff: 1.5, idleMax: 30, idleHintFrom: 1, flickTime: 0.25, tapMovePx: 24, tapMoveCss: 24,
     critterK: 2, critterSoftK: 1.5, histLag: 0.12, histKeep: 0.25, puffTime: 0.6,
 
@@ -150,6 +150,8 @@
     return { W: S, H: clamp(Math.round(S / aspect), cfg.minLong, cfg.maxLong) };
   }
   function ageKey(age) { return clamp(Math.round(+age || 4), 3, 7); }
+  /** Entry spread inside a lane's centre range for k fish: they enter to a … 1 − a (k = 2: ¼ / ¾ ≈ 0.22 / 0.78). */
+  function laneSpread(k) { return k <= 2 ? 0.22 : 0.06; }
   /** The HUD's measured box among the hudKeep boxes (the one in the top-right). */
   function hudBox(hk, W, H) { var best = null; for (var i = 0; i < hk.length; i++) { var b = hk[i]; if (b.x + b.w / 2 > W / 2 && b.y < H / 2 && (!best || b.y + b.h > best.y + best.h)) best = b; } return best; }
   /** The offset mouth − centre of a fish (or hook point − centre of a bubble) for a pose. */
@@ -214,34 +216,54 @@
     bb = bubble.y + bubble.h;
     // swim range + lanes
     var x0 = portrait ? ins.left + cfg.swimSidePort : rock.x1 + cfg.swimRockGap, x1 = W - ins.right - (portrait ? cfg.swimSidePort : cfg.swimRightLand);
-    var top = surfaceY + cfg.laneTopK * size, bot = groundY - cfg.laneBotK * size;
+    var top = surfaceY + cfg.laneTopK * size + cfg.laneTopPad, bot = groundY - cfg.laneBotK * size;
+    // the opaque sand of the lake-bed art starts at H − 138·kp (kp = the env art scale): the fish body stays ≥ 10 px above it
+    var kp = portrait ? (tall ? cfg.bedKTall : cfg.bedKPort) : 1;
+    bot = Math.min(bot, H - cfg.bedSand * kp - cfg.bedGap - 0.5 * size);
     hk.forEach(function (b) { if (b.y > H / 2) bot = Math.min(bot, b.y - cfg.keepGap - 0.5 * size); });
-    var nMax = portrait ? (tall ? cfg.lanesTall : cfg.lanesPort) : cfg.lanesLand, nl = 1, sp = 0, j;
-    for (j = nMax; j >= 2; j--) {
-      sp = (bot - top) / (j - 1);
-      if (sp >= (j >= 5 ? cfg.laneTallK : cfg.laneMinK) * size) { nl = j; break; }
+    var nMax = portrait ? (tall ? cfg.lanesTall : cfg.lanesPort) : cfg.lanesLand, j;
+    var need = a <= 3 ? 3 : a === 4 ? 4 : 5;   // the most fish a round of this age shows
+    function buildLanes(minK) {
+      var nl = 1, sp = 0, k2, lanes = [], ranges = [];
+      for (k2 = nMax; k2 >= 2; k2--) {
+        sp = (bot - top) / (k2 - 1);
+        if (sp >= (k2 >= 5 ? Math.max(minK, cfg.laneTallK) : minK) * size) { nl = k2; break; }
+      }
+      if (nl < 2) { nl = bot - top >= 0.8 * size ? 2 : 1; sp = nl > 1 ? bot - top : 0; }
+      for (k2 = 0; k2 < nl; k2++) {
+        var ly = Math.round(nl > 1 ? top + k2 * sp : (top + Math.max(top, bot)) / 2);
+        lanes.push(ly);
+        var lx0 = x0;
+        if (rock.x1 + cfg.rockLaneGap > lx0 && ly - 0.5 * size - 6 < rock.y) lx0 = rock.x1 + cfg.rockLaneGap;   // the rock hides that lane's left end
+        var cx0 = lx0 + 0.5 * len, cx1 = x1 - 0.5 * len;
+        if (cx1 < cx0) { var mid = (cx0 + cx1) / 2; cx0 = cx1 = mid; }
+        // cap: how many fish fit (spread over the lane's centre range with a lane-neighbour gap ≥ neighK·len + 8)
+        var cap = 1;
+        for (var kk = 2; kk <= cfg.laneCapMax; kk++) if ((1 - 2 * laneSpread(kk)) * (cx1 - cx0) / (kk - 1) >= cfg.neighK * len + 8) cap = kk;
+        ranges.push({ x0: lx0, x1: x1, cx0: cx0, cx1: cx1, cap: cap });
+      }
+      return { lanes: lanes, ranges: ranges, sp: sp, capSum: ranges.reduce(function (t, R) { return t + R.cap; }, 0) };
     }
-    if (nl < 2) { nl = bot - top >= 0.8 * size ? 2 : 1; sp = nl > 1 ? bot - top : 0; }
-    var lanes = [], ranges = [];
-    for (j = 0; j < nl; j++) {
-      var ly = Math.round(nl > 1 ? top + j * sp : (top + Math.max(top, bot)) / 2);
-      lanes.push(ly);
-      var lx0 = x0;
-      if (rock.x1 + cfg.rockLaneGap > lx0 && ly - 0.5 * size - 6 < rock.y) lx0 = rock.x1 + cfg.rockLaneGap;   // the rock hides that lane's left end
-      var cx0 = lx0 + 0.5 * len, cx1 = x1 - 0.5 * len;
-      if (cx1 < cx0) { var mid = (cx0 + cx1) / 2; cx0 = cx1 = mid; }
-      ranges.push({ x0: lx0, x1: x1, cx0: cx0, cx1: cx1, cap: cx1 - cx0 >= 2 * cfg.neighK * len * 0.75 + 4 ? 2 : 1 });
-    }
+    // lanes ≥ 1.0 size apart; only when they cannot hold the age's biggest round they tighten (down to laneSqueezeK)
+    var LB = buildLanes(cfg.laneMinK);
+    for (var mk = cfg.laneMinK - 0.05; LB.capSum < need && mk >= cfg.laneSqueezeK - 1e-9; mk -= 0.05) { var L2 = buildLanes(mk); if (L2.lanes.length > LB.lanes.length) LB = L2; }
+    var lanes = LB.lanes, ranges = LB.ranges, sp = LB.sp;
     var swim = { x0: x0, x1: x1, lanes: lanes, ranges: ranges, spacing: sp, len: len, top: top, bottom: bot };
     // lilies: 4 spots ON the surface, clear of the rock
-    var lx = Math.max(x0, rock.x1) + cfg.lilyInset, rx = x1 - cfg.lilyInset, lilies = [];
-    for (j = 0; j < 4; j++) lilies.push({ x: Math.round(lerp(lx, rx, (j + 0.5) / 4)), y: surfaceY + cfg.lilyDy });
+    // render draws a pad ≈ lilyPadW × lilyS wide (lilyS = size/104 × 0.95); centres from the rock (+ 12 px gap) to swim.x1 − 12,
+    // ≥ lilyGapMin apart, else the pads shrink (layout.lilyS)
+    var lilyS = size / 104 * cfg.lilyK, padHalf = 0.5 * cfg.lilyPadW * lilyS, lilies = [];
+    var lx = Math.max(x0, rock.x1 + cfg.lilyEdge + padHalf), rx = x1 - cfg.lilyEdge, lsp = (rx - lx) / 3;
+    if (lsp < cfg.lilyGapMin) { lx = Math.max(x0, rock.x1 + cfg.lilyEdge); lsp = (rx - lx) / 3; }
+    lilyS = Math.min(lilyS, Math.max(0.5, (lsp - 16) / cfg.lilyPadW));
+    for (j = 0; j < 4; j++) lilies.push({ x: Math.round(lx + j * lsp), y: surfaceY + cfg.lilyDy });
     // bronto stands at the right end, knees in the water (bottom anchor)
     var bh = portrait ? cfg.bronto.hPort : cfg.bronto.hLand;
-    var bronto = { x: W - ins.right - 0.22 * bh, y: surfaceY + 0.22 * bh, h: bh };
+    var bronto = { x: W - ins.right - 0.5 * bh * 260 / 300 - 4, y: surfaceY + 0.22 * bh, h: bh, w: bh * 260 / 300 };   // the whole art box on screen
     var L = { W: W, H: H, ins: ins, portrait: portrait, tall: tall, phone: phone, groundY: groundY, bubble: bubble, hud: hud,
       surfaceY: surfaceY, size: size, len: len, tibo: tibo, tiboBox: tiboBox, rock: rock, rodBase: rodBase, rodLen: rodLen,
-      tipShow: tipShow, lineShow: lineShow, showPt: showPt, showBox: showBox, swim: swim, lilies: lilies, bronto: bronto,
+      tipShow: tipShow, lineShow: lineShow, showPt: showPt, showBox: showBox, swim: swim, lilies: lilies, lilyS: lilyS, bronto: bronto,
+      bedTop: H - cfg.bedSand * kp,
       band: { x: ins.left, y: surfaceY, w: W - ins.left - ins.right, h: Math.max(0, groundY - surfaceY) },
       sky: { y0: Math.max(bb, hud.y + hud.h) + 20, y1: surfaceY - 40 },
       hitPad: cfg.hitPad, hitR: cfg.hitK * size + cfg.hitPad,
@@ -448,7 +470,12 @@
     ln.tip = rodTip(L.rodBase, L.rodLen, ln.rodAngle, ln.bend);
     if (ln.state === 'fly' && this._cast) this._flyAim(this.memberById(ln.id), true);
     else if (ln.state === 'sink' && this._cast) { this._cast.x0 = clamp(ln.hook.x, 0, L.W); this._cast.y0 = L.surfaceY; }
-    else if (ln.state === 'rest' || ln.state === 'free') this._lineRest(true);
+    else if (ln.state === 'rest' || ln.state === 'free') {
+      var keepId = this.phase === 'cast' && this.state === 'round' ? ln.id : null;   // the wind-up goes on (QA P1-a)
+      var ra = ln.rodAngle, rv = ln.rodV, bd = ln.bend, bv = ln.bendV;
+      this._lineRest(true);
+      if (keepId) { ln.id = keepId; ln.rodAngle = ra; ln.rodV = rv; ln.bend = bd; ln.bendV = bv; ln.tip = rodTip(L.rodBase, L.rodLen, ra, bd); ln.hook = { x: ln.tip.x, y: ln.tip.y + cfg.restLine }; }
+    }
     ln.hook.x = clamp(ln.hook.x, 0, L.W); ln.hook.y = clamp(ln.hook.y, 0, L.H);
     this._tipPrev = null;
     this.ripples = []; this.splashes = [];
@@ -528,7 +555,7 @@
     if (cur.targetValue != null) this._usedTargets.push(cur.targetValue);
     this._clearRound(true);
     this.cur = cur; this.surprise = cur.surprise;
-    this.misses = 0; this.streak = 0; this._noProg = 0; this._roundAssisted = false;
+    this.misses = 0; this.streak = 0; this._noProg = 0; this._roundAssisted = false; this._pokes = 0;
     this._relayout(false);
     this._laneN = this.layout.swim.lanes.length;
     this.members = cur.members.map(function (q, i) { return self._newMember(q, i); });
@@ -570,8 +597,9 @@
       list.forEach(function (m, j) {
         m.laneY = L.swim.lanes[+ln];
         // one fish: anywhere in the middle, from a random side; two: from opposite sides to ≈ ¼ / ¾ of the lane
-        m.xu = n === 1 ? r.float(cfg.enterSpread[0], cfg.enterSpread[1]) : n === 2 ? (j ? 0.78 : 0.22) : (j + 0.5) / n;
-        var side = n === 1 ? r.sign() : (m.xu < 0.5 ? -1 : 1);   // −1: enters from the left (heading right)
+        var a = laneSpread(n);
+        m.xu = n === 1 ? r.float(cfg.enterSpread[0], cfg.enterSpread[1]) : a + (1 - 2 * a) * j / (n - 1);
+        var side = n === 1 ? r.sign() : (m.xu < 0.5 ? -1 : m.xu > 0.5 ? 1 : r.sign());   // −1: enters from the left (heading right)
         m.xe = lerp(R.cx0, R.cx1, m.xu);
         m.face = -side; m.dir = m.face;
         var len = self._len(m);
@@ -584,6 +612,9 @@
         self._pose(m); self._twin(m);
       });
     });
+    // spawn order: the fish heading farthest into the lake first, so one never has to pass another of its side
+    ms.slice().sort(function (p, q) { return (q.face > 0 ? q.xe : L.W - q.xe) - (p.face > 0 ? p.xe : L.W - p.xe) || p.i - q.i; })
+      .forEach(function (m, k) { m._spawnAt = k * cfg.enterStagger; });
     this._prevLane = tgt ? tgt.lane : -1;
   };
 
@@ -633,15 +664,18 @@
     if (this._g || (this.state !== 'round' && this.state !== 'roundDone')) return null;
     this.finger.x = x; this.finger.y = y; this.finger.down = true;
     var L = this.layout, g = this._g = { x0: x, y0: y, x: x, y: y, t: this.time, judged: false, kind: 'gesture', maxD: 0, result: null, soft: false, contacted: false };
-    this._touch();
     var play = this.interactive;
-    if (play && this.assistId && inBox(L.band, x, y)) {   // assist: the next press anywhere in the water picks the target
+    // assist: the next press anywhere in the water (or on Tibo: he helps) picks the target
+    if (play && this.assistId && (inBox(L.band, x, y) || (this.cfg.assistTibo && inBox(L.tiboBox, x, y)))) {
+      this._touch();
       var a = this.memberById(this.assistId), under = this._memberNear(x, y).m;
       if (a && (a.state === 'swim' || a.state === 'dart')) { this._contact(a, g, under ? under.id : null); return (g.result = 'member'); }
     }
     var near = this._memberNear(x, y), cr = this._critterAt(x, y);
+    // critter / Tibo taps never restart the idle clock (a child who only pokes Tibo still gets nudges, hints and the assist)
     if (cr && (!near.m || cr.d * this.cfg.critterK < near.d)) { this._tapCritter(cr); g.kind = 'critter'; g.contacted = true; return (g.result = 'critter'); }
     var m = near.m;
+    if (m || !inBox(L.tiboBox, x, y)) this._touch();
     if (m) {
       if (play && (m.state === 'swim' || m.state === 'dart')) { this._contact(m, g); return (g.result = 'member'); }
       g.contacted = true;
@@ -763,7 +797,7 @@
   };
   P._pokeTibo = function () {
     var M = this._mouth(), a = this.prompt();
-    this._touch();
+    if (this.interactive) { this._pokes = (this._pokes || 0) + 1; if (this._pokes % this.cfg.pokeNoProgress === 0) this._noProgress(false); }
     if (this.tibo.mood === 'idle' || this.tibo.mood === 'talk' || this.tibo.mood === 'think') this._mood('talk', 1.0);
     this._bounce();
     var ev = { type: 'pokeTibo', x: M.x, y: M.y };
@@ -966,7 +1000,10 @@
   };
   P._stepCast = function (h) {
     var C = this._cast, cfg = this.cfg, ln = this.line, m = this.memberById(ln.id), L = this.layout;
-    if (!C || !m) { this._lineFree(); this._setPhase('play'); this._answered = false; return; }
+    if (!C || !m) {   // safety net: back to play, nobody left hooked
+      this.members.forEach(function (q) { if (q.state === 'hooked') { q.state = 'swim'; q.alert = 0; } });
+      this._cast = null; this._lineFree(); this._setPhase('play'); this._answered = false; this._mood('idle', 0.1); return;
+    }
     C.t += h;
     if (!C.released && C.t >= cfg.castWindup + cfg.castRelease * cfg.castWhip - 1e-9) {   // the line leaves mid-whip
       C.released = true; ln.state = 'fly';
@@ -1126,7 +1163,7 @@
   };
   P._roundDone = function (m) {
     var st = this._starsFor(this.misses), cur = this.cur, cfg = this.cfg;
-    if (this._roundAssisted) st = Math.min(st, 2);   // an assisted round ≤ 2★
+    if (this._roundAssisted) st = Math.min(st, this.cfg.assistMaxStars);   // an assisted round: 1★ (QA: mashing must not earn 2★)
     this.roundStars = st; this.stars += st; this.levelStars += st;
     var rk = cur.rule;
     this._prevRuleRun = this._prevRule && this._prevRule.kind === rk.kind && String(this._prevRule.value) === String(rk.value) ? this._prevRuleRun + 1 : 1;
@@ -1375,6 +1412,7 @@
           var wk = Math.max(1, L.W / cfg.enterRefW);   // wide screens: the fish come from further, so faster
           vdes = m.face * Math.max(cruise, Math.min(cfg.enterVMax * wk, Math.sqrt(cruise * cruise + 2 * cfg.enterAcc * wk * d)));
           var ga = this._gapAhead(m);
+          if (ga < 2 && m.x >= R.cx0 && m.x <= R.cx1) { m.state = 'swim'; vdes = 0; break; }   // blocked by a lane neighbour: it is in
           if (ga < 1e8) vdes = m.face * Math.min(Math.abs(vdes), Math.max(0, cruise * Math.sqrt(clamp(ga / (cfg.brakeL * len), 0, 1)) + 2 * Math.max(0, ga)));
           k = cfg.enterVelK;
           break;
@@ -1569,7 +1607,6 @@
       this._frogHop(c, pads[this._crng.int(0, pads.length - 1)], cfg.frog.hopT, cfg.frog.hopH);
       c.state = 'hop';
     } else if (c.kind === 'fireflies') { var f = c.flies[cr.i]; f.tw = 1; ev.i = cr.i; ev.x = f.x; ev.y = f.y; }
-    this._touch();
     this._emit(ev);
   };
   /** The round ends: a critter still around says goodbye. */

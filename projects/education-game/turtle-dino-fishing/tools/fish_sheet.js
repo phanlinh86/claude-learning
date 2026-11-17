@@ -121,8 +121,9 @@ function pageSheet({ name }) {
     rods.forEach(([b, x], i) => {
       const base = { x, y: 250 }, tip = A.drawRod(g, base, 170, -1.05, b);
       const hook = i === 3 ? { x: tip.x + 40, y: 420 } : i === 2 ? { x: tip.x + 10, y: 360 } : { x: tip.x + 4, y: tip.y + 60 };
-      A.drawLine(g, tip, hook, i === 0 ? 10 : i === 3 ? 0 : 4, night ? 1 : 0, layout.surfaceY);
-      A.drawHook(g, hook.x, hook.y, 1.2, hook.y > layout.surfaceY);
+      if (i === 1) { hook.x = tip.x + 70; hook.y = tip.y + 30; }   // mid-cast: hook flying in the air
+      A.drawLine(g, tip, hook, i === 0 ? 10 : i === 3 ? 0 : 4, night ? 1 : 0, layout.surfaceY, 1.2);
+      A.drawHook(g, hook.x, hook.y, 1.2, true);
       label('bend ' + b, x + 40, 40 + i * 0, 12, night ? '#fff' : '#333');
     });
     // fish swimming + a hooked one wriggling at the hook of rod 4

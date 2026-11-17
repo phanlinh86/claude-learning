@@ -35,7 +35,7 @@
   'use strict';
   var TL = G.TL = G.TL || {};
 
-  var TAU = Math.PI * 2, LW = 3.6;
+  var TAU = Math.PI * 2, LW = 4.2, RIM = '#FFF8EA', RIM_A = 0.85, RIM_W = 7.4;   // RIM_W: cream rim ≈ 3.7 units outside the outline
   var FONT = 'ui-rounded, "Arial Rounded MT Bold", system-ui, sans-serif';
   var FALLBACK = {
     red:    { base: '#E84A4A', dark: '#A8282E', light: '#F7A0A0' },
@@ -88,7 +88,7 @@
     if (name && HEX.test(name)) return { base: name, dark: mix(name, '#2F2A3A', 0.38), light: mix(name, '#FFFFFF', 0.5) };
     return pal(name);
   }
-  function lineOf(c) { return c.base === '#FFD23F' ? '#B0850A' : c.base === '#FF8FC0' ? '#B84A7E' : c.base === '#4CC26B' ? '#2A7A3E' : c.dark; }
+  function lineOf(c) { return mix(c.base === '#FFD23F' ? '#B0850A' : c.base === '#FF8FC0' ? '#B84A7E' : c.base === '#4CC26B' ? '#2A7A3E' : c.dark, '#2F2A3A', 0.22); }
   function shadeOf(c) { return mix(c.base, c.dark, 0.32); }
 
   // ---------------------------------------------------------------- path helpers + Path2D cache
@@ -274,6 +274,8 @@
   function drawBody(g, th, night, mir, blurK) {
     var F = fishCols(th), mk = markOf(th);
     g.lineJoin = 'round'; g.lineCap = 'round';
+    // cream sticker rim behind the outline: every answer colour reads on every water mood (QA: luminance ≈ 1:1 otherwise)
+    g.strokeStyle = rgba(RIM, RIM_A); g.lineWidth = LW + RIM_W; strokeP(g, P('f.sil', fSil));
     if (night > 0.01) {     // pale rim glow, never darkens
       g.save();
       if (blurK > 0) { g.shadowColor = rgba('#FFF2CF', 0.95 * night); g.shadowBlur = 11 * blurK; }
@@ -320,7 +322,7 @@
       g.save(); g.translate(MX - (mk.type === 'text' && mk.text.length >= 3 ? 4 : 0), MY); if (mir) g.scale(-1, 1);
       if (mk.type === 'shape') drawShapeMark(g, mk);
       else if (mk.type === 'spots') drawSpots(g, mk.n);
-      else signText(g, mk.text, 0, 0, mk.text.length <= 1 ? 60 : mk.text.length <= 2 ? 58 : 54, mk.text.length <= 1 ? 46 : mk.text.length <= 2 ? 38 : 30, INK, mk.text.length >= 4 ? 24 : 0);
+      else signText(g, mk.text, 0, 0, mk.text.length <= 1 ? 50 : 50, mk.text.length <= 1 ? 40 : mk.text.length <= 2 ? 32 : 25, INK, mk.text.length >= 4 ? 21 : 0);
       g.restore();
     }
   }
@@ -399,7 +401,8 @@
   }
   function drawTail(ctx, F, ox, oy, a0, a1, night) {
     var tr = flexPath(ctx, TAIL, ox, oy, a0, a1, 34);
-    if (night > 0.01) { ctx.strokeStyle = rgba('#FFF6DC', 0.85 * night); ctx.lineWidth = LW + 7; ctx.stroke(); }
+    ctx.strokeStyle = rgba(RIM, RIM_A); ctx.lineWidth = LW * 0.9 + RIM_W; ctx.stroke();
+    if (night > 0.01) { ctx.strokeStyle = rgba('#FFF6DC', 0.85 * night); ctx.lineWidth = LW + RIM_W + 4; ctx.stroke(); }
     ctx.fillStyle = F.fin; ctx.fill();
     ctx.save(); ctx.clip();
     ctx.strokeStyle = F.finRay; ctx.lineWidth = 2.6;
@@ -412,7 +415,8 @@
   }
   function drawVentral(ctx, F, ox, oy, a, night) {
     flexPath(ctx, VENTRAL, ox, oy, a, a * 1.6, 16);
-    if (night > 0.01) { ctx.strokeStyle = rgba('#FFF6DC', 0.85 * night); ctx.lineWidth = LW + 6; ctx.stroke(); }
+    ctx.strokeStyle = rgba(RIM, RIM_A); ctx.lineWidth = LW * 0.85 + RIM_W; ctx.stroke();
+    if (night > 0.01) { ctx.strokeStyle = rgba('#FFF6DC', 0.85 * night); ctx.lineWidth = LW + RIM_W + 3; ctx.stroke(); }
     ctx.fillStyle = F.fin; ctx.fill();
     ctx.strokeStyle = F.finLine; ctx.lineWidth = LW * 0.85; ctx.stroke();
   }
@@ -760,7 +764,7 @@
     dot(ctx, -2.4, -3.6, 1.5, 'rgba(255,255,255,0.9)');
     ctx.restore();
   }
-  function drawLine(ctx, tip, hook, slack, night, surfaceY) {
+  function drawLine(ctx, tip, hook, slack, night, surfaceY, floatS) {
     if (!ctx || !tip || !hook) return;
     var tx = num(tip.x, 0), ty = num(tip.y, 0), hx = num(hook.x, tx), hy = num(hook.y, ty + 40), sl = num(slack, 0), nt = clamp01(night);
     var cx = (tx + hx) / 2, cy = (ty + hy) / 2 + sl;
@@ -775,6 +779,15 @@
       for (var i = 0; i < 18; i++) { var u = (lo + hi) / 2, v = 1 - u, y = v * v * ty + 2 * v * u * cy + u * u * hy; if (y < sy) lo = u; else hi = u; }
       var uu = (lo + hi) / 2, vv = 1 - uu, fx = vv * vv * tx + 2 * vv * uu * cx + uu * uu * hx;
       drawFloat(ctx, fx, sy - 1, 1.15, 0);
+    } else if (num(floatS, 0) > 0 && !(isFinite(sy) && hy > sy + 6)) {   // hook in the air: the float rides ON the line 18·s above the hook
+      var want = 18 * num(floatS, 1), acc = 0, px = hx, py = hy, fu = 1;
+      for (var k = 1; k <= 60; k++) {
+        var uq = 1 - k / 60, vq = 1 - uq, qx = vq * vq * tx + 2 * vq * uq * cx + uq * uq * hx, qy = vq * vq * ty + 2 * vq * uq * cy + uq * uq * hy;
+        acc += Math.hypot(qx - px, qy - py); px = qx; py = qy; fu = uq;
+        if (acc >= want) break;
+      }
+      var fv = 1 - fu, dxq = 2 * fv * (cx - tx) + 2 * fu * (hx - cx), dyq = 2 * fv * (cy - ty) + 2 * fu * (hy - cy);
+      drawFloat(ctx, px, py, num(floatS, 1), Math.atan2(dyq, dxq) - Math.PI / 2);
     }
     ctx.restore();
   }
@@ -782,7 +795,7 @@
     if (!ctx) return;
     x = num(x, 0); y = num(y, 0); s = num(s, 1); if (!(s > 0)) return;
     ctx.save(); ctx.translate(x, y); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    if (!noFloat) drawFloat(ctx, 0, -24 * s, s, 0);
+    if (!noFloat) drawFloat(ctx, 0, -18 * s, s, 0);
     ctx.scale(s, s);
     var hookP = function (q) { q.moveTo(0, 2); q.lineTo(0, 10); q.bezierCurveTo(0, 17, 9, 17, 9, 10); q.lineTo(9, 7); };
     ctx.strokeStyle = '#5E6A76'; ctx.lineWidth = 4.6; ctx.beginPath(); hookP(ctx); ctx.stroke();
@@ -867,8 +880,12 @@
     ctx.bezierCurveTo(wid, -len * 0.18, wid * 0.85, -len * 0.74, 0, -len);
     ctx.bezierCurveTo(-wid * 0.85, -len * 0.74, -wid, -len * 0.18, 0, 0); ctx.closePath();
   }
+  var PETAL_LINE = '#B8A088';
   function drawPetal(ctx, ang, len, wid, fill, line, tip) {
     ctx.save(); ctx.rotate(ang);
+    if (fill === 'pink') {   // soft pink tip → cream base
+      var pg = ctx.createLinearGradient(0, -len, 0, 0); pg.addColorStop(0, '#FFE6EE'); pg.addColorStop(1, '#FFF8EE'); fill = pg;
+    }
     petalPath(ctx, len, wid); ctx.fillStyle = fill; ctx.fill();
     if (tip) { ctx.save(); ctx.clip(); ctx.fillStyle = tip; ctx.beginPath(); ell(ctx, 0, -len, wid * 0.9, len * 0.34, 0); ctx.fill(); ctx.restore(); }
     petalPath(ctx, len, wid); ctx.strokeStyle = line; ctx.lineWidth = 1.6; ctx.stroke();
@@ -895,22 +912,22 @@
     ctx.strokeStyle = LAKE.padEdge; ctx.lineWidth = 2.6; strokeP(ctx, P('lily.pad', lilyPad));
     if (op >= 0) {
       var o = Math.max(0, Math.min(1.35, op)), oc = Math.min(1, o), pop = 1 + Math.max(0, o - 1) * 0.5;
-      var c = color ? colOf(color) : null, tint = c ? mix(c.base, LAKE.gold, 0.15) : LAKE.gold;
-      ctx.save(); ctx.translate(0, -3); ctx.scale(pop, pop);
+      var c = color ? colOf(color) : null, tint = c ? c.base : '#FFC93C', big = 1 + 0.3 * oc;
+      ctx.save(); ctx.translate(0, -3); ctx.scale(pop * big, pop * big);
       if (oc < 0.08) {   // closed bud
-        drawPetal(ctx, 0, 30, 10, LAKE.petal, '#C9B9A2', c ? rgba(c.light, 0.6) : 'rgba(255,214,200,0.6)');
+        drawPetal(ctx, 0, 30, 10, LAKE.petal, PETAL_LINE, c ? rgba(c.light, 0.6) : 'rgba(255,214,200,0.6)');
       } else {
         var back = 7, front = 5, L1 = 26 + 9 * oc, L2 = 21 + 6 * oc;
-        for (var i = 0; i < back; i++) { var f = i / (back - 1) - 0.5; drawPetal(ctx, f * (0.5 + 2.1 * oc), L1, 10, '#F6EEE2', '#C9B9A2', c ? rgba(c.light, 0.6) : 'rgba(255,226,150,0.45)'); }
+        for (var i = 0; i < back; i++) { var f = i / (back - 1) - 0.5; drawPetal(ctx, f * (0.5 + 2.1 * oc), L1, 10, 'pink', PETAL_LINE, c ? rgba(c.light, 0.55) : null); }
         // centre
         ctx.save(); ctx.translate(0, -6 * oc); ctx.scale(1, 0.6);
         var cg = ctx.createRadialGradient(0, -8, 1, 0, -8, 16 * oc + 2);
-        cg.addColorStop(0, mix(tint, '#FFFFFF', 0.35)); cg.addColorStop(1, tint);
+        cg.addColorStop(0, mix(tint, '#FFFFFF', 0.2)); cg.addColorStop(0.6, tint); cg.addColorStop(1, c ? mix(c.base, c.dark, 0.3) : '#E0A21C');
         ctx.fillStyle = cg; ctx.beginPath(); circ(ctx, 0, -8, 14 * oc + 2); ctx.fill();
-        ctx.strokeStyle = c ? lineOf(c) : '#C99A12'; ctx.lineWidth = 1.8; ctx.stroke();
+        ctx.strokeStyle = c ? lineOf(c) : '#B0850A'; ctx.lineWidth = 2.2; ctx.stroke();
         ctx.restore();
         for (var d = 0; d < 6; d++) dot(ctx, (d - 2.5) * 4 * oc, -6 - 4 * oc + Math.abs(d - 2.5) * 0.8, 1.8, '#FFF1B8');
-        ctx.save(); ctx.translate(0, 5); for (var j = 0; j < front; j++) { var g2 = j / (front - 1) - 0.5; drawPetal(ctx, g2 * (0.9 + 2.3 * oc), L2 * (0.8 - 0.12 * oc), 9, LAKE.petal, '#C9B9A2', null); } ctx.restore();
+        ctx.save(); ctx.translate(0, 5); for (var j = 0; j < front; j++) { var g2 = j / (front - 1) - 0.5; drawPetal(ctx, g2 * (0.9 + 2.3 * oc), L2 * (0.8 - 0.12 * oc), 9, 'pink', PETAL_LINE, null); } ctx.restore();
       }
       ctx.restore();
     }

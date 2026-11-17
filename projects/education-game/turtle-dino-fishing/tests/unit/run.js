@@ -115,14 +115,17 @@ test('layout: 5 required viewports × ages — lanes in the water above the keep
     assert.strictEqual(L.portrait, H > W, tag);
     if (!L.portrait) assert.strictEqual(L.surfaceY, Math.round(H * 0.4), tag + ' landscape surface');
     else assert.ok(L.surfaceY >= 0.3 * H - 1 && L.surfaceY >= L.bubble.y + L.bubble.h + 0.2 * H - 1, tag + ' portrait surface');
-    assert.ok(L.portrait ? S.lanes.length >= 3 : S.lanes.length === (keep ? S.lanes.length : 3) && S.lanes.length >= 2, tag + ' lane count ' + S.lanes.length);
-    if (vp === 'iphoneP' && !keep) assert.strictEqual(S.lanes.length, 5, tag + ' tall portrait: 5 lanes');
+    assert.ok(S.lanes.length >= 2 && (vp !== 'iphoneP' || keep || S.lanes.length >= 4), tag + ' lane count ' + S.lanes.length);
+    // every round's fish fit the lanes' caps (max 5 fish, ages ≤ 4: 4)
+    assert.ok(S.ranges.reduce((a, R) => a + R.cap, 0) >= Math.max(...FISH_N[age]), tag + ' lane capacity');
+    const kp = L.portrait ? (H / W > 1.6 ? 1.36 : 1.15) : 1;
     S.lanes.forEach((y, i) => {
-      assert.ok(y - 0.5 * size >= L.surfaceY + 0.2 * size, tag + ' lane ' + i + ' under the surface');
+      assert.ok(y - 0.5 * size >= L.surfaceY + 0.25 * size + 11, tag + ' lane ' + i + ' under the lily pads');
+      assert.ok(y + 0.5 * size <= H - 138 * kp - 10 + 0.5, tag + ' lane ' + i + ' above the lake-bed sand');
       assert.ok(y + 0.5 * size <= L.groundY, tag + ' lane ' + i + ' above the lake bed');
       if (hk) assert.ok(y + 0.5 * size <= hk[0].y - 44 + 0.5, tag + ' lane ' + i + ' ≥ 44 px above the bottom keep-out');
       assert.ok(y + 0.5 * size <= H - ins.bottom, tag + ' lane above the home indicator');
-      if (i) assert.ok(y - S.lanes[i - 1] >= 1.0 * size - 0.5, tag + ' lane spacing');
+      if (i) assert.ok(y - S.lanes[i - 1] >= 0.85 * size - 1 && (y - S.lanes[i - 1] >= 1.0 * size - 1 || REQ.indexOf(vp) < 0 || keep), tag + ' lane spacing (≥ 1.0 size on the required devices)');
       const R = S.ranges[i];
       assert.ok(R.x0 >= ins.left && R.x1 <= W - ins.right && R.cx0 <= R.cx1, tag + ' range on screen');
       assert.ok(R.cx0 - 0.75 * size >= ins.left - 0.5 && R.cx1 + 0.75 * size <= W - ins.right + 0.5, tag + ' whole fish inside');
@@ -133,9 +136,14 @@ test('layout: 5 required viewports × ages — lanes in the water above the keep
     assert.strictEqual(L.lilies.length, 4);
     L.lilies.forEach(l => {
       assert.strictEqual(l.y, L.surfaceY + 6, tag + ' lily on the surface');
-      assert.ok(l.x >= S.x0 + 39 && l.x <= S.x1 - 39 && l.x > L.rock.x1, tag + ' lily inside the lake, clear of the rock');
+      assert.ok(l.x >= S.x0 && l.x <= S.x1 - 11 && l.x - 42 * L.lilyS >= L.rock.x1 + 11, tag + ' lily inside the lake, its pad clear of the rock');
     });
-    for (let i = 1; i < 4; i++) assert.ok(L.lilies[i].x - L.lilies[i - 1].x >= 80, tag + ' lilies spread');
+    for (let i = 1; i < 4; i++) {
+      assert.ok(L.lilies[i].x - L.lilies[i - 1].x >= 110 || L.lilies[i].x - L.lilies[i - 1].x >= 84 * L.lilyS + 16, tag + ' lilies ≥ 110 px apart (else smaller pads)');
+      assert.ok(L.lilies[i].x - L.lilies[i - 1].x >= 84 * L.lilyS + 15, tag + ' pads never overlap');
+    }
+    const bw = L.bronto.h * 260 / 300;
+    assert.ok(L.bronto.x + 0.5 * bw <= W - ins.right + 0.5 && Math.abs(L.bronto.w - bw) < 1e-9, tag + ' bronto art inside the screen');
     // the show point (the hanging fish) below / beside the bubble, above the water, on screen; the rod tips too
     assert.ok(!boxHit(L.showBox, L.bubble) && !boxHit(L.showBox, L.hud), tag + ' show fish clear of the bubble / HUD');
     assert.ok(L.showBox.y + L.showBox.h < L.surfaceY && L.showBox.x >= ins.left && L.showBox.x + L.showBox.w <= W - ins.right, tag + ' show fish on screen');
@@ -391,7 +399,38 @@ test('soft taps: 3 → hint, 6 (after 10 s of play) → assist; the next press a
   assert.ok(ev.some(e => e.type === 'assist') && ev.some(e => e.type === 'right'));
   let st = null;
   runUntil(w, () => { for (const e of w.drainEvents()) if (e.type === 'roundDone') st = e.stars; return st !== null; }, 20);
-  assert.ok(st <= 2, 'assisted ≤ 2★');
+  assert.strictEqual(st, 1, 'assisted → 1★ (assistMaxStars)');
+});
+test('QA P1-a: a resize at any moment of the cast (every 0.03 s) never leaves the round stuck; a lost cast un-hooks the fish', () => {
+  for (const [a, b] of [['ipadL', 'iphoneP'], ['iphoneP', 'air11L']]) for (let dt0 = 0; dt0 <= 1.2; dt0 += 0.03) {
+    const w = atPlay(4, 'colors', 1, { vp: a, seed: 81 });
+    const t = w.target; tap(w, t.x, t.y);
+    run(w, dt0, H);
+    const v = VPS[b]; w.setViewport(v[0], v[1], v[2]);
+    runUntil(w, () => w.state === 'roundDone', 15);
+    assert.ok(!w.members.some(m => m.state === 'hooked'), 'nobody left hooked');
+    runUntil(w, () => w.interactive && w.round === 2, 15);
+  }
+  // the safety net: the cast loses its fish → back to play, the fish swims again
+  const w = atPlay(4, 'colors', 1, { seed: 82 });
+  const t = w.target; tap(w, t.x, t.y); run(w, 0.05, H);
+  w.line.id = null; run(w, 0.05, H);
+  assert.strictEqual(w.phase, 'play'); assert.strictEqual(t.state, 'swim'); assert.ok(w.interactive);
+  tap(w, t.x, t.y); assert.strictEqual(w.phase, 'cast');
+});
+test('QA P1-b: a child who only taps Tibo / critters still gets idle nudges, hints and the assist; Tibo catches while assisted (1★)', () => {
+  const w = atPlay(4, 'colors', 1, { seed: 83 });
+  const tb = w.tiboHit();
+  let idle = 0, hint = 0, armed = false, right = null, st = null;
+  for (let k = 0; k < 60 * 60 && !right; k++) {
+    if (k % 90 === 0) { w.pointerDown(tb.cx, tb.cy); w.pointerUp(tb.cx, tb.cy); }
+    w.update(1 / 60);
+    for (const e of w.drainEvents()) { if (e.type === 'idle') idle++; if (e.type === 'hint') hint++; if (e.type === 'assistArmed') armed = true; if (e.type === 'right') right = e; }
+  }
+  assert.ok(idle >= 1 && hint >= 1 && armed, 'idle ' + idle + ' hint ' + hint + ' armed ' + armed);
+  assert.ok(right && right.id === w.cur.targetId, 'a Tibo press caught the target while assisted');
+  runUntil(w, () => { for (const e of w.drainEvents()) if (e.type === 'roundDone') st = e.stars; return st !== null; }, 20);
+  assert.strictEqual(st, 1);
 });
 test('stars: 3 / 2 / 1 for 0 / 1 / ≥ 2 misses', () => {
   for (const miss of [0, 1, 2, 3]) {

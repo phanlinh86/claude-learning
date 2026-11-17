@@ -1,4 +1,4 @@
-/* TL.Storage (Moka's Fairy Tea Party) — tiny key/value store on localStorage (in-memory fallback when blocked, e.g. private mode).
+/* TL.Storage (Tibo's Dino Lake Fishing) — tiny key/value store on localStorage (in-memory fallback when blocked, e.g. private mode).
  * Values are strings; JSON helpers. set() returns Promise<boolean> and rolls back the cached value on failure. */
 (function (TL) {
   'use strict';

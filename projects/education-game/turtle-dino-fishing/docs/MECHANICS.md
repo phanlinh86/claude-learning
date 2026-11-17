@@ -2,13 +2,13 @@
 
 Owner: mechanics engineer. Code: `game/js/{rng,content,world,weather,bot}.js`. Contract: `docs/DESIGN.md` §2, §5.1–5.5 — **where
 this file and DESIGN differ, this file is what the code does.**
-Tests: `node tests/unit/run.js` (23 tests, ≈ 13 s): layout on 8 viewports (the 5 required ones: 1556×720, 960×720, 720×1556,
+Tests: `node tests/unit/run.js` (25 tests, ≈ 14 s): layout on 8 viewports (the 5 required ones: 1556×720, 960×720, 720×1556,
 1180×820, 820×1180, with insets) × ages 3–7 × with / without a bottom keep-out; 44 000 rounds (11 topics × ages 3–7 × 200 seeds ×
 4 rounds, en / vi) checked by an independent rule checker; swimming (lane range, smooth U-turns, no lane overlap, no jumps); the
 whole catch; rod bend; counting / home badge; wrong → dart; hint; soft → hint → assist; stars; lagged hit test + slide + Tibo
 poke; idle backoff; resize at 7 moments of a round × 3 device pairs; chapter flow + time limit; short rounds; every critter;
 15 full bot sessions (skill 1 / 0.6 / 0.2 × ages 3–7, all events carry x, y); determinism + interpolation twins (incl. rot
-through the flip); weather; bot. `node tests/unit/run.js <name part>` runs a subset.
+through the flip); weather; bot; QA regressions (resize every 0.03 s of the cast; a child who only taps Tibo). `node tests/unit/run.js <name part>` runs a subset.
 Sim (report-only): `node tests/sim/hs_playtest.js [--n 40] [--ages 3,4] [--models typical,slow3,bot1,bot0.6,bot0.2] [--config '{…}']`
 (exit 1 when a target is missed; numbers in §9).
 
@@ -49,13 +49,17 @@ passed 75 s, ≥ 2 once past 110 s) the world stays in `roundDone / leave` for `
 - `pointerDown(x, y)` → `'member'` (play: the gesture's FIRST contact, judged) | `'brush'` (a fish pressed outside play: it
   wiggles, `wiggle {early}`) | `'critter'` | `'tibo'` (the poke fires on release, < `tapMoveMax()` move) | `'soft'` (nothing:
   bubbles + ripple in the water, a sparkle puff in the sky) | `'early'` (enter phase, nothing under the finger) | null (not in a round).
-- **Hit test**: circle at the fish body centre, `r = 0.6 × size + 14` (little fish × 0.85; bubbles `0.65 × size + 14`), tested at
+- **Hit test**: circle at the fish body centre, `r = 0.6 × size + 22` (little fish 0.85 × 0.6 × size + 22; bubbles `0.65 × size + 22`), tested at
   the fish's **interpolated position now AND its position 0.12 s ago** (a 0.25 s position history per fish) — either counts;
   **nearest centre wins**. A critter wins only when ≥ 2 × closer (`critterK`). Fish / critters beat Tibo.
 - **Slide**: a press that started on nothing and moves onto a swimming fish within `flickTime 0.25 s` is judged on that fish.
-- A soft press counts as "no progress" on **release** (play only; not within 1.5 × r of a critter).
+- A soft press counts as "no progress" on **release** (play only; not within 1.5 × r of a critter). **Every 2nd Tibo poke in play**
+  (`pokeNoProgress`) counts as a no-progress press too.
+- **Idle clock**: fish / water / sky presses restart it; **Tibo pokes and critter taps do not** (a child who only taps Tibo or the
+  critter still gets the idle nudges, the hint, the assist and main's auto-pause at idle n = 5).
 - **Assist** (after 6 no-progress presses, armed only after ≥ 10 s of play): the target glows, grows × 1.12, slows to 20 %, and the
-  next press anywhere in `layout.band` (the water) picks it (≤ 2★).
+  next press anywhere in `layout.band` (the water) **or on Tibo** (`assistTibo`) picks it. An assisted round gets **1★**
+  (`assistMaxStars`); the 2-miss hint rules are unchanged (3 / 2 / 1★ by misses).
 - While a finger is down, fish within 180 px of it ease to 35 % speed.
 
 ## 3. Layout (`computeLayout`, DESIGN §2)
@@ -71,33 +75,36 @@ passed 75 s, ≥ 2 once past 110 s) the world stays in `roundDone / leave` for `
 | `rodLen` | 170 | 150 |
 | `rock` {x, y (bottom-centre anchor), w, h, top, x0, x1, seat} | w 300, h = w·260/320; placed so the SVG seat (150, 70) is under Tibo's seat: x = tibo.x + 10·w/320, y = tibo.y + 190·w/320 (it stands deep in the water) | w 270 |
 | `tipShow`, `lineShow`, `showPt`, `showBox` | the rod in the show pose (angle −0.75, bend 0.4) → tip; the fish hangs facing Tibo, head up 0.42 rad; `showPt` = its centre: y = surfaceY − 0.5 size − 24 (line length clamped 60–160) | same |
-| `swim` {x0, x1, lanes [y], ranges [{x0, x1, cx0, cx1, cap}], spacing, len} | x0 = rock right + 30, x1 = W − ins.right − 50; 3 lanes between surfaceY + 0.75 size and groundY − 0.85 size (and ≥ 44 px above a bottom keep-out), spacing ≥ 1.0 size (fewer lanes if it does not fit) | x0 = ins.left + 40, x1 = W − ins.right − 40; 4 lanes (5 on tall screens with spacing ≥ 1.25 size). A lane whose left end is hidden by the rock starts at rock right + 20 |
-| lane range | `cx0 / cx1` = the range for the fish CENTRE (whole body inside x0..x1); `cap` 2 when the range ≥ 2.4 len, else 1 fish | same |
-| `lilies[4]` {x, y} | on the surface (y = surfaceY + 6), at (i + 0.5)/4 of [max(swim.x0, rock right) + 40, swim.x1 − 40] | same |
-| `bronto` {x, y (bottom), h} | x = W − ins.right − 0.22 h, y = surfaceY + 0.22 h, h 220 | h 200 |
+| `swim` {x0, x1, lanes [y], ranges [{x0, x1, cx0, cx1, cap}], spacing, len, top, bottom} | x0 = rock right + 30, x1 = W − ins.right − 50; up to 3 lanes evenly from `top` = surfaceY + 0.75 size + 12 (fins clear of the lily pads) to `bottom` = min(groundY − 0.85 size, **bedTop − 10 − 0.5 size**, a bottom keep-out − 44 − 0.5 size); spacing ≥ 1.0 size, fewer lanes if needed (a 720-high landscape now has 2 lanes) | x0 = ins.left + 40, x1 = W − ins.right − 40; up to 4 lanes (5 on tall screens with spacing ≥ 1.25 size). A lane whose left end is hidden by the rock starts at rock right + 20 |
+| `bedTop` | H − 138·kp: the top of the opaque sand of the lake-bed art (kp = 1 landscape, 1.15 portrait, 1.36 tall portrait); no fish body goes below bedTop − 10 | same |
+| lane range | `cx0 / cx1` = the range for the fish CENTRE (whole body inside x0..x1); `cap` = how many fish fit (1–3): k fish spread over [a, 1 − a] of the range (a = 0.22 for 2, 0.06 for 3) with centre gaps ≥ 1.3 len + 8. Only when the caps cannot hold the age's biggest round (3 / 4 / 5 fish at ages 3 / 4 / 5+) does the spacing tighten, down to 0.85 size (odd screens like 720×960; never on the required devices) | same |
+| `lilies[4]` {x, y}, `lilyS` | on the surface (y = surfaceY + 6), evenly from max(swim.x0, rock right + 12 + pad/2) to swim.x1 − 12 (≥ 110 px apart on every required device). **`lilyS`** = the pad scale render must use (= size/104 × 0.95, shrunk when the spacing is < pad + 16; pad ≈ 84 × lilyS px) | same |
+| `bronto` {x, y (bottom), h, w} | w = h·260/300 (art anchor 130/260 of the width), x = W − ins.right − w/2 − 4 (the whole art box on screen), y = surfaceY + 0.22 h, h 220 | h 200 |
 | `band` (assist) | the water: y from surfaceY to groundY, full safe width | same |
 | `sky` {y0, y1} | the band for the pterosaur / fireflies: below the bubble + HUD, ≥ 40 px above the surface | same |
 Also `W, H, ins, portrait, tall, phone, hud, keep[], hudKeep, safe, hitR, hitPad, len`.
-Examples (age 4): **960×720** (iPad, ins top 32 / bottom 27): surfaceY 288, lanes 366 / 478 / 591, centre range 377–832, bubble
-448,50 312×134, showPt (354, 212), tipShow (289, 91), lilies 406 / 538 / 671 / 804, rock right 269. **1556×720** (iPhone, notch
-108 / 108, bottom 38): lanes 366 / 473 / 580, range 485–1320, bubble 556,18 692×134, showPt (462, 212). **720×1556** (iPhone
-portrait): surfaceY 669, size 116, 5 lanes 756 … 1369 (the top lane 355–593, cap 1), bubble 24,218 672×140, showPt (335, 587),
-line 65. **1180×820**: surfaceY 328, lanes 406 / 552 / 698. **820×1180**: surfaceY 504, 4 lanes 582 … 1046, showPt (328, 428).
+Examples (age 4): **960×720** (iPad, ins top 32 / bottom 27): surfaceY 288, lanes 378 / 520 (cap 2 + 2), centre range 377–832,
+bubble 448,50 312×134, showPt (354, 212), tipShow (289, 91), lilies 321 / 514 / 706 / 898, bronto x 860, rock right 269.
+**1556×720** (iPhone, notch 108 / 108, bottom 38): lanes 378 / 520 (cap 3 + 3), range 485–1320, lilies 429 … 1386, bubble
+556,18 692×134, showPt (462, 212). **720×1556** (iPhone portrait): surfaceY 669, size 116, 4 lanes 768 / 945 / 1123 / 1300 (the
+top lane 355–593 cap 1, the others cap 2), lilies 305 / 426 / 547 / 668 (lilyS 1.06), bronto x 629, bubble 24,218 672×140,
+showPt (335, 587), line 65. **1180×820**: surfaceY 328, lanes 418 / 620 (cap 3 + 3). **820×1180**: surfaceY 504, 4 lanes
+594 … 959, showPt (328, 428).
 
 ## 4. `TL.CONFIG` (all tunable via `new TL.World({config})`)
 | group | values |
 |---|---|
 | flow | step 1/120, roundsPerLevel 4, chapterTimeLimit 75 s, chapterMinRounds 3, chapterHardLimit 110 s, chapterHardMinRounds 2, shortBudget [∞, 26, 42, 56] s (a later round is short: ≤ 2 fish at ages ≤ 4, ≤ 3 from 5), introTime 2.5, levelDoneTime 3.6, pondFullTime 1.6, talkAfterAnswer 1.6, talkLock 1, talkAskTime 12, talkGlowAfterAsks 2, talkMaxAsks 3, talkGiveUp 2 |
-| layout | §3 (bubble*, hud*, surface*, tibo*, tiboSvg, rockSvg, rodLen*, swim*, lane*, lily*, showLift 24, lineShow 60–160, size, tallK 1.12, lenK 1.5, littleK 0.6, bubbleD 1.25, hitK 0.6, hitPad 14, littleHitK 0.85, bubbleHitK 0.65, **mouth {x 0.66, y 0.04}** × size (fish facing right), hangRot 0.42, bubbleHook 0.6) |
+| layout | §3 (bubble*, hud*, surface*, tibo*, tiboSvg, rockSvg, rodLen*, swim*, laneTopPad 12, laneMinK 1.0, laneSqueezeK 0.85, laneCapMax 3, bedSand 138, bedGap 10, bedKPort 1.15, bedKTall 1.36, lilyEdge 12, lilyK 0.95, lilyPadW 84, lilyGapMin 110, showLift 24, lineShow 60–160, size, tallK 1.12, lenK 1.5, littleK 0.6, bubbleD 1.25, hitK 0.6, **hitPad 22**, littleHitK 0.85, bubbleHitK 0.65, **mouth {x 0.66, y 0.04}** × size (fish facing right), hangRot 0.42, bubbleHook 0.6) |
 | rod angles | rodRest −1.05, rodWindup −1.22, rodWhip −0.62, rodCast −0.85, rodReel −1.0, rodShow −0.75; bendCast 0.15, bendReel 0.8, bendShow 0.4; angle spring ω 12 ζ 0.35, bend spring ω 9 ζ 0.45; back to rest ω 10 ζ 0.25 (overshoot) |
 | swimming | speed {3: 38, 4: 48, 5: 58, 6: 66, 7: 74} px/s × per fish 0.85–1.15 (bubbles × 0.7); velK 2.6 /s (turns 6), turnTime 0.35 s, brakeL 0.3 len (constant-deceleration stop before the range end / a lane neighbour closer than neighK 1.3 len), sepK 1.08 (safety push), bob ±6 px at 0.5 Hz (bubbles ±9), drift ±10 px at 0.07 Hz (× 0.6 when lanes are tight), y spring ω 2.6 ζ 0.9, pitch 0.6 × atan(vy / |vx|) ≤ 0.25 rad, rot spring ω 10 ζ 0.8, tail wag 1.1–3.2 Hz with speed; fingerR 180 → 35 %, hint 40 %, assist 20 % (slowRate 3 /s); squash spring ω 14 ζ 0.4 |
-| enter | stagger 0.25 s, enterMin 1.2 s, speed √(cruise² + 2·380·d) ≤ 480 px/s (× W/1100 on wide screens), braking to cruise at its entry point (one fish: 30–70 % of the lane, two: ¼ and ¾ from opposite sides) |
+| enter | stagger 0.25 s (the fish heading farthest into the lake first), enterMin 1.2 s, speed √(cruise² + 2·380·d) ≤ 480 px/s (× W/1100 on wide screens), braking to cruise at its entry point (one fish: 30–70 % of the lane; two: 22 % / 78 % from opposite sides; three: 6 / 50 / 94 %); a fish blocked by a lane neighbour inside the range counts as in |
 | wrong | dart 0.4 s at 3 × cruise away from the finger (toward the roomier side near an end), turn 0.18 s, stretch kick 0.16, 3 bubbles; sameWrongWindow 1 s |
 | cast | wind-up 0.12 s, whip 0.15 s, the hook leaves at the end of the whip; flight 0.55 s ballistic: apex 90 px above the release point (never above ins.top + 14; lowered × 0.7 steps until the sampled arc clears the bubble, ≥ 24); aims at the fish's predicted stop (it brakes with k 5 /s); sink 0.35 s (sway 6 px) to the mouth |
 | reel | under water: the MOUTH follows a quadratic Bézier from the bite to the exit point (θ0 = 0.45 rad right of the show tip on the surface), 0.7–1.3 s (≈ 330 px/s, accelerating), wobble 10 px; air: pendulum g 1400, damping 1.2 /s while reeling in (0.6 in show), exit swing 0.25 × the tangential velocity, |θ| ≤ 1.1; line reeled in at 150 px/s to `lineShow` (≥ 0.6 s in the air); wriggle 4.2 Hz ± 0.16 rad × wriggle (1 → 0.55 → 0.2); hanging rot spring ω 24 |
 | show / release | showTime 1.4 s (count: 0.25 + n × 0.55 + 0.8 s); badge 2 s (fade 0.25); leap: ballistic g 1400 from where it hangs to lily[round], apex ≤ 150 (≥ 60) and its body under the bubble when they overlap in x, one full flip, blend out of the hang pose 0.18 s; away 0.9 s fade; lily 0.12 s after the dive, open spring ω 8 ζ 0.4 (overshoot ≈ 1.25) |
 | joy / leave | the others swim up to 0.55 size under the surface during the release; joyGap 0.35 s left → right, apex 60–90 px above the surface, g 1400, one flip, small splash on re-entry; joyTail 0.5, joyMaxT 4.5; leave 620 px/s (k 4) to the nearer side (turn 0.22 s), leaveMax 1.8 s |
-| help | hint after 2 misses or 3 no-progress presses; assist after 6, armed after ≥ 10 s of play; hintTime 10 s, cooldown 6 s, hand cycle 1.6 s (taps twice, follows the swimming target); idle 12 s × 1.5 up to 30 s (12, 30, 57, 87 … s), the first idle hints; any touch restarts the idle count; flickTime 0.25; tap = moved < max(24 logical, 24 CSS px ÷ viewScale) |
+| help | hint after 2 misses or 3 no-progress presses (every 2nd Tibo poke in play is one: pokeNoProgress 2); assist after 6, armed after ≥ 10 s of play, assistTibo true, assistMaxStars 1; hintTime 10 s, cooldown 6 s, hand cycle 1.6 s (taps twice, follows the swimming target); idle 12 s × 1.5 up to 30 s (12, 30, 57, 87 … s), the first idle hints; any fish / water / sky touch restarts the idle count (Tibo / critter taps do not); flickTime 0.25; tap = moved < max(24 logical, 24 CSS px ÷ viewScale) |
 | fx | ripple 0.9 s (r 8 → 70·k), splash 0.5 s, bubbles ≤ 40, ripples ≤ 16, splashes ≤ 10, puffs 0.6 s |
 | critters | one round per chapter (round 1 or 2, seeded), kind by chapter: ptero / bronto / frog / fireflies; appear 2–4.5 s after the first ask (also during cast / reel / show); ptero r 60 (in 2.6 s Bézier from the right → dip 0.6 s skimming the surface (splash) → glide out 2.4 s; tap → loop r 55 / 1.2 s); bronto r 0.3 h (wades in 2.5 s, stays 10 s, tap → spray 1.6 s, out 2.5 s; while in the water the lane ranges end at its legs: `cx1 ≤ block − len/2`); frog r 44 (hops in 0.8 s to the first open lily (else lily 3), sits 12 s, tap → hops 0.6 s to another lily, out 0.8 s); fireflies 6 × r 40 (in 1.4 s, dance 14 s, out 1.2 s; tap → twinkle 0.9 s) |
 | Tibo | moods idle talk happy cheer think oops cast reel wave; moodTime happy 1 cheer 1.4 oops 0.8 think 1.4 talk 1 wave 1.4 cast 0.7 (reel held through the reel); bounce 0.42 s; blink 2.2–5 s (0.13 s); look spring 6 /s |
@@ -143,7 +150,7 @@ _pslack, _pbend, _prodAngle }`.
   draw it small).
 ### 6.3 Lake things
 - `w.lilies[4] {x, y, open 0..~1.25 (spring; _popen), color (answer colour of the caught fish, null = gold), sway rad}` →
-  `drawLily(ctx, x, y, s, clamp(open, 0, 1.25), color, t)`; pads always drawn (open 0 = closed bud). `w.pondFull` 0..1 (twins
+  `drawLily(ctx, x, y, layout.lilyS, clamp(open, 0, 1.25), color, t)` (**use `layout.lilyS` as the pad scale**); pads always drawn (open 0 = closed bud). `w.pondFull` 0..1 (twins
   `_ppondFull`): sway + sparkle after the 4th lily.
 - `w.badge {home, x, y, a 0..1 (_pa), id}` → `drawHomeBadge(ctx, home, r, {alpha: a})` (beside the hanging fish, 2 s).
 - `w.ripples [{x, y, r, a}]` → `drawRipple`, `w.splashes [{x, y, s, u 0..1}]` → `drawSplash`, `w.bubbles [{x, y, r, a}]` →
@@ -178,7 +185,7 @@ _pslack, _pbend, _prodAngle }`.
 | `show` | `{id}` | "ta-da" chime |
 | `count` | `{id, i (1-based), n}` (fish centre) | rising "pip" + the number (`sayCountRun`) |
 | `home` | `{home, id}` (badge centre) | home line ("The crab lives in the sea.") |
-| `roundDone` | `{round, stars, misses, assisted}` | HUD star; praise (droppable) |
+| `roundDone` | `{round, stars, misses, assisted}` (assisted → 1★) | HUD star; praise (droppable) |
 | `release` | `{id}` | "whee" rising sine; `release[]` ("Bye bye, little fish!") |
 | `dive` | `{id}` (lily spot on the surface) | big splash (with `splash`) |
 | `lily` | `{i, color, auto?}` | soft bell chord + `weather.burst(x, y, {kind:'sparkle', n: 8})`; HUD lily dot i; `lily[]` (not when auto) |
@@ -188,7 +195,7 @@ _pslack, _pbend, _prodAngle }`.
 | `wrong` | `{id, thing, got: {nameKind, nameValue}, want: {kind, value, nameKind, promptKey, params}, streak, misses, hint?: true}` | soft "bloop-bloop" + bubble pops; `sayWrong` (kind words, then the goal) |
 | `wiggle` | `{id, repeat?: true, early?: true}` | a tiny bloop (no words) |
 | `soft` | `{kind 'water'|'sky'|'early'}` | a soft blip (water: bubble sound); never a mistake |
-| `pokeTibo` | `{promptKey, params, rule}` (play: repeat the question) or `{busy: true}` (giggle only, never cut a line) | |
+| `pokeTibo` | `{promptKey, params, rule}` (play: repeat the question) or `{busy: true}` (giggle only, never cut a line). It does not restart the idle clock; while the assist is armed a press on Tibo catches the target (`assist` + `right` instead of `pokeTibo`) | |
 | `hint` | `{id, mode 'tap', want, idle?}` | `hint[]` line |
 | `idle` | `{n, promptKey, params, rule}` (x, y = mouth) | `idle[]` nudge + the question; main pauses at n = 5 |
 | `assistArmed` / `assist` | `{id}` / `{id, from}` | — / as `right` |
@@ -233,17 +240,18 @@ Main also calls `weather.resize(L.W, L.H, L.surfaceY, L.groundY)` after every `s
   fish; 15 % slides from the water below; ≈ 4 % taps on empty water; Talk right with p = skill; critters p 0.6 per round; pokes
   Tibo p 0.03 per round. `stats {taps, slides, right, wrong, soft, water, talks, talkRight, critter, poke}`.
 
-## 10. Playtest numbers (`hs_playtest.js --n 30`, 1/30 s frames, 5 viewports, en / vi)
+## 10. Playtest numbers (`hs_playtest.js --n 30`, 1/30 s frames, 5 viewports, en / vi; after the QA fixes)
 | model | age | session min median (p90, max) | chapter s median [p10–p90] | round s (to roundDone) median (p90) | misses / round | rounds with a hint | stars 3/2/1 % | stuck |
 |---|---|---|---|---|---|---|---|---|
-| typical | 3 / 4 | 5.2 / 5.2 (5.5, 5.7) | 69.6 / 69.3 [64–78] | 12.5 / 12.2 (16.5) | 0.29 / 0.22 | 10 / 6 % | 78–82 / 14–16 / 4–7 | 0 |
-| typical | 5 / 6 / 7 | 5.2 / 5.2 / 4.9 (≤ 5.6) | 66–69 [63–79] | 11.3–11.9 | 0.11–0.16 | 2–3 % | 86–90 / 9–11 / 1–2 | 0 |
-| **slow3** (slow 3-year-old) | 3 / 4 | **6.3 / 6.5 (6.8–7.0, max 7.2)** | **84.4 / 84.2 [75–97]** | 16.0 / 17.3 (26.7) | 0.51 / 0.58 | 30 / 29 % | 59–66 / 20–26 / 13–15 | 0 |
-| bot1 / bot0.6 / bot0.2 | 3–7 | 3.9–4.2 / 4.1–4.5 / 4.6–5.0 | 50–54 / 54–59 / 61–66 | 8.2–8.7 / 9.2–9.8 / 11.2–11.6 | 0 / 0.55 / 1.4 | 0 / 15 / 60 % | 100 / 60 / 19 % 3★ | 0 |
+| typical | 3 / 4 | 5.1 / 5.0 (5.3–5.5, 5.5) | 67.9 / 68.1 [62–77] | 12.1 / 11.8 (15–17) | 0.34 / 0.19 | 11 / 4 % | 75–83 / 14–16 / 3–8 | 0 |
+| typical | 5 / 6 / 7 | 5.1 / 5.2 / 4.9 (≤ 5.5) | 64–68 [62–77] | 10.9–11.5 | 0.10–0.17 | 2–4 % | 86–91 / 8–12 / 1–2 | 0 |
+| **slow3** (slow 3-year-old) | 3 / 4 | **6.3 / 6.5 (6.7–7.0, max 7.1)** | **83.0 / 85.7 [74–99]** | 15.5 / 17.2 (26) | 0.52 / 0.55 | 28 / 31 % | 62–65 / 22–24 / 13–14 | 0 |
+| bot1 / bot0.6 / bot0.2 | 3–7 | 3.8–4.2 / 4.1–4.4 / 4.5–4.9 | 49–52 / 53–57 / 60–64 | 8.0–8.3 / 8.8–9.3 / 10.9–11.3 | 0 / 0.55 / 1.4 | 0 / 14 / 62 % | 100 / 59 / 20 % 3★ | 0 |
 A typical round: enter ≈ 1.6–2.0 s + play (listening ≈ 2.6 s + thinking) + cast 1.0 s + reel ≈ 2.2 s + show 1.4 s (count + 0.55 s
 per spot) → `roundDone`; then release ≈ 0.9 s + joy ≈ 0.4 s/fish + 0.5 + leave ≈ 1.2 s. 0 NaN, 0 stuck rounds, 0 fish off screen.
-The defaults already hit the targets (toddler chapter 60–100 s, session ≤ 8 min), so no CONFIG value was changed for pacing; the
-slow toddler's long chapters are kept in range by the 75 s / 110 s chapter limits (some chapters end after 3 rounds).
+The defaults hit the targets (toddler chapter 60–100 s, session ≤ 8 min), so no CONFIG value was changed for pacing; the slow
+toddler's long chapters are kept in range by the 75 s / 110 s chapter limits (some chapters end after 3 rounds). hitPad 22 kept
+the wrong-fish rate where it was (typical age 4: 0.19 misses / round).
 
 ## 11. Integrator notes
 - **Landscape: the cast line / the leap can pass behind the DOM speech bubble** (the rod tip is top-left, the bubble top-right; for
@@ -253,6 +261,7 @@ slow toddler's long chapters are kept in range by the 75 s / 110 s chapter limit
 - Draw the fish mouth at local (0.66 s, 0.04 s) (fish facing right) and the rod with the §6.2 formula — the tests check the world
   side; FishArt's tests should check `drawRod(...)` returns `TL.World.rodTip(...)`.
 - `world.layout.bubble` is where the DOM bubble goes (it moved right of the show area in landscape).
+- New layout fields for render: `layout.lilyS` (lily pad scale), `layout.bedTop` (sand top the lanes respect), `layout.bronto.w`.
 - The rock is anchored by its SVG seat under Tibo's seat (`layout.rock`), so it stands deep in the water; render tints its
   underwater part (below `surfaceY`).
 - Files copied from the tea party still contain words broken by the `FT → TL` rename (`ft` → `tl`): `letl` (left), `sotl` (soft),

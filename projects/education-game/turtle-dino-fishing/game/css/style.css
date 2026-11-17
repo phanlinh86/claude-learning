@@ -365,3 +365,22 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 @media (max-width: 430px) and (orientation: portrait), (max-height: 430px) and (orientation: landscape) {
   .bubble { padding: 6px 14px; border-radius: 20px; }
 }
+
+/* ---------- QA fixes 2026-11-17 (visual QA P2-3, P2-4, P2-6, P3-1) ---------- */
+/* the bubble sits away from Tibo (top right in landscape, full width in portrait): no tail pointing at nothing */
+.bubble::before, .bubble::after { display: none; }
+/* portrait title: Tibo on his rock stays visible — logo, tagline and ▶ live in the open water below the surface */
+@media (orientation: portrait) {
+  .title-wrap { justify-content: flex-end; padding-top: 0; padding-bottom: calc(var(--sa-b) + 9vh); }
+  /* portrait celebration: the panel at the bottom, Tibo cheering and the fish fountain stay in view */
+  #scrDone { align-items: flex-end; justify-content: center; padding-top: 0; padding-bottom: calc(var(--sa-b) + 3vh); }
+}
+/* landscape title: language chips + gear together at the top right, clear of Tibo's hat */
+@media (orientation: landscape) {
+  .title-top { justify-content: flex-end; gap: 12px; padding-right: calc(var(--sa-r) + 8px); }
+}
+/* phone landscape Talk time: the picture fills its column */
+@media (orientation: landscape) and (max-height: 500px) {
+  .talk-panel { grid-template-columns: 240px minmax(0, 1fr); }
+  .talk-panel #talkShow { width: 240px; }
+}

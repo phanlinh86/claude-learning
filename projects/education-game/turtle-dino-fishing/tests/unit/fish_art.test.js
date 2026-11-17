@@ -228,6 +228,7 @@ for (const withP2D of [false, true]) {
     ['drawWater defaults', m => A.drawWater(m.ctx, {}, NaN, null)],
     ['drawSurfaceFront', m => A.drawSurfaceFront(m.ctx, lay, 1, { mood: 'sunset' })],
     ['drawLine + float', m => { A.drawLine(m.ctx, { x: 300, y: 100 }, { x: 420, y: 500 }, 20, 1, 288); A.drawLine(m.ctx, { x: 300, y: 100 }, { x: 310, y: 160 }, 4, 0); }],
+    ['drawLine float in the air', m => { A.drawLine(m.ctx, { x: 300, y: 100 }, { x: 380, y: 150 }, 8, 0, 288, 1.2); A.drawLine(m.ctx, { x: 300, y: 100 }, { x: 300, y: 101 }, 0, 0, null, 1); }],
     ['drawLine defaults', m => A.drawLine(m.ctx, {}, {}, NaN, NaN)],
     ['drawHook', m => { A.drawHook(m.ctx, 100, 200, 1.2); A.drawHook(m.ctx, 100, 200, 1, true); A.drawFloat(m.ctx, 5, 5, 1, 0.2); }],
     ['drawRipple', m => [5, 30, 80].forEach(r => A.drawRipple(m.ctx, 100, 300, r, 0.7))],

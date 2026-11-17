@@ -1,4 +1,4 @@
-// Tiny static file server for the e2e tests of Moka's Fairy Tea Party (serves game/ on a free port).
+// Tiny static file server for the e2e tests of Tibo's Dino Lake Fishing (serves game/ on a free port).
 const http = require('http'), fs = require('fs'), path = require('path');
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.webmanifest': 'application/manifest+json', '.json': 'application/json' };
 module.exports = function serve(root = path.join(__dirname, '..', '..', 'game')) {

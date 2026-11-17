@@ -322,7 +322,7 @@
       for (const p of w.puffs || []) { try { P.drawSparkle(g, ip(p, 'x', a), ip(p, 'y', a), (p.r || 14) * 1.3, p.alpha == null ? 1 : p.alpha, this.time * 2); } catch (e) { /* skip */ } }
     }
     _lilies(w, a) {
-      const P = FA(), L = this._L, s = (L.size || 104) / 104 * 0.95, full = clamp(ip(w, 'pondFull', a) || 0, 0, 1);
+      const P = FA(), L = this._L, s = L.lilyS || (L.size || 104) / 104 * 0.95, full = clamp(ip(w, 'pondFull', a) || 0, 0, 1);
       (w.lilies || L.lilies || []).forEach((q, i) => {
         const open = q.open == null ? 0 : clamp(ip(q, 'open', a), -1, 1.3);
         let y = q.y; try { y = (P.waveY ? P.waveY(L, q.x, this.time) : L.surfaceY) + 6; } catch (e) { /* keep */ }
@@ -386,9 +386,10 @@
       if (!tip) return;
       const hk = Ln._phook && Ln.hook ? { x: lerp(Ln._phook.x, Ln.hook.x, a), y: lerp(Ln._phook.y, Ln.hook.y, a) } : Ln.hook;
       if (!hk) return;
-      const slack = ip(Ln, 'slack', a) || 0, wet = hk.y > L.surfaceY + 4;
-      try { P.drawLine(g, tip, hk, slack, this._night, L.surfaceY); } catch (e) { /* skip */ }
-      if (Ln.state !== 'taut') { try { P.drawHook(g, hk.x, hk.y, 1, wet); } catch (e) { /* skip */ } }
+      const slack = ip(Ln, 'slack', a) || 0;
+      // the float rides on the line (in the air 18·s above the hook, on the surface once the hook sinks): drawLine owns it
+      try { P.drawLine(g, tip, hk, slack, this._night, L.surfaceY, Ln.state === 'taut' ? 0 : 1); } catch (e) { /* skip */ }
+      if (Ln.state !== 'taut') { try { P.drawHook(g, hk.x, hk.y, 1, true); } catch (e) { /* skip */ } }
     }
     _critter(c, a) {
       if (!c || c.state === 'gone') return;
@@ -466,11 +467,12 @@
       }
       // a fountain of leaping fish
       const things = [{ kind: 'fish', color: 'red' }, { kind: 'fish', color: 'yellow' }, { kind: 'fish', color: 'blue' }, { kind: 'fish', mark: { n: 3 } }, { kind: 'fish', color: 'green' }];
-      const pb = o.boxes && o.boxes.done;
       for (let i = 0; i < things.length; i++) {
         const per = 2.4, u = ((t + i * per / things.length) % per) / per;
         const cx = lerp(xa + 60, xb - 60, (i + 0.5) / things.length), x = cx + (u - 0.5) * 120;
-        const hgt = Math.min(240, L.surfaceY - ((pb && this.H > this.W) ? pb.y + pb.h + 40 : 80));
+        let hgt = Math.max(80, Math.min(240, L.surfaceY - ((L.ins && L.ins.top) || 0) - 120));   // leaps up into the sky, clear of the panel
+        const pb = o.boxes && o.boxes.done;
+        if (pb && pb.y + pb.h < L.surfaceY) hgt = Math.max(60, Math.min(hgt, L.surfaceY - (pb.y + pb.h) - 30));   // landscape: under the top panel
         const y = L.surfaceY + 30 - 4 * u * (1 - u) * (hgt + 30);
         g.save(); g.translate(x, y); g.rotate((u - 0.5) * 2.4);
         try { P.drawThing(g, things[i], (L.size || 104) * 0.8, { t, wag: 1, night: this._night }); } catch (err) { /* skip */ }
