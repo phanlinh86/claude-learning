@@ -1,0 +1,29 @@
+{
+  "name": "Tibo's Dino Lake Fishing · Rùa Tibo Câu Cá Hồ Khủng Long",
+  "short_name": "Dino Lake",
+  "description": "Fishing learning game with Tibo the baby turtle in a dinosaur-valley lake: tap the fish Tibo asks for, he reels it up, then it leaps home and a water lily blooms. Colours, shapes, big and little, counting spots, animal homes, letters, numbers. English & Vietnamese.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#BFE6F2",
+  "theme_color": "#BFE6F2",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
