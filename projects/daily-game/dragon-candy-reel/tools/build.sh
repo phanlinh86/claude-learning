@@ -16,7 +16,8 @@ node tools/render_icon.js game/assets/default/icon.svg build
 python3 tools/make_ico.py build app/icon.ico
 
 echo "3/4  Embedding icon + manifest resources"
-RSRC=$(command -v rsrc || echo "$(go env GOPATH)/bin/rsrc")
+GOBIN_DIR=$(go env GOBIN); [ -n "$GOBIN_DIR" ] || GOBIN_DIR="$(go env GOPATH)/bin"   # go install uses GOBIN when set
+RSRC=$(command -v rsrc || echo "$GOBIN_DIR/rsrc")
 [ -x "$RSRC" ] || go install github.com/akavel/rsrc@v0.10.2
 "$RSRC" -arch amd64 -manifest app/app.manifest -ico app/icon.ico -o app/rsrc_windows_amd64.syso
 

@@ -32,7 +32,7 @@ Taffy the baby dragon sits on a wafer-biscuit dock over the Fizzy Soda Lake in C
 - Best score saved per difficulty.
 
 ## Levels: weather (distinct backgrounds and ambient animation)
-Each level needs 8 snowflakes (Easy 6, Hard 10).
+Each level needs 8 snowflakes (Easy 8, Hard 10).
 1. **Sunny Shore**: bright sky, lollipop trees, cotton-candy clouds; light rays in turquoise soda; fizz bubbles. Gentle gusts.
 2. **Sprinkle Rain**: soft grey-pink sky, rainbow sprinkles falling and plinking rings on the water.
 3. **Windy Swirl**: fast clouds, candy-floss tufts and wrappers blowing; the strongest, most frequent gusts.

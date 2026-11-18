@@ -99,7 +99,7 @@ Largest real sway at the bottom (gust magnitude 1): Easy Sunny 20 px, Normal Sun
 | `maxLines / snapReset / invuln` | 3 / 1.0 / 1.5 | — / s / s | Spools; the hook is gone 1 s; then 1.5 s gummy-proof |
 | `puffTime / puffDrift / puffRise / leaveSpeed` | 0.28 / 42 / 16 / 150 | s, px/s | A bumped gummy puffs up, drifts away and floats up; on level clear gummies swim off |
 | `points / perfectBonus` | berry 10, lime 20, grape 30, gold 50; +5 | pts | gold = 5 × berry |
-| `goldChance / goldSpeed / goldNeedle` | 1/12, 1.6, 1.15 | — | Rare, drifts 60% faster, needle 15% faster |
+| `goldChance / goldSpeed / goldNeedle` | 1/12, 1.35, 1.15 | — | Rare, drifts 35% faster (playtest: was 1.6), needle 15% faster |
 | `depthSpeed / zoneSpeed / loopSpeedUp / loopSpeedCap` | 0.35 / 0.10 / 0.08 / 1.4 | × | Deeper and later = faster; endless +8% per loop, capped |
 | `maxFlakes / maxFish` | 4 / 8 | — | Keeps the lake readable for small kids |
 | `flakeBobAmp/Rate`, `gummyBobAmp/Rate` | 5, 1.9 / 10, 2.4 | px, rad/s | Flakes bob gently, gummies "swim" more |
@@ -111,7 +111,7 @@ Per difficulty (`CONFIG.difficulty.easy|normal|hard`):
 
 | Key | easy | normal | hard |
 |---|---|---|---|
-| `flakesNeeded` | 6 | 8 | 10 |
+| `flakesNeeded` | 8 (playtest: was 6) | 8 | 10 |
 | `sinkTerm / riseTerm` (px/s) | 190 / 125 | 230 / 150 | 265 / 170 |
 | `flakeR / gummyR` (px) | 30 / 16 | 27 / 19 | 24 / 21 |
 | `flakeEvery` (s) / `flakeSpeed` (px/s) | 3.0–4.4 / 30–44 | 3.0–4.4 / 38–56 | 2.8–4.2 / 46–68 |
@@ -120,7 +120,7 @@ Per difficulty (`CONFIG.difficulty.easy|normal|hard`):
 | `needle / needleZone` (sweeps/s) | 0.50/0.04 | 0.65/0.05 | 0.85/0.06 |
 | `stepsFull` | 4 | 5 | 6 |
 | `gummyEvery / gummyMin / gummyGrow` | 24/10/.85 | 13/5/.82 | 8/3.2/.80 |
-| `gummyMax / gummyMaxCap` | 1 / 2 | 2 / 4 | 3 / 5 |
+| `gummyMax / gummyMaxCap` | 1 / 1 (playtest: cap was 2) | 2 / 4 | 3 / 5 |
 | `gustEvery / driftMax / current` | see §1.4 | | |
 
 ## 3. Motion model (unchanged from the scaffold, renamed)

@@ -1,0 +1,52 @@
+[
+ {
+  "name": "landscape 960×540",
+  "logical": "960×540",
+  "browser": {
+   "simS": 239.99166666661188,
+   "flakesPerMin": 9.000312510853126,
+   "levels": 6,
+   "snaps": 0,
+   "escapes": 0,
+   "gustsPerMin": 3.750130212855469,
+   "levelS": 38.63333333333333,
+   "fps": 59.93333333333333,
+   "mode": "playing",
+   "errors": 0
+  },
+  "headless": {
+   "simS": 239.99166666661188,
+   "flakesPerMin": 9.662499999996653,
+   "levels": 6,
+   "snaps": 0,
+   "escapes": 0,
+   "gustsPerMin": 4.149999999998563,
+   "levelS": 36.98333333333334
+  }
+ },
+ {
+  "name": "portrait 390×844 touch",
+  "logical": "560×1212",
+  "browser": {
+   "simS": 240.11666666661117,
+   "flakesPerMin": 8.495870063165704,
+   "levels": 5,
+   "snaps": 0,
+   "escapes": 0,
+   "gustsPerMin": 3.748177969043693,
+   "levelS": 40.86,
+   "fps": 58.666666666666664,
+   "mode": "playing",
+   "errors": 0
+  },
+  "headless": {
+   "simS": 240.11666666661117,
+   "flakesPerMin": 9.545359894492423,
+   "levels": 6,
+   "snaps": 0,
+   "escapes": 0,
+   "gustsPerMin": 4.1105018393822075,
+   "levelS": 37.20583333333333
+  }
+ }
+]

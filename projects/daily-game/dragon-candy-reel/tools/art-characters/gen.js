@@ -26,7 +26,7 @@ const P = {
   // peppermint rod + reel
   mintStick: '#ffffff', mintRed: '#f0475e', rodLine: '#a3303f', reel: '#d3dbe6', reelLine: '#56627a',
   // flakes
-  berry: '#ff6fa8', berryHi: '#ffc2dc', berryLine: '#b02e68',
+  berry: '#ff6fa8', berryHi: '#ffc2dc', berryLine: '#b02e68', berryDeep: '#8a1f50',   // berryDeep: the flake's thicker, darker outline (keeps contrast when colour-blind)
   lime: '#8edc3e', limeHi: '#d6f7a8', limeLine: '#3f8019',
   grape: '#a970ea', grapeHi: '#dcc6ff', grapeDeep: '#7d45c9', grapeLine: '#4e2591',
   gold: '#ffcf2e', goldHi: '#fff3a8', goldDeep: '#f0a20f', goldLine: '#97600a',
@@ -462,9 +462,9 @@ function flakeBerry() {
   s += line(spokes, P.sugar, 15) + line(nubs, P.sugar, 11);
   for (let i = 0; i < 6; i++) { const t = at(c, c, 22, -90 + i * 60); s += `<path d="${circ(t[0], t[1], 7.6)}" fill="${P.sugar}"/>`; }
   s += `<path d="${circ(c, c, 11.5)}" fill="${P.sugar}"/>`;
-  s += line(spokes, P.berryLine, 11) + line(nubs, P.berryLine, 7.4);
-  for (let i = 0; i < 6; i++) { const t = at(c, c, 22, -90 + i * 60); s += `<path d="${circ(t[0], t[1], 5.6)}" fill="${P.berryLine}"/>`; }
-  s += `<path d="${circ(c, c, 9.4)}" fill="${P.berryLine}"/>`;
+  s += line(spokes, P.berryDeep, 11.8) + line(nubs, P.berryDeep, 8);
+  for (let i = 0; i < 6; i++) { const t = at(c, c, 22, -90 + i * 60); s += `<path d="${circ(t[0], t[1], 6)}" fill="${P.berryDeep}"/>`; }
+  s += `<path d="${circ(c, c, 9.8)}" fill="${P.berryDeep}"/>`;
   s += line(spokes, P.berry, 7) + line(nubs, P.berry, 3.6);
   for (let i = 0; i < 6; i++) {
     const t = at(c, c, 22, -90 + i * 60);

@@ -79,7 +79,7 @@ const PAL = {
     cloud: '#bea6b6', cloudSh: '#9b8296', cloudSh2: '#d8c4cf',
     haze: '#c7b5bf', hazeK: 0.45, farHaze: 0.5,
     ground: '#b9d6c0', groundSh: '#93b7a3',
-    water: ['#7cc4cf', '#2e6f8f'], rays: 0,
+    water: ['#9fbcc4', '#2f5873'], rays: 0,   // grey slate soda (visual QA: was close to sunny)
     wafer: '#d9a65e', waferD: '#a36d33', waferL: '#ecc98c', cream: '#f6e8d6', icing: '#fbf3ee', icingSh: '#e2cdc6',
     sand: '#dcd6cb', sandSh: '#b9b0a2', crystal: '#e2f1f5', crystalSh: '#9cc1cc', under: 0.5,
   },
@@ -88,7 +88,7 @@ const PAL = {
     cloud: '#ffffff', cloudSh: '#d6ecfb', cloudSh2: '#ffe6f2',
     haze: '#dcf5ff', hazeK: 0.1, farHaze: 0.4,
     ground: '#c7efc0', groundSh: '#9ad6a4',
-    water: ['#86dcd6', '#2a8aa6'], rays: 0.16,
+    water: ['#a4f0cf', '#1f7a80'], rays: 0.16,   // mint-green soda (visual QA: was close to sunny)
     wafer: '#ebb768', waferD: '#c0843b', waferL: '#f8d99c', cream: '#fff3dc', icing: '#fffaf3', icingSh: '#efd9c6',
     sand: '#f0e4c8', sandSh: '#d5c299', crystal: '#e6faff', crystalSh: '#a3d6e4', under: 0.55,
   },
@@ -393,7 +393,10 @@ function water(L) {
     for (const [x, w, sl] of rays) b += pth(`M${x} 0L${x + w} 0L${f(x + w + sl * lean * 1.15)} 320L${f(x + sl * lean * 0.9)} 320Z`, 'url(#ry)');
   }
   if (L === 'sunny' || L === 'wind') { defs += rad('fz', [['0', '#e8fffb', 0.16], ['1', '#e8fffb', 0]]); b += ell(480, 30, 560, 110, 'url(#fz)'); }
-  if (L === 'rain') { defs += rad('rg', [['0', '#e6eef2', 0.14], ['1', '#e6eef2', 0]]); b += ell(480, 0, 620, 90, 'url(#rg)'); }
+  if (L === 'rain') {
+    defs += rad('rg', [['0', '#e6eef2', 0.14], ['1', '#e6eef2', 0]]); b += ell(480, 0, 620, 90, 'url(#rg)');
+    defs += lin('rv2', [['0', '#c9d2d8', 0.22], ['0.6', '#9aa6b0', 0.12], ['1', '#9aa6b0', 0]]); b += rect(0, 0, W, 260, 'url(#rv2)');   // soft grey drizzle veil
+  }
   if (L === 'snow') {
     defs += rad('sg', [['0', '#ffe2b0', 0.1], ['1', '#ffe2b0', 0]]); // warm house-light reflection near the surface (far left / far right)
     b += ell(215, 8, 110, 40, 'url(#sg)') + ell(780, 8, 150, 50, 'url(#sg)');
@@ -447,7 +450,8 @@ function reef(L) {
   let back = '', mid = '', front = '';
   const bed = prof(286, [[2.2, 2, li], [1.4, 5, 1.7], [0.6, 13, 0.4]]);
   // swirl-lollipop "plants" (edges only)
-  const lol = [[40, 130, 17, CANDY.pink], [92, 86, 12, CANDY.mint], [205, 110, 15, CANDY.blue], [262, 70, 11, CANDY.purple], [700, 92, 13, CANDY.lime], [770, 140, 18, CANDY.blue], [845, 78, 12, CANDY.pink], [925, 112, 15, CANDY.mint]];
+  const TEAL = '#4fd1c5';   // reef lollipops avoid purple / pink so a grape flake never sits on its own hue
+  const lol = [[40, 130, 17, TEAL], [92, 86, 12, CANDY.mint], [205, 110, 15, CANDY.blue], [262, 70, 11, TEAL], [700, 92, 13, CANDY.lime], [770, 140, 18, CANDY.blue], [845, 78, 12, TEAL], [925, 112, 15, CANDY.mint]];
   for (const [x, h, R, c] of lol) { const c1 = under(c); back += wrap(x + lean, R + 22, X => lollipop(X - lean, bed(x) + 4, h, R, c1, lite(c1, 0.55), { lean, stick: under('#fff6ec'), olw: 2.4 })); }
   // licorice weeds
   const lic = under(L === 'snow' ? '#5a4a78' : '#6b4a63');
@@ -455,7 +459,7 @@ function reef(L) {
   // rock-candy crystal clusters
   for (const [x, h, n] of [[160, 74, 5], [290, 40, 3], [735, 56, 4], [820, 96, 5], [20, 50, 3]]) { const st = r(); mid += wrap(x, h * 0.7, X => crystals(X, bed(x) + 4, h, P, n, rng(Math.floor(st * 1e6)), glow)); }
   // gumdrop rocks
-  for (const [x, w, h, c] of [[70, 56, 34, CANDY.purple], [245, 40, 24, CANDY.orange], [690, 46, 28, CANDY.pink], [895, 64, 38, CANDY.lime], [612, 26, 12, '#bfe3e8']]) mid += wrap(x, w / 2 + 4, X => gumRock(X, bed(x) + 4, w, h, under(c)));
+  for (const [x, w, h, c] of [[70, 56, 34, CANDY.blue], [245, 40, 24, CANDY.orange], [690, 46, 28, CANDY.mint], [895, 64, 38, CANDY.lime], [612, 26, 12, '#bfe3e8']]) mid += wrap(x, w / 2 + 4, X => gumRock(X, bed(x) + 4, w, h, under(c)));
   // calm column: only tiny clear crystals, pale pebbles and a couple of shells (all ≤ 30 px)
   for (const [x, h] of [[360, 22, 3], [455, 16, 2], [530, 26, 3], [600, 14, 2]].map(a => a)) { const st = r(); front += crystals(x, bed(x) + 4, h, P, 3, rng(Math.floor(st * 1e6)), glow); }
   for (let i = 0; i < 10; i++) { const x = CALM0 + 10 + r() * (CALM1 - CALM0 - 20), c = lite(P.sand, 0.4); front += ell(x, bed(x) + 2, 4 + r() * 3, 2.4 + r() * 1.2, c, OL(P.sandSh, 1.4)); }
@@ -463,7 +467,7 @@ function reef(L) {
   let sand = pth(profPath(bed, 320, 6), 'url(#sd)') + stk(profLine(bed, 6), dark(P.sand, 0.25), 3);
   sand += stk(profLine(x => bed(x) + 3, 6), lite(P.sand, 0.45), 1.6, ' opacity="0.8"');
   // sugar grains + candy pebbles (colour only outside the calm column, and muted)
-  const peb = [CANDY.pink, CANDY.mint, CANDY.blue, CANDY.purple, CANDY.gold];
+  const peb = [CANDY.pink, CANDY.mint, CANDY.blue, CANDY.lime, CANDY.gold];
   for (let i = 0; i < 90; i++) {
     const x = r() * W, y = bed(x) + 8 + r() * 24, s = 1.2 + r() * 2.6, m = ((x % W) + W) % W, calm = m > CALM0 - 10 && m < CALM1 + 10;
     const c = calm || r() < 0.55 ? (r() < 0.5 ? P.sandSh : lite(P.sand, 0.5)) : under(peb[i % peb.length]);

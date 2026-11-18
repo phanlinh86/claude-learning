@@ -31,6 +31,7 @@
     hookBottomPad: 22,      // px    maxHookY = floorY - 22: the hook never touches the sugar sand
     bandSplits: [0.36, 0.68], // frac of minHookY..maxHookY: shallow | middle | deep
     screenPad: 60,          // px    the swayed hook always stays inside [60, W − 60]
+    portraitItems: 1.15,    // ×     portrait (tall phone): snowflakes and gummies are drawn and hit 15% bigger
 
     // ---- hook motion ----
     hookR: 11,              // px    hit radius of the hook (around its hit centre = hook.x, hook.y)
@@ -75,6 +76,7 @@
     catchFly: 0.75,         // s     flake flies in an arc from the gap to the candy jar
     jarDX: -150,            // px    jar (flake landing point) relative to holeX
     jarDY: -20,             // px    jar landing y relative to surfaceY
+    catchArc: 110,          // px    height of the flight to the jar (clears Taffy's head, stays in the sky band)
 
     // ---- lines / snaps ----
     maxLines: 3,            // —     licorice spools; a sour-gummy bump snaps one
@@ -94,7 +96,7 @@
     flakeBobAmp: 5,         // px    flakes in bubbles bob gently…
     flakeBobRate: 1.9,      // rad/s …at ~3.3 s per bob
     goldChance: 1 / 12,     // —     per flake spawn; never twice in a row
-    goldSpeed: 1.6,         // ×     golden flakes drift faster (harder to get, worth more)
+    goldSpeed: 1.35,        // ×     golden flakes drift faster (harder to get, worth more; playtest 1.6 → 1.35)
     goldNeedle: 1.15,       // ×     needle 15% faster while reeling a golden flake
     depthSpeed: 0.35,       // ×     swimmers 35% faster at the deepest point than at the top
     zoneSpeed: 0.1,         // ×     +10% swim speed per level within a loop
@@ -120,7 +122,7 @@
 
     difficulty: {
       easy: {
-        flakesNeeded: 6,
+        flakesNeeded: 8,               // playtest: 6 → 8 (Easy levels last ≈50 s)
         sinkTerm: 190, riseTerm: 125,  // px/s  slow hook = easy to stop on a flake
         flakeR: 30, gummyR: 16,        // px    big flakes, small gummies
         flakeEvery: [3.0, 4.4],        // s     flake spawn interval
@@ -130,7 +132,7 @@
         needle: 0.5, needleZone: 0.04, // sweeps/s (one sweep = 0→1)
         stepsFull: 4,                  // good taps to land a flake from the deepest point
         maxSlips: 3,
-        gummyEvery: 24, gummyMin: 10, gummyMax: 1, gummyMaxCap: 2, // s, s, alive, alive cap
+        gummyEvery: 24, gummyMin: 10, gummyMax: 1, gummyMaxCap: 1, // s, s, alive, alive cap (playtest: one sour gummy at a time on Easy)
         gummyGrow: 0.85,               // × spawn interval per level
         gustEvery: [11, 15],           // s     between gusts
         driftMax: 34,                  // px    sway at the bottom at |wind| = 1
@@ -218,7 +220,7 @@
     this._hangT = 0;
     this._safeT = 0;
     this.layout = null;
-    this.setLayout(opts.width || 960, opts.height || 540);
+    this.setLayout(opts.width || 960, opts.height || 540, opts.top || 0);
     var L = this.layout;
     this.hook = { x: L.holeX, y: L.waterTop - CONFIG.newLineAbove, prevX: L.holeX, prevY: L.waterTop - CONFIG.newLineAbove,
       vx: 0, vy: 0, sway: 0, swayV: 0, holding: false, tilt: 0, drop: true, lost: false, wob: 0, r: CONFIG.hookR };
@@ -227,25 +229,28 @@
   };
 
   // ------------------------------------------------------------------ layout
-  World.prototype._calcLayout = function (w, h) {
-    var surfaceY = CONFIG.surfaceY, waterTop = CONFIG.waterTop, floorY = h - CONFIG.floorPad;
+  /* top: the safe-area inset (logical px) the whole scene moves down by in portrait, so the HUD under a notch never
+   * covers the jar, the windsock or the deck. 0 in landscape / without a notch. */
+  World.prototype._calcLayout = function (w, h, top) {
+    top = M.max(0, M.round(top || 0));
+    var surfaceY = CONFIG.surfaceY + top, waterTop = CONFIG.waterTop + top, floorY = h - CONFIG.floorPad;
     var minHookY = waterTop + CONFIG.hookTopPad, maxHookY = floorY - CONFIG.hookBottomPad;
     if (maxHookY < minHookY + 120) maxHookY = minHookY + 120; // tiny windows: still playable
     var span = maxHookY - minHookY;
     return {
-      width: w, height: h, surfaceY: surfaceY, waterTop: waterTop, floorY: floorY,
+      width: w, height: h, top: top, itemK: h > w ? CONFIG.portraitItems : 1, surfaceY: surfaceY, waterTop: waterTop, floorY: floorY,
       holeX: M.round(w / 2), minHookY: minHookY, maxHookY: maxHookY,
       bands: [minHookY, minHookY + span * CONFIG.bandSplits[0], minHookY + span * CONFIG.bandSplits[1], maxHookY]
     };
   };
 
-  World.prototype.setLayout = function (w, h) {
-    var old = this.layout, L = this._calcLayout(w, h);
+  World.prototype.setLayout = function (w, h, top) {
+    var old = this.layout, L = this._calcLayout(w, h, top);
     this.layout = L;
     if (!old) return;
-    var oSpan = old.maxHookY - old.minHookY, nSpan = L.maxHookY - L.minHookY;
+    var oSpan = old.maxHookY - old.minHookY, nSpan = L.maxHookY - L.minHookY, ik = L.itemK / (old.itemK || 1);
     function mapY(y) {
-      if (y < old.minHookY) return y;                   // above the water: unchanged (dock is fixed)
+      if (y < old.minHookY) return y + L.surfaceY - old.surfaceY;   // above the water: moves with the dock
       return L.minHookY + (y - old.minHookY) / oSpan * nSpan;
     }
     function mapX(x) { return x - old.holeX + L.holeX; }
@@ -260,6 +265,7 @@
     for (var i = 0; i < this.items.length; i++) {
       var it = this.items[i];
       it.x = it.prevX = mapX(it.x);
+      if (ik !== 1 && it.kind !== 'fish') { it.r *= ik; if (it.r0) it.r0 *= ik; }
       it.y = it.prevY = mapY(it.y);
       if (it.by !== undefined) it.by = mapY(it.by);
     }
@@ -665,8 +671,8 @@
     if (it) {
       it.state = 'escape';
       it.t = 0;
-      it.vx = this.rng.sign() * this.rng.range(55, 85);
-      it.vy = -this.rng.range(50, 70);
+      it.vx = this.rng.sign() * this.rng.range(35, 55);   // wriggles free sideways a little…
+      it.vy = -this.rng.range(80, 100);                   // …and visibly floats up (it "floated away")
     }
     this._setTaffy('oops');
     this._emit({ type: 'escape', item: it });
@@ -755,8 +761,8 @@
         if ((it.vx > 0 && it.x > W + CONFIG.exitMargin) || (it.vx < 0 && it.x < -CONFIG.exitMargin)) remove = true;
       } else if (it.state === 'escape') {
         // bubble wriggles free: rises with buoyancy, drifts sideways (and with the current), slows in the water
-        it.vy += -60 * h;
-        it.vy *= M.exp(-0.6 * h);
+        it.vy += -90 * h;
+        it.vy *= M.exp(-0.5 * h);
         it.vx *= M.exp(-0.3 * h);
         it.x += (it.vx + push) * h + M.sin(it.t * 9) * 0.6;
         it.y += it.vy * h;
@@ -766,7 +772,7 @@
         var k = clamp(it.t / CONFIG.catchFly, 0, 1);
         var bx = L.holeX + CONFIG.jarDX, by = L.surfaceY + CONFIG.jarDY;
         it.x = it.fx0 + (bx - it.fx0) * k;
-        it.y = it.fy0 + (by - it.fy0) * k - M.sin(M.PI * k) * 150;
+        it.y = it.fy0 + (by - it.fy0) * k - M.sin(M.PI * k) * CONFIG.catchArc;
         if (k >= 1) remove = true;
       } else if (it.state === 'puffed') {
         it.puff = clamp(it.t / CONFIG.puffTime, 0, 1);
@@ -818,7 +824,7 @@
     var depth = (y - L.minHookY) / (L.maxHookY - L.minHookY);
     var speed = this._swimSpeed(rng.range(d.flakeSpeed[0], d.flakeSpeed[1]), depth) * (gold ? CONFIG.goldSpeed : 1);
     var type = gold ? 'gold' : CONFIG.bandTypes[band];
-    var it = this._newItem('flake', type, y, speed, rng.sign(), d.flakeR * (gold ? 1.05 : 1), CONFIG.flakeBobAmp, CONFIG.flakeBobRate, inside);
+    var it = this._newItem('flake', type, y, speed, rng.sign(), d.flakeR * (gold ? 1.05 : 1) * L.itemK, CONFIG.flakeBobAmp, CONFIG.flakeBobRate, inside);
     if (gold) this._emit({ type: 'golden', item: it });
     return it;
   };
@@ -842,7 +848,7 @@
     var y = rng.range(L.minHookY + 16, L.maxHookY - 6);
     var depth = (y - L.minHookY) / (L.maxHookY - L.minHookY);
     var speed = this._swimSpeed(rng.range(CONFIG.gummySpeed[0], CONFIG.gummySpeed[1]), depth * 0.5);
-    return this._newItem('gummy', 'gummy', y, speed, rng.sign(), d.gummyR, CONFIG.gummyBobAmp, CONFIG.gummyBobRate);
+    return this._newItem('gummy', 'gummy', y, speed, rng.sign(), d.gummyR * L.itemK, CONFIG.gummyBobAmp, CONFIG.gummyBobRate);
   };
 
   World.prototype._spawn = function (h) {

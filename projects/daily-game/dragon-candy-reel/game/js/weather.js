@@ -26,8 +26,8 @@
     { floss: 6, wrapper: 0, sprinkle: 0, snow: 0, bubble: 26, glint: 0, flossFast: false,
       tint: null, glow: 0.0, dark: 0.0 },
     // rain: rainbow sprinkles at an angle, ring ripples on the water
-    { floss: 0, wrapper: 0, sprinkle: 56, snow: 0, bubble: 14, glint: 0, flossFast: false,
-      tint: 'rgba(110,100,150,0.08)', glow: 0.2, dark: 0.15 },
+    { floss: 0, wrapper: 0, sprinkle: 80, snow: 0, bubble: 12, glint: 0, flossFast: false,
+      tint: 'rgba(90,100,120,0.12)', glow: 0.2, dark: 0.15 },
     // wind: floss tufts and wrappers tumbling fast
     { floss: 14, wrapper: 10, sprinkle: 0, snow: 0, bubble: 14, glint: 0, flossFast: true,
       tint: null, glow: 0.05, dark: 0.0 },
@@ -36,7 +36,8 @@
       tint: 'rgba(30,30,90,0.16)', glow: 0.85, dark: 0.45 }
   ];
   var KINDS = ['floss', 'wrapper', 'sprinkle', 'snow', 'bubble', 'glint'];
-  var MAX_TRAIL = 12, MAX_BURST = 48, MAX_RING = 18;
+  var MAX_TRAIL = 12, MAX_BURST = 48, MAX_RING = 22;
+  var SKY_H = 136;   // the sky band reaches this far above the deck (the scene moves down under a notch)
   var SPRINKLES = ['sprinkle', 'sprinkle_b', 'sprinkle_y'];
 
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
@@ -110,7 +111,7 @@
         var fast = this.target.flossFast;
         depth = r.next();
         return this._push({ kind: kind, sprite: 'floss', layer: 'sky', depth: depth,
-          x: anywhere ? r.range(-20, W + 20) : (wind >= 0 ? -24 : W + 24), y: r.range(14, sy - 24),
+          x: anywhere ? r.range(-20, W + 20) : (wind >= 0 ? -24 : W + 24), y: r.range(sy - SKY_H, sy - 24),
           size: fast ? 12 + depth * 14 : 18 + depth * 18, vx: wind * (fast ? 150 : 30),
           push: (fast ? 150 : 34) * (0.6 + 0.6 * depth) + (fast ? 0 : 6), resp: fast ? 1.4 : 0.6,
           sway: r.range(0.5, 1.2), swayAmp: fast ? 18 : 5, ph: r.range(0, 6.28),
@@ -119,18 +120,19 @@
       case 'wrapper':
         depth = r.next();
         return this._push({ kind: kind, sprite: 'wrapper', layer: 'sky', depth: depth,
-          x: anywhere ? r.range(-20, W + 20) : (wind >= 0 ? -20 : W + 20), y: r.range(20, sy - 10),
+          x: anywhere ? r.range(-20, W + 20) : (wind >= 0 ? -20 : W + 20), y: r.range(sy - SKY_H + 6, sy - 10),
           size: 10 + depth * 8, vx: wind * 180, push: 170 + 80 * depth, resp: 1.8,
           sway: r.range(1.5, 2.6), swayAmp: 26, ph: r.range(0, 6.28),
           rot: r.range(0, 6.28), spin: r.range(4, 9) * r.sign(), base: 0.95 });
       case 'sprinkle': {
-        // near sprinkles (front layer) fall all the way to the water and ring it; far ones stop at the deck
+        // near sprinkles (front layer, 13–16 px) ring the water as they hit it, dive 30–60 px in and fade;
+        // far ones stop at the deck
         depth = r.next();
         var front = depth > 0.62;
         return this._push({ kind: kind, sprite: r.pick(SPRINKLES), layer: front ? 'front' : 'sky', depth: depth,
           x: r.range(-40, W + 40), y: anywhere ? r.range(-10, front ? wt : sy) : r.range(-30, -8),
-          size: 6 + depth * 7, vy: 190 + depth * 170, vx: wind * 90, push: 70 + 50 * depth, resp: 3,
-          yEnd: front ? wt + 2 : sy + 4, base: 0.65 + depth * 0.35 });
+          size: front ? 15 + (depth - 0.62) * 13 : 6 + depth * 8, vy: 190 + depth * 170, vx: wind * 90, push: 70 + 50 * depth, resp: 3,
+          yEnd: front ? wt + 2 + r.range(30, 60) : sy + 4, base: 0.65 + depth * 0.35 });
       }
       case 'snow':
         depth = r.next();                       // 0 = far (small, slow, faint) … 1 = near
@@ -159,8 +161,8 @@
     var n = 0;
     for (var i = 0; i < this.particles.length; i++) if (this.particles[i].kind === 'ring') n++;
     if (n >= MAX_RING || x < -10 || x > this.width + 10) return;
-    this._push({ kind: 'ring', sprite: 'ring', layer: 'front', x: x, y: this.waterTop + 2, size: 6, sx: 0.32,
-      life: this.rng.range(0.5, 0.75), base: 0.85 });
+    this._push({ kind: 'ring', sprite: 'ring', layer: 'front', x: x, y: this.waterTop + 2, size: 10, sx: 0.36,
+      life: this.rng.range(0.7, 1.0), base: 1 });
   };
 
   /** One-off burst. opts: speed (px/s), gravity (px/s²), drag (1/s), life (s), size (px),
@@ -238,12 +240,12 @@
           p.vx += (wind * p.push - p.vx) * ke;
           p.x += p.vx * dt;
           p.y += M.cos(this.time * p.sway + p.ph) * p.swayAmp * dt;
-          p.y = clamp(p.y, 8, sy - 6);
+          p.y = clamp(p.y, sy - SKY_H - 6, sy - 6);
           p.rot += (p.spin + p.vx * 0.01) * dt;
           p.alpha = p.base;
           if (p.x > W + 40 || p.x < -40) {
             if (p.dying) dead = true;
-            else { p.x = p.x > W ? -30 : W + 30; p.y = r.range(14, sy - 24); }
+            else { p.x = p.x > W ? -30 : W + 30; p.y = r.range(sy - SKY_H, sy - 24); }
           }
           break;
         case 'sprinkle':
@@ -252,17 +254,20 @@
           p.x += p.vx * dt; p.y += p.vy * dt;
           p.rot = -M.atan2(p.vx, p.vy);            // rod points along its fall
           p.alpha = p.base;
+          if (p.layer === 'front' && p.y > wt) {
+            if (!p.tw) { p.tw = 1; rings.push(p.x); }  // tw: already rang the surface
+            p.alpha = p.base * 0.8 * clamp(1 - (p.y - wt) / M.max(1, p.yEnd - wt), 0, 1);
+          }
           if (p.y >= p.yEnd) {
-            if (p.layer === 'front') rings.push(p.x);
             if (p.dying) dead = true;
-            else { p.y = r.range(-30, -8); p.x = r.range(-40, W + 40); }
+            else { p.y = r.range(-30, -8); p.x = r.range(-40, W + 40); p.tw = 0; }
           }
           if (p.x > W + 60) p.x -= W + 100; else if (p.x < -60) p.x += W + 100;
           break;
         case 'ring':
           // ripple spreads and fades
           var u = p.age / p.life;
-          p.size = 6 + 26 * M.sqrt(u);
+          p.size = 10 + 34 * M.sqrt(u);
           p.alpha = p.base * clamp(1 - u, 0, 1);
           if (u >= 1) dead = true;
           break;

@@ -46,7 +46,7 @@
     makeWorld(seed, forTitle, level) {
       const s = seed != null ? seed : (this.seed != null ? this.seed : (Math.random() * 1e9) | 0);
       const R = this.renderer;
-      return new PR.World({ seed: s, difficulty: forTitle ? 'normal' : this.difficulty(), width: R.VW, height: R.VH, level: level || 0 });
+      return new PR.World({ seed: s, difficulty: forTitle ? 'normal' : this.difficulty(), width: R.VW, height: R.VH, top: R.sceneTop(), level: level || 0 });
     },
     readInsets() {
       const el = document.getElementById('safeProbe'); if (!el) return null;
@@ -62,6 +62,7 @@
     },
 
     toTitle() {
+      this.closeScoreCard();
       PR.Audio.stopMusic();
       this.releaseAll();
       this.mode = 'title';
@@ -77,6 +78,7 @@
 
     startGame() {
       PR.Audio.unlock();
+      this.closeScoreCard();
       { const t = document.getElementById('toast'); if (t) t.classList.add('hidden'); }
       this.releaseAll();
       this.runDifficulty = this.difficulty();
@@ -113,6 +115,9 @@
     },
     canvasFocus() { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); },
     canRestart() { return performance.now() - this.overAt > 700; },
+    /* the Score Card window (made by extras.js, not one of UI.SCREENS) */
+    scoreCardOpen() { const sc = document.getElementById('scScreen'); return !!(sc && !sc.classList.contains('hidden')); },
+    closeScoreCard() { const sc = document.getElementById('scScreen'); if (sc) sc.classList.add('hidden'); },
 
     gameOver() {
       const w = this.world, key = 'best_' + (this.runDifficulty || this.difficulty());
@@ -155,10 +160,14 @@
       PR.UI.syncMute(); PR.UI.toast(this.settings.muted || this.urlMute ? 'Sound off' : 'Sound on', 900);
     },
     setFullscreen(on) {
-      this.fullscreen = on;
-      if (typeof window.ffFullscreen === 'function') window.ffFullscreen(on);
-      else if (on && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
-      else if (!on && document.fullscreenElement) document.exitFullscreen().catch(() => {});
+      // the flag follows what really happened: a refused request (iPad Safari, an iframe) leaves the toggle off
+      const sync = () => { this.fullscreen = !!document.fullscreenElement; PR.UI.syncSettings(); };
+      if (typeof window.ffFullscreen === 'function') { this.fullscreen = on; window.ffFullscreen(on); }
+      else if (on && document.documentElement.requestFullscreen) {
+        try { const pr = document.documentElement.requestFullscreen(); if (pr && pr.then) pr.then(sync, sync); else sync(); } catch (err) { sync(); }
+      } else if (!on && document.fullscreenElement) {
+        try { const pr = document.exitFullscreen(); if (pr && pr.then) pr.then(sync, sync); else sync(); } catch (err) { sync(); }
+      } else sync();
       setTimeout(() => this.renderer.resize(), 150);
     },
     picturesChanged() { PR.Assets._ver = (PR.Assets._ver || 0) + 1; },
@@ -195,7 +204,14 @@
           this.keysDown.add(e.code); this.inputDown();
           return;
         }
-        if (this.mode === 'over' && (e.code === 'Enter' || e.code === 'Space')) { e.preventDefault(); if (!e.repeat && this.canRestart()) this.startGame(); return; }
+        if (this.mode === 'over' && (e.code === 'Enter' || e.code === 'Space')) {
+          // the Score Card window is open: its own buttons get the key, never "play again" behind it
+          if (this.scoreCardOpen()) return;
+          // a focused Menu / Score Card / link button does its own action; only Play Again (or nothing focused) restarts
+          const f = document.activeElement;
+          if (f && (f.tagName === 'BUTTON' || f.tagName === 'A') && f.id !== 'btnAgain') return;
+          e.preventDefault(); if (!e.repeat && this.canRestart()) this.startGame(); return;
+        }
         if (this.mode === 'title' && ui === 'scrTitle' && e.code === 'Space') {
           const f = document.activeElement;
           if (f && f.tagName === 'BUTTON' && f.id !== 'btnPlay') return;

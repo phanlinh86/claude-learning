@@ -1,13 +1,38 @@
 // Functional QA suite for Taffy's Candy Reel.
 // Run: NODE_PATH=$(npm root -g) node tests/e2e/functional.js
 // Prints PASS/FAIL per check, saves screenshots to tests/out/func_*.png, exits 1 on any FAIL.
-// Sections: boot · menus (mouse / keyboard / touch) · input · rules · pause & mute · settings persistence ·
-// Change Pictures · layout at 7 sizes · long bot run at ?speed=16.
+// Sections: boot · menus (mouse / keyboard / touch) · input · rules · wind twist · all levels + loop · pause & mute ·
+// settings (sound / music / volume / difficulty / full screen) and persistence · focus & double-trigger ·
+// Change Pictures · layout at 10 sizes (incl. the play band) · long bot run at ?speed=16.
+// Run one section: node tests/e2e/functional.js wind   (substring of the section name)
+// game/ is served over http://127.0.0.1 by a tiny static server in this file (same as GitHub Pages: a real origin).
 'use strict';
 const { chromium } = require('playwright');
-const path = require('path'), fs = require('fs');
-const GAME = 'file://' + path.resolve(__dirname, '../../game/index.html');
+const path = require('path'), fs = require('fs'), http = require('http');
+const ROOT = path.resolve(__dirname, '../../game');
+let GAME = '';   // set once the static server is listening
 const OUT = path.resolve(__dirname, '../out'); fs.mkdirSync(OUT, { recursive: true });
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml',
+  '.png': 'image/png', '.jpg': 'image/jpeg', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.ico': 'image/x-icon' };
+const notFound = [];
+function serve() {
+  return new Promise(res => {
+    const srv = http.createServer((req, rsp) => {
+      let u = decodeURIComponent(req.url.split('?')[0]); if (u.endsWith('/')) u += 'index.html';
+      const f = path.join(ROOT, path.normalize(u));
+      if (!f.startsWith(ROOT)) { rsp.writeHead(403); rsp.end(); return; }
+      fs.readFile(f, (e, d) => {
+        if (e) { notFound.push(u); rsp.writeHead(404); rsp.end('not found'); return; }
+        rsp.writeHead(200, { 'Content-Type': MIME[path.extname(f)] || 'application/octet-stream', 'Cache-Control': 'no-store' }); rsp.end(d);
+      });
+    });
+    srv.listen(0, '127.0.0.1', () => res(srv));
+  });
+}
+// wait until the finite CSS animations (panel "pop") have finished: a fixed sleep raced the 1.03 overshoot on slow runs
+const animsDone = p => p.evaluate(() => Promise.race([
+  Promise.all(document.getAnimations().filter(a => { const t = a.effect && a.effect.getTiming(); return t && t.iterations !== Infinity; }).map(a => a.finished.catch(() => {}))),
+  new Promise(r => setTimeout(r, 2000))]));
 const LONG_RUN_S = +(process.env.LONG_RUN_S || 75);   // real seconds of the ×16 bot run (75 s ≈ 20 simulated minutes)
 
 let nPass = 0, nFail = 0;
@@ -540,7 +565,7 @@ async function sRules() {
   const ed = await p.evaluate(() => ({ d: PR.debug.world.difficulty, need: PR.debug.world.flakesNeeded }));
   await p.evaluate(() => { PR.debug.world.score = 60; }); await killNow(p); await waitMode(p, 'over', 5000);
   const es = await p.evaluate(() => ({ easy: localStorage.getItem('dcr:best_easy'), normal: localStorage.getItem('dcr:best_normal') }));
-  check('rules: Easy has its own best (title 0, game easy with 6 snowflakes/zone, saved separately)', eb === '0' && ed.d === 'easy' && ed.need === 6 && es.easy === '60' && es.normal === '135', { eb, ed, es });
+  check('rules: Easy has its own best (title 0, game easy with 8 snowflakes/zone, saved separately)', eb === '0' && ed.d === 'easy' && ed.need === 8 && es.easy === '60' && es.normal === '135', { eb, ed, es });
   // Reset best: needs two taps
   await sleep(800); await p.click('#btnOverMenu'); await waitMode(p, 'title');
   await p.click('#btnSettings'); await waitUi(p, 'scrSettings');
@@ -619,13 +644,18 @@ async function sPictures() {
     const g2 = g.createLinearGradient(0, 0, 6000, 4000); g2.addColorStop(0, '#147'); g2.addColorStop(0.5, '#6cf'); g2.addColorStop(1, '#fe9'); g.fillStyle = g2; g.fillRect(0, 0, 6000, 4000);
     for (let i = 0; i < 400; i++) { g.fillStyle = `hsl(${i * 37 % 360},70%,60%)`; g.beginPath(); g.arc((i * 911) % 6000, (i * 577) % 4000, 40 + i % 90, 0, 7); g.fill(); }
     out.huge = await enc(c, 'image/jpeg', 0.85);
+    c = document.createElement('canvas'); c.width = 640; c.height = 480; g = c.getContext('2d');
+    g.fillStyle = '#8bd'; g.fillRect(0, 0, 640, 480); g.fillStyle = '#c63'; g.beginPath(); g.arc(320, 240, 150, 0, 7); g.fill();
+    out.opaquePng = await enc(c, 'image/png');
     return out;
   });
   const files = {
     png: { name: 'sticker.png', mimeType: 'image/png', buffer: Buffer.from(mk.png, 'base64') },
     jpg: { name: 'photo.jpg', mimeType: 'image/jpeg', buffer: Buffer.from(mk.jpg, 'base64') },
     huge: { name: 'huge.jpg', mimeType: 'image/jpeg', buffer: Buffer.from(mk.huge, 'base64') },
-    txt: { name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('hello, not a picture') }
+    txt: { name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('hello, not a picture') },
+    badPng: { name: 'broken.png', mimeType: 'image/png', buffer: Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), Buffer.from('truncated garbage, not really a png')]) },
+    opaquePng: { name: 'photo.png', mimeType: 'image/png', buffer: Buffer.from(mk.opaquePng, 'base64') }
   };
   const slotIndex = { hero: 0, flake: 1, gummy: 2, bg_sunny: 3, bg_rain: 4, bg_wind: 5, bg_snow: 6 };
   await p.click('#btnCustomize'); await waitUi(p, 'scrCustom');
@@ -648,6 +678,12 @@ async function sPictures() {
   check('pictures: the card shows "Your picture" and the Round shape is selected', /Your picture/.test(tag) && await p.evaluate(() => document.querySelector('#slotGrid .slot:nth-child(2) .shape button.on').dataset.shape === 'circle'));
   toast = await pick('gummy', files.txt); s = await stored('gummy');
   check('pictures: a non-image file → friendly error toast, nothing stored', /picture file/i.test(toast) && s === null, toast);
+  toast = await pick('gummy', files.badPng); s = await stored('gummy');
+  check('pictures: a broken file named .png (image/png) → friendly "could not be opened" toast, nothing stored', /could not be opened/i.test(toast) && s === null, toast);
+  toast = await pick('gummy', files.opaquePng); s = await stored('gummy');
+  check('pictures: an opaque PNG photo → gummy becomes a round sticker', /saved/i.test(toast) && s && s.shape === 'circle', { toast, s });
+  await p.click('#slotGrid .slot:nth-child(3) [data-act=reset]');
+  check('pictures: Reset on the gummy card clears it again', await p.evaluate(() => !PR.Assets.hasCustom('gummy') && localStorage.getItem('dcr:img_gummy') === null));
   toast = await pick('bg_sunny', files.huge); s = await stored('bg_sunny');
   check('pictures: 6000×4000 photo → background downscaled to 1600 px long edge and stored', /saved/i.test(toast) && s && s.w === 1600 && s.h === 1067, { toast, s });
   toast = await pick('gummy', files.huge); s = await stored('gummy');
@@ -689,15 +725,20 @@ async function sPictures() {
 
 async function sLayout() {
   const sizes = [
-    ['1280x720', { width: 1280, height: 720 }, 1, false],
-    ['960x540', { width: 960, height: 540 }, 1, false],
-    ['1024x768', { width: 1024, height: 768 }, 1, false],
-    ['2560x1440', { width: 2560, height: 1440 }, 1, false],
+    ['phone_landscape', { width: 844, height: 390 }, 3, true],
     ['iphone_portrait', { width: 390, height: 844 }, 3, true],
+    ['ipad_1024x768', { width: 1024, height: 768 }, 2, true],
+    ['ipad_1366x1024', { width: 1366, height: 1024 }, 2, true],
     ['ipad_portrait', { width: 1024, height: 1366 }, 2, true],
-    ['phone_landscape', { width: 844, height: 390 }, 3, true]
+    ['960x540', { width: 960, height: 540 }, 1, false],
+    ['1920x1080', { width: 1920, height: 1080 }, 1, false],
+    ['1280x720', { width: 1280, height: 720 }, 1, false],
+    ['1024x768', { width: 1024, height: 768 }, 1, false],
+    ['2560x1440', { width: 2560, height: 1440 }, 1, false]
   ];
+  const only = process.env.LAYOUT_ONLY;   // e.g. LAYOUT_ONLY=ipad to run a subset
   for (const [name, vp, dpr, mobile] of sizes) {
+    if (only && !name.includes(only)) continue;
     const { page: p, errs, ctx } = await open({ viewport: vp, deviceScaleFactor: dpr, hasTouch: mobile, isMobile: mobile }, '?mute=1&seed=9&autostart=1&bot=1&skill=0.9');
     await waitMode(p, 'playing'); await sleep(2800);
     await p.screenshot({ path: OUT + `/func_${name}_play.png` });
@@ -709,8 +750,8 @@ async function sLayout() {
       const taffy = css(b.x + 10 * 0.8, b.y + 10 * 0.8, 120 * 0.8 * 1.0 + 8, 140 * 0.8);
       const hud = document.getElementById('hud').getBoundingClientRect();
       // score plate & zone pill, as drawHud computes them
-      const I = R.ins, L = w.layout, portrait = R.VW < R.VH, K = portrait ? Math.min(R._hudK || 1, 1.3) : (R._hudK || 1);
-      const x0 = I.left + 12, y0 = portrait ? Math.max(L.waterTop + 22, I.top + 10) : I.top + 10, ic = Math.round(26 * K);
+      const I = R.ins, L = w.layout, portrait = R.VW < R.VH, K = portrait ? Math.min(R._hudK || 1, 1.1) : (R._hudK || 1);   // mirrors render.js drawHud()
+      const x0 = I.left + 12, y0 = I.top + 10, ic = Math.round(26 * K);
       const plate = css(x0 - 4, y0 - 4, Math.round(Math.max(3 * (ic + 4) + 16, 120 * K)), Math.round(76 * K));
       const P = R.pillRect(w), pill = P ? css(P.x, P.y, P.w, P.h) : null;
       // windsock on the dock (pole + sock at full stretch either way, plus the gust arrow)
@@ -721,8 +762,14 @@ async function sLayout() {
       for (const y of [L.minHookY, L.maxHookY]) { w.hook.y = y; const [rx, ry, RR] = R.reelPos(w); reel.push({ l: rx - RR - 16, t: ry - RR - 20, r: rx + RR + 16, b: ry + 44, VW: R.VW, VH: R.VH }); }
       w.hook.y = hy;
       const rod = R.rodTip(w);
+      // play band (DESIGN §2: holeX ± 160 from WATER_TOP to FLOOR_Y, no overlays) and the hook's real reach: the sway
+      // grows with depth (wind × driftMax × depthFrac), widest on Hard in the Windy level (70 × 1.4), + hook radius + 8
+      const band = css(L.holeX - 160, L.waterTop, 320, L.floorY - L.waterTop);
+      const reachAt = yCss => { const y = (yCss - c.top) / k, df = Math.max(0, Math.min(1, (y - L.waterTop) / (L.maxHookY - L.waterTop))); return k * (70 * 1.4 * df + (w.hook.r || 11) + 8); };
+      const hookReach = r => !!r && r.b > c.top + L.waterTop * k && r.l < c.left + L.holeX * k + reachAt(r.b) && r.r > c.left + L.holeX * k - reachAt(r.b);
+      const column = { hud: hookReach({ l: hud.left, r: hud.right, b: hud.bottom }), plate: hookReach(plate), pill: hookReach(pill), sock: hookReach(sock) };
       return { vw: innerWidth, vh: innerHeight, canvas: { l: c.left, t: c.top, r: c.right, b: c.bottom }, VW: R.VW, VH: R.VH, taffy, hud: { l: hud.left, t: hud.top, r: hud.right, b: hud.bottom, w: hud.width },
-        plate, pill, sock, reel, gapCss: c.left + L.holeX * k, rodCss: { x: c.left + rod[0] * k, y: c.top + rod[1] * k }, px: R.px, errors: PR.debug.stats.errors.length };
+        plate, pill, sock, reel, band, column, gapCss: c.left + L.holeX * k, rodCss: { x: c.left + rod[0] * k, y: c.top + rod[1] * k }, px: R.px, errors: PR.debug.stats.errors.length };
     });
     const inVp = (r, slack = 1) => r && r.l >= -slack && r.t >= -slack && r.r <= geo.vw + slack && r.b <= geo.vh + slack;
     const ov = (a, b) => a && b && a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b;
@@ -734,6 +781,12 @@ async function sLayout() {
     check(`layout ${name}: windsock inside the screen, clear of the level pill, HUD buttons and Taffy`, inVp(geo.sock) && !ov(geo.sock, geo.pill) && !ov(geo.sock, geo.hud) && !ov(geo.sock, geo.taffy), { sock: geo.sock, pill: geo.pill });
     check(`layout ${name}: score plate and HUD buttons inside the canvas`, inVp(geo.plate) && geo.plate.l >= geo.canvas.l - 1 && geo.plate.r <= geo.canvas.r + 1);
     check(`layout ${name}: reel meter stays on screen (shallow and deep hook)`, geo.reel.every(r => r.l >= 0 && r.t >= 0 && r.r <= r.VW && r.b <= r.VH), geo.reel);
+    check(`layout ${name}: play band (gap ± 160, water top → floor) fits inside the canvas and the viewport`, inVp(geo.band) && geo.band.l >= geo.canvas.l - 1 && geo.band.r <= geo.canvas.r + 1, geo.band);
+    const hits = [['HUD buttons', geo.hud], ['score plate', geo.plate], ['level pill', geo.pill], ['windsock', geo.sock]];
+    const colHits = Object.keys(geo.column).filter(n => geo.column[n]);
+    check(`layout ${name}: no HUD / plate / pill / windsock where the hook can reach (gap ± max wind sway at that depth)`, colHits.length === 0, colHits);
+    const bandHits = hits.filter(([, r]) => ov(r, geo.band)).map(([n, r]) => n + ' by ' + Math.round(Math.min(r.r, geo.band.r) - Math.max(r.l, geo.band.l)) + 'px');
+    check(`layout ${name}: no HUD / plate / pill / windsock over the DESIGN play band (gap ± 160)`, bandHits.length === 0, bandHits);
     // panels
     for (const scr of ['scrTitle', 'scrHow', 'scrSettings', 'scrCustom', 'scrPause', 'scrOver']) {
       await p.evaluate(s => {
@@ -741,7 +794,7 @@ async function sLayout() {
         else if (s === 'scrOver') PR.UI.showGameOver({ score: 1234, best: 5678, newBest: true, cleared: 3, flakes: 33, gold: 2, perfect: 12, escapes: 3, snaps: 3, reached: 'Sugar Snow (round 2)' });
         else PR.UI.show(s);
       }, scr);
-      await sleep(450);   // pop animation
+      await sleep(60); await animsDone(p);   // pop animation (overshoots to 1.03×) must be over before measuring
       const pr = await p.evaluate(s => {
         const el = document.querySelector('#' + s + ' .panel') || document.querySelector('#' + s + ' .title-wrap');
         const r = el.getBoundingClientRect();
@@ -802,6 +855,312 @@ async function sLongRun() {
   await ctx.close();
 }
 
+// ---------------------------------------------------------------- the wind twist
+async function sWind() {
+  const { page: p, errs, ctx } = await open();
+  await p.evaluate(() => PR.Game.setSetting('difficulty', 'normal'));
+  await startPlaying(p);
+  // 1) the natural gust schedule on every level: gustWarn exactly gustWarnTime (1.5 s) before each gust, the gust flips
+  //    the wind, the first gust no earlier than 6 s, intervals inside gustEvery (×0.75 on the Windy level)
+  const sched = await p.evaluate(() => {
+    PR.debug.setSpeed(0);
+    const w = PR.debug.world, H = 1 / 120, out = [];
+    for (let z = 0; z < 4; z++) {
+      PR.debug.gotoLevel(z); w.drainEvents();
+      w.items.length = 0; w._flakeT = w._gumT = w._fishT = 1e9;
+      const t0 = w.time, pairs = [], gustT = [], bad = [];
+      let warn = null, firstGust = null;
+      for (let i = 0; i < 150 * 120; i++) {
+        const tgt = w.wind.target;
+        w.update(H);
+        for (const e of w.drainEvents()) {
+          if (e.type === 'gustWarn') { if (warn) bad.push('two warnings'); warn = { t: w.time, dir: e.dir, tgt }; }
+          if (e.type === 'gust') {
+            if (!warn) { bad.push('gust without warning'); continue; }
+            pairs.push({ dt: w.time - warn.t, sameDir: e.dir === warn.dir, flipped: Math.sign(e.dir) === -Math.sign(warn.tgt), mag: Math.abs(w.wind.target) / w.wind.strength });
+            gustT.push(w.time - t0); if (firstGust == null) firstGust = w.time - t0; warn = null;
+          }
+        }
+        if (Math.abs(w.wind.value) > 1 + 1e-9) bad.push('wind out of range');
+      }
+      const ivals = gustT.slice(1).map((t, i) => t - gustT[i]);
+      out.push({ zone: z, n: pairs.length, pairs, bad: bad.slice(0, 3), firstGust, ivals, every: w.diff.gustEvery, k: z === 2 ? 0.75 : 1, strength: w.wind.strength, warnTime: 1.5 });
+    }
+    PR.debug.gotoLevel(0); w.drainEvents();
+    return out;
+  });
+  for (const s of sched) {
+    const dts = s.pairs.map(x => x.dt);
+    const exact = dts.every(d => Math.abs(d - 1.5) <= 1 / 120 + 1e-6);
+    check(`wind zone ${s.zone}: every gust is announced by gustWarn exactly 1.5 s before (±1 step)`, s.n >= 8 && exact && s.bad.length === 0, { gusts: s.n, dtMin: +Math.min(...dts).toFixed(4), dtMax: +Math.max(...dts).toFixed(4), bad: s.bad });
+    check(`wind zone ${s.zone}: each gust flips the direction and keeps the announced direction`, s.pairs.every(x => x.sameDir && x.flipped), s.pairs.filter(x => !(x.sameDir && x.flipped)).slice(0, 2));
+    check(`wind zone ${s.zone}: gust strength inside 0.55..1 × level strength`, s.pairs.every(x => x.mag >= 0.55 - 1e-6 && x.mag <= 1 + 1e-6), s.pairs.map(x => +x.mag.toFixed(2)).slice(0, 6));
+    const lo = s.every[0] * s.k - 0.02, hi = s.every[1] * s.k + 0.02;
+    check(`wind zone ${s.zone}: first gust ≥ 6 s into the level, gaps inside gustEvery${s.zone === 2 ? ' × 0.75' : ''}`, s.firstGust >= 6 - 1e-6 && s.ivals.every(v => v >= lo && v <= hi), { first: +s.firstGust.toFixed(2), range: [+lo.toFixed(2), +hi.toFixed(2)], ivals: s.ivals.map(v => +v.toFixed(1)) });
+  }
+  // 2) the windsock: instrument drawWindsock's ctx.scale calls (1st = the sock, its x sign is the direction it points;
+  //    2nd while a gust is announced = the arrow)
+  await p.evaluate(() => {
+    const R = PR.Game.renderer, o = R.drawWindsock;
+    R.drawWindsock = function (g, w) {
+      const sc = g.scale, calls = []; g.scale = function (x, y) { calls.push(x); return sc.call(this, x, y); };
+      try { return o.call(this, g, w); } finally { g.scale = sc; R._sockCalls = calls; }
+    };
+  });
+  const sock = async v => {
+    await p.evaluate(v => { const w = PR.debug.world; Object.assign(w.wind, { value: v, target: v, rate: 0, next: 1e9, warn: 0, _mag: 0 }); PR.Game.renderer.gustT = 0; }, v);
+    await sleep(120);
+    return p.evaluate(() => PR.Game.renderer._sockCalls.slice());
+  };
+  const sR = await sock(0.8), sL = await sock(-0.8), sR2 = await sock(0.1), sL2 = await sock(-0.1);
+  check('wind: windsock points right when wind.value > 0 and left when < 0 (strong and light wind)', sR[0] > 0 && sL[0] < 0 && sR2[0] > 0 && sL2[0] < 0, { right: sR[0], left: sL[0], lightR: sR2[0], lightL: sL2[0] });
+  check('wind: windsock stretches longer in a strong wind', Math.abs(sR[0]) > Math.abs(sR2[0]) + 0.2, { strong: +Math.abs(sR[0]).toFixed(2), light: +Math.abs(sR2[0]).toFixed(2) });
+  check('wind: no gust arrow while no gust is announced', sR.length === 1, sR.length);
+  // announced gust: arrow points the NEW way while the sock still shows the current wind
+  await p.evaluate(() => { const w = PR.debug.world; Object.assign(w.wind, { value: 0.6, target: 0.6, rate: 0, next: 1e9, warn: 0, _mag: 0 }); PR.debug.gust(-1); });
+  await sleep(150);
+  const ga = await p.evaluate(() => ({ calls: PR.Game.renderer._sockCalls.slice(), warn: PR.debug.world.wind.warn, dir: PR.debug.world.wind.warnDir, arrowT: PR.Game.renderer.gustT }));
+  check('wind: PR.debug.gust(-1) announces: warn 1.5 s, warnDir −1, gustWarn reaches the renderer (arrow timer)', ga.warn > 1.3 && ga.warn <= 1.5 && ga.dir === -1 && ga.arrowT > 0, ga);
+  check('wind: during the warning the sock still points with the current wind and the arrow points the new way', ga.calls.length === 2 && ga.calls[0] > 0 && ga.calls[1] < 0, ga.calls);
+  // 3) the gust arrives 1.5 s later in game time (speed 1, real clock)
+  await p.evaluate(() => PR.debug.setSpeed(1));
+  const g0 = await p.evaluate(() => PR.debug.world.stats.gusts);
+  await sleep(1000);
+  const mid = await p.evaluate(() => ({ g: PR.debug.world.stats.gusts, t: PR.debug.world.wind.target }));
+  await sleep(1100);
+  const aft = await p.evaluate(() => ({ g: PR.debug.world.stats.gusts, t: PR.debug.world.wind.target, v: PR.debug.world.wind.value }));
+  check('wind: the announced gust has not arrived after 1.0 s and has after 2.1 s (target flips to −)', mid.g === g0 && mid.t > 0 && aft.g === g0 + 1 && aft.t < 0, { mid, aft });
+  await p.evaluate(() => PR.debug.setSpeed(0));
+  // instant gust and default (flip) direction
+  const ig = await p.evaluate(() => {
+    const w = PR.debug.world; Object.assign(w.wind, { value: 0.5, target: 0.5, rate: 0, next: 1e9, warn: 0, _mag: 0 }); w.drainEvents();
+    const g = w.stats.gusts; PR.debug.gust(undefined, true); const ev = w.drainEvents().map(e => e.type);
+    return { flipped: w.wind.target < 0, gusts: w.stats.gusts - g, warn: w.wind.warn, ev, valueJump: Math.abs(w.wind.value - 0.5) };
+  });
+  check('wind: PR.debug.gust(undefined, true) = an instant gust that flips the wind (no warning, value eases, no jump)', ig.flipped && ig.gusts === 1 && ig.warn === 0 && ig.ev.includes('gust') && !ig.ev.includes('gustWarn') && ig.valueJump < 1e-9, ig);
+  // a gust announced right before a level change is cancelled (the next level starts with a breeze, no surprise gust)
+  const lc = await p.evaluate(() => {
+    const w = PR.debug.world; PR.debug.gust(1); w.drainEvents(); PR.debug.gotoLevel(1); w.drainEvents();
+    let gust = false; for (let i = 0; i < 240; i++) { w.update(1 / 120); if (w.drainEvents().some(e => e.type === 'gust')) gust = true; }
+    return { warn: w.wind.warn, gust, next: +w.wind.next.toFixed(2) };
+  });
+  check('wind: a warning pending at a level change is cancelled, no gust in the next 2 s', lc.warn === 0 && !lc.gust && lc.next > 3, lc);
+  await p.evaluate(() => { PR.debug.gotoLevel(0); PR.debug.world.drainEvents(); });
+  // 4) the hook sways with depth: hold the hook at a depth in a steady wind and let the line settle
+  const sway = await p.evaluate(() => {
+    const w = PR.debug.world, L = w.layout, res = {};
+    w.items.length = 0; w._flakeT = w._gumT = w._fishT = 1e9;
+    for (const [name, y, v] of [['shallow', L.minHookY + 20, 1], ['mid', (L.minHookY + L.maxHookY) / 2, 1], ['deep', L.maxHookY, 1], ['deepLeft', L.maxHookY, -1]]) {
+      Object.assign(w.wind, { value: v, target: v, rate: 0, next: 1e9, warn: 0, _mag: 0 });
+      w.phase = 'roam'; Object.assign(w.hook, { lost: false, drop: false, holding: false });
+      let maxDx = 0;
+      for (let i = 0; i < 6 * 120; i++) { w.hook.y = w.hook.prevY = y; w.hook.vy = 0; w.update(1 / 120); maxDx = Math.max(maxDx, Math.abs(w.hook.x - L.holeX)); }
+      res[name] = { sway: +w.hook.sway.toFixed(2), x: +(w.hook.x - L.holeX).toFixed(2), expect: +(v * w.driftMax() * w.depthFrac(y)).toFixed(2), inside: w.hook.x >= 60 && w.hook.x <= L.width - 60 };
+    }
+    return res;
+  });
+  const near = (a, b) => Math.abs(a - b) <= Math.max(1.5, Math.abs(b) * 0.08);
+  check('wind: hook sway settles at wind × driftMax × depth (shallow < mid < deep)', near(sway.shallow.sway, sway.shallow.expect) && near(sway.mid.sway, sway.mid.expect) && near(sway.deep.sway, sway.deep.expect) && sway.shallow.sway < sway.mid.sway && sway.mid.sway < sway.deep.sway, sway);
+  check('wind: the hook is drawn where it sways (hook.x = gap + sway) and flips side with the wind', near(sway.deep.x, sway.deep.sway) && sway.deepLeft.sway < -0.9 * sway.deep.sway, { deep: sway.deep, deepLeft: sway.deepLeft });
+  // with real input: hold Space in a steady right wind, the hook ends up right of the gap
+  await p.evaluate(() => { const w = PR.debug.world; Object.assign(w.wind, { value: 1, target: 1, rate: 0, next: 1e9, warn: 0, _mag: 0 }); w.hook.sway = w.hook.swayV = 0; PR.debug.setSpeed(1); });
+  await p.keyboard.down('Space'); await sleep(3500);
+  const held = await p.evaluate(() => { const w = PR.debug.world; return { dx: +(w.hook.x - w.layout.holeX).toFixed(1), depth: +w.depthFrac(w.hook.y).toFixed(2), phase: w.phase }; });
+  await p.keyboard.up('Space');
+  check('wind: holding Space in a right wind sinks the hook and the line bows to the right', held.depth > 0.6 && held.dx > 12, held);
+  // swimmers drift with the current
+  const cur = await p.evaluate(() => {
+    const w = PR.debug.world; const it = { vx: 30, y: w.layout.waterTop + 20 };
+    w.wind.value = 1; const a = w.effVx(it); w.wind.value = -1; const b = w.effVx(it); w.wind.value = 0; const c = w.effVx(it);
+    return { with: +a.toFixed(2), against: +b.toFixed(2), calm: +c.toFixed(2) };
+  });
+  check('wind: swimmers are pushed by the current (faster with the wind, slower against, never reversed)', cur.with > cur.calm && cur.against < cur.calm && cur.against > 0, cur);
+  check('wind: no console errors', errs.length === 0, errs.slice(0, 3));
+  await ctx.close();
+}
+
+// ---------------------------------------------------------------- every level and the loop, by real catches
+async function sLevels() {
+  const { page: p, errs, ctx } = await open();
+  await p.evaluate(() => PR.Game.setSetting('difficulty', 'easy'));
+  await startPlaying(p);
+  const names = ['Sunny Shore', 'Sprinkle Rain', 'Windy Swirl', 'Sugar Snow'];
+  const seen = []; let base0 = 0;
+  for (let lv = 0; lv < 5; lv++) {
+    const need = await p.evaluate(() => PR.debug.world.flakesNeeded);
+    const before = await p.evaluate(() => { const w = PR.debug.world; w.lines = 2; return { level: w.level, zone: w.zone, width: w.reel.width || w._reelWidth, needle: w._needle }; });
+    for (let i = 0; i < need; i++) {
+      await setupReel(p, ['berry', 'lime', 'grape', 'gold'][i % 4]);
+      let n = 0; while (n++ < 40) { const x = await reelTap(p, 'good'); if (x.after.catching || x.after.phase !== 'reel') break; }
+      await p.evaluate(() => PR.debug.world.update(0.4));
+    }
+    await sleep(200);   // the frame loop drains levelUp → visuals, weather, music, banner
+    const st = await p.evaluate(() => {
+      const w = PR.debug.world, R = PR.Game.renderer;
+      return { level: w.level, zone: w.zone, loop: w.loop, lines: w.lines, gz: w.flakesInZone, vis: R.vis.cur, wx: PR.Game.weather.zone, au: PR.Audio.zone, auLoop: PR.Audio.loop,
+        banner: R.banner && R.banner.s, bannerLoop: R.banner && R.banner.loop, width: w._reelWidth, needle: w._needle, strength: w.wind.strength };
+    });
+    seen.push(st);
+    const z = (lv + 1) % 4;
+    check(`levels: catching ${need} snowflakes on level ${lv + 1} (${names[lv % 4]}) → ${names[z]}${lv + 1 >= 4 ? ' (round 2)' : ''}`,
+      st.level === lv + 1 && st.zone === z && st.vis === z && st.wx === z && st.au === z && st.banner === z && st.lines === 3 && st.gz === 0 && st.loop === (lv + 1 >= 4 ? 1 : 0),
+      st);
+    if (lv === 0) base0 = before.needle;
+    if (lv + 1 === 4) check('levels: round 2 is faster (needle ≥ ×1.07 of round 1 Sunny Shore) and the banner / music know it is round 2', st.needle >= base0 * 1.07 && st.bannerLoop === 1 && st.auLoop === 1, { needle: st.needle, base0, bannerLoop: st.bannerLoop, auLoop: st.auLoop });
+  }
+  // difficulty grows within a loop: the green zone never widens, the needle never slows
+  const widths = seen.map(s => +s.width.toFixed(3)), needles = seen.map(s => +s.needle.toFixed(3));
+  check('levels: the green zone shrinks (or holds) and the needle speeds up (or holds) level by level', widths.slice(1, 3).every((v, i) => v <= widths[i] + 1e-9) && needles.slice(1, 3).every((v, i) => v >= needles[i] - 1e-9), { widths, needles });
+  check('levels: the Windy level has the strongest wind', seen[1].strength === Math.max(...seen.slice(0, 4).map(s => s.strength)), seen.map(s => s.strength));
+  await p.evaluate(() => PR.debug.setSpeed(1));
+  await sleep(1500);
+  await p.screenshot({ path: OUT + '/func_level_round2.png' });
+  check('levels: no console errors', errs.length === 0 && await p.evaluate(() => PR.debug.stats.errors.length === 0), errs.slice(0, 3));
+  await ctx.close();
+}
+
+// ---------------------------------------------------------------- settings: volume, sound, music, full screen, storage keys
+async function sSettingsMore() {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+  let o = await open(null, '?mute=1', ctx), p = o.page;
+  const errs = o.errs;
+  await p.click('#btnSettings'); await waitUi(p, 'scrSettings');
+  const vol = () => p.evaluate(() => ({ ui: document.getElementById('setVolumeVal').textContent, range: +document.getElementById('setVolume').value, stored: localStorage.getItem('dcr:volume'), audio: PR.Audio.volume }));
+  let v = await vol();
+  check('settings/volume: Volume row present, starts at 100%', v.ui === '100%' && v.range === 100, v);
+  await p.click('.vol-step[data-d="-1"]'); v = await vol();
+  check('settings/volume: "−" lowers by 10%, saves dcr:volume and sets PR.Audio.volume', v.ui === '90%' && v.stored === '0.90' && Math.abs(v.audio - 0.9) < 1e-9, v);
+  await p.click('.vol-step[data-d="1"]'); await p.click('.vol-step[data-d="1"]'); v = await vol();
+  check('settings/volume: "+" is capped at 100%', v.ui === '100%' && v.stored === '1.00', v);
+  await p.fill('#setVolume', '35').catch(async () => { await p.evaluate(() => { const r = document.getElementById('setVolume'); r.value = 35; r.dispatchEvent(new Event('input')); }); });
+  v = await vol();
+  check('settings/volume: dragging the slider to 35 saves 0.35', v.ui === '35%' && v.stored === '0.35' && Math.abs(v.audio - 0.35) < 1e-9, v);
+  for (let i = 0; i < 5; i++) await p.click('.vol-step[data-d="-1"]');
+  v = await vol();
+  check('settings/volume: "−" stops at 0%', v.ui === '0%' && v.stored === '0.00' && v.audio === 0, v);
+  await p.click('.vol-step[data-d="1"]'); await p.click('.vol-step[data-d="1"]'); await p.click('.vol-step[data-d="1"]');   // 30 %
+  check('settings/volume: volume clicks never start a game or leave Settings', await mode(p) === 'title' && await ui(p) === 'scrSettings');
+  // sound / music toggles reach the audio engine
+  await p.click('label.set:has(#setSfx) .tog'); await p.click('label.set:has(#setMusic) .tog');
+  const a1 = await p.evaluate(() => ({ sfx: PR.Audio.sfxOn, music: PR.Audio.musicOn, s: JSON.parse(localStorage.getItem('dcr:settings')) }));
+  check('settings: Sound effects / Music toggles switch the audio engine and are saved', a1.sfx === false && a1.music === false && a1.s.sfx === false && a1.s.music === false, a1);
+  await p.click('label.set:has(#setSfx) .tog'); await p.click('label.set:has(#setMusic) .tog');
+  // difficulty segment
+  for (const d of ['hard', 'normal', 'easy']) {
+    await p.click(`#setDifficulty button[data-v=${d}]`);
+    const s = await p.evaluate(() => ({ on: [...document.querySelectorAll('#setDifficulty button.on')].map(b => b.dataset.v), saved: JSON.parse(localStorage.getItem('dcr:settings')).difficulty }));
+    check(`settings: difficulty ${d} is highlighted alone and saved`, s.on.length === 1 && s.on[0] === d && s.saved === d, s);
+  }
+  // full screen (Chromium headless supports the Fullscreen API)
+  const rowShown = await visible(p, '#rowFull');
+  check('settings/full screen: the Full screen row is shown where the browser supports it', rowShown === await p.evaluate(() => document.fullscreenEnabled));
+  await p.click('#rowFull .tog'); await sleep(400);
+  let f = await p.evaluate(() => ({ el: !!document.fullscreenElement, g: PR.Game.fullscreen, box: document.getElementById('setFull').checked }));
+  check('settings/full screen: the toggle enters full screen', f.el && f.g && f.box, f);
+  await p.evaluate(() => document.exitFullscreen()); await sleep(400);   // as when the player presses Esc in the browser
+  f = await p.evaluate(() => ({ el: !!document.fullscreenElement, g: PR.Game.fullscreen, box: document.getElementById('setFull').checked }));
+  check('settings/full screen: leaving full screen from the browser unticks the toggle (fullscreenchange)', !f.el && !f.g && !f.box, f);
+  await p.keyboard.press('Escape'); await waitUi(p, 'scrTitle');
+  await p.keyboard.press('F11'); await sleep(400);
+  const f1 = await p.evaluate(() => !!document.fullscreenElement);
+  await p.keyboard.press('F11'); await sleep(400);
+  const f2 = await p.evaluate(() => !!document.fullscreenElement);
+  check('settings/full screen: F11 toggles full screen on and off', f1 && !f2, { f1, f2 });
+  await p.evaluate(() => PR.Game.startGame()); await waitMode(p, 'playing');
+  await p.keyboard.press('F11'); await sleep(400);
+  const f3 = await p.evaluate(() => ({ el: !!document.fullscreenElement, mode: PR.Game.mode, w: PR.Game.renderer.canvas.getBoundingClientRect().width }));
+  await p.keyboard.press('F11'); await sleep(400);
+  check('settings/full screen: F11 during play keeps playing (no pause, canvas re-laid out)', f3.el && f3.mode === 'playing' && f3.w > 0, f3);
+  const sj = await p.evaluate(() => JSON.parse(localStorage.getItem('dcr:settings')));
+  check('settings: full screen and the ?mute test flag are not saved in settings', !('fullscreen' in sj) && sj.muted === false, sj);
+  await p.evaluate(() => PR.Game.toTitle());
+  // reload without ?mute: not muted, volume 30 %, sound on
+  await p.close();
+  o = await open(null, '?seed=3', ctx); p = o.page;
+  await p.click('#btnSettings'); await waitUi(p, 'scrSettings');
+  const r = await p.evaluate(() => ({ urlMute: PR.Game.urlMute, muted: PR.Game.settings.muted, audioMuted: PR.Audio.muted, vol: document.getElementById('setVolumeVal').textContent, audioVol: PR.Audio.volume }));
+  check('settings: after a ?mute=1 session a normal reload is not muted and keeps volume 30%', !r.urlMute && !r.muted && !r.audioMuted && r.vol === '30%' && Math.abs(r.audioVol - 0.3) < 1e-9, r);
+  // a game, a best score, a picture: every key this game writes uses the dcr: prefix
+  await p.keyboard.press('Escape'); await waitUi(p, 'scrTitle');
+  await p.evaluate(() => PR.Game.startGame()); await waitMode(p, 'playing');
+  await p.evaluate(() => { PR.debug.world.score = 70; }); await killNow(p); await waitMode(p, 'over', 6000);
+  const keys = await p.evaluate(() => Object.keys(localStorage));
+  check('storage: every localStorage key uses the dcr: prefix (shared GitHub Pages origin)', keys.length >= 3 && keys.every(k => k.startsWith('dcr:')), keys);
+  check('settings more: no console errors', errs.length === 0 && o.errs.length === 0, errs.concat(o.errs).slice(0, 3));
+  await ctx.close();
+}
+
+// ---------------------------------------------------------------- focus and double-trigger bugs
+async function sFocus() {
+  const { page: p, errs, ctx } = await open();
+  const starts = () => p.evaluate(() => PR.Game._starts);
+  // Space with How/Settings focused on the title opens that screen and does not start a game
+  await p.focus('#btnSettings'); await p.keyboard.press('Space'); await sleep(150);
+  check('focus: Space on a focused Settings button opens Settings, starts no game', await ui(p) === 'scrSettings' && await starts() === 0 && await mode(p) === 'title');
+  await p.keyboard.press('Escape'); await waitUi(p, 'scrTitle'); await sleep(80);
+  // double-click Play = one game
+  await p.dblclick('#btnPlay'); await waitMode(p, 'playing'); await sleep(300);
+  check('focus: double-clicking Play starts exactly one game', await starts() === 1, await starts());
+  await calm(p); await sleep(1300); await calm(p);
+  // Enter after clicking the HUD Mute button: a sink, not a second Mute
+  const m0 = await p.evaluate(() => PR.Game.settings.muted || PR.Game.urlMute);
+  await p.click('#btnMuteHud'); await sleep(100);
+  const m1 = await p.evaluate(() => PR.Game.settings.muted || PR.Game.urlMute);
+  await p.keyboard.down('Enter'); await sleep(250); const h = await hook(p); await p.keyboard.up('Enter'); await sleep(100);
+  const m2 = await p.evaluate(() => PR.Game.settings.muted || PR.Game.urlMute);
+  check('focus: Enter after clicking HUD Mute sinks the hook and does not click Mute again', m0 !== m1 && m1 === m2 && h.holding, { m0, m1, m2, holding: h.holding });
+  await p.click('#btnMuteHud'); await sleep(100);
+  // P while holding: the hold is released, Esc resumes, the old key-up does nothing, a new hold works
+  await p.keyboard.down('Space'); await sleep(200);
+  await p.keyboard.press('p'); await waitMode(p, 'paused');
+  const hp = await hook(p);
+  await p.keyboard.up('Space');
+  await p.keyboard.press('Escape'); await waitMode(p, 'playing'); await sleep(100);
+  const hr = await hook(p);
+  await p.keyboard.down('Space'); await sleep(200); const hn = await hook(p); await p.keyboard.up('Space');
+  check('focus: pausing while holding releases the hold; after resume a new hold works', !hp.holding && !hr.holding && hn.holding, { paused: hp.holding, resumed: hr.holding, newHold: hn.holding });
+  // game over: buttons other than Play Again must do what they say on Enter
+  await killNow(p); await waitMode(p, 'over', 6000); await sleep(800);
+  await p.focus('#btnOverMenu'); const s0 = await starts();
+  await p.keyboard.press('Enter'); await sleep(300);
+  const om = { mode: await mode(p), starts: (await starts()) - s0 };
+  check('focus: Enter on a focused game-over Menu button goes to the Menu (not a new game)', om.mode === 'title' && om.starts === 0, om);
+  if (om.mode !== 'over' && om.mode !== 'title') await p.evaluate(() => PR.Game.toTitle());
+  // Score Card modal: Enter / Space on its buttons must not restart the game behind it
+  await p.evaluate(() => PR.Game.startGame()); await waitMode(p, 'playing'); await killNow(p); await waitMode(p, 'over', 6000); await sleep(800);
+  await p.click('#btnScoreCard');
+  await p.waitForFunction(() => { const m = document.getElementById('scScreen'); return m && !m.classList.contains('hidden'); }, null, { timeout: 8000 });
+  await sleep(150);
+  const s1 = await starts(), foc = await p.evaluate(() => document.activeElement && document.activeElement.id);
+  await p.keyboard.press('Enter'); await sleep(250);
+  const sc1 = await p.evaluate(() => ({ mode: PR.Game.mode, card: !document.getElementById('scScreen').classList.contains('hidden') }));
+  check('focus: Enter on the focused Score Card button does not start a game behind the card', sc1.mode === 'over' && (await starts()) === s1, { focused: foc, ...sc1, starts: (await starts()) - s1 });
+  if (sc1.mode !== 'over') { await p.evaluate(() => { document.getElementById('scScreen').classList.add('hidden'); PR.Game.mode = 'playing'; }); await killNow(p); await waitMode(p, 'over', 6000); await sleep(800); await p.click('#btnScoreCard'); await sleep(600); }
+  await p.focus('#scCopy'); const s2 = await starts();
+  await p.keyboard.press('Space'); await sleep(250);
+  const sc2 = await p.evaluate(() => ({ mode: PR.Game.mode, card: !document.getElementById('scScreen').classList.contains('hidden') }));
+  check('focus: Space on the Score Card "Copy text" button does not start a game behind the card', sc2.mode === 'over' && (await starts()) === s2, { ...sc2, starts: (await starts()) - s2 });
+  await p.evaluate(() => { const m = document.getElementById('scScreen'); if (m) m.classList.add('hidden'); });
+  // touch: Play Again inside the 0.7 s lock is ignored, after it one tap = one game
+  check('focus: no console errors', errs.length === 0, errs.slice(0, 3));
+  await ctx.close();
+  const t = await open({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 3, hasTouch: true, isMobile: true });
+  await t.page.evaluate(() => PR.Game.startGame()); await waitMode(t.page, 'playing'); await killNow(t.page); await waitMode(t.page, 'over', 6000);
+  const ts0 = await t.page.evaluate(() => PR.Game._starts);
+  await sleep(100); await t.page.tap('#btnAgain'); await sleep(200);
+  const locked = await mode(t.page) === 'over';
+  await sleep(700); await t.page.tap('#btnAgain'); await waitMode(t.page, 'playing'); await sleep(700);
+  const ts1 = await t.page.evaluate(() => PR.Game._starts);
+  check('focus/touch: Play Again tapped inside the 0.7 s lock is ignored, the next tap starts exactly one game', locked && ts1 === ts0 + 1, { locked, starts: ts1 - ts0 });
+  // touch during the reel on the HUD Mute button = no reel tap
+  await setupReel(t.page, 'grape');
+  const rt0 = await t.page.evaluate(() => PR.debug.world.reel.taps);
+  await t.page.tap('#btnMuteHud'); await sleep(700); await t.page.tap('#btnMuteHud'); await sleep(200);
+  check('focus/touch: tapping HUD Mute during the reel is no reel tap', await t.page.evaluate(() => PR.debug.world.reel.taps) === rt0);
+  check('focus/touch: no console errors', t.errs.length === 0, t.errs.slice(0, 3));
+  await t.ctx.close();
+}
+
 // a phone that renders at a steady 30 fps (iOS Low Power Mode caps requestAnimationFrame at 30 Hz):
 // the adaptive-resolution guard must not mistake the 33 ms vsync for an overloaded GPU and blur the game
 async function sLowPower30fps() {
@@ -818,15 +1177,19 @@ async function sLowPower30fps() {
 }
 
 (async () => {
-  browser = await chromium.launch({ args: ['--allow-file-access-from-files'] });
+  const srv = await serve();
+  GAME = `http://127.0.0.1:${srv.address().port}/index.html`;
+  browser = await chromium.launch();
   const only = process.argv[2];
-  const sections = { sBoot, sMenusMouseKeyboard, sMenusTouch, sInput, sTouchInput, sRules, sMuteSettings, sPictures, sLayout, sLowPower30fps, sLongRun };
+  const sections = { sBoot, sMenusMouseKeyboard, sMenusTouch, sInput, sTouchInput, sRules, sWind, sLevels, sMuteSettings, sSettingsMore, sFocus, sPictures, sLayout, sLowPower30fps, sLongRun };
   for (const [name, fn] of Object.entries(sections)) {
     if (only && !name.toLowerCase().includes(only.toLowerCase())) continue;
     console.log('\n== ' + name);
     try { await fn(); } catch (e) { check(name + ': section ran to the end', false, String(e && e.message || e).split('\n')[0]); }
   }
   await browser.close();
+  srv.close();
+  if (!only) check('server: every file the game asked for exists (no 404)', notFound.length === 0, [...new Set(notFound)].slice(0, 5));
   console.log(`\nRESULT: ${nPass} passed, ${nFail} failed`);
   if (nFail) console.log('FAILED:\n  ' + fails.join('\n  '));
   process.exit(nFail ? 1 : 0);

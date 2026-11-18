@@ -190,7 +190,9 @@ canvas#game{background:#1d3a6b}
 @keyframes flipReady{0%,100%{box-shadow:0 0 0 0 rgba(255,230,120,.0),0 4px 10px rgba(0,0,0,.3)}50%{box-shadow:0 0 0 8px rgba(255,230,120,.35),0 4px 10px rgba(0,0,0,.3)}}
 .action-btn.hidden{display:none}
 .icon-btn{min-width:44px;min-height:44px}
-.new-best{right:calc(var(--u)*-5.6);top:calc(var(--u)*-1.6)}
+/* NEW! sits inline between the "Best" label and the number (inside the panel, never over the digits) */
+.sc .new-best{position:static;order:0;margin-right:auto;align-self:center;transform:rotate(-8deg)}
+.sc span{order:-1}.sc b{order:1}
 /* touch devices: hide keyboard-only wording */
 body.touch .kb-only{display:none}
 body:not(.touch) .touch-only{display:none}

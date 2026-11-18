@@ -89,8 +89,8 @@ test('rng: deterministic, in range, API', () => {
 
 test('CONFIG: step, presets, flakesNeeded per difficulty', () => {
   assert.ok(C.step <= 1 / 120 + 1e-12);
-  assert.deepStrictEqual(['easy', 'normal', 'hard'].map(d => C.difficulty[d].flakesNeeded), [6, 8, 10]);
-  assert.deepStrictEqual(['easy', 'normal', 'hard'].map(d => mk(d).flakesNeeded), [6, 8, 10]);
+  assert.deepStrictEqual(['easy', 'normal', 'hard'].map(d => C.difficulty[d].flakesNeeded), [8, 8, 10]);
+  assert.deepStrictEqual(['easy', 'normal', 'hard'].map(d => mk(d).flakesNeeded), [8, 8, 10]);
   assert.deepStrictEqual(J(C.points), { berry: 10, lime: 20, grape: 30, gold: 50 });
   const e = C.difficulty.easy, n = C.difficulty.normal, h = C.difficulty.hard;
   assert.ok(e.reelWidth > n.reelWidth && n.reelWidth > h.reelWidth, 'green zone narrows with difficulty');
@@ -744,7 +744,7 @@ test('weather: every level, bursts, all screen sizes, gusty wind — bounded (< 
         assert.ok(['sky', 'back', 'front'].includes(p.layer));
         assert.ok(isFinite(p.x) && isFinite(p.y) && isFinite(p.rot) && p.size > 0 && p.alpha >= 0 && p.alpha <= 1.0001);
         if (p.kind === 'burst') continue;
-        if (SKY.includes(p.sprite)) assert.ok(p.y <= 196, p.sprite + ' stays above the water ' + p.y);
+        if (SKY.includes(p.sprite)) assert.ok(p.y <= (p.kind === 'sprinkle' && p.layer === 'front' ? 190 + 62 : 196), p.sprite + ' stays above the water (near sprinkles dive ≤ 60 px in) ' + p.y);
         if (p.sprite === 'bubble_s' || (p.sprite === 'sparkle' && p.kind === 'glint')) assert.ok(p.y >= 180, p.sprite + ' under water ' + p.y);
         if (p.sprite === 'ring') near(p.y, 192, 1e-9, 'rings at waterTop + 2');
       }

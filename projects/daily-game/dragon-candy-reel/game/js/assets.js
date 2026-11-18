@@ -79,7 +79,8 @@
   /* Downscale a file the player picked to something small enough to store. */
   function fileToDataURL(file, kind) {
     return new Promise((resolve, reject) => {
-      if (!file || !/^image\//.test(file.type)) { reject(new Error('Please choose a picture file (PNG, JPG, GIF, WebP…).')); return; }
+      // an empty type is allowed (some iOS Files / HEIC picks): a file that is not really a picture fails in img.onerror
+      if (!file || (file.type && !/^image\//.test(file.type))) { reject(new Error('Please choose a picture file (PNG, JPG, GIF, WebP…).')); return; }
       const url = URL.createObjectURL(file);
       const img = new Image();
       img.onload = () => {
