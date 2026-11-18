@@ -1,44 +1,35 @@
-/* GW.Render — draws the seasonal fairy forest, the mossy clearing with the memory cards (3D flips), the forest rewards
- * (butterflies, lanterns, acorns, animals, stars), Dee the duckling, the sky and juice on one canvas.
- * Logical coordinates (short side 720) × render scale `rs` = device pixels. The static landscape is composed once per
- * resize/season and blitted; card faces/backs come cached from GW.CardArt; positions interpolate with world.alpha. */
+/* GW.Render — draws Peekaboo Street: sky (sun, clouds, kites, rainbow), parallax city layers that scroll as Gigi walks,
+ * traffic and the little bus, the apartment building whose windows are the memory cards (GW.WindowArt), Gigi the giraffe
+ * calf with her springy neck (GW.GigiArt + SVG body/head), the pigeon and the balloon, weather particles and juice.
+ * Logical coordinates (short side 720) × render scale `rs` = device pixels. Positions interpolate with world.alpha. */
 (function (GW) {
   'use strict';
   const TAU = Math.PI * 2;
   const FONT = 'ui-rounded, "SF Pro Rounded", "Arial Rounded MT Bold", "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif';
-  const INK = '#3d3a52';
   const lerp = (a, b, t) => a + (b - a) * t;
   const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
   const easeOutBack = t => { const c = 1.6; t -= 1; return 1 + (c + 1) * t * t * t + c * t * t; };
-  const CA = () => GW.CardArt;
-  const SEASONS = ['spring', 'summer', 'autumn', 'winter'];
-  const FILL = { spring: '#A3CF84', summer: '#96C677', autumn: '#B5BE85', winter: '#DFE9F1' };
-  const PANEL = [['207,227,184', 0.5, 'rgba(255,255,255,.55)'], ['207,227,184', 0.5, 'rgba(255,255,255,.55)'],
-    ['232,215,181', 0.5, 'rgba(255,255,255,.55)'], ['234,242,248', 0.6, '#C9D9E6']];
+  const WA = () => GW.WindowArt;
+  const GA = () => GW.GigiArt;
+  const MOODS = ['sunny', 'breezy', 'rain', 'rainbow'];
+  const ROAD = { sunny: '#82858B', breezy: '#82858B', rain: '#737880', rainbow: '#7E8288' };
   const CONF = ['#E84A4A', '#3C8DE8', '#FFD23F', '#4CC26B', '#FF9A2E', '#9B6BE0', '#FF8FC0'];
+  const ip = (o, k, a) => { const p = o['_p' + k]; const v = o[k]; return p == null || v == null ? v : lerp(p, v, a); };
 
   function roundRect(g, x, y, w, h, r) {
     g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r);
     g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r);
   }
-  function roundPoly(g, pts, r) {
-    const n = pts.length;
-    const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
-    const s = mid(pts[n - 1], pts[0]);
-    g.moveTo(s[0], s[1]);
-    for (let i = 0; i < n; i++) { const p = pts[i], q = pts[(i + 1) % n]; g.arcTo(p[0], p[1], q[0], q[1], r); }
-  }
   function fitText(g, text, maxW, px, weight) {
     let f = px;
     g.font = `${weight || 900} ${f}px ${FONT}`;
-    let w = g.measureText(text).width;
+    const w = g.measureText(text).width;
     if (w > maxW) { f = Math.max(8, f * maxW / w); g.font = `${weight || 900} ${f}px ${FONT}`; }
     return f;
   }
   function outlinedText(g, text, x, y, px, fill, stroke, maxW) {
     fitText(g, text, maxW || 9999, px);
-    g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.lineJoin = 'round';
+    g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
     if (stroke) { g.lineWidth = Math.max(3, px * 0.16); g.strokeStyle = stroke; g.strokeText(text, x, y); }
     g.fillStyle = fill; g.fillText(text, x, y);
   }
@@ -47,53 +38,23 @@
     constructor(canvas) {
       this.canvas = canvas; this.g = canvas.getContext('2d');
       this.W = 960; this.H = 720; this.rs = 1; this.lang = 'en';
-      this.fx = []; this.land = null; this.landKey = ''; this.time = 0;
-      this.quality = 1; this.hudStar = { x: 900, y: 40 };
-      this._blinkT = 2; this._blink = 0; this._night = 0;
+      this.fx = []; this.time = 0; this.quality = 1; this.hudStar = { x: 900, y: 40 };
+      this._talkT = 0;
+      this._wopt = {};
+      this._spr = (n, x, y, s) => this._sprite(n, x, y, s);
     }
     resize(W, H, rs) {
       this.W = W; this.H = H; this.rs = rs;
       const bw = Math.round(W * rs), bh = Math.round(H * rs);
       if (this.canvas.width !== bw || this.canvas.height !== bh) { this.canvas.width = bw; this.canvas.height = bh; }
-      this.landKey = ''; GW.Assets.dropExact();
+      GW.Assets.dropExact();
     }
-
-    /* ---------- static landscape ---------- */
-    _landscape(layout, level) {
-      const key = this.W + 'x' + this.H + '@' + this.rs + ':' + (level | 0) + ':' + layout.groundY;
-      if (key === this.landKey && this.land) return this.land;
-      const rs = this.rs, bw = this.canvas.width, bh = this.canvas.height;
-      const c = this.land && this.land.width === bw && this.land.height === bh ? this.land : GW.Assets.makeCanvas(bw, bh);
-      const g = c.getContext('2d');
-      g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, bw, bh);
-      const gy = layout.groundY;
-      const k = this._layerScale(layout);   // tall portrait: bigger hills fill the sky behind the items
-      const groundTop = gy - 30 - 40 * k, midBottom = gy - 10, farBottom = gy - 120;   // per env artist (k=1: tops gy-70 / gy-370 / gy-540)
-      const layers = [
-        { n: 'far_' + SEASONS[level | 0], w: 1200 * k, h: 420 * k, bottom: farBottom, off: 0.15 * 1300 * (this._chap | 0) },
-        { n: 'mid_' + SEASONS[level | 0], w: 1200 * k, h: 360 * k, bottom: midBottom, off: 0.35 * 1300 * (this._chap | 0) },
-        { n: 'ground_' + SEASONS[level | 0], w: 1200 * k, h: 260 * k, bottom: groundTop + 260 * k, off: 0 }
-      ];
-      for (const L of layers) {
-        const tw = Math.round(L.w * rs), th = Math.round(L.h * rs);
-        const tile = GW.Assets.exact(L.n, tw, th);
-        if (!tile) continue;
-        const y = Math.round((L.bottom - L.h) * rs);
-        let x = -Math.round(((L.off % L.w) + L.w) % L.w * rs);
-        for (; x < bw; x += tw) g.drawImage(tile, x, y);
-        if (L.n.indexOf('ground') === 0 && y + th < bh) { // fill below the ground art if the screen is very tall
-          g.fillStyle = FILL[SEASONS[level | 0]]; g.fillRect(0, y + th - 2, bw, bh - (y + th) + 2);
-        }
-      }
-      this.land = c; this.landKey = key;
-      return c;
-    }
-    _layerScale(layout) { return layout && layout.H > layout.W * 1.6 ? 1.36 : 1; }
-    prewarm(layout, level) { // build tiles ahead of time (cheap when cached)
-      const rs = this.rs, k = this._layerScale(layout), s = SEASONS[clamp(level | 0, 0, 3)];
-      GW.Assets.exact('far_' + s, Math.round(1200 * k * rs), Math.round(420 * k * rs));
-      GW.Assets.exact('mid_' + s, Math.round(1200 * k * rs), Math.round(360 * k * rs));
-      GW.Assets.exact('ground_' + s, Math.round(1200 * k * rs), Math.round(260 * k * rs));
+    _k(layout) { return layout && layout.H > layout.W * 1.6 ? 1.36 : 1; }
+    prewarm(layout, mood) {
+      const rs = this.rs, k = this._k(layout), m = MOODS[clamp(mood | 0, 0, 3)];
+      GW.Assets.exact('far_' + m, Math.round(1200 * k * rs), Math.round(420 * k * rs));
+      GW.Assets.exact('mid_' + m, Math.round(1200 * k * rs), Math.round(360 * k * rs));
+      GW.Assets.exact('ground_' + m, Math.round(1200 * k * rs), Math.round(260 * k * rs));
     }
 
     /* ---------- frame ---------- */
@@ -101,284 +62,291 @@
       const g = this.g, rs = this.rs, W = this.W, H = this.H;
       this.lang = o.lang || 'en';
       this.time += o.dt || 0;
-      const layout = world.layout;
+      const L = world.layout, a = world.alpha == null ? 1 : world.alpha;
       const amb = weather.ambient || {};
-      g.setTransform(rs, 0, 0, rs, 0, 0);
-      g.globalAlpha = 1;
-      this._sky(world, weather, amb, layout);
-      for (const c of weather.clouds || []) this._sprite(c.sprite, c.x, c.y, 300 * (c.scale || 1), 0, c.alpha == null ? 1 : c.alpha);
-      this._particles(weather.particles, 'sky');
-      const season = o.title ? 0 : o.done ? 3 : clamp(world.level | 0, 0, 3);
-      this._season = season; this._chap = o.title ? 0 : (world.level | 0);
-      const land = this._landscape(layout, season);
-      g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(land, 0, 0); g.setTransform(rs, 0, 0, rs, 0, 0);
+      const mood = o.title ? 0 : o.done ? 3 : clamp(world.level | 0, 0, 3);
+      this._mood = mood; this._amb = amb;
+      const scroll = o.title ? this.time * 6 : (ip(world, 'scroll', a) || 0);
+      g.setTransform(rs, 0, 0, rs, 0, 0); g.globalAlpha = 1;
+      this._sky(world, weather, amb, L);
+      this._street(L, mood, scroll);
       if (amb.tint) { g.fillStyle = amb.tint; g.fillRect(0, 0, W, H); }
-      this._particles(weather.particles, 'back');
       if (o.title) this._titleScene(world, o);
       else if (o.done) this._doneScene(world, o);
-      else this._game(world, o);
+      else this._game(world, o, a, weather);
       this._particles(weather.particles, 'front');
       this._fx(o.dt || 0);
       if (!o.title && !o.done) this._banner(world);
       if (o.debug) this._debug(world);
     }
-    _sky(world, weather, amb, layout) {
-      const g = this.g, W = this.W, H = this.H, gy = layout.groundY, k = this._layerScale(layout);
+    _sky(world, weather, amb, L) {
+      const g = this.g, W = this.W, H = this.H, gy = L.groundY, k = this._k(L);
       const sky = g.createLinearGradient(0, 0, 0, gy);
-      sky.addColorStop(0, amb.skyTop || '#86C8F4'); sky.addColorStop(1, amb.skyBottom || '#DCF0FF');
+      sky.addColorStop(0, amb.skyTop || '#8CCBEF'); sky.addColorStop(1, amb.skyBottom || '#E4F3FA');
       g.fillStyle = sky; g.fillRect(0, 0, W, H);
       if (amb.horizon) {
         const hz = g.createLinearGradient(0, gy - 620 * k, 0, gy - 140);
         hz.addColorStop(0, amb.horizon + '00'); hz.addColorStop(0.6, amb.horizon + '88'); hz.addColorStop(1, amb.horizon + 'CC');
         g.fillStyle = hz; g.fillRect(0, Math.max(0, gy - 620 * k), W, gy);
       }
-      const t = weather.time || this.time;
-      const st = amb.stars || 0;
-      if (st > 0.01 && weather.stars) {
-        for (const s of weather.stars) {
-          const al = st * (0.55 + 0.45 * Math.sin(s.phase + (s.tw || 1.5) * t));
-          if (al < 0.03) continue;
-          g.fillStyle = s.r > 2 ? `rgba(255,243,196,${al})` : `rgba(255,255,255,${al})`;
-          g.beginPath(); g.arc(s.x, s.y, s.r || 1.2, 0, TAU); g.fill();
-        }
-      }
-      // the sun stays high, above the card board
-      const P = layout.board;
-      const skyMax = Math.max(60 + (layout.ins ? layout.ins.top : 0), (P ? P.y - 20 : gy - 300) - 62);
+      const top = (L.ins ? L.ins.top : 0);
       if ((amb.sun || 0) > 0.01) {
-        const big = amb.sunY > 0.38 ? 180 : 150;
-        this._sprite('sun', W * (amb.sunX == null ? 0.66 : amb.sunX), Math.min(skyMax, H * (amb.sunY == null ? 0.14 : amb.sunY)), big, 0, amb.sun);
+        const sy = Math.max(top + 70, Math.min(H * (amb.sunY == null ? 0.14 : amb.sunY), gy - 420 * k));
+        this._sprite('sun', W * (amb.sunX == null ? 0.7 : amb.sunX), sy, 170, 0, amb.sun);
       }
-      if ((amb.moon || 0) > 0.01) {
-        this._sprite('moon', W * (amb.moonX == null ? 0.78 : amb.moonX), Math.min(skyMax, H * (amb.moonY == null ? 0.14 : amb.moonY)), 150, 0, amb.moon);
+      if ((amb.rainbow || 0) > 0.01) {
+        const rw = Math.min(1.1 * W, 1300 * k), rh = rw / 2, midY = gy - 26 - 360 * k;
+        const spr = GW.Assets.sprite('rainbow', rw * this.rs);
+        if (spr) { g.save(); g.globalAlpha = amb.rainbow * 0.9; g.drawImage(spr, W * 0.55 - rw / 2, midY + 250 * k - rh, rw, rh); g.restore(); }
       }
+      for (const c of weather.clouds || []) this._sprite(c.sprite, c.x, c.y, 300 * (c.scale || 1), 0, c.alpha == null ? 1 : c.alpha);
+      for (const kt of weather.kites || []) this._kite(kt);
+      this._particles(weather.particles, 'sky');
+    }
+    _kite(kt) {
+      if (!(kt.alpha > 0.01)) return;
+      const g = this.g, s = kt.size || 64;
+      g.save(); g.globalAlpha *= kt.alpha;
+      g.strokeStyle = 'rgba(90,80,70,.55)'; g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(kt.ax, kt.ay);
+      g.quadraticCurveTo((kt.ax + kt.x) / 2 + 40 * (kt.side || 1), (kt.ay + kt.y) / 2 + 30, kt.x, kt.y); g.stroke();
+      g.translate(kt.x, kt.y); g.rotate(kt.rot || 0);
+      const spr = GW.Assets.sprite('kite', s * 1.33 * this.rs);
+      if (spr) { const h = s * 1.33, w = h * 96 / 128; g.drawImage(spr, -w / 2, -h * 50 / 128, w, h); }
+      g.restore();
+    }
+    _layer(name, w, h, y, off) {
+      const rs = this.rs, tw = Math.round(w * rs), th = Math.round(h * rs);
+      const tile = GW.Assets.exact(name, tw, th);
+      if (!tile) return;
+      const g = this.g;
+      g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
+      let x = -Math.round((((off % w) + w) % w) * rs);
+      const yy = Math.round(y * rs);
+      for (; x < this.canvas.width; x += tw) g.drawImage(tile, x, yy);
+      g.restore();
+    }
+    _street(L, mood, scroll) {
+      const g = this.g, gy = L.groundY, k = this._k(L), m = MOODS[mood];
+      this._layer('far_' + m, 1200 * k, 420 * k, gy - 26 - 100 * k - 420 * k, scroll * 0.15);
+      this._layer('mid_' + m, 1200 * k, 360 * k, gy - 26 - 360 * k, scroll * 0.4);
+      this._layer('ground_' + m, 1200 * k, 260 * k, gy - 30 - 40 * k, scroll);
+      const fillY = gy - 30 + 220 * k;
+      if (fillY < this.H) { g.fillStyle = ROAD[m]; g.fillRect(0, fillY - 1, this.W, this.H - fillY + 1); }
     }
 
     /* ---------- the round ---------- */
-    _game(w, o) {
-      const a = w.alpha == null ? 1 : w.alpha;
+    _game(w, o, a, weather) {
       const L = w.layout;
-      this._groundY = L.groundY;
-      const showPanel = w.state === 'round' && w.phase !== 'done';   // between rounds the rewards fill the forest
-      this._panelA = clamp((this._panelA == null ? 0 : this._panelA) + (showPanel ? 1 : -1) * (o.dt || 0) * 3, 0, 1);
-      if (L.grid && L.grid.style === 'pond') this._pads(w, a); else this._panel(L);
-      const rws = (w.rewards || []).slice().sort((p, q) => p.y - q.y);   // back row first
-      for (const r of rws) if (r.kind === 'lantern') this._reward(r, a);
-      this._dee(w, o, a);
-      this._stack(w, L);
-      const cards = (w.cards || []).filter(c => c.state !== 'gone');
-      // resting cards first, lifted / moving ones on top
-      cards.sort((p, q) => (p.lift || 0) - (q.lift || 0));
-      for (const c of cards) this._card(c, a);
-      for (const r of rws) if (r.kind !== 'lantern') this._reward(r, a);
+      // traffic + the bus on the road (behind the building's pavement edge? no: the road is in front of the facade's foot)
+      const traffic = (w.traffic || []).slice().sort((p, q) => (p.lane || 0) - (q.lane || 0));
+      // buildings
+      const sT = w.phase === 'scroll' ? clamp(ip(w, 'scrollT', a), 0, 1) : 1;
+      if (w.prevBuilding && w.phase === 'scroll') this._building(w.prevBuilding, -sT * this.W, true, a, w);
+      if (L.grid && L.grid.building && w.building) {
+        this._building({ building: w.building, rect: L.grid.building, grid: L.grid, cards: w.cards }, (1 - sT) * this.W, false, a, w);
+      } else if (w.lastBuilding) this._building(w.lastBuilding, 0, true, a, w);
+      for (const c of traffic) this._car(c, a);
+      if (w.critter && w.critter.type === 'bus') this._bus(w.critter, a);
+      this._particles(weather.particles, 'back');
+      this._gigi(w, o, a);
+      if (w.critter && w.critter.type === 'pigeon') this._pigeon(w.critter, a);
+      if (w.critter && w.critter.type === 'balloon') this._balloon(w.critter, a);
     }
-    _pads(w, a) {   // surprise "pond" round: every card floats on its own lily pad
-      const g = this.g, k = this._panelA == null ? 1 : this._panelA;
-      if (k <= 0.01) return;
-      g.save(); g.globalAlpha = k;
-      for (const c of w.cards || []) {
-        if (c.state === 'gone') continue;
-        const x = c._px == null ? c.x : lerp(c._px, c.x, a), y = (c._py == null ? c.y : lerp(c._py, c.y, a)) + c.h * 0.38;
-        g.fillStyle = 'rgba(70,120,140,.25)'; g.beginPath(); g.ellipse(x, y + 8, c.w * 0.78, c.h * 0.22, 0, 0, TAU); g.fill();
-        g.fillStyle = this._season === 3 ? '#B9D3C9' : '#7DB86A';
-        g.beginPath(); g.ellipse(x, y, c.w * 0.72, c.h * 0.2, 0, 0.25, TAU - 0.25); g.lineTo(x, y); g.closePath(); g.fill();
-        g.strokeStyle = this._season === 3 ? '#8FB0A6' : '#4E8A47'; g.lineWidth = 3; g.stroke();
-      }
-      g.restore();
-    }
-    _panel(L) {   // the soft mossy clearing behind the grid
-      const G = L.grid;
-      if (!G || !G.rect) return;
-      const g = this.g, R = G.rect, pad = Math.max(16, G.gap * 1.2), P = PANEL[this._season || 0];
-      const k = this._panelA == null ? 1 : this._panelA;
-      if (k <= 0.01) return;
-      g.save(); g.globalAlpha = k;
-      g.fillStyle = `rgba(${P[0]},${P[1]})`;
-      g.beginPath(); roundRect(g, R.x - pad, R.y - pad, R.w + pad * 2, R.h + pad * 2, 40); g.fill();
-      g.lineWidth = 3; g.strokeStyle = P[2]; g.stroke();
-      g.restore();
-    }
-    _stack(w, L) {   // the deck beside Dee while dealing
-      if (w.phase !== 'deal' || !L.stack) return;
-      const left = (w.cards || []).filter(c => c.state === 'deal' && (c.t == null || c.t < 0)).length;
-      const G = L.grid || { cw: 120, ch: 154 };
-      for (let i = 0; i < left; i++) {
-        const g = this.g; g.save(); g.translate(L.stack.x, L.stack.y - i * 1.5); g.scale(0.45, 0.45);
-        this._cardShadow(G.cw, G.ch, 0);
-        if (CA()) CA().drawBack(g, G.cw, G.ch, {});
+    _building(B, dx, frozen, a, w) {
+      const art = WA(); if (!art || !B || !B.rect) return;
+      const g = this.g, R = B.rect;
+      const r = { x: R.x + dx, y: R.y, w: R.w, h: R.h, roofH: R.roofH };
+      if (r.x > this.W + 40 || r.x + r.w < -40) return;
+      const door = R.door;
+      const opt = door ? { doorX: door.x + dx, doorW: door.w, doorH: door.h } : { doorX: r.x - 4000 };
+      opt.light = frozen ? 0.5 : (w.cheer || 0);
+      // soft contact shadow on the pavement
+      g.fillStyle = 'rgba(60,55,50,.14)'; g.fillRect(r.x - 6, r.y + r.h - 3, r.w + 12, 8);
+      art.drawBuilding(g, r, B.building, opt);
+      const cheer = frozen ? 1 : (w.cheer || 0);
+      if (cheer > 0.01 && art.drawBunting) {
+        g.save(); g.globalAlpha = clamp(cheer * 1.5, 0, 1);
+        art.drawBunting(g, r.x + 6, r.y + 4, r.x + r.w - 6, r.y + 4, this.time);
         g.restore();
       }
+      const rain = (this._amb && this._amb.rain) || 0;
+      for (const c of B.cards || []) this._window(c, B.building, dx, frozen, a, rain, cheer);
     }
-    _cardShadow(cw, ch, lift) {
-      const g = this.g;
-      g.fillStyle = `rgba(40,50,30,${0.22 - 0.08 * lift})`;
-      g.beginPath(); roundRect(g, -cw / 2 + 2 + lift * 4, -ch / 2 + 5 + lift * 10, cw, ch, cw * 0.12); g.fill();
-    }
-    _card(c, a) {
-      if (c.state === 'deal' && (c.t == null || c.t < 0)) return;
-      const g = this.g;
-      const x = c._px == null ? c.x : lerp(c._px, c.x, a), y = c._py == null ? c.y : lerp(c._py, c.y, a);
-      const rot = c._prot == null ? (c.rot || 0) : lerp(c._prot, c.rot || 0, a);
-      const flip = c._pflip == null ? (c.flip || 0) : lerp(c._pflip, c.flip || 0, a);
-      const lift = clamp(c.lift || 0, 0, 1), al = c.alpha == null ? 1 : clamp(c.alpha, 0, 1);
-      if (al <= 0.01) return;
-      const liftPx = ((GW.CONFIG && GW.CONFIG.liftPx) || 8) * lift;
-      g.save(); g.globalAlpha = al;
-      g.translate(x, y); g.rotate(rot); g.scale(c.sx || 1, c.sy || 1);
-      // shadow stays on the clearing, the card rises
-      const sxk = Math.max(0.05, Math.abs(Math.cos(Math.PI * clamp(flip, 0, 1))));
-      g.save(); g.scale(sxk, 1); this._cardShadow(c.w, c.h, lift); g.restore();
-      g.translate(0, -liftPx);
-      const art = CA();
-      if (art) {
-        const opt = { glow: c.glow || 0, sprite: (n, sx, sy, sz) => this._sprite(n.indexOf('animal_') === 0 ? n : 'animal_' + n, sx, sy, sz) };
-        art.drawCard(g, c.w, c.h, c.face, flip, opt);
-      } else { g.fillStyle = flip > 0.5 ? '#FFF8EA' : '#2F7D73'; g.fillRect(-c.w / 2, -c.h / 2, c.w, c.h); }
+    _window(c, building, dx, frozen, a, rain, cheer) {
+      const g = this.g, art = WA();
+      const x = (frozen ? c.x : ip(c, 'x', a)) + dx, y = frozen ? c.y : ip(c, 'y', a);
+      if (x + c.w < -20 || x - c.w > this.W + 20) return;
+      const open = frozen ? (c.state === 'matched' ? 1 : (c.open || 0)) : (ip(c, 'open', a) || 0);
+      const O = this._wopt;
+      O.shutter = building.shutter; O.trim = building.trim;
+      O.light = clamp((c.light || 0) + (c.state === 'matched' ? cheer * 0.3 : 0), 0, 1);
+      O.glow = c.glow || 0; O.glowColor = undefined;
+      O.bloom = frozen ? (c.bloom || 0) : (ip(c, 'bloom', a) || 0);
+      O.bloomColor = (c.face && c.face.color) || 'mixed';
+      O.bounce = frozen ? 0 : (ip(c, 'bounce', a) || 0);
+      O.wiggle = c.wiggle || 0; O.rain = rain; O.t = this.time; O.seed = c.seed || 0;
+      O.sprite = this._spr; O.alpha = c.alpha == null ? 1 : c.alpha;
+      g.save(); g.translate(x, y);
+      art.drawWindow(g, c.w, c.h, c.face, open, O);
       g.restore();
     }
-    _reward(r, a) {
-      const g = this.g, art = CA();
-      const al = r.alpha == null ? 1 : clamp(r.alpha, 0, 1);
-      if (al <= 0.01 || !art) return;
-      const x = r._px == null ? r.x : lerp(r._px, r.x, a), y = r._py == null ? r.y : lerp(r._py, r.y, a);
-      const rot = r._prot == null ? (r.rot || 0) : lerp(r._prot, r.rot || 0, a);
-      g.save(); g.globalAlpha = al;
-      switch (r.kind) {
-        case 'butterfly':
-          g.translate(x, y); g.rotate(rot); if ((r.face || 1) < 0) g.scale(-1, 1);
-          art.drawButterfly(g, r.color || 'blue', r.size || 46, r.flap || 0);
-          break;
-        case 'lantern': {
-          if (r.ax != null) {
-            g.strokeStyle = '#7A6046'; g.lineWidth = 2; g.lineCap = 'round';
-            const top = art.lanternTop ? art.lanternTop(r.shape || 'circle', r.size || 52) : -(r.size || 52) * 0.6;
-            const tx = x + Math.sin(rot) * -top, ty = y + Math.cos(rot) * top;
-            g.beginPath(); g.moveTo(r.ax, r.ay); g.lineTo(tx, ty); g.stroke();
-          }
-          g.translate(x, y); g.rotate(rot);
-          art.drawLantern(g, r.shape || 'circle', r.color || 'yellow', r.size || 52, r.glow == null ? 0.6 : r.glow);
-          break;
-        }
-        case 'star':
-          g.translate(x, y); g.rotate(rot); g.scale(r.sx || 1, r.sx || 1);
-          art.drawStar(g, r.size || 44, r.text, { twinkle: 0.5 + 0.5 * Math.sin(this.time * 3 + (r.id ? String(r.id).length : 0)) });
-          break;
-        case 'acorns':
-          for (const p of r.pieces || []) {
-            const px = p._px == null ? p.x : lerp(p._px, p.x, a), py = p._py == null ? p.y : lerp(p._py, p.y, a);
-            const pr = p._prot == null ? (p.rot || 0) : lerp(p._prot, p.rot || 0, a);
-            g.save(); g.translate(px, py); g.rotate(pr); art.drawAcorn(g, r.pieceSize || 22); g.restore();
-          }
-          break;
-        case 'animal': {
-          const s = r.size || 70;
-          const gy = this._groundY || y;
-          if (r.state !== 'fly') { g.fillStyle = 'rgba(40,50,30,.18)'; g.beginPath(); g.ellipse(x, y - 2, s * 0.32, s * 0.06, 0, 0, TAU); g.fill(); }
-          g.translate(x, y); g.rotate(rot); g.scale((r.sx || 1) * ((r.face || 1) < 0 ? -1 : 1), r.sy || 1);
-          this._sprite(r.sprite && r.sprite.indexOf('animal_') === 0 ? r.sprite : 'animal_' + (r.sprite || 'fox'), 0, -s / 2, s);
-          void gy;
-          break;
-        }
+    _car(c, a) {
+      const x = ip(c, 'x', a), y = c.y, w = c.w || 150, h = c.h || 75;
+      const spr = GW.Assets.sprite(c.kind || 'car_a', w * this.rs);
+      if (!spr) return;
+      const g = this.g;
+      g.save(); g.translate(x, y); if ((c.face || 1) < 0) g.scale(-1, 1);
+      g.fillStyle = 'rgba(30,30,35,.18)'; g.beginPath(); g.ellipse(0, -2, w * 0.42, 5, 0, 0, TAU); g.fill();
+      g.drawImage(spr, -w / 2, -h * 114 / 120, w, h);
+      g.restore();
+    }
+    _bus(b, a) {
+      const x = ip(b, 'x', a), y = ip(b, 'y', a), w = b.w || 220, h = b.h || 92;
+      const spr = GW.Assets.sprite('bus', w * this.rs);
+      if (!spr) return;
+      const g = this.g;
+      g.save(); g.translate(x, y); g.rotate(b.rot || 0); g.scale((b.sx || 1) * ((b.face || 1) < 0 ? -1 : 1), b.sy || 1);
+      g.fillStyle = 'rgba(30,30,35,.2)'; g.beginPath(); g.ellipse(0, -2, w * 0.44, 6, 0, 0, TAU); g.fill();
+      const top = -h * 197 / 200;
+      g.drawImage(spr, -w / 2, top, w, h);
+      // passengers in the three windows: little round heads that wave (sticker friends)
+      const pass = ['animal_cat', 'animal_rabbit', 'animal_duck'];
+      const wv = b.wave || 0;
+      for (let i = 0; i < 3; i++) {
+        const wx = -w / 2 + w * (102 + i * 112) / 480, wy = top + h * 92 / 200;
+        const bob = Math.sin(this.time * 6 + i * 1.7) * 3 * wv;
+        g.save(); g.beginPath(); g.rect(wx - w * 50 / 480, top + h * 56 / 200, w * 100 / 480, h * 58 / 200); g.clip();
+        this._sprite(pass[i], wx, wy - bob, h * 0.5);
+        g.restore();
       }
+      if ((b.honk || 0) > 0.05) {   // beep lines in front of the bus
+        g.strokeStyle = `rgba(255,255,255,${0.9 * b.honk})`; g.lineWidth = 4; g.lineCap = 'round';
+        for (let i = -1; i <= 1; i++) { g.beginPath(); g.moveTo(w * 0.52, top + h * 0.45 + i * 14); g.lineTo(w * 0.52 + 22 * b.honk, top + h * 0.45 + i * 22); g.stroke(); }
+      }
+      g.restore();
+    }
+    _pigeon(p, a) {
+      const x = ip(p, 'x', a), y = ip(p, 'y', a), s = 64;
+      const spr = GW.Assets.sprite((p.state === 'fly' || p.state === 'away' || (p.flap || 0) > 0.5) && (p.flap || 0) > 0.5 ? 'pigeon_flap' : 'pigeon', s * this.rs);
+      if (!spr) return;
+      const g = this.g;
+      g.save(); g.translate(x, y); g.rotate((p.rot || 0) + (p.peck || 0) * 0.25 * ((p.face || 1) < 0 ? -1 : 1));
+      g.scale((p.sx || 1) * ((p.face || 1) < 0 ? -1 : 1), p.sy || 1);
+      g.drawImage(spr, -s / 2, -s * 120 / 128, s, s);
+      g.restore();
+    }
+    _balloon(b, a) {
+      const art = WA(); if (!art) return;
+      const x = ip(b, 'x', a), y = ip(b, 'y', a);
+      const g = this.g;
+      g.save(); g.globalAlpha *= b.alpha == null ? 1 : b.alpha; g.translate(x, y); g.rotate(b.rot || 0);
+      art.drawBalloon(g, b.color || 'red', 70, this.time);
       g.restore();
     }
 
-    _dee(w, o, a) {
-      const L = w.layout.dee, m = w.dee || {};
-      let frame = 'dee_idle';
-      const mood = m.mood || 'idle';
-      if (mood === 'happy') frame = 'dee_happy';
-      else if (mood === 'cheer') frame = 'dee_cheer';
-      else if (mood === 'think') frame = 'dee_think';
-      else if (mood === 'oops') frame = 'dee_oops';
-      if (frame === 'dee_idle') {
-        if (o.speaking && Math.floor(this.time / 0.15) % 2 === 0) frame = 'dee_talk';
-        else if (this._blinking(o.dt)) frame = 'dee_blink';
+    _gigi(w, o, a) {
+      const L = w.layout, G = w.gigi || {}, LG = L.gigi;
+      if (!LG) return;
+      const h = LG.h;
+      const hop = ip(G, 'hop', a) || 0;
+      const hx = ip(G, 'hx', a) != null ? ip(G, 'hx', a) : (G._phx == null ? G.headX : lerp(G._phx, G.headX, a));
+      const hy = G._phy == null ? G.headY : lerp(G._phy, G.headY, a);
+      this._drawGigi(LG.x, LG.y, h, hop, G.neckBaseX, G.neckBaseY, hx, hy, this._gigiBody(G, hop), this._gigiHead(G, o), 1);
+    }
+    _gigiBody(G, hop) {
+      if (G.walking) return (G.walk || 0) % 1 < 0.5 ? 'gigi_body_walk_a' : 'gigi_body_walk_b';
+      if (hop > 6) return 'gigi_body_hop';
+      return 'gigi_body_stand';
+    }
+    _gigiHead(G, o) {
+      const m = (G.moodT || 0) > 0 ? G.mood : 'idle';
+      if (m === 'happy' || m === 'cheer' || m === 'think' || m === 'oops') return 'gigi_head_' + m;
+      if (o.speaking && Math.floor(this.time / 0.15) % 2 === 0) return 'gigi_head_talk';
+      if ((G.blink || 0) > 0.5) return 'gigi_head_blink';
+      return 'gigi_head_idle';
+    }
+    _drawGigi(fx, fy, h, hop, bx, by, hx, hy, bodyFrame, headFrame, scaleX) {
+      const g = this.g, ga = GA();
+      // shadow on the pavement, smaller while she hops
+      const shk = 1 / (1 + hop / 60);
+      g.fillStyle = `rgba(50,45,40,${0.22 * shk})`;
+      g.beginPath(); g.ellipse(fx, fy - 2, h * 0.36 * shk, h * 0.055 * shk, 0, 0, TAU); g.fill();
+      const by0 = fy - hop;
+      const body = GW.Assets.sprite(bodyFrame, h * this.rs) || GW.Assets.sprite('gigi_body_stand', h * this.rs);
+      if (bx == null) { bx = fx + (172 - 128) / 256 * h; by = by0 + (96 - 244) / 256 * h; }
+      if (hx == null) { hx = bx + 0.12 * h; hy = by - 0.6 * h; }
+      if (body) g.drawImage(body, fx - h * 128 / 256, by0 - h * 244 / 256, h, h);
+      if (ga && ga.drawNeck) ga.drawNeck(g, bx, by, hx, hy, ga.thickFor ? ga.thickFor(h) : 0.22 * h);
+      const hs = 0.62 * h / 192;
+      const head = GW.Assets.sprite(headFrame, 192 * hs * this.rs) || GW.Assets.sprite('gigi_head_idle', 192 * hs * this.rs);
+      if (head) {
+        g.save(); g.translate(hx, hy); g.rotate(ga && ga.headAngle ? ga.headAngle(bx, by, hx, hy) : 0);
+        g.drawImage(head, -70 * hs, -160 * hs, 192 * hs, 192 * hs);
+        g.restore();
       }
-      const hop = m.hop || 0;
-      if (this._lastHop > 2 && hop <= 2) this._landSquash = 0.22;
-      this._lastHop = hop;
-      this._landSquash = Math.max(0, (this._landSquash || 0) - (o.dt || 0));
-      const sq = this._landSquash > 0 ? 0.92 + 0.08 * (1 - this._landSquash / 0.22) : 1;
-      const breathe = (1 + 0.018 * Math.sin(this.time * 2.6)) * sq;
-      this._character(frame, L.x, L.y - hop, L.h, breathe, L.y, hop);
-    }
-    _blinking(dt) {
-      this._blinkT -= dt || 0;
-      if (this._blinkT <= 0) { this._blink = 0.13; this._blinkT = 2.5 + Math.random() * 3; }
-      if (this._blink > 0) { this._blink -= dt || 0; return true; }
-      return false;
-    }
-    _character(frame, x, y, h, breathe, groundY, hop) {
-      const g = this.g, box = h * 256 / 234;      // Dee's drawing fills y 10–244 (234 px) of the 256 box
-      const spr = GW.Assets.sprite(frame, box * this.rs) || GW.Assets.sprite('dee_idle', box * this.rs);
-      const sy = groundY == null ? y : groundY, shk = 1 / (1 + (hop || 0) / 60);
-      g.fillStyle = `rgba(50,70,30,${0.22 * shk})`;
-      g.beginPath(); g.ellipse(x, sy - box * 0.02, box * 0.3 * shk, box * 0.05 * shk, 0, 0, TAU); g.fill();
-      if (!spr) return;
-      g.save(); g.translate(x, y); g.scale(1 / (breathe * 0.5 + 0.5), breathe);
-      g.drawImage(spr, -box * 128 / 256, -box * 244 / 256, box, box);
-      g.restore();
+      void scaleX;
     }
 
     /* ---------- title & celebration ---------- */
+    _miniBuilding(cx, groundY, cw, faces, opens, lights, building) {
+      const art = WA(); if (!art) return;
+      const ch = cw / 0.78, gap = Math.max(16, cw * 0.18), pad = Math.max(20, cw * 0.24);
+      const n = faces.length, rowW = n * cw + (n - 1) * gap;
+      const winY = groundY - ch * 1.25;
+      const r = { x: cx - rowW / 2 - pad, y: winY - ch / 2 - pad, w: rowW + 2 * pad, h: groundY + 4 - (winY - ch / 2 - pad), roofH: cw * 0.32 };
+      art.drawBuilding(this.g, r, building, { doorX: r.x - 4000, light: 0.3 });
+      for (let i = 0; i < n; i++) {
+        const O = { shutter: building.shutter, trim: building.trim, light: lights[i] || 0, bloom: lights[i] ? 1 : 0, bloomColor: 'mixed', sprite: this._spr, t: this.time };
+        this.g.save(); this.g.translate(cx - rowW / 2 + cw / 2 + i * (cw + gap), winY);
+        art.drawWindow(this.g, cw, ch, faces[i], opens[i], O);
+        this.g.restore();
+      }
+      return r;
+    }
     _titleScene(w, o) {
       const L = w.layout, W = this.W, H = this.H, portrait = H > W;
-      const h = portrait ? Math.min(300, H * 0.2) : Math.min(260, H * 0.38);
-      const x = portrait ? W * 0.3 : L.ins.left + W * 0.15, y = L.groundY + 10;
-      const cyc = this.time % 2.4;
-      const frame = cyc < 0.5 ? 'dee_happy' : cyc < 0.62 ? 'dee_blink' : 'dee_idle';
-      const hop = cyc < 0.5 ? Math.sin(cyc / 0.5 * Math.PI) * 18 : 0;
-      // three cards that flip on their own, one after another
-      const cw = portrait ? 92 : 84, ch = cw / 0.78;
-      const cx0 = portrait ? W * 0.68 : W - L.ins.right - Math.max(170, W * 0.14), cy = L.groundY - ch * 0.62;
-      const faces = [{ kind: 'shape', value: 'heart', shape: 'heart', color: 'red' }, { kind: 'animal', value: 'fox', sprite: 'animal_fox' }, { kind: 'color', value: 'blue', color: 'blue' }];
-      const art = CA();
-      for (let i = 0; i < 3; i++) {
-        const ph = ((this.time * 0.45 + i / 3) % 1), f = ph < 0.15 ? ph / 0.15 : ph < 0.55 ? 1 : ph < 0.7 ? 1 - (ph - 0.55) / 0.15 : 0;
-        const fx = cx0 + (i - 1) * (cw + 12), fy = cy + (i === 1 ? -14 : 0);
-        const g = this.g; g.save(); g.translate(fx, fy); g.rotate((i - 1) * 0.08);
-        this._cardShadow(cw, ch, 0);
-        if (art) art.drawCard(g, cw, ch, faces[i], f, { sprite: (n, sx, sy, sz) => this._sprite(n.indexOf('animal_') === 0 ? n : 'animal_' + n, sx, sy, sz) });
-        g.restore();
-      }
-      this._character(frame, x, y - hop, h, 1 + 0.02 * Math.sin(this.time * 2.6), y, hop);
+      // a little building whose windows open and close on their own
+      const cw = portrait ? 96 : 84;
+      const cx = portrait ? W * 0.62 : W - L.ins.right - Math.max(190, W * 0.17);
+      const faces = [{ kind: 'color', value: 'red', color: 'red', obj: 'umbrella' }, { kind: 'animal', value: 'dog', sprite: 'animal_dog' }, { kind: 'shape', value: 'star', shape: 'star', color: 'blue' }];
+      const opens = [0, 1, 2].map(i => {
+        const ph = (this.time * 0.4 + i / 3) % 1;
+        if (ph < 0.12) return easeOutBack(ph / 0.12) ;
+        if (ph < 0.55) return 1;
+        if (ph < 0.65) return 1 - (ph - 0.55) / 0.1;
+        return 0;
+      });
+      this._miniBuilding(cx, L.groundY, cw, faces, opens, [0, 0, 0], { facade: 'cream', trim: '#FBF7EE', shutter: 'teal', roof: 'gable', seed: 3 });
+      // Gigi waving
+      const hgt = portrait ? Math.min(420, H * 0.3) : Math.min(380, H * 0.55);
+      const gx = portrait ? W * 0.2 : L.ins.left + W * 0.13;
+      const cyc = this.time % 2.6, hop = cyc < 0.45 ? Math.sin(cyc / 0.45 * Math.PI) * 16 : 0;
+      g_shadow(this.g, gx, L.groundY + 20, hgt * 0.22);
+      this._sprite2('gigi_title', gx, L.groundY + 22 - hop, hgt, 320 / 480);
     }
-    _doneScene(w, o) {   // the winter party: every reward of the session around a cheering Dee
-      const L = w.layout, W = this.W, H = this.H, t = this.time, art = CA();
-      const col = w.collected || [];
-      const an = col.filter(r => r.kind === 'animal').map(r => r.sprite);
-      const friends = an.length ? an : (GW.ANIMALS || []).map(a => 'animal_' + a);
-      const x0 = L.ins.left + 40, x1 = W - L.ins.right - 40, n = Math.min(friends.length, 10);
-      const step = Math.min(100, (x1 - x0) / Math.max(1, n)), s = Math.min(76, step * 0.95);
-      const sx = (x0 + x1) / 2 - step * (n - 1) / 2;
-      for (let i = 0; i < n; i++) {
-        const hop = Math.max(0, Math.sin(t * 3.2 + i * 0.9)) * 14;
-        const nm = friends[i].indexOf('animal_') === 0 ? friends[i] : 'animal_' + friends[i];
-        this._sprite(nm, sx + i * step, L.groundY + 34 - hop - s / 2, s);
-      }
-      if (art) {
-        const bf = col.filter(r => r.kind === 'butterfly').map(r => r.color);
-        const cols = bf.length ? bf : ['red', 'blue', 'yellow', 'purple', 'green'];
-        for (let i = 0; i < Math.min(cols.length, 10); i++) {
-          const u = (t * 0.07 + i * 0.137) % 1;
-          const bx = W * ((i * 0.618 + 0.1) % 1) + Math.sin(t * 1.3 + i) * 30, by = H * 0.15 + (H * 0.45) * ((i * 0.37) % 1) + Math.sin(t * 2 + i) * 20;
-          this.g.save(); this.g.translate(bx, by); this.g.rotate(Math.sin(t + i) * 0.2);
-          art.drawButterfly(this.g, cols[i], 44, (Math.sin(t * 9 + i) + 1) / 2); this.g.restore();
-          void u;
-        }
-        const ln = col.filter(r => r.kind === 'lantern');
-        for (let i = 0; i < Math.min(ln.length, 6); i++) {
-          const lx = L.ins.left + 60 + i * ((W - L.ins.left - L.ins.right - 120) / Math.max(1, Math.min(ln.length, 6) - 1 || 1)), ly = L.ins.top + 70 + (i % 2) * 30;
-          this.g.save(); this.g.translate(lx, ly); this.g.rotate(Math.sin(t * 1.5 + i) * 0.1);
-          art.drawLantern(this.g, ln[i].shape || 'star', ln[i].color || 'yellow', 48, 0.8); this.g.restore();
-        }
-      }
-      const hgt = Math.min(H * (o && o.compact ? 0.48 : 0.32), 320);
-      const cyc = t % 1.1, hop = cyc < 0.55 ? Math.sin(cyc / 0.55 * Math.PI) * 34 : 0;
-      const y = o && o.compact ? L.groundY - 10 : Math.min(L.groundY - 20, H * (H > W ? 0.4 : 0.52));
-      const cx = o && o.compact ? L.ins.left + W * 0.18 : W / 2;
-      this._character(cyc < 0.55 ? 'dee_cheer' : 'dee_happy', cx, y - hop, hgt, 1, y, hop);
+    _sprite2(name, cx, bottom, h, aspect) {   // bottom-anchored sprite with a known aspect (w/h)
+      const spr = GW.Assets.sprite(name, h * this.rs);
+      if (!spr) return;
+      const w = h * aspect;
+      this.g.drawImage(spr, cx - w / 2, bottom - h, w, h);
+    }
+    _doneScene(w, o) {   // the street party at rainbow time: a building full of lit windows with what the child found
+      const L = w.layout, W = this.W, H = this.H, t = this.time, portrait = H > W;
+      const col = (w.collected || []).slice(-6);
+      const faces = col.length ? col.map(p => p.faceA) : [{ kind: 'color', value: 'red', color: 'red', obj: 'balloon' }, { kind: 'animal', value: 'cat', sprite: 'animal_cat' }, { kind: 'shape', value: 'heart', shape: 'heart', color: 'purple' }];
+      const per = portrait ? 3 : Math.min(6, faces.length);
+      const row = faces.slice(0, per);
+      const cw = Math.min(portrait ? 150 : 120, (W - L.ins.left - L.ins.right - 120) / (row.length * 1.25));
+      const cx = o && o.compact ? W * 0.6 : W / 2;
+      const bump = row.map((_, i) => Math.max(0, Math.sin(t * 3 + i * 0.9)) * 6);
+      this._miniBuilding(cx, L.groundY, cw, row.map((f, i) => Object.assign({}, f)), row.map(() => 1), row.map(() => 1), { facade: 'skygrey', trim: '#FBF7EE', shutter: 'terracotta', roof: 'arch', seed: 9 });
+      void bump;
+      const hgt = Math.min(H * (o && o.compact ? 0.5 : 0.3), 400);
+      const cyc = t % 1.1, hop = cyc < 0.55 ? Math.sin(cyc / 0.55 * Math.PI) * 30 : 0;
+      const gx = o && o.compact ? L.ins.left + W * 0.14 : L.ins.left + 110;
+      g_shadow(this.g, gx, L.groundY + 20, hgt * 0.22);
+      this._sprite2('gigi_title', gx, L.groundY + 22 - hop, hgt, 320 / 480);
     }
 
     _banner(w) {
@@ -391,19 +359,19 @@
       const bw = Math.min(620, W - 80), bh = 170, cx = W / 2, cy = clamp((L.board ? L.board.y + L.board.h * 0.45 : this.H * 0.45), L.ins.top + 120, this.H - 300);
       g.save(); g.translate(cx, cy); g.scale(s, s); g.globalAlpha = clamp(k * 1.5, 0, 1);
       g.fillStyle = 'rgba(40,60,110,.25)'; g.beginPath(); roundRect(g, -bw / 2, -bh / 2 + 8, bw, bh, 34); g.fill();
-      g.fillStyle = '#FBFDFF'; g.beginPath(); roundRect(g, -bw / 2, -bh / 2, bw, bh, 34); g.fill();
-      g.lineWidth = 5; g.strokeStyle = '#BFD8EE'; g.stroke();
+      g.fillStyle = '#FFFCF4'; g.beginPath(); roundRect(g, -bw / 2, -bh / 2, bw, bh, 34); g.fill();
+      g.lineWidth = 5; g.strokeStyle = '#E8CFA2'; g.stroke();
       const I = GW.I18N, lang = this.lang;
       if (w.state === 'intro') {
         const top = I ? I.t(lang, 'ui.chapter', { n: (w.level | 0) + 1 }) : 'Chapter ' + ((w.level | 0) + 1);
         const name = I ? I.t(lang, 'topic.' + w.topic) : w.topic;
-        outlinedText(g, top, 0, -bh * 0.22, 30, '#6b7a99', null, bw - 60);
-        outlinedText(g, name, 0, bh * 0.14, 62, '#2e8c78', '#ffffff', bw - 60);
+        outlinedText(g, top, 0, -bh * 0.22, 30, '#7a6a5a', null, bw - 60);
+        outlinedText(g, name, 0, bh * 0.14, 62, '#3E8C84', '#ffffff', bw - 60);
       } else {
         const s1 = I ? I.t(lang, 'ui.stars') : 'Stars';
-        outlinedText(g, s1, 0, -bh * 0.24, 34, '#6b7a99', null, bw - 60);
+        outlinedText(g, s1, 0, -bh * 0.24, 34, '#7a6a5a', null, bw - 60);
         this._sprite('star', -48, bh * 0.14, 84, Math.sin(this.time * 3) * 0.12);
-        outlinedText(g, '× ' + (w.levelStars || 0), 44, bh * 0.16, 62, '#2e8c78', '#ffffff', 160);
+        outlinedText(g, '× ' + (w.levelStars || 0), 44, bh * 0.16, 62, '#3E8C84', '#ffffff', 160);
       }
       g.restore();
     }
@@ -412,40 +380,44 @@
       const fx = this.fx;
       if (fx.length > 240) fx.splice(0, fx.length - 240);
       const R = Math.random;
-      if (type === 'pop') {
-        const col = (CA() && CA().COLORS && CA().COLORS[opt.color]) ? CA().COLORS[opt.color].base : CONF[(Math.random() * CONF.length) | 0], size = opt.size || 110;
-        fx.push({ k: 'flash', x, y, t: 0, life: 0.32, size, color: opt.color || 'red' });
-        const n = Math.round(24 * this.quality);
+      if (type === 'pop') {   // a found window: warm flash + a few sparkles + confetti in the item's colour
+        const C = WA() && WA().COLORS && WA().COLORS[opt.color];
+        const col = C ? C.base : CONF[(R() * CONF.length) | 0], size = opt.size || 110;
+        fx.push({ k: 'flash', x, y, t: 0, life: 0.32, size });
+        const n = Math.round(12 * this.quality);
         for (let i = 0; i < n; i++) {
-          const a = R() * TAU, sp = 220 + R() * 360;
-          fx.push({ k: 'p', sprite: R() < 0.5 ? 'confetti_a' : 'confetti_b', tint: col, x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 120,
-            g: 520, drag: 1.4, t: 0, life: 0.9 + R() * 0.5, size: 22 + R() * 12, rot: R() * TAU, vr: (R() - 0.5) * 14, sway: R() * TAU });
+          const an = R() * TAU, sp = 160 + R() * 260;
+          fx.push({ k: 'p', sprite: R() < 0.5 ? 'confetti_a' : 'confetti_b', tint: col, x, y, vx: Math.cos(an) * sp, vy: Math.sin(an) * sp - 120,
+            g: 520, drag: 1.4, t: 0, life: 0.8 + R() * 0.4, size: 18 + R() * 10, rot: R() * TAU, vr: (R() - 0.5) * 14, sway: R() * TAU });
         }
         for (let i = 0; i < 5; i++) {
-          const a = R() * TAU, sp = 90 + R() * 140;
-          fx.push({ k: 'p', sprite: 'sparkle', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, g: 0, t: 0, life: 0.5 + R() * 0.2, size: 20 + R() * 12, rot: R() * TAU, vr: 4 });
+          const an = R() * TAU, sp = 80 + R() * 120;
+          fx.push({ k: 'p', sprite: 'sparkle', x, y, vx: Math.cos(an) * sp, vy: Math.sin(an) * sp, g: 0, t: 0, life: 0.5 + R() * 0.2, size: 20 + R() * 12, rot: R() * TAU, vr: 4 });
         }
-      } else if (type === 'rainbow') {   // the magic pair: a rainbow arc grows out of the burst + golden sparkles
-        fx.push({ k: 'rainbow', x, y, t: 0, life: 2.2, size: Math.min(this.W, this.H) * 0.42 });
-        for (let i = 0; i < 26; i++) {
-          const a = R() * TAU, sp = 120 + R() * 300;
-          fx.push({ k: 'p', sprite: 'sparkle', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 100, g: 200, t: 0, life: 1 + R() * 0.6, size: 22 + R() * 18, rot: R() * TAU, vr: 5 });
+      } else if (type === 'bloom') {   // flowers pop out of the box
+        for (let i = 0; i < 4; i++) fx.push({ k: 'p', sprite: 'paper', tint: CONF[(R() * CONF.length) | 0], x: x + (R() - 0.5) * 60, y, vx: (R() - 0.5) * 120, vy: -120 - R() * 120, g: 500, t: 0, life: 0.7, size: 12 + R() * 6, rot: R() * TAU, vr: 8 });
+      } else if (type === 'roof') {    // the building cheers: confetti from the roof
+        const n = Math.round(50 * this.quality);
+        for (let i = 0; i < n; i++) {
+          const an = -Math.PI / 2 + (R() - 0.5) * 2.2, sp = 260 + R() * 360;
+          fx.push({ k: 'p', sprite: R() < 0.5 ? 'confetti_a' : 'confetti_b', tint: CONF[i % CONF.length], x: x + (R() - 0.5) * (opt.w || 200), y, vx: Math.cos(an) * sp, vy: Math.sin(an) * sp,
+            g: 420, drag: 1.2, t: 0, life: 1.6 + R() * 0.8, size: 20 + R() * 10, rot: R() * TAU, vr: (R() - 0.5) * 12, sway: R() * TAU });
         }
       } else if (type === 'land') {
         for (let i = 0; i < 4; i++) fx.push({ k: 'p', sprite: 'puff', x: x + (R() - 0.5) * 40, y: y - 6, vx: (R() - 0.5) * 90, vy: -20 - R() * 30, g: 40, t: 0, life: 0.45, size: 20 + R() * 10, rot: R() * TAU, vr: 0, grow: 1.5, a0: 0.6 });
+      } else if (type === 'sparkle') {
+        for (let i = 0; i < 10; i++) { const an = R() * TAU, sp = 60 + R() * 160; fx.push({ k: 'p', sprite: 'sparkle', x, y, vx: Math.cos(an) * sp, vy: Math.sin(an) * sp - 60, g: 60, t: 0, life: 0.8, size: 18 + R() * 12, rot: 0, vr: 4 }); }
       } else if (type === 'star') {
         fx.push({ k: 'star', x0: x, y0: y, x1: this.hudStar.x, y1: this.hudStar.y, t: -(opt.delay || 0), life: 0.8, size: 70, onDone: opt.onDone });
       } else if (type === 'confetti') {
-        const n = Math.round(120 * this.quality), cols = ['#E84A4A', '#3C8DE8', '#FFD23F', '#4CC26B', '#FF9A2E', '#9B6BE0', '#FF8FC0'];
+        const n = Math.round(120 * this.quality);
         for (let i = 0; i < n; i++) {
-          fx.push({ k: 'p', sprite: R() < 0.5 ? 'confetti_a' : 'confetti_b', tint: cols[i % cols.length], x: R() * this.W, y: -20 - R() * this.H * 0.5, vx: (R() - 0.5) * 60, vy: 60 + R() * 120,
+          fx.push({ k: 'p', sprite: R() < 0.5 ? 'confetti_a' : 'confetti_b', tint: CONF[i % CONF.length], x: R() * this.W, y: -20 - R() * this.H * 0.5, vx: (R() - 0.5) * 60, vy: 60 + R() * 120,
             g: 30, drag: 0.6, t: 0, life: 5 + R() * 2, size: 22 + R() * 12, rot: R() * TAU, vr: (R() - 0.5) * 10, sway: R() * TAU });
         }
       } else if (type === 'hint') {
         const r0 = (opt.size || 110) * 0.75;
-        for (let i = 0; i < 7; i++) { const a = i / 7 * TAU; fx.push({ k: 'p', sprite: 'sparkle', x: x + Math.cos(a) * r0, y: y + Math.sin(a) * r0, vx: Math.cos(a) * 30, vy: Math.sin(a) * 30 - 20, g: 0, t: 0, life: 0.9, size: 22, rot: 0, vr: 3 }); }
-      } else if (type === 'wrong') {
-        fx.push({ k: 'ring', x, y, t: 0, life: 0.35, size: (opt.size || 110) * 1.1, color: '255,255,255' });
+        for (let i = 0; i < 7; i++) { const an = i / 7 * TAU; fx.push({ k: 'p', sprite: 'sparkle', x: x + Math.cos(an) * r0, y: y + Math.sin(an) * r0, vx: Math.cos(an) * 30, vy: Math.sin(an) * 30 - 20, g: 0, t: 0, life: 0.9, size: 22, rot: 0, vr: 3 }); }
       }
     }
     _fx(dt) {
@@ -465,21 +437,8 @@
           if (f.tint) this._tinted(f.sprite, f.tint, f.x, f.y, s, f.rot, al);
           else this._sprite(f.sprite, f.x, f.y, s, f.rot, al);
         } else if (f.k === 'flash') {
-          g.strokeStyle = `rgba(255,250,220,${0.9 * (1 - u)})`; g.lineWidth = 8 * (1 - u) + 1;
+          g.strokeStyle = `rgba(255,246,210,${0.9 * (1 - u)})`; g.lineWidth = 8 * (1 - u) + 1;
           g.beginPath(); g.arc(f.x, f.y, f.size * (0.25 + 0.6 * u), 0, TAU); g.stroke();
-          g.fillStyle = `rgba(255,255,240,${0.55 * (1 - u) * (1 - u)})`; g.beginPath(); g.arc(f.x, f.y, f.size * 0.35 * (1 - u * 0.5), 0, TAU); g.fill();
-        } else if (f.k === 'rainbow') {
-          const grow = Math.min(1, u * 3), fade = u > 0.7 ? (1 - u) / 0.3 : 1;
-          const cols = ['#E84A4A', '#FF9A2E', '#FFD23F', '#4CC26B', '#3C8DE8', '#9B6BE0'];
-          g.save(); g.globalAlpha = 0.75 * fade; g.lineCap = 'round';
-          cols.forEach((c, i) => {
-            g.strokeStyle = c; g.lineWidth = f.size * 0.045;
-            g.beginPath(); g.arc(f.x, f.y + f.size * 0.25, f.size * (0.62 - i * 0.05), Math.PI, Math.PI + Math.PI * grow); g.stroke();
-          });
-          g.restore();
-        } else if (f.k === 'ring') {
-          g.strokeStyle = `rgba(${f.color || '255,240,150'},${0.8 * (1 - u)})`; g.lineWidth = 6 * (1 - u) + 1;
-          g.beginPath(); g.ellipse(f.x, f.y, f.size * (0.3 + u * 0.5), f.size * (0.3 + u * 0.5), 0, 0, TAU); g.stroke();
         } else if (f.k === 'star') {
           const e = u * u * (3 - 2 * u);
           const x = lerp(f.x0, f.x1, e), y = lerp(f.y0, f.y1, e) - Math.sin(u * Math.PI) * 140;
@@ -493,14 +452,9 @@
       const g = this.g, k = size / Math.max(spr.width, spr.height), w = spr.width * k, h = spr.height * k;
       g.save(); g.globalAlpha *= alpha; g.translate(x, y); g.rotate(rot || 0); g.drawImage(spr, -w / 2, -h / 2, w, h); g.restore();
     }
-
     _particles(list, layer) {
       if (!list) return;
       for (const p of list) if ((p.layer || 'back') === layer && p.alpha > 0.01) {
-        if (p.sprite === 'butterfly') {
-          if (CA()) { const g = this.g; g.save(); g.globalAlpha *= p.alpha; g.translate(p.x, p.y); g.rotate(p.rot || 0); if (p.flipX === -1) g.scale(-1, 1); CA().drawButterfly(g, p.color || 'yellow', p.size, p.flap || 0); g.restore(); }
-          continue;
-        }
         if (p.sprite === 'dot') { this.g.fillStyle = `rgba(255,255,255,${p.alpha})`; this.g.beginPath(); this.g.arc(p.x, p.y, p.size / 2, 0, TAU); this.g.fill(); continue; }
         this._sprite(p.sprite === 'star' ? 'pstar' : p.sprite, p.x, p.y, p.size, p.rot || 0, p.alpha, null, p.flipX === -1);
       }
@@ -520,28 +474,23 @@
       } else g.drawImage(spr, x - w / 2, y - h / 2, w, h);
       if (alpha != null && alpha < 1) g.globalAlpha /= alpha;
     }
-    _img(name, x, y, w, h) {
-      const spr = GW.Assets.sprite(name, Math.max(w, h) * this.rs);
-      if (spr) this.g.drawImage(spr, x, y, w, h);
-    }
     _debug(w) {
-      const g = this.g;
+      const g = this.g, L = w.layout;
       g.strokeStyle = 'rgba(255,0,0,.6)'; g.lineWidth = 2;
-      const B = w.layout.board; if (B) g.strokeRect(B.x, B.y, B.w, B.h);
+      const B = L.board; if (B) g.strokeRect(B.x, B.y, B.w, B.h);
       for (const c of w.cards || []) g.strokeRect(c.x - c.w / 2 - 10, c.y - c.h / 2 - 10, c.w + 20, c.h + 20);
-      g.fillStyle = 'rgba(255,0,0,.5)';
-      for (const p of w.layout.perches || []) { g.beginPath(); g.arc(p.x, p.y, 4, 0, TAU); g.fill(); }
+      if (GW.World.gigiHead) { const hb = GW.World.gigiHead(w); if (hb) g.strokeRect(hb.x, hb.y, hb.w, hb.h); }
+      const r = L.gigiRect; if (r) g.strokeRect(r.x, r.y, r.w, r.h);
     }
-    /* A card face (or a little card fan for counts) for Talk-time previews and choices. */
+    /* A window face for Talk-time previews and choices. */
     drawItemBody(g, it, s) {
-      const art = CA(); if (!art) return;
+      const art = WA(); if (!art) return;
       const face = it.face || it;
-      if (face.kind === 'color' && art.drawButterfly && it.bare) { art.drawButterfly(g, face.color || face.value, s * 0.8, 0.2); return; }
       const cw = s * 0.62, ch = cw / 0.78;
-      this._cardShadow(cw, ch, 0);
-      art.drawFront(g, cw, ch, face, { sprite: (n, sx, sy, sz) => this._sprite(n.indexOf('animal_') === 0 ? n : 'animal_' + n, sx, sy, sz, 0, 1, g === this.g ? null : g) });
+      art.drawFace(g, cw, ch, face, { sprite: (n, sx, sy, sz) => this._sprite(n, sx, sy, sz, 0, 1, g === this.g ? null : g) });
     }
   }
+  function g_shadow(g, x, y, r) { g.fillStyle = 'rgba(50,45,40,.2)'; g.beginPath(); g.ellipse(x, y - 4, r, r * 0.16, 0, 0, TAU); g.fill(); }
 
   Renderer.preview = function (canvas, thing) {
     const g = canvas.getContext('2d');

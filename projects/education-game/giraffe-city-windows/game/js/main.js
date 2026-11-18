@@ -1,4 +1,4 @@
-/* GW main (Dee's Forest Memory) — boots the game, sizes the canvas for any phone/tablet shape, runs the loop and turns
+/* GW main (Gigi's Peekaboo Windows) — boots the game, sizes the canvas for any phone/tablet shape, runs the loop and turns
  * world events into voice, sound, effects and UI. */
 (function (GW) {
   'use strict';
@@ -189,6 +189,7 @@
     for (const e of evs) onEvent(e);
   }
   function cardById(id) { return (world.cards || []).find(c => c.id === id); }
+  const toCss = r => r && ({ x: view.left + r.x * view.s, y: view.top + r.y * view.s, w: r.w * view.s, h: r.h * view.s });
 
   function onEvent(e) {
     const L = world.layout;
@@ -201,6 +202,7 @@
         speak(T('weather.' + e.level));   // "Spring is here!" — queued after the chapter name
         GW.UI.say(T('topic.' + e.topic));
         render.prewarm(L, e.level + 1);
+        if (e.level === 2) GW.Audio.play('whoosh');
         break;
       case 'round': {
         lastRoundEvt = e; stats.rounds++; idleSaid = 0;
@@ -208,22 +210,37 @@
         const txt = promptText(e);
         lastPromptText = txt; rewardSaid = false;
         GW.UI.say(txt); speakPrompt(txt, { priority: true });
-        if (e.surprise) {   // one surprise round per chapter: shuffle / golden pair / lily-pond layout
+        break;
+      }
+      case 'scroll':   // Gigi trots on to the next building
+        GW.Audio.play('whoosh');
+        if (!e.first) speak(T('walk'));
+        break;
+      case 'walk': GW.Audio.play('step', { foot: e.foot }); break;
+      case 'critter': {   // surprise friends: a pigeon on a sill, the little bus, a balloon — never a mistake
+        const sound = { pigeon: e.action === 'tap' || e.action === 'leave' ? 'flutter' : 'coo', bus: 'beep', balloon: 'squeak' }[e.critter];
+        if (e.action === 'enter') {
           GW.Audio.play('surprise');
-          speak(T('surprise.' + e.surprise));
+          if (e.critter === 'bus') GW.Audio.play('car');
+          if (GW.I18N.sayCritter) speak(GW.I18N.sayCritter(curLang(), e.critter));
+        } else if (e.action === 'land') GW.Audio.play('coo');
+        else if (e.action === 'stop') GW.Audio.play('beep');
+        else if (e.action === 'tap') {
+          GW.Audio.play(sound); if (e.critter === 'pigeon') GW.Audio.play('coo');
+          render.burst('sparkle', e.x, e.y);
+          if (canInterrupt() && GW.I18N.sayCritter) speak(GW.I18N.sayCritter(curLang(), e.critter, 'tap'), { interrupt: !(GW.Voice && GW.Voice.isSpeaking()) });
         }
         break;
       }
-      case 'shuffle': GW.Audio.play('swap'); break;
-      case 'golden': {
-        GW.Audio.play('golden');
-        render.burst('rainbow', e.x, e.y);
-        speak(T('golden'), { interrupt: true });
-        break;
-      }
-      case 'deal': GW.Audio.play('deal'); break;
       case 'peek': GW.Audio.play('peek'); speak(T('peek')); break;          // queued after the prompt
-      case 'hide': GW.Audio.play('shuffle'); break;
+      case 'hide': speak(T('hide')); break;
+      case 'clack': GW.Audio.play('clack', { v: e.v }); break;
+      case 'bloom': GW.Audio.play('pop'); render.burst('bloom', e.x, e.y); break;
+      case 'cheer':
+        GW.Audio.play('cheer');
+        render.burst('roof', e.x, e.y, { w: (world.layout.grid && world.layout.grid.building ? world.layout.grid.building.w : 300) * 0.8 });
+        speak(T('cheer'));   // queued after the last match line
+        break;
       case 'flip': {
         GW.Audio.play('flip');
         if (e.open === 2) lastPraise = 0;
@@ -243,7 +260,7 @@
         stats.correct++;
         GW.Audio.play('match', { count: e.found || 0 });
         const ca = cardById(e.a), cb = cardById(e.b);
-        if (ca && cb) render.burst('pop', (ca.x + cb.x) / 2, (ca.y + cb.y) / 2, { color: (ca.face && ca.face.color) || null, size: ca.w * 1.4, delay: 0 });
+        for (const c of [ca, cb]) if (c) render.burst('pop', c.x, c.y, { color: (c.face && c.face.color) || null, size: c.w * 1.2 });
         lastMatchAt = performance.now();
         speak(GW.I18N.sayMatch ? GW.I18N.sayMatch(curLang(), Object.assign({ topic: world.topic }, e)) : T('praise'), { interrupt: true });
         break;
@@ -255,19 +272,6 @@
         if (nowW - lastWrongSay > 1500) {
           lastWrongSay = nowW;
           speak(GW.I18N.sayMismatch ? GW.I18N.sayMismatch(curLang(), Object.assign({ topic: world.topic }, e)) : T('wrong'), { interrupt: canInterrupt() });
-        }
-        break;
-      }
-      case 'reward': {
-        GW.Audio.play('reward', { kind: e.kind });
-        break;
-      }
-      case 'land': {
-        GW.Audio.play('land', { kind: e.kind });
-        // once per round, when Dee is quiet and the match line is over: name what joined the forest
-        const now = performance.now();
-        if (!rewardSaid && e.kind && !(GW.Voice && GW.Voice.isSpeaking()) && now - lastMatchAt > 4000) {
-          rewardSaid = true; speak(T('reward.' + e.kind));
         }
         break;
       }
@@ -284,13 +288,14 @@
       case 'roundDone': {
         GW.Audio.play('round');
         const n = e.stars || 1;
-        const from = L.dee;
+        const hb = GW.World.gigiHead ? GW.World.gigiHead(world) : null;
+        const sx = hb ? hb.x + hb.w / 2 : L.gigi.x, sy = hb ? hb.y : L.gigi.y - L.gigi.h;
         for (let i = 0; i < n; i++) {
-          render.burst('star', from.x + 60, from.y - from.h * 0.7, {
+          render.burst('star', sx, sy, {
             delay: i * 0.22, onDone: () => { shownStars++; GW.UI.setStars(shownStars, true); GW.Audio.play('star', { i }); }
           });
         }
-        speak(T('great'));   // queued after the last match line
+        if (e.stars >= 3 && Math.random() < 0.5) speak(T('great'));   // the building's cheer line already praised
         GW.UI.setDots(world.roundsPerLevel || 5, ((e.round != null ? e.round : world.round) % (world.roundsPerLevel || 5)) + 1);
         break;
       }
@@ -322,7 +327,7 @@
         break;
       case 'sessionDone': {
         GW.Audio.play('fanfare');
-        weather.setWeather(3, {});                 // the night party under the stars and fireflies
+        weather.setWeather(3, {});                 // the street party under the rainbow
         render.burst('confetti', 0, 0);
         progress.totalStars += e.stars || 0; progress.sessions++;
         GW.Storage.setJSON('progress', progress);
@@ -378,7 +383,7 @@
     stats.frames++;
     if (mode === 'play' || mode === 'talk' || mode === 'done') {
       let left = dt * speed;
-      world.wind = (weather.ambient && weather.ambient.wind) || 0;   // gusts sway the butterflies and lanterns
+      world.wind = (weather.ambient && weather.ambient.wind) || 0;   // the breeze sways open shutters
       while (left > 1e-6) {
         const step = Math.min(left, 1 / 30);
         if (bot && (mode === 'play' || mode === 'talk')) bot.step(step);
@@ -404,10 +409,8 @@
   function toLogical(cx, cy) { return { x: (cx - view.left) / view.s, y: (cy - view.top) / view.s }; }
   function onDown(p) {
     if (mode !== 'play' || bot) return;
-    if (world.pointerDown(p.x, p.y) != null) return;           // cards win over Dee's tap zone
-    const L = world.layout.dee;
-    // tapping Dee (or the bubble) repeats the instruction
-    if (Math.abs(p.x - L.x) < L.h * 0.5 && p.y < L.y + 10 && p.y > L.y - L.h * 1.05) repeatPrompt();
+    const hit = world.pointerDown(p.x, p.y);   // a window, a surprise friend, or Gigi
+    if (hit === 'gigi') repeatPrompt();         // tapping Gigi (or the bubble) repeats the instruction
   }
   function repeatPrompt() {
     if (!lastRoundEvt || world.state !== 'round') return;
@@ -505,8 +508,16 @@
       get bot() { return bot; }, view: () => view, render: () => render,
       cardScreen(id) {
         const c = cardById(id); if (!c) return null;
-        return { x: view.left + c.x * view.s, y: view.top + c.y * view.s, w: c.w * view.s, h: c.h * view.s };
+        const dx = world.buildingDx || 0;
+        return { x: view.left + (c.x + dx) * view.s, y: view.top + c.y * view.s, w: c.w * view.s, h: c.h * view.s };
       },
+      gigiScreen() {
+        const r = world.layout.gigiRect, hb = GW.World.gigiHead(world);
+        if (!r) return null;
+        const x0 = Math.min(r.x, hb.x), y0 = Math.min(r.y, hb.y), x1 = Math.max(r.x + r.w, hb.x + hb.w), y1 = Math.max(r.y + r.h, hb.y + hb.h);
+        return Object.assign(toCss({ x: x0, y: y0, w: x1 - x0, h: y1 - y0 }), { body: toCss(r), head: toCss(hb) });
+      },
+      critterScreen() { return toCss(world.critterRect ? world.critterRect() : null); },
       audio: () => GW.Audio
     }));
   }

@@ -1,14 +1,14 @@
 /* GW.Audio — every sound is synthesized with WebAudio (no files to license or download).
- * Soft toddler-friendly SFX, a gentle generative music loop per weather, night breeze ambience,
- * and ducking while Dee speaks. iOS: call unlock() inside the first touchend/click. */
+ * Soft toddler-friendly SFX, a gentle generative music loop per weather, rain ambience,
+ * and ducking while Gigi speaks. iOS: call unlock() inside the first touchend/click. */
 (function (GW) {
   'use strict';
   const NOTE = n => 440 * Math.pow(2, (n - 69) / 12);
   const MUSIC = [
-    { root: 60, tempo: 96, prog: [[0, 4, 7], [5, 9, 12], [7, 11, 14], [0, 4, 7]], lead: 'triangle' },    // spring: C major, waking up
-    { root: 62, tempo: 108, prog: [[0, 4, 7], [7, 11, 14], [9, 12, 16], [5, 9, 12]], lead: 'triangle' },  // summer: D major, bright
-    { root: 65, tempo: 88, prog: [[0, 4, 7], [-3, 0, 4], [5, 9, 12], [7, 11, 14]], lead: 'sine' },        // autumn: F major, warm
-    { root: 67, tempo: 76, prog: [[0, 4, 7], [-5, -1, 2], [-3, 0, 4], [-7, -3, 0]], lead: 'sine' }        // winter: G music box
+    { root: 60, tempo: 96, prog: [[0, 4, 7], [5, 9, 12], [7, 11, 14], [0, 4, 7]], lead: 'triangle' },    // sunny: C major, a bright morning street
+    { root: 62, tempo: 108, prog: [[0, 4, 7], [7, 11, 14], [9, 12, 16], [5, 9, 12]], lead: 'triangle' },  // breezy: D major, skipping along
+    { root: 65, tempo: 88, prog: [[0, 4, 7], [-3, 0, 4], [5, 9, 12], [7, 11, 14]], lead: 'sine' },        // rain: F major, cosy
+    { root: 67, tempo: 76, prog: [[0, 4, 7], [-5, -1, 2], [-3, 0, 4], [-7, -3, 0]], lead: 'sine' }        // rainbow: G music box
   ];
   const SCALE = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24];
 
@@ -58,7 +58,7 @@
       this.sfx.gain.setTargetAtTime(this.sfxOn ? 0.9 : 0, t, 0.03);
       const mv = this.musicOn && this._playing ? (this.ducked ? 0.07 : 0.22) : 0;
       this.music.gain.setTargetAtTime(mv, t, this.ducked ? 0.08 : 0.5);
-      const av = this.sfxOn && this._playing && this.mood === 3 ? (this.ducked ? 0.02 : 0.05) : 0;   // soft winter wind
+      const av = this.sfxOn && this._playing && this.mood === 2 ? (this.ducked ? 0.04 : 0.1) : 0;   // gentle rain on the street
       this.amb.gain.setTargetAtTime(av, t, 0.8);
     },
     setVolume(v) { this.setOptions({ volume: v }); },
@@ -140,9 +140,38 @@
           if (now - (this._lastPlay.dealQ || 0) < 0.05) return;
           this._lastPlay.dealQ = now;
           this.noise(0.07, { vol: 0.16, type: 'bandpass', f0: 2600, f1: 1200, q: 1.1 }); break;
-        case 'flip':     // card turning over: a papery "fwip" rising into a soft bell
-          this.noise(0.1, { vol: 0.2, type: 'bandpass', f0: 1400, f1: 3600, q: 0.9 });
-          this.tone(NOTE(79) * r, 0.18, { type: 'triangle', vol: 0.14, at: 0.06 }); break;
+        case 'flip':     // shutters swing open: a short wooden creak, a breath of air, then a little bell
+          this.tone(170 * r, 0.16, { type: 'sawtooth', vol: 0.05, slideTo: 240 * r });
+          this.noise(0.14, { vol: 0.16, type: 'bandpass', f0: 900, f1: 2600, q: 0.8, at: 0.03 });
+          this.tone(NOTE(79) * r, 0.2, { type: 'triangle', vol: 0.16, at: 0.1 }); break;
+        case 'clack': {  // shutters hit shut: a soft wooden knock (louder when they close faster)
+          if (now - (this._lastPlay.clackQ || 0) < 0.05) return;
+          this._lastPlay.clackQ = now;
+          const v = Math.max(0.4, Math.min(1, (opt.v || 8) / 10));
+          this.noise(0.05, { vol: 0.22 * v, type: 'bandpass', f0: 1100 * r, q: 2.5 });
+          this.tone(210 * r, 0.07, { type: 'triangle', vol: 0.16 * v, slideTo: 150 * r }); break;
+        }
+        case 'pop':      // flower box: a springy "bloop"
+          this.tone(420 * r, 0.12, { type: 'sine', vol: 0.2, slideTo: 900 * r });
+          this.tone(NOTE(91) * r, 0.14, { type: 'triangle', vol: 0.08, at: 0.05 }); break;
+        case 'cheer':    // the whole building lights up: a bright arpeggio + shaker
+          [0, 4, 7, 12, 16, 19].forEach((n, i) => this.tone(NOTE(72 + n), 0.32, { type: 'triangle', vol: 0.2, at: i * 0.07 }));
+          for (let i = 0; i < 6; i++) this.noise(0.05, { vol: 0.07, type: 'highpass', f0: 5000, at: 0.05 + i * 0.09 });
+          break;
+        case 'step':     // little hooves on the pavement: clip-clop
+          this.tone((opt.foot ? 900 : 760) * r, 0.04, { type: 'triangle', vol: 0.12, slideTo: (opt.foot ? 600 : 500) * r });
+          this.noise(0.03, { vol: 0.07, type: 'bandpass', f0: 2400, q: 3 }); break;
+        case 'coo':      // pigeon: a soft "coo-roo"
+          this.tone(380, 0.22, { type: 'sine', vol: 0.18, slideTo: 330 });
+          this.tone(360, 0.3, { type: 'sine', vol: 0.16, at: 0.26, slideTo: 300 }); break;
+        case 'flutter': for (let i = 0; i < 6; i++) this.noise(0.04, { vol: 0.1, type: 'bandpass', f0: 1600, q: 1, at: i * 0.045 }); break;
+        case 'beep':     // the little bus: "beep beep!"
+          this.tone(NOTE(76), 0.14, { type: 'square', vol: 0.07 }); this.tone(NOTE(76), 0.18, { type: 'square', vol: 0.07, at: 0.2 });
+          this.tone(NOTE(80), 0.14, { type: 'triangle', vol: 0.1 }); this.tone(NOTE(80), 0.18, { type: 'triangle', vol: 0.1, at: 0.2 }); break;
+        case 'squeak':   // balloon twirls up
+          this.tone(700 * r, 0.25, { type: 'sine', vol: 0.15, slideTo: 1500 * r });
+          [0, 4, 7].forEach((n, i) => this.tone(NOTE(91 + n), 0.15, { type: 'sine', vol: 0.08, at: 0.2 + i * 0.05 })); break;
+        case 'car': this.noise(0.9, { vol: 0.035, type: 'lowpass', f0: 300, f1: 200, q: 0.7 }); break;
         case 'tapcard': this.tone(NOTE(84) * r, 0.12, { type: 'triangle', vol: 0.12 }); break;
         case 'peek': [0, 7, 12].forEach((n, i) => this.tone(NOTE(84 + n), 0.22, { type: 'sine', vol: 0.12, at: i * 0.05 })); break;
         case 'shuffle':  // all cards flip down in a wave

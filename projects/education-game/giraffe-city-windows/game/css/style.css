@@ -1,4 +1,4 @@
-/* Dee's Forest Memory — mobile-first shell (iPhone / iPad Safari, portrait + landscape). */
+/* Gigi's Peekaboo Windows — mobile-first shell (iPhone / iPad Safari, portrait + landscape). */
 :root {
   --ink: #33364f;
   --cream: #fbfdff;
@@ -154,15 +154,15 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 
 /* ---------- done ---------- */
 #scrDone { align-items: flex-end; padding-bottom: calc(var(--sa-b) + 4vh); }
-/* short landscape phones: panel on the right so the cheering Dee (left) stays visible */
-/* every landscape screen: panel on the right so the cheering Dee (left) and the friends on the grass stay visible */
+/* short landscape phones: panel on the right so the cheering Gigi (left) stays visible */
+/* every landscape screen: panel on the right so the cheering Gigi (left) and the friends on the grass stay visible */
 @media (orientation: landscape) {
   #scrDone { align-items: flex-start; justify-content: flex-end; padding-top: calc(var(--sa-t) + 8vh); padding-bottom: 0; }
   #scrDone .done-panel { max-width: min(470px, 46vw); }
 }
 @media (orientation: portrait) {
   #scrDone { padding-bottom: calc(var(--sa-b) + 20vh); }
-  /* portrait title: logo + ▶ at the top, Dee and the cards below (visual QA P1-2) */
+  /* portrait title: logo + ▶ at the top, Gigi and the building below (visual QA P1-2) */
   .title-wrap { justify-content: flex-start; padding-top: 4vh; padding-bottom: 0; gap: 6px; }
   .btn-play { width: clamp(110px, 22 * var(--u), 170px); }
 }
@@ -208,7 +208,7 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
   .talk-choices button canvas { width: 84px; height: 84px; }
 }
 @media (prefers-reduced-motion: reduce) { .btn-play { animation: none; } }
-/* the smallest landscape phones (SE): no room for the tagline next to Dee */
+/* the smallest landscape phones (SE): no room for the tagline next to Gigi */
 @media (orientation: landscape) and (max-height: 380px) { .tagline { display: none; } }
 
 /* volume: slider in settings, big − / + in the pause menu (kid-reachable) */

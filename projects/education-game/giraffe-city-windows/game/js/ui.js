@@ -1,4 +1,4 @@
-/* GW.UI — DOM screens: title, parent settings, HUD, Dee's speech bubble, pause, Talk time, celebration. */
+/* GW.UI — DOM screens: title, parent settings, HUD, Gigi's speech bubble, pause, Talk time, celebration. */
 (function (GW) {
   'use strict';
   const $ = id => document.getElementById(id);
@@ -23,7 +23,7 @@
       const parts = [T(lang, 'ui.logo1'), T(lang, 'ui.logo2')];
       $('logo1').textContent = parts[0]; $('logo2').textContent = parts[1];
       const sub = T(lang, 'ui.subtitle'); $('tagline').textContent = sub === 'ui.subtitle' ? '' : sub;
-      document.title = title === 'ui.title' ? "Dee's Forest Memory" : title;
+      document.title = title === 'ui.title' ? "Gigi's Peekaboo Windows" : title;
       $('inpName').placeholder = T(lang, 'ui.namePlaceholder');
       $('btnPlay').setAttribute('aria-label', T(lang, 'ui.play'));
     },
@@ -122,10 +122,11 @@
     },
     _choiceVisual(c) {   // pictures on the answer buttons (no reading needed for ages ≤ 5)
       switch (c.kind) {
-        case 'color': return { kind: 'color', value: c.value, color: c.value };
+        case 'color': return { kind: 'color', value: c.value, color: c.value, obj: c.obj || 'balloon' };
+        case 'home': return { kind: 'home', value: c.value, sprite: c.sprite || 'home_' + c.value, animal: c.animal };
         case 'shape': return { kind: 'shape', value: c.value, shape: c.value, color: 'blue' };
         case 'animal': return { kind: 'animal', value: c.value, sprite: 'animal_' + c.value };
-        case 'size': { const sp = c.sprite || 'animal_bear'; return { kind: 'animal', value: sp.replace('animal_', ''), sprite: sp, scale: c.scale || (c.value === 'big' ? 1 : 0.6), size: c.value }; }
+        case 'size': { const sp = c.sprite || 'animal_dog'; return { kind: 'animal', value: sp.replace('animal_', ''), sprite: sp, scale: c.scale || (c.value === 'big' ? 1 : 0.6), size: c.value }; }
         case 'number': return this._age <= 5 && c.value >= 1 && c.value <= 10 ? { kind: 'dots', value: +c.value, n: +c.value } : null;
         default: return null;
       }
