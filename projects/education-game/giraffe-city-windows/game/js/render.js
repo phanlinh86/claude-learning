@@ -146,10 +146,11 @@
       if (L.grid && L.grid.building && w.building) {
         this._building({ building: w.building, rect: L.grid.building, grid: L.grid, cards: w.cards }, (1 - sT) * this.W, false, a, w);
       } else if (w.lastBuilding) this._building(w.lastBuilding, 0, true, a, w);
-      for (const c of traffic) this._car(c, a);
-      if (w.critter && w.critter.type === 'bus') this._bus(w.critter, a);
       this._particles(weather.particles, 'back');
       this._gigi(w, o, a);
+      // the road is nearer to us than the pavement Gigi stands on: cars and the bus pass in front of her feet
+      for (const c of traffic) this._car(c, a);
+      if (w.critter && w.critter.type === 'bus') this._bus(w.critter, a);
       if (w.critter && w.critter.type === 'pigeon') this._pigeon(w.critter, a);
       if (w.critter && w.critter.type === 'balloon') this._balloon(w.critter, a);
     }
@@ -333,18 +334,23 @@
     }
     _doneScene(w, o) {   // the street party at rainbow time: a building full of lit windows with what the child found
       const L = w.layout, W = this.W, H = this.H, t = this.time, portrait = H > W;
-      const col = (w.collected || []).slice(-6);
+      const all = w.collected || [], col = [];   // one find from across the whole session (every chapter's topic)
+      for (let i = 0; i < Math.min(5, all.length); i++) col.push(all[Math.floor((i + 0.5) * all.length / Math.min(5, all.length))]);
       const faces = col.length ? col.map(p => p.faceA) : [{ kind: 'color', value: 'red', color: 'red', obj: 'balloon' }, { kind: 'animal', value: 'cat', sprite: 'animal_cat' }, { kind: 'shape', value: 'heart', shape: 'heart', color: 'purple' }];
-      const per = portrait ? 3 : Math.min(6, faces.length);
+      const compact = !!(o && o.compact);
+      const hgt = Math.min(H * (compact ? 0.5 : 0.3), 400);
+      const gx = L.ins.left + Math.max(80, hgt * 0.24);
+      // the building stands right of Gigi; in landscape it stays left of the done panel (right ≈ 46 % of the screen)
+      const left = gx + hgt * 0.3, right = compact ? W * 0.5 : W - L.ins.right - 24;
+      const per = Math.min(portrait ? 3 : 5, faces.length);
       const row = faces.slice(0, per);
-      const cw = Math.min(portrait ? 150 : 120, (W - L.ins.left - L.ins.right - 120) / (row.length * 1.25));
-      const cx = o && o.compact ? W * 0.6 : W / 2;
-      const bump = row.map((_, i) => Math.max(0, Math.sin(t * 3 + i * 0.9)) * 6);
-      this._miniBuilding(cx, L.groundY, cw, row.map((f, i) => Object.assign({}, f)), row.map(() => 1), row.map(() => 1), { facade: 'skygrey', trim: '#FBF7EE', shutter: 'terracotta', roof: 'arch', seed: 9 });
-      void bump;
-      const hgt = Math.min(H * (o && o.compact ? 0.5 : 0.3), 400);
+      const cw = Math.min(portrait ? 150 : 120, (right - left) / (row.length * 1.2 + 0.5));
+      const ch = cw / 0.78, gap = Math.max(16, cw * 0.18), pad = Math.max(20, cw * 0.24);
+      const bw = row.length * cw + (row.length - 1) * gap + 2 * pad;
+      const cx = left + bw / 2;
+      this._miniBuilding(cx, L.groundY, cw, row.map(f => Object.assign({}, f)), row.map(() => 1), row.map(() => 1), { facade: 'skygrey', trim: '#FBF7EE', shutter: 'terracotta', roof: 'arch', seed: 9 });
+      void ch;
       const cyc = t % 1.1, hop = cyc < 0.55 ? Math.sin(cyc / 0.55 * Math.PI) * 30 : 0;
-      const gx = o && o.compact ? L.ins.left + W * 0.14 : L.ins.left + 110;
       g_shadow(this.g, gx, L.groundY + 20, hgt * 0.22);
       this._sprite2('gigi_title', gx, L.groundY + 22 - hop, hgt, 320 / 480);
     }
@@ -486,8 +492,8 @@
     drawItemBody(g, it, s) {
       const art = WA(); if (!art) return;
       const face = it.face || it;
-      const cw = s * 0.62, ch = cw / 0.78;
-      art.drawFace(g, cw, ch, face, { sprite: (n, sx, sy, sz) => this._sprite(n, sx, sy, sz, 0, 1, g === this.g ? null : g) });
+      const cw = s * (this._preview === 'choice' ? 0.78 : 0.62), ch = cw / 0.78;
+      art.drawFace(g, cw, ch, face, { plain: this._preview === 'choice', sprite: (n, sx, sy, sz) => this._sprite(n, sx, sy, sz, 0, 1, g === this.g ? null : g) });
     }
   }
   function g_shadow(g, x, y, r) { g.fillStyle = 'rgba(50,45,40,.2)'; g.beginPath(); g.ellipse(x, y - 4, r, r * 0.16, 0, 0, TAU); g.fill(); }
@@ -500,12 +506,12 @@
     g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, cw, ch);
     const r = GW.render; if (!r) return;
     const saveG = r.g, saveRs = r.rs;
-    r.g = g; r.rs = dpr;
+    r.g = g; r.rs = dpr; r._preview = canvas.id === 'talkShow' ? 'show' : 'choice';
     try {
       g.save(); g.translate(cw / 2, ch / 2);
       r.drawItemBody(g, thing, Math.min(ch * 0.98, cw * 1.2));
       g.restore();
-    } finally { r.g = saveG; r.rs = saveRs; }
+    } finally { r.g = saveG; r.rs = saveRs; r._preview = null; }
   };
   GW.Renderer = Renderer;
 })(window.GW = window.GW || {});

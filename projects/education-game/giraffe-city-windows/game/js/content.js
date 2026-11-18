@@ -177,11 +177,19 @@
     var add = function (c) { cards.push(c); };
     switch (topic) {
       case 'colors': {
-        var pool = age <= COLOR_SAFE_MAX_AGE ? rng.pick(SAFE_SETS).slice() : COLORS5.slice();
+        // the clash-free set sharing the fewest colours with the previous round (playtest P2-5: colours repeated too often)
+        var pool;
+        if (age <= COLOR_SAFE_MAX_AGE) {
+          var sets = rng.shuffle(SAFE_SETS.slice()), bestN = 99;
+          for (var si = 0; si < sets.length; si++) {
+            var shared = sets[si].filter(function (v) { return pv.indexOf(v) >= 0; }).length;
+            if (shared < bestN) { bestN = shared; pool = sets[si].slice(); }
+          }
+        } else pool = COLORS5.slice();
         var cs = freshSample(rng, pool, N, pv);
         // ages ≤ 4: ONE thing for the whole round (both windows of a pair show it; the colour is the only cue);
         // age 5+: the two windows of a pair show two DIFFERENT things of the same colour.
-        var things = rng.shuffle(GW.THINGS.slice()), one = things[0];
+        var prevObj = prev && prev.obj, things = rng.shuffle(GW.THINGS.filter(function (t) { return t !== prevObj; })), one = things[0];
         for (i = 0; i < N; i++) {
           var c = cs[i], k = 'c:' + c, oa, ob;
           if (age <= SAME_THING_MAX_AGE) { oa = ob = one; }
@@ -304,7 +312,7 @@
     var values = keys.map(function (k) { return info[k].nameValue; });
     var set = topic + ':' + cards.map(function (c) { return c.key + '/' + JSON.stringify(c.face); }).sort().join('|');
     return { topic: topic, promptKey: 'p.' + topic, params: { n: N }, pairs: N, peek: 0, cards: cards, pairInfo: info,
-      seed: (rng.next() * 4294967296) >>> 0, sum: { set: set, values: values } };
+      seed: (rng.next() * 4294967296) >>> 0, sum: { set: set, values: values, obj: topic === 'colors' && age <= SAME_THING_MAX_AGE && cards.length ? cards[0].face.obj : null } };
   }
 
   // ---------------- self-check ----------------

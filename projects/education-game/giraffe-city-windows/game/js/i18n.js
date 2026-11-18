@@ -397,7 +397,7 @@
       'say.countDone': '{num}! {num} {dots}!',
 
       'praise': ['Yes!', 'Great job!', 'You got it!', 'Super!', 'Wonderful!', 'Nice one!', 'Hooray!', 'Well done!'],
-      'great': ['Great job, {child}!', 'You did it, {child}!', 'You found all the pairs!', 'What a bright building, {child}!',
+      'great': ['Great job, {child}!', 'You did it, {child}!', 'You found all the pairs!',
         'Super finding!', 'Hooray! All pairs found!', 'You are so clever!'],
       'cheer': ['The whole building is shining!', 'Hooray! Every window is lit!', 'What a bright building, {child}!',
         'Look, confetti! You found them all!', 'The building is cheering for you!'],
@@ -572,7 +572,7 @@
       'say.countDone': '{num}! {num} {dots}!',
 
       'praise': ['Đúng rồi!', 'Giỏi quá!', 'Tuyệt vời!', 'Hoan hô!', 'Bé giỏi lắm!', 'Chính xác!', 'Siêu quá!', 'Hay lắm!'],
-      'great': ['Bé {child} giỏi quá!', 'Hoan hô bé {child}!', 'Bé tìm được hết các đôi rồi!', 'Ngôi nhà sáng rực rồi, {child} giỏi quá!',
+      'great': ['Bé {child} giỏi quá!', 'Hoan hô bé {child}!', 'Bé tìm được hết các đôi rồi!',
         'Bé tìm giỏi quá!', 'Hoan hô, tìm hết rồi!', 'Bé thông minh quá!'],
       'cheer': ['Cả ngôi nhà sáng rực rồi!', 'Hoan hô! Cửa sổ nào cũng sáng đèn!', 'Ngôi nhà sáng rực rồi, {child} giỏi quá!',
         'Pháo giấy nè! Bé tìm hết rồi!', 'Ngôi nhà đang reo hò cho bé đó!'],

@@ -583,8 +583,8 @@ test('taps: only in play / mismatch resolve; matched → tap; misses → null; j
   run(w, 0.5); assert.strictEqual(w.phase, 'play'); assert.strictEqual(tap(w, other), other.id);
 });
 
-test('hints: 3 mismatches in a row → hint {a, b} (glow 2.5 s + the closed window opens a crack ≈ 0.3); cooldown 6 s; manual hint(); idle nudges 12/30/57/87 s, hint from the 2nd', () => {
-  const w = mkWorld({ age: 5 }); roundOf(w, 'animals', 3); untilPhase(w, 'play'); ev(w);
+test('hints (with the old streak 3 / glow 2.5 config; the game uses 2 / 6 s): 3 mismatches in a row → hint {a, b} (glow 2.5 s + the closed window opens a crack ≈ 0.3); cooldown 6 s; manual hint(); idle nudges 12/30/57/87 s, hint from the 2nd', () => {
+  const w = mkWorld({ age: 5, config: { hintAfterStreak: 3, hintGlowTime: 2.5 } }); roundOf(w, 'animals', 3); untilPhase(w, 'play'); ev(w);
   const hints = [];
   for (let k = 0; k < 3; k++) {
     const [a, b] = twoDifferent(w); tap(w, a); tap(w, b); run(w, 1.5);
@@ -593,28 +593,28 @@ test('hints: 3 mismatches in a row → hint {a, b} (glow 2.5 s + the closed wind
   assert.strictEqual(hints.length, 1);
   const A = w.cardById(hints[0].a), B = w.cardById(hints[0].b);
   assert.strictEqual(A.key, B.key); assert.strictEqual(w.streak, 0);
-  const w2 = mkWorld({ age: 5 }); roundOf(w2, 'animals', 3); untilPhase(w2, 'play'); ev(w2);
+  const w2 = mkWorld({ age: 5, config: { hintAfterStreak: 3, hintGlowTime: 2.5 } }); roundOf(w2, 'animals', 3); untilPhase(w2, 'play'); ev(w2);
   assert.ok(w2.hint()); const he = ev(w2).find(e => e.type === 'hint'); const HA = w2.cardById(he.a);
   let maxO = 0, glowSeen = 0, t = 0;
   while (t < 3) { w2.update(H); t += H; maxO = Math.max(maxO, HA.open); glowSeen = Math.max(glowSeen, HA.glow); }
   assert.ok(maxO > 0.28 && maxO < 0.45, 'crack ' + maxO); assert.ok(glowSeen > 0.99); assert.strictEqual(HA.glow, 0); assert.ok(HA.open < 0.01);
   assert.strictEqual(HA.state, 'down');
-  const w3 = mkWorld({ age: 5 }); roundOf(w3, 'animals', 3); untilPhase(w3, 'play'); ev(w3);
+  const w3 = mkWorld({ age: 5, config: { hintAfterStreak: 3, hintGlowTime: 2.5 } }); roundOf(w3, 'animals', 3); untilPhase(w3, 'play'); ev(w3);
   const hs = [];
   for (let k = 0; k < 8; k++) { const [a, b] = twoDifferent(w3); tap(w3, a); tap(w3, b); run(w3, 1.4); for (const e of ev(w3)) if (e.type === 'hint') hs.push(k); }
   assert.deepStrictEqual(hs, [2, 7], 'cooldown ' + hs);
-  const w4 = mkWorld({ age: 4 }); roundOf(w4, 'colors', 2); untilPhase(w4, 'play'); ev(w4);
+  const w4 = mkWorld({ age: 4, config: { hintAfterStreak: 3, hintGlowTime: 2.5 } }); roundOf(w4, 'colors', 2); untilPhase(w4, 'play'); ev(w4);
   const t0 = w4.time, idles = [], ih = [];
   run(w4, 90, () => { for (const e of w4.events) { if (e.type === 'idle') idles.push(+(w4.time - t0).toFixed(2)); if (e.type === 'hint' && e.idle) ih.push(w4.time - t0); } w4.events.length = 0; });
   assert.deepStrictEqual(idles.slice(0, 4).map(Math.round), [12, 30, 57, 87]);
   assert.ok(ih.length >= 2 && Math.round(ih[0]) === 30, 'idle hint from the 2nd nudge');
-  const w5 = mkWorld({ age: 4 }); roundOf(w5, 'colors', 2); untilPhase(w5, 'play'); ev(w5);
+  const w5 = mkWorld({ age: 4, config: { hintAfterStreak: 3, hintGlowTime: 2.5 } }); roundOf(w5, 'colors', 2); untilPhase(w5, 'play'); ev(w5);
   run(w5, 10); w5.pointerDown(w5.layout.W / 2, 2); run(w5, 10); assert.ok(!ev(w5).some(e => e.type === 'idle'));
 });
 
 test('stars: mismatches ≤ max(1, pairs − 1) → 3, ≤ 2·pairs → 2, else 1; Talk right → +1', () => {
   for (const [m, want] of [[0, 3], [3, 3], [4, 2], [8, 2], [9, 1]]) {
-    const w = mkWorld({ age: 5 }); roundOf(w, 'animals', 3); untilPhase(w, 'play'); ev(w);
+    const w = mkWorld({ age: 5, config: { hintAfterStreak: 3, hintGlowTime: 2.5 } }); roundOf(w, 'animals', 3); untilPhase(w, 'play'); ev(w);
     assert.strictEqual(w.pairs, 4);
     for (let k = 0; k < m; k++) { const [a, b] = twoDifferent(w); tap(w, a); tap(w, b); run(w, 1.5); }
     solveRound(w);
@@ -627,7 +627,7 @@ test('stars: mismatches ≤ max(1, pairs − 1) → 3, ≤ 2·pairs → 2, else 
 });
 
 test('cheer: 0.7 s after the last pair the building cheers 1.2 s (cheer {x, y} at the roof centre, windows hop in a wave, Gigi cheers) → roundDone 0.8 s → the next scroll', () => {
-  const w = mkWorld({ age: 4 }); roundOf(w, 'colors', 2); untilPhase(w, 'play'); ev(w);
+  const w = mkWorld({ age: 4, config: { hintAfterStreak: 3, hintGlowTime: 2.5 } }); roundOf(w, 'colors', 2); untilPhase(w, 'play'); ev(w);
   const keys = [...new Set(w.cards.map(c => c.key))];
   let lastMatch = null, cheerE = null, cheerT = null, doneT = null, hopStart = {}, n = 0;
   for (const k of keys) { const p = pairOf(w, k); tap(w, p[0]); tap(w, p[1]); run(w, 0.6); }
@@ -644,7 +644,7 @@ test('cheer: 0.7 s after the last pair the building cheers 1.2 s (cheer {x, y} a
   const order = w.cards.slice().sort((a, b) => a.slot - b.slot).map(c => hopStart[c.id]);
   for (let i = 1; i < order.length; i++) assert.ok(order[i] - order[i - 1] > 0.04 && order[i] - order[i - 1] < 0.08, 'wave');
   void lastMatch;
-  const w2 = mkWorld({ age: 4 }); roundOf(w2, 'colors', 2); untilPhase(w2, 'play'); ev(w2);
+  const w2 = mkWorld({ age: 4, config: { hintAfterStreak: 3, hintGlowTime: 2.5 } }); roundOf(w2, 'colors', 2); untilPhase(w2, 'play'); ev(w2);
   const ks = [...new Set(w2.cards.map(c => c.key))];
   for (let i = 0; i < ks.length - 1; i++) { const p = pairOf(w2, ks[i]); tap(w2, p[0]); tap(w2, p[1]); run(w2, 0.6); }
   const pl = pairOf(w2, ks[ks.length - 1]); tap(w2, pl[0]); tap(w2, pl[1]); let mT = null, cT = null; n = 0;

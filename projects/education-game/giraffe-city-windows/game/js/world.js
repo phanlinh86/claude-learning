@@ -109,9 +109,9 @@
     fastReset: true,           // 3rd tap while 2 mismatched windows are up: both close at once, the new one opens
 
     // ---- help
-    hintAfterStreak: 3,        // 3 mismatches in a row → hint (streak resets)
+    hintAfterStreak: 2,        // 2 mismatches in a row → hint (streak resets; playtest P1-3, was 3)
     hintCooldown: 6,           // s: no auto-hint while one glows nor within 6 s of the last
-    hintGlowTime: 2.5,         // glow 2.5 s (fade in 0.2, out 0.4)
+    hintGlowTime: 6,           // glow 6 s so a careful child can use it (playtest P1-3, was 2.5)
     hintPeekDelay: 0.2, hintPeekHold: 0.45,   // the hinted closed windows open a crack for 0.45 s …
     hintPeekOpen: 0.3,         // … to open = 0.3 (DESIGN: "a crack")
     idleTime: 12,              // s without a tap in play → idle nudge …
@@ -908,6 +908,7 @@
     if (d > (reach || L.neckMax) + 1e-6 || d < L.neckMin - 1e-6) return false;
     if (b.x < S.x - 1e-6 || b.y < S.y - 1e-6 || b.x + b.w > S.x + S.w + 1e-6 || b.y + b.h > S.y + S.h + 1e-6) return false;
     if (jy < L.ins.top + cfg.headTopK * h - 1e-6) return false;
+    if (jy > L.neckBase.y - 0.3 * h + 1e-6) return false;   // never a neck lying flat at pavement level (visual QA P2-2)
     if (withGrid && L.grid && overlapArea(b, inflate(L.grid.rect, cfg.headKeep)) > 0) return false;
     return true;
   };

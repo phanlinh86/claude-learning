@@ -28,7 +28,7 @@ Tests: `node tests/unit/run.js` (39 tests, ≈ 25 s; `node tests/unit/run.js shu
 ## 1. API (DESIGN §6.2)
 `setViewport(W, H, ins)`, `setAge`, `setLang`, `newSession({lastTopics}?)`, `startLevel(i)`, `update(dt)`, `drainEvents()`,
 `pointerDown(x, y)` → window id │ `'critter'` │ `'gigi'` │ `null` (windows open **on touch-down**), `pointerMove`, `pointerUp`,
-`cancelDrag()`, `hint()` → window id (manual hint: main calls it on a tap on Gigi / the bubble), `talkAnswer(choiceId)` → bool,
+`cancelDrag()`, `hint()` → window id (manual hint; main does NOT call it on a Gigi / bubble tap — that repeats the prompt), `talkAnswer(choiceId)` → bool,
 `skipTalk()`, `prompt()` → `{promptKey, params}`, `cardById(id)` (= `itemById`), `cardRect(c)`, `critterRect()` → tight box │ null.
 Statics: `GW.World.logicalSize`, `computeLayout(W, H, ins)`, `chooseGrid(L, n, age)`, **`gigiHead(w, alpha?)`** → `{x, y, w, h, jx, jy}`,
 `headBoxAt(jx, jy, h)`, `rectGap`, `overlapArea`, `FACADES / SHUTTERS / DOORS / ROOFS`.

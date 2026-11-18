@@ -125,7 +125,16 @@
     const vs = $('optVolume'); if (vs && document.activeElement !== vs) vs.value = Math.round((S.volume == null ? 1 : S.volume) * 100);
   }
   // the instruction is the most important line: praise / wrong lines must not cut it off (playtest P1-2)
-  function speakPrompt(txt, opt) { promptUntil = performance.now() + 300 + 72 * (txt || '').length; speak(txt, opt); }
+  // protected from the moment it is queued until it has been spoken (playtest P1-2: it often waits in the queue)
+  let pendingPrompt = '';
+  function speakPrompt(txt, opt) {
+    if (!txt) return;
+    if (!voiceOn() || !GW.Voice) { promptUntil = performance.now() + 300 + 72 * txt.length; speak(txt, opt); return; }
+    pendingPrompt = txt; promptUntil = Infinity;
+    const p = GW.Voice.say(txt, opt || {});
+    const done = () => { if (pendingPrompt === txt && promptUntil === Infinity) promptUntil = 0; };
+    if (p && p.then) p.then(done, done); else promptUntil = performance.now() + 300 + 72 * txt.length;
+  }
   const canInterrupt = () => performance.now() > promptUntil;
   function promptText(e) {
     return T(e.promptKey, e.params || {});
@@ -213,8 +222,7 @@
         break;
       }
       case 'scroll':   // Gigi trots on to the next building
-        GW.Audio.play('whoosh');
-        if (!e.first) speak(T('walk'));
+        GW.Audio.play('whoosh');   // the clip-clop steps say "off we go" — no line here (playtest P1-1)
         break;
       case 'walk': GW.Audio.play('step', { foot: e.foot }); break;
       case 'critter': {   // surprise friends: a pigeon on a sill, the little bus, a balloon — never a mistake
@@ -232,18 +240,18 @@
         }
         break;
       }
-      case 'peek': GW.Audio.play('peek'); speak(T('peek')); break;          // queued after the prompt
-      case 'hide': speak(T('hide')); break;
+      case 'peek': GW.Audio.play('peek'); if (!GW.Voice || !GW.Voice.isSpeaking()) speak(T('peek')); break;   // never a backlog
+      case 'hide': if (!GW.Voice || !GW.Voice.isSpeaking()) speak(T('hide')); break;
       case 'clack': GW.Audio.play('clack', { v: e.v }); break;
       case 'bloom': GW.Audio.play('pop'); render.burst('bloom', e.x, e.y); break;
       case 'cheer':
         GW.Audio.play('cheer');
         render.burst('roof', e.x, e.y, { w: (world.layout.grid && world.layout.grid.building ? world.layout.grid.building.w : 300) * 0.8 });
-        speak(T('cheer'));   // queued after the last match line
+        if (world.round >= (world.roundsPerLevel || 4) - 1 || !(GW.Voice && GW.Voice.isSpeaking())) speak(T('cheer'));
         break;
       case 'flip': {
         GW.Audio.play('flip');
-        if (e.open === 2) lastPraise = 0;
+        if (e.open === 2) { lastPraise = 0; break; }   // the match / mismatch line names both windows a moment later (playtest P2-4)
         const line = GW.I18N.sayFlip ? GW.I18N.sayFlip(curLang(), Object.assign({ topic: world.topic }, e)) : '';
         speak(line, { interrupt: canInterrupt() });   // the card's name is the lesson; it never cuts the instruction
         break;
@@ -269,7 +277,7 @@
         stats.wrong++;
         GW.Audio.play('hmm');
         const nowW = performance.now();
-        if (nowW - lastWrongSay > 1500) {
+        if (nowW - lastWrongSay > 300) {
           lastWrongSay = nowW;
           speak(GW.I18N.sayMismatch ? GW.I18N.sayMismatch(curLang(), Object.assign({ topic: world.topic }, e)) : T('wrong'), { interrupt: canInterrupt() });
         }
@@ -295,7 +303,6 @@
             delay: i * 0.22, onDone: () => { shownStars++; GW.UI.setStars(shownStars, true); GW.Audio.play('star', { i }); }
           });
         }
-        if (e.stars >= 3 && Math.random() < 0.5) speak(T('great'));   // the building's cheer line already praised
         GW.UI.setDots(world.roundsPerLevel || 5, ((e.round != null ? e.round : world.round) % (world.roundsPerLevel || 5)) + 1);
         break;
       }
@@ -333,8 +340,9 @@
         GW.Storage.setJSON('progress', progress);
         shownStars = e.stars || shownStars; GW.UI.setStars(shownStars);
         $('doneStars').textContent = e.stars || 0;
-        $('doneTitle').textContent = T('session.done', { stars: e.stars || 0 });
-        speak(T('session.done', { stars: e.stars || 0 }), { interrupt: true });
+        const doneTxt = T('session.done', { stars: e.stars || 0 }).replace(/\b1 stars\b/, '1 star');
+        $('doneTitle').textContent = doneTxt;
+        speak(doneTxt, { interrupt: true });
         mode = 'done';
         GW.UI.only('scrDone'); GW.UI.show('hud', false); GW.UI.say('');
         if (autoRestart) setTimeout(() => { if (mode === 'done') startGame(); }, 1500 / speed);
@@ -415,7 +423,7 @@
   function repeatPrompt() {
     if (!lastRoundEvt || world.state !== 'round') return;
     GW.Audio.play('click');
-    world.dee && (world.dee.mood = 'think', world.dee.moodT = 1.2);
+    world.gigi && (world.gigi.mood = 'think', world.gigi.moodT = 1.2);
     const cp = currentPrompt(); promptUntil = 0; speakPrompt(cp, { interrupt: true });
   }
 
@@ -529,7 +537,11 @@
     Object.assign(progress, GW.Storage.getJSON('progress', {}));
     GW.UI.applyLang(curLang());
     if (GW.I18N && GW.I18N.setChild) GW.I18N.setChild(S.name);
-    if (GW.Voice) GW.Voice.init({ lang: curLang(), enabled: voiceOn() });
+    if (GW.Voice) {
+      GW.Voice.init({ lang: curLang(), enabled: voiceOn() });
+      const prevStart = GW.Voice.onStart;
+      GW.Voice.onStart = t => { if (t === pendingPrompt) promptUntil = performance.now() + 300 + 72 * t.length; if (prevStart) prevStart(t); };
+    }
     render = new GW.Renderer($('game')); GW.render = render;
     world = new GW.World({ seed: FLAGS.seed != null ? FLAGS.seed : (Date.now() & 0x7fffffff), age: FLAGS.age || S.age, lang: curLang() });
     weather = new GW.Weather({ width: 960, height: 720, seed: 11 });

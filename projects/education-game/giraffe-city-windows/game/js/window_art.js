@@ -467,7 +467,7 @@
   }
 
   // ================================================================ window geometry (local coords, centred cell w × h)
-  var SWING = 1.17;     // shutter angle at open = 1: 1.17·90° ≈ 105° (past perpendicular → the back face shows)
+  var SWING = 1.1;      // shutter angle at open = 1: 1.1·90° ≈ 99° (just past perpendicular → the back face shows; less reach so neighbours never stack, visual QA P2-3)
   var PERSP = 2.6;      // camera distance in window widths (in front of the window centre)
   function geometry(w, h) {
     var capH = 0.085 * w, sillH = 0.09 * w, fw = 0.062 * w, fx = 0.44 * w;
@@ -770,7 +770,8 @@
     ctx.fillStyle = 'rgba(40,28,22,0.35)'; ctx.fillRect(-0.006 * W, S.top + 0.01 * W, 0.012 * W, S.bot - S.top - 0.02 * W);
   }
   function drawShutters(ctx, G, open, base) {
-    var th = clamp(open, 0, 1.12) * Math.PI / 2 * SWING;
+    var oc = clamp(open, 0, 1.12); if (oc > 1) oc = 1 + (oc - 1) * 0.4;   // the hinge stop: overshoot shows, but only a little
+    var th = oc * Math.PI / 2 * SWING;
     if (th < 0.004) {
       cached(ctx, 'sh:' + base, G.w, G.h, function (c, W, H) { paintClosedShutters(c, W, H, base); }, Math.ceil(0.05 * G.w));
       return;
