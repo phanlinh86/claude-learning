@@ -2,7 +2,7 @@
 // Variety audit (report-only): what changes from round to round, chapter to chapter and "Play again" to "Play again"?
 //   node tests/sim/pt_variety.js [--n 200]   → tests/sim/out/pt_variety.md
 // Generates N pairs of back-to-back sessions per age (like "Play again") with the same Content calls as the World; records every
-// round's pair keys, the mechanic surface (face kinds, reward kind, grid shape, pairs), topic order and seasons.
+// round's pair keys, the mechanic surface (face kinds, grid shape, pairs), topic order and weather.
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -27,7 +27,7 @@ function playTwo(age, seed) {
         hist.push(cur.sum);
         const vals = [...new Set(cur.cards.map(c => c.key))].sort(), g = GW.World.chooseGrid(Lp, cur.cards.length, age);
         ses.rounds.push({ l, topic, vals, kinds: [...new Set(cur.cards.map(c => c.face.kind))].sort().join('+'),
-          reward: cur.pairInfo[vals[0]].reward.kind, grid: g.cols + 'x' + g.rows });
+          grid: g.cols + 'x' + g.rows });
       }
     });
     S.push(ses);
@@ -46,7 +46,7 @@ for (const age of [3, 4, 5, 6, 7]) {
       orders.add(ses.topics.join('>'));
       for (let l = 0; l < 4; l++) {
         const R = ses.rounds.filter(r => r.l === l);
-        rewardsPerCh.push(new Set(R.map(r => r.reward)).size);
+        rewardsPerCh.push(new Set(R.map(r => r.kinds)).size);
         const seen = new Set();
         R.forEach((r, i) => {
           kinds[r.topic + ': ' + r.kinds] = 1; grids.add(r.grid);
@@ -67,7 +67,7 @@ for (const age of [3, 4, 5, 6, 7]) {
   rows2.push([age, Object.keys(kinds).sort().join(' · ')]);
 }
 function f(x) { return x.toFixed(1); }
-md += tbl(['age', 'chapter order (every session)', '# orders', 'distinct pair values per chapter', 'values carried from the previous round', 'rounds with only already-seen values', 'reward kinds per chapter', 'chapter values shared with "Play again"', 'grid shapes (iPhone P)'], rows);
+md += tbl(['age', 'chapter order (every session)', '# orders', 'distinct pair values per chapter', 'values carried from the previous round', 'rounds with only already-seen values', 'face-kind mixes per chapter', 'chapter values shared with "Play again"', 'grid shapes (iPhone P)'], rows);
 md += '\n### Card face kinds per topic (the whole surface a child sees)\n\n' + tbl(['age', 'topic: face kinds'], rows2);
 // voice line pools (en)
 const STR = GW.I18N ? null : null;

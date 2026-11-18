@@ -1,7 +1,7 @@
-/* Dee's Forest Memory — GW.Input: one-finger tap-to-flip input + kid-proofing + parent hold-gate.
+/* Gigi's Peekaboo Windows — GW.Input: one-finger tap-to-open input + kid-proofing + parent hold-gate.
  *
- * Tap-to-flip: `down(x, y, ev)` fires SYNCHRONOUSLY inside pointerdown (no tap-vs-drag wait, no click delay), so the
- * world flips the card on touch-down. move/up are still delivered (harmless for a tap game, useful for tests).
+ * Tap-to-open: `down(x, y, ev)` fires SYNCHRONOUSLY inside pointerdown (no tap-vs-drag wait, no click delay), so the
+ * world swings the window's shutters open on touch-down (taps on Gigi / a critter are resolved by world.pointerDown). move/up are still delivered (harmless for a tap game, useful for tests).
  *
  *   const detach = GW.Input.attach(canvas, {
  *     toLogical(clientX, clientY) → {x, y},

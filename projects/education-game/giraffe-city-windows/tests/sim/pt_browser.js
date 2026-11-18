@@ -86,7 +86,7 @@ let md = '## Real-browser playtest (Chromium headless, mobile contexts with touc
           const b = await page.evaluate((id) => GW.debug.cardScreen(id), pick.id);
           await page.touchscreen.tap(b.x + (rnd() - 0.5) * b.w * 0.5, b.y + (rnd() - 0.5) * b.h * 0.5); taps++;
           if (s.open.length === 1) await snap(`L${s.level}_r${s.round}_two_up`); else await snap(`L${s.level}_r${s.round}_one_up`);
-          await sleep(900);   // a 4-year-old listens to Dee name the card
+          await sleep(900);   // a 4-year-old listens to Gigi name the window
           continue;
         }
       }

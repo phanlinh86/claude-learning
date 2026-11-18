@@ -1,35 +1,43 @@
-/* Dee's Forest Memory — GW.I18N (English + Vietnamese). Dee the duckling talks to the child about memory cards.
+/* Gigi's Peekaboo Windows — GW.I18N (English + Vietnamese). Gigi the giraffe calf talks to the child about what is
+ * hiding behind the windows of the buildings on Peekaboo Street.
  *
  *   GW.I18N.t(lang, key, params, rng?)     → string (variants picked with rng.next()/rng()/Math.random)
- *   GW.I18N.name(lang, kind, value)        → display + spoken name ("red"/"màu đỏ", 7 → "seven"/"bảy",
- *                                            fox → "fox"/"con cáo", dots 3 → "three acorns"/"ba hạt dẻ")
+ *   GW.I18N.name(lang, kind, value)        → display + spoken name ("red"/"màu đỏ", {value:'red', obj:'umbrella'} →
+ *                                            "a red umbrella"/"cái ô màu đỏ", 7 → "seven"/"bảy", dog → "dog"/"con chó",
+ *                                            kennel → "kennel"/"nhà chó", dots 3 → "three dots"/"ba chấm tròn")
  *   GW.I18N.words(lang, kind, value)       → accepted spoken forms for speech recognition (lower-case, + no-diacritic forms)
- *   GW.I18N.speech(lang, text)             → text tuned for TTS (letter names, + − =). ("Dee" → "Đi" happens in voice.js)
+ *   GW.I18N.speech(lang, text)             → text tuned for TTS (letter names, + − =, dashes).
+ *                                            ("Gigi" → "Gi Gi" for Vietnamese happens in voice.js)
  *
- *   Card lines (memory game). Every function copes with a missing / partial event and never returns '' or "{x}":
- *   GW.I18N.sayFlip(lang, ev, rng)         → name of the turned face: "Red!", "A red heart!", "One, two, three acorns!",
- *                                            "Three!", "A fox!", "A little fox!", "The letter B!", "Two plus three!"
- *   GW.I18N.sayMatch(lang, ev, rng)        → "Two foxes! A pair!", "Three and three acorns! A match!",
- *                                            "Seven and seven acorns! Seven is odd!", "Fox starts with the letter F! A pair!"
- *   GW.I18N.sayMismatch(lang, ev, rng)     → "A fox and an owl. Let's look again!" — kind, never negative
- *   GW.I18N.sayReward(lang, ev, rng)       → optional line for a `reward` event (ev.kind butterfly|lantern|acorns|animal|star)
- *   GW.I18N.sayCount(lang, n, need)        → "Two!" … at need "Three! Three acorns!"
- *   GW.I18N.cardPhrase(lang, card)         → "a fox" / "con cáo", "three acorns" / "ba hạt dẻ" (what mismatch lines use)
+ *   Window lines (memory game). Every function copes with a missing / partial event and never returns '' or "{x}":
+ *   GW.I18N.sayFlip(lang, ev, rng)         → what is inside the window that opened: "Red!", "A red umbrella!",
+ *                                            "One, two, three dots!", "Three!", "A dog!", "The kennel!", "The letter B!"
+ *   GW.I18N.sayMatch(lang, ev, rng)        → "Two red umbrellas — a pair!", "The dog lives in the kennel!",
+ *                                            "Three — one, two, three! A pair!", "Dog starts with the letter D! A pair!"
+ *   GW.I18N.sayMismatch(lang, ev, rng)     → "A red umbrella and a blue kite. Let's look again!",
+ *                                            "A dog and a nest. Where does the dog live?" — kind, never negative
+ *   GW.I18N.sayCritter(lang, type, action?, rng) → surprise lines (pigeon | bus | balloon; action 'tap' for the tap reaction)
+ *   GW.I18N.sayReward(lang, ev, rng)       → legacy (Dee's rewards); unknown kinds → praise
+ *   GW.I18N.sayCount(lang, n, need)        → "Two!" … at need "Three! Three dots!"
+ *   GW.I18N.cardPhrase(lang, card)         → "a red umbrella" / "cái ô màu đỏ", "the kennel"… (what mismatch lines use)
  *   GW.I18N.talkWrong(lang, kind, value)   → gentle "it's X" line for a missed Talk-time answer
+ *                                            (home: "The dog lives in the kennel! Good try!")
  *   GW.I18N.setChild(name)                 → default {child} for every t() call
  *   GW.I18N.langs = ['en', 'vi'];  has(lang, key);  keys(lang);  raw(lang, key);  PARAMS (required params per key)
  *
  * Event fields read by sayFlip / sayMatch / sayMismatch (all optional):
- *   ev.nameKind, ev.nameValue, ev.face {kind, value, color, shape, sprite, text, n, scale, parity}, ev.topic, ev.parity,
- *   ev.size ('big'|'small', size rounds), ev.word (initial match);
- *   per card: ev.nameKindA/nameValueA/faceA/sizeA + …B (what GW.World sends), or ev.cardA / ev.cardB (card objects
+ *   ev.nameKind, ev.nameValue, ev.face {kind, value, color, obj, shape, sprite, text, n, scale, parity, animal},
+ *   ev.topic, ev.parity, ev.size ('big'|'small'), ev.word (initial match), ev.animal + ev.home (homes match);
+ *   per window: ev.nameKindA/nameValueA/faceA/sizeA + …B (what GW.World sends), or ev.cardA / ev.cardB (card objects
  *   {nameKind, nameValue, face, size}), or ev.nameA / ev.nameB as {kind, value}; also ev.cards = [cardA, cardB].
  *
- * Name kinds: color, shape, size, animal, number, dots, letter, text, sum, diff, parity, word.
- * Params: values may be RAW ({animal:'fox'}, {color:'red'}) — keys named like a name kind (color, shape, size, animal,
- * parity) are named automatically; an object {kind, value} is always replaced by name(lang, kind, value).
+ * Name kinds: color, shape, size, animal, home, thing, number, dots, letter, text, sum, diff, parity, word.
+ * Params: values may be RAW ({animal:'dog'}, {color:'red'}, {home:'kennel'}, {thing:'kite'}) — keys named like a name
+ * kind (color, shape, size, animal, home, thing, parity) are named automatically; an object {kind, value} is always
+ * replaced by name(lang, kind, value).
  * Derived params: {letter}/{lower} from letter|text, {word} from word|animal|sprite, {expr} from expr|text|a,b,
- * {acorns} ("acorn"/"acorns", vi "hạt dẻ") and {num} (number word) from n, {animal} from a bare animal id in {sound}.
+ * {dots} ("dot"/"dots", vi "chấm tròn"), {num} (number word) and {counted} ("one, two, three") from n,
+ * {thing} from obj, {animal} from a bare animal id in {sound}/{sprite}.
  * Keys with required params (PARAMS) fall back to a generic key when a param is missing (never "the !" on screen);
  * an unknown prompt key `p.<x>` falls back to `p.any`. {child}: if the child's name is empty, variants containing
  * {child} are skipped; if every variant has it, {child} becomes "friend" / "bé". Missing params are removed.
@@ -41,10 +49,16 @@
   'use strict';
 
   var LANGS = ['en', 'vi'];
-  var ANIMALS = ['fox', 'deer', 'hedgehog', 'squirrel', 'bunny', 'frog', 'bear', 'owl', 'mouse'];
+  var ANIMALS = ['dog', 'cat', 'bird', 'fish', 'bee', 'rabbit', 'duck', 'hen', 'spider'];
+  var HOME_OF = { dog: 'kennel', cat: 'basket', bird: 'nest', fish: 'bowl', bee: 'hive', rabbit: 'hutch', duck: 'pond',
+    hen: 'coop', spider: 'web' };
+  var HOMES = ANIMALS.map(function (a) { return HOME_OF[a]; });
+  var ANIMAL_OF = {};
+  ANIMALS.forEach(function (a) { ANIMAL_OF[HOME_OF[a]] = a; });
+  var THINGS = ['umbrella', 'balloon', 'car', 'kite', 'cup', 'boot'];
 
   // ---------------------------------------------------------------- names
-  // Vietnamese animal names carry their classifier ("con cáo"), as a kindergarten teacher says them.
+  // Vietnamese names carry their classifier ("con chó", "cái ô", "quả bóng bay"), as a kindergarten teacher says them.
   var NAMES = {
     en: {
       color: { red: 'red', blue: 'blue', yellow: 'yellow', green: 'green', orange: 'orange', purple: 'purple', pink: 'pink',
@@ -52,8 +66,11 @@
       shape: { circle: 'circle', square: 'square', triangle: 'triangle', star: 'star', heart: 'heart', rect: 'rectangle',
         rectangle: 'rectangle', oval: 'oval', diamond: 'diamond' },
       size: { big: 'big', small: 'little', little: 'little' },
-      animal: { fox: 'fox', deer: 'deer', hedgehog: 'hedgehog', squirrel: 'squirrel', bunny: 'bunny', frog: 'frog',
-        bear: 'bear', owl: 'owl', mouse: 'mouse' },
+      animal: { dog: 'dog', cat: 'cat', bird: 'bird', fish: 'fish', bee: 'bee', rabbit: 'bunny', duck: 'duck',
+        hen: 'hen', spider: 'spider' },
+      home: { kennel: 'kennel', basket: 'basket', nest: 'nest', bowl: 'fish bowl', hive: 'beehive', hutch: 'hutch',
+        pond: 'pond', coop: 'hen house', web: 'web' },
+      thing: { umbrella: 'umbrella', balloon: 'balloon', car: 'car', kite: 'kite', cup: 'cup', boot: 'boot' },
       parity: { odd: 'odd', even: 'even' }
     },
     vi: {
@@ -63,19 +80,24 @@
         heart: 'hình trái tim', rect: 'hình chữ nhật', rectangle: 'hình chữ nhật', oval: 'hình bầu dục',
         diamond: 'hình thoi' },
       size: { big: 'to', small: 'nhỏ', little: 'nhỏ' },
-      animal: { fox: 'con cáo', deer: 'con hươu', hedgehog: 'con nhím', squirrel: 'con sóc', bunny: 'con thỏ',
-        frog: 'con ếch', bear: 'con gấu', owl: 'con cú', mouse: 'con chuột' },
+      animal: { dog: 'con chó', cat: 'con mèo', bird: 'con chim', fish: 'con cá', bee: 'con ong', rabbit: 'con thỏ',
+        duck: 'con vịt', hen: 'con gà', spider: 'con nhện' },
+      home: { kennel: 'nhà chó', basket: 'cái giỏ', nest: 'tổ chim', bowl: 'bể cá', hive: 'tổ ong', hutch: 'chuồng thỏ',
+        pond: 'cái ao', coop: 'chuồng gà', web: 'mạng nhện' },
+      thing: { umbrella: 'cái ô', balloon: 'quả bóng bay', car: 'chiếc ô tô', kite: 'con diều', cup: 'cái cốc',
+        boot: 'chiếc ủng' },
       parity: { odd: 'lẻ', even: 'chẵn' }
     }
   };
   var PLURAL_EN = {
     shape: { circle: 'circles', square: 'squares', triangle: 'triangles', star: 'stars', heart: 'hearts',
       rect: 'rectangles', rectangle: 'rectangles', oval: 'ovals', diamond: 'diamonds' },
-    animal: { fox: 'foxes', deer: 'deer', hedgehog: 'hedgehogs', squirrel: 'squirrels', bunny: 'bunnies', frog: 'frogs',
-      bear: 'bears', owl: 'owls', mouse: 'mice' }
+    animal: { dog: 'dogs', cat: 'cats', bird: 'birds', fish: 'fish', bee: 'bees', rabbit: 'bunnies', duck: 'ducks',
+      hen: 'hens', spider: 'spiders' },
+    thing: { umbrella: 'umbrellas', balloon: 'balloons', car: 'cars', kite: 'kites', cup: 'cups', boot: 'boots' }
   };
-  // The dots on count cards are acorns. vi "hạt dẻ" is what Vietnamese children call an acorn (Scrat's "hạt dẻ").
-  var ACORN = { en: ['acorn', 'acorns'], vi: ['hạt dẻ', 'hạt dẻ'] };
+  // The dots on count windows are round coloured lights. Spoken as "dots" / "chấm tròn" (what preschool worksheets say).
+  var DOT = { en: ['dot', 'dots'], vi: ['chấm tròn', 'chấm tròn'] };
 
   var NUM = {
     en: ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve',
@@ -123,19 +145,31 @@
       shape: { circle: ['circle', 'round', 'ring', 'circles', 'ball'], square: ['square', 'box', 'squares'],
         triangle: ['triangle', 'try angle', 'triangles'], star: ['star', 'stars'], heart: ['heart', 'hearts', 'hart', 'love'],
         rect: ['rectangle', 'rectangles', 'long box'], rectangle: ['rectangle', 'rectangles'], oval: ['oval', 'egg'],
-        diamond: ['diamond', 'kite'] },
+        diamond: ['diamond'] },
       size: { big: ['big', 'large', 'huge', 'bigger', 'giant'], small: ['little', 'small', 'tiny', 'smaller', 'baby'],
         little: ['little', 'small', 'tiny', 'smaller', 'baby'] },
       animal: {
-        fox: ['fox', 'foxy', 'fox cub', 'foxes', 'foxie'],
-        deer: ['deer', 'fawn', 'baby deer', 'dear', 'deers'],
-        hedgehog: ['hedgehog', 'hedgie', 'hedge hog', 'hedgehogs', 'porcupine'],
-        squirrel: ['squirrel', 'squirrels', 'squirrely', 'squirl', 'chipmunk'],
-        bunny: ['bunny', 'rabbit', 'bunnies', 'bunny rabbit', 'bun'],
-        frog: ['frog', 'froggy', 'frogs', 'froggie', 'toad'],
-        bear: ['bear', 'teddy', 'teddy bear', 'bear cub', 'bears', 'bare'],
-        owl: ['owl', 'owlet', 'owls', 'hoot owl', 'baby owl'],
-        mouse: ['mouse', 'mice', 'mousey', 'mousie', 'little mouse'] },
+        dog: ['dog', 'doggy', 'doggie', 'puppy', 'pup', 'dogs'],
+        cat: ['cat', 'kitty', 'kitten', 'cats', 'kitty cat'],
+        bird: ['bird', 'birdie', 'birds', 'songbird', 'little bird'],
+        fish: ['fish', 'fishy', 'goldfish', 'fishes', 'fishie'],
+        bee: ['bee', 'bees', 'honey bee', 'bumblebee', 'bumble bee'],
+        rabbit: ['bunny', 'rabbit', 'bunnies', 'bunny rabbit', 'rabbits'],
+        duck: ['duck', 'duckling', 'ducky', 'duckie', 'ducks'],
+        hen: ['hen', 'chicken', 'chick', 'hens', 'chickens'],
+        spider: ['spider', 'spiders', 'spidery', 'itsy bitsy spider'] },
+      home: {
+        kennel: ['kennel', 'dog house', 'doghouse', 'dog kennel', 'puppy house'],
+        basket: ['basket', 'cat basket', 'cat bed', 'kitty bed'],
+        nest: ['nest', 'bird nest', 'birds nest', 'birdie nest'],
+        bowl: ['fish bowl', 'fishbowl', 'bowl', 'fish tank', 'aquarium', 'tank'],
+        hive: ['beehive', 'bee hive', 'hive', 'bee house'],
+        hutch: ['hutch', 'rabbit hutch', 'bunny house', 'rabbit house', 'bunny hutch'],
+        pond: ['pond', 'duck pond', 'lake', 'pool'],
+        coop: ['hen house', 'henhouse', 'coop', 'chicken coop', 'chicken house'],
+        web: ['web', 'spider web', 'spiderweb', 'cobweb', 'spider’s web'] },
+      thing: { umbrella: ['umbrella', 'brolly', 'umbrellas'], balloon: ['balloon', 'balloons', 'baloon'],
+        car: ['car', 'cars', 'auto'], kite: ['kite', 'kites'], cup: ['cup', 'mug', 'cups'], boot: ['boot', 'boots', 'rain boot', 'welly'] },
       parity: { odd: ['odd', 'odds'], even: ['even', 'evens'] }
     },
     vi: {
@@ -150,32 +184,46 @@
       size: { big: ['to', 'lớn', 'bự', 'to lắm', 'to hơn'], small: ['nhỏ', 'bé', 'nhỏ xíu', 'nhỏ hơn', 'tí hon'],
         little: ['nhỏ', 'bé', 'nhỏ xíu', 'nhỏ hơn', 'tí hon'] },
       animal: {
-        fox: ['con cáo', 'cáo', 'cáo con', 'chú cáo'],
-        deer: ['con hươu', 'hươu', 'con nai', 'nai', 'hươu con', 'nai con', 'hươu sao'],
-        hedgehog: ['con nhím', 'nhím', 'nhím con', 'chú nhím'],
-        squirrel: ['con sóc', 'sóc', 'sóc con', 'chú sóc'],
-        bunny: ['con thỏ', 'thỏ', 'thỏ con', 'thỏ trắng'],
-        frog: ['con ếch', 'ếch', 'ếch con', 'con nhái', 'ếch xanh'],
-        bear: ['con gấu', 'gấu', 'gấu con', 'gấu bông', 'gấu nâu'],
-        owl: ['con cú', 'cú', 'cú mèo', 'con cú mèo', 'cú con'],
-        mouse: ['con chuột', 'chuột', 'chuột con', 'chuột nhắt'] },
+        dog: ['con chó', 'chó', 'cún', 'con cún', 'chó con', 'cún con'],
+        cat: ['con mèo', 'mèo', 'mèo con', 'chú mèo', 'mèo meo'],
+        bird: ['con chim', 'chim', 'chim non', 'chim sẻ', 'chú chim'],
+        fish: ['con cá', 'cá', 'cá vàng', 'cá con'],
+        bee: ['con ong', 'ong', 'ong mật', 'chú ong'],
+        rabbit: ['con thỏ', 'thỏ', 'thỏ con', 'thỏ trắng'],
+        duck: ['con vịt', 'vịt', 'vịt con', 'vịt vàng'],
+        hen: ['con gà', 'gà', 'gà mái', 'gà con', 'con gà mái'],
+        spider: ['con nhện', 'nhện', 'nhện con', 'chú nhện'] },
+      // bare "tổ" / "chuồng" / "nhà" are deliberately missing: they fit several homes
+      home: {
+        kennel: ['nhà chó', 'nhà cún', 'chuồng chó', 'nhà của chó'],
+        basket: ['cái giỏ', 'giỏ', 'giỏ mèo', 'ổ mèo', 'cái rổ'],
+        nest: ['tổ chim', 'cái tổ chim', 'tổ của chim'],
+        bowl: ['bể cá', 'bể', 'bình cá', 'hồ cá', 'chậu cá'],
+        hive: ['tổ ong', 'nhà ong', 'tổ của ong'],
+        hutch: ['chuồng thỏ', 'nhà thỏ', 'chuồng của thỏ'],
+        pond: ['cái ao', 'ao', 'ao nước', 'hồ nước'],
+        coop: ['chuồng gà', 'nhà gà', 'chuồng của gà'],
+        web: ['mạng nhện', 'lưới nhện', 'tơ nhện'] },
+      thing: { umbrella: ['cái ô', 'ô', 'cái dù', 'dù'], balloon: ['quả bóng bay', 'bóng bay', 'bong bóng', 'trái bong bóng'],
+        car: ['chiếc ô tô', 'ô tô', 'xe ô tô', 'xe hơi', 'cái xe'], kite: ['con diều', 'diều', 'cánh diều'],
+        cup: ['cái cốc', 'cốc', 'cái ly', 'ly', 'cái tách'], boot: ['chiếc ủng', 'ủng', 'đôi ủng', 'giày ủng'] },
       parity: { odd: ['lẻ', 'số lẻ', 'lẽ', 'lẹ'], even: ['chẵn', 'số chẵn', 'chặn', 'chắn'] }
     }
   };
 
-  // Default GW.WORDS (DESIGN §5.1) — word lists for the 'initial' topic. content.js loads later and may replace it.
-  // vi: nhím (nh), thỏ (th), chuột (ch) are skipped — Vietnamese phonics teaches nh / th / ch as their own sounds.
+  // Default GW.WORDS (DESIGN §6.1) — word lists for the 'initial' topic. content.js loads later and may replace it.
+  // vi: chó (ch), chim (ch), thỏ (th), nhện (nh) are skipped — Vietnamese phonics teaches ch / th / nh as their own sounds.
   var WORD_LIST = {
-    en: [['fox', 'animal_fox', 'F'], ['deer', 'animal_deer', 'D'], ['hedgehog', 'animal_hedgehog', 'H'],
-      ['squirrel', 'animal_squirrel', 'S'], ['bunny', 'animal_bunny', 'B'], ['frog', 'animal_frog', 'F'],
-      ['bear', 'animal_bear', 'B'], ['owl', 'animal_owl', 'O'], ['mouse', 'animal_mouse', 'M']],
-    vi: [['cáo', 'animal_fox', 'C'], ['hươu', 'animal_deer', 'H'], ['sóc', 'animal_squirrel', 'S'],
-      ['ếch', 'animal_frog', 'Ê'], ['gấu', 'animal_bear', 'G'], ['cú', 'animal_owl', 'C']]
+    en: [['dog', 'animal_dog', 'D'], ['cat', 'animal_cat', 'C'], ['bird', 'animal_bird', 'B'], ['fish', 'animal_fish', 'F'],
+      ['bee', 'animal_bee', 'B'], ['rabbit', 'animal_rabbit', 'R'], ['duck', 'animal_duck', 'D'], ['hen', 'animal_hen', 'H'],
+      ['spider', 'animal_spider', 'S']],
+    vi: [['mèo', 'animal_cat', 'M'], ['cá', 'animal_fish', 'C'], ['ong', 'animal_bee', 'O'], ['vịt', 'animal_duck', 'V'],
+      ['gà', 'animal_hen', 'G']]
   };
   if (!GW.WORDS) {
     GW.WORDS = {};
     LANGS.forEach(function (l) {
-      GW.WORDS[l] = WORD_LIST[l].map(function (w) { return { word: w[0], sprite: w[1], initial: w[2] }; });
+      GW.WORDS[l] = WORD_LIST[l].map(function (w) { return { word: w[0], sprite: w[1], initial: w[2], animal: w[1].slice(7) }; });
     });
   }
   function spriteOfWord(lang, w) {        // looks in content's GW.WORDS first, then the default list
@@ -190,24 +238,38 @@
     for (i = 0; i < WORD_LIST[lang].length; i++) if (WORD_LIST[lang][i][1] === spr) return WORD_LIST[lang][i][0];
     return null;
   }
-  function animalOf(v) {                  // 'fox' | 'animal_fox' | {kind:'animal', value:'fox'} → 'fox' | null
+  function animalOf(v) {                  // 'dog' | 'animal_dog' | {kind:'animal', value:'dog'} → 'dog' | null
     if (v && typeof v === 'object') v = v.value != null ? v.value : v.sprite;
     if (v == null) return null;
     var s = String(v).replace(/^animal_/, '').replace(/\.svg$/, '');
+    if (s === 'bunny') s = 'rabbit';
     return ANIMALS.indexOf(s) >= 0 ? s : null;
+  }
+  function homeOf(v) {                    // 'kennel' | 'home_kennel' | {value:'kennel'} → 'kennel' | null
+    if (v && typeof v === 'object') v = v.value != null ? v.value : v.sprite;
+    if (v == null) return null;
+    var s = String(v).replace(/^home_/, '').replace(/\.svg$/, '');
+    return HOMES.indexOf(s) >= 0 ? s : null;
+  }
+  function thingOf(v) {
+    if (v == null) return null;
+    var s = String(v).replace(/^thing_/, '');
+    return THINGS.indexOf(s) >= 0 ? s : null;
   }
 
   // ---------------------------------------------------------------- strings
-  var TOPICS = ['colors', 'size', 'shapes', 'count', 'animals', 'letters', 'lower', 'initial', 'add', 'sub', 'oddeven'];
-  var NAME_KINDS = ['color', 'shape', 'size', 'animal', 'number', 'dots', 'letter', 'text', 'sum', 'diff', 'parity', 'word'];
+  var TOPICS = ['colors', 'size', 'shapes', 'count', 'animals', 'homes', 'letters', 'lower', 'initial', 'add', 'sub', 'oddeven'];
+  var NAME_KINDS = ['color', 'shape', 'size', 'animal', 'home', 'thing', 'number', 'dots', 'letter', 'text', 'sum', 'diff',
+    'parity', 'word'];
+  var CRITTERS = ['pigeon', 'bus', 'balloon'];
 
   var STR = {
     en: {
-      'ui.title': 'Dee’s Forest Memory',
-      'ui.logo1': 'Dee’s',
-      'ui.logo2': 'Forest Memory',
-      'ui.subtitle': 'Flip, match and learn with Dee!',
-      'ui.tagline': 'Flip, match and learn with Dee!',
+      'ui.title': 'Gigi’s Peekaboo Windows',
+      'ui.logo1': 'Gigi’s',
+      'ui.logo2': 'Peekaboo Windows',
+      'ui.subtitle': 'Open the windows and find the pairs with Gigi!',
+      'ui.tagline': 'Open the windows and find the pairs with Gigi!',
       'ui.play': 'Play',
       'ui.playAgain': 'Play again',
       'ui.home': 'Home',
@@ -223,28 +285,30 @@
       'ui.sound': 'Sound effects',
       'ui.music': 'Music',
       'ui.volume': 'Volume',
-      'ui.voice': 'Dee’s voice',
+      'ui.voice': 'Gigi’s voice',
       'ui.mic': 'Answer by voice',
       'ui.done': 'Done',
       'ui.stars': 'Stars',
       'ui.chapter': 'Chapter {n}',
       'ui.allDone': 'All done! {stars} stars',
-      'ui.welcome': ['Hi {child}! I am Dee. Let’s find the pairs!', 'Hi! I am Dee. Let’s find the pairs!'],
+      'ui.welcome': ['Hi {child}! I am Gigi. Let’s peek in the windows!', 'Hi! I am Gigi. Let’s peek in the windows!'],
       'ui.micUnsupported': 'Voice answers are not available here. Tap the pictures!',
       'ui.micDenied': 'The microphone is off. Tap the pictures instead!',
       'ui.voiceMissing': 'Tip for parents: add a voice in Settings › Accessibility › Spoken Content › Voices.',
       'ui.tapOrSay': 'Tap or say the answer!',
-      'ui.listening': 'Dee is listening…',
-      'ui.tapDee': 'Tap Dee to hear it again',
+      'ui.listening': 'Gigi is listening…',
+      'ui.tapGigi': 'Tap Gigi to hear it again',
+      'ui.tapDee': 'Tap Gigi to hear it again',
       'ui.skip': 'Skip',
       'ui.langName.en': 'English',
       'ui.langName.vi': 'Tiếng Việt',
 
-      'topic.colors': 'Colour Butterflies',
+      'topic.colors': 'Colour Pairs',
       'topic.size': 'Big and Little',
-      'topic.shapes': 'Shape Lanterns',
-      'topic.count': 'Counting Acorns',
-      'topic.animals': 'Forest Friends',
+      'topic.shapes': 'Shape Pairs',
+      'topic.count': 'Counting Dots',
+      'topic.animals': 'Animal Friends',
+      'topic.homes': 'Animal Homes',
       'topic.letters': 'Letter Pairs',
       'topic.lower': 'Big and Small Letters',
       'topic.initial': 'First Letters',
@@ -252,37 +316,51 @@
       'topic.sub': 'Take Away',
       'topic.oddeven': 'Odd and Even',
 
-      'weather.0': 'Spring is here! Look, blossoms!',
-      'weather.1': 'Hello, summer! The sun is warm!',
-      'weather.2': 'Autumn leaves! Red and gold!',
-      'weather.3': 'Snowy winter! Brrr, so cold!',
+      'weather.0': ['What a sunny day!', 'Hello, sunshine! The street is bright!'],
+      'weather.1': ['Whoosh — it’s windy!', 'A breezy day! Look at the kites!'],
+      'weather.2': ['Pitter-patter, rain!', 'Rain! The windows are cosy.'],
+      'weather.3': ['Look — a rainbow!', 'A rainbow over the street!'],
 
-      'p.any': ['Find two cards that match!', 'Which two cards are the same?', 'Let’s find the matching pairs!'],
-      'p.colors': ['Find the colour pairs!', 'Find two butterflies of the same colour!', 'Which colours go together?'],
+      'p.any': ['Find two windows that match!', 'Which two windows are the same?', 'Let’s find the matching pairs!'],
+      'p.colors': ['Find the colour pairs!', 'Find two things of the same colour!', 'Which colours go together?'],
       'p.size': ['Find the big one and the little one!', 'Match each big animal with its little one!', 'Big and little friends go together!'],
-      'p.shapes': ['Find the shape pairs!', 'Find two lanterns with the same shape!', 'Which shapes go together?'],
-      'p.count': ['Match each number with its acorns!', 'Count the acorns and find the number!', 'Which number goes with the acorns?'],
-      'p.animals': ['Find two of each animal!', 'Find the forest friends that match!', 'Every animal has a twin. Find them!'],
-      'p.letters': ['Find the letter pairs!', 'Find two cards with the same letter!', 'Which letters are the same?'],
+      'p.shapes': ['Find the shape pairs!', 'Find two windows with the same shape!', 'Which shapes go together?'],
+      'p.count': ['Match the number with the dots!', 'Count the dots and find the number!', 'Which number goes with the dots?'],
+      'p.animals': ['Find two of each animal!', 'Find the animal friends that match!', 'Every animal has a twin. Find them!'],
+      'p.homes': ['Who lives where? Find each animal’s home!', 'Find each animal and its home!', 'Every animal has a home. Let’s find them!'],
+      'p.letters': ['Find the letter pairs!', 'Find two windows with the same letter!', 'Which letters are the same?'],
       'p.lower': ['Match each big letter with its small letter!', 'Find the big and small letter pairs!', 'Every big letter has a small friend!'],
       'p.initial': ['Match each letter with an animal that starts with it!', 'Which animal starts with this letter?', 'Find the letter and its animal!'],
       'p.add': ['Match each sum with its answer!', 'Add them up and find the answer!', 'Which number is the answer?'],
       'p.sub': ['Match each take-away with its answer!', 'Take away and find the answer!', 'How many are left? Find the pair!'],
-      'p.oddeven': ['Match each number with its acorns! Odd or even?', 'Count the acorns and find the number!', 'Find the number pairs! Odd or even?'],
+      'p.oddeven': ['Match the number with the dots! Odd or even?', 'Count the dots and find the number!', 'Find the number pairs! Odd or even?'],
 
-      'surprise.shuffle': ['Oh! Two cards are swapping places. Watch!', 'Whoosh! Two cards are moving. Keep your eyes on them!'],
-      'surprise.golden': ['One pair is magic! Can you find it?', 'Psst! A magic pair is hiding here!'],
-      'surprise.pond': ['The cards are floating on lily pads!', 'Splash! The cards are on the pond today!'],
-      'golden': ['A rainbow! You found the magic pair!', 'Wow, the magic pair! Look at the rainbow!'],
-      'peek': ['Look carefully!', 'Look at all the cards!', 'Remember where they are!', 'Peek! Look closely!',
+      // surprises (one round per chapter) — tap is always fun, never a mistake
+      'critter.pigeon': ['Look! A pigeon on the window sill!', 'Coo coo! A pigeon came to visit!'],
+      'critter.pigeon.tap': ['Coo coo! Bye bye, pigeon!', 'Flap, flap! Off it flies!'],
+      'critter.bus': ['Beep beep! Here comes the little bus!', 'Look! A little bus is driving by!'],
+      'critter.bus.tap': ['Beep beep! Everyone is waving!', 'Beep beep! Hello, little bus!'],
+      'critter.balloon': ['Look! A balloon is floating up!', 'Up, up, up goes the balloon!'],
+      'critter.balloon.tap': ['Whee! Look at it twirl!', 'Twirl and sparkle! Whee!'],
+      'surprise.pigeon': ['Look! A pigeon on the window sill!', 'Coo coo! A pigeon came to visit!'],
+      'surprise.bus': ['Beep beep! Here comes the little bus!', 'Look! A little bus is driving by!'],
+      'surprise.balloon': ['Look! A balloon is floating up!', 'Up, up, up goes the balloon!'],
+      // legacy surprise keys from Dee's game (main.js still knows them); kept short and neutral
+      'surprise.shuffle': ['Watch the windows carefully!', 'Keep your eyes on the windows!'],
+      'surprise.golden': ['One pair is extra sparkly! Can you find it?', 'Psst! A sparkly pair is hiding here!'],
+      'surprise.pond': ['Look at all the windows!', 'So many windows! Let’s peek!'],
+      'golden': ['Sparkles! You found the sparkly pair!', 'Wow, the sparkly pair! Look at it shine!'],
+      'peek': ['Look carefully!', 'Look in all the windows!', 'Remember what is inside!', 'Peekaboo! Look closely!',
         'Watch carefully, {child}!'],
-      'hide': ['Now they hide!', 'Flip! They are hiding!', 'Now find the pairs!', 'Hide and seek! Your turn!',
-        'They are hiding. Tap two cards!'],
+      'hide': ['Now they hide!', 'Shutters closed! Your turn!', 'Now find the pairs!', 'Peekaboo! Where did they go?',
+        'They are hiding. Open two windows!'],
 
-      'flip.color': ['{name}!', 'A {name} butterfly!'],
+      'flip.color': ['{name}!', 'It is {name}!'],
+      'flip.thing': ['A {color} {thing}!', 'Look, a {color} {thing}!'],
       'flip.shape': 'A {name}!',
       'flip.shapeColor': 'A {color} {shape}!',
       'flip.animal': ['A {name}!', 'Hello, {name}!'],
+      'flip.home': ['The {name}!', 'Look, a {name}!'],
       'flip.number': ['{num}!', 'Number {num}!'],
       'flip.letter': ['The letter {letter}!', 'Letter {letter}!'],
       'flip.capital': 'Big letter {letter}!',
@@ -290,13 +368,16 @@
       'flip.expr': '{expr}!',
       'flip.word': '{word}!',
 
-      'match.color': ['{name} and {name}! A pair!', 'Two {name} butterflies! A pair!'],
+      'match.color': ['{name} and {name}! A pair!', 'Both {name}! A pair!'],
+      'match.thing': ['Two {color} {things} — a pair!', 'Two {color} {things}! Hooray!'],
+      'match.colorMix': ['{A} and {B} — both {color}!', 'Both {color}! {A} and {B}!'],
       'match.shape': ['Two {plural}! A pair!', 'Two {plural}! They match!'],
       'match.animal': ['Two {plural}! A pair!', 'Two {plural}! Hooray!'],
+      'match.home': ['The {animal} lives in the {home}!', 'Yes! The {animal} lives in the {home}!'],
       'match.size': ['A big {beast} and a little {beast}! A pair!'],
-      'match.count': ['{num} and {num} {acorns}! A match!', '{num} {acorns}! Number {num}! A pair!'],
+      'match.count': ['{num} and {num} {dots}! A match!', '{num} — {counted}! A pair!'],
       'match.number': ['{num} and {num}! A pair!'],
-      'match.oddeven': ['{num} and {num} {acorns}! {num} is {parity}!', '{num} is {parity}! A pair!'],
+      'match.oddeven': ['{num} and {num} {dots}! {num} is {parity}!', '{num} is {parity}! A pair!'],
       'match.letter': ['Letter {letter} and letter {letter}! A pair!'],
       'match.lower': ['Big letter {letter} and small letter {lower}! A pair!'],
       'match.initial': ['{word} starts with the letter {letter}! A pair!'],
@@ -304,33 +385,39 @@
       'match.any': ['A pair!', 'A match! Hooray!', 'You found a pair!', 'They match!', 'Two the same! Yay!'],
 
       'mismatch.two': ['{A} and {B}. Let’s look again!', '{A} and {B}. Let’s remember them!',
-        '{A} and {B}! Try two more cards!'],
-      'wrong': ['Let’s look again!', 'Almost! Try two more!', 'Let’s remember those two!', 'Hmm, try another card!',
+        '{A} and {B}! Try two more windows!'],
+      'mismatch.home': ['{A} and {B}. Where does the {animal} live?', '{A} and {B}. Let’s find the {animal}’s home!'],
+      'wrong': ['Let’s look again!', 'Almost! Try two more!', 'Let’s remember those two!', 'Hmm, try another window!',
         'So close! One more try!', 'Let’s think again!', 'Keep trying, you can do it!'],
-      'miss': ['Tap a card!', 'The cards are over here!', 'Try a card!', 'Touch a card to flip it!', 'Flip a card!'],
+      'miss': ['Tap a window!', 'The windows are up here!', 'Try a window!', 'Touch a window to open it!', 'Open a window!'],
 
-      'reward.butterfly': ['Flutter, butterfly!', 'A butterfly for the forest!'],
-      'reward.lantern': ['A lantern lights up!', 'Look, a glowing lantern!'],
-      'reward.acorns': ['Acorns for the forest!', 'Tumble, acorns!'],
-      'reward.animal': ['A new forest friend!', 'Hop, hop! Hello, friend!'],
       'reward.star': ['A twinkly star!', 'Look, a little star!'],
-      'say.countDone': '{num}! {num} {acorns}!',
+      'reward.light': ['The lights are on!', 'Look, the windows glow!'],
+      'reward.bloom': ['Flowers! Pop, pop!', 'Look, the flowers bloom!'],
+      'say.countDone': '{num}! {num} {dots}!',
 
       'praise': ['Yes!', 'Great job!', 'You got it!', 'Super!', 'Wonderful!', 'Nice one!', 'Hooray!', 'Well done!'],
-      'great': ['Great job, {child}!', 'You did it, {child}!', 'You found all the pairs!', 'Wow, {child}, what a memory!',
+      'great': ['Great job, {child}!', 'You did it, {child}!', 'You found all the pairs!', 'What a bright building, {child}!',
         'Super finding!', 'Hooray! All pairs found!', 'You are so clever!'],
-      'hint': ['Psst! Look at the glowing cards!', 'Here is a clue! Watch these two!', 'Dee will help! Look here!',
-        'Look! These two are wiggling!', 'Try the sparkly cards!'],
-      'idle': ['Tap a card to flip it!', 'Want to play? Tap a card!', 'Dee is waiting! Your turn!',
-        'The cards are waiting for you!', 'Let’s find a pair! Tap one!', 'I am here, {child}! Let’s play!'],
+      'cheer': ['The whole building is shining!', 'Hooray! Every window is lit!', 'What a bright building, {child}!',
+        'Look, confetti! You found them all!', 'The building is cheering for you!'],
+      'walk': ['Let’s go to the next building!', 'Clip-clop! Off we go!', 'Trot, trot! A new building!',
+        'Come on, {child}! Next building!', 'Down the street we go!'],
+      'hint': ['Psst! Look at the glowing windows!', 'Here is a clue! Peek at these two!', 'Gigi will help! Look here!',
+        'Look! These shutters are peeking open!', 'Try the sparkly windows!'],
+      'idle': ['Tap a window to open it!', 'Want to play? Tap a window!', 'Gigi is waiting! Your turn!',
+        'The windows are waiting for you!', 'Let’s find a pair! Tap one!', 'I am here, {child}! Let’s play!'],
 
-      'talk.intro': 'Talk time! Dee has a question.',
-      'talk.colors': 'What colour is this butterfly?',
+      'talk.intro': 'Talk time! Gigi has a question.',
+      'talk.colors': 'What colour is this {thing}?',
+      'talk.colorsAny': 'What colour is this?',
       'talk.size': 'Is it big or little?',
-      'talk.shapes': 'What shape is this lantern?',
-      'talk.count': 'How many acorns?',
+      'talk.shapes': 'What shape is this?',
+      'talk.count': 'How many dots?',
       'talk.animals': 'Where is the {animal}?',
       'talk.animalsAny': 'Which animal is this?',
+      'talk.homes': 'Where does the {animal} live?',
+      'talk.homesAny': 'Which home is this?',
       'talk.letters': 'Which letter is this?',
       'talk.lower': 'Which letter is this?',
       'talk.initial': 'Which letter does it start with?',
@@ -342,19 +429,20 @@
       'talk.wrong': 'It is {answer}! Good try!',
       'talk.wrong.a': 'It is a {answer}! Good try!',
       'talk.wrong.animal': 'It is the {answer}! Good try!',
+      'talk.wrong.home': 'The {animal} lives in the {home}! Good try!',
       'talk.wrong.size': 'It is {answer}! Good try!',
       'talk.wrong.letter': 'It is the letter {letter}! Good try!',
       'talk.wrong.number': 'It is {answer}! Good try!',
 
       'session.done': ['You did it all! {stars} stars! Hooray!', 'Amazing, {child}! {stars} stars!',
-        'What a forest party! {stars} stars!']
+        'The whole street is shining! {stars} stars!']
     },
     vi: {
-      'ui.title': 'Vịt Dee Lật Thẻ Rừng Xanh',
-      'ui.logo1': 'Vịt Dee',
-      'ui.logo2': 'Lật Thẻ Rừng Xanh',
-      'ui.subtitle': 'Cùng vịt Dee lật thẻ, ghép cặp và học nhé!',
-      'ui.tagline': 'Cùng vịt Dee lật thẻ, ghép cặp và học nhé!',
+      'ui.title': 'Hươu Gigi Mở Cửa Sổ',
+      'ui.logo1': 'Hươu Gigi',
+      'ui.logo2': 'Mở Cửa Sổ',
+      'ui.subtitle': 'Cùng hươu Gigi mở cửa sổ, tìm đôi giống nhau nhé!',
+      'ui.tagline': 'Cùng hươu Gigi mở cửa sổ, tìm đôi giống nhau nhé!',
       'ui.play': 'Chơi',
       'ui.playAgain': 'Chơi lại',
       'ui.home': 'Trang chủ',
@@ -370,29 +458,31 @@
       'ui.sound': 'Âm thanh',
       'ui.music': 'Nhạc nền',
       'ui.volume': 'Âm lượng',
-      'ui.voice': 'Giọng của Dee',
+      'ui.voice': 'Giọng của Gigi',
       'ui.mic': 'Trả lời bằng giọng nói',
       'ui.done': 'Xong',
       'ui.stars': 'Ngôi sao',
       'ui.chapter': 'Chương {n}',
       'ui.allDone': 'Hoàn thành! {stars} ngôi sao',
-      'ui.welcome': ['Chào bé {child}! Mình là vịt Dee. Mình cùng lật thẻ nhé!',
-        'Chào bé! Mình là vịt Dee. Mình cùng lật thẻ nhé!'],
+      'ui.welcome': ['Chào bé {child}! Mình là hươu cao cổ Gigi. Mình cùng mở cửa sổ nhé!',
+        'Chào bé! Mình là hươu cao cổ Gigi. Mình cùng mở cửa sổ nhé!'],
       'ui.micUnsupported': 'Máy này chưa nghe được giọng nói. Bé chạm vào hình nhé!',
       'ui.micDenied': 'Micrô đang tắt. Bé chạm vào hình nhé!',
       'ui.voiceMissing': 'Mẹo cho bố mẹ: thêm giọng tiếng Việt trong Cài đặt › Trợ năng › Nội dung được đọc › Giọng nói.',
       'ui.tapOrSay': 'Bé chạm hoặc nói đáp án nhé!',
-      'ui.listening': 'Dee đang nghe…',
-      'ui.tapDee': 'Chạm vào Dee để nghe lại nhé',
+      'ui.listening': 'Gigi đang nghe…',
+      'ui.tapGigi': 'Chạm vào Gigi để nghe lại nhé',
+      'ui.tapDee': 'Chạm vào Gigi để nghe lại nhé',
       'ui.skip': 'Bỏ qua',
       'ui.langName.en': 'English',
       'ui.langName.vi': 'Tiếng Việt',
 
-      'topic.colors': 'Bướm sắc màu',
+      'topic.colors': 'Cặp màu sắc',
       'topic.size': 'To và nhỏ',
-      'topic.shapes': 'Đèn lồng hình khối',
-      'topic.count': 'Đếm hạt dẻ',
-      'topic.animals': 'Bạn thú trong rừng',
+      'topic.shapes': 'Cặp hình khối',
+      'topic.count': 'Đếm chấm tròn',
+      'topic.animals': 'Bạn thú',
+      'topic.homes': 'Nhà của các con vật',
       'topic.letters': 'Cặp chữ cái',
       'topic.lower': 'Chữ hoa, chữ thường',
       'topic.initial': 'Chữ cái đầu tiên',
@@ -400,87 +490,109 @@
       'topic.sub': 'Phép trừ',
       'topic.oddeven': 'Số chẵn, số lẻ',
 
-      'weather.0': 'Mùa xuân đến rồi! Hoa nở nè!',
-      'weather.1': 'Chào mùa hè! Nắng ấm quá!',
-      'weather.2': 'Mùa thu rồi! Lá vàng rơi nè!',
-      'weather.3': 'Mùa đông tuyết rơi! Lạnh quá!',
+      'weather.0': ['Trời nắng đẹp quá!', 'Chào ông mặt trời! Phố sáng bừng nè!'],
+      'weather.1': ['Vù vù — gió thổi rồi!', 'Trời có gió! Bé nhìn diều bay kìa!'],
+      'weather.2': ['Tí tách, trời mưa rồi!', 'Mưa rồi! Cửa sổ ấm áp ghê.'],
+      'weather.3': ['Nhìn kìa — cầu vồng!', 'Cầu vồng trên phố kìa!'],
 
-      'p.any': ['Bé ơi, tìm hai thẻ giống nhau nhé!', 'Hai thẻ nào giống nhau nhỉ?', 'Mình cùng tìm các cặp giống nhau nào!'],
-      'p.colors': ['Bé ơi, tìm hai thẻ cùng màu nhé!', 'Bé tìm hai chú bướm cùng màu nhé!', 'Màu nào đi cùng màu nào nhỉ?'],
+      'p.any': ['Bé ơi, tìm hai cửa sổ giống nhau nhé!', 'Hai cửa sổ nào giống nhau nhỉ?', 'Mình cùng tìm các đôi giống nhau nào!'],
+      'p.colors': ['Bé ơi, tìm hai đồ vật cùng màu nhé!', 'Bé tìm hai cửa sổ cùng màu nhé!', 'Màu nào đi cùng màu nào nhỉ?'],
       'p.size': ['Bé ơi, tìm bạn to và bạn nhỏ nhé!', 'Bé ghép bạn thú to với bạn nhỏ nhé!', 'Bạn to tìm bạn nhỏ nào!'],
-      'p.shapes': ['Bé ơi, tìm hai thẻ cùng hình nhé!', 'Bé tìm hai đèn lồng cùng hình nhé!', 'Hình nào đi cùng hình nào nhỉ?'],
-      'p.count': ['Bé ơi, ghép số với số hạt dẻ nhé!', 'Bé đếm hạt dẻ rồi tìm số nhé!', 'Số nào đi với hạt dẻ nhỉ?'],
+      'p.shapes': ['Bé ơi, tìm hai cửa sổ cùng hình nhé!', 'Bé tìm hai hình giống nhau nhé!', 'Hình nào đi cùng hình nào nhỉ?'],
+      'p.count': ['Bé ơi, ghép số với chấm tròn nhé!', 'Bé đếm chấm tròn rồi tìm số nhé!', 'Số nào đi với các chấm tròn nhỉ?'],
       'p.animals': ['Bé ơi, tìm hai bạn thú giống nhau nhé!', 'Bé tìm các bạn thú sinh đôi nhé!', 'Bạn thú nào giống nhau nhỉ?'],
-      'p.letters': ['Bé ơi, tìm hai chữ cái giống nhau nhé!', 'Bé tìm hai thẻ cùng chữ nhé!', 'Chữ nào giống chữ nào nhỉ?'],
+      'p.homes': ['Ai sống ở đâu? Bé tìm nhà cho các bạn nhé!', 'Bé ghép con vật với ngôi nhà của nó nhé!',
+        'Con vật nào sống ở đâu nhỉ? Bé tìm nào!'],
+      'p.letters': ['Bé ơi, tìm hai chữ cái giống nhau nhé!', 'Bé tìm hai cửa sổ cùng chữ nhé!', 'Chữ nào giống chữ nào nhỉ?'],
       'p.lower': ['Bé ơi, ghép chữ hoa với chữ thường nhé!', 'Bé tìm cặp chữ hoa, chữ thường nhé!', 'Chữ hoa nào đi với chữ thường nào?'],
       'p.initial': ['Bé ghép chữ cái với tên con vật nhé!', 'Con vật nào bắt đầu bằng chữ này?', 'Bé tìm chữ cái và con vật nhé!'],
       'p.add': ['Bé ơi, ghép phép cộng với đáp số nhé!', 'Bé cộng lại rồi tìm đáp số nhé!', 'Đáp số là số nào nhỉ?'],
-      'p.sub': ['Bé ơi, ghép phép trừ với đáp số nhé!', 'Bé bớt đi rồi tìm đáp số nhé!', 'Còn lại mấy nhỉ? Bé tìm cặp nhé!'],
-      'p.oddeven': ['Bé ghép số với hạt dẻ! Chẵn hay lẻ nhỉ?', 'Bé đếm hạt dẻ rồi tìm số nhé!', 'Bé tìm cặp số nhé! Chẵn hay lẻ?'],
+      'p.sub': ['Bé ơi, ghép phép trừ với đáp số nhé!', 'Bé bớt đi rồi tìm đáp số nhé!', 'Còn lại mấy nhỉ? Bé tìm đôi nhé!'],
+      'p.oddeven': ['Bé ghép số với chấm tròn! Chẵn hay lẻ nhỉ?', 'Bé đếm chấm tròn rồi tìm số nhé!', 'Bé tìm đôi số nhé! Chẵn hay lẻ?'],
 
-      'surprise.shuffle': ['Ồ! Hai thẻ đang đổi chỗ kìa. Bé nhìn nhé!', 'Vèo vèo! Hai thẻ chạy đi đâu đó. Bé nhìn kỹ nhé!'],
-      'surprise.golden': ['Có một cặp thẻ thần kỳ! Bé tìm được không?', 'Suỵt! Một cặp thẻ thần kỳ đang trốn đây nè!'],
-      'surprise.pond': ['Các thẻ đang nổi trên lá sen nè!', 'Tõm! Hôm nay các thẻ nằm trên mặt hồ đó!'],
-      'golden': ['Cầu vồng nè! Bé tìm được cặp thẻ thần kỳ rồi!', 'Oa, cặp thẻ thần kỳ! Bé nhìn cầu vồng kìa!'],
-      'peek': ['Bé nhìn kỹ nhé!', 'Bé nhớ kỹ các thẻ nhé!', 'Nhìn kỹ nào bé ơi!', 'Bé nhớ chỗ các thẻ nhé!',
+      'critter.pigeon': ['Nhìn kìa! Bạn bồ câu đậu trên bậu cửa sổ!', 'Gù gù! Bạn bồ câu đến chơi nè!'],
+      'critter.pigeon.tap': ['Gù gù! Tạm biệt bồ câu nhé!', 'Phành phạch! Bồ câu bay đi rồi!'],
+      'critter.bus': ['Bíp bíp! Xe buýt nhỏ đến rồi!', 'Nhìn kìa! Xe buýt nhỏ chạy qua nè!'],
+      'critter.bus.tap': ['Bíp bíp! Mọi người vẫy tay chào bé!', 'Bíp bíp! Chào xe buýt nhỏ!'],
+      'critter.balloon': ['Nhìn kìa! Quả bóng bay đang bay lên!', 'Bóng bay bay lên cao, cao nữa!'],
+      'critter.balloon.tap': ['Ui! Bóng bay xoay tròn lấp lánh!', 'Vèo! Bóng bay bay lên trời rồi!'],
+      'surprise.pigeon': ['Nhìn kìa! Bạn bồ câu đậu trên bậu cửa sổ!', 'Gù gù! Bạn bồ câu đến chơi nè!'],
+      'surprise.bus': ['Bíp bíp! Xe buýt nhỏ đến rồi!', 'Nhìn kìa! Xe buýt nhỏ chạy qua nè!'],
+      'surprise.balloon': ['Nhìn kìa! Quả bóng bay đang bay lên!', 'Bóng bay bay lên cao, cao nữa!'],
+      'surprise.shuffle': ['Bé nhìn kỹ các cửa sổ nhé!', 'Bé để ý các cửa sổ nhé!'],
+      'surprise.golden': ['Có một đôi lấp lánh! Bé tìm được không?', 'Suỵt! Một đôi lấp lánh đang trốn đây nè!'],
+      'surprise.pond': ['Bé nhìn các cửa sổ nè!', 'Nhiều cửa sổ quá! Mình ngó vào nhé!'],
+      'golden': ['Lấp lánh quá! Bé tìm được đôi lấp lánh rồi!', 'Oa, đôi lấp lánh! Sáng quá kìa!'],
+      'peek': ['Bé nhìn kỹ nhé!', 'Bé nhớ trong cửa sổ có gì nhé!', 'Nhìn kỹ nào bé ơi!', 'Ú òa! Bé nhìn kỹ nào!',
         'Bé {child} nhìn kỹ nhé!'],
-      'hide': ['Giờ các thẻ trốn rồi!', 'Úp lại rồi! Đến lượt bé nhé!', 'Trốn tìm nào! Bé lật hai thẻ nhé!',
-        'Các thẻ đi trốn rồi!', 'Bé tìm các cặp nhé!'],
+      'hide': ['Giờ chúng trốn rồi!', 'Đóng cửa rồi! Đến lượt bé nhé!', 'Bé tìm các đôi giống nhau nhé!',
+        'Ú òa! Chúng trốn đâu rồi nhỉ?', 'Trốn hết rồi! Bé mở hai cửa sổ nhé!'],
 
-      'flip.color': ['{name}!', 'Bướm {name}!'],
+      'flip.color': ['{name}!', '{name} nè!'],
+      'flip.thing': ['{thing} {color}!', '{thing} {color} nè!'],
       'flip.shape': '{name}!',
       'flip.shapeColor': '{shape} {color}!',
       'flip.animal': ['{name}!', '{name} nè!'],
+      'flip.home': ['{name}!', '{name} nè!'],
       'flip.number': ['Số {num}!'],
       'flip.letter': ['Chữ {letter}!'],
       'flip.capital': 'Chữ {letter} in hoa!',
       'flip.small': 'Chữ {lower} viết thường!',
       'flip.expr': '{expr}!',
-      'flip.word': '{word}!',
+      'flip.word': ['{word}!', '{word} nè!'],
 
-      'match.color': ['{name} và {name}! Một cặp rồi!', 'Hai con bướm {name}! Một cặp rồi!'],
-      'match.shape': ['Hai {name}! Một cặp rồi!', 'Hai {name} giống nhau! Giỏi quá!'],
-      'match.animal': ['Hai {name}! Một cặp rồi!', 'Hai {name} giống nhau! Giỏi quá!'],
-      'match.size': ['{beast} to và {beast} nhỏ! Một cặp rồi!'],
-      'match.count': ['Số {num} và {num} {acorns}! Đúng một cặp!', '{num} {acorns}! Số {num}! Một cặp rồi!'],
-      'match.number': ['Số {num} và số {num}! Một cặp rồi!'],
-      'match.oddeven': ['Số {num} và {num} {acorns}! {num} là số {parity}!', '{num} là số {parity}! Một cặp rồi!'],
+      'match.color': ['{name} và {name}! Một đôi rồi!', 'Cùng {name}! Một đôi rồi!'],
+      'match.thing': ['Hai {thing} {color} — một đôi!', 'Hai {thing} {color}! Giỏi quá!'],
+      'match.colorMix': ['{A} và {B} — cùng {color}!', 'Cùng {color}! {A} và {B}!'],
+      'match.shape': ['Hai {name}! Một đôi rồi!', 'Hai {name} giống nhau! Giỏi quá!'],
+      'match.animal': ['Hai {name}! Một đôi rồi!', 'Hai {name} giống nhau! Giỏi quá!'],
+      'match.home': ['{animal} sống trong {home}!', '{animal} về {home} rồi! Hoan hô!'],
+      'match.size': ['{beast} to và {beast} nhỏ! Một đôi rồi!'],
+      'match.count': ['Số {num} và {num} {dots}! Đúng một đôi!', '{num} — {counted}! Một đôi rồi!'],
+      'match.number': ['Số {num} và số {num}! Một đôi rồi!'],
+      'match.oddeven': ['Số {num} và {num} {dots}! {num} là số {parity}!', '{num} là số {parity}! Một đôi rồi!'],
       'match.letter': ['Chữ {letter} và chữ {letter}! Một cặp rồi!'],
       'match.lower': ['Chữ {letter} in hoa và chữ {lower} thường! Một cặp rồi!'],
-      'match.initial': ['{word} bắt đầu bằng chữ {letter}! Một cặp rồi!'],
+      'match.initial': ['{word} bắt đầu bằng chữ {letter}! Một đôi rồi!'],
       'match.math': ['{expr} bằng {num}! Đúng rồi!', 'Đúng rồi! {expr} bằng {num}!'],
-      'match.any': ['Một cặp rồi!', 'Giống nhau rồi! Hoan hô!', 'Bé tìm được một cặp!', 'Đúng một cặp rồi!',
-        'Hai thẻ giống nhau! Giỏi quá!'],
+      'match.any': ['Một đôi rồi!', 'Giống nhau rồi! Hoan hô!', 'Bé tìm được một đôi!', 'Đúng một đôi rồi!',
+        'Hai cửa sổ giống nhau! Giỏi quá!'],
 
-      'mismatch.two': ['{A} và {B}. Mình nhìn lại nhé!', '{A} và {B}. Bé nhớ kỹ nhé!',
-        '{A} và {B}! Bé thử hai thẻ khác nào!'],
-      'wrong': ['Mình nhìn lại nhé!', 'Gần đúng rồi! Thử lại nào!', 'Bé nhớ hai thẻ đó nhé!', 'Hì, bé thử thẻ khác nào!',
+      'mismatch.two': ['{A} và {B}. Mình xem lại nhé!', '{A} và {B}. Bé nhớ kỹ nhé!',
+        '{A} và {B}! Bé thử tiếp nào!'],
+      'mismatch.home': ['{A} và {B}. {animal} sống ở đâu nhỉ?', '{A} và {B}. Mình tìm nhà cho {animal} nhé!'],
+      'wrong': ['Mình xem lại nhé!', 'Gần đúng rồi! Thử lại nào!', 'Bé nhớ hai cửa sổ đó nhé!', 'Hì, bé thử cửa sổ khác nào!',
         'Suýt nữa thôi! Thử tiếp nhé!', 'Không sao đâu, thử lại nhé!', 'Bé nghĩ thêm chút nữa nhé!'],
-      'miss': ['Bé chạm vào một thẻ nhé!', 'Các thẻ ở đây nè!', 'Bé thử lật một thẻ nào!', 'Chạm vào thẻ để lật nhé!',
-        'Lật một thẻ nào bé ơi!'],
+      'miss': ['Bé chạm vào một cửa sổ nhé!', 'Các cửa sổ ở trên này nè!', 'Bé thử mở một cửa sổ nào!',
+        'Chạm vào cửa sổ để mở nhé!', 'Mở một cửa sổ nào bé ơi!'],
 
-      'reward.butterfly': ['Bướm bay rồi nè!', 'Một chú bướm cho khu rừng!'],
-      'reward.lantern': ['Đèn lồng sáng rồi!', 'Nhìn kìa, đèn lồng lung linh!'],
-      'reward.acorns': ['Hạt dẻ lăn nè!', 'Hạt dẻ cho khu rừng!'],
-      'reward.animal': ['Thêm một bạn thú nè!', 'Nhảy nhảy! Chào bạn nhé!'],
       'reward.star': ['Ngôi sao lấp lánh!', 'Nhìn kìa, một ngôi sao nhỏ!'],
-      'say.countDone': '{num}! {num} {acorns}!',
+      'reward.light': ['Đèn sáng rồi!', 'Nhìn kìa, cửa sổ sáng đèn!'],
+      'reward.bloom': ['Hoa nở rồi! Bụp bụp!', 'Nhìn kìa, hoa nở rồi!'],
+      'say.countDone': '{num}! {num} {dots}!',
 
       'praise': ['Đúng rồi!', 'Giỏi quá!', 'Tuyệt vời!', 'Hoan hô!', 'Bé giỏi lắm!', 'Chính xác!', 'Siêu quá!', 'Hay lắm!'],
-      'great': ['Bé {child} giỏi quá!', 'Hoan hô bé {child}!', 'Bé tìm được hết các cặp rồi!', 'Oa, bé {child} nhớ giỏi quá!',
-        'Bé lật thẻ giỏi quá!', 'Hoan hô, tìm hết rồi!', 'Bé thông minh quá!'],
-      'hint': ['Nhìn nè! Hai thẻ này đang sáng.', 'Bé thử hai thẻ lấp lánh nhé!', 'Dee gợi ý nè: nhìn hai thẻ này!',
-        'Vịt Dee giúp bé nhé, nhìn đây!', 'Hai thẻ đang lắc lư đó bé!'],
-      'idle': ['Bé ơi, lật thẻ tiếp nào!', 'Bé chạm vào một thẻ nhé!', 'Vịt Dee đang chờ bé nè!', 'Đến lượt bé rồi đó!',
-        'Bé {child} ơi, mình chơi tiếp nhé!', 'Các thẻ đang chờ bé nè!'],
+      'great': ['Bé {child} giỏi quá!', 'Hoan hô bé {child}!', 'Bé tìm được hết các đôi rồi!', 'Ngôi nhà sáng rực rồi, {child} giỏi quá!',
+        'Bé tìm giỏi quá!', 'Hoan hô, tìm hết rồi!', 'Bé thông minh quá!'],
+      'cheer': ['Cả ngôi nhà sáng rực rồi!', 'Hoan hô! Cửa sổ nào cũng sáng đèn!', 'Ngôi nhà sáng rực rồi, {child} giỏi quá!',
+        'Pháo giấy nè! Bé tìm hết rồi!', 'Ngôi nhà đang reo hò cho bé đó!'],
+      'walk': ['Mình sang ngôi nhà tiếp theo nhé!', 'Lóc cóc! Mình đi tiếp nào!', 'Lộc cộc, lộc cộc! Nhà mới kìa!',
+        'Bé {child} ơi, mình sang nhà mới nhé!', 'Mình đi dọc con phố nào!'],
+      'hint': ['Nhìn nè! Hai cửa sổ này đang sáng.', 'Bé thử hai cửa sổ lấp lánh nhé!', 'Gigi gợi ý nè: nhìn hai cửa sổ này!',
+        'Gigi giúp bé nhé, nhìn đây!', 'Cửa sổ đang hé mở đó bé!'],
+      'idle': ['Bé ơi, mở cửa sổ tiếp nào!', 'Bé chạm vào một cửa sổ nhé!', 'Gigi đang chờ bé nè!', 'Đến lượt bé rồi đó!',
+        'Bé {child} ơi, mình chơi tiếp nhé!', 'Các cửa sổ đang chờ bé nè!'],
 
-      'talk.intro': 'Giờ trò chuyện! Vịt Dee hỏi bé nhé.',
-      'talk.colors': 'Con bướm này màu gì nhỉ?',
+      'talk.intro': 'Giờ trò chuyện! Gigi hỏi bé nhé.',
+      'talk.colors': '{thing} này màu gì nhỉ?',
+      'talk.colorsAny': 'Cái này màu gì nhỉ?',
       'talk.size': 'Bạn này to hay nhỏ nhỉ?',
-      'talk.shapes': 'Chiếc đèn lồng này hình gì nhỉ?',
-      'talk.count': 'Có mấy hạt dẻ nào?',
+      'talk.shapes': 'Đây là hình gì nhỉ?',
+      'talk.count': 'Có mấy chấm tròn nào?',
       'talk.animals': '{animal} đâu rồi nhỉ?',
       'talk.animalsAny': 'Đây là con gì nhỉ?',
+      'talk.homes': '{animal} sống ở đâu nhỉ?',
+      'talk.homesAny': 'Đây là nhà của ai nhỉ?',
       'talk.letters': 'Đây là chữ gì nào?',
       'talk.lower': 'Đây là chữ gì nào?',
       'talk.initial': 'Hình này bắt đầu bằng chữ gì nhỉ?',
@@ -492,35 +604,40 @@
       'talk.wrong': 'Là {answer} đó! Bé cố gắng lắm!',
       'talk.wrong.a': 'Là {answer} đó! Bé cố gắng lắm!',
       'talk.wrong.animal': 'Là {answer} đó! Bé cố gắng lắm!',
+      'talk.wrong.home': '{animal} sống trong {home} đó! Bé cố gắng lắm!',
       'talk.wrong.size': 'Bạn này {answer} đó! Bé cố gắng lắm!',
       'talk.wrong.letter': 'Là chữ {letter} đó! Bé cố gắng lắm!',
       'talk.wrong.number': 'Là số {answer} đó! Bé cố gắng lắm!',
 
       'session.done': ['Bé làm xong hết rồi! {stars} ngôi sao! Hoan hô!', 'Bé {child} giỏi quá! {stars} ngôi sao!',
-        'Tiệc rừng xanh vui quá! {stars} ngôi sao!']
+        'Cả con phố sáng đèn rồi! {stars} ngôi sao!']
     }
   };
 
   // required params → fallback key when one is missing (checked AFTER derived params are filled in)
   var NEEDS = {
-    'talk.animals': ['animal'], 'say.countDone': ['num'],
-    'flip.color': ['name'], 'flip.shape': ['name'], 'flip.shapeColor': ['shape', 'color'], 'flip.animal': ['name'],
+    'talk.animals': ['animal'], 'talk.homes': ['animal'], 'talk.colors': ['thing'], 'say.countDone': ['num'],
+    'flip.color': ['name'], 'flip.thing': ['color', 'thing'], 'flip.shape': ['name'], 'flip.shapeColor': ['shape', 'color'],
+    'flip.animal': ['name'], 'flip.home': ['name'],
     'flip.number': ['num'], 'flip.letter': ['letter'], 'flip.capital': ['letter'], 'flip.small': ['lower'],
     'flip.expr': ['expr'], 'flip.word': ['word'],
-    'match.color': ['name'], 'match.shape': ['name', 'plural'], 'match.animal': ['name', 'plural'],
-    'match.size': ['beast'], 'match.count': ['num', 'acorns'], 'match.number': ['num'],
-    'match.oddeven': ['num', 'acorns', 'parity'], 'match.letter': ['letter'], 'match.lower': ['letter', 'lower'],
+    'match.color': ['name'], 'match.thing': ['color', 'thing', 'things'], 'match.colorMix': ['A', 'B', 'color'],
+    'match.shape': ['name', 'plural'], 'match.animal': ['name', 'plural'], 'match.home': ['animal', 'home'],
+    'match.size': ['beast'], 'match.count': ['num', 'dots', 'counted'], 'match.number': ['num'],
+    'match.oddeven': ['num', 'dots', 'parity'], 'match.letter': ['letter'], 'match.lower': ['letter', 'lower'],
     'match.initial': ['word', 'letter'], 'match.math': ['expr', 'num'],
-    'mismatch.two': ['A', 'B'],
-    'talk.wrong': ['answer'], 'talk.wrong.a': ['answer'], 'talk.wrong.animal': ['answer'],
+    'mismatch.two': ['A', 'B'], 'mismatch.home': ['A', 'B', 'animal'],
+    'talk.wrong': ['answer'], 'talk.wrong.a': ['answer'], 'talk.wrong.animal': ['answer'], 'talk.wrong.home': ['animal', 'home'],
     'talk.wrong.letter': ['letter'], 'talk.wrong.number': ['answer'], 'talk.wrong.size': ['answer']
   };
-  var FALLBACK = { 'talk.animals': 'talk.animalsAny', 'say.countDone': 'praise', 'mismatch.two': 'wrong',
-    'flip.shapeColor': 'flip.shape' };
-  ['flip.color', 'flip.shape', 'flip.animal', 'flip.number', 'flip.letter', 'flip.capital', 'flip.small', 'flip.expr',
-    'flip.word'].forEach(function (k) { FALLBACK[k] = 'praise'; });
-  ['match.color', 'match.shape', 'match.animal', 'match.size', 'match.count', 'match.number', 'match.oddeven',
-    'match.letter', 'match.lower', 'match.initial', 'match.math'].forEach(function (k) { FALLBACK[k] = 'match.any'; });
+  var FALLBACK = { 'talk.animals': 'talk.animalsAny', 'talk.homes': 'talk.homesAny', 'talk.colors': 'talk.colorsAny',
+    'say.countDone': 'praise', 'mismatch.two': 'wrong', 'mismatch.home': 'mismatch.two', 'flip.shapeColor': 'flip.shape',
+    'talk.wrong.home': 'talk.wrong.a' };
+  ['flip.color', 'flip.thing', 'flip.shape', 'flip.animal', 'flip.home', 'flip.number', 'flip.letter', 'flip.capital',
+    'flip.small', 'flip.expr', 'flip.word'].forEach(function (k) { FALLBACK[k] = 'praise'; });
+  ['match.color', 'match.thing', 'match.colorMix', 'match.shape', 'match.animal', 'match.home', 'match.size', 'match.count',
+    'match.number', 'match.oddeven', 'match.letter', 'match.lower', 'match.initial', 'match.math']
+    .forEach(function (k) { FALLBACK[k] = 'match.any'; });
   ['talk.wrong', 'talk.wrong.a', 'talk.wrong.animal', 'talk.wrong.letter', 'talk.wrong.number', 'talk.wrong.size']
     .forEach(function (k) { FALLBACK[k] = 'wrong'; });
 
@@ -576,33 +693,63 @@
     if (!p) return null;
     return p[1] === '+' ? +p[0] + +p[2] : +p[0] - +p[2];
   }
-  function acorns(lang, n) { return ACORN[lang][n === 1 ? 0 : 1]; }
+  function dotWord(lang, n) { return DOT[lang][n === 1 ? 0 : 1]; }
+  function counted(lang, n) {    // "one, two, three" (2 ≤ n ≤ 5) · otherwise "seven dots"
+    if (n >= 2 && n <= 5) {
+      var parts = [];
+      for (var i = 1; i <= n; i++) parts.push(numberName(lang, i));
+      return parts.join(', ');
+    }
+    return numberName(lang, n) + ' ' + dotWord(lang, n);
+  }
   function isLetter(s) { return typeof s === 'string' && /^\p{L}$/u.test(s); }
 
-  function sizeOf(v) {                     // 'big' | 'small' | 'little' | 'fox_small' | 'small:fox' → 'big'|'small'|null
+  function sizeOf(v) {                     // 'big' | 'small' | 'little' | 'dog_small' | 'small:dog' → 'big'|'small'|null
     var s = String(rawVal(v) == null ? '' : rawVal(v)).toLowerCase();
     if (/(^|[_:\-\s])big($|[_:\-\s])/.test(s) || s === 'large') return 'big';
     if (/(^|[_:\-\s])(small|little)($|[_:\-\s])/.test(s)) return 'small';
     return null;
   }
-  function animalIn(v) {                   // finds an animal id inside 'fox_small', 'animal_fox', 'small:fox'
+  function animalIn(v) {                   // finds an animal id inside 'dog_small', 'animal_dog', 'small:dog'
     var a = animalOf(v);
     if (a) return a;
     var s = String(rawVal(v) == null ? '' : rawVal(v)).toLowerCase();
     var parts = s.split(/[_:\-\s]+/);
-    for (var i = 0; i < parts.length; i++) if (ANIMALS.indexOf(parts[i]) >= 0) return parts[i];
+    for (var i = 0; i < parts.length; i++) { var b = animalOf(parts[i]); if (b) return b; }
     return null;
+  }
+  // colour + thing from 'red', 'red:umbrella', 'umbrella_red', {value:'red', obj:'umbrella'} → {color, thing}
+  function colorThing(value, obj) {
+    var out = { color: null, thing: thingOf(obj) };
+    if (value && typeof value === 'object') {
+      if (!out.thing) out.thing = thingOf(value.obj) || thingOf(value.thing);
+      value = value.value != null ? value.value : value.color;
+    }
+    if (value == null) return out;
+    var s = String(value);
+    if (NAMES.en.color[s] != null) { out.color = s; return out; }
+    var parts = s.toLowerCase().split(/[_:\-\s]+/);
+    for (var i = 0; i < parts.length; i++) {
+      if (!out.color && NAMES.en.color[parts[i]] != null) out.color = parts[i];
+      else if (!out.thing && thingOf(parts[i])) out.thing = parts[i];
+    }
+    return out;
+  }
+  function thingPhrase(lang, thing, color) {      // "a red umbrella" / "cái ô màu đỏ"; no colour: "an umbrella" / "cái ô"
+    if (lang === 'vi') return NAMES.vi.thing[thing] + (color ? ' ' + NAMES.vi.color[color] : '');
+    return anFix('a ' + (color ? NAMES.en.color[color] + ' ' : '') + NAMES.en.thing[thing]);
   }
 
   function name(lang, kind, value) {
     lang = L(lang);
+    var objVal = value;
     if (value && typeof value === 'object' && 'value' in value) value = value.value;
     var tbl;
     switch (kind) {
       case 'number': return numberName(lang, value);
       case 'dots': {
         var n = num(value);
-        return n == null ? String(value) : numberName(lang, n) + ' ' + acorns(lang, n);
+        return n == null ? String(value) : numberName(lang, n) + ' ' + dotWord(lang, n);
       }
       case 'letter': {
         var s = String(value);
@@ -616,6 +763,7 @@
         if (num(tx) != null) return numberName(lang, num(tx));
         if (isLetter(tx)) return name(lang, 'letter', tx);
         if (animalOf(tx)) return NAMES[lang].animal[animalOf(tx)];
+        if (homeOf(tx)) return NAMES[lang].home[homeOf(tx)];
         return tx;
       }
       case 'word': {
@@ -627,9 +775,24 @@
         var a = animalIn(value);
         return a ? NAMES[lang].animal[a] : String(value);
       }
+      case 'home': {
+        var h = homeOf(value);
+        return h ? NAMES[lang].home[h] : String(value);
+      }
+      case 'thing': {
+        var th = thingOf(value);
+        return th ? NAMES[lang].thing[th] : String(value);
+      }
+      case 'color': {
+        var ct = colorThing(objVal);
+        if (ct.color && ct.thing) return thingPhrase(lang, ct.thing, ct.color);
+        if (ct.color) return NAMES[lang].color[ct.color];
+        if (ct.thing) return thingPhrase(lang, ct.thing, null);
+        return String(value);
+      }
       case 'size': {
         var sz = sizeOf(value), an = animalIn(value);
-        if (sz && an) return lang === 'vi' ? NAMES.vi.animal[an] + ' ' + NAMES.vi.size[sz] : NAMES.en.size[sz] + ' ' + an;
+        if (sz && an) return lang === 'vi' ? NAMES.vi.animal[an] + ' ' + NAMES.vi.size[sz] : NAMES.en.size[sz] + ' ' + NAMES.en.animal[an];
         if (sz) return NAMES[lang].size[sz];
         return String(value);
       }
@@ -668,6 +831,7 @@
 
   function words(lang, kind, value) {
     lang = L(lang);
+    var objVal = value;
     if (value && typeof value === 'object' && 'value' in value) value = value.value;
     var out = [];
     switch (kind) {
@@ -675,7 +839,11 @@
       case 'dots': {
         var dn = num(value);
         out = numberWords(lang, value);
-        if (dn != null) addForms(out, [name(lang, 'dots', dn), dn + ' ' + acorns(lang, dn)]);
+        if (dn != null) {
+          var nw = numberName(lang, dn);
+          addForms(out, [name(lang, 'dots', dn), dn + ' ' + dotWord(lang, dn)].concat(lang === 'vi' ?
+            [nw + ' chấm', nw + ' đèn', nw + ' cái đèn'] : [nw + ' lights', nw + ' light', nw + ' circles']));
+        }
         return out;
       }
       case 'parity': {
@@ -688,6 +856,7 @@
         if (num(tx) != null) return numberWords(lang, num(tx));
         if (isLetter(tx)) return words(lang, 'letter', tx);
         if (animalOf(tx)) return words(lang, 'animal', tx);
+        if (homeOf(tx)) return words(lang, 'home', tx);
         return addForms(out, [tx]);
       }
       case 'letter': {
@@ -726,6 +895,23 @@
         if (!an) return addForms(out, [String(value)]);
         return addForms(out, [NAMES[lang].animal[an]].concat(WORDS[lang].animal[an] || []));
       }
+      case 'home': {
+        var h = homeOf(value);
+        if (!h) return addForms(out, [String(value)]);
+        return addForms(out, [NAMES[lang].home[h]].concat(WORDS[lang].home[h] || []));
+      }
+      case 'thing': {
+        var th = thingOf(value);
+        if (!th) return addForms(out, [String(value)]);
+        return addForms(out, [NAMES[lang].thing[th]].concat(WORDS[lang].thing[th] || []));
+      }
+      case 'color': {
+        var ct = colorThing(objVal);
+        if (!ct.color) return addForms(out, [String(value)]);
+        var cl = [NAMES[lang].color[ct.color]].concat(WORDS[lang].color[ct.color] || []);
+        if (ct.thing) cl.push(name(lang, 'color', { value: ct.color, obj: ct.thing }).replace(/^an? /, ''));
+        return addForms(out, cl);
+      }
       case 'size': {
         var sz = sizeOf(value);
         if (!sz) return addForms(out, [String(value)]);
@@ -744,15 +930,18 @@
   // ---------------------------------------------------------------- t()
   var I18N = { langs: LANGS.slice(), child: '' };
 
-  // Fill in the derived params ({letter}, {lower}, {word}, {expr}, {acorns}, {num}, {animal}) from what the caller passed.
+  // Fill in the derived params ({letter}, {lower}, {word}, {expr}, {dots}, {num}, {counted}, {animal}, {thing}).
   function derive(lang, params) {
     var p = {}, k;
     if (params && typeof params === 'object') for (k in params) if (Object.prototype.hasOwnProperty.call(params, k)) p[k] = params[k];
-    // {animal} from a bare animal id in {sound} / {sprite} (Kitten-style talk params)
+    // {animal} from a bare animal id in {sound} / {sprite}
     if (!present(p.animal)) {
       var src0 = present(p.sound) ? animalOf(rawVal(p.sound)) : present(p.sprite) ? animalOf(rawVal(p.sprite)) : null;
       if (src0) p.animal = src0;
     }
+    // {thing} from {obj} (colour talk: "What colour is this umbrella?")
+    if (!present(p.thing) && present(p.obj) && thingOf(rawVal(p.obj))) p.thing = rawVal(p.obj);
+    if (present(p.thing) && typeof p.thing !== 'object' && !thingOf(p.thing) && !/\s/.test(String(p.thing))) delete p.thing;
     // {letter} / {lower}
     if (!present(p.letter) && present(p.text) && isLetter(String(rawVal(p.text)))) p.letter = String(rawVal(p.text));
     if (present(p.letter)) {
@@ -776,10 +965,11 @@
     } else if (typeof p.expr !== 'string' || splitOp(p.expr)) p.expr = exprText(rawVal(p.expr));
     // {parity} may come as value
     if (!present(p.parity) && (rawVal(p.value) === 'odd' || rawVal(p.value) === 'even')) p.parity = rawVal(p.value);
-    // {acorns} + {num} from n
+    // {dots} + {num} + {counted} from n
     var c = present(p.n) ? num(p.n) : null;
-    if (!present(p.acorns)) p.acorns = acorns(lang, c === 1 ? 1 : 2);
+    if (!present(p.dots)) p.dots = dotWord(lang, c === 1 ? 1 : 2);
     if (!present(p.num) && c != null) p.num = numberName(lang, c);
+    if (!present(p.counted) && c != null) p.counted = counted(lang, c);
     return p;
   }
 
@@ -788,13 +978,13 @@
     if (typeof val === 'object' && val.kind) return name(lang, val.kind, val.value);
     if (typeof val === 'object') return '';
     switch (key) {
-      case 'color': case 'shape': case 'size': case 'animal': case 'parity':
+      case 'color': case 'shape': case 'size': case 'animal': case 'parity': case 'home': case 'thing':
         return name(lang, key, val);
       default: return String(val);
     }
   }
 
-  // English "a owl" → "an owl", but never the LETTER A ("letter A and …"). No regex look-behind (iOS < 16.4).
+  // English "a orange" → "an orange", but never the LETTER A ("letter A and …"). No regex look-behind (iOS < 16.4).
   function anFix(s) {
     return String(s).replace(/(^|[\s"“(])([Aa]) (?=[aeiou]|8\b|11\b|18\b)/g, function (m, pre, a, off, str) {
       if (/letter\s*$/i.test(str.slice(0, off + pre.length))) return m;
@@ -810,7 +1000,9 @@
     });
     out = out.replace(/\s+([,.!?…])/g, '$1').replace(/\s{2,}/g, ' ').replace(/,\s*([!?.])/g, '$1').trim();
     if (lang === 'en') out = anFix(out);
-    out = out.replace(/([.!?]\s+)(\p{Ll})/gu, function (m, pre, ch) { return pre + ch.toUpperCase(); });
+    out = out.replace(/([.!?—]\s+)(\p{Ll})/gu, function (m, pre, ch) {
+      return pre.charAt(0) === '—' ? m : pre + ch.toUpperCase();
+    });
     return capFirst(out);
   }
 
@@ -846,7 +1038,7 @@
   I18N.words = words;
   I18N.numberName = numberName;
   I18N.stripMarks = stripMarks;
-  I18N.sound = function () { return ''; };          // forest animals have no "says …" questions (kept for old callers)
+  I18N.sound = function () { return ''; };          // no "says …" questions in this game (kept for old callers)
   I18N.hasSound = function () { return false; };
   I18N.has = function (lang, key) { return STR[L(lang)][key] != null; };
   I18N.keys = function (lang) { return Object.keys(STR[L(lang)]); };
@@ -854,14 +1046,18 @@
   I18N.setChild = function (nm) { I18N.child = nm ? String(nm).trim().slice(0, 24) : ''; };
   I18N.TOPICS = TOPICS.slice();
   I18N.ANIMALS = ANIMALS.slice();
+  I18N.HOMES = HOMES.slice();
+  I18N.HOME_OF = HOME_OF;
+  I18N.THINGS = THINGS.slice();
+  I18N.CRITTERS = CRITTERS.slice();
   I18N.NAME_KINDS = NAME_KINDS.slice();
   I18N.PARAMS = NEEDS;           // required params per key (for tests)
   I18N.NAME_TABLE = NAMES;       // read-only use (tests / UI)
   I18N.LETTER_VI = LETTER_VI;
   I18N.WORD_LIST = WORD_LIST;
 
-  // ---------------------------------------------------------------- cards → meaning
-  // sem = { k: 'color'|'shape'|'animal'|'dots'|'number'|'letter'|'expr'|'word'|'parity'|null, … }
+  // ---------------------------------------------------------------- windows → meaning
+  // sem = { k: 'color'|'shape'|'animal'|'home'|'dots'|'number'|'letter'|'expr'|'word'|'parity'|null, … }
   function semOf(kind, value, face, ctx, size) {
     face = (face && typeof face === 'object') ? face : {};
     ctx = ctx || {};
@@ -877,9 +1073,12 @@
     var scale = typeof face.scale === 'number' ? face.scale : null;
     var s = { k: null };
     switch (kind) {
-      case 'color': {
-        var col = NAMES.en.color[value] != null ? value : face.color;
-        if (col != null && NAMES.en.color[col] != null) s = { k: 'color', color: col };
+      case 'color': case 'thing': {
+        var ct = colorThing(value, face.obj || face.thing);
+        if (!ct.color && face.color != null && NAMES.en.color[face.color] != null) ct.color = face.color;
+        if (!ct.thing && kind === 'thing') ct.thing = thingOf(value);
+        if (ct.color) { s = { k: 'color', color: ct.color }; if (ct.thing) s.thing = ct.thing; }
+        else if (ct.thing) s = { k: 'color', color: null, thing: ct.thing };
         break;
       }
       case 'shape': {
@@ -890,14 +1089,20 @@
         }
         break;
       }
+      case 'home': {
+        var hm = homeOf(value) || homeOf(face.sprite) || homeOf(face.value);
+        if (hm) s = { k: 'home', home: hm };
+        break;
+      }
       case 'size': case 'animal': {
-        var an = animalIn(value) || animalIn(face.sprite) || animalIn(face.value) || animalIn(ctx.animal);
-        if (!an) break;
+        var an = animalIn(value) || animalIn(face.sprite) || animalIn(face.value) || (kind === 'size' ? animalIn(ctx.animal) : null);
+        if (!an) { if (homeOf(value) || homeOf(face.sprite)) return semOf('home', value, face, ctx); break; }
         var sz = sizeOf(value) || sizeOf(size) || sizeOf(face.size) || null;
         if (!sz && scale != null && scale < 0.85) sz = 'small';
         if (!sz && (kind === 'size' || topic === 'size')) sz = scale != null && scale < 0.85 ? 'small' : 'big';
         s = { k: 'animal', animal: an };
         if (sz) s.size = sz;
+        if (topic === 'initial' && !sz) { s = { k: 'word', animal: an }; }
         break;
       }
       case 'dots': {
@@ -934,6 +1139,7 @@
         else if (num(tx) != null) s = { k: 'number', n: num(tx) };
         else if (isLetter(tx)) return semOf('letter', tx, face, ctx);
         else if (animalIn(tx)) return semOf('animal', tx, face, ctx, size);
+        else if (homeOf(tx)) return semOf('home', tx, face, ctx);
         else if (tx) s = { k: 'word', word: tx };
         break;
       }
@@ -941,7 +1147,7 @@
         var wv = value != null ? String(value) : '';
         var wa = animalOf(wv) || animalOf(face.sprite) || animalOf(spriteOfWord(ctx.lang || 'en', wv)) ||
           animalOf(spriteOfWord('vi', wv)) || animalOf(spriteOfWord('en', wv));
-        if (wa) s = { k: 'word', animal: wa };
+        if (wa) { s = { k: 'word', animal: wa }; if (wv && !animalOf(wv) && !/^animal_/.test(wv)) s.word = wv; }
         else if (wv) s = { k: 'word', word: wv };
         break;
       }
@@ -951,7 +1157,9 @@
         if (value != null && value !== '') {
           if (num(value) != null) s = { k: 'number', n: num(value) };
           else if (animalIn(value)) s = { k: 'animal', animal: animalIn(value) };
+          else if (homeOf(value)) s = { k: 'home', home: homeOf(value) };
           else if (NAMES.en.color[value] != null) s = { k: 'color', color: value };
+          else if (thingOf(value)) s = { k: 'color', color: null, thing: thingOf(value) };
           else if (NAMES.en.shape[value] != null) s = { k: 'shape', shape: value };
           else if (splitOp(value)) s = { k: 'expr', expr: String(value) };
           else if (isLetter(String(value))) return semOf('letter', value, face, ctx);
@@ -976,7 +1184,7 @@
   function ctxOf(ev, lang) {
     return { topic: ev.topic || (ev.round && ev.round.topic) || null, parity: ev.parity, animal: ev.animal, lang: lang };
   }
-  // the two cards of a match / mismatch event, as sems (0, 1 or 2 entries)
+  // the two windows of a match / mismatch event, as sems (0, 1 or 2 entries)
   function twoCards(ev, lang) {
     var ctx = ctxOf(ev, lang), out = [];
     var A = null, B = null;
@@ -992,23 +1200,30 @@
     return out;
   }
 
-  // "a fox" / "con cáo", "three acorns" / "ba hạt dẻ", "letter B" / "chữ B" …
+  // "a red umbrella" / "cái ô màu đỏ", "three dots" / "ba chấm tròn", "a kennel" / "nhà chó", "letter B" / "chữ B" …
   function phrase(lang, s) {
     var vi = lang === 'vi';
     switch (s.k) {
-      case 'color': return name(lang, 'color', s.color);
+      case 'color':
+        if (s.thing) return thingPhrase(lang, s.thing, s.color);
+        return name(lang, 'color', s.color);
       case 'shape': return vi ? name(lang, 'shape', s.shape) : 'a ' + name(lang, 'shape', s.shape);
       case 'animal':
         if (vi) return NAMES.vi.animal[s.animal] + (s.size ? ' ' + NAMES.vi.size[s.size] : '');
         return 'a ' + (s.size ? NAMES.en.size[s.size] + ' ' : '') + NAMES.en.animal[s.animal];
-      case 'dots': return numberName(lang, s.n) + ' ' + acorns(lang, s.n);
+      case 'home': return vi ? NAMES.vi.home[s.home] : 'a ' + NAMES.en.home[s.home];
+      case 'dots': return numberName(lang, s.n) + ' ' + dotWord(lang, s.n);
       case 'number': return vi ? 'số ' + numberName(lang, s.n) : numberName(lang, s.n);
       case 'letter':
         if (vi) return 'chữ ' + s.letter + (s.small ? ' thường' : s.capital ? ' in hoa' : '');
         return (s.small ? 'small letter ' : s.capital ? 'big letter ' : 'letter ') + s.letter;
       case 'expr': return exprWords(lang, s.expr);
       case 'word':
-        if (s.animal) return vi ? NAMES.vi.animal[s.animal] : 'a ' + NAMES.en.animal[s.animal];
+        if (s.animal) {
+          var wd = wordOfSprite(lang, 'animal_' + s.animal);
+          if (vi) return wd || NAMES.vi.animal[s.animal];
+          return 'a ' + (wd || NAMES.en.animal[s.animal]);
+        }
         return String(s.word);
       case 'parity': return name(lang, 'parity', s.parity);
       default: return '';
@@ -1020,23 +1235,26 @@
     return lang === 'en' ? anFix(s) : s;
   };
 
-  function countLine(lang, n) {               // "One, two, three acorns!" (n ≤ 5) · "Seven acorns!"
+  function countLine(lang, n) {               // "One, two, three dots!" (n ≤ 5) · "Seven dots!"
     var head;
     if (n >= 1 && n <= 5) {
       var parts = [];
       for (var i = 1; i <= n; i++) parts.push(numberName(lang, i));
       head = parts.join(', ');
     } else head = numberName(lang, n);
-    return capFirst(head + ' ' + acorns(lang, n) + '!');
+    return capFirst(head + ' ' + dotWord(lang, n) + '!');
   }
 
-  // Name of a turned card: `flip` and `tap` events { nameKind, nameValue, face, topic? }
+  // What is inside the window that opened: `flip` and `tap` events { nameKind, nameValue, face, topic? }
   I18N.sayFlip = function (lang, ev, rng) {
     lang = L(lang);
     ev = (ev && typeof ev === 'object') ? ev : {};
     var s = semOf(ev.nameKind, ev.nameValue, ev.face, ctxOf(ev, lang), ev.size);
     switch (s.k) {
-      case 'color': return I18N.t(lang, 'flip.color', { name: name(lang, 'color', s.color) }, rng);
+      case 'color':
+        if (s.thing && s.color) return I18N.t(lang, 'flip.thing', { color: s.color, thing: s.thing }, rng);
+        if (s.thing) return capFirst(thingPhrase(lang, s.thing, null)) + '!';
+        return I18N.t(lang, 'flip.color', { name: name(lang, 'color', s.color) }, rng);
       case 'shape':
         if (s.color) return I18N.t(lang, 'flip.shapeColor', { shape: s.shape, color: s.color }, rng);
         return I18N.t(lang, 'flip.shape', { name: name(lang, 'shape', s.shape) }, rng);
@@ -1044,6 +1262,7 @@
         var nm = lang === 'vi' ? phrase(lang, s) : (s.size ? NAMES.en.size[s.size] + ' ' : '') + NAMES.en.animal[s.animal];
         return I18N.t(lang, 'flip.animal', { name: nm }, rng);
       }
+      case 'home': return I18N.t(lang, 'flip.home', { name: NAMES[lang].home[s.home] }, rng);
       case 'dots': return countLine(lang, s.n);
       case 'number': return I18N.t(lang, 'flip.number', { num: numberName(lang, s.n) }, rng);
       case 'letter':
@@ -1052,7 +1271,12 @@
         return I18N.t(lang, 'flip.letter', { letter: s.letter }, rng);
       case 'expr': return I18N.t(lang, 'flip.expr', { expr: exprWords(lang, s.expr) }, rng);
       case 'word':
-        if (s.animal) return I18N.t(lang, 'flip.animal', { name: NAMES[lang].animal[s.animal] }, rng);
+        if (s.animal) {
+          // initial topic: say the WORD that carries the letter ("Mèo!", "A rabbit!"), not "con mèo" (starts with C)
+          var wd = s.word || wordOfSprite(lang, 'animal_' + s.animal);
+          if (lang === 'vi') return I18N.t(lang, 'flip.word', { word: wd || NAMES.vi.animal[s.animal] }, rng);
+          return I18N.t(lang, 'flip.animal', { name: wd || NAMES.en.animal[s.animal] }, rng);
+        }
         return I18N.t(lang, 'flip.word', { word: String(s.word) }, rng);
       case 'parity': return capFirst(name(lang, 'parity', s.parity)) + '!';
       default: return I18N.t(lang, 'praise', null, rng);
@@ -1060,7 +1284,7 @@
   };
   I18N.sayTap = I18N.sayFlip;
 
-  // `match` event { nameKind, nameValue, topic?, cardA/cardB | nameKindA… | nameA/nameB, parity? }
+  // `match` event { nameKind, nameValue, topic?, cardA/cardB | nameKindA… | nameA/nameB, parity?, animal?, home? }
   I18N.sayMatch = function (lang, ev, rng) {
     lang = L(lang);
     ev = (ev && typeof ev === 'object') ? ev : {};
@@ -1070,10 +1294,17 @@
     if (main.k) cs.push(main);
     function find(k) { for (var i = 0; i < cs.length; i++) if (cs[i].k === k) return cs[i]; return null; }
     var dots = find('dots'), numb = find('number'), expr = find('expr'), letter = find('letter'), word = find('word'),
-      animal = find('animal'), color = find('color'), shape = find('shape'), par = find('parity');
+      animal = find('animal'), color = find('color'), shape = find('shape'), par = find('parity'), home = find('home');
     var n = dots ? dots.n : numb ? numb.n : null;
     var odd = topic === 'oddeven' || (dots && dots.parity) || (numb && numb.parity) || par ||
       ev.parity === 'odd' || ev.parity === 'even';
+    // homes: "The dog lives in the kennel!"
+    var evHome = homeOf(rawVal(ev.home)), evAnimal = animalOf(rawVal(ev.animal));
+    if (home || evHome || (topic === 'homes' && (animal || evAnimal))) {
+      var ha = (animal && animal.animal) || evAnimal || (home && ANIMAL_OF[home.home]) || (evHome && ANIMAL_OF[evHome]);
+      var hh = (home && home.home) || evHome || (ha && HOME_OF[ha]);
+      if (ha && hh) return I18N.t(lang, 'match.home', { animal: ha, home: hh }, rng);
+    }
     // add / sub: "Two plus three is five!"
     if (expr) {
       var ans = exprAnswer(expr.expr);
@@ -1083,18 +1314,18 @@
     if (topic === 'add' || topic === 'sub') return I18N.t(lang, 'match.any', null, rng);
     if (odd && n != null) {
       var parity = n % 2 ? 'odd' : 'even';
-      return I18N.t(lang, 'match.oddeven', { num: numberName(lang, n), acorns: acorns(lang, n), parity: parity }, rng);
+      return I18N.t(lang, 'match.oddeven', { num: numberName(lang, n), dots: dotWord(lang, n), parity: parity }, rng);
     }
     if ((dots || topic === 'count') && n != null)
-      return I18N.t(lang, 'match.count', { num: numberName(lang, n), acorns: acorns(lang, n) }, rng);
+      return I18N.t(lang, 'match.count', { num: numberName(lang, n), dots: dotWord(lang, n), counted: counted(lang, n) }, rng);
     if (numb) return I18N.t(lang, 'match.number', { num: numberName(lang, numb.n) }, rng);
     // initial: letter ↔ animal picture
     if (letter && (word || animal || topic === 'initial')) {
       var wa = (word && word.animal) || (animal && animal.animal);
       var w = present(ev.word) && typeof rawVal(ev.word) === 'string' ? name(lang, 'word', rawVal(ev.word)) :
-        wa ? (wordOfSprite(lang, 'animal_' + wa) || NAMES[lang].animal[wa]) : word ? String(word.word) : '';
-      var L1 = letter.letter;
-      if (w) return I18N.t(lang, 'match.initial', { word: w, letter: upper(L1) }, rng);
+        word && word.word ? String(word.word) :
+          wa ? (wordOfSprite(lang, 'animal_' + wa) || NAMES[lang].animal[wa]) : '';
+      if (w) return I18N.t(lang, 'match.initial', { word: w, letter: upper(letter.letter) }, rng);
     }
     if (letter) {
       var hasSmall = cs.some(function (c) { return c.k === 'letter' && c.small; });
@@ -1107,27 +1338,54 @@
       var a = animal ? animal.animal : word.animal;
       var sized = cs.some(function (c) { return c.k === 'animal' && c.size; });
       if (topic === 'size' || (sized && cs.some(function (c) { return c.size === 'small'; }) &&
-          (cs.some(function (c) { return c.size === 'big'; }) || topic === 'size' || ev.nameKind === 'size')))
-        return I18N.t(lang, 'match.size', { beast: lang === 'vi' ? NAMES.vi.animal[a] : NAMES.en.animal[a] }, rng);
+          (cs.some(function (c) { return c.size === 'big'; }) || ev.nameKind === 'size')))
+        return I18N.t(lang, 'match.size', { beast: NAMES[lang].animal[a] }, rng);
       return I18N.t(lang, 'match.animal', { name: NAMES[lang].animal[a], plural: PLURAL_EN.animal[a] }, rng);
     }
-    if (color) return I18N.t(lang, 'match.color', { name: name(lang, 'color', color.color) }, rng);
+    if (color) {
+      var things = cs.filter(function (c) { return c.k === 'color' && c.thing; });
+      var col = color.color;
+      for (var i = 0; !col && i < cs.length; i++) if (cs[i].k === 'color' && cs[i].color) col = cs[i].color;
+      if (col && things.length >= 2 && things[0].thing !== things[1].thing)
+        return I18N.t(lang, 'match.colorMix', { A: thingPhrase(lang, things[0].thing, null),
+          B: thingPhrase(lang, things[1].thing, null), color: col }, rng);
+      if (col && things.length)
+        return I18N.t(lang, 'match.thing', { color: col, thing: things[0].thing, things: PLURAL_EN.thing[things[0].thing] }, rng);
+      if (col) return I18N.t(lang, 'match.color', { name: name(lang, 'color', col) }, rng);
+    }
     if (shape) return I18N.t(lang, 'match.shape', { name: name(lang, 'shape', shape.shape), plural: PLURAL_EN.shape[shape.shape] }, rng);
     return I18N.t(lang, 'match.any', null, rng);
   };
 
-  // `mismatch` event: "A fox and an owl. Let's look again!" — names both cards, never negative.
+  // `mismatch` event: "A red umbrella and a blue kite. Let's look again!" — names both windows, never negative.
   I18N.sayMismatch = function (lang, ev, rng) {
     lang = L(lang);
     ev = (ev && typeof ev === 'object') ? ev : {};
     var cs = twoCards(ev, lang);
     if (cs.length < 2) return I18N.t(lang, 'wrong', null, rng);
-    var A = phrase(lang, cs[0]), B = phrase(lang, cs[1]);
+    var s0 = cs[0], s1 = cs[1];
+    // two colour things: leave out what they share ("An umbrella and a kite." when both are red;
+    // "A red umbrella and a blue umbrella." keeps the colours, which are the point)
+    if (s0.k === 'color' && s1.k === 'color' && s0.thing && s1.thing && s0.color && s0.color === s1.color && s0.thing !== s1.thing) {
+      s0 = { k: 'color', thing: s0.thing, color: null }; s1 = { k: 'color', thing: s1.thing, color: null };
+    }
+    var A = phrase(lang, s0), B = phrase(lang, s1);
     if (!A || !B) return I18N.t(lang, 'wrong', null, rng);
+    // homes: an animal + someone else's home → "… Where does the dog live?" (a gentle teaching nudge)
+    var an = cs[0].k === 'animal' && cs[1].k === 'home' ? cs[0].animal : cs[1].k === 'animal' && cs[0].k === 'home' ? cs[1].animal : null;
+    if (an && rnd(rng) < 0.67) return I18N.t(lang, 'mismatch.home', { A: A, B: B, animal: an }, rng);
     return I18N.t(lang, 'mismatch.two', { A: A, B: B }, rng);
   };
 
-  // optional: a short line when a reward flies out (ev.kind = butterfly | lantern | acorns | animal | star)
+  // Surprise visitors: sayCritter(lang, 'pigeon'|'bus'|'balloon' | {type, action}, action?, rng)
+  I18N.sayCritter = function (lang, type, action, rng) {
+    lang = L(lang);
+    if (type && typeof type === 'object') { rng = action; action = type.action; type = type.type; }
+    if (CRITTERS.indexOf(type) < 0) return I18N.t(lang, 'praise', null, rng);
+    return I18N.t(lang, 'critter.' + type + (action === 'tap' ? '.tap' : ''), null, rng);
+  };
+
+  // legacy: a short line for a `reward` event (this game has none; star / light / bloom kept), else praise
   I18N.sayReward = function (lang, ev, rng) {
     lang = L(lang);
     var k = ev && typeof ev === 'object' ? ev.kind : ev;
@@ -1135,7 +1393,7 @@
     return I18N.t(lang, 'reward.' + k, null, rng);
   };
 
-  // Counting aloud (acorns): n < need → "Two!"; n ≥ need → "Three! Three acorns!" / "Ba! Ba hạt dẻ!"
+  // Counting aloud (dots): n < need → "Two!"; n ≥ need → "Three! Three dots!" / "Ba! Ba chấm tròn!"
   I18N.sayCount = function (lang, n, need, rng) {
     lang = L(lang);
     var c = num(n);
@@ -1145,7 +1403,7 @@
     return I18N.t(lang, 'say.countDone', { n: c }, rng);
   };
 
-  // Back-compat aliases for Kitten-style callers: a `correct` → the card name; a `wrong` → the mismatch line.
+  // Back-compat aliases for Kitten-style callers: a `correct` → the window name; a `wrong` → the mismatch line.
   I18N.sayCorrect = function (lang, ev, rng) { return I18N.sayFlip(lang, ev, rng); };
   I18N.sayWrong = function (lang, ev, rng) { return I18N.sayMismatch(lang, ev, rng); };
 
@@ -1154,6 +1412,11 @@
     if (kind && typeof kind === 'object') { value = kind.value; kind = kind.kind; }
     if (value == null || value === '') return I18N.t(lang, 'wrong');
     var ans = { answer: { kind: kind, value: value } };
+    if (kind === 'home') {
+      var h = homeOf(value);
+      if (!h) return I18N.t(lang, 'talk.wrong', { answer: String(value) });
+      return I18N.t(lang, 'talk.wrong.home', { animal: ANIMAL_OF[h], home: h, answer: ans.answer });
+    }
     if (kind === 'animal' || kind === 'size' && animalIn(value)) {
       var a = animalIn(value);
       if (!a) return I18N.t(lang, 'talk.wrong', { answer: String(value) });
@@ -1174,7 +1437,7 @@
   I18N.speech = function (lang, text) {
     lang = L(lang);
     var s = String(text == null ? '' : text);
-    s = s.replace(/[…]/g, '.').replace(/[›»«]/g, ',');
+    s = s.replace(/[…]/g, '.').replace(/[›»«]/g, ',').replace(/\s*[—–]\s*/g, ', ');
     if (lang === 'en') {
       s = s.replace(/\b(letter|Letter) ([A-Za-z])(?![A-Za-z’'])/g, function (m, w, ch) {
         return w + ' ' + (LETTER_SPEECH_EN[ch.toUpperCase()] || ch);
@@ -1187,7 +1450,7 @@
       s = s.replace(/(\d)\s*\+\s*(\d)/g, '$1 cộng $2').replace(/(\d)\s*[−\-]\s*(\d)/g, '$1 trừ $2')
         .replace(/\s=\s/g, ' bằng ');
     }
-    return s.replace(/\s{2,}/g, ' ').trim();
+    return s.replace(/\s{2,}/g, ' ').replace(/,\s*([!?.])/g, '$1').trim();
   };
 
   GW.I18N = I18N;

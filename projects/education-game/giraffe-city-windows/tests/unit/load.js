@@ -1,4 +1,4 @@
-// Dee's Forest Memory — loads the classic browser scripts into a node `vm` sandbox with a fake `window` (card_art.js is optional: not loaded here).
+// Gigi's Peekaboo Windows — loads the classic browser scripts into a node `vm` sandbox with a fake `window` (art / render scripts are not loaded here).
 'use strict';
 const fs = require('fs');
 const path = require('path');

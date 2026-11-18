@@ -1,24 +1,22 @@
-/* Dee's Forest Memory — GW.CONFIG + GW.World (headless, deterministic memory-card simulation; DESIGN §2, §5.2)
+/* Gigi's Peekaboo Windows — GW.CONFIG + GW.World (headless, deterministic memory game in the windows of a city
+ * building; DESIGN §1, §2, §6.2; docs/MECHANICS.md)
  *
  * ============================== CONVENTIONS ==============================
  *  Units: logical px (short side = 720), seconds, radians, y DOWN. rot > 0 = clockwise (canvas).
- *  update(dt) runs fixed sub-steps of cfg.step (1/120 s) with an accumulator. At the START of every sub-step each card,
- *  reward and acorn piece stores _px,_py,_prot (cards also _pflip); the renderer draws p = _p + (p − _p)·w.alpha.
+ *  update(dt) runs fixed sub-steps of cfg.step (1/120 s) with an accumulator. At the START of every sub-step each window,
+ *  the critter, every car, Gigi's head and the camera store their previous values (_px, _py, _popen, _pflip, _pbloom,
+ *  _pbounce, _phx, _phy, _phop, _pscroll, _pscrollT); the renderer draws p = _p + (p − _p)·w.alpha.
  *  The result depends only on the seed and the sub-step at which inputs arrive.
  *
- *  Card c (state deal | down | up | matched | gone; skip 'gone'):
- *    centre (x, y), size w × h (already the grid size) × (sx, sy), rotation rot, c.alpha.
- *    flip 0 = back … 1 = face: draw scaleX·|cos(π·flip)|, the FACE when flip > 0.5, else the back; a slight skew for depth.
- *    lift 0..1: draw the card CONFIG.liftPx (8) px higher and its shadow bigger/softer. glow 0..1 = hint halo.
- *    'deal' cards with t < 0 still sit on the deck (layout.stack), small (sx = sy = CONFIG.stackScale), face down.
- *  Reward r (state fly | settle | idle), kinds:
- *    butterfly  centre (x, y), width r.size, r.flap 0 (wings closed) … 1 (open), r.face ±1 (facing), rot
- *    lantern    centre (x, y), r.size; if r.ax !== null a string from (ax, ay) to the lantern top; r.glow 0..1
- *    star       centre (x, y), r.size × (sx, sy), r.glow, r.text (letter / number on it)
- *    animal     BOTTOM-CENTRE anchor (x, y), width r.size, r.face ±1 (+1 = facing right, as the sprite), sx/sy about the anchor
- *    acorns     r.pieces[] { x, y, rot, _px, _py, _prot } acorn centres, each r.pieceSize wide (r.x, r.y = pile bottom centre)
- *    every reward: r.alpha (fades at the end of a chapter).
- *  Dee: w.dee { mood, moodT, lookX, lookY, hop } — hop = px ABOVE the feet anchor (layout.dee).
+ *  Window c (w.cards[], state down | up | matched; matched windows STAY, lit):
+ *    centre (x, y), size w × h (= the grid size). c.open 0 closed … 1 open (≤ cfg.openMax 1.12 while it overshoots);
+ *    c.flip = min(1, max(0, open)) (old name); c.light 0..1 lamp (after a match); c.bloom 0..≈1.2 flower box (spring);
+ *    c.bounce ≥ 0 px the face hops UP; c.wiggle rad face rotation (mismatch "no-no"); c.glow 0..1 hint halo.
+ *    During phase 'scroll' the windows of the NEW building are drawn offset by w.buildingDx = (1 − scrollT)·W.
+ *  Building: w.building = { facade, trim, shutter, door, roof, seed } (style), layout.grid.building = rect + roof + door.
+ *  Gigi: w.gigi { mood, moodT, hop, walk, walking, headX, headY (= the NECK JOINT of the head, hop included), neckBaseX,
+ *    neckBaseY (hop included), … }: draw the body at (layout.gigi.x, layout.gigi.y − hop), the neck base → head joint as given.
+ *  Critter: w.critter (surprise round) { type pigeon | bus | balloon, x, y, … }; traffic: w.traffic[] cars on the road.
  * ========================================================================
  */
 (function (GW) {
@@ -28,135 +26,123 @@
     // ---- timing / state machine (s)
     step: 1 / 120,             // fixed simulation sub-step (≤ 1/120 per DESIGN)
     maxFrame: 1.0,             // largest dt accepted per update() (speed mode passes big dt)
-    roundsPerLevel: 4,         // rounds per chapter (warm-up + 3)
-    chapterTimeLimit: 80,      // s since the chapter began: after ≥ chapterMinRounds rounds go to Talk time once exceeded (DESIGN 90; playtest: the careful 4-year-old's p90 session 494 → 447 s)
+    roundsPerLevel: 4,         // rounds (buildings) per chapter (warm-up + 3)
+    chapterTimeLimit: 80,      // s since the chapter began: after ≥ chapterMinRounds rounds go to Talk time once exceeded (Dee's tuned rule)
     chapterMinRounds: 3,
-    introTime: 2.5,            // chapter banner + season line + the 2.5 s season crossfade
-    roundEndDelay: 0.4,        // s after the last pair burst → roundDone (the last reward flies on during roundDone) (playtest: 0.7 → 0.4)
-    roundDoneTime: 1.8,        // stars + Dee's short praise, then the next round (playtest: 2.2 → 1.8)
+    introTime: 2.5,            // chapter banner + weather line + the 2.5 s weather crossfade
+    matchCelebrate: 0.7,       // s after the LAST pair's check → the building cheers (light + both flower boxes popped by then)
+    cheerTime: 1.2,            // DESIGN: 'cheer' phase — every window glows, confetti from the roof, windows hop in a wave
+    cheerWave: 0.06,           // s between the windows' cheer hops (slot order)
+    roundDoneTime: 0.8,        // stars + Gigi's short praise, then the street scrolls (Dee 1.8; playtest: the scroll + cheer add ≈ 3 s per round)
+    scrollTime: 1.6,           // DESIGN: the camera pans one screen width, smooth-step
+    scrollSettle: 0.15,        // s after the new building is in place → peek
     talkAfterAnswer: 2.0,      // the Talk panel stays after an answer
-    levelDoneTime: 2.0,        // chapter stars (playtest: 2.4 → 2.0)
-    rewardFadeTime: 1.2,       // rewards fade out during levelDone (they stay the whole chapter)
+    levelDoneTime: 2.0,        // chapter stars
     talkAskTime: 12,           // s without an answer → talkAsk (re-ask), repeating
     talkGlowAfterAsks: 2,      // from this re-ask on talk.glowAnswer = true
 
-    // ---- content tuning (playtest-tuned; null → the DESIGN tables GW.Content.PAIRS / PEEK)
-    // DESIGN 3: 2,2,3,3 · 4: 2,3,4,4 · 5: 3,4,5,5 · 6–7: 3,4,5,6 gave a typical 4-year-old chapter of 119 s (target 60–100)
-    // and typical sessions up to 527 s (target ≤ 480). Tuned: 94 s / ≤ 460 s (docs/MECHANICS.md §9).
+    // ---- content tuning (playtest-tuned; null → the DESIGN tables GW.Content.PAIRS / PEEK) — kept from Dee (MECHANICS §6)
     pairsByAge: { 3: [2, 2, 2, 3], 4: [2, 2, 3, 3], 5: [2, 3, 4, 4], 6: [3, 3, 4, 5], 7: [3, 4, 4, 5] },
-    peekByAge: { 3: 2.8, 4: 2.2, 5: 2.0, 6: 1.5, 7: 1.5 },   // s face up (DESIGN 3.5 / 2.5 / 2.0 / 1.5 / 1.5) …
-    peekPerCard: true,         // … × (0.6 + 0.1·cards) (QA P2-2): 4 cards 1.0×, 6 → 1.2×, 8 → 1.4×, 10 → 1.6×
+    peekByAge: { 3: 2.8, 4: 2.2, 5: 2.0, 6: 1.5, 7: 1.5 },   // s every window stays open in the peek …
+    peekPerCard: true,         // … × (0.6 + 0.1·windows): 4 windows 1.0×, 6 → 1.2×, 8 → 1.4×, 10 → 1.6×
 
-    // ---- surprise round (QA P1-2): one per chapter, the type rotates per chapter from a random start per session
-    surpriseRound: 2,          // round index (the 3rd round; always played: the chapter limit applies after ≥ 3 rounds)
-    surpriseTypes: ['shuffle', 'golden', 'pond'],
-    shuffleTime: 0.9,          // shuffle: after the hide, 2 face-down cards swap along arcs (2 swaps from age 5) …
-    shuffleFrom: 5,            // … age from which 2 pairs of cards swap
-    shuffleArc: 0.35,          // arc bulge = 0.35·distance (+ 30 px), one card each side
-    shuffleSettle: 0.15,       // s after the swap → play
-    pondScale: 0.92,           // pond: cards 0.92× the grid size (never below the age minimum) …
-    pondArc: 0.4,              // … columns follow an arc of up to 0.4·card height, rows stagger sideways …
-    pondBob: 3, pondBobHz: 0.4,  // … and the cards bob ±3 px like lily pads
+    // ---- surprise round: one per chapter, the type rotates per chapter from a random start per session
+    surpriseRound: 2,          // round index (the 3rd building; always played: the chapter limit applies after ≥ 3 rounds)
+    surpriseTypes: ['pigeon', 'bus', 'balloon'],
+    surpriseDelay: [1.5, 3.5], // s after play starts until the critter appears
     adaptHold: true,           // after a HARD round the next round does not grow (pairs = min(table, last round's pairs)) …
     adaptSlowPlay: 40,         // … hard = more than 40 s of play, or only 1 star
 
     // ---- layout (DESIGN §2; px)
     shortSide: 720, minLong: 960, maxLong: 1600,
-    groundOffset: 90,          // groundY = H − ins.bottom − 90
-    deeDxLand: 110, deeDyLand: 16, deeHLand: 180,   // Dee feet anchor, landscape
-    deeDxPort: 100, deeDyPort: 20, deeHPort: 170,   // portrait
-    deeBoxW: 1.0,              // Dee's box is h × (1.0·h) around the anchor (the 256² sprite) — used for keep-out tests
+    groundOffset: 90,          // groundY = H − ins.bottom − 90 (top of the pavement)
+    gigiDxLand: 110, gigiDyLand: 22, gigiHLand: 150,   // Gigi's feet anchor + body-box height, landscape
+    gigiDxPort: 100, gigiDyPort: 24, gigiHPort: 140,   // portrait
+    gigiBoxW: 1.2,             // Gigi's keep-out / body hit box = (1.2·h) × h above the feet
+    bodyFeet: [128, 244], bodySocket: [172, 96], bodyBox: 256,   // body svg anchors (DESIGN §4.1, viewBox 256)
+    headJoint: [70, 160], headBoxSvg: 192, headK: 0.62,          // head svg anchors (viewBox 192); head box = 0.62·h square
     bubbleX: 24, bubbleY: 20, bubbleMaxW: 640, bubbleRightGap: 160, bubbleH: 122,   // landscape bubble
     bubbleHPort: 124, bubbleGapPort: 24,   // portrait: the bubble sits BELOW the HUD: y = ins.top + hudH + 24
     hudW: 160, hudH: 96,       // DOM buttons top-right: x > W − ins.right − 160, y < ins.top + 96
-    boardTopGap: 24,           // board starts 24 px below the bubble
-    boardGroundGap: 10,        // … and ends 10 px above groundY (cards may cover the grass edge)
-    boardDeeGapLand: 130,      // landscape: board x ≥ dee.x + 130 (DESIGN ≥ 120; +10 so cards are ≥ 40 px from Dee's box)
+    boardTopGap: 24,           // board (building incl. its top facade pad) starts 24 px below the bubble
+    boardGroundGap: 14,        // windows end ≥ 14 px above groundY (facade below them ≥ 0.5·gap down to groundY + 4)
+    boardGigiGapLand: 130,     // landscape: board x ≥ gigi.x + 130 (Gigi's box + 40 px; her rest head + 16 px keep-out stays left of it)
     boardSide: 24,             // side margins of the board
-    boardDeeHeadGap: 10,       // portrait board A: bottom ≤ Dee's head − 10
-    boardDeeSideGap: 40,       // portrait board B (right of Dee, down to the grass): x ≥ Dee's box right + 40
-    stackDx: 72, stackDy: 30,  // the deck sits on the grass at (dee.x + 72, groundY + 30), in front of Dee's wing
-    stackScale: 0.45,          // deck cards are drawn at 0.45× (they grow while flying to their slot)
+    boardHeadGap: 22,          // portrait board A (above Gigi): bottom ≤ Gigi's REST head box top − 22 (16 px keep-out + 6)
+    boardGigiSideGap: 40,      // portrait board B (right of Gigi): x ≥ Gigi's box right + 40
 
-    // ---- cards / grid
-    cardAspect: 0.78,          // w : h
-    gapFrac: 0.12, gapMin: 14, // gap = max(14, 0.12·cw)
-    cardMin: { 3: 120, 4: 120, 5: 104, 6: 104, 7: 104 },   // smallest allowed card width per age
-    cardMax: 210,              // cards never get wider than this (2-pair rounds on a big portrait screen)
-    hitPad: 10,                // hit test = card rect grown by 10 px; nearest rect wins
-    sameTapHint: 3,            // QA P1-4: 3 taps on the one open card (no idle reset) → auto hint (partner glows)
-    thirdTapAfter: 0.5,        // QA P2-1: the third-tap reset needs both mismatched faces shown ≥ 0.5 s
-    yellowDeeGap: 40,          // colour rounds: no yellow card within 40 px of Dee's box (Dee is yellow too)
+    // ---- windows / grid / building
+    cardAspect: 0.78,          // window w : h
+    gapFrac: 0.16, gapMin: 18, // gap = max(18, 0.16·cw) (shutters swing into the gap)
+    padFrac: 0.22, padMin: 22, // facade around the grid: pad = max(22, 0.22·cw) on the sides and the top (inside the board)
+    roofFrac: 0.32,            // roof / cornice band above the facade = 0.32·cw (may go under the HUD / bubble)
+    doorFrac: 0.42,            // door width = 0.42·cw (drawn in free facade space, never over a window)
+    cardMin: { 3: 120, 4: 120, 5: 104, 6: 104, 7: 104 },   // smallest allowed window width per age
+    cardMax: 210,              // windows never get wider than this
+    hitPad: 10,                // hit test = window rect grown by 10 px; nearest centre wins
+    sameTapHint: 3,            // 3 taps on the one open window (no idle reset) → auto hint (partner glows)
+    thirdTapAfter: 0.5,        // the third-tap reset needs both mismatched faces shown ≥ 0.5 s
+    yellowGigiGap: 40,         // colour rounds: no yellow window within 40 px of Gigi's box (sand-coloured giraffe)
 
-    // deal: ballistic arcs from the deck, staggered, with a spin, landing squash
-    dealStagger: 0.07,         // s between cards leaving the deck
-    dealTime: [0.42, 0.62],    // flight time = 0.42 + d/2400 s, ≤ 0.62
-    dealSpeed: 2400,
-    dealGravity: 2600,         // px/s² (the arc's apex is ≈ g·T²/8 above the straight line)
-    dealSpin: [0.5, 1.0],      // turns during the flight (random sign), ends at rot 0
-    dealSquash: 0.12,          // landing squash q (sx = 1 + q, sy = 1 − q)
-    dealSettle: 0.15,          // s after the last card landed → peek
-    // flip: critically damped spring on flip (0 → 1 in ≈ 0.26 s to 95 %)
-    flipOmega: 18,
-    liftPx: 8,                 // renderer: a card rises liftPx·lift (lift = sin(π·flip) while turning)
+    // ---- shutters (DESIGN §6.2): spring on c.open towards 1 (open) / 0 (closed)
+    openOmega: 16, openZeta: 0.42,   // under-damped: swings open past 1 …
+    openMax: 1.12,             // … and hits the hinge stop at 1.12 (bounces back with 0.3 of its speed) — DESIGN "≤ 1.12"
+    openStopBounce: 0.3,
+    clackBounce: 0.25,         // closing: crossing 0 → open = 0, velocity × −0.25 (a small rebound) …
+    clackMinV: 4,              // … 'clack' event when it hits with ≥ 4 /s (the first hit of a close; ≈ 8–10 /s)
+    clackStopV: 0.6,           // slower hits just stop
+    breezeSway: 0.03, breezeHz: 0.7, breezeWind: 22,   // open shutters sway ±0.03·(wind/22) in a breeze (w.wind from main)
     peekStagger: 0.05,         // peek wave (slot order) / hide wave (reverse)
-    playAtHide: 0.5,           // play starts when every card's flip < 0.5 (faces hidden)
-    squashOmega: 20, squashZeta: 0.35,   // card squash spring
-    breathAmp: 0.012, breathHz: 0.35,    // face-down cards breathe ≤ 1.5 % in play
-    // match / mismatch
-    matchAt: 0.95,             // the check happens when the 2nd card's flip ≥ 0.95
-    matchHold: 0.25,           // both faces shown, cards lift …
-    matchResolveTime: 0.4,     // … phase back to 'play' 0.4 s after the check (the pair is still spinning away)
-    matchSlideOmega: 11, matchSlideZeta: 0.8,   // spring to the pair's midpoint
-    matchSpinDelay: 0.1,       // spin starts 0.1 s after the slide
-    matchSpinOmega: 9, matchSpinZeta: 0.45,     // full turn with ≈ 20 % overshoot
-    matchShrink: 0.86,         // the pair shrinks to 0.86× as it meets
-    matchSquashAt: 0.7, matchSquash: 0.2,       // squash pulse at 0.7 s …
-    matchBurstAt: 0.85,        // … burst at 0.85 s after the check → 'gone' + the reward
+    playAtHide: 0.5,           // play starts when every window's open < 0.5 (faces hidden)
+    // ---- match / mismatch
+    matchAt: 0.95,             // the check happens when the 2nd window's open ≥ 0.95
+    matchHold: 0.25,           // both faces shown …
+    matchResolveTime: 0.4,     // … phase back to 'play' 0.4 s after the check (the boxes are still blooming)
+    lightTime: 0.4,            // lamp on: light 0 → 1 (smooth-step) from matchHold
+    bloomOmega: 14, bloomZeta: 0.45,   // flower box spring to 1 (ζ 0.45 → peak 1.20; DESIGN ζ 0.35 would reach 1.31 > its 0..1.2 range)
+    bloomDelay: [0.05, 0.2],   // s after matchHold: box A pops, then box B ("pop-pop") → bloom {id} events
+    bounceG: 2000, bouncePx: 12, matchHops: 2,   // both faces hop twice, 12 px apex, g 2000 px/s²
+    cheerHopPx: 10,            // cheer wave: every window's face hops once
     mismatchShow: 1.0,         // s both faces stay up after a mismatch (age 3: mismatchShowByAge)
-    mismatchShowByAge: { 3: 1.2 },   // (DESIGN 1.4; playtest 1.2 — the 3-year-old chapter was 116 s)
-    shakeAmp: 0.08, shakeWiggles: 3, shakeTime: 0.5,   // "no-no": damped sine rotation, 3 wiggles in 0.5 s
-    fastReset: true,           // 3rd tap while 2 mismatched cards are up: both flip down at once, the new one flips up
+    mismatchShowByAge: { 3: 1.2 },
+    shakeAmp: 0.08, shakeWiggles: 3, shakeTime: 0.5,   // face "no-no": damped sine rotation c.wiggle, 3 wiggles in 0.5 s
+    fastReset: true,           // 3rd tap while 2 mismatched windows are up: both close at once, the new one opens
 
     // ---- help
     hintAfterStreak: 3,        // 3 mismatches in a row → hint (streak resets)
     hintCooldown: 6,           // s: no auto-hint while one glows nor within 6 s of the last
     hintGlowTime: 2.5,         // glow 2.5 s (fade in 0.2, out 0.4)
-    hintPeekDelay: 0.2, hintPeekHold: 0.45,   // the hinted face-down cards half-turn (flip → 0.75) for 0.45 s …
-    hintPeekFlip: 0.75,        // … 0.75 = the face is visible at 70 % width (0.5 would be edge-on)
+    hintPeekDelay: 0.2, hintPeekHold: 0.45,   // the hinted closed windows open a crack for 0.45 s …
+    hintPeekOpen: 0.3,         // … to open = 0.3 (DESIGN: "a crack")
     idleTime: 12,              // s without a tap in play → idle nudge …
     idleBackoff: 1.5, idleMax: 30,   // … gap ×1.5 per nudge up to 30 s
     idleHintFrom: 2,           // from the 2nd idle nudge of a round a hint glows too
 
-    // ---- rewards (one per match; they stay the whole chapter)
-    maxRewards: 30,            // per chapter (DESIGN §8)
-    perchStep: 52,             // candidate perch grid (px) (QA P2-3: 64 → 52)
-    perchJitter: [18, 12],     // ± px x / y per candidate (ground rows ±4 y): no lattice look (QA visual P2-1)
-    perchMinGap: 24,           // prefer free perches ≥ 24 px from other rewards; random pick weighted by that gap (≤ 160)
-    perchMargin: 10,           // reward boxes keep 10 px from the cards, bubble, HUD, Dee and the safe-area edges
-    groundPerchDy: [72, 40],   // ground rows: bottom anchor at groundY + 72 (front) and + 40 (back row; render back first)
-    branchDy: [-420, -360, -300],   // branch heights relative to groundY (env artist: mid_* low branches) — lanterns hang here
-    canopyDy: 26,              // + a branch row at ins.top + 26 (the canopy edge at the top of the screen)
-    lilyCount: 2,              // the 2 rightmost ground perches are lily pads (frogs go there first)
-    sizes: { butterfly: 46, star: 52, lantern: 52, animal: 70, acorn: 28 },   // (QA: star 44 → 52, acorn 22 → 28)
-    lanternString: 36,         // px of string from the branch to the lantern top
-    flyTime: [0.9, 1.8], flySpeed: 900,   // butterflies / stars / lanterns: T = 0.7 + d/900 s within [0.9, 1.8]
-    flyArc: 0.35, flyArcMax: 170,         // bezier control point raised by 0.35·d (≤ 170 px)
-    flutterAmp: 26, flutterHz: 2.2,       // butterflies: noisy sideways sine on the path
-    flapHz: 9, flapIdleEvery: [2, 4], flapIdleTime: 0.5,   // wing beats in flight; lazy flaps when sitting
-    settleTime: 0.6,
-    hopG: 2600, hopApex: [80, 46, 30], animalHops: 3, hopSquash: 0.18,   // animals: 3 parabolic hops, apex 80/46/30 px
-    idleHopEvery: [4, 8], idleHopPx: 10,  // resting animals do a tiny hop now and then
-    acornG: 2000, acornRest: 0.4, acornFric: 0.75, acornRoll: 6, acornApex: [60, 130], acornStagger: 0.04, acornMax: 12,
-    acornSpread: 24,           // pile: acorns 0.6·size apart in rows of 4 / 3 / 3 / 2 (QA P2-3: narrower piles)
-    pendG: 980, pendDamp: 0.8, pendWind: 0.0025, pendKick: 0.32,   // lanterns: pendulum g/L, damping /s, wind torque, first swing
-    starTwinkle: 0.1, starHz: 1.4, bobPx: 4,
-
-    // ---- Dee
+    // ---- Gigi
     moodTime: { happy: 0.9, cheer: 1.6, oops: 0.8, think: 1.4 },
-    hopPx: { happy: 14, cheer: 26 }, hopTime: 0.4, lookRate: 6, lookHold: 3
+    hopPx: { happy: 14, cheer: 26 }, hopTime: 0.4, lookRate: 6, lookHold: 3,
+    headOmega: 9, headZeta: 0.55,    // the head joint follows its target with a spring (≈ 12 % overshoot: a springy stretch)
+    neckMaxK: 1.6, neckMinK: 0.45,   // |head joint − neck base| ≤ 1.6·h (target), ≥ 0.45·h
+    stretchMaxK: 1.08,               // the spring may overshoot the reach to 1.08 × neckMax
+    restDx: 0.12, restDy: -0.6,      // rest pose: head joint = neck base + (0.12·h, −0.6·h)
+    headKeep: 16,                    // the head box never comes within 16 px of the window grid rect
+    headTopK: 0.35,                  // head joint y ≥ ins.top + 0.35·h
+    walkHz: 2.2, walkBob: 4, walkLead: 0.1,   // trot cycles / s, body bob px, head leans 0.1·h forward while walking
+    blinkEvery: [2.5, 5], blinkTime: 0.12,
+
+    // ---- critters (surprise round) and traffic
+    pigeonSize: 64, pigeonFly: 1.4, pigeonAway: 1.2, pigeonMove: [8, 14], pigeonPeck: [1.2, 2.8], pigeonFlapHz: 8,
+    busW: 220, busH: 92, busSpeed: 120, busStop: 2.0, busHonkExtra: 1.0, busBrake: 160, busAccel: 120, busDy: 82,
+    balloonSize: 70, balloonRise: 40, balloonSwayPx: 18, balloonSwayHz: 0.35, balloonString: 50, balloonAway: 380,
+    carW: 150, carH: 75, carEvery: [6, 14], carSpeed: [140, 200], carMax: 2, carLaneDy: [66, 82], carAccel: 300, carGap: 40
   };
   GW.CONFIG = CONFIG;
+
+  var FACADES = ['#E6B8A2', '#F2E3C6', '#C9D8B6', '#C8D6E2', '#D9CFE0', '#EAD4AE'];   // DESIGN §3
+  var SHUTTERS = ['#5E9E97', '#6C86A6', '#8E9A5B', '#B9775E'];
+  var DOORS = ['#7A5A44', '#5E7A8C', '#8A6A9A', '#6E8A5A'];
+  var ROOFS = ['flat', 'gable', 'arch'];
+  var TRIM = '#FBF7EE';
 
   var TAU = Math.PI * 2;
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
@@ -172,7 +158,7 @@
     var dx = Math.max(0, a.x - (b.x + b.w), b.x - (a.x + a.w)), dy = Math.max(0, a.y - (b.y + b.h), b.y - (a.y + a.h));
     return hyp(dx, dy);
   }
-  function inside(R, S) { return R.x >= S.x - 1e-6 && R.y >= S.y - 1e-6 && R.x + R.w <= S.x + S.w + 1e-6 && R.y + R.h <= S.y + S.h + 1e-6; }
+  function inRect(x, y, R) { return x >= R.x && x <= R.x + R.w && y >= R.y && y <= R.y + R.h; }
 
   /** DESIGN §2 short-side rule: CSS viewport → logical W×H. */
   function logicalSize(cssW, cssH, cfg) {
@@ -182,14 +168,30 @@
     return { W: S, H: clamp(Math.round(S / aspect), cfg.minLong, cfg.maxLong) };
   }
 
+  // ------------------------------------------------------------------ Gigi geometry
+  /** Head box (logical px) for a head joint (jx, jy): the 0.62·h square of the head svg, its neck joint at (jx, jy). */
+  function headBoxAt(jx, jy, h, cfg) {
+    var s = cfg.headK * h, ox = cfg.headJoint[0] / cfg.headBoxSvg * s, oy = cfg.headJoint[1] / cfg.headBoxSvg * s;
+    return { x: jx - ox, y: jy - oy, w: s, h: s };
+  }
+  function gigiGeometry(L, cfg) {
+    var g = L.gigi, h = g.h, B = cfg.bodyBox;
+    L.gigiRect = { x: g.x - cfg.gigiBoxW * h / 2, y: g.y - h, w: cfg.gigiBoxW * h, h: h };
+    L.neckBase = { x: g.x + (cfg.bodySocket[0] - cfg.bodyFeet[0]) / B * h, y: g.y + (cfg.bodySocket[1] - cfg.bodyFeet[1]) / B * h };
+    L.headRest = { x: L.neckBase.x + cfg.restDx * h, y: L.neckBase.y + cfg.restDy * h };
+    L.headRestBox = headBoxAt(L.headRest.x, L.headRest.y, h, cfg);
+    L.neckMax = cfg.neckMaxK * h; L.neckMin = cfg.neckMinK * h;
+  }
+
   function computeLayout(W, H, ins, cfg) {
     ins = { top: +(ins && ins.top) || 0, right: +(ins && ins.right) || 0, bottom: +(ins && ins.bottom) || 0, left: +(ins && ins.left) || 0 };
     var portrait = H > W, tall = H / W > 1.6;
     var groundY = H - ins.bottom - cfg.groundOffset;
-    var dee = portrait ? { x: ins.left + cfg.deeDxPort, y: groundY + cfg.deeDyPort, h: cfg.deeHPort }
-      : { x: ins.left + cfg.deeDxLand, y: groundY + cfg.deeDyLand, h: cfg.deeHLand };
-    var dw = dee.h * cfg.deeBoxW;
-    var deeRect = { x: dee.x - dw / 2, y: dee.y - dee.h, w: dw, h: dee.h };
+    var gigi = portrait ? { x: ins.left + cfg.gigiDxPort, y: groundY + cfg.gigiDyPort, h: cfg.gigiHPort }
+      : { x: ins.left + cfg.gigiDxLand, y: groundY + cfg.gigiDyLand, h: cfg.gigiHLand };
+    var L = { W: W, H: H, ins: ins, portrait: portrait, tall: tall, groundY: groundY, gigi: gigi };
+    gigiGeometry(L, cfg);
+    var GR = L.gigiRect;
     var bx = ins.left + cfg.bubbleX;
     var bubble = portrait
       ? { x: bx, y: ins.top + cfg.hudH + cfg.bubbleGapPort, w: Math.min(cfg.bubbleMaxW, W - bx - ins.right - cfg.bubbleX), h: cfg.bubbleHPort }
@@ -197,36 +199,40 @@
     var hud = { x: W - ins.right - cfg.hudW, y: 0, w: cfg.hudW + ins.right, h: ins.top + cfg.hudH };
     var top = bubble.y + bubble.h + cfg.boardTopGap, bottom = groundY - cfg.boardGroundGap, boards;
     if (!portrait) {
-      var lx = dee.x + cfg.boardDeeGapLand;
+      var lx = gigi.x + cfg.boardGigiGapLand;
       boards = [{ x: lx, y: top, w: W - ins.right - cfg.boardSide - lx, h: bottom - top }];
     } else {
-      var ax = ins.left + cfg.boardSide, bxx = deeRect.x + deeRect.w + cfg.boardDeeSideGap;
+      var ax = ins.left + cfg.boardSide, bxx = Math.max(GR.x + GR.w + cfg.boardGigiSideGap, L.headRestBox.x + L.headRestBox.w + cfg.boardHeadGap);
       boards = [
-        { x: ax, y: top, w: W - ins.right - cfg.boardSide - ax, h: deeRect.y - cfg.boardDeeHeadGap - top },   // A: above Dee
-        { x: bxx, y: top, w: W - ins.right - cfg.boardSide - bxx, h: bottom - top }                              // B: right of Dee
+        { x: ax, y: top, w: W - ins.right - cfg.boardSide - ax, h: L.headRestBox.y - cfg.boardHeadGap - top },   // A: above Gigi's head
+        { x: bxx, y: top, w: W - ins.right - cfg.boardSide - bxx, h: bottom - top }                               // B: right of Gigi
       ];
     }
     boards.forEach(function (b) { b.w = Math.max(0, b.w); b.h = Math.max(0, b.h); });
-    var L = {
-      W: W, H: H, ins: ins, portrait: portrait, tall: tall, groundY: groundY, dee: dee, deeRect: deeRect, bubble: bubble, hud: hud,
-      boards: boards, board: boards[0], stack: { x: dee.x + cfg.stackDx, y: groundY + cfg.stackDy },
-      safe: { x: ins.left, y: ins.top, w: W - ins.left - ins.right, h: H - ins.top - ins.bottom },
-      grid: null, perches: []
-    };
-    L.perchCands = perchCandidates(L, cfg);
-    L.perches = L.perchCands.map(function (p) { return { x: p.x, y: p.y, kind: p.kind }; });
+    L.bubble = bubble; L.hud = hud; L.boards = boards; L.board = boards[0];
+    L.safe = { x: ins.left, y: ins.top, w: W - ins.left - ins.right, h: H - ins.top - ins.bottom };
+    L.road = { y0: groundY + 40, y1: H };
+    L.grid = null;
+    // old names (Dee's code / tests)
+    L.dee = gigi; L.deeRect = GR;
     return L;
   }
 
-  /* ------------------------------------------------------------------ grid
-   * Every cols × rows with cols·rows ≥ n and ≤ n + 1 (at most one empty slot, the last row centred), on every board
-   * candidate (portrait: A above Dee, B right of Dee). Largest card wins (capped at cardMax); ties (< 0.5 px) prefer
-   * more columns in landscape, more rows in portrait, then board A. */
+  /* ------------------------------------------------------------------ grid + building
+   * Every cols × rows with cols·rows ≥ n and ≤ n + 1 (at most one empty slot, the last row centred), on every board.
+   * The building (grid + facade pad on the sides and the top) must fit the board. Largest window wins (capped at cardMax);
+   * ties (< 0.5 px) → the squarer grid, then board A, then more columns (landscape) / rows (portrait). */
+  function gapOf(cw, cfg) { return Math.max(cfg.gapMin, cfg.gapFrac * cw); }
+  function padOf(cw, cfg) { return Math.max(cfg.padMin, cfg.padFrac * cw); }
   function fitCard(b, cols, rows, cfg) {
-    var g = cfg.gapFrac, a = cfg.cardAspect;
-    var cw = Math.min(b.w / (cols + g * (cols - 1)), b.h / (rows / a + g * (rows - 1)));
-    if (g * cw < cfg.gapMin) cw = Math.min((b.w - cfg.gapMin * (cols - 1)) / cols, (b.h - cfg.gapMin * (rows - 1)) * a / rows);
-    return Math.max(0, cw);
+    var a = cfg.cardAspect, lo = 0, hi = Math.max(1, b.w / cols);
+    function ok(cw) {
+      var g = gapOf(cw, cfg), p = padOf(cw, cfg);
+      return cols * cw + (cols - 1) * g + 2 * p <= b.w + 1e-9 && rows * cw / a + (rows - 1) * g + p <= b.h + 1e-9;
+    }
+    if (!ok(lo + 1e-6)) return 0;
+    for (var i = 0; i < 44; i++) { var m = (lo + hi) / 2; if (ok(m)) lo = m; else hi = m; }
+    return lo;
   }
   function chooseGrid(L, n, age, cfg) {
     var best = null;
@@ -238,7 +244,6 @@
         var raw = fitCard(b, cols, rows, cfg), sc = Math.min(raw, cfg.cardMax);
         var better = !best || sc > best.sc + 0.5;
         if (!better && best && Math.abs(sc - best.sc) <= 0.5) {
-          // QA P2-4 ties: the squarer grid, then board A (above Dee), then wider (landscape) / taller (portrait)
           var sq = Math.abs(cols - rows) - Math.abs(best.cols - best.rows);
           if (sq !== 0) better = sq < 0;
           else if (bi !== best.bi) better = bi < best.bi;
@@ -247,112 +252,54 @@
         if (better) best = { sc: sc, raw: raw, cols: cols, rows: rows, bi: bi };
       }
     }
-    var B = L.boards[best.bi], cw = best.sc, ch = cw / cfg.cardAspect, gap = Math.max(cfg.gapMin, cfg.gapFrac * cw);
+    var B = L.boards[best.bi], cw = best.sc, ch = cw / cfg.cardAspect, gap = gapOf(cw, cfg), pad = padOf(cw, cfg);
     var gw = best.cols * cw + (best.cols - 1) * gap, gh = best.rows * ch + (best.rows - 1) * gap;
-    var x0 = B.x + (B.w - gw) / 2, y0 = B.y + (B.h - gh) / 2, slots = [];
+    var x0 = B.x + (B.w - gw - 2 * pad) / 2 + pad, y0 = B.y + (B.h - gh - pad) / 2 + pad, slots = [];
     for (var k = 0; k < n; k++) {
       var r = Math.floor(k / best.cols), c = k % best.cols, inRow = Math.min(best.cols, n - r * best.cols);
       var off = (best.cols - inRow) * (cw + gap) / 2;
       slots.push({ x: x0 + off + c * (cw + gap) + cw / 2, y: y0 + r * (ch + gap) + ch / 2 });
     }
-    return { cols: best.cols, rows: best.rows, cw: cw, ch: ch, gap: gap, x0: x0, y0: y0, n: n, slots: slots, boardIndex: best.bi,
+    var g = { cols: best.cols, rows: best.rows, cw: cw, ch: ch, gap: gap, pad: pad, x0: x0, y0: y0, n: n, slots: slots, boardIndex: best.bi,
       board: B, rect: { x: x0, y: y0, w: gw, h: gh }, minOk: cw >= (cfg.cardMin[age] || cfg.cardMin[5]) - 1e-9 };
+    g.building = buildingRect(L, g, cfg);
+    return g;
   }
-
-  /** Pond surprise: the grid's slots become lily pads — cards 0.92× (≥ the age minimum), columns on an arc, rows staggered
-   * sideways; neighbours keep ≥ gapMin (column pitch unchanged, stagger ≤ (gap' − gapMin)/2); the result is re-centred in the board. */
-  function pondLayout(g, age, cfg) {
-    var B = g.board, minW = cfg.cardMin[age] || cfg.cardMin[5];
-    var cw = Math.min(g.cw, Math.max(minW, g.cw * cfg.pondScale)), ch = cw / cfg.cardAspect;
-    var px = g.cw + g.gap, py = g.ch + g.gap, gapX = px - cw;
-    var gw = (g.cols - 1) * px + cw, gh = (g.rows - 1) * py + ch;
-    var S = Math.max(0, Math.min((gapX - cfg.gapMin) / 2, (B.w - gw) / 2, 0.25 * cw));
-    var A = Math.max(0, Math.min(B.h - gh, cfg.pondArc * ch));
-    var pts = g.slots.map(function (s, k) {
-      var r = Math.floor(k / g.cols), c = Math.round((s.x - g.x0 - g.cw / 2) / px * 1e6) / 1e6;
-      var arc = function (cc) { return Math.sin(Math.PI * (clamp(cc, 0, g.cols - 1) + 0.5) / g.cols); };
-      // a centred last-row card sits between two columns: never lift it more than the cards above it (keeps the gap)
-      var lift = Math.abs(c - Math.round(c)) > 1e-3 ? Math.min(arc(c - 0.5), arc(c + 0.5)) : arc(c);
-      return { x: s.x + (r % 2 ? S : -S) * (g.rows > 1 ? 1 : 0), y: s.y - A * lift };
-    });
-    var x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
-    pts.forEach(function (q) { x0 = Math.min(x0, q.x - cw / 2); x1 = Math.max(x1, q.x + cw / 2); y0 = Math.min(y0, q.y - ch / 2); y1 = Math.max(y1, q.y + ch / 2); });
-    var dx = B.x + (B.w - (x1 - x0)) / 2 - x0, dy = B.y + (B.h - (y1 - y0)) / 2 - y0;
-    pts.forEach(function (q) { q.x += dx; q.y += dy; });
-    var o = {}; for (var k in g) o[k] = g[k];
-    o.cw = cw; o.ch = ch; o.slots = pts; o.style = 'pond';
-    o.rect = { x: x0 + dx, y: y0 + dy, w: x1 - x0, h: y1 - y0 };
-    o.minOk = cw >= minW - 1e-9;
-    return o;
+  function shiftGrid(g, dx) {
+    g.x0 += dx; g.rect = { x: g.rect.x + dx, y: g.rect.y, w: g.rect.w, h: g.rect.h };
+    for (var i = 0; i < g.slots.length; i++) g.slots[i] = { x: g.slots[i].x + dx, y: g.slots[i].y };
   }
-
-  /* ------------------------------------------------------------------ perches
-   * Candidate points (kind ground | lily | branch | air). A reward kind maps a point to its final anchor + box; a point is
-   * valid for a reward when that box is inside the safe area and clear of the bubble, HUD, Dee and the CURRENT card grid
-   * (all grown by perchMargin). Rewards whose box a new, bigger grid covers fly to a new perch at the round start. */
-  function perchCandidates(L, cfg) {
-    var out = [], ins = L.ins, st = cfg.perchStep, x, y, i, j;
-    var jr = new GW.RNG((Math.imul(L.W | 0, 7919) ^ Math.imul(L.H | 0, 104729) ^ 0x51ed) >>> 0), JX = cfg.perchJitter[0], JY = cfg.perchJitter[1];
-    var gdy = [].concat(cfg.groundPerchDy);
-    for (j = 0; j < gdy.length; j++) {
-      var gx = [];
-      for (x = ins.left + 44 + (j % 2) * st / 2; x <= L.W - ins.right - 44 + 1e-6; x += st) gx.push(x);
-      for (i = 0; i < gx.length; i++) out.push({ x: clamp(gx[i] + jr.float(-JX, JX), ins.left + 40, L.W - ins.right - 40), y: L.groundY + gdy[j] + jr.float(-4, 4),
-        kind: j === 0 && i >= gx.length - cfg.lilyCount ? 'lily' : 'ground', row: j });
+  /** Facade rect around the grid down to the pavement + roof band + a door in free facade space (or null).
+   * May shift the grid sideways inside its board to make room for a door bay. */
+  function buildingRect(L, g, cfg) {
+    var R = g.rect, p = g.pad, ground = L.groundY + 4;
+    var b = { x: R.x - p, y: R.y - p, w: R.w + 2 * p, h: ground - (R.y - p), roofH: cfg.roofFrac * g.cw, pad: p, door: null, doorX: null, doorW: null };
+    var dw = cfg.doorFrac * g.cw, band = ground - (R.y + R.h), GR = L.gigiRect, door = null;
+    if (band - 0.5 * g.gap >= Math.max(56, 0.4 * g.ch)) {
+      // a free band under the windows (portrait board A): the door in it, not behind Gigi
+      var cx = b.x + b.w / 2;
+      if (cx + dw / 2 + 8 > GR.x && cx - dw / 2 - 8 < GR.x + GR.w) cx = b.x + b.w - p - 0.25 * g.cw - dw / 2;
+      door = { x: cx, y: ground, w: dw, h: Math.min(0.9 * g.ch, band - 0.5 * g.gap) };
+    } else if (g.cols * g.rows > g.n) {
+      // the last row has an empty slot: the door in the free half-slot at its right end
+      var last = g.slots[g.n - 1], lastR = last.x + g.cw / 2, lastTop = last.y - g.ch / 2;
+      var z0 = lastR + g.gap / 2, z1 = R.x + R.w + p / 2, ww = Math.min(dw, z1 - z0 - 6);
+      if (ww >= 0.3 * g.cw) door = { x: (z0 + z1) / 2, y: ground, w: ww, h: Math.min(0.9 * g.ch, ground - lastTop - 0.12 * g.ch) };
     }
-    var bys = cfg.branchDy.map(function (d) { return L.groundY + d; }).concat([ins.top + cfg.canopyDy]);
-    for (i = 0; i < bys.length; i++) for (x = ins.left + 40 + (i % 2) * st / 2; x <= L.W - ins.right - 40; x += st)
-      out.push({ x: x + jr.float(-JX, JX), y: bys[i] + jr.float(-JY, JY) * (i === bys.length - 1 ? 0.3 : 1), kind: 'branch' });
-    var row = 0;
-    for (y = ins.top + 40; y <= L.groundY - 50; y += st * 0.85, row++)
-      for (x = ins.left + 36 + (row % 2) * st / 2; x <= L.W - ins.right - 36; x += st) out.push({ x: x + jr.float(-JX, JX), y: y + jr.float(-JY, JY), kind: 'air' });
-    return out;
-  }
-  var PREF = {
-    butterfly: ['branch', 'ground', 'air'], butterfly2: ['ground', 'branch', 'air'], lantern: ['branch', 'air'], star: ['air', 'branch'],
-    acorns: ['ground', 'lily', 'branch'], animal: ['ground', 'lily', 'branch'], frog: ['lily', 'ground', 'branch'],
-    owl: ['branch', 'ground', 'lily'], squirrel: ['branch', 'ground', 'lily']
-  };
-  function prefFor(r) {
-    if (r.kind === 'animal') { var a = String(r.sprite || '').replace('animal_', ''); return PREF[a] || PREF.animal; }
-    if (r.kind === 'butterfly' && r._alt) return PREF.butterfly2;   // every 2nd butterfly sits on a flower first
-    return PREF[r.kind];
-  }
-  var ACORN_ROWS = [4, 3, 3, 2];
-  function acornRows(n) { var rows = [], left = Math.max(1, Math.min(12, n || 1)); for (var i = 0; left > 0; i++) { var k = Math.min(left, ACORN_ROWS[i]); rows.push(k); left -= k; } return rows; }
-  /** Final placement of reward kind at perch point p → { x, y, ax, ay, box }. */
-  function placeAt(kind, p, cfg, n) {
-    var S = cfg.sizes, s, o = { ax: null, ay: null };
-    switch (kind) {
-      case 'animal': s = S.animal; o.x = p.x; o.y = p.y; o.box = { x: p.x - s / 2, y: p.y - s, w: s, h: s }; break;
-      case 'acorns': {
-        var R = S.acorn / 2, rows = acornRows(n), hw = (rows[0] - 1) / 2 * 0.6 * S.acorn + R, hh = 2 * R + (rows.length - 1) * 1.25 * R;
-        s = Math.max(hw, cfg.acornSpread); o.x = p.x; o.y = p.y; o.box = { x: p.x - s, y: p.y - hh, w: 2 * s, h: hh }; break;
-      }
-      case 'lantern':
-        s = S.lantern;
-        if (p.kind === 'branch') { o.ax = p.x; o.ay = p.y; o.x = p.x; o.y = p.y + cfg.lanternString + s / 2;
-          o.box = { x: p.x - s / 2 - 18, y: p.y, w: s + 36, h: cfg.lanternString + s }; }
-        else { o.x = p.x; o.y = p.y; o.box = { x: p.x - s / 2, y: p.y - s / 2 - 4, w: s, h: s + 8 }; }
-        break;
-      default: {   // butterfly, star: sit on a branch / flower, or hover in the air
-        s = S[kind] || 44;
-        var dy = p.kind === 'ground' || p.kind === 'lily' ? -s * 0.6 : p.kind === 'branch' ? -s * 0.45 : 0;
-        o.x = p.x; o.y = p.y + dy;
-        var pad = kind === 'star' ? s * 0.12 : 4;
-        o.box = { x: o.x - s / 2 - pad, y: o.y - s / 2 - pad, w: s + 2 * pad, h: s + 2 * pad };
+    if (!door) {
+      // no free facade: a narrow bay on the right (else the left) side of the building when the board has room
+      var bayW = dw + 0.5 * g.gap, B = g.board, dh = Math.min(0.9 * g.ch, ground - (R.y + R.h - g.ch));
+      var spareR = B.x + B.w - (b.x + b.w), spareL = b.x - B.x;
+      if (spareL + spareR >= bayW - 1e-6) {
+        // shift the whole building (grid included) left just enough, then add the bay on the right
+        var sh = Math.min(0, spareR - bayW);
+        if (sh < 0) { shiftGrid(g, sh); R = g.rect; b.x += sh; }
+        b.w += bayW;
+        door = { x: R.x + R.w + (p + bayW) / 2, y: ground, w: dw, h: dh };
       }
     }
-    return o;
-  }
-  function boxFree(box, L, cfg) {
-    var m = cfg.perchMargin;
-    if (!inside(box, inflate(L.safe, -6))) return false;
-    var obs = [L.bubble, L.hud, L.deeRect];
-    if (L.hudKeep) obs.push(L.hudKeep);       // the REAL (DOM-measured) HUD from main.js (rewards only)
-    if (L.grid) obs.push(L.grid.rect);
-    for (var i = 0; i < obs.length; i++) if (overlapArea(box, inflate(obs[i], m)) > 0) return false;
-    return true;
+    if (door) { b.door = door; b.doorX = door.x; b.doorW = door.w; }
+    return b;
   }
 
   // ------------------------------------------------------------------ World
@@ -360,7 +307,8 @@
     opts = opts || {};
     this.cfg = merge(CONFIG, opts.config);
     this.seed = opts.seed !== undefined ? opts.seed : 1;
-    this.rng = new GW.RNG(this.seed);
+    this.rng = new GW.RNG(this.seed);                                  // content / hints (the game's own stream)
+    this.arng = new GW.RNG(((this.seed >>> 0) ^ 0xA5A5F00D) >>> 0);    // ambient: buildings, critters, traffic, blinks
     this.age = GW.Content.ageOf(opts.age !== undefined ? opts.age : 4);
     this.lang = opts.lang === 'vi' ? 'vi' : 'en';
     this._pendingAge = this.age; this._pendingLang = this.lang;
@@ -373,94 +321,127 @@
     this.cur = null; this.cards = []; this.rewards = []; this.collected = []; this.open = [];
     this.talk = null; this.talkAnswered = null;
     this.held = null; this.pairsHeld = false; this.wind = 0; this.hudKeep = opts.hudKeep || null; this.lastTopics = null;
-    this.surprise = null; this._surpriseOff = 0; this._sameN = 0; this._bfN = 0; this._hard = false; this._lastPairs = 0; this._playStart = 0;
+    this.surprise = null; this._surpriseOff = 0; this._sameN = 0; this._hard = false; this._lastPairs = 0; this._playStart = 0;
+    this.building = null; this.prevBuilding = null; this.lastBuilding = null;
+    this.scroll = 0; this.scrollT = 1; this._pscroll = 0; this._pscrollT = 1; this._scroll0 = 0; this.buildingDx = 0; this.prevDx = 0;
+    this.critter = null; this._critterAt = -1; this.traffic = []; this._carNext = 4; this._carN = 0;
+    this.cheer = 0;
     this.finger = { x: 0, y: 0, down: false };
-    this.dee = { mood: 'idle', moodT: 0, lookX: 0, lookY: 0, hop: 0, _hopT: -1, _hopPx: 0, _hopN: 0 };
+    this.gigi = { mood: 'idle', moodT: 0, lookX: 0, lookY: 0, hop: 0, _phop: 0, _hopT: -1, _hopPx: 0, _hopN: 0,
+      walk: 0, walking: false, _foot: 0, headX: 0, headY: 0, _phx: 0, _phy: 0, _hvx: 0, _hvy: 0, neckBaseX: 0, neckBaseY: 0,
+      neckLen: 0, blink: 0, _blinkT: 3, _blinkOn: 0, tx: 0, ty: 0 };
     this.events = []; this.sessions = 0; this.interactive = false; this.solved = false;
     this._mis = null; this._anims = []; this._idleN = 0; this._idleT = 0; this._idleGap = this.cfg.idleTime; this._doneT = -1;
     this._lastHintT = -1e9; this.levelStartTime = 0; this._talkAskT = 0; this._talkAsks = 0; this._hist = [];
-    this._lookId = null; this._lookT = -1e9; this._rewardN = 0; this._holdT = -1; this._lastTapId = null;
+    this._lookId = null; this._lookT = -1e9; this._holdT = -1; this._lastTapId = null; this._gridVer = 0; this._tKey = '';
     this.setViewport(opts.width || 1280, opts.height || 720, opts.ins || null);
-    this.dee.lookX = this.layout.board.x + this.layout.board.w / 2; this.dee.lookY = this.layout.board.y + this.layout.board.h / 2;
+    var Lb = this.layout.board;
+    this.gigi.lookX = Lb.x + Lb.w / 2; this.gigi.lookY = Lb.y + Lb.h / 2;
+    this._snapHead();
   }
   World.logicalSize = logicalSize;
   World.computeLayout = function (W, H, ins, cfg) { return computeLayout(W, H, ins, merge(CONFIG, cfg)); };
   World.chooseGrid = function (L, n, age, cfg) { return chooseGrid(L, n, GW.Content.ageOf(age || 4), merge(CONFIG, cfg)); };
-  World.placeAt = function (kind, p, cfg, n) { return placeAt(kind, p, merge(CONFIG, cfg), n); };
-  World.pondLayout = function (g, age, cfg) { return pondLayout(g, GW.Content.ageOf(age || 4), merge(CONFIG, cfg)); };
+  World.headBoxAt = function (jx, jy, h, cfg) { return headBoxAt(jx, jy, h, merge(CONFIG, cfg)); };
   World.rectGap = rectGap; World.overlapArea = overlapArea;
+  World.FACADES = FACADES; World.SHUTTERS = SHUTTERS; World.DOORS = DOORS; World.ROOFS = ROOFS;
+  /** Gigi's head box for hit tests and the renderer (alpha given → interpolated): { x, y, w, h, jx, jy } (jx, jy = neck joint). */
+  World.gigiHead = function (w, alpha) {
+    var g = w.gigi, a = alpha === undefined ? 1 : alpha;
+    var jx = g._phx + (g.headX - g._phx) * a, jy = g._phy + (g.headY - g._phy) * a;
+    var b = headBoxAt(jx, jy, w.layout.gigi.h, w.cfg); b.jx = jx; b.jy = jy;
+    return b;
+  };
 
   var P = World.prototype;
   Object.defineProperty(P, 'items', { get: function () { return this.cards; } });
+  Object.defineProperty(P, 'dee', { get: function () { return this.gigi; } });   // old helper names (shared code)
+  Object.defineProperty(P, 'miu', { get: function () { return this.gigi; } });
   P._emit = function (e) { this.events.push(e); };
   P.drainEvents = function () { var e = this.events; this.events = []; return e; };
   P.setAge = function (a) { this._pendingAge = GW.Content.ageOf(a); };
   P.setLang = function (l) { this._pendingLang = l === 'vi' ? 'vi' : 'en'; };
   P.cardById = function (id) { for (var i = 0; i < this.cards.length; i++) if (this.cards[i].id === id) return this.cards[i]; return null; };
   P.itemById = P.cardById;
-  P.rewardById = function (id) { for (var i = 0; i < this.rewards.length; i++) if (this.rewards[i].id === id) return this.rewards[i]; return null; };
   P._setState = function (s) { this.state = s; this.stateTime = 0; };
   P._setPhase = function (p) { this.phase = p; this.phaseTime = 0; };
   P._mood = function (m) {
-    var d = this.dee; d.mood = m; d.moodT = this.cfg.moodTime[m] || 1;
+    var d = this.gigi; d.mood = m; d.moodT = this.cfg.moodTime[m] || 1;
     if (this.cfg.hopPx[m]) { d._hopT = 0; d._hopPx = this.cfg.hopPx[m]; d._hopN = m === 'cheer' ? 3 : 1; }
   };
   P.cancelDrag = function () { this.finger.down = false; };
   P.skipTalk = function () { if (this.state === 'talk') this._levelDone(); };
   P.prompt = function () { return this.cur ? { promptKey: this.cur.promptKey, params: this.cur.params } : null; };
   P._mismatchShow = function () { var b = this.cfg.mismatchShowByAge; return (b && b[this.age] !== undefined) ? b[this.age] : this.cfg.mismatchShow; };
-  /** Card rect (CSS-free, logical px) at its current position. */
+  /** Window rect (logical px, at its slot; add w.buildingDx while scrolling). */
   P.cardRect = function (c) { return { x: c.x - c.w / 2, y: c.y - c.h / 2, w: c.w, h: c.h }; };
+  /** Tight hit box of the critter (logical px) or null. */
+  P.critterRect = function () {
+    var k = this.critter, cfg = this.cfg;
+    if (!k || k.state === 'gone') return null;
+    if (k.type === 'pigeon') { var s = cfg.pigeonSize; return { x: k.x - 0.42 * s, y: k.y - 0.78 * s, w: 0.84 * s, h: 0.78 * s }; }
+    if (k.type === 'bus') return { x: k.x - k.w / 2, y: k.y - k.h, w: k.w, h: k.h };
+    var r = cfg.balloonSize / 2; return { x: k.x - r, y: k.y - r * 1.15, w: 2 * r, h: 2.3 * r };
+  };
 
   // ---------------------------------------------------------------- viewport
   P.setViewport = function (W, H, ins) {
-    var keepGrid = this.layout && this.layout.grid;
+    var old = this.layout;
     this.layout = computeLayout(W, H, ins, this.cfg);
     var hk = this.hudKeep;
     this.layout.hudKeep = hk && hk.w > 0 && hk.h > 0 ? { x: +hk.x, y: +hk.y, w: +hk.w, h: +hk.h } : null;
+    this.prevBuilding = null; this.lastBuilding = null;     // frozen snapshots of another layout: dropped
     if (this.cur && this.cards.length) this._relayoutRound();
-    else if (keepGrid) this.layout.grid = null;
-    if (this.rewards.length) this._reperchAll(true);
+    else this.layout.grid = null;
+    this._gridVer++;
+    var L = this.layout, g = this.gigi;
+    g.neckBaseX = L.neckBase.x; g.neckBaseY = L.neckBase.y;
+    if (old) {
+      // keep Gigi's head pose relative to her neck, then make it valid for the new layout
+      var dx = g.headX - old.neckBase.x, dy = g.headY - old.neckBase.y;
+      g.headX = g._phx = L.neckBase.x + dx * L.gigi.h / old.gigi.h; g.headY = g._phy = L.neckBase.y + dy * L.gigi.h / old.gigi.h;
+      var q = this._nearestHead(g.headX, g.headY, !!L.grid && this.phase !== 'scroll');
+      g.headX = g._phx = q.x; g.headY = g._phy = q.y; g._hvx = g._hvy = 0;
+      this._tKey = '';
+      // critter + traffic follow the new street
+      for (var i = 0; i < this.traffic.length; i++) { var car = this.traffic[i]; car.y = car._py = L.groundY + this.cfg.carLaneDy[car.lane]; car.x = car._px = car.x * W / old.W; }
+      var k = this.critter;
+      if (k) {
+        if (k.type === 'bus') { k.y = k._py = L.groundY + this.cfg.busDy; k.x = k._px = k.x * W / old.W; k.xStop = W / 2; }
+        else if (k.type === 'pigeon' && L.grid) { this._pigeonSill(k, k.sillId); if (k.state === 'sit') { k.x = k._px = k.sx0; k.y = k._py = k.sy0; } }
+        else { k.x = k._px = k.x * W / old.W; k.y = k._py = k.y * H / old.H; }
+      }
+    }
   };
 
   P._relayoutRound = function () {
     var L = this.layout, g = chooseGrid(L, this.cards.length, this.age, this.cfg), i;
-    if (this.surprise === 'pond') g = pondLayout(g, this.age, this.cfg);
     L.grid = g; L.board = g.board;
     for (i = 0; i < this.cards.length; i++) {
       var c = this.cards[i], s = g.slots[c.slot];
-      c.hx = s.x; c.hy = s.y; c.w = g.cw; c.h = g.ch;
-      c._sw = null;
-      if (c.state === 'deal') { this._dealPath(c); if (c.t < 0) { c.x = c._px = L.stack.x; c.y = c._py = L.stack.y; } }
-      else if (c.state !== 'matched') { c.x = c._px = s.x; c.y = c._py = s.y; c.vx = c.vy = 0; }
+      c.hx = c.x = c._px = s.x; c.hy = c.y = c._py = s.y; c.w = g.cw; c.h = g.ch;
     }
-    if (this.cur.topic === 'colors') this._yellowRule(false);
-    for (i = 0; i < this._anims.length; i++) {
-      var m = this._anims[i], a = this.cardById(m.a), b = this.cardById(m.b);
-      m.mx = a._mx = b._mx = (a.hx + b.hx) / 2; m.my = a._my = b._my = (a.hy + b.hy) / 2;
-    }
+    if (this.cur.topic === 'colors') this._yellowRule();
   };
 
-  /** Colour rounds: swap yellow cards away from Dee (≥ yellowDeeGap from Dee's box). */
-  P._yellowRule = function (atStart) {
-    var L = this.layout, cfg = this.cfg, cards = this.cards, D = L.deeRect, self = this;
-    function near(c) { return rectGap(self.cardRect({ x: c.hx, y: c.hy, w: c.w, h: c.h }), D) < cfg.yellowDeeGap - 1e-6; }
+  /** Colour rounds: swap yellow windows away from Gigi (≥ yellowGigiGap from her box). */
+  P._yellowRule = function () {
+    var L = this.layout, cfg = this.cfg, cards = this.cards, D = L.gigiRect, self = this;
+    function gap(c) { return rectGap(self.cardRect({ x: c.hx, y: c.hy, w: c.w, h: c.h }), D); }
     for (var guard = 0; guard < cards.length; guard++) {
       var bad = null, i;
-      for (i = 0; i < cards.length; i++) if (cards[i].face.color === 'yellow' && cards[i].state !== 'gone' && near(cards[i])) { bad = cards[i]; break; }
+      for (i = 0; i < cards.length; i++) if (cards[i].face.color === 'yellow' && gap(cards[i]) < cfg.yellowGigiGap - 1e-6) { bad = cards[i]; break; }
       if (!bad) return;
       var best = null, bd = -1;
       for (i = 0; i < cards.length; i++) {
         var o = cards[i]; if (o.face.color === 'yellow' || o.state === 'matched') continue;
-        var d = rectGap(this.cardRect({ x: o.hx, y: o.hy, w: o.w, h: o.h }), D);
-        if (d >= cfg.yellowDeeGap && d > bd) { bd = d; best = o; }
+        var d = gap(o);
+        if (d >= cfg.yellowGigiGap && d > bd) { bd = d; best = o; }
       }
       if (!best) return;
       var s = bad.slot; bad.slot = best.slot; best.slot = s;
       var g = L.grid, A = g.slots[bad.slot], Bs = g.slots[best.slot];
-      bad.hx = A.x; bad.hy = A.y; best.hx = Bs.x; best.hy = Bs.y;
-      if (!atStart) { bad.x = bad._px = A.x; bad.y = bad._py = A.y; best.x = best._px = Bs.x; best.y = best._py = Bs.y; }
-      else { this._dealPath(bad); this._dealPath(best); }
+      bad.hx = bad.x = bad._px = A.x; bad.hy = bad.y = bad._py = A.y; best.hx = best.x = best._px = Bs.x; best.hy = best.y = best._py = Bs.y;
     }
   };
 
@@ -484,11 +465,29 @@
     this.weather = this.level;
     this.round = 0; this.levelStars = 0; this.levelStartTime = this.time; this._hist = []; this._hard = false; this._lastPairs = 0;
     this.roundsPerLevel = this.cfg.roundsPerLevel;
-    this.cards = []; this.rewards = []; this.open = []; this.cur = null; this.talk = null; this.talkAnswered = null;
-    this.interactive = false; this.solved = false; this._mis = null; this._anims = []; this.layout.grid = null; this._rewardN = 0;
-    this.surprise = null; this._bfN = 0;
+    this.cards = []; this.open = []; this.cur = null; this.talk = null; this.talkAnswered = null;
+    this.interactive = false; this.solved = false; this._mis = null; this._anims = []; this.layout.grid = null; this._gridVer++;
+    this.surprise = null; this.critter = null; this.cheer = 0;
     this._setState('intro'); this.phase = null;
     this._emit({ type: 'level', level: this.level, topic: this.topic });
+  };
+
+  /** A new building style, never the previous building's facade or shutter colour. */
+  P._newBuilding = function () {
+    var r = this.arng, prev = this.building, f, s;
+    do { f = r.pick(FACADES); } while (prev && f === prev.facade);
+    do { s = r.pick(SHUTTERS); } while (prev && s === prev.shutter);
+    return { facade: f, trim: TRIM, shutter: s, door: r.pick(DOORS), roof: r.pick(ROOFS), seed: (r.next() * 4294967296) >>> 0 };
+  };
+  function freezeCards(cards) {
+    return cards.map(function (c) {
+      return { id: c.id, face: c.face, state: c.state, slot: c.slot, x: c.x, y: c.y, w: c.w, h: c.h,
+        open: Math.min(1, Math.max(0, c.open)), flip: c.flip, light: c.light, bloom: Math.min(1, c.bloom), bounce: 0, wiggle: 0, glow: 0 };
+    });
+  }
+  P._snapshotBuilding = function () {
+    if (!this.building || !this.layout.grid) return null;
+    return { building: this.building, rect: this.layout.grid.building, grid: this.layout.grid, cards: freezeCards(this.cards) };
   };
 
   P._beginRound = function () {
@@ -501,79 +500,59 @@
     this.pairsHeld = held;
     if (cfg.peekPerCard) cur.peek = cur.peek * (0.6 + 0.1 * cur.cards.length);
     var ST = cfg.surpriseTypes, sp = ST && ST.length && this.round === cfg.surpriseRound ? ST[(this.level + this._surpriseOff) % ST.length] : null;
-    this.surprise = sp; cur.surprise = sp; cur.golden = sp === 'golden' ? rr.pick(Object.keys(cur.pairInfo).sort()) : null;
-    this._shuffled = false; this._sameN = 0;
+    this.surprise = sp; cur.surprise = sp; this._critterAt = -1;
+    this._sameN = 0;
+    // the street: the old building (or the last one of the previous chapter) leaves, a new one slides in
+    this.prevBuilding = (this.cards.length ? this._snapshotBuilding() : null) || this.lastBuilding || null;
+    this.lastBuilding = null;
+    var first = !this.prevBuilding;
+    this.building = this._newBuilding();
     this.cur = cur; this._hist.push(cur.sum);
     this.mismatches = 0; this.streak = 0; this.found = 0; this.pairs = cur.pairs; this.open = []; this._mis = null; this._anims = [];
     this._idleN = 0; this._idleT = 0; this._idleGap = cfg.idleTime; this._doneT = -1; this._holdT = -1;
-    this.interactive = false; this.solved = false;
+    this.interactive = false; this.solved = false; this.cheer = 0;
     var g = chooseGrid(L, cur.cards.length, this.age, cfg);
-    if (sp === 'pond') g = pondLayout(g, this.age, cfg);
-    L.grid = g; L.board = g.board;
+    L.grid = g; L.board = g.board; this._gridVer++;
+    var ar = this.arng;
     this.cards = cur.cards.map(function (s, k) {
+      var q = g.slots[k];
       return { id: s.id, key: s.key, face: s.face, nameKind: s.nameKind, nameValue: s.nameValue, size: s.size || null, word: s.word || null,
-        slot: k, state: 'deal', t: -k * cfg.dealStagger, x: L.stack.x, y: L.stack.y - k * 1.5, _px: L.stack.x, _py: L.stack.y - k * 1.5,
-        rot: 0, _prot: 0, w: g.cw, h: g.ch, hx: g.slots[k].x, hy: g.slots[k].y, vx: 0, vy: 0, vr: 0,
-        flip: 0, _pflip: 0, _fv: 0, flipT: 0, lift: 0, _lv: 0, sx: cfg.stackScale, sy: cfg.stackScale, _q: 0, _qv: 0,
-        glow: 0, glowT: 0, peekT: -1, waveT: -1, alpha: 1, shakeT: -1, _ph: rr.float(0, TAU), _spin: 0, _sv: 0, _scale: 1,
-        _dT: 0, _dvx: 0, _dvy: 0, _dw: 0, _dx0: 0, _dy0: 0, _drot0: 0, _spinTurns: rr.float(cfg.dealSpin[0], cfg.dealSpin[1]) * (rr.chance(0.5) ? 1 : -1) };
+        obj: s.obj || null, slot: k, state: 'down', x: q.x, y: q.y, _px: q.x, _py: q.y, hx: q.x, hy: q.y, w: g.cw, h: g.ch, rot: 0, _prot: 0,
+        sx: 1, sy: 1, alpha: 1, lift: 0,
+        open: 0, _popen: 0, _ov: 0, openT: 0, flip: 0, _pflip: 0, flipT: 0,
+        light: 0, bloom: 0, _pbloom: 0, _blv: 0, bounce: 0, _pbounce: 0, _bvy: 0, _bt: 0, _bq: 0, _bT: -1, _bPx: 0, wiggle: 0,
+        glow: 0, glowT: 0, peekT: -1, waveT: -1, shakeT: -1, _mt: -1, _popA: 0, _popped: false, _ph: ar.float(0, TAU), seed: (ar.next() * 65536) | 0 };
     });
-    for (i = 0; i < this.cards.length; i++) this._dealPath(this.cards[i]);
-    if (cur.topic === 'colors') this._yellowRule(true);
-    this._setState('round'); this._setPhase('deal');
-    this._emit({ type: 'round', round: this.round, topic: this.topic, promptKey: cur.promptKey, params: cur.params, pairs: cur.pairs, held: held, surprise: sp });
-    this._reperchAll(false);     // rewards the new grid covers fly to a free perch
+    if (cur.topic === 'colors') this._yellowRule();
+    this._setState('round'); this._setPhase('scroll');
+    this._scroll0 = this.scroll; this.scrollT = this._pscrollT = 0;
+    this.buildingDx = L.W; this.prevDx = 0;
+    this.gigi.walking = true; this.gigi._foot = 0;
+    this._emit({ type: 'scroll', first: first, building: this.building });
+    this._emit({ type: 'round', round: this.round, topic: this.topic, promptKey: cur.promptKey, params: cur.params, pairs: cur.pairs, held: held,
+      surprise: sp, building: this.building });
   };
 
-  /** Ballistic deal path from the deck to the card's slot (re-computed if the slot changes before it lands). */
-  P._dealPath = function (c) {
-    var cfg = this.cfg, S = this.layout.stack, x0 = S.x, y0 = S.y;
-    var d = hyp(c.hx - x0, c.hy - y0), T = clamp(cfg.dealTime[0] + d / cfg.dealSpeed, cfg.dealTime[0], cfg.dealTime[1]);
-    c._dx0 = x0; c._dy0 = y0; c._dT = T;
-    c._dvx = (c.hx - x0) / T; c._dvy = (c.hy - y0 - 0.5 * cfg.dealGravity * T * T) / T;
-    c._dw = c._spinTurns * TAU / T; c._drot0 = -c._dw * T;
+  P._startPeek = function () {
+    this._setPhase('peek');
+    for (var i = 0; i < this.cards.length; i++) this.cards[i].waveT = this.cards[i].slot * this.cfg.peekStagger;
+    this._emit({ type: 'peek' });
   };
 
   P._startPlay = function () {
     this._setPhase('play'); this.interactive = true; this._idleT = 0; this._playStart = this.time;
+    if (this.surprise && !this.critter && this._critterAt < 0) this._critterAt = this.time + this.arng.float(this.cfg.surpriseDelay[0], this.cfg.surpriseDelay[1]);
     this._emit({ type: 'play' });
   };
 
-  /** Shuffle surprise: 1 swap (2 from age shuffleFrom) of face-down cards with different keys; each card flies along a
-   * bezier bulging to its own side (they pass each other), lift 1 mid-way. Colour rounds never move yellow next to Dee. */
-  P._startShuffle = function () {
-    var cfg = this.cfg, L = this.layout, rr = this.rng, self = this, cards = this.cards.slice(), swaps = [];
-    this._shuffled = true;
-    var nSw = this.age >= cfg.shuffleFrom ? 2 : 1, used = {};
-    function okAt(c, slot) {
-      if (c.face.color !== 'yellow') return true;
-      var q = L.grid.slots[slot];
-      return rectGap({ x: q.x - c.w / 2, y: q.y - c.h / 2, w: c.w, h: c.h }, L.deeRect) >= cfg.yellowDeeGap - 1e-6;
-    }
-    for (var t = 0; t < nSw; t++) {
-      var opts = [];
-      for (var i = 0; i < cards.length; i++) for (var j = i + 1; j < cards.length; j++) {
-        var a = cards[i], b = cards[j];
-        if (used[a.id] || used[b.id] || a.key === b.key || a.state !== 'down' || b.state !== 'down') continue;
-        if (!okAt(a, b.slot) || !okAt(b, a.slot)) continue;
-        opts.push([a, b]);
-      }
-      if (!opts.length) break;
-      var pr = opts[Math.floor(rr.next() * opts.length)];
-      used[pr[0].id] = used[pr[1].id] = 1; swaps.push(pr);
-    }
-    this._setPhase('shuffle');
-    swaps.forEach(function (pr) {
-      var a = pr[0], b = pr[1], sa = a.slot;
-      a.slot = b.slot; b.slot = sa;
-      [a, b].forEach(function (c, side) {
-        var q = L.grid.slots[c.slot], x0 = c.x, y0 = c.y, dx = q.x - x0, dy = q.y - y0, d = hyp(dx, dy) || 1;
-        var bulge = (cfg.shuffleArc * d + 30) * (side ? -1 : 1);
-        c._sw = { x0: x0, y0: y0, x1: q.x, y1: q.y, cx: (x0 + q.x) / 2 - dy / d * bulge, cy: (y0 + q.y) / 2 + dx / d * bulge, t: 0 };
-        c.hx = q.x; c.hy = q.y;
-      });
-      self._emit({ type: 'shuffle', a: a.id, b: b.id });
-    });
+  P._startCheer = function () {
+    var B = this.layout.grid.building, cfg = this.cfg, self = this;
+    this._setPhase('cheer');
+    this._mood('cheer');
+    this.cards.forEach(function (c) { self._kickBounce(c, c.slot * cfg.cheerWave, 1, cfg.cheerHopPx); });
+    var k = this.critter;
+    if (k && k.type === 'pigeon' && k.state !== 'away' && k.state !== 'gone') { this._pigeonAway(k); this._emit({ type: 'critter', critter: 'pigeon', action: 'leave', x: k.x, y: k.y }); }
+    this._emit({ type: 'cheer', x: B.x + B.w / 2, y: B.y - B.roofH });
   };
 
   P._endRound = function () {
@@ -582,7 +561,6 @@
     this._hard = st === 1 || this.time - this._playStart > this.cfg.adaptSlowPlay; this._lastPairs = N;
     this.interactive = false;
     this._setState('roundDone'); this.phase = 'done';
-    this._mood('cheer');
     this._emit({ type: 'roundDone', round: this.round, stars: st, mismatches: m });
   };
 
@@ -591,7 +569,9 @@
     this.talk = GW.Content.makeTalk(this.topic, { age: this.age, lang: this.lang, rng: rr });
     this.talk.glowAnswer = false;
     this.talkAnswered = null; this._talkAskT = 0; this._talkAsks = 0;
-    this.cards = []; this.open = []; this.cur = null; this.layout.grid = null; this.phase = null;
+    this.lastBuilding = this._snapshotBuilding();      // the lit building stays in the street behind the Talk panel
+    this.cards = []; this.open = []; this.cur = null; this.layout.grid = null; this.phase = null; this._gridVer++;
+    this.critter = null; this.cheer = 0;
     this._setState('talk');
     this._emit({ type: 'talk', talk: this.talk });
   };
@@ -612,107 +592,113 @@
   };
 
   // ---------------------------------------------------------------- input
-  /** The card under (x, y): rect grown by hitPad; inside several → nearest centre. 'gone' / dealing cards never hit. */
+  /** The window under (x, y): rect grown by hitPad; inside several → nearest centre. */
   P._hit = function (x, y) {
     var best = null, bd = 1e9, pad = this.cfg.hitPad;
     for (var i = 0; i < this.cards.length; i++) {
       var c = this.cards[i];
-      if (c.state === 'gone' || c.state === 'deal') continue;
-      var hw = c.w * Math.max(c.sx, 0.5) / 2 + pad, hh = c.h * Math.max(c.sy, 0.5) / 2 + pad;
-      var dx = Math.abs(x - c.x), dy = Math.abs(y - c.y);
-      if (dx > hw || dy > hh) continue;
+      if (Math.abs(x - c.x) > c.w / 2 + pad || Math.abs(y - c.y) > c.h / 2 + pad) continue;
       var d = hyp(x - c.x, y - c.y);
       if (d < bd - 1e-9) { bd = d; best = c; }
     }
     return best;
   };
+  P._hitGigi = function (x, y) {
+    var L = this.layout;
+    return inRect(x, y, L.gigiRect) || inRect(x, y, World.gigiHead(this));
+  };
 
+  /** Touch-down. Returns a window id, 'critter', 'gigi' or null. Order: the pigeon / balloon (drawn in front of the windows,
+   * tight box) → windows → Gigi (body or head box) → the bus. Windows answer only in play / resolve. */
   P.pointerDown = function (x, y) {
     this.finger.x = x; this.finger.y = y; this.finger.down = true;
-    if (this.state !== 'round' || this.solved) return null;
-    var ph = this.phase;
-    if (ph !== 'play' && ph !== 'resolve') return null;
-    var c = this._hit(x, y), cfg = this.cfg;
-    // QA P1-4: tapping the ONE open card again and again is not "activity" (no idle reset); 3 such taps → a hint
-    var same = !!c && c.state === 'up' && this.open.length === 1 && this.open[0] === c.id && !this._mis;
-    if (!same) { this._idleT = 0; this._idleGap = cfg.idleTime; }   // any other touch shows the child is here
-    if (!c) return null;
-    this._lookId = c.id; this._lookT = this.time; this._lastTapId = c.id;
-    if (same) { if (++this._sameN >= cfg.sameTapHint) { this._sameN = 0; this._autoHint(); } }
-    else this._sameN = 0;
-    if (c.state === 'matched' || c.state === 'up') { this._emitTap(c); return c.id; }
-    // c is face down
-    if (ph === 'resolve' && !this._mis) return null;          // a pair was just found (≤ matchResolveTime): flips wait
-    if (this.open.length < 2) { this._flipUp(c); return c.id; }
-    var a = this.cardById(this.open[0]), b = this.cardById(this.open[1]);
-    if (a.key === b.key || !cfg.fastReset) return null;     // a match is about to be confirmed
-    // impatient third tap: only after both faces showed thirdTapAfter s (QA P2-1); then both flip down at once, the new one up
-    if (!this._mis || this._mis.t < cfg.thirdTapAfter) return null;
-    this._flipDown(a); this._flipDown(b);
-    this.open = []; this._mis = null; this._setPhase('play');
-    this._flipUp(c);
-    return c.id;
+    var inRound = this.state === 'round', cfg = this.cfg;
+    var kr = this.critterRect(), k = this.critter;
+    if (kr && k.type !== 'bus' && k.state !== 'away' && inRect(x, y, kr)) { this._tapCritter(); return 'critter'; }
+    var scrolling = inRound && this.phase === 'scroll';
+    var c = inRound && !scrolling ? this._hit(x, y) : null;
+    if (c) {
+      if (this.solved) return null;
+      var ph = this.phase;
+      if (ph !== 'play' && ph !== 'resolve') return null;
+      // tapping the ONE open window again and again is not "activity" (no idle reset); 3 such taps → a hint
+      var same = c.state === 'up' && this.open.length === 1 && this.open[0] === c.id && !this._mis;
+      if (!same) { this._idleT = 0; this._idleGap = cfg.idleTime; }
+      this._lookId = c.id; this._lookT = this.time; this._lastTapId = c.id;
+      if (same) { if (++this._sameN >= cfg.sameTapHint) { this._sameN = 0; this._autoHint(); } }
+      else this._sameN = 0;
+      if (c.state === 'matched' || c.state === 'up') { this._emitTap(c); return c.id; }
+      if (ph === 'resolve' && !this._mis) return null;          // a pair was just found (≤ matchResolveTime): opens wait
+      if (this.open.length < 2) { this._openUp(c); return c.id; }
+      var a = this.cardById(this.open[0]), b = this.cardById(this.open[1]);
+      if (a.key === b.key || !cfg.fastReset) return null;     // a match is about to be confirmed
+      if (!this._mis || this._mis.t < cfg.thirdTapAfter) return null;
+      this._close(a); this._close(b);
+      this.open = []; this._mis = null; this._setPhase('play');
+      this._openUp(c);
+      return c.id;
+    }
+    if (this.state !== 'menu' && this._hitGigi(x, y)) { this._idleT = 0; this._idleGap = cfg.idleTime; return 'gigi'; }
+    if (kr && k.type === 'bus' && inRect(x, y, kr)) { this._tapCritter(); return 'critter'; }
+    if (inRound && (this.phase === 'play' || this.phase === 'resolve')) { this._idleT = 0; this._idleGap = cfg.idleTime; }   // the child is here
+    return null;
   };
   P.pointerMove = function (x, y) { this.finger.x = x; this.finger.y = y; };
   P.pointerUp = function (x, y) { if (x !== undefined) { this.finger.x = x; this.finger.y = y; } this.finger.down = false; };
 
-  P._emitTap = function (c) { this._emit({ type: 'tap', id: c.id, nameKind: c.nameKind, nameValue: c.nameValue, face: c.face, size: c.size }); };
-  P._flipUp = function (c) {
-    c.state = 'up'; c.flipT = 1; c.peekT = -1;
+  P._emitTap = function (c) { this._emit({ type: 'tap', id: c.id, nameKind: c.nameKind, nameValue: c.nameValue, face: c.face, size: c.size, obj: c.obj }); };
+  P._openUp = function (c) {
+    c.state = 'up'; c.openT = c.flipT = 1; c.peekT = -1;
     this.open.push(c.id);
-    this._emit({ type: 'flip', id: c.id, nameKind: c.nameKind, nameValue: c.nameValue, face: c.face, size: c.size, open: this.open.length });
+    this._emit({ type: 'flip', id: c.id, nameKind: c.nameKind, nameValue: c.nameValue, face: c.face, size: c.size, obj: c.obj, open: this.open.length });
   };
-  P._flipDown = function (c) { c.state = 'down'; c.flipT = 0; c.shakeT = -1; };
+  P._close = function (c) { c.state = 'down'; c.openT = c.flipT = 0; c.shakeT = -1; };
 
   P._names = function (ev, a, b) {
-    ev.nameKindA = a.nameKind; ev.nameValueA = a.nameValue; ev.faceA = a.face; ev.sizeA = a.size;
-    ev.nameKindB = b.nameKind; ev.nameValueB = b.nameValue; ev.faceB = b.face; ev.sizeB = b.size;
+    ev.nameKindA = a.nameKind; ev.nameValueA = a.nameValue; ev.faceA = a.face; ev.sizeA = a.size; ev.objA = a.obj;
+    ev.nameKindB = b.nameKind; ev.nameValueB = b.nameValue; ev.faceB = b.face; ev.sizeB = b.size; ev.objB = b.obj;
     return ev;
   };
 
   P._check = function () {
     var a = this.cardById(this.open[0]), b = this.cardById(this.open[1]);
-    if (a.key === b.key) this._match(a, b); else this._mismatch(a, b, true);
-    this.open = a.key === b.key ? [] : this.open;
+    if (a.key === b.key) this._match(a, b); else this._mismatch(a, b);
   };
+
+  /** Starts `hops` ballistic hops of apex px on window c's face after `delay` s. */
+  P._kickBounce = function (c, delay, hops, px) { c._bT = delay; c._bq = hops; c._bPx = px; };
 
   P._match = function (a, b) {
     var cfg = this.cfg, info = this.cur.pairInfo[a.key];
-    a.state = b.state = 'matched'; a.flipT = b.flipT = 1;
+    a.state = b.state = 'matched'; a.openT = b.openT = a.flipT = b.flipT = 1;
     this.open = []; this.found++; this.streak = 0;
     var last = this.found >= this.pairs;
-    var M = { a: a.id, b: b.id, t: 0, mx: (a.hx + b.hx) / 2, my: (a.hy + b.hy) / 2, burst: false, info: info, last: last };
-    this._anims.push(M);
+    this._anims.push({ a: a.id, b: b.id, t: 0, last: last });
     a._mt = b._mt = 0; a.glowT = b.glowT = 0; a.peekT = b.peekT = -1;
-    a._mx = b._mx = M.mx; a._my = b._my = M.my;
+    a._popA = cfg.matchHold + cfg.bloomDelay[0]; b._popA = cfg.matchHold + cfg.bloomDelay[1]; a._popped = b._popped = false;
+    this._kickBounce(a, cfg.matchHold, cfg.matchHops, cfg.bouncePx); this._kickBounce(b, cfg.matchHold, cfg.matchHops, cfg.bouncePx);
     this._setPhase('resolve');
     this._mood(last ? 'cheer' : 'happy');
     var ev = { type: 'match', a: a.id, b: b.id, key: a.key, nameKind: info.nameKind, nameValue: info.nameValue, found: this.found, pairs: this.pairs };
-    ['parity', 'animal', 'word', 'text', 'lower'].forEach(function (k) { if (info[k] !== undefined) ev[k] = info[k]; });
-    if (this.cur.golden && a.key === this.cur.golden) {
-      ev.golden = true; M.golden = true;
-      this._mood('cheer');
-      this._emit(this._names(ev, a, b));
-      this._emit({ type: 'golden', a: a.id, b: b.id, key: a.key, x: M.mx, y: M.my });
-    } else this._emit(this._names(ev, a, b));
-    if (last) { this.solved = true; this.interactive = false; }
+    ['parity', 'animal', 'home', 'word', 'text', 'lower', 'obj'].forEach(function (k) { if (info[k] !== undefined) ev[k] = info[k]; });
+    this._emit(this._names(ev, a, b));
+    this.collected.push({ topic: this.topic, key: a.key, faceA: a.face, faceB: b.face });
+    if (last) { this.solved = true; this.interactive = false; this._doneT = 0; }
   };
 
-  P._mismatch = function (a, b, show) {
+  P._mismatch = function (a, b) {
     var cfg = this.cfg;
     this.mismatches++; this.streak++;
     this._mood('oops');
-    if (show) {
-      this._mis = { a: a.id, b: b.id, t: 0 };
-      this._setPhase('resolve');
-      a.shakeT = b.shakeT = 0;
-    }
+    this._mis = { a: a.id, b: b.id, t: 0 };
+    this._setPhase('resolve');
+    a.shakeT = b.shakeT = 0;
     var ev = { type: 'mismatch', a: a.id, b: b.id, streak: this.streak, mismatches: this.mismatches };
     this._emit(this._names(ev, a, b));
     if (this.streak >= cfg.hintAfterStreak) { if (this._autoHint() !== null) this.streak = 0; }
   };
 
-  /** The pair to hint: the partner of a single open card, else the pair of the last tapped card, else a random unfound pair. */
+  /** The pair to hint: the partner of a single open window, else the pair of the last tapped one, else a random unfound pair. */
   P._hintPair = function () {
     var cards = this.cards, i, key = null;
     var free = function (c) { return c.state === 'down' || c.state === 'up'; };
@@ -737,14 +723,15 @@
     var cfg = this.cfg;
     for (var i = 0; i < 2; i++) { pr[i].glowT = cfg.hintGlowTime; if (pr[i].state === 'down') pr[i].peekT = 0; }
     this._lastHintT = this.time;
-    this._lookId = pr[0].id; this._lookT = this.time;
+    var lk = pr[0].state === 'down' ? pr[0] : pr[1];
+    this._lookId = lk.id; this._lookT = this.time;
     this._mood('think');
     var ev = { type: 'hint', a: pr[0].id, b: pr[1].id, nameKind: pr[0].nameKind, nameValue: pr[0].nameValue };
     if (fromIdle) ev.idle = true;
     this._emit(ev);
     return pr[0].id;
   };
-  /** Manual hint (tap on Dee / the bubble): glows one pair; no event if it already glows. */
+  /** Manual hint (tap on Gigi / the bubble): glows one pair; no event if it already glows. */
   P.hint = function () {
     if (this.state !== 'round' || this.solved || (this.phase !== 'play' && this.phase !== 'resolve')) return null;
     var pr = this._hintPair();
@@ -753,255 +740,276 @@
     return this._doHint(false);
   };
 
-  // ---------------------------------------------------------------- rewards
-  P._spawnReward = function (R) {
-    var cfg = this.cfg, info = R.info.reward, rr = this.rng;
-    if (this.rewards.length >= cfg.maxRewards) this.rewards.shift();
-    var k = this._rewardN++;
-    var r = { id: 'r' + k, kind: info.kind, color: info.color || null, shape: info.shape || null, sprite: info.sprite || null,
-      n: info.n || null, text: info.text || null, key: R.info.key || null,
-      x: R.mx, y: R.my, _px: R.mx, _py: R.my, rot: 0, _prot: 0, sx: 1, sy: 1, alpha: 1, flap: 1, face: 1, glow: 0,
-      size: cfg.sizes[info.kind === 'acorns' ? 'acorn' : info.kind], pieceSize: cfg.sizes.acorn,
-      anchor: info.kind === 'animal' ? 'bottom' : 'center', ax: null, ay: null, state: 'fly', t: 0, perch: null, target: null,
-      _ph: rr.float(0, TAU), _q: 0, _qv: 0, _nextIdle: rr.float(2, 5), pieces: null, _th: 0, _tw: 0 };
-    if (r.kind === 'animal') r.y = r._py = R.my + r.size / 2;
-    if (r.kind === 'butterfly') r._alt = (this._bfN++) % 2 === 1;
-    if (R.golden) r.golden = true;
-    this.rewards.push(r);
-    this.collected.push({ kind: r.kind, color: r.color, shape: r.shape, sprite: r.sprite, n: r.n, text: r.text });
-    this._perch(r, false);
-    this._emit({ type: 'reward', id: r.id, kind: r.kind, x: R.mx, y: R.my, color: r.color, shape: r.shape, sprite: r.sprite, n: r.n, text: r.text,
-      golden: !!R.golden });
-    return r;
-  };
-
-  /** Picks a free perch for r (tiers by kind preference; least overlap with other rewards) and starts its flight. */
-  P._perch = function (r, snap) {
-    var L = this.layout, cfg = this.cfg, pref = prefFor(r), boxes = [], i, j;
-    for (i = 0; i < this.rewards.length; i++) { var o = this.rewards[i]; if (o !== r && o.target) boxes.push(o.target.box); }
-    var best = null, bestScore = 1e18;
-    var free = [];
-    for (j = 0; j < pref.length; j++) {
-      free = [];
-      for (i = 0; i < L.perchCands.length; i++) {
-        var p = L.perchCands[i];
-        if (p.kind !== pref[j]) continue;
-        var pl = placeAt(r.kind, p, cfg, r.n);
-        if (!boxFree(pl.box, L, cfg)) continue;
-        var ov = 0;
-        for (var b = 0; b < boxes.length; b++) ov += overlapArea(pl.box, boxes[b]);
-        pl.kind = p.kind;
-        if (ov === 0) {   // tightness: distance to the nearest other reward box (tight packing leaves room for later ones)
-          var gap = 1e9;
-          for (var b2 = 0; b2 < boxes.length; b2++) gap = Math.min(gap, rectGap(pl.box, boxes[b2]));
-          pl._gap = gap; free.push(pl);
-        }
-        var score = ov * 10 + j;
-        if (score < bestScore) { bestScore = score; best = pl; }
-      }
-      if (free.length) break;
-    }
-    var pick = best;
-    if (free.length) {   // spread out: prefer perches ≥ perchMinGap from the others, random weighted by the gap (≤ 160 px)
-      var pool = free.filter(function (q) { return q._gap >= cfg.perchMinGap; });
-      if (!pool.length) pool = free;
-      var tot = 0, wsum = pool.map(function (q) { tot += Math.min(160, q._gap) + 1; return tot; });
-      var u = this.rng.next() * tot, k = 0;
-      while (k < pool.length - 1 && wsum[k] < u) k++;
-      pick = pool[k];
-    }
-    if (!pick) {   // nothing valid at all (tiny screen): the ground strip in the middle
-      pick = placeAt(r.kind, { x: L.W / 2, y: L.groundY + [].concat(cfg.groundPerchDy)[0], kind: 'ground' }, cfg, r.n); pick.kind = 'ground';
-    }
-    r.target = pick; r.perch = { kind: pick.kind, x: pick.x, y: pick.y };
-    if (snap) this._snapReward(r); else this._fly(r);
-  };
-
-  /** Re-perch rewards whose target box the current grid covers (round start) or everything (resize: snap). */
-  P._reperchAll = function (snap) {
-    var L = this.layout, cfg = this.cfg, list = this.rewards.slice(), i;
-    if (snap) { for (i = 0; i < list.length; i++) list[i].target = null; for (i = 0; i < list.length; i++) this._perch(list[i], true); return; }
-    for (i = 0; i < list.length; i++) {
-      var r = list[i];
-      if (r.target && !boxFree(r.target.box, L, cfg)) { r.target = null; this._perch(r, false); }
-    }
-  };
-
-  P._snapReward = function (r) {
-    var T = r.target;
-    r.x = r._px = T.x; r.y = r._py = T.y; r.ax = T.ax; r.ay = T.ay; r.rot = r._prot = 0; r.state = 'idle'; r.t = 0; r._th = 0; r._tw = 0;
-    if (r.kind === 'acorns') this._makePieces(r, true);
-  };
-
-  /** Starts the flight from the reward's current position to r.target. */
-  P._fly = function (r) {
-    var cfg = this.cfg, T = r.target, x0 = r.x, y0 = r.y, d = hyp(T.x - x0, T.y - y0), rr = this.rng;
-    r.state = 'fly'; r.t = 0; r.ax = null; r.ay = null;
-    r.face = T.x >= x0 ? 1 : -1;
-    if (r.kind === 'animal') {
-      var n = cfg.animalHops, pts = [{ x: x0, y: y0 }];
-      for (var k = 1; k < n; k++) {
-        var u = k === 1 ? 0.55 : 0.55 + 0.45 * (k - 1) / (n - 1);
-        pts.push({ x: x0 + (T.x - x0) * u, y: T.y + (y0 - T.y) * (1 - u) * (T.y < y0 ? 1 : 0) });
-      }
-      pts.push({ x: T.x, y: T.y });
-      r._hops = []; for (k = 0; k < n; k++) r._hops.push(this._hop(pts[k], pts[k + 1], cfg.hopApex[k] || 30, cfg.hopG));
-      r._hopI = 0; r._hopT = 0;
-    } else if (r.kind === 'acorns') {
-      this._makePieces(r, false);
+  // ---------------------------------------------------------------- critters (surprise round)
+  P._spawnCritter = function () {
+    var cfg = this.cfg, L = this.layout, r = this.arng, g = L.grid, type = this.surprise, k;
+    k = { type: type, x: 0, y: 0, _px: 0, _py: 0, rot: 0, _prot: 0, state: 'in', t: 0, flap: 0, face: 1, color: null,
+      sx: 1, sy: 1, _q: 0, _qv: 0, honk: 0, wave: 0, peck: 0, swing: 0, _sw: 0, size: 0, w: 0, h: 0, tapped: false };
+    if (type === 'pigeon') {
+      k.size = cfg.pigeonSize;
+      var c = r.pick(this.cards);
+      this._pigeonSill(k, c.id);
+      var fromRight = r.chance(0.6);
+      this._pigeonFly(k, fromRight ? L.W + 60 : -60, L.ins.top + r.float(30, 90), k.sx0, k.sy0, cfg.pigeonFly);
+      k.state = 'fly';
+    } else if (type === 'bus') {
+      k.w = cfg.busW; k.h = cfg.busH; k.x = -k.w / 2 - 20; k.y = L.groundY + cfg.busDy; k.vx = 0; k.xStop = L.W / 2; k.stopT = cfg.busStop;
+      k.lane = 1; k.state = 'in';
     } else {
-      var arc = Math.min(cfg.flyArcMax, cfg.flyArc * d);
-      r._bz = { x0: x0, y0: y0, cx: (x0 + T.x) / 2, cy: Math.min(y0, T.y) - arc, x1: T.x, y1: T.y,
-        T: clamp(0.7 + d / cfg.flySpeed, cfg.flyTime[0], cfg.flyTime[1]) };
+      k.size = cfg.balloonSize;
+      var cols = ['red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink'];
+      var used = {}; this.cards.forEach(function (q) { if (q.face.color) used[q.face.color] = 1; });
+      var free = cols.filter(function (q) { return !used[q]; });
+      k.color = r.pick(free.length ? free : cols);
+      var R = g.rect;
+      k.x0 = r.float(R.x + 0.15 * R.w, R.x + 0.85 * R.w); k.x = k.x0; k.y = L.groundY + 6; k.vx = 0; k.vy = -cfg.balloonRise;
+      k.state = 'rise'; k._ph = r.float(0, TAU);
+    }
+    k._px = k.x; k._py = k.y;
+    this.critter = k;
+    this._emit({ type: 'critter', critter: type, action: 'enter', x: k.x, y: k.y });
+  };
+  /** The pigeon's sill: the bottom edge of window id (a random spot along it). */
+  P._pigeonSill = function (k, id) {
+    var c = this.cardById(id) || this.cards[0];
+    if (!c) return;
+    k.sillId = c.id;
+    var u = k._sillU !== undefined ? k._sillU : (k._sillU = this.arng.float(-0.25, 0.25));
+    k.sx0 = c.hx + u * c.w; k.sy0 = c.hy + c.h / 2;
+  };
+  P._pigeonFly = function (k, x0, y0, x1, y1, T) {
+    var d = hyp(x1 - x0, y1 - y0);
+    k._bz = { x0: x0, y0: y0, cx: (x0 + x1) / 2, cy: Math.min(y0, y1) - 0.25 * d - 30, x1: x1, y1: y1, T: T };
+    k.x = x0; k.y = y0; k.t = 0; k.face = x1 >= x0 ? 1 : -1;
+  };
+  P._pigeonAway = function (k) {
+    var L = this.layout, right = k.x > L.W / 2 ? 1 : -1;
+    if (k.state === 'fly' && k._bz) right = k.face;
+    this._pigeonFly(k, k.x, k.y, right > 0 ? L.W + 90 : -90, L.ins.top - 70, this.cfg.pigeonAway);
+    k.state = 'away';
+  };
+  P._tapCritter = function () {
+    var k = this.critter, cfg = this.cfg;
+    k.tapped = true;
+    if (k.type === 'pigeon') this._pigeonAway(k);
+    else if (k.type === 'bus') { k.honk = 1; k._q = 0.08; k._qv = 0; k.wave = 1; if (k.state === 'stop') k.stopT = Math.min(k.stopT + cfg.busHonkExtra, cfg.busStop + 2 * cfg.busHonkExtra); }
+    else if (k.state !== 'away') { k.state = 'away'; k.t = 0; k._spin = 0; }
+    this._emit({ type: 'critter', critter: k.type, action: 'tap', x: k.x, y: k.type === 'bus' ? k.y - k.h / 2 : k.y });
+  };
+  /** The vehicle ahead of v (same lane, in its driving direction) among the cars and the bus. */
+  P._ahead = function (v, dir) {
+    var best = null, bd = 1e9, list = this.traffic.slice(), k = this.critter;
+    if (k && k.type === 'bus' && k.state !== 'gone') list.push(k);
+    for (var i = 0; i < list.length; i++) {
+      var o = list[i]; if (o === v || o.lane !== v.lane) continue;
+      var d = (o.x - v.x) * dir;
+      if (d > 0 && d < bd) { bd = d; best = o; }
+    }
+    return best ? { v: best, gap: bd - (best.w + v.w) / 2 } : null;
+  };
+  P._stepCritter = function (h) {
+    var k = this.critter, cfg = this.cfg, L = this.layout, u, B;
+    k._px = k.x; k._py = k.y; k._prot = k.rot;
+    k.t += h;
+    if (k.type === 'pigeon') {
+      if (k.state === 'fly' || k.state === 'away' || k.state === 'hop') {
+        B = k._bz; u = clamp(k.t / B.T, 0, 1);
+        var s = k.state === 'away' ? u * u : smooth(u), q = 1 - s;
+        k.x = q * q * B.x0 + 2 * q * s * B.cx + s * s * B.x1; k.y = q * q * B.y0 + 2 * q * s * B.cy + s * s * B.y1;
+        k.flap = 0.5 + 0.5 * Math.sin(TAU * cfg.pigeonFlapHz * k.t * (k.state === 'away' ? 1.4 : 1));
+        k.rot = 0.18 * k.face * Math.sin(Math.PI * u);
+        if (u >= 1) {
+          if (k.state === 'away') { k.state = 'gone'; return; }
+          if (k.state === 'fly') this._emit({ type: 'critter', critter: 'pigeon', action: 'land', x: k.x, y: k.y });
+          k.state = 'sit'; k.t = 0; k.rot = 0; k.flap = 0; k._q = 0.15; k._qv = 0;
+          k._peckT = this.arng.float(cfg.pigeonPeck[0], cfg.pigeonPeck[1]); k._moveT = this.arng.float(cfg.pigeonMove[0], cfg.pigeonMove[1]);
+        }
+      } else if (k.state === 'sit') {
+        k.x = k.sx0; k.y = k.sy0;
+        k._peckT -= h;
+        if (k._peckT <= 0) { k._peckT = this.arng.float(cfg.pigeonPeck[0], cfg.pigeonPeck[1]); k._peck0 = k.t; }
+        k.peck = k._peck0 !== undefined && k.t - k._peck0 < 0.3 ? Math.sin(Math.PI * (k.t - k._peck0) / 0.3) : 0;
+        k._moveT -= h;
+        if (k._moveT <= 0 && this.cards.length > 1) {   // flutters over to another sill now and then
+          var others = this.cards.filter(function (c) { return c.id !== k.sillId; });
+          var x0 = k.x, y0 = k.y; k._sillU = undefined; this._pigeonSill(k, this.arng.pick(others).id);
+          this._pigeonFly(k, x0, y0, k.sx0, k.sy0, 0.8); k.state = 'hop';
+        }
+      }
+      var w0 = 18, z0 = 0.3; k._qv += (-w0 * w0 * k._q - 2 * z0 * w0 * k._qv) * h; k._q += k._qv * h; k.sx = 1 + k._q; k.sy = 1 - k._q;
+    } else if (k.type === 'bus') {
+      var vmax = cfg.busSpeed, ah = this._ahead(k, 1);
+      if (k.state === 'in') { var d = k.xStop - k.x; vmax = Math.min(vmax, Math.sqrt(Math.max(0, 2 * cfg.busBrake * d))); if (d <= 0.5) { k.state = 'stop'; k.t = 0; k.x = Math.max(k.x, k.xStop); vmax = 0; this._emit({ type: 'critter', critter: 'bus', action: 'stop', x: k.x, y: k.y }); } }
+      else if (k.state === 'stop') { vmax = 0; k.stopT -= h; if (k.stopT <= 0) { k.state = 'out'; k.t = 0; } }
+      if (ah) vmax = Math.min(vmax, Math.max(0, (ah.gap - cfg.carGap) * 3 + (ah.v.vx || 0)));
+      var acc = clamp((vmax - k.vx) / h, -cfg.busBrake * 2, cfg.busAccel);
+      k.vx += acc * h; if (k.state === 'stop') k.vx = Math.max(0, Math.min(k.vx, vmax));
+      k.x += k.vx * h;
+      k.rot += (clamp(acc * 0.00025, -0.05, 0.05) - k.rot) * Math.min(1, 6 * h);   // body pitch: nose dips when braking
+      k.honk = Math.max(0, k.honk - h / 0.5); k.wave = Math.max(0, k.wave - h / 1.5);
+      var w1 = 16, z1 = 0.3; k._qv += (-w1 * w1 * k._q - 2 * z1 * w1 * k._qv) * h; k._q += k._qv * h; k.sx = 1 + k._q; k.sy = 1 - k._q;
+      if (k.state === 'out' && k.x - k.w / 2 > L.W + 20) k.state = 'gone';
+    } else {   // balloon
+      if (k.state === 'rise') {
+        var ax = k.x;
+        k.x = k.x0 + cfg.balloonSwayPx * Math.sin(TAU * cfg.balloonSwayHz * k.t + k._ph) + 0.4 * this.wind * k.t;
+        k.y += -cfg.balloonRise * h;
+        k.vx = (k.x - ax) / h;
+      } else if (k.state === 'away') {
+        var ax2 = k.x;
+        k.vy = Math.max(-cfg.balloonAway, k.vy - 1200 * h); k.y += k.vy * h;
+        k._spin += 9 * h; k.rot = k._spin + 0.2 * Math.sin(k._spin);
+        k.x += 0.3 * this.wind * h; k.vx = (k.x - ax2) / h;
+      }
+      // the string is a damped pendulum hanging from the balloon; the balloon's sideways acceleration swings it
+      var Ls = cfg.balloonString, axl = (k.vx - (k._vx0 || 0)) / h; k._vx0 = k.vx;
+      k._sw += (-(980 / Ls) * Math.sin(k.swing) - 1.6 * k._sw - axl / Ls * Math.cos(k.swing) * 0.6) * h;
+      k.swing = clamp(k.swing + k._sw * h, -0.8, 0.8);
+      if (k.state === 'rise') k.rot = 0.08 * Math.sin(TAU * cfg.balloonSwayHz * k.t + k._ph + 1);
+      if (k.y < -cfg.balloonSize * 1.5 - 60) k.state = 'gone';
     }
   };
 
-  /** A parabolic hop from a to b with an apex ≥ apex px above the higher end (kept on screen). */
-  P._hop = function (a, b, apex, g) {
-    var top = this.layout.ins.top + 30;
-    var H = Math.max(apex, a.y - b.y + apex);
-    if (a.y - H < top) H = Math.max(Math.max(0, a.y - b.y) + 4, a.y - top);
-    var vy = -Math.sqrt(2 * g * H), dy = b.y - a.y;
-    var T = (-vy + Math.sqrt(Math.max(0, vy * vy + 2 * g * dy))) / g;
-    T = Math.max(T, 0.12);
-    return { x0: a.x, y0: a.y, vx: (b.x - a.x) / T, vy: vy, T: T, g: g, x1: b.x, y1: b.y };
-  };
-
-  P._makePieces = function (r, rest) {
-    var cfg = this.cfg, T = r.target, n = Math.min(cfg.acornMax, Math.max(1, r.n || 1)), rr = this.rng, D = cfg.sizes.acorn, R = D / 2;
-    var rows = acornRows(n), x0 = r.x, y0 = r.y, k = 0;
-    r.pieces = []; r._hw = Math.max((rows[0] - 1) / 2 * 0.6 * D + R, cfg.acornSpread);
-    for (var lay = 0; lay < rows.length; lay++) for (var idx = 0; idx < rows[lay]; idx++, k++) {
-      // a pile: rows of 4 / 3 / 3 / 2, each row 0.6·size apart, every row on the gaps of the one below
-      var tx = T.x + (idx - (rows[lay] - 1) / 2) * 0.6 * D + (rest ? 0 : rr.float(-2, 2));
-      var ty = T.y - R - lay * R * 1.25;
-      var pc = { x: x0, y: y0, _px: x0, _py: y0, rot: 0, _prot: 0, vx: 0, vy: 0, vr: 0, tx: tx, ty: ty, state: 'wait',
-        delay: k * cfg.acornStagger, hop: null };
-      if (rest) { pc.x = pc._px = tx; pc.y = pc._py = ty; pc.state = 'rest'; pc.rot = pc._prot = rr.float(-0.4, 0.4); }
-      else pc.hop = this._hop({ x: x0 + rr.float(-8, 8), y: y0 }, { x: tx, y: ty }, rr.float(cfg.acornApex[0], cfg.acornApex[1]), cfg.acornG);
-      r.pieces.push(pc);
+  // ---------------------------------------------------------------- traffic (ambient)
+  P._stepTraffic = function (h) {
+    var cfg = this.cfg, L = this.layout, r = this.arng, i;
+    var quiet = this.state === 'talk' || this.state === 'levelDone' || this.state === 'sessionDone' || this.state === 'menu';
+    if (!quiet && this.time >= this._carNext) {
+      this._carNext = this.time + 1;            // retry in 1 s when the lane entry is busy
+      if (this.traffic.length < cfg.carMax) {
+        var lane = r.int(0, 1), face = lane === 1 ? 1 : -1, x = face > 0 ? -cfg.carW / 2 - 10 : L.W + cfg.carW / 2 + 10;
+        var probe = { lane: lane, x: x - face * 400, w: cfg.carW }, ah = this._ahead(probe, face);
+        if (!ah || ah.gap > 260) {
+          this.traffic.push({ id: 'car' + (this._carN++), kind: r.chance(0.5) ? 'car_a' : 'car_b', lane: lane, face: face, x: x, _px: x,
+            y: L.groundY + cfg.carLaneDy[lane], _py: L.groundY + cfg.carLaneDy[lane], vx: face * r.float(cfg.carSpeed[0], cfg.carSpeed[1]), w: cfg.carW, h: cfg.carH });
+          this.traffic[this.traffic.length - 1].v0 = Math.abs(this.traffic[this.traffic.length - 1].vx);
+          this._carNext = this.time + r.float(cfg.carEvery[0], cfg.carEvery[1]);
+        }
+      }
+    }
+    for (i = this.traffic.length - 1; i >= 0; i--) {
+      var c = this.traffic[i];
+      c._px = c.x; c._py = c.y;
+      var vmax = c.v0, a2 = this._ahead(c, c.face);
+      if (a2) vmax = Math.min(vmax, Math.max(0, (a2.gap - cfg.carGap) * 3 + Math.abs(a2.v.vx || 0)));
+      var sp = Math.abs(c.vx);
+      sp += clamp((vmax - sp) / h, -cfg.carAccel * 2, cfg.carAccel) * h;
+      c.vx = c.face * Math.max(0, sp);
+      c.x += c.vx * h;
+      if (c.x < -cfg.carW - 200 || c.x > L.W + cfg.carW + 200) this.traffic.splice(i, 1);
     }
   };
 
-  P._stepReward = function (r, h) {
-    var cfg = this.cfg, T = r.target, i, u;
-    r.t += h;
-    if (this.state === 'levelDone') r.alpha = 1 - clamp(this.stateTime / cfg.rewardFadeTime, 0, 1);
-    switch (r.kind) {
-      case 'butterfly': case 'star': case 'lantern': {
-        if (r.state === 'fly') {
-          var B = r._bz; u = clamp(r.t / B.T, 0, 1);
-          var s = smooth(u), q = 1 - s;
-          var bx = q * q * B.x0 + 2 * q * s * B.cx + s * s * B.x1, by = q * q * B.y0 + 2 * q * s * B.cy + s * s * B.y1;
-          if (r.kind === 'butterfly') {
-            var dx = 2 * q * (B.cx - B.x0) + 2 * s * (B.x1 - B.cx), dy = 2 * q * (B.cy - B.y0) + 2 * s * (B.y1 - B.cy), dl = hyp(dx, dy) || 1;
-            var fl = cfg.flutterAmp * Math.sin(Math.PI * u) * (Math.sin(TAU * cfg.flutterHz * r.t + r._ph) + 0.4 * Math.sin(TAU * 3.7 * r.t + 2 * r._ph));
-            bx += -dy / dl * fl; by += dx / dl * fl;
-            r.flap = 0.5 + 0.5 * Math.cos(TAU * cfg.flapHz * r.t);
-            r.rot = clamp(dx / dl * 0.25, -0.3, 0.3); r.face = dx >= 0 ? 1 : -1;
-          } else if (r.kind === 'star') { r.rot += 4 * h; r.glow = 1; }
-          else { r.rot = clamp((B.x1 - B.x0) * 0.0006 * Math.sin(Math.PI * u), -0.3, 0.3); r.glow = 0.6 + 0.4 * u; }
-          r.x = bx; r.y = by;
-          if (u >= 1) {
-            r.x = T.x; r.y = T.y; r.state = 'settle'; r.t = 0;
-            if (r.kind === 'lantern' && T.ax !== null) { r.ax = T.ax; r.ay = T.ay; r._th = cfg.pendKick * r.face; r._tw = 0; }
-            this._emit({ type: 'land', id: r.id, kind: r.kind, x: r.x, y: r.y });
-          }
-        } else {
-          if (r.state === 'settle' && r.t >= cfg.settleTime) { r.state = 'idle'; r.t = 0; }
-          if (r.kind === 'butterfly') {
-            var flapping = r.state === 'settle' || r._idleFlap > 0;
-            if (r.state === 'idle') { r._nextIdle -= h; if (r._nextIdle <= 0) { r._idleFlap = cfg.flapIdleTime; r._nextIdle = this.rng.float(cfg.flapIdleEvery[0], cfg.flapIdleEvery[1]); } }
-            if (r._idleFlap > 0) r._idleFlap -= h;
-            var slow = r.state === 'settle' ? 1 - r.t / cfg.settleTime : 0.5;
-            r.flap = flapping ? 0.5 + 0.5 * Math.cos(TAU * cfg.flapHz * (0.5 + 0.5 * slow) * r.t) : Math.max(0.15, r.flap - 3 * h);
-            r.rot += (0 - r.rot) * Math.min(1, 8 * h);
-            r.x = T.x; r.y = T.y;
-          } else if (r.kind === 'star') {
-            r.sx = r.sy = 1 + cfg.starTwinkle * Math.sin(TAU * cfg.starHz * this.time + r._ph);
-            r.rot = 0.15 * Math.sin(0.8 * this.time + r._ph);
-            r.x = T.x; r.y = T.y + cfg.bobPx * Math.sin(1.3 * this.time + r._ph);
-            r.glow = 0.65 + 0.35 * Math.sin(TAU * 0.7 * this.time + r._ph);
-          } else {   // lantern: pendulum from the branch, nudged by the wind
-            r.glow = 0.8 + 0.2 * Math.sin(5.3 * this.time + r._ph) * Math.sin(2.1 * this.time);
-            if (r.ax !== null) {
-              var Lp = cfg.lanternString + r.size / 2;
-              r._tw += (-(cfg.pendG / Lp) * Math.sin(r._th) - cfg.pendDamp * r._tw + cfg.pendWind * this.wind * 9.8) * h;
-              r._th += r._tw * h;
-              r._th = clamp(r._th, -1, 1);
-              r.x = r.ax + Lp * Math.sin(r._th); r.y = r.ay + Lp * Math.cos(r._th);
-              r.rot = -r._th;
-            } else { r.x = T.x; r.y = T.y + cfg.bobPx * Math.sin(1.1 * this.time + r._ph); r.rot = 0.05 * Math.sin(0.9 * this.time + r._ph); }
-          }
-        }
-        break;
-      }
-      case 'animal': {
-        if (r.state === 'fly') {
-          var hp = r._hops[r._hopI];
-          r._hopT += h;
-          var tt = Math.min(r._hopT, hp.T);
-          r.x = hp.x0 + hp.vx * tt; r.y = hp.y0 + hp.vy * tt + 0.5 * hp.g * tt * tt;
-          r.rot = 0.12 * r.face * Math.sin(Math.PI * tt / hp.T);
-          if (r._hopT >= hp.T) {
-            r.x = hp.x1; r.y = hp.y1; r.rot = 0;
-            var vy = hp.vy + hp.g * hp.T;
-            r._q = cfg.hopSquash * clamp(vy / 700, 0.4, 1.2); r._qv = 0;
-            r._hopI++; r._hopT = 0;
-            if (r._hopI >= r._hops.length) { r.state = 'settle'; r.t = 0; this._emit({ type: 'land', id: r.id, kind: r.kind, x: r.x, y: r.y }); }
-          }
-        } else {
-          if (r.state === 'settle' && r.t >= cfg.settleTime) { r.state = 'idle'; r.t = 0; }
-          if (r.state === 'idle') {
-            r._nextIdle -= h;
-            if (r._nextIdle <= 0 && !r._ih) { r._ih = this._hop({ x: T.x, y: T.y }, { x: T.x, y: T.y }, cfg.idleHopPx, cfg.hopG); r._ihT = 0; r._nextIdle = this.rng.float(cfg.idleHopEvery[0], cfg.idleHopEvery[1]); }
-          }
-          if (r._ih) {
-            r._ihT += h; var it = Math.min(r._ihT, r._ih.T);
-            r.y = T.y + r._ih.vy * it + 0.5 * r._ih.g * it * it;
-            if (r._ihT >= r._ih.T) { r._ih = null; r.y = T.y; r._q = cfg.hopSquash * 0.4; r._qv = 0; }
-          } else r.y = T.y;
-          r.x = T.x;
-        }
-        var w = 18, z = 0.3;
-        r._qv += (-w * w * r._q - 2 * z * w * r._qv) * h; r._q += r._qv * h;
-        r.sx = 1 + r._q; r.sy = 1 - r._q + (r.state === 'idle' && !r._ih ? 0.02 * Math.sin(TAU * 0.5 * this.time + r._ph) : 0);
-        break;
-      }
-      case 'acorns': {
-        var all = true, any = false, R = cfg.sizes.acorn / 2;
-        for (i = 0; i < r.pieces.length; i++) {
-          var pc = r.pieces[i];
-          pc._px = pc.x; pc._py = pc.y; pc._prot = pc.rot;
-          if (pc.state === 'wait') { pc.delay -= h; if (pc.delay <= 0) { pc.state = 'air'; pc.vx = pc.hop.vx; pc.vy = pc.hop.vy; pc.vr = pc.hop.vx / R * 0.5; } all = false; continue; }
-          if (pc.state === 'air' || pc.state === 'bounce') {
-            pc.vy += cfg.acornG * h; pc.x += pc.vx * h; pc.y += pc.vy * h; pc.rot += pc.vr * h;
-            if (pc.state === 'air') pc.x = clamp(pc.x, Math.min(pc.hop.x0, pc.tx) - 1, Math.max(pc.hop.x0, pc.tx) + 1);
-            if (pc.y >= pc.ty && pc.vy > 0) {
-              pc.y = pc.ty;
-              if (pc.state === 'air') { any = true; pc.vx = clamp(pc.vx * 0.15, -60, 60); }
-              pc.state = 'bounce';
-              pc.vy = -cfg.acornRest * pc.vy; pc.vx *= cfg.acornFric; pc.vr = pc.vx / R;
-              if (Math.abs(pc.vy) < 60) { pc.vy = 0; pc.state = 'roll'; }
-            }
-            if (pc.state !== 'roll') all = false;
-          }
-          if (pc.state === 'roll') {
-            pc.vx -= pc.vx * Math.min(1, cfg.acornRoll * h);
-            pc.x += pc.vx * h; pc.rot += pc.vx / R * h;
-            pc.x = clamp(pc.x, T.x - r._hw + R, T.x + r._hw - R);
-            if (Math.abs(pc.vx) < 2) { pc.vx = 0; pc.state = 'rest'; }
-            else all = false;
-          }
-        }
-        if (r.state === 'fly' && r.pieces.some(function (p) { return p.state === 'bounce' || p.state === 'roll' || p.state === 'rest'; })) {
-          r.state = 'settle'; r.t = 0; this._emit({ type: 'land', id: r.id, kind: r.kind, x: T.x, y: T.y });
-        }
-        if (r.state === 'settle' && all) { r.state = 'idle'; r.t = 0; }
-        r.x = T.x; r.y = T.y;
-        break;
-      }
+  // ---------------------------------------------------------------- Gigi's head (springy neck)
+  /** Is (jx, jy) a valid head joint? reach, screen, top limit and (withGrid) ≥ headKeep px away from the window grid. */
+  P._headOk = function (jx, jy, withGrid, reach) {
+    var L = this.layout, cfg = this.cfg, h = L.gigi.h, b = headBoxAt(jx, jy, h, cfg), S = L.safe;
+    var d = hyp(jx - L.neckBase.x, jy - L.neckBase.y);
+    if (d > (reach || L.neckMax) + 1e-6 || d < L.neckMin - 1e-6) return false;
+    if (b.x < S.x - 1e-6 || b.y < S.y - 1e-6 || b.x + b.w > S.x + S.w + 1e-6 || b.y + b.h > S.y + S.h + 1e-6) return false;
+    if (jy < L.ins.top + cfg.headTopK * h - 1e-6) return false;
+    if (withGrid && L.grid && overlapArea(b, inflate(L.grid.rect, cfg.headKeep)) > 0) return false;
+    return true;
+  };
+  /** The valid head joint nearest to (tx, ty) (projections + a polar sample of the reach disc; the rest pose last). */
+  P._nearestHead = function (tx, ty, withGrid) {
+    var L = this.layout, cfg = this.cfg, h = L.gigi.h, base = L.neckBase, self = this, best = null, bd = 1e18;
+    function consider(x, y) {
+      // pull into the reach annulus first
+      var dx = x - base.x, dy = y - base.y, d = hyp(dx, dy) || 1e-9;
+      if (d > L.neckMax) { x = base.x + dx / d * L.neckMax; y = base.y + dy / d * L.neckMax; }
+      else if (d < L.neckMin) { x = base.x + dx / d * L.neckMin; y = base.y + dy / d * L.neckMin; }
+      if (!self._headOk(x, y, withGrid)) return;
+      var e = hyp(x - tx, y - ty);
+      if (e < bd) { bd = e; best = { x: x, y: y }; }
     }
+    consider(tx, ty);
+    if (best && bd < 1e-6) return best;
+    // screen-clamped target
+    var s = cfg.headK * h, ox = cfg.headJoint[0] / cfg.headBoxSvg * s, oy = cfg.headJoint[1] / cfg.headBoxSvg * s, S = L.safe;
+    var cx = clamp(tx, S.x + ox, S.x + S.w - (s - ox)), cy = clamp(ty, Math.max(S.y + oy, L.ins.top + cfg.headTopK * h), S.y + S.h - (s - oy));
+    consider(cx, cy);
+    if (withGrid && L.grid) {   // just outside the forbidden rect for the joint (grid + keep-out, grown by the head box offsets)
+      var E = inflate(L.grid.rect, cfg.headKeep), F = { x: E.x - (s - ox), y: E.y - (s - oy), w: E.w + s, h: E.h + s }, m = 0.5;
+      [[F.x - m, cy], [F.x + F.w + m, cy], [cx, F.y - m], [cx, F.y + F.h + m],
+        [F.x - m, F.y - m], [F.x + F.w + m, F.y - m], [F.x - m, F.y + F.h + m], [F.x + F.w + m, F.y + F.h + m]].forEach(function (p) { consider(p[0], p[1]); });
+    }
+    for (var ai = 0; ai < 40; ai++) for (var ri = 0; ri < 6; ri++) {
+      var ang = ai / 40 * TAU, rad = L.neckMin + (L.neckMax - L.neckMin) * (ri + 0.5) / 6;
+      consider(base.x + Math.cos(ang) * rad, base.y + Math.sin(ang) * rad);
+    }
+    consider(L.headRest.x, L.headRest.y);
+    return best || { x: L.headRest.x, y: L.headRest.y };
+  };
+  P._snapHead = function () {
+    var g = this.gigi, L = this.layout;
+    g.headX = g._phx = L.headRest.x; g.headY = g._phy = L.headRest.y; g._hvx = g._hvy = 0;
+    g.neckBaseX = L.neckBase.x; g.neckBaseY = L.neckBase.y; g.tx = L.headRest.x; g.ty = L.headRest.y;
+  };
+  /** Head target (cached): rest / walking lean / the window Gigi looks at / the roof while the building cheers. */
+  P._headTarget = function () {
+    var g = this.gigi, L = this.layout, cfg = this.cfg, h = L.gigi.h, key, tx, ty, grid = true;
+    var look = this._lookId && this.time - this._lookT < cfg.lookHold ? this.cardById(this._lookId) : null;
+    if (this.state === 'round' && this.phase === 'scroll') { key = 'walk'; tx = L.headRest.x + cfg.walkLead * h; ty = L.headRest.y; grid = false; }
+    else if (this.state === 'round' && this.phase === 'cheer' && L.grid) { key = 'roof'; var B = L.grid.building; tx = B.x + B.w / 2; ty = B.y - B.roofH; }
+    else if (this.state === 'round' && look && L.grid) { key = 'win:' + look.id; tx = look.hx; ty = look.hy; }
+    else { key = 'rest'; tx = L.headRest.x; ty = L.headRest.y; }
+    key += '|' + this._gridVer;
+    if (key !== this._tKey) {
+      this._tKey = key;
+      var q = this._nearestHead(tx, ty, grid);
+      g.tx = q.x; g.ty = q.y; g._tGrid = grid;
+    }
+  };
+  P._stepGigi = function (h) {
+    var d = this.gigi, cfg = this.cfg, L = this.layout;
+    d._phx = d.headX; d._phy = d.headY; d._phop = d.hop;
+    if (d.moodT > 0) { d.moodT -= h; if (d.moodT <= 0) { d.moodT = 0; d.mood = 'idle'; } }
+    // eyes
+    var B = L.grid ? L.grid.rect : L.board, lx = B.x + B.w / 2, ly = B.y + B.h / 2;
+    if (this._lookId && this.time - this._lookT < cfg.lookHold) { var c = this.cardById(this._lookId); if (c) { lx = c.x; ly = c.y; } }
+    if (d.walking) { lx = L.W; ly = L.gigi.y - 1.5 * L.gigi.h; }
+    var k = Math.min(1, h * cfg.lookRate);
+    d.lookX += (lx - d.lookX) * k; d.lookY += (ly - d.lookY) * k;
+    // hops (mood) + trot bob
+    var hop = 0;
+    if (d._hopT >= 0) {
+      d._hopT += h;
+      var n = d._hopT / cfg.hopTime;
+      if (n >= d._hopN) d._hopT = -1;
+      else { var ph = n - Math.floor(n); hop = d._hopPx * Math.pow(0.7, Math.floor(n)) * 4 * ph * (1 - ph); }
+    }
+    if (d.walking) {
+      var w0 = d.walk; d.walk = (d.walk + cfg.walkHz * h) % 1;
+      var f0 = Math.floor(w0 * 2), f1 = Math.floor(d.walk * 2) + (d.walk < w0 ? 2 : 0);
+      if (f1 !== f0) { d._foot = (d._foot + 1) % 2; this._emit({ type: 'walk', foot: d._foot }); }
+      hop += cfg.walkBob * Math.abs(Math.sin(TAU * d.walk));
+    } else d.walk = 0;
+    d.hop = hop;
+    // blink
+    d._blinkT -= h;
+    if (d._blinkT <= 0) { d._blinkOn = cfg.blinkTime; d._blinkT = this.arng.float(cfg.blinkEvery[0], cfg.blinkEvery[1]); }
+    if (d._blinkOn > 0) d._blinkOn -= h;
+    d.blink = d._blinkOn > 0 ? 1 : 0;
+    // head: spring to the target, then the hard limits (grid keep-out, screen, reach)
+    this._headTarget();
+    // (the body hop lifts the head target too: the head follows through the springy neck, a little late)
+    var w = cfg.headOmega, z = cfg.headZeta;
+    d._hvx += (w * w * (d.tx - d.headX) - 2 * z * w * d._hvx) * h; d._hvy += (w * w * (d.ty - hop - d.headY) - 2 * z * w * d._hvy) * h;
+    var nx = d.headX + d._hvx * h, ny = d.headY + d._hvy * h;
+    var base = L.neckBase, dd = hyp(nx - base.x, ny - base.y) || 1e-9, mx = cfg.stretchMaxK * L.neckMax;
+    if (dd > mx) { nx = base.x + (nx - base.x) / dd * mx; ny = base.y + (ny - base.y) / dd * mx; }
+    if (dd < L.neckMin) { nx = base.x + (nx - base.x) / dd * L.neckMin; ny = base.y + (ny - base.y) / dd * L.neckMin; }
+    if (!this._headOk(nx, ny, d._tGrid !== false, mx)) {
+      // the overshoot would hit the keep-out / the screen edge: slide along it (keep the free axis), else stop there
+      if (this._headOk(nx, d.headY, d._tGrid !== false, mx)) { ny = d.headY; d._hvy = 0; }
+      else if (this._headOk(d.headX, ny, d._tGrid !== false, mx)) { nx = d.headX; d._hvx = 0; }
+      else if (this._headOk(d.headX, d.headY, d._tGrid !== false, mx)) { nx = d.headX; ny = d.headY; d._hvx = d._hvy = 0; }
+      else { var q = this._nearestHead(nx, ny, d._tGrid !== false); nx = q.x; ny = q.y; d._hvx = d._hvy = 0; }
+    }
+    d.headX = nx; d.headY = ny;
+    d.neckBaseX = base.x; d.neckBaseY = base.y - hop;     // the neck base rides on the hopping body
+    d.neckLen = hyp(nx - base.x, ny - base.y);
   };
 
   // ---------------------------------------------------------------- simulation
@@ -1016,8 +1024,10 @@
 
   P._step = function (h) {
     var cfg = this.cfg, i;
-    for (i = 0; i < this.cards.length; i++) { var o = this.cards[i]; o._px = o.x; o._py = o.y; o._prot = o.rot; o._pflip = o.flip; }
-    for (i = 0; i < this.rewards.length; i++) { var q = this.rewards[i]; q._px = q.x; q._py = q.y; q._prot = q.rot; }
+    for (i = 0; i < this.cards.length; i++) {
+      var o = this.cards[i]; o._px = o.x; o._py = o.y; o._prot = o.rot; o._popen = o.open; o._pflip = o.flip; o._pbloom = o.bloom; o._pbounce = o.bounce;
+    }
+    this._pscroll = this.scroll; this._pscrollT = this.scrollT;
     this.time += h; this.stateTime += h; this.phaseTime += h;
 
     switch (this.state) {
@@ -1042,35 +1052,41 @@
       case 'levelDone':
         if (this.stateTime >= cfg.levelDoneTime) {
           if (this.level < this.levels.length - 1) this.startLevel(this.level + 1);
-          else { this._setState('sessionDone'); this.cards = []; this.rewards = []; this._emit({ type: 'sessionDone', stars: this.stars, rewards: this.collected.length }); }
+          else { this._setState('sessionDone'); this.cards = []; this._emit({ type: 'sessionDone', stars: this.stars, rewards: this.collected.length, found: this.collected.length }); }
         }
         break;
     }
-    for (i = 0; i < this.cards.length; i++) this._stepCard(this.cards[i], h);
-    for (i = 0; i < this.rewards.length; i++) this._stepReward(this.rewards[i], h);
-    this._stepDee(h);
+    for (i = 0; i < this.cards.length; i++) this._stepWindow(this.cards[i], h);
+    if (this.critter) { this._stepCritter(h); if (this.critter && this.critter.state === 'gone') this.critter = null; }
+    this._stepTraffic(h);
+    this._stepGigi(h);
   };
 
   P._stepRound = function (h) {
     var cfg = this.cfg, cards = this.cards, i, c, all;
     switch (this.phase) {
-      case 'deal':
-        all = true;
-        for (i = 0; i < cards.length; i++) if (cards[i].state === 'deal') { all = false; break; }
-        if (all && this._holdT < 0) this._holdT = 0;
-        if (this._holdT >= 0) {
-          this._holdT += h;
-          if (this._holdT >= cfg.dealSettle) {
-            this._holdT = -1; this._setPhase('peek');
-            for (i = 0; i < cards.length; i++) cards[i].waveT = cards[i].slot * cfg.peekStagger;
-            this._emit({ type: 'peek' });
+      case 'scroll': {
+        var L = this.layout, u = this.phaseTime / cfg.scrollTime, s = smooth(u), dPx = (s - this.scrollT) * L.W;
+        this.scrollT = s; this.scroll = this._scroll0 + s * L.W;
+        this.buildingDx = (1 - s) * L.W; this.prevDx = -s * L.W;
+        // the critter and the cars belong to the street: they move with it
+        for (i = 0; i < this.traffic.length; i++) { this.traffic[i].x -= dPx; }
+        if (this.critter) { var k = this.critter; k.x -= dPx; if (k.x0 !== undefined) k.x0 -= dPx; if (k.xStop !== undefined) k.xStop -= dPx; if (k._bz) { k._bz.x0 -= dPx; k._bz.cx -= dPx; k._bz.x1 -= dPx; }
+          if (k.x < -400) this.critter = null; }
+        if (u >= 1) {
+          if (this._holdT < 0) {
+            this.scrollT = 1; this.buildingDx = 0; this.prevDx = -L.W; this.prevBuilding = null; this.gigi.walking = false;
+            this._holdT = 0;
           }
+          this._holdT += h;
+          if (this._holdT >= cfg.scrollSettle) { this._holdT = -1; this._startPeek(); }
         }
         break;
+      }
       case 'peek':
-        for (i = 0; i < cards.length; i++) { c = cards[i]; if (c.waveT >= 0) { c.waveT -= h; if (c.waveT <= 0) { c.waveT = -1; c.flipT = 1; } } }
+        for (i = 0; i < cards.length; i++) { c = cards[i]; if (c.waveT >= 0) { c.waveT -= h; if (c.waveT <= 0) { c.waveT = -1; c.openT = c.flipT = 1; } } }
         all = true;
-        for (i = 0; i < cards.length; i++) if (cards[i].flip < 0.95) { all = false; break; }
+        for (i = 0; i < cards.length; i++) if (cards[i].open < 0.95 || cards[i].openT < 1) { all = false; break; }
         if (all && this._holdT < 0) this._holdT = 0;
         if (this._holdT >= 0) {
           this._holdT += h;
@@ -1083,177 +1099,119 @@
         }
         break;
       case 'hide':
-        for (i = 0; i < cards.length; i++) { c = cards[i]; if (c.waveT >= 0) { c.waveT -= h; if (c.waveT <= 0) { c.waveT = -1; c.flipT = 0; } } }
+        for (i = 0; i < cards.length; i++) { c = cards[i]; if (c.waveT >= 0) { c.waveT -= h; if (c.waveT <= 0) { c.waveT = -1; c.openT = c.flipT = 0; } } }
         all = true;
-        for (i = 0; i < cards.length; i++) if (cards[i].flip >= cfg.playAtHide || cards[i].flipT > 0) { all = false; break; }
-        if (all && this.surprise === 'shuffle' && !this._shuffled) {
-          for (i = 0; i < cards.length; i++) if (cards[i].flip > 0.03) { all = false; break; }   // faces fully hidden first
-          if (all) { this._startShuffle(); break; }
-          break;
-        }
+        for (i = 0; i < cards.length; i++) if (cards[i].open >= cfg.playAtHide || cards[i].openT > 0) { all = false; break; }
         if (all) this._startPlay();
         break;
-      case 'shuffle': {
-        all = true;
-        for (i = 0; i < cards.length; i++) if (cards[i]._sw) { all = false; break; }
-        if (all && this._holdT < 0) this._holdT = 0;
-        if (this._holdT >= 0) { this._holdT += h; if (this._holdT >= cfg.shuffleSettle) { this._holdT = -1; this._startPlay(); } }
-        break;
-      }
       case 'play':
-      case 'resolve':
-      case 'done': {
+      case 'resolve': {
         if (!this._mis && this.open.length === 2) {
           var a = this.cardById(this.open[0]), b = this.cardById(this.open[1]);
-          if (a.flip >= cfg.matchAt && b.flip >= cfg.matchAt) this._check();
+          if (a.open >= cfg.matchAt && b.open >= cfg.matchAt) this._check();
         }
         var young = false;
         for (i = this._anims.length - 1; i >= 0; i--) {
-          var M = this._anims[i];
-          M.t += h;
-          if (M.t < cfg.matchResolveTime) young = true;
-          if (M.t >= cfg.matchBurstAt) {
-            var ca = this.cardById(M.a), cb = this.cardById(M.b);
-            ca.state = cb.state = 'gone'; ca.alpha = cb.alpha = 0;
-            M.info.key = ca.key;
-            this._spawnReward(M);
-            this._anims.splice(i, 1);
-            if (M.last) this._doneT = 0;
-          }
+          var M = this._anims[i]; M.t += h;
+          if (M.t < cfg.matchResolveTime) young = true; else this._anims.splice(i, 1);
         }
         if (this._mis) {
           this._mis.t += h;
           if (this._mis.t >= this._mismatchShow()) {
-            this._flipDown(this.cardById(this._mis.a)); this._flipDown(this.cardById(this._mis.b));
+            this._close(this.cardById(this._mis.a)); this._close(this.cardById(this._mis.b));
             this.open = []; this._mis = null;
           }
         }
+        if (this.surprise && !this.critter && this._critterAt >= 0 && this.time >= this._critterAt && !this.solved) {
+          var busy = false;
+          if (this.surprise === 'bus') for (i = 0; i < this.traffic.length; i++) { var t = this.traffic[i]; if (t.lane === 1 && t.x < 300) busy = true; }
+          if (busy) this._critterAt = this.time + 0.5; else { this._critterAt = -2; this._spawnCritter(); }
+        }
         if (this._doneT >= 0) {
-          if (this.phase !== 'done') this._setPhase('done');
           this._doneT += h;
-          if (this._doneT >= cfg.roundEndDelay) { this._doneT = -1; this._endRound(); }
+          if (this._doneT >= cfg.matchCelebrate) { this._doneT = -1; this._startCheer(); }
           break;
         }
         if (this.solved) { if (this.phase !== 'resolve') this._setPhase('resolve'); break; }
         var want = this._mis || young ? 'resolve' : 'play';
         if (this.phase !== want) this._setPhase(want);
         // idle nudges (only while playing)
-        if (!this.solved) {
-          this._idleT += h;
-          if (this._idleT >= this._idleGap - 1e-9) {
-            this._idleT = 0;
-            this._idleGap = Math.min(cfg.idleMax, this._idleGap * cfg.idleBackoff);
-            this._idleN++;
-            this._mood('think');
-            this._emit({ type: 'idle', n: this._idleN, promptKey: this.cur.promptKey, params: this.cur.params });
-            if (this._idleN >= cfg.idleHintFrom) this._doHint(true);
-          }
+        this._idleT += h;
+        if (this._idleT >= this._idleGap - 1e-9) {
+          this._idleT = 0;
+          this._idleGap = Math.min(cfg.idleMax, this._idleGap * cfg.idleBackoff);
+          this._idleN++;
+          this._mood('think');
+          this._emit({ type: 'idle', n: this._idleN, promptKey: this.cur.promptKey, params: this.cur.params });
+          if (this._idleN >= cfg.idleHintFrom) this._doHint(true);
         }
         break;
       }
+      case 'cheer':
+        this.cheer = Math.sin(Math.PI * clamp(this.phaseTime / cfg.cheerTime, 0, 1));
+        if (this.phaseTime >= cfg.cheerTime) { this.cheer = 0; this._endRound(); }
+        break;
     }
   };
 
-  /** A matching pair keeps spinning while the round goes on: their resolve record is kept on the cards (_m). */
-  P._stepCard = function (c, h) {
+  /** One window: shutters (spring + hinge stop + clack), hint crack, breeze sway, lamp, flower box, face hops / wiggle. */
+  P._stepWindow = function (c, h) {
     var cfg = this.cfg, w, z, u;
-    c.t += h;
     if (c.glowT > 0) c.glowT = Math.max(0, c.glowT - h);
     c.glow = c.glowT > 0 ? clamp(Math.min(c.glowT / 0.4, (cfg.hintGlowTime - c.glowT) / 0.2), 0, 1) : 0;
-    if (c.state === 'gone') return;
-    if (c.state === 'deal') {
-      if (c.t < 0) return;
-      if (!c._dealt) { c._dealt = true; this._emit({ type: 'deal', id: c.id }); }
-      var tt = Math.min(c.t, c._dT);
-      c.x = c._dx0 + c._dvx * tt; c.y = c._dy0 + c._dvy * tt + 0.5 * cfg.dealGravity * tt * tt;
-      c.rot = c._drot0 + c._dw * tt;
-      c.sx = c.sy = cfg.stackScale + (1 - cfg.stackScale) * smooth(tt / c._dT);
-      if (c.t >= c._dT) {
-        c.state = 'down'; c.x = c.hx; c.y = c.hy; c.rot = 0; c.sx = c.sy = 1; c._q = cfg.dealSquash; c._qv = 0;
-      }
-      return;
-    }
-    if (c._sw) {   // shuffle flight (quadratic bezier, smooth-step), lifted
-      var S = c._sw; S.t += h;
-      var su = smooth(S.t / cfg.shuffleTime), sq = 1 - su;
-      c.x = sq * sq * S.x0 + 2 * sq * su * S.cx + su * su * S.x1;
-      c.y = sq * sq * S.y0 + 2 * sq * su * S.cy + su * su * S.y1;
-      c.lift = Math.sin(Math.PI * Math.min(1, S.t / cfg.shuffleTime));
-      c.rot = 0.12 * Math.sin(TAU * Math.min(1, S.t / cfg.shuffleTime)) * (S.cx > (S.x0 + S.x1) / 2 ? 1 : -1);
-      if (S.t >= cfg.shuffleTime) { c._sw = null; c.x = c.hx; c.y = c.hy; c.rot = 0; c.lift = 0; c._q = cfg.dealSquash * 0.7; c._qv = 0; }
-      c.sx = 1 + c._q; c.sy = 1 - c._q;
-      return;
-    }
-    if (this.surprise === 'pond' && (c.state === 'down' || c.state === 'up')) {   // lily pads bob gently
-      c.x = c.hx; c.y = c.hy + cfg.pondBob * Math.sin(c._ph + TAU * cfg.pondBobHz * this.time);
-    }
-    // hint peek on a face-down card
+    // hint: a closed window opens a crack
     if (c.state === 'down') {
-      var pk = 0;
       if (c.peekT >= 0) {
         c.peekT += h;
-        if (c.peekT >= cfg.hintPeekDelay && c.peekT < cfg.hintPeekDelay + cfg.hintPeekHold) pk = cfg.hintPeekFlip;
+        var pk = c.peekT >= cfg.hintPeekDelay && c.peekT < cfg.hintPeekDelay + cfg.hintPeekHold ? cfg.hintPeekOpen : 0;
         if (c.peekT >= cfg.hintPeekDelay + cfg.hintPeekHold) c.peekT = -1;
-        c.flipT = pk;
-      } else if (c.waveT < 0 && (this.phase === 'play' || this.phase === 'resolve' || this.phase === 'done')) c.flipT = 0;
+        c.openT = c.flipT = pk;
+      } else if (c.waveT < 0 && (this.phase === 'play' || this.phase === 'resolve' || this.phase === 'cheer')) c.openT = c.flipT = 0;
     }
-    // flip: critically damped spring
-    w = cfg.flipOmega;
-    c._fv += (w * w * (c.flipT - c.flip) - 2 * w * c._fv) * h;
-    c.flip += c._fv * h;
-    if (c.flip < 0) { c.flip = 0; if (c._fv < 0) c._fv = 0; }
-    if (c.flip > 1) { c.flip = 1; if (c._fv > 0) c._fv = 0; }
-    var liftT = Math.sin(Math.PI * c.flip);
+    var tgt = c.openT;
+    if (tgt >= 1 && this.wind) tgt += cfg.breezeSway * clamp(this.wind / cfg.breezeWind, -1.5, 1.5) * Math.sin(c._ph + TAU * cfg.breezeHz * this.time);
+    // shutters: under-damped spring, hinge stop at openMax, a clack when they shut
+    w = cfg.openOmega; z = cfg.openZeta;
+    c._ov += (w * w * (tgt - c.open) - 2 * z * w * c._ov) * h;
+    c.open += c._ov * h;
+    if (c.open > cfg.openMax) { c.open = cfg.openMax; if (c._ov > 0) c._ov = -c._ov * cfg.openStopBounce; }
+    if (c.open < 0) {
+      c.open = 0;
+      if (c._ov < 0) {
+        var vin = -c._ov;
+        c._ov = vin < cfg.clackStopV ? 0 : vin * cfg.clackBounce;
+        if (vin >= cfg.clackMinV) this._emit({ type: 'clack', id: c.id, v: vin });
+      }
+    }
+    c.flip = clamp(c.open, 0, 1);
+    // match: lamp, flower box, face hops
     if (c.state === 'matched') {
-      c._mt = (c._mt || 0) + h;
-      var mt = c._mt, R = { mx: c._mx, my: c._my };
-      c.lift += (1 - c.lift) * Math.min(1, 12 * h);
-      if (mt >= cfg.matchHold) {
-        // slide to the midpoint (spring), spin a full turn (under-damped → overshoot), shrink
-        w = cfg.matchSlideOmega; z = cfg.matchSlideZeta;
-        c.vx += (w * w * (R.mx - c.x) - 2 * z * w * c.vx) * h; c.vy += (w * w * (R.my - c.y) - 2 * z * w * c.vy) * h;
-        c.x += c.vx * h; c.y += c.vy * h;
-        if (mt >= cfg.matchHold + cfg.matchSpinDelay) {
-          w = cfg.matchSpinOmega; z = cfg.matchSpinZeta;
-          c._sv += (w * w * (TAU - c._spin) - 2 * z * w * c._sv) * h; c._spin += c._sv * h;
-        }
-        c._scale += (cfg.matchShrink - c._scale) * Math.min(1, 6 * h);
-        if (mt >= cfg.matchSquashAt && !c._squashed) { c._squashed = true; c._q = cfg.matchSquash; c._qv = 0; }
-      }
-      c.rot = c._spin;
-    } else {
-      c.lift = liftT;
-      // "no-no" shake: damped sine rotation, 3 wiggles
-      c.rot = 0;
-      if (c.shakeT >= 0) {
-        c.shakeT += h; u = c.shakeT / cfg.shakeTime;
-        if (u >= 1) c.shakeT = -1;
-        else c.rot = cfg.shakeAmp * Math.sin(TAU * cfg.shakeWiggles * u) * (1 - u) * (1 - u);
+      c._mt += h;
+      c.light = smooth((c._mt - cfg.matchHold) / cfg.lightTime);
+      if (c._mt >= c._popA) {
+        if (!c._popped) { c._popped = true; this._emit({ type: 'bloom', id: c.id, x: c.x, y: c.y + c.h / 2 }); }
+        w = cfg.bloomOmega; z = cfg.bloomZeta;
+        c._blv += (w * w * (1 - c.bloom) - 2 * z * w * c._blv) * h; c.bloom += c._blv * h;
       }
     }
-    w = cfg.squashOmega; z = cfg.squashZeta;
-    c._qv += (-w * w * c._q - 2 * z * w * c._qv) * h; c._q += c._qv * h;
-    var br = c.state === 'down' && c.flip < 0.02 && this.phase === 'play' ? cfg.breathAmp * Math.sin(c._ph + TAU * cfg.breathHz * this.time) : 0;
-    c.sx = c._scale * (1 + c._q) * (1 + br); c.sy = c._scale * (1 - c._q) * (1 + br);
-  };
-  P._stepDee = function (h) {
-    var d = this.dee, cfg = this.cfg, L = this.layout;
-    if (d.moodT > 0) { d.moodT -= h; if (d.moodT <= 0) { d.moodT = 0; d.mood = 'idle'; } }
-    var B = L.grid ? L.grid.rect : L.board, lx = B.x + B.w / 2, ly = B.y + B.h / 2;
-    if (this._lookId && this.time - this._lookT < cfg.lookHold) {
-      var c = this.cardById(this._lookId);
-      if (c && c.state !== 'gone') { lx = c.x; ly = c.y; }
+    // face hops: exact ballistic arcs bounce = v0·t − ½·g·t² (apex = the hop height), one after the other
+    if (c._bT >= 0) { c._bT -= h; if (c._bT < 0 && c._bq > 0) { c._bq--; c._bvy = Math.sqrt(2 * cfg.bounceG * c._bPx); c._bt = 0; } }
+    if (c._bvy > 0) {
+      c._bt += h;
+      var tH = 2 * c._bvy / cfg.bounceG;
+      if (c._bt >= tH) {
+        if (c._bq > 0) { c._bq--; c._bt -= tH; } else { c._bvy = 0; c._bt = 0; }
+      }
+      c.bounce = c._bvy > 0 ? Math.max(0, c._bvy * c._bt - 0.5 * cfg.bounceG * c._bt * c._bt) : 0;
     }
-    var k = Math.min(1, h * cfg.lookRate);
-    d.lookX += (lx - d.lookX) * k; d.lookY += (ly - d.lookY) * k;
-    if (d._hopT >= 0) {
-      d._hopT += h;
-      var n = d._hopT / cfg.hopTime;
-      if (n >= d._hopN) { d._hopT = -1; d.hop = 0; }
-      else { var ph = n - Math.floor(n); d.hop = d._hopPx * Math.pow(0.7, Math.floor(n)) * 4 * ph * (1 - ph); }
+    // mismatch: the faces shake "no-no"
+    c.wiggle = 0;
+    if (c.shakeT >= 0) {
+      c.shakeT += h; u = c.shakeT / cfg.shakeTime;
+      if (u >= 1) c.shakeT = -1;
+      else c.wiggle = cfg.shakeAmp * Math.sin(TAU * cfg.shakeWiggles * u) * (1 - u) * (1 - u);
     }
   };
 
-  Object.defineProperty(P, 'miu', { get: function () { return this.dee; } });   // old helper name (kept for shared code)
   GW.World = World;
 })(window.GW = window.GW || {});

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><clipPath id="bowl_c1"><path d="M 42 26 L 86 26 C 86 32 90 36 96 40 C 116 54 114 96 96 108 C 82 116 46 116 32 108 C 14 96 12 54 32 40 C 38 36 42 32 42 26 Z" /></clipPath><clipPath id="bowl_c2"><rect x="36" y="21" width="56" height="9" rx="4.5" /></clipPath><g id="bowl_sil"><path d="M 42 26 L 86 26 C 86 32 90 36 96 40 C 116 54 114 96 96 108 C 82 116 46 116 32 108 C 14 96 12 54 32 40 C 38 36 42 32 42 26 Z" /><rect x="36" y="21" width="56" height="9" rx="4.5" /></g></defs>
+<g transform="translate(0.24 -5.74) scale(0.9962)">
+<use href="#bowl_sil" xlink:href="#bowl_sil" transform="translate(0 3.01)" fill="#3A3020" stroke="#3A3020" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>
+<use href="#bowl_sil" xlink:href="#bowl_sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 42 26 L 86 26 C 86 32 90 36 96 40 C 116 54 114 96 96 108 C 82 116 46 116 32 108 C 14 96 12 54 32 40 C 38 36 42 32 42 26 Z" fill="#EEF8FC"/>
+<g clip-path="url(#bowl_c1)">
+<path d="M 10 52 C 24 46 36 56 50 50 C 64 44 76 56 90 50 C 102 45 112 52 120 50 L 120 120 L 10 120 Z" fill="#9AD6F0"/><path d="M 10 52 C 24 46 36 56 50 50 C 64 44 76 56 90 50 C 102 45 112 52 120 50" fill="none" stroke="#FFFFFF" stroke-width="2.4" opacity=".8"/><ellipse cx="66" cy="112" rx="46" ry="10" fill="#7FC2E2"/><path d="M 46 108 C 40 94 50 86 44 72 C 50 82 56 90 52 108 Z" fill="#5DB86A" stroke="#3A8A48" stroke-width="1.6"/><path d="M 54 108 C 56 96 64 92 60 80 C 68 88 66 100 62 108 Z" fill="#78C878" stroke="#3A8A48" stroke-width="1.6"/><path d="M 80 108 C 76 98 84 90 80 82 C 88 90 88 100 86 108 Z" fill="#5DB86A" stroke="#3A8A48" stroke-width="1.6"/><circle cx="36" cy="106" r="5" fill="#F2C9A0" stroke="#B59677" stroke-width="1.2"/><circle cx="46" cy="110" r="5" fill="#E9D8F2" stroke="#B09FA8" stroke-width="1.2"/><circle cx="68" cy="110" r="6" fill="#F6E3A6" stroke="#B8A67B" stroke-width="1.2"/><circle cx="92" cy="106" r="5" fill="#F2B8C0" stroke="#B58C8A" stroke-width="1.2"/><circle cx="100" cy="102" r="4" fill="#CFE6C0" stroke="#A0A88A" stroke-width="1.2"/><circle cx="58" cy="111" r="4" fill="#D6E4EE" stroke="#A4A6A6" stroke-width="1.2"/><circle cx="88" cy="72" r="3.4" fill="none" stroke="#FFFFFF" stroke-width="1.6"/><circle cx="92" cy="62" r="2.4" fill="none" stroke="#FFFFFF" stroke-width="1.6"/><circle cx="86" cy="56" r="1.8" fill="none" stroke="#FFFFFF" stroke-width="1.6"/>
+</g>
+<path d="M 42 26 L 86 26 C 86 32 90 36 96 40 C 116 54 114 96 96 108 C 82 116 46 116 32 108 C 14 96 12 54 32 40 C 38 36 42 32 42 26 Z" fill="none" stroke="#6FA4C4" stroke-width="2.4" stroke-linejoin="round"/>
+<path d="M 26 62 C 22 72 22 84 26 92" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+<path d="M 32 50 C 30 52 29 54 28 56" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+<rect x="36" y="21" width="56" height="9" rx="4.5" fill="#D7EEF8"/>
+<g clip-path="url(#bowl_c2)">
+<ellipse cx="52" cy="24" rx="10" ry="1.4" fill="#FFFFFF" opacity=".5"/>
+</g>
+<rect x="36" y="21" width="56" height="9" rx="4.5" fill="none" stroke="#6FA4C4" stroke-width="2.2" stroke-linejoin="round"/>
+</g>
+</svg>

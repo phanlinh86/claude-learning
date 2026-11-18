@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Dee's Forest Memory — pedagogy / variety analysis of GW.Content (chapters generated exactly like the World does: 4 rounds with history),
+// Gigi's Peekaboo Windows — pedagogy / variety analysis of GW.Content (chapters generated exactly like the World does: 4 rounds with history),
 // plus Talk-time answer balance.   node tests/sim/content_stats.js [chapters=400]
 // Prints markdown (stdout + tests/sim/out/content_stats.md).
 'use strict';

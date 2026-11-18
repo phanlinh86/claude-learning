@@ -1,4 +1,5 @@
-/* Dee's Forest Memory — GW.PALETTE, GW.ANIMALS, GW.AGE_TOPICS, GW.WORDS, GW.Content (pure + deterministic; DESIGN §5.1)
+/* Gigi's Peekaboo Windows — GW.PALETTE, GW.ANIMALS, GW.HOMES, GW.THINGS, GW.AGE_TOPICS, GW.WORDS, GW.Content
+ * (pure + deterministic; DESIGN §6.1, docs/MECHANICS.md §2)
  *
  *   GW.Content.makeRound(topic, { age, lang, rng, roundIndex, history, pairs?, peek? }) → round
  *        history (optional) = the summaries (round.sum) of the earlier rounds of THIS chapter, oldest first; the world
@@ -9,20 +10,22 @@
  *   GW.Content.topicsFor(age)   → the 4 chapter topics (age ≥ 7 uses 7, < 3 uses 3)
  *
  * round = { topic, promptKey:'p.<topic>', params:{ n (pairs) }, pairs:N, peek (s),
- *   cards:[{ id:'c0'…, key, face, nameKind, nameValue, size? }],          // 2·N cards, shuffled = grid slot order
- *   pairInfo:{ <key>: { nameKind, nameValue, parity?, animal?, text?, lower?, reward:{kind, color?, shape?, sprite?, n?, text?} } },
- *   reward:{ kind:'butterfly'|'lantern'|'acorns'|'animal'|'star' }, seed (uint32), sum:{ set, key } }
+ *   cards:[{ id:'c0'…, key, face, nameKind, nameValue, size?, word?, obj? }],   // 2·N windows, shuffled = grid slot order
+ *   pairInfo:{ <key>: { nameKind, nameValue, parity?, animal?, home?, word?, text?, lower?, obj? } },
+ *   seed (uint32), sum:{ set, values } }
  *
- * Faces (what GW.CardArt draws):
- *   color  {kind, value:c, color:c}                      -> a butterfly in that colour
- *   shape  {kind, value:s, shape:s, color:c}             → a lantern-style shape (circle square triangle star heart rect)
+ * Faces (what GW.WindowArt draws inside a window):
+ *   color  {kind, value:c, color:c, obj}                 → GW.WindowArt.drawThing(obj, c): umbrella balloon car kite cup boot
+ *   shape  {kind, value:s, shape:s, color:c}             → a shape (circle square triangle star heart rect)
  *   animal {kind, value:a, sprite:'animal_<a>', scale:1|0.6, size?:'big'|'small'}
- *   dots   {kind, value:n, n, parity?}                   → n acorns in a dice layout (≤ 12)
- *   number {kind, value:n, n, text:'7', parity?}         → numeral   (parity 'odd'|'even' → coloured card frame, oddeven only)
+ *   home   {kind, value:h, sprite:'home_<h>', animal:a}  → the animal's home (homes topic)
+ *   dots   {kind, value:n, n, parity?}                   → n round lights in a dice layout (≤ 12)
+ *   number {kind, value:n, n, text:'7', parity?}         → numeral   (parity 'odd'|'even' → coloured window frame, oddeven only)
  *   letter {kind, value:'A', text:'A'}                    text {kind, value:'2 + 3', text:'2 + 3'}
- * Card names (what Dee says on a flip): color/color, shape/shape, animal/animal (+ card.size 'big'|'small' in size rounds),
- *   dots/dots (n — "one, two, three acorns"), number/number, letter/letter (as shown: 'a' on a small-letter card),
- *   sum/'2 + 3', diff/'5 − 2'. pairInfo names the PAIR for the match line (count: number n; initial: letter + animal …).
+ * Window names (what Gigi says when it opens): color/color (+ card.obj: "a red umbrella"), shape/shape, animal/animal
+ *   (+ card.size 'big'|'small' in size rounds), home/home, dots/dots (n — "one, two, three"), number/number, letter/letter
+ *   (as shown: 'a' on a small-letter window), sum/'2 + 3', diff/'5 − 2'. pairInfo names the PAIR for the match line
+ *   (count: number n; initial: letter + animal …; homes: animal + home; colors: + obj when both windows show the same thing).
  */
 (function (GW) {
   'use strict';
@@ -39,26 +42,31 @@
   var COLORS = ['red', 'blue', 'yellow', 'green', 'orange', 'purple'];
   var COLORS5 = COLORS.concat(['pink']);
 
-  GW.ANIMALS = ['fox', 'deer', 'hedgehog', 'squirrel', 'bunny', 'frog', 'bear', 'owl', 'mouse'];
+  GW.ANIMALS = ['dog', 'cat', 'bird', 'fish', 'bee', 'rabbit', 'duck', 'hen', 'spider'];
+  // homes topic (age 4–5): every animal has exactly one home and every home belongs to exactly one animal
+  GW.HOMES = { dog: 'kennel', cat: 'basket', bird: 'nest', fish: 'bowl', bee: 'hive', rabbit: 'hutch', duck: 'pond', hen: 'coop', spider: 'web' };
+  GW.HOME_LIST = GW.ANIMALS.map(function (a) { return GW.HOMES[a]; });
+  // colour things (drawn by GW.WindowArt.drawThing in an answer colour)
+  GW.THINGS = ['umbrella', 'balloon', 'car', 'kite', 'cup', 'boot'];
 
   GW.AGE_TOPICS = {
-    3: ['colors', 'size', 'shapes', 'animals'],
-    4: ['colors', 'shapes', 'count', 'animals'],
-    5: ['shapes', 'count', 'letters', 'animals'],
+    3: ['colors', 'shapes', 'size', 'animals'],
+    4: ['colors', 'shapes', 'count', 'homes'],
+    5: ['shapes', 'count', 'letters', 'homes'],
     6: ['lower', 'initial', 'add', 'count'],
     7: ['initial', 'add', 'sub', 'oddeven']
   };
-  var ALL_TOPICS = ['colors', 'size', 'shapes', 'count', 'animals', 'letters', 'lower', 'initial', 'add', 'sub', 'oddeven'];
-  // QA P1-1: every age has a POOL of ≥ 5 topics; a session plays 4 of them (rotating, so "Play again" differs)
+  var ALL_TOPICS = ['colors', 'size', 'shapes', 'count', 'animals', 'homes', 'letters', 'lower', 'initial', 'add', 'sub', 'oddeven'];
+  // every age has a POOL of ≥ 5 topics; a session plays 4 of them (rotating, so "Play again" differs)
   GW.AGE_POOLS = {
-    3: ['colors', 'animals', 'size', 'shapes', 'count'],
-    4: ['colors', 'animals', 'shapes', 'count', 'size'],
-    5: ['shapes', 'count', 'letters', 'animals', 'colors'],
+    3: ['colors', 'shapes', 'size', 'animals', 'count'],
+    4: ['colors', 'shapes', 'count', 'homes', 'animals', 'size'],
+    5: ['shapes', 'count', 'letters', 'homes', 'animals', 'colors'],
     6: ['lower', 'initial', 'add', 'count', 'letters'],
     7: ['initial', 'add', 'sub', 'oddeven', 'count']
   };
   // easiest first (a chapter list is always sorted by this)
-  var DIFFICULTY = ['colors', 'animals', 'size', 'shapes', 'letters', 'count', 'lower', 'initial', 'add', 'sub', 'oddeven'];
+  var DIFFICULTY = ['colors', 'animals', 'size', 'shapes', 'letters', 'count', 'homes', 'lower', 'initial', 'add', 'sub', 'oddeven'];
 
   // ---- tables (DESIGN §5.1)
   var PAIRS = { 3: [2, 2, 3, 3], 4: [2, 3, 4, 4], 5: [3, 4, 5, 5], 6: [3, 4, 5, 6], 7: [3, 4, 5, 6] };   // pairs per round
@@ -77,16 +85,16 @@
 
   function Wd(word, animal, initial) { return { word: word, sprite: 'animal_' + animal, animal: animal, initial: initial }; }
   GW.WORDS = {
-    en: [Wd('fox', 'fox', 'F'), Wd('deer', 'deer', 'D'), Wd('hedgehog', 'hedgehog', 'H'), Wd('squirrel', 'squirrel', 'S'),
-      Wd('bunny', 'bunny', 'B'), Wd('frog', 'frog', 'F'), Wd('bear', 'bear', 'B'), Wd('owl', 'owl', 'O'), Wd('mouse', 'mouse', 'M')],
-    // VN kindergartens teach th / nh / ch as their own sounds: thỏ, nhím, chuột are left out. ếch starts with the letter Ê.
-    vi: [Wd('cáo', 'fox', 'C'), Wd('hươu', 'deer', 'H'), Wd('sóc', 'squirrel', 'S'), Wd('gấu', 'bear', 'G'), Wd('cú', 'owl', 'C'),
-      Wd('ếch', 'frog', 'Ê')]
+    en: [Wd('dog', 'dog', 'D'), Wd('cat', 'cat', 'C'), Wd('bird', 'bird', 'B'), Wd('fish', 'fish', 'F'), Wd('bee', 'bee', 'B'),
+      Wd('rabbit', 'rabbit', 'R'), Wd('duck', 'duck', 'D'), Wd('hen', 'hen', 'H'), Wd('spider', 'spider', 'S')],
+    // VN kindergartens teach ch / th / nh as their own sounds: chó, chim, thỏ, nhện are left out (DESIGN §6.1).
+    vi: [Wd('mèo', 'cat', 'M'), Wd('cá', 'fish', 'C'), Wd('ong', 'bee', 'O'), Wd('vịt', 'duck', 'V'), Wd('gà', 'hen', 'G')]
   };
 
   /* Colour-blind / toddler safety: up to age 5 (COLOR_SAFE_MAX_AGE) never blue+purple, red+green, yellow+orange or
    * green+orange in one round, and no pink (QA visual P3-10: blue+purple ΔE00 1.2 under deuteranopia at age 5). */
   var COLOR_SAFE_MAX_AGE = 5;
+  var SAME_THING_MAX_AGE = 4;   // colours: up to age 4 both windows of a pair show the same thing, from 5 two different things
   var CLASH = [['blue', 'purple'], ['red', 'green'], ['yellow', 'orange'], ['green', 'orange']];
   function clash(cs) {
     for (var i = 0; i < CLASH.length; i++) if (cs.indexOf(CLASH[i][0]) >= 0 && cs.indexOf(CLASH[i][1]) >= 0) return true;
@@ -120,8 +128,9 @@
   function maxPairs(topic, age, lang) {
     if (topic === 'colors') return age <= COLOR_SAFE_MAX_AGE ? SAFE_MAX : COLORS5.length;
     if (topic === 'shapes') return shapesFor(age).length;
-    if (topic === 'initial') return initialsOf(lang).length;
-    if (topic === 'size' || topic === 'animals') return GW.ANIMALS.length;
+    // initial: at least one word stays out of every round, so consecutive rounds can differ (vi: 5 words → ≤ 4 pairs)
+    if (topic === 'initial') return Math.min(initialsOf(lang).length, GW.WORDS[langOf(lang)].length - 1);
+    if (topic === 'size' || topic === 'animals' || topic === 'homes') return GW.ANIMALS.length;
     return MAX_PAIRS;
   }
   function pairsFor(topic, age, lang, ri, tbl) {
@@ -163,25 +172,30 @@
   }
 
   function build(topic, age, lang, rng, ri, N, prev) {
-    var cards = [], info = {}, rewardKind, i, warm = ri === 0;
+    var cards = [], info = {}, i, warm = ri === 0;
     var pv = prev ? prev.values : [];
     var add = function (c) { cards.push(c); };
     switch (topic) {
       case 'colors': {
         var pool = age <= COLOR_SAFE_MAX_AGE ? rng.pick(SAFE_SETS).slice() : COLORS5.slice();
         var cs = freshSample(rng, pool, N, pv);
-        rewardKind = 'butterfly';
+        // ages ≤ 4: ONE thing for the whole round (both windows of a pair show it; the colour is the only cue);
+        // age 5+: the two windows of a pair show two DIFFERENT things of the same colour.
+        var things = rng.shuffle(GW.THINGS.slice()), one = things[0];
         for (i = 0; i < N; i++) {
-          var c = cs[i], k = 'c:' + c;
-          for (var t = 0; t < 2; t++) add(card(k, { kind: 'color', value: c, color: c }, 'color', c));
-          info[k] = { nameKind: 'color', nameValue: c, reward: { kind: 'butterfly', color: c } };
+          var c = cs[i], k = 'c:' + c, oa, ob;
+          if (age <= SAME_THING_MAX_AGE) { oa = ob = one; }
+          else { var tw = rng.sample(GW.THINGS, 2); oa = tw[0]; ob = tw[1]; }
+          add(card(k, { kind: 'color', value: c, color: c, obj: oa }, 'color', c, { obj: oa }));
+          add(card(k, { kind: 'color', value: c, color: c, obj: ob }, 'color', c, { obj: ob }));
+          info[k] = { nameKind: 'color', nameValue: c };
+          if (oa === ob) info[k].obj = oa;
         }
         break;
       }
       case 'shapes': {
         var sp = freshSample(rng, shapesFor(age), N, pv);
         var cols = rng.shuffle((age >= 5 ? COLORS5 : COLORS).slice());
-        rewardKind = 'lantern';
         for (i = 0; i < N; i++) {
           var s = sp[i], ks = 's:' + s, ca, cb;
           if (age <= 4) { ca = cb = cols[i % cols.length]; }       // every shape its own colour, the pair shares it
@@ -191,14 +205,13 @@
           }
           add(card(ks, { kind: 'shape', value: s, shape: s, color: ca }, 'shape', s));
           add(card(ks, { kind: 'shape', value: s, shape: s, color: cb }, 'shape', s));
-          info[ks] = { nameKind: 'shape', nameValue: s, reward: { kind: 'lantern', shape: s, color: ca } };
+          info[ks] = { nameKind: 'shape', nameValue: s };
         }
         break;
       }
       case 'size':
       case 'animals': {
         var an = freshSample(rng, GW.ANIMALS, N, pv);
-        rewardKind = 'animal';
         for (i = 0; i < N; i++) {
           var a = an[i], ka = (topic === 'size' ? 'z:' : 'a:') + a, spr = 'animal_' + a;
           if (topic === 'size') {
@@ -207,7 +220,18 @@
           } else {
             for (var u = 0; u < 2; u++) add(card(ka, { kind: 'animal', value: a, sprite: spr, scale: 1 }, 'animal', a));
           }
-          info[ka] = { nameKind: 'animal', nameValue: a, reward: { kind: 'animal', sprite: spr } };
+          info[ka] = { nameKind: 'animal', nameValue: a };
+        }
+        break;
+      }
+      case 'homes': {
+        // the animal ↔ its home (dog ↔ kennel …); homes are empty pictures so the pair is a real match
+        var ah = freshSample(rng, GW.ANIMALS, N, pv);
+        for (i = 0; i < N; i++) {
+          var an2 = ah[i], hm = GW.HOMES[an2], kh = 'h:' + an2;
+          add(card(kh, { kind: 'animal', value: an2, sprite: 'animal_' + an2, scale: 1 }, 'animal', an2));
+          add(card(kh, { kind: 'home', value: hm, sprite: 'home_' + hm, animal: an2 }, 'home', hm));
+          info[kh] = { nameKind: 'animal', nameValue: an2, animal: an2, home: hm };
         }
         break;
       }
@@ -221,14 +245,13 @@
           var nOdd = Math.max(1, Math.min(N - 1, rng.int(Math.floor(N / 2), Math.ceil(N / 2))));
           nums = freshSample(rng, odd, nOdd, pv).concat(freshSample(rng, even, N - nOdd, pv));
         } else nums = freshSample(rng, range(lo, Math.max(hi, lo + N - 1)), N, pv);
-        rewardKind = 'acorns';
         for (i = 0; i < N; i++) {
           var n = nums[i], kn = 'n:' + n, ex = topic === 'oddeven' ? { parity: parityOf(n) } : null;
           var fn = { kind: 'number', value: n, n: n, text: String(n) }, fd = { kind: 'dots', value: n, n: n };
           if (ex) { fn.parity = fd.parity = ex.parity; }
           add(card(kn, fn, 'number', n));
           add(card(kn, fd, 'dots', n));
-          info[kn] = { nameKind: 'number', nameValue: n, reward: { kind: 'acorns', n: n } };
+          info[kn] = { nameKind: 'number', nameValue: n };
           if (ex) info[kn].parity = ex.parity;
         }
         break;
@@ -236,13 +259,12 @@
       case 'letters':
       case 'lower': {
         var ls = freshSample(rng, letterPool(lang, topic), N, pv);
-        rewardKind = 'star';
         for (i = 0; i < N; i++) {
           var L = ls[i], kl = 'L:' + L;
           add(card(kl, { kind: 'letter', value: L, text: L }, 'letter', L));
           var L2 = topic === 'lower' ? L.toLowerCase() : L;
           add(card(kl, { kind: 'letter', value: L2, text: L2 }, 'letter', L2));
-          info[kl] = { nameKind: 'letter', nameValue: L, reward: { kind: 'star', text: L } };
+          info[kl] = { nameKind: 'letter', nameValue: L };
           if (topic === 'lower') info[kl].lower = L2;
         }
         break;
@@ -250,12 +272,11 @@
       case 'initial': {
         // one word per initial: pick N initials, then a word for each
         var W = GW.WORDS[lang], inits = freshSample(rng, initialsOf(lang), N, pv);
-        rewardKind = 'animal';
         for (i = 0; i < N; i++) {
           var I = inits[i], wd = rng.pick(W.filter(function (w) { return w.initial === I; })), ki = 'I:' + I;
           add(card(ki, { kind: 'letter', value: I, text: I }, 'letter', I));
           add(card(ki, { kind: 'animal', value: wd.animal, sprite: wd.sprite, scale: 1 }, 'animal', wd.animal, { word: wd.word }));
-          info[ki] = { nameKind: 'letter', nameValue: I, animal: wd.animal, word: wd.word, reward: { kind: 'animal', sprite: wd.sprite } };
+          info[ki] = { nameKind: 'letter', nameValue: I, animal: wd.animal, word: wd.word };
         }
         break;
       }
@@ -265,7 +286,6 @@
         var answers = isAdd ? range(2, top) : range(0, top - 1);
         if (warm) answers = answers.filter(function (v) { return isAdd ? v <= 6 : v <= 4; });
         var ans = freshSample(rng, answers, N, pv);
-        rewardKind = 'star';
         for (i = 0; i < N; i++) {
           var v = ans[i], x, y;
           if (isAdd) { x = rng.int(1, v - 1); y = v - x; }
@@ -273,7 +293,7 @@
           var txt = x + (isAdd ? ' + ' : ' ' + MINUS + ' ') + y, kv = 'v:' + v;
           add(card(kv, { kind: 'text', value: txt, text: txt }, isAdd ? 'sum' : 'diff', txt));
           add(card(kv, { kind: 'number', value: v, n: v, text: String(v) }, 'number', v));
-          info[kv] = { nameKind: 'number', nameValue: v, text: txt, reward: { kind: 'star', text: String(v) } };
+          info[kv] = { nameKind: 'number', nameValue: v, text: txt };
         }
         break;
       }
@@ -284,12 +304,12 @@
     var values = keys.map(function (k) { return info[k].nameValue; });
     var set = topic + ':' + cards.map(function (c) { return c.key + '/' + JSON.stringify(c.face); }).sort().join('|');
     return { topic: topic, promptKey: 'p.' + topic, params: { n: N }, pairs: N, peek: 0, cards: cards, pairInfo: info,
-      reward: { kind: rewardKind }, seed: (rng.next() * 4294967296) >>> 0, sum: { set: set, values: values } };
+      seed: (rng.next() * 4294967296) >>> 0, sum: { set: set, values: values } };
   }
 
   // ---------------- self-check ----------------
-  var FACE_KINDS = ['color', 'shape', 'dots', 'number', 'letter', 'text', 'animal'];
-  var NAME_KINDS = ['color', 'shape', 'animal', 'dots', 'number', 'letter', 'sum', 'diff'];
+  var FACE_KINDS = ['color', 'shape', 'dots', 'number', 'letter', 'text', 'animal', 'home'];
+  var NAME_KINDS = ['color', 'shape', 'animal', 'home', 'dots', 'number', 'letter', 'sum', 'diff'];
   var WORD_INIT = {};
   (function () { for (var l in GW.WORDS) { WORD_INIT[l] = {}; GW.WORDS[l].forEach(function (w) { WORD_INIT[l][w.animal + '|' + w.word] = w.initial; }); } })();
   function evalText(t) {
@@ -300,7 +320,11 @@
   function facesMatch(topic, a, b) {
     var A = a.face, B = b.face;
     switch (topic) {
-      case 'colors': return A.kind === 'color' && B.kind === 'color' && A.color === B.color;
+      case 'colors': return A.kind === 'color' && B.kind === 'color' && A.color === B.color && GW.THINGS.indexOf(A.obj) >= 0 && GW.THINGS.indexOf(B.obj) >= 0;
+      case 'homes': {
+        var an = A.kind === 'animal' ? A : B.kind === 'animal' ? B : null, ho = an === A ? B : A;
+        return !!an && ho.kind === 'home' && GW.HOMES[an.value] === ho.value && ho.animal === an.value;
+      }
       case 'shapes': return A.kind === 'shape' && B.kind === 'shape' && A.shape === B.shape;
       case 'animals': return A.kind === 'animal' && B.kind === 'animal' && A.sprite === B.sprite && A.scale === B.scale;
       case 'size': return A.kind === 'animal' && B.kind === 'animal' && A.sprite === B.sprite && A.scale !== B.scale;
@@ -345,6 +369,8 @@
       if (c.face.value === undefined || c.face.value === null) return 'face without value';
       if (c.face.color && !GW.PALETTE[c.face.color]) return 'bad colour ' + c.face.color;
       if (c.face.kind === 'animal' && (GW.ANIMALS.indexOf(c.face.value) < 0 || c.face.sprite !== 'animal_' + c.face.value)) return 'bad animal';
+      if (c.face.kind === 'home' && (GW.HOME_LIST.indexOf(c.face.value) < 0 || c.face.sprite !== 'home_' + c.face.value)) return 'bad home';
+      if (c.face.kind === 'color' && GW.THINGS.indexOf(c.face.obj) < 0) return 'colour face without a thing';
       if (c.face.kind === 'dots' && !(c.face.n >= 1 && c.face.n <= 12)) return 'dots out of 1–12';
       if (NAME_KINDS.indexOf(c.nameKind) < 0 || c.nameValue === undefined || c.nameValue === null) return 'no name';
       (byKey[c.key] = byKey[c.key] || []).push(c);
@@ -355,7 +381,7 @@
       var pr = byKey[keys[i]];
       if (pr.length !== 2) return 'key ' + keys[i] + ' on ' + pr.length + ' cards';
       if (!facesMatch(r.topic, pr[0], pr[1])) return 'pair ' + keys[i] + ' does not match';
-      if (!r.pairInfo[keys[i]] || !r.pairInfo[keys[i]].reward) return 'no pair info';
+      if (!r.pairInfo[keys[i]] || NAME_KINDS.indexOf(r.pairInfo[keys[i]].nameKind) < 0) return 'no pair info';
       // no card may also match a card of another pair (every pair is unambiguous)
       for (var j = 0; j < keys.length; j++) if (j !== i) {
         var q = byKey[keys[j]];
@@ -365,6 +391,10 @@
     if (r.topic === 'colors') {
       var cs = keys.map(function (k) { return r.pairInfo[k].nameValue; });
       if (r.age <= COLOR_SAFE_MAX_AGE && (clash(cs) || cs.indexOf('pink') >= 0)) return 'colour clash';
+      for (i = 0; i < keys.length; i++) {
+        var pp = byKey[keys[i]], same = pp[0].face.obj === pp[1].face.obj;
+        if (r.age <= SAME_THING_MAX_AGE ? !same : same) return 'colour pair things (' + keys[i] + ')';
+      }
     }
     return null;
   }
@@ -389,6 +419,7 @@
    *   size     show a big / small animal → big or small? (kind 'size')
    *   count    show dots face (k ≤ 5 at ages ≤ 4) → how many?      oddeven show number face → odd or even? (kind 'parity')
    *   animals  "Where is the {animal}?" params {animal}, show null, 3 animal picture choices
+   *   homes    "Where does the {animal} live?" params {animal, home}, show the animal face, 3 home choices (kind 'home', sprite)
    *   letters  show capital → which letter?   lower show small letter → which capital?   initial show animal, params {word, animal}
    *   add/sub  show text face → which number? */
   function makeTalk(topic, o) {
@@ -398,7 +429,8 @@
     switch (topic) {
       case 'colors': {
         var pool = age <= COLOR_SAFE_MAX_AGE ? rng.pick(SAFE_SETS) : COLORS5;
-        a = rng.pick(pool); show = { kind: 'color', value: a, color: a };
+        a = rng.pick(pool); show = { kind: 'color', value: a, color: a, obj: rng.pick(GW.THINGS) };
+        params = { obj: show.obj };
         ch = choicesFrom(rng, 'color', a, pool, 3); break;
       }
       case 'shapes': {
@@ -417,6 +449,14 @@
       case 'animals': {
         a = rng.pick(GW.ANIMALS); params = { animal: a };
         ch = choicesFrom(rng, 'animal', a, GW.ANIMALS, 3); break;
+      }
+      case 'homes': {
+        // "Where does the {animal} live?" — show the animal, 3 home pictures
+        var an3 = rng.pick(GW.ANIMALS); a = GW.HOMES[an3];
+        show = { kind: 'animal', value: an3, sprite: 'animal_' + an3, scale: 1 }; params = { animal: an3, home: a };
+        ch = choicesFrom(rng, 'home', a, GW.HOME_LIST, 3);
+        ch.choices.forEach(function (c) { c.sprite = 'home_' + c.value; });
+        break;
       }
       case 'count': {
         var rr = { 3: [1, 4], 4: [1, 5], 5: [2, 8], 6: [3, 10], 7: [3, 10] }[age];
@@ -477,7 +517,8 @@
 
   GW.Content = {
     makeRound: makeRound, makeTalk: makeTalk, validate: validate, facesMatch: facesMatch,
-    topicsFor: topicsFor, DIFFICULTY: DIFFICULTY, COLOR_SAFE_MAX_AGE: COLOR_SAFE_MAX_AGE,
+    topicsFor: topicsFor, DIFFICULTY: DIFFICULTY, COLOR_SAFE_MAX_AGE: COLOR_SAFE_MAX_AGE, SAME_THING_MAX_AGE: SAME_THING_MAX_AGE,
+    HOMES: GW.HOMES, HOME_LIST: GW.HOME_LIST, THINGS: GW.THINGS,
     pairsFor: pairsFor, maxPairs: maxPairs,
     TOPICS: ALL_TOPICS, COLORS: COLORS, COLORS5: COLORS5, SHAPES: SHAPES.concat(['rect']), ANIMALS: GW.ANIMALS,
     PAIRS: PAIRS, PEEK: PEEK, MAX_PAIRS: MAX_PAIRS, SMALL_SCALE: SMALL_SCALE, COUNT_RANGE: COUNT_RANGE, LETTER_POOL: LETTER_POOL,

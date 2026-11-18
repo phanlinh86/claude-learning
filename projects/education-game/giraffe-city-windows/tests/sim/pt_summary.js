@@ -39,7 +39,7 @@ function report(D) {
   md += tbl(['driver', 'age', 'n', 'done', 'session', 'p90', 'max', 'chapter', 'p10–p90', 'round', 'play/round', 'mm/round', 'mm p90', 'rounds w/ hint', '3★/1★ rounds', 'stars %', 'cut ≤3', 'taps', 'dead taps', 'play share'], rows);
 
   md += '\n### Where the time goes (s per session, share) — typical / weak4, age 4\n\n';
-  const keys = ['intro', 'round.deal', 'round.peek', 'round.hide', 'round.play', 'round.resolve', 'round.mismatchShow', 'round.done', 'roundDone', 'talk.ask', 'talk.after', 'levelDone'];
+  const keys = ['intro', 'round.scroll', 'round.peek', 'round.hide', 'round.play', 'round.resolve', 'round.mismatchShow', 'round.cheer', 'roundDone', 'talk.ask', 'talk.after', 'levelDone'];
   const lr = [];
   for (const d of ['typical', 'weak4', 'slow3', 'spam4c']) {
     const sub = S.filter(s => s.driver === d && s.age === 4); if (!sub.length) continue; const g = agg(sub);
@@ -56,16 +56,7 @@ function report(D) {
   }
   md += tbl(['age', 'topic', 'rounds', 'round s', 'play s', 'mm', 'pairs seen'], tr);
 
-  md += '\n### Reward crowding at Talk time (final perch boxes overlapping > 40 % of the smaller box), all drivers\n\n';
-  const cr = [];
-  for (const v of vps) for (const a of ages) {
-    const C = flat(S.filter(s => s.vp === v && s.age === a).map(s => s.crowd)); if (!C.length) continue;
-    const byL = [0, 1, 2, 3].map(l => { const q = C.filter(c => c.level === l); return q.length ? fp(sum(q.map(c => c.bad)) / Math.max(1, sum(q.map(c => c.n)))) : '–'; });
-    cr.push([v, a, f1(mean(C.map(c => c.n))), Math.max(...C.map(c => c.n)), fp(sum(C.map(c => c.bad)) / Math.max(1, sum(C.map(c => c.n)))), fp(C.filter(c => c.bad > 0).length / C.length), f1(mean(C.map(c => c.air)))].concat(byL));
-  }
-  md += tbl(['viewport', 'age', 'rewards/chapter', 'max', 'crowded rewards', 'chapters with a cluster', 'in the air', 'ch1', 'ch2', 'ch3', 'ch4'], cr);
-
-  md += '\n### Card width (px, logical) by age × viewport: min / median, pairs → grid\n\n';
+  md += '\n### Window width (px, logical) by age × viewport: min / median, pairs → grid\n\n';
   const cw = [];
   for (const v of vps) for (const a of ages) {
     const K = flat(S.filter(s => s.vp === v && s.age === a).map(s => s.cards)); if (!K.length) continue;

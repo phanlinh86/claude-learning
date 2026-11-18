@@ -3,3 +3,4 @@ tests/out/
 tests/sim/out/*.json
 tests/sim/out/pt_browser/
 *.log
+tests/sim/out/

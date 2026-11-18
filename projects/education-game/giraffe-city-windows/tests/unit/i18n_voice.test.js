@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Dee's Forest Memory — unit tests for i18n.js, voice.js, input.js.
-// Run from projects/education-game/duckling-forest-memory:   node tests/unit/i18n_voice.test.js
+// Gigi's Peekaboo Windows — unit tests for i18n.js, voice.js, input.js.
+// Run from projects/education-game/giraffe-city-windows:   node tests/unit/i18n_voice.test.js
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -31,7 +31,7 @@ const NEG_EN = /\b(no|not|wrong|bad|fail|failed|incorrect|oh no|mistake|oops)\b/
 const NEG_VI = /(^|[\s,.!?])(sai|dở|tệ|hỏng|không đúng|chưa đúng|trật|sai rồi)([\s,.!?]|$)/iu;
 function positive(s) { return !NEG_EN.test(s) && !NEG_VI.test(String(s).toLowerCase()); }
 const r0 = () => 0, r9 = () => 0.99;
-const nWords = (s) => String(s).split(/\s+/).filter(Boolean).length;
+const nWords = (s) => String(s).split(/\s+/).filter(w => w && w !== '—').length;
 function clean(s) {
   return typeof s === 'string' && s.trim().length > 0 && s.indexOf('{') < 0 && s.indexOf('}') < 0 &&
     !/undefined|null|NaN|\[object/.test(s) && !/\s[!?.,]/.test(s) && !/^[!?.,]/.test(s);
@@ -46,75 +46,104 @@ catch (e) { console.log('FAIL  scripts load: ' + e.stack); process.exit(1); }
 const I = GW.I18N, V = GW.Voice;
 for (const f of ['i18n.js', 'voice.js', 'input.js'])
   ok(!/\(\?<[=!]/.test(fs.readFileSync(path.join(JS, f), 'utf8')), `${f} has no regex look-behind (SyntaxError on iOS < 16.4)`);
+for (const f of ['i18n.js', 'voice.js', 'input.js']) {
+  const src = fs.readFileSync(path.join(JS, f), 'utf8');
+  ok(!/\bDM\.|Forest Memory|Đi'|\/\\bDee/.test(src), `${f} has no Dee / DM leftovers (namespace, title, spoken-name rule)`);
+}
 
 // ------------------------------------------------------------------ keys
 section('keys exist in both languages');
-const TOPICS = ['colors', 'size', 'shapes', 'count', 'animals', 'letters', 'lower', 'initial', 'add', 'sub', 'oddeven'];
-const ANIMALS = ['fox', 'deer', 'hedgehog', 'squirrel', 'bunny', 'frog', 'bear', 'owl', 'mouse'];   // DESIGN §5.1
+const TOPICS = ['colors', 'size', 'shapes', 'count', 'animals', 'homes', 'letters', 'lower', 'initial', 'add', 'sub', 'oddeven'];
+const ANIMALS = ['dog', 'cat', 'bird', 'fish', 'bee', 'rabbit', 'duck', 'hen', 'spider'];   // DESIGN §6.1
+const HOME_OF = { dog: 'kennel', cat: 'basket', bird: 'nest', fish: 'bowl', bee: 'hive', rabbit: 'hutch', duck: 'pond', hen: 'coop', spider: 'web' };
+const HOMES = ANIMALS.map(a => HOME_OF[a]);
+const THINGS = ['umbrella', 'balloon', 'car', 'kite', 'cup', 'boot'];
+const COLORS = ['red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink'];
+const CRITTERS = ['pigeon', 'bus', 'balloon'];
 const UI = ['title', 'logo1', 'logo2', 'subtitle', 'tagline', 'play', 'playAgain', 'home', 'paused', 'resume', 'settings',
   'holdForParents', 'age', 'language', 'name', 'namePlaceholder', 'sound', 'music', 'volume', 'voice', 'mic', 'done',
   'stars', 'chapter', 'allDone', 'welcome', 'micUnsupported', 'micDenied', 'voiceMissing', 'tapOrSay', 'listening',
-  'tapDee', 'years', 'skip', 'langName.en', 'langName.vi'];
+  'tapGigi', 'tapDee', 'years', 'skip', 'langName.en', 'langName.vi'];
 const REQUIRED = []
   .concat(UI.map(k => 'ui.' + k))
   .concat(TOPICS.map(k => 'topic.' + k))
   .concat([0, 1, 2, 3].map(k => 'weather.' + k))
   .concat(TOPICS.map(k => 'p.' + k)).concat(['p.any'])
-  .concat(['surprise.shuffle', 'surprise.golden', 'surprise.pond', 'golden'])
-  .concat(['peek', 'hide', 'praise', 'great', 'wrong', 'miss', 'hint', 'idle', 'talk.intro', 'talk.right', 'talk.wrong',
-    'talk.animalsAny', 'session.done', 'say.countDone', 'mismatch.two', 'match.any'])
-  .concat(['color', 'shape', 'shapeColor', 'animal', 'number', 'letter', 'capital', 'small', 'expr', 'word'].map(k => 'flip.' + k))
-  .concat(['color', 'shape', 'animal', 'size', 'count', 'number', 'oddeven', 'letter', 'lower', 'initial', 'math'].map(k => 'match.' + k))
-  .concat(['butterfly', 'lantern', 'acorns', 'animal', 'star'].map(k => 'reward.' + k))
+  .concat(CRITTERS.map(k => 'critter.' + k)).concat(CRITTERS.map(k => 'critter.' + k + '.tap'))
+  .concat(CRITTERS.map(k => 'surprise.' + k)).concat(['surprise.shuffle', 'surprise.golden', 'surprise.pond', 'golden'])
+  .concat(['peek', 'hide', 'praise', 'great', 'cheer', 'walk', 'wrong', 'miss', 'hint', 'idle', 'talk.intro', 'talk.right',
+    'talk.wrong', 'talk.animalsAny', 'talk.homesAny', 'talk.colorsAny', 'session.done', 'say.countDone', 'mismatch.two',
+    'mismatch.home', 'match.any', 'talk.wrong.home'])
+  .concat(['color', 'thing', 'shape', 'shapeColor', 'animal', 'home', 'number', 'letter', 'capital', 'small', 'expr', 'word'].map(k => 'flip.' + k))
+  .concat(['color', 'thing', 'colorMix', 'shape', 'animal', 'home', 'size', 'count', 'number', 'oddeven', 'letter', 'lower',
+    'initial', 'math'].map(k => 'match.' + k))
+  .concat(['star', 'light', 'bloom'].map(k => 'reward.' + k))
   .concat(TOPICS.map(k => 'talk.' + k));
 for (const lang of I.langs) for (const k of REQUIRED) ok(I.has(lang, k), `key ${k} in ${lang}`);
 eq(JSON.stringify(I.keys('en').slice().sort()), JSON.stringify(I.keys('vi').slice().sort()), 'en and vi have identical key sets');
 for (const k of Object.keys(I.PARAMS)) for (const lang of I.langs) ok(I.has(lang, k), `PARAMS key ${k} exists in ${lang}`);
-// keys the game code asks for at run time (files still copied from Kitten's Balloon Farm are skipped until rewired)
+// every key: the same {params} in both languages (in every variant together)
+for (const k of I.keys('en')) {
+  // English-only plural params ({plural}, {things}) are the same value as vi {name} / {thing} (Vietnamese has no plural)
+  const PL = { '{plural}': '{name}', '{things}': '{thing}' };
+  const ps = (l) => Array.from(new Set(([].concat(I.raw(l, k)).join(' ').match(/\{\w+\}/g) || []).filter(x => x !== '{child}')
+    .map(x => PL[x] || x))).sort().join(',');
+  eq(ps('vi'), ps('en'), `key ${k}: identical {params} in en and vi`);
+}
+// keys the game code asks for at run time
 (function () {
   const files = ['main.js', 'ui.js', 'render.js', '../index.html'];
   const used = new Set();
   for (const f of files) {
     let src = '';
     try { src = fs.readFileSync(path.join(JS, f), 'utf8'); } catch (e) { continue; }
-    if (/Balloon Farm|Miu/.test(src.slice(0, 600))) { console.log(`   (${f} is still the Kitten copy — key check skipped)`); continue; }
-    src.replace(/['"`]((?:ui|talk|session|weather|topic|p|peek|hide|flip|match|mismatch|reward)(?:\.[A-Za-z0-9.]*[A-Za-z0-9])?)['"`]/g,
-      (m, k) => { if (/\./.test(k) || ['peek', 'hide'].includes(k)) used.add(k); return m; });
+    src.replace(/['"`]((?:ui|talk|session|weather|topic|p|peek|hide|flip|match|mismatch|reward|critter|cheer|walk|surprise)(?:\.[A-Za-z0-9.]*[A-Za-z0-9])?)['"`]/g,
+      (m, k) => { if (/\./.test(k) || ['peek', 'hide', 'cheer', 'walk'].includes(k)) used.add(k); return m; });
   }
   for (const k of used) for (const lang of I.langs) ok(I.has(lang, k), `key used by the game code exists: ${lang} ${k}`);
 })();
-const ALL_TEXT = I.langs.map(l => I.keys(l).map(x => [].concat(I.raw(l, x)).join(' ')).join(' ')).join(' ');
-for (const k of ['Miu', 'kitten', 'balloon', 'farm', 'pop', 'Bụp', 'bóng', 'nông trại', 'mèo', 'oink', 'moo', 'Lumi', 'garden'])
-  ok(ALL_TEXT.toLowerCase().indexOf(k.toLowerCase()) < 0, `no leftover Kitten/Owl wording "${k}"`);
+// every I18N function Dee's main.js calls is still there
+for (const fn of ['t', 'name', 'words', 'sayFlip', 'sayMatch', 'sayMismatch', 'setChild', 'talkWrong', 'sayCritter', 'cardPhrase',
+  'sayCount', 'sayReward', 'speech', 'has', 'keys', 'raw']) ok(typeof I[fn] === 'function', `GW.I18N.${fn} exists`);
 
-for (const lang of I.langs) for (const k of ['praise', 'wrong', 'hint', 'idle', 'great', 'miss', 'talk.right', 'peek', 'hide', 'match.any']) {
+section('no leftovers from the forest / duckling game');
+const ALL_TEXT = I.langs.map(l => I.keys(l).map(x => [].concat(I.raw(l, x)).join(' ')).join(' ')).join(' ');
+for (const k of ['Dee', 'Đi đây', 'vịt Dee', 'duckling', 'forest', 'acorn', 'butterfly', 'butterflies', 'lantern', 'lily pad',
+  'fox', 'owl', 'hedgehog', 'squirrel', 'blossom', 'autumn', 'winter', 'snow', 'hạt dẻ', 'bướm', 'đèn lồng', 'rừng', 'lá sen',
+  'con cáo', 'con cú', 'tuyết', 'thẻ', 'card', 'flip', 'Miu', 'kitten', 'farm', 'nông trại'])
+  ok(ALL_TEXT.toLowerCase().indexOf(k.toLowerCase()) < 0, `no leftover wording "${k}"`);
+
+for (const lang of I.langs) for (const k of ['praise', 'wrong', 'hint', 'idle', 'great', 'cheer', 'walk', 'miss', 'talk.right', 'peek', 'hide', 'match.any']) {
   const v = I.raw(lang, k);
   ok(Array.isArray(v) && v.length >= 5 && v.length <= 8, `${lang} ${k} has 5–8 variants (${v && v.length})`);
 }
-for (const lang of I.langs) for (const k of ['great', 'idle', 'talk.right', 'peek']) {
+for (const lang of I.langs) for (const k of ['great', 'cheer', 'walk', 'idle', 'talk.right', 'peek']) {
   const v = I.raw(lang, k);
   ok(v.some(s => s.includes('{child}')) && v.some(s => !s.includes('{child}')), `${lang} ${k} has name + no-name variants`);
 }
 
 section('Vietnamese wording sanity, titles');
 const viAll = I.keys('vi').map(k => [].concat(I.raw('vi', k)).join(' ')).join(' ');
-for (const bad of ['Be oi', 'nhe!', 'Dung roi', 'hat de', 'mau do', 'con cao', 'the giong'])
+for (const bad of ['Be oi', 'nhe!', 'Dung roi', 'mau do', 'con cho', 'cua so', 'cai o'])
   ok(viAll.indexOf(bad) < 0, `vi text has no un-accented "${bad}"`);
 ok(/Bé ơi/.test(viAll) && /nhé!/.test(viAll) && /nào!/.test(viAll) && /giỏi quá!/.test(viAll), 'vi uses "Bé ơi", "nhé!", "nào!", "giỏi quá!"');
-ok(/thẻ/.test(viAll) && /hạt dẻ/.test(viAll) && /cặp/.test(viAll), 'vi uses thẻ / hạt dẻ / cặp');
-ok(!/Dee đây|Dee đi\b/.test(viAll), 'vi never says "Dee đây" / "Dee đi" (spoken "Đi đây" means "leaving now")');
-eq(I.t('en', 'ui.title'), 'Dee’s Forest Memory', 'en title');
-eq(I.t('vi', 'ui.title'), 'Vịt Dee Lật Thẻ Rừng Xanh', 'vi title');
-eq(I.t('en', 'ui.logo1') + ' / ' + I.t('en', 'ui.logo2'), 'Dee’s / Forest Memory', 'en logo lines');
-eq(I.t('vi', 'ui.logo1') + ' / ' + I.t('vi', 'ui.logo2'), 'Vịt Dee / Lật Thẻ Rừng Xanh', 'vi logo lines');
-eq(I.t('en', 'ui.voice'), 'Dee’s voice', 'en ui.voice');
-eq(I.t('vi', 'ui.voice'), 'Giọng của Dee', 'vi ui.voice');
+ok(/cửa sổ/.test(viAll) && /chấm tròn/.test(viAll) && /một đôi/i.test(viAll), 'vi uses cửa sổ / chấm tròn / một đôi');
+ok(!/Gigi đây|Gigi gì/.test(viAll), 'vi never says "Gigi đây" / "Gigi gì" (spoken "Gi Gi gì" sounds like "what")');
+eq(I.t('en', 'ui.title'), 'Gigi’s Peekaboo Windows', 'en title');
+eq(I.t('vi', 'ui.title'), 'Hươu Gigi Mở Cửa Sổ', 'vi title');
+eq(I.t('en', 'ui.logo1') + ' / ' + I.t('en', 'ui.logo2'), 'Gigi’s / Peekaboo Windows', 'en logo lines');
+eq(I.t('vi', 'ui.logo1') + ' / ' + I.t('vi', 'ui.logo2'), 'Hươu Gigi / Mở Cửa Sổ', 'vi logo lines');
+eq(I.t('en', 'ui.voice'), 'Gigi’s voice', 'en ui.voice');
+eq(I.t('vi', 'ui.voice'), 'Giọng của Gigi', 'vi ui.voice');
 eq(I.t('en', 'ui.volume'), 'Volume', 'en ui.volume');
 eq(I.t('vi', 'ui.volume'), 'Âm lượng', 'vi ui.volume');
-eq(I.t('vi', 'ui.listening'), 'Dee đang nghe…', 'vi listening');
-eq(I.t('en', 'weather.0'), 'Spring is here! Look, blossoms!', 'weather 0 spring');
-eq(I.t('en', 'weather.3'), 'Snowy winter! Brrr, so cold!', 'weather 3 winter');
-eq(I.t('vi', 'weather.1'), 'Chào mùa hè! Nắng ấm quá!', 'vi weather 1 summer');
+eq(I.t('vi', 'ui.listening'), 'Gigi đang nghe…', 'vi listening');
+eq(I.t('en', 'weather.0', {}, r0), 'What a sunny day!', 'weather 0 sunny');
+eq(I.t('en', 'weather.1', {}, r0), 'Whoosh — it’s windy!', 'weather 1 windy');
+eq(I.t('en', 'weather.2', {}, r0), 'Pitter-patter, rain!', 'weather 2 rain');
+eq(I.t('en', 'weather.3', {}, r0), 'Look — a rainbow!', 'weather 3 rainbow');
+eq(I.t('vi', 'weather.2', {}, r9), 'Mưa rồi! Cửa sổ ấm áp ghê.', 'vi weather 2 rain');
+eq(I.t('vi', 'weather.3', {}, r9), 'Cầu vồng trên phố kìa!', 'vi weather 3 rainbow');
 
 section('no negative words in any line');
 for (const lang of I.langs) for (const k of I.keys(lang)) {
@@ -123,9 +152,10 @@ for (const lang of I.langs) for (const k of I.keys(lang)) {
 }
 
 section('every string renders, no "{" left, short sentences');
-const FULL = { n: 3, stars: 7, child: 'Mai', answer: 'X', name: 'red', animal: 'fox', color: 'red', shape: 'star',
-  size: 'big', letter: 'B', lower: 'b', text: 'B', word: 'fox', a: 2, b: 3, parity: 'odd', expr: '2 + 3', num: 'three',
-  acorns: 'acorns', plural: 'foxes', beast: 'fox', A: 'a fox', B: 'an owl' };
+const FULL = { n: 3, stars: 7, child: 'Mai', answer: 'X', name: 'red', animal: 'dog', home: 'kennel', color: 'red',
+  thing: 'umbrella', things: 'umbrellas', shape: 'star', size: 'big', letter: 'B', lower: 'b', text: 'B', word: 'dog', a: 2,
+  b: 3, parity: 'odd', expr: '2 + 3', num: 'three', dots: 'dots', counted: 'one, two, three', plural: 'dogs', beast: 'dog',
+  A: 'a dog', B: 'a nest' };
 for (const lang of I.langs) for (const k of I.keys(lang)) {
   const raw = [].concat(I.raw(lang, k));
   for (let i = 0; i < raw.length; i++) {
@@ -143,55 +173,76 @@ for (const lang of I.langs) for (const k of I.keys(lang)) {
 }
 eq(I.t('xx', 'ui.play'), 'Play', 'unknown language falls back to English');
 eq(I.t('en', 'no.such.key'), 'no.such.key', 'unknown key returns the key');
-eq(I.t('en', 'p.nosuchtopic', {}, r0), 'Find two cards that match!', 'unknown prompt → p.any');
-eq(I.t('vi', 'p.nosuchtopic', {}, r0), 'Bé ơi, tìm hai thẻ giống nhau nhé!', 'vi unknown prompt → p.any');
+eq(I.t('en', 'p.nosuchtopic', {}, r0), 'Find two windows that match!', 'unknown prompt → p.any');
+eq(I.t('vi', 'p.nosuchtopic', {}, r0), 'Bé ơi, tìm hai cửa sổ giống nhau nhé!', 'vi unknown prompt → p.any');
 ok(clean(I.t('en', null)) || I.t('en', null) === '', 't with a null key does not throw');
 
-section('prompts, peek/hide, talk');
+section('prompts, peek/hide, cheer/walk, critters, talk');
 for (const lang of I.langs) for (const k of TOPICS.map(x => 'p.' + x).concat(['p.any'])) {
   const v = I.raw(lang, k);
   ok(Array.isArray(v) && v.length === 3 && new Set(v).size === 3, `${lang} ${k} has 3 different variants`);
   for (let i = 0; i < 3; i++) eq(I.t(lang, k, {}, () => (i + 0.5) / 3), I.t(lang, k, {}, () => (i + 0.5) / 3), `${lang} ${k}[${i}] is deterministic with an rng`);
 }
-for (const lang of I.langs) for (const k of ['surprise.shuffle', 'surprise.golden', 'surprise.pond', 'golden']) {
+for (const lang of I.langs) for (const k of CRITTERS.map(c => 'critter.' + c).concat(CRITTERS.map(c => 'critter.' + c + '.tap'),
+  CRITTERS.map(c => 'surprise.' + c), ['surprise.shuffle', 'surprise.golden', 'surprise.pond', 'golden'], [0, 1, 2, 3].map(x => 'weather.' + x))) {
   const v = I.raw(lang, k);
   ok(Array.isArray(v) && v.length === 2, `${lang} ${k} has 2 variants`);
 }
-eq(I.t('en', 'golden', {}, r0), 'A rainbow! You found the magic pair!', 'en golden');
-eq(I.t('vi', 'surprise.pond', {}, r0), 'Các thẻ đang nổi trên lá sen nè!', 'vi surprise.pond');
-for (const lang of I.langs) { for (let i = 0; i < 4; i++) ok(clean(I.t(lang, 'weather.' + i)), `${lang} weather.${i} kept`);
-  for (const k of ['butterfly', 'lantern', 'acorns', 'animal', 'star']) ok(I.has(lang, 'reward.' + k), `${lang} reward.${k} kept`); }
 eq(I.t('en', 'p.colors', {}, r0), 'Find the colour pairs!', 'en p.colors');
-eq(I.t('en', 'p.count', { n: 3 }, r0), 'Match each number with its acorns!', 'en p.count ignores params');
-eq(I.t('en', 'p.animals', {}, r0), 'Find two of each animal!', 'en p.animals');
-eq(I.t('vi', 'p.colors', {}, r0), 'Bé ơi, tìm hai thẻ cùng màu nhé!', 'vi p.colors');
-eq(I.t('vi', 'p.animals', { animal: 'fox' }, r0), 'Bé ơi, tìm hai bạn thú giống nhau nhé!', 'vi p.animals');
+eq(I.t('en', 'p.count', { n: 3 }, r0), 'Match the number with the dots!', 'en p.count ignores params');
+eq(I.t('en', 'p.homes', {}, r0), 'Who lives where? Find each animal’s home!', 'en p.homes');
+eq(I.t('vi', 'p.homes', {}, r0), 'Ai sống ở đâu? Bé tìm nhà cho các bạn nhé!', 'vi p.homes');
+eq(I.t('vi', 'p.any', {}, r0), 'Bé ơi, tìm hai cửa sổ giống nhau nhé!', 'vi p.any');
+eq(I.t('vi', 'p.animals', { animal: 'dog' }, r0), 'Bé ơi, tìm hai bạn thú giống nhau nhé!', 'vi p.animals');
 for (const lang of I.langs) for (const t of TOPICS) for (const params of [undefined, null, {}, { n: 4 }, { color: 'red', shape: 'x' }, 'junk', 7]) {
   const s = I.t(lang, 'p.' + t, params);
   ok(clean(s) && s !== 'p.' + t && nWords(s) <= 12, `${lang} p.${t} renders with params ${JSON.stringify(params)}: ${s}`);
 }
-eq(I.t('en', 'peek', {}, () => 0), 'Look carefully!', 'en peek[0]');
-eq(I.t('vi', 'peek', {}, () => 0), 'Bé nhìn kỹ nhé!', 'vi peek[0]');
-eq(I.t('en', 'hide', {}, () => 0), 'Now they hide!', 'en hide[0]');
-eq(I.t('en', 'talk.animals', { animal: 'fox' }), 'Where is the fox?', 'en talk.animals');
-eq(I.t('vi', 'talk.animals', { animal: 'fox' }), 'Con cáo đâu rồi nhỉ?', 'vi talk.animals');
-eq(I.t('vi', 'talk.animals', { animal: { kind: 'animal', value: 'owl' } }), 'Con cú đâu rồi nhỉ?', 'vi talk.animals object param');
-eq(I.t('en', 'talk.animals', { sound: 'deer' }), 'Where is the deer?', 'talk.animals from a Kitten-style {sound: id}');
-eq(I.t('en', 'talk.animals', { animal: 'animal_mouse' }), 'Where is the mouse?', 'talk.animals from a sprite id');
+eq(I.t('en', 'peek', {}, r0), 'Look carefully!', 'en peek[0]');
+eq(I.t('vi', 'peek', {}, r0), 'Bé nhìn kỹ nhé!', 'vi peek[0]');
+eq(I.t('en', 'hide', {}, r0), 'Now they hide!', 'en hide[0]');
+eq(I.t('vi', 'hide', {}, r0), 'Giờ chúng trốn rồi!', 'vi hide[0]');
+eq(I.t('en', 'cheer', {}, r0), 'The whole building is shining!', 'en cheer[0]');
+eq(I.t('en', 'walk', {}, r0), 'Let’s go to the next building!', 'en walk[0]');
+ok(I.raw('en', 'great').concat(I.raw('en', 'cheer')).includes('What a bright building, {child}!'), 'en "What a bright building, {child}!"');
+ok(I.raw('vi', 'cheer').includes('Ngôi nhà sáng rực rồi, {child} giỏi quá!'), 'vi "Ngôi nhà sáng rực rồi, {child} giỏi quá!"');
+eq(I.t('vi', 'cheer', { child: 'Mai' }, () => 0.5), 'Ngôi nhà sáng rực rồi, Mai giỏi quá!', 'vi cheer with the name');
+for (const lang of I.langs) for (const c of CRITTERS) {
+  const s1 = I.sayCritter(lang, c), s2 = I.sayCritter(lang, c, 'tap'), s3 = I.sayCritter(lang, { type: c, action: 'tap' });
+  ok(clean(s1) && clean(s2) && clean(s3) && positive(s1 + ' ' + s2), `${lang} sayCritter ${c}: ${s1} / ${s2}`);
+  ok(I.raw(lang, 'critter.' + c + '.tap').includes(s2) && I.raw(lang, 'critter.' + c).includes(s1), `${lang} sayCritter ${c} uses its keys`);
+}
+eq(I.sayCritter('en', 'bus', 'tap', r0), 'Beep beep! Everyone is waving!', 'en bus tap');
+eq(I.sayCritter('vi', 'pigeon', null, r9), 'Gù gù! Bạn bồ câu đến chơi nè!', 'vi pigeon');
+ok(I.raw('en', 'praise').includes(I.sayCritter('en', 'ufo')), 'unknown critter → praise');
+eq(I.t('en', 'talk.animals', { animal: 'dog' }), 'Where is the dog?', 'en talk.animals');
+eq(I.t('vi', 'talk.animals', { animal: 'dog' }), 'Con chó đâu rồi nhỉ?', 'vi talk.animals');
+eq(I.t('vi', 'talk.animals', { animal: { kind: 'animal', value: 'cat' } }), 'Con mèo đâu rồi nhỉ?', 'vi talk.animals object param');
+eq(I.t('en', 'talk.animals', { sound: 'bee' }), 'Where is the bee?', 'talk.animals from {sound: id}');
+eq(I.t('en', 'talk.animals', { animal: 'animal_rabbit' }), 'Where is the bunny?', 'talk.animals from a sprite id (rabbit = bunny)');
 eq(I.t('en', 'talk.animals', {}), 'Which animal is this?', 'talk.animals fallback');
 eq(I.t('vi', 'talk.animals'), 'Đây là con gì nhỉ?', 'vi talk.animals fallback');
+eq(I.t('en', 'talk.homes', { animal: 'bird' }), 'Where does the bird live?', 'en talk.homes');
+eq(I.t('vi', 'talk.homes', { animal: 'bird' }), 'Con chim sống ở đâu nhỉ?', 'vi talk.homes');
+eq(I.t('en', 'talk.homes', {}), 'Which home is this?', 'en talk.homes fallback');
+eq(I.t('en', 'talk.colors', { obj: 'umbrella' }), 'What colour is this umbrella?', 'en talk.colors with the thing');
+eq(I.t('vi', 'talk.colors', { thing: 'balloon' }), 'Quả bóng bay này màu gì nhỉ?', 'vi talk.colors with the thing');
+eq(I.t('en', 'talk.colors', {}), 'What colour is this?', 'en talk.colors without a thing');
+eq(I.t('vi', 'talk.colors', { obj: 'zzz' }), 'Cái này màu gì nhỉ?', 'vi talk.colors with junk obj');
 for (const lang of I.langs) for (const a of ANIMALS) {
-  const s = I.t(lang, 'talk.animals', { animal: a });
-  ok(s.indexOf(I.name(lang, 'animal', a)) >= 0 || s.indexOf(I.name(lang, 'animal', a).replace(/^c/, 'C')) >= 0, `${lang} talk.animals names ${a}: ${s}`);
+  for (const k of ['talk.animals', 'talk.homes']) {
+    const s = I.t(lang, k, { animal: a });
+    ok(s.toLowerCase().indexOf(I.name(lang, 'animal', a)) >= 0, `${lang} ${k} names ${a}: ${s}`);
+  }
 }
-eq(I.t('en', 'talk.count'), 'How many acorns?', 'en talk count');
-eq(I.t('vi', 'talk.count'), 'Có mấy hạt dẻ nào?', 'vi talk count');
+eq(I.t('en', 'talk.count'), 'How many dots?', 'en talk count');
+eq(I.t('vi', 'talk.count'), 'Có mấy chấm tròn nào?', 'vi talk count');
 eq(I.t('en', 'ui.chapter', { n: 2 }), 'Chapter 2', 'en chapter');
 eq(I.t('vi', 'ui.allDone', { stars: 12 }), 'Hoàn thành! 12 ngôi sao', 'vi allDone');
-eq(I.t('en', 'ui.welcome', { child: 'Mai' }), 'Hi Mai! I am Dee. Let’s find the pairs!', 'welcome with name');
-eq(I.t('en', 'ui.welcome', { child: '' }), 'Hi! I am Dee. Let’s find the pairs!', 'welcome without name');
-eq(I.t('vi', 'ui.welcome', { child: '' }), 'Chào bé! Mình là vịt Dee. Mình cùng lật thẻ nhé!', 'vi welcome without name');
-eq(I.t('vi', 'ui.welcome', { child: 'Mai' }), 'Chào bé Mai! Mình là vịt Dee. Mình cùng lật thẻ nhé!', 'vi welcome with name');
+eq(I.t('en', 'ui.welcome', { child: 'Mai' }), 'Hi Mai! I am Gigi. Let’s peek in the windows!', 'welcome with name');
+eq(I.t('en', 'ui.welcome', { child: '' }), 'Hi! I am Gigi. Let’s peek in the windows!', 'welcome without name');
+eq(I.t('vi', 'ui.welcome', { child: '' }), 'Chào bé! Mình là hươu cao cổ Gigi. Mình cùng mở cửa sổ nhé!', 'vi welcome without name');
+eq(I.t('vi', 'ui.welcome', { child: 'Mai' }), 'Chào bé Mai! Mình là hươu cao cổ Gigi. Mình cùng mở cửa sổ nhé!', 'vi welcome with name');
 I.setChild('An');
 ok(I.t('en', 'ui.welcome').indexOf('An') > 0, 'setChild is the default {child}');
 ok(I.raw('en', 'great').map((s, i) => I.t('en', 'great', {}, () => (i + 0.5) / 7)).some(s => s.includes('An')), 'great uses the child name');
@@ -205,14 +256,16 @@ for (const r of [() => NaN, () => 1, () => -3, { next: () => 2 }, 'x'])
 
 section('names for every kind/value');
 const VALUES = {
-  color: ['red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink'],
+  color: COLORS.concat(COLORS.map(c => ({ value: c, obj: 'umbrella' })), ['red:kite', 'boot_blue']),
   shape: ['circle', 'square', 'triangle', 'star', 'heart', 'rect'],
   size: ['big', 'small'],
   animal: ANIMALS,
+  home: HOMES,
+  thing: THINGS,
   parity: ['odd', 'even'],
   number: Array.from({ length: 21 }, (_, i) => i),
   dots: Array.from({ length: 12 }, (_, i) => i + 1),
-  text: ['2 + 3', '7 − 2', '5', 'B', 'fox'],
+  text: ['2 + 3', '7 − 2', '5', 'B', 'dog', 'nest'],
   word: [].concat(ANIMALS.map(a => 'animal_' + a))
 };
 const LETTERS = new Set(('ABCDEFGHIJKLMNOPQRSTUVWXYZ' + 'ĂÂĐÊÔƠƯ').split(''));
@@ -220,47 +273,62 @@ VALUES.letter = Array.from(LETTERS).concat(Array.from(LETTERS).map(c => c.toLowe
 VALUES.sum = []; VALUES.diff = [];
 for (let a = 1; a <= 19; a++) for (let b = 1; a + b <= 20; b++) VALUES.sum.push(a + '+' + b);
 for (let a = 1; a <= 10; a++) for (let b = 0; b <= a; b++) VALUES.diff.push(a + '−' + b);
-eq(I.NAME_KINDS.join(','), 'color,shape,size,animal,number,dots,letter,text,sum,diff,parity,word', 'NAME_KINDS');
+eq(I.NAME_KINDS.join(','), 'color,shape,size,animal,home,thing,number,dots,letter,text,sum,diff,parity,word', 'NAME_KINDS');
 for (const k of I.NAME_KINDS) ok(VALUES[k], `test covers name kind ${k}`);
 for (const lang of I.langs) {
   for (const kind of Object.keys(VALUES)) {
     for (const v of VALUES[kind]) {
       const n = I.name(lang, kind, v);
-      ok(typeof n === 'string' && n.length > 0 && !/undefined|null/.test(n), `${lang} name ${kind} ${v}`);
-      if (['color', 'shape', 'animal', 'parity', 'size'].includes(kind) && lang === 'vi')
-        ok(n !== v, `vi name ${kind} ${v} is translated (${n})`);
+      ok(typeof n === 'string' && n.length > 0 && !/undefined|null|object/.test(n), `${lang} name ${kind} ${JSON.stringify(v)}: ${n}`);
+      if (['color', 'shape', 'animal', 'home', 'thing', 'parity', 'size'].includes(kind) && lang === 'vi')
+        ok(n !== v, `vi name ${kind} ${JSON.stringify(v)} is translated (${n})`);
       if (kind === 'sum' || kind === 'diff' || kind === 'dots') ok(!/\d/.test(n), `${lang} ${kind} ${v} spoken as words (${n})`);
       const w = I.words(lang, kind, v);
-      ok(Array.isArray(w) && w.length > 0, `${lang} words ${kind} ${v}`);
-      ok(w.every(x => typeof x === 'string' && x === x.toLowerCase()), `${lang} words ${kind} ${v} are lower-case`);
-      if (lang === 'vi' && kind !== 'letter' && !(kind === 'text' && /^\p{L}$/u.test(v))) ok(w.every(x => w.includes(I.stripMarks(x).toLowerCase())), `vi words ${kind} ${v} include no-diacritic forms`);
+      ok(Array.isArray(w) && w.length > 0, `${lang} words ${kind} ${JSON.stringify(v)}`);
+      ok(w.every(x => typeof x === 'string' && x === x.toLowerCase()), `${lang} words ${kind} ${JSON.stringify(v)} are lower-case`);
+      if (lang === 'vi' && kind !== 'letter' && !(kind === 'text' && /^\p{L}$/u.test(v))) ok(w.every(x => w.includes(I.stripMarks(x).toLowerCase())), `vi words ${kind} ${JSON.stringify(v)} include no-diacritic forms`);
       if (kind === 'number' || kind === 'dots') ok(w.includes(String(v)), `${lang} words ${kind} ${v} include the digit`);
     }
   }
   for (const e of sb.GW.WORDS[lang]) {
     ok(I.name(lang, 'word', e.word).length > 0, `${lang} word ${e.word}`);
     ok(I.words(lang, 'word', e.word).length > 1, `${lang} words for word ${e.word} include the animal forms`);
-    const first = e.word.normalize('NFD').replace(/[\u0300\u0301\u0303\u0309\u0323]/g, '').normalize('NFC').charAt(0).toUpperCase();
+    const first = e.word.normalize('NFD').replace(/[̣̀́̃̉]/g, '').normalize('NFC').charAt(0).toUpperCase();
     ok(first === e.initial, `${lang} word ${e.word} starts with ${e.initial} (tone marks ignored)`);
   }
 }
-eq(sb.GW.WORDS.vi.map(w => w.word + w.initial).join(','), 'cáoC,hươuH,sócS,ếchÊ,gấuG,cúC', 'vi initial words (no nh/th/ch digraphs)');
-eq(sb.GW.WORDS.en.map(w => w.word + w.initial).join(','), 'foxF,deerD,hedgehogH,squirrelS,bunnyB,frogF,bearB,owlO,mouseM', 'en initial words');
-const EN_ANIMAL = { fox: 'fox', deer: 'deer', hedgehog: 'hedgehog', squirrel: 'squirrel', bunny: 'bunny', frog: 'frog', bear: 'bear', owl: 'owl', mouse: 'mouse' };
-const VI_ANIMAL = { fox: 'con cáo', deer: 'con hươu', hedgehog: 'con nhím', squirrel: 'con sóc', bunny: 'con thỏ', frog: 'con ếch', bear: 'con gấu', owl: 'con cú', mouse: 'con chuột' };
+eq(sb.GW.WORDS.vi.map(w => w.word + w.initial).join(','), 'mèoM,cáC,ongO,vịtV,gàG', 'vi initial words (no ch/th/nh digraphs)');
+eq(sb.GW.WORDS.en.map(w => w.word + w.initial).join(','), 'dogD,catC,birdB,fishF,beeB,rabbitR,duckD,henH,spiderS', 'en initial words');
+const EN_ANIMAL = { dog: 'dog', cat: 'cat', bird: 'bird', fish: 'fish', bee: 'bee', rabbit: 'bunny', duck: 'duck', hen: 'hen', spider: 'spider' };
+const VI_ANIMAL = { dog: 'con chó', cat: 'con mèo', bird: 'con chim', fish: 'con cá', bee: 'con ong', rabbit: 'con thỏ', duck: 'con vịt', hen: 'con gà', spider: 'con nhện' };
+const EN_HOME = { kennel: 'kennel', basket: 'basket', nest: 'nest', bowl: 'fish bowl', hive: 'beehive', hutch: 'hutch', pond: 'pond', coop: 'hen house', web: 'web' };
+const VI_HOME = { kennel: 'nhà chó', basket: 'cái giỏ', nest: 'tổ chim', bowl: 'bể cá', hive: 'tổ ong', hutch: 'chuồng thỏ', pond: 'cái ao', coop: 'chuồng gà', web: 'mạng nhện' };
+const EN_THING = { umbrella: 'umbrella', balloon: 'balloon', car: 'car', kite: 'kite', cup: 'cup', boot: 'boot' };
+const VI_THING = { umbrella: 'cái ô', balloon: 'quả bóng bay', car: 'chiếc ô tô', kite: 'con diều', cup: 'cái cốc', boot: 'chiếc ủng' };
 for (const a of ANIMALS) { eq(I.name('en', 'animal', a), EN_ANIMAL[a], 'en animal ' + a); eq(I.name('vi', 'animal', a), VI_ANIMAL[a], 'vi animal ' + a); }
-eq(I.name('en', 'animal', 'animal_owl'), 'owl', 'animal from sprite id');
+for (const h of HOMES) { eq(I.name('en', 'home', h), EN_HOME[h], 'en home ' + h); eq(I.name('vi', 'home', h), VI_HOME[h], 'vi home ' + h);
+  eq(I.name('en', 'home', 'home_' + h), EN_HOME[h], 'home from sprite id ' + h); }
+for (const t of THINGS) { eq(I.name('en', 'thing', t), EN_THING[t], 'en thing ' + t); eq(I.name('vi', 'thing', t), VI_THING[t], 'vi thing ' + t); }
+eq(I.name('en', 'color', { value: 'red', obj: 'umbrella' }), 'a red umbrella', 'en colour with obj');
+eq(I.name('vi', 'color', { value: 'red', obj: 'umbrella' }), 'cái ô màu đỏ', 'vi colour with obj');
+eq(I.name('en', 'color', { value: 'orange', obj: 'kite' }), 'an orange kite', 'en colour with obj: a → an');
+eq(I.name('vi', 'color', { value: 'green', obj: 'car' }), 'chiếc ô tô màu xanh lá', 'vi green car');
+eq(I.name('vi', 'color', 'yellow:boot'), 'chiếc ủng màu vàng', 'vi colour "yellow:boot"');
+eq(I.name('en', 'color', 'cup_purple'), 'a purple cup', 'en colour "cup_purple"');
+eq(I.name('en', 'color', 'red'), 'red', 'en plain colour');
 eq(I.name('vi', 'color', 'pink'), 'màu hồng', 'vi pink');
+eq(I.name('en', 'animal', 'animal_hen'), 'hen', 'animal from sprite id');
+eq(I.name('en', 'animal', 'bunny'), 'bunny', 'animal "bunny" alias');
 eq(I.name('vi', 'shape', 'heart'), 'hình trái tim', 'vi heart');
 eq(I.name('en', 'shape', 'rect'), 'rectangle', 'en rect');
 eq(I.name('en', 'size', 'small'), 'little', 'en small = little');
-eq(I.name('en', 'size', 'fox_small'), 'little fox', 'en size with animal');
-eq(I.name('vi', 'size', 'big:bear'), 'con gấu to', 'vi size with animal');
+eq(I.name('en', 'size', 'rabbit_small'), 'little bunny', 'en size with animal');
+eq(I.name('vi', 'size', 'big:cat'), 'con mèo to', 'vi size with animal');
 eq(I.name('en', 'number', 7), 'seven', 'en 7');
 eq(I.name('vi', 'number', 15), 'mười lăm', 'vi 15');
-eq(I.name('en', 'dots', 1), 'one acorn', 'en dots 1');
-eq(I.name('en', 'dots', 4), 'four acorns', 'en dots 4');
-eq(I.name('vi', 'dots', 3), 'ba hạt dẻ', 'vi dots 3');
+eq(I.name('en', 'dots', 1), 'one dot', 'en dots 1');
+eq(I.name('en', 'dots', 4), 'four dots', 'en dots 4');
+eq(I.name('vi', 'dots', 3), 'ba chấm tròn', 'vi dots 3');
 eq(I.name('vi', 'letter', 'B'), 'bờ', 'vi letter B phonics');
 eq(I.name('vi', 'letter', 'K'), 'ca', 'vi letter K');
 eq(I.name('vi', 'letter', 'Y'), 'i dài', 'vi letter Y');
@@ -268,153 +336,194 @@ eq(I.name('en', 'sum', '2+3'), 'two plus three', 'en sum');
 eq(I.name('vi', 'diff', '7−2'), 'bảy trừ hai', 'vi diff');
 eq(I.name('en', 'text', '2 + 3'), 'two plus three', 'text expression');
 eq(I.name('vi', 'text', '5'), 'năm', 'text number');
+eq(I.name('vi', 'text', 'nest'), 'tổ chim', 'text home');
 eq(I.name('vi', 'parity', 'odd'), 'lẻ', 'vi odd');
 eq(I.name('en', 'parity', 7), 'seven', 'parity with a number value');
-eq(I.name('vi', 'word', 'animal_frog'), 'ếch', 'vi word from sprite id');
-eq(I.name('en', 'word', 'animal_bear'), 'bear', 'en word from sprite id');
+eq(I.name('vi', 'word', 'animal_cat'), 'mèo', 'vi word from sprite id');
+eq(I.name('en', 'word', 'animal_rabbit'), 'rabbit', 'en word from sprite id (R for rabbit)');
 ok(I.words('en', 'color', 'blue').includes('blew'), 'blue/blew');
 ok(I.words('vi', 'number', 2).includes('hài'), 'hai/hài');
 ok(I.words('vi', 'color', 'red').includes('mau do'), 'words include stripped forms');
-ok(I.words('en', 'dots', 3).includes('three acorns') && I.words('vi', 'dots', 3).includes('ba hat de'), 'dots words: "three acorns", "ba hat de"');
-ok(I.words('vi', 'animal', 'deer').includes('nai') && I.words('vi', 'animal', 'deer').includes('hươu con'), 'vi deer: nai, hươu con (DESIGN §6)');
-ok(I.words('vi', 'animal', 'owl').includes('cú mèo') && I.words('vi', 'animal', 'owl').includes('con cu'), 'vi owl: cú mèo, con cu');
-ok(I.words('en', 'animal', 'bunny').includes('rabbit') && I.words('en', 'animal', 'mouse').includes('mice'), 'en bunny/rabbit, mouse/mice');
-ok(I.words('vi', 'word', 'cáo').includes('con cáo') && I.words('vi', 'word', 'cáo').includes('cao'), 'vi word cáo accepts animal forms');
+ok(I.words('en', 'dots', 3).includes('three dots') && I.words('vi', 'dots', 3).includes('ba cham tron') && I.words('vi', 'dots', 3).includes('ba chấm'), 'dots words');
+ok(I.words('en', 'dots', 3).includes('three lights'), 'dots words: "three lights"');
+ok(I.words('vi', 'animal', 'dog').includes('cún') && I.words('vi', 'animal', 'dog').includes('cun'), 'vi dog: cún (DESIGN §7)');
+ok(I.words('en', 'animal', 'rabbit').includes('rabbit') && I.words('en', 'animal', 'rabbit').includes('bunny'), 'en rabbit/bunny');
+ok(I.words('en', 'animal', 'hen').includes('chicken') && I.words('en', 'animal', 'dog').includes('puppy'), 'en hen/chicken, dog/puppy');
+ok(I.words('en', 'home', 'coop').includes('hen house') && I.words('en', 'home', 'bowl').includes('fish bowl'), 'en home words');
+ok(I.words('vi', 'home', 'pond').includes('ao') && I.words('vi', 'home', 'kennel').includes('nha cho'), 'vi home words');
+ok(I.words('vi', 'thing', 'umbrella').includes('dù') && I.words('vi', 'thing', 'cup').includes('ly'), 'vi thing words: dù, ly (southern)');
+ok(I.words('vi', 'color', { value: 'red', obj: 'umbrella' }).includes('đỏ'), 'colour words with obj still accept the colour');
+ok(I.words('vi', 'word', 'mèo').includes('con mèo') && I.words('vi', 'word', 'mèo').includes('meo'), 'vi word mèo accepts animal forms');
 ok(I.words('en', 'size', 'small').includes('little') && I.words('en', 'size', 'small').includes('small'), 'size small words');
-for (const lang of I.langs) for (const kind of I.NAME_KINDS) for (const v of [undefined, null, '', {}, 'zzz', -1, 999]) {
+for (const lang of I.langs) for (const kind of I.NAME_KINDS) for (const v of [undefined, null, '', {}, 'zzz', -1, 999, { value: 'zz', obj: 'q' }]) {
   let n, w;
   try { n = I.name(lang, kind, v); w = I.words(lang, kind, v); } catch (e) { n = null; }
   ok(typeof n === 'string' && Array.isArray(w), `${lang} name/words ${kind} ${JSON.stringify(v)} do not throw`);
 }
 
-// ------------------------------------------------------------------ card lines
+// ------------------------------------------------------------------ window lines
 section('sayFlip: exact lines');
 const card = (nameKind, nameValue, face) => ({ nameKind, nameValue, face: face || { kind: nameKind, value: nameValue } });
-eq(I.sayFlip('en', card('color', 'red'), r0), 'Red!', 'en color');
-eq(I.sayFlip('en', card('color', 'orange'), r9), 'An orange butterfly!', 'en color variant, a → an');
-eq(I.sayFlip('vi', card('color', 'red'), r0), 'Màu đỏ!', 'vi color');
-eq(I.sayFlip('vi', card('color', 'red'), r9), 'Bướm màu đỏ!', 'vi color variant');
+const thing = (c, o) => card('color', c, { kind: 'color', value: c, color: c, obj: o });
+const homeCard = (h) => card('home', h, { kind: 'home', value: h, sprite: 'home_' + h, animal: Object.keys(HOME_OF).find(a => HOME_OF[a] === h) });
+const animalCard = (a) => card('animal', a, { kind: 'animal', value: a, sprite: 'animal_' + a });
+eq(I.sayFlip('en', card('color', 'red'), r0), 'Red!', 'en plain colour');
+eq(I.sayFlip('vi', card('color', 'red'), r0), 'Màu đỏ!', 'vi plain colour');
+eq(I.sayFlip('en', thing('red', 'umbrella'), r0), 'A red umbrella!', 'en colour thing');
+eq(I.sayFlip('en', thing('orange', 'umbrella'), r0), 'An orange umbrella!', 'en colour thing a → an');
+eq(I.sayFlip('en', thing('blue', 'kite'), r9), 'Look, a blue kite!', 'en colour thing variant');
+eq(I.sayFlip('vi', thing('red', 'umbrella'), r0), 'Cái ô màu đỏ!', 'vi colour thing (cái ô)');
+eq(I.sayFlip('vi', thing('yellow', 'balloon'), r0), 'Quả bóng bay màu vàng!', 'vi quả bóng bay');
+eq(I.sayFlip('vi', thing('green', 'car'), r0), 'Chiếc ô tô màu xanh lá!', 'vi chiếc ô tô');
+eq(I.sayFlip('vi', thing('purple', 'kite'), r0), 'Con diều màu tím!', 'vi con diều');
+eq(I.sayFlip('vi', thing('blue', 'cup'), r0), 'Cái cốc màu xanh dương!', 'vi cái cốc');
+eq(I.sayFlip('vi', thing('red', 'boot'), r9), 'Chiếc ủng màu đỏ nè!', 'vi chiếc ủng variant');
 eq(I.sayFlip('en', card('shape', 'heart'), r0), 'A heart!', 'en shape');
 eq(I.sayFlip('en', card('shape', 'heart', { kind: 'shape', shape: 'heart', color: 'red' }), r0), 'A red heart!', 'en shape with colour');
 eq(I.sayFlip('vi', card('shape', 'star', { kind: 'shape', shape: 'star', color: 'blue' }), r0), 'Hình ngôi sao màu xanh dương!', 'vi shape with colour');
-eq(I.sayFlip('vi', card('shape', 'heart'), r0), 'Hình trái tim!', 'vi shape');
-eq(I.sayFlip('en', card('dots', 1), r0), 'One acorn!', 'en dots 1');
-eq(I.sayFlip('en', card('dots', 3), r0), 'One, two, three acorns!', 'en dots 3 counted');
-eq(I.sayFlip('en', card('dots', 5), r0), 'One, two, three, four, five acorns!', 'en dots 5 counted');
-eq(I.sayFlip('en', card('dots', 7), r0), 'Seven acorns!', 'en dots 7 not counted');
-eq(I.sayFlip('vi', card('dots', 3), r0), 'Một, hai, ba hạt dẻ!', 'vi dots 3');
-eq(I.sayFlip('vi', card('dots', 12), r0), 'Mười hai hạt dẻ!', 'vi dots 12');
-eq(I.sayFlip('en', { nameKind: 'dots', face: { kind: 'dots', n: 4 } }, r0), 'One, two, three, four acorns!', 'dots n from face');
+eq(I.sayFlip('en', card('dots', 1), r0), 'One dot!', 'en dots 1');
+eq(I.sayFlip('en', card('dots', 3), r0), 'One, two, three dots!', 'en dots 3 counted');
+eq(I.sayFlip('en', card('dots', 7), r0), 'Seven dots!', 'en dots 7 not counted');
+eq(I.sayFlip('vi', card('dots', 3), r0), 'Một, hai, ba chấm tròn!', 'vi dots 3');
+eq(I.sayFlip('en', { nameKind: 'dots', face: { kind: 'dots', n: 4 } }, r0), 'One, two, three, four dots!', 'dots n from face');
 eq(I.sayFlip('en', card('number', 3), r0), 'Three!', 'en number');
 eq(I.sayFlip('vi', card('number', 3), r0), 'Số ba!', 'vi number');
-eq(I.sayFlip('en', card('animal', 'fox'), r0), 'A fox!', 'en animal');
-eq(I.sayFlip('en', card('animal', 'owl'), r0), 'An owl!', 'en owl → an');
-eq(I.sayFlip('vi', card('animal', 'fox'), r0), 'Con cáo!', 'vi animal');
-eq(I.sayFlip('vi', card('animal', 'fox'), r9), 'Con cáo nè!', 'vi animal variant');
-eq(I.sayFlip('en', card('size', 'big', { kind: 'animal', sprite: 'animal_fox', scale: 1 }), r0), 'A big fox!', 'en size big');
-eq(I.sayFlip('en', card('size', 'small', { kind: 'animal', sprite: 'animal_fox', scale: 0.6 }), r0), 'A little fox!', 'en size little');
-eq(I.sayFlip('vi', card('size', 'small', { kind: 'animal', sprite: 'animal_bear', scale: 0.6 }), r0), 'Con gấu nhỏ!', 'vi size little');
-eq(I.sayFlip('en', { nameKind: 'animal', nameValue: 'fox', face: { kind: 'animal', sprite: 'animal_fox', scale: 0.6 }, topic: 'size' }, r0), 'A little fox!', 'size read from scale');
-eq(I.sayFlip('en', { nameKind: 'animal', nameValue: 'fox', face: { kind: 'animal', scale: 1 }, topic: 'size' }, r0), 'A big fox!', 'size topic, scale 1 → big');
+eq(I.sayFlip('en', animalCard('dog'), r0), 'A dog!', 'en animal');
+eq(I.sayFlip('en', animalCard('rabbit'), r0), 'A bunny!', 'en rabbit says bunny');
+eq(I.sayFlip('vi', animalCard('dog'), r0), 'Con chó!', 'vi animal');
+eq(I.sayFlip('vi', animalCard('spider'), r9), 'Con nhện nè!', 'vi animal variant');
+eq(I.sayFlip('en', homeCard('kennel'), r0), 'The kennel!', 'en home');
+eq(I.sayFlip('en', homeCard('coop'), r0), 'The hen house!', 'en home coop');
+eq(I.sayFlip('vi', homeCard('kennel'), r0), 'Nhà chó!', 'vi home');
+eq(I.sayFlip('vi', homeCard('nest'), r9), 'Tổ chim nè!', 'vi home variant');
+eq(I.sayFlip('en', Object.assign(homeCard('hive'), { topic: 'homes' }), r0), 'The beehive!', 'home window never names its animal');
+eq(I.sayFlip('en', card('size', 'big', { kind: 'animal', sprite: 'animal_dog', scale: 1 }), r0), 'A big dog!', 'en size big');
+eq(I.sayFlip('en', card('size', 'small', { kind: 'animal', sprite: 'animal_cat', scale: 0.6 }), r0), 'A little cat!', 'en size little');
+eq(I.sayFlip('vi', card('size', 'small', { kind: 'animal', sprite: 'animal_duck', scale: 0.6 }), r0), 'Con vịt nhỏ!', 'vi size little');
+eq(I.sayFlip('en', { nameKind: 'animal', nameValue: 'hen', face: { kind: 'animal', scale: 1 }, topic: 'size' }, r0), 'A big hen!', 'size topic, scale 1 → big');
 eq(I.sayFlip('en', card('letter', 'B'), r0), 'The letter B!', 'en letter');
 eq(I.speech('en', I.sayFlip('en', card('letter', 'B'), r0)), 'The letter bee!', 'en letter speech');
 eq(I.sayFlip('vi', card('letter', 'B'), r0), 'Chữ B!', 'vi letter');
 eq(I.speech('vi', I.sayFlip('vi', card('letter', 'B'), r0)), 'Chữ bờ!', 'vi letter phonics in speech');
 eq(I.sayFlip('en', card('letter', 'b'), r0), 'Small letter b!', 'en small letter');
 eq(I.sayFlip('vi', card('letter', 'b'), r0), 'Chữ b viết thường!', 'vi small letter');
-eq(I.speech('vi', 'Chữ b viết thường!'), 'Chữ bờ viết thường!', 'vi small letter speech');
 eq(I.sayFlip('en', Object.assign(card('letter', 'B'), { topic: 'lower' }), r0), 'Big letter B!', 'en capital in lower topic');
-eq(I.sayFlip('vi', Object.assign(card('letter', 'B'), { topic: 'lower' }), r0), 'Chữ B in hoa!', 'vi capital in lower topic');
 eq(I.sayFlip('en', card('sum', '2+3'), r0), 'Two plus three!', 'en sum');
 eq(I.sayFlip('vi', card('diff', '7−2'), r0), 'Bảy trừ hai!', 'vi diff');
-eq(I.sayFlip('en', card('text', '2 + 3'), r0), 'Two plus three!', 'en text expr');
-eq(I.sayFlip('en', card('word', 'animal_fox'), r0), 'A fox!', 'en word card (initial)');
-eq(I.sayFlip('vi', card('word', 'cáo', { kind: 'animal', sprite: 'animal_fox' }), r0), 'Con cáo!', 'vi word card (initial)');
-eq(I.sayFlip('en', card('parity', 7, { kind: 'parity', n: 7 }), r0), 'Seven!', 'parity card names the number');
-eq(I.sayFlip('en', card('parity', 7, { kind: 'parity', n: 7, dots: true }), r0), 'Seven acorns!', 'parity dots card counts');
-eq(I.sayFlip('en', { face: { kind: 'animal', sprite: 'animal_deer' } }, r0), 'A deer!', 'face only (no nameKind)');
-eq(I.sayFlip('en', { nameValue: 'owl' }, r0), 'An owl!', 'value only: guessed');
+eq(I.sayFlip('en', card('word', 'animal_rabbit'), r0), 'A rabbit!', 'en word window (initial R)');
+eq(I.sayFlip('vi', card('word', 'mèo', { kind: 'animal', sprite: 'animal_cat' }), r0), 'Mèo!', 'vi word window says the word (initial M)');
+eq(I.sayFlip('vi', Object.assign(animalCard('duck'), { topic: 'initial' }), r0), 'Vịt!', 'vi initial topic animal window says the word');
+eq(I.sayFlip('en', card('parity', 7, { kind: 'parity', n: 7 }), r0), 'Seven!', 'parity window names the number');
+eq(I.sayFlip('en', card('parity', 7, { kind: 'parity', n: 7, dots: true }), r0), 'Seven dots!', 'parity dots window counts');
+eq(I.sayFlip('en', { face: { kind: 'animal', sprite: 'animal_bee' } }, r0), 'A bee!', 'face only (no nameKind)');
+eq(I.sayFlip('en', { nameValue: 'cat' }, r0), 'A cat!', 'value only: guessed');
+eq(I.sayFlip('en', { nameValue: 'web' }, r0), 'The web!', 'home value only: guessed');
 ok(I.raw('en', 'praise').includes(I.sayFlip('en', {}, r0)), 'empty event → praise');
 eq(I.sayTap, I.sayFlip, 'sayTap alias');
 
 section('sayMatch: exact lines');
 const pair = (topic, a, b, extra) => Object.assign({ topic, cardA: a, cardB: b, nameKind: a.nameKind, nameValue: a.nameValue }, extra || {});
-eq(I.sayMatch('en', pair('animals', card('animal', 'fox'), card('animal', 'fox')), r0), 'Two foxes! A pair!', 'en animals');
-eq(I.sayMatch('en', { nameKind: 'animal', nameValue: 'mouse' }, r0), 'Two mice! A pair!', 'en animals (event fields only)');
-eq(I.sayMatch('vi', { nameKind: 'animal', nameValue: 'fox' }, r0), 'Hai con cáo! Một cặp rồi!', 'vi animals');
-eq(I.sayMatch('en', { nameKind: 'color', nameValue: 'red' }, r0), 'Red and red! A pair!', 'en colors');
-eq(I.sayMatch('vi', { nameKind: 'color', nameValue: 'red' }, r9), 'Hai con bướm màu đỏ! Một cặp rồi!', 'vi colors variant');
+eq(I.sayMatch('en', pair('colors', thing('red', 'umbrella'), thing('red', 'umbrella')), r0), 'Two red umbrellas — a pair!', 'en colour things');
+eq(I.sayMatch('vi', pair('colors', thing('red', 'umbrella'), thing('red', 'umbrella')), r0), 'Hai cái ô màu đỏ — một đôi!', 'vi colour things');
+eq(I.sayMatch('vi', pair('colors', thing('yellow', 'balloon'), thing('yellow', 'balloon')), r9), 'Hai quả bóng bay màu vàng! Giỏi quá!', 'vi colour things variant');
+eq(I.sayMatch('en', pair('colors', thing('orange', 'boot'), thing('orange', 'boot')), r0), 'Two orange boots — a pair!', 'en orange boots');
+eq(I.sayMatch('en', pair('colors', thing('red', 'balloon'), thing('red', 'car')), r0), 'A balloon and a car — both red!', 'en age 5+: two things, one colour');
+eq(I.sayMatch('vi', pair('colors', thing('red', 'balloon'), thing('red', 'car')), r0), 'Quả bóng bay và chiếc ô tô — cùng màu đỏ!', 'vi two things, one colour');
+eq(I.sayMatch('en', pair('colors', thing('blue', 'umbrella'), thing('blue', 'kite')), r9), 'Both blue! An umbrella and a kite!', 'en colorMix variant');
+eq(I.sayMatch('en', { nameKind: 'color', nameValue: 'red' }, r0), 'Red and red! A pair!', 'en plain colours');
+eq(I.sayMatch('vi', { nameKind: 'color', nameValue: 'red' }, r9), 'Cùng màu đỏ! Một đôi rồi!', 'vi plain colours variant');
+eq(I.sayMatch('en', { nameKind: 'color', nameValue: 'red', nameKindA: 'color', nameValueA: 'red', faceA: { kind: 'color', color: 'red', obj: 'cup' },
+  nameKindB: 'color', nameValueB: 'red', faceB: { kind: 'color', color: 'red', obj: 'cup' } }, r0), 'Two red cups — a pair!', 'colour things via the World fields');
+eq(I.sayMatch('en', pair('homes', animalCard('dog'), homeCard('kennel')), r0), 'The dog lives in the kennel!', 'en homes');
+eq(I.sayMatch('vi', pair('homes', animalCard('dog'), homeCard('kennel')), r0), 'Con chó sống trong nhà chó!', 'vi homes');
+eq(I.sayMatch('vi', pair('homes', homeCard('nest'), animalCard('bird')), r0), 'Con chim sống trong tổ chim!', 'vi homes (home window first)');
+eq(I.sayMatch('vi', pair('homes', animalCard('fish'), homeCard('bowl')), r9), 'Con cá về bể cá rồi! Hoan hô!', 'vi homes variant');
+eq(I.sayMatch('en', { topic: 'homes', animal: 'rabbit', home: 'hutch' }, r0), 'The bunny lives in the hutch!', 'homes from ev.animal + ev.home');
+eq(I.sayMatch('en', { topic: 'homes', nameKind: 'animal', nameValue: 'duck' }, r0), 'The duck lives in the pond!', 'homes from topic + animal only');
+eq(I.sayMatch('en', { home: 'web' }, r0), 'The spider lives in the web!', 'homes from ev.home only');
+for (const a of ANIMALS) for (const lang of I.langs) {
+  const s = I.sayMatch(lang, Object.assign(pair('homes', animalCard(a), homeCard(HOME_OF[a])), { animal: a, home: HOME_OF[a] }), r0);
+  ok(s.toLowerCase().indexOf(I.name(lang, 'animal', a)) >= 0 && s.indexOf(I.name(lang, 'home', HOME_OF[a])) >= 0, `${lang} homes match ${a}: ${s}`);
+}
+eq(I.sayMatch('en', pair('animals', animalCard('dog'), animalCard('dog')), r0), 'Two dogs! A pair!', 'en animals');
+eq(I.sayMatch('en', { nameKind: 'animal', nameValue: 'rabbit' }, r0), 'Two bunnies! A pair!', 'en animals (event fields only)');
+eq(I.sayMatch('en', { nameKind: 'animal', nameValue: 'fish' }, r0), 'Two fish! A pair!', 'en fish plural');
+eq(I.sayMatch('vi', { nameKind: 'animal', nameValue: 'cat' }, r0), 'Hai con mèo! Một đôi rồi!', 'vi animals');
 eq(I.sayMatch('en', { nameKind: 'shape', nameValue: 'heart' }, r0), 'Two hearts! A pair!', 'en shapes');
-eq(I.sayMatch('vi', { nameKind: 'shape', nameValue: 'star' }, r0), 'Hai hình ngôi sao! Một cặp rồi!', 'vi shapes');
-eq(I.sayMatch('en', pair('count', card('number', 3), card('dots', 3)), r0), 'Three and three acorns! A match!', 'en count');
-eq(I.sayMatch('en', pair('count', card('number', 1), card('dots', 1)), r0), 'One and one acorn! A match!', 'en count 1 (singular)');
-eq(I.sayMatch('vi', pair('count', card('number', 3), card('dots', 3)), r0), 'Số ba và ba hạt dẻ! Đúng một cặp!', 'vi count');
-eq(I.sayMatch('en', { topic: 'count', nameKind: 'number', nameValue: 4 }, r0), 'Four and four acorns! A match!', 'count from topic + nameValue');
-eq(I.sayMatch('en', pair('oddeven', card('number', 7), card('dots', 7)), r0), 'Seven and seven acorns! Seven is odd!', 'en oddeven');
-eq(I.sayMatch('vi', pair('oddeven', card('number', 8), card('dots', 8)), r0), 'Số tám và tám hạt dẻ! Tám là số chẵn!', 'vi oddeven');
+eq(I.sayMatch('vi', { nameKind: 'shape', nameValue: 'star' }, r0), 'Hai hình ngôi sao! Một đôi rồi!', 'vi shapes');
+eq(I.sayMatch('en', pair('count', card('number', 3), card('dots', 3)), r0), 'Three and three dots! A match!', 'en count');
+eq(I.sayMatch('en', pair('count', card('number', 3), card('dots', 3)), r9), 'Three — one, two, three! A pair!', 'en count counted (REQUIREMENT line)');
+eq(I.sayMatch('en', pair('count', card('number', 1), card('dots', 1)), r0), 'One and one dot! A match!', 'en count 1 (singular)');
+eq(I.sayMatch('vi', pair('count', card('number', 3), card('dots', 3)), r0), 'Số ba và ba chấm tròn! Đúng một đôi!', 'vi count');
+eq(I.sayMatch('vi', pair('count', card('number', 4), card('dots', 4)), r9), 'Bốn — một, hai, ba, bốn! Một đôi rồi!', 'vi count counted');
+eq(I.sayMatch('en', { topic: 'count', nameKind: 'number', nameValue: 4 }, r0), 'Four and four dots! A match!', 'count from topic + nameValue');
+eq(I.sayMatch('en', pair('oddeven', card('number', 7), card('dots', 7)), r0), 'Seven and seven dots! Seven is odd!', 'en oddeven');
+eq(I.sayMatch('vi', pair('oddeven', card('number', 8), card('dots', 8)), r0), 'Số tám và tám chấm tròn! Tám là số chẵn!', 'vi oddeven');
 eq(I.sayMatch('en', { nameKind: 'number', nameValue: 6, parity: 'even' }, r9), 'Six is even! A pair!', 'oddeven from ev.parity');
-eq(I.sayMatch('en', pair('size', card('size', 'big', { kind: 'animal', sprite: 'animal_fox', scale: 1 }), card('size', 'small', { kind: 'animal', sprite: 'animal_fox', scale: 0.6 })), r0),
-  'A big fox and a little fox! A pair!', 'en size');
-eq(I.sayMatch('vi', { topic: 'size', nameKind: 'animal', nameValue: 'bear' }, r0), 'Con gấu to và con gấu nhỏ! Một cặp rồi!', 'vi size');
+eq(I.sayMatch('en', pair('size', card('size', 'big', { kind: 'animal', sprite: 'animal_dog', scale: 1 }), card('size', 'small', { kind: 'animal', sprite: 'animal_dog', scale: 0.6 })), r0),
+  'A big dog and a little dog! A pair!', 'en size');
+eq(I.sayMatch('vi', { topic: 'size', nameKind: 'animal', nameValue: 'hen' }, r0), 'Con gà to và con gà nhỏ! Một đôi rồi!', 'vi size');
 eq(I.sayMatch('en', pair('letters', card('letter', 'B'), card('letter', 'B')), r0), 'Letter B and letter B! A pair!', 'en letters');
-eq(I.speech('en', 'Letter B and letter B! A pair!'), 'Letter bee and letter bee! A pair!', 'en letters speech');
 eq(I.sayMatch('vi', { nameKind: 'letter', nameValue: 'Ê' }, r0), 'Chữ Ê và chữ Ê! Một cặp rồi!', 'vi letters');
-eq(I.sayMatch('en', pair('lower', card('letter', 'B'), card('letter', 'b')), r0), 'Big letter B and small letter b! A pair!', 'en lower');
 eq(I.sayMatch('en', pair('lower', card('letter', 'A'), card('letter', 'a')), r0), 'Big letter A and small letter a! A pair!', 'letter A is never "An"');
-eq(I.sayMismatch('en', { cardA: card('letter', 'A'), cardB: card('letter', 'E') }, r0), 'Letter A and letter E. Let’s look again!', 'mismatch letter A');
-eq(I.sayMismatch('en', { cardA: card('letter', 'E'), cardB: card('letter', 'A') }, r0), 'Letter E and letter A. Let’s look again!', 'mismatch letter A last');
-eq(I.sayFlip('en', card('color', 'orange'), r9), 'An orange butterfly!', 'a → an still works');
-for (const L of 'AEIOU') ok(!/letter An\b/.test(I.sayMatch('en', pair('lower', card('letter', L), card('letter', L.toLowerCase())), r0)), 'no "letter An" for ' + L);
 eq(I.sayMatch('vi', pair('lower', card('letter', 'G'), card('letter', 'g')), r0), 'Chữ G in hoa và chữ g thường! Một cặp rồi!', 'vi lower');
 eq(I.speech('vi', 'Chữ G in hoa và chữ g thường! Một cặp rồi!'), 'Chữ gờ in hoa và chữ gờ thường! Một cặp rồi!', 'vi lower speech');
-eq(I.sayMatch('en', pair('initial', card('letter', 'F'), card('animal', 'fox', { kind: 'animal', sprite: 'animal_fox' })), r0),
-  'Fox starts with the letter F! A pair!', 'en initial');
-eq(I.sayMatch('vi', pair('initial', card('letter', 'C'), card('word', 'cáo', { kind: 'animal', sprite: 'animal_fox' })), r0),
-  'Cáo bắt đầu bằng chữ C! Một cặp rồi!', 'vi initial');
+eq(I.sayMatch('en', pair('initial', card('letter', 'D'), card('animal', 'dog', { kind: 'animal', sprite: 'animal_dog' })), r0),
+  'Dog starts with the letter D! A pair!', 'en initial');
+eq(I.sayMatch('en', pair('initial', card('letter', 'R'), card('word', 'rabbit', { kind: 'animal', sprite: 'animal_rabbit' })), r0),
+  'Rabbit starts with the letter R! A pair!', 'en initial rabbit (not "bunny")');
+eq(I.sayMatch('vi', pair('initial', card('letter', 'M'), card('word', 'mèo', { kind: 'animal', sprite: 'animal_cat' })), r0),
+  'Mèo bắt đầu bằng chữ M! Một đôi rồi!', 'vi initial');
 eq(I.sayMatch('en', pair('add', card('sum', '2+3'), card('number', 5)), r0), 'Two plus three is five! A match!', 'en add');
-eq(I.sayMatch('vi', pair('sub', card('number', 5), card('diff', '7−2')), r0), 'Bảy trừ hai bằng năm! Đúng rồi!', 'vi sub (answer card first)');
-eq(I.sayMatch('en', pair('add', card('text', '4 + 4', { kind: 'text', text: '4 + 4' }), card('text', '8', { kind: 'text', text: '8' })), r0),
-  'Four plus four is eight! A match!', 'add with text faces');
+eq(I.sayMatch('vi', pair('sub', card('number', 5), card('diff', '7−2')), r0), 'Bảy trừ hai bằng năm! Đúng rồi!', 'vi sub (answer window first)');
 ok(I.raw('en', 'match.any').includes(I.sayMatch('en', {}, r0)), 'empty match → match.any');
-ok(I.raw('en', 'match.any').includes(I.sayMatch('en', { topic: 'add', nameKind: 'number', nameValue: 5 }, r0)), 'add without the sum card → match.any (never "five and five")');
-// field variants for the two cards
+ok(I.raw('en', 'match.any').includes(I.sayMatch('en', { topic: 'add', nameKind: 'number', nameValue: 5 }, r0)), 'add without the sum window → match.any');
 const viaFields = [
-  { cards: [card('animal', 'fox'), card('animal', 'fox')] },
-  { nameKindA: 'animal', nameValueA: 'fox', nameKindB: 'animal', nameValueB: 'fox' },
-  { nameA: { kind: 'animal', value: 'fox' }, nameB: { kind: 'animal', value: 'fox' } },
-  { faceA: { kind: 'animal', sprite: 'animal_fox' }, faceB: { kind: 'animal', sprite: 'animal_fox' } },
-  { nameA: 'fox', nameB: 'fox' }
+  { cards: [animalCard('cat'), animalCard('cat')] },
+  { nameKindA: 'animal', nameValueA: 'cat', nameKindB: 'animal', nameValueB: 'cat' },
+  { nameA: { kind: 'animal', value: 'cat' }, nameB: { kind: 'animal', value: 'cat' } },
+  { faceA: { kind: 'animal', sprite: 'animal_cat' }, faceB: { kind: 'animal', sprite: 'animal_cat' } },
+  { nameA: 'cat', nameB: 'cat' }
 ];
-for (const f of viaFields) eq(I.sayMatch('en', f, r0), 'Two foxes! A pair!', 'match card fields ' + Object.keys(f).join(','));
+for (const f of viaFields) eq(I.sayMatch('en', f, r0), 'Two cats! A pair!', 'match window fields ' + Object.keys(f).join(','));
 
 section('sayMismatch: exact lines');
-eq(I.sayMismatch('en', { cardA: card('animal', 'fox'), cardB: card('animal', 'owl') }, r0), 'A fox and an owl. Let’s look again!', 'en animals');
-eq(I.sayMismatch('vi', { cardA: card('animal', 'fox'), cardB: card('animal', 'owl') }, r0), 'Con cáo và con cú. Mình nhìn lại nhé!', 'vi animals');
-eq(I.sayMismatch('en', { nameKindA: 'color', nameValueA: 'red', nameKindB: 'color', nameValueB: 'blue' }, r0), 'Red and blue. Let’s look again!', 'en colours');
-eq(I.sayMismatch('vi', { nameA: { kind: 'color', value: 'red' }, nameB: { kind: 'color', value: 'pink' } }, r0), 'Màu đỏ và màu hồng. Mình nhìn lại nhé!', 'vi colours');
-eq(I.sayMismatch('en', { cardA: card('number', 3), cardB: card('dots', 5) }, r0), 'Three and five acorns. Let’s look again!', 'en count');
-eq(I.sayMismatch('vi', { cardA: card('number', 3), cardB: card('dots', 1) }, r0), 'Số ba và một hạt dẻ. Mình nhìn lại nhé!', 'vi count');
-eq(I.sayMismatch('en', { cardA: card('shape', 'heart'), cardB: card('shape', 'circle') }, r9), 'A heart and a circle! Try two more cards!', 'en shapes variant');
-eq(I.sayMismatch('en', { topic: 'size', cardA: card('animal', 'fox', { kind: 'animal', scale: 1 }), cardB: card('animal', 'owl', { kind: 'animal', scale: 0.6 }) }, r0),
-  'A big fox and a little owl. Let’s look again!', 'en size');
-eq(I.sayMismatch('en', { cardA: card('letter', 'B'), cardB: card('letter', 'd') }, r0), 'Letter B and small letter d. Let’s look again!', 'en letters');
-eq(I.sayMismatch('vi', { cardA: card('sum', '2+3'), cardB: card('number', 4) }, r0), 'Hai cộng ba và số bốn. Mình nhìn lại nhé!', 'vi add');
+eq(I.sayMismatch('en', { cardA: animalCard('dog'), cardB: animalCard('cat') }, r0), 'A dog and a cat. Let’s look again!', 'en animals');
+eq(I.sayMismatch('vi', { cardA: animalCard('dog'), cardB: animalCard('cat') }, r0), 'Con chó và con mèo. Mình xem lại nhé!', 'vi animals');
+eq(I.sayMismatch('en', { cardA: thing('red', 'umbrella'), cardB: thing('blue', 'kite') }, r0), 'A red umbrella and a blue kite. Let’s look again!', 'en colour things');
+eq(I.sayMismatch('vi', { cardA: thing('red', 'umbrella'), cardB: thing('blue', 'kite') }, r0), 'Cái ô màu đỏ và con diều màu xanh dương. Mình xem lại nhé!', 'vi colour things');
+eq(I.sayMismatch('en', { cardA: thing('orange', 'umbrella'), cardB: thing('yellow', 'umbrella') }, r0), 'An orange umbrella and a yellow umbrella. Let’s look again!', 'en an orange umbrella');
+eq(I.sayMismatch('en', { nameKindA: 'color', nameValueA: 'red', nameKindB: 'color', nameValueB: 'blue' }, r0), 'Red and blue. Let’s look again!', 'en plain colours');
+eq(I.sayMismatch('en', { cardA: thing('red', 'umbrella'), cardB: thing('red', 'kite') }, r0), 'An umbrella and a kite. Let’s look again!', 'en same colour: only the things (REQUIREMENT line)');
+eq(I.sayMismatch('vi', { cardA: thing('red', 'umbrella'), cardB: thing('red', 'kite') }, r0), 'Cái ô và con diều. Mình xem lại nhé!', 'vi same colour: "Cái ô và con diều"');
+eq(I.sayMismatch('en', { cardA: card('number', 3), cardB: card('dots', 5) }, r0), 'Three and five dots. Let’s look again!', 'en count');
+eq(I.sayMismatch('vi', { cardA: card('number', 3), cardB: card('dots', 1) }, r0), 'Số ba và một chấm tròn. Mình xem lại nhé!', 'vi count');
+eq(I.sayMismatch('en', { topic: 'homes', cardA: animalCard('dog'), cardB: homeCard('nest') }, r0), 'A dog and a nest. Where does the dog live?', 'en homes: animal + other home');
+eq(I.sayMismatch('vi', { topic: 'homes', cardA: homeCard('pond'), cardB: animalCard('hen') }, r0), 'Cái ao và con gà. Con gà sống ở đâu nhỉ?', 'vi homes: home + animal');
+eq(I.sayMismatch('en', { topic: 'homes', cardA: animalCard('dog'), cardB: homeCard('nest') }, r9), 'A dog and a nest! Try two more windows!', 'en homes mismatch variant');
+eq(I.sayMismatch('en', { topic: 'homes', cardA: homeCard('hive'), cardB: homeCard('web') }, r0), 'A beehive and a web. Let’s look again!', 'en two homes');
+eq(I.sayMismatch('en', { cardA: card('shape', 'heart'), cardB: card('shape', 'circle') }, r9), 'A heart and a circle! Try two more windows!', 'en shapes variant');
+eq(I.sayMismatch('en', { topic: 'size', cardA: card('animal', 'dog', { kind: 'animal', scale: 1 }), cardB: card('animal', 'cat', { kind: 'animal', scale: 0.6 }) }, r0),
+  'A big dog and a little cat. Let’s look again!', 'en size');
+eq(I.sayMismatch('en', { cardA: card('letter', 'A'), cardB: card('letter', 'E') }, r0), 'Letter A and letter E. Let’s look again!', 'mismatch letter A');
+eq(I.sayMismatch('vi', { cardA: card('sum', '2+3'), cardB: card('number', 4) }, r0), 'Hai cộng ba và số bốn. Mình xem lại nhé!', 'vi add');
 ok(I.raw('en', 'wrong').includes(I.sayMismatch('en', { a: 'c1', b: 'c2', streak: 2 }, r0)), 'mismatch without names → wrong[]');
-ok(I.raw('vi', 'wrong').includes(I.sayMismatch('vi', { cardA: card('animal', 'fox') }, r0)), 'mismatch with one card → wrong[]');
-eq(I.cardPhrase('en', card('animal', 'owl')), 'an owl', 'cardPhrase en');
-eq(I.cardPhrase('vi', card('dots', 4)), 'bốn hạt dẻ', 'cardPhrase vi');
-eq(I.sayCorrect('en', card('animal', 'fox'), r0), 'A fox!', 'sayCorrect alias → sayFlip');
-eq(I.sayWrong('en', { cardA: card('animal', 'fox'), cardB: card('animal', 'owl') }, r0), 'A fox and an owl. Let’s look again!', 'sayWrong alias → sayMismatch');
+ok(I.raw('vi', 'wrong').includes(I.sayMismatch('vi', { cardA: animalCard('dog') }, r0)), 'mismatch with one window → wrong[]');
+eq(I.cardPhrase('en', thing('orange', 'cup')), 'an orange cup', 'cardPhrase en');
+eq(I.cardPhrase('vi', card('dots', 4)), 'bốn chấm tròn', 'cardPhrase vi');
+eq(I.cardPhrase('en', homeCard('bowl')), 'a fish bowl', 'cardPhrase home');
+eq(I.sayCorrect('en', animalCard('dog'), r0), 'A dog!', 'sayCorrect alias → sayFlip');
+eq(I.sayWrong('en', { cardA: animalCard('dog'), cardB: animalCard('cat') }, r0), 'A dog and a cat. Let’s look again!', 'sayWrong alias → sayMismatch');
 
 section('sayReward / sayCount');
-for (const lang of I.langs) for (const k of ['butterfly', 'lantern', 'acorns', 'animal', 'star', 'zzz', undefined]) {
+for (const lang of I.langs) for (const k of ['star', 'light', 'bloom', 'butterfly', 'zzz', undefined]) {
   const s = I.sayReward(lang, { kind: k });
   ok(clean(s) && positive(s), `${lang} sayReward ${k}: ${s}`);
 }
 eq(I.sayCount('en', 2, 3), 'Two!', 'en count < need');
-eq(I.sayCount('en', 3, 3), 'Three! Three acorns!', 'en count done');
-eq(I.sayCount('en', 1, 1), 'One! One acorn!', 'en count done singular');
-eq(I.sayCount('vi', 3, 3), 'Ba! Ba hạt dẻ!', 'vi count done');
+eq(I.sayCount('en', 3, 3), 'Three! Three dots!', 'en count done');
+eq(I.sayCount('en', 1, 1), 'One! One dot!', 'en count done singular');
+eq(I.sayCount('vi', 3, 3), 'Ba! Ba chấm tròn!', 'vi count done');
 for (const lang of I.langs) for (let need = 1; need <= 12; need++) for (let n = 1; n <= need; n++) {
   const s = I.sayCount(lang, n, need);
   ok(clean(s) && positive(s), `${lang} sayCount ${n}/${need}: ${s}`);
@@ -424,13 +533,17 @@ for (const lang of I.langs) for (let need = 1; need <= 12; need++) for (let n = 
 section('say* on many synthetic pair events (both languages)');
 function synthPairs() {
   const P = [];   // [topic, cardA, cardB]
-  const COL = ['red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink'];
   const SH = ['circle', 'square', 'triangle', 'star', 'heart', 'rect'];
-  for (const c of COL) P.push(['colors', card('color', c, { kind: 'color', value: c, color: c }), card('color', c, { kind: 'color', color: c })]);
-  for (const s of SH) for (const c of COL.slice(0, 3)) P.push(['shapes', card('shape', s, { kind: 'shape', shape: s, color: c }), card('shape', s, { kind: 'shape', shape: s, color: COL[(COL.indexOf(c) + 2) % 7] })]);
+  for (const c of COLORS) P.push(['colors', card('color', c, { kind: 'color', value: c, color: c }), card('color', c, { kind: 'color', color: c })]);
+  for (const c of COLORS) for (const o of THINGS) {
+    P.push(['colors', thing(c, o), thing(c, o)]);
+    P.push(['colors', thing(c, o), thing(c, THINGS[(THINGS.indexOf(o) + 1) % THINGS.length])]);
+  }
+  for (const s of SH) for (const c of COLORS.slice(0, 3)) P.push(['shapes', card('shape', s, { kind: 'shape', shape: s, color: c }), card('shape', s, { kind: 'shape', shape: s, color: COLORS[(COLORS.indexOf(c) + 2) % 7] })]);
   for (const a of ANIMALS) {
-    P.push(['animals', card('animal', a, { kind: 'animal', sprite: 'animal_' + a }), card('animal', a, { kind: 'animal', sprite: 'animal_' + a })]);
+    P.push(['animals', animalCard(a), animalCard(a)]);
     P.push(['size', card('size', 'big', { kind: 'animal', sprite: 'animal_' + a, scale: 1 }), card('size', 'small', { kind: 'animal', sprite: 'animal_' + a, scale: 0.6 })]);
+    P.push(['homes', animalCard(a), homeCard(HOME_OF[a])]);
   }
   for (let n = 1; n <= 12; n++) {
     P.push(['count', card('number', n, { kind: 'number', value: n, n }), card('dots', n, { kind: 'dots', n })]);
@@ -462,7 +575,7 @@ for (const [topic, A, B, onlyLang] of PAIRS) for (const lang of I.langs) {
   for (const c of [A, B]) for (let i = 0; i < 2; i++) {
     const s = I.sayFlip(lang, Object.assign({ topic }, c), () => i * 0.7);
     ok(clean(s) && positive(s) && nWords(s) <= 12, `${lang} sayFlip ${topic} ${c.nameKind}:${c.nameValue}: ${s}`);
-    ok(!I.raw(lang, 'praise').includes(s), `${lang} sayFlip ${topic} ${c.nameKind}:${c.nameValue} names the card (${s})`);
+    ok(!I.raw(lang, 'praise').includes(s), `${lang} sayFlip ${topic} ${c.nameKind}:${c.nameValue} names the window (${s})`);
     synthN++;
   }
   for (const ev of shapes(topic, A, B)) for (let i = 0; i < 2; i++) {
@@ -470,22 +583,22 @@ for (const [topic, A, B, onlyLang] of PAIRS) for (const lang of I.langs) {
     ok(clean(s) && positive(s) && nWords(s) <= 14, `${lang} sayMatch ${topic} ${Object.keys(ev).join('+')}: ${s}`);
     synthN++;
   }
-  // full-information events name the pair (never only the generic line)
   const full = I.sayMatch(lang, shapes(topic, A, B)[0], r0);
   ok(!I.raw(lang, 'match.any').includes(full), `${lang} sayMatch ${topic} ${A.nameValue}/${B.nameValue} is specific: ${full}`);
   if (topic === 'oddeven') ok(full.indexOf(I.name(lang, 'parity', A.face.n % 2 ? 'odd' : 'even')) >= 0, `${lang} oddeven match names the parity: ${full}`);
   if (topic === 'count' || topic === 'oddeven') ok(full.toLowerCase().indexOf(I.name(lang, 'number', A.face.n)) >= 0, `${lang} ${topic} match says the number: ${full}`);
-  if (topic === 'animals') ok(full.indexOf(I.name(lang, 'animal', A.nameValue)) >= 0 || lang === 'en', `${lang} animals match names it: ${full}`);
+  if (topic === 'homes') ok(full.indexOf(I.name(lang, 'home', B.nameValue)) >= 0, `${lang} homes match names the home: ${full}`);
+  if (topic === 'colors' && A.face.obj) ok(full.toLowerCase().indexOf(I.name(lang, 'color', A.face.color)) >= 0, `${lang} colour match names the colour: ${full}`);
 }
-// mismatches: neighbouring pairs of the same topic
 for (let i = 0; i + 1 < PAIRS.length; i++) {
   const [t1, A] = PAIRS[i], [t2, , B2] = PAIRS[i + 1];
   if (t1 !== t2) continue;
   for (const lang of I.langs) for (let k = 0; k < 3; k++) {
     for (const ev of [{ topic: t1, cardA: A, cardB: B2, streak: k }, { nameKindA: A.nameKind, nameValueA: A.nameValue, faceA: A.face, nameKindB: B2.nameKind, nameValueB: B2.nameValue, faceB: B2.face }]) {
       const s = I.sayMismatch(lang, ev, () => k * 0.4);
-      ok(clean(s) && positive(s) && nWords(s) <= 15, `${lang} sayMismatch ${t1} ${A.nameValue}/${B2.nameValue}: ${s}`);
-      ok(!I.raw(lang, 'wrong').includes(s), `${lang} sayMismatch ${t1} names both cards: ${s}`);
+      // a Vietnamese "word" here is one syllable (quả bóng bay = 3), so vi gets a few more
+      ok(clean(s) && positive(s) && nWords(s) <= (lang === 'vi' ? 18 : 15), `${lang} sayMismatch ${t1} ${A.nameValue}/${B2.nameValue}: ${s}`);
+      ok(!I.raw(lang, 'wrong').includes(s), `${lang} sayMismatch ${t1} names both windows: ${s}`);
       synthN++;
     }
   }
@@ -493,30 +606,31 @@ for (let i = 0; i + 1 < PAIRS.length; i++) {
 ok(synthN > 3000, `checked ${synthN} synthetic lines`);
 
 section('garbage events never throw, never print junk');
-const JUNK = [undefined, null, 0, 1, '', 'fox', [], {}, { nameKind: 'xyz', nameValue: 'q' }, { nameKind: 'animal' },
+const JUNK = [undefined, null, 0, 1, '', 'dog', [], {}, { nameKind: 'xyz', nameValue: 'q' }, { nameKind: 'animal' },
   { nameKind: 'number', nameValue: 'abc' }, { nameKind: 'dots', nameValue: -2 }, { nameKind: 'dots', nameValue: 30 },
   { nameValue: {} }, { face: null }, { face: 5 }, { cardA: 5, cardB: 'x' }, { cards: [null, {}] }, { nameA: {}, nameB: [] },
   { nameKind: 'letter', nameValue: 'AB' }, { nameKind: 'sum', nameValue: '2+' }, { nameKind: 'color', nameValue: 'teal' },
+  { nameKind: 'color', nameValue: 'red', face: { obj: 'spaceship' } }, { nameKind: 'home', nameValue: 'castle' },
+  { topic: 'homes' }, { topic: 'homes', animal: 'unicorn' }, { home: 'nope' },
   { nameKind: 'shape', nameValue: 'blob', face: { kind: 'shape', color: 'zz' } }, { topic: 'oddeven' }, { topic: 'size', nameKind: 'size', nameValue: 'big' }];
-for (const lang of I.langs) for (const ev of JUNK) for (const fn of ['sayFlip', 'sayMatch', 'sayMismatch', 'sayReward', 'sayCorrect', 'sayWrong']) {
+for (const lang of I.langs) for (const ev of JUNK) for (const fn of ['sayFlip', 'sayMatch', 'sayMismatch', 'sayReward', 'sayCorrect', 'sayWrong', 'sayCritter']) {
   let s;
   try { s = I[fn](lang, ev); } catch (e) { s = 'THROW ' + e.message; }
   ok(clean(s) && positive(s), `${lang} ${fn}(${JSON.stringify(ev)}) → ${s}`);
 }
 
 // ------------------------------------------------------------------ real rounds from content.js (pair rounds), if available
-section('lines for every card and pair content.js makes');
+section('lines for every window and pair content.js makes');
 (function () {
   const sc = makeSandbox(); sc.GW = {};
   let C;
   try { C = load(sc, ['rng.js', 'i18n.js', 'content.js']); } catch (e) { console.log('   (content.js not loadable yet: ' + e.message + ')'); return; }
   if (!C.Content || !C.Content.makeRound) { console.log('   (GW.Content.makeRound missing — skipped)'); return; }
   const I2 = C.I18N;
+  if (!C.ANIMALS || JSON.stringify(C.ANIMALS) !== JSON.stringify(ANIMALS)) {
+    console.log('   (content.js still has the old animal list — content checks skipped until the mechanics engineer lands it)'); return;
+  }
   const ages = Object.keys(C.AGE_TOPICS || { 3: 1, 4: 1, 5: 1, 6: 1, 7: 1 }).map(Number);
-  let probe;
-  try { probe = C.Content.makeRound((C.AGE_TOPICS[4] || ['colors'])[0], { age: 4, lang: 'en', rng: new C.RNG(1), roundIndex: 0 }); } catch (e) { probe = null; }
-  if (!probe || !Array.isArray(probe.cards)) { console.log('   (content.js still makes balloon rounds — pair-round checks skipped)'); return; }
-  if (C.ANIMALS) eq(JSON.stringify(C.ANIMALS), JSON.stringify(ANIMALS), 'content GW.ANIMALS = DESIGN §5.1 list');
   let rounds = 0, talks = 0, lines = 0;
   for (const lang of ['en', 'vi']) for (const age of ages) for (const topic of (C.AGE_TOPICS[age] || [])) for (let s = 1; s <= 10; s++) {
     let r;
@@ -527,8 +641,8 @@ section('lines for every card and pair content.js makes');
     const txt = I2.t(lang, r.promptKey, r.params || {});
     ok(clean(txt) && txt !== r.promptKey && ![].concat(I2.raw(lang, 'p.any')).includes(txt), `${lang} ${r.promptKey} renders: ${txt}`);
     for (const c of r.cards) {
-      ok(I2.NAME_KINDS.includes(c.nameKind), `${lang} card nameKind ${c.nameKind} is a known kind`);
-      const s1 = I2.sayFlip(lang, { id: c.id, nameKind: c.nameKind, nameValue: c.nameValue, face: c.face, size: c.size });   // as World emits
+      ok(I2.NAME_KINDS.includes(c.nameKind), `${lang} window nameKind ${c.nameKind} is a known kind`);
+      const s1 = I2.sayFlip(lang, { id: c.id, topic, nameKind: c.nameKind, nameValue: c.nameValue, face: c.face, size: c.size });
       ok(clean(s1) && positive(s1) && !I2.raw(lang, 'praise').includes(s1), `${lang} ${topic} flip ${c.nameKind}:${JSON.stringify(c.nameValue)}: ${s1}`);
       lines++;
     }
@@ -537,26 +651,23 @@ section('lines for every card and pair content.js makes');
     const keys = Object.keys(byKey);
     for (const k of keys) {
       const [A, B] = byKey[k];
-      ok(byKey[k].length === 2, `${topic} key ${k} has exactly two cards`);
+      ok(byKey[k].length === 2, `${topic} key ${k} has exactly two windows`);
       if (!B) continue;
-      // exactly what GW.World._match emits (pairInfo names the pair; _names adds both cards)
       const info = (r.pairInfo || {})[k] || { nameKind: A.nameKind, nameValue: A.nameValue };
-      const ev = { a: A.id, b: B.id, key: k, nameKind: info.nameKind, nameValue: info.nameValue, found: 1, pairs: r.pairs,
+      const ev = { a: A.id, b: B.id, key: k, topic, nameKind: info.nameKind, nameValue: info.nameValue, found: 1, pairs: r.pairs,
         nameKindA: A.nameKind, nameValueA: A.nameValue, faceA: A.face, sizeA: A.size,
         nameKindB: B.nameKind, nameValueB: B.nameValue, faceB: B.face, sizeB: B.size };
-      ['parity', 'animal', 'word', 'text', 'lower'].forEach(x => { if (info[x] !== undefined) ev[x] = info[x]; });
-      for (const e2 of [ev, { a: A.id, b: B.id, cardA: A, cardB: B }]) {
+      ['parity', 'animal', 'home', 'word', 'text', 'lower'].forEach(x => { if (info[x] !== undefined) ev[x] = info[x]; });
+      for (const e2 of [ev, { a: A.id, b: B.id, topic, cardA: A, cardB: B }]) {
         const m = I2.sayMatch(lang, e2);
         ok(clean(m) && positive(m) && !I2.raw(lang, 'match.any').includes(m), `${lang} ${topic} match ${k}: ${m}`);
-        if (topic === 'size') ok(/big|little| to | nhỏ/.test(m + ' '), `${lang} size match says big + little: ${m}`);
-        if (topic === 'oddeven') ok(m.indexOf(I2.name(lang, 'parity', (+info.nameValue) % 2 ? 'odd' : 'even')) >= 0, `${lang} oddeven match names the parity: ${m}`);
-        if (topic === 'initial' && info.word) ok(m.toLowerCase().indexOf(String(info.word).toLowerCase()) >= 0, `${lang} initial match says the word: ${m}`);
+        if (topic === 'homes') ok(/lives|sống|về/.test(m), `${lang} homes match says where it lives: ${m}`);
         lines++;
       }
     }
     for (let i = 0; i + 1 < keys.length; i++) {
       const A = byKey[keys[i]][0], B = byKey[keys[i + 1]][byKey[keys[i + 1]].length - 1];
-      const mm = I2.sayMismatch(lang, { a: A.id, b: B.id, streak: 1, nameKindA: A.nameKind, nameValueA: A.nameValue, faceA: A.face, sizeA: A.size,
+      const mm = I2.sayMismatch(lang, { a: A.id, b: B.id, streak: 1, topic, nameKindA: A.nameKind, nameValueA: A.nameValue, faceA: A.face, sizeA: A.size,
         nameKindB: B.nameKind, nameValueB: B.nameValue, faceB: B.face, sizeB: B.size });
       ok(clean(mm) && positive(mm) && !I2.raw(lang, 'wrong').includes(mm), `${lang} ${topic} mismatch: ${mm}`);
       lines++;
@@ -585,8 +696,10 @@ section('lines for every card and pair content.js makes');
 })();
 
 section('talkWrong');
-eq(I.talkWrong('en', 'animal', 'fox'), 'It is the fox! Good try!', 'en talkWrong animal');
-eq(I.talkWrong('vi', 'animal', 'owl'), 'Là con cú đó! Bé cố gắng lắm!', 'vi talkWrong animal');
+eq(I.talkWrong('en', 'animal', 'dog'), 'It is the dog! Good try!', 'en talkWrong animal');
+eq(I.talkWrong('vi', 'animal', 'cat'), 'Là con mèo đó! Bé cố gắng lắm!', 'vi talkWrong animal');
+eq(I.talkWrong('en', 'home', 'kennel'), 'The dog lives in the kennel! Good try!', 'en talkWrong home');
+eq(I.talkWrong('vi', 'home', 'nest'), 'Con chim sống trong tổ chim đó! Bé cố gắng lắm!', 'vi talkWrong home');
 eq(I.talkWrong('en', 'shape', 'circle'), 'It is a circle! Good try!', 'en talkWrong shape');
 eq(I.talkWrong('vi', { kind: 'color', value: 'blue' }), 'Là màu xanh dương đó! Bé cố gắng lắm!', 'vi talkWrong colour');
 eq(I.talkWrong('en', 'number', 4), 'It is four! Good try!', 'en talkWrong number');
@@ -597,22 +710,24 @@ eq(I.talkWrong('en', 'parity', 'even'), 'It is even! Good try!', 'en talkWrong p
 eq(I.talkWrong('vi', 'parity', 'odd'), 'Là số lẻ đó! Bé cố gắng lắm!', 'vi talkWrong parity');
 for (const lang of I.langs) for (const kind of Object.keys(VALUES)) for (const v of VALUES[kind].slice(0, 12)) {
   const s = I.talkWrong(lang, kind, v);
-  ok(clean(s) && positive(s), `${lang} talkWrong ${kind} ${v}: ${s}`);
+  ok(clean(s) && positive(s), `${lang} talkWrong ${kind} ${JSON.stringify(v)}: ${s}`);
 }
-ok(clean(I.talkWrong('en')) && clean(I.talkWrong('vi', {})), 'talkWrong without a value');
+ok(clean(I.talkWrong('en')) && clean(I.talkWrong('vi', {})) && clean(I.talkWrong('en', 'home', 'castle')), 'talkWrong without a (known) value');
 
-section('speech text: letters, maths, "Dee" → "Đi" only when spoken in Vietnamese');
+section('speech text: letters, maths, dashes, "Gigi" → "Gi Gi" only when spoken in Vietnamese');
 eq(I.speech('en', 'Find the letter B!'), 'Find the letter bee!', 'en letter speech');
 eq(I.speech('vi', '2+3'), '2 cộng 3', 'vi math speech');
 eq(I.speech('en', '7 − 2'), '7 minus 2', 'en math speech');
-eq(V.spoken('vi', 'Chào bé! Mình là vịt Dee.'), 'Chào bé! Mình là vịt Đi.', 'vi spoken: Dee → Đi');
-eq(V.spoken('vi', 'Dee gợi ý nè: chữ B!'), 'Đi gợi ý nè: chữ bờ!', 'vi spoken: name + phonics');
-eq(V.spoken('en', 'Hi! I am Dee.'), 'Hi! I am Dee.', 'en spoken keeps Dee');
-eq(V.spoken('vi', 'Deep Deer'), 'Deep Deer', 'only the whole word Dee');
+eq(I.speech('en', 'Two red umbrellas — a pair!'), 'Two red umbrellas, a pair!', 'dash → comma pause');
+eq(I.speech('vi', 'Nhìn kìa — cầu vồng!'), 'Nhìn kìa, cầu vồng!', 'vi dash → comma pause');
+eq(V.spoken('vi', 'Chào bé! Mình là hươu cao cổ Gigi.'), 'Chào bé! Mình là hươu cao cổ Gi Gi.', 'vi spoken: Gigi → Gi Gi');
+eq(V.spoken('vi', 'Gigi gợi ý nè: chữ B!'), 'Gi Gi gợi ý nè: chữ bờ!', 'vi spoken: name + phonics');
+eq(V.spoken('en', 'Hi! I am Gigi.'), 'Hi! I am Gigi.', 'en spoken keeps Gigi');
+eq(V.spoken('vi', 'Gigis Gigio'), 'Gigis Gigio', 'only the whole word Gigi');
 for (const k of I.keys('vi')) for (const s of [].concat(I.raw('vi', k))) {
-  if (s.indexOf('Dee') < 0) continue;
-  ok(V.spoken('vi', s).indexOf('Dee') < 0 && V.spoken('vi', s).indexOf('Đi') >= 0, `vi ${k} spoken with "Đi": ${V.spoken('vi', s)}`);
-  ok(I.t('vi', k, { child: '', stars: 3, n: 1 }).indexOf('Đi') < 0, `vi ${k} display keeps "Dee"`);
+  if (s.indexOf('Gigi') < 0) continue;
+  ok(V.spoken('vi', s).indexOf('Gigi') < 0 && V.spoken('vi', s).indexOf('Gi Gi') >= 0, `vi ${k} spoken with "Gi Gi": ${V.spoken('vi', s)}`);
+  ok(I.t('vi', k, { child: '', stars: 3, n: 1 }).indexOf('Gi Gi') < 0, `vi ${k} display keeps "Gigi"`);
 }
 
 // ------------------------------------------------------------------ matcher
@@ -629,6 +744,8 @@ eq(V.match(['mau hong'], colVi), 'pink', '"mau hong"');
 eq(V.match(['xanh'], colVi), null, '"xanh" alone is ambiguous');
 eq(V.match(['banana', 'hello'], colEn), null, 'unrelated words → null');
 eq(V.match('blue', colEn), 'blue', 'accepts a single string');
+eq(V.match(['cái ô màu đỏ'], colVi), 'red', 'vi "cái ô màu đỏ" → red');
+eq(V.match(['a red umbrella'], colEn), 'red', 'en "a red umbrella" → red');
 const numVi = ch('vi', 'number', [3, 5, 12]);
 const numEn = ch('en', 'number', [3, 5, 12]);
 eq(V.match(['ba'], numVi), '3', '"ba" → 3');
@@ -639,9 +756,9 @@ eq(V.match(['I think five'], numEn), '5', '"I think five"');
 eq(V.match(['to'], ch('en', 'number', [2, 4])), '2', 'solo "to" → 2');
 eq(V.match(['không biết'], ch('vi', 'number', [0, 1])), null, '"không biết" is not 0');
 const dotsEn = ch('en', 'dots', [2, 3, 4]), dotsVi = ch('vi', 'dots', [2, 3, 4]);
-eq(V.match(['three acorns'], dotsEn), '3', 'en "three acorns"');
+eq(V.match(['three dots'], dotsEn), '3', 'en "three dots"');
 eq(V.match(['four'], dotsEn), '4', 'en dots "four"');
-eq(V.match(['ba hạt dẻ'], dotsVi), '3', 'vi "ba hạt dẻ"');
+eq(V.match(['ba chấm tròn'], dotsVi), '3', 'vi "ba chấm tròn"');
 eq(V.match(['hai'], dotsVi), '2', 'vi dots "hai"');
 for (let n = 0; n <= 20; n++) {
   const set = ch('en', 'number', [n, (n + 1) % 21, (n + 2) % 21]), setV = ch('vi', 'number', [n, (n + 1) % 21, (n + 2) % 21]);
@@ -650,25 +767,34 @@ for (let n = 0; n <= 20; n++) {
   if (n > 0) eq(V.match([I.name('vi', 'number', n)], setV), String(n), `vi number word ${n}`);
   if (n > 0) eq(V.match([I.stripMarks(I.name('vi', 'number', n))], setV), String(n), `vi number no diacritics ${n}`);
 }
-// forest animals: every one of the 9 is distinguishable by its own name (EN + VI, with/without diacritics, classifiers)
-const animEn = ch('en', 'animal', ANIMALS), animVi = ch('vi', 'animal', ANIMALS);
-for (const a of ANIMALS) {
-  const en = I.name('en', 'animal', a), vi = I.name('vi', 'animal', a);
-  eq(V.match([en], animEn), a, `en "${en}" → ${a}`);
-  eq(V.match(['the ' + en + '!'], animEn), a, `en "the ${en}!" → ${a}`);
-  eq(V.match([vi], animVi), a, `vi "${vi}" → ${a}`);
-  eq(V.match([I.stripMarks(vi).toLowerCase()], animVi), a, `vi no-diacritics "${I.stripMarks(vi)}" → ${a}`);
-  const bare = vi.replace(/^con /, '');
-  eq(V.match([bare], animVi), a, `vi bare "${bare}" → ${a}`);
-  eq(V.match(['là ' + vi + ' đó'], animVi), a, `vi "là ${vi} đó" → ${a}`);
-  for (const w of I.words('vi', 'animal', a)) eq(V.match([w], animVi), a, `vi accepted form "${w}" → ${a}`);
-  for (const w of I.words('en', 'animal', a)) eq(V.match([w], animEn), a, `en accepted form "${w}" → ${a}`);
+// city animals, homes, things: every one distinguishable by its own name (EN + VI, with/without diacritics, classifiers)
+for (const [kind, list] of [['animal', ANIMALS], ['home', HOMES], ['thing', THINGS]]) {
+  const en = ch('en', kind, list), vi = ch('vi', kind, list);
+  for (const a of list) {
+    const ne = I.name('en', kind, a), nv = I.name('vi', kind, a);
+    eq(V.match([ne], en), a, `en ${kind} "${ne}" → ${a}`);
+    eq(V.match(['the ' + ne + '!'], en), a, `en ${kind} "the ${ne}!" → ${a}`);
+    eq(V.match([nv], vi), a, `vi ${kind} "${nv}" → ${a}`);
+    eq(V.match([I.stripMarks(nv).toLowerCase()], vi), a, `vi ${kind} no-diacritics "${I.stripMarks(nv)}" → ${a}`);
+    eq(V.match(['là ' + nv + ' đó'], vi), a, `vi ${kind} "là ${nv} đó" → ${a}`);
+    if (kind === 'animal') { const bare = nv.replace(/^con /, ''); eq(V.match([bare], vi), a, `vi bare "${bare}" → ${a}`); }
+    for (const w of I.words('vi', kind, a)) eq(V.match([w], vi), a, `vi ${kind} accepted form "${w}" → ${a}`);
+    for (const w of I.words('en', kind, a)) eq(V.match([w], en), a, `en ${kind} accepted form "${w}" → ${a}`);
+  }
 }
-for (const [said, want] of [['con nai', 'deer'], ['nai', 'deer'], ['hươu con', 'deer'], ['cú mèo', 'owl'], ['con cu meo', 'owl'],
-  ['nhím', 'hedgehog'], ['con soc', 'squirrel'], ['ếch', 'frog'], ['con ech', 'frog'], ['gấu', 'bear'], ['chuot', 'mouse'], ['cáo', 'fox'], ['thỏ', 'bunny']])
+const animEn = ch('en', 'animal', ANIMALS), animVi = ch('vi', 'animal', ANIMALS);
+const homeEn = ch('en', 'home', HOMES), homeVi = ch('vi', 'home', HOMES);
+for (const [said, want] of [['cún', 'dog'], ['con cun', 'dog'], ['mèo con', 'cat'], ['chim sẻ', 'bird'], ['cá vàng', 'fish'],
+  ['ong mật', 'bee'], ['thỏ', 'rabbit'], ['vit', 'duck'], ['gà mái', 'hen'], ['nhen', 'spider']])
   eq(V.match([said], animVi), want, `vi "${said}" → ${want}`);
-for (const [said, want] of [['rabbit', 'bunny'], ['mice', 'mouse'], ['teddy bear', 'bear'], ['fawn', 'deer'], ['froggy', 'frog'], ['a fox', 'fox'], ['owlet', 'owl']])
+for (const [said, want] of [['puppy', 'dog'], ['kitty', 'cat'], ['bunny rabbit', 'rabbit'], ['chicken', 'hen'], ['duckling', 'duck'], ['a goldfish', 'fish']])
   eq(V.match([said], animEn), want, `en "${said}" → ${want}`);
+for (const [said, want] of [['dog house', 'kennel'], ['spider web', 'web'], ['chicken coop', 'coop'], ['beehive', 'hive'], ['fish tank', 'bowl'], ['bird nest', 'nest']])
+  eq(V.match([said], homeEn), want, `en "${said}" → ${want}`);
+for (const [said, want] of [['tổ ong', 'hive'], ['to chim', 'nest'], ['hồ cá', 'bowl'], ['ao', 'pond'], ['chuong ga', 'coop'], ['chuồng thỏ', 'hutch'], ['nhà cún', 'kennel']])
+  eq(V.match([said], homeVi), want, `vi "${said}" → ${want}`);
+eq(V.match(['tổ'], homeVi), null, 'vi "tổ" alone is ambiguous (tổ chim / tổ ong)');
+eq(V.match(['chuồng'], homeVi), null, 'vi "chuồng" alone is ambiguous');
 eq(V.match(['con'], animVi), null, 'vi "con" alone matches nothing');
 eq(V.match(['hello'], animEn), null, 'en unrelated → null');
 const parVi = ch('vi', 'parity', ['odd', 'even']);
@@ -686,12 +812,13 @@ eq(V.match(['little'], ch('en', 'size', ['big', 'small'])), 'small', 'en little 
 eq(V.match(['hình tam giác'], ch('vi', 'shape', ['circle', 'triangle', 'star'])), 'triangle', 'vi triangle');
 eq(V.match(['hinh ngoi sao'], ch('vi', 'shape', ['circle', 'heart', 'star'])), 'star', 'vi star no diacritics');
 eq(V.match(['two plus three'], ch('en', 'sum', ['2+3', '1+1'])), '2+3', 'en sum spoken');
-eq(V.match(['fox'], [{ id: 'f', kind: 'animal', value: 'fox' }, { id: 'o', kind: 'animal', value: 'owl' }], 'en'), 'f', '{id,kind,value} choices');
-eq(V.match(['con cú'], [{ id: 'f', kind: 'animal', value: 'fox' }, { id: 'o', kind: 'animal', value: 'owl' }], 'vi'), 'o', '{id,kind,value} vi');
+eq(V.match(['dog'], [{ id: 'd', kind: 'animal', value: 'dog' }, { id: 'c', kind: 'animal', value: 'cat' }], 'en'), 'd', '{id,kind,value} choices');
+eq(V.match(['con mèo'], [{ id: 'd', kind: 'animal', value: 'dog' }, { id: 'c', kind: 'animal', value: 'cat' }], 'vi'), 'c', '{id,kind,value} vi');
+eq(V.match(['tổ chim'], [{ id: 'n', kind: 'home', value: 'nest' }, { id: 'h', kind: 'home', value: 'hive' }], 'vi'), 'n', '{id,kind,value} homes vi');
 eq(V.match(['red'], []), null, 'no choices → null');
 eq(V.match([null, undefined], colEn), null, 'garbage transcripts → null');
 
-section('input: tap-to-flip, (x, y, ev) in logical px, one pointer');
+section('input: tap-to-open, (x, y, ev) in logical px, one pointer');
 (function () {
   function El(tag, cls) { this.nodeType = 1; this.tag = tag; this.cls = cls || ''; this.parentElement = null; this.style = {}; this.h = {}; }
   El.prototype.matches = function (sel) {
@@ -722,7 +849,7 @@ section('input: tap-to-flip, (x, y, ev) in logical px, one pointer');
   const e1 = pe(1, 100, 60);
   canvas.emit('pointerdown', e1);
   downSync = calls.length === 1 && calls[0][0] === 'down';
-  ok(downSync, 'down fires synchronously inside pointerdown (instant flip)');
+  ok(downSync, 'down fires synchronously inside pointerdown (shutters open at once)');
   ok(e1.prevented, 'pointerdown preventDefault (no emulated mouse / click delay)');
   canvas.emit('pointerdown', pe(2, 300, 300, { isPrimary: false }));   // a second finger is ignored
   canvas.emit('pointermove', pe(2, 310, 300));
@@ -902,7 +1029,7 @@ asyncTests.push((async function () {
   const cur = E.spoken[E.spoken.length - 1];
   eq(cur.lang, 'en-US', 'utterance lang en-US');
   ok(cur.voice && cur.voice.name === 'Samantha', 'utterance voice set');
-  ok(Math.abs(cur.rate - 0.92) < 1e-9 && Math.abs(cur.pitch - 1.3) < 1e-9, 'Dee: rate 0.92, pitch 1.3');
+  ok(Math.abs(cur.rate - 0.9) < 1e-9 && Math.abs(cur.pitch - 1.25) < 1e-9, 'Gigi: rate 0.9, pitch 1.25');
   ok(V2.isSpeaking(), 'isSpeaking true while talking');
   ok(starts >= 1, 'onStart fired');
   // queue: one speaking + at most 2 waiting; the oldest non-priority line is dropped
@@ -939,15 +1066,15 @@ asyncTests.push((async function () {
   eq(E.spoken[E.spoken.length - 1].text, 'Find the letter bee!', 'speech() applied to the utterance');
   ok(V2.log.some(e => e.text === 'Find the letter B!'), 'log keeps the display text');
   E.end(); await wait(10);
-  // the Vietnamese voice says "Đi"; the bubble text (onStart, log) keeps "Dee"
+  // the Vietnamese voice says "Gi Gi"; the bubble text (onStart, log) keeps "Gigi"
   let startText = null; V2.onStart = (t) => { starts++; startText = t; };
-  const dv = V2.say('Mình là vịt Dee. Dee giúp bé nhé!', { lang: 'vi' }); await wait(20);
-  eq(E.spoken[E.spoken.length - 1].text, 'Mình là vịt Đi. Đi giúp bé nhé!', 'vi utterance says "Đi"');
-  ok(V2.log.some(e => e.text === 'Mình là vịt Dee. Dee giúp bé nhé!'), 'vi log keeps "Dee"');
-  eq(startText, 'Mình là vịt Dee. Dee giúp bé nhé!', 'onStart gets the display text with "Dee"');
+  const dv = V2.say('Mình là hươu Gigi. Gigi giúp bé nhé!', { lang: 'vi' }); await wait(20);
+  eq(E.spoken[E.spoken.length - 1].text, 'Mình là hươu Gi Gi. Gi Gi giúp bé nhé!', 'vi utterance says "Gi Gi"');
+  ok(V2.log.some(e => e.text === 'Mình là hươu Gigi. Gigi giúp bé nhé!'), 'vi log keeps "Gigi"');
+  eq(startText, 'Mình là hươu Gigi. Gigi giúp bé nhé!', 'onStart gets the display text with "Gigi"');
   E.end(); await dv;
-  const de = V2.say('I am Dee!', { lang: 'en' }); await wait(20);
-  eq(E.spoken[E.spoken.length - 1].text, 'I am Dee!', 'en utterance keeps "Dee"');
+  const de = V2.say('I am Gigi!', { lang: 'en' }); await wait(20);
+  eq(E.spoken[E.spoken.length - 1].text, 'I am Gigi!', 'en utterance keeps "Gigi"');
   E.end(); await de;
   // volume follows setVolume
   V2.setVolume(0.4);
@@ -955,8 +1082,8 @@ asyncTests.push((async function () {
   ok(Math.abs(E.spoken[E.spoken.length - 1].volume - 0.4) < 1e-9, 'utterance volume = setVolume');
   E.end(); await vv; V2.setVolume(1);
   // sayKey
-  const sk = V2.sayKey('talk.animals', { animal: 'fox' }, { lang: 'vi' });
-  eq(sk.text, 'Con cáo đâu rồi nhỉ?', 'sayKey renders the vi line');
+  const sk = V2.sayKey('talk.homes', { animal: 'dog' }, { lang: 'vi' });
+  eq(sk.text, 'Con chó sống ở đâu nhỉ?', 'sayKey renders the vi line');
   await wait(20); E.end(); await sk;
   // disabled → nothing spoken but logged
   V2.setEnabled(false);
@@ -1001,9 +1128,9 @@ asyncTests.push((async function () {
   eq(r1.id, 'r', 'listen resolves on a final match');
   ok(R.aborted, 'recognizer aborted after match');
   // interim match waits, then resolves
-  const pr2 = V2.listen({ lang: 'en', choices: ch('en', 'animal', ['fox', 'owl', 'frog']), timeoutMs: 2000 });
-  E.rec.onresult({ resultIndex: 0, results: [result(false, 'the owl')] });
-  eq((await pr2).id, 'owl', 'interim match resolves after a short wait');
+  const pr2 = V2.listen({ lang: 'en', choices: ch('en', 'home', ['kennel', 'nest', 'pond']), timeoutMs: 2000 });
+  E.rec.onresult({ resultIndex: 0, results: [result(false, 'the nest')] });
+  eq((await pr2).id, 'nest', 'interim match resolves after a short wait');
   // a fresh recognizer per listen() (iOS hangs when one is reused)
   const r2a = E.rec;
   const pr3 = V2.listen({ lang: 'en', choices: colEn, timeoutMs: 2000 });

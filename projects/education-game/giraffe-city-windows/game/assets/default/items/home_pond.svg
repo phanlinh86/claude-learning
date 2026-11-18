@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><clipPath id="pond_c1"><rect x="14" y="30" width="8" height="20" rx="4" /></clipPath><clipPath id="pond_c2"><rect x="30" y="22" width="8" height="20" rx="4" /></clipPath><clipPath id="pond_c3"><rect x="42" y="40" width="8" height="20" rx="4" /></clipPath><clipPath id="pond_c4"><path d="M 6 90 C 10 74 14 62 22 54 C 20 68 18 80 18 90 Z" /></clipPath><clipPath id="pond_c5"><path d="M 52 88 C 56 74 62 66 70 62 C 66 72 62 80 62 88 Z" /></clipPath><clipPath id="pond_c6"><ellipse cx="68" cy="92" rx="52" ry="26" /></clipPath><clipPath id="pond_c7"><ellipse cx="68" cy="93" rx="44" ry="20" /></clipPath><clipPath id="pond_c8"><path d="M 84 98 C 84 90 94 86 102 88 C 110 90 114 98 108 104 L 96 98 L 100 108 C 92 110 84 106 84 98 Z" /></clipPath><clipPath id="pond_c9"><ellipse cx="94" cy="87" rx="3.4" ry="5.8" /></clipPath><clipPath id="pond_c10"><ellipse cx="98.76" cy="90.45" rx="3.4" ry="5.8" transform="rotate(72 98.76 90.45)" /></clipPath><clipPath id="pond_c11"><ellipse cx="96.94" cy="96.05" rx="3.4" ry="5.8" transform="rotate(144 96.94 96.05)" /></clipPath><clipPath id="pond_c12"><ellipse cx="91.06" cy="96.05" rx="3.4" ry="5.8" transform="rotate(216 91.06 96.05)" /></clipPath><clipPath id="pond_c13"><ellipse cx="89.24" cy="90.45" rx="3.4" ry="5.8" transform="rotate(288 89.24 90.45)" /></clipPath><clipPath id="pond_c14"><ellipse cx="110" cy="76" rx="6" ry="4.2" /></clipPath><clipPath id="pond_c15"><ellipse cx="118" cy="88" rx="4.6" ry="3.22" /></clipPath><clipPath id="pond_c16"><ellipse cx="28" cy="108" rx="5" ry="3.5" /></clipPath><g id="pond_sil"><path d="M 22 90 C 22 70 18 50 18 26" fill="none" stroke-width="20.4"/><path d="M 32 90 C 32 70 34 50 34 18" fill="none" stroke-width="20.4"/><path d="M 12 90 C 12 70 6 50 6 40" fill="none" stroke-width="20.4"/><path d="M 42 90 C 42 70 46 50 46 36" fill="none" stroke-width="20.4"/><rect x="14" y="30" width="8" height="20" rx="4" /><rect x="30" y="22" width="8" height="20" rx="4" /><rect x="42" y="40" width="8" height="20" rx="4" /><path d="M 6 90 C 10 74 14 62 22 54 C 20 68 18 80 18 90 Z" /><path d="M 52 88 C 56 74 62 66 70 62 C 66 72 62 80 62 88 Z" /><ellipse cx="68" cy="92" rx="52" ry="26" /><ellipse cx="110" cy="76" rx="6" ry="4.2" /><ellipse cx="118" cy="88" rx="4.6" ry="3.22" /><ellipse cx="28" cy="108" rx="5" ry="3.5" /></g></defs>
+<g transform="translate(8.55 3.81) scale(0.876)">
+<use href="#pond_sil" xlink:href="#pond_sil" transform="translate(0 3.42)" fill="#3A3020" stroke="#3A3020" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>
+<use href="#pond_sil" xlink:href="#pond_sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 22 90 C 22 70 18 50 18 26" fill="none" stroke="#3E7E36" stroke-width="6.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 22 90 C 22 70 18 50 18 26" fill="none" stroke="#6FB55A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 32 90 C 32 70 34 50 34 18" fill="none" stroke="#3E7E36" stroke-width="6.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 32 90 C 32 70 34 50 34 18" fill="none" stroke="#6FB55A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 12 90 C 12 70 6 50 6 40" fill="none" stroke="#3E7E36" stroke-width="6.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 12 90 C 12 70 6 50 6 40" fill="none" stroke="#6FB55A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 42 90 C 42 70 46 50 46 36" fill="none" stroke="#3E7E36" stroke-width="6.4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 42 90 C 42 70 46 50 46 36" fill="none" stroke="#6FB55A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="14" y="30" width="8" height="20" rx="4" fill="#87542E"/>
+<g clip-path="url(#pond_c1)"><g transform="translate(-1 -2)"><rect x="14" y="30" width="8" height="20" rx="4" fill="#A0683E"/></g>
+</g>
+<rect x="14" y="30" width="8" height="20" rx="4" fill="none" stroke="#5E3A1C" stroke-width="2.4" stroke-linejoin="round"/>
+<rect x="30" y="22" width="8" height="20" rx="4" fill="#87542E"/>
+<g clip-path="url(#pond_c2)"><g transform="translate(-1 -2)"><rect x="30" y="22" width="8" height="20" rx="4" fill="#A0683E"/></g>
+</g>
+<rect x="30" y="22" width="8" height="20" rx="4" fill="none" stroke="#5E3A1C" stroke-width="2.4" stroke-linejoin="round"/>
+<rect x="42" y="40" width="8" height="20" rx="4" fill="#87542E"/>
+<g clip-path="url(#pond_c3)"><g transform="translate(-1 -2)"><rect x="42" y="40" width="8" height="20" rx="4" fill="#A0683E"/></g>
+</g>
+<rect x="42" y="40" width="8" height="20" rx="4" fill="none" stroke="#5E3A1C" stroke-width="2.4" stroke-linejoin="round"/>
+<path d="M 6 90 C 10 74 14 62 22 54 C 20 68 18 80 18 90 Z" fill="#7CC264"/>
+<g clip-path="url(#pond_c4)">
+</g>
+<path d="M 6 90 C 10 74 14 62 22 54 C 20 68 18 80 18 90 Z" fill="none" stroke="#3E7E36" stroke-width="2" stroke-linejoin="round"/>
+<path d="M 52 88 C 56 74 62 66 70 62 C 66 72 62 80 62 88 Z" fill="#7CC264"/>
+<g clip-path="url(#pond_c5)">
+</g>
+<path d="M 52 88 C 56 74 62 66 70 62 C 66 72 62 80 62 88 Z" fill="none" stroke="#3E7E36" stroke-width="2" stroke-linejoin="round"/>
+<ellipse cx="68" cy="92" rx="52" ry="26" fill="#7BBC62"/>
+<g clip-path="url(#pond_c6)"><g transform="translate(0 -3)"><ellipse cx="68" cy="92" rx="52" ry="26" fill="#93CF78"/></g>
+</g>
+<ellipse cx="68" cy="92" rx="52" ry="26" fill="none" stroke="#4F8C3E" stroke-width="2.4" stroke-linejoin="round"/>
+<ellipse cx="68" cy="93" rx="44" ry="20" fill="#6AB6DC"/>
+<g clip-path="url(#pond_c7)"><g transform="translate(2 3)"><ellipse cx="68" cy="93" rx="44" ry="20" fill="#8DD0EE"/></g>
+<path d="M 34 92 C 40 88 50 88 56 92" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" opacity=".8"/><path d="M 42 102 C 48 99 56 99 62 102" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" opacity=".8"/><path d="M 96 86 C 100 84 106 84 110 86" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" opacity=".8"/>
+<ellipse cx="50" cy="86" rx="12" ry="2.5" transform="rotate(-4 50 86)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<ellipse cx="68" cy="93" rx="44" ry="20" fill="none" stroke="#3D86B0" stroke-width="2.4" stroke-linejoin="round"/>
+<path d="M 84 98 C 84 90 94 86 102 88 C 110 90 114 98 108 104 L 96 98 L 100 108 C 92 110 84 106 84 98 Z" fill="#5AA64A"/>
+<g clip-path="url(#pond_c8)"><g transform="translate(-1 -1.5)"><path d="M 84 98 C 84 90 94 86 102 88 C 110 90 114 98 108 104 L 96 98 L 100 108 C 92 110 84 106 84 98 Z" fill="#6CBF5A"/></g>
+</g>
+<path d="M 84 98 C 84 90 94 86 102 88 C 110 90 114 98 108 104 L 96 98 L 100 108 C 92 110 84 106 84 98 Z" fill="none" stroke="#3E7E36" stroke-width="2.4" stroke-linejoin="round"/>
+<ellipse cx="94" cy="87" rx="3.4" ry="5.8" fill="#F9B4CF"/>
+<g clip-path="url(#pond_c9)">
+</g>
+<ellipse cx="94" cy="87" rx="3.4" ry="5.8" fill="none" stroke="#C6668E" stroke-width="1.4" stroke-linejoin="round"/>
+<ellipse cx="98.76" cy="90.45" rx="3.4" ry="5.8" transform="rotate(72 98.76 90.45)" fill="#F9B4CF"/>
+<g clip-path="url(#pond_c10)">
+</g>
+<ellipse cx="98.76" cy="90.45" rx="3.4" ry="5.8" transform="rotate(72 98.76 90.45)" fill="none" stroke="#C6668E" stroke-width="1.4" stroke-linejoin="round"/>
+<ellipse cx="96.94" cy="96.05" rx="3.4" ry="5.8" transform="rotate(144 96.94 96.05)" fill="#F9B4CF"/>
+<g clip-path="url(#pond_c11)">
+</g>
+<ellipse cx="96.94" cy="96.05" rx="3.4" ry="5.8" transform="rotate(144 96.94 96.05)" fill="none" stroke="#C6668E" stroke-width="1.4" stroke-linejoin="round"/>
+<ellipse cx="91.06" cy="96.05" rx="3.4" ry="5.8" transform="rotate(216 91.06 96.05)" fill="#F9B4CF"/>
+<g clip-path="url(#pond_c12)">
+</g>
+<ellipse cx="91.06" cy="96.05" rx="3.4" ry="5.8" transform="rotate(216 91.06 96.05)" fill="none" stroke="#C6668E" stroke-width="1.4" stroke-linejoin="round"/>
+<ellipse cx="89.24" cy="90.45" rx="3.4" ry="5.8" transform="rotate(288 89.24 90.45)" fill="#F9B4CF"/>
+<g clip-path="url(#pond_c13)">
+</g>
+<ellipse cx="89.24" cy="90.45" rx="3.4" ry="5.8" transform="rotate(288 89.24 90.45)" fill="none" stroke="#C6668E" stroke-width="1.4" stroke-linejoin="round"/>
+<circle cx="94" cy="92" r="2.6" fill="#FFE27A" stroke="#C99A12" stroke-width="1" stroke-linejoin="round"/>
+<ellipse cx="110" cy="76" rx="6" ry="4.2" fill="#B3ACA2"/>
+<g clip-path="url(#pond_c14)"><g transform="translate(-1 -1.5)"><ellipse cx="110" cy="76" rx="6" ry="4.2" fill="#C9C3BA"/></g>
+</g>
+<ellipse cx="110" cy="76" rx="6" ry="4.2" fill="none" stroke="#7F786E" stroke-width="2.4" stroke-linejoin="round"/>
+<ellipse cx="118" cy="88" rx="4.6" ry="3.22" fill="#B3ACA2"/>
+<g clip-path="url(#pond_c15)"><g transform="translate(-1 -1.5)"><ellipse cx="118" cy="88" rx="4.6" ry="3.22" fill="#C9C3BA"/></g>
+</g>
+<ellipse cx="118" cy="88" rx="4.6" ry="3.22" fill="none" stroke="#7F786E" stroke-width="2.4" stroke-linejoin="round"/>
+<ellipse cx="28" cy="108" rx="5" ry="3.5" fill="#B3ACA2"/>
+<g clip-path="url(#pond_c16)"><g transform="translate(-1 -1.5)"><ellipse cx="28" cy="108" rx="5" ry="3.5" fill="#C9C3BA"/></g>
+</g>
+<ellipse cx="28" cy="108" rx="5" ry="3.5" fill="none" stroke="#7F786E" stroke-width="2.4" stroke-linejoin="round"/>
+</g>
+</svg>

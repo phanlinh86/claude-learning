@@ -1,6 +1,6 @@
-// Dee's Forest Memory — high-speed playtest harness v2 (report-only; never edits game code).
+// Gigi's Peekaboo Windows — high-speed playtest harness v2 (from Dee's QA round 1) (report-only; never edits game code).
 // Adds to tests/sim/lib.js: extra child models (weak4, impatient4, repeat4, spam4 anywhere, spam4c on cards, stuck1),
-// a per-phase time ledger (waiting vs playing), reward crowding at the end of each chapter (final perch boxes),
+// a per-phase time ledger (waiting vs playing), (reward crowding: always 0 — this game has no rewards),
 // card size per round, wasted taps (taps while the game is not listening).
 //   const P = require('./pt_lib'); const m = P.run({ age, lang, vp, driver, seed, config });
 'use strict';
@@ -39,7 +39,7 @@ class Repeater {
     }
     this.kid.observe && this.kid.observe();
     this.t -= dt; if (this.t > 0) return; this.t = r.float(0.5, 0.9);
-    if (!this.fix || this.fix.state === 'gone' || this.fix.state === 'matched') {
+    if (!this.fix || this.fix.state === 'matched') {
       const live = w.cards.filter(c => c.state === 'down'); if (!live.length) return;
       this.fix = r.pick(live); this.n = 0;
     }
@@ -55,7 +55,7 @@ class Stuck1 {
     const w = this.w; this.t -= dt; if (this.t > 0) return; this.t = 0.7;
     if (w.state === 'talk') { if (!w.talkAnswered) w.talkAnswer(w.talk.answerId); return; }
     if (w.state !== 'round') { this.fix = null; return; }
-    if (!this.fix || this.fix.state === 'gone') this.fix = w.cards.find(c => c.state !== 'gone' && c.state !== 'deal') || null;
+    if (!this.fix || this.fix.state === 'matched') this.fix = w.cards.find(c => c.state !== 'matched') || null;
     if (!this.fix) return;
     w.pointerDown(this.fix.x, this.fix.y); w.pointerUp(this.fix.x, this.fix.y); this.stats.taps++;
   }

@@ -1,33 +1,36 @@
-/* Dee's Forest Memory — GW.Bot (autoplay for tests / demo / ?bot=1; DESIGN §5.4)
+/* Gigi's Peekaboo Windows — GW.Bot (autoplay for tests / demo / ?bot=1; DESIGN §6.6)
  *
- *   const bot = new GW.Bot(world, { skill: 0.8, seed: 1 });
+ *   const bot = new GW.Bot(world, { skill: 0.8, seed: 1, critterTaps: 0.2 });
  *   bot.step(dt);        // call every frame BEFORE world.update(dt) (same dt)
- *   bot.stats            // { taps, grabs (= taps), flips, matches, mismatches, misses, talks, talkRight }
+ *   bot.stats            // { taps, grabs (= taps), flips, matches, mismatches, misses, talks, talkRight, critters }
  *   bot.finger           // { x, y, down } virtual finger (debug overlay)
- *   bot.memory           // { cardId: key } what the bot remembers
+ *   bot.memory           // { windowId: key } what the bot remembers
  *
- * Memory model: every time a card's face becomes visible (peek, its own flips, a hint peek) the bot remembers it with
- * probability `skill`. It plays a known pair first; with one card up it taps the remembered partner, else a card it has
- * not seen (else any face-down card). skill 1 = perfect memory (never a mismatch after the peek).
+ * Memory model: every time a window's face becomes visible (the peek, its own opens, a hint crack) the bot remembers it
+ * with probability `skill`. It plays a known pair first; with one window open it taps the remembered partner, else a
+ * window it has not seen (else any closed window). skill 1 = perfect memory (never a mismatch after the peek).
  * Plays ONLY through the public input API, like a finger: reaction (0.9 − 0.5·skill)·U(0.8, 1.25) s (+0.6 s before the
- * first tap of a round), eased path at 900–1300 px/s, pointerDown at the card ± 0.25·size, pointerUp 0.06–0.12 s later.
- * It waits while a mismatch is shown or a pair is being checked. Talk: answers after 1.0–2.2 s, right with p = skill.
+ * first tap of a round), eased path at 900–1300 px/s, pointerDown at the window ± 0.25·size (never on the critter's box),
+ * pointerUp 0.06–0.12 s later. It waits while a mismatch is shown or a pair is being checked. Critters are mostly ignored:
+ * a new critter is tapped once with p = critterTaps (default 0.2). Talk: answers after 1.0–2.2 s, right with p = skill.
  */
 (function (GW) {
   'use strict';
 
   function hyp(x, y) { return Math.sqrt(x * x + y * y); }
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+  function inR(x, y, R) { return !!R && x >= R.x && x <= R.x + R.w && y >= R.y && y <= R.y + R.h; }
 
   function Bot(world, opts) {
     opts = opts || {};
     this.world = world;
     this.skill = clamp(opts.skill !== undefined ? +opts.skill : 0.8, 0, 1);
+    this.critterTaps = opts.critterTaps !== undefined ? +opts.critterTaps : 0.2;
     this.rng = new GW.RNG(opts.seed !== undefined ? opts.seed : 99);
     this.enabled = true;
-    this.stats = { taps: 0, grabs: 0, flips: 0, matches: 0, mismatches: 0, misses: 0, talks: 0, talkRight: 0 };
+    this.stats = { taps: 0, grabs: 0, flips: 0, matches: 0, mismatches: 0, misses: 0, talks: 0, talkRight: 0, critters: 0 };
     this.finger = { x: world.layout.W / 2, y: world.layout.H / 2, down: false };
-    this.memory = {}; this._vis = {}; this._roundKey = null;
+    this.memory = {}; this._vis = {}; this._roundKey = null; this._critSeen = null;
     this.phase = 'wait'; this._t = this._reaction(); this._first = true;
     this._path = null; this._target = null; this._talkT = -1; this._ox = 0; this._oy = 0;
   }
@@ -49,7 +52,7 @@
     return p.t >= p.T;
   };
 
-  /** Remembers faces as they become visible (flip > 0.9), each exposure with p = skill. */
+  /** Remembers faces as they become visible (fully open, or a hint crack), each exposure with p = skill. */
   Bot.prototype._observe = function () {
     var w = this.world, rk = w.level + ':' + w.round + ':' + (w.cur ? w.cur.seed : '');
     if (rk !== this._roundKey) { this._roundKey = rk; this.memory = {}; this._vis = {}; this._mis0 = 0; this._found0 = 0; }
@@ -57,8 +60,8 @@
     this.stats.matches += Math.max(0, w.found - this._found0); this._found0 = w.found;
     for (var i = 0; i < w.cards.length; i++) {
       var c = w.cards[i];
-      if (c.state === 'gone') { delete this.memory[c.id]; continue; }
-      var vis = c.flip > 0.9 || (c.flip > 0.7 && c.peekT >= 0);
+      if (c.state === 'matched') { delete this.memory[c.id]; continue; }
+      var vis = c.flip > 0.9 || (c.peekT >= 0 && c.open > 0.25);
       if (vis && !this._vis[c.id] && this.rng.chance(this.skill)) this.memory[c.id] = c.key;
       this._vis[c.id] = vis;
     }
@@ -85,6 +88,16 @@
   Bot.prototype._busy = function () {
     var w = this.world;
     return w.open.length >= 2 || w.phase !== 'play' || !!w._mis;
+  };
+
+  /** A tap offset on window c that is not on the critter's box (the pigeon / balloon in front of the windows). */
+  Bot.prototype._aim = function (c) {
+    var R = this.world.critterRect ? this.world.critterRect() : null;
+    for (var k = 0; k < 6; k++) {
+      this._ox = this.rng.float(-0.25, 0.25) * c.w; this._oy = this.rng.float(-0.25, 0.25) * c.h;
+      if (!inR(c.x + this._ox, c.y + this._oy, R)) return;
+    }
+    this._ox = 0; this._oy = -0.3 * c.h;
   };
 
   Bot.prototype.step = function (dt) {
@@ -118,30 +131,51 @@
     }
 
     switch (this.phase) {
-      case 'wait':
+      case 'wait': {
         if (this._busy()) { this._t = Math.max(this._t, this._reaction() * 0.5); break; }
         this._t -= dt;
-        if (this._t <= 0) {
-          var c = this._choose();
-          if (!c) { this._t = 0.1; break; }
-          this._target = c; this.phase = 'reach'; this._first = false;
-          this._ox = r.float(-0.25, 0.25) * c.w; this._oy = r.float(-0.25, 0.25) * c.h;
-          this._startPath(c.x + this._ox, c.y + this._oy);
+        if (this._t > 0) break;
+        // a new critter: tap it once now and then (fun, never a mistake)
+        var k = w.critter, kr = w.critterRect ? w.critterRect() : null;
+        if (k && kr && k !== this._critSeen && k.state !== 'away' && k.state !== 'fly') {
+          this._critSeen = k;
+          if (r.chance(this.critterTaps)) {
+            this._target = null; this.phase = 'reachCritter'; this._first = false;
+            this._startPath(kr.x + kr.w / 2, kr.y + kr.h / 2);
+            break;
+          }
         }
+        var c = this._choose();
+        if (!c) { this._t = 0.1; break; }
+        this._target = c; this.phase = 'reach'; this._first = false;
+        this._aim(c);
+        this._startPath(c.x + this._ox, c.y + this._oy);
         break;
+      }
+      case 'reachCritter': {
+        var R = w.critterRect ? w.critterRect() : null;
+        if (!R || !w.critter || w.critter.state === 'away') { this.phase = 'wait'; this._t = 0.15; break; }
+        if (this._move(dt, R.x + R.w / 2, R.y + R.h / 2)) {
+          this.finger.down = true;
+          if (w.pointerDown(this.finger.x, this.finger.y) === 'critter') this.stats.critters++;
+          this.stats.taps++; this.stats.grabs++;
+          this.phase = 'up'; this._t = r.float(0.06, 0.12);
+        }
+        w.pointerMove(this.finger.x, this.finger.y);
+        break;
+      }
       case 'reach': {
         var tc = this._target;
         if (!tc || tc.state !== 'down' || this._busy()) { this.phase = 'wait'; this._t = 0.15; break; }
         if (this._move(dt, tc.x + this._ox, tc.y + this._oy)) {
+          // the critter moved onto the aim point meanwhile: re-aim
+          if (inR(this.finger.x, this.finger.y, w.critterRect ? w.critterRect() : null)) { this._aim(tc); this._startPath(tc.x + this._ox, tc.y + this._oy); break; }
           this.finger.down = true;
           var n0 = w.events.length;
           var id = w.pointerDown(this.finger.x, this.finger.y);
           this.stats.taps++; this.stats.grabs++;
-          if (!id) this.stats.misses++;
-          for (var i = n0; i < w.events.length; i++) {
-            var e = w.events[i];
-            if (e.type === 'flip') this.stats.flips++;
-          }
+          if (!id || id === 'gigi' || id === 'critter') this.stats.misses++;
+          for (var i = n0; i < w.events.length; i++) if (w.events[i].type === 'flip') this.stats.flips++;
           this.phase = 'up'; this._t = r.float(0.06, 0.12);
         }
         w.pointerMove(this.finger.x, this.finger.y);

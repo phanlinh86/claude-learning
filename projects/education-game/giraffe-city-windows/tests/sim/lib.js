@@ -1,10 +1,10 @@
-// Dee's Forest Memory — headless playtest harness (report-only; never edits game code).
+// Gigi's Peekaboo Windows — headless playtest harness (report-only; never edits game code).
 //   const L = require('./lib'); const m = L.runSession({ age, lang, vp, driver: 'typical', seed, config });
 // Loads rng/content/world/bot into a node vm (same pattern as tests/unit/load.js), drives ONLY the public input API
 // (pointerDown/Up, talkAnswer, hint) and measures round / chapter / session times, mismatches, hints, idles, stars,
-// stuck rounds, NaN, rewards off-screen / on the bubble, HUD, Dee or the cards, smallest card.
-// (Field names kept from the balloon harness: wrong = mismatches, offscreen = bad reward placements, homesSeen = reward
-//  checks, packShrinkMin = smallest card width in px, packFail = grids below the age's minimum card size.)
+// stuck rounds, NaN, Gigi's head on the windows / off-screen, smallest window, critter taps.
+// (Field names kept from the older harnesses: wrong = mismatches, offscreen = bad head placements, homesSeen = head
+//  checks, packShrinkMin = smallest window width in px, packFail = grids below the age's minimum window size.)
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -38,19 +38,20 @@ const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
  * memories fade with an exponential lifetime tau (s). It plays a remembered pair, else the remembered partner of the
  * card it just turned, else a card it has not seen — but with p = pRandom it just taps any face-down card.
  * Rhythm: after "now they hide" it starts after `listen` s, waits `reaction` s between turns and `afterFlip` s after its
- * own flip (hears Dee say the name); while a mismatch shows it waits with p = patience, else it taps a new card (the
- * third-tap fast reset). Gets distracted (looks away) with p = pDistract per round. Aims inside `aim` × the card half-size.
- * Talk: answers after talkDelay s, right with p = talkRight. */
+ * own flip (hears Gigi say the name); while a mismatch shows it waits with p = patience, else it taps a new card (the
+ * third-tap fast reset). Gets distracted (looks away) with p = pDistract per round. Aims inside `aim` × the window half-size
+ * (a tap can land on the pigeon / balloon in front of a window: no window opens, the child just tries again).
+ * A critter (surprise round) is tapped once with p = critter, after `reaction` s. Talk: answers after talkDelay s, right with p = talkRight. */
 const KID_PROFILES = {
   // a slow, dreamy 3-year-old
   slow3: { peekRecall: 0.15, flipRecall: 0.4, tau: 20, pRandom: 0.3, listen: [2.5, 4], reaction: [2.5, 4.5], afterFlip: [1.0, 1.6],
-    patience: 0.9, pDistract: 0.3, track: 0.35, followHint: 0.8, distract: [5, 15], aim: 0.9, speed: [250, 450], talkDelay: [3, 8], talkRight: 0.55 },
+    patience: 0.9, pDistract: 0.3, track: 0.35, followHint: 0.8, distract: [5, 15], aim: 0.9, speed: [250, 450], talkDelay: [3, 8], talkRight: 0.55, critter: 0.8 },
   // a quick but impulsive 3-year-old (often taps on before a mismatch flips back)
   toddler: { peekRecall: 0.2, flipRecall: 0.45, tau: 20, pRandom: 0.35, listen: [1.5, 2.5], reaction: [1.0, 2.0], afterFlip: [0.2, 0.6],
-    patience: 0.3, pDistract: 0.15, track: 0.4, followHint: 0.8, distract: [3, 8], aim: 1.0, speed: [350, 600], talkDelay: [2, 5], talkRight: 0.6 },
+    patience: 0.3, pDistract: 0.15, track: 0.4, followHint: 0.8, distract: [3, 8], aim: 1.0, speed: [350, 600], talkDelay: [2, 5], talkRight: 0.6, critter: 0.9 },
   // a careful 4-year-old with a weak memory: always waits, but forgets a lot
   careful4: { peekRecall: 0.2, flipRecall: 0.45, tau: 25, pRandom: 0.15, listen: [2, 3], reaction: [1.6, 3.0], afterFlip: [0.8, 1.4],
-    patience: 1.0, pDistract: 0.1, track: 0.5, followHint: 0.8, distract: [4, 10], aim: 0.7, speed: [350, 550], talkDelay: [3, 6], talkRight: 0.75 },
+    patience: 1.0, pDistract: 0.1, track: 0.5, followHint: 0.8, distract: [4, 10], aim: 0.7, speed: [350, 550], talkDelay: [3, 6], talkRight: 0.75, critter: 0.6 },
   typical: null    // per age, see typicalProfile()
 };
 function typicalProfile(age) {
@@ -58,22 +59,21 @@ function typicalProfile(age) {
   return { peekRecall: 0.3 + 0.3 * k, flipRecall: 0.55 + 0.3 * k, tau: 30 + 60 * k, pRandom: 0.2 - 0.15 * k,
     listen: [1.8 - 0.6 * k, 2.8 - 0.8 * k], reaction: [1.3 - 0.5 * k, 2.6 - 1.1 * k], afterFlip: [0.6, 1.1 - 0.3 * k],
     patience: 0.85, pDistract: 0.15 - 0.08 * k, track: 0.6 + 0.3 * k, followHint: 0.8, distract: [4, 10], aim: 0.75, speed: [400 + 300 * k, 650 + 350 * k],
-    talkDelay: [3 - k, 5.5 - 1.5 * k], talkRight: 0.7 + 0.25 * k };
+    talkDelay: [3 - k, 5.5 - 1.5 * k], talkRight: 0.7 + 0.25 * k, critter: 0.75 - 0.3 * k };
 }
 
 class Kid {
   constructor(w, prof, seed) {
     this.w = w; this.p = prof; this.r = new GW.RNG(seed); this.f = { x: w.layout.W / 2, y: w.layout.H / 2, down: false };
     this.phase = 'wait'; this.t = 0; this.talkT = -1; this.roundKey = ''; this.mem = {}; this.vis = {}; this.sw = {}; this.target = null;
-    this.stats = { taps: 0, misses: 0, third: 0 };
+    this.stats = { taps: 0, misses: 0, third: 0, critters: 0 }; this.critSeen = null;
   }
   rf(a) { return this.r.float(a[0], a[1]); }
   observe() {
     const w = this.w, p = this.p;
     for (const c of w.cards) {
-      if (c.state === 'gone') { delete this.mem[c.id]; continue; }
-      if (c._sw && !this.sw[c.id]) { this.sw[c.id] = 1; if (!this.r.chance(p.track)) delete this.mem[c.id]; }   // lost track in a shuffle
-      const vis = c.flip > 0.9 || (c.flip > 0.7 && c.peekT >= 0);
+      if (c.state === 'matched') { delete this.mem[c.id]; continue; }
+      const vis = c.flip > 0.9 || (c.peekT >= 0 && c.open > 0.25);   // fully open, or the hint crack
       if (vis && !this.vis[c.id] && this.r.chance(w.phase === 'peek' ? p.peekRecall : p.flipRecall)) this.mem[c.id] = { key: c.key, t: w.time };
       this.vis[c.id] = vis;
     }
@@ -124,11 +124,23 @@ class Kid {
     switch (this.phase) {
       case 'wait': {
         const misShowing = !!w._mis, pending = w.open.length === 2 && !w._mis;
-        this.t -= dt;                                                        // (keeps thinking while Dee talks / cards turn)
+        this.t -= dt;                                                        // (keeps thinking while Gigi talks / shutters swing)
         if (pending || (w.phase === 'resolve' && !misShowing)) return;     // a pair is being checked / was just found
         if (misShowing) { if (this.patientNow === undefined) this.patientNow = r.chance(p.patience); if (this.patientNow) return; }
         else this.patientNow = undefined;
         if (this.t > 0) return;
+        // a new critter: most children want to touch it (once)
+        const k = w.critter, kr = w.critterRect();
+        if (k && kr && k !== this.critSeen && k.state !== 'away') {
+          this.critSeen = k;
+          if (r.chance(p.critter || 0)) {
+            this.target = null; this.ox = 0; this.oy = 0; this.crit = true;
+            const d0 = hyp(kr.x + kr.w / 2 - this.f.x, kr.y + kr.h / 2 - this.f.y); this.T = Math.max(0.15, d0 / this.rf(p.speed)); this.tt = 0;
+            this.x0 = this.f.x; this.y0 = this.f.y; this.phase = 'reach';
+            return;
+          }
+        }
+        this.crit = false;
         const c = this.choose();
         if (!c) { this.t = 0.2; return; }
         if (misShowing) this.stats.third++;
@@ -139,13 +151,21 @@ class Kid {
         return;
       }
       case 'reach': {
-        const c = this.target;
+        let c = this.target;
+        if (this.crit) {   // reaching for the critter (it moves): aim at its current box
+          const kr = w.critterRect();
+          if (!kr || !w.critter || w.critter.state === 'away') { this.phase = 'wait'; this.t = this.rf(p.reaction) * 0.5; this.crit = false; return; }
+          c = { x: kr.x + kr.w / 2, y: kr.y + kr.h / 2 };
+        }
         this.tt += dt; const u = Math.min(1, this.tt / this.T), s = u * u * (3 - 2 * u);
         this.f.x = this.x0 + (c.x + this.ox - this.x0) * s; this.f.y = this.y0 + (c.y + this.oy - this.y0) * s;
         if (u >= 1) {
           this.stats.taps++;
           const n0 = w.events.length;
-          if (!w.pointerDown(this.f.x, this.f.y)) this.stats.misses++;
+          const res = w.pointerDown(this.f.x, this.f.y);
+          if (res === 'critter') this.stats.critters++;
+          else if (!res || res === 'gigi') this.stats.misses++;
+          this.crit = false;
           w.pointerUp(this.f.x, this.f.y);
           const flipped = w.events.slice(n0).some(e => e.type === 'flip');
           this.phase = 'wait'; this.patientNow = undefined;
@@ -221,23 +241,19 @@ function runSession(o) {
   const m = {
     age, lang, vp: o.vp, driver: o.driver, seed, sessionTime: null, done: false, stars: 0,
     rounds: [], chapters: [], hints: 0, idles: 0, idleGaps: [], wrongs: 0, corrects: 0, talkAsks: 0,
-    stuck: [], slow: [], invariant: [], offscreen: 0, homesSeen: 0, packShrinkMin: 1e9, packFail: 0, errors: [], content: []
+    stuck: [], slow: [], invariant: [], offscreen: 0, homesSeen: 0, packShrinkMin: 1e9, packFail: 0, errors: [], content: [], critters: 0, critterTaps: 0
   };
   let rd = null, ch = null, lastIdleT = null, t = 0;
-  function checkRewards() {   // at each round start: every resting reward inside the screen, clear of bubble / HUD / Dee
-    const L = w.layout, safe = { x: L.ins.left, y: L.ins.top, w: L.W - L.ins.left - L.ins.right, h: L.H - L.ins.top - L.ins.bottom };
-    for (const r of w.rewards) {
-      if (r.state === 'fly') continue;
-      m.homesSeen++;
-      const B = rewardBox(r);
-      const inside = B.x >= safe.x - 1e-6 && B.y >= safe.y - 1e-6 && B.x + B.w <= safe.x + safe.w + 1e-6 && B.y + B.h <= safe.y + safe.h + 1e-6;
-      if (!inside || ovl(B, L.bubble) || ovl(B, L.hud) || ovl(B, L.deeRect) || !Number.isFinite(B.x + B.y)) m.offscreen++;
-    }
+  function checkHead() {   // Gigi's head box: on the safe screen, never within 16 px of the windows (outside the scroll)
+    const L = w.layout, safe = L.safe, B = GW.World.gigiHead(w);
+    m.homesSeen++;
+    const inside = B.x >= safe.x - 1e-6 && B.y >= safe.y - 1e-6 && B.x + B.w <= safe.x + safe.w + 1e-6 && B.y + B.h <= safe.y + safe.h + 1e-6;
+    const onWin = L.grid && !(w.state === 'round' && w.phase === 'scroll') && ovl(B, { x: L.grid.rect.x - 16, y: L.grid.rect.y - 16, w: L.grid.rect.w + 32, h: L.grid.rect.h + 32 });
+    if (!inside || onWin || !Number.isFinite(B.x + B.y)) m.offscreen++;
   }
-  function checkCards() {   // when play starts: card size vs the age minimum, cards clear of the rewards
+  function checkCards() {   // when play starts: window size vs the age minimum
     const g = w.layout.grid; if (!g) return;
     m.packShrinkMin = Math.min(m.packShrinkMin, g.cw); if (!g.minOk) m.packFail++;
-    for (const r of w.rewards) if (r.state !== 'fly' && ovl(rewardBox(r), g.rect)) m.offscreen++;
   }
   const handle = (e) => {
     switch (e.type) {
@@ -248,7 +264,8 @@ function runSession(o) {
         m.rounds.push(rd); lastIdleT = null; if (ch) ch.rounds++;
         if (o.keepContent) m.content.push({ l: w.level, r: e.round, topic: e.topic, pairs: e.pairs, keys: w.cards.map(c => c.key).sort().join(',') });
         break;
-      case 'play': if (rd) rd.interactiveAt = w.time - rd.start; checkCards(); checkRewards(); break;
+      case 'play': if (rd) rd.interactiveAt = w.time - rd.start; checkCards(); break;
+      case 'critter': if (e.action === 'tap') m.critterTaps++; if (e.action === 'enter') m.critters++; break;
       case 'match': m.corrects++; break;
       case 'mismatch': m.wrongs++; if (rd) rd.wrong++; break;
       case 'hint': m.hints++; if (rd) rd.hints++; break;
@@ -270,10 +287,12 @@ function runSession(o) {
         if (w.time - rd.start > roundCap && !rd.stuckFlag) { rd.stuckFlag = true; m.slow.push({ level: w.level, round: w.round, topic: w.topic }); }
         if ((++k & 7) === 0) {
           // structural stuck: playing, not solved, but no card can be turned and nothing is animating
-          const live = w.cards.some(c => c.state === 'down' || c.state === 'up' || c.state === 'matched');
-          if (w.phase === 'play' && !w.solved && !live) { if (++noMove > 30) m.stuck.push({ kind: 'noCard', level: w.level, round: w.round, topic: w.topic }); } else noMove = 0;
-          for (const c of w.cards) if (!Number.isFinite(c.x + c.y + c.rot + c.flip + c.sx)) { m.invariant.push('NaN ' + c.id); break; }
-          for (const r of w.rewards) if (!Number.isFinite(r.x + r.y + r.rot)) { m.invariant.push('NaN ' + r.id); break; }
+          const live = w.cards.some(c => c.state === 'down' || c.state === 'up');
+          if (w.phase === 'play' && !w.solved && !live) { if (++noMove > 30) m.stuck.push({ kind: 'noWindow', level: w.level, round: w.round, topic: w.topic }); } else noMove = 0;
+          for (const c of w.cards) if (!Number.isFinite(c.x + c.y + c.open + c.flip + c.light + c.bloom + c.bounce + c.wiggle)) { m.invariant.push('NaN ' + c.id); break; }
+          if (w.critter && !Number.isFinite(w.critter.x + w.critter.y + w.critter.rot)) m.invariant.push('NaN critter');
+          if (!Number.isFinite(w.gigi.headX + w.gigi.headY + w.scroll)) m.invariant.push('NaN gigi');
+          if ((k & 31) === 0) checkHead();
           if (m.invariant.length > 20 || m.stuck.length > 20) break;
         }
       }

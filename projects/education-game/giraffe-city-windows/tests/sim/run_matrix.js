@@ -20,7 +20,7 @@ function compact(m) {
       n: r.cards, sp: r.surprise, wrong: r.wrong, hints: r.hints, idles: r.idles, stars: r.stars })),
     hints: m.hints, idles: m.idles, idleGaps: m.idleGaps, wrongs: m.wrongs, corrects: m.corrects, talkAsks: m.talkAsks,
     stuck: m.stuck.length, stuckKinds: m.stuck.slice(0, 3), slow: m.slow.length, invariant: m.invariant.length, errors: m.errors.slice(0, 2),
-    offscreen: m.offscreen, homesSeen: m.homesSeen, packShrinkMin: m.packShrinkMin, packFail: m.packFail,
+    offscreen: m.offscreen, homesSeen: m.homesSeen, packShrinkMin: m.packShrinkMin, packFail: m.packFail, critters: m.critters, critterTaps: m.critterTaps,
     content: m.content.length ? m.content : undefined
   };
 }

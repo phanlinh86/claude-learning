@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-// High-speed playtest (report-only): thousands of headless sessions per age × driver, plus an absent child.
+// Gigi's Peekaboo Windows — high-speed playtest (report-only): headless sessions per age × driver, plus an absent child.
 //   node tests/sim/playtest.js                     → default matrix (≈ 2 200 sessions), writes tests/sim/out/pt_base.{json,md}
 //   node tests/sim/playtest.js --n 4 --name quick --config '{"roundDoneTime":2}'
 // Drivers: bot0.3 bot0.6 bot0.9 bot1 (GW.Bot memory skills), typical (per-age child), careful4 (careful 4-year-old with a
 // weak memory), toddler (impulsive 3-year-old), slow3 (slow dreamy 3-year-old), tapper (random taps), spammer (hammers
 // the screen). Targets (REQUIREMENT / skill): typical 4-year-old chapter 60–100 s, every session ≤ 8 min for typical
-// children, no stuck round, no NaN, every reward on screen and off the cards / bubble / HUD / Dee, cards ≥ the age minimum.
+// children, no stuck round, no NaN, Gigi's head on screen and off the windows, windows ≥ the age minimum.
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -56,8 +56,8 @@ function absent() {
     ['every session finished', all.done === all.n, all.done + '/' + all.n],
     ['no stuck round / NaN / error', !all.stuck && !all.invariant && !all.errors, `${all.stuck}/${all.invariant}/${all.errors}`],
     ['careful 4-year-old (weak memory) session p90 ≤ 8 min', car4.sesP90 <= 480, car4.sesP90.toFixed(0) + ' s'],
-    ['every resting reward on screen, off the cards / bubble / HUD / Dee', !all.offscreen, all.offscreen + '/' + all.homes],
-    ['every grid ≥ the age minimum card size', !all.packFail, all.packFail + ' (smallest ' + all.shrinkMin.toFixed(0) + ' px)']
+    ["Gigi's head always on screen and ≥ 16 px from the windows", !all.offscreen, all.offscreen + '/' + all.homes],
+    ['every grid ≥ the age minimum window size', !all.packFail, all.packFail + ' (smallest ' + all.shrinkMin.toFixed(0) + ' px)']
   ];
   md += '\n### Verdict\n\n' + v.map(([k, ok, val]) => `- ${ok ? 'PASS' : 'FAIL'} ${k}: ${val}`).join('\n') + '\n';  md += `- INFO slow dreamy 3-year-old (slow3, ages 3–4): session mean ${slow.ses.toFixed(0)} s, p90 ${slow.sesP90.toFixed(0)} s, ${(100 * slow.cut).toFixed(0)} % of chapters cut to 3 rounds\n`;
   md += `\n_${sessions.length} sessions, ${((Date.now() - t0) / 1000).toFixed(0)} s wall_\n`;

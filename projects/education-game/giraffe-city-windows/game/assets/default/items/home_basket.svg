@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><clipPath id="basket_c1"><ellipse cx="64" cy="70" rx="56" ry="14" /></clipPath><clipPath id="basket_c2"><path d="M 108 64 Q 105.64 67.79 97.71 71.07 Q 87.24 74.06 71.64 74.83 Q 55.21 76.47 42 73.53 Q 29.59 71.22 22.65 67.76 Q 19.85 64 22.65 60.24 Q 29.59 56.78 42 54.47 Q 55.21 51.53 71.64 53.17 Q 87.24 53.94 97.71 56.93 Q 105.64 60.21 108 64 Z" /></clipPath><clipPath id="basket_c3"><path d="M 8 72 C 30 82 98 82 120 72 C 118 96 98 112 64 112 C 30 112 10 96 8 72 Z" /></clipPath><clipPath id="basket_c4"><circle cx="101" cy="46" r="13" /></clipPath><g id="basket_sil"><ellipse cx="64" cy="70" rx="56" ry="14" /><path d="M 108 64 Q 105.64 67.79 97.71 71.07 Q 87.24 74.06 71.64 74.83 Q 55.21 76.47 42 73.53 Q 29.59 71.22 22.65 67.76 Q 19.85 64 22.65 60.24 Q 29.59 56.78 42 54.47 Q 55.21 51.53 71.64 53.17 Q 87.24 53.94 97.71 56.93 Q 105.64 60.21 108 64 Z" /><path d="M 8 72 C 30 82 98 82 120 72 C 118 96 98 112 64 112 C 30 112 10 96 8 72 Z" /><circle cx="101" cy="46" r="13" /></g></defs>
+<g transform="translate(4.7 -4.68) scale(0.9266)">
+<use href="#basket_sil" xlink:href="#basket_sil" transform="translate(0 3.24)" fill="#3A3020" stroke="#3A3020" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>
+<use href="#basket_sil" xlink:href="#basket_sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
+<ellipse cx="64" cy="70" rx="56" ry="14" fill="#A87434"/>
+<g clip-path="url(#basket_c1)">
+</g>
+<ellipse cx="64" cy="70" rx="56" ry="14" fill="none" stroke="#7E5420" stroke-width="2.4" stroke-linejoin="round"/>
+<path d="M 108 64 Q 105.64 67.79 97.71 71.07 Q 87.24 74.06 71.64 74.83 Q 55.21 76.47 42 73.53 Q 29.59 71.22 22.65 67.76 Q 19.85 64 22.65 60.24 Q 29.59 56.78 42 54.47 Q 55.21 51.53 71.64 53.17 Q 87.24 53.94 97.71 56.93 Q 105.64 60.21 108 64 Z" fill="#E99DBA"/>
+<g clip-path="url(#basket_c2)"><g transform="translate(-2 -3)"><path d="M 108 64 Q 105.64 67.79 97.71 71.07 Q 87.24 74.06 71.64 74.83 Q 55.21 76.47 42 73.53 Q 29.59 71.22 22.65 67.76 Q 19.85 64 22.65 60.24 Q 29.59 56.78 42 54.47 Q 55.21 51.53 71.64 53.17 Q 87.24 53.94 97.71 56.93 Q 105.64 60.21 108 64 Z" fill="#F6BBD0"/></g>
+<ellipse cx="46" cy="58" rx="10" ry="3" transform="rotate(-4 46 58)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M 108 64 Q 105.64 67.79 97.71 71.07 Q 87.24 74.06 71.64 74.83 Q 55.21 76.47 42 73.53 Q 29.59 71.22 22.65 67.76 Q 19.85 64 22.65 60.24 Q 29.59 56.78 42 54.47 Q 55.21 51.53 71.64 53.17 Q 87.24 53.94 97.71 56.93 Q 105.64 60.21 108 64 Z" fill="none" stroke="#B9668A" stroke-width="2.4" stroke-linejoin="round"/>
+<circle cx="50" cy="64" r="1.8" fill="#C9739A"/>
+<circle cx="64" cy="64" r="1.8" fill="#C9739A"/>
+<circle cx="78" cy="64" r="1.8" fill="#C9739A"/>
+<path d="M 8 72 C 30 82 98 82 120 72 C 118 96 98 112 64 112 C 30 112 10 96 8 72 Z" fill="#C08C46"/>
+<g clip-path="url(#basket_c3)"><g transform="translate(-3 -4)"><path d="M 8 72 C 30 82 98 82 120 72 C 118 96 98 112 64 112 C 30 112 10 96 8 72 Z" fill="#DCA962"/></g>
+<path d="M 26 76 C 28 84 28 96 26 104" fill="none" stroke="#7E5420" stroke-width="2" opacity=".6"/><path d="M 40 76 C 42 84 42 96 40 104" fill="none" stroke="#7E5420" stroke-width="2" opacity=".6"/><path d="M 54 76 C 56 84 56 96 54 104" fill="none" stroke="#7E5420" stroke-width="2" opacity=".6"/><path d="M 68 76 C 70 84 70 96 68 104" fill="none" stroke="#7E5420" stroke-width="2" opacity=".6"/><path d="M 82 76 C 84 84 84 96 82 104" fill="none" stroke="#7E5420" stroke-width="2" opacity=".6"/><path d="M 96 76 C 98 84 98 96 96 104" fill="none" stroke="#7E5420" stroke-width="2" opacity=".6"/><path d="M 10 82 C 40 90 88 90 118 82" fill="none" stroke="#F2CC8A" stroke-width="2.4" opacity=".45"/><path d="M 10 94 C 40 102 88 102 118 94" fill="none" stroke="#F2CC8A" stroke-width="2.4" opacity=".45"/>
+<ellipse cx="26" cy="84" rx="7" ry="2.5" transform="rotate(20 26 84)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M 8 72 C 30 82 98 82 120 72 C 118 96 98 112 64 112 C 30 112 10 96 8 72 Z" fill="none" stroke="#7E5420" stroke-width="2.4" stroke-linejoin="round"/>
+<path d="M 8 72 C 30 82 98 82 120 72" fill="none" stroke="#EFC27E" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 8 72 C 30 82 98 82 120 72" fill="none" stroke="#7E5420" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+<circle cx="101" cy="46" r="13" fill="#7FC79E"/>
+<g clip-path="url(#basket_c4)"><g transform="translate(-2 -2)"><circle cx="101" cy="46" r="13" fill="#9ED9B6"/></g>
+<path d="M 92 38 C 98 44 100 52 98 60" fill="none" stroke="#5FA986" stroke-width="1.8" stroke-linecap="round"/><path d="M 100 32 C 108 38 112 46 110 56" fill="none" stroke="#5FA986" stroke-width="1.8" stroke-linecap="round"/><path d="M 88 46 C 96 42 106 42 114 46" fill="none" stroke="#5FA986" stroke-width="1.8" stroke-linecap="round"/>
+</g>
+<circle cx="101" cy="46" r="13" fill="none" stroke="#4E9A74" stroke-width="2.4" stroke-linejoin="round"/>
+<path d="M 88 52 C 80 56 76 50 70 54" fill="none" stroke="#4E9A74" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</svg>

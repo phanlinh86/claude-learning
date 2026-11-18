@@ -1,4 +1,4 @@
-/* Dee's Forest Memory — GW.RNG (seeded mulberry32, same style as the sister games)
+/* Gigi's Peekaboo Windows — GW.RNG (seeded mulberry32, same style as the sister games)
  * Same seed => same sequence on every platform; this is what makes GW.World,
  * GW.Content, GW.Weather and GW.Bot deterministic.
  *

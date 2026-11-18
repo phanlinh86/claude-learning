@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Summarises tests/sim/out/<name>.json into markdown tables (stdout + tests/sim/out/<name>.md).
+// Gigi's Peekaboo Windows — summarises tests/sim/out/<name>.json into markdown tables (stdout + tests/sim/out/<name>.md).
 //   node tests/sim/summarize.js baseline
 'use strict';
 const fs = require('fs');
@@ -33,6 +33,7 @@ function agg(S) {
     cut: talkRounds.filter(k => k < 4).length / Math.max(1, talkRounds.length),
     stuck: sum(S.map(s => s.stuck)), slow: sum(S.map(s => s.slow || 0)), invariant: sum(S.map(s => s.invariant)), errors: sum(S.map(s => s.errors.length)),
     offscreen: sum(S.map(s => s.offscreen)), homes: sum(S.map(s => s.homesSeen)), shrinkMin: Math.min(...S.map(s => s.packShrinkMin)),
+    critters: sum(S.map(s => s.critters || 0)), critterTaps: sum(S.map(s => s.critterTaps || 0)),
     packFail: sum(S.map(s => s.packFail))
   };
 }
@@ -57,8 +58,8 @@ function report(D) {
   }
   md += tbl(['driver', 'age', 'mismatch/round', 'rounds w/ hint', 'hints/min', 'idles/min', 'idle gap', 'stars', 'min', 'of max', '3★ / 2★ / 1★'], rows2);
   const all = agg(S);
-  md += `\n### Health\n\nstuck rounds ${all.stuck} · rounds > 180 s ${all.slow} · NaN ${all.invariant} · errors ${all.errors} · bad reward placements ${all.offscreen}/${all.homes} · ` +
-    `smallest card ${all.shrinkMin.toFixed(0)} px · grids below the age minimum ${all.packFail}\n`;
+  md += `\n### Health\n\nstuck rounds ${all.stuck} · rounds > 180 s ${all.slow} · NaN ${all.invariant} · errors ${all.errors} · Gigi's head on the windows / off-screen ${all.offscreen}/${all.homes} checks · ` +
+    `smallest window ${all.shrinkMin.toFixed(0)} px · grids below the age minimum ${all.packFail} · critters ${all.critters}, tapped ${all.critterTaps}\n`;
   // per topic round time for the typical child
   const typ = S.filter(s => s.driver === 'typical');
   if (typ.length) {

@@ -1,14 +1,14 @@
-/* Dee's Forest Memory — GW.Voice: Dee the duckling talks (Web Speech TTS) and listens (SpeechRecognition).
+/* Gigi's Peekaboo Windows — GW.Voice: Gigi the giraffe calf talks (Web Speech TTS) and listens (SpeechRecognition).
  *
  *   GW.Voice.init({ lang, enabled })      call once at boot (safe without speechSynthesis)
  *   GW.Voice.unlock()                     call inside the FIRST touchend/click (iOS + Chrome need a gesture)
  *   GW.Voice.setLang('en'|'vi')  setEnabled(bool)  stop()  isSpeaking()  hasVoice(lang)  voiceName(lang?)
  *   GW.Voice.say(text, { interrupt, priority, rate, pitch, lang }) → Promise<{ spoken, reason }>
  *   GW.Voice.sayKey(key, params, opts) → Promise (promise.text = the display text, for the speech bubble)
- *   GW.Voice.onStart = fn(text)  GW.Voice.onEnd = fn(text)   (Dee's talk frames, music ducking; text = display text)
+ *   GW.Voice.onStart = fn(text)  GW.Voice.onEnd = fn(text)   (Gigi's talk frames, music ducking; text = display text)
  *   GW.Voice.onVoicesChanged(fn) → off()   fn() runs whenever the voice list changes (iOS fills it late)
- *   GW.Voice.log  — every line Dee said (also when muted): { t, lang, text }; mirrored to GW.debug.voiceLog
- *   GW.Voice.spoken(lang, text) → the text actually sent to TTS (I18N.speech + vi "Dee" → "Đi"); pure, unit-tested
+ *   GW.Voice.log  — every line Gigi said (also when muted): { t, lang, text }; mirrored to GW.debug.voiceLog
+ *   GW.Voice.spoken(lang, text) → the text actually sent to TTS (I18N.speech + vi "Gigi" → "Gi Gi"); pure, unit-tested
  *   GW.Voice.setVolume(0..1)    → utterance volume (follows the game's volume setting)
  *
  *   GW.Voice.canListen()  → bool (false when unsupported, iOS home-screen app, or permission denied this session)
@@ -40,12 +40,15 @@
     'superstar', 'trinoids', 'whisper', 'wobble', 'zarvox', 'fred', 'junior', 'ralph', 'kathy', 'grandma', 'grandpa',
     'eddy', 'flo', 'reed', 'rocko', 'sandy', 'shelley', 'deranged', 'hysterical', 'pipe organ'];
 
-  // Dee is a playful little duckling: pitch 1.3 (bright, young — the top of what iOS voices take before they get
-  // squeaky) and an unhurried rate 0.92 so a 3–5-year-old can follow; below ~0.85 Vietnamese tones get smeared.
-  var RATE = 0.92, PITCH = 1.3, MAXQ = 2, STALE_MS = 5000;
-  // The helper is written "Dee" in both languages. A Vietnamese voice reads "Dee" as "đê"/"đi-i"; the name is
-  // pronounced "Đi", so the SPOKEN text is changed (the bubble and the log keep "Dee").
-  var NAME_SPOKEN = { vi: [/\bDee\b/g, 'Đi'] };
+  // Gigi is a cheerful, slightly breathy giraffe calf: pitch 1.25 (young and warm, a touch lower than a duckling —
+  // above ~1.3 iOS voices get squeaky) and an unhurried rate 0.9 so a 3–5-year-old can follow; below ~0.85
+  // Vietnamese tones get smeared.
+  var RATE = 0.9, PITCH = 1.25, MAXQ = 2, STALE_MS = 5000;
+  // The helper is written "Gigi" in both languages. A Vietnamese voice reads "Gigi" as one odd syllable ("ghi-ghi"
+  // or letter by letter); the name is pronounced "Gi Gi" (two syllables, Vietnamese "gi" = /zi/ in the north,
+  // /ji/ in the south — both sound like the English name). Only the SPOKEN text is changed (bubble and log keep "Gigi").
+  // \b is ASCII-only in JS regex, which is fine here: "Gigi" is plain ASCII; "Gigi's" also matches.
+  var NAME_SPOKEN = { vi: [/\bGigi\b/g, 'Gi Gi'] };
 
   var V = {
     log: [], onStart: null, onEnd: null, onListen: null,
@@ -485,7 +488,7 @@
         resolve({ id: null, transcript: '', reason: denied ? 'not-allowed' : 'unsupported' }); return;
       }
       if (listenFinish) listenFinish({ id: null, transcript: '', reason: 'aborted' });
-      V.stop();                                   // Dee must not talk into the mic
+      V.stop();                                   // Gigi must not talk into the mic
       var restoreSession = sessionFor('play-and-record');
       var lang = opts.lang === 'vi' || opts.lang === 'en' ? opts.lang : V._lang;
       var choices = prepChoices(opts.choices, lang);

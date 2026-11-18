@@ -25,7 +25,7 @@ function timeline(where, age) {
     for (const e of w.drainEvents()) {
       const at = (w.time - t0).toFixed(0) + ' s';
       if (e.type === 'idle') {
-        if (++idleSaid <= 4) { spoken++; log.push(`${at} idle #${e.n}: Dee says "Tap a card…" + the prompt${e.n >= 2 ? ' (a pair glows)' : ''}`); }
+        if (++idleSaid <= 4) { spoken++; log.push(`${at} idle #${e.n}: Gigi says "Tap a window…" + the prompt${e.n >= 2 ? ' (a pair glows)' : ''}`); }
         else { paused = w.time - t0; log.push(`${at} idle #${e.n}: pause() — music stops, pause menu`); }
       } else if (e.type === 'hint' && e.idle) { /* glow, not spoken */ }
       else if (e.type === 'talkAsk') {
