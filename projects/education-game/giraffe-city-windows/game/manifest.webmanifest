@@ -1,0 +1,16 @@
+{
+  "name": "Gigi's Peekaboo Windows · Hươu Gigi Mở Cửa Sổ",
+  "short_name": "Peekaboo Windows",
+  "description": "Open the windows with Gigi the giraffe calf and find matching pairs: colours, shapes, numbers, animals and their homes. English & Vietnamese.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#8CCBEF",
+  "theme_color": "#8CCBEF",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

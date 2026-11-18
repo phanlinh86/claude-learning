@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><clipPath id="coop_c1"><path d="M 94 82 L 124 112 L 116 116 L 86 86 Z" /></clipPath><clipPath id="coop_c2"><path d="M 26 114 L 26 58 L 40 34 L 64 22 L 88 34 L 102 58 L 102 114 Z" /></clipPath><clipPath id="coop_c3"><circle cx="64" cy="48" r="9" /></clipPath><clipPath id="coop_c4"><rect x="48" y="80" width="32" height="34" rx="2" /></clipPath><clipPath id="coop_c5"><path d="M 86 86 L 86 74 C 86 68 98 68 98 74 L 98 86 Z" /></clipPath><clipPath id="coop_c6"><rect x="18" y="112" width="92" height="6" rx="3" /></clipPath><g id="coop_sil"><path d="M 94 82 L 124 112 L 116 116 L 86 86 Z" /><path d="M 26 114 L 26 58 L 40 34 L 64 22 L 88 34 L 102 58 L 102 114 Z" /><path d="M 22 62 L 38 32 L 64 18 L 90 32 L 106 62" fill="none" stroke-width="23"/><circle cx="64" cy="48" r="9" /><rect x="48" y="80" width="32" height="34" rx="2" /><rect x="18" y="112" width="92" height="6" rx="3" /></g></defs>
+<g transform="translate(-5.43 -2.38) scale(0.9779)">
+<use href="#coop_sil" xlink:href="#coop_sil" transform="translate(0 3.07)" fill="#3A3020" stroke="#3A3020" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>
+<use href="#coop_sil" xlink:href="#coop_sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 94 82 L 124 112 L 116 116 L 86 86 Z" fill="#B88550"/>
+<g clip-path="url(#coop_c1)">
+<path d="M 100 92 L 95 97 M 106 98 L 101 103 M 112 104 L 107 109" stroke="#7A5228" stroke-width="2"/>
+</g>
+<path d="M 94 82 L 124 112 L 116 116 L 86 86 Z" fill="none" stroke="#7A5228" stroke-width="2.2" stroke-linejoin="round"/>
+<path d="M 26 114 L 26 58 L 40 34 L 64 22 L 88 34 L 102 58 L 102 114 Z" fill="#C26C50"/>
+<g clip-path="url(#coop_c2)"><g transform="translate(-3 -4)"><path d="M 26 114 L 26 58 L 40 34 L 64 22 L 88 34 L 102 58 L 102 114 Z" fill="#D98466"/></g>
+<path d="M 38 30 L 38 116" stroke="#86412C" stroke-width="1.6" opacity=".5"/><path d="M 50 30 L 50 116" stroke="#86412C" stroke-width="1.6" opacity=".5"/><path d="M 62 30 L 62 116" stroke="#86412C" stroke-width="1.6" opacity=".5"/><path d="M 74 30 L 74 116" stroke="#86412C" stroke-width="1.6" opacity=".5"/><path d="M 86 30 L 86 116" stroke="#86412C" stroke-width="1.6" opacity=".5"/><path d="M 98 30 L 98 116" stroke="#86412C" stroke-width="1.6" opacity=".5"/>
+<ellipse cx="38" cy="64" rx="5" ry="3" transform="rotate(-20 38 64)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M 26 114 L 26 58 L 40 34 L 64 22 L 88 34 L 102 58 L 102 114 Z" fill="none" stroke="#86412C" stroke-width="2.4" stroke-linejoin="round"/>
+<path d="M 22 62 L 38 32 L 64 18 L 90 32 L 106 62" fill="none" stroke="#8C6A5A" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 22 62 L 38 32 L 64 18 L 90 32 L 106 62" fill="none" stroke="#FBF7EE" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="64" cy="48" r="9" fill="#5E3E28"/>
+<g clip-path="url(#coop_c3)">
+<path d="M 55 52 C 58 46 62 50 64 46 C 66 50 70 46 73 52 L 73 58 L 55 58 Z" fill="#F2D27A"/>
+</g>
+<circle cx="64" cy="48" r="9" fill="none" stroke="#3E2618" stroke-width="2.2" stroke-linejoin="round"/>
+<path d="M 55 48 L 73 48 M 64 39 L 64 57" fill="none" stroke="#FBF7EE" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="64" cy="48" r="9" fill="none" stroke="#FBF7EE" stroke-width="3" stroke-linejoin="round"/>
+<rect x="48" y="80" width="32" height="34" rx="2" fill="#E9C29A"/>
+<g clip-path="url(#coop_c4)">
+<path d="M 48 80 L 80 114 M 80 80 L 48 114" stroke="#FBF7EE" stroke-width="4"/>
+</g>
+<rect x="48" y="80" width="32" height="34" rx="2" fill="none" stroke="#86412C" stroke-width="2.2" stroke-linejoin="round"/>
+<rect x="48" y="80" width="32" height="34" rx="2" fill="none" stroke="#FBF7EE" stroke-width="3.4" stroke-linejoin="round"/>
+<path d="M 86 86 L 86 74 C 86 68 98 68 98 74 L 98 86 Z" fill="#5E3E28"/>
+<g clip-path="url(#coop_c5)">
+</g>
+<path d="M 86 86 L 86 74 C 86 68 98 68 98 74 L 98 86 Z" fill="none" stroke="#3E2618" stroke-width="2" stroke-linejoin="round"/>
+<rect x="18" y="112" width="92" height="6" rx="3" fill="#9DCB7E"/>
+<g clip-path="url(#coop_c6)">
+</g>
+<rect x="18" y="112" width="92" height="6" rx="3" fill="none" stroke="#5A8C46" stroke-width="2" stroke-linejoin="round"/>
+</g>
+</svg>

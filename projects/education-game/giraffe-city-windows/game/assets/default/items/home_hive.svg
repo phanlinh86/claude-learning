@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><clipPath id="hive_c1"><ellipse cx="64" cy="22" rx="9" ry="5" /></clipPath><clipPath id="hive_c2"><path d="M 16 106 C 14 66 30 26 64 20 C 98 26 114 66 112 106 Z" /></clipPath><clipPath id="hive_c3"><path d="M 52 106 C 52 92 76 92 76 106 Z" /></clipPath><clipPath id="hive_c4"><rect x="8" y="104" width="112" height="10" rx="4" /></clipPath><clipPath id="hive_c5"><rect x="18" y="112" width="8" height="8" rx="2" /></clipPath><clipPath id="hive_c6"><rect x="102" y="112" width="8" height="8" rx="2" /></clipPath><clipPath id="hive_c7"><path d="M 70 66 C 74 60 80 62 80 66 C 80 72 74 74 70 78 C 66 74 60 72 60 66 C 60 62 66 60 70 66 Z" /></clipPath><g id="hive_sil"><ellipse cx="64" cy="22" rx="9" ry="5" /><path d="M 16 106 C 14 66 30 26 64 20 C 98 26 114 66 112 106 Z" /><path d="M 52 106 C 52 92 76 92 76 106 Z" /><rect x="8" y="104" width="112" height="10" rx="4" /><rect x="18" y="112" width="8" height="8" rx="2" /><rect x="102" y="112" width="8" height="8" rx="2" /></g></defs>
+<g transform="translate(4.7 -0.97) scale(0.9266)">
+<use href="#hive_sil" xlink:href="#hive_sil" transform="translate(0 3.24)" fill="#3A3020" stroke="#3A3020" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>
+<use href="#hive_sil" xlink:href="#hive_sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
+<ellipse cx="64" cy="22" rx="9" ry="5" fill="#D9A140"/>
+<g clip-path="url(#hive_c1)"><g transform="translate(-1 -1)"><ellipse cx="64" cy="22" rx="9" ry="5" fill="#F0C064"/></g>
+</g>
+<ellipse cx="64" cy="22" rx="9" ry="5" fill="none" stroke="#93661A" stroke-width="2.4" stroke-linejoin="round"/>
+<path d="M 16 106 C 14 66 30 26 64 20 C 98 26 114 66 112 106 Z" fill="#D9A140"/>
+<g clip-path="url(#hive_c2)"><g transform="translate(-3 -4)"><path d="M 16 106 C 14 66 30 26 64 20 C 98 26 114 66 112 106 Z" fill="#F0C064"/></g>
+<path d="M 10 40 C 40 47 88 47 118 40" fill="none" stroke="#B8832C" stroke-width="2.6" stroke-linecap="round" opacity=".75"/><path d="M 10 54 C 40 61 88 61 118 54" fill="none" stroke="#B8832C" stroke-width="2.6" stroke-linecap="round" opacity=".75"/><path d="M 10 68 C 40 75 88 75 118 68" fill="none" stroke="#B8832C" stroke-width="2.6" stroke-linecap="round" opacity=".75"/><path d="M 10 82 C 40 89 88 89 118 82" fill="none" stroke="#B8832C" stroke-width="2.6" stroke-linecap="round" opacity=".75"/><path d="M 10 96 C 40 103 88 103 118 96" fill="none" stroke="#B8832C" stroke-width="2.6" stroke-linecap="round" opacity=".75"/><path d="M 10 35 C 40 42 88 42 118 35" fill="none" stroke="#FBE0A0" stroke-width="2.4" opacity=".6"/><path d="M 10 49 C 40 56 88 56 118 49" fill="none" stroke="#FBE0A0" stroke-width="2.4" opacity=".6"/><path d="M 10 63 C 40 70 88 70 118 63" fill="none" stroke="#FBE0A0" stroke-width="2.4" opacity=".6"/><path d="M 10 77 C 40 84 88 84 118 77" fill="none" stroke="#FBE0A0" stroke-width="2.4" opacity=".6"/><path d="M 10 91 C 40 98 88 98 118 91" fill="none" stroke="#FBE0A0" stroke-width="2.4" opacity=".6"/>
+<ellipse cx="40" cy="40" rx="8" ry="4" transform="rotate(-40 40 40)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M 16 106 C 14 66 30 26 64 20 C 98 26 114 66 112 106 Z" fill="none" stroke="#93661A" stroke-width="2.4" stroke-linejoin="round"/>
+<path d="M 52 106 C 52 92 76 92 76 106 Z" fill="#5E3E1E"/>
+<g clip-path="url(#hive_c3)">
+</g>
+<path d="M 52 106 C 52 92 76 92 76 106 Z" fill="none" stroke="#3E2610" stroke-width="2" stroke-linejoin="round"/>
+<rect x="8" y="104" width="112" height="10" rx="4" fill="#94623A"/>
+<g clip-path="url(#hive_c4)"><g transform="translate(0 -2)"><rect x="8" y="104" width="112" height="10" rx="4" fill="#A8744A"/></g>
+</g>
+<rect x="8" y="104" width="112" height="10" rx="4" fill="none" stroke="#6E4626" stroke-width="2.4" stroke-linejoin="round"/>
+<rect x="18" y="112" width="8" height="8" rx="2" fill="#94623A"/>
+<g clip-path="url(#hive_c5)">
+</g>
+<rect x="18" y="112" width="8" height="8" rx="2" fill="none" stroke="#6E4626" stroke-width="2" stroke-linejoin="round"/>
+<rect x="102" y="112" width="8" height="8" rx="2" fill="#94623A"/>
+<g clip-path="url(#hive_c6)">
+</g>
+<rect x="102" y="112" width="8" height="8" rx="2" fill="none" stroke="#6E4626" stroke-width="2" stroke-linejoin="round"/>
+<path d="M 70 66 C 74 60 80 62 80 66 C 80 72 74 74 70 78 C 66 74 60 72 60 66 C 60 62 66 60 70 66 Z" fill="#F6A94A"/>
+<g clip-path="url(#hive_c7)">
+<ellipse cx="65" cy="65" rx="2" ry="1.4" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M 70 66 C 74 60 80 62 80 66 C 80 72 74 74 70 78 C 66 74 60 72 60 66 C 60 62 66 60 70 66 Z" fill="none" stroke="#B8661C" stroke-width="1.6" stroke-linejoin="round"/>
+</g>
+</svg>
