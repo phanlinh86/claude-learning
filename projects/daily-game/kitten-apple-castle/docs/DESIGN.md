@@ -84,4 +84,18 @@ URL `?speed=N&bot=1&skill=S&autostart=1&autorestart=1&seed=N&mute=1&debug=1&leve
 SFX: drop "whoop", wooden crate thunk, perfect "clunk-ding" rising with combo + a soft lantern "bloom" chime, edge creak, miss "boing-tumble", topple soft clatter, apple "crunch-pling" (brighter when glow), pie fanfare (oven ding), heart lost, goal: Granny Boo's "woo-hoo" (soft sine glide, friendly), level-up, game over gentle tune, best score, click. Music: cosy castle tunes per time of day (dawn music box + bird chirps, noon bouncy pizzicato/marimba, sunset warm accordion-like pad, night soft celesta lullaby with an owl hoot), crossfade on level change. iOS loudness via `shared/daily-mobile/apply.py` (already applied in the scaffold's audio.js — keep it).
 
 ## 9. Mobile (iPhone / iPad)
-Same platform layer as the other daily games (already in the scaffold): viewport-fit, safe-area probe, rotate prompt, pointer events with capture, ghost-click guard, kid-proofing, visibilitychange pause, letterbox filled with scenery, home-screen icons from `tools/render_mobile_icons.js`.
+Same platform layer as the other daily games (already in the scaffold): viewport-fit, safe-area probe, both orientations supported (no rotate prompt; play survives a rotation), pointer events with capture, ghost-click guard, kid-proofing, visibilitychange pause, letterbox filled with scenery, home-screen icons from `tools/render_mobile_icons.js`.
+
+## 10. Changes after QA (2026-11-19)
+From `docs/reports/visual.md`, `functional.md` and `playtest.md`:
+- **Ziggy below the HUD in landscape** (visual P1): the landscape rocket line and `topLine` changed (MECHANICS §3 "Layout"). We did not use the report's `max(0.17·h + 34, 1.95·unit)` everywhere: on 16:9 it would close the apple band, so no apples would spawn. 4:3 iPads get 1.95 unit. 16:9 gets 1.72 unit, and topLine moves down to keep the drop height. A HUD panel Ziggy passes under now fades to 0.55, not 0.3.
+- **Light** (visual P2-1, P2-3): lantern halos are drawn with `'screen'` and alpha `0.15 + 0.55·gk²`, so there is no white flare on a light sky. `drawDarkness` cuts a soft extra hole (r 0.9 unit, a 0.35) at the tower top. This is drawing only: `world.lights()` and the bot's `lit` are unchanged.
+- **Text** (visual P2-2, P3-3, P3-4): the pie toast never sits on the HUD. "+N" pops stay below Ziggy, live 0.7 s, and are skipped near a big message less than 0.3 s old (the goal bonus pop is exempt).
+- **Title** (visual P2-4): no Ziggy or drop guide over the logo. The castle and tower stay as the backdrop.
+- **Goal show** (visual P3-1, P3-2): the flash scales with light (`0.45·(0.4 + 0.6·light)`). Granny Boo drifts sideways as fast as she rises (`ghostSide` 1.0).
+- **Keys** (functional P2-1): the game-over Enter/Space handler ignores keys while the Score Card (`#scScreen`) is open, and while any other focused button, link or input has focus. `startGame()` and `toTitle()` hide the card.
+- **How to Play on an iPhone in landscape** (functional P2-2): a compact `(pointer:coarse) and (max-height:430px)` layout, plus a sticky button row.
+- **Glow apples** (functional P3-2): glow apples count only in a darkening time of day (`World._dark()`), so a looped Dawn's sunrise doesn't give +10 apples.
+- **Go wrapper** (functional P3-3): explicit Content-Type values for .js, .css, .svg, .webmanifest, .json, .png, .webp, .jpg and .html.
+- **Balance** (playtest): easy.swing 0.52, easy.crate 1.45, hard.assist 0.35, sunset goal 13, night goal 15 (the proposal said 14).
+- **Not done:** visual P3-5, the darker leaf band on `crate_1`. `icon.svg` (and so the home-screen and exe icons) embeds `crate_1`, so the change would not stay in one file. P3-6 (the custom-background night tint) was optional and was left out.

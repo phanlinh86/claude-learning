@@ -79,7 +79,14 @@ test('rng: deterministic, in range, API', () => {
 test('layout: DESIGN §2 numbers (landscape, portrait, wide)', () => {
   const L = AC.World.computeLayout(960, 540);
   assert.strictEqual(L.unit, 100); assert.strictEqual(L.groundY, 400); assert.strictEqual(L.cx, 480);
-  near(L.saucerScreenY, 0.17 * 540 + 34, 1e-9); near(L.topLine, 324, 1e-9); near(L.crateW0, 110, 1e-9); near(L.crateH0, 110 * 2 / 3, 1e-9);
+  near(L.saucerScreenY, 172, 1e-9); near(L.topLine, 362, 1e-9);   // QA 2026-11-19: Ziggy below the HUD, apple band kept
+  // the apple band (topLine − saucer − 1.65 unit) stays open in landscape, and 4:3 iPads get the full 1.95-unit clearance
+  for (const [vw, vh] of [[960, 540], [1280, 720], [844, 390], [1366, 1024], [1024, 768], [1180, 820]]) {
+    const Q = AC.World.computeLayout(vw, vh);
+    assert.ok(Q.topLine - Q.saucerScreenY - 1.65 * Q.unit >= 0.25 * Q.unit - 1e-9, vw + 'x' + vh + ' apple band');
+    assert.ok(Q.saucerScreenY >= 1.72 * Q.unit - 1e-9 && Q.saucerScreenY >= 0.17 * vh + 34 - 1e-9, vw + 'x' + vh + ' below the HUD');
+  }
+  near(AC.World.computeLayout(1366, 1024).saucerScreenY, 1.95 * (1366 / 9.6), 1e-9); near(AC.World.computeLayout(1366, 1024).topLine, 0.6 * 1024, 1e-9); near(L.crateW0, 110, 1e-9); near(L.crateH0, 110 * 2 / 3, 1e-9);
   near(L.swingA, 288, 1e-9); assert.ok(!L.portrait);
   const P = AC.World.computeLayout(560, 1000);
   assert.ok(P.portrait); near(P.unit, 560 / 6, 1e-9); near(P.topLine, 560, 1e-9); near(P.swingA, 0.34 * 560, 1e-9);
@@ -276,9 +283,17 @@ test('scoring: +10 per crate, perfect +10×combo (cap 5), apple +5 / +10 glow, g
   const s1 = w.score; w._collectApples({ x: 0, y: 0, w: 0, h: 0 });
   w.appleList.push(w._newApple(0, 0, 0)); w.appleList[0].y = 0; w._collectApples({ x: 0, y: 0, w: 2, h: 2 });
   assert.strictEqual(w.score, s1 + C.applePoints);
+  // glow apples need the dark of a darkening time of day (sunset/night): a looped Dawn's sunrise from Night's
+  // darkness is not "dark" (functional QA 2026-11-19 P3-2)
   w.light = 0.3; w.appleList.push(w._newApple(0, 0, 0)); w.appleList[1].y = 0;
-  const s1b = w.score; w._collectApples({ x: 0, y: 0, w: 2, h: 2 });
-  assert.strictEqual(w.score, s1b + C.appleGlowPoints);
+  const s1a = w.score; w._collectApples({ x: 0, y: 0, w: 2, h: 2 });
+  assert.strictEqual(w.score, s1a + C.applePoints, 'dawn sunrise at light 0.3: a plain apple');
+  const n = mk('normal', 1, 960, 540, 3); n.planet.appleChance = 0; n.appleList.length = 0;
+  n.appleList.push(n._newApple(0, 0, 0)); n.appleList[0].y = 0; assert.ok(n.light < C.glowBelow && n.appleList[0].glow);
+  const s1b = n.score; n._collectApples({ x: 0, y: 0, w: 2, h: 2 });
+  assert.strictEqual(n.score, s1b + C.appleGlowPoints);
+  const dw = mk('normal', 1, 960, 540, 3); dw._startLevel(4, true, false);   // loop: Dawn 2 starts in Night's light
+  assert.ok(dw.light < C.glowBelow && !dw._dark(), 'looped dawn sunrise is not glow time');
   const g = mk('normal', 1, 960, 540, 6); g.planet.appleChance = 0; g.appleList.length = 0; g.setTower(new Array(g.goal - 1).fill(0));
   dropAt(g, 0); const s2 = g.score; const ev = run(g, 1.5);
   assert.strictEqual(of(ev, 'goal')[0].bonus, 100 * 3 * 2); assert.strictEqual(g.score, s2 + 20 + 600);
@@ -301,7 +316,7 @@ test('apples: collected by a falling crate (+5, event, total), at most 3 alive, 
       assert.ok(Math.abs(c.x - sim.layout.cx) <= sim.layout.swingA + 1e-6);
       for (const k of ['id', 'x', 'y', 'prevX', 'prevY', 'r', 't', 'frame', 'rot', 'state', 'glow']) assert.ok(k in c, k);
       frames.add(c.frame); maxRot = Math.max(maxRot, Math.abs(c.rot));
-      assert.strictEqual(c.glow, sim.light < C.glowBelow);
+      assert.strictEqual(c.glow, sim._dark());
     }
   }
   assert.ok(maxAlive >= 1 && maxAlive <= 3, 'alive ' + maxAlive);

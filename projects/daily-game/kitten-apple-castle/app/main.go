@@ -219,9 +219,25 @@ func main() {
 		return
 	}
 	mux := http.NewServeMux()
+	mimeTypes := map[string]string{
+		".js":          "text/javascript; charset=utf-8",
+		".css":         "text/css; charset=utf-8",
+		".svg":         "image/svg+xml",
+		".webmanifest": "application/manifest+json",
+		".json":        "application/json",
+		".png":         "image/png",
+		".webp":        "image/webp",
+		".jpg":         "image/jpeg",
+		".html":        "text/html; charset=utf-8",
+	}
 	fileServer := http.FileServer(http.FS(sub))
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "no-store")
+		// explicit MIME types: on Windows Go's mime package reads the registry, and some PCs map .js/.css to
+		// odd types (a stylesheet with the wrong type is blocked). Functional QA P3-3.
+		if ct, ok := mimeTypes[strings.ToLower(filepath.Ext(r.URL.Path))]; ok {
+			w.Header().Set("Content-Type", ct)
+		}
 		fileServer.ServeHTTP(w, r)
 	}))
 	go http.Serve(ln, mux)

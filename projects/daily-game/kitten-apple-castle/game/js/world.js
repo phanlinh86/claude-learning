@@ -58,7 +58,7 @@
     // ---- apples & pies (REQUIREMENT "Score and lose") ----
     applePoints: 5,         // pts    an apple in daylight
     appleGlowPoints: 10,    // pts    a "glow apple" (collected while light < glowBelow): rewards stacking on into the dark
-    glowBelow: 0.5,         // light  below this ambient light apples glow (and score double)
+    glowBelow: 0.5,         // light  below this ambient light apples glow (and score double) — only in a darkening zone (_dark())
     pieEvery: 5,            // apples Granny Boo bakes a pie every 5 apples → +1 heart (up to maxHearts)
     apples: { max: 3, life: 3, r: 0.21, bandTop: 0.8, bandBot: 0.45, minGap: 0.65, bob: 0.06, bobW: 2.6, rock: 0.14, flutter: 2.2, pair: 0.25, onPath: 0.7, follow: 3 },
     //       max alive · life in drops · radius (unit; apple drawn 0.42 unit) · fall band: centre ≥ rocket + 0.8 unit (and
@@ -134,7 +134,8 @@
     ghostFrom: 1.1,         // unit   she starts this far above her hover point (floats DOWN in, like the requirement says)
     ghostBob: 0.07,         // unit   hover bob amplitude…
     ghostBobW: 3.2,         // rad/s  …period ≈2 s
-    ghostRiseAcc: 700,      // px/s²  (×u) in travel she floats up and away (and drifts outward 40 % of that)
+    ghostRiseAcc: 700,      // px/s²  (×u) in travel she floats up and away…
+    ghostSide: 1.0,         // ×      …and drifts outward as fast as she rises (0.4 let her float up through Ziggy; visual QA P3-2)
     travelTime: 1.2,        // s      crates fade, the camera glides down to the ground (C¹ smoothstep), then levelUp
     heartReward: 1,         // —      hearts back on every new time of day (up to max)
 
@@ -148,23 +149,28 @@
 
     // ---- per difficulty (Easy is tuned for a 6-year-old; values from the fox-moon-stack playtest) ----
     difficulty: {
-      easy:   { swing: 0.6,  crate: 1.35, perfectTol: 0.22,  hearts: 5, inherit: 0.5,  sway: 0.65, assist: 0.6 },
+      easy:   { swing: 0.52, crate: 1.45, perfectTol: 0.22,  hearts: 5, inherit: 0.5,  sway: 0.65, assist: 0.6 },
       normal: { swing: 1.0,  crate: 1.0,  perfectTol: 0.15,  hearts: 3, inherit: 1.0,  sway: 1.0,  assist: 0.5 },
-      hard:   { swing: 1.22, crate: 0.9,  perfectTol: 0.11,  hearts: 3, inherit: 1.15, sway: 1.25, assist: 0.2 }
+      hard:   { swing: 1.22, crate: 0.9,  perfectTol: 0.11,  hearts: 3, inherit: 1.15, sway: 1.25, assist: 0.35 }
     },
     //  swing = × zone swingW · crate = × crate size · perfectTol = |dx| ≤ tol·w is perfect · hearts at start/max
     //  inherit = × CONFIG.inherit · sway = × sway kicks · assist = share of an off-centre landing the glow
     //  pulls back toward the centre (the crate slides in over ≈0.12 s; Easy forgives lean, Hard is nearly raw physics)
+    //  Playtest 2026-11-19 (docs/reports/playtest.md): easy.swing 0.6 → 0.52 (a small kid's late tap costs v × delay:
+    //  4–5-year-old dawn clear 63 → 83 %, Easy adult dawn 41 → 47 s), easy.crate 1.35 → 1.45 (wider stay window for
+    //  noisy taps), hard.assist 0.2 → 0.35 (halves the surprise centre-of-mass topples, 6.3 → 2.8 per 100 drops)
 
     // ---- times of day (zone = level % 4) ----
     zones: [
       { key: 'dawn',   light: 0.85, g: 760,  swingW: 1.75, drag: 0,    appleChance: 0.55, goal: 10 },  // soft light, slow swing (5 s period on Easy), gentle falls
       { key: 'noon',   light: 1.0,  g: 980,  swingW: 1.95, drag: 0.1,  appleChance: 0.6,  goal: 12 },  // brightest; a breeze trims the sideways drift a little
-      { key: 'sunset', light: 0.55, g: 1120, swingW: 2.2,  drag: 0.15, appleChance: 0.6,  goal: 14 },  // getting dim: lanterns start to matter
-      { key: 'night',  light: 0.3,  g: 1220, swingW: 2.35, drag: 0.1,  appleChance: 0.65, goal: 16 }   // dark + fastest swing, but gentler than fox's comet (the dark is the challenge)
+      { key: 'sunset', light: 0.55, g: 1120, swingW: 2.2,  drag: 0.15, appleChance: 0.6,  goal: 13 },  // getting dim: lanterns start to matter
+      { key: 'night',  light: 0.3,  g: 1220, swingW: 2.35, drag: 0.1,  appleChance: 0.65, goal: 15 }   // dark + fastest swing, but gentler than fox's comet (the dark is the challenge)
     ]
     //  light 0..1 at the START of the zone (it eases toward the next zone's light, Night → nightEnd) · g px/s² (×u) ·
     //  swingW rad/s (phase speed of x = cx + swingA·sin φ) · drag 1/s on vx (0 = none) · apple chance per crate · goal crates
+    //  Playtest 2026-11-19: sunset goal 14 → 13 and night 16 → 15 (a 6-year-old on Easy took 93–110 s for them; the
+    //  playtest proposed night 14, we kept 15 to soften the Normal-adult trade-off: shorter levels bring the faster loop 2 sooner)
   };
 
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
@@ -190,11 +196,19 @@
     var portrait = h > w;
     var unit = portrait ? M.min(w / 6, h / 8) : M.min(w / 9.6, h / 5.4);
     var crateW0 = 1.1 * unit;
+    // Landscape: keep Ziggy's ears below the HUD panels (visual QA 2026-11-19 P1: at 0.17·h + 34 she flew under the
+    // HUD 69–87 % of the time). The apple band between the held crate and the tower top is topLine − saucer − 1.65 unit,
+    // so the rocket may only come down as far as the band allows:
+    //  - tall screens (iPad 4:3) have room: 1.95 unit (clear of both HUD panels), topLine stays 0.60·h;
+    //  - 16:9 has no room for that (the band would be −0.36 unit → no apples): 1.72 unit (clear of the centre
+    //    panel; the score panel only meets her at the swing ends) and topLine moves down to keep a 0.25 unit band,
+    //    so the drop height stays what it was (960×540: 198 → 190 px; saucer 126 → 172, topLine 324 → 362).
+    var saucerY = portrait ? 0.20 * h + 34 : M.max(0.17 * h + 34, M.min(1.95 * unit, M.max(1.72 * unit, 0.60 * h - 1.9 * unit)));
     return {
       width: w, height: h, portrait: portrait, unit: unit,
       groundY: h - 140 * unit / 100,
-      saucerScreenY: (portrait ? 0.20 : 0.17) * h + 34,
-      topLine: portrait ? 0.56 * h : 0.60 * h,
+      saucerScreenY: saucerY,
+      topLine: portrait ? 0.56 * h : M.max(0.60 * h, saucerY + 1.9 * unit),
       crateW0: crateW0, crateH0: crateW0 * 2 / 3,
       swingA: portrait ? 0.34 * w : M.min(0.30 * w, 3.0 * unit),
       cx: w / 2
@@ -323,7 +337,7 @@
     if (this.held) out.push({ x: this.held.x, y: this.held.y, r: LC.held.r * u, a: LC.held.a, kind: 'held' });
     if (this.falling) out.push({ x: this.falling.x, y: this.falling.y, r: LC.falling.r * u, a: LC.falling.a, kind: 'falling' });
     this._towerLights(out);
-    if (this.light < CONFIG.glowBelow) {
+    if (this._dark()) {
       for (i = 0; i < this.appleList.length; i++) {
         c = this.appleList[i];
         if (c.state === 'float') out.push({ x: c.x, y: c.y, r: LC.apple.r * u, a: LC.apple.a, kind: 'apple' });
@@ -451,7 +465,7 @@
   World.prototype._newApple = function (x, sy, ph) {
     var y = this._camTarget() + sy, K = CONFIG.apples;
     return { id: ++this._id, x: x, y: y, prevX: x, prevY: y, sy: sy, baseY: y, r: K.r * this.layout.unit, t: 0,
-      frame: 0, rot: 0, prevRot: 0, state: 'float', glow: this.light < CONFIG.glowBelow, life: 0, ph: ph, fade: 1 };
+      frame: 0, rot: 0, prevRot: 0, state: 'float', glow: this._dark(), life: 0, ph: ph, fade: 1 };
   };
   World.prototype._spawnApples = function () {
     var K = CONFIG.apples, L = this.layout, u = L.unit, alive = 0, i;
@@ -484,7 +498,7 @@
   };
 
   World.prototype._appleStep = function (h) {
-    var K = CONFIG.apples, u = this.layout.unit, dark = this.light < CONFIG.glowBelow;
+    var K = CONFIG.apples, u = this.layout.unit, dark = this._dark();
     for (var i = this.appleList.length - 1; i >= 0; i--) {
       var c = this.appleList[i];
       c.prevRot = c.rot;
@@ -519,7 +533,7 @@
     }
   };
   World.prototype._takeApple = function (c) {
-    var glow = this.light < CONFIG.glowBelow, pts = glow ? CONFIG.appleGlowPoints : CONFIG.applePoints;
+    var glow = this._dark(), pts = glow ? CONFIG.appleGlowPoints : CONFIG.applePoints;
     c.state = 'collected'; c.t = 0; c.glow = glow;
     this.apples++; this.stats.apples++; if (glow) this.stats.glowApples++;
     this.score += pts;
@@ -534,6 +548,11 @@
   };
 
   // ---------- light ----------
+  /** Glow apples: only while it is dark AND the light is not rising, i.e. not during the sunrise that eases a looped
+   *  Dawn up from Night's darkness (functional QA P3-2: its first apples used to count as +10 glow apples). */
+  World.prototype._dark = function () {
+    return this.light < CONFIG.glowBelow && this.planet.lightEnd <= this.planet.light;
+  };
   World.prototype._lightStep = function (h) {
     var P = this.planet, k = 1 - M.exp(-CONFIG.lightRate * h);
     this._progE += (this._prog - this._progE) * k;
@@ -982,7 +1001,7 @@
     var g = this.ghost;
     if (g) {
       g.t += h;
-      g.vy -= CONFIG.ghostRiseAcc * u * h; g.vx += g.side * 0.4 * CONFIG.ghostRiseAcc * u * h;
+      g.vy -= CONFIG.ghostRiseAcc * u * h; g.vx += g.side * CONFIG.ghostSide * CONFIG.ghostRiseAcc * u * h;
       g.x += g.vx * h; g.y += g.vy * h;
     }
     if (t >= CONFIG.travelTime) {

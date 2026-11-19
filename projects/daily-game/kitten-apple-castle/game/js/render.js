@@ -250,16 +250,18 @@
           case 'pie': {
             this.piePulse = 1;
             const s = w.saucer;
-            this.say(e.gained ? 'Apple pie! +1 ♥' : 'Apple pie! Yum!', s.x, s.y - L.unit * 1.0, '#ffd98a', 24, 'pie');
+            // never on top of the HUD: keep the toast below both HUD rows (visual QA P2-2)
+            const py = Math.max(s.y - L.unit * 1.0, w.cam.y + this.ins.top + (L.portrait ? 225 : 140));
+            this.say(e.gained ? 'Apple pie! +1 ♥' : 'Apple pie! Yum!', s.x, py, '#ffd98a', 24, 'pie');
             if (wx) wx.burst('heart', s.x, s.y, 10, { speed: 180 * u, life: 0.9, size: 16 * u, gravity: 80, layer: 'front' });
             break;
           }
           case 'combo': this.comboShow = 1.2; break;
           case 'goal': {
-            this.flash = 0.45; this.flashCol = '#fff2c4';
+            this.flash = 0.45 * (0.4 + 0.6 * this.light()); this.flashCol = '#fff2c4';   // softer in the dark (never washes night grey)
             this.texts = this.texts.filter(t => t.big ? t.key !== 'perfect' : t.t > 0.6);
             this.say('Tower done!', L.cx, w.layout.saucerScreenY + w.cam.y + L.unit * 1.4, '#ffe9a8', 30, 'goal');
-            this.pop('+' + e.bonus, e.x + L.unit * 0.9, e.y - L.unit * 0.3, '#ffd23f', 24);
+            this.pop('+' + e.bonus, e.x + L.unit * 0.9, e.y - L.unit * 0.3, '#ffd23f', 24, true);
             if (wx) wx.burst('star', e.x, e.y, 16, { speed: 260 * u, life: 1.0, size: 16 * u, gravity: 220, up: 0.5, layer: 'front', glow: true });
             break;
           }
@@ -279,10 +281,15 @@
     _quiet() { return AC.Game && AC.Game.mode === 'title'; }   // the title demo stays calm behind the menu
     ring(x, y, col, life, r, wdt) {
       if (this._quiet()) return; this.fx.push({ kind: 'ring', x, y, col, t: 0, life, r, w: wdt || 3 }); if (this.fx.length > 40) this.fx.shift(); }
-    pop(txt, x, y, col, size) {
+    pop(txt, x, y, col, size, force) {
       if (this._quiet()) return;
+      const w = this.world;
+      // never on Ziggy: a pop that follows a toppling crate up stays below her rocket (visual QA P3-3)
+      if (w && w.cam && w.layout) y = Math.max(y, w.cam.y + w.layout.saucerScreenY + w.layout.unit * 0.6);
+      // no pile-ups: a fresh big message nearby wins over a small "+N" (visual QA P3-4)
+      if (!force) for (const t of this.texts) if (t.big && t.t < 0.3 && Math.abs(t.x - x) < 80 && Math.abs(t.y - y) < 80) return;
       for (const t of this.texts) if (!t.big && t.t < 0.35 && Math.abs(t.x - x) < 60 && Math.abs(t.y - y) < size) y = t.y - size * 1.1;
-      this.texts.push({ txt, x, y, col, size, t: 0, life: 0.9, vy: -55 }); if (this.texts.length > 24) this.texts.shift(); }
+      this.texts.push({ txt, x, y, col, size, t: 0, life: 0.7, vy: -55 }); if (this.texts.length > 24) this.texts.shift(); }
     say(txt, x, y, col, size, key) {
       if (this._quiet()) return;
       if (key) this.texts = this.texts.filter(t => t.key !== key);
@@ -335,8 +342,8 @@
       this.drawFlag(g, w);
       this.drawGhost(g, w);
       this.drawApples(g, w);
-      this.drawGuide(g, w, mode);
-      this.drawSaucer(g, w, mode);
+      // the title keeps the castle + tower as a living backdrop, but no Ziggy/guide over the logo (visual QA P2-4)
+      if (mode !== 'title') { this.drawGuide(g, w, mode); this.drawSaucer(g, w, mode); }
       g.setTransform(px, 0, 0, px, sx * px, sy * px);
       this.drawParticles(g, 'front', camY, false);
       // the twist: darkness with light cut-outs, then everything that glows
@@ -400,6 +407,20 @@
         gr.addColorStop(1, 'rgba(0,0,0,0)');
         dg.fillStyle = gr;
         dg.fillRect(L.x - L.r, L.y - L.r, L.r * 2, L.r * 2);
+      }
+      // drawing only (not a world light, so bot `lit` and the rules stay the same): a soft extra hole at the tower top,
+      // so a child who never gets Perfect drops can still see the edge she aims at (visual QA P2-3)
+      if (w.tower && w.layout) {
+        const T = w.tower, r = 0.9 * w.layout.unit, a = 0.35, tx = T.topX + (T.sway || 0), ty = T.topY;
+        if (!(ty - r - camY > this.VH || ty + r - camY < 0)) {
+          const gr = dg.createRadialGradient(tx, ty, 0, tx, ty, r);
+          gr.addColorStop(0, 'rgba(0,0,0,' + a + ')');
+          gr.addColorStop(0.25, 'rgba(0,0,0,' + (a * 0.88).toFixed(3) + ')');
+          gr.addColorStop(0.5, 'rgba(0,0,0,' + (a * 0.56).toFixed(3) + ')');
+          gr.addColorStop(0.75, 'rgba(0,0,0,' + (a * 0.19).toFixed(3) + ')');
+          gr.addColorStop(1, 'rgba(0,0,0,0)');
+          dg.fillStyle = gr; dg.fillRect(tx - r, ty - r, r * 2, r * 2);
+        }
       }
       dg.globalCompositeOperation = 'source-over';
       g.setTransform(1, 0, 0, 1, 0, 0);
@@ -516,8 +537,9 @@
         const sc = b == null ? 1 : 1 + 2.70158 * Math.pow(k - 1, 3) + 1.70158 * Math.pow(k - 1, 2);   // easeOutBack: pops in with a little overshoot
         if (sc <= 0.02) continue;
         const pulse = 0.9 + 0.1 * Math.sin(this.time * 4 + c.id);
-        g.save(); g.globalCompositeOperation = 'lighter';
-        this._glowAt(g, '255,190,90', p.lx, p.ly, u * (0.45 + 0.35 * gk) * sc, (0.25 + 0.5 * gk) * pulse * al);
+        // 'screen' + a gk² alpha curve: warm on a light sky, no white flare (visual QA P2-1); still 0.7 at night
+        g.save(); g.globalCompositeOperation = 'screen';
+        this._glowAt(g, '255,190,90', p.lx, p.ly, u * (0.45 + 0.35 * gk) * sc, (0.15 + 0.55 * gk * gk) * pulse * al);
         g.restore();
         g.save(); g.globalAlpha = al; g.translate(p.x, p.y); g.rotate(rot); g.scale(sc, sc);
         if (im) g.drawImage(im, -LW / 2, 0, LW, LH);
@@ -746,7 +768,7 @@
       const s = w.saucer, a = w.alpha || 0, S = w.layout.unit * Z_K * (s.scale || 1), camY = this.camY();
       const sx = lerp(s.prevX, s.x, a), sy = lerp(s.prevY, s.y, a) - camY;
       const l = sx - S * 0.45, r = sx + S * 0.45, t = sy - S * Z_CY, b = sy + S * 0.3;
-      return (r > x && l < x + wd && b > y && t < y + ht) ? 0.3 : 1;
+      return (r > x && l < x + wd && b > y && t < y + ht) ? 0.55 : 1;   // 0.55: text stays readable (visual QA P1)
     }
     drawHud(g, w, mode) {
       const L = w.layout, K = Math.min(this._hudK, 1.25), I = this.ins, VW = this.VW;

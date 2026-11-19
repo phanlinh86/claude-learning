@@ -751,7 +751,7 @@ async function sLayout() {
       return hits.map(([n, i]) => { const sx = L.cx + [-1, 0, 1][i] * L.swingA, s = Object.assign({}, w.saucer, { x: sx, prevX: sx, prevY: w.saucer.y });
         return R._fadeFor({ phase: 'swing', saucer: s, layout: L, alpha: 0 }, ...P[n]); });
     }, hit) : [];
-    check(`layout ${tag}: HUD panels fade (≤ 0.35) whenever Ziggy flies under them`, fades.every(a => a <= 0.35), hit.length ? { hit, fades } : undefined);
+    check(`layout ${tag}: HUD panels fade (≤ 0.55, still readable: visual QA 2026-11-19) whenever Ziggy flies under them`, fades.every(a => a <= 0.55 + 1e-9), hit.length ? { hit, fades } : undefined);
     const hh = geo.panels.filter(([n, r]) => ov(r, geo.held)).map(([n]) => n);
     check(`layout ${tag}: HUD panels do not cover the held crate`, hh.length === 0, hh.length ? hh : undefined);
     check(`layout ${tag}: canvas backing store sharp for the DPR (within the pixel cap)`, geo.canvasPx >= Math.min(geo.vw * dpr, Math.sqrt((mobile ? 3.2e6 : 1920 * 1080) * geo.VW / geo.VH)) * 0.6, { px: +geo.px.toFixed(2), canvasPx: geo.canvasPx });

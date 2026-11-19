@@ -21,10 +21,10 @@ here is the **light** (the day-to-night twist), **lanterns**, **apples and pies*
   - Otherwise it misses the tower completely and falls.
 - **Centre of mass:** after every crate that stays, each support from the plinth upward is checked. If the centre of mass of everything above a support is past that support's edge, everything above it topples off the heavier side.
 - A miss or a topple costs **one heart** (one per drop at most). At 0 hearts the tumbles finish, then game over.
-- **Apples:** each new crate has a chance (per zone) to bring 1–2 floating apples (≤ 3 alive) in the gap between the hanging crate and the tower top; 70 % hang over the drop path, 30 % out on the swing. A falling crate's box collects every apple it touches: **+5**, or **+10 while `light < 0.5`** (a "glow apple").
+- **Apples:** each new crate has a chance (per zone) to bring 1–2 floating apples (≤ 3 alive) in the gap between the hanging crate and the tower top; 70 % hang over the drop path, 30 % out on the swing. A falling crate's box collects every apple it touches: **+5**, or **+10 while `light < 0.5` in a darkening time of day** (a "glow apple"; Sunset and Night only, so the sunrise that eases a looped Dawn up from Night's darkness never counts: `World._dark()`, QA 2026-11-19).
 - **Pies:** every 5 apples Granny Boo bakes a pie: **+1 heart** up to the maximum (event `pie`, `gained` false when hearts are full).
 - **Score:** a crate that stays +10. A perfect adds +10 × min(combo, 5). Apple +5 / +10. Goal bonus = 100 × (zone + 1) × (loop + 1).
-- **Goal** (`placed === goal`, 10/12/14/16 crates, +1 per loop) → phase `goal` (3.0 s), then `travel` (1.2 s), then `levelUp`:
+- **Goal** (`placed === goal`, 10/12/13/15 crates, +1 per loop) → phase `goal` (3.0 s), then `travel` (1.2 s), then `levelUp`:
 
 | time | what happens | event |
 |---|---|---|
@@ -83,6 +83,8 @@ How well the player can see the landing spot: `lit = 1 − (1 − light)·(1 −
 
 **Sway.** `sway'' = −ω²·sway − 2ζω·sway'`, ω = 3.4 rad/s, ζ = 0.34 (first overshoot 32 %, each swing < 45 % of the one before, tested). Each landing kicks `1.3·dx (×0.25 if perfect) + 0.06·vx`, × `min(1, crates/4)` × difficulty sway; clamped to ±0.32 unit. Offset at height y = `sway·((groundY − y)/towerH)^1.5`. `tower.swayA` (the spring's acceleration) drives the lanterns.
 
+**Layout (landscape, 2026-11-19).** `saucerScreenY = max(0.17·h + 34, min(1.95u, max(1.72u, 0.60·h − 1.9u)))` and `topLine = max(0.60·h, saucerScreenY + 1.9u)`: Ziggy stays below the HUD panels, and the apple band (`topLine − saucerScreenY − 1.65u`) never closes (≥ 0.25u). 4:3 iPads get the full 1.95u with topLine 0.60·h; 16:9 gets 1.72u (960×540: 172 / 362 px, was 126 / 324). Portrait is unchanged.
+
 **Camera.** Target `min(0, topY − crateH − topLine)`, a critically damped spring (ω = 5, no overshoot, tested monotonic) plus a guard that keeps the tower top at or below `topLine` in every frame (tested at 960×540, 560×1000, 720×1600). During `goal` it keeps following the tower (the show happens at the top). In `travel` it glides down with a C¹ smoothstep over 1.2 s while Granny Boo floats up, so she leaves the view quickly and the new level starts at the ground.
 
 **Apples.** Each floats in screen space where the camera is heading (`baseY` follows at 3/s as the tower grows) and bobs `0.06 unit·sin(φ + 2.6t)`. It **rocks like a fruit hanging on a stem**: `rot = 0.14·cos(φ + 2.6t)`, a quarter period ahead of the bob (tilt is largest as it passes the middle, upright at the top and bottom of the bob). `frame` (0|1) flips 2.2 times/s for the leaf flutter. `glow` follows `light < 0.5` while floating and is frozen at collection. Collection = the falling crate's box overlaps the apple's circle (r 0.21 unit).
@@ -126,38 +128,44 @@ How well the player can see the landing spot: `lit = 1 − (1 − light)·(1 −
 | dropBuffer | 0.25 s | one early tap is kept, older taps are ignored |
 | **goalTime / ghostIn / ghostArrive / ghostWaveOn / ghostWaveOff** | 3.0 / 0.35 / 1.45 / 1.7 / 2.8 s | the flag is seen first, then a 1.1 s swoop, then 1.1 s of waving |
 | **ghostDX / ghostDY / ghostFrom** | 1.3 / −0.45 / 1.1 unit | beside the top crate (½ crate ≤ 0.75 + ½ ghost 0.45 + a gap); she floats down into place |
-| **ghostBob / ghostBobW / ghostRiseAcc** | 0.07 unit / 3.2 rad/s / 700u px/s² | a soft ghostly hover, then an easy float away |
+| **ghostBob / ghostBobW / ghostRiseAcc / ghostSide** | 0.07 unit / 3.2 rad/s / 700u px/s² / 1.0 | a soft ghostly hover, then an easy float away, drifting sideways as fast as she rises (0.4 let her float up through Ziggy) |
 | travelTime / heartReward | 1.2 s / 1 | camera glide down; a heart back each level |
 | loopSwing / loopSwingCap / loopG / loopGoal / loopTol / loopTolMin | 0.12 / 1.6 / 0.06 / 1 / 0.06 / 0.8 | loops get gently faster (fox-moon-stack playtest values) |
 
-### Difficulty (`CONFIG.difficulty`, from the fox-moon-stack playtest)
+### Difficulty (`CONFIG.difficulty`, from the fox-moon-stack playtest; **bold** = changed by the 2026-11-19 playtest)
 | | swing × | crate × | perfectTol (×w) | hearts | inherit × | sway × | assist |
 |---|---|---|---|---|---|---|---|
-| easy | 0.6 | 1.35 | 0.22 | 5 | 0.5 | 0.65 | 0.6 |
+| easy | **0.52** | **1.45** | 0.22 | 5 | 0.5 | 0.65 | 0.6 |
 | normal | 1.0 | 1.0 | 0.15 | 3 | 1.0 | 1.0 | 0.5 |
-| hard | 1.22 | 0.9 | 0.11 | 3 | 1.15 | 1.25 | 0.2 |
+| hard | 1.22 | 0.9 | 0.11 | 3 | 1.15 | 1.25 | **0.35** |
+
+Why (docs/reports/playtest.md): a small kid's late tap costs v × delay, so Easy swings 13 % slower (4–5-year-old dawn clear 63 → 83 %, Easy adult dawn 41 → 47 s) with a wider crate (a wider stay window for noisy taps); Hard's assist 0.2 → 0.35 halves the surprise centre-of-mass topples (6.3 → 2.8 per 100 drops), and Hard stays hard.
 
 ### Times of day (`CONFIG.zones`)
 | zone | key | light (start → end) | g (px/s² ×u) | swingW (rad/s) | drag (per s) | apple chance | goal |
 |---|---|---|---|---|---|---|---|
 | 0 | dawn | 0.85 → 1.0 | 760 | 1.75 | 0 | 0.55 | 10 |
 | 1 | noon | 1.0 → 0.55 | 980 | 1.95 | 0.1 | 0.6 | 12 |
-| 2 | sunset | 0.55 → 0.3 | 1120 | 2.2 | 0.15 | 0.6 | 14 |
-| 3 | night | 0.3 → 0.24 | 1220 | 2.35 | 0.1 | 0.65 | 16 |
+| 2 | sunset | 0.55 → 0.3 | 1120 | 2.2 | 0.15 | 0.6 | **13** (was 14) |
+| 3 | night | 0.3 → 0.24 | 1220 | 2.35 | 0.1 | 0.65 | **15** (was 16) |
+
+Sunset/Night goals: a 6-year-old on Easy took 93–110 s for them. The playtest proposed night 14; we kept 15 to soften the Normal-adult trade-off (shorter levels bring the faster loop 2 sooner: survival p50 357 → 297 s with 14).
 
 Sunset and Night are a little gentler than fox-moon-stack's last planets (g 1250/1400, swing 2.3/2.5), because the dark is now part of the challenge.
 
 ### What that means at 960×540
 | diff | zone | swing period | v max px/s | crate w | perfect ± px | fall | worst drift px | goal |
 |---|---|---|---|---|---|---|---|---|
-| easy | dawn | 5.98 s | 302 | 149 | 32.7 | 0.53 s | 24 | 10 |
-| easy | noon | 5.37 s | 337 | 149 | 32.7 | 0.47 s | 23 | 12 |
-| easy | sunset | 4.76 s | 380 | 149 | 32.7 | 0.44 s | 24 | 14 |
-| easy | night | 4.46 s | 406 | 149 | 32.7 | 0.42 s | 25 | 16 |
+| easy | dawn | 6.90 s | 262 | 160 | 35.1 | ≈0.53 s | ≈21 | 10 |
+| easy | noon | 6.20 s | 292 | 160 | 35.1 | ≈0.47 s | ≈20 | 12 |
+| easy | sunset | 5.49 s | 329 | 160 | 35.1 | ≈0.44 s | ≈21 | 13 |
+| easy | night | 5.14 s | 352 | 160 | 35.1 | ≈0.42 s | ≈22 | 15 |
 | normal | dawn | 3.59 s | 504 | 110 | 16.5 | 0.53 s | 81 | 10 |
-| normal | night | 2.67 s | 677 | 110 | 16.5 | 0.42 s | 84 | 16 |
+| normal | night | 2.67 s | 677 | 110 | 16.5 | 0.42 s | 84 | 15 |
 | hard | dawn | 2.94 s | 615 | 99 | 10.9 | 0.53 s | 113 | 10 |
-| hard | night | 2.19 s | 826 | 99 | 10.9 | 0.42 s | 117 | 16 |
+| hard | night | 2.19 s | 826 | 99 | 10.9 | 0.42 s | 117 | 15 |
+
+(2026-11-19: Easy rows recomputed for swing 0.52 / crate 1.45; fall times and drift are scaled estimates, not re-measured. The landscape layout change keeps the drop height at 960×540 within 8 px of before.)
 
 On Easy the worst-case drift (≈25 px) is a sixth of a crate, and the perfect zone is ±33 px: a child who taps when the crate is "over the tower" lands it.
 

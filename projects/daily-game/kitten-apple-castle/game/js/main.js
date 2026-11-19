@@ -70,12 +70,15 @@
       this._setLevelVisuals(0, true);
       this.deadT = -1;
       AC.UI.setHud(false);
+      this._hideCard();
       AC.UI.show('scrTitle');
     },
+    _hideCard() { const c = document.getElementById('scScreen'); if (c) c.classList.add('hidden'); },   // the extras Score Card
 
     startGame() {
       AC.Audio.unlock();
       { const t = document.getElementById('toast'); if (t) t.classList.add('hidden'); }
+      this._hideCard();
       this.runDifficulty = this.difficulty();
       const lv = params.has('level') ? Math.max(0, num('level', 0) | 0) : 0;
       this.world = this.makeWorld(null, false, lv);
@@ -182,7 +185,14 @@
         if (this.mode === 'playing') {
           if (DROP_KEYS.includes(e.code)) { e.preventDefault(); if (!e.repeat) this.drop(); return; }
         }
-        if (this.mode === 'over' && (e.code === 'Enter' || e.code === 'Space')) { const f = document.activeElement; if (f && f.tagName === 'BUTTON' && f.id !== 'btnAgain') return; e.preventDefault(); if (!e.repeat && this.canRestart()) this.startGame(); return; }
+        if (this.mode === 'over' && (e.code === 'Enter' || e.code === 'Space')) {
+          // the Score Card (extras.js) sits over Game Over: its keys are its own (functional QA P2-1)
+          const card = document.getElementById('scScreen');
+          if (card && !card.classList.contains('hidden')) return;
+          const f = document.activeElement;
+          if (f && f.id !== 'btnAgain' && f.matches && f.matches('button, a, input, [role=button]')) return;
+          e.preventDefault(); if (!e.repeat && this.canRestart()) this.startGame(); return;
+        }
         if (this.mode === 'title' && ui === 'scrTitle' && e.code === 'Space') {
           const f = document.activeElement;
           if (f && f.tagName === 'BUTTON' && f.id !== 'btnPlay') return;

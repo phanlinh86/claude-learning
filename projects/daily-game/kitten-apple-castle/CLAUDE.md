@@ -4,9 +4,11 @@
 A family-friendly drop-and-stack physics tower at a cosy haunted-but-cute castle: Ziggy the rocket kitten drops apple crates from her hover-rocket, catches floating apples (5 apples = a pie = +1 heart), and fills each time of day's crate goal so Granny Boo the friendly ghost can fetch the apples. The twist: the day turns to night as the tower grows; Perfect drops hang lanterns that light the way. Requirement: `REQUIREMENT.md`. Made with `/build-game random`, scaffolded from `../fox-moon-stack`.
 
 ## Status
-v1.0 in progress (2026-11-19): art, world/weather/bot and the integrated game are done.
-- Tests: unit 28/28, functional 272/272, smoke and the shared mobile-layer test pass with zero console errors; the exe builds.
-- Not yet verified: nobody has listened to the music or played on a real iPhone/iPad (touch emulated in Chromium); the exe hasn't been run on Windows.
+v1.0 in progress (2026-11-19): art, world/weather/bot and the integrated game are done. The QA fixes from `docs/reports/` (visual, functional, playtest) are applied; the list is in DESIGN §10.
+- Applied: Ziggy stays below the HUD in landscape, through a new landscape `saucerScreenY`/`topLine` that keeps the apple band open (not the report's exact formula). Also: HUD fade 0.55, lantern glow with `screen` blending, an extra drawn light at the tower top, toast and pop placement, no Ziggy on the title, the softer goal flash, Granny Boo leaving sideways, the Score Card key fix, the compact How to Play on iPhone landscape, no glow apples in a looped Dawn, explicit MIME types in Go, and the playtest CONFIG (easy 0.52/1.45, hard assist 0.35, goals 10/12/13/15).
+- Not applied: the darker `crate_1` leaf band, because `icon.svg` embeds it. The custom-background night tint was optional.
+- Tests: unit 28/28, functional 451/451, smoke, and the shared mobile-layer test (EXTRAS PASSED) all pass with zero console errors. The exe builds.
+- Not yet verified: nobody has listened to the music or played on a real iPhone/iPad (touch was emulated in Chromium). The exe hasn't been run on Windows, so the MIME fix is untested there. The balance numbers come from model players, not real children.
 
 ## Stack
 Same as the other games in `projects/daily-game/`:
