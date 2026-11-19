@@ -1,0 +1,17 @@
+{
+  "note": "Ziggy's Apple Castle high-speed playtest proposal, 2026-11-19 (docs/reports/playtest.md). Apply to CONFIG in game/js/world.js; results/world.patched.js is world.js with exactly these edits.",
+  "changes": [
+    { "key": "difficulty.easy.swing",  "old": 0.6,  "new": 0.52, "why": "a 4-5-year-old's late tap costs v*delay; 13 % slower swing: kid4 dawn clear 63 -> 83 %, easy adult dawn 41 -> 47 s (into the 45-90 s band)" },
+    { "key": "difficulty.easy.crate",  "old": 1.35, "new": 1.45, "why": "wider crate = wider stay window for noisy/late taps; still 1.6 unit on a 2.4 unit plinth" },
+    { "key": "difficulty.hard.assist", "old": 0.2,  "new": 0.35, "why": "Hard heart losses were ~40 % surprise centre-of-mass topples (6.3 / 100 drops); halves topples, Hard stays 100 % game over for the adult model" },
+    { "key": "zones[2].goal (sunset)", "old": 14,   "new": 13,   "why": "kid6 on Easy took 93-110 s for sunset/night; normal adult stays >= 45 s" },
+    { "key": "zones[3].goal (night)",  "old": 16,   "new": 14,   "why": "same: night was the longest and darkest level (kid6 Easy 110 s -> ~95 s)" }
+  ],
+  "overrides": {
+    "difficulty": {
+      "easy": { "swing": 0.52, "crate": 1.45 },
+      "hard": { "assist": 0.35 }
+    },
+    "zones": { "2": { "goal": 13 }, "3": { "goal": 14 } }
+  }
+}
