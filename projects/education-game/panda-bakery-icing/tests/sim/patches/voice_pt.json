@@ -1,0 +1,27 @@
+[
+ {
+  "file": "main.js",
+  "old": "if (!finishSaid) { finishSaid = true; IB.UI.say(T('finish')); if (canInterrupt()) speak(T('finish')); }",
+  "new": "if (!finishSaid) { finishSaid = true; IB.UI.say(T('finish')); }"
+ },
+ {
+  "file": "main.js",
+  "old": "if (!progressSaid && Math.abs((e.total || 0) - 0.5) < 0.01 && curAge() <= 4)",
+  "new": "if (!progressSaid && Math.abs((e.total || 0) - 0.5) < 0.01 && curAge() <= 4 && world.path && world.path.len >= 450)"
+ },
+ {
+  "file": "main.js",
+  "old": "if (e.mode === 'trace' && !traceStartSaid && curAge() <= 4) {",
+  "new": "if (e.mode === 'trace' && !traceStartSaid && curAge() <= 4 && !/shining|sparkly|chấm sáng|lấp lánh/i.test(txt)) {"
+ },
+ {
+  "file": "main.js",
+  "old": "if (pendingSurprise === 'mouse' && !mouseSaid) { mouseSaid = true; speak(T('surprise.mouse')); }",
+  "new": ""
+ },
+ {
+  "file": "main.js",
+  "old": "case 'mouse': IB.Audio.play('peek'); break;",
+  "new": "case 'mouse': IB.Audio.play('peek'); if (!mouseSaid && canInterrupt()) { mouseSaid = true; speak(T('surprise.mouse')); } break;"
+ }
+]

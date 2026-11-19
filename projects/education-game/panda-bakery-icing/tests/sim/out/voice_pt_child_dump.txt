@@ -1,0 +1,1383 @@
+--- 3 en
+    0.1   2.2/2.2 Chapter 1. Colourful Icing
+    2.4   2.0/2.0 Spring blossoms outside!
+    4.4   2.7/2.7 Can you make a red straight line?
+    9.1   1.4/1.4 Yummy red icing!
+   10.5   3.4/3.4 Follow the dots to pipe the straight line!
+   13.9 X 0.6/2.8 Start at the sparkly dot and slide!
+   14.7   2.5/2.5 Look at your red straight line!
+   17.2   1.0/1.0 Sprinkles!
+   18.3   1.6/1.6 You are so clever!
+   19.9   2.7/2.7 Can you make a blue rainbow arch?
+   22.6 X 1.0/3.0 Who is peeking out of the flour sack?
+   23.8   1.2/1.2 Blue! Squish!
+   25.0   4.3/4.3 Let’s pipe the rainbow arch! Press on the shining dot!
+   29.7 X 0.4/1.2 Lovely icing!
+   30.1   2.5/2.5 A blue rainbow arch! Beautiful!
+   32.7   2.3/2.3 Sparkle, sparkle! Sprinkles!
+   35.1   1.6/1.6 You are so clever!
+   36.7   2.4/2.4 Can you make a purple zigzag?
+   39.2   1.4/1.4 Purple! Squish!
+   40.6   2.8/2.8 Follow the dots to pipe the zigzag!
+   45.8 X 0.6/1.1 Keep going!
+   46.5   2.3/2.3 Look at your purple zigzag!
+   48.7   3.2/3.2 Pipe a green wave! Find the green icing!
+   52.8 X 1.7/3.3 That one is purple! Let’s look for green!
+   54.5   1.3/1.3 Green! Squish!
+   55.9   2.8/2.8 Now pipe the wave! Follow the dots!
+   61.2 X 0.4/0.7 Yummy!
+   61.6   2.0/2.0 Look at your green wave!
+   63.7   1.0/1.0 Sprinkles!
+   65.2   1.1/1.1 You got it!
+   66.6   2.8/2.8 Can you make a yellow rainbow arch?
+   71.3 X 1.8/3.0 That’s blue icing. Let’s find yellow!
+   73.3   1.2/1.2 Yellow icing!
+   74.5   4.3/4.3 Let’s pipe the rainbow arch! Press on the shining dot!
+   79.5 X 0.5/1.3 Halfway there!
+   80.0   2.8/2.8 What a lovely yellow rainbow arch!
+   82.9   2.5/2.5 Shake, shake! Sprinkles on top!
+   85.4   0.7/0.7 Super!
+   86.2   2.5/2.5 Talk time! Which one is purple?
+   89.3   1.7/1.7 Yes! You are right!
+   92.8   2.0/2.0 Chapter 2. Shape Cookies
+   94.8   1.8/1.8 Sunny summer kitchen!
+   96.7   2.3/2.3 Which cookie is the square?
+   99.8 X 1.1/3.1 That’s the circle. Where is the square?
+  101.0   1.4/1.4 A square cookie!
+  102.5   2.8/2.8 Follow the dots to pipe the square!
+  105.4   2.8/2.8 Start at the sparkly dot and slide!
+  108.3   0.7/0.7 Yummy!
+  109.7   2.6/2.6 You piped all around the square!
+  112.3   2.5/2.5 Shake, shake! Sprinkles on top!
+  114.9   1.0/1.0 Great job!
+  115.9   2.8/2.8 Where is the star? Tap that cookie!
+  119.3   0.9/0.9 The star!
+  120.2   2.7/2.7 Follow the dots to pipe the star!
+  126.4   0.7/0.7 Yummy!
+  127.8   1.7/1.7 What a lovely star!
+  129.4   2.5/2.5 Shake, shake! Sprinkles on top!
+  132.0   2.3/2.3 Hooray! The cookie is done!
+  134.3   2.3/2.3 Which cookie is the square?
+  137.2   1.4/1.4 Yes, the square!
+  138.6   2.8/2.8 Follow the dots to pipe the square!
+  145.2   0.7/0.7 Yummy!
+  146.9   1.8/1.8 What a lovely square!
+  148.8   2.3/2.3 Sparkle, sparkle! Sprinkles!
+  151.2   1.6/1.6 You are so clever!
+  152.8   2.0/2.0 Find the circle cookie!
+  156.3 X 1.7/3.3 That’s the triangle. Where is the circle?
+  158.2   1.4/1.4 A circle cookie!
+  159.6   3.8/3.8 Let’s pipe the circle! Press on the shining dot!
+  165.0 X 1.1/1.3 Halfway there!
+  166.2   1.8/1.8 What a lovely circle!
+  168.0   2.5/2.5 Shake, shake! Sprinkles on top!
+  170.6   0.5/0.5 Yes!
+  171.2   2.5/2.5 Talk time! Where is the square?
+  176.9   1.1/1.1 Clever you!
+  180.3   2.0/2.0 Chapter 3. Big and Small
+  182.4   1.9/1.9 Autumn leaves outside!
+  184.3   1.7/1.7 Which cookie is big?
+  188.8   1.5/1.5 Yes, the big one!
+  190.4   3.0/3.0 Now pipe the circle! Follow the dots!
+  193.4   2.8/2.8 Press on the shining dot and slide!
+  196.3 X 0.5/1.3 Halfway there!
+  196.9   2.3/2.3 The big cookie looks yummy!
+  199.2   1.0/1.0 Sprinkles!
+  200.5   1.1/1.1 Super baker!
+  201.9   1.9/1.9 Find the small cookie!
+  206.7   1.5/1.5 The small cookie!
+  208.2   3.8/3.8 Let’s pipe the circle! Press on the shining dot!
+  213.4 X 0.9/1.1 Keep going!
+  214.3   3.1/3.1 All around the small cookie! Beautiful!
+  217.5   2.3/2.3 Sparkle, sparkle! Sprinkles!
+  219.9   1.7/1.7 What a yummy cookie!
+  221.7   1.9/1.9 Find the small cookie!
+  224.7   1.5/1.5 The small cookie!
+  226.2   3.0/3.0 Now pipe the circle! Follow the dots!
+  230.3 X 0.6/0.7 Yummy!
+  230.9   2.4/2.4 The small cookie looks yummy!
+  233.4   1.0/1.0 Sprinkles!
+  234.4   1.7/1.7 What a yummy cookie!
+  236.2   1.7/1.7 Tap the big cookie!
+  240.6   1.4/1.4 The big cookie!
+  242.0   3.8/3.8 Let’s pipe the circle! Press on the shining dot!
+  247.4 X 1.1/1.1 Keep going!
+  248.6   3.0/3.0 All around the big cookie! Beautiful!
+  251.6   1.0/1.0 Sprinkles!
+  252.6   1.1/1.1 Super baker!
+  253.8   2.5/2.5 Talk time! Which cookie is big?
+  257.3   1.4/1.4 Correct! Hooray!
+  260.6   2.1/2.1 Chapter 4. Animal Cookies
+  262.8   2.2/2.2 Snow outside, cosy inside!
+  265.0   2.8/2.8 Find the duck cookie! Quack quack!
+  268.6   2.3/2.3 Yes, the duck! Quack quack!
+  270.8   2.0/2.0 Pipe a road to the pond!
+  272.9 X 2.1/2.8 Press on the shining dot and slide!
+  275.1   2.5/2.5 The road to the pond is ready!
+  277.6   2.5/2.5 Shake, shake! Sprinkles on top!
+  280.1   2.8/2.8 Quack quack! Splash! Into the pond!
+  283.0   1.7/1.7 What a yummy cookie!
+  284.8   2.8/2.8 Buzz buzz! Where is the bee cookie?
+  287.7   2.0/2.0 Yes, the bee! Buzz buzz!
+  289.8   2.3/2.3 Pipe a road to the beehive!
+  292.4   2.5/2.5 Road done! Off to the beehive!
+  294.9   2.5/2.5 Shake, shake! Sprinkles on top!
+  297.4   2.3/2.3 Buzz buzz! The bee is home!
+  299.7   2.3/2.3 Hooray! The cookie is done!
+  302.0   2.4/2.4 Moo! Where is the cow cookie?
+  304.5 X 0.4/4.4 Tweet tweet! Hmm, that’s the bird. Can you find the cow?
+  304.9   1.2/1.2 The cow! Moo!
+  306.2   2.0/2.0 Pipe a road to the barn!
+  310.9 X 0.7/1.2 Lovely icing!
+  311.6   2.5/2.5 What a yummy road to the barn!
+  314.2   1.0/1.0 Sprinkles!
+  315.2   1.8/1.8 Moo! The cow is home!
+  317.0   0.7/0.7 Super!
+  317.9   3.1/3.1 Which cookie is the bird? Tweet tweet!
+  323.1 X 1.7/3.6 Buzz buzz! That’s the bee. Where is the bird?
+  324.9   2.3/2.3 Yes, the bird! Tweet tweet!
+  327.1   2.8/2.8 Let’s pipe a road home to the nest!
+  330.2 X 0.4/1.2 Lovely icing!
+  330.6   2.5/2.5 The road to the nest is ready!
+  333.2   2.5/2.5 Shake, shake! Sprinkles on top!
+  335.7   2.5/2.5 Tweet tweet! The bird is home!
+  338.3   1.0/1.0 Well done!
+  339.3 X 2.8/2.9 Talk time! Where does the frog live?
+  342.1   1.4/1.4 Correct! Hooray!
+  345.6   1.4/1.4 So many cookies!
+  347.0   3.1/3.1 What a yummy bakery! 45 stars! Hooray!
+--- 3 vi
+    0.1   2.0/2.0 Chương 1. Kem nhiều màu
+    2.1   2.8/2.8 Mùa xuân, ngoài cửa sổ hoa nở rồi!
+    5.0   3.6/3.6 Bé vẽ được một đường thẳng màu tím không nào?
+    9.1   1.1/1.1 Kem màu tím!
+   10.2   3.6/3.6 Giờ bé vẽ đường thẳng nhé! Theo các chấm nào!
+   13.9 X 0.7/3.1 Bé ấn vào chấm sáng rồi miết theo nhé!
+   14.7   2.4/2.4 Đường thẳng màu tím xinh quá!
+   17.1   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+   19.7   1.6/1.6 Bé thông minh quá!
+   21.3   3.7/3.7 Bé ơi, mình vẽ một đường lượn sóng màu đỏ nhé!
+   25.0   1.1/1.1 Kem màu đỏ!
+   26.1   3.4/3.4 Bé vẽ theo chấm để có đường lượn sóng nhé!
+   30.5 X 0.6/1.1 Tiếp đi bé!
+   31.1   3.1/3.1 Nhìn đường lượn sóng màu đỏ của bé nè!
+   34.3   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+   36.8   3.3/3.3 Bé ơi, mình vẽ một cầu vồng màu vàng nhé!
+   40.2 X 0.5/3.7 Nhìn kìa! Một bạn chuột nhắt! Bé chạm vào nhé!
+   40.8   1.9/1.9 Kem màu vàng ngon quá!
+   42.7   3.4/3.4 Giờ bé vẽ cầu vồng nhé! Theo các chấm nào!
+   47.2 X 0.2/0.9 Ngon quá!
+   47.5   2.5/2.5 Một cầu vồng màu vàng! Đẹp quá!
+   50.0   4.8/4.8 Mình vẽ đường zíc zắc màu đỏ nào! Bé chọn túi kem màu đỏ nhé!
+   54.8   2.0/2.0 Màu đỏ nè! Bóp kem nào!
+   56.8 X 0.9/3.2 Bé vẽ theo chấm để có đường zíc zắc nhé!
+   57.9   2.9/2.9 Nhìn đường zíc zắc màu đỏ của bé nè!
+   60.8   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+   63.4   1.6/1.6 Bé thông minh quá!
+   65.0   3.9/3.9 Bé vẽ được một đường lượn sóng màu tím không nào?
+   68.9   2.0/2.0 Màu tím nè! Bóp kem nào!
+   71.0 X 1.0/4.7 Bé ơi, mình vẽ đường lượn sóng nào! Bé ấn vào chấm sáng nhé!
+   72.0   2.7/2.7 Đường lượn sóng màu tím xinh quá!
+   74.8   2.5/2.5 Lấp lánh, lấp lánh! Cốm màu nè!
+   77.4   2.0/2.0 Hoan hô, bánh xong rồi!
+   79.4 X 2.5/3.4 Giờ trò chuyện! Cái nào màu xanh dương nhỉ?
+   82.0   3.0/3.0 Là màu xanh dương đó! Bé cố gắng lắm!
+   85.3   2.3/2.3 Chương 2. Bánh quy hình khối
+   87.7   2.1/2.1 Mùa hè, căn bếp đầy nắng!
+   89.9   2.5/2.5 Bé tìm bánh quy hình tròn nhé!
+   94.3   1.0/1.0 Hình tròn!
+   95.4   2.9/2.9 Bé vẽ theo chấm để có hình tròn nhé!
+   98.3   3.1/3.1 Bé ấn vào chấm sáng rồi miết theo nhé!
+  101.7   1.1/1.1 Tiếp đi bé!
+  103.2   1.7/1.7 Hình tròn xinh quá!
+  104.8   2.5/2.5 Lấp lánh, lấp lánh! Cốm màu nè!
+  107.4   1.6/1.6 Bé thông minh quá!
+  109.1   2.8/2.8 Bé tìm bánh quy hình trái tim nhé!
+  113.0   2.2/2.2 Bánh quy hình trái tim nè!
+  115.2   3.7/3.7 Giờ bé vẽ hình trái tim nhé! Theo các chấm nào!
+  119.4   1.1/1.1 Kem đẹp quá!
+  121.0   2.0/2.0 Hình trái tim xinh quá!
+  122.9   2.5/2.5 Lấp lánh, lấp lánh! Cốm màu nè!
+  125.5   1.3/1.3 Bánh ngon quá!
+  126.9   3.0/3.0 Bé ơi, bánh quy nào là hình tròn nhỉ?
+  129.9 X 0.5/2.6 Chíp chíp! Cốm màu bay khắp nơi!
+  130.4   1.7/1.7 Đúng rồi, hình tròn!
+  132.2   3.4/3.4 Giờ bé vẽ hình tròn nhé! Theo các chấm nào!
+  136.7 X 1.1/1.1 Tiếp đi bé!
+  137.8   1.7/1.7 Hình tròn xinh quá!
+  139.5   1.1/1.1 Rắc cốm nào!
+  141.3   2.4/2.4 Bé là thợ làm bánh siêu giỏi!
+  143.7   2.8/2.8 Bé tìm bánh quy hình ngôi sao nhé!
+  146.8   2.2/2.2 Bánh quy hình ngôi sao nè!
+  149.0   3.2/3.2 Bé vẽ theo chấm để có hình ngôi sao nhé!
+  154.3   1.4/1.4 Được nửa rồi nè!
+  155.8   2.0/2.0 Hình ngôi sao xinh quá!
+  157.8   2.5/2.5 Lấp lánh, lấp lánh! Cốm màu nè!
+  160.4   2.4/2.4 Bé là thợ làm bánh siêu giỏi!
+  162.9 X 1.3/3.0 Giờ trò chuyện! Hình vuông ở đâu nhỉ?
+  164.3   1.9/1.9 Đúng rồi! Bé giỏi quá!
+  167.7   1.7/1.7 Chương 3. To và nhỏ
+  169.3   2.8/2.8 Mùa thu, lá vàng bay ngoài cửa sổ!
+  172.2   2.3/2.3 Bé ơi, tìm cái bánh to nhé!
+  174.9 X 1.9/3.7 Ồ, đây là cái bánh nhỏ. Bé tìm cái bánh to nào!
+  176.9   1.1/1.1 Cái bánh to!
+  178.1   2.9/2.9 Bé vẽ theo chấm để có hình tròn nhé!
+  181.1   3.5/3.5 Bắt đầu từ chấm lấp lánh, rồi miết theo nhé!
+  184.6 X 0.4/1.1 Kem đẹp quá!
+  185.2   2.5/2.5 Kem quanh cái bánh to! Đẹp quá!
+  187.7   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+  190.3   0.8/0.8 Hoan hô!
+  191.2   2.4/2.4 Bé chạm vào cái bánh nhỏ nhé!
+  194.2   1.4/1.4 Bánh này nhỏ nè!
+  195.6 X 4.1/4.3 Bé ơi, mình vẽ hình tròn nào! Bé ấn vào chấm sáng nhé!
+  199.8   2.3/2.3 Cái bánh nhỏ trông ngon quá!
+  202.2   2.5/2.5 Lấp lánh, lấp lánh! Cốm màu nè!
+  204.8   2.4/2.4 Bé là thợ làm bánh siêu giỏi!
+  207.2   2.3/2.3 Bé ơi, tìm cái bánh to nhé!
+  209.5 X 0.4/2.5 Phụt! Bột bay khắp nơi! Hi hi!
+  210.1   1.9/1.9 Đúng rồi, cái bánh to!
+  212.0   2.9/2.9 Bé vẽ theo chấm để có hình tròn nhé!
+  216.1 X 1.4/1.4 Được nửa rồi nè!
+  217.6   2.5/2.5 Kem quanh cái bánh to! Đẹp quá!
+  220.1   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+  222.7   1.3/1.3 Bánh ngon quá!
+  224.0   3.1/3.1 Cái bánh nào nhỏ nhỉ? Bé chạm vào nào!
+  227.2   2.0/2.0 Đúng rồi, cái bánh nhỏ!
+  229.1   2.9/2.9 Bé vẽ theo chấm để có hình tròn nhé!
+  232.8 X 0.7/1.1 Tiếp đi bé!
+  233.6   2.3/2.3 Cái bánh nhỏ trông ngon quá!
+  235.9   2.5/2.5 Lấp lánh, lấp lánh! Cốm màu nè!
+  238.5   1.3/1.3 Bánh ngon quá!
+  239.8   3.0/3.0 Giờ trò chuyện! Cái bánh nào nhỏ nhỉ?
+  243.8   1.6/1.6 Bé thông minh quá!
+  247.2   2.2/2.2 Chương 4. Bánh quy con vật
+  249.4   3.4/3.4 Ngoài trời tuyết rơi, trong bếp ấm áp ghê!
+  252.8   3.7/3.7 Bánh nào là con bò nhỉ? Ụm bò! Bé chạm vào nhé!
+  256.5   2.8/2.8 Bé vẽ theo chấm tới cái chuồng nhé!
+  259.4 X 1.4/4.4 Bé đặt ngón tay lên chấm sáng rồi kéo theo các chấm nào!
+  260.9   2.8/2.8 Xong đường rồi! Về cái chuồng nào!
+  263.8   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+  266.3   2.0/2.0 Ụm bò! Về chuồng rồi nè!
+  268.4   1.6/1.6 Bé thông minh quá!
+  270.0   4.0/4.0 Ụt ịt! Bánh quy hình con heo ở đâu nhỉ? Bé tìm nào!
+  274.1   1.4/1.4 Con heo! Ụt ịt!
+  275.5 X 2.1/3.1 Bé ơi, vẽ con đường tới cái chuồng nhé!
+  277.6   2.5/2.5 Đường tới cái chuồng xong rồi!
+  280.2   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+  282.7   1.8/1.8 Ụt ịt! Cảm ơn bé nhé!
+  284.6   2.0/2.0 Hoan hô, bánh xong rồi!
+  286.6   3.5/3.5 Bé ơi, tìm bánh quy hình con ếch nhé! Ộp ộp!
+  290.1   2.1/2.1 Đúng rồi, con ếch! Ộp ộp!
+  292.3 X 1.7/2.5 Bé vẽ theo chấm tới cái ao nhé!
+  294.1   2.5/2.5 Xong đường rồi! Về cái ao nào!
+  296.6   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+  299.1   2.5/2.5 Ộp ộp! Tõm! Nhảy xuống ao rồi!
+  301.7   2.4/2.4 Bé là thợ làm bánh siêu giỏi!
+  304.1   3.5/3.5 Bé ơi, tìm bánh quy hình con heo nhé! Ụt ịt!
+  307.6   2.1/2.1 Đúng rồi, con heo! Ụt ịt!
+  309.8 X 2.0/3.1 Bé ơi, vẽ con đường tới cái chuồng nhé!
+  311.9   2.8/2.8 Xong đường rồi! Về cái chuồng nào!
+  314.7   2.5/2.5 Lấp lánh, lấp lánh! Cốm màu nè!
+  317.2   2.4/2.4 Bé là thợ làm bánh siêu giỏi!
+  319.7 X 2.7/3.1 Giờ trò chuyện! Con chó sống ở đâu nhỉ?
+  322.4   1.7/1.7 Đúng luôn! Siêu quá!
+  325.9   1.9/1.9 Bao nhiêu là bánh quy!
+  327.8   3.1/3.1 Bé làm bao nhiêu là bánh! 50 ngôi sao!
+--- 4 en
+    0.1   2.2/2.2 Chapter 1. Colourful Icing
+    2.4   2.0/2.0 Spring blossoms outside!
+    4.4   3.9/3.9 Pipe a green straight line! Find the green icing!
+    9.1   1.1/1.1 Green icing!
+   10.2   3.4/3.4 Follow the dots to pipe the straight line!
+   13.6 X 0.9/4.0 Put your finger on the shining dot and slide along!
+   14.7   2.8/2.8 What a lovely green straight line!
+   17.5   2.3/2.3 Sparkle, sparkle! Sprinkles!
+   19.8   1.1/1.1 Super baker!
+   21.0   2.8/2.8 Can you make a yellow rainbow arch?
+   23.9   3.0/3.0 That’s blue icing. Let’s find yellow!
+   26.9   1.2/1.2 Yellow icing!
+   28.2 X 2.8/4.3 Let’s pipe the rainbow arch! Press on the shining dot!
+   31.1   2.7/2.7 Look at your yellow rainbow arch!
+   33.8   2.3/2.3 Sparkle, sparkle! Sprinkles!
+   36.1   1.0/1.0 Wonderful!
+   37.2   3.4/3.4 Pipe a purple wave! Find the purple icing!
+   40.6   1.4/1.4 Purple! Squish!
+   42.1   2.7/2.7 Follow the dots to pipe the wave!
+   47.1 X 0.3/1.1 Keep going!
+   47.5   2.1/2.1 A purple wave! Beautiful!
+   49.6   3.1/3.1 Pipe a red zigzag! Find the red icing!
+   52.7   1.1/1.1 Red! Squish!
+   53.9   2.8/2.8 Follow the dots to pipe the zigzag!
+   57.4 X 0.4/1.3 Halfway there!
+   57.9   2.1/2.1 What a lovely red zigzag!
+   60.0   2.5/2.5 Shake, shake! Sprinkles on top!
+   62.6   1.6/1.6 You are so clever!
+   64.2   2.1/2.1 Can you make a blue loop?
+   66.8   1.5/1.5 Yummy blue icing!
+   68.3   2.8/2.8 Now pipe the loop! Follow the dots!
+   71.6 X 0.6/0.7 Yummy!
+   72.3   2.0/2.0 A blue loop! Beautiful!
+   74.2   1.0/1.0 Sprinkles!
+   75.8   1.6/1.6 You are so clever!
+   77.4   2.5/2.5 Talk time! Which one is green?
+   82.2   1.9/1.9 It is green! Good try!
+   85.5   2.0/2.0 Chapter 2. Shape Cookies
+   87.6   1.8/1.8 Sunny summer kitchen!
+   89.5   3.0/3.0 Where is the square? Tap that cookie!
+   94.5   1.4/1.4 A square cookie!
+   96.0   3.8/3.8 Let’s pipe the square! Press on the shining dot!
+   99.9   2.8/2.8 Start at the sparkly dot and slide!
+  102.8 X 1.2/1.2 Lovely icing!
+  104.0   2.2/2.2 A square! Beautiful icing!
+  106.3   2.3/2.3 Sparkle, sparkle! Sprinkles!
+  108.6   1.1/1.1 Super baker!
+  109.8   2.2/2.2 Which cookie is the heart?
+  113.8   1.0/1.0 The heart!
+  114.9   2.8/2.8 Follow the dots to pipe the heart!
+  120.3   1.2/1.2 Lovely icing!
+  121.8   2.5/2.5 You piped all around the heart!
+  124.4   1.0/1.0 Sprinkles!
+  125.5   1.6/1.6 You are so clever!
+  127.1   2.1/2.1 Which cookie is the star?
+  129.2 X 1.9/2.4 Look! A little mouse! Tap it!
+  131.3   1.3/1.3 A star cookie!
+  132.6   2.7/2.7 Follow the dots to pipe the star!
+  137.7   0.7/0.7 Yummy!
+  138.9   2.5/2.5 You piped all around the star!
+  141.5   2.3/2.3 Sparkle, sparkle! Sprinkles!
+  143.8   2.3/2.3 Hooray! The cookie is done!
+  146.1   2.3/2.3 Which cookie is the square?
+  148.4   1.1/1.1 The square!
+  149.5   3.0/3.0 Now pipe the square! Follow the dots!
+  155.6   1.1/1.1 Keep going!
+  157.3   1.8/1.8 What a lovely square!
+  159.1   1.0/1.0 Sprinkles!
+  160.7   1.1/1.1 Super baker!
+  161.9   2.5/2.5 Talk time! Where is the heart?
+  165.8   1.5/1.5 Wow, you know it!
+  169.2   2.1/2.1 Chapter 3. Counting Chips
+  171.3   1.9/1.9 Autumn leaves outside!
+  173.2   3.0/3.0 Now pipe number two! Follow the dots!
+  176.2 X 2.2/4.0 Put your finger on the shining dot and slide along!
+  178.6   1.8/1.8 You piped number two!
+  180.4   3.2/3.2 Now put 2 chocolate chips on the cookie!
+  183.8   0.5/0.5 One!
+  185.8   0.5/0.5 Two!
+  186.4   2.3/2.3 Yummy! Two chocolate chips!
+  189.2   1.1/1.1 Super baker!
+  190.6   2.8/2.8 Where is number 3? Tap that cookie!
+  195.8   1.7/1.7 Number three! Super!
+  197.5   3.0/3.0 Follow the dots to pipe number three!
+  201.6 X 0.9/1.3 Halfway there!
+  202.6   1.7/1.7 Three! Lovely icing!
+  204.3   4.0/4.0 Let’s count! Tap 3 chocolate chips onto the cookie!
+  208.4   0.5/0.5 One!
+  210.0   0.5/0.5 Two!
+  211.3   0.7/0.7 Three!
+  212.0   2.4/2.4 Three chocolate chips! Yummy!
+  214.7   1.6/1.6 You are so clever!
+  216.3   3.9/3.9 Let’s pipe number four! Press on the shining dot!
+  221.3 X 0.6/1.6 Now the next line!
+  222.1   1.9/1.9 You piped number four!
+  224.0   3.2/3.2 Tap the cookie 4 times! Chocolate chips!
+  227.2   0.5/0.5 One!
+  228.7   0.5/0.5 Two!
+  230.3   0.7/0.7 Three!
+  232.0   0.6/0.6 Four!
+  232.7   2.7/2.7 Four chocolate chips! Just right!
+  235.4   2.3/2.3 Hooray! The cookie is done!
+  237.7   4.0/4.0 Let’s pipe number three! Press on the shining dot!
+  241.8   1.6/1.6 A beautiful three!
+  243.5   3.2/3.2 Now put 3 chocolate chips on the cookie!
+  248.0   0.5/0.5 One!
+  250.0   0.5/0.5 Two!
+  252.2   0.7/0.7 Three!
+  252.9   2.4/2.4 Yummy! Three chocolate chips!
+  255.5   1.1/1.1 Super baker!
+  256.7   3.7/3.7 Talk time! How many chocolate chips are there?
+  262.9   1.7/1.7 Yes! You are right!
+  266.4   2.1/2.1 Chapter 4. Animal Cookies
+  268.5   2.2/2.2 Snow outside, cosy inside!
+  270.7   2.9/2.9 Which cookie is the rabbit? Hop hop!
+  274.8   2.1/2.1 Yes, the rabbit! Hop hop!
+  276.9   3.0/3.0 Let’s pipe a road home to the burrow!
+  279.9 X 1.2/2.8 Start at the sparkly dot and slide!
+  281.3   2.4/2.4 Road done! Off to the burrow!
+  283.7   1.0/1.0 Sprinkles!
+  284.8   2.3/2.3 Hop hop! The rabbit is home!
+  287.2   2.3/2.3 Hooray! The cookie is done!
+  289.5   3.1/3.1 Tweet tweet! Where is the bird cookie?
+  292.6 X 0.2/2.2 Squeak! The mouse giggles!
+  292.9   1.9/1.9 Tweet tweet! The bird!
+  294.8   2.0/2.0 Pipe a road to the nest!
+  297.7 X 0.3/0.7 Yummy!
+  298.1   2.5/2.5 The road to the nest is ready!
+  300.6   1.0/1.0 Sprinkles!
+  301.6   2.0/2.0 Tweet tweet! Thank you!
+  303.6   1.6/1.6 You are so clever!
+  305.2   2.4/2.4 Find the frog cookie! Ribbit!
+  307.9   1.5/1.5 Ribbit! The frog!
+  309.5   2.8/2.8 Let’s pipe a road home to the pond!
+  314.2 X 0.3/0.7 Yummy!
+  314.6   2.5/2.5 What a yummy road to the pond!
+  317.1   1.0/1.0 Sprinkles!
+  318.2   2.5/2.5 Ribbit! Splash! Into the pond!
+  320.7   2.3/2.3 Hooray! The cookie is done!
+  323.0   2.9/2.9 Which cookie is the rabbit? Hop hop!
+  326.0   1.7/1.7 Hop hop! The rabbit!
+  327.7   2.5/2.5 Follow the dots to the burrow!
+  330.9 X 0.4/0.7 Yummy!
+  331.4   2.6/2.6 The road to the burrow is ready!
+  334.0   2.3/2.3 Sparkle, sparkle! Sprinkles!
+  336.4   2.1/2.1 Hop hop! Into the burrow!
+  338.5   2.3/2.3 Hooray! The cookie is done!
+  340.8 X 2.8/2.8 Talk time! Where does the dog live?
+  343.6   1.7/1.7 Yes! You are right!
+  347.1   2.3/2.3 Hooray! What a yummy bakery!
+  349.4 X -351.3/3.1 What a yummy bakery! 50 stars! Hooray!
+COUNT not heard 4vi @182.5 none
+--- 4 vi
+    0.1   2.0/2.0 Chương 1. Kem nhiều màu
+    2.1   2.8/2.8 Mùa xuân, ngoài cửa sổ hoa nở rồi!
+    5.0   3.7/3.7 Bé vẽ được một đường thẳng màu vàng không nào?
+    9.1   1.9/1.9 Kem màu vàng ngon quá!
+   11.0   3.1/3.1 Bé vẽ theo chấm để có đường thẳng nhé!
+   14.1 X 0.5/3.1 Bé ấn vào chấm sáng rồi miết theo nhé!
+   14.7   2.8/2.8 Một đường thẳng màu vàng! Đẹp quá!
+   17.5   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+   20.0   1.3/1.3 Bánh ngon quá!
+   21.4   4.4/4.4 Mình vẽ cầu vồng màu đỏ nào! Bé chọn túi kem màu đỏ nhé!
+   25.8   2.0/2.0 Màu đỏ nè! Bóp kem nào!
+   27.8   2.8/2.8 Bé vẽ theo chấm để có cầu vồng nhé!
+   31.1   2.5/2.5 Nhìn cầu vồng màu đỏ của bé nè!
+   33.6   2.5/2.5 Lấp lánh, lấp lánh! Cốm màu nè!
+   36.2   1.6/1.6 Bé thông minh quá!
+   37.8   3.8/3.8 Bé ơi, mình vẽ một đường lượn sóng màu vàng nhé!
+   41.7   1.9/1.9 Kem màu vàng ngon quá!
+   43.6 X 3.7/3.9 Giờ bé vẽ đường lượn sóng nhé! Theo các chấm nào!
+   47.5   3.1/3.1 Một đường lượn sóng màu vàng! Đẹp quá!
+   50.6   4.3/4.3 Bé vẽ được một đường zíc zắc màu xanh dương không nào?
+   54.8   1.7/1.7 Kem màu xanh dương!
+   56.5 X 1.2/4.5 Bé ơi, mình vẽ đường zíc zắc nào! Bé ấn vào chấm sáng nhé!
+   57.9   3.4/3.4 Một đường zíc zắc màu xanh dương! Đẹp quá!
+   61.3   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+   63.8   1.6/1.6 Bé thông minh quá!
+   65.5   3.2/3.2 Bé ơi, mình vẽ một cầu vồng màu cam nhé!
+   68.7   2.0/2.0 Màu cam nè! Bóp kem nào!
+   70.8 X 1.1/3.4 Giờ bé vẽ cầu vồng nhé! Theo các chấm nào!
+   72.0   2.2/2.2 Cầu vồng màu cam xinh quá!
+   74.2   1.1/1.1 Rắc cốm nào!
+   75.5   2.4/2.4 Bé là thợ làm bánh siêu giỏi!
+   77.9   2.9/2.9 Giờ trò chuyện! Cái nào màu cam nhỉ?
+   81.8   2.5/2.5 Là màu cam đó! Bé cố gắng lắm!
+   85.3   2.3/2.3 Chương 2. Bánh quy hình khối
+   87.6   2.1/2.1 Mùa hè, căn bếp đầy nắng!
+   89.8   2.5/2.5 Bé tìm bánh quy hình tròn nhé!
+   94.3   1.7/1.7 Đúng rồi, hình tròn!
+   96.0   3.4/3.4 Giờ bé vẽ hình tròn nhé! Theo các chấm nào!
+   99.5   3.1/3.1 Bé ấn vào chấm sáng rồi miết theo nhé!
+  102.6 X 0.5/1.4 Được nửa rồi nè!
+  103.2   2.0/2.0 Hình tròn! Kem đẹp quá!
+  105.1   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+  107.7   1.6/1.6 Bé thông minh quá!
+  109.4   3.1/3.1 Bé ơi, bánh quy nào là hình vuông nhỉ?
+  112.8   2.0/2.0 Bánh quy hình vuông nè!
+  114.8   3.5/3.5 Giờ bé vẽ hình vuông nhé! Theo các chấm nào!
+  119.6   1.1/1.1 Tiếp đi bé!
+  121.5   2.8/2.8 Bé vẽ kem quanh hình vuông rồi nè!
+  124.3   2.5/2.5 Lấp lánh, lấp lánh! Cốm màu nè!
+  126.8   2.5/2.5 Bé tìm bánh quy hình tròn nhé!
+  129.4 X 1.5/3.7 Nhìn kìa! Một bạn chuột nhắt! Bé chạm vào nhé!
+  130.9   1.0/1.0 Hình tròn!
+  132.0   2.9/2.9 Bé vẽ theo chấm để có hình tròn nhé!
+  137.2   0.9/0.9 Ngon quá!
+  138.3   2.0/2.0 Hình tròn! Kem đẹp quá!
+  140.3   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+  142.9   1.3/1.3 Bánh ngon quá!
+  144.3   2.8/2.8 Bé tìm bánh quy hình tam giác nhé!
+  147.3   2.2/2.2 Bánh quy hình tam giác nè!
+  149.5   4.5/4.5 Bé ơi, mình vẽ hình tam giác nào! Bé ấn vào chấm sáng nhé!
+  154.6   1.1/1.1 Kem đẹp quá!
+  155.8   2.3/2.3 Hình tam giác! Kem đẹp quá!
+  158.1   2.5/2.5 Lấp lánh, lấp lánh! Cốm màu nè!
+  160.7   2.4/2.4 Bé là thợ làm bánh siêu giỏi!
+  163.2 X 1.1/3.2 Giờ trò chuyện! Hình trái tim ở đâu nhỉ?
+  164.3   1.7/1.7 Đúng luôn! Siêu quá!
+  167.8   2.2/2.2 Chương 3. Đếm hạt sô cô la
+  170.0   2.8/2.8 Mùa thu, lá vàng bay ngoài cửa sổ!
+  172.8   4.0/4.0 Bé ơi, mình vẽ số hai nào! Bé ấn vào chấm sáng nhé!
+  177.2   1.8/1.8 Số hai! Kem xinh quá!
+  179.0   5.4/5.4 Bé ơi, mình đếm nhé! Bé chạm 2 lần để thả 2 hạt sô cô la lên bánh nào!
+  184.5   0.5/0.5 Hai!
+  185.1   2.3/2.3 Hai hạt sô cô la! Ngon quá!
+  187.8   1.6/1.6 Bé thông minh quá!
+  189.4   3.2/3.2 Số 3 ở đâu nhỉ? Bé chạm vào bánh đó nào!
+  194.3   0.7/0.7 Số ba!
+  195.1   2.6/2.6 Bé vẽ theo chấm để có số ba nhé!
+  200.2 X 1.0/1.4 Được nửa rồi nè!
+  201.3   1.3/1.3 Số ba đẹp quá!
+  202.6   5.4/5.4 Bé ơi, mình đếm nhé! Bé chạm 3 lần để thả 3 hạt sô cô la lên bánh nào!
+  208.1   0.5/0.5 Một!
+  208.6   0.5/0.5 Hai!
+  210.0   0.5/0.5 Ba!
+  210.5   2.2/2.2 Ba hạt sô cô la! Ngon quá!
+  213.3   1.3/1.3 Bánh ngon quá!
+  214.7   3.1/3.1 Giờ bé vẽ số ba nhé! Theo các chấm nào!
+  218.3 X 2.5/2.6 Chíp chíp! Cốm màu bay khắp nơi!
+  220.8   1.8/1.8 Bé vẽ được số ba rồi!
+  222.7   3.1/3.1 Giờ bé thả 3 hạt sô cô la lên bánh nhé!
+  227.4   0.5/0.5 Một!
+  229.4   0.5/0.5 Hai!
+  231.0   0.5/0.5 Ba!
+  231.5   2.2/2.2 Ba hạt sô cô la! Ngon quá!
+  234.4   1.6/1.6 Bé thông minh quá!
+  236.0   4.0/4.0 Bé ơi, mình vẽ số bốn nào! Bé ấn vào chấm sáng nhé!
+  241.6 X 0.6/2.2 Giờ tới nét tiếp theo nhé!
+  242.3   1.8/1.8 Số bốn! Kem xinh quá!
+  244.1   3.1/3.1 Giờ bé thả 4 hạt sô cô la lên bánh nhé!
+  248.2   0.5/0.5 Một!
+  250.2   0.5/0.5 Hai!
+  251.9   0.5/0.5 Ba!
+  253.8   0.5/0.5 Bốn!
+  254.4   2.3/2.3 Ngon quá! Bốn hạt sô cô la!
+  257.2   2.0/2.0 Hoan hô, bánh xong rồi!
+  259.2   3.2/3.2 Giờ trò chuyện! Có mấy hạt sô cô la nào?
+  263.4   1.4/1.4 Oa, bé biết rồi!
+  266.9   2.2/2.2 Chương 4. Bánh quy con vật
+  269.1   3.4/3.4 Ngoài trời tuyết rơi, trong bếp ấm áp ghê!
+  272.5   4.2/4.2 Bé ơi, tìm bánh quy hình con thỏ nhé! Nhảy tưng tưng!
+  276.7   2.5/2.5 Mình vẽ đường về cái hang nào!
+  279.2 X 0.9/3.1 Bé ấn vào chấm sáng rồi miết theo nhé!
+  280.1   2.9/2.9 Con đường kem tới cái hang ngon quá!
+  283.1   1.1/1.1 Rắc cốm nào!
+  284.3   2.8/2.8 Nhảy tưng tưng! Thỏ về tới nhà rồi!
+  287.2   1.6/1.6 Bé thông minh quá!
+  288.8   3.5/3.5 Bé ơi, tìm bánh quy hình con heo nhé! Ụt ịt!
+  292.3   1.6/1.6 Ụt ịt! Con heo nè!
+  294.0   2.6/2.6 Mình vẽ đường về cái chuồng nào!
+  296.8   2.8/2.8 Xong đường rồi! Về cái chuồng nào!
+  299.6   1.1/1.1 Rắc cốm nào!
+  300.7   2.0/2.0 Ụt ịt! Về chuồng rồi nè!
+  302.8   2.0/2.0 Hoan hô, bánh xong rồi!
+  304.8   4.2/4.2 Cạp cạp! Bánh quy hình con vịt ở đâu nhỉ? Bé tìm nào!
+  309.0   1.5/1.5 Con vịt! Cạp cạp!
+  310.6   2.8/2.8 Bé ơi, vẽ con đường tới cái ao nhé!
+  314.5 X 0.4/1.4 Được nửa rồi nè!
+  314.9   2.5/2.5 Xong đường rồi! Về cái ao nào!
+  317.5   1.1/1.1 Rắc cốm nào!
+  318.6   2.0/2.0 Cạp cạp! Cảm ơn bé nhé!
+  320.6   0.9/0.9 Siêu quá!
+  321.6   3.4/3.4 Bé ơi, tìm bánh quy hình con bò nhé! Ụm bò!
+  326.4   1.5/1.5 Ụm bò! Con bò nè!
+  328.0   2.8/2.8 Bé vẽ theo chấm tới cái chuồng nhé!
+  332.5 X 0.3/0.9 Ngon quá!
+  332.9   3.1/3.1 Con đường kem tới cái chuồng ngon quá!
+  336.0   1.1/1.1 Rắc cốm nào!
+  337.1   1.8/1.8 Ụm bò! Cảm ơn bé nhé!
+  339.0   1.3/1.3 Bánh ngon quá!
+  340.3   3.2/3.2 Giờ trò chuyện! Con chim sống ở đâu nhỉ?
+  344.3   1.7/1.7 Chính xác! Hoan hô!
+  347.6   1.9/1.9 Bao nhiêu là bánh quy!
+  349.6   3.1/3.1 Bé làm bao nhiêu là bánh! 50 ngôi sao!
+--- 5 en
+    0.1   2.0/2.0 Chapter 1. Shape Cookies
+    2.2   2.0/2.0 Spring blossoms outside!
+    4.3   3.0/3.0 Where is the square? Tap that cookie!
+    9.1   1.1/1.1 The square!
+   10.2   3.8/3.8 Let’s pipe the square! Press on the shining dot!
+   18.1   2.2/2.2 A square! Beautiful icing!
+   20.3   2.3/2.3 Sparkle, sparkle! Sprinkles!
+   22.6   1.1/1.1 Super baker!
+   23.8   2.8/2.8 Where is the star? Tap that cookie!
+   27.3   1.3/1.3 A star cookie!
+   28.6   2.7/2.7 Follow the dots to pipe the star!
+   35.6   2.0/2.0 A star! Beautiful icing!
+   37.7   1.0/1.0 Sprinkles!
+   39.1   1.6/1.6 You are so clever!
+   40.7   1.8/1.8 Find the oval cookie!
+   43.0 X 0.9/2.5 A little bird flies by! Tap it!
+   44.0 X 0.2/2.4 Hee hee! The bird says hello!
+   44.3   1.3/1.3 Yes, the oval!
+   45.6   2.8/2.8 Now pipe the oval! Follow the dots!
+   51.6   2.1/2.1 An oval! Beautiful icing!
+   53.8   2.3/2.3 Sparkle, sparkle! Sprinkles!
+   56.2   1.7/1.7 What a yummy cookie!
+   57.9   2.1/2.1 Find the triangle cookie!
+   60.1   1.6/1.6 A triangle cookie!
+   61.8   3.1/3.1 Now pipe the triangle! Follow the dots!
+   67.8   2.0/2.0 What a lovely triangle!
+   69.8   2.3/2.3 Sparkle, sparkle! Sprinkles!
+   72.2   1.6/1.6 You are so clever!
+   73.8 X 2.3/2.6 Talk time! Where is the diamond?
+   76.3   1.4/1.4 Correct! Hooray!
+   79.7   2.1/2.1 Chapter 2. Counting Chips
+   81.8   1.8/1.8 Sunny summer kitchen!
+   83.6   3.8/3.8 Let’s pipe number one! Press on the shining dot!
+   87.8   1.4/1.4 A beautiful one!
+   89.3   4.0/4.0 Let’s count! Tap 1 chocolate chip onto the cookie!
+   93.7   0.5/0.5 One!
+   94.3   2.2/2.2 Yummy! One chocolate chip!
+   97.1   1.7/1.7 What a yummy cookie!
+   98.9   2.5/2.5 Find the cookie with number 2!
+  103.3 X 1.9/3.1 That’s number one. Where is number two?
+  105.3 X 1.7/3.8 Hmm, that’s number one. Can you find number two?
+  107.2   1.1/1.1 Number two!
+  108.3   3.0/3.0 Now pipe number two! Follow the dots!
+  114.8   1.4/1.4 A beautiful two!
+  116.2   4.0/4.0 Let’s count! Tap 2 chocolate chips onto the cookie!
+  120.5   0.5/0.5 One!
+  122.5   0.5/0.5 Two!
+  123.1   2.6/2.6 Two chocolate chips! Just right!
+  125.8   0.5/0.5 Yes!
+  127.2   3.1/3.1 Now pipe number five! Follow the dots!
+  130.3   3.0/3.0 Who is peeking out of the flour sack?
+  133.6 X 0.7/1.8 Great! One more line!
+  134.3   1.7/1.7 Five! Lovely icing!
+  136.0   4.0/4.0 Let’s count! Tap 5 chocolate chips onto the cookie!
+  140.2   0.5/0.5 One!
+  142.2   0.5/0.5 Two!
+  143.9   0.7/0.7 Three!
+  145.9   0.6/0.6 Four!
+  147.2   0.6/0.6 Five!
+  147.9   2.3/2.3 Five chocolate chips! Yummy!
+  150.5   2.3/2.3 Hooray! The cookie is done!
+  152.8   3.0/3.0 Now pipe number ten! Follow the dots!
+  156.4 X 1.9/2.8 Next one! Start at the shining dot!
+  158.4   1.6/1.6 Ten! Lovely icing!
+  160.1   3.3/3.3 Now put 10 chocolate chips on the cookie!
+  164.8   0.5/0.5 One!
+  166.1   0.5/0.5 Two!
+  167.8   0.7/0.7 Three!
+  169.4   0.6/0.6 Four!
+  171.0   0.6/0.6 Five!
+  172.3   0.5/0.5 Six!
+  173.7   0.7/0.7 Seven!
+  175.3   0.7/0.7 Eight!
+  176.9   0.6/0.6 Nine!
+  178.1   0.5/0.5 Ten!
+  178.7   2.3/2.3 Ten chocolate chips! Yummy!
+  181.5   1.1/1.1 Super baker!
+  182.7   3.7/3.7 Talk time! How many chocolate chips are there?
+  186.4   1.1/1.1 Clever you!
+  189.8   1.9/1.9 Chapter 3. ABC Cookies
+  191.8   1.9/1.9 Autumn leaves outside!
+  193.7   2.5/2.5 Find the cookie with letter en!
+  198.8   1.0/1.0 Letter en!
+  199.9   2.9/2.9 Now pipe letter en! Follow the dots!
+  204.6 X 1.8/2.8 Next one! Start at the shining dot!
+  206.4   1.7/1.7 You piped letter en!
+  208.2   2.5/2.5 Shake, shake! Sprinkles on top!
+  210.8   1.6/1.6 You are so clever!
+  212.4   2.3/2.3 Which cookie has letter see?
+  214.8 X 1.7/2.4 Hee hee! The bird says hello!
+  216.7   1.1/1.1 Letter see!
+  217.8   2.8/2.8 Follow the dots to pipe letter see!
+  223.2   1.8/1.8 You piped letter see!
+  225.0   2.5/2.5 Shake, shake! Sprinkles on top!
+  227.6   1.1/1.1 Super baker!
+  228.8   2.3/2.3 Which cookie has letter zee?
+  232.4   1.4/1.4 Yes, letter zee!
+  233.9   2.8/2.8 Follow the dots to pipe letter zee!
+  239.1   1.8/1.8 You piped letter zee!
+  240.9   1.0/1.0 Sprinkles!
+  242.6   2.3/2.3 Hooray! The cookie is done!
+  244.9   3.0/3.0 Where is letter ess? Tap that cookie!
+  248.8   1.4/1.4 Yes, letter ess!
+  250.3   3.0/3.0 Now pipe letter ess! Follow the dots!
+  255.4   2.1/2.1 What a lovely letter ess!
+  257.6   2.3/2.3 Sparkle, sparkle! Sprinkles!
+  260.0   1.7/1.7 What a yummy cookie!
+  261.7   2.8/2.8 Talk time! Where is the letter ell?
+  266.4   1.4/1.4 Correct! Hooray!
+  269.8   2.1/2.1 Chapter 4. Animal Cookies
+  271.9   2.2/2.2 Snow outside, cosy inside!
+  274.1   2.8/2.8 Find the bird cookie! Tweet tweet!
+  278.1   1.9/1.9 The bird! Tweet tweet!
+  280.1   2.0/2.0 Pipe a road to the nest!
+  284.9   2.5/2.5 What a yummy road to the nest!
+  287.5   1.0/1.0 Sprinkles!
+  288.5   2.5/2.5 Tweet tweet! Home to the nest!
+  291.0   1.7/1.7 What a yummy cookie!
+  292.8   2.7/2.7 Which cookie is the frog? Ribbit!
+  296.1   1.9/1.9 Yes, the frog! Ribbit!
+  298.0   2.0/2.0 Pipe a road to the pond!
+  301.4   2.3/2.3 Road done! Off to the pond!
+  303.7   2.3/2.3 Sparkle, sparkle! Sprinkles!
+  306.1   1.6/1.6 Ribbit! Thank you!
+  307.7   1.6/1.6 You are so clever!
+  309.4   2.8/2.8 Which cookie is the bee? Buzz buzz!
+  312.2   2.0/2.0 Yes, the bee! Buzz buzz!
+  314.3   2.5/2.5 Follow the dots to the beehive!
+  317.4   2.7/2.7 The road to the beehive is ready!
+  320.2   2.3/2.3 Sparkle, sparkle! Sprinkles!
+  322.5   2.3/2.3 Buzz buzz! The bee is home!
+  324.8   1.7/1.7 What a yummy cookie!
+  326.6   2.6/2.6 Find the rabbit cookie! Hop hop!
+  329.3 X 0.8/4.3 Ribbit! Hmm, that’s the frog. Can you find the rabbit?
+  330.1   2.1/2.1 Yes, the rabbit! Hop hop!
+  332.3   3.0/3.0 Let’s pipe a road home to the burrow!
+  335.8   2.6/2.6 What a yummy road to the burrow!
+  338.4   2.5/2.5 Shake, shake! Sprinkles on top!
+  341.0   1.7/1.7 Hop hop! Thank you!
+  342.7   0.5/0.5 Yes!
+  343.3   2.8/2.8 Talk time! Where does the dog live?
+  347.6   1.1/1.1 Clever you!
+  350.9   2.3/2.3 Hooray! What a yummy bakery!
+  353.3   3.1/3.1 What a yummy bakery! 49 stars! Hooray!
+--- 5 vi
+    0.1   2.3/2.3 Chương 1. Bánh quy hình khối
+    2.5   2.8/2.8 Mùa xuân, ngoài cửa sổ hoa nở rồi!
+    5.3   2.8/2.8 Bé tìm bánh quy hình chữ nhật nhé!
+    9.1   2.2/2.2 Bánh quy hình chữ nhật nè!
+   11.3   4.5/4.5 Bé ơi, mình vẽ hình chữ nhật nào! Bé ấn vào chấm sáng nhé!
+   17.3   3.0/3.0 Bé vẽ kem quanh hình chữ nhật rồi nè!
+   20.3   1.1/1.1 Rắc cốm nào!
+   21.5   2.4/2.4 Bé là thợ làm bánh siêu giỏi!
+   23.9   3.2/3.2 Bé ơi, bánh quy nào là hình bầu dục nhỉ?
+   27.2   3.6/3.6 Đây là hình chữ nhật. Hình bầu dục ở đâu nhỉ?
+   30.8   1.2/1.2 Hình bầu dục!
+   32.0 X 1.8/3.7 Giờ bé vẽ hình bầu dục nhé! Theo các chấm nào!
+   34.0   1.9/1.9 Hình bầu dục xinh quá!
+   35.9   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+   38.5   1.0/1.0 Tuyệt vời!
+   39.5   3.1/3.1 Bé ơi, bánh quy nào là hình vuông nhỉ?
+   42.6   1.1/1.1 Hình vuông!
+   43.7   3.5/3.5 Giờ bé vẽ hình vuông nhé! Theo các chấm nào!
+   50.9   2.8/2.8 Bé vẽ kem quanh hình vuông rồi nè!
+   53.7   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+   56.2   1.6/1.6 Bé thông minh quá!
+   57.9   3.9/3.9 Hình trái tim ở đâu nhỉ? Bé chạm vào bánh đó nào!
+   61.8   2.2/2.2 Bánh quy hình trái tim nè!
+   64.0 X 3.1/3.7 Giờ bé vẽ hình trái tim nhé! Theo các chấm nào!
+   67.2   2.0/2.0 Hình trái tim xinh quá!
+   69.1   2.5/2.5 Lấp lánh, lấp lánh! Cốm màu nè!
+   71.7   2.4/2.4 Bé là thợ làm bánh siêu giỏi!
+   74.2 X 1.3/3.2 Giờ trò chuyện! Hình trái tim ở đâu nhỉ?
+   75.5   1.4/1.4 Oa, bé biết rồi!
+   79.0   2.2/2.2 Chương 2. Đếm hạt sô cô la
+   81.2   2.1/2.1 Mùa hè, căn bếp đầy nắng!
+   83.3   2.7/2.7 Bé vẽ theo chấm để có số hai nhé!
+   88.3   1.8/1.8 Số hai! Kem xinh quá!
+   90.1   3.2/3.2 Bé chạm vào bánh 2 lần nhé! Sô cô la nè!
+   94.1   0.5/0.5 Một!
+   96.2   0.5/0.5 Hai!
+   96.8   2.3/2.3 Ngon quá! Hai hạt sô cô la!
+   99.6   2.4/2.4 Bé là thợ làm bánh siêu giỏi!
+  102.0   2.7/2.7 Bánh nào có số 2 nhỉ? Bé tìm nhé!
+  104.8 X 1.5/2.4 Ai đang ló ra từ bao bột nhỉ?
+  106.3 X 2.0/2.6 Đây là số bốn. Số hai ở đâu nhỉ?
+  108.5 X 2.1/2.6 Đây là số bốn. Số hai ở đâu nhỉ?
+  110.7   1.5/1.5 Số hai! Giỏi quá!
+  112.2   3.2/3.2 Giờ bé vẽ số hai nhé! Theo các chấm nào!
+  116.8   1.9/1.9 Bé vẽ được số hai rồi!
+  118.8   3.1/3.1 Giờ bé thả 2 hạt sô cô la lên bánh nhé!
+  123.0   0.5/0.5 Một!
+  124.6   0.5/0.5 Hai!
+  125.2   2.5/2.5 Hai hạt sô cô la! Vừa đủ luôn!
+  128.0   0.8/0.8 Hay lắm!
+  129.4   2.8/2.8 Bé vẽ theo chấm để có số chín nhé!
+  135.9   1.9/1.9 Số chín! Kem xinh quá!
+  137.9   3.2/3.2 Bé chạm vào bánh 9 lần nhé! Sô cô la nè!
+  141.8   0.5/0.5 Một!
+  143.5   0.5/0.5 Hai!
+  145.4   0.5/0.5 Ba!
+  147.5   0.5/0.5 Bốn!
+  148.9   0.5/0.5 Năm!
+  151.1   0.5/0.5 Sáu!
+  152.9   0.5/0.5 Bảy!
+  154.9   0.5/0.5 Tám!
+  156.6   0.6/0.6 Chín!
+  157.3   2.3/2.3 Ngon quá! Chín hạt sô cô la!
+  160.0   1.6/1.6 Bé thông minh quá!
+  161.6 X 3.1/3.2 Giờ trò chuyện! Có mấy hạt sô cô la nào?
+  164.8   2.4/2.4 Là số bốn đó! Bé cố gắng lắm!
+  168.3   2.2/2.2 Chương 3. Bánh quy chữ cái
+  170.5   2.8/2.8 Mùa thu, lá vàng bay ngoài cửa sổ!
+  173.3   2.8/2.8 Bánh nào có chữ gờ nhỉ? Bé tìm nhé!
+  176.2 X 1.2/2.8 Đây là chữ e! Mình tìm chữ gờ nhé!
+  177.4   1.5/1.5 Đúng rồi, chữ gờ!
+  179.0   3.2/3.2 Giờ bé vẽ chữ gờ nhé! Theo các chấm nào!
+  185.7   1.4/1.4 Chữ gờ xinh quá!
+  187.1   1.1/1.1 Rắc cốm nào!
+  189.1   1.0/1.0 Tuyệt vời!
+  190.5   2.8/2.8 Bánh nào có chữ nờ nhỉ? Bé tìm nhé!
+  195.2   1.5/1.5 Chữ nờ! Giỏi quá!
+  196.7   2.7/2.7 Bé vẽ theo chấm để có chữ nờ nhé!
+  200.6 X 1.5/2.2 Giờ tới nét tiếp theo nhé!
+  202.2   1.7/1.7 Chữ nờ! Kem đẹp quá!
+  203.9   2.5/2.5 Lấp lánh, lấp lánh! Cốm màu nè!
+  206.5   1.3/1.3 Bánh ngon quá!
+  207.8   3.4/3.4 Chữ lờ ở đâu nhỉ? Bé chạm vào bánh đó nào!
+  211.3   0.8/0.8 Chữ lờ!
+  212.2   2.7/2.7 Bé vẽ theo chấm để có chữ lờ nhé!
+  218.3   1.7/1.7 Chữ lờ! Kem đẹp quá!
+  220.0   1.1/1.1 Rắc cốm nào!
+  221.7   2.4/2.4 Bé là thợ làm bánh siêu giỏi!
+  224.1   2.8/2.8 Bánh nào có chữ dờ nhỉ? Bé tìm nhé!
+  228.3   1.5/1.5 Đúng rồi, chữ dờ!
+  229.9   4.0/4.0 Bé ơi, mình vẽ chữ dờ nào! Bé ấn vào chấm sáng nhé!
+  234.1 X 1.6/2.5 Giỏi quá! Thêm một nét nữa nào!
+  235.8   1.7/1.7 Chữ dờ! Kem đẹp quá!
+  237.5   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+  240.1   2.4/2.4 Bé là thợ làm bánh siêu giỏi!
+  242.5 X 2.8/2.9 Giờ trò chuyện! Chữ i dài ở đâu nhỉ?
+  245.4   2.6/2.6 Là chữ i dài đó! Bé cố gắng lắm!
+  248.8   2.2/2.2 Chương 4. Bánh quy con vật
+  251.1   3.4/3.4 Ngoài trời tuyết rơi, trong bếp ấm áp ghê!
+  254.5   3.5/3.5 Bé ơi, tìm bánh quy hình con heo nhé! Ụt ịt!
+  258.0   1.4/1.4 Con heo! Ụt ịt!
+  259.4   2.8/2.8 Bé vẽ theo chấm tới cái chuồng nhé!
+  263.4   3.1/3.1 Con đường kem tới cái chuồng ngon quá!
+  266.6   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+  269.1   1.8/1.8 Ụt ịt! Cảm ơn bé nhé!
+  271.0   2.0/2.0 Hoan hô, bánh xong rồi!
+  273.0   3.7/3.7 Bé ơi, tìm bánh quy hình con chó nhé! Gâu gâu!
+  276.7   2.3/2.3 Đúng rồi, con chó! Gâu gâu!
+  279.0 X 1.1/2.6 Mình vẽ đường về chuồng chó nào!
+  280.1   2.8/2.8 Xong đường rồi! Về chuồng chó nào!
+  283.0   1.1/1.1 Rắc cốm nào!
+  284.1   2.3/2.3 Gâu gâu! Cún về tới nhà rồi!
+  286.5   2.0/2.0 Hoan hô, bánh xong rồi!
+  288.5   4.4/4.4 Chíp chíp! Bánh quy hình con chim ở đâu nhỉ? Bé tìm nào!
+  292.9   2.5/2.5 Đúng rồi, con chim! Chíp chíp!
+  295.4 X 0.6/2.4 Mình vẽ đường về tổ chim nào!
+  296.1   2.8/2.8 Con đường kem tới tổ chim ngon quá!
+  299.0   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+  301.6   2.5/2.5 Chíp chíp! Chim về tới nhà rồi!
+  304.2   2.4/2.4 Bé là thợ làm bánh siêu giỏi!
+  306.6   3.8/3.8 Bánh nào là con ếch nhỉ? Ộp ộp! Bé chạm vào nhé!
+  310.5   1.4/1.4 Con ếch! Ộp ộp!
+  311.9 X 1.6/2.8 Bé ơi, vẽ con đường tới cái ao nhé!
+  313.6   2.5/2.5 Xong đường rồi! Về cái ao nào!
+  316.1   2.5/2.5 Lấp lánh, lấp lánh! Cốm màu nè!
+  318.6   1.8/1.8 Ộp ộp! Cảm ơn bé nhé!
+  320.5   1.3/1.3 Bánh ngon quá!
+  321.8 X 2.6/3.1 Giờ trò chuyện! Con heo sống ở đâu nhỉ?
+  324.6   1.4/1.4 Oa, bé biết rồi!
+  327.9   2.3/2.3 Hoan hô! Tiệm bánh ngon quá!
+  330.3 X -333.3/3.1 Bé làm bao nhiêu là bánh! 43 ngôi sao!
+--- 6 en
+    0.1   2.6/2.6 Chapter 1. Big and Small Letters
+    2.8   2.0/2.0 Spring blossoms outside!
+    4.9   2.7/2.7 Find the cookie with small aitch!
+    9.1   1.1/1.1 Small aitch!
+   10.2   2.9/2.9 Follow the dots to pipe small aitch!
+   16.3   2.2/2.2 What a lovely small aitch!
+   18.5   1.0/1.0 Sprinkles!
+   19.8   2.3/2.3 Hooray! The cookie is done!
+   22.1   3.3/3.3 Where is small kay? It goes with big kay!
+   25.4 X 0.0/3.0 Who is peeking out of the flour sack?
+   25.6   1.0/1.0 Small kay!
+   26.6   3.7/3.7 Let’s pipe small kay! Press on the shining dot!
+   31.9 X 0.7/1.8 Great! One more line!
+   32.6 X 0.7/2.8 Next one! Start at the shining dot!
+   33.5   1.7/1.7 You piped small kay!
+   35.2   2.3/2.3 Sparkle, sparkle! Sprinkles!
+   37.6   1.6/1.6 You are so clever!
+   39.2   3.4/3.4 Big ay has a little friend. Find small ay!
+   43.3   0.9/0.9 Small ay!
+   44.2   2.8/2.8 Now pipe small ay! Follow the dots!
+   51.5   2.0/2.0 What a lovely small ay!
+   53.5   1.0/1.0 Sprinkles!
+   55.0   1.1/1.1 Super baker!
+   56.4   3.4/3.4 Big ar has a little friend. Find small ar!
+   61.5 X 1.7/2.8 That’s small em. Where is small ar?
+   63.3 X 1.8/2.9 That’s small jee. Where is small ar?
+   65.2   0.9/0.9 Small ar!
+   66.1   2.7/2.7 Follow the dots to pipe small ar!
+   72.3   1.7/1.7 You piped small ar!
+   73.9   1.0/1.0 Sprinkles!
+   75.8   0.5/0.5 Yes!
+   76.4   4.0/4.0 Talk time! Where is small oh? It goes with big oh!
+   81.0   1.1/1.1 Clever you!
+   84.3   2.0/2.0 Chapter 2. First Letters
+   86.4   1.8/1.8 Sunny summer kitchen!
+   88.3   2.5/2.5 Find the first letter of frog!
+   91.5   1.8/1.8 Yes! eff is for frog!
+   93.3   3.0/3.0 Now pipe letter eff! Follow the dots!
+   96.5 X 0.7/2.8 Next one! Start at the shining dot!
+   97.3 X 0.6/1.6 Now the next line!
+   98.0   2.0/2.0 eff for frog! Beautiful!
+  100.0   2.5/2.5 Shake, shake! Sprinkles on top!
+  102.6   1.7/1.7 What a yummy cookie!
+  104.4   3.6/3.6 Listen: Cat! Which letter does it start with?
+  108.0   1.7/1.7 Yes! see is for cat!
+  109.8   2.8/2.8 Follow the dots to pipe letter see!
+  115.8   2.3/2.3 You piped C! see is for cat!
+  118.1   2.5/2.5 Shake, shake! Sprinkles on top!
+  120.7   1.6/1.6 You are so clever!
+  122.3   3.7/3.7 Listen: Duck! Which letter does it start with?
+  126.0 X 0.5/3.5 Hmm, that’s letter bee. Say it slowly: Duck!
+  126.7   1.4/1.4 dee is for duck!
+  128.1   2.8/2.8 Follow the dots to pipe letter dee!
+  133.3 X 1.6/2.8 Next one! Start at the shining dot!
+  135.1   2.0/2.0 dee for duck! Beautiful!
+  137.1   3.4/3.4 Look! A little bird at the window! Tap it!
+  140.5   1.1/1.1 You got it!
+  141.6 X 3.6/3.7 Listen: Frog! Which letter does it start with?
+  145.3   1.8/1.8 Yes! eff is for frog!
+  147.2   3.0/3.0 Now pipe letter eff! Follow the dots!
+  150.3 X 0.7/2.8 Next one! Start at the shining dot!
+  151.2 X 0.7/1.6 Now the next line!
+  151.9   2.0/2.0 eff for frog! Beautiful!
+  154.0   2.3/2.3 Sparkle, sparkle! Sprinkles!
+  156.4   1.1/1.1 Super baker!
+  157.6   3.6/3.6 Talk time! Which letter does duck start with?
+  161.3   1.5/1.5 Wow, you know it!
+  164.7   1.7/1.7 Chapter 3. Adding Up
+  166.4   1.9/1.9 Autumn leaves outside!
+  168.3   4.0/4.0 Count it up: 2 plus 1! Which cookie is the answer?
+  173.6   2.0/2.0 Yes! 2 plus 1 is three!
+  175.5   4.0/4.0 Let’s pipe number three! Press on the shining dot!
+  180.2   1.6/1.6 A beautiful three!
+  181.8   2.3/2.3 Sparkle, sparkle! Sprinkles!
+  184.1   2.3/2.3 Hooray! The cookie is done!
+  186.4   3.3/3.3 What is 4 plus 3? Find the answer cookie!
+  189.9   2.0/2.0 Yes! 4 plus 3 is seven!
+  191.9   3.0/3.0 Follow the dots to pipe number seven!
+  197.2   2.0/2.0 You piped number seven!
+  199.1   1.0/1.0 Sprinkles!
+  200.6   1.6/1.6 You are so clever!
+  202.2 X 3.8/4.0 Count it up: 1 plus 1! Which cookie is the answer?
+  206.2 X 0.5/2.6 Poof! Flour everywhere! Hee hee!
+  206.8   1.8/1.8 Yes! 1 plus 1 is two!
+  208.6   3.8/3.8 Let’s pipe number two! Press on the shining dot!
+  213.2   1.4/1.4 A beautiful two!
+  214.6   2.3/2.3 Sparkle, sparkle! Sprinkles!
+  217.0   1.6/1.6 You are so clever!
+  218.6   2.9/2.9 Let’s add! 1 plus 2. Tap the answer!
+  222.7   1.6/1.6 1 plus 2 is three!
+  224.3   3.1/3.1 Now pipe number three! Follow the dots!
+  230.3   2.0/2.0 You piped number three!
+  232.2   2.5/2.5 Shake, shake! Sprinkles on top!
+  234.8   1.1/1.1 Super baker!
+  236.0   2.3/2.3 Talk time! What is 2 plus 4?
+  239.9   1.4/1.4 Correct! Hooray!
+  243.3   2.1/2.1 Chapter 4. Counting Chips
+  245.5   2.2/2.2 Snow outside, cosy inside!
+  247.7   3.0/3.0 Now pipe number one! Follow the dots!
+  252.8   1.4/1.4 A beautiful one!
+  254.2   4.0/4.0 Let’s count! Tap 1 chocolate chip onto the cookie!
+  259.2   0.5/0.5 One!
+  259.8   2.2/2.2 Yummy! One chocolate chip!
+  262.5   1.1/1.1 Super baker!
+  263.9   2.5/2.5 Find the cookie with number 2!
+  269.1   1.1/1.1 Number two!
+  270.3   3.8/3.8 Let’s pipe number two! Press on the shining dot!
+  275.8   1.6/1.6 Two! Lovely icing!
+  277.4   4.0/4.0 Let’s count! Tap 2 chocolate chips onto the cookie!
+  281.4   0.5/0.5 One!
+  282.0   0.5/0.5 Two!
+  282.6   2.3/2.3 Yummy! Two chocolate chips!
+  285.3   1.1/1.1 Super baker!
+  286.7   2.0/2.0 Which cookie has an 11?
+  290.4   1.8/1.8 Number eleven! Super!
+  292.2   3.1/3.1 Follow the dots to pipe number eleven!
+  297.1 X 0.9/2.8 Next one! Start at the shining dot!
+  298.1   2.0/2.0 You piped number eleven!
+  300.2   3.3/3.3 Now put 11 chocolate chips on the cookie!
+  303.5   0.5/0.5 One!
+  305.1   0.5/0.5 Two!
+  306.4   0.7/0.7 Three!
+  307.8   0.6/0.6 Four!
+  309.0   0.6/0.6 Five!
+  310.5   0.5/0.5 Six!
+  312.6   0.7/0.7 Seven!
+  314.6   0.7/0.7 Eight!
+  316.4   0.6/0.6 Nine!
+  318.3   0.5/0.5 Ten!
+  320.3   0.8/0.8 Eleven!
+  321.1   2.8/2.8 Eleven chocolate chips! Just right!
+  324.0   2.3/2.3 Hooray! The cookie is done!
+  326.3 X 2.4/3.7 Talk time! How many chocolate chips are there?
+  328.8   1.4/1.4 Correct! Hooray!
+  332.1   2.0/2.0 Look at all our cookies!
+  334.2   2.6/2.6 So many cookies baked! 45 stars!
+COUNT not heard 6vi @261.9 none
+COUNT not heard 6vi @322.2 none
+--- 6 vi
+    0.1   2.4/2.4 Chương 1. Chữ hoa, chữ thường
+    2.6   2.8/2.8 Mùa xuân, ngoài cửa sổ hoa nở rồi!
+    5.4   4.3/4.3 Chữ xờ thường ở đâu nhỉ? Bạn ấy đi cùng chữ xờ hoa đó!
+    9.7   1.3/1.3 Chữ xờ thường!
+   11.0   3.7/3.7 Giờ bé vẽ chữ xờ thường nhé! Theo các chấm nào!
+   15.2 X 1.5/2.5 Giỏi quá! Thêm một nét nữa nào!
+   16.8   2.0/2.0 Chữ xờ thường xinh quá!
+   18.7   2.5/2.5 Lấp lánh, lấp lánh! Cốm màu nè!
+   21.3   2.4/2.4 Bé là thợ làm bánh siêu giỏi!
+   23.8   4.3/4.3 Chữ nờ thường ở đâu nhỉ? Bạn ấy đi cùng chữ nờ hoa đó!
+   28.1   2.0/2.0 Đúng rồi, chữ nờ thường!
+   30.1 X 2.4/3.7 Giờ bé vẽ chữ nờ thường nhé! Theo các chấm nào!
+   32.6   2.3/2.3 Chữ nờ thường! Kem đẹp quá!
+   34.9   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+   37.5   2.4/2.4 Bé là thợ làm bánh siêu giỏi!
+   40.0   4.6/4.6 Bé ơi, chữ sờ hoa có một bạn nhỏ. Bé tìm chữ sờ thường nhé!
+   44.6   2.0/2.0 Chữ sờ thường! Giỏi quá!
+   46.7 X 3.1/3.2 Bé vẽ theo chấm để có chữ sờ thường nhé!
+   49.9   2.4/2.4 Bé vẽ được chữ sờ thường rồi!
+   52.3   1.1/1.1 Rắc cốm nào!
+   53.5   2.4/2.4 Bé là thợ làm bánh siêu giỏi!
+   55.9   2.7/2.7 Bé tìm bánh có chữ bờ thường nào!
+   59.8   2.0/2.0 Đúng rồi, chữ bờ thường!
+   61.8   3.2/3.2 Bé vẽ theo chấm để có chữ bờ thường nhé!
+   67.5   2.3/2.3 Chữ bờ thường! Kem đẹp quá!
+   69.7   2.5/2.5 Lấp lánh, lấp lánh! Cốm màu nè!
+   72.3   1.6/1.6 Bé thông minh quá!
+   73.9 X 1.5/4.9 Giờ trò chuyện! Chữ rờ thường ở đâu nhỉ? Bạn của chữ rờ hoa đó!
+   75.5   1.7/1.7 Đúng luôn! Siêu quá!
+   79.0   2.2/2.2 Chương 2. Chữ cái đầu tiên
+   81.2   2.1/2.1 Mùa hè, căn bếp đầy nắng!
+   83.3   2.8/2.8 Bé tìm chữ cái đầu tiên của bò nhé!
+   87.7 X 1.7/3.1 Ồ, đây là chữ sờ. Bé đọc chậm nhé: Bò!
+   89.5   1.8/1.8 Đúng rồi! Chữ bờ, bò!
+   91.3   4.0/4.0 Bé ơi, mình vẽ chữ bờ nào! Bé ấn vào chấm sáng nhé!
+   96.0 X 1.9/2.5 Giỏi quá! Thêm một nét nữa nào!
+   98.0   2.4/2.4 Bé vẽ chữ bờ rồi! Chữ bờ, bò!
+  100.5   1.1/1.1 Rắc cốm nào!
+  101.7   0.9/0.9 Đúng rồi!
+  102.9   3.3/3.3 Bé nghe nè: Ong! Bắt đầu bằng chữ gì nào?
+  106.2 X 1.0/3.7 Nhìn kìa! Một bạn chuột nhắt! Bé chạm vào nhé!
+  107.3   1.8/1.8 Đúng rồi! Chữ o, ong!
+  109.2   4.0/4.0 Bé ơi, mình vẽ chữ o nào! Bé ấn vào chấm sáng nhé!
+  115.0   1.7/1.7 Chữ o, ong! Đẹp quá!
+  116.8   2.5/2.5 Lấp lánh, lấp lánh! Cốm màu nè!
+  119.4   2.4/2.4 Bé là thợ làm bánh siêu giỏi!
+  121.8   3.2/3.2 Bé nghe nè: Bò! Bắt đầu bằng chữ gì nào?
+  125.1 X 1.4/3.8 Đây là chữ pờ. Bé nghe nè: Bò! Mình tìm lại nhé!
+  126.5   1.1/1.1 Chữ bờ, bò!
+  127.7   3.2/3.2 Giờ bé vẽ chữ bờ nhé! Theo các chấm nào!
+  132.9 X 2.1/2.9 Nét nữa nè! Bắt đầu ở chấm sáng nhé!
+  135.2   1.7/1.7 Chữ bờ, bò! Đẹp quá!
+  136.9   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+  139.5   1.1/1.1 Bé giỏi lắm!
+  140.7   3.3/3.3 Bé nghe nè: Ong! Bắt đầu bằng chữ gì nào?
+  145.4   1.8/1.8 Đúng rồi! Chữ o, ong!
+  147.3   4.0/4.0 Bé ơi, mình vẽ chữ o nào! Bé ấn vào chấm sáng nhé!
+  152.7   2.3/2.3 Bé vẽ chữ o rồi! Chữ o, ong!
+  155.0   2.5/2.5 Lấp lánh, lấp lánh! Cốm màu nè!
+  157.6   2.0/2.0 Hoan hô, bánh xong rồi!
+  159.6 X 1.7/3.5 Giờ trò chuyện! Ong bắt đầu bằng chữ gì nhỉ?
+  161.3   1.4/1.4 Oa, bé biết rồi!
+  164.8   1.7/1.7 Chương 3. Phép cộng
+  166.4   2.8/2.8 Mùa thu, lá vàng bay ngoài cửa sổ!
+  169.3   3.9/3.9 Bé ơi, 4 cộng 2 bằng mấy? Bé tìm bánh đáp án nhé!
+  173.2   1.6/1.6 4 cộng 2 bằng sáu!
+  174.8 X 3.2/4.0 Bé ơi, mình vẽ số sáu nào! Bé ấn vào chấm sáng nhé!
+  178.1   1.8/1.8 Số sáu! Kem xinh quá!
+  179.9   1.1/1.1 Rắc cốm nào!
+  181.5   1.6/1.6 Bé thông minh quá!
+  183.1   3.7/3.7 Bé tính nhé: 1 cộng 7! Bánh nào là đáp án nào?
+  188.1 X 1.8/2.7 Đây là số mười. Mình đếm lại nhé!
+  189.9   2.3/2.3 Đúng rồi! 1 cộng 7 bằng tám!
+  192.3   2.7/2.7 Bé vẽ theo chấm để có số tám nhé!
+  197.8   1.4/1.4 Số tám đẹp quá!
+  199.3   1.1/1.1 Rắc cốm nào!
+  201.4   1.0/1.0 Tuyệt vời!
+  202.8   3.8/3.8 Mình cộng nào! 1 cộng 1. Bé chạm vào đáp án nhé!
+  207.1   1.6/1.6 1 cộng 1 bằng hai!
+  208.7   3.2/3.2 Giờ bé vẽ số hai nhé! Theo các chấm nào!
+  213.6   1.4/1.4 Số hai đẹp quá!
+  215.0   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+  217.5   1.3/1.3 Bánh ngon quá!
+  218.9   3.8/3.8 Mình cộng nào! 8 cộng 2. Bé chạm vào đáp án nhé!
+  223.8 X 1.6/2.8 Ồ, số bảy. Bé đếm thêm lần nữa nào!
+  225.4   1.7/1.7 8 cộng 2 bằng mười!
+  227.1   4.1/4.1 Bé ơi, mình vẽ số mười nào! Bé ấn vào chấm sáng nhé!
+  231.8 X 2.0/2.9 Nét nữa nè! Bắt đầu ở chấm sáng nhé!
+  233.8   1.9/1.9 Số mười! Kem xinh quá!
+  235.8   1.1/1.1 Rắc cốm nào!
+  237.3   1.0/1.0 Chính xác!
+  238.3   3.1/3.1 Giờ trò chuyện! 1 cộng 2 bằng mấy nhỉ?
+  242.8   1.4/1.4 Oa, bé biết rồi!
+  246.2   2.2/2.2 Chương 4. Đếm hạt sô cô la
+  248.4   3.4/3.4 Ngoài trời tuyết rơi, trong bếp ấm áp ghê!
+  251.8   4.0/4.0 Bé ơi, mình vẽ số hai nào! Bé ấn vào chấm sáng nhé!
+  256.6   1.8/1.8 Số hai! Kem xinh quá!
+  258.4   5.4/5.4 Bé ơi, mình đếm nhé! Bé chạm 2 lần để thả 2 hạt sô cô la lên bánh nào!
+  263.9   0.5/0.5 Hai!
+  264.5   2.5/2.5 Hai hạt sô cô la! Vừa đủ luôn!
+  267.1   1.6/1.6 Bé thông minh quá!
+  268.7   2.6/2.6 Bé ơi, tìm bánh quy có số 3 nhé!
+  273.4   1.4/1.4 Đúng rồi, số ba!
+  274.8   4.0/4.0 Bé ơi, mình vẽ số ba nào! Bé ấn vào chấm sáng nhé!
+  281.3   1.8/1.8 Bé vẽ được số ba rồi!
+  283.1   5.4/5.4 Bé ơi, mình đếm nhé! Bé chạm 3 lần để thả 3 hạt sô cô la lên bánh nào!
+  288.6   0.5/0.5 Một!
+  289.2   0.5/0.5 Hai!
+  290.2   0.5/0.5 Ba!
+  290.7   2.4/2.4 Ba hạt sô cô la! Vừa đủ luôn!
+  293.5   1.6/1.6 Bé thông minh quá!
+  295.1   3.6/3.6 Giờ bé vẽ số mười một nhé! Theo các chấm nào!
+  298.7 X 2.0/2.5 Phụt! Bột bay khắp nơi! Hi hi!
+  300.9 X 0.9/2.9 Nét nữa nè! Bắt đầu ở chấm sáng nhé!
+  301.9   2.2/2.2 Số mười một! Kem xinh quá!
+  304.1   3.3/3.3 Bé chạm vào bánh 11 lần nhé! Sô cô la nè!
+  307.4   0.5/0.5 Một!
+  308.1   0.5/0.5 Hai!
+  310.0   0.5/0.5 Ba!
+  311.8   0.5/0.5 Bốn!
+  313.2   0.5/0.5 Năm!
+  314.9   0.5/0.5 Sáu!
+  316.1   0.5/0.5 Bảy!
+  317.7   0.5/0.5 Tám!
+  319.3   0.6/0.6 Chín!
+  321.0   0.6/0.6 Mười!
+  322.2   0.9/0.9 Mười một!
+  323.2   2.6/2.6 Ngon quá! Mười một hạt sô cô la!
+  325.8   1.6/1.6 Bé thông minh quá!
+  327.4   3.2/3.2 Giờ trò chuyện! Có mấy hạt sô cô la nào?
+  330.9   1.7/1.7 Chính xác! Hoan hô!
+  334.4   1.9/1.9 Bao nhiêu là bánh quy!
+  336.3   3.1/3.1 Bé làm bao nhiêu là bánh! 45 ngôi sao!
+--- 7 en
+    0.1   2.0/2.0 Chapter 1. First Letters
+    2.2   2.0/2.0 Spring blossoms outside!
+    4.3   4.0/4.0 What letter does frog start with? Find that cookie!
+    9.1   1.8/1.8 Yes! eff is for frog!
+   10.9   3.0/3.0 Now pipe letter eff! Follow the dots!
+   14.9 X 0.7/1.8 Great! One more line!
+   15.8 X 0.7/1.6 Now the next line!
+   16.6   2.0/2.0 eff for frog! Beautiful!
+   18.6   2.3/2.3 Sparkle, sparkle! Sprinkles!
+   21.0   1.6/1.6 You are so clever!
+   22.6   2.5/2.5 Find the first letter of bird!
+   25.1 X 1.6/2.4 Look! A little mouse! Tap it!
+   26.9   1.8/1.8 Yes! bee is for bird!
+   28.7   2.8/2.8 Follow the dots to pipe letter bee!
+   33.0   1.6/1.6 Now the next line!
+   34.9   2.4/2.4 You piped B! bee is for bird!
+   37.3   2.5/2.5 Shake, shake! Sprinkles on top!
+   39.9   1.7/1.7 What a yummy cookie!
+   41.6   3.7/3.7 Listen: Frog! Which letter does it start with?
+   45.3   1.4/1.4 eff is for frog!
+   46.8 X 2.8/3.0 Now pipe letter eff! Follow the dots!
+   49.8 X 0.7/1.6 Now the next line!
+   50.5 X 0.5/2.8 Next one! Start at the shining dot!
+   51.1   2.4/2.4 You piped F! eff is for frog!
+   53.6   2.5/2.5 Shake, shake! Sprinkles on top!
+   56.2   2.3/2.3 Hooray! The cookie is done!
+   58.5   4.0/4.0 What letter does cat start with? Find that cookie!
+   62.5   1.4/1.4 see is for cat!
+   63.9   2.8/2.8 Follow the dots to pipe letter see!
+   67.5   2.0/2.0 see for cat! Beautiful!
+   69.5   1.0/1.0 Sprinkles!
+   71.0   1.6/1.6 You are so clever!
+   72.6   3.6/3.6 Talk time! Which letter does fish start with?
+   77.0   1.6/1.6 That is it! Super!
+   80.3   1.7/1.7 Chapter 2. Adding Up
+   82.1   1.8/1.8 Sunny summer kitchen!
+   84.0   4.0/4.0 Count it up: 4 plus 1! Which cookie is the answer?
+   88.0 X 0.5/3.6 Hmm, number seven. Let’s count one more time!
+   88.5   1.5/1.5 4 plus 1 is five!
+   90.1   3.1/3.1 Now pipe number five! Follow the dots!
+   95.0 X 0.6/1.8 Great! One more line!
+   95.8   1.7/1.7 Five! Lovely icing!
+   97.4   2.5/2.5 Shake, shake! Sprinkles on top!
+  100.0   1.0/1.0 Well done!
+  101.1   3.3/3.3 What is 3 plus 4? Find the answer cookie!
+  105.8   1.6/1.6 3 plus 4 is seven!
+  107.5   4.0/4.0 Let’s pipe number seven! Press on the shining dot!
+  112.0   2.0/2.0 You piped number seven!
+  114.0   1.0/1.0 Sprinkles!
+  115.5   2.3/2.3 Hooray! The cookie is done!
+  117.8   3.4/3.4 What is 17 plus 2? Find the answer cookie!
+  121.3   2.3/2.3 Yes! 17 plus 2 is nineteen!
+  123.6   3.4/3.4 Now pipe number nineteen! Follow the dots!
+  127.0   1.6/1.6 Now the next line!
+  128.8   2.0/2.0 Nineteen! Lovely icing!
+  130.7   2.5/2.5 Shake, shake! Sprinkles on top!
+  133.3   1.7/1.7 What a yummy cookie!
+  135.1   4.0/4.0 Count it up: 2 plus 4! Which cookie is the answer?
+  139.1   1.8/1.8 Yes! 2 plus 4 is six!
+  140.9   2.8/2.8 Follow the dots to pipe number six!
+  145.8   1.8/1.8 You piped number six!
+  147.7   2.3/2.3 Sparkle, sparkle! Sprinkles!
+  150.1   1.7/1.7 What a yummy cookie!
+  151.8   2.4/2.4 Talk time! What is 3 plus 10?
+  156.3   2.1/2.1 It is thirteen! Good try!
+  159.7   1.7/1.7 Chapter 3. Take Away
+  161.4   1.9/1.9 Autumn leaves outside!
+  163.3   3.4/3.4 What is 6 minus 1? Find the answer cookie!
+  167.8   2.0/2.0 Yes! 6 minus 1 is five!
+  169.7   3.1/3.1 Now pipe number five! Follow the dots!
+  174.9 X 0.6/1.8 Great! One more line!
+  175.7   1.7/1.7 Five! Lovely icing!
+  177.3   2.3/2.3 Sparkle, sparkle! Sprinkles!
+  179.7   1.7/1.7 What a yummy cookie!
+  181.5 X 3.1/3.4 What is 6 minus 4? Find the answer cookie!
+  184.7   1.5/1.5 6 minus 4 is two!
+  186.2   3.8/3.8 Let’s pipe number two! Press on the shining dot!
+  190.4   1.8/1.8 You piped number two!
+  192.3   1.0/1.0 Sprinkles!
+  193.9   2.3/2.3 Hooray! The cookie is done!
+  196.2   3.1/3.1 Take away! 10 minus 2. Tap the answer!
+  200.8   2.1/2.1 Yes! 10 minus 2 is eight!
+  203.0   3.1/3.1 Now pipe number eight! Follow the dots!
+  208.3   1.7/1.7 Eight! Lovely icing!
+  210.1   2.3/2.3 Sparkle, sparkle! Sprinkles!
+  212.5   1.1/1.1 Super baker!
+  213.7   3.0/3.0 Take away! 6 minus 1. Tap the answer!
+  218.3   2.0/2.0 Yes! 6 minus 1 is five!
+  220.3   3.1/3.1 Now pipe number five! Follow the dots!
+  225.9 X 0.8/2.8 Next one! Start at the shining dot!
+  226.8   1.9/1.9 You piped number five!
+  228.8   1.0/1.0 Sprinkles!
+  230.3   2.3/2.3 Hooray! The cookie is done!
+  232.6 X 2.3/2.4 Talk time! What is 4 minus 2?
+  234.9   1.4/1.4 Correct! Hooray!
+  238.3   2.0/2.0 Chapter 4. Odd and Even
+  240.3   2.2/2.2 Snow outside, cosy inside!
+  242.6   2.5/2.5 Which cookie has an odd number?
+  245.8   1.9/1.9 Yes! Seventeen is odd!
+  247.7   3.4/3.4 Now pipe number seventeen! Follow the dots!
+  251.1 X 1.1/1.6 Now the next line!
+  252.3   3.1/3.1 You piped seventeen! Seventeen is odd!
+  255.5   2.5/2.5 Shake, shake! Sprinkles on top!
+  258.0   1.1/1.1 Super baker!
+  259.2   2.6/2.6 Tap a cookie with an odd number!
+  261.9   1.7/1.7 Yes! Eleven is odd!
+  263.6   4.0/4.0 Let’s pipe number eleven! Press on the shining dot!
+  268.8 X 1.0/2.8 Next one! Start at the shining dot!
+  269.9   2.6/2.6 You piped eleven! Eleven is odd!
+  272.5   2.5/2.5 Shake, shake! Sprinkles on top!
+  275.1   1.1/1.1 Super baker!
+  276.3   2.6/2.6 Which cookie has an even number?
+  278.9   1.8/1.8 Yes! Sixteen is even!
+  280.8   3.3/3.3 Now pipe number sixteen! Follow the dots!
+  284.1 X 1.6/2.8 Next one! Start at the shining dot!
+  285.8   2.8/2.8 You piped sixteen! Sixteen is even!
+  288.6   2.3/2.3 Sparkle, sparkle! Sprinkles!
+  291.0   1.1/1.1 Super baker!
+  292.2   2.7/2.7 Tap a cookie with an even number!
+  294.9 X 0.8/3.5 Thirteen is odd! Let’s look for another one!
+  295.9   1.7/1.7 Yes! Eight is even!
+  297.5   3.0/3.0 Follow the dots to pipe number eight!
+  304.1   2.5/2.5 You piped eight! Eight is even!
+  306.6   2.3/2.3 Sparkle, sparkle! Sprinkles!
+  309.0   1.0/1.0 Great job!
+  310.0   2.5/2.5 Talk time! Which number is odd?
+  314.6   2.1/2.1 It is nineteen! Good try!
+  317.9   2.0/2.0 Look at all our cookies!
+  320.0   3.1/3.1 What a yummy bakery! 48 stars! Hooray!
+--- 7 vi
+    0.1   2.2/2.2 Chương 1. Chữ cái đầu tiên
+    2.4   2.8/2.8 Mùa xuân, ngoài cửa sổ hoa nở rồi!
+    5.2   3.2/3.2 Bé nghe nè: Bò! Bắt đầu bằng chữ gì nào?
+    9.1   1.8/1.8 Đúng rồi! Chữ bờ, bò!
+   10.9   2.7/2.7 Bé vẽ theo chấm để có chữ bờ nhé!
+   14.9 X 2.2/2.9 Nét nữa nè! Bắt đầu ở chấm sáng nhé!
+   17.3   2.4/2.4 Bé vẽ chữ bờ rồi! Chữ bờ, bò!
+   19.7   1.1/1.1 Rắc cốm nào!
+   20.9   1.3/1.3 Bánh ngon quá!
+   22.2   2.9/2.9 Bé tìm chữ cái đầu tiên của ong nhé!
+   26.1   1.8/1.8 Đúng rồi! Chữ o, ong!
+   27.9   2.6/2.6 Bé vẽ theo chấm để có chữ o nhé!
+   32.8   1.7/1.7 Chữ o, ong! Đẹp quá!
+   34.5   2.5/2.5 Lấp lánh, lấp lánh! Cốm màu nè!
+   37.1   2.0/2.0 Hoan hô, bánh xong rồi!
+   39.1   2.9/2.9 Bé tìm chữ cái đầu tiên của vịt nhé!
+   43.0   1.1/1.1 Chữ vờ, vịt!
+   44.2   3.2/3.2 Giờ bé vẽ chữ vờ nhé! Theo các chấm nào!
+   49.1   1.8/1.8 Chữ vờ, vịt! Đẹp quá!
+   51.0   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+   53.6   2.4/2.4 Bé là thợ làm bánh siêu giỏi!
+   56.0   4.3/4.3 Bé ơi, ong bắt đầu bằng chữ gì nhỉ? Bé tìm bánh đó nhé!
+   60.4   1.1/1.1 Chữ o, ong!
+   61.5   4.0/4.0 Bé ơi, mình vẽ chữ o nào! Bé ấn vào chấm sáng nhé!
+   66.5   2.3/2.3 Bé vẽ chữ o rồi! Chữ o, ong!
+   68.9   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+   71.5   2.0/2.0 Hoan hô, bánh xong rồi!
+   73.5 X 1.0/3.5 Giờ trò chuyện! Ong bắt đầu bằng chữ gì nhỉ?
+   74.5   1.4/1.4 Oa, bé biết rồi!
+   78.0   1.7/1.7 Chương 2. Phép cộng
+   79.6   2.1/2.1 Mùa hè, căn bếp đầy nắng!
+   81.8   3.7/3.7 Bé tính nhé: 1 cộng 2! Bánh nào là đáp án nào?
+   86.7 X 1.7/2.6 Đây là số năm. Mình đếm lại nhé!
+   88.5   2.3/2.3 Đúng rồi! 1 cộng 2 bằng ba!
+   90.7   3.1/3.1 Giờ bé vẽ số ba nhé! Theo các chấm nào!
+   96.0   1.7/1.7 Số ba! Kem xinh quá!
+   97.7   1.1/1.1 Rắc cốm nào!
+   99.4   0.9/0.9 Siêu quá!
+  100.8   3.7/3.7 Bé tính nhé: 3 cộng 4! Bánh nào là đáp án nào?
+  105.0   2.3/2.3 Đúng rồi! 3 cộng 4 bằng bảy!
+  107.4   2.7/2.7 Bé vẽ theo chấm để có số bảy nhé!
+  112.0   1.4/1.4 Số bảy đẹp quá!
+  113.5   2.5/2.5 Lấp lánh, lấp lánh! Cốm màu nè!
+  116.0   2.4/2.4 Bé là thợ làm bánh siêu giỏi!
+  118.5   3.9/3.9 Bé ơi, 1 cộng 5 bằng mấy? Bé tìm bánh đáp án nhé!
+  122.4   1.6/1.6 1 cộng 5 bằng sáu!
+  124.0 X 2.4/2.7 Bé vẽ theo chấm để có số sáu nhé!
+  126.5   1.8/1.8 Số sáu! Kem xinh quá!
+  128.4   1.1/1.1 Rắc cốm nào!
+  130.0   1.6/1.6 Bé thông minh quá!
+  131.6   3.8/3.8 Mình cộng nào! 6 cộng 1. Bé chạm vào đáp án nhé!
+  136.6 X 1.8/2.7 Đây là số chín. Mình đếm lại nhé!
+  138.4   1.6/1.6 6 cộng 1 bằng bảy!
+  140.1   2.7/2.7 Bé vẽ theo chấm để có số bảy nhé!
+  145.1   1.4/1.4 Số bảy đẹp quá!
+  146.5   1.1/1.1 Rắc cốm nào!
+  148.5   0.9/0.9 Giỏi quá!
+  149.5   3.1/3.1 Giờ trò chuyện! 5 cộng 10 bằng mấy nhỉ?
+  155.3   1.7/1.7 Đúng luôn! Siêu quá!
+  158.8   1.6/1.6 Chương 3. Phép trừ
+  160.4   2.8/2.8 Mùa thu, lá vàng bay ngoài cửa sổ!
+  163.2   3.2/3.2 Có 10, bớt đi 7! Bánh nào là đáp án nào?
+  166.4   2.3/2.3 Đúng rồi! 10 trừ 7 bằng ba!
+  168.7   4.0/4.0 Bé ơi, mình vẽ số ba nào! Bé ấn vào chấm sáng nhé!
+  173.6   1.3/1.3 Số ba đẹp quá!
+  174.9   1.1/1.1 Rắc cốm nào!
+  177.0   1.3/1.3 Bánh ngon quá!
+  178.4   3.2/3.2 Có 10, bớt đi 2! Bánh nào là đáp án nào?
+  183.9   2.3/2.3 Đúng rồi! 10 trừ 2 bằng tám!
+  186.3   3.2/3.2 Giờ bé vẽ số tám nhé! Theo các chấm nào!
+  191.3   1.9/1.9 Bé vẽ được số tám rồi!
+  193.3   2.5/2.5 Lấp lánh, lấp lánh! Cốm màu nè!
+  195.9   2.0/2.0 Hoan hô, bánh xong rồi!
+  197.8   3.7/3.7 Mình trừ nào! 8 trừ 1. Bé chạm vào đáp án nhé!
+  201.5   1.5/1.5 8 trừ 1 bằng bảy!
+  203.1   3.2/3.2 Giờ bé vẽ số bảy nhé! Theo các chấm nào!
+  207.3   1.9/1.9 Bé vẽ được số bảy rồi!
+  209.2   2.5/2.5 Lấp lánh, lấp lánh! Cốm màu nè!
+  211.8   1.3/1.3 Bánh ngon quá!
+  213.1   3.2/3.2 Có 10, bớt đi 8! Bánh nào là đáp án nào?
+  217.7 X 1.2/3.0 Ồ, số không. Bé đếm thêm lần nữa nào!
+  218.9   1.6/1.6 10 trừ 8 bằng hai!
+  220.6   3.2/3.2 Giờ bé vẽ số hai nhé! Theo các chấm nào!
+  226.3   1.4/1.4 Số hai đẹp quá!
+  227.8   1.1/1.1 Rắc cốm nào!
+  229.8   1.1/1.1 Bé giỏi lắm!
+  231.0   3.0/3.0 Giờ trò chuyện! 5 trừ 3 bằng mấy nhỉ?
+  235.8   1.9/1.9 Đúng rồi! Bé giỏi quá!
+  239.2   2.0/2.0 Chương 4. Số chẵn, số lẻ
+  241.2   3.4/3.4 Ngoài trời tuyết rơi, trong bếp ấm áp ghê!
+  244.6   2.1/2.1 Bé ơi, tìm một số lẻ nhé!
+  247.3 X 1.6/3.2 Mười tám là số chẵn. Bé tìm số khác nào!
+  248.9   1.2/1.2 Bảy là số lẻ!
+  250.2   3.2/3.2 Giờ bé vẽ số bảy nhé! Theo các chấm nào!
+  255.2   2.5/2.5 Bé vẽ số bảy rồi! Bảy là số lẻ!
+  257.7   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+  260.3   0.9/0.9 Siêu quá!
+  261.3   2.1/2.1 Bé ơi, tìm một số lẻ nhé!
+  264.9   1.3/1.3 Chín là số lẻ!
+  266.3   4.1/4.1 Bé ơi, mình vẽ số chín nào! Bé ấn vào chấm sáng nhé!
+  272.6   2.7/2.7 Bé vẽ số chín rồi! Chín là số lẻ!
+  275.4   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+  278.0   2.4/2.4 Bé là thợ làm bánh siêu giỏi!
+  280.4   2.8/2.8 Bánh nào có số lẻ nhỉ? Bé tìm nào!
+  283.2   2.4/2.4 Đúng rồi! Mười chín là số lẻ!
+  285.7   3.1/3.1 Bé vẽ theo chấm để có số mười chín nhé!
+  288.8 X 0.6/2.9 Nét nữa nè! Bắt đầu ở chấm sáng nhé!
+  289.6   2.6/2.6 Mười chín là số lẻ! Kem đẹp quá!
+  292.2   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+  294.8   2.4/2.4 Bé là thợ làm bánh siêu giỏi!
+  297.2   2.1/2.1 Bé ơi, tìm một số lẻ nhé!
+  299.4   1.6/1.6 Mười một là số lẻ!
+  301.0   4.4/4.4 Bé ơi, mình vẽ số mười một nào! Bé ấn vào chấm sáng nhé!
+  305.4 X 0.7/2.2 Giờ tới nét tiếp theo nhé!
+  306.3   3.3/3.3 Bé vẽ số mười một rồi! Mười một là số lẻ!
+  309.6   2.5/2.5 Lắc, lắc! Rắc cốm lên bánh nào!
+  312.2   1.6/1.6 Bé thông minh quá!
+  313.8 X 2.6/3.1 Giờ trò chuyện! Số nào là số chẵn nhỉ?
+  316.4   1.7/1.7 Đúng luôn! Siêu quá!
+  319.9   2.3/2.3 Hoan hô! Tiệm bánh ngon quá!
+  322.2   2.6/2.6 Tiệm bánh ngon quá! 48 ngôi sao!
