@@ -44,8 +44,9 @@ function runGame(AC, player, opts) {
     firstPointT: null, levelT: [], drops: 0, placed: 0, perfect: 0, edges: 0,
     lossMiss: 0, lossTopple: 0, toppleEvents: 0, toppleCrates: 0, missEdge: 0, missAir: 0,
     apples: 0, glowApples: 0, pies: 0, pieHearts: 0, lanterns: 0, maxCombo: 0, waits: [], dropsByLevel: {}, lossByLevel: {}, nanBad: 0,
-    bufferedDrops: 0
+    bufferedDrops: 0, levelZ: [], dropRec: [], heartsByPie: 0, deathZone: null, deathLevel: null
   };
+  let rec = null;   // the drop being tracked: {z, lv, lit, lan (top crate has a lantern), out}
   let t = 0, spawnT = 0, lastLand = null, lastLevelT = 0;
   while (t < maxTime) {
     player.step(dt, w, t);
@@ -56,20 +57,26 @@ function runGame(AC, player, opts) {
         case 'spawn': spawnT = t; break;
         case 'drop': {
           m.drops++; const wt = t - spawnT; m.waits.push(wt); if (wt < 0.02) m.bufferedDrops++;
-          m.dropsByLevel[w.level] = (m.dropsByLevel[w.level] || 0) + 1; break;
+          m.dropsByLevel[w.level] = (m.dropsByLevel[w.level] || 0) + 1;
+          if (opts.record !== false) {
+            const top = w._top();
+            rec = { z: w.zone, lv: w.level, light: w.light, lit: w.litAt(top.x + w.swayOffset(top.y), top.y), lan: !!(top.crate && top.crate.lantern), n: w.tower.list.length, out: null };
+            m.dropRec.push(rec);
+          }
+          break;
         }
         case 'land': lastLand = e; if (m.firstPointT === null && e.perfect !== undefined && w.score > 0) m.firstPointT = t; break;
-        case 'perfect': m.perfect++; break;
-        case 'edge': m.edges++; break;
-        case 'miss': m.lossMiss++; if (lastLand && lastLand.crate === e.crate) m.missEdge++; else m.missAir++;
+        case 'perfect': m.perfect++; if (rec && !rec.out) rec.out = 'perfect'; break;
+        case 'edge': m.edges++; if (rec && !rec.out) rec.out = 'edge'; break;
+        case 'miss': if (rec && !rec.out) rec.out = 'miss'; m.lossMiss++; if (lastLand && lastLand.crate === e.crate) m.missEdge++; else m.missAir++;
           m.lossByLevel[w.level] = (m.lossByLevel[w.level] || 0) + 1; break;
-        case 'topple': m.toppleEvents++; m.toppleCrates += e.count; m.lossTopple++;
+        case 'topple': if (rec) rec.topple = true; m.toppleEvents++; m.toppleCrates += e.count; m.lossTopple++;
           m.lossByLevel[w.level] = (m.lossByLevel[w.level] || 0) + 1; break;
         case 'apple': m.apples++; if (e.glow) m.glowApples++; break;
         case 'pie': m.pies++; if (e.gained) m.pieHearts++; break;
         case 'lantern': m.lanterns++; break;
-        case 'levelUp': m.levels++; m.levelT.push(t - lastLevelT); lastLevelT = t; break;
-        case 'gameOver': m.over = true; break;
+        case 'levelUp': m.levels++; m.levelT.push(t - lastLevelT); m.levelZ.push(((e.level - 1) % 4 + 4) % 4); lastLevelT = t; break;
+        case 'gameOver': m.over = true; m.deathZone = w.zone; m.deathLevel = w.level; break;
       }
     }
     if (!isFinite(w.score) || !isFinite(w.tower.sway)) m.nanBad++;

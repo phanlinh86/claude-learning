@@ -1,33 +1,44 @@
-// Visual QA capture: every screen at 4 viewports, every planet mid-tower, the goal sequence, motion contact sheets,
-// custom pictures, and a deuteranopia simulation of the Easy drop guide. Output: tests/out/visual/*.png (gitignored).
-// Run: node tests/visual/capture.js   [only=<name,...>]
+// Visual QA capture for Ziggy's Apple Castle. Serves game/ over http (python3 -m http.server, free port) and
+// screenshots: every screen at 3 viewports, every time of day early/late (with and without lanterns) + colour-blind
+// simulations, Granny Boo's goal show and the level transition, motion contact sheets, custom pictures.
+// Output: tests/out/visual/*.png (gitignored).   Run: node tests/visual/capture.js [only=screens,zones,goal,motion,custom]
+'use strict';
 const { chromium } = require('playwright');
-const path = require('path'), fs = require('fs');
-const GAME = 'file://' + path.resolve(__dirname, '../../game/index.html');
+const path = require('path'), fs = require('fs'), net = require('net'), { spawn } = require('child_process');
+const ROOT = path.resolve(__dirname, '../../game');
 const OUT = path.resolve(__dirname, '../out/visual'); fs.mkdirSync(OUT, { recursive: true });
 const only = (process.argv.find(a => a.startsWith('only=')) || '').slice(5).split(',').filter(Boolean);
 const want = n => !only.length || only.includes(n);
 const VIEWS = {
-  desk: { viewport: { width: 1280, height: 720 } },
-  ipadL: { viewport: { width: 1024, height: 768 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true },
+  land: { viewport: { width: 960, height: 540 } },
   phone: { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, hasTouch: true, isMobile: true },
-  ipadP: { viewport: { width: 820, height: 1180 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true }
+  ipad: { viewport: { width: 1366, height: 1024 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true }
 };
+const ZONES = ['dawn', 'noon', 'sunset', 'night'];
 const errs = [];
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+const freePort = () => new Promise(res => { const s = net.createServer(); s.listen(0, () => { const p = s.address().port; s.close(() => res(p)); }); });
+let BASE;
+
+// Colour-vision simulation matrices (Machado et al. 2009, severity 1.0)
+const CVD = {
+  deutan: '0.367 0.861 -0.228 0 0  0.280 0.673 0.047 0 0  -0.012 0.043 0.969 0 0  0 0 0 1 0',
+  protan: '0.152 1.053 -0.205 0 0  0.115 0.786 0.099 0 0  -0.004 -0.048 1.052 0 0  0 0 0 1 0'
+};
 
 async function open(b, view, q) {
   const ctx = await b.newContext(VIEWS[view]);
   const p = await ctx.newPage();
   p.on('pageerror', e => errs.push(view + ': ' + e));
   p.on('console', m => { if (m.type() === 'error') errs.push(view + ': ' + m.text()); });
-  await p.goto(GAME + '?mute=1&seed=7' + (q || ''));
-  await p.waitForFunction(() => window.AC && AC.debug && AC.Game && AC.Game.mode !== 'boot', null, { timeout: 15000 });
-  await p.evaluate(() => {
+  await p.goto(BASE + '/index.html?mute=1&seed=7' + (q || ''));
+  await p.waitForFunction(() => window.AC && AC.debug && AC.Game && AC.Game.mode !== 'boot', null, { timeout: 20000 });
+  await p.evaluate(cvd => {
     window._ev = [];
     const R = AC.Game.renderer, o = R.onEvents.bind(R);
     R.onEvents = evts => { for (const e of evts) window._ev.push({ type: e.type, t: performance.now() }); return o(evts); };
-    // drop the held crate as soon as pred(predictLanding(), world) is true
+    document.body.insertAdjacentHTML('beforeend', '<svg width="0" height="0" style="position:absolute"><filter id="deutan"><feColorMatrix type="matrix" values="' + cvd.deutan +
+      '"/></filter><filter id="protan"><feColorMatrix type="matrix" values="' + cvd.protan + '"/></filter></svg>');
     window.VQ = {
       dropWhen(src, timeout) {
         const pred = new Function('p', 'w', 'return (' + src + ')');
@@ -36,43 +47,58 @@ async function open(b, view, q) {
           const tick = () => {
             const w = AC.debug.world, p = w.phase === 'swing' && w.held && w.predictLanding();
             if (p && pred(p, w)) { AC.debug.drop(); return res(true); }
-            if (performance.now() - t0 > (timeout || 8000)) return res(false);
+            if (performance.now() - t0 > (timeout || 9000)) return res(false);
             requestAnimationFrame(tick);
           };
           tick();
         });
+      },
+      // a tower of n crates at the current zone, light eased to where it would be, frozen
+      tower(n, lanterns, jitter) {
+        const w = AC.debug.world, dx = []; for (let i = 0; i < n; i++) dx.push(jitter ? ((i * 37) % 11 - 5) * 0.03 : 0);
+        w.setTower(dx, { lanterns: !!lanterns });
+        for (let i = 0; i < 40; i++) w._lightStep(1);
+        w.hearts = w.maxHearts;
       }
     };
-  });
+  }, CVD);
   return p;
 }
 const shot = (p, name, clip) => p.screenshot({ path: OUT + '/' + name + '.png', clip });
-const waitPhase = (p, ph, t) => p.waitForFunction(x => AC.debug.world.phase === x, ph, { timeout: t || 20000 }).catch(() => errs.push('phase ' + ph + ' timeout'));
+const cvdShot = async (p, name, f) => {
+  await p.evaluate(f => { document.getElementById('game').style.filter = 'url(#' + f + ')'; }, f); await sleep(80);
+  await shot(p, name + '_' + f);
+  await p.evaluate(() => { document.getElementById('game').style.filter = ''; });
+};
+const freeze = p => p.evaluate(() => AC.debug.setSpeed(0.0001));
+const run = p => p.evaluate(() => AC.debug.setSpeed(1));
 
-// burst of frames → one contact sheet
 async function sheet(p, name, n, gap, clip, cols) {
   const frames = [];
   for (let i = 0; i < n; i++) {
-    const t = await p.evaluate(() => AC.debug.world.time.toFixed(3));
-    frames.push({ t, b64: (await p.screenshot({ clip })).toString('base64') });
+    const t = await p.evaluate(() => AC.debug.world.time.toFixed(2));
+    frames.push({ t, b64: (await p.screenshot(clip ? { clip } : {})).toString('base64') });
     if (gap) await sleep(gap);
   }
-  const c = cols || Math.min(6, n), w = clip.width, h = clip.height, sc = Math.min(1, 1800 / (c * w));
-  const html = '<body style="margin:0;background:#222;display:grid;grid-template-columns:repeat(' + c + ',' + Math.round(w * sc) + 'px);gap:4px">' +
-    frames.map(f => '<div style="position:relative"><img style="width:' + Math.round(w * sc) + 'px;display:block" src="data:image/png;base64,' + f.b64 +
+  const vp = p.viewportSize(), cl = clip || { width: vp.width, height: vp.height };
+  const c = cols || Math.min(6, n), sc = Math.min(1, 1800 / (c * cl.width)), w = Math.round(cl.width * sc);
+  const html = '<body style="margin:0;background:#222;display:grid;grid-template-columns:repeat(' + c + ',' + w + 'px);gap:4px">' +
+    frames.map(f => '<div style="position:relative"><img style="width:' + w + 'px;display:block" src="data:image/png;base64,' + f.b64 +
       '"><span style="position:absolute;left:4px;top:2px;color:#0f0;font:12px monospace;background:#000a">t=' + f.t + '</span></div>').join('') + '</body>';
-  const q = await p.context().browser().newPage({ viewport: { width: Math.round(c * (w * sc + 4)), height: 200 } });
-  await q.setContent(html); await q.waitForTimeout(100);
+  const q = await p.context().browser().newPage({ viewport: { width: Math.round(c * (w + 4)), height: 200 } });
+  await q.setContent(html); await q.waitForTimeout(150);
   await q.screenshot({ path: OUT + '/sheet_' + name + '.png', fullPage: true }); await q.close();
 }
-
-async function clipAt(pg) {
-      const r = await pg.evaluate(() => { const w = AC.debug.world, R = AC.Game.renderer, k = 1280 / R.VW; return { x: (w.layout.cx) * k, y: (w.tower.topY - w.cam.y) * k, u: w.layout.unit * k }; });
-      const x = Math.max(0, Math.round(r.x - r.u * 3)), y = Math.max(0, Math.round(r.y - r.u * 3.2));
-      return { x, y, width: Math.min(1280 - x, Math.round(r.u * 6)), height: Math.min(720 - y, Math.round(r.u * 4.5)) };
+// clip around the tower top (CSS px)
+async function clipTop(p, wu, hu) {
+  return p.evaluate(([wu, hu]) => {
+    const w = AC.debug.world, c = document.getElementById('game').getBoundingClientRect(), k = c.width / AC.Game.renderer.VW, L = w.layout;
+    const x = c.left + (L.cx - L.unit * wu / 2) * k, y = c.top + (w.tower.topY - w.cam.y - L.unit * hu * 0.62) * k;
+    const X = Math.max(0, Math.round(x)), Y = Math.max(0, Math.round(y));
+    return { x: X, y: Y, width: Math.round(Math.min(innerWidth - X, L.unit * wu * k)), height: Math.round(Math.min(innerHeight - Y, L.unit * hu * k)) };
+  }, [wu || 6, hu || 5]);
 }
 
-// generated custom pictures (photo-like opaque + transparent cut-out)
 async function makePictures(p) {
   const imgs = await p.evaluate(() => {
     const mk = (w, h, f) => { const c = document.createElement('canvas'); c.width = w; c.height = h; f(c.getContext('2d'), w, h); return c.toDataURL('image/png'); };
@@ -81,8 +107,8 @@ async function makePictures(p) {
         g.fillStyle = '#222'; g.beginPath(); g.arc(150, 180, 18, 0, 7); g.arc(250, 180, 18, 0, 7); g.fill(); g.fillStyle = '#e66'; g.beginPath(); g.arc(200, 260, 30, 0, 3.14); g.fill(); }),
       crate: mk(600, 400, (g, w, h) => { const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, '#2b6cb0'); gr.addColorStop(1, '#f6ad55'); g.fillStyle = gr; g.fillRect(0, 0, w, h);
         g.fillStyle = '#fff'; g.font = 'bold 160px sans-serif'; g.fillText('ABC', 80, 260); }),
-      coin: mk(200, 200, (g) => { g.fillStyle = '#e53e3e'; g.beginPath(); g.arc(100, 100, 90, 0, 7); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(100, 100, 40, 0, 7); g.fill(); }),
-      bg_moon: mk(1600, 900, (g, w, h) => { const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#87ceeb'); gr.addColorStop(1, '#f0e68c'); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+      apple: mk(200, 200, g => { g.fillStyle = '#e53e3e'; g.beginPath(); g.arc(100, 100, 90, 0, 7); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(100, 100, 40, 0, 7); g.fill(); }),
+      bg_night: mk(1600, 900, (g, w, h) => { const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#87ceeb'); gr.addColorStop(1, '#f0e68c'); g.fillStyle = gr; g.fillRect(0, 0, w, h);
         g.fillStyle = '#2f855a'; for (let i = 0; i < 6; i++) { g.beginPath(); g.arc(150 + i * 260, 820, 160, 0, 7); g.fill(); } })
     };
   });
@@ -93,178 +119,149 @@ async function makePictures(p) {
 }
 
 (async () => {
-  const b = await chromium.launch({ args: ['--allow-file-access-from-files'] });
-
-  // ---------- 1. screens at every viewport ----------
-  if (want('screens')) for (const v of Object.keys(VIEWS)) {
-    const p = await open(b, v);
-    await p.waitForTimeout(2500);
-    await shot(p, v + '_title');
-    for (const [btn, name] of [['btnHow', 'how'], ['btnSettings', 'settings'], ['btnCustomize', 'custom']]) {
-      await p.click('#' + btn); await p.waitForTimeout(400); await shot(p, v + '_' + name);
-      if (name === 'how' || name === 'custom') { // scrolled bottom too
+  const port = await freePort();
+  const srv = spawn('python3', ['-m', 'http.server', String(port), '--bind', '127.0.0.1'], { cwd: ROOT, stdio: 'ignore' });
+  BASE = 'http://127.0.0.1:' + port;
+  for (let i = 0; i < 50; i++) { try { await new Promise((ok, no) => { const s = net.connect(port, '127.0.0.1', () => { s.end(); ok(); }); s.on('error', no); }); break; } catch (e) { await sleep(100); } }
+  const b = await chromium.launch();
+  try {
+    // ---------- 1. every screen at every viewport ----------
+    if (want('screens')) for (const v of Object.keys(VIEWS)) {
+      const p = await open(b, v);
+      await sleep(2500); await shot(p, v + '_title');
+      for (const [btn, name] of [['btnHow', 'how'], ['btnSettings', 'settings'], ['btnCustomize', 'custom']]) {
+        await p.click('#' + btn); await sleep(450); await shot(p, v + '_' + name);
         await p.evaluate(() => { const s = document.querySelector('.screen:not(.hidden)'); if (s) s.scrollTop = 1e5; const pn = document.querySelector('.screen:not(.hidden) .panel'); if (pn) pn.scrollTop = 1e5; });
-        await p.waitForTimeout(200); await shot(p, v + '_' + name + '_bottom');
+        await sleep(200); await shot(p, v + '_' + name + '_bottom');
+        await p.click('.screen:not(.hidden) .btn-back'); await sleep(350);
       }
-      await p.click('.screen:not(.hidden) .btn-back'); await p.waitForTimeout(300);
+      await p.click('#btnPlay'); await sleep(800); await shot(p, v + '_banner');
+      await sleep(2000); await shot(p, v + '_play_start');
+      await p.evaluate(() => { AC.debug.setBot(true, 0.9); AC.debug.setSpeed(3); });
+      await p.waitForFunction(() => AC.debug.world.placed >= 6, null, { timeout: 40000 }).catch(() => errs.push(v + ' slow'));
+      await run(p); await sleep(300); await shot(p, v + '_play');
+      await p.click('#btnPause'); await sleep(450); await shot(p, v + '_pause');
+      await p.click('#btnResume'); await sleep(200);
+      await p.evaluate(() => { AC.debug.setBot(true, 0); AC.debug.setSpeed(8); });
+      await p.waitForFunction(() => AC.debug.mode === 'over', null, { timeout: 90000 }).catch(() => errs.push(v + ' no over'));
+      await run(p); await sleep(1300); await shot(p, v + '_over');
+      await p.context().close();
     }
-    await p.click('#btnPlay'); await p.waitForTimeout(700); await shot(p, v + '_banner');
-    await p.evaluate(() => { AC.debug.setBot(true, 0.9); AC.debug.setSpeed(3); });
-    await p.waitForFunction(() => AC.debug.world.placed >= 6, null, { timeout: 30000 }).catch(() => errs.push(v + ' slow'));
-    await p.evaluate(() => AC.debug.setSpeed(1)); await p.waitForTimeout(300); await shot(p, v + '_play');
-    await p.click('#btnPause'); await p.waitForTimeout(400); await shot(p, v + '_pause');
-    await p.click('#btnResume'); await p.waitForTimeout(200);
-    await p.evaluate(() => { AC.debug.setBot(true, 0); AC.debug.setSpeed(8); });
-    await p.waitForFunction(() => AC.debug.mode === 'over', null, { timeout: 90000 }).catch(() => errs.push(v + ' no over'));
-    await p.evaluate(() => AC.debug.setSpeed(1)); await p.waitForTimeout(1200); await shot(p, v + '_over');
-    await p.context().close();
-  }
 
-  // ---------- 2. every planet mid-tower (desk + phone) + guide on easy ----------
-  if (want('planets')) for (const v of ['desk', 'phone', 'ipadL']) {
-    const p = await open(b, v, '&autostart=1&bot=1&skill=0.8&diff=easy');
-    for (const lv of [0, 1, 2, 3]) {
-      await p.evaluate(l => { AC.debug.gotoLevel(l); AC.debug.setSpeed(3); }, lv);
-      await p.waitForFunction(() => AC.debug.world.placed >= 7, null, { timeout: 40000 }).catch(() => errs.push(v + ' planet ' + lv));
-      await p.evaluate(() => AC.debug.setSpeed(1)); await p.waitForTimeout(700);
-      await shot(p, v + '_planet' + lv);
+    // ---------- 2. every zone early / late, with and without lanterns, + colour-blind ----------
+    if (want('zones')) for (const v of Object.keys(VIEWS)) for (const diff of (v === 'land' ? ['normal', 'easy'] : ['normal'])) {
+      const p = await open(b, v, '&autostart=1&diff=' + diff);
+      const tag = v + (diff === 'easy' ? '_easy' : '');
+      for (let z = 0; z < 4; z++) {
+        await p.evaluate(z => { AC.debug.gotoLevel(z); }, z); await sleep(2700);   // crossfade + banner gone
+        const goal = await p.evaluate(() => AC.debug.world.goal);
+        for (const [nm, n, lan] of [['early', 2, false], ['late', goal - 1, false], ['late_lanterns', goal - 1, true]]) {
+          if (diff === 'easy' && nm !== 'late') continue;
+          await run(p); await p.evaluate(([n, lan]) => VQ.tower(n, lan, !lan), [n, lan]); await sleep(500);
+          await freeze(p); await sleep(120);
+          const L = await p.evaluate(() => AC.debug.world.light.toFixed(2));
+          await shot(p, tag + '_zone_' + ZONES[z] + '_' + nm);
+          console.log(tag, ZONES[z], nm, 'light', L);
+          if (v === 'land' && diff === 'normal' && z >= 2 && nm !== 'early') { await cvdShot(p, tag + '_zone_' + ZONES[z] + '_' + nm, 'deutan'); await cvdShot(p, tag + '_zone_' + ZONES[z] + '_' + nm, 'protan'); }
+        }
+        await run(p);
+      }
+      await p.context().close();
     }
-    await p.context().close();
-  }
 
-  // ---------- 3. goal sequence ----------
-  if (want('goal')) {
-    const p = await open(b, 'desk', '&autostart=1&bot=1&skill=1&diff=easy');
-    await p.evaluate(() => AC.debug.setSpeed(4));
-    await p.waitForFunction(() => AC.debug.world.placed >= AC.debug.world.goal - 1, null, { timeout: 60000 });
-    await p.evaluate(() => AC.debug.setSpeed(1));
-    await waitPhase(p, 'goal');
-    await sheet(p, 'goal', 12, 200, { x: 0, y: 0, width: 1280, height: 720 }, 4);
-    await sheet(p, 'travel', 12, 120, { x: 0, y: 0, width: 1280, height: 720 }, 4);
-    await p.waitForTimeout(300); await shot(p, 'desk_newplanet_banner');
-    await p.context().close();
-    const q = await open(b, 'phone', '&autostart=1&bot=1&skill=1&diff=easy');
-    await q.evaluate(() => AC.debug.setSpeed(4));
-    await q.waitForFunction(() => AC.debug.world.placed >= AC.debug.world.goal - 1, null, { timeout: 60000 });
-    await q.evaluate(() => AC.debug.setSpeed(1));
-    await waitPhase(q, 'goal'); await q.waitForTimeout(1500); await shot(q, 'phone_goal');
-    await waitPhase(q, 'swing'); await q.waitForTimeout(300); await shot(q, 'phone_newplanet');
-    await q.context().close();
-  }
-
-  // ---------- 4. motion contact sheets (manual drops) ----------
-  if (want('motion') || want('guide')) {
-    if (want('motion')) {
-    const p = await open(b, 'desk', '&autostart=1&diff=normal');
-    await p.waitForTimeout(2600); // banner gone
-    // stack 3 perfect crates first
-    for (let i = 0; i < 3; i++) { await p.evaluate(() => VQ.dropWhen('p.perfect && Math.abs(p.dx)<2')); await p.waitForTimeout(1300); }
-    await p.evaluate(() => AC.debug.setSpeed(0.35));
-    let clip = await clipAt(p);
-    await p.evaluate(() => VQ.dropWhen('p.perfect && Math.abs(p.dx)<2'));
-    await sheet(p, 'perfect', 12, 40, clip, 6);
-    await p.evaluate(() => AC.debug.setSpeed(1)); await p.waitForTimeout(1200);
-    await p.evaluate(() => AC.debug.setSpeed(0.35)); clip = await clipAt(p);
-    await p.evaluate(() => VQ.dropWhen('p.ok && !p.perfect && Math.abs(p.dx) > w.held.w*0.33'));
-    await sheet(p, 'edge_sway', 18, 60, clip, 6);
-    await p.evaluate(() => AC.debug.setSpeed(1)); await p.waitForTimeout(1500);
-    await p.evaluate(() => AC.debug.setSpeed(0.35)); clip = await clipAt(p); clip.y = Math.max(0, clip.y - 0); clip.height = Math.min(720 - clip.y, clip.height + 200);
-    await p.evaluate(() => VQ.dropWhen('!p.ok && Math.abs(p.dx) < w.held.w*0.75'));
-    await sheet(p, 'miss', 18, 60, clip, 6);
-    await p.evaluate(() => AC.debug.setSpeed(1)); await p.waitForTimeout(2500);
-    // topple: keep landing edges on the right; every drop is captured slowly, the one that topples is kept
-    let toppled = false;
-    for (let i = 0; i < 9 && !toppled; i++) {
-      if (await p.evaluate(() => AC.debug.mode === 'over')) break;
-      await p.evaluate(() => { window._ev = []; AC.debug.setSpeed(0.35); });
-      clip = { x: 240, y: 0, width: 800, height: 720 };
-      await p.evaluate(() => VQ.dropWhen('p.ok && p.dx > w.held.w*0.4'));
-      await sheet(p, 'topple', 18, 70, clip, 6);
-      await p.evaluate(() => AC.debug.setSpeed(1));
-      toppled = await p.evaluate(() => window._ev.some(e => e.type === 'topple'));
-      await p.waitForTimeout(1500);
-    }
-    if (!toppled) errs.push('could not provoke a topple');
-    await p.context().close();
-
-    }
-    // coin collect + grow
-    const q = await open(b, 'desk', '&autostart=1&diff=easy');
-    await q.waitForTimeout(2600);
-    let got = false;
-    for (let i = 0; i < 14 && !got && want('motion'); i++) {
-      const has = await q.evaluate(() => AC.debug.world.coinList.some(c => c.state === 'float'));
-      if (has) {
-        await q.evaluate(() => { AC.debug.world.growCoins = 4; AC.debug.setSpeed(0.4); });
-        await q.evaluate(() => VQ.dropWhen('p.ok && w.coinList.some(c => c.state==="float" && Math.abs(c.x - p.x) < c.r*0.6 && c.y < w.tower.topY)', 6000));
-        await sheet(q, 'coin_grow', 24, 40, { x: 0, y: 0, width: 1280, height: 720 }, 6);
-        await q.evaluate(() => AC.debug.setSpeed(1));
-        got = await q.evaluate(() => window._ev.some(e => e.type === 'coin'));
-      } else {
-        await q.evaluate(() => VQ.dropWhen('p.perfect')); await q.waitForTimeout(1300);
+    // ---------- 3. goal show + level transition ----------
+    if (want('goal')) for (const v of ['land', 'phone']) {
+      for (const z of [0, 3]) {
+        const p = await open(b, v, '&autostart=1&diff=easy&level=' + z);
+        await sleep(2600);
+        await p.evaluate(() => { const w = AC.debug.world; VQ.tower(w.goal - 2, true); AC.debug.setBot(true, 1); });
+        await p.waitForFunction(() => AC.debug.world.phase === 'goal', null, { timeout: 30000 }).catch(() => errs.push(v + ' no goal'));
+        await p.evaluate(() => AC.debug.setBot(false));
+        await sheet(p, v + '_goal_' + ZONES[z], 12, 260, null, 4);
+        await p.waitForFunction(() => { const g = AC.debug.world.ghost; return g && g.wave; }, null, { timeout: 8000 }).catch(() => {});
+        await shot(p, v + '_goal_wave_' + ZONES[z]);
+        await p.waitForFunction(() => AC.debug.world.phase === 'travel', null, { timeout: 15000 }).catch(() => errs.push(v + ' no travel'));
+        await sheet(p, v + '_travel_' + ZONES[z], 12, 140, null, 4);
+        await p.waitForFunction(() => AC.debug.world.phase === 'swing', null, { timeout: 15000 }).catch(() => {});
+        await sleep(300); await shot(p, v + '_next_banner_' + ZONES[z]);
+        await p.context().close();
       }
     }
-    if (!got) errs.push('no coin captured');
-    await q.waitForTimeout(800); await shot(q, 'desk_after_grow');
-    // Easy drop guide, three colours + deuteranopia
-    for (const [name, cond] of [['green', 'p.perfect'], ['white', 'p.ok && !p.perfect && Math.abs(p.dx)>w.held.w*0.3'], ['red', '!p.ok']]) {
-      await q.evaluate(() => AC.debug.setSpeed(1));
-      // freeze the moment the prediction matches (checked every frame at normal speed)
-      const okc = await q.evaluate(c => new Promise(res => {
-        const pred = new Function('p', 'w', 'return (' + c + ')'), t0 = performance.now();
-        const tick = () => { const w = AC.debug.world, p = w.phase === 'swing' && w.held && w.predictLanding();
-          if (p && pred(p, w)) { AC.debug.setSpeed(0.0001); return res(true); }
-          if (performance.now() - t0 > 20000) return res(false); requestAnimationFrame(tick); };
-        tick(); }), cond);
-      if (!okc) errs.push('guide ' + name);
-      await q.waitForTimeout(120);
-      const r = await clipAt(q);
-      const cl = { x: r.x, y: Math.max(0, r.y - 120), width: r.width, height: Math.min(720 - Math.max(0, r.y - 120), r.height + 120) };
-      await shot(q, 'guide_' + name, cl);
-      await q.evaluate(() => {
-        if (!document.getElementById('cvd')) document.body.insertAdjacentHTML('beforeend', '<svg width="0" height="0" style="position:absolute"><filter id="cvd"><feColorMatrix type="matrix" values="0.367 0.861 -0.228 0 0  0.280 0.673 0.047 0 0  -0.012 0.043 0.969 0 0  0 0 0 1 0"/></filter></svg>');
-        document.getElementById('game').style.filter = 'url(#cvd)';
-      });
-      await q.waitForTimeout(80); await shot(q, 'guide_' + name + '_deutan', cl);
-      await q.evaluate(() => { document.getElementById('game').style.filter = ''; AC.debug.setSpeed(1); });
-      await q.waitForTimeout(1600);
-    }
-    await q.context().close();
-  }
 
-  // ---------- 5. custom pictures ----------
-  if (want('custom')) for (const v of ['desk', 'phone']) {
-    const p = await open(b, v);
-    const files = await makePictures(p);
-    await p.click('#btnCustomize'); await p.waitForTimeout(300);
-    const ids = await p.evaluate(() => AC.Assets.SLOTS.map(s => s.id));
-    for (const id of ['hero', 'crate', 'coin', 'bg_moon']) {
-      const i = ids.indexOf(id);
-      const [chooser] = await Promise.all([p.waitForEvent('filechooser'), p.locator('#slotGrid .slot').nth(i).locator('[data-act=pick]').click()]);
-      await chooser.setFiles(files[id]); await p.waitForTimeout(500);
+    // ---------- 4. motion bursts ----------
+    if (want('motion')) for (const z of [0, 3]) {
+      const p = await open(b, 'land', '&autostart=1&diff=normal&level=' + z);
+      const Z = ZONES[z];
+      await sleep(2700);
+      await p.evaluate(() => VQ.tower(3, false)); await sleep(300);
+      // drop + perfect + lantern pop
+      await p.evaluate(() => AC.debug.setSpeed(0.35));
+      let clip = await clipTop(p, 6, 6);
+      await p.evaluate(() => VQ.dropWhen('p.perfect && Math.abs(p.dx)<2'));
+      await sheet(p, Z + '_perfect', 18, 35, clip, 6);
+      await run(p); await sleep(1400);
+      await p.evaluate(() => AC.debug.setSpeed(0.35)); clip = await clipTop(p, 6, 5);
+      await p.evaluate(() => VQ.dropWhen('p.ok && !p.perfect && Math.abs(p.dx) > w.held.w*0.33'));
+      await sheet(p, Z + '_edge', 18, 60, clip, 6);
+      await run(p); await sleep(1500);
+      await p.evaluate(() => AC.debug.setSpeed(0.35)); clip = await clipTop(p, 7, 7);
+      await p.evaluate(() => VQ.dropWhen('!p.ok && Math.abs(p.dx) < w.held.w*0.75'));
+      await sheet(p, Z + '_miss', 18, 60, clip, 6);
+      await run(p); await sleep(2500);
+      let toppled = false;
+      for (let i = 0; i < 9 && !toppled; i++) {
+        if (await p.evaluate(() => AC.debug.mode === 'over')) break;
+        await p.evaluate(() => { window._ev = []; AC.debug.world.hearts = AC.debug.world.maxHearts; AC.debug.setSpeed(0.35); });
+        await p.evaluate(() => VQ.dropWhen('p.ok && p.dx > w.held.w*0.4'));
+        await sheet(p, Z + '_topple', 18, 70, { x: 180, y: 0, width: 600, height: 540 }, 6);
+        await run(p);
+        toppled = await p.evaluate(() => window._ev.some(e => e.type === 'topple'));
+        await sleep(1500);
+      }
+      if (!toppled) errs.push(Z + ': could not provoke a topple');
+      // apple collect (+ pie toast: 4 apples already in the pie)
+      let got = false;
+      await p.evaluate(() => VQ.tower(3, z => 0));
+      for (let i = 0; i < 14 && !got; i++) {
+        const has = await p.evaluate(() => AC.debug.world.appleList.some(c => c.state === 'float'));
+        if (has) {
+          await p.evaluate(() => { window._ev = []; AC.debug.world.pieApples = 4; AC.debug.world.hearts = 1; AC.debug.setSpeed(0.4); });
+          const ok = await p.evaluate(() => VQ.dropWhen('p.ok && w.appleList.some(c => c.state==="float" && Math.abs(c.x - p.x) < c.r*0.6 && c.y < w.tower.topY)', 6000));
+          if (ok) {
+            await sheet(p, Z + '_apple_pie', 24, 45, null, 6);
+            got = await p.evaluate(() => window._ev.some(e => e.type === 'apple'));
+          }
+          await run(p); await sleep(1200);
+        } else { await p.evaluate(() => VQ.dropWhen('p.perfect')); await sleep(1300); }
+      }
+      if (!got) errs.push(Z + ': no apple captured');
+      await p.context().close();
     }
-    await shot(p, v + '_custom_filled');
-    await p.click('#scrCustom .btn-back'); await p.waitForTimeout(300);
-    await p.click('#btnPlay'); await p.waitForTimeout(400);
-    await p.evaluate(() => { AC.debug.setBot(true, 0.85); AC.debug.setSpeed(3); });
-    await p.waitForFunction(() => AC.debug.world.placed >= 6, null, { timeout: 40000 }).catch(() => errs.push('custom slow'));
-    await p.evaluate(() => AC.debug.setSpeed(1)); await p.waitForTimeout(400);
-    await shot(p, v + '_custom_play');
-    await p.context().close();
-  }
 
-  // ---------- 6. particle sprites close-up per planet ----------
-  if (want('particles')) {
-    const p = await open(b, 'desk', '&autostart=1&diff=easy');
-    for (const lv of [0, 1, 2, 3]) {
-      await p.evaluate(l => AC.debug.gotoLevel(l), lv); await p.waitForTimeout(3500);
-      await p.evaluate(() => { const w = AC.debug.world, L = w.layout; ['star', 'sparkle', 'puff', 'coinbit', 'dust', 'ice', 'snow', 'petal', 'spark', 'heart'].forEach((s, i) =>
-        AC.Game.weather.burst(s, L.cx - 300 + i * 66, L.groundY - L.unit * 2.4, 4, { speed: 30, life: 3, size: 26, gravity: 0, layer: 'front' })); });
-      await p.waitForTimeout(250); await shot(p, 'particles_' + lv, { x: 260, y: 200, width: 760, height: 400 });
+    // ---------- 5. custom pictures ----------
+    if (want('custom')) for (const v of ['land', 'phone']) {
+      const p = await open(b, v);
+      const files = await makePictures(p);
+      await p.click('#btnCustomize'); await sleep(300);
+      const ids = await p.evaluate(() => AC.Assets.SLOTS.map(s => s.id));
+      for (const id of ['hero', 'crate', 'apple', 'bg_night']) {
+        const i = ids.indexOf(id);
+        const [chooser] = await Promise.all([p.waitForEvent('filechooser'), p.locator('#slotGrid .slot').nth(i).locator('[data-act=pick]').click()]);
+        await chooser.setFiles(files[id]); await sleep(700);
+      }
+      await shot(p, v + '_custom_filled');
+      await p.click('#scrCustom .btn-back'); await sleep(300);
+      await p.click('#btnPlay'); await sleep(2600);
+      for (const z of [0, 3]) {
+        await p.evaluate(z => AC.debug.gotoLevel(z), z); await sleep(2600);
+        await p.evaluate(z => VQ.tower(z ? 13 : 5, z === 3, true), z); await sleep(1200);
+        await freeze(p); await sleep(100); await shot(p, v + '_custom_play_' + ZONES[z]); await run(p);
+      }
+      await p.evaluate(() => { for (const s of AC.Assets.SLOTS) AC.Assets.clearCustom && AC.Assets.clearCustom(s.id); });
+      await p.context().close();
     }
-    await p.context().close();
+  } finally {
+    console.log(errs.length ? 'NOTES/ERRORS:\n' + errs.join('\n') : 'no console errors');
+    await b.close(); srv.kill();
   }
-
-  console.log(errs.length ? 'NOTES/ERRORS:\n' + errs.join('\n') : 'no console errors');
-  await b.close();
 })();

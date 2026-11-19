@@ -43,11 +43,15 @@ function timingPlayer(AC, seed, p) {
     const bad = w.stats.misses, perf = w.stats.perfect;
     if (lastMode) { const b = stats.byMode[lastMode] || (stats.byMode[lastMode] = { n: 0, miss: 0 }); b.n++; b.miss += bad - snap; }
     snap = bad;
+    // darkness: a dim tower top is harder to judge (same law as AC.Bot, own constant so CONFIG proposals can't tune the model)
+    const pl = w.predictLanding(), lit = pl && typeof pl.lit === 'number' ? pl.lit : 1;
+    const dk = 1 + (p.darkK === undefined ? 0.7 : p.darkK) * (1 - M.max(0, M.min(1, lit)));
+    stats.litSum = (stats.litSum || 0) + lit; stats.plans = (stats.plans || 0) + 1;
     plan = {
       look: rng.range(p.look[0], p.look[1]) + (rng.chance(p.distract || 0) ? rng.range(2, 6) : 0),
       react: rng.range(p.react[0], p.react[1]),
-      k: M.max(0.3, M.min(1.25, p.k + rng.gauss() * p.kSd)),
-      aim: rng.gauss() * p.aimSd * c.w,
+      k: M.max(0.3, M.min(1.25, p.k + rng.gauss() * p.kSd * dk)),
+      aim: rng.gauss() * p.aimSd * c.w * dk,
       mode: x < (p.random || 0) ? 'random' : x < (p.random || 0) + (p.late || 0) ? 'late' : 'time',
       pass: rng.chance(p.pass || 0) ? 1 : 0, prev: null, randT: 0
     };
@@ -100,6 +104,33 @@ function spamPlayer(AC, seed) {
     name: 'spam', stats,
     step(dt, w) { next -= dt; if (next <= 0) { next = rng.range(0.05, 0.15); stats.taps++; w.drop(); } }
   };
+}
+
+/** (c2) metronome: taps every `iv` s exactly (never looks). */
+function intervalPlayer(AC, seed, iv, off) {
+  let next = off === undefined ? 0.37 * iv : off; const stats = { taps: 0 };
+  return { name: 'every' + iv, stats, step(dt, w, t) { if (t >= next) { next += iv; stats.taps++; w.drop(); } } };
+}
+/** (c3) rhythm after spawn: taps exactly `d` s after each new crate appears (tries to phase-lock to the swing). */
+function delayPlayer(AC, seed, d) {
+  let crate = null, tw = 0; const stats = { taps: 0 };
+  return { name: 'delay' + d, stats, step(dt, w) {
+    if (w.phase !== 'swing' || !w.held) { crate = null; return; }
+    if (crate !== w.held) { crate = w.held; tw = 0; }
+    tw += dt; if (tw >= d) { stats.taps++; w.drop(); crate = null; tw = -1e9; }
+  } };
+}
+/** (c4) "tap when Ziggy is in the middle": taps as soon as the rocket crosses cx (no anticipation, no aim). */
+function centrePlayer(AC, seed, react) {
+  let prev = null, pend = -1, crate = null; const stats = { taps: 0 };
+  return { name: 'centre', stats, step(dt, w) {
+    if (pend >= 0) { pend -= dt; if (pend < 0) { stats.taps++; w.drop(); pend = -1; } return; }
+    if (w.phase !== 'swing' || !w.held) { prev = null; crate = null; return; }
+    if (crate !== w.held) { crate = w.held; prev = null; }
+    const e = w.saucer.x - w.layout.cx;
+    if (prev !== null && M.sign(e) !== M.sign(prev)) pend = react || 0;
+    prev = e;
+  } };
 }
 
 /** (d) "wait for perfect": frame-perfect, drops the first frame predictLanding().perfect is true. */
@@ -160,4 +191,4 @@ function appleGreed(AC, seed, o) {
   };
 }
 
-module.exports = { botPlayer, kidPlayer, adultPlayer, spamPlayer, perfectWaiter, appleGreed, landXAfter };
+module.exports = { botPlayer, kidPlayer, adultPlayer, spamPlayer, intervalPlayer, delayPlayer, centrePlayer, perfectWaiter, appleGreed, landXAfter };

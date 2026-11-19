@@ -1,15 +1,33 @@
 // Functional QA suite for Ziggy's Apple Castle.
-// Run: node tests/e2e/functional.js [sectionFilter]      (LONG_RUN_S=60 by default)
+// Run: node tests/e2e/functional.js [sectionFilter]      (LONG_RUN_S=60 by default: ≈16 simulated minutes at ×16)
+// Serves game/ with `python3 -m http.server` on a free loopback port (like GitHub Pages: a real http origin).
 // Prints PASS/FAIL per check, screenshots in tests/out/func_*.png, exits 1 on any FAIL.
-// Sections: static (Go wrapper + iOS) · boot · menus · input · touch · rules · hearts · pause · settings ·
-// best · pictures · layout (6 sizes / DPRs) · long bot run at ?speed=16.
+// Sections: static (Go wrapper + iOS) · boot · menus · extras (volume, full screen, Score Card) · input · pointer ·
+// touch · rules · rules2 (combo cap, glow apples, pie cap) · zones (4 times of day + loop, light monotonic) · hearts ·
+// pause · settings · storage keys · best · pictures (7 slots) · light · layout (10 sizes / DPRs) · safe area · rotation ·
+// long bot run at ?speed=16.
 'use strict';
 const { chromium } = require('playwright');
-const path = require('path'), fs = require('fs');
+const path = require('path'), fs = require('fs'), net = require('net'), http = require('http');
+const { spawn } = require('child_process');
 const ROOT = path.resolve(__dirname, '../..');
-const GAME = 'file://' + path.join(ROOT, 'game/index.html');
+let GAME = 'file://' + path.join(ROOT, 'game/index.html');   // replaced by the http URL once the server is up
 const OUT = path.resolve(__dirname, '../out'); fs.mkdirSync(OUT, { recursive: true });
 const LONG_RUN_S = +(process.env.LONG_RUN_S || 60);
+let server = null;
+function freePort() { return new Promise((res, rej) => { const s = net.createServer(); s.unref(); s.on('error', rej); s.listen(0, '127.0.0.1', () => { const p = s.address().port; s.close(() => res(p)); }); }); }
+async function startServer() {
+  const port = await freePort();
+  server = spawn('python3', ['-m', 'http.server', String(port), '--bind', '127.0.0.1', '--directory', path.join(ROOT, 'game')], { stdio: 'ignore' });
+  const url = `http://127.0.0.1:${port}/index.html`;
+  for (let i = 0; i < 100; i++) {
+    const ok = await new Promise(r => http.get(url, res => { res.resume(); r(res.statusCode === 200); }).on('error', () => r(false)));
+    if (ok) { GAME = url; return url; }
+    await new Promise(r => setTimeout(r, 100));
+  }
+  throw new Error('python3 http.server did not start on port ' + port);
+}
+function stopServer() { if (server) { try { server.kill(); } catch (e) { /* gone */ } server = null; } }
 
 let nPass = 0, nFail = 0;
 const fails = [];
@@ -116,6 +134,10 @@ async function sStatic() {
   check('static/app: single-instance mutex + WebView2-missing browser fallback', go.includes('SingleInstance') && go.includes('FileProtocolHandler'));
   const fallbackUrlHasApp = /url := .*\?app=1/.test(go) && /FileProtocolHandler", url\)/.test(go);
   check('static/app: browser fallback does not pass ?app=1 (Quit button would not work in a tab)', !fallbackUrlHasApp);
+  check('static/app: the http server listens on loopback only (no 0.0.0.0 / ":port")', !/Listen\("tcp", "(0\.0\.0\.0)?:/.test(go) && /net\.Listen\("tcp", "127\.0\.0\.1:/.test(go));
+  check('static/app: store caps a value (12 MB) and rejects bad keys on Set / Del / All', /len\(v\) > 12<<20/.test(go) && (go.match(/keyRe\.MatchString\(k\)/g) || []).length >= 3);
+  check('static/app: WebView2 profile in %LOCALAPPDATA%\\ZiggysAppleCastle\\WebView2, Debug off', /filepath\.Join\(localAppData, "ZiggysAppleCastle", "WebView2"\)/.test(go) && /Debug:\s+false/.test(go));
+  check('static/app: full screen and quit run on the UI thread (w.Dispatch)', /ffFullscreen[\s\S]{0,120}w\.Dispatch/.test(go) && /ffQuit[\s\S]{0,80}w\.Dispatch/.test(go));
   const html = fs.readFileSync(path.join(ROOT, 'game/index.html'), 'utf8');
   check('static/iOS: viewport no zoom + viewport-fit=cover', /user-scalable=no/.test(html) && /maximum-scale=1/.test(html) && /viewport-fit=cover/.test(html));
   check('static/iOS: apple-mobile-web-app-capable, touch icon and manifest', /apple-mobile-web-app-capable/.test(html) && /apple-touch-icon/.test(html) && /manifest\.webmanifest/.test(html));
@@ -629,8 +651,21 @@ async function sPictures() {
   check('pictures: the frame is actually drawn (not blank)', px > 30, Math.round(px));
   await p.evaluate(() => AC.debug.gotoLevel(1)); await sleep(1500);
   check('pictures: times of day without a custom picture still use the default scene', await p.evaluate(() => !AC.Game.renderer.background(1).custom));
+  // the other three times of day (all 7 slots get a picture)
+  await p.evaluate(() => AC.Game.toTitle()); await p.click('#btnCustomize'); await waitUi(p, 'scrCustom');
+  for (const sl of ['bg_noon', 'bg_sunset', 'bg_night']) {
+    const t = await pick(sl, files.opaque), s2 = await stored(sl);
+    check(`pictures: ${sl} background saved (JPEG, ≤ 1600 px)`, /saved/i.test(t) && s2 && Math.max(s2.w, s2.h) <= 1600, { t, s2 });
+  }
+  const tags = await p.evaluate(() => [...document.querySelectorAll('#slotGrid .slot .tag')].map(t => /Your picture/.test(t.textContent)));
+  check('pictures: all 7 cards show "Your picture"', tags.length === 7 && tags.every(Boolean), tags);
+  await p.click('#scrCustom .btn-back'); await waitUi(p, 'scrTitle');
+  await p.evaluate(() => { AC.Game.startGame(); AC.debug.gotoLevel(3); }); await sleep(2000);
+  const nb = await p.evaluate(() => { const R = AC.Game.renderer; return { custom: [0, 1, 2, 3].map(z => !!R.background(z).custom), dark: R._darkA, vis: R.vis.cur, errors: AC.debug.stats.errors.length }; });
+  await p.screenshot({ path: OUT + '/func_custom_night.png' });
+  check('pictures: every time of day uses its picture, and the darkness still falls over the Night picture', nb.custom.every(Boolean) && nb.vis === 3 && nb.dark > 0.3 && nb.errors === 0, nb);
   await p.reload(); await instrument(p);
-  check('pictures: custom pictures survive a reload', await p.evaluate(() => ['hero', 'crate', 'apple', 'bg_dawn'].every(s => AC.Assets.hasCustom(s))));
+  check('pictures: custom pictures survive a reload (all 7 slots)', await p.evaluate(() => AC.Assets.SLOTS.every(s => AC.Assets.hasCustom(s.id)) && AC.Assets.SLOTS.length === 7));
   await p.click('#btnCustomize'); await waitUi(p, 'scrCustom');
   await p.click('#slotGrid .slot:nth-child(1) [data-act=reset]');
   const r1 = await p.evaluate(() => ({ hero: AC.Assets.hasCustom('hero'), k: localStorage.getItem('kac:img_hero'), shape: localStorage.getItem('kac:shape_hero'), crate: AC.Assets.hasCustom('crate') }));
@@ -653,7 +688,11 @@ async function sLayout() {
     ['1920x1080', { width: 1920, height: 1080 }, 1, false],
     ['phone_390x844', { width: 390, height: 844 }, 3, true],
     ['ipad_port_820x1180', { width: 820, height: 1180 }, 2, true],
-    ['ipad_land_1180x820', { width: 1180, height: 820 }, 2, true]
+    ['ipad_land_1180x820', { width: 1180, height: 820 }, 2, true],
+    ['phone_land_844x390', { width: 844, height: 390 }, 3, true],
+    ['ipad_1024x768', { width: 1024, height: 768 }, 2, true],
+    ['ipad_pro_1366x1024', { width: 1366, height: 1024 }, 2, true],
+    ['ipad_pro_port_1024x1366', { width: 1024, height: 1366 }, 2, true]
   ];
   for (const [name, vp, dpr, mobile] of sizes) {
     const tag = `${name}@${dpr}x`;
@@ -808,6 +847,7 @@ async function sLongRun() {
   const stats = await p.evaluate(() => ({ games: AC.debug.stats.games, levels: AC.debug.stats.levels, scores: AC.debug.stats.scores, times: AC.debug.stats.times, errors: AC.debug.stats.errors }));
   await p.screenshot({ path: OUT + '/func_longrun.png' });
   console.log('      long run:', JSON.stringify({ realS: LONG_RUN_S, simMin: +(simT / 60).toFixed(1), maxParticles: maxP, maxFx, maxCrates, maxLevel, stuckS: stuck, stats }));
+  check('long run: several simulated minutes played (≥ 5 min)', simT / 60 >= 5, +(simT / 60).toFixed(1));
   check('long run: ≥ 3 games completed and auto-restarted', stats.games >= 3, stats.games);
   check('long run: every finished game has a score and a sane length (> 15 s)', stats.scores.every(s => s > 0) && stats.times.every(t => t > 15), { scores: stats.scores, times: stats.times });
   check('long run: never stuck in swing (a drop at least every 3 s real time at ×16)', stuck < 3, stuck);
@@ -820,10 +860,324 @@ async function sLongRun() {
   await ctx.close();
 }
 
+// ======================================================================= extras: volume, full screen, Score Card
+async function sExtras() {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+  const { page: p, errs } = await open(null, '?seed=2&diff=normal', ctx);   // no ?mute: the volume reaches AC.Audio
+  await p.click('#btnSettings'); await waitUi(p, 'scrSettings');
+  check('extras: Settings has a Volume slider and − / + buttons', await visible(p, '#setVolume') && await p.evaluate(() => document.querySelectorAll('#scrSettings .vol-step').length === 2));
+  await p.fill('#setVolume', '30'); await p.dispatchEvent('#setVolume', 'input');
+  let v = await p.evaluate(() => ({ ls: localStorage.getItem('kac:volume'), a: AC.Audio.volume, label: document.getElementById('setVolumeVal').textContent }));
+  check('extras: volume 30 % → kac:volume = 0.30, applied to AC.Audio, label 30%', v.ls === '0.30' && Math.abs(v.a - 0.3) < 0.01 && v.label === '30%', v);
+  await p.click('.vol-step[data-d="-1"]');
+  v = await p.evaluate(() => ({ ls: localStorage.getItem('kac:volume'), a: AC.Audio.volume }));
+  check('extras: "−" lowers the volume by 10 % (→ 0.20)', v.ls === '0.20' && Math.abs(v.a - 0.2) < 0.01, v);
+  await p.click('.vol-step[data-d="-1"]'); await p.click('.vol-step[data-d="-1"]'); await p.click('.vol-step[data-d="-1"]');
+  check('extras: volume clamps at 0 %', await p.evaluate(() => localStorage.getItem('kac:volume') === '0.00' && AC.Audio.volume === 0));
+  await p.fill('#setVolume', '70'); await p.dispatchEvent('#setVolume', 'input');
+  // full screen
+  const fsRow = await visible(p, '#rowFull');
+  check('extras: Full screen row shown on desktop (fullscreenEnabled)', fsRow);
+  if (fsRow) {
+    await p.click('label.set:has(#setFull)'); await sleep(500);
+    const f1 = await p.evaluate(() => ({ game: AC.Game.fullscreen, el: !!document.fullscreenElement, box: document.getElementById('setFull').checked }));
+    check('extras: Full screen toggle → document full screen, checkbox on', f1.game && f1.el && f1.box, f1);
+    await p.keyboard.press('F11'); await sleep(500);
+    const f2 = await p.evaluate(() => ({ game: AC.Game.fullscreen, el: !!document.fullscreenElement, box: document.getElementById('setFull').checked }));
+    check('extras: F11 leaves full screen again, checkbox off', !f2.game && !f2.el && !f2.box, f2);
+    check('extras: full screen is not stored in settings', await p.evaluate(() => !('fullscreen' in JSON.parse(localStorage.getItem('kac:settings') || '{}'))));
+  }
+  await p.click('#scrSettings .btn-back'); await waitUi(p, 'scrTitle');
+  await p.reload(); await instrument(p);
+  check('extras: volume survives a reload (70 %)', await p.evaluate(() => Math.abs(AC.Audio.volume - 0.7) < 0.01 && document.getElementById('setVolume').value === '70'));
+  // Score Card on game over
+  await startPlaying(p, true);
+  await killNow(p, 432);
+  await sleep(800);
+  check('extras: game over shows the Score Card button', await visible(p, '#btnScoreCard'));
+  const s0 = await starts(p);
+  await p.click('#btnScoreCard');
+  const opened = await p.waitForSelector('#scScreen:not(.hidden)', { timeout: 10000 }).then(() => true, () => false);
+  await sleep(300);
+  const sc = await p.evaluate(() => window.__scoreCard);
+  check('extras: Score Card opens a 1080×1350 picture with the score in the share text, no restart', opened && sc && sc.w === 1080 && sc.h === 1350 && /I scored 432 /.test(sc.text) && /^http:\/\/127\.0\.0\.1/.test(sc.text.split(' ').pop()) && await mode(p) === 'over' && await starts(p) === s0, sc && sc.text);
+  await p.keyboard.press('Escape'); await sleep(200);
+  check('extras: Esc closes the card, game over screen still up', await p.evaluate(() => document.getElementById('scScreen').classList.contains('hidden')) && await ui(p) === 'scrOver' && await mode(p) === 'over');
+  // keyboard on the open card: Enter / Space must act on the card, never start a game behind it
+  for (const key of ['Enter', 'Space']) {
+    await p.click('#btnScoreCard'); await p.waitForSelector('#scScreen:not(.hidden)', { timeout: 10000 }).catch(() => {});
+    await sleep(200);
+    const s1 = await starts(p), focus = await p.evaluate(() => document.activeElement && (document.activeElement.id || document.activeElement.tagName));
+    await p.keyboard.press(key); await sleep(300);
+    const r = await p.evaluate(() => ({ mode: AC.Game.mode, card: !document.getElementById('scScreen').classList.contains('hidden') }));
+    check(`extras: ${key} with the Score Card open (focus ${focus}) does not start a game behind the card`, (await starts(p)) === s1 && r.mode === 'over', Object.assign({ starts: (await starts(p)) - s1 }, r));
+    if (r.mode !== 'over') {
+      check(`extras: (${key}) if a game did start, the Score Card is not left covering it`, !r.card, r);
+      await p.evaluate(() => { const m = document.getElementById('scScreen'); m.classList.add('hidden'); });
+      await killNow(p, 432); await sleep(800);
+    } else { await p.click('#scClose'); await sleep(150); }
+  }
+  await p.evaluate(() => { const m = document.getElementById('scScreen'); if (m && !m.classList.contains('hidden')) document.getElementById('scClose').click(); });
+  const s2 = await starts(p);
+  await p.click('#btnAgain');
+  check('extras: after closing the card, Play Again starts once', await waitMode(p, 'playing') && await starts(p) === s2 + 1);
+  check('extras: no console errors', errs.length === 0, errs.slice(0, 3));
+  await ctx.close();
+}
+
+// ======================================================================= pointer events (synthetic pointerdown on every surface)
+async function sPointer() {
+  const { page: p, errs, ctx } = await open({}, '?mute=1&seed=8&diff=normal');
+  await startPlaying(p);
+  const pd = (sel, type) => p.evaluate(([s, t]) => {
+    const el = document.querySelector(s), r = el.getBoundingClientRect();
+    el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, button: 0, pointerType: t || 'mouse', pointerId: 7, isPrimary: true, clientX: r.left + r.width / 2, clientY: r.top + r.height * 0.8 }));
+  }, [sel, type]);
+  let d0 = await drops(p);
+  await pd('#game'); await sleep(120);
+  check('pointer: pointerdown (mouse) on the canvas drops one crate', await drops(p) === d0 + 1);
+  await holding(p); d0 = await drops(p);
+  await pd('#game', 'touch'); await sleep(120);
+  check('pointer: pointerdown (touch) on the canvas drops one crate', await drops(p) === d0 + 1);
+  await holding(p); d0 = await drops(p);
+  await pd('#game', 'pen'); await sleep(120);
+  check('pointer: pointerdown (pen / Apple Pencil) on the canvas drops one crate', await drops(p) === d0 + 1);
+  await holding(p); d0 = await drops(p);
+  for (const sel of ['#btnPause', '#btnMuteHud', '#hud', '#btnPause svg']) await pd(sel, 'touch');
+  await sleep(200);
+  check('pointer: pointerdown on the HUD (buttons, icons, the bar) never drops', await drops(p) === d0 && await mode(p) === 'playing');
+  await p.evaluate(() => AC.UI.toast('Hello', 3000));
+  await pd('#game', 'touch'); await sleep(150);
+  check('pointer: a tap on the stage while a toast is showing still drops', await drops(p) === d0 + 1);
+  await holding(p); d0 = await drops(p);
+  await p.evaluate(() => AC.Game.pause());
+  for (const sel of ['#scrPause', '#scrPause .panel', '#game']) await pd(sel, 'touch');
+  await sleep(150);
+  check('pointer: pointerdown on the Pause screen / canvas while paused never drops', await drops(p) === d0 && await mode(p) === 'paused');
+  await p.evaluate(() => AC.Game.resume());
+  await p.evaluate(() => AC.Game.toTitle()); await sleep(200);
+  const t0 = await starts(p);
+  for (const sel of ['#scrTitle', '#game']) await pd(sel, 'touch');
+  await sleep(200);
+  check('pointer: pointerdown on the title (outside the buttons) neither starts nor drops', await starts(p) === t0 && await mode(p) === 'title');
+  check('pointer: no console errors', errs.length === 0, errs.slice(0, 3));
+  await ctx.close();
+}
+
+// ======================================================================= scoring rules 2: combo cap, glow apples, pie cap
+async function sRules2() {
+  const { page: p, errs, ctx } = await open({}, '?mute=1&seed=13&diff=normal');
+  await startPlaying(p);
+  const snap = () => p.evaluate(() => ({ s: AC.debug.world.score, n: window._ev.length, light: AC.debug.world.light }));
+  const after = n => p.evaluate(n => { const ev = window._ev.slice(n), w = AC.debug.world; return { s: w.score, combo: w.combo, ap: ev.filter(e => e.type === 'apple').reduce((a, e) => a + e.points, 0), perf: ev.filter(e => e.type === 'perfect').map(e => e.combo), apples: ev.filter(e => e.type === 'apple'), pie: ev.filter(e => e.type === 'pie'), land: ev.filter(e => e.type === 'land').length }; }, n);
+  for (const c0 of [4, 5, 9]) {
+    await holding(p);
+    await p.evaluate(c => { AC.debug.world.combo = c; }, c0);
+    const b = await snap();
+    await armDrop(p, 'perfect');
+    const a = await after(b.n);
+    const exp = 10 + 10 * Math.min(c0 + 1, 5) + a.ap;
+    check(`rules2: perfect with combo ${c0} → combo ${c0 + 1}, +10 + ${10 * Math.min(c0 + 1, 5)} (cap ×5)`, a.perf.length === 1 && a.perf[0] === c0 + 1 && a.s - b.s === exp, { delta: a.s - b.s, exp, perf: a.perf });
+  }
+  const hudCombo = await p.evaluate(() => Math.min(5, AC.debug.world.combo));
+  check('rules2: HUD combo text is capped at ×5', hudCombo === 5, hudCombo);
+  // apples by light: noon (light 1) → 5, night (light < 0.5) → 10 glow
+  async function catchApple(level) {
+    await p.evaluate(l => { AC.debug.gotoLevel(l); AC.debug.world.hearts = 99; }, level);
+    await holding(p);
+    for (let i = 0; i < 12; i++) {
+      await p.waitForFunction(() => AC.debug.world.appleList.some(c => c.state === 'float'), null, { timeout: 2500 }).catch(() => {});
+      const has = await p.evaluate(() => AC.debug.world.appleList.some(c => c.state === 'float'));
+      const b = await snap();
+      await armDrop(p, has ? 'apple' : 'perfect');
+      const a = await after(b.n);
+      if (a.apples.length) return { b, a };
+    }
+    return null;
+  }
+  let r = await catchApple(1);
+  check('rules2: Noon (light ≥ 0.5): an apple = +5, not glowing', r && r.b.light >= 0.5 && r.a.apples.every(e => e.points === 5 && !e.glow), r && { light: r.b.light, pts: r.a.apples.map(e => e.points) });
+  const g0 = await p.evaluate(() => AC.debug.world.stats.glowApples);
+  r = await catchApple(3);
+  const g1 = await p.evaluate(() => AC.debug.world.stats.glowApples);
+  check('rules2: Night (light < 0.5): an apple = +10 glow apple (event glow, stats.glowApples)', r && r.b.light < 0.5 && r.a.apples.every(e => e.points === 10 && e.glow) && g1 > g0, r && { light: r.b.light, pts: r.a.apples.map(e => e.points), glow: g1 - g0 });
+  check('rules2: night apples are drawn with a glow flag while floating', await p.evaluate(() => AC.debug.world.appleList.filter(c => c.state === 'float').every(c => c.glow)));
+  // pie at full hearts: no extra heart above the max
+  await holding(p);
+  await p.evaluate(() => { const w = AC.debug.world; w.hearts = w.maxHearts; w.pieApples = 4; });
+  let pie = null;
+  for (let i = 0; i < 12 && !pie; i++) {
+    await p.waitForFunction(() => AC.debug.world.appleList.some(c => c.state === 'float'), null, { timeout: 2500 }).catch(() => {});
+    const has = await p.evaluate(() => AC.debug.world.appleList.some(c => c.state === 'float'));
+    const b = await snap();
+    await p.evaluate(() => { const w = AC.debug.world; if (w.hearts < w.maxHearts) w.hearts = w.maxHearts; });
+    await armDrop(p, has ? 'apple' : 'perfect');
+    const a = await after(b.n);
+    if (a.pie.length) pie = Object.assign({}, a.pie[0], await p.evaluate(() => ({ h: AC.debug.world.hearts, max: AC.debug.world.maxHearts, pa: AC.debug.world.pieApples })));
+  }
+  check('rules2: a pie at full hearts → gained:false, hearts stay at the max, counter back to 0', pie && pie.gained === false && pie.h === pie.max && pie.pa <= 1, pie);
+  check('rules2: no console errors', errs.length === 0 && await p.evaluate(() => AC.debug.stats.errors.length === 0), errs.slice(0, 3));
+  await ctx.close();
+}
+
+// ======================================================================= all 4 times of day + loop, light monotonic
+async function sZones() {
+  const { page: p, errs, ctx } = await open({ viewport: { width: 960, height: 540 } }, '?mute=1&seed=17&diff=easy');
+  await startPlaying(p);
+  await p.evaluate(() => {
+    const G = AC.Game, st = G.step; window._lt = [];
+    G.step = function () {
+      const r = st.apply(this, arguments), w = this.world;
+      if (this.mode === 'playing' && w) {
+        const A = window._lt; let L = A[A.length - 1];
+        if (!L || L.level !== w.level) { L = { level: w.level, zone: w.zone, loop: w.loop, start: w.planet.light, end: w.planet.lightEnd, first: w.light, prev: w.light, ups: 0, downs: 0, maxUp: 0, maxDown: 0, n: 0, goal: w.goal, swingW: w.planet.swingW, vis: [], wz: [], minL: w.light }; A.push(L); }
+        else {
+          const d = w.light - L.prev;
+          if (d > 1e-7) { L.ups++; L.maxUp = Math.max(L.maxUp, d); } else if (d < -1e-7) { L.downs++; L.maxDown = Math.max(L.maxDown, -d); }
+          L.prev = w.light; L.n++; L.last = w.light; L.minL = Math.min(L.minL, w.light); L.dayT = w.dayT;
+          if (L.n === 240) { L.vis = this.renderer.vis.cur; L.wz = this.weather.zone; L.music = AC.Audio._zone != null ? AC.Audio._zone : null; }
+        }
+      }
+      return r;
+    };
+    AC.debug.setBot(true, 1); AC.debug.setSpeed(8);
+  });
+  const ok = await p.waitForFunction(() => AC.debug.world.level >= 4 && AC.debug.world.placed >= 3, null, { timeout: 240000 }).then(() => true, () => false);
+  await p.evaluate(() => AC.debug.setSpeed(1));
+  const R = await p.evaluate(() => ({ lt: window._lt, ups: window._ev.filter(e => e.type === 'levelUp').map(e => [e.level, e.zone]), goals: window._ev.filter(e => e.type === 'goal').map(e => e.bonus), ghosts: window._ev.filter(e => e.type === 'ghost').length, perf: window._ev.filter(e => e.type === 'perfect').length, lant: window._ev.filter(e => e.type === 'lantern').length, w: { level: AC.debug.world.level, zone: AC.debug.world.zone, loop: AC.debug.world.loop, goal: AC.debug.world.goal, phase: AC.debug.world.phase }, mode: AC.Game.mode }));
+  check('zones: a perfect bot plays Dawn → Noon → Sunset → Night → Dawn (round 2)', ok && JSON.stringify(R.ups) === JSON.stringify([[1, 1], [2, 2], [3, 3], [4, 0]]), { ok, ups: R.ups, w: R.w, mode: R.mode });
+  check('zones: 4 goal shows with bonuses 100 / 200 / 300 / 400 and Granny Boo each time', JSON.stringify(R.goals) === '[100,200,300,400]' && R.ghosts === 4, { goals: R.goals, ghosts: R.ghosts });
+  check('zones: round 2 Dawn: loop 1, goal 10 + 1 = 11, rocket swings faster than round 1', R.w.loop === 1 && R.w.goal === 11 && R.lt.length >= 5 && R.lt[4].swingW > R.lt[0].swingW, { loop: R.w.loop, goal: R.w.goal, sw: R.lt.map(l => +l.swingW.toFixed(2)) });
+  const vis = R.lt.slice(0, 5).map(l => [l.zone, l.vis, l.wz]);
+  check('zones: renderer scene and weather switch to each time of day', vis.every(([z, v, wz]) => v === z && wz === z), vis);
+  const names = ['dawn', 'noon', 'sunset', 'night', 'dawn2'];
+  for (let i = 0; i < Math.min(5, R.lt.length); i++) {
+    const L = R.lt[i], dir = Math.sign(L.end - L.start) || Math.sign(L.end - L.first);
+    const against = dir > 0 ? L.downs : L.ups, maxAgainst = dir > 0 ? L.maxDown : L.maxUp;
+    check(`zones: light monotonic within ${names[i]} (${L.first.toFixed(2)} → ${(L.last || 0).toFixed(2)}, target ${L.start} → ${L.end})`, against === 0 || maxAgainst < 1e-5, { ups: L.ups, downs: L.downs, maxAgainst });
+  }
+  const starts4 = R.lt.slice(0, 4).map(l => +l.first.toFixed(2)), ends4 = R.lt.slice(0, 4).map(l => +(l.last || 0).toFixed(2));
+  check('zones: light starts ≈ 0.85 / 1.0 / 0.55 / 0.3 and ends ≈ 1.0 / 0.55 / 0.3 / 0.24', [0.85, 1, 0.55, 0.3].every((v, i) => Math.abs(starts4[i] - v) < 0.06) && [1, 0.55, 0.3, 0.24].every((v, i) => Math.abs(ends4[i] - v) < 0.06), { starts4, ends4 });
+  check('zones: every perfect hung a lantern over the whole day', R.perf > 0 && R.perf === R.lant, { perf: R.perf, lant: R.lant });
+  // night at its darkest is still readable; lanterns keep the top lit
+  await p.evaluate(() => { AC.debug.setBot(false); AC.debug.gotoLevel(3); });
+  await holding(p);
+  await p.evaluate(() => { const w = AC.debug.world; w.setTower([0, 1, 2, 3, 0, 1, 2], { lanterns: true }); w._prog = 1; w.light = w.planet.lightEnd; });
+  await sleep(1500);
+  const dk = await p.evaluate(() => { const R = AC.Game.renderer, c = R.canvas, d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let s = 0, n = 0; for (let i = 0; i < d.length; i += 4 * 97) { s += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]; n++; } return { lum: s / n, dark: R._darkA, light: AC.debug.world.light, lit: AC.debug.world.predictLanding().lit }; });
+  await p.screenshot({ path: OUT + '/func_night_end.png' });
+  check('zones: darkest night (light 0.24) is never black (mean luminance > 25, darkness ≤ 0.65)', dk.lum > 25 && dk.dark <= 0.65 && dk.light < 0.26, dk);
+  check('zones: with lanterns the tower top stays readable at the darkest point (lit ≥ 0.5)', dk.lit >= 0.5, dk.lit);
+  check('zones: no console errors', errs.length === 0 && await p.evaluate(() => AC.debug.stats.errors.length === 0), errs.slice(0, 3));
+  await ctx.close();
+}
+
+// ======================================================================= storage keys
+async function sStorage() {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+  const { page: p, errs } = await open(null, '?seed=2', ctx);
+  await p.evaluate(() => localStorage.clear());
+  await p.reload(); await instrument(p);
+  // play a short game, change every setting, die, set a volume
+  await p.click('#btnSettings'); await waitUi(p, 'scrSettings');
+  await p.click('label.set:has(#setMusic)'); await p.click('#setDifficulty button[data-v=normal]');
+  await p.fill('#setVolume', '55'); await p.dispatchEvent('#setVolume', 'input');
+  await p.click('#scrSettings .btn-back'); await waitUi(p, 'scrTitle');
+  await startPlaying(p, true); await killNow(p, 77); await sleep(800);
+  await p.keyboard.press('KeyM');
+  const keys = await p.evaluate(() => Object.keys(localStorage));
+  const bad = keys.filter(k => !k.startsWith('kac:'));
+  check('storage: every key the game writes uses the kac: prefix (shared GitHub Pages origin)', bad.length === 0 && keys.length >= 3, { keys, bad });
+  check('storage: expected keys present (settings, best_normal, volume)', ['kac:settings', 'kac:best_normal', 'kac:volume'].every(k => keys.includes(k)), keys);
+  const s = await p.evaluate(() => JSON.parse(localStorage.getItem('kac:settings')));
+  check('storage: settings JSON holds only sfx / music / muted / difficulty', s && Object.keys(s).sort().join() === 'difficulty,music,muted,sfx', s);
+  // test flags in the URL never reach storage
+  const before = await p.evaluate(() => JSON.stringify(Object.assign({}, localStorage)));
+  await p.goto(GAME + '?mute=1&diff=hard&speed=4&bot=1&autostart=1&autorestart=1&seed=3&level=2&debug=1'); await instrument(p);
+  await sleep(2500);
+  await p.evaluate(() => { AC.Game.setSetting('sfx', true); });   // any save while test flags are on
+  const after = await p.evaluate(() => JSON.parse(localStorage.getItem('kac:settings')));
+  check('storage: with ?mute=1&diff=hard&… a settings save keeps muted/difficulty as the player chose', after.muted === s.muted && after.difficulty === 'normal', { before: s, after });
+  const flagKeys = await p.evaluate(() => Object.keys(localStorage).filter(k => /speed|bot|autostart|autorestart|seed|level|debug|urlMute|urlDiff/i.test(k)));
+  check('storage: no test-flag keys stored', flagKeys.length === 0, flagKeys);
+  // corrupt settings JSON → boots with defaults, no errors
+  await p.evaluate(() => { localStorage.setItem('kac:settings', '{not json'); localStorage.setItem('kac:best_easy', 'abc'); });
+  await p.goto(GAME + '?mute=1&seed=2'); await instrument(p);
+  const d = await p.evaluate(() => ({ s: AC.Game.settings, best: AC.Game.best('easy'), title: document.getElementById('bestTitle').textContent }));
+  check('storage: a corrupt settings value / best score boots with defaults (no NaN)', d.s.difficulty === 'easy' && d.best === 0 && d.title === '0', d);
+  check('storage: no console errors', errs.length === 0, errs.slice(0, 3));
+  void before;
+  await ctx.close();
+}
+
+// ======================================================================= safe area (notch / home indicator) + rotate behaviour
+function hudPanelsJS() {
+  // drawHud's layout in logical units → CSS px rects
+  const R = AC.Game.renderer, w = AC.debug.world, L = w.layout, c = R.canvas.getBoundingClientRect(), k = c.width / R.VW;
+  const css = (x, y, ww, hh) => ({ l: c.left + x * k, t: c.top + y * k, r: c.left + (x + ww) * k, b: c.top + (y + hh) * k });
+  const K = Math.min(R._hudK, 1.25), I = R.ins, x0 = I.left + 12, ptop = I.top + 12, pw = 190 * Math.min(K, 1.1), hb = R._hudBtn;
+  const right = hb ? hb.l - 10 : R.VW - 110; let cx, cy, cw; const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  if (!L.portrait) { cw = clamp(right - (x0 + pw) - 24, 200, 320); cx = Math.max(x0 + pw + 12 + cw / 2, R.VW / 2); if (cx + cw / 2 > right) cx = right - cw / 2; cy = ptop; }
+  else { cw = Math.min(R.VW - I.left - I.right - 24, 420); cx = R.VW / 2; cy = ptop + 108; }
+  const S = 1.55 * L.unit, sw = [L.cx - L.swingA, L.cx + L.swingA].map(x => css(x - S * 0.45, w.saucer.y - w.cam.y - S * 0.5, S * 0.9, S));
+  const btns = ['btnPause', 'btnMuteHud'].map(id => { const q = document.getElementById(id).getBoundingClientRect(); return { id, l: q.left, t: q.top, r: q.right, b: q.bottom }; });
+  return { VW: R.VW, panels: { score: css(x0, ptop, pw, 98), zone: css(cx - cw / 2, cy, cw, 78) }, swing: sw, btns, vw: innerWidth, vh: innerHeight, ins: R.ins, canvas: { l: c.left, t: c.top, r: c.right, b: c.bottom } };
+}
+const AC_VW = g => g.VW;
+async function sSafeArea() {
+  const cases = [
+    ['iphone_port_390x844@3', { width: 390, height: 844 }, 3, { top: 47, right: 0, bottom: 34, left: 0 }],
+    ['iphone_land_844x390@3', { width: 844, height: 390 }, 3, { top: 0, right: 47, bottom: 21, left: 47 }],
+    ['ipad_1024x768@2', { width: 1024, height: 768 }, 2, { top: 24, right: 0, bottom: 20, left: 0 }],
+    ['ipad_pro_1366x1024@2', { width: 1366, height: 1024 }, 2, { top: 24, right: 0, bottom: 20, left: 0 }]
+  ];
+  for (const [tag, vp, dpr, sa] of cases) {
+    const { page: p, errs, ctx } = await open({ viewport: vp, deviceScaleFactor: dpr, hasTouch: true, isMobile: true }, '?mute=1&seed=9&autostart=1&bot=1&skill=0.95&diff=normal&speed=2');
+    await waitMode(p, 'playing');
+    await p.addStyleTag({ content: `#safeProbe{padding:${sa.top}px ${sa.right}px ${sa.bottom}px ${sa.left}px !important}` });
+    await p.evaluate(() => AC.Game.relayout()); await sleep(500);
+    const g = await p.evaluate(hudPanelsJS);
+    const expIns = ['top', 'right', 'bottom', 'left'].every(k => Math.abs(g.ins[k] * (g.canvas.r - g.canvas.l) / AC_VW(g) - Math.max(0, sa[k] - (k === 'top' || k === 'bottom' ? g.canvas.t : g.canvas.l))) < 2);
+    check(`safe area ${tag}: the probe's insets reach the renderer (R.ins)`, expIns, { ins: Object.fromEntries(Object.entries(g.ins).map(([k, v]) => [k, +v.toFixed(1)])), sa });
+    const inSafe = r => r.l >= sa.left - 1 && r.t >= sa.top - 1 && r.r <= g.vw - sa.right + 1 && r.b <= g.vh - sa.bottom + 1;
+    const badP = Object.entries(g.panels).filter(([, r]) => !inSafe(r)).map(([n, r]) => n + ':' + [r.l, r.t, r.r, r.b].map(Math.round));
+    check(`safe area ${tag}: HUD panels (score, time of day) inside the safe area`, badP.length === 0, badP.length ? { badP, sa } : undefined);
+    const badB = g.btns.filter(b => !inSafe(b)).map(b => b.id + ':' + [b.l, b.t, b.r, b.b].map(Math.round));
+    check(`safe area ${tag}: pause / sound buttons inside the safe area`, badB.length === 0, badB.length ? { badB, sa } : undefined);
+    const badS = g.swing.filter(r => r.l < sa.left - 1 || r.r > g.vw - sa.right + 1).map(r => [r.l, r.r].map(Math.round));
+    check(`safe area ${tag}: Ziggy's whole swing stays clear of the notch sides`, badS.length === 0, badS.length ? { badS, sa } : undefined);
+    const rot = await p.evaluate(() => [...document.querySelectorAll('body *')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 40 && getComputedStyle(e).display !== 'none' && getComputedStyle(e).visibility !== 'hidden' && /rotate|turn your|landscape|portrait/i.test(e.textContent || '') && !e.closest('.hidden'); }).map(e => e.id || e.className));
+    check(`safe area ${tag}: no rotate prompt blocks play (both orientations are supported)`, rot.length === 0 && await mode(p) === 'playing', rot);
+    await p.screenshot({ path: OUT + `/func_safe_${tag.replace('@', '_')}.png` });
+    check(`safe area ${tag}: no console errors`, errs.length === 0, errs.slice(0, 3));
+    await ctx.close();
+  }
+  // rotate portrait → landscape mid-drop, then back; held crate / saucer on screen, nothing lost
+  const { page: p, errs, ctx } = await open({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, deviceScaleFactor: 3 }, '?mute=1&seed=9&diff=normal');
+  await startPlaying(p);
+  for (let i = 0; i < 4; i++) await armDrop(p, 'perfect');
+  const before = await p.evaluate(() => ({ placed: AC.debug.world.placed, score: AC.debug.world.score, n: AC.debug.world.tower.list.length }));
+  await p.evaluate(() => AC.debug.drop()); await sleep(60);   // a crate in the air during the rotation
+  await p.setViewportSize({ width: 844, height: 390 }); await sleep(900);
+  await holding(p);
+  const g1 = await p.evaluate(() => { const w = AC.debug.world, L = w.layout, R = AC.Game.renderer; return { portrait: L.portrait, VW: R.VW, VH: R.VH, lw: L.width, n: w.tower.list.length, off: w.tower.list.filter(c => c.x - c.w / 2 < 0 || c.x + c.w / 2 > L.width).length, sx: w.saucer.x, sy: w.saucer.y - w.cam.y, topS: w.tower.topY - w.cam.y, hearts: w.hearts, score: w.score }; });
+  check('rotation: portrait → landscape with a crate in the air: landscape layout, tower intact, saucer + top on screen', !g1.portrait && g1.lw === g1.VW && g1.n >= before.n && g1.off === 0 && g1.sx > 0 && g1.sx < g1.VW && g1.sy > 0 && g1.topS > 0 && g1.topS < g1.VH && g1.score >= before.score, Object.assign({ before }, g1));
+  await p.evaluate(() => AC.Game.pause());
+  await p.setViewportSize({ width: 390, height: 844 }); await sleep(900);
+  const g2 = await p.evaluate(() => ({ mode: AC.Game.mode, ui: AC.UI.current, portrait: AC.debug.world.layout.portrait }));
+  check('rotation: rotating while paused keeps the Pause screen and re-lays out', g2.mode === 'paused' && g2.ui === 'scrPause' && g2.portrait, g2);
+  await p.evaluate(() => AC.Game.resume()); await sleep(400);
+  check('rotation: no console errors', errs.length === 0 && await p.evaluate(() => AC.debug.stats.errors.length === 0), errs.slice(0, 3));
+  await ctx.close();
+}
+
 (async () => {
   browser = await chromium.launch({ args: ['--allow-file-access-from-files'] });
+  await startServer();
+  console.log('serving game/ at ' + GAME);
+  process.on('exit', stopServer);
   const only = process.argv[2];
-  const sections = { sStatic, sBoot, sMenus, sInput, sTouch, sRules, sHearts, sPause, sSettings, sBest, sPictures, sLight, sLayout, sLongRun };
+  const sections = { sStatic, sBoot, sMenus, sExtras, sInput, sPointer, sTouch, sRules, sRules2, sZones, sHearts, sPause, sSettings, sStorage, sBest, sPictures, sLight, sLayout, sSafeArea, sLongRun };
   for (const [name, fn] of Object.entries(sections)) {
     if (only && !name.toLowerCase().includes(only.toLowerCase())) continue;
     console.log('\n== ' + name);
