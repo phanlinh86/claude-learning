@@ -10,10 +10,10 @@
   --u: min(1vw, 1.78vh); /* 1/100 of the 16:9 game width */
 }
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;background:#141a40;overflow:hidden;font-family:var(--font);color:var(--ink);
+html,body{margin:0;height:100%;background:#2a1f4e;overflow:hidden;font-family:var(--font);color:var(--ink);
   user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
 #stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
-canvas#game{display:block;background:#141a40;touch-action:none;cursor:pointer}
+canvas#game{display:block;background:#2a1f4e;touch-action:none;cursor:pointer}
 .hidden{display:none !important}
 
 /* ---------- screens ---------- */
@@ -62,7 +62,7 @@ kbd{display:inline-block;padding:0 .45em;border-radius:.35em;background:#fff;bor
 .logo{margin:calc(var(--u)*.5) 0 0;font-size:calc(var(--u)*8.5);line-height:1;letter-spacing:.01em;
   -webkit-text-stroke:calc(var(--u)*.45) #2b1a5e;paint-order:stroke fill;
   text-shadow:0 calc(var(--u)*.7) 0 #2b1a5e, 0 calc(var(--u)*1.2) calc(var(--u)*1.4) rgba(0,0,0,.35)}
-.logo .l1{color:#7fd8c8}.logo .l2{color:#ffd44a}
+.logo .l1{color:#7fe0cc}.logo .l2{color:#ff6f61}
 .tagline{margin:calc(var(--u)*1) 0 0;font-size:calc(var(--u)*2.2);color:#fff;
   text-shadow:0 2px 0 #3b2a6e,0 0 calc(var(--u)*1) rgba(0,0,0,.4)}
 .best-line{margin-top:calc(var(--u)*1.8);color:#fff;font-size:calc(var(--u)*2);text-shadow:0 2px 0 #3b2a6e}
@@ -174,9 +174,9 @@ kbd{display:inline-block;padding:0 .45em;border-radius:.35em;background:#fff;bor
 .medal-ribbon{position:relative}
 
 /* ---------- theme ---------- */
-html,body{background:#0f2347}
-canvas#game{background:#1d3a6b}
-.logo .l1{color:#9ff0e0}.logo .l2{color:#ffd44a}
+html,body{background:#2a1f4e}
+canvas#game{background:#3a2c66}
+.logo .l1{color:#9ff0e0}.logo .l2{color:#ff7a68}
 .logo{font-size:calc(var(--u)*8)}
 .panel h2{color:#6a3fc4}
 .panel.wide{width:calc(var(--u)*80)}

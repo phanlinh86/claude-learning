@@ -122,11 +122,11 @@
       $('overScore').textContent = info.score;
       $('overBest').textContent = info.best;
       $('newBest').classList.toggle('hidden', !info.newBest);
-      const c = info.cleared;   // planets finished: 1 bronze, 2 silver, 3 gold, 4+ platinum
+      const c = info.cleared;   // times of day finished: 1 bronze, 2 silver, 3 gold, 4+ platinum
       const m = c >= 4 ? 'platinum' : c >= 3 ? 'gold' : c >= 2 ? 'silver' : c >= 1 ? 'bronze' : 'none';
       $('medal').className = 'medal ' + m;
-      $('medalName').textContent = m === 'none' ? 'Finish a planet for a medal' : m[0].toUpperCase() + m.slice(1) + ' medal';
-      $('overStats').innerHTML = `Crates stacked: <b>${info.placed}</b> · Perfect: <b>${info.perfect}</b> · Best combo: <b>${info.combo}</b><br>Star-coins: <b>${info.coins}</b> · Tallest tower: <b>${info.tallest}</b><br>Reached: <b>${info.reached}</b>`;
+      $('medalName').textContent = m === 'none' ? 'Finish a time of day for a medal' : m[0].toUpperCase() + m.slice(1) + ' medal';
+      $('overStats').innerHTML = `Crates stacked: <b>${info.placed}</b> · Lanterns lit: <b>${info.lanterns != null ? info.lanterns : info.perfect}</b> · Best combo: <b>${info.combo}</b><br>Apples: <b>${info.apples || 0}</b> · Apple pies: <b>${info.pies || 0}</b> · Tallest tower: <b>${info.tallest}</b><br>Reached: <b>${info.reached}</b>`;
       this.show('scrOver');
     },
 
@@ -141,7 +141,7 @@
     renderSlots() {
       const A = AC.Assets, grid = $('slotGrid');
       grid.innerHTML = '';
-      const defaultPreview = s => s.id === 'hero' ? A.files.juno_idle : s.id === 'crate' ? A.files.crate_0 : s.id === 'coin' ? A.files.coin_0 : null;
+      const defaultPreview = s => s.id === 'hero' ? A.files.ziggy_idle : s.id === 'crate' ? A.files.crate_0 : s.id === 'apple' ? A.files.apple_0 : null;
       A.SLOTS.forEach(s => {
         const custom = A.hasCustom(s.id);
         const el = document.createElement('div');
@@ -160,7 +160,7 @@
           const c = document.createElement('canvas'); c.width = 320; c.height = 180;
           c.style.width = '100%'; c.style.height = '100%';
           const g = c.getContext('2d'); const n = A.SEASONS[s.season];
-          g.fillStyle = ['#1a1f4a', '#2a1638', '#0d2238', '#1e1040'][s.season]; g.fillRect(0, 0, 320, 180);
+          g.fillStyle = ['#f7a6c0', '#7cc8ff', '#ff9a5a', '#1b1e4a'][s.season]; g.fillRect(0, 0, 320, 180);
           ['sky', 'far'].forEach(l => { const im = A.img[n + '_' + l]; if (im) g.drawImage(im, 0, 0, 320, 180); });
           { const im = A.img[n + '_ground']; if (im) g.drawImage(im, 0, 150, 320, 60); }
           prev.appendChild(c);

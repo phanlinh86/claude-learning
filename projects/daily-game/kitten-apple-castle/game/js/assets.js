@@ -2,27 +2,27 @@
  * Sprites are rasterized once at (logical size × render scale) so drawing stays fast and crisp. */
 (function (AC) {
   'use strict';
-  const SEASONS = ['moon', 'dunes', 'rings', 'comet'];   // the four planets (kept the name SEASONS for the shared helpers)
+  const SEASONS = ['dawn', 'noon', 'sunset', 'night'];   // the four times of day (kept the name SEASONS for the shared helpers)
   const LAYERS = ['sky', 'far', 'ground'];
   const D = 'assets/default/';
-  const files = { icon: D + 'icon.svg', beam: D + 'beam.svg', base: D + 'base.svg', flag: D + 'flag.svg', rocket: D + 'rocket.svg',
-    flame: D + 'flame.svg', heart: D + 'heart.svg', heart_empty: D + 'heart_empty.svg' };
-  ['idle', 'drop', 'happy', 'oops'].forEach(f => { files['juno_' + f] = D + 'juno_' + f + '.svg'; });
+  const files = {};
+  ['icon', 'beam', 'base', 'flag', 'ghost', 'ghost_wave', 'lantern', 'apple_0', 'apple_1', 'apple_glow', 'pie', 'heart', 'heart_empty']
+    .forEach(k => { files[k] = D + k + '.svg'; });
+  ['idle', 'drop', 'happy', 'oops'].forEach(f => { files['ziggy_' + f] = D + 'ziggy_' + f + '.svg'; });
   for (let t = 0; t < 4; t++) files['crate_' + t] = D + 'crate_' + t + '.svg';
-  for (let t = 0; t < 3; t++) files['coin_' + t] = D + 'coin_' + t + '.svg';
-  ['star', 'sparkle', 'puff', 'dust', 'ice', 'snow', 'heart', 'spark', 'coinbit', 'petal']
+  ['star', 'sparkle', 'puff', 'heart', 'spark', 'applebit', 'petal', 'leaf', 'mist', 'bat_0', 'bat_1', 'firefly', 'wisp']
     .forEach(p => { files['p_' + p] = D + 'particles/' + p + '.svg'; });
   SEASONS.forEach(s => LAYERS.forEach(l => { files[s + '_' + l] = D + 'levels/' + s + '/' + l + '.svg'; }));
   const LAYER_SIZE = { sky: [960, 540], far: [960, 540], ground: [960, 180] };
 
   const SLOTS = [
-    { id: 'hero', name: 'Juno', kind: 'char', box: [96, 96] },
+    { id: 'hero', name: 'Ziggy', kind: 'char', box: [96, 96] },
     { id: 'crate', name: 'Crate', kind: 'char', box: [96, 64] },
-    { id: 'coin', name: 'Star-coin', kind: 'char', box: [48, 48] },
-    { id: 'bg_moon', name: 'Moon Base', kind: 'bg', season: 0 },
-    { id: 'bg_dunes', name: 'Rusty Dunes', kind: 'bg', season: 1 },
-    { id: 'bg_rings', name: 'Ring World', kind: 'bg', season: 2 },
-    { id: 'bg_comet', name: 'Comet Garden', kind: 'bg', season: 3 }
+    { id: 'apple', name: 'Apple', kind: 'char', box: [48, 48] },
+    { id: 'bg_dawn', name: 'Dawn · Garden Gate', kind: 'bg', season: 0 },
+    { id: 'bg_noon', name: 'Noon · Sunny Courtyard', kind: 'bg', season: 1 },
+    { id: 'bg_sunset', name: 'Sunset · Bat Ramparts', kind: 'bg', season: 2 },
+    { id: 'bg_night', name: 'Night · Moon Tower', kind: 'bg', season: 3 }
   ];
 
   function loadImage(src) {
@@ -114,7 +114,7 @@
     /* Only what the first screen needs blocks start-up; the deeper zones' art streams in behind the title. */
     async loadAll(onProgress) {
       const keys = Object.keys(files);
-      const later = k => /^(dunes|rings|comet)_/.test(k);
+      const later = k => /^(noon|sunset|night)_/.test(k);
       let done = 0;
       const one = async k => { this.img[k] = await loadImage(files[k]); done++; if (onProgress) onProgress(done / keys.length); };
       this.restLoaded = Promise.all(keys.filter(later).map(one)).then(() => { this.restDone = true; if (AC.Game && AC.Game.renderer) AC.Game.renderer.prewarm(1); });

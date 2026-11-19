@@ -19,7 +19,7 @@
     world: null, weather: null, bot: null, renderer: null,
     settings: { sfx: true, music: true, muted: false, difficulty: 'easy' },   // a family game: first run on Easy
     fullscreen: false, overAt: 0, deadT: -1,
-    stats: { games: 0, scores: [], times: [], levels: [], placed: 0, perfect: 0, coins: 0, errors: [] },
+    stats: { games: 0, scores: [], times: [], levels: [], placed: 0, perfect: 0, apples: 0, errors: [] },
 
     async boot() {
       await AC.Storage.init();
@@ -122,13 +122,13 @@
       const s = w.stats || {}, names = AC.Renderer.ZONE_INFO.map(z => z.name);
       AC.UI.showGameOver({
         score: w.score, best: Math.max(prev, w.score), newBest: newBest && w.score > 0, cleared: w.level || 0,
-        placed: s.placed || 0, perfect: s.perfect || 0, combo: w.maxCombo || 0, coins: s.coins || 0, tallest: (s.bestTower || 0) + ' crates',
+        placed: s.placed || 0, perfect: s.perfect || 0, combo: w.maxCombo || 0, apples: s.apples || 0, pies: s.pies || 0, lanterns: s.lanterns || 0, tallest: (s.bestTower || 0) + ' crates',
         reached: names[(w.zone || 0) % 4] + ((w.loop || 0) > 0 ? ' (round ' + (w.loop + 1) + ')' : '')
       });
       if (newBest && w.score > 0) AC.Audio.play('best');
       const st = this.stats;
       st.games++; st.scores.push(w.score); st.times.push(+(this.runT || 0).toFixed(2)); st.levels.push(w.level || 0);
-      st.placed += s.placed || 0; st.perfect += s.perfect || 0; st.coins += s.coins || 0;
+      st.placed += s.placed || 0; st.perfect += s.perfect || 0; st.apples += s.apples || 0;
       if (this.autoRestart) setTimeout(() => this.startGame(), 50);
     },
 
@@ -235,17 +235,17 @@
         switch (e.type) {
           case 'spawn': if (sound) A.play('spawn'); break;
           case 'drop': if (sound) A.play('drop'); break;
-          case 'land': if (sound) A.play('land', { speed: e.speed, grow: this.world.grow }); break;
+          case 'land': if (sound) A.play('land', { speed: e.speed }); break;
           case 'perfect': if (sound) A.play('perfect', { combo: e.combo }); break;
           case 'edge': if (sound) A.play('edge'); break;
           case 'miss': if (sound) A.play('miss'); break;
           case 'topple': if (sound) A.play('topple'); break;
           case 'heartLost': if (sound) A.play('heartLost'); break;
-          case 'coin': if (sound) A.play('coin', { total: e.total }); break;
-          case 'grow': if (sound) A.play('grow'); break;
-          case 'shrink': if (sound) A.play('shrink'); break;
+          case 'lantern': if (sound) A.play('lantern'); break;
+          case 'apple': if (sound) A.play('apple', { total: e.total, glow: e.glow }); break;
+          case 'pie': if (sound) A.play('pie', { gained: e.gained }); break;
           case 'goal': if (sound) A.play('goal'); break;
-          case 'rocket': if (sound) A.play('rocket'); break;
+          case 'ghost': if (sound) A.play('ghost'); break;
           case 'levelUp': this._setLevelVisuals(e.zone, false); if (sound) setTimeout(() => A.play('level'), 150); break;
           case 'gameOver': if (sound) A.play('over'); A.stopMusic(); this.deadT = 0; break;
         }

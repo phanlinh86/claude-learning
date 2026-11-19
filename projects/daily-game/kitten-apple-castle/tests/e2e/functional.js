@@ -42,11 +42,11 @@ async function instrument(page) {
     window._ev = [];
     const h = G.handleEvents;
     G.handleEvents = function (evts) {
-      for (const e of evts) window._ev.push({ type: e.type, combo: e.combo, bonus: e.bonus, total: e.total, hearts: e.hearts, grow: e.grow, level: e.level, zone: e.zone, perfect: e.perfect, count: e.count, score: this.world.score });
+      for (const e of evts) window._ev.push({ type: e.type, combo: e.combo, bonus: e.bonus, total: e.total, hearts: e.hearts, glow: e.glow, gained: e.gained, points: e.points, level: e.level, zone: e.zone, perfect: e.perfect, count: e.count, score: this.world.score });
       if (window._ev.length > 4000) window._ev.splice(0, 2000);
       return h.apply(this, arguments);
     };
-    // window._arm: 'miss' | 'perfect' | 'edge' | 'coin' → the player drops when the predicted landing matches
+    // window._arm: 'miss' | 'perfect' | 'edge' | 'apple' → the player drops when the predicted landing matches
     const st = G.step;
     G.step = function (dt) {
       const r = st.apply(this, arguments);
@@ -58,8 +58,8 @@ async function instrument(page) {
           if (a === 'miss') go = !pl.ok && Math.abs(pl.dx) > pl.topW * 0.9;
           else if (a === 'perfect') go = pl.perfect && Math.abs(pl.dx) < pl.tol * 0.5;
           else if (a === 'edge') go = pl.ok && !pl.perfect && Math.abs(pl.dx) < pl.topW * 0.3;
-          else if (a === 'coin') {
-            const c = w.coinList.find(c => c.state === 'float');
+          else if (a === 'apple') {
+            const c = w.appleList.find(c => c.state === 'float');
             if (c && pl.perfect && Math.abs(pl.dx) < pl.tol * 0.5) { c.x = (w.held.x + pl.x) / 2; go = true; }
           }
         }
@@ -111,7 +111,7 @@ async function sStatic() {
   check('static/app: storage in %APPDATA%\\ZiggysAppleCastle\\data', /filepath\.Join\(appData, "ZiggysAppleCastle"\)/.test(go) && /filepath\.Join\(base, "data"\)/.test(go));
   check('static/app: binds ffStoreAll/Set/Del, ffFullscreen, ffQuit', ['ffStoreAll', 'ffStoreSet', 'ffStoreDel', 'ffFullscreen', 'ffQuit'].every(n => go.includes('"' + n + '"')));
   check('static/app: atomic write (tmp + rename) and key filter', /\.tmp"/.test(go) && /os\.Rename/.test(go) && /\^\[a-zA-Z0-9_\\-\]\{1,64\}\$/.test(go));
-  const keys = ['settings', 'best_easy', 'best_normal', 'best_hard', 'img_hero', 'shape_hero', 'img_crate', 'shape_crate', 'img_coin', 'img_bg_moon', 'img_bg_comet'];
+  const keys = ['settings', 'best_easy', 'best_normal', 'best_hard', 'img_hero', 'shape_hero', 'img_crate', 'shape_crate', 'img_apple', 'img_bg_dawn', 'img_bg_night'];
   check('static/app: every storage key the game writes passes the Go key filter', keys.every(k => /^[a-zA-Z0-9_\-]{1,64}$/.test(k)));
   check('static/app: single-instance mutex + WebView2-missing browser fallback', go.includes('SingleInstance') && go.includes('FileProtocolHandler'));
   const fallbackUrlHasApp = /url := .*\?app=1/.test(go) && /FileProtocolHandler", url\)/.test(go);
@@ -124,11 +124,17 @@ async function sStatic() {
   const listed = [];
   assets.replace(/D \+ '([^']+)'/g, (m, f) => listed.push(f));
   const missing = [];
-  for (const k of ['idle', 'drop', 'happy', 'oops']) if (!fs.existsSync(path.join(ROOT, 'game/assets/default/juno_' + k + '.svg'))) missing.push('juno_' + k);
-  for (const z of ['moon', 'dunes', 'rings', 'comet']) for (const l of ['sky', 'far', 'ground']) if (!fs.existsSync(path.join(ROOT, `game/assets/default/levels/${z}/${l}.svg`))) missing.push(z + '/' + l);
-  for (const pn of ['star', 'sparkle', 'puff', 'dust', 'ice', 'snow', 'heart', 'spark', 'coinbit', 'petal']) if (!fs.existsSync(path.join(ROOT, 'game/assets/default/particles/' + pn + '.svg'))) missing.push('p_' + pn);
-  for (const f of ['rocket.svg', 'flame.svg', 'beam.svg', 'base.svg', 'flag.svg', 'heart.svg', 'heart_empty.svg', 'icon.svg']) if (!fs.existsSync(path.join(ROOT, 'game/assets/default/' + f))) missing.push(f);
+  for (const f of listed.filter(f => /\.svg$/.test(f))) if (!fs.existsSync(path.join(ROOT, 'game/assets/default', f))) missing.push(f);
+  for (const k of ['idle', 'drop', 'happy', 'oops']) if (!fs.existsSync(path.join(ROOT, 'game/assets/default/ziggy_' + k + '.svg'))) missing.push('ziggy_' + k);
+  for (const z of ['dawn', 'noon', 'sunset', 'night']) for (const l of ['sky', 'far', 'ground']) if (!fs.existsSync(path.join(ROOT, `game/assets/default/levels/${z}/${l}.svg`))) missing.push(z + '/' + l);
+  for (const pn of ['star', 'sparkle', 'puff', 'heart', 'spark', 'applebit', 'petal', 'leaf', 'mist', 'bat_0', 'bat_1', 'firefly', 'wisp']) if (!fs.existsSync(path.join(ROOT, 'game/assets/default/particles/' + pn + '.svg'))) missing.push('p_' + pn);
+  for (const f of ['beam', 'base', 'flag', 'ghost', 'ghost_wave', 'lantern', 'apple_0', 'apple_1', 'apple_glow', 'pie', 'heart', 'heart_empty', 'icon', 'crate_0', 'crate_3']) if (!fs.existsSync(path.join(ROOT, 'game/assets/default/' + f + '.svg'))) missing.push(f);
   check('static: every default asset file exists', missing.length === 0, missing.length ? missing : undefined);
+  const art = fs.readdirSync(path.join(ROOT, 'game/assets/default')).filter(f => /^(juno|coin|rocket|flame)/.test(f));
+  check('static: no leftover fox-moon-stack art (juno/coin/rocket/flame)', art.length === 0, art.length ? art : undefined);
+  const code = ['js/render.js', 'js/main.js', 'js/ui.js', 'js/assets.js', 'js/audio.js', 'index.html'].map(f => fs.readFileSync(path.join(ROOT, 'game', f), 'utf8')).join('\n');
+  const old = (code.match(/\b(Juno|juno_|coinList|star-coin|rocket\.svg|Moon Stack|Rusty Dunes|Ring World|Comet Garden)\b/g) || []);
+  check('static: no leftover Juno / coin / planet names in the game code', old.length === 0, old.length ? [...new Set(old)] : undefined);
 }
 
 // ======================================================================= boot
@@ -319,31 +325,36 @@ async function sRules() {
   await startPlaying(p);
   let sc0 = await p.evaluate(() => AC.debug.world.score);
   check('rules: perfect drop armed', await armDrop(p, 'perfect'));
-  let st = await p.evaluate(() => ({ score: AC.debug.world.score, combo: AC.debug.world.combo, coins: window._ev.filter(e => e.type === 'coin').length, perf: window._ev.filter(e => e.type === 'perfect').map(e => e.combo) }));
-  check('rules: first perfect = +10 placed + 10×1 bonus (+5 per coin)', st.score - sc0 === 20 + 5 * st.coins && st.combo === 1, Object.assign({ delta: st.score - sc0 }, st));
-  sc0 = st.score; let c0 = st.coins;
+  const APS = () => p.evaluate(() => window._ev.filter(e => e.type === 'apple').reduce((a, e) => a + e.points, 0));
+  let st = await p.evaluate(() => ({ score: AC.debug.world.score, combo: AC.debug.world.combo, perf: window._ev.filter(e => e.type === 'perfect').map(e => e.combo) }));
+  let ap = await APS();
+  check('rules: first perfect = +10 placed + 10×1 bonus (+ apple points)', st.score - sc0 === 20 + ap && st.combo === 1, Object.assign({ delta: st.score - sc0, ap }, st));
+  sc0 = st.score; let a0 = ap;
   await armDrop(p, 'perfect');
-  st = await p.evaluate(() => ({ score: AC.debug.world.score, combo: AC.debug.world.combo, coins: window._ev.filter(e => e.type === 'coin').length }));
-  check('rules: second perfect in a row = +10 + 10×2', st.score - sc0 === 30 + 5 * (st.coins - c0) && st.combo === 2, { delta: st.score - sc0, combo: st.combo });
-  sc0 = st.score; c0 = st.coins;
+  st = await p.evaluate(() => ({ score: AC.debug.world.score, combo: AC.debug.world.combo, lanterns: AC.debug.world.lanterns, lanternEv: window._ev.filter(e => e.type === 'lantern').length }));
+  ap = await APS();
+  check('rules: second perfect in a row = +10 + 10×2', st.score - sc0 === 30 + (ap - a0) && st.combo === 2, { delta: st.score - sc0, combo: st.combo });
+  check('rules: every perfect hangs a lantern (lantern event + crate.lantern)', st.lanternEv === 2 && st.lanterns === 2, st);
+  sc0 = st.score; a0 = ap;
   await armDrop(p, 'edge');
-  st = await p.evaluate(() => ({ score: AC.debug.world.score, combo: AC.debug.world.combo, coins: window._ev.filter(e => e.type === 'coin').length, edge: window._ev.filter(e => e.type === 'edge').length, br: window._ev.filter(e => e.type === 'comboBreak').length, topple: window._ev.filter(e => e.type === 'topple').length }));
-  check('rules: off-centre landing = +10 only, combo resets', st.edge === 1 && st.score - sc0 === 10 + 5 * (st.coins - c0) && st.combo === 0 && st.br >= 1, Object.assign({ delta: st.score - sc0 }, st));
-  // coin: steer a floating coin into the fall path
-  await p.waitForFunction(() => AC.debug.world.coinList.some(c => c.state === 'float'), null, { timeout: 2000 }).catch(() => {});
+  st = await p.evaluate(() => ({ score: AC.debug.world.score, combo: AC.debug.world.combo, edge: window._ev.filter(e => e.type === 'edge').length, br: window._ev.filter(e => e.type === 'comboBreak').length, topple: window._ev.filter(e => e.type === 'topple').length, lanterns: AC.debug.world.lanterns }));
+  ap = await APS();
+  check('rules: off-centre landing = +10 only, combo resets, no new lantern', st.edge === 1 && st.score - sc0 === 10 + (ap - a0) && st.combo === 0 && st.br >= 1 && st.lanterns === 2, Object.assign({ delta: st.score - sc0 }, st));
+  // apple: steer a floating apple into the fall path
+  await p.waitForFunction(() => AC.debug.world.appleList.some(c => c.state === 'float'), null, { timeout: 2000 }).catch(() => {});
   let tries = 0, got = false;
   while (tries++ < 8 && !got) {
-    const hasCoin = await p.evaluate(() => AC.debug.world.coinList.some(c => c.state === 'float'));
-    const b = await p.evaluate(() => ({ s: AC.debug.world.score, c: AC.debug.world.coins, combo: AC.debug.world.combo }));
-    await armDrop(p, hasCoin ? 'coin' : 'perfect');
-    const a = await p.evaluate(() => ({ s: AC.debug.world.score, c: AC.debug.world.coins, combo: AC.debug.world.combo, perfect: window._ev.length && window._ev.filter(e => e.type === 'perfect').slice(-1)[0] }));
+    const hasApple = await p.evaluate(() => AC.debug.world.appleList.some(c => c.state === 'float'));
+    const b = await p.evaluate(() => ({ s: AC.debug.world.score, c: AC.debug.world.apples, light: AC.debug.world.light, n: window._ev.length }));
+    await armDrop(p, hasApple ? 'apple' : 'perfect');
+    const a = await p.evaluate(n => ({ s: AC.debug.world.score, c: AC.debug.world.apples, combo: AC.debug.world.combo, pts: window._ev.slice(n).filter(e => e.type === 'apple').map(e => e.points) }), b.n);
     if (a.c > b.c) {
       got = true;
-      const exp = 10 + (a.combo > 0 ? 10 * Math.min(a.combo, 5) : 0) + 5 * (a.c - b.c);
-      check('rules: a star-coin caught by the falling crate = +5 (and counted)', a.s - b.s === exp, { delta: a.s - b.s, exp, coins: a.c - b.c });
+      const exp = 10 + (a.combo > 0 ? 10 * Math.min(a.combo, 5) : 0) + a.pts.reduce((x, y) => x + y, 0);
+      check('rules: an apple caught by the falling crate = +5 in daylight (and counted)', a.s - b.s === exp && a.pts.every(v => v === (b.light < 0.5 ? 10 : 5)), { delta: a.s - b.s, exp, pts: a.pts, light: b.light });
     }
   }
-  if (!got) check('rules: a star-coin caught by the falling crate = +5 (and counted)', false, 'no coin collected in 8 drops');
+  if (!got) check('rules: an apple caught by the falling crate = +5 in daylight (and counted)', false, 'no apple collected in 8 drops');
   // run to the goal with a perfect bot and check the whole ledger
   await p.evaluate(() => { AC.debug.setBot(true, 1); AC.debug.setSpeed(4); });
   const goal = await p.waitForFunction(() => window._ev.some(e => e.type === 'levelUp'), null, { timeout: 60000 }).then(() => true, () => false);
@@ -355,24 +366,25 @@ async function sRules() {
     for (const e of ev) {
       if (e.type === 'land') exp += 10;
       if (e.type === 'perfect') exp += 10 * Math.min(e.combo, 5);
-      if (e.type === 'coin') exp += 5;
+      if (e.type === 'apple') exp += e.points;
       if (e.type === 'goal') exp += e.bonus;
     }
     const g = ev.find(e => e.type === 'goal'), lu = ev.find(e => e.type === 'levelUp'), maxCombo = Math.max(0, ...ev.filter(e => e.type === 'perfect').map(e => e.combo));
-    return { exp, score: w.score, goalBonus: g && g.bonus, lu: lu && { level: lu.level, zone: lu.zone }, level: w.level, zone: w.zone, vis: AC.Game.renderer.vis.cur, rocket: ev.some(e => e.type === 'rocket'), maxCombo, placed: w.placed, goal: w.goal, hearts: w.hearts, maxHearts: w.maxHearts };
+    const order = ['goal', 'ghost', 'levelUp'].map(t => ev.findIndex(e => e.type === t));
+    return { exp, score: w.score, goalBonus: g && g.bonus, lu: lu && { level: lu.level, zone: lu.zone }, level: w.level, zone: w.zone, vis: AC.Game.renderer.vis.cur, order, maxCombo, placed: w.placed, goal: w.goal, hearts: w.hearts, maxHearts: w.maxHearts };
   });
-  check('rules: score ledger matches (10/placed + 10×min(combo,5)/perfect + 5/coin + goal bonus)', L.exp === L.score, { exp: L.exp, score: L.score });
-  check('rules: goal bonus on planet 1 = 100 × (zone+1) × (loop+1) = 100', L.goalBonus === 100, L.goalBonus);
-  check('rules: a rocket lands before the planet changes', L.rocket);
-  check('rules: level 2 is Rusty Dunes (zone 1), fresh tower, renderer switches planet', L.lu && L.lu.level === 1 && L.lu.zone === 1 && L.level === 1 && L.vis === 1 && L.placed <= 1 && L.goal === 12, L);
+  check('rules: score ledger matches (10/placed + 10×min(combo,5)/perfect + apple points + goal bonus)', L.exp === L.score, { exp: L.exp, score: L.score });
+  check('rules: goal bonus on Dawn = 100 × (zone+1) × (loop+1) = 100', L.goalBonus === 100, L.goalBonus);
+  check('rules: goal show in order: goal → Granny Boo arrives (ghost) → levelUp', L.order.every(i => i >= 0) && L.order[0] < L.order[1] && L.order[1] < L.order[2], L.order);
+  check('rules: level 2 is Noon (zone 1), fresh tower, renderer switches scene', L.lu && L.lu.level === 1 && L.lu.zone === 1 && L.level === 1 && L.vis === 1 && L.placed <= 1 && L.goal === 12, L);
   check('rules: combo is capped at ×5 for points (ledger uses min) and grows past 2', L.maxCombo >= 3, L.maxCombo);
   // goal bonus on zone 3 loop 1: 100×3×2
   await p.evaluate(() => { AC.debug.gotoLevel(6); window._ev = []; AC.debug.setSpeed(6); });
   const g2 = await p.waitForFunction(() => window._ev.some(e => e.type === 'goal'), null, { timeout: 90000 }).then(() => true, () => false);
   await p.evaluate(() => AC.debug.setSpeed(1));
   const gb = await p.evaluate(() => (window._ev.find(e => e.type === 'goal') || {}).bonus);
-  check('rules: goal bonus on level 7 (Ring World, round 2) = 100×3×2 = 600', g2 && gb === 600, gb);
-  // hearts reward on a new planet
+  check('rules: goal bonus on level 7 (Sunset, round 2) = 100×3×2 = 600', g2 && gb === 600, gb);
+  // hearts reward on a new time of day
   await p.evaluate(() => { AC.debug.setBot(false); });
   await holding(p, 20000);
   // gotoLevel is a jump (no reward); the +1 heart belongs to goal → travel → levelUp: make the next crate the goal
@@ -382,7 +394,7 @@ async function sRules() {
   await p.waitForFunction(() => window._ev.some(e => e.type === 'levelUp'), null, { timeout: 30000 }).catch(() => {});
   await p.evaluate(() => AC.debug.setSpeed(1));
   const hr = await p.evaluate(() => AC.debug.world.hearts);
-  check('rules: +1 heart back on reaching a new planet', hr === 2, hr);
+  check('rules: +1 heart back on reaching a new time of day', hr === 2, hr);
   check('rules: no console errors', errs.length === 0 && await p.evaluate(() => AC.debug.stats.errors.length === 0), errs.slice(0, 3));
   await ctx.close();
 }
@@ -392,11 +404,21 @@ async function sHearts() {
   const { page: p, errs, ctx } = await open({}, '?mute=1&seed=3&diff=normal');
   await startPlaying(p, true);
   check('hearts: Normal starts with 3 hearts', await p.evaluate(() => AC.debug.world.hearts === 3 && AC.debug.world.maxHearts === 3));
-  await p.evaluate(() => { const w = AC.debug.world; w.grow = 2; });
   await armDrop(p, 'miss');
   await sleep(300);
-  const s = await p.evaluate(() => ({ hearts: AC.debug.world.hearts, grow: AC.debug.world.grow, miss: window._ev.filter(e => e.type === 'miss').length, hl: window._ev.filter(e => e.type === 'heartLost').length, mode: AC.Game.mode }));
-  check('hearts: a miss costs exactly one heart and shrinks Juno one step', s.hearts === 2 && s.grow === 1 && s.miss === 1 && s.hl === 1, s);
+  const s = await p.evaluate(() => ({ hearts: AC.debug.world.hearts, miss: window._ev.filter(e => e.type === 'miss').length, hl: window._ev.filter(e => e.type === 'heartLost').length, mode: AC.Game.mode }));
+  check('hearts: a miss costs exactly one heart', s.hearts === 2 && s.miss === 1 && s.hl === 1, s);
+  // pie: the 5th apple bakes a pie = +1 heart
+  await holding(p);
+  await p.evaluate(() => { AC.debug.world.pieApples = 4; });
+  let pie = null;
+  for (let i = 0; i < 10 && !pie; i++) {
+    const has = await p.evaluate(() => AC.debug.world.appleList.some(c => c.state === 'float'));
+    await armDrop(p, has ? 'apple' : 'perfect');
+    pie = await p.evaluate(() => { const e = window._ev.find(e => e.type === 'pie'); return e ? { gained: e.gained, hearts: AC.debug.world.hearts, pieApples: AC.debug.world.pieApples, pies: AC.debug.world.stats.pies } : null; });
+  }
+  check('hearts: 5 apples → Apple pie! +1 heart (pie event, counter back to 0)', pie && pie.gained && pie.hearts === 3 && pie.pieApples <= 1 && pie.pies === 1, pie);
+  await p.evaluate(() => { AC.debug.world.hearts = 2; });
   // topple: build an offset tower so the COM leaves the support → one heart for miss+topple
   await holding(p);
   await armDrop(p, 'miss');
@@ -562,9 +584,9 @@ async function sPictures() {
     txt: { name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('hello, not a picture') },
     broken: { name: 'broken.png', mimeType: 'image/png', buffer: Buffer.from('this is not really a png') }
   };
-  const slotIndex = { hero: 0, crate: 1, coin: 2, bg_moon: 3, bg_dunes: 4, bg_rings: 5, bg_comet: 6 };
+  const slotIndex = { hero: 0, crate: 1, apple: 2, bg_dawn: 3, bg_noon: 4, bg_sunset: 5, bg_night: 6 };
   await p.click('#btnCustomize'); await waitUi(p, 'scrCustom');
-  check('pictures: 7 slots (Juno, crate, coin, 4 planets)', await p.evaluate(() => document.querySelectorAll('#slotGrid .slot').length) === 7);
+  check('pictures: 7 slots (Ziggy, crate, apple, 4 times of day)', await p.evaluate(() => document.querySelectorAll('#slotGrid .slot').length) === 7);
   async function pick(slot, file) {
     await p.evaluate(() => { const t = document.getElementById('toast'); t.classList.add('hidden'); t.textContent = ''; });
     const [fc] = await Promise.all([p.waitForEvent('filechooser', { timeout: 5000 }), p.click(`#slotGrid .slot:nth-child(${slotIndex[slot] + 1}) [data-act=pick]`)]);
@@ -578,23 +600,23 @@ async function sPictures() {
     return { w: im.naturalWidth, h: im.naturalHeight, kb: Math.round(d.length / 1024), type: d.slice(5, d.indexOf(';')), shape: localStorage.getItem('kac:shape_' + slot) };
   }, slot);
   let toast = await pick('hero', files.png), s = await stored('hero');
-  check('pictures: PNG with transparency → Juno, kept whole ("fit")', /saved/i.test(toast) && s && s.shape === 'fit' && await p.evaluate(() => AC.Assets.hasCustom('hero')), { toast, s });
+  check('pictures: PNG with transparency → Ziggy, kept whole ("fit")', /saved/i.test(toast) && s && s.shape === 'fit' && await p.evaluate(() => AC.Assets.hasCustom('hero')), { toast, s });
   toast = await pick('crate', files.opaque); s = await stored('crate');
   check('pictures: opaque picture → crate saved (whole picture: crates are boxes, never round by default)', /saved/i.test(toast) && s && s.shape !== 'circle', { toast, s });
-  toast = await pick('coin', files.png); s = await stored('coin');
-  check('pictures: star-coin picture saved', /saved/i.test(toast) && s, { toast, s });
+  toast = await pick('apple', files.png); s = await stored('apple');
+  check('pictures: apple picture saved', /saved/i.test(toast) && s, { toast, s });
   const tag = await p.textContent('#slotGrid .slot:nth-child(1) .tag');
   check('pictures: the card shows "Your picture"', /Your picture/.test(tag), tag);
-  toast = await pick('bg_dunes', files.txt); s = await stored('bg_dunes');
+  toast = await pick('bg_noon', files.txt); s = await stored('bg_noon');
   check('pictures: a text file → friendly error toast, nothing stored', /picture file/i.test(toast) && s === null, toast);
-  toast = await pick('bg_dunes', files.broken); s = await stored('bg_dunes');
+  toast = await pick('bg_noon', files.broken); s = await stored('bg_noon');
   check('pictures: a broken "PNG" → friendly error toast, nothing stored', /could not be opened/i.test(toast) && s === null, toast);
-  toast = await pick('bg_moon', files.huge); s = await stored('bg_moon');
-  check('pictures: 4000×3000 picture → Moon Base background downscaled to 1600×1200 JPEG', /saved/i.test(toast) && s && s.w === 1600 && s.h === 1200 && s.type === 'image/jpeg', { toast, s });
+  toast = await pick('bg_dawn', files.huge); s = await stored('bg_dawn');
+  check('pictures: 4000×3000 picture → Dawn background downscaled to 1600×1200 JPEG', /saved/i.test(toast) && s && s.w === 1600 && s.h === 1200 && s.type === 'image/jpeg', { toast, s });
   toast = await pick('crate', files.huge); s = await stored('crate');
   check('pictures: 4000×3000 picture → crate downscaled to ≤ 512 px', /saved/i.test(toast) && s && Math.max(s.w, s.h) <= 512, { toast, s });
   await p.click('#slotGrid .slot:nth-child(1) .shape button[data-shape=circle]');
-  check('pictures: shape button switches Juno to Round', await p.evaluate(() => localStorage.getItem('kac:shape_hero') === 'circle' && AC.Assets.custom.hero.width === 512));
+  check('pictures: shape button switches Ziggy to Round', await p.evaluate(() => localStorage.getItem('kac:shape_hero') === 'circle' && AC.Assets.custom.hero.width === 512));
   await p.screenshot({ path: OUT + '/func_pictures.png' });
   await p.click('#scrCustom .btn-back'); await waitUi(p, 'scrTitle');
   await p.evaluate(() => { AC.Game.startGame(); AC.debug.setBot(true, 0.9); AC.debug.setSpeed(3); });
@@ -603,12 +625,12 @@ async function sPictures() {
   const play = await p.evaluate(() => { const R = AC.Game.renderer, w = AC.debug.world; return { custom: !!R.background(0).custom, zone: R.vis.cur, placed: w.placed, errors: AC.debug.stats.errors.length }; });
   await p.screenshot({ path: OUT + '/func_custom_play.png' });
   const px = await p.evaluate(() => { const c = AC.Game.renderer.canvas, g = c.getContext('2d'); const d = g.getImageData(0, Math.round(c.height * 0.3), c.width, 1).data; let s = 0; for (let i = 0; i < d.length; i += 4) s += d[i] + d[i + 1] + d[i + 2]; return s / (d.length / 4); });
-  check('pictures: the game plays with custom Juno / crate / coin / Moon background (no errors)', play.custom && play.placed >= 4 && play.errors === 0, play);
+  check('pictures: the game plays with custom Ziggy / crate / apple / Dawn background (no errors)', play.custom && play.placed >= 4 && play.errors === 0, play);
   check('pictures: the frame is actually drawn (not blank)', px > 30, Math.round(px));
   await p.evaluate(() => AC.debug.gotoLevel(1)); await sleep(1500);
-  check('pictures: planets without a custom picture still use the default scene', await p.evaluate(() => !AC.Game.renderer.background(1).custom));
+  check('pictures: times of day without a custom picture still use the default scene', await p.evaluate(() => !AC.Game.renderer.background(1).custom));
   await p.reload(); await instrument(p);
-  check('pictures: custom pictures survive a reload', await p.evaluate(() => ['hero', 'crate', 'coin', 'bg_moon'].every(s => AC.Assets.hasCustom(s))));
+  check('pictures: custom pictures survive a reload', await p.evaluate(() => ['hero', 'crate', 'apple', 'bg_dawn'].every(s => AC.Assets.hasCustom(s))));
   await p.click('#btnCustomize'); await waitUi(p, 'scrCustom');
   await p.click('#slotGrid .slot:nth-child(1) [data-act=reset]');
   const r1 = await p.evaluate(() => ({ hero: AC.Assets.hasCustom('hero'), k: localStorage.getItem('kac:img_hero'), shape: localStorage.getItem('kac:shape_hero'), crate: AC.Assets.hasCustom('crate') }));
@@ -644,8 +666,8 @@ async function sLayout() {
       const R = AC.Game.renderer, w = AC.debug.world, L = w.layout, c = R.canvas.getBoundingClientRect(), k = c.width / R.VW, camY = w.cam.y;
       const css = (x, y, ww, hh) => ({ l: c.left + x * k, t: c.top + y * k, r: c.left + (x + ww) * k, b: c.top + (y + hh) * k });
       const hud = document.getElementById('hud').getBoundingClientRect();
-      // Juno's visible sprite bounds (alpha scan of the idle frame; body centre at (80,78) of the 160 viewBox)
-      const im = AC.Assets.img.juno_idle, sc = document.createElement('canvas'); sc.width = sc.height = 160;
+      // Ziggy's visible sprite bounds (alpha scan of the idle frame; body centre at (80,78) of the 160 viewBox)
+      const im = AC.Assets.img.ziggy_idle, sc = document.createElement('canvas'); sc.width = sc.height = 160;
       const sg = sc.getContext('2d'); sg.drawImage(im, 0, 0, 160, 160); const d = sg.getImageData(0, 0, 160, 160).data;
       let x0a = 160, x1a = 0, y0a = 160, y1a = 0;
       for (let y = 0; y < 160; y++) for (let x = 0; x < 160; x++) if (d[(y * 160 + x) * 4 + 3] > 40) { x0a = Math.min(x0a, x); x1a = Math.max(x1a, x); y0a = Math.min(y0a, y); y1a = Math.max(y1a, y); }
@@ -662,7 +684,7 @@ async function sLayout() {
       const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
       if (!L.portrait) { cw = clamp(right - (x0 + pw) - 24, 200, 320); cx = Math.max(x0 + pw + 12 + cw / 2, R.VW / 2); if (cx + cw / 2 > right) cx = right - cw / 2; cy = ptop; }
       else { cw = Math.min(R.VW - I.left - I.right - 24, 420); cx = R.VW / 2; cy = ptop + 108; }
-      const panels = [['score', css(x0, ptop, pw, 98)], ['planet', css(cx - cw / 2, cy, cw, 78)]];
+      const panels = [['score', css(x0, ptop, pw, 98)], ['zone', css(cx - cw / 2, cy, cw, 78)]];
       const btns = ['btnPause', 'btnMuteHud'].map(id => { const q = document.getElementById(id).getBoundingClientRect(); return { id, l: q.left, t: q.top, r: q.right, b: q.bottom, w: q.width, h: q.height }; });
       return { vw: innerWidth, vh: innerHeight, VW: R.VW, VH: R.VH, portrait: L.portrait, canvas: { l: c.left, t: c.top, r: c.right, b: c.bottom }, saucer, swing, tower, held, panels, placed: w.placed,
         hud: { l: hud.left, t: hud.top, r: hud.right, b: hud.bottom, w: hud.width }, btns, px: R.px, canvasPx: R.canvas.width, docW: document.documentElement.scrollWidth, docH: document.documentElement.scrollHeight, errors: AC.debug.stats.errors.length };
@@ -680,24 +702,24 @@ async function sLayout() {
     check(`layout ${tag}: saucer stays on screen across its whole swing`, geo.swing.every(r => inside(r, geo.canvas, 2)), geo.swing.map(R0));
     const hit = [];
     geo.panels.forEach(([n, r]) => geo.swing.forEach((sw, i) => { if (ov(r, sw)) hit.push([n, i]); }));
-    // by design (visual QA P1-2) a panel FADES while Juno flies under it: check the renderer's fade for each overlap
+    // by design (visual QA P1-2) a panel FADES while Ziggy flies under it: check the renderer's fade for each overlap
     const fades = hit.length ? await p.evaluate(hits => {
       const R = AC.Game.renderer, w = AC.debug.world, L = w.layout, K = Math.min(R._hudK, 1.25), I = R.ins, x0 = I.left + 12, ptop = I.top + 12, pw = 190 * Math.min(K, 1.1), hb = R._hudBtn;
       const right = hb ? hb.l - 10 : R.VW - 110; let cx, cy, cw; const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
       if (!L.portrait) { cw = clamp(right - (x0 + pw) - 24, 200, 320); cx = Math.max(x0 + pw + 12 + cw / 2, R.VW / 2); if (cx + cw / 2 > right) cx = right - cw / 2; cy = ptop; }
       else { cw = Math.min(R.VW - I.left - I.right - 24, 420); cx = R.VW / 2; cy = ptop + 108; }
-      const P = { score: [x0, ptop, pw, 98], planet: [cx - cw / 2, cy, cw, 78] };
+      const P = { score: [x0, ptop, pw, 98], zone: [cx - cw / 2, cy, cw, 78] };
       return hits.map(([n, i]) => { const sx = L.cx + [-1, 0, 1][i] * L.swingA, s = Object.assign({}, w.saucer, { x: sx, prevX: sx, prevY: w.saucer.y });
         return R._fadeFor({ phase: 'swing', saucer: s, layout: L, alpha: 0 }, ...P[n]); });
     }, hit) : [];
-    check(`layout ${tag}: HUD panels fade (≤ 0.35) whenever Juno flies under them`, fades.every(a => a <= 0.35), hit.length ? { hit, fades } : undefined);
+    check(`layout ${tag}: HUD panels fade (≤ 0.35) whenever Ziggy flies under them`, fades.every(a => a <= 0.35), hit.length ? { hit, fades } : undefined);
     const hh = geo.panels.filter(([n, r]) => ov(r, geo.held)).map(([n]) => n);
     check(`layout ${tag}: HUD panels do not cover the held crate`, hh.length === 0, hh.length ? hh : undefined);
     check(`layout ${tag}: canvas backing store sharp for the DPR (within the pixel cap)`, geo.canvasPx >= Math.min(geo.vw * dpr, Math.sqrt((mobile ? 3.2e6 : 1920 * 1080) * geo.VW / geo.VH)) * 0.6, { px: +geo.px.toFixed(2), canvasPx: geo.canvasPx });
     for (const scr of ['scrTitle', 'scrHow', 'scrSettings', 'scrCustom', 'scrPause', 'scrOver']) {
       await p.evaluate(s => {
         if (s === 'scrPause') { AC.Game.mode = 'playing'; AC.Game.deadT = -1; AC.Game.pause(); }
-        else if (s === 'scrOver') AC.UI.showGameOver({ score: 12345, best: 67890, newBest: true, cleared: 4, placed: 140, perfect: 90, combo: 12, coins: 66, tallest: '18 crates', reached: 'Comet Garden (round 2)' });
+        else if (s === 'scrOver') AC.UI.showGameOver({ score: 12345, best: 67890, newBest: true, cleared: 4, placed: 140, perfect: 90, combo: 12, apples: 66, pies: 13, lanterns: 90, tallest: '18 crates', reached: 'Night · Moon Tower (round 2)' });
         else AC.UI.show(s);
       }, scr);
       await sleep(750);
@@ -736,6 +758,37 @@ async function sLayout() {
   await ctx.close();
 }
 
+// ======================================================================= light (the twist)
+async function sLight() {
+  const { page: p, errs, ctx } = await open({ viewport: { width: 960, height: 540 } }, '?mute=1&seed=5&diff=normal');
+  await startPlaying(p);
+  const lum = () => p.evaluate(() => { const c = AC.Game.renderer.canvas, g = c.getContext('2d'), d = g.getImageData(0, 0, c.width, c.height).data; let s = 0, n = 0; for (let i = 0; i < d.length; i += 4 * 97) { s += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]; n++; } return s / n; });
+  await p.evaluate(() => AC.debug.gotoLevel(1)); await sleep(3500);
+  const noon = await p.evaluate(() => ({ light: AC.debug.world.light, dark: AC.Game.renderer._darkA }));
+  check('light: Noon starts in full daylight (no darkness layer)', noon.light > 0.97 && !noon.dark, noon);
+  const lNoon = await lum();
+  await p.evaluate(() => AC.debug.gotoLevel(3)); await sleep(3500);
+  const night = await p.evaluate(() => ({ light: AC.debug.world.light, dark: AC.Game.renderer._darkA, tint: AC.debug.world.lightTint }));
+  const lNight = await lum();
+  check('light: Night is dark (light ≤ 0.31, darkness alpha 0.5–0.62)', night.light <= 0.31 && night.dark >= 0.5 && night.dark <= 0.63 && night.tint === 'night', night);
+  check('light: Night frame is clearly darker than Noon but never black (kids must see)', lNight < lNoon * 0.75 && lNight > 25, { noon: Math.round(lNoon), night: Math.round(lNight) });
+  // lanterns light up the tower top: compare the pixels around the top crate with and without lanterns
+  const topLum = () => p.evaluate(() => { const R = AC.Game.renderer, w = AC.debug.world, c = R.canvas, t = w.tower.list[w.tower.list.length - 1];
+    const x = Math.round((t.x - t.w) * R.px), y = Math.round((t.y - t.h * 1.5 - w.cam.y) * R.px), d = c.getContext('2d').getImageData(Math.max(0, x), Math.max(0, y), Math.round(t.w * 2 * R.px), Math.round(t.h * 2 * R.px)).data;
+    let s = 0, n = 0; for (let i = 0; i < d.length; i += 16) { s += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]; n++; } return s / n; });
+  await p.evaluate(() => { AC.debug.world.setTower([0, 0, 0, 0, 0, 0]); }); await sleep(400);
+  const dim = await topLum(), lit0 = await p.evaluate(() => AC.debug.world.predictLanding().lit);
+  await p.evaluate(() => { AC.debug.world.setTower([0, 0, 0, 0, 0, 0], { lanterns: true }); }); await sleep(400);
+  const bright = await topLum(), lit1 = await p.evaluate(() => AC.debug.world.predictLanding().lit);
+  await p.screenshot({ path: OUT + '/func_night_lanterns.png' });
+  check('light: lanterns brighten the tower top on screen (≥ +15 %)', bright > dim * 1.15, { dim: Math.round(dim), bright: Math.round(bright) });
+  check('light: lanterns raise predictLanding().lit', lit1 > lit0 + 0.2, { lit0: +lit0.toFixed(2), lit1: +lit1.toFixed(2) });
+  const glow = await p.evaluate(() => AC.debug.weather.particles.some(q => q.glow));
+  check('light: night has glow particles (fireflies / twinkles) drawn above the darkness', glow);
+  check('light: no console errors', errs.length === 0 && await p.evaluate(() => AC.debug.stats.errors.length === 0), errs.slice(0, 3));
+  await ctx.close();
+}
+
 // ======================================================================= long bot run
 async function sLongRun() {
   const { page: p, errs, ctx } = await open({ viewport: { width: 1280, height: 720 } }, '?mute=1&seed=21&autostart=1&bot=1&skill=0.5&speed=16&autorestart=1&diff=normal');
@@ -770,7 +823,7 @@ async function sLongRun() {
 (async () => {
   browser = await chromium.launch({ args: ['--allow-file-access-from-files'] });
   const only = process.argv[2];
-  const sections = { sStatic, sBoot, sMenus, sInput, sTouch, sRules, sHearts, sPause, sSettings, sBest, sPictures, sLayout, sLongRun };
+  const sections = { sStatic, sBoot, sMenus, sInput, sTouch, sRules, sHearts, sPause, sSettings, sBest, sPictures, sLight, sLayout, sLongRun };
   for (const [name, fn] of Object.entries(sections)) {
     if (only && !name.toLowerCase().includes(only.toLowerCase())) continue;
     console.log('\n== ' + name);

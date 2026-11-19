@@ -1,13 +1,13 @@
 {
   "name": "Ziggy's Apple Castle",
-  "short_name": "Moon Stack",
-  "description": "Help Juno the space fox stack crates on friendly planets!",
+  "short_name": "Apple Castle",
+  "description": "Help Ziggy the rocket kitten stack apple crates up a cosy castle!",
   "start_url": "./",
   "scope": "./",
   "display": "fullscreen",
   "orientation": "any",
-  "background_color": "#141a40",
-  "theme_color": "#1a1f4a",
+  "background_color": "#2a1f4e",
+  "theme_color": "#2a1f4e",
   "icons": [
     { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },

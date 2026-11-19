@@ -1,15 +1,17 @@
 /* AC.Audio — every sound is synthesized with WebAudio (no audio files, nothing to license).
- * SFX for drops, thunks, perfects (pitch rises with combo), coins, growing, rockets; plus a soft generative space lullaby per planet
- * (DESIGN §7), scheduled a little ahead with a lookahead timer. Unlocks on the first user gesture (iOS). */
+ * SFX (DESIGN §8): drop whoop, wooden crate thunk, perfect clunk-ding rising with combo + a lantern bloom chime, apple
+ * crunch-pling (brighter for glow apples), pie oven-ding fanfare, Granny Boo's friendly "woo-hoo"; plus a cosy generative
+ * castle tune per time of day (dawn music box + birds, noon marimba, sunset accordion pad, night celesta lullaby + owl),
+ * scheduled a little ahead with a lookahead timer and crossfaded on level change. Unlocks on the first gesture (iOS). */
 (function (AC) {
   'use strict';
   const NOTE = n => 440 * Math.pow(2, (n - 69) / 12);
-  // per planet: root (MIDI), bar chords (semitones), tempo (beats/min), beats per bar, lead wave, sparkle
+  // per time of day: root (MIDI), bar chords (semitones), tempo, beats per bar, lead wave, extras
   const ZONE_MUSIC = [
-    { root: 64, prog: [[0, 4, 7], [-3, 0, 4], [5, 9, 12], [-5, -1, 2]], bpm: 84, beats: 4, lead: 'sine', bell: true },             // Moon Base: dreamy pad + music box, E major
-    { root: 62, prog: [[0, 4, 7], [5, 9, 12], [-2, 2, 5], [7, 11, 14]], bpm: 104, beats: 4, lead: 'triangle', bell: false, plink: true }, // Rusty Dunes: warm marimba, D
-    { root: 67, prog: [[0, 4, 7], [2, 5, 9], [-3, 0, 4], [5, 9, 12]], bpm: 92, beats: 3, lead: 'sine', bell: true },              // Ring World: glassy bells waltz, G
-    { root: 69, prog: [[0, 4, 7], [-3, 0, 4], [-5, -1, 2], [5, 9, 12]], bpm: 112, beats: 4, lead: 'triangle', bell: true, plink: true } // Comet Garden: twinkly arps, A
+    { root: 67, prog: [[0, 4, 7], [5, 9, 12], [-3, 0, 4], [-5, -1, 2]], bpm: 88, beats: 3, lead: 'sine', bell: true, birds: true },          // Dawn: music-box waltz, G
+    { root: 65, prog: [[0, 4, 7], [5, 9, 12], [-2, 2, 5], [7, 11, 14]], bpm: 112, beats: 4, lead: 'triangle', plink: true, pluck: true },   // Noon: bouncy marimba, F
+    { root: 62, prog: [[0, 4, 7], [-3, 0, 4], [5, 9, 12], [7, 11, 14]], bpm: 92, beats: 4, lead: 'triangle', accordion: true },            // Sunset: warm accordion pad, D
+    { root: 64, prog: [[0, 4, 7], [-3, 0, 4], [-7, -3, 0], [-5, -1, 2]], bpm: 76, beats: 3, lead: 'sine', bell: true, owl: true }           // Night: celesta lullaby, E
   ];
   const PENTA = [0, 2, 4, 7, 9, 12, 14, 16];
 
@@ -110,10 +112,11 @@
         case 'start': [0, 4, 7, 12].forEach((s, i) => T(NOTE(72 + s), 0.18, { type: 'triangle', vol: 0.2, at: i * 0.07 })); break;
         case 'spawn': T(NOTE(91), 0.08, { type: 'sine', vol: 0.04 }); break;
         case 'drop': this.noise(0.2, { vol: 0.09, freq: 1800, slideTo: 500, q: 0.8 }); T(880, 0.16, { type: 'sine', vol: 0.08, slideTo: 330 }); break;
-        case 'land': {   // a crate thunk: heavier with size (grow) and speed
-          const v = Math.min(1, (o.speed || 600) / 1200), k = 1 - Math.min(0.35, (o.grow || 0) * 0.07);
-          T((120 + 50 * (1 - v)) * k, 0.16, { type: 'sine', vol: 0.12 + 0.16 * v, slideTo: 60 * k });
-          this.noise(0.08, { vol: 0.06 + 0.08 * v, freq: 500 * k, q: 1.2 }); break;
+        case 'land': {   // a wooden crate thunk: heavier with speed
+          const v = Math.min(1, (o.speed || 600) / 1200);
+          T(110 + 45 * (1 - v), 0.16, { type: 'sine', vol: 0.12 + 0.16 * v, slideTo: 58 });
+          this.noise(0.07, { vol: 0.06 + 0.08 * v, freq: 420, q: 1.4 });
+          this.noise(0.04, { vol: 0.04, freq: 1800, q: 2, at: 0.01 }); break;   // the plank "tock"
         }
         case 'perfect': {   // clunk-ding: pitch rises with combo
           const n = 76 + Math.min(8, o.combo || 1) * 2;
@@ -122,16 +125,42 @@
           if ((o.combo || 0) >= 3) T(NOTE(n + 12), 0.4, { type: 'sine', vol: 0.09, at: 0.13 });
           break;
         }
+        case 'lantern': {   // a soft "bloom": a warm swell and two glassy chimes
+          T(NOTE(79), 0.7, { type: 'sine', vol: 0.06, at: 0.16, attack: 0.12 });
+          T(NOTE(88), 0.5, { type: 'sine', vol: 0.05, at: 0.24 });
+          T(NOTE(95), 0.45, { type: 'sine', vol: 0.035, at: 0.3 });
+          break;
+        }
         case 'edge': T(330, 0.25, { type: 'triangle', vol: 0.07, slideTo: 300 }); T(300, 0.25, { type: 'triangle', vol: 0.06, at: 0.18, slideTo: 340 }); break;   // wobble creak
         case 'miss': T(520, 0.45, { type: 'sine', vol: 0.16, slideTo: 140 }); T(NOTE(64), 0.15, { type: 'triangle', vol: 0.08, at: 0.45 }); T(NOTE(60), 0.25, { type: 'triangle', vol: 0.08, at: 0.6 }); break;   // boing-tumble + "oh-oh"
         case 'topple': for (let i = 0; i < 4; i++) { T(140 - i * 12, 0.12, { type: 'sine', vol: 0.1, at: i * 0.11, slideTo: 70 }); this.noise(0.06, { vol: 0.05, freq: 600, at: i * 0.11 }); } break;
         case 'heartLost': T(NOTE(69), 0.18, { type: 'sine', vol: 0.1 }); T(NOTE(65), 0.3, { type: 'sine', vol: 0.1, at: 0.16 }); break;
-        case 'coin': { const n = 88 + ((o.total || 0) % 5); T(NOTE(n), 0.08, { type: 'square', vol: 0.05 }); T(NOTE(n + 5), 0.2, { type: 'sine', vol: 0.12, at: 0.06 }); break; }
-        case 'grow': [0, 4, 7, 12, 16].forEach((s, i) => T(NOTE(67 + s), 0.14, { type: 'triangle', vol: 0.14, at: i * 0.05 })); T(200, 0.4, { type: 'sine', vol: 0.08, slideTo: 600 }); break;
-        case 'shrink': T(700, 0.4, { type: 'sine', vol: 0.1, slideTo: 250 }); break;
+        case 'apple': {   // crunch + pling; a glow apple adds a bright sparkle on top
+          const n = 84 + ((o.total || 0) % 5);
+          this.noise(0.06, { vol: 0.08, freq: 2600, q: 1.5 });
+          T(NOTE(n), 0.16, { type: 'triangle', vol: 0.12, at: 0.04 });
+          T(NOTE(n + 7), 0.22, { type: 'sine', vol: 0.1, at: 0.09 });
+          if (o.glow) { T(NOTE(n + 19), 0.3, { type: 'sine', vol: 0.07, at: 0.14 }); T(NOTE(n + 24), 0.35, { type: 'sine', vol: 0.05, at: 0.2 }); }
+          break;
+        }
+        case 'pie': {   // the oven "ding!" then a happy little fanfare
+          T(NOTE(96), 0.6, { type: 'sine', vol: 0.12 }); T(NOTE(103), 0.5, { type: 'sine', vol: 0.05, at: 0.01 });
+          [0, 4, 7, 12, 16].forEach((s, i) => T(NOTE(72 + s), 0.18, { type: 'triangle', vol: 0.14, at: 0.3 + i * 0.07 }));
+          if (o.gained) T(NOTE(91), 0.4, { type: 'sine', vol: 0.08, at: 0.68 });
+          break;
+        }
+        case 'ghost': {   // Granny Boo's friendly "woo-hoo": two soft vibrato glides
+          const c = this.ctx, t = c.currentTime;
+          [[0, 520, 700, 0.42], [0.5, 640, 900, 0.5]].forEach(([at, f0, f1, d]) => {
+            const o1 = c.createOscillator(), g1 = c.createGain(), lfo = c.createOscillator(), lg = c.createGain();
+            o1.type = 'sine'; o1.frequency.setValueAtTime(f0, t + at); o1.frequency.exponentialRampToValueAtTime(f1, t + at + d * 0.6); o1.frequency.exponentialRampToValueAtTime(f0 * 0.9, t + at + d);
+            lfo.frequency.value = 6; lg.gain.value = 14; lfo.connect(lg); lg.connect(o1.frequency);
+            g1.gain.setValueAtTime(0.0001, t + at); g1.gain.exponentialRampToValueAtTime(0.11, t + at + 0.08); g1.gain.exponentialRampToValueAtTime(0.0001, t + at + d);
+            o1.connect(g1); g1.connect(this.sfx); o1.start(t + at); lfo.start(t + at); o1.stop(t + at + d + 0.05); lfo.stop(t + at + d + 0.05);
+          });
+          break;
+        }
         case 'combo': { const c = Math.min(8, o.combo || 2); [0, 4, 7].forEach((s, i) => T(NOTE(84 + c + s), 0.12, { type: 'sine', vol: 0.06, at: 0.25 + i * 0.05 })); break; }
-        case 'rocket': this.noise(0.9, { vol: 0.1, freq: 400, q: 0.5, slideTo: 150 }); T(90, 0.5, { type: 'sine', vol: 0.12, at: 0.05, slideTo: 60 }); break;
-        case 'liftoff': this.noise(1.1, { vol: 0.1, freq: 200, q: 0.5, slideTo: 2400 }); break;
         case 'goal': [0, 4, 7, 12, 16, 19, 24].forEach((s, i) => T(NOTE(72 + s), 0.3, { type: 'triangle', vol: 0.16, at: i * 0.08 })); break;
         case 'level': [0, 4, 7, 12, 7, 12, 16].forEach((s, i) => T(NOTE(72 + s), 0.24, { type: 'triangle', vol: 0.18, at: i * 0.1 })); break;
         case 'over': [12, 7, 4, 0].forEach((s, i) => T(NOTE(67 + s), 0.4, { type: 'sine', vol: 0.18, at: i * 0.2 })); break;
@@ -140,7 +169,14 @@
     },
 
     // ---------- music ----------
-    setLevel(zone, loop) { this.zone = ((zone || 0) % 4 + 4) % 4; this.loop = loop || 0; },
+    setLevel(zone, loop) {
+      const z = ((zone || 0) % 4 + 4) % 4;
+      if (z !== this.zone && this.ctx && this._musicPlaying && this.musicOn) {   // crossfade: dip, switch, swell back
+        const t = this.ctx.currentTime, gn = this.music.gain;
+        gn.cancelScheduledValues(t); gn.setValueAtTime(gn.value, t); gn.linearRampToValueAtTime(0.02, t + 0.45); gn.linearRampToValueAtTime(0.3, t + 1.6);
+      }
+      this.zone = z; this.loop = loop || 0;
+    },
     startMusic() {
       if (!this.ensure()) return;
       this._musicPlaying = true; this.applyMute();
@@ -172,6 +208,10 @@
           this.tone(NOTE(m.root + 12 + s), spb * 1.4, { type: m.lead, vol: 0.07, dest: this.music, when: t });
         }
         if (m.bell && r > 0.8) this.tone(NOTE(m.root + 31), spb * 2, { type: 'sine', vol: 0.03, dest: this.music, when: t + spb / 2 });
+        if (m.pluck && inBar % 2 === 1) this.tone(NOTE(m.root - 12 + chord[2]), 0.09, { type: 'triangle', vol: 0.05, dest: this.music, when: t });   // pizzicato off-beats
+        if (m.accordion && inBar === 0) chord.forEach(s => this.tone(NOTE(m.root + s), spb * m.beats * 0.9, { type: 'sawtooth', vol: 0.012, attack: 0.3, dest: this.music, when: t }));
+        if (m.birds && b % 16 === 9) for (let i = 0; i < 3; i++) this.tone(NOTE(98 + (i % 2) * 3), 0.07, { type: 'sine', vol: 0.025, slideTo: NOTE(101), dest: this.music, when: t + i * 0.11 });
+        if (m.owl && b % 24 === 13) { this.tone(NOTE(62), 0.32, { type: 'sine', vol: 0.05, slideTo: NOTE(60), attack: 0.05, dest: this.music, when: t }); this.tone(NOTE(62), 0.5, { type: 'sine', vol: 0.05, slideTo: NOTE(59), attack: 0.05, dest: this.music, when: t + 0.42 }); }
         this._next += spb; this._beat++;
       }
     }

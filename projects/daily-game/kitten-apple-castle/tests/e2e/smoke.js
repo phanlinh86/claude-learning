@@ -1,4 +1,5 @@
-// Smoke test: boot, title (bot demo), real taps, bot play at speed, every planet, goal → next planet, game over;
+// Smoke test: boot, title (bot demo), real taps, bot play at speed, every time of day (Night with lanterns), Granny Boo's
+// goal show → next time of day, game over;
 // zero console errors. Screenshots in tests/out/.
 const { chromium } = require('playwright');
 const path = require('path'), fs = require('fs');
@@ -33,6 +34,8 @@ const OUT = path.resolve(__dirname, '../out'); fs.mkdirSync(OUT, { recursive: tr
   await p.evaluate(() => AC.debug.setSpeed(1));
   await p.waitForTimeout(1600);
   await p.screenshot({ path: OUT + '/smoke_goal.png' });
+  const gs = await p.evaluate(() => ({ ghost: AC.debug.world.ghost && AC.debug.world.ghost.state, flag: !!AC.debug.world.flag }));
+  if (!gs.ghost || !gs.flag) errs.push('goal show: no Granny Boo / flag ' + JSON.stringify(gs));
   await p.waitForFunction(() => AC.debug.world.level >= 1, null, { timeout: 20000 }).catch(() => errs.push('no level 2'));
   for (const lv of [1, 2, 3]) {
     await p.evaluate(l => { AC.debug.gotoLevel(l); AC.debug.setSpeed(3); }, lv);
@@ -40,6 +43,10 @@ const OUT = path.resolve(__dirname, '../out'); fs.mkdirSync(OUT, { recursive: tr
     await p.evaluate(() => AC.debug.setSpeed(1));
     await p.waitForTimeout(400);
     await p.screenshot({ path: OUT + '/smoke_zone' + lv + '.png' });
+    if (lv === 3) {
+      const n = await p.evaluate(() => ({ light: AC.debug.world.light, lanterns: AC.debug.world.lanterns, dark: AC.Game.renderer._darkA }));
+      if (!(n.light < 0.35 && n.lanterns > 0 && n.dark > 0.4)) errs.push('night: expected darkness and lanterns ' + JSON.stringify(n));
+    }
   }
   // game over: a clumsy bot
   await p.evaluate(() => { AC.debug.setBot(true, 0.0); AC.debug.setSpeed(8); });
