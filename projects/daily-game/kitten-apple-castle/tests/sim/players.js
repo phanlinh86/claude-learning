@@ -1,4 +1,4 @@
-// Player models for the Moon Stack playtest sims. Each has step(dt, world, t), called once per frame before
+// Player models for the Ziggy's Apple Castle playtest sims. Each has step(dt, world, t), called once per frame before
 // world.update, and calls world.drop() directly (the real input path: a tap = one drop()).
 'use strict';
 const M = Math;
@@ -115,17 +115,17 @@ function perfectWaiter(AC, seed, o) {
   };
 }
 
-/** Replay a release now (same integrator as predictLanding) and count coins the crate box would touch. */
-function predictWithCoins(w) {
+/** Replay a release now (same integrator as predictLanding) and count apples the crate box would touch. */
+function predictWithApples(w) {
   const c = w.held; if (!c) return null;
-  const top = w._top(), P = w.planet, h = w.constructor.CONFIG.step, K = w.constructor.CONFIG.coins, u = w.layout.unit;
+  const top = w._top(), P = w.planet, h = w.constructor.CONFIG.step, K = w.constructor.CONFIG.apples, u = w.layout.unit;
   const b = { x: c.x, y: c.y, vx: P.inherit * w.saucer.vx, vy: 0 };
-  const coins = w.coinList.filter(k => k.state === 'float');
+  const apples = w.appleList.filter(k => k.state === 'float');
   const hit = new Set(); let tt = 0;
   for (let n = 0; n < 4000; n++) {
     const prevBottom = b.y + c.h / 2;
     w._ballistic(b, h); tt += h;
-    for (const k of coins) {
+    for (const k of apples) {
       if (hit.has(k)) continue;
       const ky = k.baseY + K.bob * u * M.sin(k.ph + (k.t + tt) * K.bobW);
       const nx = M.max(b.x - c.w / 2, M.min(k.x, b.x + c.w / 2)), ny = M.max(b.y - c.h / 2, M.min(ky, b.y + c.h / 2));
@@ -137,27 +137,27 @@ function predictWithCoins(w) {
 }
 
 /**
- * (e) coin greed: waits (frame-perfect) for a release that collects a coin AND stays (ok); prefers
- * coin + perfect; gives up after `patience` s and takes the next perfect. Ignores tower lean.
+ * (e) apple greed: waits (frame-perfect) for a release that collects an apple AND stays (ok); prefers
+ * apple + perfect; gives up after `patience` s and takes the next perfect. Ignores tower lean.
  */
-function coinGreed(AC, seed, o) {
+function appleGreed(AC, seed, o) {
   o = o || {}; const patience = o.patience === undefined ? 6 : o.patience;
-  const stats = { taps: 0, coinTaps: 0, fallback: 0 }; let crate = null, tw = 0;
+  const stats = { taps: 0, appleTaps: 0, fallback: 0 }; let crate = null, tw = 0;
   return {
-    name: 'coinGreed', stats,
+    name: 'appleGreed', stats,
     step(dt, w) {
       if (w.phase !== 'swing' || !w.held) { crate = null; return; }
       if (crate !== w.held) { crate = w.held; tw = 0; }
       tw += dt;
       const p = w.predictLanding(); if (!p) return;
-      const anyCoin = w.coinList.some(k => k.state === 'float');
-      if (anyCoin && tw < patience && p.ok) {
-        const n = predictWithCoins(w);
-        if (n > 0 && (p.perfect || tw > patience / 2 || o.edgeOk)) { stats.taps++; stats.coinTaps++; w.drop(); return; }
+      const anyApple = w.appleList.some(k => k.state === 'float');
+      if (anyApple && tw < patience && p.ok) {
+        const n = predictWithApples(w);
+        if (n > 0 && (p.perfect || tw > patience / 2 || o.edgeOk)) { stats.taps++; stats.appleTaps++; w.drop(); return; }
       }
-      if ((!anyCoin || tw >= patience) && p.perfect) { stats.taps++; if (anyCoin) stats.fallback++; w.drop(); }
+      if ((!anyApple || tw >= patience) && p.perfect) { stats.taps++; if (anyApple) stats.fallback++; w.drop(); }
     }
   };
 }
 
-module.exports = { botPlayer, kidPlayer, adultPlayer, spamPlayer, perfectWaiter, coinGreed, landXAfter };
+module.exports = { botPlayer, kidPlayer, adultPlayer, spamPlayer, perfectWaiter, appleGreed, landXAfter };

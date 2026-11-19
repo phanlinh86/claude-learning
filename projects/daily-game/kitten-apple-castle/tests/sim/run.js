@@ -32,7 +32,7 @@ const HUMANS = {
   adult: (AC, s) => P.adultPlayer(AC, s),
   spam: (AC, s) => P.spamPlayer(AC, s),
   waitPerfect: (AC, s) => P.perfectWaiter(AC, s),
-  coinGreed: (AC, s) => P.coinGreed(AC, s)
+  appleGreed: (AC, s) => P.appleGreed(AC, s)
 };
 const LAYOUTS = { 'phone-land 960x540': [960, 540], 'iPhone-portrait 390x844': [390, 844], 'iPad-portrait 820x1180': [820, 1180] };
 
@@ -56,7 +56,7 @@ function windows(AC, diff, level, W, H) {
   return { period: per, perfectMs: 1000 * L.mean(pr), stayMs: 1000 * L.mean(ok) };
 }
 
-/** One planet attempt from level `lv` (fresh hearts): clear %, planet time, hearts lost per 100 drops. */
+/** One level attempt from level `lv` (fresh hearts): clear %, level time, hearts lost per 100 drops. */
 function endless(AC, mk, diff, lv, seeds) {
   const ms = many(AC, mk, diff, { level: lv, stopAtLevel: 1, seeds, maxTime: 240 });
   const drops = ms.reduce((a, m) => a + m.drops, 0) || 1;
@@ -85,20 +85,20 @@ function runAll(kind, patched) {
 }
 
 function md(res) {
-  const out = ['# Moon Stack sim — ' + res.kind + ' (' + res.seeds + ' seeds × ' + res.time + ' s cap, 960×540 unless noted; ' + res.secs.toFixed(0) + ' s wall)', ''];
+  const out = ['# Ziggy\'s Apple Castle sim — ' + res.kind + ' (' + res.seeds + ' seeds × ' + res.time + ' s cap, 960×540 unless noted; ' + res.secs.toFixed(0) + ' s wall)', ''];
   out.push('## AC.Bot grid', L.table(Object.entries(res.bots), 'diff / player'), '');
   out.push('## Human-like models', L.table(Object.entries(res.humans), 'diff / player'), '');
   out.push('## Device layouts', L.table(Object.entries(res.layouts), 'layout / diff / player'), '');
   out.push('## Timing windows (one pass over a 3-crate tower)', '| diff / level | swing period s | perfect window ms | stay window ms |', '|---|---|---|---|');
   for (const [k, v] of Object.entries(res.windows)) out.push('| ' + k + ' | ' + L.f(v.period, 2) + ' | ' + L.f(v.perfectMs, 0) + ' | ' + L.f(v.stayMs, 0) + ' |');
-  out.push('', '## Endless pace (one planet from level L, fresh hearts)', '| diff / player / level | clear % | planet time p50 s | hearts lost /100 drops | of which topples |', '|---|---|---|---|---|');
+  out.push('', '## Endless pace (one level from level L, fresh hearts)', '| diff / player / level | clear % | level time p50 s | hearts lost /100 drops | of which topples |', '|---|---|---|---|---|');
   for (const [k, v] of Object.entries(res.endless)) out.push('| ' + k + ' | ' + L.f(v.clear, 0) + ' | ' + L.f(v.time, 0) + ' | ' + L.f(v.lossPer100, 1) + ' | ' + L.f(v.topplePer100, 1) + ' |');
   return out.join('\n') + '\n';
 }
 
 function compare(a, b) {
-  const cols = [['P1 clear%', 'p1Clear', 0], ['over%', 'overPct', 0], ['surv p50 s', 'surv50', 0], ['planets p50', 'lv50', 0], ['P1 time s', 'p1T', 0],
-    ['planet time s', 'lvlT', 0], ['perfect%', 'perfectPct', 0], ['miss%', 'missPct', 1], ['topple/100', 'topplePer100', 2], ['score p50', 'score50', 0], ['wait p50', 'wait50', 2]];
+  const cols = [['P1 clear%', 'p1Clear', 0], ['over%', 'overPct', 0], ['surv p50 s', 'surv50', 0], ['levels p50', 'lv50', 0], ['P1 time s', 'p1T', 0],
+    ['level time s', 'lvlT', 0], ['perfect%', 'perfectPct', 0], ['miss%', 'missPct', 1], ['topple/100', 'topplePer100', 2], ['score p50', 'score50', 0], ['wait p50', 'wait50', 2]];
   const out = ['# Before → after (baseline → proposal)', ''];
   const sec = (title, A, B) => {
     out.push('## ' + title, '| row | ' + cols.map(c => c[0]).join(' | ') + ' |', '|' + '---|'.repeat(cols.length + 1));
@@ -108,7 +108,7 @@ function compare(a, b) {
   sec('Human-like models', a.humans, b.humans); sec('Device layouts', a.layouts, b.layouts); sec('AC.Bot grid', a.bots, b.bots);
   out.push('## Timing windows ms (perfect / stay)', '| diff / level | before | after |', '|---|---|---|');
   for (const k of Object.keys(a.windows)) out.push('| ' + k + ' | ' + L.f(a.windows[k].perfectMs, 0) + ' / ' + L.f(a.windows[k].stayMs, 0) + ' | ' + L.f(b.windows[k].perfectMs, 0) + ' / ' + L.f(b.windows[k].stayMs, 0) + ' |');
-  out.push('', '## Endless pace (clear % / planet time s / hearts lost per 100 drops)', '| diff / player / level | before | after |', '|---|---|---|');
+  out.push('', '## Endless pace (clear % / level time s / hearts lost per 100 drops)', '| diff / player / level | before | after |', '|---|---|---|');
   for (const k of Object.keys(a.endless)) { const x = a.endless[k], y = b.endless[k]; out.push('| ' + k + ' | ' + [L.f(x.clear, 0), L.f(x.time, 0), L.f(x.lossPer100, 1)].join(' / ') + ' | ' + [L.f(y.clear, 0), L.f(y.time, 0), L.f(y.lossPer100, 1)].join(' / ') + ' |'); }
   return out.join('\n') + '\n';
 }

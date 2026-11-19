@@ -1,5 +1,5 @@
 {
-  "note": "Playtest proposal 2026-11-04 — keep in sync with results/proposal.patch",
+  "note": "fox-moon-stack playtest proposal 2026-11-04 (already the defaults here); replace with this game's proposal after its playtest",
   "overrides": {
     "loopGoal": 1,
     "loopTolMin": 0.8,

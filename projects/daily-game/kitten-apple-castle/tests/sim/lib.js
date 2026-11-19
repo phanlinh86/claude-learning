@@ -10,7 +10,7 @@ const JS = path.join(__dirname, '..', '..', 'game', 'js');
 
 /**
  * Fresh AC namespace. opts.worldSrc: a replacement world.js source (to test a patched copy);
- * opts.overrides: CONFIG values deep-merged in (arrays: {planets: {0: {goal: 8}}} merges by index).
+ * opts.overrides: CONFIG values deep-merged in (arrays: {zones: {0: {goal: 8}}} merges by index).
  */
 function makeAC(opts) {
   opts = opts || {};
@@ -33,7 +33,7 @@ function merge(dst, src) {
 
 /**
  * Play one game. player: { attach(w), step(dt, w, t) } (step is called before world.update each frame).
- * opts: { diff, seed, maxTime (s), dt, width, height, level, stopAtLevel (stop when this many planets are cleared) }
+ * opts: { diff, seed, maxTime (s), dt, width, height, level, stopAtLevel (stop when this many levels are cleared) }
  */
 function runGame(AC, player, opts) {
   const dt = opts.dt || 1 / 60, maxTime = opts.maxTime || 600;
@@ -43,7 +43,7 @@ function runGame(AC, player, opts) {
     diff: opts.diff, seed: opts.seed, over: false, time: 0, score: 0, levels: 0,
     firstPointT: null, levelT: [], drops: 0, placed: 0, perfect: 0, edges: 0,
     lossMiss: 0, lossTopple: 0, toppleEvents: 0, toppleCrates: 0, missEdge: 0, missAir: 0,
-    coins: 0, maxGrow: 0, maxCombo: 0, waits: [], dropsByLevel: {}, lossByLevel: {}, nanBad: 0,
+    apples: 0, glowApples: 0, pies: 0, pieHearts: 0, lanterns: 0, maxCombo: 0, waits: [], dropsByLevel: {}, lossByLevel: {}, nanBad: 0,
     bufferedDrops: 0
   };
   let t = 0, spawnT = 0, lastLand = null, lastLevelT = 0;
@@ -65,8 +65,9 @@ function runGame(AC, player, opts) {
           m.lossByLevel[w.level] = (m.lossByLevel[w.level] || 0) + 1; break;
         case 'topple': m.toppleEvents++; m.toppleCrates += e.count; m.lossTopple++;
           m.lossByLevel[w.level] = (m.lossByLevel[w.level] || 0) + 1; break;
-        case 'coin': m.coins++; break;
-        case 'grow': m.maxGrow = Math.max(m.maxGrow, e.grow); break;
+        case 'apple': m.apples++; if (e.glow) m.glowApples++; break;
+        case 'pie': m.pies++; if (e.gained) m.pieHearts++; break;
+        case 'lantern': m.lanterns++; break;
         case 'levelUp': m.levels++; m.levelT.push(t - lastLevelT); lastLevelT = t; break;
         case 'gameOver': m.over = true; break;
       }
@@ -105,8 +106,9 @@ function summarise(ms) {
     topplePer100: 100 * ms.reduce((a, m) => a + m.toppleEvents, 0) / drops,
     toppleGamesPct: 100 * toppleGames / n,
     lossMiss: ms.reduce((a, m) => a + m.lossMiss, 0), lossTopple: ms.reduce((a, m) => a + m.lossTopple, 0),
-    grow50: q(ms.map(m => m.maxGrow), 0.5), growMax: Math.max(...ms.map(m => m.maxGrow)),
-    coinsPerDrop: ms.reduce((a, m) => a + m.coins, 0) / drops,
+    pies50: q(ms.map(m => m.pies), 0.5), pieHearts: ms.reduce((a, m) => a + m.pieHearts, 0),
+    applesPerDrop: ms.reduce((a, m) => a + m.apples, 0) / drops,
+    glowApplePct: 100 * ms.reduce((a, m) => a + m.glowApples, 0) / (ms.reduce((a, m) => a + m.apples, 0) || 1),
     wait50: q([].concat(...ms.map(m => m.waits)), 0.5), wait90: q([].concat(...ms.map(m => m.waits)), 0.9),
     nanBad: ms.reduce((a, m) => a + m.nanBad, 0)
   };
@@ -114,10 +116,10 @@ function summarise(ms) {
 
 const COLS = [
   ['n', 'n', 0], ['over%', 'overPct', 0], ['surv p50 s', 'surv50', 0], ['score p10/50/90', r => f(r.score10, 0) + '/' + f(r.score50, 0) + '/' + f(r.score90, 0)],
-  ['planets p50 (max)', r => f(r.lv50, 0) + ' (' + r.lvMax + ')'], ['P1 clear%', 'p1Clear', 0], ['P1 time s', 'p1T', 1], ['planet time p50 s', 'lvlT', 1],
+  ['levels p50 (max)', r => f(r.lv50, 0) + ' (' + r.lvMax + ')'], ['P1 clear%', 'p1Clear', 0], ['P1 time s', 'p1T', 1], ['level time p50 s', 'lvlT', 1],
   ['1st pt s', 'firstPt', 1], ['perfect%', 'perfectPct', 0], ['miss%/drop', 'missPct', 1], ['topple/100 drops', 'topplePer100', 2],
-  ['games w/ topple%', 'toppleGamesPct', 0], ['hearts lost miss:topple', r => r.lossMiss + ':' + r.lossTopple], ['grow p50 (max)', r => f(r.grow50, 0) + ' (' + r.growMax + ')'],
-  ['coins/drop', 'coinsPerDrop', 2], ['wait p50/p90 s', r => f(r.wait50, 2) + '/' + f(r.wait90, 2)]
+  ['games w/ topple%', 'toppleGamesPct', 0], ['hearts lost miss:topple', r => r.lossMiss + ':' + r.lossTopple], ['pies p50 (hearts won)', r => f(r.pies50, 0) + ' (' + r.pieHearts + ')'],
+  ['apples/drop', 'applesPerDrop', 2], ['glow apple%', 'glowApplePct', 0], ['wait p50/p90 s', r => f(r.wait50, 2) + '/' + f(r.wait90, 2)]
 ];
 function table(rows, labelHead, cols) {
   cols = cols || COLS;

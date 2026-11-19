@@ -9,6 +9,8 @@
  * timing error τ ~ N(0, (1 − skill)·0.12 s) drawn once per crate (negative = taps early, positive = late).
  * Its aim point is the top crate's centre plus a small aim error (sd (1 − skill)·0.12·w) and it lets a chance pass with probability 0.55·(1 − skill) (halving each time); skilled bots
  * (≥ 0.6) also aim a little back against the tower's lean. skill 1 ≈ always perfect, 0.5 ≈ casual player.
+ * Darkness (the twist): both noises are × (1 + CONFIG.darkNoise·(1 − lit)), where lit = predictLanding().lit at
+ * the moment the bot starts watching — a dim tower top is harder to judge; lanterns from Perfect drops help.
  */
 (function (AC) {
   'use strict';
@@ -20,7 +22,7 @@
     this.world = world;
     this.skill = clamp(opts.skill === undefined ? 0.8 : +opts.skill, 0, 1);
     this.rng = new AC.RNG(opts.seed === undefined ? 99 : opts.seed);
-    this.stats = { drops: 0, thinks: 0, passes: 0, giveUps: 0 };
+    this.stats = { drops: 0, thinks: 0, passes: 0, giveUps: 0, litSum: 0 };
     this._crate = null;
   }
 
@@ -30,8 +32,12 @@
     var s = this.skill, w = this.world;
     this._crate = c;
     this._think = (0.8 - 0.5 * s) * this.rng.range(0.85, 1.15);
-    this._tau = clamp(this.rng.gauss() * (1 - s) * 0.12, -0.25, 0.25);
-    var aim = this.rng.gauss() * (1 - s) * 0.12 * c.w;
+    var p = w.predictLanding(), lit = p && typeof p.lit === 'number' ? p.lit : 1;
+    var dk = (AC.World && AC.World.CONFIG.darkNoise) || 0;
+    this._dark = 1 + dk * (1 - clamp(lit, 0, 1));
+    this._lit = lit;
+    this._tau = clamp(this.rng.gauss() * (1 - s) * 0.12 * this._dark, -0.3, 0.3);
+    var aim = this.rng.gauss() * (1 - s) * 0.12 * c.w * this._dark;
     if (s >= 0.6) {                                 // lean back against the tower's drift
       var l = w.tower.list, n = l.length;
       if (n >= 2) {
@@ -45,6 +51,7 @@
     this._last = null;
     this._watch = 0;
     this.stats.thinks++;
+    this.stats.litSum += lit;
   };
 
   Bot.prototype.step = function (dt) {

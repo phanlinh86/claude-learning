@@ -10,9 +10,12 @@
  *   w.drop(); w.update(1/60); ...
  *   var ev = w.drainEvents();          // [{type:'drop', x, vx}, {type:'land', ...}, ...]
  *   // render: lerp prevX/prevY/prevRot → x/y/rot, cam.prevY → cam.y, tower.prevSway → sway with w.alpha
+ *   var L = w.lights();                // [{x, y, r, a}] world coords: cut these out of the darkness layer
  *
  * The tower is `this.tower.list` (placed crates, bottom first). Placed crates keep their REST x; the
  * tower's sway is a separate damped spring added at draw time by swayOffset(y).
+ * The twist: `light` (0..1) slides from the current time of day's light toward the next one's as the
+ * tower grows; Perfect drops hang lanterns that light the tower up again.
  */
 (function (AC) {
   'use strict';
@@ -23,45 +26,76 @@
     maxFrame: 0.25,         // s      longest frame simulated (hidden tab → no fast-forward of minutes)
 
     // ---- layout pieces (DESIGN §2/§4; lengths in "unit" multiples) ----
-    baseW: 2.4,             // unit   launch pad width (base.svg 240 px at unit 100)
-    baseH: 0.64,            // unit   launch pad height
+    baseW: 2.4,             // unit   stone plinth width (base.svg 240 px at unit 100)
+    baseH: 0.64,            // unit   plinth height
     baseTopFrac: 4 / 64,    // ×h     base.svg's flat top is y = 4 of 64: crates sit there, not on the box top
-    saucerSize: 1.55,       // unit   Juno + saucer drawn square (× saucer.scale)
-    emitterDY: 0.6,         // unit   body centre (80,78) → beam emitter (80,140) of the 160 viewBox: 62/160 × 1.55
-    beamGap: 0.3,           // unit   visible beam between emitter and the held crate's top
-    rocketDX: 2.15,         // unit   the rocket lands this far right of cx (beside the base, inside a 560-wide portrait)
-    rocketHalfH: 0.675,     // unit   rocket centre → nozzle bottom: (152 − 80)/160 × 1.5 unit
-    flagH: 1.2,             // unit   beacon flag height (for the event y)
+    saucerSize: 1.55,       // unit   Ziggy + hover-rocket drawn square
+    emitterDY: 0.6,         // unit   body centre (80,78) → lantern emitter (80,140) of the 160 viewBox: 62/160 × 1.55
+    beamGap: 0.3,           // unit   visible lantern glow between emitter and the held crate's top
+    flagH: 1.2,             // unit   goal pennant height (its little lantern sits on top)
 
     // ---- crates ----
-    crateGrow: 0.06,        // ×/step each grow step makes new crates 6 % bigger (5 steps → +30 %: easier to land, heavier)
-    holdOmega: 18,          // rad/s  held crate follows the saucer on a spring: ≈0.07 s lag, a soft pendulum swing-out…
+    holdOmega: 18,          // rad/s  held crate follows the rocket on a spring: ≈0.07 s lag, a soft pendulum swing-out…
     holdZeta: 0.6,          // —      …that overshoots ≈10 % at the turn-arounds (reads as "hanging", never wobbly)
-    inherit: 0.3,           // ×      share of the saucer's sideways speed a released crate keeps (the beam damps the rest; ×difficulty.inherit)
+    inherit: 0.3,           // ×      share of the rocket's sideways speed a released crate keeps (the glow damps the rest; ×difficulty.inherit)
     spinK: 0.0006,          // rad/s per px/s  a moving release spins the crate a hair (≈0.05 rad over a fall), purely cosmetic
     squashRef: 900,         // px/s   landing speed that gives squash 1.0 (×u)…
-    squashMin: 0.15,        // —      …but even a short drop squashes visibly
+    squashMin: 0.15,        // —      …but even a short drop squashes visibly (the wooden "thunk")
     squashMax: 0.65,        // —      …and a long one stays cartoon-readable
     squashDecay: 7,         // 1/s    squash fades to <10 % in 0.33 s (a "thunk", then still)
-    slideRate: 28,          // 1/s    perfect snap / beam-assist slide: 95 % in 0.11 s (reads as a snap, but no 1-frame jump)
+    slideRate: 28,          // 1/s    perfect snap / assist slide: 95 % in 0.11 s (reads as a snap, but no 1-frame jump)
 
-    // ---- landing rules ----
-    perfectSnapFloor: 6,    // px     (×u) perfect zone is never smaller than this (tiny crates in later loops)
+    // ---- landing rules & score ----
+    perfectSnapFloor: 6,    // px     (×u) perfect zone is never smaller than this (later loops)
     comboCap: 5,            // ×      perfect bonus multiplier cap (REQUIREMENT)
     placePoints: 10,        // pts    every crate that stays
     perfectPoints: 10,      // pts    × min(combo, comboCap) on a perfect
-    coinPoints: 5,          // pts    per star-coin
     goalPoints: 100,        // pts    × (zone+1) × (loop+1)
     settleTime: 0.5,        // s      after a crate stays: squash + sway read before the next crate appears
-    missSettle: 0.9,        // s      after a miss/topple: time to watch the tumble (and for Juno's "oops")
+    missSettle: 0.9,        // s      after a miss/topple: time to watch the tumble (and for Ziggy's "oops")
     overWait: 1.6,          // s      max wait for tumbling crates before game over is announced
+
+    // ---- apples & pies (REQUIREMENT "Score and lose") ----
+    applePoints: 5,         // pts    an apple in daylight
+    appleGlowPoints: 10,    // pts    a "glow apple" (collected while light < glowBelow): rewards stacking on into the dark
+    glowBelow: 0.5,         // light  below this ambient light apples glow (and score double)
+    pieEvery: 5,            // apples Granny Boo bakes a pie every 5 apples → +1 heart (up to maxHearts)
+    apples: { max: 3, life: 3, r: 0.21, bandTop: 0.8, bandBot: 0.45, minGap: 0.65, bob: 0.06, bobW: 2.6, rock: 0.14, flutter: 2.2, pair: 0.25, onPath: 0.7, follow: 3 },
+    //       max alive · life in drops · radius (unit; apple drawn 0.42 unit) · fall band: centre ≥ rocket + 0.8 unit (and
+    //       below the held crate) and ≤ tower top − 0.45 unit · min gap between apples (unit) · bob amplitude (unit) ·
+    //       bob rad/s (period 2.4 s) · rock: rotation amplitude (rad) of the hanging-pendulum rock, a quarter period
+    //       ahead of the bob (an apple hanging from an invisible stem) · flutter: leaf frame flips per s (apple_0/apple_1) ·
+    //       chance of a second apple · share placed over the drop path (top x ± 0.6 crate), the rest anywhere on the
+    //       swing (a risky grab) · follow 1/s: apples drift up with the tower (63 % in 0.33 s) so they stay in the fall band
+
+    // ---- light: the day-to-night twist (DESIGN §5.1) ----
+    nightEnd: 0.24,         // light  where Night's light ends (darkest point; still readable, never black)
+    lightRate: 1.0,         // 1/s    world.light eases toward its target: 63 % in 1 s — a change you notice, never a jump
+    darkNoise: 0.7,         // ×      the bot's timing/aim noise is × (1 + darkNoise·(1 − lit)): ×1.5 on an unlit Night top (Normal 0.5-skill
+                            //        night misses 20 % → 31 % of drops; 1.0 gave 34 %, too punishing; Easy kid 2 % → 8 %)
+    lightFalloff: 2,        // —      light falloff (1 − (d/r)²)^2 used by predictLanding().lit (matches a soft radial gradient)
+    lights: {               // radius in unit, a = strength 0..1 (DESIGN §5.1)
+      ziggy:   { r: 2.0, a: 1 },    // Ziggy's lantern at the emitter
+      held:    { r: 1.1, a: 0.6 },  // the crate hanging in her glow
+      falling: { r: 0.9, a: 0.45 }, // (extra) a released crate keeps a little glow until it lands
+      lantern: { r: 1.5, a: 0.9 },  // a lantern hung by a Perfect drop
+      apple:   { r: 0.55, a: 0.5 }, // a floating glow apple (only when dark)
+      flag:    { r: 1.2, a: 1 },    // the goal pennant's little lantern
+      ghost:   { r: 1.1, a: 0.55 }, // (extra) Granny Boo glows softly
+      maxLanterns: 10               // only the top 10 lanterns of the tower are lights (cheap darkness pass)
+    },
+    lantern: { hookIn: 0.12, hookDown: 0.1, bodyDY: 0.25, omega: 5.8, zeta: 0.12, kick: 2.2, maxRot: 0.6 },
+    //       hook point: hookIn unit inside the crate's side edge, hookDown unit below its top · light centre bodyDY unit
+    //       below the hook (lantern drawn 0.34×0.45 unit) · the lantern is a little pendulum on its hook: ω = √(g/ℓ) with
+    //       ℓ = bodyDY ≈ 0.25 unit → ≈5.6, tuned to 5.8 rad/s (a 1.1 s swing), ζ 0.12 (swings ≈4 times), driven by the hook's sideways
+    //       acceleration (tower sway) and kicked kick rad/s when it is hung · |rot| ≤ maxRot rad
 
     // ---- tumbles (miss pivot + centre-of-mass topple) ----
     impactSpin: 0.55,       // ×      share of the impact's angular momentum about the edge corner kept as spin (rest lost to the "thunk")
     toppleSpin0: 0.6,       // rad/s  a COM topple starts from a gentle nudge (the support gives way)
-    releaseAngle: 0.6,      // rad    pivoting crates slide off the corner after tipping ≈34° (friction cone of cardboard on metal)
+    releaseAngle: 0.6,      // rad    pivoting crates slide off the corner after tipping ≈34° (friction cone of wood on wood)
     clearPush: 60,          // px/s   (×u) small outward push at release so tumblers clear the tower they fell from
-    slideAcc: 900,          // px/s²  (×u) a tumbler resting on the launch pad slides/tips off its outer edge
+    slideAcc: 900,          // px/s²  (×u) a tumbler resting on the plinth slides/tips off its outer edge
     bounce: 0.3,            // —      ground restitution: one soft "boing", then it rests
     bounceMin: 120,         // px/s   (×u) slower touch-downs don't bounce
     groundFriction: 0.65,   // ×      vx kept at each ground contact
@@ -74,18 +108,13 @@
     swayKick: 1.3,          // 1/s    sway velocity per px of off-centre landing (dx 40 px → ≈15 px top sway)
     swayVxKick: 0.06,       // ×      plus the crate's own sideways momentum
     perfectKick: 0.25,      // ×      perfect drops kick lightly (a "settle" not a wobble)
-    growKick: 9,            // px/s   (×u) per grow step: bigger crates are heavier, every landing shakes more
     swayHeightRef: 4,       // crates the kick ramps up to full strength over the first 4 crates (a short tower is stiff)
     swayMax: 0.32,          // unit   hard limit of the top sway (×u) — keeps the landing target fair
 
     // ---- camera ----
     camOmega: 5,            // rad/s  critically damped spring to the target: 90 % in ≈0.8 s, never overshoots
-    goalCamStart: 1.25,     // s      in the goal phase the camera starts gliding down with the rocket…
-    goalCamEnd: 2.5,        // s      …and reaches the ground when it touches down
 
-    // ---- saucer ----
-    saucerGrow: 0.08,       // ×/step scale = 1 + 0.08·grow (DESIGN)
-    scaleRate: 4,           // 1/s    scale eases to the target (grow/shrink take ≈0.5 s)
+    // ---- Ziggy's hover-rocket ----
     bobAmp: 0.04,           // unit   gentle hover bob…
     bobW: 2.2,              // rad/s  …period ≈2.9 s
     tiltK: 0.00045,         // rad per px/s (÷u)  leans into the swing…
@@ -94,52 +123,48 @@
     anim: { drop: 0.35, happy: 0.8, oops: 0.95 }, // s  pose durations before back to idle
     dropBuffer: 0.25,       // s      a press while no crate is held is kept this long (one press only)
 
-    // ---- goal sequence ----
-    goalTime: 3.0,          // s      flag rises, rocket glides in and lands
-    rocketIn: 1.2,          // s      rocket appears (top of screen) at this time…
-    rocketLand: 2.5,        // s      …and touches down here (decelerating like a retro-burn)
-    travelTime: 1.0,        // s      crates fade, rocket lifts off, then levelUp
-    rocketAcc: 1400,        // px/s²  (×u) lift-off acceleration in travel
-    heartReward: 1,         // —      hearts back on every new planet (up to max)
+    // ---- goal show: Granny Boo (DESIGN §5.1) ----
+    goalTime: 3.0,          // s      the whole show in phase 'goal' (flag at 0 s)
+    ghostIn: 0.35,          // s      Granny Boo appears off-screen at the side…
+    ghostArrive: 1.45,      // s      …and arrives beside the tower top (x ease-out cubic, y smoothstep → a curved path that slows to a stop)
+    ghostWaveOn: 1.7,       // s      waves (ghost_wave frame)…
+    ghostWaveOff: 2.8,      // s      …until here
+    ghostDX: 1.3,           // unit   hover centre beside the tower top (crate ½w ≤ 0.75 + ghost ½w 0.45 + a gap)
+    ghostDY: -0.45,         // unit   hover centre relative to the tower top (her hem is level with the top crate)
+    ghostFrom: 1.1,         // unit   she starts this far above her hover point (floats DOWN in, like the requirement says)
+    ghostBob: 0.07,         // unit   hover bob amplitude…
+    ghostBobW: 3.2,         // rad/s  …period ≈2 s
+    ghostRiseAcc: 700,      // px/s²  (×u) in travel she floats up and away (and drifts outward 40 % of that)
+    travelTime: 1.2,        // s      crates fade, the camera glides down to the ground (C¹ smoothstep), then levelUp
+    heartReward: 1,         // —      hearts back on every new time of day (up to max)
 
-    // ---- coins ----
-    coins: { max: 3, life: 3, r: 0.21, bandTop: 0.8, bandBot: 0.45, minGap: 0.65, bob: 0.06, bobW: 2.6, spinRate: 7, pair: 0.25, onPath: 0.7, follow: 3 },
-    //       max alive · life in drops · radius (unit) · fall band: centre ≥ saucer + 0.8 unit (and below the
-    //       held crate) and ≤ tower top − 0.45 unit (DESIGN says 0.6; 0.45 leaves room in the 1-crate gap) · min gap
-    //       between coins (unit) · bob amplitude (unit) · bob rad/s · spin frames/s · chance of a second coin ·
-    //       share of coins placed over the drop path (top x ± 0.6 crate) — the rest anywhere on the swing ·
-    //       follow 1/s: coins drift up with the tower (63 % in 0.33 s) so they stay in the fall band
-    growEvery: 5,           // coins  per grow step (REQUIREMENT)
-    growMax: 5,             // steps
-
-    // ---- loops (after Comet Garden the planets repeat) ----
-    loopSwing: 0.12,        // ×/loop saucer swings 12 % faster each round…
+    // ---- loops (after Night the day starts again) ----
+    loopSwing: 0.12,        // ×/loop rocket swings 12 % faster each round…
     loopSwingCap: 1.6,      // ×      …up to 60 % faster
-    loopG: 0.06,            // ×/loop slightly heavier gravity each round
-    loopGoal: 1,            // crates more per round (playtest: +2 made late planets 20+ crates and 75 s+; +1 keeps 45–60 s)
+    loopG: 0.06,            // ×/loop slightly heavier crates each round
+    loopGoal: 1,            // crates more per round (fox-moon-stack playtest: +1 keeps 45–60 s per level)
     loopTol: 0.06,          // ×/loop perfect zone shrinks 6 % per round…
-    loopTolMin: 0.8,        // ×      …to at least 80 % (playtest: 70 % left Hard 1–2-frame perfect windows)
+    loopTolMin: 0.8,        // ×      …to at least 80 % (70 % left Hard 1–2-frame perfect windows)
 
-    // ---- per difficulty (Easy is tuned for a 6-year-old) ----
+    // ---- per difficulty (Easy is tuned for a 6-year-old; values from the fox-moon-stack playtest) ----
     difficulty: {
       easy:   { swing: 0.6,  crate: 1.35, perfectTol: 0.22,  hearts: 5, inherit: 0.5,  sway: 0.65, assist: 0.6 },
       normal: { swing: 1.0,  crate: 1.0,  perfectTol: 0.15,  hearts: 3, inherit: 1.0,  sway: 1.0,  assist: 0.5 },
       hard:   { swing: 1.22, crate: 0.9,  perfectTol: 0.11,  hearts: 3, inherit: 1.15, sway: 1.25, assist: 0.2 }
     },
-    //  swing = × planet swingW · crate = × crate size · perfectTol = |dx| ≤ tol·w is perfect · hearts at start/max
-    //  inherit = × CONFIG.inherit · sway = × sway kicks · assist = share of an off-centre landing the beam
+    //  swing = × zone swingW · crate = × crate size · perfectTol = |dx| ≤ tol·w is perfect · hearts at start/max
+    //  inherit = × CONFIG.inherit · sway = × sway kicks · assist = share of an off-centre landing the glow
     //  pulls back toward the centre (the crate slides in over ≈0.12 s; Easy forgives lean, Hard is nearly raw physics)
-    //  Playtest 2026-11-04 (tests/sim, docs/reports/playtest.md): Easy stay window 302 → 433 ms for 4–6-year-olds;
-    //  Normal/Hard assist so centre-of-mass topples are ~30 % / ~50 % of heart losses instead of 67 %.
 
-    // ---- planets (zone = level % 4) ----
-    planets: [
-      { key: 'moon',  g: 760,  swingW: 1.75, drag: 0,    coinChance: 0.55, goal: 10 },  // low gravity: slow gentle falls; swing period 3.6 s (5 s on Easy)
-      { key: 'dunes', g: 1050, swingW: 1.95, drag: 0.25, coinChance: 0.6,  goal: 12 },  // thin dusty air: a little drag on the sideways drift
-      { key: 'rings', g: 1250, swingW: 2.3,  drag: 0.1,  coinChance: 0.6,  goal: 14 },  // "faster saucer" (REQUIREMENT)
-      { key: 'comet', g: 1400, swingW: 2.5,  drag: 0.15, coinChance: 0.65, goal: 16 }   // the busiest planet before the loop
+    // ---- times of day (zone = level % 4) ----
+    zones: [
+      { key: 'dawn',   light: 0.85, g: 760,  swingW: 1.75, drag: 0,    appleChance: 0.55, goal: 10 },  // soft light, slow swing (5 s period on Easy), gentle falls
+      { key: 'noon',   light: 1.0,  g: 980,  swingW: 1.95, drag: 0.1,  appleChance: 0.6,  goal: 12 },  // brightest; a breeze trims the sideways drift a little
+      { key: 'sunset', light: 0.55, g: 1120, swingW: 2.2,  drag: 0.15, appleChance: 0.6,  goal: 14 },  // getting dim: lanterns start to matter
+      { key: 'night',  light: 0.3,  g: 1220, swingW: 2.35, drag: 0.1,  appleChance: 0.65, goal: 16 }   // dark + fastest swing, but gentler than fox's comet (the dark is the challenge)
     ]
-    //  g px/s² (×u) · swingW rad/s (phase speed of x = cx + swingA·sin φ) · drag 1/s on vx (0 = no air) · coin chance per crate · goal crates
+    //  light 0..1 at the START of the zone (it eases toward the next zone's light, Night → nightEnd) · g px/s² (×u) ·
+    //  swingW rad/s (phase speed of x = cx + swingA·sin φ) · drag 1/s on vx (0 = none) · apple chance per crate · goal crates
   };
 
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
@@ -154,6 +179,7 @@
     this.state = 'held'; this.perfect = false; this.squash = 0; this.t = 0;
     this.alpha = 1; this.hvx = 0; this.rest = 0; this.onGround = false; this.pivot = null; this.floor = 0;
     this.tx = x;            // rest x target of a placed crate (x slides into it after a perfect snap / assist)
+    this.lantern = false; this.lanternSide = 1; this.lanternRot = 0; this.prevLanternRot = 0; this.lanternW = 0;
   }
 
   function World(opts) { this.reset(opts); }
@@ -186,25 +212,26 @@
     this.events = [];
     this.score = 0; this.combo = 0; this.maxCombo = 0;
     this.maxHearts = this.diff.hearts; this.hearts = this.maxHearts;
-    this.coins = 0; this.grow = 0; this.growCoins = 0;
-    this.stats = { drops: 0, placed: 0, perfect: 0, edges: 0, misses: 0, topples: 0, coins: 0, grows: 0, levels: 0, bestTower: 0 };
+    this.apples = 0; this.pieApples = 0;
+    this.stats = { drops: 0, placed: 0, perfect: 0, edges: 0, misses: 0, topples: 0, apples: 0, glowApples: 0, pies: 0, lanterns: 0, levels: 0, bestTower: 0 };
     this._id = 0; this._lastStyle = -1; this._buf = -1;
     var L = this.layout;
     this.saucer = { x: L.cx, prevX: L.cx, y: 0, prevY: 0, vx: 0, phase: 0, scale: 1, prevScale: 1, anim: 'idle', animT: 0, tilt: 0 };
     this.level = opts.level | 0;
-    this._startLevel(this.level, false);
+    this._startLevel(this.level, false, true);
   };
 
-  // ---------- planets & sizes ----------
-  World.prototype._planetFor = function (level) {
-    var zone = ((level % 4) + 4) % 4, loop = M.floor(level / 4), P = CONFIG.planets[zone], D = this.diff;
+  // ---------- zones & sizes ----------
+  World.prototype._zoneFor = function (level) {
+    var zone = ((level % 4) + 4) % 4, loop = M.floor(level / 4), Z = CONFIG.zones[zone], D = this.diff;
     return {
-      key: P.key, zone: zone, loop: loop,
-      g: P.g * (1 + CONFIG.loopG * loop),
-      swingW: P.swingW * D.swing * M.min(CONFIG.loopSwingCap, 1 + CONFIG.loopSwing * loop),
-      drag: P.drag,
-      coinChance: P.coinChance,
-      goal: P.goal + CONFIG.loopGoal * loop,
+      key: Z.key, zone: zone, loop: loop,
+      light: Z.light, lightEnd: zone === 3 ? CONFIG.nightEnd : CONFIG.zones[zone + 1].light,
+      g: Z.g * (1 + CONFIG.loopG * loop),
+      swingW: Z.swingW * D.swing * M.min(CONFIG.loopSwingCap, 1 + CONFIG.loopSwing * loop),
+      drag: Z.drag,
+      appleChance: Z.appleChance,
+      goal: Z.goal + CONFIG.loopGoal * loop,
       perfectTol: D.perfectTol * M.max(CONFIG.loopTolMin, 1 - CONFIG.loopTol * loop),
       inherit: CONFIG.inherit * D.inherit
     };
@@ -212,7 +239,7 @@
 
   World.prototype._u = function () { return this.layout.unit / 100; };
   World.prototype._crateSize = function () {
-    var L = this.layout, s = this.diff.crate * (1 + CONFIG.crateGrow * this.grow);
+    var L = this.layout, s = this.diff.crate;
     return { w: L.crateW0 * s, h: L.crateH0 * s };
   };
 
@@ -221,19 +248,25 @@
     this.base = { x: L.cx, y: L.groundY - h / 2, w: CONFIG.baseW * u, h: h, top: L.groundY - h + h * CONFIG.baseTopFrac };
   };
 
-  World.prototype._startLevel = function (level, emit) {
+  World.prototype._startLevel = function (level, emit, instantLight) {
     this.level = level;
     this.zone = ((level % 4) + 4) % 4;
     this.loop = M.floor(level / 4);
-    this.planet = this._planetFor(level);
+    this.planet = this._zoneFor(level);          // DESIGN keeps the fox name `planet` for the zone params
     this.goal = this.planet.goal;
     this.placed = 0;
-    this.crates = []; this.coinList = []; this.pivots = [];
+    this.crates = []; this.appleList = []; this.pivots = [];
     this.held = null; this.falling = null;
-    this.flag = null; this.rocket = null;
+    this.flag = null; this.ghost = null;
+    this._lanternSide = -1;
+    this._prog = 0;                               // max tower progress placed/goal reached in this level (light never goes back)
+    if (instantLight || this.light === undefined) { this.light = this.planet.light; this._progE = 0; }
+    this._progE = 0;
+    this.dayT = this.zone;
+    this.lightTint = this.planet.key;
     this._makeBase();
-    this.tower = { sway: 0, prevSway: 0, swayV: 0, height: 0, topY: this.base.top, topX: this.base.x, count: 0, list: [] };
-    // on a new planet the camera keeps its place (≈0 after the travel glide) and springs to the new target;
+    this.tower = { sway: 0, prevSway: 0, swayV: 0, swayA: 0, height: 0, topY: this.base.top, topX: this.base.x, count: 0, list: [] };
+    // on a new time of day the camera keeps its place (≈0 after the travel glide) and springs to the new target;
     // on a fresh game it starts on the target
     var camY = emit && this.cam ? this.cam.y : null;
     this.cam = { y: 0, prevY: 0, v: 0 };
@@ -247,17 +280,14 @@
     this._spawn();
   };
 
-  /** Jump straight to level i (fresh tower; emits levelUp). */
+  /** Jump straight to level i (fresh tower; emits levelUp; the light jumps to that time of day). */
   World.prototype.gotoLevel = function (i) {
     i = M.max(0, i | 0);
     this.stats.levels = M.max(this.stats.levels, i);
-    this._startLevel(i, true);
+    this._startLevel(i, true, true);
   };
 
   // ---------- public helpers ----------
-  /** Coins array (alias kept for the contract name `coins[]`; `coins` is the total count). */
-  Object.defineProperty(World.prototype, 'coinsAlive', { get: function () { return this.coinList; } });
-
   World.prototype.drainEvents = function () { var e = this.events; this.events = []; return e; };
   World.prototype._emit = function (e) { this.events.push(e); };
 
@@ -272,6 +302,64 @@
   World.prototype.swayOffsetLerp = function (y, alpha) {
     var a = alpha === undefined ? this.alpha : alpha, t = this.tower;
     return (t.prevSway + (t.sway - t.prevSway) * a) * this._swayFrac(y, t.topY);
+  };
+
+  /** Where a lantern crate's lantern hangs (world coords, sway included for placed crates; pure):
+   *  {x, y} = the hook (lantern.svg's (24, 0)), {lx, ly} = the glowing body centre, rot = pendulum angle (rad, about the hook). */
+  World.prototype.lanternPos = function (c, alpha) {
+    var K = CONFIG.lantern, u = this.layout.unit, s = c.lanternSide;
+    var sx = c.state === 'placed' ? (alpha === undefined ? this.swayOffset(c.y) : this.swayOffsetLerp(c.y, alpha)) : 0;
+    var cs = M.cos(c.rot), sn = M.sin(c.rot);
+    var ox = s * (c.w / 2 - K.hookIn * u), oy = -c.h / 2 + K.hookDown * u;      // crate-local, rotated with the crate
+    var hx = c.x + sx + ox * cs - oy * sn, hy = c.y + ox * sn + oy * cs;
+    var a = c.lanternRot + c.rot, d = K.bodyDY * u;
+    return { x: hx, y: hy, lx: hx - M.sin(a) * d, ly: hy + M.cos(a) * d, rot: a };
+  };
+
+  /** Light sources for the darkness layer, world coords (pure, no RNG): [{x, y, r, a, kind}]. */
+  World.prototype.lights = function () {
+    var out = [], u = this.layout.unit, LC = CONFIG.lights, s = this.saucer, i, c;
+    out.push({ x: s.x, y: s.y + CONFIG.emitterDY * u, r: LC.ziggy.r * u, a: LC.ziggy.a, kind: 'ziggy' });
+    if (this.held) out.push({ x: this.held.x, y: this.held.y, r: LC.held.r * u, a: LC.held.a, kind: 'held' });
+    if (this.falling) out.push({ x: this.falling.x, y: this.falling.y, r: LC.falling.r * u, a: LC.falling.a, kind: 'falling' });
+    this._towerLights(out);
+    if (this.light < CONFIG.glowBelow) {
+      for (i = 0; i < this.appleList.length; i++) {
+        c = this.appleList[i];
+        if (c.state === 'float') out.push({ x: c.x, y: c.y, r: LC.apple.r * u, a: LC.apple.a, kind: 'apple' });
+      }
+    }
+    if (this.flag) out.push({ x: this.flag.x + this.swayOffset(this.flag.y), y: this.flag.y - CONFIG.flagH * u * 0.9, r: LC.flag.r * u, a: LC.flag.a, kind: 'flag' });
+    if (this.ghost) out.push({ x: this.ghost.x, y: this.ghost.y, r: LC.ghost.r * u, a: LC.ghost.a, kind: 'ghost' });
+    return out;
+  };
+  World.prototype._towerLights = function (out) {
+    var l = this.tower.list, u = this.layout.unit, LC = CONFIG.lights, n = 0;
+    for (var i = l.length - 1; i >= 0 && n < LC.maxLanterns; i--) {
+      if (!l[i].lantern) continue;
+      var p = this.lanternPos(l[i]);
+      out.push({ x: p.lx, y: p.ly, r: LC.lantern.r * u, a: LC.lantern.a, kind: 'lantern' });
+      n++;
+    }
+    return out;
+  };
+
+  /** How lit is world point (x, y)? ambient light screened with the strongest light that reaches it (0..1).
+   *  `out` = the light list to use (default: everything but Ziggy's own lantern and the crate in her glow). */
+  World.prototype.litAt = function (x, y, list) {
+    if (!list) {
+      list = this._towerLights([]);
+      var all = this.lights();
+      for (var k = 0; k < all.length; k++) if (all[k].kind === 'apple' || all[k].kind === 'flag' || all[k].kind === 'ghost') list.push(all[k]);
+    }
+    var best = 0;
+    for (var i = 0; i < list.length; i++) {
+      var Lg = list[i], d2 = ((x - Lg.x) * (x - Lg.x) + (y - Lg.y) * (y - Lg.y)) / (Lg.r * Lg.r);
+      if (d2 >= 1) continue;
+      var f = M.pow(1 - d2, CONFIG.lightFalloff) * Lg.a;
+      if (f > best) best = f;
+    }
+    return clamp(1 - (1 - this.light) * (1 - best), 0, 1);
   };
 
   // ---------- input ----------
@@ -310,7 +398,14 @@
     T.topY = top.y; T.topX = top.x; T.count = T.list.length; this.placed = T.list.length;
     T.height = this.layout.groundY - top.y;
     if (T.count > this.stats.bestTower) this.stats.bestTower = T.count;
+    if (this.goal > 0) this._prog = M.max(this._prog || 0, M.min(1, this.placed / this.goal));
   };
+  World.prototype._lanternCount = function () {
+    var n = 0, l = this.tower.list;
+    for (var i = 0; i < l.length; i++) if (l[i].lantern) n++;
+    return n;
+  };
+  Object.defineProperty(World.prototype, 'lanterns', { get: function () { return this._lanternCount(); } });
 
   World.prototype._camTarget = function () {
     var L = this.layout, h = this.held ? this.held.h : this._crateSize().h;
@@ -318,15 +413,14 @@
   };
 
   World.prototype._placeSaucer = function () {
-    var s = this.saucer, L = this.layout, u = this._u();
+    var s = this.saucer, L = this.layout;
     s.x = L.cx + L.swingA * M.sin(s.phase);
     s.vx = L.swingA * this.planet.swingW * M.cos(s.phase);
     s.y = this.cam.y + L.saucerScreenY + CONFIG.bobAmp * L.unit * M.sin(this.time * CONFIG.bobW);
-    return u;
   };
   World.prototype._holdY = function (c) {
     var s = this.saucer, u = this.layout.unit;
-    return s.y + CONFIG.emitterDY * u * s.scale + CONFIG.beamGap * u + c.h / 2;
+    return s.y + CONFIG.emitterDY * u + CONFIG.beamGap * u + c.h / 2;
   };
 
   World.prototype._spawn = function () {
@@ -339,51 +433,114 @@
     this.held = c;
     this.phase = 'swing'; this.phaseT = 0;
     this._emit({ type: 'spawn' });
-    this._spawnCoins();
+    this._spawnApples();
     if (this._buf >= 0 && this.time - this._buf <= CONFIG.dropBuffer + 1e-9) this._release();
     this._buf = -1;
   };
 
-  // ---------- coins ----------
-  World.prototype._coinBand = function () {
-    var L = this.layout, u = L.unit, K = CONFIG.coins;
-    // screen space; never overlapping the crate hanging in the beam (its bottom + one coin radius)
-    var ch = this.held ? this.held.h : this._crateSize().h, sc = 1 + CONFIG.saucerGrow * this.grow;
-    var heldBottom = L.saucerScreenY + (CONFIG.emitterDY * sc + CONFIG.beamGap) * u + ch + CONFIG.bobAmp * u;
+  // ---------- apples ----------
+  World.prototype._appleBand = function () {
+    var L = this.layout, u = L.unit, K = CONFIG.apples;
+    // screen space; never overlapping the crate hanging in the glow (its bottom + one apple radius)
+    var ch = this.held ? this.held.h : this._crateSize().h;
+    var heldBottom = L.saucerScreenY + (CONFIG.emitterDY + CONFIG.beamGap) * u + ch + CONFIG.bobAmp * u;
     var top = M.max(L.saucerScreenY + K.bandTop * u, heldBottom + (K.r + 0.05) * u);
     var bot = this.tower.topY - this._camTarget() - K.bandBot * u;   // where the camera is heading (it lags one crate at spawn)
     return { top: top, bot: bot };
   };
-  World.prototype._spawnCoins = function () {
-    var K = CONFIG.coins, L = this.layout, u = L.unit, alive = 0, i;
-    for (i = 0; i < this.coinList.length; i++) {
-      var c0 = this.coinList[i];
-      if (c0.state === 'float' && ++c0.life >= K.life) { c0.state = 'gone'; c0.fade = 1; }
+  World.prototype._newApple = function (x, sy, ph) {
+    var y = this._camTarget() + sy, K = CONFIG.apples;
+    return { id: ++this._id, x: x, y: y, prevX: x, prevY: y, sy: sy, baseY: y, r: K.r * this.layout.unit, t: 0,
+      frame: 0, rot: 0, prevRot: 0, state: 'float', glow: this.light < CONFIG.glowBelow, life: 0, ph: ph, fade: 1 };
+  };
+  World.prototype._spawnApples = function () {
+    var K = CONFIG.apples, L = this.layout, u = L.unit, alive = 0, i;
+    for (i = 0; i < this.appleList.length; i++) {
+      var a0 = this.appleList[i];
+      if (a0.state === 'float' && ++a0.life >= K.life) { a0.state = 'gone'; a0.fade = 1; }
     }
-    for (i = 0; i < this.coinList.length; i++) if (this.coinList[i].state === 'float') alive++;
-    if (alive >= K.max || !this.rng.chance(this.planet.coinChance)) return;
-    var n = this.rng.chance(K.pair) ? 2 : 1, band = this._coinBand();
+    for (i = 0; i < this.appleList.length; i++) if (this.appleList[i].state === 'float') alive++;
+    if (alive >= K.max || !this.rng.chance(this.planet.appleChance)) return;
+    var n = this.rng.chance(K.pair) ? 2 : 1, band = this._appleBand();
     if (band.bot - band.top < 2) return;
     for (var k = 0; k < n && alive < K.max; k++) {
       for (var tries = 0; tries < 6; tries++) {
-        // most coins hang over the drop path (a good drop grabs them); some sit out on the swing (a risky grab)
+        // most apples hang over the drop path (a good drop grabs them); some sit out on the swing (a risky grab)
         var x = this.rng.chance(K.onPath)
           ? clamp(this.tower.topX + this.rng.range(-0.6, 0.6) * this._crateSize().w, L.cx - L.swingA, L.cx + L.swingA)
           : L.cx + this.rng.range(-0.9, 0.9) * L.swingA;
         var sy = this.rng.range(band.top, band.bot);
         var ok = true;
-        for (i = 0; i < this.coinList.length; i++) {
-          var o = this.coinList[i];
+        for (i = 0; i < this.appleList.length; i++) {
+          var o = this.appleList[i];
           if (o.state === 'float' && M.hypot(o.x - x, o.sy - sy) < K.minGap * u) { ok = false; break; }
         }
         if (!ok) continue;
-        var y = this._camTarget() + sy;
-        this.coinList.push({ id: ++this._id, x: x, y: y, prevX: x, prevY: y, sy: sy, baseY: y, r: K.r * u, t: 0,
-          spin: this.rng.range(0, 4), state: 'float', life: 0, ph: this.rng.range(0, 6.283), fade: 1 });
+        this.appleList.push(this._newApple(x, sy, this.rng.range(0, 6.283)));
         alive++;
         break;
       }
     }
+  };
+
+  World.prototype._appleStep = function (h) {
+    var K = CONFIG.apples, u = this.layout.unit, dark = this.light < CONFIG.glowBelow;
+    for (var i = this.appleList.length - 1; i >= 0; i--) {
+      var c = this.appleList[i];
+      c.prevRot = c.rot;
+      c.t += h;
+      var th = c.ph + c.t * K.bobW;
+      c.frame = M.floor(c.t * K.flutter + c.ph) % 2;
+      if (c.state === 'float') {
+        // anchored in the world where the camera is heading; floats up gently as the tower grows
+        c.baseY += (this._camTarget() + c.sy - c.baseY) * (1 - M.exp(-K.follow * h));
+        c.y = c.baseY + K.bob * u * M.sin(th);
+        c.rot = K.rock * M.cos(th);                 // pendulum rock: max tilt at the middle of the bob, upright at its ends
+        c.glow = dark;
+        if (c.y > this.tower.topY - c.r) { c.state = 'gone'; }   // the tower grew into it (rare)
+      } else if (c.state === 'collected') {
+        if (c.t > 0.6) c.state = 'gone';
+      }
+      if (c.state === 'gone') {
+        c.fade = (c.fade || 1) - h / 0.25;
+        if (c.fade <= 0) this.appleList.splice(i, 1);
+      }
+    }
+  };
+
+  World.prototype._collectApples = function (cr) {
+    for (var i = 0; i < this.appleList.length; i++) {
+      var c = this.appleList[i];
+      if (c.state !== 'float') continue;
+      var nx = clamp(c.x, cr.x - cr.w / 2, cr.x + cr.w / 2), ny = clamp(c.y, cr.y - cr.h / 2, cr.y + cr.h / 2);
+      var ddx = c.x - nx, ddy = c.y - ny;
+      if (ddx * ddx + ddy * ddy > c.r * c.r) continue;
+      this._takeApple(c);
+    }
+  };
+  World.prototype._takeApple = function (c) {
+    var glow = this.light < CONFIG.glowBelow, pts = glow ? CONFIG.appleGlowPoints : CONFIG.applePoints;
+    c.state = 'collected'; c.t = 0; c.glow = glow;
+    this.apples++; this.stats.apples++; if (glow) this.stats.glowApples++;
+    this.score += pts;
+    this._emit({ type: 'apple', apple: c, x: c.x, y: c.y, total: this.apples, points: pts, glow: glow });
+    this.pieApples++;
+    if (this.pieApples >= CONFIG.pieEvery) {
+      this.pieApples = 0; this.stats.pies++;
+      var gained = this.hearts < this.maxHearts;
+      if (gained) this.hearts++;
+      this._emit({ type: 'pie', hearts: this.hearts, gained: gained });
+    }
+  };
+
+  // ---------- light ----------
+  World.prototype._lightStep = function (h) {
+    var P = this.planet, k = 1 - M.exp(-CONFIG.lightRate * h);
+    this._progE += (this._prog - this._progE) * k;
+    var target = P.light + (P.lightEnd - P.light) * easeInOut(this._prog);
+    this.light += (target - this.light) * k;
+    this.dayT = this.zone + this._progE;
+    this.lightTint = this._progE < 0.5 ? P.key : CONFIG.zones[M.min(3, this.zone + 1)].key;
   };
 
   // ---------- main loop ----------
@@ -397,29 +554,28 @@
   };
 
   World.prototype._step = function (h) {
-    var i, c, s = this.saucer, T = this.tower, L = this.layout;
+    var i, c, s = this.saucer, T = this.tower;
     // prev* for interpolation
     s.prevX = s.x; s.prevY = s.y; s.prevScale = s.scale;
     this.cam.prevY = this.cam.y; T.prevSway = T.sway;
-    for (i = 0; i < this.crates.length; i++) { c = this.crates[i]; c.prevX = c.x; c.prevY = c.y; c.prevRot = c.rot; }
-    for (i = 0; i < this.coinList.length; i++) { c = this.coinList[i]; c.prevX = c.x; c.prevY = c.y; }
-    if (this.rocket) { this.rocket.prevX = this.rocket.x; this.rocket.prevY = this.rocket.y; }
+    for (i = 0; i < this.crates.length; i++) { c = this.crates[i]; c.prevX = c.x; c.prevY = c.y; c.prevRot = c.rot; c.prevLanternRot = c.lanternRot; }
+    for (i = 0; i < this.appleList.length; i++) { c = this.appleList[i]; c.prevX = c.x; c.prevY = c.y; }
+    if (this.ghost) { this.ghost.prevX = this.ghost.x; this.ghost.prevY = this.ghost.y; }
 
     this.time += h; this.phaseT += h;
 
-    // sway spring
+    // sway spring, then the lantern pendulums it drives
     this._swayStep(T, h);
-    // saucer phase (position is placed after the camera moved, below)
+    this._lanternStep(h);
+    // rocket phase (position is placed after the camera moved, below)
     s.phase += this.planet.swingW * h;
     if (s.phase > 1e4) s.phase -= 2 * M.PI * M.floor(s.phase / (2 * M.PI));
-    var tScale = 1 + CONFIG.saucerGrow * this.grow;
-    s.scale += (tScale - s.scale) * (1 - M.exp(-CONFIG.scaleRate * h));
     var tTilt = clamp(s.vx * CONFIG.tiltK / this._u(), -CONFIG.tiltMax, CONFIG.tiltMax);
     s.tilt += (tTilt - s.tilt) * (1 - M.exp(-CONFIG.tiltRate * h));
     s.animT += h;
     if (s.anim !== 'idle' && s.animT >= (CONFIG.anim[s.anim] || 0.5)) { s.anim = 'idle'; s.animT = 0; }
 
-    // held crate: spring-lagged pendulum under the beam (uses last step's saucer: one step of lag is the spring's input)
+    // held crate: spring-lagged pendulum under the glow (uses last step's rocket: one step of lag is the spring's input)
     if (this.held) {
       c = this.held; c.t += h;
       var w0 = CONFIG.holdOmega, z = CONFIG.holdZeta;
@@ -450,12 +606,13 @@
     // remove gone crates
     for (i = this.crates.length - 1; i >= 0; i--) if (this.crates[i].state === 'gone') this.crates.splice(i, 1);
 
-    // camera (after landings/topples so the top never pokes above topLine), then the saucer rides with it
+    // camera (after landings/topples so the top never pokes above topLine), then the rocket rides with it
     this._camStep(h);
     this._placeSaucer();
     if (this.held) this.held.y = this._holdY(this.held);
-    // coins
-    this._coinStep(h);
+    // light, then apples (their glow follows the light)
+    this._lightStep(h);
+    this._appleStep(h);
 
     // phases
     if (this.phase === 'settle') {
@@ -475,19 +632,33 @@
 
   World.prototype._swayStep = function (T, h) {
     var w0 = CONFIG.swayOmega, z = CONFIG.swayZeta, lim = CONFIG.swayMax * this.layout.unit;
-    T.swayV += (-w0 * w0 * T.sway - 2 * z * w0 * T.swayV) * h;
+    var a = -w0 * w0 * T.sway - 2 * z * w0 * T.swayV;
+    T.swayV += a * h;
     T.sway += T.swayV * h;
+    T.swayA = a;
     if (T.sway > lim) { T.sway = lim; if (T.swayV > 0) T.swayV *= -0.3; }
     else if (T.sway < -lim) { T.sway = -lim; if (T.swayV < 0) T.swayV *= -0.3; }
   };
 
+  /** Each hung lantern is a damped pendulum on its hook, driven by the hook's sideways acceleration (tower sway). */
+  World.prototype._lanternStep = function (h) {
+    var K = CONFIG.lantern, l = this.tower.list, ell = K.bodyDY * this.layout.unit, w0 = K.omega, aT = this.tower.swayA || 0;
+    for (var i = 0; i < l.length; i++) {
+      var c = l[i];
+      if (!c.lantern) continue;
+      var ax = aT * this._swayFrac(c.y, this.tower.topY);
+      // θ'' = −ω²θ − 2ζωθ' − a_hook/ℓ  (a hook accelerating right swings the lantern left: θ > 0 = clockwise)
+      c.lanternW += (-w0 * w0 * c.lanternRot - 2 * K.zeta * w0 * c.lanternW + ax / ell) * h;
+      c.lanternRot = clamp(c.lanternRot + c.lanternW * h, -K.maxRot, K.maxRot);
+    }
+  };
+
   World.prototype._camStep = function (h) {
     var cam = this.cam;
-    if (this.phase === 'goal' || this.phase === 'travel') {
-      // the camera glides down with the rocket (kinematic ease, C¹ at both ends), then stays on the ground
+    if (this.phase === 'travel') {
+      // the camera glides down to the ground while Granny Boo floats up (kinematic ease, C¹ at both ends)
       if (this._goalCam === undefined) this._goalCam = cam.y;
-      var t = this.phase === 'goal' ? this.phaseT : CONFIG.goalCamEnd + this.phaseT;
-      var e = easeInOut((t - CONFIG.goalCamStart) / (CONFIG.goalCamEnd - CONFIG.goalCamStart));
+      var e = easeInOut(this.phaseT / CONFIG.travelTime);
       var ny = this._goalCam * (1 - e);
       cam.v = (ny - cam.y) / h; cam.y = ny;
       return;
@@ -502,7 +673,7 @@
   };
 
   // ---------- falling + landing ----------
-  /** Advance one falling body by h with planet gravity/drag (exact for constant g). */
+  /** Advance one falling body by h with zone gravity/drag (exact for constant g). */
   World.prototype._ballistic = function (c, h) {
     var g = this.planet.g * this._u(), d = this.planet.drag;
     if (d > 0) {
@@ -518,7 +689,7 @@
     var prevBottom = c.y + c.h / 2;
     this._ballistic(c, h);
     c.rot += c.vr * h; c.t += h;
-    this._collectCoins(c);
+    this._collectApples(c);
     var bottom = c.y + c.h / 2;
     if (prevBottom <= top.y + 1e-9 && bottom >= top.y) {
       var sx = this.swayOffset(top.y);
@@ -550,7 +721,6 @@
     // sway kick: off-centre landings rock the tower; perfect ones only settle it
     var n = this.tower.list.length, hf = M.min(1, n / CONFIG.swayHeightRef), D = this.diff;
     var kick = CONFIG.swayKick * dx * (perfect ? CONFIG.perfectKick : 1) + CONFIG.swayVxKick * vx;
-    kick += this.grow * CONFIG.growKick * u * sgn(dx !== 0 ? dx : vx);
     this.tower.swayV += kick * hf * D.sway;
     if (perfect) {
       this.combo++;
@@ -560,6 +730,12 @@
       this._anim('happy');
       this._emit({ type: 'perfect', crate: c, combo: this.combo });
       if (this.combo >= 2) this._emit({ type: 'combo', combo: this.combo });
+      // a Perfect hangs a lantern on the crate, alternating sides up the tower
+      this._lanternSide = -this._lanternSide;
+      c.lantern = true; c.lanternSide = this._lanternSide;
+      c.lanternRot = 0; c.prevLanternRot = 0; c.lanternW = -c.lanternSide * CONFIG.lantern.kick;   // swings out as it is hung
+      this.stats.lanterns++;
+      this._emit({ type: 'lantern', crate: c });
     } else {
       this.stats.edges++;
       this._breakCombo();
@@ -597,7 +773,6 @@
     this.stats.misses++;
     this._breakCombo();
     this._emit({ type: 'miss', crate: c });
-    if (this.grow > 0 && this.difficulty !== 'easy') { this.grow--; this._emit({ type: 'shrink', grow: this.grow }); }
     this._loseHeart();
     this._enterSettle(CONFIG.missSettle);
   };
@@ -686,7 +861,7 @@
     if (c.y + hey >= floor) {
       c.y = floor - hey; c.floor = floor;
       if (onBase) {
-        // on the launch pad shelf: slide/tip towards its outer edge
+        // on the plinth: slide/tip towards its outer edge
         if (c.vy > CONFIG.bounceMin * u) c.vy = -c.vy * CONFIG.bounce; else c.vy = 0;
         var dir = sgn(c.x - B.x);
         c.vx = c.vx * 0.9 + dir * CONFIG.slideAcc * u * h;
@@ -711,7 +886,7 @@
     var total = 0, lowestY = null;
     for (var guard = 0; guard < 50; guard++) {
       var l = this.tower.list, n = l.length, found = -2, comX = 0, dir = 1;
-      // supports from the bottom up (−1 = the launch pad): the lowest joint that fails takes everything above
+      // supports from the bottom up (−1 = the plinth): the lowest joint that fails takes everything above
       for (var i = -1; i < n - 1; i++) {
         var m = 0, sx = 0;
         for (var j = i + 1; j < n; j++) { var mj = l[j].w * l[j].h; m += mj; sx += mj * l[j].tx; }
@@ -743,84 +918,59 @@
     return total;
   };
 
-  // ---------- coins ----------
-  World.prototype._coinStep = function (h) {
-    var K = CONFIG.coins, u = this.layout.unit;
-    for (var i = this.coinList.length - 1; i >= 0; i--) {
-      var c = this.coinList[i];
-      c.t += h; c.spin = (c.spin + K.spinRate * h) % 4;
-      if (c.state === 'float') {
-        // anchored in the world where the camera is heading; floats up gently as the tower grows
-        c.baseY += (this._camTarget() + c.sy - c.baseY) * (1 - M.exp(-CONFIG.coins.follow * h));
-        c.y = c.baseY + K.bob * u * M.sin(c.ph + c.t * K.bobW);
-        if (c.y > this.tower.topY - c.r) { c.state = 'gone'; }   // the tower grew into it (rare)
-      } else if (c.state === 'collected') {
-        if (c.t > 0.6) c.state = 'gone';
-      }
-      if (c.state === 'gone') {
-        c.fade = (c.fade || 1) - h / 0.25;
-        if (c.fade <= 0) this.coinList.splice(i, 1);
-      }
-    }
-  };
-
-  World.prototype._collectCoins = function (cr) {
-    for (var i = 0; i < this.coinList.length; i++) {
-      var c = this.coinList[i];
-      if (c.state !== 'float') continue;
-      var nx = clamp(c.x, cr.x - cr.w / 2, cr.x + cr.w / 2), ny = clamp(c.y, cr.y - cr.h / 2, cr.y + cr.h / 2);
-      var ddx = c.x - nx, ddy = c.y - ny;
-      if (ddx * ddx + ddy * ddy > c.r * c.r) continue;
-      c.state = 'collected'; c.t = 0;
-      this.coins++; this.stats.coins++;
-      this.score += CONFIG.coinPoints;
-      this._emit({ type: 'coin', coin: c, x: c.x, y: c.y, total: this.coins });
-      if (this.grow < CONFIG.growMax) {
-        this.growCoins++;
-        if (this.growCoins >= CONFIG.growEvery) {
-          this.growCoins = 0; this.grow++; this.stats.grows++;
-          this._emit({ type: 'grow', grow: this.grow });
-        }
-      }
-    }
-  };
-
-  // ---------- goal → rocket → travel → levelUp ----------
+  // ---------- goal → Granny Boo → travel → levelUp ----------
   World.prototype._startGoal = function () {
     this._goalPending = false;
-    var top = this._top(), L = this.layout, u = L.unit;
-    this.phase = 'goal'; this.phaseT = 0; this._goalCam = this.cam.y;
+    var top = this._top(), u = this.layout.unit;
+    this.phase = 'goal'; this.phaseT = 0;
     this.flag = { x: top.x, y: top.y, t: 0 };
     var bonus = CONFIG.goalPoints * (this.zone + 1) * (this.loop + 1);
     this.score += bonus;
     this._anim('happy');
     this._emit({ type: 'goal', x: top.x + this.swayOffset(top.y), y: top.y - CONFIG.flagH * u, bonus: bonus });
-    // remove the held crate if any (none: goal starts from settle) and float coins fade
-    for (var i = 0; i < this.coinList.length; i++) if (this.coinList[i].state === 'float') { this.coinList[i].state = 'gone'; this.coinList[i].fade = 1; }
+    // the floating apples fade (Granny Boo takes them in through her window: renderer)
+    for (var i = 0; i < this.appleList.length; i++) if (this.appleList[i].state === 'float') { this.appleList[i].state = 'gone'; this.appleList[i].fade = 1; }
   };
 
-  World.prototype._rocketLandY = function () { return this.layout.groundY - CONFIG.rocketHalfH * this.layout.unit; };
+  /** Granny Boo's hover point (world): beside the tower top. */
+  World.prototype._ghostHome = function (side) {
+    var u = this.layout.unit, top = this._top();
+    return { x: top.x + side * CONFIG.ghostDX * u, y: top.y + CONFIG.ghostDY * u };
+  };
 
   World.prototype._goalStep = function (h) {
     var t = this.phaseT, L = this.layout, u = L.unit;
     if (this.flag) this.flag.t += h;
-    if (t >= CONFIG.rocketIn) {
-      var rx = L.cx + CONFIG.rocketDX * u;
-      var s = (t - CONFIG.rocketIn) / (CONFIG.rocketLand - CONFIG.rocketIn);
-      var y0 = -1.2 * u, y1 = this._rocketLandY() - 0;       // screen-relative start, world landing
-      var y = s >= 1 ? y1 : (this.cam.y + y0) + (y1 - (this.cam.y + y0)) * easeOutCubic(s);
-      if (!this.rocket) this.rocket = { x: rx, y: y, prevX: rx, prevY: y, state: 'in', t: 0, vy: 0 };
-      var r = this.rocket;
-      r.t += h; r.x = rx; r.y = y;
-      if (s >= 1 && r.state === 'in') {
-        r.state = 'land'; r.y = y1;
-        this._emit({ type: 'rocket' });
+    if (t >= CONFIG.ghostIn) {
+      var side = 1, home = this._ghostHome(side);
+      if (!this.ghost) {
+        var sx = L.cx + side * (L.width / 2 + 0.6 * u);
+        this.ghost = { x: sx, y: home.y - CONFIG.ghostFrom * u, prevX: sx, prevY: home.y - CONFIG.ghostFrom * u,
+          state: 'in', t: 0, wave: false, side: side, x0: sx, y0: home.y - CONFIG.ghostFrom * u, vx: 0, vy: 0 };
       }
+      var g = this.ghost;
+      g.t += h;
+      var s = (t - CONFIG.ghostIn) / (CONFIG.ghostArrive - CONFIG.ghostIn);
+      if (g.state === 'in') {
+        // ease-out arc: x decelerates (cubic) faster than y settles (smoothstep) → a curved swoop that stops softly
+        g.x = g.x0 + (home.x - g.x0) * easeOutCubic(s);
+        g.y = g.y0 + (home.y - g.y0) * easeInOut(s);
+        if (s >= 1) { g.state = 'hover'; g.x = home.x; g.y = home.y; this._emit({ type: 'ghost' }); }
+      } else {
+        var th = (t - CONFIG.ghostArrive) * CONFIG.ghostBobW;
+        g.x = home.x;
+        g.y = home.y + CONFIG.ghostBob * u * M.sin(th);
+      }
+      g.wave = t >= CONFIG.ghostWaveOn && t < CONFIG.ghostWaveOff;
     }
     if (t >= CONFIG.goalTime) {
-      if (this.rocket && this.rocket.state === 'in') { this.rocket.state = 'land'; this.rocket.y = this._rocketLandY(); this._emit({ type: 'rocket' }); }
-      this.phase = 'travel'; this.phaseT = 0;
-      if (this.rocket) { this.rocket.state = 'out'; this.rocket.vy = 0; this.rocket.t = 0; }
+      if (this.ghost && this.ghost.state === 'in') { this.ghost.state = 'hover'; this._emit({ type: 'ghost' }); }
+      this.phase = 'travel'; this.phaseT = 0; this._goalCam = this.cam.y;
+      if (this.ghost) {
+        var gg = this.ghost; gg.state = 'out'; gg.t = 0; gg.wave = false;
+        // leave with the bob's current velocity (C¹), then float up and outward
+        gg.vx = 0; gg.vy = CONFIG.ghostBob * u * CONFIG.ghostBobW * M.cos((t - CONFIG.ghostArrive) * CONFIG.ghostBobW);
+      }
     }
   };
 
@@ -829,18 +979,22 @@
     var a = M.max(0, 1 - t / (CONFIG.travelTime * 0.8));
     for (var i = 0; i < this.crates.length; i++) this.crates[i].alpha = M.min(this.crates[i].alpha, a);
     if (this.flag) { this.flag.t += h; }
-    var r = this.rocket;
-    if (r) { r.t += h; r.vy -= CONFIG.rocketAcc * u * h; r.y += r.vy * h; }
+    var g = this.ghost;
+    if (g) {
+      g.t += h;
+      g.vy -= CONFIG.ghostRiseAcc * u * h; g.vx += g.side * 0.4 * CONFIG.ghostRiseAcc * u * h;
+      g.x += g.vx * h; g.y += g.vy * h;
+    }
     if (t >= CONFIG.travelTime) {
       this._goalCam = undefined;
       this.stats.levels++;
       this.hearts = M.min(this.maxHearts, this.hearts + CONFIG.heartReward);
-      this._startLevel(this.level + 1, true);
+      this._startLevel(this.level + 1, true, false);
     }
   };
 
   // ---------- prediction (pure; used by the bot and the renderer's drop guide) ----------
-  /** Where would the held crate land if released now? {x, dx, perfect, ok, landY} or null. */
+  /** Where would the held crate land if released now? {x, dx, perfect, ok, landY, topX, topW, tol, lit} or null. */
   World.prototype.predictLanding = function () {
     var c = this.held;
     if (!c) return null;
@@ -859,7 +1013,8 @@
         var tol = M.max(P.perfectTol * c.w, CONFIG.perfectSnapFloor * u);
         var ok = M.abs(dx) <= top.w / 2, perfect = M.abs(dx) <= tol;
         return { x: perfect ? top.x + sx : b.x, dx: dx, perfect: perfect, ok: ok,
-          landY: ok ? top.y - c.h / 2 : this.layout.groundY - c.h / 2, topX: top.x + sx, topW: top.w, tol: tol };
+          landY: ok ? top.y - c.h / 2 : this.layout.groundY - c.h / 2, topX: top.x + sx, topW: top.w, tol: tol,
+          lit: this.litAt(top.x + this.swayOffset(top.y), top.y) };
       }
     }
     return null;
@@ -887,21 +1042,25 @@
       g.m *= k * k;
     }
     this._makeBase();
-    var T = this.tower; T.sway *= k; T.swayV *= k; T.prevSway = T.sway;
+    var T = this.tower; T.sway *= k; T.swayV *= k; T.swayA *= k; T.prevSway = T.sway;
     this._updateTower();
     if (this.flag) { this.flag.x = X(this.flag.x); this.flag.y = Y(this.flag.y); }
-    if (this.rocket) { this.rocket.x = X(this.rocket.x); this.rocket.y = Y(this.rocket.y); this.rocket.vy *= k; this.rocket.prevX = this.rocket.x; this.rocket.prevY = this.rocket.y; }
+    var gh = this.ghost;
+    if (gh) {
+      gh.x = X(gh.x); gh.y = Y(gh.y); gh.x0 = L.cx + gh.side * (L.width / 2 + 0.6 * L.unit); gh.y0 = Y(gh.y0);
+      gh.vx *= k; gh.vy *= k; gh.prevX = gh.x; gh.prevY = gh.y;
+    }
     // camera: straight to its new target (no spring from a stale value)
-    if (this.phase === 'goal' || this.phase === 'travel') { if (this._goalCam !== undefined) this._goalCam *= k; this.cam.y *= k; }
+    if (this.phase === 'travel') { if (this._goalCam !== undefined) this._goalCam *= k; this.cam.y *= k; }
     else this.cam.y = this._camTarget();
     this.cam.v = 0; this.cam.prevY = this.cam.y;
     var s = this.saucer;
     this._placeSaucer(); s.prevX = s.x; s.prevY = s.y;
     if (this.held) { this.held.y = this._holdY(this.held); this.held.prevY = this.held.y; }
-    // coins: keep their place in the fall band (screen-relative), x re-anchored
-    var band = this._coinBand(), ob = { top: o.saucerScreenY + CONFIG.coins.bandTop * o.unit };
-    for (i = 0; i < this.coinList.length; i++) {
-      c = this.coinList[i];
+    // apples: keep their place in the fall band (screen-relative), x re-anchored
+    var band = this._appleBand(), ob = { top: o.saucerScreenY + CONFIG.apples.bandTop * o.unit };
+    for (i = 0; i < this.appleList.length; i++) {
+      c = this.appleList[i];
       c.x = X(c.x); c.r *= k;
       c.sy = clamp(band.top + (c.sy - ob.top) * k, band.top, M.max(band.top, band.bot));
       c.baseY = this._camTarget() + c.sy; c.y = c.baseY; c.prevX = c.x; c.prevY = c.y;
@@ -909,8 +1068,9 @@
   };
 
   // ---------- test hooks ----------
-  /** Build a tower of placed crates at rest offsets dxs[i] (px from cx, ×u). Test/debug helper. */
-  World.prototype.setTower = function (dxs) {
+  /** Build a tower of placed crates at rest offsets dxs[i] (px from cx, ×u). Test/debug helper.
+   *  opts.lanterns: true → every crate gets a lantern (alternating sides). */
+  World.prototype.setTower = function (dxs, opts) {
     var L = this.layout, u = this._u(), i;
     for (i = this.crates.length - 1; i >= 0; i--) if (this.crates[i].state === 'placed') this.crates.splice(i, 1);
     this.tower.list = [];
@@ -919,6 +1079,7 @@
     for (i = 0; i < dxs.length; i++) {
       var c = new Crate(++this._id, L.cx + dxs[i] * u, y - sz.h / 2, sz.w, sz.h, i % 4);
       c.state = 'placed'; c.tx = c.x; y -= sz.h;
+      if (opts && opts.lanterns) { c.lantern = true; c.perfect = true; c.lanternSide = i % 2 ? -1 : 1; }
       this.crates.push(c); this.tower.list.push(c);
     }
     this.tower.sway = this.tower.swayV = this.tower.prevSway = 0;
@@ -935,14 +1096,15 @@
     return {
       time: r(this.time), phase: this.phase, level: this.level, zone: this.zone, loop: this.loop,
       score: this.score, combo: this.combo, maxCombo: this.maxCombo, hearts: this.hearts, maxHearts: this.maxHearts,
-      difficulty: this.difficulty, coins: this.coins, grow: this.grow, growCoins: this.growCoins,
+      difficulty: this.difficulty, apples: this.apples, pieApples: this.pieApples,
+      light: r(this.light), dayT: r(this.dayT), lightTint: this.lightTint, lanterns: this._lanternCount(),
       placed: this.placed, goal: this.goal,
       cam: { y: r(this.cam.y) },
-      saucer: { x: r(this.saucer.x), y: r(this.saucer.y), scale: r(this.saucer.scale), anim: this.saucer.anim },
+      saucer: { x: r(this.saucer.x), y: r(this.saucer.y), scale: this.saucer.scale, anim: this.saucer.anim },
       tower: { sway: r(this.tower.sway), height: r(this.tower.height), topY: r(this.tower.topY), topX: r(this.tower.topX), count: this.tower.count },
-      crates: this.crates.map(function (c) { return { id: c.id, style: c.style, x: r(c.x), y: r(c.y), w: r(c.w), state: c.state, perfect: c.perfect, rot: r(c.rot) }; }),
-      coinsAlive: this.coinList.map(function (c) { return { x: r(c.x), y: r(c.y), state: c.state }; }),
-      held: !!this.held, flag: !!this.flag, rocket: this.rocket ? this.rocket.state : null,
+      crates: this.crates.map(function (c) { return { id: c.id, style: c.style, x: r(c.x), y: r(c.y), w: r(c.w), state: c.state, perfect: c.perfect, lantern: c.lantern, rot: r(c.rot) }; }),
+      appleList: this.appleList.map(function (c) { return { x: r(c.x), y: r(c.y), state: c.state, glow: c.glow }; }),
+      held: !!this.held, flag: !!this.flag, ghost: this.ghost ? this.ghost.state : null,
       stats: JSON.parse(JSON.stringify(this.stats))
     };
   };

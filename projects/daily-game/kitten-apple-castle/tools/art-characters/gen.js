@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Character & item art generator for Ziggy's Apple Castle.
 // 100% original hand-written SVG (no text, fonts, scripts, images or external refs).
-// Juno's four frames are built from the SAME saucer parts, so the hull geometry is
+// Ziggy's four frames are built from the SAME rocket parts, so the rocket geometry is
 // identical across frames: only the face, ears, paws, lever and emitter glow change.
 // Usage: node tools/art-characters/gen.js   (writes into game/assets/default/)
 'use strict';
@@ -12,38 +12,46 @@ const OUT = path.resolve(__dirname, '../../game/assets/default');
 
 // ---------------------------------------------------------------- palette
 const P = {
-  // Juno (fox)
-  fox: '#ff8a3d', foxShade: '#e86a24', foxLine: '#a3461c',
-  cream: '#fff1d6', creamShade: '#f2d9ae', creamLine: '#b98a5c',
-  earTip: '#5a3020', earIn: '#ffc9a8', paw: '#c8602a', pawLine: '#7a3416',
-  eye: '#2b1a3a', eyeLow: '#5d4a9c', cheek: '#ff8fa8', nose: '#4a2618', mouth: '#7a2a24', tongue: '#ff7f96',
-  sweat: '#9fe3ff', sweatLine: '#3f8fbf',
-  // saucer
-  hull: '#eae6ff', hullShade: '#b9b1e8', hullLine: '#5b5196', collar: '#cfc8f2', under: '#9d94d6',
-  glass: '#cfeeff', glassLine: '#8db6e6',
-  lTeal: '#3fe0d0', lYellow: '#ffd23f', lPink: '#ff7ab8', lightLine: '#4a4185',
-  emit: '#46e8d8', emitCore: '#d4fff9', emitLine: '#1f8a86', nozzle: '#8f86c8',
-  lever: '#8f86c8', knob: '#ff5c8a', knobLine: '#a3224f',
-  // crates: [fill, shade, line]
-  crates: [
-    ['#ff6b6b', '#e2474d', '#9e2a32'],
-    ['#ffc93c', '#eea514', '#8f5c00'],
-    ['#4fb8ff', '#2b90e2', '#1a5a96'],
-    ['#3fd6a0', '#1fb37f', '#11704c'],
+  // Ziggy (cream-and-ginger kitten)
+  cream: '#fff3e0', creamShade: '#f0d9b8', creamLine: '#a8784a',
+  ginger: '#ffb15c', gingerShade: '#ec8f34', gingerLine: '#a3561c', stripe: '#e07f2a',
+  earIn: '#ffb3c1', eye: '#3a2340', eyeLow: '#7a5ab0', cheek: '#ff8fa8', nose: '#ff7f9a', noseLine: '#b84862',
+  mouth: '#8a3a3a', tongue: '#ff7f96', whisker: '#a8784a',
+  sweat: '#9fe3ff', sweatShade: '#6cc7ee', sweatLine: '#3f8fbf',
+  brass: '#f0b84e', brassShade: '#c98d2c', brassLine: '#7a5418', goggle: '#c6f4ee', goggleShade: '#8ed8cf',
+  // hover-rocket (mint-teal)
+  mint: '#3fd6c0', mintShade: '#25ad99', mintLine: '#136b5e', inside: '#1d7f71', rim: '#ffffff', rimShade: '#d4f2ec',
+  fin: '#ff8f7a', finShade: '#e0634f', finLine: '#8f3a2c',
+  port: '#fff0a8', portShade: '#ffd45a',
+  lever: '#9fd9cf', knob: '#ff5c8a', knobLine: '#a3224f',
+  emit: '#ffd25a', emitCore: '#fff8d6', emitLine: '#a8741a',
+  // crates (honey wood) and their painted bands: [fill, shade, line]
+  wood: '#d9a066', woodShade: '#a86a3a', woodLine: '#6b3f1f', post: '#c4864d', grain: '#b97a45',
+  bands: [
+    ['#ff5a5a', '#d93d45', '#8f2430'],
+    ['#4ccf6a', '#2fa84e', '#1d6b33'],
+    ['#ffc93c', '#e8a51c', '#8a5a00'],
+    ['#58b4ff', '#3590e0', '#1d5a99'],
   ],
-  band: '#e6e2f6', bandShade: '#bdb6dc', rivet: '#8c86b0', sticker: '#ffffff',
-  // coin
-  gold: '#ffd23f', goldRim: '#e0a400', goldLine: '#9a6400', goldEdge: '#c48a00', goldHi: '#fff2a8',
-  // base
-  pad: '#c9c2f0', padShade: '#a49bd8', padLine: '#4f4690', padStripe: '#3fd6c8',
-  // flag & rocket
-  pole: '#e6e2f6', poleLine: '#5b5196', beacon: '#ffe15a', beaconLine: '#a87a00', pennant: '#3fd6c8', pennantShade: '#22b2a6', pennantLine: '#0f6e68',
-  rkt: '#fff6e6', rktShade: '#e8d8bf', rktLine: '#8a6a5a', rktRed: '#ff6b6b', rktRedShade: '#e2474d', rktRedLine: '#9e2a32',
-  win: '#7fd6ff', winShade: '#4aa8e6', winLine: '#2a5a96',
+  stencil: '#fff3e0',
+  // apple
+  apple: '#ff4d4d', appleShade: '#c22d3a', appleLine: '#7a1b26', stem: '#8a5a32', stemLine: '#4f3018',
+  leaf: '#5ccf5c', leafShade: '#3aa845', leafLine: '#22652a',
+  // lantern
+  lamp: '#ffcf5a', lampCore: '#fff6c8', lampShade: '#f0a632', lampLine: '#9a5a14',
+  // stone (base)
+  stone: '#aaa2d0', stoneShade: '#8f86b8', stoneLine: '#4e4680', stoneDark: '#7b72a8', moss: '#7fbf6a', mossShade: '#5a9a4e', mossLine: '#2f5f2a',
+  // flag
+  pennant: '#ff8fc0', pennantShade: '#e866a0', pennantLine: '#9a3366', pole: '#c99a60', poleLine: '#6b3f1f',
+  // Granny Boo
+  ghost: '#f4f0ff', ghostShade: '#cfc6f0', ghostLine: '#7d70b3', ghostEye: '#4a3f7a',
+  bonnet: '#ffa6c9', bonnetShade: '#e87fab', bonnetLine: '#a34a77',
+  // pie
+  crust: '#f5bd5f', crustShade: '#d6913a', crustLine: '#8a5420', filling: '#d9443e', tin: '#c9c0ea', tinShade: '#a49bd0', tinLine: '#5b5196',
   // hearts
   heart: '#ff5c8a', heartShade: '#e23d6e', heartLine: '#a3224f', heartEmpty: '#b9b1e8',
   // icon
-  night: '#2a1b5e', night2: '#160f3c', badgeLine: '#8f7fe0',
+  night: '#2e1f66', night2: '#170f40', badgeLine: '#9a8ae6', moon: '#fff1b0', moonShade: '#f2d470', moonLine: '#a88a2a',
 };
 
 // ---------------------------------------------------------------- helpers
@@ -86,275 +94,311 @@ function glow(cx, cy, r, col, a0 = 0.6, a1 = 0.26) {
     `<stop offset="1" stop-color="${col}" stop-opacity="0"/></radialGradient>` +
     `<circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#${id})"/>`;
 }
-function starPts(cx, cy, ro, ri, n = 5, rot = -90) {
-  const pts = [];
-  for (let i = 0; i < n * 2; i++) {
-    const r = i % 2 ? ri : ro;
-    const a = ((rot + (i * 180) / n) * Math.PI) / 180;
-    pts.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]);
-  }
-  return pts;
-}
-// rounded polygon (corners softened with quadratic curves)
-function softPoly(pts, k = 0.2) {
-  const mid = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
-  let d = '';
-  for (let i = 0; i < pts.length; i++) {
-    const p = pts[i], prev = pts[(i - 1 + pts.length) % pts.length], next = pts[(i + 1) % pts.length];
-    const a = mid(p, prev, k), b = mid(p, next, k);
-    d += (i ? 'L' : 'M') + f(a[0]) + ' ' + f(a[1]) + 'Q' + f(p[0]) + ' ' + f(p[1]) + ' ' + f(b[0]) + ' ' + f(b[1]);
-  }
-  return d + 'Z';
-}
-const star = (cx, cy, ro, ri, k = 0.22) => softPoly(starPts(cx, cy, ro, ri), k);
 const heartPath = (cx, cy, s) => {
-  // heart of width ~2s, centred at (cx, cy)
   const p = (x, y) => `${f(cx + x * s)} ${f(cy + y * s)}`;
   return `M${p(0, 0.95)}C${p(-0.35, 0.68)} ${p(-1, 0.25)} ${p(-1, -0.28)}C${p(-1, -0.72)} ${p(-0.62, -0.95)} ${p(-0.3, -0.95)}` +
     `C${p(-0.12, -0.95)} ${p(0, -0.84)} ${p(0, -0.62)}C${p(0, -0.84)} ${p(0.12, -0.95)} ${p(0.3, -0.95)}` +
     `C${p(0.62, -0.95)} ${p(1, -0.72)} ${p(1, -0.28)}C${p(1, 0.25)} ${p(0.35, 0.68)} ${p(0, 0.95)}Z`;
 };
+// apple silhouette centred on (cx, cy) with half-width s (top dimple, bottom dimple)
+const applePath = (cx, cy, s) => {
+  const p = (x, y) => `${f(cx + x * s)} ${f(cy + y * s)}`;
+  return `M${p(0, -0.72)}C${p(0.3, -1.02)} ${p(1, -0.95)} ${p(1, -0.18)}C${p(1, 0.52)} ${p(0.55, 0.98)} ${p(0.22, 0.95)}` +
+    `C${p(0.1, 0.94)} ${p(0.05, 0.88)} ${p(0, 0.88)}C${p(-0.05, 0.88)} ${p(-0.1, 0.94)} ${p(-0.22, 0.95)}` +
+    `C${p(-0.55, 0.98)} ${p(-1, 0.52)} ${p(-1, -0.18)}C${p(-1, -0.95)} ${p(-0.3, -1.02)} ${p(0, -0.72)}Z`;
+};
+// leaf from base (x, y) pointing at angle a (deg), length L, half-width w
+const leafPath = (x, y, a, L, w) => {
+  const r = (a * Math.PI) / 180, c = Math.cos(r), sn = Math.sin(r);
+  const T = (u, v) => `${f(x + u * c - v * sn)} ${f(y + u * sn + v * c)}`;
+  return `M${T(0, 0)}C${T(L * 0.3, -w)} ${T(L * 0.75, -w)} ${T(L, 0)}C${T(L * 0.75, w)} ${T(L * 0.3, w)} ${T(0, 0)}Z`;
+};
+const leafVein = (x, y, a, L) => {
+  const r = (a * Math.PI) / 180;
+  return `M${f(x + 0.15 * L * Math.cos(r))} ${f(y + 0.15 * L * Math.sin(r))}L${f(x + 0.8 * L * Math.cos(r))} ${f(y + 0.8 * L * Math.sin(r))}`;
+};
 
-// ================================================================= JUNO
-// viewBox 0 0 160 160. Body centre (80,78). Beam emitter (80,140).
-const DOME = { cx: 80, cy: 70, r: 54, base: 100 };
-const domeHalf = Math.sqrt(DOME.r ** 2 - (DOME.base - DOME.cy) ** 2);
-const DOME_D = `M${f(DOME.cx - domeHalf)} ${DOME.base}A${DOME.r} ${DOME.r} 0 1 1 ${f(DOME.cx + domeHalf)} ${DOME.base}Z`;
-const HULL_D = 'M4 111C4 100 36 96 80 96C124 96 156 100 156 111C156 122 122 130 80 130C38 130 4 122 4 111Z';
-const HEAD_D = 'M80 35C99 35 109 46 109 58C109 64 108 68 106 71L115 77L102 80C96 85 89 88 80 88C71 88 64 85 58 80L45 77L54 71C52 68 51 64 51 58C51 46 61 35 80 35Z';
-const MASK_D = 'M40 66C56 61 70 63 80 70C90 63 104 61 120 66L120 100L40 100Z';
-const EAR_L = 'M51 55Q49 33 54 21Q57 18 61 21Q70 29 76 40Z';
-const TAIL_D = 'M108 102C126 110 152 106 157 86C161 71 151 57 136 58C142 66 142 76 134 82C126 88 117 90 108 91Z';
+// ================================================================= ZIGGY
+// viewBox 0 0 160 160. Body centre (80,78). Lantern emitter (80,140).
+const RIM = { cx: 80, cy: 98, rx: 46, ry: 7.5 };
+const RIM_D = ell(RIM.cx, RIM.cy, RIM.rx, RIM.ry);
+const BODY_D = `M34 98A46 7.5 0 0 0 126 98C131 106 133 116 129 124C124 132 106 137 80 137C54 137 36 132 31 124C27 116 29 106 34 98Z`;
+const HEAD_D = 'M80 34C102 34 115 46 115 61C115 67 113 71 110 74L116 78L107 80C101 86 92 89 80 89C68 89 59 86 53 80L44 78L50 74C47 71 45 67 45 61C45 46 58 34 80 34Z';
+const TORSO_D = 'M56 114C56 89 66 82 80 82C94 82 104 89 104 114Z';
+const EAR_D = 'M47 54Q42 32 48 18Q51 14 56 17Q67 25 74 39Z';
+const EAR_IN = 'M52 47Q49 33 52 25Q60 31 66 39Z';
+const TAIL_D = 'M108 106C122 102 139 98 143 84C147 70 141 59 132 61C125 63 127 72 134 70';
 
 function ear(side, mode) {
-  // mode: 'up' | 'perk' | 'down'
-  const pivot = [63, 44];
+  const pivot = [61, 45];
   let tf = '';
-  if (mode === 'perk') tf = `rotate(6 ${pivot[0]} ${pivot[1]}) translate(0 -2)`;
-  if (mode === 'down') tf = `rotate(-34 ${pivot[0]} ${pivot[1]}) translate(2 4)`;
-  const id = uid();
-  let s = `<g transform="${tf}">`;
-  s += `<clipPath id="${id}"><path d="${EAR_L}"/></clipPath><g clip-path="url(#${id})">`;
-  s += `<path d="${EAR_L}" fill="${P.foxShade}"/><path d="${EAR_L}" fill="${P.fox}" transform="translate(-3 1)"/>`;
-  s += `<path d="M56 50Q55 35 58 28Q66 34 70 42Z" fill="${P.earIn}"/>`;
-  s += `<path d="M40 10L80 10L80 36Q66 26 46 32Z" fill="${P.earTip}"/>`;
-  s += `</g><path d="${EAR_L}" fill="none" stroke="${P.foxLine}" stroke-width="3" stroke-linejoin="round"/></g>`;
+  if (mode === 'perk') tf = `rotate(-7 ${pivot[0]} ${pivot[1]}) translate(0 -2)`;
+  if (mode === 'down') tf = `rotate(-30 ${pivot[0]} ${pivot[1]}) translate(2 5)`;
+  const ginger = side === 'L';
+  const fill = ginger ? P.ginger : P.cream, shade = ginger ? P.gingerShade : P.creamShade, ln = ginger ? P.gingerLine : P.creamLine;
+  let s = `<g transform="${tf}">` + shape(EAR_D, fill, shade, ln, { off: [-3, 1], inner: `<path d="${EAR_IN}" fill="${P.earIn}"/>` }) + `</g>`;
   return side === 'L' ? s : `<g transform="translate(160 0) scale(-1 1)">${s}</g>`;
+}
+
+function helmet() {
+  let s = '';
+  const dome = 'M63 43C63 30 70 23 80 23C90 23 97 30 97 43Z';
+  s += shape(dome, P.brass, P.brassShade, P.brassLine, { off: [-3, -2], hi: [72, 30, 4.5, 2.4, -35], hiOp: 0.75,
+    inner: `<rect x="60" y="36" width="40" height="2" fill="${P.brassShade}" opacity="0.6"/>` });
+  s += shape(ell(80, 43, 22, 4.2), P.brass, P.brassShade, P.brassLine, { sw: 2.5, off: [0, -1.5] });
+  s += `<circle cx="80" cy="22" r="3" fill="${P.brass}" stroke="${P.brassLine}" stroke-width="2"/>`;
+  // goggles pushed up on the dome
+  s += line('M64 34Q80 29 96 34', P.brassLine, 3.2);
+  for (const x of [72, 88]) {
+    s += shape(circ(x, 32, 5.4), P.goggle, P.goggleShade, P.brassLine, { sw: 2.4, off: [-1.5, -1.5], hi: [x - 1.6, 30.4, 1.8, 1.1, -30], hiOp: 0.95 });
+  }
+  return s;
 }
 
 function face(frame) {
   let s = '';
-  const eyeOpen = (x, y, dy = 0) =>
-    `<ellipse cx="${x}" cy="${y}" rx="6.4" ry="8" fill="${P.eye}"/>` +
-    `<ellipse cx="${x}" cy="${y + 4 + dy}" rx="4" ry="2.6" fill="${P.eyeLow}" opacity="0.8"/>` +
-    `<circle cx="${x - 2}" cy="${y - 3 + dy}" r="2.6" fill="#fff"/><circle cx="${x + 2.4}" cy="${y + 2 + dy}" r="1.1" fill="#fff"/>`;
+  const eyeOpen = (x, y, big = 1) =>
+    `<ellipse cx="${x}" cy="${y}" rx="${f(7 * big)}" ry="${f(8.6 * big)}" fill="${P.eye}"/>` +
+    `<ellipse cx="${x}" cy="${f(y + 4.3 * big)}" rx="${f(4.4 * big)}" ry="${f(2.8 * big)}" fill="${P.eyeLow}" opacity="0.85"/>` +
+    `<circle cx="${f(x - 2.4 * big)}" cy="${f(y - 3.2 * big)}" r="${f(2.9 * big)}" fill="#fff"/><circle cx="${f(x + 2.6 * big)}" cy="${f(y + 1.8 * big)}" r="${f(1.3 * big)}" fill="#fff"/>`;
   if (frame === 'idle') {
-    s += eyeOpen(68, 59) + eyeOpen(92, 59);
-    s += line('M73 76Q76.5 79.5 80 76.5Q83.5 79.5 87 76', P.mouth, 2.4);
+    s += eyeOpen(67, 61) + eyeOpen(93, 61);
+    s += line('M73.5 75.5Q76.8 79 80 75.8Q83.2 79 86.5 75.5', P.mouth, 2.3);
   } else if (frame === 'drop') {
-    s += eyeOpen(68, 60, 1.5) + eyeOpen(92, 60, 1.5);
-    s += `<ellipse cx="80" cy="79" rx="3.6" ry="4.2" fill="${P.mouth}"/><ellipse cx="80" cy="80.5" rx="2.2" ry="1.8" fill="${P.tongue}"/>`;
+    s += eyeOpen(67, 61, 1.08) + eyeOpen(93, 61, 1.08);
+    s += `<ellipse cx="80" cy="79" rx="3.6" ry="4.4" fill="${P.mouth}"/><ellipse cx="80" cy="80.6" rx="2.2" ry="1.8" fill="${P.tongue}"/>`;
   } else if (frame === 'happy') {
-    s += line('M61.5 61Q68 52 74.5 61', P.eye, 3.4) + line('M85.5 61Q92 52 98.5 61', P.eye, 3.4);
-    s += `<path d="M71 75Q80 74 89 75Q88 85 80 85Q72 85 71 75Z" fill="${P.mouth}" stroke="${P.mouth}" stroke-width="1.5" stroke-linejoin="round"/>`;
-    s += `<path d="M75 81.5Q80 78.5 85 81.5Q83 84.5 80 84.5Q77 84.5 75 81.5Z" fill="${P.tongue}"/>`;
+    s += line('M60 63Q67 53 74 63', P.eye, 3.6) + line('M86 63Q93 53 100 63', P.eye, 3.6);
+    s += `<path d="M71.5 75Q80 74 88.5 75Q87.5 85.5 80 85.5Q72.5 85.5 71.5 75Z" fill="${P.mouth}" stroke="${P.mouth}" stroke-width="1.5" stroke-linejoin="round"/>`;
+    s += `<path d="M75 81.5Q80 78.5 85 81.5Q83 85 80 85Q77 85 75 81.5Z" fill="${P.tongue}"/>`;
   } else if (frame === 'oops') {
-    s += line('M62 55L73 59.5L62 64', P.eye, 3.4) + line('M98 55L87 59.5L98 64', P.eye, 3.4);
-    s += line('M71 79Q73.5 76 76 79Q78.5 82 81 79Q83.5 76 86 79Q87.5 80.5 89 79', P.mouth, 2.4);
+    s += line('M61 56L72 61L61 66', P.eye, 3.6) + line('M99 56L88 61L99 66', P.eye, 3.6);
+    s += line('M71 79.5Q73.5 76.5 76 79.5Q78.5 82.5 81 79.5Q83.5 76.5 86 79.5Q87.5 81 89 79.5', P.mouth, 2.3);
   }
-  // nose (on top of the mouth start)
-  s += `<path d="M75.5 69.5Q80 67 84.5 69.5Q83 74 80 74Q77 74 75.5 69.5Z" fill="${P.nose}"/><ellipse cx="78.6" cy="69.6" rx="1.6" ry="0.9" fill="#fff" opacity="0.7"/>`;
-  // rosy cheeks (bigger when happy)
-  const cr = frame === 'happy' ? 1.25 : 1;
-  s += `<ellipse cx="60" cy="72" rx="${f(5.5 * cr)}" ry="${f(3.4 * cr)}" fill="${P.cheek}" opacity="0.75"/>`;
-  s += `<ellipse cx="100" cy="72" rx="${f(5.5 * cr)}" ry="${f(3.4 * cr)}" fill="${P.cheek}" opacity="0.75"/>`;
+  // nose: little pink rounded triangle
+  s += `<path d="M75.5 70Q80 67.4 84.5 70Q83 74.2 80 74.2Q77 74.2 75.5 70Z" fill="${P.nose}" stroke="${P.noseLine}" stroke-width="1.4" stroke-linejoin="round"/><ellipse cx="78.4" cy="69.9" rx="1.5" ry="0.8" fill="#fff" opacity="0.8"/>`;
+  // rosy cheeks
+  const cr = frame === 'happy' ? 1.22 : 1;
+  s += `<ellipse cx="56.5" cy="73.5" rx="${f(5.6 * cr)}" ry="${f(3.4 * cr)}" fill="${P.cheek}" opacity="0.72"/>`;
+  s += `<ellipse cx="103.5" cy="73.5" rx="${f(5.6 * cr)}" ry="${f(3.4 * cr)}" fill="${P.cheek}" opacity="0.72"/>`;
+  // whiskers (two each side, outside the cheeks)
+  const wk = ' opacity="0.85"';
+  s += line('M50 70.5L36 67.5', P.whisker, 1.8, wk) + line('M50 75L37 77', P.whisker, 1.8, wk);
+  s += line('M110 70.5L124 67.5', P.whisker, 1.8, wk) + line('M110 75L123 77', P.whisker, 1.8, wk);
   if (frame === 'oops') {
-    // sweat drop beside the head
-    s += shape('M113 46Q119 55 119 59Q119 64 113.5 64Q108 64 108 59Q108 55 113 46Z', P.sweat, '#6cc7ee', P.sweatLine, { sw: 2, off: [-1.5, -1.5], hi: [111.5, 58, 1.6, 2.6, 0], hiOp: 0.9 });
+    s += shape('M114 40Q120 49 120 53Q120 58 114.5 58Q109 58 109 53Q109 49 114 40Z', P.sweat, P.sweatShade, P.sweatLine, { sw: 2, off: [-1.5, -1.5], hi: [112.5, 52, 1.6, 2.6, 0], hiOp: 0.9 });
   }
   return s;
 }
 
-function juno(frame, prefix) {
+function paw(x, y, ginger = false) {
+  const fill = ginger ? P.ginger : P.cream, shade = ginger ? P.gingerShade : P.creamShade, ln = ginger ? P.gingerLine : P.creamLine;
+  return shape(ell(x, y, 7, 5), fill, shade, ln, { sw: 2.5, off: [-1.5, -1.5] }) +
+    line(`M${x - 2.2} ${y + 1.5}V${y + 4}M${x + 2.2} ${y + 1.5}V${y + 4}`, ln, 1.4, ' opacity="0.7"');
+}
+
+function ziggy(frame, prefix) {
   PFX = prefix; _id = 0;
   let s = '';
-  // underside bowl + nozzle (behind the hull)
-  s += shape('M46 122C54 136 106 136 114 122Z', P.under, null, P.hullLine);
-  s += shape(rrect(71, 128, 18, 10, 4), P.nozzle, null, P.hullLine, { sw: 2.5 });
-  // dome back glass
-  s += `<path d="${DOME_D}" fill="${P.glass}" opacity="0.22"/>`;
-  // torso + chest
-  s += shape('M57 106C57 90 66 81 80 81C94 81 103 90 103 106Z', P.fox, P.foxShade, P.foxLine, { off: [-3, -3] });
-  s += `<ellipse cx="80" cy="95" rx="12" ry="11" fill="${P.cream}"/>`;
-  // ears behind the head
+  // --- rocket back parts (identical in every frame)
+  // side fins
+  s += shape('M36 106Q16 112 13 130Q12 138 19 137L40 128Z', P.fin, P.finShade, P.finLine, { off: [-2, -3] });
+  s += shape('M124 106Q144 112 147 130Q148 138 141 137L120 128Z', P.fin, P.finShade, P.finLine, { off: [-2, -3] });
+  // lantern-hook nozzle (behind the hull bottom)
+  s += shape(rrect(71, 130, 18, 8, 3.5), P.brass, P.brassShade, P.brassLine, { sw: 2.5, off: [-2, -2] });
+  // inside of the barrel (dark), seen through the open top
+  s += `<path d="${RIM_D}" fill="${P.inside}"/>`;
+  // tail rises from inside the barrel (base hidden by the front lip)
+  s += line(TAIL_D, P.gingerLine, 14.5) + line(TAIL_D, P.ginger, 9.5);
+  s += `<path d="${TAIL_D}" fill="none" stroke="${P.stripe}" stroke-width="9.5" stroke-dasharray="4 7"/>`;
+  // --- kitten
+  s += shape(TORSO_D, P.cream, P.creamShade, P.creamLine, { off: [-3, -3], inner: `<path d="M84 80C96 82 104 90 104 102H90Q92 92 84 80Z" fill="${P.ginger}"/>` });
   const em = frame === 'happy' ? 'perk' : frame === 'oops' ? 'down' : 'up';
   s += ear('L', em) + ear('R', em);
-  // head with cream mask
-  s += shape(HEAD_D, P.fox, P.foxShade, P.foxLine, {
+  s += shape(HEAD_D, P.cream, P.creamShade, P.creamLine, {
     off: [-3, -4],
-    inner: `<path d="${MASK_D}" fill="${P.creamShade}"/><path d="${MASK_D}" fill="${P.cream}" transform="translate(-2 -2)"/>` +
-      `<ellipse cx="70" cy="44" rx="10" ry="4" transform="rotate(-18 70 44)" fill="#fff" opacity="0.35"/>`,
+    inner:
+      // ginger patch over the right eye (soft blob) + two forehead stripes
+      `<path d="M84 46C96 42 112 48 114 60C116 70 106 74 98 72C90 70 84 64 83 57C82 52 82 48 84 46Z" fill="${P.ginger}"/>` +
+      `<path d="M84 46C96 42 112 48 114 60C116 70 106 74 98 72C96 72 95 70 98 69C108 68 110 60 104 54C99 49 90 48 84 46Z" fill="${P.gingerShade}" opacity="0.55"/>` +
+      `<ellipse cx="80" cy="76" rx="12" ry="8" fill="#fff" opacity="0.55"/>`,
+    hi: [62, 46, 9, 3.6, -25], hiOp: 0.55,
   });
+  s += helmet();
   s += face(frame);
-  // dome front glass: outline + highlights
-  s += `<path d="${DOME_D}" fill="none" stroke="${P.glassLine}" stroke-width="3" stroke-linejoin="round" opacity="0.95"/>`;
-  s += line('M37 66A44 44 0 0 1 62 25', '#fff', 5, ' opacity="0.75"');
-  s += `<circle cx="70" cy="21.5" r="2.6" fill="#fff" opacity="0.8"/>`;
-  s += line('M124 78A46 46 0 0 1 120 92', '#fff', 3, ' opacity="0.45"');
-  // hull (identical in every frame)
-  s += shape(HULL_D, P.hull, P.hullShade, P.hullLine, { off: [0, -8], hi: [40, 104, 20, 3.2, -4], hiOp: 0.8 });
-  // dome collar ring
-  s += shape(ell(80, 99, 47, 6), P.collar, P.hullShade, P.hullLine, { sw: 2.5, off: [0, -2] });
-  // rim lights along the equator
-  const cols = [P.lTeal, P.lYellow, P.lPink];
-  [17, 37, 58.5, 80, 101.5, 123, 143].forEach((x, i) => {
-    const y = 112 + 5 * (1 - ((x - 80) / 78) ** 2);
-    s += `<circle cx="${f(x)}" cy="${f(y)}" r="4.6" fill="${cols[i % 3]}" stroke="${P.lightLine}" stroke-width="2"/>`;
-    s += `<circle cx="${f(x - 1.4)}" cy="${f(y - 1.5)}" r="1.4" fill="#fff" opacity="0.9"/>`;
+  // --- rocket front (identical in every frame)
+  s += shape(BODY_D, P.mint, P.mintShade, P.mintLine, {
+    off: [-6, -4],
+    inner: line('M28 102A52 8.5 0 0 0 132 102', P.rimShade, 8) + line('M28 101A52 8.5 0 0 0 132 101', P.rim, 6) +
+      `<path d="M38 108Q35 120 46 128" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity="0.5"/>`,
   });
-  // lever on the collar (left, clear of the tail) + paws
-  const pawAt = (x, y, r = 0) => shape(ell(x, y, 6.8, 4.8), P.paw, null, P.pawLine, { sw: 2.5, hi: [x - 2, y - 2, 2.6, 1.3, r], hiOp: 0.35 });
-  if (frame === 'drop') {
-    s += line('M48 99L56 88', P.hullLine, 6) + line('M48 99L56 88', P.lever, 3);
-    s += `<circle cx="56.5" cy="87" r="4.2" fill="${P.knob}" stroke="${P.knobLine}" stroke-width="2"/>`;
-    s += pawAt(58, 89) + pawAt(93, 97);
-  } else {
-    s += line('M48 99L44 86', P.hullLine, 6) + line('M48 99L44 86', P.lever, 3);
-    s += `<circle cx="43.7" cy="85" r="4.2" fill="${P.knob}" stroke="${P.knobLine}" stroke-width="2"/>`;
-    if (frame === 'happy') s += pawAt(64, 95, -20) + pawAt(96, 95, 20);
-    else if (frame === 'oops') s += pawAt(70, 98) + pawAt(90, 98);
-    else s += pawAt(67, 97) + pawAt(93, 97);
+  s += line('M34 98A46 7.5 0 0 1 126 98', P.mintLine, 3); // back rim edge
+  // portholes / lights
+  for (const [x, y] of [[55, 119], [80, 122.5], [105, 119]]) {
+    s += `<circle cx="${x}" cy="${y}" r="7.6" fill="${P.rim}" stroke="${P.mintLine}" stroke-width="2.4"/>`;
+    s += shape(circ(x, y, 4.6), P.port, P.portShade, P.mintLine, { sw: 1.8, off: [-1.4, -1.4], hi: [x - 1.4, y - 1.6, 1.5, 1, 0], hiOp: 0.95 });
   }
-  // bushy tail curling over the rim on the right, white tip
-  s += shape(TAIL_D, P.fox, P.foxShade, P.foxLine, {
-    off: [-3, -3],
-    inner: `<path d="M128 50L164 50L164 78Q152 80 144 76Q138 70 134 62Z" fill="${P.creamShade}"/><path d="M126 48L164 48L164 74Q152 77 144 73Q138 68 133 60Z" fill="${P.cream}"/>`,
-  });
-  // beam emitter glow
-  if (frame === 'drop') s += glow(80, 140, 19, P.emit, 0.95, 0.45);
-  else s += glow(80, 140, 12, P.emit, 0.7, 0.3);
-  s += `<circle cx="80" cy="140" r="${frame === 'drop' ? 5.6 : 4.6}" fill="${P.emitCore}" stroke="${P.emitLine}" stroke-width="2"/>`;
+  // lever (on the rim, left) + paws on the rim
+  if (frame === 'drop') {
+    s += line('M44 101L52 89', P.mintLine, 6.5) + line('M44 101L52 89', P.lever, 3.2);
+    s += `<circle cx="52.6" cy="88" r="4.4" fill="${P.knob}" stroke="${P.knobLine}" stroke-width="2"/><circle cx="51.4" cy="86.8" r="1.3" fill="#fff" opacity="0.85"/>`;
+    s += paw(55, 90, true) + paw(96, 99);
+  } else {
+    s += line('M44 101L38 88', P.mintLine, 6.5) + line('M44 101L38 88', P.lever, 3.2);
+    s += `<circle cx="37.7" cy="87" r="4.4" fill="${P.knob}" stroke="${P.knobLine}" stroke-width="2"/><circle cx="36.5" cy="85.8" r="1.3" fill="#fff" opacity="0.85"/>`;
+    if (frame === 'happy') s += paw(62, 93, true) + paw(98, 93);
+    else if (frame === 'oops') s += paw(70, 99, true) + paw(90, 99);
+    else s += paw(65, 99, true) + paw(95, 99);
+  }
+  // lantern emitter glow
+  if (frame === 'drop') s += glow(80, 140, 20, P.emit, 0.95, 0.45);
+  else s += glow(80, 140, 13, P.emit, 0.7, 0.3);
+  s += line('M80 136V137.5', P.brassLine, 2.5);
+  s += `<circle cx="80" cy="140" r="${frame === 'drop' ? 5.4 : 4.6}" fill="${P.emitCore}" stroke="${P.emitLine}" stroke-width="2"/>`;
   return s;
 }
 
-// ================================================================= BEAM
+// ================================================================= BEAM (0 0 80 120)
 function beam() {
   PFX = 'bm'; _id = 0;
   const g = uid(), h = uid();
-  let s = `<linearGradient id="${g}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7ff7ee" stop-opacity="0.45"/><stop offset="1" stop-color="#46d8e8" stop-opacity="0.16"/></linearGradient>`;
-  s += `<linearGradient id="${h}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#bffcff" stop-opacity="0"/><stop offset="0.5" stop-color="#bffcff" stop-opacity="0.3"/><stop offset="1" stop-color="#bffcff" stop-opacity="0"/></linearGradient>`;
+  let s = `<linearGradient id="${g}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd98a" stop-opacity="0.45"/><stop offset="1" stop-color="#ffc861" stop-opacity="0.2"/></linearGradient>`;
+  s += `<linearGradient id="${h}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff2c8" stop-opacity="0"/><stop offset="0.5" stop-color="#fff2c8" stop-opacity="0.3"/><stop offset="1" stop-color="#fff2c8" stop-opacity="0"/></linearGradient>`;
   s += `<path d="M30 0H50L80 120H0Z" fill="url(#${g})"/>`;
   s += `<path d="M36 0H44L58 120H22Z" fill="url(#${h})"/>`;
   for (const y of [28, 64, 100]) {
     const hw = 10 + (30 * y) / 120;
-    s += `<ellipse cx="40" cy="${y}" rx="${f(hw - 2)}" ry="${f(2 + y / 60)}" fill="none" stroke="#dffeff" stroke-width="2" opacity="0.4"/>`;
+    s += `<ellipse cx="40" cy="${y}" rx="${f(hw - 2)}" ry="${f(2 + y / 60)}" fill="none" stroke="#ffe7a8" stroke-width="2" opacity="0.4"/>`;
   }
+  for (const [x, y, r] of [[34, 46, 1.6], [50, 80, 1.8], [28, 92, 1.4], [46, 18, 1.2]]) s += `<circle cx="${x}" cy="${y}" r="${r}" fill="#fffbe8" opacity="0.45"/>`;
   return s;
 }
 
 // ================================================================= CRATES (0 0 120 80)
-function sticker(i, ln) {
-  const w = P.sticker;
-  if (i === 0) return shape(star(60, 41, 17, 7.6, 0.18), w, '#ffe3e0', ln, { sw: 2.5, off: [-1.5, -1.5] });
+function stencil(i, ln) {
+  const w = P.stencil, o = { sw: 2.2, off: [-1, -1] };
+  if (i === 0) {
+    return shape(applePath(60, 41.5, 9.5), w, '#ffe2d6', ln, o) + line('M60 34.5Q60.5 31.5 62 30', ln, 2.2) +
+      shape(leafPath(61.5, 32, -25, 9, 3.4), w, null, ln, { sw: 1.8 });
+  }
   if (i === 1) {
-    const d = 'M66 24A17 17 0 1 0 72 54A14 14 0 1 1 66 24Z';
-    return shape(d, w, '#fff0c4', ln, { sw: 2.5, off: [-1.5, -1.5] }) +
-      `<circle cx="74" cy="31" r="2.2" fill="${w}" stroke="${ln}" stroke-width="1.5"/>`;
+    return shape(leafPath(48, 47, -28, 26, 8.5), w, '#e2f7e4', ln, o) + line(leafVein(48, 47, -28, 26), ln, 1.8) +
+      line('M48 47L45 50', ln, 2.2);
   }
   if (i === 2) {
-    const ringD = 'M36 41A24 7 0 1 0 84 41A24 7 0 1 0 36 41Z', front = 'M36 41A24 7 0 0 0 84 41';
-    let s = line(ringD, ln, 7) + line(ringD, w, 3.2);
-    s += shape(circ(60, 41, 12.5), w, '#dcefff', ln, { sw: 2.5, off: [-1.5, -1.5], inner: `<path d="M44 37Q60 33 76 37" stroke="#cfe6ff" stroke-width="3" fill="none"/>` });
-    s += line(front, ln, 7) + line(front, w, 3.2);
-    return `<g transform="rotate(-16 60 41)">${s}</g>`;
+    let s = '';
+    for (let k = 0; k < 8; k++) {
+      const a = (k * Math.PI) / 4, x1 = 60 + 9.5 * Math.cos(a), y1 = 40 + 9.5 * Math.sin(a), x2 = 60 + 13 * Math.cos(a), y2 = 40 + 13 * Math.sin(a);
+      s += line(`M${f(x1)} ${f(y1)}L${f(x2)} ${f(y2)}`, ln, 5.4) + line(`M${f(x1)} ${f(y1)}L${f(x2)} ${f(y2)}`, w, 2.4);
+    }
+    return s + shape(circ(60, 40, 7), w, '#fff1c8', ln, o);
   }
-  // rocket
-  let s = shape('M52 50L46 57L52 56Z', w, null, ln, { sw: 2.2 }) + shape('M68 50L74 57L68 56Z', w, null, ln, { sw: 2.2 });
-  s += shape('M60 22C67 28 69 38 68 54H52C51 38 53 28 60 22Z', w, '#d9f7ea', ln, { sw: 2.5, off: [-1.5, -1.5] });
-  s += `<circle cx="60" cy="38" r="4" fill="${P.crates[3][0]}" stroke="${ln}" stroke-width="2"/>`;
-  return `<g transform="rotate(14 60 40)">${s}</g>`;
+  const d = 'M63 28A12 12 0 1 0 70 50A10 10 0 1 1 63 28Z';
+  return shape(d, w, '#e2f0ff', ln, o) + `<circle cx="71" cy="33" r="1.6" fill="${w}" stroke="${ln}" stroke-width="1.2"/>`;
 }
 function crate(i) {
   PFX = 'c' + i; _id = 0;
-  const [fill, shade, ln] = P.crates[i];
+  const [bf, bs, bl] = P.bands[i];
   const O = rrect(1.5, 1.5, 117, 77, 7.5);
   const id = uid();
   let s = `<clipPath id="${id}"><path d="${O}"/></clipPath><g clip-path="url(#${id})">`;
-  // body with one-step shade (bottom + right)
-  s += `<rect x="0" y="0" width="120" height="80" fill="${shade}"/>`;
-  s += `<rect x="0" y="0" width="112" height="56" fill="${fill}"/>`;
-  // side panel grooves
-  s += line('M22 17V63', ln, 2.4, ' opacity="0.35"') + line('M98 17V63', ln, 2.4, ' opacity="0.35"');
-  // metal bands
-  s += `<rect x="0" y="0" width="120" height="16" fill="${P.bandShade}"/><rect x="0" y="0" width="120" height="12.5" fill="${P.band}"/>`;
-  s += `<rect x="8" y="3.6" width="64" height="3.2" rx="1.6" fill="#fff" opacity="0.9"/><rect x="78" y="3.6" width="10" height="3.2" rx="1.6" fill="#fff" opacity="0.9"/>`;
-  s += `<rect x="0" y="64" width="120" height="16" fill="${P.bandShade}"/><rect x="0" y="64" width="120" height="10" fill="${P.band}"/>`;
-  s += `<path d="M0 16H120M0 64H120" stroke="${ln}" stroke-width="2.5"/>`;
-  s += `</g>`;
-  // rivets
-  for (const [x, y] of [[10, 8.5], [110, 8.5], [10, 71.5], [110, 71.5]]) {
-    s += `<circle cx="${x}" cy="${y}" r="3.1" fill="${P.rivet}" stroke="${ln}" stroke-width="1.4"/><circle cx="${x - 0.9}" cy="${y - 0.9}" r="1" fill="#fff" opacity="0.85"/>`;
+  s += `<rect x="0" y="0" width="120" height="80" fill="${P.wood}"/>`;
+  // three planks, each with a darker lower edge (one-step shade) and a grain stroke
+  for (const [y0, y1] of [[0, 27], [27, 53], [53, 80]]) {
+    s += `<rect x="0" y="${y1 - 5}" width="120" height="5" fill="${P.woodShade}" opacity="0.55"/>`;
   }
-  s += sticker(i, ln);
-  s += `<path d="${O}" fill="none" stroke="${ln}" stroke-width="3" stroke-linejoin="round"/>`;
+  s += line('M26 12Q46 9 60 13', P.grain, 1.6, ' opacity="0.7"') + line('M70 65Q84 62 96 66', P.grain, 1.6, ' opacity="0.7"');
+  s += `<rect x="18" y="5" width="48" height="2.6" rx="1.3" fill="#fff" opacity="0.4"/>`;
+  // painted band on the middle plank
+  s += `<rect x="0" y="27" width="120" height="26" fill="${bs}"/><rect x="0" y="27" width="120" height="21.5" fill="${bf}"/>`;
+  s += `<rect x="20" y="30" width="30" height="2.2" rx="1.1" fill="#fff" opacity="0.45"/>`;
+  // corner posts
+  for (const x of [0, 104]) {
+    s += `<rect x="${x}" y="0" width="16" height="80" fill="${P.woodShade}"/><rect x="${x}" y="0" width="12.5" height="80" fill="${P.post}"/>`;
+    s += `<path d="M${x === 0 ? 16 : 104} 0V80" stroke="${P.woodLine}" stroke-width="2.2"/>`;
+  }
+  s += `<path d="M16 27H104M16 53H104" stroke="${P.woodLine}" stroke-width="2.2"/>`;
+  s += `</g>`;
+  // nails on the posts
+  for (const x of [8.5, 111.5]) for (const y of [12, 40, 68]) s += `<circle cx="${x}" cy="${y}" r="2.1" fill="${P.woodLine}" opacity="0.8"/>`;
+  s += stencil(i, bl);
+  s += `<path d="${O}" fill="none" stroke="${P.woodLine}" stroke-width="3" stroke-linejoin="round"/>`;
   return s;
 }
 
-// ================================================================= COINS (0 0 64 64, centre 32,32)
-function coin(k, prefix) {
+// ================================================================= LANTERN (0 0 48 64; hook at 24,0)
+function lantern(prefix = 'ln') {
   PFX = prefix; _id = 0;
-  const R = 27, rx = R * k;
-  const th = 5.5 * Math.sqrt(1 - k * k) + 0.6; // visible edge thickness
   let s = '';
-  // edge (the coin's thickness, seen as a band on the right)
-  if (k < 0.99) {
-    const d = `M32 ${32 - R}H${f(32 + th)}A${f(rx)} ${R} 0 0 1 ${f(32 + th)} ${32 + R}H32Z`;
-    s += `<path d="${d}" fill="${P.goldEdge}" stroke="${P.goldLine}" stroke-width="3" stroke-linejoin="round"/>`;
-    for (let j = -3; j <= 3; j++) {
-      const y = 32 + j * R * 0.26;
-      const xx = 32 + th + rx * Math.sqrt(Math.max(0, 1 - ((y - 32) / R) ** 2));
-      s += line(`M${f(xx - th * 0.75)} ${f(y)}H${f(xx - 1)}`, P.goldLine, 1.2, ' opacity="0.5"');
-    }
-  }
-  // face: rim + inner disc + embossed star, all squashed by k around x=32
-  const face = ell(32, 32, rx, R);
+  s += glow(24, 36, 24, P.lamp, 0.55, 0.22);
+  s += line('M24 0.5V5', P.brassLine, 2.4) + line('M24 5Q19 5 19 9', P.brassLine, 2.2);
+  // cap
+  s += shape('M15 15Q15 9 24 9Q33 9 33 15Z', P.brass, P.brassShade, P.brassLine, { sw: 2.4, off: [-1.5, -1] });
+  // glowing body
   const g = uid();
-  s += `<clipPath id="${g}"><path d="${face}"/></clipPath><g clip-path="url(#${g})">`;
-  s += `<path d="${face}" fill="${P.goldRim}"/>`;
-  s += `<g transform="translate(32 0) scale(${k} 1) translate(-32 0)">`;
-  s += `<circle cx="32" cy="32" r="20.5" fill="${P.gold}"/>`;
-  s += `<path d="${star(33.2, 33.4, 13, 5.6)}" fill="${P.goldEdge}" opacity="0.7"/>`;
-  s += `<path d="${star(32, 32, 13, 5.6)}" fill="${P.goldHi}"/>`;
-  s += `<circle cx="32" cy="32" r="20.5" fill="none" stroke="${P.goldEdge}" stroke-width="2" opacity="0.7"/>`;
-  s += `</g>`;
-  s += `<ellipse cx="${f(32 - rx * 0.42)}" cy="17" rx="${f(Math.max(1.2, rx * 0.28))}" ry="5" transform="rotate(${f(-30 * k)} ${f(32 - rx * 0.42)} 17)" fill="#fff" opacity="0.75"/>`;
-  s += `</g><path d="${face}" fill="none" stroke="${P.goldLine}" stroke-width="3" stroke-linejoin="round"/>`;
+  s += `<radialGradient id="${g}" cx="22" cy="33" r="18" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${P.lampCore}"/><stop offset="0.45" stop-color="${P.lamp}"/><stop offset="1" stop-color="${P.lampShade}"/></radialGradient>`;
+  const body = ell(24, 34, 16, 18);
+  s += `<path d="${body}" fill="url(#${g})"/>`;
+  s += line('M15 20Q10 34 15 48M33 20Q38 34 33 48M24 16V52', P.lampShade, 1.6, ' opacity="0.8"');
+  s += `<ellipse cx="18" cy="26" rx="3" ry="5" transform="rotate(20 18 26)" fill="#fff" opacity="0.7"/>`;
+  s += `<path d="${body}" fill="none" stroke="${P.lampLine}" stroke-width="2.6"/>`;
+  // base + tassel
+  s += shape('M16 50H32Q32 56 24 56Q16 56 16 50Z', P.brass, P.brassShade, P.brassLine, { sw: 2.4, off: [-1.5, -1] });
+  s += line('M24 56V61', P.fin, 3) + `<circle cx="24" cy="61.4" r="1.8" fill="${P.fin}"/>`;
   return s;
+}
+
+// ================================================================= APPLES (0 0 64 64; centre 32,34)
+function apple(frame, prefix) {
+  PFX = prefix; _id = 0;
+  let s = '';
+  const d = applePath(32, 36, 22);
+  s += shape(d, P.apple, P.appleShade, P.appleLine, { off: [-5, -4], hi: [22, 26, 4.8, 7.5, 30], hiOp: 0.75 });
+  s += `<circle cx="20" cy="38" r="2" fill="#fff" opacity="0.6"/>`;
+  // stem
+  s += line('M32 21Q31 14 35 9', P.stemLine, 5.4) + line('M32 21Q31 14 35 9', P.stem, 2.6);
+  // leaf: frame 0 lies to the right, frame 1 flips up
+  const [lx, ly, la] = frame ? [34, 13, -70] : [34, 14, -18];
+  s += shape(leafPath(lx, ly, la, 18, 6.5), P.leaf, P.leafShade, P.leafLine, { sw: 2.4, off: [-1.5, -1.5] }) + line(leafVein(lx, ly, la, 18), P.leafLine, 1.5, ' opacity="0.8"');
+  return s;
+}
+function appleGlow() {
+  PFX = 'ag'; _id = 0;
+  const id = uid();
+  return `<radialGradient id="${id}" cx="32" cy="32" r="32" gradientUnits="userSpaceOnUse">` +
+    `<stop offset="0" stop-color="#fff3b0" stop-opacity="0.5"/><stop offset="0.35" stop-color="#ffc04a" stop-opacity="0.38"/>` +
+    `<stop offset="0.7" stop-color="#ff7a4a" stop-opacity="0.14"/><stop offset="1" stop-color="#ff6a5a" stop-opacity="0"/></radialGradient>` +
+    `<circle cx="32" cy="32" r="32" fill="url(#${id})"/>`;
 }
 
 // ================================================================= BASE (0 0 240 64; flat top y = 4)
 function base() {
   PFX = 'bs'; _id = 0;
   let s = '';
-  // legs + feet
-  for (const x of [34, 206]) {
-    s += shape(`M${x - 6} 34L${x - 9} 56H${x + 9}L${x + 6} 34Z`, P.padShade, null, P.padLine, { sw: 2.5 });
-    s += shape(rrect(x - 16, 54, 32, 8, 4), P.pad, P.padShade, P.padLine, { sw: 2.5, off: [0, -3] });
+  // wall of stones, two rows
+  const rows = [[19, 40, [12, 52, 96, 144, 188, 228]], [40, 62, [8, 40, 82, 120, 158, 200, 232]]];
+  for (const [y0, y1, xs] of rows) {
+    for (let k = 0; k < xs.length - 1; k++) {
+      const x0 = xs[k] + 1, x1 = xs[k + 1] - 1;
+      s += shape(rrect(x0, y0 + 0.5, x1 - x0, y1 - y0 - 1, 5), P.stone, P.stoneShade, P.stoneLine, { sw: 2.5, off: [-2, -3] });
+    }
   }
-  s += shape('M100 34L97 52H143L140 34Z', P.padShade, null, P.padLine, { sw: 2.5 });
-  s += shape(rrect(90, 50, 60, 10, 5), P.pad, P.padShade, P.padLine, { sw: 2.5, off: [0, -3] });
-  // body (under the deck)
-  s += shape('M18 22H222L208 40Q206 42 202 42H38Q34 42 32 40Z', P.pad, P.padShade, P.padLine, { off: [0, -5] });
-  // lights
-  [[80, P.lYellow], [120, P.lTeal], [160, P.lPink]].forEach(([x, c]) => {
-    s += glow(x, 32, 9, c, 0.6, 0.25);
-    s += `<circle cx="${x}" cy="32" r="4.4" fill="${c}" stroke="${P.lightLine}" stroke-width="2"/><circle cx="${x - 1.3}" cy="30.6" r="1.3" fill="#fff" opacity="0.9"/>`;
-  });
-  // deck: top outer edge exactly at y = 4 (path at 5.5 + half of the 3 px stroke)
-  s += shape(rrect(3.5, 5.5, 233, 18, 6), '#e3dffa', P.padShade, P.padLine, {
+  // carved apple medallion in the middle
+  s += shape(circ(120, 41, 13), '#bcb5dc', P.stoneShade, P.stoneLine, { sw: 2.5, off: [-1.5, -2] });
+  s += `<path d="${applePath(120.8, 42.8, 7.4)}" fill="${P.stoneDark}"/>`;
+  s += `<path d="${applePath(120, 42, 7.4)}" fill="${P.stoneShade}" stroke="${P.stoneLine}" stroke-width="1.6"/>`;
+  s += `<path d="${leafPath(121, 35.5, -30, 6.5, 2.4)}" fill="${P.stoneShade}" stroke="${P.stoneLine}" stroke-width="1.4"/>`;
+  // capstone slab: top outer edge exactly at y = 4 (path at 5.5 + half of the 3 px stroke)
+  s += shape(rrect(3.5, 5.5, 233, 15, 6), '#c2bce2', P.stoneShade, P.stoneLine, {
     off: [0, -4],
-    inner: `<rect x="0" y="13" width="240" height="4.5" fill="${P.padStripe}"/><rect x="12" y="8" width="150" height="2.4" rx="1.2" fill="#fff" opacity="0.9"/>`,
+    inner: `<rect x="14" y="8" width="130" height="2.4" rx="1.2" fill="#fff" opacity="0.6"/>` +
+      line('M70 13L74 16M176 12L171 16', P.stoneLine, 1.4, ' opacity="0.5"'),
   });
+  // moss tufts hanging from the slab front edge and at the wall foot (never above y 9)
+  const tuft = (x, y, w) => shape(`M${x - w} ${y}Q${x - w * 0.7} ${y + 6} ${x - w * 0.35} ${y + 3.5}Q${x} ${y + 8} ${x + w * 0.35} ${y + 3.5}Q${x + w * 0.7} ${y + 6} ${x + w} ${y}Q${x} ${y - 2} ${x - w} ${y}Z`, P.moss, P.mossShade, P.mossLine, { sw: 2, off: [0, -1.5] });
+  s += tuft(30, 18.5, 11) + tuft(196, 18.5, 9) + tuft(160, 18.5, 6);
+  s += shape('M16 62Q18 54 24 57Q28 52 33 58Q38 56 38 62Z', P.moss, P.mossShade, P.mossLine, { sw: 2, off: [0, -1.5] });
+  s += shape('M206 62Q208 55 214 57Q219 53 224 62Z', P.moss, P.mossShade, P.mossLine, { sw: 2, off: [0, -1.5] });
   return s;
 }
 
@@ -362,52 +406,92 @@ function base() {
 function flag() {
   PFX = 'fl'; _id = 0;
   let s = '';
-  s += shape(rrect(9.5, 14, 5, 108, 2.5), P.pole, P.hullShade, P.poleLine, { sw: 2.5, off: [-1.5, 0] });
-  s += shape('M3 124Q3 114 12 114Q21 114 21 124Z', P.pad, P.padShade, P.padLine, { sw: 2.5, off: [0, -2] });
-  // pennant with a paw print
+  s += shape(rrect(9.8, 13, 4.4, 109, 2.2), P.pole, P.woodShade, P.poleLine, { sw: 2.4, off: [-1.5, 0] });
+  s += shape('M3 124Q3 114 12 114Q21 114 21 124Z', P.stone, P.stoneShade, P.stoneLine, { sw: 2.5, off: [0, -2] });
+  // pennant with an apple mark
   const pd = 'M15 20Q36 26 57 35Q60 37 57 39Q36 47 15 54Z';
-  let paw = `<ellipse cx="31" cy="40.5" rx="5" ry="4.3" fill="#fff"/>`;
-  for (const [x, y] of [[25.5, 34.5], [30, 31.5], [35, 32.5], [38, 37]]) paw += `<circle cx="${x}" cy="${y}" r="2.1" fill="#fff"/>`;
-  s += shape(pd, P.pennant, P.pennantShade, P.pennantLine, { off: [0, -4], inner: paw, sw: 2.5 });
-  // beacon light
-  s += glow(12, 10, 10, P.beacon, 0.9, 0.4);
-  s += shape(circ(12, 10, 5.8), P.beacon, '#ffc21a', P.beaconLine, { sw: 2.2, off: [-1, -1.5], hi: [10.2, 8, 1.8, 1.3, 0], hiOp: 0.95 });
+  const mark = `<path d="${applePath(30, 38, 7)}" fill="${P.stencil}"/><path d="M30.5 32.5L32 29" stroke="${P.stencil}" stroke-width="2" stroke-linecap="round"/>`;
+  s += shape(pd, P.pennant, P.pennantShade, P.pennantLine, { off: [0, -4], inner: mark, sw: 2.5 });
+  // little round lantern on top
+  s += glow(12, 8, 11, P.lamp, 0.9, 0.4);
+  s += shape(circ(12, 8.2, 5.6), P.lamp, P.lampShade, P.lampLine, { sw: 2.2, off: [-1, -1.5], hi: [10.2, 6.4, 1.8, 1.3, 0], hiOp: 0.95 });
+  s += shape(rrect(8.5, 12.4, 7, 3, 1.4), P.brass, null, P.brassLine, { sw: 1.6 });
   return s;
 }
 
-// ================================================================= ROCKET (0 0 96 160; centre 48,80; nozzle bottom 48,152)
-function rocket() {
-  PFX = 'rk'; _id = 0;
+// ================================================================= PIE (0 0 64 48)
+function pieBody() {
   let s = '';
-  // fins (behind body)
-  s += shape('M28 100Q12 112 12 138Q12 144 18 142L32 132Z', P.rktRed, P.rktRedShade, P.rktRedLine, { off: [-2, -3] });
-  s += shape('M68 100Q84 112 84 138Q84 144 78 142L64 132Z', P.rktRed, P.rktRedShade, P.rktRedLine, { off: [-2, -3] });
-  // nozzle
-  s += shape('M38 134H58L62 150Q62 152 60 152H36Q34 152 34 150Z', P.nozzle, '#6f66ad', P.hullLine, { off: [-2, -2] });
-  // body with coral nose cone (clipped band)
-  const body = 'M48 10C66 22 74 50 74 84C74 106 70 124 64 138H32C26 124 22 106 22 84C22 50 30 22 48 10Z';
-  s += shape(body, P.rkt, P.rktShade, P.rktLine, {
-    off: [-5, 0],
-    inner: `<path d="M0 0H96V40Q48 48 0 40Z" fill="${P.rktRedShade}"/><path d="M0 0H91V39Q46 47 0 39Z" fill="${P.rktRed}"/>` +
-      `<path d="M0 40Q48 48 96 40" fill="none" stroke="${P.rktRedLine}" stroke-width="2.5"/>` +
-      `<rect x="0" y="122" width="96" height="6" fill="${P.rktRed}"/><path d="M0 122H96M0 128H96" stroke="${P.rktRedLine}" stroke-width="2"/>`,
-    hi: [36, 76, 4, 22, -4], hiOp: 0.7,
-  });
-  // round window with a tiny star
-  s += shape(circ(48, 76, 13), P.win, P.winShade, P.winLine, { off: [-2.5, -2.5], sw: 3, inner: `<path d="${star(48, 77, 6, 2.6)}" fill="${P.lYellow}"/>`, hi: [43, 70, 4, 2.5, -35], hiOp: 0.85 });
-  s += `<circle cx="48" cy="76" r="16" fill="none" stroke="${P.hullShade}" stroke-width="3"/>`;
-  s += `<circle cx="48" cy="76" r="17.5" fill="none" stroke="${P.rktLine}" stroke-width="1.5"/>`;
-  // centre fin
-  s += shape('M48 108Q52 120 51 136H45Q44 120 48 108Z', P.rktRed, P.rktRedShade, P.rktRedLine, { sw: 2.5, off: [-1, 0] });
+  // tin
+  s += shape('M5 28H59L53 43Q52 45 49 45H15Q12 45 11 43Z', P.tin, P.tinShade, P.tinLine, { sw: 2.5, off: [-3, -2],
+    inner: line('M17 32L19 43M27 32L28 43M37 32L36 43M47 32L45 43', P.tinShade, 1.6) });
+  // crust dome with lattice
+  const dome = 'M6 29C6 17 18 9 32 9C46 9 58 17 58 29Q32 34 6 29Z';
+  let lat = `<path d="${dome}" fill="${P.filling}"/>`;
+  for (let k = -3; k <= 4; k++) {
+    const x = 10 + k * 10;
+    lat += line(`M${x} 34L${x + 22} 4`, P.crustLine, 6.2) + line(`M${x} 34L${x + 22} 4`, P.crust, 4);
+  }
+  for (let k = -1; k <= 6; k++) {
+    const x = 4 + k * 10;
+    lat += line(`M${x} 4L${x + 22} 34`, P.crustLine, 6.2) + line(`M${x} 4L${x + 22} 34`, P.crust, 4);
+  }
+  lat += `<path d="${dome}" fill="${P.crustShade}" opacity="0.25" transform="translate(4 4)"/>`;
+  s += shape(dome, P.filling, null, P.crustLine, { inner: lat, hi: [22, 15, 7, 2.4, -14], hiOp: 0.45 });
+  // crimped rim
+  s += shape(rrect(4, 26, 56, 6, 3), P.crust, P.crustShade, P.crustLine, { sw: 2.5, off: [0, -1.5],
+    inner: line('M10 27V31M18 27V31M26 27V31M34 27V31M42 27V31M50 27V31', P.crustShade, 1.6) });
   return s;
 }
-function flame() {
-  PFX = 'fm'; _id = 0;
-  const g = uid();
-  let s = `<radialGradient id="${g}" cx="24" cy="10" r="50" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff6c2"/><stop offset="0.45" stop-color="#ffc23c"/><stop offset="1" stop-color="#ff7a3c" stop-opacity="0.85"/></radialGradient>`;
-  s += `<path d="M5 0H43Q46 18 36 38Q30 52 24 63Q18 52 12 38Q2 18 5 0Z" fill="url(#${g})" opacity="0.95"/>`;
-  s += `<path d="M13 0H35Q36 14 30 28Q27 36 24 44Q21 36 18 28Q12 14 13 0Z" fill="#ffe66a" opacity="0.9"/>`;
-  s += `<path d="M19 0H29Q30 9 27 17Q25 22 24 26Q23 22 21 17Q18 9 19 0Z" fill="#fffbe6"/>`;
+function pie() { PFX = 'pi'; _id = 0; return pieBody(); }
+
+// ================================================================= GRANNY BOO (0 0 96 160; centre 48,80; hem ~152)
+function hemBody() {
+  let d = 'M48 12C71 12 83 30 83 54C83 78 86 104 88 128C88.6 136 88.8 140 88 144';
+  const n = 4, x0 = 88, x1 = 8, wseg = (x0 - x1) / n;
+  for (let k = 0; k < n; k++) {
+    const xa = x0 - k * wseg, xb = xa - wseg;
+    d += `Q${f((xa + xb) / 2)} 158 ${f(xb)} 144`;
+  }
+  return d + 'C7.2 140 7.4 136 8 128C10 104 13 78 13 54C13 30 25 12 48 12Z';
+}
+function ghost(wave, prefix) {
+  PFX = prefix; _id = 0;
+  let s = '';
+  const G = (d, o = {}) => shape(d, P.ghost, P.ghostShade, P.ghostLine, { off: [-5, -3], ...o });
+  // waving arm behind the body edge (drawn first so its root tucks under the body)
+  if (wave) {
+    s += G('M72 94C80 88 81 76 80 64C77 58 79 50 85 50C91 50 92 58 89 64C90 78 88 92 78 102Z', { off: [-2, -2], sw: 2.8 });
+    s += line('M78 44Q85 38 91 43', P.ghostLine, 2, ' opacity="0.55"') + line('M76 38Q85 30 92 36', P.ghostLine, 2, ' opacity="0.35"');
+  }
+  // body
+  s += G(hemBody(), { hi: [30, 34, 6, 12, 20], hiOp: 0.7 });
+  // bonnet
+  const bon = 'M18 46C16 26 30 10 48 10C66 10 80 26 78 46C72 36 62 30 48 30C34 30 24 36 18 46Z';
+  s += shape(bon, P.bonnet, P.bonnetShade, P.bonnetLine, { off: [-3, -3], hi: [34, 18, 7, 2.6, -24], hiOp: 0.55 });
+  // frill along the bonnet front
+  let fr = 'M19 45';
+  for (let k = 0; k < 6; k++) { const xa = 19 + k * 10, xb = xa + 10; fr += `Q${xa + 5} ${k < 3 ? 33 - k * 2 : 27 + (k - 3) * 2} ${xb} ${k < 2 ? 38 - k * 4 : k < 4 ? 31 : 34 + (k - 4) * 5}`; }
+  s += line(fr, '#fff', 3.4, ' opacity="0.9"');
+  // little bow on the side
+  s += shape('M70 20Q78 12 80 20Q78 28 70 20Z', P.bonnet, P.bonnetShade, P.bonnetLine, { sw: 2, off: [-1, -1] });
+  s += shape('M70 20Q62 13 61 21Q63 28 70 20Z', P.bonnet, P.bonnetShade, P.bonnetLine, { sw: 2, off: [-1, -1] });
+  s += `<circle cx="70" cy="20" r="2.6" fill="${P.bonnetShade}" stroke="${P.bonnetLine}" stroke-width="1.6"/>`;
+  // face: kind eyes behind round glasses, cheeks, smile
+  for (const x of [36, 60]) {
+    s += `<ellipse cx="${x}" cy="60" rx="3.4" ry="4.2" fill="${P.ghostEye}"/><circle cx="${x - 1.1}" cy="58.4" r="1.3" fill="#fff"/>`;
+    s += `<circle cx="${x}" cy="60" r="9" fill="#ffffff" fill-opacity="0.22" stroke="${P.ghostLine}" stroke-width="2.4"/>`;
+    s += line(`M${x - 5.5} 55.5Q${x - 3} 53.2 ${x} 53.2`, '#fff', 1.6, ' opacity="0.9"');
+  }
+  s += line('M45 59Q48 57 51 59', P.ghostLine, 2.2);
+  s += line('M27 59L21 57M69 59L75 57', P.ghostLine, 1.8, ' opacity="0.8"');
+  s += `<ellipse cx="27" cy="73" rx="6" ry="3.6" fill="${P.cheek}" opacity="0.6"/><ellipse cx="69" cy="73" rx="6" ry="3.6" fill="${P.cheek}" opacity="0.6"/>`;
+  s += line('M40 73.5Q48 81 56 73.5', P.ghostLine, 2.6) + `<path d="M44 76.6Q48 79.4 52 76.6Q50.5 80.4 48 80.4Q45.5 80.4 44 76.6Z" fill="${P.tongue}"/>`;
+  // pie dish held in front
+  s += `<g transform="translate(19 92) scale(0.9)">${pieBody()}</g>`;
+  // little arms holding the dish
+  s += G('M14 96C10 104 14 116 26 120C30 121 32 116 28 113C22 110 20 104 22 98Z', { off: [-2, -2], sw: 2.6 });
+  if (!wave) s += G('M82 96C86 104 82 116 70 120C66 121 64 116 68 113C74 110 76 104 74 98Z', { off: [-2, -2], sw: 2.6 });
   return s;
 }
 
@@ -424,24 +508,33 @@ function heart(full) {
 function icon() {
   let s = '';
   PFX = 'ic'; _id = 0;
-  const g = uid();
-  s += `<radialGradient id="${g}" cx="110" cy="90" r="170" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#4a3496"/><stop offset="0.6" stop-color="${P.night}"/><stop offset="1" stop-color="${P.night2}"/></radialGradient>`;
+  const g = uid(), cl = uid();
+  s += `<radialGradient id="${g}" cx="120" cy="96" r="170" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#5a3fa8"/><stop offset="0.6" stop-color="${P.night}"/><stop offset="1" stop-color="${P.night2}"/></radialGradient>`;
   s += `<circle cx="128" cy="128" r="122" fill="url(#${g})" stroke="${P.badgeLine}" stroke-width="6"/>`;
-  // ringed planet + stars
-  s += line('M28 62Q48 56 70 46', '#ffd27a', 4);
-  s += shape(circ(48, 56, 13), '#ff9fb8', '#e47898', '#8a3a5e', { sw: 2.5 });
-  s += line('M34 66Q48 62 64 54', '#ffd27a', 4);
-  s += `<path d="${star(214, 46, 7, 3)}" fill="#fff4b0"/><path d="${star(44, 118, 6, 2.6)}" fill="#fff4b0"/><path d="${star(212, 150, 6, 2.6)}" fill="#fff4b0"/>`;
-  for (const [x, y, r] of [[78, 44, 2.2], [176, 36, 2], [36, 150, 1.8], [222, 112, 1.6], [60, 196, 2]]) s += `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" opacity="0.85"/>`;
-  // crates (2 stacked) — reuse the crate drawing scaled to 76x50
-  const cw = 78, ch = 52, cx = 128;
-  const cr = (i, x, y) => { const c = crate(i); return `<g transform="translate(${x} ${y}) scale(${cw / 120} ${ch / 80})">${c}</g>`; };
-  s += cr(2, cx - cw / 2, 186) + cr(0, cx - cw / 2 + 4, 186 - ch);
-  // Juno (happy) in the saucer, holding a coin
-  const j = juno('happy', 'icj');
-  s += `<g transform="translate(36 -8) scale(1.15)">${j}`;
-  const c = coin(1, 'icc');
-  s += `<g transform="translate(66 76) scale(0.44)">${c}</g></g>`;
+  s += `<clipPath id="${cl}"><circle cx="128" cy="128" r="119"/></clipPath><g clip-path="url(#${cl})">`;
+  // stars
+  for (const [x, y, r] of [[100, 34, 2.2], [176, 30, 2.4], [30, 132, 1.8], [228, 104, 2], [150, 54, 1.6], [64, 92, 1.6]]) s += `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" opacity="0.85"/>`;
+  // crescent moon (top-left) with a sleepy smile
+  const moon = 'M62 38A25 25 0 1 0 84 80A20 20 0 1 1 62 38Z';
+  s += glow(60, 64, 36, '#fff1b0', 0.35, 0.12);
+  s += shape(moon, P.moon, P.moonShade, P.moonLine, { off: [-3, -3] });
+  s += line('M45 64Q48 67 51 64', P.moonLine, 2.4) + `<ellipse cx="48" cy="72" rx="3" ry="1.8" fill="${P.cheek}" opacity="0.6"/>`;
+  // cute crooked turret (right)
+  s += shape('M196 250L200 120Q212 116 224 120L232 250Z', '#9d94c8', '#7f76b0', '#4e4680', { off: [-4, 0] });
+  s += shape('M192 124Q206 70 222 66Q230 92 236 126Q214 118 192 124Z', '#c77fb8', '#a55e98', '#6a3466', { off: [-3, 0] });
+  s += line('M222 66L230 54', '#6a3466', 2.4) + shape('M230 54L246 58L231 64Z', P.pennant, null, P.pennantLine, { sw: 2 });
+  s += shape(rrect(207, 146, 14, 20, 7), '#ffd86a', '#f0b040', '#7a5418', { sw: 2.5, off: [-1, -1] });
+  // hill
+  s += `<path d="M0 232Q128 206 256 232V256H0Z" fill="#3a5a6a"/>`;
+  // two crates
+  const cw = 69, ch = 46, cx = 128;
+  const cr = (i, x, y) => `<g transform="translate(${x} ${y}) scale(${cw / 120} ${ch / 80})">${crate(i)}</g>`;
+  s += cr(1, cx - cw / 2 - 2, 198) + cr(0, cx - cw / 2 + 3, 198 - ch + 1);
+  s += `</g>`;
+  // Ziggy (happy) in her rocket, holding an apple
+  const z = ziggy('happy', 'icz');
+  s += `<g transform="translate(52 6) scale(0.95)">${z}`;
+  s += `<g transform="translate(83 72) scale(0.42)">${apple(0, 'ica')}</g></g>`;
   return s;
 }
 
@@ -451,16 +544,23 @@ function write(name, w, h, body) {
   console.log('wrote', name);
 }
 fs.mkdirSync(OUT, { recursive: true });
-for (const fr of ['idle', 'drop', 'happy', 'oops']) write(`juno_${fr}.svg`, 160, 160, juno(fr, 'j' + fr[0]));
+for (const fr of ['idle', 'drop', 'happy', 'oops']) write(`ziggy_${fr}.svg`, 160, 160, ziggy(fr, 'z' + fr[0]));
 write('beam.svg', 80, 120, beam());
 for (let i = 0; i < 4; i++) write(`crate_${i}.svg`, 120, 80, crate(i));
-write('coin_0.svg', 64, 64, coin(1, 'k0'));
-write('coin_1.svg', 64, 64, coin(0.6, 'k1'));
-write('coin_2.svg', 64, 64, coin(0.22, 'k2'));
+write('lantern.svg', 48, 64, lantern());
+write('apple_0.svg', 64, 64, apple(0, 'p0'));
+write('apple_1.svg', 64, 64, apple(1, 'p1'));
+write('apple_glow.svg', 64, 64, appleGlow());
 write('base.svg', 240, 64, base());
 write('flag.svg', 64, 128, flag());
-write('rocket.svg', 96, 160, rocket());
-write('flame.svg', 48, 64, flame());
+write('ghost.svg', 96, 160, ghost(false, 'g0'));
+write('ghost_wave.svg', 96, 160, ghost(true, 'g1'));
 write('heart.svg', 48, 48, heart(true));
 write('heart_empty.svg', 48, 48, heart(false));
+write('pie.svg', 64, 48, pie());
 write('icon.svg', 256, 256, icon());
+// remove the fox-moon-stack leftovers
+for (const old of ['juno_idle.svg', 'juno_drop.svg', 'juno_happy.svg', 'juno_oops.svg', 'coin_0.svg', 'coin_1.svg', 'coin_2.svg', 'rocket.svg', 'flame.svg']) {
+  const p = path.join(OUT, old);
+  if (fs.existsSync(p)) { fs.unlinkSync(p); console.log('removed', old); }
+}

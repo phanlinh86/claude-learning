@@ -10,7 +10,7 @@ function row(ov, diff, name, W, H, extra) {
   const AC = L.makeAC({ overrides: ov }), ms = [];
   for (let s = 1; s <= SEEDS; s++) ms.push(L.runGame(AC, who[name](AC, s), Object.assign({ diff, seed: s, maxTime: 600, width: W, height: H }, extra || {})));
   const r = L.summarise(ms);
-  return [diff, name, W + 'x' + H, 'P1 ' + L.f(r.p1Clear, 0) + '%', 'planets ' + L.f(r.lv50, 0), 'surv ' + L.f(r.surv50, 0), 'P1T ' + L.f(r.p1T, 0), 'lvT ' + L.f(r.lvlT, 0),
+  return [diff, name, W + 'x' + H, 'P1 ' + L.f(r.p1Clear, 0) + '%', 'levels ' + L.f(r.lv50, 0), 'surv ' + L.f(r.surv50, 0), 'P1T ' + L.f(r.p1T, 0), 'lvT ' + L.f(r.lvlT, 0),
     'perf ' + L.f(r.perfectPct, 0), 'miss ' + L.f(r.missPct, 1), 'topG ' + L.f(r.toppleGamesPct, 0) + '%', 'm:t ' + r.lossMiss + ':' + r.lossTopple, 'score ' + L.f(r.score50, 0)].join('  ');
 }
 const sets = {
