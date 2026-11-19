@@ -1,0 +1,12 @@
+{
+  "note": "Playtest proposal 2026-11-04 — keep in sync with results/proposal.patch",
+  "overrides": {
+    "loopGoal": 1,
+    "loopTolMin": 0.8,
+    "difficulty": {
+      "easy":   { "swing": 0.6, "crate": 1.35, "hearts": 5, "assist": 0.6 },
+      "normal": { "perfectTol": 0.15, "assist": 0.5 },
+      "hard":   { "perfectTol": 0.11, "assist": 0.2 }
+    }
+  }
+}
