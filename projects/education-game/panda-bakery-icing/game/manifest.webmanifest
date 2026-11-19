@@ -1,0 +1,16 @@
+{
+  "name": "Mochi's Icing Bakery · Tiệm Bánh Quy Của Gấu Trúc Mochi",
+  "short_name": "Icing Bakery",
+  "description": "Decorate cookies with Mochi the little panda baker: trace the dots with your finger — colours, shapes, counting, letters, animals. English & Vietnamese.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#F6E9D2",
+  "theme_color": "#F6E9D2",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

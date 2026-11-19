@@ -1,0 +1,15 @@
+{
+ "_about": "Mochi right (near) paw grip point per frame, [x, y] in the 0 0 300 300 viewBox (feet anchor 150,292): draw the icing bag gripped there, the nozzle hanging from it. _nozzle = suggested nozzle direction in degrees, canvas convention (0 = right, 90 = straight down), from the grip towards the nozzle tip. Paw radius ~18 px at viewBox scale.",
+ "idle": [223, 253],
+ "blink": [223, 253],
+ "talk": [233, 246],
+ "happy": [244, 231],
+ "cheer": [236, 176],
+ "think": [169, 194],
+ "oops": [246, 223],
+ "wave": [232, 176],
+ "pipe": [248, 216],
+ "point": [242, 189],
+ "title": [232, 176],
+ "_nozzle": {"idle": 100, "blink": 100, "talk": 96, "happy": 70, "cheer": 60, "think": 140, "oops": 70, "wave": 40, "pipe": 70, "point": 30, "title": 40}
+}
