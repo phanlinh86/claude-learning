@@ -122,11 +122,13 @@
       $('overScore').textContent = info.score;
       $('overBest').textContent = info.best;
       $('newBest').classList.toggle('hidden', !info.newBest);
-      const c = info.cleared;   // times of day finished: 1 bronze, 2 silver, 3 gold, 4+ platinum
+      const c = info.cleared;   // floors climbed: 1 bronze, 2 silver, 3 gold, 4+ platinum
       const m = c >= 4 ? 'platinum' : c >= 3 ? 'gold' : c >= 2 ? 'silver' : c >= 1 ? 'bronze' : 'none';
       $('medal').className = 'medal ' + m;
-      $('medalName').textContent = m === 'none' ? 'Reach the next time of day for a medal' : m[0].toUpperCase() + m.slice(1) + ' medal';
-      $('overStats').innerHTML = `Fireflies caught: <b>${info.caught}</b> · Best streak: <b>${info.combo}</b> · Flips: <b>${info.flips}</b><br>Distance: <b>${info.distance} m</b> · Paint arches: <b>${info.gates}</b><br>Reached: <b>${info.reached}</b>`;
+      $('medalName').textContent = m === 'none' ? 'Climb to the next floor for a medal' : m[0].toUpperCase() + m.slice(1) + ' medal';
+      const item = (k, v) => `<span>${k}: <b>${v}</b></span>`;
+      $('overStats').innerHTML = [item('Leaves caught', info.caught), item('Best streak', info.combo), item('Flips', info.flips)].join(' · ') + '<br>' +
+        [item('Floors climbed', info.floors), item('Distance', info.distance + ' m')].join(' · ') + '<br>' + item('Reached', info.reached);
       this.show('scrOver');
     },
 
@@ -141,7 +143,7 @@
     renderSlots() {
       const A = OF.Assets, grid = $('slotGrid');
       grid.innerHTML = '';
-      const defaultPreview = s => s.id === 'hero' ? A.files.bolt_happy : s.id === 'firefly' ? A.files.ff_yellow_0 : null;
+      const defaultPreview = s => s.id === 'hero' ? A.files.ollie_happy : s.id === 'leaf' ? A.files.leaf_1 : null;
       A.SLOTS.forEach(s => {
         const custom = A.hasCustom(s.id);
         const el = document.createElement('div');
@@ -160,8 +162,10 @@
           const c = document.createElement('canvas'); c.width = 320; c.height = 180;
           c.style.width = '100%'; c.style.height = '100%';
           const g = c.getContext('2d'); const n = A.SEASONS[s.season];
-          g.fillStyle = ['#f8c8a8', '#7cc6ff', '#ff9a5c', '#0e1638'][s.season]; g.fillRect(0, 0, 320, 180);
+          const P = OF.Renderer.PAL[s.season];
+          g.fillStyle = P.wall; g.fillRect(0, 0, 320, 180);
           ['sky', 'far', 'mid'].forEach(l => { const im = A.img[n + '_' + l]; if (im) g.drawImage(im, 0, 0, 320, 180); });
+          { const im = A.img[n + '_rail']; if (im) for (let x = 0; x < 320; x += 80) g.drawImage(im, x, 0, 80, 53); }
           { const im = A.img[n + '_building']; if (im) for (let x = 0; x < 320; x += 80) g.drawImage(im, x, 140, 80, 133); }
           prev.appendChild(c);
         } else {

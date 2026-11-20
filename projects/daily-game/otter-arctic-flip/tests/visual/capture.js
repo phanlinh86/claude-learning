@@ -1,7 +1,7 @@
-// Visual QA capture for Ollie's Lighthouse Flip: every screen at 5 viewports, each time of day in play, the crossfade,
-// frame-stepped motion contact sheets (flip up/down, vent + sign bump, gap fall + drone rescue, catch + wrong-colour
-// flee, gate), a firefly line-up per time of day in colour / greyscale / deuteranopia, and custom pictures.
-// Output: tests/out/visual/*.png (gitignored).   Run: node tests/visual/capture.js [only=screens,zones,fade,motion,ff,custom]
+// Visual QA capture for Ollie's Lighthouse Flip: every screen at 6 viewports, each floor in play (light and dark), the
+// crossfade, frame-stepped motion contact sheets (flip up/down, prop bumps, hatch fall + Pip rescue, leaf catches, lamps
+// switching on, stairway door), a leaf line-up per floor in colour / greyscale / deuteranopia, and custom pictures.
+// Output: tests/out/visual/*.png (gitignored).   Run: node tests/visual/capture.js [only=screens,zones,fade,motion,leaves,custom] [views=small,phone]
 // Motion sheets freeze the game (setSpeed(0)) and advance it by exact fixed steps, so every frame is reproducible.
 const { chromium } = require('playwright');
 const path = require('path'), fs = require('fs');
@@ -9,8 +9,11 @@ const GAME = 'file://' + path.resolve(__dirname, '../../game/index.html');
 const OUT = path.resolve(__dirname, '../out/visual'); fs.mkdirSync(OUT, { recursive: true });
 const only = (process.argv.find(a => a.startsWith('only=')) || '').slice(5).split(',').filter(Boolean);
 const want = n => !only.length || only.includes(n);
+const views = (process.argv.find(a => a.startsWith('views=')) || '').slice(6).split(',').filter(Boolean);
+const vlist = list => views.length ? list.filter(v => views.includes(v)) : list;
 const VIEWS = {
   desk: { viewport: { width: 1280, height: 720 } },
+  small: { viewport: { width: 960, height: 540 } },
   ipadL: { viewport: { width: 1024, height: 768 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true },
   ipadP: { viewport: { width: 768, height: 1024 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true },
   phone: { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true },
@@ -41,11 +44,11 @@ async function open(b, view, q) {
         const X = Math.max(0, c.left + x * s), Y = Math.max(0, c.top + y * s);
         return { x: Math.round(X), y: Math.round(Y), width: Math.round(Math.min(innerWidth - X, w * s)), height: Math.round(Math.min(innerHeight - Y, h * s)) };
       },
-      heroClip(bw, ah, bh, fw) {   // units: before/after Bolt horizontally, whole corridor + margins vertically
+      heroClip(bw, ah, bh, fw) {   // units: before/after Ollie horizontally, whole corridor + margins vertically
         const L = OF.debug.world.layout, u = L.unit;
         return VQ.clip(L.heroX - (bw || 1.2) * u, L.ceilY - (ah || 0.6) * u, ((bw || 1.2) + (fw || 2.4)) * u, L.corridorH + ((ah || 0.6) + (bh || 0.6)) * u);
       },
-      // solid track, Bolt standing on `side`, full batteries, no blink
+      // solid track, Ollie standing on `side`, full hearts, no blink
       toSide(side) {
         const w = OF.debug.world; w.setTrack({}); w.hearts = w.maxHearts; w.phase = 'run';
         if (w.hero.state === 'rescue') VQ.adv(2.5);
@@ -96,7 +99,7 @@ async function makePictures(p) {
       hero: mk(400, 400, (g, w, h) => { g.fillStyle = '#5a8f3a'; g.fillRect(0, 0, w, h); g.fillStyle = '#c98a4b'; g.beginPath(); g.arc(200, 210, 140, 0, 7); g.fill();
         g.fillStyle = '#7a4a22'; g.beginPath(); g.ellipse(85, 120, 45, 80, -0.4, 0, 7); g.ellipse(315, 120, 45, 80, 0.4, 0, 7); g.fill();
         g.fillStyle = '#222'; g.beginPath(); g.arc(150, 180, 18, 0, 7); g.arc(250, 180, 18, 0, 7); g.fill(); g.fillStyle = '#e66'; g.beginPath(); g.arc(200, 260, 30, 0, 3.14); g.fill(); }),
-      firefly: mk(300, 300, (g) => { g.fillStyle = '#334'; g.fillRect(0, 0, 300, 300); g.fillStyle = '#9ad'; g.beginPath(); g.ellipse(150, 150, 110, 70, 0.3, 0, 7); g.fill();
+      leaf: mk(300, 300, (g) => { g.fillStyle = '#334'; g.fillRect(0, 0, 300, 300); g.fillStyle = '#9ad'; g.beginPath(); g.ellipse(150, 150, 110, 70, 0.3, 0, 7); g.fill();
         g.fillStyle = '#fff'; g.beginPath(); g.arc(110, 130, 22, 0, 7); g.fill(); }),
       bg_dawn: mk(1600, 900, (g, w, h) => { const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#87ceeb'); gr.addColorStop(1, '#f0e68c'); g.fillStyle = gr; g.fillRect(0, 0, w, h);
         g.fillStyle = '#2f855a'; for (let i = 0; i < 6; i++) { g.beginPath(); g.arc(150 + i * 260, 820, 160, 0, 7); g.fill(); }
@@ -114,7 +117,7 @@ async function makePictures(p) {
   const b = await chromium.launch({ args: ['--allow-file-access-from-files'] });
 
   // ---------- 1. every screen at every viewport ----------
-  if (want('screens')) for (const v of Object.keys(VIEWS)) {
+  if (want('screens')) for (const v of vlist(Object.keys(VIEWS))) {
     const p = await open(b, v);
     await p.waitForTimeout(2500);
     await shot(p, v + '_title');
@@ -129,7 +132,7 @@ async function makePictures(p) {
     await p.evaluate(() => { OF.debug.setBot(true, 0.9); OF.debug.setSpeed(2); });
     await p.waitForTimeout(5000);
     await p.evaluate(() => OF.debug.setSpeed(1)); await p.waitForTimeout(400); await shot(p, v + '_play');
-    // Bolt on the rail (HUD fade check)
+    // Ollie on the ceiling (HUD fade check)
     await p.evaluate(() => { OF.debug.setBot(false); const w = OF.debug.world; w.setTrack({}); if (w.hero.side !== 'ceil') w.flip(); });
     await p.waitForTimeout(900); await shot(p, v + '_play_rail');
     await p.click('#btnPause'); await p.waitForTimeout(400); await shot(p, v + '_pause');
@@ -141,14 +144,14 @@ async function makePictures(p) {
   }
 
   // ---------- 2. each time of day in play ----------
-  if (want('zones')) for (const v of ['desk', 'ipadP', 'phone', 'phoneL']) {
+  if (want('zones')) for (const v of vlist(['desk', 'small', 'ipadP', 'phone', 'phoneL'])) {
     const p = await open(b, v, '&autostart=1&bot=1&skill=0.9&diff=normal');
     for (const lv of [0, 1, 2, 3]) {
       await p.evaluate(l => { OF.debug.gotoLevel(l); OF.debug.setSpeed(3); }, lv);
       await p.waitForTimeout(3600);
       await p.evaluate(() => OF.debug.setSpeed(1)); await p.waitForTimeout(500);
       await shot(p, v + '_zone' + lv);
-      if (v === 'desk') {   // greyscale of the same moment
+      if (v === 'desk' || v === 'small') {   // greyscale of the same moment
         await p.evaluate(() => OF.debug.setSpeed(0));
         await p.evaluate(() => { document.getElementById('game').style.filter = 'grayscale(1)'; });
         await p.waitForTimeout(80); await shot(p, v + '_zone' + lv + '_grey');
@@ -170,7 +173,7 @@ async function makePictures(p) {
   }
 
   // ---------- 4. motion contact sheets ----------
-  if (want('motion')) for (const v of ['desk', 'phone']) {
+  if (want('motion')) for (const v of vlist(['desk', 'phone'])) {
     const p = await freshRun(b, v);
     const clip = await p.evaluate(() => VQ.heroClip());
     const wide = await p.evaluate(() => VQ.heroClip(1.2, 0.6, 0.6, 4.6));
@@ -190,25 +193,26 @@ async function makePictures(p) {
       // obstacle line-up at rest (vents on the roof, signs on the rail) + a gap on each surface: readability
       await p.evaluate(() => { VQ.toSide('floor'); OF.debug.world.setTrack({ obstacles: [{ kind: 'vent', variant: 0, x: 2.2 }, { kind: 'vent', variant: 1, x: 4 }, { kind: 'sign', variant: 0, x: 6 }, { kind: 'sign', variant: 1, x: 8 }], roofs: [[-50, 9], [11, 5000]], rails: [[-50, 9.5], [11.5, 5000]] }); VQ.adv(0.05); });
       await p.evaluate(() => VQ.frame()); await shot(p, 'desk_obstacles');
-      // gap fall + drone rescue (full screen)
+      // hatch fall + Pip rescue (full screen)
       const full = await p.evaluate(() => VQ.clip(0, 0, OF.Game.renderer.VW, OF.Game.renderer.VH));
       await p.evaluate(() => { VQ.toSide('floor'); OF.debug.world.setTrack({ roofs: [[-50, 1.2], [6, 5000]], rails: [[-50, 5000]] }); });
       await stepSheet(b, p, 'gap_rescue', 30, 0.07, full, 5);
       // gap fall from the rail
       await p.evaluate(() => { VQ.toSide('ceil'); OF.debug.world.setTrack({ rails: [[-50, 1.2], [6, 5000]], roofs: [[-50, 0.5], [3, 3.6], [8, 5000]] }); });
       await stepSheet(b, p, 'gap_rescue_rail', 30, 0.07, full, 5);
-      // catch + wrong colour
-      await p.evaluate(() => { VQ.toSide('floor'); const w = OF.debug.world;
-        const c = w.hero.color, o = (c + 1) % 3; w.setTrack({ fireflies: [{ x: 1.2, side: 'floor', color: c }, { x: 1.8, side: 'floor', color: c }, { x: 2.6, side: 'floor', color: o }, { x: 3.3, side: 'floor', color: (c + 2) % 3 }] }); });
-      await stepSheet(b, p, 'catch_wrong', 24, 1 / 30, wide, 6);
-      // gate
-      await p.evaluate(() => { VQ.toSide('floor'); const w = OF.debug.world; w.setTrack({ gates: [{ x: 1.6, color: (w.hero.color + 1) % 3 }] }); });
-      await stepSheet(b, p, 'gate', 18, 1 / 30, wide, 6);
-      // finish arch
+      // leaf catches: a line on the floor and a streak (×2)
+      await p.evaluate(() => { VQ.toSide('floor'); const w = OF.debug.world; w.combo = 3;
+        w.setTrack({ leaves: [1.2, 1.8, 2.4, 3.0].map((x, i) => ({ x, side: 'floor', kind: i % 3 })) }); });
+      await stepSheet(b, p, 'catch', 24, 1 / 30, wide, 6);
+      // lamps switching on as the Map Library begins (full screen)
+      await p.evaluate(() => { const w = OF.debug.world; w.gotoLevel(1); OF.Game._setLevelVisuals(1, true); VQ.adv(3); w.gotoLevel(2); OF.Game.renderer.banner = null; w.setTrack({}); });
+      await stepSheet(b, p, 'lamps_on', 12, 0.25, await p.evaluate(() => VQ.clip(0, 0, OF.Game.renderer.VW, OF.Game.renderer.VH)), 4);
+      await p.evaluate(() => { const w = OF.debug.world; w.gotoLevel(0); OF.Game._setLevelVisuals(0, true); VQ.adv(3); });
+      // stairway door
       await p.evaluate(() => { VQ.toSide('floor'); OF.debug.world.setTrack({ finish: 2.2 }); });
       await stepSheet(b, p, 'finish', 12, 0.1, await p.evaluate(() => VQ.clip(0, 0, OF.Game.renderer.VW, OF.Game.renderer.VH)), 4);
     }
-    // night flip (glow + dark rail)
+    // night flip (headlamp + dark ceiling)
     if (v === 'desk') {
       await p.evaluate(() => { const w = OF.debug.world; w.gotoLevel(3); OF.Game._setLevelVisuals(3, true); OF.Game.renderer.banner = null; w.setTrack({}); VQ.adv(1); w.hero.invuln = 0; });
       await stepSheet(b, p, 'night_flip_up', 12, 1 / 30, clip, 6, () => { const w = OF.debug.world; if (w.hero.side === 'floor') w.flip(); });
@@ -216,20 +220,20 @@ async function makePictures(p) {
     await p.context().close();
   }
 
-  // ---------- 5. firefly line-up per time of day: colour / grey / deuteranopia ----------
-  if (want('ff')) {
+  // ---------- 5. leaf line-up per floor: colour / grey / deuteranopia ----------
+  if (want('leaves')) {
     const p = await freshRun(b, 'desk');
     await p.evaluate(() => document.body.insertAdjacentHTML('beforeend', '<svg width="0" height="0" style="position:absolute"><filter id="cvd"><feColorMatrix type="matrix" values="0.367 0.861 -0.228 0 0  0.280 0.673 0.047 0 0  -0.012 0.043 0.969 0 0  0 0 0 1 0"/></filter></svg>'));
     for (const lv of [0, 1, 2, 3]) {
-      await p.evaluate(l => { const w = OF.debug.world; w.gotoLevel(l); OF.Game._setLevelVisuals(l, true); OF.Game.renderer.banner = null;
-        w.setTrack({ fireflies: [0, 1, 2, 0, 1, 2].map((c, i) => ({ x: 1.6 + i * 0.7, side: i < 3 ? 'floor' : 'ceil', color: c })).concat([0, 1, 2].map((c, i) => ({ x: 2.2 + i * 0.9, side: 'mid', color: c }))) });
-        VQ.adv(0.02); }, lv);
+      await p.evaluate(l => { const w = OF.debug.world; w.gotoLevel(l); OF.Game._setLevelVisuals(l, true); VQ.adv(3); OF.Game.renderer.banner = null;
+        w.setTrack({ leaves: [0, 1, 2, 0, 1, 2].map((k, i) => ({ x: 1.6 + i * 0.7, side: i < 3 ? 'floor' : 'ceil', kind: k })).concat([0, 1, 2].map((k, i) => ({ x: 2.2 + i * 0.9, side: 'mid', kind: k }))) });
+        VQ.adv(0.05); }, lv);
       const clip = await p.evaluate(() => VQ.heroClip(1.0, 0.6, 0.6, 5.2));
       await p.evaluate(() => VQ.frame());
-      await shot(p, 'ff_zone' + lv, clip);
+      await shot(p, 'leaves_zone' + lv, clip);
       for (const [f, n] of [['grayscale(1)', 'grey'], ['url(#cvd)', 'deutan']]) {
         await p.evaluate(x => { document.getElementById('game').style.filter = x; }, f);
-        await p.waitForTimeout(80); await shot(p, 'ff_zone' + lv + '_' + n, clip);
+        await p.waitForTimeout(80); await shot(p, 'leaves_zone' + lv + '_' + n, clip);
       }
       await p.evaluate(() => { document.getElementById('game').style.filter = ''; });
     }
@@ -237,12 +241,12 @@ async function makePictures(p) {
   }
 
   // ---------- 6. custom pictures ----------
-  if (want('custom')) for (const v of ['desk', 'phone']) {
+  if (want('custom')) for (const v of vlist(['desk', 'small', 'phone'])) {
     const p = await open(b, v);
     const files = await makePictures(p);
     await p.click('#btnCustomize'); await p.waitForTimeout(300);
     const ids = await p.evaluate(() => OF.Assets.SLOTS.map(s => s.id));
-    for (const id of ['hero', 'firefly', 'bg_dawn', 'bg_night']) {
+    for (const id of ['hero', 'leaf', 'bg_dawn', 'bg_night']) {
       const i = ids.indexOf(id);
       const [chooser] = await Promise.all([p.waitForEvent('filechooser'), p.locator('#slotGrid .slot').nth(i).locator('[data-act=pick]').click()]);
       await chooser.setFiles(files[id]); await p.waitForTimeout(600);
@@ -255,7 +259,7 @@ async function makePictures(p) {
     await p.evaluate(() => OF.debug.setSpeed(1)); await p.waitForTimeout(300);
     await shot(p, v + '_custom_play');
     // custom flip sheet
-    await p.evaluate(() => { OF.debug.setBot(false); OF.debug.setSpeed(0); const w = OF.debug.world; w.setTrack({ fireflies: [0, 1, 2].map((c, i) => ({ x: 2.2 + i * 0.8, side: 'mid', color: c })) }); VQ.adv(0.6); });
+    await p.evaluate(() => { OF.debug.setBot(false); OF.debug.setSpeed(0); const w = OF.debug.world; w.setTrack({ leaves: [0, 1, 2].map((k, i) => ({ x: 2.2 + i * 0.8, side: 'mid', kind: k })) }); VQ.adv(0.6); });
     if (v === 'desk') {
       const clip = await p.evaluate(() => VQ.heroClip());
       await stepSheet(b, p, 'custom_flip', 12, 1 / 30, clip, 6, () => { const w = OF.debug.world; if (w.hero.side === 'floor') w.flip(); });

@@ -1,5 +1,5 @@
-// Smoke test: boot, title (bot demo), real taps flip gravity, bot play at speed, every time of day, finish → next level,
-// game over; zero console errors. Screenshots in tests/out/.
+// Smoke test: boot, title (bot demo), real taps flip gravity, bot play at speed catching leaves, every floor (lamps on and
+// darkness on Sunset / Night), stairway door → next floor, game over; zero console errors. Screenshots in tests/out/.
 const { chromium } = require('playwright');
 const path = require('path'), fs = require('fs');
 const GAME = 'file://' + path.resolve(__dirname, '../../game/index.html');
@@ -18,14 +18,14 @@ const OUT = path.resolve(__dirname, '../out'); fs.mkdirSync(OUT, { recursive: tr
   await p.waitForFunction(() => OF.debug && OF.debug.mode === 'playing');
   await p.waitForTimeout(800);
   await p.screenshot({ path: OUT + '/smoke_banner.png' });
-  // a real player: click the stage a few times (each click flips once Bolt has landed)
+  // a real player: click the stage a few times (each click flips once Ollie has landed)
   for (let i = 0; i < 3; i++) { await p.mouse.click(640, 400); await p.waitForTimeout(700); }
   const f1 = await p.evaluate(() => OF.debug.world.stats.flips);
   if (f1 < 3) errs.push('clicks flipped only ' + f1 + ' times');
   await p.mouse.click(640, 400); await p.waitForTimeout(180);
   await p.screenshot({ path: OUT + '/smoke_flip.png' });
   await p.evaluate(() => { OF.debug.startGame(); OF.debug.setBot(true, 1); OF.debug.setSpeed(4); });
-  await p.waitForFunction(() => OF.debug.world.stats.caught >= 10, null, { timeout: 40000 }).catch(() => errs.push('bot caught < 10 fireflies'));
+  await p.waitForFunction(() => OF.debug.world.stats.caught >= 10, null, { timeout: 40000 }).catch(() => errs.push('bot caught < 10 leaves'));
   await p.evaluate(() => OF.debug.setSpeed(1));
   await p.waitForTimeout(500);
   await p.screenshot({ path: OUT + '/smoke_play.png' });
@@ -40,6 +40,9 @@ const OUT = path.resolve(__dirname, '../out'); fs.mkdirSync(OUT, { recursive: tr
     await p.evaluate(() => OF.debug.setSpeed(1));
     await p.waitForTimeout(400);
     await p.screenshot({ path: OUT + '/smoke_zone' + lv + '.png' });
+    const v = await p.evaluate(() => { const w = OF.debug.world, R = OF.Game.renderer; return { zone: w.zone, lampsOn: w.lampsOn, light: w.lightView, dark: R.darkAlpha(), lampK: R.lampK, lamps: w.lamps.length }; });
+    const wantDark = lv >= 2;
+    if (v.zone !== lv || v.lampsOn !== wantDark || (wantDark && (v.dark < 0.2 || v.lampK < 0.9)) || (!wantDark && v.dark > 0.1) || v.lamps < 3) errs.push('floor ' + lv + ' visibility wrong: ' + JSON.stringify(v));
   }
   // game over: no bot, nobody flips
   await p.evaluate(() => { OF.debug.setBot(false); OF.debug.setSpeed(8); });

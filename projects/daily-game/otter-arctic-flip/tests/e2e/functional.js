@@ -2,8 +2,9 @@
 // Run: node tests/e2e/functional.js [sectionFilter]      (LONG_RUN_S=75 real seconds at ×16 by default)
 // Prints PASS/FAIL per check, screenshots in tests/out/func_*.png, exits 1 on any FAIL.
 // Sections: static (Go wrapper + iOS) · boot · menus · input · touch · mech (flip buffer / coyote / resize, headless world) ·
-// rules (scoring, gates) · hearts (bump, fall, finish, levels) · pause · over (game-over screen, restart lock) ·
-// settings · best · pictures · layout (8 sizes / DPRs) · rotate · long bot run at ?speed=16.
+// rules (leaves, streak, combo break) · hearts (bump, fall, Pip rescue, stairway door, floors) · light (day-to-night
+// darkness, lamps, headlamp beam) · pause · over (game-over screen, restart lock) · settings · best · pictures
+// (customisation) · layout (8 sizes / DPRs) · rotate · long bot run at ?speed=16.
 'use strict';
 const { chromium } = require('playwright');
 const path = require('path'), fs = require('fs');
@@ -43,7 +44,7 @@ async function instrument(page) {
     window._ev = [];
     const h = G.handleEvents;
     G.handleEvents = function (evts) {
-      if (this.mode !== 'title') for (const e of evts) window._ev.push({ type: e.type, combo: e.combo, mult: e.mult, points: e.points, bonus: e.bonus, hearts: e.hearts, level: e.level, zone: e.zone, color: e.color, grav: e.grav, side: e.side, score: this.world.score, t: +this.world.time.toFixed(3) });
+      if (this.mode !== 'title') for (const e of evts) window._ev.push({ type: e.type, combo: e.combo, mult: e.mult, points: e.points, bonus: e.bonus, hearts: e.hearts, level: e.level, zone: e.zone, to: e.to, kind: e.leaf ? e.leaf.kind : undefined, grav: e.grav, side: e.side, score: this.world.score, t: +this.world.time.toFixed(3) });
       if (window._ev.length > 4000) window._ev.splice(0, 2000);
       return h.apply(this, arguments);
     };
@@ -59,14 +60,14 @@ const grounded = (p, t) => p.waitForFunction(() => { const w = OF.debug.world; r
 const visible = (p, sel) => p.evaluate(s => { const e = document.querySelector(s); if (!e) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(e).display !== 'none'; }, sel);
 const evs = (p, type) => p.evaluate(t => window._ev.filter(e => e.type === t), type);
 async function stageXY(p) { return p.evaluate(() => { const r = document.getElementById('game').getBoundingClientRect(); return [r.left + r.width * 0.55, r.top + r.height * 0.5]; }); }
-// start a run on a hand-made, fully solid track (no hazards, no fireflies) with lots of batteries
+// start a run on a hand-made, fully solid track (no hazards, no leaves) with lots of hearts
 async function startSafe(p, spec, keepHearts) {
   await p.evaluate(() => OF.Game.startGame());
   await waitMode(p, 'playing');
   await p.evaluate(([spec, keep]) => { const w = OF.debug.world; w.setTrack(spec || {}); if (!keep) w.hearts = 99; window._ev = []; }, [spec || null, !!keepHearts]);
   await grounded(p);
 }
-// game over now: one battery, a vent right ahead, then the 1.6 s death delay
+// game over now: one heart, a vent right ahead, then the 1.6 s death delay
 async function killNow(p, score) {
   await p.evaluate(s => { const w = OF.debug.world; w.hearts = 1; w.hero.invuln = 0; if (s != null) w.score = s; w.setTrack({ obstacles: [{ kind: 'vent', x: 1.2 }, { kind: 'sign', x: 1.2 }] }); OF.debug.setSpeed(3); }, score);
   const ok = await waitMode(p, 'over', 10000);
@@ -81,7 +82,7 @@ async function sStatic() {
   check('static/app: storage in %APPDATA%\\OlliesLighthouseFlip\\data', /filepath\.Join\(appData, "OlliesLighthouseFlip"\)/.test(go) && /filepath\.Join\(base, "data"\)/.test(go));
   check('static/app: binds ffStoreAll/Set/Del, ffFullscreen, ffQuit', ['ffStoreAll', 'ffStoreSet', 'ffStoreDel', 'ffFullscreen', 'ffQuit'].every(n => go.includes('"' + n + '"')));
   check('static/app: atomic write (tmp + rename) and key filter', /\.tmp"/.test(go) && /os\.Rename/.test(go) && /\^\[a-zA-Z0-9_\\-\]\{1,64\}\$/.test(go));
-  const keys = ['settings', 'best_easy', 'best_normal', 'best_hard', 'img_hero', 'shape_hero', 'img_firefly', 'shape_firefly', 'img_bg_dawn', 'img_bg_noon', 'img_bg_sunset', 'img_bg_night'];
+  const keys = ['settings', 'best_easy', 'best_normal', 'best_hard', 'img_hero', 'shape_hero', 'img_leaf', 'shape_leaf', 'img_bg_dawn', 'img_bg_noon', 'img_bg_sunset', 'img_bg_night'];
   check('static/app: every storage key the game writes passes the Go key filter', keys.every(k => /^[a-zA-Z0-9_\-]{1,64}$/.test(k)));
   check('static/app: single-instance mutex name and window title match the game', go.includes('OlliesLighthouseFlip.SingleInstance') && (go.match(/"Ollie's Lighthouse Flip"/g) || []).length >= 3);
   check('static/app: browser fallback strips ?app=1 (Quit would not work in a tab)', /TrimSuffix\(url, "\?app=1"\)/.test(go));
@@ -96,12 +97,16 @@ async function sStatic() {
   check('static/iOS: home-screen PNG icons exist', ['apple-touch-icon.png', 'icon-192.png', 'icon-512.png'].every(f => fs.existsSync(path.join(ROOT, 'game/assets/icons', f))));
   // every default asset referenced by assets.js exists on disk
   const D = path.join(ROOT, 'game/assets/default'), need = ['icon', 'drone', 'finish', 'battery', 'battery_empty', 'vent_0', 'vent_1', 'sign_0', 'sign_1'];
-  ['run_0', 'run_1', 'run_2', 'run_3', 'air', 'bump', 'happy'].forEach(f => need.push('bolt_' + f));
-  ['pink', 'yellow', 'cyan'].forEach(c => need.push('firefly_' + c + '_0', 'firefly_' + c + '_1', 'gate_' + c));
-  ['mist', 'seed', 'mote', 'leaf', 'star', 'sparkle', 'puff', 'spark', 'bit_pink', 'bit_yellow', 'bit_cyan', 'shoot'].forEach(x => need.push('particles/' + x));
+  ['run_0', 'run_1', 'run_2', 'run_3', 'air', 'bump', 'happy'].forEach(f => need.push('ollie_' + f));
+  [0, 1, 2].forEach(k => need.push('leaf_' + k));
+  ['snow', 'flake', 'mote', 'sparkle', 'star', 'puff', 'bit_0', 'bit_1', 'bit_2', 'aurora', 'glow'].forEach(x => need.push('particles/' + x));
   ['dawn', 'noon', 'sunset', 'night'].forEach(z => ['sky', 'far', 'mid', 'building', 'rail', 'rail_end'].forEach(l => need.push('levels/' + z + '/' + l)));
   const missing = need.filter(f => !fs.existsSync(path.join(D, f + '.svg')));
   check('static: every default asset file exists (' + need.length + ' SVGs)', missing.length === 0, missing.length ? missing : undefined);
+  const assetsJs = fs.readFileSync(path.join(ROOT, 'game/js/assets.js'), 'utf8');
+  check('static: assets.js lists no Rooftop Flip leftovers (bolt / firefly / gate / colours)', !/bolt_|firefly|gate_|bit_pink|COLORS/.test(assetsJs));
+  const allText = ['index.html', 'js/ui.js', 'js/main.js', 'js/render.js', 'manifest.webmanifest'].map(f => fs.readFileSync(path.join(ROOT, 'game', f), 'utf8')).join('\n');
+  check('static: no "Bolt", "firefly", "battery" text, "paint arch" or "Rooftop" left in the UI', !/Bolt|[Ff]ireflies|[Ff]irefly|[Bb]atter(y|ies)|paint arch|Rooftop/.test(allText.replace(/'battery(_empty)?'/g, '')));
 }
 
 // ======================================================================= boot
@@ -179,7 +184,7 @@ async function sInput() {
     await sleep(80);
     check(`input: ${key} flips once`, await flips(p) === f0 + 1);
   }
-  check('input: Bolt lands on the rail and the roof after those flips (alternating sides)', await grounded(p) && await p.evaluate(() => { const ev = window._ev.filter(e => e.type === 'land'); return ev.length >= 6 && ev.every((e, i) => i === 0 || e.side !== ev[i - 1].side); }));
+  check('input: Ollie lands on the rail and the roof after those flips (alternating sides)', await grounded(p) && await p.evaluate(() => { const ev = window._ev.filter(e => e.type === 'land'); return ev.length >= 6 && ev.every((e, i) => i === 0 || e.side !== ev[i - 1].side); }));
   // key repeat: hold Space; repeated keydowns (repeat:true) must never flip again
   await grounded(p);
   let f0 = await flips(p);
@@ -297,7 +302,7 @@ async function sMech() {
     w = mk({ roofs: [[-50, 1], [30, 5000]] }); run(w, 3, w => !w.hero.grounded); run(w, 0.08);
     out.coyote = { ret: w.flip(), flips: w.stats.flips };
     run(w, 1.5); out.coyote.side = w.hero.side; out.coyote.falls = w.stats.falls;
-    // past coyote (0.2 s) → no flip, he falls and the drone rescues him
+    // past coyote (0.2 s) → no flip, he falls and Pip rescues him
     w = mk({ roofs: [[-50, 1], [12, 5000]] }); run(w, 3, w => !w.hero.grounded); run(w, 0.2);
     out.late = { ret: w.flip(), flips0: w.stats.flips };
     run(w, 0.6); out.late.falls = w.stats.falls; out.late.state = w.hero.state;
@@ -331,7 +336,7 @@ async function sMech() {
   check('mech: coyote time: a flip 0.08 s after running off an edge still works (no fall)', r.coyote.ret === true && r.coyote.flips === 1 && r.coyote.side === 'ceil' && r.coyote.falls === 0, r.coyote);
   check('mech: after the coyote window (0.2 s) a press does not flip; he falls and the drone takes him', r.late.ret === false && r.late.flips0 === 0 && r.late.falls === 1 && r.late.state === 'rescue', r.late);
   check('mech: flips are ignored during the rescue', r.late.rescueFlip === false && r.late.flipsAfter === 0, r.late);
-  check('mech: after the rescue Bolt runs again with ~1.5 s safety, one battery lost', r.late.after.state === 'run' && r.late.after.grounded && r.late.after.invuln > 1 && r.late.after.hearts === 2, r.late.after);
+  check('mech: after the rescue Ollie runs again with ~1.5 s safety, one heart lost', r.late.after.state === 'run' && r.late.after.grounded && r.late.after.invuln > 1 && r.late.after.hearts === 2, r.late.after);
   check('mech: resize to portrait mid-flip → still lands on the rail, no fall / bump, hero x re-anchored', r.resizeAir.side === 'ceil' && r.resizeAir.grounded && r.resizeAir.falls === 0 && r.resizeAir.bumps === 0 && Math.abs(r.resizeAir.heroX - r.resizeAir.heroXexp) < 1 && Math.abs(r.resizeAir.y - r.resizeAir.stand) < 0.5, r.resizeAir);
   check('mech: five resizes while on the rail → stays clamped on the rail', r.resizeRail.side === 'ceil' && r.resizeRail.grounded && r.resizeRail.falls === 0 && Math.abs(r.resizeRail.y - r.resizeRail.stand) < 0.5, r.resizeRail);
   check('mech: generated tracks: at every x at least one surface is safe (easy / normal / hard)', r.fair.every(f => f.bad === 0 && f.n > 1000), r.fair);
@@ -339,88 +344,145 @@ async function sMech() {
   await ctx.close();
 }
 
-// ======================================================================= scoring / gates
+// ======================================================================= scoring: leaves, streak, combo break
 async function sRules() {
   const { page: p, errs, ctx } = await open({}, '?mute=1&seed=11&diff=normal');
   await startSafe(p);
-  const c = await p.evaluate(() => OF.debug.world.hero.color);
-  const c1 = (c + 1) % 3, c2 = (c + 2) % 3;
-  await p.evaluate(([c, c1, c2]) => {
+  await p.evaluate(() => {
     const w = OF.debug.world;
-    w.setTrack({ fireflies: [{ x: 1.5, side: 'floor', color: c }, { x: 3, side: 'floor', color: c1 }, { x: 4.5, side: 'floor', color: c }, { x: 8, side: 'floor', color: c2 }, { x: 9.5, side: 'floor', color: c }],
-      gates: [{ x: 6.5, color: c2 }] });
-    w.combo = 4; w.mult = 1; w.score = 0; window._ev = []; OF.debug.setSpeed(2);
-  }, [c, c1, c2]);
-  await p.waitForFunction(() => OF.debug.world.distance > 0 && window._ev.filter(e => ['catch', 'wrong'].includes(e.type)).length >= 5, null, { timeout: 10000 }).catch(() => {});
+    w.setTrack({ leaves: [{ x: 1.5, side: 'floor', kind: 0, still: true }, { x: 2.1, side: 'floor', kind: 0, still: true }, { x: 2.7, side: 'floor', kind: 1, still: true }, { x: 7.5, side: 'floor', kind: 2, still: true }],
+      obstacles: [{ kind: 'vent', x: 4.6 }] });
+    w.combo = 4; w.mult = 1; w.score = 0; w.hearts = 3; window._ev = []; OF.debug.setSpeed(2);
+  });
+  await p.waitForFunction(() => window._ev.filter(e => e.type === 'catch').length >= 4, null, { timeout: 12000 }).catch(() => {});
   await sleep(200);
   await p.evaluate(() => OF.debug.setSpeed(1));
-  const ev = await p.evaluate(() => window._ev.filter(e => ['catch', 'wrong', 'gate', 'combo', 'comboBreak'].includes(e.type)));
-  const st = await p.evaluate(() => ({ score: OF.debug.world.score, color: OF.debug.world.hero.color, combo: OF.debug.world.combo, caught: OF.debug.world.stats.caught, wrong: OF.debug.world.stats.wrong, gates: OF.debug.world.stats.gates }));
+  const ev = await p.evaluate(() => window._ev.filter(e => ['catch', 'combo', 'comboBreak', 'bump'].includes(e.type)));
+  const st = await p.evaluate(() => ({ score: OF.debug.world.score, combo: OF.debug.world.combo, maxCombo: OF.debug.world.maxCombo, caught: OF.debug.world.stats.caught, bumps: OF.debug.world.stats.bumps }));
   const seq = ev.map(e => e.type).join(',');
-  const catches = ev.filter(e => e.type === 'catch'), main = ev.filter(e => ['catch', 'wrong', 'gate'].includes(e.type));
-  check('rules: event order catch, wrong, catch, gate, catch, wrong', main.map(e => e.type).join() === 'catch,wrong,catch,gate,catch,wrong', seq);
-  check('rules: own colour at combo 4→5 = +10×2 (multiplier ×2 every 5 in a row), "combo" event', catches[0] && catches[0].points === 20 && catches[0].mult === 2 && catches[0].combo === 5 && ev.some(e => e.type === 'combo' && e.mult === 2), catches[0]);
-  const wr = main[1] || {}, iw = ev.indexOf(wr);
-  check('rules: wrong colour gives no points, combo resets on Normal (comboBreak right after it)', wr.type === 'wrong' && wr.score === main[0].score && ev[iw + 1] && ev[iw + 1].type === 'comboBreak' && ev[iw + 1].combo === 5, ev.slice(0, 5));
-  check('rules: after the reset the next catch is +10×1', catches[1] && catches[1].points === 10 && catches[1].combo === 1, catches[1]);
-  const gate = ev.find(e => e.type === 'gate');
-  check('rules: the paint arch changes Bolt\'s colour to its own (a different colour)', gate && gate.color === c2 && gate.color !== c, gate);
-  check('rules: after the gate the new colour counts and the old colour is "wrong"', catches[2] && catches[2].points === 10 && main[main.length - 1].type === 'wrong' && st.color === c2, { catches, last: main[main.length - 1] });
-  check('rules: score = 20 + 10 + 10 = 40, stats counted', st.score === 40 && st.caught === 3 && st.wrong === 2 && st.gates === 1, st);
-  const ffs = await p.evaluate(() => OF.debug.world.fireflies.map(f => f.state));
-  check('rules: no fireflies left flying on the track (caught ones fly into Bolt, wrong ones flee)', ffs.every(s => s !== 'fly'), ffs);
+  const catches = ev.filter(e => e.type === 'catch');
+  check('rules: event order catch, combo, catch, catch, bump, comboBreak, catch', seq === 'catch,combo,catch,catch,bump,comboBreak,catch', seq);
+  check('rules: a leaf at combo 4→5 = +10×2 (multiplier ×2 every 5 in a row), "combo" event', catches[0] && catches[0].points === 20 && catches[0].mult === 2 && catches[0].combo === 5 && ev.some(e => e.type === 'combo' && e.mult === 2), catches[0]);
+  check('rules: catch events carry the leaf kind (green, green, gold, red)', catches.map(c => c.kind).join() === '0,0,1,2', catches.map(c => c.kind));
+  const br = ev.find(e => e.type === 'comboBreak');
+  check('rules: a bump on Normal resets the streak (comboBreak 7 → 0)', br && br.combo === 7 && br.to === 0, br);
+  check('rules: after the reset the next leaf is +10×1', catches[3] && catches[3].points === 10 && catches[3].combo === 1, catches[3]);
+  check('rules: score = 20 + 20 + 20 + 10 = 70, stats counted, best streak 7', st.score === 70 && st.caught === 4 && st.bumps === 1 && st.maxCombo === 7, st);
+  const left = await p.evaluate(() => OF.debug.world.leaves.map(f => f.state));
+  check('rules: no leaves left fluttering (caught ones spiral into Ollie and vanish)', left.every(s => s !== 'fly'), left);
   // ×5 cap
-  await p.evaluate(c => { const w = OF.debug.world; w.setTrack({ fireflies: [{ x: 1.5, side: 'floor', color: c }] }); w.combo = 40; w.score = 0; window._ev = []; }, st.color);
+  await grounded(p);
+  await p.evaluate(() => { const w = OF.debug.world; w.hero.invuln = 0; w.setTrack({ leaves: [{ x: 1.5, side: 'floor', kind: 1, still: true }] }); w.combo = 40; w.score = 0; window._ev = []; });
   await p.waitForFunction(() => window._ev.some(e => e.type === 'catch'), null, { timeout: 5000 }).catch(() => {});
   const cap = await p.evaluate(() => (window._ev.find(e => e.type === 'catch') || {}));
   check('rules: the multiplier is capped at ×5 (+50)', cap.points === 50 && cap.mult === 5, cap);
-  // fireflies in the middle are caught in flight
+  // leaves in the middle of the corridor are caught in flight
   await grounded(p);
-  await p.evaluate(c => { const w = OF.debug.world; w.setTrack({ fireflies: [{ x: 0.9, side: 'mid', color: c }] }); w.combo = 0; window._ev = []; OF.debug.flip(); }, st.color);
+  await p.evaluate(() => { const w = OF.debug.world; w.setTrack({ leaves: [{ x: 0.9, side: 'mid', kind: 0, still: true }] }); w.combo = 0; window._ev = []; OF.debug.flip(); });
   await p.waitForFunction(() => OF.debug.world.hero.grounded, null, { timeout: 3000 }).catch(() => {});
   await sleep(200);
-  check('rules: a firefly in the flight path is caught mid-flip', await p.evaluate(() => window._ev.some(e => e.type === 'catch')));
-  // Easy: a wrong firefly does not break the combo
+  check('rules: a leaf in the flight path is caught mid-flip', await p.evaluate(() => window._ev.some(e => e.type === 'catch')));
+  // fluttering leaves really move (pendulum) and flip their face
+  const fl = await p.evaluate(async () => {
+    const w = OF.debug.world; w.setTrack({ leaves: [{ x: 6, side: 'floor', kind: 0 }] });
+    const f = w.leaves[0], xs = [], rots = [], faces = new Set();
+    for (let i = 0; i < 30; i++) { await new Promise(r => setTimeout(r, 50)); xs.push(f.x - w.cam.x); rots.push(f.rot); faces.add(f.face); }
+    return { dx: Math.max(...xs.map((x, i) => i ? Math.abs(x - xs[i - 1]) : 0)), rotSpan: Math.max(...rots) - Math.min(...rots), faces: [...faces] };
+  });
+  check('rules: a leaf sways (rotation changes, face flips both ways for the flutter)', fl.rotSpan > 0.3 && fl.faces.length === 2, fl);
+  // Easy: a bump halves the streak, 5 hearts
   await p.goto(GAME + '?mute=1&seed=11&diff=easy'); await instrument(p);
   await startSafe(p);
-  await p.evaluate(() => { const w = OF.debug.world, c = w.hero.color; w.setTrack({ fireflies: [{ x: 1.5, side: 'floor', color: (c + 1) % 3 }] }); w.combo = 3; window._ev = []; });
-  await p.waitForFunction(() => window._ev.some(e => e.type === 'wrong'), null, { timeout: 5000 }).catch(() => {});
-  const ez = await p.evaluate(() => ({ combo: OF.debug.world.combo, br: window._ev.filter(e => e.type === 'comboBreak').length, wrong: window._ev.filter(e => e.type === 'wrong').length, hearts: OF.debug.world.maxHearts }));
-  check('rules: Easy: a wrong firefly keeps the combo (no comboBreak); Easy has 5 batteries', ez.wrong === 1 && ez.combo === 3 && ez.br === 0 && ez.hearts === 5, ez);
+  await p.evaluate(() => { const w = OF.debug.world; w.setTrack({ obstacles: [{ kind: 'vent', x: 1.5 }] }); w.combo = 8; window._ev = []; });
+  await p.waitForFunction(() => window._ev.some(e => e.type === 'bump'), null, { timeout: 5000 }).catch(() => {});
+  const ez = await p.evaluate(() => ({ combo: OF.debug.world.combo, br: window._ev.filter(e => e.type === 'comboBreak').map(e => e.to), hearts: OF.debug.world.maxHearts }));
+  check('rules: Easy: a bump halves the streak (8 → 4); Easy has 5 hearts', ez.combo === 4 && ez.br.join() === '4' && ez.hearts === 5, ez);
   check('rules: no console errors', errs.length === 0 && await p.evaluate(() => OF.debug.stats.errors.length === 0), errs.slice(0, 3));
   await ctx.close();
 }
 
-// ======================================================================= batteries / finish / levels
+// ======================================================================= day-to-night visibility: darkness, lamps, headlamp
+async function sLight() {
+  const { page: p, errs, ctx } = await open({}, '?mute=1&seed=5&diff=normal');
+  await startSafe(p);
+  const px = async () => p.evaluate(() => {
+    const R = OF.Game.renderer, w = OF.debug.world, g = R.canvas.getContext('2d'), k = R.px, L = w.layout, u = L.unit;
+    const lum = (x, y) => { const d = g.getImageData(Math.round(x * k), Math.round(y * k), 1, 1).data; return 0.299 * d[0] + 0.587 * d[1] + 0.114 * d[2]; };
+    const ahead = []; for (let i = 1.4; i <= 2.6; i += 0.3) ahead.push(lum(L.heroX + i * u, L.midY + 0.6 * u));
+    const behind = []; for (let i = 0.5; i <= 1.4; i += 0.3) behind.push(lum(Math.max(4, L.heroX - 1.6 * u - i * u * 0.3), L.midY - 0.9 * u));
+    return { zone: w.zone, light: +w.light.toFixed(2), view: +w.lightView.toFixed(2), lampsOn: w.lampsOn, dark: +R.darkAlpha().toFixed(2), lampK: +R.lampK.toFixed(2),
+      beam: +w.beamUnits().toFixed(2), see: +w.seeAheadUnits().toFixed(2), reach: +w.screenReachUnits().toFixed(2), lamps: w.lamps.length,
+      ahead: ahead.reduce((a, b) => a + b) / ahead.length, behind: behind.reduce((a, b) => a + b) / behind.length };
+  });
+  let d = await px();
+  check('light: Floor 1 (dawn) is bright: light ≥ 0.78, lamps off, darkness ≤ 0.21', d.zone === 0 && d.light >= 0.78 && !d.lampsOn && d.dark <= 0.21 && d.lampK === 0, d);
+  check('light: wall lamps exist along the corridor (drawn even when off)', d.lamps >= 3, d.lamps);
+  await p.evaluate(() => { window._ev = []; OF.debug.gotoLevel(1); });
+  await sleep(3000);
+  d = await px();
+  check('light: Floor 2 (noon) is the brightest: light ≥ 0.88, no darkness, lamps off', d.zone === 1 && d.light >= 0.88 && d.dark < 0.12 && !d.lampsOn, d);
+  await p.evaluate(() => { window._ev = []; OF.debug.gotoLevel(2); });
+  await sleep(200);
+  const lev = await p.evaluate(() => window._ev.map(e => e.type).filter(t => t === 'levelUp' || t === 'lampsOn'));
+  check('light: entering Floor 3 (sunset) fires levelUp then lampsOn once', lev.join() === 'levelUp,lampsOn', lev);
+  await sleep(3200);
+  await p.evaluate(() => OF.debug.world.setTrack({}));
+  await sleep(300);
+  d = await px();
+  check('light: Floor 3 (sunset): lamps on and faded in, darkness eased in from lightView', d.zone === 2 && d.lampsOn && d.lampK === 1 && d.dark > 0.2 && Math.abs(d.view - d.light) < 0.08, d);
+  check('light: the headlamp beam covers what must be seen (beam = min(max(seeAhead, 3.2), screen reach))', Math.abs(d.beam - Math.min(Math.max(d.see, 3.2), d.reach)) < 0.01, d);
+  check('light: ahead of Ollie (in the beam) is brighter than the dark wall behind him', d.ahead > d.behind + 8, { ahead: Math.round(d.ahead), behind: Math.round(d.behind) });
+  await p.screenshot({ path: OUT + '/func_light_sunset.png' });
+  await p.evaluate(() => { window._ev = []; OF.debug.gotoLevel(3); });
+  await sleep(3500);
+  d = await px();
+  const lo = await p.evaluate(() => window._ev.filter(e => e.type === 'lampsOn').length);
+  check('light: Floor 4 (night): darkest (light ≤ 0.40 but ≥ 0.30), lamps already on (no second lampsOn)', d.zone === 3 && d.light <= 0.4 && d.light >= 0.3 && d.lampsOn && lo === 0, { d, lo });
+  check('light: darkness never hides everything (alpha ≤ 0.7)', d.dark <= 0.7 && d.dark > 0.5, d.dark);
+  check('light: the beam still lights the corridor ahead at night', d.ahead > d.behind + 8, { ahead: Math.round(d.ahead), behind: Math.round(d.behind) });
+  // beacons: every prop carries one; the renderer lists them while lamps are on
+  const bc = await p.evaluate(() => { const w = OF.debug.world; w.setTrack({ obstacles: [{ kind: 'vent', x: 3 }, { kind: 'sign', x: 5 }], roofs: [[-50, 6], [7.5, 5000]] }); const out = []; OF.Game.renderer._forBeacons(w, w.cam.x, (x, y) => out.push([Math.round(x), Math.round(y)])); return { props: w.obstacles.every(o => o.beacon), n: out.length }; });
+  check('light: props have beacons and hatch edges get warning lamps (2 props + 2 span ends)', bc.props && bc.n === 4, bc);
+  await p.evaluate(() => { OF.debug.world.hearts = 99; });
+  await sleep(1200);
+  await p.screenshot({ path: OUT + '/func_light_night.png' });
+  // renderer darkness canvas is half-res and bounded
+  const dc = await p.evaluate(() => { const R = OF.Game.renderer; return { w: R._dark.width, h: R._dark.height, cw: R.canvas.width, ch: R.canvas.height }; });
+  check('light: darkness canvas is half resolution and ≤ 960×540 device px', dc.w <= 960 && dc.h <= 540 && dc.w <= Math.ceil(dc.cw / 2) + 1, dc);
+  check('light: no console errors', errs.length === 0 && await p.evaluate(() => OF.debug.stats.errors.length === 0), errs.slice(0, 3));
+  await ctx.close();
+}
+
+// ======================================================================= hearts / finish / levels
 async function sHearts() {
   const { page: p, errs, ctx } = await open({}, '?mute=1&seed=3&diff=normal');
   await startSafe(p, null, true);
-  check('hearts: Normal starts with 3 batteries', await p.evaluate(() => OF.debug.world.hearts === 3 && OF.debug.world.maxHearts === 3));
+  check('hearts: Normal starts with 3 hearts', await p.evaluate(() => OF.debug.world.hearts === 3 && OF.debug.world.maxHearts === 3));
   await p.evaluate(() => { const w = OF.debug.world; w.setTrack({ obstacles: [{ kind: 'vent', x: 1.5 }, { kind: 'sign', x: 3 }] }); w.combo = 3; window._ev = []; });
   await p.waitForFunction(() => window._ev.some(e => e.type === 'bump'), null, { timeout: 5000 }).catch(() => {});
   await sleep(1500);
   let s = await p.evaluate(() => ({ hearts: OF.debug.world.hearts, bumps: window._ev.filter(e => e.type === 'bump').length, hl: window._ev.filter(e => e.type === 'heartLost').length, br: window._ev.filter(e => e.type === 'comboBreak').length, combo: OF.debug.world.combo, hit: OF.debug.world.obstacles.map(o => o.kind + ':' + o.hit) }));
-  check('hearts: a vent on the roof → bump: one battery, the vent is "hit", combo reset; the sign on the rail is not touched', s.hearts === 2 && s.bumps === 1 && s.hl === 1 && s.br === 1 && s.combo === 0 && s.hit.join() === 'vent:true,sign:false', s);
+  check('hearts: a snowball pile on the floor → bump: one heart, the vent is "hit", combo reset; the ceiling prop is not touched', s.hearts === 2 && s.bumps === 1 && s.hl === 1 && s.br === 1 && s.combo === 0 && s.hit.join() === 'vent:true,sign:false', s);
   await grounded(p);
   await p.evaluate(() => { const w = OF.debug.world; w.hero.invuln = 0; w.setTrack({ roofs: [[-50, 1.2], [9, 5000]] }); window._ev = []; });
   await p.waitForFunction(() => window._ev.some(e => e.type === 'rescue'), null, { timeout: 8000 }).catch(() => {});
   s = await p.evaluate(() => ({ hearts: OF.debug.world.hearts, ev: window._ev.map(e => e.type).filter(t => ['fall', 'heartLost', 'rescue', 'bump'].includes(t)), hero: OF.debug.world.hero.state, inv: OF.debug.world.hero.invuln }));
-  check('hearts: a gap in the roof → fall: one battery, the drone rescues Bolt, then a safety blink', s.hearts === 1 && s.ev.join() === 'fall,heartLost,rescue' && s.hero === 'run' && s.inv > 1, s);
+  check('hearts: an open floor hatch → fall: one heart, Pip rescues Ollie, then a safety blink', s.hearts === 1 && s.ev.join() === 'fall,heartLost,rescue' && s.hero === 'run' && s.inv > 1, s);
   await p.screenshot({ path: OUT + '/func_rescued.png' });
-  // finish arch: bonus, +1 battery, next time of day
+  // stairway door: bonus, +1 heart, next time of day
   await grounded(p);
   await p.evaluate(() => { const w = OF.debug.world; w.setTrack({ finish: 2 }); w.score = 50; window._ev = []; });
   await p.waitForFunction(() => window._ev.some(e => e.type === 'levelUp'), null, { timeout: 6000 }).catch(() => {});
   await sleep(1800);
   s = await p.evaluate(() => { const w = OF.debug.world, ev = window._ev; return { ev: ev.map(e => e.type).filter(t => ['finish', 'heartGain', 'levelUp'].includes(t)), lu: ev.find(e => e.type === 'levelUp'), hearts: w.hearts, score: w.score, level: w.level, zone: w.zone, vis: OF.Game.renderer.vis.cur, wx: OF.Game.weather.zone !== undefined ? OF.Game.weather.zone : null }; });
-  check('hearts: passing the finish arch → finish, heartGain, levelUp (in order)', s.ev.join() === 'finish,heartGain,levelUp', s.ev);
-  check('hearts: finish bonus on Dawn = 100, +1 battery (1 → 2)', s.lu && s.lu.bonus === 100 && s.score === 150 && s.hearts === 2, s);
+  check('hearts: passing the stairway door → finish, heartGain, levelUp (in order)', s.ev.join() === 'finish,heartGain,levelUp', s.ev);
+  check('hearts: finish bonus on Dawn = 100, +1 heart (1 → 2)', s.lu && s.lu.bonus === 100 && s.score === 150 && s.hearts === 2, s);
   check('hearts: level 2 is Noon (zone 1) and the renderer switches to Noon', s.level === 1 && s.zone === 1 && s.lu.zone === 1 && s.vis === 1, s);
-  // at full batteries a finish gives no extra
+  // at full hearts a finish gives no extra
   await p.evaluate(() => { const w = OF.debug.world; w.hearts = 3; w.setTrack({ finish: 2 }); window._ev = []; });
   await p.waitForFunction(() => window._ev.some(e => e.type === 'levelUp'), null, { timeout: 6000 }).catch(() => {});
   s = await p.evaluate(() => ({ hearts: OF.debug.world.hearts, gain: window._ev.filter(e => e.type === 'heartGain').length, lu: window._ev.find(e => e.type === 'levelUp') }));
-  check('hearts: finish with full batteries: stays at the max (3), Noon bonus 200', s.hearts === 3 && s.gain === 0 && s.lu && s.lu.bonus === 200, s);
+  check('hearts: finish with full hearts: stays at the max (3), Noon bonus 200', s.hearts === 3 && s.gain === 0 && s.lu && s.lu.bonus === 200, s);
   // gotoLevel → every time of day, round 2 bonus
   for (const lv of [3, 0, 5]) {
     await p.evaluate(l => { window._ev = []; OF.debug.gotoLevel(l); }, lv);
@@ -436,12 +498,12 @@ async function sHearts() {
   // speed of round 2 > round 1
   const sp = await p.evaluate(() => { const w = OF.debug.world; return [w.speedTarget(w.levelBase ? w.plans[w.planIdx].startX : w.hero.x), w.loop]; });
   check('hearts: the world still runs (level 7 Sunset round 2)', await p.evaluate(() => OF.debug.world.level === 6 && OF.debug.world.zone === 2 && OF.debug.world.phase === 'run'), sp);
-  // the last battery: no rescue, game over
+  // the last heart: no rescue, game over
   await grounded(p);
   await p.evaluate(() => { const w = OF.debug.world; w.hearts = 1; w.hero.invuln = 0; w.setTrack({ roofs: [[-50, 1.2], [9, 5000]], rails: [[-50, 1.2], [9, 5000]] }); window._ev = []; });
-  check('hearts: falling with the last battery → game over (no rescue)', await waitMode(p, 'over', 8000) && await p.evaluate(() => !window._ev.some(e => e.type === 'rescue') && window._ev.some(e => e.type === 'gameOver')));
+  check('hearts: falling with the last heart → game over (no rescue)', await waitMode(p, 'over', 8000) && await p.evaluate(() => !window._ev.some(e => e.type === 'rescue') && window._ev.some(e => e.type === 'gameOver')));
   const ov = await p.evaluate(() => ({ phase: OF.debug.world.phase, hud: document.getElementById('hud').classList.contains('hidden'), games: OF.debug.stats.games, hero: OF.debug.world.hero.y, VH: OF.Game.renderer.VH }));
-  check('hearts: world over, HUD hidden, game counted, Bolt does not fly off for ever', ov.phase === 'over' && ov.hud && ov.games === 1 && ov.hero < ov.VH + 600, ov);
+  check('hearts: world over, HUD hidden, game counted, Ollie does not fly off for ever', ov.phase === 'over' && ov.hud && ov.games === 1 && ov.hero < ov.VH + 600, ov);
   check('hearts: no console errors', errs.length === 0 && await p.evaluate(() => OF.debug.stats.errors.length === 0), errs.slice(0, 3));
   await ctx.close();
 }
@@ -473,7 +535,7 @@ async function sPause() {
   await sleep(500);
   await p.keyboard.press('Escape');
   await sleep(600);
-  check('pause: paused mid-flip, then resumed → Bolt lands on the rail', !air && await p.evaluate(() => OF.debug.world.hero.grounded && OF.debug.world.hero.side === 'ceil' && OF.debug.world.stats.falls === 0));
+  check('pause: paused mid-flip, then resumed → Ollie lands on the rail', !air && await p.evaluate(() => OF.debug.world.hero.grounded && OF.debug.world.hero.side === 'ceil' && OF.debug.world.stats.falls === 0));
   await p.evaluate(() => window.dispatchEvent(new Event('blur')));
   check('pause: window blur auto-pauses', await mode(p) === 'paused');
   await p.click('#btnResume'); await waitMode(p, 'playing');
@@ -518,8 +580,8 @@ async function sOver() {
   const o = await p.evaluate(() => ({ score: document.getElementById('overScore').textContent, best: document.getElementById('overBest').textContent, nb: !document.getElementById('newBest').classList.contains('hidden'), medal: document.getElementById('medal').className, name: document.getElementById('medalName').textContent, stats: document.getElementById('overStats').textContent, ws: OF.debug.world.score, dist: Math.round(OF.debug.world.distance) }));
   check('over: score on the screen = world score (1234)', o.score === '1234' && o.ws === 1234, o);
   check('over: first game → Best 1234 and NEW!', o.best === '1234' && o.nb, o);
-  check('over: one time of day finished → bronze medal', /bronze/.test(o.medal) && /Bronze/.test(o.name), o);
-  check('over: stats line shows flips, fireflies, distance and "Reached: Noon"', o.stats.includes('Flips: ' + pre.flips) && o.stats.includes('Fireflies caught: ' + pre.caught) && /Distance: \d+ m/.test(o.stats) && o.stats.includes('Reached: Noon'), { o: o.stats, pre });
+  check('over: one floor climbed → bronze medal', /bronze/.test(o.medal) && /Bronze/.test(o.name), o);
+  check('over: stats show leaves, flips, floors, best streak, distance and "Reached: Floor 2 · Greenhouse"', o.stats.includes('Flips: ' + pre.flips) && o.stats.includes('Leaves caught: ' + pre.caught) && o.stats.includes('Best streak: ' + pre.maxCombo) && o.stats.includes('Floors climbed: 1') && /Distance: \d+ m/.test(o.stats) && o.stats.includes('Reached: Floor 2 · Greenhouse'), { o: o.stats, pre });
   // restart lock 0.7 s
   let s0 = await starts(p);
   await p.keyboard.press('Enter'); await p.keyboard.press('Space'); await p.evaluate(() => document.getElementById('btnAgain').click());
@@ -565,7 +627,7 @@ async function sSettings() {
   const r = await p.evaluate(() => ({ s: OF.Game.settings, sfx: document.getElementById('setSfx').checked, music: document.getElementById('setMusic').checked, on: document.querySelector('#setDifficulty .on') && document.querySelector('#setDifficulty .on').dataset.v, diff: OF.Game.difficulty(), aud: OF.Audio.opts || null }));
   check('settings: survive a reload (state + controls)', !r.s.sfx && !r.s.music && r.s.muted && r.s.difficulty === 'hard' && !r.sfx && !r.music && r.on === 'hard' && r.diff === 'hard', r);
   await p.evaluate(() => OF.Game.startGame()); await waitMode(p, 'playing');
-  check('settings: a new game uses the saved difficulty (Hard: 3 batteries, hard preset)', await p.evaluate(() => OF.debug.world.difficulty === 'hard' && OF.debug.world.maxHearts === 3));
+  check('settings: a new game uses the saved difficulty (Hard: 3 hearts, hard preset)', await p.evaluate(() => OF.debug.world.difficulty === 'hard' && OF.debug.world.maxHearts === 3));
   await p.evaluate(() => OF.Game.toTitle());
   // test flags never saved
   await p.evaluate(() => { localStorage.clear(); });
@@ -644,7 +706,7 @@ async function sPictures() {
     let c = document.createElement('canvas'); c.width = 400; c.height = 300; let g = c.getContext('2d');
     g.fillStyle = '#e0302a'; g.fillRect(0, 0, 400, 300); g.fillStyle = '#fff'; g.fillRect(20, 20, 60, 60);
     out.photo = await enc(c, 'image/png');
-    // a cut-out with transparency (green circle) → firefly
+    // a cut-out with transparency (green circle) → leaf
     c = document.createElement('canvas'); c.width = 200; c.height = 200; g = c.getContext('2d');
     g.fillStyle = '#20c040'; g.beginPath(); g.arc(100, 100, 80, 0, 7); g.fill();
     out.cut = await enc(c, 'image/png');
@@ -667,9 +729,9 @@ async function sPictures() {
     txt: { name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('hello, not a picture') },
     broken: { name: 'broken.png', mimeType: 'image/png', buffer: Buffer.from('this is not really a png') }
   };
-  const slotIndex = { hero: 0, firefly: 1, bg_dawn: 2, bg_noon: 3, bg_sunset: 4, bg_night: 5 };
+  const slotIndex = { hero: 0, leaf: 1, bg_dawn: 2, bg_noon: 3, bg_sunset: 4, bg_night: 5 };
   await p.click('#btnCustomize'); await waitUi(p, 'scrCustom');
-  check('pictures: 6 slots (Bolt, Firefly, Dawn, Noon, Sunset, Night)', await p.evaluate(() => [...document.querySelectorAll('#slotGrid .slot h3')].map(h => h.textContent).join()) === 'Bolt,Firefly,Dawn,Noon,Sunset,Night');
+  check('pictures: 6 slots (Ollie, Leaf, Boot Room, Greenhouse, Map Library, Lantern Deck)', await p.evaluate(() => [...document.querySelectorAll('#slotGrid .slot h3')].map(h => h.textContent).join()) === 'Ollie,Leaf,Boot Room,Greenhouse,Map Library,Lantern Deck');
   async function pick(slot, file) {
     await p.evaluate(() => { const t = document.getElementById('toast'); t.classList.add('hidden'); t.textContent = ''; });
     const [fc] = await Promise.all([p.waitForEvent('filechooser', { timeout: 5000 }), p.click(`#slotGrid .slot:nth-child(${slotIndex[slot] + 1}) [data-act=pick]`)]);
@@ -683,11 +745,11 @@ async function sPictures() {
     return { w: im.naturalWidth, h: im.naturalHeight, kb: Math.round(d.length / 1024), type: d.slice(5, d.indexOf(';')), shape: localStorage.getItem('olf:shape_' + slot) };
   }, slot);
   let toast = await pick('hero', files.photo), s = await stored('hero');
-  check('pictures: an opaque photo → Bolt, saved, made round ("circle")', /saved/i.test(toast) && s && s.shape === 'circle' && await p.evaluate(() => OF.Assets.hasCustom('hero')), { toast, s });
-  toast = await pick('firefly', files.cut); s = await stored('firefly');
-  check('pictures: a transparent cut-out → Firefly, kept whole ("fit")', /saved/i.test(toast) && s && s.shape === 'fit', { toast, s });
+  check('pictures: an opaque photo → Ollie, saved, made round ("circle")', /saved/i.test(toast) && s && s.shape === 'circle' && await p.evaluate(() => OF.Assets.hasCustom('hero')), { toast, s });
+  toast = await pick('leaf', files.cut); s = await stored('leaf');
+  check('pictures: a transparent cut-out → Leaf, kept whole ("fit")', /saved/i.test(toast) && s && s.shape === 'fit', { toast, s });
   toast = await pick('bg_dawn', files.bg); s = await stored('bg_dawn');
-  check('pictures: a picture → Dawn background (JPEG)', /saved/i.test(toast) && s && s.type === 'image/jpeg' && s.w === 1200, { toast, s });
+  check('pictures: a picture → Boot Room background (JPEG)', /saved/i.test(toast) && s && s.type === 'image/jpeg' && s.w === 1200, { toast, s });
   const tag = await p.textContent('#slotGrid .slot:nth-child(1) .tag');
   check('pictures: the card shows "Your picture"', /Your picture/.test(tag), tag);
   toast = await pick('bg_noon', files.txt); s = await stored('bg_noon');
@@ -695,51 +757,51 @@ async function sPictures() {
   toast = await pick('bg_noon', files.broken); s = await stored('bg_noon');
   check('pictures: a broken "PNG" → friendly error toast, nothing stored', /could not be opened/i.test(toast) && s === null, toast);
   toast = await pick('bg_night', files.huge); s = await stored('bg_night');
-  check('pictures: 6000×4000 photo → Night background downscaled to 1600×1067 JPEG', /saved/i.test(toast) && s && s.w === 1600 && Math.abs(s.h - 1067) <= 1 && s.type === 'image/jpeg', { toast, s });
-  toast = await pick('firefly', files.huge); s = await stored('firefly');
-  check('pictures: 6000×4000 photo → Firefly downscaled to ≤ 512 px (and made round)', /saved/i.test(toast) && s && Math.max(s.w, s.h) <= 512 && s.shape === 'circle', { toast, s });
+  check('pictures: 6000×4000 photo → Lantern Deck background downscaled to 1600×1067 JPEG', /saved/i.test(toast) && s && s.w === 1600 && Math.abs(s.h - 1067) <= 1 && s.type === 'image/jpeg', { toast, s });
+  toast = await pick('leaf', files.huge); s = await stored('leaf');
+  check('pictures: 6000×4000 photo → Leaf downscaled to ≤ 512 px (and made round)', /saved/i.test(toast) && s && Math.max(s.w, s.h) <= 512 && s.shape === 'circle', { toast, s });
   await p.click('#slotGrid .slot:nth-child(2) .shape button[data-shape=fit]');
-  check('pictures: the shape buttons switch the Firefly to "Whole picture"', await p.evaluate(() => localStorage.getItem('olf:shape_firefly') === 'fit' && document.querySelector('#slotGrid .slot:nth-child(2) .shape button.on').dataset.shape === 'fit'));
+  check('pictures: the shape buttons switch the Leaf to "Whole picture"', await p.evaluate(() => localStorage.getItem('olf:shape_leaf') === 'fit' && document.querySelector('#slotGrid .slot:nth-child(2) .shape button.on').dataset.shape === 'fit'));
   await p.screenshot({ path: OUT + '/func_pictures.png' });
   await p.click('#scrCustom .btn-back'); await waitUi(p, 'scrTitle');
   // play with the custom pictures
   await p.evaluate(() => { OF.Game.startGame(); OF.debug.setBot(true, 1); OF.debug.setSpeed(2); });
   await p.waitForFunction(() => OF.debug.world.stats.caught >= 3 && OF.debug.world.hero.grounded && OF.debug.world.hero.side === 'floor', null, { timeout: 25000 }).catch(() => {});
-  await p.evaluate(() => { OF.debug.setSpeed(1); OF.debug.setBot(false); const w = OF.debug.world; w.hearts = 99; w.setTrack({ fireflies: [{ x: 3.5, side: 'floor', color: w.hero.color }] }); });
+  await p.evaluate(() => { OF.debug.setSpeed(1); OF.debug.setBot(false); const w = OF.debug.world; w.hearts = 99; w.setTrack({ leaves: [{ x: 3.5, side: 'floor', kind: 1, still: true }] }); });
   await grounded(p);
   await sleep(300);
   const play = await p.evaluate(() => {
     const R = OF.Game.renderer, w = OF.debug.world, g = R.canvas.getContext('2d'), px = R.px;
     const at = (x, y) => { const d = g.getImageData(Math.round(x * px), Math.round(y * px), 1, 1).data; return [d[0], d[1], d[2]]; };
-    const hx = w.layout.heroX, hy = w.hero.y, u = w.layout.unit;
+    const L = w.layout, hx = L.heroX, hy = w.hero.y, u = L.unit;
     const heroPx = [[0, 0], [-0.1 * u, 0.05 * u], [0.1 * u, -0.05 * u], [0, -0.12 * u]].map(([dx, dy]) => at(hx + dx, hy + dy));
-    const f = w.fireflies.find(f => f.state === 'fly');
-    const ffPx = f ? at(f.x - w.cam.x, f.y) : null;
-    const skyPx = at(R.VW * 0.6, 12);
-    return { custom: !!R.background(0).custom, zone: R.vis.cur, caught: w.stats.caught, errors: OF.debug.stats.errors.length, heroPx, ffPx, skyPx };
+    const f = w.leaves.find(f => f.state === 'fly');
+    const leafCached = Object.keys(R._spr).some(k => k.startsWith('cleaf|')) && Object.keys(R._spr).some(k => k.startsWith('ol|custom:leaf'));
+    const skyPx = at(R.VW * 0.75, L.midY - 0.3 * u);
+    return { custom: !!R.background(0).custom, zone: R.vis.cur, caught: w.stats.caught, errors: OF.debug.stats.errors.length, heroPx, leaf: !!f, leafCached, skyPx };
   });
   await p.screenshot({ path: OUT + '/func_custom_play.png' });
   const red = c => c[0] > 150 && c[1] < 110 && c[2] < 110;
-  check('pictures: the game plays with custom Bolt / firefly / Dawn background, fireflies still caught, no errors', play.custom && play.caught >= 3 && play.errors === 0, { custom: play.custom, caught: play.caught, errors: play.errors });
-  check('pictures: Bolt is drawn with the custom photo (red pixels at his body)', play.heroPx.filter(red).length >= 3, play.heroPx);
-  check('pictures: the firefly is drawn with the custom picture (green-ish pixel at a firefly)', play.ffPx && play.ffPx[1] > play.ffPx[0] && play.ffPx[1] > 120, play.ffPx);
-  check('pictures: the Dawn sky is the custom photo (blue-ish top)', play.skyPx[2] > 150 && play.skyPx[0] < 120, play.skyPx);
+  check('pictures: the game plays with custom Ollie / leaf / Boot Room background, leaves still caught, no errors', play.custom && play.caught >= 3 && play.errors === 0, { custom: play.custom, caught: play.caught, errors: play.errors });
+  check('pictures: Ollie is drawn with the custom photo (red pixels at his body)', play.heroPx.filter(red).length >= 3, play.heroPx);
+  check('pictures: the leaf is drawn with the custom picture (custom leaf sprite with its green ring rendered)', play.leaf && play.leafCached, { leaf: play.leaf, cached: play.leafCached });
+  check('pictures: the Boot Room scene is the custom photo (blue-green behind the corridor)', play.skyPx[2] > 110 && play.skyPx[0] < 90, play.skyPx);
   await p.evaluate(() => OF.debug.gotoLevel(1)); await sleep(2000);
-  check('pictures: Noon (no custom picture) still uses the default scene', await p.evaluate(() => !OF.Game.renderer.background(1).custom));
+  check('pictures: Greenhouse (no custom picture) still uses the default scene', await p.evaluate(() => !OF.Game.renderer.background(1).custom));
   await p.evaluate(() => OF.debug.gotoLevel(3)); await sleep(2000);
-  check('pictures: Night uses the custom 6000×4000 photo without errors', await p.evaluate(() => OF.Game.renderer.background(3).custom && OF.debug.stats.errors.length === 0));
+  check('pictures: Lantern Deck uses the custom 6000×4000 photo without errors', await p.evaluate(() => OF.Game.renderer.background(3).custom && OF.debug.stats.errors.length === 0));
   await p.reload(); await instrument(p);
-  check('pictures: custom pictures survive a reload', await p.evaluate(() => ['hero', 'firefly', 'bg_dawn', 'bg_night'].every(s => OF.Assets.hasCustom(s))));
+  check('pictures: custom pictures survive a reload', await p.evaluate(() => ['hero', 'leaf', 'bg_dawn', 'bg_night'].every(s => OF.Assets.hasCustom(s))));
   await p.click('#btnCustomize'); await waitUi(p, 'scrCustom');
   await p.click('#slotGrid .slot:nth-child(1) [data-act=reset]');
-  const r1 = await p.evaluate(() => ({ hero: OF.Assets.hasCustom('hero'), k: localStorage.getItem('olf:img_hero'), shape: localStorage.getItem('olf:shape_hero'), ff: OF.Assets.hasCustom('firefly') }));
+  const r1 = await p.evaluate(() => ({ hero: OF.Assets.hasCustom('hero'), k: localStorage.getItem('olf:img_hero'), shape: localStorage.getItem('olf:shape_hero'), ff: OF.Assets.hasCustom('leaf') }));
   check('pictures: Reset on one card clears only that picture', !r1.hero && r1.k === null && r1.shape === null && r1.ff, r1);
   await p.click('#btnResetAll');
   const r2 = await p.evaluate(() => ({ any: OF.Assets.SLOTS.some(s => OF.Assets.hasCustom(s.id)), keys: Object.keys(localStorage).filter(k => /^olf:(img|shape)_/.test(k)), tags: [...document.querySelectorAll('#slotGrid .tag')].map(t => t.textContent) }));
   check('pictures: Reset all clears every picture and its stored data', !r2.any && r2.keys.length === 0 && r2.tags.every(t => t === 'Original'), r2);
   await p.click('#scrCustom .btn-back'); await waitUi(p, 'scrTitle');
   await p.evaluate(() => OF.Game.startGame()); await sleep(800);
-  check('pictures: after Reset all the default scene and Bolt are drawn again', await p.evaluate(() => !OF.Game.renderer.background(0).custom && !OF.Assets.hasCustom('hero')));
+  check('pictures: after Reset all the default scene and Ollie are drawn again', await p.evaluate(() => !OF.Game.renderer.background(0).custom && !OF.Assets.hasCustom('hero')));
   check('pictures: no console errors', errs.length === 0 && await p.evaluate(() => OF.debug.stats.errors.length === 0), errs.slice(0, 3));
   await ctx.close();
 }
@@ -768,19 +830,14 @@ async function sLayout() {
       const css = (x, y, ww, hh) => ({ l: c.left + x * k, t: c.top + y * k, r: c.left + (x + ww) * k, b: c.top + (y + hh) * k });
       const hud = document.getElementById('hud').getBoundingClientRect();
       const S = u * 0.95;
-      const boltAt = y => css(L.heroX - S / 2, y - S / 2, S, S);
-      const bolt = [boltAt(w.standY('floor') - 0.1 * u), boltAt(w.standY('ceil') + 0.1 * u)];
-      // HUD panels as drawHud lays them out
-      const K = Math.min(R._hudK, 1.25), I = R.ins, x0 = I.left + 12, top = I.top + 12, hb = R._hudBtn, VW = R.VW;
-      const hs = 22 * Math.min(K, 1.15), pw = Math.max(190 * Math.min(K, 1.1), 28 + w.maxHearts * (hs + 4));
-      const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-      const right = hb ? hb.l - 10 : VW - 110; let cx, cy, cw;
-      if (!L.portrait) { cw = clamp(right - (x0 + pw) - 24, 220, 340); cx = Math.max(x0 + pw + 12 + cw / 2, VW / 2); if (cx + cw / 2 > right) cx = right - cw / 2; cy = top; }
-      else { cw = Math.min(VW - I.left - I.right - 24, 420); cx = VW / 2; cy = top + 108; }
-      const panelsL = [['score', [x0, top, pw, 98]], ['zone', [cx - cw / 2, cy, cw, 78]]];
+      const ollieAt = y => css(L.heroX - S / 2, y - S / 2, S, S);
+      const ollie = [ollieAt(w.standY('floor') - 0.1 * u), ollieAt(w.standY('ceil') + 0.1 * u)];
+      // HUD panels exactly as drawHud lays them out (Renderer.hudLayout)
+      const H = R.hudLayout(w);
+      const panelsL = [['score', H.score], ['zone', H.zone]];
       const panels = panelsL.map(([n, a]) => [n, css(...a), a[1] + a[3]]);
       const btns = ['btnPause', 'btnMuteHud'].map(id => { const q = document.getElementById(id).getBoundingClientRect(); return { id, l: q.left, t: q.top, r: q.right, b: q.bottom, w: q.width, h: q.height }; });
-      return { vw: innerWidth, vh: innerHeight, VW: R.VW, VH: R.VH, portrait: L.portrait, unit: +u.toFixed(1), ceilY: L.ceilY, floorY: L.floorY, canvas: { l: c.left, t: c.top, r: c.right, b: c.bottom }, bolt, panels,
+      return { vw: innerWidth, vh: innerHeight, VW: R.VW, VH: R.VH, portrait: L.portrait, unit: +u.toFixed(1), ceilY: L.ceilY, floorY: L.floorY, canvas: { l: c.left, t: c.top, r: c.right, b: c.bottom }, ollie, panels,
         hud: { l: hud.left, t: hud.top, r: hud.right, b: hud.bottom, w: hud.width }, btns, px: R.px, canvasPx: R.canvas.width, docW: document.documentElement.scrollWidth, docH: document.documentElement.scrollHeight, bodyW: document.body.scrollWidth, errors: OF.debug.stats.errors.length };
     });
     const inVp = (r, slack = 1) => r && r.l >= -slack && r.t >= -slack && r.r <= geo.vw + slack && r.b <= geo.vh + slack;
@@ -789,18 +846,18 @@ async function sLayout() {
     const R0 = r => r && ({ l: Math.round(r.l), t: Math.round(r.t), r: Math.round(r.r), b: Math.round(r.b) });
     check(`layout ${tag}: canvas inside the viewport, no horizontal / vertical page scroll`, inVp(geo.canvas) && geo.docW <= geo.vw && geo.bodyW <= geo.vw && geo.docH <= geo.vh, { canvas: R0(geo.canvas), VW: geo.VW, VH: geo.VH, doc: [geo.docW, geo.docH] });
     check(`layout ${tag}: HUD buttons visible, inside the viewport${mobile ? ', ≥ 44 css px' : ''}`, geo.hud.w > 0 && inVp(geo.hud) && geo.btns.every(b => inVp(b) && (!mobile || (b.w >= 43.5 && b.h >= 43.5))), geo.btns.map(b => Math.round(b.w) + 'x' + Math.round(b.h)));
-    check(`layout ${tag}: Bolt on screen on the roof and on the rail`, geo.bolt.every(b => inside(b, geo.canvas, 2)), geo.bolt.map(R0));
-    check(`layout ${tag}: both surfaces on screen (rail and rooftops with room around them)`, geo.ceilY > 0.6 * geo.unit && geo.floorY < geo.VH - 0.6 * geo.unit, { ceilY: Math.round(geo.ceilY), floorY: Math.round(geo.floorY), VH: geo.VH });
+    check(`layout ${tag}: Ollie on screen on the floor and on the ceiling`, geo.ollie.every(b => inside(b, geo.canvas, 2)), geo.ollie.map(R0));
+    check(`layout ${tag}: both surfaces on screen (ceiling beam and floor with room around them)`, geo.ceilY > 0.6 * geo.unit && geo.floorY < geo.VH - 0.6 * geo.unit, { ceilY: Math.round(geo.ceilY), floorY: Math.round(geo.floorY), VH: geo.VH });
     const bad = geo.panels.filter(([n, r]) => !inside(r, geo.canvas) || ov(r, geo.hud)).map(([n, r]) => n + ':' + JSON.stringify(R0(r)));
     check(`layout ${tag}: HUD panels inside the canvas and clear of pause/mute`, bad.length === 0, bad.length ? bad : undefined);
     check(`layout ${tag}: HUD panels do not overlap each other`, !ov(geo.panels[0][1], geo.panels[1][1]), geo.panels.map(([n, r]) => n + ':' + JSON.stringify(R0(r))));
     const intoCorr = geo.panels.filter(([n, r, b]) => b > geo.ceilY + 1).map(([n, r, b]) => n + ' bottom ' + Math.round(b) + ' > ceilY ' + Math.round(geo.ceilY));
-    check(`layout ${tag}: HUD panels stay above the play corridor (rail underside)`, intoCorr.length === 0, intoCorr.length ? intoCorr : undefined);
+    check(`layout ${tag}: HUD panels stay above the play corridor (ceiling underside)`, intoCorr.length === 0, intoCorr.length ? intoCorr : undefined);
     check(`layout ${tag}: canvas backing store sharp for the DPR (within the pixel cap)`, geo.canvasPx >= Math.min(geo.vw * dpr, Math.sqrt((mobile ? 3.2e6 : 1920 * 1080) * geo.VW / geo.VH)) * 0.6, { px: +geo.px.toFixed(2), canvasPx: geo.canvasPx });
     for (const scr of ['scrTitle', 'scrHow', 'scrSettings', 'scrCustom', 'scrPause', 'scrOver']) {
       await p.evaluate(s => {
         if (s === 'scrPause') { OF.Game.mode = 'playing'; OF.Game.deadT = -1; OF.Game.pause(); }
-        else if (s === 'scrOver') OF.UI.showGameOver({ score: 24680, best: 24680, newBest: true, cleared: 5, caught: 412, combo: 57, flips: 388, gates: 31, distance: 1840, reached: 'Noon (round 2)' });
+        else if (s === 'scrOver') OF.UI.showGameOver({ score: 124680, best: 124680, newBest: true, cleared: 5, caught: 412, combo: 57, flips: 388, floors: 5, distance: 1840, reached: 'Floor 2 · Greenhouse (day 2)' });
         else OF.UI.show(s);
       }, scr);
       await sleep(600);
@@ -840,7 +897,7 @@ async function sRotate() {
   await p.evaluate(() => OF.debug.setSpeed(1));
   await sleep(900);
   let r = await p.evaluate(() => { const w = OF.debug.world; return { side: w.hero.side, grounded: w.hero.grounded, falls: w.stats.falls, bumps: w.stats.bumps, portrait: w.layout.portrait, VW: OF.Game.renderer.VW, lw: w.layout.width, sx: Math.round(w.hero.x - w.cam.x), hx: Math.round(w.layout.heroX) }; });
-  check('rotate: the resize happened while Bolt was in the air', mid.air && mid.portrait, mid);
+  check('rotate: the resize happened while Ollie was in the air', mid.air && mid.portrait, mid);
   check('rotate: landscape → portrait mid-flip: lands on the rail, no fall / bump, layout follows the screen', r.side === 'ceil' && r.grounded && r.falls === 0 && r.bumps === 0 && r.portrait && r.lw === r.VW && r.sx === r.hx, r);
   await p.evaluate(() => { OF.debug.setSpeed(0.2); OF.debug.flip(); });
   await sleep(200);
@@ -870,7 +927,7 @@ async function sRotate() {
 async function sLongRun() {
   const { page: p, errs, ctx } = await open({ viewport: { width: 1280, height: 720 } }, '?mute=1&seed=21&autostart=1&bot=1&skill=0.5&speed=16&autorestart=1&diff=normal');
   await waitMode(p, 'playing');
-  let overRun = 0, notOver = 0, maxP = 0, maxFx = 0, maxObj = { obstacles: 0, fireflies: 0, gates: 0, roofs: 0, rails: 0, hazards: 0 }, maxLevel = 0, simT = 0, lastT = -1, stuck = 0, lastD = -1;
+  let overRun = 0, notOver = 0, maxP = 0, maxFx = 0, maxObj = { obstacles: 0, leaves: 0, lamps: 0, roofs: 0, rails: 0, hazards: 0 }, maxLevel = 0, simT = 0, lastT = -1, stuck = 0, lastD = -1;
   const t0 = Date.now();
   while (Date.now() - t0 < LONG_RUN_S * 1000) {
     await sleep(500);
@@ -893,7 +950,7 @@ async function sLongRun() {
   check('long run: the world never stalls while playing', stuck === 0, stuck);
   check('long run: weather particles bounded (< 140)', maxP < 140, maxP);
   check('long run: renderer fx + texts bounded (≤ 64)', maxFx <= 64, maxFx);
-  check('long run: world objects culled (obstacles < 80, fireflies < 200, spans < 80, gates < 20)', maxObj.obstacles < 80 && maxObj.fireflies < 200 && maxObj.roofs < 80 && maxObj.rails < 80 && maxObj.gates < 20 && maxObj.hazards < 160, maxObj);
+  check('long run: world objects culled (obstacles < 80, leaves < 200, lamps < 120, spans < 80)', maxObj.obstacles < 80 && maxObj.leaves < 200 && maxObj.lamps < 120 && maxObj.roofs < 80 && maxObj.rails < 80 && maxObj.hazards < 160, maxObj);
   check('long run: OF.debug.stats.errors empty', stats.errors.length === 0, stats.errors.slice(0, 2));
   check('long run: no console errors', errs.length === 0, errs.slice(0, 3));
   await ctx.close();
@@ -903,7 +960,7 @@ async function sLongRun() {
   const T0 = Date.now();
   browser = await chromium.launch({ args: ['--allow-file-access-from-files'] });
   const only = process.argv[2];
-  const sections = { sStatic, sBoot, sMenus, sInput, sTouch, sMech, sRules, sHearts, sPause, sOver, sSettings, sBest, sPictures, sLayout, sRotate, sLongRun };
+  const sections = { sStatic, sBoot, sMenus, sInput, sTouch, sMech, sRules, sLight, sHearts, sPause, sOver, sSettings, sBest, sPictures, sLayout, sRotate, sLongRun };
   for (const [name, fn] of Object.entries(sections)) {
     if (only && !name.toLowerCase().includes(only.toLowerCase())) continue;
     console.log('\n== ' + name);

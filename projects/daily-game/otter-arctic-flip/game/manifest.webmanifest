@@ -1,13 +1,13 @@
 {
   "name": "Ollie's Lighthouse Flip",
-  "short_name": "Rooftop Flip",
-  "description": "Flip between the rooftops and the sky-rail with Bolt the robot pup!",
+  "short_name": "Lighthouse Flip",
+  "description": "Flip between the floor and the ceiling of a cosy lighthouse with Ollie the sea otter!",
   "start_url": "./",
   "scope": "./",
   "display": "fullscreen",
   "orientation": "any",
-  "background_color": "#0e1638",
-  "theme_color": "#0e1638",
+  "background_color": "#0f2347",
+  "theme_color": "#0f2347",
   "icons": [
     { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },

@@ -2,26 +2,27 @@
  * Sprites are rasterized once at (logical size × render scale) so drawing stays fast and crisp. */
 (function (OF) {
   'use strict';
-  const SEASONS = ['dawn', 'noon', 'sunset', 'night'];   // the four times of day (name SEASONS kept for the shared helpers)
+  const SEASONS = ['dawn', 'noon', 'sunset', 'night'];   // the four floors / times of day (name SEASONS kept for the shared helpers)
   const LAYERS = ['sky', 'far', 'mid', 'building', 'rail', 'rail_end'];
   const D = 'assets/default/';
   const files = { icon: D + 'icon.svg', drone: D + 'drone.svg', finish: D + 'finish.svg', battery: D + 'battery.svg', battery_empty: D + 'battery_empty.svg' };
-  ['run_0', 'run_1', 'run_2', 'run_3', 'air', 'bump', 'happy'].forEach(f => { files['bolt_' + f] = D + 'bolt_' + f + '.svg'; });
-  const COLORS = ['pink', 'yellow', 'cyan'];
-  COLORS.forEach(c => { files['ff_' + c + '_0'] = D + 'firefly_' + c + '_0.svg'; files['ff_' + c + '_1'] = D + 'firefly_' + c + '_1.svg'; files['gate_' + c] = D + 'gate_' + c + '.svg'; });
+  ['run_0', 'run_1', 'run_2', 'run_3', 'air', 'bump', 'happy'].forEach(f => { files['ollie_' + f] = D + 'ollie_' + f + '.svg'; });
+  [0, 1, 2].forEach(k => { files['leaf_' + k] = D + 'leaf_' + k + '.svg'; });
   ['vent_0', 'vent_1', 'sign_0', 'sign_1'].forEach(f => { files[f] = D + f + '.svg'; });
-  ['mist', 'seed', 'mote', 'leaf', 'star', 'sparkle', 'puff', 'spark', 'bit_pink', 'bit_yellow', 'bit_cyan', 'shoot']
-    .forEach(p => { files['p_' + p] = D + 'particles/' + p + '.svg'; });
+  // particles (weather ambient + bursts); aurora is 64×32, the rest 32×32
+  const PARTICLES = ['snow', 'flake', 'mote', 'sparkle', 'star', 'puff', 'bit_0', 'bit_1', 'bit_2', 'aurora', 'glow'];
+  PARTICLES.forEach(p => { files['p_' + p] = D + 'particles/' + p + '.svg'; });
   SEASONS.forEach(s => LAYERS.forEach(l => { files[s + '_' + l] = D + 'levels/' + s + '/' + l + '.svg'; }));
   const LAYER_SIZE = { sky: [960, 540], far: [960, 540], mid: [960, 540], building: [240, 400], rail: [240, 160], rail_end: [40, 160] };
 
+  // DESIGN §6: Ollie, the leaf, and one full-scene background per floor (storage keys olf:img_<id>, olf:shape_<id>)
   const SLOTS = [
-    { id: 'hero', name: 'Bolt', kind: 'char', box: [96, 96] },
-    { id: 'firefly', name: 'Firefly', kind: 'char', box: [64, 64] },
-    { id: 'bg_dawn', name: 'Dawn', kind: 'bg', season: 0 },
-    { id: 'bg_noon', name: 'Noon', kind: 'bg', season: 1 },
-    { id: 'bg_sunset', name: 'Sunset', kind: 'bg', season: 2 },
-    { id: 'bg_night', name: 'Night', kind: 'bg', season: 3 }
+    { id: 'hero', name: 'Ollie', kind: 'char', box: [96, 96] },
+    { id: 'leaf', name: 'Leaf', kind: 'char', box: [64, 64] },
+    { id: 'bg_dawn', name: 'Boot Room', kind: 'bg', season: 0 },
+    { id: 'bg_noon', name: 'Greenhouse', kind: 'bg', season: 1 },
+    { id: 'bg_sunset', name: 'Map Library', kind: 'bg', season: 2 },
+    { id: 'bg_night', name: 'Lantern Deck', kind: 'bg', season: 3 }
   ];
 
   function loadImage(src) {
@@ -103,7 +104,7 @@
   }
 
   const A = {
-    SEASONS, SLOTS, LAYERS, LAYER_SIZE, COLORS, files,
+    SEASONS, SLOTS, LAYERS, LAYER_SIZE, PARTICLES, files,
     img: {},           // key -> HTMLImageElement (defaults)
     customSrc: {},     // slot -> HTMLImageElement (as stored)
     custom: {},        // slot -> processed canvas

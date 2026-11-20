@@ -119,11 +119,11 @@
       this._dragging = false;
       OF.Audio.stopMusic();
       OF.UI.setHud(false);
-      const s = w.stats || {}, names = OF.Renderer.ZONE_INFO.map(z => z.name);
+      const s = w.stats || {};
       OF.UI.showGameOver({
         score: w.score, best: Math.max(prev, w.score), newBest: newBest && w.score > 0, cleared: w.level || 0,
-        caught: s.caught || 0, combo: w.maxCombo || 0, flips: s.flips || 0, gates: s.gates || 0, distance: Math.round(w.distance || 0),
-        reached: names[(w.zone || 0) % 4] + ((w.loop || 0) > 0 ? ' (round ' + (w.loop + 1) + ')' : '')
+        caught: s.caught || 0, combo: w.maxCombo || 0, flips: s.flips || 0, floors: w.level || 0, distance: Math.round(w.distance || 0),
+        reached: OF.Renderer.FLOOR_LABEL((w.zone || 0) % 4) + ((w.loop || 0) > 0 ? ' (day ' + (w.loop + 1) + ')' : '')
       });
       if (newBest && w.score > 0) OF.Audio.play('best');
       const st = this.stats;
@@ -236,16 +236,15 @@
           case 'flip': if (sound) A.play('flip', { grav: e.grav }); break;
           case 'land': if (sound) A.play('land', { speed: e.speed }); break;
           case 'catch': if (sound) A.play('catch', { combo: e.combo }); break;
-          case 'wrong': if (sound) A.play('wrong'); break;
           case 'combo': if (sound) A.play('combo', { mult: e.mult }); break;
           case 'comboBreak': if (sound) A.play('comboBreak'); break;
-          case 'gate': if (sound) A.play('gate'); break;
+          case 'lampsOn': if (sound) A.play('lamps'); break;
           case 'bump': if (sound) A.play('bump'); break;
-          case 'fall': if (sound) { A.play('fall'); setTimeout(() => A.play('drone'), 250); } break;
+          case 'fall': if (sound) { A.play('fall'); setTimeout(() => A.play('puffin'), 250); } break;
           case 'rescue': if (sound) A.play('rescue'); break;
           case 'heartLost': if (sound) A.play('heartLost'); break;
           case 'heartGain': if (sound) A.play('heartGain'); break;
-          case 'finish': if (sound) A.play('finish'); break;
+          case 'finish': if (sound) A.play('finish'); break;   // door creak + fanfare
           case 'levelUp': this._setLevelVisuals(e.zone, false); if (sound) setTimeout(() => A.play('level'), 350); break;
           case 'gameOver': if (sound) A.play('over'); A.stopMusic(); this.deadT = 0; break;
         }
