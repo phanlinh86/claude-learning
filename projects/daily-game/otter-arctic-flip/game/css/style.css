@@ -316,7 +316,7 @@ body.touch .tagline{font-size:max(15px, calc(var(--u)*2.2))}body.touch .best-lin
 .how-ico img:nth-last-child(3):first-child,
 .how-ico img:nth-last-child(3):first-child ~ img{width:calc(var(--u)*3)}
 /* "NEW!" badge sits inside the score box (no sideways overflow) */
-.new-best{right:0!important;top:calc(var(--u)*-1.4)!important}
+/* (replaced after QA: the badge now sits inline beside the Best label, see the end of this file) */
 /* short landscape phones: How to Play fits, OK button visible */
 @media (max-height:430px){
   #scrHow .panel{padding:8px 16px}
@@ -336,4 +336,29 @@ body.touch .tagline{font-size:max(15px, calc(var(--u)*2.2))}body.touch .best-lin
   .over-body{flex-direction:column;gap:calc(var(--u)*1.2)}
   .scores{min-width:0;width:100%}
   .stats{text-align:center}
+}
+
+/* ---------- Changes after QA (docs/reports/functional.md, visual.md; DESIGN "Changes after QA") ---------- */
+/* visual P2-2: "NEW!" sits inline next to the Best label and never covers the score digits */
+.new-best{position:static!important;align-self:center;margin-left:calc(var(--u)*.8);margin-right:auto}
+/* visual P3-5: the three leaf icons get their own room in How to Play */
+.how-ico.trio{flex:none;min-width:calc(var(--u)*9.6);gap:2px}
+.how-ico.trio img{width:calc(var(--u)*2.8)!important}
+/* functional P3-3: finger-sized volume − / + (44 px; 40 px on short landscape phones) */
+#scrSettings .vol-step{width:44px;height:44px;flex:none}
+#scrSettings .set-volume input[type=range]{width:min(22vw,180px);min-width:0}
+/* functional P2-1: Settings on small landscape phones (667×375, 568×320): two shrinkable columns, the volume row
+   spans both, and the panel scrolls if it is still too tall, so Normal / Hard / Reset / Done are always reachable */
+@media (max-height:430px){
+  #scrSettings .settings{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #scrSettings .set{min-width:0;gap:8px}
+  #scrSettings .set > span{min-width:0}
+  #scrSettings .set-volume,#scrSettings .set-diff{grid-column:1/-1}
+  #scrSettings .vol-step{width:40px;height:40px}
+  #scrSettings .seg{flex:none}
+  #scrSettings .panel{max-height:calc(100vh - 12px);max-height:calc(100dvh - 12px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+  #scrHow .how-ico.trio{min-width:calc(var(--u)*8)}
+  #scrHow .how-ico.trio img{width:calc(var(--u)*2.4)!important}
+  /* visual P3-6: the Pause panel sits below the HUD panels on a landscape phone */
+  #scrPause .panel{margin-top:calc(var(--u)*5)}
 }

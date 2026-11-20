@@ -15,7 +15,7 @@ Units are px (logical, y down) and s. CONFIG lengths are in **units** (`layout.u
 - Bumping a prop costs one heart. The prop squashes (`hit`), and then Ollie gets 1.5 s of blinking safety.
 - Falling through a hatch (leaving the corridor by 1.3 u) also costs one heart. Pip the puffin (`drone`) swoops in, carries Ollie to the next safe stretch, and then he gets 1.5 s of safety.
 - **Leaves**: every leaf counts, +10 × mult. mult = 1 + ⌊combo/5⌋, up to ×5. A bump or a fall **resets** the combo on Normal and Hard and **halves** it on Easy.
-- About every 60–80 s there is a stairway door: bonus 100 × (zone + 1) × (loop + 1), +1 heart, and the next floor (a later time of day) starts without a stop. After the Lantern Deck the next day starts at the Boot Room, 8 % faster.
+- About every 60–80 s there is a stairway door: bonus 500 × (zone + 1) × (loop + 1), +1 heart, and the next floor (a later time of day) starts without a stop. After the Lantern Deck the next day starts at the Boot Room, 8 % faster.
 - No hearts left → `gameOver`, and the scroll eases to a stop over 0.6 s.
 
 ## 2. Motion model
@@ -51,7 +51,7 @@ Units are px (logical, y down) and s. CONFIG lengths are in **units** (`layout.u
 | speedRamp / speedEase / loopSpeed / loopSpeedCap | 0.10 / 0.6 / 0.08 / 1.4 | — | +10 % across a floor; each day 8 % faster, at most +40 % |
 | invuln / overStop | 1.5 / 0.6 | s | blink after a hit; stop at game over |
 | droneIn / carry / droneOut / hang / catchDamp / rescueAhead | 0.45 / 0.9 / 0.6 / 0.72 / 18 / 1.6 | s, unit, 1/s | Pip's rescue |
-| leafPoints / multEvery / multMax / finishBonus / heartReward | 10 / 5 / 5 / 100 / 1 | — | REQUIREMENT |
+| leafPoints / multEvery / multMax / finishBonus / heartReward | 10 / 5 / 5 / 500 / 1 | — | REQUIREMENT |
 | leaf.r / len / swing / omega | 0.22 / 0.25 / 0.5–0.8 / 2.2–3.0 | unit, rad, rad/s | DESIGN §5.1 pendulum; a lazy 2.1–2.9 s period that a child can follow |
 | leaf.bob / bobW / tilt | 0.06 / 1.1 / 1.2 | unit, rad/s, × | slow bob out of step with the swing, so the motion never looks mechanical |
 | leaf.caughtT / turns / spin | 0.35 / 1.0 / 14 | s, turns, rad/s | the caught spiral |
@@ -75,19 +75,19 @@ Hatches widen by +0.1 u per loop, capped at 2.2 u. Easy is Rooftop Flip's playte
 ### Floors (`CONFIG.zones`, zone = level % 4)
 | zone | floor | speed (u/s, ×1.1 by the door) | seconds | alt | gapK | extraK | arc | line | light from → to |
 |---|---|---|---|---|---|---|---|---|---|
-| dawn | Boot Room | 3.0 | 62 | 0.55 | 0.8 | 1.25 | 0.45 | 0.8 | 0.78 → 0.95 |
+| dawn | Boot Room | 3.0 | 62 | 0.55 | 1.0 | 1.5 | 0.45 | 0.8 | 0.78 → 0.95 |
 | noon | Greenhouse | 3.3 | 68 | 0.6 | 1.0 | 1.1 | 0.5 | 0.8 | 1.00 → 0.88 |
 | sunset | Map Library | 3.6 | 72 | 0.65 | 1.1 | 1.0 | 0.55 | 0.75 | 0.72 → 0.48 |
 | night | Lantern Deck | 3.9 | 76 | 0.65 | 1.15 | 0.95 | 0.6 | 0.75 | 0.40 → 0.32 |
 
 `levelLen` (units) = seconds × the floor's mean speed, so a floor takes the same time on every difficulty. `alt` is the chance that the next hazard is on the other surface, which forces a flip.
 
-Measured density per minute of play (`node tests/sim/run.js --only density`):
+Measured density per minute of play (`node tests/sim/run.js --only density`; the dawn column was re-measured after the QA change to zone 0 `gapK` 1.0 / `extraK` 1.5):
 | | dawn | noon | sunset | night |
 |---|---|---|---|---|
-| Easy: hazards / forced flips / hatch % / leaves | 16 / 9 / 35 / 134 | 18 / 10 / 23 / 139 | 18 / 11 / 27 / 151 | 18 / 12 / 23 / 174 |
-| Normal | 30 / 16 / 36 / 196 | 33 / 18 / 43 / 228 | 31 / 23 / 51 / 206 | 34 / 21 / 49 / 225 |
-| Hard | 38 / 23 / 42 / 222 | 41 / 25 / 39 / 258 | 43 / 27 / 49 / 250 | 45 / 28 / 56 / 289 |
+| Easy: hazards / forced flips / hatch % / leaves | 15 / 8 / 31 / 131 | 18 / 10 / 23 / 139 | 18 / 11 / 27 / 151 | 18 / 12 / 23 / 174 |
+| Normal | 26 / 15 / 63 / 188 | 33 / 18 / 43 / 228 | 31 / 23 / 51 / 206 | 34 / 21 / 49 / 225 |
+| Hard | 36 / 22 / 51 / 214 | 41 / 25 / 39 / 258 | 43 / 27 / 49 / 250 | 45 / 28 / 56 / 289 |
 
 There are 38–84 wall lamps per floor, one every 4.25 u on average.
 
@@ -124,7 +124,7 @@ Measured in the unit tests: skill 1 takes **0 hits in 2 × 10 min** on every dif
 - Every prop has `beacon: true`. Hatch beacons sit on the span ends (`roofs[i].x1` / `x0`, `rails[i]…`).
 - **Visibility rule.** `seeAheadUnits()` = `(reaction·S + S·flightTime)/unit + 0.8`, where S is the floor's top speed (and never below the current speed, which a test checks over a whole floor). `beamUnits()` = `min(max(seeAhead, 3.2), screenReachUnits())`, where `screenReachUnits()` = `(width − heroX)/unit`.
   - Landscape (960×540, 1280×540, 960×720), Normal and Hard: seeAhead is 6.1–6.5 u and fits on screen (reach 7.1 u, or 9.5 u at 1280 wide).
-  - **Easy** (reaction 1.8 s) on sunset/night and on later days needs 7.5–11 u. **Every portrait layout** (reach 4.7 u) needs more than the screen shows, even in daylight. In those cases the beam is **clamped to the screen edge**: the whole visible run ahead is lit, so the darkness never hides anything that daylight would show, and beacons glow beyond the beam on both surfaces. The test lists the clamped cases (84 of 144 layout × difficulty × floor combinations).
+  - **Easy** (reaction 1.8 s) on sunset/night and on later days needs 7.5–11 u. **Every portrait layout** (reach 5.9 u since the QA fix: unit = min(w/7, h/8), heroX = 0.16·w; it was 4.7 u) still needs a little more than the screen shows. In those cases the beam is **clamped to the screen edge**: the whole visible run ahead is lit, so the darkness never hides anything that daylight would show, and beacons glow beyond the beam on both surfaces. On top of that the renderer draws a pulsing amber "›" **edge warning** at the right edge, on the floor or ceiling side, for every hazard that is within seeAhead but not yet on screen (all layouts). The test lists the clamped cases (66 of 144 layout × difficulty × floor combinations).
 - Headlamp: `hero.lamp {x, y, prevX, prevY}` is the lens in world space: `x + 0.208u` and `y − 0.144u·cos(π·flipT)`. That puts the lens ahead and above on the floor, ahead and below on the ceiling, and moves it smoothly during the turn-over. It matches render.js's sprite anchor (feet line on the surface). If the renderer adds the tilt or the squash, rotate the offset the same way. Aim the beam along +x from `lamp`.
 
 ## 7. Weather (`OF.Weather`)

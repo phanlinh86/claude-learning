@@ -16,6 +16,9 @@
     autoRestart: params.get('autorestart') === '1',
     seed: params.has('seed') ? num('seed', 1) : null,
     urlDiff: DIFFS.includes(params.get('diff')) ? params.get('diff') : null,   // test flag, never saved
+    // test-URL runs (bot / speed / level / seed) never write the child's best score (DESIGN §5.4)
+    // (?savebest=1 opts back in: only the e2e tests of the best-score code use it)
+    testRun: (params.get('bot') === '1' || params.has('speed') || params.has('level') || params.has('seed')) && params.get('savebest') !== '1',
     world: null, weather: null, bot: null, renderer: null,
     settings: { sfx: true, music: true, muted: false, difficulty: 'easy' },   // a family game: first run on Easy
     fullscreen: false, overAt: 0, deadT: -1,
@@ -73,8 +76,11 @@
       OF.UI.show('scrTitle');
     },
 
+    /* the Score Card modal (added by extras.js) is open */
+    scoreCardOpen() { const m = document.getElementById('scScreen'); return !!(m && !m.classList.contains('hidden')); },
     startGame() {
       OF.Audio.unlock();
+      { const m = document.getElementById('scScreen'); if (m) m.classList.add('hidden'); }   // never leave the Score Card over a new run
       { const t = document.getElementById('toast'); if (t) t.classList.add('hidden'); }
       this.runDifficulty = this.difficulty();
       const lv = params.has('level') ? Math.max(0, num('level', 0) | 0) : 0;
@@ -109,12 +115,12 @@
       this.canvasFocus();
     },
     canvasFocus() { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); },
-    canRestart() { return performance.now() - this.overAt > 700; },
+    canRestart() { return performance.now() - this.overAt > 700 && !this.scoreCardOpen(); },   // no restart behind the Score Card
 
     gameOver() {
       const w = this.world, key = 'best_' + (this.runDifficulty || this.difficulty());
       const prev = parseInt(OF.Storage.get(key, '0'), 10) || 0, newBest = w.score > prev;
-      if (newBest) OF.Storage.set(key, String(w.score));
+      if (newBest && !this.testRun) OF.Storage.set(key, String(w.score));
       this.mode = 'over'; this.overAt = performance.now();
       this._dragging = false;
       OF.Audio.stopMusic();
@@ -182,7 +188,7 @@
         if (this.mode === 'playing') {
           if (FLIP_KEYS.includes(e.code)) { e.preventDefault(); if (!e.repeat) this.flip(); return; }
         }
-        if (this.mode === 'over' && (e.code === 'Enter' || e.code === 'Space')) { const f = document.activeElement; if (f && f.tagName === 'BUTTON' && f.id !== 'btnAgain') return; e.preventDefault(); if (!e.repeat && this.canRestart()) this.startGame(); return; }
+        if (this.mode === 'over' && (e.code === 'Enter' || e.code === 'Space')) { if (this.scoreCardOpen()) return; const f = document.activeElement; if (f && f.tagName === 'BUTTON' && f.id !== 'btnAgain') return; e.preventDefault(); if (!e.repeat && this.canRestart()) this.startGame(); return; }
         if (this.mode === 'title' && ui === 'scrTitle' && e.code === 'Space') {
           const f = document.activeElement;
           if (f && f.tagName === 'BUTTON' && f.id !== 'btnPlay') return;

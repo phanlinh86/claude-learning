@@ -476,13 +476,13 @@ async function sHearts() {
   await sleep(1800);
   s = await p.evaluate(() => { const w = OF.debug.world, ev = window._ev; return { ev: ev.map(e => e.type).filter(t => ['finish', 'heartGain', 'levelUp'].includes(t)), lu: ev.find(e => e.type === 'levelUp'), hearts: w.hearts, score: w.score, level: w.level, zone: w.zone, vis: OF.Game.renderer.vis.cur, wx: OF.Game.weather.zone !== undefined ? OF.Game.weather.zone : null }; });
   check('hearts: passing the stairway door → finish, heartGain, levelUp (in order)', s.ev.join() === 'finish,heartGain,levelUp', s.ev);
-  check('hearts: finish bonus on Dawn = 100, +1 heart (1 → 2)', s.lu && s.lu.bonus === 100 && s.score === 150 && s.hearts === 2, s);
+  { const FB = await p.evaluate(() => OF.World.CONFIG.finishBonus); check('hearts: finish bonus on Dawn = finishBonus (' + FB + '), +1 heart (1 → 2)', s.lu && s.lu.bonus === FB && s.score === 50 + FB && s.hearts === 2, s); }
   check('hearts: level 2 is Noon (zone 1) and the renderer switches to Noon', s.level === 1 && s.zone === 1 && s.lu.zone === 1 && s.vis === 1, s);
   // at full hearts a finish gives no extra
   await p.evaluate(() => { const w = OF.debug.world; w.hearts = 3; w.setTrack({ finish: 2 }); window._ev = []; });
   await p.waitForFunction(() => window._ev.some(e => e.type === 'levelUp'), null, { timeout: 6000 }).catch(() => {});
   s = await p.evaluate(() => ({ hearts: OF.debug.world.hearts, gain: window._ev.filter(e => e.type === 'heartGain').length, lu: window._ev.find(e => e.type === 'levelUp') }));
-  check('hearts: finish with full hearts: stays at the max (3), Noon bonus 200', s.hearts === 3 && s.gain === 0 && s.lu && s.lu.bonus === 200, s);
+  { const FB = await p.evaluate(() => OF.World.CONFIG.finishBonus); check('hearts: finish with full hearts: stays at the max (3), Noon bonus 2 × finishBonus', s.hearts === 3 && s.gain === 0 && s.lu && s.lu.bonus === 2 * FB, s); }
   // gotoLevel → every time of day, round 2 bonus
   for (const lv of [3, 0, 5]) {
     await p.evaluate(l => { window._ev = []; OF.debug.gotoLevel(l); }, lv);
@@ -494,7 +494,7 @@ async function sHearts() {
   await p.evaluate(() => { const w = OF.debug.world; w.setTrack({ finish: 2 }); window._ev = []; });
   await p.waitForFunction(() => window._ev.some(e => e.type === 'levelUp'), null, { timeout: 6000 }).catch(() => {});
   const b2 = await p.evaluate(() => (window._ev.find(e => e.type === 'levelUp') || {}).bonus);
-  check('hearts: finishing level 6 (Noon, round 2) gives 100×2×2 = 400', b2 === 400, b2);
+  { const FB = await p.evaluate(() => OF.World.CONFIG.finishBonus); check('hearts: finishing level 6 (Noon, round 2) gives finishBonus×2×2 = ' + 4 * FB, b2 === 4 * FB, b2); }
   // speed of round 2 > round 1
   const sp = await p.evaluate(() => { const w = OF.debug.world; return [w.speedTarget(w.levelBase ? w.plans[w.planIdx].startX : w.hero.x), w.loop]; });
   check('hearts: the world still runs (level 7 Sunset round 2)', await p.evaluate(() => OF.debug.world.level === 6 && OF.debug.world.zone === 2 && OF.debug.world.phase === 'run'), sp);
@@ -567,11 +567,11 @@ async function sPause() {
 
 // ======================================================================= game over screen + restart lock
 async function sOver() {
-  const { page: p, errs, ctx } = await open({}, '?mute=1&seed=4&diff=normal');
+  const { page: p, errs, ctx } = await open({}, '?mute=1&savebest=1&seed=4&diff=normal');
   await p.evaluate(() => { localStorage.clear(); OF.Storage.cache = {}; });
   await startSafe(p, null, true);
   // finish Dawn (bronze), then a few flips, then die with a known score
-  await p.evaluate(() => { const w = OF.debug.world; w.setTrack({ finish: 1.5 }); w.score = 1234 - 100; });
+  await p.evaluate(() => { const w = OF.debug.world; w.setTrack({ finish: 1.5 }); w.score = 1234 - OF.World.CONFIG.finishBonus; });
   await p.waitForFunction(() => OF.debug.world.level === 1, null, { timeout: 6000 }).catch(() => {});
   await grounded(p);
   await p.evaluate(() => OF.debug.flip()); await grounded(p); await p.evaluate(() => OF.debug.flip()); await grounded(p);
@@ -611,7 +611,7 @@ async function sOver() {
 // ======================================================================= settings
 async function sSettings() {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 } });
-  let { page: p, errs } = await open(null, '?seed=2', ctx);
+  let { page: p, errs } = await open(null, '?savebest=1&seed=2', ctx);
   const ls = () => p.evaluate(() => JSON.parse(localStorage.getItem('olf:settings') || 'null'));
   check('settings: first run defaults (sfx on, music on, Easy, not muted)', await p.evaluate(() => { const s = OF.Game.settings; return s.sfx && s.music && !s.muted && s.difficulty === 'easy'; }));
   await p.click('#btnSettings'); await waitUi(p, 'scrSettings');
@@ -631,7 +631,7 @@ async function sSettings() {
   await p.evaluate(() => OF.Game.toTitle());
   // test flags never saved
   await p.evaluate(() => { localStorage.clear(); });
-  await p.goto(GAME + '?mute=1&diff=normal&seed=2'); await instrument(p);
+  await p.goto(GAME + '?mute=1&diff=normal&savebest=1&seed=2'); await instrument(p);
   check('settings: ?mute=1 mutes audio without touching saved settings', await p.evaluate(() => OF.Game.urlMute && !OF.Game.settings.muted));
   check('settings: ?diff=normal is used for play', await p.evaluate(() => OF.Game.difficulty() === 'normal'));
   await p.click('#btnSettings'); await waitUi(p, 'scrSettings');
@@ -645,7 +645,7 @@ async function sSettings() {
   await p.keyboard.press('KeyM');   // clears the URL mute only (sound on), nothing saved as muted
   s = await ls();
   check('settings: M under ?mute=1 unmutes for this session without saving "muted"', await p.evaluate(() => !OF.Game.urlMute) && s.muted === false, s);
-  await p.goto(GAME + '?seed=2'); await instrument(p);
+  await p.goto(GAME + '?savebest=1&seed=2'); await instrument(p);
   check('settings: after leaving the test URL the saved difficulty is still Easy, not muted', await p.evaluate(() => OF.Game.difficulty() === 'easy' && !OF.Game.settings.muted));
   // Reset best: two taps
   await p.evaluate(() => { OF.Storage.set('best_easy', '77'); OF.Storage.set('best_hard', '99'); });
@@ -661,7 +661,7 @@ async function sSettings() {
 // ======================================================================= best score per difficulty
 async function sBest() {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 } });
-  let { page: p, errs } = await open(null, '?mute=1&seed=4', ctx);
+  let { page: p, errs } = await open(null, '?mute=1&savebest=1&seed=4', ctx);
   await p.evaluate(() => { localStorage.clear(); OF.Storage.cache = {}; });
   for (const [d, sc] of [['easy', 120], ['normal', 340], ['hard', 560]]) {
     await p.evaluate(d => OF.Game.setSetting('difficulty', d), d);
@@ -685,7 +685,7 @@ async function sBest() {
   check('best: a run started on Easy saves to best_easy even if Settings changed mid-run', await p.evaluate(() => localStorage.getItem('olf:best_easy') === '200' && localStorage.getItem('olf:best_hard') === '560'));
   check('best: the in-game HUD "Best" belongs to the run\'s difficulty', hudBest === 120, { hudBest });
   // ?diff=hard plays hard and saves to best_hard
-  await p.goto(GAME + '?mute=1&seed=4&diff=hard'); await instrument(p);
+  await p.goto(GAME + '?mute=1&savebest=1&seed=4&diff=hard'); await instrument(p);
   const savedD = await p.evaluate(() => JSON.parse(localStorage.getItem('olf:settings')).difficulty);
   await p.evaluate(() => OF.Game.setSetting('difficulty', 'normal'));   // saved: normal, URL: hard
   await startSafe(p, null, true); await killNow(p, 900);
@@ -697,7 +697,7 @@ async function sBest() {
 
 // ======================================================================= pictures
 async function sPictures() {
-  const { page: p, errs, ctx } = await open({ viewport: { width: 1280, height: 720 } }, '?mute=1&seed=4&diff=easy');
+  const { page: p, errs, ctx } = await open({ viewport: { width: 1280, height: 720 } }, '?mute=1&savebest=1&seed=4&diff=easy');
   await p.evaluate(() => { localStorage.clear(); });
   const mk = await p.evaluate(async () => {
     const out = {};

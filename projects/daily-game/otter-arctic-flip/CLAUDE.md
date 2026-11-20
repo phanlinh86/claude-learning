@@ -6,6 +6,10 @@ A family-friendly gravity-flip runner inside a cosy arctic lighthouse: Ollie the
 ## Status
 v1.0 integrated on 2026-11-20 (scaffolded from `../robot-rooftop-flip/`; colour matching removed, visibility twist added).
 - Tests: unit 27/27, functional 352/352, smoke clean, `shared/daily-mobile/test_extras.js` passed.
+- QA round (2026-11-20, `docs/reports/`): functional found 1 P1 / 2 P2 / 4 P3 (`tests/e2e/extra_qa.js`, 10 fails), visual 1 P1 / 3 P2 / 10 P3, playtest proposed a Boot Room + door-bonus change.
+- Fixes applied (details in `docs/DESIGN.md` §10 "Changes after QA"): playtest balance (Boot Room extraK 1.5 / gapK 1.0, finishBonus 500); wider portrait view (unit w/7, heroX 0.16·w) + amber "›" edge warning for hazards within seeAhead but off screen; Score Card can't be restarted behind / is hidden on start, share link = Pages URL; Settings fits 667×375 and 568×320, 44 px volume buttons; test-URL runs don't save bests (`?savebest=1` opt-in for e2e); slim landscape floor banner; inline "NEW!"; Boot Room boots hung on pegs (art regenerated); blinking white beacons; no paper-thin flip; bump hop + recoil; popups step apart; HUD fades during rescue; How to Play leaf icons; Pause below the HUD; `docs/art` compressed (7.5 MB → 1.2 MB).
+- Tests after the fixes: unit 27/27, smoke clean, functional 352/352, extra_qa 61/61 (was 45/55; new checks for ?seed/?level best saving and the edge warning), `test_extras.js` passed, exe builds (PE32+).
+- Open items: Score Card loopback/keyboard fixes in `shared/daily-mobile/extras.js` (shared, not edited here; this game guards in main.js); custom pictures should move to IndexedDB (functional P3-4); a failed best-score save is silent; music keeps playing on Pause; visual P3-3 (tall portrait ceiling-hatch shaft), P3-9 (Change Pictures grid gap at 960×540), P3-10 (noon leaf outline for deuteranopia) skipped; a gentler "Little" preset for 3–4-year-olds is out of scope.
 - Not yet verified: nobody has listened to the music or played on a real iPhone/iPad (touch emulated in Chromium); the exe hasn't been run on Windows.
 
 ## Stack

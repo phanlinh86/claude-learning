@@ -293,7 +293,7 @@
       const px = this.px, dk = clamp(A / 0.6, 0, 1);
       g.setTransform(px, 0, 0, px, 0, 0);
       g.globalCompositeOperation = 'lighter';
-      const warm = this._radial('warm', '255,206,128', 0.3), amber = this._radial('amber', '255,160,60', 0.3);
+      const warm = this._radial('warm', '255,206,128', 0.3), amber = this._radial('beaconW', '236,244,255', 0.3);
       const glow = (im, x, y, r, al) => { if (x + r < 0 || x - r > VW || al <= 0.005) return; g.globalAlpha = al; g.drawImage(im, x - r, y - r, 2 * r, 2 * r); };
       {
         const wc = this._cone('255,236,170'), sc = len / 256;
@@ -303,7 +303,7 @@
       }
       if (this.lampK > 0.01) {
         for (const l of w.lamps) { const p = this._lampXY(l, L); glow(warm, sx(p.x), p.y, 0.95 * u, 0.42 * this.lampK * dk); }
-        const pulse = 0.75 + 0.25 * Math.sin(this.time * 4);
+        const pulse = this._blink();
         this._forBeacons(w, camX, (x, y) => glow(amber, x, y, 0.32 * u, 0.6 * this.lampK * dk * pulse));
       }
       for (const fx of this._doorXs(w)) glow(warm, sx(fx), L.ceilY + 60 / 300 * L.corridorH, 0.9 * u, 0.5 * dk);
@@ -327,6 +327,8 @@
       return out;
     }
     /* every visible warning beacon (screen x, y): props + the span ends at each open hatch */
+    /* beacons blink ≈2 Hz (soft-edged on/off), so they read as a signal and not as a steady glowing leaf */
+    _blink() { return 0.45 + 0.55 * clamp(0.5 + Math.sin(this.time * 12.6) * 3, 0, 1); }
     _forBeacons(w, camX, fn) {
       const L = w.layout, u = L.unit, VW = this.VW;
       for (const o of w.obstacles) {
@@ -414,7 +416,13 @@
     }
     pop(txt, x, y, col, size, vy) {
       if (this._quiet()) return;
-      for (const t of this.texts) if (!t.big && t.t < 0.35 && Math.abs(t.x - x) < size * 3 && Math.abs(t.y - y) < size) x = t.x + size * 3;
+      // a fresh "+N" next to another one steps right AND away from Ollie's surface, so they never stack
+      const dy = this.world && this.world.hero && this.world.hero.grav < 0 ? 1 : -1;
+      for (let k = 0; k < 4; k++) {
+        let hit = false;
+        for (const t of this.texts) if (!t.big && t.t < 0.5 && Math.abs(t.x - x) < size * 2.6 && Math.abs(t.y - y) < size * 0.95) { x = t.x + size * 1.6; y = t.y + dy * size * 1.2; hit = true; }
+        if (!hit) break;
+      }
       this.texts.push({ txt, x, y, col, size, t: 0, life: 0.8, vy: vy == null ? -60 : vy, vx: 0, align: 'left' }); if (this.texts.length > 24) this.texts.shift();
     }
     say(txt, x, y, col, size, key) {
@@ -489,7 +497,7 @@
       this.drawDarkness(g, w, camX);
       g.setTransform(px, 0, 0, px, 0, 0);
       this.drawTexts(g);
-      if (mode !== 'title') this.drawHud(g, w, mode);
+      if (mode !== 'title') { this.drawEdgeWarn(g, w, camX, mode); this.drawHud(g, w, mode); }
       else {
         const dg = g.createRadialGradient(this.VW / 2, this.VH / 2, 0, this.VW / 2, this.VH / 2, Math.max(this.VW, this.VH) * 0.6);
         dg.addColorStop(0, 'rgba(10,12,40,.50)'); dg.addColorStop(1, 'rgba(10,12,40,.16)');
@@ -562,7 +570,7 @@
       // ---- hatch warning beacons on the span ends (only while the lamps are on)
       if (this.lampK > 0.01 && alpha > 0.5) {
         const bs = this._beaconSpr(u), d = 0.16 * u;
-        g.globalAlpha = this.lampK;
+        g.globalAlpha = this.lampK * this._blink();
         this._forBeacons({ layout: L, obstacles: [], roofs: w.roofs, rails: w.rails }, camX, (x, y) => g.drawImage(bs, x + camX - d, y - d, 2 * d, 2 * d));
       }
       g.globalAlpha = 1;
@@ -579,15 +587,17 @@
       }
       return gr;
     }
-    /* a little amber warning lamp */
+    /* a little warning lamp: a white-hot lens in a dark round bezel with a 4-point glint (no leaf shape or colour) */
     _beaconSpr(u) {
       const s = 0.32 * u;
-      return this._stamp('beacon|' + Math.round(s), s, s, (g, w) => {
+      return this._stamp('beacon2|' + Math.round(s), s, s, (g, w) => {
         const c = w / 2;
-        const gr = g.createRadialGradient(c * 0.85, c * 0.8, 0, c, c, c * 0.62);
-        gr.addColorStop(0, '#fff6c8'); gr.addColorStop(0.5, '#ffb43c'); gr.addColorStop(1, '#e0761e');
-        g.fillStyle = gr; g.beginPath(); g.arc(c, c, c * 0.6, 0, TAU); g.fill();
-        g.lineWidth = Math.max(1, w * 0.08); g.strokeStyle = '#6a3a14'; g.stroke();
+        g.fillStyle = '#2e2c40'; g.beginPath(); g.arc(c, c, c * 0.66, 0, TAU); g.fill();
+        const gr = g.createRadialGradient(c * 0.9, c * 0.85, 0, c, c, c * 0.5);
+        gr.addColorStop(0, '#ffffff'); gr.addColorStop(0.55, '#f2f6ff'); gr.addColorStop(1, '#ffd98a');
+        g.fillStyle = gr; g.beginPath(); g.arc(c, c, c * 0.48, 0, TAU); g.fill();
+        g.strokeStyle = 'rgba(255,255,255,.9)'; g.lineWidth = Math.max(1, w * 0.06); g.lineCap = 'round';
+        g.beginPath(); g.moveTo(c, c * 0.18); g.lineTo(c, c * 1.82); g.moveTo(c * 0.18, c); g.lineTo(c * 1.82, c); g.stroke();
       });
     }
 
@@ -637,7 +647,7 @@
 
     drawObstacles(g, w, camX) {
       const L = w.layout, u = L.unit, bs = this._beaconSpr(u), d = 0.16 * u;
-      const pulse = 0.8 + 0.2 * Math.sin(this.time * 4);
+      const pulse = this._blink();
       for (const o of w.obstacles) {
         if (o.x + o.w < camX || o.x - o.w > camX + this.VW) continue;
         const key = o.kind + '_' + (o.variant || 0), im = this.spr(key, o.w, o.h);
@@ -757,15 +767,17 @@
         g.beginPath(); g.ellipse(x, ry, 0.36 * u, 0.06 * u, 0, 0, TAU); g.fill();
       }
       g.globalAlpha = blink ? 0.55 : 1;
-      // turn-over: vertical scale through ±0.42 (sign flips in one frame) plus a tilt: the nose leads the way
+      // turn-over: vertical scale through ±0.62 (sign flips in one frame) plus a tilt: reads as a roll, not a squash
       let sy = Math.cos(Math.PI * ft);
-      if (Math.abs(sy) < 0.42) sy = ft < 0.5 ? 0.42 : -0.42;
+      if (Math.abs(sy) < 0.62) sy = ft < 0.5 ? 0.62 : -0.62;
       const going = h.grav < 0 ? -1 : 1;
-      const tilt = Math.sin(Math.PI * ft) * 0.45 * going + (h.knock || 0) * Math.sin(this.time * 30) * 0.12;
+      const tilt = Math.sin(Math.PI * ft) * 0.6 * going + (h.knock || 0) * Math.sin(this.time * 30) * 0.12;
       const sq = h.squash || 0, foot = OLLIE_STAND * u;
-      const hop = h.bumpT != null && h.bumpT < 0.45 ? Math.sin(h.bumpT / 0.45 * Math.PI) * 0.22 * u : 0;
+      // bump: a higher hop plus a short recoil, so the boing reads as bouncing off the pile (not sinking into it)
+      const bk = h.bumpT != null && h.bumpT < 0.45 ? Math.sin(h.bumpT / 0.45 * Math.PI) : 0;
+      const hop = bk * 0.4 * u, recoil = bk * 0.15 * u;
       g.save();
-      g.translate(x, y - hop * (h.grav < 0 ? -1 : 1));
+      g.translate(x - recoil, y - hop * (h.grav < 0 ? -1 : 1));
       g.rotate(tilt);
       g.scale(1, sy);
       // landing squash pivots on the feet line, so the paws stay on the surface
@@ -881,6 +893,35 @@
       g.globalAlpha = 1;
     }
 
+    /* Edge warning: a hazard Ollie should already know about (within seeAhead) but still beyond the right edge of
+     * the screen gets a pulsing amber "›" at the right edge on its side (floor / ceiling). Above the darkness. */
+    edgeWarnings(w, camX) {
+      const out = { floor: null, ceil: null };
+      if (!w || !w.seeAheadUnits || w.phase !== 'run') return out;
+      const L = w.layout, u = L.unit, edge = camX + this.VW - 0.2 * u, lim = w.hero.x + w.seeAheadUnits() * u;
+      const near = (side, x0) => { if (x0 > edge && x0 <= lim && (out[side] == null || x0 < out[side])) out[side] = x0; };
+      for (const o of w.obstacles) near(o.kind === 'vent' ? 'floor' : 'ceil', o.x - o.w / 2);
+      const gaps = (spans, side) => { for (let i = 0; i + 1 < spans.length; i++) if (spans[i + 1].x0 - spans[i].x1 >= 1) near(side, spans[i].x1); };
+      gaps(w.roofs, 'floor'); gaps(w.rails, 'ceil');
+      return out;
+    }
+    drawEdgeWarn(g, w, camX, mode) {
+      if (mode !== 'playing') { this.edgeWarn = null; return; }
+      const E = this.edgeWarnings(w, camX); this.edgeWarn = E;
+      const L = w.layout, u = L.unit, x = this.VW - this.ins.right - 0.32 * u, s = 0.3 * u;
+      g.save(); g.lineJoin = 'round'; g.lineCap = 'round';
+      for (const side of ['floor', 'ceil']) {
+        if (E[side] == null) continue;
+        const y = side === 'floor' ? L.floorY - 0.32 * u : L.ceilY + 0.32 * u;
+        const k = clamp(1 - (E[side] - (camX + this.VW)) / (2 * u), 0.4, 1);   // brighter as it comes closer
+        g.globalAlpha = (0.6 + 0.4 * Math.sin(this.time * 8)) * k;
+        g.beginPath(); g.moveTo(x - s * 0.45, y - s * 0.6); g.lineTo(x + s * 0.3, y); g.lineTo(x - s * 0.45, y + s * 0.6);
+        g.lineWidth = s * 0.55; g.strokeStyle = '#6a3a14'; g.stroke();
+        g.lineWidth = s * 0.3; g.strokeStyle = '#ffb43c'; g.stroke();
+      }
+      g.restore(); g.globalAlpha = 1;
+    }
+
     // ---------------- HUD ----------------
     _rr(g, x, y, w, h, r) {
       g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r);
@@ -899,7 +940,8 @@
     _fadeFor(w, x, y, wd, ht) {
       const h = w.hero, L = w.layout, S = L.unit * OLLIE_K;
       const l = L.heroX - S / 2, r = L.heroX + S / 2, t = h.y - S * 0.6, b = h.y + S * 0.6;
-      return (r > x && l < x + wd && b > y && t < y + ht) ? 0.3 : 1;
+      if (!(r > x && l < x + wd && b > y && t < y + ht)) return 1;
+      return h.state === 'rescue' ? 0.15 : 0.3;   // Ollie dangling with Pip under the HUD: almost see-through
     }
     /* HUD layout (also read by the tests): score panel left, floor panel centre-top (landscape) or second row (portrait). */
     hudLayout(w) {
@@ -974,17 +1016,21 @@
     drawBanner(g) {
       const b = this.banner, z = b.s % 4, info = ZONE_INFO[z], t = b.t;
       const a = t < 0.3 ? t / 0.3 : t > 2.2 ? Math.max(0, (2.6 - t) / 0.4) : 1;
-      const h = 76, cx = this.VW / 2, y = this._lowY() - (1 - a) * 16;
+      // landscape: a slim banner at the very bottom, so hatches just ahead of Ollie stay visible under it
+      const port = this.world && this.world.layout.portrait;
+      const h = port ? 76 : 52, cx = this.VW / 2;
+      const y = (port ? this._lowY() : this.VH - this.ins.bottom - h / 2 - 6) - (1 - a) * 16;
       const w = Math.min(this.VW - 40, 440);
-      g.globalAlpha = a * 0.88;
-      this._panel(g, cx - w / 2, y - h / 2, w, h, 22);
+      g.globalAlpha = a * (port ? 0.88 : 0.78);
+      this._panel(g, cx - w / 2, y - h / 2, w, h, port ? 22 : 16);
       g.globalAlpha = a;
       let title = FLOOR_LABEL(z);
-      g.font = '900 26px ' + FONT;
-      const fs = Math.min(26, 26 * (w - 30) / Math.max(1, g.measureText(title).width));
-      this._text(g, title, cx, y - 14, fs, info.color, 'center');
+      const fmax = port ? 26 : 20;
+      g.font = '900 ' + fmax + 'px ' + FONT;
+      const fs = Math.min(fmax, fmax * (w - 30) / Math.max(1, g.measureText(title).width));
+      this._text(g, title, cx, y - (port ? 14 : 10), fs, info.color, 'center');
       const sub = b.loop ? 'Day ' + (b.loop + 1) + ' · ' + info.time + ' — up the stairs!' : info.sub;
-      this._text(g, sub, cx, y + 18, 16, '#fff', 'center', '800');
+      this._text(g, sub, cx, y + (port ? 18 : 13), port ? 16 : 13, '#fff', 'center', '800');
       g.globalAlpha = 1;
     }
 

@@ -26,7 +26,7 @@ Ollie the sea otter is climbing the Snowcap Lighthouse to light the great lamp b
 - Esc or P pauses, M mutes, F11 toggles full screen.
 
 ## Score and lose
-- Leaf: +10 × multiplier (×1 … ×5; +1 every 5 in a row). Each floor finished: bonus 100 × floor × round.
+- Leaf: +10 × multiplier (×1 … ×5; +1 every 5 in a row). Each floor finished: bonus 500 × floor × round.
 - 3 hearts (Easy 5). Bumping a snowball pile or a hanging prop, or falling through a hatch (Pip the puffin flies in and carries Ollie back), costs one heart, breaks the combo (Normal/Hard) and gives a short blink of safety. Each new floor gives one heart back.
 - No hearts → game over. Best score saved per difficulty.
 

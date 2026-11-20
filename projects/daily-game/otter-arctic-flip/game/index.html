@@ -69,7 +69,7 @@
         <div class="medal-box"><div id="medal" class="medal none"></div><div id="medalName" class="medal-name"></div></div>
         <div class="scores">
           <div class="sc"><span>Score</span><b id="overScore">0</b></div>
-          <div class="sc"><span>Best</span><b id="overBest">0</b><i id="newBest" class="new-best hidden">NEW!</i></div>
+          <div class="sc"><span>Best</span><i id="newBest" class="new-best hidden">NEW!</i><b id="overBest">0</b></div>
           <div class="stats" id="overStats"></div>
         </div>
       </div>
@@ -88,7 +88,7 @@
       <div class="how-grid">
         <div class="how"><div class="how-ico"><img src="assets/default/ollie_run_0.svg" alt=""><img src="assets/default/ollie_air.svg" alt="" style="transform:scaleY(-1)"></div><p>Ollie runs by himself. <span class="kb-only">Press <kbd>Space</kbd> or click</span><span class="touch-only"><b>Tap the screen</b></span> to <b>flip</b>: his magic scarf swooshes him up to the <b>ceiling</b> or back down to the <b>floor</b>.</p></div>
         <div class="how"><div class="how-ico"><img src="assets/default/vent_0.svg" alt=""><img src="assets/default/sign_1.svg" alt=""></div><p>Flip over open <b>hatches</b> and around snowballs and hanging baskets. A bump costs a <b>heart</b>; if Ollie falls, <b>Pip the puffin</b> carries him back.</p></div>
-        <div class="how"><div class="how-ico"><img src="assets/default/leaf_0.svg" alt=""><img src="assets/default/leaf_1.svg" alt=""><img src="assets/default/leaf_2.svg" alt=""></div><p>Catch the fluttering <b>leaves</b>! Many in a row make a <b>leaf streak</b> (×2…×5).</p></div>
+        <div class="how"><div class="how-ico trio"><img src="assets/default/leaf_0.svg" alt=""><img src="assets/default/leaf_1.svg" alt=""><img src="assets/default/leaf_2.svg" alt=""></div><p>Catch the fluttering <b>leaves</b>! Many in a row make a <b>leaf streak</b> (×2…×5).</p></div>
         <div class="how"><div class="how-ico"><img src="assets/default/finish.svg" alt="" style="height:64px"></div><p>Reach the <b>stairway door</b> to climb: Boot Room → Greenhouse → Map Library → Lantern Deck. Day turns to night, and the <b>lamps</b> and Ollie's <b>headlamp</b> light the way.</p></div>
       </div>
       <p class="small kb-only"><kbd>Space</kbd>/<kbd>↑</kbd>/<kbd>↓</kbd>/<kbd>Enter</kbd> flip · <kbd>Esc</kbd>/<kbd>P</kbd> pause · <kbd>M</kbd> sound · <kbd>F11</kbd> full screen</p>
@@ -103,7 +103,7 @@
       <div class="settings">
         <label class="set"><span>Sound effects</span><input type="checkbox" id="setSfx"><i class="tog"></i></label>
         <label class="set"><span>Music</span><input type="checkbox" id="setMusic"><i class="tog"></i></label>
-        <div class="set"><span>Difficulty</span>
+        <div class="set set-diff"><span>Difficulty</span>
           <div class="seg" id="setDifficulty">
             <button data-v="easy">Easy</button><button data-v="normal">Normal</button><button data-v="hard">Hard</button>
           </div>
@@ -142,6 +142,6 @@
 <script src="js/render.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/main.js"></script>
-<script src="js/extras.js" data-ns="OF" data-prefix="olf:"></script>
+<script src="js/extras.js" data-ns="OF" data-prefix="olf:" data-url="https://phanlinh86.github.io/claude-learning/projects/daily-game/otter-arctic-flip/game/"></script>
 </body>
 </html>

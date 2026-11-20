@@ -106,6 +106,14 @@ async function sFlags() {
   await p.waitForFunction(() => OF.Game && OF.Game.mode === 'over', null, { timeout: 90000 }).catch(() => {});
   const r = await p.evaluate(() => ({ mode: OF.Game.mode, score: OF.debug.stats.scores[0], best: localStorage.getItem('olf:best_normal') }));
   check('flags: a ?bot=1 (test) run does not write the player\'s best score', r.best === null, r);
+  // ?seed / ?level runs are test runs too; a plain run (no test flag) does save
+  for (const [q, want] of [['?mute=1&seed=4&autostart=1&diff=normal', null], ['?mute=1&level=2&autostart=1&diff=normal', null], ['?mute=1&autostart=1&diff=normal', '777']]) {
+    await p.evaluate(() => localStorage.clear());
+    await p.goto(BASE + q);
+    await p.waitForFunction(() => OF.Game && OF.Game.mode === 'playing', null, { timeout: 15000 }).catch(() => {});
+    const b = await p.evaluate(() => { OF.debug.world.score = 777; OF.Game.gameOver(); return localStorage.getItem('olf:best_normal'); });
+    check(`flags: ${q} ${want ? 'saves' : 'does not save'} the best score`, b === want, b);
+  }
   check('flags: no console errors', errs.length === 0, errs.slice(0, 3));
   await ctx.close();
 }
@@ -214,6 +222,27 @@ async function sFairness() {
   await ctx.close();
 }
 
+// ======================================================================= edge warning: a hazard within seeAhead but still off screen
+async function sEdgeWarn() {
+  const { p, errs, ctx } = await open({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true }, '?mute=1&seed=4&autostart=1&diff=easy&level=3');
+  await p.waitForFunction(() => OF.Game && OF.Game.mode === 'playing', null, { timeout: 15000 }).catch(() => {});
+  const r = await p.evaluate(async () => {
+    const w = OF.debug.world, R = OF.Game.renderer, u = w.layout.unit, reach = w.screenReachUnits(), see = w.seeAheadUnits();
+    const off = reach + 0.6;                               // just past the right edge, inside seeAhead
+    w.setTrack({ roofs: [[-50, off], [off + 1.4, 5000]], obstacles: [{ kind: 'sign', x: off + 0.4 }] });
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    const a = Object.assign({}, R.edgeWarn);
+    w.setTrack({ roofs: [[-50, see + 3], [see + 4.4, 5000]] });   // beyond seeAhead: no warning yet
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    return { reach, see, a, b: Object.assign({}, R.edgeWarn) };
+  });
+  check('edge warning: portrait night, a floor hatch and a ceiling prop just past the right edge (inside seeAhead) are flagged on their side', r.see > r.reach && r.a.floor != null && r.a.ceil != null, r);
+  check('edge warning: a hatch beyond seeAhead is not flagged yet', r.b.floor == null && r.b.ceil == null, r);
+  await p.screenshot({ path: path.join(ROOT, 'tests/out/extra_edgewarn_390x844.png') }).catch(() => {});
+  check('edge warning: no console errors', errs.length === 0, errs.slice(0, 3));
+  await ctx.close();
+}
+
 // ======================================================================= pictures: SVG + full storage + share link
 async function sPictures() {
   const { p, errs, ctx } = await open({}, '?mute=1');
@@ -251,7 +280,7 @@ async function sPictures() {
   for (let i = 0; i < 50; i++) { const ok = await new Promise(r => { const s = net.connect(port, '127.0.0.1', () => { s.end(); r(true); }); s.on('error', () => r(false)); }); if (ok) break; await sleep(100); }
   browser = await chromium.launch();
   const only = process.argv[2];
-  const sections = { sScoreCard, sVolume, sFlags, sRescue, sSpeed16, sMobile, sFairness, sPictures };
+  const sections = { sScoreCard, sVolume, sFlags, sRescue, sSpeed16, sMobile, sFairness, sEdgeWarn, sPictures };
   try {
     for (const [name, fn] of Object.entries(sections)) {
       if (only && !name.toLowerCase().includes(only.toLowerCase())) continue;

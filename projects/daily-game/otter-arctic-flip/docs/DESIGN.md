@@ -17,7 +17,7 @@ Fantasy in one sentence: **it must FEEL like a bouncy little otter swooshing bet
 ## 2. Screen, scroll & coordinates (unchanged from Rooftop Flip)
 - Logical view `VW×VH` from `Renderer.computeView`: landscape ≥16:9 → 540 tall, up to 1280 wide; other landscape → 960 wide, up to 960 tall; portrait → 560 wide (720 when aspect ≥ 0.6), up to 1600 tall.
 - Units px (logical) and s; y grows downward; no vertical camera; `screenX = worldX − cam.x` (lerped with `world.alpha`).
-- `OF.World.computeLayout(w, h)` → `{width, height, portrait, unit, midY, ceilY, floorY, corridorH, heroX}`: `unit = portrait ? min(w/6, h/8) : min(w/9.6, h/5.4)`; `midY = portrait ? 0.47·h : 0.53·h`; `ceilY = midY − 1.45·unit`; `floorY = midY + 1.45·unit`; `heroX = portrait ? 0.22·w : 0.26·w`. At 960×540: ceilY ≈ 141, floorY ≈ 431.
+- `OF.World.computeLayout(w, h)` → `{width, height, portrait, unit, midY, ceilY, floorY, corridorH, heroX}`: `unit = portrait ? min(w/7, h/8) : min(w/9.6, h/5.4)`; `midY = portrait ? 0.47·h : 0.53·h`; `ceilY = midY − 1.45·unit`; `floorY = midY + 1.45·unit`; `heroX = portrait ? 0.16·w : 0.26·w`. At 960×540: ceilY ≈ 141, floorY ≈ 431.
 - Below floorY = the floor slab and the storey below (wood/stone); above ceilY = the ceiling beam, joists and upper wall.
 
 ## 3. Art style guide (ALL art agents)
@@ -78,7 +78,7 @@ Same API as Rooftop Flip's `RF.World` (`reset/setLayout/flip/update/drainEvents/
   - **Visibility rule:** the renderer must keep every hazard lit at least `CONFIG.seeAhead` units ahead of Ollie: `seeAhead(level) = (reaction·speed + flightDist)/unit + 0.8` (export `world.seeAheadUnits()`); the headlamp beam length = `max(seeAhead, 3.2)` units on the current running side, and beacons always glow. Unit test proves seeAhead ≤ distance from heroX to the right screen edge in every layout (else the beam reach is clamped to the screen and beacons carry visibility).
 - `hero` as before minus `color`, plus `lamp {x, y}` (world position of the headlamp lens after flip turn-over: mirror vertically with flipT), `state 'run'|'air'|'rescue'`.
 - `drone` stays as the rescue helper (Pip the puffin; same fields).
-- `finish {x}` = stairway door. Passing it → `finish`, bonus `100 × (zone + 1) × (loop + 1)`, +1 heart (up to max), `levelUp`.
+- `finish {x}` = stairway door. Passing it → `finish`, bonus `500 × (zone + 1) × (loop + 1)`, +1 heart (up to max), `levelUp`.
 - Events: `flip, land, catch, combo, comboBreak, bump, fall, rescue, heartLost, heartGain, finish, levelUp, gameOver`, plus `{type:'lampsOn'}` once per level when `lampsOn` turns true (renderer: a soft "click" and lamps fade on).
 - **Rules** (speed, gravity, flip, support, coyote, rescue, obstacles, fairness, levels, lose): same as Rooftop Flip (`../robot-rooftop-flip/docs/MECHANICS.md`), with zone keys dawn/noon/sunset/night and the same tuned Easy preset (reaction 1.8 s etc.). The first floor must be easy for a 6-year-old.
 - `getState()` adds `light, lampsOn, leaves (count alive)`.
@@ -88,7 +88,7 @@ Same API as Rooftop Flip's `RF.World` (`reset/setLayout/flip/update/drainEvents/
 ### 5.3 `OF.Bot` — same as `RF.Bot` minus colour logic: flips before hazards (`hazardAhead`), never into a hazard, optional flips (skill ≥ 0.6) to catch a group of leaves when safe.
 
 ### 5.4 Test hooks
-URL `?speed=N&bot=1&skill=S&autostart=1&autorestart=1&seed=N&mute=1&debug=1&level=N&diff=easy|normal|hard`; `window.OF.debug` → `{ world, weather, mode, stats, getState(), setSpeed(n), startGame(), setBot(on, skill), setAutoRestart(on), gotoLevel(i), flip() }`. Test flags are never saved.
+URL `?speed=N&bot=1&skill=S&autostart=1&autorestart=1&seed=N&mute=1&debug=1&level=N&diff=easy|normal|hard`; `window.OF.debug` → `{ world, weather, mode, stats, getState(), setSpeed(n), startGame(), setBot(on, skill), setAutoRestart(on), gotoLevel(i), flip() }`. Test flags are never saved, and a run with `?bot=1`, `?speed`, `?level` or `?seed` never writes the best score (`Game.testRun`; `?savebest=1` opts back in for the e2e tests of the best-score code).
 
 ## 6. Customisation slots
 `hero` (a custom picture drawn round inside a procedural otter ring: two round ears, a teal scarf band and the headlamp, with run bob and the same flip), `leaf` (custom picture drawn round with a leaf-shaped green ring and a little stem; flutter motion kept), `bg_dawn`, `bg_noon`, `bg_sunset`, `bg_night` (a full-scene photo replaces sky+far+mid for that floor; floor and ceiling stay; darkness still applies).
@@ -103,3 +103,17 @@ URL `?speed=N&bot=1&skill=S&autostart=1&autorestart=1&seed=N&mute=1&debug=1&leve
 SFX: flip "swoosh" (rising up / falling down), land soft "fwump", catch leaf "rustle-pling" with pitch rising with combo, multiplier chime, bump soft "boing", fall "whee" + puffin flaps and a "peep", rescue pop, heart lost, heart gain, lamps-on "click-hum", finish door creak + fanfare, level-up, game over gentle tune, best score, button click. Music per floor: dawn soft marimba, noon bright plucks, sunset warm keys, night dreamy music-box bells; crossfade on level change.
 
 ## 9. Mobile — same platform layer as the other daily games (copied from Rooftop Flip, then `python3 shared/daily-mobile/apply.py otter-arctic-flip`).
+
+## 10. Changes after QA (2026-11-20)
+Three QA reports (`docs/reports/functional.md`, `visual.md`, `playtest.md`) were applied as follows.
+- **Balance (playtest):** Boot Room `zones[0].extraK` 1.25 → 1.5 and `gapK` 0.8 → 1.0 (the first floor is now the gentlest per minute); `finishBonus` 100 → 500, so a stairway door is worth `500 × floor × round` (REQUIREMENT updated). `multEvery` stays 5.
+- **Portrait view (visual P1 / functional P2):** `unit = min(w/7, h/8)` and `heroX = 0.16·w` in portrait (§2). Ollie is ≈14 % smaller on a phone and sees ≈5.9 units ahead (was 4.7), so Easy and Normal Floor 1 show a hazard at least one reaction time before the last flip.
+- **Edge warning (render.js `edgeWarnings` / `drawEdgeWarn`, all layouts):** for each side, the nearest hazard (prop or hatch) that is within `seeAheadUnits()` of Ollie but still beyond the right screen edge gets a pulsing amber "›" (`#ffb43c`, brown outline) at `x = VW − inset − 0.32u`, `y = floorY − 0.32u` or `ceilY + 0.32u`. Drawn above the darkness, below the HUD, only while playing; `renderer.edgeWarn` exposes it to tests.
+- **Beacons:** a white-hot lens in a dark round bezel with a 4-point glint, blinking ≈2 Hz (`_blink()`), with a cool white glow, so at night they no longer look like the warm red/gold leaves. Sconces and leaves stay warm and steady.
+- **Floor banner:** in landscape it is slim (52 px, title ≤ 20 px, subtitle 13 px, alpha 0.78) and sits at the bottom edge, so hatches ahead of Ollie stay visible; portrait is unchanged.
+- **Ollie:** the turn-over keeps at least 0.62 of his height with a 0.6 rad tilt (a roll, not a sliver); a bump hops 0.4u with a 0.15u recoil (bounces off the pile instead of sinking in); the HUD panels fade to 0.15 while he dangles under them during a rescue.
+- **Popups:** a new "+N" next to a fresh one steps right and away from Ollie's surface (no stacking).
+- **Menus:** "NEW!" sits inline beside the Best label; How to Play's three leaf icons get their own room; the Pause panel sits below the HUD on landscape phones; on short landscape screens Settings uses two shrinkable columns, the Volume and Difficulty rows span both, and the panel scrolls if it is still too tall; volume −/+ are 44 px (40 px on short screens).
+- **Score Card:** Enter/Space/Play Again never restart while the Score Card is open (`Game.scoreCardOpen()`), `startGame()` hides it, and the share link is the GitHub Pages URL (`data-url` on the extras.js tag) instead of the app's loopback address.
+- **Art:** the Boot Room's decorative boots no longer stand on the floor line (crate stacks with boots are a hazard); they hang from wall pegs at 60 % opacity (`tools/art-environment/gen.js`). `docs/art/` contact sheets are downscaled to ≤ 1200 px and palette-compressed (re-running the sheet tools writes full-size PNGs again).
+

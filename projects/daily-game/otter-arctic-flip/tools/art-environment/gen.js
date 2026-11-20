@@ -282,8 +282,12 @@ function midLayer(z, P) {
         const c2 = dark(col, 0.35);
         s += `<g transform="rotate(${rot} ${cx + dx} 431)">` + pth(`M${f(cx + dx - 5)} 431V200Q${f(cx + dx - 5)} 184 ${f(cx + dx + 2)} 180Q${f(cx + dx + 5)} 186 ${f(cx + dx + 5)} 200V431Z`, col, OL(c2, 2.2)) + rect(cx + dx - 5, 300, 10, 14, c2, op(0.6)) + '</g>';
       }
-      // a pair of boots on the floor
-      for (const bx of [cx - 70, cx + 62]) s += pth(`M${f(bx - 8)} 431V398H${f(bx + 6)}V418Q${f(bx + 16)} 418 ${f(bx + 18)} 431Z`, '#7d7488', OL('#4e4658', 2.2)) + rect(bx - 8, 398, 14, 5, '#c9c0cc');
+      // a pair of boots hung by their laces from wall pegs (visual QA P2-3: nothing boot-like stands on the floor line,
+      // because a crate stack with boots is a hazard); muted and 60 % opaque so they read as back-wall decoration
+      for (const bx of [cx - 70, cx + 62]) {
+        s += circ(bx, 322, 3.5, '#8a7a60') + stk(`M${f(bx)} ${f(322)}L${f(bx - 3)} ${f(332)}M${f(bx)} ${f(322)}L${f(bx + 3)} ${f(332)}`, '#5e566a', 1.4, op(0.6));
+        s += `<g opacity="0.6">` + pth(`M${f(bx - 8)} 362V332H${f(bx + 6)}V350Q${f(bx + 16)} 350 ${f(bx + 18)} 362Z`, '#8e88a0', OL('#5e566a', 2)) + rect(bx - 8, 332, 14, 4, '#c9c0cc') + '</g>';
+      }
       return wrapG(cx - 90, cx + 90, s);
     };
     deco += skis(0);
