@@ -1,0 +1,116 @@
+<!doctype html>
+<!-- Contact sheet for RT.BlockArt shell blocks (character artist B). Open directly or via `node tools/block_sheet.js`.
+     ?panel=sand|water|dark draws one panel only (default: all three stacked). ?dpr=2 for retina. -->
+<html><head><meta charset="utf-8"><title>Block sheet</title>
+<style>body{margin:0;background:#222}canvas{display:block}</style></head>
+<body><canvas id="c"></canvas>
+<script src="../game/js/content.js"></script>
+<script src="../game/js/block_art.js"></script>
+<script>
+(function () {
+  var BA = RT.BlockArt;
+  var ANIMALS = RT.ANIMALS || ['fish', 'crab', 'turtle', 'whale', 'seahorse', 'dolphin', 'jellyfish', 'shrimp'];
+  var COLORS = ['red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink'];
+  var SHAPES = RT.SHAPES || ['circle', 'square', 'triangle', 'star', 'heart', 'rect', 'diamond', 'oval'];
+  var PANELS = { sand: '#F1E2BE', water: '#7FD0E3', dark: '#17364A' };
+  var qp = new URLSearchParams(location.search), only = qp.get('panel');
+  var LW = 139, LH = 99, W = 1800;
+  var imgs = {};
+  function img(name) { var i = imgs[name]; return i && i.complete && i.naturalWidth ? i : null; }
+  var loads = ANIMALS.map(function (a) {
+    return new Promise(function (res) { var i = new Image(); i.onload = i.onerror = res; i.src = '../game/assets/default/items/animal_' + a + '.svg'; imgs['animal_' + a] = i; });
+  });
+
+  function rows() {
+    var R = [];
+    R.push(COLORS.map(function (c) { return { kind: 'color', value: c, color: c }; }));
+    R.push(SHAPES.map(function (s, i) { return { kind: 'shape', value: s, shape: s, color: COLORS[i % 7] }; }));
+    R.push(SHAPES.map(function (s, i) { return { kind: 'shape', value: s, shape: s, color: COLORS[(i + 3) % 7] }; }));
+    R.push([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (n) { return { kind: 'dots', value: n, n: n }; }));
+    R.push([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (n) { return { kind: 'number', value: n, n: n, text: String(n), showDots: true }; }));
+    R.push([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 20].map(function (n) { return { kind: 'number', value: n, n: n, text: String(n) }; }));
+    R.push(ANIMALS.map(function (a) { return { kind: 'animal', value: a, animal: a }; }).concat([{ kind: 'animal', value: 'zebra', animal: 'zebra' }]));
+    R.push(['A', 'B', 'M', 'W', 'a', 'b', 'g', 'Đ', 'ă', 'ơ'].map(function (l) { return { kind: 'letter', value: l, text: l }; }));
+    R.push(['2 + 3', '5 − 2', '10 − 4', '7', 'odd', 'chẵn'].map(function (t) { return { kind: 'text', value: t, text: t }; })
+      .concat([{ kind: 'parity', value: 'odd' }, { kind: 'parity', value: 'even' }]));
+    R.push([{ kind: 'size', value: 'big', size: 'big', color: 'orange' }, { kind: 'size', value: 'small', size: 'small', color: 'orange', scale: 0.72 },
+            { kind: 'size', value: 'big', size: 'big', color: 'blue' }, { kind: 'size', value: 'small', size: 'small', color: 'blue' },
+            { kind: 'size', value: 'big', size: 'big', animal: 'crab' }, { kind: 'size', value: 'small', size: 'small', animal: 'crab' }]);
+    return R;
+  }
+
+  function cell(g, b, cx, cy, s, o) {
+    var w = LW * s, h = LH * s, sc = BA.blockScale(b);
+    g.fillStyle = 'rgba(40,40,20,0.18)'; g.beginPath(); g.ellipse(cx, cy + h / 2 + 3, w * 0.5 * sc, 5 * s, 0, 0, 7); g.fill();
+    g.save(); g.translate(cx, cy + (h - h * sc) / 2);       // a small block rests on the same line
+    BA.drawBlock(g, b, w, h, Object.assign({ dpr: DPR, img: img, id: o && o.id }, o || {}));
+    g.restore();
+  }
+
+  function drawPanel(g, x0, y0, bg) {
+    var y = y0, pad = 16, step = LW + 14;
+    g.fillStyle = bg; g.fillRect(x0, y0, W, 99999);
+    rows().forEach(function (row) {
+      row.forEach(function (b, i) { cell(g, b, x0 + pad + LW / 2 + (i % 10) * step, y + 14 + LH / 2 + Math.floor(i / 10) * (LH + 22), 1, { id: i }); });
+      y += Math.ceil(row.length / 10) * (LH + 22) + 6;
+    });
+    // a stacked tower (ridge seeds vary by id) on the shell tray, with pearls on top (as world.pearlOffsets places them)
+    var bx = x0 + pad + 120, by = y + 6 * LH + 40;
+    g.save(); g.translate(bx, by + 2); BA.drawPlate(g, LW * 1.25, LH * 0.3); g.restore();
+    ['red', 'yellow', 'blue', 'green', 'purple', 'orange'].forEach(function (c, i) {
+      g.save(); g.translate(bx, by - LH / 2 - i * LH); BA.drawBlock(g, { kind: 'color', value: c, color: c }, LW, LH, { dpr: DPR, id: i }); g.restore();
+    });
+    var topY = by - 6 * LH + LH * 0.06, ph = Math.round(0.33 * LH);
+    [-56, -42, -29, -16, -3].forEach(function (f, i) { g.save(); g.translate(bx + f, topY); BA.drawPearl(g, ph, 1, 0, 0.4 + i); g.restore(); });
+    // pearl states: lit 0→1, out 0→1 (1x, h = 0.4·LH) and 3x
+    var cx = x0 + 330, py = by - 470, h1 = Math.round(0.4 * LH);
+    [0, 0.3, 0.6, 1].forEach(function (l, i) { g.save(); g.translate(cx + i * 46, py); BA.drawPearl(g, h1, l, 0, i * 0.37); g.restore(); });
+    [0.15, 0.35, 0.55, 0.75, 0.88, 0.95].forEach(function (o, i) { g.save(); g.translate(cx + (i + 4) * 46, py); BA.drawPearl(g, h1, 1, o, 0.2); g.restore(); });
+    [[0, 0], [1, 0], [1, 0.4], [1, 0.9]].forEach(function (s, i) { g.save(); g.translate(cx + 520 + i * 110, py + 40); g.scale(3, 3); BA.drawPearl(g, h1, s[0], s[1], 0.3); g.restore(); });
+    // bubbles: sizes 4 → 60, alpha 1 / 0.5
+    [4, 7, 11, 18, 28, 44, 60].forEach(function (r, i) { g.save(); g.translate(cx + 30 + i * 80 + r * 0.2, by - 300); BA.drawBubble(g, r, 1); g.restore(); });
+    g.save(); g.translate(cx + 640, by - 300); BA.drawBubble(g, 40, 0.5); g.restore();
+    // a block in its lift bubble
+    g.save(); g.translate(cx + 860, by - 300); BA.drawBlock(g, { kind: 'color', value: 'green', color: 'green' }, LW, LH, { dpr: DPR, lift: 1, id: 2 }); BA.drawBubble(g, LW * 0.68, 1); g.restore();
+    // glow / lift states
+    [{ glow: 0.5 }, { glow: 1 }, { lift: 1 }, { glow: 1, lift: 1 }].forEach(function (o, i) {
+      g.save(); g.translate(cx + 30 + LW / 2 + i * (LW + 50), by - 150); if (o.lift) g.scale(1.08, 1.08);
+      BA.drawBlock(g, { kind: 'color', value: 'pink', color: 'pink' }, LW, LH, Object.assign({ dpr: DPR, t: 0.3, id: 3 }, o)); g.restore();
+    });
+    // old API: drawBlock(ctx, block, S, opt)
+    g.save(); g.translate(cx + 30 + LW / 2, by - 10); BA.drawBlock(g, { kind: 'dots', value: 4, n: 4 }, 124, { dpr: DPR }); g.restore();
+    // fish confetti (palette + hex tints), 1x and 3x; ghost hand at several tap phases; glow
+    var sx = cx + 230;
+    COLORS.forEach(function (c, i) { g.save(); g.translate(sx + i * 34, by - 20); BA.drawSprinkle(g, 22, c, (i - 3) * 0.5); g.restore(); });
+    ['#FFFFFF', '#BFE8D8', '#DCCDF3'].forEach(function (c, i) { g.save(); g.translate(sx + (i + 7) * 34, by - 20); BA.drawSprinkle(g, 22, c, i); g.restore(); });
+    ['red', 'yellow', 'blue'].forEach(function (c, i) { g.save(); g.translate(sx + i * 90, by + 30); g.scale(3, 3); BA.drawSprinkle(g, 22, c, 0); g.restore(); });
+    [0.1, 0.45, 0.55, 0.8].forEach(function (t, i) { g.save(); g.translate(sx + 380 + i * 90, by - 70); BA.drawGhostHand(g, 80, t); g.restore(); });
+    g.save(); g.translate(sx + 840, by - 10); BA.drawGlow(g, 120, 72, 0, 1); g.strokeStyle = 'rgba(255,255,255,.5)'; g.strokeRect(-60, -36, 120, 72); g.restore();
+    y = by + 80;
+    // 3x row: colour, shape, dots 5, dots 8, number+dots 4, animal, letter
+    var big = [{ kind: 'color', value: 'red', color: 'red' }, { kind: 'shape', value: 'star', shape: 'star', color: 'yellow' },
+      { kind: 'dots', value: 5, n: 5 }, { kind: 'dots', value: 8, n: 8 }, { kind: 'number', value: 4, n: 4, text: '4', showDots: true },
+      { kind: 'animal', value: 'turtle', animal: 'turtle' }, { kind: 'letter', value: 'B', text: 'B' }, { kind: 'color', value: 'blue', color: 'blue' }];
+    var s3 = 3;
+    var per = Math.floor(W / (LW * s3 + 30));
+    big.forEach(function (b, i) {
+      var col = i % per, rw = Math.floor(i / per);
+      cell(g, b, x0 + 20 + LW * s3 / 2 + col * (LW * s3 + 30), y + 30 + LH * s3 / 2 + rw * (LH * s3 + 50), s3, { id: i + 2 });
+    });
+    y += Math.ceil(big.length / per) * (LH * s3 + 50) + 30;
+    return y - y0;
+  }
+
+  var DPR = +(qp.get('dpr') || 1);
+  Promise.all(loads).then(function () {
+    var cv = document.getElementById('c'), names = only ? [only] : Object.keys(PANELS);
+    var H = 3400 * names.length;
+    cv.width = W * DPR; cv.height = H * DPR; cv.style.width = W + 'px'; cv.style.height = H + 'px';
+    var g = cv.getContext('2d'); g.scale(DPR, DPR);
+    var y = 0;
+    names.forEach(function (n) { y += drawPanel(g, 0, y, PANELS[n]); });
+    window.SHEET_H = y; window.SHEET_W = W;
+    document.title = 'done';
+  });
+})();
+</script></body></html>

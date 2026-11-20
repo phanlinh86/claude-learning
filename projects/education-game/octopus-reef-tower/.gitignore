@@ -1,0 +1,8 @@
+node_modules/
+tests/out/
+tests/sim/out/*.json
+tests/sim/out/pt_browser/
+*.log
+docs/reports/visual/screens/
+docs/reports/visual/topics/
+docs/reports/visual/talk/

@@ -1,0 +1,16 @@
+{
+  "name": "Pip's Reef Tower · Tháp San Hô Của Bạch Tuộc Pip",
+  "short_name": "Reef Tower",
+  "description": "Build a swaying shell tower under the sea with Pip the little octopus: colours, shapes, counting pearls and sea animals. English & Vietnamese.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#7FD0E3",
+  "theme_color": "#7FD0E3",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
