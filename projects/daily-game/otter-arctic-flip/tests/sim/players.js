@@ -41,7 +41,9 @@ function humanPlayer(OF, seed, p) {
     const h = w.hero, S = M.max(1, w.speed), tte = (hz.x0 - h.x) / S;
     const aim = M.max(0.1, p.aimMu + rng.gauss() * p.aimSd), err = (p.bias || 0) + rng.gauss() * p.errSd;
     let fireT = t + M.max(0, tte - aim + err);
-    let ready = M.max(readyT, t + (mine ? 0 : react() * 0.5));
+    // notice: × a reaction time between a hazard coming into view and acting on it (0 = the original model);
+    // darkReact: extra s while the lamps are on (dim floors: lower contrast, a child looks twice)
+    let ready = M.max(readyT, t + (mine ? (p.notice || 0) * react() : react() * 0.5) + (w.lampsOn ? (p.darkReact || 0) : 0));
     if (rng.chance(p.distract || 0)) ready += rng.range(p.distractT[0], p.distractT[1]);
     if (ready > fireT) { stats.lateNotice++; fireT = ready; }
     return { hz, side: h.side, fireT, forget: mine && rng.chance(p.forget || 0), check: rng.chance(p.check || 0) };
@@ -60,7 +62,8 @@ function humanPlayer(OF, seed, p) {
       if (h.grounded && !wasGrounded) { landIdx++; plan = null; }
       if (h.grounded && !wasGrounded) readyT = t + react() * (p.landReact === undefined ? 1 : p.landReact);
       wasGrounded = h.grounded;
-      const F = w.flightDist(), view = p.view * u;
+      // viewFn(w, p) → units the player can see ahead (vision models in vision.js); default: a fixed p.view
+      const F = w.flightDist(), view = (p.viewFn ? p.viewFn(w, p) : p.view) * u;
       // execute the plan
       if (plan && t >= plan.fireT) {
         const stillMine = h.side === plan.side || (!h.grounded && h.coyote > 0);
@@ -140,7 +143,12 @@ function pingPong() {
   const stats = { taps: 0 };
   return { name: 'pingPong', stats, step(dt, w) { if (w.hero.grounded) { stats.taps++; w.flip(); } } };
 }
+/** (c'') stays on one side: flips once at `at` s (to the ceiling) and never again. */
+function oneFlip(at) {
+  const stats = { taps: 0 }; let done = false;
+  return { name: 'oneFlip', stats, step(dt, w, t) { if (!done && t >= at && w.hero.grounded) { done = true; stats.taps++; w.flip(); } } };
+}
 /** (d) never taps. */
 function neverTap() { return { name: 'never', stats: {}, step() {} }; }
 
-module.exports = { botPlayer, humanPlayer, kidPlayer, adultPlayer, hazardOnly, spamPlayer, pingPong, neverTap, KID, ADULT };
+module.exports = { botPlayer, humanPlayer, kidPlayer, adultPlayer, hazardOnly, spamPlayer, pingPong, oneFlip, neverTap, KID, ADULT };

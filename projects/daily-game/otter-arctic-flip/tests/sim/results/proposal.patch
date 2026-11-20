@@ -1,0 +1,20 @@
+--- a/game/js/world.js	2026-11-20 04:05:04.494247740 -0800
++++ b/game/js/world.js	2026-11-20 05:41:19.280283037 -0800
+@@ -82,7 +82,7 @@
+     leafPoints: 10,         // pts    × mult per leaf
+     multEvery: 5,           // leaves mult = 1 + ⌊combo / 5⌋…
+     multMax: 5,             // ×      …up to ×5 (REQUIREMENT)
+-    finishBonus: 100,       // pts    × (zone + 1) × (loop + 1)
++    finishBonus: 500,       // pts    × (zone + 1) × (loop + 1)
+     heartReward: 1,         // —      hearts back at every stairway door (up to max)
+ 
+     // ---- leaves: a pendulum flutter in the warm draft (DESIGN §5.1) ----
+@@ -141,7 +141,7 @@
+ 
+     // ---- floors = times of day (zone = level % 4) ----
+     zones: [
+-      { key: 'dawn',   speed: 3.0, seconds: 62, alt: 0.55, gapK: 0.8,  extraK: 1.25, arc: 0.45, line: 0.8,  lightFrom: 0.78, lightTo: 0.95 },  // Boot Room: slow, calm, sun rising
++      { key: 'dawn',   speed: 3.0, seconds: 62, alt: 0.55, gapK: 1.0,  extraK: 1.5,  arc: 0.45, line: 0.8,  lightFrom: 0.78, lightTo: 0.95 },  // Boot Room: slow, calm, sun rising
+       { key: 'noon',   speed: 3.3, seconds: 68, alt: 0.6,  gapK: 1.0,  extraK: 1.1,  arc: 0.5,  line: 0.8,  lightFrom: 1.00, lightTo: 0.88 },  // Greenhouse
+       { key: 'sunset', speed: 3.6, seconds: 72, alt: 0.65, gapK: 1.1,  extraK: 1.0,  arc: 0.55, line: 0.75, lightFrom: 0.72, lightTo: 0.48 },  // Map Library: lamps on
+       { key: 'night',  speed: 3.9, seconds: 76, alt: 0.65, gapK: 1.15, extraK: 0.95, arc: 0.6,  line: 0.75, lightFrom: 0.40, lightTo: 0.32 }   // Lantern Deck: headlamp + lamps

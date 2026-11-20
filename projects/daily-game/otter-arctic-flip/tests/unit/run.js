@@ -87,6 +87,7 @@ test('determinism: same seed + same inputs → identical state; other seed diffe
   const flips = [3.0, 4.5, 6.3, 8.0, 9.5, 12.0, 13.5, 16.0, 18.5, 21.0, 24.0, 27.5];
   const sim = (seed, dt) => {
     const w = mk('normal', seed); let t = 0, k = 0; const n = Math.round(30 / dt);
+    w.hearts = w.maxHearts = 99;                    // the fixed tap script must not end in a game over on any track
     for (let i = 0; i < n; i++) { if (k < flips.length && t >= flips[k] - 1e-9) { w.flip(); k++; } w.update(dt); t = (i + 1) * dt; w.drainEvents(); }
     return w;
   };
@@ -504,14 +505,14 @@ test('stairway door: bonus, +1 heart, levelUp to the next time of day; loop bonu
   const w = flat('normal', { finish: 3 }); w.hearts = 2;
   const ev = run(w, 1.5);
   const t = types(ev); assert.ok(t.indexOf('finish') >= 0 && t.indexOf('finish') < t.indexOf('levelUp'));
-  const lu = of(ev, 'levelUp')[0]; deq([lu.level, lu.zone, lu.bonus], [1, 1, 100]);
-  assert.strictEqual(w.score, 100); assert.strictEqual(w.hearts, 3); deq(of(ev, 'heartGain').map(e => e.hearts), [3]);
+  const lu = of(ev, 'levelUp')[0]; deq([lu.level, lu.zone, lu.bonus], [1, 1, C.finishBonus]);   // finishBonus × 1 × 1
+  assert.strictEqual(w.score, C.finishBonus); assert.strictEqual(w.hearts, 3); deq(of(ev, 'heartGain').map(e => e.hearts), [3]);
   assert.strictEqual(w.level, 1); assert.strictEqual(w.zone, 1); assert.strictEqual(w.stats.levels, 1);
   // night of round 1 → dawn of round 2: bonus 100 × 4 × 1; level 7 (night, loop 1) bonus 100 × 4 × 2
   const w2 = mk('normal', 1, 960, 540, 3); w2.setTrack({ finish: 2 });
-  const lu2 = of(run(w2, 1.2), 'levelUp')[0]; deq([lu2.level, lu2.zone, lu2.bonus], [4, 0, 400]); assert.strictEqual(w2.loop, 1);
+  const lu2 = of(run(w2, 1.2), 'levelUp')[0]; deq([lu2.level, lu2.zone, lu2.bonus], [4, 0, 4 * C.finishBonus]); assert.strictEqual(w2.loop, 1);
   const w3 = mk('normal', 1, 960, 540, 7); w3.setTrack({ finish: 2 });
-  assert.strictEqual(of(run(w3, 1.2), 'levelUp')[0].bonus, 800);
+  assert.strictEqual(of(run(w3, 1.2), 'levelUp')[0].bonus, 8 * C.finishBonus);
   // no heart beyond max
   const w4 = flat('easy', { finish: 2 }); assert.strictEqual(of(run(w4, 1.5), 'heartGain').length, 0); assert.strictEqual(w4.hearts, 5);
 });
