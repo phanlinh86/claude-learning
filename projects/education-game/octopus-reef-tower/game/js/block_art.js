@@ -3,8 +3,8 @@
  *   drawBlock(ctx, block, LW, LH, opt)   a chunky SHELL BLOCK, origin = CENTRE, LW × LH px (layout.LW / layout.LH).
  *       opt = { glow 0..1, lift 0..1, dpr, id (ridge seed), img(name) → Image|null, t, cache:false }
  *       Front view with a thin top face (top 14 % of LH), rounded corners r = 0.2·LH, a scalloped shell ridge along
- *       the top edge (5–7 bumps, pattern from opt.id), soft ridge lines fanning on the front and a tiny barnacle /
- *       pearl in one corner. color blocks: the whole block in the answer colour (base front, light ridges/top, dark
+ *       the top edge (5–7 bumps, pattern from opt.id), soft ridge lines fanning on the front and (not on colour
+ *       blocks) a tiny pink fan shell in one corner. color blocks: the whole block in the answer colour (base front, light ridges/top, dark
  *       outline). Others: sand-stone #F3DDB2 / top #FBEFD4 / outline #B98A4E with a decoration: shape | dots (white
  *       pearl dots with a lilac rim, dice / ten-frame layout 1–10) | number (+ pearl dots when block.showDots) |
  *       animal (sticker 'animal_<x>') | letter | text | size (small = block.scale or 0.72 of both dims; an animal size
@@ -212,10 +212,10 @@
     ctx.beginPath(); ctx.ellipse(-hw + 0.22 * w, yb + 0.02 * h, 0.12 * w, 0.018 * h, -0.02, 0, PI2); ctx.fill();
     ctx.fillStyle = 'rgba(255,255,255,0.24)';
     ctx.beginPath(); ctx.ellipse(-hw + 0.085 * w, yT + 0.28 * h, 0.03 * w, 0.16 * h, 0, 0, PI2); ctx.fill();
-    // a tiny barnacle / pearl in one corner (side by seed)
+    // a tiny pink fan shell in one corner (side by seed). Visual P2-1: colour blocks no longer get a tiny white corner pearl —
+    // it looked like the counting pearl of the finale
     var side = (seed & 1) ? 1 : -1;
-    if (C.colour) barnacle(ctx, side * (hw - 0.075 * w - 0.03 * h), hh - 0.17 * h, 0.05 * h, C);
-    else if (decorated !== 'busy') barnacle(ctx, side * (hw - 0.075 * w - 0.02 * h), hh - 0.2 * h, 0.05 * h, C);
+    if (!C.colour && decorated !== 'busy') barnacle(ctx, side * (hw - 0.075 * w - 0.02 * h), hh - 0.2 * h, 0.05 * h, C);
     ctx.restore();
     // crisp outer outline on top
     ctx.save(); bodyPath(ctx, w, h, seed); ctx.lineJoin = 'round'; ctx.lineWidth = lw; ctx.strokeStyle = C.line; ctx.stroke(); ctx.restore();

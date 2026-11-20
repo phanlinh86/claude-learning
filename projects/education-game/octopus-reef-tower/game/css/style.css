@@ -99,7 +99,7 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
   user-select: text; -webkit-user-select: text; touch-action: manipulation; }
 .set-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; margin: 14px 0; }
 .toggle { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; background: #fff; padding: 10px 12px; border-radius: 14px; }
-.toggle input { width: 26px; height: 26px; accent-color: var(--green); }
+.toggle input { width: 26px; height: 26px; flex: 0 0 26px; margin: 0; accent-color: var(--green); }   /* never squeezed (QA P2-3) */
 .small-note { font-size: 14px; opacity: .75; margin: 4px 0 12px; }
 .settings-panel > .btn { width: 100%; position: sticky; bottom: -22px; box-shadow: 0 6px 0 var(--green-d), 0 -10px 16px var(--cream); }
 @media (max-height: 500px) {
@@ -224,14 +224,28 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
   .set-row { margin: 2px 0; gap: 8px; }
   .set-row .chip, .chips .chip { min-height: 40px; padding: 4px 12px; }
   #inpName { padding: 6px 10px; font-size: 17px; }
-  .set-grid { gap: 4px 10px; }
-  .toggle { min-height: 40px; }
+  /* QA P2-3: one row of 4 with a smaller label font (≤ 2 lines) and fixed 26 px checkboxes: nothing hides under Done */
+  .set-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px 8px; margin: 6px 0; }
+  .toggle { min-height: 40px; padding: 4px 8px; gap: 8px; font-size: 15px; line-height: 1.12; }
+  .small-note { margin: 2px 0 8px; width: 100%; }
+  /* name + volume share one row so the voice note shows above the sticky Done without scrolling (QA P2-3) */
+  .settings-panel { display: flex; flex-wrap: wrap; align-content: flex-start; column-gap: 18px; }
+  .settings-panel > * { flex: 0 0 100%; min-width: 0; }
+  .settings-panel > .set-row:nth-of-type(3), .settings-panel > .set-row:nth-of-type(4) { flex: 1 1 0; flex-wrap: nowrap; }
+  .settings-panel #inpName { width: 0; flex: 1 1 auto; max-width: 220px; }
+  .settings-panel #optVolume { width: 0; flex: 1 1 auto; max-width: 220px; }
+}
+/* narrow portrait phones: the four toggles in two columns so the voice note shows above the sticky Done (QA P2-3) */
+@media (max-width: 500px) and (orientation: portrait) {
+  .set-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .toggle { font-size: 16px; line-height: 1.15; padding: 8px 10px; gap: 8px; }
+  .small-note { margin: 4px 0 16px; }
 }
 
 /* the HUD keeps a visible edge over pale skies and snow */
 .hud-stars, .hud-dots, #hud .icon-btn { border: 3px solid #bfd8ee; }
 
-/* Vietnamese title is longer: smaller logo, keep "Tháp Bánh Kem" on one line (visual QA P2-5) */
+/* Vietnamese title is longer: smaller logo, keep the second title line (#logo2) on one line */
 :lang(vi) .logo { font-size: clamp(34px, 8.6 * var(--u), 96px); }
 #logo2 { white-space: nowrap; }
 /* narrow phones: Talk-time choices stay on one row (Vietnamese names are longer — visual QA P2-4) */

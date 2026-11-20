@@ -287,7 +287,7 @@ test('layout: DESIGN §2 numbers (S 124/110, LW/LH, stand, drop zone, Pip, bubbl
   assert.strictEqual(L.tower.x, 512); assert.strictEqual(L.tower.baseTop, 596); assert.strictEqual(L.tower.baseW, 199);
   assert.deepStrictEqual(L.drop, { x0: 512 - 129.5, x1: 512 + 129.5, y1: 606 });
   assert.deepStrictEqual(L.pip, { x: 120, y: 688, h: 330 });
-  assert.deepStrictEqual(L.bubble, { x: 24, y: 18, w: 512 - 129.5 - 20 - 24, h: 122 });
+  assert.deepStrictEqual(L.bubble, { x: 24, y: 18, w: 512 - 90 - 14 - 24, h: 122 });   // up to the goal box (visual QA P2-4)
   assert.strictEqual(L.goalY, 596 - 4 * 99 - 8); assert.deepStrictEqual(L.goal, { x: 512, y: L.goalY, cloudY: L.goalY - 18 });
   assert.strictEqual(L.goalH, 110);
   L = RT.World.computeLayout(960, 720, null, {}, 4); assert.strictEqual(L.pip.h, 300); assert.strictEqual(L.tower.x, 400);
@@ -696,7 +696,7 @@ test('world: small layers are 0.72 × LW × LH, resting bottom-aligned in their 
   assert.ok(Math.abs((sm.homeY + sm.bh / 2) - (bg.homeY + bg.bh / 2)) < 1e-9, 'bottoms aligned');
 });
 
-test('world: wrong → bounce off (restitution 0.45, kick towards home, spin), arc home; lock 0.7 s (locked); 2nd miss → hint + ghost hand', () => {
+test('world: wrong → bounce off (restitution 0.45, kick towards home, spin), drift home; lock 1.3 s (locked); 2nd miss → hint + ghost hand', () => {
   const w = mkWorld({ age: 4 }); roundOf(w, 'colors', 2);
   const X = wrongP(w), R = rightP(w);
   assert.strictEqual(dragToTower(w, X), 'drop');
@@ -880,17 +880,21 @@ test('world: pearls — one per layer (n = 2…5) at World.pearlOffsets, pop wit
   }
 });
 
-test('world: pearl i sits on block i (left part of its front, inside the block, clear of the centred decoration and of the crown) — every viewport × age; counting goes bottom → top; n = 1 works', () => {
+test('world: pearl i hangs on block i’s LEFT side, outside the face (visual P2-1: never over numerals / dots, clear of the crown and of Pip; ball ≥ 14 CSS px on iPhone portrait) — every viewport × age; counting goes bottom → top; n = 1 works', () => {
   for (const v of VIEWPORTS) for (const age of AGES) {
     const L = RT.World.computeLayout(v.W, v.H, v.ins, {}, age), LW = L.LW, cx = L.crownOff;
     assert.ok(cx + 32 <= LW / 2 + 1, v.name + ' crown on the top');
-    const xs = RT.World.pearlOffsets(5, L), h = xs.h, tag = v.name + ' age ' + age;
-    assert.ok(h === L.pearlH && h >= 30, tag + ' pearl ' + h + ' px');
+    const xs = RT.World.pearlOffsets(5, L), h = xs.h, r = xs.r, tag = v.name + ' age ' + age;
+    const css = Math.min(v.W, v.H) === 720 && v.W < v.H && /iPhone/.test(v.name) ? 393 / 720 : 0;   // iPhone portrait CSS px per logical px
+    assert.ok(h === L.pearlH && 2 * r >= 0.28 * L.LH, tag + ' pearl ' + h + ' px, ball ' + (2 * r).toFixed(1));
+    if (css) assert.ok(2 * r * css >= 14, tag + ' ball ' + (2 * r * css).toFixed(1) + ' CSS px');
+    assert.ok(Math.abs(xs.y - CFG.pearlBallY * h) < 1e-9, tag + ' ball centred on the block height');
     for (const x of xs) {
-      assert.ok(x - h / 2 >= -LW / 2 + 4, tag + ' inside the block');
-      assert.ok(x + h / 2 <= -0.12 * LW, tag + ' clear of the centred decoration (' + (x + h / 2).toFixed(0) + ')');
-      assert.ok(x + h / 2 <= cx - 32 - 2, tag + ' clear of the crown');
-      assert.ok(xs.y + h / 2 <= L.LH / 2, tag + ' pearl fits the block height');
+      assert.ok(x + r <= -0.42 * LW, tag + ' the ball stays off the face (labels / dots reach ±0.42·LW): ' + (x + r).toFixed(0));
+      assert.ok(x < -LW / 2 && x + r > -LW / 2, tag + ' touches the left edge');
+      assert.ok(r <= 0.45 * L.LH, tag + ' fits the block height');
+      const left = L.tower.x + x - 0.2 * h, pipR = L.pip.x + CFG.pipHalfW * L.pip.h;
+      assert.ok(left > pipR && left > L.ins.left, tag + ' clear of Pip and the screen edge (' + left.toFixed(0) + ' vs ' + pipR.toFixed(0) + ')');
     }
   }
   const w = mkWorld({ age: 4, config: { blocksByRound: [1, 1, 1, 1] } });
@@ -904,7 +908,7 @@ test('world: pearl i sits on block i (left part of its front, inside the block, 
     }
   });
   for (let j = 1; j < 4; j++) assert.ok(ys[j] < ys[j - 1] - 0.8 * w2.layout.LH, 'pearl j on block j (bottom → top)');
-  for (const [dx, dy] of rel) { assert.ok(dx < 0 && dx > -w2.layout.LW / 2, 'left part'); assert.ok(Math.abs(dy - w2.layout.pearlH / 2) < 4, 'base below the centre'); }
+  for (const [dx, dy] of rel) { assert.ok(dx < -w2.layout.LW / 2 && dx > -w2.layout.LW / 2 - w2.layout.pearlH * 0.3, 'just left of the block ' + dx.toFixed(0)); assert.ok(Math.abs(dy - CFG.pearlBallY * w2.layout.pearlH) < 4, 'base below the centre (ball centred)'); }
 });
 
 test('world: errorless fade — from the 3rd wrong drop on one ask the wrong layers puff away (fadeWrong), only the right one is left; hints as before; the next ask has all its choices', () => {
@@ -993,7 +997,7 @@ test('world: setBreeze (weather wind 0..1) — a gentle sinusoidal rocking, |θ|
   w.setBreeze(7); assert.strictEqual(w._breezeIn, 1); w.setBreeze(-1); assert.strictEqual(w._breezeIn, 0); w.setBreeze(NaN); assert.strictEqual(w._breezeIn, 0);
 });
 
-test('world: puffer surprise — swims in from the right once, hovers beside the tower top 4 s; a tap → pufferTap (no score), puffs up (puff 0 → 1), one spinning loop, deflates, zooms off right; it leaves when a block is sent', () => {
+test('world: puffer surprise — swims in from the right once, hovers beside the tower top 4 s; a tap → pufferTap (no score), puffs up (puff 0 → 1), one spinning loop, deflates, zooms off right; playtest P1-2: it STAYS when a block is sent (lift + sink pass in front of it) and leaves after pufferSit', () => {
   const w = mkWorld({ age: 4 }); roundOf(w, 'colors', 2, 'puffer');
   assert.strictEqual(w.surprise, 'puffer');
   dragToTower(w, rightP(w)); untilPhase(w, 'ask', 20000);
@@ -1025,7 +1029,76 @@ test('world: puffer surprise — swims in from the right once, hovers beside the
   const w2 = mkWorld({ age: 4, seed: 5 }); roundOf(w2, 'colors', 2, 'puffer');
   dragToTower(w2, rightP(w2)); untilPhase(w2, 'ask', 20000);
   until(w2, () => w2.puffer && w2.puffer.state === 'sit', 6000);
-  tapPiece(w2, rightP(w2)); assert.strictEqual(w2.puffer.state, 'away');
+  const sitT = w2.time, R2 = rightP(w2);
+  tapPiece(w2, R2); assert.strictEqual(w2.puffer.state, 'sit', 'a send does not chase it away');
+  until(w2, () => R2.state !== 'lift' && R2.state !== 'fall');
+  assert.ok(w2.puffer && w2.puffer.state === 'sit', 'still there after the block landed');
+  until(w2, () => !w2.puffer || w2.puffer.state === 'away');
+  assert.ok(w2.time - sitT >= CFG.pufferSit - 0.05, 'leaves only after pufferSit (' + (w2.time - sitT).toFixed(2) + ' s)');
+  assert.deepStrictEqual([CFG.pufferDelay[0], CFG.pufferDelay[1], CFG.pufferIn], [0.3, 0.8, 1.2]);
+});
+
+test('world: ask gate (playtest P1-1) — ages ≤ 5 the ask opens only once Pip is quiet (world.speechBusy hook), at most askGateMax s; nothing is tappable meanwhile (no boop); age 6 / no hook: no wait', () => {
+  assert.strictEqual(CFG.askGateMax, 2.5); assert.strictEqual(CFG.askGateAges, 5);
+  const dealt = w => { until(w, () => w.phase === 'deal' && w.pieces.length && w.pieces.every(p => p.state === 'rest' || p.askIdx !== w.ask)); };
+  // busy for 1.2 s after the deal settles → the ask waits ≈ 1.2 s
+  let busy = true;
+  const w = mkWorld({ age: 4 }); w.speechBusy = () => busy;
+  w.levels = ['colors', 'colors', 'colors', 'colors']; w.startLevel(0); w._beginRound();
+  dealt(w); run(w, CFG.dealSettle + 0.05); evs(w);
+  assert.strictEqual(w.phase, 'deal', 'held while Pip talks');
+  const p = w.pieces[0];
+  assert.strictEqual(w.pointerDown(p.x, p.y), null, 'blocks not tappable yet'); w.pointerUp(p.x, p.y);
+  assert.ok(!evs(w).some(e => e.type === 'locked' || e.type === 'ask'), 'no boop, no ask');
+  run(w, 1.0); assert.strictEqual(w.phase, 'deal');
+  busy = false; w.update(H);
+  assert.strictEqual(w.phase, 'ask', 'opens on the first quiet step');
+  const ev = evs(w).find(e => e.type === 'ask'); assert.ok(ev && ev.waited > 1.0 && ev.waited < 1.2, 'waited ' + (ev && ev.waited));
+  // always busy → opens after askGateMax
+  const w2 = mkWorld({ age: 3 }); w2.speechBusy = () => true;
+  w2.levels = ['colors', 'colors', 'colors', 'colors']; w2.startLevel(0); w2._beginRound();
+  dealt(w2); const t0 = w2.time; untilPhase(w2, 'ask');
+  assert.ok(Math.abs(w2.time - t0 - CFG.dealSettle - CFG.askGateMax) < 0.05, 'max wait ' + (w2.time - t0).toFixed(2));
+  // ages 6–7, a throwing hook, or no hook: no wait
+  for (const [age, hook] of [[6, () => true], [7, () => true], [4, () => { throw new Error('x'); }], [4, null]]) {
+    const w3 = mkWorld({ age }); if (hook) w3.speechBusy = hook;
+    w3.levels = ['count', 'count', 'count', 'count']; w3.startLevel(0); w3._beginRound();
+    dealt(w3); const t3 = w3.time; untilPhase(w3, 'ask');
+    assert.ok(w3.time - t3 <= CFG.dealSettle + 0.02, 'age ' + age + ' no wait (' + (w3.time - t3).toFixed(2) + ')');
+  }
+  // a full bot session with a hook that is busy half of the time still finishes (no hang)
+  const w4 = mkWorld({ age: 4, seed: 3 }); let k = 0; w4.speechBusy = () => (k++ % 60) < 30;
+  const b = new RT.Bot(w4, { skill: 0.8, seed: 3 }); let n = 0;
+  while (w4.state !== 'sessionDone' && n++ < 30 * 900) { b.step(1 / 30); w4.update(1 / 30); }
+  assert.strictEqual(w4.state, 'sessionDone');
+});
+
+test('world: a wrong block drifts home through the water (functional P3-1) — peak speed ≈ 420 px/s (only the far 3rd slot of a wide landscape needs up to ≈ 850), home ≤ 2.4 s after it was sent, every viewport × age', () => {
+  let worst = 0, worstT = 0, over = 0, all = 0;
+  for (const v of VIEWPORTS) for (const age of [3, 4, 5, 7]) for (const ri of [0, 2]) {
+    const w = mkWorld({ age, vp: v, seed: 7 + ri }); roundOf(w, 'colors', ri);
+    for (const X of w.pieces.filter(p => !p.right).slice(0, CFG.fadeWrongAfter - 1)) {
+      until(w, () => w.phase === 'ask' && w.time >= w._lockUntil && X.state === 'rest');
+      const t0 = w.time; let peak = 0, sawHome = false;
+      assert.strictEqual(tapPiece(w, X), 'drop');
+      until(w, () => { if (X.state === 'bounce' || X.state === 'home') { peak = Math.max(peak, Math.hypot(X.vx, X.vy)); } if (X.state === 'home') { sawHome = true; assert.ok(X.arc.drift && onScreen(w, X.x, X.y, 1)); } if (w.time - t0 > 8) throw new Error("stuck " + v.name + " age " + age + " ri " + ri + " " + X.state + " " + w.phase); return X.state === "rest"; });
+      assert.ok(sawHome && Math.abs(X.x - X.homeX) < 1e-6 && Math.abs(X.y - X.homeY) < 0.1 * w.layout.LH, 'home');
+      worst = Math.max(worst, peak); worstT = Math.max(worstT, w.time - t0); all++; if (peak > 1.05 * CFG.homeDriftV) over++;
+    }
+  }
+  assert.ok(worst <= 900, 'peak ' + worst.toFixed(0) + ' px/s'); assert.ok(worstT <= CFG.homeBy + 0.07, 'home in ' + worstT.toFixed(2) + ' s');
+  assert.ok(over / all < 0.35, over + '/' + all + ' trips above 420 px/s');
+  console.log('     (' + all + ' wrong trips: peak ≤ ' + worst.toFixed(0) + ' px/s, ' + over + ' above 441; home ≤ ' + worstT.toFixed(2) + ' s)');
+});
+
+test('content: the very first session (no stored last topics, functional P3-2) plays RT.AGE_TOPICS[age] — age 4: colours, shapes, counting, animals; then it rotates', () => {
+  for (const age of AGES) for (const seed of [1, 104, 103, 77]) {
+    const w = mkWorld({ age, seed });
+    assert.deepStrictEqual(w.levels, RT.AGE_TOPICS[age], 'age ' + age + ' seed ' + seed);
+  }
+  assert.deepStrictEqual(RT.AGE_TOPICS[4], ['colors', 'shapes', 'count', 'animals']);
+  assert.deepStrictEqual(C.topicsFor(4, new RT.RNG(5), []), RT.AGE_TOPICS[4]);
+  assert.notDeepStrictEqual(C.topicsFor(4, new RT.RNG(5), RT.AGE_TOPICS[4]), RT.AGE_TOPICS[4]);
 });
 
 test('world: rotation / resize mid-drag, mid-fall, mid-deal, mid-crown-drop, mid-clear — everything snaps and goes on', () => {
@@ -1047,7 +1120,7 @@ test('world: rotation / resize mid-drag, mid-fall, mid-deal, mid-crown-drop, mid
     untilPhase(w, 'ask');
     const X = wrongP(w); d = w.dropPoint(); drag(w, X, d.x, d.y - 150); flip(w); check(w, 'mid-fall wrong');
     assert.ok(evs(w).some(e => e.type === 'wrong')); assert.strictEqual(X.state, 'rest'); assert.strictEqual(w.phase, 'ask');
-    run(w, 1);
+    run(w, CFG.wrongLock);
     dragToTower(w, rightP(w)); until(w, () => w.pieces.some(q => q.state === 'in' && q.alpha > 0)); flip(w); check(w, 'mid-deal'); untilPhase(w, 'ask');
     while (w.phase !== 'done') { dragToTower(w, rightP(w)); until(w, () => w.phase === 'ask' || w.phase === 'done'); }
     until(w, () => w.goal.state === 'drop'); evs(w); flip(w); check(w, 'mid-crown');

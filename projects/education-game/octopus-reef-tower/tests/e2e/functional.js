@@ -4,7 +4,7 @@
 //   node tests/e2e/functional.js drag wrong rotate      (only some groups)
 //   JOBS=2 node tests/e2e/functional.js                 (groups run in parallel pages; default 2)
 // Groups: boot lang gate settings flags volume drag wrong miss tap poke multi talk pause visibility rotate idle countup
-//         bot done layout puffer
+//         bot done layout puffer tapx words
 // Prints PASS/FAIL per check + a per-group summary, writes tests/out/functional/results.json (+ screenshots),
 // exits 1 on any FAIL. Never edits the game: it only reads RT.debug / world state and touches the screen.
 const { chromium } = require('playwright');
@@ -43,6 +43,15 @@ function badText(s) {
   if (/\bundefined\b|\bNaN\b|\bnull\b|\[object/.test(s)) return 'undefined/NaN/null';
   if (/\b(p|ui|topic|talk|say|session|weather|surprise|stack|count|puffer|blow|crown)\.[a-zA-Z0-9]/.test(s)) return 'raw i18n key';
   return null;
+}
+
+/* Leftovers from Koko's Cake Tower (EN + VI). "bee" is allowed only as the spoken name of the letter B. */
+const OLD_RE = /\b(cakes?|cupcakes?|koalas?|koko|cherr(y|ies)|candles?|frosting|icing)\b|bánh kem|bánh ngọt|\bnến\b|anh đào|gấu túi|con ong|\bkoko\b/i;
+function oldWord(s) {
+  s = String(s || '');
+  if (OLD_RE.test(s)) return true;
+  const bee = s.replace(/\b(letter|big|small) bee\b/gi, '').replace(/\bbee is for\b/gi, '').replace(/(^|[\s"“(])bee([!.?,”")]|$)/gi, '$1$2');
+  return /\bbees?\b/i.test(bee);
 }
 
 let srv, browser;
@@ -114,13 +123,13 @@ async function installEv(page) {
 const DONE_TYPES = ['towerDone', 'crown', 'crownOn', 'count', 'blow', 'pearlsOut', 'sprinkles', 'roundDone'];
 const doneSeq = page => page.evaluate(T => {
   const ev = window.__ev.filter(e => T.includes(e.type)), out = [];
-  let cakes = 0;
+  let towers = 0;
   for (let i = 0; i < ev.length; i++) {
     if (ev[i].type !== 'towerDone') continue;
     const j = ev.findIndex((e, k) => k > i && e.type === 'roundDone');
-    if (j < 0) { if (i < ev.length - 1) out.push(`cake @${ev[i].lv}:${ev[i].rd}: no roundDone after towerDone`); continue; }
-    cakes++;
-    const seq = ev.slice(i, j + 1), n = ev[i].n, tag = `cake ${ev[i].lv}:${ev[i].rd} n=${n}`;
+    if (j < 0) { if (i < ev.length - 1) out.push(`tower @${ev[i].lv}:${ev[i].rd}: no roundDone after towerDone`); continue; }
+    towers++;
+    const seq = ev.slice(i, j + 1), n = ev[i].n, tag = `tower ${ev[i].lv}:${ev[i].rd} n=${n}`;
     const want = ['towerDone', 'crown', 'crownOn'].concat(Array(n).fill('count'), ['blow', 'pearlsOut', 'sprinkles', 'roundDone']);
     const got = seq.map(e => e.type);
     if (got.join() !== want.join()) out.push(`${tag}: order ${got.join('>')}`);
@@ -133,7 +142,7 @@ const doneSeq = page => page.evaluate(T => {
     const dt = ev[j].wt - ev[i].wt, exp = 1.8 + 0.45 * n;
     if (Math.abs(dt - exp) > 0.25) out.push(`${tag}: towerDone→roundDone ${dt.toFixed(2)} s (want ${exp.toFixed(2)})`);
   }
-  return { cakes, out };
+  return { towers, out };
 }, DONE_TYPES);
 const evOf = (page, t) => page.evaluate(t => window.__ev.filter(e => e.type === t), t);
 const evTypes = page => page.evaluate(() => window.__ev.map(e => e.type));
@@ -330,8 +339,8 @@ async function gSettings(check) {
   await tapEl(c, '#scrSettings label.toggle:has(#optMusic)');
   await tapEl(c, '#scrSettings [data-lang="vi"]');
   await c.page.evaluate(() => { const e = document.getElementById('optVolume'); e.value = 60; e.dispatchEvent(new Event('input', { bubbles: true })); });
-  const s1 = await c.page.evaluate(() => JSON.parse(localStorage.getItem('ck:settings') || '{}'));
-  check('settings: saved to localStorage ck:settings', s1.age === 5 && s1.name === 'Mầm' && s1.music === false && s1.lang === 'vi' && Math.abs(s1.volume - 0.6) < 1e-6, s1);
+  const s1 = await c.page.evaluate(() => JSON.parse(localStorage.getItem('rt:settings') || '{}'));
+  check('settings: saved to localStorage rt:settings', s1.age === 5 && s1.name === 'Mầm' && s1.music === false && s1.lang === 'vi' && Math.abs(s1.volume - 0.6) < 1e-6, s1);
   await tapEl(c, '#btnSettingsDone');
   check('settings: Done returns to title', await visible(c.page, 'scrTitle') && !(await visible(c.page, 'scrSettings')));
   const ageTxt = await c.page.evaluate(() => document.getElementById('titleAge').textContent);
@@ -346,7 +355,7 @@ async function gSettings(check) {
   const praise = await c.page.evaluate(() => { const o = []; for (let i = 0; i < 40; i++) o.push(RT.I18N.t('vi', 'great', { child: 'Mầm' })); return o; });
   check('settings: the child\'s name is used in praise', praise.some(l => /Mầm/.test(l)) && praise.every(l => !badText(l)), [...new Set(praise)]);
   const keys = await c.page.evaluate(() => Object.keys(localStorage));
-  check('settings: only ck: keys in localStorage', keys.length > 0 && keys.every(k => k.startsWith('ck:')), keys);
+  check('settings: only rt: keys in localStorage', keys.length > 0 && keys.every(k => k.startsWith('rt:')), keys);
   check('settings: zero console errors', c.errors.length === 0, c.errors);
   await ctx.close();
 }
@@ -354,7 +363,7 @@ async function gSettings(check) {
 async function gFlags(check) {
   const ctx = await browser.newContext(ctxOpts(DEV.iphoneP));
   const c = await open(DEV.iphoneP, 'mute=1&lang=vi&age=7&speed=2&seed=9', { ctx });
-  const t1 = await c.page.evaluate(() => ({ l1: document.getElementById('logo1').textContent, age: document.getElementById('titleAge').textContent, ls: localStorage.getItem('ck:settings') }));
+  const t1 = await c.page.evaluate(() => ({ l1: document.getElementById('logo1').textContent, age: document.getElementById('titleAge').textContent, ls: localStorage.getItem('rt:settings') }));
   check('flags: ?lang=vi&age=7 applied for the session', t1.l1 === 'Bạch Tuộc Pip' && /7/.test(t1.age), t1);
   check('flags: nothing saved just by loading with flags', t1.ls == null, t1.ls);
   await begin(c);
@@ -362,10 +371,10 @@ async function gFlags(check) {
   await c.page.evaluate(() => RT.debug.goTitle());
   await openSettingsByHold(c);
   await tapEl(c, '#scrSettings label.toggle:has(#optSfx)');
-  const s2 = await c.page.evaluate(() => JSON.parse(localStorage.getItem('ck:settings') || '{}'));
+  const s2 = await c.page.evaluate(() => JSON.parse(localStorage.getItem('rt:settings') || '{}'));
   check('flags: saving another setting does not store the flag values (lang/age/speed/seed/mute/level)', s2.lang === 'en' && s2.age === 4 && s2.sfx === false && !('speed' in s2) && !('seed' in s2) && !('mute' in s2) && !('level' in s2) && !('bot' in s2), s2);
   const keys = await c.page.evaluate(() => Object.keys(localStorage));
-  check('flags: only ck: keys in localStorage', keys.every(k => k.startsWith('ck:')), keys);
+  check('flags: only rt: keys in localStorage', keys.every(k => k.startsWith('rt:')), keys);
   await tapEl(c, '#btnSettingsDone');
   await c.page.goto(srv.url + '?mute=1'); await waitTitle(c.page);
   const t2 = await c.page.evaluate(() => ({ l1: document.getElementById('logo1').textContent, age: document.getElementById('titleAge').textContent, s: RT.debug.getState().settings, sp: RT.debug.getState().speed }));
@@ -393,7 +402,7 @@ async function gVolume(check) {
   await openSettingsByHold(c);
   await c.page.evaluate(() => { const e = document.getElementById('optVolume'); e.value = 30; e.dispatchEvent(new Event('input', { bubbles: true })); e.dispatchEvent(new Event('change', { bubbles: true })); });
   await sleep(400);
-  const v = await c.page.evaluate(() => ({ S: RT.debug.getState().settings.volume, A: RT.debug.audio().volume, g: RT.debug.audio().user.gain.value, saved: JSON.parse(localStorage.getItem('ck:settings') || '{}').volume }));
+  const v = await c.page.evaluate(() => ({ S: RT.debug.getState().settings.volume, A: RT.debug.audio().volume, g: RT.debug.audio().user.gain.value, saved: JSON.parse(localStorage.getItem('rt:settings') || '{}').volume }));
   check('volume: slider 30 % → setting, saved, audio gain 0.48', Math.abs(v.S - 0.3) < 1e-6 && Math.abs(v.saved - 0.3) < 1e-6 && Math.abs(v.A - 0.3) < 1e-6 && Math.abs(v.g - 0.48) < 0.05, v);
   await tapEl(c, '#btnSettingsDone');
   await c.page.reload(); await waitTitle(c.page);
@@ -405,7 +414,7 @@ async function gVolume(check) {
   const lv0 = await c.page.evaluate(() => document.getElementById('volLevel').textContent);
   check('volume: pause menu shows the level', lv0 === '30%', lv0);
   await tapEl(c, '#btnVolUp'); await tapEl(c, '#btnVolUp');
-  const up = await c.page.evaluate(() => ({ S: RT.debug.getState().settings.volume, saved: JSON.parse(localStorage.getItem('ck:settings')).volume, lv: document.getElementById('volLevel').textContent, A: RT.debug.audio().volume }));
+  const up = await c.page.evaluate(() => ({ S: RT.debug.getState().settings.volume, saved: JSON.parse(localStorage.getItem('rt:settings')).volume, lv: document.getElementById('volLevel').textContent, A: RT.debug.audio().volume }));
   check('volume: + + in pause → 50 %, saved, audio volume follows', Math.abs(up.S - 0.5) < 1e-6 && Math.abs(up.saved - 0.5) < 1e-6 && up.lv === '50%' && Math.abs(up.A - 0.5) < 1e-6, up);
   for (let i = 0; i < 7; i++) await tapEl(c, '#btnVolDown');
   await sleep(300);
@@ -451,7 +460,7 @@ async function gDrag(check) {
     const rd = await evOf(c.page, 'roundDone'), cnt = (await evOf(c.page, 'count')).map(e => e.i);
     check(`${tag}: tower done → count 1…n bottom-up, roundDone 3 stars`, rd.length === 1 && rd[0].stars === 3 && cnt.join() === [...Array(s0.asks)].map((_, i) => i + 1).join(), { rd, cnt });
     const ds = await doneSeq(c.page);
-    check(`${tag}: done sequence towerDone→crown→crownOn→count×n→blow→pearlsOut→sprinkles→roundDone, pearls = layers, timing`, ds.cakes === 1 && ds.out.length === 0, ds);
+    check(`${tag}: done sequence towerDone→crown→crownOn→count×n→blow→pearlsOut→sprinkles→roundDone, pearls = layers, timing`, ds.towers === 1 && ds.out.length === 0, ds);
     await shot(c, 'drag-done');
     await c.page.waitForFunction(() => RT.debug.world.round === 1 && RT.debug.world.phase === 'ask', null, { timeout: 15000 }).catch(() => {});
     await sleep(800);
@@ -852,7 +861,7 @@ async function gRotate(check) {
     check(`${tag}: the stale finger lifting drops nothing`, !ev.includes('drop') && !ev.includes('stack') && !ev.includes('wrong') && (await towerN(c.page)) === n0, ev);
     const v1 = await sceneAudit(c.page);
     const ps = await pieceState(c.page, r.id);
-    check(`${tag}: layers / cake / Pip inside the rotated screen, block home`, v1.length === 0 && ps.state === 'rest' && ps.atHome, { v1, ps });
+    check(`${tag}: blocks / tower / Pip inside the rotated screen, block home`, v1.length === 0 && ps.state === 'rest' && ps.atHome, { v1, ps });
     const W = await c.page.evaluate(() => RT.debug.getState());
     check(`${tag}: logical size switched orientation`, (b.viewport.width > b.viewport.height) === (W.W > W.H), { W: W.W, H: W.H });
     await shot({ page: c.page, dev: b }, 'rotate-after-drag');
@@ -915,7 +924,7 @@ async function gCountUp(check) {
     await startGame(c2, 4); await waitAsk(c2.page).catch(() => {});
     const s2 = await wstate(c2.page), a2 = (await evOf(c2.page, 'ask'))[0];
     check(`${tag}: ?level=${idx} → chapter ${idx}, topic count, first ask p.countUp`, s2.level === idx && s2.topic === 'count' && a2 && a2.promptKey === 'p.countUp', { s2, a2: a2 && { k: a2.promptKey, p: a2.params } });
-    const ls = await c2.page.evaluate(() => JSON.parse(localStorage.getItem('ck:settings') || 'null'));
+    const ls = await c2.page.evaluate(() => JSON.parse(localStorage.getItem('rt:settings') || 'null'));
     check(`${tag}: ?level is never saved`, !ls || !('level' in ls), ls);
     check(`${tag}: ?level page: zero console errors`, c2.errors.length === 0, c2.errors);
     await c2.close();
@@ -938,9 +947,9 @@ async function gBot(check) {
     check(`${tag}: session reaches mode done`, ok, st);
     check(`${tag}: played at age ${age}`, st.age === age, st.age);
     const cnt = await c.page.evaluate(() => { const n = t => window.__ev.filter(e => e.type === t).length; return { level: n('level'), talk: n('talk'), round: n('round'), roundDone: n('roundDone'), towerDone: n('towerDone'), sessionDone: n('sessionDone'), wrong: n('wrong'), stack: n('stack'), asks: n('ask'), crownOn: n('crownOn'), sprinkles: n('sprinkles'), pearlsOut: n('pearlsOut') }; });
-    check(`${tag}: 4 chapters, 4 talks, ≥ 2 cakes per chapter, every cake done, one stack per ask`, cnt.level === 4 && cnt.talk === 4 && cnt.round === cnt.roundDone && cnt.round === cnt.towerDone && cnt.round >= 8 && cnt.sessionDone === 1 && cnt.stack === cnt.asks && cnt.crownOn === cnt.round && cnt.sprinkles === cnt.round && cnt.pearlsOut === cnt.round, cnt);
+    check(`${tag}: 4 chapters, 4 talks, ≥ 2 towers per chapter, every tower done, one stack per ask`, cnt.level === 4 && cnt.talk === 4 && cnt.round === cnt.roundDone && cnt.round === cnt.towerDone && cnt.round >= 8 && cnt.sessionDone === 1 && cnt.stack === cnt.asks && cnt.crownOn === cnt.round && cnt.sprinkles === cnt.round && cnt.pearlsOut === cnt.round, cnt);
     const ds = await doneSeq(c.page);
-    check(`${tag}: every cake's done sequence in order, pearls = layers, timing`, ds.cakes === cnt.round && ds.out.length === 0, { cakes: ds.cakes, out: ds.out.slice(0, 6) });
+    check(`${tag}: every tower's done sequence in order, pearls = layers, timing`, ds.towers === cnt.round && ds.out.length === 0, { towers: ds.towers, out: ds.out.slice(0, 6) });
     // every ask's prompt spoken (one of the prompt's wordings, in the session language), chapter by chapter
     const pr = await c.page.evaluate(lang => {
       const vl = window.__vl, out = { perLevel: {}, missing: [] };
@@ -971,6 +980,8 @@ async function gBot(check) {
     function badText(s) { if (!s.trim()) return 'empty'; if (/[{}]|\bundefined\b|\bNaN\b|\[object/.test(s)) return 'x'; if (/\b(p|ui|topic|talk|session|weather|surprise|stack)\.[a-zA-Z0-9]/.test(s)) return 'key'; return null; }
     const wrongLang = vl.filter(t => !t.startsWith(lang + '|'));
     check(`${tag}: every voice line in ${lang}`, wrongLang.length === 0, wrongLang.slice(0, 5));
+    const old = vl.filter(t => oldWord(t.slice(3)));
+    check(`${tag}: no Koko-era words (cake/koala/cherry/candle/bee) in any voice line`, old.length === 0, [...new Set(old)].slice(0, 6));
     const neg = vl.filter(t => NEG_RE.test(t.slice(3)));
     check(`${tag}: no negative words in any voice line`, neg.length === 0, [...new Set(neg)].slice(0, 6));
     if (lang === 'vi') { const viShare = vl.filter(t => VI_RE.test(t)).length / Math.max(1, vl.length); check(`${tag}: VI lines carry Vietnamese diacritics (≥ 80 %)`, viShare >= 0.8, { viShare, sample: vl.filter(t => !VI_RE.test(t)).slice(0, 8) }); }
@@ -1110,12 +1121,12 @@ async function gPuffer(check) {
     const tag = `puffer/${d.name}`;
     await c.page.evaluate(() => { window.__stopBotOnPuffer = true; RT.debug.setBot(true, 1); RT.debug.setSpeed(8); RT.debug.startGame(); });
     const came = await c.page.waitForFunction(() => window.__ev.some(e => e.type === 'puffer'), null, { timeout: 120000, polling: 100 }).then(() => true).catch(() => false);
-    check(`${tag}: a puffer arrives during play (age 3 surprise cake)`, came, await wstate(c.page));
+    check(`${tag}: a puffer arrives during play (age 3 surprise tower)`, came, await wstate(c.page));
     if (!came) { await c.close(); continue; }
     await c.page.evaluate(() => { RT.debug.setBot(false); RT.debug.setSpeed(1); });
     const sat = await c.page.waitForFunction(() => { const B = RT.debug.world.puffer; return B && B.state === 'sit'; }, null, { timeout: 4000 }).then(() => true).catch(() => false);
     const b0 = await c.page.evaluate(() => { const w = RT.debug.world; return { st: w.puffer && w.puffer.state, hit: w.pufferHit(), misses: w.misses, tower: w.tower.blocks.length, phase: w.phase, scr: RT.debug.pufferScreen(), under: (() => { const s = RT.debug.pufferScreen(); const e = s && document.elementFromPoint(s.x, s.y); return e && (e.id || e.className); })() }; });
-    check(`${tag}: the puffer sits on the cake, on screen, tappable (pufferHit), on the canvas`, sat && b0.hit && b0.scr && b0.scr.x > 0 && b0.scr.x < d.viewport.width && b0.scr.y > 0 && b0.scr.y < d.viewport.height && b0.under === 'game', b0);
+    check(`${tag}: the puffer sits on the tower, on screen, tappable (pufferHit), on the canvas`, sat && b0.hit && b0.scr && b0.scr.x > 0 && b0.scr.x < d.viewport.width && b0.scr.y > 0 && b0.scr.y < d.viewport.height && b0.under === 'game', b0);
     await clearEv(c.page);
     const n0 = await vlen(c.page);
     const p = await c.page.evaluate(() => RT.debug.pufferScreen());
@@ -1141,6 +1152,161 @@ async function gPuffer(check) {
   }
 }
 
+/* Per-frame recorder of one piece (logical px, state) + the tower sway, until stopRec. */
+const startRec = (page, id) => page.evaluate(id => {
+  window.__rec = []; window.__recOn = true;
+  const loop = () => {
+    if (!window.__recOn) return;
+    const w = RT.debug.world, p = w.pieceById(id), L = w.layout;
+    if (p) { const s = RT.debug.toScreen(p.x, p.y), v = RT.debug.view(); window.__rec.push({ t: w.time, st: p.state, x: p.x, y: p.y, vx: p.vx || 0, vy: p.vy || 0, sx: s.x, sy: s.y, hw: p.bw * v.s / 2, hh: p.bh * v.s / 2, ph: w.phase, th: Math.abs(w.tower.theta || 0), W: L.W, H: L.H }); }
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+}, id);
+const stopRec = page => page.evaluate(() => { window.__recOn = false; return window.__rec; });
+/* The motion of a wrong bounce: stays on screen, peak speed, how long it takes to get home. */
+function bounceStats(rec, vw, vh) {
+  const mv = rec.filter(r => r.st !== 'rest' && r.st !== 'drag');
+  const off = mv.filter(r => r.sx - r.hw < -4 || r.sx + r.hw > vw + 4 || r.sy - r.hh < -4 || r.sy + r.hh > vh + 4);
+  const b = rec.filter(r => r.st === 'bounce' || r.st === 'home');
+  const peak = Math.max(0, ...b.map(r => Math.hypot(r.vx, r.vy)));
+  const t0 = mv.length ? mv[0].t : 0, tEnd = (rec.slice().reverse().find(r => r.st !== 'rest') || {}).t || t0;
+  return { frames: rec.length, states: [...new Set(rec.map(r => r.st))].join('>'), off: off.length, offSample: off.slice(0, 2), peak: Math.round(peak), dur: +(tEnd - t0).toFixed(2), maxTheta: +Math.max(0, ...rec.map(r => r.th)).toFixed(3) };
+}
+
+/* TAP extras: wrong tap ×2 (gentle bounce on screen, counts as a miss, 2nd → hint + glow), taps during the lift ignored,
+ * double-tap sends one block, rotation mid-lift (right and wrong) and mid-bounce never leaves a stuck state. */
+async function gTapX(check) {
+  for (const [d, rot] of [[DEV.iphoneP, DEV.iphoneL], [DEV.ipadL, DEV.ipadP], [DEV.iphoneL, DEV.iphoneP]]) {
+    const c = await open(d, 'mute=1&seed=37&age=4');
+    const tag = `tapx/${d.name}`;
+    await begin(c); await sleep(800);
+    const s0 = await wstate(c.page);
+    let pl = await piecesInfo(c.page);
+    const wr = pl.filter(i => !i.right);
+    // --- wrong tap #1: gentle bounce home, counts as a miss, no hint yet
+    await clearEv(c.page);
+    await startRec(c.page, wr[0].id);
+    await tapAt(c, wr[0], 70);
+    const gotW = await waitEv(c.page, 'wrong', 4000);
+    const home1 = await waitRest(c.page, wr[0].id, 6000);
+    await sleep(100);
+    const bs = bounceStats(await stopRec(c.page), d.viewport.width, d.viewport.height);
+    const w1 = await evOf(c.page, 'wrong'), s1 = await wstate(c.page);
+    check(`${tag}: wrong tap → lift > fall > bounce > home > rest, wrong event, back home`, gotW && home1 && /lift/.test(bs.states) && /bounce/.test(bs.states) && /home/.test(bs.states), bs);
+    check(`${tag}: wrong tap counts as a miss (askMisses 1), tower unchanged, no hint yet`, w1.length === 1 && w1[0].misses === 1 && s1.askMisses === 1 && s1.tower === s0.tower && (await evOf(c.page, 'hint')).length === 0, { w1, s1 });
+    check(`${tag}: the bounce is gentle: block always on screen, home within 2.5 s, tower sway ≤ 0.12 rad`, bs.off === 0 && bs.dur <= 2.5 && bs.maxTheta <= 0.12, bs);
+    check(`${tag}: bounce/home speed stays watery (peak ≤ 2.5 × sink terminal 420 = 1050 px/s; now ${bs.peak})`, bs.peak <= 1050, bs);
+    // --- wrong tap #2 (same or other wrong block) → hint on the right block, glow
+    await waitAsk(c.page).catch(() => {}); await sleep(200);
+    await clearEv(c.page);
+    pl = await piecesInfo(c.page);
+    const w2 = pl.find(i => !i.right && i.id !== wr[0].id) || pl.find(i => !i.right);
+    await tapAt(c, w2, 70);
+    await waitEv(c.page, 'wrong', 4000); await sleep(300);
+    const h = await evOf(c.page, 'hint'), aid = await c.page.evaluate(() => RT.debug.answerId());
+    const gl = await c.page.evaluate(() => { const w = RT.debug.world, p = w.pieceById(RT.debug.answerId()); return { glow: p && p.glow, glowT: p && p._glowT, hand: w.hintHand && w.hintHand.pieceId, misses: w.askMisses }; });
+    check(`${tag}: 2nd wrong TAP → hint on the right block, it glows, ghost hand on it`, h.length === 1 && h[0].pieceId === aid && gl.glow > 0.05 && gl.hand === aid && gl.misses === 2, { h, gl, ev: await evTypes(c.page) });
+    await shot(c, 'tapx-hint');
+    // --- taps during the lift are ignored: tap right, then tap it again + the other block while it rides the bubble
+    await waitAsk(c.page).catch(() => {}); await sleep(350);
+    await clearEv(c.page);
+    pl = await piecesInfo(c.page);
+    const r = pl.find(i => i.right), o = pl.find(i => !i.right && i.state === 'rest');
+    const n0 = await towerN(c.page);
+    await tapAt(c, r, 60);
+    await sleep(120);
+    const stL = (await pieceState(c.page, r.id)).state;
+    const dl0 = await c.page.evaluate(() => window.__downLog.length);
+    await tapAt(c, r, 50); await sleep(40);
+    if (o) { await tapAt(c, o, 50); }
+    const midDowns = await c.page.evaluate(n => window.__downLog.slice(n), dl0);
+    await waitEv(c.page, 'stack', 4000); await sleep(300);
+    const tpL = await evOf(c.page, 'tapPiece');
+    check(`${tag}: taps during the lift (${stL}) are ignored: one tapPiece, one drop, one stack, tower +1, other block still home`,
+      stL === 'lift' && tpL.length === 1 && (await evOf(c.page, 'drop')).length === 1 && (await evOf(c.page, 'stack')).length === 1 && (await towerN(c.page)) === n0 + 1 && midDowns.every(x => x.r == null || x.r === 'locked') && (!o || (await evOf(c.page, 'wrong')).length === 0),
+      { stL, tpL: tpL.length, midDowns, ev: await evTypes(c.page) });
+    // --- double tap (two taps 90 ms apart) on the right block of the next ask → one block sent
+    const more = await c.page.waitForFunction(() => { const w = RT.debug.world; return (w.phase === 'ask' && w.state === 'round') || w.state !== 'round' || window.__ev.some(e => e.type === 'towerDone'); }, null, { timeout: 8000 }).then(() => true).catch(() => false);
+    if (more && (await wstate(c.page)).phase === 'ask' && !(await c.page.evaluate(() => window.__ev.some(e => e.type === 'towerDone')))) {
+      await waitAsk(c.page).catch(() => {}); await sleep(350);
+      await clearEv(c.page);
+      const r2 = (await piecesInfo(c.page)).find(i => i.right), n1 = await towerN(c.page);
+      await tapAt(c, r2, 40); await sleep(90); await tapAt(c, r2, 40);
+      await waitEv(c.page, 'stack', 4000); await sleep(400);
+      check(`${tag}: double tap on the right block → exactly one tapPiece + one stack`, (await evOf(c.page, 'tapPiece')).length === 1 && (await evOf(c.page, 'stack')).length === 1 && (await towerN(c.page)) === n1 + 1, await evTypes(c.page));
+    }
+    // --- rotate mid-lift (right block): it still lands, scene inside, next ask normal
+    await setSpeed(c.page, 3);
+    await c.page.waitForFunction(() => { const w = RT.debug.world; return w.state === 'round' && w.phase === 'ask' && RT.debug.answerId() != null && !w._locked() && w.pieces.filter(p => p.askIdx === w.ask).every(p => p.state === 'rest'); }, null, { timeout: 20000 }).catch(() => {});
+    await setSpeed(c.page, 1); await sleep(350);
+    await clearEv(c.page);
+    let ri = (await piecesInfo(c.page)).find(i => i.right);
+    const n2 = await towerN(c.page), rd0 = (await wstate(c.page)).round;
+    await tapAt(c, ri, 60); await sleep(150);
+    const stR = (await pieceState(c.page, ri.id) || {}).state;
+    await c.page.setViewportSize(rot.viewport); await sleep(500);
+    const ok1 = await waitEv(c.page, 'stack', 4000);
+    await sleep(300);
+    const au1 = await sceneAudit(c.page), ws1 = await wstate(c.page);
+    check(`${tag}: rotated → ${rot.name} mid-lift (${stR}) → the right block still stacks, nothing off screen`, stR === 'lift' && ok1 && au1.length === 0 && (ws1.tower === n2 + 1 || ws1.round > rd0 || ws1.phase === 'done'), { stR, ok1, au1, ws1, n2 });
+    // --- rotate mid-lift with a WRONG block: bounce resolves, phase back to ask, no stuck press / lock
+    await setSpeed(c.page, 3);
+    const back = await c.page.waitForFunction(() => { const w = RT.debug.world; return w.state === 'round' && w.phase === 'ask' && RT.debug.answerId() != null && !w._locked() && w.pieces.filter(p => p.askIdx === w.ask).every(p => p.state === 'rest') && w.pieces.filter(p => p.askIdx === w.ask && !p.right).length > 0; }, null, { timeout: 25000 }).then(() => true).catch(() => false);
+    await setSpeed(c.page, 1); await sleep(350);
+    if (back) {
+      await clearEv(c.page);
+      const wi = (await piecesInfo(c.page)).find(i => !i.right);
+      await tapAt(c, wi, 60); await sleep(150);
+      const stW = (await pieceState(c.page, wi.id) || {}).state;
+      await c.page.setViewportSize(d.viewport); await sleep(400);
+      const after = await c.page.evaluate(id => { const w = RT.debug.world, p = w.pieceById(id); return { phase: w.phase, press: w._press, p: p && p.state, locked: w._locked() }; }, wi.id);
+      const asking = await c.page.waitForFunction(() => { const w = RT.debug.world; return w.phase === 'ask' && w.pieces.filter(p => p.askIdx === w.ask).every(p => p.state === 'rest'); }, null, { timeout: 4000 }).then(() => true).catch(() => false);
+      const au2 = await sceneAudit(c.page);
+      check(`${tag}: rotated back mid-lift of a WRONG block (${stW}) → block home, phase ask again, no stuck press, all on screen`, ['lift', 'fall'].includes(stW) && asking && after.press == null && au2.length === 0, { stW, after, asking, au2, ev: await evTypes(c.page) });
+      await c.page.waitForFunction(() => !RT.debug.world._locked(), null, { timeout: 4000 }).catch(() => {}); await sleep(200);   // wrongLock is 1.3 s (playtest P2-1)
+      await clearEv(c.page);
+      ri = (await piecesInfo(c.page)).find(i => i.right);
+      if (ri) { await tapAt(c, ri, 60); check(`${tag}: after the rotation a tap on the right block stacks`, await waitEv(c.page, 'stack', 4000), await evTypes(c.page)); }
+      // --- rotate during the bounce of a wrong block
+      await setSpeed(c.page, 3);
+      const back2 = await c.page.waitForFunction(() => { const w = RT.debug.world; return w.state === 'round' && w.phase === 'ask' && !w._locked() && w.pieces.filter(p => p.askIdx === w.ask).every(p => p.state === 'rest') && w.pieces.some(p => p.askIdx === w.ask && !p.right); }, null, { timeout: 25000 }).then(() => true).catch(() => false);
+      await setSpeed(c.page, 1); await sleep(350);
+      if (back2) {
+        await clearEv(c.page);
+        const wb = (await piecesInfo(c.page)).find(i => !i.right);
+        await tapAt(c, wb, 60);
+        const inB = await c.page.waitForFunction(id => { const p = RT.debug.world.pieceById(id); return p && p.state === 'bounce'; }, wb.id, { timeout: 3000, polling: 'raf' }).then(() => true).catch(() => false);
+        await c.page.setViewportSize(rot.viewport); await sleep(400);
+        const asking2 = await c.page.waitForFunction(() => { const w = RT.debug.world; return w.phase === 'ask' && w.pieces.filter(p => p.askIdx === w.ask).every(p => p.state === 'rest'); }, null, { timeout: 4000 }).then(() => true).catch(() => false);
+        const au3 = await sceneAudit(c.page);
+        check(`${tag}: rotated mid-bounce (${inB ? 'bounce' : 'missed the bounce'}) → phase ask again, all on screen`, inB && asking2 && au3.length === 0, { inB, asking2, au3, ws: await wstate(c.page) });
+        await c.page.waitForFunction(() => !RT.debug.world._locked(), null, { timeout: 4000 }).catch(() => {}); await sleep(200); await clearEv(c.page);
+        const rr = (await piecesInfo(c.page)).find(i => i.right);
+        if (rr) { await tapAt(c, rr, 60); check(`${tag}: a tap on the right block stacks after the mid-bounce rotation`, await waitEv(c.page, 'stack', 4000), await evTypes(c.page)); }
+      }
+    }
+    check(`${tag}: zero console errors`, c.errors.length === 0, c.errors);
+    await c.close();
+  }
+}
+
+/* Every text string (EN + VI) and the title/settings DOM: no Koko-era words. */
+async function gWords(check) {
+  const c = await open(DEV.iphoneP, 'mute=1');
+  for (const lang of ['en', 'vi']) {
+    const bad = await c.page.evaluate(lang => RT.I18N.keys(lang).map(k => [k, RT.I18N.raw(lang, k)]).filter(([, v]) => v != null).map(([k, v]) => [k, Array.isArray(v) ? v.join(' | ') : typeof v === 'object' ? JSON.stringify(v) : String(v)]), lang);
+    const hits = bad.filter(([, v]) => oldWord(v));
+    check(`words: no cake/koala/cherry/candle/bee words in any ${lang} string (${bad.length} keys)`, hits.length === 0, hits.slice(0, 8));
+    if (lang === 'vi') await tapEl(c, '.title-screen [data-lang="vi"]');
+    const dom = await c.page.evaluate(() => document.body.innerText + ' ' + document.title);
+    check(`words: page text (${lang}) has no Koko-era words`, !oldWord(dom), (dom.match(OLD_RE_SRC) || []).slice(0, 5));
+  }
+  check('words: zero console errors', c.errors.length === 0, c.errors);
+  await c.close();
+}
+const OLD_RE_SRC = OLD_RE;
+
 async function pool(items, n, fn) {
   const q = items.slice(); const ws = [];
   for (let i = 0; i < Math.min(n, q.length); i++) ws.push((async () => { while (q.length) await fn(q.shift()); })());
@@ -1149,7 +1315,7 @@ async function pool(items, n, fn) {
 
 const GROUPS = { boot: gBoot, lang: gLang, gate: gGate, settings: gSettings, flags: gFlags, volume: gVolume, drag: gDrag, wrong: gWrong,
   miss: gMiss, tap: gTap, poke: gPoke, multi: gMulti, talk: gTalk, pause: gPause, visibility: gVisibility, rotate: gRotate,
-  idle: gIdle, countup: gCountUp, bot: gBot, done: gDone, layout: gLayout, puffer: gPuffer };
+  idle: gIdle, countup: gCountUp, bot: gBot, done: gDone, layout: gLayout, puffer: gPuffer, tapx: gTapX, words: gWords };
 
 (async () => {
   const bad = ONLY.filter(g => !GROUPS[g]);

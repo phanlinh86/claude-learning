@@ -2,7 +2,7 @@
  *
  *   RT.Voice.init({ lang, enabled })      call once at boot (safe without speechSynthesis)
  *   RT.Voice.unlock()                     call inside the FIRST touchend/click (iOS + Chrome need a gesture)
- *   RT.Voice.setLang('en'|'vi')  setEnabled(bool)  stop()  isSpeaking()  hasVoice(lang)  voiceName(lang?)
+ *   RT.Voice.setLang('en'|'vi')  setEnabled(bool)  stop()  isSpeaking()  isBusy()  hasVoice(lang)  voiceName(lang?)
  *   RT.Voice.say(text, { interrupt, priority, rate, pitch, lang }) → Promise<{ spoken, reason }>
  *   RT.Voice.sayKey(key, params, opts) → Promise (promise.text = the display text, for the speech bubble)
  *   RT.Voice.onStart = fn(text)  RT.Voice.onEnd = fn(text)   (Pip's talk frames, music ducking; text = display text)
@@ -256,6 +256,8 @@
   V.isEnabled = function () { return V._enabled; };
   V.isSupported = function () { return !!(synth || getSynth()); };
   V.isSpeaking = function () { return !!current; };
+  /** Speaking, or a line is queued and about to start (e.g. the 50–90 ms after an interrupt) — main's ask gate uses it. */
+  V.isBusy = function () { return !!current || (queue.length > 0 && !!synth && V._enabled && canSpeakNow()); };
   V.hasVoice = function (lang) { return !!pick(lang || V._lang); };
   V.voiceName = function (lang) { var v = pick(lang || V._lang); return v ? v.name : ''; };
   V.voices = function () { loadVoices(); return voices.slice(); };

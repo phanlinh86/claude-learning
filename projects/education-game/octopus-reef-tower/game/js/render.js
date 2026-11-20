@@ -163,8 +163,20 @@
       this._layer('ground', from, to, mix);
       this._caustics(amb);
       this._surface(amb);
-      if (amb.darkness > 0.01) { g.fillStyle = `rgba(40,70,100,${clamp(amb.darkness, 0, 0.5)})`; g.fillRect(0, 0, W, H); }
-      if (amb.tint) { g.fillStyle = typeof amb.tint === 'string' ? amb.tint : `rgba(${amb.tint.join(',')})`; g.fillRect(0, 0, W, H); }
+      // rain darkness + mood tint: full over the water, fading to ~25 % over the sand so the tray band keeps its warm colour
+      // (visual QA P2-5: a grey sand ring had the luminance of the green / orange / pink blocks)
+      const sandY = Math.min(H * (portrait ? 0.66 : 0.68), (this._L.groundY || H) - (this._L.LH || 99) * 1.1);
+      const veil = (r, gg, b, al) => {
+        if (!(al > 0.004)) return;
+        const gr = g.createLinearGradient(0, sandY - 70, 0, sandY + 40);
+        gr.addColorStop(0, `rgba(${r},${gg},${b},${al})`); gr.addColorStop(1, `rgba(${r},${gg},${b},${al * 0.25})`);
+        g.fillStyle = gr; g.fillRect(0, 0, W, H);
+      };
+      if (amb.darkness > 0.01) veil(40, 70, 100, clamp(amb.darkness, 0, 0.5));
+      if (amb.tint) {
+        if (typeof amb.tint === 'string') { g.fillStyle = amb.tint; g.fillRect(0, 0, W, H); }
+        else veil(amb.tint[0], amb.tint[1], amb.tint[2], amb.tint[3]);
+      }
     }
     _rays(sx, sunA, amb) {   // soft light rays slanting down from the surface, gently swaying
       if (!(sunA > 0.02)) return;
@@ -193,10 +205,12 @@
     }
     _surface(amb) {   // the wavy water surface band at the very top, scrolling slowly with the current
       const g = this.g, W = this.W, portrait = this.H > W, k = portrait ? 1.2 : 1, h = 90 * k, tw = 1200 * k;
+      // landscape: the band is lifted (only its lower part shows) so a 5-shell tower's starfish stays clear of it (QA P3-5)
+      const lift = portrait ? 0 : Math.round((W / this.H > 1.9 ? 34 : 18) * this.rs);
       const off = ((this.time * (12 + (amb.wind || 0) * 30)) % tw + tw) % tw;
       if (RT.Assets.has('surface')) {
         const tile = RT.Assets.exact('surface', Math.round(tw * this.rs), Math.round(h * this.rs));
-        if (tile) { g.save(); g.setTransform(1, 0, 0, 1, 0, 0); for (let x = -off * this.rs; x < W * this.rs; x += tile.width) g.drawImage(tile, Math.round(x), 0); g.restore(); return; }
+        if (tile) { g.save(); g.setTransform(1, 0, 0, 1, 0, 0); for (let x = -off * this.rs; x < W * this.rs; x += tile.width) g.drawImage(tile, Math.round(x), -lift); g.restore(); return; }
       }
       g.save(); g.fillStyle = 'rgba(255,255,255,.25)'; g.beginPath(); g.moveTo(0, 0);
       for (let x = 0; x <= W; x += 20) g.lineTo(x, 14 + Math.sin((x + off) / 60) * 6);
@@ -252,8 +266,12 @@
       const bw = (p.bw || D.LW) * sc, bh = (p.bh || D.LH) * sc;
       const L = this._L, gy = (p.homeY != null ? p.homeY + (p.bh || D.LH) / 2 + 2 : L.groundY - 6);
       const lift = clamp((gy - (y + bh / 2)) / 260, 0, 1);
-      if (p.state !== 'fall' || lift < 0.98) this._shadow(x, gy, bw * small * (0.95 - 0.45 * lift), al * (1 - 0.6 * lift));
+      if (p.state !== 'fall' || lift < 0.98) this._shadow(x, gy, bw * small * (0.95 - 0.45 * lift), al * (1 - 0.6 * lift) * 1.6);
+      // a soft dark halo around the shell silhouette so pale blocks (yellow) pop on the sunny sand (visual QA P3-1)
+      const halo = !(p.glow > 0.01);
+      if (halo) { this.g.save(); this.g.shadowColor = 'rgba(70,45,10,0.55)'; this.g.shadowBlur = 5 * this.rs; this.g.shadowOffsetY = 1.5 * this.rs; }
       this._block(p.block, x, y, rot, p.sx, p.sy, { S: D.S, LW: D.LW * sc, LH: D.LH * sc }, { glow: p.glow || 0, lift: p.state === 'drag' || p.state === 'lift' ? 1 : 0, id: p.block && p.block.id != null ? p.block.id : p.id }, al);
+      if (halo) this.g.restore();
       const bub = p.bubble != null ? +p.bubble : (p.state === 'lift' ? 1 : 0);
       if (bub > 0.01) this._liftBubble(x, y, Math.hypot(bw * small, bh * small) * 0.56 + 10, bub * al);
     }
@@ -419,7 +437,7 @@
       const LW = portrait ? 130 : 110, LH = Math.round(LW * 0.71), tx = portrait ? W * 0.62 : (ins.left || 0) + Math.max(340, W * 0.34);
       this._miniTower(tx, gy - 64, LW, LH, ['red', 'orange', 'yellow', 'green', 'blue'], t, { glow: true, pearls: 5 });
       const lh = portrait ? Math.min(340, gy - 120) : Math.min(360, H * 0.52), k = lh / PIP.h;
-      const lx = portrait ? (ins.left || 0) + 130 : tx - LW * 0.6 - PIP.w * k * 0.42;
+      const lx = portrait ? (ins.left || 0) + 130 : tx - LW * 0.6 - PIP.w * k * 0.56;   // QA P2-6: the raised arm clears the tower
       const hop = Math.max(0, Math.sin(t * 4)) * 16;
       this._shadow(lx, gy + 2, PIP.w * k * 0.55, 1);
       const nm = RT.Assets.has('pip_cheer') ? 'pip_cheer' : 'pip_idle';
@@ -496,12 +514,13 @@
       } else if (type === 'fish') {   // the fish school swirls around the finished tower, then swims away
         const n = Math.round((opt.n || 12) * Math.max(0.6, this.quality)), rx = opt.rx || 170, ry = opt.ry || 120;
         for (let i = 0; i < n; i++) fx.push({ k: 'fish', cx: x, cy: y, rx: rx * (0.75 + R() * 0.5), ry: ry * (0.7 + R() * 0.6), a: i / n * TAU + R() * 0.3, w: (1.6 + R() * 0.6) * (opt.dir || 1),
-          t: -i * 0.04, life: 2.6 + R() * 0.5, len: 22 + R() * 10, color: FISHC[i % FISHC.length], x, y, rot: 0 });
-      } else if (type === 'sparkles') {
-        for (let i = 0; i < 26; i++) {
-          const a = R() * TAU, sp = 120 + R() * 300;
-          fx.push({ k: 'p', sprite: R() < 0.5 ? 'sparkle' : 'pstar', tint: CONF[i % CONF.length], x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 100, g: 220, t: 0, life: 1 + R() * 0.6, size: 20 + R() * 16, rot: R() * TAU, vr: 5 });
+          t: -i * 0.04, life: 2.6 + R() * 0.5, len: (opt.len || 44) + R() * 10, color: FISHC[i % FISHC.length], x, y, rot: 0 });
+      } else if (type === 'sparkles') {   // white sparkles + bubbles (no gold stars: they read as extra starfish — QA P3-3)
+        for (let i = 0; i < 16; i++) {
+          const a = R() * TAU, sp = 100 + R() * 240;
+          fx.push({ k: 'p', sprite: 'sparkle', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 80, g: 160, t: 0, life: 0.8 + R() * 0.5, size: 18 + R() * 12, rot: R() * TAU, vr: 5 });
         }
+        for (let i = 0; i < 10; i++) { const a = R() * TAU, r0 = 20 + R() * 50; this._bub(x + Math.cos(a) * r0, y + Math.sin(a) * r0 * 0.6, 4 + R() * 7, -70 - R() * 70, 1.1 + R() * 0.6, Math.cos(a) * 50); }
       } else if (type === 'smoke') {   // the pearls float away: each leaves a little bubble cluster
         for (let i = 0; i < (opt.n || 4); i++) { const px = x + (i - ((opt.n || 4) - 1) / 2) * (opt.gap || 26); for (let j = 0; j < 3; j++) this._bub(px + (R() - 0.5) * 14, y - j * 8, 4 + R() * 6, -80 - R() * 50, 1.4 + R() * 0.4); }
       } else if (type === 'breath') {   // Pip blows a stream of bubbles from her lips to the tower top
@@ -597,11 +616,18 @@
         } else if (f.k === 'num') {
           const s = easeOutBack(clamp(u * 3, 0, 1)), al = u > 0.7 ? (1 - u) / 0.3 : 1;
           g.save(); g.globalAlpha *= al; g.translate(f.x, f.y - u * 40); g.scale(s, s);
-          outlinedText(g, f.text, 0, 0, 84, '#1F6F86', '#FFFFFF', 200); g.restore();
+          // white numeral, teal outline, in a small bubble: never mistaken for the dark-teal numerals ON the blocks (QA P2-2)
+          const R0 = 38;
+          g.fillStyle = 'rgba(31,111,134,.55)'; g.strokeStyle = '#FFFFFF'; g.lineWidth = 4;
+          g.beginPath(); g.arc(0, 0, R0, 0, TAU); g.fill(); g.stroke();
+          g.fillStyle = 'rgba(255,255,255,.9)'; g.beginPath(); g.arc(-R0 * 0.45, -R0 * 0.45, R0 * 0.16, 0, TAU); g.fill();
+          outlinedText(g, f.text, 0, 3, 54, '#FFFFFF', '#1F6F86', R0 * 1.7); g.restore();
         } else if (f.k === 'star') {
           const e = u * u * (3 - 2 * u);
           const x = lerp(f.x0, f.x1, e), y = lerp(f.y0, f.y1, e) - Math.sin(u * Math.PI) * 140;
-          this._sprite('star', x, y, f.size * (1 - 0.5 * u), u * 6, 1);
+          const sz = f.size * (1 - 0.5 * u);
+          g.fillStyle = 'rgba(255,255,255,.7)'; g.beginPath(); g.arc(x, y, sz * 0.62, 0, TAU); g.fill();
+          this._sprite('star', x, y, sz, u * 6, 1);
         }
       }
     }

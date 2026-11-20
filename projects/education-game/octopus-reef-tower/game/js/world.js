@@ -2,16 +2,16 @@
  *
  * ============================== CONVENTIONS ==============================
  *  Units: logical px (short side 720), seconds, radians, y DOWN, rot > 0 clockwise. Screen space = world space (no camera).
- *  update(dt) runs fixed sub-steps of cfg.step (1/120 s); at the START of every sub-step pieces / flying tower layers / the
+ *  update(dt) runs fixed sub-steps of cfg.step (1/120 s); at the START of every sub-step pieces / flying tower blocks / the
  *  puffer store _px/_py/_prot, the tower stores _ptheta, the goal _pcrownY/_pcloudY. Render v = _v + (v − _v)·alpha.
  *
  *  BLOCK SIZE: layout.LW × layout.LH (= round(1.12·S) × round(0.80·S)); a small block is 0.72× both (piece.bw × piece.bh).
  *    RT.BlockArt.drawBlock(ctx, block, LW·scale, LH·scale, opt) is called with the FULL size — BlockArt shrinks 'small' itself.
- *  PIECE (a choice layer): (x, y) = CENTRE; draw translate(x, y) · rotate(rot) · scale(sx, sy) · drawBlock(...) with
+ *  PIECE (a choice block): (x, y) = CENTRE; draw translate(x, y) · rotate(rot) · scale(sx, sy) · drawBlock(...) with
  *    globalAlpha = alpha. y already includes the bottom-anchored squash offset. glow 0..1 = hint halo.
- *    Draw order: w.drawOrder() (resting 2nd row → 1st row → hopping → the active piece on top, above the cake).
+ *    Draw order: w.drawOrder() (resting 2nd row → 1st row → hopping → the active piece on top, above the tower).
  *  TOWER: w.blockPose(i, alpha) → { x, y (centre), rot, sx, sy, alpha } of tower.blocks[i] (i = 0 bottom); draw like a
- *    piece. The stand's plate top centre is (tower.x, tower.baseTop). Layer i is rotated θ·(i+1)/n (the cake bends).
+ *    piece. The stand's top centre is (tower.x, tower.baseTop). Block i is rotated θ·(i+1)/n (the tower bends).
  *  GOAL: w.cloudPose(alpha) → {x, y (= the jellyfish bell top, anchor (100, 30) of env/jelly_ride.svg), s, alpha, pulse} | null;
  *    w.crownPose(alpha) → {x, y (= crown bottom anchor (40, 86)), rot, sx, sy, alpha} | null. goal.pulse 0..1 (0.9 Hz bell pulse).
  *  PEARLS: w.pearlPose(j, alpha) → {x, y (pearl BASE = anchor (24, 46) of pearl.svg), rot, s (pop scale, overshoots), h, lit, out
@@ -29,10 +29,10 @@
     // ---- timing / state machine (s)
     step: 1 / 120,             // fixed simulation sub-step (≤ 1/120 per DESIGN)
     maxFrame: 1.0,             // largest dt accepted per update() (speed mode passes big dt)
-    roundsPerLevel: 4,         // cakes per chapter
-    chapterTimeLimit: 80,      // s since the chapter began: after ≥ chapterMinRounds cakes go to Talk time once exceeded
+    roundsPerLevel: 4,         // towers per chapter
+    chapterTimeLimit: 80,      // s since the chapter began: after ≥ chapterMinRounds towers go to Talk time once exceeded
     chapterMinRounds: 2,
-    chapterBudget: 100,        // … and also when this chapter's pace (s per stacked layer) says the next cake would end past 100 s
+    chapterBudget: 100,        // … and also when this chapter's pace (s per stacked block) says the next tower would end past 100 s
     introTime: 2.5,            // chapter banner + weather line (the 2.5 s weather crossfade)
     talkAfterAnswer: 1.6,
     levelDoneTime: 1.8,
@@ -44,10 +44,10 @@
     groundLand: 28, groundPort: 40,
     blockS: { 3: 124, 4: 124, 5: 110, 6: 110, 7: 110 }, blockMin: 92,   // item scale S
     layerW: 1.12, layerH: 0.80,               // shell blocks: LW = round(1.12·S), LH = round(0.80·S) (age 4: 139 × 99)
-    topRoomLand: 150, topRoomPort: 364,       // the tallest cake top stays this far below ins.top (tall portrait: bubble bottom 234 + 12 + goalH 110 + 8)
+    topRoomLand: 150, topRoomPort: 364,       // the tallest tower top stays this far below ins.top (tall portrait: bubble bottom 234 + 12 + goalH 110 + 8)
     wideRatio: 1.9, topRoomWide: 116,         // phone landscape (W/H > 1.9): less sky → S 110 at ages 5–7
     baseDyPortShort: 90, topRoomPortShort: 272, pipDyPortShort: 40,   // QA P3-9: iPad portrait feet 11 px over the tray → 41 px clearance   // short portraits (iPad): bubble on the HUD row; sky = bubble bottom 142 + 12 + 110 + 8
-    towerFracLand: 0.40, towerMinLand: 400, towerFracPort: 0.58,   // 0.40 / 400: room for 2–3 wide layers right of the drop zone (iPad 4:3)
+    towerFracLand: 0.40, towerMinLand: 400, towerFracPort: 0.58,   // 0.40 / 400: room for 2–3 wide blocks right of the drop zone (iPad 4:3)
     baseDyLand: 96, baseDyPort: 150, baseExtra: 60,   // the stand is ≈ 98 px tall at baseW 221 → it stands on the ground in landscape
     dropPad: 60, dropBelow: 10, dropCatch: 40,   // dropCatch: the RELEASE test reaches 40 px further to each side (QA P2-3: 78–88 % of side misses were within 40 px); the layout keeps dropPad
     goalGap: 8, goalH: 110, cloudLift: 18,    // crown bottom = goalY; the jellyfish bell top 18 px above it; crown + bell ≈ 110 px
@@ -78,35 +78,44 @@
     breezeTorque: 0.18, breezeHz: [0.3, 0.19], breezeMix: [0.75, 0.25], breezeTau: 1.2,   // setBreeze (sea current): |θ| from it ≤ ≈ 0.016 rad
     restitution: 0.45, bounceKick: 260, bounceSpin: 7, bounceSway: 0.025, bounceApex: 6,
     homeApex: 50, tapApex: 22,
+    // QA P3-1: a wrong block drifts home through the water (Hermite curve from its bounce velocity to rest): peak ≈ homeDriftV,
+    // stretched only as far as the time budget allows (home ≤ homeBy s after it was sent)
+    homeDriftV: 420, homeBy: 2.4, homeDriftMin: 0.45, homeDriftRock: 0.06,
     dealStagger: 0.08, dealDelay: 0.35, dealSettle: 0.08, nextDealDelay: 0.15,
+    // playtest P1-1 ask gate (ages ≤ askGateAges): the ask (question + tappable blocks) opens only once Pip is quiet
+    // (world.speechBusy(), set by main), waiting at most askGateMax s; without the hook (headless, speed mode) no wait
+    askGateMax: 2.5, askGateAges: 5,
     dealSink: 0.75, dealFrom: 300, dealRock: 0.14, dealSway: 10, dealFade: 0.25, dealSquash: 0.07,   // pieces drift down 300 px into their slots
     outTime: 0.35, outVx: [60, 140], outVy: -200, outBuoy: -300, tossApex: 1.2,   // out: the unchosen blocks float up and fade
-    dropAbove: 1.5,            // dropPoint = 1.5·LH above the cake top
+    dropAbove: 1.5,            // dropPoint = 1.5·LH above the tower top
     bobAmp: 2, bobHz: 0.7, wiggleAmp: 0.07, wiggleHz: 2.2,
     // goal: the starfish crown riding a little jellyfish
     goalOmega: 7, goalZeta: 0.7, goalBob: 4, goalBobHz: 1.1, goalNear: 1.5, goalBump: 60, pulseHz: 0.9,   // swim-in spring (≈ 4 % overshoot), bob ± 4 px
 
-    // ---- cake done → clear (DESIGN §5.2: ≈ 3.6 s for 4 layers)
+    // ---- tower done → clear (DESIGN §5.2: ≈ 3.6 s for 4 blocks)
     crownAt: 0.15, crownHop: 160, crownG: 1400, crownSquash: 0.3, crownOmega: 22, crownZeta: 0.3, crownKick: 0.012,
     jellyAway: 1.0, jellyUp: 340,   // the jellyfish swims up 340 px and fades in 1 s after it drops the crown
     countAt: 0.65, countStep: 0.45,  // count i at countAt + (i − 1)·countStep (room for a spoken number)
-    // the crown sits at +min(0.28·LW, LW/2 − 32) on the top block (its 64 px stay on the top); pearl i (square art, drawn
-    // pearlH·LH = 40 px at age 4) sits on block i's front, its centre pearlInset px in from the left edge, vertically centred
-    crownOff: 0.28, crownHalfW: 32, pearlH: 0.40, pearlInset: 8, pearlMaxBh: 0.6, popOmega: 18, popZeta: 0.4, litDelay: 0.1, litTime: 0.2,
+    // the crown sits at +min(0.28·LW, LW/2 − 32) on the top block (its 64 px stay on the top). Visual P2-1: pearl i (art drawn
+    // pearlH·LH = 79 px at age 4, ball 0.38·h ≈ 30 px ≈ 16 CSS px on iPhone portrait) hangs on block i's LEFT side, outside
+    // the face (it never covers numerals / dots / pictures; the crown and the count numerals are on the right): the ball centre
+    // pearlOut·ball-radius outside the left edge, at the block's mid-height (pearlBallY = the art's ball centre above its base, × h)
+    crownOff: 0.28, crownHalfW: 32, pearlH: 0.80, pearlOut: 0.55, pearlBallY: 0.29, pearlBallR: 0.19, pearlMaxBh: 1.0, popOmega: 18, popZeta: 0.4, litDelay: 0.1, litTime: 0.2,
     blowAfter: 0.45, blowKick: 0.025, outAfter: 0.45, outTimeC: 0.4, sprinklesAfter: 0.3, roundDoneAfter: 0.4, doneMax: 7,
     clearStagger: 0.1, clearTime: 0.8, clearVy: -80, clearBuoy: 1100, clearVt: 700, clearFade: 0.3, clearDrift: [20, 60], clearAfter: 0.1,
 
     // ---- help
-    hintAfterMisses: 2, hintCooldown: 6, wrongLock: 0.7, hintTime: 4, hintStroke: 0.9, hintBob: 28,   // the ghost hand TAPS the piece (0.9 s per tap)
+    hintAfterMisses: 2, hintCooldown: 6, wrongLock: 1.3, hintTime: 4, hintStroke: 0.9, hintBob: 28,   // the ghost hand TAPS the piece (0.9 s per tap)
     idleTime: 12, idleBackoff: 1.5, idleMax: 30, idleHintFrom: 1,   // QA P3-3: gaps 12, 18, 27, 30, 30 (skill rule: back-off to 30 s)
-    graceAssist: true, freeSlipFrom: 3, softTapHint: 3, tapAssist: true,   // freeSlipFrom 3 (QA P3-1): cakes of ≥ 3 layers forgive one slip
-    fadeWrongAfter: 3,         // QA P1-1: from the 3rd wrong drop on one ask the wrong layers puff away (_out) — only the right one is left
+    graceAssist: true, freeSlipFrom: 3, softTapHint: 3, tapAssist: true,   // freeSlipFrom 3 (QA P3-1): towers of ≥ 3 blocks forgive one slip
+    fadeWrongAfter: 3,         // QA P1-1: from the 3rd wrong drop on one ask the wrong blocks puff away (_out) — only the right one is left
 
     // ---- surprise round: one per chapter, the type rotates per chapter from a random start per session
     surpriseRound: 1,
     surpriseTypes: ['breeze', 'puffer'],
     gustAfter: 1.1, gustPeak: 0.1, gustDir: -1, holdDelay: 0.3, holdTime: 1.5, holdDamp: 3, holdStiff: 1.5, windDecay: 1.2,
-    pufferDelay: [1.0, 2.0], pufferIn: 1.8, pufferSit: 4, pufferOut: 1.2, pufferLoop: 1.4, pufferLoopR: 46, pufferR: 64,
+    // playtest P1-2: the puffer stays when a block is sent (it leaves after pufferSit or when tapped) and arrives sooner
+    pufferDelay: [0.3, 0.8], pufferIn: 1.2, pufferSit: 4, pufferOut: 1.2, pufferLoop: 1.4, pufferLoopR: 46, pufferR: 64,
     pufferPuffIn: 0.25, pufferSpin: [0.3, 1.05], pufferHoverDx: 0.5, pufferHoverPx: 44, pufferHoverDy: 56,   // hover right of the top
 
     // ---- Pip
@@ -128,6 +137,16 @@
     for (var i = 0; i < a.length; i++) { var b = a[i]; if (b && b.w > 0 && b.h > 0) out.push({ x: +b.x, y: +b.y, w: +b.w, h: +b.h }); }
     return out;
   }
+  /** Cubic Hermite drift A {x0, y0, vx0, vy0, x1, y1, T} at u = t/T (end velocity 0) → {x, y, vx, vy}. */
+  function herm(A, u) {
+    u = clamp(u, 0, 1);
+    var u2 = u * u, u3 = u2 * u, T = A.T;
+    var h00 = 2 * u3 - 3 * u2 + 1, h10 = u3 - 2 * u2 + u, h01 = 3 * u2 - 2 * u3;
+    var d00 = 6 * u2 - 6 * u, d10 = 3 * u2 - 4 * u + 1, d01 = 6 * u - 6 * u2;
+    return { x: h00 * A.x0 + h10 * T * A.vx0 + h01 * A.x1, y: h00 * A.y0 + h10 * T * A.vy0 + h01 * A.y1,
+      vx: (d00 * A.x0 + d01 * A.x1) / T + d10 * A.vx0, vy: (d00 * A.y0 + d01 * A.y1) / T + d10 * A.vy0 };
+  }
+  function driftPeak(A) { var m = 0; for (var i = 0; i <= 24; i++) { var q = herm(A, i / 24); m = Math.max(m, hyp(q.vx, q.vy)); } return m; }
   function insOf(ins) {
     return { top: +(ins && ins.top) || 0, right: +(ins && ins.right) || 0, bottom: +(ins && ins.bottom) || 0, left: +(ins && ins.left) || 0 };
   }
@@ -147,7 +166,7 @@
     return S;
   }
 
-  /** DESIGN §2 layout. maxN = the most layers a cake of this age has (S is fixed for the session). */
+  /** DESIGN §2 layout. maxN = the most blocks a tower of this age has (S is fixed for the session). */
   function computeLayout(W, H, ins, cfg, age, maxN) {
     ins = insOf(ins);
     var portrait = H > W, tall = H / W > cfg.tallRatio;
@@ -156,7 +175,7 @@
     if (portrait) {
       tx = cfg.towerFracPort * W;
       var bdy = tall ? cfg.baseDyPort : cfg.baseDyPortShort, room = tall ? cfg.topRoomPort : cfg.topRoomPortShort;
-      // the tray row (LH) below the stand + maxN layers on it fit under the top room
+      // the tray row (LH) below the stand + maxN blocks on it fit under the top room
       S = fitS(S0, groundY - bdy - ins.top - room, maxN + 1, cfg);
       LH = Math.round(cfg.layerH * S);
       baseTop = groundY - LH - bdy;
@@ -177,8 +196,20 @@
     var bubble = portrait
       ? (tall ? { x: bx, y: ins.top + cfg.bubbleYPort, w: W - bx - ins.right - cfg.bubbleX, h: cfg.bubbleHPort }
               : { x: bx, y: ins.top + cfg.bubbleYLand, w: W - ins.right - cfg.hudW - 14 - bx, h: cfg.bubbleHPort })
-      : { x: bx, y: ins.top + cfg.bubbleYLand, w: Math.min(cfg.bubbleMaxW, drop.x0 - 20 - bx), h: cfg.bubbleHLand };
+      : { x: bx, y: ins.top + cfg.bubbleYLand, w: landBubbleW(), h: cfg.bubbleHLand };
     bubble.w = Math.max(0, bubble.w);
+    // landscape (visual QA P2-4): the bubble runs up to the goal box's left edge (starfish + jellyfish, ±90 px, as in the
+    // layout test) instead of the drop zone's; when even the tallest tower's goal box (goalH) stays below the bubble band
+    // it runs on over the tower, stopping short of the puffer's hover spot (right of the top) and of the HUD
+    function landBubbleW() {
+      var left = tx - 90 - 14 - bx;
+      var goalTop = baseTop - maxN * Math.round(cfg.layerH * S) - cfg.goalGap - cfg.goalH;
+      if (goalTop > ins.top + cfg.bubbleYLand + cfg.bubbleHLand + 16) {
+        var right = Math.min(W - ins.right - cfg.hudW - 14, tx + cfg.pufferHoverDx * LW + cfg.pufferHoverPx - 84);
+        return Math.min(Math.round(cfg.bubbleMaxW * 1.3), Math.max(left, right - bx));
+      }
+      return Math.min(cfg.bubbleMaxW, left);
+    }
     var hud = { x: W - ins.right - cfg.hudW, y: 0, w: cfg.hudW + ins.right, h: ins.top + cfg.hudH };
     var L = {
       W: W, H: H, ins: ins, portrait: portrait, tall: tall, groundY: groundY, S: S, LW: LW, LH: LH, maxN: maxN, tower: tower, drop: drop,
@@ -194,18 +225,19 @@
   function goalYFor(L, cfg, n) { return L.tower.baseTop - n * L.LH - cfg.goalGap; }
   function setGoalY(L, cfg, n) { L.goalY = goalYFor(L, cfg, n); L.goal = { x: L.tower.x, y: L.goalY, cloudY: L.goalY - cfg.cloudLift }; }
 
-  /** Pearl offsets for a tower of n full blocks → [x…] (offset from each block's centre) with .h (drawn pearl height) and .y
-   *  (the base offset below the block centre). Pearl j is on block j: x = −bw/2 + pearlInset + h/2 (left part of the front,
-   *  clear of the centred decoration and of the crown, which sits right of the centre on the top). */
+  /** Pearl offsets for a tower of n full blocks → [x…] (offset from each block's centre) with .h (drawn pearl height), .y
+   *  (the base offset below the block centre) and .r (the ball radius). Pearl j hangs on block j's LEFT side (visual P2-1):
+   *  ball centre x = −bw/2 − pearlOut·r (just outside the face, so it never covers the block's numeral / dots / picture; the
+   *  crown and the count numerals are on the right), ball centre y = the block's centre. */
   function pearlOffsets(n, LW, LH, cfg, bw, bh) {
     bw = bw || LW; bh = bh || LH;
-    var h = Math.min(Math.round(cfg.pearlH * LH), Math.round(cfg.pearlMaxBh * bh)), out = [];
-    for (var j = 0; j < n; j++) out.push(-bw / 2 + cfg.pearlInset + h / 2);
-    out.h = h; out.y = h / 2;
+    var h = Math.min(Math.round(cfg.pearlH * LH), Math.round(cfg.pearlMaxBh * bh)), r = cfg.pearlBallR * h, out = [];
+    for (var j = 0; j < n; j++) out.push(-bw / 2 - cfg.pearlOut * r);
+    out.h = h; out.y = cfg.pearlBallY * h; out.r = r;
     return out;
   }
 
-  /** Resting centres of k choice layers (full-size centres; a small layer sits lower, bottom-aligned). */
+  /** Resting centres of k choice blocks (full-size centres; a small block sits lower, bottom-aligned). */
   function slotsFor(L, cfg, k) {
     var LW = L.LW, LH = L.LH, ins = L.ins, out = [], a, b, yr;
     function row(m, y, r) {
@@ -258,7 +290,7 @@
     return computeLayout(W, H, ins, c, a, RT.Content.maxBlocks(a));
   };
   World.slotsFor = slotsFor;
-  World.pearlOffsets = function (n, L, cfg) { return pearlOffsets(n, L.LW, L.LH, merge(CONFIG, cfg)); };   // → [x…] with .h (pearl height px)
+  World.pearlOffsets = function (n, L, cfg) { return pearlOffsets(n, L.LW, L.LH, merge(CONFIG, cfg)); };   // → [x…] with .h (pearl height px), .y, .r
   World.kickFor = kickFor;
 
   var P = World.prototype;
@@ -268,7 +300,7 @@
   P.drainEvents = function () { var e = this.events; this.events = []; return e; };
   P.setAge = function (a) { this._pendingAge = RT.Content.ageOf(a); };
   P.setLang = function (l) { this._pendingLang = l === 'vi' ? 'vi' : 'en'; };
-  /** Weather wind 0..1 (main passes weather.ambient.wind every frame): a gentle sinusoidal rocking of the cake (|θ| ≤ 0.02). */
+  /** Weather wind 0..1 (main passes weather.ambient.wind every frame): a gentle sinusoidal rocking of the tower (|θ| ≤ 0.02). */
   P.setBreeze = function (v) { this._breezeIn = clamp(+v || 0, 0, 1); };
   P.pieceById = function (id) { for (var i = 0; i < this.pieces.length; i++) if (this.pieces[i].id === id) return this.pieces[i]; return null; };
   P._setState = function (s) { this.state = s; this.stateTime = 0; };
@@ -307,17 +339,17 @@
   P.luluHit = P.pipHit;   // deprecated alias
   /** Pip's lips in the blow frame (art (270, 140) of 300×400, feet (150, 392)). */
   P.pipMouth = function () { var Q = this.layout.pip, k = Q.h / 400; return { x: Q.x + 120 * k, y: Q.y - 252 * k }; };
-  /** Top surface centre of the cake (stand top when empty) → {x, y, rot}. */
+  /** Top surface centre of the tower (stand top when empty) → {x, y, rot}. */
   P.towerTop = function (alpha) {
     var T = this.tower, live = this._liveCount();
     if (!live) return { x: T.x, y: T.baseTop, rot: 0 };
     var c = this._chain(alpha === undefined ? 1 : alpha), q = c[live - 1];
     return { x: q.tx, y: q.ty, rot: q.rot };
   };
-  /** Logical point dropAbove·LH above the cake top (where a finger lets go of a layer). */
+  /** Logical point dropAbove·LH above the tower top (where a finger lets go of a block). */
   P.dropPoint = function () { var t = this.towerTop(); return { x: t.x, y: t.y - this.cfg.dropAbove * this.layout.LH }; };
   P._liveCount = function () { var b = this.tower.blocks, n = 0; while (n < b.length && !b[n].fly) n++; return n; };
-  /** The bending chain of the stacked layers: centre, rotation, top point of every non-flying layer. */
+  /** The bending chain of the stacked blocks: centre, rotation, top point of every non-flying block. */
   P._chain = function (alpha) {
     var T = this.tower, n = this._liveCount(), th = lerp(T._ptheta, T.theta, alpha), out = [];
     var ax = T.x, ay = T.baseTop;
@@ -331,7 +363,7 @@
     }
     return out;
   };
-  /** Pose of tower layer i for render: {x, y (centre), rot, sx, sy, alpha}. */
+  /** Pose of tower block i for render: {x, y (centre), rot, sx, sy, alpha}. */
   P.blockPose = function (i, alpha) {
     var b = this.tower.blocks[i];
     if (!b) return null;
@@ -343,7 +375,7 @@
     var c = this._chain(alpha)[i];
     return { x: c.x, y: c.y, rot: c.rot, sx: b.sx, sy: b.sy, alpha: 1 };
   };
-  /** A point (ox along the layer, on its top surface − up) of the layer that carries the crown → {x, y, rot, alpha}. */
+  /** A point (ox along the block, on its top surface − up) of the block that carries the crown → {x, y, rot, alpha}. */
   P._onTop = function (ox, up, alpha) {
     var G = this.goal, T = this.tower, i = -1, k;
     for (k = 0; k < T.blocks.length; k++) if (G && T.blocks[k].id === G.onId) i = k;
@@ -368,7 +400,7 @@
     return { x: G.x, y: lerp(G._pcloudY, G.cloudY, alpha), s: G.cloudS, alpha: G.cloudA, pulse: G.pulse };
   };
   P.jellyPose = P.cloudPose;
-  /** The crown: {x, y (bottom anchor), rot, sx, sy, alpha} | null (null once its layer has flown away). */
+  /** The crown: {x, y (bottom anchor), rot, sx, sy, alpha} | null (null once its block has flown away). */
   P.crownPose = function (alpha) {
     var G = this.goal;
     if (!G) return null;
@@ -452,7 +484,7 @@
       }
       if (p.state === 'out') p.state = 'gone';
       if (p.state !== 'gone') self._rest(p, true);
-      if (p.state === 'rest' && p._fadeOut) { p._fadeOut = false; p.state = 'gone'; }   // a fading wrong layer just vanishes on a re-layout
+      if (p.state === 'rest' && p._fadeOut) { p._fadeOut = false; p.state = 'gone'; }   // a fading wrong block just vanishes on a re-layout
     });
     this.pieces = this.pieces.filter(function (p) { return p.state !== 'gone'; });
     if (this.tower.blocks.some(function (b) { return b.fly; })) {
@@ -506,14 +538,14 @@
   P._beginRound = function () {
     var cfg = this.cfg;
     var rr = new RT.RNG((this.rng.next() * 4294967296) >>> 0);
-    // the chapter's surprise: the puffer at cake surpriseRound; the breeze at the first cake from there with ≥ 3 layers (it needs a 3rd
-    // layer after the gust — age 4's cake 2 has 2 layers since QA P2-4)
+    // the chapter's surprise: the puffer at tower surpriseRound; the breeze at the first tower from there with ≥ 3 blocks (it needs a 3rd
+    // block after the gust — age 4's tower 2 has 2 blocks since QA P2-4)
     var ST = cfg.surpriseTypes, type = ST && ST.length ? ST[(this.level + this._surpriseOff) % ST.length] : null, at = cfg.surpriseRound;
     if (type === 'breeze' && !cfg.blocksByRound) while (at < 3 && RT.Content.blocksFor(this.topic, this.age, at) < 3) at++;
     var sp = type && this.round === at ? type : null;
     this.cur = RT.Content.makeRound(this.topic, { age: this.age, lang: this.lang, rng: rr, roundIndex: this.round, surprise: sp,
       avoid: this._lastAskOf || null, blocks: cfg.blocksByRound ? cfg.blocksByRound[this.round] : undefined });
-    if (sp === 'breeze' && this.cur.n < 3) sp = 'puffer';   // the breeze needs a 3rd layer after the gust
+    if (sp === 'breeze' && this.cur.n < 3) sp = 'puffer';   // the breeze needs a 3rd block after the gust
     if (sp === 'puffer' && this.cur.n < 2) sp = null;
     this.cur.surprise = sp;
     this._lastAskOf = this.cur.asks[this.cur.asks.length - 1];
@@ -567,7 +599,16 @@
       p.rot = p._prot = 0;
       self.pieces.push(p); ids.push(p.id);
     });
+    this._gateT = 0;
     this._emit({ type: 'deal', ask: this.ask, n: k, pieces: ids });
+  };
+  /** Playtest P1-1 ask gate: true while the dealt ask should keep waiting for Pip to finish speaking (ages ≤ askGateAges,
+   *  at most askGateMax s). `world.speechBusy` is an optional hook main sets (() => the voice is speaking or has a line queued);
+   *  without it (headless tests, sims, speed mode) the gate never waits, so the world stays deterministic. */
+  P._askGated = function () {
+    var cfg = this.cfg, f = this.speechBusy;
+    if (typeof f !== 'function' || !(cfg.askGateMax > 0) || this.age > cfg.askGateAges || this._gateT >= cfg.askGateMax) return false;
+    try { return !!f(); } catch (e) { return false; }
   };
 
   P._startAsk = function () {
@@ -577,7 +618,7 @@
     this.askMisses = 0; this._lockUntil = -1; this._softN = 0;
     this._idleT = 0; this._idleGap = this.cfg.idleTime; this._idleN = 0;
     this._emit({ type: 'ask', ask: this.ask, asks: this.asks, promptKey: a.promptKey, params: a.params, answerId: r ? r.id : null,
-      nameKind: a.nameKind, nameValue: a.nameValue, first: this.ask === 0 });
+      nameKind: a.nameKind, nameValue: a.nameValue, first: this.ask === 0, waited: this._gateT || 0 });
     if (this.surprise === 'puffer' && !this._beeDone && this._beeAt < 0 && this.ask >= 1) {
       this._beeAt = this.time + this.rng.float(this.cfg.pufferDelay[0], this.cfg.pufferDelay[1]);
     }
@@ -631,7 +672,7 @@
       this._press = { kind: 'pip', x0: x, y0: y, t0: this.time, moved: false, maxD: 0, fx: x, fy: y };
       return 'pip';
     }
-    if (!hit) {   // plaza / sky / the cake: a soft tap (and, once the layer was hinted, a tap on the cake stacks it)
+    if (!hit) {   // plaza / sky / the tower: a soft tap (and, once the block was hinted, a tap on the tower stacks it)
       if (this.phase === 'ask' && this._openAsk === this.ask) this._press = { kind: 'grass', x0: x, y0: y, t0: this.time, moved: false, maxD: 0, fx: x, fy: y };
       return null;
     }
@@ -743,6 +784,22 @@
     p.arc = { x0: p.x, y0: p.y, x1: p.homeX, y1: p.homeY, t1: t1, T: Math.max(0.05, t1 + t2), t: 0, rot0: p.rot };
     p.state = 'home'; p.z = 3;
   };
+  /** QA P3-1: a bonked (wrong) block drifts home through the water instead of a fast ballistic drop: a cubic Hermite curve
+   *  from its bounce velocity to rest in its slot. T is chosen so the peak speed is ≈ homeDriftV (the sinking terminal speed),
+   *  but never longer than the time left until homeBy s after it was sent (then it moves a little faster). */
+  P._driftHome = function (p) {
+    var cfg = this.cfg, vC = cfg.homeDriftV, D = hyp(p.homeX - p.x, p.homeY - p.y);
+    var left = Math.max(cfg.homeDriftMin, cfg.homeBy - (this.time - (p._sentAt !== undefined ? p._sentAt : this.time)));
+    var A = { drift: true, x0: p.x, y0: p.y, x1: p.homeX, y1: p.homeY, vx0: p.vx, vy0: p.vy, T: 1, t: 0, t1: 0, rot0: p.rot };
+    var T = clamp(1.5 * D / vC, cfg.homeDriftMin, left), k;
+    for (k = 0; k < 12; k++) {   // stretch T until the sampled peak speed is ≤ vC (or the budget is used up)
+      A.T = T;
+      if (driftPeak(A) <= vC * 1.02 || T >= left) break;
+      T = Math.min(left, T * 1.1);
+    }
+    A.T = T;
+    p.arc = A; p.state = 'home'; p.z = 3;
+  };
   P._rest = function (p, snap) {
     p.state = 'rest'; p.arc = null; p.vx = p.vy = 0; p.z = p.row ? 0 : 1;
     if (snap) { p.x = p._px = p.homeX; p.y = p._py = p.homeY; p.rot = p._prot = 0; p.rv = 0; p.scale = 1; p._sv = 0; p._q = p._qv = 0; p.sx = p.sy = 1; p.alpha = 1; }
@@ -764,19 +821,19 @@
     if (this._press && this._press.id === p.id) this._press = null;
     p.state = 'lift'; p.z = 4; p.arc = null; p.vx = p.vy = 0; p.rv = 0; p.t = 0; p._trailT = 0; p.bubble = 0; p._fadeOut = p._fadeOut || false;
     p.lift = { x0: p.x, y0: p.y, t: 0, T: cfg.sendTime, apex: cfg.sendApex * this.layout.LH + cfg.sendApexPx, rot0: p.rot };
-    this._setPhase('drop');
-    this._beeAway();
+    p._sentAt = this.time;
+    this._setPhase('drop');   // (playtest P1-2: the puffer stays — it leaves after pufferSit or when tapped)
   };
   P._startFall = function (p) {
     var cfg = this.cfg, top = this.towerTop(), LW = this.layout.LW;
     if (p.y + p.bh / 2 > top.y - 4) { this._send(p, false); return; }   // let go beside / below the top: a bubble carries it up
+    if (p.state !== 'lift') p._sentAt = this.time;   // a dragged release: the home budget (homeBy) counts from here
     p.state = 'fall'; p.z = 4; p.ft = 0; p._rot0 = p.rot; p._trailT = p._trailT || 0;
     p.vx *= cfg.fallKeepVx;
     p.vy = p.vy > 0 ? p.vy : p.vy * 0.3;
     p.fallOff = clamp(p.x - top.x, -(cfg.landWithin * LW - cfg.sinkSway), cfg.landWithin * LW - cfg.sinkSway);
     p.rv = 0;
     this._setPhase('drop');
-    this._beeAway();
   };
   P._trail = function (p, h) {
     p._trailT = (p._trailT || 0) + h;
@@ -865,17 +922,23 @@
       }
       case 'bounce': {
         p.vy += cfg.gHome * h; p.x += p.vx * h; p.y += p.vy * h; p.rot += p.rv * h;
-        if (p.vy >= 0) this._arcHome(p, cfg.bounceApex);
+        if (p.vy >= 0) this._driftHome(p);
         break;
       }
       case 'home': {
         var A = p.arc;
         A.t += h;
         var tt = Math.min(A.t, A.T);
-        p.x = A.x0 + (A.x1 - A.x0) * tt / A.T;
-        p.y = A.y0 - g * A.t1 * tt + 0.5 * g * tt * tt;
-        p.vy = -g * A.t1 + g * tt; p.vx = (A.x1 - A.x0) / A.T;
-        p.rot = A.rot0 * (1 - smooth(tt / A.T)); p.rv = 0;
+        if (A.drift) {   // QA P3-1: a watery drift (cubic Hermite: bounce velocity → rest), rocking a little
+          var hp = herm(A, tt / A.T);
+          p.x = hp.x; p.y = hp.y; p.vx = hp.vx; p.vy = hp.vy;
+          p.rot = A.rot0 * (1 - smooth(tt / A.T)) + cfg.homeDriftRock * Math.sin(TAU * cfg.rockHz * tt) * Math.sin(Math.PI * tt / A.T); p.rv = 0;
+        } else {
+          p.x = A.x0 + (A.x1 - A.x0) * tt / A.T;
+          p.y = A.y0 - g * A.t1 * tt + 0.5 * g * tt * tt;
+          p.vy = -g * A.t1 + g * tt; p.vx = (A.x1 - A.x0) / A.T;
+          p.rot = A.rot0 * (1 - smooth(tt / A.T)); p.rv = 0;
+        }
         if (A.t >= A.T) {
           p.x = A.x1; p.y = A.y1;
           p._q = cfg.landSquash * clamp(p.vy / 1400, 0.25, 1); p._qv = 0;
@@ -904,7 +967,7 @@
     p.glow += (gT - p.glow) * Math.min(1, h * (gT ? 6 : 3));
   };
 
-  /** The right layer lands on the cake top: joins the stack, jelly squash, the cake sways. */
+  /** The right block lands on the tower top: joins the stack, jelly squash, the tower sways. */
   P._land = function (p, impact) {
     var cfg = this.cfg, T = this.tower, L = this.layout, LW = L.LW, live = this._liveCount();
     var top = this.towerTop(), a = this._askObj();
@@ -919,7 +982,7 @@
     var dir = Math.abs(off) > 0.02 * LW ? sgn(off) : (this._crng.chance(0.5) ? 1 : -1);
     var peak = Math.min(cfg.swayPeakMax, (cfg.swayBase + cfg.swayOffset * Math.abs(off) / (cfg.landWithin * LW) + cfg.swayImpact * impact) * (0.8 + 0.1 * n));
     this._swayKick(dir * peak, true);
-    // the cloud bumps up a little when the cake gets close
+    // the jellyfish bumps up a little when the tower gets close
     var G = this.goal;
     if (G && G.state === 'float') {
       var gap = (top.y - p.bh) - G.y;
@@ -948,7 +1011,7 @@
     q.state = 'out'; q.t = 0; q.z = 2; q.arc = null;
     q.vx = dir * this._crng.float(cfg.outVx[0], cfg.outVx[1]); q.vy = cfg.outVy; q.rv = dir * this._crng.float(2, 5);
   };
-  /** A wrong layer bounces off the top (restitution, sideways kick towards its home side, spin) and flies home. */
+  /** A wrong block bounces off the top (restitution, sideways kick towards its home side, spin) and flies home. */
   P._bounce = function (p, impact) {
     var cfg = this.cfg, a = this._askObj(), top = this.towerTop(), R = this._rightPiece();
     var dir = p.homeX >= top.x ? 1 : -1;
@@ -971,7 +1034,7 @@
     else if (this.askMisses > cfg.hintAfterMisses) this._autoHint();
     if (cfg.fadeWrongAfter && this.askMisses >= cfg.fadeWrongAfter) this._fadeWrong(p);
   };
-  /** Errorless fade: the wrong layers of this ask puff away (the bouncing one when it is home) — only the right one stays. */
+  /** Errorless fade: the wrong blocks of this ask puff away (the bouncing one when it is home) — only the right one stays. */
   P._fadeWrong = function (bouncing) {
     var self = this, ids = [];
     this.pieces.forEach(function (q) {
@@ -1045,7 +1108,7 @@
     H.alpha = Math.min(1, H.time / 0.2, Math.max(0, (H.T - H.time) / 0.3));
   };
 
-  // ---------------------------------------------------------------- cake done: crown → count + pearls → blow → sprinkles → clear
+  // ---------------------------------------------------------------- tower done: crown → count + pearls → blow → sprinkles → clear
   P._starsFor = function (m) {
     var free = this.cur && this.cur.n >= this.cfg.freeSlipFrom ? 1 : 0;
     return m <= free ? 3 : m <= free + 1 ? 2 : 1;
@@ -1088,7 +1151,7 @@
       D.blow = true; D.outAt = t + cfg.outAfter;
       this._mood('blow');
       this.blowT = 1;
-      this._swayKick(cfg.blowKick, true);   // the breath gust: the cake jiggles towards the right
+      this._swayKick(cfg.blowKick, true);   // the breath gust: the tower jiggles towards the right
       var top = this.towerTop(), mo = this.pipMouth();
       this._emit({ type: 'blow', x: mo.x, y: mo.y, tx: top.x, ty: top.y });
     }
@@ -1132,7 +1195,7 @@
     for (var j = 0; j < this.pearls.length; j++) {
       var C = this.pearls[j];
       if (C._popAt < 0) continue;
-      // pop: a spring from 0 to 1 with an overshoot (≈ 1.25) — the pearl springs up out of the frosting
+      // pop: a spring from 0 to 1 with an overshoot (≈ 1.25) — the pearl springs up out of its shell
       C._pv += (w * w * (1 - C.pop) - 2 * z * w * C._pv) * h; C.pop = Math.max(0, C.pop + C._pv * h);
       var lt = now - C._popAt - cfg.litDelay;
       C.lit = clamp(lt / cfg.litTime, 0, 1) * (1 - C.out);
@@ -1214,7 +1277,7 @@
   P._stepGoal = function (h) {
     var G = this.goal, cfg = this.cfg;
     if (!G) return;
-    // float-in / bump spring of the cloud (+ crown while it sits on it)
+    // float-in / bump spring of the jellyfish (+ crown while it sits on it)
     var w = cfg.goalOmega, z = cfg.goalZeta;
     G.vy += (-w * w * G.dy - 2 * z * w * G.vy) * h; G.dy += G.vy * h;
     if (G._puffT >= 0) {   // the jellyfish swims up (accelerating pulses) and fades
@@ -1296,7 +1359,7 @@
       var T = this.tower;
       T.omega = 0;
       this._swayKick(cfg.gustDir * cfg.gustPeak - T.theta * 0.5);
-      this._holdAt = this.time + cfg.holdDelay;   // the cake tips first, then Pip steadies it with both paws
+      this._holdAt = this.time + cfg.holdDelay;   // the tower tips first, then Pip steadies it with both paws
       this._emit({ type: 'gust', dir: cfg.gustDir, strength: 1 });
     }
     if (this._holdAt > 0 && this.time >= this._holdAt) { this._holdAt = -1; this._mood('hold', cfg.holdTime); }
@@ -1361,7 +1424,10 @@
         if (this._dealAt < 0) {
           var a = this.ask, all = this.pieces.some(function (p) { return p.askIdx === a; }) &&
             this.pieces.every(function (p) { return p.askIdx !== a || p.state === 'rest'; });
-          if (all) { this._settleT += h; if (this._settleT >= cfg.dealSettle) this._startAsk(); }
+          if (all) {
+            this._settleT += h;
+            if (this._settleT >= cfg.dealSettle) { if (this._askGated()) this._gateT += h; else this._startAsk(); }   // P1-1: wait for Pip to be quiet
+          }
         }
         break;
       }
@@ -1397,7 +1463,7 @@
     b.blinkT -= h;
     if (b.blink && b.blinkT <= 0) { b.blink = false; b.blinkT = this._crng.float(cfg.blink[0], cfg.blink[1]); }
     else if (!b.blink && b.blinkT <= 0) { b.blink = true; b.blinkT = cfg.blinkTime; }
-    // look: the dragged / flying piece, the puffer, the falling crown, else the cake top
+    // look: the dragged / flying piece, the puffer, the falling crown, else the tower top
     var tx = L.tower.x, ty = this.towerTop().y, act = null;
     for (var i = 0; i < this.pieces.length; i++) if (this.pieces[i].z >= 3) act = this.pieces[i];
     if (act) { tx = act.x; ty = act.y; } else if (this.puffer) { tx = this.puffer.x; ty = this.puffer.y; }

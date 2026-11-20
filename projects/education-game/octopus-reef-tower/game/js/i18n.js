@@ -333,7 +333,7 @@
       'surprise.breeze': ['A sea current is coming!', 'Feel the current? Hold on, tower!'],
       'gust': ['Whoa, a current! I’ve got it!', 'Whoosh! Pip holds the tower!'],
       'surprise.puffer': ['Look! A puffer fish is coming!', 'Here comes a little puffer fish!'],
-      'puffer': ['A puffer fish is visiting our tower!', 'Hello, puffer fish! Tap it!'],
+      'puffer': ['A puffer fish! Tap it!', 'Hello, puffer fish! Tap it!'],
       'puffer.tap': ['Puff! Look how round! Bye-bye, puffer fish!', 'Puff! So round! Bye-bye, puffer fish!'],
 
       'praise': ['Yes!', 'Great job!', 'You got it!', 'Super!', 'Wonderful!', 'Nice one!', 'Hooray!', 'Well done!'],
@@ -491,7 +491,7 @@
       'surprise.breeze': ['Có dòng nước chảy tới đó!', 'Có dòng nước kìa! Tháp ơi, đứng vững nhé!'],
       'gust': ['Ui, dòng nước mạnh! Pip giữ tháp nè!', 'Vù vù! Pip đỡ tháp rồi!'],
       'surprise.puffer': ['Nhìn kìa! Bạn cá nóc bơi tới!', 'Có bạn cá nóc nhỏ ghé chơi nè!'],
-      'puffer': ['Bạn cá nóc ghé thăm tháp rồi!', 'Chào bạn cá nóc! Bé chạm thử nhé!'],
+      'puffer': ['Cá nóc kìa! Bé chạm thử nhé!', 'Chào cá nóc! Bé chạm nhé!'],
       'puffer.tap': ['Phồng! Tròn xoe luôn! Tạm biệt cá nóc!', 'Phồng lên rồi! Tạm biệt bạn cá nóc!'],
 
       'praise': ['Đúng rồi!', 'Giỏi quá!', 'Tuyệt vời!', 'Hoan hô!', 'Bé giỏi lắm!', 'Chính xác!', 'Siêu quá!', 'Hay lắm!'],

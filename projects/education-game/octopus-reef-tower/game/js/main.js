@@ -132,6 +132,8 @@
     if (pendingPrompt && display === pendingPrompt) { promptStart = performance.now(); promptUntil = promptStart + 300 + 72 * display.length; pendingPrompt = null; }
   }
   const canInterrupt = () => performance.now() > promptUntil;
+  // Pip is talking or has a line queued (false when the voice is off / speed mode, so the world's ask gate never waits then)
+  const voiceBusy = () => !!(voiceOn() && RT.Voice && (RT.Voice.isBusy ? RT.Voice.isBusy() : RT.Voice.isSpeaking()));
   function promptText(e) {
     return T(e.promptKey, e.params || {});
   }
@@ -217,7 +219,7 @@
         RT.UI.setDots(world.roundsPerLevel || 4, 0);
         speak(T('ui.chapter', { n: e.level + 1 }) + '. ' + T('topic.' + e.topic), { interrupt: true });
         speak(T('weather.' + e.level));   // "Sunny day under the sea!" — queued after the chapter name
-        RT.UI.say(T('topic.' + e.topic));
+        RT.UI.say(T('weather.' + e.level));   // the banner already shows the chapter name (visual QA P3-6)
         render.prewarm(world.layout, e.level);
         break;
       case 'round': {
@@ -302,7 +304,7 @@
       case 'count': {
         RT.Audio.play('count', { i: e.i });
         if (e.cx != null) { RT.Audio.play('pearl'); render.burst('flame', e.cx, e.cy - 16, {}); }
-        render.burst('count', e.x + (L.LW || 139) * 0.75, e.y, { n: e.i });
+        render.burst('count', e.x + (L.LW || 139) * 0.5 + 60, e.y, { n: e.i });   // clear of the swaying tower edge (QA P2-2)
         break;
       }
       case 'crown': RT.Audio.play('swim'); render.burst('bubbles', e.x, e.y + 30, { n: 8, w: 90 }); break;   // the jellyfish lets go and swims up
@@ -320,7 +322,7 @@
         RT.Audio.play('fish'); RT.Audio.play('collect', { i: 3 });
         { const T0 = world.tower || {}, tx = T0.x || (L.tower && L.tower.x) || e.x || view.W / 2, th = (T0.n || (T0.blocks && T0.blocks.length) || 3) * (L.LH || 99);
           const cy = ((L.tower && L.tower.baseTop) || view.H * 0.7) - th / 2;
-          render.burst('fish', tx, cy, { n: 12, rx: (L.LW || 139) * 0.95, ry: Math.max(70, th * 0.55) }); }
+          render.burst('fish', tx, cy, { n: 14, rx: (L.LW || 139) * 0.95, ry: Math.max(70, th * 0.55) }); }
         if (weather.burst) weather.burst(e.x, e.y, { kind: 'sprinkles', n: 24 });
         if (world.pip) { world.pip.mood = 'cheer'; world.pip.moodT = 1.4; }
         { const gr = T('great'); if (gr && gr !== 'great') speak(gr); }   // praise with the child's name at every finished tower
@@ -342,7 +344,8 @@
       }
       case 'puffer': {
         RT.Audio.play('buzz');
-        const bl = T('puffer'); if (bl && bl !== 'puffer') speak(bl, { interrupt: canInterrupt() });
+        // playtest P2-2: a short line, and only when Pip is quiet (it used to cut, or be cut by, the praise / wrong lines)
+        const bl = T('puffer'); if (bl && bl !== 'puffer' && !voiceBusy()) speak(bl);
         break;
       }
       case 'pufferTap': {
@@ -594,6 +597,7 @@
     if (RT.Voice) { RT.Voice.init({ lang: curLang(), enabled: voiceOn() }); const prevStart = RT.Voice.onStart; RT.Voice.onStart = d => { onVoiceStart(d); if (prevStart) prevStart(d); }; }
     render = new RT.Renderer($('game')); RT.render = render;
     world = new RT.World({ seed: FLAGS.seed != null ? FLAGS.seed : (Date.now() & 0x7fffffff), age: FLAGS.age || S.age, lang: curLang() });
+    world.speechBusy = voiceBusy;   // playtest P1-1: the world opens an ask (ages ≤ 5) only once Pip is quiet (≤ 2.5 s wait)
     weather = new RT.Weather({ width: 960, height: 720, seed: 11 });
     hooks();
     bindUI();

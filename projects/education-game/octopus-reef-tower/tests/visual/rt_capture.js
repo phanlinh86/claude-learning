@@ -42,6 +42,12 @@ async function screens() {
     await page.evaluate(() => { const D = RT.debug; D.drag(D.rightP(), 8, true, 0.6); D.adv(0.05); });
     await roundShot(page, J, tag, f, '05-drag');
     await page.evaluate(() => { const D = RT.debug, w = D.world; w.cancelDrag(); D.restAll(); });
+    // TAP TO SEND: the right block in its lift bubble mid-flight, then sinking after the pop
+    await page.evaluate(() => { const D = RT.debug, w = D.world, p = D.rightP(); w.pointerDown(p.x, p.y); D.adv(1 / 30); w.pointerUp(p.x, p.y); D.adv(0.3); });
+    await roundShot(page, J, tag, f, '05b-lift-bubble', true);
+    await page.evaluate(() => { const D = RT.debug, w = D.world, p = D.rightP(); D.until(() => p.state !== 'lift', 2); D.adv(0.35); });
+    await roundShot(page, J, tag, f, '05c-sinking', true);
+    await page.evaluate(() => { const D = RT.debug; D.restAll(); D.adv(0.3); });
     // wrong block dropped over the cake → bounce
     await page.evaluate(() => { const D = RT.debug, w = D.world; D.drag(D.wrongP()); D.until(() => w.phase === 'bounce', 3); D.adv(0.12); });
     await roundShot(page, J, tag, f, '06-wrong-bounce', true);
@@ -62,6 +68,12 @@ async function screens() {
     await roundShot(page, J, tag, f, '11-pearls-lit', true);
     await page.evaluate(() => { const D = RT.debug, w = D.world; D.until(() => w.pip.mood === 'blow', 3); D.adv(0.3); });
     await roundShot(page, J, tag, f, '12-blow', true);
+    await page.evaluate(() => { const D = RT.debug, w = D.world; D.until(() => w._done && w._done.out, 3); D.adv(0.22); });
+    await roundShot(page, J, tag, f, '12b-pearls-out', true);
+    await page.evaluate(() => { const D = RT.debug, w = D.world; D.until(() => w._done && w._done.spr, 3); D.adv(0.25); });
+    await roundShot(page, J, tag, f, '12c-fish-school', true);
+    await page.evaluate(() => { const D = RT.debug, w = D.world; D.until(() => w.phase === 'clear', 3); D.adv(0.3); });
+    await roundShot(page, J, tag, f, '12d-clear', true);
     // Talk time
     await page.evaluate(() => { const D = RT.debug, w = D.world; D.until(() => w.state !== 'round', 4); if (w.state !== 'talk') { w.state = 'round'; w._startTalk(); } });
     await sleep(900); await shot(page, f('13-talk'));
@@ -85,6 +97,10 @@ async function weather() {
   const names = ['sunny', 'breezy', 'rain', 'rainbow'];
   for (const dev of DEVS) {
     const { ctx, page } = await open(dev, 'age=4&lang=en', { seed: 9 });
+    for (let lv = 0; lv < 4; lv++) {   // chapter banner per weather
+      await page.evaluate(lv => { const D = RT.debug, w = D.world; if (D.mode !== 'play') D.startGame(); D.freeze(); w.startLevel(lv); D.tod(lv); D.adv(0.9); }, lv);
+      await sleep(250); await shot(page, path.join(dir, `${dev}-banner-L${lv}-${names[lv]}.png`));
+    }
     for (let lv = 0; lv < 4; lv++) {
       const ok = await page.evaluate(lv => { const D = RT.debug; const r = D.toAsk(lv, 'colors', 3, 2); D.thaw(); return r; }, lv);
       await sleep(1500);   // let weather particles run (thawed; the bot is off, so no stack happens)

@@ -65,10 +65,10 @@
   var DIFFICULTY = ['colors', 'animals', 'size', 'shapes', 'letters', 'count', 'lower', 'initial', 'add', 'sub', 'oddeven'];
 
   // ---- tables (DESIGN §5.1)
-  var BLOCKS = { 3: [2, 2, 3, 3], 4: [2, 2, 3, 4], 5: [3, 3, 4, 5], 6: [3, 4, 4, 5], 7: [3, 4, 4, 5] };   // layers per cake (QA P2-4: the tallest 4th cake was cut in 61 % of age-4 and 88–98 % of age-5–7 chapters)   // blocks to stack per round (QA: the 4th tower is the big one)
+  var BLOCKS = { 3: [2, 2, 3, 3], 4: [2, 2, 3, 4], 5: [3, 3, 4, 5], 6: [3, 4, 4, 5], 7: [3, 4, 4, 5] };   // blocks per tower, by round (QA P2-4: the tallest 4th tower was cut in 61 % of age-4 and 88–98 % of age-5–7 chapters; the 4th tower is the big one)
   var MAX_BLOCKS = 5, MAX_CHOICES = 4;
   var COUNT_RANGE = { 3: [1, 4], 4: [1, 5], 5: [1, 10], 6: [2, 10], 7: [3, 10] };   // dots rounds (dice dots 1–10)
-  var SMALL_SCALE = 0.72;                                                  // a small layer is 0.72 × LW and 0.72 × LH (DESIGN §4.2)
+  var SMALL_SCALE = 0.72;                                                  // a small block is 0.72 × LW and 0.72 × LH (DESIGN §4.2)
   var ODDEVEN_MAX = { 6: 12, 7: 20 };
   var ADD_MAX = { 6: 10, 7: 20 };
   var SUB_MAX = 10;
@@ -551,11 +551,12 @@
     return { topic: topic, promptKey: 'talk.' + topic, params: params, show: show, choices: ch.choices, answerId: ch.answerId };
   }
 
-  /** 4 chapter topics for a session. Without rng: RT.AGE_TOPICS. With rng: chapter 1 = the easiest pool topic that was not
-   * chapter 1 last time; chapters 2–4 = 3 of the others (preferring topics left out of `last`), sorted easiest first. */
+  /** 4 chapter topics for a session. Without rng, or on the very first session (no `last`, QA P3-2: age 4 then gets colours,
+   * shapes, counting 1–5 and animals as REQUIREMENT lists): RT.AGE_TOPICS. Later sessions: chapter 1 = the easiest pool
+   * topic that was not chapter 1 last time; chapters 2–4 = 3 of the others (preferring topics left out of `last`), easiest first. */
   function topicsFor(age, rng, last) {
     age = ageOf(age);
-    if (!rng) return RT.AGE_TOPICS[age].slice();
+    if (!rng || !Array.isArray(last) || !last.length) return RT.AGE_TOPICS[age].slice();
     var pool = RT.AGE_POOLS[age].slice().sort(function (a, b) { return DIFFICULTY.indexOf(a) - DIFFICULTY.indexOf(b); });
     last = Array.isArray(last) ? last : [];
     var first = pool[0];
