@@ -1,0 +1,7 @@
+{
+  "note": "CONFIG overrides proposed by the playtest (docs/reports/playtest.md, 2026-11-20). Keep in sync with results/proposal.patch.",
+  "overrides": {
+    "zones": { "0": { "extraK": 1.5, "gapK": 1.0 } },
+    "finishBonus": 500
+  }
+}
