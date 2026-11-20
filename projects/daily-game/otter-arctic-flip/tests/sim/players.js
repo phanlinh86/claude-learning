@@ -1,4 +1,4 @@
-// Player models for the Rooftop Flip playtest sims. Each has step(dt, world, t), called once per frame before
+// Player models for the Lighthouse Flip playtest sims. Each has step(dt, world, t), called once per frame before
 // world.update, and calls world.flip() directly (the real input path: one tap = one flip()).
 'use strict';
 const M = Math;
@@ -22,8 +22,8 @@ function botPlayer(OF, skill) {
  * `bias + N(0, errSd)` s (positive = late). It can only act `react` s after it last had to re-orient
  * (a landing, a drone drop) or after the hazard appeared, plus an occasional distraction. Per hazard it may
  * forget to tap; it may misread a hazard on the OTHER surface as its own (taps toward it); it taps at random
- * (Poisson) and sometimes double-taps. It chases fireflies on the other surface (only its colour unless
- * `confuse`), and `check` is the chance it looks at the landing spot before tapping (waits if unsafe).
+ * (Poisson) and sometimes double-taps. It chases groups of leaves on the other surface (`chase` = chance per
+ * group), and `check` is the chance it looks at the landing spot before tapping (waits if unsafe).
  */
 function humanPlayer(OF, seed, p) {
   const rng = new OF.RNG(seed * 31 + (p.salt || 1));
@@ -84,16 +84,16 @@ function humanPlayer(OF, seed, p) {
           }
         }
       }
-      // chase fireflies on the other surface when nothing is about to happen here
+      // chase leaves on the other surface when nothing is about to happen here
       if (p.chase && t >= readyT && (!plan || plan.fireT > t + 0.9)) {
         const other = opp(side), a = h.x + F, b = h.x + F + 2.5 * u;
         let key = null;
-        const value = (sd, x0) => {                        // liked minus disliked fireflies near that surface's line
+        const value = (sd, x0) => {                        // fluttering leaves near that surface's line
           const sy = w.standY(sd); let v = 0;
-          for (const f of w.fireflies) {
-            if (f.state !== 'fly' || f.x < x0 || f.x > b || M.abs(f.y - sy) > 0.5 * u) continue;
+          for (const f of w.leaves) {
+            if (f.state !== 'fly' || f.baseX < x0 || f.baseX > b || M.abs(f.baseY - sy) > 0.5 * u) continue;
             if (sd === other && key === null) key = f.id;
-            v += f.color === h.color || p.confuse >= 1 ? 1 : (rng.chance(p.confuse || 0) ? 1 : -(p.dislike === undefined ? 1 : p.dislike));
+            v++;
           }
           return v;
         };
@@ -113,20 +113,18 @@ function humanPlayer(OF, seed, p) {
 const KID = {
   name: 'kid', salt: 11, view: 7, react: [0.6, 1.1], aimMu: 0.6, aimSd: 0.15, bias: 0.08, errSd: 0.18,
   forget: 0.05, distract: 0.08, distractT: [0.5, 2.0], randomRate: 0.08, double: 0.10, misread: 0.06,
-  chase: 0.35, confuse: 0.35, check: 0, chaseSafe: false
+  chase: 0.35, check: 0, chaseSafe: false
 };
 const ADULT = {
   name: 'adult', salt: 23, view: 7, react: [0.3, 0.5], aimMu: 0.38, aimSd: 0.08, bias: 0.03, errSd: 0.07,
   forget: 0.005, distract: 0.02, distractT: [0.3, 1.0], randomRate: 0, double: 0.02, misread: 0.01,
-  chase: 0.6, confuse: 0, check: 0.9, chaseSafe: true, dodge: true
+  chase: 0.6, check: 0.9, chaseSafe: true, dodge: true
 };
-/** (a) 4–6-year-old: slow reactions 0.6–1.1 s, rough timing, forgets, misreads, random/double taps, chases any firefly. */
+/** (a) 4–6-year-old: slow reactions 0.6–1.1 s, rough timing, forgets, misreads, random/double taps, chases leaves unsafely. */
 function kidPlayer(OF, seed, o) { return humanPlayer(OF, seed, Object.assign({}, KID, o || {})); }
-/** (b) casual adult: 0.3–0.5 s reactions, good timing, checks the landing spot, chases its colour. */
+/** (b) casual adult: 0.3–0.5 s reactions, good timing, checks the landing spot, chases leaves only when safe. */
 function adultPlayer(OF, seed, o) { return humanPlayer(OF, seed, Object.assign({}, ADULT, o || {})); }
-/** (e) colour-ignorer: adult timing, chases every firefly group whatever its colour. */
-function colourIgnorer(OF, seed) { return adultPlayer(OF, seed, { name: 'colourIgnorer', confuse: 1, dodge: false }); }
-/** (e') hazards only: adult timing, never flips for fireflies. */
+/** (e) hazards only: adult timing, never flips for leaves. */
 function hazardOnly(OF, seed) { return adultPlayer(OF, seed, { name: 'hazardOnly', chase: 0 }); }
 
 /** (c) spam-tapper: a tap every `ms` (±15 %), never looks. */
@@ -137,7 +135,7 @@ function spamPlayer(OF, seed, ms) {
     step(dt, w) { next -= dt; if (next <= 0) { next = (ms / 1000) * rng.range(0.85, 1.15); stats.taps++; w.flip(); } }
   };
 }
-/** (c') "flip on every landing": taps the frame Bolt lands (perfect ping-pong, no looking). */
+/** (c') "flip on every landing": taps the frame Ollie lands (perfect ping-pong, no looking). */
 function pingPong() {
   const stats = { taps: 0 };
   return { name: 'pingPong', stats, step(dt, w) { if (w.hero.grounded) { stats.taps++; w.flip(); } } };
@@ -145,4 +143,4 @@ function pingPong() {
 /** (d) never taps. */
 function neverTap() { return { name: 'never', stats: {}, step() {} }; }
 
-module.exports = { botPlayer, humanPlayer, kidPlayer, adultPlayer, colourIgnorer, hazardOnly, spamPlayer, pingPong, neverTap, KID, ADULT };
+module.exports = { botPlayer, humanPlayer, kidPlayer, adultPlayer, hazardOnly, spamPlayer, pingPong, neverTap, KID, ADULT };

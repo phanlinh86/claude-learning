@@ -51,7 +51,7 @@ function playBot(diff, seed, skill, maxS, opts) {
       ev.push(x.type);
       if (x.type === 'levelUp') { levelT.push(t - last); last = t; if (wx) wx.setLevel(x.zone); }
       if (wx) {
-        if (x.type === 'catch') wx.burst('bit_pink', x.x - w.cam.x, x.y, 8, { speed: 180 });
+        if (x.type === 'catch') wx.burst('bit_' + x.leaf.kind, x.x - w.cam.x, x.y, 8, { speed: 180 });
         if (x.type === 'land') wx.burst('puff', w.layout.heroX, w.hero.y, 5, { up: 1, gravity: 60 });
         if (x.type === 'finish') wx.burst('sparkle', w.layout.heroX, w.layout.midY, 30, { speed: 260, gravity: -40 });
         if (x.type === 'bump') wx.burst('star', w.layout.heroX, w.hero.y, 10, {});
@@ -84,7 +84,7 @@ test('layout: DESIGN §2 numbers (landscape, portrait, wide)', () => {
 
 // ---------- determinism ----------
 test('determinism: same seed + same inputs → identical state; other seed differs; frame-rate independent', () => {
-  const flips = [3.0, 4.5, 6.25, 8.0, 9.5, 12.0, 13.5, 16.0, 18.5, 21.0, 24.0, 27.5];
+  const flips = [3.0, 4.5, 6.3, 8.0, 9.5, 12.0, 13.5, 16.0, 18.5, 21.0, 24.0, 27.5];
   const sim = (seed, dt) => {
     const w = mk('normal', seed); let t = 0, k = 0; const n = Math.round(30 / dt);
     for (let i = 0; i < n; i++) { if (k < flips.length && t >= flips[k] - 1e-9) { w.flip(); k++; } w.update(dt); t = (i + 1) * dt; w.drainEvents(); }
@@ -92,7 +92,8 @@ test('determinism: same seed + same inputs → identical state; other seed diffe
   };
   const a = sim(5, 1 / 60), b = sim(5, 1 / 60), c = sim(6, 1 / 60);
   deq(a.getState(), b.getState());
-  deq(a.fireflies.map(f => [f.x, f.y, f.state]), b.fireflies.map(f => [f.x, f.y, f.state]));
+  deq(a.leaves.map(f => [f.x, f.y, f.rot, f.state, f.kind]), b.leaves.map(f => [f.x, f.y, f.rot, f.state, f.kind]));
+  deq(a.lamps.map(l => [l.x, l.side]), b.lamps.map(l => [l.x, l.side]));
   deq(a.hazards.map(h => [h.side, h.x0, h.x1]), b.hazards.map(h => [h.side, h.x0, h.x1]));
   assert.ok(a.stats.flips >= 6, 'flips ' + a.stats.flips);
   assert.notDeepStrictEqual(J(a.getState()), J(c.getState()));
@@ -203,7 +204,7 @@ test('support: a crack narrower than the paws is run over; a gap makes him fall;
   r = runUntil(w, e => of(e, 'rescue').length, 3); assert.ok(of(r.ev, 'rescue').length === 1); assert.ok(w.hero.grounded);
 });
 
-test('obstacles: bump costs a battery, obstacle is squashed, 1.5 s blink of safety', () => {
+test('obstacles: bump costs a heart, obstacle is squashed, 1.5 s blink of safety', () => {
   const w = flat('normal', { obstacles: [{ kind: 'vent', x: 3 }, { kind: 'vent', x: 4.5, variant: 1 }, { kind: 'vent', x: 12 }] });
   const h0 = w.hearts;
   let ev = run(w, 2.5);
@@ -214,7 +215,7 @@ test('obstacles: bump costs a battery, obstacle is squashed, 1.5 s blink of safe
   ev = run(w, 2.0);
   assert.strictEqual(of(ev, 'bump').length, 1, 'third vent after the blink');
   assert.ok(w.obstacles[0].hitT > 2);
-  // the rail side: a sign hits Bolt upside-down, a vent below does not
+  // the rail side: a sign hits Ollie upside-down, a vent below does not
   const w2 = flat('normal', { obstacles: [{ kind: 'vent', x: 3 }, { kind: 'sign', x: 6 }] });
   run(w2, 0.05); w2.flip(); ev = run(w2, 2.5);
   assert.deepStrictEqual(of(ev, 'bump').map(e => e.ob.kind), ['sign']);
@@ -224,43 +225,89 @@ test('obstacles: bump costs a battery, obstacle is squashed, 1.5 s blink of safe
   assert.strictEqual(of(ev, 'bump').length, 0, 'a flip 1.25 u before a vent clears it');
 });
 
-test('fireflies: catch vs wrong (Normal breaks the combo, Easy ignores), flee arc', () => {
-  for (const diff of ['normal', 'easy']) {
-    const w = flat(diff); const c = w.hero.color, o = (c + 1) % 3;
-    w.setTrack({ fireflies: [{ x: 1.5, color: c }, { x: 2.3, color: c }, { x: 3.1, color: c }, { x: 4.2, color: o }, { x: 5.2, color: c }] });
-    let fy0 = null, flee = null, fleeY = [];
-    const ev = run(w, 4.6 * w.layout.unit / w.speed, (e, w) => { if (e.type === 'wrong') { flee = e.ff; fy0 = e.ff.y; } });
-    const cat = of(ev, 'catch'), wr = of(ev, 'wrong');
-    assert.strictEqual(cat.length, 3, diff + ' 3 caught'); assert.strictEqual(wr.length, 1);
-    deq(cat.map(e => e.combo), [1, 2, 3]); deq(cat.map(e => e.points), [10, 10, 10]);
-    assert.ok(flee && flee.state === 'flee');
-    if (diff === 'normal') { assert.strictEqual(w.combo, 0); assert.strictEqual(of(ev, 'comboBreak')[0].combo, 3); }
-    else { assert.strictEqual(w.combo, 3); assert.strictEqual(of(ev, 'comboBreak').length, 0); }
-    for (let i = 0; i < 30; i++) { w.update(H); fleeY.push(flee.y); }
-    assert.ok(fleeY[29] < fy0 - 0.3 * w.layout.unit, 'zips up');
-    assert.ok(fleeY[29] - fleeY[28] < fleeY[1] - fleeY[0], 'accelerating arc');
-    run(w, 1.5);
-    assert.ok(!w.fireflies.includes(flee), 'fled and gone');
-    assert.strictEqual(w.stats.caught, 4); assert.strictEqual(w.stats.wrong, 1);
-  }
-  // Easy has the bigger catch radius: a firefly 0.62 u above the standing line is caught on Easy only
+test('leaves: catch scoring and points, Easy has the bigger catch radius', () => {
+  const w = flat('normal', { leaves: [1.5, 2.3, 3.1].map((x, i) => ({ x, kind: i, still: true })) });
+  const ev = run(w, 3.6 * w.layout.unit / w.speed);
+  const cat = of(ev, 'catch');
+  assert.strictEqual(cat.length, 3); deq(cat.map(e => e.combo), [1, 2, 3]); deq(cat.map(e => e.points), [10, 10, 10]);
+  assert.ok(cat[0].leaf && cat[0].leaf.kind === 0, 'catch.leaf'); assert.strictEqual(w.stats.caught, 3);
+  assert.ok(!('wrong' in w.stats) && !('gates' in w.stats), 'no colour stats');
+  // Easy has the bigger catch radius: a leaf 0.51 u above the standing line is caught on Easy only
   for (const [diff, n] of [['easy', 1], ['normal', 0]]) {
-    const bob = C.ff.bob; C.ff.bob = 0; C.ff.drift = 0;      // hold it still: box top is 0.25 u above, radii 0.22 / 0.297
-    const w = flat(diff); w.setTrack({ fireflies: [{ x: 1.5, dy: -0.51, color: w.hero.color }] });
-    const n2 = of(run(w, 1), 'catch').length; C.ff.bob = bob; C.ff.drift = 0.05;
-    assert.strictEqual(n2, n, diff);
+    const w2 = flat(diff, { leaves: [{ x: 1.5, dy: -0.51, still: true }] });
+    assert.strictEqual(of(run(w2, 1), 'catch').length, n, diff);
   }
-  // fireflies bob gently around their spot
-  const w = flat('normal', { fireflies: [{ x: 30, color: 0 }] });
-  const f = w.fireflies[0]; let lo = 1e9, hi = -1e9;
-  for (let i = 0; i < 400; i++) { w.update(H); lo = Math.min(lo, f.y); hi = Math.max(hi, f.y); }
-  near(hi - lo, 2 * C.ff.bob * w.layout.unit, 1.5, 'bob amplitude');
+});
+
+test('leaves: pendulum flutter is bounded, smooth, tilts with the swing; caught leaves spiral into Ollie in 0.35 s', () => {
+  const w = flat('normal', { leaves: [{ x: 60 }, { x: 61, side: 'ceil' }, { x: 62, side: 'mid' }] });
+  const u = w.layout.unit, LF = C.leaf;
+  for (const f of w.leaves) {
+    assert.ok(f.swing >= LF.swing[0] && f.swing <= LF.swing[1] && f.omega >= LF.omega[0] && f.omega <= LF.omega[1]);
+    near(f.len, LF.len * u, 1e-9);
+  }
+  const st = w.leaves.map(f => ({ f, maxStep: 0, maxRotStep: 0, faces: 0, lastFace: f.face, minY: 1e9, maxY: -1e9, minX: 1e9, maxX: -1e9, pass: 0 }));
+  for (let i = 0; i < 120 * 6; i++) {
+    w.update(H);
+    for (const s of st) {
+      const f = s.f;
+      s.maxStep = Math.max(s.maxStep, Math.hypot(f.x - f.prevX, f.y - f.prevY));
+      s.maxRotStep = Math.max(s.maxRotStep, Math.abs(f.rot - f.prevRot));
+      if (f.face !== s.lastFace) { s.faces++; s.lastFace = f.face; }
+      s.minY = Math.min(s.minY, f.y); s.maxY = Math.max(s.maxY, f.y); s.minX = Math.min(s.minX, f.x - f.baseX); s.maxX = Math.max(s.maxX, f.x - f.baseX);
+      // pendulum geometry: rot = 1.2·θ and x − baseX = L·sin θ
+      const th = f.rot / LF.tilt; near(f.x - f.baseX, f.len * Math.sin(th), 1e-6, 'x = L sin θ');
+      assert.ok(Math.abs(th) <= f.swing + 1e-9, 'θ within swing');
+      // it rises at the ends of its swing (y DOWN): y ≤ baseY + bob, and y ≥ baseY − L(1 − cos swing) − bob
+      assert.ok(f.y <= f.baseY + LF.bob * u + 1e-6 && f.y >= f.baseY - f.len * (1 - Math.cos(f.swing)) - LF.bob * u - 1e-6, 'y bounded');
+    }
+  }
+  for (const s of st) {
+    const f = s.f, period = 2 * Math.PI / f.omega, n = 6 / period;
+    assert.ok(s.maxStep < 1.5, 'smooth: ' + s.maxStep.toFixed(2) + ' px/step');
+    assert.ok(s.maxRotStep < 0.03, 'rot smooth');
+    near(s.faces, 2 * n, 1.5, 'face flips twice per swing period');
+    assert.ok(s.maxX > 0.8 * f.len * Math.sin(f.swing) && s.minX < -0.8 * f.len * Math.sin(f.swing), 'swings both ways');
+    assert.ok(s.maxY - s.minY < 0.25 * u, 'gentle vertical motion ' + ((s.maxY - s.minY) / u).toFixed(3) + ' u');
+  }
+  // caught: spiral into Ollie over 0.35 s, smooth, then gone
+  const w2 = flat('easy', { leaves: [{ x: 1.0, dy: -0.3 }] });
+  const r = runUntil(w2, e => of(e, 'catch').length, 2); const f = of(r.ev, 'catch')[0].leaf;
+  assert.strictEqual(f.state, 'caught');
+  const d0 = Math.hypot(f.x - w2.hero.x, f.y - w2.hero.y); let maxJ = 0, t = 0, ang = [], prevD = d0;
+  while (f.state === 'caught' && t < 1) {
+    w2.update(H); t += H;
+    const d = Math.hypot(f.x - w2.hero.x, f.y - w2.hero.y);
+    assert.ok(d <= prevD + 1e-6, 'radius shrinks'); prevD = d;
+    maxJ = Math.max(maxJ, Math.hypot((f.x - w2.hero.x) - (f.prevX - w2.hero.prevX), f.y - f.prevY));
+    ang.push(Math.atan2(f.y - w2.hero.y, f.x - w2.hero.x));
+  }
+  near(t, C.leaf.caughtT, 2 * H, 'spiral time'); assert.strictEqual(f.state, 'gone');
+  assert.ok(prevD < 1e-6 + 0.02 * d0, 'ends in Ollie');
+  assert.ok(maxJ < 10, 'spiral is smooth (relative to Ollie): ' + maxJ.toFixed(1) + ' px/step');
+  let sweep = 0; for (let i = 1; i < ang.length; i++) { let da = ang[i] - ang[i - 1]; da -= 2 * Math.PI * Math.round(da / (2 * Math.PI)); sweep += da; }
+  assert.ok(Math.abs(sweep) > 1.5 * Math.PI, 'it spirals (sweep ' + (sweep / Math.PI).toFixed(2) + 'π)');
+  run(w2, 0.1); assert.ok(!w2.leaves.includes(f), 'removed');
+});
+
+test('combo: bump/fall resets it on Normal/Hard, halves it on Easy', () => {
+  for (const [diff, after] of [['normal', 0], ['hard', 0], ['easy', 3]]) {
+    const w = flat(diff, { leaves: [1.2, 1.8, 2.4, 3.0, 3.6, 4.2, 4.8].map(x => ({ x, still: true })), obstacles: [{ kind: 'vent', x: 6.5 }] });
+    w.hero.invuln = 0;
+    const ev = run(w, 7.2 * w.layout.unit / w.speed);
+    assert.strictEqual(of(ev, 'catch').length, 7, diff); assert.strictEqual(of(ev, 'bump').length, 1, diff + ' bump');
+    deq(of(ev, 'comboBreak').map(e => [e.combo, e.to]), [[7, after]], diff);
+    assert.strictEqual(w.combo, after); assert.strictEqual(w.mult, 1 + Math.floor(after / 5));
+  }
+  // a fall on Easy halves too
+  const w = flat('easy', { leaves: [1.2, 1.8, 2.4, 3.0].map(x => ({ x, still: true })), roofs: [[-5, 4.5], [8, 100]] });
+  const ev = run(w, 3); assert.strictEqual(of(ev, 'fall').length, 1); assert.strictEqual(w.combo, 2);
 });
 
 test('combo → multiplier ×1..×5 (+1 every 5), combo events, points', () => {
-  const w = flat('normal'); const c = w.hero.color;
-  const ffs = []; for (let i = 0; i < 26; i++) ffs.push({ x: 1.5 + 0.6 * i, color: c });
-  w.setTrack({ fireflies: ffs });
+  const w = flat('normal');
+  const lv = []; for (let i = 0; i < 26; i++) lv.push({ x: 1.5 + 0.6 * i, still: true });
+  w.setTrack({ leaves: lv });
   const ev = run(w, 6);
   const cat = of(ev, 'catch'); assert.strictEqual(cat.length, 26);
   deq(of(ev, 'combo').map(e => [e.combo, e.mult]), [[5, 2], [10, 3], [15, 4], [20, 5]]);
@@ -270,16 +317,108 @@ test('combo → multiplier ×1..×5 (+1 every 5), combo events, points', () => {
   assert.strictEqual(w.score, pts); assert.strictEqual(w.maxCombo, 26);
 });
 
-test('paint gates change Bolt\'s colour; the new colour then counts', () => {
-  const w = flat('normal'); const c = w.hero.color, n = (c + 1) % 3;
-  w.setTrack({ gates: [{ x: 2, color: n }], fireflies: [{ x: 3, color: n }, { x: 4, color: c }] });
-  const ev = run(w, 1.6);
-  deq(of(ev, 'gate').map(e => e.color), [n]);
-  assert.strictEqual(w.hero.color, n); assert.ok(w.gates[0].passed);
-  assert.strictEqual(of(ev, 'catch').length, 1); assert.strictEqual(of(ev, 'wrong').length, 1);
-  // generated gates always change the colour and come every ≈8–14 s
-  const g = playBot('normal', 4, 1, 240, { immortal: true });
-  const gw = g.w; assert.ok(gw.stats.gates >= 15 && gw.stats.gates <= 32, 'gates in 4 min: ' + gw.stats.gates);
+// ---------- visibility twist ----------
+test('light: per floor lightFrom → lightTo by progress, monotonic within a floor, in [0.3, 1]; lampsOn once per floor', () => {
+  const w = mk('easy', 4); w.hearts = w.maxHearts = 1e6;
+  const bot = new OF.Bot(w, { skill: 1, seed: 2 });
+  let lastLevel = w.level, lastLight = w.light, dir = null, lampsEv = {}, t = 0;
+  const seenZones = new Set();
+  while (t < 640) {
+    bot.step(1 / 60); w.update(1 / 60); t += 1 / 60;
+    for (const e of w.drainEvents()) if (e.type === 'lampsOn') { lampsEv[e.level] = (lampsEv[e.level] || 0) + 1; assert.ok(w.lampsOn); }
+    assert.ok(w.light >= 0.3 - 1e-12 && w.light <= 1 + 1e-12, 'light range ' + w.light);
+    assert.strictEqual(w.lampsOn, w.light < C.light.lampsBelow);
+    assert.ok(w.lightView >= 0.3 - 1e-9 && w.lightView <= 1 + 1e-9);
+    if (w.level !== lastLevel) { lastLevel = w.level; dir = null; lastLight = w.light; continue; }
+    const Z = C.zones[w.zone]; const sgn = Math.sign(Z.lightTo - Z.lightFrom);
+    assert.ok((w.light - lastLight) * sgn >= -1e-12, 'monotonic in floor ' + w.level);
+    near(w.light, Z.lightFrom + (Z.lightTo - Z.lightFrom) * w.progress, 1e-9);
+    lastLight = w.light; seenZones.add(w.zone);
+  }
+  assert.ok(w.level >= 8, 'two days played');
+  // lamps switch on at the start of every sunset floor (from a lit noon), never in dawn/noon
+  deq(Object.keys(lampsEv).map(Number).sort((a, b) => a - b), [2, 6], 'lampsOn at sunset of day 1 and 2');
+  for (const k in lampsEv) assert.strictEqual(lampsEv[k], 1);
+  // zone values: dawn/noon bright (no lamps), sunset dims through the threshold, night stays ≥ 0.3
+  for (const z of [0, 1]) assert.ok(Math.min(C.zones[z].lightFrom, C.zones[z].lightTo) >= C.light.lampsBelow);
+  assert.ok(C.zones[2].lightFrom < C.light.lampsBelow && Math.min(C.zones[3].lightFrom, C.zones[3].lightTo) >= C.light.min);
+  // a world created on a dark floor starts with lampsOn and no event
+  const wn = mk('normal', 1, 960, 540, 3); assert.ok(wn.lampsOn); assert.strictEqual(of(wn.drainEvents(), 'lampsOn').length, 0);
+  near(wn.light, 0.40, 1e-9);
+  // gotoLevel from a bright floor to sunset fires it
+  const wg = mk('normal', 1); run(wg, 1); wg.drainEvents(); wg.gotoLevel(2);
+  deq(types(wg.drainEvents()), ['levelUp', 'lampsOn']);
+});
+
+test('lamps: deterministic with the track, every 3.5–5 u alternating high/low, culled; obstacles carry beacons', () => {
+  const a = mk('normal', 8), b = mk('normal', 8);
+  run(a, 20); run(b, 20);
+  deq(a.lamps.map(l => [l.x, l.side]), b.lamps.map(l => [l.x, l.side]));
+  const u = a.layout.unit;
+  for (let i = 1; i < a.lamps.length; i++) {
+    const d = (a.lamps[i].x - a.lamps[i - 1].x) / u;
+    assert.ok(d >= C.light.lampEvery[0] - 1e-9 && d <= C.light.lampEvery[1] + 2 * C.light.lampDoorClear + 1e-9, 'spacing ' + d);
+    assert.notStrictEqual(a.lamps[i].side, a.lamps[i - 1].side, 'alternate');
+    assert.ok(a.lamps[i].side === 'ceil' || a.lamps[i].side === 'floor');
+  }
+  assert.ok(a.lamps[0].x <= a.cam.x + u * 2 && a.lamps[a.lamps.length - 1].x >= a.cam.x + a.layout.width, 'cover the screen');
+  // lamps do not change the track (own RNG stream): same hazards as a world whose lamps were regenerated
+  const c = mk('normal', 8); c.lampRng = new OF.RNG(12345); run(c, 20);
+  deq(a.hazards.map(h => [h.side, h.x0, h.x1]), c.hazards.map(h => [h.side, h.x0, h.x1]));
+  // and they survive a resize at the same place in units
+  const d = mk('normal', 8); run(d, 5); const rel = d.lamps.map(l => (l.x - d.hero.x) / d.layout.unit);
+  d.setLayout(560, 1000); deq(d.lamps.slice(0, rel.length).map(l => +((l.x - d.hero.x) / d.layout.unit).toFixed(9)), rel.map(v => +v.toFixed(9)));
+  // culled: bounded in a long run, never far behind
+  const r = playBot('normal', 5, 1, 300, { immortal: true });
+  assert.ok(r.w.lamps.length < 40, 'lamps ' + r.w.lamps.length);
+  assert.ok(r.w.lamps[0].x > r.w.cam.x - r.w.layout.width * (C.gen.behind + 0.3));
+  for (const ob of r.w.obstacles) assert.strictEqual(ob.beacon, true);
+  // no lamp right at a stairway door
+  for (const l of r.w.lamps) for (const pl of r.w.plans) assert.ok(Math.abs(l.x - pl.finishX) >= C.light.lampDoorClear * r.w.layout.unit - 1e-6 || !isFinite(pl.finishX));
+});
+
+test('visibility rule: seeAhead ≤ screen reach in landscape; portrait clamps the beam to the screen (documented)', () => {
+  const layouts = [[960, 540], [1280, 540], [960, 720], [560, 1000], [720, 1100], [560, 1600]];
+  const rows = [], clamped = [];
+  for (const [W, Hh] of layouts) for (const diff of ['easy', 'normal', 'hard']) for (let lv = 0; lv < 8; lv++) {
+    const w = mk(diff, 1, W, Hh, lv);
+    const sa = w.seeAheadUnits(), reach = w.screenReachUnits(), beam = w.beamUnits();
+    const S = w.levelBase(lv) * (1 + C.speedRamp), tF = w.flightTime();
+    assert.ok(sa >= (C.difficulty[diff].reaction * S + S * tF) / w.layout.unit + C.light.seeExtra - 1e-9, 'formula');
+    assert.ok(beam >= Math.min(C.light.beamMin, reach) - 1e-9 && beam <= reach + 1e-9);
+    if (sa <= reach) near(beam, Math.max(sa, C.light.beamMin), 1e-9);
+    else near(beam, reach, 1e-9, 'clamped to the screen');
+    // Normal/Hard in landscape: the whole seeAhead fits on screen. Easy (reaction 1.8 s) at sunset/night and every
+    // portrait layout need more than the screen shows even in daylight: the beam is clamped to the screen edge, so the
+    // darkness never hides anything daylight would show, and beacons glow beyond the beam (MECHANICS §6).
+    if (!w.layout.portrait && diff !== 'easy' && lv < 4) assert.ok(sa <= reach + 1e-9, W + '×' + Hh + ' ' + diff + ' L' + lv + ': seeAhead ' + sa.toFixed(2) + ' > reach ' + reach.toFixed(2));
+    if (sa > reach) clamped.push(W + '×' + Hh + ' ' + diff + ' L' + lv);
+    if (lv === 0 || lv === 3) rows.push(W + '×' + Hh + ' ' + diff[0] + lv + ' ' + sa.toFixed(1) + '/' + reach.toFixed(1));
+  }
+  console.log('     (seeAhead/reach u: ' + rows.filter((_, i) => i % 3 === 0).join(', ') + ')');
+  console.log('     (beam clamped to the screen in ' + clamped.length + '/144 cases: ' + clamped.filter(c => !/^(560|720)/.test(c)).join(', ') + ' + all portrait)');
+  // seeAhead holds for the whole floor (it uses the floor's top speed, never below the current speed)
+  const w = mk('normal', 2); const b = new OF.Bot(w, { skill: 1 }); let worst = 0;
+  for (let i = 0; i < 60 * 70; i++) { b.step(1 / 60); w.update(1 / 60);
+    const need = (w.D.reaction * w.speed + w.flightDist()) / w.layout.unit + C.light.seeExtra; worst = Math.max(worst, need - w.seeAheadUnits()); }
+  assert.ok(worst <= 1e-9, 'seeAhead covers the real speed');
+  const st = w.getState(); assert.ok(typeof st.light === 'number' && typeof st.lampsOn === 'boolean' && typeof st.leaves === 'number' && st.hero.lamp);
+});
+
+test('headlamp: hero.lamp follows the lens (92,44) of the sprite and mirrors with the turn-over', () => {
+  const w = flat('normal'); run(w, 0.05);
+  const u = w.layout.unit, S = 0.95 * u, h = w.hero;
+  // renderer anchor: sprite feet line (y 120) on the surface, hero.y = standOff above it
+  const lx = (92 - 64) / 128 * S, ly = C.standOff * u - (120 - 44) / 128 * S;
+  near(h.lamp.x - h.x, lx, 1e-9); near(h.lamp.y - h.y, ly, 1e-9);
+  assert.ok(h.lamp.y < h.y && h.lamp.x > h.x, 'ahead and above when on the floor');
+  w.flip(); runUntil(w, e => of(e, 'land').length, 1); run(w, 0.02);
+  near(w.hero.lamp.y - w.hero.y, -ly, 1e-9, 'mirrored on the ceiling (below the hit centre)');
+  near(w.hero.lamp.x - w.hero.x, lx, 1e-9);
+  // mid flip it moves smoothly
+  w.flip(); let maxJ = 0;
+  for (let i = 0; i < 60; i++) { w.update(H); maxJ = Math.max(maxJ, Math.abs((w.hero.lamp.y - w.hero.y) - (w.hero.lamp.prevY - w.hero.prevY))); }
+  assert.ok(maxJ < 3, 'lens moves smoothly relative to Ollie: ' + maxJ.toFixed(2));
 });
 
 // ---------- generator fairness ----------
@@ -319,32 +458,38 @@ test('fairness: one surface always safe, hazard windows, forced-flip spacing, ga
     // every x: one surface safe (sampled every 0.05 u)
     const end = hz[hz.length - 1].x1;
     for (let x = start; x < end; x += 0.05 * u) assert.ok(w.safeAt('floor', x) || w.safeAt('ceil', x), 'both unsafe at ' + ((x - start) / u).toFixed(2));
-    // finish arches stand in calm stretches
+    // stairway doors stand in calm stretches
     for (const p of w.plans) if (p.finishX < end) {
       assert.ok(w.clearRange('floor', p.finishX - C.gen.finishClear * u, p.finishX + C.gen.finishClear * u) &&
                 w.clearRange('ceil', p.finishX - C.gen.finishClear * u, p.finishX + C.gen.finishClear * u), 'finish clear');
     }
-    // gates on safe ground, alternating colours; fireflies never inside obstacles
-    let col = w.hero.color;
-    for (const g of w.gates) { assert.notStrictEqual(g.color, col, 'gate changes colour'); col = g.color; assert.ok(w.safeAt('floor', g.x) && w.safeAt('ceil', g.x)); }
-    for (const f of w.fireflies) for (const ob of w.obstacles) {
-      const top = ob.side === 'floor' ? w.layout.floorY - ob.h : w.layout.ceilY;
-      const cx = Math.max(ob.x - ob.w / 2, Math.min(f.baseX, ob.x + ob.w / 2)), cy = Math.max(top, Math.min(f.baseY, top + ob.h));
-      assert.ok(Math.hypot(f.baseX - cx, f.baseY - cy) >= f.r, 'firefly inside an obstacle');
+    // leaves: their whole pendulum swing stays out of every obstacle; kinds 0..2; one kind per pattern
+    const sw = C.leaf.len * u * Math.sin(C.leaf.swing[1]);
+    for (const f of w.leaves) {
+      assert.ok(f.kind >= 0 && f.kind <= 2);
+      for (const ob of w.obstacles) {
+        const top = ob.side === 'floor' ? w.layout.floorY - ob.h : w.layout.ceilY;
+        for (const dx of [-sw, 0, sw]) {
+          const x = f.baseX + dx, cx = Math.max(ob.x - ob.w / 2, Math.min(x, ob.x + ob.w / 2)), cy = Math.max(top, Math.min(f.baseY, top + ob.h));
+          assert.ok(Math.hypot(x - cx, f.baseY - cy) >= f.r, 'leaf swings into an obstacle');
+        }
+      }
     }
-    // ≈65 % of fireflies match the colour in force at their x
-    const marks = [{ x: -1e18, c: w.hero.color }].concat(w.gates.map(g => ({ x: g.x, c: g.color })));
-    let match = 0; for (const f of w.fireflies) { let c = marks[0].c; for (const mk of marks) if (mk.x <= f.baseX) c = mk.c; if (c === f.color) match++; }
-    const share = match / w.fireflies.length; assert.ok(share > 0.58 && share < 0.82, 'match share ' + share.toFixed(2));
+    assert.ok(w.leaves.length > 200, 'leaves ' + w.leaves.length);
   }
   console.log('     (' + checked + ' hazards checked)');
 });
 
 test('Easy is gentler: slower, fewer and narrower gaps, longer calm between forced flips', () => {
-  const st = d => {
-    const w0 = genTrack(d, 0, 9, 100), u = w0.layout.unit, w = w0, hz = w0.hazards.filter(h => h.x1 < w0.plans[1].startX);   // dawn of round 1
-    const len = (hz[hz.length - 1].x1 - w.plans[0].startX) / u, gaps = hz.filter(h => h.kind === 'gap');
-    return { perSec: hz.length / (len / (w.levelBase(0) / u)), gapShare: gaps.length / hz.length, maxGap: Math.max(...gaps.map(g => (g.x1 - g.x0) / u)), speed: w.levelBase(0) / u };
+  const st = d => {   // the first floor (dawn of day 1), pooled over 12 seeds (one floor holds only 15–40 hazards)
+    let nHz = 0, nGap = 0, maxGap = 0, secs = 0, w = null;
+    for (let seed = 1; seed <= 12; seed++) {
+      w = genTrack(d, 0, seed, 100); const u = w.layout.unit, hz = w.hazards.filter(h => h.x1 < w.plans[1].startX);
+      const gaps = hz.filter(h => h.kind === 'gap');
+      nHz += hz.length; nGap += gaps.length; maxGap = Math.max(maxGap, ...gaps.map(g => (g.x1 - g.x0) / u));
+      secs += (hz[hz.length - 1].x1 - w.plans[0].startX) / w.levelBase(0);
+    }
+    return { perSec: nHz / secs, gapShare: nGap / nHz, maxGap, speed: w.levelBase(0) / w.layout.unit };
   };
   const e = st('easy'), n = st('normal'), h = st('hard');
   assert.ok(e.speed < n.speed && n.speed < h.speed);
@@ -355,7 +500,7 @@ test('Easy is gentler: slower, fewer and narrower gaps, longer calm between forc
 });
 
 // ---------- levels ----------
-test('finish arch: bonus, +1 battery, levelUp to the next time of day; loop bonus', () => {
+test('stairway door: bonus, +1 heart, levelUp to the next time of day; loop bonus', () => {
   const w = flat('normal', { finish: 3 }); w.hearts = 2;
   const ev = run(w, 1.5);
   const t = types(ev); assert.ok(t.indexOf('finish') >= 0 && t.indexOf('finish') < t.indexOf('levelUp'));
@@ -383,7 +528,7 @@ test('levels pace at ≈60–80 s on every difficulty; speed rises inside a leve
   assert.ok(w.levelBase(4) > w.levelBase(0) * 1.07 && w.levelBase(4) < w.levelBase(0) * 1.09);
 });
 
-test('gotoLevel jumps (levelUp, safe track ahead, Bolt keeps running)', () => {
+test('gotoLevel jumps (levelUp, safe track ahead, Ollie keeps running)', () => {
   const w = mk('normal', 3); run(w, 2); w.drainEvents();
   w.gotoLevel(6);
   const ev = w.drainEvents(); deq(of(ev, 'levelUp').map(e => [e.level, e.zone]), [[6, 2]]);
@@ -396,7 +541,7 @@ test('gotoLevel jumps (levelUp, safe track ahead, Bolt keeps running)', () => {
   assert.strictEqual(bad, 0);
 });
 
-test('game over: last battery → phase over, scroll eases to a stop, input ignored', () => {
+test('game over: last heart → phase over, scroll eases to a stop, input ignored', () => {
   const w = flat('normal', { obstacles: [{ kind: 'vent', x: 2 }] }); w.hearts = 1;
   const ev = run(w, 1);
   const tt = types(ev).filter(t => t === 'bump' || t === 'heartLost' || t === 'gameOver');
@@ -405,7 +550,7 @@ test('game over: last battery → phase over, scroll eases to a stop, input igno
   assert.ok(!w.flip());
   run(w, 0.7); assert.ok(w.speed < 1e-6, 'stopped');
   const x = w.cam.x; run(w, 1); assert.strictEqual(w.cam.x, x);
-  // a fall with the last battery: no drone, game over
+  // a fall with the last heart: no drone, game over
   const w2 = flat('normal', { roofs: [[-5, 1], [4, 100]] }); w2.hearts = 1;
   const ev2 = run(w2, 2);
   assert.ok(types(ev2).includes('gameOver') && !types(ev2).includes('rescue')); assert.strictEqual(w2.drone, null);
@@ -460,12 +605,12 @@ test('bot skill 1 survives 10 simulated minutes on every difficulty (zero hits);
   console.log('     (skill 1 hits in 2×10 min: ' + out.join(', ') + ')');
 });
 
-test('bot: optional flips for fireflies only when skilled; never flips into a hazard', () => {
-  const w = flat('normal'); const c = w.hero.color;
-  w.setTrack({ fireflies: [3, 3.6, 4.2, 4.8].map(x => ({ x, side: 'ceil', color: c })) });
+test('bot: optional flips for leaves only when skilled; never flips into a hazard', () => {
+  const lv = [3, 3.6, 4.2, 4.8].map(x => ({ x, side: 'ceil' }));
+  const w = flat('normal', { leaves: lv });
   const b = new OF.Bot(w, { skill: 1 }); for (let i = 0; i < 260; i++) { b.step(1 / 120); w.update(1 / 120); }
-  assert.ok(b.stats.optional >= 1 && w.stats.caught >= 3, 'flipped for the fireflies');
-  const w2 = flat('normal'); w2.setTrack({ fireflies: [3, 3.6, 4.2, 4.8].map(x => ({ x, side: 'ceil', color: c })) });
+  assert.ok(b.stats.optional >= 1 && w.stats.caught >= 3, 'flipped for the leaves');
+  const w2 = flat('normal', { leaves: lv });
   const b2 = new OF.Bot(w2, { skill: 0.5 }); for (let i = 0; i < 260; i++) { b2.step(1 / 120); w2.update(1 / 120); }
   assert.strictEqual(b2.stats.optional, 0);
   // a vent ahead but the rail above has a hole at the landing spot → the bot waits for solid rail
@@ -476,38 +621,45 @@ test('bot: optional flips for fireflies only when skilled; never flips into a ha
 });
 
 // ---------- weather ----------
-test('weather: every zone, landscape + portrait: bounded counts, front layer soft, stars in the sky band', () => {
-  for (const [W, Hh] of [[960, 540], [560, 1000], [720, 1600], [1280, 540]]) {
+test('weather: every zone, landscape + portrait up to 720×1600: bounded, outside back layer, soft front layer', () => {
+  const FRONT_OK = new Set(['mote', 'sparkle']);
+  for (const [W, Hh] of [[960, 540], [560, 1000], [720, 1600], [1280, 540], [720, 1100]]) {
     const wx = new OF.Weather({ width: W, height: Hh, seed: 3 });
     for (let z = 0; z < 4; z++) {
       wx.setLevel(z);
-      let maxN = 0, shoots = 0, sawShot = false;
+      let maxN = 0;
       for (let i = 0; i < 60 * 25; i++) {
         wx.update(1 / 60, 330);
-        if (i % 20 === 0) wx.burst('bit_yellow', W / 3, Hh / 2, 25, { speed: 200 });
+        if (i % 20 === 0) wx.burst('bit_' + (i % 3), W / 3, Hh / 2, 25, { speed: 200 });
         maxN = Math.max(maxN, wx.particles.length);
-        const shot = wx.particles.some(p => p.kind === 'shoot'); if (shot && !sawShot) shoots++; sawShot = shot;
         for (const p of wx.particles) {
           assert.ok(isFinite(p.x) && isFinite(p.y) && p.alpha >= 0 && p.alpha <= 1);
-          if (p.kind !== 'burst' && p.layer === 'front') assert.ok(p.alpha <= 0.5 + 1e-9 && p.size < 20 * W / 960 + 10, 'soft front');
-          if (p.kind === 'star') assert.ok(p.y <= wx.skyY + 1e-9, 'star in the sky band');
-          if (p.kind !== 'burst' && p.kind !== 'shoot' && p.kind !== 'trail') assert.ok(p.x > -400 && p.x < W + 400);
+          if (p.kind === 'burst') continue;
+          if (p.layer === 'front') {
+            assert.ok(FRONT_OK.has(p.sprite), 'front sprite ' + p.sprite);
+            assert.ok(p.alpha <= 0.45 + 1e-9 && p.size < 12 * W / 960 + 6, 'soft front');
+            if (!p.dying) assert.ok(p.y >= wx.ceilY - 6 && p.y <= wx.floorY + 6, 'motes in the corridor air');
+          } else assert.ok(['snow', 'flake', 'star', 'aurora'].includes(p.sprite), 'back sprite ' + p.sprite);
+          if ((p.kind === 'star' || p.kind === 'aurora') && !p.dying) assert.ok(p.y >= p.y0 - 5 && p.y <= p.y1 + 5 && p.y1 < 0.62 * Hh, p.kind + ' high in the windows');
+          assert.ok(p.x > -400 && p.x < W + 400);
         }
       }
       assert.ok(maxN < 140, 'cap ' + maxN);
-      const kinds = new Set(wx.particles.map(p => p.kind));
-      const want = [['mist', 'dew'], ['seed'], ['mote'], ['star']][z];
+      const kinds = new Set(wx.particles.filter(p => !p.dying).map(p => p.kind));
+      const want = [['snow', 'mote'], ['flake', 'mote'], ['snow', 'mote'], ['snow', 'star', 'aurora', 'sparkle']][z];
       for (const k of want) assert.ok(kinds.has(k), 'zone ' + z + ' has ' + k);
-      if (z === 3) assert.ok(shoots >= 2 && shoots <= 5, 'shooting stars in 25 s: ' + shoots);
-      assert.ok(wx.particles.filter(p => p.kind === 'mote' && p.layer === 'front').length === 0, 'motes stay back');
+      const front = wx.particles.filter(p => p.kind !== 'burst' && !p.dying && p.layer === 'front').length;
+      assert.ok(front <= 14, 'front sparse: ' + front);
     }
     wx.resize(Hh, W); wx.update(1 / 60, 300); assert.ok(wx.particles.length < 140);
   }
-  // ambient particles drift with the scroll by depth
-  const wx = new OF.Weather({ width: 960, height: 540, seed: 1 }); wx.setLevel(1, { instant: true });
-  const p = wx.particles.find(q => q.layer === 'front') || wx.particles[0];
+  // ambient particles drift with the scroll by depth; snow falls
+  const wx = new OF.Weather({ width: 960, height: 540, seed: 1 }); wx.setLevel(0, { instant: true });
+  const p = wx.particles.find(q => q.layer === 'front');
   const x0 = p.x; wx.update(0.05, 400); assert.ok(p.x < x0, 'drifts left');
-  assert.ok(new OF.Weather({ width: 960, height: 540 }).ambient.tint !== undefined);
+  const s = wx.particles.find(q => q.kind === 'snow' && q.y < 400), y0 = s.y; wx.update(0.1, 0); assert.ok(s.y > y0, 'snow falls');
+  const tints = [0, 1, 2, 3].map(z => { wx.setLevel(z); return wx.ambient.tint; });
+  assert.ok(tints[1] === null && /255,140/.test(tints[2]) && /40,60,150/.test(tints[3]), 'tints ' + tints);
 });
 
 test('fuzz: random taps, resizes, gotoLevel during flight/rescue — no NaN, invariants hold', () => {
@@ -527,11 +679,12 @@ test('fuzz: random taps, resizes, gotoLevel during flight/rescue — no NaN, inv
       near(h.x - w.cam.x, L.heroX, 1e-6);
       if (h.grounded) near(h.y, w.standY(h.side), 1e-6);
       assert.ok(w.mult >= 1 && w.mult <= 5 && w.progress >= 0 && w.progress <= 1);
-      for (const f of w.fireflies) assert.ok(isFinite(f.x) && isFinite(f.y));
+      for (const f of w.leaves) assert.ok(isFinite(f.x) && isFinite(f.y) && isFinite(f.rot));
+      assert.ok(isFinite(h.lamp.x) && isFinite(h.lamp.y) && w.light >= 0.3 && w.light <= 1);
       stuck = w.hero.state === 'rescue' ? stuck + 1 : 0; assert.ok(stuck < 400, 'rescue never ends');
     }
     assert.ok(falls > 0 && rescues >= falls - cancels - 1, diff + ' falls ' + falls + ' rescues ' + rescues + ' cancels ' + cancels);
-    assert.ok(w.roofs.length < 80 && w.fireflies.length < 150, 'culled');
+    assert.ok(w.roofs.length < 80 && w.leaves.length < 150 && w.lamps.length < 60, 'culled');
   }
 });
 
@@ -543,10 +696,10 @@ test('10 simulated minutes of bot play (+ weather) run in ≈2 s', () => {
   assert.ok(ms < 3000, 'took ' + ms + ' ms');
   assert.ok(r.t >= 599 || r.w.phase === 'over');
   assert.ok(r.maxP < 140);
-  for (const e of ['flip', 'land', 'catch', 'wrong', 'combo', 'gate', 'finish', 'levelUp']) assert.ok(r.ev.includes(e), e);
+  for (const e of ['flip', 'land', 'catch', 'combo', 'finish', 'levelUp', 'lampsOn']) assert.ok(r.ev.includes(e), e);
   const st = r.w.getState();
   assert.ok(st.level >= 7 && st.score > 3000, 'level ' + st.level + ' score ' + st.score);
-  assert.ok(st.counts.fireflies < 120 && st.counts.obstacles < 60 && st.counts.roofs < 60, 'culled ' + JSON.stringify(st.counts));
+  assert.ok(st.counts.leaves < 120 && st.counts.lamps < 40 && st.counts.obstacles < 60 && st.counts.roofs < 60, 'culled ' + JSON.stringify(st.counts));
   console.log('     (10 min: ' + ms + ' ms, level ' + st.level + ', score ' + st.score + ', caught ' + st.stats.caught + ', flips ' + st.stats.flips + ', hits ' + (st.stats.bumps + st.stats.falls) + ')');
 });
 

@@ -12,7 +12,7 @@ for (let s = 1; s <= N; s++) {
     p.step(1 / 60, w, t); w.update(1 / 60); t += 1 / 60;
     for (const e of w.drainEvents()) if (e.type === 'bump' || e.type === 'fall') {
       n++; const ago = w.time - (p.stats.lastT === undefined ? -9 : p.stats.lastT);
-      const why = ago < 1.5 ? ({ planned: 'own planned tap, too late', forgot: 'forgot to tap', random: 'random tap', doubles: 'double tap (flip-back)', misread: 'misread a hazard on the other surface', chases: 'chased fireflies' })[p.stats.lastWhy] || '?' : 'no tap in the last 1.5 s (late notice / distraction)';
+      const why = ago < 1.5 ? ({ planned: 'own planned tap, too late', forgot: 'forgot to tap', random: 'random tap', doubles: 'double tap (flip-back)', misread: 'misread a hazard on the other surface', chases: 'chased leaves' })[p.stats.lastWhy] || '?' : 'no tap in the last 1.5 s (late notice / distraction)';
       by[why] = (by[why] || 0) + 1; const k = e.type === 'fall' ? 'gap' : e.ob.kind; kind[k] = (kind[k] || 0) + 1;
     }
   }

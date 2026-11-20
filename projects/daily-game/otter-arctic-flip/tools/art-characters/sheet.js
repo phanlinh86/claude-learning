@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 // Contact sheets for the character art of Ollie's Lighthouse Flip (Playwright + Chromium).
-// - characters_sheet_light.png / _dark.png: every asset at in-game size (unit = 100) and enlarged,
-//   on a light background and on deep navy; Bolt frames get anchor marks (green = body centre 64,74;
-//   magenta = chest screen 60,82; orange line = feet line y 120); run-cycle strip, firefly wing strips
-//   (plus a greyscale row), Bolt upside-down (scaleY -1) clamped under a dark rail strip.
-// - characters_scene.png: 960x540 mock scene (roof line y 431, rail underside y 141).
-// Usage: node tools/art-characters/sheet.js
+// - characters_sheet_light.png / _dark.png / _night.png: every asset at in-game size (unit = 100) and enlarged,
+//   on a light background, a dark grey-brown and a deep night blue; Ollie frames get anchor marks
+//   (green = body centre 64,74; magenta = headlamp lens 92,44; orange line = feet line y 120);
+//   run-cycle strip, leaf flutter strip (+ greyscale row), Ollie upside-down (scaleY -1) under a ceiling beam.
+// - characters_scene.png: 960x540 mock corridor (floor y 431, ceiling underside y 141) with dimming.
+// Usage: node tools/art-characters/sheet.js        (QA_DIR=dir also writes a big close-up of Ollie)
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -17,18 +17,16 @@ const OUTD = path.join(ROOT, 'docs/art');
 const uri = (n) => 'data:image/svg+xml;base64,' + fs.readFileSync(path.join(A, n)).toString('base64');
 
 const U = 100, CORR = 290;
-const BOLT = 0.95 * U, FF = 0.44 * U;
-const NAVY = '#141a40', LIGHT = '#eef0f6';
-const COLS = ['pink', 'yellow', 'cyan'];
-const GLOW = { pink: '#ff5fa2', yellow: '#ffd23f', cyan: '#39e1ff' };
-const BOLTS = ['bolt_run_0', 'bolt_run_1', 'bolt_run_2', 'bolt_run_3', 'bolt_air', 'bolt_bump', 'bolt_happy'];
+const OL = 0.95 * U, LF = 0.42 * U;
+const BG = { light: '#eef0f6', dark: '#2e2a2a', night: '#0e1638' };
+const LEAFC = ['#5fd35a', '#ffc53d', '#ff6b3d'];
+const OLLIES = ['ollie_run_0', 'ollie_run_1', 'ollie_run_2', 'ollie_run_3', 'ollie_air', 'ollie_bump', 'ollie_happy'];
 // [file, w, h, enlarge]
 const ITEMS = [
-  ...BOLTS.map((n) => [n + '.svg', BOLT, BOLT, 4]),
-  ...COLS.flatMap((c) => [0, 1].map((i) => [`firefly_${c}_${i}.svg`, FF, FF, 4])),
-  ...COLS.map((c) => [`gate_${c}.svg`, 0.95 * U, CORR, 2]),
-  ['vent_0.svg', 80, 62, 4], ['vent_1.svg', 50, 78, 4], ['sign_0.svg', 80, 66, 4], ['sign_1.svg', 55, 70, 4],
-  ['drone.svg', 100, 75, 4], ['finish.svg', 140, CORR, 2],
+  ...OLLIES.map((n) => [n + '.svg', OL, OL, 4]),
+  ...[0, 1, 2].map((i) => [`leaf_${i}.svg`, LF, LF, 4]),
+  ['vent_0.svg', 80, 62, 3], ['vent_1.svg', 50, 78, 3], ['sign_0.svg', 80, 66, 3], ['sign_1.svg', 55, 70, 3],
+  ['drone.svg', 100, 75, 3], ['finish.svg', 140, CORR, 1.5],
   ['battery.svg', 28, 28, 4], ['battery_empty.svg', 28, 28, 4], ['icon.svg', 32, 32, 8],
 ];
 const T = (t, c) => `<div style="font:bold 14px sans-serif;color:${c};margin:14px 0 6px">${t}</div>`;
@@ -41,97 +39,71 @@ function cell(n, w, h, fg, k = 1, marks = false, label = true) {
   w *= k; h *= k;
   let s = `<div style="text-align:center;font:10px sans-serif;color:${fg}"><div style="position:relative;width:${w}px;height:${h}px;outline:1px dashed rgba(128,128,160,.35)">`;
   s += img(n, 0, 0, w, h);
-  if (marks && n.startsWith('bolt')) {
+  if (marks && n.startsWith('ollie')) {
     const sx = w / 128;
     s += `<div style="position:absolute;left:0;top:${120 * sx}px;width:${w}px;height:1px;background:#f80"></div>`;
-    s += cross(64 * sx, 74 * sx, '#0c0') + cross(60 * sx, 82 * sx, '#f0f');
+    s += cross(64 * sx, 74 * sx, '#0c0') + cross(92 * sx, 44 * sx, '#f0f');
   }
+  if (marks && n === 'drone.svg') s += cross(64 * w / 128, 36 * w / 128, '#0c0') + cross(64 * w / 128, 92 * w / 128, '#f0f');
+  if (marks && n === 'finish.svg') s += cross(80 * w / 160, 60 * h / 300, '#f0f');
   return s + `</div>${label ? n.replace('.svg', '') : ''}</div>`;
 }
 function panel(bg) {
-  const dark = bg === NAVY, fg = dark ? '#ddd' : '#222';
-  let h = `<div style="background:${bg};padding:14px;width:1872px">` + T('in-game size (unit = 100; Bolt 95 px, firefly 44 px, gates/finish stretched to corridor 290 px)', fg);
+  const dark = bg !== BG.light, fg = dark ? '#ddd' : '#222';
+  let h = `<div style="background:${bg};padding:14px;width:1872px">` + T('in-game size (unit = 100; Ollie 95 px, leaf 42 px, finish stretched to corridor 290 px)', fg);
   h += `<div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px">`;
   for (const [n, w, hh] of ITEMS) h += cell(n, w, hh, fg, 1, false);
-  h += `</div>` + T('enlarged: Bolt / fireflies / obstacles / drone / battery 4x, gates + finish 2x, icon 8x (Bolt marks: green body centre, magenta chest screen, orange feet line)', fg);
+  h += `</div>` + T('enlarged (Ollie marks: green body centre 64,74 / magenta headlamp lens 92,44 / orange feet line 120; drone: body centre + hook 64,92; finish: lamp 80,60)', fg);
   h += `<div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px">`;
   for (const [n, w, hh, k] of ITEMS) h += cell(n, w, hh, fg, k, true, false);
   h += `</div>`;
-  // run-cycle strip on a baseline at 2x
-  h += T('run cycle 0-1-2-3-0-1-2-3 at 2x (identical body; feet on the line)', fg) + `<div style="position:relative;height:${BOLT * 2 + 10}px;width:${8 * BOLT * 1.6}px">`;
-  for (let i = 0; i < 8; i++) h += img(`bolt_run_${i % 4}.svg`, i * BOLT * 1.6, 0, BOLT * 2, BOLT * 2);
-  h += `<div style="position:absolute;left:0;top:${(120 / 128) * BOLT * 2}px;width:100%;height:2px;background:${dark ? '#6a78b0' : '#8a93b0'}"></div></div>`;
-  // firefly wing strips (colour + greyscale)
-  h += T('firefly wing flap 0-1-0-1 at 2x, colour and greyscale (with additive glow like in game)', fg) + `<div style="display:flex;gap:30px">`;
+  h += T('run cycle 0-1-2-3-0-1-2-3 at 2x (identical body; feet on the line)', fg) + `<div style="position:relative;height:${OL * 2 + 10}px;width:${8 * OL * 1.6}px">`;
+  for (let i = 0; i < 8; i++) h += img(`ollie_run_${i % 4}.svg`, i * OL * 1.6, 0, OL * 2, OL * 2);
+  h += `<div style="position:absolute;left:0;top:${(120 / 128) * OL * 2}px;width:100%;height:2px;background:${dark ? '#6a78b0' : '#8a93b0'}"></div></div>`;
+  // leaves: flutter (rotated / flipped like the renderer does), colour + greyscale
+  h += T('leaves fluttering (rot -40..40, mirrored), 2x, colour and greyscale, with the night glow', fg) + `<div style="display:flex;gap:30px">`;
   for (const gs of [false, true]) {
     h += `<div style="display:flex;flex-direction:column;gap:6px;${gs ? 'filter:grayscale(1)' : ''}">`;
-    for (const c of COLS) {
+    for (let c = 0; c < 3; c++) {
       h += `<div style="display:flex;gap:8px">`;
-      for (let i = 0; i < 4; i++) h += `<div style="position:relative;width:88px;height:88px;background:radial-gradient(circle at 53% 62%, ${GLOW[c]}${dark ? '88' : '44'} 0, transparent 60%)">${img(`firefly_${c}_${i % 2}.svg`, 0, 0, 88, 88)}</div>`;
+      [-40, -15, 15, 40].forEach((r, i) => {
+        h += `<div style="position:relative;width:84px;height:84px;background:${dark ? `radial-gradient(circle, ${LEAFC[c]}55 0, transparent 60%)` : 'none'}">` +
+          img(`leaf_${c}.svg`, 0, 0, 84, 84, `transform:rotate(${r}deg) scaleX(${i % 2 ? -1 : 1})`) + `</div>`;
+      });
       h += `</div>`;
     }
     h += `</div>`;
   }
   h += `</div>`;
-  // upside-down on a dark rail strip, at in-game size and 2x
-  h += T('upside-down on the rail (scaleY -1), in-game size and 2x', fg);
+  h += T('upside-down on the ceiling beam (scaleY -1), in-game size and 2x', fg);
   const RH = 40, W = 1400;
-  h += `<div style="position:relative;height:${RH + BOLT * 2 + 20}px;width:${W}px;background:#1a2148">`;
-  h += `<div style="position:absolute;left:0;top:0;width:${W}px;height:${RH}px;background:linear-gradient(#5a6488,#3b4466);border-bottom:3px solid #ffe2a0"></div>`;
+  h += `<div style="position:relative;height:${RH + OL * 2 + 20}px;width:${W}px;background:#3a4560">`;
+  h += `<div style="position:absolute;left:0;top:0;width:${W}px;height:${RH}px;background:linear-gradient(#8a6440,#6b4a2c);border-bottom:3px solid #4a2e18"></div>`;
   let x = 10;
-  for (const n of [...BOLTS]) {
-    h += img(n + '.svg', x, RH + 3 - (8 / 128) * BOLT, BOLT, BOLT, 'transform:scaleY(-1)');
-    x += BOLT + 6;
-  }
-  for (const n of ['bolt_run_0', 'bolt_run_2', 'bolt_happy']) {
-    h += img(n + '.svg', x, RH + 3 - (8 / 128) * BOLT * 2, BOLT * 2, BOLT * 2, 'transform:scaleY(-1)');
-    x += BOLT * 2 + 6;
-  }
+  for (const n of OLLIES) { h += img(n + '.svg', x, RH + 3 - (8 / 128) * OL, OL, OL, 'transform:scaleY(-1)'); x += OL + 6; }
+  for (const n of ['ollie_run_0', 'ollie_run_2', 'ollie_happy']) { h += img(n + '.svg', x, RH + 3 - (8 / 128) * OL * 2, OL * 2, OL * 2, 'transform:scaleY(-1)'); x += OL * 2 + 6; }
   return h + `</div></div>`;
 }
-function scene() {
-  const W = 960, H = 540, ROOF = 431, RAIL = 141;
-  const k = BOLT / 128;
-  let h = `<div style="position:relative;width:${W}px;height:${H}px;background:linear-gradient(#0e1638,#2b2f6b);overflow:hidden">`;
-  for (let i = 0; i < 50; i++) {
-    const x = (i * 137.5) % W, y = (i * 53.3) % 110;
-    h += `<div style="position:absolute;left:${x}px;top:${y}px;width:2px;height:2px;border-radius:1px;background:#cfd4ff;opacity:.6"></div>`;
-  }
-  // far skyline
-  for (let i = 0; i < 14; i++) {
-    const bx = i * 72 - 10, bh = 120 + ((i * 47) % 90);
-    h += `<div style="position:absolute;left:${bx}px;top:${ROOF - bh}px;width:64px;height:${bh}px;background:#232a58;opacity:.9"></div>`;
-  }
-  // roofs with a gap 560..660
-  for (const [x0, x1] of [[0, 520], [640, W]]) {
-    h += `<div style="position:absolute;left:${x0}px;top:${ROOF}px;width:${x1 - x0}px;height:${H - ROOF}px;background:#3b4466;border-top:6px solid #56608a;box-sizing:border-box"></div>`;
-  }
-  // rail with a gap 360..460
-  for (const [x0, x1] of [[0, 330], [440, W]]) {
-    h += `<div style="position:absolute;left:${x0}px;top:${RAIL - 40}px;width:${x1 - x0}px;height:40px;background:linear-gradient(#5a6488,#3b4466);border-bottom:3px solid #ffe2a0;box-sizing:border-box"></div>`;
-  }
-  const ff = (c, i, x, y) => `<div style="position:absolute;left:${x - 40}px;top:${y - 40}px;width:80px;height:80px;background:radial-gradient(circle, ${GLOW[c]}99 0, ${GLOW[c]}33 35%, transparent 65%);mix-blend-mode:screen"></div>` +
-    img(`firefly_${c}_${i}.svg`, x - FF / 2, y - FF / 2, FF, FF);
-  // gate
-  h += img('gate_cyan.svg', 470, RAIL, 0.95 * U, ROOF - RAIL, '');
-  // fireflies: line along the roof, an arc in the flip path, a cluster under the rail
-  [[320, 380], [370, 380], [420, 380]].forEach(([x, y], i) => { h += ff('yellow', i % 2, x, y); });
-  [[620, 360], [660, 300], [690, 240]].forEach(([x, y], i) => { h += ff('cyan', i % 2, x, y); });
-  [[760, 190], [800, 190], [840, 205]].forEach(([x, y], i) => { h += ff(['pink', 'cyan', 'yellow'][i], i % 2, x, y); });
-  // obstacles
-  h += img('vent_0.svg', 780, ROOF - 62, 80, 62) + img('vent_1.svg', 900, ROOF - 78, 50, 78);
-  h += img('sign_0.svg', 160, RAIL, 80, 66) + img('sign_1.svg', 590, RAIL, 55, 70);
-  // Bolt on the roof (feet line y 120 at ROOF), body centre x 250
-  h += img('bolt_run_1.svg', 250 - 64 * k, ROOF - 120 * k, BOLT, BOLT);
-  // ghost: Bolt upside-down on the rail
-  h += img('bolt_run_3.svg', 80 - 64 * k, RAIL - 8 * k, BOLT, BOLT, 'transform:scaleY(-1);opacity:.55');
-  // drone carrying Bolt over the roof gap: Bolt's top hangs on the hook (64,92)
-  const dx = 580, dy = 230;
-  const dk = 100 / 128; // drone drawn 100 x 75, body centre (64,36), hook (64,92)
-  h += img('bolt_bump.svg', dx - 64 * k, dy + (92 - 36) * dk - 14 * k, BOLT, BOLT);
+function scene(dark) {
+  const W = 960, H = 540, FLOOR = 431, CEIL = 141, k = OL / 128;
+  let h = `<div style="position:relative;width:${W}px;height:${H}px;background:${dark ? '#3a4560' : '#a9b6c8'};overflow:hidden">`;
+  for (const wx of [200, 640]) h += `<div style="position:absolute;left:${wx}px;top:170px;width:170px;height:160px;background:${dark ? 'linear-gradient(#0e1638,#263a6a)' : 'linear-gradient(#ffc8b0,#d9b8e8)'};border:10px solid #6b4a2c;box-sizing:border-box"></div>`;
+  for (const [x0, x1] of [[0, 520], [640, W]]) h += `<div style="position:absolute;left:${x0}px;top:${FLOOR}px;width:${x1 - x0}px;height:${H - FLOOR}px;background:#b07a4f;border-top:6px solid #8a5a34;box-sizing:border-box"></div>`;
+  for (const [x0, x1] of [[0, 330], [440, W]]) h += `<div style="position:absolute;left:${x0}px;top:0;width:${x1 - x0}px;height:${CEIL}px;background:linear-gradient(#5a3a22,#8a6440);border-bottom:4px solid #4a2e18;box-sizing:border-box"></div>`;
+  const leaf = (c, x, y, r) => img(`leaf_${c}.svg`, x - LF / 2, y - LF / 2, LF, LF, `transform:rotate(${r}deg)`);
+  [[320, 395], [365, 400], [410, 395]].forEach(([x, y], i) => { h += leaf(0, x, y, [-20, 10, 30][i]); });
+  [[620, 360], [660, 300], [690, 240]].forEach(([x, y], i) => { h += leaf(1, x, y, [20, -10, 15][i]); });
+  [[760, 180], [800, 175], [840, 185]].forEach(([x, y], i) => { h += leaf(2, x, y, [-30, 0, 25][i]); });
+  h += img('vent_0.svg', 780, FLOOR - 62, 80, 62) + img('vent_1.svg', 900, FLOOR - 78, 50, 78);
+  h += img('sign_0.svg', 160, CEIL, 80, 66) + img('sign_1.svg', 590, CEIL, 55, 70);
+  h += img('ollie_run_1.svg', 250 - 64 * k, FLOOR - 120 * k, OL, OL);
+  h += img('ollie_run_3.svg', 80 - 64 * k, CEIL - 8 * k, OL, OL, 'transform:scaleY(-1)');
+  const dx = 560, dy = 230, dk = 100 / 128;
+  h += img('ollie_bump.svg', dx - 64 * k, dy + (92 - 36) * dk - 14 * k, OL, OL);
   h += img('drone.svg', dx - 64 * dk, dy - 36 * dk, 100, 75);
-  h += img('finish.svg', 880 - 70, RAIL, 140, ROOF - RAIL, 'opacity:.92');
-  // HUD batteries
+  h += img('finish.svg', 880 - 70, CEIL, 140, FLOOR - CEIL);
+  if (dark) h += `<div style="position:absolute;inset:0;background:rgba(10,14,38,.55)"></div>` +
+    `<div style="position:absolute;left:${250 + 28 * k - 40}px;top:${FLOOR - 76 * k - 40}px;width:80px;height:80px;border-radius:50%;background:radial-gradient(#fff2a866,transparent 70%)"></div>`;
   [0, 1, 2].forEach((i) => { h += img(i < 2 ? 'battery.svg' : 'battery_empty.svg', 14 + i * 32, 14, 28, 28); });
   return h + `</div>`;
 }
@@ -146,14 +118,15 @@ function scene() {
     await (await page.$('body > div')).screenshot({ path: path.isAbsolute(name) ? name : path.join(OUTD, name) });
     console.log('wrote ' + name);
   };
-  await shot(panel(LIGHT), 'characters_sheet_light.png');
-  await shot(panel(NAVY), 'characters_sheet_dark.png');
-  await shot(`<div style="display:flex">${scene()}</div>`, 'characters_scene.png');
-  // close-ups for QA (scratch, not part of the deliverables) when QA_DIR is set
+  await shot(panel(BG.light), 'characters_sheet_light.png');
+  await shot(panel(BG.dark), 'characters_sheet_dark.png');
+  await shot(panel(BG.night), 'characters_sheet_night.png');
+  await shot(`<div style="display:flex;flex-direction:column">${scene(false)}${scene(true)}</div>`, 'characters_scene.png');
   if (process.env.QA_DIR) {
-    const big = (names, k) => `<div style="background:${LIGHT};padding:10px;display:flex;gap:10px;flex-wrap:wrap;width:1800px">` +
+    const big = (names, k, bg) => `<div style="background:${bg};padding:10px;display:flex;gap:10px;flex-wrap:wrap;width:1800px">` +
       names.map((n) => `<img src="${uri(n)}" style="width:${k}px;height:${k}px;background:#c8cede">`).join('') + '</div>';
-    await shot(big(BOLTS.map((b) => b + '.svg'), 380), path.resolve(process.env.QA_DIR, 'bolt_big.png'));
+    await shot(big(OLLIES.map((b) => b + '.svg'), 420, BG.light), path.resolve(process.env.QA_DIR, 'ollie_big.png'));
+    await shot(big(['leaf_0.svg', 'leaf_1.svg', 'leaf_2.svg', 'drone.svg', 'icon.svg'], 340, BG.light), path.resolve(process.env.QA_DIR, 'items_big.png'));
   }
   await browser.close();
 })();

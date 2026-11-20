@@ -43,8 +43,8 @@ function runGame(OF, player, opts) {
   const m = {
     diff: opts.diff, seed: opts.seed, over: false, time: 0, score: 0, levels: 0,
     firstPointT: null, firstHitT: null, levelT: [], heartsAtFinish: [], hitsByLevel: {}, ptsByLevel: {},
-    bumps: 0, falls: 0, caught: 0, wrong: 0, ownMissed: 0, wrongAvoided: 0, flips: 0, taps: 0,
-    multCatch: [0, 0, 0, 0, 0, 0], maxMult: 1, maxCombo: 0, comboBreaks: 0, gates: 0,
+    bumps: 0, falls: 0, caught: 0, missed: 0, flips: 0, taps: 0, lampsOn: 0,
+    multCatch: [0, 0, 0, 0, 0, 0], maxMult: 1, maxCombo: 0, comboBreaks: 0,
     nanBad: 0, outOfBounds: 0, maxRescue: 0, stall: 0, finalHash: null
   };
   const seen = new Set();
@@ -62,27 +62,24 @@ function runGame(OF, player, opts) {
           m.caught++; m.multCatch[e.mult]++; m.maxMult = Math.max(m.maxMult, e.mult);
           m.ptsByLevel[w.level] = (m.ptsByLevel[w.level] || 0) + e.points;
           if (m.firstPointT === null) m.firstPointT = t; break;
-        case 'wrong': m.wrong++; break;
+        case 'lampsOn': m.lampsOn++; break;
         case 'comboBreak': m.comboBreaks++; break;
-        case 'gate': m.gates++; break;
         case 'bump': case 'fall':
           if (e.type === 'bump') m.bumps++; else m.falls++;
           m.hitsByLevel[w.level] = (m.hitsByLevel[w.level] || 0) + 1;
           if (m.firstHitT === null) m.firstHitT = t; break;
-        case 'finish': m.heartsAtFinish.push(null); break;      // batteries left BEFORE the arch's +1 (set below)
+        case 'finish': m.heartsAtFinish.push(null); break;      // hearts left BEFORE the door's +1 (set below)
         case 'heartGain': { const k = m.heartsAtFinish.length - 1; if (k >= 0 && m.heartsAtFinish[k] === null) m.heartsAtFinish[k] = e.hearts - 1; break; }
         case 'levelUp': m.levels++; m.levelT.push(t - lastLevelT); lastLevelT = t; break;
         case 'gameOver': m.over = true; break;
       }
     }
     for (let k = 0; k < m.heartsAtFinish.length; k++) if (m.heartsAtFinish[k] === null) m.heartsAtFinish[k] = w.maxHearts;  // full: no gain event
-    // fireflies that scrolled past Bolt still flying: a missed own-colour one, or a wrong one avoided
+    // leaves that scrolled past Ollie still fluttering: missed
     const hx = w.hero.x;
-    for (const f of w.fireflies) {
-      if (f.state === 'fly' && f.x < hx - 0.6 * u && !seen.has(f.id)) {
-        seen.add(f.id);
-        if (f.color === w.hero.color) m.ownMissed++; else m.wrongAvoided++;
-      } else if (f.state !== 'fly') seen.add(f.id);
+    for (const f of w.leaves) {
+      if (f.state === 'fly' && f.x < hx - 0.6 * u && !seen.has(f.id)) { seen.add(f.id); m.missed++; }
+      else if (f.state !== 'fly') seen.add(f.id);
     }
     const h = w.hero;
     if (!isFinite(h.x) || !isFinite(h.y) || !isFinite(w.speed) || !isFinite(w.score) || !isFinite(w.cam.x)) m.nanBad++;
@@ -115,7 +112,7 @@ function summarise(ms) {
   const fh = ms.map(m => m.firstHitT === null ? m.time : m.firstHitT);   // censored at the end of the game
   const dawnHearts = ms.filter(m => m.heartsAtFinish.length >= 1).map(m => m.heartsAtFinish[0]);
   const noonHearts = ms.filter(m => m.heartsAtFinish.length >= 2).map(m => m.heartsAtFinish[1]);
-  const caught = sum(ms, 'caught'), wrong = sum(ms, 'wrong'), own = caught + sum(ms, 'ownMissed'), bad = wrong + sum(ms, 'wrongAvoided');
+  const caught = sum(ms, 'caught'), all = caught + sum(ms, 'missed');
   const mc = [0, 0, 0, 0, 0, 0]; ms.forEach(m => m.multCatch.forEach((v, i) => { mc[i] += v; }));
   return {
     n, overPct: 100 * ms.filter(m => m.over).length / n,
@@ -123,14 +120,15 @@ function summarise(ms) {
     score10: q(ms.map(m => m.score), 0.1), score50: q(ms.map(m => m.score), 0.5), score90: q(ms.map(m => m.score), 0.9),
     lv50: q(ms.map(m => m.levels), 0.5), lvMax: Math.max(...ms.map(m => m.levels)),
     reach1: reach(1), reach2: reach(2), reach3: reach(3), reach4: reach(4),
+    floorHearts: [0, 1, 2, 3].map(k => q(ms.filter(m => m.heartsAtFinish.length > k).map(m => m.heartsAtFinish[k]), 0.5)),
+    floorMin: [0, 1, 2, 3].map(k => q(lv[k], 0.1)), floorMax: [0, 1, 2, 3].map(k => q(lv[k], 0.9)),
     dawnHearts50: q(dawnHearts, 0.5), noonHearts50: q(noonHearts, 0.5),
     dawnT: q(lv[0], 0.5), noonT: q(lv[1], 0.5), sunsetT: q(lv[2], 0.5), nightT: q(lv[3], 0.5),
     firstPt: q(fp, 0.5), firstHit: q(fh, 0.5), firstHit10: q(fh, 0.1),
     hitsPerMin: (sum(ms, 'bumps') + sum(ms, 'falls')) / mins,
     bumpShare: 100 * sum(ms, 'bumps') / Math.max(1, sum(ms, 'bumps') + sum(ms, 'falls')),
     dawnHits: mean(ms.map(m => m.hitsByLevel[0] || 0)),
-    ownRate: 100 * caught / Math.max(1, own), wrongRate: 100 * wrong / Math.max(1, bad),
-    purity: 100 * caught / Math.max(1, caught + wrong),
+    catchRate: 100 * caught / Math.max(1, all),
     ptsPerMin: sum(ms, m => m.score) / mins,
     multShare: 100 * (caught - mc[1]) / Math.max(1, caught),
     mult5: 100 * ms.filter(m => m.maxMult >= 5).length / n, maxMult50: q(ms.map(m => m.maxMult), 0.5),
@@ -145,18 +143,20 @@ const COLS = {
     ['n', 'n', 0], ['over%', 'overPct', 0], ['surv p10/50/90 s', r => f(r.surv10, 0) + '/' + f(r.surv50, 0) + '/' + f(r.surv90, 0)],
     ['score p10/50/90', r => f(r.score10, 0) + '/' + f(r.score50, 0) + '/' + f(r.score90, 0)],
     ['levels p50 (max)', r => f(r.lv50, 0) + ' (' + r.lvMax + ')'],
-    ['reach Noon/Sunset/Night/Loop %', r => [r.reach1, r.reach2, r.reach3, r.reach4].map(pct).join('/')],
-    ['batt. left at Dawn/Noon arch p50', r => f(r.dawnHearts50, 0) + '/' + f(r.noonHearts50, 0)],
+    ['clear floor 1/2/3/4 %', r => [r.reach1, r.reach2, r.reach3, r.reach4].map(pct).join('/')],
+    ['hearts left at door 1/2 p50', r => f(r.dawnHearts50, 0) + '/' + f(r.noonHearts50, 0)],
     ['hits/min', 'hitsPerMin', 2], ['Dawn hits', 'dawnHits', 2], ['1st hit p10/p50 s', r => f(r.firstHit10, 0) + '/' + f(r.firstHit, 0)]
   ],
   scoring: [
-    ['1st pt s', 'firstPt', 1], ['pts/min', 'ptsPerMin', 0], ['own caught %', 'ownRate', 0], ['wrong hit %', 'wrongRate', 0],
-    ['purity %', 'purity', 0], ['catches at ×2+ %', 'multShare', 0], ['reach ×5 % games', 'mult5', 0],
+    ['1st pt s', 'firstPt', 1], ['pts/min', 'ptsPerMin', 0], ['leaves caught %', 'catchRate', 0],
+    ['catches at ×2+ %', 'multShare', 0], ['reach ×5 % games', 'mult5', 0],
     ['taps/min', 'tapsPerMin', 0], ['flips/min', 'flipsPerMin', 0], ['bump share %', 'bumpShare', 0]
   ],
   pacing: [
-    ['Dawn s', 'dawnT', 1], ['Noon s', 'noonT', 1], ['Sunset s', 'sunsetT', 1], ['Night s', 'nightT', 1]
+    ['Boot Room (dawn) s', 'dawnT', 1], ['Greenhouse (noon) s', 'noonT', 1], ['Map Library (sunset) s', 'sunsetT', 1], ['Lantern Deck (night) s', 'nightT', 1]
   ],
+  floors: [1, 2, 3, 4].map(k => ['floor ' + k + ': clear % · s p10/50/90 · hearts left',
+    r => pct(r['reach' + k]) + ' · ' + f(r.floorMin[k - 1], 0) + '/' + f(r[['dawnT', 'noonT', 'sunsetT', 'nightT'][k - 1]], 0) + '/' + f(r.floorMax[k - 1], 0) + ' · ' + f(r.floorHearts[k - 1], 0)]),
   health: [['NaN frames', 'nanBad', 0], ['out-of-corridor frames', 'oob', 0], ['stall frames', 'stall', 0], ['longest rescue s', 'maxRescue', 2]]
 };
 function table(rows, labelHead, cols) {

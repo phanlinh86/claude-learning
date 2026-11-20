@@ -1,6 +1,6 @@
 /* Ollie's Lighthouse Flip — OF.World (headless, deterministic) + OF.World.CONFIG
  *
- * Contract: docs/DESIGN.md §2 and §5.1. Motion model, generator, fairness and tuning: docs/MECHANICS.md.
+ * Contract: docs/DESIGN.md §2 and §5.1. Motion model, generator, fairness, visibility and tuning: docs/MECHANICS.md.
  * Units: px (logical, y DOWN) and seconds. Lengths in CONFIG are in "unit" multiples (layout.unit = 100 at
  * 960×540) and accelerations/speeds are given for unit = 100 and multiplied by u = unit/100 at use, so the
  * game plays the same on any screen. Everything runs in fixed sub-steps of CONFIG.step: same seed + same
@@ -10,86 +10,108 @@
  *   w.flip(); w.update(1/60);
  *   var ev = w.drainEvents();          // [{type:'flip', grav}, {type:'land', side, speed}, ...]
  *   // render: screenX = lerp(x.prevX, x, w.alpha) − lerp(cam.prevX, cam.x, w.alpha);
- *   //         hero y / flipT, fireflies and the drone lerp prev* the same way.
+ *   //         hero y / flipT / lamp, leaves (x, y, rot) and the drone lerp prev* the same way.
  *
- * The track is made of solid spans (roofs[], rails[]); a gap is the space between two spans of one surface.
- * hazards[] {kind, side, x0, x1, ob} is the generator's own list of gaps + obstacles (sorted by x0); it is what
- * hazardAhead() and the fairness tests read. Extras beyond DESIGN §5.1 (docs/MECHANICS.md §8): hero.prevX/knock/
- * coyote/buffer, firefly.baseX/ph2, drone.flipY/side, plans[] (level spans; draw every visible finishX), and the
- * pure helpers standY(side), clearRange(side,a,b), safeAt(side,x), speedTarget(x), levelBase(l), levelUnits(l).
+ * The track is made of solid spans (roofs[] = floor, rails[] = ceiling beam; names kept from Rooftop Flip); a gap
+ * (open hatch) is the space between two spans of one surface. hazards[] {kind, side, x0, x1, ob} is the
+ * generator's own list of gaps + obstacles (sorted by x0); it is what hazardAhead() and the fairness tests read.
+ * Visibility twist: world.light (0.3..1) follows the floor's lightFrom → lightTo by progress; lampsOn = light < 0.75;
+ * lamps[] are wall lamps placed with the track; obstacles carry .beacon; seeAheadUnits()/beamUnits() give the
+ * headlamp reach the renderer must keep lit (DESIGN §5.1 visibility rule, MECHANICS §6).
+ * Extras beyond DESIGN §5.1 (MECHANICS §9): hero.prevX/knock/coyote/buffer, hero.lamp.prevX/prevY,
+ * leaf.face/ph2/bob/omega/len, world.lightView, drone.flipY/side, plans[], and the pure helpers standY(side),
+ * clearRange(side,a,b), safeAt(side,x), speedTarget(x), levelBase(l), levelUnits(l), lightAt(level, progress),
+ * screenReachUnits(), beamUnits().
  */
 (function (OF) {
   'use strict';
   var M = Math;
 
   var CONFIG = {
-    step: 1 / 120,          // s      fixed sub-step: at 4.3 u/s Bolt moves 3.6 px per step, a flip's 2 u are ~45 steps
+    step: 1 / 120,          // s      fixed sub-step: at 4.3 u/s Ollie moves 3.6 px per step, a flip's 2 u are ~45 steps
     maxFrame: 0.25,         // s      longest frame simulated (a hidden tab does not fast-forward minutes)
 
-    // ---- Bolt's body (DESIGN §5.1) ----
-    standOff: 0.42,         // unit   body centre ↔ the surface he stands on (feet line of the 0.95 u sprite)
-    heroBox: 0.50,          // unit   hit box w = h around the body centre
+    // ---- Ollie's body (DESIGN §4.1 / §5.1) ----
+    standOff: 0.42,         // unit   hit centre ↔ the surface he stands on (feet line of the 0.95 u sprite)
+    heroBox: 0.50,          // unit   hit box w = h around the hit centre
     foot: 0.18,             // unit   half footprint: supported while either paw is over a solid span
     stepUp: 0.12,           // unit   a sag of up to this below the surface still "catches" on the far edge of a
-                            //        narrow crack (feels like a stumble, not a fall); deeper = inside the wall → falls
+                            //        narrow crack (feels like a stumble, not a fall); deeper = inside the floor → falls
+    // headlamp lens in the 128×128 sprite drawn 0.95 u, feet line y 120 on the surface (render.js anchors the
+    // sprite by its feet, so hero.y sits standOff above the feet): lens (92, 44) → offset from hero (x, y):
+    lampDx: (92 - 64) / 128 * 0.95,                  // unit  +0.208 (ahead of the hit centre)
+    lampDy: 0.42 - (120 - 44) / 128 * 0.95,          // unit  −0.144 (above it when upright; mirrored by the turn-over)
 
-    // ---- gravity flip (the "zoop") ----
+    // ---- gravity flip (the "swoosh") ----
     g: 2200,                // px/s²  (×u) pull toward the current surface. With kick 140 a flip crosses the 2.06 u
                             //        between the two standing lines in 0.374 s: snappy, yet you can see the arc
-    kick: 140,              // px/s   (×u) push toward the new surface at the flip: Bolt "springs" off, no dead float
-    maxVy: 1500,            // px/s   (×u) terminal speed (a flip lands at ≈960; only gap falls reach it)
-    turnK: 0.95,            // ×      the turn-over (flipT) takes 95 % of the flight: he is upside-down just before the clank
+    kick: 140,              // px/s   (×u) push toward the new surface at the flip: Ollie springs off, no dead float
+    maxVy: 1500,            // px/s   (×u) terminal speed (a flip lands at ≈960; only hatch falls reach it)
+    turnK: 0.95,            // ×      the turn-over (flipT) takes 95 % of the flight: he is upside-down just before the fwump
     coyote: 0.12,           // s      flip still allowed this long after running off an edge (DESIGN)
     buffer: 0.18,           // s      a press in the air is kept this long and fires on landing (one press only)
-    fallOut: 1.3,           // unit   past floorY + 1.3 u / above ceilY − 1.3 u Bolt has left the corridor → fall
+    fallOut: 1.3,           // unit   past floorY + 1.3 u / above ceilY − 1.3 u Ollie has left the corridor → fall
 
     // ---- feel ----
     squashRef: 1000,        // px/s   (×u) landing speed that gives squash 1 × squashMax…
     squashMin: 0.2,         // —      …a stumble still squashes a little
-    squashMax: 0.7,         // —      …a full flip lands at ≈0.67: a clear cartoon "CLANK"
+    squashMax: 0.7,         // —      …a full flip lands at ≈0.67: a clear cartoon "fwump"
     squashDecay: 8,         // 1/s    fades to < 10 % in 0.29 s
     knockDecay: 5,          // 1/s    hero.knock (bump recoil 0..1, for the renderer's wobble) fades in ≈0.5 s
-    stride: 1.1,            // unit   one 4-frame run cycle per 1.1 u: ≈3 cycles/s at Normal noon (a scampering pup)
+    stride: 1.1,            // unit   one 4-frame run cycle per 1.1 u: ≈3 bounds/s at Normal noon
 
     // ---- scroll speed ----
-    speedRamp: 0.10,        // ×      the scroll eases up 10 % from a level's start to its finish arch…
-    speedEase: 0.6,         // 1/s    …and follows its target with this rate (a level change blends over ≈3 s)
-    loopSpeed: 0.08,        // ×/loop each round after Night is 8 % faster (DESIGN)…
+    speedRamp: 0.10,        // ×      the scroll eases up 10 % from a floor's start to its stairway door…
+    speedEase: 0.6,         // 1/s    …and follows its target with this rate (a floor change blends over ≈3 s)
+    loopSpeed: 0.08,        // ×/loop each new day after the Lantern Deck is 8 % faster (DESIGN)…
     loopSpeedCap: 1.4,      // ×      …up to 40 % (loop 5+)
     overStop: 0.6,          // s      game over: the scroll eases to a stop
 
     // ---- hearts / safety ----
     invuln: 1.5,            // s      blink of safety after a bump or a rescue (DESIGN)
 
-    // ---- rescue drone ----
-    droneIn: 0.45,          // s      the drone swoops in from the upper left and grabs Bolt…
+    // ---- rescue (Pip the puffin; the object keeps the name `drone`) ----
+    droneIn: 0.45,          // s      Pip swoops in from the upper left and grabs Ollie…
     carry: 0.9,             // s      …carries him (≥ 0.9 s, longer if the next safe spot is further)…
     droneOut: 0.6,          // s      …drops him and flies off ahead
-    hang: 0.72,             // unit   drone body centre ↔ Bolt's body centre while carried (rope + hook)
-    catchDamp: 18,          // 1/s    Bolt's fall speed is damped out while the drone reaches him (he dangles, no snap)
+    hang: 0.72,             // unit   Pip's body centre ↔ Ollie's hit centre while carried (rope + ring hook)
+    catchDamp: 18,          // 1/s    Ollie's fall speed is damped out while Pip reaches him (he dangles, no snap)
     rescueAhead: 1.6,       // unit   the drop spot needs this much clear surface ahead (+ half a reaction)
 
     // ---- scoring ----
-    ffPoints: 10,           // pts    × mult per matching firefly
-    multEvery: 5,           // ff     mult = 1 + ⌊combo / 5⌋…
+    leafPoints: 10,         // pts    × mult per leaf
+    multEvery: 5,           // leaves mult = 1 + ⌊combo / 5⌋…
     multMax: 5,             // ×      …up to ×5 (REQUIREMENT)
     finishBonus: 100,       // pts    × (zone + 1) × (loop + 1)
-    heartReward: 1,         // —      hearts back at every finish arch (up to max)
+    heartReward: 1,         // —      hearts back at every stairway door (up to max)
 
-    // ---- fireflies ----
-    ff: {
-      r: 0.22,              // unit   circle radius (catch radius ×difficulty.catchK)
-      bob: 0.08, bobW: 2.4, // unit, rad/s   gentle hover: ±8 px, period 2.6 s
-      drift: 0.05, driftW: 0.9, // unit, rad/s  a tiny sideways drift on top (they look alive, never leave their spot)
-      caughtT: 0.22,        // s      caught: sucked into Bolt's chest lantern, then gone
-      suck: 22,             // 1/s    …the pull rate toward his chest (95 % in 0.14 s)
-      fleeVx: 2.2,          // unit/s wrong colour: zips forward…
-      fleeVy: 2.6,          // unit/s …and away from Bolt (up, or down if he is above it)…
-      fleeAcc: 4.5,         // unit/s² …accelerating: a curved "zip" arc…
-      fleeWiggle: 0.35,     // unit/s  …with a little flutter
-      fleeT: 1.1,           // s      then it is gone
-      spacing: 0.58,        // unit   between fireflies of a line
-      minGap: 0.45          // unit   no two fireflies closer than this
+    // ---- leaves: a pendulum flutter in the warm draft (DESIGN §5.1) ----
+    leaf: {
+      r: 0.22,              // unit   catch circle radius (×difficulty.catchK)
+      len: 0.25,            // unit   L: the invisible string from the pivot to the leaf
+      swing: [0.5, 0.8],    // rad    swing amplitude per leaf: θ = swing·sin(ω·time + phase)
+      omega: [2.2, 3.0],    // rad/s  ω per leaf (a 2.1–2.9 s period: a lazy, readable sway)
+      bob: 0.06,            // unit   slow extra vertical bob…
+      bobW: 1.1,            // rad/s  …period 5.7 s, out of step with the swing so it never looks mechanical
+      tilt: 1.2,            // ×      rot = 1.2·θ: the leaf tilts with its swing (face = sign dθ/dt for the flutter flip)
+      caughtT: 0.35,        // s      caught: spirals into Ollie this long, then gone
+      turns: 1.0,           // turns  the spiral's sweep around him; radius and angle share one smoothstep, so it
+                            //        starts gently, whirls fastest half-way in and settles into his chest
+      spin: 14,             // rad/s  how fast a caught leaf spins on itself
+      spacing: 0.58,        // unit   between leaves of a line
+      minGap: 0.45,         // unit   no two leaves closer than this
+      obClear: 0.32         // unit   a leaf's pivot stays this far (+ r) from any obstacle: its whole swing is clear
+    },
+
+    // ---- visibility (the twist: dawn → night, DESIGN §5.1) ----
+    light: {
+      min: 0.3,             // —      darkness never goes below 30 % light (DESIGN)
+      lampsBelow: 0.75,     // —      lampsOn = light < 0.75 → wall lamps, beacons, glowing leaves
+      viewEase: 1.2,        // 1/s    world.lightView eases toward light (≈2.5 s to settle after a floor change)
+      seeExtra: 0.8,        // unit   seeAhead = (reaction·S + flightDist)/unit + 0.8
+      beamMin: 3.2,         // unit   the headlamp beam is never shorter than this
+      lampEvery: [3.5, 5.0],// unit   wall lamps along the corridor, alternating high (ceil) / low (floor)
+      lampDoorClear: 1.0    // unit   no wall lamp right at a stairway door (the door has its own lantern)
     },
 
     // ---- track generator (DESIGN §5.1 fairness) ----
@@ -97,51 +119,45 @@
       ahead: 2.5,           // screens generated ahead of the camera (≥ 2)
       behind: 1.0,          // screens kept behind (then culled)
       margin: 0.8,          // unit   m: the safe surface must be clear from x0 − (flightDist + m) to x1 + m
-      sameGap: 1.2,         // unit   min solid run between two hazards on the same surface (a building ≥ 1.2 u)
-      finishClear: 2.5,     // unit   both surfaces safe this far before and after a finish arch
-      breather: 1.2,        // s      plus this much calm after a finish (the sky crossfades)
-      gateEvery: [8, 13],   // s      asked gap to the next paint gate; the first clear spot after it is used → ≈8.5–13.5 s in play (DESIGN 8–14)
-      firstGate: [6, 9],    // s      the first gate of a run comes a bit sooner
-      gateClear: 0.8,       // unit   a gate needs both surfaces safe ± this (its posts stand on solid ground)
-      match: 0.65,          // —      share of fireflies in Bolt's colour (DESIGN ≈65 %)
-      arcMatch: 0.8,        // —      fireflies on a flip arc are a reward: mostly matching
-      arcLead: 0.45,        // unit   the arc starts this far before the latest flip point (where a good player flips)
-      lineMono: true,       // —      a firefly line is ONE colour (like a cluster), so the player can read it and pick a surface
-      maxGapUnit: 2.2       // unit   widest gap anywhere
+      sameGap: 1.2,         // unit   min solid run between two hazards on the same surface
+      finishClear: 2.5,     // unit   both surfaces safe this far before and after a stairway door
+      breather: 1.2,        // s      plus this much calm after a door (the scene crossfades)
+      arcLead: 0.45,        // unit   a leaf arc starts this far before the latest flip point (where a good player flips)
+      maxGapUnit: 2.2       // unit   widest hatch anywhere
     },
 
-    // ---- per difficulty (Easy is tuned for a 4–6-year-old: playtest docs/reports/playtest.md) ----
+    // ---- per difficulty (Easy is tuned for a 4–6-year-old: Rooftop Flip's playtest, re-checked by tests/sim) ----
     difficulty: {
-      easy:   { speed: 0.78, hearts: 5, reaction: 1.8,  gapMin: 0.8, gapMax: 1.4, gapShare: 0.30, extra: [0.8, 2.0], catchK: 1.35, hitK: 0.6,  wrongBreaks: false, hitBreaks: false, safeStart: 3.0 },
-      normal: { speed: 1.0,  hearts: 3, reaction: 0.95, gapMin: 0.8, gapMax: 1.9, gapShare: 0.45, extra: [0.2, 1.1], catchK: 1.0,  hitK: 1.0,  wrongBreaks: true,  hitBreaks: true,  safeStart: 2.0 },
-      hard:   { speed: 1.15, hearts: 3, reaction: 0.7,  gapMin: 1.0, gapMax: 2.2, gapShare: 0.5,  extra: [0.05, 0.8], catchK: 1.0, hitK: 1.05, wrongBreaks: true,  hitBreaks: true,  safeStart: 2.0 }
+      easy:   { speed: 0.78, hearts: 5, reaction: 1.8,  gapMin: 0.8, gapMax: 1.4, gapShare: 0.30, extra: [0.8, 2.0], catchK: 1.35, hitK: 0.6,  comboKeep: 0.5, safeStart: 3.0 },
+      normal: { speed: 1.0,  hearts: 3, reaction: 0.95, gapMin: 0.8, gapMax: 1.9, gapShare: 0.45, extra: [0.2, 1.1], catchK: 1.0,  hitK: 1.0,  comboKeep: 0,   safeStart: 2.0 },
+      hard:   { speed: 1.15, hearts: 3, reaction: 0.7,  gapMin: 1.0, gapMax: 2.2, gapShare: 0.5,  extra: [0.05, 0.8], catchK: 1.0, hitK: 1.05, comboKeep: 0,   safeStart: 2.0 }
     },
-    //  speed = × zone speed · reaction = s the player gets between two forced flips (on top of the flight) ·
-    //  gapMin/Max = gap width (unit) · gapShare = share of hazards that are gaps (the rest are vents/signs: you
-    //  can see them coming better) · extra = s of random calm added after each hazard · catchK = × catch radius ·
-  //  hitK = × obstacle hit box (Easy 0.6: a flip that grazes a corner, or a tap a bit late, is forgiven; running into it still bumps) ·
-    //  wrongBreaks = a wrong-colour firefly resets the combo · hitBreaks = a bump/fall resets the combo ·
+    //  speed = × floor speed · reaction = s the player gets between two forced flips (on top of the flight) ·
+    //  gapMin/Max = hatch width (unit) · gapShare = share of hazards that are hatches (the rest are props: easier to
+    //  see coming) · extra = s of random calm added after each hazard · catchK = × catch radius ·
+    //  hitK = × obstacle hit box (Easy 0.6: a flip that grazes a corner, or a tap a bit late, is forgiven) ·
+    //  comboKeep = share of the combo kept after a bump/fall (Easy halves it, Normal/Hard reset it) ·
     //  safeStart = s of an empty track at the start of a run / after gotoLevel
 
-    // ---- times of day (zone = level % 4) ----
+    // ---- floors = times of day (zone = level % 4) ----
     zones: [
-      { key: 'dawn',   speed: 3.0, seconds: 62, alt: 0.55, gapK: 0.8, extraK: 1.25, arc: 0.45, line: 0.8 },  // sleepy rooftops: slow, calm, fewer gaps
-      { key: 'noon',   speed: 3.3, seconds: 68, alt: 0.6,  gapK: 1.0, extraK: 1.1,  arc: 0.5,  line: 0.8 },
-      { key: 'sunset', speed: 3.6, seconds: 72, alt: 0.65, gapK: 1.1, extraK: 1.0,  arc: 0.55, line: 0.75 },
-      { key: 'night',  speed: 3.9, seconds: 76, alt: 0.65, gapK: 1.15, extraK: 0.95, arc: 0.6, line: 0.75 }  // brightest fireflies, busiest rooftops
+      { key: 'dawn',   speed: 3.0, seconds: 62, alt: 0.55, gapK: 0.8,  extraK: 1.25, arc: 0.45, line: 0.8,  lightFrom: 0.78, lightTo: 0.95 },  // Boot Room: slow, calm, sun rising
+      { key: 'noon',   speed: 3.3, seconds: 68, alt: 0.6,  gapK: 1.0,  extraK: 1.1,  arc: 0.5,  line: 0.8,  lightFrom: 1.00, lightTo: 0.88 },  // Greenhouse
+      { key: 'sunset', speed: 3.6, seconds: 72, alt: 0.65, gapK: 1.1,  extraK: 1.0,  arc: 0.55, line: 0.75, lightFrom: 0.72, lightTo: 0.48 },  // Map Library: lamps on
+      { key: 'night',  speed: 3.9, seconds: 76, alt: 0.65, gapK: 1.15, extraK: 0.95, arc: 0.6,  line: 0.75, lightFrom: 0.40, lightTo: 0.32 }   // Lantern Deck: headlamp + lamps
     ],
-    //  speed = unit/s at difficulty 1, loop 0 (×1.1 by the level's end) · seconds = intended level duration
-    //  (levelLen = seconds × the level's mean speed) · alt = chance the next hazard is on the other surface
-    //  (forces a flip) · gapK = × gapShare · extraK = × difficulty.extra · arc = chance of fireflies along a
-    //  flip path · line = chance of a firefly line / cluster per stretch
+    //  speed = unit/s at difficulty 1, loop 0 (×1.1 by the door) · seconds = intended floor duration
+    //  (levelLen = seconds × the floor's mean speed) · alt = chance the next hazard is on the other surface
+    //  (forces a flip) · gapK = × gapShare · extraK = × difficulty.extra · arc = chance of leaves along a
+    //  flip path · line = chance of a leaf line / cluster per stretch · lightFrom → lightTo = world.light by progress
 
     // ---- obstacle sizes (DESIGN §4.1 drawn sizes) and the softer hit box ----
     obstacles: {
-      vent: [{ w: 0.80, h: 0.62 }, { w: 0.50, h: 0.78 }],   // AC unit, chimney (stand on the roof)
-      sign: [{ w: 0.80, h: 0.66 }, { w: 0.55, h: 0.70 }]    // shop sign, flower basket (hang from the rail)
+      vent: [{ w: 0.80, h: 0.62 }, { w: 0.50, h: 0.78 }],   // snowball pile, crate stack (stand on the floor)
+      sign: [{ w: 0.80, h: 0.66 }, { w: 0.55, h: 0.70 }]    // mitten line, plant basket (hang from the ceiling)
     },
     obHitW: 0.8,            // ×      hit box = 80 % of the drawn width (rounded art: corners never "hit")…
-    obHitH: 0.88            // ×      …and 88 % of the height (a smoke puff / chain does not count)
+    obHitH: 0.88            // ×      …and 88 % of the height (cords / a twig do not count)
   };
 
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
@@ -155,7 +171,7 @@
     w = +w || 960; h = +h || 540;
     var portrait = h > w;
     var unit = portrait ? M.min(w / 6, h / 8) : M.min(w / 9.6, h / 5.4);
-    var midY = portrait ? 0.47 * h : 0.53 * h;   // portrait: a little higher, less empty sky above the rail
+    var midY = portrait ? 0.47 * h : 0.53 * h;   // portrait: a little higher, less empty wall above the ceiling
     var ceilY = midY - 1.45 * unit, floorY = midY + 1.45 * unit;
     return { width: w, height: h, portrait: portrait, unit: unit, midY: midY, ceilY: ceilY, floorY: floorY,
       corridorH: floorY - ceilY, heroX: portrait ? 0.22 * w : 0.26 * w };
@@ -173,8 +189,9 @@
     this.D = CONFIG.difficulty[this.difficulty];
     this.rng = new OF.RNG(this.seed);
     this.genRng = this.rng.fork('track');
+    this.lampRng = this.rng.fork('lamps');           // own stream: lamps never change the track
     this.layout = computeLayout(opts.width || 960, opts.height || 540);
-    var L = this.layout, u = L.unit;
+    var L = this.layout;
     this.time = 0; this.phase = 'run'; this.overT = 0; this._overV = 0;
     this.level = M.max(0, opts.level | 0); this.zone = this.level % 4; this.loop = M.floor(this.level / 4);
     this.score = 0; this.combo = 0; this.mult = 1; this.maxCombo = 0;
@@ -185,21 +202,27 @@
     this.cam = { x: 0, prevX: 0 };
     var hx = L.heroX;
     this.hero = { x: hx, prevX: hx, y: this.standY('floor'), prevY: this.standY('floor'), vy: 0, grav: 1,
-      grounded: true, side: 'floor', flipT: 0, prevFlipT: 0, color: this.rng.int(3), state: 'run', invuln: 0,
-      runPhase: 0, squash: 0, bumpT: 99, happyT: 99, knock: 0, coyote: 0, buffer: 0, turn: null };
-    this.roofs = []; this.rails = []; this.obstacles = []; this.fireflies = []; this.gates = []; this.hazards = [];
+      grounded: true, side: 'floor', flipT: 0, prevFlipT: 0, state: 'run', invuln: 0,
+      runPhase: 0, squash: 0, bumpT: 99, happyT: 99, knock: 0, coyote: 0, buffer: 0, turn: null,
+      lamp: { x: 0, y: 0, prevX: 0, prevY: 0 } };
+    this.roofs = []; this.rails = []; this.obstacles = []; this.leaves = []; this.hazards = []; this.lamps = [];
     this.finish = null; this.drone = null; this.rescue = null;
-    this.stats = { flips: 0, caught: 0, wrong: 0, bumps: 0, falls: 0, gates: 0, levels: 0, distance: 0 };
+    this.light = 1; this.lightView = 1; this.lampsOn = false; this._lampsLevel = -1;
+    this.stats = { flips: 0, caught: 0, bumps: 0, falls: 0, levels: 0, distance: 0 };
+    this._lampX = hx - L.width;                      // wall lamps from one screen behind Ollie
+    this._lampSide = 'ceil';
     this._startTrack(hx, this.level);
     this.speed = this.speedTarget(hx);
     this._welcome();
     this._generate();
-    this._syncLevel();
+    this._syncLevel(true);
+    this.lightView = this.light;
+    this._lampPos(); this.hero.lamp.prevX = this.hero.lamp.x; this.hero.lamp.prevY = this.hero.lamp.y;
   };
 
   /** Fresh generator + both surfaces solid from one screen behind x (used by reset and gotoLevel). */
   World.prototype._startTrack = function (x, level, r0, c0) {
-    var L = this.layout, u = L.unit, D = this.D, G = CONFIG.gen;
+    var L = this.layout, u = L.unit, D = this.D;
     this.plans = [{ level: level, startX: x, finishX: x + this.levelUnits(level) * u }];
     this.planIdx = 0;
     if (!r0) { r0 = { x0: x - L.width - u, x1: x }; this.roofs.push(r0); }
@@ -210,16 +233,14 @@
       open: { floor: r0, ceil: c0 },
       cursor: x + D.safeStart * S + S * this.flightTime(),
       lastStart: { floor: -1e9, ceil: -1e9 }, lastEnd: { floor: -1e9, ceil: -1e9 }, lastSide: null,
-      frontier: x, decoX: x + 1.5 * u,
-      nextGateX: x + this.genRng.range(G.firstGate[0], G.firstGate[1]) * S,
-      color: this.hero.color, marks: [{ x: -1e18, color: this.hero.color }]
+      frontier: x, decoX: x + 1.5 * u, kind: 0
     };
   };
 
-  /** A short line of matching fireflies on the roof right after the start: the first thing a child sees. */
+  /** A short line of leaves on the floor right after the start: the first thing a child sees (and catches). */
   World.prototype._welcome = function () {
-    var u = this.layout.unit, x = this.hero.x + 2.6 * u;
-    for (var i = 0; i < 3; i++) this._addFF(x + i * CONFIG.ff.spacing * u, this.standY('floor'), this.hero.color);
+    var u = this.layout.unit, x = this.hero.x + 2.6 * u, k = this._nextKind();
+    for (var i = 0; i < 3; i++) this._addLeaf(x + i * CONFIG.leaf.spacing * u, this.standY('floor'), k);
     this.gen.decoX = x + 3 * u;
   };
 
@@ -251,7 +272,7 @@
     return true;
   };
   World.prototype.safeAt = function (side, x) { return this.clearRange(side, x, x); };
-  /** Nearest gap/obstacle on `side` overlapping [fromX, fromX + dist] → {kind, x0, x1, ob} | null (pure). */
+  /** Nearest hatch/obstacle on `side` overlapping [fromX, fromX + dist] → {kind, x0, x1, ob} | null (pure). */
   World.prototype.hazardAhead = function (side, fromX, dist) {
     var hz = this.hazards, end = fromX + (dist === undefined ? 1e9 : dist);
     for (var i = 0; i < hz.length; i++) {
@@ -274,11 +295,11 @@
   };
 
   // ------------------------------------------------------------------ speed & levels
-  World.prototype.levelBase = function (level) {   // px/s at the start of that level
+  World.prototype.levelBase = function (level) {   // px/s at the start of that floor
     var Z = CONFIG.zones[level % 4], loop = M.floor(level / 4);
     return Z.speed * this.D.speed * M.min(CONFIG.loopSpeedCap, 1 + CONFIG.loopSpeed * loop) * this.layout.unit;
   };
-  /** Level length in units: its intended seconds × its mean speed (so every difficulty takes ≈ the same time). */
+  /** Floor length in units: its intended seconds × its mean speed (so every difficulty takes ≈ the same time). */
   World.prototype.levelUnits = function (level) {
     return CONFIG.zones[level % 4].seconds * this.levelBase(level) * (1 + CONFIG.speedRamp / 2) / this.layout.unit;
   };
@@ -286,37 +307,87 @@
     for (var i = this.plans.length - 1; i > 0; i--) if (x >= this.plans[i].startX) return this.plans[i];
     return this.plans[0];
   };
-  /** Scroll speed the world eases toward at world x (rises 10 % across a level). */
+  /** Scroll speed the world eases toward at world x (rises 10 % across a floor). */
   World.prototype.speedTarget = function (x) {
     var p = this._planAt(x), len = p.finishX - p.startX;
     var f = isFinite(len) && len > 0 ? clamp((x - p.startX) / len, 0, 1) : 0;
     return this.levelBase(p.level) * (1 + CONFIG.speedRamp * f);
   };
-  /** Upper bound of the real speed inside plan p (its end speed; the previous level's end speed early on,
-   *  because the eased speed may still be higher there, e.g. Night → Dawn of the next round). */
+  /** Upper bound of the real speed inside plan p (its end speed; the previous floor's end speed early on,
+   *  because the eased speed may still be higher there, e.g. Lantern Deck → Boot Room of the next day). */
   World.prototype._capFor = function (p, x) {
     var S = this.levelBase(p.level) * (1 + CONFIG.speedRamp);
     if (p.level > 0 && (x === undefined || x < p.startX + 0.35 * (p.finishX - p.startX)))
       S = M.max(S, this.levelBase(p.level - 1) * (1 + CONFIG.speedRamp));
     return S;
   };
-  World.prototype._syncLevel = function () {
+
+  // ------------------------------------------------------------------ visibility
+  /** Daylight for a floor at progress 0..1 (pure): lerp(lightFrom, lightTo), never below CONFIG.light.min. */
+  World.prototype.lightAt = function (level, progress) {
+    var Z = CONFIG.zones[((level | 0) % 4 + 4) % 4];
+    return clamp(lerp(Z.lightFrom, Z.lightTo, clamp(progress || 0, 0, 1)), CONFIG.light.min, 1);
+  };
+  /** Units ahead of Ollie that must be lit (DESIGN §5.1): (reaction·S + flightDist)/unit + 0.8, S = the floor's
+   *  top speed (upper bound of the real speed there, so it holds for the whole floor). */
+  World.prototype.seeAheadUnits = function (level) {
+    var lv = level === undefined ? this.level : level, u = this.layout.unit;
+    var p = this.plans[this.planIdx], S = p && p.level === lv ? this._capFor(p, this.hero.x) : this.levelBase(lv) * (1 + CONFIG.speedRamp);
+    S = M.max(S, this.speed);
+    return (this.D.reaction * S + S * this.flightTime()) / u + CONFIG.light.seeExtra;
+  };
+  /** Units from Ollie (heroX) to the right screen edge. */
+  World.prototype.screenReachUnits = function () { return (this.layout.width - this.layout.heroX) / this.layout.unit; };
+  /** Headlamp beam length in units: max(seeAhead, 3.2), clamped to the screen (beyond it nothing is drawn anyway). */
+  World.prototype.beamUnits = function () {
+    return M.min(M.max(this.seeAheadUnits(), CONFIG.light.beamMin), this.screenReachUnits());
+  };
+
+  World.prototype._syncLevel = function (quiet) {
     var p = this.plans[this.planIdx], u = this.layout.unit;
     this.level = p.level; this.zone = p.level % 4; this.loop = M.floor(p.level / 4);
     var len = p.finishX - p.startX;
     this.levelLen = len / u;
     this.progress = isFinite(len) && len > 0 ? clamp((this.hero.x - p.startX) / len, 0, 1) : 0;
     this.finish = isFinite(p.finishX) ? { x: p.finishX } : null;
+    this.light = this.lightAt(this.level, this.progress);
+    var on = this.light < CONFIG.light.lampsBelow;
+    if (on && !this.lampsOn && this._lampsLevel !== this.level) {
+      this._lampsLevel = this.level;
+      if (!quiet) this.events.push({ type: 'lampsOn', level: this.level, zone: this.zone, light: this.light });
+    }
+    if (on) this._lampsLevel = this.level;
+    this.lampsOn = on;
+  };
+
+  /** Headlamp lens world position: the sprite offset, mirrored vertically as the turn-over goes (cos π·flipT). */
+  World.prototype._lampPos = function () {
+    var h = this.hero, u = this.layout.unit;
+    h.lamp.x = h.x + CONFIG.lampDx * u;
+    h.lamp.y = h.y + CONFIG.lampDy * u * M.cos(M.PI * h.flipT);
   };
 
   // ------------------------------------------------------------------ generator
   World.prototype._generate = function () {
-    var g = this.gen;
+    var g = this.gen, limit = this.cam.x + this.layout.width * (1 + CONFIG.gen.ahead);
+    this._genLamps(limit);
     if (g.off) return;
-    var limit = this.cam.x + this.layout.width * (1 + CONFIG.gen.ahead), guard = 0;
+    var guard = 0;
     while (g.frontier < limit && guard++ < 200) this._placeNext();
     g.open.floor.x1 = M.max(g.open.floor.x1, g.frontier);
     g.open.ceil.x1 = M.max(g.open.ceil.x1, g.frontier);
+  };
+
+  /** Wall lamps every 3.5–5 u, alternating high/low, from their own RNG stream (deterministic, track-independent). */
+  World.prototype._genLamps = function (limit) {
+    var u = this.layout.unit, Lc = CONFIG.light, guard = 0;
+    while (this._lampX < limit && guard++ < 100) {
+      var x = this._lampX;
+      if (this.plans && this._nearFinish(x, Lc.lampDoorClear * u)) x += 2 * Lc.lampDoorClear * u;
+      this.lamps.push({ id: this._id++, x: x, side: this._lampSide });
+      this._lampSide = opp(this._lampSide);
+      this._lampX = x + this.lampRng.range(Lc.lampEvery[0], Lc.lampEvery[1]) * u;
+    }
   };
 
   World.prototype._placeNext = function () {
@@ -331,7 +402,7 @@
     if (gap) w = r.range(D.gapMin, M.min(G.maxGapUnit, D.gapMax + 0.1 * loop)) * u;
     else { var sz = CONFIG.obstacles[kind][variant]; w = sz.w * u; h = sz.h * u; }
     var b0 = g.cursor;
-    b0 = M.max(b0, g.lastEnd[side] + G.sameGap * u);          // a real building between two hazards on one surface
+    b0 = M.max(b0, g.lastEnd[side] + G.sameGap * u);          // solid floor/beam between two hazards on one surface
     b0 = M.max(b0, g.lastEnd[other] + F + m);                 // the other surface is clear from b0 − F − m
     b0 = M.max(b0, g.lastStart[other] + F + R);               // forced flips: reaction time + a flight apart
     b0 += r.range(D.extra[0], D.extra[1]) * Z.extraK * S;
@@ -344,13 +415,13 @@
       var ns = { x0: b1, x1: b1 };
       this._spans(side).push(ns); g.open[side] = ns;
     } else {
-      var ob = { id: this._id++, kind: kind, variant: variant, side: side, x: (b0 + b1) / 2, w: w, h: h, hit: false, hitT: 0 };
+      var ob = { id: this._id++, kind: kind, variant: variant, side: side, x: (b0 + b1) / 2, w: w, h: h, hit: false, hitT: 0, beacon: true };
       this.obstacles.push(ob); hz.ob = ob;
     }
     this.hazards.push(hz);
     g.lastStart[side] = b0; g.lastEnd[side] = b1; g.lastSide = side;
     g.cursor = b1; g.frontier = b1;
-    if (g.open[other].x1 < b1) g.open[other].x1 = b1;     // both surfaces are final up to b1 (the gap side's new span starts there)
+    if (g.open[other].x1 < b1) g.open[other].x1 = b1;     // both surfaces are final up to b1
     if (g.open[side].x1 < b1) g.open[side].x1 = b1;
     this._decorate(g.decoX, b1, hz, p);
     g.decoX = M.max(g.decoX, b1);
@@ -373,62 +444,51 @@
     for (var i = 0; i < this.plans.length; i++) if (M.abs(this.plans[i].finishX - x) < d) return true;
     return false;
   };
-  World.prototype._colorAt = function (x) {
-    var mk = this.gen.marks;
-    for (var i = mk.length - 1; i >= 0; i--) if (mk[i].x <= x) return mk[i].color;
-    return this.hero.color;
+  /** One leaf colour per pattern, cycling green → gold → red. */
+  World.prototype._nextKind = function () { var k = this.gen.kind; this.gen.kind = (k + 1) % 3; return k; };
+  World.prototype._addLeaf = function (x, y, kind) {
+    var u = this.layout.unit, r = this.genRng, LF = CONFIG.leaf;
+    var f = { id: this._id++, x: x, y: y, prevX: x, prevY: y, baseX: x, baseY: y, kind: kind, r: LF.r * u,
+      phase: r.range(0, 6.283), swing: r.range(LF.swing[0], LF.swing[1]), omega: r.range(LF.omega[0], LF.omega[1]),
+      ph2: r.range(0, 6.283), len: LF.len * u, rot: 0, prevRot: 0, face: 1, state: 'fly', t: 0, sp: null };
+    this._leafPose(f);
+    f.prevX = f.x; f.prevY = f.y; f.prevRot = f.rot;
+    this.leaves.push(f);
+    return f;
   };
-  World.prototype._ffColor = function (x, pMatch) {
-    var c = this._colorAt(x), r = this.genRng;
-    return r.chance(pMatch) ? c : (c + 1 + r.int(2)) % 3;
+  /** Pendulum pose at world time: θ = swing·sin(ωt + phase); the leaf hangs L below an invisible pivot, so it is
+   *  lowest (baseY) mid-swing and rises L(1 − cos θ) at the ends (y is DOWN → minus), plus a slow bob. */
+  World.prototype._leafPose = function (f) {
+    var LF = CONFIG.leaf, u = this.layout.unit, a = f.omega * this.time + f.phase;
+    var th = f.swing * M.sin(a);
+    f.x = f.baseX + f.len * M.sin(th);
+    f.y = f.baseY - f.len * (1 - M.cos(th)) + (f.still ? 0 : LF.bob * u * M.sin(LF.bobW * this.time + f.ph2));
+    f.rot = LF.tilt * th;
+    f.face = M.cos(a) >= 0 ? 1 : -1;                  // sign of dθ/dt: the renderer mirrors the leaf on each swing
   };
-  World.prototype._addFF = function (x, y, color) {
-    var u = this.layout.unit, r = this.genRng;
-    var ff = { id: this._id++, x: x, y: y, prevX: x, prevY: y, baseX: x, baseY: y, color: color, r: CONFIG.ff.r * u,
-      phase: r.range(0, 6.283), ph2: r.range(0, 6.283), state: 'fly', t: 0, vx: 0, vy: 0 };
-    this.fireflies.push(ff);
-    return ff;
-  };
-  /** Can a firefly sit at (x, y)? Not in an obstacle, not on a gate/finish, not on another firefly. */
-  World.prototype._ffOk = function (x, y) {
-    var u = this.layout.unit, rr = CONFIG.ff.r * u, i;
+  /** Can a leaf hang at (x, y)? Its whole swing clear of obstacles, not on a door, not on another leaf. */
+  World.prototype._leafOk = function (x, y) {
+    var u = this.layout.unit, LF = CONFIG.leaf, rr = (LF.r + LF.obClear) * u, i;
     for (i = 0; i < this.obstacles.length; i++) {
       var ob = this.obstacles[i];
       var top = ob.side === 'floor' ? this.layout.floorY - ob.h : this.layout.ceilY;
       var cx = clamp(x, ob.x - ob.w / 2, ob.x + ob.w / 2), cy = clamp(y, top, top + ob.h);
-      if ((x - cx) * (x - cx) + (y - cy) * (y - cy) < (rr + 0.12 * u) * (rr + 0.12 * u)) return false;
+      if ((x - cx) * (x - cx) + (y - cy) * (y - cy) < rr * rr) return false;
     }
-    for (i = this.gates.length - 1; i >= 0 && i >= this.gates.length - 3; i--) if (M.abs(this.gates[i].x - x) < 0.7 * u) return false;
     if (this._nearFinish(x, 0.9 * u)) return false;
-    var md = CONFIG.ff.minGap * u;
-    for (i = this.fireflies.length - 1; i >= 0 && i >= this.fireflies.length - 24; i--) {
-      var f = this.fireflies[i];
+    var md = LF.minGap * u;
+    for (i = this.leaves.length - 1; i >= 0 && i >= this.leaves.length - 24; i--) {
+      var f = this.leaves[i];
       if (M.abs(f.baseX - x) < md && M.abs(f.baseY - y) < md) return false;
     }
     return true;
   };
 
-  /** Gates, firefly arcs, lines and clusters in [s, e] (final track there). hz = the hazard ending at e. */
+  /** Leaf arcs, lines and clusters in [s, e] (final track there). hz = the hazard ending at e. */
   World.prototype._decorate = function (s, e, hz, p) {
-    var g = this.gen, r = this.genRng, u = this.layout.unit, G = CONFIG.gen, Z = CONFIG.zones[p.level % 4];
+    var r = this.genRng, u = this.layout.unit, Z = CONFIG.zones[p.level % 4];
     if (e <= s) return;
-    // paint gate
-    if (g.nextGateX <= e - 0.6 * u) {
-      for (var gx = M.max(s + 0.6 * u, g.nextGateX); gx <= e - 0.6 * u; gx += 0.2 * u) {
-        var gc = G.gateClear * u;
-        if (this.clearRange('floor', gx - gc, gx + gc) && this.clearRange('ceil', gx - gc, gx + gc) && !this._nearFinish(gx, 2.5 * u)) {
-          var col = (g.color + 1 + r.int(2)) % 3;
-          this.gates.push({ id: this._id++, x: gx, color: col, passed: false });
-          g.marks.push({ x: gx, color: col }); g.color = col;
-          var S0 = this.speedTarget(gx);
-          g.nextGateX = gx + r.range(G.gateEvery[0], G.gateEvery[1]) * S0;
-          break;
-        }
-      }
-    }
-    // an arc of fireflies along the flip that this hazard forces
-    if (hz && r.chance(Z.arc)) this._arc(hz, s);
-    // lines / clusters along a safe surface
+    if (hz && r.chance(Z.arc)) this._arc(hz, s);              // leaves along the flip this hazard forces
     var n = 1 + M.floor((e - s) / (5 * u));
     for (var k = 0; k < n; k++) if (r.chance(Z.line)) { if (r.chance(0.72)) this._line(s, e); else this._cluster(s, e); }
   };
@@ -438,14 +498,14 @@
     var fx = hz.x0 - F - CONFIG.gen.arcLead * u;
     if (fx < s + 0.2 * u) return;
     var side = hz.side, y0 = this.standY(side), dir = side === 'floor' ? -1 : 1;
-    var g = CONFIG.g * u / 100, k = CONFIG.kick * u / 100;
+    var g = CONFIG.g * u / 100, k = CONFIG.kick * u / 100, kind = this._nextKind();
     for (var i = 0; i < 4; i++) {
       var t = tF * (0.22 + 0.2 * i), x = fx + S * t, y = y0 + dir * (k * t + 0.5 * g * t * t);
-      if (this._ffOk(x, y)) this._addFF(x, y, this._ffColor(x, CONFIG.gen.arcMatch));
+      if (this._leafOk(x, y)) this._addLeaf(x, y, kind);
     }
   };
   World.prototype._line = function (s, e) {
-    var u = this.layout.unit, r = this.genRng, n = r.int(3, 5), len = (n - 1) * CONFIG.ff.spacing * u;
+    var u = this.layout.unit, r = this.genRng, n = r.int(3, 5), len = (n - 1) * CONFIG.leaf.spacing * u;
     for (var tries = 0; tries < 4; tries++) {
       var a = s + 0.5 * u, b = e - 0.5 * u - len;
       if (b < a) return;
@@ -453,14 +513,10 @@
       if (!this.clearRange(side, x0 - 0.5 * u, x0 + len + 0.5 * u)) side = opp(side);
       if (!this.clearRange(side, x0 - 0.5 * u, x0 + len + 0.5 * u)) continue;
       var y = this.standY(side), ok = true, i;
-      for (i = 0; i < n && ok; i++) ok = this._ffOk(x0 + i * CONFIG.ff.spacing * u, y);
+      for (i = 0; i < n && ok; i++) ok = this._leafOk(x0 + i * CONFIG.leaf.spacing * u, y);
       if (!ok) continue;
-      var mono = CONFIG.gen.lineMono, lc = -1;
-      if (mono) {
-        if (this._colorAt(x0) !== this._colorAt(x0 + len)) continue;   // never straddle a paint gate
-        lc = this._ffColor(x0, CONFIG.gen.match);
-      }
-      for (i = 0; i < n; i++) { var x = x0 + i * CONFIG.ff.spacing * u; this._addFF(x, y, mono ? lc : this._ffColor(x, CONFIG.gen.match)); }
+      var kind = this._nextKind();
+      for (i = 0; i < n; i++) this._addLeaf(x0 + i * CONFIG.leaf.spacing * u, y, kind);
       return;
     }
   };
@@ -474,10 +530,10 @@
       if (!this.clearRange(side, cx - 0.8 * u, cx + 0.8 * u)) continue;
       var sy = this.standY(side), dir = side === 'floor' ? -1 : 1;
       var pts = [[cx - 0.32 * u, sy], [cx, sy + dir * 0.3 * u], [cx + 0.32 * u, sy]], ok = true, i;
-      for (i = 0; i < 3 && ok; i++) ok = this._ffOk(pts[i][0], pts[i][1]);
+      for (i = 0; i < 3 && ok; i++) ok = this._leafOk(pts[i][0], pts[i][1]);
       if (!ok) continue;
-      var c = this._ffColor(cx, CONFIG.gen.match);           // a cluster is one colour (easy to read)
-      for (i = 0; i < 3; i++) this._addFF(pts[i][0], pts[i][1], c);
+      var kind = this._nextKind();
+      for (i = 0; i < 3; i++) this._addLeaf(pts[i][0], pts[i][1], kind);
       return;
     }
   };
@@ -515,7 +571,8 @@
     var hero = this.hero, L = this.layout, u = L.unit, i;
     // ---- prev* for the renderer's lerp
     this.cam.prevX = this.cam.x; hero.prevX = hero.x; hero.prevY = hero.y; hero.prevFlipT = hero.flipT;
-    for (i = 0; i < this.fireflies.length; i++) { var f0 = this.fireflies[i]; f0.prevX = f0.x; f0.prevY = f0.y; }
+    hero.lamp.prevX = hero.lamp.x; hero.lamp.prevY = hero.lamp.y;
+    for (i = 0; i < this.leaves.length; i++) { var f0 = this.leaves[i]; f0.prevX = f0.x; f0.prevY = f0.y; f0.prevRot = f0.rot; }
     if (this.drone) { this.drone.prevX = this.drone.x; this.drone.prevY = this.drone.y; }
     this.time += dt;
     var run = this.phase === 'run';
@@ -534,7 +591,7 @@
     this.distance += dx / u; this.stats.distance = this.distance;
     hero.runPhase = (hero.runPhase + dx / (CONFIG.stride * u)) % 1;
 
-    // ---- Bolt
+    // ---- Ollie
     if (hero.state === 'rescue') this._stepRescue(dt);
     else this._stepHero(dt, run);
 
@@ -549,27 +606,22 @@
     hero.squash *= M.exp(-CONFIG.squashDecay * dt); if (hero.squash < 1e-3) hero.squash = 0;
     hero.knock *= M.exp(-CONFIG.knockDecay * dt); if (hero.knock < 1e-3) hero.knock = 0;
     hero.bumpT += dt; hero.happyT += dt;
+    this._lampPos();
 
     // ---- obstacles
     for (i = 0; i < this.obstacles.length; i++) { var o = this.obstacles[i]; if (o.hit) o.hitT += dt; }
     if (run && hero.state !== 'rescue' && hero.invuln <= 0) this._collide();
 
-    // ---- fireflies, gates, finish
-    this._stepFireflies(dt, run && hero.state !== 'rescue');
+    // ---- leaves, door
+    this._stepLeaves(dt, run && hero.state !== 'rescue');
     if (run) {
-      for (i = 0; i < this.gates.length; i++) {
-        var gt = this.gates[i];
-        if (!gt.passed && hero.x >= gt.x) {
-          gt.passed = true; hero.color = gt.color; this.stats.gates++;
-          this.events.push({ type: 'gate', color: gt.color, x: gt.x });
-        }
-      }
       var p = this.plans[this.planIdx];
       if (hero.x >= p.finishX) this._finishLevel(p);
     }
     this._syncLevel();
+    this.lightView += (this.light - this.lightView) * (1 - M.exp(-CONFIG.light.viewEase * dt));
 
-    // ---- drone flying out
+    // ---- Pip flying out
     if (this.drone && this.drone.state === 'out') this._stepDroneOut(dt);
 
     // ---- track
@@ -633,10 +685,12 @@
     }
   };
 
+  /** A bump or a fall: Normal/Hard reset the combo, Easy halves it (difficulty.comboKeep). */
   World.prototype._hitCombo = function () {
-    if (!this.D.hitBreaks) return;
-    if (this.combo >= 2) this.events.push({ type: 'comboBreak', combo: this.combo });
-    this.combo = 0; this.mult = 1;
+    var was = this.combo, now = M.floor(was * this.D.comboKeep);
+    if (was >= 2) this.events.push({ type: 'comboBreak', combo: was, to: now });
+    this.combo = now;
+    this.mult = M.min(CONFIG.multMax, 1 + M.floor(now / CONFIG.multEvery));
   };
   World.prototype._loseHeart = function () {
     this.hearts = M.max(0, this.hearts - 1);
@@ -647,8 +701,8 @@
     }
   };
 
-  // ------------------------------------------------------------------ fall + drone rescue
-  /** y past which Bolt has left the corridor. Capped so the fall and the rescue stay on screen (16:9 is only
+  // ------------------------------------------------------------------ fall + Pip's rescue
+  /** y past which Ollie has left the corridor. Capped so the fall and the rescue stay on screen (16:9 is only
    *  540 tall: floorY + 1.3 u would be below the bottom edge) and clear of the HUD at the top. */
   World.prototype._fallY = function (side) {
     var L = this.layout, u = L.unit;
@@ -661,11 +715,11 @@
     this.events.push({ type: 'fall' });
     this._hitCombo();
     this._loseHeart();
-    if (this.phase !== 'run') return;                        // the last battery: no rescue, game over
+    if (this.phase !== 'run') return;                        // the last heart: no rescue, game over
     var L = this.layout, u = L.unit;
     h.state = 'rescue'; h.grounded = false; h.side = null; h.coyote = 0; h.buffer = 0;
     var tg = this._rescueTarget(fromSide, h.x + this.speed * (CONFIG.droneIn + CONFIG.carry));
-    var hs = tg.side === 'floor' ? -1 : 1;                    // drone above Bolt (roof drop) / below him (rail)
+    var hs = tg.side === 'floor' ? -1 : 1;                    // Pip above Ollie (floor drop) / below him (ceiling)
     var sx = L.heroX - 3 * u, sy = fromSide === 'floor' ? L.floorY - 0.6 * u : L.ceilY + 0.6 * u;
     this.drone = { x: this.cam.x + sx, y: sy, prevX: this.cam.x + sx, prevY: sy, state: 'in', t: 0, flipY: hs > 0, side: tg.side };
     this.rescue = { t: 0, sx: sx, sy: sy, hs: hs, side: tg.side, x: tg.x, catchY: h.y, dur: 0, fromT: h.flipT };
@@ -692,7 +746,7 @@
     R.t += dt; d.t += dt;
     var hang = CONFIG.hang * u;
     if (d.state === 'in') {
-      h.vy *= M.exp(-CONFIG.catchDamp * dt);                 // he dangles to a stop as the drone reaches him
+      h.vy *= M.exp(-CONFIG.catchDamp * dt);                 // he dangles to a stop as Pip reaches him
       h.y += h.vy * dt;
       var lo = L.height - 0.4 * u, hi = 0.7 * u;            // …and never dangles off screen
       if (h.y > lo) { h.y = lo; h.vy = 0; } else if (h.y < hi) { h.y = hi; h.vy = 0; }
@@ -737,59 +791,42 @@
     if (d.t >= CONFIG.droneOut) { this.drone = null; this.rescue = null; }
   };
 
-  // ------------------------------------------------------------------ fireflies
-  World.prototype._stepFireflies = function (dt, canCatch) {
-    var h = this.hero, u = this.layout.unit, FF = CONFIG.ff, hb = CONFIG.heroBox * u / 2;
-    var cr = FF.r * u * this.D.catchK, keep = 0, list = this.fireflies;
+  // ------------------------------------------------------------------ leaves
+  World.prototype._stepLeaves = function (dt, canCatch) {
+    var h = this.hero, u = this.layout.unit, LF = CONFIG.leaf, hb = CONFIG.heroBox * u / 2;
+    var cr = LF.r * u * this.D.catchK, keep = 0, list = this.leaves;
     for (var i = 0; i < list.length; i++) {
       var f = list[i];
       f.t += dt;
       if (f.state === 'fly') {
-        f.phase += FF.bobW * dt;
-        f.y = f.baseY + FF.bob * u * M.sin(f.phase);
-        f.x = f.baseX + FF.drift * u * M.sin(FF.driftW / FF.bobW * f.phase + f.ph2);
+        this._leafPose(f);
         if (canCatch && M.abs(f.x - h.x) < hb + cr + 1) {
           var cx = clamp(f.x, h.x - hb, h.x + hb), cy = clamp(f.y, h.y - hb, h.y + hb);
-          if ((f.x - cx) * (f.x - cx) + (f.y - cy) * (f.y - cy) <= cr * cr) this._touch(f);
+          if ((f.x - cx) * (f.x - cx) + (f.y - cy) * (f.y - cy) <= cr * cr) this._catch(f);
         }
       } else if (f.state === 'caught') {
-        var k = 1 - M.exp(-FF.suck * dt);
-        f.x += (h.x - f.x) * k; f.y += (h.y + 0.08 * u * (h.grav > 0 ? 1 : -1) - f.y) * k;
-        if (f.t >= FF.caughtT) f.state = 'gone';
-      } else if (f.state === 'flee') {
-        var dir = f.vy < 0 ? -1 : 1;
-        f.vy += dir * FF.fleeAcc * u * dt;
-        f.x += (f.vx + FF.fleeWiggle * u * 6 * M.cos(f.t * 16)) * dt;
-        f.y += f.vy * dt;
-        if (f.t >= FF.fleeT) f.state = 'gone';
+        // spiral into Ollie: radius shrinks smoothly to 0 while the angle sweeps `turns` around him
+        var sp = f.sp, k = clamp(f.t / LF.caughtT, 0, 1);
+        var e = smooth(k), rad = sp.r0 * (1 - e), ang = sp.a0 + sp.dir * LF.turns * 2 * M.PI * e;
+        f.x = h.x + rad * M.cos(ang); f.y = h.y + rad * M.sin(ang);
+        f.rot += sp.dir * LF.spin * dt;
+        if (f.t >= LF.caughtT) f.state = 'gone';
       }
       if (f.state !== 'gone') list[keep++] = f;
     }
     list.length = keep;
   };
-  World.prototype._touch = function (f) {
-    var h = this.hero, u = this.layout.unit;
-    f.t = 0;
-    if (f.color === h.color) {
-      f.state = 'caught';
-      this.combo++; this.maxCombo = M.max(this.maxCombo, this.combo);
-      var m = M.min(CONFIG.multMax, 1 + M.floor(this.combo / CONFIG.multEvery));
-      var up = m > this.mult; this.mult = m;
-      var pts = CONFIG.ffPoints * m;
-      this.score += pts; this.stats.caught++; h.happyT = 0;
-      this.events.push({ type: 'catch', ff: f, x: f.x, y: f.y, combo: this.combo, mult: m, points: pts });
-      if (up) this.events.push({ type: 'combo', combo: this.combo, mult: m });
-    } else {
-      f.state = 'flee';
-      f.vx = CONFIG.ff.fleeVx * u;
-      f.vy = (h.grav > 0 ? -1 : 1) * CONFIG.ff.fleeVy * u;     // away from the surface Bolt is pulled to (up from the roof, down from the rail)
-      this.stats.wrong++;
-      this.events.push({ type: 'wrong', ff: f });
-      if (this.D.wrongBreaks) {
-        if (this.combo >= 2) this.events.push({ type: 'comboBreak', combo: this.combo });
-        this.combo = 0; this.mult = 1;
-      }
-    }
+  World.prototype._catch = function (f) {
+    var h = this.hero, dx = f.x - h.x, dy = f.y - h.y;
+    f.t = 0; f.state = 'caught';
+    f.sp = { r0: M.max(1e-3, M.sqrt(dx * dx + dy * dy)), a0: M.atan2(dy, dx), dir: dy * h.grav < 0 ? 1 : -1 };
+    this.combo++; this.maxCombo = M.max(this.maxCombo, this.combo);
+    var m = M.min(CONFIG.multMax, 1 + M.floor(this.combo / CONFIG.multEvery));
+    var up = m > this.mult; this.mult = m;
+    var pts = CONFIG.leafPoints * m;
+    this.score += pts; this.stats.caught++; h.happyT = 0;
+    this.events.push({ type: 'catch', leaf: f, x: f.x, y: f.y, combo: this.combo, mult: m, points: pts });
+    if (up) this.events.push({ type: 'combo', combo: this.combo, mult: m });
   };
 
   // ------------------------------------------------------------------ levels
@@ -797,7 +834,7 @@
     var zone = p.level % 4, loop = M.floor(p.level / 4);
     var bonus = CONFIG.finishBonus * (zone + 1) * (loop + 1);
     this.score += bonus;
-    this.events.push({ type: 'finish', x: p.finishX });
+    this.events.push({ type: 'finish', x: p.finishX, bonus: bonus });
     if (this.hearts < this.maxHearts) {
       this.hearts = M.min(this.maxHearts, this.hearts + CONFIG.heartReward);
       this.events.push({ type: 'heartGain', hearts: this.hearts });
@@ -805,11 +842,11 @@
     if (!this.plans[this.planIdx + 1]) this.plans.push({ level: p.level + 1, startX: p.finishX, finishX: Infinity });
     this.planIdx++;
     this.stats.levels++;
-    this._syncLevel();
-    this.events.push({ type: 'levelUp', level: this.level, zone: this.zone, bonus: bonus });
+    this.events.push({ type: 'levelUp', level: p.level + 1, zone: (p.level + 1) % 4, bonus: bonus });
+    this._syncLevel();                                       // after levelUp: a 'lampsOn' of the new floor follows it
   };
 
-  /** Jump to level i: the track ahead of Bolt is rebuilt (a safe start), score and hearts are kept. */
+  /** Jump to floor i: the track ahead of Ollie is rebuilt (a safe start), score and hearts are kept. */
   World.prototype.gotoLevel = function (i) {
     i = M.max(0, i | 0);
     var h = this.hero, u = this.layout.unit, x = h.x;
@@ -820,10 +857,9 @@
     }
     this.obstacles = this.obstacles.filter(function (o) { return o.x + o.w / 2 < x - u; });
     this.hazards = this.hazards.filter(function (z) { return z.x1 < x - u; });
-    this.fireflies = this.fireflies.filter(function (f) { return f.x < x - 0.5 * u; });
-    this.gates = this.gates.filter(function (g) { return g.x <= x; });
+    this.leaves = this.leaves.filter(function (f) { return f.x < x - 0.5 * u; });
     var self = this, open = {};
-    ['floor', 'ceil'].forEach(function (side) {           // cut the track ahead; solid under Bolt on both surfaces
+    ['floor', 'ceil'].forEach(function (side) {           // cut the track ahead; solid under Ollie on both surfaces
       var a = self._spans(side);
       while (a.length && a[a.length - 1].x0 > x) a.pop();
       var last = a[a.length - 1];
@@ -833,9 +869,9 @@
     this._startTrack(x, i, open.floor, open.ceil);
     this.speed = this.speedTarget(x);
     this.phase = 'run';
+    this.events.push({ type: 'levelUp', level: i, zone: i % 4, bonus: 0 });
     this._generate();
     this._syncLevel();
-    this.events.push({ type: 'levelUp', level: this.level, zone: this.zone, bonus: 0 });
   };
   // ------------------------------------------------------------------ resize / rotate
   /** New logical size: re-anchors everything (x scaled by the unit ratio; y kept relative to the corridor). */
@@ -853,25 +889,28 @@
     var sc = function (arr) { for (var j = 0; j < arr.length; j++) { arr[j].x0 *= k; arr[j].x1 *= k; } };
     sc(this.roofs); sc(this.rails); sc(this.hazards);
     for (i = 0; i < this.obstacles.length; i++) { var o = this.obstacles[i]; o.x *= k; o.w *= k; o.h *= k; }
-    for (i = 0; i < this.fireflies.length; i++) {
-      var f = this.fireflies[i];
-      f.x *= k; f.baseX *= k; f.y = Y(f.y); f.baseY = Y(f.baseY); f.r *= k; f.vx *= k; f.vy *= k;
+    for (i = 0; i < this.leaves.length; i++) {
+      var f = this.leaves[i];
+      f.x *= k; f.baseX *= k; f.y = Y(f.y); f.baseY = Y(f.baseY); f.r *= k; f.len *= k;
+      if (f.sp) f.sp.r0 *= k;
     }
-    for (i = 0; i < this.gates.length; i++) this.gates[i].x *= k;
+    for (i = 0; i < this.lamps.length; i++) this.lamps[i].x *= k;
+    this._lampX *= k;
     for (i = 0; i < this.plans.length; i++) { this.plans[i].startX *= k; this.plans[i].finishX *= k; }
     var g = this.gen;
-    g.cursor *= k; g.frontier *= k; g.decoX *= k; g.nextGateX *= k;
+    g.cursor *= k; g.frontier *= k; g.decoX *= k;
     g.lastStart.floor *= k; g.lastStart.ceil *= k; g.lastEnd.floor *= k; g.lastEnd.ceil *= k;
-    for (i = 0; i < g.marks.length; i++) g.marks[i].x *= k;
     if (this.drone) { this.drone.x *= k; this.drone.y = Y(this.drone.y); }
     if (this.rescue) {
       var R = this.rescue;
       R.x *= k; R.catchY = Y(R.catchY); R.sx *= k; R.sy = Y(R.sy);
       if (R.outX !== undefined) { R.outX = R.outX * k; R.outY = Y(R.outY); }
     }
+    this._lampPos();
     // no lerp streak on the next frame
     this.cam.prevX = this.cam.x; hero.prevX = hero.x; hero.prevY = hero.y; hero.prevFlipT = hero.flipT;
-    for (i = 0; i < this.fireflies.length; i++) { this.fireflies[i].prevX = this.fireflies[i].x; this.fireflies[i].prevY = this.fireflies[i].y; }
+    hero.lamp.prevX = hero.lamp.x; hero.lamp.prevY = hero.lamp.y;
+    for (i = 0; i < this.leaves.length; i++) { var q = this.leaves[i]; q.prevX = q.x; q.prevY = q.y; q.prevRot = q.rot; }
     if (this.drone) { this.drone.prevX = this.drone.x; this.drone.prevY = this.drone.y; }
     this._generate();
     this._syncLevel();
@@ -883,26 +922,26 @@
     sc(this.roofs); sc(this.rails);
     var n = 0; while (n < this.hazards.length && this.hazards[n].x1 < cut) n++; if (n) this.hazards.splice(0, n);
     this.obstacles = this.obstacles.filter(function (o) { return o.x + o.w / 2 >= cut; });
-    this.fireflies = this.fireflies.filter(function (f) { return f.x >= cut - u; });
-    this.gates = this.gates.filter(function (g) { return g.x >= cut; });
-    var mk = this.gen.marks; while (mk.length > 2 && mk[1].x < cut) mk.shift();
+    this.leaves = this.leaves.filter(function (f) { return f.x >= cut - u; });
+    n = 0; while (n < this.lamps.length && this.lamps[n].x < cut - u) n++; if (n) this.lamps.splice(0, n);
     var keepFrom = 0; while (keepFrom < this.planIdx - 1) keepFrom++;
     if (keepFrom > 0) { this.plans.splice(0, keepFrom); this.planIdx -= keepFrom; this.gen.planIdx -= keepFrom; }
   };
 
   // ------------------------------------------------------------------ test hooks
-  /** Hand-made track (tests). x values in UNITS relative to Bolt's current x; y offsets in units.
-   *  spec = { roofs: [[a,b],…], rails: [[a,b],…] (default: solid everywhere), obstacles: [{kind:'vent'|'sign', variant, x}],
-   *           fireflies: [{x, side:'floor'|'ceil'|'mid', dy, color}], gates: [{x, color}], finish: units | null } */
+  /** Hand-made track (tests). x values in UNITS relative to Ollie's current x; y offsets in units.
+   *  spec = { roofs: [[a,b],…] (floor), rails: [[a,b],…] (ceiling) (default: solid everywhere),
+   *           obstacles: [{kind:'vent'|'sign', variant, x}], leaves: [{x, side:'floor'|'ceil'|'mid', dy, kind, still}],
+   *           finish: units | null }   (leaf.still: swing 0 and no bob — a leaf that holds still, for exact tests) */
   World.prototype.setTrack = function (spec) {
     spec = spec || {};
-    var u = this.layout.unit, X = this.hero.x, self = this, i;
+    var u = this.layout.unit, X = this.hero.x, self = this;
     var mkSpans = function (list) {
       list = list || [[-50, 5000]];
       return list.map(function (s) { return { x0: X + s[0] * u, x1: X + s[1] * u }; }).sort(function (a, b) { return a.x0 - b.x0; });
     };
     this.roofs = mkSpans(spec.roofs); this.rails = mkSpans(spec.rails);
-    this.obstacles = []; this.fireflies = []; this.gates = []; this.hazards = [];
+    this.obstacles = []; this.leaves = []; this.hazards = [];
     ['floor', 'ceil'].forEach(function (side) {
       var a = self._spans(side);
       for (var j = 0; j + 1 < a.length; j++) if (a[j + 1].x0 > a[j].x1) self.hazards.push({ kind: 'gap', side: side, x0: a[j].x1, x1: a[j + 1].x0, ob: null });
@@ -910,35 +949,37 @@
     });
     (spec.obstacles || []).forEach(function (o) {
       var kind = o.kind === 'sign' ? 'sign' : 'vent', v = o.variant | 0, sz = CONFIG.obstacles[kind][v];
-      var ob = { id: self._id++, kind: kind, variant: v, side: kind === 'vent' ? 'floor' : 'ceil', x: X + o.x * u, w: sz.w * u, h: sz.h * u, hit: false, hitT: 0 };
+      var ob = { id: self._id++, kind: kind, variant: v, side: kind === 'vent' ? 'floor' : 'ceil', x: X + o.x * u, w: sz.w * u, h: sz.h * u, hit: false, hitT: 0, beacon: true };
       self.obstacles.push(ob);
       self.hazards.push({ kind: kind, side: ob.side, x0: ob.x - ob.w / 2, x1: ob.x + ob.w / 2, ob: ob });
     });
     this.hazards.sort(function (a, b) { return a.x0 - b.x0; });
-    (spec.fireflies || []).forEach(function (f) {
+    (spec.leaves || []).forEach(function (f) {
       var y = f.side === 'mid' ? self.layout.midY : self.standY(f.side || 'floor');
-      var ff = self._addFF(X + f.x * u, y + (f.dy || 0) * u, f.color | 0);
-      ff.phase = 0;
+      var lf = self._addLeaf(X + f.x * u, y + (f.dy || 0) * u, (f.kind | 0) % 3);
+      if (f.still) { lf.swing = 0; lf.ph2 = 0; lf.still = true; }
+      self._leafPose(lf); lf.prevX = lf.x; lf.prevY = lf.y; lf.prevRot = lf.rot;
     });
-    (spec.gates || []).forEach(function (g) { self.gates.push({ id: self._id++, x: X + g.x * u, color: g.color | 0, passed: false }); });
     var fin = spec.finish === undefined || spec.finish === null ? Infinity : X + spec.finish * u;
     this.plans = [{ level: this.level, startX: X, finishX: fin }]; this.planIdx = 0;
     this.gen.off = true; this.gen.planIdx = 0;
-    this._syncLevel();
+    this._syncLevel(true);
   };
 
   World.prototype.getState = function () {
-    var h = this.hero;
+    var h = this.hero, alive = 0;
+    for (var i = 0; i < this.leaves.length; i++) if (this.leaves[i].state === 'fly') alive++;
     return {
       time: this.time, phase: this.phase, level: this.level, zone: this.zone, loop: this.loop,
       score: this.score, combo: this.combo, mult: this.mult, maxCombo: this.maxCombo,
       hearts: this.hearts, maxHearts: this.maxHearts, difficulty: this.difficulty,
       distance: this.distance, progress: this.progress, levelLen: this.levelLen, speed: this.speed,
+      light: this.light, lampsOn: this.lampsOn, leaves: alive, seeAhead: this.seeAheadUnits(),
       cam: { x: this.cam.x },
       hero: { x: h.x, y: h.y, vy: h.vy, grav: h.grav, grounded: h.grounded, side: h.side, flipT: h.flipT,
-        color: h.color, state: h.state, invuln: h.invuln, squash: h.squash },
+        state: h.state, invuln: h.invuln, squash: h.squash, lamp: { x: h.lamp.x, y: h.lamp.y } },
       counts: { roofs: this.roofs.length, rails: this.rails.length, obstacles: this.obstacles.length,
-        fireflies: this.fireflies.length, gates: this.gates.length, hazards: this.hazards.length },
+        leaves: this.leaves.length, lamps: this.lamps.length, hazards: this.hazards.length },
       finish: this.finish ? this.finish.x : null,
       drone: this.drone ? this.drone.state : null,
       stats: JSON.parse(JSON.stringify(this.stats))

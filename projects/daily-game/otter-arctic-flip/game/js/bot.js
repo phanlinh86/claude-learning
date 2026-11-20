@@ -3,14 +3,14 @@
  *   var bot = new OF.Bot(world, { skill: 0.5, seed: 3 });
  *   each frame: bot.step(dt); world.update(dt);
  *
- * While Bolt stands on a surface the bot looks ahead on THAT surface (world.hazardAhead) and flips when the
+ * While Ollie stands on a surface the bot looks ahead on THAT surface (world.hazardAhead) and flips when the
  * next gap/vent/sign is within flightDist + lead, where lead = (0.4 + 0.5·(1 − skill)) unit (a beginner flips
  * early "to be safe"). Its timing error τ ~ N(0, (1 − skill)·0.15 s) is drawn once per hazard (positive = late)
  * and shifts the trigger by speed·τ; with chance 0.3·(1 − skill) it also has an attention lapse (notices the
  * hazard 0.1–0.4 s + 0.5·(1 − skill) s late), which is what makes casual players bump now and then. It never flips into trouble: the landing stretch on the other surface
  * (from half a flight to a flight + 0.8 unit ahead) must be solid and obstacle-free, otherwise it waits.
- * Skilled bots (skill ≥ 0.6) also make optional flips to catch a group of matching fireflies (or dodge wrong
- * ones) on the other surface when that surface stays safe for a while. If Bolt runs off an edge it uses the
+ * Skilled bots (skill ≥ 0.6) also make optional flips to catch a group of leaves (≥ 2 more than on its own
+ * surface) on the other surface when that surface stays safe for a while. If Ollie runs off an edge it uses the
  * coyote time to flip. skill 1 ≈ never hit; 0.5 ≈ a casual player.
  */
 (function (OF) {
@@ -35,13 +35,13 @@
     return false;
   };
 
-  /** Matching minus wrong fireflies on `side` in [a, b] (near its standing line). */
+  /** Flying leaves on `side` in [a, b] (near its standing line). */
   Bot.prototype._value = function (side, a, b) {
-    var w = this.world, u = w.layout.unit, sy = w.standY(side), v = 0, c = w.hero.color;
-    for (var i = 0; i < w.fireflies.length; i++) {
-      var f = w.fireflies[i];
-      if (f.state !== 'fly' || f.x < a || f.x > b || M.abs(f.y - sy) > 0.5 * u) continue;
-      v += f.color === c ? 1 : (w.D.wrongBreaks ? -1.5 : -0.2);
+    var w = this.world, u = w.layout.unit, sy = w.standY(side), v = 0;
+    for (var i = 0; i < w.leaves.length; i++) {
+      var f = w.leaves[i];
+      if (f.state !== 'fly' || f.baseX < a || f.baseX > b || M.abs(f.baseY - sy) > 0.5 * u) continue;
+      v++;
     }
     return v;
   };
@@ -76,7 +76,7 @@
         return;
       }
     }
-    // optional flips for fireflies (skilled players only)
+    // optional flips for a group of leaves (skilled players only)
     if (s < 0.6 || !otherOk) return;
     var a = h.x + F, b = h.x + F + 2.5 * u;
     var gain = this._value(other, a, b) - this._value(side, h.x, b);

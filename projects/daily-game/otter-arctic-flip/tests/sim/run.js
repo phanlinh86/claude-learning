@@ -1,5 +1,6 @@
 // Ollie's Lighthouse Flip — high-speed playtest runner (headless, all CPU cores).
-//   node tests/sim/run.js                 baseline: every section → results/baseline.{json,md}
+//   node tests/sim/run.js                 floors report: kid / casual / spam models per floor and difficulty → stdout + results/floors.md
+//   node tests/sim/run.js --full          baseline: every section → results/baseline.{json,md}
 //   node tests/sim/run.js --proposal      the CONFIG proposal applied in memory → results/proposal.{json,md}
 //   node tests/sim/run.js --patched FILE  load FILE as world.js (a copy with proposal.patch applied) → results/patched.*
 //   node tests/sim/run.js --compare       before/after tables from baseline.json + proposal.json → results/compare.md
@@ -14,6 +15,7 @@ const P = require('./players');
 
 const OUT = path.join(__dirname, 'results');
 const PROPOSAL = require('./proposal-config.json');
+const FLOORS = ['kid4', 'kid', 'kid6', 'adult', 'bot05', 'spam250', 'spam400', 'never'];
 const DIFFS = ['easy', 'normal', 'hard'];
 
 // ---------- players (by key) ----------
@@ -23,7 +25,6 @@ const PLAYERS = {
   kid4: (OF, s) => P.kidPlayer(OF, s, { name: 'kid4', react: [0.8, 1.1], bias: 0.12, errSd: 0.22, forget: 0.08, randomRate: 0.12, misread: 0.10, double: 0.15 }),
   kid6: (OF, s) => P.kidPlayer(OF, s, { name: 'kid6', react: [0.6, 0.8], bias: 0.06, errSd: 0.14, forget: 0.03, randomRate: 0.05, misread: 0.04, double: 0.06 }),
   adult: (OF, s) => P.adultPlayer(OF, s),
-  colourIgnorer: (OF, s) => P.colourIgnorer(OF, s),
   hazardOnly: (OF, s) => P.hazardOnly(OF, s),
   never: () => P.neverTap(),
   pingPong: () => P.pingPong(),
@@ -33,12 +34,12 @@ const PLAYERS = {
 const LABEL = {
   bot1: 'bot skill 1', bot08: 'bot skill 0.8', bot05: 'bot skill 0.5', bot03: 'bot skill 0.3',
   kid: 'kid 4–6 (base)', kid4: 'kid, struggling 4 y', kid6: 'kid, steady 6 y', adult: 'casual adult',
-  colourIgnorer: 'colour-ignorer (adult)', hazardOnly: 'hazards only (adult)', never: 'never taps', pingPong: 'flip on every landing',
+  hazardOnly: 'hazards only (adult)', never: 'never taps', pingPong: 'flip on every landing',
   spam80: 'spam every 80 ms', spam150: 'spam 150 ms', spam250: 'spam 250 ms', spam400: 'spam 400 ms', spam700: 'spam 700 ms', spam1000: 'spam 1000 ms'
 };
 const SECTIONS = {
   bots: ['bot1', 'bot08', 'bot05', 'bot03'],
-  humans: ['kid4', 'kid', 'kid6', 'adult', 'colourIgnorer', 'hazardOnly'],
+  humans: ['kid4', 'kid', 'kid6', 'adult', 'hazardOnly'],
   exploits: ['never', 'pingPong', 'spam80', 'spam150', 'spam250', 'spam400', 'spam700', 'spam1000']
 };
 
@@ -90,7 +91,7 @@ function pool(cfg, jobs) {
 }
 
 // ---------- single-thread extras ----------
-/** Latest safe flip: seconds before Bolt's centre reaches the hazard's near edge (hand-made track, one hazard). */
+/** Latest safe flip: seconds before Ollie's centre reaches the hazard's near edge (hand-made track, one hazard). */
 function lateLimits(OF) {
   const rows = [];
   for (const diff of DIFFS) for (const zone of [0, 3]) {
@@ -173,10 +174,10 @@ function loopPacing(OF) {
 function density(OF) {
   const rows = [];
   for (const diff of DIFFS) {
-    const acc = [0, 1, 2, 3].map(() => ({ hz: 0, gaps: 0, alt: 0, ff: 0, gates: 0, t: 0 }));
+    const acc = [0, 1, 2, 3].map(() => ({ hz: 0, gaps: 0, alt: 0, ff: 0, lamps: 0, t: 0 }));
     for (let s = 1; s <= 3; s++) {
       const w = new OF.World({ seed: s, difficulty: diff }), bot = new OF.Bot(w, { skill: 1, seed: s });
-      const seenH = new Set(), seenF = new Set(), seenG = new Set();
+      const seenH = new Set(), seenF = new Set(), seenG = new Set();   // hazards, leaves, lamps
       let last = null, lvT = 0, lv = 0;
       while (w.level < 4 && w.time < 400) {
         bot.step(1 / 60); w.update(1 / 60);
@@ -186,11 +187,11 @@ function density(OF) {
           seenH.add(h); const l = lvAt(h.x0); if (l > 3) continue;
           acc[l].hz++; if (h.kind === 'gap') acc[l].gaps++; if (last && last.side !== h.side) acc[l].alt++; last = h;
         }
-        for (const f of w.fireflies) if (!seenF.has(f.id)) { seenF.add(f.id); const l = lvAt(f.baseX); if (l <= 3) acc[l].ff++; }
-        for (const g of w.gates) if (!seenG.has(g.id)) { seenG.add(g.id); const l = lvAt(g.x); if (l <= 3) acc[l].gates++; }
+        for (const f of w.leaves) if (!seenF.has(f.id)) { seenF.add(f.id); const l = lvAt(f.baseX); if (l <= 3) acc[l].ff++; }
+        for (const g of w.lamps) if (!seenG.has(g.id)) { seenG.add(g.id); const l = lvAt(g.x); if (l <= 3) acc[l].lamps++; }
       }
     }
-    rows.push({ diff, z: acc.map(a => ({ hzMin: 60 * a.hz / a.t, gapPct: 100 * a.gaps / a.hz, forcedMin: 60 * a.alt / a.t, ffMin: 60 * a.ff / a.t, gates: a.gates / 3 })) });
+    rows.push({ diff, z: acc.map(a => ({ hzMin: 60 * a.hz / a.t, gapPct: 100 * a.gaps / a.hz, forcedMin: 60 * a.alt / a.t, ffMin: 60 * a.ff / a.t, lamps: a.lamps / 3 })) });
   }
   return rows;
 }
@@ -212,8 +213,8 @@ function md(label, R) {
       '| diff | zone | speed u/s | vent AC | vent chimney | sign | gap 1.0 u | gap 1.8 u | earliest guaranteed |', '|---|---|---|---|---|---|---|---|---|',
       ...R.late.map(r => `| ${r.diff} | ${r.zone} | ${r.speed} | ${r.vent0} | ${r.vent1} | ${r['sign0']} | ${r['gap1.0']} | ${r['gap1.8']} | ${r.early} |`), '');
   }
-  if (R.density) parts.push('## Track density (per minute of play; gates per level)', '', '| diff | ' + ['dawn', 'noon', 'sunset', 'night'].map(z => z + ' hazards / forced flips / gap % / fireflies / gates').join(' | ') + ' |', '|---|---|---|---|---|',
-    ...R.density.map(r => '| ' + r.diff + ' | ' + r.z.map(a => [L.f(a.hzMin, 1), L.f(a.forcedMin, 1), L.f(a.gapPct, 0), L.f(a.ffMin, 0), L.f(a.gates, 1)].join(' / ')).join(' | ') + ' |'), '');
+  if (R.density) parts.push('## Track density (per minute of play; wall lamps per floor)', '', '| diff | ' + ['dawn', 'noon', 'sunset', 'night'].map(z => z + ' hazards / forced flips / gap % / leaves / lamps').join(' | ') + ' |', '|---|---|---|---|---|',
+    ...R.density.map(r => '| ' + r.diff + ' | ' + r.z.map(a => [L.f(a.hzMin, 1), L.f(a.forcedMin, 1), L.f(a.gapPct, 0), L.f(a.ffMin, 0), L.f(a.lamps, 1)].join(' / ')).join(' | ') + ' |'), '');
   if (R.det) parts.push('## Determinism', '', '| diff | player | same seed twice | replay by sub-step = live |', '|---|---|---|---|',
     ...R.det.map(r => `| ${r.diff} | ${r.player} | ${r.repeatSame} | ${r.replaySame} (${r.replayScore} vs ${r.liveScore}) |`), '');
   if (R.fps) parts.push('## Frame rate', '', L.table(R.fps, 'run', L.COLS.survival.concat(L.COLS.pacing)), '');
@@ -227,6 +228,7 @@ async function main() {
   const opt = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
   fs.mkdirSync(OUT, { recursive: true });
   if (args.includes('--compare')) return compare();
+  if (!args.includes('--full') && !args.includes('--proposal') && !args.includes('--patched') && !args.includes('--only')) return floors(+opt('--seeds', 40), +opt('--time', 400));
   const SEEDS = +opt('--seeds', 100), TIME = +opt('--time', 600);
   const only = (opt('--only', 'bots,humans,exploits,late,density,det,fps,loop')).split(',');
   const patched = opt('--patched', null);
@@ -256,12 +258,29 @@ async function main() {
   process.stderr.write('done in ' + R.secs.toFixed(0) + ' s → results/' + label + '.md\n');
 }
 
+/** Default report: per-floor clear rate, time and hearts left for the kid / casual / spam models. */
+async function floors(SEEDS, TIME) {
+  const seeds = Array.from({ length: SEEDS }, (_, i) => i + 1), jobs = [], t0 = Date.now();
+  for (const d of DIFFS) for (const p of FLOORS) jobs.push({ player: p, diff: d, seeds, time: TIME });
+  const res = await pool({}, jobs);
+  const C = L.COLS, parts = ['# Floors — per-floor survival and time', '', SEEDS + ' rounds per row, cap ' + TIME + ' s, 960×540, dt 1/60. ' +
+    '"clear %" = rounds that walked through that floor\'s stairway door; s = seconds spent on that floor (p10/p50/p90 of the rounds that cleared it).', ''];
+  for (const d of DIFFS) {
+    const rows = FLOORS.map(p => [LABEL[p], L.summarise(res[p + '|' + d])]);
+    parts.push('## ' + d, '', L.table(rows, 'player', C.floors.concat([C.survival[2], C.survival[7], C.scoring[1]])), '');
+  }
+  const out = parts.join('\n');
+  fs.writeFileSync(path.join(OUT, 'floors.md'), out);
+  console.log(out);
+  process.stderr.write('done in ' + ((Date.now() - t0) / 1000).toFixed(0) + ' s → tests/sim/results/floors.md\n');
+}
+
 /** Before/after of the key rows. */
 function compare() {
   const A = JSON.parse(fs.readFileSync(path.join(OUT, 'baseline.json'))), B = JSON.parse(fs.readFileSync(path.join(OUT, fs.existsSync(path.join(OUT, 'patched.json')) && process.argv.includes('--use-patched') ? 'patched.json' : 'proposal.json')));
-  const keys = [['humans', 'kid4'], ['humans', 'kid'], ['humans', 'kid6'], ['humans', 'adult'], ['humans', 'colourIgnorer'], ['humans', 'hazardOnly'], ['bots', 'bot1'], ['bots', 'bot08'], ['bots', 'bot05'], ['bots', 'bot03'],
+  const keys = [['humans', 'kid4'], ['humans', 'kid'], ['humans', 'kid6'], ['humans', 'adult'], ['humans', 'hazardOnly'], ['bots', 'bot1'], ['bots', 'bot08'], ['bots', 'bot05'], ['bots', 'bot03'],
     ['exploits', 'never'], ['exploits', 'pingPong'], ['exploits', 'spam150'], ['exploits', 'spam400']];
-  const C = L.COLS, cols = [C.survival[2], C.survival[3], C.survival[5], C.survival[6], C.survival[7], C.survival[8], C.scoring[1], C.scoring[4], C.scoring[5]];
+  const C = L.COLS, cols = [C.survival[2], C.survival[3], C.survival[5], C.survival[6], C.survival[7], C.survival[8], C.scoring[1], C.scoring[2], C.scoring[3]];
   const parts = ['# Before / after (' + B.label + ')', ''];
   for (const d of DIFFS) {
     const rows = [];

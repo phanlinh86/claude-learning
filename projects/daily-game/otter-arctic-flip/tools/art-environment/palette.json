@@ -1,26 +1,74 @@
 {
   "dawn": {
-    "wall": "#b56a5a",
-    "bottom": "#6e3a3a",
-    "skyTop": "#a596d2",
-    "skyBottom": "#f8c8a8"
+    "wall": "#a9b6c8",
+    "slab": "#7a5236",
+    "bottom": "#3a3040",
+    "floor": "#b07a4f",
+    "beam": "#ddd3c2",
+    "ceil": "#8794ab",
+    "skyTop": "#9d94cf",
+    "skyBottom": "#fbd2b4",
+    "windowY": [
+      166,
+      334
+    ],
+    "windowX": [
+      240,
+      720
+    ]
   },
   "noon": {
-    "wall": "#c9a27a",
-    "bottom": "#7e5d42",
-    "skyTop": "#55a8ee",
-    "skyBottom": "#cdeeff"
+    "wall": "#dfe9e4",
+    "slab": "#8a5c4c",
+    "bottom": "#3e3238",
+    "floor": "#c47a5a",
+    "beam": "#cdb48c",
+    "ceil": "#d2ddd6",
+    "skyTop": "#4fa2ea",
+    "skyBottom": "#d4f0ff",
+    "windowY": [
+      146,
+      356
+    ],
+    "windowX": [
+      240,
+      720
+    ]
   },
   "sunset": {
-    "wall": "#7d4e5e",
-    "bottom": "#43283a",
-    "skyTop": "#3e3482",
-    "skyBottom": "#ffb36a"
+    "wall": "#6e4f5a",
+    "slab": "#563428",
+    "bottom": "#241820",
+    "floor": "#7a4a34",
+    "beam": "#86687a",
+    "ceil": "#4a343c",
+    "skyTop": "#3d3380",
+    "skyBottom": "#f6c09a",
+    "windowY": [
+      152,
+      334
+    ],
+    "windowX": [
+      240,
+      720
+    ]
   },
   "night": {
-    "wall": "#3b4466",
-    "bottom": "#20263f",
-    "skyTop": "#0a1130",
-    "skyBottom": "#2b2f6b"
+    "wall": "#3a4560",
+    "slab": "#343c56",
+    "bottom": "#151a2c",
+    "floor": "#4a5470",
+    "beam": "#56607e",
+    "ceil": "#2a3248",
+    "skyTop": "#070c26",
+    "skyBottom": "#22306a",
+    "windowY": [
+      166,
+      334
+    ],
+    "windowX": [
+      240,
+      720
+    ]
   }
 }
