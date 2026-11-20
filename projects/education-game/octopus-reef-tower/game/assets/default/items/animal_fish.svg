@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><g id="sil"><path d="M40 64 C30 52 20 40 12 40 C10 50 14 58 20 64 C14 70 10 78 12 88 C20 88 30 76 40 64 Z"/><path d="M50 40 C54 24 74 18 88 30 C82 32 76 36 72 40 Z"/><path d="M60 88 C60 100 70 104 78 98 C74 94 72 90 72 86 Z"/><ellipse cx="72" cy="64" rx="40" ry="31"/><path d="M58 70 C64 64 74 66 72 78 C66 82 58 78 58 70 Z"/></g></defs>
+<use href="#sil" xlink:href="#sil" transform="translate(0 2.5)" fill="#1F4E5A" stroke="#1F4E5A" stroke-width="14" stroke-linejoin="round" opacity=".22"/>
+<use href="#sil" xlink:href="#sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="14" stroke-linejoin="round"/>
+<clipPath id="c0"><path d="M40 64 C30 52 20 40 12 40 C10 50 14 58 20 64 C14 70 10 78 12 88 C20 88 30 76 40 64 Z"/></clipPath>
+<g fill="#C27650" stroke="#C27650" stroke-width="5.2" stroke-linejoin="round"><path d="M40 64 C30 52 20 40 12 40 C10 50 14 58 20 64 C14 70 10 78 12 88 C20 88 30 76 40 64 Z"/></g>
+<g fill="#EDAB87"><path d="M40 64 C30 52 20 40 12 40 C10 50 14 58 20 64 C14 70 10 78 12 88 C20 88 30 76 40 64 Z"/></g>
+<g clip-path="url(#c0)"><g fill="#FFC29E" transform="translate(-2.4 -2.8)"><path d="M40 64 C30 52 20 40 12 40 C10 50 14 58 20 64 C14 70 10 78 12 88 C20 88 30 76 40 64 Z"/></g><path d="M16 48 Q24 56 30 62 M16 80 Q24 72 30 66" fill="none" stroke="#E4A07B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="18" cy="48" rx="3" ry="7" transform="rotate(20 18 48)" fill="#FFFFFF" opacity=".34"/></g>
+<clipPath id="c1"><path d="M50 40 C54 24 74 18 88 30 C82 32 76 36 72 40 Z"/></clipPath>
+<g fill="#C27650" stroke="#C27650" stroke-width="5.2" stroke-linejoin="round"><path d="M50 40 C54 24 74 18 88 30 C82 32 76 36 72 40 Z"/></g>
+<g fill="#EDAB87"><path d="M50 40 C54 24 74 18 88 30 C82 32 76 36 72 40 Z"/></g>
+<g clip-path="url(#c1)"><g fill="#FFC29E" transform="translate(-2.4 -2.8)"><path d="M50 40 C54 24 74 18 88 30 C82 32 76 36 72 40 Z"/></g><path d="M60 34 Q66 28 74 26" fill="none" stroke="#E4A07B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<clipPath id="c2"><path d="M60 88 C60 100 70 104 78 98 C74 94 72 90 72 86 Z"/></clipPath>
+<g fill="#C27650" stroke="#C27650" stroke-width="5.2" stroke-linejoin="round"><path d="M60 88 C60 100 70 104 78 98 C74 94 72 90 72 86 Z"/></g>
+<g fill="#EDAB87"><path d="M60 88 C60 100 70 104 78 98 C74 94 72 90 72 86 Z"/></g>
+<g clip-path="url(#c2)"><g fill="#FFC29E" transform="translate(-2.4 -2.8)"><path d="M60 88 C60 100 70 104 78 98 C74 94 72 90 72 86 Z"/></g></g>
+<clipPath id="c3"><ellipse cx="72" cy="64" rx="40" ry="31"/></clipPath>
+<g fill="#3C8E84" stroke="#3C8E84" stroke-width="5.2" stroke-linejoin="round"><ellipse cx="72" cy="64" rx="40" ry="31"/></g>
+<g fill="#6BBEB1"><ellipse cx="72" cy="64" rx="40" ry="31"/></g>
+<g clip-path="url(#c3)"><g fill="#7FD3C4" transform="translate(-2.4 -2.8)"><ellipse cx="72" cy="64" rx="40" ry="31"/></g><ellipse cx="78" cy="82" rx="30" ry="12" fill="#C5EBE4"/><path d="M52 50 Q58 60 52 70 M62 46 Q69 58 62 72" fill="none" stroke="#64B7AA" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/><ellipse cx="56" cy="44" rx="14" ry="6" transform="rotate(-25 56 44)" fill="#FFFFFF" opacity=".34"/></g>
+<ellipse cx="88" cy="58" rx="7.75" ry="8.99" fill="#2F2A3A"/><circle cx="85.52" cy="54.74" r="3.1" fill="#FFFFFF"/><circle cx="90.64" cy="61.41" r="1.4" fill="#FFFFFF"/>
+<ellipse cx="94" cy="74" rx="5.2" ry="3.22" fill="#F58C8C" opacity="0.8"/>
+<path d="M96 80 Q102 80.5 108 74" fill="none" stroke="#5A2E3A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+<clipPath id="c4"><path d="M58 70 C64 64 74 66 72 78 C66 82 58 78 58 70 Z"/></clipPath>
+<g fill="#C27650" stroke="#C27650" stroke-width="5.2" stroke-linejoin="round"><path d="M58 70 C64 64 74 66 72 78 C66 82 58 78 58 70 Z"/></g>
+<g clip-path="url(#c4)"><g fill="#FFC29E"><path d="M58 70 C64 64 74 66 72 78 C66 82 58 78 58 70 Z"/></g><path d="M62 72 L68 76" fill="none" stroke="#E4A07B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+</svg>
