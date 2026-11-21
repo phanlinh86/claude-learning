@@ -32,7 +32,7 @@ get bonked! The day goes from **dawn** (Earthrise) to **noon**, **sunset** (a ri
 - Streak of pops (no bubble escaped) → ×2 at 8, ×3 at 20. A bubble that floats out of the top only ends the streak.
 - **Magnet bubble** (the twist, ~1 per 25 s): pop it → 7 s magnet: bubbles within reach are pulled toward Bristle.
 - **Moon pebbles**: drift down slowly with a shadow ring on the floor; a bonk costs a heart (soft "boing", dizzy stars).
-- Fill the **cupcake box** (20 / 24 / 28 / 32 on Normal) → level clear (bonus hearts × 100) → next time of day.
+- Fill the **cupcake box** (20 / 24 / 26 / 28 on Normal) → level clear (bonus hearts × 100) → next time of day.
   After night it loops, a bit busier (endless).
 - Lose: all hearts gone (Normal 3, Easy 5, Hard 3).
 

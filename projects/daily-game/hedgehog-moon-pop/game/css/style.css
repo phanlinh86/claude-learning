@@ -188,7 +188,6 @@ canvas#game{background:#2a2f6e}
 .action-btn.hidden{display:none}
 .action-btn.charging{filter:saturate(.35) brightness(.95)}
 .icon-btn{min-width:44px;min-height:44px}
-.new-best{right:calc(var(--u)*-5.6);top:calc(var(--u)*-1.6)}
 /* touch devices: hide keyboard-only wording */
 body.touch .kb-only{display:none}
 body:not(.touch) .touch-only{display:none}
@@ -266,3 +265,37 @@ body.touch .btn:focus-visible,body.touch .btn:focus{outline:none}
   .slot .btn{padding-left:10px;padding-right:10px;min-width:0}
   .slot .shape button{padding:2px 6px}
 }
+
+/* ---------- QA round 1 (2026-11-21) ---------- */
+/* NEW! badge stays inside the score box (visual #7, functional P3-4) */
+.scores .sc{padding-right:calc(var(--u)*5.2)}
+.new-best{right:0;top:calc(var(--u)*-1)}
+/* round title badge (visual #20) */
+.title-icon{border-radius:50%}
+/* tagline keeps a margin in portrait (visual #9) */
+.title-wrap{padding:0 16px;box-sizing:border-box;max-width:100vw}
+.tagline{max-width:calc(100vw - 32px);box-sizing:border-box;border-radius:18px}
+/* background slot titles may wrap to 2 lines (visual #15) */
+.slot h3{white-space:normal;line-height:1.1;text-overflow:clip}
+/* volume row fits on narrow phones (visual #8; the rule lives here, extras.js is shared) */
+@media (max-width:480px){
+  .set-volume input[type=range]{width:22vw}
+  .set-volume b{min-width:2.6em}
+  .vol-step{width:30px !important;height:30px !important;font-size:17px !important}
+  .set-volume .vol-wrap{gap:4px}
+}
+/* toast moves to the top while a menu panel is open, so it never covers Reset all / Done (visual #10) */
+.toast.top{top:16px !important;bottom:auto !important}
+/* How to Play on short landscape phones: the cards scroll, the OK button is always on screen (functional P2-1, visual #16) */
+@media (orientation:landscape) and (max-height:500px){
+  #scrHow .panel{display:flex;flex-direction:column;padding-top:calc(var(--u)*1.2);padding-bottom:calc(var(--u)*1.2)}
+  #scrHow .panel h2{margin-bottom:calc(var(--u)*.6)}
+  #scrHow .how-grid{overflow:auto;min-height:0;flex:1 1 auto;gap:calc(var(--u)*1)}
+  #scrHow .how{padding:calc(var(--u)*.7)}
+  #scrHow .how p{font-size:calc(var(--u)*1.3);line-height:1.25}
+  #scrHow .weather-line{display:none}
+  #scrHow .menu,#scrHow .panel > .btn{flex:0 0 auto}
+}
+/* the Game Over panel never shows through behind the Score Card (visual #14) */
+.sc-screen{background:rgba(20,18,50,.6)}
+body:has(#scScreen:not(.hidden)) #scrOver .panel{visibility:hidden}

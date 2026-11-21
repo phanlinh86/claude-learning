@@ -53,7 +53,13 @@ const quiet = p => p.evaluate(() => { const w = MP.debug.world; w.items.length =
     check(`${name}: touchmove blocked on the canvas, allowed inside panels`, blocked.canvas && !blocked.panel, blocked);
     const gz = await p.evaluate(() => { const e = new Event('gesturestart', { cancelable: true }); document.dispatchEvent(e); return e.defaultPrevented; });
     check(`${name}: pinch-zoom gesture blocked`, gz);
+    // QA: the OK button must be tappable without scrolling (a child won't scroll); report it on its own, then scroll
+    // it into view so one layout bug doesn't cascade into every later check on this device
+    const okVis = await p.evaluate(() => { const b = document.querySelector('#scrHow .btn-back'), r = b.getBoundingClientRect(), h = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return !!h && b.contains(h); });
+    check(`${name}: How to Play OK button tappable without scrolling`, okVis);
+    await p.evaluate(() => document.querySelector('#scrHow .btn-back').scrollIntoView({ block: 'nearest' })); await sleep(150);
     await p.touchscreen.tap(...await p.center('#scrHow .btn-back')); await sleep(300);
+    check(`${name}: How to Play OK returns to the title`, (await p.evaluate(() => MP.UI.current)) === 'scrTitle');
     check(`${name}: ghost click after the Back tap did not start a game`, (await p.evaluate(() => MP.debug.mode)) === 'title');
     // play
     await p.touchscreen.tap(...await p.center('#btnPlay')); await sleep(400);

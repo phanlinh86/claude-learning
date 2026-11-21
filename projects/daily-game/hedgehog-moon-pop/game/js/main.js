@@ -56,6 +56,7 @@
     makeWorld(seed, forTitle) {
       const s = seed != null ? seed : (this.seed != null ? this.seed : (Math.random() * 1e9) | 0);
       const w = new MP.World({ seed: s, config: forTitle ? {} : difficultyOverrides(this.difficulty()) });
+      w._demo = !!forTitle;
       this.applyPlayRange(w);
       w.reset();
       if (!forTitle) this.applyLength(w);
@@ -81,7 +82,13 @@
       if (this.world) this.applyPlayRange(this.world);
       if (this.world) { const c = this.world.cfg; if (this.renderer.pointer) this.renderer.pointer[0] = Math.max(c.xMin, Math.min(c.xMax, this.renderer.pointer[0])); }
     },
-    applyPlayRange(w) { const L = this.renderer && this.renderer.layout; if (L && w.setPlayRange) w.setPlayRange(L.playMin, L.playMax); },
+    applyPlayRange(w) {
+      const L = this.renderer && this.renderer.layout; if (!(L && w.setPlayRange)) return;
+      let lo = L.playMin;
+      // title demo on landscape screens: Bristle skates in the clear right part, not under the menu (visual QA #21)
+      if (w._demo && this.renderer.VW >= this.renderer.VH && L.playMax - 580 >= 300) lo = Math.max(lo, 580);
+      w.setPlayRange(lo, L.playMax);
+    },
     releasePointer() { this.pointerDown = false; this._steerId = null; if (this._touches) this._touches.clear(); if (this.isTouch && this.renderer) this.renderer.pointer = null; },
     makeWeather() { return new MP.Weather({ width: 960, height: 540, seed: 5 }); },
 

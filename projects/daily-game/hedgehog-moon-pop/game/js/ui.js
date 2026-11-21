@@ -70,7 +70,7 @@
       });
       if (game.isApp) $('btnQuit').classList.remove('hidden');
       if (game.isTouch) document.body.classList.add('touch');
-      if (!game.isApp && !document.fullscreenEnabled) $('rowFull').classList.add('hidden');
+      if (!game.isApp && (!document.fullscreenEnabled || /iPhone|iPod/.test(navigator.userAgent))) $('rowFull').classList.add('hidden');   // no Fullscreen API on iPhone
       this.renderSlots();
       this.syncSettings();
     },
@@ -134,6 +134,7 @@
     toast(msg, ms = 2200) {
       const t = $('toast');
       t.textContent = msg; t.classList.remove('hidden');
+      t.classList.toggle('top', !!document.querySelector('.screen.dim:not(.hidden)'));
       clearTimeout(this._toastT);
       this._toastT = setTimeout(() => t.classList.add('hidden'), ms);
     },
@@ -147,7 +148,7 @@
         const custom = A.hasCustom(s.id);
         const el = document.createElement('div');
         el.className = 'slot';
-        const title = s.kind === 'bg' ? s.name : s.name;
+        const title = s.kind === 'bg' ? s.name.split(/\s+[—-]\s+/)[0] : s.name;   // short names (Dawn / Noon / …) for backgrounds
         el.innerHTML = `<h3>${title}</h3><div class="prev ${s.kind === 'bg' ? 'bg' : ''}"></div>
           <div class="tag ${custom ? 'custom' : ''}">${custom ? '★ Your picture' : 'Original'}</div>
           ${s.kind === 'char' ? `<div class="shape"><button data-shape="fit">Whole picture</button><button data-shape="circle">Round</button></div>` : ''}

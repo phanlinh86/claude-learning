@@ -150,7 +150,8 @@
             const f = s && s.face < 0 ? -1 : 1, air = !!(s && s.air);
             // never on Bristle: on the floor above him; in the air (he bounces up after a pop) beside him, behind his back
             let px = clamp(e.x - f * 26, 40, 920), py = Math.max(Math.min(e.y, s ? s.y : e.y) - 58, 70);
-            if (air) { px = e.x - f * 92; if (px < 50 || px > 910) px = e.x + f * 92; py = Math.max(e.y, 90); }
+            if (air) { px = e.x - f * 92; if (px < 50 || px > 910) px = e.x + f * 92; py = e.y; }
+            py = this.freeY(px, Math.max(py, 124), tier >= 2 && !mag ? 56 : 30);   // below the HUD, never stacked (visual QA #5)
             const big = tier >= 3 || (e.mult || 1) >= 3;
             this.texts.push({ text: '+' + e.points, x: px, y: py, life: 0, max: 0.9, size: 20 + 3 * tier + 2 * Math.min(3, e.mult || 1), color: big ? '#ffe14d' : '#ffffff' });
             if (tier >= 2 && !mag) this.texts.push({ text: tier >= 3 ? 'Sky pop! ×3' : 'High pop ×2', x: px, y: py - 26, life: 0, max: 0.9, size: tier >= 3 ? 19 : 16, color: tier >= 3 ? '#ffe14d' : '#bfe6ff' });
@@ -158,7 +159,7 @@
           }
           case 'chain':
             { const f = s && s.face < 0 ? -1 : 1; let cx = (e.x || 480) - f * 110; if (cx < 90 || cx > 870) cx = (e.x || 480) + f * 110;
-            this.texts.push({ text: 'Chain ×' + e.n + '!', x: clamp(cx, 90, 870), y: Math.max(90, (e.y || 300) + 34), life: 0, max: 1.0, size: 24 + Math.min(5, e.n) * 3, color: '#8ff0ff' }); }
+            this.texts.push({ text: 'Chain ×' + e.n + '!', x: clamp(cx, 90, 870), y: this.freeY(clamp(cx, 90, 870), Math.max(124, (e.y || 300) + 34), 34), life: 0, max: 1.0, size: 24 + Math.min(5, e.n) * 3, color: '#8ff0ff' }); }
             break;
           case 'multup':
             this.texts.push({ text: '×' + e.mult + ' STREAK!', x: 480, y: 150, life: 0, max: 1.3, size: 30 + e.mult * 4, color: '#ffe14d', big: true });
@@ -181,7 +182,7 @@
             this.texts.push({ text: 'Boing!', x: clamp(e.x, 80, 880), y: Math.max(80, e.y - 76), life: 0, max: 0.9, size: 30, color: '#ffd1e6' });
             for (let i = 0; i < 6; i++) { const a = -Math.PI / 2 + (i - 2.5) * 0.5, sp = 110 + Math.random() * 50; this.fx.push({ k: 'sprite', spr: 'p_star', x: e.x, y: e.y - 30, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, g: 200, life: 0, max: 0.7, size: 16 + Math.random() * 6, rot: a, vr: 5 }); }
             break;
-          case 'heal': this.texts.push({ text: '+1 heart', x: 110, y: 90, life: 0, max: 1.4, size: 22, color: '#ff8fae' }); break;
+          case 'heal': this.texts.push({ text: '+1 heart', x: 110, y: 96, life: 0, max: 1.4, size: 22, color: '#ff8fae', big: true }); break;
           case 'pebbleland': this.puffs(e.x, Math.min(e.y + 12, 490), 6, '#d8d4e8'); break;
           case 'jump': this.puffs(e.x, 490, 5, '#e6e2f2'); break;
           case 'land': this.puffs(e.x, 490, 6, '#e6e2f2'); break;
@@ -190,6 +191,7 @@
             this._boxPop = 1;
             break;
           case 'cleared':
+            this.texts = this.texts.filter(t => t.text !== 'Cupcake box full!');
             this.texts.push({ text: 'Level clear!', x: 480, y: 240, life: 0, max: 2.2, size: 46, color: '#ffe14d', big: true });
             if (e.bonus) this.texts.push({ text: 'Heart bonus +' + e.bonus, x: 480, y: 292, life: 0, max: 2.2, size: 24, color: '#ffffff', big: true });
             for (let i = 0; i < 30; i++) { const a = Math.random() * TAU, sp = 120 + Math.random() * 220; this.fx.push({ k: 'sprite', spr: 'p_sparkle', x: 480, y: 230, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 120, g: 200, life: -i * 0.015, max: 1.4, size: 14 + Math.random() * 12, rot: 0, vr: 3 }); }
@@ -346,8 +348,8 @@
       g.drawImage(spr, dx, dy);
       if (dx > 0) {
         const col = (sx0) => { const t = document.createElement('canvas'); t.width = 1; t.height = sh; const tg = t.getContext('2d'); tg.imageSmoothingQuality = 'high'; tg.drawImage(spr, sx0, 0, Math.round(96 * this.px), sh, 0, 0, 1, sh); return t; };
-        g.drawImage(col(0), 0, 0, 1, sh, 0, dy, dx + 1, sh);
-        g.drawImage(col(sw - Math.round(96 * this.px)), 0, 0, 1, sh, dx + sw - 1, dy, c.width - dx - sw + 1, sh);
+        g.drawImage(col(0), 0, 0, 1, sh, 0, dy, dx, sh);   // never over the scene's own edge columns (1 px seam, visual QA #3)
+        g.drawImage(col(sw - Math.round(96 * this.px)), 0, 0, 1, sh, dx + sw, dy, c.width - dx - sw, sh);
         // feather the joins: a mirrored copy of the sky's edge fades out into the averaged sides (no hard seam where
         // the night's milky band or the dawn glow reaches the edge)
         const fw = Math.min(dx, Math.round(140 * this.px));
@@ -366,19 +368,29 @@
         }
       }
       if (dy > 0) {
-        const t = document.createElement('canvas'); t.width = 1; t.height = 1;
-        const tg = t.getContext('2d'); tg.imageSmoothingEnabled = true; tg.imageSmoothingQuality = 'high';
-        tg.drawImage(c, 0, dy + 1, c.width, Math.max(2, Math.round(6 * this.px)), 0, 0, 1, 1);
-        g.drawImage(t, 0, 0, 1, 1, 0, 0, c.width, dy + 1);
-        // blend from the palette's top-of-sky colour down into the averaged strip (no flat band in tall portrait)
+        // stretch the scene's real top row upward (keeps its left→right glow, no hard band at scene y 0: visual QA #4),
+        // then blend the palette's top-of-sky colour in from the top
+        const row = Math.max(1, Math.round(2 * this.px));
+        g.drawImage(c, 0, dy + row, c.width, 1, 0, 0, c.width, dy + row);
         const pal = MP.Assets.palette && MP.Assets.palette[n];
         if (pal && pal.skyTop) {
-          const gr = g.createLinearGradient(0, 0, 0, dy + 1);
-          gr.addColorStop(0, pal.skyTop);
-          const d = t.getContext('2d').getImageData(0, 0, 1, 1).data;
-          gr.addColorStop(1, `rgba(${d[0]},${d[1]},${d[2]},1)`);
-          g.fillStyle = gr; g.fillRect(0, 0, c.width, dy + 1);
+          const gr = g.createLinearGradient(0, 0, 0, dy + row);
+          gr.addColorStop(0, pal.skyTop); gr.addColorStop(0.35, pal.skyTop);
+          const m = /^#([0-9a-f]{6})$/i.exec(pal.skyTop);
+          const rgb = m ? [0, 2, 4].map(k => parseInt(m[1].substr(k, 2), 16)).join(',') : '0,0,0';
+          gr.addColorStop(1, 'rgba(' + rgb + ',0)');
+          g.fillStyle = gr; g.fillRect(0, 0, c.width, dy + row);
         }
+        // feather the join: the sprite's top 40 px fade in over the stretched band
+        const fh = Math.min(Math.round(40 * this.px), sh);
+        const t = document.createElement('canvas'); t.width = c.width; t.height = fh;
+        const tg = t.getContext('2d');
+        tg.drawImage(c, 0, dy, c.width, fh, 0, 0, c.width, fh);
+        tg.globalCompositeOperation = 'destination-in';
+        const fg = tg.createLinearGradient(0, 0, 0, fh); fg.addColorStop(0, 'rgba(0,0,0,0)'); fg.addColorStop(1, 'rgba(0,0,0,1)');
+        tg.fillStyle = fg; tg.fillRect(0, 0, c.width, fh);
+        g.drawImage(c, 0, dy + row, c.width, 1, 0, dy, c.width, fh);
+        g.drawImage(t, 0, dy);
         if (z === 3 || z === 0) {   // dawn / night: stars in the extra sky
           let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
           const nStars = Math.round(this.VW * this.SY / 9000);
@@ -516,6 +528,7 @@
         this.drawBubbles();
         this.drawMagnetField();
         this.drawHog(mode);
+        this.drawPebbleWarn();
         this.drawPebbles();
       }
       if (this.weather) this.particles('front');
@@ -563,6 +576,15 @@
     zoneTint() { const p = MP.Assets.palette && MP.Assets.palette[MP.Assets.SEASONS[this.vis.cur]]; return (p && p.tint) || '#c9c4dc'; }
     nightGlow() { const a = this.weather && this.weather.ambient; return a && a.glow != null ? clamp(a.glow, 0, 1) : (this.vis.cur === 3 ? 1 : 0); }
 
+    /* nudge a popup down until no live popup sits within 70 px (x) / h px (y) of it */
+    freeY(px, py, h) {
+      for (let n = 0; n < 8; n++) {
+        if (!this.texts.some(t => !t.big && t.life < t.max * 0.6 && Math.abs(t.x - px) < 70 && Math.abs(t.y - py) < h)) break;
+        py += 30;
+      }
+      return Math.min(py, 440);
+    }
+
     /* vent craters in the floor; a vent that is about to puff glows and breathes (telegraph) */
     drawVents() {
       const g = this.ctx, w = this.world, A = MP.Assets, cr = A.sprite('crater', CRATER_W, CRATER_H);
@@ -571,9 +593,11 @@
         const p = clamp(v.puff || 0, 0, 1), x = v.x, y = FLOOR - 22;
         if (p > 0) {   // soft glow out of the mouth, pulsing faster as the bubble is about to come out
           const pulse = 0.8 + 0.2 * Math.sin(this.time * (8 + 10 * p));
-          g.globalAlpha = 0.35 + 0.5 * p; g.fillStyle = this.glow('rgba(190,235,255,0.75)');
+          g.globalAlpha = 0.55 + 0.45 * p; g.fillStyle = this.glow('rgba(120,200,255,0.9)');
           g.save(); g.translate(x, y + 12); g.scale(40 * pulse * (0.6 + 0.6 * p), 26 * pulse * (0.6 + 0.6 * p)); g.beginPath(); g.arc(0, 0, 1, 0, TAU); g.fill(); g.restore();
           g.globalAlpha = 1;
+          this._ventRing = this._ventRing || [];
+          this._ventRing.push(x, y, p, pulse);
         }
         if (cr) {
           const sq = 1 + 0.06 * p * Math.sin(this.time * 18);
@@ -582,6 +606,19 @@
           g.fillStyle = '#8a86a6'; g.beginPath(); g.ellipse(x, y + 16, 40, 10, 0, 0, TAU); g.fill();
           g.fillStyle = '#4a4668'; g.beginPath(); g.ellipse(x, y + 16, 28, 6, 0, 0, TAU); g.fill();
         }
+      }
+      // pulsing white ring on the mouth of a vent that is about to puff (reads on the pale dawn/noon floor: visual QA #12)
+      const vr = this._ventRing;
+      if (vr && vr.length) {
+        g.lineWidth = 2.5;
+        for (let i = 0; i < vr.length; i += 4) {
+          const x = vr[i], y = vr[i + 1], p = vr[i + 2], pulse = (vr[i + 3] - 0.8) / 0.2;
+          g.strokeStyle = 'rgba(70,90,170,' + (0.25 + 0.35 * p).toFixed(3) + ')'; g.lineWidth = 5;
+          g.beginPath(); g.ellipse(x, y + 16, 30 + 6 * pulse, 8 + 2 * pulse, 0, 0, TAU); g.stroke();
+          g.strokeStyle = 'rgba(255,255,255,' + (0.5 + 0.5 * p).toFixed(3) + ')'; g.lineWidth = 2.5;
+          g.beginPath(); g.ellipse(x, y + 16, 30 + 6 * pulse, 8 + 2 * pulse, 0, 0, TAU); g.stroke();
+        }
+        vr.length = 0;
       }
     }
 
@@ -599,8 +636,30 @@
         const lx = it.lx != null ? it.lx : it.x, pulse = 0.5 + 0.5 * Math.sin(this.time * (8 + 8 * k));
         g.fillStyle = `rgba(40,30,90,${(0.12 + 0.28 * k).toFixed(3)})`;
         g.beginPath(); g.ellipse(lx, FLOOR - 1, 10 + 20 * k, 3 + 4 * k, 0, 0, TAU); g.fill();
-        g.strokeStyle = `rgba(255,140,120,${(0.35 + 0.45 * k * pulse).toFixed(3)})`; g.lineWidth = 2 + 1.5 * k;
-        g.beginPath(); g.ellipse(lx, FLOOR - 1, 16 + 22 * k, 5 + 5 * k, 0, 0, TAU); g.stroke();
+      }
+    }
+
+    /* the pebble warning ring, drawn AFTER Bristle so the board never hides it (visual QA #1), with a dark under-stroke
+     * for colour-blind players (#13) and a bobbing chevron over his head when the pebble is aimed at him */
+    drawPebbleWarn() {
+      const g = this.ctx, w = this.world, s = w.hog;
+      for (const it of w.items) {
+        if (it.kind !== 'pebble' || it.state !== 'fall' || it.harmless) continue;
+        const k = it.shadow != null ? clamp(it.shadow, 0, 1) : clamp((it.y + 30) / (FLOOR - 40 + 30), 0, 1);
+        const lx = it.lx != null ? it.lx : it.x, pulse = 0.5 + 0.5 * Math.sin(this.time * (8 + 8 * k));
+        const rx = 16 + 22 * k, ry = 5 + 5 * k;
+        g.strokeStyle = 'rgba(50,25,80,0.5)'; g.lineWidth = 4 + 1.5 * k;
+        g.beginPath(); g.ellipse(lx, FLOOR - 1, rx, ry, 0, 0, TAU); g.stroke();
+        g.strokeStyle = `rgba(255,140,120,${(0.45 + 0.45 * k * pulse).toFixed(3)})`; g.lineWidth = 2 + 1.5 * k;
+        g.beginPath(); g.ellipse(lx, FLOOR - 1, rx, ry, 0, 0, TAU); g.stroke();
+        if (s && Math.abs(lx - s.x) < 40) {
+          const cy = s.y - 62 + Math.sin(this.time * 10) * 4, a = 0.35 + 0.45 * k;
+          g.lineCap = 'round'; g.lineJoin = 'round';
+          g.strokeStyle = `rgba(50,25,80,${(a * 0.6).toFixed(3)})`; g.lineWidth = 7;
+          g.beginPath(); g.moveTo(s.x - 10, cy - 6); g.lineTo(s.x, cy + 4); g.lineTo(s.x + 10, cy - 6); g.stroke();
+          g.strokeStyle = `rgba(255,140,120,${a.toFixed(3)})`; g.lineWidth = 4;
+          g.beginPath(); g.moveTo(s.x - 10, cy - 6); g.lineTo(s.x, cy + 4); g.lineTo(s.x + 10, cy - 6); g.stroke();
+        }
       }
     }
 
@@ -612,8 +671,9 @@
       return { spr: A.sprite(CUP_KEYS[it.color || 0] || CUP_KEYS[0], CUP, CUP), w: CUP, h: CUP };
     }
     drawBubbles() {
-      const g = this.ctx, w = this.world, A = MP.Assets, film = A.sprite('bubble', 80 * 0.75, 80 * 0.75);
+      const g = this.ctx, w = this.world, A = MP.Assets;
       const glow = this.nightGlow(), phone = this.cssScale < 0.8 ? 1.2 : 1;   // phones: bubbles drawn 20 % bigger (visual only)
+      const filmPx = Math.round(BUBBLE_R * phone * 80 / 37), film = A.sprite('bubble', filmPx, filmPx);   // rasterised at drawn size (visual QA #17)
       const puffT = (w.cfg && w.cfg.puffTime) || 0.8;
       for (const it of w.items) {
         if (it.kind === 'pebble') continue;
@@ -661,17 +721,20 @@
       const R = m.r || 300, fade = clamp(m.t / 0.6, 0, 1), warn = m.t < 1.5 ? 0.5 + 0.5 * Math.sin(this.time * 18) : 1;
       g.save();
       g.beginPath(); g.rect(s.x - R - 10, s.y - R - 10, 2 * R + 20, FLOOR - (s.y - R - 10)); g.clip();   // the field stops at the floor
-      g.globalAlpha = 0.4 * fade * warn; g.strokeStyle = MAGNET_COLOR; g.lineWidth = 3;
+      const rr = R * (0.96 + 0.04 * Math.sin(this.time * 5));
+      g.globalAlpha = 0.45 * fade * warn; g.strokeStyle = '#ffffff'; g.lineWidth = 6;
+      g.beginPath(); g.arc(s.x, s.y, rr, 0, TAU); g.stroke();
+      g.globalAlpha = 0.75 * fade * warn; g.strokeStyle = MAGNET_COLOR; g.lineWidth = 3.5;
       g.setLineDash([10, 12]); g.lineDashOffset = -this.time * 40;
-      g.beginPath(); g.arc(s.x, s.y, R * (0.96 + 0.04 * Math.sin(this.time * 5)), 0, TAU); g.stroke();
+      g.beginPath(); g.arc(s.x, s.y, rr, 0, TAU); g.stroke();
       g.setLineDash([]);
       g.globalAlpha = 0.18 * fade; g.fillStyle = this.glow('rgba(255,120,140,0.5)');
       g.save(); g.translate(s.x, s.y); g.scale(70, 70); g.beginPath(); g.arc(0, 0, 1, 0, TAU); g.fill(); g.restore();
-      g.lineWidth = 1.5; g.strokeStyle = '#ffd0d6';
+      g.lineWidth = 2.5; g.strokeStyle = '#ff8a96';
       for (const it of w.items) {
         if (it.state !== 'rise' || it.kind === 'pebble') continue;
         const d = Math.hypot(it.x - s.x, it.y - s.y); if (d > R) continue;
-        g.globalAlpha = 0.35 * fade * (1 - d / R);
+        g.globalAlpha = 0.6 * fade * (1 - d / R);
         g.beginPath(); g.moveTo(it.x, it.y); g.lineTo(s.x, s.y); g.stroke();
       }
       g.restore();
@@ -712,7 +775,7 @@
       // board
       const b = s.board || { x: s.x, y: s.y + 38, rot: 0 };
       const bd = A.sprite('board', BOARD_W, BOARD_H);
-      g.save(); g.translate(b.x, b.y - 6 + (s.air ? 0 : bob * 0.3)); g.rotate(b.rot || 0); g.scale(face, 1);   // deck top = 6 px above the deck centre
+      g.save(); g.translate(b.x, b.y - 6 + (s.air ? 0 : bob * 0.3)); g.rotate(s.air ? (b.rot || 0) : 0); g.scale(face, 1);   // flat on the floor (visual QA #2); deck top = 6 px above the deck centre
       if (bd) g.drawImage(bd, -BOARD_TOP[0], -BOARD_TOP[1], BOARD_W, BOARD_H);
       g.restore();
       // Bristle

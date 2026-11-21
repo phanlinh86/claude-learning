@@ -218,7 +218,7 @@ test('pop: hit radius, tiers, points, ground pop vs air pop', () => {
   deq([ev[0].tier, ev[0].points, ev[0].combo, ev[0].mult, ev[0].chain, ev[0].air, w.box, w.score], [1, 10, 1, 1, 0, false, 1, 10]);
   for (const k of ['id', 'x', 'y', 'kind', 'color', 'tier', 'points', 'combo', 'mult', 'chain', 'air']) assert.ok(k in ev[0], 'pop.' + k);
   assert.strictEqual(w.hog.frame, 'happy');
-  assert.strictEqual(w._tier(361), 1); assert.strictEqual(w._tier(360), 2); assert.strictEqual(w._tier(221), 2); assert.strictEqual(w._tier(220), 3);
+  assert.strictEqual(w._tier(361), 1); assert.strictEqual(w._tier(360), 2); assert.strictEqual(w._tier(241), 2); assert.strictEqual(w._tier(240), 3);
   // pebbles never pop bubbles
   w.items.length = 0; const b = bubbleAt(w, 300, 300, 'cupcake', 0, 0); pebbleAt(w, 300, 300, 0); w.update(H);
   assert.strictEqual(b.state, 'rise');

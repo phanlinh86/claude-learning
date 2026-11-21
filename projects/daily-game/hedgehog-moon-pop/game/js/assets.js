@@ -152,7 +152,7 @@
         this.customSrc[s.id] = img;
         this.custom[s.id] = processCustom(img, s.kind === 'bg' ? 'fit' : S.get('shape_' + s.id, 'fit'));
       }));
-      this._cache.clear();
+      this._cache.clear(); this._thumbs = {};
     },
 
     async setCustom(slotId, file) {
@@ -168,12 +168,12 @@
       MP.Storage.set('shape_' + slotId, shape);
       const src = this.customSrc[slotId];
       if (src) this.custom[slotId] = processCustom(src, shape);
-      this._cache.clear();
+      this._cache.clear(); if (this._thumbs) delete this._thumbs[slotId];
     },
     clearCustom(slotId) {
       MP.Storage.del('img_' + slotId); MP.Storage.del('shape_' + slotId);
       delete this.customSrc[slotId]; delete this.custom[slotId];
-      this._cache.clear();
+      this._cache.clear(); if (this._thumbs) delete this._thumbs[slotId];
     },
     /* Small preview image (data URL) for the Change Pictures cards — cached, cheap to redraw. */
     thumb(slotId) {

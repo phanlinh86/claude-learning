@@ -48,12 +48,12 @@ The position uses the average velocity of each step, so the arc is exact: apex 2
 ## 4. Popping and scoring
 - A bubble pops if dist(hog, bubble) < r + hogR, with hogR 28 standing and 30 as a ball (interpolated by curl). Standing on a vent pops
   its bubble as it emerges: **ground pops**, the skate-only way to play.
-- Tiers by the bubble's y at the pop: **y > 360 → ×1, 220 < y ≤ 360 → ×2, y ≤ 220 → ×3**. *Deviation from DESIGN (200):* with
+- Tiers by the bubble's y at the pop: **y > 360 → ×1, 240 < y ≤ 360 → ×2, y ≤ 240 → ×3** (220 → 240 after the playtest, docs/reports/playtest.md). *Deviation from DESIGN (200):* with
   apex y 246 plus 58 px reach, a single jump could only touch y ≥ 188, and the sims showed sky pops almost never happened.
   At 220 a perfectly timed apex pop or any chain reaches the sky tier. It is still rare: skill-1 bot ≈ 0.15 sky pops/min.
 - Points = 10 × tier × mult + 10 × (chain − 1) (the second air pop of a jump onward). The streak counts +1 per pop (cupcake or magnet),
   mult ×1/×2/×3 at 0/8/20 (Easy 0/5/12). Escapes and bonks reset it.
-- Box: each popped cupcake counts +1 (magnets don't). **Targets 20/24/28/32** (Easy 14/17/20/23, Hard 26/30/34/38), × `lengthK`, minimum 6.
+- Box: each popped cupcake counts +1 (magnets don't). **Targets 20/24/26/28** (night 32 → 28 and sunset 28 → 26 after the playtest) (Easy 14/17/20/23, Hard 26/30/34/38), × `lengthK`, minimum 6.
   *Deviation from DESIGN (15/18/21/24):* level time is set by the spawn rate (a good player pops almost everything),
   and 15 cupcakes at 1.9 s each would make a level last about 30 s. The 45–90 s target needs these larger boxes (see §8).
 - Box full → `boxfull`. Puffing vents are cancelled, falling pebbles turn harmless and fade, and there is a 1 s grace in which pops

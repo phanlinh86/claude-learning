@@ -51,7 +51,7 @@
     hogRestY: 446,                 // px, Bristle's body centre when skating (board top 478)
     escapeY: 60,                   // px, a bubble whose centre goes above this floats away
     ventY: 470,                    // px, bubbles emerge at (vent.x, ventY)
-    ceilY: 110,                    // px, soft ceiling for Bristle's centre (chains can't fly him into the HUD)
+    ceilY: 124,                    // px, soft ceiling for Bristle's centre (chains can't fly him into the HUD)
     xMin: 60, xMax: 900,           // px, Bristle x clamp (setPlayRange changes it)
 
     // --- skating (a skateboard on the Moon: low friction, but precise enough for a 6-year-old)
@@ -113,7 +113,7 @@
     squishDecay: 6,                // 1/s
     popTime: 0.25,                 // s, pop fade
     escapeTime: 0.5,               // s, escape fade (keeps rising)
-    tierY: [360, 220],             // px: y > 360 tier 1 (low), 220 < y ≤ 360 tier 2, y ≤ 220 tier 3 (sky).
+    tierY: [360, 240],             // px: y > 360 tier 1 (low), 240 < y ≤ 360 tier 2, y ≤ 240 tier 3 (sky). Playtest: 220 → 240 (sky pops 0.1 → 0.5–0.7/min for good players).
                                    //  220, not 200: the apex (y 246) + pop reach (58) then just touches the sky band,
                                    //  so a perfectly timed single jump can score ×3; chains get there easily
 
@@ -131,7 +131,7 @@
     basePoints: 10,                // × tier × mult
     chainPoints: 10,               // × (chain − 1): from the 2nd pop of one jump on
     multThresholds: [0, 8, 20],    // combo needed for ×1..×3
-    boxTargets: [20, 24, 28, 32],  // cupcakes per level; dawn ≈ 50–60 s at bot skill 0.8 (see MECHANICS.md)
+    boxTargets: [20, 24, 26, 28],  // playtest: night 32 → 28 (kid6 night 78 → 73 s, kid4 108 → 88 s); cupcakes per level; dawn ≈ 50–60 s at bot skill 0.8 (see MECHANICS.md)
     lengthK: 1,                    // settings level length (short 0.7 / normal 1 / long 1.4) × box target
     boxMin: 6,
 
@@ -339,8 +339,10 @@
       if (s.x < xMin) { s.x = xMin; if (s.vx < 0) s.vx = 0; } else if (s.x > xMax) { s.x = xMax; if (s.vx > 0) s.vx = 0; }
       s._px = s.x; s.board.x = s.board._px = s.x;
     }
+    var ventsOut = false, lo = xMin + c.ventMargin, hi = xMax - c.ventMargin;
+    if (this.vents) for (var vi = 0; vi < this.vents.length; vi++) if (this.vents[vi].x < lo || this.vents[vi].x > hi) ventsOut = true;
     if (this.vents && this._info) {
-      this._placeVents(this._info.vents);
+      if (ventsOut) this._placeVents(this._info.vents);   // only re-place when a vent left the visible floor (functional P3-3)
       var items = this.items || [], i, it;
       for (i = 0; i < items.length; i++) {
         it = items[i];
@@ -508,7 +510,7 @@
       s._flip = Math.min(1, s._flip + h / c.flipTime);
       b.rot = s.tilt + (s._flip < 1 ? s.face * TAU * smooth(s._flip) : 0);
     } else {
-      b.x = tx; b.y = c.hogRestY + c.boardOff; b.vx = s.vx; b.vy = 0; b.rot = s.tilt;
+      b.x = tx; b.y = c.hogRestY + c.boardOff; b.vx = s.vx; b.vy = 0; b.rot = 0;   // flat on the floor (visual QA P1: both wheels on the ground)
     }
     // pushing (accelerating along the motion on the floor) alternates 'push' / 'skate'
     var pushing = !s.air && Math.abs(s.vx) > 20 && s.ax * sgn(s.vx) > c.pushMinA && Math.abs(s.vx) < c.maxSpeed - 1;
