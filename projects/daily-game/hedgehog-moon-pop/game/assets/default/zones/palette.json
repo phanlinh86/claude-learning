@@ -1,0 +1,34 @@
+{
+  "dawn": {
+    "banner": "#e88a8a",
+    "accent": "#ffd27a",
+    "hud": "#5a4e8c",
+    "sky": "#b698b2",
+    "skyTop": "#5d5a9c",
+    "tint": "#b8a0c4"
+  },
+  "noon": {
+    "banner": "#6f8fd8",
+    "accent": "#ffcf5a",
+    "hud": "#4f63a6",
+    "sky": "#bac3eb",
+    "skyTop": "#8fa6de",
+    "tint": "#b0b6d8"
+  },
+  "sunset": {
+    "banner": "#e8735e",
+    "accent": "#ffd08a",
+    "hud": "#5a3478",
+    "sky": "#ba7381",
+    "skyTop": "#4e3580",
+    "tint": "#c8a29e"
+  },
+  "night": {
+    "banner": "#5d64c8",
+    "accent": "#ffd88a",
+    "hud": "#1c2258",
+    "sky": "#232a5d",
+    "skyTop": "#0b0f30",
+    "tint": "#7e88bc"
+  }
+}

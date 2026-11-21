@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="40" viewBox="0 0 120 40">
+<path d="M25,17 L39,17 L35,24.6 L29,24.6 Z" fill="#c3c8da" stroke="#4e5672" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><path d="M81,17 L95,17 L91,24.6 L85,24.6 Z" fill="#c3c8da" stroke="#4e5672" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="32" cy="31" r="7" fill="#3fc4a8" stroke="#17695a" stroke-width="2.8"/>
+<path d="M27.6,28 C29,26 31,25.4 33,25.6" fill="none" stroke="#9cf0dc" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="32" cy="31" r="2.6" fill="#eef3fb" stroke="#17695a" stroke-width="1.4"/><circle cx="88" cy="31" r="7" fill="#3fc4a8" stroke="#17695a" stroke-width="2.8"/>
+<path d="M83.6,28 C85,26 87,25.4 89,25.6" fill="none" stroke="#9cf0dc" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="88" cy="31" r="2.6" fill="#eef3fb" stroke="#17695a" stroke-width="1.4"/>
+<defs><clipPath id="dk"><path d="M14,10 L106,10 C110,10 113,7.4 115,3.6 C116,1.8 118.6,2.4 118.2,4.6 C117,11 112.6,17 106,17 L14,17 C7.4,17 3,11 1.8,4.6 C1.4,2.4 4,1.8 5,3.6 C7,7.4 10,10 14,10 Z"/></clipPath></defs>
+<path d="M14,10 L106,10 C110,10 113,7.4 115,3.6 C116,1.8 118.6,2.4 118.2,4.6 C117,11 112.6,17 106,17 L14,17 C7.4,17 3,11 1.8,4.6 C1.4,2.4 4,1.8 5,3.6 C7,7.4 10,10 14,10 Z" fill="#e8604c"/>
+<g clip-path="url(#dk)">
+  <rect x="0" y="14.4" width="120" height="4" fill="#c4453a"/>
+  <path d="M6,12.6 L114,12.6" stroke="#fff1d6" stroke-width="1.8"/>
+</g>
+<path d="M14,10 L106,10 C110,10 113,7.4 115,3.6 C116,1.8 118.6,2.4 118.2,4.6 C117,11 112.6,17 106,17 L14,17 C7.4,17 3,11 1.8,4.6 C1.4,2.4 4,1.8 5,3.6 C7,7.4 10,10 14,10 Z" fill="none" stroke="#86291f" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M18,10.2 L46,10.2" stroke="#ffa08c" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>
