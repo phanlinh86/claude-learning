@@ -17,7 +17,7 @@ const VP = { width: 1180, height: 820 }, CHILD = get('child', '1') === '1', VARI
 /** In-page 4-year-old (replaces ?bot=1 with --child 1): listens until Bibi stops talking, thinks 1.3–2.6 s (eager: p 0.25 taps
  *  0.6–1.6 s after the prompt STARTED), right with p 0.82, retries 0.8–1.6 s after Bibi's correction; song: taps a drum 0.8–3 s
  *  after the song ask (p 0.8) or waits for the auto cascade; Talk: answers 3–6 s after the question ends (p 0.87 right). */
-function child() {
+function child(DRUM) {
   const w = CD.debug.world, R = Math.random, U = (a, b) => a + (b - a) * R();
   let key = '', at = 0, listenFrom = 0, eager = false, songKey = '', songAt = 0, talkKey = '', talkAt = 0, up = 0;
   const talking = () => CD.Voice.isSpeaking && CD.Voice.isSpeaking();
@@ -37,6 +37,17 @@ function child() {
       const k = w.level + ':' + w.round;
       if (k !== songKey) { songKey = k; songAt = R() < 0.8 ? now + U(800, 3000) : 1e15; }
       if (now > songAt) { const c = w.drums.find(q => q.state === 'stand'); if (c) { w.pointerDown(c.cx, c.cy); up = now + 120; } songAt = 1e15; }
+      return;
+    }
+    const st = w.stepInfo;
+    if (st && st.mode === 'beat' && (w.interactive || (DRUM && w.state === 'round'))) {   // beat the big drum (typical gaps 0.35–0.8 s; wild: bursts 0.09–0.3 s from the ask on)
+      const c = w.drums.find(q => q.state === 'stand'); if (!c) return;
+      const k = w.level + ':' + w.round + ':' + w.step;
+      if (k !== key) { key = k; at = DRUM ? now + U(200, 1000) : 0; listenFrom = now; }
+      if (!at) { if (!talking() && now - listenFrom > 300) at = now + U(1300, 2600); return; }
+      if (now < at) return;
+      w.pointerDown(c.cx + U(-20, 20), c.cy + U(-20, 20)); up = now + (DRUM ? U(30, 80) : U(60, 200));
+      at = DRUM ? now + (R() < 0.15 ? U(300, 1500) : U(90, 300)) : now + (R() < 0.07 ? U(2000, 6000) : U(350, 800));
       return;
     }
     if (!w.interactive || !a.drum) { key = ''; return; }
@@ -110,11 +121,11 @@ function fakeTTS() {
       const t = CD.I18N.t.bind(CD.I18N); let songs = 0;
       CD.I18N.t = (lang, key, p, r) => {
         if (key === 'songDone') return '';
-        if (key === 'song' && songs++ > 0) return lang === 'vi' ? 'Vuốt qua các chuông nào!' : 'Swipe the drums!';
+        if (key === 'song' && songs++ > 0) return lang === 'vi' ? 'Bé gõ các trống nào!' : 'Tap the drums!';
         return t(lang, key, p, r);
       };
     });
-    if (CHILD) await page.evaluate(child);
+    if (CHILD) await page.evaluate(child, VARIANT === 'drummer');
     await page.waitForTimeout(MIN * 60000);
     const r = await page.evaluate((lang) => {
       // classify each requested line by the i18n key whose template matches it (longest literal wins)
@@ -122,13 +133,14 @@ function fakeTTS() {
       for (const k of I.keys(lang)) { const v = I.raw(lang, k); for (const t of (Array.isArray(v) ? v : typeof v === 'string' ? [v] : [])) {
         const lit = t.replace(/\{[^}]+\}/g, '').length; if (lit < 4) continue;
         try { pats.push({ k, lit, re: new RegExp(esc(t).replace(/\\\{[^}]+\\\}|\{[^}]+\}/g, '.{0,40}?').replace(/\s+/g, '\\s*')) }); } catch (e) {} } }
-      const kindOf = text => { if (/(One, two|Một, hai)|^(One bell|One dot|Một cái chuông|Một chấm)!/.test(text)) return 'countRun';
+      const kindOf = text => { if (/(One, two|Một, hai)|^(One dot|Một chấm)!/.test(text)) return 'countRun';
         const m = pats.filter(p => p.re.test(text)), has = f => m.find(p => f(p.k));
         const pick = has(k => k === 'idle') || has(k => k === 'hint') || has(k => /^p\./.test(k));
         if (pick) return pick.k;
         let best = null; for (const p of m) if (!best || p.lit > best.lit) best = p; return best ? best.k : '?'; };
       for (const q of window.__say) q.kind = kindOf(q.text);
-      return { say: window.__say, tts: window.__tts, ev: window.__ev, mode: CD.debug.mode, wtime: CD.debug.world.time, level: CD.debug.world.level };
+      const words = {}; for (let i = 1; i <= 20; i++) words[String(I.t(lang, 'count.' + i)).replace(/[!.]/g, '').trim().toLowerCase()] = i;
+      return { words, say: window.__say, tts: window.__tts, ev: window.__ev, mode: CD.debug.mode, wtime: CD.debug.world.time, level: CD.debug.world.level };
     }, lang);
     const fam0 = k => /^p\./.test(k) ? 'prompt' : k === 'countRun' ? 'countRun' : /^w\.|wrong/.test(k) ? 'wrong' : /^(right|name\.say)/.test(k) ? 'right' : k.split('.')[0];
     const fam = k => (k === 'countRun' ? 'countRun' : fam0(k));
@@ -160,7 +172,39 @@ function fakeTTS() {
     const sil = []; const sorted = r.tts.slice().sort((a, b) => a.start - b.start);
     for (let i = 1; i < sorted.length; i++) { const g = sorted[i].start - (sorted[i - 1].end || sorted[i - 1].start); if (g > 8000) sil.push({ gap: Math.round(g / 100) / 10, after: sorted[i - 1].text, next: sorted[i].text }); }
     const reps = []; for (let i = 1; i < sorted.length; i++) for (let k = i - 1; k >= 0 && sorted[i].start - sorted[k].start < 10000; k--) if (sorted[k].text === sorted[i].text) reps.push(sorted[i].text);
-    const rec = { age, lang, errors: errors.slice(0, 4), wallMin: MIN, gameS: Math.round(r.wtime), level: r.level, mode: r.mode, requests: r.say.length, utterances: r.tts.length,
+    // ---- flow checks: count words in order (never a late "Two!" after "Three!"), one praise per round, nothing after the cymbal
+    const numOf = text => { const m = String(text).toLowerCase().match(/^([^!,.]+)!/); return m && r.words[m[1].trim()] ? r.words[m[1].trim()] : 0; };
+    const evAt = r.ev.map(e => e.t), bounds = r.ev.filter(e => e.type === 'ask' || e.type === 'songAsk');
+    const flow = { beatSteps: 0, countWords: 0, countCut: 0, outOfOrder: [], lateCount: [], praise: { rounds: 0, zero: 0, two: 0 }, afterCymbal: [], songDoneLines: 0, songDoneNotLast: 0 };
+    for (let i = 0; i < r.ev.length; i++) {
+      const e = r.ev[i];
+      if (e.type === 'ask') {
+        const end = (r.ev.slice(i + 1).find(q => q.type === 'ask' || q.type === 'songAsk' || q.type === 'levelDone') || { t: 1e15 }).t;
+        const isBeat = r.ev.slice(i + 1).some(q => q.t < end && q.type === 'count');
+        if (!isBeat) continue;
+        flow.beatSteps++;
+        const us = sorted.filter(u => u.start >= e.t - 5 && u.start < end + 1500 && numOf(u.text));
+        let hi = 0;
+        for (const u of us) { const n = numOf(u.text); flow.countWords++; if (u.how === 'cut') flow.countCut++; if (n <= hi && flow.outOfOrder.length < 8) flow.outOfOrder.push(us.map(x => x.text).join(' | ')); hi = Math.max(hi, n); }
+        const reqs = r.say.filter(q => q.cause === 'count' && q.t >= e.t && q.t < end);
+        for (const q of reqs) { const u = sorted.find(x => x.start >= q.t - 5 && x.text === q.text); if (u && u.start - q.t > 700 && flow.lateCount.length < 8) flow.lateCount.push(q.text + ' +' + Math.round(u.start - q.t) + 'ms'); }
+      }
+      if (e.type === 'roundDone') {
+        const end = (r.ev.slice(i + 1).find(q => q.type === 'songAsk') || { t: 1e15 }).t;
+        const n = r.say.filter(q => (q.kind === 'great' || q.kind === 'praise') && q.t >= e.t - 5 && q.t <= end + 5).length;
+        flow.praise.rounds++; if (n === 0) flow.praise.zero++; if (n > 1) flow.praise.two++;
+      }
+      if (e.type === 'cymbal') {
+        const nx = r.ev.slice(i + 1).find(q => ['round', 'talk', 'levelDone', 'sessionDone'].includes(q.type)) || { t: 1e15, type: 'end' };
+        const last = nx.type !== 'round';
+        for (const u of sorted.filter(x => x.start > e.t + 5 && x.start < nx.t)) {
+          const q = r.say.find(z => Math.abs(z.t - u.start) < 1500 && z.text === u.text), k = q ? q.kind : '?';
+          if (k === 'songDone') { flow.songDoneLines++; if (!last) flow.songDoneNotLast++; continue; }
+          if (flow.afterCymbal.length < 8) flow.afterCymbal.push((q ? q.cause + '/' + k : '?') + ': ' + u.text);
+        }
+      }
+    }
+    const rec = { age, lang, flow, errors: errors.slice(0, 4), wallMin: MIN, gameS: Math.round(r.wtime), level: r.level, mode: r.mode, requests: r.say.length, utterances: r.tts.length,
       promptDelay: { mean: +(lat.reduce((a, b) => a + b, 0) / Math.max(1, lat.length)).toFixed(2), p50: q(0.5), p90: q(0.9), over2s: lat.filter(x => x > 2).length, n: lat.length },
       rounds: r.ev.filter(e => e.type === 'roundDone').length, perMin: +(r.tts.length / ((t1 - t0) / 60000)).toFixed(1), talkPct: +(talkMs / (t1 - t0) * 100).toFixed(1), asks, askHeardBeforeTouch: heardBefore,
       kinds,

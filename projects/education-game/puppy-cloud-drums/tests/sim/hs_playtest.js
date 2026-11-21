@@ -16,8 +16,10 @@ const { fork } = require('child_process');
 const L = require('./lib');
 
 const args = process.argv.slice(2), get = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
-const N = +get('n', 120), config = JSON.parse(get('config', '{}'));
-const ALL = 'typical,slow3,swipey,perfect,tapper,swiper,spammer,beam,bot0.5,bot0.8,bot1,absent';
+const N = +get('n', 120), config = JSON.parse(get('config', '{}')), proto = JSON.parse(get('proto', '{}'));
+const ALL = 'typical,slow3,swipey,perfect,tapper,swiper,spammer,beam,drummer,stopper,bot0.5,bot0.8,bot1,absent';
+const PROMPT_S = +get('prompt', 2.5);   // ≈ how long "Beat the big drum three times!" takes to say (iOS, rate 0.9)
+const QUIET = m => m === 'absent' || m === 'frozen';
 const MODELS = get('models', ALL).split(','), AGES = get('ages', '3,4,5,6,7').split(',').map(Number);
 const TAG = get('tag', 'base'), JOBS = +get('jobs', 2);
 const VPS = Object.keys(L.VIEWPORTS);
@@ -33,12 +35,13 @@ function finiteWorld(w) {
 function runOne(o) {
   const w = L.mkWorld(o);
   const d = L.makeModel(o.model, w, o.age, o.seed + 1);
-  const quiet = o.model === 'absent';
+  const quiet = QUIET(o.model);
   const S = { model: o.model, age: o.age, done: false, nan: false, time: 0, stuckState: false, rounds: [], chapters: [], talks: 0, talkRight: 0, talkAuto: 0,
-    miss2NoHint: 0, offScreen: 0, topics: null, idles: [], maxDrums: 0, keys: [], repKey: 0, maxSwing: 0, beatCounts: 0, beatBrush: 0, beatNudges: 0 };
+    miss2NoHint: 0, offScreen: 0, topics: null, idles: [], maxDrums: 0, keys: [], repKey: 0, maxSwing: 0, beatCounts: 0, beatBrush: 0, beatNudges: 0, beatSteps: [], asks: 0, repAns: 0, firsts: 0, repFirst: 0, nudgeAt: [] };
   w.newSession();
   const dt = 1 / 30, cap = o.cap || (quiet ? 600 : 1800);
-  let R = null, chap = null, t = 0, lastChange = 0, sig = '';
+  let R = null, chap = null, t = 0, lastChange = 0, sig = '', B = null, prevAns = null, lastRoundAns = null;
+  const closeB = () => { if (B) S.beatSteps.push(B); B = null; };
   const closeStep = () => { if (R && R.stepWrong >= 2 && R.stepHint === 0) S.miss2NoHint++; if (R) { R.stepWrong = 0; R.stepHint = 0; } };
   while (w.state !== 'sessionDone' && t < cap) {
     d.step(dt); w.update(dt); t += dt;
@@ -61,19 +64,27 @@ function runOne(o) {
           R = { topic: w.topic, ri: e.round, t0: w.time, steps: e.steps, drums: e.drums, wrong: 0, brush: 0, soft: 0, right: 0, assist: 0, hintMiss: 0, hintIdle: 0, idle: 0,
             surprise: e.surprise, surpriseTap: 0, firstAsk: 0, playT: 0, lastProg: w.time, maxGap: 0, stepWrong: 0, stepHint: 0, level: w.level, firstAskT: 0, songT0: 0, songAuto: false, songStart: 0 };
           if (S.keys.includes(e.key)) S.repKey++; S.keys.push(e.key); break;
-        case 'ask': if (R) { closeStep(); if (e.first) { R.firstAsk = w.time; R.firstAskT = w.time - R.t0; R.lastProg = w.time; } } break;
+        case 'ask':
+          closeB(); S.asks++;
+          { const a = w.topic + ':' + e.nameValue; if (a === prevAns) S.repAns++; if (e.first) { S.firsts++; if (a === lastRoundAns) S.repFirst++; } prevAns = a; }
+          if (e.mode === 'beat') B = { askT: w.time, n: e.need, counted: 0, early: 0, fast: 0, over: 0, doneT: -1, nudges: [], lastCount: w.time, hints: 0, assist: 0, age: o.age };
+          if (R) { closeStep(); if (e.first) { R.firstAsk = w.time; R.firstAskT = w.time - R.t0; R.lastProg = w.time; } } break;
         case 'wrong': if (R) { R.wrong++; R.stepWrong++; } break;
-        case 'count': if (e.beat) S.beatCounts++; break;
-        case 'ring': if (R && e.brush) R.brush++; if (e.beat && e.brush) S.beatBrush++; break;
-        case 'beatNudge': if (R) R.idle++; S.beatNudges++; break;
+        case 'count': if (e.beat) { S.beatCounts++; if (B) { B.counted++; B.lastCount = w.time; if (w.time - B.askT < (o.promptS || PROMPT_S)) B.early++; } } break;
+        case 'ring': if (R && e.brush) R.brush++; if (e.beat && e.brush) S.beatBrush++;
+          if (B && B.doneT < 0 && e.beat && e.brush && e.listen) B.listen = (B.listen || 0) + 1; else if (B && B.doneT < 0 && e.beat && e.brush) B.fast++; else if (B && B.doneT >= 0) B.over++; break;
+        case 'beatNudge': if (R) R.idle++; S.beatNudges++; if (B) B.nudges.push(+(w.time - B.lastCount).toFixed(2)); if (quiet) S.nudgeAt.push(+(w.time - (B ? B.lastCount : 0)).toFixed(1)); break;
         case 'soft': if (R) R.soft++; break;
-        case 'assist': if (R) R.assist++; break;
-        case 'right': if (R) { R.right++; R.maxGap = Math.max(R.maxGap, w.time - R.lastProg); R.lastProg = w.time; R.stepWrong = 0; R.stepHint = 0; } break;
+        case 'assist': if (R) R.assist++; if (B) B.assist++; break;
+        case 'right': if (B && e.beat) B.doneT = w.time;
+          if (R) { R.right++; R.maxGap = Math.max(R.maxGap, w.time - R.lastProg); R.lastProg = w.time; R.stepWrong = 0; R.stepHint = 0; } break;
         case 'idle': if (R) R.idle++; if (quiet) S.idles.push(+(w.time).toFixed(1)); break;
-        case 'hint': if (R) { if (e.idle) R.hintIdle++; else R.hintMiss++; R.stepHint++; } break;
+        case 'hint': if (B && B.doneT < 0) B.hints++;
+          if (R) { if (e.idle) R.hintIdle++; else R.hintMiss++; R.stepHint++; } break;
         case 'lambTap': case 'birdTap': case 'fireflyTap': if (R) R.surpriseTap++; break;
         case 'lamb': case 'bird': case 'fireflies': if (R) { R.surpriseShown = (R.surpriseShown || 0) + 1; R.surpriseAt = w.time - R.firstAsk; } break;
-        case 'roundDone': if (R) { closeStep(); R.stars = e.stars; R.playT = w.time - R.firstAsk; R.songT0 = w.time; } break;
+        case 'songAsk': closeB(); break;
+        case 'roundDone': lastRoundAns = prevAns; if (R) { closeStep(); R.stars = e.stars; R.playT = w.time - R.firstAsk; R.songT0 = w.time; } break;
         case 'songNote': if (R && e.i === 0) R.songStart = w.time - R.songT0; break;
         case 'songDone': if (R) R.songAuto = e.auto; break;
         case 'drumsOut':
@@ -86,7 +97,7 @@ function runOne(o) {
       }
     }
   }
-  S.time = w.time;
+  closeB(); S.time = w.time;
   if (d.flushIntent) {   // gesture fairness: did the judged drum equal the aimed one?
     d.flushIntent();
     const F = {};
@@ -129,10 +140,20 @@ function summarize(list) {
       nan: ss.filter(s => s.nan).length, stuckState: ss.filter(s => s.stuckState).length, off: ss.reduce((a, s) => a + s.offScreen, 0),
       m2: ss.reduce((a, s) => a + s.miss2NoHint, 0), maxDrums: Math.max(...ss.map(s => s.maxDrums)), maxSwing: Math.max(...ss.map(s => s.maxSwing)),
       beatCounts: ss.reduce((a, s) => a + s.beatCounts, 0), beatBrush: ss.reduce((a, s) => a + s.beatBrush, 0), beatNudges: ss.reduce((a, s) => a + s.beatNudges, 0),
-      idles: model === 'absent' ? (ss[0].idles || []).slice(0, 6).join(' ') : '',
+      idles: QUIET(model) ? (ss[0].idles || []).slice(0, 6).join(' ') : '',
       repKey: ss.reduce((a, s) => a + s.repKey, 0) / nR * 100,
       surpriseTap: rounds.filter(r => r.surprise).length ? rounds.filter(r => r.surprise && r.surpriseTap).length / rounds.filter(r => r.surprise).length * 100 : 0,
-      firstAsk: m(r => r.firstAskT), overhead: m(r => r.dur - r.playT),
+      firstAsk: m(r => r.firstAskT),
+      beat: (() => { const bs = ss.flatMap(s => s.beatSteps || []), done = bs.filter(b => b.doneT >= 0), nB = Math.max(1, bs.length), cnt = bs.reduce((a, b) => a + b.counted, 0), fast = bs.reduce((a, b) => a + b.fast, 0), lis = bs.reduce((a, b) => a + (b.listen || 0), 0);
+        const first = bs.filter(b => b.nudges.length).map(b => b.nudges[0]);
+        return { n: bs.length, dur: L.mean(done.map(b => b.doneT - b.askT)), durP90: L.pct(done.map(b => b.doneT - b.askT), 0.9),
+          preDone: done.filter(b => b.doneT - b.askT < PROMPT_S).length / Math.max(1, done.length) * 100, early: bs.reduce((a, b) => a + b.early, 0) / Math.max(1, cnt) * 100,
+          ignored: (fast + lis) / Math.max(1, fast + cnt + lis) * 100, lis: lis / Math.max(1, fast + cnt + lis) * 100, over: L.mean(bs.map(b => b.over)), over3: bs.filter(b => b.over >= 3).length / nB * 100,
+          nudgeSteps: bs.filter(b => b.nudges.length).length / nB * 100, nudges: L.mean(bs.map(b => b.nudges.length)), nudgeLat: L.mean(first),
+          hintSteps: bs.filter(b => b.hints).length / nB * 100, assistSteps: bs.filter(b => b.assist).length / nB * 100,
+          nudgeAt: (ss.find(s => (s.nudgeAt || []).length) || {}).nudgeAt || [] }; })(),
+      repAns: ss.reduce((a, s) => a + (s.repAns || 0), 0) / Math.max(1, ss.reduce((a, s) => a + (s.asks || 0), 0)) * 100,
+      repFirst: ss.reduce((a, s) => a + (s.repFirst || 0), 0) / Math.max(1, ss.reduce((a, s) => a + (s.firsts || 0), 0)) * 100, overhead: m(r => r.dur - r.playT),
       fair: (() => { const F = {}; for (const s of ss) for (const k of Object.keys(s.fair || {})) { const a = F[k] = F[k] || { n: 0, same: 0, other: 0, none: 0, assisted: 0, unfair: 0, aimRight: 0 }; for (const q of Object.keys(a)) a[q] += s.fair[k][q]; } return F; })(),
       st3cap: rounds.filter(r => r.stars === 3 && !r.assist).length / nR * 100,
       surpShown: rounds.filter(r => r.surpriseShown).length / nR * 100, surpPerChap: rounds.filter(r => r.surpriseShown).length / Math.max(1, chaps.length),
@@ -170,6 +191,10 @@ function table(rows, topicRows) {
   for (const r of rows) if (r.model !== 'absent') out.push(`| ${r.model} | ${r.age} | ${f(r.st3)} | ${f(r.st3cap)} |`);
   out.push('', '| model | age | surprise rounds % | surprises / chapter | appears s after 1st ask | play s of those rounds | shown but not tapped % |', '|---|---|---|---|---|---|---|');
   for (const r of rows) if (r.model !== 'absent') out.push(`| ${r.model} | ${r.age} | ${f(r.surpShown)} | ${r.surpPerChap.toFixed(2)} | ${f(r.surpAt)} | ${f(r.surpPlayT)} | ${f(r.surpMissed)} |`);
+  out.push('', `**Beat mode** (count at age ≤ 4; prompt ≈ ${PROMPT_S} s). done before prompt end = the n-th beat counted before Bibi could finish saying n; early beats = counted beats that landed while the prompt was still being spoken; ignored = taps faster than beatGap (boom, no count); over = taps on the drum after the count was complete (gap / next ask).`, '',
+    '| model | age | beat steps | ask → done s (p90) | done before prompt end % | early counted beats % | ignored taps % | over-taps / step (≥ 3 %) | steps with a nudge % (nudges/step) | 1st nudge after last beat s | steps with hint % / assist % | same answer as previous ask % | round opens with last answer % |', '|---|---|---|---|---|---|---|---|---|---|---|---|---|');
+  for (const r of rows) { const b = r.beat; if (!b || !b.n) { out.push(`| ${r.model} | ${r.age} | 0 | | | | | | | | | ${f(r.repAns)} | ${f(r.repFirst)} |`); continue; }
+    out.push(`| ${r.model} | ${r.age} | ${b.n} | ${f(b.dur)} (${f(b.durP90)}) | ${f(b.preDone)} | ${f(b.early)} | ${f(b.ignored)}${b.lis ? ' (listen ' + f(b.lis) + ')' : ''} | ${b.over.toFixed(2)} (${f(b.over3)}) | ${f(b.nudgeSteps)} (${b.nudges.toFixed(2)}) | ${f(b.nudgeLat)} | ${f(b.hintSteps)} / ${f(b.assistSteps)} | ${f(r.repAns)} | ${f(r.repFirst)} |${b.nudgeAt.length ? ' nudges at ' + b.nudgeAt.slice(0, 6).join(' ') : ''}`); }
   return out.join('\n');
 }
 
@@ -181,8 +206,8 @@ if (process.argv.includes('--worker')) {
   });
 } else {
   const jobs = [];
-  for (const model of MODELS) for (const age of AGES) for (let i = 0; i < (model === 'absent' ? Math.min(N, 4) : N); i++) if (!/^slow/.test(model) || age <= 4 || get('models'))   // a slow 3-year-old plays ages 3–4
-    jobs.push({ model, age, seed: 1000 + i * 37 + age * 7, vp: VPS[i % VPS.length], lang: i % 2 ? 'vi' : 'en', config });
+  for (const model of MODELS) for (const age of AGES) for (let i = 0; i < (QUIET(model) ? Math.min(N, 4) : N); i++) if (!/^(slow|stopper|drummer|frozen)/.test(model) || age <= 4 || get('models'))   // a slow 3-year-old plays ages 3–4
+    jobs.push({ model, age, seed: 1000 + i * 37 + age * 7, vp: VPS[i % VPS.length], lang: i % 2 ? 'vi' : 'en', config, proto, promptS: PROMPT_S });
   const parts = Array.from({ length: JOBS }, () => []);
   jobs.forEach((j, i) => parts[i % JOBS].push(j));
   const t0 = Date.now();
@@ -193,13 +218,13 @@ if (process.argv.includes('--worker')) {
     c.send(p);
   }))).catch(e => { console.error(e); process.exit(1); }).then(rs => {
     const list = rs.flat(), failed = list.filter(s => s.failed), { rows, topicRows } = summarize(list.filter(s => !s.failed)), md = table(rows, topicRows);
-    const head = `# hs_playtest ${TAG} — ${list.length} sessions (${failed.length} failed), config ${JSON.stringify(config)} (${((Date.now() - t0) / 1000).toFixed(0)} s)\n\n`;
+    const head = `# hs_playtest ${TAG} — ${list.length} sessions (${failed.length} failed), config ${JSON.stringify(config)}${Object.keys(proto).length ? ' proto ' + JSON.stringify(proto) : ''} (${((Date.now() - t0) / 1000).toFixed(0)} s)\n\n`;
     console.log(head + md);
     const dir = path.join(__dirname, 'out');
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(path.join(dir, 'hs_' + TAG + '.md'), head + md + '\n');
     fs.writeFileSync(path.join(dir, 'hs_' + TAG + '.json'), JSON.stringify({ config, rows, topicRows }, null, 1));
-    const bad = rows.filter(r => r.nan || r.stuckState || r.off || (r.model !== 'absent' && r.stuck));
+    const bad = rows.filter(r => r.nan || r.stuckState || r.off || (!QUIET(r.model) && r.stuck));
     if (failed.length || bad.length) { console.log('\nFAIL: ' + (failed.length + ' failed sessions; ') + bad.map(r => r.model + '/' + r.age).join(', ')); process.exit(1); }
   });
 }

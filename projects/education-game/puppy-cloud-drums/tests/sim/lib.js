@@ -37,7 +37,27 @@ function mkWorld(o) {
   const vp = VIEWPORTS[o.vp || 'ipadL'];
   const w = new CD.World({ seed: o.seed, age: o.age, lang: o.lang || 'en', config: o.config || {} });
   w.setViewport(vp.W, vp.H, vp.ins);
+  if (o.proto) applyProto(w, o.proto);
   return w;
+}
+
+/** SIM-ONLY prototypes of proposed game changes that have no CONFIG key yet (`--proto '{…}'`; never touches game/js):
+ *   beatListen s — beats on the big drum in the first s seconds after a beat ask boom but do not count (Bibi finishes saying
+ *                  the number first; ≈ the prompt length). Models the proposed `CONFIG.beatListen` (or "count from the end of
+ *                  the prompt" in main.js). */
+function applyProto(w, P) {
+  if (P.beatListen) {
+    const ask = w._ask, hit = w._beatHit;
+    w._ask = function (first) { this._pAskT = this.time; return ask.call(this, first); };
+    w._beatHit = function (c, dir, str, swipe, from, x, y) {
+      if (from === undefined && this.time - (this._pAskT || 0) < P.beatListen) {   // listening: a soft boom, not a count
+        const st = this._strike(c, dir, 0.6, 'brush');
+        this._emit({ type: 'ring', id: c.id, thing: c.thing, note: this._noteOf(c), x: c.cx, y: c.cy, strength: st, judged: false, brush: true, swipe: !!swipe, beat: true, listen: true });
+        return 'drum';
+      }
+      return hit.call(this, c, dir, str, swipe, from, x, y);
+    };
+  }
 }
 
 /** One finger. gesture(x0, y0, x1, y1, T, hold) presses at once (→ the pointerDown result), slides on a slightly curved path
@@ -294,6 +314,56 @@ class StageTapper extends Kid {
     this.f.gesture(x, y, x, y, 0, r.float(0.05, 0.25));
   }
 }
+/** "Taps fast / drums wildly": a typical child in find rounds (a bit hastier), but on the big drum it DRUMS: it starts
+ *  0.2–1.0 s after the ask (does not wait for the prompt to end), bursts of 4–10 beats 0.09–0.30 s apart, short 0.3–1.5 s
+ *  breaks, and it keeps drumming through the gap after a finished count, the song and the next ask (it never listens for n).
+ *  Checks beat-mode over-counting (count done before the number was even heard), "ignored" taps (too fast → boom, no count). */
+class WildDrummer extends Kid {
+  constructor(w, prof, seed) { super(w, Object.assign(prof, { think: [0.6, 1.4], pSwipe: 0.35, prompt: 1.2, hold: [0.03, 0.08] }), seed); this.burst = 0; this.bt = 0.5; }
+  beatRound() { const w = this.w; return w.state === 'round' && w.cur && w.cur.steps[0].mode === 'beat'; }
+  onEvent(e) { super.onEvent(e); if (e.type === 'ask' && e.mode === 'beat') this.bt = this.r.float(0.2, 1.0); }
+  step(dt) {
+    const w = this.w, r = this.r;
+    if (!this.beatRound()) return super.step(dt);
+    if (this.f.busy) { this.f.step(dt); return; }
+    if (this.surprises()) return;
+    this.bt -= dt; if (this.bt > 0) return;
+    const c = w.drums.find(q => q.state === 'stand');
+    if (!c) return;
+    if (this.burst <= 0) this.burst = r.int ? r.int(4, 10) : Math.floor(r.float(4, 11));
+    this.burst--; this.stats.beats++;
+    this._intent({ id: c.id, want: c.id, judged: undefined, assisted: false, kind: 'beat' });
+    this.tapDrum(c);
+    this.bt = this.burst > 0 ? r.float(0.09, 0.30) : r.float(0.3, 1.5);
+  }
+}
+/** "Stops halfway through a count": a typical child that, in a beat step with n ≥ 2, stops (p = pStop) after k = 1 … n−1 beats
+ *  and just looks at Bibi. It resumes only when Bibi speaks to it (beatNudge / hint): with p = pResume per nudge, U(1.2, 2.5) s
+ *  later. pResume 0 = never resumes (measures the nudge cadence of a frozen child). */
+class Stopper extends Kid {
+  constructor(w, prof, seed, o) { super(w, prof, seed); this.o = Object.assign({ pStop: 0.7, pResume: 0.75 }, o || {}); this.sk = ''; this.stopAt = 0; this.waiting = false; }
+  onEvent(e) {
+    if (this.waiting && (e.type === 'beatNudge' || e.type === 'hint' || e.type === 'idle')) {
+      if (this.r.chance(this.o.pResume)) { this.waiting = false; this.stopAt = 1e9; this.t = this.r.float(1.2, 2.5); }
+      return;
+    }
+    if (this.waiting) return;
+    super.onEvent(e);
+  }
+  act() {
+    const w = this.w, st = w.stepInfo;
+    if (!(st && st.mode === 'beat')) return super.act();
+    const k = w.level + ':' + w.round + ':' + w.step;
+    if (k !== this.sk) { this.sk = k; this.waiting = false; this.stopAt = st.need >= 2 && this.r.chance(this.o.pStop) ? 1 + Math.floor(this.r.next() * (st.need - 1)) : 1e9; }
+    if (this.waiting) { this.t = 1e9; return; }
+    if (w._beat && w._beat.i >= this.stopAt) { this.waiting = true; this.stats.beatPauses++; this.t = 1e9; return; }
+    const c = w.drumById(st.targets[0]);
+    this._intent({ id: c.id, want: c.id, judged: undefined, assisted: false, kind: 'beat' });
+    this.stats.beats++; this.tapDrum(c);
+    this.t = this.rf(this.p.beatGap);
+  }
+  step(dt) { if (this.waiting) { const w = this.w; if (!(w.stepInfo && w.stepInfo.mode === 'beat') || w.state !== 'round') this.waiting = false; } return super.step(dt); }
+}
 /** Never touches the screen: a round waits for the child (no fail state, no auto-play in play); the song plays by itself;
  *  idle nudges + hints must keep coming at 12 → 18 → 27 → 30 s and nothing may break. */
 class Absent { constructor(w) { this.w = w; this.stats = {}; } step() {} onEvent() {} }
@@ -312,6 +382,10 @@ function makeModel(name, w, age, seed) {
   if (name === 'absent') return new Absent(w);
   if (name === 'beam' || name === 'stage') return new StageTapper(w, typicalProfile(age), seed);
   if (name === 'swipey') return new Kid(w, Object.assign(typicalProfile(age), { pSwipe: 0.8 }), seed);   // a typical child who mostly swipes AT the drum
+  if (name === 'eager') return new Kid(w, Object.assign(typicalProfile(age), { prompt: 0.6, think: [0.4, 1.2] }), seed);   // acts while Bibi is still talking
+  if (name === 'drummer') return new WildDrummer(w, typicalProfile(age), seed);
+  if (name === 'stopper') return new Stopper(w, typicalProfile(age), seed);
+  if (name === 'frozen') return new Stopper(w, typicalProfile(age), seed, { pStop: 1, pResume: 0 });   // stops mid-count, never resumes
   if (/^bot/.test(name)) return new BotModel(w, +name.slice(3) || 0.8, seed);
   throw new Error('unknown model ' + name);
 }

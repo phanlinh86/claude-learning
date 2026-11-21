@@ -19,7 +19,7 @@ const DEVICES = [
 ];
 const BOT_RUNS = [];
 [3, 4, 5, 6, 7].forEach((age, i) => ['en', 'vi'].forEach((lang, j) => BOT_RUNS.push({ age, lang, dev: (i + j) % 4 })));
-const BOT_SPEED = +process.env.BOT_SPEED || 10, BOT_PAR = +process.env.BOT_PAR || 4;
+const BOT_SPEED = +process.env.BOT_SPEED || 8, BOT_PAR = +process.env.BOT_PAR || 4;
 const VI_CHARS = /[ăâđêôơưàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ]/i;
 // a raw i18n key, an unfilled {param}, or a JS hole in a spoken line
 const RAW = /\{|\}|undefined|NaN|\bnull\b|\[object|\b(ui|p|talk|topic|weather|right|wrong|surprise|lamb|bird|firefly|bibi|count|name|idle|session)\.[a-z0-9]/i;
@@ -56,28 +56,31 @@ const INIT = () => {
     },
     v() { return CD.debug.view(); },
     toL(x, y) { const v = CD.debug.view(); return { x: (x - v.left) / v.s, y: (y - v.top) / v.s }; },
-    // a CSS-px point on the bare canvas (no DOM above it), clear of every drum (+ margin for the swing), Bibi and
-    // the surprises; inBand: inside the beam band (true) / outside it (false) / either (null)
+    // a CSS-px point on the bare canvas (no DOM above it), clear of every drum + cushion (+ a margin for the hop / tilt),
+    // Bibi, the cymbal and the surprises; inBand: inside the drum band (true → soft 'stage') / outside it (false → 'sky') / either
     softPoint(inBand) {
-      const w = CD.debug.world, L = w.layout, v = CD.debug.view(), band = L.band, kb = L.bibiBox;
-      const inBox = (b, x, y) => x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h;
-      const cands = [];
-      for (let gx = 0.03; gx < 0.98; gx += 0.025) for (let gy = 0.05; gy < 0.95; gy += 0.025) {
-        const cx = innerWidth * gx, cy = innerHeight * gy, p = this.toL(cx, cy);
-        if (p.x < 10 || p.y < 10 || p.x > L.W - 10 || p.y > L.groundY - 10) continue;
-        const el = document.elementFromPoint(cx, cy); if (!el || el.id !== 'game') continue;
-        if (inBand === true && !inBox(band, p.x, p.y)) continue;
-        if (inBand === false && inBox(band, p.x, p.y)) continue;
-        if (inBox({ x: kb.x - 20, y: kb.y - 20, w: kb.w + 40, h: kb.h + 40 }, p.x, p.y)) continue;
-        if (!w._clearOfDrums(p.x, p.y, 90)) continue;
-        if (w._drumAt(p.x, p.y)) continue;
-        if (!w._clearOfKeep(p.x, p.y, 48)) continue;   // the bubble / HUD boxes (even while the DOM bubble is hidden)
-        const s = [w.lambHit(), w.birdHit(), w.fireflyHit()].filter(Boolean);
-        if (s.some(c => Math.hypot(p.x - c.x, p.y - c.y) < c.r + 40)) continue;
-        cands.push({ x: Math.round(cx), y: Math.round(cy) });
+      const w = CD.debug.world, L = w.layout, band = L.band, kb = L.bibiBox, cb = L.cymbalBox;
+      const inBox = (b, x, y, m = 0) => x >= b.x - m && x <= b.x + b.w + m && y >= b.y - m && y <= b.y + b.h + m;
+      for (const M of [60, 30, 12]) {
+        const cands = [];
+        for (let gx = 0.03; gx < 0.98; gx += 0.02) for (let gy = 0.05; gy < 0.95; gy += 0.02) {
+          const cx = innerWidth * gx, cy = innerHeight * gy, p = this.toL(cx, cy);
+          if (p.x < 10 || p.y < 10 || p.x > L.W - 10 || p.y > L.groundY - 10) continue;
+          const el = document.elementFromPoint(cx, cy); if (!el || el.id !== 'game') continue;
+          if (inBand === true && !inBox(band, p.x, p.y)) continue;
+          if (inBand === false && inBox(band, p.x, p.y)) continue;
+          if (inBox(kb, p.x, p.y, 20) || (cb && inBox(cb, p.x, p.y, 20))) continue;
+          if (w.drums.some(c => c.state !== 'gone' && (Math.hypot(p.x - c.cx, p.y - c.cy) <= w._hitR(c) + M || inBox(w._cushionBox(c), p.x, p.y, M / 2)))) continue;
+          if (w._drumAt(p.x, p.y)) continue;
+          if (!w._clearOfKeep(p.x, p.y, 48)) continue;   // the bubble / HUD boxes (even while the DOM bubble is hidden)
+          const s = [w.lambHit(), w.birdHit(), w.fireflyHit()].filter(Boolean);
+          if (s.some(c => Math.hypot(p.x - c.x, p.y - c.y) < c.r + 40)) continue;
+          if (w.fireflies && w.fireflies.some(f => Math.hypot(p.x - f.x, p.y - f.y) < 60)) continue;
+          cands.push({ x: Math.round(cx), y: Math.round(cy) });
+        }
+        if (cands.length) return cands[Math.floor(cands.length / 2)];
       }
-      void v;
-      return cands.length ? cands[Math.floor(cands.length / 2)] : null;
+      return null;
     },
     hang() { return CD.debug.world.drums.filter(c => c.state === 'stand'); },
     // a CSS-px point on drum id's RIM (between its core and its hit circle), not on any other drum, on the bare canvas
@@ -95,15 +98,15 @@ const INIT = () => {
       }
       return null;
     },
-    // every hanging drum's body (circle at its centre, r = 0.45 size) inside the CSS viewport?
+    // every standing drum's body (circle at its centre, r = 0.45 size) and its cushion inside the CSS viewport?
     outside() {
       const w = CD.debug.world, v = CD.debug.view(), out = [];
       for (const c of w.drums) {
-        if (c.state === 'gone') continue;
+        if (c.state === 'gone' || c.state === 'out') continue;
         const p = CD.debug.toScreen(c.cx, c.cy), r = Math.min(c.bw || c.size, c.bh || c.size) * 0.45 * v.s;
         if (p.x - r < -1 || p.y - r < -1 || p.x + r > innerWidth + 1 || p.y + r > innerHeight + 1) out.push(`${c.id} ${c.state} at ${Math.round(p.x)},${Math.round(p.y)} r ${Math.round(r)}`);
-        const hk = CD.debug.toScreen(c.hookX, c.hookY);
-        if (hk.x < 0 || hk.x > innerWidth || hk.y < 0 || hk.y > innerHeight) out.push(`${c.id} hook at ${Math.round(hk.x)},${Math.round(hk.y)}`);
+        const a = CD.debug.toScreen(c.padX - c.cushionW / 2, c.padY), b = CD.debug.toScreen(c.padX + c.cushionW / 2, c.padY + c.cushionH);
+        if (a.x < -1 || a.y < -1 || b.x > innerWidth + 1 || b.y > innerHeight + 1) out.push(`${c.id} cushion ${Math.round(a.x)},${Math.round(a.y)}…${Math.round(b.x)},${Math.round(b.y)}`);
       }
       return out;
     }
@@ -244,7 +247,7 @@ T.tap_right = async ({ page, cdp, url, d }) => {
   await page.waitForTimeout(1100);   // the note flies 0.7 s to its lantern
   await shot(page, d, '1-right');
   const evs = await evSince(page, n0);
-  const st = await page.evaluate(id => ({ done: CD.debug.world.drumById(id).done, lit: CD.debug.world.lanterns.map(l => l.lit), om: CD.debug.world.drumById(id).omega }), i.a);
+  const st = await page.evaluate(id => ({ done: CD.debug.world.drumById(id).done, lit: CD.debug.world.lanterns.map(l => l.lit) }), i.a);
   check(evs.some(e => e.type === 'ring' && e.judged && e.id === i.a && !e.dull), 'no judged ring on the asked drum: ' + types(evs));
   check(evs.some(e => e.type === 'right' && e.id === i.a), 'no right event: ' + types(evs));
   check(!evs.some(e => e.type === 'wrong'), 'a wrong event on the right tap: ' + types(evs));
@@ -300,12 +303,12 @@ T.swipe_from_right = async ({ page, cdp, url, d }) => {
 T.swipe_from_sky = async ({ page, cdp, url, d }) => {
   await setupRound(page, url, { seed: 5 });
   const s = await page.evaluate(() => {
-    const w = CD.debug.world, L = w.layout, y = w._drumMidY ? w._drumMidY() : L.beam.hookY + 120;
+    const w = CD.debug.world, L = w.layout, y = w._drumMidY();
     const hang = w.drums.filter(c => c.state === 'stand').sort((a, b) => a.cx - b.cx);
     // start left of the leftmost drum's circle on empty sky (not Bibi), end right of the rightmost
     const first = hang[0], lastC = hang[hang.length - 1];
     let x0 = first.cx - w._hitR(first) - 30;
-    const inK = (x, yy) => { const b = L.bibiBox; return x >= b.x && x <= b.x + b.w && yy >= b.y && yy <= b.y + b.h; };
+    const inB = (b, x, yy) => b && x >= b.x - 6 && x <= b.x + b.w + 6 && yy >= b.y - 6 && yy <= b.y + b.h + 6, inK = (x, yy) => inB(L.bibiBox, x, yy) || inB(L.cymbalBox, x, yy);
     while (x0 > 8 && (w._drumAt(x0, y) || inK(x0, y))) x0 -= 10;
     x0 = Math.max(8, x0);
     const x1 = Math.min(L.W - 8, lastC.cx + w._hitR(lastC) + 30);
@@ -385,7 +388,7 @@ T.tap_sky_soft = async ({ page, cdp, url }) => {
     const evs = await evSince(page, n0);
     // the 2nd no-progress press may bring the hint (by design); nothing may ring or count as wrong
     check(evs.length && evs[0].type === 'soft' && evs.every(e => ['soft', 'hint', 'assistArmed'].includes(e.type)), `tap on empty ${band ? 'band' : 'sky'} at ${p.x},${p.y}: ` + types(evs));
-    check(evs[0].kind === (band ? 'beam' : 'sky'), 'soft kind: ' + evs[0].kind);
+    check(evs[0].kind === (band ? 'stage' : 'sky'), 'soft kind: ' + evs[0].kind + ' (want ' + (band ? 'stage' : 'sky') + ')');
   }
   const s = await page.evaluate(() => ({ m: CD.debug.world.misses, st: CD.debug.world.state, ph: CD.debug.world.phase }));
   check(s.m === 0 && s.st === 'round' && s.ph === 'play', 'after soft taps: ' + JSON.stringify(s));
@@ -435,29 +438,189 @@ T.assist_young = async ({ page, cdp, url }) => {
   const rd = (await evSince(page, n2)).find(e => e.type === 'roundDone');
   check(rd && rd.stars <= 2, 'an assisted round gave ' + (rd && rd.stars) + ' stars (want ≤ 2)');
 };
-T.count_strings = async ({ page, cdp, url, d }) => {
+T.beat_count = async ({ page, cdp, url, d }) => {
+  // age 4 count = beat mode: ONE big drum + a number card; every real tap ≥ 0.2 s after the last counted one is a beat
   await setupRound(page, url, { topic: 'count', age: 4, seed: 8 });
-  const i = await info(page);
-  const th = await page.evaluate(id => CD.debug.world.drumById(id).thing, i.a);
-  check(th.kind === 'string' && th.n >= 1, 'not a bell-string round: ' + JSON.stringify(th));
-  const L0 = await saidLen(page), n0 = await evLen(page);
-  await tap(cdp, page, i.at);
-  await page.waitForTimeout(700 + 550 * th.n);
-  await shot(page, d, '5-count');
+  let doubled = false, fastChecked = 0;
+  for (let rr = 0; rr < 2; rr++) {   // the warm-up round (n = 1, 2), then a full one (3 steps, one n ≥ 3)
+  if (rr > 0) await waitAsk(page, 30000);
+  const st0 = await page.evaluate(() => { const w = CD.debug.world, live = w.drums.filter(c => c.state !== 'gone'); return { mode: w.stepInfo.mode, need: w.stepInfo.need, kind: live[0].thing.kind, n: live.length, steps: w.cur.steps.map(s => s.need), card: w.card ? { n: w.card.n, lit: w.card.lit } : null, round: w.round }; });
+  check(st0.mode === 'beat' && st0.kind === 'big' && st0.n === 1, 'not a beat round with one big drum: ' + JSON.stringify(st0));
+  check(st0.card && st0.card.n === st0.need && st0.card.lit === 0, 'number card at the ask: ' + JSON.stringify(st0));
+  const L0 = await page.evaluate(() => CD.debug.voiceLog.length), n0 = await evLen(page);
+  // a touch beside the big drum is soft (never a wrong, never a count)
+  if (rr === 0) {
+  const sp = await page.evaluate(() => window.__qa.softPoint(null));
+  check(sp, 'no soft point beside the big drum');
+  await tap(cdp, page, sp, 60); await page.waitForTimeout(250);
   const evs = await evSince(page, n0);
-  const counts = evs.filter(e => e.type === 'count' && e.id === i.a);
-  check(evs.some(e => e.type === 'right' && e.id === i.a && e.count && e.count.n === th.n), 'no right with count: ' + types(evs));
-  check(counts.length === th.n, `count events ${counts.length} for a string of ${th.n}: ` + types(evs));
-  check(counts.every((e, k) => e.i === k + 1 || e.i === k), 'count indices: ' + counts.map(e => e.i).join(','));
-  const lines = await said(page, L0);
-  check(lines.some(t => /one/i.test(t) && /bell/i.test(t)), 'no count run ("One, … bells!") in the voice: ' + JSON.stringify(lines));
+  check(evs.length && evs[0].type === 'soft' && !evs.some(e => e.type === 'count' || e.type === 'wrong'), 'tap beside the big drum: ' + types(evs));
+  }
+  let evs;
+  for (let si = 0; si < st0.steps.length; si++) {
+    if (si > 0) await waitAsk(page);
+    const s = await page.evaluate(() => { const w = CD.debug.world; return { need: w.stepInfo.need, mode: w.stepInfo.mode, step: w.step, lit: w.card ? w.card.lit : null, cn: w.card ? w.card.n : null }; });
+    check(s.mode === 'beat' && s.lit === 0 && s.cn === s.need, `step ${si} at its ask: ` + JSON.stringify(s));
+    const e1 = await evLen(page);
+    for (let k = 1; k <= s.need; k++) {
+      const at = await page.evaluate(() => CD.debug.drumScreen(CD.debug.answer().drum));
+      check(at, `no big drum to beat (step ${si}, beat ${k})`);
+      const jx = ((k * 37) % 21 - 10) / 100 * at.r, jy = ((k * 53) % 21 - 10) / 100 * at.r;   // real fingers wander a little
+      if (k === 1 && s.need >= 2 && !doubled) {   // a too-fast double tap (2nd touch < 0.2 s later): it booms, it does not count
+        doubled = true;
+        // both touches go out back to back (CDP keeps the order); a slow headless frame can still put them ≥ 0.2 s apart
+        // in world time — then the 2nd one rightly counts, and the double is retried on a later step
+        const P = tp(at.x + jx, at.y + jy), Q = tp(at.x, at.y);
+        await Promise.all([touchStart(cdp, [P]), touchEnd(cdp), touchStart(cdp, [Q]), touchEnd(cdp)]);
+        await page.waitForTimeout(60);
+        const ed = await evSince(page, e1);
+        const rings = ed.filter(e => e.type === 'ring' && e.beat), counts = ed.filter(e => e.type === 'count' && e.beat);
+        check(rings.length === 2, 'a double tap on the big drum gave ' + rings.length + ' beat rings: ' + types(ed));
+        const dt = rings[1]._t - rings[0]._t;
+        if (dt >= 0.2 - 1e-6) {
+          check(counts.length === 2 && rings[1].judged, `two beats ${dt.toFixed(3)} s apart (≥ 0.2) did not both count: ` + types(ed));
+          console.log(`      beat_count ${d.name}: double tap was ${dt.toFixed(3)} s apart in world time (slow frame) — retrying later`);
+          doubled = false; k++;
+        } else { check(rings[1].brush && !rings[1].judged && counts.length === 1, 'a beat < 0.2 s after the last one counted / did not boom: ' + types(ed) + ' dt ' + dt.toFixed(3)); fastChecked++; }
+      } else await tap(cdp, page, { x: at.x + jx, y: at.y + jy }, 60);
+      await page.waitForTimeout(330);
+      const es = await evSince(page, e1);
+      const counts = es.filter(e => e.type === 'count' && e.beat), rights = es.filter(e => e.type === 'right');
+      const lit = await page.evaluate(() => CD.debug.world.card ? CD.debug.world.card.lit : null);
+      check(counts.length === k && counts.every((e, j) => e.i === j + 1 && e.n === s.need), `step ${si}: after ${k} beats, counts ${counts.map(e => e.i).join(',')}: ` + types(es));
+      check(lit === k, `card.lit ${lit} after ${k} beats (need ${s.need})`);
+      if (k < s.need) check(rights.length === 0, `right after only ${k} of ${s.need} beats: ` + types(es));
+      else {
+        check(rights.length === 1 && rights[0].beat && rights[0].count && rights[0].count.n === s.need, `no single beat right at the ${s.need}th beat: ` + types(es));
+        const ci = es.findIndex(e => e.type === 'count' && e.i === s.need), ri = es.findIndex(e => e.type === 'right');
+        check(ci >= 0 && ri > ci, 'right must follow the last count: ' + types(es));
+        check(es.some(e => e.type === 'stepDone'), 'no stepDone after the count: ' + types(es));
+      }
+    }
+    if (si === 0 && rr === 1) await shot(page, d, '5-beat');
+    // extra beats after the count is complete only boom (the drum is done in the gap)
+    const e2 = await evLen(page);
+    const at2 = await page.evaluate(() => { const w = CD.debug.world, c = w.drums.find(q => q.state === 'stand'); return c ? CD.debug.drumScreen(c.id) : null; });
+    if (at2 && si < st0.steps.length - 1) {
+      await tap(cdp, page, at2, 50); await page.waitForTimeout(150);
+      const ex = await evSince(page, e2);
+      check(!ex.some(e => e.type === 'count' || e.type === 'right' || e.type === 'wrong'), 'a beat in the gap after a complete count was judged: ' + types(ex));
+    }
+  }
+  await page.waitForFunction(() => CD.debug.world.state === 'roundDone', null, { timeout: 8000 });
+  evs = await evSince(page, n0);
+  check(!evs.some(e => e.type === 'wrong'), 'a wrong event in beat mode: ' + types(evs));
+  check(await page.evaluate(() => CD.debug.world.misses) === 0, 'misses in beat mode');
+  const rd = evs.find(e => e.type === 'roundDone');
+  check(rd && rd.stars === 3, 'beat round stars: ' + JSON.stringify(rd));
+  await page.waitForTimeout(400);
+  const log = await page.evaluate(n => CD.debug.voiceLog.slice(n).map(x => x.text), L0);
+  check(log.includes('One!'), 'no count word "One!" in the voice log: ' + JSON.stringify(log));
+  const maxNeed = Math.max(...st0.steps), word = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six'][maxNeed];
+  if (maxNeed >= 3) check(log.includes('Two!'), 'no count word "Two!" in the voice log: ' + JSON.stringify(log));
+  check(log.some(t => t.startsWith(word + '!') && t.length > word.length + 2), `no beat right line starting "${word}!" in the voice log: ` + JSON.stringify(log));
+  check(!log.some(t => RAW.test(t)), 'raw key in the beat lines: ' + JSON.stringify(log));
+  console.log(`      beat_count ${d.name} round ${st0.round}: steps ${st0.steps.join('/')}, lines ${JSON.stringify(log.slice(0, 12))}`);
+  // the song of a beat round: the big drum three times, then the cymbal
+  await page.waitForFunction(n => window.__ev.slice(n).some(e => e.type === 'songDone'), n0, { timeout: 15000 }).catch(() => {});
+  const se = (await evSince(page, n0)).filter(e => ['songNote', 'cymbal', 'songDone'].includes(e.type));
+  check(se.filter(e => e.type === 'songNote').length === 3 && se.some(e => e.type === 'cymbal'), 'beat song: ' + types(se));
+  }
+  check(fastChecked >= 1, 'the too-fast double tap was never checked (every try landed ≥ 0.2 s apart)');
+};
+T.rotate_beat = async ({ page, cdp, url, d }) => {
+  // beat mode across a rotation: the partial count survives, the big drum + card stay on screen (card above ↔ beside)
+  await setupRound(page, url, { topic: 'count', age: 4, seed: 9 });
+  await page.waitForFunction(() => CD.debug.world.stepInfo && CD.debug.world.stepInfo.need >= 2 && CD.debug.world.interactive, null, { timeout: 100 }).catch(() => {});
+  let need = await page.evaluate(() => CD.debug.world.stepInfo.need);
+  if (need < 2) {   // step 0 of the warm-up is n = 1: beat it, wait for the n = 2 step
+    const at = await page.evaluate(() => CD.debug.drumScreen(CD.debug.answer().drum));
+    await tap(cdp, page, at); await waitAsk(page);
+    need = await page.evaluate(() => CD.debug.world.stepInfo.need);
+  }
+  check(need >= 2, 'no beat step with n ≥ 2');
+  const n0 = await evLen(page);
+  let at = await page.evaluate(() => CD.debug.drumScreen(CD.debug.answer().drum));
+  await tap(cdp, page, at); await page.waitForTimeout(300);
+  const inView = () => page.evaluate(() => {
+    const w = CD.debug.world, c = w.drums.find(q => q.state === 'stand'), b = CD.debug.cardScreen(), bad = window.__qa.outside();
+    if (b && (b.x < -1 || b.y < -1 || b.x + b.w > innerWidth + 1 || b.y + b.h > innerHeight + 1)) bad.push('card ' + JSON.stringify(b));
+    if (b && c) { const p = CD.debug.drumScreen(c.id), r = 0.42 * c.size * CD.debug.view().s;   // the card never covers the drum body
+      if (p.x + r > b.x + 4 && p.x - r < b.x + b.w - 4 && p.y + r > b.y + 4 && p.y - r < b.y + b.h - 4) bad.push('card overlaps the big drum'); }
+    return { bad, lit: w.card && w.card.lit, mode: w.card && w.card.mode, lmode: w.layout.beat && w.layout.beat.mode };
+  });
+  const s0 = await inView();
+  check(s0.bad.length === 0 && s0.lit === 1, 'before rotating: ' + JSON.stringify(s0));
+  await page.setViewportSize({ width: d.viewport.height, height: d.viewport.width });
+  await page.waitForTimeout(600);
+  const s1 = await inView();
+  await shot(page, d, 'c-beat-rotated');
+  check(s1.bad.length === 0, 'after rotating: ' + s1.bad.join('; '));
+  check(s1.lit === 1, 'the partial count was lost on rotation: ' + JSON.stringify(s1));
+  for (let k = 2; k <= need; k++) { at = await page.evaluate(() => CD.debug.drumScreen(CD.debug.answer().drum)); await tap(cdp, page, at); await page.waitForTimeout(320); }
+  const evs = await evSince(page, n0);
+  check(evs.filter(e => e.type === 'count' && e.beat).length === need && evs.some(e => e.type === 'right' && e.beat), `beats after rotation (need ${need}): ` + types(evs));
+  await page.setViewportSize(d.viewport);
+  await page.waitForTimeout(500);
+  const s2 = await inView();
+  check(s2.bad.length === 0, 'after rotating back: ' + s2.bad.join('; '));
+  console.log(`      rotate_beat ${d.name}: card ${s0.mode} → ${s1.mode} → ${s2.mode}`);
+};
+T.beat_nudge = async ({ page, cdp, url, d }) => {
+  // a partial count and no finger: Bibi nudges after 4 s ("One! One more!"), not the generic idle line
+  await setupRound(page, url, { topic: 'count', age: 4, seed: 9 });
+  let need = await page.evaluate(() => CD.debug.world.stepInfo.need);
+  if (need < 2) { const at = await page.evaluate(() => CD.debug.drumScreen(CD.debug.answer().drum)); await tap(cdp, page, at); await waitAsk(page); need = await page.evaluate(() => CD.debug.world.stepInfo.need); }
+  check(need >= 2, 'no beat step with n ≥ 2');
+  const at = await page.evaluate(() => CD.debug.drumScreen(CD.debug.answer().drum));
+  await tap(cdp, page, at);
+  const v0 = await page.evaluate(() => CD.debug.voiceLog.length), n0 = await evLen(page);
+  await page.waitForFunction(n => window.__ev.slice(n).some(e => e.type === 'beatNudge'), n0, { timeout: 9000 });
+  await page.waitForTimeout(200);
+  const evs = await evSince(page, n0), nd = evs.find(e => e.type === 'beatNudge');
+  const log = await page.evaluate(n => CD.debug.voiceLog.slice(n).map(x => x.text), v0);
+  const dt = nd._t - (await page.evaluate(n => { const c = window.__ev.slice(0, n).reverse().find(e => e.type === 'count'); return c ? c._t : 0; }, n0));
+  check(nd.i === 1 && nd.n === need, 'beatNudge payload: ' + JSON.stringify(nd));
+  check(dt > 3.8 && dt < 4.4, `beatNudge ${dt.toFixed(2)} s after the beat (want 4)`);
+  check(!evs.some(e => e.type === 'idle'), 'a generic idle nudge during a partial count: ' + types(evs));
+  check(log.length >= 1 && /one/i.test(log[log.length - 1]) && !RAW.test(log[log.length - 1]), 'beat nudge line: ' + JSON.stringify(log));
+  check(await page.evaluate(() => CD.debug.world.card.lit) === 1, 'the nudge reset the card');
+};
+T.animal_prompt = async ({ page, cdp, url, d }) => {
+  // "Who says moo? Tap the cow!" — find a cow ask (seeded), check the bubble / voice log, then tap it: "Moo! The cow!"
+  let found = null, tried = [];
+  for (let seed = 30; seed < 60 && !found; seed++) {
+    await setupRound(page, url, { topic: 'animals', age: 4, seed });
+    for (let k = 0; k < 5; k++) {
+      const a = await page.evaluate(() => { const w = CD.debug.world, an = CD.debug.answer(); const c = an && an.drum != null ? w.drumById(an.drum) : null; return c ? { id: c.id, animal: c.thing.animal, bubble: document.getElementById('bubbleText').textContent, at: CD.debug.drumScreen(c.id) } : null; });
+      if (!a) break;
+      tried.push(a.animal);
+      if (a.animal === 'cow') { found = a; break; }
+      await tap(cdp, page, a.at); await page.waitForTimeout(300);
+      if (await page.evaluate(() => CD.debug.world.state !== 'round')) break;
+      try { await waitAsk(page, 8000); } catch (e) { break; }
+    }
+  }
+  check(found, 'no cow asked in 30 seeds: ' + tried.join(','));
+  const L0 = await page.evaluate(() => CD.debug.voiceLog.length - 6);
+  const log0 = await page.evaluate(n => CD.debug.voiceLog.slice(Math.max(0, n)).map(x => x.text), L0);
+  check(/moo/i.test(found.bubble) && /cow/i.test(found.bubble), 'the cow prompt does not name moo + cow: ' + found.bubble);
+  check(log0.includes(found.bubble), 'the cow prompt is not in the voice log: ' + JSON.stringify({ bubble: found.bubble, log0 }));
+  console.log(`      animal_prompt ${d.name}: "${found.bubble}" (Who says moo: ${/Who says moo\?/.test(found.bubble)})`);
+  const v1 = await page.evaluate(() => CD.debug.voiceLog.length), n0 = await evLen(page);
+  await tap(cdp, page, found.at);
+  await page.waitForTimeout(500);
+  const evs = await evSince(page, n0);
+  const log = await page.evaluate(n => CD.debug.voiceLog.slice(n).map(x => x.text), v1);
+  check(evs.some(e => e.type === 'right' && e.id === found.id), 'tap on the cow: ' + types(evs));
+  check(log.some(t => /moo/i.test(t) && /cow/i.test(t)), 'no "Moo! The cow!" right line: ' + JSON.stringify(log));
 };
 T.song_swipe = async ({ page, cdp, url, d }) => {
   await setupRound(page, url, { seed: 9 });
   check(await finishRoundByTaps(cdp, page), 'round not finished');
   await page.waitForFunction(() => { const a = CD.debug.answer(); return a && a.song; }, null, { timeout: 8000 });
   await page.waitForTimeout(500);
-  const B = await page.evaluate(() => { const w = CD.debug.world, y = w._drumMidY(); const b = w.layout.beam; return { a: CD.debug.toScreen(b.x0 + 6, y), b: CD.debug.toScreen(b.x1 - 6, y), n: w.drums.filter(c => c.state === 'stand').length }; });
+  const B = await page.evaluate(() => { const w = CD.debug.world, y = w._drumMidY(); const b = w.layout.band; return { a: CD.debug.toScreen(b.x + 6, y), b: CD.debug.toScreen(b.x + b.w - 6, y), n: w.drums.filter(c => c.state === 'stand').length }; });
   const n0 = await evLen(page);
   await swipe(cdp, page, B.a, B.b, { n: 20, ms: 500 });
   await page.waitForTimeout(400 + 160 * B.n + 900);
@@ -468,9 +631,56 @@ T.song_swipe = async ({ page, cdp, url, d }) => {
   check(notes.every((e, k) => e.i === k), 'cascade order: ' + notes.map(e => e.i).join(','));
   check(done && done.auto === false, 'songDone after a real swipe: ' + JSON.stringify(done));
   check(!evs.some(e => e.type === 'wrong'), 'wrong during song');
+  checkCymbal(evs);
+};
+function checkCymbal(evs) {
+  const notes = evs.filter(e => e.type === 'songNote'), cy = evs.filter(e => e.type === 'cymbal'), done = evs.find(e => e.type === 'songDone');
+  check(cy.length === 1, 'cymbal events in the song: ' + cy.length + ' — ' + types(evs));
+  const last = notes[notes.length - 1];
+  check(last && cy[0]._t > last._t && (!done || done._t > cy[0]._t), 'cymbal not between the last song note and songDone: ' + types(evs));
+  check(Math.abs(cy[0]._t - last._t - 0.25) < 0.05, `cymbal ${(cy[0]._t - last._t).toFixed(3)} s after the last note (want 0.25)`);
+}
+T.song_tap = async ({ page, cdp, url, d }) => {
+  // a plain tap on any drum in song time starts the wave (the drum touched just booms; never judged)
+  await setupRound(page, url, { seed: 21 });
+  check(await finishRoundByTaps(cdp, page), 'round not finished');
+  await page.waitForFunction(() => { const a = CD.debug.answer(); return a && a.song; }, null, { timeout: 8000 });
+  await page.waitForTimeout(300);
+  const t = await page.evaluate(() => { const c = window.__qa.hang()[0]; return { id: c.id, at: CD.debug.drumScreen(c.id), n: window.__qa.hang().length }; });
+  const n0 = await evLen(page);
+  await tap(cdp, page, t.at, 70);
+  await page.waitForTimeout(400 + 180 * t.n + 1100);
+  const evs = await evSince(page, n0);
+  const notes = evs.filter(e => e.type === 'songNote'), done = evs.find(e => e.type === 'songDone');
+  check(notes.length === t.n && notes.every((e, k) => e.i === k), `tap in song time: songNotes ${notes.map(e => e.i).join(',')} of ${t.n}: ` + types(evs));
+  const xs = notes.map(e => e.x);
+  check(xs.every((x, k) => k === 0 || x >= xs[k - 1] - 1), 'the wave is not left → right: ' + xs.map(Math.round).join(','));
+  check(done && done.auto === false, 'songDone after a tap: ' + JSON.stringify(done));
+  check(!evs.some(e => e.type === 'wrong' || e.type === 'right' || (e.type === 'ring' && e.judged)), 'a judged ring in song time: ' + types(evs));
+  checkCymbal(evs);
+};
+T.cymbal_tap = async ({ page, cdp, url, d }) => {
+  // the cymbal beside Bibi: a tap is a soft crash (cymbalTap), never soft / progress / a miss
+  await setupRound(page, url, { seed: 22, age: 5 });
+  const c = await page.evaluate(() => { const k = CD.debug.cymbalScreen(), p = window.__qa.toL(k.x, k.y), el = document.elementFromPoint(k.x, k.y); return { k, onDrum: !!CD.debug.world._drumAt(p.x, p.y), el: el && el.id, bibi: (() => { const b = CD.debug.world.layout.bibiBox; return p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h; })() }; });
+  check(c.k && c.k.x > 0 && c.k.y > 0 && c.k.x < d.viewport.width && c.k.y < d.viewport.height, 'cymbal off screen: ' + JSON.stringify(c.k));
+  check(!c.onDrum && c.el === 'game' && !c.bibi, 'the cymbal centre is covered: ' + JSON.stringify(c));
+  const n0 = await evLen(page), ans = await page.evaluate(() => CD.debug.answer().drum);
+  for (let k = 0; k < 3; k++) { await tap(cdp, page, { x: c.k.x, y: c.k.y }, 60); await page.waitForTimeout(250); }
+  const evs = await evSince(page, n0);
+  const ring = await page.evaluate(() => ({ ring: CD.debug.world.cymbal.ring, tilt: CD.debug.world.cymbal.tilt }));
+  check(evs.filter(e => e.type === 'cymbalTap').length === 3, 'cymbalTap events: ' + types(evs));
+  check(!evs.some(e => ['soft', 'ring', 'wrong', 'hint', 'assistArmed'].includes(e.type)), 'a cymbal tap counted as soft / no-progress / a strike: ' + types(evs));
+  check(ring.ring > 0, 'the cymbal does not ring after a tap: ' + JSON.stringify(ring));
+  check(await page.evaluate(() => CD.debug.world.misses) === 0, 'cymbal taps counted as misses');
+  const i = await info(page);
+  check(i.a === ans, 'the asked drum changed after cymbal taps');
+  const n1 = await evLen(page);
+  await tap(cdp, page, i.at); await page.waitForTimeout(300);
+  check((await evSince(page, n1)).some(e => e.type === 'right' && e.id === i.a), 'asked drum after cymbal taps');
 };
 T.song_band_press = async ({ page, cdp, url, d }) => {
-  // a press on the empty beam band in song time plays the song (cascade from the nearest drum)
+  // a press on the empty drum band in song time plays the song (the left → right wave)
   await setupRound(page, url, { seed: 20 });
   check(await finishRoundByTaps(cdp, page), 'round not finished');
   await page.waitForFunction(() => { const a = CD.debug.answer(); return a && a.song; }, null, { timeout: 8000 });
@@ -486,6 +696,7 @@ T.song_band_press = async ({ page, cdp, url, d }) => {
   check(notes.length === n, `band press in song time: songNotes ${notes.length} of ${n}: ` + types(evs));
   check(done && done.auto === false, 'songDone after a band press: ' + JSON.stringify(done));
   check(!evs.some(e => e.type === 'soft'), 'the band press was also a soft press: ' + types(evs));
+  checkCymbal(evs);
 };
 T.song_auto = async ({ page, cdp, url }) => {
   await setupRound(page, url, { seed: 10 });
@@ -496,6 +707,7 @@ T.song_auto = async ({ page, cdp, url }) => {
   const ask = evs.find(e => e.type === 'songAsk'), note = evs.find(e => e.type === 'songNote'), done = evs.find(e => e.type === 'songDone');
   check(ask && note, 'no songAsk / songNote: ' + types(evs));
   check(done.auto === true, 'songDone without a touch is not auto: ' + JSON.stringify(done));
+  checkCymbal(evs);
   const dt = note._t - ask._t;   // world seconds (a slow headless frame rate stretches wall time: dt is capped per frame)
   check(dt > 3.8 && dt < 4.3, `auto cascade ${dt.toFixed(2)} s (world) after songAsk (want 4 s)`);
 };
@@ -632,10 +844,10 @@ T.rotate_mid_round = async ({ page, cdp, url, d }) => {
   check(ev2.some(e => e.type === 'right' && e.id === j.a), 'tap after rotation: ' + types(ev2));
   check(out2.length === 0, 'outside the screen after rotating back: ' + out2.join('; '));
 };
-T.rotate_swinging = async ({ page, cdp, url, d }) => {
-  // hard swipes set every drum swinging, then rotate twice: the swung bodies must stay on screen every frame
+T.rotate_bouncing = async ({ page, cdp, url, d }) => {
+  // a hard swipe sets every drum hopping, then rotate twice: the bodies + cushions must stay on screen every settled frame
   await setupRound(page, url, { seed: 15, age: 6 });
-  const B = await page.evaluate(() => { const w = CD.debug.world, y = w._drumMidY(); const b = w.layout.beam; return { a: CD.debug.toScreen(b.x0 - 30, y), b: CD.debug.toScreen(b.x1 + 30, y) }; });
+  const B = await page.evaluate(() => { const w = CD.debug.world, y = w._drumMidY(); const b = w.layout.band; return { a: CD.debug.toScreen(b.x - 30, y), b: CD.debug.toScreen(b.x + b.w + 30, y) }; });
   await swipe(cdp, page, { x: Math.max(3, B.a.x), y: B.a.y }, { x: Math.min(d.viewport.width - 3, B.b.x), y: B.b.y }, { n: 6, ms: 90 });
   await page.evaluate(() => { window.__out = []; const f = () => { const v = CD.debug.view(), fresh = (v.W > v.H) === (innerWidth > innerHeight) && Math.abs(v.cssW - Math.min(innerWidth, innerHeight * v.W / v.H)) < 2;
     if (fresh) window.__fresh = (window.__fresh || 0) + 1;
@@ -647,7 +859,7 @@ T.rotate_swinging = async ({ page, cdp, url, d }) => {
   const o = await page.evaluate(() => { cancelAnimationFrame(window.__raf); return window.__out.slice(0, 3); });
   const fresh = await page.evaluate(() => window.__fresh || 0);
   check(fresh >= 10, 'too few settled frames checked: ' + fresh);
-  check(o.length === 0, 'a swinging drum left the screen around a rotation: ' + o.join(' | '));
+  check(o.length === 0, 'a hopping drum left the screen around a rotation: ' + o.join(' | '));
 };
 T.second_finger_ignored = async ({ page, cdp, url }) => {
   await setupRound(page, url, { seed: 16 });
@@ -722,8 +934,8 @@ T.language_switch = async ({ page, url, d }) => {
   await tapEl(page, '.title-top [data-lang="vi"]');
   await page.waitForTimeout(200);
   let s = await page.evaluate(() => ({ html: document.documentElement.lang, logo: document.getElementById('logo1').textContent + ' ' + document.getElementById('logo2').textContent, play: document.getElementById('btnPlay').getAttribute('aria-label'), age: document.getElementById('titleAge').textContent, title: document.title, saved: CD.debug.getState().settings.lang }));
-  check(s.html === 'vi' && /Khỉ Bibi/.test(s.logo) && /Chuông Gió/.test(s.logo) && s.play === 'Chơi' && s.saved === 'vi', 'VI not applied on title: ' + JSON.stringify(s));
-  check(/Chuông Gió Lửa Trại/.test(s.title), 'VI document title: ' + s.title);
+  check(s.html === 'vi' && /Cún Bibi/.test(s.logo) && /Trống Mây/.test(s.logo) && s.play === 'Chơi' && s.saved === 'vi', 'VI not applied on title: ' + JSON.stringify(s));
+  check(/Trống Mây/.test(s.title), 'VI document title: ' + s.title);
   await shot(page, d, 'a-title-vi');
   await tapEl(page, '#btnPlay');
   await page.evaluate(() => window.__qa.hook());
@@ -731,7 +943,7 @@ T.language_switch = async ({ page, url, d }) => {
   await waitAsk(page);
   await shot(page, d, 'b-vi-round');
   const vb = await page.evaluate(() => ({ bubble: document.getElementById('bubbleText').textContent, last: window.__asks.slice(-1)[0], said: window.__said.slice(-4) }));
-  check(VI_CHARS.test(vb.bubble) && /chuông|bé/i.test(vb.bubble), 'bubble not Vietnamese: ' + vb.bubble);
+  check(VI_CHARS.test(vb.bubble) && /trống|bé/i.test(vb.bubble), 'bubble not Vietnamese: ' + vb.bubble);
   check(vb.last && vb.last.lang === 'vi', 'ask built in ' + (vb.last && vb.last.lang));
   check(vb.said.some(x => x.text === vb.bubble), 'the VI prompt was not sent to the voice: ' + JSON.stringify(vb.said));
   // back to English through pause → home
@@ -798,7 +1010,7 @@ T.settings_persist = async ({ page, cdp, url }) => {
   await page.waitForTimeout(200);
   check(await visible(page, 'scrTitle'), 'Done did not return to the title');
   const keys = await page.evaluate(() => Object.keys(localStorage));
-  check(keys.includes('cd:settings') && keys.every(k => k.startsWith('cd:')), 'storage keys not under cc: — ' + keys.join(','));
+  check(keys.includes('cd:settings') && keys.every(k => k.startsWith('cd:')), 'storage keys not under cd: — ' + keys.join(','));
   await gotoTitle(page, url + '?mute=1');
   let s = await page.evaluate(() => ({ st: CD.debug.getState().settings, age: document.getElementById('titleAge').textContent, html: document.documentElement.lang, vol: document.getElementById('optVolume').value, music: document.getElementById('optMusic').checked, sfx: document.getElementById('optSfx').checked, name: document.getElementById('inpName').value }));
   check(s.st.age === 6 && s.st.lang === 'vi' && s.st.name === 'Mầm' && Math.abs(s.st.volume - 0.4) < 1e-6 && s.st.music === false && s.st.sfx === false, 'settings not kept across reload: ' + JSON.stringify(s.st));
@@ -888,8 +1100,8 @@ T.url_age_shown = async ({ page, url }) => {
   check(bad.length === 0, 'the title age differs from the age played: ' + bad.join('; '));
 };
 
-const CORE = ['boot_title', 'tap_right', 'tap_wrong', 'swipe_from_right', 'swipe_from_sky', 'rim_tap', 'tap_sky_soft', 'song_swipe', 'song_band_press', 'rotate_mid_round', 'rotate_swinging', 'surprise_lamb', 'surprise_bird', 'surprise_fireflies'];
-const EXTRA = ['two_misses_hint', 'assist_young', 'count_strings', 'song_auto', 'bibi_repeat', 'talk_time_tap', 'pause_resume', 'visibility_pause',
+const CORE = ['boot_title', 'tap_right', 'tap_wrong', 'swipe_from_right', 'swipe_from_sky', 'rim_tap', 'tap_sky_soft', 'song_swipe', 'song_band_press', 'rotate_mid_round', 'rotate_bouncing', 'surprise_lamb', 'surprise_bird', 'surprise_fireflies'];
+const EXTRA = ['two_misses_hint', 'assist_young', 'beat_count', 'beat_nudge', 'rotate_beat', 'animal_prompt', 'cymbal_tap', 'song_tap', 'song_auto', 'bibi_repeat', 'talk_time_tap', 'pause_resume', 'visibility_pause',
   'second_finger_ignored', 'language_switch', 'parent_gate', 'settings_persist', 'audio_chain_volume', 'release_over_hud', 'url_age_shown'];
 
 async function runDevice(browser, url, d) {
