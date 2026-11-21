@@ -75,8 +75,10 @@ class Finger {
  * away U(distract) s (p = pDistract). Picks the asked drum with p = skill (a glowing hint: p = followHint), else another drum.
  * Touch: a tap at the drum centre ± aim × r (sometimes a finger too far → empty sky = a soft press), held U(hold) s; with
  * p = pSwipe a swipe that starts beside the drum and runs through it (its first contact may be a neighbour when the start is
- * sloppy). Curiosity: p = pPoke presses Bibi / the sky. Song: swipes across the beam band (p = pSongSwipe) after U(songT) s,
- * else taps a drum, else waits for the auto cascade. Surprises: taps them with p = pSurprise. Talk: answers after U(talk) s. */
+ * sloppy). Curiosity: p = pPoke presses Bibi / the sky. Beat mode (count at ages ≤ 4): beats the big drum with U(beatGap)
+ * s gaps, sometimes looks away mid-count (p = pBeatPause, U(beatPause) s → Bibi's beatNudge), sometimes double-taps faster than
+ * the world's beatGap (p = pBeatDouble). Song: swipes across the drum band (p = pSongSwipe) after U(songT) s, else taps a
+ * drum, else waits for the auto wave. Surprises: taps them with p = pSurprise. Talk: answers after U(talk) s. */
 const SKILL = { 3: 0.72, 4: 0.82, 5: 0.86, 6: 0.9, 7: 0.92 };
 const THINK = { 3: [1.6, 3.2], 4: [1.3, 2.6], 5: [1.1, 2.3], 6: [1.0, 2.0], 7: [0.9, 1.8] };
 const BETWEEN = { 3: [0.9, 1.9], 4: [0.8, 1.6], 5: [0.7, 1.4], 6: [0.6, 1.2], 7: [0.5, 1.1] };
@@ -85,22 +87,24 @@ function typicalProfile(age) {
   return { skill: SKILL[age], think: THINK[age], between: BETWEEN[age], aim: AIM[age], hold: [0.04, 0.3], tremor: age <= 3 ? 3 : 1.5,
     followHint: 0.92, pDistract: age <= 4 ? 0.07 : 0.04, distract: [3, 9], pSwipe: age <= 4 ? 0.2 : 0.25, swipeSloppy: age <= 4 ? 0.35 : 0.2,
     pPoke: age <= 4 ? 0.06 : 0.03, pSlip: age <= 3 ? 0.03 : 0.015, pSurprise: 0.7, talk: [3, 6], talkRight: Math.min(0.95, SKILL[age] + 0.05),
-    prompt: 2.4, pSongSwipe: 0.7, pSongTap: 0.2, songT: [0.8, 3.0] };
+    prompt: 2.4, pSongSwipe: 0.7, pSongTap: 0.2, songT: [0.8, 3.0],
+    beatGap: age <= 3 ? [0.45, 1.0] : [0.35, 0.8], pBeatPause: age <= 3 ? 0.12 : 0.07, beatPause: [2, 6], pBeatDouble: 0.08 };
 }
 function slowProfile() {
   return Object.assign(typicalProfile(3), { skill: 0.6, think: [2.8, 6], between: [1.6, 3.4], aim: 1.0, hold: [0.1, 0.8], tremor: 5, followHint: 0.8,
-    pDistract: 0.15, distract: [4, 12], pSwipe: 0.1, swipeSloppy: 0.6, pPoke: 0.12, pSlip: 0.06, talk: [4, 9], talkRight: 0.6, pSongSwipe: 0.4, pSongTap: 0.3, songT: [1.5, 5] });
+    pDistract: 0.15, distract: [4, 12], pSwipe: 0.1, swipeSloppy: 0.6, pPoke: 0.12, pSlip: 0.06, talk: [4, 9], talkRight: 0.6, pSongSwipe: 0.4, pSongTap: 0.3, songT: [1.5, 5],
+    beatGap: [0.6, 1.4], pBeatPause: 0.2, beatPause: [3, 8], pBeatDouble: 0.12 });
 }
 function perfectProfile(age) {
   return Object.assign(typicalProfile(age), { skill: 1, think: [0.8, 1.2], between: [0.4, 0.7], aim: 0.1, hold: [0.04, 0.08], tremor: 0, followHint: 1,
-    pDistract: 0, pSwipe: 0, pPoke: 0, pSlip: 0, talk: [1, 2], talkRight: 1, pSongSwipe: 1, songT: [0.6, 0.9] });
+    pDistract: 0, pSwipe: 0, pPoke: 0, pSlip: 0, talk: [1, 2], talkRight: 1, pSongSwipe: 1, songT: [0.6, 0.9], beatGap: [0.3, 0.45], pBeatPause: 0, pBeatDouble: 0 });
 }
 
 class Kid {
   constructor(w, prof, seed) {
     this.w = w; this.p = prof; this.r = new CD.RNG(seed); this.f = new Finger(w, this.r);
     this.t = -1; this.talkT = -1; this.key = ''; this.surp = {}; this.songKey = ''; this.songT = -1; this.songMode = '';
-    this.stats = { taps: 0, swipes: 0, pokes: 0, slips: 0, surprise: 0, songSwipes: 0, songTaps: 0, songWaits: 0 };
+    this.stats = { taps: 0, swipes: 0, pokes: 0, slips: 0, surprise: 0, songSwipes: 0, songTaps: 0, songWaits: 0, beats: 0, beatPauses: 0, beatDoubles: 0 };
     this.intents = [];   // fairness: { kind 'tap'|'swipe'|'sloppy', id (aimed drum), want (asked drum), judged (id|null), assisted }
     this.intent = null;
   }
@@ -114,7 +118,7 @@ class Kid {
     if (it && e.type === 'assist') it.assisted = true;
     if (it && e.type === 'wrong' && it.judged === e.id && e.id !== it.id && it.want === it.id) it.unfairMiss = true;
     if (e.type === 'ask') this.t = this.p.prompt + this.rf(this.p.think);
-    if (e.type === 'idle' || e.type === 'hint' || e.type === 'wrong') this.t = Math.min(this.t, this.p.prompt * 0.6 + this.rf(this.p.between));   // Bibi speaks again
+    if (e.type === 'idle' || e.type === 'hint' || e.type === 'wrong' || e.type === 'beatNudge') this.t = Math.min(this.t, this.p.prompt * 0.6 + this.rf(this.p.between));   // Bibi speaks again
   }
   talk(dt) {
     const w = this.w, r = this.r, p = this.p;
@@ -127,7 +131,7 @@ class Kid {
       w.talkAnswer(pick);
     }
   }
-  hanging() { return this.w.drums.filter(c => c.state === 'hang'); }
+  hanging() { return this.w.drums.filter(c => c.state === 'stand'); }
   tap(x, y) { this.stats.taps++; return this.f.gesture(x, y, x, y, 0, this.rf(this.p.hold), { slip: this.r.chance(this.p.pSlip) }); }
   /** Tap drum c (aim error ± aim × r). */
   tapDrum(c) {
@@ -180,12 +184,21 @@ class Kid {
       this.stats.pokes++;
       const L = w.layout;
       if (r.chance(0.5)) { const b = w.bibiHit(); this.tap(b.cx, b.cy); }
-      else this.tap(r.float(L.ins.left + 20, L.W - L.ins.right - 200), r.float(L.bubble.y + L.bubble.h + 10, L.beam.y - 30));
+      else { const y0 = L.bubble.y + L.bubble.h + 10; this.tap(r.float(L.ins.left + 20, L.W - L.ins.right - 200), r.float(y0, Math.max(y0 + 1, L.band.y - 10))); }
       return;
     }
     let c = w.drumById(a.drum);
+    const st = w.stepInfo;
+    if (st && st.mode === 'beat') {   // beat the big drum: human gaps, sometimes a pause (looks away), sometimes a too-fast double tap
+      this._intent({ id: c.id, want: a.drum, judged: undefined, assisted: false, glow, kind: 'beat' });
+      this.stats.beats++; this.tapDrum(c);
+      this.t = this.rf(p.beatGap);
+      if (r.chance(p.pBeatPause)) { this.stats.beatPauses++; this.t = this.rf(p.beatPause); }
+      else if (r.chance(p.pBeatDouble)) { this.stats.beatDoubles++; this.t = r.float(0.06, 0.15); }
+      return;
+    }
     if (!r.chance(glow ? p.followHint : p.skill)) { const o = this.hanging().filter(q => q.id !== c.id && !q.done); if (o.length) c = r.pick(o); }
-    if (c.state !== 'hang') return;
+    if (c.state !== 'stand') return;
     const sw = r.chance(p.pSwipe), o = { id: c.id, want: a.drum, judged: undefined, assisted: false, glow };
     this._intent(o);
     if (sw) { o.kind = 'swipe'; this.swipeDrum(c, o); } else { o.kind = 'tap'; this.tapDrum(c); }
@@ -203,13 +216,13 @@ class Kid {
     if (this.t < 0) this.t = this.rf(p.between);
     this.t -= dt;
     if (this.t > 0) return;
-    if (this.r.chance(p.pDistract)) { this.t = this.rf(p.distract); return; }
+    if (this.r.chance(p.pDistract) && !w._beat) { this.t = this.rf(p.distract); return; }
     this.t = this.rf(p.between);
     this.act();
   }
 }
 
-/** Random tapper: presses random points (half on the beam band, half anywhere) every U(0.6, 1.8) s; often a short random slide. */
+/** Random tapper: presses random points (half on the drum band, half anywhere) every U(0.6, 1.8) s; often a short random slide. */
 class Tapper extends Kid {
   step(dt) {
     const w = this.w, r = this.r;
@@ -244,7 +257,7 @@ class Swiper extends Kid {
     this.swipeBand();
   }
 }
-/** Spammer: 6 presses per second on random drums / the beam band (tiny slides), never waits for Bibi. */
+/** Spammer: 6 presses per second on random drums / the drum band (tiny slides), never waits for Bibi. */
 class Spammer extends Kid {
   step(dt) {
     const w = this.w, r = this.r;
@@ -262,10 +275,10 @@ class Spammer extends Kid {
     this.f.gesture(x, y, x + r.float(-8, 8), y + r.float(-8, 8), r.float(0.02, 0.06), 0);
   }
 }
-/** "Taps the beam": the log beam looks touchable, so this child presses the beam / the cords' top (the band above the
- *  bodies) every U(0.8, 2) s and, with p = pDrum (0.2), a drum at random; never aims. Progress = the hint + the assist (a
- *  press anywhere in the band strikes the asked drum) — checks that a beam-tapper is not stuck. */
-class BeamTapper extends Kid {
+/** "Taps the stage": the clouds under the drums look touchable, so this child presses the stage line (the cushions and the
+ *  gaps between them) every U(0.8, 2) s and, with p = 0.2, a drum at random; never aims. Progress = the hint + the assist (a
+ *  press anywhere in the band strikes the asked drum) — checks that a stage-tapper is not stuck. (Model name 'beam' kept.) */
+class StageTapper extends Kid {
   step(dt) {
     const w = this.w, r = this.r;
     if (w.state === 'talk') return this.talk(dt);
@@ -274,10 +287,10 @@ class BeamTapper extends Kid {
     if (this.t < 0) this.t = r.float(0.8, 2);
     this.t -= dt; if (this.t > 0) return;
     this.t = r.float(0.8, 2);
-    const B = w.beamHit(), hs = this.hanging();
+    const B = w.stageHit(), hs = this.hanging();
     this.stats.taps++;
     if (hs.length && r.chance(0.2)) { this.tapDrum(r.pick(hs)); return; }
-    const x = r.float(B.x0 + 10, B.x1 - 10), y = B.y + r.float(-B.r - 6, B.r + 6);
+    const x = r.float(B.x0 + 10, B.x1 - 10), y = B.y + r.float(-10, 70);
     this.f.gesture(x, y, x, y, 0, r.float(0.05, 0.25));
   }
 }
@@ -297,7 +310,7 @@ function makeModel(name, w, age, seed) {
   if (name === 'swiper') return new Swiper(w, typicalProfile(age), seed);
   if (name === 'spammer') return new Spammer(w, typicalProfile(age), seed);
   if (name === 'absent') return new Absent(w);
-  if (name === 'beam') return new BeamTapper(w, typicalProfile(age), seed);
+  if (name === 'beam' || name === 'stage') return new StageTapper(w, typicalProfile(age), seed);
   if (name === 'swipey') return new Kid(w, Object.assign(typicalProfile(age), { pSwipe: 0.8 }), seed);   // a typical child who mostly swipes AT the drum
   if (/^bot/.test(name)) return new BotModel(w, +name.slice(3) || 0.8, seed);
   throw new Error('unknown model ' + name);

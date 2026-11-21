@@ -1,4 +1,4 @@
-/* Bibi's Cloud Drums — CD.Input: one-finger TAP / SWIPE input (strike a hanging drum, or strum across the drums) +
+/* Bibi's Cloud Drums — CD.Input: one-finger TAP / SWIPE input (boom a cloud drum, or swipe across the drums) +
  * kid-proofing + parent hold-gate.
  *
  * ============================================================================================================
@@ -13,12 +13,12 @@
  *      down: p => world.pointerDown(p.x, p.y)           // WRONG: p is a number, p.x is undefined
  * ============================================================================================================
  *
- * The child taps a hanging drum (World.pointerDown strikes it at once: it swings away from the finger and rings) or
- * swipes across the beam band (World.pointerMove tests the finger SEGMENT from the previous point against every drum, so
+ * The child taps a cloud drum (World.pointerDown strikes it at once: it squashes, hops off its cushion and booms) or
+ * swipes across the drum band (World.pointerMove tests the finger SEGMENT from the previous point against every drum, so
  * a fast swipe that jumps 60 px between two moves still strikes each drum it crossed; the FIRST drum a gesture reaches is
  * the judged answer, the others are soft brushes). Song time is one swipe across all drums. This module guarantees ONE
  * active finger whose whole life reaches the world, in order, exactly once:
- *   - `down(x, y, ev)`  fires SYNCHRONOUSLY inside pointerdown (the drum rings at once — no tap delay; the canvas has
+ *   - `down(x, y, ev)`  fires SYNCHRONOUSLY inside pointerdown (the drum booms at once — no tap delay; the canvas has
  *     `touch-action: none`, pointerdown is preventDefault'ed, POINTER CAPTURE is taken so every later move/up of this
  *     finger comes to the canvas even when it leaves it);
  *   - `move(x, y, ev)`  EVERY pointermove of THAT finger, synchronously, unthrottled, in order (every segment of a swipe
@@ -45,7 +45,7 @@
  *   CD.Input.kidProof();                                  // once at boot; idempotent
  *   const off = CD.Input.holdButton(el, 2000, onDone, onProgress);   // parent gate; onProgress(p), p = 0..1
  *
- * ONE FINGER: while a finger is down, EXTRA fingers are IGNORED (a second hand resting on the screen must not ring a
+ * ONE FINGER: while a finger is down, EXTRA fingers are IGNORED (a second hand resting on the screen must not boom a
  * second drum or restart the gesture). Exceptions — the old finger is known to be gone, so it ends with cancel() and the new
  * one begins:
  *   - Pointer Events: the new touch is `isPrimary` (iOS marks a touch primary only when no other touch is down → the old

@@ -1,0 +1,387 @@
+{
+ "_about": "Bibi per frame, in the 0 0 300 300 viewBox (feet anchor 150,292). hand = centre of the NEAR drumstick ball tip (wave: the top of the waving paw; point: the stick tip to aim the hint / sparkle from); farHand = centre of the FAR drumstick tip; nearPaw / farPaw = paw centres; headTop = [x, y] of the fur-tuft top (speech-bubble tail / stars over the head; the round head itself starts at y 62); eye = near eye centre; bbox = measured opaque box [x0, y0, x1, y1] (added by tools/bibi_sheet.js).",
+ "idle": {
+  "hand": [
+   261,
+   226
+  ],
+  "farHand": [
+   262,
+   168
+  ],
+  "nearPaw": [
+   200,
+   256
+  ],
+  "farPaw": [
+   226,
+   226
+  ],
+  "headTop": [
+   154,
+   44
+  ],
+  "eye": [
+   136,
+   122
+  ],
+  "bbox": [
+   63,
+   43,
+   271,
+   295
+  ]
+ },
+ "blink": {
+  "hand": [
+   261,
+   226
+  ],
+  "farHand": [
+   262,
+   168
+  ],
+  "nearPaw": [
+   200,
+   256
+  ],
+  "farPaw": [
+   226,
+   226
+  ],
+  "headTop": [
+   154,
+   44
+  ],
+  "eye": [
+   136,
+   122
+  ],
+  "bbox": [
+   63,
+   43,
+   271,
+   295
+  ]
+ },
+ "talk": {
+  "hand": [
+   247,
+   155
+  ],
+  "farHand": [
+   260,
+   182
+  ],
+  "nearPaw": [
+   222,
+   218
+  ],
+  "farPaw": [
+   218,
+   236
+  ],
+  "headTop": [
+   154,
+   44
+  ],
+  "eye": [
+   136,
+   122
+  ],
+  "bbox": [
+   60,
+   43,
+   269,
+   295
+  ]
+ },
+ "happy": {
+  "hand": [
+   263,
+   191
+  ],
+  "farHand": [
+   252,
+   156
+  ],
+  "nearPaw": [
+   214,
+   238
+  ],
+  "farPaw": [
+   224,
+   218
+  ],
+  "headTop": [
+   154,
+   44
+  ],
+  "eye": [
+   136,
+   122
+  ],
+  "bbox": [
+   50,
+   43,
+   272,
+   295
+  ]
+ },
+ "cheer": {
+  "hand": [
+   247,
+   89
+  ],
+  "farHand": [
+   70,
+   85
+  ],
+  "nearPaw": [
+   226,
+   154
+  ],
+  "farPaw": [
+   82,
+   152
+  ],
+  "headTop": [
+   154,
+   44
+  ],
+  "eye": [
+   136,
+   122
+  ],
+  "bbox": [
+   23,
+   43,
+   289,
+   295
+  ]
+ },
+ "think": {
+  "hand": [
+   188,
+   179
+  ],
+  "farHand": [
+   260,
+   182
+  ],
+  "nearPaw": [
+   222,
+   238
+  ],
+  "farPaw": [
+   218,
+   236
+  ],
+  "headTop": [
+   154,
+   44
+  ],
+  "eye": [
+   136,
+   122
+  ],
+  "bbox": [
+   59,
+   40,
+   272,
+   295
+  ]
+ },
+ "oops": {
+  "hand": [
+   266,
+   140
+  ],
+  "farHand": [
+   260,
+   182
+  ],
+  "nearPaw": [
+   230,
+   198
+  ],
+  "farPaw": [
+   218,
+   236
+  ],
+  "headTop": [
+   154,
+   44
+  ],
+  "eye": [
+   136,
+   122
+  ],
+  "bbox": [
+   63,
+   42,
+   275,
+   295
+  ]
+ },
+ "wave": {
+  "hand": [
+   239,
+   135
+  ],
+  "farHand": [
+   270,
+   194
+  ],
+  "nearPaw": [
+   234,
+   150
+  ],
+  "farPaw": [
+   218,
+   238
+  ],
+  "headTop": [
+   154,
+   44
+  ],
+  "eye": [
+   136,
+   122
+  ],
+  "bbox": [
+   55,
+   43,
+   284,
+   295
+  ]
+ },
+ "point": {
+  "hand": [
+   282,
+   154
+  ],
+  "farHand": [
+   260,
+   182
+  ],
+  "nearPaw": [
+   228,
+   196
+  ],
+  "farPaw": [
+   218,
+   236
+  ],
+  "headTop": [
+   154,
+   44
+  ],
+  "eye": [
+   136,
+   122
+  ],
+  "bbox": [
+   60,
+   43,
+   290,
+   295
+  ]
+ },
+ "dance": {
+  "hand": [
+   231,
+   88
+  ],
+  "farHand": [
+   291,
+   226
+  ],
+  "nearPaw": [
+   224,
+   156
+  ],
+  "farPaw": [
+   224,
+   240
+  ],
+  "headTop": [
+   154,
+   44
+  ],
+  "eye": [
+   136,
+   122
+  ],
+  "bbox": [
+   18,
+   43,
+   299,
+   295
+  ]
+ },
+ "beat": {
+  "hand": [
+   265,
+   286
+  ],
+  "farHand": [
+   287,
+   256
+  ],
+  "nearPaw": [
+   210,
+   246
+  ],
+  "farPaw": [
+   228,
+   222
+  ],
+  "headTop": [
+   154,
+   44
+  ],
+  "eye": [
+   136,
+   122
+  ],
+  "bbox": [
+   67,
+   43,
+   300,
+   295
+  ]
+ },
+ "full_wave": {
+  "hand": [
+   258,
+   91
+  ],
+  "farHand": [
+   281,
+   233
+  ],
+  "nearPaw": [
+   228,
+   152
+  ],
+  "farPaw": [
+   214,
+   242
+  ],
+  "headTop": [
+   154,
+   44
+  ],
+  "eye": [
+   136,
+   122
+  ],
+  "bbox": [
+   53,
+   43,
+   300,
+   295
+  ]
+ }
+}

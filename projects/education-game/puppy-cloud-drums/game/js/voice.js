@@ -1,4 +1,4 @@
-/* Bibi's Cloud Drums — CD.Voice: Bibi the little monkey talks (Web Speech TTS) and listens (SpeechRecognition).
+/* Bibi's Cloud Drums — CD.Voice: Bibi the puppy talks (Web Speech TTS) and listens (SpeechRecognition).
  *
  *   CD.Voice.init({ lang, enabled })      call once at boot (safe without speechSynthesis)
  *   CD.Voice.unlock()                     call inside the FIRST touchend/click (iOS + Chrome need a gesture)
@@ -9,7 +9,7 @@
  *   CD.Voice.onVoicesChanged(fn) → off()   fn() runs whenever the voice list changes (iOS fills it late)
  *   CD.Voice.log  — every line Bibi said (also when muted / at test speed): { t, lang, text }; mirrored to CD.debug.voiceLog
  *   CD.Voice.spoken(lang, text) → the text actually sent to TTS (I18N.speech: letter names, + − =); pure, unit-tested
- *     "Bibi" is spoken as written in both languages ("ki" is an ordinary Vietnamese syllable).
+ *     "Bibi" is spoken as written in both languages ("bi" is an ordinary Vietnamese syllable).
  *   CD.Voice.RATE / CD.Voice.PITCH  → 0.9 / 1.2 (Bibi's voice; per line overridable with opts.rate / opts.pitch)
  *   CD.Voice.setVolume(0..1)    → utterance volume (follows the game's volume setting)
  *   CD.Voice.setSpeed(n)        → test speed (?speed=N): n > 1 → LOG ONLY, nothing is spoken (say resolves 'speed');
@@ -44,7 +44,7 @@
     'superstar', 'trinoids', 'whisper', 'wobble', 'zarvox', 'fred', 'junior', 'ralph', 'kathy', 'grandma', 'grandpa',
     'eddy', 'flo', 'reed', 'rocko', 'sandy', 'shelley', 'deranged', 'hysterical', 'pipe organ'];
 
-  // Bibi is a cheerful little monkey: pitch 1.2 (young, bright and warm without going squeaky — iOS voices
+  // Bibi is a cheerful little puppy: pitch 1.2 (young, bright and warm without going squeaky — iOS voices
   // above ~1.3 start to sound robotic) and an unhurried rate 0.9 so a 3–5-year-old can follow; below ~0.85 Vietnamese
   // tones smear. Queue: 1 speaking + MAXQ waiting; non-priority lines older than STALE_MS are skipped.
   var RATE = 0.9, PITCH = 1.2, MAXQ = 2, STALE_MS = 5000;

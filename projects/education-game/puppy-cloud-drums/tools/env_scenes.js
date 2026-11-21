@@ -1,36 +1,32 @@
-// Bibi's Cloud Drums: mountain-campsite environment RECIPE + preview scenes + seam test (Playwright + canvas).
+// Bibi's Cloud Drums: rainbow cloud-land environment RECIPE + preview scenes + seam test (Playwright + canvas).
 // Run after tools/art_env.js:   node tools/env_scenes.js [filter]      (filter e.g. "night", "720x1556", "seams", "sheet")
 // Writes docs/art/env_<1556x720|960x720|720x1556>_<mood>.png, docs/art/env_seams.png, docs/art/env_particles.png.
 //
 // ================================== RECIPE (render.js copies this; all numbers are logical px) ==================
-// Same shape as the Pom's Puzzle Town recipe (render.js pastes envLayout / tileXs verbatim — pure, no DOM, no requires —
-// plus the colour tables). DIFFERENCES from the town recipe (what the lead changes when porting render.js):
-//   * MOODS are morning | noon | sunset | night (weather 0..3), not spring … winter.
-//   * L.campY is the camp line (mid layer base = ground line). L.streetY and L.sandY are kept as aliases of campY.
-//   * SKY: paint the gradient from y 0 to L.skyY1 (the lake horizon), fill below with the last stop. SKY.sunset has 3 stops
-//     (violet band on top); weather may still supply skyTop/skyMid/skyBottom (use SKY[m][1] as skyMid for sunset).
-//   * PAVE_BOTTOM → **GROUND_BOTTOM** (fill colour below the ground tile, below L.ground.fillY). RECIPE.PAVE_BOTTOM and
-//     RECIPE.SAND_BOTTOM are aliases so the old code runs unchanged.
-//   * L.sun[m] = {x, y, size} for all 4 moods (night = just below the ridge, so a sunset→night crossfade glides it down;
-//     draw it with ambient.sunA, 0 at night). From fractions RECIPE.SUN[orientation][m] of the safe area; in landscape x is
-//     pushed right of the bubble edge. Morning: low, rising from behind the ridge just right of the bubble; noon: high;
-//     sunset: low right, half behind the peaks (draw the sun BEFORE far so peaks occlude it).
-//   * NEW L.moon = {x, y, size}: env/moon.svg (200×200, crescent + glow), draw before far with ambient.moonA.
-//   * NEW L.stars = {y1, n}: star field area 0…y1 (above the main ridge) and the count from RECIPE.STARS.density
-//     (stars per px² of W × y1, capped at STARS.max). Draw before the moon / far; alpha = ambient.starsA.
-//   * NEW RECIPE.CLOUDS[m] = {n, alpha, tint|null}: how many clouds and how strongly (tint = 'source-atop' overlay colour for
-//     the white cloud art, e.g. warm at sunset, blue-grey at night).
-//   * NEW RECIPE.TINT[m]: suggested ambient.tint for far/mid/ground = null — the layer SVGs already carry each mood
-//     (night is drawn dark blue in the files). Do NOT darken drums / Bibi; add the warm RIM[m] rim light instead.
-//   * NEW RECIPE.LAKE = {y0, y1} lake strip in far-tile coords; L.lake = {y0, y1} on screen (for optional sparkle particles).
-//   * L.clock = [] and L.volcano = [] (no clock tower / smoke): the town clock-hands loop is a no-op.
+// The layer GEOMETRY is the camp game's (render.js envLayout / tileXs are pasted verbatim — pure, no DOM, no requires), so
+// only the constant tables change: SKY, GROUND_BOTTOM, ENV (LAKE = the cloud-sea horizon), SUN, MOON, STARS, CLOUDS.
+//   * MOODS are morning | noon | sunset | night (weather 0..3).
+//   * L.campY = the cloud-floor line (mid layer base = ground line). L.streetY / L.sandY are aliases of campY.
+//   * SKY: paint the gradient from y 0 to L.skyY1 (the cloud-sea horizon), fill below with the last stop. SKY.sunset has 3
+//     stops (violet on top, peach at 0.45 → weather's skyMid sits at 0.45 in render.js, so they match).
+//   * GROUND_BOTTOM: fill colour below the ground tile (below L.ground.fillY). PAVE_BOTTOM / SAND_BOTTOM are aliases.
+//   * L.sun[m] = {x, y, size} for all 4 moods (night = low, so a sunset→night crossfade glides it down; draw with
+//     ambient.sunA). Landscape x is pushed right of the bubble edge. Draw the sun BEFORE far so cloud mountains occlude it.
+//   * L.moon = {x, y, size}: env/moon.svg (200×200, crescent, no face), drawn before far with ambient.moonA.
+//   * L.stars = {y1, n}: star field 0…y1, density RECIPE.STARS.density (per px² of W × y1), capped at STARS.max.
+//   * RECIPE.CLOUDS[m] = {n, alpha, tint|null}: cloud count / strength and the 'source-atop' overlay for the white art.
+//   * RECIPE.TINT[m] = ambient.tint overlay (weather.js MOODS[].tint): null by day; night a whisper — the SVGs carry the
+//     mood (night is drawn deep blue-lilac). Never darken drums / Bibi; use the RIM[m] rim light instead.
+//   * RECIPE.LAKE (= HORIZON {y0 560, y1 700}) = the cloud-sea strip in far-tile coords; L.lake = its screen span (no
+//     special drawing needed; it only ends the sky gradient — L.skyY1 = L.lake.y0).
+//   * NEW env/rainbow.svg (600×300, bottom-anchored arc with cloud feet) for the celebration (not part of the backdrop).
 //
 //   L = RECIPE.envLayout(W, H, ins)           (ins = safe-area insets {top,left,right,bottom}, may be omitted)
 //   0 campY  = Landscape: round(0.60 H) (H=720 → 432); portrait: round(0.70 H) (720×1556 → 1089, 720×960 → 672).
 //   1 sky    : vertical linear gradient SKY[m] from y 0 to L.skyY1, last stop below. Night: stars (L.stars) on top.
 //   2 sun / moon at L.sun[m] / L.moon; clouds env/cloud_a|b (300×140) at scale L.clouds.s, centre y ∈ [L.clouds.y0, y1].
 //   3 far    : tile far_m (L.far.w × L.far.h) at x ∈ tileXs(L.far.x0, L.far.w, W), top y = L.far.y; its bottom (720)
-//              sits at campY − 30·km, behind the mid layer's meadow bank. Lake on screen = L.lake.
+//              sits at campY − 30·km, behind the mid layer's front hills.
 //   4 mid    : tile mid_m — its line y 298 (MID_BASE) lands on campY.
 //   5 ground : tile ground_m — its line y 40 (GROUND_LINE) = campY; then fillRect(0, L.ground.fillY, W, H − fillY) with
 //              GROUND_BOTTOM[m] when fillY < H.
@@ -38,10 +34,10 @@
 //   (kp; far k = 0.7·kp, mid k = 0.86·kp); ground kg = clamp((H − campY) / 220, 1, 1.8). Every layer is uniformly scaled so
 //   CD.Assets.exact(name, round(w·rs), round(h·rs)) can pre-render it once. Mood crossfade: draw both moods' stacks with
 //   alpha 1 / mix (same geometry).
-// Landscape H=720 (any W): campY 432; far k 0.70 (y −98; back peaks ≈ y 112…150, main peaks ≈ 176…224, lake 330…388);
-//   mid k 0.86 (y 176; pine tops ≈ 248…320, tents ≈ 356…428); ground k 1.31 (y 380, fillY 718). The upper ≈ 45 % is sky +
-//   mountains (where the beam / drums hang).
-// Portrait 720×1556: campY 1089; far k 0.952 (main peaks ≈ 742…790), mid k 1.17, ground k 1.8 (fillY 1481, fill below).
+// Landscape H=720 (any W): campY 432; far k 0.70 (y −98; rainbow top ≈ 49, islands ≈ 40…120, back cloud mountains
+//   ≈ 112…196, main ≈ 210…238, skyY1 294); mid k 0.86 (y 176; hills ≈ 305…360, cottages ≈ 300…410); ground k 1.31
+//   (y 380, floor 432…718, fillY 718). The drum band (cushion tops ≈ groundY − 150 ≈ 556) sits on the light cloud floor.
+// Portrait 720×1556: campY 1089; far k 0.952 (y 369), mid k 1.17, ground k 1.8 (fillY 1481, fill below).
 // =================================================================================================================
 'use strict';
 const fs = require('fs');
@@ -50,18 +46,19 @@ const ENV = require('./art_env.js');
 
 // sun / moon spots as fractions of W / H (+ the safe-area insets), size in px
 const SUN = {
-  // landscape x is pushed right of the bubble edge (x ≥ bubbleRight + size/2): morning rises from behind the ridge
-  landscape: { morning: { x: 0.3, y: 0.17, size: 140 }, noon: { x: 0.71, y: 0.1, size: 150 }, sunset: { x: 0.84, y: 0.19, size: 176 }, night: { x: 0.86, y: 0.40, size: 150 } },
-  portrait: { morning: { x: 0.2, y: 0.24, size: 120 }, noon: { x: 0.72, y: 0.18, size: 130 }, sunset: { x: 0.78, y: 0.43, size: 150 }, night: { x: 0.8, y: 0.52, size: 130 } },
+  // landscape x is pushed right of the bubble edge (x ≥ bubbleRight + size/2); morning low, rising over the cloud mountains
+  landscape: { morning: { x: 0.3, y: 0.2, size: 140 }, noon: { x: 0.71, y: 0.1, size: 150 }, sunset: { x: 0.84, y: 0.15, size: 176 }, night: { x: 0.86, y: 0.40, size: 150 } },
+  portrait: { morning: { x: 0.2, y: 0.24, size: 120 }, noon: { x: 0.72, y: 0.18, size: 130 }, sunset: { x: 0.78, y: 0.27, size: 150 }, night: { x: 0.8, y: 0.40, size: 130 } },
 };
-const MOON = { landscape: { x: 0.74, y: 0.13, size: 130 }, portrait: { x: 0.74, y: 0.21, size: 120 } };
-const STARS = { density: 1 / 4500, max: 180, r: [0.7, 2.1], twinkle: 0.3 };   // twinkle = fraction that twinkles (alpha wave)
+const MOON = { landscape: { x: 0.74, y: 0.13, size: 130 }, portrait: { x: 0.74, y: 0.2, size: 120 } };
+const STARS = { density: 1 / 3800, max: 200, r: [0.7, 2.1], twinkle: 0.35 };   // twinkle = fraction that twinkles (alpha wave)
 const CLOUDS = {
-  morning: { n: 2, alpha: 0.8, tint: 'rgba(255,226,206,0.45)' },
+  morning: { n: 3, alpha: 0.85, tint: 'rgba(255,214,226,0.35)' },
   noon: { n: 4, alpha: 0.95, tint: null },
-  sunset: { n: 3, alpha: 0.85, tint: 'rgba(246,170,140,0.5)' },
-  night: { n: 2, alpha: 0.22, tint: 'rgba(90,108,160,0.6)' },
+  sunset: { n: 3, alpha: 0.85, tint: 'rgba(255,190,170,0.42)' },
+  night: { n: 2, alpha: 0.3, tint: 'rgba(84,94,160,0.62)' },
 };
+const TINT = { morning: null, noon: null, sunset: null, night: 'rgba(20,24,70,0.08)' };   // = weather.js MOODS[].tint
 
 /** Pure layout of the environment layers for a W × H screen. ins = safe-area insets (logical px). */
 function envLayout(W, H, ins) {
@@ -71,14 +68,14 @@ function envLayout(W, H, ins) {
   const kp = portrait ? (tall ? 1.36 : 1.15) : 1;          // skill rule: background layers ×1.36 on tall portrait
   const kf = 0.7 * kp, km = 0.86 * kp;
   const kg = Math.max(1, Math.min(1.8, (H - campY) / 220));
-  // far: the tallest main peak (far x 690) right of centre in landscape, centred in portrait
+  // far: x 690 (between the rainbow centre and the right island) right of centre in landscape, centred in portrait
   const far = { k: kf, w: 1200 * kf, h: 720 * kf, x0: Math.round(W * (portrait ? 0.5 : 0.62) - 690 * kf), y: Math.round(campY - 30 * km - 720 * kf) };
-  // mid: the two tents (mid x 330 / 486) a bit left of centre, behind the drums; ground: the path branch (x ≈ 600) centre
+  // mid: the two cottages (mid x 300 / 545) a bit left of centre, behind the drums; ground: tile centre (x 600)
   const mid = { k: km, w: 1200 * km, h: 300 * km, x0: Math.round(W * (portrait ? 0.5 : 0.45) - 410 * km), y: campY - 298 * km };
   const ground = { k: kg, w: 1200 * kg, h: 260 * kg, x0: Math.round(W * (portrait ? 0.5 : 0.55) - 600 * kg), y: campY - 40 * kg };
   ground.fillY = ground.y + 258 * kg;
-  const hillTop = far.y + 300 * kf;                         // highest back-range peak
-  const skyY1 = Math.round(far.y + ENV.LAKE.y0 * kf);       // sky gradient end: the lake horizon
+  const hillTop = far.y + 300 * kf;                         // highest back cloud-mountain top
+  const skyY1 = Math.round(far.y + ENV.LAKE.y0 * kf);       // sky gradient end: the cloud-sea horizon
   const lake = { y0: skyY1, y1: Math.round(far.y + ENV.LAKE.y1 * kf) };
   const o = portrait ? 'portrait' : 'landscape', sun = {};
   const cw = W - ins.left - ins.right, ch = H - ins.top - ins.bottom;
@@ -103,13 +100,15 @@ function tileXs(x0, tw, W) { const out = []; let x = x0 - Math.ceil((x0 + 0.01) 
 const RECIPE = {
   MOODS: ENV.MOODS,                 // ['morning','noon','sunset','night'] = weather 0..3
   SKY: ENV.SKY,                     // { mood: [[offset, colour], …] } from y 0 to L.skyY1
-  MEADOW: ENV.MEADOW,               // meadow colour at the top of the ground tile (reference / tints)
+  FLOOR: ENV.FLOOR,                 // cloud-floor colour at the top of the ground tile (reference / tints)
+  MEADOW: ENV.FLOOR,                // alias (camp name)
   GROUND_BOTTOM: ENV.GROUND_BOTTOM, // fill colour below the ground tile
   PAVE_BOTTOM: ENV.GROUND_BOTTOM,   // alias for the town render code
   SAND_BOTTOM: ENV.GROUND_BOTTOM,   // alias for the dig render code
-  RIM: ENV.RIM,                     // warm rim-light colour per mood (night = fire / lantern light)
-  TINT: { morning: null, noon: null, sunset: null, night: null },   // no overlay needed: the SVGs carry the mood
-  LAKE: ENV.LAKE,                   // lake strip in far-tile coords
+  RIM: ENV.RIM,                     // warm rim-light colour per mood (night = window / lantern light)
+  TINT,                             // ambient.tint overlay per mood (weather.js)
+  LAKE: ENV.HORIZON,                // cloud-sea strip in far-tile coords (render.js ENV.LAKE)
+  HORIZON: ENV.HORIZON,
   TILES: { far: [1200, 720, 720], mid: [1200, 300, 298], ground: [1200, 260, 40] }, // [w, h, line that maps to its anchor]
   SUN, MOON, STARS, CLOUDS,
   envLayout, tileXs,
@@ -124,28 +123,34 @@ const A = path.join(ROOT, 'game/assets/default');
 const ART = path.join(ROOT, 'docs/art');
 const MOODS = ENV.MOODS;
 const PARTS = ['mist', 'mote', 'sparkle', 'star', 'ember', 'firefly', 'leaf', 'butterfly', 'confetti_a', 'confetti_b', 'dot', 'dust', 'note'];
-const NAMES = ['env/sun', 'env/moon', 'env/cloud_a', 'env/cloud_b', ...MOODS.flatMap(s => ['far', 'mid', 'ground'].map(l => `env/${l}_${s}`)), ...PARTS.map(p => 'particles/' + p)];
+const NAMES = ['env/sun', 'env/moon', 'env/cloud_a', 'env/cloud_b', 'env/rainbow', ...MOODS.flatMap(s => ['far', 'mid', 'ground'].map(l => `env/${l}_${s}`)), ...PARTS.map(p => 'particles/' + p)];
 const SRC = {}; for (const n of NAMES) SRC[n] = 'data:image/svg+xml;base64,' + fs.readFileSync(path.join(A, n + '.svg')).toString('base64');
 const VPS = [[1556, 720], [960, 720], [720, 1556]];
-const DRUMS = { morning: ['#E84A4A', '#3C8DE8', '#FFD23F', '#4CC26B'], noon: ['#FF9A2E', '#8E44AD', '#3C8DE8', '#4CC26B'], sunset: ['#3C8DE8', '#E84A4A', '#4CC26B', '#FFD23F'], night: ['#E84A4A', '#FF9A2E', '#4CC26B', '#8E44AD'] };
+const DRUMS6 = ['#E84A4A', '#3C8DE8', '#FFD23F', '#4CC26B', '#FF9A2E', '#8E44AD'];
+const DRUMS = { morning: DRUMS6, noon: DRUMS6.slice(2).concat(DRUMS6.slice(0, 2)), sunset: DRUMS6.slice(4).concat(DRUMS6.slice(0, 4)), night: DRUMS6.slice(1).concat(DRUMS6.slice(0, 1)) };
 
-// placeholder UI (DESIGN §2, zero insets) — only for judging the previews
+// placeholder UI (DESIGN §2, zero insets) — only for judging the previews: bubble, HUD, star-lantern string, drums on
+// cushions in the middle band (answer colours), Bibi (apricot blob) and the cymbal
 function uiLayout(W, H) {
-  const portrait = H > W, groundY = H - (portrait ? 26 : 14), item = 112;
+  const portrait = H > W, groundY = H - (portrait ? 26 : 14);
   if (!portrait) {
-    const bubble = { x: 24, y: 18, w: Math.min(560, W - 224), h: 122 };
-    const bibi = { x: 118, y: groundY - 4, h: 230 }, fire = { x: bibi.x + 150, y: groundY - 6, s: 1 };
-    const beam = { x0: 250, x1: W - 36, y: Math.max(210, bubble.y + bubble.h + 92) };
-    return { portrait, groundY, bubble, bibi, fire, beam, item, cord: [90, 150] };
+    const item = 112, bubble = { x: 24, y: 18, w: Math.min(560, W - 224), h: 122 };
+    const bibi = { x: 118, y: groundY - 4, h: 230 }, cymbal = { x: bibi.x + 150, y: groundY - 6 };
+    const garland = { x0: 250, x1: W - 40, y: bubble.y + bubble.h + 46, sag: 22 };
+    const n = W > 1200 ? 6 : 4, x0 = 250 + item * 0.7, x1 = W - 40 - item * 0.7, pads = [];
+    for (let i = 0; i < n; i++) pads.push({ x: x0 + (x1 - x0) * i / (n - 1), y: groundY - 150 + [0, -28, 18, -14, 26, -24][i] });
+    return { portrait, groundY, bubble, bibi, cymbal, garland, pads, item };
   }
-  const bubble = { x: 24, y: 110, w: W - 48, h: 124 };
-  const bibi = { x: 104, y: groundY - 4, h: 200 }, fire = { x: W - 120, y: groundY - 6, s: 0.9 };
-  const beam = { x0: 36, x1: W - 36, y: Math.max(bubble.y + bubble.h + 92, bibi.y - bibi.h - 60 - 190 - item) };
-  return { portrait, groundY, bubble, bibi, fire, beam, item, cord: [110, 190] };
+  const item = Math.round(112 * 1.15), bubble = { x: 24, y: 110, w: W - 48, h: 124 };
+  const bibi = { x: 104, y: groundY - 4, h: 200 }, cymbal = { x: W - 110, y: groundY - 6 };
+  const garland = { x0: 36, x1: W - 36, y: bubble.y + bubble.h + 46, sag: 22 };
+  const base = bibi.y - bibi.h - 60, pads = [];
+  for (let i = 0; i < 6; i++) pads.push({ x: 36 + item * 0.7 + (W - 72 - item * 1.4) * (i % 3) / 2 + (i < 3 ? 0 : item * 0.55) - (i < 3 ? item * 0.2 : 0), y: base - (i < 3 ? item * 1.05 * 2.1 : item * 1.05 * 0.4) - (i % 2) * 18 });
+  return { portrait, groundY, bubble, bibi, cymbal, garland, pads, item };
 }
 
-function pageScene({ mood, W, H, L, U, src, sky, groundBottom, cols, clouds, starsCfg }) {
-  const load = s => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = s; });
+function pageScene({ mood, W, H, L, U, src, sky, groundBottom, cols, clouds, starsCfg, tint }) {
+  const load = s => new Promise((r, j) => { const i = new Image(); i.onload = () => r(i); i.onerror = () => j(new Error('bad image ' + s.slice(0, 60))); i.src = s; });
   const tileXs = (x0, tw, W) => { const out = []; let x = x0 - Math.ceil((x0 + 0.01) / tw) * tw; for (; x < W; x += tw) out.push(x); return out; };
   return (async () => {
     const im = {}; for (const k of Object.keys(src)) im[k] = await load(src[k]);
@@ -165,7 +170,7 @@ function pageScene({ mood, W, H, L, U, src, sky, groundBottom, cols, clouds, sta
     } else {
       const sn = L.sun[mood];
       const glow = g.createRadialGradient(sn.x, sn.y, sn.size * 0.2, sn.x, sn.y, sn.size * 1.3);
-      const warm = mood === 'sunset' ? '255,200,150' : '255,248,220';
+      const warm = mood === 'sunset' ? '255,196,140' : mood === 'morning' ? '255,226,190' : '255,248,220';
       glow.addColorStop(0, `rgba(${warm},0.45)`); glow.addColorStop(1, `rgba(${warm},0)`);
       g.fillStyle = glow; g.beginPath(); g.arc(sn.x, sn.y, sn.size * 1.3, 0, 7); g.fill();
       g.drawImage(im['env/sun'], sn.x - sn.size / 2, sn.y - sn.size / 2, sn.size, sn.size);
@@ -182,56 +187,54 @@ function pageScene({ mood, W, H, L, U, src, sky, groundBottom, cols, clouds, sta
     const lay = (name, Ly) => { for (const x of tileXs(Ly.x0, Ly.w, W)) g.drawImage(im[name], x, Ly.y, Ly.w + 0.5, Ly.h); };
     lay('env/far_' + mood, L.far); lay('env/mid_' + mood, L.mid); lay('env/ground_' + mood, L.ground);
     if (L.ground.fillY < H) { g.fillStyle = groundBottom; g.fillRect(0, L.ground.fillY - 1, W, H - L.ground.fillY + 1); }
-    // ---- placeholders: bubble, HUD, beam + posts + garland, drums (bells), Bibi blob, campfire
+    if (tint) { g.fillStyle = tint; g.fillRect(0, 0, W, H); }
+    // ---- placeholders
     const rr = (x, y, w, h, r, fill) => { g.beginPath(); g.roundRect(x, y, w, h, r); g.fillStyle = fill; g.fill(); };
     rr(U.bubble.x, U.bubble.y, U.bubble.w, U.bubble.h, 26, 'rgba(255,255,255,0.93)');
     rr(W - 160, 16, 144, 64, 20, 'rgba(255,255,255,0.9)');
-    const B = U.beam, gy = U.groundY;
-    g.lineCap = 'round';
-    for (const px of [B.x0, B.x1]) { g.strokeStyle = '#6E4526'; g.lineWidth = 26; g.beginPath(); g.moveTo(px, B.y - 70); g.lineTo(px, gy); g.stroke(); g.strokeStyle = '#A87245'; g.lineWidth = 20; g.stroke(); }
-    // garland + lanterns
-    const gY = B.y - 62; g.strokeStyle = night ? '#8C7A66' : '#7A5C40'; g.lineWidth = 2; g.beginPath(); g.moveTo(B.x0, gY); g.quadraticCurveTo((B.x0 + B.x1) / 2, gY + 52, B.x1, gY); g.stroke();
-    for (let i = 0; i < 4; i++) {
-      const t = (i + 1) / 5, x = B.x0 + (B.x1 - B.x0) * t, y = gY + 4 * 26 * t * (1 - t), lit = i < 2;
-      if (lit) { const lg = g.createRadialGradient(x, y + 16, 4, x, y + 16, 60); lg.addColorStop(0, 'rgba(255,214,140,0.65)'); lg.addColorStop(1, 'rgba(255,214,140,0)'); g.fillStyle = lg; g.beginPath(); g.arc(x, y + 16, 60, 0, 7); g.fill(); }
-      g.fillStyle = lit ? '#FFE3A8' : '#F6E7C8'; g.strokeStyle = '#B89870'; g.lineWidth = 3; g.beginPath(); g.ellipse(x, y + 18, 15, 18, 0, 0, 7); g.fill(); g.stroke();
+    // star-lantern string
+    const G = U.garland; g.strokeStyle = night ? '#9AA0C4' : '#B8BCCC'; g.lineWidth = 2; g.beginPath(); g.moveTo(G.x0, G.y); g.quadraticCurveTo((G.x0 + G.x1) / 2, G.y + 2 * G.sag, G.x1, G.y); g.stroke();
+    const star = (x, y, r) => { g.beginPath(); for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + k * Math.PI / 5, q = k % 2 ? r * 0.5 : r; g.lineTo(x + q * Math.cos(a), y + q * Math.sin(a)); } g.closePath(); };
+    for (let i = 0; i < 5; i++) {
+      const t = (i + 1) / 6, x = G.x0 + (G.x1 - G.x0) * t, y = G.y + 4 * G.sag * t * (1 - t) + 18, lit = i < 2;
+      if (lit) { const lg = g.createRadialGradient(x, y, 4, x, y, 50); lg.addColorStop(0, 'rgba(255,226,150,0.6)'); lg.addColorStop(1, 'rgba(255,226,150,0)'); g.fillStyle = lg; g.beginPath(); g.arc(x, y, 50, 0, 7); g.fill(); }
+      star(x, y, 17); g.fillStyle = lit ? '#FFE9A8' : 'rgba(255,248,230,0.5)'; g.fill(); g.strokeStyle = '#D8C08A'; g.lineWidth = 2.5; g.stroke();
     }
-    g.strokeStyle = '#6E4526'; g.lineWidth = 32; g.beginPath(); g.moveTo(B.x0 - 18, B.y); g.lineTo(B.x1 + 18, B.y); g.stroke(); g.strokeStyle = '#A87245'; g.lineWidth = 26; g.stroke();
-    g.strokeStyle = '#D29A66'; g.lineWidth = 4; g.beginPath(); g.moveTo(B.x0, B.y - 7); g.lineTo(B.x1, B.y - 7); g.stroke();
-    const n = 4, sp = Math.max(1.3 * U.item, Math.min(1.7 * U.item, (B.x1 - B.x0) / n)), cx0 = (B.x0 + B.x1) / 2 - sp * (n - 1) / 2;
-    const cords = [U.cord[0] + 20, U.cord[1], U.cord[0], U.cord[1] - 30];
-    for (let i = 0; i < n; i++) {
-      const x = cx0 + i * sp, top = B.y + 12 + cords[i], s = U.item, col = cols[i];
-      g.strokeStyle = '#B49470'; g.lineWidth = 3; g.beginPath(); g.moveTo(x, B.y + 10); g.lineTo(x, top); g.stroke();
-      g.fillStyle = '#D8B26A'; g.beginPath(); g.arc(x, top + 4, 7, 0, 7); g.fill();
-      const w = s * 0.86;
-      g.beginPath(); g.moveTo(x - w * 0.3, top + 10); g.quadraticCurveTo(x - w * 0.36, top + s * 0.62, x - w / 2, top + s * 0.86); g.lineTo(x + w / 2, top + s * 0.86); g.quadraticCurveTo(x + w * 0.36, top + s * 0.62, x + w * 0.3, top + 10); g.quadraticCurveTo(x, top - 6, x - w * 0.3, top + 10);
-      g.fillStyle = col; g.fill(); g.lineWidth = 4; g.strokeStyle = 'rgba(0,0,0,0.28)'; g.stroke();
-      if (night) { g.strokeStyle = 'rgba(255,211,138,0.7)'; g.lineWidth = 3; g.beginPath(); g.moveTo(x + w * 0.26, top + 16); g.quadraticCurveTo(x + w * 0.32, top + s * 0.6, x + w * 0.44, top + s * 0.82); g.stroke(); }
-      g.fillStyle = 'rgba(255,255,255,0.45)'; g.beginPath(); g.ellipse(x - w * 0.14, top + s * 0.32, 7, 16, 0.2, 0, 7); g.fill();
-      g.fillStyle = '#D8B26A'; g.beginPath(); g.arc(x, top + s * 0.92, 9, 0, 7); g.fill();
-    }
-    // campfire
-    const F = U.fire, fs_ = F.s;
-    if (night || mood === 'sunset') { const fg = g.createRadialGradient(F.x, F.y - 20, 10, F.x, F.y - 20, 220); fg.addColorStop(0, `rgba(255,190,110,${night ? 0.4 : 0.22})`); fg.addColorStop(1, 'rgba(255,190,110,0)'); g.fillStyle = fg; g.beginPath(); g.arc(F.x, F.y - 20, 220, 0, 7); g.fill(); }
-    g.fillStyle = '#8C8478'; for (let k = -3; k <= 3; k++) { g.beginPath(); g.ellipse(F.x + k * 15 * fs_, F.y, 9 * fs_, 7 * fs_, 0, 0, 7); g.fill(); }
-    g.fillStyle = '#FF9A2E'; g.beginPath(); g.moveTo(F.x - 30 * fs_, F.y - 6); g.quadraticCurveTo(F.x - 26 * fs_, F.y - 60 * fs_, F.x, F.y - 96 * fs_); g.quadraticCurveTo(F.x + 26 * fs_, F.y - 60 * fs_, F.x + 30 * fs_, F.y - 6); g.fill();
-    g.fillStyle = '#FFD23F'; g.beginPath(); g.moveTo(F.x - 16 * fs_, F.y - 6); g.quadraticCurveTo(F.x - 14 * fs_, F.y - 40 * fs_, F.x, F.y - 62 * fs_); g.quadraticCurveTo(F.x + 14 * fs_, F.y - 40 * fs_, F.x + 16 * fs_, F.y - 6); g.fill();
-    // Bibi placeholder (chestnut monkey blob, cream face + bandana)
-    const P = U.bibi; g.lineWidth = 5; g.strokeStyle = '#4E2F1F';
-    g.fillStyle = '#8A5A3B'; g.beginPath(); g.ellipse(P.x, P.y - P.h * 0.28, P.h * 0.26, P.h * 0.28, 0, 0, 7); g.fill(); g.stroke();
+    // drums on cushions (answer colours)
+    U.pads.forEach((pd, i) => {
+      const s = U.item, col = cols[i % cols.length], cw = s * 1.25, ch = s * 0.32;
+      // cushion: white-lilac puff with a lilac underside
+      g.fillStyle = night ? '#BCB8DA' : '#DCD6EC'; g.beginPath(); g.ellipse(pd.x, pd.y + ch * 0.55, cw * 0.5, ch * 0.5, 0, 0, 7); g.fill();
+      g.fillStyle = night ? '#E4E1F4' : '#FBFAFE'; for (const [dx, r] of [[-0.3, 0.2], [0, 0.26], [0.3, 0.2]]) { g.beginPath(); g.arc(pd.x + dx * cw, pd.y + ch * 0.3, r * cw, Math.PI, 0); g.fill(); }
+      g.beginPath(); g.ellipse(pd.x, pd.y + ch * 0.32, cw * 0.48, ch * 0.4, 0, 0, 7); g.fill();
+      // drum body (cylinder) + cream skin
+      const w = s, h = s * 0.86, x0 = pd.x - w / 2, top = pd.y - h;
+      g.fillStyle = col; g.beginPath(); g.roundRect(x0, top + w * 0.14, w, h - w * 0.14, 10); g.fill();
+      g.lineWidth = 4; g.strokeStyle = 'rgba(40,20,40,0.35)'; g.stroke();
+      g.fillStyle = '#E4E6EE'; g.fillRect(x0, pd.y - 12, w, 10); g.fillRect(x0, top + w * 0.12, w, 9);
+      g.fillStyle = '#FFF6E6'; g.beginPath(); g.ellipse(pd.x, top + w * 0.14, w / 2, w * 0.14, 0, 0, 7); g.fill(); g.strokeStyle = '#9AA0B4'; g.lineWidth = 3; g.stroke();
+      if (night) { g.strokeStyle = 'rgba(210,220,255,0.7)'; g.lineWidth = 3; g.beginPath(); g.moveTo(x0 + w - 4, top + w * 0.25); g.lineTo(x0 + w - 4, pd.y - 14); g.stroke(); }
+      g.fillStyle = 'rgba(255,255,255,0.35)'; g.fillRect(x0 + w * 0.12, top + w * 0.28, w * 0.1, h * 0.5);
+    });
+    // cymbal on a stand
+    const Cy = U.cymbal; g.strokeStyle = '#9AA0B4'; g.lineWidth = 5; g.beginPath(); g.moveTo(Cy.x, Cy.y); g.lineTo(Cy.x, Cy.y - 120); g.moveTo(Cy.x - 26, Cy.y); g.lineTo(Cy.x, Cy.y - 30); g.lineTo(Cy.x + 26, Cy.y); g.stroke();
+    g.fillStyle = '#D8B26A'; g.beginPath(); g.ellipse(Cy.x, Cy.y - 124, 46, 11, -0.12, 0, 7); g.fill(); g.strokeStyle = '#9C7838'; g.lineWidth = 3; g.stroke();
+    // Bibi placeholder (apricot puppy blob, cream muzzle, floppy ears, white collar)
+    const P = U.bibi; g.lineWidth = 5; g.strokeStyle = '#8A5A34';
+    g.fillStyle = '#E7B07A'; g.beginPath(); g.ellipse(P.x, P.y - P.h * 0.28, P.h * 0.26, P.h * 0.28, 0, 0, 7); g.fill(); g.stroke();
     g.beginPath(); g.ellipse(P.x, P.y - P.h * 0.7, P.h * 0.27, P.h * 0.25, 0, 0, 7); g.fill(); g.stroke();
-    g.fillStyle = '#F2D9B8'; g.beginPath(); g.ellipse(P.x + P.h * 0.03, P.y - P.h * 0.66, P.h * 0.18, P.h * 0.16, 0, 0, 7); g.fill();
-    g.fillStyle = '#F1E6CF'; g.beginPath(); g.ellipse(P.x, P.y - P.h * 0.48, P.h * 0.22, P.h * 0.06, 0, 0, 7); g.fill();
+    g.fillStyle = '#B9784A'; g.beginPath(); g.ellipse(P.x - P.h * 0.25, P.y - P.h * 0.66, P.h * 0.07, P.h * 0.15, 0.3, 0, 7); g.fill(); g.beginPath(); g.ellipse(P.x + P.h * 0.25, P.y - P.h * 0.66, P.h * 0.07, P.h * 0.15, -0.3, 0, 7); g.fill();
+    g.fillStyle = '#FBEBD3'; g.beginPath(); g.ellipse(P.x + P.h * 0.03, P.y - P.h * 0.62, P.h * 0.14, P.h * 0.1, 0, 0, 7); g.fill();
+    g.fillStyle = '#FFFFFF'; g.beginPath(); g.ellipse(P.x, P.y - P.h * 0.48, P.h * 0.22, P.h * 0.06, 0, 0, 7); g.fill();
     // a few mood particles
-    const pk = { morning: ['mist', 'mote'], noon: ['butterfly', 'leaf'], sunset: ['ember', 'mote'], night: ['firefly', 'ember'] }[mood];
+    const pk = { morning: ['mist', 'mote'], noon: ['butterfly', 'leaf'], sunset: ['ember', 'mote'], night: ['firefly', 'firefly'] }[mood];
     for (let i = 0; i < 14; i++) { const name = pk[i % 2], p = im['particles/' + name], s = 18 + (i % 4) * 6, x = (i * 0.618 % 1) * W, y = ((i * 0.37 + 0.05) % 1) * H; g.drawImage(p, x, y, name === 'mist' ? s * 4 : s, name === 'mist' ? s * 2 : s); }
     return c.toDataURL('image/png');
   })();
 }
 
 function pageSeams({ src, list }) {
-  const load = s => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = s; });
+  const load = s => new Promise((r, j) => { const i = new Image(); i.onload = () => r(i); i.onerror = () => j(new Error('bad image ' + s.slice(0, 60))); i.src = s; });
   return (async () => {
     let total = 0; for (const [, w, h] of list) total += h / 2 * (1200 / w) + 12;
     const out = document.createElement('canvas'); out.width = 1800; out.height = Math.ceil(total);
@@ -260,13 +263,13 @@ function pageSeams({ src, list }) {
 }
 
 function pageParticles({ src, parts, extras }) {
-  const load = s => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = s; });
+  const load = s => new Promise((r, j) => { const i = new Image(); i.onload = () => r(i); i.onerror = () => j(new Error('bad image ' + s.slice(0, 60))); i.src = s; });
   return (async () => {
     const c = document.createElement('canvas'); c.width = 1720; c.height = 560; const g = c.getContext('2d');
-    g.fillStyle = '#D6F0FB'; g.fillRect(0, 0, 1720, 130); g.fillStyle = '#2C3D58'; g.fillRect(0, 130, 1720, 130); g.fillStyle = '#A6BD8C'; g.fillRect(0, 260, 1720, 300);
+    g.fillStyle = '#D6F0FB'; g.fillRect(0, 0, 1720, 130); g.fillStyle = '#2C3D58'; g.fillRect(0, 130, 1720, 130); g.fillStyle = '#F4F1FA'; g.fillRect(0, 260, 1720, 300);
     let x = 20;
     for (const p of parts) { const im = await load(src['particles/' + p]); for (const y0 of [0, 130, 260]) p === 'mist' ? g.drawImage(im, x - 24, y0 + 41, 144, 72) : g.drawImage(im, x, y0 + 17, 96, 96); x += 130; }
-    x = 20; for (const e of extras) { const im = await load(src[e]); const w = e.includes('cloud') ? 300 : 200, h = e.includes('cloud') ? 140 : 200; const k = 160 / Math.max(w, h); g.fillStyle = e.includes('moon') ? '#1E2A4A' : 'rgba(0,0,0,0)'; g.fillRect(x - 10, 380, w * k + 20, h * k + 20); g.drawImage(im, x, 390, w * k, h * k); x += w * k + 40; }
+    x = 20; for (const e of extras) { const im = await load(src[e]); const w = e.includes('cloud') ? 300 : e.includes('rainbow') ? 600 : 200, h = e.includes('cloud') ? 140 : e.includes('rainbow') ? 300 : 200; const k = (e.includes('rainbow') ? 340 : 160) / Math.max(w, h); g.fillStyle = e.includes('moon') ? '#1E2A4A' : 'rgba(0,0,0,0)'; g.fillRect(x - 10, 380, w * k + 20, h * k + 20); g.drawImage(im, x, 390, w * k, h * k); x += w * k + 40; }
     return c.toDataURL('image/png');
   })();
 }
@@ -280,10 +283,10 @@ function pageParticles({ src, parts, extras }) {
   for (const [W, H] of VPS) for (const m of MOODS) {
     const vp = `${W}x${H}`; if (only && !`${vp}_${m}`.includes(only)) continue;
     const U = uiLayout(W, H), L = envLayout(W, H);
-    save(await pg.evaluate(pageScene, { mood: m, W, H, L, U, src: SRC, sky: ENV.SKY[m], groundBottom: ENV.GROUND_BOTTOM[m], cols: DRUMS[m], clouds: CLOUDS, starsCfg: STARS }), path.join(ART, `env_${vp}_${m}.png`));
-    if (m === 'morning') console.log(vp, JSON.stringify({ campY: L.campY, skyY1: L.skyY1, hillTop: Math.round(L.hillTop), lake: L.lake, kf: +L.far.k.toFixed(3), km: +L.mid.k.toFixed(3), kg: +L.ground.k.toFixed(2), farY: Math.round(L.far.y), midY: Math.round(L.mid.y), groundY: Math.round(L.ground.y), fillY: Math.round(L.ground.fillY), stars: L.stars, beamY: U.beam.y }));
+    save(await pg.evaluate(pageScene, { mood: m, W, H, L, U, src: SRC, sky: ENV.SKY[m], groundBottom: ENV.GROUND_BOTTOM[m], cols: DRUMS[m], clouds: CLOUDS, starsCfg: STARS, tint: TINT[m] }), path.join(ART, `env_${vp}_${m}.png`));
+    if (m === 'morning') console.log(vp, JSON.stringify({ campY: L.campY, skyY1: L.skyY1, hillTop: Math.round(L.hillTop), horizon: L.lake, kf: +L.far.k.toFixed(3), km: +L.mid.k.toFixed(3), kg: +L.ground.k.toFixed(2), farY: Math.round(L.far.y), midY: Math.round(L.mid.y), groundY: Math.round(L.ground.y), fillY: Math.round(L.ground.fillY), stars: L.stars, padY: Math.round(U.pads[0].y) }));
   }
-  if (!only || only === 'sheet') save(await pg.evaluate(pageParticles, { src: SRC, parts: PARTS, extras: ['env/sun', 'env/moon', 'env/cloud_a', 'env/cloud_b'] }), path.join(ART, 'env_particles.png'));
+  if (!only || only === 'sheet') save(await pg.evaluate(pageParticles, { src: SRC, parts: PARTS, extras: ['env/sun', 'env/moon', 'env/cloud_a', 'env/cloud_b', 'env/rainbow'] }), path.join(ART, 'env_particles.png'));
   if (!only || only === 'seams') {
     const last = s => ENV.SKY[s][ENV.SKY[s].length - 1][1];
     const list = MOODS.flatMap(s => [['env/far_' + s, 1200, 720, 420, last(s)], ['env/mid_' + s, 1200, 300, 150, last(s)], ['env/ground_' + s, 1200, 260, 0, ENV.GROUND_BOTTOM[s]]]);

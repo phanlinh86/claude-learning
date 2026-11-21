@@ -33,24 +33,24 @@
 
   // DESIGN §3 skies per mood. sun / moon positions as fractions of (W, H above the ground); clouds = how many of 6 show.
   var MOODS = [
-    { name: 'morning', top: '#F7D9C4', mid: '#FAE6D2', bottom: '#FDF3E1', tint: [255, 214, 190, 0.05],
+    { name: 'morning', top: '#FAD6E0', mid: '#FDE4E2', bottom: '#FFF1E4', tint: null,
       amb: { light: 0.95, sunX: 0.2, sunY: 0.32, sunA: 1, moonX: 0.8, moonY: 0.18, moonA: 0, starsA: 0, fire: 0.4, clouds: 3, cloudA: 0.85 },
       emitters: [{ kind: 'mist', sprite: 'mist', layer: 'back', count: 6, size: [170, 280], alpha: [0.22, 0.42], color: '#FFFFFF' },
-        { kind: 'mote', sprite: 'mote', layer: 'back', count: 8, size: [8, 13], alpha: [0.4, 0.75], color: '#FFF1DE' },
+        { kind: 'mote', sprite: 'mote', layer: 'back', count: 8, size: [8, 13], alpha: [0.4, 0.75], color: '#FFEAF0' },
         { kind: 'ember', sprite: 'ember', layer: 'back', count: 3, size: [5, 9], alpha: [0.7, 1] }] },
-    { name: 'noon', top: '#7CC4EE', mid: '#A9DAF4', bottom: '#D6F0FB', tint: null,
+    { name: 'noon', top: '#8FD0F4', mid: '#B9E2F8', bottom: '#E2F5FD', tint: null,
       amb: { light: 1, sunX: 0.62, sunY: 0.1, sunA: 1, moonX: 0.8, moonY: 0.18, moonA: 0, starsA: 0, fire: 0.25, clouds: 5, cloudA: 0.92 },
       emitters: [{ kind: 'butterfly', sprite: 'butterfly', layer: 'back', count: 3, size: [18, 24], alpha: [0.85, 1] },
         { kind: 'leaf', sprite: 'leaf', layer: 'back', count: 6, size: [14, 20], alpha: [0.8, 1] },
         { kind: 'mote', sprite: 'mote', layer: 'back', count: 4, size: [7, 12], alpha: [0.3, 0.55], color: '#FFFFFF' },
         { kind: 'ember', sprite: 'ember', layer: 'back', count: 2, size: [5, 8], alpha: [0.6, 0.9] }] },
-    { name: 'sunset', top: '#F29B6B', mid: '#F7B98A', bottom: '#FBD7A5', tint: [255, 140, 80, 0.1],
+    { name: 'sunset', top: '#C98BC0', mid: '#FFC9A0', bottom: '#FFE7C2', tint: null,
       amb: { light: 0.85, sunX: 0.82, sunY: 0.52, sunA: 1, moonX: 0.2, moonY: 0.2, moonA: 0.15, starsA: 0.12, fire: 0.7, clouds: 3, cloudA: 0.8 },
-      emitters: [{ kind: 'ember', sprite: 'ember', layer: 'back', count: 7, size: [5, 10], alpha: [0.75, 1] },
-        { kind: 'mote', sprite: 'mote', layer: 'back', count: 8, size: [8, 13], alpha: [0.45, 0.8], color: '#FFD98A' }] },
-    { name: 'night', top: '#1E2A4A', mid: '#2C3A61', bottom: '#3B4C78', tint: [20, 30, 80, 0.35],
+      emitters: [{ kind: 'mote', sprite: 'ember', layer: 'back', count: 7, size: [9, 15], alpha: [0.6, 0.9] },   // pastel puffs drifting up
+        { kind: 'mote', sprite: 'mote', layer: 'back', count: 8, size: [8, 13], alpha: [0.45, 0.8], color: '#FFE2A8' }] },
+    { name: 'night', top: '#1F2550', mid: '#313A6D', bottom: '#44508A', tint: [20, 24, 70, 0.08],
       amb: { light: 0.55, sunX: 0.82, sunY: 0.7, sunA: 0, moonX: 0.78, moonY: 0.16, moonA: 1, starsA: 1, fire: 1, clouds: 2, cloudA: 0.35 },
-      emitters: [{ kind: 'firefly', sprite: 'firefly', layer: 'back', count: 9, size: [10, 16], alpha: [0.7, 1], color: '#E9F59A' },
+      emitters: [{ kind: 'firefly', sprite: 'firefly', layer: 'back', count: 9, size: [10, 16], alpha: [0.7, 1], color: '#FFF3B0' },
         { kind: 'ember', sprite: 'ember', layer: 'back', count: 8, size: [5, 10], alpha: [0.8, 1] }] }
   ];
   MOODS.forEach(function (m) { m._top = hex(m.top); m._mid = hex(m.mid); m._bot = hex(m.bottom); m._tint = m.tint || [255, 255, 255, 0]; });
@@ -58,8 +58,8 @@
   var PARTY_EMIT = [{ kind: 'glint', sprite: 'star', layer: 'front', count: 10, size: [12, 20], alpha: [0.6, 0.95], color: '#FFD54A' },
     { kind: 'fall', sprite: 'confetti_a', alt: 'confetti_b', layer: 'front', count: 14, size: [12, 18], alpha: [0.85, 1], confetti: true }];
   var CONFETTI = ['#E84A4A', '#FF9A2E', '#FFD23F', '#4CC26B', '#3C8DE8', '#8E44AD', '#FF8FC0'];
-  var DUST = ['#E8DFD2', '#D9CFC0', '#F3ECE2'];
-  var EMBER = ['#FFB547', '#FF8A3D', '#FFD27A'];
+  var DUST = ['#F4F1FA', '#E6E0F2', '#FFFFFF'];   // soft cloud puffs
+  var EMBER = ['#FFD9D2', '#F6D2EA', '#FFE6C4'];   // pastel puffs (the ember sprite carries its own colour)
 
   function Weather(opts) {
     opts = opts || {};

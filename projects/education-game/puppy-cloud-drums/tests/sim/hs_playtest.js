@@ -23,8 +23,9 @@ const TAG = get('tag', 'base'), JOBS = +get('jobs', 2);
 const VPS = Object.keys(L.VIEWPORTS);
 
 function finiteWorld(w) {
-  if (![w.beam.wob, w.stars, w.bibi.hop].every(Number.isFinite)) return false;
-  return w.drums.every(c => Number.isFinite(c.cx) && Number.isFinite(c.cy) && Number.isFinite(c.theta) && Number.isFinite(c.rot) && Number.isFinite(c.cord)) &&
+  if (![w.cymbal.tilt, w.stars, w.bibi.hop].every(Number.isFinite)) return false;
+  if (w.card && ![w.card.x, w.card.y, w.card.pop].every(Number.isFinite)) return false;
+  return w.drums.every(c => Number.isFinite(c.cx) && Number.isFinite(c.cy) && Number.isFinite(c.hop) && Number.isFinite(c.sq) && Number.isFinite(c.tilt) && Number.isFinite(c.dent) && Number.isFinite(c.padY)) &&
     w.lanterns.every(l => Number.isFinite(l.swing) && Number.isFinite(l.lit)) && w.notes.every(n => Number.isFinite(n.x) && Number.isFinite(n.y)) &&
     w.fireflies.every(f => Number.isFinite(f.x) && Number.isFinite(f.y));
 }
@@ -34,7 +35,7 @@ function runOne(o) {
   const d = L.makeModel(o.model, w, o.age, o.seed + 1);
   const quiet = o.model === 'absent';
   const S = { model: o.model, age: o.age, done: false, nan: false, time: 0, stuckState: false, rounds: [], chapters: [], talks: 0, talkRight: 0, talkAuto: 0,
-    miss2NoHint: 0, offScreen: 0, topics: null, idles: [], maxDrums: 0, keys: [], repKey: 0, maxSwing: 0 };
+    miss2NoHint: 0, offScreen: 0, topics: null, idles: [], maxDrums: 0, keys: [], repKey: 0, maxSwing: 0, beatCounts: 0, beatBrush: 0, beatNudges: 0 };
   w.newSession();
   const dt = 1 / 30, cap = o.cap || (quiet ? 600 : 1800);
   let R = null, chap = null, t = 0, lastChange = 0, sig = '';
@@ -43,13 +44,13 @@ function runOne(o) {
     d.step(dt); w.update(dt); t += dt;
     if (!finiteWorld(w)) { S.nan = true; break; }
     const Lw = w.layout;
-    for (const c of w.drums) {
-      if (c.state === 'gone' || c.pop <= 0) continue;
-      if (c.cx < -20 || c.cx > Lw.W + 20 || c.cy < -20 || c.cy > Lw.H + 20) S.offScreen++;
-      S.maxSwing = Math.max(S.maxSwing, Math.abs(c.theta));
+    for (const c of w.drums) {   // a standing drum (+ its cushion) must be fully on screen (enter falls from above, out floats away)
+      if (c.state !== 'stand') continue;
+      if (c.x - c.bw / 2 < 0 || c.x + c.bw / 2 > Lw.W || c.y - c.bh < 0 || c.padY + c.cushionH > Lw.H || c.padX - c.cushionW / 2 < 0 || c.padX + c.cushionW / 2 > Lw.W) S.offScreen++;
+      S.maxSwing = Math.max(S.maxSwing, c.hop);
     }
     S.maxDrums = Math.max(S.maxDrums, w.drums.length);
-    const s2 = w.state + ':' + w.phase + ':' + w.level + ':' + w.round + ':' + w.step + ':' + w.drums.filter(c => c.done).length;
+    const s2 = w.state + ':' + w.phase + ':' + w.level + ':' + w.round + ':' + w.step + ':' + w.drums.filter(c => c.done).length + ':' + (w.card ? w.card.lit : '');
     if (s2 !== sig) { sig = s2; lastChange = t; } else if (!quiet && t - lastChange > 200) { S.stuckState = s2; break; }
     for (const e of w.drainEvents()) {
       if (d.onEvent) d.onEvent(e);
@@ -62,7 +63,9 @@ function runOne(o) {
           if (S.keys.includes(e.key)) S.repKey++; S.keys.push(e.key); break;
         case 'ask': if (R) { closeStep(); if (e.first) { R.firstAsk = w.time; R.firstAskT = w.time - R.t0; R.lastProg = w.time; } } break;
         case 'wrong': if (R) { R.wrong++; R.stepWrong++; } break;
-        case 'ring': if (R && e.brush) R.brush++; break;
+        case 'count': if (e.beat) S.beatCounts++; break;
+        case 'ring': if (R && e.brush) R.brush++; if (e.beat && e.brush) S.beatBrush++; break;
+        case 'beatNudge': if (R) R.idle++; S.beatNudges++; break;
         case 'soft': if (R) R.soft++; break;
         case 'assist': if (R) R.assist++; break;
         case 'right': if (R) { R.right++; R.maxGap = Math.max(R.maxGap, w.time - R.lastProg); R.lastProg = w.time; R.stepWrong = 0; R.stepHint = 0; } break;
@@ -125,6 +128,7 @@ function summarize(list) {
       talkAuto: ss.reduce((a, s) => a + s.talkAuto, 0) / Math.max(1, ss.reduce((a, s) => a + s.talks, 0)) * 100,
       nan: ss.filter(s => s.nan).length, stuckState: ss.filter(s => s.stuckState).length, off: ss.reduce((a, s) => a + s.offScreen, 0),
       m2: ss.reduce((a, s) => a + s.miss2NoHint, 0), maxDrums: Math.max(...ss.map(s => s.maxDrums)), maxSwing: Math.max(...ss.map(s => s.maxSwing)),
+      beatCounts: ss.reduce((a, s) => a + s.beatCounts, 0), beatBrush: ss.reduce((a, s) => a + s.beatBrush, 0), beatNudges: ss.reduce((a, s) => a + s.beatNudges, 0),
       idles: model === 'absent' ? (ss[0].idles || []).slice(0, 6).join(' ') : '',
       repKey: ss.reduce((a, s) => a + s.repKey, 0) / nR * 100,
       surpriseTap: rounds.filter(r => r.surprise).length ? rounds.filter(r => r.surprise && r.surpriseTap).length / rounds.filter(r => r.surprise).length * 100 : 0,
@@ -151,9 +155,9 @@ function summarize(list) {
 
 function table(rows, topicRows) {
   const f = L.f1, out = [];
-  out.push('| model | age | n | done % | session min (p90) | chapter s mean [p10–p90] | cut % | round s (p90) | play s | rounds > 120 s (max s) | no right note > 60 s (max gap s) | stars 3/2/1 % | wrong / brush / soft per round | assist rounds % | hints miss/idle per round (rounds with a hint %) | idle/round | song auto % (1st note s) | talk right % (auto %) | NaN / stuck / off / 2-wrong-no-hint | max drums / max swing rad |');
-  out.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
-  for (const r of rows) out.push(`| ${r.model} | ${r.age} | ${r.n} | ${f(r.done)} | ${f(r.sess)} (${f(r.sessP90)}) | ${f(r.chap)} [${f(r.chapP10)}–${f(r.chapP90)}] | ${f(r.cut)} | ${f(r.round)} (${f(r.roundP90)}) | ${f(r.play)} | ${r.stuck} (${f(r.maxRound)}) | ${r.gap60} (${f(r.maxGap)}) | ${f(r.st3)}/${f(r.st2)}/${f(r.st1)} | ${r.wrong.toFixed(2)} / ${r.brush.toFixed(2)} / ${r.soft.toFixed(2)} | ${f(r.assistR)} | ${r.hintMiss.toFixed(2)}/${r.hintIdle.toFixed(2)} (${f(r.hintRounds)}) | ${r.idle.toFixed(2)} | ${f(r.songAuto)} (${f(r.songStart)}) | ${f(r.talkRight)} (${f(r.talkAuto)}) | ${r.nan} / ${r.stuckState} / ${r.off} / ${r.m2}${r.idles ? ' · idle at ' + r.idles : ''} | ${r.maxDrums} / ${r.maxSwing.toFixed(2)} |`);
+  out.push('| model | age | n | done % | session min (p90) | chapter s mean [p10–p90] | cut % | round s (p90) | play s | rounds > 120 s (max s) | no right note > 60 s (max gap s) | stars 3/2/1 % | wrong / brush / soft per round | assist rounds % | hints miss/idle per round (rounds with a hint %) | idle/round | song auto % (1st note s) | talk right % (auto %) | NaN / stuck / off / 2-wrong-no-hint | max drums / max hop px | beats counted / fast (brush) / nudges |');
+  out.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
+  for (const r of rows) out.push(`| ${r.model} | ${r.age} | ${r.n} | ${f(r.done)} | ${f(r.sess)} (${f(r.sessP90)}) | ${f(r.chap)} [${f(r.chapP10)}–${f(r.chapP90)}] | ${f(r.cut)} | ${f(r.round)} (${f(r.roundP90)}) | ${f(r.play)} | ${r.stuck} (${f(r.maxRound)}) | ${r.gap60} (${f(r.maxGap)}) | ${f(r.st3)}/${f(r.st2)}/${f(r.st1)} | ${r.wrong.toFixed(2)} / ${r.brush.toFixed(2)} / ${r.soft.toFixed(2)} | ${f(r.assistR)} | ${r.hintMiss.toFixed(2)}/${r.hintIdle.toFixed(2)} (${f(r.hintRounds)}) | ${r.idle.toFixed(2)} | ${f(r.songAuto)} (${f(r.songStart)}) | ${f(r.talkRight)} (${f(r.talkAuto)}) | ${r.nan} / ${r.stuckState} / ${r.off} / ${r.m2}${r.idles ? ' · idle at ' + r.idles : ''} | ${r.maxDrums} / ${r.maxSwing.toFixed(1)} | ${r.beatCounts} / ${r.beatBrush} / ${r.beatNudges} |`);
   out.push('', '| model | age | repeated set % | surprise tapped % | per-round overhead s (first ask s) | ch1 s / 3★% / wrong | ch2 | ch3 | ch4 |', '|---|---|---|---|---|---|---|---|---|');
   for (const r of rows) if (r.model !== 'absent') out.push(`| ${r.model} | ${r.age} | ${f(r.repKey)} | ${f(r.surpriseTap)} | ${f(r.overhead)} (${f(r.firstAsk)}) | ` + r.ch.map(c => `${f(c.dur)} (p90 ${f(c.p90)}, cut ${f(c.cut)}%) / ${f(c.st3)} / ${c.wrong.toFixed(2)}`).join(' | ') + ' |');
   out.push('', '| model | age | topic | chapters | mean s | p90 s | round s | drums | wrong / round | 3★ % | hint rounds % |', '|---|---|---|---|---|---|---|---|---|---|---|');

@@ -2,15 +2,16 @@
 """Character art generator for Bibi's Cloud Drums (character artist A). 100 % original vector art.
 
 Writes (relative to game/assets/default/):
-  characters/bibi_{idle,blink,talk,happy,cheer,think,oops,wave,point,dance}.svg + bibi_full_wave.svg
-        0 0 300 300, FEET ANCHOR (150,292). Bibi (a small round chestnut monkey with a heart-shaped cream face, a curl of
-        hair on top, a long curly tail and a cream polka-dot camp bandana) faces RIGHT in 3/4 view, eyes on the viewer.
-        Head, body, belly, bandana and ears are identical in every frame; only eyes, mouth, brows, arms, (think / oops) a
-        small head tilt and (dance) the near leg + tail swirl change.
-        docs/art/bibi_hand.json gives per frame the near hand tip, the far hand, the head top and the near eye.
-  characters/lamb.svg, lamb_ball.svg   0 0 160 120, bottom anchor (80,116), facing right
-  characters/bird.svg, bird_sing.svg           0 0 120 100, feet anchor (60,96), facing LEFT
-  icon.svg                                     0 0 512 512, full bleed, opaque, no text
+  characters/bibi_{idle,blink,talk,happy,cheer,think,oops,wave,point,dance,beat}.svg + bibi_full_wave.svg
+        0 0 300 300, FEET ANCHOR (150,292). Bibi (a small round apricot puppy with floppy darker ears, a cream muzzle and
+        belly, a fur tuft on top, a short tail and a white sailor collar with slate trim) sits facing RIGHT in 3/4 view,
+        eyes on the viewer, and holds two wooden drumsticks with cream ball tips.
+        Head, body, collar and feet are IDENTICAL in every frame; only eyes, mouth, brows, the ear flop, the front paws +
+        sticks and the tail change. beat = both sticks down mid-strike; full_wave = title pose with a small wood drum.
+        docs/art/bibi_hand.json gives per frame the near stick tip, the far stick tip, both paws, the head top and the eye.
+  characters/lamb.svg, lamb_ball.svg   0 0 160 120, bottom anchor (80,116), facing right (a fluffy cloud lamb)
+  characters/bird.svg, bird_sing.svg   0 0 120 100, feet anchor (60,96), facing LEFT
+  icon.svg                             0 0 512 512, full bleed, opaque, no text: Bibi drumming on a red cloud drum
 
 Usage: python3 tools/art_bibi.py [outDir]
 Style (docs/DESIGN.md section 3): flat cartoon, ~4 px outline (at 256) in a darker tone (never black), one-step cel
@@ -28,13 +29,18 @@ HAND_JSON = os.path.join(ROOT, 'docs', 'art', 'bibi_hand.json')
 LW = 4.6  # outline width at viewBox 300 (= 4 px at 256)
 
 P = {  # Bibi palette (DESIGN.md section 3) — never an answer colour
-    'fur': '#8A5A3B', 'sh': '#6F4630', 'line': '#4E2F1F', 'farFur': '#7A4E33', 'farSh': '#5F3B28',
-    'face': '#F2D9B8', 'faceSh': '#DDBF98', 'faceLine': '#9C6E4A',
-    'cheek': '#F2A99A', 'pupil': '#2F2A3A', 'white': '#FFFFFF', 'mouth': '#6E2C25', 'tongue': '#EE8F84',
-    'nose': '#5A3424',
-    'band': '#F1E6CF', 'bandSh': '#DDCCAA', 'dot': '#A27B55', 'bandLine': '#8A6A4A',
+    'fur': '#E7B07A', 'sh': '#C98E57', 'line': '#8A5A34', 'farFur': '#D9A068', 'farSh': '#BC834E',
+    'ear': '#B9784A', 'earSh': '#9C6038', 'earIn': '#C98E62',
+    'cream': '#FBEBD3', 'creamSh': '#E8D2B2', 'creamLine': '#B98A5E',
+    'cheek': '#F2A99A', 'pupil': '#2F2A3A', 'white': '#FFFFFF', 'mouth': '#7A3A2C', 'tongue': '#EE8F84',
+    'nose': '#4A3226',
+    'collar': '#FFFFFF', 'collarSh': '#E6E8F0', 'slate': '#5B6478', 'slateD': '#434A5C',
+    'wood': '#D9B48A', 'woodSh': '#BF9466', 'woodLine': '#8E6640', 'tip': '#FFF6E6', 'tipLine': '#B89B72',
     'brass': '#D8B26A', 'brassD': '#9C7838', 'brassL': '#F3DFAE',
 }
+DRUM_WOOD = ('#C99466', '#8E5F3A', '#E9C29A')
+SKIN = ('#FFF6E6', '#EADBC0', '#B89B72')
+HOOP = ('#E4E6EE', '#9AA0B4', '#FFFFFF')
 
 
 # ------------------------------------------------------------------ tiny SVG helpers
@@ -142,152 +148,208 @@ def star4(x, y, s, fill='#FFF6C8', line='#E2C86A', w=1.6):
                 f'fill="{fill}" stroke="{line}" stroke-width="{f(w)}" stroke-linejoin="round"')
 
 
+def scallop(cx, cy, rx, ry, n, bulge=0.62, a0=-90):
+    """A puffy cloud / wool outline: n points on an ellipse joined by outward arcs."""
+    pts = [(cx + rx * math.cos(math.radians(a0 + 360 * i / n)), cy + ry * math.sin(math.radians(a0 + 360 * i / n)))
+           for i in range(n)]
+    d = f'M{f(pts[0][0])},{f(pts[0][1])}'
+    for i in range(n):
+        x0, y0 = pts[i]
+        x1, y1 = pts[(i + 1) % n]
+        r = math.hypot(x1 - x0, y1 - y0) * bulge
+        d += f' A{f(r)},{f(r)} 0 0 1 {f(x1)},{f(y1)}'
+    return d + ' Z'
+
+
+def poly(pts):
+    return 'M' + ' L'.join(f'{f(x)},{f(y)}' for x, y in pts) + ' Z'
+
+
 # ======================================================================= BIBI
-HEAD = (150, 130, 72, 66)          # x 78-222, y 64-196
-NECK = (152, 204)                  # tilt pivot
-BODY = (146, 242, 45, 41)          # x 101-191, y 201-283
-BELLY = (158, 248, 27, 25)
-EYE_N = (144, 128, 16)             # near eye (viewer's left, bigger)
-EYE_F = (190, 124, 13)             # far eye (towards the drums)
-NOSE = (186, 152)
-MOUTH = (180, 170)
-SH_F = (118, 214)                  # far shoulder (behind the body)
-SH_N = (178, 214)                  # near shoulder (in front)
-ARM_W = 21                         # arm tube outer width
-HAND_R = 11
-TUFT_TOP = 38
+# head: a wide soft puppy head (cheeks fuller low), centre ≈ (150,128), y 62..198
+HEAD = [(150, 62), (186, 66), (214, 82), (229, 108), (232, 138), (224, 166), (202, 189), (170, 199), (134, 198),
+        (102, 188), (79, 166), (70, 136), (76, 106), (96, 80), (120, 66)]
+TUFT = 'M134,68 C130,56 140,48 150,54 C152,44 166,42 170,52 C178,52 182,60 178,68 C164,74 148,74 134,68 Z'
+TUFT_TOP = 44
+MUZZLE = (181, 163, 35, 25)        # cream snout, x 146-216, y 138-188
+NOSE = (193, 149)
+MOUTH = (190, 168)
+EYE_N = (136, 122, 17)             # near eye (viewer's left, bigger)
+EYE_F = (199, 117, 13.5)           # far eye (towards the drums)
+BODY = (148, 242, 48, 45)          # x 100-196, y 197-287
+BELLY = (166, 254, 25, 24)
+SH_F = (170, 216)                  # far shoulder (behind the body)
+SH_N = (178, 220)                  # near shoulder (in front)
+ARM_W = 23                         # arm tube outer width
+PAW_R = 12.5
+STICK_L = 68                       # paw centre → tip centre
+STICK_BACK = 13                    # butt end behind the paw
+STICK_W = 10
+TIP_R = 7
 
-# heart-shaped face mask (two lobes round the eyes, point at the chin), shifted right: 3/4 view facing right
-FACE = [(167, 106), (180, 96), (199, 95), (214, 107), (219, 128), (215, 150), (206, 172), (188, 189), (170, 193),
-        (148, 185), (128, 168), (118, 146), (119, 120), (130, 101), (150, 96)]
+# ear: local shape hanging DOWN from its root (0,0); rotated per pose (+ = clockwise on screen)
+EAR = [(0, -2), (13, 2), (19, 20), (16, 46), (7, 72), (-8, 83), (-23, 77), (-29, 55), (-25, 27), (-14, 6)]
+EAR_N = (96, 86)
+EAR_F = (206, 78)
 
-# arm centre lines (shoulder → elbow → hand centre) per pose; 'fist' = closed hand, 'open' = waving palm, 'point' = finger
+# arms: [shoulder, elbow, paw] + stick angle (deg, 0 = right, -90 = up); kind 'stick' | 'open' | 'two' (both sticks)
+#               far arm                                         near arm
 ARMS = {
-    #            far arm                                   near arm                                    near hand
-    'idle':  ([SH_F, (106, 236), (110, 258)],             [SH_N, (194, 236), (192, 258)],             'fist'),
-    'talk':  ([SH_F, (106, 236), (110, 258)],             [SH_N, (204, 236), (224, 222)],             'open'),
-    'happy': ([SH_F, (96, 234), (82, 222)],               [SH_N, (206, 234), (224, 218)],             'open'),
-    'cheer': ([SH_F, (84, 204), (54, 172)],               [SH_N, (212, 186), (230, 150)],             'open'),
-    'think': ([SH_F, (106, 236), (110, 258)],             [SH_N, (214, 226), (204, 196)],             'fist'),
-    'oops':  ([SH_F, (104, 238), (108, 258)],             [SH_N, (222, 196), (226, 146)],             'fist'),
-    'wave':  ([SH_F, (106, 236), (110, 258)],             [SH_N, (222, 196), (240, 146)],             'open'),
-    'point': ([SH_F, (106, 236), (110, 258)],             [SH_N, (214, 200), (246, 178)],             'point'),
-    'dance': ([SH_F, (88, 210), (60, 200)],               [SH_N, (214, 200), (246, 186)],             'open'),
-    'full_wave': ([SH_F, (82, 200), (46, 168)],           [SH_N, (204, 238), (220, 226)],             'fist'),
-    'ring':  ([SH_F, (106, 236), (110, 258)],             [SH_N, (230, 192), (262, 142)],             'open'),
+    'idle':  ([SH_F, (204, 220), (226, 226)], -58,  [SH_N, (188, 242), (200, 256)], -26, 'stick'),
+    'talk':  ([SH_F, (200, 226), (218, 236)], -52,  [SH_N, (204, 232), (222, 218)], -68, 'stick'),
+    'happy': ([SH_F, (204, 222), (224, 218)], -66,  [SH_N, (198, 236), (214, 238)], -44, 'stick'),
+    'cheer': ([(122, 214), (96, 186), (82, 152)], -100, [SH_N, (212, 190), (226, 154)], -72, 'stick'),
+    'think': ([SH_F, (200, 226), (218, 236)], -52,  [SH_N, (204, 240), (222, 238)], -120, 'stick'),
+    'oops':  ([SH_F, (200, 226), (218, 236)], -52,  [SH_N, (210, 214), (230, 198)], -58, 'stick'),
+    'wave':  ([SH_F, (200, 228), (218, 238)], -40,  [SH_N, (218, 194), (234, 150)], 0, 'open'),
+    'point': ([SH_F, (200, 226), (218, 236)], -52,  [SH_N, (210, 210), (228, 196)], -38, 'stick'),
+    'dance': ([SH_F, (204, 230), (224, 240)], -12,  [SH_N, (214, 192), (224, 156)], -84, 'stick'),
+    'beat':  ([SH_F, (206, 220), (228, 222)], 30,   [SH_N, (194, 240), (210, 246)], 36, 'stick'),
+    'full_wave': ([SH_F, (200, 228), (214, 242)], -8, [SH_N, (214, 192), (228, 152)], -64, 'stick'),
+    'icon':  ([SH_F, (208, 208), (234, 204)], 10,   [SH_N, (204, 226), (226, 228)], 16, 'stick'),
 }
 ARMS['blink'] = ARMS['idle']
 
 POSES = {
-    #             eyes      mouth     tilt brows    look      far hand
-    'idle':      ('open',   'smile',  0,   None,    (0, 2),   'fist'),
-    'blink':     ('closed', 'smile',  0,   None,    (0, 2),   'fist'),
-    'talk':      ('open',   'talk',   0,   None,    (0, 2),   'fist'),
-    'happy':     ('wide',   'big',    0,   None,    (0, 1),   'open'),
-    'cheer':     ('happy',  'big',    0,   None,    (0, 0),   'open'),
-    'think':     ('look',   'hmm',    7,   (0, 6),  (4, -5),  'fist'),
-    'oops':      ('wide',   'o',     -6,   (7, 0),  (-1, 1),  'fist'),
-    'wave':      ('open',   'big',    0,   None,    (0, 2),   'fist'),
-    'point':     ('look',   'talk',   0,   (4, 4),  (5, -3),  'fist'),
-    'dance':     ('happy',  'big',    0,   None,    (0, 0),   'open'),
-    'full_wave': ('wide',   'big',    0,   None,    (0, 2),   'open'),
+    #             eyes      mouth     brows    look      ears (near, far)  tail
+    'idle':      ('open',   'smile',  None,    (1, 2),   (0, 0),           'rest'),
+    'blink':     ('closed', 'smile',  None,    (1, 2),   (0, 0),           'rest'),
+    'talk':      ('open',   'talk',   None,    (1, 2),   (4, -4),          'rest'),
+    'happy':     ('wide',   'tongue', None,    (0, 1),   (14, -12),        'up'),
+    'cheer':     ('happy',  'big',    None,    (0, 0),   (26, -24),        'up'),
+    'think':     ('look',   'hmm',    (0, 6),  (4, -5),  (6, -2),          'rest'),
+    'oops':      ('wide',   'o',      (7, 0),  (-1, 1),  (-4, -34),        'rest'),
+    'wave':      ('open',   'big',    None,    (1, 2),   (10, -8),         'up'),
+    'point':     ('look',   'talk',   (4, 4),  (5, -3),  (4, -6),          'rest'),
+    'dance':     ('happy',  'tongue', None,    (0, 0),   (52, -50),        'wag'),
+    'beat':      ('wide',   'smile',  (3, 3),  (4, 3),   (-8, 8),          'up'),
+    'full_wave': ('wide',   'big',    None,    (1, 2),   (12, -10),        'up'),
+    'icon':      ('happy',  'big',    None,    (0, 0),   (-6, 10),         'up'),
 }
 
 
 def eye(cx, cy, r, mode='open', look=(0, 2)):
     o = ''
     if mode in ('open', 'wide', 'look'):
-        rr = r * (1.08 if mode == 'wide' else 1)
-        o += ell(cx, cy, rr * 0.9, rr, fl(P['white'], P['line'], 3.2))
-        px, py = cx + look[0], cy + look[1]
-        pr = r * (0.72 if mode == 'wide' else 0.68)
-        o += ell(px, py, pr * 0.9, pr, f'fill="{P["pupil"]}"')
-        o += circ(px - pr * 0.3, py - pr * 0.4, pr * 0.44, 'fill="#FFFFFF"')
-        o += circ(px + pr * 0.4, py + pr * 0.42, pr * 0.18, 'fill="#FFFFFF"')
+        rr = r * (1.06 if mode == 'wide' else 1)
+        o += ell(cx, cy, rr * 0.92, rr * 1.04, f'fill="{P["pupil"]}"')
+        px, py = cx + look[0] * 0.5, cy + look[1] * 0.5
+        # big dark eyes with two catch-lights (no white sclera: rounder, younger puppy look)
+        o += circ(px - rr * 0.3, py - rr * 0.36, rr * 0.36, 'fill="#FFFFFF"')
+        o += circ(px + rr * 0.34, py + rr * 0.34, rr * 0.15, 'fill="#FFFFFF"')
+        o += ell(cx, cy + rr * 0.55, rr * 0.5, rr * 0.2, 'fill="#6C6488" opacity=".55"')
     elif mode == 'closed':          # gentle U: blink
-        o += path(f'M{f(cx - r * 0.8)},{f(cy)} Q{f(cx)},{f(cy + r * 0.62)} {f(cx + r * 0.8)},{f(cy)}', st(P['pupil'], 4.6))
+        o += path(f'M{f(cx - r * 0.85)},{f(cy)} Q{f(cx)},{f(cy + r * 0.7)} {f(cx + r * 0.85)},{f(cy)}', st(P['pupil'], 4.8))
     elif mode == 'happy':           # ^ arcs
-        o += path(f'M{f(cx - r * 0.8)},{f(cy + r * 0.32)} Q{f(cx)},{f(cy - r * 0.9)} {f(cx + r * 0.8)},{f(cy + r * 0.32)}',
-                  st(P['pupil'], 5.2))
+        o += path(f'M{f(cx - r * 0.85)},{f(cy + r * 0.34)} Q{f(cx)},{f(cy - r * 0.95)} {f(cx + r * 0.85)},{f(cy + r * 0.34)}',
+                  st(P['pupil'], 5.4))
     return o
 
 
 def mouth(mode):
     mx, my = MOUTH
     line = P['line']
-    if mode == 'closed':
-        return path(f'M{mx - 9},{my - 2} Q{mx - 1},{my + 6} {mx + 9},{my - 3}', st(line, 3.6))
-    if mode == 'smile':
-        return path(f'M{mx - 12},{my - 4} Q{mx - 1},{my + 8} {mx + 11},{my - 5}', st(line, 3.8))
+    w = f'M{mx - 13},{my - 3} Q{mx - 7},{my + 5} {mx},{my - 2} Q{mx + 7},{my + 5} {mx + 13},{my - 4}'
+    if mode == 'smile':     # the puppy "w"
+        return path(w, st(line, 3.6))
     if mode == 'talk':
-        o = path(f'M{mx - 10},{my - 4} Q{mx},{my - 5} {mx + 10},{my - 5} Q{mx + 10},{my + 11} {mx},{my + 12} '
-                 f'Q{mx - 10},{my + 10} {mx - 10},{my - 4} Z', fl(P['mouth'], line, 3.2))
-        o += ell(mx, my + 7.5, 6, 3.4, f'fill="{P["tongue"]}"')
+        o = path(f'M{mx - 11},{my - 3} Q{mx},{my - 5} {mx + 11},{my - 4} Q{mx + 10},{my + 12} {mx},{my + 13} '
+                 f'Q{mx - 10},{my + 12} {mx - 11},{my - 3} Z', fl(P['mouth'], line, 3.2))
+        o += ell(mx, my + 8, 6.4, 3.6, f'fill="{P["tongue"]}"')
         return o
-    if mode == 'big':
-        w, h = 15, 15
-        o = path(f'M{f(mx - w)},{f(my - 5)} Q{mx},{f(my - 1)} {f(mx + w)},{f(my - 7)} '
-                 f'Q{f(mx + w * 0.8)},{f(my + h)} {mx},{f(my + h)} Q{f(mx - w * 0.8)},{f(my + h)} {f(mx - w)},{f(my - 5)} Z',
+    if mode in ('big', 'tongue'):
+        ww, h = 16, 15
+        o = path(f'M{f(mx - ww)},{f(my - 4)} Q{mx},{f(my - 1)} {f(mx + ww)},{f(my - 6)} '
+                 f'Q{f(mx + ww * 0.8)},{f(my + h)} {mx},{f(my + h)} Q{f(mx - ww * 0.8)},{f(my + h)} {f(mx - ww)},{f(my - 4)} Z',
                  fl(P['mouth'], line, 3.2))
-        o += ell(mx, my + h - 5, 8, 4, f'fill="{P["tongue"]}"')
+        if mode == 'tongue':   # tongue hanging out a little below the mouth
+            o += path(f'M{mx - 8},{my + 6} Q{mx - 9},{my + 24} {mx},{my + 24} Q{mx + 9},{my + 24} {mx + 8},{my + 6} Z',
+                      fl(P['tongue'], '#C9645A', 2.8))
+            o += path(f'M{mx},{my + 9} L{mx},{my + 17}', st('#C9645A', 2.2))
+        else:
+            o += ell(mx, my + h - 5, 8, 4, f'fill="{P["tongue"]}"')
         return o
     if mode == 'o':
-        return ell(mx + 1, my + 3, 5.5, 6.5, fl(P['mouth'], line, 3))
+        return ell(mx + 1, my + 3, 5.8, 7, fl(P['mouth'], line, 3))
     if mode == 'hmm':
-        return path(f'M{mx - 10},{my + 2} Q{mx - 5},{my - 3} {mx},{my + 1} Q{mx + 5},{my + 5} {mx + 10},{my}', st(line, 3.6))
+        return path(f'M{mx - 11},{my + 2} Q{mx - 5},{my - 3} {mx},{my + 1} Q{mx + 5},{my + 5} {mx + 11},{my}', st(line, 3.6))
     return ''
 
 
-def ears(doc):
-    """Big round monkey ears: the near one sticks out on the viewer's left, the far one peeks out behind the head."""
-    o = doc.shaded('<circle cx="224" cy="116" r="19" {a}/>', P['farFur'], P['farSh'], P['line'], dx=-5, dy=-5)
-    o += circ(226, 117, 10.5, f'fill="{P["faceSh"]}"')
-    o += doc.shaded('<circle cx="78" cy="130" r="27" {a}/>', P['fur'], P['sh'], P['line'], dx=-6, dy=-6)
-    o += circ(80, 132, 16.5, f'fill="{P["face"]}"')
-    o += path('M74,124 Q70,134 78,142', st(P['faceSh'], 3.4))
-    return o
+def ear(doc, root, ang, far=False):
+    sx = -0.86 if far else 1      # the far ear is mirrored (hangs to the right) and a bit smaller
+    pts = [rot(root[0] + x * sx, root[1] + y * abs(sx), ang, *root) for (x, y) in EAR]
+    d = ptsd(pts)
+    base, sh = (P['earSh'], '#8C5632') if far else (P['ear'], P['earSh'])
+    return doc.shaded(f'<path d="{d}" {{a}}/>', base, sh, P['line'], dx=-5 * sx, dy=-4)
 
 
 def head(doc, pose):
-    eyes, mo, tilt, brows, look, _ = POSES[pose]
-    hx, hy, hrx, hry = HEAD
-    o = ears(doc)
-    # hair curl on top (a single spring-like curl, Bibi's mark)
-    curl = 'M140,70 C134,56 140,42 154,40 C166,39 172,50 166,58 C161,64 152,60 156,53'
-    o += tube(curl, 13, P['line'], P['fur'], 4.2)
-    hi = ell(110, 104, 12, 6.5, 'fill="#FFFFFF" opacity=".28" transform="rotate(-42 110 104)"')
-    tpl = f'<ellipse cx="{hx}" cy="{hy}" rx="{hrx}" ry="{hry}" {{a}}/>'
-    o += doc.shaded(tpl, P['fur'], P['sh'], P['line'], dx=-12, dy=-10, hi=hi)
-    # two little fur flicks on the forehead
-    o += path('M134,78 Q142,70 150,74 M152,72 Q160,64 168,70', st(P['sh'], 3.2))
-    # heart face
-    fd = ptsd(FACE)
-    o += doc.shaded(f'<path d="{fd}" {{a}}/>', P['face'], P['faceSh'], P['faceLine'], dx=-7, dy=-7, w=3)
+    eyes, mo, brows, look, (ean, eaf), _ = POSES[pose]
+    o = ''
+    tuft = doc.shaded(f'<path d="{TUFT}" {{a}}/>', P['fur'], P['sh'], P['line'], dx=-4, dy=-3, w=4)
+    o += tuft
+    hd = ptsd(HEAD)
+    hi = ell(108, 98, 15, 7.5, 'fill="#FFFFFF" opacity=".32" transform="rotate(-42 108 98)"')
+    o += doc.shaded(f'<path d="{hd}" {{a}}/>', P['fur'], P['sh'], P['line'], dx=-12, dy=-11, hi=hi)
+    # a soft cream blaze between the eyes running into the muzzle
+    mx, my, mrx, mry = MUZZLE
+    o += doc.shaded(f'<ellipse cx="{mx}" cy="{my}" rx="{mrx}" ry="{mry}" {{a}}/>', P['cream'], P['creamSh'], P['creamLine'],
+                    dx=-6, dy=-6, w=3)
     # cheeks
-    o += ell(132, 158, 12, 7.5, f'fill="{P["cheek"]}" opacity=".85"')
-    o += ell(209, 154, 6.5, 5.5, f'fill="{P["cheek"]}" opacity=".85"')
-    # nose (small soft oval with a shine) + philtrum
+    o += ell(118, 152, 13, 8, f'fill="{P["cheek"]}" opacity=".8"')
+    o += ell(222, 146, 6.5, 5.5, f'fill="{P["cheek"]}" opacity=".8"')
+    # nose: a rounded button + shine, philtrum to the mouth
     nx, ny = NOSE
-    o += ell(nx, ny, 7, 4.6, f'fill="{P["nose"]}"') + ell(nx - 2, ny - 1.6, 2.4, 1.3, 'fill="#FFFFFF" opacity=".55"')
-    o += path(f'M{nx - 2},{ny + 4} Q{nx - 4},{ny + 10} {MOUTH[0]},{MOUTH[1] - 4}', st(P['faceLine'], 2.2))
+    o += path(f'M{nx - 11},{ny - 4} Q{nx},{ny - 10} {nx + 11},{ny - 4} Q{nx + 10},{ny + 7} {nx},{ny + 8} Q{nx - 10},{ny + 7} {nx - 11},{ny - 4} Z',
+              f'fill="{P["nose"]}"')
+    o += ell(nx - 3, ny - 3, 3.8, 2, 'fill="#FFFFFF" opacity=".6"')
+    o += path(f'M{nx},{ny + 8} L{MOUTH[0]},{MOUTH[1] - 2}', st(P['line'], 3))
     o += mouth(mo)
     o += eye(*EYE_N, mode=eyes, look=look)
     o += eye(*EYE_F, mode=eyes, look=(look[0] * 0.8, look[1] * 0.8))
-    if eyes in ('open', 'wide', 'look'):  # two tiny lashes at the outer corner of the near eye
-        x, y, r = EYE_N
-        o += path(f'M{f(x - r * 0.8)},{f(y - r * 0.56)} L{f(x - r * 1.16)},{f(y - r * 0.8)} '
-                  f'M{f(x - r * 0.88)},{f(y - r * 0.2)} L{f(x - r * 1.26)},{f(y - r * 0.28)}', st(P['line'], 2.8))
     if brows:
         for (cx, cy, r), lift in zip((EYE_N, EYE_F), brows):
-            y = cy - r - 7 - lift
-            o += path(f'M{f(cx - 7)},{f(y + 3)} Q{f(cx)},{f(y - 3)} {f(cx + 7)},{f(y + 3)}', st(P['line'], 3.4))
-    if tilt:
-        o = f'<g transform="rotate({tilt} {NECK[0]} {NECK[1]})">{o}</g>'
+            y = cy - r - 8 - lift
+            o += path(f'M{f(cx - 7)},{f(y + 3)} Q{f(cx)},{f(y - 3)} {f(cx + 7)},{f(y + 3)}', st(P['line'], 3.6))
+    # far ear behind the head, near ear in front (both flop per pose)
+    far_ear = ear(doc, EAR_F, eaf, far=True)
+    near_ear = ear(doc, EAR_N, ean)
+    return far_ear, o + near_ear
+
+
+def stick(px, py, ang):
+    """A wooden drumstick gripped at (px, py) pointing at ang. Returns svg and the tip centre."""
+    a = math.radians(ang)
+    tx, ty = math.cos(a), math.sin(a)
+    bx, by = px - tx * STICK_BACK, py - ty * STICK_BACK
+    ex, ey = px + tx * (STICK_L - TIP_R * 0.6), py + ty * (STICK_L - TIP_R * 0.6)
+    d = f'M{f(bx)},{f(by)} L{f(ex)},{f(ey)}'
+    o = path(d, st(P['woodLine'], STICK_W + 3.6)) + path(d, st(P['wood'], STICK_W - 0.6))
+    # a light grain line along the upper edge
+    nx, ny = ty, -tx
+    if ny > 0:
+        nx, ny = -nx, -ny
+    o += path(f'M{f(bx + tx * 4 + nx * 1.8)},{f(by + ty * 4 + ny * 1.8)} L{f(ex - tx * 6 + nx * 1.8)},{f(ey - ty * 6 + ny * 1.8)}',
+              st('#F1D9B6', 2.2))
+    cx, cy = px + tx * STICK_L, py + ty * STICK_L
+    o += circ(cx, cy, TIP_R, fl(P['tip'], P['tipLine'], 3)) + circ(cx - 2, cy - 2.2, 2.2, 'fill="#FFFFFF"')
+    return o, (cx, cy)
+
+
+def paw(hx, hy, tx, ty, far=False, line_dir=None):
+    fur = P['farFur'] if far else P['fur']
+    o = circ(hx, hy, PAW_R, fl(fur, P['line'], 3.8))
+    # two toe lines on the front of the gripping paw
+    lx, ly = line_dir or (tx, ty)
+    for s in (-1, 1):
+        ox, oy = hx + lx * 5 + (-ly) * s * 3.2, hy + ly * 5 + lx * s * 3.2
+        o += path(f'M{f(ox)},{f(oy)} L{f(ox + lx * 5)},{f(oy + ly * 5)}', st(P['line'], 2.4) + ' opacity=".8"')
     return o
 
 
-def arm(pts, kind, far=False):
-    """Arm tube through pts (shoulder → elbow → hand centre) + hand. Returns svg and the hand tip point."""
+def arm(pts, ang, kind, far=False):
+    """Front leg tube through pts + paw (+ stick). Returns svg (stick behind paw) and the tip used for the hand table."""
     d = ptsd(pts, close=False)
     fur = P['farFur'] if far else P['fur']
     o = tube(d, ARM_W, P['line'], fur)
@@ -295,250 +357,241 @@ def arm(pts, kind, far=False):
     ex, ey = pts[-2]
     ln = math.hypot(hx - ex, hy - ey) or 1
     tx, ty = (hx - ex) / ln, (hy - ey) / ln
-    palm = P['faceSh'] if far else P['face']
-    tip = (hx + tx * HAND_R, hy + ty * HAND_R)
-    if kind == 'point':
-        fx, fy = hx + tx * 21, hy + ty * 21
-        o += path(f'M{f(hx)},{f(hy)} L{f(fx)},{f(fy)}', st(P['line'], 12)) + path(f'M{f(hx)},{f(hy)} L{f(fx)},{f(fy)}', st(palm, 4.2))
-        o += circ(hx, hy, HAND_R, fl(palm, P['line'], 3.6))
-        # curled fingers line
-        o += path(f'M{f(hx - ty * 6 + tx * 2)},{f(hy + tx * 6 + ty * 2)} Q{f(hx + tx * 6)},{f(hy + ty * 6)} '
-                  f'{f(hx + ty * 6 + tx * 2)},{f(hy - tx * 6 + ty * 2)}', st(P['faceLine'], 2.2))
-        tip = (fx + tx * 3, fy + ty * 3)
-    elif kind == 'open':
-        # palm with three little finger bumps fanned along the arm direction + a thumb
-        for a in (-38, 0, 38):
+    if kind == 'open':
+        # waving paw: a round pad with three toe beans, slightly bigger
+        o += circ(hx, hy, PAW_R + 2.5, fl(fur, P['line'], 3.8))
+        o += ell(hx, hy + 2.5, 6.4, 5, f'fill="{P["earIn"]}"')
+        for a in (-40, 0, 40):
             c, s = math.cos(math.radians(a)), math.sin(math.radians(a))
             dx, dy = tx * c - ty * s, tx * s + ty * c
-            o += circ(hx + dx * 10.5, hy + dy * 10.5, 5.2, fl(palm, P['line'], 3))
-        o += circ(hx, hy, HAND_R + 0.5, fl(palm, P['line'], 3.6))
-        o += circ(hx, hy, HAND_R - 2.4, f'fill="{palm}"')
-        tip = (hx + tx * 16, hy + ty * 16)
-    else:
-        o += circ(hx, hy, HAND_R, fl(palm, P['line'], 3.6))
-        o += path(f'M{f(hx - ty * 5 + tx * 3)},{f(hy + tx * 5 + ty * 3)} Q{f(hx + tx * 7)},{f(hy + ty * 7)} '
-                  f'{f(hx + ty * 5 + tx * 3)},{f(hy - tx * 5 + ty * 3)}', st(P['faceLine'], 2.2))
+            o += circ(hx + dx * 8.6, hy + dy * 8.6 + 1, 2.6, f'fill="{P["earIn"]}"')
+        return o, (hx + tx * (PAW_R + 3), hy + ty * (PAW_R + 3))
+    sk, tip = stick(hx, hy, ang)
+    if kind == 'two':
+        sk2, _ = stick(hx, hy, ang - 18)
+        sk = sk2 + sk
+    o += sk
+    o += paw(hx, hy, tx, ty, far)
     return o, tip
 
 
 TAILS = {
-    'rest':  [(104, 256), (74, 266), (48, 252), (40, 222), (50, 196), (72, 188), (86, 202), (78, 216), (66, 210)],
-    'swirl': [(104, 254), (70, 252), (44, 228), (42, 196), (58, 172), (82, 168), (94, 184), (86, 198), (74, 192)],
+    'rest': [(104, 258), (86, 254), (74, 240), (74, 224)],
+    'up':   [(104, 256), (88, 246), (82, 228), (88, 212)],
+    'wag':  [(104, 256), (84, 238), (86, 218), (100, 206)],
 }
 
 
 def tail(kind):
-    d = ptsd(TAILS[kind], close=False)
-    return tube(d, 15, P['line'], P['fur']) + path(d, st('#FFFFFF', 2.2) + ' opacity=".18" transform="translate(-2,-2)"')
+    pts = TAILS[kind]
+    d = ptsd(pts, close=False)
+    o = tube(d, 19, P['line'], P['fur'])
+    # cream tip
+    x, y = pts[-1]
+    o += circ(x, y, 5.4, f'fill="{P["cream"]}"')
+    if kind == 'wag':
+        o += path('M70,206 Q64,218 68,232 M80,190 Q70,198 70,210', st(P['line'], 3.2) + ' opacity=".7"')
+    return o
 
 
-def legs(doc, dance=False):
-    """Returns (far leg, near leg) svg. Feet are soft cream ovals pointing right; the far leg sits behind the body."""
-    far = tube('M126,266 L122,280', 22, P['line'], P['farFur'])
-    far += ell(124, 284, 17, 7.6, fl(P['faceSh'], P['line'], 3.6))
-    if dance:   # near knee up, foot kicked forward (in front of the body)
-        thigh = ''
-        near = tube('M166,262 Q192,266 204,250', 23, P['line'], P['fur'])
-        near += ell(210, 245, 9, 15, fl(P['face'], P['line'], 3.6) + ' transform="rotate(-24 210 245)"')
-    else:       # thigh hidden behind the round body, only the foot peeks out in front
-        thigh = tube('M166,262 L170,280', 23, P['line'], P['fur'])
-        near = ell(176, 284, 21, 7.8, fl(P['face'], P['line'], 3.6))
-        near += path('M188,281 L190,287 M181,280 L182,287', st(P['faceLine'], 2))
-    return far + thigh, near
+def legs(doc):
+    """(far foot behind the body, near haunch + near foot in front). Identical in every frame."""
+    far = ell(196, 284, 16, 8, fl(P['farFur'], P['line'], 3.8))
+    hi = ell(116, 250, 8, 4.5, 'fill="#FFFFFF" opacity=".22" transform="rotate(-36 116 250)"')
+    near = doc.shaded('<ellipse cx="126" cy="262" rx="27" ry="25" {a}/>', P['fur'], P['sh'], P['line'], dx=-6, dy=-7, hi=hi)
+    near += ell(150, 284, 23, 8.4, fl(P['fur'], P['line'], 3.8))
+    near += path('M162,280 L164,287 M154,279 L155,287', st(P['line'], 2.4) + ' opacity=".8"')
+    return far, near
 
 
-def bandana(doc):
-    band = 'M104,200 C128,214 172,216 196,198 C200,204 201,212 197,218 C172,236 126,234 101,216 C98,210 99,204 104,200 Z'
-    knot = 'M148,216 C162,220 178,218 190,212 C190,228 180,244 168,252 C160,240 152,228 148,216 Z'
-    o = ''
-    for shape in (band, knot):
-        cid = doc.clip(f'<path d="{shape}"/>')
-        o += path(shape, f'fill="{P["band"]}"')
-        o += f'<g clip-path="url(#{cid})">'
-        o += path('M96,222 C126,240 176,240 204,214 L204,260 L96,260 Z', f'fill="{P["bandSh"]}"')
-        for (x, y) in ((112, 210), (128, 220), (146, 214), (164, 222), (182, 214), (194, 206), (120, 202), (156, 206),
-                       (172, 232), (160, 240), (178, 222)):
-            o += circ(x, y, 3.9, f'fill="{P["dot"]}"')
-        o += '</g>'
-        o += path(shape, f'fill="none" stroke="{P["bandLine"]}" stroke-width="{f(LW * 0.8)}" stroke-linejoin="round"')
+def collar(doc):
+    """White sailor collar with a slate trim line + a small slate neckerchief knot in front."""
+    shape = 'M98,196 C122,216 176,218 200,194 C206,204 206,216 200,222 C178,242 120,242 96,220 C91,210 92,200 98,196 Z'
+    cid = doc.clip(f'<path d="{shape}"/>')
+    o = path(shape, f'fill="{P["collar"]}"')
+    o += f'<g clip-path="url(#{cid})">'
+    o += path('M90,222 C124,246 176,246 208,218 L208,256 L90,256 Z', f'fill="{P["collarSh"]}"')
+    o += '</g>'
+    o += path('M102,213 C128,231 172,233 196,213', st(P['slate'], 3.6))
+    o += path(shape, f'fill="none" stroke="{P["slate"]}" stroke-width="{f(LW * 0.75)}" stroke-linejoin="round"')
+    # neckerchief tails + knot (slate)
+    o += path('M170,228 L160,248 L172,244 Z M176,228 L184,248 L188,236 Z', fl(P['slate'], P['slateD'], 2.6))
+    o += ell(173, 227, 7.5, 6, fl(P['slate'], P['slateD'], 2.6))
+    o += ell(171, 225, 2.6, 1.6, 'fill="#FFFFFF" opacity=".45"')
     return o
 
 
 def body(doc):
     bx, by, brx, bry = BODY
     tpl = f'<ellipse cx="{bx}" cy="{by}" rx="{brx}" ry="{bry}" {{a}}/>'
-    hi = ell(116, 228, 9, 5.5, 'fill="#FFFFFF" opacity=".24" transform="rotate(-36 116 228)"')
-    o = doc.shaded(tpl, P['fur'], P['sh'], P['line'], dx=-11, dy=-9, hi=hi)
+    o = doc.shaded(tpl, P['fur'], P['sh'], P['line'], dx=-11, dy=-9)
     px, py, prx, pry = BELLY
-    o += doc.shaded(f'<ellipse cx="{px}" cy="{py}" rx="{prx}" ry="{pry}" {{a}}/>', P['face'], P['faceSh'], P['faceSh'],
+    o += doc.shaded(f'<ellipse cx="{px}" cy="{py}" rx="{prx}" ry="{pry}" {{a}}/>', P['cream'], P['creamSh'], P['creamSh'],
                     dx=-5, dy=-5, w=0.1)
     return o
 
 
-def small_bell(doc, cx, top, h, base, dark, light, line=None, clap=0, tilt=0):
-    """A classic camp bell (dome + flared lip) hanging from (cx, top) with a crown loop; used by the title pose + icon."""
-    line = line or dark
-    w = h * 0.86
-    y0 = top + h * 0.12
-    yl = top + h * 0.86
-    d = (f'M{f(cx - w * 0.28)},{f(y0 + h * 0.06)} C{f(cx - w * 0.3)},{f(y0 - h * 0.08)} {f(cx + w * 0.3)},{f(y0 - h * 0.08)} '
-         f'{f(cx + w * 0.28)},{f(y0 + h * 0.06)} C{f(cx + w * 0.36)},{f(y0 + h * 0.3)} {f(cx + w * 0.32)},{f(yl - h * 0.14)} '
-         f'{f(cx + w * 0.5)},{f(yl)} C{f(cx + w * 0.3)},{f(yl + h * 0.08)} {f(cx - w * 0.3)},{f(yl + h * 0.08)} {f(cx - w * 0.5)},{f(yl)} '
-         f'C{f(cx - w * 0.32)},{f(yl - h * 0.14)} {f(cx - w * 0.36)},{f(y0 + h * 0.3)} {f(cx - w * 0.28)},{f(y0 + h * 0.06)} Z')
+def wood_drum(doc, cx, bottom, w, h, body_col=DRUM_WOOD, cord=True):
+    """A small standing drum: barrel body, silver hoops top + bottom, cream skin ellipse on top, tension cords."""
+    base, dark, light = body_col
+    ry = w * 0.2
+    top = bottom - h
     o = ''
-    o += circ(cx, top + h * 0.06, h * 0.07, f'fill="none" stroke="{P["brassD"]}" stroke-width="{f(max(2, h * 0.045))}"')
-    o += circ(cx + clap, yl + h * 0.06, h * 0.085, fl(P['brass'], P['brassD'], max(1.6, h * 0.03)))
-    hi = path(f'M{f(cx - w * 0.16)},{f(y0 + h * 0.08)} C{f(cx - w * 0.24)},{f(y0 + h * 0.3)} {f(cx - w * 0.24)},{f(yl - h * 0.24)} '
-              f'{f(cx - w * 0.3)},{f(yl - h * 0.08)}', st(light, max(2.4, h * 0.06)) + ' opacity=".85"')
-    o += doc.shaded(f'<path d="{d}" {{a}}/>', base, dark, line, dx=-w * 0.12, dy=-h * 0.04, w=max(2.4, h * 0.045), hi=hi)
-    o += path(f'M{f(cx - w * 0.47)},{f(yl - h * 0.02)} C{f(cx - w * 0.2)},{f(yl + h * 0.05)} {f(cx + w * 0.2)},{f(yl + h * 0.05)} '
-              f'{f(cx + w * 0.47)},{f(yl - h * 0.02)}', st(line, max(1.8, h * 0.03)) + ' opacity=".6"')
-    if tilt:
-        o = f'<g transform="rotate({f(tilt)} {f(cx)} {f(top)})">{o}</g>'
+    shell = (f'M{f(cx - w / 2)},{f(top)} L{f(cx - w / 2 + 1)},{f(bottom - ry * 0.6)} '
+             f'A{f(w / 2)},{f(ry)} 0 0 0 {f(cx + w / 2 - 1)},{f(bottom - ry * 0.6)} L{f(cx + w / 2)},{f(top)} Z')
+    hi = path(f'M{f(cx - w * 0.36)},{f(top + h * 0.2)} L{f(cx - w * 0.36)},{f(bottom - h * 0.24)}', st(light, max(3, w * 0.05)) + ' opacity=".9"')
+    o += doc.shaded(f'<path d="{shell}" {{a}}/>', base, dark, dark, dx=-w * 0.14, dy=0, w=max(3, w * 0.04), hi=hi)
+    if cord:   # zig-zag cream cords between the hoops
+        n = 6
+        ys, ye = top + ry * 0.9, bottom - ry * 0.9
+        d = ''
+        for i in range(n + 1):
+            a = math.pi * (0.08 + 0.84 * i / n)
+            x = cx - math.cos(a) * w * 0.5
+            yy = (ye if i % 2 else ys) + math.sin(a) * ry * 0.5
+            d += ('M' if i == 0 else 'L') + f'{f(x)},{f(yy)} '
+        o += path(d, st('#F6EBD3', max(2.2, w * 0.03)))
+    # bottom hoop
+    bh = max(5, h * 0.12)
+    o += path(f'M{f(cx - w / 2 - 1)},{f(bottom - bh - ry * 0.6)} A{f(w / 2 + 1)},{f(ry)} 0 0 0 {f(cx + w / 2 + 1)},{f(bottom - bh - ry * 0.6)} '
+              f'L{f(cx + w / 2 + 1)},{f(bottom - ry * 0.6)} A{f(w / 2 + 1)},{f(ry)} 0 0 1 {f(cx - w / 2 - 1)},{f(bottom - ry * 0.6)} Z',
+              fl(HOOP[0], HOOP[1], max(2.4, w * 0.03)))
+    # skin + top hoop
+    o += ell(cx, top, w / 2 + 2, ry + 2, fl(HOOP[0], HOOP[1], max(2.6, w * 0.035)))
+    o += ell(cx, top - 1, w / 2 - w * 0.04, ry - w * 0.035, fl(SKIN[0], SKIN[2], max(1.6, w * 0.02)))
+    o += ell(cx - w * 0.14, top - ry * 0.25, w * 0.14, ry * 0.3, f'fill="#FFFFFF" opacity=".75"')
     return o
 
 
-def bibi(doc, pose, arms_pose=None):
-    eyes, mo, tilt, brows, look, far_kind = POSES[pose]
-    aF, aN, near_kind = ARMS[arms_pose or pose]
-    dance = pose == 'dance'
-    o = tail('swirl' if dance else 'rest')
-    far_arm, far_tip = arm(aF, far_kind, far=True)
-    far_leg, near_leg = legs(doc, dance)
-    o += far_leg
-    o += far_arm
-    o += body(doc)
-    o += near_leg
-    o += bandana(doc)
-    o += head(doc, pose)
-    near_arm, near_tip = arm(aN, near_kind)
+def bibi(doc, pose):
+    eyes, mo, brows, look, ears_, tail_kind = POSES[pose]
+    aF, angF, aN, angN, near_kind = ARMS[pose]
+    o = tail(tail_kind)
+    far_ear, head_svg = head(doc, pose)
+    far_kind = 'two' if near_kind == 'open' else 'stick'
+    far_arm, far_tip = arm(aF, angF, far_kind, far=True)
+    far_leg, near_leg = legs(doc)
+    o += far_ear + far_leg + far_arm
+    o += body(doc) + near_leg
+    o += collar(doc)
+    if pose == 'full_wave':   # the little drum beside him, the far stick resting on its skin
+        o += wood_drum(doc, 252, 284, 64, 46)
+        o += arm(aF, angF, 'stick', far=True)[0]
+    o += head_svg
+    near_arm, near_tip = arm(aN, angN, near_kind)
     # pose extras (drawn in the line colour, soft)
     soft = st(P['line'], 3.6) + ' opacity=".75"'
     ex = ''
     if pose in ('wave', 'full_wave'):
-        hx, hy = aN[-1] if pose == 'wave' else aF[-1]
-        sgn = 1 if pose == 'wave' else -0.6
-        ex += path(f'M{f(hx + sgn * 22)},{f(hy - 16)} Q{f(hx + sgn * 32)},{f(hy - 4)} {f(hx + sgn * 30)},{f(hy + 12)} '
-                  f'M{f(hx + sgn * 30)},{f(hy - 30)} Q{f(hx + sgn * 46)},{f(hy - 12)} {f(hx + sgn * 42)},{f(hy + 10)}', soft)
+        hx, hy = near_tip
+        ex += path(f'M{f(hx + 20)},{f(hy - 10)} Q{f(hx + 30)},{f(hy + 2)} {f(hx + 28)},{f(hy + 18)} '
+                   f'M{f(hx + 30)},{f(hy - 26)} Q{f(hx + 44)},{f(hy - 8)} {f(hx + 40)},{f(hy + 14)}', soft)
     if pose == 'cheer':
-        for (x, y, r) in ((40, 120, 5), (262, 112, 5), (30, 92, 3.4), (276, 86, 3.4)):
+        for (x, y, r) in ((40, 116, 5), (270, 100, 5), (30, 88, 3.4), (282, 72, 3.4)):
             ex += circ(x, y, r, f'fill="none" stroke="{P["line"]}" stroke-width="2.6" opacity=".8"')
     if pose == 'dance':
-        ex += path('M262,170 Q276,180 276,196 M226,264 Q238,272 236,284', soft)
-        ex += circ(270, 156, 3.6, f'fill="none" stroke="{P["line"]}" stroke-width="2.6" opacity=".8"')
+        ex += path('M264,150 Q278,162 276,178', soft)
+        ex += circ(268, 132, 3.6, f'fill="none" stroke="{P["line"]}" stroke-width="2.6" opacity=".8"')
     if pose == 'oops':
-        ex += path('M244,64 Q244,52 254,52 Q264,52 262,62 Q260,70 252,72 L252,78', st(P['line'], 4) + ' opacity=".8"')
-        ex += circ(252, 88, 2.8, f'fill="{P["line"]}" opacity=".8"')
+        ex += path('M246,58 Q246,46 256,46 Q266,46 264,56 Q262,64 254,66 L254,72', st(P['line'], 4) + ' opacity=".8"')
+        ex += circ(254, 82, 2.8, f'fill="{P["line"]}" opacity=".8"')
     if pose == 'think':
-        for (x, y, r) in ((228, 86, 3.4), (240, 70, 5), (256, 52, 7)):
+        for (x, y, r) in ((232, 84, 3.4), (246, 68, 5), (262, 50, 7)):
             ex += circ(x, y, r, f'fill="none" stroke="{P["line"]}" stroke-width="2.6" opacity=".75"')
+    if pose == 'beat':   # little "whack" ticks above the two tips
+        for (x, y) in (far_tip, near_tip):
+            ex += path(f'M{f(x - 4)},{f(y - 14)} L{f(x - 7)},{f(y - 24)} M{f(x + 6)},{f(y - 12)} L{f(x + 12)},{f(y - 20)}', soft)
     if ex:   # a soft cream halo under the motion marks so they also read on the night sky
         halo = (ex.replace(f'stroke="{P["line"]}"', 'stroke="#FFF4E0"').replace(f'fill="{P["line"]}"', 'fill="#FFF4E0"')
                 .replace('stroke-width="2.6"', 'stroke-width="6"').replace('stroke-width="3.6"', 'stroke-width="7"')
                 .replace('stroke-width="4"', 'stroke-width="7.4"'))
         o += f'<g opacity=".55">{halo}</g>' + ex
-    if pose == 'full_wave':   # a little brass bell on a string held in the near hand
-        hx, hy = aN[-1]
-        o += path(f'M{f(hx + 2)},{f(hy + 4)} Q{f(hx + 6)},{f(hy + 14)} {f(hx + 4)},{f(hy + 24)}', st(P['bandLine'], 2.6))
-        o += small_bell(doc, hx + 4, hy + 22, 34, P['brass'], P['brassD'], P['brassL'], line=P['brassD'], clap=2, tilt=-10)
     o += near_arm
-    return o, near_tip, far_tip
-
-
-def head_top(pose):
-    tilt = POSES[pose][2]
-    if not tilt:
-        return [154, TUFT_TOP]
-    x, y = rot(154, TUFT_TOP, tilt, *NECK)
-    return [round(x), round(y)]
+    paws = {'nearPaw': list(aN[-1]), 'farPaw': list(aF[-1])}
+    return o, near_tip, far_tip, paws
 
 
 def write_bibi():
     out = {}
     for pose in POSES:
+        if pose == 'icon':
+            continue
         d = Doc('k')
-        b, tip, ftip = bibi(d, pose)
+        b, tip, ftip, paws = bibi(d, pose)
         write(f'characters/bibi_{pose}.svg', svg(300, 300, b, ''.join(d.defs)))
-        ex, ey = EYE_N[0], EYE_N[1]
-        if POSES[pose][2]:
-            ex, ey = rot(ex, ey, POSES[pose][2], *NECK)
         out[pose] = {'hand': [round(tip[0]), round(tip[1])], 'farHand': [round(ftip[0]), round(ftip[1])],
-                     'headTop': head_top(pose), 'eye': [round(ex), round(ey)]}
+                     'nearPaw': paws['nearPaw'], 'farPaw': paws['farPaw'],
+                     'headTop': [154, TUFT_TOP], 'eye': [EYE_N[0], EYE_N[1]]}
     os.makedirs(os.path.dirname(HAND_JSON), exist_ok=True)
     with open(HAND_JSON, 'w') as fh:
-        json.dump({'_about': ('Bibi per frame, in the 0 0 300 300 viewBox (feet anchor 150,292). hand = tip of the NEAR hand '
-                              '(point: the fingertip — aim the hint / sparkle from here; wave: the waving palm top); farHand = '
-                              'tip of the far hand; headTop = [x, y] of the hair-curl top (speech-bubble tail / stars over the '
-                              'head; the round head itself starts at y 64); eye = near eye centre; bbox = measured opaque box '
+        json.dump({'_about': ('Bibi per frame, in the 0 0 300 300 viewBox (feet anchor 150,292). hand = centre of the NEAR '
+                              'drumstick ball tip (wave: the top of the waving paw; point: the stick tip to aim the hint / '
+                              'sparkle from); farHand = centre of the FAR drumstick tip; nearPaw / farPaw = paw centres; '
+                              'headTop = [x, y] of the fur-tuft top (speech-bubble tail / stars over the head; the round '
+                              'head itself starts at y 62); eye = near eye centre; bbox = measured opaque box [x0, y0, x1, y1] '
                               '(added by tools/bibi_sheet.js).'),
                    **out}, fh, indent=1)
         fh.write('\n')
     return out
 
 
-# ======================================================================= LAMB
-HG = {'sp': '#9C8B7A', 'spSh': '#80705F', 'spLine': '#5E5043', 'spHi': '#B9AA99', 'face': '#EBD9C0', 'faceSh': '#D6C0A2',
-      'faceLine': '#8E7660', 'nose': '#E7B6B0', 'noseLine': '#B07F79', 'feet': '#C9B49A'}
-
-
-def spikes(cx, cy, rx, ry, a0, a1, n, k):
-    """Scalloped spiky outline points along an ellipse arc (angles in degrees, 0 = right, y down)."""
-    pts = []
-    for i in range(n * 2 + 1):
-        a = math.radians(a0 + (a1 - a0) * i / (n * 2))
-        r = 1 + (k if i % 2 else 0)
-        pts.append((cx + rx * r * math.cos(a), cy + ry * r * math.sin(a)))
-    return pts
-
-
-def poly(pts):
-    return 'M' + ' L'.join(f'{f(x)},{f(y)}' for x, y in pts) + ' Z'
+# ======================================================================= LAMB (cloud lamb, faces RIGHT)
+LB = {'wool': '#F4F1FA', 'woolSh': '#D9D2EC', 'woolLine': '#A99FC8', 'face': '#8C8AA0', 'faceSh': '#77758C',
+      'faceLine': '#5E5C74', 'hoof': '#6E6C84', 'nose': '#F2B8C0', 'cheek': '#F2A9B4'}
 
 
 def lamb(ball=False):
     d = Doc('h')
     o = ''
     if not ball:
-        # feet (behind)
-        for x in (54, 98):
-            o += ell(x, 109.5, 9, 4.6, fl(HG['feet'], HG['faceLine'], 2.6))
-        # face + belly (the cream front part, pointed snout to the right)
-        face = ptsd([(78, 108), (66, 86), (76, 58), (100, 46), (122, 56), (138, 72), (150, 86), (146, 96), (126, 104),
-                     (104, 110)])
-        o += d.shaded(f'<path d="{face}" {{a}}/>', HG['face'], HG['faceSh'], HG['faceLine'], dx=-4, dy=-4, w=3.4)
-        # spiky back (dome on the left, over the head)
-        pts = spikes(70, 76, 56, 42, 112, 300, 12, 0.16)
-        pts = [(90, 111)] + [(x, min(y, 111)) for (x, y) in pts] + [(104, 52), (96, 70), (84, 92)]
-        back = poly(pts)
-        o += d.shaded(f'<path d="{back}" {{a}}/>', HG['sp'], HG['spSh'], HG['spLine'], dx=-5, dy=-5, w=3.6,
-                      hi=ell(46, 52, 14, 7, 'fill="#FFFFFF" opacity=".25" transform="rotate(-30 46 52)"'))
-        for (x0, y0, x1, y1) in ((40, 70, 30, 60), (54, 60, 46, 48), (68, 56, 64, 42), (36, 92, 24, 88), (52, 84, 42, 76),
-                                 (60, 98, 48, 98), (74, 72, 70, 62), (84, 60, 84, 50)):
-            o += path(f'M{x0},{y0} L{x1},{y1}', st(HG['spHi'], 2.6))
-        # ear
-        o += ell(104, 54, 7, 6, fl(HG['face'], HG['faceLine'], 2.6)) + ell(105, 55, 3.4, 3, f'fill="{HG["nose"]}"')
-        # eye + cheek + nose + smile
-        o += circ(116, 72, 6.2, f'fill="#2F2A3A"') + circ(114, 70, 2.3, 'fill="#FFFFFF"') + circ(118.4, 74.4, 1, 'fill="#FFFFFF"')
-        o += ell(118, 86, 6, 3.6, 'fill="#F2A99A" opacity=".85"')
-        o += circ(150, 86, 6, fl(HG['nose'], HG['noseLine'], 2.4)) + ell(148.4, 84, 2, 1.3, 'fill="#FFFFFF" opacity=".8"')
-        o += path('M136,94 Q140,98 145,95', st(HG['faceLine'], 2.4))
-        # tiny front paw
-        o += ell(112, 108.5, 7, 4.4, fl(HG['feet'], HG['faceLine'], 2.4))
+        o += ell(80, 113.5, 46, 3, 'fill="#5E5C74" opacity=".14"')
+        # legs (far pair darker, behind)
+        for x, far in ((60, True), (100, True), (48, False), (90, False)):
+            col = LB['faceSh'] if far else LB['face']
+            o += path(f'M{x},92 L{x},108', st(LB['faceLine'], 12.5)) + path(f'M{x},92 L{x},108', st(col, 6.5))
+            o += rect(x - 6, 106, 12, 7, 3.5, fl(LB['hoof'], LB['faceLine'], 2.4))
+        # tail puff
+        o += d.shaded(scallop(30, 66, 9, 9, 6, 0.7).join(['<path d="', '" {a}/>']), LB['wool'], LB['woolSh'], LB['woolLine'],
+                      dx=-2, dy=-2, w=3)
+        # woolly body (puffy scallops)
+        body = scallop(72, 72, 40, 26, 13, 0.64)
+        o += d.shaded(f'<path d="{body}" {{a}}/>', LB['wool'], LB['woolSh'], LB['woolLine'], dx=-5, dy=-6, w=3.4,
+                      hi=ell(52, 54, 13, 6, 'fill="#FFFFFF" opacity=".8" transform="rotate(-20 52 54)"'))
+        for (x, y) in ((60, 74), (80, 64), (90, 82), (70, 88)):
+            o += path(f'M{x - 5},{y} Q{x},{y - 6} {x + 5},{y}', st(LB['woolSh'], 2.4))
+        # head: grey face, ear, wool cap
+        o += d.shaded('<ellipse cx="124" cy="62" rx="9" ry="5" transform="rotate(-20 124 62)" {a}/>', LB['face'], LB['faceSh'],
+                      LB['faceLine'], dx=-1, dy=-1, w=2.4)
+        o += d.shaded('<ellipse cx="126" cy="72" rx="17" ry="19" transform="rotate(-18 126 72)" {a}/>', LB['face'],
+                      LB['faceSh'], LB['faceLine'], dx=-3, dy=-3, w=3)
+        o += d.shaded('<ellipse cx="104" cy="62" rx="11" ry="6" transform="rotate(30 104 62)" {a}/>', LB['face'],
+                      LB['faceSh'], LB['faceLine'], dx=-1, dy=-1, w=2.6)
+        o += ell(104, 62, 6, 3, f'fill="{LB["nose"]}" opacity=".8" transform="rotate(30 104 62)"')
+        cap = scallop(116, 54, 13, 9, 7, 0.7)
+        o += d.shaded(f'<path d="{cap}" {{a}}/>', LB['wool'], LB['woolSh'], LB['woolLine'], dx=-2, dy=-2, w=2.8)
+        # eye, cheek, nose, smile
+        o += ell(129, 68, 4.4, 5, 'fill="#2F2A3A"') + circ(127.6, 66.2, 1.8, 'fill="#FFFFFF"')
+        o += ell(124, 80, 5, 3, f'fill="{LB["cheek"]}" opacity=".9"')
+        o += ell(139, 79, 3.4, 2.6, f'fill="{LB["nose"]}"')
+        o += path('M133,85 Q137,88 141,85', st('#4E4C62', 2.2))
     else:
-        cx, cy, r = 80, 70, 39
-        pts = spikes(cx, cy, r, r, -90, 270, 18, 0.13)
-        ballp = poly(pts)
-        o += ell(80, 113.5, 30, 2.5, 'fill="#5E5043" opacity=".18"')
-        o += d.shaded(f'<path d="{ballp}" {{a}}/>', HG['sp'], HG['spSh'], HG['spLine'], dx=-6, dy=-6, w=3.6,
-                      hi=ell(64, 50, 13, 7, 'fill="#FFFFFF" opacity=".28" transform="rotate(-35 64 50)"'))
-        for a in range(0, 360, 30):
-            x0, y0 = cx + 18 * math.cos(math.radians(a)), cy + 18 * math.sin(math.radians(a))
-            x1, y1 = cx + 30 * math.cos(math.radians(a + 8)), cy + 30 * math.sin(math.radians(a + 8))
-            o += path(f'M{f(x0)},{f(y0)} L{f(x1)},{f(y1)}', st(HG['spHi'], 2.4))
-        # a little cream face peeking at the front + the nose and a closed happy eye
-        o += path('M100,86 Q118,80 122,94 Q116,106 100,104 Z', fl(HG['face'], HG['faceLine'], 2.8))
-        o += circ(123, 93, 5, fl(HG['nose'], HG['noseLine'], 2.2))
-        o += path('M104,90 Q108,86 112,90', st('#2F2A3A', 2.6))
+        o += ell(80, 114, 36, 3, 'fill="#5E5C74" opacity=".16"')
+        # tiny hooves peeking underneath
+        for x in (64, 96):
+            o += rect(x - 6, 104, 12, 8, 3.5, fl(LB['hoof'], LB['faceLine'], 2.4))
+        ballp = scallop(80, 70, 42, 40, 15, 0.62)
+        o += d.shaded(f'<path d="{ballp}" {{a}}/>', LB['wool'], LB['woolSh'], LB['woolLine'], dx=-6, dy=-7, w=3.4,
+                      hi=ell(62, 48, 14, 7, 'fill="#FFFFFF" opacity=".85" transform="rotate(-35 62 48)"'))
+        for (x, y) in ((64, 70), (86, 56), (96, 88), (72, 92), (56, 86)):
+            o += path(f'M{x - 5},{y} Q{x},{y - 6} {x + 5},{y}', st(LB['woolSh'], 2.4))
+        # a little face peeking at the front
+        o += ell(108, 82, 14, 13, fl('#A3A1B6', LB['faceLine'], 2.8))
+        for x in (102, 113):
+            o += ell(x, 79, 2.8, 3.2, 'fill="#2F2A3A"') + circ(x - 0.9, 77.8, 1.1, 'fill="#FFFFFF"')
+        o += path('M105,90 Q108,92 111,90', st('#4E4C62', 1.8))
+        o += ell(118, 86, 2.8, 2.2, f'fill="{LB["nose"]}"') + ell(99, 86, 3.6, 2.2, f'fill="{LB["cheek"]}" opacity=".9"')
+        cap = scallop(106, 64, 12, 5, 6, 0.7)
+        o += d.shaded(f'<path d="{cap}" {{a}}/>', LB['wool'], LB['woolSh'], LB['woolLine'], dx=-2, dy=-2, w=2.6)
     return svg(160, 120, o, ''.join(d.defs))
 
 
@@ -589,112 +642,73 @@ def bird(sing=False):
 
 
 # ======================================================================= ICON
-def plate_star(doc, cx, cy, r, base, dark, light):
+def cloud(doc, cx, cy, w, h, base='#FFFFFF', shade='#E3DDF2', line='#C4BBE0', lw=4):
+    """A flat-bottomed puffy cloud (bumps on top, soft flat base)."""
+    n = 7
     pts = []
-    for i in range(10):
-        a = math.radians(-90 + i * 36)
-        rr = r if i % 2 == 0 else r * 0.48
-        pts.append((cx + rr * math.cos(a), cy + rr * math.sin(a)))
-    dd = poly(pts)
-    return doc.shaded(f'<path d="{dd}" {{a}}/>', base, dark, dark, dx=-r * 0.1, dy=-r * 0.1, w=4,
-                      hi=ell(cx - r * 0.25, cy - r * 0.25, r * 0.16, r * 0.08, f'fill="{light}" transform="rotate(-40 {f(cx - r * 0.25)} {f(cy - r * 0.25)})"'))
-
-
-def log(doc, x0, y0, x1, y1, r):
-    """A horizontal or vertical log (wood palette) with bark lines and a cut end ring on the ends."""
-    horiz = abs(y1 - y0) < abs(x1 - x0)
-    if horiz:
-        tpl = rect(x0, y0 - r, x1 - x0, 2 * r, r, '{a}')
-    else:
-        tpl = rect(x0 - r, y0, 2 * r, y1 - y0, r * 0.6, '{a}')
-    o = doc.shaded(tpl, '#A87245', '#8A5A35', '#6E4526', dx=-3, dy=-r * 0.35, w=4.4,
-                   hi=None)
-    if horiz:
-        o += path(f'M{f(x0 + r)},{f(y0 - r * 0.45)} L{f(x1 - r)},{f(y0 - r * 0.45)}', st('#D29A66', 3) + ' opacity=".8"')
-        for x in range(int(x0) + 40, int(x1) - 20, 54):
-            o += path(f'M{x},{f(y0 - 2)} Q{x + 16},{f(y0 + 4)} {x + 30},{f(y0 + 1)}', st('#6E4526', 2.6) + ' opacity=".6"')
-        for x in (x0 + r * 0.6, x1 - r * 0.6):
-            o += ell(x, y0, r * 0.5, r * 0.85, fl('#D29A66', '#6E4526', 3)) + ell(x, y0, r * 0.2, r * 0.38, 'fill="none" stroke="#A87245" stroke-width="2"')
-    else:
-        o += path(f'M{f(x0 - r * 0.4)},{f(y0 + 10)} L{f(x0 - r * 0.4)},{f(y1)}', st('#D29A66', 3) + ' opacity=".7"')
-        for y in range(int(y0) + 40, int(y1), 46):
-            o += path(f'M{f(x0 - 4)},{y} Q{f(x0 + 2)},{y + 16} {f(x0 - 2)},{y + 30}', st('#6E4526', 2.6) + ' opacity=".55"')
-    return o
+    for i in range(n + 1):
+        t = i / n
+        x = cx - w / 2 + w * t
+        y = cy - h * (0.35 + 0.65 * math.sin(math.pi * t)) * (0.92 if i % 2 else 1)
+        pts.append((x, y))
+    d = f'M{f(cx - w / 2)},{f(cy)}'
+    for i in range(n):
+        x0, y0 = pts[i]
+        x1, y1 = pts[i + 1]
+        r = math.hypot(x1 - x0, y1 - y0) * 0.58
+        d += f' A{f(r)},{f(r)} 0 0 1 {f(x1)},{f(y1)}'
+    d += f' L{f(cx + w / 2)},{f(cy)} Q{f(cx)},{f(cy + h * 0.32)} {f(cx - w / 2)},{f(cy)} Z'
+    return doc.shaded(f'<path d="{d}" {{a}}/>', base, shade, line, dx=-w * 0.03, dy=-h * 0.12, w=lw)
 
 
 def icon():
     d = Doc('i')
     g = d.uid('s')
-    d.defs.append(f'<linearGradient id="{g}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B9729A"/>'
-                  f'<stop offset=".38" stop-color="#F29B6B"/><stop offset=".72" stop-color="#FBD7A5"/></linearGradient>')
+    d.defs.append(f'<linearGradient id="{g}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9FD3F2"/>'
+                  f'<stop offset=".55" stop-color="#D9EEFA"/><stop offset="1" stop-color="#FBE3EC"/></linearGradient>')
     o = rect(0, 0, 512, 512, 0, f'fill="url(#{g})"')
-    # low sun on the right + soft rays
-    o += circ(424, 318, 62, 'fill="#FFE2A6" opacity=".55"') + circ(424, 318, 44, 'fill="#FFF0C4"')
-    # mountains with snowy caps (desaturated, violet-rose)
-    o += path('M0,350 L0,290 L60,236 L104,270 L170,196 L238,268 L282,236 L350,300 L400,262 L462,224 L512,262 L512,350 Z',
-              'fill="#B77D8E"')
-    o += path('M150,218 L170,196 L192,220 L180,214 L170,224 L160,214 Z M442,240 L462,224 L486,244 L472,240 L462,248 L452,240 Z '
-              'M44,250 L60,236 L76,250 L66,248 L60,254 L52,248 Z', 'fill="#F7E3DC"')
-    o += path('M0,360 L0,318 L80,284 L150,316 L230,282 L310,322 L388,290 L460,316 L512,300 L512,360 Z', 'fill="#C98B87"')
-    # lake glint
-    o += rect(0, 352, 512, 22, 0, 'fill="#E9B6A2"') + path('M300,362 L392,362 M330,368 L372,368', st('#FFF0C4', 3) + ' opacity=".8"')
-    # silhouetted pines
-    for (x, s) in ((20, 1.1), (66, 0.9), (110, 1.2), (350, 1.0), (392, 1.25), (440, 0.95), (486, 1.15)):
-        hgt = 90 * s
-        b = 382
-        o += path(f'M{f(x)},{f(b - hgt)} L{f(x + 22 * s)},{f(b - hgt * 0.5)} L{f(x + 12 * s)},{f(b - hgt * 0.5)} '
-                  f'L{f(x + 28 * s)},{f(b)} L{f(x - 28 * s)},{f(b)} L{f(x - 12 * s)},{f(b - hgt * 0.5)} L{f(x - 22 * s)},{f(b - hgt * 0.5)} Z',
-                  'fill="#7A5468"')
-    # meadow
-    o += path('M0,384 C120,370 300,376 512,366 L512,512 L0,512 Z', 'fill="#D7A86E"')
-    o += path('M0,430 C140,418 330,428 512,414 L512,512 L0,512 Z', 'fill="#C8955D"')
-    for (x, y) in ((40, 404), (210, 398), (470, 396), (300, 446), (120, 470), (430, 470)):
-        o += path(f'M{x},{y} l-5,-10 M{x},{y} l0,-12 M{x},{y} l5,-10', st('#A97A45', 2.6))
-    # little campfire glow bottom right
-    fx = 400
-    o += ell(fx, 478, 54, 14, 'fill="#FFD9A0" opacity=".55"')
-    o += path(f'M{fx - 28},484 L{fx + 28},472 M{fx - 28},472 L{fx + 28},484', st('#6E4526', 9))
-    o += path(f'M{fx},478 C{fx - 16},472 {fx - 16},452 {fx - 6},440 C{fx - 6},454 {fx},454 {fx + 2},442 C{fx + 8},450 {fx + 18},460 {fx + 10},476 Z', fl('#FFB65C', '#E07D35', 3))
-    o += path(f'M{fx},476 C{fx - 6},470 {fx - 6},462 {fx - 2},456 C{fx},464 {fx + 6},464 {fx + 6},470 Z', 'fill="#FFE7A0"')
-    # garland with three lit paper lanterns (warm cream, brass-gold glow)
-    o += path('M42,58 Q268,104 492,58', st('#6E4526', 2.6))
-    for (x, y) in ((150, 80), (256, 89), (362, 80)):
-        o += circ(x, y + 10, 20, 'fill="#FFE7A8" opacity=".45"')
-        o += path(f'M{x},{y - 4} L{x},{y}', st('#6E4526', 2.4))
-        o += ell(x, y + 11, 12, 13, fl('#F8E2B0', '#C99A5A', 2.6)) + path(f'M{x - 7},{y + 11} L{x + 7},{y + 11}', st('#E2BE80', 2))
-        o += rect(x - 5, y - 2, 10, 4, 1.5, f'fill="{P["brass"]}"') + rect(x - 5, y + 21, 10, 3.6, 1.5, f'fill="{P["brass"]}"')
-    # posts + beam (the right post bleeds off the edge so the drums get room)
-    o += log(d, 44, 92, 44, 520, 17) + log(d, 492, 92, 492, 520, 17)
-    o += log(d, 22, 120, 512, 120, 18)
-    # drums (cords + brass hooks) — the struck red bell swings away from Bibi's hand
-    drums = [(292, 208, 104, 'bell', ('#E84A4A', '#A8282E', '#F7A0A0'), -9),
-              (384, 236, 0, 'star', ('#FFD23F', '#C99A12', '#FFEB9C'), 0),
-              (450, 178, 70, 'bell', ('#3C8DE8', '#1F5BA8', '#A6CCF5'), 3)]
-    for (cx, top, h, kind, (bs, dk, lt), tilt) in drums:
-        hx = cx
-        bx, by = rot(cx, top, tilt, hx, 134)
-        o += path(f'M{hx},132 L{f(bx)},{f(by)}', st('#8A6A4A', 3.2))
-        o += circ(hx, 136, 4.2, fl(P['brass'], P['brassD'], 2))
-        if kind == 'bell':
-            o += f'<g transform="rotate({tilt} {hx} 134)">' + small_bell(d, cx, top, h, bs, dk, lt, line=dk, clap=-4 if tilt else 0) + '</g>'
-        else:
-            o += circ(cx, top + 4, 5, f'fill="none" stroke="{P["brassD"]}" stroke-width="3"')
-            o += plate_star(d, cx, top + 40, 34, bs, dk, lt)
-    # "ding" ticks round the struck bell (short radial strokes) + sparkles
-    for ang in (-150, -122, -58, -30):
-        a = math.radians(ang)
-        x0, y0 = 304 + 62 * math.cos(a), 262 + 62 * math.sin(a)
-        x1, y1 = 304 + 80 * math.cos(a), 262 + 80 * math.sin(a)
-        o += path(f'M{f(x0)},{f(y0)} L{f(x1)},{f(y1)}', st('#FFF6D8', 7))
-    o += star4(352, 330, 12, w=2.2) + star4(420, 296, 9, w=2) + star4(236, 184, 9, w=2)
-    # Bibi (happy face, near arm up, open palm tapping the bell lip)
-    sc = 1.22
-    tx, ty = 128 - 150 * sc, 506 - 292 * sc
+    # faint pastel rainbow
+    for i, col in enumerate(('#F7B8C4', '#FBD3A8', '#FBEAA8', '#BFE5C4', '#B9D7F2', '#D4C6F0')):
+        r = 300 - i * 15
+        o += path(f'M{f(256 - r)},430 A{r},{r} 0 0 1 {f(256 + r)},430', st(col, 15) + ' opacity=".7"')
+    # sun
+    o += circ(430, 78, 52, 'fill="#FFF3C4" opacity=".6"') + circ(430, 78, 36, fl('#FFE58A', '#F2C65A', 4))
+    # background clouds
+    o += cloud(d, 92, 130, 150, 52, lw=3.4) + cloud(d, 330, 70, 120, 40, lw=3.2)
+    o += cloud(d, 470, 250, 140, 54, lw=3.4) + cloud(d, 40, 330, 130, 56, lw=3.4)
+    # cloud floor
+    o += cloud(d, 256, 470, 620, 120, base='#F8F6FC', shade='#DCD6EC', line='#BDB4DC', lw=4.4)
+    o += rect(0, 470, 512, 42, 0, 'fill="#DCD6EC"')
+    o += path('M0,470 Q256,500 512,470', st('#BDB4DC', 4.4))
+    for (x, y) in ((40, 488), (468, 486), (120, 500)):
+        o += star4(x, y, 7, fill='#FFF6C8', line='#E2C86A', w=1.8)
+    # Bibi (drumming pose), scaled up, standing on the floor on the left
+    sc = 1.25
+    tx, ty = 140 - 150 * sc, 452 - 292 * sc
     kd = Doc('ik')
-    kb, tip, _ = bibi(kd, 'happy', arms_pose='ring')
+    kb, tip, ftip, _ = bibi(kd, 'icon')
     d.defs.extend(kd.defs)
-    o += ell(130, 504, 110, 12, 'fill="#7A4E33" opacity=".22"')
+
+    def T(p):
+        return tx + p[0] * sc, ty + p[1] * sc
+    t1, t2 = T(tip), T(ftip)
+    # the red cloud drum: skin centred under the two stick tips, standing on a small cloud cushion
+    dw, dh = 164, 74
+    dcx = (t1[0] + t2[0]) / 2 + 6
+    dtop = max(t1[1], t2[1]) + 8
+    if dcx + dw / 2 > 500:
+        dcx = 500 - dw / 2
+    o += cloud(d, dcx, dtop + dh + 14, dw * 1.25, 40, lw=3.8)
+    o += wood_drum(d, dcx, dtop + dh, dw, dh, body_col=('#E84A4A', '#A8282E', '#F7A0A0'))
+    o += ell(140, 452, 100, 9, 'fill="#8A7FB0" opacity=".2"')
     o += f'<g transform="translate({f(tx)},{f(ty)}) scale({sc})">{kb}</g>'
+    # "boom" ticks round the struck skin + sparkles
+    for ang in (-160, -135, -45, -20):
+        a = math.radians(ang)
+        x0, y0 = dcx + 96 * math.cos(a), dtop + 30 * math.sin(a) - 10
+        x1, y1 = dcx + 118 * math.cos(a), dtop + 46 * math.sin(a) - 22
+        o += path(f'M{f(x0)},{f(y0)} L{f(x1)},{f(y1)}', st('#FFFFFF', 9)) + path(f'M{f(x0)},{f(y0)} L{f(x1)},{f(y1)}', st('#F7A0A0', 4))
+    o += star4(dcx + 98, dtop - 74, 14, w=2.4) + star4(dcx - 30, dtop - 96, 10, w=2.2) + star4(40, 250, 10, w=2.2)
     return svg(512, 512, o, ''.join(d.defs))
 
 

@@ -1,6 +1,6 @@
 // Bibi's Cloud Drums — unit test for CD.DrumArt (game/js/drum_art.js), plain node, no browser.
 // A mock 2D context records every call; Path2D is stubbed. Checks: all public functions exist, every kind / option draws
-// without throwing and actually draws, bodyBox ≤ size with a sane cy, no NaN reaches the context, node-safe load.
+// without throwing and actually draws, bodyBox ≤ size with cy < 0 (above the bottom-centre anchor), no NaN reaches the context, node-safe load.
 // Run: node tests/unit/drum_art.test.js   (exit code 1 on any failure)
 'use strict';
 const fs = require('fs'), path = require('path'), vm = require('vm');
@@ -58,32 +58,35 @@ for (const withP2D of [false, true]) {
   const CD = load(withP2D), A = CD && CD.DrumArt, tag = withP2D ? '[Path2D] ' : '[no Path2D] ';
   ok(!!A, tag + 'CD.DrumArt exists');
   if (!A) continue;
-  ['drawDrum', 'bodyBox', 'drawCord', 'drawBeam', 'drawGarland', 'drawFire', 'drawNote', 'drawIcon', 'drawGhostHand',
-    'drawFirefly', 'hookPoint', 'pal', 'thingKey', 'clearCache', 'lanternRadius', 'fireTop']
+  ['drawDrum', 'bodyBox', 'drawCushion', 'cushionDip', 'drawGarland', 'drawCymbal', 'drawCard', 'drawNote', 'drawIcon',
+    'drawGhostHand', 'drawFirefly', 'pal', 'thingKey', 'clearCache', 'lanternRadius']
     .forEach(f => ok(typeof A[f] === 'function', tag + 'function ' + f));
+  ['drawBeam', 'drawFire', 'drawCord', 'hookPoint', 'fireTop'].forEach(f => ok(A[f] === undefined, tag + 'chime-era ' + f + ' removed'));
   ok(A.PALETTE && A.PALETTE.red.base === '#E84A4A' && A.PALETTE.purple.light === '#D2BDF3', tag + 'palette exact hex');
-  ok(A.BRASS.base === '#D8B26A' && A.WOOD.base === '#A87245', tag + 'brass / wood hex');
-  ok(A.SHAPES.length === 8 && A.ANIMALS.length === 8, tag + 'shapes / animals lists');
+  ok(A.BRASS.base === '#D8B26A' && A.WOOD.base === '#C99466' && A.SILVER.base === '#E4E6EE' && A.SKIN.base === '#FFF6E6', tag + 'brass / wood / silver / skin hex');
+  ok(A.CLOUD.base === '#F4F1FA' && A.CLOUD.shade === '#DCD6EC', tag + 'cushion white-lilac');
+  ok(A.SHAPES.length === 8 && A.KINDS.join() === 'drum,shape,big,dots,animal,glyph', tag + 'shapes / kinds lists');
+  ok(A.ANIMALS.join() === 'cow,duck,cat,pig,frog,sheep,hen,mouse', tag + 'animals list');
   ok(A.pal('red').base === '#E84A4A' && A.pal('nope') === null, tag + 'pal lookup');
 
   const COLORS = ['red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink'];
   const things = [].concat(
-    COLORS.map(c => ({ kind: 'bell', color: c })),
-    [{ kind: 'bell', color: 'red', big: true }, { kind: 'bell' }],
-    A.SHAPES.map((s, i) => ({ kind: 'plate', shape: s, color: COLORS[i % 7] })), [{ kind: 'plate', shape: 'blob' }],
-    [0, 1, 2, 3, 4, 5, 6].map(n => ({ kind: 'string', n })),
+    COLORS.map(c => ({ kind: 'drum', color: c })), [{ kind: 'drum' }, { kind: 'drum', color: 'weird' }],
+    A.SHAPES.map((s, i) => ({ kind: 'shape', shape: s, color: COLORS[i % 7] })), [{ kind: 'shape', shape: 'blob' }],
+    [{ kind: 'big' }, { kind: 'big', n: 3 }],
     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(n => ({ kind: 'dots', n })),
     A.ANIMALS.map(a => ({ kind: 'animal', animal: a })), [{ kind: 'animal', animal: 'dragon' }],
     ['A', 'g', 'Đ', '7', '12', '', 'WWW'].map(t => ({ kind: 'glyph', text: t })), [{ kind: 'glyph', text: 'B', color: 'blue' }, { kind: 'glyph', n: 9 }],
     [{ kind: 'mystery' }]
   );
-  const opts = [{}, { ring: 0.7 }, { ring: 1, clap: 1 }, { ring: 0.5, flash: 0 }, { glow: 1 }, { dim: 1 }, { count: 0 }, { count: 3 },
-    { count: 99 }, { clap: -1 }, { night: 1, ring: 0.3, glow: 0.5 }, { pop: 0.4 }, { pop: 0 }, { ring: NaN, glow: 'x' }];
+  const opts = [{}, { ring: 0.7 }, { ring: 1, skin: 1, skinPh: 1.6 }, { ring: 0.5, dull: 1 }, { glow: 1 }, { dim: 1 }, { count: 0 }, { count: 3 },
+    { count: 99 }, { sq: 0.8 }, { sq: 1.2, skin: 0.5, skinPh: 4.7 }, { sing: 1 }, { sing: 0.4, ring: 0.3 },
+    { night: 1, ring: 0.3, glow: 0.5 }, { pop: 0.4 }, { pop: 1.2 }, { pop: 0 }, { ring: NaN, glow: 'x', sq: NaN, skin: 'y' }];
   for (const t of things) {
     for (const size of [112, 336, 48]) {
       const b = A.bodyBox(t, size);
       ok(b.w > 0 && b.h > 0 && b.w <= size + 1e-9 && b.h <= size + 1e-9, tag + 'bodyBox ≤ size ' + JSON.stringify(t) + ' ' + size + ' → ' + JSON.stringify(b));
-      ok(b.cy > 0 && b.cy < b.h, tag + 'bodyBox cy inside ' + JSON.stringify(t));
+      ok(b.cy < 0 && -b.cy < b.h, tag + 'bodyBox cy above the anchor, inside the box ' + JSON.stringify(t));
     }
     for (const o of opts) {
       const m = mockCtx();
@@ -96,45 +99,50 @@ for (const withP2D of [false, true]) {
   }
   // the right options change the drawing
   const count = (t, o) => { const m = mockCtx(); A.drawDrum(m.ctx, t, 112, o); return m.calls.length; };
-  ok(count({ kind: 'bell', color: 'red' }, { ring: 0.7 }) > count({ kind: 'bell', color: 'red' }, {}), tag + 'ring adds arcs');
-  ok(count({ kind: 'string', n: 3 }, { count: 3 }) > count({ kind: 'string', n: 3 }, { count: 0 }), tag + 'count lights bells');
-  ok(count({ kind: 'animal', animal: 'fox' }, { ring: 0.8, flash: 0 }) > count({ kind: 'animal', animal: 'fox' }, { ring: 0.4, flash: 0 }) - 40, tag + 'animal sings');
-  for (let n = 1; n <= 5; n++) {
-    const sb = A.bodyBox({ kind: 'string', n }, 100);
-    ok(sb.w >= 80 && sb.h >= 80, tag + 'string n=' + n + ' fills ≥ 0.8 × size ' + JSON.stringify(sb));
-    ok(JSON.stringify(sb) === JSON.stringify(A.bodyBox({ kind: 'string', n: 1 }, 100)), tag + 'string n=' + n + ' same box as n=1 (fair counting)');
-  }
-  // every little bell of a string is ≥ 0.3 × size wide: measure the bell bodies' arcs/curves via the recorded transform
-  ok(A.STRING_BELL && A.STRING_BELL.w >= 30, tag + 'string mini bell ≥ 0.3 × size wide (' + (A.STRING_BELL && A.STRING_BELL.w) + ')');
-  ok(count({ kind: 'string', n: 5 }, {}) > count({ kind: 'string', n: 1 }, {}), tag + 'more bells draw more');
-  ok(Math.abs(A.bodyBox({ kind: 'bell' }, 100).w - 86) < 1e-9 && A.bodyBox({ kind: 'bell' }, 100).h === 100, tag + 'bell 0.86 × 1');
-  const rect = A.bodyBox({ kind: 'plate', shape: 'rect' }, 100), ov = A.bodyBox({ kind: 'plate', shape: 'oval' }, 100);
-  ok(rect.w > rect.h * 1.1 && ov.h > ov.w * 1.3, tag + 'rect wide / oval tall');
+  ok(count({ kind: 'drum', color: 'red' }, { ring: 0.7 }) > count({ kind: 'drum', color: 'red' }, {}), tag + 'ring adds flash + sound rings');
+  ok(count({ kind: 'drum', color: 'red' }, { ring: 0.7, dull: 1 }) < count({ kind: 'drum', color: 'red' }, { ring: 0.7 }), tag + 'dull drops the flash');
+  ok(count({ kind: 'big' }, { skin: 1, skinPh: 1 }) > count({ kind: 'big' }, {}), tag + 'skin ripple draws ripples');
+  ok(count({ kind: 'dots', n: 3 }, { count: 3 }) > count({ kind: 'dots', n: 3 }, { count: 0 }), tag + 'count rings dots');
+  ok(count({ kind: 'animal', animal: 'cow' }, { sing: 1 }) > count({ kind: 'animal', animal: 'cow' }, {}), tag + 'animal sings (song lines)');
+  ok(count({ kind: 'dots', n: 9 }, {}) > count({ kind: 'dots', n: 2 }, {}), tag + 'more dots draw more');
+  // squash keeps the bottom at the anchor: the scale is applied about the origin (no translate before it)
+  { const seq = []; const m = mockCtx(); const ctx = new Proxy(m.ctx, { get(t, k) { const v = t[k]; if (k === 'scale' || k === 'translate') return (...a) => { seq.push([k, ...a]); return v(...a); }; return v; } });
+    A.drawDrum(ctx, { kind: 'drum', color: 'red' }, 112, { sq: 0.8 });
+    const sc = seq.findIndex(q => q[0] === 'scale' && Math.abs(q[2] - 0.8) < 1e-9);
+    ok(sc >= 0 && Math.abs(seq[sc][1] - 1 / Math.sqrt(0.8)) < 1e-9 && !seq.slice(0, sc).some(q => q[0] === 'translate'), tag + 'squash about the anchor, width × 1/√sq'); }
+  // geometry: proportions per kind
+  const bb = k => A.bodyBox(k, 100);
+  ok(Math.abs(bb({ kind: 'drum' }).h - 88.3) < 1.5 && bb({ kind: 'drum' }).w > 95, tag + 'tom ≈ size wide, ≈ 0.86–0.9 tall');
+  ok(bb({ kind: 'big' }).h > 93, tag + 'big drum deeper (≈ 0.95)');
+  A.ANIMALS.forEach(a => ok(bb({ kind: 'animal', animal: a }).h > 90, tag + a + ' (animal + drum) fills the size'));
+  const dip0 = A.cushionDip(140, 0), dip1 = A.cushionDip(140, 1);
+  ok(dip0 === 0 && dip1 > 4 && dip1 < 14, tag + 'cushionDip 0 → 0, 1 → a few px (' + dip1.toFixed(2) + ')');
 
   // scene pieces
-  const layout = { beam: { x0: 250, x1: 1200, y: 260, r: 15 }, posts: [{ x: 250, top: 190, bottom: 700 }, { x: 1200, top: 190, bottom: 700 }],
-    garland: { x0: 250, x1: 1200, y: 198, sag: 26 }, hooks: [{ x: 400 }, { x: 600 }] };
+  const garland = { x0: 250, x1: 1200, y: 198, sag: 22 };
   const lanterns = [{ x: 400, y: 215, lit: 0, color: null, swing: 0, flash: 0 }, { x: 600, y: 222, lit: 1, color: 'red', swing: 0.2, flash: 1 },
     { x: 800, y: 222, lit: 0.5, color: null, swing: -0.1, flash: 0.3 }, { x: 900, y: 220, lit: 1, color: 'weird' }, null];
   const scene = [
-    ['drawCord', m => A.drawCord(m.ctx, 10, 10, 30, 160, { night: 1 })],
-    ['drawCord zero', m => A.drawCord(m.ctx, 10, 10, 10, 10, {})],
-    ['drawBeam', m => A.drawBeam(m.ctx, layout, { t: 1, wob: 2, night: 0.5, hooks: [300, { x: 500 }] })],
-    ['drawBeam default hooks', m => A.drawBeam(m.ctx, layout)],
-    ['drawBeam no posts', m => A.drawBeam(m.ctx, { beam: { x0: 0, x1: 500, y: 100, r: 15 } }, {})],
-    ['drawGarland', m => A.drawGarland(m.ctx, layout.garland, lanterns, { t: 2, night: 1 })],
-    ['drawGarland empty', m => A.drawGarland(m.ctx, layout.garland, [], {})],
-    ['drawFire', m => A.drawFire(m.ctx, { x: 200, y: 600, s: 0.9 }, { t: 3.3, glow: 1 })],
-    ['drawFire noglow', m => A.drawFire(m.ctx, { x: 200, y: 600, s: 1 }, { t: 0, glow: 0 })],
+    ['drawCushion', m => A.drawCushion(m.ctx, 100, 300, 140, { dent: 0.7, t: 2, night: 1, alpha: 0.8, pop: 0.6 })],
+    ['drawCushion defaults', m => A.drawCushion(m.ctx, 100, 300, 140)],
+    ['drawCushion dent 1', m => A.drawCushion(m.ctx, 100, 300, 140, { dent: 1 })],
+    ['drawCushion NaN', m => A.drawCushion(m.ctx, 100, 300, NaN, { dent: NaN, pop: 'x' })],
+    ['drawGarland', m => A.drawGarland(m.ctx, garland, lanterns, { t: 2, night: 1 })],
+    ['drawGarland empty', m => A.drawGarland(m.ctx, garland, [], {})],
+    ['drawCymbal', m => A.drawCymbal(m.ctx, { x: 200, y: 600, s: 0.9 }, { tilt: 0.2, ring: 1, night: 1, t: 3 })],
+    ['drawCymbal h only', m => A.drawCymbal(m.ctx, { x: 200, y: 600, h: 120 })],
+    ['drawCard', m => { for (let n = 1; n <= 12; n++) for (let l = 0; l <= n; l += 2) A.drawCard(m.ctx, 50, 50, n, { lit: l, pop: 0.9, flash: 0.5, size: 150 }); }],
+    ['drawCard junk', m => A.drawCard(m.ctx, 50, 50, NaN, { lit: 99 })],
     ['drawNote', m => A.drawNote(m.ctx, 50, 50, 40, { color: 'blue', alpha: 0.5, rot: 0.3 })],
     ['drawNote gold', m => A.drawNote(m.ctx, 50, 50, 40)],
     ['drawGhostHand', m => A.drawGhostHand(m.ctx, 90, 0.5)],
-    ['drawFirefly', m => A.drawFirefly(m.ctx, 5, 5, 4, 0.7)],
+    ['drawFirefly', m => { A.drawFirefly(m.ctx, 5, 5, 4, 0.7); A.drawFirefly(m.ctx, 5, 5, 4, 0); }],
     ['drawIcon number', m => A.drawIcon(m.ctx, { kind: 'number', n: 7 }, 120)],
     ['drawIcon number 15', m => A.drawIcon(m.ctx, { kind: 'number', n: 15 }, 120)],
     ['drawIcon color', m => A.drawIcon(m.ctx, { kind: 'color', color: 'green' }, 120)],
     ['drawIcon size big', m => A.drawIcon(m.ctx, { kind: 'size', big: true, color: 'blue' }, 120)],
     ['drawIcon size small', m => A.drawIcon(m.ctx, { kind: 'size', big: false }, 120)],
+    ['drawIcon sound', m => A.ANIMALS.concat(['??']).forEach(a => A.drawIcon(m.ctx, { kind: 'sound', animal: a }, 120))],
     ['drawIcon letter', m => A.drawIcon(m.ctx, { kind: 'letter', text: 'Q' }, 120)],
     ['drawIcon drums', m => things.forEach(t => A.drawIcon(m.ctx, t, 120))],
     ['drawIcon unknown', m => A.drawIcon(m.ctx, { kind: '??' }, 120)]
@@ -144,13 +152,13 @@ for (const withP2D of [false, true]) {
     try { f(m); ok(m.bad.length === 0, tag + n + ' clean ' + m.bad.slice(0, 3).join(' | ')); ok(m.depth() === 0, tag + n + ' balanced'); }
     catch (e) { ok(false, tag + n + ' threw: ' + e.stack); }
   }
+  { const m = mockCtx(); A.drawCard(m.ctx, 0, 0, 3, { lit: 0 }); const c0 = m.calls.length; const m2 = mockCtx(); A.drawCard(m2.ctx, 0, 0, 3, { lit: 3 }); ok(m2.calls.length > c0, tag + 'lit card dots draw glow'); }
   // null-safety
-  try { A.drawDrum(null, { kind: 'bell' }, 112); A.drawDrum(mockCtx().ctx, null, 112); A.drawBeam(null); A.drawGarland(mockCtx().ctx, null); A.drawFire(null); A.drawIcon(null); ok(true, ''); }
+  try { A.drawDrum(null, { kind: 'drum' }, 112); A.drawDrum(mockCtx().ctx, null, 112); A.drawCushion(null); A.drawGarland(mockCtx().ctx, null); A.drawCymbal(null);
+    A.drawCymbal(mockCtx().ctx, null); A.drawCard(null); A.drawIcon(null); ok(true, ''); }
   catch (e) { ok(false, tag + 'null args threw ' + e.message); }
-  const hp = A.hookPoint(layout, 400, 2);
-  ok(hp.x === 400 && hp.y === 260 + 2 + 15 + 12, tag + 'hookPoint');
-  ok(A.fireTop({ x: 0, y: 600, s: 1 }) === 490, tag + 'fireTop');
-  ok(A.thingKey({ kind: 'bell', color: 'red' }) !== A.thingKey({ kind: 'bell', color: 'blue' }), tag + 'thingKey distinct');
+  ok(A.thingKey({ kind: 'drum', color: 'red' }) !== A.thingKey({ kind: 'drum', color: 'blue' }), tag + 'thingKey distinct');
+  ok(A.lanternRadius() > 15, tag + 'lanternRadius');
   A.clearCache();
 }
 

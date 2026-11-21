@@ -9,17 +9,19 @@
  *   CD.Content.matches(round, step, thing) → bool (does this drum answer this step)
  *
  * round = { topic, age, lang, roundIndex, level, short, surprise: null|'lamb'|'bird'|'fireflies', key, seed,
- *   drums: [ { id 'c0'…, thing, note (index into CD.NOTES), target: bool } ]   (order = hook order on the beam, left → right)
- *   steps:  [ { mode 'find'|'findAll', targets [drumId], need, promptKey, params, nameKind, nameValue } ]
- *   song:   [drumId…]   the targets in step order (= the tune; their notes climb) }
- * thing = { kind 'bell'|'plate'|'string'|'dots'|'animal'|'glyph', color?, shape?, n?, animal?, text?, big?, size?, nameKind, nameValue }
+ *   drums: [ { id 'c0'…, thing, note (index into CD.NOTES), target: bool } ]   (order = pad order on the stage, left → right)
+ *   steps:  [ { mode 'find'|'findAll'|'beat', targets [drumId], need, promptKey, params, nameKind, nameValue, note? } ]
+ *   song:   [drumId…]   the targets in step order (= the tune; their notes climb; beat mode: the big drum once per step) }
+ * thing = { kind 'drum'|'shape'|'big'|'dots'|'animal'|'glyph', color?, shape?, n?, animal?, text?, big?, size?, nameKind, nameValue }
  *   nameKind / nameValue name the drum the way this round's question is about:
- *     bell (colors) → 'color' / 'red'   · bell (size) → 'size' / 'big'|'small' (+ big: bool, size)  · animal (size-round distractor) → 'animal'
- *     plate → 'shape' / 'star' (+ color) · string / dots → 'number' / 3 · animal → 'animal' / 'bear' · glyph → 'letter' / 'B'|'b' or 'number' / 7
+ *     drum (colors) → 'color' / 'red'   · drum (size) → 'size' / 'big'|'small' (+ big: bool, size)  · animal (size-round distractor) → 'animal'
+ *     shape → 'shape' / 'star' (+ color) · dots → 'number' / 3 · big (beat mode) → 'number' / n of the first step ·
+ *     animal → 'animal' / 'cow' · glyph → 'letter' / 'B'|'b' or 'number' / 7
  * step: find = exactly ONE target; at every step exactly one drum not yet rung right matches (distractors never match).
  *       findAll (oddeven) = every right-parity drum (2–3); need = targets.length.
+ *       beat (count at ages ≤ 4) = the ONE big drum, need = n beats; step.note = that step's note (one lantern per step).
  * Prompt keys / params: p.colors {color} · p.shapes {shape, color} · p.shapes5 {shape, color} · p.size {size, color} ·
- *   p.count {n, kind 'string'|'dots'} · p.animals {animal} · p.letters {letter} · p.lower {letter (CAPITAL shown), small} ·
+ *   p.beat {n} · p.count {n, kind 'dots'} · p.animals {animal} · p.letters {letter} · p.lower {letter (CAPITAL shown), small} ·
  *   p.initial {letter, animal} · p.add {a, b} · p.sub {a, b} · p.oddeven {parity}
  * talk = { topic, promptKey 'talk.<topic>', params, show: icon | null, choices [{ id, thing: icon, value }], answer, answerId }
  *   icon = any drum thing (drawn with DrumArt.drawIcon) or { kind:'number', n } · { kind:'color', color } · { kind:'size', big, size, color }
@@ -43,8 +45,8 @@
   CD.COLORS = ['red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink'];
   var COLORS = CD.COLORS.slice(0, 6), COLORS5 = CD.COLORS.slice();
   CD.SHAPES = ['circle', 'square', 'triangle', 'star', 'heart', 'rect', 'diamond', 'oval'];
-  CD.ANIMALS = ['bear', 'fox', 'owl', 'deer', 'rabbit', 'squirrel', 'frog', 'duck'];
-  CD.DRUM_KINDS = ['bell', 'plate', 'string', 'dots', 'animal', 'glyph'];
+  CD.ANIMALS = ['cow', 'duck', 'cat', 'pig', 'frog', 'sheep', 'hen', 'mouse'];   // Bibi is the dog, so no dog
+  CD.DRUM_KINDS = ['drum', 'shape', 'big', 'dots', 'animal', 'glyph'];
   CD.NOTES = ['C5', 'D5', 'E5', 'G5', 'A5', 'C6', 'D6'];          // pentatonic; a drum's `note` is an index into this
   CD.NOTE_HZ = [523.25, 587.33, 659.26, 783.99, 880.0, 1046.5, 1174.66];
 
@@ -57,7 +59,7 @@
   };
   /* Every age has a POOL of 5 topics in difficulty order; a session plays 4 of them (rotating between sessions). */
   CD.AGE_POOLS = {
-    3: ['colors', 'shapes', 'size', 'animals', 'count'],
+    3: ['colors', 'shapes', 'size', 'animals'],          // age 3 never gets count
     4: ['colors', 'size', 'shapes', 'count', 'animals'],
     5: ['colors', 'shapes', 'count', 'letters', 'animals'],
     6: ['letters', 'lower', 'initial', 'add', 'count'],
@@ -79,8 +81,8 @@
    * the initial is the word's first letter with tone marks dropped; a letter with its own marks (ếch → Ê) is not in the VI
    * letter pool, so that animal is left out of VI 'initial' rounds. */
   CD.TOY_WORDS = {
-    en: { bear: 'bear', fox: 'fox', owl: 'owl', deer: 'deer', rabbit: 'rabbit', squirrel: 'squirrel', frog: 'frog', duck: 'duck' },
-    vi: { bear: 'gấu', fox: 'cáo', owl: 'cú', deer: 'hươu', rabbit: 'thỏ', squirrel: 'sóc', frog: 'ếch', duck: 'vịt' }
+    en: { cow: 'cow', duck: 'duck', cat: 'cat', pig: 'pig', frog: 'frog', sheep: 'sheep', hen: 'hen', mouse: 'mouse' },
+    vi: { cow: 'bò', duck: 'vịt', cat: 'mèo', pig: 'heo', frog: 'ếch', sheep: 'cừu', hen: 'gà', mouse: 'chuột' }
   };
   function langOf(l) { return l === 'vi' ? 'vi' : 'en'; }
   /** The initial letter of the animal's word (capital, tone marks dropped), or null when it is not in that language's pool. */
@@ -94,7 +96,7 @@
   }
 
   /* Colour safety (DESIGN §3): below age 5 one round never holds blue+purple, red+green, yellow+orange, green+orange or
-   * red+orange (every answer-coloured drum: bells, plates), and no pink. At most 3 colours fit below age 5. */
+   * red+orange (every answer-coloured drum: colour drums, shape emblems), and no pink. At most 3 colours fit below age 5. */
   var COLOR_SAFE_BELOW = 5;
   var CLASH = [['blue', 'purple'], ['red', 'green'], ['yellow', 'orange'], ['green', 'orange'], ['red', 'orange']];
   function pairsFor(age) { return age < COLOR_SAFE_BELOW ? CLASH : []; }
@@ -142,9 +144,9 @@
   function hasNeighbours(v) { for (var i = 0; i < v.length; i++) for (var j = 0; j < i; j++) if (Math.abs(v[i] - v[j]) <= 1) return true; return false; }
 
   // ---------------- things ----------------
-  function bell(c) { return { kind: 'bell', color: c, nameKind: 'color', nameValue: c }; }
-  function plate(s, c) { return { kind: 'plate', shape: s, color: c, nameKind: 'shape', nameValue: s }; }
-  function string(n) { return { kind: 'string', n: n, nameKind: 'number', nameValue: n }; }
+  function drum(c) { return { kind: 'drum', color: c, nameKind: 'color', nameValue: c }; }
+  function shapeD(s, c) { return { kind: 'shape', shape: s, color: c, nameKind: 'shape', nameValue: s }; }
+  function bigD(n) { return { kind: 'big', big: true, nameKind: 'number', nameValue: n }; }
   function dots(n) { return { kind: 'dots', n: n, nameKind: 'number', nameValue: n }; }
   function animal(a) { return { kind: 'animal', animal: a, nameKind: 'animal', nameValue: a }; }
   function glyphL(c) { return { kind: 'glyph', text: String(c), nameKind: 'letter', nameValue: String(c) }; }
@@ -152,8 +154,12 @@
   function thingKey(t) { return [t.kind, t.color || '', t.shape || '', t.n === undefined ? '' : t.n, t.animal || '', t.text || '', t.size || ''].join(':'); }
   /** The round's set of drums, order-free (targets and distractors marked apart). */
   function roundKey(r) {
-    return r.drums.map(function (c) { return (c.target ? 'T' : 'D') + thingKey(c.thing); }).sort().join(',');
+    var k = r.drums.map(function (c) { return (c.target ? 'T' : 'D') + thingKey(c.thing); }).sort().join(',');
+    if (r.steps && r.steps.length && r.steps[0].mode === 'beat') k += '|beat:' + r.steps.map(function (s) { return s.need; }).join('-');
+    return k;
   }
+  /** Beat mode: the count topic below age 5 (one big drum, beat it n times). */
+  function beatMode(topic, age) { return topic === 'count' && age <= 4; }
 
   // ---------------- counts ----------------
   /** { n: targets, d: distractors } (DESIGN §5.1). Warm-up 2 + 0; short rounds 2; age 3: 2 (+1 from round 2, not in the first
@@ -176,12 +182,12 @@
   function matches(r, s, t) {
     var p = s.params || {};
     switch (r.topic) {
-      case 'colors': return t.kind === 'bell' && t.color === p.color;
-      case 'shapes': return t.kind === 'plate' && t.shape === p.shape && (s.promptKey !== 'p.shapes5' || t.color === p.color);
-      case 'size': return t.kind === 'bell' && t.size === p.size;
+      case 'colors': return t.kind === 'drum' && t.color === p.color;
+      case 'shapes': return t.kind === 'shape' && t.shape === p.shape && (s.promptKey !== 'p.shapes5' || t.color === p.color);
+      case 'size': return t.kind === 'drum' && t.size === p.size;
       case 'animals': return t.kind === 'animal' && t.animal === p.animal;
       case 'initial': return t.kind === 'animal' && initialOf(t.animal, r.lang) === p.letter;
-      case 'count': return (t.kind === 'string' || t.kind === 'dots') && t.n === p.n;
+      case 'count': return s.mode === 'beat' ? t.kind === 'big' : t.kind === 'dots' && t.n === p.n;
       case 'letters': return t.kind === 'glyph' && t.text === p.letter;
       case 'lower': return t.kind === 'glyph' && t.text === p.small;
       case 'add': return t.kind === 'glyph' && t.n === p.a + p.b;
@@ -212,33 +218,33 @@
   function buildRound(topic, age, lang, rng, ri, level, short) {
     var real = [], extra = [], steps = [], i, cn = countsFor(rng, age, ri, level, short), n = cn.n, d = cn.d;
     var r = { topic: topic, age: age, lang: lang, roundIndex: ri, level: level, short: !!short, surprise: null, drums: null, steps: steps, song: null };
-    var probs = null, oddPar = null;
+    var probs = null, oddPar = null, beatNs = null;
     switch (topic) {
       case 'colors': {
         if (n + d > maxSafe(age)) n = maxSafe(age) - d;   // below age 5 only 3 colours fit in a round: 2 + 1 distractor
         var cs = colourSet(rng, age, n + d);
-        for (i = 0; i < n + d; i++) (i < n ? real : extra).push(bell(cs[i]));
+        for (i = 0; i < n + d; i++) (i < n ? real : extra).push(drum(cs[i]));
         break;
       }
       case 'shapes': {
         if (age < 5) {
           var col = colourSet(rng, age, 1)[0], shs = shapeSet(rng, age, n + d);
-          for (i = 0; i < n + d; i++) (i < n ? real : extra).push(plate(shs[i], col));
-        } else {   // shapes5: a 2 × 2 grid of 2 shapes × 2 colours (+ one extra plate) → the answer needs both shape and colour
+          for (i = 0; i < n + d; i++) (i < n ? real : extra).push(shapeD(shs[i], col));
+        } else {   // shapes5: a 2 × 2 grid of 2 shapes × 2 colours (+ one extra drum) → the answer needs both shape and colour
           var sh = shapeSet(rng, age, 3), cc = colourSet(rng, age, 3);
-          var grid = rng.shuffle([plate(sh[0], cc[0]), plate(sh[0], cc[1]), plate(sh[1], cc[0]), plate(sh[1], cc[1])]);
-          if (n + d >= 5) grid.push(rng.chance(0.5) ? plate(sh[2], cc[rng.int(0, 1)]) : plate(sh[rng.int(0, 1)], cc[2]));
+          var grid = rng.shuffle([shapeD(sh[0], cc[0]), shapeD(sh[0], cc[1]), shapeD(sh[1], cc[0]), shapeD(sh[1], cc[1])]);
+          if (n + d >= 5) grid.push(rng.chance(0.5) ? shapeD(sh[2], cc[rng.int(0, 1)]) : shapeD(sh[rng.int(0, 1)], cc[2]));
           grid = grid.slice(0, n + d);
           var gi = rng.shuffle(range(0, grid.length - 1));
           for (i = 0; i < gi.length; i++) (i < n ? real : extra).push(grid[gi[i]]);
         }
         break;
       }
-      case 'size': {   // a big and a small bell of one colour (+ an animal drum from round 2: not a bell at all)
+      case 'size': {   // a big and a small drum of one colour (+ an animal drum from round 2: not a colour drum at all)
         n = 2;
         var c1 = colourSet(rng, age, 1)[0];
         ['big', 'small'].forEach(function (sz) {
-          var t = bell(c1); t.size = sz; t.big = sz === 'big'; t.nameKind = 'size'; t.nameValue = sz; real.push(t);
+          var t = drum(c1); t.size = sz; t.big = sz === 'big'; t.nameKind = 'size'; t.nameValue = sz; real.push(t);
         });
         if (d) extra.push(animal(rng.pick(CD.ANIMALS)));
         break;
@@ -258,12 +264,16 @@
       }
       case 'count': {
         var vals;
-        if (age <= 4) {   // bell strings 1–5: warm-up 1 vs 2, round 1 up to 4, later up to 5
-          var hi = ri === 0 ? 2 : ri === 1 ? 4 : 5;
-          vals = rng.sample(range(1, hi), n + d);
-          if (ri >= 1) vals.sort(function (a, b) { return b - a; });   // playtest P2-3: the targets are the bigger strings (practise 3–5), the distractor the smallest
-          for (i = 0; i < n + d; i++) (i < n ? real : extra).push(string(vals[i]));
-        } else {          // dot plates: warm-up ≤ 5, later 1–10 (6+: 12); age 5: no two neighbours
+        if (age <= 4) {   // beat mode: ONE big drum; warm-up n = 1, 2; later 3 steps (2 when short) of distinct n in 1–5, one ≥ 3
+          var ns;
+          if (ri === 0) ns = [1, 2];
+          else {
+            var k = short ? 2 : 3;
+            for (var tb = 0; tb < 100; tb++) { ns = rng.sample(range(1, 5), k); if (Math.max.apply(null, ns) >= 3) break; }
+          }
+          beatNs = ns;
+          real.push(bigD(ns[0]));
+        } else {          // dots drums: warm-up ≤ 5, later 1–10 (6+: 12); age 5: no two neighbours
           var hiD = ri === 0 ? 5 : DOTS_MAX[age] || 10;
           for (var tr = 0; tr < 200; tr++) {
             vals = rng.sample(range(1, hiD), n + d);
@@ -317,7 +327,9 @@
     r.drums = all.map(function (q, k) { return { id: 'c' + k, thing: q.t, note: -1, target: q.real }; });
     var targ = r.drums.filter(function (c) { return c.target; });
     // steps
-    if (topic === 'oddeven') {
+    if (beatNs) {
+      beatNs.forEach(function (bn) { steps.push(S('beat', [targ[0].id], bn, 'p.beat', { n: bn }, 'number', bn)); });
+    } else if (topic === 'oddeven') {
       var ord = rng.shuffle(targ.slice());
       steps.push(S('findAll', ord.map(function (c) { return c.id; }), ord.length, 'p.oddeven', { parity: oddPar }, 'parity', oddPar));
     } else if (probs) {
@@ -330,9 +342,10 @@
     }
     // the tune: targets in step order get ascending pentatonic notes; distractors a random free note
     r.song = [];
-    steps.forEach(function (s) { s.targets.forEach(function (id) { r.song.push(id); }); });
+    steps.forEach(function (s) { if (s.mode === 'beat') r.song.push(s.targets[0]); else s.targets.forEach(function (id) { r.song.push(id); }); });
     var notes = rng.sample(range(0, CD.NOTES.length - 1), r.song.length).sort(function (x, y) { return x - y; });
-    r.song.forEach(function (id, k) { byId(r, id).note = notes[k]; });
+    if (beatNs) { steps.forEach(function (s, k) { s.note = notes[k]; }); r.drums[0].note = notes[0]; }
+    else r.song.forEach(function (id, k) { byId(r, id).note = notes[k]; });
     var free = range(0, CD.NOTES.length - 1).filter(function (x) { return notes.indexOf(x) < 0; });
     r.drums.forEach(function (c) { if (c.note < 0) c.note = free.length ? free.splice(rng.int(0, free.length - 1), 1)[0] : rng.int(0, CD.NOTES.length - 1); });
     r.key = roundKey(r);
@@ -377,7 +390,8 @@
   /** null when the round is completable and follows every rule (DESIGN §5.1 / §3), else the reason. */
   function validate(r) {
     if (!r || !r.drums || !r.steps || !r.song) return 'no drums / steps / song';
-    var i, j, ids = {}, nC = r.drums.length, age = r.age, ri = r.roundIndex;
+    var i, j, ids = {}, nC = r.drums.length, age = r.age, ri = r.roundIndex, beat = beatMode(r.topic, age);
+    if (beat) return validateBeat(r);
     if (nC < 2 || nC > MAX_DRUMS) return nC + ' drums';
     var real = [], extra = [];
     for (i = 0; i < nC; i++) {
@@ -386,10 +400,10 @@
       ids[c.id] = c;
       if (!t || CD.DRUM_KINDS.indexOf(t.kind) < 0) return 'drum kind';
       if (!t.nameKind || t.nameValue === undefined || t.nameValue === null) return 'drum name';
-      if ((t.kind === 'bell' || t.kind === 'plate') && !CD.PALETTE[t.color]) return 'drum colour ' + t.color;
-      if (t.kind === 'plate' && CD.SHAPES.indexOf(t.shape) < 0) return 'shape';
+      if ((t.kind === 'drum' || t.kind === 'shape') && !CD.PALETTE[t.color]) return 'drum colour ' + t.color;
+      if (t.kind === 'shape' && CD.SHAPES.indexOf(t.shape) < 0) return 'shape';
+      if (t.kind === 'big') return 'a big drum outside beat mode';
       if (t.kind === 'animal' && CD.ANIMALS.indexOf(t.animal) < 0) return 'animal';
-      if (t.kind === 'string' && !(t.n >= 1 && t.n <= 5)) return 'string n ' + t.n;
       if (t.kind === 'dots' && !(t.n >= 1 && t.n <= 12)) return 'dots n ' + t.n;
       if (t.kind === 'glyph' && !(t.text && t.text.length >= 1 && t.text.length <= 2)) return 'glyph text';
       if (t.kind === 'glyph' && t.n !== undefined && String(t.n) !== t.text) return 'glyph number';
@@ -459,13 +473,13 @@
     if (bad) return 'confusable shapes ' + bad.join('+');
     switch (r.topic) {
       case 'colors': {
-        if (nk.join() !== 'bell') return 'colours: bells only';
-        if (cs.length !== nC) return 'colours: two bells in one colour';
-        if (r.drums.some(function (q) { return q.thing.size; })) return 'colours: a sized bell';
+        if (nk.join() !== 'drum') return 'colours: colour drums only';
+        if (cs.length !== nC) return 'colours: two drums in one colour';
+        if (r.drums.some(function (q) { return q.thing.size; })) return 'colours: a sized drum';
         break;
       }
       case 'shapes':
-        if (nk.join() !== 'plate') return 'shapes: plates only';
+        if (nk.join() !== 'shape') return 'shapes: shape drums only';
         for (i = 0; i < shapes.length; i++) if (shapesFor(age).indexOf(shapes[i]) < 0) return 'shape ' + shapes[i] + ' at age ' + age;
         if (age < 5 && (cs.length !== 1 || shapes.length !== nC)) return 'shapes: one colour, all shapes different';
         if (age >= 5 && nC >= 3) {   // the first ask needs both shape and colour
@@ -475,10 +489,10 @@
         }
         break;
       case 'size': {
-        if (nS !== 2 || real.some(function (q) { return q.thing.kind !== 'bell'; })) return 'size: 2 bells';
+        if (nS !== 2 || real.some(function (q) { return q.thing.kind !== 'drum'; })) return 'size: 2 drums';
         var a0 = real[0].thing, a1 = real[1].thing;
         if (a0.color !== a1.color || [a0.size, a1.size].sort().join() !== 'big,small') return 'size pair';
-        if (extra.some(function (q) { return q.thing.kind === 'bell' || q.thing.size; })) return 'size distractor';
+        if (extra.some(function (q) { return q.thing.kind === 'drum' || q.thing.size; })) return 'size distractor';
         break;
       }
       case 'animals': case 'initial':
@@ -489,11 +503,9 @@
         }
         break;
       case 'count': {
-        var want = age <= 4 ? 'string' : 'dots';
-        if (nk.join() !== want) return 'count: ' + want + ' only';
+        if (nk.join() !== 'dots') return 'count: dots drums only';
         var nn = r.drums.map(function (q) { return q.thing.n; });
-        if (want === 'string' && Math.max.apply(null, nn) > (ri === 0 ? 2 : ri === 1 ? 4 : 5)) return 'count: too many bells for round ' + ri;
-        if (want === 'dots' && Math.max.apply(null, nn) > (ri === 0 ? 5 : DOTS_MAX[age] || 10)) return 'count: too many dots';
+        if (Math.max.apply(null, nn) > (ri === 0 ? 5 : DOTS_MAX[age] || 10)) return 'count: too many dots';
         if (age === 5 && hasNeighbours(nn)) return 'count: neighbours at age 5';
         break;
       }
@@ -515,6 +527,32 @@
     return null;
   }
 
+  /** Beat mode (count at ages ≤ 4): ONE big drum (the target), steps 'beat' with need = n (warm-up 1, 2; later 3 — 2 when
+   *  short — distinct n in 1–5 with one ≥ 3), the step notes climb, the song = the big drum once per step. */
+  function validateBeat(r) {
+    if (r.drums.length !== 1) return 'beat: ' + r.drums.length + ' drums';
+    var c = r.drums[0], t = c.thing, ri = r.roundIndex;
+    if (!c.id || !c.target || !t || t.kind !== 'big' || !t.big || t.nameKind !== 'number' || t.nameValue === undefined) return 'beat: the big drum';
+    if (!(c.note >= 0 && c.note < CD.NOTES.length)) return 'note';
+    var ns = r.steps.map(function (s) { return s.need; }), k = ri === 0 ? 2 : r.short ? 2 : 3;
+    if (ns.length !== k) return 'beat: ' + ns.length + ' steps (want ' + k + ')';
+    if (ri === 0 && ns.join() !== '1,2') return 'beat warm-up ' + ns.join();
+    if (ri > 0 && Math.max.apply(null, ns) < 3) return 'beat: no n ≥ 3';
+    for (var i = 0; i < r.steps.length; i++) {
+      var s = r.steps[i];
+      if (s.mode !== 'beat' || s.promptKey !== 'p.beat' || !s.params || s.params.n !== s.need || s.nameKind !== 'number' || s.nameValue !== s.need) return 'beat step prompt';
+      if (s.targets.length !== 1 || s.targets[0] !== c.id) return 'beat step target';
+      if (!(s.need >= 1 && s.need <= 5 && s.need === Math.floor(s.need))) return 'beat n ' + s.need;
+      if (ns.indexOf(s.need) !== i) return 'beat: n twice';
+      if (!matches(r, s, t)) return 'beat: the big drum does not answer';
+      if (!(s.note >= 0 && s.note < CD.NOTES.length) || (i && !(s.note > r.steps[i - 1].note))) return 'beat: the song does not climb';
+    }
+    if (c.note !== r.steps[0].note) return 'beat: drum note';
+    if (r.song.length !== r.steps.length || r.song.some(function (id) { return id !== c.id; })) return 'beat: song';
+    if (r.key !== roundKey(r)) return 'key';
+    return null;
+  }
+
   // ---------------- Talk time ----------------
   function choicesFrom(rng, answer, pool, count, mk) {
     var vals = [answer], p2 = rng.shuffle(pool.filter(function (v) { return v !== answer; }));
@@ -531,11 +569,11 @@
   }
   /**
    * makeTalk(topic, { age, lang, rng }) → { topic, promptKey 'talk.<topic>', params, show, choices [{id, thing, value}], answer, answerId }
-   *   colors  "What colour is this bell?" {color}       show bell,           choices {kind:'color'} paint blobs (clash-free below 5)
-   *   shapes  "Which one is the {shape}?" {shape}       show null,           choices plates (one colour)
-   *   size    "Which bell is {size}?" {size}            show null,           choices {kind:'size', big, size, color}
+   *   colors  "What colour is this drum?" {color}       show drum,           choices {kind:'color'} paint blobs (clash-free below 5)
+   *   shapes  "Which one is the {shape}?" {shape}       show null,           choices shape drums (one colour)
+   *   size    "Which drum is {size}?" {size}            show null,           choices {kind:'size', big, size, color}
    *   animals "Where is the {animal}?" {animal}         show null,           choices animal drums
-   *   count   "How many bells / dots?" {n, kind}        show string / dots,  choices {kind:'number', n}
+   *   count   "How many dots?" {n, kind 'dots'}         show a dots drum,    choices {kind:'number', n} (numeral + dots)
    *   letters "Where is the letter {letter}?"           show null,           choices letter glyphs
    *   lower   "Find small {small}" {letter, small}      show capital glyph,  choices small glyphs
    *   initial "Which letter does {animal} start with?"  show animal drum,   choices letter glyphs
@@ -549,12 +587,12 @@
     var show = null, params = {}, ch, a, nC = age <= 3 ? 2 : 3;
     switch (topic) {
       case 'colors': {
-        var set = colourSet(rng, age, 3); a = set[0]; params = { color: a }; show = bell(a);
+        var set = colourSet(rng, age, 3); a = set[0]; params = { color: a }; show = drum(a);
         ch = choicesFrom(rng, a, set, nC, function (c) { return { kind: 'color', color: c }; }); break;
       }
       case 'shapes': {
         var col = colourSet(rng, age, 1)[0], shs = shapeSet(rng, age, 3); a = shs[0]; params = { shape: a };
-        ch = choicesFrom(rng, a, shs, nC, function (s) { return plate(s, col); }); break;
+        ch = choicesFrom(rng, a, shs, nC, function (s) { return shapeD(s, col); }); break;
       }
       case 'size': {
         var c2 = colourSet(rng, age, 1)[0]; a = rng.pick(['big', 'small']); params = { size: a, color: c2 };
@@ -566,9 +604,9 @@
         ch = choicesFrom(rng, a, CD.ANIMALS, nC, function (x) { return animal(x); }); break;
       }
       case 'count': {
-        var kd = age <= 4 ? 'string' : 'dots', rr = { 3: [1, 4], 4: [1, 5], 5: [2, 8], 6: [3, 10], 7: [3, 10] }[age];
-        a = rng.int(rr[0], rr[1]); params = { n: a, kind: kd }; show = kd === 'string' ? string(a) : dots(a);
-        var near = range(Math.max(1, a - 2), a + 2).filter(function (x) { return x !== a && (kd !== 'string' || x <= 5); });
+        var kd = 'dots', rr = { 3: [1, 4], 4: [1, 5], 5: [2, 8], 6: [3, 10], 7: [3, 10] }[age];
+        a = rng.int(rr[0], rr[1]); params = { n: a, kind: kd }; show = dots(a);
+        var near = range(Math.max(1, a - 2), a + 2).filter(function (x) { return x !== a && (age > 4 || x <= 5); });
         ch = choicesFrom(rng, a, near, nC, function (x) { return { kind: 'number', n: x }; }); break;
       }
       case 'letters': case 'lower': {
@@ -625,7 +663,7 @@
     makeRound: makeRound, makeTalk: makeTalk, validate: validate, topicsFor: topicsFor, matches: matches, stepFor: stepFor,
     ageOf: ageOf, langOf: langOf, clash: clash, safeSets: safeSets, maxSafe: maxSafe, pairsFor: pairsFor, sameAnswer: sameAnswer,
     shapesFor: shapesFor, parityOf: parityOf, letterPool: letterPool, initialOf: initialOf, thingKey: thingKey, roundKey: roundKey,
-    countsFor: countsFor,
+    countsFor: countsFor, beatMode: beatMode,
     TOPICS: ALL_TOPICS, COLORS: COLORS, COLORS5: COLORS5, SHAPES3: SHAPES3, SHAPE_PAIRS: SHAPE_PAIRS, LOWER_PAIRS: LOWER_PAIRS, BDPQ: BDPQ,
     LETTER_POOL: LETTER_POOL, CLASH: CLASH, COLOR_SAFE_BELOW: COLOR_SAFE_BELOW, MAX_DRUMS: MAX_DRUMS, ADD_MAX: ADD_MAX, SUB_MAX: SUB_MAX,
     ODDEVEN_MAX: ODDEVEN_MAX, DOTS_MAX: DOTS_MAX, SIZE_K: SIZE_K

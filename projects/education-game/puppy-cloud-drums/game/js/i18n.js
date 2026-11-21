@@ -1,50 +1,56 @@
-/* Bibi's Cloud Drums — CD.I18N (English + Vietnamese). Bibi (EN/VI lines "Bibi", VI titles "Khỉ Bibi") is a cheerful
- * little monkey camping in the mountains who hung a row of wind drums ("chuông gió") from a log beam over the campfire.
- * The child taps or swipes a drum, it swings and rings; a right note lights a paper lantern ("đèn lồng"). "Bibi" is read
- * naturally by English and Vietnamese voices ("ki" is an ordinary Vietnamese syllable), so no TTS rewrite (docs/VOICE.md §0).
+/* Bibi's Cloud Drums — CD.I18N (English + Vietnamese). Bibi (EN/VI lines "Bibi", VI titles "Cún Bibi") is a cheerful
+ * apricot puppy with two drumsticks who plays the drums on the clouds of a rainbow land. Drums stand on little floating
+ * cloud cushions; the child taps one: BOOM ("Bùm!"), it hops and lands, a note flies up and lights a star lantern
+ * ("đèn ngôi sao"). Counting at ages ≤ 4 = beat the big drum N times ("Bé gõ trống to ba cái nhé!"); the song ends with
+ * Bibi's cymbal ("Xoảng!"). "Bibi" is read naturally by English and Vietnamese voices ("bi" is an ordinary Vietnamese
+ * syllable), so no TTS rewrite (docs/VOICE.md §0).
  *
  *   CD.I18N.t(lang, key, params, rng?)            → string (variants picked with rng.next()/rng()/Math.random)
- *   CD.I18N.ask(lang, promptKey, params, {next, rng}) → the step prompt; next:true → "Next one! Ring the red bell!"
- *   CD.I18N.name(lang, kind, value, opts?)        → a name. kinds: color (vi "màu đỏ"), hue (bare, vi "đỏ"), shape, size,
- *                                                   bell (a colour or big/small → "red bell" / "chuông màu đỏ"), plate (a
- *                                                   shape → "star drum" / "chuông hình ngôi sao"), string (n → "three
- *                                                   bells" / "ba cái chuông"), dots (n), animal (vi "con gấu"), word
- *                                                   (animal without classifier), number, letter, text, sum, diff, parity
- *   CD.I18N.words(lang, kind, value)              → accepted spoken forms (lower-case, + no-diacritic forms, digits)
+ *   CD.I18N.ask(lang, promptKey, params, {next, rng}) → the step prompt; next:true → "Next one! Boom the red drum!"
+ *   CD.I18N.name(lang, kind, value, opts?)        → a name. kinds: color (vi "màu đỏ"), hue (bare, vi "đỏ"), shape (vi
+ *                                                   "ngôi sao", "hình tròn"), shapeH (vi "hình ngôi sao"), size, drum (a
+ *                                                   colour or big/small → "red drum" / "trống màu đỏ"), big ("big drum" /
+ *                                                   "trống to"), dots (n → "seven dots" / "bảy chấm"), animal (vi "con bò"),
+ *                                                   sound (the animal's sound: "moo" / "ùm bò"), word (animal without
+ *                                                   classifier), number, letter, text, sum, diff, parity
+ *   CD.I18N.words(lang, kind, value)              → accepted spoken forms (lower-case, + no-diacritic forms, digits;
+ *                                                   animals also by their sound: "moo" → cow)
  *   CD.I18N.choiceWords(lang, choice)             → spoken forms for a Talk choice {id, thing:{kind, …}}
- *   CD.I18N.drumPhrase(lang, thing, opts?)       → a drum named for a sentence: "the red bell", "the big bell", "the
- *                                                   triangle", "three bells", "five dots", "the bear", "letter B", "small
- *                                                   b", "number five" / "chuông màu đỏ", "chuông to", "chuông hình tam
- *                                                   giác", "chùm ba cái chuông", "năm chấm", "con gấu" ({drum:true} →
- *                                                   "chuông con gấu"), "chữ B", "chữ b thường", "số năm"
- *                                                   (alias: piecePhrase)
+ *   CD.I18N.drumPhrase(lang, thing, opts?)        → a drum named for a sentence: "the red drum", "the big drum", "the star
+ *                                                   drum", "the drum with five dots", "the cow", "letter B", "small b",
+ *                                                   "number five" / "trống màu đỏ", "trống to", "trống ngôi sao", "trống
+ *                                                   có năm chấm", "con bò" ({drum:true} → "trống con bò"), "chữ B",
+ *                                                   "chữ b thường", "số năm"   (alias: piecePhrase)
  *   CD.I18N.phrase(lang, thing)                   → the same for any thing / icon / {nameKind, nameValue}
- *   CD.I18N.sayName(lang, thing)                  → a drum's plain name ("the red bell" / "chuông màu đỏ")
- *   CD.I18N.sayRight(lang, e, rng?)               → `right`: "Ding! The red bell!", "Ding-dong! The bear!" / "Đinh đoong!
- *                                                   Chuông màu đỏ!"; counting strings → the count run "One, two, three
- *                                                   bells!"; add/sub "Five! 2 + 3 is five!"; oddeven "Seven is odd!";
- *                                                   initial "B is for bear!"  (aliases: sayPlaced; sayPickup / sayTap
- *                                                   = "The red bell!" / "Look, the red bell!")
- *   CD.I18N.sayWrong(lang, e, rng?)               → `wrong`: "That’s the blue bell. Let’s ring the red one!" (names what
- *                                                   was rung, then the goal; maths never gives the answer away)
- *   CD.I18N.sayCount(lang, i)                     → "One!" … "Twenty!"
- *   CD.I18N.sayCountRun(lang, n, kind?)           → "One, two, three bells!" / "Một, hai, ba cái chuông!" (kind 'string'
- *                                                   default | 'dots' | a thing)
- *   CD.I18N.sayCountDone(lang, n, kind?, rng?)    → "Three bells! Hooray!"
+ *   CD.I18N.sayName(lang, thing)                  → a drum's plain name ("the red drum" / "trống màu đỏ")
+ *   CD.I18N.sayRight(lang, e, rng?)               → `right`: "Boom! The red drum!", animals "Moo! The cow!" / "Ùm bò! Con
+ *                                                   bò!", beat mode (e.count {n}) "Three! You beat it three times!" /
+ *                                                   "Ba! Bé gõ đủ ba cái rồi!", dots with e.count → the count run "One,
+ *                                                   two, three dots!", add/sub "Five! 2 + 3 is five!", oddeven "Seven is
+ *                                                   odd!", initial "C is for cow!"   (aliases: sayPlaced; sayPickup /
+ *                                                   sayTap = "The red drum!" / "Look, the red drum!")
+ *   CD.I18N.sayWrong(lang, e, rng?)               → `wrong`: "That’s the blue drum. Let’s boom the red one!" (names what
+ *                                                   was tapped, then the goal; animals "The duck says quack! Let’s find
+ *                                                   the cow!"; maths never gives the answer away)
+ *   CD.I18N.sayCount(lang, i)                     → "One!" … "Twenty!" (one beat counted aloud)
+ *   CD.I18N.sayCountRun(lang, n, kind?)           → "One, two, three!" (kind 'beat' / default) | "One, two, three dots!"
+ *                                                   (kind 'dots' or a dots thing)
+ *   CD.I18N.sayCountDone(lang, n, kind?, rng?)    → "Three beats! Hooray!" / "Ba cái! Hoan hô!"
+ *   CD.I18N.sayBeatNudge(lang, e, rng?)           → `beatNudge {i, n}`: "Two! One more!" / "Hai rồi! Thêm một cái nữa!"
  *   CD.I18N.talkWrong(lang, choice | kind, value) → gentle "It is red! Good try!" for a missed Talk-time answer
  *   CD.I18N.speech(lang, text)                    → text tuned for TTS (letter names, + − =, " — " pause)
+ *   CD.I18N.soundOf(lang, animal)                 → "moo" / "ùm bò"
  *   CD.I18N.setChild(name)  has(lang, key)  keys(lang)  raw(lang, key)  langs  PARAMS  TOPICS  ANIMALS  SHAPES  COLORS
  *
  * Event objects `e` (main passes the world event + { topic, params (the current step's params), promptKey, thing (the
- * drum's thing) }): thing = { kind 'bell'|'plate'|'string'|'dots'|'animal'|'glyph', color?, shape?, n?, animal?, text?,
- * big?, nameKind, nameValue }. When `thing` is missing, the drum is rebuilt from {nameKind, nameValue} + topic (`got`).
- * Params: values may be RAW ({color:'red'}, {animal:'bear'}, {n:3, kind:'string'}) — keys named like a name kind are named
- * automatically; an object {kind, value} or {nameKind, nameValue} is replaced by its name / phrase; {thing: {...}} → its
- * drum phrase.
- * Derived params: {hue} (bare colour) from color, {word} from animal, {lower} from letter, {expr} from a,b / text, {num}
- * (number word), {items} ("bells"/"bell"/"dots", vi "cái chuông" / "chấm"), {itemsPl} (always plural) and {holder} (EN
- * "one", vi "chùm" for a bell string / "chuông" for a dot plate) from n and kind ('string' default, 'dots').
- * Vietnamese shape prompts / Talk say "hình ngôi sao", "hình trái tim" ({shape} in p.shapes*, talk.shapes*).
+ * drum's thing) }): thing = { kind 'drum'|'shape'|'big'|'dots'|'animal'|'glyph', color?, shape?, n?, animal?, text?, big?,
+ * nameKind, nameValue }. When `thing` is missing, the drum is rebuilt from {nameKind, nameValue} + topic (`got`).
+ * Params: values may be RAW ({color:'red'}, {animal:'cow'}, {n:3}) — keys named like a name kind are named automatically;
+ * an object {kind, value} or {nameKind, nameValue} is replaced by its name / phrase; {thing: {...}} → its drum phrase.
+ * Derived params: {hue} (bare colour) from color, {word} and {sound} from animal, {lower} from letter, {expr} from a,b /
+ * text, {num} (number word), {times} ("once" / "three times", vi "ba cái") from n, {done} / {left} (number words: beats so
+ * far / beats still to go) from i + n, {items} ("dots"/"dot", vi "chấm") and {itemsPl} (always plural) from n + kind.
+ * Vietnamese shape Talk questions say "hình ngôi sao", "hình trái tim" ({shape} in talk.shapes*).
  * Keys with required params (PARAMS) fall back to a generic key when a param is missing (never "the !" on screen).
  * {child}: if the child's name is empty, variants containing {child} are skipped (and "bé {child}" → "bé", ", {child}!" → "!").
  */
@@ -52,11 +58,11 @@
   'use strict';
 
   var LANGS = ['en', 'vi'];
-  var ANIMALS = ['bear', 'fox', 'owl', 'deer', 'rabbit', 'squirrel', 'frog', 'duck'];
+  var ANIMALS = ['cow', 'duck', 'cat', 'pig', 'frog', 'sheep', 'hen', 'mouse'];
   var SHAPES = ['circle', 'square', 'triangle', 'star', 'heart', 'rect', 'diamond', 'oval'];
   var COLORS = ['red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink'];
-  var DRUM_KINDS = ['bell', 'plate', 'string', 'dots', 'animal', 'glyph'];
-  var KIND_ALIAS = { shape: 'plate', bunch: 'string', bells: 'string', obj: 'bell', tag: 'glyph', number: 'glyph' };
+  var DRUM_KINDS = ['drum', 'shape', 'big', 'dots', 'animal', 'glyph'];
+  var KIND_ALIAS = { tom: 'drum', obj: 'drum', tag: 'glyph', number: 'glyph', bass: 'big' };
 
   // ---------------------------------------------------------------- names
   var NAMES = { en: {}, vi: {} };
@@ -67,7 +73,8 @@
   NAMES.vi.hue = { red: 'đỏ', blue: 'xanh dương', yellow: 'vàng', green: 'xanh lá', orange: 'cam', purple: 'tím', pink: 'hồng' };
   NAMES.en.shape = { circle: 'circle', square: 'square', triangle: 'triangle', star: 'star', heart: 'heart', rect: 'rectangle',
     rectangle: 'rectangle', diamond: 'diamond', oval: 'oval' };
-  // DESIGN §6: "ngôi sao", "trái tim" without "hình" as a bare name; a drum plate is "chuông hình ngôi sao" (shapeH)
+  // DESIGN §6: shape drums "trống hình tròn / hình vuông / hình tam giác / ngôi sao / trái tim / hình chữ nhật / hình thoi /
+  // hình bầu dục"; a Talk question says "hình ngôi sao" (shapeH)
   NAMES.vi.shape = { circle: 'hình tròn', square: 'hình vuông', triangle: 'hình tam giác', star: 'ngôi sao',
     heart: 'trái tim', rect: 'hình chữ nhật', rectangle: 'hình chữ nhật', diamond: 'hình thoi', oval: 'hình bầu dục' };
   NAMES.en.shapeH = NAMES.en.shape;
@@ -75,20 +82,21 @@
     heart: 'hình trái tim', rect: 'hình chữ nhật', rectangle: 'hình chữ nhật', diamond: 'hình thoi', oval: 'hình bầu dục' };
   NAMES.en.size = { big: 'big', small: 'small' };
   NAMES.vi.size = { big: 'to', small: 'nhỏ' };
-  NAMES.en.animal = { bear: 'bear', fox: 'fox', owl: 'owl', deer: 'deer', rabbit: 'rabbit', squirrel: 'squirrel', frog: 'frog',
-    duck: 'duck' };
-  NAMES.vi.animal = { bear: 'con gấu', fox: 'con cáo', owl: 'con cú', deer: 'con hươu', rabbit: 'con thỏ', squirrel: 'con sóc',
-    frog: 'con ếch', duck: 'con vịt' };
+  NAMES.en.animal = { cow: 'cow', duck: 'duck', cat: 'cat', pig: 'pig', frog: 'frog', sheep: 'sheep', hen: 'hen', mouse: 'mouse' };
+  NAMES.vi.animal = { cow: 'con bò', duck: 'con vịt', cat: 'con mèo', pig: 'con heo', frog: 'con ếch', sheep: 'con cừu',
+    hen: 'con gà mái', mouse: 'con chuột' };
   NAMES.en.word = NAMES.en.animal;
-  NAMES.vi.word = { bear: 'gấu', fox: 'cáo', owl: 'cú', deer: 'hươu', rabbit: 'thỏ', squirrel: 'sóc', frog: 'ếch', duck: 'vịt' };
+  NAMES.vi.word = { cow: 'bò', duck: 'vịt', cat: 'mèo', pig: 'heo', frog: 'ếch', sheep: 'cừu', hen: 'gà mái', mouse: 'chuột' };
+  // the animal sounds (DESIGN §6; the Vietnamese ones kindergartens use)
+  NAMES.en.sound = { cow: 'moo', duck: 'quack', cat: 'meow', pig: 'oink', frog: 'ribbit', sheep: 'baa', hen: 'cluck', mouse: 'squeak' };
+  NAMES.vi.sound = { cow: 'ùm bò', duck: 'cạp cạp', cat: 'meo meo', pig: 'ụt ịt', frog: 'ộp ộp', sheep: 'be be',
+    hen: 'cục ta cục tác', mouse: 'chít chít' };
   NAMES.en.parity = { odd: 'odd', even: 'even' };
   NAMES.vi.parity = { odd: 'lẻ', even: 'chẵn' };
-  // counted things: [singular, plural]; RUN = the word used when counting aloud ("Một, hai, ba cái chuông!")
-  var ITEMS = { en: { string: ['bell', 'bells'], dots: ['dot', 'dots'] },
-    vi: { string: ['cái chuông', 'cái chuông'], dots: ['chấm', 'chấm'] } };
-  var RUN = ITEMS;
-  // what holds the counted things: EN "the one with three bells"; VI "chùm có ba cái chuông" / "chuông có năm chấm"
-  var HOLDER = { en: { string: 'one', dots: 'one' }, vi: { string: 'chùm', dots: 'chuông' } };
+  // counted things: [singular, plural]; RUN = the word said after a count run ("Một, hai, ba chấm!"; beats: none)
+  var ITEMS = { en: { dots: ['dot', 'dots'], beat: ['beat', 'beats'] },
+    vi: { dots: ['chấm', 'chấm'], beat: ['cái', 'cái'] } };
+  var RUN = { en: { dots: ['dot', 'dots'], beat: ['', ''] }, vi: { dots: ['chấm', 'chấm'], beat: ['', ''] } };
 
   var NUM = {
     en: ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve',
@@ -124,22 +132,23 @@
     'T': ['tê', 'tơ'], 'U': ['u'], 'Ư': ['ư'], 'V': ['vê', 'vơ'], 'X': ['ích xì', 'xơ'], 'Y': ['i dài', 'i cờ rét'],
     'F': ['ép'], 'J': ['gi'], 'W': ['vê kép'], 'Z': ['dét'] };
 
-  // extra accepted spoken forms per kind/value (names are always accepted automatically).
+  // extra accepted spoken forms per kind/value (names — and for animals their sounds — are always accepted automatically).
   // No form is shared by two values of the same kind.
   var WORDS = {
     en: {
       color: { red: ['red', 'read', 'reds'], blue: ['blue', 'blew', 'blues'], yellow: ['yellow', 'yello'],
         green: ['green', 'greens'], orange: ['orange', 'oranges'], purple: ['purple', 'violet', 'pupple'],
         pink: ['pink', 'pinks', 'pinky'] },
-      shape: { circle: ['circle', 'round', 'ring', 'circles'], square: ['square', 'squares'],
+      shape: { circle: ['circle', 'round', 'circles'], square: ['square', 'squares'],
         triangle: ['triangle', 'try angle', 'triangles'], star: ['star', 'stars'], heart: ['heart', 'hearts', 'hart', 'love'],
         rect: ['rectangle', 'rectangles', 'long box'], rectangle: ['rectangle', 'rectangles'], oval: ['oval', 'ovals', 'egg shape'],
         diamond: ['diamond', 'diamonds'] },
       size: { big: ['big', 'large', 'huge', 'bigger', 'giant'], small: ['small', 'little', 'tiny', 'smaller', 'baby'] },
-      animal: { bear: ['bear', 'bears', 'teddy', 'teddy bear', 'bare'], fox: ['fox', 'foxy', 'foxes', 'fax'],
-        owl: ['owl', 'owls', 'hoot', 'hoo hoo'], deer: ['deer', 'dear', 'fawn', 'reindeer', 'deers'],
-        rabbit: ['rabbit', 'rabbits', 'bunny', 'bunnies', 'rabit'], squirrel: ['squirrel', 'squirrels', 'squirl', 'squirrelly'],
-        frog: ['frog', 'froggy', 'frogs', 'ribbit'], duck: ['duck', 'ducky', 'duckie', 'ducks', 'quack'] },
+      animal: { cow: ['cow', 'cows', 'moo moo', 'mooo', 'moo cow'], duck: ['duck', 'ducky', 'duckie', 'ducks', 'quack quack'],
+        cat: ['cat', 'cats', 'kitty', 'kitten', 'kitty cat', 'meow meow', 'miaow', 'mew'],
+        pig: ['pig', 'pigs', 'piggy', 'piglet', 'oink oink'], frog: ['frog', 'froggy', 'frogs', 'ribbit ribbit', 'croak'],
+        sheep: ['sheep', 'sheepy', 'baa baa', 'ba ba'], hen: ['hen', 'hens', 'chicken', 'chick', 'cluck cluck', 'bawk'],
+        mouse: ['mouse', 'mice', 'mousey', 'mousie', 'squeak squeak', 'eek'] },
       parity: { odd: ['odd', 'odds'], even: ['even', 'evens'] }
     },
     vi: {
@@ -150,11 +159,16 @@
         star: ['ngôi sao', 'sao', 'hình ngôi sao', 'hình sao'], heart: ['trái tim', 'tim', 'hình trái tim', 'hình tim'],
         rect: ['chữ nhật', 'hình chữ nhật'], rectangle: ['chữ nhật', 'hình chữ nhật'], oval: ['bầu dục', 'hình bầu dục'],
         diamond: ['hình thoi', 'thoi'] },
-      size: { big: ['to', 'lớn', 'bự', 'to lắm', 'to hơn', 'chuông to'], small: ['nhỏ', 'bé', 'nhỏ xíu', 'nhỏ hơn', 'tí hon', 'chuông nhỏ'] },
-      animal: { bear: ['con gấu', 'gấu', 'gấu con', 'gấu nâu', 'chú gấu'], fox: ['con cáo', 'cáo', 'cáo con', 'chồn cáo'],
-        owl: ['con cú', 'cú', 'cú mèo', 'con cú mèo'], deer: ['con hươu', 'hươu', 'con nai', 'nai', 'hươu con'],
-        rabbit: ['con thỏ', 'thỏ', 'thỏ con', 'thỏ trắng'], squirrel: ['con sóc', 'sóc', 'sóc con', 'chú sóc'],
-        frog: ['con ếch', 'ếch', 'ếch con', 'con nhái'], duck: ['con vịt', 'vịt', 'vịt con', 'cạp cạp'] },
+      size: { big: ['to', 'lớn', 'bự', 'to lắm', 'to hơn', 'trống to', 'trống lớn'],
+        small: ['nhỏ', 'bé', 'nhỏ xíu', 'nhỏ hơn', 'tí hon', 'trống nhỏ'] },
+      animal: { cow: ['con bò', 'bò', 'bò sữa', 'bò con', 'ụm bò', 'ò ò', 'ò ó'],
+        duck: ['con vịt', 'vịt', 'vịt con', 'quạc quạc', 'cạp'],
+        cat: ['con mèo', 'mèo', 'mèo con', 'mèo meo', 'meo'],
+        pig: ['con heo', 'heo', 'con lợn', 'lợn', 'heo con', 'ủn ỉn', 'ụt ịt ụt ịt'],
+        frog: ['con ếch', 'ếch', 'ếch con', 'con nhái', 'ộp ộp ộp', 'ộp'],
+        sheep: ['con cừu', 'cừu', 'cừu con', 'be be be', 'bee be'],
+        hen: ['con gà mái', 'gà mái', 'con gà', 'gà', 'gà mẹ', 'cục tác', 'cục ta cục tác', 'cục cục'],
+        mouse: ['con chuột', 'chuột', 'chuột con', 'chút chít', 'chít'] },
       parity: { odd: ['lẻ', 'số lẻ', 'lẽ', 'lẹ'], even: ['chẵn', 'số chẵn', 'chặn', 'chắn'] }
     }
   };
@@ -163,10 +177,10 @@
   // ({en:[{word, initial, animal}], vi:[…]}). vi words are the animal names WITHOUT the classifier "con"; the VI initial
   // keeps the letter's own marks (ếch → Ê) but never a tone mark.
   var WORD_LIST = {
-    en: [['bear', 'bear', 'B'], ['fox', 'fox', 'F'], ['owl', 'owl', 'O'], ['deer', 'deer', 'D'], ['rabbit', 'rabbit', 'R'],
-      ['squirrel', 'squirrel', 'S'], ['frog', 'frog', 'F'], ['duck', 'duck', 'D']],
-    vi: [['gấu', 'bear', 'G'], ['cáo', 'fox', 'C'], ['cú', 'owl', 'C'], ['hươu', 'deer', 'H'], ['thỏ', 'rabbit', 'T'],
-      ['sóc', 'squirrel', 'S'], ['ếch', 'frog', 'Ê'], ['vịt', 'duck', 'V']]
+    en: [['cow', 'cow', 'C'], ['duck', 'duck', 'D'], ['cat', 'cat', 'C'], ['pig', 'pig', 'P'], ['frog', 'frog', 'F'],
+      ['sheep', 'sheep', 'S'], ['hen', 'hen', 'H'], ['mouse', 'mouse', 'M']],
+    vi: [['bò', 'cow', 'B'], ['vịt', 'duck', 'V'], ['mèo', 'cat', 'M'], ['heo', 'pig', 'H'], ['ếch', 'frog', 'Ê'],
+      ['cừu', 'sheep', 'C'], ['gà mái', 'hen', 'G'], ['chuột', 'mouse', 'C']]
   };
   function defaultEntries(lang) {
     return WORD_LIST[lang].map(function (w) { return { id: w[1], word: w[0], animal: w[1], initial: w[2] }; });
@@ -178,13 +192,13 @@
 
   // ---------------------------------------------------------------- strings
   var TOPICS = ['colors', 'shapes', 'size', 'count', 'animals', 'letters', 'lower', 'initial', 'add', 'sub', 'oddeven'];
-  var NAME_KINDS = ['color', 'hue', 'shape', 'size', 'bell', 'plate', 'string', 'dots', 'animal', 'word', 'number', 'letter',
-    'text', 'sum', 'diff', 'parity'];
+  var NAME_KINDS = ['color', 'hue', 'shape', 'shapeH', 'size', 'drum', 'big', 'dots', 'animal', 'sound', 'word', 'number',
+    'letter', 'text', 'sum', 'diff', 'parity'];
   // prompt keys content.js asks with (DESIGN §5.1 / §6) and their REQUIRED params (others are optional)
   var PROMPTS = {
     'p.colors': ['color'], 'p.shapes': ['shape'], 'p.shapes5': ['shape', 'color'], 'p.size': ['size'],
-    'p.animals': ['animal'], 'p.count': ['n'], 'p.letters': ['letter'], 'p.lower': ['letter'], 'p.initial': ['letter'],
-    'p.add': ['a', 'b'], 'p.sub': ['a', 'b'], 'p.oddeven': ['parity']
+    'p.animals': ['animal'], 'p.beat': ['n'], 'p.count': ['n'], 'p.letters': ['letter'], 'p.lower': ['letter'],
+    'p.initial': ['letter'], 'p.add': ['a', 'b'], 'p.sub': ['a', 'b'], 'p.oddeven': ['parity']
   };
   var MAX_COUNT = 20;
 
@@ -193,8 +207,8 @@
       'ui.title': 'Bibi’s Cloud Drums',
       'ui.logo1': 'Bibi’s',
       'ui.logo2': 'Cloud Drums',
-      'ui.subtitle': 'Tap a drum, hear it ring, light up the lanterns!',
-      'ui.tagline': 'Tap a drum, hear it ring, light up the lanterns!',
+      'ui.subtitle': 'Boom the cloud drums, light up the stars!',
+      'ui.tagline': 'Boom the cloud drums, light up the stars!',
       'ui.play': 'Play',
       'ui.playAgain': 'Play again',
       'ui.home': 'Home',
@@ -218,25 +232,25 @@
       'ui.stars': 'Stars',
       'ui.chapter': 'Chapter {n}',
       'ui.allDone': 'All done! {stars} stars',
-      'ui.welcome': ['Hi {child}! I am Bibi. Let’s ring the drums!', 'Hi! I am Bibi. Let’s ring the drums!'],
+      'ui.welcome': ['Hi {child}! I am Bibi. Let’s play the drums!', 'Hi! I am Bibi. Let’s play the drums!'],
       'ui.micUnsupported': 'Voice answers are not available here. Tap the pictures!',
       'ui.micDenied': 'The microphone is off. Tap the pictures instead!',
       'ui.voiceMissing': 'Tip for parents: add a voice in Settings › Accessibility › Spoken Content › Voices.',
       'ui.tapOrSay': 'Tap or say the answer!',
       'ui.listening': 'Bibi is listening…',
       'ui.tapBibi': 'Tap Bibi to hear it again',
-      'ui.tapHint': 'Tap a drum to ring it',
+      'ui.tapHint': 'Tap a drum to boom it',
       'ui.swipeHint': 'Swipe across the drums',
       'ui.skip': 'Skip',
       'ui.gallery': 'Our songs',
       'ui.langName.en': 'English',
       'ui.langName.vi': 'Tiếng Việt',
 
-      'topic.colors': 'Colour Bells',
+      'topic.colors': 'Colour Drums',
       'topic.shapes': 'Shape Drums',
       'topic.size': 'Big and Small',
       'topic.count': 'Let’s Count',
-      'topic.animals': 'Forest Friends',
+      'topic.animals': 'Farm Band',
       'topic.letters': 'Letter Drums',
       'topic.lower': 'Big and Small Letters',
       'topic.initial': 'First Letters',
@@ -244,88 +258,96 @@
       'topic.sub': 'Take Away',
       'topic.oddeven': 'Odd and Even',
 
-      'weather.0': 'Good morning, mountains!',
+      'weather.0': 'Good morning, cloud land!',
       'weather.1': 'Sunny noon!',
-      'weather.2': 'Sunset time!',
+      'weather.2': 'Sunset clouds!',
       'weather.3': 'Starry night!',
 
-      'enter': ['New drums!', 'Look, new drums!', 'Here come new drums!'],
+      'enter': ['Here come the drums!', 'Look, new drums!', 'Boom! New drums!'],
 
-      'p.any': ['Let’s ring a drum!', 'Tap a drum and hear it sing!', 'Which drum shall we ring?'],
+      'p.any': ['Let’s boom a drum!', 'Tap a drum and hear it boom!', 'Which drum shall we play?'],
       'p.next': ['Next one!', 'One more!', 'Now,'],
-      'p.colors': ['Ring the {color} bell!', 'Where is the {color} bell? Ring it!', 'Can you ring the {color} bell?'],
-      'p.shapes': ['Ring the {shape}!', 'Where is the {shape} drum? Ring it!', 'Can you ring the {shape}?'],
-      'p.shapes5': ['Ring the {color} {shape}!', 'Where is the {color} {shape}? Ring it!', 'Can you ring the {color} {shape}?'],
-      'p.size': ['Ring the {size} bell!', 'Which bell is {size}? Ring it!', 'Can you ring the {size} bell?'],
-      'p.sizeAny': ['Ring the big bell!', 'Which bell is big? Ring it!', 'Can you ring the big bell?'],
-      'p.animals': ['Ring the {animal}!', 'Where is the {animal}? Ring it!', 'Can you ring the {animal} drum?'],
-      'p.count': ['Ring the {holder} with {num} {items}!', 'Let’s count! Which {holder} has {num} {items}? Ring it!',
-        'Can you find {num} {items}? Ring that {holder}!'],
-      'p.letters': ['Ring the letter {letter}!', 'Where is the letter {letter}? Ring it!', 'Can you ring letter {letter}?'],
-      'p.lower': ['Big {letter} has a little friend. Ring small {lower}!', 'Ring small {lower}!',
+      'p.colors': ['Boom the {color} drum!', 'Where is the {color} drum? Tap it!', 'Can you boom the {color} drum?'],
+      'p.shapes': ['Boom the {shape} drum!', 'Where is the {shape} drum? Tap it!', 'Can you boom the {shape} drum?'],
+      'p.shapes5': ['Boom the {color} {shape} drum!', 'Where is the {color} {shape}? Tap it!', 'Can you boom the {color} {shape} drum?'],
+      'p.size': ['Boom the {size} drum!', 'Which drum is {size}? Tap it!', 'Can you boom the {size} drum?'],
+      'p.sizeAny': ['Boom the big drum!', 'Which drum is big? Tap it!', 'Can you boom the big drum?'],
+      'p.animals': ['Who says {sound}? Tap the {animal}!', 'Listen: {sound}! Where is the {animal}? Tap it!',
+        'Who says {sound}? Boom the {animal} drum!'],
+      'p.beat': ['Beat the big drum {times}!', 'Let’s count! Beat the big drum {times}!', 'Can you beat the big drum {times}?'],
+      'p.count': ['Boom the drum with {num} {items}!', 'Let’s count! Which drum has {num} {items}? Tap it!',
+        'Can you find {num} {items}? Boom that drum!'],
+      'p.letters': ['Boom the letter {letter}!', 'Where is the letter {letter}? Tap it!', 'Can you boom letter {letter}?'],
+      'p.lower': ['Big {letter} has a little friend. Boom small {lower}!', 'Boom small {lower}!',
         'Where is small {lower}? It goes with big {letter}!'],
-      'p.initial': ['Ring the animal that starts with {letter}!', 'Who starts with {letter}? Ring it!',
+      'p.initial': ['Boom the animal that starts with {letter}!', 'Who starts with {letter}? Tap it!',
         'Listen: {letter}! Which animal starts with {letter}?'],
-      'p.add': ['What is {a} + {b}? Ring the answer!', 'Let’s add! {a} + {b}. Ring the answer!',
-        'Count it up: {a} + {b}! Ring the answer!'],
-      'p.sub': ['What is {a} − {b}? Ring the answer!', 'Take away! {a} − {b}. Ring the answer!',
-        'Start with {a}, take away {b}! Ring the answer!'],
-      'p.oddeven': ['Ring all the {parity} numbers!', 'Find every {parity} number and ring it!', 'Let’s ring all the {parity} numbers!'],
+      'p.add': ['What is {a} + {b}? Boom the answer!', 'Let’s add! {a} + {b}. Tap the answer!',
+        'Count it up: {a} + {b}! Boom the answer!'],
+      'p.sub': ['What is {a} − {b}? Boom the answer!', 'Take away! {a} − {b}. Tap the answer!',
+        'Start with {a}, take away {b}! Boom the answer!'],
+      'p.oddeven': ['Boom all the {parity} numbers!', 'Find every {parity} number and tap it!', 'Let’s boom all the {parity} numbers!'],
 
       'name.say': ['{thing}!'],
       'tap': ['{thing}!', 'Look, {thing}!', 'This is {thing}!'],
-      'right': ['Ding! {thing}!', 'Ding-dong! {thing}!', '{thing}! Lovely!'],
-      'right.label': ['Ding! {label}!', '{label}! Lovely!', 'Ding-dong! {label}!'],
-      'right.parity': ['{num} is {parity}!', 'Yes! {num} is {parity}!', 'Ding! {num} is {parity}!'],
-      'right.initial': ['{letter} is for {word}!', 'Yes! {letter} is for {word}!', 'Ding! {letter} is for {word}!'],
-      'right.sum': ['{ans}! {expr} is {ans}!', 'Yes! {expr} is {ans}!', 'Ding! {expr} is {ans}!'],
-      'right.any': ['Ding! Lovely!', 'Ding-dong! Just right!', 'Ding! Hooray!'],
+      'right': ['Boom! {thing}!', '{thing}! Boom!', 'Boom boom! {thing}! Lovely!'],
+      'right.label': ['Boom! {label}!', '{label}! Lovely!', 'Boom boom! {label}!'],
+      'right.animal': ['{sound}! {thing}!', 'Boom! {sound}! {thing}!', '{sound}! {thing} sings along!'],
+      'right.beat': ['{num}! You beat it {times}!', '{num}! Super drumming!', '{num}! Hooray, {times}!'],
+      'right.parity': ['{num} is {parity}!', 'Yes! {num} is {parity}!', 'Boom! {num} is {parity}!'],
+      'right.initial': ['{letter} is for {word}!', 'Yes! {letter} is for {word}!', 'Boom! {letter} is for {word}!'],
+      'right.sum': ['{ans}! {expr} is {ans}!', 'Yes! {expr} is {ans}!', 'Boom! {expr} is {ans}!'],
+      'right.any': ['Boom! Lovely!', 'Boom boom! Just right!', 'Boom! Hooray!'],
       'countDone': ['{num} {items}! Hooray!', 'We counted {num} {items}!', '{num} {items}! Super counting!'],
-      'lantern': ['A lantern lights up!', 'Look, the lantern glows!', 'One more lantern!'],
+      'beatNudge': ['{done}! {left} more!', 'That’s {done}! {left} more!', '{done}! Keep going, {left} more!'],
+      'lantern': ['A star lantern lights up!', 'Look, the star lantern glows!', 'One more star lantern!'],
 
-      'wrong.thing': ['That’s {got}. Let’s ring {want}!', 'Oh, {got}! Where is {want}?', 'This one is {got}! Let’s look for {want}!'],
-      'wrong.count': ['That {holder} has {got}. Let’s ring the {holder} with {want}!', 'Oh, {got}! Let’s look for {want}!',
+      'wrong.thing': ['That’s {got}. Let’s boom {want}!', 'Oh, {got}! Where is {want}?', 'This one is {got}! Let’s look for {want}!'],
+      'wrong.animal': ['{got} says {gotSound}! Let’s find {want}!', '{gotSound}! That’s {got}. Who says {sound}? Let’s find {want}!',
+        'That’s {got}, {gotSound}! Let’s boom {want}!'],
+      'wrong.count': ['That drum has {got}. Let’s boom the drum with {want}!', 'Oh, {got}! Let’s look for {want}!',
         'Let’s count: {got}! We need {want}!'],
       'wrong.math': ['That’s {got}. Let’s count again!', 'Hmm, {got}. Let’s count one more time!', 'That’s {got}! Let’s think again!'],
-      'wrong.parity': ['{num} is {parity}! Let’s look for another one!', '{num} is {parity}. Let’s ring a different one!',
+      'wrong.parity': ['{num} is {parity}! Let’s look for another one!', '{num} is {parity}. Let’s boom a different one!',
         '{num} is {parity}! Let’s try another number!'],
-      'wrong.initial': ['{word} starts with {first}! Let’s look again!', '{word} starts with {first}. Let’s ring another one!',
+      'wrong.initial': ['{word} starts with {first}! Let’s look again!', '{word} starts with {first}. Let’s boom another one!',
         '{word} starts with {first}! Let’s try another animal!'],
       'wrong.any': ['Let’s look again!', 'Let’s try another drum!', 'Hmm, let’s think again!', 'Keep going, you can do it!'],
-      'stepDone': ['Hooray!', 'Lovely ringing!', 'Wonderful!', 'Ding!'],
-      'song': ['Now play our song — swipe across the drums!', 'Song time! Swipe across all the drums!',
-        'Let’s play our song! Swipe over the drums!'],
-      'songShort': ['Now our song!', 'Swipe for our song!', 'Song time!'],
-      'songDone': ['Beautiful music!', 'What a lovely song, {child}!', 'Ding-a-ling! Beautiful!', 'Wow, what a song!'],
-      'surprise.lamb': ['Look! A little lamb!', 'Sniff, sniff! Who is that?', 'A lamb is going for a walk!'],
-      'lamb.tap': ['Roll, roll! A spiky ball!', 'The lamb curls up! Hee hee!', 'Sniff! Hello, lamb!'],
-      'surprise.bird': ['Look! A little bird!', 'Tweet tweet! Who is that?', 'A songbird came to listen!'],
+      'stepDone': ['Hooray!', 'Lovely drumming!', 'Wonderful!', 'Boom!'],
+      'song': ['Now play our song — tap the drums!', 'Song time! Tap or swipe the drums!',
+        'Let’s play our song! Tap the drums!'],
+      'songShort': ['Now our song!', 'Tap for our song!', 'Song time!'],
+      'songDone': ['What a band!', 'What a band, {child}!', 'Boom, boom, tsss! Beautiful!', 'Wow, what a song!'],
+      'cymbal.tap': ['Tsss!', 'Crash!', 'Shiny cymbal!'],
+      'surprise.lamb': ['Look! A fluffy cloud lamb!', 'Baa! Who is that?', 'A cloud lamb came to dance!'],
+      'lamb.tap': ['Puff! A round woolly ball!', 'Boing, boing! The lamb bounces!', 'Hee hee! Hello, little lamb!'],
+      'surprise.bird': ['Look! A little bird!', 'Tweet tweet! Who is that?', 'A little bird came to listen!'],
       'bird.tap': ['Tweet! The bird sings your note!', 'Tweet tweet! What a song!', 'The bird sings along!'],
-      'surprise.fireflies': ['Look! Fireflies!', 'Twinkle, twinkle! Fireflies!', 'The fireflies came to play!'],
+      'surprise.fireflies': ['Look! Little stars came to listen!', 'Twinkle, twinkle! Little stars!', 'The little stars came to play!'],
       'firefly.tap': ['Twinkle!', 'Zip! Twinkle!', 'Sparkle, sparkle!'],
-      'bibi.poke': ['Hee hee! That tickles!', 'Ooh ooh! Hi there!', 'Bibi is happy!'],
+      'bibi.poke': ['Hee hee! That tickles!', 'Woof woof! Hi there!', 'Bibi is happy!'],
 
       'praise': ['Yes!', 'Great job!', 'You got it!', 'Super!', 'Wonderful!', 'Lovely!', 'Hooray!', 'Well done!'],
-      'great': ['Beautiful music, {child}!', 'You did it, {child}!', 'What a music star!', 'Wow, {child}, super ringing!',
+      'great': ['Beautiful drumming, {child}!', 'You did it, {child}!', 'What a music star!', 'Wow, {child}, super drumming!',
         'Hooray! Our song is ready!', 'You are so clever!', 'Lovely music!'],
-      'party': ['Look at all our lanterns!', 'Hooray! What a music day!', 'All the lanterns are glowing!'],
-      'hint': ['Psst! Look at the shining drum!', 'Watch the little hand!', 'Bibi will help! Ring this one!',
+      'party': ['Look at all our star lanterns!', 'Hooray! What a music day!', 'All the star lanterns are glowing!'],
+      'hint': ['Psst! Look at the shining drum!', 'Watch the little hand!', 'Bibi will help! Boom this one!',
         'Look, this drum is sparkling!', 'The shiny one! Tap it!'],
-      'idle': ['Let’s ring a drum!', 'Bibi is waiting! Your turn!', 'Tap a drum!', 'I am here, {child}! Let’s play!',
-        'The drums want to sing!', 'Which drum is next?'],
+      'idle': ['Let’s boom a drum!', 'Bibi is waiting! Your turn!', 'Tap a drum!', 'I am here, {child}! Let’s play!',
+        'The drums want to play!', 'Which drum is next?'],
 
       'talk.intro': 'Talk time!',
-      'talk.colors': 'What colour is this bell?',
+      'talk.colors': 'What colour is this drum?',
       'talk.colorsAny': 'What colour is this?',
-      'talk.colorsWhich': 'Which bell is {color}?',
+      'talk.colorsWhich': 'Which drum is {color}?',
       'talk.shapes': 'Which one is the {shape}?',
       'talk.shapesAny': 'What shape is this?',
       'talk.shapes5': 'Which one is the {color} {shape}?',
-      'talk.size': 'Which bell is {size}?',
+      'talk.size': 'Which drum is {size}?',
       'talk.sizeAny': 'Which one is big?',
       'talk.count': 'How many {itemsPl}?',
       'talk.countAny': 'How many are there?',
-      'talk.animals': 'Where is the {animal}?',
+      'talk.animals': 'Who says {sound}?',
       'talk.animalsAny': 'Who is this?',
       'talk.animalsWho': 'Who is this?',
       'talk.letters': 'Where is the letter {letter}?',
@@ -343,22 +365,22 @@
         'Clever you!', 'Yes, {child}! Great answer!'],
       'talk.wrong': 'It is {answer}! Good try!',
       'talk.wrong.a': 'It is a {answer}! Good try!',
-      'talk.wrong.animal': 'It is the {answer}! Good try!',
+      'talk.wrong.animal': 'It is the {answer}, {sound}! Good try!',
       'talk.wrong.size': 'It is the {answer} one! Good try!',
       'talk.wrong.letter': 'It is the letter {letter}! Good try!',
       'talk.wrong.small': 'It is small letter {letter}! Good try!',
       'talk.wrong.number': 'It is {answer}! Good try!',
-      'talk.wrong.any': 'Good try! Let’s ring more drums!',
+      'talk.wrong.any': 'Good try! Let’s play more drums!',
 
       'session.done': ['What a music day! {stars} stars! Hooray!', 'Amazing, {child}! {stars} stars!',
         'So many songs! {stars} stars!']
     },
     vi: {
-      'ui.title': 'Chuông Gió Lửa Trại Của Khỉ Bibi',
-      'ui.logo1': 'Khỉ Bibi',
-      'ui.logo2': 'Chuông Gió Lửa Trại',
-      'ui.subtitle': 'Bé chạm chuông gió, nghe chuông reo, thắp sáng đèn lồng nhé!',
-      'ui.tagline': 'Bé chạm chuông gió, nghe chuông reo, thắp sáng đèn lồng nhé!',
+      'ui.title': 'Trống Mây Của Cún Bibi',
+      'ui.logo1': 'Cún Bibi',
+      'ui.logo2': 'Trống Mây',
+      'ui.subtitle': 'Bé gõ trống mây, thắp sáng đèn ngôi sao nhé!',
+      'ui.tagline': 'Bé gõ trống mây, thắp sáng đèn ngôi sao nhé!',
       'ui.play': 'Chơi',
       'ui.playAgain': 'Chơi lại',
       'ui.home': 'Trang chủ',
@@ -382,116 +404,126 @@
       'ui.stars': 'Ngôi sao',
       'ui.chapter': 'Chương {n}',
       'ui.allDone': 'Hoàn thành! {stars} ngôi sao',
-      'ui.welcome': ['Chào bé {child}! Mình là khỉ Bibi. Mình cùng rung chuông nhé!',
-        'Chào bé! Mình là khỉ Bibi. Mình cùng rung chuông nhé!'],
+      'ui.welcome': ['Chào bé {child}! Mình là cún Bibi. Mình cùng gõ trống nhé!',
+        'Chào bé! Mình là cún Bibi. Mình cùng gõ trống nhé!'],
       'ui.micUnsupported': 'Máy này chưa nghe được giọng nói. Bé chạm vào hình nhé!',
       'ui.micDenied': 'Micrô đang tắt. Bé chạm vào hình nhé!',
       'ui.voiceMissing': 'Mẹo cho bố mẹ: thêm giọng tiếng Việt trong Cài đặt › Trợ năng › Nội dung được đọc › Giọng nói.',
       'ui.tapOrSay': 'Bé chạm hoặc nói đáp án nhé!',
       'ui.listening': 'Bibi đang nghe…',
       'ui.tapBibi': 'Chạm vào Bibi để nghe lại nhé',
-      'ui.tapHint': 'Bé chạm vào chuông để chuông reo nhé',
-      'ui.swipeHint': 'Bé vuốt tay qua các chuông nhé',
+      'ui.tapHint': 'Bé chạm vào trống để trống kêu bùm nhé',
+      'ui.swipeHint': 'Bé vuốt tay qua các trống nhé',
       'ui.skip': 'Bỏ qua',
       'ui.gallery': 'Bài hát của bé',
       'ui.langName.en': 'English',
       'ui.langName.vi': 'Tiếng Việt',
 
-      'topic.colors': 'Chuông sắc màu',
-      'topic.shapes': 'Chuông hình khối',
+      'topic.colors': 'Trống sắc màu',
+      'topic.shapes': 'Trống hình dạng',
       'topic.size': 'To và nhỏ',
       'topic.count': 'Cùng đếm nào',
-      'topic.animals': 'Bạn thú rừng xanh',
-      'topic.letters': 'Chuông chữ cái',
+      'topic.animals': 'Ban nhạc nông trại',
+      'topic.letters': 'Trống chữ cái',
       'topic.lower': 'Chữ hoa, chữ thường',
       'topic.initial': 'Chữ cái đầu tiên',
       'topic.add': 'Phép cộng',
       'topic.sub': 'Phép trừ',
       'topic.oddeven': 'Số chẵn, số lẻ',
 
-      'weather.0': 'Chào buổi sáng, núi ơi!',
+      'weather.0': 'Chào buổi sáng, xứ mây ơi!',
       'weather.1': 'Buổi trưa nắng đẹp quá!',
-      'weather.2': 'Hoàng hôn đến rồi!',
+      'weather.2': 'Mây hoàng hôn đẹp quá!',
       'weather.3': 'Đêm đầy sao lấp lánh!',
 
-      'enter': ['Chuông mới nè!', 'Nhìn kìa, chuông mới!', 'Chuông mới tới rồi!'],
+      'enter': ['Trống tới rồi nè!', 'Nhìn kìa, trống mới!', 'Bùm! Trống mới nè!'],
 
-      'p.any': ['Bé ơi, mình rung chuông nhé!', 'Bé chạm một cái chuông, nghe chuông hát nào!', 'Mình rung chuông nào đây nhỉ?'],
+      'p.any': ['Bé ơi, mình gõ trống nhé!', 'Bé gõ một cái trống, nghe trống kêu bùm nào!', 'Mình gõ trống nào đây nhỉ?'],
       'p.next': ['Tiếp nào!', 'Thêm nữa nhé!', 'Giờ thì'],
-      'p.colors': ['Bé ơi, rung chuông {color} nhé!', 'Chuông {color} đâu rồi nhỉ? Bé rung nào!', 'Bé rung chuông {color} nào!'],
-      'p.shapes': ['Bé ơi, rung chuông {shape} nhé!', 'Chuông {shape} đâu rồi nhỉ? Bé rung nào!', 'Bé rung chuông {shape} nào!'],
-      'p.shapes5': ['Bé ơi, rung chuông {shape} {color} nhé!', 'Chuông {shape} {color} đâu rồi nhỉ? Bé rung nào!',
-        'Bé rung chuông {shape} {color} nào!'],
-      'p.size': ['Bé ơi, rung chuông {size} nhé!', 'Chuông nào {size} nhỉ? Bé rung nào!', 'Bé rung cái chuông {size} nào!'],
-      'p.sizeAny': ['Bé ơi, rung chuông to nhé!', 'Chuông nào to nhỉ? Bé rung nào!', 'Bé rung cái chuông to nào!'],
-      'p.animals': ['Bé ơi, rung chuông {animal} nhé!', 'Chuông {animal} đâu rồi nhỉ? Bé rung nào!', 'Rung chuông {animal} nào!'],
-      'p.count': ['Bé ơi, rung {holder} có {num} {items} nhé!', 'Mình đếm nhé! {holder} nào có {num} {items}? Bé rung nào!',
-        'Bé tìm {holder} có {num} {items} rồi rung nào!'],
-      'p.letters': ['Bé ơi, rung chuông chữ {letter} nhé!', 'Chữ {letter} ở đâu nhỉ? Bé rung nào!', 'Bé rung chuông chữ {letter} nào!'],
-      'p.lower': ['Bé ơi, chữ {letter} hoa có một bạn nhỏ. Bé rung chữ {lower} thường nhé!', 'Bé rung chữ {lower} thường nào!',
+      'p.colors': ['Bé ơi, gõ trống {color} nhé!', 'Trống {color} đâu rồi nhỉ? Bé gõ nào!', 'Bé gõ trống {color} nào!'],
+      'p.shapes': ['Bé ơi, gõ trống {shape} nhé!', 'Trống {shape} đâu rồi nhỉ? Bé gõ nào!', 'Bé gõ trống {shape} nào!'],
+      'p.shapes5': ['Bé ơi, gõ trống {shape} {color} nhé!', 'Trống {shape} {color} đâu rồi nhỉ? Bé gõ nào!',
+        'Bé gõ trống {shape} {color} nào!'],
+      'p.size': ['Bé ơi, gõ trống {size} nhé!', 'Trống nào {size} nhỉ? Bé gõ nào!', 'Bé gõ cái trống {size} nào!'],
+      'p.sizeAny': ['Bé ơi, gõ trống to nhé!', 'Trống nào to nhỉ? Bé gõ nào!', 'Bé gõ cái trống to nào!'],
+      'p.animals': ['Con gì kêu {sound}? Bé gõ trống {animal} nhé!', 'Bé ơi, con gì kêu {sound} nhỉ? Gõ trống {animal} nào!',
+        'Bé nghe nè: {sound}! Trống {animal} đâu rồi? Bé gõ nào!'],
+      'p.beat': ['Bé gõ trống to {times} nhé!', 'Bé ơi, mình đếm nhé! Gõ trống to {times} nào!', 'Bé ơi, gõ trống to {times} nhé!'],
+      'p.count': ['Bé ơi, gõ trống có {num} {items} nhé!', 'Mình đếm nhé! Trống nào có {num} {items}? Bé gõ nào!',
+        'Bé tìm trống có {num} {items} rồi gõ nào!'],
+      'p.letters': ['Bé ơi, gõ trống chữ {letter} nhé!', 'Chữ {letter} ở đâu nhỉ? Bé gõ nào!', 'Bé gõ trống chữ {letter} nào!'],
+      'p.lower': ['Bé ơi, chữ {letter} hoa có một bạn nhỏ. Bé gõ chữ {lower} thường nhé!', 'Bé gõ chữ {lower} thường nào!',
         'Chữ {lower} thường ở đâu nhỉ? Bạn ấy đi cùng chữ {letter} hoa đó!'],
-      'p.initial': ['Bé ơi, rung con vật bắt đầu bằng chữ {letter} nhé!', 'Bạn nào bắt đầu bằng chữ {letter}? Bé rung nào!',
+      'p.initial': ['Bé ơi, gõ con vật bắt đầu bằng chữ {letter} nhé!', 'Bạn nào bắt đầu bằng chữ {letter}? Bé gõ nào!',
         'Bé nghe nè, chữ {letter}! Con vật nào bắt đầu bằng chữ {letter}?'],
-      'p.add': ['Bé ơi, {a} + {b} bằng mấy? Bé rung chuông đáp án nhé!', 'Mình cộng nào! {a} + {b}. Bé rung đáp án nhé!',
-        'Bé tính nhé: {a} + {b}! Rung đáp án nào!'],
-      'p.sub': ['Bé ơi, {a} − {b} bằng mấy? Bé rung chuông đáp án nhé!', 'Mình trừ nào! {a} − {b}. Bé rung đáp án nhé!',
-        'Có {a}, bớt đi {b}! Bé rung đáp án nào!'],
-      'p.oddeven': ['Bé ơi, rung hết các số {parity} nhé!', 'Bé tìm hết các số {parity} rồi rung nào!', 'Mình rung các số {parity} nhé!'],
+      'p.add': ['Bé ơi, {a} + {b} bằng mấy? Bé gõ trống đáp án nhé!', 'Mình cộng nào! {a} + {b}. Bé gõ đáp án nhé!',
+        'Bé tính nhé: {a} + {b}! Gõ đáp án nào!'],
+      'p.sub': ['Bé ơi, {a} − {b} bằng mấy? Bé gõ trống đáp án nhé!', 'Mình trừ nào! {a} − {b}. Bé gõ đáp án nhé!',
+        'Có {a}, bớt đi {b}! Bé gõ đáp án nào!'],
+      'p.oddeven': ['Bé ơi, gõ hết các số {parity} nhé!', 'Bé tìm hết các số {parity} rồi gõ nào!', 'Mình gõ các số {parity} nhé!'],
 
       'name.say': ['{thing}!'],
       'tap': ['{thing}!', 'Nhìn nè, {thing}!', 'Đây là {thing} nè!'],
-      'right': ['Đinh đoong! {thing}!', 'Leng keng! {thing} nè!', '{thing}! Hay quá!'],
-      'right.label': ['Đinh đoong! {label}!', '{label}! Hay quá!', 'Leng keng! {label} nè!'],
-      'right.parity': ['{num} là số {parity}!', 'Đúng rồi! {num} là số {parity}!', 'Đinh đoong! {num} là số {parity}!'],
-      'right.initial': ['Chữ {letter}, {word}!', 'Đúng rồi! Chữ {letter}, {word}!', 'Đinh đoong! Chữ {letter}, {word}!'],
-      'right.sum': ['{ans}! {expr} bằng {ans}!', 'Đúng rồi! {expr} bằng {ans}!', 'Đinh đoong! {expr} bằng {ans}!'],
-      'right.any': ['Đinh đoong! Hay quá!', 'Leng keng! Đúng rồi!', 'Đinh đoong! Hoan hô!'],
+      'right': ['Bùm! {thing}!', '{thing}! Bùm!', 'Bùm bùm! {thing} nè! Hay quá!'],
+      'right.label': ['Bùm! {label}!', '{label}! Hay quá!', 'Bùm bùm! {label} nè!'],
+      'right.animal': ['{sound}! {thing}!', 'Bùm! {sound}! {thing} nè!', '{sound}! {thing} hát theo nè!'],
+      'right.beat': ['{num}! Bé gõ đủ {times} rồi!', '{num}! Bé gõ trống giỏi quá!', '{num}! Hoan hô, đủ {times} rồi!'],
+      'right.parity': ['{num} là số {parity}!', 'Đúng rồi! {num} là số {parity}!', 'Bùm! {num} là số {parity}!'],
+      'right.initial': ['Chữ {letter}, {word}!', 'Đúng rồi! Chữ {letter}, {word}!', 'Bùm! Chữ {letter}, {word}!'],
+      'right.sum': ['{ans}! {expr} bằng {ans}!', 'Đúng rồi! {expr} bằng {ans}!', 'Bùm! {expr} bằng {ans}!'],
+      'right.any': ['Bùm! Hay quá!', 'Bùm bùm! Đúng rồi!', 'Bùm! Hoan hô!'],
       'countDone': ['{num} {items}! Hoan hô!', 'Mình đếm được {num} {items} rồi!', '{num} {items}! Bé đếm giỏi quá!'],
-      'lantern': ['Đèn lồng sáng lên rồi!', 'Nhìn kìa, đèn lồng sáng rồi!', 'Thêm một chiếc đèn lồng!'],
+      'beatNudge': ['{done} rồi! Thêm {left} cái nữa!', 'Được {done} cái rồi! Bé gõ thêm {left} cái nữa nhé!',
+        '{done} rồi nè! Gõ thêm {left} cái nào!'],
+      'lantern': ['Đèn ngôi sao sáng lên rồi!', 'Nhìn kìa, đèn ngôi sao sáng rồi!', 'Thêm một chiếc đèn ngôi sao!'],
 
-      'wrong.thing': ['Đây là {got}. Mình rung {want} nhé!', 'Ồ, {got} nè! {want} ở đâu nhỉ?', 'Cái này là {got}! Bé tìm {want} nào!'],
-      'wrong.count': ['{holder} này có {got}. Mình rung {holder} có {want} nhé!', 'Ồ, {got} nè! Bé tìm {holder} có {want} nào!',
+      'wrong.thing': ['Đây là {got}. Mình gõ {want} nhé!', 'Ồ, {got} nè! {want} ở đâu nhỉ?', 'Cái này là {got}! Bé tìm {want} nào!'],
+      'wrong.animal': ['{got} kêu {gotSound}! Mình tìm {want} nhé!', '{gotSound}! Đây là {got}. Con gì kêu {sound} nhỉ? Bé tìm {want} nào!',
+        'Đây là {got} nè, {gotSound}! Mình gõ {want} nhé!'],
+      'wrong.count': ['Trống này có {got}. Mình gõ trống có {want} nhé!', 'Ồ, {got} nè! Bé tìm trống có {want} nào!',
         'Mình đếm nhé: {got}! Mình cần {want} nè!'],
       'wrong.math': ['Đây là {got}. Mình đếm lại nhé!', 'Ồ, {got}. Bé đếm thêm lần nữa nào!', 'Đây là {got}! Bé nghĩ thêm chút nhé!'],
-      'wrong.parity': ['{num} là số {parity}! Mình tìm số khác nhé!', '{num} là số {parity}. Bé rung số khác nào!',
+      'wrong.parity': ['{num} là số {parity}! Mình tìm số khác nhé!', '{num} là số {parity}. Bé gõ số khác nào!',
         '{num} là số {parity}! Bé thử số khác nhé!'],
-      'wrong.initial': ['{word} bắt đầu bằng chữ {first}! Mình tìm lại nhé!', '{word} bắt đầu bằng chữ {first}. Bé rung bạn khác nào!',
+      'wrong.initial': ['{word} bắt đầu bằng chữ {first}! Mình tìm lại nhé!', '{word} bắt đầu bằng chữ {first}. Bé gõ bạn khác nào!',
         '{word} bắt đầu bằng chữ {first}! Bé thử bạn khác nhé!'],
-      'wrong.any': ['Mình tìm lại nhé!', 'Bé thử chuông khác nào!', 'Bé nghĩ thêm chút nữa nhé!', 'Cố lên, bé làm được mà!'],
-      'stepDone': ['Hoan hô!', 'Bé rung chuông giỏi quá!', 'Tuyệt vời!', 'Leng keng, hay quá!'],
-      'song': ['Giờ mình cùng hát nhé — bé vuốt qua các chuông nào!', 'Đến giờ hát rồi! Bé vuốt qua tất cả các chuông nhé!',
-        'Mình cùng chơi nhạc nào! Bé vuốt tay qua các chuông nhé!'],
-      'songShort': ['Giờ mình hát nào!', 'Bé vuốt để hát nhé!', 'Đến giờ hát rồi!'],
-      'songDone': ['Bé chơi nhạc hay quá!', 'Bài hát hay quá, bé {child} ơi!', 'Leng keng! Hay quá đi!', 'Oa, bài hát tuyệt quá!'],
-      'surprise.lamb': ['Nhìn kìa! Một bạn nhím nhỏ!', 'Khụt khịt! Ai đó nhỉ?', 'Bạn nhím đi dạo kìa!'],
-      'lamb.tap': ['Lăn, lăn! Một quả bóng gai!', 'Bạn nhím cuộn tròn rồi! Hi hi!', 'Khụt khịt! Chào bạn nhím!'],
+      'wrong.any': ['Mình tìm lại nhé!', 'Bé thử trống khác nào!', 'Bé nghĩ thêm chút nữa nhé!', 'Cố lên, bé làm được mà!'],
+      'stepDone': ['Hoan hô!', 'Bé gõ trống giỏi quá!', 'Tuyệt vời!', 'Bùm bùm, hay quá!'],
+      'song': ['Giờ mình cùng chơi bài hát nhé — bé gõ các trống nào!', 'Đến giờ chơi nhạc rồi! Bé gõ hoặc vuốt qua các trống nhé!',
+        'Mình cùng chơi bài hát nào! Bé gõ các trống nhé!'],
+      'songShort': ['Giờ mình chơi nhạc nào!', 'Bé gõ trống chơi nhạc nhé!', 'Đến giờ chơi nhạc rồi!'],
+      'songDone': ['Ban nhạc hay quá!', 'Ban nhạc hay quá, bé {child} ơi!', 'Bùm bùm, xoảng! Hay quá đi!', 'Oa, bài hát tuyệt quá!'],
+      'cymbal.tap': ['Xoảng!', 'Xủng xoẻng!', 'Xoảng! Lấp lánh quá!'],
+      'surprise.lamb': ['Nhìn kìa! Một bạn cừu mây bông xù!', 'Be be! Ai đó nhỉ?', 'Bạn cừu mây đến nhảy múa nè!'],
+      'lamb.tap': ['Phồng! Bạn cừu thành cục bông tròn xoe!', 'Tưng tưng! Bạn cừu nhún nhảy nè!', 'Hi hi! Chào bạn cừu nhỏ!'],
       'surprise.bird': ['Nhìn kìa! Một bạn chim nhỏ!', 'Chíp chíp! Ai đó nhỉ?', 'Bạn chim đến nghe nhạc nè!'],
       'bird.tap': ['Chíp chíp! Bạn chim hát theo bé nè!', 'Chíp chíp! Hay quá!', 'Bạn chim hát cùng bé nè!'],
-      'surprise.fireflies': ['Nhìn kìa! Đom đóm!', 'Lấp lánh, lấp lánh! Đom đóm nè!', 'Các bạn đom đóm đến chơi nè!'],
+      'surprise.fireflies': ['Nhìn kìa! Các ngôi sao nhỏ đến nghe nhạc nè!', 'Lấp lánh, lấp lánh! Sao nhỏ nè!',
+        'Các bạn sao nhỏ đến chơi nè!'],
       'firefly.tap': ['Lấp lánh!', 'Vụt! Lấp lánh!', 'Lung linh quá!'],
-      'bibi.poke': ['Hi hi! Nhột quá!', 'Úp úp! Chào bé nè!', 'Bibi vui quá!'],
+      'bibi.poke': ['Hi hi! Nhột quá!', 'Gâu gâu! Chào bé nè!', 'Bibi vui quá!'],
 
       'praise': ['Đúng rồi!', 'Giỏi quá!', 'Tuyệt vời!', 'Hoan hô!', 'Bé giỏi lắm!', 'Chính xác!', 'Hay quá!', 'Hay lắm!'],
-      'great': ['Bé {child} chơi nhạc hay quá!', 'Hoan hô bé {child}!', 'Ngôi sao âm nhạc đây rồi!', 'Oa, bé {child} rung chuông siêu giỏi!',
+      'great': ['Bé {child} gõ trống hay quá!', 'Hoan hô bé {child}!', 'Ngôi sao âm nhạc đây rồi!', 'Oa, bé {child} gõ trống siêu giỏi!',
         'Hoan hô! Bài hát xong rồi!', 'Bé thông minh quá!', 'Bé chơi nhạc hay quá!'],
-      'party': ['Nhìn đèn lồng của mình nè!', 'Hoan hô! Một ngày âm nhạc tuyệt quá!', 'Đèn lồng sáng hết rồi!'],
-      'hint': ['Nhìn nè! Chuông này đang lấp lánh.', 'Bé xem bàn tay nhỏ chỉ nè!', 'Bibi giúp bé nhé! Rung chuông này nè!',
-        'Nhìn kìa, chuông này sáng lên!', 'Chuông lấp lánh đó! Bé chạm vào nhé!'],
-      'idle': ['Mình rung chuông nào!', 'Bibi đang chờ bé nè!', 'Bé chạm vào một cái chuông nhé!', 'Bé {child} ơi, mình chơi tiếp nhé!',
-        'Các chuông muốn hát nè!', 'Chuông nào tiếp theo đây nhỉ?'],
+      'party': ['Nhìn đèn ngôi sao của mình nè!', 'Hoan hô! Một ngày âm nhạc tuyệt quá!', 'Đèn ngôi sao sáng hết rồi!'],
+      'hint': ['Nhìn nè! Trống này đang lấp lánh.', 'Bé xem bàn tay nhỏ chỉ nè!', 'Bibi giúp bé nhé! Gõ trống này nè!',
+        'Nhìn kìa, trống này sáng lên!', 'Trống lấp lánh đó! Bé chạm vào nhé!'],
+      'idle': ['Mình gõ trống nào!', 'Bibi đang chờ bé nè!', 'Bé chạm vào một cái trống nhé!', 'Bé {child} ơi, mình chơi tiếp nhé!',
+        'Các trống muốn chơi nhạc nè!', 'Trống nào tiếp theo đây nhỉ?'],
 
       'talk.intro': 'Mình cùng nói chuyện nhé!',
-      'talk.colors': 'Chuông này màu gì nhỉ?',
+      'talk.colors': 'Trống này màu gì nhỉ?',
       'talk.colorsAny': 'Cái này màu gì nhỉ?',
-      'talk.colorsWhich': 'Chuông nào {color} nhỉ?',
+      'talk.colorsWhich': 'Trống nào {color} nhỉ?',
       'talk.shapes': '{shape} là cái nào nhỉ?',
       'talk.shapesAny': 'Cái này hình gì nhỉ?',
       'talk.shapes5': '{shape} {color} là cái nào nhỉ?',
-      'talk.size': 'Chuông nào {size} nhỉ?',
+      'talk.size': 'Trống nào {size} nhỉ?',
       'talk.sizeAny': 'Cái nào to nhỉ?',
       'talk.count': 'Có mấy {itemsPl} nào?',
       'talk.countAny': 'Có bao nhiêu cái nào?',
-      'talk.animals': '{animal} ở đâu nhỉ?',
+      'talk.animals': 'Con gì kêu {sound} nhỉ?',
       'talk.animalsAny': 'Đây là con gì nhỉ?',
       'talk.animalsWho': 'Đây là con gì nhỉ?',
       'talk.letters': 'Chữ {letter} ở đâu nhỉ?',
@@ -509,12 +541,12 @@
         'Bé thông minh quá!', 'Đúng rồi, bé {child} ơi!'],
       'talk.wrong': 'Là {answer} đó! Bé cố gắng lắm!',
       'talk.wrong.a': 'Là {answer} đó! Bé cố gắng lắm!',
-      'talk.wrong.animal': 'Là {answer} đó! Bé cố gắng lắm!',
-      'talk.wrong.size': 'Là chuông {answer} đó! Bé cố gắng lắm!',
+      'talk.wrong.animal': 'Là {answer} đó, {sound}! Bé cố gắng lắm!',
+      'talk.wrong.size': 'Là trống {answer} đó! Bé cố gắng lắm!',
       'talk.wrong.letter': 'Là chữ {letter} đó! Bé cố gắng lắm!',
       'talk.wrong.small': 'Là chữ {letter} thường đó! Bé cố gắng lắm!',
       'talk.wrong.number': 'Là số {answer} đó! Bé cố gắng lắm!',
-      'talk.wrong.any': 'Bé cố gắng lắm! Mình rung chuông tiếp nhé!',
+      'talk.wrong.any': 'Bé cố gắng lắm! Mình gõ trống tiếp nhé!',
 
       'session.done': ['Một ngày âm nhạc tuyệt quá! {stars} ngôi sao!', 'Bé {child} giỏi quá! {stars} ngôi sao!',
         'Bé chơi được bao nhiêu là bài hát! {stars} ngôi sao!']
@@ -530,23 +562,24 @@
 
   // required params → fallback key when one is missing (checked AFTER derived params are filled in)
   var NEEDS = {
-    'name.say': ['thing'], 'tap': ['thing'], 'right': ['thing'], 'right.label': ['label'],
-    'right.parity': ['num', 'parity'], 'right.initial': ['letter', 'word'], 'right.sum': ['expr', 'ans'], 'countDone': ['n'],
-    'wrong.thing': ['got', 'want'], 'wrong.count': ['got', 'want'], 'wrong.math': ['got'], 'wrong.parity': ['num', 'parity'],
-    'wrong.initial': ['word', 'first'],
+    'name.say': ['thing'], 'tap': ['thing'], 'right': ['thing'], 'right.label': ['label'], 'right.animal': ['sound', 'thing'],
+    'right.beat': ['num', 'times'], 'right.parity': ['num', 'parity'], 'right.initial': ['letter', 'word'],
+    'right.sum': ['expr', 'ans'], 'countDone': ['n'], 'beatNudge': ['done', 'left'],
+    'wrong.thing': ['got', 'want'], 'wrong.animal': ['got', 'gotSound', 'want', 'sound'], 'wrong.count': ['got', 'want'],
+    'wrong.math': ['got'], 'wrong.parity': ['num', 'parity'], 'wrong.initial': ['word', 'first'],
     'talk.colorsWhich': ['color'], 'talk.shapes': ['shape'], 'talk.shapes5': ['shape', 'color'],
-    'talk.size': ['size'], 'talk.animals': ['animal'], 'talk.letters': ['letter'], 'talk.lower': ['letter'],
+    'talk.size': ['size'], 'talk.animals': ['sound'], 'talk.letters': ['letter'], 'talk.lower': ['letter'],
     'talk.initial': ['word'], 'talk.add': ['a', 'b'], 'talk.sub': ['a', 'b'], 'talk.oddeven': ['parity'],
-    'talk.wrong': ['answer'], 'talk.wrong.a': ['answer'], 'talk.wrong.animal': ['answer'], 'talk.wrong.size': ['answer'],
+    'talk.wrong': ['answer'], 'talk.wrong.a': ['answer'], 'talk.wrong.animal': ['answer', 'sound'], 'talk.wrong.size': ['answer'],
     'talk.wrong.letter': ['letter'], 'talk.wrong.small': ['letter'], 'talk.wrong.number': ['answer']
   };
   Object.keys(PROMPTS).forEach(function (k) { NEEDS[k] = PROMPTS[k]; });
-  var FALLBACK = { 'p.shapes5': 'p.shapes', 'p.size': 'p.sizeAny', 'countDone': 'stepDone',
-    'name.say': 'praise', 'tap': 'praise', 'right': 'right.any',
+  var FALLBACK = { 'p.shapes5': 'p.shapes', 'p.size': 'p.sizeAny', 'countDone': 'stepDone', 'beatNudge': 'idle',
+    'name.say': 'praise', 'tap': 'praise', 'right': 'right.any', 'right.animal': 'right', 'wrong.animal': 'wrong.thing',
     'talk.colorsWhich': 'talk.colorsAny', 'talk.shapes': 'talk.shapesAny', 'talk.shapes5': 'talk.shapes',
     'talk.size': 'talk.sizeAny', 'talk.animals': 'talk.animalsAny', 'talk.letters': 'talk.lettersAny',
     'talk.lower': 'talk.lowerAny', 'talk.initial': 'talk.initialAny', 'talk.add': 'talk.calc', 'talk.sub': 'talk.calc',
-    'talk.oddeven': 'talk.oddevenAny' };
+    'talk.oddeven': 'talk.oddevenAny', 'talk.wrong.animal': 'talk.wrong.any' };
   Object.keys(NEEDS).forEach(function (k) {
     if (FALLBACK[k]) return;
     if (/^p\./.test(k)) FALLBACK[k] = 'p.any';
@@ -620,10 +653,12 @@
   function animalOf(v) {
     if (v && typeof v === 'object') v = v.animal != null ? v.animal : rawVal(v);
     if (v == null) return null;
-    var s = String(v).toLowerCase().replace(/\.svg$/, '').replace(/^(animal|drum)_/, '');
-    if (s === 'bunny') s = 'rabbit';
+    var s = String(v).toLowerCase().replace(/\.svg$/, '').replace(/^(animal|drum|sound)_/, '');
+    if (s === 'chicken') s = 'hen';
+    if (s === 'kitty') s = 'cat';
     return ANIMALS.indexOf(s) >= 0 ? s : null;
   }
+  function soundOf(lang, a) { a = animalOf(a); return a ? NAMES[L(lang)].sound[a] : null; }
   function sizeOf(v) {
     if (v === true) return 'big';
     if (v === false) return 'small';
@@ -646,15 +681,22 @@
     if (KIND_ALIAS[s]) s = KIND_ALIAS[s];
     return DRUM_KINDS.indexOf(s) >= 0 ? s : null;
   }
-  // the counted-items kind: 'string' (little bells on a bar, default) | 'dots'
-  function itemsKind(v) {
+  // the counted-items kind: 'dots' | 'beat' (def when neither)
+  function itemsKind(v, def) {
     if (v && typeof v === 'object') v = v.kind != null ? v.kind : v.items;
     var s = low(v);
-    return (s === 'dots' || s === 'dot') ? 'dots' : 'string';
+    if (s === 'dots' || s === 'dot') return 'dots';
+    if (s === 'beat' || s === 'beats' || s === 'big') return 'beat';
+    return def || 'dots';
   }
   function itemsWord(lang, kind, n, run) {
     var tbl = (run ? RUN : ITEMS)[L(lang)][itemsKind(kind)];
     return tbl[n === 1 ? 0 : 1];
+  }
+  // "once" / "two times" / vi "một cái", "ba cái"
+  function timesWord(lang, n) {
+    if (L(lang) === 'vi') return numberName('vi', n) + ' cái';
+    return n === 1 ? 'once' : numberName('en', n) + ' times';
   }
 
   // ---- words for the 'initial' topic: tolerant of whatever shape content.js gives CD.WORDS
@@ -718,21 +760,17 @@
     var tbl, vi = lang === 'vi';
     switch (kind) {
       case 'number': return numberName(lang, value);
-      case 'dots': case 'string': case 'bunch': {
+      case 'dots': {
         var n = num(value);
-        return n == null ? String(value) : numberName(lang, n) + ' ' + itemsWord(lang, kind, n);
+        return n == null ? String(value) : numberName(lang, n) + ' ' + itemsWord(lang, 'dots', n);
       }
-      case 'bell': {
+      case 'drum': {
         var bc = colorOf(value), bs = sizeOf(value);
-        if (bs) return vi ? 'chuông ' + NAMES.vi.size[bs] : NAMES.en.size[bs] + ' bell';
-        if (bc) return vi ? 'chuông ' + NAMES.vi.color[bc] : NAMES.en.color[bc] + ' bell';
-        return vi ? 'chuông' : 'bell';
+        if (bs) return vi ? 'trống ' + NAMES.vi.size[bs] : NAMES.en.size[bs] + ' drum';
+        if (bc) return vi ? 'trống ' + NAMES.vi.color[bc] : NAMES.en.color[bc] + ' drum';
+        return vi ? 'trống' : 'drum';
       }
-      case 'plate': {
-        var ps = shapeOf(value);
-        if (!ps) return vi ? 'chuông' : 'drum';
-        return vi ? 'chuông ' + NAMES.vi.shapeH[ps] : NAMES.en.shape[ps] + ' drum';
-      }
+      case 'big': return vi ? 'trống to' : 'big drum';
       case 'letter': {
         var s = String(value);
         if (vi) return LETTER_VI[upper(s)] || s.toLowerCase();
@@ -759,6 +797,7 @@
         if (!a) return String(value == null ? '' : value).replace(/_/g, ' ');
         return NAMES[lang].animal[a];
       }
+      case 'sound': { var sa = animalOf(value); return sa ? NAMES[lang].sound[sa] : String(value == null ? '' : value); }
       case 'size': { var sz2 = sizeOf(value); return sz2 ? NAMES[lang].size[sz2] : String(value); }
       case 'parity': {
         if (num(value) != null) return numberName(lang, num(value));
@@ -794,9 +833,9 @@
   }
 
   // a Talk-time choice / picture thing → [kind, value].
-  // Drum things: bell {color} → colour (with `big` → size); plate {shape} → shape; string / dots / number {n} → number;
-  // animal → animal; glyph {text} → text; icons: color {color}, number {n}, size {big}; {nameKind, nameValue} wins;
-  // {id, thing, value}.
+  // Drum things: drum {color} → colour (with `big` → size); shape {shape} → shape; big {n} → number (else size big);
+  // dots / number {n} → number; animal / sound {animal} → animal; glyph {text} → text; icons: color {color},
+  // number {n}, size {big}; {nameKind, nameValue} wins; {id, thing, value}.
   function kvOf(t) {
     var kv = kvRaw(t);
     return [kv[0], scalar(kv[1])];
@@ -804,25 +843,28 @@
   function kvRaw(t) {
     t = obj(t);
     if (t.thing && typeof t.thing === 'object') return kvRaw(t.thing);
-    if (t.nameKind != null) return [t.nameKind, t.nameValue];
+    if (t.nameKind != null) return [t.nameKind === 'sound' ? 'animal' : t.nameKind, t.nameValue];
     switch (low(t.kind)) {
       case 'color': case 'blob': case 'paint':
         return ['color', t.color != null ? t.color : t.value];
-      case 'bell': case 'obj':
+      case 'drum': case 'tom': case 'obj':
         if (t.big === true || t.big === false) return ['size', t.big ? 'big' : 'small'];
         if (t.color != null) return ['color', t.color];
-        return ['bell', t.value];
-      case 'plate': case 'shape':
+        return ['drum', t.value];
+      case 'shape':
         if (t.shape != null) return ['shape', t.shape];
         return t.value != null ? ['shape', t.value] : ['color', t.color];
       case 'size': {
         var sz = thingSize(t);
         return ['size', sz != null ? sz : t.value];
       }
-      case 'animal':
+      case 'big':
+        if (t.n != null) return ['number', t.n];
+        return ['size', 'big'];
+      case 'animal': case 'sound':
         if (t.big === true || t.big === false) return ['size', t.big ? 'big' : 'small'];
         return ['animal', t.animal != null ? t.animal : t.value];
-      case 'number': case 'dots': case 'string': case 'bunch': return ['number', t.n != null ? t.n : t.value];
+      case 'number': case 'dots': return ['number', t.n != null ? t.n : t.value];
       case 'letter': return ['letter', t.text != null ? t.text : t.value];
       case 'glyph': case 'text': case 'tag': return ['text', t.text != null ? t.text : (t.n != null ? t.n : t.value)];
       case 'parity': return ['parity', t.value];
@@ -833,22 +875,23 @@
     lang = L(lang);
     if (kind && typeof kind === 'object') { var kv = kvOf(kind); kind = kv[0]; value = kv[1]; }
     if (kind === 'blob') kind = 'color';
+    if (kind === 'sound') kind = 'animal';
     value = rawVal(value);
     var out = [];
     switch (kind) {
       case 'number': return numberWords(lang, value);
-      case 'dots': case 'string': case 'bunch': {
+      case 'dots': {
         var dn = num(value);
         out = numberWords(lang, value);
-        if (dn != null) addForms(out, [name(lang, kind, dn), dn + ' ' + itemsWord(lang, kind, dn)]);
+        if (dn != null) addForms(out, [name(lang, 'dots', dn), dn + ' ' + itemsWord(lang, 'dots', dn)]);
         return out;
       }
-      case 'bell': {
-        if (colorOf(value)) return words(lang, 'color', value).concat(addForms([], [name(lang, 'bell', value)]));
-        if (sizeOf(value)) return words(lang, 'size', value).concat(addForms([], [name(lang, 'bell', value)]));
-        return addForms(out, [name(lang, 'bell', value)]);
+      case 'drum': {
+        if (colorOf(value)) return words(lang, 'color', value).concat(addForms([], [name(lang, 'drum', value)]));
+        if (sizeOf(value)) return words(lang, 'size', value).concat(addForms([], [name(lang, 'drum', value)]));
+        return addForms(out, [name(lang, 'drum', value)]);
       }
-      case 'plate': return words(lang, 'shape', value);
+      case 'big': return words(lang, 'size', 'big');
       case 'parity': if (num(value) != null) return numberWords(lang, num(value)); break;
       case 'text': {
         var tx = String(value);
@@ -883,13 +926,13 @@
       case 'word': {
         var a = animalOf(value) || (findEntry(lang, value) || {}).animal;
         var list = [wordName(lang, value)];
-        if (a) list = list.concat([NAMES[lang].animal[a]], WORDS[lang].animal[a] || []);
+        if (a) list = list.concat([NAMES[lang].animal[a], NAMES[lang].sound[a]], WORDS[lang].animal[a] || []);
         return addForms(out, list);
       }
       case 'animal': {
         var an = animalOf(value);
         if (!an) return addForms(out, [String(value)]);
-        return addForms(out, [NAMES[lang].animal[an], NAMES[lang].word[an]].concat(WORDS[lang].animal[an] || []));
+        return addForms(out, [NAMES[lang].animal[an], NAMES[lang].word[an], NAMES[lang].sound[an]].concat(WORDS[lang].animal[an] || []));
       }
       case 'color': case 'hue': {
         var c = low(value);
@@ -901,7 +944,7 @@
         if (!sz) return addForms(out, [String(value)]);
         return addForms(out, [NAMES[lang].size[sz]].concat(WORDS[lang].size[sz] || []));
       }
-      case 'shape': {
+      case 'shape': case 'shapeH': {
         var sh = shapeOf(value);
         if (!sh) return addForms(out, [String(value)]);
         return addForms(out, [NAMES[lang].shape[sh], NAMES[lang].shapeH[sh]].concat(WORDS[lang].shape[sh] || []));
@@ -930,11 +973,12 @@
     var vi = lang === 'vi', k = th.k, v = th.v, out = '';
     switch (k) {
       case 'color': case 'hue': out = name(lang, 'color', v); break;
-      case 'shape': out = vi ? name(lang, 'shape', v) : 'the ' + name(lang, 'shape', v); break;
+      case 'shape': case 'shapeH': out = vi ? name(lang, 'shape', v) : 'the ' + name(lang, 'shape', v); break;
       case 'animal': case 'word': out = vi ? name(lang, 'animal', v) : 'the ' + name(lang, 'animal', v); break;
-      case 'bell': case 'plate': out = vi ? name(lang, k, v) : 'the ' + name(lang, k, v); break;
-      case 'size': out = vi ? 'chuông ' + name(lang, 'size', v) : 'the ' + name(lang, 'size', v) + ' one'; break;
-      case 'dots': case 'string': case 'bunch': out = num(v) != null ? name(lang, k, num(v)) : ''; break;
+      case 'sound': out = name(lang, 'sound', v); break;
+      case 'drum': case 'big': out = vi ? name(lang, k, v) : 'the ' + name(lang, k, v); break;
+      case 'size': out = vi ? 'trống ' + name(lang, 'size', v) : 'the ' + name(lang, 'size', v) + ' one'; break;
+      case 'dots': out = num(v) != null ? name(lang, k, num(v)) : ''; break;
       case 'letter': {
         var s = String(v == null ? th.text : v);
         var small = s !== s.toUpperCase();
@@ -959,48 +1003,49 @@
     return lang === 'en' ? anFix(out) : out;
   }
 
-  // ---------------------------------------------------------------- drumPhrase: a hanging drum named
-  // thing = { kind: bell|plate|string|dots|animal|glyph (or a Talk icon: color|number|size), color?, shape?, n?, animal?,
+  // ---------------------------------------------------------------- drumPhrase: a cloud drum named
+  // thing = { kind: drum|shape|big|dots|animal|glyph (or a Talk icon: color|number|size|sound), color?, shape?, n?, animal?,
   //           text?, big?, nameKind?, nameValue? }
-  // opts = { art: 'the' (default) | 'a' | null (EN article), color: true|false (plate: say its colour; default no),
-  //          size: bool (bell: say big/small; default when nameKind is 'size' or big is set), drum: bool (VI animal:
-  //          "chuông con gấu"), bare: bool (numbers without "number": "five") }. Unknown things → their name phrase (or '').
+  // opts = { art: 'the' (default) | 'a' | null (EN article), color: true|false (shape drum: say its colour; default no),
+  //          size: bool (colour drum: say big/small; default when nameKind is 'size' or big is set), drum: bool (VI animal:
+  //          "trống con bò"), bare: bool (numbers without "number": "five") }. Unknown things → their name phrase (or '').
   function drumPhrase(lang, t, opts) {
     lang = L(lang);
     t = obj(t);
     opts = opts || {};
     var vi = lang === 'vi';
     var art = opts.art === undefined ? 'the' : opts.art;
-    var kind = drumKind(t.kind) || (['color', 'size', 'letter', 'text'].indexOf(t.kind) >= 0 ? t.kind : null);
+    var kind = drumKind(t.kind) || (['color', 'size', 'letter', 'text', 'sound'].indexOf(t.kind) >= 0 ? t.kind : null);
     if (t.kind === 'number' && t.text == null && t.n != null) kind = 'number';
     if (!kind) return t.nameKind != null ? phraseOf(lang, thingOf(t)) : '';
     var col = colorOf(t.color);
     function withArt(s) { return art ? art + ' ' + s : s; }
     switch (kind) {
-      case 'bell': {
+      case 'drum': {
         var sz = opts.size === false ? null : thingSize(t);
         if (opts.size !== true && t.nameKind !== 'size' && t.big !== true && t.big !== false) sz = null;
         var useCol = col && (opts.color === true || (opts.color !== false && !sz));
-        if (vi) return 'chuông' + (sz ? ' ' + NAMES.vi.size[sz] : '') + (useCol ? ' ' + NAMES.vi.color[col] : '');
-        return anFix(withArt((sz ? NAMES.en.size[sz] + ' ' : '') + (useCol ? NAMES.en.color[col] + ' ' : '') + 'bell'));
+        if (vi) return 'trống' + (sz ? ' ' + NAMES.vi.size[sz] : '') + (useCol ? ' ' + NAMES.vi.color[col] : '');
+        return anFix(withArt((sz ? NAMES.en.size[sz] + ' ' : '') + (useCol ? NAMES.en.color[col] + ' ' : '') + 'drum'));
       }
-      case 'plate': {
+      case 'shape': {
         var sh = shapeOf(t.shape != null ? t.shape : (t.nameKind === 'shape' ? t.nameValue : null));
         var useC = col && opts.color === true;
-        if (!sh) return useC ? (vi ? 'chuông ' + NAMES.vi.color[col] : anFix(withArt(NAMES.en.color[col] + ' drum'))) : (vi ? 'chuông' : withArt('drum'));
-        if (vi) return 'chuông ' + NAMES.vi.shapeH[sh] + (useC ? ' ' + NAMES.vi.color[col] : '');
-        return anFix(withArt((useC ? NAMES.en.color[col] + ' ' : '') + NAMES.en.shape[sh]));
+        if (!sh) return useC ? (vi ? 'trống ' + NAMES.vi.color[col] : anFix(withArt(NAMES.en.color[col] + ' drum'))) : (vi ? 'trống' : withArt('drum'));
+        if (vi) return 'trống ' + NAMES.vi.shape[sh] + (useC ? ' ' + NAMES.vi.color[col] : '');
+        return anFix(withArt((useC ? NAMES.en.color[col] + ' ' : '') + NAMES.en.shape[sh] + ' drum'));
       }
-      case 'string': case 'dots': {
-        var n = num(t.n != null ? t.n : (t.nameKind === 'number' || t.nameKind === kind ? t.nameValue : null));
-        if (n == null) return vi ? (kind === 'dots' ? 'chuông có chấm' : 'chùm chuông') : withArt(kind === 'dots' ? 'dot drum' : 'bell string');
-        if (vi && kind === 'string') return 'chùm ' + name(lang, kind, n);
-        return name(lang, kind, n);
+      case 'big':
+        return vi ? 'trống to' : withArt('big drum');
+      case 'dots': {
+        var n = num(t.n != null ? t.n : (t.nameKind === 'number' || t.nameKind === 'dots' ? t.nameValue : null));
+        if (n == null) return vi ? 'trống có chấm' : withArt('dot drum');
+        return vi ? 'trống có ' + name(lang, 'dots', n) : withArt('drum with ' + name(lang, 'dots', n));
       }
-      case 'animal': {
-        var an = animalOf(t.animal != null ? t.animal : (t.nameKind === 'animal' ? t.nameValue : null));
+      case 'animal': case 'sound': {
+        var an = animalOf(t.animal != null ? t.animal : (t.nameKind === 'animal' || t.nameKind === 'sound' ? t.nameValue : null));
         if (!an) return '';
-        if (vi) return (opts.drum ? 'chuông ' : '') + NAMES.vi.animal[an];
+        if (vi) return (opts.drum ? 'trống ' : '') + NAMES.vi.animal[an];
         return anFix(withArt(NAMES.en.animal[an]));
       }
       case 'glyph': case 'text': case 'letter': case 'number': {
@@ -1030,14 +1075,18 @@
     var pth = obj(p.thing);
     // {hue} = bare colour (vi "đỏ")
     if (!present(p.hue) && present(p.color)) p.hue = name(lang, 'hue', rawVal(p.color));
-    // VI drum shapes: "chuông hình ngôi sao", "Hình trái tim là cái nào nhỉ?"
-    if (lang === 'vi' && present(p.shape) && /^(p\.shapes|talk\.shapes)/.test(key) && shapeOf(rawVal(p.shape)))
+    // VI Talk shapes: "Hình trái tim là cái nào nhỉ?"
+    if (lang === 'vi' && present(p.shape) && /^talk\.shapes/.test(key) && shapeOf(rawVal(p.shape)))
       p.shape = { kind: 'shapeH', value: shapeOf(rawVal(p.shape)) };
     // {size} from big
     if (!present(p.size) && (p.big === true || p.big === false)) p.size = p.big ? 'big' : 'small';
-    // {word} from animal
-    if (present(p.animal) && animalOf(p.animal) && !present(p.word)) p.word = wordName(lang, animalOf(p.animal));
+    // {word} + {sound} from animal
+    var an = present(p.animal) ? animalOf(p.animal) : null;
+    if (an && !present(p.word)) p.word = wordName(lang, an);
+    if (an && !present(p.sound)) p.sound = NAMES[lang].sound[an];
     if (present(p.word)) p.word = wordName(lang, p.word);
+    if (present(p.sound) && animalOf(p.sound)) p.sound = NAMES[lang].sound[animalOf(p.sound)];
+    if (present(p.gotSound) && animalOf(p.gotSound)) p.gotSound = NAMES[lang].sound[animalOf(p.gotSound)];
     // {letter} / {lower}
     if (!present(p.letter) && present(p.text) && isLetter(String(rawVal(p.text)))) p.letter = String(rawVal(p.text));
     if (present(p.letter)) {
@@ -1055,17 +1104,23 @@
     } else p.expr = exprText(rawVal(p.expr));
     if (present(p.a)) p.a = String(rawVal(p.a));
     if (present(p.b)) p.b = String(rawVal(p.b));
-    // {num} + {items} + {holder} from n (+ kind 'string' | 'dots')
+    // {num} + {times} + {items} from n (+ kind 'dots' | 'beat')
     var c = present(p.n) ? num(p.n) : null;
     if (!present(p.num) && c != null) p.num = numberName(lang, c);
+    if (!present(p.times) && c != null && c >= 1) p.times = timesWord(lang, c);
     if (present(p.n) && typeof p.n === 'object') p.n = c != null ? c : '';
-    var ik = present(p.kind) ? p.kind : (pth.kind || (p.dots ? 'dots' : 'string'));
-    if (!present(p.items) || typeof p.items !== 'string' || /^(dots?|string|bunch|bells?)$/.test(p.items)) {
+    // {done} / {left}: beats so far / still to go (beatNudge {i, n})
+    var bi = present(p.i) ? num(p.i) : null;
+    if (bi != null && c != null && bi >= 1) {
+      if (!present(p.done)) p.done = numberName(lang, bi);
+      if (!present(p.left)) p.left = numberName(lang, Math.max(1, c - bi));
+    }
+    var ik = itemsKind(present(p.kind) ? p.kind : pth.kind, key === 'p.beat' ? 'beat' : 'dots');
+    if (!present(p.items) || typeof p.items !== 'string' || /^(dots?|beats?|big)$/.test(p.items)) {
       p.items = itemsWord(lang, present(p.items) ? p.items : ik, c == null ? 2 : c);
     }
-    // {itemsPl}: always the plural ("How many bells?" even when the shown drum has one bell)
+    // {itemsPl}: always the plural ("How many dots?" even when the shown drum has one dot)
     if (!present(p.itemsPl)) p.itemsPl = itemsWord(lang, ik, 2);
-    if (!present(p.holder)) p.holder = HOLDER[lang][itemsKind(ik)];
     // {got}/{want}/{label} objects → phrases; {thing} object → its drum phrase
     ['got', 'want', 'label'].forEach(function (q) {
       if (p[q] && typeof p[q] === 'object') p[q] = present(p[q]) ? phraseOf(lang, thingOf(p[q])) : (drumPhrase(lang, p[q]) || '');
@@ -1139,7 +1194,7 @@
     return fill(lang, v, p, child);
   };
 
-  // the step prompt; opts.next → "Next one! Ring the red bell!" / "Now, ring the bear!" (main: the 2nd+ step).
+  // the step prompt; opts.next → "Next one! Boom the red drum!" / "Now, who says moo? …" (main: the 2nd+ step).
   // A p.next variant without end punctuation ("Now," / "Giờ thì") runs into the prompt (its first letter lower-cased).
   I18N.ask = function (lang, key, params, opts) {
     opts = opts || {};
@@ -1147,8 +1202,8 @@
     if (!opts.next) return line;
     var pre = I18N.t(lang, 'p.next', null, opts.rng);
     if (L(lang) === 'vi') {
-      // no "Bé ơi," in mid-sentence after a prefix ("Thêm một chuông nữa nhé! Bé rung …", "Giờ thì bé rung …")
-      if (/^Bé ơi, (rung|tìm|chạm) /.test(line)) line = line.replace(/^Bé ơi, (rung|tìm|chạm) /, 'Bé $1 ');
+      // no "Bé ơi," in mid-sentence after a prefix ("Thêm nữa nhé! Bé gõ …", "Giờ thì bé gõ …")
+      if (/^Bé ơi, (gõ|tìm|chạm) /.test(line)) line = line.replace(/^Bé ơi, (gõ|tìm|chạm) /, 'Bé $1 ');
       else if (/^Bé ơi, /.test(line)) { line = line.slice(7); line = line.charAt(0).toUpperCase() + line.slice(1); }
       // never the same particle twice ("Tiếp nào! … nào!", "… nữa nhé! … nhé!"): take another prefix
       var PT = /(nhé|nào|nhỉ)[!?]$/, has = function (q) { var m = PT.exec(q); return !!m && line.indexOf(m[1] + q.slice(-1)) >= 0; };
@@ -1166,6 +1221,7 @@
   I18N.words = words;
   I18N.numberName = numberName;
   I18N.stripMarks = stripMarks;
+  I18N.soundOf = function (lang, a) { return soundOf(lang, a) || ''; };
   I18N.has = function (lang, key) { return STR[L(lang)][key] != null; };
   I18N.keys = function (lang) { return Object.keys(STR[L(lang)]); };
   I18N.raw = function (lang, key) { return STR[L(lang)][key]; };
@@ -1198,15 +1254,16 @@
 
   // ---------------------------------------------------------------- game lines
   // a drum thing rebuilt from {nameKind, nameValue} + topic (when main did not pass e.thing)
-  function thingFromName(nk, nv, topic, params) {
+  function thingFromName(nk, nv, topic, params, pk) {
     params = obj(params);
     switch (nk) {
-      case 'color': return { kind: topic === 'shapes' ? 'plate' : 'bell', color: nv, nameKind: nk, nameValue: nv };
-      case 'size': return { kind: 'bell', big: sizeOf(nv) === 'big', color: params.color, nameKind: nk, nameValue: nv };
-      case 'shape': return { kind: 'plate', shape: nv, color: params.color, nameKind: nk, nameValue: nv };
-      case 'animal': case 'word': return { kind: 'animal', animal: nv, nameKind: 'animal', nameValue: nv };
+      case 'color': return { kind: topic === 'shapes' ? 'shape' : 'drum', color: nv, nameKind: nk, nameValue: nv };
+      case 'size': return { kind: 'drum', big: sizeOf(nv) === 'big', color: params.color, nameKind: nk, nameValue: nv };
+      case 'shape': return { kind: 'shape', shape: nv, color: params.color, nameKind: nk, nameValue: nv };
+      case 'animal': case 'word': case 'sound': return { kind: 'animal', animal: nv, nameKind: 'animal', nameValue: nv };
       case 'number':
-        if (topic === 'count') return { kind: itemsKind(params.kind) === 'dots' ? 'dots' : 'string', n: num(nv), nameKind: nk, nameValue: nv };
+        if (pk === 'p.beat') return { kind: 'big', n: num(nv), nameKind: nk, nameValue: nv };
+        if (topic === 'count') return { kind: 'dots', n: num(nv), nameKind: nk, nameValue: nv };
         return { kind: 'glyph', text: String(nv), n: num(nv), nameKind: nk, nameValue: nv };
       case 'letter': case 'text': case 'parity':
         return { kind: 'glyph', text: String(nv), n: num(nv) != null ? num(nv) : undefined, nameKind: nk, nameValue: nv };
@@ -1219,28 +1276,28 @@
     if (ev.thing && typeof ev.thing === 'object') return ev.thing;
     if (drumKind(ev.kind)) return ev;
     var src = obj(from != null ? from : ev);
-    if (src.nameKind != null) return thingFromName(src.nameKind, src.nameValue, ev.topic, ev.params) || src;
+    if (src.nameKind != null) return thingFromName(src.nameKind, src.nameValue, ev.topic, ev.params, ev.promptKey) || src;
     return {};
   }
-  // what the current step is about: size round? shapes-with-colours round?
+  // what the current step is about: size round? shapes-with-colours round? beat step?
   function ctxOf(ev) {
     ev = obj(ev);
     var params = obj(ev.params), topic = ev.topic, pk = String(ev.promptKey || '');
     var want = thingOf(ev.want);
     return {
-      topic: topic, params: params,
+      topic: topic, params: params, beat: pk === 'p.beat' || ev.mode === 'beat',
       size: topic === 'size' || pk === 'p.size' || want.k === 'size' || present(params.size),
-      // shapes with colours (age 5): only p.shapes5 names the colour — content.js also sends {color} with p.shapes
-      // (the round's one plate colour), which must not be said
+      // shapes with colours (age 5): only p.shapes5 names the colour — content.js may also send {color} with p.shapes
+      // (the round's one drum colour), which must not be said
       mix: pk ? pk === 'p.shapes5' : (present(params.shape) && present(params.color))
     };
   }
   function nameOpts(t, cx, drum) {
     var k = drumKind(t.kind);
-    return { size: k === 'bell' ? (cx.size || undefined) : undefined,
-      color: k === 'plate' ? cx.mix : (k === 'bell' && cx.size ? false : undefined), drum: !!drum };
+    return { size: k === 'drum' ? (cx.size || undefined) : undefined,
+      color: k === 'shape' ? cx.mix : (k === 'drum' && cx.size ? false : undefined), drum: !!drum };
   }
-  // the spoken name of a drum ("the red bell", "three bells", "letter B", "five")
+  // the spoken name of a drum ("the red drum", "the drum with three dots", "letter B", "five")
   function plainName(lang, ev, drum) {
     var t = evThing(ev), cx = ctxOf(ev);
     var k = drumKind(t.kind);
@@ -1253,42 +1310,46 @@
     return s;
   }
 
-  // a drum's plain name: sayName(lang, thing | e) → "the red bell" / "chuông màu đỏ"
+  // a drum's plain name: sayName(lang, thing | e) → "the red drum" / "trống màu đỏ"
   I18N.sayName = function (lang, thing) {
     lang = L(lang);
     var e = obj(thing);
     if (!e.thing && !drumKind(e.kind) && e.nameKind == null) return '';
     return plainName(lang, e.thing || drumKind(e.kind) ? e : { thing: e }, false) || '';
   };
-  // "The red bell!" / "Chuông màu đỏ!" (a brush, a Talk picture tap)
+  // "The red drum!" / "Trống màu đỏ!" (a brush, a Talk picture tap)
   I18N.sayPickup = function (lang, ev, rng) {
     lang = L(lang);
     var s = plainName(lang, ev, false);
     return s ? I18N.t(lang, 'name.say', { thing: s }, rng) : I18N.t(lang, 'praise', null, rng);
   };
-  // "Look, the red bell!" / "Nhìn nè, chuông màu đỏ!"
+  // "Look, the red drum!" / "Nhìn nè, trống màu đỏ!"
   I18N.sayTap = function (lang, ev, rng) {
     lang = L(lang);
     var s = plainName(lang, ev, false);
     return s ? I18N.t(lang, 'tap', { thing: s }, rng) : I18N.t(lang, 'p.any', null, rng);
   };
 
-  // `right {id, thing, x, y, count?: {n}}` (+ topic, params, promptKey) → the ding line.
+  // `right {id, thing, x, y, count?: {n}}` (+ topic, params, promptKey) → the boom line.
   I18N.sayRight = function (lang, ev, rng) {
     lang = L(lang);
     ev = obj(ev);
     var t = evThing(ev), cx = ctxOf(ev), k = drumKind(t.kind), topic = cx.topic, params = cx.params;
     var cnt = obj(ev.count);
-    // a counting string: the count run is the line ("One, two, three bells!")
-    if (k === 'string' || (k === 'dots' && num(cnt.n) != null) || (!k && num(cnt.n) != null)) {
-      var n = num(cnt.n) != null ? num(cnt.n) : num(t.n != null ? t.n : t.nameValue);
-      if (n != null) return I18N.sayCountRun(lang, n, k || params.kind);
+    // beat mode: the Nth beat → "Three! You beat it three times!"
+    if (k === 'big' || cx.beat) {
+      var bn = num(cnt.n) != null ? num(cnt.n) : num(params.n);
+      if (bn != null && bn >= 1) return I18N.t(lang, 'right.beat', { n: bn }, rng);
     }
+    // dots with a count run (e.count): "One, two, three dots!"
+    if (k === 'dots' && num(cnt.n) != null) return I18N.sayCountRun(lang, num(cnt.n), 'dots');
     var an = animalOf(t.animal || (t.nameKind === 'animal' ? t.nameValue : null));
     if (topic === 'initial' && an) {
       var ini = initialOf(lang, an);
       return I18N.t(lang, 'right.initial', { letter: ini.first, word: ini.word }, rng);
     }
+    // animals: the sound + the name ("Moo! The cow!" / "Ùm bò! Con bò!")
+    if (k === 'animal' && an) return I18N.t(lang, 'right.animal', { sound: NAMES[lang].sound[an], thing: drumPhrase(lang, t) }, rng);
     if (k === 'glyph' || (!k && ['letter', 'number', 'text', 'sum', 'diff', 'parity'].indexOf(t.nameKind) >= 0)) {
       var tx = t.text != null ? t.text : t.nameValue, gn = num(tx);
       if (topic === 'oddeven' && gn != null) return I18N.t(lang, 'right.parity', { n: gn, parity: gn % 2 ? 'odd' : 'even' }, rng);
@@ -1305,33 +1366,34 @@
   };
   I18N.sayPlaced = I18N.sayRight;
 
-  // what we ring for, named for the wrong line ("the red one", "the triangle", "the big one" / "chuông màu đỏ",
-  // "chuông to", "chuông hình tam giác", "chuông con gấu")
+  // what we boom for, named for the wrong line ("the red one", "the triangle drum", "the big one" / "trống màu đỏ",
+  // "trống to", "trống hình tam giác", "trống con bò")
   function wantPhrase(lang, want, t, cx) {
     var vi = lang === 'vi', params = cx.params;
     switch (want.k) {
       case 'color': {
         var c = colorOf(want.v);
         if (!c) break;
-        return vi ? 'chuông ' + NAMES.vi.color[c] : 'the ' + NAMES.en.color[c] + ' one';
+        return vi ? 'trống ' + NAMES.vi.color[c] : 'the ' + NAMES.en.color[c] + ' one';
       }
       case 'size': {
         var sz = sizeOf(want.v);
         if (!sz) break;
-        return vi ? 'chuông ' + NAMES.vi.size[sz] : 'the ' + NAMES.en.size[sz] + ' one';
+        return vi ? 'trống ' + NAMES.vi.size[sz] : 'the ' + NAMES.en.size[sz] + ' one';
       }
       case 'shape': {
         var col = cx.mix ? colorOf(params.color) : null;
-        return drumPhrase(lang, { kind: 'plate', shape: want.v, color: col }, { color: !!col });
+        return drumPhrase(lang, { kind: 'shape', shape: want.v, color: col }, { color: !!col });
       }
-      case 'animal': return drumPhrase(lang, { kind: 'animal', animal: want.v }, { drum: true });
+      case 'animal': case 'sound': return drumPhrase(lang, { kind: 'animal', animal: want.v }, { drum: true });
     }
     return phraseOf(lang, want);
   }
 
-  // `wrong {id, got:{nameKind,nameValue}, want:{nameKind,nameValue}, streak, x, y}` (+ main adds thing = the rung
-  // drum's thing, topic, params = the step's params) → names what was rung, then the goal.
-  // Maths never names the right answer; parity says what the rung number is; initial says the word's first letter.
+  // `wrong {id, got:{nameKind,nameValue}, want:{nameKind,nameValue}, streak, x, y}` (+ main adds thing = the tapped
+  // drum's thing, topic, params = the step's params) → names what was tapped, then the goal.
+  // Maths never names the right answer; parity says what the tapped number is; initial says the word's first letter;
+  // animals say the tapped animal's sound ("The duck says quack! Let's find the cow!").
   I18N.sayWrong = function (lang, ev, rng) {
     lang = L(lang);
     ev = obj(ev);
@@ -1339,6 +1401,7 @@
     var got = thingOf(ev.got), want = thingOf(ev.want), cx = ctxOf(ev), topic = cx.topic, params = cx.params;
     if (got.k == null && t.nameKind != null) got = thingOf(t);
     var k = drumKind(t.kind);
+    if (cx.beat || k === 'big') return I18N.t(lang, 'wrong.any', null, rng);   // no wrong in a beat step (defensive)
     var gotTx = t.text != null ? t.text : (got.v != null ? got.v : got.text), gn = num(gotTx);
     if (topic === 'add' || topic === 'sub' || want.k === 'sum' || want.k === 'diff' || (want.k === 'text' && splitOp(want.v))) {
       return I18N.t(lang, 'wrong.math', { got: gotTx != null ? (gn != null ? phraseOf(lang, { k: 'number', v: gn }) : phraseOf(lang, got)) : null }, rng);
@@ -1350,12 +1413,17 @@
       var ini = initialOf(lang, gotAnimal);
       return I18N.t(lang, 'wrong.initial', { word: capFirst(ini.word), first: ini.first }, rng);
     }
-    // counting: "That one has four bells. Let's ring the one with three bells!"
-    if (k === 'string' || k === 'dots' || topic === 'count') {
+    // animals: "The duck says quack! Let's find the cow!" / "Con vịt kêu cạp cạp! Mình tìm trống con bò nhé!"
+    var wantAnimal = (want.k === 'animal' || want.k === 'sound') ? animalOf(want.v) : null;
+    if (gotAnimal && wantAnimal && gotAnimal !== wantAnimal) {
+      return I18N.t(lang, 'wrong.animal', { got: drumPhrase(lang, { kind: 'animal', animal: gotAnimal }),
+        gotSound: NAMES[lang].sound[gotAnimal], want: wantPhrase(lang, want, t, cx), sound: NAMES[lang].sound[wantAnimal] }, rng);
+    }
+    // counting dots: "That drum has four dots. Let's boom the drum with three dots!"
+    if (k === 'dots' || topic === 'count') {
       var gN = num(t.n != null ? t.n : got.v), wN = num(want.v != null ? want.v : params.n);
-      var ik = itemsKind(k === 'dots' || k === 'string' ? k : params.kind);
       if (gN != null && wN != null && gN !== wN)
-        return I18N.t(lang, 'wrong.count', { got: name(lang, ik, gN), want: name(lang, ik, wN), kind: ik }, rng);
+        return I18N.t(lang, 'wrong.count', { got: name(lang, 'dots', gN), want: name(lang, 'dots', wN), kind: 'dots' }, rng);
       if (gN == null || wN == null) return I18N.t(lang, 'wrong.any', null, rng);
     }
     var g = k ? drumPhrase(lang, t, nameOpts(t, cx, true)) : '';
@@ -1375,19 +1443,26 @@
     if (STR[lang]['count.' + c]) return STR[lang]['count.' + c];
     return capFirst(numberName(lang, c)) + '!';
   };
-  // the whole count in one line: "One, two, three bells!" / "Một, hai, ba cái chuông!" (n = 1: "One bell!")
+  // the whole count in one line: "One, two, three!" (beats, default) / "One, two, three dots!" (kind 'dots' or a dots
+  // thing); n = 1: "One!" / "One dot!"
   I18N.sayCountRun = function (lang, n, kind) {
     lang = L(lang);
     var c = num(n);
     if (c == null || c < 1) return c === 0 ? I18N.sayCount(lang, 0) : I18N.t(lang, 'praise');
     var list = [];
     for (var i = 1; i <= c; i++) list.push(numberName(lang, i));
-    return capFirst(list.join(', ') + ' ' + itemsWord(lang, kind, c, true)) + '!';
+    var w = itemsWord(lang, itemsKind(kind, 'beat'), c, true);
+    return capFirst(list.join(', ') + (w ? ' ' + w : '')) + '!';
   };
-  // the count is complete: "Three bells! Hooray!"
+  // the count is complete: "Three beats! Hooray!" / "Three dots! Hooray!"
   I18N.sayCountDone = function (lang, n, kind, rng) {
     if (rng === undefined && kind && typeof kind !== 'string' && typeof kind.kind !== 'string') { rng = kind; kind = null; }
-    return I18N.t(lang, 'countDone', { n: num(n), kind: itemsKind(kind) }, rng);
+    return I18N.t(lang, 'countDone', { n: num(n), kind: itemsKind(kind, 'beat') }, rng);
+  };
+  // `beatNudge {i, n}` → "Two! One more!" / "Hai rồi! Thêm một cái nữa!"
+  I18N.sayBeatNudge = function (lang, ev, rng) {
+    ev = obj(ev);
+    return I18N.t(lang, 'beatNudge', { i: ev.i, n: ev.n != null ? ev.n : obj(ev.params).n }, rng);
   };
 
   I18N.talkWrong = function (lang, kind, value) {
@@ -1396,23 +1471,27 @@
     if (kind === 'blob') kind = 'color';
     if (value == null || value === '') return I18N.t(lang, 'talk.wrong.any');
     var ans = { answer: { kind: kind, value: value } };
-    if (kind === 'animal') return animalOf(value) ? I18N.t(lang, 'talk.wrong.animal', ans) : I18N.t(lang, 'talk.wrong', { answer: String(value) });
-    if (kind === 'shape' || kind === 'plate') return shapeOf(value) ? I18N.t(lang, lang === 'en' ? 'talk.wrong.a' : 'talk.wrong', { answer: { kind: 'shape', value: value } }) : I18N.t(lang, 'talk.wrong.any');
+    if (kind === 'animal' || kind === 'sound') {
+      var an = animalOf(value);
+      return an ? I18N.t(lang, 'talk.wrong.animal', { answer: { kind: 'animal', value: an }, sound: NAMES[lang].sound[an] }) :
+        I18N.t(lang, 'talk.wrong', { answer: String(value) });
+    }
+    if (kind === 'shape' || kind === 'shapeH') return shapeOf(value) ? I18N.t(lang, lang === 'en' ? 'talk.wrong.a' : 'talk.wrong', { answer: { kind: 'shape', value: value } }) : I18N.t(lang, 'talk.wrong.any');
     if (kind === 'size') return sizeOf(value) ? I18N.t(lang, 'talk.wrong.size', ans) : I18N.t(lang, 'talk.wrong.any');
     if (kind === 'color' || kind === 'hue') return colorOf(value) ? I18N.t(lang, 'talk.wrong', { answer: { kind: 'color', value: value } }) : I18N.t(lang, 'talk.wrong.any');
-    if (kind === 'bell') return colorOf(value) ? I18N.talkWrong(lang, 'color', value) : sizeOf(value) ? I18N.talkWrong(lang, 'size', value) : I18N.t(lang, 'talk.wrong.any');
+    if (kind === 'drum') return colorOf(value) ? I18N.talkWrong(lang, 'color', value) : sizeOf(value) ? I18N.talkWrong(lang, 'size', value) : I18N.t(lang, 'talk.wrong.any');
     if (kind === 'letter' || (kind === 'text' && isLetter(String(value)))) {
       var lv = String(value);
       return I18N.t(lang, lv !== lv.toUpperCase() ? 'talk.wrong.small' : 'talk.wrong.letter', { letter: lv });
     }
-    if (kind === 'number' || kind === 'dots' || kind === 'string' || kind === 'bunch' || ((kind === 'parity' || kind === 'text') && num(value) != null))
+    if (kind === 'number' || kind === 'dots' || ((kind === 'parity' || kind === 'text') && num(value) != null))
       return num(value) != null ? I18N.t(lang, 'talk.wrong.number', { answer: { kind: 'number', value: num(value) } }) : I18N.t(lang, 'talk.wrong.any');
     if (kind === 'parity' && lang === 'vi') return I18N.t(lang, 'talk.wrong.number', ans);
     return I18N.t(lang, 'talk.wrong', ans);
   };
 
   // Text → TTS-friendly text (Voice.say calls this). Display text stays untouched.
-  // "Bibi" is read well by English and Vietnamese voices ("ki" is an ordinary Vietnamese syllable): no rewrite.
+  // "Bibi" is read well by English and Vietnamese voices ("bi" is an ordinary Vietnamese syllable): no rewrite.
   var VI_UP = 'A-ZĂÂĐÊÔƠƯ', VI_LO = 'a-zăâđêôơư';
   var RE_VI_LETTER = new RegExp('(chữ|Chữ) ([' + VI_UP + VI_LO + '])(?![\\p{L}\\p{N}])', 'gu');
   I18N.speech = function (lang, text) {

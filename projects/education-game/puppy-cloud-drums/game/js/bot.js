@@ -10,9 +10,11 @@
  *   after an `ask` it waits 0.8–2.2 s × (1.3 − 0.5·skill); then it touches the asked drum with p = skill (always while the
  *   hint glows), else another drum not rung yet. A touch is a tap (aim error ± 0.3 × hit radius, held 0.06–0.16 s) or, with
  *   p = 0.25, a short horizontal swipe that starts just outside the drum (on the side away from its neighbours' path) so
- *   the FIRST contact is the drum it aims at. Song: swipes left → right across the beam band (p 0.8) or waits for the auto
- *   cascade. Talk: answers after 1.0–2.4 s, right with p = skill (always when the answer glows). Surprises: taps the lamb /
- *   bird / a firefly with p = 0.6 per round.
+ *   the FIRST contact is the drum it aims at. Beat mode (count at ages ≤ 4): taps the big drum `need` times, 0.35–0.7 s
+ *   apart; with skill < 1 it sometimes pauses mid-count (p 0.5 × (1 − skill) per beat, 1.5–5 s) and sometimes double-taps
+ *   faster than beatGap (p 0.5 × (1 − skill), 0.08–0.15 s: the 2nd tap only booms). Song: swipes left → right across the drum
+ *   band (p 0.8) or waits for the auto wave. Talk: answers after 1.0–2.4 s, right with p = skill (always when the answer
+ *   glows). Surprises: taps the lamb / bird / a firefly with p = 0.6 per round.
  */
 (function (CD) {
   'use strict';
@@ -25,7 +27,7 @@
     this.skill = clamp(opts.skill !== undefined && opts.skill !== null ? +opts.skill : 0.8, 0, 1);
     this.rng = new CD.RNG(opts.seed !== undefined ? opts.seed : 99);
     this.enabled = true;
-    this.stats = { taps: 0, swipes: 0, right: 0, wrong: 0, brush: 0, soft: 0, songSwipes: 0, songWaits: 0, talks: 0, talkRight: 0, lamb: 0, bird: 0, firefly: 0, poke: 0 };
+    this.stats = { taps: 0, swipes: 0, right: 0, wrong: 0, brush: 0, soft: 0, songSwipes: 0, songWaits: 0, talks: 0, talkRight: 0, lamb: 0, bird: 0, firefly: 0, poke: 0, beats: 0, counts: 0, beatPauses: 0, beatDoubles: 0 };
     this.finger = { x: world.layout.W / 2, y: world.layout.H / 2, down: false };
     this._t = -1; this._key = ''; this._talkT = -1; this._surp = {}; this.g = null; this._songKey = ''; this._songT = -1;
   }
@@ -37,6 +39,7 @@
     else if (e.type === 'wrong') this.stats.wrong++;
     else if (e.type === 'ring' && e.brush) this.stats.brush++;
     else if (e.type === 'soft') this.stats.soft++;
+    else if (e.type === 'count' && e.beat) this.stats.counts++;
     else if (e.type === 'ask') this._t = this._delay();
   };
 
@@ -139,9 +142,21 @@
     if (this._t > 0) return;
     this._t = this._delay() * 0.6;
     if (!a || !a.drum) return;
+    var st = w.stepInfo;
+    if (st && st.mode === 'beat') {   // beat the big drum with human gaps; sometimes a pause, sometimes a too-fast double tap
+      var hb = w.drumHit(a.drum);
+      if (!hb) return;
+      this.stats.taps++; this.stats.beats++;
+      this.tapAt(hb.x + r.float(-0.3, 0.3) * hb.r, hb.y + r.float(-0.3, 0.3) * hb.r);
+      var miss = 1 - this.skill, gap = r.float(0.35, 0.7);
+      if (r.chance(0.5 * miss)) { gap = r.float(1.5, 5); this.stats.beatPauses++; }
+      else if (r.chance(0.5 * miss)) { gap = r.float(0.08, 0.15); this.stats.beatDoubles++; }
+      this._t = gap;
+      return;
+    }
     var right = !!w.hintHand || !!w.assistId || r.chance(this.skill), id = a.drum;
     if (!right) {
-      var others = w.drums.filter(function (c) { return c.id !== a.drum && !c.done && c.state === 'hang'; });
+      var others = w.drums.filter(function (c) { return c.id !== a.drum && !c.done && c.state === 'stand'; });
       if (others.length) id = r.pick(others).id;
     }
     this._touchDrum(id);

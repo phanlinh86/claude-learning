@@ -36,7 +36,7 @@ function child() {
     if (a.song) {
       const k = w.level + ':' + w.round;
       if (k !== songKey) { songKey = k; songAt = R() < 0.8 ? now + U(800, 3000) : 1e15; }
-      if (now > songAt) { const c = w.drums.find(q => q.state === 'hang'); if (c) { w.pointerDown(c.cx, c.cy); up = now + 120; } songAt = 1e15; }
+      if (now > songAt) { const c = w.drums.find(q => q.state === 'stand'); if (c) { w.pointerDown(c.cx, c.cy); up = now + 120; } songAt = 1e15; }
       return;
     }
     if (!w.interactive || !a.drum) { key = ''; return; }
@@ -45,7 +45,7 @@ function child() {
     if (!at) { if (eager) at = listenFrom + U(600, 1600); else if (!talking() && now - listenFrom > 300) at = now + U(1300, 2600); }
     if (at && now > at) {
       let c = w.drumById(a.drum);
-      if (R() > 0.82 && !w.hintHand && !w.assistId) { const o = w.drums.filter(q => q.state === 'hang' && !q.done && q.id !== c.id); if (o.length) c = o[Math.floor(R() * o.length)]; }
+      if (R() > 0.82 && !w.hintHand && !w.assistId) { const o = w.drums.filter(q => q.state === 'stand' && !q.done && q.id !== c.id); if (o.length) c = o[Math.floor(R() * o.length)]; }
       w.pointerDown(c.cx + U(-20, 20), c.cy + U(-20, 20)); up = now + U(60, 250); at = 1e15;
     }
   }, 33);

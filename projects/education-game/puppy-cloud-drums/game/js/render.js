@@ -15,16 +15,16 @@
   const CONF = ['#E84A4A', '#3C8DE8', '#FFD23F', '#4CC26B', '#FF9A2E', '#8E44AD', '#FF8FC0'];
   const MOODS = ['morning', 'noon', 'sunset', 'night'];
   // tools/env_scenes.js RECIPE tables
-  const SKY = { morning: [[0, '#F7D9C4'], [1, '#FDF3E1']], noon: [[0, '#7CC4EE'], [1, '#D6F0FB']],
-    sunset: [[0, '#B9729A'], [0.38, '#F29B6B'], [1, '#FBD7A5']], night: [[0, '#1E2A4A'], [1, '#3B4C78']] };
-  const GROUND_BOTTOM = { morning: '#97A87F', noon: '#8EA678', sunset: '#938766', night: '#2C3D48' };
-  const ENV = { LAKE: { y0: 612, y1: 694 }, MOODS };
-  const SUN = { landscape: { morning: { x: .3, y: .17, size: 140 }, noon: { x: .71, y: .1, size: 150 }, sunset: { x: .84, y: .19, size: 176 }, night: { x: .86, y: .40, size: 150 } },
-    portrait: { morning: { x: .2, y: .24, size: 120 }, noon: { x: .72, y: .18, size: 130 }, sunset: { x: .78, y: .43, size: 150 }, night: { x: .8, y: .52, size: 130 } } };
-  const MOON = { landscape: { x: .74, y: .13, size: 130 }, portrait: { x: .74, y: .21, size: 120 } };
-  const STARS = { density: 1 / 4500, max: 180, r: [0.7, 2.1], twinkle: 0.3 };
-  const CLOUDS = { morning: { alpha: .8, tint: 'rgba(255,226,206,0.45)' }, noon: { alpha: .95, tint: null },
-    sunset: { alpha: .85, tint: 'rgba(246,170,140,0.5)' }, night: { alpha: .22, tint: 'rgba(90,108,160,0.6)' } };
+  const SKY = { morning: [[0, '#FAD6E0'], [1, '#FFF1E4']], noon: [[0, '#8FD0F4'], [1, '#E2F5FD']],
+    sunset: [[0, '#C98BC0'], [0.45, '#FFC9A0'], [1, '#FFE7C2']], night: [[0, '#1F2550'], [1, '#44508A']] };
+  const GROUND_BOTTOM = { morning: '#E8D9E7', noon: '#DCD6EC', sunset: '#E8CFD9', night: '#363D72' };
+  const ENV = { LAKE: { y0: 560, y1: 700 }, MOODS };   // LAKE = the cloud-sea horizon strip (ends the sky gradient)
+  const SUN = { landscape: { morning: { x: .3, y: .2, size: 140 }, noon: { x: .71, y: .1, size: 150 }, sunset: { x: .84, y: .15, size: 176 }, night: { x: .86, y: .40, size: 150 } },
+    portrait: { morning: { x: .2, y: .24, size: 120 }, noon: { x: .72, y: .18, size: 130 }, sunset: { x: .78, y: .27, size: 150 }, night: { x: .8, y: .40, size: 130 } } };
+  const MOON = { landscape: { x: .74, y: .13, size: 130 }, portrait: { x: .74, y: .2, size: 120 } };
+  const STARS = { density: 1 / 3800, max: 200, r: [0.7, 2.1], twinkle: 0.35 };
+  const CLOUDS = { morning: { alpha: .85, tint: 'rgba(255,214,226,0.35)' }, noon: { alpha: .95, tint: null },
+    sunset: { alpha: .85, tint: 'rgba(255,190,170,0.42)' }, night: { alpha: .3, tint: 'rgba(84,94,160,0.62)' } };
   // Bibi: 300×300 frames, feet anchor (150, 292); visible body y 33…294 (docs/art/bibi_bbox.json)
   const BIBI = { w: 300, h: 300, ax: 150, ay: 292, body: 261 };
   const HOG = { w: 160, h: 120, ax: 80, ay: 116 };

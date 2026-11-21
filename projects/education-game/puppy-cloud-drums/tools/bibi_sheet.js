@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Bibi's Cloud Drums — contact sheets for character artist A's SVGs.
 // Run from the game folder root:  python3 tools/art_bibi.py && node tools/bibi_sheet.js
-//   → docs/art/bibi_sheet.png     (every Bibi frame at in-game size 230 px on morning sky / grass / night)
-//     docs/art/bibi_3x.png        (every Bibi frame at 3× in-game size, light sky)
+//   → docs/art/bibi_sheet.png     (every Bibi frame at in-game size 230 px on pastel morning / noon blue / night navy)
+//     docs/art/bibi_3x.png        (every Bibi frame at 3× in-game size on pastel, noon and night)
 //     docs/art/bibi_surprise.png  (lamb, lamb_ball, bird, bird_sing at in-game size and 3× on the 3 backgrounds)
 //     docs/art/bibi_icon.png      (icon at 512 / 180 / 60)
 //     docs/art/bibi_bbox.json     (measured opaque bounding box of every file, viewBox px; Bibi boxes merged into bibi_hand.json)
@@ -14,12 +14,12 @@ const { chromium } = require('playwright');
 const ROOT = path.join(__dirname, '..');
 const CH = path.join(ROOT, 'game', 'assets', 'default', 'characters');
 const OUT = path.join(ROOT, 'docs', 'art');
-const POSES = ['idle', 'blink', 'talk', 'happy', 'cheer', 'think', 'oops', 'wave', 'point', 'dance', 'full_wave'];
+const POSES = ['idle', 'blink', 'talk', 'happy', 'cheer', 'think', 'oops', 'wave', 'point', 'dance', 'beat', 'full_wave'];
 const OTHERS = [['lamb', 160, 120], ['lamb_ball', 160, 120], ['bird', 120, 100], ['bird_sing', 120, 100]];
 const BG = {
-  sky: 'linear-gradient(#F7D9C4,#FDF3E1)',
-  grass: '#A9C08A',
-  night: 'linear-gradient(#1E2A4A,#3B4C78)',
+  pastel: 'linear-gradient(#FAD6E0,#FFF1E4)',
+  noon: 'linear-gradient(#8FD0F4,#E2F5FD)',
+  night: 'linear-gradient(#1F2550,#44508A)',
 };
 const uri = f => 'data:image/svg+xml;base64,' + fs.readFileSync(f).toString('base64');
 
@@ -44,7 +44,8 @@ async function shot(page, html, file) {
 
   // in-game: Bibi h = 230 → the 300 box is drawn at 230 px
   await shot(page, Object.values(BG).map(bg => row(bg, bibi.map(s => [s, 230, 230]), 6)).join(''), 'bibi_sheet.png');
-  await shot(page, [0, 1, 2].map(r => row(BG.sky, bibi.slice(r * 4, r * 4 + 4).map(s => [s, 690, 690]))).join(''), 'bibi_3x.png');
+  const bgs = Object.values(BG);
+  await shot(page, [0, 1, 2].map(r => row(bgs[r], bibi.slice(r * 4, r * 4 + 4).map(s => [s, 690, 690]))).join(''), 'bibi_3x.png');
 
   const oth = OTHERS.map(([n, w, h]) => [uri(path.join(CH, n + '.svg')), w, h]);
   // in-game: lamb ≈ 96 px tall box, bird ≈ 70 px tall box
@@ -53,7 +54,7 @@ async function shot(page, html, file) {
   await shot(page, Object.values(BG).map(bg => row(bg, [...small, ...big])).join(''), 'bibi_surprise.png');
 
   const icon = uri(path.join(ROOT, 'game', 'assets', 'default', 'icon.svg'));
-  await shot(page, row('#FFFFFF', [[icon, 512, 512], [icon, 180, 180], [icon, 60, 60]]), 'bibi_icon.png');
+  await shot(page, row('#FFFFFF', [[icon, 512, 512], [icon, 180, 180], [icon, 60, 60]]) + row('#1F2550', [[icon, 180, 180], [icon, 60, 60]]), 'bibi_icon.png');
 
   // measured opaque bounding boxes (alpha > 8) in viewBox px
   const files = [...POSES.map(p => ['bibi_' + p, 300, 300]), ...OTHERS];
