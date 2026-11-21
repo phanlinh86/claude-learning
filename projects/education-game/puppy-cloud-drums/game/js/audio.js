@@ -1,10 +1,10 @@
 /* CD.Audio (Bibi's Cloud Drums) — every sound is synthesized with WebAudio (no files to license or download).
- * The drums: a bell (additive partials 1 / 2.76 / 5.4, fast decay), a brighter plate, a jingly string of little bells, a
- * wooden animal drum (wood block + a tiny chirp) — each in its own pentatonic note (CD.NOTES C5…D6); a brush is the same
- * note softer, a wrong strike a dull wooden "bonk". Count jingles, the lantern's warm "pop-glow", the note's whoosh up, the
- * song cascade, a soft beam knock, lamb sniff + roll, a songbird tweet, firefly twinkles. Ambience per mood (morning
- * birds, a noon breeze, sunset crickets, night crickets + fire crackle) and a soft kalimba / guitar loop per mood, ducked
- * while Bibi speaks and during the song cascade (setSong).
+ * The drums: a membrane boom (sine with a fast pitch drop + noise slap) with a quiet partial in its own pentatonic note
+ * (CD.NOTES C5…D6) so the song has a tune; the big drum deeper; shape / dots / glyph drums brighter; animal drums add a
+ * tiny synthesized voice (moo, quack, meow…). A brush is softer, a wrong strike a muffled "bumpf". Cushion poofs, the
+ * star lantern twinkle, the note's whoosh up, the cymbal crash, lamb baa + boing, a bird tweet, star twinkles. Ambience
+ * per mood (morning birds, a noon breeze, sunset/night crickets) and a soft kalimba / pluck loop per mood, ducked while
+ * Bibi speaks and during the song (setSong).
  * Chain: sfx / music / amb → master (mute) → compressor → user volume × 1.6 makeup → speakers (phones are quiet).
  * iOS: call unlock() inside the first touchend/click (it also switches the audio session to 'playback'). */
 (function (CD) {
@@ -116,13 +116,10 @@
         for (let i = 0; i < n; i++) this.tone(f, 0.025, { type: 'sine', vol: 0.022, at: i * 0.05, attack: 0.003, dest: this.amb });
       }
       if (this._bubT > 0) return;
-      if (this.mood === 3) {          // night: the fire crackles
-        this._bubT = 0.8 + Math.random() * 2.2;
-        const n = 1 + (Math.random() * 3 | 0);
-        for (let i = 0; i < n; i++) this.noise(0.03, { vol: 0.05 + Math.random() * 0.04, type: 'highpass', f0: 1800 + Math.random() * 2000, q: 0.8, at: i * (0.04 + Math.random() * 0.1), attack: 0.002, dest: this.amb });
-      } else if (this.mood === 2) {   // sunset: a far owl-ish hoot now and then, or a soft crackle
+      if (this.mood >= 2) {            // sunset / night: a faraway star twinkle now and then
         this._bubT = 3 + Math.random() * 4;
-        this.noise(0.04, { vol: 0.05, type: 'highpass', f0: 2500, q: 0.8, attack: 0.002, dest: this.amb });
+        const f = NOTE(96 + [0, 4, 7, 12][(Math.random() * 4) | 0]);
+        this.tone(f, 0.4, { type: 'sine', vol: 0.02, attack: 0.01, dest: this.amb });
       } else {                        // a little bird: two or three quick chirps (morning: more often)
         this._bubT = (this.mood === 0 ? 2.2 : 3.4) + Math.random() * 4.5;
         const f = 2400 + Math.random() * 1200, n = 2 + (Math.random() * 2 | 0);
@@ -131,23 +128,34 @@
     },
     /* the song cascade: the music bed steps back so the child's tune rings out */
     setSong(on) { if (this._song !== !!on) { this._song = !!on; this.apply(); } },
-    /* a struck drum in its note: kind bell | plate | string | dots | animal | glyph; strength ≈ 0.6–1.6; brush = softer */
-    drum(note, { kind = 'bell', strength = 1, brush = false, at = 0, dest = null } = {}) {
+    /* a struck drum in its note: kind drum | shape | big | dots | animal | glyph; strength ≈ 0.6–1.6; brush = softer.
+     * Membrane = a sine that drops fast in pitch (the "boom") + a short noise slap; a quiet tonal partial at the drum's
+     * pentatonic note carries the melody of the song. The big drum is an octave lower and longer. */
+    drum(note, { kind = 'drum', strength = 1, brush = false, at = 0, dest = null, animal = null } = {}) {
       const m = DRUM_MIDI[((note | 0) % DRUM_MIDI.length + DRUM_MIDI.length) % DRUM_MIDI.length] || 76;
-      const f = NOTE(m), v = Math.max(0.06, Math.min(0.34, 0.22 * Math.max(0.5, Math.min(1.5, strength)) * (brush ? 0.45 : 1)));
-      if (kind === 'plate' || kind === 'dots' || kind === 'glyph') {   // a brighter metal plate
-        this.tone(f, 1.4, { type: 'sine', vol: v, at, attack: 0.002, dest });
-        this.tone(f * 2.0, 0.8, { type: 'sine', vol: v * 0.35, at, attack: 0.002, dest });
-        this.tone(f * 3.9, 0.35, { type: 'sine', vol: v * 0.18, at, attack: 0.001, dest });
-        this.noise(0.02, { vol: v * 0.3, type: 'highpass', f0: 5000, q: 0.7, at, attack: 0.001, dest });
-      } else if (kind === 'string') {   // several little bells jingling, around the note
-        for (let i = 0; i < 4; i++) this.bell(f * 2 * (1 + i * 0.03), 0.4, { vol: v * 0.35, at: at + i * 0.035, dest });
-        this.tone(f, 0.9, { type: 'sine', vol: v * 0.7, at, attack: 0.002, dest });
-      } else if (kind === 'animal') {   // a hollow wood block + the bell under it
-        this.tone(f * 0.5, 0.12, { type: 'triangle', vol: v * 0.9, at, slideTo: f * 0.45, attack: 0.002, dest });
-        this.noise(0.03, { vol: v * 0.35, type: 'bandpass', f0: 1200, q: 3, at, attack: 0.001, dest });
-        this.bell(f, 1.0, { vol: v * 0.8, at: at + 0.02, dest });
-      } else this.bell(f, 1.6, { vol: v, at, dest });
+      const v = Math.max(0.08, Math.min(0.34, 0.26 * Math.max(0.5, Math.min(1.5, strength)) * (brush ? 0.45 : 1)));
+      const big = kind === 'big', bright = kind === 'shape' || kind === 'dots' || kind === 'glyph';
+      const f = NOTE(m - (big ? 36 : 24));
+      this.tone(f * 1.9, big ? 0.55 : 0.32, { type: 'sine', vol: v * (big ? 1.15 : 1), at, slideTo: f, attack: 0.002, dest });
+      this.tone(f * 2.95, 0.09, { type: 'triangle', vol: v * 0.25, at, slideTo: f * 1.6, attack: 0.001, dest });
+      this.noise(big ? 0.09 : 0.05, { vol: v * (bright ? 0.42 : 0.3), type: 'bandpass', f0: big ? 700 : bright ? 2600 : 1500, q: 0.9, at, attack: 0.001, dest });
+      this.tone(NOTE(m), big ? 0.5 : 0.7, { type: 'sine', vol: v * 0.32, at: at + 0.005, attack: 0.004, dest });   // the tune
+      if (kind === 'animal' && animal && !brush) this.voice(animal, { at: at + 0.1, vol: 0.2, dest });
+    },
+    /* tiny synthesized animal voices (never samples): moo, quack, meow, oink, ribbit, baa, cluck, squeak */
+    voice(animal, { at = 0, vol = 0.2, dest = null } = {}) {
+      const r = 1 + (Math.random() - 0.5) * 0.06;
+      switch (animal) {
+        case 'cow': this.tone(150 * r, 0.6, { type: 'sawtooth', vol: vol * 0.55, at, slideTo: 115 * r, attack: 0.08, dest }); this.tone(300 * r, 0.5, { type: 'sine', vol: vol * 0.3, at, slideTo: 230 * r, attack: 0.08, dest }); break;
+        case 'duck': for (let i = 0; i < 2; i++) { this.tone(520 * r, 0.12, { type: 'square', vol: vol * 0.3, at: at + i * 0.16, slideTo: 380 * r, attack: 0.005, dest }); this.noise(0.1, { vol: vol * 0.2, type: 'bandpass', f0: 1400, q: 3, at: at + i * 0.16, dest }); } break;
+        case 'cat': this.tone(620 * r, 0.22, { type: 'triangle', vol: vol * 0.6, at, slideTo: 900 * r, attack: 0.03, dest }); this.tone(900 * r, 0.3, { type: 'triangle', vol: vol * 0.5, at: at + 0.2, slideTo: 520 * r, attack: 0.01, dest }); break;
+        case 'pig': for (let i = 0; i < 2; i++) this.tone(190 * r, 0.12, { type: 'square', vol: vol * 0.3, at: at + i * 0.17, slideTo: 140 * r, attack: 0.01, dest }); break;
+        case 'frog': for (let i = 0; i < 2; i++) this.tone(260 * r, 0.09, { type: 'square', vol: vol * 0.28, at: at + i * 0.13, slideTo: 330 * r, attack: 0.005, dest }); break;
+        case 'sheep': { const c = this.ctx; if (!c) break; for (let i = 0; i < 6; i++) this.tone((420 + (i % 2) * 40) * r, 0.1, { type: 'sawtooth', vol: vol * 0.22, at: at + i * 0.07, attack: 0.01, dest }); break; }
+        case 'hen': for (let i = 0; i < 3; i++) this.tone((700 + i * 90) * r, 0.07, { type: 'triangle', vol: vol * 0.5, at: at + i * 0.1, slideTo: 500 * r, attack: 0.004, dest }); break;
+        case 'mouse': for (let i = 0; i < 2; i++) this.tone(2300 * r, 0.06, { type: 'sine', vol: vol * 0.45, at: at + i * 0.09, slideTo: 2900 * r, attack: 0.004, dest }); break;
+        default: break;
+      }
     },
     /* one bubble "bloop": a sine whose pitch rises fast (the classic bubble resonance) */
     bubble(at = 0, vol = 0.12, dest = null) {
@@ -219,24 +227,33 @@
     play(name, opt = {}) {
       if (!this.ctx || this.muted || !this.sfxOn) return;
       const now = this.ctx.currentTime;
-      const gap = { clink: 0.05, pop: 0.05, beam: 0.25, jingle: 0.08, lantern: 0.06, noteFly: 0.12, strum: 0.3, sniff: 0.5, tweet: 0.4, twinkle: 0.15, bonk: 0.12 }[name];
+      const gap = { poof: 0.06, crash: 0.25, baa: 0.6, boing: 0.3, clink: 0.05, pop: 0.05, beam: 0.25, jingle: 0.08, lantern: 0.06, noteFly: 0.12, strum: 0.3, sniff: 0.5, tweet: 0.4, twinkle: 0.15, bonk: 0.12 }[name];
       if (gap && now - (this._lastPlay[name] || 0) < gap) return;   // staggered, never a buzz
       this._lastPlay[name] = now;
       const r = 1 + (Math.random() - 0.5) * 0.08;
       const cn = NOTE(COLOR_NOTE[opt.color] || 76);
       switch (name) {
-        case 'drum': this.drum(opt.note || 0, { kind: opt.kind, strength: opt.strength || 1, brush: !!opt.brush }); break;
-        case 'bonk':     // a wrong strike: a dull, friendly wooden "bonk" (+ its note very softly)
-          this.tone(170 * r, 0.22, { type: 'triangle', vol: 0.26, slideTo: 120 * r, attack: 0.003 });
-          this.noise(0.05, { vol: 0.1, type: 'lowpass', f0: 900, q: 0.8 });
+        case 'drum': this.drum(opt.note || 0, { kind: opt.kind, strength: opt.strength || 1, brush: !!opt.brush, animal: opt.animal }); break;
+        case 'bonk':     // a wrong strike: a muffled, friendly "bumpf" (+ its note very softly)
+          this.tone(110 * r, 0.2, { type: 'sine', vol: 0.3, slideTo: 80 * r, attack: 0.003 });
+          this.noise(0.06, { vol: 0.1, type: 'lowpass', f0: 600, q: 0.8 });
           if (opt.note != null) this.drum(opt.note, { kind: opt.kind, strength: 0.6, brush: true, at: 0.03 }); break;
-        case 'clink': this.drum(opt.note || 0, { kind: opt.kind, strength: 0.5, brush: true }); this.noise(0.03, { vol: 0.05, type: 'bandpass', f0: 3200, q: 3 }); break;   // a drum arrives
+        case 'clink': this.drum(opt.note || 0, { kind: opt.kind, strength: 0.5, brush: true }); break;   // a drum lands on its cushion
+        case 'poof':     // a cushion squish / a landing: a soft airy puff
+          this.noise(0.18, { vol: Math.min(0.14, 0.05 + 0.015 * (opt.v || 1)), type: 'lowpass', f0: 700, f1: 300, q: 0.6, attack: 0.01 }); break;
+        case 'crash':    // the cymbal: bright filtered noise + a shimmering partial cluster, long tail
+          this.noise(opt.soft ? 0.7 : 1.6, { vol: opt.soft ? 0.09 : 0.2, type: 'highpass', f0: 5200, q: 0.5, attack: 0.002 });
+          this.noise(opt.soft ? 0.3 : 0.6, { vol: opt.soft ? 0.05 : 0.11, type: 'bandpass', f0: 3200, f1: 7000, q: 0.7, attack: 0.002 });
+          [1, 1.48, 2.13, 2.87].forEach((k, i) => this.tone(980 * k * r, opt.soft ? 0.4 : 1.0, { type: 'sine', vol: (opt.soft ? 0.015 : 0.03) / (i + 1), attack: 0.002 }));
+          break;
+        case 'baa': this.voice('sheep', { vol: 0.16 }); break;
+        case 'boing': this.tone(220 * r, 0.35, { type: 'sine', vol: 0.18, slideTo: 660 * r, attack: 0.005 }); this.tone(660 * r, 0.25, { type: 'sine', vol: 0.1, at: 0.3, slideTo: 330 * r }); break;
         case 'jingle': { const k = Math.min(opt.i || 1, 12); const f = NOTE(SCALE_C[k] + 79); this.bell(f, 0.5, { vol: 0.2 }); this.tone(f * 2, 0.2, { vol: 0.06, at: 0.02 }); break; }   // counting bell i
         case 'lantern':  // the note arrives: a warm "pop-glow"
           this.tone(NOTE(84) * r, 0.1, { type: 'sine', vol: 0.18, slideTo: NOTE(91), attack: 0.003 });
           this.bell(NOTE(91 + ((opt.i || 0) % 3) * 2), 0.6, { vol: 0.08, at: 0.06 }); break;
         case 'noteFly': this.noise(0.5, { vol: 0.05, type: 'bandpass', f0: 900, f1: 3400, q: 1.1, attack: 0.08 }); break;
-        case 'beam':     // a press on the beam / the sky: a soft wooden knock, no words
+        case 'beam':     // (unused) a soft knock, no words
           this.tone(150 * r, 0.12, { type: 'sine', vol: 0.16, slideTo: 110 * r, attack: 0.003 });
           this.noise(0.04, { vol: 0.05, type: 'lowpass', f0: 800, q: 0.7 }); break;
         case 'songAsk': [0, 2, 4, 7].forEach((n, i) => this.bell(NOTE(84 + n), 0.5, { vol: 0.06, at: i * 0.09 })); break;

@@ -62,7 +62,7 @@ if (require.main === module) (async () => {
       await page.screenshot({ path: path.join(OUT, d.name + '-1-right.png') });
       if (await evCount(page, 'right') <= right0) errors.push('real tap on the asked drum gave no right event: ' + JSON.stringify(a1));
       // 2) tap a WRONG drum at the next ask (the warm-up round may have no distractor: then the next round)
-      const ready = () => { const w = CD.debug.world, a = CD.debug.answer(); return w.state === 'round' && w.interactive && a && a.drum != null && w.drums.some(c => c.state === 'hang' && c.id !== a.drum && !c.done); };
+      const ready = () => { const w = CD.debug.world, a = CD.debug.answer(); return w.state === 'round' && w.interactive && a && a.drum != null && w.drums.some(c => c.state === 'stand' && c.id !== a.drum && !c.done); };
       try { await page.waitForFunction(ready, null, { timeout: 6000 }); } catch (e) {
         await page.evaluate(() => { CD.debug.setBot(true, 1); CD.debug.setSpeed(6); });
         await page.waitForFunction(() => CD.debug.world.state === 'roundDone', null, { timeout: 30000 });
@@ -73,7 +73,7 @@ if (require.main === module) (async () => {
       await page.waitForTimeout(300);
       const a2 = await page.evaluate(() => {
         const w = CD.debug.world, a = CD.debug.answer();
-        const other = w.drums.find(c => c.state === 'hang' && c.id !== a.drum && !c.done);
+        const other = w.drums.find(c => c.state === 'stand' && c.id !== a.drum && !c.done);
         return other ? { id: other.id, at: CD.debug.drumScreen(other.id) } : null;
       });
       if (!a2) errors.push('no other drum for the wrong tap');
@@ -95,7 +95,7 @@ if (require.main === module) (async () => {
       try {
         await page.waitForFunction(() => { const a = CD.debug.answer(); return a && a.song && CD.debug.world.phase === 'song'; }, null, { timeout: 15000 });
         await page.waitForTimeout(700);
-        const B = await page.evaluate(() => { const w = CD.debug.world, ys = w.drums.filter(c => c.state === 'hang').map(c => CD.debug.drumScreen(c.id)); return { ys, b: CD.debug.beamScreen() }; });
+        const B = await page.evaluate(() => { const w = CD.debug.world, ys = w.drums.filter(c => c.state === 'stand').map(c => CD.debug.drumScreen(c.id)); return { ys, b: CD.debug.stageScreen() }; });
         const y = Math.round(B.ys.reduce((s, c) => s + c.y, 0) / B.ys.length);
         await drag(cdp, page, { x: B.b.x0 + 4, y }, { x: B.b.x1 - 4, y }, 16, 500);
         await page.waitForTimeout(600);

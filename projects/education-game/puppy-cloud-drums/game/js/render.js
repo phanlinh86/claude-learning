@@ -1,10 +1,10 @@
-/* CD.Renderer (Bibi's Cloud Drums) — draws the mountain campsite and the wind drums on one canvas (MECHANICS §3):
+/* CD.Renderer (Bibi's Cloud Drums) — draws the rainbow cloud land and the cloud drums on one canvas (MECHANICS §3):
  * sky gradient (ambient colours crossfading morning → noon → sunset → night), star field, sun / moon, clouds, far
- * mountains + lake, mid pines + tents, meadow (tools/env_scenes.js RECIPE), back particles, the campfire, Bibi (mood
- * frames, blink, talk flaps, hop), the log beam + posts, the lantern garland, cords + swinging drums, flying notes,
- * surprises (lamb, songbird, fireflies), the hint hand, front particles, fx and the chapter banner.
- * Title: Bibi waving with a little bell beside a small beam with 3 drums. Session done: Bibi dances by the fire under
- * a garland of every lantern lit this session. Logical coordinates (short side 720) × render scale rs = device pixels. */
+ * cloud mountains + islands, mid cloud hills + cottages, cloud floor (tools/env_scenes.js RECIPE), back particles, the
+ * cymbal, Bibi (mood frames, blink, talk flaps, hop), the star-lantern string, cushions + bouncing drums, the beat card,
+ * flying notes, surprises (lamb, bird, twinkle stars), the hint hand, front particles, fx and the chapter banner.
+ * Title: Bibi waving a stick beside 3 cloud drums. Session done: Bibi dances under a rainbow and a string of every
+ * star lantern lit this session. Logical coordinates (short side 720) × render scale rs = device pixels. */
 (function (CD) {
   'use strict';
   const TAU = Math.PI * 2;
@@ -25,8 +25,8 @@
   const STARS = { density: 1 / 3800, max: 200, r: [0.7, 2.1], twinkle: 0.35 };
   const CLOUDS = { morning: { alpha: .85, tint: 'rgba(255,214,226,0.35)' }, noon: { alpha: .95, tint: null },
     sunset: { alpha: .85, tint: 'rgba(255,190,170,0.42)' }, night: { alpha: .3, tint: 'rgba(84,94,160,0.62)' } };
-  // Bibi: 300×300 frames, feet anchor (150, 292); visible body y 33…294 (docs/art/bibi_bbox.json)
-  const BIBI = { w: 300, h: 300, ax: 150, ay: 292, body: 261 };
+  // Bibi: 300×300 frames, feet anchor (150, 292); visible body y 43…295 (docs/art/bibi_bbox.json)
+  const BIBI = { w: 300, h: 300, ax: 150, ay: 292, body: 252 };
   const HOG = { w: 160, h: 120, ax: 80, ay: 116 };
   const BIRD = { w: 120, h: 100, ax: 60, ay: 96 };
   const ip = (o, k, a) => { const p = o['_p' + k], v = o[k]; return p == null || v == null ? v : p + (v - p) * a; };
@@ -227,16 +227,22 @@
     _game(w, o, a) {
       const L = this._L, C = CA(); if (!L) return;
       const g = this.g, night = this._night, t = this.time;
-      const fireGlow = this._amb.fire == null ? 0.5 : this._amb.fire;
-      if (C && L.fire) { try { C.drawFire(g, L.fire, { t, glow: fireGlow }); } catch (e) { /* skip */ } }
+      if (C && L.cymbal) {
+        const cy = w.cymbal || {};
+        try { C.drawCymbal(g, L.cymbal, { tilt: ip(cy, 'tilt', a) || 0, ring: cy.ring || 0, night, t }); } catch (e) { /* skip */ }
+      }
       this._bibi(w.bibi, L.bibi);
       if (!C) return;
-      const wob = ip(w.beam || {}, 'wob', a) || 0;
-      try { C.drawBeam(g, L, { t, wob, night, hooks: (L.hooks || []).map(h => h.x) }); } catch (e) { /* skip */ }
       const lan = (w.lanterns || []).map(q => Object.assign({}, q, { lit: ip(q, 'lit', a), swing: ip(q, 'swing', a) }));
       if (L.garland) { try { C.drawGarland(g, L.garland, lan, { t, night }); } catch (e) { /* skip */ } }
-      // cords + drums (hook order); the ring arcs of a struck drum are drawn with it
-      for (const c of w.drums || []) this._drum(c, a, night);
+      const drums = w.drums || [];
+      for (const c of drums) this._cushion(c, a, night);
+      for (const c of drums) this._drum(c, a, night);
+      const cd = w.card;
+      if (cd) {
+        const pop = ip(cd, 'pop', a);
+        if (pop > 0.01) { try { C.drawCard(g, cd.x, cd.y, cd.n, { lit: cd.lit || 0, pop, flash: cd.flash || 0, size: cd.h || 140 }); } catch (e) { /* skip */ } }
+      }
       for (const n of w.notes || []) {
         const x = ip(n, 'x', a), y = ip(n, 'y', a);
         try { C.drawNote(g, x, y, 34, { color: n.color, alpha: n.alpha == null ? 1 : n.alpha, rot: n.rot || 0 }); } catch (e) { /* skip */ }
@@ -246,16 +252,23 @@
       for (const f of w.fireflies || []) { try { C.drawFirefly(g, ip(f, 'x', a), ip(f, 'y', a), f.r || 5, f.glow == null ? 1 : f.glow); } catch (e) { /* skip */ } }
       this._hintHand(w.hintHand, a);
     }
+    _cushion(c, a, night) {
+      const C = CA(); if (!C || c.state === 'gone') return;
+      const cp = ip(c, 'cushionPop', a); if (!(cp > 0.01)) return;
+      const al = c.state === 'out' ? Math.max(0, Math.min(1, cp)) : 1;
+      try { C.drawCushion(this.g, ip(c, 'padX', a) != null ? ip(c, 'padX', a) : c.padX, ip(c, 'padY', a), c.cushionW || this._L.cushion.w,
+        { dent: Math.max(0, ip(c, 'dent', a) || 0), t: this.time + (c.id || 0) * 0.7, night, pop: cp, alpha: al }); } catch (e) { /* skip */ }
+    }
     _drum(c, a, night) {
       const C = CA(); if (!C || c.state === 'gone') return;
       const pop = ip(c, 'pop', a); if (!(pop > 0)) return;
-      const g = this.g, x = ip(c, 'x', a), y = ip(c, 'y', a), cord = ip(c, 'cord', a) || 0;
-      const hookY = c.hookY != null ? c.hookY : (this._L.beam && this._L.beam.hookY);
-      if (cord > 2 && c.hookX != null) { try { C.drawCord(g, c.hookX, hookY, x, y, { night }); } catch (e) { /* skip */ } }
-      g.save(); g.translate(x, y); g.rotate(ip(c, 'rot', a) || 0);
+      const g = this.g, x = ip(c, 'x', a), y = ip(c, 'y', a);
+      const alpha = c.alpha == null ? 1 : clamp(ip(c, 'alpha', a), 0, 1); if (alpha <= 0.01) return;
+      g.save(); g.globalAlpha *= alpha; g.translate(x, y); g.rotate(ip(c, 'tilt', a) || 0);
       try {
-        C.drawDrum(g, c.thing, c.size, { glow: c.glow || 0, ring: c.ring || 0, flash: c.dull ? 0 : undefined, dim: c.dim || 0,
-          count: c.count == null ? -1 : c.count, clap: c.clap || 0, night, pop });
+        C.drawDrum(g, c.thing, c.size, { glow: c.glow || 0, ring: c.ring || 0, dull: c.dull ? 1 : 0, sq: ip(c, 'sq', a) || 1,
+          skin: ip(c, 'skin', a) || 0, skinPh: c.skinPh || 0, dim: c.dim || 0, count: c.count == null ? -1 : c.count, night, pop,
+          sing: c.thing && c.thing.kind === 'animal' && (c.ring || 0) > 0.35 ? 1 : 0 });
       } catch (e) { /* skip */ }
       g.restore();
     }
@@ -320,60 +333,56 @@
       g.restore();
     }
 
-    /* ---------- a small drum row (title / done): beam from x0 to x1 at y, things hanging ---------- */
+    /* ---------- a small drum row (title / done): drums standing on cloud cushions, taking turns booming ---------- */
     _miniRow(x0, x1, y, things, size, opt = {}) {
       const C = CA(); if (!C) return;
       const g = this.g, n = things.length, t = this.time, night = this._night;
-      const hooks = things.map((_, i) => x0 + (x1 - x0) * (i + 0.5) / n);
-      const L = { beam: { x0, x1, y, r: 13, hookY: y + 19 }, posts: [{ x: x0, top: y - 50, bottom: opt.ground || y + 260 }, { x: x1, top: y - 50, bottom: opt.ground || y + 260 }], hooks: hooks.map(x => ({ x, y: y + 19 })) };
-      try { C.drawBeam(g, L, { t, wob: 0, night, hooks }); } catch (e) { /* skip */ }
       if (opt.lanterns) {
-        const gl = { x0, x1, y: y - 44, sag: 22 }, m = opt.lanterns.length;
-        const lan = opt.lanterns.map((col, i) => { const u = (i + 0.5) / m; return { x: lerp(x0, x1, u), y: gl.y + 4 * gl.sag * u * (1 - u), lit: col === undefined ? 0 : 1, color: col || null, swing: Math.sin(t * 1.4 + i) * 0.06, flash: 0 }; });
+        const gl = { x0, x1, y: opt.garlandY != null ? opt.garlandY : y - size * 2.2, sag: 22 }, m = opt.lanterns.length;
+        const lan = opt.lanterns.map((col, i) => { const u = (i + 0.5) / m; return { x: lerp(gl.x0, gl.x1, u), y: gl.y + 4 * gl.sag * u * (1 - u), lit: col === undefined ? 0 : 1, color: col || null, swing: Math.sin(t * 1.4 + i) * 0.06, flash: 0 }; });
         try { C.drawGarland(g, gl, lan, { t, night }); } catch (e) { /* skip */ }
       }
       things.forEach((th, i) => {
-        const cord = (opt.cords && opt.cords[i]) || 60 + (i % 2) * 30, hy = y + 19;
-        const th0 = Math.sin(t * 1.7 + i * 1.3) * (opt.swing != null ? opt.swing : 0.08) + (opt.kick && opt.kick[i] ? opt.kick[i] : 0);
-        const bx = hooks[i] + Math.sin(th0) * cord, by = hy + Math.cos(th0) * cord;
-        try { C.drawCord(g, hooks[i], hy, bx, by, { night }); } catch (e) { /* skip */ }
-        g.save(); g.translate(bx, by); g.rotate(-th0);
-        const ring = opt.ring ? opt.ring(i) : 0;
-        try { C.drawDrum(g, th, size, { ring, night, glow: opt.glow ? opt.glow(i) : 0 }); } catch (e) { /* skip */ }
+        const px = x0 + (x1 - x0) * (i + 0.5) / n, py = y + (i % 2 ? -26 : 0) + Math.sin(t * 2.2 + i * 1.7) * 3;
+        const hit = opt.hit ? opt.hit(i) : 0;   // 0..1 just struck
+        const hop = hit > 0 ? Math.sin(Math.min(1, hit) * Math.PI) * 20 : 0;
+        const sq = hit > 0.85 ? 0.86 : hit > 0 && hit < 0.2 ? 0.86 + hit * 0.7 : 1;
+        try { C.drawCushion(g, px, py, size * 1.25, { dent: hit > 0 && hit < 0.3 ? 1 - hit / 0.3 : 0, t: t + i, night }); } catch (e) { /* skip */ }
+        g.save(); g.translate(px, py - hop);
+        try { C.drawDrum(g, th, size, { ring: opt.ring ? opt.ring(i) : 0, night, sq, skin: opt.ring ? opt.ring(i) : 0, skinPh: t * 40, glow: opt.glow ? opt.glow(i) : 0 }); } catch (e) { /* skip */ }
         g.restore();
       });
     }
 
-    /* ---------- title: Bibi waving with a little bell beside a small beam with 3 drums ---------- */
+    /* ---------- title: Bibi waving with a stick beside 3 cloud drums ---------- */
     _titleScene(w, o) {
       const W = this.W, H = this.H, L = this._L, ins = L.ins || {}, portrait = H > W, gy = L.groundY, C = CA();
       const blink = Math.sin(this.time * 1.3) > 0.985;
       let nh, px, x0, x1, by;
       if (portrait) {
         nh = Math.min(300, H * 0.22); px = (ins.left || 0) + 40 + nh * 0.42;
-        x0 = px + nh * 0.55; x1 = W - (ins.right || 0) - 40; by = gy - nh - 120;
+        x0 = (ins.left || 0) + 60; x1 = W - (ins.right || 0) - 60; by = gy - nh - 90;
       } else {
         nh = Math.min(330, H * 0.46); px = (ins.left || 0) + 40 + nh * 0.46;
-        x1 = W - (ins.right || 0) - 50; x0 = Math.max(px + nh * 0.6, x1 - clamp(W * 0.3, 270, 400)); by = gy - 330;
+        x1 = W - (ins.right || 0) - 50; x0 = Math.max(px + nh * 0.6, x1 - clamp(W * 0.3, 300, 420)); by = gy - 120;
       }
-      if (C && L.fire) { try { C.drawFire(this.g, { x: px + nh * 0.58, y: gy - 6, s: 0.8 }, { t: this.time, glow: this._amb.fire == null ? 0.5 : this._amb.fire }); } catch (e) { /* skip */ } }
+      if (C) { try { C.drawCymbal(this.g, { x: px + nh * 0.62, y: gy - 4, s: 0.75 }, { tilt: Math.sin(this.time * 2) * 0.04, ring: 0, night: this._night, t: this.time }); } catch (e) { /* skip */ } }
       this._bibi({ blink }, { x: px, y: gy - 4, h: nh }, { frame: 'bibi_full_wave' });
-      // the three drums take turns ringing (a little demo tune)
-      const beat = this.time * 1.2, cur = Math.floor(beat) % 3, ph = beat - Math.floor(beat);
-      const things = [{ kind: 'bell', color: 'red' }, { kind: 'plate', shape: 'star', color: 'yellow' }, { kind: 'bell', color: 'blue' }];
-      const kick = [0, 0, 0]; kick[cur] = 0.25 * Math.exp(-ph * 2.5) * Math.sin(ph * 9);
-      const sz = portrait ? 96 : 100;
-      this._miniRow(x0, x1, by, things, sz, { ground: gy, cords: [70, 110, 80], kick, ring: i => (i === cur ? Math.max(0, 1 - ph * 1.3) : 0),
-        lanterns: ['red', 'yellow', undefined, undefined] });
+      const beat = this.time * 1.6, cur = Math.floor(beat) % 3, ph = beat - Math.floor(beat);
+      const things = [{ kind: 'drum', color: 'red' }, { kind: 'shape', shape: 'star', color: 'yellow' }, { kind: 'drum', color: 'blue' }];
+      const sz = portrait ? 104 : 100;
+      this._miniRow(x0, x1, by, things, sz, { hit: i => (i === cur ? ph : 0), ring: i => (i === cur ? Math.max(0, 1 - ph * 1.3) : 0),
+        lanterns: portrait ? null : ['red', 'yellow', undefined, undefined], garlandY: by - sz * 2.3 });
     }
-    /* ---------- session done: Bibi dances by the fire under a garland of every lantern lit this session ---------- */
+    /* ---------- session done: Bibi dances under a string of every star lantern lit this session ---------- */
     _doneScene(w, o) {
       const W = this.W, H = this.H, t = this.time, L = this._L, ins = L.ins || {}, portrait = H > W, gy = L.groundY, C = CA(), g = this.g;
       this._galleryT += o.dt || 0;
       const panel = o.boxes && o.boxes.done;
-      if (C && L.fire) { try { C.drawFire(g, L.fire, { t, glow: 1 }); } catch (e) { /* skip */ } }
+      const rb = Math.min(W * 0.9, 900);
+      g.save(); g.globalAlpha = clamp(this._galleryT / 1.2, 0, 1) * 0.8; this._img('rainbow', W / 2 - rb / 2, gy - rb * 0.62, rb, rb / 2); g.restore();
+      if (C && L.cymbal) { try { C.drawCymbal(g, L.cymbal, { tilt: Math.sin(t * 6) * 0.08, ring: Math.max(0, Math.sin(t * 3)), night: this._night, t }); } catch (e) { /* skip */ } }
       this._bibi({ hop: Math.max(0, Math.sin(t * 5)) * 0.6 }, L.bibi, { frame: Math.sin(t * 3) > 0 ? 'bibi_dance' : 'bibi_cheer' });
-      // the lantern colours of the session (one per lit note), up to 12, light up one by one along a long garland
       const cols = [];
       for (const s of this.gallery) for (const c of s.colors || []) cols.push(c || null);
       const list = cols.slice(-12); if (!list.length) list.push('red', 'yellow', 'blue');
@@ -398,16 +407,16 @@
       const bw = Math.min(620, W - 80), bh = 170, cx = W / 2, cy = H * (H > W ? 0.4 : 0.42);
       g.save(); g.translate(cx, cy); g.scale(s, s); g.globalAlpha = clamp(k * 1.5, 0, 1);
       g.fillStyle = 'rgba(50,35,25,.28)'; g.beginPath(); roundRect(g, -bw / 2, -bh / 2 + 8, bw, bh, 34); g.fill();
-      g.fillStyle = '#A87245'; g.beginPath(); roundRect(g, -bw / 2 - 10, -bh / 2 - 10, bw + 20, bh + 20, 40); g.fill();
-      g.lineWidth = 3; g.strokeStyle = '#6E4526'; g.stroke();
+      g.fillStyle = '#B9A6E0'; g.beginPath(); roundRect(g, -bw / 2 - 10, -bh / 2 - 10, bw + 20, bh + 20, 40); g.fill();
+      g.lineWidth = 3; g.strokeStyle = '#7C6BB0'; g.stroke();
       g.fillStyle = '#FFF9EE'; g.beginPath(); roundRect(g, -bw / 2, -bh / 2, bw, bh, 30); g.fill();
-      g.lineWidth = 3; g.strokeStyle = '#D29A66'; g.stroke();
+      g.lineWidth = 3; g.strokeStyle = '#D9CFF0'; g.stroke();
       const I = CD.I18N, lang = this.lang;
       if (w.state === 'intro') {
         const top = I ? I.t(lang, 'ui.chapter', { n: (w.level | 0) + 1 }) : 'Chapter ' + ((w.level | 0) + 1);
         const name = I ? I.t(lang, 'topic.' + w.topic) : w.topic;
-        outlinedText(g, top, 0, -bh * 0.22, 30, '#7D6A4A', null, bw - 60);
-        outlinedText(g, name, 0, bh * 0.14, 58, '#6E4526', '#ffffff', bw - 60);
+        outlinedText(g, top, 0, -bh * 0.22, 30, '#7A6E99', null, bw - 60);
+        outlinedText(g, name, 0, bh * 0.14, 58, '#5B4E8C', '#ffffff', bw - 60);
       } else {
         const s1 = I ? I.t(lang, 'ui.stars') : 'Stars';
         outlinedText(g, s1, 0, -bh * 0.24, 34, '#7D6A4A', null, bw - 60);

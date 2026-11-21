@@ -79,7 +79,7 @@ const INIT = () => {
       void v;
       return cands.length ? cands[Math.floor(cands.length / 2)] : null;
     },
-    hang() { return CD.debug.world.drums.filter(c => c.state === 'hang'); },
+    hang() { return CD.debug.world.drums.filter(c => c.state === 'stand'); },
     // a CSS-px point on drum id's RIM (between its core and its hit circle), not on any other drum, on the bare canvas
     rimPoint(id) {
       const w = CD.debug.world, c = w.drumById(id), rc = w._coreR(c), rh = w._hitR(c), d = (rc + rh) / 2;
@@ -182,7 +182,7 @@ async function setupRound(page, url, { topic = 'colors', age = 4, seed = 3, lang
 }
 async function waitAsk(page, timeout = 20000) {
   await page.evaluate(() => CD.debug.setSpeed(4));
-  await page.waitForFunction(() => { const w = CD.debug.world, a = CD.debug.answer(); return w.interactive && a && a.drum != null && w.drums.every(c => c.state === 'hang'); }, null, { timeout, polling: 'raf' });
+  await page.waitForFunction(() => { const w = CD.debug.world, a = CD.debug.answer(); return w.interactive && a && a.drum != null && w.drums.every(c => c.state === 'stand'); }, null, { timeout, polling: 'raf' });
   await page.evaluate(() => CD.debug.setSpeed(1));
   await page.waitForTimeout(350);   // the drums settle a little (breeze only)
 }
@@ -197,7 +197,7 @@ async function botToNextRound(page, timeout = 60000) {
 async function info(page) {
   return page.evaluate(() => {
     const w = CD.debug.world, a = CD.debug.answer();
-    const hang = w.drums.filter(c => c.state === 'hang');
+    const hang = w.drums.filter(c => c.state === 'stand');
     const others = hang.filter(c => c.id !== a.drum && !c.done).map(c => ({ id: c.id, at: CD.debug.drumScreen(c.id) }));
     return { a: a.drum, at: CD.debug.drumScreen(a.drum), others, all: hang.map(c => ({ id: c.id, at: CD.debug.drumScreen(c.id), done: c.done })), misses: w.misses };
   });
@@ -301,7 +301,7 @@ T.swipe_from_sky = async ({ page, cdp, url, d }) => {
   await setupRound(page, url, { seed: 5 });
   const s = await page.evaluate(() => {
     const w = CD.debug.world, L = w.layout, y = w._drumMidY ? w._drumMidY() : L.beam.hookY + 120;
-    const hang = w.drums.filter(c => c.state === 'hang').sort((a, b) => a.cx - b.cx);
+    const hang = w.drums.filter(c => c.state === 'stand').sort((a, b) => a.cx - b.cx);
     // start left of the leftmost drum's circle on empty sky (not Bibi), end right of the rightmost
     const first = hang[0], lastC = hang[hang.length - 1];
     let x0 = first.cx - w._hitR(first) - 30;
@@ -457,7 +457,7 @@ T.song_swipe = async ({ page, cdp, url, d }) => {
   check(await finishRoundByTaps(cdp, page), 'round not finished');
   await page.waitForFunction(() => { const a = CD.debug.answer(); return a && a.song; }, null, { timeout: 8000 });
   await page.waitForTimeout(500);
-  const B = await page.evaluate(() => { const w = CD.debug.world, y = w._drumMidY(); const b = w.layout.beam; return { a: CD.debug.toScreen(b.x0 + 6, y), b: CD.debug.toScreen(b.x1 - 6, y), n: w.drums.filter(c => c.state === 'hang').length }; });
+  const B = await page.evaluate(() => { const w = CD.debug.world, y = w._drumMidY(); const b = w.layout.beam; return { a: CD.debug.toScreen(b.x0 + 6, y), b: CD.debug.toScreen(b.x1 - 6, y), n: w.drums.filter(c => c.state === 'stand').length }; });
   const n0 = await evLen(page);
   await swipe(cdp, page, B.a, B.b, { n: 20, ms: 500 });
   await page.waitForTimeout(400 + 160 * B.n + 900);
@@ -684,7 +684,7 @@ async function surpriseTest({ page, cdp, url, d }, kind, level) {
   // never blocks a drum: every drum centre still strikes the drum, and the surprise circle is clear of drum centres
   const chk = await page.evaluate(f => {
     const w = CD.debug.world, s = CD.debug[f](), v = CD.debug.view(), bad = [];
-    for (const c of w.drums.filter(c => c.state === 'hang')) {
+    for (const c of w.drums.filter(c => c.state === 'stand')) {
       if (w._drumAt(c.cx, c.cy) !== c) bad.push('drum ' + c.id + ' not hit at its centre');
       const sc = CD.debug.toScreen(c.cx, c.cy);
       if (Math.hypot(sc.x - s.x, sc.y - s.y) < s.r) bad.push('drum ' + c.id + ' centre inside the ' + f + ' circle');

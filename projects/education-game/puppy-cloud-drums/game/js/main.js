@@ -37,7 +37,7 @@
   const stats = { sessions: 0, rounds: 0, rings: 0, brushes: 0, correct: 0, wrong: 0, soft: 0, hints: 0, assists: 0, counts: 0,
     lanterns: 0, songs: 0, songAuto: 0, talks: 0, talkRight: 0, lambTaps: 0, birdTaps: 0, fireflyTaps: 0, frames: 0, slowFrames: 0 };
   const eventLog = [];             // the last 300 world events (type + id), for the e2e tests
-  let promptUntil = 0, lastWrongSay = -1e9, idleSaid = 0, shownStars = 0, lastPraise = -1e9, lastPopSay = -1e9;   // -1e9: never rate-limited at load
+  let promptUntil = 0, lastWrongSay = -1e9, idleSaid = 0, shownStars = 0, lastPraise = -1e9, lastPopSay = -1e9, lastCymbalSay = -1e9;   // -1e9: never rate-limited at load
   let lastNamed = { id: null, t: -1e9 };
 
   /* ---------- sizing ---------- */
@@ -86,13 +86,13 @@
     c.style.left = view.left + 'px'; c.style.top = view.top + 'px';
     render.resize(view.W, view.H, rs);
     world.tapMoveMin = Math.max(24, 18 / view.s);   // ≈ 18 pt of finger wobble is still a tap on small phones
-    world.setViewport(view.W, view.H, view.ins);    // beam, hooks, garland and Bibi re-laid
+    world.setViewport(view.W, view.H, view.ins);    // pads, garland, cymbal and Bibi re-laid
     placeBubble();
     world.hudKeep = measureHud();                   // the real HUD (CSS px) may reach lower than the logical keep-out
     world.setViewport(view.W, view.H, view.ins);
     weather.resize(view.W, view.H, world.layout && world.layout.groundY);
-    const F = world.layout && world.layout.fire;
-    if (F && weather.fireAt) weather.fireAt(F.x, F.y - 30 * (F.s || 1));   // embers rise from the campfire
+    const F = world.layout && world.layout.cymbal;
+    if (F && weather.fireAt) weather.fireAt(F.x, F.y - (F.h || 140));   // warm puffs rise from beside the cymbal
     placeBubble();
     updateHudStarTarget();
   }
@@ -265,7 +265,7 @@
       case 'ring': {   // every strike: the drum's own note (a brush softer, a wrong one dull — its bonk comes with `wrong`)
         stats.rings++; if (e.brush) stats.brushes++;
         const th = e.thing || (drumOf(e.id) || {}).thing || {};
-        if (!e.dull) CD.Audio.play('drum', { note: e.note, kind: th.kind, strength: e.strength || 1, brush: !!e.brush });
+        if (!e.dull) CD.Audio.play('drum', { note: e.note, kind: th.kind, animal: th.animal, strength: e.strength || 1, brush: !!e.brush });
         if (!e.brush && !e.dull) render.burst('ring', e.x, e.y, { size: 150, rgb: '255,240,190', life: 0.5 });
         break;
       }
@@ -277,18 +277,53 @@
         if (weather.burst) weather.burst(e.x, e.y, { kind: 'notes', n: 4 });
         bibiMood('happy', 1.0);
         const txt = line('sayRight', ev2(e), 'praise');
-        const isCount = !!e.count || th.kind === 'string';
-        speak(txt, { interrupt: !isCount || canInterrupt() });
-        // a count run ("One, two, three bells!") is the most important line of the round: nothing may cut it
-        if (isCount) promptUntil = performance.now() + 900 + 600 * ((e.count && e.count.n) || th.n || 1);
-        else protect(txt);
+        if (e.beat) {   // follows the child's last beat ("Three! You beat it three times!"): always interrupts
+          speak(txt, { interrupt: true }); protect(txt);
+        } else {
+          const isCount = !!e.count;
+          speak(txt, { interrupt: !isCount || canInterrupt() });
+          // a count run ("One, two, three dots!") is the most important line of the round: nothing may cut it
+          if (isCount) promptUntil = performance.now() + 900 + 600 * ((e.count && e.count.n) || th.n || 1);
+          else protect(txt);
+        }
         CD.Audio.play('noteFly');
         break;
       }
-      case 'count': {   // a little bell / dot lights: a jingle + the numeral (the words are the right line's run)
+      case 'count': {   // beat mode: one beat counted ("Two!"); dots: a dot lights (the words are the right line's run)
         stats.counts++;
-        CD.Audio.play('jingle', { i: e.i });
-        render.burst('count', e.x, e.y - 30, { n: e.i });
+        if (e.beat) {
+          bibiMood(e.i % 2 ? 'beat' : 'idle', 0.25);
+          const cd = world.card;
+          render.burst('count', cd ? cd.x : e.x, cd ? cd.y - (cd.h || 140) * 0.5 - 20 : e.y - 60, { n: e.i });
+          if (e.i < e.n) {
+            const txt = line('sayCount', e.i, '') || String(e.i);
+            promptUntil = 0; pendingPrompt = null;
+            speak(txt, { interrupt: true });
+          }
+        } else {
+          CD.Audio.play('jingle', { i: e.i });
+          render.burst('count', e.x, e.y - 30, { n: e.i });
+        }
+        break;
+      }
+      case 'beatNudge':
+        if (++idleSaid <= 4) speak(line('sayBeatNudge', e, 'idle'));
+        else if (idleSaid >= 5 && !bot) pause();
+        break;
+      case 'land':
+        CD.Audio.play('poof', { v: e.v || 1 });
+        if ((e.v || 1) > 3) render.burst('puff', e.x, e.y, { n: 5, color: '#FFFFFF' });
+        break;
+      case 'cymbal':
+        CD.Audio.play('crash');
+        bibiMood('cheer', 1.2);
+        render.burst('sparkles', e.x, e.y, { n: 18 });
+        render.burst('ring', e.x, e.y, { size: 200, rgb: '255,236,170', life: 0.6 });
+        break;
+      case 'cymbalTap': {
+        CD.Audio.play('crash', { soft: true });
+        const now = performance.now();
+        if (now - lastCymbalSay > 8000 && !speaking() && canInterrupt()) { lastCymbalSay = now; speak(T('cymbal.tap')); }
         break;
       }
       case 'lantern': {
@@ -307,7 +342,7 @@
         if (now - lastWrongSay > 1500) { lastWrongSay = now; const wt = line('sayWrong', ev2(Object.assign({}, e, { thing: c && c.thing })), 'hint'); feedback(wt); protect(wt); }
         break;
       }
-      case 'soft': stats.soft++; CD.Audio.play('beam'); break;
+      case 'soft': stats.soft++; CD.Audio.play('soft'); break;
       case 'hint': {
         stats.hints++;
         CD.Audio.play('hint');
@@ -331,8 +366,8 @@
         break;
       }
       case 'roundDone': {
-        const n = e.stars || 1, B = world.layout && world.layout.beam;
-        const fx = B ? (B.x0 + B.x1) / 2 : view.W / 2, fy = B ? B.y - 40 : view.H * 0.3;
+        const n = e.stars || 1, B = world.layout && world.layout.stage, G = world.layout && world.layout.garland;
+        const fx = B ? (B.x0 + B.x1) / 2 : view.W / 2, fy = G ? G.y + 70 : view.H * 0.3;
         CD.Audio.play('complete');
         for (let i = 0; i < n; i++) {
           render.burst('star', fx + (i - (n - 1) / 2) * 70, fy, { delay: 0.15 + i * 0.22, onDone: () => { shownStars++; CD.UI.setStars(shownStars, true); CD.Audio.play('star', { i }); } });
@@ -351,9 +386,10 @@
         break;
       }
       case 'songNote': {
-        if (e.i === 0) { stats.songs++; CD.Audio.setSong(true); CD.Audio.play('strum'); bibiMood('dance', 3); }
+        if (e.i === 0) { stats.songs++; CD.Audio.setSong(true); }
+        bibiMood(e.i % 2 ? 'idle' : 'beat', 0.17);
         const c = drumOf(e.id);
-        CD.Audio.play('drum', { note: e.note, kind: c && c.thing && c.thing.kind, strength: 1.1 });
+        CD.Audio.play('drum', { note: e.note, kind: c && c.thing && c.thing.kind, strength: 1.1 });   // no animal voices in the song wave
         render.burst('note', e.x, e.y - 40, { color: c && c.thing && c.thing.color });
         break;
       }
@@ -365,12 +401,12 @@
       }
       case 'drumsOut': CD.Audio.play('out'); break;
       case 'lamb':
-        CD.Audio.play('sniff');
+        CD.Audio.play('baa');
         if (canInterrupt()) speak(T('surprise.lamb'));
         break;
       case 'lambTap':
         stats.lambTaps++;
-        CD.Audio.play('roll');
+        CD.Audio.play('boing');
         if (weather.burst) weather.burst(e.x, e.y, { kind: 'dust', n: 6 });
         if (canInterrupt()) speak(T('lamb.tap'), { interrupt: true });
         break;
@@ -391,7 +427,7 @@
       case 'fireflyTap': {
         stats.fireflyTaps++;
         CD.Audio.play('twinkle');
-        render.burst('sparkles', e.x, e.y, { n: 8, color: '#E9F59A' });
+        render.burst('sparkles', e.x, e.y, { n: 8, color: '#FFF3B0' });
         const now = performance.now();
         if (now - lastPopSay > 2000 && canInterrupt()) { lastPopSay = now; speak(T('firefly.tap'), { interrupt: true }); }
         break;
@@ -612,7 +648,7 @@
       getState() {
         const s = world.stepInfo;
         return { mode, state: world.state, phase: world.phase, level: world.level, topic: world.topic, round: world.round, step: world.step,
-          stepMode: s ? s.mode : null, stars: world.stars, misses: world.misses,
+          stepMode: s ? s.mode : null, card: world.card ? { n: world.card.n, lit: world.card.lit } : null, stars: world.stars, misses: world.misses,
           drums: (world.drums || []).map(c => ({ id: c.id, state: c.state, done: !!c.done, target: !!c.target, kind: c.thing && c.thing.kind })),
           lanterns: (world.lanterns || []).map(l => +(l.lit || 0).toFixed(2)),
           surprise: world.cur && world.cur.surprise, songs: (world.songs || []).length,
@@ -625,7 +661,9 @@
       gotoLevel(i) { world.startLevel(i); },
       view: () => view, render: () => render,
       drumScreen(id) { return circ(world.drumHit ? world.drumHit(id) : null); },
-      beamScreen() { const B = world.layout && world.layout.beam; if (!B) return null; const p0 = pt({ x: B.x0, y: B.y }), p1 = pt({ x: B.x1, y: B.y }); return { x0: p0.x, x1: p1.x, y: p0.y }; },
+      stageScreen() { const B = world.layout && world.layout.stage; if (!B) return null; const p0 = pt({ x: B.x0, y: B.y }), p1 = pt({ x: B.x1, y: B.y }); return { x0: p0.x, x1: p1.x, y: p0.y }; },
+      cymbalScreen() { const k = world.cymbalHit ? world.cymbalHit() : null; return k ? { x: view.left + k.cx * view.s, y: view.top + k.cy * view.s, w: k.w * view.s, h: k.h * view.s } : null; },
+      cardScreen() { const c = world.card; return c ? box({ x: c.x - (c.w || 100) / 2, y: c.y - (c.h || 140) / 2, w: c.w || 100, h: c.h || 140 }) : null; },
       bandScreen() { return box(world.layout && world.layout.band); },
       bibiScreen() { const k = world.bibiHit ? world.bibiHit() : null; return k ? { x: view.left + (k.cx != null ? k.cx : k.x + k.w / 2) * view.s, y: view.top + (k.cy != null ? k.cy : k.y + k.h / 2) * view.s, w: k.w * view.s, h: k.h * view.s } : null; },   // centre x, y + w, h
       lambScreen() { return circ(world.lambHit ? world.lambHit() : null); },

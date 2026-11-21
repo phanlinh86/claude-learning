@@ -1,13 +1,13 @@
 /* Bibi's Cloud Drums — mobile-first shell (iPhone / iPad Safari, portrait + landscape). Camp palette: warm log-wood rims
  * (the drum beam), cocoa ink, cream panels (answer colours stay for the drums only). */
 :root {
-  --ink: #4a3624;
+  --ink: #3f3a5e;
   --cream: #fbfdff;
   --green: #45b864; --green-d: #2a8343;
   --orange: #ff9a2e; --orange-d: #c4650c;
   --blue: #3c8de8; --blue-d: #1f5ba8;
-  --sky: #FDF3E1;
-  --rim: #D29A66; --rim-d: #A87245; --deep: #6E4526; --foam: #FFF6E4;
+  --sky: #FFF1E4;
+  --rim: #B9A6E0; --rim-d: #8E7CC4; --deep: #4F4486; --foam: #FBF7FF;
   --sa-t: env(safe-area-inset-top, 0px); --sa-r: env(safe-area-inset-right, 0px);
   --sa-b: env(safe-area-inset-bottom, 0px); --sa-l: env(safe-area-inset-left, 0px);
   --u: min(1vw, 1vh);            /* 1 % of the short side */
@@ -83,7 +83,7 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 .chip.on { background: var(--blue); color: #fff; box-shadow: 0 3px 0 var(--blue-d); }
 
 .gear-btn { position: relative; width: 60px; height: 60px; border-radius: 50%; background: rgba(255, 255, 255, .7); display: grid; place-items: center; }
-.gear-btn .gear { width: 30px; fill: #7a5a38; }
+.gear-btn .gear { width: 30px; fill: #6a5f9a; }
 .gear-btn .ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
 .gear-btn .ring circle { fill: none; stroke: var(--orange); stroke-width: 5; stroke-linecap: round;
   stroke-dasharray: 132; stroke-dashoffset: calc(132 * (1 - var(--p, 0))); }
@@ -126,7 +126,7 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 .hud-dots i.now { background: #fff; box-shadow: 0 0 0 3px #ffc531 inset; }
 .icon-btn { width: 56px; height: 56px; border-radius: 50%; background: rgba(255, 255, 255, .85); display: grid; place-items: center;
   box-shadow: 0 3px 0 rgba(0, 0, 0, .12); }
-.icon-btn svg { width: 26px; fill: #6b4a2c; }
+.icon-btn svg { width: 26px; fill: #5a5088; }
 
 /* ---------- speech bubble ---------- */
 .bubble { position: absolute; z-index: 4; display: flex; align-items: center; background: #fff; border-radius: 26px;

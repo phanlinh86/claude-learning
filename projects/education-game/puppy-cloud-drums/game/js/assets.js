@@ -1,16 +1,16 @@
 /* CD.Assets (Bibi's Cloud Drums) — loads the SVG art and keeps pre-rasterized copies so drawing stays fast on phones.
  * sprite(name, px) returns a canvas whose longest side is ≥ px device pixels (rounded up to a size
  * bucket, so a handful of bitmaps serve every zoom level). exact(name, w, h) = one exact-size raster (tiled env layers).
- * Drums, the beam, lanterns, the fire and the hint hand are canvas code (drum_art.js), not files. */
+ * Drums, cushions, the star lanterns, the cymbal, the beat card and the hint hand are canvas code (drum_art.js), not files. */
 (function (CD) {
   'use strict';
   const D = 'assets/default/';
   const files = {};
-  ['idle', 'blink', 'talk', 'happy', 'cheer', 'think', 'oops', 'wave', 'point', 'dance', 'full_wave'].forEach(f => { files['bibi_' + f] = D + 'characters/bibi_' + f + '.svg'; });
+  ['idle', 'blink', 'talk', 'happy', 'cheer', 'think', 'oops', 'wave', 'point', 'dance', 'beat', 'full_wave'].forEach(f => { files['bibi_' + f] = D + 'characters/bibi_' + f + '.svg'; });
   ['lamb', 'lamb_ball', 'bird', 'bird_sing'].forEach(f => { files[f] = D + 'characters/' + f + '.svg'; });
   files.star = D + 'ui/star.svg'; files.star_empty = D + 'ui/star_empty.svg'; files.icon = D + 'icon.svg';
   ['morning', 'noon', 'sunset', 'night'].forEach(m => ['far', 'mid', 'ground'].forEach(l => { files[l + '_' + m] = D + 'env/' + l + '_' + m + '.svg'; }));
-  ['sun', 'moon', 'cloud_a', 'cloud_b'].forEach(f => { files[f] = D + 'env/' + f + '.svg'; });
+  ['sun', 'moon', 'cloud_a', 'cloud_b', 'rainbow'].forEach(f => { files[f] = D + 'env/' + f + '.svg'; });
   // particles (Weather sprite names); the weather's 'star' sprite is stored as 'pstar' (the HUD star is 'star')
   ['mist', 'mote', 'sparkle', 'star', 'ember', 'firefly', 'leaf', 'butterfly', 'confetti_a', 'confetti_b', 'dot', 'dust', 'note']
     .forEach(p => { files[p === 'star' ? 'pstar' : p] = D + 'particles/' + p + '.svg'; });

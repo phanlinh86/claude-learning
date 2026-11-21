@@ -1,13 +1,13 @@
 {
-  "name": "Bibi's Cloud Drums · Chuông Gió Lửa Trại Của Khỉ Bibi",
+  "name": "Bibi's Cloud Drums · Trống Mây Của Cún Bibi",
   "short_name": "Cloud Drums",
-  "description": "Music learning game with Bibi the little monkey: tap the wind drum Bibi asks for — it swings, rings and lights a lantern. Colours, shapes, counting, animals, letters. English & Vietnamese.",
+  "description": "Music learning game with Bibi the puppy: boom the cloud drum Bibi asks for — it bounces and lights a star lantern. Colours, shapes, counting beats, singing animals, letters. English & Vietnamese.",
   "start_url": "./",
   "scope": "./",
   "display": "fullscreen",
   "orientation": "any",
-  "background_color": "#F7D9C4",
-  "theme_color": "#F7D9C4",
+  "background_color": "#FAD6E0",
+  "theme_color": "#FAD6E0",
   "icons": [
     {
       "src": "assets/icons/icon-192.png",
