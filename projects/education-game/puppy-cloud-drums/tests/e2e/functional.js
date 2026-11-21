@@ -183,11 +183,14 @@ async function setupRound(page, url, { topic = 'colors', age = 4, seed = 3, lang
   }, [topic, level, prep]);
   await waitAsk(page);
 }
-async function waitAsk(page, timeout = 20000) {
+async function waitAsk(page, timeout = 20000, { listen = true } = {}) {
   await page.evaluate(() => CD.debug.setSpeed(4));
   await page.waitForFunction(() => { const w = CD.debug.world, a = CD.debug.answer(); return w.interactive && a && a.drum != null && w.drums.every(c => c.state === 'stand'); }, null, { timeout, polling: 'raf' });
   await page.evaluate(() => CD.debug.setSpeed(1));
-  await page.waitForTimeout(350);   // the drums settle a little (breeze only)
+  if (!listen) return;   // beat mode: the caller wants to touch inside the beatListen window
+  await page.waitForTimeout(350);   // the drums settle a little
+  // beat mode: beats in the first CONFIG.beatListen s after the ask only boom (the child hears the number first)
+  await page.waitForFunction(() => { const w = CD.debug.world, B = w._beat; return !B || !w.stepInfo || w.stepInfo.mode !== 'beat' || w.time - B.askT >= CD.CONFIG.beatListen + 0.02; }, null, { timeout: 5000, polling: 'raf' });
 }
 /** finish the current round with the bot (fast), stop the bot at the next round's first ask */
 async function botToNextRound(page, timeout = 60000) {
@@ -441,7 +444,7 @@ T.assist_young = async ({ page, cdp, url }) => {
 T.beat_count = async ({ page, cdp, url, d }) => {
   // age 4 count = beat mode: ONE big drum + a number card; every real tap ≥ 0.2 s after the last counted one is a beat
   await setupRound(page, url, { topic: 'count', age: 4, seed: 8 });
-  let doubled = false, fastChecked = 0;
+  let doubled = false, fastChecked = 0, listenChecked = false;
   for (let rr = 0; rr < 2; rr++) {   // the warm-up round (n = 1, 2), then a full one (3 steps, one n ≥ 3)
   if (rr > 0) await waitAsk(page, 30000);
   const st0 = await page.evaluate(() => { const w = CD.debug.world, live = w.drums.filter(c => c.state !== 'gone'); return { mode: w.stepInfo.mode, need: w.stepInfo.need, kind: live[0].thing.kind, n: live.length, steps: w.cur.steps.map(s => s.need), card: w.card ? { n: w.card.n, lit: w.card.lit } : null, round: w.round }; });
@@ -458,7 +461,20 @@ T.beat_count = async ({ page, cdp, url, d }) => {
   }
   let evs;
   for (let si = 0; si < st0.steps.length; si++) {
-    if (si > 0) await waitAsk(page);
+    if (si > 0) {
+      if (rr === 0 && si === 1) {   // a beat inside CONFIG.beatListen after the ask booms (ring brush beat) but does not count
+        await waitAsk(page, 20000, { listen: false });
+        const e0 = await evLen(page);
+        const q = await page.evaluate(() => { const w = CD.debug.world; return { at: CD.debug.drumScreen(CD.debug.answer().drum), since: w.time - w._beat.askT, listen: CD.CONFIG.beatListen }; });
+        check(q.since < q.listen - 0.15, `could not tap inside beatListen (${q.since.toFixed(2)} s after the ask, window ${q.listen})`);
+        await tap(cdp, page, q.at, 50); await page.waitForTimeout(60);
+        const el = await evSince(page, e0), r = el.filter(e => e.type === 'ring' && e.beat);
+        const lt = await page.evaluate(() => ({ lit: CD.debug.world.card.lit, i: CD.debug.world._beat.i }));
+        check(r.length === 1 && r[0].brush && !r[0].judged && !el.some(e => e.type === 'count' || e.type === 'right' || e.type === 'wrong') && lt.lit === 0 && lt.i === 0, 'a beat inside beatListen counted / did not boom: ' + types(el) + ' ' + JSON.stringify(lt));
+        await page.waitForFunction(() => { const w = CD.debug.world; return w.time - w._beat.askT >= CD.CONFIG.beatListen + 0.02 && w.time - w._beat.lastT >= CD.CONFIG.beatGap; }, null, { timeout: 5000, polling: 'raf' });
+        listenChecked = true;
+      } else await waitAsk(page);
+    }
     const s = await page.evaluate(() => { const w = CD.debug.world; return { need: w.stepInfo.need, mode: w.stepInfo.mode, step: w.step, lit: w.card ? w.card.lit : null, cn: w.card ? w.card.n : null }; });
     check(s.mode === 'beat' && s.lit === 0 && s.cn === s.need, `step ${si} at its ask: ` + JSON.stringify(s));
     const e1 = await evLen(page);
@@ -527,6 +543,7 @@ T.beat_count = async ({ page, cdp, url, d }) => {
   check(se.filter(e => e.type === 'songNote').length === 3 && se.some(e => e.type === 'cymbal'), 'beat song: ' + types(se));
   }
   check(fastChecked >= 1, 'the too-fast double tap was never checked (every try landed ≥ 0.2 s apart)');
+  check(listenChecked, 'the beatListen window was never checked');
 };
 T.rotate_beat = async ({ page, cdp, url, d }) => {
   // beat mode across a rotation: the partial count survives, the big drum + card stay on screen (card above ↔ beside)
@@ -581,7 +598,8 @@ T.beat_nudge = async ({ page, cdp, url, d }) => {
   const log = await page.evaluate(n => CD.debug.voiceLog.slice(n).map(x => x.text), v0);
   const dt = nd._t - (await page.evaluate(n => { const c = window.__ev.slice(0, n).reverse().find(e => e.type === 'count'); return c ? c._t : 0; }, n0));
   check(nd.i === 1 && nd.n === need, 'beatNudge payload: ' + JSON.stringify(nd));
-  check(dt > 3.8 && dt < 4.4, `beatNudge ${dt.toFixed(2)} s after the beat (want 4)`);
+  const bn = await page.evaluate(() => CD.CONFIG.beatNudge);
+  check(dt > bn - 0.2 && dt < bn + 0.4, `beatNudge ${dt.toFixed(2)} s after the beat (want ${bn})`);
   check(!evs.some(e => e.type === 'idle'), 'a generic idle nudge during a partial count: ' + types(evs));
   check(log.length >= 1 && /one/i.test(log[log.length - 1]) && !RAW.test(log[log.length - 1]), 'beat nudge line: ' + JSON.stringify(log));
   check(await page.evaluate(() => CD.debug.world.card.lit) === 1, 'the nudge reset the card');
@@ -631,14 +649,15 @@ T.song_swipe = async ({ page, cdp, url, d }) => {
   check(notes.every((e, k) => e.i === k), 'cascade order: ' + notes.map(e => e.i).join(','));
   check(done && done.auto === false, 'songDone after a real swipe: ' + JSON.stringify(done));
   check(!evs.some(e => e.type === 'wrong'), 'wrong during song');
-  checkCymbal(evs);
+  await checkCymbal(page, evs);
 };
-function checkCymbal(evs) {
+async function checkCymbal(page, evs) {
+  const cd = await page.evaluate(() => CD.CONFIG.cymbalDelay);
   const notes = evs.filter(e => e.type === 'songNote'), cy = evs.filter(e => e.type === 'cymbal'), done = evs.find(e => e.type === 'songDone');
   check(cy.length === 1, 'cymbal events in the song: ' + cy.length + ' — ' + types(evs));
   const last = notes[notes.length - 1];
   check(last && cy[0]._t > last._t && (!done || done._t > cy[0]._t), 'cymbal not between the last song note and songDone: ' + types(evs));
-  check(Math.abs(cy[0]._t - last._t - 0.25) < 0.05, `cymbal ${(cy[0]._t - last._t).toFixed(3)} s after the last note (want 0.25)`);
+  check(Math.abs(cy[0]._t - last._t - cd) < 0.05, `cymbal ${(cy[0]._t - last._t).toFixed(3)} s after the last note (want CONFIG.cymbalDelay ${cd})`);
 }
 T.song_tap = async ({ page, cdp, url, d }) => {
   // a plain tap on any drum in song time starts the wave (the drum touched just booms; never judged)
@@ -657,7 +676,7 @@ T.song_tap = async ({ page, cdp, url, d }) => {
   check(xs.every((x, k) => k === 0 || x >= xs[k - 1] - 1), 'the wave is not left → right: ' + xs.map(Math.round).join(','));
   check(done && done.auto === false, 'songDone after a tap: ' + JSON.stringify(done));
   check(!evs.some(e => e.type === 'wrong' || e.type === 'right' || (e.type === 'ring' && e.judged)), 'a judged ring in song time: ' + types(evs));
-  checkCymbal(evs);
+  await checkCymbal(page, evs);
 };
 T.cymbal_tap = async ({ page, cdp, url, d }) => {
   // the cymbal beside Bibi: a tap is a soft crash (cymbalTap), never soft / progress / a miss
@@ -696,7 +715,7 @@ T.song_band_press = async ({ page, cdp, url, d }) => {
   check(notes.length === n, `band press in song time: songNotes ${notes.length} of ${n}: ` + types(evs));
   check(done && done.auto === false, 'songDone after a band press: ' + JSON.stringify(done));
   check(!evs.some(e => e.type === 'soft'), 'the band press was also a soft press: ' + types(evs));
-  checkCymbal(evs);
+  await checkCymbal(page, evs);
 };
 T.song_auto = async ({ page, cdp, url }) => {
   await setupRound(page, url, { seed: 10 });
@@ -707,9 +726,10 @@ T.song_auto = async ({ page, cdp, url }) => {
   const ask = evs.find(e => e.type === 'songAsk'), note = evs.find(e => e.type === 'songNote'), done = evs.find(e => e.type === 'songDone');
   check(ask && note, 'no songAsk / songNote: ' + types(evs));
   check(done.auto === true, 'songDone without a touch is not auto: ' + JSON.stringify(done));
-  checkCymbal(evs);
+  await checkCymbal(page, evs);
   const dt = note._t - ask._t;   // world seconds (a slow headless frame rate stretches wall time: dt is capped per frame)
-  check(dt > 3.8 && dt < 4.3, `auto cascade ${dt.toFixed(2)} s (world) after songAsk (want 4 s)`);
+  const sw = await page.evaluate(() => CD.CONFIG.songWait);
+  check(dt > sw - 0.2 && dt < sw + 0.3, `auto cascade ${dt.toFixed(2)} s (world) after songAsk (want CONFIG.songWait ${sw} s)`);
 };
 T.bibi_repeat = async ({ page, cdp, url }) => {
   await setupRound(page, url, { seed: 11 });

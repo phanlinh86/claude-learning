@@ -61,3 +61,9 @@ It still describes hanging chimes, pendulums, beam, posts and fire, "Bibi the li
 ### Notes (not game bugs)
 - Under the full parallel suite, headless iPhone @3 frames stretched to about 0.3 s. Two back-to-back CDP touches once landed 0.35 s apart in world time, so the double-tap check now retries on a later step and still requires at least one verified fast double. When idle, headless frames are 16.7 ms median (iPhone @3) and 33 ms (iPad landscape @2), which is software rendering.
 - The animal prompt variants are seeded. "Who says moo?" verbatim appeared on iPhone portrait; the other devices got "Listen: Moo! Where is the cow?". Both name the sound and the animal.
+
+## Re-run after the QA fixes (commit a4c9365)
+- **106 / 106 passed** (907 s), exit 0. The suite now reads its timings from `CD.CONFIG` instead of hard-coding them: `beatListen`, `beatGap`, `beatNudge`, `songWait` and `cymbalDelay`.
+- `waitAsk` waits out `beatListen` on beat steps. `beat_count` adds a check that a tap inside `beatListen` gives `ring{brush, beat}` with no `count`, `card.lit` stays 0 and `_beat.i` stays 0.
+- Age-3 bot sessions now get a surprise tap (fireflies 1 in EN and in VI; it was 0 before). That fits the "surprises stay through song/out" fix, so P2-1 looks addressed. Ages 6–7 still sometimes get 0 taps, but that comes from the bot's 0.6 tap chance.
+- No new game bugs were found.
