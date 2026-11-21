@@ -46,7 +46,7 @@ sessionDone`. During song and out the state is `roundDone`. `interactive` = stat
   `'bibi'` (poke on release) | `'cymbal'` (a soft crash) | `'soft'` (nothing / the stage / the sky) | `'early'` (enter, nothing
   under the finger) | null. Priority: **drum > surprises > Bibi > cymbal > soft**.
 - Hit test: circle at the body centre (current, hopped + tilted) r = 0.6 × size + hitPad (14; phones / tall screens hitPad grows
-  so the diameter is ≥ 184 logical ≈ 100 css px, `layout.hitPad`) **plus the cushion box** (`padX ± cushionW/2`, `padY … padY +
+  so the diameter is ≥ 200 logical — **per drum, the small one too** (`layout.hitMin` 100) ≥ 100 css px even on a 360 px tall phone) **plus the cushion box** (`padX ± cushionW/2`, `padY … padY +
   cushionH`, + 6 px); nearest body centre wins. The **core** r = 0.42 × size + 8 is judged at once.
 - Strike direction: finger left of the body centre → the drum leans right (`dir = +1`), i.e. away from the finger. A slide uses
   the finger's horizontal direction. Strength: tap 1; swipe `clamp(speed / swipeRef 900, 0.6, 1.6)`; rate-limited 0.18 s per drum.
@@ -110,7 +110,7 @@ w.hintHand {x, y (fingertip, +_px _py), press 0..1, alpha, mode 'tap'|'swipe', i
 ## 4. Layout (DESIGN §2) — `computeLayout(W, H, ins, cfg, age, hudKeep, n, kMax, beat)`
 - Bubble / HUD as before (landscape 24, 18, ≤ 560 × 134; portrait full width at ins.top + 110, h 124; a measured HUD narrows /
   pushes the bubble). Bibi: landscape x = ins.left + 118, h 230; portrait x = ins.left + 104, h 200 (230 tall); feet y = groundY − 4.
-- **Cymbal**: landscape x = bibi.x + 150, s 1; portrait x = W − ins.right − 120, s 0.9; y = groundY − 6; box 120 × 140 × s.
+- **Cymbal**: landscape x = bibi.x + 180 (clear of Bibi's stick), s 1; portrait x = W − ins.right − 120, s 1.1; y = groundY − 6; box 120 × 140 × s.
 - **Stage**: landscape x0 = ins.left + 250, x1 = W − ins.right − 40; portrait x0 = ins.left + 36, x1 = W − ins.right − 36.
 - **Garland** (no posts): x0 = ins.left + 60, x1 = W − ins.right − 60, y = max(bubble bottom, top keep boxes) + 46 (landscape) / + 84
   (portrait: the perched bird stays clear of the bubble; a very short portrait falls back to + 46), sag 22. `lanternBottom` = y + 22
@@ -121,15 +121,19 @@ w.hintHand {x, y (fingertip, +_px _py), press 0..1, alpha, mode 'tap'|'swipe', i
 - **Sized per round** for its real drum count n and its biggest size factor kMax (the size topic's big drum 1.25; between rounds
   maxDrums[age], 1). u = kMax × item, foot = 1.25 u. Tiers (first that fits): zig-zag (portrait, n ≥ 3, item = min(cap, usable /
   (kMax (0.95 (n − 1) + 1.25))) when ≥ 8 px bigger than the row) → row item = min(cap, usable / (kMax (1.3 (n − 1) + 1.25))) →
-  itemMin at 1.3 → itemMin at 1.18 → (odd viewports only) squeezed. cap = itemCap 150 on phones / tall, else the age's item
+  itemMin at 1.3 → itemMin at 1.18 → (odd viewports only) squeezed. cap = itemCapTall 170 then itemCap 150 on tall portrait, 150 on phones, else the age's item
   (112 / 112 / 112 / 104 / 104). A tier fits when the span ≤ usable and the vertical band [highest pad whose hit circle stays below
   topLimit … lowest pad whose cushion stays above the floor] holds the stagger (±28; else one height, `layout.tight`) or the zig-zag.
+- **Drum cap**: ages ≥ 5 on phones / tall portrait screens get ≤ 4 drums (`phoneMaxDrums`, passed to `makeRound({maxDrums})`; dots and
+  letters stay big). A rotation mid-round keeps the round's drums (5 still fit in a zig-zag).
+- **Portrait centring**: the band (row / zig-zag / beat drum + card) is centred between `lanternBottom` and the floor, clamped to the
+  allowed pad range (QA visual P2-7). Size rounds (kMax > 1) never zig-zag and stand on **one line** (`pads[i].flat`).
 - **Pads** (`padsFor`): centred on the stage, spacing clamp((usable − foot) / (n − 1), spK·u, 1.7 u) (zig ≤ 1.3 u); heights from the
   round seed: row = base ± 28 with neighbours ≥ 24 apart; zig-zag = alternate high / low rows 1.35 u + 56 apart (± 8 jitter) so a
   hopping low drum never touches the high neighbour's cushion; then clipped per drum to its own [lo, hi] (`pads[i].clipped`).
-- **Beat mode** (n = 1, `beat`): the big drum `size = round(item × 1.45)`. The card goes **above** the drum (card bottom = drum top −
-  hopMax 30 − 12, card top ≥ lanternBottom + 8) if that fits with a drum ≥ 1.3 × item (the card may shrink 140 → 110); otherwise the
-  card goes **beside** it (right, 30 px gap, card centre at the body centre; the pair is centred on the stage; the drum shrinks
+- **Beat mode** (n = 1, `beat`): the big drum `size = round(item × 1.45)`. The card (h 140; **170 on phones / tall**) goes **above**
+  the drum (card bottom = drum top − hopMax 30 − the sound rings 0.3 × size − cardGap 24, card top ≥ lanternBottom + 8) if that fits with
+  a drum ≥ 1.3 × item (the card may shrink to 110); otherwise the card goes **beside** it (right, gap 30 + 0.15 × size, card centre at the body centre; the pair is centred on the stage; the drum shrinks
   only as needed, never below item).
 - Results: iPad 1180×820 112 for ≤ 5 drums (hit Ø 185 css), beat 162 + card beside; iPad 820×1180 112 (≤ 4), 104 / 100 for 5,
   beat 146 + card above (110); iPhone 393×852 150 (82 css, hit Ø 114 css) for 2–3 in a row and 4 in a zig-zag, 128 (hit Ø 100 css)
@@ -156,17 +160,21 @@ w.hintHand {x, y (fingertip, +_px _py), press 0..1, alpha, mode 'tap'|'swipe', i
   lantern lights (rate 3 /s), flashes 0.6 s and swings (spring ω 5, ζ 0.12, kick 0.22 rad). A right **dots** drum then lights its
   dots 1..n, 0.5 s apart (`count`, a little skin ripple + tilt each); the next ask waits for that run.
 - **Beat mode** (`step.mode 'beat'`, count at ages ≤ 4): at the ask `w.card` pops up (back-out 0.25 s). A touch on the big drum ≥
-  `beatGap` 0.2 s after the last counted beat → `ring {judged, beat}` + `count {i, n, beat}`, card.lit = i, card.flash = 1 (decays
+  `beatListen` 0.9 s after the ask (the child hears the number first: QA playtest P1-1; earlier touches boom as `ring {brush, beat}`)
+  and ≥ `beatGap` 0.2 s after the last counted beat → `ring {judged, beat}` + `count {i, n, beat}`, card.lit = i, card.flash = 1 (decays
   0.4 s), Bibi `beat`; faster touches → `ring {brush, beat}` (boom, no count). Beat i = n → `right {count: {n}, beat}` → note → lantern
   → `stepDone`; the card pops away after 0.6 s (0.2 s), the next ask after askGap 1 s + 0.8 s. A partial count with no finger down
   → `beatNudge` after 4 s, then × 1.5 backoff (6, 9 …; it is an idle nudge: the 2nd one also hints). Touches beside the drum are soft.
 - **Song**: `songAsk` 0.5 s after `roundDone`; the swipe hand loops (2 s); a touch on any drum, a press in the drum band or songWait
-  4 s → the wave: every drum left → right, 0.18 s apart (`song` strike, hop 26; beat mode: the big drum × 3, 0.3 s apart, the steps'
+  6 s (the VI song ask is 4.7 s long) → the wave: every drum left → right, 0.18 s apart (`song` strike, hop 26; beat mode: the big drum × 3, 0.3 s apart, the steps'
   climbing notes), each lantern flashes in turn, Bibi `beat` / `idle`; **`cymbal`** 0.25 s after the last note (w.cymbal tilt spring
   ω 7, ζ 0.15 kicked to 0.32 rad, ring 1 decaying 1.2 s; Bibi `cheer`); `songDone` 0.6 s later. A cymbal tap: kick 0.14, ring 0.5.
 - **Out**: distractors first, 0.08 s apart: a last hop (peak 18, with anticipation), after its apex the drum floats away upward
   (+1500 px/s²) with a ±10 px sway, fading (alpha 1 → 0 between 0.25 and 0.7 s); its cushion puffs away (0.12 → 0.4 s). The next
   round after max(0.9 s, the last one gone).
+- **Surprises stay** through the song and out and leave when the next round starts (`_nextRound`); at ages ≤ 4 they spawn 1 s
+  after the first ask and the lamb starts just inside the right edge (30 px), so 3–4-year-olds see them (QA functional P2-1). On phones
+  / tall screens the lamb and bird hit circles are r 92 (≥ 100 css).
 - **Lamb**: 70 px/s along groundY − 8 from the right, sniffs 7 s at the spot nearest the middle ≥ 90 px right of Bibi's box and ≥
   cymbal w/2 + 80 from the cymbal, leaves right at 1.6 × speed. Tap: puffs into a ball (0.25 s), rolls 40 px without slipping
   (r 30), un-puffs (0.35 s). Hit circle r 58 at y − 34.
@@ -230,12 +238,14 @@ w.hintHand {x, y (fingertip, +_px _py), press 0..1, alpha, mode 'tap'|'swipe', i
 - Kinds `drum` (colours, size), `shape` (shapes, shapes5), `big` (beat mode), `dots`, `animal`, `glyph`. `CD.ANIMALS` = cow, duck,
   cat, pig, frog, sheep, hen, mouse (`CD.TOY_WORDS` VI bò, vịt, mèo, heo, ếch, cừu, gà, chuột → initials B V M H – C G C; EN C D C P
   F S H M; the frog has no VI initial).
+- **size**: a big (1.25) and a small (0.75) drum of one colour; from round 2 the distractor is a **mid-size (1.0) drum of another
+  clash-free colour** (`size 'mid'`, named by its colour) — not an animal drum (QA visual P2-3).
 - Drums per round: warm-up 2 + 0; age 3: 2 (+1 from round 2, not in chapter 1); age 4: 3 + 1 (chapter 1: 3 + 0); age 5: 3–4 + 1;
   6+: 4 + 1; short 2; oddeven 2–3 + 1–2; colours below 5: ≤ 3 colours. Order = pad order (shuffled). Every find step: exactly one
   drum not rung yet matches (validated with an independent matcher).
 - **count**: age 3 never (not in its pool); **age 4 = beat mode**: `drums = [{id, thing {kind 'big', big, nameKind 'number',
   nameValue = the first n}, target}]`, steps `{mode 'beat', targets [id], need n, promptKey 'p.beat', params {n}, nameKind 'number',
-  nameValue n, note}`; warm-up n = 1, 2; later 3 steps (2 when short) of distinct n in 1–5 with one ≥ 3; the step notes climb; the
+  nameValue n, note}`; warm-up n = 1, 2; later 3 steps (2 when short) of distinct n in **2–5** with one ≥ 3; the step notes climb; the
   drum's note = the first step's; `song` = the big drum once per step. Age 5+ = dots drums (`p.count {n, kind 'dots'}`, 1–10 / 12,
   no neighbours at 5).
 - Talk: pictures only for ages ≤ 5; count shows a **dots drum** and offers `{kind:'number', n}` icons (≤ 5 at age 4);
@@ -249,12 +259,15 @@ glow strengths from that table (it checks the plumbing, not the hex values).
 
 ## 10. Bot (`CD.Bot`, DESIGN §5.4)
 Waits 0.8–2.2 s × (1.3 − 0.5 skill) after an ask, touches the asked drum with p = skill (always with a hint / the assist), else
-another standing drum: a tap (± 0.3 r) or (p 0.25) a swipe that starts just outside the drum. **Beat mode**: taps the big drum with
+another standing drum: a tap (± 0.3 r); surprises are tapped (p 0.6 per round) ≈ 0.2 s after they become tappable, also during the song; or (p 0.25) a swipe that starts just outside the drum. **Beat mode**: taps the big drum with
 0.35–0.7 s gaps; per beat p = 0.5 (1 − skill) a pause of 1.5–5 s (→ `beatNudge`), else p = 0.5 (1 − skill) a too-fast double tap
 0.08–0.15 s (only booms). Stats add `beats, counts, beatPauses, beatDoubles`. Song: a band swipe after 0.6–2 s (p 0.8) or waits for
 the auto wave. Talk right with p = skill. Taps surprises with p 0.6 per round.
 
 ## 11. Playtest (`hs_playtest.js --n 20`, 1 060 sessions, 12 models, 1/30 s frames, 5 viewports, EN / VI)
+After the QA round (beatListen, songWait 6, beat n 2–5, phones ≤ 4 drums, hit Ø 200, surprises stay): exit 0, typical 3 / 4 6.1 /
+6.4 min (chapter 88 / 92 s, 3★ 63 / 73 %), typical 5–7 5.7–6.4 min, slow3 7.0 (7.6) / 7.1 (7.8), slow3 auto songs 31 / 33 % (was 38–46).
+Before it:
 All models: **0 failed / stuck states / NaN / standing drums off screen, 0 rounds > 120 s**; max hop 30 px.
 | model | age | session min (p90) | chapter s | 3★ % | assist rounds % | beats counted / too fast / nudges |
 |---|---|---|---|---|---|---|

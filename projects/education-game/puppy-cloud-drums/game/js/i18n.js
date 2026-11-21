@@ -48,7 +48,8 @@
  * Params: values may be RAW ({color:'red'}, {animal:'cow'}, {n:3}) — keys named like a name kind are named automatically;
  * an object {kind, value} or {nameKind, nameValue} is replaced by its name / phrase; {thing: {...}} → its drum phrase.
  * Derived params: {hue} (bare colour) from color, {word} and {sound} from animal, {lower} from letter, {expr} from a,b /
- * text, {num} (number word), {times} ("once" / "three times", vi "ba cái") from n, {done} / {left} (number words: beats so
+ * text, {num} (number word), {times} ("once" / "three times", vi "ba cái") and {timesHead} (the same; vi n = 1
+ * "một cái thôi") from n, {done} / {left} (number words: beats so
  * far / beats still to go) from i + n, {items} ("dots"/"dot", vi "chấm") and {itemsPl} (always plural) from n + kind.
  * Vietnamese shape Talk questions say "hình ngôi sao", "hình trái tim" ({shape} in talk.shapes*).
  * Keys with required params (PARAMS) fall back to a generic key when a param is missing (never "the !" on screen).
@@ -274,7 +275,9 @@
       'p.sizeAny': ['Boom the big drum!', 'Which drum is big? Tap it!', 'Can you boom the big drum?'],
       'p.animals': ['Who says {sound}? Tap the {animal}!', 'Listen: {sound}! Where is the {animal}? Tap it!',
         'Who says {sound}? Boom the {animal} drum!'],
-      'p.beat': ['Beat the big drum {times}!', 'Let’s count! Beat the big drum {times}!', 'Can you beat the big drum {times}?'],
+      // the number FIRST (a fast drummer starts on the first word: playtest P1-1); no `next` opener for p.beat
+      'p.beat': ['{timesHead}! Beat the big drum {times}!', '{timesHead}! Can you beat the big drum {times}?',
+        '{timesHead}! Let’s beat the big drum {times}!'],
       'p.count': ['Boom the drum with {num} {items}!', 'Let’s count! Which drum has {num} {items}? Tap it!',
         'Can you find {num} {items}? Boom that drum!'],
       'p.letters': ['Boom the letter {letter}!', 'Where is the letter {letter}? Tap it!', 'Can you boom letter {letter}?'],
@@ -316,7 +319,7 @@
       'stepDone': ['Hooray!', 'Lovely drumming!', 'Wonderful!', 'Boom!'],
       'song': ['Now play our song — tap the drums!', 'Song time! Tap or swipe the drums!',
         'Let’s play our song! Tap the drums!'],
-      'songShort': ['Now our song!', 'Tap for our song!', 'Song time!'],
+      'songShort': ['Our song!', 'Song time!', 'Play our song!'],
       'songDone': ['What a band!', 'What a band, {child}!', 'Boom, boom, tsss! Beautiful!', 'Wow, what a song!'],
       'cymbal.tap': ['Tsss!', 'Crash!', 'Shiny cymbal!'],
       'surprise.lamb': ['Look! A fluffy cloud lamb!', 'Baa! Who is that?', 'A cloud lamb came to dance!'],
@@ -448,7 +451,8 @@
       'p.sizeAny': ['Bé ơi, gõ trống to nhé!', 'Trống nào to nhỉ? Bé gõ nào!', 'Bé gõ cái trống to nào!'],
       'p.animals': ['Con gì kêu {sound}? Bé gõ trống {animal} nhé!', 'Bé ơi, con gì kêu {sound} nhỉ? Gõ trống {animal} nào!',
         'Bé nghe nè: {sound}! Trống {animal} đâu rồi? Bé gõ nào!'],
-      'p.beat': ['Bé gõ trống to {times} nhé!', 'Bé ơi, mình đếm nhé! Gõ trống to {times} nào!', 'Bé ơi, gõ trống to {times} nhé!'],
+      'p.beat': ['{timesHead} nhé! Bé gõ trống to {times} nhé!', '{timesHead} nào! Bé gõ trống to {times} nhé!',
+        '{timesHead} nha! Bé gõ trống to {times} nào!'],
       'p.count': ['Bé ơi, gõ trống có {num} {items} nhé!', 'Mình đếm nhé! Trống nào có {num} {items}? Bé gõ nào!',
         'Bé tìm trống có {num} {items} rồi gõ nào!'],
       'p.letters': ['Bé ơi, gõ trống chữ {letter} nhé!', 'Chữ {letter} ở đâu nhỉ? Bé gõ nào!', 'Bé gõ trống chữ {letter} nào!'],
@@ -489,9 +493,10 @@
         '{word} bắt đầu bằng chữ {first}! Bé thử bạn khác nhé!'],
       'wrong.any': ['Mình tìm lại nhé!', 'Bé thử trống khác nào!', 'Bé nghĩ thêm chút nữa nhé!', 'Cố lên, bé làm được mà!'],
       'stepDone': ['Hoan hô!', 'Bé gõ trống giỏi quá!', 'Tuyệt vời!', 'Bùm bùm, hay quá!'],
-      'song': ['Giờ mình cùng chơi bài hát nhé — bé gõ các trống nào!', 'Đến giờ chơi nhạc rồi! Bé gõ hoặc vuốt qua các trống nhé!',
-        'Mình cùng chơi bài hát nào! Bé gõ các trống nhé!'],
-      'songShort': ['Giờ mình chơi nhạc nào!', 'Bé gõ trống chơi nhạc nhé!', 'Đến giờ chơi nhạc rồi!'],
+      // ≈ 2.5 s of speech (playtest P2-2): ≤ 10 words
+      'song': ['Mình chơi nhạc nào! Bé gõ trống nhé!', 'Đến giờ chơi nhạc! Bé gõ các trống nhé!',
+        'Mình cùng chơi nhạc! Bé gõ trống nào!'],
+      'songShort': ['Chơi nhạc nào!', 'Mình chơi nhạc!', 'Gõ trống nào!'],
       'songDone': ['Ban nhạc hay quá!', 'Ban nhạc hay quá, bé {child} ơi!', 'Bùm bùm, xoảng! Hay quá đi!', 'Oa, bài hát tuyệt quá!'],
       'cymbal.tap': ['Xoảng!', 'Xủng xoẻng!', 'Xoảng! Lấp lánh quá!'],
       'surprise.lamb': ['Nhìn kìa! Một bạn cừu mây bông xù!', 'Be be! Ai đó nhỉ?', 'Bạn cừu mây đến nhảy múa nè!'],
@@ -667,9 +672,10 @@
     if (/(^|[_:\-\s])(small|little)($|[_:\-\s])/.test(s)) return 'small';
     return null;
   }
-  // a thing's size: big true/false, or size 'big'/'small'
+  // a thing's size: big true/false, or size 'big'/'small'; a size that is neither (a 'mid' distractor) → null
   function thingSize(t) {
     t = obj(t);
+    if (typeof t.size === 'string' && t.size && !sizeOf(t.size) && t.nameKind !== 'size') return null;
     if (t.big === true || t.big === false) return t.big ? 'big' : 'small';
     if (t.nameKind === 'size' && sizeOf(t.nameValue)) return sizeOf(t.nameValue);
     return sizeOf(t.size);
@@ -1024,7 +1030,7 @@
       case 'drum': {
         var sz = opts.size === false ? null : thingSize(t);
         if (opts.size !== true && t.nameKind !== 'size' && t.big !== true && t.big !== false) sz = null;
-        var useCol = col && (opts.color === true || (opts.color !== false && !sz));
+        var useCol = col && (opts.color === true || !sz);   // color:false only hides the colour when the size is said
         if (vi) return 'trống' + (sz ? ' ' + NAMES.vi.size[sz] : '') + (useCol ? ' ' + NAMES.vi.color[col] : '');
         return anFix(withArt((sz ? NAMES.en.size[sz] + ' ' : '') + (useCol ? NAMES.en.color[col] + ' ' : '') + 'drum'));
       }
@@ -1108,6 +1114,8 @@
     var c = present(p.n) ? num(p.n) : null;
     if (!present(p.num) && c != null) p.num = numberName(lang, c);
     if (!present(p.times) && c != null && c >= 1) p.times = timesWord(lang, c);
+    // {timesHead}: the number said first in a beat ask ("Three times!" / "Ba cái nhé!"; n = 1 "Once!" / "Một cái thôi nhé!")
+    if (!present(p.timesHead) && c != null && c >= 1) p.timesHead = lang === 'vi' && c === 1 ? 'một cái thôi' : timesWord(lang, c);
     if (present(p.n) && typeof p.n === 'object') p.n = c != null ? c : '';
     // {done} / {left}: beats so far / still to go (beatNudge {i, n})
     var bi = present(p.i) ? num(p.i) : null;
@@ -1199,7 +1207,7 @@
   I18N.ask = function (lang, key, params, opts) {
     opts = opts || {};
     var line = I18N.t(lang, key, params, opts.rng);
-    if (!opts.next) return line;
+    if (!opts.next || key === 'p.beat') return line;   // a beat ask starts with its number, never "Next one!" (P1-1)
     var pre = I18N.t(lang, 'p.next', null, opts.rng);
     if (L(lang) === 'vi') {
       // no "Bé ơi," in mid-sentence after a prefix ("Thêm nữa nhé! Bé gõ …", "Giờ thì bé gõ …")

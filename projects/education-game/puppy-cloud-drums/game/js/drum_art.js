@@ -48,7 +48,7 @@
   var SKIN = { base: '#FFF6E6', dark: '#EADBC0', light: '#FFFFFF', line: '#B89B72' };
   var CREAM = { base: '#FFF6E6', dark: '#B89B72', light: '#FFFFFF' };          // cream body of the shape drums
   var CORD = '#F6EBD3', CORD_LINE = '#B89B72';
-  var CLOUD = { base: '#F4F1FA', shade: '#DCD6EC', line: '#B3A9D0', light: '#FFFFFF' };
+  var CLOUD = { base: '#F4F1FA', shade: '#C9BFE6', line: '#A89BD0', light: '#FFFFFF' };
   var GOLD = { base: '#E9B949', dark: '#9C7838', light: '#F8E3A6' };          // notes / lanterns with no colour
   var STAR = { base: '#FFD23F', dark: '#B8860B', light: '#FFF1B0' };          // gold star emblem / lit card dots
   var INK = '#4A5A8C';                                                          // numerals on the card
@@ -384,7 +384,7 @@
   // ================================================================= SHAPE drum (cream body + big emblem)
   var SHAPE = {   // emblems in a −50..50 × 11..98 design box (centre ≈ 55), scaled onto the drum front
     circle:   { b: function (t) { circ(t, 0, 55, 44); }, k: 1 },
-    square:   { b: function (t) { rrect(t, -42, 13, 84, 84, 10); }, k: 1 },
+    square:   { b: function (t) { rrect(t, -42, 13, 84, 84, 10); }, k: 1.1 },
     triangle: { b: function (t) { rpoly(t, [[0, 8], [52, 96], [-52, 96]], [9, 9, 9]); }, k: 1, dy: 3 },
     star:     { b: function (t) { rpoly(t, starPts(0, 59, 52, 23), [5, 2.5, 5, 2.5, 5, 2.5, 5, 2.5, 5, 2.5]); }, k: 1.05, dy: 2 },
     heart:    { b: function (t) {
@@ -441,7 +441,7 @@
 
   // ================================================================= DOTS drum (counting, age 5+)
   var DOTC = FALLBACK.red;
-  var PANEL = { x: -34, w: 68 };
+  var PANEL = { x: -40, w: 80 };
   function panelRect(k) { var g = GEO[k], y0 = frontTop(g) + 3, y1 = frontBot(g) - 3.5; return { x: PANEL.x, y: y0, w: PANEL.w, h: y1 - y0 }; }
   function panel(ctx, k) {
     var r = panelRect(k), key = 'panel.' + k;
@@ -453,13 +453,14 @@
   }
   function dotLayout(n, r) {
     var out = [], i, cx = 0, cy = r.y + r.h / 2, rr, sp;
-    if (n <= 3) { sp = 19; rr = 7.8; for (i = 0; i < n; i++) out.push([(i - (n - 1) / 2) * sp, cy, rr]); return out; }
-    if (n <= 5) { sp = 12.8; rr = 5.6; for (i = 0; i < n; i++) out.push([(i - (n - 1) / 2) * sp, cy, rr]); return out; }
-    var rows = n <= 10 ? [cy - 6.6, cy + 6.6] : [cy - 11.4, cy, cy + 11.4];
-    sp = 12.4; rr = n <= 10 ? 5 : 4.4;
+    if (n <= 3) { sp = 22; rr = 9; for (i = 0; i < n; i++) out.push([(i - (n - 1) / 2) * sp, cy, rr]); return out; }
+    if (n <= 5) { sp = 15.5; rr = 6.8; for (i = 0; i < n; i++) out.push([(i - (n - 1) / 2) * sp, cy, rr]); return out; }
+    // 6–10: ten-frame (rows of 5); 11–12: two rows of 6 — always two rows so the dots stay big enough to count on a phone
+    var per = n <= 10 ? 5 : 6;
+    sp = n <= 10 ? 14.8 : 12.6; rr = n <= 10 ? 6.2 : 5.4;
     for (i = 0; i < n; i++) {
-      var row = Math.floor(i / 5), col = i % 5, inRow = row < 2 ? Math.min(5, n - row * 5) : n - 10;
-      out.push([row < 2 ? (col - 2) * sp : cx + (col - (inRow - 1) / 2) * sp, rows[row], rr]);   // ten-frame, extras centred below
+      var row = Math.floor(i / per), col = i % per, inRow = row ? n - per : per;
+      out.push([cx + (col - (row ? (per - 1) / 2 : (inRow - 1) / 2)) * sp, cy + (row ? 7.6 : -7.6), rr]);   // the second row starts under the first
     }
     return out;
   }
@@ -845,7 +846,10 @@
       ctx.restore();
     };
     if (glow > 0.01) rim('rgba(255,236,160,' + (0.9 * glow).toFixed(3) + ')', 8 + 6 * glow);
-    if (night > 0.01) rim('rgba(205,220,255,' + (0.32 * night).toFixed(3) + ')', 4.5, -1.2, -1.4);
+    // a thin light rim always (purple / pink pop on dusky skies) + a pale halo (≈ 3 px at 112) once night > 0.3
+    var halo = night > 0.3 ? Math.min(1, (night - 0.3) / 0.4) : 0;
+    rim('rgba(255,255,255,' + (0.55 + 0.35 * halo).toFixed(3) + ')', LW + 2.4 + 3.2 * halo);
+    if (night > 0.01) rim('rgba(214,226,255,' + (0.3 * night).toFixed(3) + ')', LW + 9 * halo + 2, -0.8, -1);
     if (ring > 0.01) rim('rgba(255,255,255,' + (0.9 * ring).toFixed(3) + ')', 5 + 8 * ring);
     FLASH = ring;
     try { Kd.draw(ctx, thing, o); } finally { FLASH = 0; }
@@ -892,8 +896,8 @@
     var b = function (t) { cloudPath(t, dent, wob); };
     var base = mix(CLOUD.base, '#DCDAF2', 0.3 * night), shade = mix(CLOUD.shade, '#B9B6DE', 0.35 * night);
     ctx.lineJoin = 'round';
-    if (flatShadow) oval(ctx, 0, 31, 38, 4.5, 0, 'rgba(140,120,190,' + (0.16 + 0.1 * night).toFixed(3) + ')');
-    ctx.strokeStyle = CLOUD.line; ctx.lineWidth = 2 * 3.2; ctx.beginPath(); b(ctx); ctx.stroke();
+    if (flatShadow) oval(ctx, 0, 32, 38, 4.5, 0, 'rgba(120,100,180,' + (0.22 + 0.1 * night).toFixed(3) + ')');
+    ctx.strokeStyle = CLOUD.line; ctx.lineWidth = 2 * 4.2; ctx.beginPath(); b(ctx); ctx.stroke();
     ctx.fillStyle = shade; ctx.beginPath(); b(ctx); ctx.fill();
     ctx.save(); ctx.beginPath(); b(ctx); ctx.clip();
     ctx.translate(-1.5, -5); ctx.fillStyle = base; ctx.beginPath(); b(ctx); ctx.fill(); ctx.translate(1.5, 5);
@@ -1058,7 +1062,7 @@
         dot(ctx, d[0], d[1], r, STAR.base); ctx.strokeStyle = STAR.dark; ctx.lineWidth = 1.8; ctx.beginPath(); circ(ctx, d[0], d[1], r); ctx.stroke();
         oval(ctx, d[0] - r * 0.3, d[1] - r * 0.35, r * 0.34, r * 0.22, -0.6, 'rgba(255,255,255,0.9)');
       } else {
-        dot(ctx, d[0], d[1], d[2], '#F3E6CF'); ctx.strokeStyle = '#B89B72'; ctx.lineWidth = 1.8; ctx.beginPath(); circ(ctx, d[0], d[1], d[2]); ctx.stroke();
+        dot(ctx, d[0], d[1], d[2], '#E6D3B3'); ctx.strokeStyle = '#8E6E48'; ctx.lineWidth = 2.4; ctx.beginPath(); circ(ctx, d[0], d[1], d[2]); ctx.stroke();
       }
     }
     if (lit > 0 && lit <= D.length) { var L = D[lit - 1]; sparkle(ctx, L[0] + L[2] * 1.3, L[1] - L[2] * 1.4, 3.6, '#FFFFFF'); }
@@ -1125,7 +1129,7 @@
     var t = thing, k = t.kind;
     ctx.save(); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     if (K[k]) {
-      var bu = boxU(t), sz = size * 0.9 * 100 / Math.max(bu.w, bu.h, 60);
+      var bu = boxU(t), sz = size * (k === 'animal' ? 0.98 : 0.92) * 100 / Math.max(bu.w, bu.h, 60);
       ctx.translate(0, -bu.cy * sz / 100); drawDrum(ctx, t, sz, {});
     } else if (k === 'letter') {
       var th = { kind: 'glyph', text: t.text, color: t.color }, bg = boxU(th), sg = size * 0.9 * 100 / Math.max(bg.w, bg.h);
@@ -1158,7 +1162,7 @@
         ctx.translate(0, size * 0.4); drawDrum(ctx, inner, size * 0.5, {});
       }
     } else if (k === 'sound' || k === 'head') {
-      var name = animalOf(t), hb = ANIMAL.headBox(name), ext = Math.max(hb.w, hb.h) + 2 * BORDER, s3 = size * 0.9 / ext;
+      var name = animalOf(t), hb = ANIMAL.headBox(name), ext = Math.max(hb.w, hb.h) + 2 * BORDER, s3 = size * 0.98 / ext;
       ctx.scale(s3, s3); ctx.translate(-(hb.x + hb.w / 2), -(hb.y + hb.h / 2));
       drawHead(ctx, name, clamp01(t.sing));
     } else {

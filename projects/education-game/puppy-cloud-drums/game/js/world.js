@@ -33,18 +33,19 @@
     bubbleX: 24, bubbleYLand: 18, bubbleMaxW: 560, bubbleRight: 200, bubbleHLand: 134, bubbleYPort: 110, bubbleHPort: 124,
     hudW: 160, hudH: 96, bubbleMinW: 220,
     bibiXLand: 118, bibiXPort: 104, bibiHLand: 230, bibiHPort: 200, bibiTallK: 1.15, bibiFeet: 4, bibiWFrac: 0.62, bibiPad: 10,
-    cymOffLand: 150, cymRightPort: 120, cymSLand: 1, cymSPort: 0.9, cymW: 120, cymH: 140, cymUp: 6, cymClear: 20,
+    cymOffLand: 180, cymRightPort: 120, cymSLand: 1, cymSPort: 1.1, cymW: 120, cymH: 140, cymUp: 6, cymClear: 20,
     stageX0Land: 250, stageRightLand: 40, stageSide: 36,
     floorLand: 110,          // landscape: cushion bottoms ≥ 110 px above the ground (the lamb walks below them)
     floorClear: 40,          // portrait: cushion bottoms ≥ 40 px above Bibi's head, the cymbal top and the ground
     garlandBelowLand: 46, garlandBelowPort: 84, garlandSag: 22, garlandSide: 60, lanternR: 22, lanternDrop: 34, noteRoom: 14,
     // item = the drum size, chosen PER ROUND from its real drum count n; phones / tall screens grow up to itemCap. Portrait rounds
     // that would get small drums stand in a zig-zag (alternate high / low pads, zigK × item + zigGap apart vertically).
-    item: { 3: 112, 4: 112, 5: 112, 6: 104, 7: 104 }, itemCap: 150, itemMin: { 3: 104, 4: 104, 5: 104, 6: 96, 7: 96 },
-    maxDrums: { 3: 3, 4: 4, 5: 5, 6: 5, 7: 5 }, spMin: 1.3, spMax: 1.7, spTight: 1.18, spZig: 0.95, zigK: 1.35, zigGap: 56, zigGain: 8, zigJit: 8,
-    sizeK: { big: 1.25, small: 0.75 }, beatK: 1.45, cushionK: 1.25, cushionHK: 0.32,
+    item: { 3: 112, 4: 112, 5: 112, 6: 104, 7: 104 }, itemCap: 150, itemCapTall: 170, itemMin: { 3: 104, 4: 104, 5: 104, 6: 96, 7: 96 },
+    maxDrums: { 3: 3, 4: 4, 5: 5, 6: 5, 7: 5 }, phoneMaxDrums: 4,   // ages ≥ 5 on phones / tall portrait: ≤ 4 drums (QA visual P1-1)
+    spMin: 1.3, spMax: 1.7, spTight: 1.18, spZig: 0.95, zigK: 1.35, zigGap: 56, zigGain: 8, zigJit: 8,
+    sizeK: { big: 1.25, small: 0.75, mid: 1 }, beatK: 1.45, cushionK: 1.25, cushionHK: 0.32,
     stagger: 28, staggerMin: 24, bobAmp: 3, bobPeriod: [2.6, 3.4],
-    hitK: 0.6, hitPad: 14, hitDiaPhone: 184, cushionHitPad: 6,   // phones / tall: hitPad grows so the hit diameter ≥ 184 logical ≈ 100 css px
+    hitK: 0.6, hitPad: 14, hitDiaPhone: 200, cushionHitPad: 6,   // phones / tall: every drum's hit diameter ≥ 200 logical (≥ 100 css px even on a 360 px tall phone, the small drum too)
     fairSwipe: true, coreK: 0.42, corePad: 8,                   // judge the BODY core, brush the rim (playtest P1-1)
 
     // ---- drum physics (DESIGN §5.2): hop + gravity, squash spring, cushion dent spring, skin ripple, tilt spring
@@ -65,7 +66,9 @@
     enterMin: 1.2, enterTail: 0.25,
 
     // ---- beat mode (count at ages ≤ 4)
-    beatGap: 0.2, beatNudge: 4, beatAboveMin: 1.3, cardSide: 30, cardH: 140, cardMinH: 110, cardWK: 0.8, cardGap: 12, cardPop: 0.25, cardOut: 0.6, cardOutTime: 0.2, cardFlash: 0.4,
+    beatGap: 0.2, beatListen: 0.9, beatNudge: 4, beatAboveMin: 1.3, cardSide: 30, cardH: 140, cardHPhone: 170, cardMinH: 110, cardWK: 0.8, cardGap: 24,
+    ringK: 0.3, ringSideK: 0.15,   // the sound rings rise ≈ 0.3 × size above the skin (and spread 0.15 × size sideways): the card stays clear of them
+    cardPop: 0.25, cardOut: 0.6, cardOutTime: 0.2, cardFlash: 0.4,
 
     // ---- notes → lanterns
     noteTime: 0.7, noteApex: 90, litRate: 3, flashTime: 0.6, lanternOmega: 5, lanternZeta: 0.12, lanternKick: 0.22, lanternSongKick: 0.12,
@@ -74,7 +77,7 @@
     askGap: 1.0, countStep: 0.5, tapMovePx: 24, glowFlash: 1.0,
 
     // ---- song + cymbal + out
-    songAskDelay: 0.5, songWait: 4, waveGap: 0.18, beatSongGap: 0.3, beatSongN: 3, cymbalDelay: 0.25, songTail: 0.6,
+    songAskDelay: 0.5, songWait: 6, waveGap: 0.18, beatSongGap: 0.3, beatSongN: 3, cymbalDelay: 0.25, songTail: 0.6,
     cymOmega: 7, cymZeta: 0.15, cymKick: 0.32, cymTapKick: 0.14, cymRingTime: 1.2,
     outStagger: 0.08, outHop: 18, outAcc: 1500, outFade: [0.25, 0.45], outSway: 10, outTime: 0.9, cushionOutDelay: 0.12, cushionOutTime: 0.28,
 
@@ -85,6 +88,8 @@
     // ---- surprises: one round per chapter (round 1 or 2, never the warm-up); chapters 0–2 rotate the types, the night is fireflies
     surpriseRounds: [1, 2], surpriseTypes: ['lamb', 'bird'], nightSurprise: 'fireflies', nightLevel: 3,
     surpriseStepS: 1.8,   // a surprise comes ≤ (notes × 1.8 − 1) s after the first ask, so short rounds see it too
+    surpriseYoungAge: 4, surpriseYoungAt: 1.0, lambInYoung: 30,   // ages ≤ 4: ≈ 1 s after the first ask, the lamb starts just inside the edge (QA functional P2-1)
+    lambRPhone: 92, birdRPhone: 92,
     lambAt: [3, 5], lambSpeed: 70, lambSniff: 7, lambR: 58, lambLift: 34, lambBallTime: 0.25, lambRoll: 40,
     lambRollTime: 0.6, lambUncurl: 0.35, lambBodyR: 30,
     birdAt: [3, 5], birdStay: 7, birdR: 48, birdLift: 30, birdW: 84, birdH: 72, birdFlyTime: 1.1, birdHopEvery: [0.9, 2], birdHopTime: 0.3, birdHopH: 14, birdSingTime: 1.0,
@@ -168,13 +173,16 @@
   function computeLayout(W, H, ins, cfg, age, hudKeep, n, kMax, beat) {
     var a = ageKey(age), portrait = H > W, phone = (portrait ? H / W : W / H) > cfg.phoneRatio, tall = H / W > cfg.tallRatio;
     n = Math.max(1, Math.round(n || cfg.maxDrums[a])); kMax = beat ? 1 : (kMax || 1);
-    var base = cfg.item[a], lo = cfg.itemMin[a] || base, cap = (tall || phone) ? Math.max(base, cfg.itemCap) : base;
+    var base = cfg.item[a], lo = cfg.itemMin[a] || base;
+    var caps = tall ? [Math.max(base, cfg.itemCapTall), Math.max(base, cfg.itemCap)] : phone ? [Math.max(base, cfg.itemCap)] : [base];
     var probe = layoutTier(W, H, ins, cfg, a, hudKeep, base, cfg.spMin, n, false, kMax, beat), usable = probe.usable, L;
     var per = function (sp) { return kMax * (sp * (n - 1) + cfg.cushionK); };
-    var row = Math.min(cap, Math.floor(usable / per(cfg.spMin)));
     var tiers = [];
-    if (portrait && n >= 3) { var zi = Math.min(cap, Math.floor(usable / per(cfg.spZig))); if (zi >= row + cfg.zigGain && row < cap) tiers.push([zi, cfg.spZig, true]); }
-    if (row >= Math.min(cap, base) || row >= lo) tiers.push([row, cfg.spMin, false]);
+    caps.forEach(function (cap) {   // tall phones try 170 first, then 150
+      var row = Math.min(cap, Math.floor(usable / per(cfg.spMin)));
+      if (portrait && n >= 3 && kMax === 1) { var zi = Math.min(cap, Math.floor(usable / per(cfg.spZig))); if (zi >= row + cfg.zigGain && row < cap) tiers.push([zi, cfg.spZig, true]); }
+      if (row >= Math.min(cap, base) || row >= lo) tiers.push([row, cfg.spMin, false]);
+    });
     tiers.push([lo, cfg.spMin, false]); tiers.push([lo, cfg.spTight, false]);
     for (var t = 0; t < tiers.length; t++) {
       L = layoutTier(W, H, ins, cfg, a, hudKeep, tiers[t][0], tiers[t][1], n, tiers[t][2], kMax, beat);
@@ -223,45 +231,53 @@
     var topLimit = Math.max(lanternBottom + cfg.noteRoom, bb + 8, keepTop + 8);   // hit circle tops stay below this
     // floor: the lowest cushion bottom (landscape: the lamb walks below; portrait: above Bibi's head and the cymbal)
     var floor = portrait ? Math.min(bibiBox.y + cfg.bibiPad, cymbalBox.y, groundY) - cfg.floorClear : groundY - cfg.floorLand;
-    var hitPad = (tall || phone) ? Math.max(cfg.hitPad, cfg.hitDiaPhone / 2 - cfg.hitK * item) : cfg.hitPad;
+    var hitPad = (tall || phone) ? Math.max(cfg.hitPad, cfg.hitDiaPhone / 2 - cfg.hitK * item) : cfg.hitPad, hitMin = (tall || phone) ? cfg.hitDiaPhone / 2 : 0;
+    var hr = function (s) { return Math.max(cfg.hitK * s + hitPad, hitMin); };
     var u = kMax * item, cushion = { w: cfg.cushionK * item, h: cfg.cushionHK * item };
     var usable = x1 - x0;
     var L = { W: W, H: H, ins: ins, portrait: portrait, tall: tall, phone: phone, groundY: groundY, bubble: bubble, hud: hud,
       bibi: bibi, bibiBox: bibiBox, cymbal: cymbal, cymbalBox: cymbalBox, stage: { x0: x0, x1: x1, y: 0 }, pads: [],
       garland: garland, lanterns: [], item: item, spK: spK, kMax: kMax, cushion: cushion, maxSize: u, usable: usable,
-      hitPad: hitPad, hitR: cfg.hitK * item + hitPad, n: n, zig: !!zig, beat: null, topLimit: topLimit, lanternBottom: lanternBottom,
+      hitPad: hitPad, hitMin: hitMin, hitR: hr(item), n: n, zig: !!zig, beat: null, topLimit: topLimit, lanternBottom: lanternBottom,
       floor: floor, cymFloor: cymbalBox.y - cfg.cymClear, keepTop: keepTop, band: null,
       safe: { x: ins.left, y: ins.top, w: W - ins.left - ins.right, h: H - ins.bottom - ins.top } };
     L.keep = [{ x: bubble.x, y: bubble.y, w: bubble.w, h: bubble.h, kind: 'bubble' }, { x: hud.x, y: hud.y, w: hud.w, h: hud.h, kind: 'hud' }];
     hk.forEach(function (b) { b.kind = 'hudKeep'; L.keep.push(b); });
     // vertical: the pad (cushion top) range for the biggest drum of this layout
-    var bobA = cfg.bobAmp;
-    var padTop = function (s, hk) { return topLimit + (hk || 0.5) * s + cfg.hitK * s + hitPad + bobA; };   // highest pad whose hit circle top stays below topLimit (animal box: centre 0.5 s up)
+    var bobA = cfg.bobAmp, vmid = (lanternBottom + floor) / 2;
+    var padTop = function (s, hk) { return topLimit + (hk || 0.5) * s + hr(s) + bobA; };   // highest pad whose hit circle top stays below topLimit (animal box: centre 0.5 s up)
     var padLow = function (s, fl) { return fl - cfg.cushionHK * s - bobA; };                               // lowest pad whose cushion stays above the floor
     var fits;
     if (beat) {   // ONE big drum + the number card: above it when there is room for a clearly big drum, else beside it
-      var s = Math.round(item * cfg.beatK), cardH = cfg.cardH, cardTop = Math.max(lanternBottom + 8, bb + 8, keepTop + 8), mode = 'above';
-      var minAbove = function (s2, h2) { return cardTop + h2 + cfg.cardGap + cfg.hopMax + 0.95 * s2 + bobA; };   // the highest pad with the card above
+      var cH0 = (tall || phone) ? cfg.cardHPhone : cfg.cardH;
+      var s = Math.round(item * cfg.beatK), cardH = cH0, cardTop = Math.max(lanternBottom + 8, bb + 8, keepTop + 8), mode = 'above';
+      var minAbove = function (s2, h2) { return cardTop + h2 + cardClear(cfg, s2) + 0.95 * s2 + bobA; };   // the highest pad with the card above
       var sMin = Math.round(item * cfg.beatAboveMin);
       while (s > sMin && padLow(s, floor) < minAbove(s, cardH)) s -= 2;
       while (cardH > cfg.cardMinH && padLow(s, floor) < minAbove(s, cardH)) cardH -= 2;
       if (padLow(s, floor) < minAbove(s, cardH)) {   // the card goes beside the drum (to its right), the pair centred on the stage
-        mode = 'side'; s = Math.round(item * cfg.beatK); cardH = cfg.cardH;
+        mode = 'side'; s = Math.round(item * cfg.beatK); cardH = cH0;
         while (s > item && padLow(s, floor) < padTop(s, 0.475)) s -= 2;
       }
       var cardW = Math.round(cardH * cfg.cardWK);
       // side: the pair spans padX − cushion/2 … card right edge; shift centres it on the stage
-      L.beat = { size: s, cardH: cardH, cardW: cardW, cardTop: cardTop, mode: mode, shift: mode === 'side' ? -(cfg.cardSide + cardW - (cfg.cushionK - 1) * s / 2) / 2 : 0 };
+      L.beat = { size: s, cardH: cardH, cardW: cardW, cardTop: cardTop, mode: mode, shift: mode === 'side' ? -(sideGap(cfg, s) + cardW - (cfg.cushionK - 1) * s / 2) / 2 : 0 };
       L.maxSize = s;
       var lo2 = mode === 'above' ? minAbove(s, cardH) : padTop(s, 0.475), hi2 = padLow(s, floor);
-      fits = hi2 >= lo2 && (mode === 'above' ? cfg.cushionK * s : (cfg.cushionK + 1) * s / 2 + cfg.cardSide + cardW) <= usable + 1e-6;
+      fits = hi2 >= lo2 && (mode === 'above' ? cfg.cushionK * s : (cfg.cushionK + 1) * s / 2 + sideGap(cfg, s) + cardW) <= usable + 1e-6;
       L.base = clamp(hi2 - cfg.stagger, lo2, Math.max(lo2, hi2));
+      // portrait: the drum (+ the card above it) is centred between the lantern string and Bibi's head (QA visual P2-7)
+      if (portrait) L.base = clamp(vmid + (mode === 'above' ? (0.63 * s + cardClear(cfg, s) + cardH) / 2 : 0.315 * s), lo2, Math.max(lo2, hi2));
     } else {
       var span = kMax * item * (spK * (n - 1) + cfg.cushionK);
       var lowest = padLow(u, floor), highest = padTop(u);
-      if (zig) { L.zigDy = cfg.zigK * u + cfg.zigGap; L.base = lowest - cfg.zigJit; fits = L.base - L.zigDy - cfg.zigJit >= highest; }
-      else if (lowest - 2 * cfg.stagger >= highest) { L.base = lowest - cfg.stagger; fits = true; }
-      else if (lowest >= highest) { L.base = (lowest + highest) / 2; L.tight = true; fits = true; }   // no room to stagger: one height
+      if (zig) {
+        L.zigDy = cfg.zigK * u + cfg.zigGap; L.base = lowest - cfg.zigJit; fits = L.base - L.zigDy - cfg.zigJit >= highest;
+        if (fits && portrait) L.base = clamp(vmid + (L.zigDy + 0.54 * u) / 2, highest + L.zigDy + cfg.zigJit, lowest - cfg.zigJit);
+      } else if (lowest - 2 * cfg.stagger >= highest) {
+        L.base = lowest - cfg.stagger; fits = true;
+        if (portrait) L.base = clamp(vmid + 0.27 * u, highest + cfg.stagger, lowest - cfg.stagger);   // centred band (QA visual P2-7)
+      } else if (lowest >= highest) { L.base = (lowest + highest) / 2; L.tight = true; fits = true; }   // no room to stagger: one height
       else { L.base = lowest; fits = false; }
       // landscape: a drum standing over the cymbal keeps its cushion above the cymbal top
       var sp0 = n <= 1 ? 0 : clamp((usable - cfg.cushionK * u) / (n - 1), spK * u, (zig ? cfg.spMin : cfg.spMax) * u), xFirst = (x0 + x1) / 2 - (n - 1) / 2 * sp0;
@@ -276,13 +292,19 @@
     L.band = { x: x0 - 20, y: topLimit - 10, w: x1 - x0 + 40, h: Math.max(60, floor + 20 - (topLimit - 10)) };
     return L;
   }
+  /** Room between the big drum's top (at rest) and the card above it: the hop, the sound rings, a gap. */
+  function cardClear(cfg, s) { return cfg.hopMax + cfg.ringK * s + cfg.cardGap; }
+  /** Gap between the big drum's body and the card beside it. */
+  function sideGap(cfg, s) { return cfg.cardSide + cfg.ringSideK * s; }
+  /** The hit radius of a drum of size s: 0.6 s + hitPad, at least hitDiaPhone / 2 on phones / tall screens. */
+  function hitROf(L, cfg, s) { return Math.max(cfg.hitK * s + L.hitPad, L.hitMin || 0); }
   /**
    * Pads (cushion tops) for n drums: centred on the stage, spacing clamp((usable − foot) / (n − 1), spK × u, spMax × u)
    * (u = kMax × item, foot = cushionK × u; zig-zag ≤ spMin × u); heights staggered per round seed (± stagger, neighbours ≥
    * staggerMin apart; zig-zag: alternate high / low rows zigDy apart), then clipped per drum to [hit circle below topLimit,
    * cushion above the floor / over the cymbal: above the cymbal]. sizes = [{size, box}] (optional, else the biggest drum).
    */
-  function padsFor(L, n, cfg, seed, sizes) {
+  function padsFor(L, n, cfg, seed, sizes, flat) {
     cfg = cfg || CONFIG;
     var u = L.kMax * L.item, foot = cfg.cushionK * u, mid = (L.stage.x0 + L.stage.x1) / 2, out = [], i;
     var sp = n <= 1 ? 0 : L.zig ? clamp((L.usable - foot) / (n - 1), L.spK * u, cfg.spMin * u) : clamp((L.usable - foot) / (n - 1), L.spK * u, cfg.spMax * u);
@@ -290,13 +312,13 @@
     for (i = 0; i < n; i++) {
       var x = mid + (i - (n - 1) / 2) * sp + (L.beat ? L.beat.shift : 0), sz = sizes && sizes[i] ? sizes[i] : { size: L.beat ? L.beat.size : u, box: { h: u, cy: -0.5 * u, w: u } };
       var s = sz.size, bx = sz.box, cw = cfg.cushionK * s;
-      var lo = L.topLimit + (-bx.cy) + cfg.hitK * s + L.hitPad + cfg.bobAmp;   // highest allowed pad (smallest y)
+      var lo = L.topLimit + (-bx.cy) + hitROf(L, cfg, s) + cfg.bobAmp;   // highest allowed pad (smallest y)
       var fl = L.floor;
       if (!L.portrait && Math.abs(x - L.cymbal.x) < L.cymbal.w / 2 + cw / 2 + 10) fl = Math.min(fl, L.cymFloor);
       var hi = fl - cfg.cushionHK * s - cfg.bobAmp;                              // lowest allowed pad
-      if (L.beat && L.beat.mode === 'above') lo = Math.max(lo, L.beat.cardTop + L.beat.cardH + cfg.cardGap + cfg.hopMax + bx.h + cfg.bobAmp);
+      if (L.beat && L.beat.mode === 'above') lo = Math.max(lo, L.beat.cardTop + L.beat.cardH + cardClear(cfg, s) + bx.h + cfg.bobAmp);
       var y;
-      if (L.beat || n === 1) y = L.base;
+      if (L.beat || n === 1 || flat) y = L.base;
       else if (L.zig) y = L.base - ((i + first) % 2 ? L.zigDy : 0) + rr.float(-cfg.zigJit, cfg.zigJit);
       else if (L.tight) y = L.base;
       else {
@@ -306,6 +328,11 @@
         prev = v; y = L.base + v;
       }
       out.push({ x: x, y: clamp(y, lo, Math.max(lo, hi)), lo: lo, hi: hi, clipped: y < lo || y > hi });
+    }
+    if (flat && n > 1) {   // size rounds: every drum on ONE line so big and small compare at a glance (QA visual P2-3)
+      var mlo = -1e9, mhi = 1e9;
+      out.forEach(function (p) { mlo = Math.max(mlo, p.lo); mhi = Math.min(mhi, p.hi); });
+      if (mlo <= mhi) out.forEach(function (p) { p.y = clamp(L.base, mlo, mhi); p.clipped = false; p.flat = true; });
     }
     return out;
   }
@@ -351,7 +378,7 @@
   }
   World.logicalSize = logicalSize;
   World.computeLayout = function (W, H, ins, cfg, age, hudKeep, n, kMax, beat) { return computeLayout(W, H, ins, merge(CONFIG, cfg), age === undefined ? 4 : age, hudKeep, n, kMax, beat); };
-  World.padsFor = function (L, n, cfg, seed, sizes) { return padsFor(L, n, merge(CONFIG, cfg), seed, sizes); };
+  World.padsFor = function (L, n, cfg, seed, sizes, flat) { return padsFor(L, n, merge(CONFIG, cfg), seed, sizes, flat); };
   World.lanternsFor = lanternsFor;
   World.bodyBox = bodyBox;
   World.kickFor = kickFor;
@@ -390,7 +417,7 @@
   };
 
   // ---------------------------------------------------------------- geometry + test hooks (logical px)
-  P._hitR = function (c) { return this.cfg.hitK * c.size + (this.layout.hitPad === undefined ? this.cfg.hitPad : this.layout.hitPad); };
+  P._hitR = function (c) { return hitROf(this.layout, this.cfg, c.size); };
   /** The body core (judged on a slide / press): r = 0.42 × size + 8 — cores of neighbours never overlap. */
   P._coreR = function (c) { return this.cfg.coreK * c.size + this.cfg.corePad; };
   P._coreSet = function (x, y) {
@@ -425,14 +452,14 @@
   P.lambHit = function () {
     var g = this.lamb, L = this.layout, cfg = this.cfg;
     if (!g || (g.state !== 'walk' && g.state !== 'sniff') || g.x < L.ins.left + 30 || g.x > L.W - L.ins.right - 30) return null;
-    var c = { x: g.x, y: g.y - cfg.lambLift, r: cfg.lambR };
+    var c = { x: g.x, y: g.y - cfg.lambLift, r: L.phone || L.tall ? cfg.lambRPhone : cfg.lambR };
     return this._drumAt(c.x, c.y) ? null : c;
   };
   /** The bird's tap circle while it sits on the lantern string, else null. */
   P.birdHit = function () {
-    var b = this.bird, cfg = this.cfg;
+    var b = this.bird, cfg = this.cfg, L = this.layout;
     if (!b || b.state !== 'perch') return null;
-    var c = { x: b.x, y: b.y - cfg.birdLift, r: cfg.birdR };
+    var c = { x: b.x, y: b.y - cfg.birdLift, r: L.phone || L.tall ? cfg.birdRPhone : cfg.birdR };
     return this._drumAt(c.x, c.y) ? null : c;
   };
   /** The first firefly that can be tapped (drifting, on screen, clear of drums and of the HUD / bubble), else null. */
@@ -470,9 +497,14 @@
   // ---------------------------------------------------------------- viewport
   P.setViewport = function (W, H, ins) { this._view = { W: W, H: H, ins: insOf(ins) }; this._relayout(false); };
   P._shape = function () {
-    var cfg = this.cfg, n = this.drums.length || cfg.maxDrums[this.age], k = 1, beat = false;
+    var cfg = this.cfg, n = this.drums.length || Math.min(cfg.maxDrums[this.age], this._drumCap()), k = 1, beat = false;
     for (var i = 0; i < this.drums.length; i++) { var t = this.drums[i].thing; if (t.kind === 'big') beat = true; else k = Math.max(k, kOf(t, cfg)); }
     return { n: n, k: k, beat: beat };
+  };
+  /** The most drums a round may have on this screen: ages ≥ 5 on phones / tall portrait screens get ≤ 4 (bigger drums). */
+  P._drumCap = function () {
+    var v = this._view, cfg = this.cfg, portrait = v.H > v.W, phone = (portrait ? v.H / v.W : v.W / v.H) > cfg.phoneRatio, tall = v.H / v.W > cfg.tallRatio;
+    return this.age >= 5 && (phone || tall) ? cfg.phoneMaxDrums : 5;
   };
   P._relayout = function (force) {
     var v = this._view, sh = this._shape();
@@ -484,7 +516,7 @@
     this.layout.hudKeep = keepBoxes(this.hudKeep);
     var K = this.layout.bibi;
     this.bibi.x = K.x; this.bibi.y = K.y; this.bibi.h = K.h; this.bibi.w = K.w;
-    this.layout.pads = padsFor(this.layout, sh.n, this.cfg, this.cur ? this.cur.seed : 1);
+    this.layout.pads = padsFor(this.layout, sh.n, this.cfg, this.cur ? this.cur.seed : 1, null, !!(this.cur && this.cur.topic === 'size'));
     this.layout.lanterns = lanternsFor(this.layout, this.lanterns.length);
     if (had) this._snapAll();
     return true;
@@ -517,14 +549,14 @@
       var s = c.thing.kind === 'big' && L.beat ? L.beat.size : Math.floor(L.item * kOf(c.thing, cfg));
       return { size: s, box: bodyBox(c.thing, s) };
     });
-    L.pads = padsFor(L, n, cfg, this.cur ? this.cur.seed : 1, sizes);
+    L.pads = padsFor(L, n, cfg, this.cur ? this.cur.seed : 1, sizes, !!(this.cur && this.cur.topic === 'size'));
     var top = 1e9, bot = -1e9, sy = 0;
     this.drums.forEach(function (c, i) {
       var z = sizes[i], p = L.pads[i];
       c.i = i; c.size = z.size; c.bw = z.box.w; c.bh = z.box.h; c.bcy = z.box.cy;
       c.cushionW = cfg.cushionK * c.size; c.cushionH = cfg.cushionHK * c.size;
       c.padX = p.x; c.padBase = p.y;
-      top = Math.min(top, p.y + c.bcy - cfg.hitK * c.size - L.hitPad - cfg.hopMax); bot = Math.max(bot, p.y + c.cushionH); sy += p.y;
+      top = Math.min(top, p.y + c.bcy - hitROf(L, cfg, c.size) - cfg.hopMax); bot = Math.max(bot, p.y + c.cushionH); sy += p.y;
     });
     if (n) {
       L.stage.y = sy / n;
@@ -537,8 +569,8 @@
     var L = this.layout, cfg = this.cfg, c = this.drumById(this.card.id) || this.drums[0], B = L.beat;
     if (!c) return;
     var h = B ? B.cardH : cfg.cardH, w = B ? B.cardW : Math.round(h * cfg.cardWK);
-    if (B && B.mode === 'side') { this.card.x = c.padX + c.bw / 2 + cfg.cardSide + w / 2; this.card.y = c.padBase + c.bcy; }
-    else { this.card.x = c.padX; this.card.y = c.padBase - cfg.bobAmp - c.bh - cfg.hopMax - cfg.cardGap - h / 2; }
+    if (B && B.mode === 'side') { this.card.x = c.padX + c.bw / 2 + sideGap(cfg, c.size) + w / 2; this.card.y = c.padBase + c.bcy; }
+    else { this.card.x = c.padX; this.card.y = c.padBase - cfg.bobAmp - c.bh - cardClear(cfg, c.size) - h / 2; }
     this.card.w = w; this.card.h = h; this.card.mode = B ? B.mode : 'above';
   };
 
@@ -597,7 +629,7 @@
     var rr = new CD.RNG((this.rng.next() * 4294967296) >>> 0);
     var sp = this.round === this._surpriseRound && this.round > 0 ? this._surpriseType() : null;
     var el = this.time - this.levelStartTime, sb = cfg.shortBudget, short = !!(sb && this.round > 0 && el > sb[Math.min(this.round, sb.length - 1)]);
-    var cur = CD.Content.makeRound(this.topic, { age: this.age, lang: this.lang, rng: rr, roundIndex: this.round, surprise: sp, short: short, level: this.level,
+    var cur = CD.Content.makeRound(this.topic, { age: this.age, lang: this.lang, rng: rr, roundIndex: this.round, surprise: sp, short: short, level: this.level, maxDrums: this._drumCap(),
       usedKeys: this._usedKeys, prevAns: this._prevAns, prevAnsRun: this._prevAnsRun });
     this._usedKeys.push(cur.key);
     this._clearRound(true);
@@ -645,7 +677,7 @@
     if (s.mode === 'beat') {   // the big drum is struck again for every beat step; a fresh number card pops up above it
       var big = this.drumById(s.targets[0]);
       if (big) big.done = false;
-      this._beat = { i: 0, lastT: -1e9 };
+      this._beat = { i: 0, lastT: -1e9, askT: this.time };
       this.card = { id: s.targets[0], x: 0, y: 0, w: 0, h: 0, n: s.need, lit: 0, pop: 0, flash: 0, _ppop: 0, _inT: 0, _outT: -1 };
       this._placeCard();
     } else this._beat = null;
@@ -655,7 +687,8 @@
       nameKind: s.nameKind, nameValue: s.nameValue, need: s.need, x: M.x, y: M.y });
     // a surprise comes 3–5 s after the first ask, but never later than the round is expected to last (notes × 1.8 − 1 s)
     var notes = notesOf(cur), late = Math.max(2, notes * cfg.surpriseStepS - 1), self = this;
-    var at = function (r) { return Math.min(self._crng.float(r[0], r[1]), late); };
+    var young = this.age <= cfg.surpriseYoungAge;
+    var at = function (r) { var v = self._crng.float(r[0], r[1]); return young ? cfg.surpriseYoungAt : Math.min(v, late); };
     if (first && this.surprise === 'lamb') this._lambNext = at(cfg.lambAt);
     if (first && this.surprise === 'bird') this._birdNext = at(cfg.birdAt);
     if (first && this.surprise === 'fireflies') this._firefliesNext = at(cfg.firefliesAt);
@@ -843,7 +876,8 @@
   };
   /** A beat on the big drum: counted when ≥ beatGap after the last counted beat (else a brush: it booms, does not count). */
   P._beatHit = function (c, dir, str, swipe, from, x, y) {
-    var cfg = this.cfg, B = this._beat, s = this.stepInfo, ok = this.time - B.lastT >= cfg.beatGap - 1e-9;
+    // counted when ≥ beatGap after the last counted beat and ≥ beatListen after the ask (the child hears the number first: QA playtest P1-1)
+    var cfg = this.cfg, B = this._beat, s = this.stepInfo, ok = this.time - B.lastT >= cfg.beatGap - 1e-9 && this.time - B.askT >= cfg.beatListen - 1e-9;
     var st = this._strike(c, dir, ok ? str : 0.6, ok ? 'tap' : 'brush');
     var note = this._noteOf(c);
     this._emit({ type: 'ring', id: c.id, thing: c.thing, note: note, x: c.cx, y: c.cy, strength: st, judged: ok, brush: !ok, swipe: !!swipe, beat: true });
@@ -1135,8 +1169,7 @@
     this.cancelDrag(); this.hintHand = null; this._disarm();
     this._setState('roundDone'); this._setPhase('song');
     this._song = { asked: false, started: false, auto: false, t: 0, order: [], notes: [], gap: this.cfg.waveGap, i: 0, done: false, crashed: false };
-    this._mood('cheer', 1.2); this._hop();
-    this._surprisesLeave();
+    this._mood('cheer', 1.2); this._hop();   // surprises stay through song + out (they leave at the next round: QA functional P2-1)
     var bc = this._bandCentre();
     this._emit({ type: 'roundDone', round: this.round, stars: st, misses: this.misses, x: bc.x, y: bc.y });
   };
@@ -1222,7 +1255,7 @@
   };
   P._nextRound = function () {
     var cfg = this.cfg;
-    this._clearRound(); this.cur = null;
+    this._surprisesLeave(); this._clearRound(true); this.cur = null;   // a lamb / bird / fireflies still here leave now
     this.round++;
     var el = this.time - this.levelStartTime, long = this.round >= cfg.chapterMinRounds && el > cfg.chapterTimeLimit;
     if (this.round < this.roundsPerLevel && !long) this._beginRound();
@@ -1458,7 +1491,7 @@
       this._lambNext -= h;
       if (this._lambNext < 0) {
         this._lambNext = -1;
-        var x0 = L.W - L.ins.right + 90;
+        var x0 = this.age <= cfg.surpriseYoungAge ? L.W - L.ins.right - cfg.lambInYoung : L.W - L.ins.right + 90;
         this.lamb = { x: x0, y: this._lambY(), _px: x0, _py: this._lambY(), dir: -1, step: 0, ball: 0, _pball: 0, roll: 0, _proll: 0,
           state: 'walk', t: 0, stopX: this._lambStop(), sniffT: 0, bt: 0, sniff: 0, tapped: false };
         this._emit({ type: 'lamb', x: L.W - L.ins.right - 40, y: this._lambY() });

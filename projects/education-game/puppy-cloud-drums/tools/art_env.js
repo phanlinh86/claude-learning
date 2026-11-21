@@ -73,10 +73,10 @@ const CL = {
     hillB: ['#F6E6EE', '#E6D1DE', '#FFF8FA'], hillF: ['#FFF6F6', '#EEDCE6', '#FFFFFF'] },
   noon: { back: ['#DCEAF8', '#BFD1EC', '#F2F8FF'], main: ['#FAFBFF', '#D9DEF2', '#FFFFFF'], sea: ['#F3F5FD', '#DCE0F2', '#FFFFFF'],
     hillB: ['#ECEFFB', '#D3D8EE', '#FAFBFF'], hillF: ['#F9F8FD', '#DFDAEF', '#FFFFFF'] },
-  sunset: { back: ['#E2B8CE', '#C99BBA', '#F4D2DE'], main: ['#F9D9D2', '#DDAFC4', '#FFE6B4'], sea: ['#FBE1D2', '#E2B9C6', '#FFEBC4'],
-    hillB: ['#F1CCD2', '#D9AEC4', '#FFE2B8'], hillF: ['#FCE6DE', '#E6C3CF', '#FFEBC8'] },
+  sunset: { back: ['#EBC8D8', '#D6AFC8', '#F8DDE6'], main: ['#FCE4DC', '#E8C4D2', '#FFE6B4'], sea: ['#FDEADF', '#EACAD4', '#FFEBC4'],
+    hillB: ['#FDEBE8', '#F8E6E6', '#FFE6C0'], hillF: ['#FFF4EE', '#FDEBE8', '#FFEDCC'] },
   night: { back: ['#353F78', '#2C3568', '#454F8A'], main: ['#434D88', '#353E76', '#6672AE'], sea: ['#4A548E', '#3B447C', '#6E7AB4'],
-    hillB: ['#3C4580', '#30386C', '#56609C'], hillF: ['#4B5390', '#3C437A', '#6A74B0'] },
+    hillB: ['#868EC2', '#7E86BC', '#A0A7D8'], hillF: ['#9098CA', '#868EC2', '#ACB2DE'] },
 };
 const RIM = { morning: '#FFF4F0', noon: '#FFFFFF', sunset: '#FFE2A8', night: '#FFD98F' };   // warm rim light (night = window light)
 // the cloud floor (ground tile): top colour and the fill below the ground tile
@@ -276,21 +276,22 @@ function ground(m) {
     m === 'sunset' ? [['#F8DDB0', '#D2A878'], ['#F4C4D2', '#C98FA4'], ['#DACCF0', '#A898CC']] :
       [['#F6E3AE', '#CDB073'], ['#F5C8D6', '#CF94A8'], ['#D8CDF2', '#A99BD0'], ['#C6E6D6', '#8DB8A2']];
   let seed = 311 + MOODS.indexOf(m); const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  for (let i = 0; i < 34; i++) {
-    const x = rnd() * W, y = 70 + rnd() * 180, n = 1 + Math.floor(rnd() * 3), sc = 0.8 + (y - 70) / 180 * 0.7, ci = i % FL.length;
-    if (x < 40 || x > W - 40) continue;   // keep flower clusters off the seam column (cleaner seam metric)
+  // 14 small, light clusters per tile, evenly spread, only in the lower floor (y ≥ 140): the band right under the campY
+  // line (tile y ≈ 40…130, where drums / cushions / Bibi stand in landscape) stays calm (visual QA P2-6)
+  for (let i = 0; i < 14; i++) {
+    const x = (i + 0.5) * W / 14 + (rnd() - 0.5) * 40, y = 142 + rnd() * 104, n = 1 + Math.floor(rnd() * 2), sc = 0.75 + (y - 140) / 110 * 0.35, ci = i % FL.length;
     o += both(xx => {
       let s = '';
       for (let k = 0; k < n; k++) {
-        const fx = xx + (k - (n - 1) / 2) * 13 * sc + (k % 2) * 3, fy = y - (k % 2) * 6 * sc, r = (5.2 + (k === 1 ? 1.2 : 0)) * sc, [c, d] = FL[(ci + k) % FL.length];
-        s += E(fx, fy + r * 0.9, r * 0.9, r * 0.25, shade, ' opacity="0.35"');
-        s += P(star5(fx, fy, r, 0.5, -90 + k * 12), c, OL(d, 1.2 * sc)) + C(fx, fy, r * 0.28, night ? '#FFFFFF' : lt(c, 0.7));
+        const fx = xx + (k - (n - 1) / 2) * 12 * sc, fy = y - (k % 2) * 5 * sc, r = 4.2 * sc, [c0, d0] = FL[(ci + k) % FL.length];
+        const c = mix(c0, top, night ? 0.25 : 0.35), d = mix(d0, top, night ? 0.3 : 0.45);
+        s += P(star5(fx, fy, r, 0.5, -90 + k * 12), c, OL(d, 1)) + C(fx, fy, r * 0.28, night ? '#F4F0FF' : lt(c, 0.7));
       }
       return s;
-    }, x, 34 * sc);
+    }, x, 30);
   }
-  // sparkle dots (white)
-  for (let i = 0; i < 40; i++) { const x = rnd() * W, y = 66 + rnd() * 190, rr = 1.2 + rnd() * 1.2; o += both(xx => C(xx, y, rr, hi, ` opacity="${night ? 0.5 : 0.9}"`), x, 3); }
+  // sparkle dots (white), also only in the lower floor
+  for (let i = 0; i < 18; i++) { const x = 20 + rnd() * (W - 40), y = 136 + rnd() * 116, rr = 1 + rnd() * 1; o += both(xx => C(xx, y, rr, hi, ` opacity="${night ? 0.4 : 0.8}"`), x, 3); }
   return svg(1200, 260, o, defs);
 }
 

@@ -296,7 +296,7 @@
     }
     _lamb(h, a) {
       if (!h) return;
-      const g = this.g, x = ip(h, 'x', a), y = h.y, size = 120, k = size / HOG.w;
+      const g = this.g, x = ip(h, 'x', a), y = h.y, size = this._L && (this._L.phone || this._L.tall) ? 160 : 136, k = size / HOG.w;
       if (!(x > -size && x < this.W + size)) return;
       const ball = clamp(ip(h, 'ball', a) || 0, 0, 1), walk = h.state === 'walk' || h.state === 'leave' ? Math.sin((h.step || 0) * TAU) : 0;
       g.save();
@@ -314,7 +314,7 @@
     }
     _bird(b, a) {
       if (!b) return;
-      const g = this.g, x = ip(b, 'x', a), y = ip(b, 'y', a), size = 84, k = size / BIRD.w;
+      const g = this.g, x = ip(b, 'x', a), y = ip(b, 'y', a), size = this._L && (this._L.phone || this._L.tall) ? 104 : 90, k = size / BIRD.w;
       if (!(x > -size && x < this.W + size)) return;
       const nm = (b.sing || 0) > 0.2 && CD.Assets.has('bird_sing') ? 'bird_sing' : 'bird';
       g.save(); g.translate(x, y - (b.hop || 0) * 14);
@@ -379,8 +379,8 @@
       const W = this.W, H = this.H, t = this.time, L = this._L, ins = L.ins || {}, portrait = H > W, gy = L.groundY, C = CA(), g = this.g;
       this._galleryT += o.dt || 0;
       const panel = o.boxes && o.boxes.done;
-      const rb = Math.min(W * 0.9, 900);
-      g.save(); g.globalAlpha = clamp(this._galleryT / 1.2, 0, 1) * 0.8; this._img('rainbow', W / 2 - rb / 2, gy - rb * 0.62, rb, rb / 2); g.restore();
+      const rb = Math.min(W * 0.62, 760), rx = portrait ? W / 2 : W * 0.6;
+      g.save(); g.globalAlpha = clamp(this._galleryT / 1.2, 0, 1) * 0.75; this._img('rainbow', rx - rb / 2, gy - rb * 0.5 - 40, rb, rb / 2); g.restore();
       if (C && L.cymbal) { try { C.drawCymbal(g, L.cymbal, { tilt: Math.sin(t * 6) * 0.08, ring: Math.max(0, Math.sin(t * 3)), night: this._night, t }); } catch (e) { /* skip */ } }
       this._bibi({ hop: Math.max(0, Math.sin(t * 5)) * 0.6 }, L.bibi, { frame: Math.sin(t * 3) > 0 ? 'bibi_dance' : 'bibi_cheer' });
       const cols = [];

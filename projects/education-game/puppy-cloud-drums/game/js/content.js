@@ -76,7 +76,7 @@
   var BDPQ = ['b', 'd', 'p', 'q'];                                   // at most one of these per round (mirror letters)
   var LOWER_PAIRS = [['m', 'w'], ['n', 'u']];
   var ADD_MAX = { 5: 10, 6: 10, 7: 20 }, SUB_MAX = 10, ODDEVEN_MAX = { 5: 10, 6: 12, 7: 20 }, DOTS_MAX = { 5: 10, 6: 12, 7: 12 };
-  var SIZE_K = { big: 1.25, small: 0.75 };
+  var SIZE_K = { big: 1.25, small: 0.75, mid: 1 };   // mid = the size round's distractor (another colour, in between)
   /* 'initial' words (the animal drums are the pictures). VI without the classifier "con". Same approach as the sister games:
    * the initial is the word's first letter with tone marks dropped; a letter with its own marks (ếch → Ê) is not in the VI
    * letter pool, so that animal is left out of VI 'initial' rounds. */
@@ -120,6 +120,7 @@
   /** The most distinct colours one round can hold (3 below age 5, 7 from age 5). */
   function maxSafe(age) { var n = 1; while (n < 7 && safeSets(age, n + 1).length) n++; return n; }
 
+  function clampI(v, a, b) { v = Math.round(+v); return v < a ? a : v > b ? b : v; }
   function ageOf(a) { a = Math.round(+a || 4); return a < 3 ? 3 : a > 7 ? 7 : a; }
   function range(a, b) { var r = []; for (var i = a; i <= b; i++) r.push(i); return r; }
   function shapesFor(age) { return age <= 3 ? SHAPES3.slice() : CD.SHAPES.slice(); }
@@ -163,8 +164,8 @@
 
   // ---------------- counts ----------------
   /** { n: targets, d: distractors } (DESIGN §5.1). Warm-up 2 + 0; short rounds 2; age 3: 2 (+1 from round 2, not in the first
-   *  chapter); age 4: 3 + 1 (first chapter 3 + 0); age 5: 3–4 + 1; ages 6+: 4 + 1. */
-  function countsFor(rng, age, ri, level, short) {
+   *  chapter); age 4: 3 + 1 (first chapter 3 + 0); age 5: 3–4 + 1; ages 6+: 4 + 1; at most `cap` drums in all (phones: 4). */
+  function countsFor(rng, age, ri, level, short, cap) {
     if (ri === 0) return { n: 2, d: 0 };
     var n, d;
     if (age <= 3) { n = 2; d = ri >= 2 && level !== 0 ? 1 : 0; }
@@ -172,6 +173,7 @@
     else if (age === 5) { n = rng.int(3, 4); d = 1; }
     else { n = 4; d = 1; }
     if (short) n = 2;
+    if (cap && n + d > cap) n = Math.max(2, cap - d);
     return { n: n, d: d };
   }
   function S(mode, targets, need, promptKey, params, nameKind, nameValue) {
@@ -215,9 +217,9 @@
   }
 
   // ---------------- rounds ----------------
-  function buildRound(topic, age, lang, rng, ri, level, short) {
-    var real = [], extra = [], steps = [], i, cn = countsFor(rng, age, ri, level, short), n = cn.n, d = cn.d;
-    var r = { topic: topic, age: age, lang: lang, roundIndex: ri, level: level, short: !!short, surprise: null, drums: null, steps: steps, song: null };
+  function buildRound(topic, age, lang, rng, ri, level, short, cap) {
+    var real = [], extra = [], steps = [], i, cn = countsFor(rng, age, ri, level, short, cap), n = cn.n, d = cn.d;
+    var r = { topic: topic, age: age, lang: lang, roundIndex: ri, level: level, short: !!short, surprise: null, drums: null, steps: steps, song: null, maxDrums: cap || MAX_DRUMS };
     var probs = null, oddPar = null, beatNs = null;
     switch (topic) {
       case 'colors': {
@@ -240,13 +242,13 @@
         }
         break;
       }
-      case 'size': {   // a big and a small drum of one colour (+ an animal drum from round 2: not a colour drum at all)
+      case 'size': {   // a big and a small drum of one colour (+ from round 2 a MID-size drum of another colour: neither big nor small)
         n = 2;
-        var c1 = colourSet(rng, age, 1)[0];
+        var c2s = colourSet(rng, age, 2), c1 = c2s[0];
         ['big', 'small'].forEach(function (sz) {
           var t = drum(c1); t.size = sz; t.big = sz === 'big'; t.nameKind = 'size'; t.nameValue = sz; real.push(t);
         });
-        if (d) extra.push(animal(rng.pick(CD.ANIMALS)));
+        if (d) { var md = drum(c2s[1]); md.size = 'mid'; md.big = false; extra.push(md); }   // named by its colour
         break;
       }
       case 'animals': {
@@ -269,7 +271,7 @@
           if (ri === 0) ns = [1, 2];
           else {
             var k = short ? 2 : 3;
-            for (var tb = 0; tb < 100; tb++) { ns = rng.sample(range(1, 5), k); if (Math.max.apply(null, ns) >= 3) break; }
+            for (var tb = 0; tb < 100; tb++) { ns = rng.sample(range(2, 5), k); if (Math.max.apply(null, ns) >= 3) break; }   // n = 1 only in the warm-up (QA playtest P3-1)
           }
           beatNs = ns;
           real.push(bigD(ns[0]));
@@ -311,6 +313,7 @@
       }
       case 'oddeven': {   // findAll: the right parity are the targets, the other parity the distractors
         if (ri === 0) { n = 2; d = 1; } else { n = rng.int(2, 3); d = n === 3 ? rng.int(1, 2) : 2; }
+        if (cap && n + d > cap) d = Math.max(1, cap - n);
         oddPar = rng.pick(['odd', 'even']);
         var hiO = ODDEVEN_MAX[age] || 12;
         var rt = rng.sample(range(1, hiO).filter(function (x) { return parityOf(x) === oddPar; }), n);
@@ -366,7 +369,7 @@
     var r = null, err = null;
     for (var attempt = 0; attempt < 80; attempt++) {
       try {
-        r = buildRound(topic, age, lang, rng, ri, level, !!o.short);
+        r = buildRound(topic, age, lang, rng, ri, level, !!o.short, o.maxDrums ? clampI(o.maxDrums, 2, MAX_DRUMS) : MAX_DRUMS);
         err = validate(r);
         if (!err && attempt < 60 && used.indexOf(r.key) >= 0) err = 'the same set as an earlier round';
         if (!err && attempt < 40 && sameAnswer(r, o.prevAns, o.prevAnsRun)) err = 'the same answer as the previous round';
@@ -392,7 +395,7 @@
     if (!r || !r.drums || !r.steps || !r.song) return 'no drums / steps / song';
     var i, j, ids = {}, nC = r.drums.length, age = r.age, ri = r.roundIndex, beat = beatMode(r.topic, age);
     if (beat) return validateBeat(r);
-    if (nC < 2 || nC > MAX_DRUMS) return nC + ' drums';
+    if (nC < 2 || nC > MAX_DRUMS || nC > (r.maxDrums || MAX_DRUMS)) return nC + ' drums';
     var real = [], extra = [];
     for (i = 0; i < nC; i++) {
       var c = r.drums[i], t = c.thing;
@@ -415,6 +418,7 @@
     var nS = real.length, lvl0 = r.level === 0, wantD, oe = r.topic === 'oddeven';
     if (oe) {
       if (nS < 2 || nS > 3 || extra.length < 1 || extra.length > 2) return 'oddeven ' + nS + ' + ' + extra.length;
+      if (nC > (r.maxDrums || MAX_DRUMS)) return nC + ' drums > ' + r.maxDrums;
     } else {
       if (ri === 0) { if (nS !== 2 || extra.length) return 'warm-up ' + nS + ' + ' + extra.length; }
       else {
@@ -423,6 +427,7 @@
         if (extra.length !== wantD) return 'distractors ' + extra.length + ' (want ' + wantD + ')';
         var lo = age <= 3 ? 2 : age === 4 ? 3 : age === 5 ? 3 : 4, hi = age <= 4 ? lo : 4;
         if (r.short || r.topic === 'size') lo = hi = 2;
+        if (r.maxDrums && r.maxDrums < MAX_DRUMS) { hi = Math.min(hi, r.maxDrums - wantD); lo = Math.min(lo, hi); }
         if (r.topic === 'colors' && age < COLOR_SAFE_BELOW) { hi = Math.min(hi, maxSafe(age) - wantD); lo = Math.min(lo, hi); }
         if (nS < lo || nS > hi) return nS + ' targets not in ' + lo + '–' + hi;
       }
@@ -492,7 +497,7 @@
         if (nS !== 2 || real.some(function (q) { return q.thing.kind !== 'drum'; })) return 'size: 2 drums';
         var a0 = real[0].thing, a1 = real[1].thing;
         if (a0.color !== a1.color || [a0.size, a1.size].sort().join() !== 'big,small') return 'size pair';
-        if (extra.some(function (q) { return q.thing.kind === 'drum' || q.thing.size; })) return 'size distractor';
+        if (extra.some(function (q) { return q.thing.kind !== 'drum' || q.thing.size !== 'mid' || q.thing.color === a0.color || q.thing.nameKind !== 'color'; })) return 'size distractor';
         break;
       }
       case 'animals': case 'initial':
@@ -537,7 +542,7 @@
     var ns = r.steps.map(function (s) { return s.need; }), k = ri === 0 ? 2 : r.short ? 2 : 3;
     if (ns.length !== k) return 'beat: ' + ns.length + ' steps (want ' + k + ')';
     if (ri === 0 && ns.join() !== '1,2') return 'beat warm-up ' + ns.join();
-    if (ri > 0 && Math.max.apply(null, ns) < 3) return 'beat: no n ≥ 3';
+    if (ri > 0 && (Math.max.apply(null, ns) < 3 || Math.min.apply(null, ns) < 2)) return 'beat: n 2–5 with one ≥ 3 after the warm-up';
     for (var i = 0; i < r.steps.length; i++) {
       var s = r.steps[i];
       if (s.mode !== 'beat' || s.promptKey !== 'p.beat' || !s.params || s.params.n !== s.need || s.nameKind !== 'number' || s.nameValue !== s.need) return 'beat step prompt';

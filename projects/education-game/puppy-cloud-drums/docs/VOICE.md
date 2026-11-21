@@ -1,7 +1,7 @@
 # Bibi's Cloud Drums — Voice, language and input
 
 Files: `game/js/i18n.js` (`CD.I18N`), `game/js/voice.js` (`CD.Voice`), `game/js/input.js` (`CD.Input`).
-Tests: `node tests/unit/i18n_voice.test.js` (≈ 34 500 checks, self-contained): every key in both languages with identical
+Tests: `node tests/unit/i18n_voice.test.js` (≈ 42 400 checks, self-contained): every key in both languages with identical
 key sets **and identical `{params}`**, every `ui.*` / `talk.*` / `topic.*` / surprise key that `index.html` / `ui.js` / `main.js`
 use, 3 wordings per instruction and reaction, Vietnamese lines carry diacritics and a warm "Bé ơi … nhé!" wording, every
 prompt × colour / shape / size / animal / n (beat 1–10, dots 1–12, EN plurals and "once"), every name kind × value (DESIGN §6
@@ -40,8 +40,10 @@ The engine (voice queue, iOS fixes, matcher, kid-proofing) is the proven one fro
   nhé!"). Spoken answers may be the sound ("moo", "ụt ịt", "ut it").
 - **Colours**: `name('vi','color','red')` = **"màu đỏ"**; VI lines put `{color}` right after the noun ("trống {color}" →
   "trống màu đỏ") and **never write "màu {color}"** (tested). Bare form (`hue`) "đỏ".
-- **Counting by beating** (ages ≤ 4): "Beat the big drum three times!" (n = 1 "once") / "Bé gõ trống to ba cái nhé!" (classifier
-  **cái** for strikes); each beat is counted aloud with the plain number word ("One!" / "Một!"); stopping halfway → "Two! One
+- **Counting by beating** (ages ≤ 4): **the number comes first** (playtest P1-1: a fast drummer starts on the first word)
+  — "Three times! Beat the big drum three times!" (n = 1 "Once! Beat the big drum once!") / "Ba cái nhé! Bé gõ trống to ba
+  cái nhé!" (n = 1 "Một cái thôi nhé! …"; classifier **cái** for strikes); a beat ask never gets a `next` opener ("Next
+  one!") and is the one VI prompt without "Bé ơi"; each beat is counted aloud with the plain number word ("One!" / "Một!"); stopping halfway → "Two! One
   more!" / "Hai rồi! Thêm một cái nữa!". Age 5+ counting = drums with dots ("Boom the drum with seven dots!").
 - **Never negative**: a wrong drum names what was tapped, then the goal ("That’s the blue drum. Let’s boom the red one!" /
   "Đây là trống màu xanh dương. Mình gõ trống màu đỏ nhé!"). Brushes, cymbal taps and taps on the sky are never mistakes and
@@ -64,8 +66,8 @@ is missing, the drum is rebuilt from `e.got` {nameKind, nameValue} + topic (+ `p
 
 | function | returns |
 |---|---|
-| `t(lang, key, params?, rng?)` | the line (a random variant). Raw params are named: `{color:'red'}`, `{shape:'star'}`, `{animal:'cow'}` (also gives `{sound}`, `{word}`), `{size:'big'}` / `{big:true}`, `{n:3}` (gives `{num}`, `{times}`, `{items}`), `{i, n}` (gives `{done}`, `{left}`); `{thing:{…}}` → its drum phrase; `{kind,value}` / `{nameKind,nameValue}` objects are named |
-| `ask(lang, promptKey, params, {next?, rng?})` | the step prompt; `next:true` → "Next one! Boom the red drum!" / "Now, who says moo? …" / "Giờ thì bé gõ …" |
+| `t(lang, key, params?, rng?)` | the line (a random variant). Raw params are named: `{color:'red'}`, `{shape:'star'}`, `{animal:'cow'}` (also gives `{sound}`, `{word}`), `{size:'big'}` / `{big:true}`, `{n:3}` (gives `{num}`, `{times}`, `{items}`), `{n}` also gives `{timesHead}` (the leading number: "Three times" / "Ba cái", vi n = 1 "Một cái thôi"), `{i, n}` (gives `{done}`, `{left}`); `{thing:{…}}` → its drum phrase; `{kind,value}` / `{nameKind,nameValue}` objects are named |
+| `ask(lang, promptKey, params, {next?, rng?})` | the step prompt; `next:true` → "Next one! Boom the red drum!" / "Now, who says moo? …" / "Giờ thì bé gõ …"; **`p.beat` ignores `next`** (its number stays the first word) |
 | `sayRight(lang, e, rng?)` | `right` → "Boom! The red drum!", "The red drum! Boom!", "Boom! The big drum!", "Boom! The blue star drum!" (p.shapes5 only), "Boom! Letter B!" · vi "Bùm! Trống màu đỏ!", "Trống ngôi sao! Bùm!"; **animals** "Moo! The cow!" / "Ùm bò! Con bò!"; **beat** (`e.count {n}` or the step's `params.n`) "Three! You beat it three times!" / "Ba! Bé gõ đủ ba cái rồi!"; dots: "Boom! The drum with seven dots!" (with `e.count` the run "One, two, … seven dots!"); add/sub "Five! 2 + 3 is five!"; oddeven "Seven is odd!"; initial "C is for cow!" / "Chữ Ê, ếch!" |
 | `sayWrong(lang, e, rng?)` | `wrong` → colours "That’s the blue drum. Let’s boom the red one!"; shapes "That’s the circle drum. Let’s boom the triangle drum!"; shapes5 "That’s the red star drum. Let’s boom the blue star drum!"; size "That’s the small drum. Let’s boom the big one!" / "Đây là trống nhỏ. Mình gõ trống to nhé!"; animals "The duck says quack! Let’s find the cow!"; dots "That drum has four dots. Let’s boom the drum with six dots!" / "Trống này có bốn chấm. Mình gõ trống có sáu chấm nhé!"; letters "That’s letter D. Let’s boom letter B!"; maths "That’s number six. Let’s count again!"; parity "Four is even! Let’s look for another one!"; initial "Cat starts with C! Let’s look again!"; a beat step never has a wrong (defensive: `wrong.any`) |
 | `sayCount(lang, i)` | "Zero!" … "Twenty!" (= `count.<i>`; beyond 20 the digits) — one beat counted aloud |
@@ -101,7 +103,7 @@ speech is log-only for `speed > 1` (`Voice.setSpeed(n)`, also read from `?speed=
 | `round {round, surprise}` | `t('enter')` in the bubble ("Here come the drums!"), not spoken — the prompt follows | — |
 | `drumIn {id, i, x, y}` | — (a soft cushion "poof" + boom per landing drum) | no line |
 | `land {id, x, y}` | — (dust puff / cushion squish sound only) | no line |
-| `ask {promptKey, params, mode, step, first}` | `ask(lang, promptKey, params, {next: !first && step > 0})` — bubble + voice ("Beat the big drum three times!", "Who says moo? Tap the cow!"); remember it for `pokeBibi` / `idle` | **protected prompt** (`priority: true`) |
+| `ask {promptKey, params, mode, step, first}` | `ask(lang, promptKey, params, {next: !first && step > 0})` — bubble + voice ("Three times! Beat the big drum three times!", "Who says moo? Tap the cow!"; for a beat ask main may open the count once the first word has been spoken — world `beatListen` 0.9 s is the fallback); remember it for `pokeBibi` / `idle` | **protected prompt** (`priority: true`) |
 | `ring {id, thing, note, judged, brush?}` | — (the drum's boom; a brush softer) | no line ever |
 | `count {id, i, n, x, y}` (beat mode) | `sayCount(lang, i)` ("One!", "Two!" / "Một!", "Hai!") for **i < n**; for i === n say nothing — the `right` line that follows starts with that number | **interrupt** (cuts the previous count word / the prompt); no queue; light the card dot with it |
 | `right {id, thing, x, y, count?}` | `sayRight(lang, e)` — beat: "Three! You beat it three times!"; animals "Moo! The cow!"; others "Boom! The red drum!" | interrupt (feedback), never over a protected prompt (then queue) — **except beat mode: interrupt always** (it follows the child's last beat); then protected |
@@ -116,7 +118,7 @@ speech is log-only for `speed > 1` (`Voice.setSpeed(n)`, also read from `?speed=
 | `pokeBibi` | repeat the current prompt (> 3 s after it was asked, not while Bibi is still saying it); with no prompt (song / out) `t('bibi.poke')` ("Woof woof! Hi there!") | interrupt |
 | `cymbalTap {x, y}` | `t('cymbal.tap')` ("Tsss!" / "Xoảng!") — **rarely**: at most once per 8 s and only when nothing is speaking; otherwise just the soft crash | never over a prompt; no queue |
 | `roundDone {round, stars, misses}` | ONE line: `t('great')` (0 misses, "Beautiful drumming, {child}!") or `t('praise')` | **queue** (never cut the right line); skip if a praise started < 1.2 s ago |
-| `songAsk {}` | `t('song')` ("Now play our song — tap the drums!" / "Giờ mình cùng chơi bài hát nhé — bé gõ các trống nào!") the first time in a chapter, then `t('songShort')` ("Now our song!") + bubble | queue after the praise, protected like a prompt |
+| `songAsk {}` | `t('song')` ("Now play our song — tap the drums!" / "Mình chơi nhạc nào! Bé gõ trống nhé!", ≈ 2.5 s, ≤ 10 words) **once per session** (playtest P2-2), then `t('songShort')` ("Our song!" / "Chơi nhạc nào!", ≤ 3 words) + bubble | queue after the praise, protected like a prompt |
 | `songNote {id, i, note}` | — (the wave; duck the music) | |
 | `cymbal {x, y}` | — (the crash at the end of the song: Bibi `cheer`) | no line |
 | `songDone {auto}` | `t('songDone')` ("What a band!" / "Ban nhạc hay quá!") **only after the last song of a chapter** (before `levelDone`); otherwise no line — the wave + crash is the reward (playtest P1-2: less talk per round) | queue |
@@ -148,7 +150,8 @@ switch them to the beat rules above (`e.count` → beat right line; `count` → 
 - **Prompts** (3 wordings; required params → else the fallback) — what content.js sends: `p.colors {color}` ("Boom the red
   drum!" / "Bé ơi, gõ trống màu đỏ nhé!"), `p.shapes {shape}` (a `{color}` param is ignored), `p.shapes5 {shape, color}` (→
   `p.shapes`), `p.size {size}` or `{big}` (→ `p.sizeAny`), `p.animals {animal}` (+ derived `{sound}`: "Who says moo? Tap the
-  cow!"), **`p.beat {n}`** ("Beat the big drum three times!" / "… once!"; `{times}`; vi "Bé gõ trống to ba cái nhé!"),
+  cow!"), **`p.beat {n}`** (number first: "Three times! Beat the big drum three times!" / "Once! Beat the big drum once!"; `{timesHead}`,
+  `{times}`; vi "Ba cái nhé! Bé gõ trống to ba cái nhé!", n = 1 "Một cái thôi nhé! …"; no `next` opener),
   `p.count {n, kind 'dots'}` ("Boom the drum with seven dots!" / "Bé ơi, gõ trống có bảy chấm nhé!"), `p.letters {letter}`,
   `p.lower {letter, small}`, `p.initial {letter, animal}`, `p.add {a, b}`, `p.sub {a, b}`, `p.oddeven {parity}`; `p.any`;
   `p.next` ("Next one!", "One more!", "Now," / "Tiếp nào!", "Thêm nữa nhé!", "Giờ thì").
@@ -156,8 +159,8 @@ switch them to the beat rules above (`e.count` → beat right line; `count` → 
   **`right.beat {num, times}`**, `right.parity {num, parity}`, `right.initial {letter, word}`, `right.sum {expr, ans}`,
   `right.any` ("Boom! Lovely!" / "Bùm! Hay quá!"), `countDone {num, items}`, **`beatNudge {done, left}`** (from `{i, n}`),
   `lantern`, `wrong.thing {got, want}`, **`wrong.animal {got, gotSound, want, sound}`**, `wrong.count {got, want}`,
-  `wrong.math {got}`, `wrong.parity {num, parity}`, `wrong.initial {word, first}`, `wrong.any`, `stepDone`, `song`,
-  `songShort`, `songDone {child}`, **`cymbal.tap`**, `enter`, `surprise.lamb`, `lamb.tap`, `surprise.bird`, `bird.tap`,
+  `wrong.math {got}`, `wrong.parity {num, parity}`, `wrong.initial {word, first}`, `wrong.any`, `stepDone`, `song` (VI ≤ 10 words),
+  `songShort` (≤ 3 words), `songDone {child}`, **`cymbal.tap`**, `enter`, `surprise.lamb`, `lamb.tap`, `surprise.bird`, `bird.tap`,
   `surprise.fireflies`, `firefly.tap`, `bibi.poke`, `hint`, `idle {child}`, `praise`, `great {child}`, `party`,
   `session.done {stars}`, `count.0..20`.
 - **Talk** (content.js `makeTalk` → `promptKey 'talk.<topic>'`): `talk.intro, talk.right`; `talk.colors` "What colour is this

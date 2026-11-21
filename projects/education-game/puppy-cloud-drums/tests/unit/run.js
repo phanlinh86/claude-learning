@@ -187,8 +187,8 @@ test('layout: DESIGN §2 boxes — ground, bubble, Bibi, cymbal, stage, garland 
     const bb = L.bubble.y + L.bubble.h;
     // cymbal: decoration on the ground where the fire was
     assert.strictEqual(L.cymbal.y, L.groundY - 6);
-    if (L.portrait) { assert.strictEqual(L.cymbal.x, v.W - ins.right - 120); assert.strictEqual(L.cymbal.s, 0.9); }
-    else { assert.strictEqual(L.cymbal.x, L.bibi.x + 150); assert.strictEqual(L.cymbal.s, 1); }
+    if (L.portrait) { assert.strictEqual(L.cymbal.x, v.W - ins.right - 120); assert.strictEqual(L.cymbal.s, 1.1); }
+    else { assert.strictEqual(L.cymbal.x, L.bibi.x + 180); assert.strictEqual(L.cymbal.s, 1); }
     assert.deepStrictEqual(L.cymbalBox, { x: L.cymbal.x - L.cymbal.w / 2, y: L.cymbal.y - L.cymbal.h, w: L.cymbal.w, h: L.cymbal.h });
     // stage
     if (L.portrait) { assert.strictEqual(L.stage.x0, ins.left + 36); assert.strictEqual(L.stage.x1, v.W - ins.right - 36); }
@@ -198,14 +198,14 @@ test('layout: DESIGN §2 boxes — ground, bubble, Bibi, cymbal, stage, garland 
     assert.ok(L.garland.x0 >= ins.left && L.garland.x1 <= v.W - ins.right);
     // item: sized for THIS round's n — iPad: ≤ the base item (≥ itemMin); phones / tall: up to itemCap 150
     const base = ITEM[age], big = L.tall || L.phone;
-    assert.ok(L.item >= CFG.itemMin[age] && L.item <= (big ? 150 : base), tag + ' item ' + L.item);
-    if (big) assert.ok(2 * L.hitR >= 184 - 1e-6, tag + ' phone hit diameter ≥ 184 (100 css px)');
+    assert.ok(L.item >= CFG.itemMin[age] && L.item <= (L.tall ? 170 : big ? 150 : base), tag + ' item ' + L.item);
+    if (big) assert.ok(2 * L.hitR >= 200 - 1e-6 && L.hitMin === 100, tag + ' phone hit diameter ≥ 200 (100 css px on a 360 px phone)');
     else assert.strictEqual(L.hitR, 0.6 * L.item + 14);
     if (!big && nC <= 3) assert.strictEqual(L.item, base, tag + ' iPad keeps the base item');
     assert.deepStrictEqual(L.cushion, { w: 1.25 * L.item, h: 0.32 * L.item });
     if (beat) {
       assert.ok(L.beat && L.beat.size >= L.item && L.beat.size <= Math.round(L.item * 1.45), tag + ' big drum ' + (L.beat && L.beat.size));
-      assert.ok(L.beat.cardH >= 110 && L.beat.cardH <= 140 && ['above', 'side'].includes(L.beat.mode));
+      assert.ok(L.beat.cardH >= 110 && L.beat.cardH <= (L.tall || L.phone ? 170 : 140) && ['above', 'side'].includes(L.beat.mode));
       if (L.beat.mode === 'above') assert.ok(L.beat.size >= Math.round(L.item * 1.3) - 2, tag + ' above: still a clearly big drum');
     } else {
       assert.strictEqual(L.beat, null);
@@ -237,7 +237,8 @@ function checkRound(w, tag) {
       const sp = c.padX - G[i - 1].c.padX, dy = Math.abs(c.padBase - G[i - 1].c.padBase);
       if (L.zig) assert.ok(sp >= 0.95 * u - 1e-6 && sp <= 1.3 * u + 1e-6, `${tag} zig spacing ${sp.toFixed(1)}`);
       else assert.ok(sp >= 1.18 * u - 1e-6 && sp >= L.spK * u - 1e-6 && sp <= 1.7 * u + 1e-6, `${tag} pad spacing ${sp.toFixed(1)} (u ${u})`);
-      if (!L.zig && !L.tight && !p.clipped && !L.pads[i - 1].clipped) assert.ok(dy >= 24 - 1e-6, `${tag} staggered neighbours ${dy.toFixed(1)}`);
+      if (p.flat) assert.ok(dy < 1e-6, tag + ' size rounds: one line');
+      else if (!L.zig && !L.tight && !p.clipped && !L.pads[i - 1].clipped) assert.ok(dy >= 24 - 1e-6, `${tag} staggered neighbours ${dy.toFixed(1)}`);
       if (L.zig) assert.ok(dy >= 1.35 * u + 46 - 2 * 8 - 1e-6 || p.clipped || L.pads[i - 1].clipped, `${tag} zig rows ${dy.toFixed(0)}`);
       // bodies (incl. the hop) never overlap a neighbour's body or cushion
       const q = G[i - 1];
@@ -279,8 +280,9 @@ function checkCard(w, tag) {
   assert.ok(box.x >= L.ins.left && box.x + box.w <= L.W - L.ins.right && box.y > bb + 4, tag + ' card on screen, below the bubble');
   for (const k of L.keep) assert.ok(!boxHit(box, k), tag + ' card overlaps the ' + k.kind);
   assert.ok(box.y >= L.lanternBottom + 8 - 1e-6, `${tag} card top ${box.y.toFixed(0)} below the lanterns ${L.lanternBottom}`);
-  const body = { x: c.padX - c.bw / 2, y: c.padBase - c.bh - CFG.hopMax - CFG.bobAmp, w: c.bw, h: c.bh + CFG.hopMax };
-  assert.ok(!boxHit(box, body), tag + ' card clear of the bouncing drum');
+  const ring = CFG.ringK * c.size, body = { x: c.padX - c.bw / 2 - CFG.ringSideK * c.size, y: c.padBase - c.bh - CFG.hopMax - ring - CFG.bobAmp, w: c.bw + 2 * CFG.ringSideK * c.size, h: c.bh + CFG.hopMax + ring };
+  assert.ok(!boxHit(box, body), tag + ' card clear of the bouncing drum and its sound rings');
+  if (L.tall || L.phone) assert.ok(K.h === 170 || K.h >= 110, tag + ' phone card');
   assert.ok(!boxHit(box, L.bibiBox) && !boxHit(box, L.cymbalBox), tag + ' card clear of Bibi / the cymbal');
 }
 
@@ -348,9 +350,13 @@ test('layout: iPhone 393×852 / 852×393 + iPads — every hit circle ≥ 100 cs
     const v = dev('dev', cw, ch, ci), k = v.k, phone = Math.max(cw, ch) / Math.min(cw, ch) > 1.9;
     for (const age of AGES) for (const topic of CD.AGE_POOLS[age]) for (const ri of [0, 1, 2, 3]) {
       const w = roundOf(mkWorld({ age, vp: v, seed: ri * 7 + age }), topic, ri), n = w.drums.length, L = w.layout, tag = `${cw}×${ch} age ${age} ${topic} r${ri} n ${n}`;
-      if (phone) for (const c of w.drums) assert.ok(2 * w.drumHit(c.id).r * k >= 100 - 0.5 || c.thing.size === 'small', tag + ' hit ' + (2 * w.drumHit(c.id).r * k).toFixed(0) + ' css');
-      if (phone && n <= 4) assert.ok(L.item * k >= 80, `${tag} drawn ${(L.item * k).toFixed(0)} css px`);
-      if (phone && L.portrait && n === 5) assert.ok(L.zig, tag + ' zig-zag');
+      if (phone) for (const c of w.drums) assert.ok(2 * w.drumHit(c.id).r * k >= 100 - 0.5, tag + ' hit ' + (2 * w.drumHit(c.id).r * k).toFixed(0) + ' css (the small drum too)');
+      if (phone && n <= 4) assert.ok(L.item * L.kMax * k >= 80 && (topic !== 'size' || L.item * k >= 70), `${tag} drawn ${(L.item * k).toFixed(0)} css px`);   // size rounds: one line, the big drum ≥ 80 css
+      if ((phone || L.tall) && age >= 5) assert.ok(n <= 4, tag + ' ≤ 4 drums on phones');
+      if (L.portrait && !w._beat && !L.tight) {   // the band is centred between the lanterns and Bibi's head (unless clamped)
+        const top = Math.min(...w.drums.map(c => c.padBase - c.bh)), bot = Math.max(...w.drums.map(c => c.padBase + c.cushionH)), mid = (L.lanternBottom + L.floor) / 2;
+        assert.ok(Math.abs((top + bot) / 2 - mid) < 0.12 * (L.floor - L.lanternBottom) + 30, `${tag} band centre ${((top + bot) / 2).toFixed(0)} vs ${mid.toFixed(0)}`);
+      }
       if (w._beat) assert.ok(w.drums[0].size * k >= (phone ? 95 : 100), tag + ' the big drum is big');
       checkRound(w, tag);
       if (w._beat) checkCard(w, tag);
@@ -359,7 +365,9 @@ test('layout: iPhone 393×852 / 852×393 + iPads — every hit circle ≥ 100 cs
   // per round: a 2-drum warm-up gets bigger drums than a 5-drum round on the same phone
   const v = dev('iPhone', 393, 852, { top: 59, bottom: 34 });
   const w2 = roundOf(mkWorld({ age: 6, vp: v }), 'add', 0), i2 = w2.layout.item;
-  roundOf(w2, 'add', 2); assert.ok(w2.drums.length === 5 && w2.layout.item < i2 && w2.layout.zig);
+  roundOf(w2, 'add', 2); assert.ok(w2.drums.length === 4 && w2.layout.item <= i2, 'phones: 4 drums at age 6');
+  const L5 = CD.World.computeLayout(v.W, v.H, v.ins, {}, 6, null, 5); assert.ok(L5.fits && L5.zig, '5 drums (after a rotation) still stand in a zig-zag');
+  const vt = dev('tall', 360, 880), L3 = CD.World.computeLayout(vt.W, vt.H, vt.ins, {}, 4, null, 2); assert.ok(L3.item === 170, 'tall phone item 170 (' + L3.item + ')');
 });
 
 // ================================================================ content
@@ -447,10 +455,10 @@ test('content: topic rules — colour drums, shape drums (one colour < 5, no con
     const s5 = C.makeRound('shapes', { age: 5, rng: rng(), roundIndex: 2 });
     assert.strictEqual(s5.steps[0].promptKey, 'p.shapes5');
     const sz = C.makeRound('size', { age: 3, rng: rng(), roundIndex: 2 });
-    const dr = sz.drums.filter(c => c.thing.kind === 'drum');
+    const dr = sz.drums.filter(c => c.target);
     assert.strictEqual(dr.length, 2); assert.deepStrictEqual(dr.map(c => c.thing.size).sort(), ['big', 'small']);
     assert.strictEqual(dr[0].thing.color, dr[1].thing.color);
-    assert.ok(sz.drums.filter(c => !c.target).every(c => c.thing.kind === 'animal'));
+    assert.ok(sz.drums.length === 3 && sz.drums.filter(c => !c.target).every(c => c.thing.kind === 'drum' && c.thing.size === 'mid' && c.thing.color !== dr[0].thing.color), 'mid-size distractor of another colour');
     assert.ok(sz.steps.every(st => st.promptKey === 'p.size' && ['big', 'small'].includes(st.params.size)));
     // beat mode (count, age 4): warm-up 1, 2; later 3 steps (2 when short) of distinct n in 1–5 with one ≥ 3
     for (const ri of [0, 1, 2, 3]) for (const short of [false, true]) {
@@ -459,7 +467,7 @@ test('content: topic rules — colour drums, shape drums (one colour < 5, no con
       assert.ok(bt.drums.length === 1 && bt.drums[0].thing.kind === 'big' && bt.drums[0].target);
       assert.ok(bt.steps.every(st => st.mode === 'beat' && st.promptKey === 'p.beat' && st.params.n === st.need && st.targets[0] === bt.drums[0].id));
       if (ri === 0) assert.deepStrictEqual(ns, [1, 2]);
-      else { assert.strictEqual(ns.length, short ? 2 : 3); assert.ok(Math.max(...ns) >= 3 && new Set(ns).size === ns.length && ns.every(x => x >= 1 && x <= 5)); }
+      else { assert.strictEqual(ns.length, short ? 2 : 3); assert.ok(Math.max(...ns) >= 3 && new Set(ns).size === ns.length && ns.every(x => x >= 2 && x <= 5), 'n 2–5 after the warm-up'); }
       assert.deepStrictEqual(bt.song, bt.steps.map(() => bt.drums[0].id));
     }
     const d5 = C.makeRound('count', { age: 5, rng: rng(), roundIndex: 2 }), ns = d5.drums.map(c => c.thing.n);
@@ -890,8 +898,13 @@ test('world: beat mode — ONE big drum; the number card pops up above / beside 
   assert.strictEqual(w.lanterns.length, w.cur.steps.length, 'one lantern per beat step');
   run(w, 0.3);
   assert.ok(w.card && w.card.n === n && w.card.lit === 0 && w.card.pop > 0.95, 'card popped up');
-  assert.ok(Math.abs(w.card.x - (w.layout.beat.mode === 'side' ? c.padX + c.bw / 2 + CFG.cardSide + w.card.w / 2 : c.padX)) < 1e-6);
+  assert.ok(Math.abs(w.card.x - (w.layout.beat.mode === 'side' ? c.padX + c.bw / 2 + CFG.cardSide + CFG.ringSideK * c.size + w.card.w / 2 : c.padX)) < 1e-6);
   checkCard(w, 'beat');
+  // beatListen: a beat in the first 0.9 s after the ask booms but does not count (the child hears the number first)
+  tapDrum(w, c.id);
+  let e0 = evs(w);
+  assert.ok(!e0.some(x => x.type === 'count') && e0.some(x => x.type === 'ring' && x.brush && x.beat), 'listening');
+  run(w, 0.75);
   const counts = [], rings = [];
   let right = null, step = null;
   const collect = () => { for (const e of evs(w)) { if (e.type === 'count') counts.push(e); if (e.type === 'ring') rings.push(e); if (e.type === 'right') right = e; if (e.type === 'stepDone') step = e; if (e.type === 'wrong') assert.fail('no wrong in beat mode'); } };
@@ -921,7 +934,7 @@ test('world: beat mode — ONE big drum; the number card pops up above / beside 
 test('world: beat mode — taps beside the drum are soft (hint at 2, assist at 3: the next band press counts a beat, ≤ 2★); a partial count nudges after 4 s (beatNudge {i, n}) with the idle backoff; no wrong is possible', () => {
   const w = beatWorld({ seed: 2 });
   const c = w.drums[0], n = w.stepInfo.need;
-  run(w, 0.5);
+  run(w, 1.0);
   tapDrum(w, c.id); evs(w);
   const t0 = w.time, nudges = [];
   run(w, 12, () => { for (const e of evs(w)) if (e.type === 'beatNudge' || e.type === 'idle') nudges.push(Object.assign({ t: +(w.time - t0).toFixed(2) }, e)); });
@@ -949,7 +962,7 @@ test('world: beat mode — warm-up 1 + 2 beats, short rounds 2 steps, the song p
   solveRound(w);
   assert.strictEqual(w.state, 'roundDone');
   const log = []; const t0 = w.time;
-  run(w, 8, () => { for (const e of evs(w)) log.push(Object.assign({ t: w.time - t0 }, e)); });
+  run(w, 10, () => { for (const e of evs(w)) log.push(Object.assign({ t: w.time - t0 }, e)); });
   const notes = log.filter(x => x.type === 'songNote');
   assert.strictEqual(notes.length, 3);
   for (let i = 1; i < 3; i++) assert.ok(Math.abs(notes[i].t - notes[i - 1].t - 0.3) < 0.02);
@@ -1034,7 +1047,7 @@ test('world: an assisted note caps the round at 2★', () => {
 });
 
 // ================================================================ world: song + out
-test('world: song — roundDone {stars} → songAsk + a ghost-hand swipe; nobody touches → auto after 4 s: every drum left → right 0.18 s apart (each hops), lanterns flash; cymbal {x, y} 0.25 s after the last note; songDone {auto} 0.6 s later; out; songs[]', () => {
+test('world: song — roundDone {stars} → songAsk + a ghost-hand swipe; nobody touches → auto after 6 s: every drum left → right 0.18 s apart (each hops), lanterns flash; cymbal {x, y} 0.25 s after the last note; songDone {auto} 0.6 s later; out; songs[]', () => {
   const w = roundOf(mkWorld({ age: 4 }), 'colors', 1);
   solveRound(w);
   let e = evs(w);
@@ -1044,7 +1057,7 @@ test('world: song — roundDone {stars} → songAsk + a ghost-hand swipe; nobody
   assert.deepStrictEqual(w.answer(), { song: true });
   const ids = w.drums.map(c => c.id);
   const log = []; const t0 = w.time - w.phaseTime; const moods = new Set(), handX = []; let maxHop = 0, maxCym = 0;
-  run(w, 8, () => {
+  run(w, 10, () => {
     if (w.hintHand && w.hintHand.mode === 'swipe') handX.push(w.hintHand.x);
     if (w.phase === 'song' && w._song && w._song.started) { moods.add(w.bibi.mood); maxHop = Math.max(maxHop, ...w.drums.map(c => c.hop)); }
     maxCym = Math.max(maxCym, Math.abs(w.cymbal.tilt));
@@ -1126,19 +1139,23 @@ test('world: out — every drum ends gone (pop 0, alpha 0), lanterns stay lit un
 });
 
 // ================================================================ world: surprises
-test('world: lamb — 3–5 s (≤ the round length) after the ask it trots in from the right along the ground, stops near the middle (clear of Bibi and the cymbal), sniffs, leaves after ≈ 7 s; tap → puffs into a ball, rolls 40 px, un-puffs', () => {
-  for (const v of [VIEWPORTS[0], VIEWPORTS[7], VIEWPORTS[2], VIEWPORTS[8]]) {
-    const w = roundOf(mkWorld({ age: 4, surprise: true, vp: v }), 'colors', 1, { surprise: 'lamb' });
+test('world: lamb — 3–5 s (≤ the round length; ages ≤ 4: 1 s, starting just inside the edge) after the ask it trots in from the right along the ground, stops near the middle (clear of Bibi and the cymbal), sniffs, leaves after ≈ 7 s; tap → puffs into a ball, rolls 40 px, un-puffs', () => {
+  for (const [v, age] of [[VIEWPORTS[0], 4], [VIEWPORTS[7], 6], [VIEWPORTS[2], 3], [VIEWPORTS[8], 5], [VIEWPORTS[9], 4]]) {
+    const w = roundOf(mkWorld({ age, surprise: true, vp: v }), age >= 6 ? 'add' : 'colors', 1, { surprise: 'lamb' });
     const t0 = w.time; let ev = null;
     until(w, () => { for (const e of evs(w)) if (e.type === 'lamb') ev = w.time - t0; return !!w.lamb; });
-    const late = Math.max(2, w.cur.steps.reduce((a, s2) => a + s2.need, 0) * 1.8 - 1);
-    assert.ok(ev >= Math.min(3, late) - 0.02 && ev <= Math.min(5, late) + 0.05, 'at ' + ev + ' (≤ ' + late + ')');
+    const late = Math.max(2, w.cur.steps.reduce((a, s2) => a + s2.need, 0) * 1.8 - 1), young = age <= 4;
+    if (young) assert.ok(Math.abs(ev - 1) < 0.02, 'young: at 1 s (' + ev + ')');
+    else assert.ok(ev >= Math.min(3, late) - 0.02 && ev <= Math.min(5, late) + 0.05, 'at ' + ev + ' (≤ ' + late + ')');
     const g = w.lamb, L = w.layout;
-    assert.ok(g.x > L.W - L.ins.right && g.dir === -1 && Math.abs(g.y - (L.groundY - 8)) < 1e-6);
+    if (young) assert.ok(g.x <= L.W - L.ins.right - 30 + 1e-6 && w.lambHit(), 'young: starts just inside the edge, tappable at once');
+    else assert.ok(g.x > L.W - L.ins.right);
+    assert.ok(g.dir === -1 && Math.abs(g.y - (L.groundY - 8)) < 1e-6);
     until(w, () => g.state === 'sniff');
     assert.ok(g.x > L.bibiBox.x + L.bibiBox.w + 60 && Math.abs(g.x - L.cymbal.x) > L.cymbal.w / 2 + 60, 'stop spot');
     assert.ok(Math.abs(g.x - L.W / 2) < L.W * 0.3);
     const hh = w.lambHit(); assert.ok(hh, v.name + ' lamb tappable');
+    assert.strictEqual(hh.r, L.phone || L.tall ? 92 : 58);
     assert.ok(!circleBox(hh, L.bibiBox));
     const x0 = g.x;
     assert.strictEqual(w.pointerDown(hh.x, hh.y), 'lamb'); w.pointerUp();
@@ -1150,6 +1167,15 @@ test('world: lamb — 3–5 s (≤ the round length) after the ask it trots in f
     until(w, () => g.state === 'leave', 12 / H);
     run(w, 14); assert.strictEqual(w.lamb, null);
   }
+  // it stays through the song + out and leaves at the next round
+  const w = roundOf(mkWorld({ age: 4, surprise: true }), 'colors', 1, { surprise: 'lamb', config: { lambSniff: 60 } });
+  w.cfg.lambSniff = 60;
+  until(w, () => w.lamb && w.lamb.state === 'sniff');
+  solveRound(w);
+  until(w, () => w.phase === 'out');
+  assert.ok(w.lamb && w.lamb.state === 'sniff' && w.lambHit(), 'still there in the out phase');
+  until(w, () => w.state === 'round');
+  assert.ok(!w.lamb || w.lamb.state === 'leave', 'leaves at the next round');
 });
 
 test('world: bird — lands on the lantern string between lanterns (feet on the string, clear of the bubble / HUD), hops along it, tap → birdTap {note = the last note rung}, leaves after ≈ 7 s', () => {
@@ -1180,7 +1206,7 @@ test('world: bird — lands on the lantern string between lanterns (feet on the 
   }
 });
 
-test('world: fireflies (twinkle stars, the night chapter) — 5 drift down between / above the drums (never on one), glow; tap → fireflyTap (flare + zip off); they leave at the song', () => {
+test('world: fireflies (twinkle stars, the night chapter) — 5 drift down between / above the drums (never on one), glow; tap → fireflyTap (flare + zip off); they stay through the song and leave at the next round', () => {
   for (const v of [VIEWPORTS[0], VIEWPORTS[9], VIEWPORTS[5]]) for (const topic of ['colors', 'count']) {
     const w = roundOf(mkWorld({ age: 4, surprise: true, vp: v }), topic, 2, { surprise: 'fireflies' });
     assert.strictEqual(w.surprise, 'fireflies');
@@ -1192,7 +1218,9 @@ test('world: fireflies (twinkle stars, the night chapter) — 5 drift down betwe
     assert.ok(types(evs(w)).includes('fireflyTap'));
     assert.strictEqual(w.fireflies[fh.i].state, 'zip'); assert.ok(w.fireflies[fh.i].glow > 1);
     solveRound(w);
-    assert.ok(w.fireflies.every(f => f.state === 'zip'));
+    assert.ok(w.fireflies.filter(f => f.state === 'drift').length >= 3, 'they stay for the song');
+    until(w, () => w.state !== 'roundDone');
+    assert.ok(w.fireflies.every(f => f.state === 'zip'), 'and leave at the next round');
   }
 });
 

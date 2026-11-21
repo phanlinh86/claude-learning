@@ -14,7 +14,7 @@
  *   apart; with skill < 1 it sometimes pauses mid-count (p 0.5 × (1 − skill) per beat, 1.5–5 s) and sometimes double-taps
  *   faster than beatGap (p 0.5 × (1 − skill), 0.08–0.15 s: the 2nd tap only booms). Song: swipes left → right across the drum
  *   band (p 0.8) or waits for the auto wave. Talk: answers after 1.0–2.4 s, right with p = skill (always when the answer
- *   glows). Surprises: taps the lamb / bird / a firefly with p = 0.6 per round.
+ *   glows). Surprises: taps the lamb / bird / a firefly with p = 0.6 per round (≈ 0.2 s after it can be tapped, also during the song).
  */
 (function (CD) {
   'use strict';
@@ -117,6 +117,13 @@
     if (this.g) { this._stepGesture(dt); return; }
     var key = w.level + ':' + w.round;
     if (this._key !== key) { this._key = key; this._surp = { lamb: r.chance(0.6), bird: r.chance(0.6), firefly: r.chance(0.6) }; this._t = -1; }
+    // surprises first (they stay through the song + out now): noticed within ≈ 0.2 s
+    var hh = w.lambHit();
+    if (this._surp.lamb && hh && r.chance(0.15)) { this._surp.lamb = false; this.tapAt(hh.x, hh.y); return; }
+    var bh = w.birdHit();
+    if (this._surp.bird && bh && r.chance(0.15)) { this._surp.bird = false; this.tapAt(bh.x, bh.y); return; }
+    var fh = w.fireflyHit();
+    if (this._surp.firefly && fh && r.chance(0.15)) { this._surp.firefly = false; this.tapAt(fh.x, fh.y); return; }
     // song: swipe across the band (or let it play by itself)
     var a = w.answer();
     if (a && a.song) {
@@ -130,12 +137,6 @@
       }
       return;
     }
-    var hh = w.lambHit();
-    if (this._surp.lamb && hh && r.chance(0.03)) { this._surp.lamb = false; this.tapAt(hh.x, hh.y); return; }
-    var bh = w.birdHit();
-    if (this._surp.bird && bh && r.chance(0.03)) { this._surp.bird = false; this.tapAt(bh.x, bh.y); return; }
-    var fh = w.fireflyHit();
-    if (this._surp.firefly && fh && r.chance(0.03)) { this._surp.firefly = false; this.tapAt(fh.x, fh.y); return; }
     if (!w.interactive) return;
     if (this._t < 0) this._t = this._delay();
     this._t -= dt;

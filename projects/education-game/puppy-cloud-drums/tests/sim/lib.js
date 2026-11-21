@@ -178,7 +178,7 @@ class Kid {
     if (key !== this.key) { this.key = key; this.surp = { lamb: r.chance(p.pSurprise), bird: r.chance(p.pSurprise), firefly: r.chance(p.pSurprise) }; }
     for (const [k, fn] of [['lamb', 'lambHit'], ['bird', 'birdHit'], ['firefly', 'fireflyHit']]) {
       const h = w[fn]();
-      if (this.surp[k] && h && r.chance(0.04)) { this.surp[k] = false; this.stats.surprise++; this.tap(h.x + r.float(-0.5, 0.5) * h.r, h.y + r.float(-0.5, 0.5) * h.r); return true; }
+      if (this.surp[k] && h && r.chance(0.12)) { this.surp[k] = false; this.stats.surprise++; this.tap(h.x + r.float(-0.5, 0.5) * h.r, h.y + r.float(-0.5, 0.5) * h.r); return true; }
     }
     return false;
   }
@@ -229,9 +229,9 @@ class Kid {
     this.talkT = -1;
     if (w.state !== 'round' && w.state !== 'roundDone') { this.f.cancel(); return; }
     if (this.f.busy) { if (this.f.step(dt) === 'slip') this.stats.slips++; return; }
+    if (this.surprises()) return;   // surprises stay through the song now
     const a = w.answer();
     if (a && a.song) return this.song(dt);
-    if (this.surprises()) return;
     if (!w.interactive) return;
     if (this.t < 0) this.t = this.rf(p.between);
     this.t -= dt;

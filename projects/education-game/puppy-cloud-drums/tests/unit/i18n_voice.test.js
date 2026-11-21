@@ -186,7 +186,8 @@ eq(I.t('vi', 'ui.voice'), 'Giọng của Bibi', 'vi voice setting names Bibi');
 eq(I.t('en', 'ui.volume'), 'Volume', 'ui.volume');
 eq(I.t('vi', 'ui.volume'), 'Âm lượng', 'vi ui.volume');
 eq(I.t('en', 'ui.listening'), 'Bibi is listening…', 'ui.listening');
-for (const k of PROMPT_KEYS) ok([].concat(I.raw('vi', k)).some(s => /Bé ơi/.test(s)), `vi ${k}: a warm "Bé ơi" wording`);
+for (const k of PROMPT_KEYS) if (k !== 'p.beat') ok([].concat(I.raw('vi', k)).some(s => /Bé ơi/.test(s)), `vi ${k}: a warm "Bé ơi" wording`);
+ok([].concat(I.raw('vi', 'p.beat')).every(s => /^\{timesHead\} (nhé|nào|nha)! Bé gõ/.test(s)), 'vi p.beat: the number first, then "Bé gõ …" (P1-1 wins over "Bé ơi")');
 for (const k of PROMPT_KEYS) ok([].concat(I.raw('vi', k)).some(s => /nhé|nào|nha/.test(s)), `vi ${k}: "nhé / nào"`);
 for (const k of ['p.colors', 'p.shapes', 'p.size', 'p.animals', 'p.beat', 'p.count', 'hint'])
   ok([].concat(I.raw('vi', k)).every(s => /trống/i.test(s)) || k === 'hint', `vi ${k}: says "trống"`);
@@ -249,10 +250,12 @@ eq(I.t('en', 'weather.3'), 'Starry night!', 'weather.3 night');
 ok(/sáng/.test(I.t('vi', 'weather.0')) && /trưa/.test(I.t('vi', 'weather.1')) && /hoàng hôn/i.test(I.t('vi', 'weather.2')) && /sao/.test(I.t('vi', 'weather.3')), 'vi day moods');
 eq(I.t('en', 'enter', null, r0), 'Here come the drums!', 'enter (DESIGN)');
 eq(I.t('en', 'song', null, r0), 'Now play our song — tap the drums!', 'song (DESIGN)');
-eq(I.t('vi', 'song', null, r0), 'Giờ mình cùng chơi bài hát nhé — bé gõ các trống nào!', 'vi song (REQUIREMENT)');
+eq(I.t('vi', 'song', null, r0), 'Mình chơi nhạc nào! Bé gõ trống nhé!', 'vi song: short (playtest P2-2)');
+for (const s of [].concat(I.raw('vi', 'song'))) ok(s.split(/\s+/).length <= 10, `vi song ≤ 10 words (≈ 2.5 s): ${s}`);
+for (const lang of I.langs) for (const s of [].concat(I.raw(lang, 'songShort'))) ok(s.split(/\s+/).length <= 3, `${lang} songShort very short: ${s}`);
 eq(I.t('en', 'songDone', null, r0), 'What a band!', 'songDone (DESIGN)');
 eq(I.t('vi', 'songDone', null, r0), 'Ban nhạc hay quá!', 'vi songDone (REQUIREMENT)');
-eq(I.t('en', 'songShort', null, r0), 'Now our song!', 'songShort');
+eq(I.t('en', 'songShort', null, r0), 'Our song!', 'songShort');
 eq(I.t('en', 'cymbal.tap', null, r0), 'Tsss!', 'cymbal.tap: short');
 ok([].concat(I.raw('en', 'cymbal.tap')).every(s => s.length <= 14) && [].concat(I.raw('vi', 'cymbal.tap')).every(s => s.length <= 20), 'cymbal taps are short');
 eq(I.t('en', 'right.any', null, r0), 'Boom! Lovely!', 'right.any');
@@ -282,11 +285,16 @@ eq(I.ask('en', 'p.size', { size: 'small' }, { rng: r0 }), 'Boom the small drum!'
 eq(I.ask('vi', 'p.size', { size: 'big' }, { rng: r0 }), 'Bé ơi, gõ trống to nhé!', 'p.size vi');
 eq(I.ask('en', 'p.size', { big: true }, { rng: r0 }), 'Boom the big drum!', 'p.size from {big:true}');
 eq(I.ask('en', 'p.size', {}, { rng: r0 }), 'Boom the big drum!', 'p.size without size → p.sizeAny');
-eq(I.ask('en', 'p.beat', { n: 3 }, { rng: r0 }), 'Beat the big drum three times!', 'p.beat en (DESIGN)');
-eq(I.ask('en', 'p.beat', { n: 1 }, { rng: r0 }), 'Beat the big drum once!', 'p.beat n = 1 → "once" (DESIGN)');
-eq(I.ask('en', 'p.beat', { n: 2 }, { rng: r0 }), 'Beat the big drum two times!', 'p.beat n = 2');
-eq(I.ask('vi', 'p.beat', { n: 3 }, { rng: r0 }), 'Bé gõ trống to ba cái nhé!', 'p.beat vi (DESIGN)');
-eq(I.ask('vi', 'p.beat', { n: 1 }, { rng: r0 }), 'Bé gõ trống to một cái nhé!', 'p.beat vi n = 1 → "một cái" (DESIGN)');
+eq(I.ask('en', 'p.beat', { n: 3 }, { rng: r0 }), 'Three times! Beat the big drum three times!', 'p.beat en: the number first (playtest P1-1)');
+eq(I.ask('en', 'p.beat', { n: 1 }, { rng: r0 }), 'Once! Beat the big drum once!', 'p.beat n = 1 → "Once!"');
+eq(I.ask('en', 'p.beat', { n: 2 }, { rng: r5 }), 'Two times! Can you beat the big drum two times?', 'p.beat n = 2');
+eq(I.ask('vi', 'p.beat', { n: 3 }, { rng: r0 }), 'Ba cái nhé! Bé gõ trống to ba cái nhé!', 'p.beat vi: the number first (P1-1)');
+eq(I.ask('vi', 'p.beat', { n: 1 }, { rng: r0 }), 'Một cái thôi nhé! Bé gõ trống to một cái nhé!', 'p.beat vi n = 1 → "Một cái thôi nhé!"');
+for (const lang of I.langs) for (let n = 1; n <= 10; n++) for (let v = 0; v < 3; v++) {
+  const s = I.ask(lang, 'p.beat', { n }, { rng: () => v / 3 }), first = s.split(/[!?]/)[0].toLowerCase();
+  ok(first.startsWith(lang === 'en' && n === 1 ? 'once' : I.numberName(lang, n)), `${lang} p.beat ${n} [${v}] starts with the number: ${s}`);
+  eq(I.ask(lang, 'p.beat', { n }, { next: true, rng: () => v / 3 }), s, `${lang} p.beat ${n} [${v}]: no "next" opener`);
+}
 eq(I.ask('en', 'p.beat', {}, { rng: r0 }), I.t('en', 'p.any', null, r0), 'p.beat without n → p.any');
 eq(I.ask('en', 'p.count', { n: 7, kind: 'dots' }, { rng: r0 }), 'Boom the drum with seven dots!', 'p.count dots (age 5+)');
 eq(I.ask('en', 'p.count', { n: 1 }, { rng: r0 }), 'Boom the drum with one dot!', 'p.count singular, dots by default');
@@ -315,11 +323,11 @@ eq(I.ask('en', 'p.colors', {}, { rng: r0 }), I.t('en', 'p.any', null, r0), 'miss
 eq(I.ask('en', 'p.colors', { color: 'red' }, { next: true, rng: r0 }), 'Next one! Boom the red drum!', 'next en');
 eq(I.ask('en', 'p.animals', { animal: 'cow' }, { next: true, rng: r9 }), 'Now, who says moo? Boom the cow drum!', 'next "Now," runs into the prompt');
 eq(I.ask('vi', 'p.colors', { color: 'red' }, { next: true, rng: r9 }), 'Giờ thì bé gõ trống màu đỏ nào!', 'next vi "Giờ thì bé gõ …"');
-eq(I.ask('en', 'p.beat', { n: 4 }, { next: true, rng: r0 }), 'Next one! Beat the big drum four times!', 'next p.beat');
+eq(I.ask('en', 'p.beat', { n: 4 }, { next: true, rng: r0 }), 'Four times! Beat the big drum four times!', 'next p.beat: no opener, the number first');
 for (const lang of I.langs) for (const k of PROMPT_KEYS) for (let v = 0; v < 3; v++) {
   const P = { color: 'green', shape: 'heart', size: 'small', animal: 'sheep', n: 4, kind: 'dots', letter: 'M', a: 3, b: 1, parity: 'even' };
   const s = I.ask(lang, k, P, { next: true, rng: () => (v + 0.5) / 3 });
-  ok(clean(s) && !/Bé ơi/.test(s.replace(/^Bé ơi/, '')) && !/(nhé|nào)!.*\1!/.test(s), `${lang} ${k} next [${v}]: ${s}`);
+  ok(clean(s) && !/Bé ơi/.test(s.replace(/^Bé ơi/, '')) && (k === 'p.beat' || !/(nhé|nào)!.*\1!/.test(s)), `${lang} ${k} next [${v}]: ${s}`);
   if (lang === 'vi') ok(!/^.+[!?] Bé ơi/.test(s), `vi ${k} next: no "Bé ơi" mid-sentence: ${s}`);
 }
 // every prompt × every value
@@ -578,6 +586,10 @@ eq(I.sayRight('en', { thing: shp('star', 'orange'), topic: 'shapes', promptKey: 
   'Boom! The star drum!', 'right p.shapes with a {color} param: the colour is not said');
 eq(W('en', sdrum(false), { nameKind: 'size', nameValue: 'big' }, 'size', { size: 'big' }), 'That’s the small drum. Let’s boom the big one!', 'wrong size');
 eq(W('vi', sdrum(false), { nameKind: 'size', nameValue: 'big' }, 'size', { size: 'big' }), 'Đây là trống nhỏ. Mình gõ trống to nhé!', 'wrong size vi');
+eq(W('en', { kind: 'drum', color: 'yellow', size: 'mid', big: false, nameKind: 'color', nameValue: 'yellow' }, { nameKind: 'size', nameValue: 'small' }, 'size', { size: 'small', color: 'purple' }),
+  'That’s the yellow drum. Let’s boom the small one!', 'wrong size: a mid-size distractor is named by its colour');
+eq(W('vi', { kind: 'drum', color: 'yellow', size: 'mid', big: false, nameKind: 'color', nameValue: 'yellow' }, { nameKind: 'size', nameValue: 'small' }, 'size', { size: 'small', color: 'purple' }),
+  'Đây là trống màu vàng. Mình gõ trống nhỏ nhé!', 'wrong size vi: mid-size distractor');
 eq(W('en', anim('duck'), { nameKind: 'animal', nameValue: 'cow' }, 'animals', { animal: 'cow' }), 'The duck says quack! Let’s find the cow!', 'wrong animals: the tapped animal\'s sound, then the goal');
 eq(W('vi', anim('duck'), { nameKind: 'animal', nameValue: 'cow' }, 'animals', { animal: 'cow' }), 'Con vịt kêu cạp cạp! Mình tìm trống con bò nhé!', 'wrong animals vi');
 eq(W('en', anim('duck'), { nameKind: 'animal', nameValue: 'cow' }, 'animals', { animal: 'cow' }, null, r5),
@@ -1188,7 +1200,7 @@ asyncTests.push((async function () {
   E.end(); await vv; V2.setVolume(1);
   // sayKey
   const sk = V2.sayKey('p.animals', { animal: 'duck' }, { lang: 'vi' });
-  ok(/con vịt/.test(sk.text) && /cạp cạp/i.test(sk.text) && /gõ/.test(sk.text), 'sayKey renders the vi line: ' + sk.text);
+  ok(/con vịt/.test(sk.text) && /cạp cạp/i.test(sk.text) && /gõ/i.test(sk.text), 'sayKey renders the vi line: ' + sk.text);
   await wait(20); E.end(); await sk;
   // disabled → nothing spoken but logged
   V2.setEnabled(false);

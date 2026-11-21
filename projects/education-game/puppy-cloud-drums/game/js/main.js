@@ -137,7 +137,9 @@
     if (p && p.then) p.then(() => { if (pendingPrompt === txt) { pendingPrompt = null; promptUntil = Math.min(promptUntil, performance.now() + 300); } }, () => {});
     if (!voiceOn()) { pendingPrompt = null; promptUntil = performance.now() + lineMs(txt); }
   }
+  let curDisplay = '', lastLetterbox = '';
   function onVoiceStart(display) {
+    curDisplay = display || '';
     if (pendingPrompt && display === pendingPrompt) { promptStart = performance.now(); promptUntil = promptStart + lineMs(display); pendingPrompt = null; }
   }
   const canInterrupt = () => performance.now() > promptUntil;
@@ -380,13 +382,18 @@
       case 'songAsk': {
         CD.Audio.play('songAsk');
         // the full "swipe across the drums" ask once per chapter, then a short one (playtest P1-2: less talk per round)
-        songWords = T(songChapter === world.level ? 'songShort' : 'song'); songChapter = world.level;
+        songWords = T(songChapter >= 0 ? 'songShort' : 'song'); songChapter = world.level;   // the long ask once per session
         CD.UI.say(songWords);
         speak(songWords);   // queued after the praise
         break;
       }
       case 'songNote': {
-        if (e.i === 0) { stats.songs++; CD.Audio.setSong(true); }
+        if (e.i === 0) {
+          stats.songs++; CD.Audio.setSong(true);
+          // the child already started the song: the song ask is stale — drop it (playtest P1-2)
+          if (CD.Voice && CD.Voice.dropQueued) CD.Voice.dropQueued();
+          if (CD.Voice && speaking() && curDisplay === songWords) CD.Voice.stop();
+        }
         bibiMood(e.i % 2 ? 'idle' : 'beat', 0.17);
         const c = drumOf(e.id);
         CD.Audio.play('drum', { note: e.note, kind: c && c.thing && c.thing.kind, strength: 1.1 });   // no animal voices in the song wave
@@ -544,6 +551,11 @@
     CD.Audio.duck(sp);
     if (CD.Audio.tick) CD.Audio.tick(dt);
     render.draw(world, weather, { boxes: domBoxes(), dt: dt * Math.min(speed, 4), lang: curLang(), title: mode === 'title' || mode === 'loading', speaking: sp, done: mode === 'done', debug: FLAGS.debug });
+    // letterbox bars (screens beyond the 1600 clamp) take the sky / floor colours instead of a flat cream (visual P2-10)
+    const am = weather.ambient || {};
+    const gb = { morning: '#E8D9E7', noon: '#DCD6EC', sunset: '#E8CFD9', night: '#363D72' }[am.env || am.mood] || '#DCD6EC';
+    const lb = (am.skyTop || '') + gb;
+    if (lb !== lastLetterbox) { lastLetterbox = lb; const st = $('stage') && $('stage').parentElement; if (st && am.skyTop) document.body.style.background = `linear-gradient(${am.skyTop}, ${am.skyBottom || am.skyTop} 55%, ${gb} 70%)`; }
     adapt(raw);
   }
   function adapt(raw) {  // adaptive quality: step the render scale down when frames stay slow

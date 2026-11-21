@@ -64,7 +64,7 @@ for (const withP2D of [false, true]) {
   ['drawBeam', 'drawFire', 'drawCord', 'hookPoint', 'fireTop'].forEach(f => ok(A[f] === undefined, tag + 'chime-era ' + f + ' removed'));
   ok(A.PALETTE && A.PALETTE.red.base === '#E84A4A' && A.PALETTE.purple.light === '#D2BDF3', tag + 'palette exact hex');
   ok(A.BRASS.base === '#D8B26A' && A.WOOD.base === '#C99466' && A.SILVER.base === '#E4E6EE' && A.SKIN.base === '#FFF6E6', tag + 'brass / wood / silver / skin hex');
-  ok(A.CLOUD.base === '#F4F1FA' && A.CLOUD.shade === '#DCD6EC', tag + 'cushion white-lilac');
+  ok(A.CLOUD.base === '#F4F1FA' && A.CLOUD.shade === '#C9BFE6', tag + 'cushion white-lilac');
   ok(A.SHAPES.length === 8 && A.KINDS.join() === 'drum,shape,big,dots,animal,glyph', tag + 'shapes / kinds lists');
   ok(A.ANIMALS.join() === 'cow,duck,cat,pig,frog,sheep,hen,mouse', tag + 'animals list');
   ok(A.pal('red').base === '#E84A4A' && A.pal('nope') === null, tag + 'pal lookup');
