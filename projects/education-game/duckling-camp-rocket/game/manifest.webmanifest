@@ -1,0 +1,29 @@
+{
+  "name": "Nim's River Hop · Nhím Nim Nhảy Đá Qua Suối",
+  "short_name": "River Hop",
+  "description": "Learning game with Nim the little hedgehog: hop across the brook on the stones Nim asks for and pick up a fruit. Colours, shapes, counting, animal homes, letters, numbers. English & Vietnamese.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#CFE6F5",
+  "theme_color": "#CFE6F5",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
