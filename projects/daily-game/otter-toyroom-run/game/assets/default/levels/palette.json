@@ -1,0 +1,42 @@
+{
+  "meadow": {
+    "skyTop": "#bfe0ea",
+    "skyBottom": "#fbf1da",
+    "floorFar": "#cfe2a9",
+    "floorNear": "#a8c97c",
+    "path": "#eee2c4",
+    "pathEdge": "#b89b6c",
+    "divider": "#fffaec",
+    "vig": "rgba(60,70,30,0.15)"
+  },
+  "pillows": {
+    "skyTop": "#cbc3ec",
+    "skyBottom": "#fde8ea",
+    "floorFar": "#e8d5ee",
+    "floorNear": "#cdb3db",
+    "path": "#f6ebe2",
+    "pathEdge": "#b9909f",
+    "divider": "#e6c3d0",
+    "vig": "rgba(80,50,90,0.16)"
+  },
+  "crayon": {
+    "skyTop": "#b2dbd2",
+    "skyBottom": "#fff0d2",
+    "floorFar": "#ead8b8",
+    "floorNear": "#cfb790",
+    "path": "#f6f0e1",
+    "pathEdge": "#86aac0",
+    "divider": "#b9d2e2",
+    "vig": "rgba(80,60,30,0.16)"
+  },
+  "stars": {
+    "skyTop": "#141b45",
+    "skyBottom": "#3c4b89",
+    "floorFar": "#3e4b82",
+    "floorNear": "#2a3464",
+    "path": "#9ba7d6",
+    "pathEdge": "#5b67a2",
+    "divider": "#e2e7fa",
+    "vig": "rgba(6,8,30,0.32)"
+  }
+}
