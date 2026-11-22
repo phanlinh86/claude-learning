@@ -1,0 +1,29 @@
+{
+  "name": "Mimi's Splash Rocket · Tên Lửa Nước Của Vịt Mimi",
+  "short_name": "Splash Rocket",
+  "description": "Learning game with Mimi the little duckling: tap the picnic mat Mimi asks for, pump, and land her water rocket there under its parachute. Colours, shapes, counting, animal homes, letters, numbers. English & Vietnamese.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#9FD3EE",
+  "theme_color": "#9FD3EE",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
