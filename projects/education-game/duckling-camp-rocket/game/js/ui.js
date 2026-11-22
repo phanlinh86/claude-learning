@@ -117,7 +117,7 @@
       b.style.minHeight = Math.round(r.h * 0.55) + 'px';
       let fs = Math.max(15, Math.min(34, r.h * 0.3));
       t.style.fontSize = fs + 'px';
-      for (let i = 0; i < 10 && b.offsetHeight > r.h + 1 && fs > 13; i++) { fs *= 0.92; t.style.fontSize = fs + 'px'; }
+      for (let i = 0; i < 10 && b.offsetHeight > r.h + 1 && fs > 14; i++) { fs = Math.max(14, fs * 0.92); t.style.fontSize = fs + 'px'; }   // QA P2-1: never below 14 px
     },
 
     /* ---------- Talk time ---------- */

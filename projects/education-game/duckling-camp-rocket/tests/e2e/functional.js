@@ -254,7 +254,7 @@ T.tap_right = async ({ page, cdp, url, d }) => {
   await pumpThree(cdp, page);
   await shot(page, d, '1-launch');
   await waitEv(page, n0, 'land', 10000);
-  const l = await page.evaluate(id => { const w = DK.debug.world, m = w.matById(id); return { dx: Math.abs(w.rocket.x - m.x), dy: Math.abs(w.rocket.y - m.y), st: w.rocket.state }; }, i.a);
+  const l = await page.evaluate(id => { const w = DK.debug.world, m = w.landPt(w.matById(id)); return { dx: Math.abs(w.rocket.x - m.x), dy: Math.abs(w.rocket.y - m.y), st: w.rocket.state }; }, i.a);   // QA P1-1: the touchdown point beside the thing
   await waitEv(page, n0, 'pennant', 10000);
   evs = await evSince(page, n0);
   const pumps = evs.filter(e => e.type === 'pump');
@@ -361,7 +361,7 @@ T.auto_pump = async ({ page, cdp, url }) => {
   const pumps = evs.filter(e => e.type === 'pump');
   check(pumps.length === 3 && pumps.every(e => e.auto) && evs.some(e => e.type === 'pumpAuto'), 'auto pump: ' + JSON.stringify(pumps));
   const log = await page.evaluate(n => DK.debug.voiceLog.slice(n).map(x => x.text).join(' | '), v0);
-  check(/help/i.test(log), '"I\'ll help!" not said: ' + log);
+  check(/help|let me pump|giúp|để mimi bơm/i.test(log), '"I\'ll help!" (any pumpAuto wording) not said: ' + log);   // QA P3-5: 3 wordings
 };
 T.rotate_mid_round = async ({ page, cdp, url, d }) => {
   await setupRound(page, url, { seed: 14, age: 5 });
@@ -408,7 +408,7 @@ T.rotate_mid_flight = async ({ page, cdp, url, d }) => {
   await waitEv(page, n0, 'land', 10000);
   await page.waitForTimeout(200);
   const land = (await evSince(page, n0)).find(e => e.type === 'land');
-  const s = await page.evaluate(id => { const w = DK.debug.world, m = w.matById(id); return { dx: Math.abs(w.rocket.x - m.x), dy: Math.abs(w.rocket.y - m.y), st: w.rocket.state }; }, i.a);
+  const s = await page.evaluate(id => { const w = DK.debug.world, m = w.landPt(w.matById(id)); return { dx: Math.abs(w.rocket.x - m.x), dy: Math.abs(w.rocket.y - m.y), st: w.rocket.state }; }, i.a);
   check(land.id === i.a && land.err <= 2 && s.dx < 30, 'the rocket did not land on the re-laid mat: ' + JSON.stringify({ land, s }));
   const out = await page.evaluate(() => window.__qa.outside());
   check(out.length === 0, 'outside the screen after the rotation mid-flight: ' + out.join('; '));
@@ -423,6 +423,10 @@ async function surpriseTest({ page, cdp, url, d }, kind, level, off) {
   // (level + off) % 2 → 0 marmot, 1 goat; level 3 = the rainbow chapter → bird
   await setupRound(page, url, { topic: 'colors', age: 3, seed: 17 + level, level, prep: `w._surpriseRound = 1; w._surpriseOff = ${off};` });
   await botToNextRound(page);
+  // the surprise spawns 2–5 s after the ask; a goat without a free spot on this layout falls back to the marmot (world.surprise follows)
+  await page.evaluate(() => DK.debug.setSpeed(3));
+  await page.waitForFunction(() => DK.debug.world._surpriseAt < 0 || DK.debug.world.state !== 'round', null, { timeout: 20000, polling: 'raf' });
+  await page.evaluate(() => DK.debug.setSpeed(1));
   const sp = await page.evaluate(() => DK.debug.world.surprise);
   if (sp !== kind) {   // no free spot for it on this screen (the world falls back / skips): not a failure of the input layer
     check(kind === 'goat' && (sp === 'marmot' || sp == null), 'surprise of round 1: ' + sp);

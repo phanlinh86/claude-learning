@@ -142,9 +142,10 @@
   const RP = () => DK.ROCKET_POINTS || { nozzle: [60, 236], nose: [60, 10], com: [60, 150], waterTop: 150, w: 56 };
   const PUMP_K = 0.85;            // the foot pump's drawn size (× MatArt's 1.35 art scale)
   const CHUTE = { w: 240, h: 200, ax: 120, ay: 196 };
+  const CHUTE_K = (DK.CONFIG && DK.CONFIG.chuteDrawK) || 1.3;   // QA P2-7: the open canopy drawn × 1.3 (the lines still meet at the nose)
   const MARMOT = { w: 160, h: 160, ax: 80, ay: 156, k: 0.6 };
   const GOAT = { w: 180, h: 180, ax: 90, ay: 174, k: 0.58 };
-  const BIRD = { w: 100, h: 90, ax: 50, ay: 86, k: 0.66 };
+  const BIRD = { w: 100, h: 90, ax: 50, ay: 86, k: 0.86 };   // QA P3-7: × 1.3 (was 0.66)
   const ip = (o, k, a) => { const p = o['_p' + k], v = o[k]; return p == null || v == null ? v : p + (v - p) * a; };
   const MA = () => DK.MatArt;
   const ME = () => DK.MeadowArt;
@@ -345,11 +346,25 @@
       }
       list.sort(byY);
       const wet = clamp(this._to === 'rain' ? this._mix : this._from === 'rain' ? 1 - this._mix : 0, 0, 1);
-      for (let i = 0; i < list.length; i++) this._mat(list[i], a, L, wet);
+      // QA P1-1: the thing on the mat the rocket stands on is drawn AFTER the rocket (the child sees what they picked)
+      const r = w.rocket, onMat = r.state === 'landed' || r.state === 'return' ? w.chosen : null, late = [];
+      for (let i = 0; i < list.length; i++) {
+        const m = list[i], top = onMat != null && m.id === onMat && m.state === 'landed';
+        this._mat(m, a, L, wet, top ? 'mat' : null);
+        if (top) late.push(m);
+      }
       for (let i = 0; i < list.length; i++) {
         const b = list[i].badge;
         if (b && b.a > 0.01) { g.save(); g.translate(b.x, b.y); P.drawHomeBadge(g, b.home, b.r, { a: b.a, pop: easeOutBack(clamp(b.a, 0, 1)) }); g.restore(); }
       }
+      // aim arc → pad + pump → Mimi → rocket → the landed thing → the flying thing
+      if (w.arc && w.arcAlpha > 0.01) P.drawArc(g, w.arc, { t: this.time, alpha: w.arcAlpha });
+      const pu = w.pump;
+      this._padPump(L, ip(r, 'aim', a) || 0, { press: ip(pu, 'press', a) || 0, glow: pu.glow || 0, gauge: pu.gauge || 0, count: pu.count || 0 });
+      const flying = r.state === 'boost' || r.state === 'coast' || r.state === 'chute';
+      this._mimi(w.mimi, a, L);
+      if (!flying) this._rocketW(r, a, L);
+      for (const m of late) this._mat(m, a, L, wet, 'thing');
       // the thing flying up to its pennant slot
       const f = w.flyer;
       if (f) {
@@ -358,13 +373,6 @@
         P.drawThing(g, f.thing, ih, { shadow: false });
         g.restore();
       }
-      // aim arc → pad + pump → Mimi → rocket
-      if (w.arc && w.arcAlpha > 0.01) P.drawArc(g, w.arc, { t: this.time, alpha: w.arcAlpha });
-      const r = w.rocket, pu = w.pump;
-      this._padPump(L, ip(r, 'aim', a) || 0, { press: ip(pu, 'press', a) || 0, glow: pu.glow || 0, gauge: pu.gauge || 0, count: pu.count || 0 });
-      const flying = r.state === 'boost' || r.state === 'coast' || r.state === 'chute';
-      this._mimi(w.mimi, a, L);
-      if (!flying) this._rocketW(r, a, L);
       // water: spray, splash, fountain drops
       for (const d of w.drops || []) P.drawDrop(g, ip(d, 'x', a), ip(d, 'y', a), d.r, d.a == null ? 1 : d.a);
       if (w.fountain) this._fountain(w.fountain, a);
@@ -372,19 +380,21 @@
       const hh = w.hintHand;
       if (hh && hh.alpha > 0.01) P.drawHintHand(g, ip(hh, 'x', a), ip(hh, 'y', a), hh.press || 0, hh.alpha, clamp(L.S * 0.72, 84, 110));
     }
-    _mat(m, a, L, wet) {
+    /** a mat + its thing; only = 'mat' | 'thing' draws just that part (the landed thing goes in front of the rocket) */
+    _mat(m, a, L, wet, only) {
       const P = MA(), g = this.g;
       const x = ip(m, 'x', a), y = m._ry, al = clamp(ip(m, 'alpha', a), 0, 1), ds = m.ds || 1;
       if (!(al > 0.01)) return;
       g.save(); g.translate(x, y);
       const rot = ip(m, 'rot', a) || 0; if (rot) g.rotate(rot);
-      P.drawMat(g, L.S * ds, { seed: m.seed, unfold: ip(m, 'unfold', a), flap: ip(m, 'flap', a) || 0, squish: ip(m, 'squish', a) || 0,
+      if (only !== 'thing') P.drawMat(g, L.S * ds, { seed: m.seed, unfold: ip(m, 'unfold', a), flap: ip(m, 'flap', a) || 0, squish: ip(m, 'squish', a) || 0,
         gold: clamp(ip(m, 'gold', a) || 0, 0, 1), glow: m.glow || 0, active: clamp(ip(m, 'active', a) || 0, 0, 1), wet: Math.max(wet, m.wet ? 0.6 : 0), alpha: al, t: this.time });
       const tA = clamp(ip(m, 'thingA', a), 0, 1);
-      if (tA > 0.01 && m.thing) {
+      if (tA > 0.01 && m.thing && only !== 'mat') {
         g.translate(0, -(ip(m, 'thingHop', a) || 0));
         const wig = ip(m, 'wig', a) || 0; if (wig) g.rotate(wig);
-        P.drawThing(g, m.thing, L.itemH * ds * (ip(m, 'thingS', a) || 1), { glow: m.glow || 0, alpha: al * tA, count: m.count == null ? -1 : m.count });
+        const wv = Math.max(wet, m.wet ? 0.6 : 0);
+        P.drawThing(g, m.thing, L.itemH * ds * (ip(m, 'thingS', a) || 1), { glow: m.glow || 0, alpha: al * tA, count: m.count == null ? -1 : m.count, halo: wv > 0.3 ? wv : 0 });
       }
       g.restore();
     }
@@ -431,7 +441,7 @@
       const x = ip(r, 'x', a), y = ip(r, 'y', a), rot = ip(r, 'rot', a) || 0;
       const nx = ip(r, 'noseX', a), ny = ip(r, 'noseY', a);
       const ch = clamp(ip(r, 'chute', a) || 0, 0, 1.4);
-      if (ch > 0.05) this._chute(nx, ny, ip(r, 'chuteRot', a) || 0, s * ch, 1);
+      if (ch > 0.05) this._chute(nx, ny, ip(r, 'chuteRot', a) || 0, s * ch * CHUTE_K, 1);
       this._rocket(x, y, rot, s, ip(r, 'sx', a) || 1, ip(r, 'sy', a) || 1, r.water == null ? 1 : r.water, r.fizz || 0);
       if (ch <= 0.05 && (r.chuteFold || 0) > 0.02) this._chute(nx, ny, rot, s, 0, r.chuteFold);
     }
@@ -478,7 +488,8 @@
       g.beginPath(); g.moveTo(x - 7, y); g.quadraticCurveTo(x - 26, y - h * 0.6, x - 14, y - h); g.lineTo(x + 14, y - h); g.quadraticCurveTo(x + 26, y - h * 0.6, x + 7, y); g.closePath(); g.fill();
       const rb = clamp(F.rainbow || 0, 0, 1) * al;
       if (rb > 0.02) {
-        const cy = y - h * 0.25, R0 = Math.max(26, h * 0.42);
+        // QA P3-5: a smaller arc (× 0.6), high in the spray (clear of the camp props)
+        const R0 = Math.max(20, h * 0.42 * 0.6), cy = y - Math.max(60, h * 0.55);
         g.lineWidth = Math.max(3, R0 * 0.07);
         for (let i = 0; i < RB.length; i++) {
           g.strokeStyle = RB[i]; g.globalAlpha = 0.55 * rb;
@@ -651,7 +662,7 @@
         const nx = x + Math.sin(sw) * L0, ny = y - Math.cos(sw) * L0;
         const open = u < 4.2 ? 1.05 : lerp(1, 0.35, clamp((u - 4.2) / 0.5, 0, 1));
         const crot = u < 4.2 ? sw * 0.4 : lerp(0, 1.1, clamp((u - 4.2) / 0.5, 0, 1));
-        this._chute(nx, ny, crot, s * open, 1);
+        this._chute(nx, ny, crot, s * open * CHUTE_K, 1);
         this._rocket(x, y, sw, s, 1, 1, 0.25, 0);
         g.restore();
       }
@@ -663,7 +674,13 @@
       const dk = this.donePanel ? [this.donePanel] : [];
       const key = this._layoutKey(L) + JSON.stringify(dk) + this.gallery.length;
       if (!this._done || this._done.key !== key) {
-        const spots = this._propMats(L, dk, 3);
+        // QA P3-6: the golden mats keep ≥ 30 px (+ the garland's room) below the panel; fewer room → a smaller keep
+        // (the garland hangs in the first 150 px below the panel; 3 mats, else 2, below it; else the old 30 px keep)
+        let spots = [];
+        for (const [ext, n] of [[150, 3], [150, 2], [30, 3], [0, 3]]) {
+          spots = this._propMats(L, dk.map(b => ({ x: b.x, y: b.y, w: b.w, h: b.h + ext })), n);
+          if (spots.length >= n) break;
+        }
         this._done = { key, mats: spots.map((s, i) => ({ x: s.x, y: s.y, ds: s.ds, seed: 4 + i * 3, ph: i * 1.3 })), popT: 0.8, fT: 0.4, F: null, drops: [] };
       }
       const D = this._done;
@@ -678,17 +695,22 @@
       if (D.popT <= 0 && D.mats.length) { D.popT = 1.4 + Math.random(); const m = D.mats[(Math.random() * D.mats.length) | 0]; this.burst('confetti', m.x, m.y - 30, { n: 14, life: 1.8, at: true }); }
       // the pole + a garland of every pennant won (up to 12), strung from the pole top across the meadow
       P.drawPole(g, L.pole.x, L.pole.y0, L.pole.y1, { t });
-      const things = this.gallery.length ? this.gallery : [{ kind: 'obj', obj: 'mug', color: 'red' }, { kind: 'shape', shape: 'star', color: 'yellow' }, { kind: 'obj', obj: 'ball', color: 'blue' }];
+      // QA P2-4: ≤ 8 pennants (the last won), bigger, hung between the panel and the topmost golden mat
+      const things = (this.gallery.length ? this.gallery : [{ kind: 'obj', obj: 'mug', color: 'red' }, { kind: 'shape', shape: 'star', color: 'yellow' }, { kind: 'obj', obj: 'ball', color: 'blue' }]).slice(-8);
       const ins = L.ins || { left: 0, right: 0, top: 0 };
       const right = L.pole.x < L.W / 2;
-      const gy0 = Math.max(L.pole.y1 + 14, dk.length ? dk[0].y + dk[0].h + 40 : 0);
-      const ax = L.pole.x + 4, ay = L.portrait ? gy0 : Math.min(gy0, L.horizon - 40), bx = right ? L.W - ins.right - 24 : ins.left + 24, by = ay - 30;
-      const sag = 70, N = things.length;
+      const topMat = D.mats.length ? Math.min(...D.mats.map(m => m.y - L.itemH * m.ds)) : L.H;
+      const gy0 = Math.max(L.pole.y1 + 14, Math.min(dk.length ? dk[0].y + dk[0].h + 24 : 0, topMat - 40 - 70));
+      let ax = L.pole.x + 4, ay = L.portrait ? gy0 : Math.min(gy0, L.horizon - 40), bx = right ? L.W - ins.right - 24 : ins.left + 24, by = ay - 30, sag = 70;
+      // portrait: the pole top stands low (in the camp) — the bunting hangs from the panel's lower corners instead, above the mats
+      const pnl = dk[0];
+      if (L.portrait && pnl && L.pole.y1 > pnl.y + pnl.h + 60) { ax = pnl.x + 18; bx = pnl.x + pnl.w - 18; ay = by = pnl.y + pnl.h - 6; sag = 40; }
+      const N = things.length;
       const pt = u => ({ x: lerp(ax, bx, u), y: lerp(ay, by, u) + sag * 4 * u * (1 - u) });
       g.strokeStyle = '#9C8763'; g.lineWidth = 3; g.beginPath();
       for (let i = 0; i <= 24; i++) { const p = pt(i / 24); if (i) g.lineTo(p.x, p.y); else g.moveTo(p.x, p.y); }
       g.stroke();
-      const pw = clamp(Math.abs(bx - ax) / (N + 1) * 0.9, 36, 54);
+      const pw = clamp(Math.abs(bx - ax) / (N + 1) * 0.9, 40, 0.8 * (L.pennantW || 72));
       for (let i = 0; i < N; i++) {
         const u = (i + 0.7) / (N + 0.6), p = pt(u);
         g.save(); g.translate(p.x + (right ? -pw * 0.31 : pw * 0.31), p.y); g.rotate(Math.PI / 2 + 0.08 * Math.sin(t * 2.2 + i));
@@ -786,7 +808,7 @@
         }
       } else if (type === 'count') {   // a big numeral pops up over the counted pinecones / the counted pennant
         for (const f of fx) if (f.k === 'num') f.t = Math.max(f.t, f.life * 0.85);
-        fx.push({ k: 'num', x, y, t: 0, life: 0.6, text: String(opt.n || ''), size: opt.size || 84 });
+        fx.push({ k: 'num', x, y, t: 0, life: 0.6, text: String(opt.n || ''), size: opt.size || 84, disc: !!opt.disc });
       }
     }
     _fx(dt) {
@@ -810,6 +832,12 @@
         } else if (f.k === 'num') {
           const s = easeOutBack(clamp(u * 3, 0, 1)), al = u > 0.6 ? (1 - u) / 0.4 : 1;
           g.save(); g.globalAlpha *= al; g.translate(f.x, f.y - u * 50); g.scale(s, s);
+          if (f.disc) {   // QA P2-3: the pump numeral on a cream disc, so it reads over any camp prop
+            const rr = (f.size || 84) * 0.63;
+            g.fillStyle = 'rgba(70,52,30,0.18)'; g.beginPath(); g.arc(2, 4, rr, 0, TAU); g.fill();
+            g.fillStyle = '#FBF3DD'; g.beginPath(); g.arc(0, 0, rr, 0, TAU); g.fill();
+            g.lineWidth = 4; g.strokeStyle = '#D9C59A'; g.stroke();
+          }
           outlinedText(g, f.text, 0, 0, f.size || 84, '#FFFFFF', INK, 200); g.restore();
         } else if (f.k === 'star') {
           const e = u * u * (3 - 2 * u);

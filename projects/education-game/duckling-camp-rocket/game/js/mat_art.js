@@ -469,11 +469,11 @@
   // dots sign: a round cream disc on a short post. With a numeral: a taller tablet, numeral on top, dots below.
   var sgDisc = function (t) { circ(t, 0, -9, 41); };
   var sgTall = function (t) { rrect(t, -43, -51, 86, 86, 24); };
-  var sgWide = function (t) { rrect(t, -49, -36, 98, 64, 26); };
+  var sgWide = function (t) { rrect(t, -58, -38, 116, 68, 26); };   // QA P1-3: wider so sums read bigger
   var SIGNS = {
     disc: { path: sgDisc, key: 'sg.disc', inner: function (t) { circ(t, 0, -9, 34.5); }, postTop: 26 },
     tall: { path: sgTall, key: 'sg.tall', inner: function (t) { rrect(t, -37, -45, 74, 74, 19); }, postTop: 30 },
-    wide: { path: sgWide, key: 'sg.wide', inner: function (t) { rrect(t, -43, -30, 86, 52, 21); }, postTop: 24 }
+    wide: { path: sgWide, key: 'sg.wide', inner: function (t) { rrect(t, -52, -32, 104, 56, 21); }, postTop: 24 }
   };
   var sgPost = function (t) { rrect(t, -6.5, 14, 13, 36, 4); };
   var sgFoot = function (t) { ell(t, 0, 47, 13, 4, 0); };
@@ -570,7 +570,7 @@
   function drawDots(ctx, th) {
     var numeral = !!th.numeral, L = dotLayoutC(th.n, numeral);
     drawSign(ctx, numeral ? 'tall' : 'disc');
-    if (numeral) signText(ctx, String(L.n), 0, -28, 64, 27, INK);
+    if (numeral) signText(ctx, String(L.n), 0, -28, 66, 30, INK);
     L.pts.forEach(function (p) { pinecone(ctx, p[0], p[1], L.rs); });
   }
   function drawDotCount(ctx, th, count) {   // counted dots get a white + gold ring (vector overlay, never cached)
@@ -607,8 +607,9 @@
   function drawTile(ctx, th) {
     var txt = tileText(th), n = txt.length, kind = tileSign(txt);
     drawSign(ctx, kind);
-    if (kind === 'disc') signText(ctx, txt, 0, -9, n <= 1 ? 54 : 60, n <= 1 ? 40 : 33, INK);
-    else signText(ctx, txt, 0, -4, 84, n <= 3 ? 34 : 30, INK);
+    // QA P1-3: bigger glyphs (were 40 / 33 / 34 / 30 high, 54 / 60 / 84 wide)
+    if (kind === 'disc') signText(ctx, txt, 0, -9, n <= 1 ? 60 : 64, n <= 1 ? 46 : 38, INK);
+    else signText(ctx, txt, 0, -4, 102, n <= 3 ? 40 : 36, INK);
   }
 
   // ================================================================= ANIMALS (images by the animal artist; placeholder)
@@ -711,8 +712,14 @@
       gr.addColorStop(1, 'rgba(255,210,90,0)');
       ctx.fillStyle = gr; ctx.beginPath(); circ(ctx, 0, cy, R); ctx.fill();
     }
+    var halo = clamp01(num(o.halo, 0));
     var dev = devScale(ctx);
     var img = k === 'animal' ? assetImg('animals/' + animalOf(thing), AW * dev) : null;
+    if (halo > 0.01 && (k === 'obj' || k === 'shape')) {   // QA P2-6: a cream halo lifts a (green) thing off the wet meadow
+      var hc = (headOf(thing) + foot) / 2, hr = 58, hg = ctx.createRadialGradient(0, hc, hr * 0.35, 0, hc, hr);
+      hg.addColorStop(0, 'rgba(251,243,221,' + (0.7 * halo).toFixed(3) + ')'); hg.addColorStop(0.7, 'rgba(251,243,221,' + (0.4 * halo).toFixed(3) + ')'); hg.addColorStop(1, 'rgba(251,243,221,0)');
+      ctx.fillStyle = hg; ctx.beginPath(); circ(ctx, 0, hc, hr); ctx.fill();
+    }
     var done = false;
     if (canDOM() && !o.direct) {
       var key = 'th:' + thingKey(thing) + '|' + (k === 'animal' ? (img ? 'i' : 'p') : '');
@@ -1175,10 +1182,14 @@
     for (var pass = 0; pass < 2; pass++) {
       for (var i = 0; i < n; i++) {
         var f = n > 1 ? i / (n - 1) : 0, bump = 0.5 + 0.5 * Math.sin(t * 8 - i * 0.9);
-        var r = (6 - 2.4 * f) * (1 + 0.2 * bump), al = a * (1 - 0.6 * f);
+        // QA P2-5: bigger dots, a dark-green ring, a floor on the alpha (the end near the mat is the useful part)
+        var r = (9 - 3 * f) * (1 + 0.2 * bump), al = a * (1 - 0.25 * f);
         ctx.globalAlpha = Math.max(0, Math.min(1, al));
-        if (pass === 0) dot(ctx, P2[i][0] + 1.4, P2[i][1] + 2.6, r, 'rgba(36,52,40,0.28)');
-        else { dot(ctx, P2[i][0], P2[i][1], r, '#FFFFFF'); dot(ctx, P2[i][0] - r * 0.3, P2[i][1] - r * 0.3, r * 0.3, 'rgba(220,236,240,0.9)'); }
+        if (pass === 0) dot(ctx, P2[i][0] + 2, P2[i][1] + 3, r, 'rgba(36,52,40,0.4)');
+        else {
+          dot(ctx, P2[i][0], P2[i][1], r + 2, '#4E7560');
+          dot(ctx, P2[i][0], P2[i][1], r, '#FFFFFF'); dot(ctx, P2[i][0] - r * 0.3, P2[i][1] - r * 0.3, r * 0.3, 'rgba(220,236,240,0.9)');
+        }
       }
     }
     ctx.restore();

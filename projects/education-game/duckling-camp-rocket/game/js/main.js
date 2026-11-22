@@ -79,8 +79,10 @@
   function windsockKeep() {
     try {
       if (!DK.MeadowArt || !render || !world.layout) return null;
-      const p = DK.MeadowArt.campProps(render.artLayout(world.layout)).find(q => q.kind === 'windsock');
-      return p && p.box ? { x: p.box.x - 6, y: p.box.y - 6, w: p.box.w + 12, h: p.box.h + 12 } : null;
+      // the windsock + (QA P3-3) a tent pitched outside the camp column: mats keep clear of every prop on the meadow
+      const out = DK.MeadowArt.campProps(render.artLayout(world.layout)).filter(q => q.box && (q.kind === 'windsock' || q.edge))
+        .map(p => ({ x: p.box.x - 6, y: p.box.y - 6, w: p.box.w + 12, h: p.box.h + 12 }));
+      return out.length ? out : null;
     } catch (e) { return null; }
   }
   function measureHud() {   // the real DOM HUD in logical px (the speech bubble is placed BY the world, so it is not a keep-out here)
@@ -102,7 +104,7 @@
     world.setViewport(view.W, view.H, view.ins);    // camp + meadow re-laid; mats glide to their new homes, Mimi / pad / pole snap
     // the windsock stands on the meadow's far edge (MeadowArt, outside the camp corner): mats and the goat's rock keep clear of it
     const sock = windsockKeep();
-    if (sock) { world.hudKeep = world.hudKeep.concat([sock]); world.setViewport(view.W, view.H, view.ins); }
+    if (sock) { world.hudKeep = world.hudKeep.concat(sock); world.setViewport(view.W, view.H, view.ins); }
     weather.resize(view.W, view.H, world.layout);
     placeBubble();
     updateHudStarTarget();
@@ -122,7 +124,8 @@
   function measureDonePanel() {
     const p = document.querySelector('#scrDone .done-panel');
     const r = p && mode === 'done' ? p.getBoundingClientRect() : null;
-    render.donePanel = r && r.height ? { x: (r.left - view.left) / view.s, y: (r.top - view.top) / view.s, w: r.width / view.s, h: r.height / view.s } : null;
+    const R = v => Math.round(v);   // whole px: a re-measure with the same box keeps the scene (render keys on it)
+    render.donePanel = r && r.height ? { x: R((r.left - view.left) / view.s), y: R((r.top - view.top) / view.s), w: R(r.width / view.s), h: R(r.height / view.s) } : null;
   }
   function placeBubble() {
     const B = world.layout && world.layout.bubble;
@@ -368,8 +371,12 @@
         DK.Audio.play('right');
         render.burst('sparkles', e.x, e.y - (world.layout ? world.layout.itemH * 0.5 : 40), { n: 12, color: th.color });
         if (e.mode === 'countSeq' || (world.cur && world.cur.mode === 'countSeq')) render.burst('count', e.x, e.y - (world.layout ? world.layout.itemH * 1.25 : 110), { n: e.count || (e.launch + 1) });
-        const txt = line('sayRight', ev2(e), 'praise');
+        // QA fix C3: the right line only NAMES the thing ("A purple mug!"); the pump glows and pumpAsk says "stomp" if needed
+        const txt = line('sayRight', Object.assign(ev2(e), { pump: false }), 'praise');
         lastRight = { text: txt };
+        // QA fix C4: the right tap makes a wrong / hint line moot — the name line may cut it
+        const curTag = DK.Voice && DK.Voice.currentTag ? DK.Voice.currentTag() : null;
+        if (curTag === 'wrong' || curTag === 'hint') { lineUntil = 0; guarded.length = 0; }
         // the child already answered: a question that has not started yet is no longer needed
         if (pendingPrompt && DK.Voice && DK.Voice.dropTagged) { DK.Voice.dropTagged('prompt'); pendingPrompt = null; promptUntil = Math.min(promptUntil, performance.now()); }
         speakRight(txt);
@@ -388,7 +395,9 @@
         stats.pumps++; pumpSeen++;
         if (e.auto) stats.autoPumps++;
         DK.Audio.play('pump', { n: e.n });
-        render.burst('count', e.x, e.y - (world.layout ? world.layout.mimiH : 180) - 40, { n: e.n, size: 70 });   // above Mimi's hat
+        render.burst('count', e.x, e.y - (world.layout ? world.layout.mimiH : 180) - 40, { n: e.n, size: 70, disc: true });   // above Mimi's hat, on a cream disc
+        // QA fix C3: a name line that has not even started would only be said after the lift-off
+        if (e.n === 1 && DK.Voice && DK.Voice.dropTagged) DK.Voice.dropTagged(['right']);
         if (DK.Voice && DK.Voice.sayPump) DK.Voice.sayPump(e.n, { lang: curLang(), auto: !!e.auto });
         else speak(String(e.n), { priority: true, tag: 'pump' });
         if (DK.I18N && DK.I18N.sayPump) DK.UI.say(DK.I18N.sayPump(curLang(), e.n));
@@ -427,7 +436,8 @@
         DK.Audio.play('pennant', { i: e.slot || 0 });
         render.burst('sparkles', e.x + 24, e.y + 16, { n: 8, color: e.thing && e.thing.color });
         // the launch's praise — skipped in countSel (the count run was the praise) and when a question is already waiting
-        if (!isCountSel() && !pendingPrompt && performance.now() - lastPraise > 1200) {
+        // QA fix C5: and while another launch of the round follows (its mats unfold, its `next` reminder is due)
+        if (!isCountSel() && !pendingPrompt && performance.now() - lastPraise > 1200 && !(world.cur && world.launch < world.cur.k)) {
           lastPraise = performance.now();
           const t = line('sayPennant', ev2(e), 'pennant.any');
           if (DK.Voice && DK.Voice.dropTagged) DK.Voice.dropTagged('right');
@@ -440,7 +450,8 @@
         stats.camps++;
         DK.Audio.setFanfare(true); setTimeout(() => DK.Audio.setFanfare(false), 2200 / Math.max(1, speed));
         const n = e.n || (world.pennants || []).length;
-        const t = DK.I18N.sayCamp ? DK.I18N.sayCamp(curLang(), n) : T('camp');
+        // QA fix C6: just the count ("One, two, three! Three flags!") — it fits inside the camp
+        const t = DK.I18N.sayCountUp ? DK.I18N.sayCountUp(curLang(), n, 'flags') : T('camp');
         if (DK.Voice && DK.Voice.dropTagged) DK.Voice.dropTagged(['pennant', 'land', 'flavour']);
         speakCount(t, 200); DK.UI.say(t);
         break;
@@ -567,6 +578,9 @@
         mode = 'done';
         DK.UI.only('scrDone'); DK.UI.show('hud', false); DK.UI.say('');
         requestAnimationFrame(measureDonePanel);
+        // the panel pops in (CSS animation, the fonts settle): measure again once it stands still, so the golden mats and the
+        // garland keep clear of its real box (visual QA P3-6)
+        [350, 900].forEach(ms => setTimeout(() => { if (mode === 'done') measureDonePanel(); }, ms));
         if (autoRestart) setTimeout(() => { if (mode === 'done') startGame(); }, 1500 / speed);
         break;
       }

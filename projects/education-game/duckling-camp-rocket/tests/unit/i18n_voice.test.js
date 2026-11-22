@@ -1164,12 +1164,21 @@ asyncTests.push((async function () {
 
   // ---- the pump count policy (VOICE §2.1): numbers never cut each other, fast pumps merge, Blast off on the 3rd
   { const P = fakeSynthEnv(); const VP = P.V; VP.init({ lang: 'en' }); VP.unlock(); await wait(100);
-    VP.say('A red mug! Now pump!', { tag: 'right' }); await wait(20);
-    const p1 = VP.sayPump(1);
-    eq(p1.text, 'One!', 'sayPump 1 text');
+    // QA fix C3: the short name line is never cut by a stomp — the count waits for it (and merges)
+    VP.say('A red mug!', { tag: 'right' }); await wait(20);
+    const r0 = VP.sayPump(1);
+    eq(r0.text, 'One!', 'sayPump 1 text');
     await wait(150);
-    eq(P.texts().slice(-1)[0], 'One!', 'pump 1 cuts the "Now pump!" right line and speaks now');
-    ok(Math.abs(P.spoken[P.spoken.length - 1].rate - 1.0) < 1e-9 && Math.abs(P.spoken[P.spoken.length - 1].pitch - 1.25) < 1e-9, 'pump lines at PUMP_RATE 1.0, Mimi pitch');
+    eq(P.texts().slice(-1)[0], 'A red mug!', 'pump 1 never cuts the right (name) line');
+    eq(VP.queuedTags()[0], 'pump', 'One! waits at the front behind the name line');
+    P.end(); await wait(30);
+    eq(P.texts().slice(-1)[0], 'One!', 'then One!');
+    P.end(); await r0;
+    VP.say('Tap, tap, tap to pump!', { tag: 'pumpAsk' }); await wait(20);
+    const p1 = VP.sayPump(1);
+    await wait(150);
+    eq(P.texts().slice(-1)[0], 'One!', 'pump 1 cuts the "stomp" pumpAsk line and speaks now');
+    ok(Math.abs(P.spoken[P.spoken.length - 1].rate - 1.2) < 1e-9 && Math.abs(P.spoken[P.spoken.length - 1].pitch - 1.25) < 1e-9, 'pump lines at PUMP_RATE 1.2, Mimi pitch');
     const p2 = VP.sayPump(2);
     eq(VP.queuedTags().join(','), 'pump', 'Two! waits — it never cuts One!');
     const p3 = VP.sayPump(3);

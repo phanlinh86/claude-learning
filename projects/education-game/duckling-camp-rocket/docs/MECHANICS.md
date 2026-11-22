@@ -13,7 +13,8 @@ harness and still speak river (stones / hops): the playtester adapts them.
 1. **Portrait pump**: `layout.pump = (W/2 − 120, H − ins.bottom − 40)`, i.e. between Mimi (ins.left + 120) and the pad (W/2), not
    W/2 + 110: **Mimi hops onto the plunger** at `aim` (0.3 s hop, `mimi.onPump = true`) and stomps it with her feet (the `pump` frame);
    she hops home at `launch`. While on the pump her feet are `(pump.x, pump.y + pump.press · 14)`. Landscape: pole / Mimi / pump / pad
-   at ins.left + 26 / 100 / 178 / 236 (× campW / 272 when the camp column is squeezed), y = H − ins.bottom − 40 (pole base) / 70 / 40 / 60.
+   at ins.left + 26 / **96 / 160 / 262** (QA fix: Mimi on the plunger never overlaps the bottle; × campW / 272 when the camp column is
+   squeezed), y = H − ins.bottom − 40 (pole base) / 70 / **76** / 60 (pump plate clear of the home indicator).
 2. **Apex**: the apex height follows DESIGN (≥ max(220, 0.5·distance) above the higher of pad / mat, clamped to y ≥ play.y0 + 40, and
    ≥ 60 px above both ends). Its x is placed **before** the mat by the parachute's glide (`vx_apex / glideOmega`): when the canopy pops,
    the rocket still flies forward and the canopy's drag (a critically damped glide = linear air drag) brakes it to a stop exactly over
@@ -29,10 +30,19 @@ harness and still speak river (stones / hops): the playtester adapts them.
    it), not bottom → top — so countSeq's pennants count "1, 2, 3" in the order they were won.
 7. **Overlapping launches**: the next launch's mats unfold while the thing is still flying up to the pole (0.1 s after it leaves the mat)
    and the rocket may still be hopping home; a right tap then waits in `aim` until the rocket stands on the pad and Mimi on the pump.
-8. **Pacing** (sim-tuned, §8): `shortBudget [∞, 22, 40, 56]`; Talk time also when the chapter passed **72 s with ≥ 2 rounds**
+8. **Pacing** (sim-tuned, §8): `shortBudget [∞, 22, 40, 56]` (a short round = **2 launches × the age's mats** since the QA fix round,
+   so the per-age 3-mat rounds really happen); Talk time also when the chapter passed **72 s with ≥ 2 rounds**
    (`chapterHardLimit`; a slow / struggling child) besides DESIGN's 75 s with ≥ 3 rounds; a round that ran > 70 s goes to the camp after
    ≥ 2 launches (`roundLongCut`); camp 1.9 s (DESIGN ≈ 2.4); the hops home take 0.3–0.55 s each (≈ 0.9 s, DESIGN 0.8).
-9. **Help values from the base's fix round**: assist after **5** no-progress presses (DESIGN text: 6), hint glow 5 s, cooldown 6 s.
+9. **Help values** (QA fix round): assist after **4** no-progress presses (DESIGN text: 6), hint glow 5 s, cooldown **5 s** (= the
+   glow), and a hint triggered by the 2nd miss **ignores the cooldown** (it is never skipped); `resetNudges()` (resume) also restarts
+   the child's full 3 s pump window; a finger resting still > 2 s (`idleRestHold`) no longer stops the idle nudges.
+16. **Touchdown beside the thing** (QA fix, visual P1-1): the rocket lands at `world.landPt(mat)` = `(mat.x + side·0.30·S·ds, mat.y +
+   0.04·S·ds)`, side = away from the pad (still on the mat ellipse, half-width 0.5·S·ds); every flight sum, the arc's end, the rings /
+   splash and `land.err` use that point; render draws the landed mat's thing (and the flyer) AFTER the rocket.
+17. **Phones get bigger mats** (QA fix, visual P1-3; `phone` = aspect > 1.9): portrait S × 1.22 (208 / 196 / 180), itemH 0.70·S,
+   horizon play.y0 + 150, depth 0.86 → 1; landscape S × 1.1 (187 / 176 / 163), itemH 0.68·S. All 11 viewports × 5 ages × m 2–3 still fit
+   at the full size (unit-tested). Phone bubble: portrait h 150, landscape w ≤ 960 (beside the measured HUD).
 10. **Mats never overlap**: besides the hit-circle rule (≥ 20 px apart), the footprints (mat + thing) of two mats never overlap (a thing
     standing in front of another mat was hard to read).
 11. `interactive` is true in `pump` only until the 3rd stomp; `answer()` in pump = `{pump: true, id: null, mat: null, x, y}`.
@@ -85,17 +95,17 @@ stomp; assist armed + a press on the meadow → the target; the nearest mat hit 
 ## 3. Layout (`computeLayout`, DESIGN §2)
 | field | landscape | portrait |
 |---|---|---|
-| `bubble` / `hud` / `play` | the base's (bubble y = ins.top + 18, h 134, w ≤ 700; HUD 160 × (ins.top + 96); play.y0 = band bottom + 10) | bubble y = ins.top + 110, h 124, full width; play.y0 below bubble and HUD |
+| `bubble` / `hud` / `play` | the base's (bubble y = ins.top + 18, h 134, w ≤ 700 (phones ≤ 960), never under the measured HUD; HUD 160 × (ins.top + 96); play.y0 = band bottom + 10) | bubble y = ins.top + 110, h 124 (phones 150), full width; play.y0 below bubble and HUD |
 | `camp` | `{x0: 0, x1: ins.left + campW, y0: play.y0, y1: H}`, campW 272 (→ 230 in 14 px steps only when 3 mats do not fit) | `{x0: 0, x1: W, y0: H − ins.bottom − campH, y1: H}`, campH 280 (tall × 1.15) |
-| `meadow` / `horizon` | `{x0: camp.x1, x1: W − ins.right, y0: play.y0, y1: play.y1}` / play.y0 + 0.30·(H − play.y0) | `{x0: ins.left, x1: W − ins.right, y0: play.y0, y1: camp.y0}` / play.y0 + 120 |
-| `pole {x, y0, y1}` | x ins.left + 26, base H − ins.bottom − 40, top play.y0 + 30 | x W − ins.right − 70, top max(play.y0 + 30, camp.y0 − 160) |
-| `mimiHome` / `pump {x, y, r}` / `pad` | (ins.left + 100, yb − 70) / (ins.left + 178, yb − 40) / (ins.left + 236, yb − 60) | (ins.left + 120, yb − 70) / (W/2 − 120, yb − 40) / (W/2, yb − 60) |
+| `meadow` / `horizon` | `{x0: camp.x1, x1: W − ins.right, y0: play.y0, y1: play.y1}` / play.y0 + 0.30·(H − play.y0) | `{x0: ins.left, x1: W − ins.right, y0: play.y0, y1: camp.y0}` / play.y0 + 120 (phones 150) |
+| `pole {x, y0, y1}` | x ins.left + 26, base H − ins.bottom − 40, top play.y0 + 30 | x W − ins.right − 92, top max(play.y0 + 30, camp.y0 − 160) |
+| `mimiHome` / `pump {x, y, r}` / `pad` | (ins.left + 96, yb − 70) / (ins.left + 160, yb − 76) / (ins.left + 262, yb − 60) | (ins.left + 120, yb − 70) / (W/2 − 120, yb − 76) / (W/2, yb − 60) |
 | `mimiH`, `rocketH` | 180, 120 | 170 (phone 200), 120 |
-| `S` / `itemH` / `hitR` | age 3–4: 170, 5: 160, 6–7: 148, −6 px steps to 130 until 3 mats fit for 3 test seeds / 0.62·S / 0.6·(S·0.8) + 14 (phones ≥ 92) at ds 1 | same |
-| `slots[j]` | `{x: pole.x, y: pole.y1 + 24 + 46·j}` (the pennant's top-left corner), j < 4; `pennantW` 56, `pennantH` 44, `poleBox` (pole + 4 pennants, the keep box mats avoid) | same |
+| `S` / `itemH` / `hitR` | age 3–4: 170, 5: 160, 6–7: 148 (phones × 1.1), −6 px steps to 130 until 3 mats fit for 3 test seeds / 0.62·S (phones 0.68·S) / 0.6·(S·0.8) + 14 (phones ≥ 92) at ds 1 | phones × 1.22, itemH 0.70·S |
+| `slots[j]` | `{x: pole.x, y: pole.y1 + 20 + 56·j}` (the pennant's top-left corner), j < 4; `pennantW` 72, `pennantH` 56, `poleBox` (pole + 4 pennants, the keep box mats avoid) | same |
 | extra | `fits`, `campW`/`campH`, `keep[]` (bubble, hud, hudKeep boxes), `safe`, `rocketS` (art scale = rocketH / (nozzle.y − nose.y)), `rocketL` (= rocketH), `rocketLc` (nozzle → COM), `rocketW`, `badgeR`, `mimiS` (= mimiH / 300), `dsMin`, `hudKeep` | |
 
-**Depth**: `depthAt(L, y) = 0.82 + 0.18·(y − horizon)/(meadow.y1 − horizon)`; a mat's hit circle is centred 0.3·itemH·ds above its centre,
+**Depth**: `depthAt(L, y) = dsMin + (1 − dsMin)·(y − horizon)/(meadow.y1 − horizon)`, dsMin 0.82 (phone portrait 0.86); a mat's hit circle is centred 0.3·itemH·ds above its centre,
 r = `hitRAt(L, ds)` = 0.6·(S·ds·0.8) + 14 (phones ≥ 92); nearest centre wins. **Footprint** (`matFoot`) = x ± 0.5·S·ds, y − itemH·ds …
 y + 0.21·S·ds + 6.
 **Mat homes** (`matHomes`, per launch, seed = round.seed + j·7919): candidates on a 12 px grid where the footprint is ≥ 44 px from the
@@ -109,14 +119,14 @@ ways) × 5 ages × m 2–3 × 40 seeds.** Every one fits at S = the age base (17
 ## 4. `DK.CONFIG` (all tunable via `new DK.World({config})`)
 | group | values |
 |---|---|
-| flow | step 1/120, roundsPerLevel 4, chapterTimeLimit 75 s (≥ 3 rounds), **chapterHardLimit 72 s (≥ 2 rounds)**, **roundLongCut 70 s (≥ 2 launches)**, shortBudget [∞, 22, 40, 56] s (a later round is 2 × 2), introTime 2.5, levelDoneTime 3.6, Talk: afterAnswer 1.6, re-ask 12 s, glow after the 2nd, give up 2 s after the 3rd |
+| flow | step 1/120, roundsPerLevel 4, chapterTimeLimit 75 s (≥ 3 rounds), **chapterHardLimit 72 s (≥ 2 rounds)**, **roundLongCut 70 s (≥ 2 launches)**, shortBudget [∞, 22, 40, 56] s (a later round is 2 launches × the age's mats), introTime 2.5, levelDoneTime 3.6, Talk: afterAnswer 1.6, re-ask 12 s, glow after the 2nd, give up 2 s after the 3rd |
 | mats | unfold: lead 0.35 s (next launches 0.1) + 0.16 s per mat, 0.4 s back-out (c1 1.2 → ≈ 4 % overshoot), the thing drops from 46 px at 55 % (gravity 1800, one bounce × 0.35); ask 0.30 s / next 0.15 s after the last mat; bob ± 2 px at 0.42–0.58 Hz; springs flap ω 12 ζ 0.25, squish ω 14 ζ 0.3, wig ω 16 ζ 0.22; kicks: wrong flap 0.8 + wig 0.3, right squish 0.15, landing squish 0.55 + flap 0.45, early 0.12; gold 0.4 s; glide 0.3 s; fold 0.5 s (rolls up in the first 55 %, rises 160 px with a 0.9 rad spin from 35 %, fades from 55 %) |
-| aim / pump | aim 0.45 s (≥; waits for the rocket on the pad + Mimi on the pump), tube spring ω 14 ζ 0.6, ≤ 0.6 rad; 14 arc points (9 ascent + 5 straight to the mat), fade 0.3 s; Mimi hop 0.3 s, apex 26 px, land squash −0.14; pumpCount 3, merge 0.22 s, auto after 3.0 s without a kid press then every 0.5 s, launch 0.25 s after the 3rd; stomp: Mimi sq −0.12 (sy 0.88), plunger held 0.09 s then spring ω 30 ζ 0.7, 14 px travel, `pump` frame 0.2 s |
-| flight | g 900 (raised for climbs that would coast > 1.05 s); boost 0.25 s; apex ≥ max(220, 0.5·dist) above the higher end, ≥ play.y0 + 40, ≥ 60 above both; glide ω 3.0; rot follows the velocity ω 10 ζ 0.8 (above 30 px/s); spray 36 drops over the boost, 260–520 px/s back along −v, ± 0.35 rad, life 0.6 s; chute spring ω 12 ζ 0.4 (→ ≈ 1.25 peak at ≈ 0.3 s), quadratic drag → terminal 220 px/s; pendulum ω 4.5, ζ 0.3 while opening (0.3 s + 0.15) then 0.15, + 2.5·(1 − e) near the ground, drive 0.6·a/L, wind torque 0.6·wind/L, soft wall ± 0.45 after the opening; wind offset 0.6·wind px; ground fade 50 px; safety 9 s |
+| aim / pump | aim **0.8 s** (≥; waits for the rocket on the pad + Mimi on the pump), tube spring ω 14 ζ 0.6, ≤ 0.6 rad; 14 arc points (9 ascent + 5 straight to the mat), fade 0.3 s; Mimi hop 0.3 s, apex 26 px, land squash −0.14; pumpCount 3, merge 0.22 s, auto after 3.0 s without a kid press (or a resume) then every 0.5 s, launch **0.6 s** after the 3rd ("Three! Blast off!" is heard as it goes); stomp: Mimi sq −0.12 (sy 0.88), plunger held 0.09 s then spring ω 30 ζ 0.7, 14 px travel, `pump` frame 0.2 s |
+| flight | g 900 (raised for climbs that would coast > 1.05 s); boost 0.25 s; apex ≥ max(220, 0.5·dist) above the higher end, ≥ play.y0 + 40, ≥ 60 above both; glide ω 3.0; rot follows the velocity ω 10 ζ 0.8 (above 30 px/s); spray 36 drops over the boost, 260–520 px/s back along −v, ± 0.35 rad, life 0.6 s; chute spring ω 12 ζ 0.4 (→ ≈ 1.25 peak at ≈ 0.3 s), quadratic drag → terminal 220 px/s; pendulum ω 4.5, ζ **0.5** while opening (0.3 s + 0.15) then 0.15, + 2.5·(1 − e) near the ground, drive **0.35**·a/L, wind torque 0.6·wind/L, **soft wall ± 0.5 from the pop** (k 180, ζ 0.8 outward; hard stop ± 0.6 after the opening) — the bottle hangs under the canopy instead of flying sideways; the canopy is drawn × 1.3 (`chuteDrawK`, also in `rocket.top`); wind offset 0.6·wind px; ground fade 50 px; safety 9 s |
 | landing | bounce 12 px (g 1600, once), tip upright ω 12 ζ 0.5, chute drapes to 0.3 / tilts 1.1 rad (ω 8 ζ 0.7), squash −0.18; puddle rings 0.3 S → 0.9 S (0.8 s, flat 0.42; a 2nd 0.15 s later); 8 splash drops (up 150–300, out 40–140 px/s, gravity 900, life 0.5 s, r 3–6; a drop falling back makes a tiny ring with p 0.3) |
 | collect | hold 0.2 s, the thing hops 20 px in 0.22 s (× 1.12), countSel counts (first 0.45 s, then every 0.4 s, 0.3 s tail), animals: home badge (r 0.42·itemH·ds, 6 /s) 1.0 s; flies 0.55 s on a quadratic Bézier (control 70 px above the higher end) shrinking to × 0.42 → pennant (pop spring ω 14 ζ 0.35); the rocket hops home from 0.4 s: 2 hops (0.3–0.55 s each by distance, apex max(36, 0.22·|dx|) / 2nd × 0.7), squash −0.16 on each touch, 0.06 s pause; refill 0.6 s |
 | camp / wipe | counts 0.3 s + 0.35 s apart (each pennant waves, spring ω 10 ζ 0.3), fountain 0.15 s after the last count (40 drops in 0.6 s up to ≈ 260 px, rainbow 0..1), roundDone at max(1.9 s, fountain + 0.8 s), cheer 0.4 s; wipe 1.3 s, swap at 0.5, unfold from 0.75 |
-| help | hint after 2 misses or 3 no-progress presses, assist after 5, hint 5 s, cooldown 6 s, hand cycle 1.6 s; idle 12 s × 1.5 up to 30 s (12, 30, 57, 87, 117 s), the 2nd idle hints; the same wrong mat < 1 s = squish (no miss) but no-progress at most once per 0.9 s; poke hop 0.3 s, 22 px; lean ω 10 ζ 0.45 (wrong 0.14 rad for 0.6 s, −0.06 watching the flight) |
+| help | hint after 2 misses (ignores the cooldown) or 3 no-progress presses, assist after **4**, hint 5 s, cooldown **5 s**, hand cycle 1.6 s; idle 12 s × 1.5 up to 30 s (12, 30, 57, 87, 117 s; also under a finger resting still > 2 s), the 2nd idle hints; the same wrong mat < 1 s = squish (no miss) but no-progress at most once per 0.9 s; poke hop 0.3 s, 22 px; lean ω 10 ζ 0.45 (wrong 0.14 rad for 0.6 s, −0.06 watching the flight) |
 | surprises | rounds [1, 2], chapters 0–2 marmot / goat (rotating, seeded start), chapter 3 (rainbow) bird; 2–5 s after the ask (any round phase but wipe / unfold). marmot: a burrow ≥ hitR + 40 from every mat of every launch (box gap ≥ 10), up 0.4 s, looks, waves at 2.5–4 s, stays 10 s, down 0.4 s; tap r 54 → jump 26 px in 0.45 s + wave 1 s; goat: a rock on the horizon line (y = horizon − 4) whose box keeps ≥ 20 px from every mat footprint (≥ 60 px where they share height), 3 hops of 0.36 s (26 px, 44 px apart) in, stands 10 s, 3 hops out; tap r 56 → a 0.4 s hop; bird: flies in 1.2 s on an arc to the pole top, perches 10 s, flies out 1.0 s; tap r 44 → sings 0.8 s. No spot → goat falls back to the marmot; no marmot spot → none |
 | wind (`DK.WindModel`) | breeze 6 / 14 / 6 / 5 px/s² (two slow sines); breezy (mood 1) gusts: first after 3–6 s, then every 6–10 s, ± 40–60, 1.5 s sin² envelope, `gust {dir}` |
 | Mimi | moods idle talk happy cheer think oops wave giggle dance look (`moodTime`), blink 2.2–5 s / 0.13 s |
@@ -182,7 +192,7 @@ clamped on screen — unit-tested over 50 bot sessions)
 | `pumpAuto` | once per launch, just before Mimi's first own stomp | `pumpAuto[]` ("I'll help!") |
 | `launch` / `whoosh` | `{id}` / — (x, y = pad) | water WHOOSH |
 | `chute` | `{id}` (x, y = the canopy point at the apex) | "fwap" (+ rarely `chute[]`) |
-| `land` | `{id, launch, row, k, err (touchdown error px, ≤ 0.1), flight (s since launch)}` (x, y = the mat) | "pomf" + `land[]` |
+| `land` | `{id, launch, row, k, err (touchdown error px vs `landPt`, ≤ 0.1), flight (s since launch), tx, ty (the touchdown point)}` (x, y = the mat) | "pomf" + `land[]` |
 | `splash` | `{id}` | splash |
 | `fold` | `{id}` — the other mats of the launch at the landing, the landed mat when the next launch starts | cloth flap |
 | `count` | `{id, i (1-based), n}` (countSel, 0.4 s apart while the sign sits on the mat) · `{i, n, camp: true, id}` (camp, 0.35 s apart, one per pennant in collection order) | pip + `sayCount(i)`; at i = n `sayCountRun(n, 'dots')` (countSel) |
@@ -257,3 +267,10 @@ Mimi / rocket off screen, 0 landings > 2 px off the mat, 0 "2 misses without a h
 - Surprises: ≈ 25–33 % of rounds; a typical child taps ≈ 70 % of them.
 - Idle nudges for an absent child: 15.7, 33.7, 60.7, 90.7, 120.7, 150.7 s into the session = 12, 30, 57, 87, 117, 147 s after the ask
   (the 2nd and later also hint); a round waits for the child (no auto-play in play; the pump auto-pumps after 3 s).
+
+## 9. QA fix round (2026-11-22) — what changed in the mechanics
+C1 short rounds keep the age's mats · C2 a new picture per launch (shapes < 5: a colour per launch; size: an obj + colour per launch;
+colours: a new obj per launch from age 3) · aim 0.8 s · launch 0.6 s · assist 4 · hint cooldown 5 s + miss hints forced · resume restarts
+the pump window · resting finger → idle nudges · touchdown beside the thing (`landPt`) · landscape camp 26 / 96 / 160 / 262 · pump 76 px up ·
+phone mats bigger · phone bubble bigger · pennants 72 × 56, pitch 56 (portrait pole 92 px from the right edge) · swing soft wall ± 0.5 from
+the pop. Numbers before → after: `docs/reports/integration.md` "Fixes after QA".

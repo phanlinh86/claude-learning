@@ -30,15 +30,18 @@ camp counts the pennants and the rocket shoots a fountain with a little rainbow;
   world's real API, `DK.CONFIG`, events and render contract, `docs/VOICE.md` the event → line table main.js follows;
   integration decisions in `docs/reports/integration.md`.
 - Kid-friendly and original only; no fail states; soft taps, surprise taps and Mimi taps are never mistakes; a wrong mat
-  ripples, kind words name what was tapped, then the goal. Exactly one target per launch (content self-checks). An assisted
-  round gets ≤ 2★. Nobody is ever stuck at the pump (Mimi pumps by herself after 3 s).
+  ripples, kind words name what was tapped, then the goal. Exactly one target per launch (content self-checks), a new picture
+  per launch; a short round keeps the age's mats. An assisted round (4 no-progress presses) gets ≤ 2★. Nobody is ever stuck
+  at the pump (Mimi pumps by herself after 3 s; a resume restarts that window). The rocket lands BESIDE the thing
+  (`world.landPt`), never on it.
 - Colour pairs below age 5: never blue+purple, red+green, yellow+orange, green+orange, red+orange in one round; no pink.
   Mimi (cream + peach), the meadow, tents and mats never use an answer colour.
 - Every text key in both `en` and `vi` with identical `{params}`; the helper is "Mimi" (VI titles "Vịt Mimi").
 - URL test flags never saved; storage prefix `dk:`. Loud audio chain + volume setting (skill rule); all sound synthesized.
-- Speech policy (VOICE §3): prompts and `next` reminders protected (`speakPrompt`); stomps only through `Voice.sayPump`
-  (merged, never cut, "Blast off!" with the 3rd); count lines (countSel collect, camp) ONE line each, queued + never cut; the
-  pennant line is the launch's praise; `unfold` / `chute` / `land` / `wipe` / surprises rare and droppable;
+- Speech policy (VOICE §3): prompts and `next` reminders protected (`speakPrompt`); the right line only NAMES the thing
+  ("A red mug!", `pump: false`) and is never cut by a stomp; stomps only through `Voice.sayPump` (rate 1.2, merged, never cut,
+  "Blast off!" with the 3rd); count lines (countSel collect, camp = `sayCountUp(n, 'flags')`) ONE line each, queued + never cut;
+  no pennant line while another launch of the round follows; `unfold` / `chute` / `land` / `wipe` / surprises rare and droppable;
   `weather.windSource = world`.
 - Touches reach the world only through `DK.Input` (`down/move/up(x, y, ev)` — two numbers in logical px; HUD, speech bubble
   and menus never reach the canvas); `rapidTaps` in the pump phase (an extra finger = a new stomp). The DOM speech bubble

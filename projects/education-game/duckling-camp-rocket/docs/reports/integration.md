@@ -92,3 +92,96 @@ Files: `game/index.html`, `css/style.css`, `manifest.webmanifest`, `js/storage.j
   `screens.js` now covers the notch insets itself; `tests/sim/hs_*.js` are the mechanics engineer's.
 - Real-device TTS / mic behaviour is unverified here (Chromium has no voices; tests use the voice log and a fake synth).
 - The open canopy can float briefly under the HUD / bubble on landscape phones (they fade, so it stays visible).
+
+## Fixes after QA (fix engineer, 2026-11-22)
+Inputs: `qa_functional.md`, `qa_visual.md`, `playtest_report.md`. Every proposal was applied (or replaced by an equivalent),
+re-tested and re-shot. No git commit.
+
+### Playtest (C1–C9)
+| id | change | where |
+|---|---|---|
+| C1 | a short round keeps the age's mats; only the launches drop to 2 (`tableKM`); unit-test `wantKM` + the "short" test follow | `content.js`, `tests/unit/run.js` |
+| C2 | a new picture per launch: shapes < 5 a colour per launch, size an obj + colour per launch, colours a new obj per launch from age 3; `validate` per row | `content.js` (= `tests/sim/patches/mats_vary.json`) |
+| C3 | the right line only names the thing (`pump: false`); `'right'` out of `PUMP_CUTS` (the stomps wait + merge); `PUMP_RATE` 1.0 → **1.2**; the first stomp drops a name line that has not started; `aimTime` 0.45 → **0.8** | `main.js`, `voice.js`, `world.js`, voice unit test |
+| C4 | a right tap clears the wrong / hint guard, so the name line cuts a moot wrong / hint line | `main.js` |
+| C5 | no pennant line while another launch of the round follows | `main.js` |
+| C6 | camp line = `sayCountUp(n, 'flags')` ("One, two, three! Three flags!") | `main.js` |
+| C7 | `.first` prompts: the topic sentence dropped (home / countSeq / shapes5 kept), key word early | `i18n.js` (EN + VI) |
+| C8 | `launchDelay` 0.25 → **0.6** | `world.js` |
+| C9 | `assistAfter` 5 → **4** | `world.js` |
+
+### Functional QA
+- **P2-1** `resetNudges()` also restarts the pump window (`_pumpS.kid = time` in phase pump) → after Resume the first auto stomp
+  comes 2.95–2.98 s later (was 0.11 s). Unit-tested.
+- **P3-1** `hintCooldown` 6 → 5 (= the glow) **and** a miss-triggered hint ignores the cooldown → the probe now sees the hint
+  (`hint_cooldown_gap`: "wrong, wrong, hint; right mat glowing"). Unit-tested.
+- **P3-4** a finger resting still > 2 s (`idleRestHold`, < 24 px slide) no longer stops the idle nudges (`long_press`: `soft, idle`). Unit-tested.
+- **P3-5** `functional.js auto_pump` accepts every `pumpAuto` wording (`/help|let me pump|giúp|để mimi bơm/i`).
+- Found on the way: in iPad portrait a goat round can find no free goat spot (the bigger pole box + windsock) → the world falls
+  back to the marmot, but `world.surprise` still said "goat" (the e2e `surprise_goat` then waited 25 s in vain). `world.surprise`
+  now reports what really came; `surpriseTest` waits for the spawn before reading it.
+- `qa_functional.js`: `assisted_round` taps `cfg.assistAfter` times; `unfold_taps` / `busy_phase_taps` tap in slow motion
+  (they raced the next launch opening under CPU load).
+
+### Visual QA
+- **P1-1** the rocket lands **beside** the thing: `world.landPt(mat)` = `(x ± 0.30·S·ds, y + 0.04·S·ds)`, away from the pad (flight,
+  arc end, rings, splash, `land.err` + new `land.tx/ty`); render draws the landed mat's thing and the flyer **after** the rocket.
+  Landing stays exact (unit: err ≤ 2 px on every shape incl. resizes mid-flight; e2e checks against `landPt`).
+- **P1-2** landscape camp at ins.left + 26 / **96 / 160 / 262** (pole / Mimi / pump / pad): Mimi on the plunger is clear of the bottle.
+- **P1-3** phones: portrait S × 1.22 (208 / 196 / 180), itemH 0.70·S, horizon play.y0 + 150, depth 0.86–1.0; landscape S × 1.1
+  (187 / 176 / 163), itemH 0.68·S. `matHomes` fit re-checked: all 11 viewports × 5 ages × m 2–3 × 40 seeds fit at the full phone
+  size (unit-tested, `L.S` = the phone size). Sign glyphs bigger (disc 40 → 46, 2-char 33 → 38, wide sign 98 → 116 units with text
+  34/30 → 40/36, numeral 27 → 30); with the bigger itemH a one-glyph sign is ≈ 0.45·itemH and a 4-glyph sum ≈ 0.30·itemH (a 4-glyph
+  sum cannot reach 0.42 inside the 132-unit sprite box: not done).
+- **P2-1** bubble font floor 14 px (`max(14, fs·0.92)`); phone bubble: portrait h 124 → 150, landscape w ≤ 700 → 960. The world's
+  `hudBox()` now only takes top-anchored keep boxes (it had picked the windsock box, so the wide bubble ran under the HUD).
+- **P2-2** swing soft wall ± 0.5 from the pop (k 180, ζ 0.8 outward; hard stop ± 0.6 after the opening), opening ζ 0.5, drive 0.35.
+- **P2-3** the pump numeral pops on a cream disc (`#FBF3DD`, rim `#D9C59A`).
+- **P2-4** pennants 72 × 56, pitch 56, top 20 (portrait pole 92 px from the right edge); MeadowArt's pennant keep box follows
+  the layout; done garland ≤ 8 pennants at 0.8 × the pole size, hung between the panel and the topmost golden mat (portrait: as
+  bunting under the panel, the pole top stands in the camp there).
+- **P2-5** aim arc dots r 9 → 6 with a 2 px `#4E7560` ring, alpha floor 0.75, shadow 0.4.
+- **P2-6** a cream halo behind objects / shapes on a wet mat (rain).
+- **P2-7** the open canopy drawn × 1.3 (`chuteDrawK`, also in `rocket.top` for the bubble fade).
+- **P3s**: mic label nowrap (VI "Chạm hoặc nói nhé!"), phone-landscape settings toggles nowrap (VI "Giọng của Mimi" fits in one
+  line), an edge tent (landscape tent_b) is a keep box like the windsock, `pumpUp` 66 → 76, fountain rainbow × 0.6 and high in the
+  spray, done mats keep ≥ 30 px (+ the garland's 150 px when they fit) below the panel (re-measured after the panel's pop-in), bird × 1.3.
+- Re-shot with `tests/qa/visual.js` (iPhone portrait + landscape EN/VI, iPad portrait) and looked at: play, pump, flight + chute,
+  land, collect, pennant, camp, Talk, settings, done.
+
+### Before → after (re-run)
+| measure | before (playtest baseline) | after |
+|---|---|---|
+| `hs_deep.js --n 80` (6 models, 1 680 sessions): NaN / stuck / off screen / 2-miss-no-hint / rounds > 120 s | 0 | **0** |
+| typical age 4: session min mean (p90) · chapter s | 6.5 (6.9) · 94.6 | 6.7 (7.1) · 96.7 |
+| typical: rounds with 3 mats, age 4 / 5 / 6 / 7 | 0 / 0 / 27 / 25 % | **31 / 60 / 91 / 91 %** |
+| typical stars 3/2/1 age 4 · age 7 | 68/24/8 · 80/17/3 | 69/24/8 · 79/18/3 |
+| same target picture as the previous launch, typical age 3 / 4 | 87 / 60 % | **32 / 27 %** (the rest: warm-up obj, inherent rules) |
+| "nearest" child session p90, ages 3–7 | 8.0–8.7 min | 7.6–8.4 min |
+| `hs_voice.js` (real page, toddler bot, 6 sessions EN portrait + landscape, ages 3 / 4 / 6): lines / min | 18.7–23.3 | 20.2–21.3 |
+| Mimi talks % of the time | 83–96 | **71–79** |
+| prompts heard to the end | 70 % | **97 %** (169 / 174; start delay 0.05–0.09 s) |
+| right (naming) line heard to the end · said after the landing | 30 % · 80 / 304 | **95 %** (143 / 150) · **0** |
+| pump count complete (1-2-3) | 96 % | **100 %** (0 stale) |
+| "Blast off!" end after lift-off s mean · after the landing | 2.26 · 42 % | **1.89–2.02** · **27 %** (41 / 150; the proposal predicted 27 %) |
+| wrong lines | spoken in full | cut by the child's right tap (C4, by design: the goal is moot) |
+
+### Tests after the fixes (one sequential run, all exit 0)
+- `node tests/unit/run.js` **33/33** (new checks: touchdown beside the thing, launch 0.6 s, assist 4, miss hint inside the old
+  cooldown gap, idle under a resting finger, resume restarts the pump window, phone sizes fit at full size, pennant slots 20 + 56·j).
+- `node tests/unit/i18n_voice.test.js` **90 350 passed, 0 failed** (the stomp waits for the name line, PUMP_RATE 1.2).
+- `node tests/unit/mat_art.test.js` **15 110 passed**.
+- `node tests/e2e/smoke.js` **PASS** iPhone portrait + landscape (real taps → right, 3 pumps, launch, land; bot session to done).
+- `node tests/e2e/functional.js` **86/86** (875 s).
+- `node tests/qa/qa_functional.js` **41/41** (incl. `pause_in_pump`: first auto stomp 2.95–2.98 s after Resume; `hint_cooldown_gap`:
+  the hint comes; `long_press`: `soft, idle`).
+- Sims: `node tests/sim/hs_deep.js --n 80 --models typical,kid0.6,botT0.8,slow3,tapper,nearest --tag after`,
+  `node tests/sim/hs_voice.js --sessions 1 --ages 3,4,6 [--vp iphone-landscape]` (numbers above).
+
+### Still open
+- A 4-glyph sum sign ("10−6") reaches ≈ 0.30·itemH, not the 0.42 the visual report asked (it would need a sign wider than the
+  thing's sprite box); one-glyph signs and numerals reach it.
+- The pathological "always the nearest mat" child at ages 5–7 still has a session p90 of 8.3–8.4 min (target ≤ 8).
+- Wrong lines are now nearly always cut by the child's next (right) tap (C4) — intended, but a child who answers fast hears only
+  the start of the teaching line.
+- Real-device TTS (iOS rate 1.2 for "Một! Hai! Ba!") still unverified.

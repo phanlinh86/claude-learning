@@ -26,14 +26,15 @@
  *   DK.Voice.matchDetail(…) → { id, transcript, score } | null
  *
  * PUMP COUNT POLICY (sayPump, docs/VOICE.md §2.1) — the child stomps 3 times; every stomp is a world event `pump {n}`:
- *   1. a pump line is priority, tag 'pump', rate PUMP_RATE (1.0, a little brisker so it keeps up with the stomps);
+ *   1. a pump line is priority, tag 'pump', rate PUMP_RATE (1.2, brisker so a merged count keeps up with the stomps);
  *   2. a pump line never cuts another pump line: "One!" always finishes;
  *   3. a NEW number while an older one still WAITS (not started) merges with it into ONE line — "Two!" waiting + pump 3 →
  *      "Two, three! Blast off!" — so a fast pumper hears every number, the voice is never more than one line behind,
  *      and "Blast off!" is always said with the 3rd number (I18N.sayPump(lang, n, from));
- *   4. pump 1 (and any pump line) cuts a current line whose tag is in PUMP_CUTS (right / pumpAsk / pumpAuto / flavour /
- *      tap / idle / hint / next / poke / pennant …) — the "Now pump!" line is moot once the child pumps; it never cuts
- *      'prompt', 'wrong', 'count' or 'pump'; then it waits at the FRONT of the queue (before normal lines);
+ *   4. pump 1 (and any pump line) cuts a current line whose tag is in PUMP_CUTS (pumpAsk / pumpAuto / flavour /
+ *      tap / idle / hint / next / poke / pennant …) — the "stomp" line is moot once the child pumps; it never cuts
+ *      'prompt', 'wrong', 'count', 'pump' or 'right' (the short name line "A purple mug!": the stomps wait for it and
+ *      merge, QA fix C3); then it waits at the FRONT of the queue (before normal lines);
  *   5. a pump line that could not start within PUMP_STALE_MS (2.5 s) is dropped (the rocket is already flying);
  *   6. auto pumps (opts.auto — Mimi pumps by herself after 3 s): the first auto pump of a sequence is prefixed with
  *      I18N 'pumpAuto' ("I'll help! Two!"); later ones merge as above;
@@ -65,8 +66,8 @@
   // tones smear. Queue: 1 speaking + MAXQ waiting; non-priority lines older than STALE_MS are skipped.
   var RATE = 0.9, PITCH = 1.25, MAXQ = 2, MAXQP = 6, STALE_MS = 5000;
   // the pump count (policy in the header): brisker rate, stale after 2.5 s, which current lines a pump line may cut
-  var PUMP_RATE = 1.0, PUMP_STALE_MS = 2500;
-  var PUMP_CUTS = ['right', 'pumpAsk', 'pumpAuto', 'flavour', 'tap', 'idle', 'hint', 'next', 'poke', 'pennant', 'land',
+  var PUMP_RATE = 1.2, PUMP_STALE_MS = 2500;
+  var PUMP_CUTS = ['pumpAsk', 'pumpAuto', 'flavour', 'tap', 'idle', 'hint', 'next', 'poke', 'pennant', 'land',
     'chute', 'unfold', 'wipe', 'surprise', null];
   // fix round 1 (QA P2-1): at most MAXQ waiting NON-priority lines (oldest dropped first); priority lines (prompts, count numbers,
   // the wrong / teaching line) are never dropped for a normal line — only past MAXQP, and then never a prompt (opts.prompt)

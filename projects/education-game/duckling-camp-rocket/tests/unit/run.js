@@ -23,12 +23,13 @@ const AGE_TOPICS = { 3: ['colors', 'shapes', 'size', 'animals'], 4: ['colors', '
 const CLASH = [['blue', 'purple'], ['red', 'green'], ['yellow', 'orange'], ['green', 'orange'], ['red', 'orange']];
 const S_BASE = { 3: 170, 4: 170, 5: 160, 6: 148, 7: 148 };
 const OBJS = ['flower', 'mushroom', 'ball', 'mug', 'lantern'];
-/** (k launches, m mats) per age / round (DESIGN §5.1 = the base's rows × stones); chapter 0 round 0 = warm-up (2, 2); short (2, 2). */
+/** (k launches, m mats) per age / round (DESIGN §5.1 = the base's rows × stones); chapter 0 round 0 = warm-up (2, 2); short = 2 launches × the age's mats. */
 function wantKM(age, ri, level, short) {
-  if (short && ri > 0) return [2, 2];
   if (ri === 0 && level === 0) return [2, 2];
-  return (age <= 3 ? [[2, 2], [2, 2], [3, 2], [3, 2]] : age === 4 ? (level === 0 ? [[2, 2], [2, 3], [3, 2], [3, 3]] : [[2, 2], [3, 2], [3, 3], [3, 3]])
-    : age === 5 ? [[3, 2], [3, 3], [3, 3], [4, 3]] : [[3, 3], [4, 3], [4, 3], [4, 3]])[ri];
+  const km = (age <= 3 ? [[2, 2], [2, 2], [3, 2], [3, 2]] : age === 4 ? (level === 0 ? [[2, 2], [2, 3], [3, 2], [3, 3]] : [[2, 2], [3, 2], [3, 3], [3, 3]])
+    : age === 5 ? [[3, 2], [3, 3], [3, 3], [4, 3]] : [[3, 3], [4, 3], [4, 3], [4, 3]])[ri].slice();
+  if (short && ri > 0) km[0] = 2;   // a short round keeps the age's mats; only the launches drop to 2
+  return km;
 }
 const DESIGN_EVENTS = ['session', 'level', 'round', 'unfold', 'ask', 'next', 'right', 'aim', 'pumpAsk', 'pump', 'pumpAuto', 'launch', 'whoosh', 'chute', 'land', 'splash',
   'fold', 'count', 'homeBadge', 'pennant', 'hopBack', 'camp', 'fountain', 'roundDone', 'wipe', 'wrong', 'squish', 'soft', 'hint', 'assistArmed', 'assist', 'idle',
@@ -161,8 +162,10 @@ test('layout: DESIGN §2 fields, camp corner, meadow, horizon, pole / pad / pump
     for (const f of ['W', 'H', 'ins', 'portrait', 'tall', 'phone', 'bubble', 'hud', 'play', 'camp', 'meadow', 'horizon', 'mimiHome', 'mimiH', 'pad', 'pump', 'pole', 'rocketH', 'S', 'itemH', 'hitR', 'slots'])
       assert.ok(L[f] !== undefined, tag + ': layout.' + f);
     assert.ok(L.fits, tag + ': fits');
-    assert.ok(L.S <= S_BASE[age] && L.S >= 130, tag + ' S ' + L.S);
-    assert.ok(Math.abs(L.itemH - 0.62 * L.S) < 1e-9);
+    const sk = L.phone ? (L.portrait ? 1.22 : 1.1) : 1;   // QA P1-3: phones show bigger mats
+    assert.ok(L.S <= Math.round(S_BASE[age] * sk) && L.S >= 130, tag + ' S ' + L.S);
+    assert.ok(!L.phone || L.S === Math.round(S_BASE[age] * sk), tag + ' phones fit at the full phone size');
+    assert.ok(Math.abs(L.itemH - (L.phone ? (L.portrait ? 0.70 : 0.68) : 0.62) * L.S) < 1e-9);
     assert.ok(Math.abs(L.hitR - Math.max(0.6 * L.S * 0.8 + 14, L.phone ? 92 : 0)) < 1e-9, tag + ' hitR');
     assert.strictEqual(L.rocketH, 120);
     const ins = L.ins, yb = L.H - ins.bottom;
@@ -170,9 +173,9 @@ test('layout: DESIGN §2 fields, camp corner, meadow, horizon, pole / pad / pump
       assert.strictEqual(L.mimiH, L.phone ? 200 : 170);
       assert.ok(Math.abs(L.camp.y0 - (yb - Math.round(280 * (L.tall ? 1.15 : 1)))) < 1e-9 && L.camp.x0 === 0 && L.camp.x1 === L.W, tag + ' camp band');
       assert.ok(Math.abs(L.meadow.y1 - L.camp.y0) < 1e-9 && L.meadow.y0 === L.play.y0, tag + ' meadow above the camp');
-      assert.ok(Math.abs(L.horizon - (L.play.y0 + 120)) < 1e-9, tag + ' horizon');
+      assert.ok(Math.abs(L.horizon - (L.play.y0 + (L.phone ? 150 : 120))) < 1e-9, tag + ' horizon');
       assert.ok(L.pole.y1 >= L.camp.y0 - 160 - 1e-9 && L.pole.y1 >= L.play.y0 + 30 - 1e-9, tag + ' pole top');
-      assert.ok(Math.abs(L.pad.x - L.W / 2) < 1e-9 && Math.abs(L.pole.x - (L.W - ins.right - 70)) < 1e-9);
+      assert.ok(Math.abs(L.pad.x - L.W / 2) < 1e-9 && Math.abs(L.pole.x - (L.W - ins.right - 92)) < 1e-9);
     } else {
       assert.strictEqual(L.mimiH, 180);
       assert.ok(L.camp.x1 - ins.left >= 230 - 1e-9 && L.camp.x1 - ins.left <= 272 + 1e-9, tag + ' camp column');
@@ -191,11 +194,11 @@ test('layout: DESIGN §2 fields, camp corner, meadow, horizon, pole / pad / pump
     assert.ok(L.mimiHome.x - (B.feet[0] - B.box[0]) * s >= ins.left - 1 && L.mimiHome.y - (B.feet[1] - B.box[1]) * s >= L.play.y0 - 1, tag + ' Mimi fully on screen');
     assert.ok(L.pole.x > ins.left && L.pole.x + L.pennantW < L.W - ins.right && L.pole.y0 < yb, tag + ' pole + pennants on screen');
     assert.strictEqual(L.slots.length, 4);
-    for (let j = 0; j < 4; j++) assert.ok(Math.abs(L.slots[j].y - (L.pole.y1 + 24 + 46 * j)) < 1e-9, tag + ' pennant slot ' + j);
+    for (let j = 0; j < 4; j++) assert.ok(Math.abs(L.slots[j].y - (L.pole.y1 + 20 + 56 * j)) < 1e-9, tag + ' pennant slot ' + j);
     assert.ok(L.slots[3].y + L.pennantH <= L.pole.y0 + 1e-9, tag + ' 4 pennants fit on the pole');
     for (const K of L.keep) assert.ok(!overlap(L.poleBox, K), tag + ' the pole clear of the ' + K.kind);
     // the depth scale (DESIGN §2): 0.82 at the horizon … 1 at the meadow bottom
-    assert.ok(Math.abs(DK.World.depthAt(L, L.horizon) - 0.82) < 1e-9 && Math.abs(DK.World.depthAt(L, L.meadow.y1) - 1) < 1e-9);
+    assert.ok(Math.abs(DK.World.depthAt(L, L.horizon) - (L.phone && L.portrait ? 0.86 : 0.82)) < 1e-9 && Math.abs(DK.World.depthAt(L, L.meadow.y1) - 1) < 1e-9);
   }
 });
 test('layout: mat homes on every device shape × age × m 2..3 × 40 seeds — inside the meadow, apart, clear of pad / pole / bubble / HUD / edges', () => {
@@ -387,7 +390,7 @@ test('world: unfold motion — 0.4 s with a small overshoot; the thing drops on 
   const hs = []; for (let i = 0; i < 240; i++) { w.update(1 / 120); hs.push(m.thingHop); }
   assert.ok(Math.max(...hs) <= 2.0001 && Math.min(...hs) >= -2.0001 && Math.max(...hs) - Math.min(...hs) > 2, 'bob ± 2 px');
 });
-test('world: right → aim (0.45 s, Mimi hops onto the pump, launcher aims ≤ 0.6 rad, 14 arc points) → pump', () => {
+test('world: right → aim (0.8 s, Mimi hops onto the pump, launcher aims ≤ 0.6 rad, 14 arc points) → pump', () => {
   for (const vp of SHAPES6) {
     const w = mkWorld({ seed: 5, vp });
     toPlay(w, 'colors', 1);
@@ -399,7 +402,8 @@ test('world: right → aim (0.45 s, Mimi hops onto the pump, launcher aims ≤ 0
     assert.ok(aim && aim.id === t.id && Math.abs(aim.angle) <= 0.6 + 1e-9, vp.name + ' aim');
     assert.strictEqual(w.phase, 'aim'); assert.ok(!w.interactive);
     assert.strictEqual(w.arc.length, 14);
-    const last = w.arc[13]; assert.ok(Math.hypot(last.x - t.x, last.y - t.y) < 1, vp.name + ' arc ends on the mat');
+    const last = w.arc[13], lp = w.landPt(t); assert.ok(Math.hypot(last.x - lp.x, last.y - lp.y) < 1, vp.name + ' arc ends on the touchdown point');
+    assert.ok(Math.abs(lp.x - t.x) > 0.2 * w.layout.S * t.ds && Math.abs(lp.x - t.x) < 0.5 * w.layout.S * t.ds && Math.sign(lp.x - t.x) === Math.sign(t.x - w.layout.pad.x || 1), vp.name + ' touchdown beside the thing, away from the pad, on the mat');
     w.arc.forEach(p => assert.ok(fin(p.x, p.y)));
     const ev2 = until(w, inPump, 2);
     assert.ok(Math.abs(w.time - (w.time - w.phaseTime)) >= 0);
@@ -411,7 +415,7 @@ test('world: right → aim (0.45 s, Mimi hops onto the pump, launcher aims ≤ 0
     assert.strictEqual(w.prompt(), null); assert.deepStrictEqual(w.targets(), []);
   }
 });
-test('world: pump — any press stomps; < 0.22 s merged; 3rd + 0.25 s → launch; Mimi squash 0.88; plunger + gauge', () => {
+test('world: pump — any press stomps; < 0.22 s merged; 3rd + 0.6 s → launch; Mimi squash 0.88; plunger + gauge', () => {
   const w = mkWorld({ seed: 6 });
   toPlay(w, 'colors', 1); tapMat(w, w._target().id); until(w, inPump, 2); w.drainEvents();
   const L = w.layout, g = grassPoint(w);
@@ -434,7 +438,7 @@ test('world: pump — any press stomps; < 0.22 s merged; 3rd + 0.25 s → launch
   assert.strictEqual(tap(w, L.pump.x, L.pump.y) === 'merged' || true, true);
   const t3 = w.time; let tl = -1;
   run(w, x => tl > 0, 1, q => { if (q.type === 'launch') tl = w.time; }, 1 / 120);
-  assert.ok(Math.abs(tl - t3 - 0.25) < 0.02, 'launch 0.25 s after the 3rd pump: ' + (tl - t3).toFixed(3));
+  assert.ok(Math.abs(tl - t3 - CFG.launchDelay) < 0.02, 'launch launchDelay (0.6 s) after the 3rd pump: ' + (tl - t3).toFixed(3));
   assert.strictEqual(w.phase, 'flight');
   assert.ok(w.pump.gauge > 0.5, 'gauge up');
 });
@@ -471,7 +475,7 @@ test('world: flight physics — boost → ballistic coast (rot follows velocity)
       const g = w._lastG; assert.ok(g >= CFG.g && g <= 3200, tag + ' g ' + g);
       for (let i = 1; i < trace.coastVy.length; i++) assert.ok(Math.abs(trace.coastVy[i] - trace.coastVy[i - 1] - g / 120) < 1e-6, tag + ' ballistic coast (one constant g)');
       assert.ok(trace.chuteMax > 1.05 && trace.chuteMax < 1.4, tag + ' the chute pops with an overshoot ' + trace.chuteMax.toFixed(2));
-      assert.ok(trace.maxSwingOpen <= 0.45 + 1e-9, tag + ' |swing| ≤ 0.45 under the open chute');
+      assert.ok(trace.maxSwingOpen <= CFG.swingMax + 0.1 + 1e-9, tag + ' |swing| ≤ swingMax + 0.1 under the open chute');
       assert.strictEqual(trace.offScreen, 0, tag + ' on screen');
       const types = trace.events.map(e => e.type);
       for (const k of ['launch', 'whoosh', 'chute', 'land', 'splash']) assert.ok(types.includes(k), tag + ' event ' + k);
@@ -603,11 +607,11 @@ test('world: wrong / squish / soft / hint / assist / poke — exactly as the bas
   tapMat(w2, bad.id);
   ev = w2.drainEvents();
   assert.ok(ev.some(e => e.type === 'wrong') && ev.some(e => e.type === 'hint'), '2 misses → hint');
-  // assist after 5 no-progress presses; the next press on the meadow picks the target; ≤ 2★
+  // assist after CFG.assistAfter (4) no-progress presses; the next press on the meadow picks the target; ≤ 2★
   const w3 = mkWorld({ seed: 63 }); toPlay(w3, 'colors', 1);
   const g3 = grassPoint(w3);
   ev = [];
-  for (let i = 0; i < 5; i++) { tap(w3, g3.x, g3.y); ev.push(...w3.drainEvents()); wait(w3, 0.05, e => ev.push(e)); }
+  for (let i = 0; i < CFG.assistAfter; i++) { tap(w3, g3.x, g3.y); ev.push(...w3.drainEvents()); wait(w3, 0.05, e => ev.push(e)); }
   assert.ok(ev.some(e => e.type === 'assistArmed'), 'assist armed');
   const target = w3._target();
   assert.strictEqual(tap(w3, g3.x, g3.y), 'mat');
@@ -627,11 +631,11 @@ test('world: wrong / squish / soft / hint / assist / poke — exactly as the bas
   // a tap on a mat outside play only squishes; a slide off Mimi is no poke
   const w5 = mkWorld({ seed: 65 }); toPlay(w5, 'colors', 1); tapMat(w5, w5._target().id);
   const other = w5.mats.find(m => !m.target && m.state === 'rest');
-  until(w5, x => x.phase === 'flight', 5, null);
+  until(w5, x => x.phase === 'flight', 8, null);
   const h = w5.matHit(other.id); assert.strictEqual(tap(w5, h.x, h.y), 'squish'); assert.ok(w5.drainEvents().some(e => e.type === 'squish' && e.early));
   const mb5 = w5.mimiHit(); w5.pointerDown(mb5.cx, mb5.cy); w5.pointerMove(mb5.cx + 60, mb5.cy); assert.strictEqual(w5.pointerUp(mb5.cx + 60, mb5.cy), 'up');
 });
-test('world: idle nudges after 12 s, backing off ×1.5 up to 30 s; the 2nd idle hints; hint cooldown 6 s; hint() only in play', () => {
+test('world: idle nudges after 12 s, backing off ×1.5 up to 30 s (also under a resting finger); the 2nd idle hints; hint cooldown = glow; a miss hint ignores it; hint() only in play', () => {
   const w = mkWorld({ seed: 71 });
   toPlay(w, 'colors', 1);
   const t0 = w.time, idles = [];
@@ -641,8 +645,28 @@ test('world: idle nudges after 12 s, backing off ×1.5 up to 30 s; the 2nd idle 
   assert.ok(hints >= 3, 'idle hints ' + hints);
   const w2 = mkWorld({ seed: 72 }); toPlay(w2, 'colors', 1);
   assert.ok(w2.hint()); w2.drainEvents();
-  wait(w2, 5.5);
-  assert.strictEqual(w2._autoHint(false), null, 'cooldown 6 s');
+  wait(w2, 4.5);
+  assert.strictEqual(w2._autoHint(false), null, 'no new hint while the glow is on');
+  wait(w2, 0.6);
+  assert.ok(w2._autoHint(false), 'cooldown (5 s) ≤ the glow (5 s): the next auto hint may come as soon as the glow ends');
+  w2.drainEvents();
+  // QA P3-1: the 2nd miss right after a glow ended is never left without a hint
+  const w6 = mkWorld({ seed: 73 }); toPlay(w6, 'colors', 1);
+  w6._autoHint(true); w6.drainEvents(); wait(w6, 3.9);
+  const bad6 = wrongOf(w6); tapMat(w6, bad6.id); wait(w6, 1.3); tapMat(w6, bad6.id);
+  const ev6 = w6.drainEvents();
+  assert.strictEqual(w6.misses, 2); assert.ok(ev6.some(e => e.type === 'hint'), '2 misses → hint even inside the old cooldown gap');
+  // QA P3-4: a finger resting still on the grass does not stop the idle nudges
+  const w7 = mkWorld({ seed: 74 }); toPlay(w7, 'colors', 1);
+  const g7 = grassPoint(w7); w7.pointerDown(g7.x, g7.y); w7.drainEvents();
+  const id7 = []; run(w7, null, 16, e => { if (e.type === 'idle') id7.push(e); }, 1 / 30);
+  assert.ok(id7.length >= 1, 'an idle nudge comes under a resting finger');
+  w7.pointerUp(g7.x, g7.y);
+  // QA P2-1: resume in the pump phase restarts the child's full 3 s window
+  const w8 = mkWorld({ seed: 75 }); toPlay(w8, 'colors', 1); tapMat(w8, w8._target().id); until(w8, inPump, 3); wait(w8, 2.7); w8.drainEvents();
+  w8.resetNudges(); const t8 = w8.time; let a8 = -1;
+  run(w8, () => a8 > 0, 4, e => { if (e.type === 'pump' && e.auto && a8 < 0) a8 = w8.time - t8; }, 1 / 120);
+  assert.ok(Math.abs(a8 - CFG.pumpAuto) < 0.05, 'the first auto stomp comes a full 3 s after the resume: ' + a8.toFixed(2));
   tapMat(w2, w2._target().id);
   assert.strictEqual(w2.hint(), null, 'no hint outside play');
 });
@@ -682,12 +706,12 @@ test('world: surprises — marmot (burrow ≥ hitR + 40 from every mat), goat (r
   assert.ok(kinds.marmot > 0 && kinds.goat > 0 && kinds.bird > 0, 'all three surprises seen ' + JSON.stringify(kinds));
   assert.ok(taps.marmot > 0 && taps.goat > 0 && taps.bird > 0, 'all three tapped ' + JSON.stringify(taps));
 });
-test('world: rounds in a long chapter get short (2 × 2); the 75 s limit ends a chapter after ≥ 3 rounds', () => {
+test('world: rounds in a long chapter get short (2 launches); the 75 s limit ends a chapter after ≥ 3 rounds', () => {
   const w = mkWorld({ seed: 101, age: 6 });
   startTopic(w, 'add', 1);
   w.levelStartTime = w.time - 50; w.round = 2;
   w._prepareRound();
-  assert.ok(w.cur.short && w.cur.k === 2 && w.cur.m === 2);
+  assert.ok(w.cur.short && w.cur.k === 2 && w.cur.m === 3, 'short keeps the age\'s mats (age 6 round 2: 3)');
   w.round = 2; w.levelStartTime = w.time - 80; w._swap();
   assert.strictEqual(w.state, 'talk'); assert.strictEqual(w.roundsPerLevel, 3);
   const w2 = mkWorld({ seed: 102 }); startTopic(w2, 'colors', 1); w2.round = 1; w2.levelStartTime = w2.time - 73; w2._swap();

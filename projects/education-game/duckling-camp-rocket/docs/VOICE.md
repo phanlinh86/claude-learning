@@ -39,7 +39,9 @@ skipped with a note (content.js is never edited from here).
   "marmot"), goat "mountain goat" / "bạn dê núi", bird "little bird" / "bạn chim nhỏ".
 - **Right lines** name the thing, then the pump cue: "A red mug! Now pump!" / "Cái cốc màu đỏ! Giờ bé bơm nhé!"; homes
   teach the home ("The penguin lives on the ice! Now pump!"); countSeq "Number 2! Now pump!"; countSel "4 pinecones! Now
-  pump!" (the pinecones are counted aloud later, at collect). `e.pump === false` → no tail.
+  pump!" (the pinecones are counted aloud later, at collect). `e.pump === false` → no tail — **main.js always passes
+  `pump: false` since the QA fix round** (C3): the child hears just the name ("A red mug!"); the glowing pump + the
+  `pumpAsk` line (when nothing speaks 1.2 s later) carry the stomp cue.
 - **Wrong lines** name what was tapped, then the goal: "That’s a blue mushroom. Find a red one!" / "Đây là cây nấm màu xanh
   dương. Mình tìm cái màu đỏ nhé!"; countSel "That’s 3 pinecones. Find the sign with 4 pinecones!"; countSeq "That’s 4.
   Which one is 2?" / "Đây là số 4. Số 2 đâu nhỉ?".
@@ -110,7 +112,7 @@ MOODS`. Kept: every Talk key, `wrong.*`, `goal.*`, `hint`, `idle`, `praise`, `gr
 Promise<{spoken, reason}>`, `sayKey(key, params, opts)` (promise `.text`), **`sayPump(n, {lang, auto, from})`** (promise
 `.text`), **`resetPump()`**, `stop()`, `dropQueued()`, `dropTagged(tags)`, `queuedTags()`, `currentTag()`, `isSpeaking()`,
 `hasVoice(lang)`, `voiceName(lang)`, `onStart(display)` / `onEnd`, `onVoicesChanged(fn)`, `log` (+ `DK.debug.voiceLog`) —
-**every line**, also when muted / at test speed, `spoken(lang, text)`, `RATE` 0.9 / **`PITCH` 1.25**, `PUMP_RATE` 1.0,
+**every line**, also when muted / at test speed, `spoken(lang, text)`, `RATE` 0.9 / **`PITCH` 1.25**, `PUMP_RATE` 1.2,
 `PUMP_STALE_MS` 2500, `PUMP_CUTS`, `canListen()`, `listen({lang, choices, timeoutMs})`, `stopListening()`,
 `isListening()`, `onListen(bool)`, `match(…)`, `matchDetail(…)`.
 - Voices: best local per language — vi **Linh** / Google Tiếng Việt / Microsoft HoaiMy; en **Samantha** / Nicky / Karen /
@@ -127,15 +129,19 @@ Promise<{spoken, reason}>`, `sayKey(key, params, opts)` (promise `.text`), **`sa
 ### 2.1 The pump count policy (`sayPump`) — tested
 The child stomps 3 times (any tap); each stomp is `pump {n, auto?}`. main calls `DK.Voice.sayPump(e.n, {lang, auto: e.auto})`
 **instead of** `say` for these:
-1. Pump lines are **priority**, tag **`'pump'`**, rate 1.0 (brisker, so the count keeps up with the stomps), Mimi's pitch.
+1. Pump lines are **priority**, tag **`'pump'`**, rate **1.2** (brisker, so a merged count keeps up with the stomps; QA fix C3 —
+   check the Vietnamese "Một! Hai! Ba!" on a device), Mimi's pitch.
 2. **A pump line never cuts another pump line** — "One!" always finishes.
 3. **Fast pumpers: merge, never lag, never skip.** A new number while an older pump line still *waits* (not started)
    replaces it with ONE line covering both: "Two!" waiting + pump 3 → **"Two, three! Blast off!"**. At most one pump line
    ever waits, so the voice is never more than one short line behind; every number is said once; **"Blast off!" is always
    said with the 3rd number** (`I18N.sayPump(lang, n, from)`).
-4. A pump line **cuts** a current line whose tag is in `PUMP_CUTS` (`right` — its "Now pump!" is moot once the child pumps
-   — `pumpAsk, pumpAuto, flavour, tap, idle, hint, next, poke, pennant, land, chute, unfold, wipe, surprise`, untagged); it
-   **never cuts** `prompt`, `wrong`, `count` or `pump`: then it waits at the **front** of the queue (after a waiting prompt).
+4. A pump line **cuts** a current line whose tag is in `PUMP_CUTS` (`pumpAsk` — "stomp" is moot once the child pumps
+   — `pumpAuto, flavour, tap, idle, hint, next, poke, pennant, land, chute, unfold, wipe, surprise`, untagged); it
+   **never cuts** `prompt`, `wrong`, `count`, `pump` or **`right`** (QA fix C3: the short name line "A red mug!" is the
+   launch's learning moment — the stomps wait for it and merge, "One, two!"): then it waits at the **front** of the queue
+   (after a waiting prompt). main.js drops a `right` line that has **not started** at the first stomp (it would only be said
+   after the lift-off).
 5. A pump line that could not start within **2.5 s** is dropped (`stale`: the rocket is already flying).
 6. `auto: true` (Mimi pumps by herself after 3 s): the first auto pump of a sequence gets the `pumpAuto` head ("I’ll help!
    Two!"); if that line is merged before it started, the merged line keeps the head.
@@ -170,7 +176,7 @@ dropped by the next ask) · tag in `code`.
 | `unfold {id}` | — (cloth "fwump"); the chapter's very first unfold of round 0: `t('unfold')` rarely (≤ 1 per chapter, 40 %) | D `flavour` |
 | `ask {promptKey, params, first}` | `ask(lang, promptKey, params, {first})`; bubble + voice; remember it for `pokeMimi` / `idle` | **P** prompt; drops `flavour`, `right`, `pennant` |
 | `next {launch, left}` | `sayNext(lang, ev2(e))` ("Next one: red!", countSeq "Now 2!"); remember it as the current prompt text | **P** (as a prompt, tag `prompt`); drops `pennant` if not started |
-| `right {id, thing, launch, k, left, home?, count?}` | `sayRight(lang, ev2(e))` → "A red mug! Now pump!" | Q behind a protected prompt, else I; tag `right` (the first pump cuts it) |
+| `right {id, thing, launch, k, left, home?, count?}` | `sayRight(lang, {…ev2(e), pump: false})` → "A red mug!" (QA C3); a `wrong` / `hint` line still speaking is moot → the name line may cut it (C4) | Q behind a protected prompt, else I; tag `right` (never cut by a stomp; dropped at the first stomp if not started) |
 | `aim {id}` | — (ratchet click) | — |
 | `pumpAsk` | bubble `t('pumpAsk')`; spoken only if nothing speaks 1.2 s later and no pump came yet | D `pumpAsk` |
 | `pump {n, auto?}` | `Voice.sayPump(n, {lang, auto})` → "One!" "Two!" "Three! Blast off!" (merged when fast) | **§2.1** tag `pump` |
@@ -182,9 +188,9 @@ dropped by the next ask) · tag in `code`.
 | `fold {id}` | — (cloth flap) | — |
 | `count {i}` (collect, countSel) | on `i === 1` only: `sayCountUp(lang, n, 'pinecones')` ("One, two, three, four! Four pinecones!") — n = the thing's pinecones; later `count` events: pip only | **P** count, Q |
 | `homeBadge {home}` | — (badge chime; the right line named the home) | — |
-| `pennant {id, slot, thing}` | `sayPennant(lang, ev2(e))` ("The red mug on the flagpole!") — the launch's praise; **skipped in countSel** (the count run was the praise) and when a `next` / `ask` is already waiting | Q, D `pennant` |
+| `pennant {id, slot, thing}` | `sayPennant(lang, ev2(e))` ("The red mug on the flagpole!") — **skipped in countSel** (the count run was the praise), when a `next` / `ask` is already waiting, and (QA C5) **while another launch of the round follows** (its `next` is due) — so in practice a sound + sparkle; the name line is the launch's praise | Q, D `pennant` |
 | `hopBack` | — (boing) | — |
-| `camp` | `sayCamp(lang, pennants.length)` ("All our flags! One, two, three! Three flags!"); the camp `count {i}` events (0.35 s) are pips only | **P** count, Q |
+| `camp` | `sayCountUp(lang, pennants.length, 'flags')` ("One, two, three! Three flags!" — QA C6: fits inside the 1.9 s camp; `sayCamp` with the "All our flags!" head is no longer used); the camp `count {i}` events (0.35 s) are pips only | **P** count, Q |
 | `fountain` | — (sparkling spray) | — |
 | `roundDone {stars}` | **no line** (stars fly) | — |
 | `wipe {mood}` | `t('wipe')` rarely (chapter 1 round 0, then ≤ 1 in 4), only when nothing speaks | D `wipe` |
@@ -205,9 +211,9 @@ dropped by the next ask) · tag in `code`.
 | `levelDone` | `t('great')` | Q |
 | `sessionDone {stars}` | `t('party')`, then `t('session.done', {stars})` | I, then Q |
 
-**Headline rules for main.js**: one question per round (`ask`), a short `next` before every later launch; the right line
-ends with "Now pump!" and is cut by the first stomp; stomps go through `Voice.sayPump` only; the pennant line is the
-launch's praise; counts (countSel collect, camp) are ONE line each, never one line per `count` event; everything decorative
+**Headline rules for main.js**: one question per round (`ask`; its `.first` wording is short — "Let's launch the rocket!" +
+the ask with the key word, QA C7), a short `next` before every later launch; the right line only names the thing and is
+never cut by a stomp (QA C3); stomps go through `Voice.sayPump` only; the name line is the launch's praise; counts (countSel collect, camp) are ONE line each, never one line per `count` event; everything decorative
 (`unfold`, `chute`, `land`, `wipe`, surprises) is rare and droppable.
 
 **Input wiring**: `DK.Input.attach(canvas, { …, rapidTaps: () => world.state === 'round' && world.phase === 'pump' })` so a

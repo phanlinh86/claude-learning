@@ -101,9 +101,11 @@
     if (L.pad) { const rh = L.rocketH || 120; out.push({ n: 'pad', x: L.pad.x - 52, y: L.pad.y - rh - 24, w: 104, h: rh + 44 }); }
     if (L.pump) out.push({ n: 'pump', x: L.pump.x - 52, y: L.pump.y - 44, w: 104, h: 96 });
     if (L.pole) {
-      const p = L.pole, right = p.x + PENNANT_W + 10 <= L.W - ((L.ins && L.ins.right) || 0);
+      // the world's pennant size when it has one (QA P2-4: bigger pennants), else the art defaults
+      const pw = L.pennantW ? L.pennantW + 20 : PENNANT_W, pp = L.pennantPitch || PENNANT_PITCH, ph = L.pennantH ? L.pennantH + 16 : 60;
+      const p = L.pole, right = p.x + pw + 10 <= L.W - ((L.ins && L.ins.right) || 0);
       out.push({ n: 'pole', x: p.x - 12, y: p.y1 - 14, w: 24, h: p.y0 - p.y1 + 24 });
-      out.push({ n: 'pennants', x: right ? p.x : p.x - PENNANT_W, y: p.y1 + 10, w: PENNANT_W, h: 24 + (PENNANT_SLOTS - 1) * PENNANT_PITCH + 60 });
+      out.push({ n: 'pennants', x: right ? p.x : p.x - pw, y: p.y1 + 10, w: pw, h: 24 + (PENNANT_SLOTS - 1) * pp + ph });
     }
     if (L.bubble) out.push({ n: 'bubble', x: L.bubble.x, y: L.bubble.y, w: L.bubble.w, h: L.bubble.h });
     if (L.hud) out.push({ n: 'hud', x: L.hud.x, y: L.hud.y, w: L.hud.w, h: L.hud.h });

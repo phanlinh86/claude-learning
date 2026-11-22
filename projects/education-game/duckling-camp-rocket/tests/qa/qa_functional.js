@@ -136,6 +136,8 @@ P.unfold_taps = async ({ page, cdp, url }) => {
   // tap every mat while it is still unfolding (first launch of a round, then the 2nd launch's unfold)
   await startRound(page, url, { waitReady: false, seed: 21 });
   await W(page, () => { const w = DK.debug.world; return w.state === 'round' && w.phase === 'unfold' && w.mats.some(m => m.state === 'unfold'); });
+  // slow motion while tapping: a tap sequence takes real time, the unfold must not end in the middle of it (probe race)
+  await page.evaluate(() => DK.debug.setSpeed(0.15));
   const n0 = await evLen(page), m0 = await page.evaluate(() => DK.debug.world.misses);
   let taps = 0;
   for (let k = 0; k < 6; k++) {
@@ -143,6 +145,7 @@ P.unfold_taps = async ({ page, cdp, url }) => {
     if (ph !== 'unfold') break;
     taps += await tapEverything(cdp, page);
   }
+  await page.evaluate(() => DK.debug.setSpeed(1));
   const evs = await evSince(page, n0);
   const bad = evs.filter(e => (e.type === 'right' || e.type === 'wrong'));
   const m1 = await page.evaluate(() => DK.debug.world.misses);
@@ -155,8 +158,10 @@ P.unfold_taps = async ({ page, cdp, url }) => {
     await tap(cdp, page, await page.evaluate(id => DK.debug.matScreen(id), i.a));
     await pumpThree(cdp, page);
     await W(page, () => DK.debug.world.mats.some(m => m.state === 'unfold' && m.launch === 1), null, 15000);
+    await page.evaluate(() => DK.debug.setSpeed(0.15));
     const n1 = await evLen(page), mm = await page.evaluate(() => DK.debug.world.misses);
     for (let k = 0; k < 4; k++) { if (!(await page.evaluate(() => DK.debug.world.mats.some(m => m.state === 'unfold')))) break; await tapEverything(cdp, page); }
+    await page.evaluate(() => DK.debug.setSpeed(1));
     const e2 = (await evSince(page, n1)).filter(e => e.type === 'right' || e.type === 'wrong');
     check(e2.length === 0 && mm === await page.evaluate(() => DK.debug.world.misses), 'taps during the 2nd launch unfold were judged: ' + types(e2));
   }
@@ -187,13 +192,15 @@ P.busy_phase_taps = async ({ page, cdp, url }) => {
     // flight → collect: keep tapping everything until the next launch is ready or the camp starts
     n0 = await evLen(page); m0 = await page.evaluate(() => DK.debug.world.misses);
     const pumps0 = await page.evaluate(() => window.__ev.filter(e => e.type === 'pump').length);
-    for (let k = 0; k < 40; k++) {
+    await page.evaluate(() => DK.debug.setSpeed(0.4));   // slow motion: a tap sent just before the next launch opens must not land after it (probe race)
+    for (let k = 0; k < 120; k++) {
       const s = await page.evaluate(() => { const w = DK.debug.world; return { st: w.state, ph: w.phase, r: w.rocket.state, inter: w.interactive }; });
       if (s.st === 'round' && s.ph === 'play' && s.inter) break;
       seen[s.st + '/' + s.ph] = 1;
       if (s.st === 'talk') break;
       await tapEverything(cdp, page);
     }
+    await page.evaluate(() => DK.debug.setSpeed(1));
     const e = await evSince(page, n0);
     const bad = e.filter(x => x.type === 'right' || x.type === 'wrong' || x.type === 'pump');
     check(bad.length === 0, 'taps during flight/collect/camp/wipe judged: ' + types(bad));
@@ -672,9 +679,10 @@ P.assisted_round = async ({ page, cdp, url }) => {
     return out[Math.floor(out.length / 2)];
   });
   check(g, 'no grass point');
-  for (let k = 0; k < 5; k++) { await tap(cdp, page, g, 50); await page.waitForTimeout(350); }
+  const nA = await page.evaluate(() => DK.debug.world.cfg.assistAfter);   // 4 since the QA fix round (was 5)
+  for (let k = 0; k < nA; k++) { await tap(cdp, page, g, 50); await page.waitForTimeout(350); }
   let evs = await evSince(page, n0);
-  check(evs.some(e => e.type === 'assistArmed'), '5 soft taps did not arm the assist: ' + types(evs));
+  check(evs.some(e => e.type === 'assistArmed'), nA + ' soft taps did not arm the assist: ' + types(evs));
   await tap(cdp, page, g, 50); await page.waitForTimeout(250);
   evs = await evSince(page, n0);
   check(evs.some(e => e.type === 'assist') && evs.some(e => e.type === 'right'), 'assist tap: ' + types(evs));

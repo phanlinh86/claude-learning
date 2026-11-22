@@ -157,6 +157,7 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
   background: #ff6f91; color: #fff; font-size: 20px; font-weight: 800; box-shadow: 0 5px 0 #c0405f; }
 .mic-btn svg { width: 30px; fill: #fff; }
 .mic-btn.listening { animation: breathe 1s ease-in-out infinite; background: #ff3d6e; }
+#micLabel { white-space: nowrap; font-size: clamp(13px, 3.6vw, 18px); }   /* QA P3-1: the label never wraps in the pill */
 
 /* ---------- done ---------- */
 #scrDone { align-items: flex-end; padding-bottom: calc(var(--sa-b) + 4vh); }
@@ -255,8 +256,8 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 /* landscape phones: settings fit without scrolling (4 toggles in one row, no note) (visual QA P3-13) */
 @media (orientation: landscape) and (max-height: 430px) {
   .settings-panel { max-width: min(820px, 100%); padding: 10px 16px; }
-  .settings-panel .set-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 4px 0; }
-  .settings-panel .toggle { font-size: 14px; padding: 4px 8px; gap: 6px; }
+  .settings-panel .set-grid { grid-template-columns: repeat(4, minmax(0, max-content)); justify-content: space-between; margin: 4px 0; }   /* QA P3-2: labels never wrap */
+  .settings-panel .toggle { font-size: 14px; padding: 4px 8px; gap: 6px; white-space: nowrap; }
   .settings-panel .toggle input { width: 22px; height: 22px; }
   .settings-panel .small-note { display: none; }
   .settings-panel .set-row label { font-size: 17px; }

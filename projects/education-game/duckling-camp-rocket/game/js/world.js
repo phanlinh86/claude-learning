@@ -18,7 +18,7 @@
     // ---- timing / state machine (s) — as the base
     step: 1 / 120, maxFrame: 1.0,
     roundsPerLevel: 4, chapterTimeLimit: 75, chapterMinRounds: 3, chapterHardLimit: 72, chapterHardMin: 2, roundLongCut: 70, roundLongMin: 2,
-    shortBudget: [1e9, 22, 40, 56],   // s into the chapter: a round starting later than this is short (2 launches × 2 mats)
+    shortBudget: [1e9, 22, 40, 56],   // s into the chapter: a round starting later than this is short (2 launches × the age's mats)
     introTime: 2.5, levelDoneTime: 3.6,
     talkAfterAnswer: 1.6, talkAskTime: 12, talkGlowAfterAsks: 2, talkMaxAsks: 3, talkGiveUp: 2,
 
@@ -26,15 +26,18 @@
     shortSide: 720, minLong: 960, maxLong: 1600, tallRatio: 1.6, phoneRatio: 1.9,
     bottomLand: 14, bottomPort: 26, bandGap: 10,
     bubbleX: 24, bubbleYLand: 18, bubbleMaxW: 700, bubbleRight: 200, bubbleHLand: 134, bubbleYPort: 110, bubbleHPort: 124,
+    bubbleHPortPhone: 150, bubbleMaxWPhone: 960,   // QA P2-1: a bigger bubble on phones (the font stays ≥ 14 CSS px)
     hudW: 160, hudH: 96, bubbleMinW: 220,
     campW: 272, campWMin: 230, campWStep: 14, campH: 280, campTallK: 1.15,
-    poleXLand: 26, poleTopGap: 30, poleBaseUp: 40, poleXPort: 70, poleRise: 160,
-    mimiXLand: 100, mimiUp: 70, pumpXLand: 178, pumpUp: 66, padXLand: 236, padUp: 60,
+    poleXLand: 26, poleTopGap: 30, poleBaseUp: 40, poleXPort: 92, poleRise: 160,
+    mimiXLand: 96, mimiUp: 70, pumpXLand: 160, pumpUp: 76, padXLand: 262, padUp: 60,   // QA P1-2: Mimi on the pump clear of the rocket
     mimiXPort: 120, pumpDxPort: -120,
-    pennantTop: 24, pennantPitch: 46, pennantW: 56, pennantH: 44, slots: 4,
-    horizonLandK: 0.30, horizonPort: 120,
+    pennantTop: 20, pennantPitch: 56, pennantW: 72, pennantH: 56, slots: 4,   // QA P2-4: bigger pennants (were 56 × 44, pitch 46)
+    horizonLandK: 0.30, horizonPort: 120, horizonPhonePort: 150,
     mimiHLand: 180, mimiHPort: 170, mimiHPhonePort: 200, rocketH: 120,
     sBase: { 3: 170, 4: 170, 5: 160, 6: 148, 7: 148 }, sMin: 130, sStep: 6, itemK: 0.62, dsMin: 0.82, matHK: 0.42,
+    // QA P1-3: phones show the mats bigger (a phone's logical px are only 0.55 CSS px): S × 1.22 / × 1.1, taller things, less depth shrink
+    phonePortSK: 1.22, phoneLandSK: 1.1, itemKPhonePort: 0.70, itemKPhoneLand: 0.68, dsMinPhonePort: 0.86,
     hitK: 0.6, hitInner: 0.8, hitPad: 14, hitPhone: 92, hitLift: 0.3, pumpHitR: 80,
     keepGap: 44, edgeGap: 44, poleGap: 40, padGap: 90, campGap: 40, matGap: 20, gridStep: 12, homeTries: 14, homeCapK: 1.0, homeJitK: 0.5,
 
@@ -48,9 +51,9 @@
     foldTime: 0.5, foldRise: 160, foldSpin: 0.9,
 
     // ---- aim / pump
-    aimTime: 0.45, aimMax: 0.6, aimOmega: 14, aimZeta: 0.6, arcN: 14, arcFade: 0.3,
+    aimTime: 0.8, aimMax: 0.6, aimOmega: 14, aimZeta: 0.6, arcN: 14, arcFade: 0.3,
     mimiHopTime: 0.3, mimiHopApex: 26, mimiLandSq: -0.14,
-    pumpCount: 3, pumpMerge: 0.22, pumpAuto: 3.0, pumpAutoEvery: 0.5, launchDelay: 0.25, pumpSq: -0.12,
+    pumpCount: 3, pumpMerge: 0.22, pumpAuto: 3.0, pumpAutoEvery: 0.5, launchDelay: 0.6, pumpSq: -0.12,
     pressOmega: 30, pressZeta: 0.7, pressHold: 0.09, pressDepth: 14, pumpFrame: 0.2,
 
     // ---- flight (physics; px, s)
@@ -58,10 +61,10 @@
     glideOmega: 3.0,             // horizontal glide under the chute: a critically damped approach (= linear air drag) onto the mat
     rotOmega: 10, rotZeta: 0.8, sprayN: 36, sprayV: [260, 520], spraySpread: 0.35, sprayLife: 0.6,
     chuteOmega: 12, chuteZeta: 0.4, chuteOpen: 0.3, chuteV: 220,
-    swingOmega: 4.5, swingZeta: 0.15, swingZetaOpen: 0.3, swingMax: 0.45, swingDrive: 0.6, swingGround: 2.5,
+    swingOmega: 4.5, swingZeta: 0.15, swingZetaOpen: 0.5, swingMax: 0.5, swingDrive: 0.35, swingGround: 2.5, swingWallK: 180, swingWallZeta: 0.8,   // QA P2-2
     windK: 0.6, windSwing: 0.6, fadeH: 50, flightMax: 9,
     landBounce: 12, bounceG: 1600, tipOmega: 12, tipZeta: 0.5, drapeTo: 0.3, drapeRot: 1.1, drapeOmega: 8, drapeZeta: 0.7, landSqR: -0.18,
-    chuteRotK: 0.4,
+    chuteRotK: 0.4, chuteDrawK: 1.3, landSideK: 0.30, landDownK: 0.04,
 
     // ---- collect / return
     landHold: 0.2, thingHopH: 20, thingHopTime: 0.22, flyTime: 0.55, flyApex: 70, flyScale: 0.42, flyNext: 0.1,
@@ -74,8 +77,8 @@
     campTime: 1.9, cheerHold: 0.4, wipeTime: 1.3, wipeSwap: 0.5, wipeUnfold: 0.75,
 
     // ---- help (as the base, incl. its fix-round values)
-    hintAfterMisses: 2, hintAfterSoft: 3, assistAfter: 5, hintTime: 5, hintCooldown: 6, hintCycle: 1.6,
-    idleTime: 12, idleBackoff: 1.5, idleMax: 30, idleHintFrom: 2, tapMovePx: 24, sameWrongWindow: 1.0, repeatNoProgress: 0.9,
+    hintAfterMisses: 2, hintAfterSoft: 3, assistAfter: 4, hintTime: 5, hintCooldown: 5, hintCycle: 1.6,
+    idleTime: 12, idleBackoff: 1.5, idleMax: 30, idleHintFrom: 2, tapMovePx: 24, idleRestHold: 2, sameWrongWindow: 1.0, repeatNoProgress: 0.9,
     pokeHopTime: 0.3, pokeApex: 22,
     leanOmega: 10, leanZeta: 0.45, leanWrong: 0.14, leanHold: 0.6, sqOmega: 16, sqZeta: 0.35, sxK: 0.6,
 
@@ -216,14 +219,14 @@
   WindModel.prototype.drain = function () { var e = this.events; this.events = []; return e; };
 
   /* ---------------------------------------------------------------- layout (DESIGN §2) */
-  function hudBox(hk, W, H) { var best = null; for (var i = 0; i < hk.length; i++) { var b = hk[i]; if (b.x + b.w / 2 > W / 2 && b.y < H / 2 && (!best || b.y + b.h > best.y + best.h)) best = b; } return best; }
+  function hudBox(hk, W, H) { var best = null; for (var i = 0; i < hk.length; i++) { var b = hk[i]; if (b.x + b.w / 2 > W / 2 && b.y < 2 &&   /* the HUD hangs from the top edge (not a meadow prop keep box) */ (!best || b.y + b.h > best.y + best.h)) best = b; } return best; }
   function baseLayout(W, H, ins, cfg, hudKeep) {
     ins = insOf(ins);
     var portrait = H > W, tall = H / W > cfg.tallRatio, phone = (portrait ? H / W : W / H) > cfg.phoneRatio;
     var hk = keepBoxes(hudKeep), hb = hudBox(hk, W, H);
     var bx = ins.left + cfg.bubbleX, bubble;
-    if (portrait) bubble = { x: bx, y: ins.top + cfg.bubbleYPort, w: W - bx - ins.right - cfg.bubbleX, h: cfg.bubbleHPort };
-    else bubble = { x: bx, y: ins.top + cfg.bubbleYLand, w: Math.min(cfg.bubbleMaxW, W - ins.right - cfg.bubbleRight - bx), h: cfg.bubbleHLand };
+    if (portrait) bubble = { x: bx, y: ins.top + cfg.bubbleYPort, w: W - bx - ins.right - cfg.bubbleX, h: phone ? cfg.bubbleHPortPhone : cfg.bubbleHPort };
+    else bubble = { x: bx, y: ins.top + cfg.bubbleYLand, w: Math.min(phone ? cfg.bubbleMaxWPhone : cfg.bubbleMaxW, W - ins.right - cfg.bubbleRight - bx), h: cfg.bubbleHLand };
     if (hb && bubble.x + bubble.w > hb.x - 10 && bubble.y < hb.y + hb.h) {   // the measured HUD: narrower beside it, else below
       var room = hb.x - 12 - bubble.x;
       if (!portrait && room >= cfg.bubbleMinW) bubble.w = room;
@@ -243,7 +246,7 @@
   /** Camp corner, meadow, horizon, Mimi / pad / pump / pole for a camp width (landscape) and mat width S. Mutates L. */
   function campGeometry(L, cfg, S, campW) {
     var W = L.W, H = L.H, ins = L.ins, P = L.play, yb = H - ins.bottom;
-    L.S = S; L.itemH = cfg.itemK * S;
+    L.S = S; L.itemH = (L.phone ? (L.portrait ? cfg.itemKPhonePort : cfg.itemKPhoneLand) : cfg.itemK) * S;
     L.mimiH = L.portrait ? (L.phone ? cfg.mimiHPhonePort : cfg.mimiHPort) : cfg.mimiHLand; L.mimiS = L.mimiH / 300;
     L.rocketH = cfg.rocketH;
     if (!L.portrait) {
@@ -261,7 +264,7 @@
       L.campH = ch;
       L.camp = { x0: 0, x1: W, y0: yb - ch, y1: H };
       L.meadow = { x0: ins.left, x1: W - ins.right, y0: P.y0, y1: L.camp.y0 };
-      L.horizon = P.y0 + cfg.horizonPort;
+      L.horizon = P.y0 + (L.phone ? cfg.horizonPhonePort : cfg.horizonPort);
       L.pole = { x: W - ins.right - cfg.poleXPort, y0: yb - cfg.poleBaseUp, y1: Math.max(P.y0 + cfg.poleTopGap, L.camp.y0 - cfg.poleRise) };
       L.mimiHome = { x: ins.left + cfg.mimiXPort, y: yb - cfg.mimiUp };
       L.pad = { x: W / 2, y: yb - cfg.padUp };
@@ -275,7 +278,7 @@
     L.poleBox = { x: L.pole.x - 10, y: L.pole.y1 - 20, w: cfg.pennantW + 20, h: Math.max(L.pole.y0, pb) - L.pole.y1 + 20 };
     var R = rocketPoints(), rs = cfg.rocketH / Math.max(1, R.nozzle[1] - R.nose[1]);
     L.rocketS = rs; L.rocketL = cfg.rocketH; L.rocketLc = (R.nozzle[1] - R.com[1]) * rs; L.rocketW = R.w * rs;
-    L.dsMin = cfg.dsMin; L.hitK = cfg.hitK; L.hitInner = cfg.hitInner; L.hitPad = cfg.hitPad; L.hitPhone = cfg.hitPhone; L.hitLift = cfg.hitLift; L.matHK = cfg.matHK;
+    L.dsMin = L.phone && L.portrait ? cfg.dsMinPhonePort : cfg.dsMin; L.hitK = cfg.hitK; L.hitInner = cfg.hitInner; L.hitPad = cfg.hitPad; L.hitPhone = cfg.hitPhone; L.hitLift = cfg.hitLift; L.matHK = cfg.matHK;
     L.hitR = hitRAt(L, 1);
     L.badgeR = cfg.badgeK * L.itemH;
     return L;
@@ -356,6 +359,8 @@
     var key = cfgKey(cfg) + '|' + W + 'x' + H + '|' + JSON.stringify(insOf(ins)) + '|' + a + '|' + JSON.stringify(keepBoxes(hudKeep));
     if (_cache[key]) return JSON.parse(_cache[key]);
     var base = cfg.sBase[a], L = null, fits = false, cw, S;
+    var bl0 = baseLayout(W, H, ins, cfg, hudKeep);
+    if (bl0.phone) base = Math.round(base * (bl0.portrait ? cfg.phonePortSK : cfg.phoneLandSK));
     var cws = [];
     for (cw = cfg.campW; cw >= cfg.campWMin - 1e-9; cw -= cfg.campWStep) cws.push(cw);
     if (cws[cws.length - 1] > cfg.campWMin) cws.push(cfg.campWMin);
@@ -565,7 +570,7 @@
     if (F && (F.phase === 'boost' || F.phase === 'coast')) {
       // re-aim the climb at the new mat: keep the COM (clamped on screen), set the ballistic velocity that reaches the new apex
       F.cx = clamp(F.cx * sx, L.ins.left + 10, L.W - L.ins.right - 10); F.cy = clamp(F.cy * sy, L.ins.top + 10, L.H - L.ins.bottom - 10);
-      var mt = this.matById(F.id), tx = mt ? mt.x : F.cx, ty = mt ? mt.y : F.cy;
+      var mt = this.matById(F.id), mp = mt ? this.landPt(mt) : null, tx = mp ? mp.x : F.cx, ty = mp ? mp.y : F.cy;
       var pl = planFlight(F.cx, F.cy + 1e3, tx, ty, L, this.cfg), apY = Math.min(pl.apexY, F.cy - 5);
       F.g = pl.g;
       var vy = -Math.sqrt(2 * F.g * Math.max(1, F.cy - apY)), tc = -vy / F.g, lead = L.rocketL - L.rocketLc, dir = tx >= F.cx ? 1 : -1;
@@ -807,9 +812,9 @@
     this.chosen = m.id;
     m.squishV += kickFor(cfg.rightSquish, cfg.squishOmega, cfg.squishZeta);
     // aim: the launcher swings towards the flight's initial velocity; the dotted arc previews the flight; Mimi hops onto the pump
-    var L = this.layout, F = planFlight(L.pad.x, L.pad.y - L.rocketLc, m.x, m.y, L, cfg);
+    var L = this.layout, lp = this.landPt(m), F = planFlight(L.pad.x, L.pad.y - L.rocketLc, lp.x, lp.y, L, cfg);
     var aim = clamp(F.theta, -cfg.aimMax, cfg.aimMax);
-    F = planFlight(L.pad.x + L.rocketLc * Math.sin(aim), L.pad.y - L.rocketLc * Math.cos(aim), m.x, m.y, L, cfg);
+    F = planFlight(L.pad.x + L.rocketLc * Math.sin(aim), L.pad.y - L.rocketLc * Math.cos(aim), lp.x, lp.y, L, cfg);
     this._aimTo = clamp(F.theta, -cfg.aimMax, cfg.aimMax);
     this._makeArc();
     if (this.rocket.state === 'pad') this.rocket.state = 'aim';   // still hopping back from the last launch: it aims once on the pad
@@ -844,7 +849,8 @@
   P._noProgress = function (miss) {
     var cfg = this.cfg;
     this._noProg++;
-    if ((miss && this.misses >= cfg.hintAfterMisses) || this._noProg >= cfg.hintAfterSoft) this._autoHint(false);
+    var missHint = miss && this.misses >= cfg.hintAfterMisses;
+    if (missHint || this._noProg >= cfg.hintAfterSoft) this._autoHint(false, missHint);
     if (this._noProg >= cfg.assistAfter && !this.assistId) {
       var a = this._target();
       if (a) { this.assistId = a.id; this._emit({ type: 'assistArmed', id: a.id, x: a.x, y: a.y }); }
@@ -904,20 +910,26 @@
   };
 
   // ---------------------------------------------------------------- the flight
+  /** QA visual P1-1: the touchdown point — beside the thing (away from the pad), still inside the mat ellipse, so the rocket
+   *  never hides the very thing the child picked. */
+  P.landPt = function (m) {
+    var L = this.layout, ds = m.ds || 1, side = m.x >= L.pad.x ? 1 : -1;
+    return { x: m.x + side * this.cfg.landSideK * L.S * ds, y: m.y + this.cfg.landDownK * L.S * ds, side: side };
+  };
   P._makeArc = function () {
     var L = this.layout, cfg = this.cfg, m = this.matById(this.chosen);
     if (!m) { this.arc = null; return; }
     var aim = this.rocket.state === 'aim' || this.rocket.state === 'pad' ? (this._aimTo || 0) : this.rocket.aim;
-    var F = planFlight(L.pad.x + L.rocketLc * Math.sin(aim), L.pad.y - L.rocketLc * Math.cos(aim), m.x, m.y, L, cfg), out = [], T = F.Tb + F.tc, N = cfg.arcN, na = N - 5;
+    var lp = this.landPt(m), F = planFlight(L.pad.x + L.rocketLc * Math.sin(aim), L.pad.y - L.rocketLc * Math.cos(aim), lp.x, lp.y, L, cfg), out = [], T = F.Tb + F.tc, N = cfg.arcN, na = N - 5;
     for (var i = 0; i < na; i++) { var q = planPos(F, T * i / (na - 1), F.g); out.push({ x: q.x, y: q.y }); }
     var ax = F.apexX + F.dir * (L.rocketL - L.rocketLc), ay = F.apexY;
-    for (var j = 1; j <= 5; j++) out.push({ x: lerp(ax, m.x, j / 5), y: lerp(ay, m.y, j / 5) });
+    for (var j = 1; j <= 5; j++) out.push({ x: lerp(ax, lp.x, j / 5), y: lerp(ay, lp.y, j / 5) });
     this.arc = out; this._arcPlan = F;
   };
   P._launch = function () {
     var cfg = this.cfg, L = this.layout, r = this.rocket, m = this.matById(this.chosen);
     var cx = r.x + L.rocketLc * Math.sin(r.rot), cy = r.y - L.rocketLc * Math.cos(r.rot);
-    var F = planFlight(cx, cy, m.x, m.y, L, cfg);
+    var lp = this.landPt(m), F = planFlight(cx, cy, lp.x, lp.y, L, cfg);
     this._fl = { id: m.id, phase: 'boost', t: 0, T: 0, F: F, g: F.g, cx: cx, cy: cy, vx: 0, vy: 0, spray: 0, off: 0, offV: 0, offA: 0, py: 0, pvy: 0, s: 0, sV: 0, e: 1, apexT: 0 };
     r.state = 'boost'; r.t = 0; r.chuteFold = 1; r.rotV = 0;
     this._setPhase('flight');
@@ -937,8 +949,9 @@
   P._stepFlight = function (h) {
     var F = this._fl, cfg = this.cfg, r = this.rocket, L = this.layout;
     if (!F) return;
-    var m = this.matById(F.id), g = F.g || cfg.g, Lr = L.rocketL, Lc = L.rocketLc;
-    if (!m) { this._land(); return; }
+    var m0 = this.matById(F.id), g = F.g || cfg.g, Lr = L.rocketL, Lc = L.rocketLc;
+    if (!m0) { this._land(); return; }
+    var m = this.landPt(m0);   // every flight sum below is relative to the touchdown point (it moves with the mat)
     F.t += h; F.T += h; r.t = F.T;
     if (F.phase === 'boost' || F.phase === 'coast') {
       if (F.phase === 'boost') {
@@ -970,8 +983,11 @@
       F.offA = w * w * (wt - F.off) - 2 * w * F.offV; F.offV += F.offA * h; F.off += F.offV * h;
       var ws = cfg.swingOmega, zs = (F.t < cfg.chuteOpen + 0.15 ? cfg.swingZetaOpen : cfg.swingZeta) + (1 - e) * cfg.swingGround;
       var sA = -ws * ws * Math.sin(F.s) + cfg.swingDrive * (F.offA / Lr) * Math.cos(F.s) - 2 * zs * ws * F.sV - cfg.windSwing * this.wind / Lr;
+      // QA P2-2: a soft wall from the pop on — the canopy's lines pull a sideways bottle back under it (≤ ± swingMax steady)
+      var ov = Math.abs(F.s) - cfg.swingMax;
+      if (ov > 0) { var sw = sgn(F.s), wk = cfg.swingWallK; sA += -wk * ov * sw - (F.sV * sw > 0 ? 2 * cfg.swingWallZeta * Math.sqrt(wk) * F.sV : 0); }
       F.sV += sA * h; F.s += F.sV * h;
-      if (F.t > cfg.chuteOpen + 0.35 && Math.abs(F.s) > cfg.swingMax) { var sg = sgn(F.s); F.s = sg * cfg.swingMax; if (F.sV * sg > 0) F.sV = -0.3 * F.sV; }
+      if (F.t > cfg.chuteOpen + 0.35 && Math.abs(F.s) > cfg.swingMax + 0.1) { var sg = sgn(F.s); F.s = sg * (cfg.swingMax + 0.1); if (F.sV * sg > 0) F.sV = -0.3 * F.sV; }
       F.e = e;
       var rot = F.s * e, px = m.x + F.off * e, py = m.y - Lr - Math.max(0, hh);
       r.rot = rot; r.rotV = F.sV; r.swing = rot; r.swingV = F.sV;
@@ -985,17 +1001,17 @@
   P._land = function () {
     var cfg = this.cfg, F = this._fl, r = this.rocket, L = this.layout, m = this.matById(F ? F.id : this.chosen), self = this;
     if (!m) { this._fl = null; this._padRocket(true); this._afterCollect(); return; }
-    var err = hyp(r.x - m.x, r.y - m.y);
-    r.x = m.x; r.y = m.y; r.vx = r.vy = 0;
-    F.phase = 'landed'; F.t = 0; F.landX = m.x; F.side = sgn(r.swing || F.off || 1);
+    var lp = this.landPt(m), err = hyp(r.x - lp.x, r.y - lp.y);
+    r.x = lp.x; r.y = lp.y; r.vx = r.vy = 0;
+    F.phase = 'landed'; F.t = 0; F.landX = lp.x; F.side = lp.side;
     r.state = 'landed'; r.swing = 0; r.swingV = 0; r._bz = 0; r._bzV = Math.sqrt(2 * cfg.bounceG * cfg.landBounce); r._bounced = false;
     r.sq = cfg.landSqR; r.sqV = 0;
     m.squishV += kickFor(cfg.landSquish, cfg.squishOmega, cfg.squishZeta); m.flapV += kickFor(cfg.landFlap, cfg.flapOmega, cfg.flapZeta);
     m.state = 'landed'; m.visited = true;
-    this._ring(m.x, m.y, 1, 1); this._ring(m.x, m.y, 0.7, 0.7, 0.15);
-    this._splash(m.x, m.y, cfg.splashN, 0.5 * L.S * m.ds);
-    this._emit({ type: 'land', id: m.id, launch: m.launch, row: m.launch, k: this.cur.k, err: err, flight: F.T, x: m.x, y: m.y });
-    this._emit({ type: 'splash', id: m.id, x: m.x, y: m.y });
+    this._ring(lp.x, lp.y, 1, 1); this._ring(lp.x, lp.y, 0.7, 0.7, 0.15);
+    this._splash(lp.x, lp.y, cfg.splashN, 0.5 * L.S * m.ds);
+    this._emit({ type: 'land', id: m.id, launch: m.launch, row: m.launch, k: this.cur.k, err: err, flight: F.T, x: m.x, y: m.y, tx: lp.x, ty: lp.y });
+    this._emit({ type: 'splash', id: m.id, x: lp.x, y: lp.y });
     this.mats.forEach(function (o) { if (o.launch === m.launch && o.id !== m.id && o.state !== 'gone' && o.state !== 'fold') self._fold(o); });
     this._mood('cheer', 1.2); this.mimi.state = 'stand';
     this._setPhase('collect');
@@ -1011,7 +1027,7 @@
     r.sy = 1 + (r.sq || 0); r.sx = 1 - this.cfg.sxK * (r.sq || 0);
     var Ls = L.rocketL * r.sy;
     r.noseX = r.x + Ls * Math.sin(r.rot); r.noseY = r.y - Ls * Math.cos(r.rot);
-    var ch = r.chute > 0.05 ? r.chute * 0.85 * L.rocketL : 0;
+    var ch = r.chute > 0.05 ? r.chute * 0.85 * this.cfg.chuteDrawK * L.rocketL : 0;   // the drawn canopy (render × chuteDrawK)
     r.top = Math.min(r.y, r.noseY) - ch;
   };
   P._stepRocket = function (h) {
@@ -1030,7 +1046,7 @@
         if (r._bz <= 0 && r._bzV < 0) { r._bz = 0; r._bzV = 0; r._bounced = true; r.sq = cfg.landSqR * 0.6; r.sqV = 0; }
       }
       var mm = F ? this.matById(F.id) : null;
-      if (mm) { r.x = mm.x; r.y = mm.y - r._bz; }
+      if (mm) { var lq = this.landPt(mm); r.x = lq.x; r.y = lq.y - r._bz; }
       spring(r, 'rot', 'rotV', 0, cfg.tipOmega, cfg.tipZeta, h);
       spring(r, 'chute', 'chuteV', cfg.drapeTo, cfg.drapeOmega, cfg.drapeZeta, h);
       spring(r, 'chuteRot', 'chuteRotV', (F ? F.side : 1) * cfg.drapeRot, cfg.drapeOmega, cfg.drapeZeta, h);
@@ -1244,10 +1260,12 @@
     this._idleT = 0; this._idleGap = this.cfg.idleTime; this._idleN = 0;
     this._talkAskT = 0; this._talkAsks = 0;
     if (this.talk) this.talk.glowAnswer = false;
+    if (this._pumpS && this.phase === 'pump') this._pumpS.kid = this.time;   // QA P2-1: a resume restarts the child's full pump window
   };
   P._glowing = function () { for (var i = 0; i < this.mats.length; i++) if (this.mats[i]._glowT > 0) return true; return false; };
-  P._autoHint = function (fromIdle) {
-    if (this._glowing() || this.hintHand || this.time - this._lastHintT < this.cfg.hintCooldown) return null;
+  P._autoHint = function (fromIdle, force) {
+    // QA P3-1: a miss-triggered hint (force) ignores the cooldown, so "2 misses → glow" is never skipped
+    if (this._glowing() || this.hintHand || (!force && this.time - this._lastHintT < this.cfg.hintCooldown)) return null;
     return this._doHint(fromIdle);
   };
   P._doHint = function (fromIdle) {
@@ -1542,6 +1560,9 @@
         this._emit({ type: 'marmot', x: sp.x, y: sp.y });
       }
     }
+    // the round's surprise is what really came (a goat without a free spot falls back to the marmot, or to nothing)
+    if (type === 'marmot' && !this.marmot) type = null;
+    this.surprise = type;
     if (type === 'bird' && !this.bird) {
       var tx = L.pole.x, ty = L.pole.y1, fx = L.portrait ? L.ins.left - 60 : L.W + 60, fy = L.play.y0 - 40;
       this.bird = { x: fx, y: fy, _px: fx, _py: fy, x0: fx, y0: fy, state: 'in', t: 0, a: 0, face: tx >= fx ? 1 : -1, flap: 0, sing: 0, frame: 'bird' };
@@ -1696,7 +1717,8 @@
     var cfg = this.cfg;
     switch (this.phase) {
       case 'play':
-        if (this.interactive && !this._g) {
+        // QA P3-4: a finger resting still (> 2 s, no slide) is not a child at play: the idle nudges still come
+        if (this.interactive && (!this._g || (this.time - this._g.t > cfg.idleRestHold && this._g.maxD < cfg.tapMovePx))) {
           this._idleT += h;
           if (this._idleT >= this._idleGap - 1e-9) {
             this._idleT = 0; this._idleGap = Math.min(cfg.idleMax, this._idleGap * cfg.idleBackoff); this._idleN++;

@@ -199,12 +199,13 @@
   /** {k launches, m mats per launch, mode} (DESIGN §5.1 = the base's rows × stones). The session warm-up (chapter 0, round 0) and
    *  short rounds are (2, 2). */
   function tableKM(age, ri, level, short) {
-    if (short && ri > 0) return [2, 2];
     if (ri === 0 && level === 0) return [2, 2];
     var T = age <= 3 ? [[2, 2], [2, 2], [3, 2], [3, 2]]
       : age === 4 ? (level === 0 ? [[2, 2], [2, 3], [3, 2], [3, 3]] : [[2, 2], [3, 2], [3, 3], [3, 3]])
       : age === 5 ? [[3, 2], [3, 3], [3, 3], [4, 3]] : [[3, 3], [4, 3], [4, 3], [4, 3]];
-    return T[Math.min(Math.max(0, ri | 0), 3)].slice();
+    var km = T[Math.min(Math.max(0, ri | 0), 3)].slice();
+    if (short && ri > 0) km[0] = 2;   // QA fix C: a short round keeps the age's mats; only the launches drop to 2
+    return km;
   }
   function countMode(ri) { return ri % 2 === 0 ? 'countSeq' : 'countSel'; }
   /** maxK: the most launches per round (default 4; the flagpole holds 4 pennants). */
@@ -300,7 +301,7 @@
         } else {
           // mixed objs; targets share the colour (different objs at age ≥ 4); the obj is never a cue: in every row a distractor
           // wears that row's target obj
-          var tt = age >= 4 ? (k <= DK.OBJS.length ? rng.sample(DK.OBJS, k) : rowValues(rng, DK.OBJS, 1, k)[0]) : rowValues(rng, [rng.pick(DK.OBJS)], 1, k)[0];
+          var tt = age >= 3 ? (k <= DK.OBJS.length ? rng.sample(DK.OBJS, k) : rowValues(rng, DK.OBJS, 1, k)[0]) : rowValues(rng, [rng.pick(DK.OBJS)], 1, k)[0];
           for (j = 0; j < k; j++) {
             tg.push(obj(tt[j], c));
             var tj = tt[j];
@@ -316,8 +317,10 @@
         if (!os) throw new Error('no shape set');
         var sv = rowValues(rng, os, k, per);
         if (age < 5) {
-          c = rng.pick(colorPool(age));
-          for (j = 0; j < k; j++) { tg.push(shape(sh, c)); ot.push(sv[j].map(function (x) { return shape(x, c); })); }
+          var cl = null;   // QA fix C: one colour per launch (still no colour cue inside a launch), a new colour each launch
+          for (var tq = 0; tq < 60 && !cl; tq++) { var cq = rng.sample(colorPool(age), Math.min(k, colorPool(age).length)); if (!clash(cq, pairsFor(age))) cl = cq; }
+          if (!cl) cl = [rng.pick(colorPool(age))];
+          for (j = 0; j < k; j++) { c = cl[j % cl.length]; tg.push(shape(sh, c)); ot.push(sv[j].map(function (x) { return shape(x, c); })); }
           pk = 'p.shapes';
         } else {   // shapes5: mixed colours — every stone of a row its own colour, a target colour also on a distractor (no cue)
           var tcols = [];
@@ -337,8 +340,11 @@
       case 'size': {
         // the same obj in one colour; targets big, the others small — or the reverse; alternates every round
         var big = avoid === null || avoid === undefined ? rng.chance(0.5) : avoid !== 'big';
-        var ob = rng.pick(DK.OBJS), col = rng.pick(colorPool(age));
+        var obs = rng.sample(DK.OBJS, Math.min(k, DK.OBJS.length)), cls = null, ob, col;   // QA fix C: a new obj + colour each launch
+        for (var tq2 = 0; tq2 < 60 && !cls; tq2++) { var cq2 = rng.sample(colorPool(age), Math.min(k, colorPool(age).length)); if (!clash(cq2, pairsFor(age))) cls = cq2; }
+        if (!cls) cls = [rng.pick(colorPool(age))];
         for (j = 0; j < k; j++) {
+          ob = obs[j % obs.length]; col = cls[j % cls.length];
           tg.push(sized(obj(ob, col), big));
           var row = []; for (var q = 0; q < per; q++) row.push(sized(obj(ob, col), !big)); ot.push(row);
         }
@@ -636,7 +642,7 @@
         var shs = uniq(all.map(function (t) { return t.shape; }));
         if (anySimilar(shs)) return 'confusable shapes ' + shs.join('+');
         if (all.some(function (t) { return shapesFor(age).indexOf(t.shape) < 0; })) return 'shape at age ' + age;
-        if (age < 5) { if (cs.length !== 1 || r.promptKey !== 'p.shapes') return 'shapes: one colour'; }
+        if (age < 5) { if (r.promptKey !== 'p.shapes' || r.rows.some(function (rw) { return uniq(rw.map(function (q) { return q.thing.color; })).length !== 1; })) return 'shapes: one colour per row'; }
         else {
           if (r.promptKey !== 'p.shapes5') return 'shapes5 prompt';
           for (j = 0; j < r.rows.length; j++) { var rc = r.rows[j].map(function (q) { return q.thing.color; }); if (uniq(rc).length !== rc.length) return 'shapes5: one colour per stone in a row'; }
@@ -649,8 +655,8 @@
       }
       case 'size': {
         if (rule.kind !== 'size' || (rule.value !== 'big' && rule.value !== 'small') || r.promptKey !== 'p.size' || r.params.big !== (rule.value === 'big')) return 'size prompt';
-        var a0 = all[0];
-        if (!all.every(function (t) { return t.kind === 'obj' && t.obj === a0.obj && t.color === a0.color && typeof t.big === 'boolean'; })) return 'size: one obj';
+        for (j = 0; j < r.rows.length; j++) { var a0 = r.rows[j][0].thing;
+          if (!r.rows[j].every(function (q) { var t = q.thing; return t.kind === 'obj' && t.obj === a0.obj && t.color === a0.color && typeof t.big === 'boolean'; })) return 'size: one obj per row'; }
         break;
       }
       case 'count': {
