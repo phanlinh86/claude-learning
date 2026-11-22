@@ -1,0 +1,1 @@
+{ "zones": [{ "patterns": { "tower2": 0 } }, null, { "gapK": 1.2 }], "ballV": 2.8, "ballKick": 1.2, "ballRest": 0.6 }

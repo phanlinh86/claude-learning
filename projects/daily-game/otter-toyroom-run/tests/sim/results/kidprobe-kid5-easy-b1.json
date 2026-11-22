@@ -1,0 +1,9011 @@
+[
+ {
+  "seed": 1,
+  "t": 55.93,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.84
+ },
+ {
+  "seed": 2,
+  "t": 65.75,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.9,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.84
+ },
+ {
+  "seed": 2,
+  "t": 68.75,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.73,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.91
+ },
+ {
+  "seed": 3,
+  "t": 37.12,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.77,
+  "need": 0,
+  "cause": "missed swipe",
+  "speed": 5.72
+ },
+ {
+  "seed": 3,
+  "t": 70.63,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.78,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.93
+ },
+ {
+  "seed": 4,
+  "t": 24.27,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.59
+ },
+ {
+  "seed": 5,
+  "t": 34.97,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": -0.37,
+  "objX": -1,
+  "seenBefore": 1.78,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.65
+ },
+ {
+  "seed": 7,
+  "t": 24.43,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.59
+ },
+ {
+  "seed": 8,
+  "t": 31.42,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.73,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.63
+ },
+ {
+  "seed": 8,
+  "t": 52.35,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.83,
+  "need": 2,
+  "cause": "wrong-way swipe",
+  "speed": 5.76
+ },
+ {
+  "seed": 10,
+  "t": 39.9,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.88,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.68
+ },
+ {
+  "seed": 10,
+  "t": 50.77,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.75
+ },
+ {
+  "seed": 11,
+  "t": 33.87,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.18,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.64
+ },
+ {
+  "seed": 11,
+  "t": 52.73,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -0.48,
+  "objX": 0,
+  "seenBefore": 1.88,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.81
+ },
+ {
+  "seed": 14,
+  "t": 18.47,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.28,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.55
+ },
+ {
+  "seed": 14,
+  "t": 48.48,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.3,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.79
+ },
+ {
+  "seed": 15,
+  "t": 6.28,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.87,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.53
+ },
+ {
+  "seed": 15,
+  "t": 31.28,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.27,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.63
+ },
+ {
+  "seed": 15,
+  "t": 43.27,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.75
+ },
+ {
+  "seed": 15,
+  "t": 55.87,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.18,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.77
+ },
+ {
+  "seed": 16,
+  "t": 12.72,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.3,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.57
+ },
+ {
+  "seed": 16,
+  "t": 44.15,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.3,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.71
+ },
+ {
+  "seed": 16,
+  "t": 47.73,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": -0.52,
+  "objX": 0,
+  "seenBefore": 0.38,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.73
+ },
+ {
+  "seed": 18,
+  "t": 12.87,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "other / slow reaction",
+  "speed": 5.52
+ },
+ {
+  "seed": 19,
+  "t": 8.72,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.2,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.55
+ },
+ {
+  "seed": 19,
+  "t": 24.73,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.88,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.59
+ },
+ {
+  "seed": 19,
+  "t": 70.85,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.33,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.87
+ },
+ {
+  "seed": 20,
+  "t": 5.58,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.82,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.48
+ },
+ {
+  "seed": 20,
+  "t": 36.23,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.22,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.66
+ },
+ {
+  "seed": 21,
+  "t": 31.67,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.32,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.63
+ },
+ {
+  "seed": 22,
+  "t": 54.18,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.83,
+  "need": 2,
+  "cause": "wrong-way swipe",
+  "speed": 5.83
+ },
+ {
+  "seed": 23,
+  "t": 32.28,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.77,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.69
+ },
+ {
+  "seed": 24,
+  "t": 45.32,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 1,
+  "heroX": 0.3,
+  "objX": 0,
+  "seenBefore": 1.8,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.71
+ },
+ {
+  "seed": 25,
+  "t": 12.45,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.83,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.52
+ },
+ {
+  "seed": 26,
+  "t": 21.03,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.85,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.62
+ },
+ {
+  "seed": 26,
+  "t": 27.92,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.73,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.61
+ },
+ {
+  "seed": 26,
+  "t": 46.15,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.77
+ },
+ {
+  "seed": 26,
+  "t": 60.5,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.32,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.86
+ },
+ {
+  "seed": 26,
+  "t": 63.45,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.77,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.82
+ },
+ {
+  "seed": 27,
+  "t": 26.13,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.78,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.65
+ },
+ {
+  "seed": 28,
+  "t": 40.05,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.2,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.74
+ },
+ {
+  "seed": 29,
+  "t": 41.13,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.78,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.69
+ },
+ {
+  "seed": 29,
+  "t": 62.58,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.23,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.88
+ },
+ {
+  "seed": 29,
+  "t": 68.45,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.91
+ },
+ {
+  "seed": 30,
+  "t": 51.72,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.87,
+  "need": 1,
+  "cause": "other / slow reaction",
+  "speed": 5.75
+ },
+ {
+  "seed": 31,
+  "t": 9.18,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.77,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.55
+ },
+ {
+  "seed": 31,
+  "t": 71.62,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.77,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.88
+ },
+ {
+  "seed": 32,
+  "t": 20.75,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.73,
+  "need": 0,
+  "cause": "missed swipe",
+  "speed": 5.62
+ },
+ {
+  "seed": 33,
+  "t": 60.23,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.22,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.81
+ },
+ {
+  "seed": 33,
+  "t": 65.47,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   1
+  ],
+  "free": [
+   0
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.78,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.84
+ },
+ {
+  "seed": 34,
+  "t": 12.67,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -0.12,
+  "objX": 0,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.57
+ },
+ {
+  "seed": 34,
+  "t": 35.93,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.66
+ },
+ {
+  "seed": 34,
+  "t": 41.97,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.78,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.75
+ },
+ {
+  "seed": 35,
+  "t": 19.18,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.83,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.56
+ },
+ {
+  "seed": 35,
+  "t": 23.17,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   1
+  ],
+  "free": [
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 0.32,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.63
+ },
+ {
+  "seed": 35,
+  "t": 37,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.82,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.66
+ },
+ {
+  "seed": 35,
+  "t": 54.27,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.82
+ },
+ {
+  "seed": 37,
+  "t": 12.15,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": -0.37,
+  "objX": -1,
+  "seenBefore": 1.83,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.51
+ },
+ {
+  "seed": 37,
+  "t": 15.75,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.83,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.53
+ },
+ {
+  "seed": 37,
+  "t": 22.72,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 0.2,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.57
+ },
+ {
+  "seed": 37,
+  "t": 39.72,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": -0.7,
+  "objX": -1,
+  "seenBefore": 1.87,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.73
+ },
+ {
+  "seed": 37,
+  "t": 42.83,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.65,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.75
+ },
+ {
+  "seed": 39,
+  "t": 55.4,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -0.12,
+  "objX": 0,
+  "seenBefore": 1.88,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.83
+ },
+ {
+  "seed": 40,
+  "t": 63.77,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.89
+ },
+ {
+  "seed": 41,
+  "t": 31.23,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.22,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.63
+ },
+ {
+  "seed": 41,
+  "t": 40.57,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": -0.88,
+  "objX": -1,
+  "seenBefore": 1.88,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.68
+ },
+ {
+  "seed": 43,
+  "t": 35.75,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 0,
+  "heroX": 0.88,
+  "objX": 1,
+  "seenBefore": 1.73,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.71
+ },
+ {
+  "seed": 43,
+  "t": 38.77,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.72
+ },
+ {
+  "seed": 43,
+  "t": 45.2,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.85,
+  "need": 0,
+  "cause": "missed swipe",
+  "speed": 5.77
+ },
+ {
+  "seed": 44,
+  "t": 11.77,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.25,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.51
+ },
+ {
+  "seed": 44,
+  "t": 44.15,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.3,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.71
+ },
+ {
+  "seed": 46,
+  "t": 56.3,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.78,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.84
+ },
+ {
+  "seed": 46,
+  "t": 65.42,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.73,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.89
+ },
+ {
+  "seed": 47,
+  "t": 42.68,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.83,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.75
+ },
+ {
+  "seed": 48,
+  "t": 6.32,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.73,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.48
+ },
+ {
+  "seed": 48,
+  "t": 18.65,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.3,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.55
+ },
+ {
+  "seed": 48,
+  "t": 66.28,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.84
+ },
+ {
+  "seed": 49,
+  "t": 3.02,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.51
+ },
+ {
+  "seed": 50,
+  "t": 8.62,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.87,
+  "need": 0,
+  "cause": "missed swipe",
+  "speed": 5.55
+ },
+ {
+  "seed": 50,
+  "t": 32.82,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -0.99,
+  "objX": -1,
+  "seenBefore": 0.3,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.69
+ },
+ {
+  "seed": 51,
+  "t": 11.3,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.73,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.56
+ },
+ {
+  "seed": 51,
+  "t": 18.12,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.6
+ },
+ {
+  "seed": 51,
+  "t": 58.65,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.85
+ },
+ {
+  "seed": 52,
+  "t": 9.32,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.2,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.5
+ },
+ {
+  "seed": 52,
+  "t": 28.03,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.85,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.61
+ },
+ {
+  "seed": 53,
+  "t": 23.77,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.25,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.58
+ },
+ {
+  "seed": 54,
+  "t": 30.35,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.83,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.62
+ },
+ {
+  "seed": 55,
+  "t": 30,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.82,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.68
+ },
+ {
+  "seed": 55,
+  "t": 39.12,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 0,
+  "heroX": 0.52,
+  "objX": 0,
+  "seenBefore": 0.27,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.68
+ },
+ {
+  "seed": 56,
+  "t": 19.77,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.56
+ },
+ {
+  "seed": 56,
+  "t": 29,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.32,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.67
+ },
+ {
+  "seed": 57,
+  "t": 12.63,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.22,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.57
+ },
+ {
+  "seed": 57,
+  "t": 29.73,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.88,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.62
+ },
+ {
+  "seed": 58,
+  "t": 41.05,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.87,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.69
+ },
+ {
+  "seed": 58,
+  "t": 68.6,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.91
+ },
+ {
+  "seed": 59,
+  "t": 60.87,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.18,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.87
+ },
+ {
+  "seed": 61,
+  "t": 10.3,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.78,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.56
+ },
+ {
+  "seed": 61,
+  "t": 17.12,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 0.3,
+  "objX": 0,
+  "seenBefore": 1.85,
+  "need": 0,
+  "cause": "wrong-way swipe",
+  "speed": 5.54
+ },
+ {
+  "seed": 63,
+  "t": 28.58,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.73,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.61
+ },
+ {
+  "seed": 64,
+  "t": 44.82,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.3,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.71
+ },
+ {
+  "seed": 65,
+  "t": 24.15,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.64
+ },
+ {
+  "seed": 66,
+  "t": 17.22,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.2,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.54
+ },
+ {
+  "seed": 66,
+  "t": 43.3,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.78,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.7
+ },
+ {
+  "seed": 67,
+  "t": 9.35,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.23,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.5
+ },
+ {
+  "seed": 67,
+  "t": 33.97,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.28,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.7
+ },
+ {
+  "seed": 67,
+  "t": 61.12,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.77,
+  "need": 2,
+  "cause": "wrong-way swipe",
+  "speed": 5.81
+ },
+ {
+  "seed": 68,
+  "t": 66.02,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.33,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.9
+ },
+ {
+  "seed": 69,
+  "t": 56.95,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": -1,
+  "heroX": -0.48,
+  "objX": 0,
+  "seenBefore": 1.77,
+  "need": 0,
+  "cause": "other / slow reaction",
+  "speed": 5.84
+ },
+ {
+  "seed": 70,
+  "t": 28.98,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.3,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.67
+ },
+ {
+  "seed": 70,
+  "t": 51.88,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.2,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.81
+ },
+ {
+  "seed": 70,
+  "t": 71.58,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.73,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.87
+ },
+ {
+  "seed": 71,
+  "t": 22.92,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.73,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.63
+ },
+ {
+  "seed": 72,
+  "t": 28.28,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.61
+ },
+ {
+  "seed": 73,
+  "t": 38.07,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.88,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.73
+ },
+ {
+  "seed": 74,
+  "t": 21.73,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.88,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.57
+ },
+ {
+  "seed": 74,
+  "t": 31.27,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.68
+ },
+ {
+  "seed": 75,
+  "t": 22.12,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.57
+ },
+ {
+  "seed": 76,
+  "t": 55.95,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.78
+ },
+ {
+  "seed": 77,
+  "t": 52.08,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.23,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.76
+ },
+ {
+  "seed": 77,
+  "t": 60.78,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 0.27,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.87
+ },
+ {
+  "seed": 79,
+  "t": 41.9,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.88,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.75
+ },
+ {
+  "seed": 81,
+  "t": 10.27,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.56
+ },
+ {
+  "seed": 81,
+  "t": 13.98,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.87,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.52
+ },
+ {
+  "seed": 81,
+  "t": 19.47,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.78,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.56
+ },
+ {
+  "seed": 81,
+  "t": 37.83,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.32,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.66
+ },
+ {
+  "seed": 81,
+  "t": 55.92,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.23,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.78
+ },
+ {
+  "seed": 82,
+  "t": 43.42,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   1
+  ],
+  "free": [
+   0
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.73,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.7
+ },
+ {
+  "seed": 82,
+  "t": 46.33,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 0.32,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.71
+ },
+ {
+  "seed": 83,
+  "t": 20.68,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.83,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.57
+ },
+ {
+  "seed": 83,
+  "t": 33.97,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.78,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.64
+ },
+ {
+  "seed": 83,
+  "t": 53.67,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 0.48,
+  "objX": 1,
+  "seenBefore": 0.32,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.76
+ },
+ {
+  "seed": 84,
+  "t": 54.28,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.77
+ },
+ {
+  "seed": 85,
+  "t": 8.32,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.73,
+  "need": 0,
+  "cause": "wrong-way swipe",
+  "speed": 5.49
+ },
+ {
+  "seed": 85,
+  "t": 35.02,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.33,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.71
+ },
+ {
+  "seed": 87,
+  "t": 69.42,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   1
+  ],
+  "free": [
+   0
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.23,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.86
+ },
+ {
+  "seed": 88,
+  "t": 42.43,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.75
+ },
+ {
+  "seed": 89,
+  "t": 56.87,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 0,
+  "heroX": 0.88,
+  "objX": 1,
+  "seenBefore": 1.85,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.84
+ },
+ {
+  "seed": 89,
+  "t": 60.28,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.27,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.86
+ },
+ {
+  "seed": 90,
+  "t": 44.93,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 0.12,
+  "objX": 0,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.71
+ },
+ {
+  "seed": 91,
+  "t": 15.02,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 0.35,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.53
+ },
+ {
+  "seed": 92,
+  "t": 6.1,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.18,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.48
+ },
+ {
+  "seed": 92,
+  "t": 49.97,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.28,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.74
+ },
+ {
+  "seed": 93,
+  "t": 55.53,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.85,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.78
+ },
+ {
+  "seed": 94,
+  "t": 29.97,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.78,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.68
+ },
+ {
+  "seed": 94,
+  "t": 45.6,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.77
+ },
+ {
+  "seed": 95,
+  "t": 42.43,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.7
+ },
+ {
+  "seed": 96,
+  "t": 27.85,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.33,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.61
+ },
+ {
+  "seed": 96,
+  "t": 43.03,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.35,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.7
+ },
+ {
+  "seed": 97,
+  "t": 39.83,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.32,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.68
+ },
+ {
+  "seed": 98,
+  "t": 43.68,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.83,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.76
+ },
+ {
+  "seed": 99,
+  "t": 30.93,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.68
+ },
+ {
+  "seed": 99,
+  "t": 56.47,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.28,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.84
+ },
+ {
+  "seed": 100,
+  "t": 52.42,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.73,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.81
+ },
+ {
+  "seed": 100,
+  "t": 65.83,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.32,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.9
+ },
+ {
+  "seed": 104,
+  "t": 33.7,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.85,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.64
+ },
+ {
+  "seed": 104,
+  "t": 44.18,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.33,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.71
+ },
+ {
+  "seed": 104,
+  "t": 47.47,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.78,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.78
+ },
+ {
+  "seed": 104,
+  "t": 54.22,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.2,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.82
+ },
+ {
+  "seed": 105,
+  "t": 6.33,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.53
+ },
+ {
+  "seed": 106,
+  "t": 51.78,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.27,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.75
+ },
+ {
+  "seed": 107,
+  "t": 51.77,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   1
+  ],
+  "free": [
+   0
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.81
+ },
+ {
+  "seed": 108,
+  "t": 68.1,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.91
+ },
+ {
+  "seed": 109,
+  "t": 48.98,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.79
+ },
+ {
+  "seed": 110,
+  "t": 38.07,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 0,
+  "heroX": 0.26,
+  "objX": 0,
+  "seenBefore": 0.22,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.67
+ },
+ {
+  "seed": 110,
+  "t": 53.78,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.77
+ },
+ {
+  "seed": 112,
+  "t": 31.77,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.69
+ },
+ {
+  "seed": 112,
+  "t": 62.32,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.82
+ },
+ {
+  "seed": 113,
+  "t": 37.28,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.77,
+  "need": 0,
+  "cause": "missed swipe",
+  "speed": 5.67
+ },
+ {
+  "seed": 113,
+  "t": 52.08,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.73,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.81
+ },
+ {
+  "seed": 114,
+  "t": 18.7,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.85,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.61
+ },
+ {
+  "seed": 114,
+  "t": 48.6,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.75,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.79
+ },
+ {
+  "seed": 115,
+  "t": 24.35,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.33,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.59
+ },
+ {
+  "seed": 115,
+  "t": 27.72,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.2,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.66
+ },
+ {
+  "seed": 117,
+  "t": 29.03,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.85,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.62
+ },
+ {
+  "seed": 117,
+  "t": 51.93,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.75
+ },
+ {
+  "seed": 117,
+  "t": 65.32,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.89
+ },
+ {
+  "seed": 118,
+  "t": 34.08,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   1
+  ],
+  "free": [
+   0
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.23,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.65
+ },
+ {
+  "seed": 119,
+  "t": 29.57,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.88,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.67
+ },
+ {
+  "seed": 119,
+  "t": 53.97,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   1
+  ],
+  "free": [
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.78,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.82
+ },
+ {
+  "seed": 121,
+  "t": 3.02,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.51
+ },
+ {
+  "seed": 121,
+  "t": 13.03,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.32,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.57
+ },
+ {
+  "seed": 121,
+  "t": 56.97,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.28,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.78
+ },
+ {
+  "seed": 123,
+  "t": 17.65,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.78,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.6
+ },
+ {
+  "seed": 123,
+  "t": 58.42,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.9,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.79
+ },
+ {
+  "seed": 123,
+  "t": 63.97,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.78,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.83
+ },
+ {
+  "seed": 124,
+  "t": 59.52,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.83,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.8
+ },
+ {
+  "seed": 125,
+  "t": 6.12,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.2,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.53
+ },
+ {
+  "seed": 125,
+  "t": 64.85,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.83,
+  "need": 2,
+  "cause": "wrong-way swipe",
+  "speed": 5.89
+ },
+ {
+  "seed": 128,
+  "t": 6.07,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.82,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.48
+ },
+ {
+  "seed": 129,
+  "t": 25.48,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   1
+  ],
+  "free": [
+   0
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.3,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.59
+ },
+ {
+  "seed": 129,
+  "t": 58.7,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.85,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.85
+ },
+ {
+  "seed": 130,
+  "t": 24.97,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 0.99,
+  "objX": 1,
+  "seenBefore": 0.28,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.65
+ },
+ {
+  "seed": 130,
+  "t": 42.2,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.35,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.69
+ },
+ {
+  "seed": 131,
+  "t": 31.05,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.87,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.63
+ },
+ {
+  "seed": 132,
+  "t": 26.48,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.65
+ },
+ {
+  "seed": 132,
+  "t": 30.12,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.62
+ },
+ {
+  "seed": 132,
+  "t": 39.82,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   1
+  ],
+  "free": [
+   0
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.68
+ },
+ {
+  "seed": 133,
+  "t": 47.95,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 0.27,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.73
+ },
+ {
+  "seed": 133,
+  "t": 50.82,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.63,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.74
+ },
+ {
+  "seed": 133,
+  "t": 57.23,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.88,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.78
+ },
+ {
+  "seed": 134,
+  "t": 52.27,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.76
+ },
+ {
+  "seed": 135,
+  "t": 22.47,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.78,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.58
+ },
+ {
+  "seed": 135,
+  "t": 25.97,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.78,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.65
+ },
+ {
+  "seed": 136,
+  "t": 62.63,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.28,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.82
+ },
+ {
+  "seed": 137,
+  "t": 3.02,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.51
+ },
+ {
+  "seed": 137,
+  "t": 33.87,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.35,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.64
+ },
+ {
+  "seed": 137,
+  "t": 40.25,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.23,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.74
+ },
+ {
+  "seed": 137,
+  "t": 58.95,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": -0.88,
+  "objX": -1,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.79
+ },
+ {
+  "seed": 137,
+  "t": 65.68,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.33,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.89
+ },
+ {
+  "seed": 138,
+  "t": 13.9,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.28,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.53
+ },
+ {
+  "seed": 138,
+  "t": 46.65,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.8,
+  "need": 0,
+  "cause": "missed swipe",
+  "speed": 5.72
+ },
+ {
+  "seed": 138,
+  "t": 52.92,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   1
+  ],
+  "free": [
+   0
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.73,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.76
+ },
+ {
+  "seed": 139,
+  "t": 23.93,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.59
+ },
+ {
+  "seed": 139,
+  "t": 34.93,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.65
+ },
+ {
+  "seed": 139,
+  "t": 68.37,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.85,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.91
+ },
+ {
+  "seed": 139,
+  "t": 71.67,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.32,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.93
+ },
+ {
+  "seed": 140,
+  "t": 33,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 0,
+  "heroX": 0.52,
+  "objX": 1,
+  "seenBefore": 1.82,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.64
+ },
+ {
+  "seed": 141,
+  "t": 28.85,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.33,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.61
+ },
+ {
+  "seed": 141,
+  "t": 46.8,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.28,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.78
+ },
+ {
+  "seed": 141,
+  "t": 57.38,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.2,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.79
+ },
+ {
+  "seed": 142,
+  "t": 35.67,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.32,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.71
+ },
+ {
+  "seed": 142,
+  "t": 62.92,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.73,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.88
+ },
+ {
+  "seed": 142,
+  "t": 71.73,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.22,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.88
+ },
+ {
+  "seed": 143,
+  "t": 26.33,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.32,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.6
+ },
+ {
+  "seed": 144,
+  "t": 66.63,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.78,
+  "need": 1,
+  "cause": "other / slow reaction",
+  "speed": 5.85
+ },
+ {
+  "seed": 145,
+  "t": 49.12,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.27,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.74
+ },
+ {
+  "seed": 145,
+  "t": 63.17,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.82,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.82
+ },
+ {
+  "seed": 146,
+  "t": 20.77,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.75,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.57
+ },
+ {
+  "seed": 147,
+  "t": 8.15,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.23,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.54
+ },
+ {
+  "seed": 147,
+  "t": 38.57,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 0.22,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.73
+ },
+ {
+  "seed": 148,
+  "t": 7.75,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 0,
+  "heroX": 0.52,
+  "objX": 0,
+  "seenBefore": 0.33,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.49
+ },
+ {
+  "seed": 148,
+  "t": 70.92,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.73,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.93
+ },
+ {
+  "seed": 149,
+  "t": 15.48,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   1
+  ],
+  "free": [
+   0
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.87,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.59
+ },
+ {
+  "seed": 149,
+  "t": 37.25,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.23,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.66
+ },
+ {
+  "seed": 151,
+  "t": 24.13,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.28,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.64
+ },
+ {
+  "seed": 151,
+  "t": 34.6,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.65
+ },
+ {
+  "seed": 151,
+  "t": 58.3,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.78,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.85
+ },
+ {
+  "seed": 152,
+  "t": 50.85,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.83,
+  "need": 2,
+  "cause": "wrong-way swipe",
+  "speed": 5.75
+ },
+ {
+  "seed": 155,
+  "t": 11.37,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.56
+ },
+ {
+  "seed": 155,
+  "t": 15,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.33,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.53
+ },
+ {
+  "seed": 155,
+  "t": 53.47,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.78,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.82
+ },
+ {
+  "seed": 156,
+  "t": 55.12,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.77,
+  "need": 0,
+  "cause": "missed swipe",
+  "speed": 5.83
+ },
+ {
+  "seed": 158,
+  "t": 46.85,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.83,
+  "need": 2,
+  "cause": "missed swipe",
+  "speed": 5.72
+ },
+ {
+  "seed": 158,
+  "t": 56.27,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.78
+ },
+ {
+  "seed": 159,
+  "t": 8.18,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.27,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.54
+ },
+ {
+  "seed": 159,
+  "t": 24.82,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.3,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.59
+ },
+ {
+  "seed": 159,
+  "t": 45,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.32,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.71
+ },
+ {
+  "seed": 160,
+  "t": 14.77,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.58
+ },
+ {
+  "seed": 161,
+  "t": 46.63,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.78,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.78
+ },
+ {
+  "seed": 163,
+  "t": 60.8,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.78,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.87
+ },
+ {
+  "seed": 164,
+  "t": 42.65,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.75
+ },
+ {
+  "seed": 164,
+  "t": 66.08,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.9,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.84
+ },
+ {
+  "seed": 166,
+  "t": 28.88,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.2,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.67
+ },
+ {
+  "seed": 167,
+  "t": 33.07,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.88,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.69
+ },
+ {
+  "seed": 168,
+  "t": 43,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.82,
+  "need": 2,
+  "cause": "wrong-way swipe",
+  "speed": 5.76
+ },
+ {
+  "seed": 171,
+  "t": 9.6,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.85,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.5
+ },
+ {
+  "seed": 172,
+  "t": 25.13,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.78,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.65
+ },
+ {
+  "seed": 173,
+  "t": 47.87,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.18,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.79
+ },
+ {
+  "seed": 173,
+  "t": 59.25,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.73,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.8
+ },
+ {
+  "seed": 173,
+  "t": 65.7,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.35,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.84
+ },
+ {
+  "seed": 174,
+  "t": 26.38,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.87,
+  "need": 0,
+  "cause": "missed swipe",
+  "speed": 5.65
+ },
+ {
+  "seed": 175,
+  "t": 10.17,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.56
+ },
+ {
+  "seed": 176,
+  "t": 20.47,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.28,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.62
+ },
+ {
+  "seed": 177,
+  "t": 50.1,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.75,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.8
+ },
+ {
+  "seed": 177,
+  "t": 67.38,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.87,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.91
+ },
+ {
+  "seed": 178,
+  "t": 5.3,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.22,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.53
+ },
+ {
+  "seed": 178,
+  "t": 32.12,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.63
+ },
+ {
+  "seed": 180,
+  "t": 21.62,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.63
+ },
+ {
+  "seed": 180,
+  "t": 46.45,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -0.89,
+  "objX": -1,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.72
+ },
+ {
+  "seed": 180,
+  "t": 54.53,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.85,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.82
+ },
+ {
+  "seed": 181,
+  "t": 17.02,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.33,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.6
+ },
+ {
+  "seed": 181,
+  "t": 44.93,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.71
+ },
+ {
+  "seed": 183,
+  "t": 32.95,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.64
+ },
+ {
+  "seed": 184,
+  "t": 44.77,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": -0.88,
+  "objX": -1,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.77
+ },
+ {
+  "seed": 184,
+  "t": 54.27,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.75,
+  "need": 0,
+  "cause": "missed swipe",
+  "speed": 5.82
+ },
+ {
+  "seed": 184,
+  "t": 63.47,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -0.63,
+  "objX": 0,
+  "seenBefore": 1.78,
+  "need": 0,
+  "cause": "other / slow reaction",
+  "speed": 5.82
+ },
+ {
+  "seed": 185,
+  "t": 5.52,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.27,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.53
+ },
+ {
+  "seed": 185,
+  "t": 43.8,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.78,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.76
+ },
+ {
+  "seed": 187,
+  "t": 6.72,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.54
+ },
+ {
+  "seed": 187,
+  "t": 22.38,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.87,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.57
+ },
+ {
+  "seed": 188,
+  "t": 21.22,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.87,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.57
+ },
+ {
+  "seed": 189,
+  "t": 26.97,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.28,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.6
+ },
+ {
+  "seed": 189,
+  "t": 32.95,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.77,
+  "need": 0,
+  "cause": "missed swipe",
+  "speed": 5.69
+ },
+ {
+  "seed": 189,
+  "t": 43.35,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.83,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.7
+ },
+ {
+  "seed": 190,
+  "t": 24.33,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.32,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.64
+ },
+ {
+  "seed": 190,
+  "t": 45.42,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.73,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.71
+ },
+ {
+  "seed": 190,
+  "t": 58.67,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.82,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.85
+ },
+ {
+  "seed": 191,
+  "t": 44.7,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.85,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.71
+ },
+ {
+  "seed": 191,
+  "t": 59.8,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.78,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.86
+ },
+ {
+  "seed": 192,
+  "t": 9.83,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.5
+ },
+ {
+  "seed": 192,
+  "t": 46.58,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.73,
+  "need": 2,
+  "cause": "wrong-way swipe",
+  "speed": 5.78
+ },
+ {
+  "seed": 192,
+  "t": 70.52,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.83,
+  "need": 0,
+  "cause": "wrong-way swipe",
+  "speed": 5.87
+ },
+ {
+  "seed": 193,
+  "t": 14.32,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.53
+ },
+ {
+  "seed": 193,
+  "t": 22.42,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.23,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.57
+ },
+ {
+  "seed": 195,
+  "t": 39.97,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.28,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.68
+ },
+ {
+  "seed": 195,
+  "t": 63.18,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.83,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.88
+ },
+ {
+  "seed": 196,
+  "t": 40.15,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.8,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.74
+ },
+ {
+  "seed": 196,
+  "t": 52.8,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": -0.88,
+  "objX": -1,
+  "seenBefore": 1.78,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.76
+ },
+ {
+  "seed": 198,
+  "t": 13.15,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.78,
+  "need": 0,
+  "cause": "wrong-way swipe",
+  "speed": 5.52
+ },
+ {
+  "seed": 198,
+  "t": 21.95,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.27,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.63
+ },
+ {
+  "seed": 198,
+  "t": 62.88,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.2,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.88
+ },
+ {
+  "seed": 199,
+  "t": 7.87,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.28,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.49
+ },
+ {
+  "seed": 199,
+  "t": 30.4,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.88,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.62
+ },
+ {
+  "seed": 200,
+  "t": 59.4,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.22,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.8
+ },
+ {
+  "seed": 201,
+  "t": 18.15,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.8,
+  "need": 0,
+  "cause": "missed swipe",
+  "speed": 5.6
+ },
+ {
+  "seed": 204,
+  "t": 15.83,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.59
+ },
+ {
+  "seed": 204,
+  "t": 63.58,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.73,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.88
+ },
+ {
+  "seed": 205,
+  "t": 6.1,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.85,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.48
+ },
+ {
+  "seed": 207,
+  "t": 64.77,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.84
+ },
+ {
+  "seed": 209,
+  "t": 3.02,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.51
+ },
+ {
+  "seed": 209,
+  "t": 44.95,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.71
+ },
+ {
+  "seed": 209,
+  "t": 48.02,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.33,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.72
+ },
+ {
+  "seed": 209,
+  "t": 57.73,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.22,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.79
+ },
+ {
+  "seed": 210,
+  "t": 25.58,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.23,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.59
+ },
+ {
+  "seed": 211,
+  "t": 10.73,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.56
+ },
+ {
+  "seed": 213,
+  "t": 39.32,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.73
+ },
+ {
+  "seed": 213,
+  "t": 51.85,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.83,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.75
+ },
+ {
+  "seed": 214,
+  "t": 28.17,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.82,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.61
+ },
+ {
+  "seed": 214,
+  "t": 55.7,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.35,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.78
+ },
+ {
+  "seed": 214,
+  "t": 58.53,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.18,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.84
+ },
+ {
+  "seed": 215,
+  "t": 48.75,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.23,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.74
+ },
+ {
+  "seed": 217,
+  "t": 45.47,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.78,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.72
+ },
+ {
+  "seed": 219,
+  "t": 5.73,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.32,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.53
+ },
+ {
+  "seed": 219,
+  "t": 38.48,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.73
+ },
+ {
+  "seed": 220,
+  "t": 11.67,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.57
+ },
+ {
+  "seed": 221,
+  "t": 50.42,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.23,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.8
+ },
+ {
+  "seed": 222,
+  "t": 26.35,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": -0.26,
+  "objX": 0,
+  "seenBefore": 0.33,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.65
+ },
+ {
+  "seed": 222,
+  "t": 60.53,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.35,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.81
+ },
+ {
+  "seed": 224,
+  "t": 25.25,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.23,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.59
+ },
+ {
+  "seed": 227,
+  "t": 39.78,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.27,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.68
+ },
+ {
+  "seed": 228,
+  "t": 26.43,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.6
+ },
+ {
+  "seed": 228,
+  "t": 29.92,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": -0.52,
+  "objX": 0,
+  "seenBefore": 0.4,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.62
+ },
+ {
+  "seed": 228,
+  "t": 70.9,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.88,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.87
+ },
+ {
+  "seed": 229,
+  "t": 59.53,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.85,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.8
+ },
+ {
+  "seed": 230,
+  "t": 58.72,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.87,
+  "need": 0,
+  "cause": "missed swipe",
+  "speed": 5.85
+ },
+ {
+  "seed": 232,
+  "t": 27.87,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.18,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.66
+ },
+ {
+  "seed": 232,
+  "t": 67.23,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.88,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.85
+ },
+ {
+  "seed": 233,
+  "t": 27.45,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.27,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.66
+ },
+ {
+  "seed": 234,
+  "t": 31.02,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.33,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.68
+ },
+ {
+  "seed": 234,
+  "t": 63.57,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.88,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.88
+ },
+ {
+  "seed": 234,
+  "t": 69.93,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.86
+ },
+ {
+  "seed": 235,
+  "t": 19.57,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": -0.11,
+  "objX": 0,
+  "seenBefore": 0.22,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.56
+ },
+ {
+  "seed": 235,
+  "t": 23.07,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   1
+  ],
+  "free": [
+   0
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.22,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.58
+ },
+ {
+  "seed": 235,
+  "t": 36.48,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.3,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.66
+ },
+ {
+  "seed": 235,
+  "t": 39.88,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.7,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.73
+ },
+ {
+  "seed": 235,
+  "t": 64.82,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.8,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.89
+ },
+ {
+  "seed": 236,
+  "t": 5.85,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.48
+ },
+ {
+  "seed": 236,
+  "t": 32.52,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.33,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.69
+ },
+ {
+  "seed": 237,
+  "t": 33.32,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.3,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.7
+ },
+ {
+  "seed": 238,
+  "t": 20.1,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.56
+ },
+ {
+  "seed": 238,
+  "t": 55.32,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.83
+ },
+ {
+  "seed": 240,
+  "t": 42.88,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.2,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.76
+ },
+ {
+  "seed": 241,
+  "t": 27.73,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.88,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.61
+ },
+ {
+  "seed": 241,
+  "t": 56.12,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.78
+ },
+ {
+  "seed": 242,
+  "t": 41.63,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.78,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.69
+ },
+ {
+  "seed": 242,
+  "t": 48.07,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.22,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.79
+ },
+ {
+  "seed": 244,
+  "t": 50.95,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.77,
+  "need": 0,
+  "cause": "missed swipe",
+  "speed": 5.75
+ },
+ {
+  "seed": 244,
+  "t": 54.75,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.23,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.83
+ },
+ {
+  "seed": 246,
+  "t": 37.95,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.67
+ },
+ {
+  "seed": 247,
+  "t": 27.75,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.23,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.61
+ },
+ {
+  "seed": 248,
+  "t": 39.13,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   1
+  ],
+  "free": [
+   0
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.28,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.73
+ },
+ {
+  "seed": 248,
+  "t": 55.77,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.83
+ },
+ {
+  "seed": 250,
+  "t": 3.02,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.51
+ },
+ {
+  "seed": 250,
+  "t": 15.42,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.59
+ },
+ {
+  "seed": 250,
+  "t": 54.2,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.85,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.82
+ },
+ {
+  "seed": 251,
+  "t": 53.08,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.9,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.76
+ },
+ {
+  "seed": 252,
+  "t": 3.02,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.51
+ },
+ {
+  "seed": 252,
+  "t": 56.57,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 0,
+  "heroX": 0.37,
+  "objX": 1,
+  "seenBefore": 1.88,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.78
+ },
+ {
+  "seed": 253,
+  "t": 41.28,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.75
+ },
+ {
+  "seed": 255,
+  "t": 11.97,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.51
+ },
+ {
+  "seed": 256,
+  "t": 13.7,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.88,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.52
+ },
+ {
+  "seed": 256,
+  "t": 37.75,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.23,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.72
+ },
+ {
+  "seed": 257,
+  "t": 56.15,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.78
+ },
+ {
+  "seed": 258,
+  "t": 27.9,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.22,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.66
+ },
+ {
+  "seed": 258,
+  "t": 38.45,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.77,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.67
+ },
+ {
+  "seed": 259,
+  "t": 5.72,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.78,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.53
+ },
+ {
+  "seed": 260,
+  "t": 6.68,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": -0.11,
+  "objX": 0,
+  "seenBefore": 0.27,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.54
+ },
+ {
+  "seed": 261,
+  "t": 35.77,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.71
+ },
+ {
+  "seed": 262,
+  "t": 61.48,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 0.3,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.87
+ },
+ {
+  "seed": 264,
+  "t": 11.6,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.88,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.51
+ },
+ {
+  "seed": 264,
+  "t": 26.28,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.27,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.6
+ },
+ {
+  "seed": 264,
+  "t": 50.5,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.82,
+  "need": 0,
+  "cause": "missed swipe",
+  "speed": 5.8
+ },
+ {
+  "seed": 265,
+  "t": 15.75,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.83,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.54
+ },
+ {
+  "seed": 265,
+  "t": 45.08,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.23,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.77
+ },
+ {
+  "seed": 267,
+  "t": 67.03,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.18,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.91
+ },
+ {
+  "seed": 268,
+  "t": 23.67,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.32,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.64
+ },
+ {
+  "seed": 268,
+  "t": 44.58,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.73,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.76
+ },
+ {
+  "seed": 269,
+  "t": 39.28,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.27,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.68
+ },
+ {
+  "seed": 270,
+  "t": 17.17,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.75,
+  "need": 2,
+  "cause": "wrong-way swipe",
+  "speed": 5.54
+ },
+ {
+  "seed": 270,
+  "t": 44.75,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -0.97,
+  "objX": -1,
+  "seenBefore": 1.73,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.71
+ },
+ {
+  "seed": 271,
+  "t": 12,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.83,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.57
+ },
+ {
+  "seed": 272,
+  "t": 19.58,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.23,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.61
+ },
+ {
+  "seed": 272,
+  "t": 58.98,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   1
+  ],
+  "free": [
+   0
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.3,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.8
+ },
+ {
+  "seed": 274,
+  "t": 12.32,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 0.2,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.57
+ },
+ {
+  "seed": 274,
+  "t": 31.98,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.63
+ },
+ {
+  "seed": 274,
+  "t": 58.17,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.82,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.85
+ },
+ {
+  "seed": 275,
+  "t": 48.1,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.73
+ },
+ {
+  "seed": 276,
+  "t": 59.32,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -0.48,
+  "objX": 0,
+  "seenBefore": 1.8,
+  "need": 0,
+  "cause": "other / slow reaction",
+  "speed": 5.86
+ },
+ {
+  "seed": 277,
+  "t": 70.92,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.9,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.87
+ },
+ {
+  "seed": 278,
+  "t": 29.37,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.18,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.67
+ },
+ {
+  "seed": 279,
+  "t": 54.6,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.83
+ },
+ {
+  "seed": 279,
+  "t": 66,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.32,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.9
+ },
+ {
+  "seed": 279,
+  "t": 68.85,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.67,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.91
+ },
+ {
+  "seed": 281,
+  "t": 21.73,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.22,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.57
+ },
+ {
+  "seed": 281,
+  "t": 49.43,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.74
+ },
+ {
+  "seed": 281,
+  "t": 59.95,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.8
+ },
+ {
+  "seed": 285,
+  "t": 3.02,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.51
+ },
+ {
+  "seed": 286,
+  "t": 28.77,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 0,
+  "heroX": 0.7,
+  "objX": 1,
+  "seenBefore": 1.75,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.61
+ },
+ {
+  "seed": 288,
+  "t": 65,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.32,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.89
+ },
+ {
+  "seed": 289,
+  "t": 14.13,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.22,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.58
+ },
+ {
+  "seed": 289,
+  "t": 41.42,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.23,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.74
+ },
+ {
+  "seed": 289,
+  "t": 55.25,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.73,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.83
+ },
+ {
+  "seed": 290,
+  "t": 21.03,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.18,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.62
+ },
+ {
+  "seed": 290,
+  "t": 62.35,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   1
+  ],
+  "free": [
+   0
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.33,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.87
+ },
+ {
+  "seed": 291,
+  "t": 13.12,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   1
+  ],
+  "free": [
+   -1,
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.57
+ },
+ {
+  "seed": 291,
+  "t": 30.08,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.73,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.68
+ },
+ {
+  "seed": 291,
+  "t": 43.03,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.85,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.7
+ },
+ {
+  "seed": 292,
+  "t": 27.95,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.27,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.66
+ },
+ {
+  "seed": 293,
+  "t": 21.37,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.85,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.57
+ },
+ {
+  "seed": 294,
+  "t": 6.38,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": -0.52,
+  "objX": -1,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.48
+ },
+ {
+  "seed": 294,
+  "t": 12.57,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.8,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.52
+ },
+ {
+  "seed": 294,
+  "t": 15.9,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.83,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.53
+ },
+ {
+  "seed": 295,
+  "t": 46.62,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.27,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.72
+ },
+ {
+  "seed": 295,
+  "t": 71.95,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "speed": 5.88
+ },
+ {
+  "seed": 296,
+  "t": 57.37,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -0.3,
+  "objX": 0,
+  "seenBefore": 1.85,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.85
+ },
+ {
+  "seed": 298,
+  "t": 30.72,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.87,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "speed": 5.63
+ },
+ {
+  "seed": 299,
+  "t": 15.47,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.85,
+  "need": 0,
+  "cause": "wrong-way swipe",
+  "speed": 5.59
+ },
+ {
+  "seed": 299,
+  "t": 47.98,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.3,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "speed": 5.79
+ },
+ {
+  "seed": 300,
+  "t": 59.45,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.77,
+  "need": 1,
+  "cause": "missed swipe",
+  "speed": 5.86
+ }
+]
