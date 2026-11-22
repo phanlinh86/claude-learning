@@ -12,7 +12,19 @@ const { resolve } = require('../unit/load');
 function loadDK() {
   // runInThisContext (not a vm sandbox): ≈ 2× faster for long sims; the sim process owns its global scope
   globalThis.window = globalThis;
-  for (const f of ['rng.js', 'content.js', 'mimi_points.js', 'world.js', 'bot.js']) { const p = resolve(f); if (fs.existsSync(p)) vm.runInThisContext(fs.readFileSync(p, 'utf8'), { filename: path.basename(p) }); }
+  // DK_PATCH=<file.json> {"content.js": [["old text", "new text"], …]}: a playtest experiment applied to the source IN MEMORY only
+  // (the game files are never edited); each old text must occur exactly once.
+  const patch = process.env.DK_PATCH ? JSON.parse(fs.readFileSync(process.env.DK_PATCH, 'utf8')) : {};
+  for (const f of ['rng.js', 'content.js', 'mimi_points.js', 'world.js', 'bot.js']) {
+    const p = resolve(f);
+    if (!fs.existsSync(p)) continue;
+    let src = fs.readFileSync(p, 'utf8');
+    for (const [a, b] of patch[f] || []) {
+      if (src.split(a).length !== 2) throw new Error('DK_PATCH: text not found exactly once in ' + f + ': ' + a.slice(0, 60));
+      src = src.replace(a, () => b);
+    }
+    vm.runInThisContext(src, { filename: path.basename(p) });
+  }
   return globalThis.DK;
 }
 const DK = loadDK();

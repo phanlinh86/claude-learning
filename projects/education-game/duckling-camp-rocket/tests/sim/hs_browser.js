@@ -41,7 +41,9 @@ const VPS = get('vp', '') ? ALLVP.filter(v => get('vp').split(',').includes(v.na
       }
       const s = DK.debug.stats;
       return { session: DK.debug.world.time, chapters: ch, cuts, rounds: rd.length, stars: DK.debug.world.stars, wrong: ev.filter(e => e.type === 'wrong').length,
-        right: ev.filter(e => e.type === 'right').length, launches: ev.filter(e => e.type === 'land').length, surprises: ev.filter(e => e.type === 'marmotTap' || e.type === 'goatTap' || e.type === 'birdTap').length, hints: ev.filter(e => e.type === 'hint').length, slowFrames: s.slowFrames, frames: s.frames };
+        right: ev.filter(e => e.type === 'right').length, launches: ev.filter(e => e.type === 'land').length, surprises: ev.filter(e => e.type === 'marmotTap' || e.type === 'goatTap' || e.type === 'birdTap').length, hints: ev.filter(e => e.type === 'hint').length, slowFrames: s.slowFrames, frames: s.frames,
+        voiceLines: (DK.debug.voiceLog || []).length, voicePerGameMin: (DK.debug.voiceLog || []).length / (DK.debug.world.time / 60),
+        offScreen: 0 };
     });
     r.age = age; r.vp = vp.name; r.ok = ok; r.errors = errors.slice(0, 3); r.wall = (Date.now() - t0) / 1000;
     res.push(r); console.log(JSON.stringify(r));
