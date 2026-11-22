@@ -1,0 +1,7868 @@
+{
+ "name": "proposal",
+ "patch": {
+  "zones": [
+   {
+    "patterns": {
+     "tower2": 0
+    }
+   },
+   null,
+   {
+    "gapK": 1.2
+   }
+  ],
+  "ballV": 2.8,
+  "ballKick": 1.2,
+  "ballRest": 0.6
+ },
+ "seeds": 60,
+ "maxT": 480,
+ "runs": 2700,
+ "secs": 132.068,
+ "agg": {
+  "easy/bot0.3": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 53,
+   "survival": {
+    "p10": 460.57,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 6450,
+    "p50": 7615,
+    "p90": 8100
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 98.3,
+    "ch5": 93.3
+   },
+   "firstAcorn": {
+    "p50": 3.03,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 26.98,
+    "p50": 95.3,
+    "p90": 175.81,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 71.97,
+      "p50": 71.97,
+      "p90": 72.23
+     },
+     "hitsPerEntered": {
+      "tower": 0.367,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0.367,
+     "jumps": 0,
+     "acorns": 117.467,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 67.68,
+      "p50": 67.95,
+      "p90": 68.22
+     },
+     "hitsPerEntered": {
+      "tower": 0.317,
+      "blocks": 0.6,
+      "ball": 0
+     },
+     "hitsTotal": 0.917,
+     "jumps": 1.3,
+     "acorns": 61.2,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 60,
+     "completed": 59,
+     "dur": {
+      "p10": 64.05,
+      "p50": 64.32,
+      "p90": 64.87
+     },
+     "hitsPerEntered": {
+      "tower": 0.217,
+      "blocks": 0.933,
+      "ball": 0.2
+     },
+     "hitsTotal": 1.35,
+     "jumps": 2.983,
+     "acorns": 52.898,
+     "deaths": 1.7
+    },
+    {
+     "ch": 4,
+     "entered": 59,
+     "completed": 56,
+     "dur": {
+      "p10": 60.8,
+      "p50": 61.07,
+      "p90": 61.62
+     },
+     "hitsPerEntered": {
+      "tower": 0.22,
+      "blocks": 1.254,
+      "ball": 0.136
+     },
+     "hitsTotal": 1.61,
+     "jumps": 4.982,
+     "acorns": 59.875,
+     "deaths": 5.1
+    },
+    {
+     "ch": 5,
+     "entered": 56,
+     "completed": 56,
+     "dur": {
+      "p10": 71.68,
+      "p50": 71.68,
+      "p90": 71.97
+     },
+     "hitsPerEntered": {
+      "tower": 0.375,
+      "blocks": 0.054,
+      "ball": 0
+     },
+     "hitsTotal": 0.429,
+     "jumps": 0.125,
+     "acorns": 125.589,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 56,
+     "completed": 55,
+     "dur": {
+      "p10": 68.02,
+      "p50": 68.3,
+      "p90": 68.57
+     },
+     "hitsPerEntered": {
+      "tower": 0.268,
+      "blocks": 0.589,
+      "ball": 0
+     },
+     "hitsTotal": 0.857,
+     "jumps": 1.073,
+     "acorns": 62.945,
+     "deaths": 1.8
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 113,
+    "blocks": 260,
+    "ball": 37
+   }
+  },
+  "easy/bot0.5": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 60,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 7939,
+    "p50": 8600,
+    "p90": 9062
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 100,
+    "ch5": 100
+   },
+   "firstAcorn": {
+    "p50": 3.03,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 46.05,
+    "p50": 196.29,
+    "p90": 448.34,
+    "never": 16.7
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 71.97,
+      "p50": 71.97,
+      "p90": 72.23
+     },
+     "hitsPerEntered": {
+      "tower": 0.15,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0.15,
+     "jumps": 0,
+     "acorns": 115.183,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 67.68,
+      "p50": 67.68,
+      "p90": 67.68
+     },
+     "hitsPerEntered": {
+      "tower": 0.017,
+      "blocks": 0.017,
+      "ball": 0
+     },
+     "hitsTotal": 0.034,
+     "jumps": 5.417,
+     "acorns": 84.75,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 64.05,
+      "p50": 64.05,
+      "p90": 64.32
+     },
+     "hitsPerEntered": {
+      "tower": 0.05,
+      "blocks": 0.367,
+      "ball": 0.033
+     },
+     "hitsTotal": 0.45,
+     "jumps": 5.983,
+     "acorns": 71.233,
+     "deaths": 0
+    },
+    {
+     "ch": 4,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 60.8,
+      "p50": 60.8,
+      "p90": 61.07
+     },
+     "hitsPerEntered": {
+      "tower": 0.033,
+      "blocks": 0.217,
+      "ball": 0
+     },
+     "hitsTotal": 0.25,
+     "jumps": 7.633,
+     "acorns": 80.85,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 71.68,
+      "p50": 71.68,
+      "p90": 71.95
+     },
+     "hitsPerEntered": {
+      "tower": 0.1,
+      "blocks": 0.017,
+      "ball": 0
+     },
+     "hitsTotal": 0.117,
+     "jumps": 0.1,
+     "acorns": 121.683,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 68.02,
+      "p50": 68.03,
+      "p90": 68.3
+     },
+     "hitsPerEntered": {
+      "tower": 0.083,
+      "blocks": 0.117,
+      "ball": 0
+     },
+     "hitsTotal": 0.2,
+     "jumps": 5.567,
+     "acorns": 84.067,
+     "deaths": 0
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 31,
+    "blocks": 71,
+    "ball": 5
+   }
+  },
+  "easy/bot0.7": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 60,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 7778,
+    "p50": 8390,
+    "p90": 8861
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 100,
+    "ch5": 100
+   },
+   "firstAcorn": {
+    "p50": 3.03,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 148.98,
+    "p50": 256.69,
+    "p90": 415.56,
+    "never": 86.7
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 71.97,
+      "p50": 71.97,
+      "p90": 71.97
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 0,
+     "acorns": 108.817,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 67.68,
+      "p50": 67.68,
+      "p90": 67.68
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 5.467,
+     "acorns": 81.3,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 64.05,
+      "p50": 64.05,
+      "p90": 64.05
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0.05,
+      "ball": 0
+     },
+     "hitsTotal": 0.05,
+     "jumps": 5.883,
+     "acorns": 68.1,
+     "deaths": 0
+    },
+    {
+     "ch": 4,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 60.8,
+      "p50": 60.8,
+      "p90": 60.8
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0.017,
+      "ball": 0
+     },
+     "hitsTotal": 0.017,
+     "jumps": 7.533,
+     "acorns": 78.85,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 71.68,
+      "p50": 71.68,
+      "p90": 71.68
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0.017,
+      "ball": 0
+     },
+     "hitsTotal": 0.017,
+     "jumps": 0.083,
+     "acorns": 115.3,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 68.03,
+      "p50": 68.03,
+      "p90": 68.03
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0.033,
+      "ball": 0
+     },
+     "hitsTotal": 0.033,
+     "jumps": 5.6,
+     "acorns": 81.65,
+     "deaths": 0
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 0,
+    "blocks": 9,
+    "ball": 0
+   }
+  },
+  "easy/bot0.9": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 60,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 7494,
+    "p50": 8100,
+    "p90": 8622
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 100,
+    "ch5": 100
+   },
+   "firstAcorn": {
+    "p50": 3.03,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 265.99,
+    "p50": 266.14,
+    "p90": 266.29,
+    "never": 96.7
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 71.97,
+      "p50": 71.97,
+      "p90": 71.97
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 0,
+     "acorns": 102.533,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 67.68,
+      "p50": 67.68,
+      "p90": 67.68
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 5.517,
+     "acorns": 79.183,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 64.05,
+      "p50": 64.05,
+      "p90": 64.05
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 5.783,
+     "acorns": 63.767,
+     "deaths": 0
+    },
+    {
+     "ch": 4,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 60.8,
+      "p50": 60.8,
+      "p90": 60.8
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 7.417,
+     "acorns": 75.2,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 71.68,
+      "p50": 71.68,
+      "p90": 71.68
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0.033,
+      "ball": 0
+     },
+     "hitsTotal": 0.033,
+     "jumps": 0.083,
+     "acorns": 109.283,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 68.03,
+      "p50": 68.03,
+      "p90": 68.03
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 5.5,
+     "acorns": 79.383,
+     "deaths": 0
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 0,
+    "blocks": 2,
+    "ball": 0
+   }
+  },
+  "easy/bot1": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 60,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 7327,
+    "p50": 7890,
+    "p90": 8425
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 100,
+    "ch5": 100
+   },
+   "firstAcorn": {
+    "p50": 3.03,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 265.97,
+    "p50": 266.14,
+    "p90": 266.31,
+    "never": 96.7
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 71.97,
+      "p50": 71.97,
+      "p90": 71.97
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 0,
+     "acorns": 100.35,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 67.68,
+      "p50": 67.68,
+      "p90": 67.68
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 5.6,
+     "acorns": 77,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 64.05,
+      "p50": 64.05,
+      "p90": 64.05
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 5.75,
+     "acorns": 61.333,
+     "deaths": 0
+    },
+    {
+     "ch": 4,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 60.8,
+      "p50": 60.8,
+      "p90": 60.8
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 7.417,
+     "acorns": 72.817,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 71.68,
+      "p50": 71.68,
+      "p90": 71.68
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0.033,
+      "ball": 0
+     },
+     "hitsTotal": 0.033,
+     "jumps": 0.083,
+     "acorns": 106.467,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 68.03,
+      "p50": 68.03,
+      "p90": 68.03
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 5.5,
+     "acorns": 77.35,
+     "deaths": 0
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 0,
+    "blocks": 2,
+    "ball": 0
+   }
+  },
+  "easy/kid": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 4,
+   "survival": {
+    "p10": 166.02,
+    "p50": 227.03,
+    "p90": 459.08
+   },
+   "score": {
+    "p10": 1397,
+    "p50": 1955,
+    "p90": 4740
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 55,
+    "ch5": 36.7
+   },
+   "firstAcorn": {
+    "p50": 3.87,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 19.58,
+    "p50": 89.36,
+    "p90": 155.23,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 71.97,
+      "p50": 71.97,
+      "p90": 72.23
+     },
+     "hitsPerEntered": {
+      "tower": 0.367,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0.367,
+     "jumps": 8.467,
+     "acorns": 56.483,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 67.68,
+      "p50": 67.95,
+      "p90": 68.48
+     },
+     "hitsPerEntered": {
+      "tower": 0.65,
+      "blocks": 0.65,
+      "ball": 0
+     },
+     "hitsTotal": 1.3,
+     "jumps": 11.15,
+     "acorns": 40.783,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 60,
+     "completed": 33,
+     "dur": {
+      "p10": 64.58,
+      "p50": 64.62,
+      "p90": 65.13
+     },
+     "hitsPerEntered": {
+      "tower": 0.3,
+      "blocks": 1.467,
+      "ball": 1.5
+     },
+     "hitsTotal": 3.267,
+     "jumps": 14.848,
+     "acorns": 34.333,
+     "deaths": 45
+    },
+    {
+     "ch": 4,
+     "entered": 33,
+     "completed": 22,
+     "dur": {
+      "p10": 60.8,
+      "p50": 61.33,
+      "p90": 61.35
+     },
+     "hitsPerEntered": {
+      "tower": 0.424,
+      "blocks": 0.636,
+      "ball": 0.667
+     },
+     "hitsTotal": 1.727,
+     "jumps": 13.455,
+     "acorns": 37.773,
+     "deaths": 33.3
+    },
+    {
+     "ch": 5,
+     "entered": 22,
+     "completed": 21,
+     "dur": {
+      "p10": 71.68,
+      "p50": 71.68,
+      "p90": 71.97
+     },
+     "hitsPerEntered": {
+      "tower": 0.409,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0.409,
+     "jumps": 8.095,
+     "acorns": 60.333,
+     "deaths": 4.5
+    },
+    {
+     "ch": 6,
+     "entered": 21,
+     "completed": 17,
+     "dur": {
+      "p10": 68.03,
+      "p50": 68.55,
+      "p90": 68.57
+     },
+     "hitsPerEntered": {
+      "tower": 0.857,
+      "blocks": 0.762,
+      "ball": 0
+     },
+     "hitsTotal": 1.619,
+     "jumps": 10.882,
+     "acorns": 40.765,
+     "deaths": 19
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 123,
+    "blocks": 184,
+    "ball": 140
+   }
+  },
+  "easy/kid5": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 151.15,
+    "p50": 182.98,
+    "p90": 249.16
+   },
+   "score": {
+    "p10": 1170,
+    "p50": 1575,
+    "p90": 2231
+   },
+   "reached": {
+    "ch2": 98.3,
+    "ch3": 90,
+    "ch4": 25,
+    "ch5": 6.7
+   },
+   "firstAcorn": {
+    "p50": 3.58,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 9.63,
+    "p50": 61.91,
+    "p90": 113.59,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 59,
+     "dur": {
+      "p10": 71.97,
+      "p50": 72.23,
+      "p90": 72.5
+     },
+     "hitsPerEntered": {
+      "tower": 0.8,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0.8,
+     "jumps": 10.102,
+     "acorns": 60.203,
+     "deaths": 1.7
+    },
+    {
+     "ch": 2,
+     "entered": 59,
+     "completed": 54,
+     "dur": {
+      "p10": 67.92,
+      "p50": 68.22,
+      "p90": 68.68
+     },
+     "hitsPerEntered": {
+      "tower": 0.949,
+      "blocks": 1.339,
+      "ball": 0
+     },
+     "hitsTotal": 2.288,
+     "jumps": 12.611,
+     "acorns": 39.481,
+     "deaths": 8.5
+    },
+    {
+     "ch": 3,
+     "entered": 54,
+     "completed": 15,
+     "dur": {
+      "p10": 64.32,
+      "p50": 64.87,
+      "p90": 65.13
+     },
+     "hitsPerEntered": {
+      "tower": 0.519,
+      "blocks": 1.444,
+      "ball": 1.315
+     },
+     "hitsTotal": 3.278,
+     "jumps": 14.4,
+     "acorns": 37.733,
+     "deaths": 72.2
+    },
+    {
+     "ch": 4,
+     "entered": 15,
+     "completed": 4,
+     "dur": {
+      "p10": 60.88,
+      "p50": 61.15,
+      "p90": 61.31
+     },
+     "hitsPerEntered": {
+      "tower": 0.6,
+      "blocks": 0.867,
+      "ball": 0.6
+     },
+     "hitsTotal": 2.067,
+     "jumps": 17.25,
+     "acorns": 37.75,
+     "deaths": 73.3
+    },
+    {
+     "ch": 5,
+     "entered": 4,
+     "completed": 2,
+     "dur": {
+      "p10": 71.71,
+      "p50": 71.81,
+      "p90": 71.92
+     },
+     "hitsPerEntered": {
+      "tower": 1.25,
+      "blocks": 0.25,
+      "ball": 0
+     },
+     "hitsTotal": 1.5,
+     "jumps": 7.5,
+     "acorns": 70.5,
+     "deaths": 50
+    },
+    {
+     "ch": 6,
+     "entered": 2,
+     "completed": 1,
+     "dur": {
+      "p10": 68.57,
+      "p50": 68.57,
+      "p90": 68.57
+     },
+     "hitsPerEntered": {
+      "tower": 0.5,
+      "blocks": 1.5,
+      "ball": 0
+     },
+     "hitsTotal": 2,
+     "jumps": 14,
+     "acorns": 40,
+     "deaths": 50
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 147,
+    "blocks": 176,
+    "ball": 82
+   }
+  },
+  "easy/adult": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 60,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 5379,
+    "p50": 5870,
+    "p90": 6254
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 100,
+    "ch5": 100
+   },
+   "firstAcorn": {
+    "p50": 3.03,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 55.83,
+    "p50": 169.21,
+    "p90": 388.19,
+    "never": 3.3
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 71.97,
+      "p50": 71.97,
+      "p90": 72.23
+     },
+     "hitsPerEntered": {
+      "tower": 0.15,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0.15,
+     "jumps": 0,
+     "acorns": 68.783,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 67.68,
+      "p50": 67.68,
+      "p90": 67.95
+     },
+     "hitsPerEntered": {
+      "tower": 0.033,
+      "blocks": 0.167,
+      "ball": 0
+     },
+     "hitsTotal": 0.2,
+     "jumps": 4.383,
+     "acorns": 47.183,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 64.05,
+      "p50": 64.32,
+      "p90": 64.58
+     },
+     "hitsPerEntered": {
+      "tower": 0.15,
+      "blocks": 0.233,
+      "ball": 0.367
+     },
+     "hitsTotal": 0.75,
+     "jumps": 7.4,
+     "acorns": 38.867,
+     "deaths": 0
+    },
+    {
+     "ch": 4,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 60.8,
+      "p50": 60.8,
+      "p90": 61.07
+     },
+     "hitsPerEntered": {
+      "tower": 0.05,
+      "blocks": 0.233,
+      "ball": 0.033
+     },
+     "hitsTotal": 0.316,
+     "jumps": 7.733,
+     "acorns": 44.85,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 71.68,
+      "p50": 71.68,
+      "p90": 71.69
+     },
+     "hitsPerEntered": {
+      "tower": 0.083,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0.083,
+     "jumps": 0.033,
+     "acorns": 72.517,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 68.02,
+      "p50": 68.03,
+      "p90": 68.3
+     },
+     "hitsPerEntered": {
+      "tower": 0.183,
+      "blocks": 0.183,
+      "ball": 0
+     },
+     "hitsTotal": 0.366,
+     "jumps": 4.667,
+     "acorns": 47.2,
+     "deaths": 0
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 50,
+    "blocks": 63,
+    "ball": 59
+   }
+  },
+  "easy/jumpSpam": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 38.89,
+    "p50": 58.82,
+    "p90": 109.58
+   },
+   "score": {
+    "p10": 99,
+    "p50": 210,
+    "p90": 632
+   },
+   "reached": {
+    "ch2": 38.3,
+    "ch3": 1.7,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstAcorn": {
+    "p50": 4.94,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 3.02,
+    "p50": 12.76,
+    "p90": 27.18,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 23,
+     "dur": {
+      "p10": 72.5,
+      "p50": 73.03,
+      "p90": 73.03
+     },
+     "hitsPerEntered": {
+      "tower": 4.367,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 4.367,
+     "jumps": 110.957,
+     "acorns": 35.783,
+     "deaths": 61.7
+    },
+    {
+     "ch": 2,
+     "entered": 23,
+     "completed": 1,
+     "dur": {
+      "p10": 68.75,
+      "p50": 68.75,
+      "p90": 68.75
+     },
+     "hitsPerEntered": {
+      "tower": 1.957,
+      "blocks": 0.652,
+      "ball": 0
+     },
+     "hitsTotal": 2.609,
+     "jumps": 81,
+     "acorns": 26,
+     "deaths": 95.7
+    },
+    {
+     "ch": 3,
+     "entered": 1,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": 2,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 2,
+     "jumps": null,
+     "acorns": null,
+     "deaths": 100
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    }
+   ],
+   "maxAir": 0.85,
+   "maxApex": 1.13,
+   "hitsByCause": {
+    "tower": 309,
+    "blocks": 15,
+    "ball": 0
+   }
+  },
+  "easy/zigzag": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 23.06,
+    "p50": 34.98,
+    "p90": 47.84
+   },
+   "score": {
+    "p10": 139,
+    "p50": 320,
+    "p90": 553
+   },
+   "reached": {
+    "ch2": 0,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstAcorn": {
+    "p50": 3.58,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 3.02,
+    "p50": 6.22,
+    "p90": 12.73,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": 5,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 5,
+     "jumps": null,
+     "acorns": null,
+     "deaths": 100
+    },
+    {
+     "ch": 2,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    }
+   ],
+   "maxAir": 0,
+   "maxApex": 0,
+   "hitsByCause": {
+    "tower": 300,
+    "blocks": 0,
+    "ball": 0
+   }
+  },
+  "easy/zigJump": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 23.06,
+    "p50": 34.98,
+    "p90": 47.84
+   },
+   "score": {
+    "p10": 80,
+    "p50": 180,
+    "p90": 301
+   },
+   "reached": {
+    "ch2": 0,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstAcorn": {
+    "p50": 3.83,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 3.02,
+    "p50": 6.22,
+    "p90": 12.73,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": 5,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 5,
+     "jumps": null,
+     "acorns": null,
+     "deaths": 100
+    },
+    {
+     "ch": 2,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    }
+   ],
+   "maxAir": 0.66,
+   "maxApex": 1.01,
+   "hitsByCause": {
+    "tower": 300,
+    "blocks": 0,
+    "ball": 0
+   }
+  },
+  "easy/idleMid": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 38.89,
+    "p50": 58.82,
+    "p90": 98.12
+   },
+   "score": {
+    "p10": 160,
+    "p50": 345,
+    "p90": 860
+   },
+   "reached": {
+    "ch2": 38.3,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstAcorn": {
+    "p50": 4.82,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 3.02,
+    "p50": 12.76,
+    "p90": 27.18,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 23,
+     "dur": {
+      "p10": 72.5,
+      "p50": 73.03,
+      "p90": 73.03
+     },
+     "hitsPerEntered": {
+      "tower": 4.367,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 4.367,
+     "jumps": 0,
+     "acorns": 58.043,
+     "deaths": 61.7
+    },
+    {
+     "ch": 2,
+     "entered": 23,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": 1.261,
+      "blocks": 1.391,
+      "ball": 0
+     },
+     "hitsTotal": 2.652,
+     "jumps": null,
+     "acorns": null,
+     "deaths": 100
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    }
+   ],
+   "maxAir": 0,
+   "maxApex": 0,
+   "hitsByCause": {
+    "tower": 291,
+    "blocks": 32,
+    "ball": 0
+   }
+  },
+  "easy/idleSide": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 35.73,
+    "p50": 60.72,
+    "p90": 93.42
+   },
+   "score": {
+    "p10": 140,
+    "p50": 330,
+    "p90": 680
+   },
+   "reached": {
+    "ch2": 28.3,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstAcorn": {
+    "p50": 5.63,
+    "never": 1.7
+   },
+   "firstHit": {
+    "p10": 3.02,
+    "p50": 7.03,
+    "p90": 25.71,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 17,
+     "dur": {
+      "p10": 72.39,
+      "p50": 73.03,
+      "p90": 73.03
+     },
+     "hitsPerEntered": {
+      "tower": 4.517,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 4.517,
+     "jumps": 0,
+     "acorns": 47.588,
+     "deaths": 71.7
+    },
+    {
+     "ch": 2,
+     "entered": 17,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": 1.294,
+      "blocks": 1.412,
+      "ball": 0
+     },
+     "hitsTotal": 2.706,
+     "jumps": null,
+     "acorns": null,
+     "deaths": 100
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    }
+   ],
+   "maxAir": 0,
+   "maxApex": 0,
+   "hitsByCause": {
+    "tower": 293,
+    "blocks": 24,
+    "ball": 0
+   }
+  },
+  "easy/botAlwaysJump": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 25,
+   "survival": {
+    "p10": 193.99,
+    "p50": 440.59,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 1979,
+    "p50": 4995,
+    "p90": 5922
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 83.3,
+    "ch5": 66.7
+   },
+   "firstAcorn": {
+    "p50": 3.18,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 78.92,
+    "p50": 101.53,
+    "p90": 169.41,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 71.97,
+      "p50": 71.97,
+      "p90": 71.97
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 110,
+     "acorns": 61.467,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 67.68,
+      "p50": 68.22,
+      "p90": 68.51
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 1.767,
+      "ball": 0
+     },
+     "hitsTotal": 1.767,
+     "jumps": 80.25,
+     "acorns": 49.3,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 60,
+     "completed": 50,
+     "dur": {
+      "p10": 64.32,
+      "p50": 64.58,
+      "p90": 64.87
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 2.083,
+      "ball": 0
+     },
+     "hitsTotal": 2.083,
+     "jumps": 113.46,
+     "acorns": 47.04,
+     "deaths": 16.7
+    },
+    {
+     "ch": 4,
+     "entered": 50,
+     "completed": 40,
+     "dur": {
+      "p10": 60.82,
+      "p50": 61.07,
+      "p90": 61.62
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 1.54,
+      "ball": 0
+     },
+     "hitsTotal": 1.54,
+     "jumps": 58.425,
+     "acorns": 42.75,
+     "deaths": 20
+    },
+    {
+     "ch": 5,
+     "entered": 40,
+     "completed": 40,
+     "dur": {
+      "p10": 71.68,
+      "p50": 71.68,
+      "p90": 71.68
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0.025,
+      "ball": 0
+     },
+     "hitsTotal": 0.025,
+     "jumps": 108.4,
+     "acorns": 61.425,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 40,
+     "completed": 36,
+     "dur": {
+      "p10": 68.16,
+      "p50": 68.3,
+      "p90": 68.57
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 1.625,
+      "ball": 0
+     },
+     "hitsTotal": 1.625,
+     "jumps": 80.806,
+     "acorns": 46.278,
+     "deaths": 10
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 0,
+    "blocks": 460,
+    "ball": 1
+   }
+  },
+  "easy/botNeverJump": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 110.97,
+    "p50": 131.08,
+    "p90": 171.72
+   },
+   "score": {
+    "p10": 1377,
+    "p50": 1685,
+    "p90": 2273
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 26.7,
+    "ch4": 3.3,
+    "ch5": 0
+   },
+   "firstAcorn": {
+    "p50": 3.03,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 77.16,
+    "p50": 84.03,
+    "p90": 102.4,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 71.97,
+      "p50": 71.97,
+      "p90": 71.97
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 0,
+     "acorns": 102.533,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 16,
+     "dur": {
+      "p10": 68.22,
+      "p50": 68.48,
+      "p90": 68.75
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 4.417,
+      "ball": 0
+     },
+     "hitsTotal": 4.417,
+     "jumps": 0,
+     "acorns": 57.75,
+     "deaths": 73.3
+    },
+    {
+     "ch": 3,
+     "entered": 16,
+     "completed": 2,
+     "dur": {
+      "p10": 64.36,
+      "p50": 64.45,
+      "p90": 64.55
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 2.875,
+      "ball": 0
+     },
+     "hitsTotal": 2.875,
+     "jumps": 0,
+     "acorns": 42.5,
+     "deaths": 87.5
+    },
+    {
+     "ch": 4,
+     "entered": 2,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 3,
+      "ball": 0
+     },
+     "hitsTotal": 3,
+     "jumps": null,
+     "acorns": null,
+     "deaths": 100
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    }
+   ],
+   "maxAir": 0,
+   "maxApex": 0,
+   "hitsByCause": {
+    "tower": 0,
+    "blocks": 317,
+    "ball": 0
+   }
+  },
+  "normal/bot0.3": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 8,
+   "survival": {
+    "p10": 116.31,
+    "p50": 211.55,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 1977,
+    "p50": 3200,
+    "p90": 8240
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 76.7,
+    "ch4": 50,
+    "ch5": 30
+   },
+   "firstAcorn": {
+    "p50": 2.43,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 28.66,
+    "p50": 81.69,
+    "p90": 140.37,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 73.08,
+      "p50": 73.08,
+      "p90": 73.35
+     },
+     "hitsPerEntered": {
+      "tower": 0.433,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0.433,
+     "jumps": 0,
+     "acorns": 145.65,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 46,
+     "dur": {
+      "p10": 68.75,
+      "p50": 69.02,
+      "p90": 69.28
+     },
+     "hitsPerEntered": {
+      "tower": 0.45,
+      "blocks": 1.167,
+      "ball": 0
+     },
+     "hitsTotal": 1.617,
+     "jumps": 3.674,
+     "acorns": 73.478,
+     "deaths": 23.3
+    },
+    {
+     "ch": 3,
+     "entered": 46,
+     "completed": 30,
+     "dur": {
+      "p10": 65.05,
+      "p50": 65.33,
+      "p90": 65.6
+     },
+     "hitsPerEntered": {
+      "tower": 0.304,
+      "blocks": 0.935,
+      "ball": 0.152
+     },
+     "hitsTotal": 1.391,
+     "jumps": 2.933,
+     "acorns": 62.4,
+     "deaths": 34.8
+    },
+    {
+     "ch": 4,
+     "entered": 30,
+     "completed": 18,
+     "dur": {
+      "p10": 61.75,
+      "p50": 62.02,
+      "p90": 62.28
+     },
+     "hitsPerEntered": {
+      "tower": 0.267,
+      "blocks": 1.267,
+      "ball": 0.033
+     },
+     "hitsTotal": 1.567,
+     "jumps": 5.444,
+     "acorns": 64.944,
+     "deaths": 40
+    },
+    {
+     "ch": 5,
+     "entered": 18,
+     "completed": 17,
+     "dur": {
+      "p10": 72.8,
+      "p50": 72.82,
+      "p90": 73.09
+     },
+     "hitsPerEntered": {
+      "tower": 0.444,
+      "blocks": 0.056,
+      "ball": 0
+     },
+     "hitsTotal": 0.5,
+     "jumps": 0.176,
+     "acorns": 153.471,
+     "deaths": 5.6
+    },
+    {
+     "ch": 6,
+     "entered": 17,
+     "completed": 11,
+     "dur": {
+      "p10": 69.08,
+      "p50": 69.37,
+      "p90": 69.63
+     },
+     "hitsPerEntered": {
+      "tower": 0.353,
+      "blocks": 1.176,
+      "ball": 0
+     },
+     "hitsTotal": 1.529,
+     "jumps": 3.818,
+     "acorns": 62.273,
+     "deaths": 35.3
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 93,
+    "blocks": 180,
+    "ball": 11
+   }
+  },
+  "normal/bot0.5": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 58,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 8669,
+    "p50": 9555,
+    "p90": 10470
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 98.3,
+    "ch4": 96.7,
+    "ch5": 96.7
+   },
+   "firstAcorn": {
+    "p50": 2.43,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 126.57,
+    "p50": 176.61,
+    "p90": 381.97,
+    "never": 16.7
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 73.08,
+      "p50": 73.08,
+      "p90": 73.08
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 0,
+     "acorns": 140.617,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 59,
+     "dur": {
+      "p10": 68.75,
+      "p50": 68.75,
+      "p90": 69.02
+     },
+     "hitsPerEntered": {
+      "tower": 0.017,
+      "blocks": 0.183,
+      "ball": 0
+     },
+     "hitsTotal": 0.2,
+     "jumps": 8.22,
+     "acorns": 97.915,
+     "deaths": 1.7
+    },
+    {
+     "ch": 3,
+     "entered": 59,
+     "completed": 58,
+     "dur": {
+      "p10": 65.05,
+      "p50": 65.05,
+      "p90": 65.33
+     },
+     "hitsPerEntered": {
+      "tower": 0.085,
+      "blocks": 0.475,
+      "ball": 0
+     },
+     "hitsTotal": 0.56,
+     "jumps": 7.397,
+     "acorns": 83.017,
+     "deaths": 1.7
+    },
+    {
+     "ch": 4,
+     "entered": 58,
+     "completed": 58,
+     "dur": {
+      "p10": 61.75,
+      "p50": 61.75,
+      "p90": 62.03
+     },
+     "hitsPerEntered": {
+      "tower": 0.069,
+      "blocks": 0.103,
+      "ball": 0.017
+     },
+     "hitsTotal": 0.189,
+     "jumps": 8.379,
+     "acorns": 86.086,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 58,
+     "completed": 58,
+     "dur": {
+      "p10": 72.8,
+      "p50": 72.82,
+      "p90": 72.82
+     },
+     "hitsPerEntered": {
+      "tower": 0.069,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0.069,
+     "jumps": 0.069,
+     "acorns": 150.431,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 58,
+     "completed": 58,
+     "dur": {
+      "p10": 69.08,
+      "p50": 69.1,
+      "p90": 69.37
+     },
+     "hitsPerEntered": {
+      "tower": 0.086,
+      "blocks": 0.241,
+      "ball": 0
+     },
+     "hitsTotal": 0.327,
+     "jumps": 8.397,
+     "acorns": 95.724,
+     "deaths": 0
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 21,
+    "blocks": 77,
+    "ball": 2
+   }
+  },
+  "normal/bot0.7": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 60,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 8638,
+    "p50": 9245,
+    "p90": 10099
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 100,
+    "ch5": 100
+   },
+   "firstAcorn": {
+    "p50": 2.43,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 97.11,
+    "p50": 156.75,
+    "p90": 444.25,
+    "never": 83.3
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 73.08,
+      "p50": 73.08,
+      "p90": 73.08
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 0,
+     "acorns": 134.05,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 68.75,
+      "p50": 68.75,
+      "p90": 68.75
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0.067,
+      "ball": 0
+     },
+     "hitsTotal": 0.067,
+     "jumps": 8.183,
+     "acorns": 93.567,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 65.05,
+      "p50": 65.05,
+      "p90": 65.05
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0.067,
+      "ball": 0
+     },
+     "hitsTotal": 0.067,
+     "jumps": 7.25,
+     "acorns": 79.117,
+     "deaths": 0
+    },
+    {
+     "ch": 4,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 61.75,
+      "p50": 61.75,
+      "p90": 61.75
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 8.283,
+     "acorns": 82.467,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 72.82,
+      "p50": 72.82,
+      "p90": 72.82
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 0.067,
+     "acorns": 141.983,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 69.08,
+      "p50": 69.08,
+      "p90": 69.08
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 8.3,
+     "acorns": 93.2,
+     "deaths": 0
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 0,
+    "blocks": 11,
+    "ball": 0
+   }
+  },
+  "normal/bot0.9": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 60,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 8280,
+    "p50": 8815,
+    "p90": 9615
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 100,
+    "ch5": 100
+   },
+   "firstAcorn": {
+    "p50": 2.43,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": null,
+    "p50": null,
+    "p90": null,
+    "never": 100
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 73.08,
+      "p50": 73.08,
+      "p90": 73.08
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 0,
+     "acorns": 125.833,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 68.75,
+      "p50": 68.75,
+      "p90": 68.75
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 8.167,
+     "acorns": 88.833,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 65.05,
+      "p50": 65.05,
+      "p90": 65.05
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 7.1,
+     "acorns": 73.7,
+     "deaths": 0
+    },
+    {
+     "ch": 4,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 61.75,
+      "p50": 61.75,
+      "p90": 61.75
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 8.283,
+     "acorns": 77.417,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 72.82,
+      "p50": 72.82,
+      "p90": 72.82
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 0.067,
+     "acorns": 132.767,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 69.08,
+      "p50": 69.08,
+      "p90": 69.08
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 8.267,
+     "acorns": 88.667,
+     "deaths": 0
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 0,
+    "blocks": 0,
+    "ball": 0
+   }
+  },
+  "normal/bot1": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 60,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 8011,
+    "p50": 8575,
+    "p90": 9294
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 100,
+    "ch5": 100
+   },
+   "firstAcorn": {
+    "p50": 2.43,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 201.78,
+    "p50": 201.78,
+    "p90": 201.78,
+    "never": 98.3
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 73.08,
+      "p50": 73.08,
+      "p90": 73.08
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 0,
+     "acorns": 121.867,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 68.75,
+      "p50": 68.75,
+      "p90": 68.75
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 8.117,
+     "acorns": 84.95,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 65.05,
+      "p50": 65.05,
+      "p90": 65.05
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0.017
+     },
+     "hitsTotal": 0.017,
+     "jumps": 6.833,
+     "acorns": 69.817,
+     "deaths": 0
+    },
+    {
+     "ch": 4,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 61.75,
+      "p50": 61.75,
+      "p90": 61.75
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 8.267,
+     "acorns": 74.05,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 72.82,
+      "p50": 72.82,
+      "p90": 72.82
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 0.067,
+     "acorns": 128.15,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 69.08,
+      "p50": 69.08,
+      "p90": 69.08
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 8.167,
+     "acorns": 85.85,
+     "deaths": 0
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 0,
+    "blocks": 0,
+    "ball": 1
+   }
+  },
+  "normal/kid": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 103.72,
+    "p50": 159.8,
+    "p90": 192.53
+   },
+   "score": {
+    "p10": 965,
+    "p50": 1480,
+    "p90": 1960
+   },
+   "reached": {
+    "ch2": 98.3,
+    "ch3": 55,
+    "ch4": 3.3,
+    "ch5": 0
+   },
+   "firstAcorn": {
+    "p50": 3.02,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 30.07,
+    "p50": 75.24,
+    "p90": 119.61,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 59,
+     "dur": {
+      "p10": 73.08,
+      "p50": 73.08,
+      "p90": 73.35
+     },
+     "hitsPerEntered": {
+      "tower": 0.55,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0.55,
+     "jumps": 8.559,
+     "acorns": 74.627,
+     "deaths": 1.7
+    },
+    {
+     "ch": 2,
+     "entered": 59,
+     "completed": 33,
+     "dur": {
+      "p10": 68.98,
+      "p50": 69.25,
+      "p90": 69.28
+     },
+     "hitsPerEntered": {
+      "tower": 1.271,
+      "blocks": 0.763,
+      "ball": 0
+     },
+     "hitsTotal": 2.034,
+     "jumps": 13.788,
+     "acorns": 44.636,
+     "deaths": 44.1
+    },
+    {
+     "ch": 3,
+     "entered": 33,
+     "completed": 2,
+     "dur": {
+      "p10": 65.32,
+      "p50": 65.32,
+      "p90": 65.33
+     },
+     "hitsPerEntered": {
+      "tower": 0.667,
+      "blocks": 0.788,
+      "ball": 0.939
+     },
+     "hitsTotal": 2.394,
+     "jumps": 15,
+     "acorns": 29.5,
+     "deaths": 93.9
+    },
+    {
+     "ch": 4,
+     "entered": 2,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": 2,
+      "blocks": 0.5,
+      "ball": 0
+     },
+     "hitsTotal": 2.5,
+     "jumps": null,
+     "acorns": null,
+     "deaths": 100
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    }
+   ],
+   "maxAir": 0.85,
+   "maxApex": 1.13,
+   "hitsByCause": {
+    "tower": 134,
+    "blocks": 72,
+    "ball": 31
+   }
+  },
+  "normal/kid5": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 86.72,
+    "p50": 114.19,
+    "p90": 172.58
+   },
+   "score": {
+    "p10": 783,
+    "p50": 1165,
+    "p90": 1780
+   },
+   "reached": {
+    "ch2": 93.3,
+    "ch3": 21.7,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstAcorn": {
+    "p50": 2.87,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 7.96,
+    "p50": 48.84,
+    "p90": 92.94,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 56,
+     "dur": {
+      "p10": 73.08,
+      "p50": 73.35,
+      "p90": 73.62
+     },
+     "hitsPerEntered": {
+      "tower": 0.933,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0.933,
+     "jumps": 10.446,
+     "acorns": 75.357,
+     "deaths": 6.7
+    },
+    {
+     "ch": 2,
+     "entered": 56,
+     "completed": 13,
+     "dur": {
+      "p10": 68.8,
+      "p50": 69.02,
+      "p90": 69.28
+     },
+     "hitsPerEntered": {
+      "tower": 1.018,
+      "blocks": 1.411,
+      "ball": 0
+     },
+     "hitsTotal": 2.429,
+     "jumps": 14.923,
+     "acorns": 43.692,
+     "deaths": 76.8
+    },
+    {
+     "ch": 3,
+     "entered": 13,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": 0.308,
+      "blocks": 1.385,
+      "ball": 0.769
+     },
+     "hitsTotal": 2.462,
+     "jumps": null,
+     "acorns": null,
+     "deaths": 100
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    }
+   ],
+   "maxAir": 0.85,
+   "maxApex": 1.13,
+   "hitsByCause": {
+    "tower": 117,
+    "blocks": 97,
+    "ball": 10
+   }
+  },
+  "normal/adult": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 55,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 5989,
+    "p50": 6500,
+    "p90": 7005
+   },
+   "reached": {
+    "ch2": 98.3,
+    "ch3": 98.3,
+    "ch4": 95,
+    "ch5": 95
+   },
+   "firstAcorn": {
+    "p50": 2.43,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 33.64,
+    "p50": 141.14,
+    "p90": 357.79,
+    "never": 3.3
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 59,
+     "dur": {
+      "p10": 73.08,
+      "p50": 73.08,
+      "p90": 73.35
+     },
+     "hitsPerEntered": {
+      "tower": 0.3,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0.3,
+     "jumps": 0,
+     "acorns": 85.051,
+     "deaths": 1.7
+    },
+    {
+     "ch": 2,
+     "entered": 59,
+     "completed": 59,
+     "dur": {
+      "p10": 68.75,
+      "p50": 68.75,
+      "p90": 69.02
+     },
+     "hitsPerEntered": {
+      "tower": 0.22,
+      "blocks": 0.203,
+      "ball": 0
+     },
+     "hitsTotal": 0.423,
+     "jumps": 7.051,
+     "acorns": 54.831,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 59,
+     "completed": 57,
+     "dur": {
+      "p10": 65.05,
+      "p50": 65.05,
+      "p90": 65.6
+     },
+     "hitsPerEntered": {
+      "tower": 0.153,
+      "blocks": 0.169,
+      "ball": 0.322
+     },
+     "hitsTotal": 0.644,
+     "jumps": 8.614,
+     "acorns": 45.298,
+     "deaths": 3.4
+    },
+    {
+     "ch": 4,
+     "entered": 57,
+     "completed": 57,
+     "dur": {
+      "p10": 61.75,
+      "p50": 61.75,
+      "p90": 62.03
+     },
+     "hitsPerEntered": {
+      "tower": 0.263,
+      "blocks": 0.14,
+      "ball": 0.088
+     },
+     "hitsTotal": 0.491,
+     "jumps": 8.877,
+     "acorns": 50.912,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 57,
+     "completed": 57,
+     "dur": {
+      "p10": 72.8,
+      "p50": 72.82,
+      "p90": 73.08
+     },
+     "hitsPerEntered": {
+      "tower": 0.211,
+      "blocks": 0.018,
+      "ball": 0
+     },
+     "hitsTotal": 0.229,
+     "jumps": 0.088,
+     "acorns": 90.316,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 57,
+     "completed": 56,
+     "dur": {
+      "p10": 69.08,
+      "p50": 69.1,
+      "p90": 69.37
+     },
+     "hitsPerEntered": {
+      "tower": 0.263,
+      "blocks": 0.211,
+      "ball": 0
+     },
+     "hitsTotal": 0.474,
+     "jumps": 7.286,
+     "acorns": 55.714,
+     "deaths": 1.8
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 87,
+    "blocks": 56,
+    "ball": 52
+   }
+  },
+  "normal/jumpSpam": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 20,
+    "p50": 30.5,
+    "p90": 55.18
+   },
+   "score": {
+    "p10": 49,
+    "p50": 130,
+    "p90": 310
+   },
+   "reached": {
+    "ch2": 1.7,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstAcorn": {
+    "p50": 3.91,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 2.42,
+    "p50": 10.11,
+    "p90": 21.5,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 1,
+     "dur": {
+      "p10": 73.35,
+      "p50": 73.35,
+      "p90": 73.35
+     },
+     "hitsPerEntered": {
+      "tower": 2.967,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 2.967,
+     "jumps": 112,
+     "acorns": 54,
+     "deaths": 98.3
+    },
+    {
+     "ch": 2,
+     "entered": 1,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": 2,
+      "blocks": 1,
+      "ball": 0
+     },
+     "hitsTotal": 3,
+     "jumps": null,
+     "acorns": null,
+     "deaths": 100
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    }
+   ],
+   "maxAir": 0.66,
+   "maxApex": 1.01,
+   "hitsByCause": {
+    "tower": 180,
+    "blocks": 1,
+    "ball": 0
+   }
+  },
+  "normal/zigzag": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 10.75,
+    "p50": 18.88,
+    "p90": 32.55
+   },
+   "score": {
+    "p10": 59,
+    "p50": 235,
+    "p90": 440
+   },
+   "reached": {
+    "ch2": 0,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstAcorn": {
+    "p50": 2.67,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 2.42,
+    "p50": 5.47,
+    "p90": 14.08,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": 3,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 3,
+     "jumps": null,
+     "acorns": null,
+     "deaths": 100
+    },
+    {
+     "ch": 2,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    }
+   ],
+   "maxAir": 0,
+   "maxApex": 0,
+   "hitsByCause": {
+    "tower": 180,
+    "blocks": 0,
+    "ball": 0
+   }
+  },
+  "normal/zigJump": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 10.75,
+    "p50": 18.88,
+    "p90": 32.55
+   },
+   "score": {
+    "p10": 39,
+    "p50": 110,
+    "p90": 211
+   },
+   "reached": {
+    "ch2": 0,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstAcorn": {
+    "p50": 2.67,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 2.42,
+    "p50": 5.47,
+    "p90": 14.08,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": 3,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 3,
+     "jumps": null,
+     "acorns": null,
+     "deaths": 100
+    },
+    {
+     "ch": 2,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    }
+   ],
+   "maxAir": 0.66,
+   "maxApex": 1.01,
+   "hitsByCause": {
+    "tower": 180,
+    "blocks": 0,
+    "ball": 0
+   }
+  },
+  "normal/idleMid": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 20,
+    "p50": 30.5,
+    "p90": 55.18
+   },
+   "score": {
+    "p10": 89,
+    "p50": 225,
+    "p90": 553
+   },
+   "reached": {
+    "ch2": 1.7,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstAcorn": {
+    "p50": 3.83,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 2.42,
+    "p50": 10.11,
+    "p90": 21.5,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 1,
+     "dur": {
+      "p10": 73.35,
+      "p50": 73.35,
+      "p90": 73.35
+     },
+     "hitsPerEntered": {
+      "tower": 2.967,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 2.967,
+     "jumps": 0,
+     "acorns": 95,
+     "deaths": 98.3
+    },
+    {
+     "ch": 2,
+     "entered": 1,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": 2,
+      "blocks": 1,
+      "ball": 0
+     },
+     "hitsTotal": 3,
+     "jumps": null,
+     "acorns": null,
+     "deaths": 100
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    }
+   ],
+   "maxAir": 0,
+   "maxApex": 0,
+   "hitsByCause": {
+    "tower": 180,
+    "blocks": 1,
+    "ball": 0
+   }
+  },
+  "normal/idleSide": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 13.41,
+    "p50": 26.51,
+    "p90": 46.2
+   },
+   "score": {
+    "p10": 40,
+    "p50": 165,
+    "p90": 401
+   },
+   "reached": {
+    "ch2": 1.7,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstAcorn": {
+    "p50": 4.4,
+    "never": 5
+   },
+   "firstHit": {
+    "p10": 2.42,
+    "p50": 5.58,
+    "p90": 20.35,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 1,
+     "dur": {
+      "p10": 73.62,
+      "p50": 73.62,
+      "p90": 73.62
+     },
+     "hitsPerEntered": {
+      "tower": 2.983,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 2.983,
+     "jumps": 0,
+     "acorns": 83,
+     "deaths": 98.3
+    },
+    {
+     "ch": 2,
+     "entered": 1,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": 1,
+      "blocks": 1,
+      "ball": 0
+     },
+     "hitsTotal": 2,
+     "jumps": null,
+     "acorns": null,
+     "deaths": 100
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    }
+   ],
+   "maxAir": 0,
+   "maxApex": 0,
+   "hitsByCause": {
+    "tower": 180,
+    "blocks": 1,
+    "ball": 0
+   }
+  },
+  "normal/botAlwaysJump": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 1,
+   "survival": {
+    "p10": 109.28,
+    "p50": 171.3,
+    "p90": 381.13
+   },
+   "score": {
+    "p10": 1008,
+    "p50": 1610,
+    "p90": 4043
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 58.3,
+    "ch4": 21.7,
+    "ch5": 13.3
+   },
+   "firstAcorn": {
+    "p50": 2.52,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 80.2,
+    "p50": 92.71,
+    "p90": 160.14,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 73.08,
+      "p50": 73.08,
+      "p90": 73.08
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 112,
+     "acorns": 67.617,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 35,
+     "dur": {
+      "p10": 68.75,
+      "p50": 69.02,
+      "p90": 69.28
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 1.917,
+      "ball": 0
+     },
+     "hitsTotal": 1.917,
+     "jumps": 81,
+     "acorns": 48.543,
+     "deaths": 41.7
+    },
+    {
+     "ch": 3,
+     "entered": 35,
+     "completed": 13,
+     "dur": {
+      "p10": 65.05,
+      "p50": 65.33,
+      "p90": 65.6
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 1.943,
+      "ball": 0.029
+     },
+     "hitsTotal": 1.972,
+     "jumps": 114.769,
+     "acorns": 46.154,
+     "deaths": 62.9
+    },
+    {
+     "ch": 4,
+     "entered": 13,
+     "completed": 8,
+     "dur": {
+      "p10": 61.75,
+      "p50": 62.06,
+      "p90": 62.29
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 1.615,
+      "ball": 0
+     },
+     "hitsTotal": 1.615,
+     "jumps": 59.25,
+     "acorns": 42.25,
+     "deaths": 38.5
+    },
+    {
+     "ch": 5,
+     "entered": 8,
+     "completed": 8,
+     "dur": {
+      "p10": 72.8,
+      "p50": 72.81,
+      "p90": 72.9
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0.125,
+      "ball": 0
+     },
+     "hitsTotal": 0.125,
+     "jumps": 110.125,
+     "acorns": 63.5,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 8,
+     "completed": 3,
+     "dur": {
+      "p10": 69.15,
+      "p50": 69.37,
+      "p90": 69.37
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 2.125,
+      "ball": 0
+     },
+     "hitsTotal": 2.125,
+     "jumps": 82,
+     "acorns": 38.667,
+     "deaths": 62.5
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 0,
+    "blocks": 228,
+    "ball": 2
+   }
+  },
+  "normal/botNeverJump": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 86.29,
+    "p50": 98.8,
+    "p90": 117.34
+   },
+   "score": {
+    "p10": 1330,
+    "p50": 1635,
+    "p90": 1905
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstAcorn": {
+    "p50": 2.43,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 76.32,
+    "p50": 81.27,
+    "p90": 94.74,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 73.08,
+      "p50": 73.08,
+      "p90": 73.08
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 0,
+     "acorns": 125.833,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 3,
+      "ball": 0
+     },
+     "hitsTotal": 3,
+     "jumps": null,
+     "acorns": null,
+     "deaths": 100
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    }
+   ],
+   "maxAir": 0,
+   "maxApex": 0,
+   "hitsByCause": {
+    "tower": 0,
+    "blocks": 180,
+    "ball": 0
+   }
+  },
+  "hard/bot0.3": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 2,
+   "survival": {
+    "p10": 116.2,
+    "p50": 184.78,
+    "p90": 407.05
+   },
+   "score": {
+    "p10": 2136,
+    "p50": 3215,
+    "p90": 7797
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 66.7,
+    "ch4": 36.7,
+    "ch5": 15
+   },
+   "firstAcorn": {
+    "p50": 2.07,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 29.6,
+    "p50": 84.15,
+    "p90": 132.35,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 73.55,
+      "p50": 73.55,
+      "p90": 73.82
+     },
+     "hitsPerEntered": {
+      "tower": 0.467,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0.467,
+     "jumps": 0,
+     "acorns": 166.8,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 40,
+     "dur": {
+      "p10": 69.17,
+      "p50": 69.72,
+      "p90": 69.72
+     },
+     "hitsPerEntered": {
+      "tower": 0.367,
+      "blocks": 1.517,
+      "ball": 0
+     },
+     "hitsTotal": 1.884,
+     "jumps": 5.325,
+     "acorns": 83.25,
+     "deaths": 33.3
+    },
+    {
+     "ch": 3,
+     "entered": 40,
+     "completed": 22,
+     "dur": {
+      "p10": 65.47,
+      "p50": 65.73,
+      "p90": 66.02
+     },
+     "hitsPerEntered": {
+      "tower": 0.225,
+      "blocks": 1.15,
+      "ball": 0.175
+     },
+     "hitsTotal": 1.55,
+     "jumps": 4.409,
+     "acorns": 71.773,
+     "deaths": 45
+    },
+    {
+     "ch": 4,
+     "entered": 22,
+     "completed": 9,
+     "dur": {
+      "p10": 62.27,
+      "p50": 62.42,
+      "p90": 62.68
+     },
+     "hitsPerEntered": {
+      "tower": 0.318,
+      "blocks": 1.682,
+      "ball": 0.045
+     },
+     "hitsTotal": 2.045,
+     "jumps": 5.111,
+     "acorns": 77.444,
+     "deaths": 59.1
+    },
+    {
+     "ch": 5,
+     "entered": 9,
+     "completed": 9,
+     "dur": {
+      "p10": 73.27,
+      "p50": 73.53,
+      "p90": 73.55
+     },
+     "hitsPerEntered": {
+      "tower": 0.556,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0.556,
+     "jumps": 0,
+     "acorns": 194,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 9,
+     "completed": 5,
+     "dur": {
+      "p10": 69.53,
+      "p50": 69.8,
+      "p90": 69.96
+     },
+     "hitsPerEntered": {
+      "tower": 0.444,
+      "blocks": 1.111,
+      "ball": 0
+     },
+     "hitsTotal": 1.555,
+     "jumps": 5.2,
+     "acorns": 85.2,
+     "deaths": 44.4
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 76,
+    "blocks": 190,
+    "ball": 11
+   }
+  },
+  "hard/bot0.5": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 57,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 9437,
+    "p50": 10480,
+    "p90": 11174
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 98.3,
+    "ch5": 96.7
+   },
+   "firstAcorn": {
+    "p50": 2.07,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 94.65,
+    "p50": 163.92,
+    "p90": 308.75,
+    "never": 15
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 73.55,
+      "p50": 73.55,
+      "p90": 73.55
+     },
+     "hitsPerEntered": {
+      "tower": 0.033,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0.033,
+     "jumps": 0,
+     "acorns": 159.617,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 69.17,
+      "p50": 69.17,
+      "p90": 69.43
+     },
+     "hitsPerEntered": {
+      "tower": 0.05,
+      "blocks": 0.233,
+      "ball": 0
+     },
+     "hitsTotal": 0.283,
+     "jumps": 10.033,
+     "acorns": 110.617,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 60,
+     "completed": 59,
+     "dur": {
+      "p10": 65.47,
+      "p50": 65.47,
+      "p90": 65.75
+     },
+     "hitsPerEntered": {
+      "tower": 0.067,
+      "blocks": 0.5,
+      "ball": 0.033
+     },
+     "hitsTotal": 0.6,
+     "jumps": 8.746,
+     "acorns": 96.78,
+     "deaths": 1.7
+    },
+    {
+     "ch": 4,
+     "entered": 59,
+     "completed": 58,
+     "dur": {
+      "p10": 62.13,
+      "p50": 62.15,
+      "p90": 62.42
+     },
+     "hitsPerEntered": {
+      "tower": 0.017,
+      "blocks": 0.305,
+      "ball": 0.034
+     },
+     "hitsTotal": 0.356,
+     "jumps": 10.259,
+     "acorns": 97,
+     "deaths": 1.7
+    },
+    {
+     "ch": 5,
+     "entered": 58,
+     "completed": 58,
+     "dur": {
+      "p10": 73.27,
+      "p50": 73.27,
+      "p90": 73.28
+     },
+     "hitsPerEntered": {
+      "tower": 0.086,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0.086,
+     "jumps": 0.121,
+     "acorns": 168.052,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 58,
+     "completed": 57,
+     "dur": {
+      "p10": 69.53,
+      "p50": 69.53,
+      "p90": 69.8
+     },
+     "hitsPerEntered": {
+      "tower": 0.069,
+      "blocks": 0.155,
+      "ball": 0
+     },
+     "hitsTotal": 0.224,
+     "jumps": 10.439,
+     "acorns": 110.596,
+     "deaths": 1.7
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 23,
+    "blocks": 85,
+    "ball": 5
+   }
+  },
+  "hard/bot0.7": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 60,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 9458,
+    "p50": 10125,
+    "p90": 10793
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 100,
+    "ch5": 100
+   },
+   "firstAcorn": {
+    "p50": 2.07,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 149.09,
+    "p50": 269.03,
+    "p90": 401.54,
+    "never": 71.7
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 73.55,
+      "p50": 73.55,
+      "p90": 73.55
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 0,
+     "acorns": 149.883,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 69.17,
+      "p50": 69.17,
+      "p90": 69.17
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0.033,
+      "ball": 0
+     },
+     "hitsTotal": 0.033,
+     "jumps": 9.9,
+     "acorns": 104.717,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 65.47,
+      "p50": 65.47,
+      "p90": 65.47
+     },
+     "hitsPerEntered": {
+      "tower": 0.017,
+      "blocks": 0.067,
+      "ball": 0
+     },
+     "hitsTotal": 0.084,
+     "jumps": 8.6,
+     "acorns": 89.65,
+     "deaths": 0
+    },
+    {
+     "ch": 4,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 62.15,
+      "p50": 62.15,
+      "p90": 62.15
+     },
+     "hitsPerEntered": {
+      "tower": 0.033,
+      "blocks": 0.05,
+      "ball": 0
+     },
+     "hitsTotal": 0.083,
+     "jumps": 10.067,
+     "acorns": 91.033,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 73.27,
+      "p50": 73.27,
+      "p90": 73.27
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 0.1,
+     "acorns": 157.183,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 69.53,
+      "p50": 69.53,
+      "p90": 69.53
+     },
+     "hitsPerEntered": {
+      "tower": 0.017,
+      "blocks": 0.067,
+      "ball": 0
+     },
+     "hitsTotal": 0.084,
+     "jumps": 10.283,
+     "acorns": 105.333,
+     "deaths": 0
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 4,
+    "blocks": 16,
+    "ball": 0
+   }
+  },
+  "hard/bot0.9": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 60,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 9057,
+    "p50": 9660,
+    "p90": 10245
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 100,
+    "ch5": 100
+   },
+   "firstAcorn": {
+    "p50": 2.08,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 173.67,
+    "p50": 173.67,
+    "p90": 173.67,
+    "never": 98.3
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 73.55,
+      "p50": 73.55,
+      "p90": 73.55
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 0,
+     "acorns": 141.583,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 69.17,
+      "p50": 69.17,
+      "p90": 69.17
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 9.867,
+     "acorns": 97.633,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 65.47,
+      "p50": 65.47,
+      "p90": 65.47
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0.017
+     },
+     "hitsTotal": 0.017,
+     "jumps": 8.15,
+     "acorns": 82.467,
+     "deaths": 0
+    },
+    {
+     "ch": 4,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 62.15,
+      "p50": 62.15,
+      "p90": 62.15
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 9.883,
+     "acorns": 86.2,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 73.27,
+      "p50": 73.27,
+      "p90": 73.27
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 0.117,
+     "acorns": 150.033,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 69.53,
+      "p50": 69.53,
+      "p90": 69.53
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 10.1,
+     "acorns": 98.817,
+     "deaths": 0
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 0,
+    "blocks": 0,
+    "ball": 1
+   }
+  },
+  "hard/bot1": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 60,
+   "survival": {
+    "p10": 480.02,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 8797,
+    "p50": 9355,
+    "p90": 9945
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 100,
+    "ch5": 100
+   },
+   "firstAcorn": {
+    "p50": 2.07,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": null,
+    "p50": null,
+    "p90": null,
+    "never": 100
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 73.55,
+      "p50": 73.55,
+      "p90": 73.55
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 0,
+     "acorns": 137.033,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 69.17,
+      "p50": 69.17,
+      "p90": 69.17
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 9.317,
+     "acorns": 93.55,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 65.47,
+      "p50": 65.47,
+      "p90": 65.47
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 7.733,
+     "acorns": 78.467,
+     "deaths": 0
+    },
+    {
+     "ch": 4,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 62.15,
+      "p50": 62.15,
+      "p90": 62.15
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 9.533,
+     "acorns": 82.95,
+     "deaths": 0
+    },
+    {
+     "ch": 5,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 73.27,
+      "p50": 73.27,
+      "p90": 73.27
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 0.1,
+     "acorns": 145.817,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 69.53,
+      "p50": 69.53,
+      "p90": 69.53
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 9.667,
+     "acorns": 94.517,
+     "deaths": 0
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 0,
+    "blocks": 0,
+    "ball": 0
+   }
+  },
+  "hard/kid": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 104.73,
+    "p50": 140.76,
+    "p90": 168.64
+   },
+   "score": {
+    "p10": 1118,
+    "p50": 1550,
+    "p90": 2082
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 43.3,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstAcorn": {
+    "p50": 2.6,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 24.91,
+    "p50": 65.15,
+    "p90": 101.69,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 73.55,
+      "p50": 73.82,
+      "p90": 73.85
+     },
+     "hitsPerEntered": {
+      "tower": 0.65,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0.65,
+     "jumps": 8.6,
+     "acorns": 84.083,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 26,
+     "dur": {
+      "p10": 69.17,
+      "p50": 69.72,
+      "p90": 69.72
+     },
+     "hitsPerEntered": {
+      "tower": 1.483,
+      "blocks": 0.8,
+      "ball": 0
+     },
+     "hitsTotal": 2.283,
+     "jumps": 14.962,
+     "acorns": 54.885,
+     "deaths": 56.7
+    },
+    {
+     "ch": 3,
+     "entered": 26,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": 0.846,
+      "blocks": 1.038,
+      "ball": 0.462
+     },
+     "hitsTotal": 2.346,
+     "jumps": null,
+     "acorns": null,
+     "deaths": 100
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    }
+   ],
+   "maxAir": 0.85,
+   "maxApex": 1.13,
+   "hitsByCause": {
+    "tower": 150,
+    "blocks": 75,
+    "ball": 12
+   }
+  },
+  "hard/kid5": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 45.7,
+    "p50": 97.74,
+    "p90": 138.19
+   },
+   "score": {
+    "p10": 469,
+    "p50": 1100,
+    "p90": 1650
+   },
+   "reached": {
+    "ch2": 73.3,
+    "ch3": 8.3,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstAcorn": {
+    "p50": 2.42,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 7.51,
+    "p50": 33.23,
+    "p90": 80.78,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 44,
+     "dur": {
+      "p10": 73.55,
+      "p50": 73.82,
+      "p90": 74.08
+     },
+     "hitsPerEntered": {
+      "tower": 1.567,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 1.567,
+     "jumps": 10.409,
+     "acorns": 86.909,
+     "deaths": 26.7
+    },
+    {
+     "ch": 2,
+     "entered": 44,
+     "completed": 5,
+     "dur": {
+      "p10": 69.55,
+      "p50": 69.72,
+      "p90": 69.72
+     },
+     "hitsPerEntered": {
+      "tower": 1.295,
+      "blocks": 1.341,
+      "ball": 0
+     },
+     "hitsTotal": 2.636,
+     "jumps": 17.6,
+     "acorns": 53,
+     "deaths": 88.6
+    },
+    {
+     "ch": 3,
+     "entered": 5,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": 1,
+      "blocks": 0.6,
+      "ball": 0.4
+     },
+     "hitsTotal": 2,
+     "jumps": null,
+     "acorns": null,
+     "deaths": 100
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    }
+   ],
+   "maxAir": 0.85,
+   "maxApex": 1.13,
+   "hitsByCause": {
+    "tower": 156,
+    "blocks": 62,
+    "ball": 2
+   }
+  },
+  "hard/adult": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 48,
+   "survival": {
+    "p10": 355.21,
+    "p50": 480.02,
+    "p90": 480.02
+   },
+   "score": {
+    "p10": 4555,
+    "p50": 6595,
+    "p90": 7091
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 100,
+    "ch4": 96.7,
+    "ch5": 90
+   },
+   "firstAcorn": {
+    "p50": 2.52,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 17.84,
+    "p50": 130.55,
+    "p90": 215.5,
+    "never": 1.7
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 73.55,
+      "p50": 73.55,
+      "p90": 73.82
+     },
+     "hitsPerEntered": {
+      "tower": 0.35,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0.35,
+     "jumps": 0,
+     "acorns": 96.433,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 69.17,
+      "p50": 69.17,
+      "p90": 69.43
+     },
+     "hitsPerEntered": {
+      "tower": 0.217,
+      "blocks": 0.2,
+      "ball": 0
+     },
+     "hitsTotal": 0.417,
+     "jumps": 9.283,
+     "acorns": 63,
+     "deaths": 0
+    },
+    {
+     "ch": 3,
+     "entered": 60,
+     "completed": 58,
+     "dur": {
+      "p10": 65.47,
+      "p50": 65.75,
+      "p90": 66.02
+     },
+     "hitsPerEntered": {
+      "tower": 0.217,
+      "blocks": 0.317,
+      "ball": 0.383
+     },
+     "hitsTotal": 0.917,
+     "jumps": 11.034,
+     "acorns": 53.897,
+     "deaths": 3.3
+    },
+    {
+     "ch": 4,
+     "entered": 58,
+     "completed": 54,
+     "dur": {
+      "p10": 62.13,
+      "p50": 62.15,
+      "p90": 62.42
+     },
+     "hitsPerEntered": {
+      "tower": 0.224,
+      "blocks": 0.345,
+      "ball": 0.034
+     },
+     "hitsTotal": 0.603,
+     "jumps": 10.463,
+     "acorns": 58.241,
+     "deaths": 6.9
+    },
+    {
+     "ch": 5,
+     "entered": 54,
+     "completed": 54,
+     "dur": {
+      "p10": 73.27,
+      "p50": 73.27,
+      "p90": 73.55
+     },
+     "hitsPerEntered": {
+      "tower": 0.296,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0.296,
+     "jumps": 0.111,
+     "acorns": 99.389,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 54,
+     "completed": 52,
+     "dur": {
+      "p10": 69.53,
+      "p50": 69.53,
+      "p90": 70
+     },
+     "hitsPerEntered": {
+      "tower": 0.37,
+      "blocks": 0.204,
+      "ball": 0
+     },
+     "hitsTotal": 0.574,
+     "jumps": 9.154,
+     "acorns": 62.25,
+     "deaths": 3.7
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 106,
+    "blocks": 77,
+    "ball": 52
+   }
+  },
+  "hard/jumpSpam": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 16.87,
+    "p50": 25.69,
+    "p90": 46.51
+   },
+   "score": {
+    "p10": 49,
+    "p50": 130,
+    "p90": 280
+   },
+   "reached": {
+    "ch2": 0,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstAcorn": {
+    "p50": 3.58,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 2.05,
+    "p50": 8.5,
+    "p90": 18.05,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": 3,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 3,
+     "jumps": null,
+     "acorns": null,
+     "deaths": 100
+    },
+    {
+     "ch": 2,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    }
+   ],
+   "maxAir": 0.66,
+   "maxApex": 1.01,
+   "hitsByCause": {
+    "tower": 180,
+    "blocks": 0,
+    "ball": 0
+   }
+  },
+  "hard/zigzag": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 10.45,
+    "p50": 13.89,
+    "p90": 22.55
+   },
+   "score": {
+    "p10": 80,
+    "p50": 160,
+    "p90": 332
+   },
+   "reached": {
+    "ch2": 0,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstAcorn": {
+    "p50": 2.42,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 2.05,
+    "p50": 4.23,
+    "p90": 9.57,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": 3,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 3,
+     "jumps": null,
+     "acorns": null,
+     "deaths": 100
+    },
+    {
+     "ch": 2,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    }
+   ],
+   "maxAir": 0,
+   "maxApex": 0,
+   "hitsByCause": {
+    "tower": 180,
+    "blocks": 0,
+    "ball": 0
+   }
+  },
+  "hard/zigJump": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 10.45,
+    "p50": 13.89,
+    "p90": 22.55
+   },
+   "score": {
+    "p10": 30,
+    "p50": 85,
+    "p90": 151
+   },
+   "reached": {
+    "ch2": 0,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstAcorn": {
+    "p50": 2.67,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 2.05,
+    "p50": 4.23,
+    "p90": 9.57,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": 3,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 3,
+     "jumps": null,
+     "acorns": null,
+     "deaths": 100
+    },
+    {
+     "ch": 2,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    }
+   ],
+   "maxAir": 0.66,
+   "maxApex": 1.01,
+   "hitsByCause": {
+    "tower": 180,
+    "blocks": 0,
+    "ball": 0
+   }
+  },
+  "hard/idleMid": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 16.87,
+    "p50": 25.69,
+    "p90": 46.51
+   },
+   "score": {
+    "p10": 89,
+    "p50": 225,
+    "p90": 553
+   },
+   "reached": {
+    "ch2": 0,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstAcorn": {
+    "p50": 3.23,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 2.05,
+    "p50": 8.5,
+    "p90": 18.05,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": 3,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 3,
+     "jumps": null,
+     "acorns": null,
+     "deaths": 100
+    },
+    {
+     "ch": 2,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    }
+   ],
+   "maxAir": 0,
+   "maxApex": 0,
+   "hitsByCause": {
+    "tower": 180,
+    "blocks": 0,
+    "ball": 0
+   }
+  },
+  "hard/idleSide": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 11.36,
+    "p50": 22.35,
+    "p90": 38.92
+   },
+   "score": {
+    "p10": 40,
+    "p50": 165,
+    "p90": 401
+   },
+   "reached": {
+    "ch2": 0,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstAcorn": {
+    "p50": 3.72,
+    "never": 5
+   },
+   "firstHit": {
+    "p10": 2.05,
+    "p50": 4.68,
+    "p90": 17.12,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": 3,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 3,
+     "jumps": null,
+     "acorns": null,
+     "deaths": 100
+    },
+    {
+     "ch": 2,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    }
+   ],
+   "maxAir": 0,
+   "maxApex": 0,
+   "hitsByCause": {
+    "tower": 180,
+    "blocks": 0,
+    "ball": 0
+   }
+  },
+  "hard/botAlwaysJump": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 5,
+   "survival": {
+    "p10": 126.64,
+    "p50": 186.7,
+    "p90": 454.87
+   },
+   "score": {
+    "p10": 1246,
+    "p50": 1940,
+    "p90": 5492
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 75,
+    "ch4": 35,
+    "ch5": 21.7
+   },
+   "firstAcorn": {
+    "p50": 2.08,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 82.73,
+    "p50": 105.38,
+    "p90": 145.34,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 73.55,
+      "p50": 73.55,
+      "p90": 73.55
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 112,
+     "acorns": 71.883,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 45,
+     "dur": {
+      "p10": 69.17,
+      "p50": 69.43,
+      "p90": 69.72
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 1.7,
+      "ball": 0
+     },
+     "hitsTotal": 1.7,
+     "jumps": 82.422,
+     "acorns": 54.978,
+     "deaths": 25
+    },
+    {
+     "ch": 3,
+     "entered": 45,
+     "completed": 21,
+     "dur": {
+      "p10": 65.47,
+      "p50": 65.75,
+      "p90": 66.02
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 1.822,
+      "ball": 0.044
+     },
+     "hitsTotal": 1.866,
+     "jumps": 115.571,
+     "acorns": 53,
+     "deaths": 53.3
+    },
+    {
+     "ch": 4,
+     "entered": 21,
+     "completed": 13,
+     "dur": {
+      "p10": 62.13,
+      "p50": 62.4,
+      "p90": 62.62
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 1.238,
+      "ball": 0
+     },
+     "hitsTotal": 1.238,
+     "jumps": 59.462,
+     "acorns": 44.462,
+     "deaths": 38.1
+    },
+    {
+     "ch": 5,
+     "entered": 13,
+     "completed": 13,
+     "dur": {
+      "p10": 73.27,
+      "p50": 73.27,
+      "p90": 73.27
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0.077,
+      "ball": 0
+     },
+     "hitsTotal": 0.077,
+     "jumps": 110.769,
+     "acorns": 82.462,
+     "deaths": 0
+    },
+    {
+     "ch": 6,
+     "entered": 13,
+     "completed": 9,
+     "dur": {
+      "p10": 69.53,
+      "p50": 70.07,
+      "p90": 70.07
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 1.923,
+      "ball": 0
+     },
+     "hitsTotal": 1.923,
+     "jumps": 82.667,
+     "acorns": 55.111,
+     "deaths": 30.8
+    }
+   ],
+   "maxAir": 1.06,
+   "maxApex": 1.25,
+   "hitsByCause": {
+    "tower": 0,
+    "blocks": 250,
+    "ball": 2
+   }
+  },
+  "hard/botNeverJump": {
+   "n": 60,
+   "maxT": 480,
+   "survived": 0,
+   "survival": {
+    "p10": 87.05,
+    "p50": 96.44,
+    "p90": 117.31
+   },
+   "score": {
+    "p10": 1399,
+    "p50": 1815,
+    "p90": 2183
+   },
+   "reached": {
+    "ch2": 100,
+    "ch3": 0,
+    "ch4": 0,
+    "ch5": 0
+   },
+   "firstAcorn": {
+    "p50": 2.08,
+    "never": 0
+   },
+   "firstHit": {
+    "p10": 74.81,
+    "p50": 80.59,
+    "p90": 92.97,
+    "never": 0
+   },
+   "chapters": [
+    {
+     "ch": 1,
+     "entered": 60,
+     "completed": 60,
+     "dur": {
+      "p10": 73.55,
+      "p50": 73.55,
+      "p90": 73.55
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 0,
+      "ball": 0
+     },
+     "hitsTotal": 0,
+     "jumps": 0,
+     "acorns": 141.583,
+     "deaths": 0
+    },
+    {
+     "ch": 2,
+     "entered": 60,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": 0,
+      "blocks": 3,
+      "ball": 0
+     },
+     "hitsTotal": 3,
+     "jumps": null,
+     "acorns": null,
+     "deaths": 100
+    },
+    {
+     "ch": 3,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 4,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 5,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    },
+    {
+     "ch": 6,
+     "entered": 0,
+     "completed": 0,
+     "dur": {
+      "p10": null,
+      "p50": null,
+      "p90": null
+     },
+     "hitsPerEntered": {
+      "tower": null,
+      "blocks": null,
+      "ball": null
+     },
+     "hitsTotal": 0,
+     "jumps": null,
+     "acorns": null,
+     "deaths": null
+    }
+   ],
+   "maxAir": 0,
+   "maxApex": 0,
+   "hitsByCause": {
+    "tower": 0,
+    "blocks": 180,
+    "ball": 0
+   }
+  }
+ },
+ "skill1Hits": [
+  {
+   "diff": "easy",
+   "seed": 11,
+   "t": 266.35,
+   "kind": "blocks",
+   "level": 4,
+   "lane": 0,
+   "heroX": 0,
+   "heroY": 0.3,
+   "objX": -0.02,
+   "objY": 0.02,
+   "dist": 1651.7,
+   "gk": 1
+  },
+  {
+   "diff": "easy",
+   "seed": 49,
+   "t": 265.93,
+   "kind": "blocks",
+   "level": 4,
+   "lane": -1,
+   "heroX": -1,
+   "heroY": 0.35,
+   "objX": -1,
+   "objY": 0,
+   "dist": 1649.2,
+   "gk": 1
+  },
+  {
+   "diff": "normal",
+   "seed": 27,
+   "t": 201.78,
+   "kind": "ball",
+   "level": 2,
+   "lane": 0,
+   "heroX": 0.37,
+   "heroY": 0.39,
+   "objX": -0.11,
+   "objY": 0.16,
+   "dist": 1547.1,
+   "gk": 1.25
+  }
+ ],
+ "kidEasy": [
+  {
+   "seed": 1,
+   "reached": 3,
+   "survival": 157.58,
+   "hits": [
+    "19.58s tower ch1",
+    "56.57s tower ch1",
+    "68.6s tower ch1",
+    "77.07s tower ch2",
+    "99.03s tower ch2",
+    "150.8s ball ch3",
+    "157.58s ball ch3"
+   ]
+  },
+  {
+   "seed": 2,
+   "reached": 7,
+   "survival": 443.22,
+   "hits": [
+    "79.88s tower ch2",
+    "103.83s tower ch2",
+    "160.98s blocks ch3",
+    "163.9s ball ch3",
+    "204.8s blocks ch4",
+    "245.18s ball ch4",
+    "339.8s blocks ch6",
+    "427.7s ball ch7",
+    "440.43s ball ch7",
+    "443.22s ball ch7"
+   ]
+  },
+  {
+   "seed": 3,
+   "reached": 4,
+   "survival": 259.37,
+   "hits": [
+    "155.12s ball ch3",
+    "162.65s blocks ch3",
+    "168.22s ball ch3",
+    "202.85s ball ch3",
+    "240.2s tower ch4",
+    "259.37s ball ch4"
+   ]
+  },
+  {
+   "seed": 4,
+   "reached": 7,
+   "survival": 459.38,
+   "hits": [
+    "128.2s blocks ch2",
+    "165.78s blocks ch3",
+    "198.18s tower ch3",
+    "256.35s blocks ch4",
+    "385.17s tower ch6",
+    "390.68s blocks ch6",
+    "439.17s ball ch7",
+    "453.82s tower ch7",
+    "456.7s ball ch7",
+    "459.38s blocks ch7"
+   ]
+  },
+  {
+   "seed": 5,
+   "reached": 3,
+   "survival": 194.37,
+   "hits": [
+    "142.88s blocks ch3",
+    "161.18s blocks ch3",
+    "166.72s blocks ch3",
+    "175.23s tower ch3",
+    "194.37s blocks ch3"
+   ]
+  },
+  {
+   "seed": 6,
+   "reached": 5,
+   "survival": 318.65,
+   "hits": [
+    "41s tower ch1",
+    "100.43s tower ch2",
+    "111.88s tower ch2",
+    "153s ball ch3",
+    "155.48s ball ch3",
+    "225.63s blocks ch4",
+    "250.7s ball ch4",
+    "301.28s tower ch5",
+    "318.65s tower ch5"
+   ]
+  },
+  {
+   "seed": 7,
+   "reached": 3,
+   "survival": 187.58,
+   "hits": [
+    "77.47s blocks ch2",
+    "83.65s tower ch2",
+    "113.9s tower ch2",
+    "116.68s blocks ch2",
+    "149.57s ball ch3",
+    "187.58s blocks ch3"
+   ]
+  },
+  {
+   "seed": 8,
+   "reached": 8,
+   "survival": 480.02,
+   "hits": [
+    "22.27s tower ch1",
+    "76.77s blocks ch2",
+    "141.43s ball ch3",
+    "157.38s blocks ch3",
+    "220.45s ball ch4",
+    "459.45s ball ch7",
+    "469.23s ball ch7",
+    "471.9s ball ch8",
+    "477.38s blocks ch8"
+   ]
+  },
+  {
+   "seed": 9,
+   "reached": 3,
+   "survival": 190.97,
+   "hits": [
+    "89.53s tower ch2",
+    "150.57s ball ch3",
+    "158.68s blocks ch3",
+    "165.93s ball ch3",
+    "178.05s tower ch3",
+    "190.97s ball ch3"
+   ]
+  },
+  {
+   "seed": 10,
+   "reached": 6,
+   "survival": 405.88,
+   "hits": [
+    "100.12s blocks ch2",
+    "128.43s blocks ch2",
+    "154.02s ball ch3",
+    "170.58s ball ch3",
+    "203s ball ch3",
+    "304.1s tower ch5",
+    "342.77s tower ch6",
+    "358.98s tower ch6",
+    "405.88s tower ch6"
+   ]
+  },
+  {
+   "seed": 11,
+   "reached": 3,
+   "survival": 159.85,
+   "hits": [
+    "97.35s blocks ch2",
+    "110.68s blocks ch2",
+    "128.67s blocks ch2",
+    "142.4s blocks ch3",
+    "156.78s ball ch3",
+    "159.85s blocks ch3"
+   ]
+  },
+  {
+   "seed": 12,
+   "reached": 3,
+   "survival": 164.85,
+   "hits": [
+    "76.5s blocks ch2",
+    "105.53s tower ch2",
+    "130.15s blocks ch2",
+    "142.28s blocks ch3",
+    "148.13s ball ch3",
+    "164.85s ball ch3"
+   ]
+  },
+  {
+   "seed": 13,
+   "reached": 7,
+   "survival": 444.4,
+   "hits": [
+    "144.78s blocks ch3",
+    "166.73s blocks ch3",
+    "179.52s tower ch3",
+    "209.72s ball ch4",
+    "219.28s tower ch4",
+    "356.57s tower ch6",
+    "394.12s blocks ch6",
+    "441.58s ball ch7",
+    "444.4s ball ch7"
+   ]
+  },
+  {
+   "seed": 14,
+   "reached": 7,
+   "survival": 431.47,
+   "hits": [
+    "113.48s tower ch2",
+    "125.07s tower ch2",
+    "130.38s blocks ch2",
+    "153.82s blocks ch3",
+    "188.38s ball ch3",
+    "233.22s ball ch4",
+    "266.93s tower ch5",
+    "384.88s blocks ch6",
+    "409.32s ball ch7",
+    "431.47s tower ch7"
+   ]
+  },
+  {
+   "seed": 15,
+   "reached": 4,
+   "survival": 229.42,
+   "hits": [
+    "42.58s tower ch1",
+    "53.23s tower ch1",
+    "159.22s blocks ch3",
+    "182.55s ball ch3",
+    "194.7s blocks ch3",
+    "203.15s blocks ch3",
+    "226.4s ball ch4",
+    "229.42s ball ch4"
+   ]
+  },
+  {
+   "seed": 16,
+   "reached": 4,
+   "survival": 224.65,
+   "hits": [
+    "34.18s tower ch1",
+    "125.7s tower ch2",
+    "128.93s blocks ch2",
+    "137.85s blocks ch2",
+    "146.12s blocks ch3",
+    "191.07s blocks ch3",
+    "214.35s ball ch4",
+    "224.65s blocks ch4"
+   ]
+  },
+  {
+   "seed": 17,
+   "reached": 6,
+   "survival": 390.23,
+   "hits": [
+    "143.53s blocks ch3",
+    "148.98s tower ch3",
+    "176.1s blocks ch3",
+    "228.27s tower ch4",
+    "236.6s ball ch4",
+    "286.33s tower ch5",
+    "345.63s blocks ch6",
+    "390.23s tower ch6"
+   ]
+  },
+  {
+   "seed": 18,
+   "reached": 8,
+   "survival": 480.02,
+   "hits": [
+    "158.55s blocks ch3",
+    "215.92s ball ch4",
+    "252.48s tower ch4",
+    "340.87s blocks ch6",
+    "352.1s blocks ch6"
+   ]
+  },
+  {
+   "seed": 19,
+   "reached": 3,
+   "survival": 156.12,
+   "hits": [
+    "86s tower ch2",
+    "97.92s tower ch2",
+    "127.9s tower ch2",
+    "130.65s tower ch2",
+    "143.03s ball ch3",
+    "156.12s blocks ch3"
+   ]
+  },
+  {
+   "seed": 20,
+   "reached": 3,
+   "survival": 201.8,
+   "hits": [
+    "89.13s blocks ch2",
+    "110.53s blocks ch2",
+    "133.53s blocks ch2",
+    "171.05s blocks ch3",
+    "173.87s ball ch3",
+    "201.8s tower ch3"
+   ]
+  },
+  {
+   "seed": 21,
+   "reached": 3,
+   "survival": 159.73,
+   "hits": [
+    "16.32s tower ch1",
+    "93.52s tower ch2",
+    "109.85s tower ch2",
+    "119.77s tower ch2",
+    "142.93s ball ch3",
+    "154.57s ball ch3",
+    "159.73s blocks ch3"
+   ]
+  },
+  {
+   "seed": 22,
+   "reached": 3,
+   "survival": 172.73,
+   "hits": [
+    "22.02s tower ch1",
+    "82.3s tower ch2",
+    "146.45s blocks ch3",
+    "149.02s blocks ch3",
+    "164.52s ball ch3",
+    "167.33s ball ch3",
+    "172.73s ball ch3"
+   ]
+  },
+  {
+   "seed": 23,
+   "reached": 3,
+   "survival": 166.15,
+   "hits": [
+    "93.48s blocks ch2",
+    "125.12s blocks ch2",
+    "146.63s tower ch3",
+    "149.92s blocks ch3",
+    "160.55s ball ch3",
+    "166.15s ball ch3"
+   ]
+  },
+  {
+   "seed": 24,
+   "reached": 3,
+   "survival": 199.15,
+   "hits": [
+    "113.53s tower ch2",
+    "152.4s blocks ch3",
+    "167.87s ball ch3",
+    "186.02s blocks ch3",
+    "191.1s ball ch3",
+    "199.15s ball ch3"
+   ]
+  },
+  {
+   "seed": 25,
+   "reached": 3,
+   "survival": 196.2,
+   "hits": [
+    "159.2s blocks ch3",
+    "175s ball ch3",
+    "178s ball ch3",
+    "188.08s blocks ch3",
+    "196.2s ball ch3"
+   ]
+  },
+  {
+   "seed": 26,
+   "reached": 7,
+   "survival": 421.35,
+   "hits": [
+    "92.47s blocks ch2",
+    "138.83s tower ch2",
+    "147.28s tower ch3",
+    "173.45s blocks ch3",
+    "229.82s tower ch4",
+    "240.45s ball ch4",
+    "368s blocks ch6",
+    "370.95s blocks ch6",
+    "418.4s blocks ch7",
+    "421.35s blocks ch7"
+   ]
+  },
+  {
+   "seed": 27,
+   "reached": 4,
+   "survival": 212.57,
+   "hits": [
+    "19.55s tower ch1",
+    "122.3s tower ch2",
+    "141.33s tower ch3",
+    "147.25s blocks ch3",
+    "155.95s blocks ch3",
+    "174.22s blocks ch3",
+    "209.85s tower ch4",
+    "212.57s tower ch4"
+   ]
+  },
+  {
+   "seed": 28,
+   "reached": 4,
+   "survival": 213.57,
+   "hits": [
+    "94.67s tower ch2",
+    "148.2s tower ch3",
+    "169.22s ball ch3",
+    "183.32s tower ch3",
+    "188.38s blocks ch3",
+    "206.82s ball ch4",
+    "213.57s blocks ch4"
+   ]
+  },
+  {
+   "seed": 29,
+   "reached": 3,
+   "survival": 196.17,
+   "hits": [
+    "80.63s tower ch2",
+    "127.22s tower ch2",
+    "153.27s ball ch3",
+    "158.77s blocks ch3",
+    "161.72s ball ch3",
+    "196.17s tower ch3"
+   ]
+  },
+  {
+   "seed": 30,
+   "reached": 4,
+   "survival": 247.05,
+   "hits": [
+    "10.37s tower ch1",
+    "142.58s ball ch3",
+    "150.18s blocks ch3",
+    "178.45s ball ch3",
+    "190.83s blocks ch3",
+    "208.98s ball ch4",
+    "247.05s blocks ch4"
+   ]
+  },
+  {
+   "seed": 31,
+   "reached": 3,
+   "survival": 186.42,
+   "hits": [
+    "63.93s tower ch1",
+    "108.97s tower ch2",
+    "161.98s blocks ch3",
+    "169.78s blocks ch3",
+    "180.73s blocks ch3",
+    "183.78s blocks ch3",
+    "186.42s tower ch3"
+   ]
+  },
+  {
+   "seed": 32,
+   "reached": 7,
+   "survival": 448.8,
+   "hits": [
+    "142.43s blocks ch3",
+    "163.8s ball ch3",
+    "166.28s ball ch3",
+    "191.95s ball ch3",
+    "283.55s tower ch5",
+    "418.47s blocks ch7",
+    "421.32s ball ch7",
+    "442.8s tower ch7",
+    "448.8s blocks ch7"
+   ]
+  },
+  {
+   "seed": 33,
+   "reached": 7,
+   "survival": 470.58,
+   "hits": [
+    "160.15s blocks ch3",
+    "196s ball ch3",
+    "208.95s tower ch4",
+    "231.92s ball ch4",
+    "394.2s tower ch6",
+    "423.92s blocks ch7",
+    "429.3s ball ch7",
+    "455.33s blocks ch7",
+    "470.58s blocks ch7"
+   ]
+  },
+  {
+   "seed": 34,
+   "reached": 4,
+   "survival": 233.25,
+   "hits": [
+    "160.03s ball ch3",
+    "165.3s blocks ch3",
+    "173.75s blocks ch3",
+    "211.53s ball ch4",
+    "227.68s blocks ch4",
+    "233.25s tower ch4"
+   ]
+  },
+  {
+   "seed": 35,
+   "reached": 6,
+   "survival": 358,
+   "hits": [
+    "113.28s blocks ch2",
+    "165.32s blocks ch3",
+    "186.25s ball ch3",
+    "209.78s blocks ch4",
+    "305.98s tower ch5",
+    "338.13s tower ch6",
+    "341.08s tower ch6",
+    "344.38s blocks ch6",
+    "358s blocks ch6"
+   ]
+  },
+  {
+   "seed": 36,
+   "reached": 3,
+   "survival": 202.23,
+   "hits": [
+    "109.03s blocks ch2",
+    "146.17s ball ch3",
+    "172.27s tower ch3",
+    "187s ball ch3",
+    "199.6s blocks ch3",
+    "202.23s ball ch3"
+   ]
+  },
+  {
+   "seed": 37,
+   "reached": 3,
+   "survival": 204.62,
+   "hits": [
+    "76.43s tower ch2",
+    "119.38s tower ch2",
+    "183.63s blocks ch3",
+    "186.57s ball ch3",
+    "191.67s ball ch3",
+    "204.62s blocks ch3"
+   ]
+  },
+  {
+   "seed": 38,
+   "reached": 7,
+   "survival": 443.25,
+   "hits": [
+    "66.5s tower ch1",
+    "151.62s ball ch3",
+    "209.25s blocks ch4",
+    "257.65s tower ch4",
+    "426.88s ball ch7",
+    "432.72s blocks ch7",
+    "435.67s blocks ch7",
+    "440.72s blocks ch7",
+    "443.25s ball ch7"
+   ]
+  },
+  {
+   "seed": 39,
+   "reached": 4,
+   "survival": 253.53,
+   "hits": [
+    "16.6s tower ch1",
+    "110.08s blocks ch2",
+    "144.18s ball ch3",
+    "149.55s ball ch3",
+    "178.82s ball ch3",
+    "206.3s ball ch4",
+    "228.02s blocks ch4",
+    "253.53s tower ch4"
+   ]
+  },
+  {
+   "seed": 40,
+   "reached": 4,
+   "survival": 238.58,
+   "hits": [
+    "96.67s blocks ch2",
+    "145.93s blocks ch3",
+    "161.48s blocks ch3",
+    "180.93s ball ch3",
+    "183.82s ball ch3",
+    "223.28s blocks ch4",
+    "238.58s ball ch4"
+   ]
+  },
+  {
+   "seed": 41,
+   "reached": 6,
+   "survival": 386.28,
+   "hits": [
+    "156.23s blocks ch3",
+    "185.4s ball ch3",
+    "210.7s ball ch4",
+    "220.95s blocks ch4",
+    "279.08s tower ch5",
+    "309.03s tower ch5",
+    "348.47s tower ch6",
+    "386.28s blocks ch6"
+   ]
+  },
+  {
+   "seed": 42,
+   "reached": 3,
+   "survival": 180.95,
+   "hits": [
+    "88.4s blocks ch2",
+    "164.48s blocks ch3",
+    "167.33s ball ch3",
+    "169.85s ball ch3",
+    "172.88s ball ch3",
+    "180.95s blocks ch3"
+   ]
+  },
+  {
+   "seed": 43,
+   "reached": 3,
+   "survival": 176.9,
+   "hits": [
+    "89.18s blocks ch2",
+    "144.6s blocks ch3",
+    "150.5s ball ch3",
+    "153.57s ball ch3",
+    "162.08s ball ch3",
+    "176.9s blocks ch3"
+   ]
+  },
+  {
+   "seed": 44,
+   "reached": 7,
+   "survival": 459.05,
+   "hits": [
+    "68.2s tower ch1",
+    "128.17s tower ch2",
+    "136.32s tower ch2",
+    "179.13s tower ch3",
+    "186.58s blocks ch3",
+    "257.82s tower ch4",
+    "263.57s tower ch4",
+    "398.87s blocks ch6",
+    "423.4s blocks ch7",
+    "456.17s ball ch7",
+    "459.05s ball ch7"
+   ]
+  },
+  {
+   "seed": 45,
+   "reached": 3,
+   "survival": 189.38,
+   "hits": [
+    "106.53s tower ch2",
+    "136.98s blocks ch2",
+    "145.5s blocks ch3",
+    "158.12s ball ch3",
+    "175.95s ball ch3",
+    "189.38s ball ch3"
+   ]
+  },
+  {
+   "seed": 46,
+   "reached": 3,
+   "survival": 203.58,
+   "hits": [
+    "11.8s tower ch1",
+    "56.12s tower ch1",
+    "173.82s blocks ch3",
+    "176.68s ball ch3",
+    "188.32s blocks ch3",
+    "191.22s blocks ch3",
+    "203.58s ball ch3"
+   ]
+  },
+  {
+   "seed": 47,
+   "reached": 4,
+   "survival": 263.37,
+   "hits": [
+    "89.67s tower ch2",
+    "149.98s ball ch3",
+    "152.92s ball ch3",
+    "204.82s blocks ch4",
+    "235.6s blocks ch4",
+    "245.47s blocks ch4",
+    "263.37s ball ch4"
+   ]
+  },
+  {
+   "seed": 48,
+   "reached": 4,
+   "survival": 257.33,
+   "hits": [
+    "37.88s tower ch1",
+    "109.52s blocks ch2",
+    "185.55s ball ch3",
+    "192.85s ball ch3",
+    "201.07s ball ch3",
+    "224.28s blocks ch4",
+    "229.37s ball ch4",
+    "257.33s blocks ch4"
+   ]
+  },
+  {
+   "seed": 49,
+   "reached": 7,
+   "survival": 429.3,
+   "hits": [
+    "60.43s tower ch1",
+    "127.83s blocks ch2",
+    "154.68s blocks ch3",
+    "174.3s blocks ch3",
+    "187.03s blocks ch3",
+    "212.95s blocks ch4",
+    "217.83s blocks ch4",
+    "378.47s tower ch6",
+    "405.33s tower ch6",
+    "419.12s blocks ch7",
+    "429.3s ball ch7"
+   ]
+  },
+  {
+   "seed": 50,
+   "reached": 8,
+   "survival": 480.02,
+   "hits": [
+    "188.1s blocks ch3",
+    "190.87s ball ch3",
+    "209.82s ball ch4",
+    "243.77s blocks ch4",
+    "358.48s tower ch6",
+    "381.88s blocks ch6",
+    "412.1s ball ch7",
+    "463.6s ball ch7",
+    "471.27s blocks ch8"
+   ]
+  },
+  {
+   "seed": 51,
+   "reached": 3,
+   "survival": 198.5,
+   "hits": [
+    "126.28s blocks ch2",
+    "144.98s tower ch3",
+    "158.08s ball ch3",
+    "187.02s ball ch3",
+    "189.78s blocks ch3",
+    "198.5s ball ch3"
+   ]
+  },
+  {
+   "seed": 52,
+   "reached": 7,
+   "survival": 452.75,
+   "hits": [
+    "98.18s tower ch2",
+    "155.85s ball ch3",
+    "193.75s blocks ch3",
+    "196.37s tower ch3",
+    "376.65s tower ch6",
+    "416.9s blocks ch7",
+    "434.08s ball ch7",
+    "444.57s ball ch7",
+    "449.87s blocks ch7",
+    "452.75s ball ch7"
+   ]
+  },
+  {
+   "seed": 53,
+   "reached": 3,
+   "survival": 199.63,
+   "hits": [
+    "74.62s blocks ch2",
+    "89.28s blocks ch2",
+    "151.7s ball ch3",
+    "160.1s blocks ch3",
+    "196.75s ball ch3",
+    "199.63s blocks ch3"
+   ]
+  },
+  {
+   "seed": 54,
+   "reached": 8,
+   "survival": 480.02,
+   "hits": [
+    "41.97s tower ch1",
+    "93.38s tower ch2",
+    "185.98s ball ch3",
+    "209.23s blocks ch4",
+    "395.63s tower ch6",
+    "403.65s tower ch6",
+    "424.72s ball ch7",
+    "450.6s blocks ch7"
+   ]
+  },
+  {
+   "seed": 55,
+   "reached": 3,
+   "survival": 194.03,
+   "hits": [
+    "149.33s blocks ch3",
+    "154.38s blocks ch3",
+    "162.47s ball ch3",
+    "178.75s blocks ch3",
+    "194.03s blocks ch3"
+   ]
+  },
+  {
+   "seed": 56,
+   "reached": 3,
+   "survival": 196.55,
+   "hits": [
+    "116.85s blocks ch2",
+    "169.42s blocks ch3",
+    "175.88s blocks ch3",
+    "186.58s ball ch3",
+    "189.13s ball ch3",
+    "196.55s blocks ch3"
+   ]
+  },
+  {
+   "seed": 57,
+   "reached": 7,
+   "survival": 441.17,
+   "hits": [
+    "74.32s tower ch2",
+    "88.58s tower ch2",
+    "131.63s blocks ch2",
+    "161.95s ball ch3",
+    "200.37s blocks ch3",
+    "375.5s blocks ch6",
+    "378.1s blocks ch6",
+    "417.22s ball ch7",
+    "431.08s ball ch7",
+    "441.17s ball ch7"
+   ]
+  },
+  {
+   "seed": 58,
+   "reached": 3,
+   "survival": 166.9,
+   "hits": [
+    "15.67s tower ch1",
+    "96.53s blocks ch2",
+    "131.02s blocks ch2",
+    "150.23s blocks ch3",
+    "155.97s blocks ch3",
+    "164.13s blocks ch3",
+    "166.9s ball ch3"
+   ]
+  },
+  {
+   "seed": 59,
+   "reached": 7,
+   "survival": 436.6,
+   "hits": [
+    "86.92s blocks ch2",
+    "167.73s tower ch3",
+    "175.82s blocks ch3",
+    "196.32s blocks ch3",
+    "232.58s tower ch4",
+    "339.32s tower ch6",
+    "379.95s tower ch6",
+    "411.52s ball ch7",
+    "428.85s blocks ch7",
+    "436.6s blocks ch7"
+   ]
+  },
+  {
+   "seed": 60,
+   "reached": 3,
+   "survival": 163.97,
+   "hits": [
+    "92.55s tower ch2",
+    "117.72s blocks ch2",
+    "127.85s blocks ch2",
+    "148.9s blocks ch3",
+    "154.37s ball ch3",
+    "163.97s ball ch3"
+   ]
+  }
+ ]
+}

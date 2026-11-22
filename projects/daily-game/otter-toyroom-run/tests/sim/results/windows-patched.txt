@@ -1,0 +1,18 @@
+
+easy: zone | blocks window (ms) | ball window ms over 13 roll speeds (min / median / max) | ball passable without a jump
+  meadow 1.0   | 375  | 150 / 175 / 180   [160 180 180 190 180 165 150 175 185 185 190 190 180] | 0/13 | in-lane impossible 0/13
+  pillows 0.7  | 565  | 285 / 295 / 325   [285 335 330 335 350 325 310 295 290 285 310 340 335] | 0/13 | in-lane impossible 0/13
+  crayon 1.25  | 310  | 130 / 140 / 155   [150 135 170 160 155 140 135 160 155 160 160 150 130] | 0/13 | in-lane impossible 0/13
+  stars 0.5    | 775  | 375 / 385 / 435   [385 445 530 530 535 510 455 435 400 390 385 385 375] | 0/13 | in-lane impossible 0/13
+
+normal: zone | blocks window (ms) | ball window ms over 13 roll speeds (min / median / max) | ball passable without a jump
+  meadow 1.0   | 410  | 210 / 215 / 225   [225 230 210 225 240 230 225 230 215 210 215 230 240] | 0/13 | in-lane impossible 0/13
+  pillows 0.7  | 600  | 305 / 315 / 350   [305 350 380 395 375 350 335 315 310 305 325 365 395] | 0/13 | in-lane impossible 0/13
+  crayon 1.25  | 340  | 175 / 175 / 185   [190 185 190 175 185 185 175 200 175 175 175 190 175] | 0/13 | in-lane impossible 0/13
+  stars 0.5    | 790  | 400 / 405 / 450   [405 475 565 580 595 545 490 450 435 415 405 400 400] | 0/13 | in-lane impossible 0/13
+
+hard: zone | blocks window (ms) | ball window ms over 13 roll speeds (min / median / max) | ball passable without a jump
+  meadow 1.0   | 440  | 220 / 235 / 240   [240 240 220 240 260 260 240 250 225 225 235 240 260] | 0/13 | in-lane impossible 0/13
+  pillows 0.7  | 615  | 330 / 340 / 375   [335 375 440 445 410 375 355 340 330 335 360 390 445] | 0/13 | in-lane impossible 0/13
+  crayon 1.25  | 360  | 180 / 190 / 200   [200 200 200 185 190 205 205 210 195 180 180 215 200] | 0/13 | in-lane impossible 0/13
+  stars 0.5    | 810  | 415 / 420 / 475   [415 480 585 620 605 550 500 475 450 425 415 415 420] | 0/13 | in-lane impossible 0/13

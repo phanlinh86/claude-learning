@@ -1,0 +1,4261 @@
+[
+ {
+  "seed": 1,
+  "t": 98.13,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.95,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6
+ },
+ {
+  "seed": 1,
+  "t": 101.18,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.83,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.02
+ },
+ {
+  "seed": 1,
+  "t": 126.65,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.97,
+  "need": 0,
+  "cause": "jumped too early (falling onto it)",
+  "heroY": 0.16,
+  "vy": -5.07,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.19
+ },
+ {
+  "seed": 1,
+  "t": 134.88,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.27,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.25
+ },
+ {
+  "seed": 2,
+  "t": 95.43,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 2.08,
+  "need": 1,
+  "cause": "other / slow reaction",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.93
+ },
+ {
+  "seed": 2,
+  "t": 105.22,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 2.03,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.99
+ },
+ {
+  "seed": 3,
+  "t": 88.22,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 2.03,
+  "need": 1,
+  "cause": "other / slow reaction",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.88
+ },
+ {
+  "seed": 3,
+  "t": 127.82,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.3,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.2
+ },
+ {
+  "seed": 4,
+  "t": 128.2,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0.018471692417515444,
+  "seenBefore": 2.02,
+  "need": 0,
+  "cause": "jumped too late (still rising)",
+  "heroY": 0.26,
+  "vy": 4.81,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.15
+ },
+ {
+  "seed": 5,
+  "t": 120.47,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.28,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.16
+ },
+ {
+  "seed": 6,
+  "t": 82.5,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0.02370226928847842,
+  "seenBefore": 1.98,
+  "need": 0,
+  "cause": "landed too early (jumped too soon)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.84
+ },
+ {
+  "seed": 7,
+  "t": 88.32,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.97,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.94
+ },
+ {
+  "seed": 7,
+  "t": 107.17,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.32,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.06
+ },
+ {
+  "seed": 8,
+  "t": 134.3,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.28,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.25
+ },
+ {
+  "seed": 10,
+  "t": 97.35,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 2,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6
+ },
+ {
+  "seed": 10,
+  "t": 100.87,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 2.02,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.02
+ },
+ {
+  "seed": 10,
+  "t": 104.85,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": -0.019670156514039264,
+  "seenBefore": 2,
+  "need": 0,
+  "cause": "landed too early (jumped too soon)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.99
+ },
+ {
+  "seed": 10,
+  "t": 130.4,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 2.08,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.16
+ },
+ {
+  "seed": 11,
+  "t": 121.2,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": -0.024059817662928255,
+  "seenBefore": 0.35,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.1
+ },
+ {
+  "seed": 12,
+  "t": 110.65,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.3,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.09
+ },
+ {
+  "seed": 14,
+  "t": 78.37,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 2.02,
+  "need": 0,
+  "cause": "landed too early (jumped too soon)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.87
+ },
+ {
+  "seed": 17,
+  "t": 96.23,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": -0.02130091805243865,
+  "seenBefore": 0.22,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.93
+ },
+ {
+  "seed": 18,
+  "t": 106.25,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": -0.02481689573847689,
+  "seenBefore": 0.23,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6
+ },
+ {
+  "seed": 19,
+  "t": 89.27,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.25,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 1.04,
+  "vy": 1.48,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.94
+ },
+ {
+  "seed": 19,
+  "t": 120.12,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.27,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.09
+ },
+ {
+  "seed": 19,
+  "t": 131.02,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 2.1,
+  "need": 2,
+  "cause": "wrong-way swipe",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.17
+ },
+ {
+  "seed": 20,
+  "t": 77.33,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -0.9775279098070071,
+  "seenBefore": 1.98,
+  "need": 0,
+  "cause": "jumped too early (falling onto it)",
+  "heroY": 0.32,
+  "vy": -4.63,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.8
+ },
+ {
+  "seed": 20,
+  "t": 105.87,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.18,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.05
+ },
+ {
+  "seed": 21,
+  "t": 85.8,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.28,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.92
+ },
+ {
+  "seed": 21,
+  "t": 88.48,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.3,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.93
+ },
+ {
+  "seed": 23,
+  "t": 116.62,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -0.9772325791278854,
+  "seenBefore": 0.27,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.07
+ },
+ {
+  "seed": 24,
+  "t": 115.87,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 2.02,
+  "need": 0,
+  "cause": "landed too early (jumped too soon)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.13
+ },
+ {
+  "seed": 25,
+  "t": 92.23,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.22,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.96
+ },
+ {
+  "seed": 25,
+  "t": 111.62,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.93,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.09
+ },
+ {
+  "seed": 26,
+  "t": 134.45,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.28,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.25
+ },
+ {
+  "seed": 27,
+  "t": 110.88,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0.026620593809057028,
+  "seenBefore": 2.03,
+  "need": 0,
+  "cause": "landed too early (jumped too soon)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.03
+ },
+ {
+  "seed": 28,
+  "t": 91.93,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0.02275084753676007,
+  "seenBefore": 0.25,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.9
+ },
+ {
+  "seed": 28,
+  "t": 108.93,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.08
+ },
+ {
+  "seed": 29,
+  "t": 112.13,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.28,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.1
+ },
+ {
+  "seed": 29,
+  "t": 131.48,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.97,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.23
+ },
+ {
+  "seed": 30,
+  "t": 80.67,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   1
+  ],
+  "free": [
+   0
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.98,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.88
+ },
+ {
+  "seed": 30,
+  "t": 134.68,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0.022058236913677927,
+  "seenBefore": 0.37,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.19
+ },
+ {
+  "seed": 32,
+  "t": 92.37,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.18,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.9
+ },
+ {
+  "seed": 33,
+  "t": 88.88,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0.018860546839423478,
+  "seenBefore": 0.37,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.88
+ },
+ {
+  "seed": 36,
+  "t": 109.03,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": -0.02324926248053089,
+  "seenBefore": 2.18,
+  "need": 0,
+  "cause": "jumped too early (falling onto it)",
+  "heroY": 0.32,
+  "vy": -4.63,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.02
+ },
+ {
+  "seed": 37,
+  "t": 77.12,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1.020130293968056,
+  "seenBefore": 2.1,
+  "need": 0,
+  "cause": "jumped too early (falling onto it)",
+  "heroY": 0.32,
+  "vy": -4.63,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.81
+ },
+ {
+  "seed": 38,
+  "t": 75.78,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 2.1,
+  "need": 0,
+  "cause": "jumped too early (falling onto it)",
+  "heroY": 0.16,
+  "vy": -5.07,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.85
+ },
+ {
+  "seed": 38,
+  "t": 86.97,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.28,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.92
+ },
+ {
+  "seed": 41,
+  "t": 124.02,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.33,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.18
+ },
+ {
+  "seed": 41,
+  "t": 130.33,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   1
+  ],
+  "free": [
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 0.22,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.23
+ },
+ {
+  "seed": 41,
+  "t": 133.12,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.3,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.18
+ },
+ {
+  "seed": 42,
+  "t": 95.88,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.37,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.99
+ },
+ {
+  "seed": 42,
+  "t": 115.57,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.22,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.12
+ },
+ {
+  "seed": 42,
+  "t": 124.27,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.18
+ },
+ {
+  "seed": 44,
+  "t": 75,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.32,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.85
+ },
+ {
+  "seed": 44,
+  "t": 83.08,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.23,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.9
+ },
+ {
+  "seed": 44,
+  "t": 94.28,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.27,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.91
+ },
+ {
+  "seed": 44,
+  "t": 97.45,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.93,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.93
+ },
+ {
+  "seed": 44,
+  "t": 100.6,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0.02501897411265721,
+  "seenBefore": 1.92,
+  "need": 0,
+  "cause": "jumped too late (still rising)",
+  "heroY": 0.26,
+  "vy": 4.81,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.96
+ },
+ {
+  "seed": 45,
+  "t": 112.55,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0.024470568293472755,
+  "seenBefore": 0.37,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.04
+ },
+ {
+  "seed": 46,
+  "t": 111.02,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0.019429023934838675,
+  "seenBefore": 0.33,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.03
+ },
+ {
+  "seed": 47,
+  "t": 99,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.98,
+  "need": 0,
+  "cause": "jumped too late (still rising)",
+  "heroY": 0.18,
+  "vy": 5.03,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.01
+ },
+ {
+  "seed": 47,
+  "t": 110.62,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.27,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.09
+ },
+ {
+  "seed": 48,
+  "t": 88.63,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": -0.02331308732624166,
+  "seenBefore": 0.28,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0.16,
+  "vy": -5.07,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.88
+ },
+ {
+  "seed": 49,
+  "t": 120.3,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0.02270201630735149,
+  "seenBefore": 2.12,
+  "need": 0,
+  "cause": "jumped too early (falling onto it)",
+  "heroY": 0.32,
+  "vy": -4.63,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.09
+ },
+ {
+  "seed": 49,
+  "t": 122.78,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.27,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.09
+ },
+ {
+  "seed": 54,
+  "t": 113.32,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.97,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.05
+ },
+ {
+  "seed": 55,
+  "t": 100.62,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 2.1,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.96
+ },
+ {
+  "seed": 56,
+  "t": 116.67,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -0.9734345721038213,
+  "seenBefore": 1.98,
+  "need": 0,
+  "cause": "landed too early (jumped too soon)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.07
+ },
+ {
+  "seed": 56,
+  "t": 130.67,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.23
+ },
+ {
+  "seed": 57,
+  "t": 77.38,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.2,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.81
+ },
+ {
+  "seed": 57,
+  "t": 88.87,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 2.02,
+  "need": 1,
+  "cause": "other / slow reaction",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.88
+ },
+ {
+  "seed": 57,
+  "t": 110.52,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 2,
+  "need": 0,
+  "cause": "landed too early (jumped too soon)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.08
+ },
+ {
+  "seed": 57,
+  "t": 132.05,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0.024452752282765385,
+  "seenBefore": 2.08,
+  "need": 0,
+  "cause": "jumped too early (falling onto it)",
+  "heroY": 0.24,
+  "vy": -4.85,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.17
+ },
+ {
+  "seed": 58,
+  "t": 89.22,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.2,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.94
+ },
+ {
+  "seed": 59,
+  "t": 97.03,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0.01919213611826611,
+  "seenBefore": 0.35,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.93
+ },
+ {
+  "seed": 59,
+  "t": 126.72,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0.021661715209872152,
+  "seenBefore": 0.37,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.14
+ },
+ {
+  "seed": 59,
+  "t": 135.03,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": -0.0235087914163402,
+  "seenBefore": 2.07,
+  "need": 0,
+  "cause": "jumped too late (still rising)",
+  "heroY": 0.26,
+  "vy": 4.81,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.19
+ },
+ {
+  "seed": 60,
+  "t": 81.98,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.3,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0.82,
+  "vy": -2.85,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.83
+ },
+ {
+  "seed": 61,
+  "t": 79.1,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 2.08,
+  "need": 1,
+  "cause": "other / slow reaction",
+  "heroY": 0.87,
+  "vy": 2.59,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.82
+ },
+ {
+  "seed": 62,
+  "t": 112.18,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.33,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.04
+ },
+ {
+  "seed": 62,
+  "t": 125.87,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.35,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.19
+ },
+ {
+  "seed": 64,
+  "t": 111.42,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": -0.52,
+  "objX": 0.019846032335190104,
+  "seenBefore": 0.23,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.04
+ },
+ {
+  "seed": 65,
+  "t": 86.33,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0.022620572317003585,
+  "seenBefore": 2.15,
+  "need": 0,
+  "cause": "jumped too early (falling onto it)",
+  "heroY": 0.32,
+  "vy": -4.63,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.86
+ },
+ {
+  "seed": 65,
+  "t": 96.05,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.2,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.99
+ },
+ {
+  "seed": 67,
+  "t": 98.58,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.23,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.01
+ },
+ {
+  "seed": 68,
+  "t": 103.37,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 2.02,
+  "need": 0,
+  "cause": "jumped too late (still rising)",
+  "heroY": 0.26,
+  "vy": 4.81,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.04
+ },
+ {
+  "seed": 72,
+  "t": 82.13,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.95,
+  "need": 2,
+  "cause": "wrong-way swipe",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.84
+ },
+ {
+  "seed": 73,
+  "t": 80.52,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1.0232947601766016,
+  "seenBefore": 0.33,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.83
+ },
+ {
+  "seed": 73,
+  "t": 95.88,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 0.37,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.99
+ },
+ {
+  "seed": 78,
+  "t": 75.93,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.8
+ },
+ {
+  "seed": 79,
+  "t": 86.83,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.98,
+  "need": 0,
+  "cause": "landed too early (jumped too soon)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.93
+ },
+ {
+  "seed": 79,
+  "t": 123.88,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.2,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.12
+ },
+ {
+  "seed": 80,
+  "t": 139.37,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.23
+ },
+ {
+  "seed": 81,
+  "t": 136.03,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1.0198934166346831,
+  "seenBefore": 2.02,
+  "need": 0,
+  "cause": "landed too early (jumped too soon)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.2
+ },
+ {
+  "seed": 82,
+  "t": 105.97,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.28,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.06
+ },
+ {
+  "seed": 82,
+  "t": 130.57,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 2.1,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.17
+ },
+ {
+  "seed": 83,
+  "t": 122.63,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": -0.02025820979848504,
+  "seenBefore": 0.28,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.11
+ },
+ {
+  "seed": 84,
+  "t": 116.17,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": -0.02580351786881996,
+  "seenBefore": 1.98,
+  "need": 0,
+  "cause": "jumped too late (still rising)",
+  "heroY": 0.26,
+  "vy": 4.81,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.07
+ },
+ {
+  "seed": 84,
+  "t": 139.67,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.23
+ },
+ {
+  "seed": 85,
+  "t": 84.22,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": -0.022058152770623566,
+  "seenBefore": 2.03,
+  "need": 0,
+  "cause": "landed too early (jumped too soon)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.85
+ },
+ {
+  "seed": 88,
+  "t": 82.03,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.18,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0.91,
+  "vy": -2.41,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.89
+ },
+ {
+  "seed": 88,
+  "t": 88.6,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.94
+ },
+ {
+  "seed": 89,
+  "t": 118.67,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.98,
+  "need": 0,
+  "cause": "wrong-way swipe",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.14
+ },
+ {
+  "seed": 89,
+  "t": 132.45,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0.018820584538625555,
+  "seenBefore": 2.03,
+  "need": 0,
+  "cause": "jumped too late (still rising)",
+  "heroY": 0.26,
+  "vy": 4.81,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.18
+ },
+ {
+  "seed": 92,
+  "t": 133.1,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.28,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 1.06,
+  "vy": -1.3,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.18
+ },
+ {
+  "seed": 93,
+  "t": 124.08,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 2.07,
+  "need": 0,
+  "cause": "landed too early (jumped too soon)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.18
+ },
+ {
+  "seed": 94,
+  "t": 98.02,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 2,
+  "need": 0,
+  "cause": "jumped too late (still rising)",
+  "heroY": 0.26,
+  "vy": 4.81,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6
+ },
+ {
+  "seed": 94,
+  "t": 129.45,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 2.1,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.16
+ },
+ {
+  "seed": 95,
+  "t": 100.57,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": -0.019239305581043788,
+  "seenBefore": 0.22,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.96
+ },
+ {
+  "seed": 96,
+  "t": 102.93,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 0.9813640519817515,
+  "seenBefore": 2.08,
+  "need": 0,
+  "cause": "landed too early (jumped too soon)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.98
+ },
+ {
+  "seed": 96,
+  "t": 119.2,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 2.02,
+  "need": 0,
+  "cause": "jumped too early (falling onto it)",
+  "heroY": 0.16,
+  "vy": -5.07,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.15
+ },
+ {
+  "seed": 97,
+  "t": 114.8,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.28,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.12
+ },
+ {
+  "seed": 98,
+  "t": 80.08,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 2.07,
+  "need": 1,
+  "cause": "other / slow reaction",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.82
+ },
+ {
+  "seed": 98,
+  "t": 90.72,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 2.03,
+  "need": 1,
+  "cause": "other / slow reaction",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.95
+ },
+ {
+  "seed": 99,
+  "t": 79.2,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": -0.023187626277795064,
+  "seenBefore": 0.35,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.82
+ },
+ {
+  "seed": 99,
+  "t": 87.82,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.3,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.93
+ },
+ {
+  "seed": 99,
+  "t": 108.48,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.97,
+  "need": 0,
+  "cause": "no jump (late / never)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.07
+ },
+ {
+  "seed": 99,
+  "t": 116.95,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.27,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.13
+ },
+ {
+  "seed": 101,
+  "t": 138.12,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.35,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 1.1,
+  "vy": -0.87,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.22
+ },
+ {
+  "seed": 102,
+  "t": 133.57,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.95,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.25
+ },
+ {
+  "seed": 103,
+  "t": 82.08,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.23,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.84
+ },
+ {
+  "seed": 104,
+  "t": 120.37,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 0,
+  "heroX": 0.07,
+  "objX": 0,
+  "seenBefore": 0.35,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.09
+ },
+ {
+  "seed": 106,
+  "t": 99.5,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.98,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.95
+ },
+ {
+  "seed": 106,
+  "t": 103.02,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 2,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.03
+ },
+ {
+  "seed": 107,
+  "t": 90.1,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -0.63,
+  "objX": -1,
+  "seenBefore": 0.25,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.95
+ },
+ {
+  "seed": 107,
+  "t": 133.28,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   1
+  ],
+  "free": [
+   0
+  ],
+  "laneAtSeen": 1,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 0.32,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.25
+ },
+ {
+  "seed": 110,
+  "t": 109.58,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 2.07,
+  "need": 1,
+  "cause": "other / slow reaction",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.08
+ },
+ {
+  "seed": 111,
+  "t": 106.67,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.32,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6
+ },
+ {
+  "seed": 111,
+  "t": 130.55,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.28,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0.78,
+  "vy": 3.03,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.23
+ },
+ {
+  "seed": 112,
+  "t": 80.8,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 1.95,
+  "need": 0,
+  "cause": "landed too early (jumped too soon)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.88
+ },
+ {
+  "seed": 112,
+  "t": 96.1,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 2.08,
+  "need": 0,
+  "cause": "jumped too late (still rising)",
+  "heroY": 0.34,
+  "vy": 4.59,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.99
+ },
+ {
+  "seed": 113,
+  "t": 91.45,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 2.1,
+  "need": 2,
+  "cause": "wrong-way swipe",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.9
+ },
+ {
+  "seed": 113,
+  "t": 94.42,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1.0191820562665816,
+  "seenBefore": 1.9,
+  "need": 0,
+  "cause": "jumped too late (still rising)",
+  "heroY": 0.26,
+  "vy": 4.81,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.91
+ },
+ {
+  "seed": 115,
+  "t": 109.6,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 2.08,
+  "need": 0,
+  "cause": "jumped too late (still rising)",
+  "heroY": 0.26,
+  "vy": 4.81,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.08
+ },
+ {
+  "seed": 116,
+  "t": 82.65,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.3,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.84
+ },
+ {
+  "seed": 117,
+  "t": 99.78,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.27,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.01
+ },
+ {
+  "seed": 117,
+  "t": 138,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": -0.025463714877841995,
+  "seenBefore": 2.03,
+  "need": 0,
+  "cause": "jumped too early (falling onto it)",
+  "heroY": 0.32,
+  "vy": -4.63,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.22
+ },
+ {
+  "seed": 118,
+  "t": 133.22,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.25
+ },
+ {
+  "seed": 119,
+  "t": 96.65,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.3,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.99
+ },
+ {
+  "seed": 121,
+  "t": 91.72,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.2,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0.55,
+  "vy": 3.92,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.9
+ },
+ {
+  "seed": 121,
+  "t": 95.27,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 1.92,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.98
+ },
+ {
+  "seed": 121,
+  "t": 134.8,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0.024657175154813256,
+  "seenBefore": 1.98,
+  "need": 0,
+  "cause": "no jump (late / never)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.2
+ },
+ {
+  "seed": 122,
+  "t": 90.92,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": -0.02062359912126946,
+  "seenBefore": 2.07,
+  "need": 0,
+  "cause": "jumped too early (falling onto it)",
+  "heroY": 0.32,
+  "vy": -4.63,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.9
+ },
+ {
+  "seed": 124,
+  "t": 127.1,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 2.08,
+  "need": 0,
+  "cause": "jumped too late (still rising)",
+  "heroY": 0.09,
+  "vy": 5.25,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.2
+ },
+ {
+  "seed": 125,
+  "t": 95.35,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 2,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.93
+ },
+ {
+  "seed": 125,
+  "t": 130.03,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.22,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.22
+ },
+ {
+  "seed": 125,
+  "t": 133.13,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.32,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.24
+ },
+ {
+  "seed": 125,
+  "t": 138.42,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 2,
+  "need": 1,
+  "cause": "other / slow reaction",
+  "heroY": 0.26,
+  "vy": 4.81,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.28
+ },
+ {
+  "seed": 126,
+  "t": 85.42,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": -0.02041976889440169,
+  "seenBefore": 2.07,
+  "need": 0,
+  "cause": "jumped too late (still rising)",
+  "heroY": 0.18,
+  "vy": 5.03,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.86
+ },
+ {
+  "seed": 130,
+  "t": 76.87,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -0.9807609096728265,
+  "seenBefore": 2.02,
+  "need": 0,
+  "cause": "jumped too early (falling onto it)",
+  "heroY": 0.32,
+  "vy": -4.63,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.8
+ },
+ {
+  "seed": 130,
+  "t": 90.53,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0.02092654695385136,
+  "seenBefore": 0.35,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.89
+ },
+ {
+  "seed": 130,
+  "t": 122.97,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 1.95,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "heroY": 1.09,
+  "vy": 1.04,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.17
+ },
+ {
+  "seed": 131,
+  "t": 106.85,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 2,
+  "need": 2,
+  "cause": "free lane 2 away (two swipes)",
+  "heroY": 1.11,
+  "vy": 0.62,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6
+ },
+ {
+  "seed": 132,
+  "t": 110.33,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.32,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.03
+ },
+ {
+  "seed": 132,
+  "t": 128.37,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": -0.018895456796744838,
+  "seenBefore": 2.02,
+  "need": 0,
+  "cause": "no jump (late / never)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.15
+ },
+ {
+  "seed": 133,
+  "t": 85.87,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.18,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.92
+ },
+ {
+  "seed": 133,
+  "t": 121.25,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0.02322037889622152,
+  "seenBefore": 2.07,
+  "need": 0,
+  "cause": "landed too early (jumped too soon)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.1
+ },
+ {
+  "seed": 134,
+  "t": 127.92,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.23,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.21
+ },
+ {
+  "seed": 135,
+  "t": 84.05,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   0
+  ],
+  "free": [
+   -1,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.2,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.91
+ },
+ {
+  "seed": 135,
+  "t": 95.75,
+  "kind": "blocks",
+  "pattern": "acornArc",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 2.07,
+  "need": 0,
+  "cause": "no jump (late / never)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.98
+ },
+ {
+  "seed": 136,
+  "t": 137.85,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": -0.02654290658188984,
+  "seenBefore": 2.18,
+  "need": 0,
+  "cause": "jumped too early (falling onto it)",
+  "heroY": 0.32,
+  "vy": -4.63,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.22
+ },
+ {
+  "seed": 137,
+  "t": 86.12,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 2.1,
+  "need": 0,
+  "cause": "no jump (late / never)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.92
+ },
+ {
+  "seed": 138,
+  "t": 88.43,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.88
+ },
+ {
+  "seed": 139,
+  "t": 130.33,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.22,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.22
+ },
+ {
+  "seed": 140,
+  "t": 94.78,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 2.1,
+  "need": 2,
+  "cause": "wrong-way swipe",
+  "heroY": 0.53,
+  "vy": -3.96,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.92
+ },
+ {
+  "seed": 140,
+  "t": 133.02,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -0.9739329335760946,
+  "seenBefore": 0.35,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.18
+ },
+ {
+  "seed": 141,
+  "t": 76.4,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 2.05,
+  "need": 1,
+  "cause": "other / slow reaction",
+  "heroY": 1.13,
+  "vy": -0.12,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.8
+ },
+ {
+  "seed": 141,
+  "t": 86.08,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": 0,
+  "seenBefore": 0.23,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.92
+ },
+ {
+  "seed": 141,
+  "t": 114.78,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1.022625053957648,
+  "seenBefore": 0.27,
+  "need": 0,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 6.05
+ },
+ {
+  "seed": 142,
+  "t": 123.93,
+  "kind": "tower",
+  "pattern": "tower1",
+  "tall": [
+   -1
+  ],
+  "free": [
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.25,
+  "need": 1,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.12
+ },
+ {
+  "seed": 143,
+  "t": 88.83,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -0.9776165636000224,
+  "seenBefore": 1.98,
+  "need": 0,
+  "cause": "no jump (late / never)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.88
+ },
+ {
+  "seed": 144,
+  "t": 82.85,
+  "kind": "blocks",
+  "pattern": "blocks1",
+  "tall": [],
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 2,
+  "need": 0,
+  "cause": "landed too early (jumped too soon)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.9
+ },
+ {
+  "seed": 146,
+  "t": 115.1,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": -1,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 0.25,
+  "need": 2,
+  "cause": "lapse (noticed < 0.45 s before)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.06
+ },
+ {
+  "seed": 148,
+  "t": 122.4,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   0,
+   1
+  ],
+  "free": [
+   -1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 1,
+  "heroX": 1,
+  "objX": 1,
+  "seenBefore": 2.05,
+  "need": 1,
+  "cause": "wrong-way swipe",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 6.17
+ },
+ {
+  "seed": 149,
+  "t": 90.57,
+  "kind": "tower",
+  "pattern": "tower2",
+  "tall": [
+   -1,
+   0
+  ],
+  "free": [
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": -1,
+  "heroX": -1,
+  "objX": -1,
+  "seenBefore": 2.05,
+  "need": 1,
+  "cause": "other / slow reaction",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0,
+  "gk": 0.7,
+  "speed": 5.89
+ },
+ {
+  "seed": 150,
+  "t": 81.92,
+  "kind": "blocks",
+  "free": [
+   -1,
+   0,
+   1
+  ],
+  "laneAtSeen": 0,
+  "laneNow": 0,
+  "heroX": 0,
+  "objX": -0.02192067250570593,
+  "seenBefore": 2.07,
+  "need": 0,
+  "cause": "landed too early (jumped too soon)",
+  "heroY": 0,
+  "vy": 0,
+  "objY": 0.02,
+  "gk": 0.7,
+  "speed": 5.84
+ }
+]

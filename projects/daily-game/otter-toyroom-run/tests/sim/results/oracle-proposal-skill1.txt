@@ -1,0 +1,3 @@
+easy seed 11 t=266.35 blocks ch5 lane 0 x 0 → avoidable (lead 2.5 s) (41286 nodes)
+easy seed 49 t=265.93 blocks ch5 lane -1 x -1 → avoidable (lead 2.5 s) (35310 nodes)
+normal seed 27 t=201.78 ball ch3 lane 0 x 0.37 → avoidable (lead 2.5 s) (38388 nodes)
