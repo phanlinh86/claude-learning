@@ -99,7 +99,7 @@ Same API as the fork minus the boss: `new OD.World(opts)` → `reset({seed, diff
 - **Events:** `acorn {o, x, y, z, variant, points, combo}`, `jump {gk}`, `land {hard}`, `lane {from, to}`, `bump {o, kind}`, `heartLost`, `heartGain`,
   `combo` (10, 20, …), `levelUp {level, zone, bonus, gk}`, `gravity {gk, from, to}` (fired when the ease starts), `gameOver`, `ballBounce {o}`.
 - **The twist — gravity per biome** (`CONFIG.zones[z].gk` = 1.0 / 0.7 / 1.25 / 0.5):
-  - hero gravity `g = CONFIG.g·gk`; take-off speed `jumpV = CONFIG.jumpV·gk^CONFIG.jumpVexp` (≈ 0.65) so the apex grows gently as gravity
+  - hero gravity `g = CONFIG.g·gk`; take-off speed `jumpV = CONFIG.jumpV·gk^CONFIG.jumpVexp` (0.35 in the build — 0.65 would make the apex shrink as gravity falls) so the apex grows gently as gravity
     falls (apex = jumpV²/2g ∝ gk^(2·0.65−1)) and airtime grows more: aim **normal apex ≈ 1.0 u / 0.65 s; floaty ≈ 1.1 u / 0.85 s; heavy
     ≈ 0.95 u / 0.57 s (still clears foam blocks 0.42 u and balls); moon ≈ 1.25 u / 1.05 s**. The engineer picks the exact exponent and documents it.
   - Gentle "floaty" feel: at the apex add a small hang (reduce g by up to 20 % while |vy| < 1 u/s) only when gk < 1.
@@ -140,4 +140,13 @@ crossfade on biome change.
 
 ## 8. Mobile
 Same platform layer as the fork / newest games: swipe on threshold crossing (≥ 24 css px within 350 ms), taps by thirds, safe areas,
-`#rotate` prompt, kid-proofing, `visibilitychange`, home-screen manifest + icons, `shared/daily-mobile/apply.py` (Volume + Score Card).
+(no `#rotate` prompt: both orientations play well), kid-proofing, `visibilitychange`, home-screen manifest + icons, `shared/daily-mobile/apply.py` (Volume + Score Card).
+
+## 9. Changes after build and QA (2026-11-22)
+- Mechanics: `jumpVexp` 0.35 + a small apex hang when gk < 1; a jump keeps its take-off gravity while gk eases; extra fields
+  hero `airT/apexY/jg/jv/jk`, balls `awake/bounces/wake`, arc acorns `arc/arcS`; `ballBounce` fires on every near floor bounce (`wall` flag).
+- Playtest: biome-1 `tower2` 0 (two-tower rows caused 59 % of kids' biome-1 hits), balls `ballV 2.8, ballKick 1.2, ballRest 0.6`
+  (the old moon first hop of 1.56 u could neither be jumped nor run under), Crayon `gapK 1.2`.
+- Renderer: landscape `laneW0 = min(0.19·VW, 0.36·VH, (footY − ins.top − 62)/2.08)` so the moon apex clears the HUD; bumped towers
+  drawn behind Otto at 30 %; "+10" at 1.25 u beside the head; gravity hint after the banner at `topY + 110`; biome pill under the
+  measured DOM button row in portrait; HUD text 15–16 px; `grav_0` is a diagonal-striped ball.

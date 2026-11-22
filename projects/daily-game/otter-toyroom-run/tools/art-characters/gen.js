@@ -402,7 +402,8 @@ function badge(inner) {
 const grav = [
   // 0 normal: a bouncing ball with a short arc
   P('M9,34 Q16,10 24,22', st('#6b5a8a', 2.2) + ' stroke-dasharray="2.5 3"') + E(24, 38, 8, 2, 'fill="#4a3a6a" opacity="0.25"') +
-  Ci(29, 26, 8, fs_('#e8453c', '#6e1a16', 2.4)) + P('M22,24 Q29,20 36,24', st('#ffffff', 2.6)) + Ci(26, 23, 1.6, 'fill="#ffffff"'),
+  Ci(29, 26, 8, fs_('#3b6fd8', '#1d3a7a', 2.4)) + P('M23.5,20.5 L33.5,31', st('#f6d02e', 3.2)) + P('M26.5,18.6 L35.8,28.3', st('#e8453c', 2.4)) +   // our own diagonal-striped toy ball (no red/white halves)
+  P('M22,23.6 L31.6,33.4', st('#e8453c', 2.4)) + Ci(29, 26, 8, 'fill="none" stroke="#1d3a7a" stroke-width="2.4"') + Ci(25.6, 22.6, 1.5, 'fill="#ffffff"'),
   // 1 floaty: a white feather drifting
   `<g transform="rotate(-35 24 24)">` + P('M24,7 C33,13 33,30 24,40 C15,30 15,13 24,7 Z', fs_('#ffffff', '#6b7a9a', 2.2)) +
   P('M24,10 L24,43', st('#6b7a9a', 1.8)) + P('M24,18 L29,15 M24,24 L30,21 M24,30 L29,27 M24,18 L19,15 M24,24 L18,21 M24,30 L19,27', st('#b8c4dc', 1.4)) + '</g>' +

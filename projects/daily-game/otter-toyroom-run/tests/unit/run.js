@@ -299,22 +299,25 @@ test('ball: rolls (rot = distance / r), bounces under the current g with restitu
   run(w2, 3); assert.ok(t2.awake && t2.x > -1.9);
 });
 
-test('ball: a hit needs real vertical overlap — passes under a high moon bounce, jumpable over a low one', () => {
+test('ball: a hit needs real vertical overlap — never under a held-high ball, every moon phase jumpable', () => {
   // a ball held high above Otto (bottom above heroH) in his lane: no hit
   const w = clean('normal', 1, 3); const o = w.spawn('ball', 0, 0.2, { awake: true, vx: 0 });
   o.awake = true; o.y = C.heroH + 0.1; o.vy = 0; w.g = 0;            // freeze it there for one step
   w._collide(); assert.strictEqual(w.hearts, 3, 'under it');
   o.y = 0.3; w._collide(); assert.strictEqual(w.hearts, 2, 'overlaps');
-  // on the moon some bounce phases let Otto run under a ball rolling through his lane
-  let under = 0, hits = 0;
-  for (let k = 0; k < 24; k++) {
-    const w2 = clean('normal', 1, 3); w2.setLane(0);
-    const b = w2.spawn('ball', 0, 6 + k * 0.17, { vx: 0.001 });
-    b.y = 0; b.vy = C.ballV * C.ballKick;                 // the big first hop after waking
-    run(w2, 1.6);
-    if (w2.hearts === 3) under++; else hits++;
+  // on the moon every bounce phase of a ball rolling through Otto's lane can be jumped (playtest 2026-11-22)
+  let phases = 0, jumpable = 0;
+  for (let k = 0; k < 13; k++) {
+    phases++;
+    for (let lead = 0.1; lead <= 1.4; lead += 0.05) {
+      const w2 = clean('normal', 1, 3); w2.setLane(0);
+      const b = w2.spawn('ball', 0, 6 + k * 0.17, { vx: 0.001 });
+      b.y = 0; b.vy = C.ballV * C.ballKick;
+      runUntil(w2, () => b.z < w2.speed * lead, 3); w2.jump(); run(w2, 2);
+      if (w2.hearts === 3) { jumpable++; break; }
+    }
   }
-  assert.ok(under > 0 && hits > 0, 'moon: sometimes under, sometimes hit (' + under + '/' + hits + ')');
+  assert.strictEqual(jumpable, phases, 'moon: every phase jumpable (' + jumpable + '/' + phases + ')');
   // heavy gravity: the ball stays low → always a hit if you just run, but a jump clears it
   let ran = 0, cleared = 0;
   for (let k = 0; k < 16; k++) {

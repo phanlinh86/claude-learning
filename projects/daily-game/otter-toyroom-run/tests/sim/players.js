@@ -108,7 +108,7 @@ class Perceiver {
       let dir = Math.sign(best - lane), n = Math.abs(best - lane);
       if (n && p.wrongSwipe && this.r.chance(p.wrongSwipe)) { dir = -dir || (this.r.chance(0.5) ? 1 : -1); n = 1; this.stats.wrong++; }
       const delay = this._react();
-      if (dir) for (let k = 0; k < n; k++) { const q = { at: this.t + delay + k * 0.12, fn: () => { if (w.move(dir)) this.stats.moves++; }, move: true }; this.queue.push(q); }
+      if (dir) for (let k = 0; k < n; k++) { const q = { at: this.t + delay + k * 0.12, fn: () => { if (p.missSwipe && this.r.chance(p.missSwipe)) { this.stats.missed = (this.stats.missed || 0) + 1; return; } if (w.move(dir)) this.stats.moves++; }, move: true }; this.queue.push(q); }
       this.intentLane = clamp(lane + dir * n, -1, 1);
     } else if (!threat && !busy) {
       // acorns / drift to the middle when nothing is coming
@@ -120,14 +120,14 @@ class Perceiver {
           if (go && !ds.some(d => d.tall && Math.abs(d.x - sh.x) < 0.8)) {
             const dir = Math.sign(sh.x - lane);
             this.queue.push({ at: this.t + this._react(), fn: () => { if (w.move(dir)) this.stats.moves++; }, move: true });
-            this.intentLane = lane + dir;
+            this.intentLane = lane + dir; this.stats.chases = (this.stats.chases || 0) + 1;
           }
         }
       }
       if (p.middlePull && this.intentLane !== 0 && !ds.some(d => d.tR < 1.5) && this._laneCost(0, ds, this.intentLane) < 50 && this.r.chance(p.middlePull * p.perceiveEvery)) {
         const dir = -Math.sign(this.intentLane);
         this.queue.push({ at: this.t + this._react(), fn: () => { if (w.move(dir)) this.stats.moves++; }, move: true });
-        this.intentLane = 0;
+        this.intentLane = 0; this.stats.pulls = (this.stats.pulls || 0) + 1;
       }
     }
     // keep the belief in sync if the world clamped a move
@@ -142,7 +142,10 @@ class Perceiver {
       // 2·jumpV/g at the current gravity), ± the player's timing error, but never before the reaction delay has
       // passed. Re-checked every frame against the real distance, so a speed change is followed.
       const air = 2 * w.jumpV / w.g;
-      this.jumps.push({ o: d.o, notBefore: this.t + this._react(), lead: (0.5 * air + 0.3 / v) - p.jumpBias - this.r.gauss() * p.jumpSd });
+      let lead = (0.5 * air + 0.3 / v) - p.jumpBias - this.r.gauss() * p.jumpSd;
+      // a young kid "knows" moon jumps are floaty and sometimes goes far too early (lands on / before the blocks)
+      if (p.lowGEarly && w.gk < 0.8 && this.r.chance(p.lowGEarly[0])) { lead += this.r.range(p.lowGEarly[1], p.lowGEarly[2]); this.stats.early = (this.stats.early || 0) + 1; }
+      this.jumps.push({ o: d.o, notBefore: this.t + this._react(), lead });
     }
   }
 }
@@ -151,6 +154,10 @@ const MODELS = {
   // a 5–6-year-old: slow, nearest thing only, sloppy jumps, likes the middle, sometimes swipes the wrong way
   kid: { reaction: [0.6, 0.9], look: 2.2, nearestOnly: true, predictBall: false, lapse: 0.08,
     wrongSwipe: 0.12, jumpBias: 0.08, jumpSd: 0.14, randomJump: 0.12, middlePull: 0.5, middleBias: true, acornChase: 0.35, perceiveEvery: 0.15 },
+  // a 5-year-old (harsher than `kid`): slower, later jumps, 10 % of swipes not recognised (too short / a tap), and in
+  // floaty / moon gravity 30 % of jumps go 0.25–0.55 s too early
+  kid5: { reaction: [0.65, 0.95], look: 2.0, nearestOnly: true, predictBall: false, lapse: 0.08,
+    wrongSwipe: 0.10, missSwipe: 0.10, jumpBias: 0.12, jumpSd: 0.16, lowGEarly: [0.3, 0.25, 0.55], randomJump: 0.15, middlePull: 0.5, middleBias: true, acornChase: 0.35, perceiveEvery: 0.15 },
   // a casual adult: quick-ish, sees 2 s ahead and all lanes, decent timing
   adult: { reaction: [0.3, 0.4], look: 2.0, nearestOnly: false, predictBall: true, lapse: 0.03,
     wrongSwipe: 0.01, jumpBias: 0.02, jumpSd: 0.06, randomJump: 0, middlePull: 0.15, middleBias: false, acornChase: 0.7, perceiveEvery: 0.1 }

@@ -37,9 +37,10 @@
  *   maxSpeed 13 u/s ......... cap for late loops
  *   heroHalfW 0.28 u, heroH 0.7 u, hitZPad 0.25 u … collision box (a high moon ball can pass over Otto)
  *   ballSpeed 1.2–1.8 u/s ... sideways roll (+10 % per biome after 3); ballWake 1.5–3 s (wakes when z < speed·wake)
- *   ballV 3.4 u/s, ballKick 1.6, ballRest 0.78 … bounce: wakes with a big first hop (1.6·ballV), restitution 0.78,
- *                             never below ballV → steady hop ballV²/2g: 0.30 u normal, 0.43 floaty, 0.24 heavy, 0.61 moon;
- *                             first moon hops 1.56 / 0.95 u: Otto can run under them (heroH 0.7)
+ *   ballV 2.8 u/s, ballKick 1.2, ballRest 0.6 … bounce: wakes with a first hop (1.2·ballV), restitution 0.6,
+ *                             never below ballV → steady hop ballV²/2g: 0.21 u normal, 0.30 floaty, 0.17 heavy, 0.41 moon;
+ *                             first moon hop 0.59 u — every bounce phase can be jumped in-lane (playtest 2026-11-22:
+ *                             the old 1.56 u moon hop was too high to jump and too low to run under)
  *   goal {easy 410, normal 530, hard 640} u … ≈ 60–75 s per biome
  *   difficulty.*: hearts, speed (u/s), react (s: row gap ≥ speed·(react + 0.5·airtime) + 2.5 u)
  *   zones[z]: gk, patterns {name: weight}, gapK (multiplies the minimum row gap; biome 1 is roomy)
@@ -61,7 +62,7 @@
     maxSpeed: 13,
     heroHalfW: 0.28, heroH: 0.7, hitZPad: 0.25,
     acornPoints: 10, comboEvery: 10, levelBonus: 100,
-    ballSpeed: [1.2, 1.8], ballWake: [1.5, 3.0], ballV: 3.4, ballKick: 1.6, ballRest: 0.78,
+    ballSpeed: [1.2, 1.8], ballWake: [1.5, 3.0], ballV: 2.8, ballKick: 1.2, ballRest: 0.6,
     goal: { easy: 410, normal: 530, hard: 640 },
     difficulty: {
       easy:   { hearts: 5, speed: 5.5, react: 1.1 },
@@ -69,9 +70,9 @@
       hard:   { hearts: 3, speed: 8.4, react: 0.62 }
     },
     zones: [
-      { gk: 1.0,  patterns: { tower1: 5, tower2: 2, acornLine: 3, acornZig: 2 }, gapK: 1.35 },
+      { gk: 1.0,  patterns: { tower1: 5, tower2: 0, acornLine: 3, acornZig: 2 }, gapK: 1.35 },   // playtest: two-tower rows caused 59 % of kids' biome-1 hits
       { gk: 0.7,  patterns: { tower1: 3, tower2: 2, blocks1: 3, blocks3: 1, acornLine: 2, acornArc: 2, acornZig: 1 }, gapK: 1.15 },
-      { gk: 1.25, patterns: { tower1: 3, tower2: 2, blocks1: 2, blocks3: 1, ball: 3, acornLine: 2, acornArc: 2, acornZig: 1 }, gapK: 1.08 },
+      { gk: 1.25, patterns: { tower1: 3, tower2: 2, blocks1: 2, blocks3: 1, ball: 3, acornLine: 2, acornArc: 2, acornZig: 1 }, gapK: 1.2 },   // playtest: a bit more room in the Crayon Jungle
       { gk: 0.5,  patterns: { tower1: 3, tower2: 3, blocks1: 2, blocks3: 2, ball: 2, acornLine: 2, acornArc: 2, acornZig: 2 }, gapK: 1.0 }
     ],
     // collision sizes: h = top height (ball: 2r, measured from ball.y), w = half-width, d = half-depth (u)

@@ -1,0 +1,59 @@
+[
+ {
+  "diff": "easy",
+  "seed": 11,
+  "t": 266.35,
+  "kind": "blocks",
+  "level": 4,
+  "lane": 0,
+  "heroX": 0,
+  "heroY": 0.3,
+  "objX": -0.02,
+  "objY": 0.02,
+  "dist": 1651.7,
+  "gk": 1,
+  "oracle": {
+   "lead": 2.5,
+   "avoidable": true,
+   "explored": 41286
+  }
+ },
+ {
+  "diff": "easy",
+  "seed": 49,
+  "t": 265.93,
+  "kind": "blocks",
+  "level": 4,
+  "lane": -1,
+  "heroX": -1,
+  "heroY": 0.35,
+  "objX": -1,
+  "objY": 0,
+  "dist": 1649.2,
+  "gk": 1,
+  "oracle": {
+   "lead": 2.5,
+   "avoidable": true,
+   "explored": 35310
+  }
+ },
+ {
+  "diff": "normal",
+  "seed": 27,
+  "t": 201.78,
+  "kind": "ball",
+  "level": 2,
+  "lane": 0,
+  "heroX": 0.37,
+  "heroY": 0.39,
+  "objX": -0.11,
+  "objY": 0.16,
+  "dist": 1547.1,
+  "gk": 1.25,
+  "oracle": {
+   "lead": 2.5,
+   "avoidable": true,
+   "explored": 38388
+  }
+ }
+]

@@ -18,12 +18,38 @@ const CANDIDATES = {
   ballSlow: { ballSpeed: [1.0, 1.5] },
   ballLow: { ballV: 3.0 },
   ease08: { gravEase: 0.8 },
-  noHang: { hang: 0 }
+  noHang: { hang: 0 },
+  // --- 2026-11-22 playtest: biome-1 tower hits of the kid models on Easy
+  noT2b1: { zones: [{ patterns: { tower2: 0 } }] },                     // biome 1 = single towers only
+  t2b1h: { zones: [{ patterns: { tower2: 1 } }] },                      // tower2 rarer in biome 1
+  gap16: { zones: [{ gapK: 1.6 }] },
+  acorn4: { zones: [{ patterns: { acornLine: 4, acornZig: 3 } }] },     // more acorn-only rows between towers
+  easyR13: { difficulty: { easy: { react: 1.3 } } },
+  narrow: { kinds: { tower: { w: 0.3 } }, heroHalfW: 0.25 },           // slightly more forgiving side clearance
+  zpad20: { hitZPad: 0.2 },
+  combo1: { zones: [{ patterns: { tower2: 0 }, gapK: 1.5 }] },
+  combo2: { zones: [{ patterns: { tower2: 0, acornLine: 4, acornZig: 3 }, gapK: 1.5 }], kinds: { tower: { w: 0.3 } } },
+  // ball bounce: lower, quicker-settling hops → moon balls jumpable in every phase, crayon window ×2
+  ballB2: { ballV: 2.8, ballKick: 1.2, ballRest: 0.6 },
+  P1: { zones: [{ patterns: { tower2: 0 } }], ballV: 2.8, ballKick: 1.2, ballRest: 0.6 },
+  P2: { zones: [{ patterns: { tower2: 0 } }, null, { gk: 1.15 }], ballV: 2.8, ballKick: 1.2, ballRest: 0.6 },
+  P3: { zones: [{ patterns: { tower2: 0 } }, null, { patterns: { ball: 2 } }], ballV: 2.8, ballKick: 1.2, ballRest: 0.6 },
+  P4: { zones: [{ patterns: { tower2: 0 } }, null, { gapK: 1.2 }], ballV: 2.8, ballKick: 1.2, ballRest: 0.6 },
+  P5: { zones: [{ patterns: { tower2: 0 } }, null, { gk: 1.15, gapK: 1.2 }], ballV: 2.8, ballKick: 1.2, ballRest: 0.6 },
+  K1: { zones: [{ patterns: { tower2: 0 } }], ballV: 2.8, ballKick: 1.2, ballRest: 0.6, ballSpeed: [0.9, 1.3] },
+  K2: { zones: [{ patterns: { tower2: 0 } }], ballV: 2.8, ballKick: 1.2, ballRest: 0.6, difficulty: { easy: { react: 1.3 } } },
+  K3: { zones: [{ patterns: { tower2: 0 } }, null, { gk: 1.15, gapK: 1.2 }], ballV: 2.8, ballKick: 1.2, ballRest: 0.6, ballSpeed: [1.0, 1.5] },
+  K4: { zones: [{ patterns: { tower2: 0 } }], ballV: 2.8, ballKick: 1.2, ballRest: 0.6, difficulty: { easy: { speed: 5.0 } } },
+  combo3: { zones: [{ patterns: { tower2: 1, acornLine: 4, acornZig: 3 }, gapK: 1.5 }], kinds: { tower: { w: 0.3 } } }
 };
 const only = process.argv[3] ? process.argv[3].split(',') : Object.keys(CANDIDATES);
 const GROUPS = process.env.SIM_GROUPS === 'wide'
   ? [['kid', 'easy', 0, 300], ['adult', 'normal', 0, 300], ['adult', 'hard', 0, 300], ['bot', 'normal', 0.5, 300], ['bot', 'hard', 0.5, 300], ['bot', 'easy', 0.3, 300]]
-  : [['kid', 'easy', 0, 300], ['kid', 'normal', 0, 200], ['adult', 'normal', 0, 300], ['bot', 'normal', 0.5, 300], ['bot', 'hard', 1, 300]];
+  : process.env.SIM_GROUPS === 'main'
+  ? [['kid', 'easy', 0, 300], ['kid5', 'easy', 0, 300], ['adult', 'normal', 0, 300], ['adult', 'hard', 0, 300], ['bot', 'normal', 0.5, 300], ['bot', 'hard', 1, 300]]
+  : process.env.SIM_GROUPS === 'kid'
+  ? [['kid', 'easy', 0, 300], ['kid5', 'easy', 0, 300], ['adult', 'normal', 0, 300]]
+  : [['kid', 'easy', 0, 300], ['kid5', 'easy', 0, 300], ['kid', 'normal', 0, 200], ['adult', 'normal', 0, 300], ['bot', 'normal', 0.5, 300], ['bot', 'hard', 1, 300]];
 for (const name of only) {
   const patch = CANDIDATES[name], line = [];
   for (const [model, diff, skill, maxT] of GROUPS) {

@@ -101,7 +101,7 @@ function buildJobs(seeds, maxT) {
   const jobs = [];
   for (const diff of ['easy', 'normal', 'hard']) {
     for (const skill of [0.3, 0.5, 0.7, 0.9, 1.0]) for (let s = 1; s <= seeds; s++) jobs.push({ group: `bot${skill}`, model: 'bot', skill, diff, seed: s, maxT });
-    for (const m of ['kid', 'adult', 'jumpSpam', 'zigzag', 'zigJump', 'idleMid', 'idleSide', 'botAlwaysJump', 'botNeverJump'])
+    for (const m of ['kid', 'kid5', 'adult', 'jumpSpam', 'zigzag', 'zigJump', 'idleMid', 'idleSide', 'botAlwaysJump', 'botNeverJump'])
       for (let s = 1; s <= seeds; s++) jobs.push({ group: m, model: m, diff, seed: s, maxT, skill: 0.9 });
   }
   return jobs;

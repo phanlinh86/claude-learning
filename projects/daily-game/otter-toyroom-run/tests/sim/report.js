@@ -4,7 +4,7 @@
 const path = require('path');
 const [A, B] = process.argv.slice(2).map(n => require(path.join(__dirname, 'results', n + '.json')));
 const f = (v, d = 0) => v === null || v === undefined || Number.isNaN(v) ? '–' : (+v).toFixed(d);
-const GROUPS = ['bot0.3', 'bot0.5', 'bot0.7', 'bot0.9', 'bot1', 'kid', 'adult', 'jumpSpam', 'zigzag', 'zigJump', 'idleMid', 'idleSide', 'botAlwaysJump', 'botNeverJump'];
+const GROUPS = ['bot0.3', 'bot0.5', 'bot0.7', 'bot0.9', 'bot1', 'kid', 'kid5', 'adult', 'jumpSpam', 'zigzag', 'zigJump', 'idleMid', 'idleSide', 'botAlwaysJump', 'botNeverJump'];
 const DIFFS = ['easy', 'normal', 'hard'];
 const BIOMES = ['meadow (gk 1)', 'pillows (0.7)', 'crayon (1.25)', 'stars (0.5)', 'meadow, loop 2'];
 const KINDS = ['tower', 'blocks', 'ball'];
@@ -46,11 +46,11 @@ function beforeAfter(A, B, groups) {
 }
 
 console.log('## overview', A.name); overview(A);
-console.log('\n## biomes', A.name); chapters(A, ['bot0.5', 'bot0.9', 'adult', 'kid']);
-console.log('\n## hits', A.name); hits(A, ['bot0.3', 'bot0.5', 'bot0.9', 'adult', 'kid']);
+console.log('\n## biomes', A.name); chapters(A, ['bot0.5', 'bot0.9', 'adult', 'kid', 'kid5']);
+console.log('\n## hits', A.name); hits(A, ['bot0.3', 'bot0.5', 'bot0.9', 'adult', 'kid', 'kid5']);
 if (B) {
   console.log('\n## before/after');
-  beforeAfter(A, B, [['easy', 'kid'], ['normal', 'kid'], ['easy', 'adult'], ['normal', 'adult'], ['hard', 'adult'], ['easy', 'bot0.3'], ['easy', 'bot0.5'], ['normal', 'bot0.5'], ['hard', 'bot0.5'], ['normal', 'bot1'], ['hard', 'bot1'], ['easy', 'idleMid'], ['easy', 'jumpSpam']]);
-  console.log('\n## biomes', B.name); chapters(B, ['bot0.5', 'adult', 'kid']);
-  console.log('\n## hits', B.name); hits(B, ['bot0.5', 'adult', 'kid']);
+  beforeAfter(A, B, [['easy', 'kid'], ['easy', 'kid5'], ['normal', 'kid'], ['easy', 'adult'], ['normal', 'adult'], ['hard', 'adult'], ['easy', 'bot0.3'], ['easy', 'bot0.5'], ['normal', 'bot0.5'], ['hard', 'bot0.5'], ['normal', 'bot1'], ['hard', 'bot1'], ['easy', 'idleMid'], ['easy', 'jumpSpam']]);
+  console.log('\n## biomes', B.name); chapters(B, ['bot0.5', 'adult', 'kid', 'kid5']);
+  console.log('\n## hits', B.name); hits(B, ['bot0.5', 'adult', 'kid', 'kid5']);
 }

@@ -83,8 +83,9 @@
       // projection (DESIGN §2)
       const portrait = v.VH > v.VW;
       this.portrait = portrait;
-      this.laneW0 = portrait ? 0.27 * v.VW : Math.min(0.19 * v.VW, 0.36 * v.VH);
       this.footY = v.VH - Math.max(0.13 * v.VH, 70) - v.ins.bottom;
+      // landscape: the moon-jump apex (head ≈ 2.08 lane widths above the feet) must stay under the HUD pills
+      this.laneW0 = portrait ? 0.27 * v.VW : Math.min(0.19 * v.VW, 0.36 * v.VH, (this.footY - v.ins.top - 62) / 2.08);
       this.horizonY = Math.round(v.VH * (portrait ? 0.36 : 0.40));
       const hud = document.getElementById('hud'), toast = document.getElementById('toast');
       const I = v.ins, S = v.s;
@@ -99,7 +100,17 @@
       if (wx.setHorizon) wx.setHorizon(this.horizonY);
     }
     playInsets() { return { top: (this.ins ? this.ins.top : 0) + 90, left: 0, right: 0 }; }
-    _measureHud() {}
+    _measureHud() { this._hudB = null; }
+    /* bottom of the Pause/Sound button row in logical px (portrait: the progress pill goes under it); re-measured twice a second */
+    _hudBottom() {
+      if (this._hudB != null && this.time - (this._hudBT || 0) < 0.5) return this._hudB;
+      const hud = document.getElementById('hud');
+      if (hud && !hud.classList.contains('hidden')) {
+        const r = hud.getBoundingClientRect(), c = this.canvas.getBoundingClientRect();
+        if (r.height > 0 && c.height > 0) { this._hudB = (r.bottom - c.top) / c.height * this.VH; this._hudBT = this.time; }
+      }
+      return this._hudB || 0;
+    }
     toLogical(cx, cy) { const r = this.canvas.getBoundingClientRect(); return [(cx - r.left) / r.width * this.VW, (cy - r.top) / r.height * this.VH]; }
     attach(world, weather) {
       this.world = world; this.weather = weather; this.fx.length = 0; this.texts.length = 0; this.flyers.length = 0;
@@ -279,12 +290,14 @@
       for (const o of w.objects) {
         if (o.state === 'gone') continue;
         const z = lerp(o.prevZ, o.z, a); if (z > ZMAX + 2 || z < ZMIN) continue;
-        items.push({ t: 'obj', o, z, x: lerp(o.prevX, o.x, a), y: lerp(o.prevY, o.y, a), rot: lerp(o.prevRot || 0, o.rot || 0, a) });
+        // a tower Otto bumped into is passed through: draw it behind him (and faded) so the child sees the 'ouch'
+        const thru = o.kind === 'tower' && o.state === 'hit' && z < 0.8;
+        items.push({ t: 'obj', o, z, sz: thru ? Math.max(z, 0.02) : z, thru, x: lerp(o.prevX, o.x, a), y: lerp(o.prevY, o.y, a), rot: lerp(o.prevRot || 0, o.rot || 0, a) });
       }
       const H = w.hero;
       items.push({ t: 'hero', z: 0, x: lerp(H.prevX, H.x, a), y: lerp(H.prevY, H.y, a) });
       if (w.endS != null) { const z = w.endS - dist; if (z < ZMAX && z > ZMIN) items.push({ t: 'arch', z }); }
-      items.sort((p, q) => (q.z - p.z) || (p.t === 'hero' ? 1 : q.t === 'hero' ? -1 : 0));
+      items.sort((p, q) => ((q.sz != null ? q.sz : q.z) - (p.sz != null ? p.sz : p.z)) || (p.t === 'hero' ? 1 : q.t === 'hero' ? -1 : 0));
       return items;
     }
     fade(z) { return clamp((ZMAX - z) / 5, 0, 1); }
@@ -341,7 +354,7 @@
       if (it.y < 1.5) this.shadow(g, it.x, it.z, Wu * (kind === 'tower' ? 0.95 : 0.85), cx, 0.22 * clamp(1 - it.y / 1.5, 0, 1));
       const sq = o.squash || 0, sxk = 1 + 0.18 * sq, syk = 1 - 0.22 * sq;
       const key = kind === 'tower' ? 'tower_' + ((o.variant || 0) % 2) : kind;
-      this.drawSpr(g, key, p.sx, p.sy, W, H, B[2] / B[0], B[3] / B[1], it.rot, sxk, syk, f);
+      this.drawSpr(g, key, p.sx, p.sy, W, H, B[2] / B[0], B[3] / B[1], it.rot, sxk, syk, it.thru ? f * 0.3 : f);
     }
     drawHero(g, it, cx) {
       const w = this.world, h = w.hero, p = this.proj(it.x, it.y, 0, cx), u = p.u;
@@ -399,8 +412,8 @@
           case 'acorn': {
             const p = this.proj(e.x, e.y, Math.max(0, e.z), cx);
             if (wx) { wx.burst('sparkle', p.sx, p.sy, 5, { speed: 120, life: 0.45, size: 0.12 * p.u + 6, spread: TAU, layer: 'front' }); wx.burst('ring', p.sx, p.sy, 1, { speed: 0, life: 0.3, size: 0.3 * p.u, layer: 'front' }); }
-            this.texts.push({ x: p.sx, y: p.sy - 0.3 * p.u, s: '+' + e.points, t: 0, col: ACORN_COL[e.variant % 3] });
-            this.flyers.push({ x: p.sx, y: p.sy, t: 0, v: e.variant % 3 });
+            this.texts.push({ x: p.sx + 0.45 * p.u, y: p.sy - 1.25 * p.u, s: '+' + e.points, t: 0, col: ACORN_COL[e.variant % 3] });   // beside and above Otto's head, never on it
+            if (OD.Game && OD.Game.mode === 'playing') this.flyers.push({ x: p.sx, y: p.sy, t: 0, v: e.variant % 3 });
             break;
           }
           case 'combo': this.texts.push({ x: this.VW / 2, y: this.footY - this.laneW0 * 1.9, s: e.combo + ' acorns in a row!', t: 0, col: '#fff3c4', big: true }); break;
@@ -418,7 +431,7 @@
           }
           case 'heartLost': case 'heartGain': this.heartPulse = 1; break;
           case 'gravity': this.gravPulse = 1; if (e.from !== e.to) this.gravMsg = 2.6; break;
-          case 'levelUp': this.showBanner(e.zone); this.gravPulse = 1; this.flash = 0.5; this.flashCol = '#fffaf0'; if (e.bonus) this.texts.push({ x: this.VW / 2, y: this.footY - this.laneW0 * 1.9, s: 'Biome bonus +' + e.bonus, t: 0, col: '#fff3c4', big: true }); break;
+          case 'levelUp': this.showBanner(e.zone); this.gravPulse = 1; this.flash = 0.5; this.flashCol = '#fffaf0'; if (e.bonus) this.texts.push({ x: this.VW / 2, y: (this.portrait ? this.ins.top + 150 : this.horizonY - 82) + 112, s: 'Biome bonus +' + e.bonus, t: 0, col: '#fff3c4', big: true }); break;   // under the banner, clear of the HUD
           case 'gameOver': this.shake = 0.3; break;
         }
       }
@@ -429,7 +442,7 @@
       if (this.vis.t < 1) this.vis.t = Math.min(1, this.vis.t + dt / 1.3);
       this.shake = Math.max(0, this.shake - dt); this.flash = Math.max(0, this.flash - dt);
       this.heartPulse = Math.max(0, this.heartPulse - dt * 2); this.acornPulse = Math.max(0, this.acornPulse - dt * 3); this.gravPulse = Math.max(0, this.gravPulse - dt);
-      if (this.gravMsg > 0) this.gravMsg = Math.max(0, this.gravMsg - dt);
+      if (this.gravMsg > 0 && (!this.banner || this.banner.t > 2.4)) this.gravMsg = Math.max(0, this.gravMsg - dt);   // waits for the biome banner
       if (this.banner) { this.banner.t += dt; if (this.banner.t > 3.2) this.banner = null; }
       for (const t of this.texts) t.t += dt;
       this.texts = this.texts.filter(t => t.t < (t.big ? 1.8 : 0.9));
@@ -527,15 +540,16 @@
       this.drawSpr(g, OD.Assets.hasCustom('acorn') ? 'custom:acorn' : 'acorn_0', x0 + 22, y1 + 19, ss, ss, 0.5, 0.5);
       g.textAlign = 'left'; g.textBaseline = 'middle'; g.font = '900 22px ' + FONT; g.fillStyle = ink;
       g.fillText(String(w.acorns || 0), x0 + 40, y1 + 20);
-      g.font = '800 14px ' + FONT; g.globalAlpha = 0.75; g.textAlign = 'right'; g.fillText(String(w.score) + ' pts', x0 + 146, y1 + 20); g.globalAlpha = 1;
+      g.font = '800 16px ' + FONT; g.globalAlpha = 0.8; g.textAlign = 'right'; g.fillText(String(w.score) + ' pts', x0 + 146, y1 + 20); g.globalAlpha = 1;
       // biome progress (gravity badge + bar); in portrait it sits under the buttons row on the right
       const bw = Math.min(250, this.VW * (this.portrait ? 0.5 : 0.3));
-      const bx = this.portrait ? this.VW - I.right - 12 - bw - 8 : this.VW / 2 - bw / 2, by = this.portrait ? y0 + 64 : y0 + 4;
+      const bx = this.portrait ? this.VW - I.right - 12 - bw - 8 : this.VW / 2 - bw / 2, by = this.portrait ? Math.max(y0 + 76, this._hudBottom() + 10) : y0 + 4;
       this._pill(g, bx - 8, by - 4, bw + 16, 38);
+      this._biomePill = { x0: bx - 8, y0: by - 4, x1: bx + bw + 8, y1: by + 34 };   // read by the layout tests
       const bk = 32 * (1 + 0.3 * this.gravPulse), gz = (w.zone != null ? w.zone : (w.level || 0) % 4);
       this.drawSpr(g, 'grav_' + gz, bx + 14, by + 15, bk, bk, 0.5, 0.5, Math.sin(this.time * 2.5) * 0.08 * (gz === 1 || gz === 3 ? 1 : 0.3));
       const tx = bx + 36, tw = bw - 44;
-      g.font = '900 13px ' + FONT; g.fillStyle = ink; g.textAlign = 'left';
+      g.font = '900 15px ' + FONT; g.fillStyle = ink; g.textAlign = 'left';
       g.fillText('Biome ' + ((w.level || 0) + 1) + ' · ' + ZONE_INFO[gz].grav.replace('!', ''), tx, by + 7);
       g.fillStyle = night ? 'rgba(255,255,255,.18)' : 'rgba(107,74,43,.18)';
       this._rr(g, tx, by + 17, tw, 9, 4.5); g.fill();
@@ -560,7 +574,7 @@
         g.globalAlpha = 1;
       }
       if (this.gravMsg > 0 && (!this.banner || this.banner.t > 2.4)) {
-        const a = Math.min(1, this.gravMsg / 0.4), y = this.portrait ? topY + 30 : this.ins.top + 116;
+        const a = Math.min(1, this.gravMsg / 0.4), y = topY + 110;
         const z = this.world ? this.world.zone % 4 : 0, s = ZONE_INFO[z].hint;
         g.globalAlpha = a; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = '900 ' + (VW < 700 ? 20 : 24) + 'px ' + FONT;
         g.lineWidth = 6; g.lineJoin = 'round'; g.strokeStyle = 'rgba(21,88,102,.9)'; g.fillStyle = '#ffe9b0';

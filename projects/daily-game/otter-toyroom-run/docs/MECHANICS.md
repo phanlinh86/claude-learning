@@ -182,3 +182,12 @@ at `arcS`. Skill: delay `(1 − skill)·0.35 s ±30 %`, jump timing error σ `(1
 `setGravity(gk)`: fall speeds × `fk`, swing / spin rates × √fk, where `fk` eases (≈ 1 s) toward `gk^0.75` (drag-limited
 fall speed ∝ √g; ^0.75 so the change reads). Burst gravity × gk. Front-layer particles: alpha ≤ 0.55, faded out in the
 centre lane band near Otto. Sprites: `dust, sparkle, butterfly, feather, confetti, leaf, star, firefly, puff, ring` (DESIGN §4.3).
+
+## QA changes (2026-11-22, from `docs/reports/playtest.md`)
+| key | before | after | why |
+|---|---|---|---|
+| `zones[0].patterns.tower2` | 2 | 0 | two-tower rows caused 59 % of kids' biome-1 hits (kid Easy 1.07 → 0.37 hits) |
+| `ballV` / `ballKick` / `ballRest` | 3.4 / 1.6 / 0.78 | 2.8 / 1.2 / 0.6 | moon first hop 1.56 u → 0.59 u: every bounce phase is now jumpable in-lane (≥ 375 ms window); steady hops 0.21 / 0.30 / 0.17 / 0.41 u |
+| `zones[2].gapK` | 1.08 | 1.2 | Crayon Jungle adult hits 1.25 → 0.64 |
+The unit test "Otto can run under a moon ball" became "every moon bounce phase is jumpable". Numbers above in this file that mention
+the old ball values are superseded by this table.

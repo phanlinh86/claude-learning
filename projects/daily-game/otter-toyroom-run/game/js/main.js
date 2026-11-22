@@ -61,6 +61,7 @@
     },
 
     toTitle() {
+      { const sc = document.getElementById('scScreen'); if (sc) sc.classList.add('hidden'); }
       OD.Audio.stopMusic();
       this.mode = 'title';
       this.world = this.makeWorld(this.seed != null ? this.seed + 99 : null, true);
@@ -74,6 +75,7 @@
     },
 
     startGame() {
+      { const sc = document.getElementById('scScreen'); if (sc) sc.classList.add('hidden'); }
       OD.Audio.unlock();
       { const t = document.getElementById('toast'); if (t) t.classList.add('hidden'); }
       this.runDifficulty = this.difficulty();
@@ -181,7 +183,7 @@
         if (this.mode === 'playing' && LANE_KEYS[e.code]) { e.preventDefault(); if (!e.repeat) this.act(LANE_KEYS[e.code]); return; }
         if (this.mode === 'playing' && JUMP_KEYS[e.code]) { e.preventDefault(); if (!e.repeat) this.act('jump'); return; }
         if (this.mode === 'playing' && (e.code === 'Enter' || e.code === 'ArrowDown' || e.code === 'KeyS')) { e.preventDefault(); return; }
-        if (this.mode === 'over' && (e.code === 'Enter' || e.code === 'Space')) { const f = document.activeElement; if (f && f.tagName === 'BUTTON' && f.id !== 'btnAgain') return; e.preventDefault(); if (!e.repeat && this.canRestart()) this.startGame(); return; }
+        if (this.mode === 'over' && (e.code === 'Enter' || e.code === 'Space')) { const f = document.activeElement, sc = document.getElementById('scScreen'); if (sc && !sc.classList.contains('hidden')) return; if (f && f !== document.body && f.closest && f.closest('button, a, input, select, label, .screen') && f.id !== 'btnAgain') return; e.preventDefault(); if (!e.repeat && this.canRestart()) this.startGame(); return; }
         if (this.mode === 'title' && ui === 'scrTitle' && e.code === 'Space') {
           const f = document.activeElement;
           if (f && f.tagName === 'BUTTON' && f.id !== 'btnPlay') return;
