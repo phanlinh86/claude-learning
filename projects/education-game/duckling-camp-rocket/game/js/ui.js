@@ -1,6 +1,6 @@
-/* DK.UI (Nim's River Hop) — DOM screens: title, parent settings, HUD, Nim's speech bubble, pause, Talk time,
- * celebration. Talk-time pictures (the shown thing standing on a river stone; answer cards: paint blobs, shape cookies,
- * numerals with dots, home badges, animals) are drawn with DK.StoneArt.drawIcon / drawStone + drawThing
+/* DK.UI (Mimi's Splash Rocket) — DOM screens: title, parent settings, HUD, Mimi's speech bubble, pause, Talk time,
+ * celebration. Talk-time pictures (the shown thing standing on a picnic mat; answer cards: paint blobs, shape cookies,
+ * numerals with pinecones, home badges, animals) are drawn with DK.MatArt.drawIcon / drawMat + drawThing
  * (Renderer.preview) into small canvases — pictures, never words to read. */
 (function (DK) {
   'use strict';
@@ -47,7 +47,7 @@
       const parts = [T(lang, 'ui.logo1'), T(lang, 'ui.logo2')];
       $('logo1').textContent = parts[0]; $('logo2').textContent = parts[1];
       let sub = T(lang, 'ui.subtitle'); if (sub === 'ui.subtitle') sub = T(lang, 'ui.tagline'); $('tagline').textContent = sub === 'ui.tagline' ? '' : sub;
-      document.title = title === 'ui.title' ? "Nim's River Hop" : title;
+      document.title = title === 'ui.title' ? "Mimi's Splash Rocket" : title;
       $('inpName').placeholder = T(lang, 'ui.namePlaceholder');
       $('btnPlay').setAttribute('aria-label', T(lang, 'ui.play'));
     },
@@ -100,7 +100,7 @@
     },
     // the wipe / Talk time: the speech bubble steps back
     fadeBubble(on) { $('bubble').classList.toggle('fade', !!on); },
-    /** Nim's art reaches under the bubble (a top-row stone / a high hop): the bubble steps back while he is there */
+    /** the rocket / Mimi reaches under the bubble (a high flight): the bubble steps back while it is there */
     bubbleUnder(on) { $('bubble').classList.toggle('under', !!on); },
     placeBubble(rect) { // CSS px rect
       const b = $('bubble');
@@ -129,7 +129,7 @@
       const sh = talk.show || {}, empty = !talk.show;
       $('talkShow').classList.toggle('hidden', empty);
       document.querySelector('.talk-panel').classList.toggle('noshow', empty);   // no picture to show: the question says it all
-      if (!empty) requestAnimationFrame(() => DK.Renderer.preview($('talkShow'), sh, { stone: true }));
+      if (!empty) requestAnimationFrame(() => DK.Renderer.preview($('talkShow'), sh, { mat: true }));
       const box = $('talkChoices'); box.innerHTML = '';
       talk.choices.forEach(c => {
         const b = document.createElement('button');

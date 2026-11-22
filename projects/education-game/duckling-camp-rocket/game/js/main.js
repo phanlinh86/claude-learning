@@ -1,10 +1,11 @@
-/* DK main (Nim's River Hop) — boots the game, sizes the canvas for any phone / tablet shape, runs the loop and turns world
- * events (stepping stones rise out of the brook, Nim hops row by row onto the stone asked for, a wrong stone wobbles, on the
- * far bank he curls up and rolls over a fruit that sticks on his spines, stars fly to the HUD, a seasonal swirl wipes the
- * crossing, a fish / frog / snowflakes drop by) into voice, sound, effects and UI, following the event → line table in
- * docs/VOICE.md §1.1 and the event list in docs/MECHANICS.md §6 (prompts protected, count lines never cut, praise
- * rate-limited, hints priority). Touches reach the world only through DK.Input (two numbers in logical px; HUD / speech
- * bubble / menus never reach the canvas). */
+/* DK main (Mimi's Splash Rocket) — boots the game, sizes the canvas for any phone / tablet shape, runs the loop and turns world
+ * events (picnic mats unfold on the meadow, the child taps the mat Mimi asks for, pumps three times, the water rocket whooshes
+ * up and floats down under its parachute onto the mat, the thing flies up the camp flagpole as a pennant, the camp counts the
+ * pennants while the rocket shoots a fountain, stars fly to the HUD, a weather sweep wipes the round, a marmot / goat / bird
+ * drop by) into voice, sound, effects and UI, following the event → line table in docs/VOICE.md §3 and the event list in
+ * docs/MECHANICS.md §6 (prompts protected, count lines never cut, the pump count through Voice.sayPump, praise rate-limited,
+ * decorative lines rare and droppable). Touches reach the world only through DK.Input (two numbers in logical px; HUD /
+ * speech bubble / menus never reach the canvas); in the pump phase every extra finger is a new stomp (rapidTaps). */
 (function (DK) {
   'use strict';
   const $ = id => document.getElementById(id);
@@ -36,14 +37,14 @@
   let mode = 'loading';            // loading | title | play | paused | talk | done
   let speed = FLAGS.speed, autoRestart = FLAGS.autorestart;
   let view = { W: 960, H: 720, s: 1, left: 0, top: 0, ins: { top: 0, right: 0, bottom: 0, left: 0 } };
-  const stats = { sessions: 0, rounds: 0, correct: 0, wrong: 0, squish: 0, soft: 0, ahead: 0, hints: 0, assists: 0, counts: 0, rises: 0,
-    hops: 0, lands: 0, crossings: 0, fruits: 0, wipes: 0, gusts: 0, talks: 0, talkRight: 0, surprises: 0, fishTaps: 0, frogTaps: 0,
-    snowTaps: 0, pokes: 0, frames: 0, slowFrames: 0 };
+  const stats = { sessions: 0, rounds: 0, correct: 0, wrong: 0, squish: 0, soft: 0, hints: 0, assists: 0, counts: 0, unfolds: 0,
+    pumps: 0, autoPumps: 0, launches: 0, chutes: 0, lands: 0, pennants: 0, camps: 0, fountains: 0, hopBacks: 0, wipes: 0, gusts: 0,
+    talks: 0, talkRight: 0, surprises: 0, marmotTaps: 0, goatTaps: 0, birdTaps: 0, pokes: 0, frames: 0, slowFrames: 0 };
   const eventLog = [];             // the last 300 world events (type + id), for the e2e tests
   let promptUntil = 0, lastWrongSay = -1e9, idleSaid = 0, shownStars = 0, lastPraise = -1e9, lastTapSay = -1e9;
-  let sessionFruits = [], riseSaid = -1, lastAhead = -1e9, wipeN = 0;
+  let sessionPennants = [], unfoldSaid = -1, wipeN = 0, landSaidRound = -1, pumpSeen = 0;
   let inputBlockUntil = 0;         // canvas presses right after Resume / Play / Play again are ignored (a double tap falls through)
-  let lastRight = null;            // the right answer's line: re-said (short) when a pause cut it while Nim hops
+  let lastRight = null;            // the right answer's line: re-said (short) when a pause cut it
   let roundMissed = false, hintBySay = false;
   const blockInput = () => { inputBlockUntil = performance.now() + 250; };
 
@@ -75,6 +76,13 @@
     if (px > cap) rs *= Math.sqrt(cap / px);
     return Math.max(0.5, rs);
   }
+  function windsockKeep() {
+    try {
+      if (!DK.MeadowArt || !render || !world.layout) return null;
+      const p = DK.MeadowArt.campProps(render.artLayout(world.layout)).find(q => q.kind === 'windsock');
+      return p && p.box ? { x: p.box.x - 6, y: p.box.y - 6, w: p.box.w + 12, h: p.box.h + 12 } : null;
+    } catch (e) { return null; }
+  }
   function measureHud() {   // the real DOM HUD in logical px (the speech bubble is placed BY the world, so it is not a keep-out here)
     const box = (r, pad) => ({ x: (r.left - view.left) / view.s - pad, y: 0, w: r.width / view.s + 2 * pad, h: (r.bottom - view.top) / view.s + pad });
     const h = $('hud').getBoundingClientRect();
@@ -91,23 +99,26 @@
     c.style.left = view.left + 'px'; c.style.top = view.top + 'px';
     render.resize(view.W, view.H, rs);
     world.hudKeep = measureHud();                   // the real HUD (CSS px) may reach lower than the logical keep-out
-    world.setViewport(view.W, view.H, view.ins);    // river, banks, rows re-laid; stones glide to their new homes, Nim snaps
+    world.setViewport(view.W, view.H, view.ins);    // camp + meadow re-laid; mats glide to their new homes, Mimi / pad / pole snap
+    // the windsock stands on the meadow's far edge (MeadowArt, outside the camp corner): mats and the goat's rock keep clear of it
+    const sock = windsockKeep();
+    if (sock) { world.hudKeep = world.hudKeep.concat([sock]); world.setViewport(view.W, view.H, view.ins); }
     weather.resize(view.W, view.H, world.layout);
     placeBubble();
     updateHudStarTarget();
     if (mode === 'done') requestAnimationFrame(measureDonePanel);
     requestAnimationFrame(measureTitle);
   }
-  /** the DOM title (logo, tagline, ▶, star line) in logical px: the title's stepping stones keep clear of it */
+  /** the DOM title (logo, tagline, ▶, star line, language / gear row) in logical px: the title's mats keep clear of it */
   function measureTitle() {
     const out = [];
-    for (const sel of ['.logo', '#tagline', '#btnPlay', '.title-info']) {
+    for (const sel of ['.logo', '#tagline', '#btnPlay', '.title-info', '.title-top .lang-switch', '#btnParents']) {
       const el = document.querySelector(sel), r = el && el.getBoundingClientRect();
       if (r && r.width > 0) out.push({ x: (r.left - view.left) / view.s - 12, y: (r.top - view.top) / view.s - 12, w: r.width / view.s + 24, h: r.height / view.s + 24 });
     }
     render.titleKeep = out.map(k => ({ x: Math.round(k.x), y: Math.round(k.y), w: Math.round(k.w), h: Math.round(k.h) }));
   }
-  /** the celebration panel in logical px (render keeps the golden stones in view) */
+  /** the celebration panel in logical px (render keeps the golden mats and the garland clear of it) */
   function measureDonePanel() {
     const p = document.querySelector('#scrDone .done-panel');
     const r = p && mode === 'done' ? p.getBoundingClientRect() : null;
@@ -151,7 +162,7 @@
     pendingPrompt = txt || null; promptStart = performance.now(); promptSpeaking = null;
     promptUntil = performance.now() + 6000 + lineMs(txt);   // until it starts (if it never does, 6 s + its length)
     const p = speak(txt, Object.assign({ priority: true, prompt: true, tag: 'prompt' }, opt || {}));
-    // the prompt ended (spoken, cut or dropped): lift its guard right away — a Nim tap may repeat it now
+    // the prompt ended (spoken, cut or dropped): lift its guard right away — a Mimi tap may repeat it now
     if (p && p.then) p.then(() => {
       promptQueued = false;
       if (pendingPrompt === txt || promptSpeaking === txt) { pendingPrompt = null; promptSpeaking = null; promptUntil = Math.min(promptUntil, performance.now() + 150); }
@@ -211,7 +222,8 @@
     if (world.levels) DK.Storage.setJSON('lastTopics', world.levels);
     if (FLAGS.level != null) world.startLevel(Math.max(0, Math.min(3, FLAGS.level | 0)));
     countUntil = 0; promptUntil = 0; promptQueued = false; lineUntil = 0; guarded.length = 0; pendingPrompt = null; promptSpeaking = null;
-    shownStars = 0; DK.UI.setStars(0); lastAsk = null; lastPromptText = ''; sessionFruits = []; lastRight = null; riseSaid = -1; wipeN = 0; lastAhead = -1e9;
+    shownStars = 0; DK.UI.setStars(0); lastAsk = null; lastPromptText = ''; sessionPennants = []; lastRight = null; unfoldSaid = -1; wipeN = 0;
+    if (DK.Voice && DK.Voice.resetPump) DK.Voice.resetPump();
     blockInput();
     render.clearGallery();
     if (weather.setParty) weather.setParty(false);
@@ -253,18 +265,16 @@
     if (world.resetNudges) world.resetNudges();
     DK.UI.only(mode === 'talk' ? 'scrTalk' : undefined);
     DK.Audio.startMusic();
-    // say the question again so a returning child knows what to do
+    // say the question again so a returning child knows what to do (VOICE §3: pause → resume)
     if (mode === 'talk' && world.talk && !world.talkAnswered) speak(T(world.talk.promptKey, world.talk.params || {}), { priority: true });
     else if (world.state === 'intro') speak(T('ui.chapter', { n: world.level + 1 }) + '. ' + T('topic.' + world.topic), { priority: true });
+    else if (world.state === 'round' && world.phase === 'pump' && world.interactive) { const t = T('pumpAsk'); DK.UI.say(t); speak(t, { priority: true, tag: 'pumpAsk' }); }
     else if (world.interactive) setTimeout(repeatPrompt, 300);
-    else if (world.state === 'round' && world.phase === 'play' && lastRight && lastRight.text) {
-      // the pause cut the right line while Nim hops: say it again (short)
-      DK.UI.say(lastRight.text); speak(lastRight.text, { priority: true });
-    }
+    else if (world.state === 'round' && lastRight && lastRight.text && (world.phase === 'aim')) { DK.UI.say(lastRight.text); speak(lastRight.text, { priority: true, tag: 'right' }); }
   }
 
-  let lastPromptText = '', lastAsk = null, lastRound = null;
-  function currentPrompt() {   // prompts have several wordings: repeat the one Nim said, word for word
+  let lastPromptText = '', lastAsk = null;
+  function currentPrompt() {   // prompts have several wordings: repeat the one Mimi said, word for word
     if (lastPromptText) return lastPromptText;
     const p = world.prompt ? world.prompt() : null;
     return p ? askText(p) : '';
@@ -278,14 +288,14 @@
       onEvent(e);
     }
   }
-  const stoneOf = id => (world.stoneById ? world.stoneById(id) : null);
-  /** the event + what main knows (VOICE §1.1): the chapter topic, the round's prompt key / params / rule / mode, the stone's thing,
-   *  the row (countSeq: the needed number is row + 1 — the world's want.rule.value is k) */
+  const matOf = id => (world.matById ? world.matById(id) : null);
+  /** the event + what main knows (VOICE §1): the chapter topic, the round's prompt key / params / rule / mode, the mat's thing,
+   *  the launch (countSeq: the needed number is launch + 1 — the world's rule.value is k) */
   function ev2(e) {
-    const c = world.cur, st = stoneOf(e.id), A = lastAsk || {};
+    const c = world.cur, m = matOf(e.id), A = lastAsk || {};
     const o = Object.assign({ topic: world.topic, promptKey: c ? c.promptKey : A.promptKey, params: c ? c.params : A.params,
-      rule: c ? c.rule : A.rule, mode: c ? c.mode : A.mode, row: world.row }, e, { thing: e.thing || (st && st.thing) || undefined });
-    if (o.mode === 'countSeq' && o.need == null && e.type === 'wrong') o.need = (e.want && e.want.count) || (o.row != null ? o.row + 1 : undefined);
+      rule: c ? c.rule : A.rule, mode: c ? c.mode : A.mode, launch: world.launch, row: world.launch }, e, { thing: e.thing || (m && m.thing) || undefined });
+    if (o.mode === 'countSeq' && o.need == null && e.type === 'wrong') o.need = (e.want && e.want.count) || (o.launch != null ? o.launch + 1 : undefined);
     return o;
   }
   function line(fn, e, fallbackKey) {
@@ -293,7 +303,7 @@
     if (I && typeof I[fn] === 'function') { try { const t = I[fn](curLang(), e); if (t) return t; } catch (err) { /* fall back */ } }
     return fallbackKey ? T(fallbackKey) : '';
   }
-  function nimMood(m, t) { if (world.nim && world.interactive) { world.nim.mood = m; world.nim.moodT = t; } }
+  function mimiMood(m, t) { if (world.mimi && world.interactive) { world.mimi.mood = m; world.mimi.moodT = t; } }
   function askText(e) {
     const I = DK.I18N;
     if (I && I.ask) { try { return I.ask(curLang(), e.promptKey, Object.assign({ child: S.name || '' }, e.params || {}), { first: !!e.first }); } catch (err) { /* fall back */ } }
@@ -304,6 +314,8 @@
       render.burst('star', x + (i - (n - 1) / 2) * 60, y, { delay: 0.1 + i * 0.2, onDone: () => { shownStars++; DK.UI.setStars(shownStars, true); DK.Audio.play('star', { i }); } });
     }
   }
+  const quiet = () => !speaking() && canInterrupt();
+  const isCountSel = () => !!(world.cur && world.cur.mode === 'countSel');
 
   function onEvent(e) {
     switch (e.type) {
@@ -313,7 +325,7 @@
         DK.Audio.setMood(wi); DK.Audio.play('chapter');
         DK.UI.setDots(world.roundsPerLevel || 4, 0);
         speak(T('ui.chapter', { n: e.level + 1 }) + '. ' + T('topic.' + e.topic), { interrupt: true, tag: 'flavour' });
-        speak(T('weather.' + wi), { tag: 'flavour' });   // queued after the chapter name ("Spring by the brook!"); dropped by the ask
+        speak(T('weather.' + wi), { tag: 'flavour' });   // queued after the chapter name ("A sunny day at camp!"); dropped by the ask
         DK.UI.say('');   // the chapter banner shows the topic
         render.prewarm(world.layout, wi);
         break;
@@ -322,103 +334,134 @@
         DK.UI.fadeBubble(false); DK.Audio.setFanfare(false);
         stats.rounds++; idleSaid = 0; lastAsk = null; lastPromptText = ''; lastRight = null; roundMissed = false;
         DK.UI.setDots(world.roundsPerLevel || 4, e.round % (world.roundsPerLevel || 4));
-        DK.UI.say(T('rise'));   // shown, not spoken: the question follows in a moment
-        weather.resize(view.W, view.H, world.layout);   // the river may be re-laid for this round's rows
+        DK.UI.say(T('unfold'));   // shown, not spoken: the question follows in a moment
+        weather.resize(view.W, view.H, world.layout);
         render.prewarmRound(world);
         break;
       }
-      case 'rise':
-        stats.rises++; DK.Audio.play('rise');
-        // rarely: "Look, stepping stones!" — once per chapter, on its first stone of round 0, only when nothing speaks
-        if (e.row === 0 && e.i === 0 && world.round === 0 && riseSaid !== world.level && !speaking() && canInterrupt() && Math.random() < 0.4) { riseSaid = world.level; speak(T('rise')); }
+      case 'unfold':
+        stats.unfolds++; DK.Audio.play('unfold');
+        // rarely: "Look, picnic mats!" — once per chapter, on the first mat of round 0, only when nothing speaks
+        if (e.launch === 0 && e.i === 0 && world.round === 0 && unfoldSaid !== world.level && quiet() && Math.random() < 0.4) { unfoldSaid = world.level; speak(T('unfold'), { tag: 'flavour' }); }
         break;
       case 'ask': {
         lastAsk = e; idleSaid = 0; DK.UI.fadeBubble(false); hintBySay = false; promptQueued = false;
-        if (DK.Voice && DK.Voice.dropTagged) DK.Voice.dropTagged(['flavour', 'right']);   // the question goes first (QA P2-2)
+        if (DK.Voice && DK.Voice.dropTagged) DK.Voice.dropTagged(['flavour', 'right', 'pennant']);   // the question goes first
         const txt = askText(Object.assign({}, e, { first: !!e.first }));
         lastPromptText = txt;
-        // the chapter / weather line may still be talking: the question cuts it (QA P2-2) — never a right / wrong / count line
+        // the chapter / weather line may still be talking: the question cuts it — never a right / wrong / count line
         const flav = DK.Voice && DK.Voice.currentTag && DK.Voice.currentTag() === 'flavour';
         DK.UI.say(txt); speakPrompt(txt, { priority: true, interrupt: !!flav });
         break;
       }
+      case 'next': {   // the reminder before launch j ≥ 1: it is the question for that launch (protected like a prompt)
+        idleSaid = 0; DK.UI.fadeBubble(false); hintBySay = false;
+        if (DK.Voice && DK.Voice.dropTagged) DK.Voice.dropTagged(['pennant', 'flavour']);
+        const txt = line('sayNext', ev2(e), 'next.any');
+        lastPromptText = txt; if (!lastAsk) lastAsk = e;
+        DK.UI.say(txt); speakPrompt(txt, { priority: true });
+        break;
+      }
       case 'right': {
         stats.correct++;
-        // VOICE §1.1 rule 1: the prompt stays protected until heard once — the right line queues behind it
         const th = e.thing || {};
         DK.Audio.play('right');
         render.burst('sparkles', e.x, e.y - (world.layout ? world.layout.itemH * 0.5 : 40), { n: 12, color: th.color });
+        if (e.mode === 'countSeq' || (world.cur && world.cur.mode === 'countSeq')) render.burst('count', e.x, e.y - (world.layout ? world.layout.itemH * 1.25 : 110), { n: e.count || (e.launch + 1) });
         const txt = line('sayRight', ev2(e), 'praise');
         lastRight = { text: txt };
-        // the child already answered row 0: a question that has not started yet is no longer needed (QA P2-1)
+        // the child already answered: a question that has not started yet is no longer needed
         if (pendingPrompt && DK.Voice && DK.Voice.dropTagged) { DK.Voice.dropTagged('prompt'); pendingPrompt = null; promptUntil = Math.min(promptUntil, performance.now()); }
-        if (e.mode === 'countSeq') {
-          // one count line per hop ("One!" "Two!" "Three!"): queued + protected, never cut
-          render.burst('count', e.x, e.y - (world.layout ? world.layout.itemH * 1.25 : 110), { n: e.count || (e.row + 1) });
-          DK.Audio.play('pip', { i: e.count || 1 });
-          stats.counts++;
-          speakCount(txt);
-        } else if (e.mode === 'countSel') {
-          // the count run ("One, two, three, four! Four dots!") is said while the world lights the dots: never cut
-          speakCount(txt, 400);
-        } else speakRight(txt);
+        speakRight(txt);
         DK.UI.say(txt);
         break;
       }
-      case 'hop':
-        stats.hops++;
-        DK.Audio.play('hop', { pitch: 1 + 0.08 * Math.max(0, (e.to | 0)) });
+      case 'aim': DK.Audio.play('aim'); break;
+      case 'pumpAsk': {
+        const p0 = ++pumpSeen, t = T('pumpAsk');
+        if (!lastRight) DK.UI.say(t);
+        // spoken only if nothing speaks 1.2 s later and no stomp came yet (droppable)
+        setTimeout(() => { if (pumpSeen === p0 && mode === 'play' && world.phase === 'pump' && !speaking()) { speak(t, { tag: 'pumpAsk' }); DK.UI.say(t); } }, 1200 / Math.max(1, speed));
         break;
-      case 'land': stats.lands++; DK.Audio.play('land'); break;
-      case 'splash': DK.Audio.play('splash', { big: !!e.fish }); break;
-      case 'thingAway':
-        DK.Audio.play('sparkle');
-        if (weather.burst) weather.burst(e.x, e.y, { kind: 'sparkle', n: 8 });
+      }
+      case 'pump': {
+        stats.pumps++; pumpSeen++;
+        if (e.auto) stats.autoPumps++;
+        DK.Audio.play('pump', { n: e.n });
+        render.burst('count', e.x, e.y - (world.layout ? world.layout.mimiH : 180) - 40, { n: e.n, size: 70 });   // above Mimi's hat
+        if (DK.Voice && DK.Voice.sayPump) DK.Voice.sayPump(e.n, { lang: curLang(), auto: !!e.auto });
+        else speak(String(e.n), { priority: true, tag: 'pump' });
+        if (DK.I18N && DK.I18N.sayPump) DK.UI.say(DK.I18N.sayPump(curLang(), e.n));
         break;
-      case 'homeBadge': DK.Audio.play('badge'); break;
-      case 'count': {   // a dot lights up on the counted sign: a rising pip + the numeral (the words are the right line's count run)
+      }
+      case 'pumpAuto': break;   // "I'll help!" is the head of Mimi's own first pump line (Voice.sayPump, auto)
+      case 'launch':
+        stats.launches++; pumpSeen++;
+        DK.Audio.play('launch');
+        if (DK.Voice && DK.Voice.resetPump) DK.Voice.resetPump();
+        break;
+      case 'whoosh': break;
+      case 'chute':
+        stats.chutes++; DK.Audio.play('chute');
+        if (world.round === 0 && world.launch === 0 && quiet() && Math.random() < 0.5) speak(T('chute'), { tag: 'chute' });
+        break;
+      case 'land':
+        stats.lands++; DK.Audio.play('land');
+        if (landSaidRound !== world.round + world.level * 10 && !isCountSel() && quiet() && Math.random() < 0.3) { landSaidRound = world.round + world.level * 10; speak(T('land'), { tag: 'land' }); }
+        break;
+      case 'splash': DK.Audio.play('splash'); break;
+      case 'fold': DK.Audio.play('fold'); break;
+      case 'count': {
         stats.counts++;
         DK.Audio.play('pip', { i: e.i });
-        render.burst('count', e.x, e.y - (world.layout ? world.layout.itemH * 0.75 : 70), { n: e.i });
+        if (e.camp) { render.burst('count', e.x + 30, e.y, { n: e.i, size: 56 }); break; }
+        // the collect count of a countSel sign: ONE count line ("One, two, three, four! Four pinecones!") on the first pip
+        render.burst('count', e.x, e.y - (world.layout ? world.layout.itemH * 1.15 : 100), { n: e.i });
+        if (e.i === 1) { const n = e.n || ((matOf(e.id) || {}).thing || {}).n || 1; const t = DK.I18N.sayCountUp ? DK.I18N.sayCountUp(curLang(), n, 'pinecones') : T('praise'); if (DK.Voice && DK.Voice.dropTagged) DK.Voice.dropTagged(['right']); speakCount(t, 400); DK.UI.say(t); }
         break;
       }
-      case 'bankLand':
-        stats.crossings++;
-        DK.Audio.play('land', { bank: true });
-        // "We crossed the brook!" only in a chapter's round 0 or after a round with a miss, and only when nothing speaks
-        if ((world.round === 0 || roundMissed) && !speaking() && canInterrupt()) speak(T('bank'));
-        break;
-      case 'curl': DK.Audio.play('curl'); break;
-      case 'stick': {
-        stats.fruits++;
-        DK.Audio.play('stick'); DK.Audio.setFanfare(true);
-        setTimeout(() => DK.Audio.setFanfare(false), 1200 / Math.max(1, speed));
-        if (e.fruit) sessionFruits.push(e.fruit);
-        render.burst('sparkles', e.x, e.y + (world.layout ? world.layout.fruitR : 20), { n: 8 });   // low, by the fruit — never over his face
-        // the fruit IS the round's praise ("Yum, an apple!"); rate-limited
-        // queued (never cutting), so it is heard after the last right line (playtest P1: it used to be skipped 80 % of the time)
-        if (performance.now() - lastPraise > 1200) { lastPraise = performance.now(); const t = line('sayFruit', e.fruit) || T('fruit.any'); if (DK.Voice && DK.Voice.dropTagged) DK.Voice.dropTagged('right'); speak(t, { tag: 'fruit' }); DK.UI.say(t); }
+      case 'homeBadge': DK.Audio.play('badge'); break;
+      case 'pennant': {
+        stats.pennants++;
+        if (e.thing) sessionPennants.push(e.thing);
+        DK.Audio.play('pennant', { i: e.slot || 0 });
+        render.burst('sparkles', e.x + 24, e.y + 16, { n: 8, color: e.thing && e.thing.color });
+        // the launch's praise — skipped in countSel (the count run was the praise) and when a question is already waiting
+        if (!isCountSel() && !pendingPrompt && performance.now() - lastPraise > 1200) {
+          lastPraise = performance.now();
+          const t = line('sayPennant', ev2(e), 'pennant.any');
+          if (DK.Voice && DK.Voice.dropTagged) DK.Voice.dropTagged('right');
+          speak(t, { tag: 'pennant' }); DK.UI.say(t);
+        }
         break;
       }
-      case 'uncurl': {
-        DK.Audio.play('uncurl');
-        const n = world.nim, sl = n && n.backSlots && n.backSlots[Math.max(0, (n.fruits.length || 1) - 1) % 4];   // by the new fruit on his back
-        if (weather.burst) weather.burst(sl ? sl.x : e.x, sl ? sl.y - 10 : e.y, { kind: 'stars', n: 8 });
+      case 'hopBack': stats.hopBacks++; DK.Audio.play('hopBack', { n: e.n }); break;
+      case 'camp': {
+        stats.camps++;
+        DK.Audio.setFanfare(true); setTimeout(() => DK.Audio.setFanfare(false), 2200 / Math.max(1, speed));
+        const n = e.n || (world.pennants || []).length;
+        const t = DK.I18N.sayCamp ? DK.I18N.sayCamp(curLang(), n) : T('camp');
+        if (DK.Voice && DK.Voice.dropTagged) DK.Voice.dropTagged(['pennant', 'land', 'flavour']);
+        speakCount(t, 200); DK.UI.say(t);
         break;
       }
+      case 'fountain':
+        stats.fountains++; DK.Audio.play('fountain');
+        if (weather.burst) weather.burst(e.x, e.y - 120, { kind: 'rainbow', n: 12 });
+        break;
       case 'roundDone': {
         DK.UI.setDots(world.roundsPerLevel || 4, ((e.round != null ? e.round : world.round) % (world.roundsPerLevel || 4)) + 1);
-        flyStars(e.stars || 1, e.x, e.y);   // the round's stars fly from above Nim's head to the HUD
-        break;   // no line: the fruit line was the praise
+        flyStars(e.stars || 1, e.x, e.y);   // the round's stars fly from above Mimi's head to the HUD
+        break;   // no line: the camp count was the praise
       }
       case 'wipe': {
         stats.wipes++; wipeN++;
         DK.Audio.play('wipe');
-        if (weather.wipeParticles) weather.wipeParticles(e.dir || (world.layout && world.layout.ax) || { x: 1, y: 0 });
+        if (weather.wipeParticles) weather.wipeParticles(e.dir || { x: 1, y: 0 });
         DK.UI.fadeBubble(true);
-        // rarely: chapter 1 round 0 names the swirl; later ≤ 1 in 4 rounds; only when nothing speaks
+        // rarely: chapter 1 round 0 names the sweep; later ≤ 1 in 4 rounds; only when nothing speaks
         const first = world.level === 0 && wipeN === 1;
-        if ((first || Math.random() < 0.25) && !speaking() && canInterrupt()) speak(T('wipe'));
+        if ((first || Math.random() < 0.25) && quiet()) speak(T('wipe'), { tag: 'wipe' });
         break;
       }
       case 'wrong': {
@@ -429,7 +472,7 @@
         if (now - lastWrongSay > 1500) {
           lastWrongSay = now;
           const ee = ev2(e);
-          // the miss that brings the hint: ONE short line that also points at the shiny one
+          // the miss that brings the hint: ONE short line that also points at the shiny mat
           const wt = e.hint ? line('sayWrongHint', ee, 'hint') : line('sayWrong', ee, 'hint');
           if (e.hint) hintBySay = true;
           if (DK.Voice && DK.Voice.dropTagged) DK.Voice.dropTagged(['wrong', 'right']);
@@ -438,56 +481,46 @@
         break;
       }
       case 'squish': stats.squish++; DK.Audio.play('squish'); break;
-      case 'ahead': {
-        stats.ahead++;
-        DK.Audio.play('ahead');
-        // "One at a time!" ≤ once per 6 s, never over a protected / count line
-        const now = performance.now();
-        if (now - lastAhead > 6000 && canInterrupt()) { lastAhead = now; const t = T('ahead'); speak(t, { interrupt: !speaking() || canInterrupt() }); }
-        break;
-      }
       case 'soft': stats.soft++; DK.Audio.play('soft'); break;
       case 'hint': {
         stats.hints++;
         DK.Audio.play('hint');
-        // the pointer line was already said with the miss; else (3 soft presses) a priority line, never dropped as stale
-        if (!e.idle && !hintBySay) speak(T('hint'), { priority: true });
+        // the pointer line was already said with the miss; else (no-progress presses) a priority line
+        if (!e.idle && !hintBySay) speak(T('hint'), { priority: true, tag: 'hint' });
         hintBySay = false;
         break;
       }
       case 'assistArmed': DK.Audio.play('hint'); break;
       case 'assist': stats.assists++; break;
       case 'idle':
-        if (++idleSaid <= 4) speak(T('idle') + ' ' + currentPrompt());   // then stay quiet: maybe nobody is there
-        else if (idleSaid >= 5 && !bot) pause();   // ≈ 2 min without a touch: nobody is playing — pause
+        if (++idleSaid <= 4) {
+          if (world.phase === 'pump') speak(T('pumpAsk'), { tag: 'idle' });
+          else speak(T('idle') + ' ' + currentPrompt(), { tag: 'idle' });
+        } else if (idleSaid >= 5 && !bot) pause();   // ≈ 2 min without a touch: nobody is playing — pause
         break;
-      case 'pokeNim': {
+      case 'pokeMimi': {
         stats.pokes++;
         DK.Audio.play('giggle');
-        // only a question that can still be answered is repeated: during the rise / a hop / the bank / the wipe / a count line
-        // Nim just giggles — and never over another line, so nothing is cut
-        // (the world sends the question's fields when it can still be answered; Nim's own little poke hop is under way by now,
-        // so world.interactive is false for a moment — the event itself says the question is open)
-        const open = !e.busy && !!e.promptKey && world.state === 'round' && world.phase === 'play' && world.row < (world.cur ? world.cur.k : 0);
-        if (!open || !lastAsk) { if (!speaking() && canInterrupt() && performance.now() - lastTapSay > 2000) { lastTapSay = performance.now(); speak(T('poke')); } break; }
+        // only a question that can still be answered is repeated; otherwise Mimi just giggles — never over another line
+        const open = !e.busy && !!e.promptKey && world.state === 'round' && world.phase === 'play' && world.launch < (world.cur ? world.cur.k : 0);
+        if (!open || !lastAsk) { if (quiet() && performance.now() - lastTapSay > 2000) { lastTapSay = performance.now(); speak(T('poke'), { tag: 'poke' }); } break; }
         askAgain(true);
         break;
       }
       case 'gust': stats.gusts++; DK.Audio.play('gust'); break;
-      case 'fish': case 'frog': case 'snow': {
-        if (e.type === 'fish' && e.n > 1) { DK.Audio.play('splash', { big: true }); break; }   // the 2nd leap: only the splash
+      case 'marmot': case 'goat': case 'bird': {
         stats.surprises++;
-        DK.Audio.play(e.type === 'fish' ? 'splash' : e.type === 'frog' ? 'croak' : 'twinkle', { big: true });
-        if (canInterrupt()) speak(T('surprise.' + e.type));   // queued, never over a protected prompt
+        DK.Audio.play(e.type === 'marmot' ? 'whistle' : e.type === 'goat' ? 'bleat' : 'chirp');
+        if (canInterrupt()) speak(T('surprise.' + e.type), { tag: 'surprise' });   // queued, never over a protected prompt
         break;
       }
-      case 'fishTap': case 'frogTap': case 'snowTap': {
+      case 'marmotTap': case 'goatTap': case 'birdTap': {
         const k = e.type.replace('Tap', '');
         stats[k + 'Taps']++;
-        DK.Audio.play(k === 'fish' ? 'splash' : k === 'frog' ? 'croak' : 'twinkle', { big: true });
-        render.burst('sparkles', e.x, e.y, { n: 8, color: k === 'snow' ? '#FFFFFF' : null });
+        DK.Audio.play(k === 'marmot' ? 'whistle' : k === 'goat' ? 'bleat' : 'chirp');
+        render.burst('sparkles', e.x, e.y, { n: 8 });
         const now = performance.now();
-        if (now - lastTapSay > 2000 && canInterrupt() && !speaking()) { lastTapSay = now; speak(T(k + '.tap'), { interrupt: true }); }
+        if (now - lastTapSay > 2000 && quiet()) { lastTapSay = now; speak(T(k + '.tap'), { tag: 'tap' }); }
         break;
       }
       case 'talk': DK.UI.fadeBubble(false); DK.UI.say(''); DK.Audio.setFanfare(false); DK.UI.setDots(world.roundsPerLevel || 4, world.roundsPerLevel || 4); openTalk(e.talk || world.talk); break;
@@ -501,7 +534,7 @@
         stats.talks++; if (e.correct) stats.talkRight++;
         DK.UI.markTalk(e.choiceId, e.answerId);
         const tk = world.talk, ans = (tk && tk.choices.find(c => c.id === e.answerId)) || {};
-        const kind = () => (DK.I18N.talkWrong ? DK.I18N.talkWrong(curLang(), ans, tk) : T('talk.wrong.any'));
+        const kind = () => (DK.I18N.talkWrong ? DK.I18N.talkWrong(curLang(), ans.thing || ans, tk) : T('talk.wrong.any'));
         if (e.auto) { speak(kind(), { interrupt: true }); break; }
         if (e.correct) {
           DK.Audio.play('talkRight');
@@ -522,7 +555,7 @@
       case 'sessionDone': {
         DK.Audio.play('party'); DK.Audio.setFanfare(false);
         if (weather.setParty) weather.setParty(true);
-        render.setGallery(sessionFruits.slice());
+        render.setGallery(sessionPennants.slice());
         render.burst('confetti', 0, 0);
         progress.totalStars += e.stars || 0; progress.sessions++;
         DK.Storage.setJSON('progress', progress);
@@ -558,7 +591,7 @@
     if (DK.Voice.stop) DK.Voice.stop();
     DK.Audio.play('listen');
     DK.UI.setListening(true, T('ui.listening'));
-    const choices = talk.choices.map(c => ({ id: c.id, words: DK.I18N.choiceWords ? DK.I18N.choiceWords(curLang(), c) : [] }));
+    const choices = talk.choices.map(c => ({ id: c.id, words: DK.I18N.choiceWords ? DK.I18N.choiceWords(curLang(), c.thing || c) : [] }));
     DK.Voice.listen({ lang: curLang(), choices, timeoutMs: 6000 }).then(res => {
       DK.UI.setListening(false, T('ui.tapOrSay'));
       if (world.state !== 'talk') return;
@@ -590,7 +623,7 @@
         left -= st;
       }
     }
-    bubbleOverNim();
+    bubbleOverArt();
     weather.update(dt * Math.min(speed, 4), {});
     const sp = speaking();
     DK.Audio.duck(sp);
@@ -598,18 +631,36 @@
     render.draw(world, weather, { dt: dt * Math.min(speed, 4), lang: curLang(), title: mode === 'title' || mode === 'loading', speaking: sp, done: mode === 'done', debug: FLAGS.debug });
     adapt(raw);
   }
-  /** safety net (visual QA P1-1): the DOM speech bubble fades while Nim's art reaches under it (a top-row stone, a high hop) */
+  /** safety net: the DOM speech bubble steps back while the rocket (+ its canopy) flies under it, or Mimi reaches under it */
   let bubbleUnder = false;
-  function bubbleOverNim() {
+  function bubbleOverArt() {
     let on = false;
-    if (mode === 'play' && world.nim && world.layout && world.layout.bubble) {
-      const n = world.nim, B = world.layout.bubble, k = (n.h || world.layout.nimH) / 300, P = DK.NIM_POINTS || { feet: [150, 290], box: [14, 50, 296, 292] };
-      const x0 = n.x - (P.feet[0] - P.box[0]) * k, x1 = n.x + (P.box[2] - P.feet[0]) * k, y0 = n.y - (P.feet[1] - P.box[1]) * k * Math.max(1, n.sy || 1);
+    if (mode === 'play' && world.layout && world.layout.bubble && world.state === 'round') {
+      const B = world.layout.bubble;
       const bb = $('bubble').offsetHeight ? Math.min(B.h, $('bubble').offsetHeight / view.s) : B.h;   // the bubble's real (shrunk) height
-      on = y0 < B.y + bb && x1 > B.x && x0 < B.x + B.w && n.y > B.y;
+      const r = world.rocket;
+      if (r && (r.state === 'boost' || r.state === 'coast' || r.state === 'chute')) {
+        const top = r.top != null ? r.top : r.noseY - 120, w = 0.5 * 240 * (r.s || 0.53) * Math.max(0.4, r.chute || 0);
+        on = top < B.y + bb && r.noseX + w + 30 > B.x && r.noseX - w - 30 < B.x + B.w;
+      }
+      const n = world.mimi;
+      if (!on && n) {
+        const k = (n.h || world.layout.mimiH) / 300, P = DK.MIMI_POINTS || { feet: [150, 290], box: [40, 28, 284, 292] };
+        const x0 = n.x - (P.feet[0] - P.box[0]) * k, x1 = n.x + (P.box[2] - P.feet[0]) * k, y0 = n.y - (P.feet[1] - P.box[1]) * k * Math.max(1, n.sy || 1);
+        on = y0 < B.y + bb && x1 > B.x && x0 < B.x + B.w && n.y > B.y;
+      }
     }
     if (on !== bubbleUnder) { bubbleUnder = on; DK.UI.bubbleUnder(on); }
+    // the HUD pills step back too while the canopy floats under them (the flight always stays visible)
+    let hu = false;
+    const r = world.rocket, Hd = (world.hudKeep && world.hudKeep[0]) || (world.layout && world.layout.hud);
+    if (mode === 'play' && Hd && r && (r.state === 'boost' || r.state === 'coast' || r.state === 'chute')) {
+      const top = r.top != null ? r.top : r.noseY - 120, w = 0.5 * 240 * (r.s || 0.53) * Math.max(0.4, r.chute || 0);
+      hu = top < Hd.y + Hd.h + 10 && r.noseX + w + 20 > Hd.x && r.noseX - w - 20 < Hd.x + Hd.w;
+    }
+    if (hu !== hudUnder) { hudUnder = hu; $('hud').classList.toggle('under', hu); }
   }
+  let hudUnder = false;
   let fastAcc = 0;
   function adapt(raw) {  // adaptive quality: step the render scale down when frames stay slow, back up after 10 s of fast ones
     if (raw > 0.5) return;
@@ -622,23 +673,24 @@
   /* ---------- input ---------- */
   function toLogical(cx, cy) { return { x: (cx - view.left) / view.s, y: (cy - view.top) / view.s }; }
   function repeatPrompt(force) {
-    // only while the question can still be answered (never during a hop / the bank: that would cut the right line / count)
-    if ((!world.interactive && !force) || !lastAsk) return;
+    // only while the question can still be answered (never during the flight / the camp: that would cut a count)
+    if ((!world.interactive && !force) || !lastAsk || world.phase !== 'play') return;
     DK.Audio.play('click');
-    nimMood('talk', 1.0);
+    mimiMood('talk', 1.0);
     const cp = currentPrompt(); promptUntil = 0; DK.UI.say(cp); speakPrompt(cp, { interrupt: true });
   }
-  /** a Nim / speech-bubble tap while the question can be answered (VOICE §1.1 rule 4): never cut a protected prompt, wrong or
-   *  count line — queue the question ONCE to follow it; never restart the question while Nim is still saying it */
+  /** a Mimi / speech-bubble tap while the question can be answered (VOICE §3 rule 4): never cut a protected prompt, wrong,
+   *  count or pump line — queue the question ONCE to follow it; never restart the question while Mimi is still saying it */
   function askAgain(force) {
-    if ((!world.interactive && !force) || !lastAsk) return;
+    if ((!world.interactive && !force) || !lastAsk || world.phase !== 'play') return;
     if (speaking() && lastSpoken === lastPromptText) return;
     if (guarded.some(g => g.kind === 'count')) return;   // count numbers still to come: never queue the question behind them
+    if (DK.Voice && DK.Voice.currentTag && DK.Voice.currentTag() === 'pump') return;
     if (!canInterrupt()) {
       if (pendingPrompt || promptQueued) return;   // the question is still to come
       const now = performance.now();
       if (now - promptStart < 3000) return;
-      promptQueued = true; nimMood('talk', 1.0);
+      promptQueued = true; mimiMood('talk', 1.0);
       const cp = currentPrompt(); DK.UI.say(cp); speakPrompt(cp, { priority: true });
       return;
     }
@@ -650,14 +702,15 @@
 
   function bindUI() {
     DK.Input.kidProof();
-    DK.UI.guardScreenClicks();   // a finger held on the canvas never clicks a screen that opens under it (QA-F P2-1)
-    // Input passes two NUMBERS in logical px (never a point object) — VOICE §4
+    DK.UI.guardScreenClicks();   // a finger held on the canvas never clicks a screen that opens under it
+    // Input passes two NUMBERS in logical px (never a point object) — VOICE §5; in the pump phase every finger is a stomp
     inputCancel = DK.Input.attach($('game'), {
       toLogical,
       down: (x, y) => { if (mode === 'play' && !bot && performance.now() >= inputBlockUntil) world.pointerDown(x, y); },   // judged at once
-      move: (x, y) => { if (mode === 'play' && !bot) world.pointerMove(x, y); },   // delivered (the world ignores it in play)
+      move: (x, y) => { if (mode === 'play' && !bot) world.pointerMove(x, y); },
       up: (x, y) => { if (mode === 'play' && !bot) world.pointerUp(x, y); },
-      cancel: () => { if (world.cancelDrag) world.cancelDrag(); }
+      cancel: () => { if (world.cancelDrag) world.cancelDrag(); },
+      rapidTaps: () => mode === 'play' && world.state === 'round' && world.phase === 'pump'
     });
     const unlock = () => { DK.Audio.unlock(); if (DK.Voice) DK.Voice.unlock(); };
     ['touchend', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, unlock, { capture: true, passive: true }));
@@ -734,10 +787,12 @@
       get voiceLog() { return (DK.Voice && DK.Voice.log) || []; },
       getState() {
         return { mode, state: world.state, phase: world.phase, level: world.level, topic: world.topic, round: world.round,
-          stars: world.stars, misses: world.misses, interactive: world.interactive,
-          row: world.row, nim: world.nim ? { state: world.nim.state, onRow: world.nim.onRow, x: world.nim.x, y: world.nim.y } : null,
-          stones: (world.stones || []).map(s => ({ id: s.id, row: s.row, state: s.state, target: s.target, visited: !!s.visited, kind: s.thing && s.thing.kind })),
-          surprise: world.surprise, weather: weather.ambient && weather.ambient.mood, W: view.W, H: view.H, ins: view.ins, settings: Object.assign({}, S), speed };
+          stars: world.stars, misses: world.misses, interactive: world.interactive, launch: world.launch, k: world.cur ? world.cur.k : 0,
+          mimi: world.mimi ? { state: world.mimi.state, frame: world.mimi.frame, x: world.mimi.x, y: world.mimi.y, onPump: world.mimi.onPump } : null,
+          rocket: world.rocket ? { state: world.rocket.state, x: world.rocket.x, y: world.rocket.y, chute: world.rocket.chute } : null,
+          mats: (world.mats || []).map(m => ({ id: m.id, launch: m.launch, state: m.state, target: m.target, visited: !!m.visited, kind: m.thing && m.thing.kind })),
+          pennants: (world.pennants || []).length, surprise: world.surprise, weather: weather.ambient && weather.ambient.mood,
+          W: view.W, H: view.H, ins: view.ins, settings: Object.assign({}, S), speed };
       },
       setSpeed(n) { speed = Math.max(0.1, +n || 1); applyAudio(); },
       startGame, goTitle,
@@ -745,11 +800,12 @@
       setAutoRestart(on) { autoRestart = !!on; },
       gotoLevel(i) { world.startLevel(i); },
       view: () => view, render: () => render,
-      stoneScreen(id) { return circ(world.stoneHit ? world.stoneHit(id) : null); },
-      nimScreen() { return box(world.nimHit ? world.nimHit() : null); },
-      fishScreen() { return circ(world.fishHit ? world.fishHit() : null); },
-      frogScreen() { return circ(world.frogHit ? world.frogHit() : null); },
-      snowScreen() { return circ(world.snowHit ? world.snowHit() : null); },
+      matScreen(id) { return circ(world.matHit ? world.matHit(id) : null); },
+      mimiScreen() { return box(world.mimiHit ? world.mimiHit() : null); },
+      pumpScreen() { return circ(world.pumpHit ? world.pumpHit() : null); },
+      marmotScreen() { return circ(world.marmotHit ? world.marmotHit() : null); },
+      goatScreen() { return circ(world.goatHit ? world.goatHit() : null); },
+      birdScreen() { return circ(world.birdHit ? world.birdHit() : null); },
       answer() { return world.answer ? world.answer() : null; },
       targets() { return world.targets ? world.targets() : []; },
       toScreen(x, y) { return { x: view.left + x * view.s, y: view.top + y * view.s }; },
@@ -768,7 +824,7 @@
     render = new DK.Renderer($('game')); DK.render = render;
     world = new DK.World({ seed: FLAGS.seed != null ? FLAGS.seed : (Date.now() & 0x7fffffff), age: curAge(), lang: curLang() });
     weather = new DK.Weather({ width: 960, height: 720, seed: 11 });
-    weather.windSource = world;   // leaves / petals / snow move with the same gusts as the stones
+    weather.windSource = world;   // leaves / petals / rain slant with the same wind and gusts as the parachute
     hooks();
     bindUI();
     applySize();

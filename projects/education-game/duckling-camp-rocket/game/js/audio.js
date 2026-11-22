@@ -1,27 +1,28 @@
-/* DK.Audio (Nim's River Hop) — every sound is synthesized with WebAudio (no files to license or download), DESIGN §7.
- * Stones rise out of the brook (a soft "plop" + bubbles), Nim hops (a springy "boing", pitch up) and lands (a wooden-stone
- * "tok" + a water "plip"), splash, wrong (a soft low "blub-wobble", never a buzzer), ahead (a tiny bloop), a soft tap on the
- * water (plink), count pips rising, curl ("whirr"), the fruit sticks on his spines (a soft "pomf" + crunch), uncurl ("ta-da"
- * sparkle), the wipe (an airy whoosh), autumn gusts, the fish splash, the frog croak, snow twinkles, Nim's giggle.
- * Ambience = a gentle brook (band-passed babbling noise) + per season: spring birds, summer insects, autumn wind, winter soft
- * chimes; a music bed per season of kalimba / marimba plucks, ducked under speech and under the celebration (setFanfare).
+/* DK.Audio (Mimi's Splash Rocket) — every sound is synthesized with WebAudio (no files to license or download), DESIGN §7.
+ * A mat unfolds (a soft cloth "fwump"), a right tap (a bright bloop), the launcher aims (a ratchet click), each pump stomp (a
+ * squeaky "pff" rising in pitch per stomp + bubbling water), launch (a water WHOOSH: filtered noise burst + rising tone), the
+ * parachute pops ("fwap"), landing ("pomf" + splash), wrong (a soft low "blub-wobble", never a buzzer), soft (a grass tick),
+ * fold (cloth flap), pennant (a rope zip up + ding), count pips rising, the fountain (sparkling spray), the rocket hops home
+ * (boing), the marmot's whistle, the goat's bleat, the bird's chirp, gusts, the wipe, Mimi's giggle-quack.
+ * Ambience per mood: sunny = a light air bed + birds, breezy = wind swells, rain = a patter bed + drips, rainbow = soft chimes;
+ * a music bed per mood of ukulele / marimba plucks, ducked under speech and under the celebration (setFanfare).
  * Chain (skill rule — phones are quiet): sfx / music / amb → master (mute) → compressor (−18 dB, knee 12, 4:1, 4 ms,
  * 180 ms) → user volume × 1.6 makeup → speakers. iOS: unlock() inside the first touchend/click also switches the audio
  * session to 'playback' (media volume, plays with the side switch on). */
 (function (DK) {
   'use strict';
   const NOTE = n => 440 * Math.pow(2, (n - 69) / 12);
-  // gentle beds, all in C major pentatonic-ish so every reward chime fits
+  // gentle camp beds, all in C major so every reward chime fits: sunny ukulele, breezy marimba, rain soft marimba, rainbow bells
   const MUSIC = [
-    { root: 60, tempo: 96, prog: [[0, 4, 7], [5, 9, 12], [-3, 0, 4], [7, 11, 14]], lead: 'marimba', swing: 0.06 },   // spring: marimba
-    { root: 60, tempo: 104, prog: [[0, 4, 7], [9, 12, 16], [5, 9, 12], [7, 11, 14]], lead: 'kalimba', swing: 0.08 },  // summer: kalimba
-    { root: 60, tempo: 88, prog: [[0, 4, 7], [-3, 0, 4], [5, 9, 12], [7, 11, 14]], lead: 'marimba', swing: 0.05 },    // autumn
-    { root: 60, tempo: 76, prog: [[0, 4, 7], [-3, 0, 4], [-7, -3, 0], [-5, -1, 2]], lead: 'bell', swing: 0 }         // winter: soft bells
+    { root: 60, tempo: 100, prog: [[0, 4, 7], [5, 9, 12], [-3, 0, 4], [7, 11, 14]], lead: 'uke', swing: 0.08 },        // sunny: ukulele
+    { root: 60, tempo: 108, prog: [[0, 4, 7], [9, 12, 16], [5, 9, 12], [7, 11, 14]], lead: 'marimba', swing: 0.06 },   // breezy: marimba
+    { root: 60, tempo: 88, prog: [[0, 4, 7], [-3, 0, 4], [5, 9, 12], [7, 11, 14]], lead: 'marimba', swing: 0.04 },     // rain
+    { root: 60, tempo: 84, prog: [[0, 4, 7], [-3, 0, 4], [-7, -3, 0], [-5, -1, 2]], lead: 'bell', swing: 0 }           // rainbow: soft bells
   ];
-  // season air under the brook: [noise lowpass Hz, gain, LFO depth] — spring air, a summer breeze, autumn wind, still winter
-  const AMB = [[600, 0.012, 0.006], [760, 0.018, 0.012], [440, 0.03, 0.024], [360, 0.01, 0.005]];
-  // the brook itself: [band-pass Hz, gain] per season (winter: quieter, under the ice rims)
-  const BROOK = [[1300, 0.03], [1200, 0.028], [1150, 0.03], [1000, 0.018]];
+  // the air under everything: [noise lowpass Hz, gain, LFO depth] — sunny air, breezy wind, rain hush, still rainbow
+  const AMB = [[600, 0.012, 0.006], [520, 0.03, 0.024], [900, 0.012, 0.004], [420, 0.01, 0.005]];
+  // a second bed: [band-pass Hz, gain] — only the rain has a real patter (a fast-wandering high band)
+  const BED = [[2600, 0.0], [1800, 0.004], [2400, 0.034], [2600, 0.0]];
   const SCALE = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24, 26, 28];
 
   const A = {
@@ -96,13 +97,13 @@
       const lfo2 = c.createOscillator(), lg2 = c.createGain(); lfo2.frequency.value = 0.07; lg2.gain.value = 80;
       lfo2.connect(lg2); lg2.connect(f.frequency);
       s.connect(f); f.connect(g); g.connect(this.amb);
-      // the brook: band-passed noise whose centre wanders quickly (babbling water) and whose level breathes slowly
-      const bk = BROOK[this.mood] || BROOK[0];
+      // the patter bed (rain): band-passed noise whose centre wanders quickly and whose level breathes slowly
+      const bk = BED[this.mood] || BED[0];
       const bs = c.createBufferSource(); bs.buffer = this.noiseBuf; bs.loop = true; bs.playbackRate.value = 0.93;
       const bf = c.createBiquadFilter(); bf.type = 'bandpass'; bf.frequency.value = bk[0]; bf.Q.value = 0.9;
       const bf2 = c.createBiquadFilter(); bf2.type = 'highshelf'; bf2.frequency.value = 3000; bf2.gain.value = -10;
-      const bg = c.createGain(); bg.gain.value = bk[1];
-      const blf = c.createOscillator(), blg = c.createGain(); blf.type = 'triangle'; blf.frequency.value = 2.7; blg.gain.value = 380;
+      const bg = c.createGain(); bg.gain.value = Math.max(0.0001, bk[1]);
+      const blf = c.createOscillator(), blg = c.createGain(); blf.type = 'triangle'; blf.frequency.value = 7.3; blg.gain.value = 700;
       blf.connect(blg); blg.connect(bf.frequency);
       const blf2 = c.createOscillator(), blg2 = c.createGain(); blf2.frequency.value = 0.19; blg2.gain.value = bk[1] * 0.35;
       blf2.connect(blg2); blg2.connect(bg.gain);
@@ -121,22 +122,21 @@
       if (!this.ctx || !this._playing || this.muted || !this.sfxOn) return;
       this._bubT -= dt || 0;
       if (this._bubT > 0) return;
-      if (this.mood === 0) {            // spring: little birds, often
+      if (this.mood === 0) {            // sunny: little birds in the pines, often
         this._bubT = 2.2 + Math.random() * 3.5;
         this.chirp(2400 + Math.random() * 1200, 2 + (Math.random() * 2 | 0), 0.035);
-      } else if (this.mood === 1) {     // summer: insects — a cricket trill, a bee buzzing by, or a far bird
-        this._bubT = 2.6 + Math.random() * 3.5;
-        const k = Math.random();
-        if (k < 0.4) this.cricket(0.035);
-        else if (k < 0.75) this.buzz(0.9 + Math.random() * 0.6, { vol: 0.026, dest: this.amb });
-        else this.chirp(2600 + Math.random() * 900, 2, 0.026);
-      } else if (this.mood === 2) {     // autumn: a soft wind swell now and then
-        this._bubT = 4 + Math.random() * 4;
-        this.noise(2.2, { vol: 0.03, type: 'lowpass', f0: 280, f1: 620, q: 0.6, attack: 0.9, dest: this.amb });
-      } else {                          // winter: a soft high chime, rarely
-        this._bubT = 5 + Math.random() * 5;
-        const n = [84, 86, 88, 91, 93][(Math.random() * 5) | 0];
-        this.bell(NOTE(n), 1.2, { vol: 0.022, dest: this.amb });
+      } else if (this.mood === 1) {     // breezy: a wind swell now and then, a far bird
+        this._bubT = 3 + Math.random() * 3.5;
+        if (Math.random() < 0.75) this.noise(2.2, { vol: 0.035, type: 'lowpass', f0: 280, f1: 700, q: 0.6, attack: 0.9, dest: this.amb });
+        else this.chirp(2600 + Math.random() * 900, 2, 0.022);
+      } else if (this.mood === 2) {     // rain: drips on the tents (little plinks)
+        this._bubT = 0.5 + Math.random() * 1.2;
+        const f = 1400 + Math.random() * 1600;
+        this.tone(f, 0.05, { type: 'sine', vol: 0.025, slideTo: f * 1.6, attack: 0.002, dest: this.amb });
+      } else {                          // rainbow: a soft high chime + a bird, gently
+        this._bubT = 3.5 + Math.random() * 4;
+        if (Math.random() < 0.6) { const n = [84, 86, 88, 91, 93][(Math.random() * 5) | 0]; this.bell(NOTE(n), 1.2, { vol: 0.024, dest: this.amb }); }
+        else this.chirp(2500 + Math.random() * 1000, 3, 0.028);
       }
     },
     cricket(vol) { for (let i = 0; i < 6; i++) this.tone(4300 + (i % 2) * 120, 0.03, { type: 'sine', vol, at: i * 0.055, attack: 0.003, dest: this.amb }); },
@@ -208,91 +208,104 @@
       this.tone(f * 2.01, dur * 0.35, { type: 'sine', vol: vol * 0.14, at, attack: 0.002, dest });
     },
 
+    /* a ukulele-ish pluck: a triangle with a fast-decaying bright partial and a soft body */
+    uke(f, dur, { vol = 0.12, at = 0, dest = null } = {}) {
+      this.tone(f, dur, { type: 'triangle', vol, at, attack: 0.002, dest });
+      this.tone(f * 2, dur * 0.4, { type: 'sine', vol: vol * 0.35, at, attack: 0.002, dest });
+      this.tone(f * 3, Math.min(0.08, dur * 0.25), { type: 'sine', vol: vol * 0.15, at, attack: 0.001, dest });
+    },
     play(name, opt = {}) {
       if (!this.ctx || this.muted || !this.sfxOn) return;
       const now = this.ctx.currentTime;
-      const gap = { rise: 0.07, hop: 0.1, land: 0.1, splash: 0.12, pip: 0.08, twinkle: 0.12, wrong: 0.18, squish: 0.15, soft: 0.08,
-        ahead: 0.15, gust: 1.0, wipe: 0.5, giggle: 0.3, badge: 0.1, croak: 0.25, sparkle: 0.08, curl: 0.3, stick: 0.2, uncurl: 0.3 }[name];
+      const gap = { unfold: 0.07, aim: 0.2, pump: 0.08, launch: 0.4, chute: 0.3, land: 0.15, splash: 0.12, pip: 0.08, wrong: 0.18,
+        squish: 0.15, soft: 0.08, fold: 0.1, pennant: 0.2, fountain: 0.5, hopBack: 0.12, gust: 1.0, wipe: 0.5, giggle: 0.3,
+        badge: 0.1, whistle: 0.3, bleat: 0.4, chirp: 0.2, sparkle: 0.08 }[name];
       if (gap && now - (this._lastPlay[name] || 0) < gap) return;   // staggered, never a buzz
       this._lastPlay[name] = now;
       const r = 1 + (Math.random() - 0.5) * 0.08;
       switch (name) {
-        case 'rise':     // a stone rises out of the brook: a soft low "plop" + a few little bubbles
-          this.tone(180 * r, 0.14, { type: 'sine', vol: 0.22, slideTo: 420 * r, attack: 0.004 });
-          this.noise(0.12, { vol: 0.05, type: 'lowpass', f0: 900, f1: 400, q: 0.7, attack: 0.004 });
-          for (let i = 0; i < 3; i++) this.tone((520 + i * 160) * r, 0.05, { type: 'sine', vol: 0.06, slideTo: (900 + i * 220) * r, attack: 0.002, at: 0.08 + i * 0.06 });
+        case 'unfold':   // a picnic mat unrolls: a soft cloth "fwump"
+          this.noise(0.16, { vol: 0.1, type: 'lowpass', f0: 900, f1: 260, q: 0.7, attack: 0.01 });
+          this.tone(150 * r, 0.12, { type: 'sine', vol: 0.16, slideTo: 95 * r, attack: 0.006 }); break;
+        case 'right':    // a right mat: a bright two-note bloop
+          this.tone(520 * r, 0.12, { type: 'sine', vol: 0.24, slideTo: 880 * r, attack: 0.004 });
+          this.bell(NOTE(84), 0.4, { vol: 0.12, at: 0.08 }); this.bell(NOTE(91), 0.45, { vol: 0.1, at: 0.16 }); break;
+        case 'aim':      // the launcher tilts: a little ratchet click-click-click
+          for (let i = 0; i < 4; i++) this.noise(0.02, { vol: 0.09, type: 'bandpass', f0: 3200 - i * 200, q: 4, attack: 0.001, at: i * 0.05 });
           break;
-        case 'hop': {    // Nim takes off: a springy "boing" sliding up (opt.pitch: higher for later rows)
-          const p = (opt.pitch || 1) * r;
-          this.tone(260 * p, 0.26, { type: 'sine', vol: 0.24, slideTo: 620 * p, attack: 0.006, vib: 16, vibHz: 18 });
-          this.tone(520 * p, 0.12, { type: 'triangle', vol: 0.05, slideTo: 1100 * p, attack: 0.004 }); break; }
-        case 'land':     // a wooden-stone "tok" + a little water "plip" (opt.bank: a soft grass thump instead of the plip)
-          this.tone(820 * r, 0.05, { type: 'triangle', vol: 0.26, slideTo: 560 * r, attack: 0.001 });
-          this.tone(310 * r, 0.07, { type: 'sine', vol: 0.2, slideTo: 220 * r, attack: 0.001 });
-          if (opt.bank) this.noise(0.1, { vol: 0.08, type: 'lowpass', f0: 500, f1: 200, q: 0.6, attack: 0.003 });
-          else this.tone(1100 * r, 0.07, { type: 'sine', vol: 0.1, slideTo: 2000 * r, attack: 0.002, at: 0.05 });
-          break;
-        case 'splash': { // water splash (the fish leaps: a bit bigger)
+        case 'pump': {   // a stomp: a squeaky "pff" rising per stomp + bubbling water in the bottle
+          const k = 1 + 0.16 * Math.max(0, (opt.n || 1) - 1);
+          this.noise(0.18, { vol: 0.12, type: 'bandpass', f0: 900 * k, f1: 2200 * k, q: 1.4, attack: 0.01 });
+          this.tone(330 * k * r, 0.16, { type: 'triangle', vol: 0.12, slideTo: 620 * k * r, attack: 0.006 });
+          for (let i = 0; i < 4; i++) this.tone((600 + i * 140) * k * r, 0.05, { type: 'sine', vol: 0.06, slideTo: (1100 + i * 200) * k * r, attack: 0.002, at: 0.1 + i * 0.05 });
+          break; }
+        case 'launch':   // the water WHOOSH: a filtered noise burst sweeping up + a rising tone
+          this.noise(0.75, { vol: 0.22, type: 'bandpass', f0: 500, f1: 3600, q: 0.8, attack: 0.02 });
+          this.noise(0.5, { vol: 0.1, type: 'highpass', f0: 2500, f1: 6000, q: 0.5, attack: 0.01 });
+          this.tone(220 * r, 0.6, { type: 'sine', vol: 0.16, slideTo: 900 * r, attack: 0.01 }); break;
+        case 'chute':    // the parachute pops open: "fwap"
+          this.noise(0.12, { vol: 0.18, type: 'bandpass', f0: 700, f1: 1500, q: 1.1, attack: 0.003 });
+          this.tone(260 * r, 0.1, { type: 'triangle', vol: 0.14, slideTo: 180 * r, attack: 0.003 });
+          this.bell(NOTE(88), 0.3, { vol: 0.06, at: 0.08 }); break;
+        case 'land':     // touchdown on the mat: a soft "pomf"
+          this.tone(150 * r, 0.18, { type: 'sine', vol: 0.3, slideTo: 85 * r, attack: 0.004 });
+          this.noise(0.12, { vol: 0.08, type: 'lowpass', f0: 700, f1: 250, q: 0.7, attack: 0.003 }); break;
+        case 'splash': { // water splash
           const k = opt.big ? 1.4 : 1;
           this.noise(0.28 * k, { vol: 0.12 * k, type: 'bandpass', f0: 2400, f1: 900, q: 0.8, attack: 0.004 });
           this.noise(0.18, { vol: 0.06, type: 'highpass', f0: 4200, q: 0.5, attack: 0.002, at: 0.02 });
           this.tone(700 * r, 0.06, { type: 'sine', vol: 0.08, slideTo: 1400 * r, attack: 0.002, at: 0.04 }); break; }
-        case 'wrong':    // a soft low "blub-wobble" (the stone wobbles in the water), never a buzzer
+        case 'wrong':    // a soft low "blub-wobble" (the mat ripples), never a buzzer
           this.tone(200 * r, 0.34, { type: 'sine', vol: 0.24, slideTo: 140 * r, attack: 0.01, vib: 20, vibHz: 9 });
-          this.tone(320 * r, 0.1, { type: 'sine', vol: 0.08, slideTo: 520 * r, attack: 0.004, at: 0.06 });
-          this.tone(300 * r, 0.1, { type: 'sine', vol: 0.06, slideTo: 480 * r, attack: 0.004, at: 0.16 }); break;
-        case 'squish':   // the same stone again / a stone poked mid-hop: only a small wobble
+          this.tone(320 * r, 0.1, { type: 'sine', vol: 0.08, slideTo: 520 * r, attack: 0.004, at: 0.06 }); break;
+        case 'squish':   // the same mat again: only a small wobble
           this.tone(240 * r, 0.18, { type: 'sine', vol: 0.12, slideTo: 180 * r, attack: 0.008, vib: 16, vibHz: 10 }); break;
-        case 'ahead':    // a stone further on: a tiny bloop
-          this.tone(420 * r, 0.09, { type: 'sine', vol: 0.14, slideTo: 640 * r, attack: 0.003 }); break;
-        case 'soft':     // a press on the water / the bank: a little "plink"
-          this.tone(1500 * r, 0.07, { type: 'sine', vol: 0.09, slideTo: 2300 * r, attack: 0.002 });
-          this.tone(900 * r, 0.05, { type: 'sine', vol: 0.04, slideTo: 1300 * r, attack: 0.002, at: 0.03 }); break;
-        case 'pip': {    // a dot / stone counted: pips rising up the scale
+        case 'soft':     // a press on the grass: a little tick
+          this.noise(0.04, { vol: 0.08, type: 'bandpass', f0: 2600, q: 2, attack: 0.002 });
+          this.tone(1500 * r, 0.05, { type: 'sine', vol: 0.06, slideTo: 2100 * r, attack: 0.002 }); break;
+        case 'fold':     // the other mats roll up: a cloth flap
+          this.noise(0.14, { vol: 0.08, type: 'bandpass', f0: 1200, f1: 600, q: 1, attack: 0.005 });
+          this.noise(0.1, { vol: 0.05, type: 'bandpass', f0: 1500, f1: 800, q: 1, attack: 0.005, at: 0.08 }); break;
+        case 'pennant':  // a rope zip up the pole + a ding
+          this.noise(0.3, { vol: 0.08, type: 'bandpass', f0: 800, f1: 3200, q: 3, attack: 0.02 });
+          this.bell(NOTE(88 + (opt.i || 0) * 2), 0.5, { vol: 0.13, at: 0.26 }); this.bell(NOTE(95 + (opt.i || 0) * 2), 0.4, { vol: 0.06, at: 0.3 }); break;
+        case 'pip': {    // a pinecone / a flag counted: pips rising up the scale
           const k = Math.min(opt.i || 1, 12), f = NOTE(72 + SCALE[Math.min(k - 1, SCALE.length - 1)]);
           this.tone(f, 0.16, { type: 'triangle', vol: 0.22, attack: 0.003 }); this.tone(f * 2, 0.08, { type: 'sine', vol: 0.07, attack: 0.002 }); break; }
-        case 'sparkle':  // the thing on the stone twinkles away
+        case 'fountain': // sparkling spray: a hiss + a rising glass run
+          this.noise(1.1, { vol: 0.08, type: 'highpass', f0: 3000, f1: 5000, q: 0.5, attack: 0.15 });
+          [0, 4, 7, 12, 16].forEach((n, i) => this.glass(NOTE(84 + n), 0.5, { vol: 0.06, at: 0.1 + i * 0.08 })); break;
+        case 'sparkle':
           [0, 4, 7].forEach((n, i) => this.glass(NOTE(88 + n), 0.3, { vol: 0.05, at: i * 0.05 })); break;
-        case 'curl':     // Nim curls into a ball: a quick rising "whirr"
-          for (let i = 0; i < 6; i++) this.tone((300 + i * 70) * r, 0.05, { type: 'triangle', vol: 0.07, slideTo: (380 + i * 80) * r, attack: 0.003, at: i * 0.035 });
-          this.noise(0.3, { vol: 0.05, type: 'bandpass', f0: 600, f1: 1800, q: 1.4, attack: 0.08 }); break;
-        case 'stick':    // the fruit sticks on his spines: a soft "pomf" + a tiny crunch
-          this.tone(150 * r, 0.16, { type: 'sine', vol: 0.3, slideTo: 90 * r, attack: 0.004 });
-          this.noise(0.1, { vol: 0.06, type: 'lowpass', f0: 700, q: 0.7, attack: 0.003 });
-          for (let i = 0; i < 3; i++) this.noise(0.025, { vol: 0.05, type: 'bandpass', f0: 2600 + i * 500, q: 3, attack: 0.002, at: 0.05 + i * 0.03 });
-          break;
-        case 'uncurl':   // ta-da! a bright little sparkle chord
-          this.kalimba(NOTE(76), 0.35, { vol: 0.16 }); this.kalimba(NOTE(83), 0.4, { vol: 0.15, at: 0.1 });
-          [0, 4, 7, 12].forEach((n, i) => this.glass(NOTE(91 + n), 0.5, { vol: 0.05, at: 0.18 + i * 0.05 })); break;
-        case 'wipe':     // the seasonal swirl sweeps across: an airy whoosh
+        case 'hopBack':  // the rocket hops home: a springy "boing"
+          this.tone(260 * r * (opt.n === 2 ? 1.2 : 1), 0.22, { type: 'sine', vol: 0.18, slideTo: 560 * r, attack: 0.006, vib: 16, vibHz: 18 }); break;
+        case 'wipe':     // the weather sweep: an airy whoosh
           this.noise(0.95, { vol: 0.12, type: 'bandpass', f0: 420, f1: 2400, q: 0.8, attack: 0.25 });
           this.noise(0.8, { vol: 0.05, type: 'highpass', f0: 3000, f1: 5000, q: 0.5, attack: 0.3, at: 0.05 }); break;
-        case 'gust':     // an autumn gust: a low wind swell
+        case 'gust':     // a breezy gust: a low wind swell
           this.noise(1.6, { vol: 0.08, type: 'lowpass', f0: 260, f1: 720, q: 0.7, attack: 0.6 }); break;
-        case 'croak':    // the frog: "ribbit" — two throaty pulses
-          for (let i = 0; i < 2; i++) {
-            this.tone(180 * r, 0.11, { type: 'sawtooth', vol: 0.06, slideTo: 140 * r, attack: 0.01, at: i * 0.15, vib: 30, vibHz: 34 });
-            this.tone(360 * r, 0.09, { type: 'sine', vol: 0.06, slideTo: 260 * r, attack: 0.01, at: i * 0.15 });
-          }
-          break;
-        case 'twinkle':  // a snowflake: a tiny high sparkle
-          [0, 7, 12, 19].forEach((n, i) => this.tone(NOTE(96 + n), 0.18, { vol: 0.06, at: i * 0.05, attack: 0.002 })); break;
-        case 'giggle':   // Nim giggles (poke): "hee-hee" — two little vibrato sweeps
-          this.tone(760 * r, 0.12, { type: 'triangle', vol: 0.1, slideTo: 980 * r, attack: 0.01, vib: 30, vibHz: 14 });
-          this.tone(820 * r, 0.14, { type: 'triangle', vol: 0.09, slideTo: 1060 * r, attack: 0.01, vib: 30, vibHz: 14, at: 0.16 }); break;
+        case 'whistle':  // the marmot's whistle: two bright slides
+          this.tone(1800 * r, 0.16, { type: 'sine', vol: 0.12, slideTo: 2600 * r, attack: 0.01 });
+          this.tone(2000 * r, 0.2, { type: 'sine', vol: 0.1, slideTo: 2900 * r, attack: 0.01, at: 0.2 }); break;
+        case 'bleat':    // the goat: a short "meh-eh" with a quick vibrato
+          this.tone(420 * r, 0.42, { type: 'sawtooth', vol: 0.05, slideTo: 380 * r, attack: 0.03, vib: 40, vibHz: 22 });
+          this.tone(840 * r, 0.42, { type: 'sine', vol: 0.06, slideTo: 760 * r, attack: 0.03, vib: 60, vibHz: 22 }); break;
+        case 'chirp':    // the bird sings
+          this.chirp(2800 * r, 3, 0.07); this.chirp(3300 * r, 2, 0.05); break;
+        case 'giggle':   // Mimi giggles: a little "quack-quack" (nasal triangle blips) + a hee
+          for (let i = 0; i < 2; i++) this.tone(560 * r, 0.09, { type: 'square', vol: 0.035, slideTo: 420 * r, attack: 0.006, at: i * 0.14 });
+          this.tone(820 * r, 0.14, { type: 'triangle', vol: 0.08, slideTo: 1060 * r, attack: 0.01, vib: 30, vibHz: 14, at: 0.3 }); break;
         case 'badge': this.tone(880 * r, 0.08, { vol: 0.1, slideTo: 1320 * r, attack: 0.002 }); this.tone(1320 * r, 0.1, { vol: 0.06, at: 0.07, attack: 0.002 }); break;
-        case 'right':    // a right stone: a happy two-note ding (the hop / land sounds follow)
-          this.bell(NOTE(84), 0.45, { vol: 0.12, at: 0.02 }); this.bell(NOTE(91), 0.5, { vol: 0.1, at: 0.11 }); break;
         case 'hint': [0, 4, 7, 12].forEach((n, i) => this.tone(NOTE(88 + n), 0.2, { vol: 0.09, at: i * 0.07 })); break;
         case 'star': this.tone(NOTE(84 + (opt.i || 0) * 4), 0.35, { type: 'triangle', vol: 0.2 }); this.tone(NOTE(96 + (opt.i || 0) * 4), 0.3, { vol: 0.08, at: 0.03 }); break;
         case 'level': [0, 4, 7, 12, 16, 19, 24].forEach((n, i) => this.mallet(NOTE(67 + n), 0.45, { vol: 0.18, at: i * 0.08 })); break;
-        case 'party':    // the session celebration: plops, a rising kalimba run, then bells
+        case 'party':    // the session celebration: whooshes up, a ukulele run, then bells
           for (let i = 0; i < 5; i++) this.tone((300 + i * 90) * r, 0.1, { type: 'sine', vol: 0.1, slideTo: (700 + i * 120) * r, attack: 0.003, at: i * 0.07 });
-          [0, 4, 7, 12, 16, 19, 24].forEach((n, i) => this.kalimba(NOTE(72 + n), 0.5, { vol: 0.14, at: 0.1 + i * 0.09 }));
+          [0, 4, 7, 12, 16, 19, 24].forEach((n, i) => this.uke(NOTE(72 + n), 0.5, { vol: 0.14, at: 0.1 + i * 0.09 }));
           [0, 4, 7, 12, 16, 19, 24].forEach((n, i) => this.bell(NOTE(84 + n), 0.7, { vol: 0.09, at: 0.9 + i * 0.1 })); break;
         case 'chapter': [0, 7, 12].forEach((n, i) => this.bell(NOTE(79 + n), 0.9, { vol: 0.11, at: i * 0.12 })); break;
         case 'click': this.tone(900, 0.05, { vol: 0.12, slideTo: 1300 }); break;
-        case 'gentle': this.tone(520 * r, 0.16, { vol: 0.09, slideTo: 400 * r }); break;   // a Talk answer that is not it
+        case 'gentle': this.tone(520 * r, 0.16, { vol: 0.1, slideTo: 400 * r }); break;   // a Talk answer that is not it
         case 'talkRight': [0, 4, 7, 12].forEach((n, i) => this.kalimba(NOTE(76 + n), 0.35, { vol: 0.2, at: i * 0.08 })); break;
         case 'listen': this.tone(NOTE(81), 0.12, { vol: 0.16 }); this.tone(NOTE(88), 0.12, { vol: 0.16, at: 0.1 }); break;
       }
@@ -305,9 +318,9 @@
       this._phrase = this._makePhrase(i);
       const h = this._hum, am = AMB[i];
       if (h && this.ctx) {
-        const t = this.ctx.currentTime, bk = BROOK[i];
+        const t = this.ctx.currentTime, bk = BED[i];
         h.f.frequency.setTargetAtTime(am[0], t, 1); h.g.gain.setTargetAtTime(am[1], t, 1); h.lg.gain.setTargetAtTime(am[2], t, 1);
-        h.bf.frequency.setTargetAtTime(bk[0], t, 1); h.bg.gain.setTargetAtTime(bk[1], t, 1);
+        h.bf.frequency.setTargetAtTime(bk[0], t, 1); h.bg.gain.setTargetAtTime(Math.max(0.0001, bk[1]), t, 1);
       }
       this.apply();
     },
@@ -359,13 +372,15 @@
       const deg = this._phrase[step];
       if (deg != null) {
         const f = NOTE(m.root + 12 + SCALE[deg]);
-        if (m.lead === 'kalimba') this.kalimba(f, eighth * 2, { vol: 0.12, at, dest: D });
+        if (m.lead === 'uke') this.uke(f, eighth * 2, { vol: 0.12, at, dest: D });
+        else if (m.lead === 'kalimba') this.kalimba(f, eighth * 2, { vol: 0.12, at, dest: D });
         else if (m.lead === 'bell') this.bell(f * 2, eighth * 3, { vol: 0.045, at, dest: D });
         else this.mallet(f, eighth * 1.8, { vol: 0.11, at, dest: D });
       }
     }
   };
-  A.SOUNDS = ['rise', 'hop', 'land', 'splash', 'wrong', 'squish', 'ahead', 'soft', 'pip', 'sparkle', 'curl', 'stick', 'uncurl', 'wipe',
-    'gust', 'croak', 'twinkle', 'giggle', 'badge', 'right', 'hint', 'star', 'level', 'party', 'chapter', 'click', 'gentle', 'talkRight', 'listen'];
+  A.SOUNDS = ['unfold', 'right', 'aim', 'pump', 'launch', 'chute', 'land', 'splash', 'wrong', 'squish', 'soft', 'fold', 'pennant', 'pip',
+    'fountain', 'sparkle', 'hopBack', 'wipe', 'gust', 'whistle', 'bleat', 'chirp', 'giggle', 'badge', 'hint', 'star', 'level', 'party',
+    'chapter', 'click', 'gentle', 'talkRight', 'listen'];
   DK.Audio = A;
 })(window.DK = window.DK || {});

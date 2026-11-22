@@ -1,13 +1,13 @@
 {
-  "name": "Nim's River Hop · Nhím Nim Nhảy Đá Qua Suối",
-  "short_name": "River Hop",
-  "description": "Learning game with Nim the little hedgehog: hop across the brook on the stones Nim asks for and pick up a fruit. Colours, shapes, counting, animal homes, letters, numbers. English & Vietnamese.",
+  "name": "Mimi's Splash Rocket · Tên Lửa Nước Của Vịt Mimi",
+  "short_name": "Splash Rocket",
+  "description": "Learning game with Mimi the little duckling: tap the picnic mat Mimi asks for, pump, and land her water rocket there under its parachute. Colours, shapes, counting, animal homes, letters, numbers. English & Vietnamese.",
   "start_url": "./",
   "scope": "./",
   "display": "fullscreen",
   "orientation": "any",
-  "background_color": "#CFE6F5",
-  "theme_color": "#CFE6F5",
+  "background_color": "#9FD3EE",
+  "theme_color": "#9FD3EE",
   "icons": [
     {
       "src": "assets/icons/icon-192.png",

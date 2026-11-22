@@ -1,27 +1,27 @@
-/* DK.Assets (Nim's River Hop) — loads the SVG art and keeps pre-rasterized copies so drawing stays fast on phones.
- * Keys are the file paths under assets/default/ without ".svg": 'characters/nim_idle', 'characters/fish', 'characters/frog',
- * 'animals/cow', 'env/far_spring', 'env/tree_winter', 'env/rock', 'particles/dragonfly', 'ui/star', 'icon' … (stone_art.js
- * looks up 'animals/<a>', river_art.js the env/* bank sprites through sprite()).
+/* DK.Assets (Mimi's Splash Rocket) — loads the SVG art and keeps pre-rasterized copies so drawing stays fast on phones.
+ * Keys are the file paths under assets/default/ without ".svg": 'characters/mimi_idle', 'characters/rocket',
+ * 'characters/chute', 'characters/marmot', 'animals/cow', 'env/far_sunny', 'env/tent_a', 'particles/raindrop', 'ui/star', 'icon' …
+ * (mat_art.js looks up 'animals/<a>', meadow_art.js the env/* camp sprites through img() / sprite()).
  * Short aliases are kept for the HUD / render / weather: 'star' = ui/star, 'pstar' = particles/star, '<particle>' = particles/<particle>.
  *   has(key)  img(key)  images[key]  sprite(key, px) → canvas whose longest side ≥ px device px (size buckets 32·1.25^k)
  *   exact(key, w, h) → one exact-size raster (tiled env layers)   tinted(key, colour, px)   dropExact()
- * Stones, the things on them, fruits, ripples, drops, home badges, snowflakes, lily pads and the hint hand are canvas code
- * (stone_art.js); the brook and its banks are canvas code too (river_art.js). */
+ * Mats, the things on them, pennants, the pole, pad, pump, drops, puddle rings, burrows, rocks, home badges and the hint hand
+ * are canvas code (mat_art.js); the meadow + camp corner is canvas code too (meadow_art.js). */
 (function (DK) {
   'use strict';
   const D = 'assets/default/';
-  const SEASONS = ['spring', 'summer', 'autumn', 'winter'];
+  const MOODS = ['sunny', 'breezy', 'rain', 'rainbow'];
   const ANIMALS = ['cow', 'pig', 'sheep', 'duck', 'hen', 'horse', 'goat', 'crab', 'penguin', 'lion', 'monkey', 'fishbowl'];
-  const PARTICLES = ['mist', 'mote', 'sparkle', 'star', 'firefly', 'petal', 'blossom', 'butterfly', 'leaf', 'snow', 'glint',
-    'confetti_a', 'confetti_b', 'dot', 'dust', 'feather', 'dragonfly'];
-  const NIM = ['idle', 'blink', 'talk', 'happy', 'cheer', 'think', 'oops', 'crouch', 'jump', 'roll', 'wave', 'giggle', 'dance', 'title'];
+  const PARTICLES = ['mist', 'mote', 'sparkle', 'star', 'petal', 'butterfly', 'leaf', 'confetti_a', 'confetti_b', 'dot', 'dust',
+    'feather', 'raindrop', 'splash', 'rainbow_sparkle'];
+  const MIMI = ['idle', 'blink', 'talk', 'happy', 'cheer', 'think', 'oops', 'pump', 'wave', 'giggle', 'dance', 'look', 'title'];
   const files = {};
   const add = k => { files[k] = D + k + '.svg'; };
-  NIM.forEach(f => add('characters/nim_' + f));
-  ['fish', 'fish_flip', 'frog', 'frog_croak'].forEach(f => add('characters/' + f));
-  ANIMALS.forEach(a => add('animals/' + a));   // only the standing frame is drawn on a stone
-  SEASONS.forEach(m => ['far', 'mid', 'bush', 'reeds', 'flowers', 'tree'].forEach(l => add('env/' + l + '_' + m)));
-  ['sun', 'moon', 'cloud_a', 'cloud_b', 'rock'].forEach(f => add('env/' + f));
+  MIMI.forEach(f => add('characters/mimi_' + f));
+  ['rocket', 'chute', 'chute_closed', 'marmot', 'marmot_wave', 'goat', 'goat_hop', 'bird', 'bird_sing'].forEach(f => add('characters/' + f));
+  ANIMALS.forEach(a => add('animals/' + a));   // only the standing frame is drawn on a mat
+  MOODS.forEach(m => ['far', 'mid'].forEach(l => add('env/' + l + '_' + m)));
+  ['sun', 'cloud_a', 'cloud_b', 'cloud_rain', 'rainbow', 'tent_a', 'tent_b', 'campfire', 'pine', 'rock', 'flowers', 'windsock'].forEach(f => add('env/' + f));
   PARTICLES.forEach(p => add('particles/' + p));
   add('ui/star'); add('ui/star_empty'); add('icon');
   // aliases (render / weather sprite names)
@@ -45,7 +45,7 @@
   const key = k => (ALIAS[k] && !files[k] ? ALIAS[k] : k);
 
   const A = {
-    files, ALIAS, ANIMALS, SEASONS, NIM, images: {}, _cache: new Map(), loaded: 0, total: 0, missing: [],
+    files, ALIAS, ANIMALS, MOODS, MIMI, images: {}, _cache: new Map(), loaded: 0, total: 0, missing: [],
     async load(onProgress) {
       const names = Object.keys(files);
       this.total = names.length;

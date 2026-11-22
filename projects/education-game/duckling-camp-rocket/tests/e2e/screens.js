@@ -1,99 +1,100 @@
-// Visual QA screenshots (Nim's River Hop): title, play in each season, wrong + hint, a hop mid-air, a countSel count above
-// Nim, the bank roll, Talk time and the done screen, on iPhone portrait / landscape and iPad portrait / landscape (CSS-px
-// screenshots, deviceScaleFactor 1). Writes tests/out/screens/<device>-<name>.png.   node tests/e2e/screens.js [devices]
-// (devices: comma list of iphone-portrait,iphone-landscape,ipad-portrait,ipad-landscape; default all)
+// Visual QA screenshots (Mimi's Splash Rocket): every key moment on iPhone + iPad, portrait + landscape, in all 4 moods.
+//   node tests/e2e/screens.js                       (all devices, all moods)
+//   ONLY=iphone-portrait MOODS=0,2 node tests/e2e/screens.js
+//   GAME_LANG=vi node tests/e2e/screens.js
+// Writes tests/out/screens/<device>-<mood>-<moment>.png (moments: title, play (mats unfolded), pump (aim + pump), flight
+// (mid-flight with the chute), land, pennant, camp (fountain), talk, done). Exits 1 on any console / page error.
 const { chromium } = require('playwright');
 const path = require('path'), fs = require('fs');
 const serve = require('./serve');
 const OUT = path.join(__dirname, '..', 'out', 'screens'); fs.mkdirSync(OUT, { recursive: true });
 const DEVICES = [
-  { name: 'iphone-portrait', viewport: { width: 393, height: 852 } },
-  { name: 'iphone-landscape', viewport: { width: 852, height: 393 } },
-  { name: 'ipad-portrait', viewport: { width: 820, height: 1180 } },
-  { name: 'ipad-landscape', viewport: { width: 1180, height: 820 } }
+  { name: 'iphone-portrait', viewport: { width: 393, height: 852 }, dpr: 3 },
+  { name: 'iphone-landscape', viewport: { width: 852, height: 393 }, dpr: 3 },
+  { name: 'ipad-portrait', viewport: { width: 820, height: 1180 }, dpr: 2 },
+  { name: 'ipad-landscape', viewport: { width: 1180, height: 820 }, dpr: 2 }
 ];
-const want = (process.argv[2] || '').split(',').filter(Boolean);
-const waitFor = (page, fn, arg, timeout = 60000) => page.waitForFunction(fn, arg, { timeout, polling: 'raf' });
+const MOODS = (process.env.MOODS || '0,1,2,3').split(',').map(Number);
+const LANG = process.env.GAME_LANG === 'vi' ? 'vi' : 'en';
+// a notch: the same CSS safe-area insets a real iPhone reports (portrait top 59 / bottom 34, landscape left/right 59 / bottom 21)
+const NOTCH = d => d.name === 'iphone-portrait' ? { t: 59, r: 0, b: 34, l: 0 } : d.name === 'iphone-landscape' ? { t: 0, r: 59, b: 21, l: 59 } : { t: 24, r: 0, b: 20, l: 0 };
+
 (async () => {
-  const srv = await serve(), browser = await chromium.launch();
-  let errors = 0;
+  const srv = await serve();
+  const browser = await chromium.launch();
+  const errors = [];
   for (const d of DEVICES) {
-    if (want.length && !want.includes(d.name)) continue;
-    const ctx = await browser.newContext({ viewport: d.viewport, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
-    const page = await ctx.newPage(), errs = [];
-    page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
-    page.on('pageerror', e => errs.push(String(e)));
+    if (process.env.ONLY && !process.env.ONLY.split(',').includes(d.name)) continue;
+    const ctx = await browser.newContext({ viewport: d.viewport, deviceScaleFactor: d.dpr, isMobile: true, hasTouch: true });
+    const n = NOTCH(d);
+    await ctx.addInitScript(n => {
+      document.addEventListener('DOMContentLoaded', () => {
+        const st = document.createElement('style');
+        st.textContent = `:root { --sa-t: ${n.t}px !important; --sa-r: ${n.r}px !important; --sa-b: ${n.b}px !important; --sa-l: ${n.l}px !important; }`;
+        document.head.appendChild(st);
+      });
+    }, n);
+    const page = await ctx.newPage();
+    page.on('console', m => { if (m.type() === 'error') errors.push(d.name + ' console: ' + m.text()); });
+    page.on('pageerror', e => errors.push(d.name + ' pageerror: ' + String(e)));
     const shot = name => page.screenshot({ path: path.join(OUT, `${d.name}-${name}.png`) });
-    const fresh = async (q, lang) => {
-      await page.goto(`${srv.url}?mute=1&seed=${q.seed || 3}&age=${q.age || 4}${lang ? '&lang=' + lang : ''}`);
-      await waitFor(page, () => window.DK && DK.debug && DK.debug.mode === 'title', null, 20000);
-    };
-    const start = async (topic, level, age) => {
-      await page.evaluate(([t, lv]) => { DK.debug.startGame(); const w = DK.debug.world; w.levels[lv] = t; w.startLevel(lv); DK.debug.setSpeed(4); }, [topic, level]);
-      await waitFor(page, () => DK.debug.world.interactive && DK.debug.world.phaseTime > 1.2);
-      await page.evaluate(() => DK.debug.setSpeed(1));
-      await page.waitForTimeout(300);
-    };
-    try {
-      await fresh({});
-      await page.waitForTimeout(1600);
-      await shot('0-title');
-      for (let lv = 0; lv < 4; lv++) {
-        await fresh({ seed: 3 + lv, age: lv === 2 ? 6 : 4 }, lv === 3 ? 'vi' : '');
-        await start(['colors', 'shapes', 'animals', 'count'][lv], lv);
-        await page.waitForTimeout(lv === 0 ? 300 : 2600);   // the season crossfade
-        await shot(`1-play-${['spring', 'summer', 'autumn', 'winter-vi'][lv]}`);
-      }
-      // wrong + hint (two wrong stones of the active row), then a hop mid-air
-      await fresh({ seed: 6 });
-      await start('colors', 0);
-      await page.evaluate(() => { const w = DK.debug.world, wr = w.stones.filter(s => s.row === w.row && !s.target && s.state === 'rest'); for (const s of wr.slice(0, 2)) { const h = w.stoneHit(s.id); w.pointerDown(h.x, h.y); w.pointerUp(h.x, h.y); } });
-      await page.waitForTimeout(500);
-      await page.evaluate(() => { const w = DK.debug.world; const h = w.hint && w.hint(); });
-      await page.waitForTimeout(700);
-      await shot('2-wrong-hint');
-      await page.evaluate(() => { DK.debug.setSpeed(0.25); const w = DK.debug.world, a = DK.debug.answer(), h = w.stoneHit(a.id); w.pointerDown(h.x, h.y); w.pointerUp(h.x, h.y); });
-      await waitFor(page, () => DK.debug.world.nim.state === 'air' && DK.debug.world._hop && DK.debug.world._hop.t > 0.2);
-      await shot('3-hop');
-      // the bank roll: let the bot finish the crossing, freeze while Nim rolls over the fruit
-      await page.evaluate(() => { DK.debug.setSpeed(1); DK.debug.setBot(true, 1); });
-      await waitFor(page, () => DK.debug.world.nim.state === 'roll' && DK.debug.world.nim.curl > 0.8);
-      await page.evaluate(() => DK.debug.setSpeed(0.05));
-      await page.waitForTimeout(300);
-      await shot('4-bank-roll');
-      await page.evaluate(() => DK.debug.setSpeed(1));
-      await waitFor(page, () => DK.debug.world.state === 'roundDone');
-      await page.waitForTimeout(250);
-      await shot('5-fruit-on-back');
-      // countSel: dots counted above Nim
-      await fresh({ seed: 8 });
-      await start('count', 0);
-      await page.evaluate(() => { DK.debug.setBot(true, 1); DK.debug.setSpeed(6); });
-      await waitFor(page, () => DK.debug.world.round === 1 && DK.debug.world.interactive && DK.debug.world.phaseTime > 1, null, 90000);
-      await page.evaluate(() => { DK.debug.setBot(false); DK.debug.setSpeed(1); const w = DK.debug.world, a = DK.debug.answer(), h = w.stoneHit(a.id); w.pointerDown(h.x, h.y); w.pointerUp(h.x, h.y); });
-      await waitFor(page, () => DK.debug.world.stones.some(s => s.count >= 2));
-      await shot('6-count-sel');
-      // Talk time
-      await page.evaluate(() => { DK.debug.setBot(true, 1); DK.debug.setSpeed(8); });
-      await waitFor(page, () => DK.debug.world.state === 'talk', null, 120000);
-      await page.evaluate(() => { DK.debug.setBot(false); DK.debug.setSpeed(1); });
-      await page.waitForTimeout(800);
-      await shot('7-talk');
-      // the wipe curtain mid-way + the done screen (a fast bot session)
-      await page.goto(`${srv.url}?mute=1&seed=11&age=4&bot=1&speed=10&autostart=1`);
-      await waitFor(page, () => window.DK && DK.debug && DK.debug.world && DK.debug.world.wipe && DK.debug.world.wipe.t > 0.3 && DK.debug.world.wipe.t < 0.45, null, 60000);
-      await page.evaluate(() => DK.debug.setSpeed(0.01));
-      await page.waitForTimeout(200);
-      await shot('8-wipe');
-      await page.evaluate(() => DK.debug.setSpeed(10));
-      await waitFor(page, () => DK.debug.mode === 'done', null, 400000);
-      await page.waitForTimeout(2500);
-      await shot('9-done');
-    } catch (e) { errs.push('exception: ' + e.message.split('\n')[0]); }
-    console.log(d.name, errs.length ? 'ERRORS ' + errs.slice(0, 4).join(' | ') : 'ok');
-    errors += errs.length;
+    const until = (fn, arg, t = 60000) => page.waitForFunction(fn, arg, { timeout: t, polling: 'raf' });
+    for (const mood of MOODS) {
+      const topic = ['colors', 'shapes', 'count', 'animals'][mood];
+      await page.goto(`${srv.url}?mute=1&seed=${5 + mood}&age=4&lang=${LANG}`);
+      await until(() => window.DK && DK.debug && DK.debug.mode === 'title');
+      if (mood === 0) { await page.waitForTimeout(900); await shot('title'); }
+      await page.evaluate(([m, t]) => {
+        DK.debug.startGame(); const w = DK.debug.world; w.levels[m] = t; w.startLevel(m);
+        DK.debug.weather.setWeather(m, { instant: true }); DK.debug.setSpeed(4);
+      }, [mood, topic]);
+      const tag = `m${mood}`;
+      try {
+        await until(() => { const w = DK.debug.world; return w.state === 'round' && w.phase === 'play' && w.phaseTime > 0.6; });
+        await page.evaluate(() => DK.debug.setSpeed(1)); await page.waitForTimeout(400);
+        await shot(`${tag}-play`);
+        // right tap → aim → pump (2 stomps), screenshot while pumping
+        await page.evaluate(() => { const w = DK.debug.world, h = w.matHit(w.answer().id); w.pointerDown(h.x, h.y); w.pointerUp(h.x, h.y); });
+        await until(() => DK.debug.world.phase === 'pump');
+        await page.evaluate(() => { const w = DK.debug.world, p = w.layout.pump; w.pointerDown(p.x, p.y); w.pointerUp(p.x, p.y); });
+        await page.waitForTimeout(300);
+        await page.evaluate(() => { const w = DK.debug.world, p = w.layout.pump; w.pointerDown(p.x, p.y); w.pointerUp(p.x, p.y); });
+        await page.waitForTimeout(60);
+        await shot(`${tag}-pump`);
+        await page.waitForTimeout(300);
+        await page.evaluate(() => { const w = DK.debug.world, p = w.layout.pump; w.pointerDown(p.x, p.y); w.pointerUp(p.x, p.y); });
+        await until(() => { const r = DK.debug.world.rocket; return r.state === 'chute' && r.chute > 0.9; });
+        await page.evaluate(() => DK.debug.setSpeed(0.0001)); await page.waitForTimeout(150);
+        await shot(`${tag}-flight`);
+        await page.evaluate(() => DK.debug.setSpeed(1));
+        await until(() => DK.debug.events.some(e => e.type === 'land'));
+        await page.waitForTimeout(250);
+        await shot(`${tag}-land`);
+        await until(() => DK.debug.events.some(e => e.type === 'pennant'));
+        await page.waitForTimeout(400);
+        await shot(`${tag}-pennant`);
+        // the bot finishes the round: the camp fountain
+        await page.evaluate(() => { DK.debug.setBot(true, 1); DK.debug.setSpeed(3); });
+        await until(() => DK.debug.world.fountain && DK.debug.world.fountain.h > 140);
+        await page.evaluate(() => DK.debug.setSpeed(0.0001)); await page.waitForTimeout(150);
+        await shot(`${tag}-camp`);
+        if (mood === 1) {   // Talk time
+          await page.evaluate(() => DK.debug.setSpeed(8));
+          await until(() => DK.debug.world.state === 'talk' && !DK.debug.world.talkAnswered, null, 200000).catch(() => {});
+          await page.evaluate(() => { DK.debug.setBot(false); DK.debug.setSpeed(1); }); await page.waitForTimeout(900);
+          await shot('talk');
+        }
+        if (mood === 3) {   // the celebration
+          await page.evaluate(() => { DK.debug.setBot(true, 1); DK.debug.setSpeed(10); });
+          await until(() => DK.debug.mode === 'done', null, 300000);
+          await page.evaluate(() => DK.debug.setSpeed(1)); await page.waitForTimeout(2600);
+          await shot('done');
+        }
+      } catch (e) { errors.push(`${d.name} mood ${mood}: ${e.message.split('\n')[0]}`); await shot(`${tag}-fail`); }
+    }
     await ctx.close();
   }
   await browser.close(); srv.close();
-  process.exit(errors ? 1 : 0);
+  console.log(errors.length ? 'ERRORS:\n' + errors.join('\n') : 'screens ok → ' + OUT);
+  process.exit(errors.length ? 1 : 0);
 })();

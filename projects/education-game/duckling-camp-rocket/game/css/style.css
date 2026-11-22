@@ -1,5 +1,6 @@
-/* Nim's River Hop — mobile-first shell (iPhone / iPad Safari, portrait + landscape). Warm woodland palette: mustard rims
- * (Nim's scarf), warm-brown ink and logo outline, cream panels (answer colours stay for the things on the stones only). */
+/* Mimi's Splash Rocket — mobile-first shell (iPhone / iPad Safari, portrait + landscape). Camp palette: khaki canvas rims
+ * (Mimi's bucket hat), warm-brown ink and logo outline, peach accents (her bill), cream panels (answer colours stay for the
+ * things on the mats only). */
 :root {
   --ink: #4A3626;
   --cream: #FFFBF3;
@@ -133,7 +134,7 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 .bubble { position: absolute; z-index: 4; display: flex; align-items: center; background: #fff; border-radius: 26px;
   padding: 10px 20px; border: 3px solid var(--rim); box-shadow: 0 5px 0 rgba(110, 76, 40, .18);
   font-weight: 800; line-height: 1.15; color: var(--ink); transform-origin: 0 60%; cursor: pointer; }
-/* a little tail down-left, towards Nim on the near bank */
+/* a little tail down-left, towards Mimi on the near bank */
 .bubble::before { content: ""; position: absolute; left: 38px; bottom: -21px; border: 11px solid transparent; border-top: 18px solid var(--rim); border-bottom: 0; }
 .bubble::after { content: ""; position: absolute; left: 41px; bottom: -15px; border: 8px solid transparent; border-top: 14px solid #fff; border-bottom: 0; }
 .bubble.say { animation: say .35s cubic-bezier(.3, 1.6, .5, 1); }
@@ -159,14 +160,14 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 
 /* ---------- done ---------- */
 #scrDone { align-items: flex-end; padding-bottom: calc(var(--sa-b) + 4vh); }
-/* every landscape screen: the panel leaves Nim on the bank visible */
+/* every landscape screen: the panel leaves Mimi on the bank visible */
 @media (orientation: landscape) {
   #scrDone { align-items: flex-start; justify-content: flex-end; padding-top: calc(var(--sa-t) + 8vh); padding-bottom: 0; }
   #scrDone .done-panel { max-width: min(470px, 46vw); }
 }
 @media (orientation: portrait) {
   #scrDone { padding-bottom: calc(var(--sa-b) + 2vh); }
-  /* portrait title: logo + ▶ at the top, Nim and the brook below */
+  /* portrait title: logo + ▶ at the top, Mimi and the meadow below */
   .title-wrap { justify-content: flex-start; padding-top: 4vh; padding-bottom: 0; gap: 6px; }
   .btn-play { width: clamp(110px, 22 * var(--u), 170px); }
 }
@@ -329,12 +330,12 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
   .hud-dots i { width: 16px; height: 16px; }
 }
 
-/* portrait: Nim sits far below the bubble — no tail pointing at the sky */
+/* portrait: Mimi sits far below the bubble — no tail pointing at the sky */
 @media (orientation: portrait) { .bubble::before, .bubble::after { display: none; } }
 
 /* ---------- fixes 2026-11-12 (visual QA P2-3, P3-8, P3-10) ---------- */
-/* landscape celebration: a compact panel at the top centre (title + stars, then the two buttons side by side) so Nim and
-   the brook stay visible */
+/* landscape celebration: a compact panel at the top centre (title + stars, then the two buttons side by side) so Mimi and
+   the meadow stay visible */
 @media (orientation: landscape) {
   #scrDone { justify-content: center; align-items: flex-start; padding-top: calc(var(--sa-t) + 2vh); padding-bottom: 0; }
   #scrDone .done-panel { max-width: min(640px, 62vw); display: grid; grid-template-columns: auto auto; align-items: center;
@@ -353,8 +354,8 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
   .chips .chip, .set-row .chip { min-width: 52px; padding: 0 12px; }
 }
 
-/* ---------- Nim's River Hop ---------- */
-/* the logo: cream letters with a warm-brown outline, the second line in Nim's mustard */
+/* ---------- Mimi's Splash Rocket ---------- */
+/* the logo: cream letters with a warm-brown outline, the second line in Mimi's mustard */
 .logo { text-shadow: 0 4px 0 var(--lilac-d), 0 8px 0 rgba(60, 36, 20, .18), 0 0 26px rgba(255, 250, 235, .75); }
 #logo1 { color: #FFF8EA; }
 #logo2 { color: #FFD987; }
@@ -394,7 +395,7 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 }
 
 /* ---------- fix round 1 ---------- */
-/* Nim under the speech bubble (top-row stone / high hop, landscape phones): the bubble steps back (visual QA P1-1) */
+/* Mimi under the speech bubble (top-row stone / high hop, landscape phones): the bubble steps back (visual QA P1-1) */
 .bubble.under { opacity: .3; }
 /* VI title tagline: no orphan "nhé!" (visual QA P3-8) */
 .tagline { text-wrap: balance; }
@@ -404,3 +405,20 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 @media (max-width: 430px) and (orientation: portrait) { .talk-choices button { width: 96px; height: 92px; flex: none; } }
 @media (min-width: 768px) and (min-height: 700px) { .talk-choices button { width: 150px; height: 128px; } }
 @media (min-width: 768px) and (min-height: 1000px) and (orientation: portrait) { .talk-choices button { width: 168px; height: 150px; } }
+
+/* ---------- Mimi's Splash Rocket: camp palette ---------- */
+:root { --rim: #D9C59A; --rim-d: #9C8763; --mustard: #F0A982; --mustard-d: #C9785A; --lilac-d: #6B5536; --sky: #9FD3EE; }
+#logo1 { color: #FFFBF0; }
+#logo2 { color: #FFD3B8; }
+.chip.on { background: var(--mustard); color: #4A2E1E; box-shadow: 0 3px 0 var(--mustard-d); }
+.hud-dots i.done { background: #F0A982; }
+.hud-dots i.now { box-shadow: 0 0 0 3px #F0A982 inset; }
+#loading { background: linear-gradient(#9FD3EE, #F3F7EE); }
+.loader { border-top-color: var(--mustard); }
+.gear-btn .gear, .icon-btn svg { fill: #6B5536; }
+.talk-choices button.glow { border-color: #F0A982; box-shadow: 0 0 0 6px rgba(240,169,130,.45), 0 6px 0 rgba(110,76,40,.22); }
+/* the speech bubble: its tail points down-left at Mimi in the camp column (landscape) */
+.bubble { border-color: var(--rim); }
+/* the rocket's canopy floats under the HUD: the pills step back (still tappable) */
+#hud { transition: opacity .25s; }
+#hud.under { opacity: .35; }

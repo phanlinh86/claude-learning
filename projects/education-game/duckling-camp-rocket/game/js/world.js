@@ -29,7 +29,7 @@
     hudW: 160, hudH: 96, bubbleMinW: 220,
     campW: 272, campWMin: 230, campWStep: 14, campH: 280, campTallK: 1.15,
     poleXLand: 26, poleTopGap: 30, poleBaseUp: 40, poleXPort: 70, poleRise: 160,
-    mimiXLand: 100, mimiUp: 70, pumpXLand: 178, pumpUp: 40, padXLand: 236, padUp: 60,
+    mimiXLand: 100, mimiUp: 70, pumpXLand: 178, pumpUp: 66, padXLand: 236, padUp: 60,
     mimiXPort: 120, pumpDxPort: -120,
     pennantTop: 24, pennantPitch: 46, pennantW: 56, pennantH: 44, slots: 4,
     horizonLandK: 0.30, horizonPort: 120,
