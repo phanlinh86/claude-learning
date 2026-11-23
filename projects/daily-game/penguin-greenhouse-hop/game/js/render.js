@@ -76,7 +76,7 @@
       this.portrait = v.VH > v.VW;
       // world → screen (DESIGN §2)
       const COLW = PH.World ? PH.World.CONFIG.COLW : 12;
-      this.unit = this.portrait ? v.VW / (COLW + 0.8) : v.VH / 11.5;
+      this.unit = this.portrait ? v.VW / (COLW + 0.8) : Math.min(v.VH / 11.5, (v.VW - 2 * 186) / COLW);   // 4:3 iPad landscape: keep the left HUD off the column
       this.colX = v.VW / 2 - COLW / 2 * this.unit;
       this.colW = COLW * this.unit;
       const hud = document.getElementById('hud'), toast = document.getElementById('toast');
@@ -204,7 +204,7 @@
       for (const wy of ys) {
         const y = Math.round(this.sy(wy, cam) - bh * 0.5);   // the beam is centred on the floor line, the hero passes in front
         if (y > this.VH + 10 || y + bh < -10) continue;
-        for (let x = ((Math.round(this.VW / 2 - bw / 2) % bw) + bw) % bw - bw; x < this.VW; x += bw) this.drawSpr(g, 'beam', x, y, bw, bh, 0, 0, 0, null, null, 0.9);
+        for (let x = ((Math.round(this.VW / 2 - bw / 2) % bw) + bw) % bw - bw; x < this.VW; x += bw) this.drawSpr(g, 'beam', x, y, bw, bh, 0, 0);
       }
     }
     drawPoles(g, cam) {
@@ -214,7 +214,7 @@
         g.fillStyle = 'rgba(255,255,255,0.10)';
         g.fillRect(0, 0, this.colX, this.VH); g.fillRect(this.colX + this.colW, 0, this.VW - this.colX - this.colW, this.VH);
       }
-      const base = Math.round(this.sy(0, cam));   // posts stand on the farmyard ground and stack upward
+      const base = Math.round(this.sy(0, cam));   // pillars stand on the greenhouse floor and stack upward
       let k = Math.max(0, Math.floor((base - this.VH) / ph));
       for (; base - k * ph > 0; k++) {
         const Y = base - (k + 1) * ph;
@@ -238,7 +238,10 @@
         g.globalAlpha = 0.10; g.fillStyle = '#203040'; g.beginPath(); g.ellipse(this.sx(p.x), sty + H * 0.9, W * 0.38, Math.max(3, H * 0.12), 0, 0, TAU); g.fill(); g.globalAlpha = 1;
         // the stalk back to the pillar side: a short curved stem so the leaf looks attached
         g.strokeStyle = '#2f7a37'; g.lineWidth = Math.max(3, u * 0.09); g.lineCap = 'round';
-        g.beginPath(); g.moveTo(stx, sty + 2); g.quadraticCurveTo(stx + side * u * 0.35, sty + u * 0.25, stx + side * u * 0.55, sty + u * 0.65); g.stroke();
+        // the stalk grows out of the nearer greenhouse pillar, so the leaf never floats
+        const wallX = side < 0 ? this.colX : this.colX + this.colW, dxw = Math.abs(stx - wallX);
+        g.beginPath(); g.moveTo(wallX, sty - 0.35 * u); g.quadraticCurveTo((wallX + stx) / 2, sty + Math.min(1.2 * u, dxw * 0.25), stx, sty + 2); g.stroke();
+        this.drawSpr(g, 'p_leafbit', wallX, sty - 0.35 * u, 0.45 * u, 0.45 * u, 0.5, 0.5, side * 0.6);
         this.drawSpr(g, 'leaf', stx, sty, W, H, B[2] / B[0], B[3] / B[1], -side * bend, -side, 1, alpha);
         return;
       }
@@ -250,14 +253,18 @@
           const ox = ex * W, oy = 2;   // rim eyelets in the basket frame, rotated with it
           g.beginPath(); g.moveTo(pxs, pys); g.lineTo(x + ox * ca + oy * sa, y - ox * sa + oy * ca); g.stroke();
         }
-        g.fillStyle = '#5a5f73'; g.beginPath(); g.arc(pxs, pys, Math.max(3, u * 0.08), 0, TAU); g.fill();
+        // the hook and a thin rod up to the greenhouse roof (off the top of the screen)
+        g.strokeStyle = 'rgba(90,95,115,0.85)'; g.lineWidth = Math.max(2, u * 0.06);
+        g.beginPath(); g.moveTo(pxs, pys - u * 0.12); g.lineTo(pxs, -10); g.stroke();
+        g.beginPath(); g.arc(pxs, pys - u * 0.02, Math.max(3, u * 0.1), -Math.PI * 0.1, Math.PI * 1.1); g.stroke();
+        g.fillStyle = '#5a5f73'; g.beginPath(); g.arc(pxs, pys, Math.max(2, u * 0.05), 0, TAU); g.fill();
         g.globalAlpha = 0.10; g.fillStyle = '#203040'; g.beginPath(); g.ellipse(x, y + H * 0.95, W * 0.32, Math.max(3, H * 0.1), 0, 0, TAU); g.fill(); g.globalAlpha = 1;
         this.drawSpr(g, 'basket', x, y, W * (1 + 0.05 * sq), H * (1 - 0.08 * sq), B[2] / B[0], B[3] / B[1], -ang, null, null, alpha);
         return;
       }
+      const Hd = p.kind === 'pot' ? Math.min(H * 0.85, 1.05 * u) : H;   // pots squatter (wide Easy pots must not reach the row below)
       // soft drop shadow for depth
-      g.globalAlpha = 0.12 * alpha; g.fillStyle = '#203040'; g.beginPath(); g.ellipse(x, y + H * 0.85 + 3, W * 0.42, Math.max(3, H * 0.12), 0, 0, TAU); g.fill(); g.globalAlpha = 1;
-      const Hd = p.kind === 'pot' ? H * 0.85 : H;   // pots a little squatter so the column stays airy
+      g.globalAlpha = 0.12 * alpha; g.fillStyle = '#203040'; g.beginPath(); g.ellipse(x, y + Hd * 0.85 + 3, W * 0.42, Math.max(3, Hd * 0.12), 0, 0, TAU); g.fill(); g.globalAlpha = 1;
       this.drawSpr(g, key, x, y, W * (1 + 0.06 * sq), Hd * (1 - 0.12 * sq), B[2] / B[0], B[3] / B[1], 0, null, null, alpha);
       if (p.spring && p.kind === 'pot') {
         const sw = 0.6 * u, sh = sw * 80 / 64, up = p.springT < 0.25;
@@ -309,7 +316,7 @@
       const size = lerp(h.prevSize || h.size || 1, h.size || 1, a), S = HERO_W * u * this.hs() * size;
       if (h.invuln > 0 && w.phase === 'play' && Math.floor(this.time * 12) % 2 === 0 && h.rescueT <= 0) g.globalAlpha = 0.55;
       const sq = h.squash || 0, st = h.stretch || 0;
-      const kx = (1 + 0.24 * sq - 0.07 * st), ky = (1 - 0.24 * sq + 0.13 * st);
+      const sqk = h.mood === 'crouch' ? 0.14 : 0.24, kx = (1 + sqk * sq - 0.07 * st), ky = (1 - sqk * sq + 0.13 * st);   // the crouch pose is already squashed
       const face = h.face < 0 ? -1 : 1;
       // tiny shadow on the platform below when close
       if (PH.Assets.hasCustom('hero')) {
@@ -353,12 +360,11 @@
             if (wx) {
               const sz = w.hero.size || 1;
               if (e.kind === 'pot') wx.burst('soil', x, y, e.spring ? 6 : 3, { speed: 110, life: 0.55, size: 0.22 * u, spread: Math.PI * 0.9, angle: -Math.PI / 2, gravity: 260, spin: 6, layer: 'front' });
-              else if (e.kind === 'leaf') { wx.burst('drip', x, y, Math.round(3 + 3 * (sz - 1) * 2), { speed: 120 + 60 * (sz - 1), life: 0.6, size: 0.2 * u, spread: Math.PI * 0.8, angle: -Math.PI / 2, gravity: 420, layer: 'front' }); if ((e.flick || 1) > 1.04) this.texts.push({ x: x + (w.hero.x < 6 ? 1 : -1) * u * 1.2, y: y + u * 0.6, s: 'Flick!', t: 0, col: '#bff5a8', down: true }); }
+              else if (e.kind === 'leaf') { wx.burst('drip', x, y, Math.round(3 + 3 * (sz - 1) * 2), { speed: 120 + 60 * (sz - 1), life: 0.6, size: 0.2 * u, spread: Math.PI * 0.8, angle: -Math.PI / 2, gravity: 420, layer: 'front' }); if ((e.flick || 1) > 1.04 && w.hero.big) this.texts.push({ x: x + (w.hero.x < 6 ? 1 : -1) * u * 1.2, y: y + u * 1.1, s: 'Flick!', t: 0, col: '#bff5a8', down: true }); }
               else if (e.kind === 'basket') wx.burst('petal', x, y, 3, { speed: 90, life: 0.8, size: 0.24 * u, spread: Math.PI, angle: -Math.PI / 2, gravity: 120, spin: 4, drag: 1.5, layer: 'front' });
               else if (e.kind === 'shelf') wx.burst('puff', x, y, 3, { speed: 70, life: 0.4, size: 0.24 * u, spread: Math.PI * 0.8, angle: -Math.PI / 2, drag: 3, layer: 'front' });
               if (e.spring) { wx.burst('sparkle', x, y - 0.4 * u, 8, { speed: 200, life: 0.6, size: 0.26 * u, spread: TAU, layer: 'front', drag: 2 }); this.texts.push({ x, y: y + u * 0.7, s: 'BOING!', t: 0, col: '#ff5a5f', down: true }); }
             }
-            if (e.kind === 'rescue') { this.texts.push({ x, y: y + u * 0.8, s: 'Umbrella boing!', t: 0, col: '#ffffff', down: true }); }
             break;
           }
           case 'grow': this.growPulse = 1; if (wx && this._heroScr) wx.burst('sparkle', this._heroScr.x, this._heroScr.y, 3, { speed: 90, life: 0.4, size: 0.18 * u, spread: TAU, layer: 'front', drag: 2 }); break;
@@ -368,20 +374,20 @@
             if (wx) wx.burst('sparkle', x, y, 5, { speed: 130, life: 0.45, size: 0.22 * u, spread: TAU, layer: 'front' });
             this.rings.push({ x, y, t: 0 });
             // one "+N" beside Puddle (the side away from the nearer wall), merged instead of stacking on her face
-            const side = w.hero.x < (PH.World.CONFIG.COLW / 2) ? 1 : -1, hx = this.sx(w.hero.x) + side * (0.75 * this.hs() * u + 18);
+            const side = w.hero.x < (PH.World.CONFIG.COLW / 2) ? 1 : -1, hx = this.sx(w.hero.x) + side * (0.68 * HERO_W * this.hs() * u * (w.hero.size || 1) + 34);
             const last = this.texts.find(t => t.plus && t.t < 0.45);
             if (last) { last.n += 10; last.s = '+' + last.n; last.t = 0.05; last.x = hx; last.y = this.sy(w.hero.y, cam) - 0.6 * u; }
             else this.texts.push({ x: hx, y: this.sy(w.hero.y, cam) - 0.6 * u, s: '+10', n: 10, plus: true, t: 0, col: '#fff27a' });
             this.flyers.push({ x, y, t: 0 });
             break;
           }
-          case 'lantern': this.texts.push({ x: this.VW / 2, y: this.VH * 0.4, s: 'Lantern full! +1 heart', t: 0, col: '#fff27a', big: true, ay: 0.26 }); this.flash = 0.3; this.flashCol = '#fff6c0'; break;
+          case 'lantern': this.texts.push({ x: this.VW / 2, y: this.VH * 0.4, s: e.gained === false ? 'Lantern full!' : 'Lantern full! +1 heart', t: 0, col: '#fff27a', big: true, ay: this.portrait ? 0.36 : 0.26 }); this.flash = 0.3; this.flashCol = '#fff6c0'; break;
           case 'heartGain': case 'fall': this.heartPulse = 1; if (e.type === 'fall') { this.shake = Math.max(this.shake, 0.3); this.flash = 0.2; this.flashCol = '#d6ecff'; } break;
-          case 'rescue': { const x = this.sx(e.x), y = this.sy(e.y, cam); if (wx) wx.burst('sparkle', x, this.VH - 30, 10, { speed: 220, life: 0.7, size: 0.26 * u, spread: Math.PI, angle: -Math.PI / 2, layer: 'front' }); break; }
+          case 'rescue': { const x = this.sx(e.x), y = this.sy(e.y, cam); this.texts.push({ x, y: this.VH - 90 - this.ins.bottom, s: 'Umbrella boing!', t: 0, col: '#ffffff' }); if (wx) wx.burst('sparkle', x, this.VH - 30, 10, { speed: 220, life: 0.7, size: 0.26 * u, spread: Math.PI, angle: -Math.PI / 2, layer: 'front' }); break; }
           case 'levelUp': {
             this.showBanner(e.zone); this.flash = 0.45; this.flashCol = '#fffaf0';
             const tot = (e.bonus || 0) + (e.sizeBonus || 0);
-            if (tot) this.texts.push({ x: this.VW / 2, y: this.VH * 0.8, s: 'Floor bonus +' + (e.bonus || 0) + (e.sizeBonus ? '  ·  size +' + e.sizeBonus : ''), t: 0, col: '#fff3c4', big: true });
+            if (tot) this.texts.push({ x: this.VW / 2, y: 0, ay: this.portrait ? 0.30 : 0.80, s: 'Floor bonus +' + (e.bonus || 0) + (e.sizeBonus ? '  ·  size +' + e.sizeBonus : ''), t: 0, col: '#fff3c4', big: true });
             if (wx && this._heroScr) wx.burst('drip', this._heroScr.x, this._heroScr.y, 14, { speed: 260, life: 0.7, size: 0.2 * u, spread: TAU, gravity: 400, layer: 'front' });   // the shake-off splash
             break;
           }
@@ -460,7 +466,7 @@
         const life = t.big ? 1.8 : 0.8, k = t.t / life, a = k < 0.7 ? 1 : 1 - (k - 0.7) / 0.3;
         const by = t.ay ? this.VH * t.ay + (this.ins.top || 0) : t.y;
         const y = by + (t.down ? 14 : -(t.big ? 18 : 30)) * Math.min(1, t.t / 0.5), fs = t.big ? 28 : 21, pop = 1 + 0.3 * Math.max(0, 1 - t.t / 0.15);
-        const H = this._heroScr, over = H && Math.abs(t.x - H.x) < (t.big ? 200 : 60) && Math.abs(y - H.y) < 0.9 * this.unit * this.hs() + 14;
+        const H = this._heroScr, over = !t.plus && H && Math.abs(t.x - H.x) < (t.big ? 200 : 60) && Math.abs(y - H.y) < 0.9 * this.unit * this.hs() + 14;
         g.globalAlpha = Math.max(0, a) * (over ? 0.35 : 1); g.font = '900 ' + Math.round(fs * pop) + 'px ' + FONT;
         g.lineWidth = 5; g.lineJoin = 'round'; g.strokeStyle = 'rgba(40,40,70,.75)'; g.strokeText(t.s, t.x, y);
         g.fillStyle = t.col; g.fillText(t.s, t.x, y);
@@ -475,7 +481,7 @@
     }
     _rr(g, x, y, w, h, r) { g.beginPath(); if (g.roundRect) g.roundRect(x, y, w, h, r); else g.rect(x, y, w, h); }
     _pill(g, x, y, w, h) {
-      g.fillStyle = 'rgba(255,253,245,.82)'; g.strokeStyle = 'rgba(47,74,107,.30)'; g.lineWidth = 2;
+      g.fillStyle = this.portrait ? 'rgba(255,253,245,.70)' : 'rgba(255,253,245,.82)'; g.strokeStyle = 'rgba(47,74,107,.30)'; g.lineWidth = 2;
       this._rr(g, x, y, w, h, h / 2); g.fill(); g.stroke();
     }
     drawHud(g) {
@@ -504,13 +510,13 @@
       g.fillText(String(w.fireflyCount || 0), x0 + 42, y1 + 21);
       g.font = '800 14px ' + FONT; g.globalAlpha = 0.75; g.textAlign = 'right'; g.fillText(String(w.score) + ' pts', x0 + 158, y1 + 21); g.globalAlpha = 1;
       // height + level progress (top centre in landscape; under the buttons in portrait)
-      const bw = Math.min(250, this.VW * (this.portrait ? 0.5 : 0.28));
-      const bx = this.portrait ? this.VW - I.right - 12 - bw - 8 : this.VW / 2 - bw / 2, by = this.portrait ? y0 + 100 : y0 + 4;
+      const bw = this.portrait ? 160 : Math.min(250, this.VW * 0.28);
+      const bx = this.portrait ? x0 + 8 : this.VW / 2 - bw / 2, by = this.portrait ? y0 + 140 : y0 + 4;   // portrait: stacked in the left column
       this._pill(g, bx - 8, by - 4, bw + 16, 40);
       g.font = '900 20px ' + FONT; g.fillStyle = ink; g.textAlign = 'left';
       g.fillText(Math.floor(w.maxY || 0) + ' m', bx + 4, by + 16);
       const tx = bx + 70, tw = bw - 76;
-      g.font = '900 12px ' + FONT; g.fillText(ZONE_INFO[this.vis.cur].name, tx, by + 7);
+      g.font = '900 12px ' + FONT; g.fillText(ZONE_INFO[this.vis.cur].name, tx, by + 7, tw);
       g.fillStyle = 'rgba(47,59,82,.15)'; this._rr(g, tx, by + 17, tw, 10, 5); g.fill();
       g.fillStyle = P.bar; this._rr(g, tx, by + 17, Math.max(10, tw * clamp(w.progress || 0, 0, 1)), 10, 5); g.fill();
       // the size meter (the twist): a little penguin badge and a bar from 1.0 to maxSize; "×2" once she's big
@@ -519,7 +525,7 @@
       this._pill(g, x0, y2, mw, 36);
       const gs = 30 * (1 + 0.25 * this.growPulse);
       this.drawSpr(g, 'grow', x0 + 20, y2 + 18, gs, gs, 0.5, 0.5);
-      const mx = x0 + 40, mW = mw - (h.big ? 92 : 52), k = clamp(((h.size || 1) - 1) / Math.max(0.01, maxS - 1), 0, 1), kb = clamp((C.bigAt - 1) / Math.max(0.01, maxS - 1), 0, 1);
+      const mx = x0 + 40, mW = mw - 92, k = clamp(((h.size || 1) - 1) / Math.max(0.01, maxS - 1), 0, 1), kb = clamp((C.bigAt - 1) / Math.max(0.01, maxS - 1), 0, 1);
       g.fillStyle = 'rgba(47,59,82,.15)'; this._rr(g, mx, y2 + 13, mW, 10, 5); g.fill();
       g.fillStyle = h.big ? '#ff5d73' : '#6f86b8'; this._rr(g, mx, y2 + 13, Math.max(10, mW * k), 10, 5); g.fill();
       g.fillStyle = 'rgba(47,59,82,.55)'; g.fillRect(Math.round(mx + mW * kb) - 1, y2 + 10, 2, 16);   // the "big" mark

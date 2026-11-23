@@ -56,7 +56,7 @@ kbd{display:inline-block;padding:0 .45em;border-radius:.35em;background:#fff;bor
 
 /* ---------- title ---------- */
 .title-wrap{text-align:center;animation:pop .45s cubic-bezier(.2,.9,.3,1.2)}
-.title-icon{width:calc(var(--u)*11);height:calc(var(--u)*11);filter:drop-shadow(0 calc(var(--u)*.5) calc(var(--u)*.6) rgba(0,0,0,.3));
+.title-icon{border-radius:50%;width:calc(var(--u)*11);height:calc(var(--u)*11);filter:drop-shadow(0 calc(var(--u)*.5) calc(var(--u)*.6) rgba(0,0,0,.3));
   animation:bob 2.2s ease-in-out infinite}
 @keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(calc(var(--u)*-1)) rotate(3deg)}}
 .logo{margin:calc(var(--u)*.5) 0 0;font-size:calc(var(--u)*8.5);line-height:1;letter-spacing:.01em;
@@ -293,9 +293,10 @@ body.touch .tagline{font-size:max(15px, calc(var(--u)*2.2))}body.touch .best-lin
 @media (max-height:430px){
   #scrSettings .panel{padding:8px 16px}
   #scrSettings .panel h2{margin-bottom:4px;font-size:calc(var(--u)*3.4)}
-  #scrSettings .settings{display:grid;grid-template-columns:1fr 1fr;gap:6px;min-width:0}
-  #scrSettings .set{padding:4px 12px;min-height:40px}
-  #scrSettings   #scrSettings .menu{margin-top:6px}
+  #scrSettings .settings{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px;min-width:0}
+  #scrSettings .set{padding:4px 12px;min-height:40px;min-width:0}
+  #scrSettings .set input[type=range]{flex:1 1 60px;min-width:50px}
+  #scrSettings .menu{margin-top:6px}
   #scrSettings .menu .btn{min-height:40px;padding-top:0;padding-bottom:0}
 }
 /* P3-7 portrait title: tagline off the screen edges, window shows above the logo, demo calmer */
@@ -344,3 +345,7 @@ body.touch .tagline{font-size:max(15px, calc(var(--u)*2.2))}body.touch .best-lin
   .stats{text-align:center}
 }
 .how-ico{margin-right:calc(var(--u)*.6)}
+/* QA 2026-11-23: phone touch targets for the shared volume steppers; picture-card shape buttons wrap inside narrow cards */
+@media (pointer:coarse){ #scrSettings .vol-step{min-height:44px;min-width:44px} }
+.slot .shape{flex-wrap:wrap;justify-content:center;max-width:100%}
+.slot .shape button{white-space:normal;min-width:0}

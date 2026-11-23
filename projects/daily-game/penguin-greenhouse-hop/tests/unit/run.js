@@ -466,7 +466,7 @@ test('generation: widths by difficulty, kind shares per zone, fireflies in arcs,
   const pe = e.platforms.find(p => p.kind === 'pot'), ph = h.platforms.find(p => p.kind === 'pot');
   near(pe.w, 2.4 * C.difficulty.easy.widthK, 1e-9); near(ph.w, 2.4 * C.difficulty.hard.widthK, 1e-9);
   assert.deepStrictEqual([C.widths.pot, C.widths.shelf, C.widths.leaf, C.widths.basket], [2.4, 1.7, 2.2, 2.0]);
-  assert.deepStrictEqual([C.difficulty.easy.widthK, C.difficulty.normal.widthK, C.difficulty.hard.widthK], [1.5, 1.2, 0.95]);
+  assert.deepStrictEqual([C.difficulty.easy.widthK, C.difficulty.normal.widthK, C.difficulty.hard.widthK], [1.6, 1.2, 0.95]);
   assert.ok(e.platforms.some(p => !p.path && p.kind !== 'ground'), 'side platforms');
   assert.ok(e.fireflies.length >= 6 && e.fireflies.length > h.fireflies.length - 6);
   // balcony shares (path only, many seeds)

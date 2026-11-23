@@ -118,7 +118,7 @@
         case 'shake': this.noise(0.5, { vol: 0.08, freq: 3000, slideTo: 1200, q: 0.5 }); T(700, 0.35, { type: 'sine', vol: 0.06, slideTo: 420 }); break;   // shake off the rain
         case 'firefly': { const c = Math.min(7, Math.max(0, (o.combo || 1) - 1)) % 8; const n = 86 + PENTA[c]; T(NOTE(n), 0.2, { type: 'sine', vol: 0.09 }); T(NOTE(n + 12), 0.14, { type: 'sine', vol: 0.03, at: 0.03 }); break; }   // twinkle
         case 'lantern': [0, 4, 7, 12, 16].forEach((s, i) => T(NOTE(84 + s), 0.22, { type: 'sine', vol: 0.1, at: i * 0.06 })); break;
-        case 'wall': T(420, 0.06, { type: 'triangle', vol: 0.08, slideTo: 300 }); this.noise(0.04, { vol: 0.04, freq: 1800, q: 3 }); break;   // tok on the fence post
+        case 'wall': T(420, 0.06, { type: 'triangle', vol: 0.08, slideTo: 300 }); this.noise(0.04, { vol: 0.04, freq: 1800, q: 3 }); break;   // tok on the iron pillar
         case 'fall': T(900, 0.7, { type: 'sine', vol: 0.1, slideTo: 220 }); break;   // wheee
         case 'heartLost': T(NOTE(69), 0.18, { type: 'sine', vol: 0.1 }); T(NOTE(65), 0.3, { type: 'sine', vol: 0.1, at: 0.16 }); break;
         case 'heartGain': [0, 4, 7].forEach((s, i) => T(NOTE(79 + s), 0.18, { type: 'sine', vol: 0.1, at: 0.4 + i * 0.07 })); break;
@@ -130,28 +130,15 @@
 
     // ---------- music ----------
     setLevel(zone, loop) { this.zone = ((zone || 0) % 4 + 4) % 4; this.loop = loop || 0; },
-    _rainBed() {   // a quiet looping rain hiss under the music (+ an unused gust bed kept so setWind stays a safe no-op)
+    _rainBed() {   // a quiet looping rain hiss under the music 
       const c = this.ctx; if (!c || this._rain) return;
       const s = c.createBufferSource(); s.buffer = this.noiseBuf; s.loop = true;
       const f = c.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 700; f.Q.value = 0.5;
       const g = c.createGain(); g.gain.value = 0.03;
       s.connect(f); f.connect(g); g.connect(this.music); s.start();
       this._rain = s;
-      const w = c.createBufferSource(); w.buffer = this.noiseBuf; w.loop = true;
-      const wf = c.createBiquadFilter(); wf.type = 'bandpass'; wf.frequency.value = 500; wf.Q.value = 0.7;
-      const wg = c.createGain(); wg.gain.value = 0;
-      const pan = c.createStereoPanner ? c.createStereoPanner() : null;
-      w.connect(wf); wf.connect(wg); if (pan) { wg.connect(pan); pan.connect(this.sfx); } else wg.connect(this.sfx);
-      w.start(); this._wind = { f: wf, g: wg, pan };
     },
-    /* the gust bed: strength 0..1, dir −1|+1 (called every frame while playing) */
-    setWind(dir, strength) {
-      const W = this._wind; if (!W || !this.ctx) return;
-      const t = this.ctx.currentTime, k = Math.max(0, Math.min(1, strength || 0));
-      W.g.gain.setTargetAtTime(this._musicPlaying ? k * 0.16 : 0, t, 0.12);
-      W.f.frequency.setTargetAtTime(380 + k * 900, t, 0.2);
-      if (W.pan) W.pan.pan.setTargetAtTime((dir || 0) * 0.6 * k, t, 0.2);
-    },
+    setWind() {},   // no wind in this game (kept so callers from the fork stay safe)
     startMusic() {
       if (!this.ensure()) return;
       this._rainBed();

@@ -122,10 +122,10 @@
       $('overScore').textContent = info.score;
       $('overBest').textContent = info.best;
       $('newBest').classList.toggle('hidden', !info.newBest);
-      const c = info.cleared;   // weather levels finished: 1 bronze, 2 silver, 3 gold, 4+ platinum
+      const c = info.cleared;   // floors finished: 1 bronze, 2 silver, 3 gold, 4+ platinum
       const m = c >= 4 ? 'platinum' : c >= 3 ? 'gold' : c >= 2 ? 'silver' : c >= 1 ? 'bronze' : 'none';
       $('medal').className = 'medal ' + m;
-      $('medalName').textContent = m === 'none' ? 'Climb past the Sunny Meadow for a medal' : m[0].toUpperCase() + m.slice(1) + ' medal';
+      $('medalName').textContent = m === 'none' ? 'Climb past the Potting Shed for a medal' : m[0].toUpperCase() + m.slice(1) + ' medal';
       $('overStats').innerHTML = `Climbed: <b>${info.height} m</b> · Fireflies: <b>${info.fireflies}</b> · Full lanterns: <b>${info.lanterns}</b><br>Bounces: <b>${info.bounces}</b> · Mushrooms: <b>${info.springs}</b> · Biggest: <b>${info.maxSize}×</b> · Falls: <b>${info.falls}</b><br>Reached: <b>${info.reached}</b>`;
       this.show('scrOver');
     },

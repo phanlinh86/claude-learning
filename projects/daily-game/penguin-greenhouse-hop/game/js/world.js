@@ -38,7 +38,7 @@
     widths: { pot: 2.4, shelf: 1.7, leaf: 2.2, basket: 2.0 },
     meterEvery: 25, levelBonus: 100,
     // --- growth + weight (the twist)
-    growRate: 0.004, growPerFirefly: 0.006, maxSize: 1.6, bigAt: 1.3, growStep: 0.1,
+    growRate: 0.006, growPerFirefly: 0.006, maxSize: 1.6, bigAt: 1.3, growStep: 0.1,
     steerK: 0.24, minVxK: 0.7, shrinkT: 0.8, sizeBonusK: 200, sizeHookMax: 2.5,
     // --- leaf: damped torsion spring about the stem (ω0 = √k ≈ 15.8 rad/s, ζ = c / 2ω0 ≈ 0.19)
     leaf: { k: 250, c: 6, impulse: 2.6, maxBend: 0.35, flick: 0.18, flickCap: 1.15 },
@@ -46,7 +46,7 @@
     basket: { len: [2.0, 3.2], push: 0.35, maxK: 1.25, ampCap: 0.5 },
     goal: { easy: 115, normal: 125, hard: 160 },
     difficulty: {
-      easy:   { hearts: 5, gap: [1.3, 2.0], maxDx: 2.6, widthK: 1.5,  basketK: 0.75, maxSize: 1.5, flyEvery: [5, 7] },
+      easy:   { hearts: 5, gap: [1.3, 2.0], maxDx: 2.6, widthK: 1.6,  basketK: 0.75, maxSize: 1.5, flyEvery: [5, 7] },
       normal: { hearts: 3, gap: [1.5, 2.4], maxDx: 4.0, widthK: 1.2,  basketK: 1.0,  maxSize: 1.6, flyEvery: [6, 9] },
       hard:   { hearts: 3, gap: [1.7, 2.6], maxDx: 4.6, widthK: 0.95, basketK: 1.15, maxSize: 1.6, flyEvery: [7, 10] }
     },
@@ -465,9 +465,10 @@
     if (this.hero.shrinkT <= 0) this._addSize(C.growPerFirefly);
     if (this.lantern >= C.lanternSize) {
       this.lantern = 0; this.stats.lanterns++;
-      if (this.hearts < this.maxHearts) this.hearts++;
-      this._emit({ type: 'lantern', hearts: this.hearts });
-      this._emit({ type: 'heartGain', hearts: this.hearts });
+      var gained = this.hearts < this.maxHearts;
+      if (gained) this.hearts++;
+      this._emit({ type: 'lantern', hearts: this.hearts, gained: gained });
+      if (gained) this._emit({ type: 'heartGain', hearts: this.hearts });
     }
   };
 

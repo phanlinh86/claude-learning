@@ -42,7 +42,7 @@ The values in `CONFIG` are the truth; this file explains them.
 
 | Key | Value | Unit | Why |
 |---|---|---|---|
-| `growRate` | 0.004 | size/s | Slow steady growth while playing (after the first hop, not while shrinking). |
+| `growRate` | 0.006 (playtest: was 0.004) | size/s | Slow steady growth while playing (after the first hop, not while shrinking). |
 | `growPerFirefly` | **0.006** | size | DESIGN guessed ≈ 0.02; sims showed players catch 50–80 fireflies/min, so 0.02 made Puddle max size within 20 s. 0.006 puts a casual player at `big` around the middle of floor 1 and near max at its end (§6). |
 | `maxSize` | 1.6 (difficulty: Easy 1.5, Normal/Hard 1.6) | size | Cap. |
 | `bigAt` | 1.3 | size | `big` = size ≥ 1.3: ×2 metre points, the bot prefers leaves. |
@@ -94,7 +94,7 @@ Measured first-landing peak bend (2.6 u leaf, landing from 3 u): size 1.0 mid 0.
 
 | | hearts | gap (u) | maxDx (u) | widthK | basketK | maxSize | flyEvery (u) |
 |---|---|---|---|---|---|---|---|
-| easy | 5 | 1.3–2.0 | 2.6 | 1.5 | 0.75 | 1.5 | 5–7 |
+| easy | 5 | 1.3–2.0 | 2.6 | 1.6 (playtest; was 1.5) | 0.75 | 1.5 | 5–7 |
 | normal | 3 | 1.5–2.4 | 4.0 | 1.2 | 1.0 | 1.6 | 6–9 |
 | hard | 3 | 1.7–2.6 | 4.6 | 0.95 | 1.15 | 1.6 | 7–10 |
 

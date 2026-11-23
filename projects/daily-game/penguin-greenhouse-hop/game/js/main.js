@@ -122,7 +122,7 @@
       PH.UI.setHud(false);
       const s = w.stats || {}, names = PH.Renderer.ZONE_INFO.map(z => z.name);
       PH.UI.showGameOver({
-        score: w.score, best: Math.max(prev, w.score), newBest: newBest && w.score > 0, cleared: w.level || 0,
+        score: w.score, best: this.botMode ? prev : Math.max(prev, w.score), newBest: newBest && w.score > 0 && !this.botMode, cleared: w.level || 0,
         height: Math.floor(w.maxY || 0), fireflies: w.fireflyCount || 0, lanterns: s.lanterns || 0, bounces: s.bounces || 0,
         springs: s.springs || 0, maxSize: +(s.maxSize || 1).toFixed(2), falls: s.falls || 0,
         reached: names[(w.zone || 0) % 4] + ((w.loop || 0) > 0 ? ' (round ' + (w.loop + 1) + ')' : '')
@@ -138,6 +138,7 @@
     resetBest() { DIFFS.forEach(d => PH.Storage.del('best_' + d)); },
     setSetting(k, v) {
       this.settings[k] = v;
+      if (k === 'difficulty') this.urlDiff = null;   // a tap in Settings beats ?diff= for the next run
       PH.Storage.setJSON('settings', this.settings);
       PH.Audio.setOptions({ sfx: this.settings.sfx, music: this.settings.music, muted: this.settings.muted || this.urlMute });
       if (k === 'music' && v && (this.mode === 'playing' || this.mode === 'paused')) PH.Audio.startMusic();
@@ -258,6 +259,7 @@
           } break;
           case 'grow': if (sound) A.play('grow', { size: e.size }); break;
           case 'big': if (sound) A.play('big'); break;
+          case 'rescue': if (sound) A.play('rescue'); break;
           case 'firefly': if (sound) A.play('firefly', { combo: e.combo }); break;
           case 'lantern': if (sound) A.play('lantern'); break;
           case 'wall': if (sound) A.play('wall'); break;
