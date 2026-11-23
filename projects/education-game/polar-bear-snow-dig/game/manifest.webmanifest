@@ -1,0 +1,16 @@
+{
+  "name": "Nuka's Snow Dig · Gấu Nuka Đào Tuyết",
+  "short_name": "Snow Dig",
+  "description": "Rub the snow with Nuka the polar-bear cub: colours, shapes, counting, arctic animals, letters. English & Vietnamese.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#7CC7EE",
+  "theme_color": "#7CC7EE",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

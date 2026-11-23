@@ -1,0 +1,255 @@
+{
+ "_about": "Nuka per frame, in the 0 0 300 300 viewBox (feet anchor 150,292). paw = centre of the near (front, viewer-right) paw; tip = the paw tip (point: the pointing toe tip, use it for the hint direction); headTop = y of the top of the ears; eye = near eye centre; bbox = measured opaque box (tools/nuka_sheet.js). slide: paw = front paw tip (leading edge of the slide).",
+ "idle": {
+  "paw": [
+   196,
+   238
+  ],
+  "tip": [
+   198,
+   254
+  ],
+  "headTop": 46,
+  "eye": [
+   146,
+   114
+  ],
+  "bbox": [
+   45,
+   43,
+   237,
+   294
+  ]
+ },
+ "blink": {
+  "paw": [
+   196,
+   238
+  ],
+  "tip": [
+   198,
+   254
+  ],
+  "headTop": 46,
+  "eye": [
+   146,
+   114
+  ],
+  "bbox": [
+   45,
+   43,
+   237,
+   294
+  ]
+ },
+ "talk": {
+  "paw": [
+   205,
+   235
+  ],
+  "tip": [
+   212,
+   249
+  ],
+  "headTop": 46,
+  "eye": [
+   146,
+   114
+  ],
+  "bbox": [
+   45,
+   43,
+   237,
+   294
+  ]
+ },
+ "happy": {
+  "paw": [
+   220,
+   224
+  ],
+  "tip": [
+   234,
+   232
+  ],
+  "headTop": 46,
+  "eye": [
+   146,
+   114
+  ],
+  "bbox": [
+   31,
+   43,
+   270,
+   294
+  ]
+ },
+ "cheer": {
+  "paw": [
+   243,
+   154
+  ],
+  "tip": [
+   253,
+   141
+  ],
+  "headTop": 46,
+  "eye": [
+   146,
+   114
+  ],
+  "bbox": [
+   31,
+   43,
+   270,
+   294
+  ]
+ },
+ "think": {
+  "paw": [
+   189,
+   183
+  ],
+  "tip": [
+   186,
+   167
+  ],
+  "headTop": 46,
+  "eye": [
+   146,
+   114
+  ],
+  "bbox": [
+   45,
+   45,
+   242,
+   294
+  ]
+ },
+ "oops": {
+  "paw": [
+   196,
+   238
+  ],
+  "tip": [
+   198,
+   254
+  ],
+  "headTop": 46,
+  "eye": [
+   146,
+   114
+  ],
+  "bbox": [
+   45,
+   40,
+   269,
+   294
+  ]
+ },
+ "wave": {
+  "paw": [
+   243,
+   154
+  ],
+  "tip": [
+   253,
+   141
+  ],
+  "headTop": 46,
+  "eye": [
+   146,
+   114
+  ],
+  "bbox": [
+   45,
+   43,
+   263,
+   294
+  ]
+ },
+ "point": {
+  "paw": [
+   227,
+   197
+  ],
+  "tip": [
+   253,
+   186
+  ],
+  "headTop": 46,
+  "eye": [
+   146,
+   114
+  ],
+  "bbox": [
+   45,
+   43,
+   256,
+   294
+  ]
+ },
+ "dig": {
+  "paw": [
+   233,
+   233
+  ],
+  "tip": [
+   247,
+   240
+  ],
+  "headTop": 46,
+  "eye": [
+   146,
+   114
+  ],
+  "bbox": [
+   45,
+   43,
+   263,
+   294
+  ]
+ },
+ "full_wave": {
+  "paw": [
+   219,
+   225
+  ],
+  "tip": [
+   233,
+   233
+  ],
+  "headTop": 46,
+  "eye": [
+   146,
+   114
+  ],
+  "bbox": [
+   45,
+   43,
+   240,
+   294
+  ]
+ },
+ "slide": {
+  "paw": [
+   276,
+   278
+  ],
+  "tip": [
+   290,
+   278
+  ],
+  "headTop": 144,
+  "eye": [
+   207,
+   199
+  ],
+  "bbox": [
+   19,
+   144,
+   300,
+   296
+  ]
+ }
+}
