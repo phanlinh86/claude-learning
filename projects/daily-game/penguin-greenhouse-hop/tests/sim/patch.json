@@ -1,0 +1,4 @@
+{
+  "*": { "growRate": 0.006 },
+  "easy": { "difficulty.easy.widthK": 1.6 }
+}

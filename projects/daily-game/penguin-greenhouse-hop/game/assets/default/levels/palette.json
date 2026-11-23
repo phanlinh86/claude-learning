@@ -1,0 +1,22 @@
+{
+  "potting": {
+    "skyTop": "#a9bcc9",
+    "skyBottom": "#e7eef0",
+    "tint": "rgba(170,190,205,0.08)"
+  },
+  "fern": {
+    "skyTop": "#9cc9b4",
+    "skyBottom": "#e3f2ea",
+    "tint": "rgba(150,205,185,0.10)"
+  },
+  "balcony": {
+    "skyTop": "#a7a9c9",
+    "skyBottom": "#e9e8f4",
+    "tint": "rgba(150,152,190,0.12)"
+  },
+  "roof": {
+    "skyTop": "#8d86c2",
+    "skyBottom": "#f3dbe4",
+    "tint": "rgba(160,140,200,0.08)"
+  }
+}
