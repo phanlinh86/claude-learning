@@ -95,3 +95,10 @@ Rules: pickup when distance < `R_NUBI·s + R_FLY`; landing when Nubi's bottom (y
 ## 6. Test hooks
 URL: `?speed=N&bot=1&skill=S&autostart=1&autorestart=1&seed=N&mute=1&debug=1&diff=easy|normal|hard&level=N&size=S` (flags never saved).
 `window.CFF.debug`: `world, weather, mode, stats, getState(), setSpeed(n), startGame(), setBot(on, skill), setAutoRestart(on), gotoLevel(i), setSize(s), aim(dx, dy), release(), puff()`.
+
+## 7. Changes after QA (2026-11-24)
+- Tuned numbers live in `world.js` CONFIG / `docs/MECHANICS.md`: GROW_FLY 0.05, GROW_GOLD 0.1, BUOY 0.15, DRAG 0.05, RAIN_PAD 0.5, **RAIN_KEEP 0.5**, **MIST_CAP 1.3** (slow growth stops there; only fireflies go beyond).
+- **Waterings per season by difficulty:** `DIFF.easy/normal/hard.landings` = 6 / 9 / 10 (playtest: seasons lasted only 22–25 s for adults).
+- Firefly arcs: up to 32 tries, crow check for releases 0.5–1.5 s on the first 28.
+- Extra phase `'flop'` (weak fling onto the bale = retry, event `flop`), extra fields `nubi.goal/flightT/puffT/spin/bonkT`, `world.P/levelParams()/predictShot()`.
+- Renderer: band + pouch drawn behind Nubi, pouch at his bottom; winter landing uses the plain frame + snow particles; bullseye ring every season during aim/flight; gold firefly ×1.18 + white dashed ring; size meter with a BIG label.

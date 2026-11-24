@@ -1,4 +1,4 @@
-// Run the existing unit suite (tests/unit/run.js, unchanged) against the RECOMMENDED patch, in memory only:
+// Nubi's Farm Fling — run the unit suite (tests/unit/run.js, unchanged) against the RECOMMENDED patch, in memory only:
 // fs.readFileSync is hooked so world.js gets the patch's source edits plus its CONFIG/DIFF/LEVELS overrides.
 //   node tests/sim/unit-with-patch.js [--stats]
 'use strict';

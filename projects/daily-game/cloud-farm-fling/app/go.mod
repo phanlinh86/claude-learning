@@ -1,4 +1,4 @@
-module finnsislandfling
+module nubisfarmfling
 
 go 1.22
 

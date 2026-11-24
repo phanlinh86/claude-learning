@@ -253,11 +253,12 @@ test('growth: slow growth while aiming/flying, eased, capped, grow/big events, s
   near(w.nubi.size, 1 + 10 * C.GROW_RATE, 0.003, 'grows ≈ GROW_RATE·t while aiming');
   assert.strictEqual(w.nubi.psize <= w.nubi.size, true);
   // crossing 1.4 → grow {size 1.4} + big (once)
-  w.setSize(1.39); w.drainEvents();
+  w.setSize(1.39); w.nubi.goal = 1.42; w.drainEvents();   // (mist stops at MIST_CAP, so push the goal like a firefly would)
   const ev = steps(w, Math.round(3 / H));
   assert.strictEqual(of(ev, 'grow').map(e => e.size).join(), '1.4'); assert.strictEqual(of(ev, 'big').length, 1);
   // cap
-  w.setSize(1.69); steps(w, Math.round(5 / H)); assert.strictEqual(w.nubi.size, C.SIZE_MAX);
+  w.setSize(1.25); steps(w, Math.round(30 / H)); near(w.nubi.size, C.MIST_CAP, 1e-6, 'mist growth stops at MIST_CAP');
+  w.setSize(1.69); steps(w, Math.round(5 / H)); near(w.nubi.size, 1.69, 1e-9, 'no mist growth above MIST_CAP');
   w.setSize(5); assert.strictEqual(w.nubi.size, C.SIZE_MAX); w.setSize(0.2); assert.strictEqual(w.nubi.size, 1);
   assert.strictEqual(mk('normal', 1, { size: 1.5 }).nubi.size, 1.5);
   assert.strictEqual(mk('normal', 1, { size: 9 }).nubi.size, C.SIZE_MAX);
@@ -468,12 +469,12 @@ test('crows: per level count, y band, never on the sling, slow drift with wrap',
   assert.ok(wrapped, 'crows wrap around');
 });
 
-test('level up after 5 landings (after the rain phase, before newShot); zones and loops', () => {
+test('level up after DIFF.landings landings (after the rain phase, before newShot); zones and loops', () => {
   const w = mk('normal', 12); w.hearts = 1e6;
   const bot = new CFF.Bot(w, { skill: 1, seed: 2 }); const ev = [];
-  for (let i = 0; i < 60 * 80 && w.level === 0; i++) { bot.step(1 / 60); w.update(1 / 60); ev.push(...w.drainEvents()); }
+  for (let i = 0; i < 60 * 160 && w.level === 0; i++) { bot.step(1 / 60); w.update(1 / 60); ev.push(...w.drainEvents()); }
   assert.strictEqual(w.level, 1); assert.strictEqual(w.zone, 1); assert.strictEqual(w.levelLandings, 0);
-  assert.strictEqual(of(ev, 'land').length, 5);
+  assert.strictEqual(of(ev, 'land').length, W.DIFF.normal.landings);
   const t = types(ev), iu = t.indexOf('levelUp');
   assert.strictEqual(t[iu + 1], 'newShot');
   assert.strictEqual(JSON.stringify(ev[iu]), JSON.stringify({ type: 'levelUp', zone: 1, level: 1, loop: 0 }));

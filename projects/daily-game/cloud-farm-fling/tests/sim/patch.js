@@ -1,72 +1,44 @@
-// Finn's Island Fling — the playtest's recommended patch, as data the sims can load (report-only: the game files
-// are never touched; `src` entries are applied to an in-memory copy of game/js/world.js by tests/sim/lib.js).
+// Nubi's Farm Fling — the playtest's recommended patch, as data the sims load (report-only: game/ is never touched;
+// `src` entries are exact replacements applied to an in-memory copy of game/js/world.js by tests/sim/lib.js).
 'use strict';
 
-// ---- code fixes (exact replacements in game/js/world.js) ----
 const SRC = {
-  // F1 — flutter spam / early taps: a tap while Finn still rises faster than FLUTTER_VY does nothing (and is NOT
-  // used up); otherwise vy = FLUTTER_VY. On the way down this is identical to today's rescue (max(vy,0)+3.2 = 3.2).
-  flutter: [
+  // S1 — seasons last a fixed number of waterings PER DIFFICULTY (DIFF.<d>.landings, fallback LANDINGS_PER_LEVEL).
+  //      render.js must read the same number for the HUD pips (see docs/reports/playtest.md).
+  landingsPerDiff: [
     ['world.js',
-      "    if (this.phase !== 'fly' || this.fluttered) return false;\n    var fox = this.fox;\n    fox.vy = M.max(fox.vy, 0) + CONFIG.FLUTTER_VY;",
-      "    if (this.phase !== 'fly' || this.fluttered) return false;\n    var fox = this.fox;\n    if (fox.vy >= CONFIG.FLUTTER_VY) return false;                          // still shooting up: tap ignored, not used up\n    fox.vy = CONFIG.FLUTTER_VY;"],
-    ['world.js',
-      "if (flutterAt !== undefined && flutterAt !== null && !fluttered && ft >= flutterAt) { f.vy = M.max(f.vy, 0) + C.FLUTTER_VY; fluttered = true; }",
-      "if (flutterAt !== undefined && flutterAt !== null && !fluttered && ft >= flutterAt && f.vy < C.FLUTTER_VY) { f.vy = C.FLUTTER_VY; fluttered = true; }"]
+      "        if (this.levelLandings >= C.LANDINGS_PER_LEVEL) this._setLevel(this.level + 1, false);",
+      "        if (this.levelLandings >= (this.D.landings || C.LANDINGS_PER_LEVEL)) this._setLevel(this.level + 1, false);"]
   ],
-  // F2 — a flop is a free RETRY of the same shot (same raft, same leaves still there) instead of a free re-roll.
-  flopRetry: [
+  // S2 — crow-safe firefly arcs: check the release window around the expected aim time (0.5–1.5 s, not 0.5–3 s, which
+  //      almost no arc passes with 2–3 crows) and allow more tries before giving up on the check.
+  crowSafeArc: [
     ['world.js',
-      "      if (this.phaseT >= C.FLOP_T) this._newShot(false);",
-      "      if (this.phaseT >= C.FLOP_T) this._retryShot();"],
+      "      for (w = 0.5; w <= 3.01; w += 0.5) for (i = 0; i < path.length; i++) {",
+      "      for (w = 0.5; w <= 1.51; w += 0.5) for (i = 0; i < path.length; i++) {"],
     ['world.js',
-      "  World.prototype._makeLeaves = function () {",
-      "  /** after a flop: Finn hops back into the sling; raft (still drifting) and the remaining leaves stay */\n" +
-      "  World.prototype._retryShot = function () {\n" +
-      "    var C = CONFIG, fox = this.fox;\n" +
-      "    this.phase = 'aim'; this.phaseT = 0; this.pull = null; this.fluttered = false; this._pulled = false;\n" +
-      "    fox.x = fox.px = this.sling.x; fox.y = fox.py = this.sling.y;\n" +
-      "    fox.vx = fox.vy = 0; fox.rot = fox.prot = 0; fox.spin = 0; fox.bonkT = 0; fox.flutT = 0; fox.flightT = 0; fox.state = 'sit';\n" +
-      "    this._emit({ type: 'newShot', retry: true });\n" +
-      "  };\n\n" +
-      "  World.prototype._makeLeaves = function () {"]
+      "    for (var tries = 0; tries < 16 && !best; tries++) {",
+      "    for (var tries = 0; tries < 32 && !best; tries++) {"],
+    ['world.js',
+      "      if (tries < 12 && this._arcHitsCrow(sol.pull, s0, g0)) continue;",
+      "      if (tries < 28 && this._arcHitsCrow(sol.pull, s0, g0)) continue;"]
   ],
-  // F3 — heart refill per difficulty (DIFF.<d>.heartEvery, falls back to CONFIG.HEART_EVERY)
-  heartEvery: [
+  // S3 — mist alone can't make Nubi big: the slow aim/flight growth stops at MIST_CAP; only fireflies go beyond.
+  //      (kills "sit in the aim phase for 2 minutes → max size → 100 % landings, never die")
+  mistCap: [
     ['world.js',
-      "if (this.leafCount % C.HEART_EVERY === 0 && this.hearts < this.maxHearts) {",
-      "if (this.leafCount % (this.D.heartEvery || C.HEART_EVERY) === 0 && this.hearts < this.maxHearts) {"]
-  ],
-  // F4 — the leaf "solution arc" must not run through a gull for a release 0.5–3 s after the shot appears
-  gullSafeArc: [
+      "    if (rate) f.goal = M.min(C.SIZE_MAX, f.goal + rate * h);",
+      "    if (rate && f.goal < C.MIST_CAP) f.goal = M.min(C.MIST_CAP, f.goal + rate * h);"],
     ['world.js',
-      "      if (s && s.pull && s.apex <= C.ARC_APEX && s.v <= C.VMAX * 0.97) sol = s;",
-      "      if (s && s.pull && s.apex <= C.ARC_APEX && s.v <= C.VMAX * 0.97 && (tries > 20 || !this._arcHitsGull(s))) sol = s;"],
-    ['world.js',
-      "  World.prototype._makeLeaves = function () {",
-      "  /** does the analytic arc s pass within R_FOX + GULL_R + 0.2 of a gull for a release 0.5–3 s from now? */\n" +
-      "  World.prototype._arcHitsGull = function (s) {\n" +
-      "    var C = CONFIG, R = C.R_FOX + C.GULL_R + 0.15, p = { x: 0, y: 0 };\n" +
-      "    for (var i = 0; i < this.gulls.length; i++) {\n" +
-      "      var g = this.gulls[i];\n" +
-      "      for (var w = 0.5; w <= 3.01; w += 0.5) for (var t = 0; t <= s.T; t += 0.04) {\n" +
-      "        gullPos(g, g.t + w + t, p);\n" +
-      "        var dx = s.x0 + s.vx * t - p.x, dy = s.y0 + s.vy * t - 0.5 * C.G * t * t - p.y;\n" +
-      "        if (dx * dx + dy * dy < R * R) return true;\n" +
-      "      }\n" +
-      "    }\n" +
-      "    return false;\n" +
-      "  };\n\n" +
-      "  World.prototype._makeLeaves = function () {"]
+      "    var wait = C.ARC_WAIT, g0 = M.min(C.SIZE_MAX, n0.goal + C.GROW_RATE * wait);",
+      "    var wait = C.ARC_WAIT, g0 = n0.goal < C.MIST_CAP ? M.min(C.MIST_CAP, n0.goal + C.GROW_RATE * wait) : n0.goal;"]
   ]
 };
 
-// ---- data changes ----
 const DATA = {
-  // D1 — wider raft spawn ranges: kills the "one memorised pull" strategy (cove easy 96 % → ~70 %), aiming still matters
-  ranges: { LEVELS: [ { x: [7.3, 13.8] }, { x: [7.4, 14.0] }, { x: [7.8, 14.3] }, { x: [8.3, 14.5] } ] },
-  // D2 — Easy is for 4–5-year-olds: bigger deck, calmer drift, longer preview, faster heart refill
-  easy: { DIFF: { easy: { hwK: 1.4, ampK: 0.5, previewK: 1.6, heartEvery: 12 }, normal: { heartEvery: 20 }, hard: { heartEvery: 25 } } }
+  landings: { DIFF: { easy: { landings: 6 }, normal: { landings: 9 }, hard: { landings: 10 } } },
+  mistCap: { CONFIG: { MIST_CAP: 1.3 } },
+  rainKeep: { CONFIG: { RAIN_KEEP: 0.5 } }
 };
 
 function combine(parts) {
@@ -77,9 +49,8 @@ function combine(parts) {
     if (x.DIFF) for (const d in x.DIFF) p.DIFF[d] = Object.assign(p.DIFF[d] || {}, x.DIFF[d]);
     if (x.LEVELS) x.LEVELS.forEach((o, i) => { if (o) p.LEVELS[i] = Object.assign(p.LEVELS[i] || {}, o); });
   }
-  // the source edits for _makeLeaves insert before the same anchor: apply F4 before F2 is fine (both keep the anchor)
   return p;
 }
 
-const PATCH = combine([SRC.flutter, SRC.flopRetry, SRC.heartEvery, SRC.gullSafeArc, DATA.ranges, DATA.easy]);
+const PATCH = combine([SRC.landingsPerDiff, DATA.landings, SRC.crowSafeArc, SRC.mistCap, DATA.mistCap, DATA.rainKeep]);
 module.exports = { PATCH, SRC, DATA, combine };

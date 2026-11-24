@@ -1,22 +1,19 @@
-// Finn's Island Fling — playtest simulation library (report-only: never edits game code).
-// A "variant" = a fresh CFF namespace (own vm sandbox) with CONFIG / DIFF / LEVELS overrides and optional
-// prototype overrides, so before/after comparisons never leak into each other.
+// Nubi's Farm Fling — playtest simulation library (report-only: never edits game code).
+// Ported from the fox game's sim. A "variant" = a fresh CFF namespace (its own vm sandbox) with CONFIG / DIFF /
+// LEVELS overrides and optional in-memory source replacements, so before/after runs never leak into each other.
 'use strict';
-const { load } = require('../unit/load.js');
+const fs = require('fs'), path = require('path'), vm = require('vm');
 
 const DEG = Math.PI / 180;
+const JS = path.join(__dirname, '..', '..', 'game', 'js');
 
-/** load the game scripts into a fresh vm sandbox, applying source replacements [[file, from, to], …]
- *  (prototype code changes in memory only — the game files on disk are never touched) */
+/** load rng/world/bot into a fresh sandbox, applying source replacements [[file, from, to], …] in memory */
 function loadSrc(src) {
-  if (!src || !src.length) return load();
-  const fs = require('fs'), path = require('path'), vm = require('vm');
-  const JS = path.join(__dirname, '..', '..', 'game', 'js');
   const sandbox = { console }; sandbox.window = sandbox; vm.createContext(sandbox);
-  for (const fname of ['rng.js', 'world.js', 'weather.js', 'bot.js']) {
+  for (const fname of ['rng.js', 'world.js', 'bot.js']) {
     let code = fs.readFileSync(path.join(JS, fname), 'utf8');
-    for (const [file, from, to] of src) if (file === fname) {
-      if (code.indexOf(from) < 0) throw new Error('patch miss in ' + file + ': ' + from.slice(0, 60));
+    for (const [file, from, to] of src || []) if (file === fname) {
+      if (code.indexOf(from) < 0) throw new Error('patch miss in ' + file + ': ' + from.slice(0, 70));
       code = code.replace(from, to);
     }
     vm.runInContext(code, sandbox, { filename: fname });
@@ -24,122 +21,144 @@ function loadSrc(src) {
   return sandbox.CFF;
 }
 
-/** fresh CFF with a patch: { CONFIG: {...}, DIFF: { easy: {...} }, LEVELS: [ {...}|null, ... ], src: [...], code(CFF) } */
+/** fresh CFF with a patch: { CONFIG, DIFF: {easy: {...}}, LEVELS: [ {...}|null ], src: [...] } */
 function variant(patch) {
   patch = patch || {};
   const CFF = loadSrc(patch.src);
   const W = CFF.World;
-  if (patch.CONFIG) Object.assign(W.CONFIG, patch.CONFIG);
+  if (patch.CONFIG) for (const k in patch.CONFIG) {
+    const v = patch.CONFIG[k];
+    if (v && typeof v === 'object' && !Array.isArray(v)) Object.assign(W.CONFIG[k], v); else W.CONFIG[k] = v;
+  }
   if (patch.DIFF) for (const d in patch.DIFF) Object.assign(W.DIFF[d], patch.DIFF[d]);
   if (patch.LEVELS) patch.LEVELS.forEach((o, i) => { if (o) Object.assign(W.LEVELS[i], o); });
-  if (patch.code) patch.code(CFF);
   return CFF;
 }
 
-// ---------- helpers ----------
 function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
 function pullAt(ang, L) { return { x: -Math.cos(ang) * L, y: -Math.sin(ang) * L }; }
-/** analytic flight (no gulls / flutter) of a pull: landing x at the deck height and flight time */
-function landAt(CFF, p) {
-  const C = CFF.World.CONFIG, W = CFF.World.prototype;
-  const v = W.launchVelocity(p.x, p.y);
-  // clamp like aim() does
-  const q = clampPull(CFF, p.x, p.y);
-  const x0 = C.SLING.x + q.x, y0 = C.SLING.y + q.y, yc = C.RAFT_TOP + C.FOOT;
-  const disc = v.vy * v.vy + 2 * C.G * (y0 - yc);
-  if (disc < 0) return { x: -1e9, T: 0 };
-  const T = (v.vy + Math.sqrt(disc)) / C.G;
-  return { x: x0 + v.vx * T, T };
-}
-function clampPull(CFF, dx, dy) {
-  const C = CFF.World.CONFIG;
-  dx = Math.min(dx, C.PULL_FWD); dy = Math.max(dy, -C.PULL_DOWN);
-  const L = Math.hypot(dx, dy);
-  if (L > C.PULL_MAX) { dx *= C.PULL_MAX / L; dy *= C.PULL_MAX / L; }
-  return { x: dx, y: dy };
-}
-/** pull length along `ang` whose analytic landing hits X (bisection; clamping included) */
-function lenFor(CFF, ang, X) {
-  const C = CFF.World.CONFIG;
-  let lo = C.PULL_MIN, hi = C.PULL_MAX;
-  for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; if (landAt(CFF, pullAt(ang, m)).x < X) lo = m; else hi = m; }
-  return (lo + hi) / 2;
+
+// ---------- human player models ----------
+// A human looks at the dotted preview (the game's own size-aware w.preview(), exactly what is on screen).
+//  * if the dots reach the outcome (they stop on the wagon / grass) the human reads the landing x off the last dot;
+//  * otherwise they EXTRAPOLATE the visible arc: 'naive' = a plain parabola with g = G (a kid who ignores the size),
+//    'fit' = gravity estimated from the curvature of the last dots (an adult reading the arc).
+// They pick an angle (random range, or along the firefly arc), choose the pull whose estimated landing hits their
+// target (wagon now, partly led toward where it rolls), then add hand error (target σ, power σ, angle σ). Shots 1–3
+// are clumsier (learn[]). Flight: random taps, smart rescue puff, or puff spam every frame.
+const MODELS = {
+  // ≈ 5 years: slow, coarse, often lets go a bit early, rarely puffs, ignores the size (naive extrapolation)
+  kid: { think: [2, 4.5], drag: [0.8, 1.6], ang: [25, 62], solAng: 0, sig: 1.0, learn: [1.7, 1.35, 1.1, 1], lead: 0,
+    angSig: 6, powSig: 0.07, extrap: 'naive', weak: 0.12, weakK: [0.6, 0.85], tap: 0.12, smart: 0, cancel: 0.05 },
+  // a younger / clumsier kid (≈ 4): sensitivity check
+  kid4: { think: [2.5, 5.5], drag: [0.9, 1.9], ang: [20, 66], solAng: 0, sig: 1.35, learn: [1.8, 1.4, 1.15, 1], lead: 0,
+    angSig: 8, powSig: 0.1, extrap: 'naive', weak: 0.2, weakK: [0.5, 0.85], tap: 0.2, smart: 0, cancel: 0.08 },
+  // casual adult: quick, follows the firefly arc half the time, half-leads the rolling wagon, rescues with a puff
+  adult: { think: [0.8, 1.8], drag: [0.4, 0.8], ang: [30, 60], solAng: 0.5, sig: 0.45, learn: [1.4, 1.1, 1], lead: 0.5,
+    angSig: 2, powSig: 0.025, extrap: 'fit', weak: 0, weakK: [1, 1], tap: 0, smart: 0.6, cancel: 0 },
+  // spam exploiter: no thinking, drags fast, releases at once, hammers the screen in every flight
+  spam: { think: [0.15, 0.3], drag: [0.12, 0.25], ang: [35, 55], solAng: 0, sig: 0.7, learn: [1, 1], lead: 0.3,
+    angSig: 4, powSig: 0.05, extrap: 'fit', weak: 0, weakK: [1, 1], tap: 0, smart: 0, spam: true, cancel: 0 },
+  // size farmer: a casual adult who sits in the aim phase until Nubi is ≥ farmTo (Big Shower), then shoots
+  farmer: { think: [0.8, 1.8], drag: [0.4, 0.8], ang: [30, 60], solAng: 0.5, sig: 0.45, learn: [1.4, 1.1, 1], lead: 0.5,
+    angSig: 2, powSig: 0.025, extrap: 'fit', weak: 0, weakK: [1, 1], tap: 0, smart: 0.6, cancel: 0, farmTo: 1.42 },
+  farmerMax: { think: [0.8, 1.8], drag: [0.4, 0.8], ang: [30, 60], solAng: 0.5, sig: 0.45, learn: [1.4, 1.1, 1], lead: 0.5,
+    angSig: 2, powSig: 0.025, extrap: 'fit', weak: 0, weakK: [1, 1], tap: 0, smart: 0.6, cancel: 0, farmTo: 1.69 }
+};
+
+/** where the human THINKS this pull lands, from what the preview shows. Leaves w.pull as it was. */
+function estLanding(CFF, w, pull, mode) {
+  const C = CFF.World.CONFIG, keep = w.pull, kp = w._pulled;
+  w.pull = { x: pull.x, y: pull.y };
+  const n = w.previewCount(), pts = w.preview(n);
+  w.pull = keep; w._pulled = kp;
+  const every = Math.max(1, Math.round(C.PREVIEW_DT / C.STEP)), dt = every * C.STEP;
+  if (!pts.length) return { x: C.SLING.x, seen: true };
+  const last = pts[pts.length - 1];
+  if (pts.length < n) return { x: last.x, seen: true };                     // dots end at the outcome
+  if (pts.length < 3) return { x: last.x, seen: false };
+  const a = pts[pts.length - 3], b = pts[pts.length - 2], c = last;
+  const vx = (c.x - b.x) / dt, vy = (c.y - b.y) / dt + 0.5 * C.G * dt;
+  let g = C.G;
+  if (mode === 'fit') g = clamp(-(c.y - 2 * b.y + a.y) / (dt * dt), 4, 14);
+  const yc = C.WAGON_TOP + C.FOOT * (last.size || w.nubi.size);              // sprite bottom touches the soil
+  const disc = vy * vy + 2 * g * (c.y - yc);
+  if (disc < 0) return { x: c.x, seen: false };
+  const T = (vy + Math.sqrt(disc)) / g;
+  return { x: c.x + vx * T, seen: false, T };
 }
 
-// ---------- player models ----------
-// A human: think → choose an angle → drag until the visible preview "points at" a target (raft now, or led for
-// drift) → hand error (bigger when the preview is too short to show the landing) → release. Flight: random taps,
-// smart rescue taps, or flutter spam.
-const MODELS = {
-  // 4–5-year-old: slow, big errors, often a weak pull (lets go early), uses the preview only partly, random taps
-  kid4: { think: [2, 5], drag: [0.8, 1.8], ang: [22, 66], solAng: 0.15, sig: 1.3, learn: [1.6, 1.3, 1.1], lead: 0,
-    angSig: 7, powBase: 0.06, powUnseen: 0.14, previewUse: 0.5, weak: 0.22, weakK: [0.45, 0.8],
-    tapChance: 0.5, tapsPer: [1, 4], smart: 0, cancelChance: 0.1 },
-  // the original tests/unit kid (≈ 6 years): for reference
-  kid6: { think: [1.5, 3.5], drag: [0.7, 1.4], ang: [28, 62], solAng: 0, sig: 0.9, learn: [1.7, 1.3, 1], lead: 0,
-    angSig: 3, powBase: 0.03, powUnseen: 0.10, previewUse: 1, weak: 0, weakK: [1, 1],
-    tapChance: 0.25, tapsPer: [1, 1], smart: 0, cancelChance: 0 },
-  // casual adult: quick, uses the full preview, aims along the leaf arc, half-leads the drift, rescues with flutter
-  adult: { think: [0.8, 2], drag: [0.5, 0.9], ang: [30, 60], solAng: 0.6, sig: 0.45, learn: [1.4, 1.1, 1], lead: 0.5,
-    angSig: 2, powBase: 0.02, powUnseen: 0.06, previewUse: 1, weak: 0, weakK: [1, 1],
-    tapChance: 0, tapsPer: [1, 1], smart: 0.6, cancelChance: 0 },
-  // spam: casual adult that hammers the screen during every flight (first frame flutter)
-  spam: { think: [0.8, 2], drag: [0.5, 0.9], ang: [30, 60], solAng: 0.6, sig: 0.45, learn: [1.4, 1.1, 1], lead: 0.5,
-    angSig: 2, powBase: 0.02, powUnseen: 0.06, previewUse: 1, weak: 0, weakK: [1, 1],
-    tapChance: 0, tapsPer: [1, 1], smart: 0, spam: true, cancelChance: 0 }
-};
+/** pull length along ang whose ESTIMATED landing (estLanding) is closest to X (coarse grid + local bisection) */
+function pullForTarget(CFF, w, ang, X, mode) {
+  const C = CFF.World.CONFIG;
+  let best = null;
+  for (let L = C.PULL_MIN + 0.02; L <= C.PULL_MAX + 1e-9; L += 0.1) {
+    const e = estLanding(CFF, w, pullAt(ang, L), mode), d = Math.abs(e.x - X);
+    if (!best || d < best.d) best = { L, d, e };
+  }
+  let lo = Math.max(C.PULL_MIN, best.L - 0.1), hi = Math.min(C.PULL_MAX, best.L + 0.1);
+  for (let i = 0; i < 9; i++) {
+    const m = (lo + hi) / 2, e = estLanding(CFF, w, pullAt(ang, m), mode);
+    if (Math.abs(e.x - X) < best.d) best = { L: m, d: Math.abs(e.x - X), e };
+    if (e.x < X) lo = m; else hi = m;
+  }
+  return best;
+}
 
 class Human {
   constructor(CFF, w, model, seed) {
     this.CFF = CFF; this.w = w; this.m = model; this.r = new CFF.RNG(seed * 13 + 5);
     this.st = 'think'; this.tt = 0; this.shot = 0; this.taps = []; this.flT = 0; this._chk = 0;
-    this.newThink();
+    this.lastSeen = []; this.newThink();
   }
   newThink() { const r = this.r, m = this.m; this.think = r.range(m.think[0], m.think[1]); this.drag = r.range(m.drag[0], m.drag[1]); }
-  plan() {
+  plan(final) {
     const CFF = this.CFF, w = this.w, C = CFF.World.CONFIG, m = this.m, r = this.r;
-    const learn = m.learn[Math.min(this.shot, m.learn.length - 1)];
-    let ang = w.solution && r.chance(m.solAng) ? w.solution.angle + r.gauss() * 4 * DEG : r.range(m.ang[0], m.ang[1]) * DEG;
-    // target: raft now, led part of the way toward where it will be at landing (≈ drag + 1.7 s flight)
-    const raft = w.raft, tl = this.drag + 1.7, future = CFF.World.raftX(raft, raft.t + tl);
-    const X = raft.x + (future - raft.x) * m.lead + r.gauss() * m.sig * learn;
-    let L = lenFor(CFF, ang, X);
-    w.aim(pullAt(ang, L).x, pullAt(ang, L).y);
-    const seen = Math.min(1, m.previewUse * w.previewCount() * C.PREVIEW_DT / Math.max(0.2, landAt(CFF, pullAt(ang, L)).T));
-    w.cancelAim();
-    L *= 1 + r.gauss() * (m.powBase + m.powUnseen * (1 - seen)) * learn;
-    if (r.chance(m.weak)) L *= r.range(m.weakK[0], m.weakK[1]);
-    const a2 = ang + r.gauss() * m.angSig * DEG * learn;
-    return pullAt(a2, clamp(L, 0.05, C.PULL_MAX));
+    if (!final) {                                      // decide angle + personal errors once per shot
+      const learn = m.learn[Math.min(this.shot, m.learn.length - 1)];
+      this.ang = w.solution && r.chance(m.solAng) ? w.solution.angle + r.gauss() * 4 * DEG : r.range(m.ang[0], m.ang[1]) * DEG;
+      this.err = { x: r.gauss() * m.sig * learn, p: r.gauss() * m.powSig * learn, a: r.gauss() * m.angSig * DEG * learn,
+        weak: r.chance(m.weak) ? r.range(m.weakK[0], m.weakK[1]) : 1 };
+    }
+    const wg = w.wagon, future = CFF.World.wagonX(wg, wg.t + 1.7);
+    const X = wg.x + (future - wg.x) * m.lead + this.err.x;
+    const b = pullForTarget(CFF, w, this.ang, X, m.extrap);
+    this.seen = b.e.seen;
+    const L = clamp(b.L * (1 + this.err.p) * this.err.weak, 0.05, C.PULL_MAX);
+    return pullAt(this.ang + this.err.a, L);
   }
   step(dt) {
     const w = this.w, m = this.m, r = this.r;
     if (w.phase === 'aim') {
       this.tt += dt;
-      if (this.st !== 'think' && this.st !== 'drag') { this.st = 'think'; this.tt = 0; this.newThink(); }
-      if (this.st === 'think' && this.tt >= this.think) { this.pull = this.plan(); this.st = 'drag'; this.tt = 0; }
+      if (this.st !== 'think' && this.st !== 'drag' && this.st !== 'farm') { this.st = 'think'; this.tt = 0; this.newThink(); }
+      if (this.st === 'think' && m.farmTo && w.nubi.size < m.farmTo && w.phaseT <= 130) { this.st = 'farm'; }
+      if (this.st === 'farm') { if (w.nubi.size >= m.farmTo || w.phaseT > 130) { this.st = 'think'; this.tt = 0; } else return; }   // gives up after 130 s
+      if (this.st === 'think' && this.tt >= this.think) { this.pull = this.plan(false); this.st = 'drag'; this.tt = 0; }
       if (this.st === 'drag') {
         const k = Math.min(1, this.tt / this.drag);
         w.aim(this.pull.x * k, this.pull.y * k);
         if (k >= 1) {
-          if (r.chance(m.cancelChance)) { w.cancelAim(); this.st = 'think'; this.tt = 0; this.newThink(); return; }
-          if (!w.release()) { this.st = 'think'; this.tt = 0; this.newThink(); return; }   // too tiny: a cancel
+          if (r.chance(m.cancel)) { w.cancelAim(); this.st = 'think'; this.tt = 0; this.newThink(); return; }
+          const p = this.plan(true);                   // final adjustment with what the preview shows now
+          w.aim(p.x, p.y);
+          this.relSize = w.nubi.size; this.relSeen = this.seen;
+          if (!w.release()) { this.st = 'think'; this.tt = 0; this.newThink(); return; }
           this.st = 'fly'; this.flT = 0; this._chk = 0;
-          this.taps = [];
-          if (r.chance(m.tapChance)) { const n = r.int(m.tapsPer[0], m.tapsPer[1]); for (let i = 0; i < n; i++) this.taps.push(r.range(0.15, 1.8)); }
+          this.taps = r.chance(m.tap) ? [r.range(0.2, 1.6)] : [];
         }
       }
     } else if (w.phase === 'fly') {
       this.flT += dt;
-      if (m.spam) w.flutter();
-      for (const t of this.taps) if (this.flT >= t) w.flutter();
-      if (m.smart > 0 && !w.fluttered) {
+      if (m.spam) w.puff();
+      for (const t of this.taps) if (this.flT >= t) w.puff();
+      if (m.smart > 0 && !w.puffed) {
         this._chk -= dt;
         if (this._chk <= 0) {
           this._chk = 0.15;
-          if (w.fox.vy < 0) {
+          if (w.nubi.vy < 0.5) {
             const now = w.predictShot(null, 0);
-            if (now.type !== 'land' && now.off < 0) { const fl = w.predictShot(null, 0, 0); if (fl.type === 'land' && r.chance(m.smart)) w.flutter(); }
+            if (now.type !== 'land' && now.off < 0) { const fl = w.predictShot(null, 0, 0); if (fl.type === 'land' && r.chance(m.smart)) w.puff(); }
           }
         }
       }
@@ -147,84 +166,74 @@ class Human {
   }
 }
 
-/** the CFF.Bot wrapped to the same interface */
+/** CFF.Bot wrapped to the same interface */
 class BotPlayer {
-  constructor(CFF, w, skill, seed) { this.b = new CFF.Bot(w, { skill, seed: seed * 7 + 1 }); }
-  step(dt) { this.b.step(dt); }
+  constructor(CFF, w, skill, seed) { this.w = w; this.b = new CFF.Bot(w, { skill, seed: seed * 7 + 1 }); }
+  step(dt) { if (this.w.phase === 'aim') this.relSize = this.w.nubi.size; this.b.step(dt); }
 }
 
-/** fixed pull every time (the "I found the magic pull" player); optional flop-reroll when the raft is "off" */
-class FixedPull {
-  constructor(CFF, w, pull, opts) {
-    this.CFF = CFF; this.w = w; this.pull = pull; this.o = opts || {}; this.t = 0; this.st = 'think';
-    this.land = landAt(CFF, pull);
-  }
-  step(dt) {
-    const w = this.w;
-    if (w.phase !== 'aim') { this.st = 'think'; this.t = 0; if (this.o.spam && w.phase === 'fly') w.flutter(); return; }
-    this.t += dt;
-    if (this.t < (this.o.think || 0.6)) return;
-    let p = this.pull;
-    if (this.o.reroll) {          // eyeball: is the raft roughly in the usual spot? if not, flop on purpose
-      if (w.raft.t < this.CFF.World.CONFIG.RAFT_GLIDE + 0.05) return;   // wait until the raft stopped gliding
-      const r = w.raft, x = this.CFF.World.raftX(r, r.t + this.land.T);
-      if (Math.abs(x - this.land.x) > r.hw * this.o.reroll) p = { x: -0.25, y: -0.25 };
-    }
-    w.aim(p.x, p.y); w.release();
-  }
-}
-
-/** flop farmer (oracle): only weak flings that come down on the beach rock; picks the one that grabs most leaves */
+/** flop farmer: a tiny fling that comes down on the hay bale (free retry, Nubi keeps growing), until big */
 class FlopFarmer {
-  constructor(CFF, w) { this.CFF = CFF; this.w = w; this.t = 0; }
+  constructor(CFF, w, seed, farmTo) { this.CFF = CFF; this.w = w; this.t = 0; this.farmTo = farmTo || 1.42; this.adult = new Human(CFF, w, MODELS.adult, seed); }
   step(dt) {
     const w = this.w;
-    if (w.phase !== 'aim') { this.t = 0; return; }
-    this.t += dt; if (this.t < 0.5) return;
-    let best = { x: -0.25, y: -0.25 }, bv = 0;
-    for (let a = 0; a <= 80; a += 5) for (let L = 0.32; L <= 1.0; L += 0.04) {
-      const p = pullAt(a * DEG, L), pr = w.predictShot(p, 0);
-      if (pr.type === 'flop' && pr.value > bv) { bv = pr.value; best = p; }
+    if (w.phase === 'aim' && w.nubi.size < this.farmTo && this.adult.st !== 'drag' && (this.flops = (this.flops || 0)) < 60) {
+      this.t += dt; if (this.t < 0.3) return; this.t = 0;
+      w.aim(-0.35, -0.3); if (w.release()) this.flops++; return;
     }
-    w.aim(best.x, best.y); w.release();
+    if (w.phase === 'land') this.flops = 0;
+    this.adult.step(dt);
   }
 }
 
 // ---------- the game runner ----------
-/** play one game; returns a rich record. opts: diff, seed, maxT, immortal, level, day, mk(CFF, w) → player */
+/** play one game; opts: diff, seed, maxT, immortal, level, size, mk(CFF, w, seed) → player, untilLevel, hook(w, e) */
 function play(CFF, opts) {
-  const w = new CFF.World({ seed: opts.seed, difficulty: opts.diff, level: opts.level || 0, day: opts.day });
+  const w = new CFF.World({ seed: opts.seed, difficulty: opts.diff, level: opts.level || 0, size: opts.size || 1 });
   if (opts.immortal) w.hearts = w.maxHearts = 1e6;
-  if (opts.worldHook) opts.worldHook(w);
   const pl = opts.mk(CFF, w, opts.seed);
-  const dt = 1 / 60, maxT = opts.maxT || 1200;
-  let t = 0, lastLv = 0, firstPoint = null, shotStart = 0;
-  const shots = [], levels = [], hearts = { lost: 0, gained: 0, gainT: [] };
-  let lvShots = 0;
+  const dt = 1 / 60, maxT = opts.maxT || 900;
+  let t = 0, lastLv = 0, firstPoint = null, lvShots = 0, flyStart = 0, aimStart = 0, flopRun = 0, maxFlopRun = 0;
+  const shots = [], levels = [], hearts = { lost: 0, gained: 0 }, bad = [];
+  let shotFlies = 0, nextCheck = 0;
   while (w.phase !== 'over' && t < maxT) {
     pl.step(dt); w.update(dt); t += dt;
+    if (w.phase === 'fly' && w.phaseT > CFF.World.CONFIG.MAX_FLIGHT + 1) bad.push('fly>' + CFF.World.CONFIG.MAX_FLIGHT + 's t=' + t.toFixed(1));
+    if (t >= nextCheck) {
+      nextCheck = t + 0.5;
+      const n = w.nubi;
+      if (![n.x, n.y, n.vx, n.vy, n.size, n.goal, w.wagon.x, w.score].every(isFinite)) bad.push('NaN t=' + t.toFixed(1));
+      if (n.size < 1 - 1e-9 || n.size > CFF.World.CONFIG.SIZE_MAX + 1e-9) bad.push('size ' + n.size);
+    }
     for (const e of w.drainEvents()) {
-      if ((e.type === 'leaf' || e.type === 'land') && firstPoint === null) firstPoint = t;
-      if (e.type === 'land' || e.type === 'splash' || e.type === 'flop') {
-        shots.push({ type: e.type, bull: !!e.bull, t, light: w.light, night: w.isNight, level: w.level, zone: w.zone, idx: shots.length, lvShot: lvShots++ });
+      if (opts.hook) opts.hook(w, e);
+      if ((e.type === 'fly' || e.type === 'land') && firstPoint === null) firstPoint = t;
+      if (e.type === 'fly') shotFlies++;
+      if (e.type === 'launch') flyStart = t;
+      if (e.type === 'land' || e.type === 'plop' || e.type === 'flop') {
+        shots.push({ type: e.type, bull: !!e.bull, big: !!e.big, t, level: w.level, zone: w.zone, lvShot: lvShots++, flies: shotFlies,
+          size: pl.relSize !== undefined ? pl.relSize : (pl.b ? undefined : undefined), seen: pl.relSeen, idx: shots.length, avail: w._availFlies });
+        shotFlies = 0;
+        if (e.type === 'flop') { flopRun++; maxFlopRun = Math.max(maxFlopRun, flopRun); } else flopRun = 0;
       }
       if (e.type === 'levelUp') { levels.push({ level: e.level - 1, t: t - lastLv, shots: lvShots }); lastLv = t; lvShots = 0; }
       if (e.type === 'heartLost') hearts.lost++;
-      if (e.type === 'heartGain') { hearts.gained++; hearts.gainT.push(t); }
+      if (e.type === 'heartGain') hearts.gained++;
     }
+    if (opts.untilLevel !== undefined && w.level >= opts.untilLevel) break;
   }
   return { t, over: w.phase === 'over', score: w.score, level: w.level, landings: w.stats.landings, stats: w.stats,
-    shots, levels, hearts, firstPoint, w };
+    shots, levels, hearts, firstPoint, bad, maxFlopRun, w };
 }
 
 // ---------- stats ----------
 function q(arr, p) { if (!arr.length) return NaN; const a = arr.slice().sort((x, y) => x - y); return a[Math.min(a.length - 1, Math.floor(p * (a.length - 1) + 0.5))]; }
 function mean(a) { return a.length ? a.reduce((x, y) => x + y, 0) / a.length : NaN; }
-function pct(n, d) { return d ? (100 * n / d).toFixed(1) + ' %' : '—'; }
+function pct(n, d) { return d ? (100 * n / d).toFixed(0) + ' %' : '—'; }
 function f(x, d) { return isFinite(x) ? x.toFixed(d === undefined ? 0 : d) : '—'; }
 function table(head, rows) {
   return '| ' + head.join(' | ') + ' |\n|' + head.map(() => '---').join('|') + '|\n' + rows.map(r => '| ' + r.join(' | ') + ' |').join('\n') + '\n';
 }
 
-module.exports = { variant, play, MODELS, Human, BotPlayer, FixedPull, FlopFarmer, landAt, lenFor, pullAt, clampPull,
-  q, mean, pct, f, table, DEG };
+module.exports = { variant, loadSrc, play, MODELS, Human, BotPlayer, FlopFarmer, estLanding, pullForTarget, pullAt,
+  q, mean, pct, f, table, DEG, clamp };

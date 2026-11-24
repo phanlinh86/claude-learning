@@ -126,7 +126,7 @@
       const c = info.cleared;   // seasons finished: 1 bronze, 2 silver, 3 gold, 4+ platinum
       const m = c >= 4 ? 'platinum' : c >= 3 ? 'gold' : c >= 2 ? 'silver' : c >= 1 ? 'bronze' : 'none';
       $('medal').className = 'medal ' + m;
-      $('medalName').textContent = m === 'none' ? 'Water the wagon 5 times in Spring for a medal' : m[0].toUpperCase() + m.slice(1) + ' medal';
+      $('medalName').textContent = m === 'none' ? 'Finish Spring for a medal' : m[0].toUpperCase() + m.slice(1) + ' medal';
       $('overStats').innerHTML = `Fireflies: <b>${info.flies}</b>${info.gold ? ` (golden: <b>${info.gold}</b>)` : ''} · Waterings: <b>${info.landings}</b> / ${info.shots} flings · Bullseyes: <b>${info.bulls}</b><br>Best streak: <b>${info.streak}</b> · Big Showers: <b>${info.big}</b> · Biggest Nubi: <b>${(info.maxSize || 1).toFixed(1)}×</b><br>Reached: <b>${info.reached}</b>`;
       this.show('scrOver');
     },

@@ -69,7 +69,7 @@
       this._bg.clear(); this._spr.clear();
       this.portrait = v.VH > v.VW;
       // world → screen (DESIGN §2): x = 0 at the left edge (landscape) so the beach rock is always flush left
-      if (this.portrait) { this.unit = v.VW / 16.4; this.ox = 0.2 * this.unit; this.seaPx = Math.round(v.VH * 0.64); }
+      if (this.portrait) { this.unit = v.VW / 16.4; this.ox = 0.2 * this.unit; this.seaPx = Math.round(v.VH * 0.58); }
       else {   // landscape: fit 9 u of height, but never cut the 16-u field on 4:3 / 16:10 screens (iPad)
         this.unit = Math.min(v.VH / 9, v.VW / 16.4);
         const spare = v.VH - 9 * this.unit;
@@ -212,9 +212,10 @@
         this.drawSpr(g, key, cx + c.off * r.hw * this.unit, cy + 3 * this.k, cw, ch * k, 0.5, 1, sway, 1, 1);
       }
       // gently mark the thirsty patch while aiming on the first season so kids learn the bullseye
-      if (this.world.phase === 'aim' && this.world.level === 0) {
-        const p = 0.5 + 0.5 * Math.sin(this.time * 4);
-        g.save(); g.globalAlpha = 0.3 + 0.4 * p; g.strokeStyle = '#ffffff'; g.lineWidth = 3 * this.k;
+      const ph = this.world.phase;
+      if (ph === 'aim' || ph === 'fly') {
+        const p = 0.5 + 0.5 * Math.sin(this.time * 4), strong = this.world.level === 0 && ph === 'aim';
+        g.save(); g.globalAlpha = strong ? 0.3 + 0.4 * p : 0.22 + 0.18 * p; g.strokeStyle = '#ffffff'; g.lineWidth = 3 * this.k;
         g.beginPath(); g.ellipse(cx, cy + 4 * this.k, r.bull * this.unit + 6 * this.k, 8 * this.k, 0, 0, TAU); g.stroke(); g.restore();
       }
     }
@@ -230,7 +231,11 @@
         const gr = g.createRadialGradient(x, y, 0, x, y, R); gr.addColorStop(0, gold ? 'rgba(255,220,110,0.95)' : 'rgba(225,255,120,0.9)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
         g.fillStyle = gr; g.fillRect(x - R, y - R, R * 2, R * 2); g.restore();
         if (custom) { const [cw, ch] = CFF.Assets.fit('fly', s, s); this.drawSpr(g, 'custom:fly', x, y, cw, ch, 0.5, 0.5, rot); if (gold) this.drawSpr(g, 'firefly_gold', x + s * 0.3, y - s * 0.3, s * 0.45, s * 0.45, 0.5, 0.5); }
-        else this.drawSpr(g, gold ? 'firefly_gold' : 'firefly', x, y, s, s, 0.5, 0.5, rot);
+        else this.drawSpr(g, gold ? 'firefly_gold' : 'firefly', x, y, gold ? s * 1.18 : s, gold ? s * 1.18 : s, 0.5, 0.5, rot);
+        if (gold) {   // a white sparkle ring: gold reads by shape + brightness, not only by hue (colour-blind safe)
+          g.save(); g.strokeStyle = 'rgba(255,255,255,0.85)'; g.lineWidth = 2.5 * this.k; g.setLineDash([4 * this.k, 5 * this.k]); g.lineDashOffset = -this.time * 20;
+          g.beginPath(); g.arc(x, y, s * 0.72, 0, TAU); g.stroke(); g.restore();
+        }
       }
     }
     drawCrows(g, a) {
@@ -246,8 +251,9 @@
       const ax = this.sx(w.sling.x), ay = this.sy(w.sling.y);
       const L = [ax + (34 - 80) / 160 * sw, ay + (46 - 50) / 256 * sh], Rr = [ax + (126 - 80) / 160 * sw, ay + (46 - 50) / 256 * sh];
       // the band: back strand (behind Nubi) from the left prong, front strand from the right prong, to Nubi's seat
-      let seat = [ax, ay + 0.15 * u];
-      if (w.phase === 'aim') { const p = w.pull; if (p) seat = [this.sx(w.sling.x + p.x) - 0.2 * u, this.sy(w.sling.y + p.y) + 0.25 * u]; }
+      const sz = (w.nubi.size || 1) * this.big, drop = 0.4 * u * sz;   // the pouch cups Nubi's bottom, never his face
+      let seat = [ax, ay + drop];
+      if (w.phase === 'aim') { const p = w.pull; if (p) seat = [this.sx(w.sling.x + p.x) - 0.1 * u * sz, this.sy(w.sling.y + p.y) + drop]; }
       else if (w.phase === 'fly' && w.nubi.flightT < 0.18) { const k = 1 - w.nubi.flightT / 0.18; seat = [ax + Math.sin(this.time * 40) * 0.15 * u * k, ay + 0.1 * u]; }
       g.save(); g.lineCap = 'round';
       if (back) {
@@ -303,7 +309,8 @@
       } else {
         // raster Nubi once at max size and scale down: one cache entry per frame, however the size changes
         const S = HERO * this.unit * this.big * CFF.World.CONFIG.SIZE_MAX, k = P.size / CFF.World.CONFIG.SIZE_MAX;
-        this.drawSpr(g, 'nubi_' + key, x, y, S, S, 0.5, 0.5, rot, sx * k, sy * k);
+        const frame = key === 'rain' && w.zone === 3 ? 'sit' : key;   // winter: Nubi snows (snow particles), no blue streaks
+        this.drawSpr(g, 'nubi_' + frame, x, y, S, S, 0.5, 0.5, rot, sx * k, sy * k);
       }
     }
 
@@ -391,9 +398,9 @@
       this.drawFlies(g, a);
       this.drawCrows(g, a);
       this.drawSling(g, true);
+      if (w.phase === 'aim') this.drawSling(g, false);   // band + pouch behind Nubi's fluffy body
       this.drawPreview(g);
       this.drawHero(g, a);
-      if (w.phase === 'aim') this.drawSling(g, false);
       this.drawParticles(g, 'front');
       this.drawJuice(g);
       if (this.debug) this.drawDebug(g, a);
@@ -461,17 +468,17 @@
         this.drawSpr(g, 'nubi_sit', lx + 16, my + 16, ps, ps, 0.5, 0.5);
         const bx = lx + 40, bw = 92;
         g.fillStyle = 'rgba(255,255,255,0.25)'; this._pill(g, bx, my + 10, bw, 12); g.fill();
-        g.fillStyle = P.size >= C.BIG_AT ? '#bfe6ff' : '#ffffff'; if (k > 0.02) { this._pill(g, bx, my + 10, Math.max(12, bw * k), 12); g.fill(); }
-        g.fillStyle = '#3a5a8a'; g.fillRect(bx + bw * bk - 1, my + 6, 2, 20); }
+        g.fillStyle = P.size >= C.BIG_AT ? '#7fc8ff' : '#ffffff'; if (k > 0.02) { this._pill(g, bx, my + 10, Math.max(12, bw * k), 12); g.fill(); }
+        g.fillStyle = '#ffffff'; g.fillRect(bx + bw * bk - 1.5, my + 5, 3, 22);
+        g.font = `900 10px ${FONT}`; g.textAlign = 'center'; g.fillStyle = P.size >= C.BIG_AT ? '#7fc8ff' : 'rgba(255,255,255,0.8)'; g.fillText('BIG', bx + bw * bk + (bw * (1 - bk)) / 2, my + 3); g.textAlign = 'left'; }
       // season name + waterings to the next season (top centre)
       const cx = this.VW / 2, pal = PAL[CFF.Assets.SEASONS[w.zone]];
       const name = ZONE_INFO[w.zone].name + (w.loop ? ' ★' + (w.loop + 1) : '');
       g.font = `800 18px ${FONT}`; const tw = g.measureText(name).width;
-      const pw = tw + 110, px = cx - pw / 2, py = y0 + (this.portrait ? 160 : 0);
+      const per = (w.D && w.D.landings) || CFF.World.CONFIG.LANDINGS_PER_LEVEL, pw = tw + 64 + per * 11, px = cx - pw / 2, py = y0 + (this.portrait ? 214 : 0);
       g.fillStyle = 'rgba(20,35,60,0.4)'; this._pill(g, px, py, pw, 40); g.fill();
       this.drawSpr(g, 'crop_' + CFF.Assets.SEASONS[w.zone], px + 22, py + 33, 16, 24, 0.5, 1);
       g.fillStyle = '#fff'; g.textAlign = 'left'; g.fillText(name, px + 40, py + 21);
-      const per = CFF.World.CONFIG.LANDINGS_PER_LEVEL;
       for (let i = 0; i < per; i++) {   // pips: waterings this season
         g.fillStyle = i < w.levelLandings ? '#8fd2ff' : 'rgba(255,255,255,0.3)';
         g.beginPath(); g.arc(px + 48 + tw + i * 11, py + 21, 4, 0, TAU); g.fill();
@@ -496,7 +503,8 @@
       const w = this.world; if (!this.hint) return;
       const touch = CFF.Game && CFF.Game.isTouch;
       g.save(); g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
-      if (this.hint === 'drag' && w.phase === 'aim' && !w.pull) {
+      if (this.banner && this.banner.t < 2.2) { /* one message at a time: the season banner first */ }
+      else if (this.hint === 'drag' && w.phase === 'aim' && !w.pull) {
         // a ghost hand drags back from Nubi and lets go, on a loop
         const t = (this.time % 2.2) / 2.2, k = t < 0.15 ? 0 : t < 0.7 ? (t - 0.15) / 0.55 : 1;
         const fx = this.sx(w.sling.x), fy = this.sy(w.sling.y);
@@ -507,7 +515,7 @@
         g.globalAlpha = 1;
         const msg = touch ? 'Drag back and let go!' : 'Drag back with the mouse (or ← → ↑ ↓ + Space)';
         g.font = `900 24px ${FONT}`; g.lineWidth = 6; g.strokeStyle = 'rgba(20,35,60,0.7)';
-        const y = this.portrait ? this.sy(w.sling.y) - 2.0 * this.unit : this.VH * 0.42;
+        const y = this.portrait ? this.sy(w.sling.y) - 2.0 * this.unit : Math.min(this.VH - 22, this.seaPx + 0.62 * this.unit);
         const x = this.portrait ? this.VW / 2 : this.sx(w.sling.x) + 3.2 * this.unit;
         g.strokeText(msg, x, y); g.fillStyle = '#fff'; g.fillText(msg, x, y);
       } else if (this.hint === 'flutter' && w.phase === 'fly' && !w.puffed) {

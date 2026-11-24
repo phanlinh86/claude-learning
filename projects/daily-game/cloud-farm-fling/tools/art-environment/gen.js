@@ -135,13 +135,13 @@ function sky(z, o) {
   return svg(SW, SH, b, defs);
 }
 const SKY = {
-  spring: { sunC: '#fbf4e2', sunRim: '#f0cfb8', sunHalo: '#fff6e4', sun: [842, 62, 30], cloudK: 0.5, under: '#9fbfd6', haze: '#eef7f2',
+  spring: { sunC: '#fbf4e2', sunRim: '#f0cfb8', sunHalo: '#fff6e4', sun: [690, 108, 30], cloudK: 0.5, under: '#9fbfd6', haze: '#eef7f2',
     clouds: [[150, 40, 170, 40, 0.75, 2], [520, 26, 120, 30, 0.6, 5], [360, 370, 220, 48, 0.7, 9], [740, 350, 180, 42, 0.65, 4], [40, 390, 160, 36, 0.6, 7]] },
-  summer: { sunC: '#fbf3df', sunRim: '#efc9a8', sunHalo: '#fff4dc', sun: [120, 58, 34], cloudK: 0.5, under: '#93b6d2', haze: '#f3f4e2',
+  summer: { sunC: '#fbf3df', sunRim: '#efc9a8', sunHalo: '#fff4dc', sun: [650, 104, 32], cloudK: 0.5, under: '#93b6d2', haze: '#f3f4e2',
     clouds: [[460, 34, 200, 44, 0.7, 12], [800, 44, 130, 32, 0.6, 13], [220, 360, 260, 52, 0.7, 14], [660, 380, 200, 44, 0.65, 15]] },
-  autumn: { sunC: '#fbefe0', sunRim: '#eebc9e', sunHalo: '#ffeedd', sun: [790, 70, 30], cloudK: 0.42, under: '#c9a99a', haze: '#f5e6d8',
+  autumn: { sunC: '#fbefe0', sunRim: '#eebc9e', sunHalo: '#ffeedd', sun: [700, 112, 30], cloudK: 0.42, under: '#c9a99a', haze: '#f5e6d8',
     clouds: [[200, 36, 220, 40, 0.7, 21], [580, 54, 140, 30, 0.55, 22], [120, 360, 220, 44, 0.65, 23], [500, 380, 280, 50, 0.7, 24], [880, 350, 180, 40, 0.6, 25]] },
-  winter: { sunC: '#e9edf2', sunRim: '#c9c3cf', sunHalo: '#eef2f6', sun: [160, 66, 28], cloudK: 0.4, under: '#7e8ea3', haze: '#c9d2dc',
+  winter: { sunC: '#e9edf2', sunRim: '#c9c3cf', sunHalo: '#eef2f6', sun: [660, 108, 28], cloudK: 0.4, under: '#7e8ea3', haze: '#c9d2dc',
     clouds: [[520, 30, 240, 42, 0.55, 31], [860, 50, 150, 32, 0.45, 32], [300, 370, 260, 50, 0.7, 33], [740, 380, 240, 46, 0.65, 34], [60, 360, 160, 36, 0.6, 35]] }
 };
 

@@ -31,12 +31,12 @@ Nothing swapped. Forked from `../fox-island-fling/` (same slingshot core, same g
 - A plop costs a heart (Easy 5, Normal 3, Hard 3). 0 hearts → game over. Every 12/20/25 fireflies (Easy/Normal/Hard) gives a heart back.
 
 ## Twist: Nubi slowly grows bigger
-Nubi grows slowly by himself (soaking up morning mist) and a bit more with every firefly, up to 1.7×. Bigger Nubi:
+Nubi grows slowly by himself (soaking up morning mist, up to 1.3×) and a bit more with every firefly, up to 1.7×. Bigger Nubi:
 - catches fireflies from further away and rains over a wider part of the wagon (easier landings);
 - is more buoyant and catches more air: he floats and slows down, so the same pull flies a shorter, loftier arc.
-Raining on the wagon uses up water (he shrinks back part of the way); a plop squeezes some puff out.
+Raining on the wagon uses up water (he shrinks halfway back); a plop squeezes some puff out.
 
-## Levels (5 waterings each, then loop slightly harder)
+## Levels (6 / 9 / 10 waterings each on Easy / Normal / Hard, then loop slightly harder)
 1. Spring Sprouts — big parked wagon, long aiming arc, blossom petals drifting.
 2. Sunflower Summer — the wagon rolls slowly back and forth, butterflies.
 3. Pumpkin Autumn — smaller rolling wagon, one friendly crow floating across (Nubi bonks off it), tumbling leaves.

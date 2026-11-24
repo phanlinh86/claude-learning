@@ -1,18 +1,20 @@
-// Visual QA capture: every screen at 4 viewports, each island at day / dusk / night (landscape + portrait),
-// the aiming state, frame-by-frame motion contact sheets (1/30 s), custom pictures in play, and a deuteranopia
-// simulation. Report-only: writes PNGs to tests/out/visual/ (gitignored). Run: node tests/visual/capture.js
+// Visual QA capture for Nubi's Farm Fling. Report-only: writes PNGs to tests/out/visual/ (gitignored).
+// Run: node tests/visual/capture.js            (all)   ONLY=screens|seasons|sizes|events|motion|deut node ...
+// Covers: every screen at 4 viewports; every season (levels 0–3) during aim / flight / landing (rain, winter snow);
+// Nubi at size 1.0 / 1.4 / 1.7 in flight and landing; a plop; a crow bonk; a season crossfade + banner; frame-by-frame
+// motion contact sheets (launch, puff, landing squash, plop) at 1/30 s; a deuteranopia simulation of every season.
 const { chromium } = require('playwright');
 const path = require('path'), fs = require('fs');
 const GAME = 'file://' + path.resolve(__dirname, '../../game/index.html');
 const OUT = path.resolve(__dirname, '../out/visual'); fs.mkdirSync(OUT, { recursive: true });
 const VIEWS = {
   desk: { viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1 },
-  ipad: { viewport: { width: 1024, height: 768 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true },
+  phoneL: { viewport: { width: 844, height: 390 }, deviceScaleFactor: 3, hasTouch: true, isMobile: true },
   phoneP: { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, hasTouch: true, isMobile: true },
-  phoneL: { viewport: { width: 844, height: 390 }, deviceScaleFactor: 3, hasTouch: true, isMobile: true }
+  ipad: { viewport: { width: 1024, height: 768 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true }
 };
-const ZONES = ['cove', 'jungle', 'lagoon', 'lantern'];
-const DAYS = { day: 0.3, dusk: 0.62, night: 0.8 };
+const SEASONS = ['spring', 'summer', 'autumn', 'winter'];
+const ONLY = process.env.ONLY || '';
 const errs = [];
 const shot = (p, name, opt) => p.screenshot(Object.assign({ path: path.join(OUT, name + '.png') }, opt || {}));
 const raf = p => p.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
@@ -24,6 +26,11 @@ async function open(b, view, q) {
   p.on('pageerror', e => errs.push(view + ': ' + e));
   await p.goto(GAME + '?mute=1&seed=7' + (q || ''));
   await p.waitForFunction(() => window.CFF && CFF.debug && CFF.debug.mode && CFF.debug.mode !== 'boot', null, { timeout: 15000 });
+  if (/autostart/.test(q || '')) {
+    await p.waitForFunction(() => CFF.debug.mode === 'playing', null, { timeout: 15000 });
+    // portrait phones show a "turn sideways" card; dismiss it so the play field is visible
+    await p.evaluate(() => { const b = document.getElementById('btnRotateOk'); if (b && !document.getElementById('rotate').classList.contains('hidden')) b.click(); });
+  }
   return { ctx, p };
 }
 // freeze the sim (speed 0) and advance it by hand: n frames of 1/30 s each
@@ -32,13 +39,30 @@ async function adv(p, frames) {
   await p.evaluate(n => { const G = CFF.Game; for (let i = 0; i < n; i++) { G.step(1 / 60); G.step(1 / 60); G.renderer.update(1 / 30); } }, frames || 1);
   await raf(p);
 }
-// advance until Finn is about to come down near the raft (or the flight ends)
-async function advNearRaft(p, du) {
-  await p.evaluate(du => { const G = CFF.Game, w = G.world; let i = 0;
-    while (i++ < 600 && w.phase === 'fly' && !(w.fox.vy < 0 && w.fox.y - w.raft.top < du)) { G.step(1 / 60); G.step(1 / 60); G.renderer.update(1 / 30); } }, du || 2.4);
+// advance (≤ max frames) until a condition on the world holds
+async function advUntil(p, cond, max) {
+  await p.evaluate(([c, m]) => { const G = CFF.Game, f = new Function('w', 'return ' + c); let i = 0;
+    while (i++ < m && !f(G.world)) { G.step(1 / 60); G.step(1 / 60); G.renderer.update(1 / 30); } }, [cond, max || 400]);
   await raf(p);
 }
-const ONLY = process.env.ONLY || '';
+// in-page installer: pin the wagon, find a pull that lands on it (or plops on the grass at ~x)
+const helpers = p => p.evaluate(() => {
+  const D = CFF.debug;
+  D.pin = (x) => { const r = D.world.wagon; r.amp = 0; if (x != null) r.baseX = x; r.fromX = r.x = r.px = r.baseX; r.t = 99; };
+  D.find = (want, gx) => {
+    const w = D.world; let best = null;
+    for (let a = 20; a <= 70; a += 1) for (let m = 0.4; m <= 1.8; m += 0.04) {
+      const pull = { x: -m * Math.cos(a * Math.PI / 180), y: -m * Math.sin(a * Math.PI / 180) };
+      const r = w.predictShot(pull, 0); if (!r) continue;
+      let sc;
+      if (want === 'land') { if (r.type !== 'land') continue; sc = Math.abs(r.off) - 0.3 * r.flies; }
+      else { if (r.type !== 'plop') continue; sc = Math.abs(r.x - gx); }
+      if (!best || sc < best.sc) best = { sc, pull, r };
+    }
+    return best;
+  };
+  D.shoot = (want, gx) => { const b = D.find(want, gx); if (!b) return null; const w = D.world; w.aim(b.pull.x * 0.5, b.pull.y * 0.5); w.aim(b.pull.x, b.pull.y); return b.r.type; };
+});
 async function sheet(b, name, files, cols, label) {
   const imgs = files.map(f => 'data:image/png;base64,' + fs.readFileSync(f).toString('base64'));
   const ctx = await b.newContext({ viewport: { width: 1600, height: 900 } }), p = await ctx.newPage();
@@ -48,6 +72,7 @@ async function sheet(b, name, files, cols, label) {
   await shot(p, name, { fullPage: true });
   await ctx.close();
 }
+const DEUT = '<svg width="0" height="0" style="position:absolute"><filter id="deut"><feColorMatrix type="matrix" values="0.367 0.861 -0.228 0 0  0.280 0.673 0.047 0 0  -0.012 0.043 0.969 0 0  0 0 0 1 0"/></filter></svg>';
 
 (async () => {
   const b = await chromium.launch({ args: ['--allow-file-access-from-files'] });
@@ -61,155 +86,117 @@ async function sheet(b, name, files, cols, label) {
       await p.evaluate(() => { const bb = [...document.querySelectorAll('.screen:not(.hidden) .btn-back')][0]; bb && bb.click(); });
       await p.waitForTimeout(400);
     }
-    await p.click('#btnPlay'); await p.waitForTimeout(2600); await shot(p, `screen_${v}_play`);
+    await p.click('#btnPlay'); await p.waitForTimeout(900); await shot(p, `screen_${v}_play_banner`);
+    await p.evaluate(() => { const b = document.getElementById('btnRotateOk'); if (b && !document.getElementById('rotate').classList.contains('hidden')) b.click(); });
+    await p.waitForTimeout(2000); await shot(p, `screen_${v}_play_hint`);
     await p.click('#btnPause'); await p.waitForTimeout(400); await shot(p, `screen_${v}_pause`);
     await p.click('#btnResume'); await p.waitForTimeout(300);
-    await p.evaluate(() => { CFF.debug.setBot(true, 0.15); CFF.debug.setSpeed(24); });
-    await p.waitForFunction(() => CFF.debug.mode === 'over', null, { timeout: 90000 });
-    await p.waitForTimeout(900); await shot(p, `screen_${v}_over`);
+    await p.evaluate(() => { CFF.debug.setBot(true, 0.2); CFF.debug.setSpeed(24); });
+    await p.waitForFunction(() => CFF.debug.mode === 'over', null, { timeout: 120000 });
+    await p.waitForTimeout(1200); await shot(p, `screen_${v}_over`);
     await ctx.close();
   }
 
-  // ---------- 2. islands × day / dusk / night, idle + aiming (preview dots) ----------
-  if (!ONLY || ONLY === 'islands') for (const v of ['desk', 'phoneP', 'ipad']) {
-    const { ctx, p } = await open(b, v, '&autostart=1');
-    await p.waitForFunction(() => CFF.debug.mode === 'playing');
-    for (let z = 0; z < 4; z++) {
-      if (z) await p.evaluate(i => CFF.debug.gotoLevel(i), z);
-      await p.waitForTimeout(3000);   // let the banner + crossfade finish
-      for (const [dn, d] of Object.entries(DAYS)) {
-        if (v === 'ipad' && dn === 'dusk') continue;
-        await p.evaluate(t => CFF.debug.setDay(t), d); await p.waitForTimeout(250);
-        await shot(p, `island_${v}_${z}${ZONES[z]}_${dn}`);
-        await p.evaluate(() => { const w = CFF.debug.world; w.aim(-0.6, -0.4); w.aim(-1.3, -0.95); });
-        await p.waitForTimeout(150); await shot(p, `aim_${v}_${z}${ZONES[z]}_${dn}`);
-        await p.evaluate(() => CFF.debug.world.cancelAim());
-      }
+  // ---------- 2. every season: aim, flight (apex), landing (rain / snow) ----------
+  if (!ONLY || ONLY === 'seasons') for (const v of Object.keys(VIEWS)) for (let z = 0; z < 4; z++) {
+    const { ctx, p } = await open(b, v, '&autostart=1&diff=normal&level=' + z);
+    await p.waitForTimeout(3200); await freeze(p); await helpers(p);
+    await p.evaluate(() => CFF.debug.pin());
+    await p.evaluate(() => CFF.debug.shoot('land')); await adv(p, 1);
+    await shot(p, `season_${v}_${z}${SEASONS[z]}_aim`);
+    await p.evaluate(() => CFF.debug.world.release());
+    await advUntil(p, 'w.nubi.vy < 0.3', 200); await shot(p, `season_${v}_${z}${SEASONS[z]}_fly`);
+    await advUntil(p, "w.phase !== 'fly'", 400); await adv(p, 10);
+    await shot(p, `season_${v}_${z}${SEASONS[z]}_land`);
+    await ctx.close();
+  }
+
+  // ---------- 3. Nubi at size 1.0 / 1.4 / 1.7, flight + landing ----------
+  if (!ONLY || ONLY === 'sizes') for (const v of ['desk', 'phoneL', 'phoneP']) for (const s of [1, 1.4, 1.7]) {
+    const { ctx, p } = await open(b, v, '&autostart=1&diff=normal&level=1&size=' + s);
+    await p.waitForTimeout(3200); await freeze(p); await helpers(p);
+    await p.evaluate(s => { CFF.debug.pin(); CFF.debug.setSize(s); }, s);
+    await p.evaluate(() => CFF.debug.shoot('land')); await adv(p, 1);
+    await shot(p, `size_${v}_${s}_aim`);
+    await p.evaluate(() => CFF.debug.world.release());
+    await advUntil(p, 'w.nubi.vy < 0.3', 200); await shot(p, `size_${v}_${s}_fly`);
+    await advUntil(p, "w.phase !== 'fly'", 400); await adv(p, 8);
+    await shot(p, `size_${v}_${s}_land`);
+    await ctx.close();
+  }
+
+  // ---------- 4. events: plop on the grass, crow bonk, season crossfade + banner ----------
+  if (!ONLY || ONLY === 'events') for (const v of ['desk', 'phoneL', 'ipad']) {
+    { // plop
+      const { ctx, p } = await open(b, v, '&autostart=1&diff=normal&level=0');
+      await p.waitForTimeout(3200); await freeze(p); await helpers(p);
+      await p.evaluate(() => { CFF.debug.pin(14.2); CFF.debug.shoot('plop', 8.5); CFF.debug.world.release(); });
+      await advUntil(p, "w.phase !== 'fly'", 400); await adv(p, 3); await shot(p, `plop_${v}_a`);
+      await adv(p, 9); await shot(p, `plop_${v}_b`);
+      await ctx.close();
     }
-    await ctx.close();
+    { // crow bonk (autumn: one crow)
+      const { ctx, p } = await open(b, v, '&autostart=1&diff=normal&level=2');
+      await p.waitForTimeout(3200); await freeze(p); await helpers(p);
+      await p.evaluate(() => { CFF.debug.pin(); CFF.debug.shoot('land'); CFF.debug.world.release(); });
+      await adv(p, 9);
+      const ok = await p.evaluate(() => { const w = CFF.debug.world, C = CFF.World.CONFIG, f = w.nubi, g = w.crows[0]; if (!g) return false; const t = 0.3;
+        const tx = f.x + f.vx * t + 0.25, ty = f.y + f.vy * t - 0.5 * C.G * t * t; g.x0 = tx - g.vx * (g.t + t); g.baseY = ty; g.ph = -2 * Math.PI * (g.t + t) / C.CROW_BOB_T; return true; });
+      if (!ok) errs.push(v + ': no crow in autumn');
+      await advUntil(p, 'w.stats.bumps > 0', 40); await shot(p, `bonk_${v}_a`);
+      await adv(p, 4); await shot(p, `bonk_${v}_b`);
+      await ctx.close();
+    }
+    { // crossfade spring → summer and the banner
+      const { ctx, p } = await open(b, v, '&autostart=1&diff=normal&level=0');
+      await p.waitForTimeout(3500); await freeze(p);
+      await p.evaluate(() => CFF.debug.gotoLevel(1));
+      for (const [f, n] of [[6, '0.2s'], [15, '0.5s'], [24, '0.8s'], [45, '1.5s']]) { await adv(p, f - (n === '0.2s' ? 0 : 0)); await shot(p, `xfade_${v}_${n}`); }
+      await ctx.close();
+    }
   }
 
-  // ---------- 3. motion contact sheets (desk, frame by frame at 1/30 s) ----------
+  // ---------- 5. motion contact sheets (desk, 1/30 s per frame) ----------
   if (!ONLY || ONLY === 'motion') {
-  const bursts = async (v, tag, zone, day, setup, frames, cols) => {
-    const { ctx, p } = await open(b, v, '&autostart=1&level=' + zone + '&day=' + day);
-    await p.waitForFunction(() => CFF.debug.mode === 'playing');
-    await p.waitForTimeout(3000); await freeze(p);
-    const files = [];
-    const grab = async () => { const f = path.join(OUT, `mo_${tag}_${String(files.length).padStart(2, '0')}.png`); await p.screenshot({ path: f }); files.push(f); };
-    await setup(p, grab);
-    for (let i = 0; i < frames; i++) { await adv(p, 1); await grab(); }
-    await sheet(b, `sheet_${tag}`, files, cols || 6, `${tag} (${v}, zone ${zone}, day ${day}) — 1/30 s per frame`);
-    await ctx.close();
-  };
-  // perfect "solution" shot with the raft pinned: passes the leaves and lands on the X
-  const pinRaft = (p, off) => p.evaluate(o => { const r = CFF.debug.world.raft; r.amp = 0; r.fromX = r.baseX = r.x = r.px = r.baseX + o * r.hw; }, off || 0);
-  const solAim = p => p.evaluate(() => { const w = CFF.debug.world, s = w.solution.pull; w.aim(s.x * 0.5, s.y * 0.5); w.aim(s.x, s.y); });
-  await bursts('desk', 'fling_bull', 0, 0.3, async (p, grab) => { await pinRaft(p, 0); await solAim(p); await adv(p, 1); await grab(); await p.evaluate(() => CFF.debug.world.release()); }, 23, 6);
-  await bursts('desk', 'bull_land', 0, 0.3, async (p, grab) => { await pinRaft(p, 0); await solAim(p); await p.evaluate(() => CFF.debug.world.release()); await advNearRaft(p); await grab(); }, 35, 6);
-  await bursts('desk', 'land_edge', 1, 0.3, async (p, grab) => { await solAim(p); await pinRaft(p, 0.75); await p.evaluate(() => CFF.debug.world.release()); await advNearRaft(p); await grab(); }, 29, 6);
-  await bursts('desk', 'flutter', 0, 0.3, async (p, grab) => {
-    await p.evaluate(() => { const w = CFF.debug.world; w.aim(-0.6, -0.4); w.aim(-1.0, -0.9); w.release(); }); await adv(p, 9); await grab();
-    await p.evaluate(() => CFF.debug.world.flutter());
-  }, 17, 6);
-  await bursts('desk', 'bonk', 2, 0.3, async (p, grab) => {
-    await p.evaluate(() => { const w = CFF.debug.world; w.aim(-0.6, -0.4); w.aim(-1.3, -0.9); w.release(); }); await adv(p, 10);
-    // put the gull right in Finn's path
-    await p.evaluate(() => { const w = CFF.debug.world, C = CFF.World.CONFIG, f = w.fox, g = w.gulls[0]; if (!g) return; const t = 0.3;
-      const tx = f.x + f.vx * t, ty = f.y + f.vy * t - 0.5 * C.G * t * t; g.x0 = tx - g.vx * (g.t + t); g.baseY = ty; g.ph = -2 * Math.PI * (g.t + t) / C.GULL_BOB_T; });
-    await grab();
-  }, 17, 6);
-  await bursts('desk', 'splash', 0, 0.3, async (p, grab) => {
-    await p.evaluate(() => { const w = CFF.debug.world, r = w.raft; r.amp = 0; r.fromX = r.baseX = r.x = r.px = 14.5; w.aim(-0.6, -0.4); w.aim(-1.0, -0.55); w.release(); }); await advNearRaft(p, 1.6); await grab();
-  }, 29, 6);
-  await bursts('desk', 'flop', 0, 0.3, async (p, grab) => { await p.evaluate(() => { const w = CFF.debug.world; w.aim(-0.3, -0.1); w.aim(-0.42, -0.12); w.release(); }); await grab(); }, 29, 6);
-  await bursts('desk', 'fling_night', 3, 0.8, async (p, grab) => { await pinRaft(p, 0); await solAim(p); await adv(p, 1); await grab(); await p.evaluate(() => CFF.debug.world.release()); await adv(p, 8); }, 17, 6);
-  await bursts('desk', 'night_land', 3, 0.8, async (p, grab) => { await pinRaft(p, 0.5); await solAim(p); await p.evaluate(() => CFF.debug.world.release()); await advNearRaft(p); await grab(); }, 23, 6);
-  await bursts('phoneP', 'fling_portrait', 2, 0.3, async (p, grab) => { await pinRaft(p, 0); await solAim(p); await adv(p, 1); await grab(); await p.evaluate(() => CFF.debug.world.release()); await advNearRaft(p); await grab(); }, 23, 8);
-  }
-
-  // ---------- 4. custom pictures through the Change Pictures file input ----------
-  if (!ONLY || ONLY === 'custom') {
-    const gen = await b.newPage();
-    const pngs = await gen.evaluate(() => {
-      const mk = (w, h, f) => { const c = document.createElement('canvas'); c.width = w; c.height = h; f(c.getContext('2d'), w, h); return c.toDataURL('image/png').split(',')[1]; };
-      const photo = mk(800, 600, (g, w, h) => {   // a "pet photo": warm wall, brown dog-ish blob, noise
-        let gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, '#c8b49a'); gr.addColorStop(1, '#6e5a48'); g.fillStyle = gr; g.fillRect(0, 0, w, h);
-        g.fillStyle = '#8b5a2b'; g.beginPath(); g.ellipse(400, 330, 210, 190, 0, 0, 7); g.fill();
-        g.fillStyle = '#5b3a1b'; g.beginPath(); g.ellipse(250, 220, 60, 110, -0.4, 0, 7); g.ellipse(550, 220, 60, 110, 0.4, 0, 7); g.fill();
-        g.fillStyle = '#111'; [[340, 300], [460, 300]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 18, 0, 7); g.fill(); });
-        g.beginPath(); g.ellipse(400, 380, 34, 24, 0, 0, 7); g.fill();
-        const id = g.getImageData(0, 0, w, h); for (let i = 0; i < id.data.length; i += 4) { const n = (Math.random() - 0.5) * 40; id.data[i] += n; id.data[i + 1] += n; id.data[i + 2] += n; } g.putImageData(id, 0, 0);
-      });
-      const sticker = mk(512, 512, (g) => {   // transparent cartoon: purple star with a face
-        g.fillStyle = '#8a4fd8'; g.strokeStyle = '#3d1a70'; g.lineWidth = 14; g.beginPath();
-        for (let i = 0; i < 10; i++) { const r = i % 2 ? 110 : 230, a = -Math.PI / 2 + i * Math.PI / 5; g.lineTo(256 + r * Math.cos(a), 270 + r * Math.sin(a)); }
-        g.closePath(); g.fill(); g.stroke(); g.fillStyle = '#fff'; g.beginPath(); g.arc(215, 250, 24, 0, 7); g.arc(300, 250, 24, 0, 7); g.fill();
-      });
-      const beach = mk(1600, 900, (g, w, h) => {   // a holiday photo: bright sky, sand, people-ish blobs
-        let gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#3a8fe0'); gr.addColorStop(0.55, '#bfe3ff'); gr.addColorStop(0.56, '#e8d29a'); gr.addColorStop(1, '#c9a868'); g.fillStyle = gr; g.fillRect(0, 0, w, h);
-        for (let i = 0; i < 40; i++) { g.fillStyle = `hsl(${Math.random() * 360},70%,${30 + Math.random() * 40}%)`; g.fillRect(Math.random() * w, 450 + Math.random() * 400, 30 + Math.random() * 80, 60 + Math.random() * 120); }
-        const id = g.getImageData(0, 0, w, h); for (let i = 0; i < id.data.length; i += 4) { const n = (Math.random() - 0.5) * 30; id.data[i] += n; id.data[i + 1] += n; id.data[i + 2] += n; } g.putImageData(id, 0, 0);
-      });
-      return { photo, sticker, beach };
-    });
-    await gen.close();
-    for (const [n, b64] of Object.entries(pngs)) fs.writeFileSync(path.join(OUT, `input_${n}.png`), Buffer.from(b64, 'base64'));
-    const ctx = await b.newContext(VIEWS.desk), p = await ctx.newPage();
-    p.on('pageerror', e => errs.push('custom: ' + e));
-    await p.goto(GAME + '?mute=1&seed=7'); await p.waitForFunction(() => CFF.debug && CFF.debug.mode === 'title');
-    await p.click('#btnCustomize'); await p.waitForTimeout(400);
-    const setSlot = async (idx, file) => {
-      const [fc] = await Promise.all([p.waitForEvent('filechooser'), p.locator('#slotGrid .slot [data-act=pick]').nth(idx).click()]);
-      await fc.setFiles(path.join(OUT, file)); await p.waitForTimeout(1500);
+    const bursts = async (v, tag, q, setup, frames, cols) => {
+      const { ctx, p } = await open(b, v, '&autostart=1&diff=normal' + q);
+      await p.waitForTimeout(3200); await freeze(p); await helpers(p);
+      const files = [];
+      const grab = async () => { const f = path.join(OUT, `mo_${tag}_${String(files.length).padStart(2, '0')}.png`); await p.screenshot({ path: f }); files.push(f); };
+      await setup(p, grab);
+      for (let i = 0; i < frames; i++) { await adv(p, 1); await grab(); }
+      await sheet(b, `sheet_${tag}`, files, cols || 6, `${tag} (${v}) — 1/30 s per frame`);
+      await ctx.close();
     };
-    await setSlot(0, 'input_photo.png'); await setSlot(1, 'input_sticker.png'); await setSlot(2, 'input_beach.png');
-    await shot(p, 'custom_screen_set');
-    // Round shape for the photo hero
-    await p.locator('#slotGrid .slot').nth(0).locator('[data-shape=circle]').click(); await p.waitForTimeout(500);
-    await shot(p, 'custom_screen_round');
-    await p.evaluate(() => [...document.querySelectorAll('#scrCustom .btn-back')][0].click()); await p.waitForTimeout(300);
-    await p.click('#btnPlay'); await p.waitForTimeout(3000);
-    for (const [dn, d] of Object.entries(DAYS)) {
-      await p.evaluate(t => CFF.debug.setDay(t), d); await p.waitForTimeout(250);
-      await p.evaluate(() => { const w = CFF.debug.world; w.aim(-0.6, -0.4); w.aim(-1.3, -0.95); }); await p.waitForTimeout(100);
-      await shot(p, `custom_play_${dn}_aim`);
-      await p.evaluate(() => CFF.debug.world.release()); await p.waitForTimeout(450); await shot(p, `custom_play_${dn}_fly`);
-      await p.waitForTimeout(2500);
-    }
-    // sticker as the hero (transparent PNG), photo as leaf
-    await p.evaluate(() => CFF.Game.pause && CFF.Game.pause());
-    await ctx.close();
-    const ctx2 = await b.newContext(VIEWS.desk), p2 = await ctx2.newPage();
-    await p2.goto(GAME + '?mute=1&seed=7'); await p2.waitForFunction(() => CFF.debug && CFF.debug.mode === 'title');
-    await p2.click('#btnCustomize'); await p2.waitForTimeout(400);
-    const set2 = async (idx, file) => { const [fc] = await Promise.all([p2.waitForEvent('filechooser'), p2.locator('#slotGrid .slot [data-act=pick]').nth(idx).click()]); await fc.setFiles(path.join(OUT, file)); await p2.waitForTimeout(1500); };
-    await set2(0, 'input_sticker.png'); await set2(1, 'input_photo.png');
-    await p2.evaluate(() => [...document.querySelectorAll('#scrCustom .btn-back')][0].click()); await p2.waitForTimeout(300);
-    await p2.click('#btnPlay'); await p2.waitForTimeout(3000);
-    await p2.evaluate(() => { const w = CFF.debug.world; w.aim(-0.6, -0.4); w.aim(-1.3, -0.95); }); await p2.waitForTimeout(100);
-    await shot(p2, 'custom2_play_aim');
-    await p2.evaluate(() => CFF.debug.world.release()); await p2.waitForTimeout(450); await shot(p2, 'custom2_play_fly');
-    await p2.evaluate(() => CFF.debug.setDay(0.8)); await p2.waitForTimeout(2500); await shot(p2, 'custom2_play_night');
-    await ctx2.close();
+    await bursts('desk', 'launch', '&level=0', async (p, grab) => { await p.evaluate(() => { CFF.debug.pin(); CFF.debug.shoot('land'); }); await adv(p, 1); await grab(); await p.evaluate(() => CFF.debug.world.release()); }, 17, 6);
+    await bursts('desk', 'puff', '&level=0&size=1.3', async (p, grab) => {
+      await p.evaluate(() => { CFF.debug.pin(); CFF.debug.shoot('land'); CFF.debug.world.release(); });
+      await advUntil(p, 'w.nubi.vy < 1', 200); await grab(); await p.evaluate(() => CFF.debug.world.puff());
+    }, 17, 6);
+    await bursts('desk', 'land', '&level=1&size=1.5', async (p, grab) => {
+      await p.evaluate(() => { CFF.debug.pin(); CFF.debug.shoot('land'); CFF.debug.world.release(); });
+      await advUntil(p, "w.phase !== 'fly' || (w.nubi.vy < 0 && w.nubi.y - w.wagon.top < 2.2)", 400); await grab();
+    }, 35, 6);
+    await bursts('desk', 'land_winter', '&level=3&size=1.2', async (p, grab) => {
+      await p.evaluate(() => { CFF.debug.pin(); CFF.debug.shoot('land'); CFF.debug.world.release(); });
+      await advUntil(p, "w.phase !== 'fly'", 400); await grab();
+    }, 23, 6);
+    await bursts('desk', 'plop', '&level=0', async (p, grab) => {
+      await p.evaluate(() => { CFF.debug.pin(14.2); CFF.debug.shoot('plop', 8.5); CFF.debug.world.release(); });
+      await advUntil(p, "w.phase !== 'fly' || (w.nubi.vy < 0 && w.nubi.y < 2.0)", 400); await grab();
+    }, 29, 6);
+    await bursts('phoneL', 'launch_phone', '&level=2', async (p, grab) => { await p.evaluate(() => { CFF.debug.pin(); CFF.debug.shoot('land'); }); await adv(p, 1); await grab(); await p.evaluate(() => CFF.debug.world.release()); }, 23, 6);
   }
 
-  // ---------- 5. deuteranopia simulation (Machado 2009 matrix as an SVG filter on the canvas + page) ----------
-  if (!ONLY || ONLY === 'deut') {
-    const { ctx, p } = await open(b, 'desk', '&autostart=1');
-    await p.waitForFunction(() => CFF.debug.mode === 'playing'); await p.waitForTimeout(3000);
-    await p.evaluate(() => {
-      document.body.insertAdjacentHTML('beforeend', '<svg width="0" height="0" style="position:absolute"><filter id="deut"><feColorMatrix type="matrix" values="0.367 0.861 -0.228 0 0  0.280 0.673 0.047 0 0  -0.012 0.043 0.969 0 0  0 0 0 1 0"/></filter></svg>');
-      document.getElementById('stage').style.filter = 'url(#deut)';
-    });
-    for (let z = 0; z < 4; z++) {
-      if (z) { await p.evaluate(i => CFF.debug.gotoLevel(i), z); await p.waitForTimeout(3000); }
-      await p.evaluate(() => { CFF.debug.setDay(0.3); const w = CFF.debug.world; w.aim(-0.6, -0.4); w.aim(-1.3, -0.95); }); await p.waitForTimeout(150);
-      await shot(p, `deut_${z}${ZONES[z]}_day`);
-      await p.evaluate(() => { CFF.debug.setDay(0.8); }); await p.waitForTimeout(200);
-      await shot(p, `deut_${z}${ZONES[z]}_night`);
-      await p.evaluate(() => CFF.debug.world.cancelAim());
-    }
+  // ---------- 6. deuteranopia simulation (Machado 2009 matrix as an SVG filter on the stage) ----------
+  if (!ONLY || ONLY === 'deut') for (const v of ['desk', 'phoneL']) for (let z = 0; z < 4; z++) {
+    const { ctx, p } = await open(b, v, '&autostart=1&diff=normal&level=' + z + '&size=1.3');
+    await p.waitForTimeout(3200); await freeze(p); await helpers(p);
+    await p.evaluate(d => { document.body.insertAdjacentHTML('beforeend', d); document.getElementById('stage').style.filter = 'url(#deut)'; }, DEUT);
+    await p.evaluate(() => { CFF.debug.pin(); CFF.debug.shoot('land'); }); await adv(p, 1);
+    await shot(p, `deut_${v}_${z}${SEASONS[z]}_aim`);
+    await p.evaluate(() => CFF.debug.world.release()); await advUntil(p, 'w.nubi.vy < 0.3', 200);
+    await shot(p, `deut_${v}_${z}${SEASONS[z]}_fly`);
     await ctx.close();
   }
 

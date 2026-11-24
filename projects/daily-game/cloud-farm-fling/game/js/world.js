@@ -38,7 +38,7 @@
     PUFF_VY: 3.2, R_NUBI: 0.45, R_FLY: 0.35, FOOT: 0.45, LAND_PAD: 0.15, RAIN_PAD: 0.5,
     // growth
     SIZE_MAX: 1.7, GROW_RATE: 0.006, GROW_FLY: 0.05, GROW_GOLD: 0.1, SIZE_EASE: 4, SHRINK_EASE: 2.5,
-    BIG_AT: 1.4, RAIN_KEEP: 0.4, PLOP_LOSS: 0.15, BUOY: 0.15, DRAG: 0.05,
+    BIG_AT: 1.4, RAIN_KEEP: 0.5, MIST_CAP: 1.3, PLOP_LOSS: 0.15, BUOY: 0.15, DRAG: 0.05,
     // world bits
     BUMP_E: 0.7, CROW_R: 0.42, BALE_X: 4.6, BALE_TOP: 1.2, OUT_L: -1, OUT_R: 17.5,
     WAGON_TOP: 0.55, WAGON_GLIDE: 0.9,
@@ -56,9 +56,9 @@
   };
 
   var DIFF = {
-    easy:   { hearts: 5, heartEvery: 12, hwK: 1.4,  bullK: 1.2,  ampK: 0.5,  previewK: 1.6,  crowK: 0, crowSpeedK: 0.8 },
-    normal: { hearts: 3, heartEvery: 20, hwK: 1.0,  bullK: 1.0,  ampK: 1.0,  previewK: 1.0,  crowK: 0, crowSpeedK: 1.0 },
-    hard:   { hearts: 3, heartEvery: 25, hwK: 0.85, bullK: 0.85, ampK: 1.25, previewK: 0.75, crowK: 1, crowSpeedK: 1.2 }
+    easy:   { landings: 6, hearts: 5, heartEvery: 12, hwK: 1.4,  bullK: 1.2,  ampK: 0.5,  previewK: 1.6,  crowK: 0, crowSpeedK: 0.8 },
+    normal: { landings: 9, hearts: 3, heartEvery: 20, hwK: 1.0,  bullK: 1.0,  ampK: 1.0,  previewK: 1.0,  crowK: 0, crowSpeedK: 1.0 },
+    hard:   { landings: 10, hearts: 3, heartEvery: 25, hwK: 0.85, bullK: 0.85, ampK: 1.25, previewK: 0.75, crowK: 1, crowSpeedK: 1.2 }
   };
 
   var LEVELS = [
@@ -103,7 +103,7 @@
   /** grow the goal by rate·h (capped) and ease size toward it; keeps psize */
   function growSize(f, h, rate, ease) {
     var C = CONFIG;
-    if (rate) f.goal = M.min(C.SIZE_MAX, f.goal + rate * h);
+    if (rate && f.goal < C.MIST_CAP) f.goal = M.min(C.MIST_CAP, f.goal + rate * h);   // slow mist growth stops at MIST_CAP (playtest: no free max size by waiting)
     f.psize = f.size;
     if (f.goal === f.size) return;
     ease = ease || C.SIZE_EASE;
@@ -374,7 +374,7 @@
     var C = CONFIG, r = this.rFly, wg = this.wagon, n0 = this.nubi, self = this;
     this.flies = []; this.solution = null;
     // size expected at release ≈ ARC_WAIT s from now (Nubi keeps growing slowly while you aim)
-    var wait = C.ARC_WAIT, g0 = M.min(C.SIZE_MAX, n0.goal + C.GROW_RATE * wait);
+    var wait = C.ARC_WAIT, g0 = n0.goal < C.MIST_CAP ? M.min(C.MIST_CAP, n0.goal + C.GROW_RATE * wait) : n0.goal;
     var s0 = g0 + (n0.size - n0.goal) * M.exp(-C.SIZE_EASE * wait);
     function ok(x, y, list) {
       if (y < C.FLY_Y[0] || y > C.FLY_Y[1] || x < C.FLY_MIN_X || x > C.FIELD_W - 0.4) return false;
@@ -398,11 +398,11 @@
       return { res: res, path: path };
     }
     var best = null;
-    for (var tries = 0; tries < 16 && !best; tries++) {
+    for (var tries = 0; tries < 32 && !best; tries++) {
       var ang = r.range(C.ARC_ANG[0], C.ARC_ANG[1]) * DEG, X = wg.baseX + r.range(-0.35, 0.35) * wg.hw;
       var sol = solveSpeed(ang, X, wg.top, s0, g0);
       if (!sol || !sol.pull || sol.apex > C.ARC_APEX || sol.v > C.VMAX * 0.97) continue;
-      if (tries < 12 && this._arcHitsCrow(sol.pull, s0, g0)) continue;
+      if (tries < 28 && this._arcHitsCrow(sol.pull, s0, g0)) continue;
       // fireflies on the body path
       var tr = trace(sol.pull, []), path = tr.path, want = r.int(3, 5), pts = [], k;
       if (tr.res.type !== 'land' || path.length < 20) continue;
@@ -453,7 +453,7 @@
     for (i = 0; i < 1000 && f.y - C.FOOT * f.size > C.GROUND_Y; i++) { stepBody(f, h); if (i % 5 === 0) path.push({ x: f.x, y: f.y, t: f.flightT, s: f.size }); }
     for (var c = 0; c < this.crows.length; c++) {
       var g = this.crows[c];
-      for (w = 0.5; w <= 3.01; w += 0.5) for (i = 0; i < path.length; i++) {
+      for (w = 0.5; w <= 1.51; w += 0.5) for (i = 0; i < path.length; i++) {
         crowPos(g, g.t + w + path[i].t, p);
         var R = C.R_NUBI * path[i].s + g.r + 0.15, dx = path[i].x - p.x, dy = path[i].y - p.y;
         if (dx * dx + dy * dy < R * R) return true;
@@ -608,7 +608,7 @@
       n.x = wg.x + rel; n.y = wg.top + C.FOOT * n.size;                       // bottom stays on the soil as he shrinks
       n.rot *= M.exp(-10 * h);
       if (this.phaseT >= C.LAND_T) {
-        if (this.levelLandings >= C.LANDINGS_PER_LEVEL) this._setLevel(this.level + 1, false);
+        if (this.levelLandings >= (this.D.landings || C.LANDINGS_PER_LEVEL)) this._setLevel(this.level + 1, false);
         this._newShot(false);
       }
     } else if (this.phase === 'plop') {

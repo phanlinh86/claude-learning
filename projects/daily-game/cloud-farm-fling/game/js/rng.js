@@ -1,4 +1,4 @@
-/* Finn's Island Fling — CFF.RNG (same API as the sister games)
+/* Nubi's Farm Fling — CFF.RNG (same API as the sister games)
  * Small, fast, seeded PRNG (mulberry32). Same seed => same sequence on every
  * platform, which is what makes CFF.World / CFF.Weather / CFF.Bot deterministic.
  *

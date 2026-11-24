@@ -30,7 +30,8 @@ with real fireflies and a crow on the way (unit test).
 | `GROW_FLY` / `GROW_GOLD` | 0.05 / 0.1 per firefly | a perfect 5-firefly shot adds ≈ 0.25 |
 | `SIZE_EASE` | 4 /s | `size` eases toward `goal` (≈ 0.25 s): a gulp swells Nubi smoothly, no pops (max 0.004 per step) |
 | `SHRINK_EASE` | 2.5 /s | the shrink while raining is 95 % done by the end of the 1.2 s rain phase |
-| `RAIN_KEEP` | 0.4 | landing: `goal = 1 + (goal − 1)·0.4` (raining uses 60 % of the extra water) |
+| `RAIN_KEEP` | 0.5 | landing: `goal = 1 + (goal − 1)·0.5` (raining uses half of the extra water; playtest: 0.4 kept Nubi at 1.1–1.25 most of the time) |
+| `MIST_CAP` | 1.3 | slow mist growth (GROW_RATE) stops here; only fireflies grow Nubi further (playtest: waiting in aim gave a free 1.7× on Hard) |
 | `PLOP_LOSS` | 0.15 | plop: `goal = max(1, goal − 0.15)` |
 | `BIG_AT` | 1.4 | `big` event when size crosses it upward; a landing at ≥ 1.4 is a Big Shower (+2) |
 | `BUOY` | 0.15 | `g = G·(1 − 0.15·(s − 1))`: 9 → 8.06 u/s² at 1.7 (a puffier cloud is lighter) |
@@ -85,7 +86,7 @@ worth 3).
 | `MIN_WAGON_DX` | 5 u | the wagon never comes closer than 5 u to the sling |
 | `FLY_Y`, `FLY_MIN_X`, `FLY_GAP` | 1.0–6.8 u, 4.4 u, 0.9 u | fireflies in the calm band, off the bale/sling, spaced out |
 | `ARC_ANG`, `ARC_APEX`, `ARC_WAIT` | 34°–64°, 6.5 u, 1 s | solution-arc angles, max apex, expected aim time |
-| `LANDINGS_PER_LEVEL` | 5 | then the next season |
+| `LANDINGS_PER_LEVEL` | 5 | fallback; `DIFF.<d>.landings` = 6 / 9 / 10 waterings per season (playtest: 5 gave 22–25 s seasons for adults; target 45–90 s) |
 | `PREVIEW_DT` | 0.06 s | dot spacing; dots per level = `LEVELS[i].PREVIEW × DIFF.previewK` |
 | `POINTS` | fly 1, gold 3, land 2, bull +3, big +2, streak +1/step (max +4) | |
 | `LOOP_CAP` | 3 | loops get harder up to loop 3, then stay |
