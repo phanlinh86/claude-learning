@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+<defs><clipPath id="cheese_c1"><path d="M 12 66 L 116 66 L 116 108 C 116 112 114 114 110 114 L 18 114 C 14 114 12 112 12 108 Z" /></clipPath><clipPath id="cheese_c2"><path d="M 12 66 L 98 28 C 106 30 114 48 116 66 Z" /></clipPath><g id="cheese_sil"><path d="M 12 66 L 116 66 L 116 108 C 116 112 114 114 110 114 L 18 114 C 14 114 12 112 12 108 Z" /><path d="M 12 66 L 98 28 C 106 30 114 48 116 66 Z" /></g></defs>
+<g transform="translate(0.24 -8.23) scale(0.9962)">
+<use href="#cheese_sil" xlink:href="#cheese_sil" transform="translate(0 3.01)" fill="#3A3020" stroke="#3A3020" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" opacity="0.18"/>
+<use href="#cheese_sil" xlink:href="#cheese_sil" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M 12 66 L 116 66 L 116 108 C 116 112 114 114 110 114 L 18 114 C 14 114 12 112 12 108 Z" fill="#F0AE22"/>
+<g clip-path="url(#cheese_c1)"><g transform="translate(-2 -3)"><path d="M 12 66 L 116 66 L 116 108 C 116 112 114 114 110 114 L 18 114 C 14 114 12 112 12 108 Z" fill="#FFC93C"/></g>
+<ellipse cx="32" cy="84" rx="7" ry="8" fill="#E39E1A"/><ellipse cx="33.4" cy="86.4" rx="4.9" ry="4.8" fill="#CF9016" opacity=".55"/><ellipse cx="60" cy="96" rx="5" ry="6" fill="#E39E1A"/><ellipse cx="61" cy="97.8" rx="3.5" ry="3.6" fill="#CF9016" opacity=".55"/><ellipse cx="86" cy="80" rx="8" ry="9" fill="#E39E1A"/><ellipse cx="87.6" cy="82.7" rx="5.6" ry="5.4" fill="#CF9016" opacity=".55"/><ellipse cx="104" cy="98" rx="4.5" ry="5" fill="#E39E1A"/><ellipse cx="104.9" cy="99.5" rx="3.15" ry="3" fill="#CF9016" opacity=".55"/><ellipse cx="50" cy="76" rx="3.5" ry="4" fill="#E39E1A"/><ellipse cx="50.7" cy="77.2" rx="2.45" ry="2.4" fill="#CF9016" opacity=".55"/>
+</g>
+<path d="M 12 66 L 116 66 L 116 108 C 116 112 114 114 110 114 L 18 114 C 14 114 12 112 12 108 Z" fill="none" stroke="#B07A10" stroke-width="2.4" stroke-linejoin="round"/>
+<path d="M 12 66 L 98 28 C 106 30 114 48 116 66 Z" fill="#FBD660"/>
+<g clip-path="url(#cheese_c2)"><g transform="translate(-1 -2)"><path d="M 12 66 L 98 28 C 106 30 114 48 116 66 Z" fill="#FFE27E"/></g>
+<ellipse cx="66" cy="54" rx="5.5" ry="2.6" transform="rotate(-10 66 54)" fill="#E39E1A"/><ellipse cx="92" cy="44" rx="3.5" ry="1.8" transform="rotate(-10 92 44)" fill="#E39E1A"/>
+<ellipse cx="70" cy="46" rx="12" ry="3" transform="rotate(-22 70 46)" fill="#FFFFFF" opacity=".5"/>
+</g>
+<path d="M 12 66 L 98 28 C 106 30 114 48 116 66 Z" fill="none" stroke="#B07A10" stroke-width="2.4" stroke-linejoin="round"/>
+</g>
+</svg>

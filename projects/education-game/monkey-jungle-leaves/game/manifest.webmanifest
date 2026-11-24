@@ -1,0 +1,16 @@
+{
+  "name": "Lolo's Jungle Leaf Match · Khỉ Lolo Lật Lá Tìm Đôi",
+  "short_name": "Leaf Match",
+  "description": "Flip the jungle leaves with Lolo the little monkey and find matching pairs: colours, shapes, numbers, animals and their favourite food. English & Vietnamese.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#7DBF8E",
+  "theme_color": "#7DBF8E",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
