@@ -1,0 +1,30 @@
+Mossy's Egg Grove deep playtest — 30 games per row, cap 1500 s, frame 1/60 s
+
+| player | diff | patch | game s p10/p50/p90 | drops p50 | score p10/p50/p90 | 1st merge s | s per season spring/summer/autumn | reached Su/A/W | warns/game | drops to 1st warn p50 | rescues/game |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| kid-tap | easy | rescue5 | 385 / 434 / 593 | 151 | 844 / 1146 / 1622 | 12.1 | 77 / 69 / 99 | 30/30/30 of 30 | 3.4 | 117 (min 84) | 2.00 |
+| kid-tap | normal | rescue5 | 251 / 289 / 392 | 96 | 557 / 708 / 1082 | 12.1 | 91 / 82 / 110 | 30/30/11 of 30 | 2.5 | 83 (min 59) | 1.00 |
+| kid-drag | easy | rescue5 | 399 / 492 / 577 | 153 | 781 / 1132 / 1506 | 14.0 | 81 / 80 / 109 | 30/30/30 of 30 | 3.5 | 115 (min 85) | 2.00 |
+| kid-drag | normal | rescue5 | 260 / 321 / 391 | 102 | 522 / 755 / 1018 | 14.0 | 92 / 88 / 124 | 30/29/10 of 30 | 2.1 | 81 (min 56) | 1.00 |
+| bot0.5 | easy | rescue5 | 293 / 356 / 431 | 176 | 1045 / 1439 / 1721 | 7.3 | 47 / 47 / 68 | 30/30/30 of 30 | 3.7 | 133 (min 82) | 2.00 |
+| bot0.5 | normal | rescue5 | 180 / 212 / 283 | 105 | 611 / 806 / 1255 | 7.9 | 57 / 50 / 75 | 30/30/15 of 30 | 2.5 | 90 (min 65) | 1.00 |
+
+| player | diff | patch | gust drops % | |Δx| land vs intent: calm / gust (u) | merge≤2 s rate: calm / gust |
+|---|---|---|---|---|---|
+| kid-tap | easy | rescue5 | 29 | 0.38 / 0.57 | 41 % / 44 % |
+| kid-tap | normal | rescue5 | 29 | 0.40 / 0.70 | 40 % / 41 % |
+| kid-drag | easy | rescue5 | 29 | 0.07 / 0.44 | 41 % / 42 % |
+| kid-drag | normal | rescue5 | 30 | 0.08 / 0.64 | 40 % / 39 % |
+| bot0.5 | easy | rescue5 | 29 | 1.38 / 1.30 | 47 % / 49 % |
+| bot0.5 | normal | rescue5 | 29 | 1.37 / 1.32 | 46 % / 45 % |
+
+| player | diff | patch | rescues | drops survived after 1st rescue p50 | s from last rescue to game over p50 | rescue removed the biggest egg % | removed kinds p50 (max) | bad | max overlap u | stuck-falling | missed merges | spawn overlaps | max pile top u | games pile > wall 11.2 / > 13.5 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| kid-tap | easy | rescue5 | 60 | 29 | 48 | 2 | 2 (7) | 0 | 0.225 | 0 | 0 | 1 | 11.39 | 7 / 0 |
+| kid-tap | normal | rescue5 | 30 | 18 | 51 | 7 | 3 (6) | 0 | 0.120 | 0 | 0 | 0 | 14.96 | 9 / 2 |
+| kid-drag | easy | rescue5 | 60 | 33 | 55 | 2 | 2 (7) | 0 | 0.135 | 0 | 0 | 0 | 11.64 | 15 / 0 |
+| kid-drag | normal | rescue5 | 30 | 14 | 45 | 10 | 3 (7) | 0 | 0.205 | 0 | 0 | 1 | 11.89 | 12 / 0 |
+| bot0.5 | easy | rescue5 | 60 | 36 | 27 | 0 | 3 (7) | 0 | 0.104 | 0 | 0 | 2 | 12.14 | 26 / 0 |
+| bot0.5 | normal | rescue5 | 30 | 11 | 22 | 0 | 3 (6) | 0 | 0.160 | 0 | 0 | 0 | 12.34 | 24 / 0 |
+
+(62.7 s, 24 jobs)

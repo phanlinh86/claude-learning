@@ -1,0 +1,132 @@
+Mossy's Egg Grove deep playtest — 40 games per row, cap 1500 s, frame 1/60 s
+
+| player | diff | patch | game s p10/p50/p90 | drops p50 | score p10/p50/p90 | 1st merge s | s per season spring/summer/autumn | reached Su/A/W | warns/game | drops to 1st warn p50 | rescues/game |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| spam-center | easy | none | 72 / 89 / 111 | 163 | 993 / 1372 / 1767 | 2.0 | 15 / 12 / 17 | 40/40/40 of 40 | 4.8 | 18 (min 14) | 2.00 |
+| spam-center | easy | overflow | 69 / 85 / 121 | 156 | 903 / 1277 / 1995 | 2.0 | 16 / 11 / 17 | 40/40/40 of 40 | 5.6 | 18 (min 14) | 2.00 |
+| spam-center | easy | nospawn | 75 / 92 / 118 | 159 | 904 / 1392 / 1816 | 2.0 | 18 / 12 / 17 | 40/40/40 of 40 | 4.5 | 15 (min 12) | 2.00 |
+| spam-center | easy | cool | 109 / 137 / 163 | 168 | 969 / 1400 / 1756 | 2.5 | 19 / 19 / 26 | 40/40/40 of 40 | 5.0 | 118 (min 13) | 2.00 |
+| spam-center | easy | rec | 106 / 135 / 171 | 165 | 926 / 1327 / 1859 | 2.5 | 20 / 19 / 24 | 40/40/40 of 40 | 5.2 | 115 (min 13) | 2.00 |
+| spam-center | normal | none | 48 / 58 / 73 | 106 | 635 / 898 / 1272 | 1.5 | 16 / 14 / 21 | 40/40/26 of 40 | 3.5 | 19 (min 13) | 1.00 |
+| spam-center | normal | overflow | 39 / 57 / 72 | 104 | 454 / 942 / 1247 | 1.5 | 17 / 14 / 19 | 40/36/24 of 40 | 4.5 | 18 (min 13) | 1.00 |
+| spam-center | normal | nospawn | 49 / 58 / 70 | 97 | 559 / 797 / 1077 | 1.5 | 20 / 14 / 20 | 40/40/19 of 40 | 2.8 | 15 (min 11) | 1.00 |
+| spam-center | normal | cool | 67 / 84 / 109 | 103 | 549 / 779 / 1237 | 1.8 | 23 / 22 / 31 | 40/40/19 of 40 | 3.0 | 78 (min 12) | 1.00 |
+| spam-center | normal | rec | 68 / 86 / 100 | 106 | 630 / 873 / 1104 | 1.8 | 23 / 22 / 27 | 40/40/27 of 40 | 3.4 | 82 (min 12) | 1.00 |
+| spam-wall | easy | none | 78 / 91 / 106 | 166 | 1105 / 1405 / 1797 | 2.1 | 12 / 12 / 17 | 40/40/40 of 40 | 7.4 | 91 (min 47) | 2.00 |
+| spam-wall | easy | overflow | 69 / 87 / 96 | 158 | 918 / 1287 / 1586 | 2.1 | 12 / 12 / 17 | 40/40/40 of 40 | 7.2 | 80 (min 40) | 2.00 |
+| spam-wall | easy | nospawn | 59 / 78 / 93 | 126 | 596 / 1025 / 1365 | 2.1 | 12 / 12 / 18 | 40/40/35 of 40 | 3.3 | 81 (min 37) | 2.00 |
+| spam-wall | easy | cool | 89 / 118 / 140 | 145 | 790 / 1112 / 1427 | 2.7 | 19 / 18 / 27 | 40/40/40 of 40 | 7.3 | 75 (min 36) | 2.00 |
+| spam-wall | easy | rec | 97 / 116 / 150 | 142 | 814 / 1102 / 1596 | 2.7 | 19 / 16 / 22 | 40/40/40 of 40 | 7.8 | 75 (min 36) | 2.00 |
+| spam-wall | normal | none | 52 / 64 / 76 | 117 | 781 / 1073 / 1362 | 2.1 | 14 / 13 / 20 | 40/39/34 of 40 | 4.6 | 79 (min 48) | 1.00 |
+| spam-wall | normal | overflow | 46 / 56 / 66 | 102 | 642 / 916 / 1161 | 2.1 | 14 / 13 / 20 | 40/39/26 of 40 | 4.9 | 63 (min 31) | 1.00 |
+| spam-wall | normal | nospawn | 42 / 51 / 65 | 81 | 467 / 692 / 1061 | 2.1 | 14 / 13 / 22 | 40/37/12 of 40 | 2.4 | 62 (min 28) | 1.00 |
+| spam-wall | normal | cool | 68 / 82 / 106 | 101 | 592 / 850 / 1189 | 2.7 | 21 / 19 / 31 | 40/39/26 of 40 | 4.5 | 62 (min 30) | 1.00 |
+| spam-wall | normal | rec | 65 / 80 / 98 | 99 | 536 / 849 / 1112 | 2.7 | 21 / 20 / 27 | 40/40/26 of 40 | 4.8 | 63 (min 30) | 1.00 |
+| spam-alt | easy | none | 68 / 79 / 102 | 145 | 868 / 1194 / 1667 | 3.2 | 14 / 11 / 16 | 40/40/40 of 40 | 5.2 | 94 (min 64) | 2.00 |
+| spam-alt | easy | overflow | 67 / 80 / 103 | 146 | 876 / 1226 / 1672 | 3.2 | 14 / 11 / 16 | 40/40/40 of 40 | 5.5 | 94 (min 64) | 2.00 |
+| spam-alt | easy | nospawn | 68 / 78 / 101 | 143 | 928 / 1201 / 1618 | 3.2 | 14 / 11 / 16 | 40/40/40 of 40 | 5.1 | 94 (min 64) | 2.00 |
+| spam-alt | easy | cool | 97 / 110 / 134 | 135 | 890 / 1050 / 1414 | 4.3 | 20 / 18 / 26 | 40/40/40 of 40 | 4.6 | 94 (min 59) | 2.00 |
+| spam-alt | easy | rec | 88 / 110 / 147 | 135 | 754 / 1056 / 1519 | 4.3 | 20 / 17 / 24 | 40/40/39 of 40 | 4.2 | 96 (min 66) | 2.00 |
+| spam-alt | normal | none | 48 / 58 / 73 | 106 | 647 / 917 / 1256 | 3.2 | 15 / 13 / 20 | 40/39/26 of 40 | 3.6 | 79 (min 50) | 1.00 |
+| spam-alt | normal | overflow | 48 / 57 / 73 | 104 | 647 / 878 / 1248 | 3.2 | 15 / 13 / 20 | 40/39/24 of 40 | 3.7 | 79 (min 50) | 1.00 |
+| spam-alt | normal | nospawn | 49 / 55 / 71 | 100 | 610 / 844 / 1251 | 3.2 | 15 / 14 / 20 | 40/40/23 of 40 | 3.3 | 79 (min 50) | 1.00 |
+| spam-alt | normal | cool | 68 / 79 / 100 | 97 | 579 / 785 / 1127 | 4.3 | 24 / 22 / 30 | 40/40/17 of 40 | 3.2 | 76 (min 54) | 1.00 |
+| spam-alt | normal | rec | 68 / 77 / 92 | 94 | 569 / 690 / 999 | 4.3 | 24 / 21 / 28 | 40/40/16 of 40 | 2.8 | 80 (min 52) | 1.00 |
+| kid-tap | easy | none | 373 / 447 / 575 | 148 | 879 / 1135 / 1597 | 12.8 | 77 / 73 / 98 | 40/40/40 of 40 | 3.6 | 116 (min 72) | 2.00 |
+| kid-tap | easy | overflow | 373 / 447 / 575 | 148 | 879 / 1135 / 1597 | 12.8 | 77 / 73 / 98 | 40/40/40 of 40 | 3.6 | 116 (min 72) | 2.00 |
+| kid-tap | easy | nospawn | 373 / 447 / 575 | 148 | 873 / 1130 / 1597 | 12.8 | 77 / 73 / 98 | 40/40/40 of 40 | 3.5 | 116 (min 72) | 2.00 |
+| kid-tap | easy | cool | 373 / 447 / 575 | 148 | 879 / 1135 / 1597 | 12.8 | 77 / 73 / 98 | 40/40/40 of 40 | 3.6 | 116 (min 72) | 2.00 |
+| kid-tap | easy | rec | 375 / 438 / 553 | 150 | 882 / 1101 / 1549 | 12.8 | 77 / 71 / 86 | 40/40/40 of 40 | 3.7 | 118 (min 76) | 2.00 |
+| kid-tap | normal | none | 236 / 283 / 350 | 95 | 450 / 716 / 1031 | 12.3 | 91 / 82 / 109 | 40/39/12 of 40 | 2.5 | 83 (min 59) | 1.00 |
+| kid-tap | normal | overflow | 236 / 283 / 350 | 95 | 450 / 716 / 1031 | 12.3 | 91 / 82 / 109 | 40/39/12 of 40 | 2.5 | 83 (min 59) | 1.00 |
+| kid-tap | normal | nospawn | 228 / 283 / 350 | 95 | 440 / 716 / 1025 | 12.3 | 91 / 82 / 109 | 40/39/12 of 40 | 2.5 | 83 (min 59) | 1.00 |
+| kid-tap | normal | cool | 236 / 279 / 350 | 95 | 450 / 714 / 971 | 12.3 | 91 / 82 / 109 | 40/39/11 of 40 | 2.5 | 82 (min 59) | 1.00 |
+| kid-tap | normal | rec | 236 / 292 / 370 | 99 | 499 / 771 / 1019 | 12.3 | 91 / 80 / 101 | 40/40/22 of 40 | 2.4 | 83 (min 57) | 1.00 |
+
+| player | diff | patch | gust drops % | |Δx| land vs intent: calm / gust (u) | merge≤2 s rate: calm / gust |
+|---|---|---|---|---|---|
+| spam-center | easy | none | 27 | 0.02 / 0.35 | 73 % / 70 % |
+| spam-center | easy | overflow | 28 | 0.02 / 0.38 | 72 % / 71 % |
+| spam-center | easy | nospawn | 26 | 0.01 / 0.39 | 71 % / 70 % |
+| spam-center | easy | cool | 29 | 0.01 / 0.37 | 65 % / 65 % |
+| spam-center | easy | rec | 29 | 0.02 / 0.56 | 65 % / 65 % |
+| spam-center | normal | none | 26 | 0.02 / 0.44 | 68 % / 61 % |
+| spam-center | normal | overflow | 26 | 0.02 / 0.46 | 68 % / 60 % |
+| spam-center | normal | nospawn | 26 | 0.01 / 0.52 | 66 % / 64 % |
+| spam-center | normal | cool | 28 | 0.02 / 0.50 | 60 % / 61 % |
+| spam-center | normal | rec | 28 | 0.02 / 0.61 | 60 % / 59 % |
+| spam-wall | easy | none | 27 | 0.11 / 0.18 | 75 % / 74 % |
+| spam-wall | easy | overflow | 27 | 0.11 / 0.18 | 76 % / 74 % |
+| spam-wall | easy | nospawn | 27 | 0.10 / 0.23 | 74 % / 74 % |
+| spam-wall | easy | cool | 28 | 0.11 / 0.20 | 66 % / 63 % |
+| spam-wall | easy | rec | 29 | 0.11 / 0.29 | 65 % / 62 % |
+| spam-wall | normal | none | 27 | 0.14 / 0.25 | 68 % / 68 % |
+| spam-wall | normal | overflow | 27 | 0.15 / 0.26 | 68 % / 68 % |
+| spam-wall | normal | nospawn | 26 | 0.14 / 0.29 | 67 % / 65 % |
+| spam-wall | normal | cool | 28 | 0.15 / 0.31 | 60 % / 57 % |
+| spam-wall | normal | rec | 28 | 0.16 / 0.37 | 58 % / 59 % |
+| spam-alt | easy | none | 27 | 7.66 / 7.60 | 61 % / 61 % |
+| spam-alt | easy | overflow | 27 | 7.66 / 7.61 | 62 % / 60 % |
+| spam-alt | easy | nospawn | 27 | 7.60 / 7.54 | 61 % / 60 % |
+| spam-alt | easy | cool | 28 | 7.68 / 7.54 | 48 % / 48 % |
+| spam-alt | easy | rec | 28 | 7.67 / 7.44 | 47 % / 48 % |
+| spam-alt | normal | none | 27 | 7.54 / 7.39 | 55 % / 55 % |
+| spam-alt | normal | overflow | 27 | 7.54 / 7.40 | 55 % / 57 % |
+| spam-alt | normal | nospawn | 27 | 7.48 / 7.31 | 55 % / 56 % |
+| spam-alt | normal | cool | 28 | 7.54 / 7.33 | 43 % / 46 % |
+| spam-alt | normal | rec | 28 | 7.54 / 7.25 | 42 % / 45 % |
+| kid-tap | easy | none | 29 | 0.38 / 0.56 | 41 % / 43 % |
+| kid-tap | easy | overflow | 29 | 0.38 / 0.56 | 41 % / 43 % |
+| kid-tap | easy | nospawn | 29 | 0.38 / 0.56 | 41 % / 43 % |
+| kid-tap | easy | cool | 29 | 0.38 / 0.56 | 41 % / 43 % |
+| kid-tap | easy | rec | 29 | 0.38 / 0.74 | 42 % / 44 % |
+| kid-tap | normal | none | 29 | 0.41 / 0.70 | 39 % / 42 % |
+| kid-tap | normal | overflow | 29 | 0.41 / 0.70 | 39 % / 42 % |
+| kid-tap | normal | nospawn | 29 | 0.41 / 0.70 | 39 % / 42 % |
+| kid-tap | normal | cool | 29 | 0.41 / 0.70 | 39 % / 42 % |
+| kid-tap | normal | rec | 29 | 0.41 / 0.86 | 40 % / 43 % |
+
+| player | diff | patch | rescues | drops survived after 1st rescue p50 | s from last rescue to game over p50 | rescue removed the biggest egg % | removed kinds p50 (max) | bad | max overlap u | stuck-falling | missed merges | spawn overlaps | max pile top u | games pile > wall 11.2 / > 13.5 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| spam-center | easy | none | 80 | 87 | 7 | 18 | 3 (6) | 0 | 0.178 | 0 | 0 | 49 | 18.82 | 40 / 40 |
+| spam-center | easy | overflow | 80 | 127 | 7 | 23 | 2 (6) | 0 | 0.133 | 0 | 0 | 43 | 18.82 | 40 / 40 |
+| spam-center | easy | nospawn | 80 | 137 | 8 | 31 | 2 (7) | 0 | 0.144 | 0 | 0 | 34 | 12.19 | 40 / 0 |
+| spam-center | easy | cool | 80 | 27 | 9 | 0 | 3 (6) | 0 | 0.279 | 0 | 0 | 21 | 18.73 | 40 / 35 |
+| spam-center | easy | rec | 80 | 33 | 9 | 4 | 2 (7) | 0 | 0.137 | 0 | 0 | 16 | 18.73 | 40 / 37 |
+| spam-center | normal | none | 40 | 15 | 8 | 18 | 3 (6) | 0 | 0.374 | 0 | 0 | 41 | 18.82 | 40 / 39 |
+| spam-center | normal | overflow | 40 | 71 | 39 | 50 | 2 (5) | 0 | 0.374 | 0 | 0 | 32 | 18.82 | 40 / 39 |
+| spam-center | normal | nospawn | 40 | 78 | 46 | 55 | 2 (5) | 0 | 0.247 | 0 | 0 | 8 | 12.33 | 40 / 0 |
+| spam-center | normal | cool | 40 | 13 | 11 | 5 | 3 (6) | 0 | 0.230 | 0 | 0 | 14 | 18.73 | 40 / 37 |
+| spam-center | normal | rec | 40 | 12 | 10 | 10 | 3 (7) | 0 | 0.151 | 0 | 0 | 16 | 18.73 | 40 / 36 |
+| spam-wall | easy | none | 80 | 39 | 10 | 1 | 3 (6) | 0 | 0.137 | 0 | 0 | 44 | 18.71 | 40 / 40 |
+| spam-wall | easy | overflow | 80 | 38 | 7 | 3 | 2 (8) | 0 | 0.136 | 0 | 0 | 39 | 18.71 | 40 / 40 |
+| spam-wall | easy | nospawn | 80 | 42 | 11 | 3 | 2 (7) | 0 | 0.136 | 0 | 0 | 14 | 12.19 | 40 / 0 |
+| spam-wall | easy | cool | 80 | 44 | 13 | 0 | 2 (6) | 0 | 0.511 | 0 | 0 | 20 | 18.54 | 40 / 40 |
+| spam-wall | easy | rec | 80 | 41 | 12 | 0 | 2 (6) | 0 | 0.609 | 0 | 0 | 19 | 18.57 | 40 / 40 |
+| spam-wall | normal | none | 40 | 16 | 9 | 5 | 3 (7) | 0 | 0.132 | 0 | 0 | 20 | 19.13 | 40 / 40 |
+| spam-wall | normal | overflow | 40 | 13 | 7 | 3 | 3 (7) | 0 | 0.059 | 0 | 0 | 13 | 18.64 | 40 / 40 |
+| spam-wall | normal | nospawn | 40 | 16 | 11 | 0 | 3 (6) | 0 | 0.055 | 0 | 0 | 8 | 12.34 | 40 / 0 |
+| spam-wall | normal | cool | 40 | 14 | 11 | 0 | 3 (6) | 0 | 0.587 | 0 | 0 | 15 | 18.85 | 40 / 40 |
+| spam-wall | normal | rec | 40 | 14 | 11 | 0 | 3 (6) | 0 | 0.475 | 0 | 0 | 9 | 19.28 | 40 / 39 |
+| spam-alt | easy | none | 80 | 35 | 6 | 0 | 2 (6) | 0 | 0.095 | 0 | 0 | 9 | 17.93 | 40 / 36 |
+| spam-alt | easy | overflow | 80 | 38 | 9 | 0 | 2 (7) | 0 | 0.137 | 0 | 0 | 13 | 17.93 | 40 / 35 |
+| spam-alt | easy | nospawn | 80 | 35 | 6 | 0 | 2 (6) | 0 | 0.096 | 0 | 0 | 13 | 12.66 | 40 / 0 |
+| spam-alt | easy | cool | 80 | 29 | 8 | 0 | 2 (5) | 0 | 0.116 | 0 | 0 | 8 | 17.89 | 40 / 31 |
+| spam-alt | easy | rec | 80 | 27 | 8 | 0 | 2 (6) | 0 | 0.149 | 0 | 0 | 7 | 17.75 | 40 / 31 |
+| spam-alt | normal | none | 40 | 14 | 7 | 0 | 3 (7) | 0 | 0.079 | 0 | 0 | 9 | 18.24 | 40 / 37 |
+| spam-alt | normal | overflow | 40 | 14 | 8 | 0 | 3 (6) | 0 | 0.079 | 0 | 0 | 9 | 18.24 | 40 / 36 |
+| spam-alt | normal | nospawn | 40 | 13 | 7 | 0 | 2 (6) | 0 | 0.074 | 0 | 0 | 7 | 12.70 | 40 / 0 |
+| spam-alt | normal | cool | 40 | 10 | 8 | 0 | 3 (6) | 0 | 0.075 | 0 | 0 | 9 | 18.15 | 40 / 31 |
+| spam-alt | normal | rec | 40 | 13 | 11 | 3 | 3 (7) | 0 | 0.078 | 0 | 0 | 6 | 17.72 | 40 / 23 |
+| kid-tap | easy | none | 80 | 27 | 32 | 1 | 2 (7) | 0 | 0.225 | 0 | 0 | 1 | 13.02 | 13 / 0 |
+| kid-tap | easy | overflow | 80 | 27 | 32 | 1 | 2 (7) | 0 | 0.225 | 0 | 0 | 1 | 13.02 | 13 / 0 |
+| kid-tap | easy | nospawn | 80 | 27 | 32 | 1 | 2 (7) | 0 | 0.225 | 0 | 0 | 1 | 11.87 | 13 / 0 |
+| kid-tap | easy | cool | 80 | 27 | 32 | 1 | 2 (7) | 0 | 0.225 | 0 | 0 | 1 | 13.02 | 13 / 0 |
+| kid-tap | easy | rec | 80 | 32 | 42 | 0 | 3 (7) | 0 | 0.083 | 0 | 0 | 0 | 16.43 | 16 / 3 |
+| kid-tap | normal | none | 40 | 11 | 31 | 3 | 3 (6) | 0 | 0.090 | 0 | 0 | 0 | 14.74 | 21 / 1 |
+| kid-tap | normal | overflow | 40 | 11 | 31 | 3 | 3 (6) | 0 | 0.090 | 0 | 0 | 0 | 14.74 | 21 / 1 |
+| kid-tap | normal | nospawn | 40 | 11 | 31 | 3 | 3 (6) | 0 | 0.090 | 0 | 0 | 0 | 12.28 | 20 / 0 |
+| kid-tap | normal | cool | 40 | 11 | 31 | 3 | 3 (6) | 0 | 0.090 | 0 | 0 | 0 | 14.74 | 21 / 1 |
+| kid-tap | normal | rec | 40 | 11 | 32 | 8 | 3 (7) | 0 | 0.289 | 0 | 0 | 0 | 12.89 | 19 / 0 |
+
+(265.8 s, 160 jobs)

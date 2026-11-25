@@ -1,0 +1,34 @@
+{
+  "spring": {
+    "skyTop": "#86b7c2",
+    "skyBottom": "#e9dccb",
+    "ground": "#4d6e43",
+    "ink": "#fbf5e8",
+    "bar": "#3d5a45",
+    "accent": "#e7a3b4"
+  },
+  "summer": {
+    "skyTop": "#5c9fb8",
+    "skyBottom": "#d4e6c4",
+    "ground": "#3f6b3a",
+    "ink": "#f3fae6",
+    "bar": "#2c5136",
+    "accent": "#e06a52"
+  },
+  "autumn": {
+    "skyTop": "#5c5583",
+    "skyBottom": "#eaae8a",
+    "ground": "#6a4630",
+    "ink": "#fff0e0",
+    "bar": "#4a2f2a",
+    "accent": "#f0915a"
+  },
+  "winter": {
+    "skyTop": "#3d5076",
+    "skyBottom": "#a9bbd3",
+    "ground": "#d4dfeb",
+    "ink": "#eef4ff",
+    "bar": "#2c3a56",
+    "accent": "#9cd2e6"
+  }
+}

@@ -1,0 +1,10 @@
+
+Settle test (Normal, bot 0.6 to k drops, then 3 s quiet, then measure 5 s):
+| k drops | piles | eggs p50 | max drift in 5 s (u) | max speed (u/s) |
+|---|---|---|---|---|
+| 15 | 10 | 6 | 0.2009 | 0.197 |
+| 30 | 10 | 8 | 2.4775 | 9.766 |
+| 45 | 10 | 11 | 0.6009 | 2.203 |
+| 60 | 10 | 14 | 0.0000 | 0.000 |
+
+(2.9 s, 4 jobs)

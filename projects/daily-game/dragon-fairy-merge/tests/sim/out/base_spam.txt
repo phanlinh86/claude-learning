@@ -1,0 +1,42 @@
+Mossy's Egg Grove deep playtest — 40 games per row, cap 1500 s, frame 1/60 s
+
+| player | diff | patch | game s p10/p50/p90 | drops p50 | score p10/p50/p90 | 1st merge s | s per season spring/summer/autumn | reached Su/A/W | warns/game | drops to 1st warn p50 | rescues/game |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| spam-center | easy | none | 72 / 89 / 111 | 163 | 993 / 1372 / 1767 | 2.0 | 15 / 12 / 17 | 40/40/40 of 40 | 4.8 | 18 (min 14) | 2.00 |
+| spam-center | normal | none | 48 / 58 / 73 | 106 | 635 / 898 / 1272 | 1.5 | 16 / 14 / 21 | 40/40/26 of 40 | 3.5 | 19 (min 13) | 1.00 |
+| spam-wall | easy | none | 78 / 91 / 106 | 166 | 1105 / 1405 / 1797 | 2.1 | 12 / 12 / 17 | 40/40/40 of 40 | 7.4 | 91 (min 47) | 2.00 |
+| spam-wall | normal | none | 52 / 64 / 76 | 117 | 781 / 1073 / 1362 | 2.1 | 14 / 13 / 20 | 40/39/34 of 40 | 4.6 | 79 (min 48) | 1.00 |
+| spam-alt | easy | none | 68 / 79 / 102 | 145 | 868 / 1194 / 1667 | 3.2 | 14 / 11 / 16 | 40/40/40 of 40 | 5.2 | 94 (min 64) | 2.00 |
+| spam-alt | normal | none | 48 / 58 / 73 | 106 | 647 / 917 / 1256 | 3.2 | 15 / 13 / 20 | 40/39/26 of 40 | 3.6 | 79 (min 50) | 1.00 |
+| spam-alt-aim | easy | none | 158 / 189 / 214 | 132 | 735 / 989 / 1187 | 6.0 | 37 / 32 / 48 | 40/40/39 of 40 | 4.5 | 90 (min 62) | 2.00 |
+| spam-alt-aim | normal | none | 104 / 128 / 145 | 90 | 467 / 685 / 888 | 6.0 | 43 / 39 / 53 | 40/38/7 of 40 | 2.8 | 75 (min 51) | 1.00 |
+| bot1-fast | easy | none | 235 / 298 / 468 | 187 | 1085 / 1545 / 2762 | 5.1 | 36 / 35 / 52 | 40/40/40 of 40 | 3.9 | 153 (min 106) | 2.00 |
+| bot1-fast | normal | none | 175 / 195 / 246 | 122 | 888 / 1082 / 1476 | 5.1 | 42 / 40 / 58 | 40/40/38 of 40 | 2.5 | 104 (min 71) | 1.00 |
+
+| player | diff | patch | gust drops % | |Δx| land vs intent: calm / gust (u) | merge≤2 s rate: calm / gust |
+|---|---|---|---|---|---|
+| spam-center | easy | none | 27 | 0.02 / 0.35 | 73 % / 70 % |
+| spam-center | normal | none | 26 | 0.02 / 0.44 | 68 % / 61 % |
+| spam-wall | easy | none | 27 | 0.11 / 0.18 | 75 % / 74 % |
+| spam-wall | normal | none | 27 | 0.14 / 0.25 | 68 % / 68 % |
+| spam-alt | easy | none | 27 | 7.66 / 7.60 | 61 % / 61 % |
+| spam-alt | normal | none | 27 | 7.54 / 7.39 | 55 % / 55 % |
+| spam-alt-aim | easy | none | 29 | 0.00 / 0.20 | 43 % / 47 % |
+| spam-alt-aim | normal | none | 28 | 0.01 / 0.28 | 40 % / 44 % |
+| bot1-fast | easy | none | 29 | 0.07 / 0.19 | 52 % / 54 % |
+| bot1-fast | normal | none | 29 | 0.09 / 0.24 | 50 % / 50 % |
+
+| player | diff | patch | rescues | drops survived after 1st rescue p50 | s from last rescue to game over p50 | rescue removed the biggest egg % | removed kinds p50 (max) | bad | max overlap u | stuck-falling | missed merges | spawn overlaps | max pile top u |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| spam-center | easy | none | 80 | 87 | 7 | 18 | 3 (6) | 0 | 0.178 | 0 | 0 | 49 | 18.82 |
+| spam-center | normal | none | 40 | 15 | 8 | 18 | 3 (6) | 0 | 0.374 | 0 | 0 | 41 | 18.82 |
+| spam-wall | easy | none | 80 | 39 | 10 | 1 | 3 (6) | 0 | 0.137 | 0 | 0 | 44 | 18.71 |
+| spam-wall | normal | none | 40 | 16 | 9 | 5 | 3 (7) | 0 | 0.132 | 0 | 0 | 20 | 19.13 |
+| spam-alt | easy | none | 80 | 35 | 6 | 0 | 2 (6) | 0 | 0.095 | 0 | 0 | 9 | 17.93 |
+| spam-alt | normal | none | 40 | 14 | 7 | 0 | 3 (7) | 0 | 0.079 | 0 | 0 | 9 | 18.24 |
+| spam-alt-aim | easy | none | 80 | 39 | 14 | 0 | 2 (6) | 0 | 0.085 | 0 | 0 | 10 | 17.81 |
+| spam-alt-aim | normal | none | 40 | 12 | 17 | 0 | 3 (5) | 0 | 0.127 | 0 | 0 | 2 | 18.13 |
+| bot1-fast | easy | none | 80 | 32 | 23 | 3 | 3 (7) | 0 | 0.127 | 0 | 0 | 3 | 12.42 |
+| bot1-fast | normal | none | 40 | 12 | 19 | 3 | 3 (6) | 0 | 0.303 | 0 | 0 | 3 | 11.70 |
+
+(56.0 s, 40 jobs)

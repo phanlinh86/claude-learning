@@ -1,0 +1,48 @@
+Mossy's Egg Grove deep playtest — 40 games per row, cap 1500 s, frame 1/60 s
+
+| player | diff | patch | game s p10/p50/p90 | drops p50 | score p10/p50/p90 | 1st merge s | s per season spring/summer/autumn | reached Su/A/W | warns/game | drops to 1st warn p50 | rescues/game |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| ignorer1 | normal | none | 199 / 253 / 348 | 125 | 771 / 1105 / 1695 | 6.1 | 54 / 55 / 79 | 40/40/34 of 40 | 2.3 | 106 (min 72) | 1.00 |
+| ignorer1 | hard | none | 142 / 170 / 195 | 84 | 596 / 752 / 862 | 6.1 | 59 / 60 / 72 | 40/39/1 of 40 | 1.4 | 81 (min 59) | 0.00 |
+| aware1 | normal | none | 198 / 256 / 305 | 127 | 832 / 1119 / 1366 | 6.1 | 53 / 52 / 76 | 40/40/37 of 40 | 2.5 | 107 (min 76) | 1.00 |
+| aware1 | hard | none | 136 / 172 / 212 | 85 | 515 / 721 / 1025 | 6.1 | 60 / 57 / 91 | 40/38/6 of 40 | 1.2 | 83 (min 52) | 0.00 |
+| wise1 | normal | none | 198 / 251 / 414 | 124 | 752 / 1101 / 2143 | 6.1 | 53 / 52 / 75 | 40/40/35 of 40 | 2.4 | 102 (min 76) | 1.00 |
+| wise1 | hard | none | 136 / 172 / 219 | 85 | 515 / 740 / 1040 | 6.1 | 60 / 58 / 91 | 40/38/6 of 40 | 1.2 | 84 (min 52) | 0.00 |
+| ignorer1 | normal | nowind | 214 / 253 / 439 | 125 | 814 / 1135 / 2299 | 6.1 | 55 / 51 / 77 | 40/40/36 of 40 | 2.6 | 109 (min 74) | 1.00 |
+| ignorer1 | easy | nowind | 318 / 400 / 644 | 198 | 1165 / 1612 / 2892 | 6.1 | 46 / 48 / 66 | 40/40/40 of 40 | 3.8 | 155 (min 97) | 2.00 |
+| aware1 | normal | nowind | 214 / 253 / 439 | 125 | 814 / 1135 / 2299 | 6.1 | 55 / 51 / 77 | 40/40/36 of 40 | 2.6 | 109 (min 74) | 1.00 |
+| aware1 | easy | nowind | 318 / 400 / 644 | 198 | 1165 / 1612 / 2892 | 6.1 | 46 / 48 / 66 | 40/40/40 of 40 | 3.8 | 155 (min 97) | 2.00 |
+| kid-tap | normal | nowind | 242 / 285 / 346 | 94 | 512 / 708 / 970 | 12.7 | 89 / 81 / 126 | 40/39/12 of 40 | 2.3 | 78 (min 58) | 1.00 |
+| kid-tap | easy | nowind | 386 / 436 / 545 | 145 | 868 / 1052 / 1514 | 12.8 | 76 / 68 / 112 | 40/40/40 of 40 | 3.7 | 110 (min 83) | 2.00 |
+
+| player | diff | patch | gust drops % | |Δx| land vs intent: calm / gust (u) | merge≤2 s rate: calm / gust |
+|---|---|---|---|---|---|
+| ignorer1 | normal | none | 29 | 0.03 / 0.68 | 49 % / 47 % |
+| ignorer1 | hard | none | 29 | 0.04 / 0.78 | 48 % / 43 % |
+| aware1 | normal | none | 29 | 0.10 / 0.32 | 49 % / 49 % |
+| aware1 | hard | none | 29 | 0.12 / 0.39 | 46 % / 47 % |
+| wise1 | normal | none | 29 | 0.10 / 0.33 | 49 % / 48 % |
+| wise1 | hard | none | 29 | 0.12 / 0.38 | 46 % / 47 % |
+| ignorer1 | normal | nowind | 0 | 0.02 / — | 48 % / — % |
+| ignorer1 | easy | nowind | 0 | 0.02 / — | 50 % / — % |
+| aware1 | normal | nowind | 0 | 0.02 / — | 48 % / — % |
+| aware1 | easy | nowind | 0 | 0.02 / — | 50 % / — % |
+| kid-tap | normal | nowind | 0 | 0.41 / — | 40 % / — % |
+| kid-tap | easy | nowind | 0 | 0.37 / — | 42 % / — % |
+
+| player | diff | patch | rescues | drops survived after 1st rescue p50 | s from last rescue to game over p50 | rescue removed the biggest egg % | removed kinds p50 (max) | bad | max overlap u | stuck-falling | missed merges | spawn overlaps | max pile top u |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| ignorer1 | normal | none | 40 | 15 | 30 | 0 | 3 (7) | 0 | 0.123 | 0 | 0 | 3 | 12.26 |
+| ignorer1 | hard | none | 0 | — | — | — | — (—) | 0 | 0.608 | 0 | 0 | 0 | 12.22 |
+| aware1 | normal | none | 40 | 14 | 28 | 3 | 3 (7) | 0 | 0.065 | 0 | 0 | 1 | 11.98 |
+| aware1 | hard | none | 0 | — | — | — | — (—) | 0 | 0.089 | 0 | 0 | 1 | 11.96 |
+| wise1 | normal | none | 40 | 13 | 27 | 5 | 3 (8) | 0 | 0.065 | 0 | 0 | 1 | 11.98 |
+| wise1 | hard | none | 0 | — | — | — | — (—) | 0 | 0.069 | 0 | 0 | 1 | 11.96 |
+| ignorer1 | normal | nowind | 40 | 13 | 26 | 3 | 3 (7) | 0 | 0.195 | 0 | 0 | 1 | 11.81 |
+| ignorer1 | easy | nowind | 80 | 37 | 24 | 0 | 3 (6) | 0 | 0.158 | 0 | 0 | 0 | 11.29 |
+| aware1 | normal | nowind | 40 | 13 | 26 | 3 | 3 (7) | 0 | 0.195 | 0 | 0 | 1 | 11.81 |
+| aware1 | easy | nowind | 80 | 37 | 24 | 0 | 3 (6) | 0 | 0.158 | 0 | 0 | 0 | 11.29 |
+| kid-tap | normal | nowind | 40 | 12 | 35 | 5 | 3 (7) | 0 | 0.096 | 0 | 0 | 1 | 15.63 |
+| kid-tap | easy | nowind | 80 | 29 | 38 | 4 | 3 (7) | 0 | 0.118 | 0 | 0 | 0 | 17.93 |
+
+(139.4 s, 48 jobs)

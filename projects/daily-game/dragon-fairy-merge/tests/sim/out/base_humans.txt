@@ -1,0 +1,42 @@
+Mossy's Egg Grove deep playtest — 40 games per row, cap 1500 s, frame 1/60 s
+
+| player | diff | patch | game s p10/p50/p90 | drops p50 | score p10/p50/p90 | 1st merge s | s per season spring/summer/autumn | reached Su/A/W | warns/game | drops to 1st warn p50 | rescues/game |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| kid-tap | easy | none | 373 / 447 / 575 | 148 | 879 / 1135 / 1597 | 12.8 | 77 / 73 / 98 | 40/40/40 of 40 | 3.6 | 116 (min 72) | 2.00 |
+| kid-tap | normal | none | 236 / 283 / 350 | 95 | 450 / 716 / 1031 | 12.3 | 91 / 82 / 109 | 40/39/12 of 40 | 2.5 | 83 (min 59) | 1.00 |
+| kid-drag | easy | none | 372 / 498 / 592 | 157 | 767 / 1151 / 1536 | 13.4 | 82 / 76 / 109 | 40/40/40 of 40 | 3.3 | 117 (min 85) | 2.00 |
+| kid-drag | normal | none | 256 / 312 / 372 | 97 | 504 / 708 / 994 | 13.4 | 92 / 86 / 119 | 40/38/12 of 40 | 2.2 | 81 (min 52) | 1.00 |
+| adult-casual | easy | none | 353 / 415 / 659 | 187 | 1220 / 1539 / 2723 | 6.7 | 51 / 51 / 73 | 40/40/40 of 40 | 3.6 | 152 (min 98) | 2.00 |
+| adult-casual | normal | none | 213 / 278 / 362 | 125 | 741 / 1097 / 1552 | 6.6 | 60 / 57 / 81 | 40/39/33 of 40 | 2.5 | 106 (min 64) | 1.00 |
+| adult-casual | hard | none | 147 / 178 / 242 | 80 | 464 / 736 / 1041 | 6.6 | 64 / 66 / 82 | 40/33/5 of 40 | 1.2 | 79 (min 60) | 0.00 |
+| adult-aware | easy | none | 331 / 428 / 667 | 193 | 1149 / 1578 / 2767 | 6.7 | 51 / 51 / 75 | 40/40/40 of 40 | 3.7 | 150 (min 106) | 2.00 |
+| adult-aware | normal | none | 211 / 260 / 415 | 117 | 715 / 998 / 1829 | 6.6 | 58 / 60 / 92 | 40/40/29 of 40 | 2.4 | 97 (min 70) | 1.00 |
+| adult-aware | hard | none | 133 / 173 / 217 | 78 | 441 / 607 / 907 | 6.6 | 66 / 66 / 82 | 40/33/3 of 40 | 1.1 | 77 (min 51) | 0.00 |
+
+| player | diff | patch | gust drops % | |Δx| land vs intent: calm / gust (u) | merge≤2 s rate: calm / gust |
+|---|---|---|---|---|---|
+| kid-tap | easy | none | 29 | 0.38 / 0.56 | 41 % / 43 % |
+| kid-tap | normal | none | 29 | 0.41 / 0.70 | 39 % / 42 % |
+| kid-drag | easy | none | 30 | 0.07 / 0.45 | 41 % / 43 % |
+| kid-drag | normal | none | 30 | 0.08 / 0.64 | 39 % / 40 % |
+| adult-casual | easy | none | 29 | 0.47 / 0.74 | 51 % / 48 % |
+| adult-casual | normal | none | 30 | 0.46 / 0.90 | 50 % / 45 % |
+| adult-casual | hard | none | 30 | 0.47 / 1.03 | 46 % / 44 % |
+| adult-aware | easy | none | 29 | 0.50 / 0.60 | 50 % / 49 % |
+| adult-aware | normal | none | 29 | 0.53 / 0.67 | 48 % / 47 % |
+| adult-aware | hard | none | 29 | 0.57 / 0.74 | 46 % / 45 % |
+
+| player | diff | patch | rescues | drops survived after 1st rescue p50 | s from last rescue to game over p50 | rescue removed the biggest egg % | removed kinds p50 (max) | bad | max overlap u | stuck-falling | missed merges | spawn overlaps | max pile top u |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| kid-tap | easy | none | 80 | 27 | 32 | 1 | 2 (7) | 0 | 0.225 | 0 | 0 | 1 | 13.02 |
+| kid-tap | normal | none | 40 | 11 | 31 | 3 | 3 (6) | 0 | 0.090 | 0 | 0 | 0 | 14.74 |
+| kid-drag | easy | none | 80 | 28 | 39 | 0 | 2 (6) | 0 | 0.135 | 0 | 0 | 0 | 11.44 |
+| kid-drag | normal | none | 40 | 12 | 38 | 0 | 3 (6) | 0 | 0.205 | 0 | 0 | 1 | 12.97 |
+| adult-casual | easy | none | 80 | 38 | 38 | 1 | 3 (7) | 0 | 0.131 | 0 | 0 | 1 | 12.13 |
+| adult-casual | normal | none | 40 | 13 | 30 | 3 | 3 (7) | 0 | 0.161 | 0 | 0 | 1 | 16.51 |
+| adult-casual | hard | none | 0 | — | — | — | — (—) | 0 | 0.188 | 0 | 0 | 0 | 12.53 |
+| adult-aware | easy | none | 80 | 35 | 33 | 0 | 3 (7) | 0 | 0.138 | 0 | 0 | 2 | 12.13 |
+| adult-aware | normal | none | 40 | 12 | 27 | 0 | 3 (7) | 0 | 0.175 | 0 | 0 | 2 | 12.33 |
+| adult-aware | hard | none | 0 | — | — | — | — (—) | 0 | 0.102 | 0 | 0 | 1 | 12.51 |
+
+(128.5 s, 40 jobs)
