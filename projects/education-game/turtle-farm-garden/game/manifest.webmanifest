@@ -1,0 +1,16 @@
+{
+  "name": "Tumi's Flower Farm · Nông Trại Hoa Của Rùa Tumi",
+  "short_name": "Flower Farm",
+  "description": "Grow a flower garden with Tumi the baby turtle: trace the dots with your finger — colours, shapes, counting carrots, letters, farm animals. English & Vietnamese.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#EAF6F4",
+  "theme_color": "#EAF6F4",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

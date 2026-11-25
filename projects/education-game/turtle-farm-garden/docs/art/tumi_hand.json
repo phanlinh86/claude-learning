@@ -1,0 +1,15 @@
+{
+ "_about": "Tumi right (near) flipper grip point per frame, [x, y] in the 0 0 300 300 viewBox (feet anchor 150,292): the watering can is held there by its handle. _nozzle = spout direction in degrees, canvas convention (0 = right, 90 = straight down), from the grip towards the spout tip. Flipper tip radius ~19 px at viewBox scale.",
+ "idle": [221, 253],
+ "blink": [221, 253],
+ "talk": [231, 247],
+ "happy": [243, 232],
+ "cheer": [236, 173],
+ "think": [174, 190],
+ "oops": [245, 222],
+ "wave": [227, 174],
+ "pipe": [247, 214],
+ "point": [240, 187],
+ "title": [227, 174],
+ "_nozzle": {"idle": 55, "blink": 55, "talk": 52, "happy": 60, "cheer": 45, "think": 100, "oops": 65, "wave": 40, "pipe": 55, "point": 30, "title": 40}
+}
