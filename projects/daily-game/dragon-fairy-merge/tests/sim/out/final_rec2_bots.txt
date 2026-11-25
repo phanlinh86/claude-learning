@@ -1,0 +1,48 @@
+Mossy's Egg Grove deep playtest — 40 games per row, cap 1500 s, frame 1/60 s
+
+| player | diff | patch | game s p10/p50/p90 | drops p50 | score p10/p50/p90 | 1st merge s | s per season spring/summer/autumn | reached Su/A/W | warns/game | drops to 1st warn p50 | rescues/game |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| bot1 | easy | rec2 | 329 / 402 / 633 | 198 | 1268 / 1600 / 2875 | 6.1 | 45 / 48 / 63 | 40/40/40 of 40 | 3.6 | 154 (min 106) | 2.00 |
+| bot1 | normal | rec2 | 221 / 258 / 426 | 126 | 907 / 1110 / 2122 | 6.1 | 51 / 53 / 67 | 40/40/39 of 40 | 2.4 | 111 (min 79) | 1.00 |
+| bot1 | hard | rec2 | 133 / 162 / 204 | 80 | 473 / 690 / 1011 | 6.1 | 57 / 59 / 65 | 40/35/7 of 40 | 1.1 | 79 (min 59) | 0.00 |
+| bot0.5 | easy | rec2 | 260 / 334 / 407 | 163 | 864 / 1289 / 1535 | 6.6 | 49 / 50 / 62 | 40/40/40 of 40 | 3.4 | 118 (min 93) | 2.00 |
+| bot0.5 | normal | rec2 | 178 / 219 / 267 | 107 | 618 / 858 / 1234 | 6.4 | 60 / 54 / 72 | 40/40/24 of 40 | 2.2 | 88 (min 56) | 1.00 |
+| bot0.5 | hard | rec2 | 127 / 151 / 190 | 74 | 411 / 571 / 841 | 6.8 | 65 / 60 / 69 | 40/28/2 of 40 | 1.2 | 70 (min 48) | 0.00 |
+| bot0.2 | easy | rec2 | 244 / 319 / 400 | 155 | 784 / 1153 / 1545 | 8.1 | 52 / 49 / 67 | 40/40/40 of 40 | 3.8 | 115 (min 75) | 2.00 |
+| bot0.2 | normal | rec2 | 169 / 213 / 263 | 101 | 590 / 757 / 1069 | 8.1 | 58 / 55 / 67 | 40/40/20 of 40 | 2.6 | 83 (min 62) | 1.00 |
+| bot0.2 | hard | rec2 | 126 / 150 / 184 | 73 | 389 / 545 / 735 | 8.1 | 65 / 61 / — | 40/29/0 of 40 | 1.2 | 71 (min 47) | 0.00 |
+| adult-casual | easy | rec2 | 353 / 457 / 801 | 206 | 1256 / 1711 / 3495 | 6.8 | 52 / 51 / 62 | 40/40/40 of 40 | 4.2 | 153 (min 102) | 2.00 |
+| adult-casual | normal | rec2 | 219 / 255 / 321 | 115 | 735 / 1001 / 1317 | 6.7 | 58 / 64 / 73 | 40/40/35 of 40 | 2.5 | 98 (min 63) | 1.00 |
+| adult-casual | hard | rec2 | 149 / 180 / 229 | 81 | 502 / 677 / 1042 | 6.7 | 64 / 65 / 59 | 40/37/5 of 40 | 1.1 | 80 (min 54) | 0.00 |
+
+| player | diff | patch | gust drops % | |Δx| land vs intent: calm / gust (u) | merge≤2 s rate: calm / gust |
+|---|---|---|---|---|---|
+| bot1 | easy | rec2 | 29 | 0.07 / 0.21 | 50 % / 49 % |
+| bot1 | normal | rec2 | 29 | 0.09 / 0.28 | 49 % / 48 % |
+| bot1 | hard | rec2 | 29 | 0.10 / 0.33 | 47 % / 47 % |
+| bot0.5 | easy | rec2 | 29 | 1.36 / 1.36 | 47 % / 49 % |
+| bot0.5 | normal | rec2 | 29 | 1.35 / 1.30 | 44 % / 45 % |
+| bot0.5 | hard | rec2 | 28 | 1.34 / 1.37 | 42 % / 46 % |
+| bot0.2 | easy | rec2 | 29 | 1.96 / 1.87 | 45 % / 45 % |
+| bot0.2 | normal | rec2 | 29 | 1.98 / 1.87 | 42 % / 43 % |
+| bot0.2 | hard | rec2 | 28 | 1.94 / 1.80 | 41 % / 41 % |
+| adult-casual | easy | rec2 | 29 | 0.47 / 0.81 | 51 % / 49 % |
+| adult-casual | normal | rec2 | 30 | 0.47 / 0.90 | 48 % / 47 % |
+| adult-casual | hard | rec2 | 29 | 0.47 / 0.98 | 47 % / 44 % |
+
+| player | diff | patch | rescues | drops survived after 1st rescue p50 | s from last rescue to game over p50 | rescue removed the biggest egg % | removed kinds p50 (max) | bad | max overlap u | stuck-falling | missed merges | spawn overlaps | max pile top u | games pile > wall 11.2 / > 13.5 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| bot1 | easy | rec2 | 80 | 34 | 28 | 0 | 3 (7) | 0 | 0.096 | 0 | 0 | 2 | 12.09 | 8 / 0 |
+| bot1 | normal | rec2 | 40 | 17 | 35 | 3 | 3 (7) | 0 | 0.198 | 0 | 0 | 0 | 12.37 | 10 / 0 |
+| bot1 | hard | rec2 | 0 | — | — | — | — (—) | 0 | 0.114 | 0 | 0 | 1 | 12.09 | 8 / 0 |
+| bot0.5 | easy | rec2 | 80 | 29 | 28 | 1 | 3 (7) | 0 | 0.118 | 0 | 0 | 1 | 12.11 | 33 / 0 |
+| bot0.5 | normal | rec2 | 40 | 10 | 21 | 0 | 3 (7) | 0 | 0.207 | 0 | 0 | 1 | 12.33 | 29 / 0 |
+| bot0.5 | hard | rec2 | 0 | — | — | — | — (—) | 0 | 0.179 | 0 | 0 | 0 | 12.53 | 29 / 0 |
+| bot0.2 | easy | rec2 | 80 | 31 | 28 | 0 | 3 (6) | 0 | 0.200 | 0 | 0 | 1 | 12.14 | 40 / 0 |
+| bot0.2 | normal | rec2 | 40 | 11 | 23 | 8 | 3 (7) | 0 | 0.103 | 0 | 0 | 1 | 12.26 | 36 / 0 |
+| bot0.2 | hard | rec2 | 0 | — | — | — | — (—) | 0 | 0.128 | 0 | 0 | 0 | 12.40 | 37 / 0 |
+| adult-casual | easy | rec2 | 80 | 46 | 30 | 1 | 3 (7) | 0 | 0.326 | 0 | 0 | 1 | 12.23 | 34 / 0 |
+| adult-casual | normal | rec2 | 40 | 14 | 31 | 0 | 3 (6) | 0 | 0.202 | 0 | 0 | 1 | 12.33 | 26 / 0 |
+| adult-casual | hard | rec2 | 0 | — | — | — | — (—) | 0 | 0.117 | 0 | 0 | 0 | 12.32 | 28 / 0 |
+
+(123.9 s, 48 jobs)

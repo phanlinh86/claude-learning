@@ -1,0 +1,48 @@
+Mossy's Egg Grove deep playtest — 40 games per row, cap 1500 s, frame 1/60 s
+
+| player | diff | patch | game s p10/p50/p90 | drops p50 | score p10/p50/p90 | 1st merge s | s per season spring/summer/autumn | reached Su/A/W | warns/game | drops to 1st warn p50 | rescues/game |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| bot1 | easy | none | 289 / 390 / 622 | 193 | 1091 / 1567 / 2864 | 6.1 | 46 / 44 / 69 | 40/40/40 of 40 | 3.6 | 144 (min 111) | 2.00 |
+| bot1 | normal | none | 198 / 256 / 305 | 127 | 832 / 1119 / 1366 | 6.1 | 53 / 52 / 76 | 40/40/37 of 40 | 2.5 | 107 (min 76) | 1.00 |
+| bot1 | hard | none | 136 / 172 / 212 | 85 | 515 / 721 / 1025 | 6.1 | 60 / 57 / 91 | 40/38/6 of 40 | 1.2 | 83 (min 52) | 0.00 |
+| bot0.8 | easy | none | 297 / 356 / 592 | 176 | 1070 / 1391 / 2686 | 6.4 | 46 / 47 / 67 | 40/40/40 of 40 | 3.7 | 139 (min 105) | 2.00 |
+| bot0.8 | normal | none | 193 / 251 / 307 | 124 | 732 / 1065 / 1356 | 6.3 | 53 / 56 / 78 | 40/40/31 of 40 | 2.5 | 102 (min 80) | 1.00 |
+| bot0.8 | hard | none | 132 / 168 / 203 | 83 | 495 / 695 / 946 | 6.3 | 58 / 58 / 75 | 40/36/3 of 40 | 1.1 | 80 (min 51) | 0.00 |
+| bot0.5 | easy | none | 293 / 343 / 452 | 170 | 1075 / 1392 / 1865 | 6.9 | 49 / 47 / 69 | 40/40/40 of 40 | 3.6 | 135 (min 82) | 2.00 |
+| bot0.5 | normal | none | 178 / 217 / 275 | 108 | 600 / 879 / 1192 | 6.9 | 57 / 51 / 77 | 40/40/23 of 40 | 2.6 | 90 (min 53) | 1.00 |
+| bot0.5 | hard | none | 116 / 156 / 196 | 77 | 384 / 615 / 955 | 7.3 | 64 / 66 / 68 | 40/26/3 of 40 | 1.2 | 71 (min 49) | 0.00 |
+| bot0.2 | easy | none | 267 / 315 / 393 | 156 | 911 / 1220 / 1606 | 8.1 | 50 / 49 / 67 | 40/40/40 of 40 | 3.4 | 125 (min 83) | 2.00 |
+| bot0.2 | normal | none | 176 / 212 / 267 | 105 | 635 / 834 / 1142 | 8.1 | 56 / 55 / 84 | 40/40/22 of 40 | 2.5 | 87 (min 57) | 1.00 |
+| bot0.2 | hard | none | 111 / 144 / 186 | 71 | 343 / 523 / 838 | 8.2 | 65 / 59 / — | 40/25/0 of 40 | 1.1 | 69 (min 47) | 0.00 |
+
+| player | diff | patch | gust drops % | |Δx| land vs intent: calm / gust (u) | merge≤2 s rate: calm / gust |
+|---|---|---|---|---|---|
+| bot1 | easy | none | 29 | 0.08 / 0.24 | 50 % / 50 % |
+| bot1 | normal | none | 29 | 0.10 / 0.32 | 49 % / 49 % |
+| bot1 | hard | none | 29 | 0.12 / 0.39 | 46 % / 47 % |
+| bot0.8 | easy | none | 29 | 0.65 / 0.72 | 50 % / 48 % |
+| bot0.8 | normal | none | 30 | 0.66 / 0.76 | 48 % / 47 % |
+| bot0.8 | hard | none | 29 | 0.66 / 0.77 | 46 % / 45 % |
+| bot0.5 | easy | none | 29 | 1.37 / 1.31 | 47 % / 49 % |
+| bot0.5 | normal | none | 29 | 1.37 / 1.36 | 47 % / 43 % |
+| bot0.5 | hard | none | 29 | 1.40 / 1.31 | 43 % / 45 % |
+| bot0.2 | easy | none | 29 | 1.97 / 1.85 | 44 % / 44 % |
+| bot0.2 | normal | none | 29 | 1.97 / 1.84 | 42 % / 45 % |
+| bot0.2 | hard | none | 29 | 1.97 / 1.81 | 40 % / 42 % |
+
+| player | diff | patch | rescues | drops survived after 1st rescue p50 | s from last rescue to game over p50 | rescue removed the biggest egg % | removed kinds p50 (max) | bad | max overlap u | stuck-falling | missed merges | spawn overlaps | max pile top u |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| bot1 | easy | none | 80 | 39 | 32 | 0 | 3 (7) | 0 | 0.205 | 0 | 0 | 1 | 11.82 |
+| bot1 | normal | none | 40 | 14 | 28 | 3 | 3 (7) | 0 | 0.065 | 0 | 0 | 1 | 11.98 |
+| bot1 | hard | none | 0 | — | — | — | — (—) | 0 | 0.089 | 0 | 0 | 1 | 11.96 |
+| bot0.8 | easy | none | 80 | 30 | 26 | 1 | 3 (8) | 0 | 0.123 | 0 | 0 | 0 | 12.06 |
+| bot0.8 | normal | none | 40 | 14 | 30 | 0 | 3 (7) | 0 | 0.156 | 0 | 0 | 1 | 17.49 |
+| bot0.8 | hard | none | 0 | — | — | — | — (—) | 0 | 0.186 | 0 | 0 | 0 | 12.09 |
+| bot0.5 | easy | none | 80 | 27 | 25 | 0 | 3 (6) | 0 | 0.104 | 0 | 0 | 3 | 13.08 |
+| bot0.5 | normal | none | 40 | 11 | 21 | 0 | 3 (7) | 0 | 0.232 | 0 | 0 | 0 | 18.05 |
+| bot0.5 | hard | none | 0 | — | — | — | — (—) | 0 | 0.379 | 0 | 0 | 0 | 14.10 |
+| bot0.2 | easy | none | 80 | 28 | 24 | 1 | 3 (6) | 0 | 0.119 | 0 | 0 | 1 | 12.14 |
+| bot0.2 | normal | none | 40 | 12 | 24 | 3 | 3 (7) | 0 | 0.110 | 0 | 0 | 0 | 12.34 |
+| bot0.2 | hard | none | 0 | — | — | — | — (—) | 0 | 0.168 | 0 | 0 | 0 | 12.53 |
+
+(163.3 s, 48 jobs)

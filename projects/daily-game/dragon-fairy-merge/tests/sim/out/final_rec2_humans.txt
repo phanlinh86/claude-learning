@@ -1,0 +1,48 @@
+Mossy's Egg Grove deep playtest — 40 games per row, cap 1500 s, frame 1/60 s
+
+| player | diff | patch | game s p10/p50/p90 | drops p50 | score p10/p50/p90 | 1st merge s | s per season spring/summer/autumn | reached Su/A/W | warns/game | drops to 1st warn p50 | rescues/game |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| kid-tap | easy | rec2 | 384 / 465 / 584 | 144 | 779 / 1099 / 1484 | 12.7 | 83 / 74 / 96 | 40/40/39 of 40 | 3.4 | 112 (min 81) | 2.00 |
+| kid-tap | normal | rec2 | 244 / 294 / 366 | 92 | 478 / 671 / 1015 | 12.3 | 95 / 94 / 91 | 40/39/9 of 40 | 2.3 | 79 (min 53) | 1.00 |
+| kid-drag | easy | rec2 | 382 / 469 / 617 | 147 | 761 / 1106 / 1540 | 13.4 | 82 / 76 / 101 | 40/40/40 of 40 | 3.5 | 117 (min 85) | 2.00 |
+| kid-drag | normal | rec2 | 256 / 312 / 386 | 97 | 504 / 708 / 1039 | 13.4 | 92 / 86 / 100 | 40/38/15 of 40 | 2.3 | 81 (min 52) | 1.00 |
+| spam-center | easy | rec2 | 112 / 141 / 162 | 167 | 974 / 1384 / 1735 | 2.5 | 20 / 19 / 23 | 40/40/40 of 40 | 5.0 | 116 (min 12) | 2.00 |
+| spam-center | normal | rec2 | 73 / 89 / 109 | 105 | 644 / 853 / 1166 | 1.8 | 23 / 22 / 28 | 40/40/28 of 40 | 2.9 | 77 (min 11) | 1.00 |
+| spam-wall | easy | rec2 | 87 / 101 / 119 | 115 | 641 / 875 / 1100 | 2.7 | 19 / 18 / 24 | 40/40/37 of 40 | 3.6 | 70 (min 35) | 2.00 |
+| spam-wall | normal | rec2 | 53 / 72 / 93 | 82 | 378 / 639 / 979 | 2.7 | 21 / 20 / 27 | 40/35/13 of 40 | 2.6 | 57 (min 29) | 1.00 |
+| spam-alt | easy | rec2 | 99 / 110 / 133 | 135 | 858 / 1049 / 1412 | 4.3 | 20 / 18 / 23 | 40/40/40 of 40 | 4.4 | 94 (min 59) | 2.00 |
+| spam-alt | normal | rec2 | 67 / 80 / 97 | 99 | 577 / 770 / 1088 | 4.3 | 24 / 22 / 26 | 40/40/22 of 40 | 2.9 | 76 (min 54) | 1.00 |
+| bot1-fast | easy | rec2 | 283 / 344 / 396 | 187 | 1156 / 1508 / 1850 | 5.7 | 40 / 41 / 53 | 40/40/40 of 40 | 3.8 | 152 (min 110) | 2.00 |
+| bot1-fast | normal | rec2 | 196 / 240 / 260 | 131 | 861 / 1148 / 1304 | 5.7 | 47 / 47 / 63 | 40/40/39 of 40 | 2.6 | 107 (min 81) | 1.00 |
+
+| player | diff | patch | gust drops % | |Δx| land vs intent: calm / gust (u) | merge≤2 s rate: calm / gust |
+|---|---|---|---|---|---|
+| kid-tap | easy | rec2 | 29 | 0.07 / 0.44 | 41 % / 43 % |
+| kid-tap | normal | rec2 | 29 | 0.08 / 0.62 | 39 % / 40 % |
+| kid-drag | easy | rec2 | 30 | 0.07 / 0.45 | 41 % / 42 % |
+| kid-drag | normal | rec2 | 30 | 0.08 / 0.65 | 39 % / 41 % |
+| spam-center | easy | rec2 | 28 | 0.01 / 0.39 | 64 % / 63 % |
+| spam-center | normal | rec2 | 27 | 0.01 / 0.51 | 59 % / 59 % |
+| spam-wall | easy | rec2 | 28 | 0.11 / 0.23 | 63 % / 62 % |
+| spam-wall | normal | rec2 | 27 | 0.15 / 0.33 | 58 % / 58 % |
+| spam-alt | easy | rec2 | 28 | 7.65 / 7.52 | 47 % / 48 % |
+| spam-alt | normal | rec2 | 27 | 7.52 / 7.30 | 42 % / 46 % |
+| bot1-fast | easy | rec2 | 29 | 0.07 / 0.17 | 50 % / 50 % |
+| bot1-fast | normal | rec2 | 29 | 0.09 / 0.23 | 48 % / 51 % |
+
+| player | diff | patch | rescues | drops survived after 1st rescue p50 | s from last rescue to game over p50 | rescue removed the biggest egg % | removed kinds p50 (max) | bad | max overlap u | stuck-falling | missed merges | spawn overlaps | max pile top u | games pile > wall 11.2 / > 13.5 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| kid-tap | easy | rec2 | 80 | 29 | 40 | 1 | 3 (6) | 0 | 0.433 | 0 | 0 | 0 | 11.76 | 17 / 0 |
+| kid-tap | normal | rec2 | 40 | 10 | 28 | 3 | 3 (7) | 0 | 0.072 | 0 | 0 | 0 | 11.93 | 14 / 0 |
+| kid-drag | easy | rec2 | 80 | 25 | 35 | 3 | 2 (7) | 0 | 0.135 | 0 | 0 | 0 | 11.40 | 8 / 0 |
+| kid-drag | normal | rec2 | 40 | 12 | 38 | 0 | 3 (6) | 0 | 0.205 | 0 | 0 | 2 | 11.89 | 21 / 0 |
+| spam-center | easy | rec2 | 80 | 38 | 11 | 10 | 3 (7) | 0 | 0.193 | 0 | 0 | 28 | 12.27 | 40 / 0 |
+| spam-center | normal | rec2 | 40 | 25 | 24 | 15 | 3 (7) | 0 | 0.230 | 0 | 0 | 13 | 12.81 | 39 / 0 |
+| spam-wall | easy | rec2 | 80 | 40 | 16 | 4 | 3 (6) | 0 | 0.190 | 0 | 0 | 13 | 12.14 | 40 / 0 |
+| spam-wall | normal | rec2 | 40 | 15 | 15 | 3 | 3 (6) | 0 | 0.106 | 0 | 0 | 7 | 12.34 | 40 / 0 |
+| spam-alt | easy | rec2 | 80 | 30 | 10 | 0 | 2 (6) | 0 | 0.116 | 0 | 0 | 9 | 12.14 | 40 / 0 |
+| spam-alt | normal | rec2 | 40 | 9 | 7 | 0 | 3 (6) | 0 | 0.134 | 0 | 0 | 9 | 12.29 | 40 / 0 |
+| bot1-fast | easy | rec2 | 80 | 34 | 31 | 0 | 3 (6) | 0 | 0.129 | 0 | 0 | 2 | 15.90 | 6 / 1 |
+| bot1-fast | normal | rec2 | 40 | 14 | 27 | 0 | 3 (6) | 0 | 0.128 | 0 | 0 | 0 | 11.79 | 8 / 0 |
+
+(108.3 s, 48 jobs)
