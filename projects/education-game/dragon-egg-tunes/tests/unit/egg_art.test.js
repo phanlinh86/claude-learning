@@ -66,7 +66,7 @@ for (const withP2D of [false, true]) {
   ok(A.SHELL.base === '#FFF4E0' && A.SHELL.shade === '#EAD9BC' && A.SHELL.dark === '#B4976E' && A.SHELL.speck === '#D9C3A0', tag + 'shell cream hex');
   ok(A.STRAW.base === '#E3C27E' && A.STRAW.dark === '#A88443' && A.STRAW.light === '#F5E2B0', tag + 'straw hex');
   ok(A.ROCK.base === '#9C8F86' && A.ROCK.dark === '#6E625C' && A.ROCK.light === '#BDB3AA' && A.MOSS.base === '#8DBF6A' && A.MOSS.dark === '#5E8F45', tag + 'rock / moss hex');
-  ok(A.VINE.base === '#6E9B52' && A.POD.base === '#F7EBD0' && A.POD.dark === '#9E8A63', tag + 'vine / pod hex');
+  ok(A.VINE.base === '#6E9B52' && A.POD.base === '#EFDDB2' && A.POD.dark === '#9E8A63', tag + 'vine / pod hex');
   { const answer = new Set(Object.values(A.PALETTE).flatMap(c => [c.base, c.dark, c.light]));
     [A.SHELL, A.STRAW, A.ROCK, A.MOSS, A.VINE, A.POD, A.VOLCANO, A.STONE].forEach(o => Object.values(o).forEach(v => ok(!answer.has(v), tag + 'neutral part never an answer colour ' + v))); }
   ['drawBeam', 'drawFire', 'drawCord', 'hookPoint', 'fireTop', 'drawDrum'].forEach(f => ok(A[f] === undefined, tag + 'old ' + f + ' absent'));

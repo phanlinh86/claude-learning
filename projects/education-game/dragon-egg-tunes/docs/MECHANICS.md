@@ -4,7 +4,7 @@ Owner: mechanics engineer. Code: `game/js/{rng,content,world,weather,bot}.js`. C
 drum game's mechanics (still true wherever this file says nothing new) are in `docs/drums_ref/MECHANICS.md`.
 Every number below is a key of `SE.CONFIG` (`game/js/world.js`) unless marked as a content table (`game/js/content.js`).
 
-Tests: `node tests/unit/run.js [name part]` (62 tests, ≈ 40 s): layout on 16 viewports × 5 ages + 400 fuzzed viewports, ≈ 90 000
+Tests: `node tests/unit/run.js [name part]` (62 tests, ≈ 36 s): layout on 16 viewports × 5 ages + 400 fuzzed viewports, ≈ 90 000
 generated rounds (independent matcher + contour check), bounce physics, judging, beat mode, song, surprises, rotation, **the demo**
 (timing / sparks / order, harmless taps, replay after a wrong, poke replay, beat demo, lanterns icon / hidden / now, rotation mid-demo),
 determinism, full bot sessions per age 3–7 × 6 viewports with demos. Most judging tests build their world with `demo: false`
@@ -22,20 +22,20 @@ sub-steps of `step` 1/120 s (dt ≤ `maxFrame` 1 s); every moving field has a `_
 `menu → intro (introTime 2.5) → round [enter → demo → play] → roundDone [song → out] → … → talk → levelDone (3.6) → … → sessionDone`.
 - **enter** as the drum game (islands puff in 0.1 s apart, eggs fall in 0.14 s apart, land, ask ≥ `enterMin` 1.2 s).
 - **demo** (`config.demo` true; `?nodemo=1` / tests: false → straight to play): Rio plays the tune from step `from` to the end.
-  - Timeline: `demoStart` → lead (`demoLead` 1.3 s for the round's first demo, `demoLeadReplay` 0.9 s otherwise) → note k arrives at
-    lead + `sparkTime` 0.45 + Σ gaps. Gap = `demoGap[age]` (3: 1.35 · 4: 1.25 · 5: 1.1 · 6: 0.95 · 7: 0.85) + `demoAnimalGap` 0.25 after an
+  - Timeline: `demoStart` → lead (`demoLead` 1.5 s for the round's first demo, `demoLeadReplay` 1.6 s otherwise: the replay line is longer) → note k arrives at
+    lead + `sparkTime` 0.45 + Σ gaps. Gap = `demoGap[age]` (3: 1.5 · 4: 1.4 · 5: 1.35 · 6: 1.05 · 7: 0.95) + `demoAnimalGap` 0.25 after an
     animal note; beat demo gap `demoBeatGap` 0.6. Each spark leaves `rioMouth()` sparkTime before its arrival (`spark` event), flies a
     parabola with its apex `sparkApex` 70 px above the higher end (never above ins.top + 8). On arrival: the egg is struck with kind
     `'demo'` (= song hop 26 px, ring 1, skin 1, animal eggs `sing`), the lantern swings, shows its icon 0.8 s (`demoShowIcon`) →
-    `demoNote` (beat: `demoCount`, card.lit = k). `demoTail` 0.5 s after the last arrival → `demoEnd` → phase `play` → `ask {afterDemo}`.
-  - Duration: first demo of n notes = 1.3 + 0.45 + (n − 1) × gap + 0.5 (age 4, 3 colours: 4.75 s); replay = 0.4 s shorter.
+    `demoNote` (beat: `demoCount`, card.lit = k). `demoTail` 0.9 s after the last arrival → `demoEnd` → phase `play` → `ask {afterDemo}`.
+  - Duration: first demo of n notes = 1.5 + 0.45 + (n − 1) × gap + 0.9 (age 4, 3 colours: 5.65 s); a replay starts 0.1 s later.
   - Rio: mood `beat` while a spark flies, `talk` 0.5 s after each arrival.
   - During the demo: `interactive` false, `answer()`, `hint()`, `prompt()` null; a touch on an egg = brush (`ring {brush}`), the sky =
     nothing (pointerDown → null), Rio = nothing; never soft / miss / hint / assist counts. A gesture that started in the demo stays a
     brush-only gesture after it (`g.demo`). Surprise timers and idle nudges pause (they run in `play`).
   - **Beat steps** each get their own demo: Rio sparks the big egg `need` times (card shows from the demo start, lights 1..need),
     `demoEnd` resets `card.lit` to 0 and the child counts (the card object is kept, no re-pop). The 2nd beat step's demo starts after
-    the 1st step's `stepDone` gap (lead 0.9).
+    the 1st step's `stepDone` gap (lead `demoLeadReplay`).
 - **play** as the drum game (judge the core, brush the rim; beat taps; dots count run; hint / assist / idle).
   - **Wrong** in a find step: `wrong {…, replay}` (misses++), then after `replayDelay` 1.6 s a **replay demo** from the current step
     (remaining notes only: `demoStart {replay: true}`) — unless the hint glow / hand is on (2nd no-progress → hint as before, then no
@@ -43,7 +43,7 @@ sub-steps of `step` 1/120 s (dt ≤ `maxFrame` 1 s); every moving field has a `_
   - **Poke Rio** in play with the step open: if ≥ `pokeReplayCooldown` 3 s since the last demo ended → `pokeRio {replay: true}` +
     replay demo from the current step (beat: the count restarts); else `pokeRio {replay: false}` (repeat the question).
 - **song / out / talk** unchanged (song wave left → right, volcano `cymbal` event 0.25 s after the last note, `songDone`, out).
-- Chapter: `roundsPerLevel` 4; after ≥ `chapterMinRounds` 2 rounds a chapter past `chapterTimeLimit` **70 s** (was 75) goes to Talk
+- Chapter: `roundsPerLevel` 4; after ≥ `chapterMinRounds` 2 rounds a chapter past `chapterTimeLimit` **68 s** (lead, after QA; was 75) goes to Talk
   time. A round starting later than `shortBudget` **[–, 26, 42, 56] s** (was 30 / 48 / 62) into the chapter is short (≤ 2 notes; beat
   1 step). Both tuned with the sim so a typical child's chapter stays ≤ 100 s (p90) with the demos.
 
@@ -68,15 +68,19 @@ w.demo      null | { from, i (notes arrived), n, list [{id, step, k}], t, gap, l
 w.sparks[]  { x, y, _px, _py, vx, vy (flight velocity → trail direction), t, life 0.45, alpha 0..1 (fade-in 0.08 s),
               color (answer colour NAME | null = gold — like lantern.color), toId, i, lantern }   (≤ 6; only in the demo)
               → EggArt.drawSpark(ctx, x, y, size, { color: color ? PALETTE[color].light : gold, alpha, t })
-w.lanterns[] { x, y, lit 0..1 (+_plit), color, swing (+_pswing), flash 0..1, icon: thing | null (beat mode → the card numeral),
+w.lanterns[] { x, y, lit 0..1 (+_plit), color, swing (+_pswing), flash 0..1, icon: thing (beat mode: {kind 'number', n: need}),
               hidden: bool (age ≥ hiddenFromAge 6, not lit, not just played in the demo), now 0..1 (+_pnow; eases at 8 /s to 1 for
               the pod being sparked in the demo and for the next note in play) } → EggArt.drawGarland(ctx, layout.garland, lanterns, opt)
 w.eggs[].sing 0..1   animal eggs: 1 on a demo / right / song strike, decays in singTime 0.9 s → drawEgg opt.sing = sing > 0
 w.card       + step (the beat step it belongs to); shown during the beat demo (lit = sparks so far), reset to lit 0 at demoEnd
 w.rio.mood   'beat' while a spark flies (rio_beat.svg = the blowing pose)
-w.rioMouth() { x: rio.x + rioMouthX 0.22 × rio.w, y: rio.y − rioMouthY 0.72 × rio.h }  (rio.x = centre, rio.y = feet, rio.w = 0.62 h;
+w.rioMouth() { x: rio.x + rioMouthX 0.416 × rio.w, y: rio.y − rioMouthY 0.579 × rio.h }  (rio.x = centre, rio.y = feet, rio.w = 0.62 h;
               tune the two fractions to the mouth point of rio_beat.svg in docs/art/rio_hand.json)
 ```
+layout.garland.podR  the drawn pod radius (lanternRDrawPhone 34 on phones / tall screens, else lanternRDraw 28; render passes it as
+              drawGarland opt.r). The layout reserves max(lanternDrop 46, podDropK 2.0 × podR) under the vine (`lanternBottom`); the egg
+              hit circles start ≥ noteRoom 14 below it and the card ≥ 8 below it. Landscape phones: the vine hangs garlandBelowLandPhone
+              12 px under the bubble (46 elsewhere, 84 in portrait) so a size round's big egg stays ≥ 70 css px on an iPhone 852×393.
 Everything else as `docs/drums_ref/MECHANICS.md` §3 (layout boxes, cushions = islands, garland = vine, cymbal = volcano, card = stone
 tablet, notes, lamb = baby triceratops, bird, fireflies, hint hand). `layout.rio` / `rioBox` / `cymbal` / `cymbalBox` unchanged.
 
@@ -88,7 +92,7 @@ tablet, notes, lamb = baby triceratops, bird, fireflies, hint hand). `layout.rio
 | **`spark`** | id, i, n, x, y (mouth), x1, y1 (target), T 0.45 | a spark leaves Rio's mouth (whoosh) |
 | **`demoNote`** | id, i (0-based in this demo), n, step, note, thing, color, lantern, nameKind, nameValue (find: the step's name; findAll: the egg's own), replay, x, y | a spark lands on a tune egg: it hops + sings, Rio names it |
 | **`demoCount`** | id, i (1-based), n (= need), step, note, replay, x, y | beat demo: a spark lands on the big egg, the card lights dot i (say the number) |
-| **`demoEnd`** | from, step, n, replay, mode, x, y (mouth) | 0.5 s after the last note; the `ask` follows in the same step |
+| **`demoEnd`** | from, step, n, replay, mode, x, y (mouth) | demoTail 0.9 s after the last note; the `ask` follows in the same step |
 | `ask` | + `echo: true`, `afterDemo` (the "Your turn!" ask), `replay` (the same step after a replay) | a step opens (first = the round's first ask only) |
 | `wrong` | + `replay` (true when Rio will replay in 1.6 s) | after its dull `ring` |
 | `pokeRio` | + `replay` (true: a replay demo starts right after); x, y = Rio's mouth | Rio tapped in play / enter |
@@ -104,10 +108,12 @@ order (any contour).
 `hint()` (null during the demo), **`demoInfo()`** → `{from, i, n, replay, mode, beatN}` | null, **`rioMouth()`** (`_rioMouth` alias kept).
 
 ## 7. SE.CONFIG keys added (demo)
-`demo true, demoLead 1.3, demoLeadReplay 0.9, sparkTime 0.45, sparkApex 70, sparkFade 0.08, demoGap {3: 1.35, 4: 1.25, 5: 1.1, 6: 0.95,
-7: 0.85}, demoAnimalGap 0.25, demoTail 0.5, demoBeatGap 0.6, replayDelay 1.6, pokeReplayCooldown 3, demoShowIcon 0.8, demoNowTail 0.35
-(the pod's "now" after its spark lands), lanternNowRate 8, hiddenFromAge 6, singTime 0.9, rioMouthX 0.22, rioMouthY 0.72`.
-Changed: `chapterTimeLimit 75 → 70`, `shortBudget [–, 30, 48, 62] → [–, 26, 42, 56]`.
+`demo true, demoLead 1.5, demoLeadReplay 1.6, sparkTime 0.45, sparkApex 70, sparkFade 0.08, demoGap {3: 1.5, 4: 1.4, 5: 1.35, 6: 1.05,
+7: 0.95}, demoAnimalGap 0.25, demoTail 0.9, demoBeatGap 0.6, replayDelay 1.6, pokeReplayCooldown 3, demoShowIcon 0.8, demoNowTail 0.35
+(the pod's "now" after its spark lands), lanternNowRate 8, hiddenFromAge 6, singTime 0.9, rioMouthX 0.416, rioMouthY 0.579` (the demo
+timings and mouth point were tuned by the lead after QA).
+Pods: `lanternDrop 46, lanternRDraw 28, lanternRDrawPhone 34, podDropK 2.0, garlandBelowLandPhone 12`.
+Changed: `introTime 3.5`, `chapterTimeLimit 75 → 68`, `shortBudget [–, 30, 48, 62] → [–, 26, 42, 56]`.
 
 ## 8. Weather (`SE.Weather`, API unchanged)
 Moods morning (valley mist, motes, a few crater embers) · noon (fern `leaf` particles on the breeze ×6, `butterfly` ×4, motes) ·
@@ -117,7 +123,11 @@ cymbal box top). Sky colours in `Weather.MOODS` belong to the environment artist
 ## 9. Bot (`SE.Bot`)
 As the drum bot, plus: **no touch while `world.phase === 'demo'`** (its think timer restarts after the demo).
 
-## 10. Playtest (`hs_playtest.js --n 20 --ages 3,4,5,7`, 8 models, 576 sessions, 5 viewports, EN / VI, final CONFIG)
+## 10. Playtest
+After the lead's QA tuning (demoLead 1.5 / replay 1.6, slower gaps, demoTail 0.9, chapter limit 68, bigger pods), `--n 10 --ages 3,4`
+with every model: exit 0, 0 stuck rounds / states / NaN / off screen, 0 judged events in demos; typical age 3 / 4 session 6.0 (6.6) /
+6.1 (6.3) min, chapter 87 [77–97] s, round 20.5 s, demo 4.7 / 4.9 s per round, replays 0.28 / 0.11 per round; slow3 6.8–7.1 (≤ 8.5) min.
+Earlier numbers (`hs_playtest.js --n 20 --ages 3,4,5,7`, 8 models, 576 sessions, before the lead's tuning):
 Exit 0: **0 failed / stuck rounds (> 120 s) / stuck states / NaN / eggs off screen; 0 judged events during demos** (spammer taps ≈ 16
 times per demo — all brushes).
 | model | age | session min (p90) | chapter s mean [p10–p90] | round s | demo s / round | replays / round | 3★ % |

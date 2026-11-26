@@ -20,7 +20,7 @@
   const GROUND_BOTTOM = { morning: '#C1C097', noon: '#AFBA85', sunset: '#BDB282', night: '#4D675E' };
   const ENV = { LAKE: { y0: 540, y1: 700 }, MOODS };   // LAKE = the valley-floor strip behind the front hills (ends the sky gradient)
   const SUN = { landscape: { morning: { x: .3, y: .2, size: 140 }, noon: { x: .71, y: .1, size: 150 }, sunset: { x: .84, y: .15, size: 176 }, night: { x: .86, y: .40, size: 150 } },
-    portrait: { morning: { x: .2, y: .24, size: 120 }, noon: { x: .72, y: .18, size: 130 }, sunset: { x: .78, y: .27, size: 150 }, night: { x: .8, y: .40, size: 130 } } };
+    portrait: { morning: { x: .2, y: .36, size: 120 }, noon: { x: .72, y: .18, size: 130 }, sunset: { x: .78, y: .36, size: 150 }, night: { x: .8, y: .40, size: 130 } } };
   const MOON = { landscape: { x: .74, y: .13, size: 130 }, portrait: { x: .74, y: .2, size: 120 } };
   const STARS = { density: 1 / 3800, max: 200, r: [0.7, 2.1], twinkle: 0.35 };
   const CLOUDS = { morning: { alpha: .85, tint: 'rgba(255,212,214,0.32)' }, noon: { alpha: .95, tint: null },
@@ -234,13 +234,13 @@
       this._rio(w.rio, L.rio);
       if (!C) return;
       const lan = (w.lanterns || []).map(q => Object.assign({}, q, { lit: ip(q, 'lit', a), swing: ip(q, 'swing', a) }));
-      if (L.garland) { try { C.drawGarland(g, L.garland, lan, { t, night }); } catch (e) { /* skip */ } }
+      if (L.garland) { try { C.drawGarland(g, L.garland, lan, { t, night, r: L.garland.podR || (L.phone || L.tall ? 34 : 28) }); } catch (e) { /* skip */ } }
       const eggs = w.eggs || [];
       for (const c of eggs) this._cushion(c, a, night);
       for (const c of eggs) { this._egg(c, a, night); this._cushion(c, a, night, true); }   // the egg sits INSIDE its straw ring
       for (const sp of w.sparks || []) {
         const x = ip(sp, 'x', a), y = ip(sp, 'y', a), al = sp.alpha == null ? 1 : sp.alpha;
-        if (al > 0.01) { try { C.drawSpark(g, x, y, this._L.phone || this._L.tall ? 46 : 40, { color: sp.color, alpha: al, t, vx: sp.vx != null ? sp.vx : x - (sp._px || x), vy: sp.vy != null ? sp.vy : y - (sp._py || y) }); } catch (e) { /* skip */ } }
+        if (al > 0.01) { try { C.drawSpark(g, x, y, this._L.phone || this._L.tall ? 60 : 52, { color: sp.color, alpha: al, t, vx: sp.vx != null ? sp.vx : x - (sp._px || x), vy: sp.vy != null ? sp.vy : y - (sp._py || y) }); } catch (e) { /* skip */ } }
       }
       const cd = w.card;
       if (cd) {
@@ -366,12 +366,12 @@
       let nh, px, x0, x1, by;
       if (portrait) {
         nh = Math.min(300, H * 0.22); px = (ins.left || 0) + 40 + nh * 0.42;
-        x0 = (ins.left || 0) + 60; x1 = W - (ins.right || 0) - 60; by = gy - nh - 90;
+        x0 = px + nh * 0.75; x1 = W - (ins.right || 0) - 40; by = gy - 40;
       } else {
         nh = Math.min(330, H * 0.46); px = (ins.left || 0) + 40 + nh * 0.46;
         x1 = W - (ins.right || 0) - 50; x0 = Math.max(px + nh * 0.6, x1 - clamp(W * 0.3, 300, 420)); by = gy - 120;
       }
-      if (C) { try { C.drawCymbal(this.g, { x: px + nh * 0.62, y: gy - 4, s: 0.75 }, { tilt: Math.sin(this.time * 2) * 0.04, ring: 0, night: this._night, t: this.time }); } catch (e) { /* skip */ } }
+      if (C) { try { C.drawCymbal(this.g, { x: px + nh * 0.98, y: gy - 4, s: 0.75 }, { tilt: Math.sin(this.time * 2) * 0.04, ring: 0, night: this._night, t: this.time }); } catch (e) { /* skip */ } }
       this._rio({ blink }, { x: px, y: gy - 4, h: nh }, { frame: 'rio_full_wave' });
       const beat = this.time * 1.6, cur = Math.floor(beat) % 3, ph = beat - Math.floor(beat);
       const things = [{ kind: 'egg', color: 'red' }, { kind: 'shape', shape: 'star', color: 'yellow' }, { kind: 'egg', color: 'blue' }];
@@ -385,7 +385,7 @@
       this._galleryT += o.dt || 0;
       const panel = o.boxes && o.boxes.done;
       const rb = Math.min(W * 0.62, 760), rx = portrait ? W / 2 : W * 0.6;
-      g.save(); g.globalAlpha = clamp(this._galleryT / 1.2, 0, 1) * 0.75; this._img('rainbow', rx - rb / 2, gy - rb * 0.5 - 40, rb, rb / 2); g.restore();
+      void rb; void rx;   // (no cloud-land rainbow here: the volcano's sparkle ring is the finale)
       if (C && L.cymbal) { try { C.drawCymbal(g, L.cymbal, { tilt: Math.sin(t * 6) * 0.08, ring: Math.max(0, Math.sin(t * 3)), night: this._night, t }); } catch (e) { /* skip */ } }
       this._rio({ hop: Math.max(0, Math.sin(t * 5)) * 0.6 }, L.rio, { frame: Math.sin(t * 3) > 0 ? 'rio_dance' : 'rio_cheer' });
       const cols = [];
@@ -420,8 +420,8 @@
       if (w.state === 'intro') {
         const top = I ? I.t(lang, 'ui.chapter', { n: (w.level | 0) + 1 }) : 'Chapter ' + ((w.level | 0) + 1);
         const name = I ? I.t(lang, 'topic.' + w.topic) : w.topic;
-        outlinedText(g, top, 0, -bh * 0.22, 30, '#7A6E99', null, bw - 60);
-        outlinedText(g, name, 0, bh * 0.14, 58, '#5B4E8C', '#ffffff', bw - 60);
+        outlinedText(g, top, 0, -bh * 0.22, 30, '#8A6A45', null, bw - 60);
+        outlinedText(g, name, 0, bh * 0.14, 58, '#6E4526', '#ffffff', bw - 60);
       } else {
         const s1 = I ? I.t(lang, 'ui.stars') : 'Stars';
         outlinedText(g, s1, 0, -bh * 0.24, 34, '#7D6A4A', null, bw - 60);

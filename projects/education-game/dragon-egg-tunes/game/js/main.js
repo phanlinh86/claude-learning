@@ -235,6 +235,12 @@
     return T(e.promptKey, e.params || {});
   }
 
+  // the big counted numeral: above the stone tablet in landscape, BESIDE it in portrait (the vine and pods sit above: QA visual P2-6)
+  function countBurst(cd, e) {
+    const L = world.layout || {};
+    if (cd && L.portrait) render.burst('count', Math.min(cd.x + (cd.w || 110) / 2 + 50, L.W - 50), cd.y, { n: e.i });
+    else render.burst('count', cd ? cd.x : e.x, cd ? cd.y - (cd.h || 140) * 0.5 - 20 : e.y - 60, { n: e.i });
+  }
   let songWords = '', songChapter = -1;
   function onEvent(e) {
     switch (e.type) {
@@ -292,7 +298,7 @@
         const c = eggOf(e.id);
         SE.Audio.play('egg', { note: e.note != null ? e.note : (c ? c.note : 0), kind: 'big', strength: 1 });
         const cd = world.card;
-        render.burst('count', cd ? cd.x : e.x, cd ? cd.y - (cd.h || 140) * 0.5 - 20 : e.y - 60, { n: e.i });
+        countBurst(cd, e);
         promptUntil = 0; pendingPrompt = null;
         speak(line('sayCount', e.i, '') || String(e.i), { interrupt: true });
         break;
@@ -330,7 +336,7 @@
         if (e.beat) {
           rioMood(e.i % 2 ? 'beat' : 'idle', 0.25);
           const cd = world.card;
-          render.burst('count', cd ? cd.x : e.x, cd ? cd.y - (cd.h || 140) * 0.5 - 20 : e.y - 60, { n: e.i });
+          countBurst(cd, e);
           if (e.i < e.n) {
             const txt = line('sayCount', e.i, '') || String(e.i);
             promptUntil = 0; pendingPrompt = null;
@@ -588,7 +594,7 @@
     render.draw(world, weather, { boxes: domBoxes(), dt: dt * Math.min(speed, 4), lang: curLang(), title: mode === 'title' || mode === 'loading', speaking: sp, done: mode === 'done', debug: FLAGS.debug });
     // letterbox bars (screens beyond the 1600 clamp) take the sky / floor colours instead of a flat cream (visual P2-10)
     const am = weather.ambient || {};
-    const gb = { morning: '#E8D9E7', noon: '#DCD6EC', sunset: '#E8CFD9', night: '#363D72' }[am.env || am.mood] || '#DCD6EC';
+    const gb = { morning: '#C1C097', noon: '#AFBA85', sunset: '#BDB282', night: '#4D675E' }[am.env || am.mood] || '#AFBA85';
     const lb = (am.skyTop || '') + gb;
     if (lb !== lastLetterbox) { lastLetterbox = lb; const st = $('stage') && $('stage').parentElement; if (st && am.skyTop) document.body.style.background = `linear-gradient(${am.skyTop}, ${am.skyBottom || am.skyTop} 55%, ${gb} 70%)`; }
     adapt(raw);

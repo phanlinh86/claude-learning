@@ -366,6 +366,55 @@ class Stopper extends Kid {
   }
   step(dt) { if (this.waiting) { const w = this.w; if (!(w.stepInfo && w.stepInfo.mode === 'beat') || w.state !== 'round') this.waiting = false; } return super.step(dt); }
 }
+/** "Taps during the demo": a typical child who cannot keep its hands still while Rio plays — it copies Rio along (taps the
+ *  sparked egg 0.15–0.7 s after each demo note with p = 0.6) and pokes a random egg / Rio now and then (p = 0.25 per note).
+ *  Every one of these taps must be a harmless brush; afterwards it plays like `typical`. */
+class DemoTapper extends Kid {
+  constructor(w, prof, seed) { super(w, prof, seed); this.dq = []; }
+  onEvent(e) {
+    super.onEvent(e);
+    if (e.type === 'demoNote' || e.type === 'demoCount') {
+      if (this.r.chance(0.6)) this.dq.push({ t: this.r.float(0.15, 0.7), id: e.id });
+      if (this.r.chance(0.25)) this.dq.push({ t: this.r.float(0.1, 1.0), id: null });
+    }
+  }
+  step(dt) {
+    const w = this.w;
+    if (w.phase === 'demo' && w.state === 'round') {
+      if (this.f.busy) { this.f.step(dt); return; }
+      for (const q of this.dq) q.t -= dt;
+      const i = this.dq.findIndex(q => q.t <= 0);
+      if (i >= 0) {
+        const q = this.dq.splice(i, 1)[0], hs = this.hanging();
+        const c = (q.id && w.eggById(q.id)) || (hs.length ? this.r.pick(hs) : null);
+        if (c && c.state === 'stand') { this.stats.demoTaps = (this.stats.demoTaps || 0) + 1; this.tapEgg(c); }
+        else if (!q.id) { const b = w.rioHit(); this.tap(b.cx, b.cy); }
+      }
+      return;
+    }
+    this.dq.length = 0;
+    return super.step(dt);
+  }
+}
+/** "Forgets the 2nd note": a typical child that remembers the first note of a tune but, on its FIRST try of step 2 (and with
+ *  p = 0.35 of step 3+), taps another egg (p = pForget 0.75). After Rio's replay it plays with the usual skill. */
+class Forgetter extends Kid {
+  constructor(w, prof, seed) { super(w, prof, seed); this.tried = {}; }
+  act() {
+    const w = this.w, st = w.stepInfo, a = w.answer();
+    if (a && a.egg && st && st.mode !== 'beat' && w.step >= 1 && !w.hintHand && !w.assistId) {
+      const k = w.level + ':' + w.round + ':' + w.step;
+      if (!this.tried[k]) {
+        this.tried[k] = 1;
+        if (this.r.chance(w.step === 1 ? 0.75 : 0.35)) {
+          const o = this.hanging().filter(q => q.id !== a.egg && !q.done);
+          if (o.length) { const c = this.r.pick(o); this._intent({ id: c.id, want: a.egg, judged: undefined, assisted: false, kind: 'tap' }); this.stats.forgot = (this.stats.forgot || 0) + 1; this.tapEgg(c); return; }
+        }
+      }
+    }
+    return super.act();
+  }
+}
 /** Never touches the screen: a round waits for the child (no fail state, no auto-play in play); the song plays by itself;
  *  idle nudges + hints must keep coming at 12 → 18 → 27 → 30 s and nothing may break. */
 class Absent { constructor(w) { this.w = w; this.stats = {}; } step() {} onEvent() {} }
@@ -385,6 +434,9 @@ function makeModel(name, w, age, seed) {
   if (name === 'beam' || name === 'stage') return new StageTapper(w, typicalProfile(age), seed);
   if (name === 'swipey') return new Kid(w, Object.assign(typicalProfile(age), { pSwipe: 0.8 }), seed);   // a typical child who mostly swipes AT the egg
   if (name === 'eager') return new Kid(w, Object.assign(typicalProfile(age), { prompt: 0.6, think: [0.4, 1.2] }), seed);   // acts while Rio is still talking
+  if (name === 'demotap') return new DemoTapper(w, typicalProfile(age), seed);
+  if (name === 'forget2') return new Forgetter(w, typicalProfile(age), seed);
+  if (name === 'slowdemotap') return new DemoTapper(w, slowProfile(), seed);
   if (name === 'eggmer') return new WildEggmer(w, typicalProfile(age), seed);
   if (name === 'stopper') return new Stopper(w, typicalProfile(age), seed);
   if (name === 'frozen') return new Stopper(w, typicalProfile(age), seed, { pStop: 1, pResume: 0 });   // stops mid-count, never resumes

@@ -1,10 +1,16 @@
-// Functional QA (Rio's Cloud Eggs) — Playwright, isMobile + hasTouch contexts on iPhone / iPad, portrait + landscape.
+// Functional QA (Rio's Singing Eggs) — Playwright, isMobile + hasTouch contexts on iPhone / iPad, portrait + landscape.
 // Every tap / swipe is a REAL CDP touch sequence (Input.dispatchTouchEvent → pointer events → SE.Input → World): the bot
 // bypasses the input layer, so this suite is the proof that fingers work.
+// The echo game: every round (and every beat step) starts with Rio's DEMO (phase 'demo': sparks fly to the tune's eggs,
+// demoNote / demoCount, demoEnd) and only then the child's turn (`ask {afterDemo}`); a wrong egg → `wrong {replay}` → a
+// replay demo 1.6 s later; poking Rio ≥ 3 s after a demo → a replay. Tests that only need the play phase wait for
+// SE.debug.answer() (null during the demo); the demo_* / wrong_replay / rio_poke / rotate_mid_demo / pause_mid_demo tests
+// touch the demo itself.
 //   node tests/e2e/functional.js                          (all: 4 devices + 10 bot sessions)
 //   ONLY=iphone-portrait node tests/e2e/functional.js     (one device, no bot sessions)
 //   TESTS=tap_right,song_swipe node tests/e2e/functional.js   (a subset of the per-device tests)
 //   SKIP_BOT=1 node tests/e2e/functional.js               (skip the full bot sessions)
+//   BOT_ONLY=1 node tests/e2e/functional.js               (only the 10 full bot sessions, ages 3–7 × EN / VI)
 // Writes screenshots + results.json to tests/out/functional/. Exits 1 on any failure.
 const { chromium } = require('playwright');
 const path = require('path'), fs = require('fs');
@@ -22,7 +28,10 @@ const BOT_RUNS = [];
 const BOT_SPEED = +process.env.BOT_SPEED || 8, BOT_PAR = +process.env.BOT_PAR || 4;
 const VI_CHARS = /[ăâđêôơưàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ]/i;
 // a raw i18n key, an unfilled {param}, or a JS hole in a spoken line
-const RAW = /\{|\}|undefined|NaN|\bnull\b|\[object|\b(ui|p|talk|topic|weather|right|wrong|surprise|lamb|bird|firefly|rio|count|name|idle|session)\.[a-z0-9]/i;
+const RAW = /\{|\}|undefined|NaN|\bnull\b|\[object|\b(ui|p|talk|topic|weather|right|wrong|surprise|lamb|bird|firefly|rio|count|name|idle|session|demo|turn|cymbal)\.[a-z0-9]/i;
+// the tune-flow lines (i18n demo.start / demo.replay / demo.beat / turn.first / turn.beat), by language
+const LISTEN = { en: /listen|count with me|watch and count|count my taps/i, vi: /nghe|đếm/i };
+const TURN = { en: /your turn|now you/i, vi: /đến lượt bé|giờ tới bé|bé hát lại/i };
 
 const results = [];
 function record(device, test, ok, detail) {
@@ -52,7 +61,10 @@ const INIT = () => {
       const w = SE.debug.world;
       if (!w || w.__qa) return;
       const o = w._emit; w.__qa = true;
-      w._emit = function (e) { const c = {}; for (const k in e) { const v = e[k]; c[k] = (v && typeof v === 'object') ? JSON.parse(JSON.stringify(v)) : v; } c._t = w.time; window.__ev.push(c); return o.call(this, e); };
+      // the world may finish an event's flat fields right after emitting it (wrong.replay): re-copy them in a microtask
+      w._emit = function (e) { const c = {}; for (const k in e) { const v = e[k]; c[k] = (v && typeof v === 'object') ? JSON.parse(JSON.stringify(v)) : v; } c._t = w.time; window.__ev.push(c);
+        if (e.type === 'demoNote' && w.cur && w.cur.steps[e.step]) { const st = w.cur.steps[e.step]; c._ctx = { topic: w.topic, promptKey: st.promptKey, params: JSON.parse(JSON.stringify(st.params || {})) }; }
+        queueMicrotask(() => { for (const k in e) { const v = e[k]; if (!(v && typeof v === 'object')) c[k] = v; } }); return o.call(this, e); };
     },
     v() { return SE.debug.view(); },
     toL(x, y) { const v = SE.debug.view(); return { x: (x - v.left) / v.s, y: (y - v.top) / v.s }; },
@@ -200,6 +212,26 @@ async function botToNextRound(page, timeout = 60000) {
   await page.evaluate(() => SE.debug.setBot(false));
   await waitAsk(page);
 }
+/** a fresh chapter of `topic` at `age`; stops (speed 1) right at the start of the round's first demo */
+async function setupDemo(page, url, { topic = 'colors', age = 5, seed = 3, lang = '', level = 0 } = {}) {
+  await gotoTitle(page, `${url}?mute=1&seed=${seed}&age=${age}${lang ? '&lang=' + lang : ''}`);
+  await page.evaluate(([t, lv]) => { SE.debug.startGame(); const w = SE.debug.world; w.levels[lv] = t; w.startLevel(lv); SE.debug.setSpeed(3); }, [topic, level]);
+  await page.waitForFunction(() => { const w = SE.debug.world; return w.state === 'round' && w.phase === 'demo' && w.demo; }, null, { timeout: 20000, polling: 'raf' });
+  await page.evaluate(() => SE.debug.setSpeed(1));
+}
+/** wait for the next demoStart after event index n0 (speed s while waiting) */
+async function waitDemoStart(page, n0, timeout = 15000) {
+  await page.waitForFunction(n => window.__ev.slice(n).some(e => e.type === 'demoStart'), n0, { timeout, polling: 'raf' });
+}
+/** at a new round with ≥ k tune steps (bot plays rounds until one is found); stops at its first ask after the demo */
+async function roundWithSteps(page, k, tries = 6) {
+  for (let t = 0; t < tries; t++) {
+    const s = await page.evaluate(() => { const w = SE.debug.world; return { n: w.cur ? w.cur.steps.length : 0, step: w.step, mode: w.stepInfo && w.stepInfo.mode }; });
+    if (s.n >= k && s.step === 0 && s.mode === 'find') return true;
+    await botToNextRound(page);
+  }
+  return false;
+}
 async function info(page) {
   return page.evaluate(() => {
     const w = SE.debug.world, a = SE.debug.answer();
@@ -285,8 +317,10 @@ T.tap_wrong = async ({ page, cdp, url, d }) => {
 };
 T.swipe_from_right = async ({ page, cdp, url, d }) => {
   await setupRound(page, url, { seed: 4 });
+  // a 1-note tune ends the round on the right tap (the song phase takes over the finger): use a tune of ≥ 2 notes
+  check(await roundWithSteps(page, 2), 'no round with a 2-note tune');
   let i = await info(page);
-  if (!i.others.length) { await botToNextRound(page); i = await info(page); }
+  check(i.others.length, 'no other egg to swipe through');
   // start ON the asked egg, swipe straight through the farthest other egg (and every one in between)
   const far = i.others.slice().sort((p, q) => Math.abs(q.at.x - i.at.x) - Math.abs(p.at.x - i.at.x))[0];
   const dx = far.at.x - i.at.x, dy = far.at.y - i.at.y, k = 1 + (far.at.r * 0.6) / Math.hypot(dx, dy);
@@ -444,9 +478,11 @@ T.assist_young = async ({ page, cdp, url }) => {
 T.beat_count = async ({ page, cdp, url, d }) => {
   // age 4 count = beat mode: ONE big egg + a number card; every real tap ≥ 0.2 s after the last counted one is a beat
   await setupRound(page, url, { topic: 'count', age: 4, seed: 8 });
-  let doubled = false, fastChecked = 0, listenChecked = false;
-  for (let rr = 0; rr < 2; rr++) {   // the warm-up round (n = 1, 2), then a full one (3 steps, one n ≥ 3)
-  if (rr > 0) await waitAsk(page, 30000);
+  let doubled = false, fastChecked = 0, listenChecked = false, nStep = 0;
+  for (let rr = 0; rr < 2; rr++) {   // the warm-up round (1 step, n ∈ {1, 2}), then a full one (2 steps, one n ≥ 3)
+  const Lpre = await page.evaluate(() => SE.debug.voiceLog.length);
+  if (rr > 0) { nStep = await evLen(page); await waitAsk(page, 30000); }
+  if (rr === 0) nStep = 0;   // setupRound reloaded the page: __ev holds this round's demo from index 0
   const st0 = await page.evaluate(() => { const w = SE.debug.world, live = w.eggs.filter(c => c.state !== 'gone'); return { mode: w.stepInfo.mode, need: w.stepInfo.need, kind: live[0].thing.kind, n: live.length, steps: w.cur.steps.map(s => s.need), card: w.card ? { n: w.card.n, lit: w.card.lit } : null, round: w.round }; });
   check(st0.mode === 'beat' && st0.kind === 'big' && st0.n === 1, 'not a beat round with one big egg: ' + JSON.stringify(st0));
   check(st0.card && st0.card.n === st0.need && st0.card.lit === 0, 'number card at the ask: ' + JSON.stringify(st0));
@@ -462,7 +498,7 @@ T.beat_count = async ({ page, cdp, url, d }) => {
   let evs;
   for (let si = 0; si < st0.steps.length; si++) {
     if (si > 0) {
-      if (rr === 0 && si === 1) {   // a beat inside CONFIG.beatListen after the ask booms (ring brush beat) but does not count
+      if (rr === 1 && si === 1) {   // a beat inside CONFIG.beatListen after the ask booms (ring brush beat) but does not count
         await waitAsk(page, 20000, { listen: false });
         const e0 = await evLen(page);
         const q = await page.evaluate(() => { const w = SE.debug.world; return { at: SE.debug.eggScreen(SE.debug.answer().egg), since: w.time - w._beat.askT, listen: SE.CONFIG.beatListen }; });
@@ -477,6 +513,16 @@ T.beat_count = async ({ page, cdp, url, d }) => {
     }
     const s = await page.evaluate(() => { const w = SE.debug.world; return { need: w.stepInfo.need, mode: w.stepInfo.mode, step: w.step, lit: w.card ? w.card.lit : null, cn: w.card ? w.card.n : null }; });
     check(s.mode === 'beat' && s.lit === 0 && s.cn === s.need, `step ${si} at its ask: ` + JSON.stringify(s));
+    {   // Rio's beat demo for this step: demoStart {mode beat, need} → demoCount 1..need → demoEnd → ask {afterDemo}
+      const dv = await evSince(page, nStep);
+      const ds = dv.filter(e => e.type === 'demoStart'), dc = dv.filter(e => e.type === 'demoCount'), de = dv.findIndex(e => e.type === 'demoEnd');
+      const ak = dv.findIndex(e => e.type === 'ask' && e.step === s.step);
+      check(ds.length === 1 && ds[0].mode === 'beat' && ds[0].need === s.need && ds[0].step === s.step, `step ${si}: beat demoStart: ` + JSON.stringify(ds));
+      check(dc.length === s.need && dc.every((e, j) => e.i === j + 1 && e.n === s.need), `step ${si}: demoCounts ${dc.map(e => e.i).join(',')} (need ${s.need})`);
+      check(de >= 0 && ak > de && dv[ak].afterDemo, `step ${si}: demoEnd → ask {afterDemo} order: ` + types(dv));
+      const djudged = dv.slice(0, de).filter(e => ['right', 'wrong', 'count', 'soft', 'hint'].includes(e.type));
+      check(djudged.length === 0, `step ${si}: judged events during the beat demo: ` + types(djudged));
+    }
     const e1 = await evLen(page);
     for (let k = 1; k <= s.need; k++) {
       const at = await page.evaluate(() => SE.debug.eggScreen(SE.debug.answer().egg));
@@ -513,6 +559,7 @@ T.beat_count = async ({ page, cdp, url, d }) => {
         check(es.some(e => e.type === 'stepDone'), 'no stepDone after the count: ' + types(es));
       }
     }
+    nStep = await evLen(page);   // the next step's beat demo starts after this step's stepDone gap
     if (si === 0 && rr === 1) await shot(page, d, '5-beat');
     // extra beats after the count is complete only boom (the egg is done in the gap)
     const e2 = await evLen(page);
@@ -531,9 +578,18 @@ T.beat_count = async ({ page, cdp, url, d }) => {
   check(rd && rd.stars === 3, 'beat round stars: ' + JSON.stringify(rd));
   await page.waitForTimeout(400);
   const log = await page.evaluate(n => SE.debug.voiceLog.slice(n).map(x => x.text), L0);
-  check(log.includes('One!'), 'no count word "One!" in the voice log: ' + JSON.stringify(log));
   const maxNeed = Math.max(...st0.steps), word = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six'][maxNeed];
+  // the child's own counts: "One!" … for every beat but the last of a step (the last one is the right line)
+  if (maxNeed >= 2) check(log.includes('One!'), 'no child count word "One!" in the voice log: ' + JSON.stringify(log));
   if (maxNeed >= 3) check(log.includes('Two!'), 'no count word "Two!" in the voice log: ' + JSON.stringify(log));
+  // Rio's demo of this round (rr > 0: the whole demo is in this slice; rr 0: it ran before setupRound returned): "Count with me!" + One! … N!
+  if (rr > 0) {
+    const dlog = await page.evaluate(n => SE.debug.voiceLog.slice(n).map(x => x.text), Lpre);
+    const ci = dlog.findIndex(t => LISTEN.en.test(t));
+    check(ci >= 0, 'no "Count with me!" demo line: ' + JSON.stringify(dlog.slice(0, 10)));
+    check(dlog.indexOf('One!', ci) > ci, 'Rio\'s demo count "One!" is not in the voice log after the demo line: ' + JSON.stringify(dlog.slice(0, 10)));
+    check(dlog.some(t => TURN.en.test(t) && /time|once|twice/i.test(t)), 'no "Your turn — tap the big egg N times!" line: ' + JSON.stringify(dlog.slice(0, 14)));
+  }
   check(log.some(t => t.startsWith(word + '!') && t.length > word.length + 2), `no beat right line starting "${word}!" in the voice log: ` + JSON.stringify(log));
   check(!log.some(t => RAW.test(t)), 'raw key in the beat lines: ' + JSON.stringify(log));
   console.log(`      beat_count ${d.name} round ${st0.round}: steps ${st0.steps.join('/')}, lines ${JSON.stringify(log.slice(0, 12))}`);
@@ -605,7 +661,7 @@ T.beat_nudge = async ({ page, cdp, url, d }) => {
   check(await page.evaluate(() => SE.debug.world.card.lit) === 1, 'the nudge reset the card');
 };
 T.animal_prompt = async ({ page, cdp, url, d }) => {
-  // "Who says moo? Tap the cow!" — find a cow ask (seeded), check the bubble / voice log, then tap it: "Moo! The cow!"
+  // "Who says quack? Tap the duckling!" — find a cow ask (seeded), check the bubble / voice log, then tap it: "Quack! The duckling!"
   let found = null, tried = [];
   for (let seed = 30; seed < 60 && !found; seed++) {
     await setupRound(page, url, { topic: 'animals', age: 4, seed });
@@ -613,25 +669,26 @@ T.animal_prompt = async ({ page, cdp, url, d }) => {
       const a = await page.evaluate(() => { const w = SE.debug.world, an = SE.debug.answer(); const c = an && an.egg != null ? w.eggById(an.egg) : null; return c ? { id: c.id, animal: c.thing.animal, bubble: document.getElementById('bubbleText').textContent, at: SE.debug.eggScreen(c.id) } : null; });
       if (!a) break;
       tried.push(a.animal);
-      if (a.animal === 'cow') { found = a; break; }
+      if (a.animal === 'duck') { found = a; break; }
       await tap(cdp, page, a.at); await page.waitForTimeout(300);
       if (await page.evaluate(() => SE.debug.world.state !== 'round')) break;
       try { await waitAsk(page, 8000); } catch (e) { break; }
     }
   }
-  check(found, 'no cow asked in 30 seeds: ' + tried.join(','));
+  check(found, 'no duckling asked in 30 seeds: ' + tried.join(','));
   const L0 = await page.evaluate(() => SE.debug.voiceLog.length - 6);
   const log0 = await page.evaluate(n => SE.debug.voiceLog.slice(Math.max(0, n)).map(x => x.text), L0);
-  check(/moo/i.test(found.bubble) && /cow/i.test(found.bubble), 'the cow prompt does not name moo + cow: ' + found.bubble);
-  check(log0.includes(found.bubble), 'the cow prompt is not in the voice log: ' + JSON.stringify({ bubble: found.bubble, log0 }));
-  console.log(`      animal_prompt ${d.name}: "${found.bubble}" (Who says moo: ${/Who says moo\?/.test(found.bubble)})`);
+  check(/quack/i.test(found.bubble) && /duckling/i.test(found.bubble), 'the duckling prompt does not name quack + duckling: ' + found.bubble);
+  // echo flow: the voice says "Your turn!" / the cue, the bubble keeps the full prompt
+  check(log0.every(t => !RAW.test(t)), 'raw line near the duckling prompt: ' + JSON.stringify(log0));
+  console.log(`      animal_prompt ${d.name}: "${found.bubble}" (Who says quack: ${/Who says quack\?/.test(found.bubble)})`);
   const v1 = await page.evaluate(() => SE.debug.voiceLog.length), n0 = await evLen(page);
   await tap(cdp, page, found.at);
   await page.waitForTimeout(500);
   const evs = await evSince(page, n0);
   const log = await page.evaluate(n => SE.debug.voiceLog.slice(n).map(x => x.text), v1);
-  check(evs.some(e => e.type === 'right' && e.id === found.id), 'tap on the cow: ' + types(evs));
-  check(log.some(t => /moo/i.test(t) && /cow/i.test(t)), 'no "Moo! The cow!" right line: ' + JSON.stringify(log));
+  check(evs.some(e => e.type === 'right' && e.id === found.id), 'tap on the duckling: ' + types(evs));
+  check(log.some(t => /quack/i.test(t) && /duckling/i.test(t)), 'no "Quack! The duckling!" right line: ' + JSON.stringify(log));
 };
 T.song_swipe = async ({ page, cdp, url, d }) => {
   await setupRound(page, url, { seed: 9 });
@@ -731,30 +788,60 @@ T.song_auto = async ({ page, cdp, url }) => {
   const sw = await page.evaluate(() => SE.CONFIG.songWait);
   check(dt > sw - 0.2 && dt < sw + 0.3, `auto cascade ${dt.toFixed(2)} s (world) after songAsk (want CONFIG.songWait ${sw} s)`);
 };
-T.rio_repeat = async ({ page, cdp, url }) => {
-  await setupRound(page, url, { seed: 11 });
-  await page.waitForTimeout(3400);   // a Rio tap repeats only after the prompt had its 3 s
-  const prompt = await page.evaluate(() => document.getElementById('bubbleText').textContent);
-  const v0 = await page.evaluate(() => SE.debug.voiceLog.length), n0 = await evLen(page);
+T.rio_poke = async ({ page, cdp, url }) => {
+  // poke Rio in play: < pokeReplayCooldown (3 s) after a demo → pokeRio {replay:false}, no demo; later → pokeRio {replay:true}
+  // + a replay demo from the current step ("Listen again!"), then "Your turn!" again; never a ring / soft / miss
+  await setupRound(page, url, { seed: 11, age: 5 });
   const k = await page.evaluate(() => SE.debug.rioScreen());
-  // tap Rio's body (the tap box centre); a egg under the finger would win, so make sure there is none
   const onEgg = await page.evaluate(([x, y]) => { const p = window.__qa.toL(x, y); return !!SE.debug.world._eggAt(p.x, p.y); }, [k.x, k.y]);
-  check(!onEgg, 'Rio\'s centre is under a egg');
+  check(!onEgg, 'Rio\'s centre is under an egg');
+  const since = await page.evaluate(() => SE.debug.world.time - SE.debug.world._lastDemoEnd);
+  let n0 = await evLen(page);
+  await tap(cdp, page, { x: k.x, y: k.y }, 90);
+  await page.waitForTimeout(250);
+  let evs = await evSince(page, n0);
+  const p1 = evs.find(e => e.type === 'pokeRio');
+  check(p1, 'no pokeRio on a Rio tap: ' + types(evs));
+  if (since < 2.5) check(p1.replay === false && !evs.some(e => e.type === 'demoStart'), `a poke ${since.toFixed(2)} s after the demo replayed (cooldown 3 s): ` + types(evs));
+  check(!evs.some(e => e.type === 'ring' || e.type === 'soft'), 'Rio tap rang / softed: ' + types(evs));
+  // after the cooldown: a replay demo from the current step
+  await page.waitForFunction(() => SE.debug.world.time - SE.debug.world._lastDemoEnd > SE.CONFIG.pokeReplayCooldown + 0.3, null, { timeout: 8000, polling: 'raf' });
+  const step = await page.evaluate(() => SE.debug.world.step);
+  const v0 = await page.evaluate(() => SE.debug.voiceLog.length);
+  n0 = await evLen(page);
   await tap(cdp, page, { x: k.x, y: k.y }, 90);
   await page.waitForTimeout(300);
-  const evs = await evSince(page, n0);
+  evs = await evSince(page, n0);
+  const p2 = evs.find(e => e.type === 'pokeRio'), ds = evs.find(e => e.type === 'demoStart');
+  check(p2 && p2.replay === true, 'pokeRio after the cooldown is not a replay: ' + JSON.stringify(p2));
+  check(ds && ds.replay === true && ds.from === step, 'no replay demoStart from the current step after the poke: ' + JSON.stringify(ds));
+  const di = await page.evaluate(() => ({ demo: SE.debug.world.demoInfo(), phase: SE.debug.world.phase, ans: SE.debug.answer() }));
+  check(di.phase === 'demo' && di.demo && di.demo.replay && di.ans === null, 'not in a replay demo after the poke: ' + JSON.stringify(di));
+  await page.waitForFunction(n => window.__ev.slice(n).some(e => e.type === 'ask' && e.replay && e.afterDemo), n0, { timeout: 15000, polling: 'raf' });
+  await page.waitForTimeout(200);
+  evs = await evSince(page, n0);
   const log = await page.evaluate(n => SE.debug.voiceLog.slice(n).map(x => x.text), v0);
-  check(evs.some(e => e.type === 'pokeRio'), 'no pokeRio on a Rio tap: ' + types(evs));
-  check(log.includes(prompt), 'Rio tap did not repeat the prompt in voiceLog: ' + JSON.stringify({ prompt, log }));
-  check(!evs.some(e => e.type === 'ring' || e.type === 'soft'), 'Rio tap rang / softed: ' + types(evs));
+  check(log.some(t => LISTEN.en.test(t)), 'no "Listen again!" after a replay poke: ' + JSON.stringify(log));
+  check(log.some(t => TURN.en.test(t)), 'no "Your turn!" after the replay: ' + JSON.stringify(log));
+  check(evs.filter(e => e.type === 'demoNote').length === ds.n, `replay demoNotes ${evs.filter(e => e.type === 'demoNote').length} of ${ds.n}`);
+  check(!evs.some(e => ['ring', 'soft', 'wrong', 'right'].includes(e.type)), 'the replay poke rang / judged: ' + types(evs));
   check(await page.evaluate(() => SE.debug.world.misses) === 0, 'Rio tap counted as a miss');
-  // tapping the speech bubble also repeats it (and never reaches the canvas)
-  const v1 = await page.evaluate(() => SE.debug.voiceLog.length), n1 = await evLen(page);
-  await tapEl(page, '#bubble');
-  await page.waitForTimeout(300);
-  const log2 = await page.evaluate(n => SE.debug.voiceLog.slice(n).map(x => x.text), v1);
-  check(log2.includes(prompt), 'bubble tap did not repeat the prompt: ' + JSON.stringify(log2));
-  check(!(await evSince(page, n1)).some(e => e.type === 'soft' || e.type === 'ring'), 'bubble tap reached the canvas');
+  // the asked egg still works after the replay
+  await waitAsk(page);
+  const i = await info(page), n1 = await evLen(page);
+  await tap(cdp, page, i.at); await page.waitForTimeout(300);
+  check((await evSince(page, n1)).some(e => e.type === 'right' && e.id === i.a), 'asked egg after a poke replay');
+  // tapping the speech bubble repeats the last prompt line (and never reaches the canvas)
+  await waitAsk(page).catch(() => {});
+  await page.waitForTimeout(3200);
+  const v1 = await page.evaluate(() => SE.debug.voiceLog.length), n2 = await evLen(page);
+  if (await visible(page, 'bubble')) {
+    await tapEl(page, '#bubble');
+    await page.waitForTimeout(300);
+    const log2 = await page.evaluate(n => SE.debug.voiceLog.slice(n).map(x => x.text), v1);
+    check(log2.length >= 1 && !RAW.test(log2[0]), 'bubble tap did not repeat a prompt line: ' + JSON.stringify(log2));
+    check(!(await evSince(page, n2)).some(e => e.type === 'soft' || e.type === 'ring'), 'bubble tap reached the canvas');
+  }
 };
 T.talk_time_tap = async ({ page, url, d }) => {
   await setupRound(page, url, { topic: 'colors', age: 4, seed: 12 });
@@ -787,12 +874,33 @@ T.pause_resume = async ({ page, url }) => {
   const t1 = await page.evaluate(() => SE.debug.world.time);
   check(t1 === t0, 'world kept running while paused');
   const L0 = await saidLen(page);
+  const turnLine = await page.evaluate(() => { const t = window.__said.map(x => x.text).filter(x => /your turn|now you/i.test(x)); return t[t.length - 1] || null; });
   await tapEl(page, '#btnResume');
   await page.waitForTimeout(700);
   const s = await page.evaluate(n => ({ mode: SE.debug.mode, t: SE.debug.world.time, said: window.__said.slice(n).map(x => x.text), bubble: document.getElementById('bubbleText').textContent }), L0);
   check(s.mode === 'play' && s.t > t1, 'resume did not continue: ' + JSON.stringify(s));
   check(!(await visible(page, 'scrPause')), 'pause screen still shown');
-  check(s.said.includes(s.bubble), 'prompt not repeated after resume: ' + JSON.stringify(s.said));
+  // the echo flow: the prompt Rio said was the "Your turn!" line (the bubble keeps the full text) → repeated word for word
+  check(turnLine, 'no "Your turn!" line was spoken after the demo');
+  check(s.said.includes(turnLine) || s.said.includes(s.bubble), 'prompt not repeated after resume: ' + JSON.stringify({ turnLine, said: s.said }));
+};
+T.pause_mid_demo = async ({ page, url, d }) => {
+  // pause during Rio's demo: the world (and the demo) freezes; resume → the demo goes on to demoEnd → "Your turn!"
+  await setupDemo(page, url, { seed: 23, age: 4 });
+  await tapEl(page, '#btnPause');
+  await page.waitForTimeout(200);
+  check(await page.evaluate(() => SE.debug.mode) === 'paused', 'pause did not open during the demo');
+  const a = await page.evaluate(() => ({ t: SE.debug.world.time, d: SE.debug.world.demoInfo(), dt: SE.debug.world.demo && SE.debug.world.demo.t }));
+  check(a.d, 'the demo was gone when the pause opened: ' + JSON.stringify(a));
+  await page.waitForTimeout(800);
+  const b = await page.evaluate(() => ({ t: SE.debug.world.time, dt: SE.debug.world.demo && SE.debug.world.demo.t }));
+  check(b.t === a.t && b.dt === a.dt, 'the demo ran on while paused: ' + JSON.stringify({ a, b }));
+  const n0 = await evLen(page);
+  await tapEl(page, '#btnResume');
+  await page.waitForFunction(n => window.__ev.slice(n).some(e => e.type === 'ask' && e.afterDemo), n0, { timeout: 15000, polling: 'raf' });
+  const evs = await evSince(page, n0);
+  check(evs.some(e => e.type === 'demoEnd'), 'no demoEnd after resuming: ' + types(evs));
+  check(await page.evaluate(() => SE.debug.mode) === 'play', 'not playing after the resumed demo');
 };
 T.visibility_pause = async ({ page, cdp, url }) => {
   await setupRound(page, url, { seed: 13 });
@@ -954,18 +1062,20 @@ T.language_switch = async ({ page, url, d }) => {
   await tapEl(page, '.title-top [data-lang="vi"]');
   await page.waitForTimeout(200);
   let s = await page.evaluate(() => ({ html: document.documentElement.lang, logo: document.getElementById('logo1').textContent + ' ' + document.getElementById('logo2').textContent, play: document.getElementById('btnPlay').getAttribute('aria-label'), age: document.getElementById('titleAge').textContent, title: document.title, saved: SE.debug.getState().settings.lang }));
-  check(s.html === 'vi' && /Cún Rio/.test(s.logo) && /Trống Mây/.test(s.logo) && s.play === 'Chơi' && s.saved === 'vi', 'VI not applied on title: ' + JSON.stringify(s));
-  check(/Trống Mây/.test(s.title), 'VI document title: ' + s.title);
+  check(s.html === 'vi' && /Rồng Rio/.test(s.logo) && /Trứng Biết Hát/.test(s.logo) && s.play === 'Chơi' && s.saved === 'vi', 'VI not applied on title: ' + JSON.stringify(s));
+  check(/Trứng Biết Hát/.test(s.title), 'VI document title: ' + s.title);
   await shot(page, d, 'a-title-vi');
   await tapEl(page, '#btnPlay');
   await page.evaluate(() => window.__qa.hook());
   await page.evaluate(() => { const w = SE.debug.world; w.levels[0] = 'colors'; w.startLevel(0); });
   await waitAsk(page);
   await shot(page, d, 'b-vi-round');
-  const vb = await page.evaluate(() => ({ bubble: document.getElementById('bubbleText').textContent, last: window.__asks.slice(-1)[0], said: window.__said.slice(-4) }));
-  check(VI_CHARS.test(vb.bubble) && /trống|bé/i.test(vb.bubble), 'bubble not Vietnamese: ' + vb.bubble);
+  const vb = await page.evaluate(() => ({ bubble: document.getElementById('bubbleText').textContent, last: window.__asks.slice(-1)[0], said: window.__said.slice(-8) }));
+  check(VI_CHARS.test(vb.bubble) && /trứng|bé/i.test(vb.bubble), 'bubble not Vietnamese: ' + vb.bubble);
   check(vb.last && vb.last.lang === 'vi', 'ask built in ' + (vb.last && vb.last.lang));
-  check(vb.said.some(x => x.text === vb.bubble), 'the VI prompt was not sent to the voice: ' + JSON.stringify(vb.said));
+  // the echo flow: Rio sang the tune ("Bé nghe Rio hát nhé!"), then "Đến lượt bé rồi!" went to the voice
+  check(vb.said.some(x => TURN.vi.test(x.text) && x.lang === 'vi'), 'the VI "your turn" line was not sent to the voice: ' + JSON.stringify(vb.said));
+  check(vb.said.every(x => !RAW.test(x.text)), 'raw VI line: ' + JSON.stringify(vb.said));
   // back to English through pause → home
   await tapEl(page, '#btnPause');
   await page.waitForFunction(() => SE.debug.mode === 'paused');
@@ -975,7 +1085,7 @@ T.language_switch = async ({ page, url, d }) => {
   await tapEl(page, '.title-top [data-lang="en"]');
   await page.waitForTimeout(200);
   s = await page.evaluate(() => ({ html: document.documentElement.lang, logo: document.getElementById('logo1').textContent + ' ' + document.getElementById('logo2').textContent, play: document.getElementById('btnPlay').getAttribute('aria-label'), saved: SE.debug.getState().settings.lang }));
-  check(s.html === 'en' && /Rio/.test(s.logo) && /Cloud Eggs/.test(s.logo) && s.play === 'Play' && s.saved === 'en', 'EN not restored: ' + JSON.stringify(s));
+  check(s.html === 'en' && /Rio/.test(s.logo) && /Singing Eggs/.test(s.logo) && s.play === 'Play' && s.saved === 'en', 'EN not restored: ' + JSON.stringify(s));
   await tapEl(page, '#btnPlay');
   await waitAsk(page, 25000);
   const eb = await page.evaluate(() => document.getElementById('bubbleText').textContent);
@@ -1120,8 +1230,177 @@ T.url_age_shown = async ({ page, url }) => {
   check(bad.length === 0, 'the title age differs from the age played: ' + bad.join('; '));
 };
 
-const CORE = ['boot_title', 'tap_right', 'tap_wrong', 'swipe_from_right', 'swipe_from_sky', 'rim_tap', 'tap_sky_soft', 'song_swipe', 'song_band_press', 'rotate_mid_round', 'rotate_bouncing', 'surprise_lamb', 'surprise_bird', 'surprise_fireflies'];
-const EXTRA = ['two_misses_hint', 'assist_young', 'beat_count', 'beat_nudge', 'rotate_beat', 'animal_prompt', 'cymbal_tap', 'song_tap', 'song_auto', 'rio_repeat', 'talk_time_tap', 'pause_resume', 'visibility_pause',
+/* ---------------------------------------------------------------- the demo (Rio plays the tune first) */
+const JUDGED = ['right', 'wrong', 'count', 'soft', 'hint', 'assist', 'assistArmed', 'stepDone'];
+T.demo_harmless = async ({ page, cdp, url, d }) => {
+  // during the demo: not interactive, answer() / hint() / prompt() null; real taps on every egg = brushes only, the sky and
+  // Rio = nothing; a finger pressed in the demo and lifted after it stays brush-only; then the round plays normally
+  await setupDemo(page, url, { seed: 24, age: 5 });
+  const st = await page.evaluate(() => { const w = SE.debug.world; return { inter: w.interactive, ans: SE.debug.answer(), hint: w.hint(), prompt: w.prompt(), demo: w.demoInfo(), list: w.demo.list.map(x => x.id), song: w.cur.song.slice(), steps: w.cur.steps.map(s => s.targets.slice()), mouth: w.rioMouth() }; });
+  check(!st.inter && st.ans === null && st.hint === null && st.prompt === null && st.demo && !st.demo.replay && st.demo.from === 0, 'hooks during the demo: ' + JSON.stringify(st));
+  check(JSON.stringify(st.list) === JSON.stringify([].concat(...st.steps)), 'the demo order is not the tune (step) order: ' + JSON.stringify(st));
+  await shot(page, d, 'd-demo');
+  const n0 = await page.evaluate(() => window.__ev.map(e => e.type).lastIndexOf('demoStart'));   // the whole demo
+  const pts = await page.evaluate(() => window.__qa.hang().map(c => ({ id: c.id, at: SE.debug.eggScreen(c.id) })));
+  const sky = await page.evaluate(() => window.__qa.softPoint(false)), rio = await page.evaluate(() => SE.debug.rioScreen());
+  let tapped = 0;
+  for (const p of pts.map(q => q.at).concat([sky, { x: rio.x, y: rio.y }]).filter(Boolean)) {
+    if (!(await page.evaluate(() => SE.debug.world.phase === 'demo'))) break;
+    await tap(cdp, page, p, 60); await page.waitForTimeout(90); tapped++;
+  }
+  check(tapped >= 3, 'the demo ended before 3 taps (' + tapped + ')');
+  // a finger pressed on the first tune egg during the demo, held past demoEnd, then lifted
+  let held = false;
+  const first = pts.find(q => q.id === st.list[0]);
+  if (await page.evaluate(() => SE.debug.world.phase === 'demo')) {
+    held = true;
+    await touchStart(cdp, [tp(first.at.x, first.at.y)]);
+    await page.waitForFunction(() => SE.debug.world.phase === 'play', null, { timeout: 15000, polling: 'raf' });
+    await page.waitForTimeout(150);
+    await touchEnd(cdp);
+    await page.waitForTimeout(250);
+  } else await page.waitForFunction(() => SE.debug.world.phase === 'play', null, { timeout: 15000, polling: 'raf' });
+  const evs = await evSince(page, n0), de = evs.findIndex(e => e.type === 'demoEnd');
+  check(de >= 0, 'no demoEnd: ' + types(evs));
+  const inDemo = evs.slice(0, de);
+  const bad = inDemo.filter(e => JUDGED.includes(e.type) || e.type === 'pokeRio' || (e.type === 'ring' && (e.judged || !e.brush)));
+  check(bad.length === 0, 'taps during the demo were judged / softed / poked: ' + types(bad));
+  check(inDemo.some(e => e.type === 'ring' && e.brush), 'a tap on an egg during the demo did not brush (sing softly): ' + types(inDemo));
+  const after = evs.slice(de);
+  if (held) check(!after.some(e => e.type === 'right' || e.type === 'wrong' || (e.type === 'ring' && e.judged)), 'a press from the demo, lifted after it, was judged: ' + types(after));
+  const sparks = evs.filter(e => e.type === 'spark'), notes = evs.filter(e => e.type === 'demoNote');
+  check(sparks.length === st.list.length && notes.length === st.list.length, `sparks ${sparks.length} / demoNotes ${notes.length} for ${st.list.length} notes`);
+  check(sparks.every(e => Math.abs(e.x - st.mouth.x) < 1 && Math.abs(e.y - st.mouth.y) < 1), 'a spark did not leave Rio\'s mouth: ' + JSON.stringify(sparks.map(e => [e.x, e.y])) + ' mouth ' + JSON.stringify(st.mouth));
+  check(notes.map(e => e.id).join() === st.list.join(), 'demoNote order: ' + notes.map(e => e.id).join());
+  check(after.some(e => e.type === 'ask' && e.afterDemo && e.step === 0), 'no ask {afterDemo} after demoEnd: ' + types(after));
+  check(await page.evaluate(() => SE.debug.world.misses) === 0, 'taps during the demo counted as misses');
+  // and the child's turn works
+  await waitAsk(page);
+  const i = await info(page), n1 = await evLen(page);
+  check(i.a === st.list[0], `asked ${i.a}, the demo played ${st.list[0]} first`);
+  await tap(cdp, page, i.at); await page.waitForTimeout(300);
+  check((await evSince(page, n1)).some(e => e.type === 'right' && e.id === i.a), 'the first tune egg after the demo was not right');
+};
+T.demo_copy_tune = async ({ page, cdp, url, d }) => {
+  // after the demo: tap the eggs in the demo's order → right, right, …, roundDone 3★; every pod lights in the egg's colour
+  await setupDemo(page, url, { seed: 25, age: 5 });
+  const n0 = await evLen(page);
+  await page.waitForFunction(n => window.__ev.slice(n).some(e => e.type === 'ask' && e.afterDemo), 0, { timeout: 15000, polling: 'raf' });
+  const notes = (await evSince(page, 0)).filter(e => e.type === 'demoNote').map(e => e.id);
+  check(notes.length >= 2, 'a 2+ note tune expected at age 5: ' + notes.join());
+  for (let k = 0; k < notes.length; k++) {
+    await waitAsk(page);
+    const i = await info(page);
+    check(i.a === notes[k], `step ${k}: asked ${i.a}, the demo played ${notes[k]}`);
+    await tap(cdp, page, i.at); await page.waitForTimeout(350);
+  }
+  await page.waitForFunction(() => SE.debug.world.state === 'roundDone', null, { timeout: 8000 });
+  const evs = await evSince(page, n0);
+  const rights = evs.filter(e => e.type === 'right').map(e => e.id);
+  check(rights.join() === notes.join(), 'right order ' + rights.join() + ' vs the tune ' + notes.join());
+  check(!evs.some(e => e.type === 'wrong'), 'a wrong while copying the tune: ' + types(evs));
+  const rd = evs.find(e => e.type === 'roundDone');
+  check(rd && rd.stars === 3, 'stars for a clean copy: ' + JSON.stringify(rd));
+  await page.waitForTimeout(800);
+  const lit = await page.evaluate(() => SE.debug.world.lanterns.map(l => +l.lit.toFixed(2)));
+  check(lit.length >= notes.length && lit.slice(0, notes.length).every(v => v >= 0.85), 'pods not lit after the tune: ' + JSON.stringify(lit));
+};
+T.wrong_replay = async ({ page, cdp, url, d }) => {
+  // a wrong egg after the demo → wrong {replay:true} + kind words ("… Listen again!"), replayDelay later a replay demo from
+  // the current step (remaining notes) with no 2nd "Listen again!"; then the right egg works. A 2nd miss → hint, no replay.
+  await setupRound(page, url, { seed: 26, age: 5 });
+  const i = await info(page);
+  check(i.others.length, 'no other egg to tap');
+  const nn = await page.evaluate(() => SE.debug.world.cur.steps.length);
+  const v0 = await page.evaluate(() => SE.debug.voiceLog.length), n0 = await evLen(page);
+  await tap(cdp, page, i.others[0].at);
+  await page.waitForTimeout(300);
+  let evs = await evSince(page, n0);
+  const w = evs.find(e => e.type === 'wrong');
+  check(w && w.id === i.others[0].id && w.replay === true, 'wrong {replay:true}: ' + JSON.stringify(w) + ' ' + types(evs));
+  check(!evs.some(e => e.type === 'right' || e.type === 'hint'), 'right / hint after one wrong: ' + types(evs));
+  await waitDemoStart(page, n0, 8000);
+  evs = await evSince(page, n0);
+  const ds = evs.find(e => e.type === 'demoStart'), rd = await page.evaluate(() => SE.CONFIG.replayDelay);
+  check(ds.replay === true && ds.from === 0 && ds.n === nn, 'replay demoStart: ' + JSON.stringify(ds));
+  check(Math.abs(ds._t - w._t - rd) < 0.15, `replay ${(ds._t - w._t).toFixed(2)} s after the wrong (want ${rd})`);
+  await shot(page, d, 'e-replay');
+  check(await page.evaluate(() => SE.debug.answer() === null && !SE.debug.world.interactive), 'interactive during the replay');
+  await page.waitForFunction(n => window.__ev.slice(n).some(e => e.type === 'ask' && e.replay && e.afterDemo), n0, { timeout: 15000, polling: 'raf' });
+  await page.waitForTimeout(150);
+  evs = await evSince(page, n0);
+  check(evs.filter(e => e.type === 'demoNote').length === nn, 'replay demoNotes: ' + types(evs));
+  const log = await page.evaluate(n => SE.debug.voiceLog.slice(n).map(x => x.text), v0);
+  const listens = log.filter(t => LISTEN.en.test(t));
+  check(log.length && /listen again|let.s listen/i.test(log[0]) && !RAW.test(log[0]), 'the wrong line is not "That\'s … Listen again!": ' + JSON.stringify(log));
+  check(listens.length === 1, `"Listen again" said ${listens.length} times around one replay (want 1: the wrong line): ` + JSON.stringify(log));
+  check(log.some(t => TURN.en.test(t)), 'no "Your turn!" after the replay: ' + JSON.stringify(log));
+  // the 2nd miss: the hint glow, no replay
+  await waitAsk(page);
+  const j = await info(page);
+  const n1 = await evLen(page);
+  await tap(cdp, page, j.others[0].at);
+  await page.waitForTimeout(2600);
+  evs = await evSince(page, n1);
+  const w2 = evs.find(e => e.type === 'wrong');
+  check(w2 && !w2.replay && evs.some(e => e.type === 'hint') && !evs.some(e => e.type === 'demoStart'), '2nd miss: hint, no replay: ' + types(evs) + ' ' + JSON.stringify(w2));
+  const n2 = await evLen(page);
+  await tap(cdp, page, j.at); await page.waitForTimeout(300);
+  check((await evSince(page, n2)).some(e => e.type === 'right' && e.id === j.a), 'the right egg after a replay + hint');
+};
+T.rotate_mid_demo = async ({ page, cdp, url, d }) => {
+  // rotate while a spark flies: eggs + cushions stay on screen, the demo finishes (every note lands), "Your turn!" follows
+  await setupDemo(page, url, { seed: 27, age: 5 });
+  await page.waitForFunction(() => SE.debug.world.sparks.length > 0, null, { timeout: 8000, polling: 'raf' });
+  const n = await page.evaluate(() => SE.debug.world.demo.list.length);
+  await page.setViewportSize({ width: d.viewport.height, height: d.viewport.width });
+  await page.waitForTimeout(400);
+  await shot(page, d, 'f-demo-rotated');
+  const s = await page.evaluate(() => ({ out: window.__qa.outside(), sp: SE.debug.world.sparks.map(q => [q.x, q.y]), ph: SE.debug.world.phase, W: SE.debug.view().W, H: SE.debug.view().H }));
+  check(s.out.length === 0, 'outside the screen after rotating mid-demo: ' + s.out.join('; '));
+  check(s.sp.every(([x, y]) => isFinite(x) && isFinite(y) && x >= -50 && y >= -50 && x <= s.W + 50 && y <= s.H + 50), 'a spark off the new layout: ' + JSON.stringify(s));
+  await page.waitForFunction(() => window.__ev.some(e => e.type === 'ask' && e.afterDemo), null, { timeout: 15000, polling: 'raf' });
+  const evs = await evSince(page, 0);
+  check(evs.filter(e => e.type === 'demoNote').length === n, `demoNotes ${evs.filter(e => e.type === 'demoNote').length} of ${n} after a rotation`);
+  const last = await page.evaluate(() => { const w = SE.debug.world; return window.__ev.filter(e => e.type === 'demoNote').map(e => { const c = w.eggById(e.id); return Math.hypot(e.x - c.cx, e.y - c.cy); }); });
+  check(last.slice(-1)[0] < 60, 'the note after the rotation did not land on its egg (offset ' + last.slice(-1)[0] + ')');
+  await waitAsk(page);
+  const i = await info(page), n1 = await evLen(page);
+  await tap(cdp, page, i.at); await page.waitForTimeout(300);
+  check((await evSince(page, n1)).some(e => e.type === 'right' && e.id === i.a), 'tap after a mid-demo rotation');
+  await page.setViewportSize(d.viewport);
+  await page.waitForTimeout(500);
+  const out2 = await page.evaluate(() => window.__qa.outside());
+  check(out2.length === 0, 'outside the screen after rotating back: ' + out2.join('; '));
+};
+async function demoVoice(page, url, lang) {
+  // the demo's lines in the voice log, in order: listen → one name per note (= sayDemo) → your turn; no raw keys
+  await setupDemo(page, url, { seed: 28, age: 4, lang });
+  await page.waitForFunction(() => window.__ev.some(e => e.type === 'ask' && e.afterDemo), null, { timeout: 15000, polling: 'raf' });
+  await page.waitForTimeout(300);
+  const r = await page.evaluate(L => {
+    const log = SE.debug.voiceLog.map(x => ({ text: x.text, lang: x.lang }));
+    const notes = window.__ev.filter(e => e.type === 'demoNote');
+    const want = notes.map(e => SE.I18N.sayDemo(L, Object.assign({}, e._ctx || {}, e)));
+    return { log, want };
+  }, lang);
+  const texts = r.log.map(x => x.text);
+  const li = texts.findIndex(t => LISTEN[lang].test(t)), ti = texts.findIndex((t, k) => k > li && TURN[lang].test(t));
+  check(li >= 0, `${lang}: no "listen" demo line: ` + JSON.stringify(texts));
+  check(ti > li, `${lang}: no "your turn" line after the demo: ` + JSON.stringify(texts));
+  check(r.want.length >= 1 && r.want.every(Boolean), `${lang}: sayDemo gave an empty name: ` + JSON.stringify(r.want));
+  let k = li;
+  for (const wname of r.want) { const j = texts.indexOf(wname, k + 1); check(j > li && j < ti, `${lang}: note name "${wname}" not between listen and your turn: ` + JSON.stringify(texts)); k = j; }
+  const raw = texts.filter(t => !t || RAW.test(t));
+  check(raw.length === 0, `${lang}: raw / undefined / {param} lines: ` + JSON.stringify(raw));
+  if (lang === 'vi') check(VI_CHARS.test(texts[li]) && VI_CHARS.test(texts[ti]) && r.want.every(t => VI_CHARS.test(t)), 'VI demo lines without diacritics: ' + JSON.stringify(texts.slice(li, ti + 1)));
+  check(r.log.slice(li).every(x => !x.lang || x.lang === lang), `${lang}: voice log lines in another language: ` + JSON.stringify(r.log.slice(li)));
+  console.log(`      demo_voice ${lang}: ${JSON.stringify(texts.slice(li, ti + 1))}`);
+}
+T.demo_voice = async ({ page, url }) => { await demoVoice(page, url, 'en'); await demoVoice(page, url, 'vi'); };
+
+const CORE = ['boot_title', 'demo_harmless', 'demo_copy_tune', 'wrong_replay', 'rotate_mid_demo', 'tap_right', 'tap_wrong', 'swipe_from_right', 'swipe_from_sky', 'rim_tap', 'tap_sky_soft', 'song_swipe', 'song_band_press', 'rotate_mid_round', 'rotate_bouncing', 'surprise_lamb', 'surprise_bird', 'surprise_fireflies'];
+const EXTRA = ['two_misses_hint', 'assist_young', 'beat_count', 'beat_nudge', 'rotate_beat', 'animal_prompt', 'cymbal_tap', 'song_tap', 'song_auto', 'rio_poke', 'talk_time_tap', 'pause_resume', 'pause_mid_demo', 'visibility_pause', 'demo_voice',
   'second_finger_ignored', 'language_switch', 'parent_gate', 'settings_persist', 'audio_chain_volume', 'release_over_hud', 'url_age_shown'];
 
 async function runDevice(browser, url, d) {
@@ -1152,26 +1431,52 @@ async function runBot(browser, url, r) {
   try {
     const t0 = Date.now();
     await page.goto(`${url}?bot=1&speed=${BOT_SPEED}&autostart=1&mute=1&age=${r.age}&lang=${r.lang}&seed=${20 + r.age}`);
+    await page.waitForFunction(() => window.SE && SE.debug && SE.debug.world, null, { timeout: 20000, polling: 'raf' });
+    await page.evaluate(() => window.__qa.hook());
     await page.waitForFunction(() => window.SE && SE.debug && SE.debug.mode === 'done', null, { timeout: 600000, polling: 500 });
     await page.waitForTimeout(1200);
     await page.screenshot({ path: path.join(OUT, `bot-age${r.age}-${r.lang}-done.png`) });
-    const res = await page.evaluate(() => ({ stats: SE.debug.stats, levels: SE.debug.world.levels, age: SE.debug.world.age, asks: window.__asks, said: window.__said.map(x => ({ text: x.text, lang: x.lang })), log: SE.debug.voiceLog.slice(), doneVisible: !document.getElementById('scrDone').classList.contains('hidden'), doneTitle: document.getElementById('doneTitle').textContent, bubbles: [] }));
+    const res = await page.evaluate(L => {
+      // the hook goes in while the page boots (autostart): start at the first complete round
+      const ev = window.__ev.slice(Math.max(0, window.__ev.findIndex(e => e.type === 'round'))), bad = [], open = [];
+      let inDemo = false, demos = 0, ends = 0, replays = 0, notes = 0, counts = 0;
+      for (const e of ev) {
+        if (e.type === 'demoStart') { if (inDemo) open.push('demoStart inside a demo'); inDemo = true; demos++; if (e.replay) replays++; }
+        else if (e.type === 'demoEnd') { inDemo = false; ends++; }
+        else if (inDemo && ['right', 'wrong', 'count', 'soft', 'hint', 'assist', 'stepDone', 'pokeRio'].includes(e.type)) bad.push(e.type + ':' + e.id);
+        if (e.type === 'demoNote') notes++;
+        if (e.type === 'demoCount') counts++;
+      }
+      const names = ev.filter(e => e.type === 'demoNote').map(e => SE.I18N.sayDemo(L, Object.assign({}, e._ctx || {}, e)));   // as main's ev2(e)
+      return { stats: SE.debug.stats, levels: SE.debug.world.levels, age: SE.debug.world.age, asks: window.__asks, said: window.__said.map(x => ({ text: x.text, lang: x.lang })), log: SE.debug.voiceLog.slice(),
+        doneVisible: !document.getElementById('scrDone').classList.contains('hidden'), doneTitle: document.getElementById('doneTitle').textContent,
+        demo: { demos, ends, replays, notes, counts, bad: bad.slice(0, 6), nbad: bad.length, open, afterDemoAsks: ev.filter(e => e.type === 'ask' && e.afterDemo).length, rounds: ev.filter(e => e.type === 'round').length }, names };
+    }, r.lang);
     const s = res.stats;
     const secs = ((Date.now() - t0) / 1000).toFixed(0);
     check(res.age === r.age, 'played age ' + res.age);
     check(res.doneVisible && res.doneTitle && !RAW.test(res.doneTitle), 'done screen: ' + JSON.stringify(res.doneTitle));
     check(s.rounds >= 12 && s.correct >= 24 && s.talks >= 4 && s.songs >= 12, 'session too short: ' + JSON.stringify(s));
-    const saidSet = new Set(res.said.map(x => x.lang + '|' + x.text));
-    const missing = res.asks.filter(a => !saidSet.has(a.lang + '|' + a.text));
+    // the demo: one per round at least (+ one per later beat step + replays); balanced; nothing judged inside one
+    const D = res.demo;
+    check(D.demos >= D.rounds && D.rounds >= 12 && D.ends === D.demos && D.open.length === 0, 'demo starts / ends / rounds: ' + JSON.stringify(D));
+    check(D.nbad === 0, `${D.nbad} judged / soft / poke events during demos: ` + JSON.stringify(D.bad));
+    check(D.afterDemoAsks === D.demos, 'ask {afterDemo} after every demo: ' + JSON.stringify(D));
+    check(D.notes + D.counts >= D.demos, 'demos without notes: ' + JSON.stringify(D));
     check(res.asks.length >= 24, 'too few prompts built: ' + res.asks.length);
     check(res.asks.every(a => a.lang === r.lang), 'prompts in the wrong language: ' + JSON.stringify(res.asks.filter(a => a.lang !== r.lang).slice(0, 2)));
-    check(missing.length === 0, `${missing.length}/${res.asks.length} prompts never reached the voice: ` + JSON.stringify(missing.slice(0, 2)));
+    // the echo flow: the voice says the demo lines (listen / note names / your turn), the bubble keeps the full prompt
+    const saidT = res.said.map(x => x.text), saidSet = new Set(saidT);
+    const nListen = saidT.filter(t => LISTEN[r.lang].test(t)).length, nTurn = saidT.filter(t => TURN[r.lang].test(t)).length;
+    check(nListen >= D.rounds && nTurn >= D.rounds, `demo lines spoken: listen ${nListen}, your turn ${nTurn} for ${D.rounds} rounds`);
+    const missNames = res.names.filter(t => !t || !saidSet.has(t));
+    check(missNames.length === 0, `${missNames.length}/${res.names.length} demo note names (sayDemo) never sent to the voice: ` + JSON.stringify(missNames.slice(0, 4)));
     const raw = res.said.filter(x => !x.text || RAW.test(x.text));
     check(raw.length === 0, 'spoken lines with a raw key / {param} / undefined: ' + JSON.stringify(raw.slice(0, 4)));
     check(res.log.length > 0 && res.log.every(x => x.lang === r.lang), 'voice log language: ' + JSON.stringify(res.log.filter(x => x.lang !== r.lang).slice(0, 2)));
     const logSet = new Set(res.log.map(x => x.text));
-    const tail = res.asks.slice(-10).filter(a => !logSet.has(a.text));
-    check(tail.length === 0, 'SE.debug.voiceLog misses recent prompts: ' + JSON.stringify(tail.slice(0, 2)));
+    const tail = saidT.slice(-10).filter(t => !logSet.has(t));
+    check(tail.length === 0, 'SE.debug.voiceLog misses recent lines: ' + JSON.stringify(tail.slice(0, 2)));
     if (r.lang === 'vi') {
       const notVi = res.said.filter(x => !VI_CHARS.test(x.text));
       check(notVi.length / res.said.length < 0.1, 'VI voice has English-looking lines: ' + JSON.stringify(notVi.slice(0, 6).map(x => x.text)));
@@ -1188,7 +1493,7 @@ async function runBot(browser, url, r) {
     else check(after.mode === 'title' && after.title && +after.stars > 0, 'Home from the done screen: ' + JSON.stringify(after));
     check(errors.length === 0, 'errors: ' + errors.slice(0, 3).join(' | '));
     record(d.name, name, true, '');
-    console.log(`      ${name}: ${secs}s, topics ${res.levels.join('/')}, rounds ${s.rounds}, right ${s.correct}, wrong ${s.wrong}, brushes ${s.brushes}, hints ${s.hints}, assists ${s.assists}, songs ${s.songs} (auto ${s.songAuto}), talks ${s.talks}, surprises ${s.lambTaps}/${s.birdTaps}/${s.fireflyTaps}, prompts ${res.asks.length}, voice lines ${res.said.length}`);
+    console.log(`      ${name}: ${secs}s, topics ${res.levels.join('/')}, rounds ${s.rounds}, right ${s.correct}, wrong ${s.wrong}, brushes ${s.brushes}, hints ${s.hints}, assists ${s.assists}, songs ${s.songs} (auto ${s.songAuto}), talks ${s.talks}, surprises ${s.lambTaps}/${s.birdTaps}/${s.fireflyTaps}, prompts ${res.asks.length}, voice lines ${res.said.length}, demos ${D.demos} (replays ${D.replays}, notes ${D.notes}, counts ${D.counts})`);
   } catch (e) {
     let st = ''; try { st = JSON.stringify(await page.evaluate(() => SE.debug.getState())); } catch (x) { /* ignore */ }
     record(d.name, name, false, (e && e.message ? e.message.split('\n')[0] : e) + (st ? '  state ' + st.slice(0, 400) : ''));
@@ -1201,7 +1506,7 @@ async function runBot(browser, url, r) {
   const browser = await chromium.launch();
   const t0 = Date.now();
   try {
-    const devs = DEVICES.filter(d => !process.env.ONLY || d.name === process.env.ONLY);
+    const devs = process.env.BOT_ONLY ? [] : DEVICES.filter(d => !process.env.ONLY || d.name === process.env.ONLY);
     for (const d of devs) await runDevice(browser, srv.url, d);
     const bots = process.env.SKIP_BOT || process.env.ONLY || process.env.TESTS ? [] : BOT_RUNS;
     for (let k = 0; k < bots.length; k += BOT_PAR) await Promise.all(bots.slice(k, k + BOT_PAR).map(r => runBot(browser, srv.url, r)));

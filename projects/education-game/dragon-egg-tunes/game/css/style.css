@@ -1,13 +1,13 @@
-/* Rio's Singing Eggs — mobile-first shell (iPhone / iPad Safari, portrait + landscape). Camp palette: warm log-wood rims
- * (the egg beam), cocoa ink, cream panels (answer colours stay for the eggs only). */
+/* Rio's Singing Eggs — mobile-first shell (iPhone / iPad Safari, portrait + landscape). Valley palette: warm straw rims
+ * (the nests), cocoa ink, cream panels (answer colours stay for the eggs only). */
 :root {
-  --ink: #3f3a5e;
-  --cream: #fbfdff;
+  --ink: #4A3828;
+  --cream: #FFFBF2;
   --green: #45b864; --green-d: #2a8343;
   --orange: #ff9a2e; --orange-d: #c4650c;
   --blue: #3c8de8; --blue-d: #1f5ba8;
   --sky: #FFF1E4;
-  --rim: #B9A6E0; --rim-d: #8E7CC4; --deep: #4F4486; --foam: #FBF7FF;
+  --rim: #D9B77A; --rim-d: #A88443; --deep: #6B4526; --foam: #FFF8EA;
   --sa-t: env(safe-area-inset-top, 0px); --sa-r: env(safe-area-inset-right, 0px);
   --sa-b: env(safe-area-inset-bottom, 0px); --sa-l: env(safe-area-inset-left, 0px);
   --u: min(1vw, 1vh);            /* 1 % of the short side */
@@ -33,7 +33,7 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
   padding: calc(var(--sa-t) + 12px) calc(var(--sa-r) + 12px) calc(var(--sa-b) + 12px) calc(var(--sa-l) + 12px); z-index: 10; }
 .screen.dim { background: rgba(60, 40, 20, .4); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
 .panel { background: var(--cream); border-radius: 28px; padding: 22px 24px; max-width: min(640px, 100%); width: 100%;
-  max-height: 100%; box-shadow: 0 8px 0 rgba(40, 60, 110, .22), 0 18px 40px rgba(0, 0, 0, .22);
+  max-height: 100%; box-shadow: 0 8px 0 rgba(90, 60, 30, .2), 0 18px 40px rgba(0, 0, 0, .22);
   border: 4px solid var(--rim); text-align: center; animation: pop .32s cubic-bezier(.3, 1.6, .5, 1); }
 .panel h2 { margin: 0 0 14px; font-size: clamp(26px, 5.2 * var(--u), 40px); font-weight: 800; letter-spacing: .5px; }
 .scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
@@ -58,12 +58,13 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 .title-top { width: 100%; display: flex; justify-content: space-between; align-items: flex-start; }
 .title-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
   padding-bottom: 6vh; }
-.logo { margin: 0; max-width: 80vw; text-align: center; line-height: .95; font-weight: 900; font-size: clamp(44px, 11 * var(--u), 108px);
+.logo { margin: 0; max-width: 80vw; text-align: center; line-height: 1.1; font-weight: 900; font-size: clamp(44px, 11 * var(--u), 108px);
   color: #fff; letter-spacing: 1px;
   text-shadow: 0 4px 0 var(--deep), 0 8px 0 rgba(0, 0, 0, .14), 0 0 24px rgba(255, 255, 255, .5);
   -webkit-text-stroke: 2px var(--deep); paint-order: stroke fill; }
 .logo span { display: inline-block; }
-#logo2 { color: #ffd23f; }
+#logo2 { color: #ffd23f; white-space: nowrap; }
+@media (orientation: portrait) { .logo { font-size: clamp(40px, 10.5vw, 96px); max-width: 94vw; } }
 .tagline { margin: 4px 0 8px; font-size: clamp(17px, 3 * var(--u), 26px); font-weight: 700; color: var(--ink);
   background: rgba(255, 255, 255, .72); padding: 6px 16px; border-radius: 99px; text-align: center; }
 .btn-play { width: clamp(120px, 24 * var(--u), 190px); aspect-ratio: 1; border-radius: 50%; background: var(--green);
@@ -83,7 +84,7 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 .chip.on { background: var(--blue); color: #fff; box-shadow: 0 3px 0 var(--blue-d); }
 
 .gear-btn { position: relative; width: 60px; height: 60px; border-radius: 50%; background: rgba(255, 255, 255, .7); display: grid; place-items: center; }
-.gear-btn .gear { width: 30px; fill: #6a5f9a; }
+.gear-btn .gear { width: 30px; fill: #7A5532; }
 .gear-btn .ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
 .gear-btn .ring circle { fill: none; stroke: var(--orange); stroke-width: 5; stroke-linecap: round;
   stroke-dasharray: 132; stroke-dashoffset: calc(132 * (1 - var(--p, 0))); }
@@ -121,16 +122,16 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 .hud-stars.bump { animation: bump .45s cubic-bezier(.3, 1.8, .5, 1); }
 @keyframes bump { 40% { transform: scale(1.28); } }
 .hud-dots { display: flex; gap: 5px; background: rgba(255, 255, 255, .6); padding: 8px 10px; border-radius: 99px; }
-.hud-dots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(20, 70, 90, .22); }
+.hud-dots i { width: 12px; height: 12px; border-radius: 50%; background: rgba(110, 80, 40, .25); }
 .hud-dots i.done { background: #ffc531; box-shadow: 0 0 0 2px #fff inset; }
 .hud-dots i.now { background: #fff; box-shadow: 0 0 0 3px #ffc531 inset; }
 .icon-btn { width: 56px; height: 56px; border-radius: 50%; background: rgba(255, 255, 255, .85); display: grid; place-items: center;
   box-shadow: 0 3px 0 rgba(0, 0, 0, .12); }
-.icon-btn svg { width: 26px; fill: #5a5088; }
+.icon-btn svg { width: 26px; fill: #7A5532; }
 
 /* ---------- speech bubble ---------- */
 .bubble { position: absolute; z-index: 4; display: flex; align-items: center; background: #fff; border-radius: 26px;
-  padding: 10px 20px; border: 3px solid var(--rim); box-shadow: 0 5px 0 rgba(10, 50, 70, .16);
+  padding: 10px 20px; border: 3px solid var(--rim); box-shadow: 0 5px 0 rgba(90, 60, 30, .2);
   font-weight: 800; line-height: 1.15; color: var(--ink); transform-origin: 0 60%; cursor: pointer; }
 /* a little tail down-left, towards Rio on the meadow */
 .bubble::before { content: ""; position: absolute; left: 38px; bottom: -21px; border: 11px solid transparent; border-top: 18px solid var(--rim); border-bottom: 0; }
@@ -143,7 +144,7 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 .talk-q { font-size: clamp(20px, 3.4 * var(--u), 28px); font-weight: 800; margin: 4px 0 14px; }
 .talk-choices { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 .talk-choices button { min-width: 108px; min-height: 108px; padding: 8px 14px; border-radius: 22px; background: #fff;
-  border: 4px solid var(--rim); box-shadow: 0 6px 0 rgba(10, 60, 80, .2); font-size: 34px; font-weight: 900;
+  border: 4px solid var(--rim); box-shadow: 0 6px 0 rgba(90, 60, 30, .2); font-size: 34px; font-weight: 900;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
 .talk-choices button small { font-size: 16px; font-weight: 800; }
 .talk-choices button canvas { width: 88px; height: 88px; }
@@ -151,7 +152,7 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 .talk-choices button.glow { border-color: #ffc531; box-shadow: 0 0 0 6px rgba(255,197,49,.45), 0 6px 0 rgba(40,60,110,.2); animation: breathe 1s ease-in-out infinite; }
 .talk-choices button.wrongpick { opacity: .45; }
 .talk-choices button:active { transform: translateY(4px); }
-.mic-btn { white-space: nowrap; margin-top: 16px; display: inline-flex; align-items: center; gap: 10px; min-height: 60px; padding: 8px 22px; border-radius: 99px;
+.mic-btn { white-space: normal; max-width: 100%; text-align: left; line-height: 1.15; margin-top: 16px; display: inline-flex; align-items: center; gap: 10px; min-height: 60px; padding: 8px 22px; border-radius: 99px;
   background: #ff6f91; color: #fff; font-size: 20px; font-weight: 800; box-shadow: 0 5px 0 #c0405f; }
 .mic-btn svg { width: 30px; fill: #fff; }
 .mic-btn.listening { animation: breathe 1s ease-in-out infinite; background: #ff3d6e; }

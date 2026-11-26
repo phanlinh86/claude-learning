@@ -26,9 +26,9 @@
   var CONFIG = {
     // ---- timing / state machine (s)
     step: 1 / 120, maxFrame: 1.0,
-    roundsPerLevel: 4, chapterTimeLimit: 70, chapterMinRounds: 2,   // 75 → 70 with the demos (sim: typical chapter p90 ≤ 100 s)
+    roundsPerLevel: 4, chapterTimeLimit: 68, chapterMinRounds: 2,   // 75 → 70 with the demos (sim: typical chapter p90 ≤ 100 s)
     shortBudget: [1e9, 26, 42, 56],   // s into the chapter: a round starting later than this is short (≤ 2 notes / 1 beat step); was 30 / 48 / 62
-    introTime: 2.5, levelDoneTime: 3.6,
+    introTime: 3.5, levelDoneTime: 3.6,
     talkAfterAnswer: 1.6, talkAskTime: 12, talkGlowAfterAsks: 2, talkMaxAsks: 3, talkGiveUp: 12,
 
     // ---- layout (DESIGN §2; px)
@@ -41,7 +41,10 @@
     stageX0Land: 250, stageRightLand: 40, stageSide: 36,
     floorLand: 110,          // landscape: cushion bottoms ≥ 110 px above the ground (the lamb walks below them)
     floorClear: 40,          // portrait: cushion bottoms ≥ 40 px above Rio's head, the cymbal top and the ground
-    garlandBelowLand: 46, garlandBelowPort: 84, garlandSag: 22, garlandSide: 60, lanternR: 22, lanternDrop: 34, noteRoom: 14,
+    garlandBelowLand: 46, garlandBelowPort: 84, garlandSag: 22, garlandSide: 60, lanternR: 22, lanternDrop: 46, noteRoom: 14,
+    // the drawn seed pod (render passes r to drawGarland): r 34 on phones / tall screens, else 28; it hangs ≈ podDropK × r below the
+    // vine (pod centre 0.86 r + the pod × the 1.12 "now" pulse ≈ 1.98 r), so the layout reserves max(lanternDrop, podDropK × r) under the string
+    lanternRDraw: 28, lanternRDrawPhone: 34, podDropK: 2.0, garlandBelowLandPhone: 12,   // landscape phones: the vine sits 12 px under the bubble (vertical room for the eggs)
     // item = the egg size, chosen PER ROUND from its real egg count n; phones / tall screens grow up to itemCap. Portrait rounds
     // that would get small eggs stand in a zig-zag (alternate high / low pads, zigK × item + zigGap apart vertically).
     item: { 3: 112, 4: 112, 5: 112, 6: 104, 7: 104 }, itemCap: 150, itemCapTall: 170, itemMin: { 3: 104, 4: 104, 5: 104, 6: 96, 7: 96 },
@@ -86,8 +89,9 @@
     outStagger: 0.08, outHop: 18, outAcc: 1500, outFade: [0.25, 0.45], outSway: 10, outTime: 0.9, cushionOutDelay: 0.12, cushionOutTime: 0.28,
 
     // ---- demo: Rio plays the tune first (DESIGN §5.2); demo: false skips it (tests, ?nodemo=1)
-    demo: true, demoLead: 1.3, demoLeadReplay: 0.9, sparkTime: 0.45, sparkApex: 70, sparkFade: 0.08,
-    demoGap: { 3: 1.35, 4: 1.25, 5: 1.1, 6: 0.95, 7: 0.85 }, demoAnimalGap: 0.25, demoTail: 0.5, demoBeatGap: 0.6,
+    demo: true, demoLead: 1.5, demoLeadReplay: 1.6, sparkTime: 0.45, sparkApex: 70, sparkFade: 0.08,
+    demoGap: { 3: 1.5, 4: 1.4, 5: 1.35, 6: 1.05, 7: 0.95 }, demoAnimalGap: 0.25, demoTail: 0.9,   // playtest P1: VI names keep up with the sparks
+    demoBeatGap: 0.6,
     replayDelay: 1.6, pokeReplayCooldown: 3, demoShowIcon: 0.8, demoNowTail: 0.35, lanternNowRate: 8, hiddenFromAge: 6, singTime: 0.9,
     rioMouthX: 0.416, rioMouthY: 0.579,   // Rio's mouth (spark origin) = feet (x, y) + (0.22 × box w, −0.72 × box h): tune to the art
 
@@ -235,9 +239,10 @@
     var keepTop = 0;
     hk.forEach(function (b) { if (b.y + b.h < H / 2) keepTop = Math.max(keepTop, b.y + b.h); });
     var bb = bubble.y + bubble.h;
-    var gy = Math.max(bb, keepTop) + (portrait ? cfg.garlandBelowPort : cfg.garlandBelowLand);
-    var garland = { x0: ins.left + cfg.garlandSide, x1: W - ins.right - cfg.garlandSide, y: gy, sag: cfg.garlandSag };
-    var lanternBottom = gy + cfg.garlandSag + cfg.lanternDrop;
+    var gy = Math.max(bb, keepTop) + (portrait ? cfg.garlandBelowPort : phone ? cfg.garlandBelowLandPhone : cfg.garlandBelowLand);
+    var podR = (tall || phone) ? cfg.lanternRDrawPhone : cfg.lanternRDraw;
+    var garland = { x0: ins.left + cfg.garlandSide, x1: W - ins.right - cfg.garlandSide, y: gy, sag: cfg.garlandSag, podR: podR };
+    var lanternBottom = gy + cfg.garlandSag + Math.max(cfg.lanternDrop, Math.ceil(cfg.podDropK * podR));
     var topLimit = Math.max(lanternBottom + cfg.noteRoom, bb + 8, keepTop + 8);   // hit circle tops stay below this
     // floor: the lowest cushion bottom (landscape: the lamb walks below; portrait: above Rio's head and the cymbal)
     var floor = portrait ? Math.min(rioBox.y + cfg.rioPad, cymbalBox.y, groundY) - cfg.floorClear : groundY - cfg.floorLand;
@@ -685,7 +690,7 @@
     L.lanterns = lanternsFor(L, nL);
     var hide = this.age >= cfg.hiddenFromAge;
     this.lanterns = L.lanterns.map(function (p, i) {   // one pod per note: its icon = the thing of that note (beat mode: null → the card numeral)
-      var st = cur.steps[i], icon = st && st.mode === 'beat' ? null : (self.eggById(cur.song[i]) || {}).thing || null;
+      var st = cur.steps[i], icon = st && st.mode === 'beat' ? { kind: 'number', n: st.need } : (self.eggById(cur.song[i]) || {}).thing || null;
       return { x: p.x, y: p.y, lit: 0, color: null, swing: 0, vswing: 0, flash: 0, icon: icon, hidden: hide, now: 0,
         _plit: 0, _pswing: 0, _pnow: 0, _litT: 0, _showT: 0, _nowT: 0 };
     });
@@ -1096,9 +1101,10 @@
     this._emit({ type: 'wrong', id: c.id, thing: t, got: { nameKind: t.nameKind, nameValue: t.nameValue, kind: t.kind, color: t.color, shape: t.shape, n: t.n,
       animal: t.animal, text: t.text, size: t.size }, want: { nameKind: s.nameKind, nameValue: s.nameValue, promptKey: s.promptKey, params: s.params },
       streak: this.streak, misses: this.misses, replay: false, x: c.cx, y: c.cy });
-    this._noProgress();
-    // Rio replays the rest of the tune after the kind words, unless the hint glow is on (DESIGN §5.2)
     var ev = this.events[this.events.length - 1];
+    this._noProgress();
+    // Rio replays the rest of the tune after the kind words, unless the hint glow is on (DESIGN §5.2); the flag is set on the
+    // wrong event itself (found before _noProgress could emit hint / assistArmed after it: QA functional P3-1)
     if (this.cfg.demo && !this._glowing() && !this.hintHand) { this._replayT = this.cfg.replayDelay; if (ev && ev.type === 'wrong') ev.replay = true; }
     else this._replayT = -1;
   };
@@ -1577,6 +1583,9 @@
     var L = this.layout, lo = L.rioBox.x + L.rioBox.w + 90, hi = L.W - L.ins.right - 90, F = L.cymbal, best = (lo + hi) / 2, bd = 1e9;
     for (var x = lo; x <= hi; x += 10) {
       if (Math.abs(x - F.x) < F.w / 2 + 80) continue;
+      var ly = this._lambY(), under = (this.eggs || []).some(function (e) {   // never stop under a floating island (QA visual P2-9)
+        return e.state !== 'gone' && Math.abs(x - e.padX) < (e.cushionW || 140) * 0.6 + 40 && e.padY + 0.6 * (e.cushionW || 140) > ly - 80; });
+      if (under) continue;
       var d = Math.abs(x - L.W / 2);
       if (d < bd) { bd = d; best = x; }
     }

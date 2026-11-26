@@ -1,8 +1,8 @@
 # Rio's Singing Eggs — Voice, language and input
 
 Files: `game/js/i18n.js` (`SE.I18N`), `game/js/voice.js` (`SE.Voice`), `game/js/input.js` (`SE.Input`).
-Tests: `node tests/unit/i18n_voice.test.js` (≈ 21 000 checks; ≈ 58 000 once `content.js` has the baby animals — it is detected by
-`'dino'` and no `'cow'`): every key in both languages with identical key sets **and identical `{params}`**, every key that
+Tests: `node tests/unit/i18n_voice.test.js` (≈ 58 600 checks with the baby-animal `content.js`, detected by `SE.ANIMALS = [… 'dino' …]`;
+≈ 21 000 without it): every key in both languages with identical key sets **and identical `{params}`**, every key that
 `index.html` / `ui.js` / `main.js` use, 3 wordings per instruction and reaction, short lines (EN ≤ 11 words, VI ≤ 15 syllables;
 tune lines ≤ 6), Vietnamese diacritics and a warm "Bé ơi … nhé!" wording, every prompt × value, every name kind × value
 (DESIGN §6 names and animal sounds exactly), `eggPhrase` for every egg kind, **every `sayDemo` nameKind × value, `sayNext`,
@@ -21,7 +21,9 @@ The engine (voice queue, iOS fixes, matcher, kid-proofing) is the proven one fro
 - **TTS of "Rio" — no rewrite.** EN and VI voices both read it naturally; `speech()` keeps it as written (tested).
 - **Copy my tune**: Rio sings first ("Listen to my tune!" / "Bé nghe Rio hát nhé!"), naming each note with **just its name**
   ("Red!", "The star!", animals sound + name "Quack! The duckling!"), then "Your turn!" / "Đến lượt bé rồi!". Ages ≤ 5 hear a
-  soft cue for each next note ("…and blue!" / "…rồi màu xanh dương!"); ages ≥ 6 do not (memory). A wrong egg: "That’s the
+  soft cue for each next note after the first ("…and blue!" / "…rồi màu xanh dương!"); only age 3 also hears the first
+  name after "Your turn!" ("First, red!"); ages ≥ 6 get no cue (memory). Wrong lines have 2 short wordings ("That’s {got}.
+  Listen again!", "Oh, {got}! Listen again!"). A wrong egg: "That’s the
   yellow egg. Listen again!" / "Đây là quả trứng màu vàng. Bé nghe lại nhé!" and Rio replays the rest of the tune.
 - **Egg vocabulary**: EN tap / sing / egg / "La la!" / "Yes!" / "Lovely!"; VI **gõ / chạm / hát / quả trứng** ("quả" is the
   natural classifier: "quả trứng màu đỏ") / "Đúng rồi!" / "Hay quá!"; seed pods on the vine bloom: "A flower opens!" / "Hoa nở
@@ -44,7 +46,7 @@ The engine (voice queue, iOS fixes, matcher, kid-proofing) is the proven one fro
   {color}"** (tested). Bare form (`hue`) "đỏ".
 - **Counting (ages ≤ 4) = copy N taps**: Rio taps the big egg N times counting aloud ("One!", "Two!", "Three!" / "Một!" …), then
   "Your turn — tap the big egg three times!" / "Đến lượt bé — gõ quả trứng to ba cái nhé!" (classifier **cái** for taps; n = 1
-  "once" / "một cái"); the child's taps are counted the same way; the last one: "Three! You tapped it three times!" / "Ba! Bé gõ
+  "once", n = 2 "twice" / "một cái", "hai cái"); the child's taps are counted the same way; the last one: "Three! You tapped it three times!" / "Ba! Bé gõ
   đủ ba cái rồi!"; stopping halfway → "Two! One more!" / "Hai rồi! Thêm một cái nữa!".
 - **Never negative**: name what was tapped, then "Listen again!" (or, with the hint glow on, the goal: "Let’s tap the red
   one!"). Brushes, taps during the demo, volcano taps and stage presses are never mistakes and have no line. Maths never gives
@@ -65,7 +67,7 @@ promptKey, mode, thing }` (main's `ev2(e)`). Missing `thing` → rebuilt from `{
 | **`sayDemoStart(lang, e, rng?)`** | `demoStart` → "Listen to my tune!" / "Bé nghe Rio hát nhé!"; `e.replay` → "Listen again!" / "Bé nghe lại nhé!"; beat demo (`e.mode === 'beat'`) → "Count with me!" / "Bé đếm cùng Rio nhé!" |
 | **`sayDemo(lang, e)`** or `sayDemo(lang, nameKind, value, {thing, topic, promptKey, params}?)` | `demoNote` → just the name: "Red!", "Blue!", "The star!", "The blue star!" (p.shapes5), "The big egg!", "Seven dots!" (dots egg / p.count), "Five!", "Letter B!", "Small g!" · VI "Màu đỏ!", "Ngôi sao!", "Ngôi sao màu xanh dương!", "Quả trứng to!", "Bảy chấm!", "Năm!", "Chữ B!", "Chữ g thường!"; **animals = sound + name** "Quack! The duckling!" / "Cạp cạp! Vịt con!" (initial topic: the name only); '' when nothing to name |
 | `demoName(lang, e \| nameKind, value?)` | the same name without "!" ("red", "the star", "vịt con") |
-| **`sayTurn(lang, e, {age, cue?, rng?})`** | the `ask` line in the tune flow: beat step → "Your turn — tap the big egg three times!" / "Đến lượt bé — gõ quả trứng to ba cái nhé!"; `e.afterDemo` → "Your turn!" / "Đến lượt bé rồi!" + (cue) "First, red!" / "Đầu tiên là màu đỏ nhé!"; a later step → (cue) "…and blue!" / "…rồi màu xanh dương!", else **''** (say nothing). `cue` defaults to `age ≤ 5`; findAll steps never get a name |
+| **`sayTurn(lang, e, {age, cue?, rng?})`** | the `ask` line in the tune flow: beat step → "Your turn — tap the big egg three times!" / "Đến lượt bé — gõ quả trứng to ba cái nhé!"; `e.afterDemo` → "Your turn!" / "Đến lượt bé rồi!" + "First, red!" / "Đầu tiên là màu đỏ nhé!" **only at age ≤ 3** (playtest: at 4–5 it gave the tune away); a later step → "…and blue!" / "…rồi màu xanh dương!" at age ≤ 5, else **''** (say nothing). `cue: true/false` overrides both; findAll steps never get a name |
 | `sayNext(lang, e \| nameKind, value?, rng?)` | `turn.next`: "…and blue!", "…then the star!", "Now the duckling!" / "…rồi màu xanh dương!" ('' when nothing to name) |
 | `ask(lang, promptKey, params, {next?, rng?})` | the full prompt (bubble text, idle help, `?nodemo=1`): "Tap the red egg!" / "Bé ơi, gõ quả trứng màu đỏ nhé!", "Who says quack? Tap the duckling!" / "Ai kêu cạp cạp? Bé gõ vịt con nhé!", `p.beat` "Tap the big egg three times!" / "Bé ơi, gõ quả trứng to ba cái nhé!" (never a `next` opener) |
 | `sayRight(lang, e, rng?)` | `right` → the short name: "Yes! Red!", "Red! Lovely!", "La la! Red!" / "Đúng rồi! Màu đỏ!"; animals "Quack! The duckling!"; beat (`e.count {n}` or `params.n`) "Three! You tapped it three times!"; dots + `e.count` → "One, two, three dots!"; add/sub "Five! 2 + 3 is five!"; oddeven "Seven is odd!"; initial "D is for duckling!" |
@@ -95,7 +97,7 @@ have **no line**; speech is log-only at `speed > 1`.
 | **`demoNote {id, i, n, step, nameKind, nameValue, replay}`** | `sayDemo(lang, ev2(e))` ("Red!", "Quack! The duckling!") — Rio mood `talk` | **queued, never interrupts** (not `priority`); before queueing note i > 0 call `Voice.dropQueued()` so at most the current note waits (a late name behind the sparks is worse than none) |
 | **`demoCount {i, n}`** (beat demo) | `sayCount(lang, i)` ("One!", "Two!", "Three!" — also for i === n: no right line follows a demo) | **interrupt** (like the child's counts) |
 | **`demoEnd {replay}`** | — (the `ask` with `afterDemo` follows) | no line |
-| **`ask {…, echo, afterDemo, replay}`** | bubble: `ask(lang, promptKey, params, {next})` (the full text, for parents). Voice: **`e.echo` → `sayTurn(lang, e, {age})`**: `afterDemo` → "Your turn!" (+ "First, red!" for age ≤ 5), beat → "Your turn — tap the big egg three times!", a later step → the cue "…and blue!" (age ≤ 5) or nothing. No `echo` (`?nodemo=1`) → `ask(...)` as before | `afterDemo` / beat: **protected prompt** (`priority`); the cue: queued, not protected (a quick child's `right` cuts it); `''` → don't speak |
+| **`ask {…, echo, afterDemo, replay}`** | bubble: `ask(lang, promptKey, params, {next})` (the full text, for parents). Voice: **`e.echo` → `sayTurn(lang, e, {age})`**: `afterDemo` → "Your turn!" (+ "First, red!" for age ≤ 3), beat → "Your turn — tap the big egg three times!", a later step → the cue "…and blue!" (age ≤ 5) or nothing. No `echo` (`?nodemo=1`) → `ask(...)` as before | `afterDemo` / beat: **protected prompt** (`priority`); the cue: queued, not protected (a quick child's `right` cuts it); `''` → don't speak |
 | `count {i, n}` (child's beat) | `sayCount(lang, i)` for i < n; i === n → the `right` line starts with the number | interrupt |
 | `right {id, thing, count?}` | `sayRight(lang, ev2(e))` ("Yes! Red!", "Quack! The duckling!", "Three! You tapped it three times!") | interrupt (beat: always); then protected |
 | `beatNudge {i, n}` | `sayBeatNudge(lang, e)` | queue (counts as an idle nudge) |

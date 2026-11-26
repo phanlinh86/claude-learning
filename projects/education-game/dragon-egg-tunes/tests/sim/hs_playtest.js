@@ -14,10 +14,11 @@ const fs = require('fs');
 const path = require('path');
 const { fork } = require('child_process');
 const L = require('./lib');
+const { VoiceModel } = require('./voice_model');
 
 const args = process.argv.slice(2), get = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
 const N = +get('n', 120), config = JSON.parse(get('config', '{}')), proto = JSON.parse(get('proto', '{}'));
-const ALL = 'typical,slow3,swipey,perfect,tapper,swiper,spammer,beam,eggmer,stopper,bot0.5,bot0.8,bot1,absent';
+const ALL = 'typical,slow3,swipey,perfect,tapper,swiper,spammer,beam,eggmer,stopper,demotap,forget2,bot0.5,bot0.8,bot1,absent';
 const PROMPT_S = +get('prompt', 2.5);   // ≈ how long "Beat the big egg three times!" takes to say (iOS, rate 0.9)
 const QUIET = m => m === 'absent' || m === 'frozen';
 const MODELS = get('models', ALL).split(','), AGES = get('ages', '3,4,5,6,7').split(',').map(Number);
@@ -36,8 +37,10 @@ function runOne(o) {
   const w = L.mkWorld(o);
   const d = L.makeModel(o.model, w, o.age, o.seed + 1);
   const quiet = QUIET(o.model);
+  const VM = o.proto && o.proto.voice ? new VoiceModel(w, { lang: o.lang, age: o.age, proto: o.proto, seed: o.seed }) : null;
   const S = { model: o.model, age: o.age, done: false, nan: false, time: 0, stuckState: false, rounds: [], chapters: [], talks: 0, talkRight: 0, talkAuto: 0,
-    miss2NoHint: 0, offScreen: 0, topics: null, idles: [], maxEggs: 0, keys: [], repKey: 0, maxSwing: 0, beatCounts: 0, beatBrush: 0, beatNudges: 0, beatSteps: [], asks: 0, repAns: 0, firsts: 0, repFirst: 0, nudgeAt: [] };
+    miss2NoHint: 0, offScreen: 0, topics: null, idles: [], maxEggs: 0, keys: [], repKey: 0, maxSwing: 0, beatCounts: 0, beatBrush: 0, beatNudges: 0, beatSteps: [], asks: 0, repAns: 0, firsts: 0, repFirst: 0, nudgeAt: [], tunes: [], tuneRepChap: 0, tuneRepPrev: 0, firstNoteRep: 0, nTunes: 0 };
+  let chapTunes = [], prevTune = null, prevFirst = null;
   w.newSession();
   const dt = 1 / 30, cap = o.cap || (quiet ? 600 : 1800);
   let R = null, chap = null, t = 0, lastChange = 0, sig = '', B = null, prevAns = null, lastRoundAns = null;
@@ -45,7 +48,7 @@ function runOne(o) {
   const closeStep = () => { if (R && R.stepWrong >= 2 && R.stepHint === 0) S.miss2NoHint++; if (R) { R.stepWrong = 0; R.stepHint = 0; } };
   while (w.state !== 'sessionDone' && t < cap) {
     let inDemo = w.phase === 'demo';   // event-ordered: was the world in the demo when this event was emitted?
-    d.step(dt); w.update(dt); t += dt;
+    d.step(dt); if (VM) VM.gate(dt); w.update(dt); t += dt; if (VM) VM.tick(w.time);
     if (!finiteWorld(w)) { S.nan = true; break; }
     const Lw = w.layout;
     for (const c of w.eggs) {   // a standing egg (+ its cushion) must be fully on screen (enter falls from above, out floats away)
@@ -54,28 +57,33 @@ function runOne(o) {
       S.maxSwing = Math.max(S.maxSwing, c.hop);
     }
     S.maxEggs = Math.max(S.maxEggs, w.eggs.length);
+    if (R) { const lk = w.state === 'round' && (w.phase === 'enter' || w.phase === 'demo'); if (lk) R.lockCur += dt; else if (R.lockCur > 0) { R.lockMax = Math.max(R.lockMax, R.lockCur); R.locks.push(R.lockCur); R.lockCur = 0; } }
     const s2 = w.state + ':' + w.phase + ':' + w.level + ':' + w.round + ':' + w.step + ':' + w.eggs.filter(c => c.done).length + ':' + (w.card ? w.card.lit : '');
     if (s2 !== sig) { sig = s2; lastChange = t; } else if (!quiet && t - lastChange > 200) { S.stuckState = s2; break; }
     for (const e of w.drainEvents()) {
       if (d.onEvent) d.onEvent(e);
+      if (VM) VM.onEvent(e);
       if (e.type === 'demoStart') inDemo = true; else if (e.type === 'demoEnd') inDemo = false;
       if (R && inDemo && (e.type === 'right' || e.type === 'wrong' || e.type === 'count' || e.type === 'soft' || e.type === 'hint' || e.type === 'assistArmed')) R.demoJudged++;
       switch (e.type) {
         case 'session': S.topics = e.levels; break;
-        case 'demoStart': if (R) { R.demoT0 = w.time; if (e.replay) R.replays++; } break;
-        case 'demoEnd': if (R && R.demoT0 >= 0) { R.demoT += w.time - R.demoT0; R.demoT0 = -1; } break;
+        case 'demoStart': if (R) { R.demoT0 = w.time; R.demoRep = e.replay; R.demoFirst = e.first; if (e.replay) R.replays++; if (w.phase === 'demo' && R.firstAsk) R.inPlay = true; } break;
+        case 'demoEnd': if (R && R.demoT0 >= 0) { const d0 = w.time - R.demoT0; R.demoT += d0; if (R.demoFirst) R.firstDemo = d0; else if (R.demoRep) { R.repDemoT += d0; R.repDemos.push(d0); } else R.stepDemoT += d0; if (R.firstAsk) R.demoInPlay += d0; R.demoT0 = -1; } if (R && R.wrongAt >= 0 && e.replay) { R.wrongToTurn.push(w.time - R.wrongAt); R.wrongAt = -1; } break;
         case 'pokeRio': if (R && e.replay) R.pokeReplays++; break;
-        case 'level': chap = { topic: e.topic, t0: w.time, rounds: 0, level: e.level, stars: 0 }; break;
+        case 'level': chapTunes = []; chap = { topic: e.topic, t0: w.time, rounds: 0, level: e.level, stars: 0 }; break;
         case 'round':
           R = { topic: w.topic, ri: e.round, t0: w.time, steps: e.steps, eggs: e.eggs, wrong: 0, brush: 0, soft: 0, right: 0, assist: 0, hintMiss: 0, hintIdle: 0, idle: 0,
-            surprise: e.surprise, surpriseTap: 0, firstAsk: 0, demoT: 0, demoT0: -1, replays: 0, pokeReplays: 0, demoJudged: 0, demoBrush: 0, notes: e.lanterns, playT: 0, lastProg: w.time, maxGap: 0, stepWrong: 0, stepHint: 0, level: w.level, firstAskT: 0, songT0: 0, songAuto: false, songStart: 0 };
-          if (S.keys.includes(e.key)) S.repKey++; S.keys.push(e.key); break;
+            surprise: e.surprise, surpriseTap: 0, firstAsk: 0, demoT: 0, demoT0: -1, firstDemo: 0, repDemoT: 0, repDemos: [], stepDemoT: 0, demoInPlay: 0, lockCur: 0, lockMax: 0, locks: [], wrongAt: -1, wrongToTurn: [], tune: '', replays: 0, pokeReplays: 0, demoJudged: 0, demoBrush: 0, notes: e.lanterns, playT: 0, lastProg: w.time, maxGap: 0, stepWrong: 0, stepHint: 0, level: w.level, firstAskT: 0, songT0: 0, songAuto: false, songStart: 0 };
+          if (S.keys.includes(e.key)) S.repKey++; S.keys.push(e.key);
+          { const cur = w.cur, tn = w.topic + ':' + cur.steps.map(q => q.mode === 'beat' ? 'b' + q.need : String(q.nameValue)).join('>'), f0 = w.topic + ':' + (cur.steps[0].mode === 'beat' ? 'b' + cur.steps[0].need : cur.steps[0].nameValue);
+            R.tune = tn; S.nTunes++; if (chapTunes.includes(tn)) S.tuneRepChap++; if (tn === prevTune) S.tuneRepPrev++; if (f0 === prevFirst) S.firstNoteRep++; chapTunes.push(tn); prevTune = tn; prevFirst = f0; S.tunes.push(tn); }
+          break;
         case 'ask':
           closeB(); S.asks++;
           { const a = w.topic + ':' + e.nameValue; if (a === prevAns) S.repAns++; if (e.first) { S.firsts++; if (a === lastRoundAns) S.repFirst++; } prevAns = a; }
           if (e.mode === 'beat') B = { askT: w.time, n: e.need, counted: 0, early: 0, fast: 0, over: 0, doneT: -1, nudges: [], lastCount: w.time, hints: 0, assist: 0, age: o.age };
           if (R) { closeStep(); if (e.first) { R.firstAsk = w.time; R.firstAskT = w.time - R.t0; R.lastProg = w.time; } } break;
-        case 'wrong': if (R) { R.wrong++; R.stepWrong++; } break;
+        case 'wrong': if (R) { R.wrong++; R.stepWrong++; if (e.replay) R.wrongAt = w.time; } break;
         case 'count': if (e.beat) { S.beatCounts++; if (B) { B.counted++; B.lastCount = w.time; if (w.time - B.askT < (o.promptS || PROMPT_S)) B.early++; } } break;
         case 'ring': if (R && e.brush) R.brush++; if (R && e.brush && inDemo) R.demoBrush++; if (e.beat && e.brush) S.beatBrush++;
           if (B && B.doneT < 0 && e.beat && e.brush && e.listen) B.listen = (B.listen || 0) + 1; else if (B && B.doneT < 0 && e.beat && e.brush) B.fast++; else if (B && B.doneT >= 0) B.over++; break;
@@ -94,7 +102,7 @@ function runOne(o) {
         case 'songNote': if (R && e.i === 0) R.songStart = w.time - R.songT0; break;
         case 'songDone': if (R) R.songAuto = e.auto; break;
         case 'eggsOut':
-          if (R) { R.dur = w.time - R.t0; S.rounds.push(R); if (chap) { chap.rounds++; chap.stars += R.stars; } }
+          if (R) { if (R.lockCur > 0) { R.lockMax = Math.max(R.lockMax, R.lockCur); R.locks.push(R.lockCur); R.lockCur = 0; } R.dur = w.time - R.t0; S.rounds.push(R); if (chap) { chap.rounds++; chap.stars += R.stars; } }
           R = null; break;
         case 'talk': S.talks++; break;
         case 'talkResult': if (e.correct) S.talkRight++; if (e.auto) S.talkAuto++; break;
@@ -103,7 +111,7 @@ function runOne(o) {
       }
     }
   }
-  closeB(); S.time = w.time;
+  closeB(); S.time = w.time; if (VM) S.voice = VM.finish();
   if (d.flushIntent) {   // gesture fairness: did the judged egg equal the aimed one?
     d.flushIntent();
     const F = {};
@@ -150,7 +158,21 @@ function summarize(list) {
       repKey: ss.reduce((a, s) => a + s.repKey, 0) / nR * 100,
       surpriseTap: rounds.filter(r => r.surprise).length ? rounds.filter(r => r.surprise && r.surpriseTap).length / rounds.filter(r => r.surprise).length * 100 : 0,
       firstAsk: m(r => r.firstAskT), demoT: m(r => r.demoT), replays: m(r => r.replays), pokeReplays: m(r => r.pokeReplays),
-      demoJudged: rounds.reduce((a, r) => a + r.demoJudged, 0), demoBrush: m(r => r.demoBrush), notes: m(r => r.notes),
+      demoJudged: rounds.reduce((a, r) => a + r.demoJudged, 0),
+      voice: (() => { const vs = ss.map(s => s.voice).filter(Boolean); if (!vs.length) return null; const lag = vs.flatMap(v => v.noteLag), rl = vs.flatMap(v => v.replayLag), sum = k => vs.reduce((a, v) => a + v[k], 0);
+        return { notes: sum('notes'), dropped: sum('noteDropped') / Math.max(1, sum('notes')) * 100, lag: L.mean(lag), lagP90: L.pct(lag, 0.9), late: lag.filter(x => x > 0.6).length / Math.max(1, sum('notes')) * 100, overlap: sum('noteOverlap') / Math.max(1, sum('notes')) * 100, rlag: L.mean(rl), rlagP90: L.pct(rl, 0.9), hold: sum('holdS') / Math.max(1, vs.length) }; })(),
+      firstDemo: m(r => r.firstDemo), repDemo: L.mean(rounds.flatMap(r => r.repDemos)), stepDemo: m(r => r.stepDemoT),
+      demoShare: L.mean(done.map(s => s.rounds.reduce((a, r) => a + r.demoT, 0) / s.time * 100)),
+      playShare: L.mean(done.map(s => s.rounds.reduce((a, r) => a + r.playT - r.demoInPlay, 0) / s.time * 100)),
+      listenVsPlay: L.mean(rounds.map(r => r.demoT / Math.max(1, r.playT - r.demoInPlay))),
+      lockMax: L.pct(rounds.map(r => r.lockMax), 0.9), lockMean: L.mean(rounds.flatMap(r => r.locks)), lockAbs: Math.max(0, ...rounds.map(r => r.lockMax)),
+      rep2: rounds.filter(r => r.replays >= 2).length / nR * 100, repMax: Math.max(0, ...rounds.map(r => r.replays)), repRounds: rounds.filter(r => r.replays > 0).length / nR * 100,
+      wrongToTurn: L.mean(rounds.flatMap(r => r.wrongToTurn)),
+      tuneRepChap: ss.reduce((a, s) => a + s.tuneRepChap, 0) / Math.max(1, ss.reduce((a, s) => a + s.nTunes, 0)) * 100,
+      tuneRepPrev: ss.reduce((a, s) => a + s.tuneRepPrev, 0) / Math.max(1, ss.reduce((a, s) => a + s.nTunes, 0)) * 100,
+      firstNoteRep: ss.reduce((a, s) => a + s.firstNoteRep, 0) / Math.max(1, ss.reduce((a, s) => a + s.nTunes, 0)) * 100,
+      distinctTunes: new Set(ss.flatMap(s => s.tunes)).size,
+      notesDist: (() => { const h = {}; for (const r of rounds) h[r.notes] = (h[r.notes] || 0) + 1; return Object.keys(h).sort().map(k => k + ':' + (h[k] / nR * 100).toFixed(0) + '%').join(' '); })(), demoBrush: m(r => r.demoBrush), notes: m(r => r.notes),
       beat: (() => { const bs = ss.flatMap(s => s.beatSteps || []), done = bs.filter(b => b.doneT >= 0), nB = Math.max(1, bs.length), cnt = bs.reduce((a, b) => a + b.counted, 0), fast = bs.reduce((a, b) => a + b.fast, 0), lis = bs.reduce((a, b) => a + (b.listen || 0), 0);
         const first = bs.filter(b => b.nudges.length).map(b => b.nudges[0]);
         return { n: bs.length, dur: L.mean(done.map(b => b.doneT - b.askT)), durP90: L.pct(done.map(b => b.doneT - b.askT), 0.9),
@@ -189,6 +211,14 @@ function table(rows, topicRows) {
   out.push('', '**Demo** (Rio plays the tune first; replays after a wrong note / a poke). judged in demo must be 0.', '',
     '| model | age | notes / round | demo s / round (incl. replays) | replays / round (poke) | taps during demo (brush) / round | judged in demo |', '|---|---|---|---|---|---|---|');
   for (const r of rows) out.push(`| ${r.model} | ${r.age} | ${r.notes.toFixed(2)} | ${f(r.demoT)} | ${r.replays.toFixed(2)} (${r.pokeReplays.toFixed(2)}) | ${r.demoBrush.toFixed(2)} | ${r.demoJudged} |`);
+  out.push('', '**Listening vs playing** (demo share = demo s / session s; play share = (first ask → round done) − demos in it; lock = a stretch the child cannot act in: enter + demo).', '',
+    '| model | age | tune notes dist | 1st demo s | replay demo s | beat-step demo s / round | demo share % | play share % | listen / play per round | lock mean s (p90 max/round, max) | rounds with replay % (≥ 2 %, max) | wrong → Your turn s | same tune in chapter % | same tune as prev % | same 1st note as prev % | distinct tunes |', '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
+  for (const r of rows) if (r.model !== 'absent') out.push(`| ${r.model} | ${r.age} | ${r.notesDist} | ${r.firstDemo.toFixed(2)} | ${r.repDemo.toFixed(2)} | ${r.stepDemo.toFixed(2)} | ${f(r.demoShare)} | ${f(r.playShare)} | ${r.listenVsPlay.toFixed(2)} | ${r.lockMean.toFixed(2)} (${r.lockMax.toFixed(1)}, ${r.lockAbs.toFixed(1)}) | ${f(r.repRounds)} (${f(r.rep2)}, ${r.repMax}) | ${r.wrongToTurn.toFixed(2)} | ${f(r.tuneRepChap)} | ${f(r.tuneRepPrev)} | ${f(r.firstNoteRep)} | ${r.distinctTunes} |`);
+  if (rows.some(r => r.voice)) {
+    out.push('', '**Voice model** (proto voice: main.js speech scheduling with 0.3 s + 83 ms/char lines). lag = name starts after its spark lands; late = lag > 0.6 s; overlap = the name still sounds when the next spark lands.', '',
+      '| model | age | demo notes | names dropped % | name lag s mean (p90) | late % | overlap next % | replay name lag s mean (p90) | gate hold s / session |', '|---|---|---|---|---|---|---|---|---|');
+    for (const r of rows) if (r.voice) { const v = r.voice; out.push(`| ${r.model} | ${r.age} | ${v.notes} | ${f(v.dropped)} | ${v.lag.toFixed(2)} (${v.lagP90.toFixed(2)}) | ${f(v.late)} | ${f(v.overlap)} | ${v.rlag.toFixed(2)} (${v.rlagP90.toFixed(2)}) | ${f(v.hold)} |`); }
+  }
   out.push('', '| model | age | repeated set % | surprise tapped % | per-round overhead s (first ask s) | ch1 s / 3★% / wrong | ch2 | ch3 | ch4 |', '|---|---|---|---|---|---|---|---|---|');
   for (const r of rows) if (r.model !== 'absent') out.push(`| ${r.model} | ${r.age} | ${f(r.repKey)} | ${f(r.surpriseTap)} | ${f(r.overhead)} (${f(r.firstAsk)}) | ` + r.ch.map(c => `${f(c.dur)} (p90 ${f(c.p90)}, cut ${f(c.cut)}%) / ${f(c.st3)} / ${c.wrong.toFixed(2)}`).join(' | ') + ' |');
   out.push('', '| model | age | topic | chapters | mean s | p90 s | round s | eggs | wrong / round | 3★ % | hint rounds % |', '|---|---|---|---|---|---|---|---|---|---|---|');

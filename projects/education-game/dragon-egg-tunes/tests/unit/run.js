@@ -207,7 +207,10 @@ test('layout: DESIGN §2 boxes — ground, bubble, Rio, cymbal, stage, garland (
     if (L.portrait) { assert.strictEqual(L.stage.x0, ins.left + 36); assert.strictEqual(L.stage.x1, v.W - ins.right - 36); }
     else { assert.strictEqual(L.stage.x0, ins.left + 250); assert.strictEqual(L.stage.x1, v.W - ins.right - 40); }
     // garland across the top band, below the bubble
-    assert.strictEqual(L.garland.y, bb + (L.portrait ? 84 : 46)); assert.strictEqual(L.garland.sag, 22);
+    assert.strictEqual(L.garland.y, bb + (L.portrait ? CFG.garlandBelowPort : L.phone ? CFG.garlandBelowLandPhone : CFG.garlandBelowLand)); assert.strictEqual(L.garland.sag, 22);
+    // the layout reserves the DRAWN pod (render: r 34 phone / tall, else 28) under the vine: pods never reach the eggs / the card
+    assert.strictEqual(L.garland.podR, L.phone || L.tall ? CFG.lanternRDrawPhone : CFG.lanternRDraw);
+    assert.ok(L.lanternBottom >= L.garland.y + L.garland.sag + 1.98 * L.garland.podR - 1e-6 && L.topLimit >= L.lanternBottom + CFG.noteRoom, tag + ' pod room');
     assert.ok(L.garland.x0 >= ins.left && L.garland.x1 <= v.W - ins.right);
     // item: sized for THIS round's n — iPad: ≤ the base item (≥ itemMin); phones / tall: up to itemCap 150
     const base = ITEM[age], big = L.tall || L.phone;
@@ -1192,7 +1195,7 @@ function runDemo(w, each) {
   return log;
 }
 
-test('world: demo — enter → demo → play: demoStart {from 0, n, replay false, mode tune}; a spark flies from rioMouth() on an arc (apex ≈ 70 px above the higher end, 0.45 s) to each note in tune order; demoNote at lead 1.3 + 0.45 + k × gap (age 4: 1.25 s); the egg hops song height + rings; Rio blows (mood beat) while a spark flies; demoEnd 0.5 s after the last; then ask {first, echo, afterDemo}', () => {
+test('world: demo — enter → demo → play: demoStart {from 0, n, replay false, mode tune}; a spark flies from rioMouth() on an arc (apex ≈ 70 px above the higher end, 0.45 s) to each note in tune order; demoNote at demoLead + sparkTime + k × demoGap[age]; the egg hops song height + rings; Rio blows (mood beat) while a spark flies; demoEnd 0.5 s after the last; then ask {first, echo, afterDemo}', () => {
   const { w, ds } = demoRound({ age: 4 }, 'colors', 2, r => r.song.length >= 2);
   assert.strictEqual(w.phase, 'demo'); assert.strictEqual(w.state, 'round');
   const M = w.rioMouth(), B = w.layout.rio;
@@ -1212,7 +1215,7 @@ test('world: demo — enter → demo → play: demoStart {from 0, n, replay fals
   assert.deepStrictEqual(notes.map(e => e.id), song, 'the tune, in step order');
   assert.strictEqual(sparks.length, song.length);
   notes.forEach((e, k) => {
-    assert.ok(Math.abs(e.t - (1.3 + 0.45 + k * 1.25)) < 0.02, `note ${k} at ${e.t.toFixed(3)}`);
+    assert.ok(Math.abs(e.t - (CFG.demoLead + CFG.sparkTime + k * CFG.demoGap[4])) < 0.02, `note ${k} at ${e.t.toFixed(3)}`);
     const c = w.eggById(e.id), st = w.cur.steps[e.step];
     assert.ok(e.i === k && e.n === song.length && e.note === c.note && e.lantern === k && e.replay === false && e.nameKind === st.nameKind && e.nameValue === st.nameValue && e.color === c.thing.color);
     assert.ok(Number.isFinite(e.x) && Number.isFinite(e.y));
@@ -1228,16 +1231,16 @@ test('world: demo — enter → demo → play: demoStart {from 0, n, replay fals
   assert.ok(Math.abs(maxHop - CFG.hopSong) < 1, 'demo strike = song hop ' + maxHop);
   assert.ok(moods.has('beat'), 'Rio blows the spark');
   const de = log.find(e => e.type === 'demoEnd'), ask = log.find(e => e.type === 'ask');
-  assert.ok(de && Math.abs(de.t - notes[notes.length - 1].t - 0.5) < 0.02 && de.replay === false && de.mode === 'tune');
+  assert.ok(de && Math.abs(de.t - notes[notes.length - 1].t - CFG.demoTail) < 0.02 && de.replay === false && de.mode === 'tune');
   assert.ok(ask && ask.first && ask.echo === true && ask.afterDemo === true && ask.step === 0 && ask.t >= de.t - 1e-9);
   assert.ok(!log.some(e => ['right', 'wrong', 'ring', 'soft'].includes(e.type)), 'the demo plays no judged ring');
   assert.ok(w.interactive && w.demo === null && w.sparks.length === 0);
   assert.deepStrictEqual(w.answer(), { egg: song[0] });
   // animals: a longer gap after each animal note (+0.25 s, the call is longer); age 7 gap 0.85
   const A = demoRound({ age: 5 }, 'animals', 2).w, la = runDemo(A).filter(e => e.type === 'demoNote');
-  for (let k = 1; k < la.length; k++) assert.ok(Math.abs(la[k].t - la[k - 1].t - (1.1 + 0.25)) < 0.02, 'animal gap');
+  for (let k = 1; k < la.length; k++) assert.ok(Math.abs(la[k].t - la[k - 1].t - (CFG.demoGap[5] + CFG.demoAnimalGap)) < 0.02, 'animal gap');
   const G = demoRound({ age: 7 }, 'add', 2).w, lg = runDemo(G).filter(e => e.type === 'demoNote');
-  for (let k = 1; k < lg.length; k++) assert.ok(Math.abs(lg[k].t - lg[k - 1].t - 0.85) < 0.02, 'age 7 gap');
+  for (let k = 1; k < lg.length; k++) assert.ok(Math.abs(lg[k].t - lg[k - 1].t - CFG.demoGap[7]) < 0.02, 'age 7 gap');
   // demo: false (tests / ?nodemo=1) goes straight to the ask
   const N = mkWorld({ age: 4 }); roundOf(N, 'colors', 2); assert.ok(N.interactive);
 });
@@ -1270,7 +1273,7 @@ test('world: demo — taps during the demo are harmless: an egg brushes (ring br
   assert.ok(D.interactive);
 });
 
-test('world: wrong → Rio replays the rest of the tune from the current step after 1.6 s (demoStart replay, lead 0.9, wrong.replay); misses kept; a 2nd wrong before it → the hint glows and no replay; a right tap cancels a pending replay', () => {
+test('world: wrong → Rio replays the rest of the tune from the current step after replayDelay (demoStart replay, lead demoLeadReplay, wrong.replay); misses kept; a 2nd wrong before it → the hint glows and no replay; a right tap cancels a pending replay', () => {
   const { w } = demoRound({ age: 5 }, 'colors', 2, r => r.song.length >= 3);
   runDemo(w);
   tapEgg(w, asked(w).id); until(w, () => w.interactive);
@@ -1280,10 +1283,10 @@ test('world: wrong → Rio replays the rest of the tune from the current step af
   tapEgg(w, o.id);
   const wr = evs(w).find(x => x.type === 'wrong'); assert.ok(wr && wr.replay === true);
   until(w, () => { for (const e of evs(w)) if (e.type === 'demoStart') ds = Object.assign({ t: w.time - t0 }, e); return !!ds; });
-  assert.ok(Math.abs(ds.t - 1.6) < 0.02 && ds.replay && ds.from === 1 && ds.n === w.cur.song.length - 1 && !ds.first, JSON.stringify(ds));
+  assert.ok(Math.abs(ds.t - CFG.replayDelay) < 0.02 && ds.replay && ds.from === 1 && ds.n === w.cur.song.length - 1 && !ds.first, JSON.stringify(ds));
   const log = runDemo(w), nt = log.filter(e => e.type === 'demoNote');
   assert.deepStrictEqual(nt.map(e => e.id), w.cur.song.slice(1), 'the rest of the tune');
-  assert.ok(Math.abs(nt[0].t - (0.9 + 0.45)) < 0.02 && nt.every(e => e.replay));
+  assert.ok(Math.abs(nt[0].t - (CFG.demoLeadReplay + CFG.sparkTime)) < 0.02 && nt.every(e => e.replay));
   const ask = log.find(e => e.type === 'ask'); assert.ok(ask && ask.afterDemo && ask.replay && !ask.first && ask.step === 1);
   assert.strictEqual(w.misses, 1); assert.strictEqual(w._noProg, 1, 'kept through the replay');
   // the 2nd wrong (after the replay): the hint glows, no replay
@@ -1310,7 +1313,7 @@ test('world: poke Rio in play → he replays the tune from the current step (pok
   runDemo(w); assert.ok(w.interactive && w.step === 0);
 });
 
-test('world: beat demo — every beat step gets its own demo: Rio sparks the big egg need times 0.6 s apart (demoCount {i, n}), the card lights a dot per spark, demoEnd resets it to 0 for the child; no wrong possible; the next step demos after stepDone', () => {
+test('world: beat demo — every beat step gets its own demo: Rio sparks the big egg need times demoBeatGap apart (demoCount {i, n}), the card lights a dot per spark, demoEnd resets it to 0 for the child; no wrong possible; the next step demos after stepDone', () => {
   const { w, ds } = demoRound({ age: 4 }, 'count', 2, r => r.steps.length === 2);
   const s0 = w.cur.steps[0], big = w.eggs[0];
   assert.deepStrictEqual([ds.mode, ds.need, ds.n, ds.from, ds.first], ['beat', s0.need, s0.need, 0, true]);
@@ -1320,8 +1323,8 @@ test('world: beat demo — every beat step gets its own demo: Rio sparks the big
   const dc = log.filter(e => e.type === 'demoCount');
   assert.deepStrictEqual(dc.map(e => e.i), Array.from({ length: s0.need }, (_, i) => i + 1));
   assert.ok(dc.every(e => e.n === s0.need && e.id === big.id && e.note === s0.note && Number.isFinite(e.x)));
-  for (let i = 1; i < dc.length; i++) assert.ok(Math.abs(dc[i].t - dc[i - 1].t - 0.6) < 0.02);
-  assert.ok(Math.abs(dc[0].t - 1.75) < 0.02);
+  for (let i = 1; i < dc.length; i++) assert.ok(Math.abs(dc[i].t - dc[i - 1].t - CFG.demoBeatGap) < 0.02);
+  assert.ok(Math.abs(dc[0].t - (CFG.demoLead + CFG.sparkTime)) < 0.02);
   assert.strictEqual(Math.max(...lits), s0.need);
   assert.ok(!log.some(e => e.type === 'demoNote' || e.type === 'count'));
   assert.ok(w.card && w.card.lit === 0 && w.interactive && w.stepInfo.mode === 'beat', 'reset for the child');
@@ -1333,12 +1336,12 @@ test('world: beat demo — every beat step gets its own demo: Rio sparks the big
   until(w, () => { for (const e of evs(w)) if (e.type === 'demoStart') d2 = Object.assign({ t: w.time - t0 }, e); return !!d2; });
   assert.ok(d2.from === 1 && d2.mode === 'beat' && !d2.replay && !d2.first && d2.need === w.cur.steps[1].need);
   const l2 = runDemo(w), c2 = l2.filter(e => e.type === 'demoCount');
-  assert.strictEqual(c2.length, w.cur.steps[1].need); assert.ok(Math.abs(c2[0].t - (0.9 + 0.45)) < 0.02);
+  assert.strictEqual(c2.length, w.cur.steps[1].need); assert.ok(Math.abs(c2[0].t - (CFG.demoLeadReplay + CFG.sparkTime)) < 0.02);
   assert.ok(l2.find(e => e.type === 'ask' && e.step === 1 && !e.first));
   assert.strictEqual(w.misses, 0);
 });
 
-test('world: lanterns — one pod per note: icon = that note\'s thing (beat: null), hidden (age ≥ 6) until lit but shows 0.8 s when Rio plays it, now → 1 on the pod being sparked and on the next note in play', () => {
+test('world: lanterns — one pod per note: icon = that note\'s thing (beat: {kind number, n}), hidden (age ≥ 6) until lit but shows 0.8 s when Rio plays it, now → 1 on the pod being sparked and on the next note in play', () => {
   const { w } = demoRound({ age: 4 }, 'animals', 2, r => r.song.length >= 2);
   w.lanterns.forEach((l, i) => { assert.strictEqual(l.icon, w.eggById(w.cur.song[i]).thing); assert.strictEqual(l.hidden, false); assert.strictEqual(l.now, 0); });
   let nowSeen = 0;
@@ -1359,8 +1362,8 @@ test('world: lanterns — one pod per note: icon = that note\'s thing (beat: nul
   assert.ok(Math.abs(shownT - 0.8) < 0.03, 'shown ' + shownT.toFixed(2) + ' s');
   run(H6, 0.35); assert.ok(H6.lanterns.every(l => l.hidden), 'hidden again for the child');
   tapEgg(H6, asked(H6).id); run(H6, 1); assert.strictEqual(H6.lanterns[0].hidden, false, 'a lit pod shows its icon');
-  // beat mode: icon null (the card numeral)
-  const B = demoRound({ age: 4 }, 'count', 1).w; assert.ok(B.lanterns.every(l => l.icon === null));
+  // beat mode: the pod shows the step's number {kind 'number', n: need}
+  const B = demoRound({ age: 4 }, 'count', 1).w; assert.ok(B.lanterns.every((l, i) => l.icon && l.icon.kind === 'number' && l.icon.n === B.cur.steps[i].need));
 });
 
 test('world: rotation mid-demo — sparks in flight retarget to the new pads and land on time; the demo finishes and play is safe', () => {
@@ -1738,7 +1741,7 @@ for (const t of tests) {
   if (only && !t.name.includes(only)) continue;
   const s = Date.now();
   try { t.fn(); pass++; console.log(`ok    ${t.name} (${Date.now() - s} ms)`); }
-  catch (e) { fail++; console.log(`FAIL  ${t.name}\n      ${(e.stack || e).toString().split('\n').slice(0, 4).join('\n      ')}`); }
+  catch (e) { fail++; console.log(`FAIL  ${t.name}\n      ${(e.stack || e).toString().split("\n").slice(0, 9).join('\n      ')}`); }
 }
 console.log(`\n${pass} passed, ${fail} failed (${((Date.now() - t0) / 1000).toFixed(1)} s)`);
 process.exit(fail ? 1 : 0);

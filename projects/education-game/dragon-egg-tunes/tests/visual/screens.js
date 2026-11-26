@@ -1,4 +1,4 @@
-// Visual QA sweep (Rio's Cloud Eggs): every screen x 5 device shapes x EN/VI with emulated notch insets, every pool topic
+// Visual QA sweep (Rio's Singing Eggs, dino valley): every screen x 5 device shapes x EN/VI with emulated notch insets, every pool topic
 // per age (3..7) in its chapter mood (chapter i -> morning / noon / sunset / night), the colour eggs on all 4 moods, and
 // in-page measurements (egg / hit sizes in CSS px, overlaps with Rio / cymbal / bubble / HUD / garland / card / notch,
 // cushion and egg contrast against the real rendered background, colour-pair rule, colour-blind distance).
@@ -20,7 +20,7 @@ const POOLS = { 3: ['colors', 'shapes', 'size', 'animals'], 4: ['colors', 'size'
   5: ['colors', 'shapes', 'count', 'letters', 'animals'], 6: ['letters', 'lower', 'initial', 'add', 'count'],
   7: ['count', 'initial', 'add', 'sub', 'oddeven'] };
 const env = (k, d) => (process.env[k] ? process.env[k].split(',') : d);
-const DEV_LIST = env('DEV', ['ip-p', 'ip-l', 'pad-p', 'pad-l']), LANGS = env('LANGS', ['en', 'vi']);
+const DEV_LIST = env('DEV', ['ip-p', 'ip-l', 'pad-p', 'pad-l', 'tall']), LANGS = env('LANGS', ['en', 'vi']);
 const PARTS = new Set(env('PART', ['screens', 'topics', 'moods'])), AGES = env('AGES', ['3', '4', '5', '6', '7']).map(Number);
 const NATIVE = process.env.DPR === 'native';
 const until = (page, fn, arg, t = 30000) => page.waitForFunction(fn, arg, { timeout: t, polling: 30 });
@@ -95,7 +95,18 @@ function installProbe() {
         }
         if (cushMid && below) { c.cushCR = +cr(cushMid, below).toFixed(2); c.cushDist = dist(cushMid, below); if (c.cushDist < 30) iss.push(`cushion ${c.id} blends with what is under it (dist ${c.cushDist}, CR ${c.cushCR})`); }
       }
-      const lan = (w.lanterns || []).map(l => ({ x: Math.round(l.x), y: Math.round(l.y) }));
+      // egg-in-ring: anchor (bottom centre) vs ring top, egg width vs ring width
+      for (const e of (w.eggs || []).filter(q => q.state === 'stand')) {
+        const sink = e.y - e.padY, wr = e.bw / e.cushionW, dx = e.x - e.padX;
+        (w.__ring = w.__ring || {})[e.id] = { sink: +sink.toFixed(1), wRatio: +wr.toFixed(2), dx: +dx.toFixed(1), hop: +(e.hop || 0).toFixed(1) };
+        if (Math.abs(dx) > 4) iss.push(`egg ${e.id} off-centre of its ring by ${dx.toFixed(1)} px`);
+        if (wr > 1.0) iss.push(`egg ${e.id} wider than its ring (${wr.toFixed(2)})`);
+      }
+      const M = w.rioMouth ? w.rioMouth() : null;
+      const sparks = (w.sparks || []).map(sp => ({ x: Math.round(sp.x), y: Math.round(sp.y), t: +(sp.t / sp.life).toFixed(2), color: sp.color, alpha: sp.alpha }));
+      const lan = (w.lanterns || []).map(l => ({ x: Math.round(l.x), y: Math.round(l.y), icon: l.icon ? (l.icon.kind + ':' + (l.icon.color || l.icon.shape || l.icon.animal || l.icon.text || l.icon.n || '')) : null, hidden: !!l.hidden, lit: +(l.lit || 0).toFixed(2) }));
+      const lanSpacing = lan.length > 1 ? Math.round(Math.min(...lan.slice(1).map((l, i) => l.x - lan[i].x))) : null;
+      if (lanSpacing != null && lanSpacing * v.s < 40) iss.push(`pods only ${Math.round(lanSpacing * v.s)} css px apart`);
       for (const l of lan) {
         const lb = { x: l.x - 24, y: l.y - 30, w: 48, h: 60 };
         if (hud && ov(lb, hud) > 0) iss.push(`lantern at ${l.x},${l.y} under HUD`);
@@ -123,7 +134,7 @@ function installProbe() {
         lowestCushion: Math.round(low), gapCushionToGround: Math.round(L.groundY - low), gapToRioHead: Math.round(kb.y - low),
         eggs: ch.map(c => ({ id: c.id, kind: c.kind, color: c.color, shape: c.shape, animal: c.animal, text: c.text, n: c.n, size: c.size, sizeCss: c.sizeCss, visCss: c.visCss, hitCss: c.hitCss,
           colCR: c.colCR, colDist: c.colDist, cushCR: c.cushCR, cushDist: c.cushDist, box: rnd(c.box), cush: rnd(c.cush), samples: c.samples })),
-        lanterns: lan, issues: iss };
+        lanterns: lan, lanSpacing, rioMouth: M && { x: Math.round(M.x), y: Math.round(M.y) }, sparks, phase: w.phase, ring: w.__ring || null, issues: iss };
     },
     dom() {
       const iss = [], vw = innerWidth, vh = innerHeight, cs = getComputedStyle(document.getElementById('safeProbe')), phone = Math.min(vw, vh) < 500;
@@ -190,6 +201,17 @@ async function screens(browser, srv, dev, lang) {
   await page.evaluate(() => SE.UI.only('scrTitle'));
   await page.evaluate(() => { SE.debug.startGame(); const w = SE.debug.world; w.levels[0] = 'colors'; w.startLevel(0); }); await sleep(1000);
   await shot(page, `${k}-03-banner`);
+  await step(page, k, 'demo', async () => {   // round 1 of the colours chapter: Rio's demo, a spark in flight from his mouth
+    await page.evaluate(() => SE.debug.setSpeed(1));
+    await until(page, () => { const w = SE.debug.world, s = w.sparks && w.sparks[0]; return w.phase === 'demo' && s && s.t / s.life > 0.35 && s.t / s.life < 0.6; }, null, 20000);
+    await page.evaluate(() => SE.debug.setSpeed(0.1)); await shot(page, `${k}-03b-demo-spark`); await G(page, k + '-demo');
+    await page.evaluate(() => SE.debug.setSpeed(1));
+    await until(page, () => { const w = SE.debug.world, s = w.sparks && w.sparks[0]; return w.phase === 'demo' && s && s.t / s.life < 0.12; }, null, 20000).catch(() => {});
+    await page.evaluate(() => SE.debug.setSpeed(0.1)); await shot(page, `${k}-03c-demo-spark-launch`); await G(page, k + '-demo-launch');
+    await page.evaluate(() => SE.debug.setSpeed(1));
+    await until(page, () => SE.debug.world.interactive && SE.debug.answer(), null, 30000);
+    await sleep(500); await shot(page, `${k}-03d-yourturn`); await G(page, k + '-yourturn');
+  });
   await step(page, k, 'play', async () => {
     await round(page, 'colors', 0, 1);
     await shot(page, `${k}-04-play`); await G(page, k + '-play');
@@ -234,9 +256,15 @@ async function screens(browser, srv, dev, lang) {
   });
   await step(page, k, 'beat', async () => {   // age-4 beat mode (count) in chapter 2 = sunset
     await round(page, 'count', 2, 1);
+    await page.evaluate(() => SE.debug.setSpeed(1));
     await shot(page, `${k}-15-beat`); await G(page, k + '-beat');
     const cid = await page.evaluate(() => SE.debug.answer() && SE.debug.answer().egg);
     if (cid != null) { await page.evaluate(id => QA.tap(id), cid); await sleep(320); await page.evaluate(id => QA.tap(id), cid); await sleep(160); await shot(page, `${k}-16-beat-lit`); }
+    // the beat demo of the next round: Rio sparks the big egg, the tablet lights dots
+    await page.evaluate(() => { SE.debug.setSpeed(4); SE.debug.setBot(true, 1); });
+    await until(page, () => { const w = SE.debug.world; return w.phase === 'demo' && w.demo && w.demo.mode === 'beat' && w.card && w.card.lit >= 1 && w.sparks.length; }, null, 40000);
+    await page.evaluate(() => { SE.debug.setBot(false); SE.debug.setSpeed(0.1); }); await shot(page, `${k}-16b-beat-demo`); await G(page, k + '-beatdemo');
+    await page.evaluate(() => SE.debug.setSpeed(1));
   });
   await step(page, k, 'night', async () => {
     await round(page, 'animals', 3, 1);

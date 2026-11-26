@@ -37,7 +37,7 @@
  *                                                   "Count with me!"
  *   SE.I18N.sayNext(lang, nameKind | e, value?, rng?) → the soft name cue (ages ≤ 5): "…and blue!" / "…rồi màu xanh dương!"
  *   SE.I18N.sayTurn(lang, e, {age, cue, rng})     → the `ask` line in the tune flow: afterDemo → "Your turn!" (+ "First,
- *                                                   red!" when cue); a beat step → "Your turn — tap the big egg three
+ *                                                   red!" at age ≤ 3); a beat step → "Your turn — tap the big egg three
  *                                                   times!"; a later step → the cue "…and blue!" (or '' when no cue)
  *   --- reactions ---
  *   SE.I18N.sayRight(lang, e, rng?)               → `right`: "Yes! Red!", animals "Quack! The duckling!" / "Cạp cạp! Vịt
@@ -335,7 +335,7 @@
       'lantern': ['A flower opens!', 'Look, the seed pod blooms!', 'One more flower!'],
 
       // wrong + Rio replays the tune (default): name what was tapped, then "Listen again!"
-      'wrong.again': ['That’s {got}. Listen again!', 'Oh, {got}! Listen again!', 'This one is {got}. Let’s listen again!'],
+      'wrong.again': ['That’s {got}. Listen again!', 'Oh, {got}! Listen again!'],
       'wrong.againAnimal': ['{got} says {gotSound}! Listen again!', '{gotSound}! That’s {got}. Listen again!',
         'That’s {got}, {gotSound}! Let’s listen again!'],
       'wrong.againCount': ['That egg has {got}. Listen again!', 'Oh, {got}! Listen again!', 'Let’s count: {got}! Listen again!'],
@@ -480,7 +480,7 @@
 
       'enter': ['Trứng tới rồi nè!', 'Nhìn kìa, trứng mới!', 'Trứng biết hát tới rồi!'],
 
-      'demo.start': ['Bé nghe Rio hát nhé!', 'Bé nghe nè, Rio hát đây!', 'Bé lắng nghe nhé!'],
+      'demo.start': ['Bé nghe Rio hát nhé!', 'Bé lắng nghe nhé!'],
       'demo.replay': ['Bé nghe lại nhé!', 'Rio hát lại nè!', 'Mình nghe lại nào!'],
       'demo.beat': ['Bé đếm cùng Rio nhé!', 'Bé xem và đếm nhé!', 'Mình cùng đếm nào!'],
       'demo.note': ['{thing}!'],
@@ -531,7 +531,7 @@
         '{done} rồi nè! Gõ thêm {left} cái nào!'],
       'lantern': ['Hoa nở rồi!', 'Nhìn kìa, nụ hoa nở rồi!', 'Thêm một bông hoa nữa!'],
 
-      'wrong.again': ['Đây là {got}. Bé nghe lại nhé!', 'Ồ, {got} nè! Mình nghe lại nhé!', 'Cái này là {got}. Bé nghe lại nào!'],
+      'wrong.again': ['Đây là {got}. Bé nghe lại nhé!', 'Ồ, {got} nè! Bé nghe lại nhé!'],
       'wrong.againAnimal': ['{got} kêu {gotSound}! Bé nghe lại nhé!', '{gotSound}! Đây là {got}. Mình nghe lại nhé!',
         'Đây là {got} nè, {gotSound}! Bé nghe lại nào!'],
       'wrong.againCount': ['Quả trứng này có {got}. Bé nghe lại nhé!', 'Ồ, {got} nè! Mình nghe lại nhé!',
@@ -768,7 +768,7 @@
   // "once" / "two times" / vi "một cái", "ba cái"
   function timesWord(lang, n) {
     if (L(lang) === 'vi') return numberName('vi', n) + ' cái';
-    return n === 1 ? 'once' : numberName('en', n) + ' times';
+    return n === 1 ? 'once' : n === 2 ? 'twice' : numberName('en', n) + ' times';
   }
 
   // ---- words for the 'initial' topic: tolerant of whatever shape content.js gives SE.WORDS
@@ -1535,14 +1535,15 @@
   };
   // the `ask` line in the tune flow (main speaks it instead of the long prompt when e.echo):
   //   beat step ............ "Your turn — tap the big egg three times!" / "Đến lượt bé — gõ quả trứng to ba cái nhé!"
-  //   e.afterDemo .......... "Your turn!" (+ "First, red!" when the cue is on)
+  //   e.afterDemo .......... "Your turn!" (+ "First, red!" at age ≤ 3)
   //   a later step ......... the cue "…and blue!" when on, else '' (say nothing: the child is mid-tune)
-  // opts = { age (cue defaults to age ≤ 5), cue: bool (overrides), rng }
+  // opts = { age (the "…and blue!" cue: age ≤ 5; the "First, red!" cue after the demo: age ≤ 3), cue: bool (overrides both), rng }
   I18N.sayTurn = function (lang, ev, opts) {
     lang = L(lang);
     ev = obj(ev); opts = obj(opts);
     var rng = opts.rng, params = obj(ev.params);
     var cue = opts.cue != null ? !!opts.cue : !(num(opts.age) > 5);
+    var firstCue = opts.cue != null ? !!opts.cue : !(num(opts.age) > 3);   // "First, red!" gives the answer away: age 3 only (playtest P1)
     if (ev.mode === 'beat' || ev.promptKey === 'p.beat') {
       var n = num(params.n != null ? params.n : (ev.need != null ? ev.need : ev.nameValue));
       return n != null && n >= 1 ? I18N.t(lang, 'turn.beat', { n: n }, rng) : I18N.t(lang, 'turn.first', null, rng);
@@ -1550,7 +1551,7 @@
     var nm = cue && ev.mode !== 'findAll' ? I18N.demoName(lang, ev) : '';
     if (ev.afterDemo) {
       var first = I18N.t(lang, 'turn.first', null, rng);
-      return nm ? first + ' ' + I18N.t(lang, 'turn.firstName', { name: nm }, rng) : first;
+      return nm && firstCue ? first + ' ' + I18N.t(lang, 'turn.firstName', { name: nm }, rng) : first;
     }
     return nm ? I18N.t(lang, 'turn.next', { name: nm }, rng) : '';
   };

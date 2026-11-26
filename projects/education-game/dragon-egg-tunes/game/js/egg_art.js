@@ -53,7 +53,7 @@
   var ROCK = { base: '#9C8F86', dark: '#6E625C', light: '#BDB3AA' };
   var MOSS = { base: '#8DBF6A', dark: '#5E8F45', light: '#B3D395' };
   var VINE = { base: '#6E9B52', dark: '#4C7238', light: '#9CC47E' };
-  var POD = { base: '#F7EBD0', dark: '#9E8A63', shade: '#E6D4AE', light: '#FFFFFF' };
+  var POD = { base: '#EFDDB2', dark: '#9E8A63', shade: '#DCC69A', light: '#FFFFFF' };   // darker than the morning sky (QA visual P2-12)
   var ROOT = { base: '#8A6E52', dark: '#5E4A36' };
   var VOLCANO = { base: '#A27B5C', dark: '#6E5040', light: '#C9A27E', shade: '#8A664C', glow: '#E89A5C', hot: '#F6C48E' };
   var STONE = { base: '#DCD5C6', dark: '#8E8676', light: '#F3EFE6', shade: '#C4BBA8', ink: '#5A5246' };
@@ -453,7 +453,7 @@
     owl:   { base: '#A88E78', dark: '#6E5846', light: '#CDB8A2' },
     frog:  { base: '#9CCB7A', dark: '#5E8A44', light: '#CBE6B2' },
     dino:  { base: '#B7B0D8', dark: '#7A72A8', light: '#DCD8EF' },
-    snake: { base: '#9DBF8E', dark: '#5F8752', light: '#C8DEBC' }
+    snake: { base: '#D8BC86', dark: '#9C7A45', light: '#F0DDB5' }   // sandy: never confused with the froglet (QA visual P2-8)
   };
   var BEAK = { base: '#F5B07A', dark: '#B86E3C', light: '#FFD9B8' };   // peach beak (not the answer orange)
   var BELLY = { base: '#FFF1D6', dark: '#C9AE84', light: '#FFFFFF' };
@@ -1264,8 +1264,8 @@
     ctx.save(); ctx.rotate(t * 1.5);
     var st = function (q) { starPath(q, 0, 0, 44 * tw, 21 * tw, 8); };
     ctx.strokeStyle = 'rgba(255,255,255,0.95)'; ctx.lineWidth = 9; ctx.lineJoin = 'round'; ctx.beginPath(); st(ctx); ctx.stroke();
-    ctx.fillStyle = c ? mix(c.light, '#FFFFFF', 0.25) : '#FFE58A'; ctx.beginPath(); st(ctx); ctx.fill();
-    ctx.strokeStyle = c ? rgba(lineOf(c), 0.7) : rgba(GOLD.dark, 0.6); ctx.lineWidth = 3; ctx.beginPath(); st(ctx); ctx.stroke();
+    ctx.fillStyle = c ? mix(c.light, '#FFFFFF', 0.25) : '#FFC93C'; ctx.beginPath(); st(ctx); ctx.fill();
+    ctx.strokeStyle = c ? rgba(lineOf(c), 0.85) : GOLD.dark; ctx.lineWidth = c ? 4 : 5; ctx.beginPath(); st(ctx); ctx.stroke();
     ctx.restore();
     dot(ctx, -8, -9, 8, 'rgba(255,255,255,0.95)');
     sparkle(ctx, 0, 0, 62 * tw, 'rgba(255,255,255,0.5)');

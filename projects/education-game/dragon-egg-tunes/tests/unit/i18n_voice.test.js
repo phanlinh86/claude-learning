@@ -104,7 +104,7 @@ let contentSB = null;
 if (fs.existsSync(path.join(JS, 'content.js'))) {
   try {
     const csrc = fs.readFileSync(path.join(JS, 'content.js'), 'utf8');
-    if (/eggs/.test(csrc) && /'big'/.test(csrc) && /'dino'/.test(csrc) && !/'cow'/.test(csrc)) {
+    if (/eggs/.test(csrc) && /'big'/.test(csrc) && /SE\.ANIMALS = \[[^\]]*'dino'/.test(csrc) && !/SE\.ANIMALS = \[[^\]]*'cow'/.test(csrc)) {
       const sbc = makeSandbox(); sbc.SE = {};
       load(sbc, ['rng.js', 'i18n.js', 'content.js'].filter(f => fs.existsSync(path.join(JS, f))));
       if (sbc.SE.Content && sbc.SE.Content.makeRound) contentSB = sbc;
@@ -185,7 +185,7 @@ for (const lang of I.langs) for (const k of PROMPT_KEYS.concat(['p.any', 'p.next
   'songShort', 'songDone', 'cymbal.tap', 'hint', 'idle', 'surprise.lamb', 'lamb.tap', 'surprise.bird', 'bird.tap',
   'surprise.fireflies', 'firefly.tap', 'rio.poke', 'session.done', 'party', 'praise', 'great'],
   TUNE_KEYS.filter(k => !/^demo\.(note|animal)$/.test(k))))
-  ok([].concat(I.raw(lang, k)).length >= 3, `${lang} ${k}: 3 wordings`);
+  ok([].concat(I.raw(lang, k)).length >= (/^(wrong\.again|demo\.start)$/.test(k) ? 2 : 3), `${lang} ${k}: 3 wordings (2 for the short wrong.again / demo.start: playtest)`);
 for (const lang of I.langs) for (const k of TOPICS.map(t => 'topic.' + t)) ok(!Array.isArray(I.raw(lang, k)), `${lang} ${k} is one banner string`);
 // short lines (≤ ~4.5 s spoken at rate 0.9 ≈ 11 words) for everything Rio says during play
 for (const lang of I.langs) for (const k of I.keys(lang)) if (!/^(ui|talk)\./.test(k))
@@ -368,8 +368,10 @@ eq(I.speech('en', '…and blue!'), 'and blue!', 'speech: the cue\'s leading "…
 // sayTurn: the ask line in the tune flow
 const askE = (extra) => Object.assign({ type: 'ask', promptKey: 'p.colors', params: { color: 'red' }, mode: 'find', step: 0, steps: 2,
   nameKind: 'color', nameValue: 'red', echo: true, afterDemo: true }, extra || {});
-eq(I.sayTurn('en', askE(), { age: 4, rng: r0 }), 'Your turn! First, red!', 'sayTurn after the demo, age 4: + the first name');
-eq(I.sayTurn('vi', askE(), { age: 4, rng: r0 }), 'Đến lượt bé rồi! Đầu tiên là màu đỏ nhé!', 'sayTurn vi after the demo');
+eq(I.sayTurn('en', askE(), { age: 3, rng: r0 }), 'Your turn! First, red!', 'sayTurn after the demo, age 3: + the first name');
+eq(I.sayTurn('vi', askE(), { age: 3, rng: r0 }), 'Đến lượt bé rồi! Đầu tiên là màu đỏ nhé!', 'sayTurn vi after the demo, age 3');
+eq(I.sayTurn('en', askE(), { age: 4, rng: r0 }), 'Your turn!', 'sayTurn after the demo, age 4: no first name (playtest: it gave the answer away)');
+eq(I.sayTurn('en', askE(), { age: 5, cue: true, rng: r0 }), 'Your turn! First, red!', 'sayTurn cue:true forces the first name');
 eq(I.sayTurn('en', askE(), { age: 6, rng: r0 }), 'Your turn!', 'sayTurn age 6: no name cue (memory)');
 eq(I.sayTurn('en', askE(), { cue: false, rng: r0 }), 'Your turn!', 'sayTurn cue:false');
 eq(I.sayTurn('en', askE({ afterDemo: false, step: 1, nameValue: 'blue', params: { color: 'blue' } }), { age: 4, rng: r0 }), '…and blue!', 'sayTurn later step: the cue');
@@ -379,7 +381,7 @@ eq(I.sayTurn('en', askE({ promptKey: 'p.beat', mode: 'beat', params: { n: 3 }, n
   'Your turn — tap the big egg three times!', 'sayTurn beat step');
 eq(I.sayTurn('vi', askE({ promptKey: 'p.beat', mode: 'beat', params: { n: 1 }, nameKind: 'number', nameValue: 1, need: 1, afterDemo: false }), { rng: r0 }),
   'Đến lượt bé — gõ quả trứng to một cái nhé!', 'sayTurn vi beat step n = 1');
-eq(I.sayTurn('en', askE({ promptKey: 'p.animals', params: { animal: 'duck' }, nameKind: 'animal', nameValue: 'duck' }), { age: 5, rng: r0 }),
+eq(I.sayTurn('en', askE({ promptKey: 'p.animals', params: { animal: 'duck' }, nameKind: 'animal', nameValue: 'duck' }), { age: 3, rng: r0 }),
   'Your turn! First, the duckling!', 'sayTurn animals: the name, no sound');
 eq(I.sayTurn('en', askE({ mode: 'findAll', promptKey: 'p.oddeven', params: { parity: 'odd' }, nameKind: 'parity', nameValue: 'odd' }), { age: 5, rng: r0 }),
   'Your turn!', 'sayTurn findAll: no single name');
@@ -407,7 +409,7 @@ eq(I.ask('en', 'p.size', {}, { rng: r0 }), 'Tap the big egg!', 'p.size without s
 // p.beat = the child's turn after Rio tapped the big egg (copy N taps)
 eq(I.ask('en', 'p.beat', { n: 3 }, { rng: r0 }), 'Tap the big egg three times!', 'p.beat en');
 eq(I.ask('en', 'p.beat', { n: 1 }, { rng: r0 }), 'Tap the big egg once!', 'p.beat n = 1 → "once"');
-eq(I.ask('en', 'p.beat', { n: 2 }, { rng: r5 }), 'Your turn! Tap the big egg two times!', 'p.beat n = 2, 2nd wording');
+eq(I.ask('en', 'p.beat', { n: 2 }, { rng: r5 }), 'Your turn! Tap the big egg twice!', 'p.beat n = 2 → "twice", 2nd wording');
 eq(I.ask('vi', 'p.beat', { n: 3 }, { rng: r0 }), 'Bé ơi, gõ quả trứng to ba cái nhé!', 'p.beat vi (REQUIREMENT)');
 eq(I.ask('vi', 'p.beat', { n: 1 }, { rng: r0 }), 'Bé ơi, gõ quả trứng to một cái nhé!', 'p.beat vi n = 1');
 for (const lang of I.langs) for (let n = 1; n <= 10; n++) for (let v = 0; v < 3; v++) {
@@ -465,10 +467,10 @@ for (const lang of I.langs) {
   }
   for (let n = 1; n <= 10; n++) for (let v = 0; v < 3; v++) {
     const s = I.ask(lang, 'p.beat', { n }, { rng: () => v / 3 });
-    ok(clean(s) && (lang === 'en' && n === 1 ? /\bonce\b/.test(s) : s.toLowerCase().includes(I.numberName(lang, n))), `${lang} p.beat ${n} [${v}]: ${s}`);
+    ok(clean(s) && (lang === 'en' && n <= 2 ? /\b(once|twice)\b/.test(s) : s.toLowerCase().includes(I.numberName(lang, n))), `${lang} p.beat ${n} [${v}]: ${s}`);
     if (lang === 'vi') ok(/ cái/.test(s), `vi p.beat ${n} counts with "cái": ${s}`);
     const tb = I.t(lang, 'turn.beat', { n }, () => v / 3);
-    ok(clean(tb) && (lang === 'en' && n === 1 ? /\bonce\b/.test(tb) : tb.toLowerCase().includes(I.numberName(lang, n))), `${lang} turn.beat ${n} [${v}]: ${tb}`);
+    ok(clean(tb) && (lang === 'en' && n <= 2 ? /\b(once|twice)\b/.test(tb) : tb.toLowerCase().includes(I.numberName(lang, n))), `${lang} turn.beat ${n} [${v}]: ${tb}`);
   }
   for (const L of LETTERS) ok(clean(I.ask(lang, 'p.letters', { letter: L }, { rng: r0 })), `${lang} p.letters ${L}`);
 }
@@ -683,7 +685,7 @@ eq(I.sayRight('en', beatE(3), r0), 'Three! You tapped it three times!', 'right b
 eq(I.sayRight('en', beatE(1), r0), 'One! You tapped it once!', 'right beat mode n = 1');
 eq(I.sayRight('vi', beatE(3), r0), 'Ba! Bé gõ đủ ba cái rồi!', 'right beat mode vi');
 eq(I.sayRight('en', { thing: bigD(4), topic: 'count', params: { n: 4 } }, r5), 'Four! Super counting!', 'right big egg without e.count → params.n');
-eq(I.sayRight('en', { nameKind: 'number', nameValue: 2, topic: 'count', promptKey: 'p.beat', params: { n: 2 } }, r0), 'Two! You tapped it two times!', 'right beat rebuilt from nameKind');
+eq(I.sayRight('en', { nameKind: 'number', nameValue: 2, topic: 'count', promptKey: 'p.beat', params: { n: 2 } }, r0), 'Two! You tapped it twice!', 'right beat rebuilt from nameKind');
 eq(I.sayRight('en', { thing: dots(7), topic: 'count', params: { n: 7, kind: 'dots' } }, r0), 'Yes! Seven dots!', 'right dots without a count run');
 eq(I.sayRight('en', { thing: dots(4), topic: 'count', count: { n: 4 } }), 'One, two, three, four dots!', 'right dots with e.count → the count run');
 eq(I.sayRight('en', { thing: glyphL('B'), topic: 'letters' }, r0), 'Yes! Letter B!', 'right letters');
