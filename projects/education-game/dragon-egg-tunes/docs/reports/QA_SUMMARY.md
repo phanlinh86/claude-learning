@@ -23,3 +23,4 @@ session; the longest stretch a child cannot act averages 4.4 s (p90 6.1 s). Age 
 `demoLeadReplay 1.6`, `demoTail 0.9`, `introTime 3.5`, `chapterTimeLimit 68`, shorter wrong-again lines, "First, red!" cue
 only at age 3 — real page VI: names dropped 4/19 → 0/16, "Your turn!" heard in full 3/11 → 9/9.
 Open (P2, design choice): slow 3-year-old chapters p90 ≈ 120 s (session still ≤ 8 min); ages 5+ often play 3 rounds per chapter.
+- 2026-11-26 functional: 126/126 (rio_poke regex re-run after the fix: 2/2 PASS); unit 62/62, i18n 58 626/0, egg_art 6 571/0, smoke PASS.

@@ -30,7 +30,7 @@ const VI_CHARS = /[ăâđêôơưàáảãạằắẳẵặầấẩẫậèé�
 // a raw i18n key, an unfilled {param}, or a JS hole in a spoken line
 const RAW = /\{|\}|undefined|NaN|\bnull\b|\[object|\b(ui|p|talk|topic|weather|right|wrong|surprise|lamb|bird|firefly|rio|count|name|idle|session|demo|turn|cymbal)\.[a-z0-9]/i;
 // the tune-flow lines (i18n demo.start / demo.replay / demo.beat / turn.first / turn.beat), by language
-const LISTEN = { en: /listen|count with me|watch and count|count my taps/i, vi: /nghe|đếm/i };
+const LISTEN = { en: /listen|count with me|watch and count|count my taps|here it is again|once more/i, vi: /nghe|đếm|rio hát lại/i };
 const TURN = { en: /your turn|now you/i, vi: /đến lượt bé|giờ tới bé|bé hát lại/i };
 
 const results = [];
