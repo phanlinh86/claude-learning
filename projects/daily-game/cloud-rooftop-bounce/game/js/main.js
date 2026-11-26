@@ -58,8 +58,14 @@
     /* phones held upright: the 16-unit city is tiny, so ask to turn sideways (once dismissed, never again this session) */
     syncRotate() {
       const el = document.getElementById('rotate'); if (!el) return;
-      const on = this.isTouch && this.renderer.portrait && this.mode === 'playing' && !this._rotOk && !this.botMode;
+      const on = this.isTouch && this.isPhone() && this.renderer.portrait && this.mode === 'playing' && !this._rotOk && !this.botMode;
       this._rotOn = on; el.classList.toggle('hidden', !on);
+    },
+    /* phone-sized screen? (portrait iPads play letterboxed, DESIGN §2); the viewport is a fallback when screen is unknown */
+    isPhone() {
+      const sw = window.screen && screen.width, sh = window.screen && screen.height;
+      if (sw > 0 && sh > 0) return Math.min(sw, sh) < 600;
+      return Math.min(window.innerWidth, window.innerHeight) < 600;
     },
     makeWeather() { return new WRB.Weather({ width: this.renderer.VW, height: this.renderer.VH, seed: 5 }); },
     _setLevelVisuals(zone, instant) {
@@ -197,10 +203,10 @@
         }
         if (this.mode === 'playing' && MOVE_KEYS[e.code]) { e.preventDefault(); this.keys[e.code] = true; this.syncKeys(); return; }
         if (this.mode === 'playing' && (e.code === 'Space' || e.code === 'Enter' || e.code === 'ArrowUp' || e.code === 'KeyW')) { e.preventDefault(); if (!e.repeat) this.serve(); return; }
-        if (this.mode === 'over' && (e.code === 'Enter' || e.code === 'Space')) { const f = document.activeElement; if (f && f.tagName === 'BUTTON' && f.id !== 'btnAgain') return; e.preventDefault(); if (!e.repeat && this.canRestart()) this.startGame(); return; }
+        if (this.mode === 'over' && (e.code === 'Enter' || e.code === 'Space')) { const f = document.activeElement, card = document.getElementById('scScreen'); if ((card && !card.classList.contains('hidden')) || (f && f !== document.body && f.id !== 'btnAgain')) return; e.preventDefault(); if (!e.repeat && this.canRestart()) this.startGame(); return; }
         if (this.mode === 'title' && ui === 'scrTitle' && (e.code === 'Space' || e.code === 'Enter')) {
           const f = document.activeElement;
-          if (f && f.tagName === 'BUTTON' && f.id !== 'btnPlay') return;
+          if (f && f !== document.body && f.id !== 'btnPlay') return;
           e.preventDefault(); this.startGame();
         }
       });

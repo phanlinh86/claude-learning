@@ -86,14 +86,14 @@
     STICK_MIN_T: 0.3,       // s — no sticking during the magnet's last 0.3 s (it would drop straight away)
     GEMS_PER_HEART: 10,     // gems — +1 heart every 10 gems caught
     HEARTS: 3, MAX_HEARTS: 5,
-    ANTI_STALL: 5,          // s — no block hit for 5 s → Wisp's bounces steer toward the nearest block (fork playtest: 12 s let stalls run to 28 s)
+    ANTI_STALL: 3,          // s — no block hit for 3 s → Wisp's bounces (and magnet releases) steer toward the nearest block (playtest: 5 s let zone ends drag for players who don't aim)
     CLEAR_T: 2.5,           // s — the 'clear' phase = the descend transition
     OOPS_T: 1.0, CHEER_T: 0.8, CLEAR_CHEER_T: 2.5, // s — Wisp face timers
     FACE_MOVE_V: 1.5,       // u/s — faster than this shows the left/right frame
     PTS: { brick: 10, combo: 5, gem: 25, clear: 100, clearHeart: 20 },
     COMBO_FROM: 3,          // the 3rd block before the pearl comes back to Wisp starts the +5 bonus
     DIFF: {
-      easy:   { paddleW: 3.6, ballSpeed: 5.4, netSaves: 8, magnetT: 12 },   // a 6-year-old: wide, slow, a forgiving net
+      easy:   { paddleW: 4.2, ballSpeed: 5.4, netSaves: 12, magnetT: 12 },  // a 4–6-year-old: wide, slow, a forgiving net (playtest: 8 saves lasted a 4-year-old ≈ 70 s)
       normal: { paddleW: 2.5, ballSpeed: 7.6, netSaves: 1, magnetT: 10 },
       hard:   { paddleW: 2.1, ballSpeed: 9.0, netSaves: 0, magnetT: 8 }
     },
@@ -113,13 +113,13 @@
       '...b..b...'
     ],
     [ // Skyscraper Spires — three towers, the middle one tallest
-      '....tt....',
+      '....bb....',
       '.b..bb..b.',
       '.b..gb..b.',
       'tbt.bb.tbt',
       'bmb.bb.bmb',
-      'bgbbttbbgb',
-      'bbbbbbbbbb'
+      'bgbbbbbbgb',
+      '.bbbbbbbb.'
     ],
     [ // Rooftop Gardens — two flowers in a long planter
       '.bb....bb.',
@@ -136,7 +136,7 @@
       'tbt.tmt.tb',
       'bgb.bbb.bm',
       'bmb.bgb.bb',
-      'tbt.tbt.tb',
+      'bbb.bbb.bb',
       '.b...b...b'
     ]
   ];
@@ -257,12 +257,19 @@
     if (!b || !b.stuck) return;
     var reach = p.w / 2 + b.r;
     var off = clamp(b.stuckOff / reach, -1, 1);
-    var ang = clamp(off * C.MAX_ANGLE + clamp(p.vx * C.NUDGE_K, -C.NUDGE_MAX, C.NUDGE_MAX), -C.MAX_ANGLE, C.MAX_ANGLE) * DEG;
+    var ang = off * C.MAX_ANGLE + clamp(p.vx * C.NUDGE_K, -C.NUDGE_MAX, C.NUDGE_MAX);
+    // the stall clock keeps running through a stick (playtest: resetting it here meant a player who doesn't aim
+    // never got the anti-stall help while the magnet was on); during a stall, steer the release like a bounce
+    if (this.noBrickT > C.ANTI_STALL) {
+      var tgt = this._nearestBrickAngle(b.x, b.y);
+      var kk = M.min(1, 0.5 + 0.5 * (this.noBrickT - C.ANTI_STALL) / C.ANTI_STALL);
+      if (tgt !== null) ang = (1 - kk) * ang + kk * tgt;
+    }
+    ang = clamp(ang, -C.MAX_ANGLE, C.MAX_ANGLE) * DEG;
     b.speed = this._speed();
     b.vx = b.speed * M.sin(ang); b.vy = b.speed * M.cos(ang);
     this._normalize(b);
     b.stuck = false; b.onPaddle = false; b.stuckT = 0;
-    this.noBrickT = 0;
     this._emit({ type: 'release', x: b.x, y: b.y, auto: !!auto });
   };
 
@@ -276,6 +283,7 @@
     leave = leave === undefined ? 1 : leave;
     var alive = this.bricks.filter(function (b) { return b.alive; });
     for (var i = 0; i < alive.length - leave; i++) alive[i].alive = false;
+    if (this.bricksLeft() === 0 && this.phase === 'play') this._zoneClear();   // clearBricks(0) must not soft-lock the zone
   };
   World.prototype.debugMagnet = function () { this._magnetOn(this.paddle.x, CONFIG.PADDLE_Y); };
   World.prototype.debugDrop = function (kind) {

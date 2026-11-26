@@ -5,7 +5,10 @@ A family-friendly brick-breaker on city rooftops at night. Wisp the cloud sprite
 
 ## Status
 v1.0, built and tested on 2026-11-26.
-- Unit tests 38/38, smoke test passes, functional suite passes (`tests/e2e/functional.js`), mobile layer `test_extras.js` passes.
+- QA round (`docs/reports/`): functional 304/304 + probe found 2 P2 (Enter on game over started a game behind the Score Card; rotate card shown on portrait iPads) + 2 P3; visual 1 P1 (zone pill hid the top-left block) + 6 P2; playtest: kids 4–6 ran out of hearts on Easy (kid4 cleared the Cloud Deck only 38 %), magnet releases reset the anti-stall clock.
+- Fixes applied: Easy Wisp 3.6 → 4.2 u and net saves 8 → 12, anti-stall 5 → 3 s, releases no longer reset the stall clock (and steer during a stall), fewer tough blocks in Spires/Lanes (kid4 clears zone 1 in 100 %); Score Card key guard; rotate card phones only; `debugClear(0)` clears the zone; storage `del()` rolls back; zone pill beside the score pill, bigger phone HUD, stuck hint away from the aim guide, popups refresh instead of stacking, faint empty hearts, darker grey buttons, sparkle/puff polish.
+- After fixes: unit 41/41, smoke pass, functional 300/300, `test_extras.js` pass, exe builds (PE32+ GUI x86-64).
+- Open: visual P3-5 (moon placement, needs art edit); probe soak only run at 20 s after fixes.
 - **Not yet verified:** a real iPhone or iPad, the music by ear, and the exe on Windows.
 
 ## Stack

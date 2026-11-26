@@ -10,6 +10,7 @@ const OUT = path.resolve(__dirname, '../out/visual'); fs.mkdirSync(OUT, { recurs
 const SIZES = {
   desk: { viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1 },
   ipad: { viewport: { width: 1024, height: 768 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true },
+  pro: { viewport: { width: 1366, height: 1024 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true },
   ipadp: { viewport: { width: 768, height: 1024 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true },
   phone: { viewport: { width: 844, height: 390 }, deviceScaleFactor: 3, hasTouch: true, isMobile: true },
   port: { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, hasTouch: true, isMobile: true }
@@ -95,7 +96,7 @@ const stickPearl = off => `(() => { const w = WRB.debug.world; WRB.debug.giveMag
   }
 
   // ---------- zones, banner, the descend transition ----------
-  if (run('zones')) for (const size of ['desk', 'phone', 'ipadp']) {
+  if (run('zones')) for (const size of ['desk', 'phone', 'ipad', 'ipadp']) {
     const p = await open(b, size, 'seed=5&autostart=1&diff=easy');
     await p.evaluate(() => { WRB.Game._rotOk = true; });
     for (const lv of [0, 1, 2, 3]) {
@@ -170,16 +171,16 @@ const stickPearl = off => `(() => { const w = WRB.debug.world; WRB.debug.giveMag
     const grid = filt => `<div style="filter:${filt};display:inline-block;padding:8px;background:linear-gradient(#141a4a,#3b3f86)">` + rows.map(r => '<div>' + r.map(cell).join('') + '</div>').join('') + '</div>';
     await p.goto(GAME.replace('index.html', 'manifest.webmanifest'));
     await p.setContent(`<body style="margin:0;background:#333;color:#fff;font:14px sans-serif">
-      <svg width="0" height="0"><filter id="deut"><feColorMatrix type="matrix" values="0.367 0.861 -0.228 0 0  0.280 0.673 0.047 0 0  -0.012 0.043 0.969 0 0  0 0 0 1 0"/></filter></svg>
-      <div>normal (block / tough / cracked / gem / magnet)</div>${grid('none')}<div>deuteranopia</div>${grid('url(#deut)')}<div>greyscale</div>${grid('grayscale(1)')}</body>`);
+      <svg width="0" height="0"><filter id="prot"><feColorMatrix type="matrix" values="0.152 1.053 -0.205 0 0  0.115 0.786 0.099 0 0  -0.004 -0.048 1.052 0 0  0 0 0 1 0"/></filter><filter id="deut"><feColorMatrix type="matrix" values="0.367 0.861 -0.228 0 0  0.280 0.673 0.047 0 0  -0.012 0.043 0.969 0 0  0 0 0 1 0"/></filter></svg>
+      <div>normal (block / tough / cracked / gem / magnet)</div>${grid('none')}<div>deuteranopia</div>${grid('url(#deut)')}<div>protanopia</div>${grid('url(#prot)')}<div>greyscale</div>${grid('grayscale(1)')}</body>`);
     await p.waitForTimeout(800);
     await p.screenshot({ path: OUT + '/cb_bricks.png', fullPage: true });
     await p.context().close();
     const g = await open(b, 'desk', 'seed=4&autostart=1&diff=hard&level=4');
     for (const lv of [4, 5, 6, 7]) {
       await g.evaluate(l => WRB.debug.gotoLevel(l), lv); await g.waitForTimeout(2600);
-      for (const [n, f] of [['norm', 'none'], ['deut', 'url(#deutx)'], ['grey', 'grayscale(1)']]) {
-        await g.evaluate(f => { if (!document.getElementById('deutsvg')) document.body.insertAdjacentHTML('beforeend', '<svg id="deutsvg" width="0" height="0" style="position:absolute"><filter id="deutx"><feColorMatrix type="matrix" values="0.367 0.861 -0.228 0 0  0.280 0.673 0.047 0 0  -0.012 0.043 0.969 0 0  0 0 0 1 0"/></filter></svg>');
+      for (const [n, f] of [['norm', 'none'], ['deut', 'url(#deutx)'], ['prot', 'url(#protx)'], ['grey', 'grayscale(1)']]) {
+        await g.evaluate(f => { if (!document.getElementById('deutsvg')) document.body.insertAdjacentHTML('beforeend', '<svg id="deutsvg" width="0" height="0" style="position:absolute"><filter id="protx"><feColorMatrix type="matrix" values="0.152 1.053 -0.205 0 0  0.115 0.786 0.099 0 0  -0.004 -0.048 1.052 0 0  0 0 0 1 0"/></filter><filter id="deutx"><feColorMatrix type="matrix" values="0.367 0.861 -0.228 0 0  0.280 0.673 0.047 0 0  -0.012 0.043 0.969 0 0  0 0 0 1 0"/></filter></svg>');
           document.getElementById('game').style.filter = f; }, f);
         await g.waitForTimeout(150);
         await shot(g, 'cb_zone' + (lv - 4) + '_' + n, { x: 0, y: 0, width: 1280, height: 470 });

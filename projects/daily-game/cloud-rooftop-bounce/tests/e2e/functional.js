@@ -745,7 +745,12 @@ const SLOT = { hero: 0, ball: 1, gem: 2, bg_cloud: 3, bg_spires: 4, bg_gardens: 
       }
       await W(p, () => WRB.UI.show('scrTitle'));
       await W(p, () => WRB.debug.startGame()); await holdServe(p); await sleep(200);
-      if (S.name.includes('portrait')) {
+      if (S.name.includes('iPad portrait')) {
+        // DESIGN §2: portrait iPads play letterboxed, the "turn your phone" card is for phones only
+        check(S.name + ' no rotate card on a portrait iPad', await isHidden(p, 'rotate'));
+        const t0 = await W(p, () => WRB.debug.world.time); await sleep(300);
+        check(S.name + ' portrait iPad: the game runs', (await W(p, () => WRB.debug.world.time)) > t0);
+      } else if (S.name === '390x844 portrait') {
         check('portrait phone: "turn sideways" card shows in game', !(await isHidden(p, 'rotate')));
         const t0 = await W(p, () => WRB.debug.world.time); await sleep(300);
         check('portrait phone: game waits behind the card', (await W(p, () => WRB.debug.world.time)) === t0);

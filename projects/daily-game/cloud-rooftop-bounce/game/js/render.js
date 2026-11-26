@@ -84,7 +84,9 @@
       this._syncLetterbox();
       const hud = document.getElementById('hud'), toast = document.getElementById('toast');
       const I = v.ins, S = v.s;
-      if (hud) { hud.style.top = (v.top + (I.top + 8) * S) + 'px'; hud.style.right = (v.left + (I.right + 8) * S) + 'px'; }
+      const uc = Math.min(window.innerWidth / 100, window.innerHeight * 0.0178), btn = Math.max(44, uc * 4);
+      this._btnL = v.VW - I.right - 8 - (2 * btn + 0.8 * uc) / S - 10;   // logical x where the pause / mute buttons begin
+      if (hud) { hud.style.top = (v.top + (I.top + 5) * S) + 'px'; hud.style.right = (v.left + (I.right + 8) * S) + 'px'; }
       if (toast) toast.style.bottom = (v.top + (I.bottom + 40) * S) + 'px';
       this._syncWeather();
       WRB.Assets.setScale(this.px);
@@ -265,7 +267,7 @@
           case 'magnetSpawn': this.sparkle(this.sx(e.x), this.sy(e.y), 6, '#ff9a9a'); break;
           case 'magnetGet':
             this.magPulse = 1; this.flash = 0.25; this.flashCol = '#ffd6dc';
-            this.popup(this.sx(w.paddle.x), this.sy(2.6), 'Magnet!', '#ff8a8a', 1.35);
+            this.popup(this.sx(w.paddle.x), this.sy(3.4), 'Magnet!', '#ff8a8a', 1.35);
             this.rings.push({ x: this.sx(w.paddle.x), y: this.sy(0.8), r0: 0.4 * u, r1: 2.6 * u, t: 0, life: 0.55, col: '#ff8a8a' });
             this.rings.push({ x: this.sx(w.paddle.x), y: this.sy(0.8), r0: 0.2 * u, r1: 2.0 * u, t: -0.1, life: 0.5, col: '#8ab8ff' });
             break;
@@ -275,7 +277,8 @@
           case 'stick': this.squash = 0.7; this.rings.push({ x: this.sx(e.x), y: this.sy(e.y), r0: 0.1 * u, r1: 0.55 * u, t: 0, life: 0.3, col: '#ff9a9a' }); this.sparkle(this.sx(e.x), this.sy(e.y), 4, '#ffd0d0'); break;
           case 'release': this.rings.push({ x: this.sx(e.x), y: this.sy(e.y), r0: 0.1 * u, r1: 0.8 * u, t: 0, life: 0.3, col: '#ffffff' }); this.sparkle(this.sx(e.x), this.sy(e.y), 5, '#dfe8ff'); break;
           case 'net': this.netFlash = 1; this.rings.push({ x: this.sx(e.x), y: this.sy(0.3), r0: 0.1 * u, r1: 1.2 * u, t: 0, life: 0.45, col: '#bfe0ff' }); this.sparkle(this.sx(e.x), this.sy(0.3), 8, '#dbeaff'); break;
-          case 'ballLost': this.shake = 0.45; this.popup(this.sx(clamp(e.x, 1, 15)), this.sy(1.9), 'Oops!', '#ffd0d8', 1.2); break;
+          case 'ballLost': { const lx = this.sx(clamp(e.x, 0.5, 15.5)); this.puffs(lx, this.sy(0.05), 3, 0.6); this.rings.push({ x: lx, y: this.sy(0.05), r0: 0.1 * u, r1: 0.9 * u, t: 0, life: 0.4, col: '#ffd0d8' }); }
+            this.shake = 0.45; this.popup(this.sx(clamp(e.x, 1, 15)), this.sy(1.9), 'Oops!', '#ffd0d8', 1.2); break;
           case 'heartLost': this.heartPulse = -1; break;
           case 'heartGain': this.heartPulse = 1; this.popup(this.sx(w.paddle.x), this.sy(2.9), '+1 ♥', '#ff8fae', 1.2); break;
           case 'levelClear':
@@ -289,11 +292,12 @@
     }
     popup(x, y, s, col, sc) {
       if (this.texts.length > 30) this.texts.shift();
-      // never pile up: a new popup near a recent one goes below it
-      const u = this.unit;
+      // never pile up: the same word again refreshes the recent one; a new popup near a recent one goes below it
+      const u = this.unit, same = this.texts.find(t => t.s === s && t.t < 0.6);
+      if (same) { same.t = 0; same.x = x; return; }
       for (let n = 0; n < 4; n++) {
         const hit = this.texts.some(t => t.t < 0.5 && Math.abs(t.x - x) < 1.8 * u && Math.abs(t.y - y) < 0.45 * u);
-        if (!hit) break; y += 0.5 * u;
+        if (!hit) break; y += 0.42 * u * (sc || 1) * 1.2;
       }
       this.texts.push({ x, y, s, col, sc: sc || 1, t: 0, life: 1.1 });
     }
@@ -337,11 +341,11 @@
       this.rings = this.rings.filter(r => r.t < r.life);
       const w = this.world;
       // descending: little cloud wisps stream up past Wisp so the fall reads
-      if (v.t < 1 && w) {
+      if (v.t < 0.8 && w) {
         this._streamT = (this._streamT || 0) - dt;
         if (this._streamT <= 0) {
-          this._streamT = 0.07; const u = this.unit;
-          this.flyers.push({ key: 'p_puff', x: Math.random() * this.VW, y: this.VH + 0.5 * u, vx: 0, vy: -(9 + Math.random() * 5) * u, g: 0, rot: 0, spin: 0, size: (0.5 + Math.random() * 0.6) * u, life: 1.1, t: 0, fade: 0.45 });
+          this._streamT = 0.1; const u = this.unit;
+          this.flyers.push({ key: 'p_puff', x: Math.random() * this.VW, y: this.VH + 0.5 * u, vx: 0, vy: -(9 + Math.random() * 5) * u, g: 0, rot: 0, spin: 0, size: (0.35 + Math.random() * 0.4) * u, life: 1.1, t: 0, fade: 0.3 });
         }
       }
       // pearl trail (world positions)
@@ -585,7 +589,7 @@
     /* a plain procedural cloud for a custom Wisp picture: overlapping puffs, lilac shade, white top */
     drawCloud(g, x, bottom, wpx, h, sxk, syk, rot) {
       g.save(); g.translate(x, bottom); g.rotate(rot || 0); g.scale(sxk, syk);
-      const r = h * 0.55, puffs = [[-0.42, 0.45, 0.75], [-0.2, 0.62, 1.0], [0.05, 0.7, 1.1], [0.28, 0.6, 0.95], [0.45, 0.42, 0.7]];
+      const r = h * 0.55, puffs = [[-0.42, 0.45, 0.65], [-0.2, 0.62, 0.9], [0.05, 0.7, 1.0], [0.28, 0.6, 0.85], [0.45, 0.42, 0.6]];
       g.fillStyle = '#b9b2e8';
       g.beginPath(); for (const [fx, fy, fr] of puffs) { g.moveTo(fx * wpx + fr * r, -fy * h + 0.06 * h); g.arc(fx * wpx, -fy * h + 0.06 * h, fr * r, 0, TAU); }
       g.rect(-wpx * 0.45, -h * 0.45, wpx * 0.9, h * 0.45); g.fill();
@@ -628,7 +632,9 @@
     drawFlyers(g) {
       for (const f of this.flyers) {
         const al = clamp(1 - f.t / f.life, 0, 1) * (f.t < 0.06 ? f.t / 0.06 : 1) * (f.fade || 1);
+        if (f.key === 'p_sparkle') { g.save(); g.globalCompositeOperation = 'lighter'; }   // glow, never grey dust
         this.drawSpr(g, f.key, f.x, f.y, f.size, f.size, 0.5, 0.5, f.rot, 1, 1, al);
+        if (f.key === 'p_sparkle') g.restore();
       }
       for (const r of this.rings) {
         if (r.t < 0) continue;
@@ -657,21 +663,31 @@
       g.beginPath(); g.moveTo(x + r, y); g.lineTo(x + w - r, y); g.arc(x + w - r, y + r, r, -Math.PI / 2, Math.PI / 2); g.lineTo(x + r, y + h); g.arc(x + r, y + r, r, Math.PI / 2, Math.PI * 1.5); g.closePath();
       g.fillStyle = col; g.fill();
     }
-    /* HUD: [score | hearts | gem n/10 | magnet timer] pill top-left, zone name under it */
+    /* HUD: [score | hearts | gem n/10 | magnet timer] pill top-left, the zone name in a dark pill right of it */
     drawHud(g, w) {
       const pal = PAL[WRB.Assets.ZONES[w.zone % 4]], I = this.ins;
-      const s = Math.max(0.8, Math.min(1.15, this.VH / 540)) * (this.portrait ? 1.25 : 1);
-      const x0 = 10 + I.left, y0 = 8 + I.top, h = 34 * s;
+      // bigger on phones (undo the small CSS scale), but the pill never reaches down over the top brick row:
+      // its height is capped to the free band, and the contents may grow up to 1.2× inside it
+      const s0 = Math.max(0.8, Math.min(1.15, this.VH / 540)) * (this.portrait ? 1.25 : Math.max(1, Math.min(1.4, 0.95 / (this.cssScale || 1))));
+      const x0 = 10 + I.left, y0 = 8 + I.top;
+      let top = 0; for (const b of w.bricks) top = Math.max(top, b.y + (b.h || 0.5) / 2);
+      const h = 34 * Math.min(s0, Math.max(0.8, top ? (this.sy(top) - 3 - y0) / 34 : s0)), s = Math.min(s0, h / 34 * 1.2);
       g.save();
       g.font = '900 ' + (22 * s).toFixed(1) + 'px ' + FONT; g.textBaseline = 'middle';
       const sc = String(w.score), tw = g.measureText(sc).width;
       const shown = Math.min(w.maxHearts, Math.max(3, w.hearts + 1));
       const heartsW = shown * 22 * s, gemW = 76 * s, mag = w.magnet && w.magnet.t > 0, magW = mag ? 34 * s : 0;
       const W = 18 * s + tw + 14 * s + heartsW + gemW + magW;
-      this._hudW = x0 + W;
-      // fade the pill when the pearl flies behind it, so a child never loses sight of it
+      const zn = ZONE_INFO[w.zone % 4].name + ((w.loop || 0) > 0 ? ' · ' + (w.loop + 1) : '');
+      g.font = '800 ' + (14 * s).toFixed(1) + 'px ' + FONT;
+      const zw = g.measureText(zn).width + 20 * s, zh = Math.min(26 * s, h);
+      const zRight = x0 + W + 8 * s + zw < (this._btnL || this.VW);   // the zone name fits beside the main pill
+      const zx = zRight ? x0 + W + 8 * s : x0 + 6 * s, zy = zRight ? y0 + (h - zh) / 2 : y0 + h + 4 * s;
+      g.font = '900 ' + (22 * s).toFixed(1) + 'px ' + FONT;
+      this._hudW = zRight ? zx + zw : x0 + W;
+      // fade both pills when the pearl flies behind them, so a child never loses sight of it
       let al = 0.88;
-      if (w.ball) { const [bx, by] = this._ballPos(w, w.alpha || 0); if (bx < x0 + W + 20 && by < y0 + h * 2.1 + 16) al = 0.4; }
+      if (w.ball) { const [bx, by] = this._ballPos(w, w.alpha || 0); if (bx < Math.max(x0 + W, zx + zw) + 20 && by < (zRight ? y0 + h : zy + zh) + 16) al = 0.4; }
       this._hudAl = this._hudAl == null ? al : lerp(this._hudAl, al, 0.25);
       g.globalAlpha = this._hudAl;
       this.pill(g, x0, y0, W, h, pal.bar);
@@ -682,7 +698,8 @@
         let sz = 20 * s;
         if (this.heartPulse > 0 && i === w.hearts - 1) sz *= 1 + 0.4 * this.heartPulse;
         if (this.heartPulse < 0 && i === w.hearts) sz *= 1 + 0.4 * -this.heartPulse;
-        this.drawSpr(g, full ? 'heart' : 'heart_empty', hx + 10 * s, y0 + h / 2, sz, sz, 0.5, 0.5);
+        const es = full ? sz : sz * 0.78;
+        this.drawSpr(g, full ? 'heart' : 'heart_empty', hx + 10 * s, y0 + h / 2, es, es, 0.5, 0.5, 0, 1, 1, full ? 1 : 0.55);
         hx += 22 * s;
       }
       hx += 6 * s;
@@ -697,13 +714,11 @@
         if (w.magnet.t < 2) g.globalAlpha *= 0.55 + 0.45 * Math.sin(this.time * 18);
         this.drawSpr(g, 'magnet', cx, cy, 24 * s, 24 * s, 0.5, 0.5);
       }
-      // zone name, a smaller pill under the first
+      // zone name: a smaller dark pill on the same row, right of the first (shares its fade)
       g.globalAlpha = this._hudAl * 0.9;
-      const zn = ZONE_INFO[w.zone % 4].name + ((w.loop || 0) > 0 ? ' · ' + (w.loop + 1) : '');
-      g.font = '800 ' + (13 * s).toFixed(1) + 'px ' + FONT;
-      const zw = g.measureText(zn).width + 20 * s, zh = 20 * s;
-      this.pill(g, x0 + 6 * s, y0 + h + 4 * s, zw, zh, 'rgba(20,22,60,0.62)');
-      g.fillStyle = '#e6e9ff'; g.fillText(zn, x0 + 16 * s, y0 + h + 4 * s + zh / 2 + 1);
+      g.font = '800 ' + (14 * s).toFixed(1) + 'px ' + FONT;
+      this.pill(g, zx, zy, zw, zh, 'rgba(20,22,60,0.62)');
+      g.fillStyle = '#e6e9ff'; g.fillText(zn, zx + 10 * s, zy + zh / 2 + 1);
       g.restore();
     }
     drawHints(g, w, mode) {
@@ -718,10 +733,12 @@
       const size = 0.4 * u * (this.portrait ? 1.2 : 1), bob = Math.sin(this.time * 4) * 0.08 * u;
       const x = clamp(this.sx(w.paddle.x), 3 * u, this.VW - 3 * u), y = this.sy(w.paddle.y + 1.35);
       if (w.phase === 'serve' && w.ball && !this.banner) {
+        if ((w.gems || []).length) g.globalAlpha = 0.75;   // see-through while gems fall behind it
         say(touch ? 'Tap to serve!' : 'Click or Space to serve!', x, y + bob, size, '#ffffff');
         if (this.hint) say(touch ? '← slide to move Wisp →' : '← move the mouse or use the arrow keys →', clamp(x, 4.2 * u, this.VW - 4.2 * u), y + bob - size * 1.15, size * 0.75, '#fff3c8');
       } else if (w.ball && w.ball.stuck) {
-        say(touch ? 'Slide to aim · tap to let go!' : 'Aim · click or Space to let go!', x, y + 0.4 * u + bob, size * 0.85, '#ffd6dc');
+        const side = (w.ball.stuckOff || 0) >= 0 ? -1 : 1;   // on the side away from the aim guide
+        say(touch ? 'Slide to aim · tap to let go!' : 'Aim · click or Space to let go!', clamp(x + side * 3.4 * u, 3 * u, this.VW - 3 * u), this.sy(w.paddle.y + 1.0) + bob, size * 0.85, '#ffd6dc');
       }
       g.restore();
       if (w.phase === 'clear') {

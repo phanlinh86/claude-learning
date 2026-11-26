@@ -5,7 +5,7 @@
   --green:#5cc65a; --green-d:#3c9a3d;
   --orange:#ff9f43; --orange-d:#d9771c;
   --blue:#8f7be0; --blue-d:#6553b3;
-  --grey:#b9b3a8; --grey-d:#8c867b;
+  --grey:#7d7690; --grey-d:#5a5470;
   --font: "Segoe UI Black","Segoe UI","Arial Rounded MT Bold","Trebuchet MS",system-ui,sans-serif;
   --u: min(1vw, 1.78vh); /* 1/100 of the 16:9 game width */
 }
@@ -401,3 +401,7 @@ kbd{border-color:#a9b1e6}
 .title-icon{border-radius:24%;box-shadow:0 0 0 calc(var(--u)*.35) rgba(255,255,255,.85)}
 /* Volume − / + (shared extras.js) are 36 px: finger-sized on touch screens */
 body.touch .set-volume .vol-step{width:44px;height:44px}
+/* visual QA 2 (docs/reports/visual.md) */
+#hud .icon-btn{width:max(44px,calc(var(--u)*4));height:max(44px,calc(var(--u)*4))}   /* P2-1: clear of the top brick row */
+.slot .shape button.on{background:var(--blue-d);border-color:#3a4396}   /* P2-6: white on the darker blue */
+@media (max-height:430px){ #scrTitle .best-line{margin-top:4px;position:absolute;right:16px;bottom:12px} }   /* P3-6: off the demo Wisp */

@@ -10,17 +10,17 @@ Every module below must use these exact names. If you need to deviate, say so in
 | One paddle, one ball, a wall of blocks | The paddle IS Wisp: a soft cloud sprite with a face whose fluffy top is the bounce surface. It squashes on every hit |
 | Hit point steers the ball | Max 60° from vertical; \|vy\| ≥ 0.38·speed after every bounce |
 | Clear the wall → next level | Levels are 4 depth zones, Wisp floats DOWN from the cloud deck to street level (a 2.5 s "descend" transition: the scene scrolls up) |
-| Ball lost → heart lost | Easy: moonbeam net saves the pearl 8× per zone (1× Normal, 0× Hard); tap to serve, auto-serve after 3 s |
+| Ball lost → heart lost | Easy: moonbeam net saves the pearl 12× per zone (1× Normal, 0× Hard); tap to serve, auto-serve after 3 s |
 | Arkanoid "catch" power-up | Our twist: **magnet** — gems are pulled to Wisp AND the pearl sticks to Wisp so you can aim, then release |
 | Speed creeps up | +4 % per zone, +6 % per round, +1 % per 8 paddle hits (cap +15 % per life) |
-| Mochi's lesson: anti-stall | Keep it (after 5 s without a brick hit the next Wisp bounce aims toward the nearest brick, 50 %→100 %) |
+| Mochi's lesson: anti-stall | Keep it (after 3 s without a brick hit the next Wisp bounce or magnet release aims toward the nearest brick, 50 %→100 %; a magnet stick does not reset the clock) |
 
 ## 2. World, screen and units (same geometry as Mochi's Fairy Bounce)
 - World units **u**, **y up**, seconds. Rooftop/ground line **y = 0**. Field **x 0…16**, walls at 0 and 16, ceiling **y = 8.6**.
 - Bricks live in the band **y 4.3 … 8.0** (no boss any more, so the wall goes higher). 10 columns × 1.4 u wide, 0.5 u tall, centres x = 1.0 + 1.55·c (c = 0…9)… (mechanics engineer may adjust; document it).
 - Wisp's bounce line (cloud top) is at **y = 1.35**. Wisp floats: render may add a ±0.04 u bob; physics ignores the bob.
 - The ball is lost below **y = −0.3**.
-- Screen: logical canvas 960×540 (16:9), wider/taller for other aspects (render.js `computeView`, unchanged from the fork). Landscape `unit = min(VH/9.1, VW/16.4)`; **art drawn for 60 px per u**. Portrait phones get the "turn sideways" card; portrait iPads play letterboxed.
+- Screen: logical canvas 960×540 (16:9), wider/taller for other aspects (render.js `computeView`, unchanged from the fork). Landscape `unit = min(VH/9.1, VW/16.4)`; **art drawn for 60 px per u**. Portrait phones get the "turn sideways" card (touch + portrait + `min(screen.width, screen.height) < 600`, viewport as a fallback); portrait iPads play letterboxed.
 - Only `render.js` knows pixels; `weather.js` works in logical screen px (decoration only).
 
 ## 3. Art style guide
@@ -100,7 +100,7 @@ Rules (numbers are the mechanics engineer's call, documented in `docs/MECHANICS.
 - Magnet bubble: falls slower (~1.8 u/s) with a wobble. Catching it sets `magnet.t = max` (refreshes if already on).
 - While magnet.t > 0: gems/bubbles within `MAGNET_RANGE` (≈6 u) get an acceleration toward Wisp's centre (≈ 14 u/s², capped speed 7 u/s) — smooth curved paths, not teleports; a downward-falling pearl that hits Wisp **sticks** (`stuck`, offset kept, follows Wisp, `stuckT` ≈ 1.5 s); `serve()` or the timeout releases it at the angle for its offset. No sticking during the last 0.3 s.
 - Ball lost while stuck can't happen. If the magnet ends while stuck, release at once.
-- First zone on Easy must be easy for a 6-year-old (wide Wisp 3.6 u, ball 5.4 u/s, 8 net saves).
+- First zone on Easy must be easy for a 6-year-old (wide Wisp 4.2 u, ball 5.4 u/s, 12 net saves).
 
 ### `weather.js` — `WRB.Weather` (ambient, logical screen px)
 ```

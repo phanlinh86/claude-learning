@@ -142,13 +142,13 @@ test('round 2 (loop ≥ 1) turns some blocks tough; same seed → same layout', 
 });
 
 test('difficulty table: Wisp width, pearl speed, net saves, magnet time (12/10/8 s)', () => {
-  const exp = { easy: [3.6, 5.4, 8, 12], normal: [2.5, 7.6, 1, 10], hard: [2.1, 9.0, 0, 8] };
+  const exp = { easy: [4.2, 5.4, 12, 12], normal: [2.5, 7.6, 1, 10], hard: [2.1, 9.0, 0, 8] };
   for (const d in exp) {
     const w = mk(d, 1), e = exp[d];
     assert.strictEqual(w.paddle.w, e[0]); assert.strictEqual(w.ball.speed, e[1]); assert.strictEqual(w.net.saves, e[2]);
     assert.strictEqual(w.magnet.max, e[3]); assert.strictEqual(w.magnet.t, 0);
   }
-  assert.strictEqual(C.AUTO_SERVE, 3); assert.strictEqual(C.STEP, 1 / 120); assert.strictEqual(C.CLEAR_T, 2.5);
+  assert.strictEqual(C.AUTO_SERVE, 3); assert.strictEqual(C.STEP, 1 / 120); assert.strictEqual(C.CLEAR_T, 2.5); assert.strictEqual(C.ANTI_STALL, 3);
 });
 
 // ---------- determinism, stepping ----------
@@ -508,8 +508,8 @@ test('hearts: lose one when the pearl is lost (serve again), game over at 0', ()
   assert.strictEqual(w.serve(), false);
 });
 
-test('net: the moonbeam saves the pearl 8× per zone on Easy, 1× on Normal, never on Hard', () => {
-  for (const [d, N] of [['easy', 8], ['normal', 1], ['hard', 0]]) {
+test('net: the moonbeam saves the pearl 12× per zone on Easy, 1× on Normal, never on Hard', () => {
+  for (const [d, N] of [['easy', 12], ['normal', 1], ['hard', 0]]) {
     const w = empty(d, 1); park(w, 2);
     assert.strictEqual(w.net.saves, N);
     for (let i = 0; i < N; i++) {
@@ -549,7 +549,68 @@ test('anti-stall: a pearl bouncing straight up and down in an empty column still
   assert.ok(of(r.ev, 'brick').length >= 1, 'no hit in 60 s');
 });
 
+test('anti-stall: the stall clock runs through a magnet stick, and a release during a stall steers toward the last block', () => {
+  // a pearl stuck at Wisp's centre with the only block far to the left: an unaimed release goes straight up
+  const w = mk('normal', 1);
+  const k = w.bricks.find(b => b.col === 1) || w.bricks[0];
+  for (const b of w.bricks) b.alive = b === k;
+  park(w, 12); w.hearts = 1e6; w.debugMagnet(); w.drainEvents();
+  shoot(w, 12, 3, 0, -7);
+  const r = runUntil(w, e => e.some(x => x.type === 'stick' || x.type === 'paddle'), 1);
+  assert.ok(of(r.ev, 'stick').length === 1, 'stick');
+  w.noBrickT = C.ANTI_STALL * 2 + 0.1;          // a long stall: the release aims fully at the block
+  const before = w.noBrickT;
+  w.ball.stuckOff = 0; assert.strictEqual(w.serve(), true);
+  assert.ok(w.noBrickT >= before, 'release keeps the stall clock (' + w.noBrickT + ')');
+  const ang = Math.atan2(w.ball.vx, w.ball.vy) / DEG;
+  assert.ok(ang < -10, 'release steered left toward the block, got ' + ang.toFixed(1) + '°');
+  // no stall → the release keeps its offset angle (aimed releases are unaffected)
+  const w2 = mk('normal', 1); for (const b of w2.bricks) b.alive = b === w2.bricks.find(x => x.col === 1);
+  park(w2, 12); w2.debugMagnet(); w2.drainEvents(); shoot(w2, 12, 3, 0, -7);
+  runUntil(w2, e => e.some(x => x.type === 'stick'), 1);
+  w2.noBrickT = 0; w2.ball.stuckOff = 0; w2.serve();
+  near(Math.atan2(w2.ball.vx, w2.ball.vy) / DEG, 0, 0.5, 'centre release with no stall');
+});
+
 // ---------- debug hooks & state ----------
+test('debugClear(0) during play clears the zone (no soft-lock); in serve it only empties the field', () => {
+  const w = mk('normal', 2); w.serve(); w.drainEvents();
+  assert.strictEqual(w.phase, 'play');
+  w.debugClear(0);
+  assert.strictEqual(w.bricksLeft(), 0); assert.strictEqual(w.phase, 'clear');
+  assert.strictEqual(of(w.drainEvents(), 'levelClear').length, 1);
+  const e = mk('normal', 2); e.debugClear(0); assert.strictEqual(e.phase, 'serve');
+});
+
+test('storage: a failed set or delete rolls the cache back (native and localStorage)', async () => {
+  const vm = require('vm');
+  const mkStore = (env) => {   // a fresh sandbox per store: `env` holds the fake host bridge or localStorage
+    const box = Object.assign({ console }, env); box.window = box; vm.createContext(box);
+    vm.runInContext(fs.readFileSync(path.join(JS, 'storage.js'), 'utf8'), box);
+    return box.WRB.Storage;
+  };
+  // native host whose delete fails
+  const S = mkStore({ wrStoreAll: async () => ({ best: '50' }), wrStoreSet: async () => true, wrStoreDel: async () => false });
+  await S.init(); assert.strictEqual(S.native, true);
+  assert.strictEqual(await S.del('best'), false); assert.strictEqual(S.get('best'), '50', 'failed native delete restored');
+  // a rejected delete restores too
+  const S2 = mkStore({ wrStoreAll: async () => ({ best: '7' }), wrStoreSet: async () => true, wrStoreDel: async () => { throw new Error('locked'); } });
+  await S2.init(); const warn = console.warn; console.warn = () => {};
+  try { assert.strictEqual(await S2.del('best'), false); } finally { console.warn = warn; }
+  assert.strictEqual(S2.get('best'), '7');
+  // a newer write after the delete is never undone by the late delete failure
+  let rel; const S3 = mkStore({ wrStoreAll: async () => ({ best: '1' }), wrStoreSet: async () => true, wrStoreDel: () => new Promise(r => { rel = r; }) });
+  await S3.init(); const pd = S3.del('best'); S3.set('best', '9'); rel(false); await pd;
+  assert.strictEqual(S3.get('best'), '9');
+  // a successful delete stays deleted
+  const S4 = mkStore({ wrStoreAll: async () => ({ best: '3' }), wrStoreSet: async () => true, wrStoreDel: async () => true });
+  await S4.init(); assert.strictEqual(await S4.del('best'), true); assert.strictEqual(S4.get('best'), undefined);
+  // localStorage that throws on remove
+  const ls = { length: 1, key: () => 'wrb:best', getItem: () => '4', setItem() {}, removeItem() { throw new Error('blocked'); } };
+  const S5 = mkStore({ localStorage: ls }); await S5.init(); assert.strictEqual(S5.native, false);
+  assert.strictEqual(await S5.del('best'), false); assert.strictEqual(S5.get('best'), '4');
+});
+
 test('debug hooks and getState()', () => {
   const w = mk('easy', 3);
   w.debugDrop('gem'); w.debugDrop('magnet');
@@ -693,8 +754,9 @@ test('10 simulated minutes (world + bot) run in ≈ 2 s', () => {
 // ---------- run ----------
 let fail = 0;
 const T0 = Date.now();
+(async () => {
 for (const t of tests) {
-  try { t.fn(); console.log('PASS ' + t.name); }
+  try { await t.fn(); console.log('PASS ' + t.name); }
   catch (e) { fail++; console.log('FAIL ' + t.name + '\n     ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join('\n     ') : e)); }
 }
 
@@ -709,3 +771,4 @@ if (process.argv.includes('--stats')) {
 }
 console.log(`\n${tests.length - fail}/${tests.length} passed (${((Date.now() - T0) / 1000).toFixed(1)} s)`);
 process.exit(fail ? 1 : 0);
+})();

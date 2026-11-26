@@ -50,13 +50,19 @@
     setJSON(k, v) { return this.set(k, JSON.stringify(v)); },
     /* Delete a value. Returns a Promise<boolean>. */
     del(k) {
+      const prev = this.cache[k];
       delete this.cache[k];
-      this._seq[k] = (this._seq[k] || 0) + 1;
+      const seq = (this._seq[k] = (this._seq[k] || 0) + 1);
+      // like set(): a failed delete puts the old value back, unless a newer write for that key happened since
+      const fail = () => {
+        if (this._seq[k] === seq && prev !== undefined) this.cache[k] = prev;
+        return false;
+      };
       if (this.native) {
-        return Promise.resolve(window.wrStoreDel(k)).then(ok => ok !== false)
-          .catch(e => { console.warn('store del', k, e); return false; });
+        return Promise.resolve(window.wrStoreDel(k)).then(ok => ok === false ? fail() : true)
+          .catch(e => { console.warn('store del', k, e); return fail(); });
       }
-      try { localStorage.removeItem(PREFIX + k); return Promise.resolve(true); } catch (e) { return Promise.resolve(false); }
+      try { localStorage.removeItem(PREFIX + k); return Promise.resolve(true); } catch (e) { return Promise.resolve(fail()); }
     }
   };
   WRB.Storage = S;
