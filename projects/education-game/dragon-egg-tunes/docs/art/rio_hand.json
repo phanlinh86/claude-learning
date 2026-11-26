@@ -1,0 +1,459 @@
+{
+ "_about": "Rio the baby dragon per frame, in the 0 0 300 300 viewBox (feet anchor 150,292). mouth = the spark origin (centre of the mouth; beat = the round singing \"O\"); tips[0] = the same mouth point (kept for code that read the old drumstick tips); hand = the tip of the NEAR paw (wave: top of the waving paw; point: the pointing claw); nearPaw / farPaw = paw centres; headTop = tip of the near horn (speech-bubble tail / stars over the head); eye = near eye centre; bbox = measured opaque box [x0, y0, x1, y1] (added by tools/rio_sheet.js).",
+ "idle": {
+  "mouth": [
+   214,
+   161
+  ],
+  "tips": [
+   [
+    214,
+    161
+   ]
+  ],
+  "hand": [
+   207,
+   262
+  ],
+  "nearPaw": [
+   200,
+   250
+  ],
+  "farPaw": [
+   216,
+   240
+  ],
+  "headTop": [
+   117,
+   52
+  ],
+  "eye": [
+   148,
+   116
+  ],
+  "bbox": [
+   25,
+   44,
+   250,
+   295
+  ]
+ },
+ "blink": {
+  "mouth": [
+   214,
+   161
+  ],
+  "tips": [
+   [
+    214,
+    161
+   ]
+  ],
+  "hand": [
+   207,
+   262
+  ],
+  "nearPaw": [
+   200,
+   250
+  ],
+  "farPaw": [
+   216,
+   240
+  ],
+  "headTop": [
+   117,
+   52
+  ],
+  "eye": [
+   148,
+   116
+  ],
+  "bbox": [
+   25,
+   44,
+   250,
+   295
+  ]
+ },
+ "talk": {
+  "mouth": [
+   213,
+   159
+  ],
+  "tips": [
+   [
+    213,
+    159
+   ]
+  ],
+  "hand": [
+   236,
+   215
+  ],
+  "nearPaw": [
+   224,
+   222
+  ],
+  "farPaw": [
+   216,
+   240
+  ],
+  "headTop": [
+   112,
+   53
+  ],
+  "eye": [
+   145,
+   117
+  ],
+  "bbox": [
+   25,
+   44,
+   248,
+   295
+  ]
+ },
+ "happy": {
+  "mouth": [
+   212,
+   157
+  ],
+  "tips": [
+   [
+    212,
+    157
+   ]
+  ],
+  "hand": [
+   233,
+   245
+  ],
+  "nearPaw": [
+   220,
+   242
+  ],
+  "farPaw": [
+   226,
+   226
+  ],
+  "headTop": [
+   110,
+   53
+  ],
+  "eye": [
+   144,
+   116
+  ],
+  "bbox": [
+   37,
+   43,
+   247,
+   295
+  ]
+ },
+ "cheer": {
+  "mouth": [
+   212,
+   155
+  ],
+  "tips": [
+   [
+    212,
+    155
+   ]
+  ],
+  "hand": [
+   265,
+   176
+  ],
+  "nearPaw": [
+   254,
+   184
+  ],
+  "farPaw": [
+   78,
+   160
+  ],
+  "headTop": [
+   108,
+   52
+  ],
+  "eye": [
+   143,
+   114
+  ],
+  "bbox": [
+   23,
+   40,
+   291,
+   295
+  ]
+ },
+ "think": {
+  "mouth": [
+   217,
+   166
+  ],
+  "tips": [
+   [
+    217,
+    166
+   ]
+  ],
+  "hand": [
+   211,
+   179
+  ],
+  "nearPaw": [
+   212,
+   192
+  ],
+  "farPaw": [
+   216,
+   240
+  ],
+  "headTop": [
+   132,
+   48
+  ],
+  "eye": [
+   156,
+   115
+  ],
+  "bbox": [
+   25,
+   42,
+   282,
+   295
+  ]
+ },
+ "oops": {
+  "mouth": [
+   217,
+   169
+  ],
+  "tips": [
+   [
+    217,
+    169
+   ]
+  ],
+  "hand": [
+   242,
+   207
+  ],
+  "nearPaw": [
+   230,
+   214
+  ],
+  "farPaw": [
+   216,
+   240
+  ],
+  "headTop": [
+   138,
+   46
+  ],
+  "eye": [
+   158,
+   114
+  ],
+  "bbox": [
+   25,
+   42,
+   274,
+   295
+  ]
+ },
+ "wave": {
+  "mouth": [
+   213,
+   159
+  ],
+  "tips": [
+   [
+    213,
+    159
+   ]
+  ],
+  "hand": [
+   267,
+   166
+  ],
+  "nearPaw": [
+   258,
+   176
+  ],
+  "farPaw": [
+   216,
+   242
+  ],
+  "headTop": [
+   112,
+   53
+  ],
+  "eye": [
+   145,
+   117
+  ],
+  "bbox": [
+   37,
+   44,
+   294,
+   295
+  ]
+ },
+ "point": {
+  "mouth": [
+   212,
+   158
+  ],
+  "tips": [
+   [
+    212,
+    158
+   ]
+  ],
+  "hand": [
+   269,
+   186
+  ],
+  "nearPaw": [
+   252,
+   196
+  ],
+  "farPaw": [
+   216,
+   240
+  ],
+  "headTop": [
+   108,
+   55
+  ],
+  "eye": [
+   143,
+   117
+  ],
+  "bbox": [
+   25,
+   43,
+   272,
+   295
+  ]
+ },
+ "dance": {
+  "mouth": [
+   210,
+   153
+  ],
+  "tips": [
+   [
+    210,
+    153
+   ]
+  ],
+  "hand": [
+   257,
+   170
+  ],
+  "nearPaw": [
+   248,
+   180
+  ],
+  "farPaw": [
+   74,
+   190
+  ],
+  "headTop": [
+   101,
+   56
+  ],
+  "eye": [
+   139,
+   117
+  ],
+  "bbox": [
+   35,
+   41,
+   275,
+   295
+  ]
+ },
+ "beat": {
+  "mouth": [
+   215,
+   146
+  ],
+  "tips": [
+   [
+    215,
+    146
+   ]
+  ],
+  "hand": [
+   231,
+   214
+  ],
+  "nearPaw": [
+   220,
+   222
+  ],
+  "farPaw": [
+   226,
+   214
+  ],
+  "headTop": [
+   97,
+   59
+  ],
+  "eye": [
+   139,
+   116
+  ],
+  "bbox": [
+   37,
+   40,
+   258,
+   295
+  ]
+ },
+ "full_wave": {
+  "mouth": [
+   212,
+   158
+  ],
+  "tips": [
+   [
+    212,
+    158
+   ]
+  ],
+  "hand": [
+   264,
+   163
+  ],
+  "nearPaw": [
+   256,
+   174
+  ],
+  "farPaw": [
+   226,
+   240
+  ],
+  "headTop": [
+   110,
+   54
+  ],
+  "eye": [
+   144,
+   117
+  ],
+  "bbox": [
+   37,
+   44,
+   295,
+   295
+  ]
+ }
+}
