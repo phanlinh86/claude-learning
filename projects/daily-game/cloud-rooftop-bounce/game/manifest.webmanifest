@@ -1,0 +1,16 @@
+{
+  "name": "Wisp's Rooftop Bounce",
+  "short_name": "Rooftop Bounce",
+  "description": "Bounce the moon-pearl with Wisp the cloud sprite, catch gems and grab the magnet over a city at night!",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#141a4a",
+  "theme_color": "#141a4a",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
