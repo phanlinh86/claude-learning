@@ -1,0 +1,34 @@
+{
+  "cloud": {
+    "skyTop": "#141841",
+    "skyBottom": "#43448e",
+    "ink": "#232659",
+    "bar": "#e9ebff",
+    "glow": "#a9b8ff",
+    "ground": "#4d4f98"
+  },
+  "spires": {
+    "skyTop": "#08122f",
+    "skyBottom": "#23457f",
+    "ink": "#14244d",
+    "bar": "#e4eeff",
+    "glow": "#ff6b6b",
+    "ground": "#1a2a55"
+  },
+  "gardens": {
+    "skyTop": "#161440",
+    "skyBottom": "#8c5476",
+    "ink": "#2a1f4f",
+    "bar": "#f1eaff",
+    "glow": "#ffc27a",
+    "ground": "#2c2550"
+  },
+  "lanes": {
+    "skyTop": "#1e1440",
+    "skyBottom": "#9a4f63",
+    "ink": "#3a1d43",
+    "bar": "#fff0e6",
+    "glow": "#ff9f5a",
+    "ground": "#3b2840"
+  }
+}
