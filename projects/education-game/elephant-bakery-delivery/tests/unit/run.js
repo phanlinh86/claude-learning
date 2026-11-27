@@ -170,6 +170,9 @@ function checkMap(L, m, n, tag, st) {
     for (const k of keep) assert.ok(!rectsOverlap(b, k, keepG - 1e-6), tag + ' house clear of ' + k.kind);
     for (const o of hb) if (o !== b) assert.ok(World_gap(b, o) >= CFG.houseGap - 1e-6, tag + ' houses apart');
   }
+  // fix round 1: with parkK 1 the parked cart's art box does not touch its own house box at all
+  if (m.parkK >= 1) for (const b of hb) { const st2 = m.houses[b.id].stop, cb = cartBox(E, st2.x, st2.y); assert.ok(World_gap(cb, b) >= 0, tag + ' parked cart clear of its house'); }
+  st.park = st.park || {}; st.park[m.parkK] = (st.park[m.parkK] || 0) + 1;
   // parked carts / start / forks: Tupi's whole art on screen and clear of the speech bubble / HUD
   const stops = Object.keys(m.houses).map(id => m.houses[id].stop).concat([m.start]).concat(m.nodes.filter(q => q.kind === 'fork'));
   for (const p of stops) {
@@ -233,6 +236,7 @@ test('roads: the map on the 6 shapes × ages × round sizes × seeds keeps every
     }
   }
   const r = st.route.sort((a, b) => a - b), over = r.filter(x => x >= 0.55).length / r.length;
+  console.log('      parking (parkK → maps): ' + JSON.stringify(st.park));
   console.log(`      ${st.maps} maps: ${st.strict} strict, ${st.loose} loose; start→house road ≥ 0.55 × play diagonal for ${(over * 100).toFixed(0)} % (median ${r[r.length >> 1].toFixed(2)})`);
   assert.ok(st.loose / st.maps < 0.25, 'mostly the strict rules');
 });
@@ -355,7 +359,7 @@ test('world: drag — the cart follows the finger ALONG the road (never off it),
   assert.ok(R.length > 10);
   const c = w.cart, h = w.cartHit();
   w.pointerDown(h.x, h.y);
-  let prevS = null, maxV = 0, maxA = 0, maxLean = 0, dist = 0, rot0 = c.wheelRot, px = c.x, py = c.y, bumps = 0, flips = 0, minFaceS = 1, hop = 0, lastV = 0;
+  let wheelAbs = 0, lastRot = c.wheelRot, prevS = null, maxV = 0, maxA = 0, maxLean = 0, dist = 0, rot0 = c.wheelRot, px = c.x, py = c.y, bumps = 0, flips = 0, minFaceS = 1, hop = 0, lastV = 0;
   let x = h.x, y = h.y, i = 0;
   while (w.phase === 'play' && i < R.length) {
     const [tx, ty] = R[i], d = Math.hypot(tx - x, ty - y);
@@ -367,13 +371,14 @@ test('world: drag — the cart follows the finger ALONG the road (never off it),
     assert.ok(offRoad(w) < 1.5, 'on the road');
     const v = Math.hypot(c.x - px, c.y - py) * 120; dist += Math.hypot(c.x - px, c.y - py); px = c.x; py = c.y;
     maxV = Math.max(maxV, c.spd); maxA = Math.max(maxA, (c.spd - lastV) * 60); lastV = c.spd;
+    wheelAbs += Math.abs(c.wheelRot - lastRot); lastRot = c.wheelRot;
     maxLean = Math.max(maxLean, Math.abs(c.lean)); minFaceS = Math.min(minFaceS, c.faceS); hop = Math.max(hop, c.hop);
     void v; void prevS; void flips;
   }
   assert.ok(maxV <= 900 + 1e-6, 'speed ' + maxV); assert.ok(maxA <= 2600 * 1.05, 'accel ' + maxA);
   assert.ok(maxLean <= 0.16 * 1.4 && maxLean > 0.005, 'lean ' + maxLean);
   const wr = BD.World.tupiPoints().cart.wheels[0][2] * c.k;
-  assert.ok(Math.abs(Math.abs(c.wheelRot - rot0) - dist / wr) < 0.15 * dist / wr + 0.5, 'wheels turn by distance / r');
+  assert.ok(Math.abs(wheelAbs - dist / wr) < 0.15 * dist / wr + 0.5, 'wheels turn by distance / r'); void rot0;
   assert.ok(bumps >= 1, 'sugar bumps on the way');
   assert.ok(['arrive', 'play', 'party'].includes(w.phase));
   w.pointerUp(x, y);
@@ -512,10 +517,43 @@ test('world: released past 80 % of a branch → the cart rolls on into that hous
   const w = mkWorld({ age: 4, seed: 16 });
   toPlay(w, 'colors', 1);
   const id = w.answer().houseId;
-  dragTo(w, id, { stopAt: x => x.cart.edge === 'to_' + id && x.cart.s > 0.85 * x.roads.edges.find(e => e.id === 'to_' + id).stopS });
+  const d = dragTo(w, id, { stopAt: x => x.cart.edge === 'to_' + id && x.cart.s > 0.85 * x.roads.edges.find(e => e.id === 'to_' + id).stopS });
+  if (w.cart.state === 'drag') w.pointerUp(d.x, d.y);
   assert.strictEqual(w.cart.state, 'auto');
   const evs = until(w, x => x.phase === 'arrive', 4);
   assert.ok(evs.some(e => e.type === 'right'));
+});
+test('fix1: lifting the finger over a house drives there; aimless scribbling far from the road just stops (no auto-roll)', () => {
+  const w = mkWorld({ age: 4, seed: 41 });
+  toPlay(w, 'colors', 1);
+  const id = w.answer().houseId, H = w.houseById(id), b = w._houseBox(H), h = w.cartHit();
+  w.pointerDown(h.x, h.y); const R = w.route(id);
+  for (let i = 0; i < 6; i++) { w.pointerMove(R[i][0], R[i][1]); run(w, null, 1 / 60); }
+  w.pointerMove((b.x0 + b.x1) / 2, (b.y0 + b.y1) / 2); w.pointerUp((b.x0 + b.x1) / 2, (b.y0 + b.y1) / 2);
+  assert.strictEqual(w.cart.state, 'auto'); assert.strictEqual(w.cart.tgt.house, id);
+  const w2 = mkWorld({ age: 4, seed: 42 });
+  toPlay(w2, 'colors', 1);
+  const id2 = w2.answer().houseId;
+  dragTo(w2, id2, { keepDown: true, stopAt: x => x.cart.edge === 'to_' + id2 && x.cart.s > 0.85 * x.roads.edges.find(e => e.id === 'to_' + id2).stopS });
+  // scribble away from every road, lift there
+  const L = w2.layout; let far = null;
+  for (let y = L.play.y0; y < L.play.y1 && !far; y += 10) for (let x = L.play.x0; x < L.play.x1 && !far; x += 10) {
+    const p = BD.Roads.project(w2.roads, x, y); if (p.d > L.roadW / 2 + 60 && !w2.houses.some(q => { const bb = w2._houseBox(q); return x >= bb.x0 && x <= bb.x1 && y >= bb.y0 && y <= bb.y1; })) far = { x, y };
+  }
+  if (w2.cart.state === 'drag' && far) { w2.pointerMove(far.x, far.y); w2.pointerUp(far.x, far.y); assert.strictEqual(w2.cart.state, 'coast', 'just stops'); }
+});
+test('fix1: party sprinkles are r 7–10 and never fly up behind the speech bubble / HUD; draw order z: the cart sorts behind a house on a y-tie', () => {
+  for (const vp of [SHAPES[2], SHAPES[1]]) {
+    const w = mkWorld({ age: 4, seed: 17, vp });
+    toPlay(w, 'colors', 0);
+    dragTo(w, w.answer().houseId); until(w, x => x.phase === 'party', 6);
+    let top = 1e9;
+    for (let k = 0; k < 240 && w.phase === 'party'; k++) { run(w, null, 1 / 120, null, 1 / 120); for (const p of w.sprinkles) { assert.ok(p.r >= 7 && p.r <= 10); top = Math.min(top, p.y); } }
+    const L = w.layout, c = w.cart;
+    for (const k of L.keep) if (k.x < c.x + 260 && k.x + k.w > c.x - 260) assert.ok(top >= k.y + k.h - 2, 'below the ' + k.kind + ' ' + top.toFixed(0));
+    const H = w.houses.find(h => h.delivered); assert.ok(c.z < H.z + 1e-9 || Math.abs(c.y - H.y) > 1);
+    assert.ok(Math.abs(c.y - H.y) < 1 && c.z < H.z, 'parked: same ground y, the cart sorts first');
+  }
 });
 test('world: the last delivery → party (honk, sprinkle fountain from the trunk tip: gravity, one bounce), roundDone stars, wipe → next build', () => {
   const w = mkWorld({ age: 4, seed: 17 });
@@ -526,7 +564,7 @@ test('world: the last delivery → party (honk, sprinkle fountain from the trunk
   const tip = w._trunkTip(), pe = run(w, x => x.sprinkles.length > 20, 3);
   assert.ok(w.sprinkles.length > 20 && w.sprinkles.length <= 80);
   assert.ok(w.sprinkles.some(p => Math.hypot(p.x - tip.x, p.y - tip.y) < 200), 'from the trunk');
-  run(w, null, 1.2);
+  pe.push(...run(w, null, 1.2));
   assert.ok(w.sprinkles.some(p => p.bounced), 'they bounce on the table');
   const rest = until(w, x => x.state === 'round' && x.phase === 'build', 6);
   const all = evs.concat(pe, rest).map(e => e.type);

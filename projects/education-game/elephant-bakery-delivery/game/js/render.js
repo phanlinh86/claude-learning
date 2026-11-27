@@ -170,9 +170,9 @@
       if (!P) return;
       // houses, the mouse and the cart back-to-front by y
       const list = this._list; list.length = 0;
-      for (const h of w.houses || []) { const ap = ip(h, 'appear', a) || 0; if (ap > 0.01) list.push({ k: 'h', o: h, y: ip(h, 'y', a) }); }
+      for (const h of w.houses || []) { const ap = ip(h, 'appear', a) || 0; if (ap > 0.01) list.push({ k: 'h', o: h, y: h.z != null ? h.z : ip(h, 'y', a) }); }
       const m = w.mouse; if (m && m.state !== 'out' && (m.peek || 0) > 0.01) list.push({ k: 'm', o: m, y: ip(m, 'y', a) });
-      const c = w.cart; if (c && (c.alpha || 0) > 0.01) list.push({ k: 'c', o: c, y: ip(c, 'y', a) });
+      const c = w.cart; if (c && (c.alpha || 0) > 0.01) list.push({ k: 'c', o: c, y: c.z != null ? ip(c, 'y', a) - 0.5 : ip(c, 'y', a) });
       list.sort((p, q) => p.y - q.y);
       for (const it of list) {
         if (it.k === 'h') this._house(it.o, a, snow);
@@ -254,19 +254,6 @@
       this._imgK('characters/cart_back', 0, 0, 340, 240, k);
       if (!(opt && opt.noTupi)) this._imgK(fr, C.seat[0] - T.seat[0], C.seat[1] - T.seat[1], 300, 300, k);
       g.restore();
-      // the cargo, upright (never mirrored — letters and numerals stay readable)
-      const cargo = opt ? opt.cargo : c.cargo;
-      if (cargo && P) {
-        const dx = (C.tray[0] - C.ground[0]) * k * sx, dy = (C.tray[1] - C.ground[1]) * k * sy;
-        const cl = Math.cos(lean), sl = Math.sin(lean);
-        const tx = x + (dx * cl - dy * sl) * face, ty = y + dx * sl + dy * cl - (opt ? 0 : ip(c, 'cargoHop', a) || 0);
-        const th = cargo.kind === 'cookies' && c.cargoCount != null && !opt ? Object.assign({}, cargo, { n: c.cargoCount }) : cargo;
-        if (!(th.kind === 'cookies' && !(th.n > 0))) {
-          g.save(); g.translate(tx, ty + 6 * k); g.rotate(lean * face * 0.6);
-          P.drawThing(g, th, 80 * k * (th.kind === 'animal' ? 1.05 : 1), { lang: this.lang, shadow: false });
-          g.restore();
-        }
-      }
       g.save(); pose();
       this._imgK('characters/cart_front', 0, 0, 340, 240, k);
       const wr = opt ? 0 : ip(c, 'wheelRot', a) || 0;
@@ -277,6 +264,19 @@
         g.restore();
       }
       g.restore();
+      // the cargo, upright and drawn OVER the front panel, raised out of the tray (QA-V P1-2: it was 30–40 % hidden)
+      const cargo = opt ? opt.cargo : c.cargo;
+      if (cargo && P) {
+        const dx = (C.tray[0] - C.ground[0]) * k * sx, dy = (C.tray[1] - C.ground[1]) * k * sy;
+        const cl = Math.cos(lean), sl = Math.sin(lean);
+        const tx = x + (dx * cl - dy * sl) * face, ty = y + dx * sl + dy * cl - (opt ? 0 : ip(c, 'cargoHop', a) || 0);
+        const th = cargo.kind === 'cookies' && c.cargoCount != null && !opt ? Object.assign({}, cargo, { n: c.cargoCount }) : cargo;
+        if (!(th.kind === 'cookies' && !(th.n > 0))) {
+          g.save(); g.translate(tx, ty - 22 * k); g.rotate(lean * face * 0.6);
+          P.drawThing(g, th, 96 * k * (th.kind === 'animal' ? 1.0 : th.kind === 'tile' || th.kind === 'cookies' ? 1.12 : 1), { lang: this.lang, shadow: false });
+          g.restore();
+        }
+      }
       g.restore();
     }
     _mouse(m, a) {
@@ -354,7 +354,9 @@
       this._table(L, keep, S.map, 7);
       if (T && S.map) { try { T.drawRoads(g, S.map, L, { reveal: 1, snow: this._snow(), t, trail: lit ? S.map.edges.map(e => e.id) : null, trailT: 1, dpr: this.rs }); } catch (e) { /* skip */ } }
       if (T) { try { T.drawBakery(g, L, t, { puff: 0.4 }); } catch (e) { /* skip */ } }
+      const hide = this._hideKeep || [];
       if (P) S.houses.forEach((h, i) => {
+        if (hide.some(k => h.x + h.S * 0.55 > k.x && h.x - h.S * 0.55 < k.x + k.w && h.y > k.y && h.y - h.S * 1.05 < k.y + k.h)) return;
         g.save(); g.translate(h.x, h.y);
         const bob = lit ? 1 + 0.02 * Math.sin(t * 3 + i) : 1; g.scale(bob, 1 / bob);
         P.drawHouse(g, h.S, { seed: h.seed, color: h.color, sign: h.sign, lit: lit ? 1 : 0.4 + 0.3 * Math.sin(t * 1.5 + i), snow: this._snow(), door: lit ? 0.5 + 0.5 * Math.sin(t * 2 + i) : 0, lang: this.lang });
@@ -366,7 +368,15 @@
       const tk = JSON.stringify(this.titleKeep || []);
       if (!this._title || this._title.key !== layoutKey(L) + tk) { this._title = this._scene(L, this.titleKeep, 2); this._title.key = layoutKey(L) + tk; }
       const S = this._title;
+      if (L.portrait && !S.port) {   // portrait: the DOM title fills the upper half — a calm street at the bottom instead of the map
+        S.port = true; S.map = null;
+        const hs = Math.min(L.houseS, 150), by = L.H - L.ins.bottom - 40;
+        S.houses = [{ x: L.W - L.ins.right - hs * 0.62, y: by - hs * 1.55, S: hs, seed: 11, color: 'red', sign: { kind: 'blob', color: 'red' } },
+          { x: L.W * 0.5 + 20, y: by - hs * 2.35, S: hs * 0.9, seed: 18, color: 'blue', sign: { kind: 'blob', color: 'blue' } }];
+      }
+      this._hideKeep = this.titleKeep || [];
       this._town(S, false, t);
+      this._hideKeep = null;
       // the cart parked at the start, Tupi standing beside it with a cupcake
       const st = (S.map && S.map.start) || L.start || { x: L.W * 0.3, y: L.H * 0.7 };
       const k = (S.map && S.map.cartK) || L.cartK || 0.5;
@@ -385,7 +395,9 @@
       const key = layoutKey(L) + JSON.stringify(dk);
       if (!this._done || this._done.key !== key) { this._done = this._scene(L, dk, 3); this._done.key = key; this._done.popT = 0.6; }
       const D = this._done;
+      this._hideKeep = dk.map(r => ({ x: r.x, y: r.y, w: r.w, h: r.h }));
       this._town(D, true, t);
+      this._hideKeep = null;
       const st = (D.map && D.map.start) || L.start || { x: L.W * 0.3, y: L.H * 0.7 };
       const k = (D.map && D.map.cartK) || L.cartK || 0.5, hop = Math.max(0, Math.sin(t * 2.6 * Math.PI)) * 8;
       const frame = Math.floor(t * 1.3) % 3 === 0 ? 'cheer' : 'spray';

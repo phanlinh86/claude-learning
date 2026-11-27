@@ -54,6 +54,25 @@ Every DESIGN §5.2 / §5.5 name exists with the DESIGN meaning. Additions and pr
 15. **Weather layers**: `'back'` (outside, clip to `wx.window`), **`'table'`** (settled petals / leaves, glints: draw after the roads, before
     the bakery), `'front'`. `wx.window {x, y, w, h}` is an estimate (centred in the wall) — use the env RECIPE's window if it differs.
 
+16. **Fix round 1** (QA visual / functional + playtest reports):
+    - **Parking clear of the house** (P1): `park = 0.5·S + parkK·cart.half + 6` with **parkK 1.0** — the parked cart's art box never
+      touches its house box (unit-tested). When no map fits, the generator falls back to `parkFallback [0.75, 0.55, 0.45]`
+      (`w.roads.parkK` tells which). All landscape maps and 2-house portrait maps park clear. **Portrait rounds with 3–4 houses and
+      ONE fork cannot**: the two roads to a top pair would come through one passage and cross, so they park closer (0.55–0.75; with
+      two forks they share the passage and split above it). The unit test's parking mix is 145 clear / 14 at 0.75 / 79 at 0.55 / 2 at 0.45 (of 240).
+    - **Portrait variety** (P2): the top single may sit at a screen edge and park inwards, the bottom single's half and the row
+      heights vary with the seed, a top pair may park inwards (carts in the middle).
+    - CONFIG: `chapterMinRounds 2` (was 3), `faceMinX 0.5`, `grabHyst 48`, `partyTime 2.0`, `sprayEnd 1.6`, `wipeTime 1.1`, `buildTime 1.3`.
+    - **Lift over a house** → auto-drive there (the house art box, no hit padding). **Release far from the road** (> roadW/2 + 40) →
+      the cart just stops, no auto-roll. The 80 % auto-roll also counts the finger's own road point (`cart.tgt`), not only the lagging cart.
+    - **Sprinkles** r 7–10 (`sprinkleR`); the launch is capped so the apex stays ≥ 16 px below any bubble / HUD box within 220 px
+      (and below the safe top); with little room the fountain goes flatter and wider.
+    - **Draw order**: sort houses by `house.z` (= `y`) and the cart by `cart.z` (= `y − 0.5`): on a tie the cart is drawn first
+      (behind the house it parks at). Everything else by its own `y`.
+    - Re-run: `BD_BOT_N=20 node tests/unit/run.js` 36 / 36 (2 new fix1 tests + the clear-parking check in the map test);
+      `hs_playtest --n 16 --ages 3,4,6` (288 sessions): every model 0 stuck / NaN / off-road / rounds > 120 s; **slow3 session p90
+      7.2–7.4 min** (was 8.0–8.2), typical age 4 chapter 90.8 s, session 6.3 min (p90 6.5). The §8 table is from before this round.
+
 ## 1. Conventions
 - Logical px (short side 720), seconds, radians, y DOWN, rot > 0 clockwise. **Screen space = world space** (no camera).
 - `update(dt)` runs fixed sub-steps of `CONFIG.step = 1/120 s` (dt capped at 1 s per call, so `?speed=N` works). At the start of every
@@ -128,13 +147,13 @@ down to 128 (6 px steps), then the loose pass; 26 attempts per size:
 | group | values |
 |---|---|
 | flow | step 1/120, roundsPerLevel 4, chapterTimeLimit 75 s (after ≥ 3 rounds), **shortBudget [∞, 32, 50, 58] s** (a round starting later into the chapter is short: 2 houses × 1), introTime 2.5, levelDoneTime 3.6, Talk: afterAnswer 1.6, re-ask 12 s, glow after the 2nd, Tupi answers 2 s after the 3rd |
-| drag | vDrag 900 px/s, approach v = min(900, 9·dist), accel ≤ 2600 px/s², brake ≤ v/0.15 (6000 px/s²); projection radius roadW/2 + 140, hysteresis 18 px; tap = < 24 px & < 0.35 s; release: coast v²/(2·2600); auto-roll past 80 % of a branch |
+| drag | vDrag 900 px/s, approach v = min(900, 9·dist), accel ≤ 2600 px/s², brake ≤ v/0.15 (6000 px/s²); projection radius roadW/2 + 140, hysteresis 48 px; tap = < 24 px & < 0.35 s; release: coast v²/(2·2600); auto-roll past 80 % of a branch |
 | auto | vAuto 520 (taps, assist, auto-roll, coast), vReturn 700, vReverse 380, vRollOut 320; v = min(vmax, √(2·2600·d) + 30) |
 | pose | lean = clamp(−3.2e-5·accel·fwd + 5.5e-5·κ·v²·face, ±0.16) → spring ω 12 ζ 0.5 (art frame, < 0 nose up); bounce spring ω 18 ζ 0.3 (bump: peak 6 px × clamp(v/500, 0.3, 1.2)); squash spring ω 16 ζ 0.35 (brake 0.1, bump −0.06, landing cargo 0.04); cargoHop ω 14 ζ 0.25; faceS → face at 2/0.18 per s, hop = 8·(1 − faceS²) px; face = sign(dir.x) when |dir.x| > 0.3 (locked while reversing); wheels: wheelRot += fwd·ds / (wheel r·k); dust puffs every 0.07 s above 260 px/s; `drive {on}` above 40 / below 10 px/s |
 | build / load | road reveal 1.0 s (ease-out by the arc distance from the root, `roads.maxDist`), houses pop 0.35 s (back-out) when the reveal reaches them, roll-out at 0.45 s from 0.35·startS; build ≥ 1.6 s; load 0.9 s (the cargo arcs 0.5 s from `layout.oven` to the tray), cookies: one every 0.45 s (`count`), 0.6 + 0.45·n s |
 | right (2.1 s) | door opens 0.12–0.42, cargo hops tray → door 0.35 + 0.5 s (`deliver`), friend pops 0.3 s and waves, windows light 0.4 s, 3 heart puffs from 0.95 s every 0.18 s (`hearts`), door closes 1.75–2.05; then `return` (or `party`) |
 | wrong (1.1 s) | bounce 7.2 px + house squash, door crack 0.25 (0.1–0.9 s), friend peeks 0.2 s (pop 0.6, head shake ± 0.18 rad), then reverse to the fork |
-| party (2.4 s) | honk 0.6 s, then spray to 2.0 s: 48 sprinkles/s from `trunkTip` at −70° ± 18° (mirrored), 380–560 px/s, gravity 900, one bounce (× −0.35) on a floor near the cart, rest 0.55 s, cap 80; delivered houses lit + 2 heart puffs; `roundDone` at 2.4 s |
+| party (2.0 s) | honk 0.6 s, then spray to 1.6 s: 48 sprinkles/s from `trunkTip` at −70° ± 18° (mirrored), 380–560 px/s, gravity 900, one bounce (× −0.35) on a floor near the cart, rest 0.55 s, cap 80; delivered houses lit + 2 heart puffs; `roundDone` at 2.0 s |
 | help | hint after 2 misses (each further miss) or 3 no-progress presses (soft taps, honks); assist after 5 no-progress or 3 misses; hint glow 5 s, cooldown 6 s, ghost hand: 1.6 s × 2 drags along `route()`; idle 12 s × 1.5 up to 30 s (12, 30, 57, 87, 117 s after the ask), the 2nd idle hints; warm-up demo 0.6 s after the session's first ask |
 | surprises | rounds [1, 2], chapters 0–2 mouse / bird (rotating, random start), chapter 3 snow; 2–5 s after the round's first ask. mouse: a table spot ≥ 90 px from roads / houses / bakery, peek 0.4 s, stays 10 s, tap r 62 → wave 0.8 s; bird: on the wall's sill (0.86·wall.h, else higher / the table's back edge) off the bubble / HUD, in 0.5 s, 12 s, tap r 58 → sings 1.2 s + hops; snow: 5 flakes r 36, 0.7 s apart, ≈ 12 s fall |
 | wind (`BD.WindModel`) | breeze 6 / 6 / 8 / 10 px/s²; autumn gusts first after 3–6 s, then every 6–10 s, ± 40–60, 1.5 s, `gust {dir}` |

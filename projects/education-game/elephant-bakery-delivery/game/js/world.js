@@ -24,7 +24,7 @@
   var CONFIG = {
     // ---- timing / state machine (s)
     step: 1 / 120, maxFrame: 1.0,
-    roundsPerLevel: 4, chapterTimeLimit: 75, chapterMinRounds: 3,
+    roundsPerLevel: 4, chapterTimeLimit: 75, chapterMinRounds: 2,
     shortBudget: [1e9, 32, 50, 58],   // s into the chapter: a round starting later than this is short (2 houses × 1 delivery)
     introTime: 2.5, levelDoneTime: 3.6,
     talkAfterAnswer: 1.6, talkAskTime: 12, talkGlowAfterAsks: 2, talkMaxAsks: 3, talkGiveUp: 2,
@@ -40,25 +40,25 @@
     bakeryK: 1.1, bakeryCompactK: 0.82, bakeryAspect: 240 / 260, bakeryEdge: 20,
     houseKeep: 24, houseKeepLoose: 12, roadKeep: 8, bakeryPortK: 0.2, houseGap: 24, cartKeep: 6, cartEdge: 4, roadEdge: 6, roadHouse: 8,
     sample: 8, sepGap: 40, sepLoose: 16, forkFree: 160, minRouteK: 0.55, forkSpread: 0.9, fanDirect: 0.25, wiggle: 0.14,
-    mapTries: 26, mapTriesRoute: 16, mapTriesLast: 60, parkK: 0.55, straightK: 0.2, turnBulge: 46, laneMin: 180, laneK: 1.25, laneShort: 130, max4Width: 1000, splitRoom: 180, rowTurn: 60, maxTurn: 0.5,
+    mapTries: 26, mapTriesRoute: 16, mapTriesLast: 60, parkK: 1.0, parkFallback: [0.75, 0.55, 0.45], parkGap: 6, straightK: 0.2, turnBulge: 46, laneMin: 180, laneK: 1.25, laneShort: 130, max4Width: 1000, splitRoom: 180, rowTurn: 60, maxTurn: 0.5,
 
     // ---- cart motion (DESIGN §5.2)
     vDrag: 900, kApproach: 9, vAuto: 520, vReturn: 700, vReverse: 380, vRollOut: 320, accel: 2600, brakeTime: 0.15, autoDecel: 2600,
     coastDecel: 2600, leanAcc: 3.2e-5, leanCurve: 5.5e-5, leanMax: 0.16, leanOmega: 12, leanZeta: 0.5,
     bounceOmega: 18, bounceZeta: 0.3, bumpEvery: 140, bumpPeak: 6, cargoOmega: 14, cargoZeta: 0.25,
-    faceTime: 0.18, faceHop: 8, faceMinX: 0.3, sqOmega: 16, sqZeta: 0.35, brakeSq: 0.1, bumpSq: 0.06,
-    grabHyst: 18, projectR: 140, tapMovePx: 24, tapTime: 0.35, autoRollFrac: 0.8, arriveTol: 6,
+    faceTime: 0.18, faceHop: 8, faceMinX: 0.5, sqOmega: 16, sqZeta: 0.35, brakeSq: 0.1, bumpSq: 0.06,
+    grabHyst: 48, projectR: 140, releaseNear: 40, tapMovePx: 24, tapTime: 0.35, autoRollFrac: 0.8, arriveTol: 6,
     dustSpeed: 260, dustEvery: 0.07, puffCap: 30, driveOn: 40, driveOff: 10,
 
     // ---- phases
-    revealTime: 1.0, buildTime: 1.6, housePop: 0.35, rollOutAt: 0.45,
+    revealTime: 1.0, buildTime: 1.3, housePop: 0.35, rollOutAt: 0.45,
     loadTime: 0.9, loadArc: 0.5, loadAt: 0.15, countLoad0: 0.6, countStep: 0.45,
     rightTime: 2.1, doorOpen: [0.12, 0.42], deliverAt: 0.35, deliverArc: 0.5, friendPop: 0.3, heartsAt: 0.95, heartsN: 3, heartsGap: 0.18,
     doorClose: [1.75, 2.05], litTime: 0.4,
     wrongTime: 1.1, wrongCrack: 0.25, wrongPeek: [0.2, 0.9],
-    partyTime: 2.4, honkTime: 0.6, sprayEnd: 2.0, sprinkleRate: 48, sprinkleCap: 80, sprinkleG: 900, sprinkleV: [380, 560],
-    sprinkleAng: -1.22, sprinkleSpread: 0.32, sprinkleLife: 0.55,
-    wipeTime: 1.3, wipeSwap: 0.5, wipeBuild: 0.75,
+    partyTime: 2.0, honkTime: 0.6, sprayEnd: 1.6, sprinkleRate: 48, sprinkleCap: 80, sprinkleG: 900, sprinkleV: [380, 560],
+    sprinkleAng: -1.22, sprinkleSpread: 0.32, sprinkleLife: 0.55, sprinkleR: [7, 10],
+    wipeTime: 1.1, wipeSwap: 0.5, wipeBuild: 0.75,
 
     // ---- help (DESIGN §5.2 / skill rules)
     hintAfterMisses: 2, hintAfterSoft: 3, assistAfter: 5, assistAfterMisses: 3, hintTime: 5, hintCooldown: 6, hintCycle: 1.6, hintDrags: 2,
@@ -288,18 +288,24 @@
     var best = null, S, t, m, rng = new BD.RNG((seed >>> 0) || 1), sizes = [];
     for (S = L.houseS; S >= cfg.houseMin - 1e-9; S -= cfg.houseStep) sizes.push(S);
     if (sizes[sizes.length - 1] > cfg.houseMin) sizes.push(cfg.houseMin);
-    for (var pass = 0; pass < 2 && !(best && best.bad === 0); pass++) {
-      var loose = pass === 1;
+    // the cart parks clear of the house (parkK 1) when any map fits; only cramped screens park closer (parkFallback)
+    var parks = [cfg.parkK].concat(cfg.parkFallback || []);
+    if (L.portrait && spec.ids.length >= 3 && spec.forks < 2) parks = parks.slice(1);   // one fork + a pair above a passage: they would cross (MECHANICS §0)
+    var cfgs = parks.map(function (pk) { var c2 = merge(cfg, { parkK: pk }); c2._why = cfg._why; return c2; });
+    for (var pass = 0; pass < 2 * cfgs.length && !(best && best.bad === 0); pass++) {
+      var loose = pass % 2 === 1, cp = cfgs[pass >> 1];
       for (var si = 0; si < sizes.length && !(best && best.bad === 0); si++) {
         for (t = 0; t < cfg.mapTries; t++) {
-          m = tryMap(L, spec, sizes[si], rng, cfg, loose, t < cfg.mapTriesRoute && !loose, best ? best.bad : 60);
+          m = tryMap(L, spec, sizes[si], rng, cp, loose, t < cfg.mapTriesRoute && !loose, best ? best.bad : 60);
+          if (m) m.parkK = cp.parkK;
           if (m && (!best || m.bad < best.bad)) best = m;
           if (best && best.bad === 0) break;
         }
       }
     }
     for (t = 0; t < cfg.mapTriesLast && !(best && best.bad === 0); t++) {   // rare: a last series at the smallest houses, loose rules
-      m = tryMap(L, spec, cfg.houseMin, rng, cfg, true, false, best ? best.bad : 60);
+      m = tryMap(L, spec, cfg.houseMin, rng, cfgs[cfgs.length - 1], true, false, best ? best.bad : 60);
+      if (m) m.parkK = cfgs[cfgs.length - 1].parkK;
       if (m && (!best || m.bad < best.bad)) best = m;
     }
     if (spec.forks >= 2 && !(best && best.bad === 0)) {   // two forks do not fit this screen: one fork
@@ -372,23 +378,35 @@
     var forkY = L.door.y - 130, rowGap = hTop + rw / 2 + cfg.roadHouse + cfg.rowTurn, edgeL = ins.left + cfg.cartEdge + g.park + ext.half + 2, edgeR = L.W - ins.right - cfg.cartEdge - g.park - ext.half - 2;
     var order = rng.shuffle(pats.slice());
     for (var pi = 0; pi < order.length; pi++) {
-      var pat = order[pi], rows = [], okP = true, k2 = 0, lastRight = false;
+      var pat = order[pi], rows = [], okP = true, k2 = 0, lastRight = rng.chance(0.5);
       for (var r = 0; r < pat.length && okP; r++) {
         var row = [];
         if (pat[r] === 2) {
-          var xl = Math.max(xLo + g.Lf + cfg.turnBulge, edgeL, ins.left + keepG + S / 2) + rng.float(0, 14), xr = Math.min(xHi - g.Lf - cfg.turnBulge, edgeR, L.W - ins.right - keepG - S / 2) - rng.float(0, 14);
-          if (xr - xl < S + Math.max(cfg.houseGap, rw + 2 * cfg.roadHouse + 4)) okP = false;
-          row.push({ x: xl, side: -1 }, { x: xr, side: 1 });
+          var xl = Math.max(xLo + g.Lf + cfg.turnBulge, edgeL, ins.left + keepG + S / 2), xr = Math.min(xHi - g.Lf - cfg.turnBulge, edgeR, L.W - ins.right - keepG - S / 2);
+          var spare = Math.max(0, xr - xl - S - Math.max(cfg.houseGap, rw + 2 * cfg.roadHouse + 4)), sh = rng.float(0, spare);
+          xl += sh * rng.float(0, 1); xr -= sh * rng.float(0, 1);
+          var outOk = xr - xl >= S + Math.max(cfg.houseGap, rw + 2 * cfg.roadHouse + 4);
+          // the top row may park INWARDS: the houses near the screen sides, both carts in the middle, the roads come up the middle
+          var il = ins.left + keepG + S / 2, ir = L.W - ins.right - keepG - S / 2, isp = (ir - il) - 2 * (g.Lf + cfg.turnBulge) - g.sep;
+          var inOk = r === pat.length - 1 && isp >= 0 && (ir - g.park - ext.half) - (il + g.park + ext.half) >= 8;
+          if (inOk && (!outOk || rng.chance(0.7))) { var ish = rng.float(0, Math.min(isp, 40)); row.push({ x: il + ish * rng.float(0, 1), side: 1 }, { x: ir - ish * rng.float(0, 1), side: -1 }); }
+          else if (outOk) row.push({ x: xl, side: -1 }, { x: xr, side: 1 });
+          else okP = false;
         } else {
           // a single house sits left or right (alternating row to row) and parks towards its screen edge, so the roads of the
           // rows above rise through the middle; the lowest row parks away from the bakery
           var lo = Math.max(ins.left + keepG + S / 2, edgeL, xLo + g.Lf + cfg.turnBulge), hi = Math.min(L.W - ins.right - keepG - S / 2, edgeR, xHi - g.Lf - cfg.turnBulge);
-          var rightHalf = r === 0 ? L.door.x < L.W / 2 : !lastRight;
+          var rightHalf = r === 0 ? (rng.chance(0.65) ? L.door.x < L.W / 2 : L.door.x >= L.W / 2) : !lastRight;
           if (pat.length === 1) rightHalf = rng.chance(0.5);
-          var sdd = rightHalf ? 1 : -1, xm = lo < hi ? lerp(lo, hi, rightHalf ? rng.float(0.62, 0.85) : rng.float(0.15, 0.38)) : L.W / 2;
+          var sdd = rightHalf ? 1 : -1, xm = lo < hi ? lerp(lo, hi, rightHalf ? rng.float(0.75, 1) : rng.float(0, 0.25)) : L.W / 2;
           if (r === 0) sdd = L.door.x < L.W / 2 ? 1 : -1;
+          var edgeP = false;
+          if (r > 0 && r === pat.length - 1 && rng.chance(0.5)) {   // the top single may sit at a screen edge and park inwards (variety)
+            var eL = rng.chance(0.5);
+            xm = eL ? ins.left + keepG + S / 2 + rng.float(0, 30) : L.W - ins.right - keepG - S / 2 - rng.float(0, 30); sdd = eL ? 1 : -1; edgeP = true;
+          }
           lastRight = rightHalf;
-          row.push({ x: xm, side: sdd });
+          row.push({ x: xm, side: sdd, edge: edgeP });
         }
         rows.push(row); k2 += row.length;
       }
@@ -400,13 +418,13 @@
       for (r = 1; r < rows.length; r++) gaps.push(rowGap + (rows[r].length === 2 && rows[r - 1].length === 2 ? cfg.splitRoom : 0));
       var need = yT + gaps.reduce(function (a, b) { return a + b; }, 0), bottomMax = Math.min(forkY - (rw / 2 + cfg.roadHouse + 100), L.bakery.y - rw / 2 - cfg.roadHouse - 1.3 * cfg.turnBulge - 40);
       if (need > bottomMax) continue;
-      var sl = (bottomMax - need) * rng.float(0.3, 0.85), wsum = 0, wts = [];
+      var sl = (bottomMax - need) * rng.float(0.1, 0.95), wsum = 0, wts = [];
       for (i = 0; i < rows.length; i++) { wts.push(rng.float(0.3, 1)); wsum += wts[i]; }
       var yRow = [], yy = yT + sl * wts[0] / wsum * 0.5;
       for (r = rows.length - 1; r >= 0; r--) { yRow[r] = yy; if (r > 0) yy += gaps[r - 1] + sl * wts[r] / wsum; }
       var idx = 0;
       out = [];
-      for (r = 0; r < rows.length; r++) rows[r].forEach(function (h) { out.push({ id: ids[idx++], x: h.x, y: yRow[r] + rng.float(-6, 6), side: h.side, row: r }); });
+      for (r = 0; r < rows.length; r++) { var dyr = 0; rows[r].forEach(function (h, q) { out.push({ id: ids[idx++], x: h.x, y: yRow[r] + rng.float(-6, 6) + (q ? dyr : -dyr) * 0.5, side: h.side, row: r, edgePark: !!h.edge }); }); }
       // passages: for each house, through every row below it (bottom → up): the free x interval closest to where it is going;
       // with one fork, roads sharing an interval get their own lanes in it (sep apart, ordered by destination) when it is wide enough
       var uses = {};
@@ -431,16 +449,17 @@
           free.forEach(function (f) { var d = Math.abs(clamp(qx, f[0], f[1]) - qx) + 0.25 * Math.abs((f[0] + f[1]) / 2 - qx); if (d < bd) { bd = d; best = f; } });
           var key2 = r2 + ':' + Math.round(best[0]);
           (uses[key2] = uses[key2] || []).push({ h: h, qx: qx });
-          h.passes.push({ r: r2, iv: best, key: key2, y: inRow[0].y });
+          h.passes.push({ r: r2, iv: best, key: key2, y: Math.max.apply(null, inRow.map(function (o) { return o.y; })), yTop: Math.min.apply(null, inRow.map(function (o) { return o.y; })) });
         }
       });
       out.forEach(function (h) {
         h.passes.forEach(function (ps) {
           var us = uses[ps.key].slice().sort(function (a2, b2) { return a2.qx - b2.qx; }), k3 = us.length, iv = ps.iv, c3 = (iv[0] + iv[1]) / 2, px;
-          if (spec.forks < 2 && k3 > 1 && iv[1] - iv[0] >= (k3 - 1) * g.sep) px = c3 + (us.findIndex(function (u) { return u.h === h; }) - (k3 - 1) / 2) * g.sep;
+          var lane = Math.min((iv[1] - iv[0]) / Math.max(1, k3 - 1), g.sep + 30);
+          if (spec.forks < 2 && k3 > 1 && iv[1] - iv[0] >= (k3 - 1) * g.sep) px = c3 + (us.findIndex(function (u) { return u.h === h; }) - (k3 - 1) / 2) * lane;
           else px = c3;
           h.wps.push({ p: { x: px, y: ps.y + rw / 2 + 14 }, t: { x: 0, y: -1 }, kind: 'pass' });
-          var ytp = ps.y - hTop - rw / 2 - 14;
+          var ytp = ps.yTop - hTop - rw / 2 - 14;
           if (ytp - h.y >= 40) h.wps.push({ p: { x: px, y: ytp }, t: { x: 0, y: -1 }, kind: 'pass' });
         });
       });
@@ -454,6 +473,7 @@
       var topRow = rows.length - 1;
       out.forEach(function (h) {
         if (h.row !== topRow || !h.wps.length || rows[topRow].length !== 1) return;
+        if (h.edgePark) return;   // already at a screen edge, parked inwards
         var px = h.wps[h.wps.length - 1].p.x, need = g.Lf + cfg.turnBulge + 14;
         if (Math.abs(px - h.x) < need) {   // too close to turn in: move it sideways (staying on screen) so the road can
           var lo2 = Math.max(ins.left + keepG + S / 2, edgeL), hi2 = Math.min(L.W - ins.right - keepG - S / 2, edgeR);
@@ -474,7 +494,7 @@
     var startS = L.bakery.w / 2 + ext.left + 8;
     var hTop = cfg.houseTop * S, keepG = loose ? cfg.houseKeepLoose : cfg.houseKeep;
     var acr = function (p) { return p.x * A.x + p.y * A.y; };
-    var park = cfg.parkK * ext.half + 0.5 * S, Lf = park + cfg.straightK * ext.half, sep = rw + (loose ? cfg.sepLoose : cfg.sepGap);
+    var park = 0.5 * S + cfg.parkK * ext.half + cfg.parkGap, Lf = park + cfg.straightK * ext.half, sep = rw + (loose ? cfg.sepLoose : cfg.sepGap);
     var bad = 0, why = cfg._why, fl = {};
     function fail(w, k) { bad += w || 1; fl[k] = (fl[k] || 0) + 1; if (why) why[k] = (why[k] || 0) + 1; return bad >= cap && !force; }
     var g = { rw: rw, hTop: hTop, keepG: keepG, ext: ext, park: park, Lf: Lf, sep: sep, r1x: L.door.x + startS + 0.3 * ext.half + 40 };
@@ -1188,7 +1208,7 @@
     var mv = Math.max(g.maxD, hyp(x - g.x0, y - g.y0)), tap = mv < cfg.tapMovePx && this.time - g.t < cfg.tapTime;
     if (g.kind === 'cart' && this.cart.state === 'drag') {
       if (tap) { this._release(true); return this._honk(); }
-      this._release(false);
+      this._release(false, x, y);
       return 'up';
     }
     if (g.kind === 'tupi' && tap && (this.state === 'round' || this.state === 'roundDone')) return this._pokeTupi();
@@ -1201,10 +1221,17 @@
     if (g && g.kind === 'cart' && this.cart.state === 'drag') this._release(false);
   };
   /** Release after a drag: the cart rolls to a stop (or into the house when past 80 % of a branch). */
-  P._release = function (tap) {
-    var c = this.cart, cfg = this.cfg, e = this._edge(c.edge);
+  P._release = function (tap, fx, fy) {
+    var c = this.cart, cfg = this.cfg, e = this._edge(c.edge), lifted = fx !== undefined && this.roads;
     if (tap) { c.tgt = { edge: c.edge, s: c.s, house: null }; c.state = 'coast'; c.mode = 'coast'; return; }
-    if (e && e.house && c.s >= cfg.autoRollFrac * e.stopS) { this._autoDrive(this.houseById(e.house), 'auto'); return; }
+    if (lifted) {   // the finger was lifted ON a house (its art box, no hit padding): the child pointed at it → drive there
+      for (var i = 0; i < this.houses.length; i++) { var hb = this._houseBox(this.houses[i]); if (fx >= hb.x0 && fx <= hb.x1 && fy >= hb.y0 && fy <= hb.y1) { this._autoDrive(this.houses[i], 'auto'); return; } }
+    }
+    var near = !lifted || (function (self) { var p = projectRoads(self.roads, fx, fy); return p && p.d <= self.layout.roadW / 2 + cfg.releaseNear; })(this);
+    if (near && e && e.house && c.s >= cfg.autoRollFrac * e.stopS) { this._autoDrive(this.houseById(e.house), 'auto'); return; }
+    var te = near && c.tgt ? this._edge(c.tgt.edge) : null;   // or the finger's own road point is past 80 % of a branch
+    if (te && te.house && c.tgt.s >= cfg.autoRollFrac * te.stopS) { this._autoDrive(this.houseById(te.house), 'auto'); return; }
+    if (!near) { c.tgt = { edge: c.edge, s: c.s, house: null }; c.state = 'coast'; c.mode = 'coast'; return; }   // aimless scribbling: just stop
     // roll on along the way it was going: braking distance v² / 2a, never past the finger's point
     var d = c.spd * c.spd / (2 * cfg.coastDecel), tg = c.tgt;
     if (tg && e) {
@@ -1411,9 +1438,14 @@
     if (this.sprinkles.length >= cfg.sprinkleCap) this.sprinkles.shift();
     var ang = cfg.sprinkleAng + r.float(-cfg.sprinkleSpread, cfg.sprinkleSpread), v = r.float(cfg.sprinkleV[0], cfg.sprinkleV[1]);
     var vx = Math.cos(ang) * v * (c.faceS >= 0 ? 1 : -1), vy = Math.sin(ang) * v;
+    // the fountain stays below the speech bubble / HUD (and the safe top): cap the rise by the room above the trunk tip
+    var top = L.ins.top + 20;
+    L.keep.forEach(function (q) { if (q.x < tip.x + 220 && q.x + q.w > tip.x - 220 && q.y < tip.y) top = Math.max(top, q.y + q.h + 16); });
+    var room = Math.max(10, tip.y - top), vmax = Math.sqrt(2 * cfg.sprinkleG * room);
+    if (-vy > vmax) { vx *= 1 + 0.4 * (1 - vmax / -vy); vy = -vmax; }
     var floor = clamp(c.y + r.float(-24, 46), L.play.y0 + 10, L.H - L.ins.bottom - 4);
     this.sprinkles.push({ kind: r.int(0, 5), x: tip.x, y: tip.y, _px: tip.x, _py: tip.y, vx: vx, vy: vy, rot: r.float(0, TAU), _prot: 0, spin: r.float(-9, 9),
-      r: r.float(3, 5), a: 1, _pa: 1, floor: floor, bounced: false, t: 0, life: 0 });
+      r: r.float(cfg.sprinkleR[0], cfg.sprinkleR[1]), a: 1, _pa: 1, floor: floor, bounced: false, t: 0, life: 0 });
   };
   P._stepSprinkles = function (h) {
     var g = this.cfg.sprinkleG, L = this.layout;
@@ -1631,6 +1663,7 @@
     spring(c, 'cargoHop', 'cargoHopV', 0, cfg.cargoOmega, cfg.cargoZeta, h);
     c.squash = clamp(c.squash, -0.2, 0.25); c.bounce = clamp(c.bounce, -10, 30);
     c.sy = 1 - c.squash; c.sx = 1 + 0.5 * c.squash;
+    c.z = c.y - 0.5;   // draw order: sort houses by house.z (= y) and the cart by cart.z — on a tie the cart is behind
     if (c.spd > cfg.dustSpeed) {
       c._dustT -= h;
       if (c._dustT <= 0) { c._dustT = cfg.dustEvery; this._dust(); }
@@ -1687,6 +1720,7 @@
         H.appear = u; H.s = backOut(u);
         if (u >= 1 && !H._landed) { H._landed = true; H.squashV += kickFor(0.08, cfg.sqOmega, cfg.sqZeta); }
       }
+      H.z = H.y;
       H.door += clamp(H._doorTo - H.door, -h * 3.4, h * 3.4);
       if (H._glowT > 0) H._glowT = Math.max(0, H._glowT - h);
       var gT = this.assistId === H.id ? 1 : H._glowT > 0 ? 0.55 + 0.45 * Math.sin(TAU * 1.6 * t) : 0;

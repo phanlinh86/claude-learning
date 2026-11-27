@@ -254,10 +254,10 @@
       'topic.sub': 'Take Away',
       'topic.oddeven': 'Odd and Even',
 
-      'weather.0': ['Spring in the bakery!', 'Spring in the bakery! Look, blossoms in the window!'],
-      'weather.1': ['Sunny summer!', 'Sunny summer! Warm sunbeams in the bakery!'],
-      'weather.2': ['Windy autumn!', 'Windy autumn! Leaves blow in through the window!'],
-      'weather.3': ['Snowy winter!', 'Snowy winter! Snow is falling outside!'],
+      'weather.0': ['Spring in the bakery!'],
+      'weather.1': ['Sunny summer!'],
+      'weather.2': ['Windy autumn!'],
+      'weather.3': ['Snowy winter!'],
 
       'odd': 'odd',
       'even': 'even',
@@ -469,10 +469,10 @@
       'topic.sub': 'Phép trừ',
       'topic.oddeven': 'Số chẵn, số lẻ',
 
-      'weather.0': ['Mùa xuân ở tiệm bánh!', 'Mùa xuân ở tiệm bánh! Hoa nở ngoài cửa sổ kìa!'],
-      'weather.1': ['Mùa hè nắng đẹp!', 'Mùa hè nắng đẹp! Nắng chiếu vào tiệm bánh nè!'],
-      'weather.2': ['Mùa thu lộng gió!', 'Mùa thu lộng gió! Lá bay vào cửa sổ kìa!'],
-      'weather.3': ['Mùa đông có tuyết!', 'Mùa đông có tuyết! Ngoài trời tuyết rơi kìa!'],
+      'weather.0': ['Mùa xuân ở tiệm bánh!'],
+      'weather.1': ['Mùa hè nắng đẹp!'],
+      'weather.2': ['Mùa thu lộng gió!'],
+      'weather.3': ['Mùa đông có tuyết!'],
 
       'odd': 'lẻ',
       'even': 'chẵn',
@@ -1388,7 +1388,8 @@
   function tailLine(lang, ev, rng) {
     var left = num(ev.left);
     if (left == null || left < 0) return '';
-    return I18N.t(lang, left === 0 ? 'right.all' : (left === 1 ? 'right.one' : 'right.more'), null, rng);
+    if (left === 0) return '';   // the party line says "all delivered" (playtest: it was said twice)
+    return I18N.t(lang, left === 1 ? 'right.one' : 'right.more', null, rng);
   }
   function cargoNumber(cargo, sign, ev) {
     return firstNum(cargo.n, obj(ev.count).n, ev.count, paramsOf(ev).n, tileNumber(obj(sign)));

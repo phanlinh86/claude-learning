@@ -404,3 +404,20 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
 @media (max-width: 430px) and (orientation: portrait) { .talk-choices button { width: 96px; height: 92px; flex: none; } }
 @media (min-width: 768px) and (min-height: 700px) { .talk-choices button { width: 150px; height: 128px; } }
 @media (min-width: 768px) and (min-height: 1000px) and (orientation: portrait) { .talk-choices button { width: 168px; height: 150px; } }
+
+/* ---------- Tupi's Bakery Delivery ---------- */
+/* Home in the pause menu is hold-to-confirm (1 s): a filling bar shows the hold */
+#btnHome { position: relative; overflow: hidden; }
+#btnHome::after { content: ''; position: absolute; left: 0; bottom: 0; height: 8px; width: calc(var(--p, 0) * 100%); background: rgba(255, 255, 255, .85); border-radius: 0 4px 4px 0; }
+/* QA-V P2-3: the logo never spills off a phone */
+.logo { max-width: 92vw; overflow-wrap: anywhere; }
+@media (max-width: 430px) and (orientation: portrait) { .logo { font-size: min(50px, 10.5vw); } }
+/* QA-V P2-7: VI settings on a landscape phone — two toggle columns, smaller labels, the panel scrolls */
+@media (orientation: landscape) and (max-height: 430px) {
+  .settings-panel .set-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .settings-panel .toggle { font-size: 15px; }
+  .settings-panel { max-height: calc(100dvh - 16px); overflow-y: auto; }
+  /* QA-V P2-8: bigger Talk pictures */
+  .talk-choices button canvas { width: 80px; height: 80px; }
+  .talk-choices button { padding: 4px 8px; }
+}

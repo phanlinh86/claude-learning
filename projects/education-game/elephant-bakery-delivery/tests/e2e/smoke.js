@@ -64,7 +64,7 @@ async function touchDrag(page, cdp, pts, stepMs) {
       catch (e) { errors.push('no delivery after the right house'); }
       await page.screenshot({ path: path.join(OUT, d.name + '-3-deliver.png') });
       // fast bot sessions
-      for (const age of d.ages) {
+      for (const age of (process.env.NOBOT ? [] : d.ages)) {
         await page.goto(srv.url + `?mute=1&seed=${10 + age}&age=${age}&speed=8&bot=1&autostart=1`);
         try {
           await page.waitForFunction(() => window.BD && BD.debug && BD.debug.mode === 'done', null, { timeout: 300000, polling: 250 });

@@ -1,937 +1,620 @@
-// Functional QA (Nim's River Hop) — Playwright, isMobile + hasTouch contexts on iPhone / iPad, portrait + landscape.
-// Every tap is a REAL CDP touch sequence (Input.dispatchTouchEvent → pointer events → BD.Input → World): the bot bypasses
-// the input layer, so this suite is the proof that fingers work on the bobbing stepping stones.
-//   node tests/e2e/functional.js                          (all: 4 devices + 10 bot sessions, ages 3–7 × EN / VI)
-//   ONLY=iphone-portrait node tests/e2e/functional.js     (one device, no bot sessions)
-//   TESTS=tap_right,count_seq node tests/e2e/functional.js   (a subset of the per-device tests)
-//   SKIP_BOT=1 node tests/e2e/functional.js               (skip the full bot sessions)    BOT_ONLY=1 (only them)
+// Functional QA (Tupi's Bakery Delivery) — Playwright, isMobile + hasTouch contexts on iPhone / iPad, portrait + landscape.
+// Every gesture on the canvas is a REAL CDP touch sequence (Input.dispatchTouchEvent → pointer events → BD.Input → World):
+// the bot bypasses the input layer, so this suite is the proof that fingers drive Tupi's cart.
+//   node tests/e2e/functional.js                              (4 devices × the per-device tests + 10 bot sessions, ages 3–7 × EN / VI)
+//   ONLY=iphone-portrait node tests/e2e/functional.js         (one device, no bot sessions)
+//   TESTS=drag_right,wrong_house node tests/e2e/functional.js (a subset of the per-device tests)
+//   SKIP_BOT=1 …  (skip the bot sessions)     BOT_ONLY=1 …  (only them)     BOT_SPEED=8 (default)
 // Writes screenshots + results.json to tests/out/functional/. Exits 1 on any failure (also on any console / page error).
+'use strict';
 const { chromium } = require('playwright');
 const path = require('path'), fs = require('fs');
 const serve = require('./serve');
 const OUT = path.join(__dirname, '..', 'out', 'functional'); fs.mkdirSync(OUT, { recursive: true });
 
 const DEVICES = [
-  { name: 'iphone-portrait', viewport: { width: 393, height: 852 }, dpr: 3, extra: true },
+  { name: 'iphone-portrait', viewport: { width: 393, height: 852 }, dpr: 3 },
   { name: 'iphone-landscape', viewport: { width: 852, height: 393 }, dpr: 3 },
-  { name: 'ipad-portrait', viewport: { width: 820, height: 1180 }, dpr: 2, extra: true },
+  { name: 'ipad-portrait', viewport: { width: 820, height: 1180 }, dpr: 2 },
   { name: 'ipad-landscape', viewport: { width: 1180, height: 820 }, dpr: 2 }
 ];
+const BOT_SPEED = +process.env.BOT_SPEED || 8;
 const BOT_RUNS = [];
-[3, 4, 5, 6, 7].forEach((age, i) => ['en', 'vi'].forEach((lang, j) => BOT_RUNS.push({ age, lang, dev: (i + j) % 4 })));
-const BOT_SPEED = +process.env.BOT_SPEED || 10, BOT_PAR = +process.env.BOT_PAR || 4;
+[3, 4, 5, 6, 7].forEach((age, i) => ['en', 'vi'].forEach((lang, j) => BOT_RUNS.push({ age, lang, dev: (2 * i + j) % 4 })));
 const VI_CHARS = /[ăâđêôơưàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ]/i;
-// a raw i18n key, an unfilled {param}, or a JS hole in a spoken line
-const RAW = /\{|\}|undefined|NaN|\bnull\b|\[object|\b(ui|p|talk|topic|weather|right|wrong|surprise|fish|frog|snow|count|name|idle|session|goal|fruit)\.[a-z0-9]/i;
+const LEAK = /undefined|NaN|\{|\}|\[object|\bnull\b/;
 
 const results = [];
 function record(device, test, ok, detail) {
   results.push({ device, test, ok, detail: detail || '' });
-  console.log(`${ok ? 'PASS' : 'FAIL'}  ${device.padEnd(16)} ${test}${ok ? '' : '  — ' + detail}`);
+  console.log(`${ok ? 'PASS' : 'FAIL'}  ${device.padEnd(16)} ${test}${detail ? '  — ' + detail : ''}`);
 }
 class Fail extends Error {}
 const check = (cond, msg) => { if (!cond) throw new Fail(msg); };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-// test-only instrumentation: every prompt the game builds and every line it sends to the voice, full world events, and
-// page-side helpers for safe touch points
-const INIT = () => {
-  window.__asks = []; window.__said = []; window.__ev = [];
-  const BD = window.BD = window.BD || {};
-  let i18n, voice;
-  Object.defineProperty(BD, 'I18N', { configurable: true, get: () => i18n, set: v => {
-    i18n = v;
-    if (v && v.ask && !v.ask.__wrapped) { const o = v.ask; v.ask = function (lang, key) { const r = o.apply(this, arguments); window.__asks.push({ lang, key, text: r }); return r; }; v.ask.__wrapped = true; }
-  } });
-  Object.defineProperty(BD, 'Voice', { configurable: true, get: () => voice, set: v => {
-    voice = v;
-    if (v && v.say && !v.say.__wrapped) { const o = v.say; v.say = function (text, opts) { window.__said.push({ text: String(text), lang: (opts && opts.lang) || v._lang, t: performance.now() }); return o.apply(this, arguments); }; v.say.__wrapped = true; }
-  } });
-  window.__qa = {
-    hook() {
-      const w = BD.debug.world;
-      if (!w || w.__qa) return;
-      const o = w._emit; w.__qa = true;
-      w._emit = function (e) { window.__ev.push(e); e._t = w.time; return o.call(this, e); };
-    },
-    toL(x, y) { const v = BD.debug.view(); return { x: (x - v.left) / v.s, y: (y - v.top) / v.s }; },
-    /** a CSS-px point on open water (no DOM above it), clear of every stone (hit radius + margin), Nim, the speech bubble /
-     *  HUD and the surprises — a press there is a 'soft' press */
-    softPoint() {
-      const w = BD.debug.world, L = w.layout, R = L.river, nb = w.nimHit();
-      const cands = [];
-      for (let gx = 0.03; gx < 0.98; gx += 0.02) for (let gy = 0.05; gy < 0.97; gy += 0.02) {
-        const cx = innerWidth * gx, cy = innerHeight * gy, p = this.toL(cx, cy);
-        if (p.x < R.x + 20 || p.x > R.x + R.w - 20 || p.y < R.y + 20 || p.y > R.y + R.h - 20) continue;
-        const el = document.elementFromPoint(cx, cy); if (!el || el.id !== 'game') continue;
-        if (nb && p.x > nb.x - 30 && p.x < nb.x + nb.w + 30 && p.y > nb.y - 30 && p.y < nb.y + nb.h + 30) continue;
-        if (w.stones.some(s => s.state !== 'gone' && s.state !== 'hidden' && (Math.hypot(p.x - s.x, p.y - s.y) < L.hitR + 50 || Math.hypot(p.x - s.x, p.y - s.y + 0.35 * L.itemH) < L.hitR + 50))) continue;
-        if (!w._clearOfKeep(p.x, p.y)) continue;
-        if ([w.fishHit(), w.frogHit(), w.snowHit()].filter(Boolean).some(c => Math.hypot(p.x - c.cx, p.y - c.cy) < c.r + 40)) continue;
-        cands.push({ x: Math.round(cx), y: Math.round(cy), lx: p.x, ly: p.y });
-      }
-      const fc = { x: R.x + R.w / 2, y: R.y + R.h / 2 };
-      cands.sort((a, b) => Math.hypot(a.lx - fc.x, a.ly - fc.y) - Math.hypot(b.lx - fc.x, b.ly - fc.y));
-      return cands.length ? cands[0] : null;
-    },
-    /** every visible stone (+ Nim's feet) inside the CSS viewport? */
-    outside() {
-      const w = BD.debug.world, v = BD.debug.view(), out = [], S = w.layout.S;
-      for (const s of w.stones) {
-        if (s.state !== 'rest') continue;
-        const p = BD.debug.toScreen(s.x, s.y), r = 0.5 * S * v.s;
-        if (p.x - r < -1 || p.y < -1 || p.x + r > innerWidth + 1 || p.y > innerHeight + 1) out.push(`${s.id} at ${Math.round(p.x)},${Math.round(p.y)}`);
-      }
-      const n = BD.debug.toScreen(w.nim.x, w.nim.y);
-      if (n.x < 0 || n.y < 0 || n.x > innerWidth || n.y > innerHeight + 1) out.push(`Nim at ${Math.round(n.x)},${Math.round(n.y)}`);
-      return out;
-    }
-  };
-};
-
-/* ---------------------------------------------------------------- touch helpers (CDP) */
-const tp = (x, y, id = 1) => ({ x: Math.round(x), y: Math.round(y), id, radiusX: 8, radiusY: 8, force: 1 });
-async function touchStart(cdp, pts) { await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: pts }); }
-async function touchMove(cdp, pts) { await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: pts }); }
-async function touchEnd(cdp, pts = []) { await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: pts }); }
-async function swipe(cdp, page, a, b, { n = 8, ms = 120, hold = 30 } = {}) {
-  await touchStart(cdp, [tp(a.x, a.y)]);
-  await page.waitForTimeout(20);
-  for (let i = 1; i <= n; i++) { const u = i / n; await touchMove(cdp, [tp(a.x + (b.x - a.x) * u, a.y + (b.y - a.y) * u)]); await page.waitForTimeout(ms / n); }
-  await page.waitForTimeout(hold);
-  await touchEnd(cdp);
-}
-async function tap(cdp, page, p, hold = 80) {
-  await touchStart(cdp, [tp(p.x, p.y)]);
-  await page.waitForTimeout(hold);
-  await touchEnd(cdp);
-}
-/** tap a stone where it bobs NOW (the position is read right before the touch) */
-async function tapStone(cdp, page, id, hold = 70) {
-  const at = await page.evaluate(i => BD.debug.stoneScreen(i), id);
-  check(at, 'stone ' + id + ' is not tappable');
-  await tap(cdp, page, at, hold);
-  return at;
+/* ---------------------------------------------------------------- page helpers */
+const evCount = (page, type) => page.evaluate(t => BD.debug.events.filter(e => e.type === t).length, type);
+const evCounts = (page, types) => page.evaluate(ts => { const o = {}; ts.forEach(t => { o[t] = BD.debug.events.filter(e => e.type === t).length; }); return o; }, types);
+const st = page => page.evaluate(() => BD.debug.getState());
+const tp = (p, id) => ({ x: Math.round(p[0]), y: Math.round(p[1]), id: id || 1, radiusX: 8, radiusY: 8, force: 1 });
+async function touchDrag(page, cdp, pts, stepMs, onStep) {
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [tp(pts[0])] });
+  for (let i = 1; i < pts.length; i++) {
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [tp(pts[i])] });
+    await page.waitForTimeout(stepMs);
+    if (onStep) await onStep(i);
+  }
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
 }
 async function tapEl(page, sel) {
-  let b = null;
-  for (let k = 0; k < 12; k++) {
-    const b1 = await page.locator(sel).first().boundingBox();
-    await page.waitForTimeout(80);
-    b = await page.locator(sel).first().boundingBox();
-    if (b1 && b && Math.abs(b1.x - b.x) < 0.5 && Math.abs(b1.y - b.y) < 0.5 && Math.abs(b1.width - b.width) < 0.5) break;
-  }
+  const b = await page.evaluate(s => { const el = document.querySelector(s); if (!el) return null; const r = el.getBoundingClientRect(); return r.width ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null; }, sel);
   check(b, 'element not visible: ' + sel);
-  await page.touchscreen.tap(b.x + b.width / 2, b.y + b.height / 2);
+  await page.touchscreen.tap(Math.round(b.x), Math.round(b.y));
+  return b;
 }
-const evLen = page => page.evaluate(() => window.__ev.length);
-const evSince = (page, n0) => page.evaluate(n => window.__ev.slice(n).map(e => { const c = {}; for (const k in e) { const v = e[k]; if (v === null || typeof v !== 'object') c[k] = v; } return c; }), n0);
-/** wait for a world event (by type, after index n0) — robust under CPU load, unlike a fixed wall-clock wait */
-const waitEv = (page, n0, type, timeout = 15000) => page.waitForFunction(([n, t]) => window.__ev.slice(n).some(e => e.type === t), [n0, type], { timeout, polling: 'raf' });
-const types = evs => evs.map(e => e.type + (e.id ? ':' + e.id : '')).join(',');
-const visible = (page, id) => page.evaluate(i => !document.getElementById(i).classList.contains('hidden'), id);
-const said = (page, n0) => page.evaluate(n => window.__said.slice(n).map(s => s.text), n0);
-const saidLen = page => page.evaluate(() => window.__said.length);
-
-/* ---------------------------------------------------------------- setup */
-async function newPage(browser, d, errors) {
-  const ctx = await browser.newContext({ viewport: d.viewport, deviceScaleFactor: d.dpr, isMobile: true, hasTouch: true });
-  await ctx.addInitScript(INIT);
-  const page = await ctx.newPage();
-  page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
-  page.on('pageerror', e => errors.push('pageerror: ' + String(e)));
-  page.on('requestfailed', r => errors.push('requestfailed: ' + r.url() + ' ' + (r.failure() && r.failure().errorText)));
-  page.on('response', r => { if (r.status() >= 400) errors.push('HTTP ' + r.status() + ' ' + r.url()); });
-  page.on('crash', () => errors.push('PAGE CRASH'));
-  const cdp = await ctx.newCDPSession(page);
-  return { ctx, page, cdp };
+const visible = (page, sel) => page.evaluate(s => { const el = document.querySelector(s); if (!el) return false; const r = el.getBoundingClientRect(); return !el.classList.contains('hidden') && r.width > 0 && getComputedStyle(el).display !== 'none'; }, sel);
+async function freshBoot(page, url, q) {   // empty storage, then boot
+  await page.goto(url + '?mute=1');
+  await page.evaluate(() => localStorage.clear());
+  await boot(page, url, q);
 }
-async function gotoTitle(page, url) {
-  await page.goto(url);
-  await page.waitForFunction(() => window.BD && BD.debug && BD.debug.mode === 'title' && BD.debug.world, null, { timeout: 20000 });
-  await page.evaluate(() => window.__qa.hook());
-  await page.waitForTimeout(250);
+async function boot(page, url, q) {
+  await page.goto(url + (q || '?mute=1&seed=3'));
+  await page.waitForFunction(() => window.BD && BD.debug && BD.debug.mode === 'title', null, { timeout: 20000 });
+  await page.waitForTimeout(300);
 }
-/** a fresh chapter of `topic` (level `level`) at `age`; waits for the first open ask (speed 1 once it is open) */
-async function setupRound(page, url, { topic = 'colors', age = 4, seed = 3, lang = '', level = 0, prep = null } = {}) {
-  await gotoTitle(page, `${url}?mute=1&seed=${seed}&age=${age}${lang ? '&lang=' + lang : ''}`);
-  await page.evaluate(([t, lv, prep]) => {
-    BD.debug.startGame(); const w = BD.debug.world; w.levels[lv] = t; w.startLevel(lv);
-    if (prep) (new Function('w', prep))(w);
-    BD.debug.setSpeed(4);
-  }, [topic, level, prep]);
-  await waitAsk(page);
+/** start a game whose chapter 0 is `topic`, fast-forward to the first interactive moment */
+async function toPlay(page, topic, opt) {
+  opt = opt || {};
+  await page.evaluate(([t, lv]) => { BD.debug.startGame(); const w = BD.debug.world; if (t) { w.levels[lv] = t; } w.startLevel(lv); BD.debug.setSpeed(4); }, [topic || null, opt.level || 0]);
+  await waitInteractive(page);
 }
-const READY = () => { const w = BD.debug.world, a = BD.debug.answer(); return w.interactive && a && a.id != null && !!BD.debug.stoneScreen(a.id) && w.phase === 'play' && w.phaseTime > 0.8 && w.stones.every(s => s.state !== 'rise'); };
-async function waitAsk(page, timeout = 30000) {
+async function waitInteractive(page, timeout) {
   await page.evaluate(() => BD.debug.setSpeed(4));
-  await page.waitForFunction(READY, null, { timeout, polling: 'raf' });
+  await page.waitForFunction(() => { const w = BD.debug.world, a = BD.debug.answer(); return BD.debug.mode === 'play' && w.interactive && a && w.cart.state === 'wait' && BD.debug.cartScreen() && w.phaseTime > 0.4 && (!w.hintHand || !w.hintHand.demo); }, null, { timeout: timeout || 30000, polling: 50 });
   await page.evaluate(() => BD.debug.setSpeed(1));
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(350);   // inputBlockUntil (250 ms) after Play
 }
-/** Nim stands again and the next row can be tapped (fast-forwards the hop) */
-async function waitHop(page, timeout = 15000) {
-  await page.evaluate(() => BD.debug.setSpeed(3));
-  await page.waitForFunction(() => { const w = BD.debug.world, a = BD.debug.answer(); return (w.interactive && a && BD.debug.stoneScreen(a.id)) || w.state !== 'round' || w.phase !== 'play' || w.row >= w.cur.k; }, null, { timeout, polling: 'raf' });
-  await page.evaluate(() => BD.debug.setSpeed(1));
-  await page.waitForTimeout(120);
-}
-/** cross the whole brook by REAL taps on each row's right stone; returns the number of hops */
-async function crossByTaps(cdp, page) {
-  let hops = 0;
-  for (let k = 0; k < 6; k++) {
-    const st = await page.evaluate(() => { const w = BD.debug.world, a = BD.debug.answer(); return { ok: w.state === 'round' && w.phase === 'play' && w.row < w.cur.k, a: a && a.id, inter: w.interactive }; });
-    if (!st.ok) break;
-    check(st.inter && st.a != null, 'not interactive mid-crossing: ' + JSON.stringify(st));
-    await tapStone(cdp, page, st.a); hops++;
-    await waitHop(page);
-  }
-  return hops;
-}
-/** finish the current round with the bot (fast), stop the bot once the next round's stones rise */
-async function botToNextRound(page, timeout = 90000) {
-  const r0 = await page.evaluate(() => BD.debug.world.round);
-  await page.evaluate(() => { BD.debug.setBot(true, 1); BD.debug.setSpeed(6); });
-  await page.waitForFunction(r => { const w = BD.debug.world; return w.state === 'round' && w.round !== r && w.phase === 'rise'; }, r0, { timeout, polling: 'raf' });
-  await page.evaluate(() => BD.debug.setBot(false));
-  await waitAsk(page);
-}
-async function info(page) {
-  return page.evaluate(() => {
-    const w = BD.debug.world, a = BD.debug.answer();
-    const row = w.stones.filter(s => s.row === w.row && s.state === 'rest');
-    return { a: a.id, row: w.row, others: row.filter(s => !s.target).map(s => s.id), ahead: w.stones.filter(s => s.row > w.row && s.state === 'rest').map(s => s.id),
-      misses: w.misses, k: w.cur.k, m: w.cur.rows[0].length, mode: w.cur.mode };
-  });
-}
-async function shot(page, d, name) { try { await page.screenshot({ path: path.join(OUT, `${d.name}-${name}.png`) }); } catch (e) { /* ignore */ } }
+/** distance of the cart from its road + whole cart art box on the logical screen */
+const cartCheck = page => page.evaluate(() => {
+  const w = BD.debug.world, c = w.cart, R = w.roads, e = BD.Roads.edge(R, c.edge), q = e ? BD.Roads.at(e, c.s) : null;
+  const pr = BD.Roads.project(R, c.x, c.y);
+  const b = w.cartBox ? w.cartBox() : null, L = w.layout;
+  const box = b ? (b.x0 !== undefined ? b : { x0: b.x, y0: b.y, x1: b.x + b.w, y1: b.y + b.h }) : null;
+  return { state: c.state, edge: c.edge, s: c.s, x: c.x, y: c.y, onEdge: q ? Math.hypot(q.x - c.x, q.y - c.y) : 1e9, nearest: pr ? pr.d : 1e9,
+    box, W: L.W, H: L.H, offScreen: box ? Math.max(0, -box.x0, -box.y0, box.x1 - L.W, box.y1 - L.H) : 0 };
+});
+const otherHouse = page => page.evaluate(() => { const a = BD.debug.answer(); const h = BD.debug.world.houses.find(h => h.id !== a.houseId); return h ? h.id : null; });
 
-/* ---------------------------------------------------------------- tests */
+/* ---------------------------------------------------------------- per-device tests */
 const T = {};
-T.boot_title = async ({ page, url, d, errors }) => {
-  const e0 = errors.length;
-  await gotoTitle(page, url + '?mute=1&seed=3');
-  await page.waitForTimeout(800);
-  await shot(page, d, '0-title');
-  check(/Nim/.test(await page.title()) && /River Hop/.test(await page.title()), 'document title: ' + await page.title());
-  check(await visible(page, 'scrTitle'), 'title screen hidden');
-  check(!(await visible(page, 'loading')), 'loading screen still shown');
-  const pb = await page.locator('#btnPlay').boundingBox();
-  check(pb && pb.width >= 44 && pb.height >= 44, 'play button too small / missing: ' + JSON.stringify(pb));
-  check(pb.x >= 0 && pb.y >= 0 && pb.x + pb.width <= d.viewport.width && pb.y + pb.height <= d.viewport.height, 'play button off screen');
-  const gb = await page.locator('#btnParents').boundingBox();
-  check(gb && gb.width >= 40 && gb.x + gb.width <= d.viewport.width && gb.y >= 0, 'gear button: ' + JSON.stringify(gb));
-  const missing = await page.evaluate(() => BD.Assets.missing.slice());
-  check(missing.length === 0, 'assets failed to load: ' + missing.join(', '));
+
+T.boot_title = async (page, ctx, cdp, url, errors) => {
+  await boot(page, url);
+  const r = await page.evaluate(() => ({ missing: BD.Assets.missing.slice(), loaded: BD.Assets.loaded, total: BD.Assets.total, title: document.title,
+    logo: document.querySelector('.logo').textContent.trim(), titleVis: !document.getElementById('scrTitle').classList.contains('hidden'),
+    loadingHidden: document.getElementById('loading').classList.contains('hidden'), hudHidden: document.getElementById('hud').classList.contains('hidden'),
+    sw: document.documentElement.scrollWidth, iw: innerWidth, age: document.getElementById('titleAge').textContent }));
+  check(r.missing.length === 0, 'assets missing: ' + r.missing.join(', '));
+  check(/Tupi/.test(r.title) && /Tupi/.test(r.logo), 'title / logo: ' + r.title + ' / ' + r.logo);
+  check(r.titleVis && r.loadingHidden && r.hudHidden, 'title screen state ' + JSON.stringify(r));
+  check(r.sw <= r.iw + 1, 'horizontal scroll ' + r.sw + ' > ' + r.iw);
+  check(await visible(page, '#btnPlay'), 'Play button not visible');
+  check(errors.length === 0, 'console errors on boot: ' + errors.join(' | '));
+  // the real ▶ tap starts the game
   await tapEl(page, '#btnPlay');
-  await page.waitForFunction(() => BD.debug.mode === 'play', null, { timeout: 5000 });
-  await page.waitForFunction(() => BD.debug.world.state === 'round', null, { timeout: 15000 });
-  check(await visible(page, 'hud'), 'HUD not shown in play');
-  await page.waitForTimeout(1500);
-  await shot(page, d, '0-rise');
-  check(errors.length === e0, 'boot errors: ' + errors.slice(e0).join(' | '));
+  await page.waitForFunction(() => BD.debug.mode === 'play', null, { timeout: 3000 });
+  check(await visible(page, '#hud'), 'HUD hidden after Play');
+  return `assets ${r.loaded}/${r.total}, "${r.logo}", ${r.age.trim()}`;
 };
-T.tap_right = async ({ page, cdp, url, d }) => {
-  await setupRound(page, url);
-  const i = await info(page);
-  const n0 = await evLen(page), L0 = await saidLen(page);
-  await tapStone(cdp, page, i.a);
-  await page.waitForTimeout(250);
-  await shot(page, d, '1-right-hop');
-  await waitEv(page, n0, 'land', 8000);
-  await waitEv(page, n0, 'thingAway', 8000);
-  const evs = await evSince(page, n0);
-  check(evs.some(e => e.type === 'right' && e.id === i.a), 'no right event: ' + types(evs));
-  check(evs.some(e => e.type === 'hop') && evs.some(e => e.type === 'land' && e.id === i.a) && evs.some(e => e.type === 'splash'), 'no hop / land / splash: ' + types(evs));
-  check(!evs.some(e => e.type === 'wrong'), 'a wrong event on the right tap: ' + types(evs));
-  const s = await page.evaluate(id => { const w = BD.debug.world, st = w.stoneById(id); return { row: w.row, onRow: w.nim.onRow, gold: st.gold, dx: Math.abs(w.nim.x - st.x) }; }, i.a);
-  check(s.row === 1 && s.onRow === 0 && s.dx < 30, 'Nim is not on the stone / the row did not advance: ' + JSON.stringify(s));
-  const lines = await said(page, L0);
-  const col = await page.evaluate(id => BD.I18N.name('en', 'color', BD.debug.world.stoneById(id).thing.color), i.a);
-  check(lines.some(t => t.toLowerCase().includes(String(col).toLowerCase())), `the right line (naming the ${col} one) was not sent to the voice: ` + JSON.stringify(lines));
-};
-T.tap_wrong = async ({ page, cdp, url, d }) => {
-  await setupRound(page, url);
-  const i = await info(page);
-  check(i.others.length, 'no other stone in the row');
-  const n0 = await evLen(page), stars0 = await page.evaluate(() => BD.debug.world.stars), L0 = await saidLen(page);
-  // slow motion while the two taps land: the 1 s same-stone window is WORLD time, so it holds whatever the CPU load
-  await page.evaluate(() => BD.debug.setSpeed(0.25));
-  await tapStone(cdp, page, i.others[0]);
-  await waitEv(page, n0, 'wrong');
-  const w0 = await evLen(page);
-  await tapStone(cdp, page, i.others[0]);
-  await waitEv(page, w0, 'squish');
-  await page.evaluate(() => BD.debug.setSpeed(1));
-  const again = await evSince(page, w0);
-  check(await page.evaluate(() => BD.debug.world.misses) === 1 && again.some(e => e.type === 'squish' && e.repeat), 'the same stone twice: ' + types(again));
-  await page.waitForTimeout(300);
-  await shot(page, d, '2-wrong');
-  const evs = await evSince(page, n0);
-  const s = await page.evaluate(id => { const w = BD.debug.world, st = w.stoneById(id); return { misses: w.misses, state: w.state, phase: w.phase, inter: w.interactive, st: st.state, row: w.row, onRow: w.nim.onRow }; }, i.others[0]);
-  check(evs.some(e => e.type === 'wrong' && e.id === i.others[0]), 'no wrong event: ' + types(evs));
-  check(!evs.some(e => e.type === 'right' || e.type === 'hop'), 'Nim hopped onto the wrong stone');
-  check(s.misses === 1 && s.state === 'round' && s.phase === 'play' && s.inter && s.st === 'rest' && s.row === 0 && s.onRow === -1, 'after one wrong tap: ' + JSON.stringify(s));
-  const lines = await said(page, L0);
-  check(lines.length >= 1 && lines.every(t => !/\b(no|wrong|oops|not)\b/i.test(t)), 'kind words after a wrong tap: ' + JSON.stringify(lines));
-  // no fail state: the crossing goes on, the round's stars drop to 2
-  await crossByTaps(cdp, page);
-  await waitEv(page, n0, 'roundDone', 15000);
-  const rd = (await evSince(page, n0)).find(e => e.type === 'roundDone');
-  check(rd && rd.stars === 2 && rd.misses === 1, 'round stars after one miss: ' + JSON.stringify(rd));
-  check(await page.evaluate(() => BD.debug.world.stars) === stars0 + 2, 'stars did not go up by 2');
-};
-T.tap_ahead = async ({ page, cdp, url }) => {
-  await setupRound(page, url, { seed: 5 });
-  await page.waitForTimeout(5200);   // "One at a time!" never cuts the question while it is protected (VOICE §1.1 rule 5)
-  const i = await info(page);
-  check(i.ahead.length, 'no stone in a later row');
-  const n0 = await evLen(page), L0 = await saidLen(page);
-  await tapStone(cdp, page, i.ahead[0]);
-  await page.waitForTimeout(300);
-  const evs = await evSince(page, n0);
-  check(evs.some(e => e.type === 'ahead' && e.id === i.ahead[0]), 'no ahead event: ' + types(evs));
-  check(!evs.some(e => e.type === 'wrong' || e.type === 'right' || e.type === 'hop'), 'an ahead stone was judged: ' + types(evs));
-  check(await page.evaluate(() => BD.debug.world.misses) === 0, 'an ahead tap counted as a miss');
-  const lines = await said(page, L0);
-  check(lines.some(t => /one at a time|row first|one stone/i.test(t)), '"One at a time!" not said: ' + JSON.stringify(lines));
-};
-T.tap_water_soft = async ({ page, cdp, url }) => {
-  await setupRound(page, url);
-  const p = await page.evaluate(() => window.__qa.softPoint());
-  check(p, 'no open water point found');
-  const n0 = await evLen(page);
-  await tap(cdp, page, p, 70);
-  await page.waitForTimeout(300);
-  const evs = await evSince(page, n0);
-  check(evs.length && evs[0].type === 'soft' && evs.every(e => ['soft', 'hint', 'assistArmed', 'gust'].includes(e.type)), `tap on the water at ${p.x},${p.y}: ` + types(evs));
-  const s = await page.evaluate(() => ({ m: BD.debug.world.misses, st: BD.debug.world.state, ph: BD.debug.world.phase, rip: BD.debug.world.ripples.length }));
-  check(s.m === 0 && s.st === 'round' && s.ph === 'play' && s.rip > 0, 'after a soft tap: ' + JSON.stringify(s));
-};
-T.full_round = async ({ page, cdp, url, d }) => {
-  await setupRound(page, url, { seed: 9 });
-  const i = await info(page), n0 = await evLen(page);
-  const hops = await crossByTaps(cdp, page);
-  check(hops === i.k, `hops ${hops} for ${i.k} rows`);
-  await page.evaluate(() => BD.debug.setSpeed(0.5));
-  await page.waitForFunction(() => BD.debug.world.nim.state === 'roll', null, { timeout: 15000, polling: 'raf' });
-  await page.waitForTimeout(250);
-  await shot(page, d, '3-roll');
-  await page.evaluate(() => BD.debug.setSpeed(1));
-  await waitEv(page, n0, 'roundDone', 15000);
-  const evs = await evSince(page, n0);
-  for (const t of ['bankLand', 'curl', 'stick', 'uncurl', 'roundDone']) check(evs.some(e => e.type === t), 'no ' + t + ' event: ' + types(evs));
-  check(evs.filter(e => e.type === 'right').length === i.k && !evs.some(e => e.type === 'wrong'), 'rights: ' + types(evs));
-  const rd = evs.find(e => e.type === 'roundDone');
-  check(rd.stars === 3, 'a perfect crossing gave ' + rd.stars + ' stars');
-  await page.waitForTimeout(500);
-  await shot(page, d, '3-fruit');
-  await page.waitForFunction(() => +document.getElementById('hudStars').textContent >= 1, null, { timeout: 8000 });
-  const s = await page.evaluate(() => ({ fruits: BD.debug.world.nim.fruits.length, hud: document.getElementById('hudStars').textContent }));
-  check(s.fruits === 1 && +s.hud >= 1, 'fruit on the back / stars in the HUD: ' + JSON.stringify(s));
-  await waitEv(page, n0, 'wipe', 8000);
-  await waitAsk(page);
-  check(await page.evaluate(() => BD.debug.world.round) === 1, 'the next round did not start');
-};
-T.count_seq = async ({ page, cdp, url, d }) => {
-  await setupRound(page, url, { topic: 'count', age: 4, seed: 8 });
-  const i = await info(page);
-  check(i.mode === 'countSeq' && i.k >= 2, 'not a countSeq round: ' + JSON.stringify(i));
-  const L0 = await saidLen(page), n0 = await evLen(page);
-  await crossByTaps(cdp, page);
-  await shot(page, d, '5-countseq');
-  await waitEv(page, n0, 'roundDone', 15000);
-  const evs = await evSince(page, n0);
-  const rights = evs.filter(e => e.type === 'right');
-  check(rights.length === i.k && rights.every((e, k) => e.count === k + 1), 'countSeq hops: ' + rights.map(e => e.count).join(','));
-  const lines = await said(page, L0);
-  check(lines.some(t => /^one\b/i.test(t)) && lines.some(t => /^two\b/i.test(t)), 'no "One!" / "Two!" count lines: ' + JSON.stringify(lines));
-};
-T.count_sel = async ({ page, cdp, url, d }) => {
-  await setupRound(page, url, { topic: 'count', age: 4, seed: 8 });
-  await botToNextRound(page);
-  const i = await info(page);
-  check(i.mode === 'countSel', 'round 1 is not countSel: ' + JSON.stringify(i));
-  const th = await page.evaluate(id => BD.debug.world.stoneById(id).thing, i.a);
-  check(th.kind === 'dots' && th.n >= 1, 'not a dots thing: ' + JSON.stringify(th));
-  const L0 = await saidLen(page), n0 = await evLen(page);
-  await tapStone(cdp, page, i.a);
-  await page.waitForTimeout(900 + 400 * th.n);
-  await shot(page, d, '5-countsel');
-  await waitEv(page, n0, 'thingAway', 12000);
-  const evs = await evSince(page, n0);
-  const counts = evs.filter(e => e.type === 'count' && e.id === i.a);
-  check(evs.some(e => e.type === 'right' && e.id === i.a), 'no right: ' + types(evs));
-  check(counts.length === th.n && counts.every((e, k) => e.i === k + 1), `count events ${counts.map(e => e.i).join(',')} for ${th.n} dots`);
-  const lines = await said(page, L0);
-  check(lines.some(t => /dots?\b/i.test(t)), 'no count run ("… dots!") in the voice: ' + JSON.stringify(lines));
-};
-T.nim_repeat = async ({ page, cdp, url }) => {
-  await setupRound(page, url, { seed: 11 });
-  await page.waitForTimeout(3400);   // a Nim tap repeats only after the prompt had its 3 s
-  const prompt = await page.evaluate(() => document.getElementById('bubbleText').textContent);
-  const v0 = await page.evaluate(() => BD.debug.voiceLog.length), n0 = await evLen(page);
-  const k = await page.evaluate(() => BD.debug.nimScreen());
-  check(k, 'no Nim hit box');
-  await tap(cdp, page, { x: k.cx, y: k.cy }, 90);
-  await page.waitForTimeout(300);
-  const evs = await evSince(page, n0);
-  const log = await page.evaluate(n => BD.debug.voiceLog.slice(n).map(x => x.text), v0);
-  check(evs.some(e => e.type === 'pokeNim'), 'no pokeNim on a Nim tap: ' + types(evs));
-  check(log.includes(prompt), 'Nim tap did not repeat the prompt in voiceLog: ' + JSON.stringify({ prompt, log }));
-  check(!evs.some(e => e.type === 'soft' || e.type === 'wrong'), 'Nim tap softed / judged: ' + types(evs));
-  // tapping the speech bubble also repeats it (and never reaches the canvas) once the repeated question had its 3 s
-  await page.waitForTimeout(3400);
-  const v1 = await page.evaluate(() => BD.debug.voiceLog.length), n1 = await evLen(page);
-  await tapEl(page, '#bubble');
-  await page.waitForTimeout(300);
-  const log2 = await page.evaluate(n => BD.debug.voiceLog.slice(n).map(x => x.text), v1);
-  check(log2.includes(prompt), 'bubble tap did not repeat the prompt: ' + JSON.stringify(log2));
-  check(!(await evSince(page, n1)).some(e => e.type === 'soft'), 'bubble tap reached the canvas');
-};
-T.surprise_fish = async ctx => surpriseTest(ctx, 'fish', 0, 0);
-T.surprise_frog = async ctx => surpriseTest(ctx, 'frog', 0, 1);
-T.surprise_snow = async ctx => surpriseTest(ctx, 'snow', 3, 0);
-async function surpriseTest({ page, cdp, url, d }, kind, level, off) {
-  // (level + off) % 2 → 0 fish, 1 frog; level 3 = winter → snow. Age 3: 2 × 2 rounds leave open water for the frog's pad
-  await setupRound(page, url, { topic: 'colors', age: 3, seed: 17 + level, level, prep: `w._surpriseRound = 1; w._surpriseOff = ${off};` });
-  await botToNextRound(page);
-  const sp = await page.evaluate(() => BD.debug.world.surprise);
-  check(sp === kind, 'surprise of round 1: ' + sp);
-  const fn = kind + 'Screen';
-  await page.evaluate(() => BD.debug.setSpeed(3));
-  await page.waitForFunction(f => !!BD.debug[f]() && BD.debug.world.interactive, fn, { timeout: 25000, polling: 'raf' });
-  await page.evaluate(k => BD.debug.setSpeed(k === 'fish' ? 0.3 : 0.5), kind);
+
+T.language = async (page, ctx, cdp, url) => {
+  await freshBoot(page, url, '?mute=1&seed=5');
+  await tapEl(page, '#scrTitle [data-lang="en"]');
+  const en = await page.evaluate(() => document.querySelector('.logo').textContent.trim());
+  await toPlay(page, 'colors');
+  const enB = await page.evaluate(() => document.getElementById('bubbleText').textContent);
+  await page.evaluate(() => BD.debug.goTitle()); await page.waitForTimeout(200);
+  await tapEl(page, '#scrTitle [data-lang="vi"]');
   await page.waitForTimeout(150);
-  const chk = await page.evaluate(f => {
-    const s = BD.debug[f](), bad = [];
-    if (!s) return { bad: ['gone'] };
-    const el = document.elementFromPoint(s.x, s.y);
-    if (!el || el.id !== 'game') bad.push('surprise under DOM ' + (el && (el.id || el.className)));
-    if (s.x < 0 || s.y < 0 || s.x > innerWidth || s.y > innerHeight) bad.push('surprise off screen');
-    return { s, bad };
-  }, fn);
-  check(chk.bad.length === 0, kind + ': ' + chk.bad.join('; '));
-  await shot(page, d, '9-' + kind);
-  let s2 = null;
-  try { await page.waitForFunction(f => !!BD.debug[f](), fn, { timeout: 6000, polling: 'raf' }); s2 = await page.evaluate(f => BD.debug[f](), fn); } catch (e) { /* checked below */ }
-  check(s2, kind + ' no longer tappable');
-  const n0 = await evLen(page);
-  await tap(cdp, page, s2, 60);
-  await page.waitForTimeout(300);
-  let evs = await evSince(page, n0);
-  check(evs.some(e => e.type === kind + 'Tap'), `tap on the ${kind} gave no ${kind}Tap: ` + types(evs));
-  check(!evs.some(e => e.type === 'wrong' || e.type === 'right'), `${kind} tap judged a stone: ` + types(evs));
-  check(await page.evaluate(() => BD.debug.world.misses) === 0, kind + ' tap counted as a miss');
-  await page.evaluate(() => BD.debug.setSpeed(1));
-  await waitAsk(page);
-  const i = await info(page);
-  const n1 = await evLen(page);
-  await tapStone(cdp, page, i.a);
-  await page.waitForTimeout(300);
-  evs = await evSince(page, n1);
-  check(evs.some(e => e.type === 'right' && e.id === i.a), 'target during the ' + kind + ': ' + types(evs));
-}
-T.two_misses_hint = async ({ page, cdp, url, d }) => {
-  await setupRound(page, url, { age: 4, topic: 'colors', seed: 6 });
-  const i = await info(page);
-  check(i.others.length >= 1, 'need another stone: ' + JSON.stringify(i));
-  const L0 = await saidLen(page), n0 = await evLen(page);
-  await tapStone(cdp, page, i.others[0]); await page.waitForTimeout(400);
-  let evs = await evSince(page, n0);
-  check(!evs.some(e => e.type === 'hint'), 'hint after one miss: ' + types(evs));
-  await page.waitForTimeout(1000);   // the same stone after the 1 s window is a new miss
-  await tapStone(cdp, page, i.others[i.others.length > 1 ? 1 : 0]); await page.waitForTimeout(600);
-  evs = await evSince(page, n0);
-  const h = evs.find(e => e.type === 'hint');
-  check(h && h.id === i.a, 'no hint on the target after 2 misses: ' + types(evs));
-  await shot(page, d, '4-hint');
-  const g = await page.evaluate(() => ({ hand: !!BD.debug.world.hintHand, m: BD.debug.world.misses }));
-  check(g.hand && g.m === 2, 'hint hand / misses: ' + JSON.stringify(g));
-  const lines = await said(page, L0);
-  check(lines.length >= 2, 'no wrong + hint lines spoken: ' + JSON.stringify(lines));
+  const vi = await page.evaluate(() => ({ logo: document.querySelector('.logo').textContent.trim(), lang: document.documentElement.lang, play: document.getElementById('btnPlay').getAttribute('aria-label'), welcome: BD.debug.voiceLog.slice(-1)[0] }));
+  await toPlay(page, 'colors');
+  const viB = await page.evaluate(() => document.getElementById('bubbleText').textContent);
+  check(en !== vi.logo, 'logo did not change: ' + en);
+  check(vi.lang === 'vi', 'html lang ' + vi.lang);
+  check(enB && viB && enB !== viB, 'bubble text did not change: ' + enB + ' / ' + viB);
+  check(!VI_CHARS.test(enB), 'EN bubble has Vietnamese letters: ' + enB);
+  check(VI_CHARS.test(viB), 'VI bubble has no diacritics: ' + viB);
+  check(vi.welcome && vi.welcome.lang === 'vi', 'no VI welcome line after the switch: ' + JSON.stringify(vi.welcome));
+  // back to EN for the next tests
+  await page.evaluate(() => BD.debug.goTitle()); await tapEl(page, '#scrTitle [data-lang="en"]');
+  return `EN "${enB}" → VI "${viB}"`;
 };
-T.talk_time_tap = async ({ page, url, d }) => {
-  await setupRound(page, url, { topic: 'colors', age: 4, seed: 12 });
-  await page.evaluate(() => { BD.debug.setBot(true, 1); BD.debug.setSpeed(8); });
-  await page.waitForFunction(() => BD.debug.world.state === 'talk', null, { timeout: 150000, polling: 'raf' });
-  await page.evaluate(() => { BD.debug.setBot(false); BD.debug.setSpeed(1); });
-  await page.waitForTimeout(700);
-  const t = await page.evaluate(() => ({ answered: BD.debug.world.talkAnswered, answer: BD.debug.world.talk.answer, n: document.querySelectorAll('#talkChoices button').length, mode: BD.debug.mode, q: document.getElementById('talkQ').textContent }));
-  check(!t.answered, 'bot answered Talk before the test could');
-  check(t.mode === 'talk' && await visible(page, 'scrTalk'), 'Talk screen not shown: ' + t.mode);
-  check(t.n >= 2 && t.n <= 3, 'Talk choices: ' + t.n);
-  check(t.q && !RAW.test(t.q), 'Talk question text: ' + t.q);
-  await shot(page, d, '7-talk');
-  const s0 = await page.evaluate(() => ({ r: BD.debug.stats.talkRight, st: BD.debug.world.stars }));
-  await tapEl(page, `#talkChoices button[data-id="${t.answer}"]`);
-  await page.waitForTimeout(300);
-  const r = await page.evaluate(() => ({ right: BD.debug.stats.talkRight, st: BD.debug.world.stars, cls: document.querySelector('#talkChoices .right') ? 1 : 0 }));
-  check(r.right === s0.r + 1 && r.cls && r.st === s0.st + 1, 'tap on the right Talk answer not counted: ' + JSON.stringify(r));
-  await page.waitForFunction(() => BD.debug.world.state !== 'talk', null, { timeout: 20000 });
-  await page.waitForFunction(() => BD.debug.mode === 'play' && BD.debug.world.state === 'round', null, { timeout: 20000 });
-  check(!(await visible(page, 'scrTalk')), 'Talk screen still shown after the answer');
-};
-T.pause_resume = async ({ page, url }) => {
-  await setupRound(page, url);
-  await tapEl(page, '#btnPause');
-  await page.waitForTimeout(200);
-  check(await page.evaluate(() => BD.debug.mode) === 'paused' && await visible(page, 'scrPause'), 'pause did not open');
-  const t0 = await page.evaluate(() => BD.debug.world.time);
-  await page.waitForTimeout(700);
-  check(await page.evaluate(() => BD.debug.world.time) === t0, 'world kept running while paused');
-  const L0 = await saidLen(page);
-  await tapEl(page, '#btnResume');
-  await page.waitForTimeout(700);
-  const s = await page.evaluate(n => ({ mode: BD.debug.mode, t: BD.debug.world.time, said: window.__said.slice(n).map(x => x.text), bubble: document.getElementById('bubbleText').textContent }), L0);
-  check(s.mode === 'play' && s.t > t0, 'resume did not continue: ' + JSON.stringify(s));
-  check(!(await visible(page, 'scrPause')), 'pause screen still shown');
-  check(s.said.includes(s.bubble), 'prompt not repeated after resume: ' + JSON.stringify(s.said));
-};
-T.visibility_pause = async ({ page, cdp, url }) => {
-  await setupRound(page, url, { seed: 13 });
-  const i = await info(page);
-  const p = await page.evaluate(() => window.__qa.softPoint());
-  check(p, 'no open water point');
-  await touchStart(cdp, [tp(p.x, p.y)]);
-  await page.waitForTimeout(80);
-  await page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => true }); Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' }); document.dispatchEvent(new Event('visibilitychange')); });
-  await page.waitForTimeout(200);
-  let s = await page.evaluate(() => ({ mode: BD.debug.mode, g: !!BD.debug.world._g, down: BD.debug.world.finger.down }));
-  check(s.mode === 'paused', 'hidden page did not pause: ' + s.mode);
-  check(!s.g && !s.down, 'the gesture was not cancelled when hidden: ' + JSON.stringify(s));
-  await page.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => false }); Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'visible' }); document.dispatchEvent(new Event('visibilitychange')); });
-  const n0 = await evLen(page);
-  const at = await page.evaluate(id => BD.debug.stoneScreen(id), i.a);
-  await touchMove(cdp, [tp(at.x, at.y)]);
-  await touchEnd(cdp);
-  await page.waitForTimeout(300);
-  s = await page.evaluate(() => ({ mode: BD.debug.mode }));
-  const evs = await evSince(page, n0);
-  check(s.mode === 'paused' && !evs.some(e => e.type === 'right' || e.type === 'wrong'), 'after becoming visible: ' + JSON.stringify(s) + ' ' + types(evs));
-  check(await visible(page, 'scrPause'), 'pause screen not shown after returning');
-  await tapEl(page, '#btnResume');
-  await page.waitForTimeout(400);
-  check(await page.evaluate(() => BD.debug.mode) === 'play', 'resume after visibility pause failed');
-  await waitAsk(page);
-  const j = await info(page);
-  const n1 = await evLen(page);
-  await tapStone(cdp, page, j.a);
-  await page.waitForTimeout(300);
-  check((await evSince(page, n1)).some(e => e.type === 'right'), 'tap after visibility pause did not give right');
-};
-T.rotate_mid_round = async ({ page, cdp, url, d }) => {
-  await setupRound(page, url, { seed: 14, age: 5 });
-  const p = await page.evaluate(() => window.__qa.softPoint());
-  check(p, 'no open water point');
-  const n0 = await evLen(page);
-  await touchStart(cdp, [tp(p.x, p.y)]);
-  await page.waitForTimeout(300);
-  check(await page.evaluate(() => !!BD.debug.world._g), 'gesture not active before rotating');
-  await page.setViewportSize({ width: d.viewport.height, height: d.viewport.width });
-  await page.waitForTimeout(600);
-  const g1 = await page.evaluate(() => ({ g: !!BD.debug.world._g }));
-  const pts = await page.evaluate(() => BD.debug.world.stones.filter(s => s.state === 'rest').map(s => BD.debug.stoneScreen(s.id)).filter(Boolean));
-  for (const c of pts) { await touchMove(cdp, [tp(c.x, c.y)]); await page.waitForTimeout(30); }
-  await touchEnd(cdp);
+
+T.parent_gate = async (page, ctx, cdp, url) => {
+  await boot(page, url);
+  await tapEl(page, '#btnParents');
+  await page.waitForTimeout(2400);
+  check(!(await visible(page, '#scrSettings')), 'a short tap opened the settings');
+  // a 1 s hold is not enough either
+  const g = await page.evaluate(() => { const r = document.getElementById('btnParents').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; });
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [tp(g)] });
   await page.waitForTimeout(1000);
-  await shot(page, d, '8-rotated');
-  const evs = await evSince(page, n0);
-  check(!g1.g, 'gesture not cancelled by the rotation');
-  check(!evs.some(e => e.type === 'right' || e.type === 'wrong'), 'the cancelled gesture still judged: ' + types(evs));
-  let out = await page.evaluate(() => window.__qa.outside());
-  check(out.length === 0, 'outside the screen after rotation: ' + out.join('; '));
-  await waitAsk(page);
-  const j = await info(page);
-  const n1 = await evLen(page);
-  await tapStone(cdp, page, j.a);
-  await page.waitForTimeout(400);
-  check((await evSince(page, n1)).some(e => e.type === 'right' && e.id === j.a), 'tap after rotation');
-  await page.setViewportSize(d.viewport);
-  await page.waitForTimeout(1200);
-  out = await page.evaluate(() => window.__qa.outside());
-  check(out.length === 0, 'outside the screen after rotating back: ' + out.join('; '));
-};
-T.rotate_mid_hop = async ({ page, cdp, url, d }) => {
-  await setupRound(page, url, { seed: 15 });
-  const i = await info(page);
-  // slow motion: the hop (≈ 0.6 s of WORLD time) is still in the air when the resize lands
-  await page.evaluate(() => BD.debug.setSpeed(0.1));
-  const n0 = await evLen(page);
-  await tapStone(cdp, page, i.a);
-  await page.waitForFunction(() => BD.debug.world.nim.state === 'air', null, { timeout: 15000, polling: 'raf' });
-  const W0 = await page.evaluate(() => BD.debug.world.layout.W);
-  await page.setViewportSize({ width: d.viewport.height, height: d.viewport.width });
-  await page.waitForFunction(w0 => BD.debug.world.layout.W !== w0, W0, { timeout: 10000, polling: 'raf' });
-  await page.evaluate(() => BD.debug.setSpeed(1));
-  await waitEv(page, n0, 'land', 10000);
-  await page.waitForTimeout(500);
-  const s = await page.evaluate(id => { const w = BD.debug.world, st = w.stoneById(id); return { dx: Math.abs(w.nim.x - st.x), dy: Math.abs(w.nim.y - st.y), onRow: w.nim.onRow, state: w.nim.state }; }, i.a);
-  check(s.dx < 30 && s.dy < 30 && s.onRow === 0, 'Nim did not land on the re-laid stone: ' + JSON.stringify(s));
-  const out = await page.evaluate(() => window.__qa.outside());
-  check(out.length === 0, 'outside the screen after the rotation mid-hop: ' + out.join('; '));
-  await shot(page, d, '8-rotated-hop');
-  await page.setViewportSize(d.viewport);
-  await page.waitForTimeout(500);
-};
-T.second_finger_ignored = async ({ page, cdp, url }) => {
-  await setupRound(page, url, { seed: 16 });
-  const i = await info(page);
-  const p = await page.evaluate(() => window.__qa.softPoint());
-  check(p, 'no open water point');
-  await touchStart(cdp, [tp(p.x, p.y, 1)]);
-  await page.waitForTimeout(300);
-  const n0 = await evLen(page);
-  const at = await page.evaluate(id => BD.debug.stoneScreen(id), i.a);
-  await touchStart(cdp, [tp(p.x, p.y, 1), tp(at.x, at.y, 2)]);   // a second finger lands on the target
-  await page.waitForTimeout(80);
-  await touchMove(cdp, [tp(p.x, p.y, 1)]);
-  await page.waitForTimeout(60);
-  await touchEnd(cdp);
-  await page.waitForTimeout(300);
-  const evs = await evSince(page, n0);
-  check(!evs.some(e => e.type === 'right' || e.type === 'wrong'), 'a second finger was judged: ' + types(evs));
-};
-T.language_switch = async ({ page, url, d }) => {
-  await page.evaluate(() => { try { localStorage.clear(); } catch (e) {} });
-  await gotoTitle(page, url + '?mute=1&seed=5&age=4');
-  await tapEl(page, '.title-top [data-lang="vi"]');
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await page.waitForTimeout(1300);
+  check(!(await visible(page, '#scrSettings')), 'a 1 s hold opened the settings');
+  // a 2 s hold opens
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [tp(g)] });
+  await page.waitForTimeout(2300);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await page.waitForTimeout(250);
+  check(await visible(page, '#scrSettings'), 'a 2.3 s hold did not open the settings');
+  await tapEl(page, '#btnSettingsDone');
   await page.waitForTimeout(200);
-  let s = await page.evaluate(() => ({ html: document.documentElement.lang, logo: document.getElementById('logo1').textContent + ' ' + document.getElementById('logo2').textContent, play: document.getElementById('btnPlay').getAttribute('aria-label'), title: document.title, saved: BD.debug.getState().settings.lang }));
-  check(s.html === 'vi' && /Nhím Nim/.test(s.logo) && /Nhảy Đá Qua Suối/.test(s.logo) && s.play === 'Chơi' && s.saved === 'vi', 'VI not applied on title: ' + JSON.stringify(s));
-  check(/Nhím Nim Nhảy Đá Qua Suối/.test(s.title), 'VI document title: ' + s.title);
-  await shot(page, d, 'a-title-vi');
-  await tapEl(page, '#btnPlay');
-  await page.evaluate(() => window.__qa.hook());
-  await page.evaluate(() => { const w = BD.debug.world; w.levels[0] = 'colors'; w.startLevel(0); });
-  await waitAsk(page);
-  await shot(page, d, 'b-vi-round');
-  const vb = await page.evaluate(() => ({ bubble: document.getElementById('bubbleText').textContent, last: window.__asks.slice(-1)[0], said: window.__said.slice(-4) }));
-  check(VI_CHARS.test(vb.bubble) && /màu|bé|nhảy/i.test(vb.bubble), 'bubble not Vietnamese: ' + vb.bubble);
-  check(vb.last && vb.last.lang === 'vi', 'ask built in ' + (vb.last && vb.last.lang));
-  check(vb.said.some(x => x.text === vb.bubble), 'the VI prompt was not sent to the voice: ' + JSON.stringify(vb.said));
-  const ov = await page.evaluate(() => document.getElementById('bubbleText').getBoundingClientRect().height - document.getElementById('bubble').clientHeight);
-  check(ov <= 4, 'VI bubble text overflows by ' + ov + ' px');
-  await tapEl(page, '#btnPause');
-  await page.waitForFunction(() => BD.debug.mode === 'paused');
-  check(await page.evaluate(() => document.querySelector('#scrPause h2').textContent) === 'Tạm dừng', 'pause title not translated');
-  await tapEl(page, '#btnHome');
-  await page.waitForFunction(() => BD.debug.mode === 'title');
-  await tapEl(page, '.title-top [data-lang="en"]');
-  await page.waitForTimeout(200);
-  s = await page.evaluate(() => ({ html: document.documentElement.lang, logo: document.getElementById('logo1').textContent + ' ' + document.getElementById('logo2').textContent, play: document.getElementById('btnPlay').getAttribute('aria-label'), saved: BD.debug.getState().settings.lang }));
-  check(s.html === 'en' && /Nim’s/.test(s.logo) && /River Hop/.test(s.logo) && s.play === 'Play' && s.saved === 'en', 'EN not restored: ' + JSON.stringify(s));
-  await tapEl(page, '#btnPlay');
-  await waitAsk(page, 30000);
-  const eb = await page.evaluate(() => document.getElementById('bubbleText').textContent);
-  check(!VI_CHARS.test(eb) && eb.length > 3, 'bubble not English after switching back: ' + eb);
+  check(await visible(page, '#scrTitle') && !(await visible(page, '#scrSettings')), 'Done did not return to the title');
+  return 'tap ✗, 1 s ✗, 2.3 s ✓';
 };
-T.parent_gate = async ({ page, cdp, url }) => {
-  await gotoTitle(page, url + '?mute=1');
-  const g = await page.locator('#btnParents').boundingBox();
-  const c = { x: g.x + g.width / 2, y: g.y + g.height / 2 };
-  await tap(cdp, page, c, 120);
-  await page.waitForTimeout(600);
-  check(!(await visible(page, 'scrSettings')), 'a short tap on the gear opened settings');
-  await page.touchscreen.tap(c.x, c.y);
-  await page.waitForTimeout(400);
-  check(!(await visible(page, 'scrSettings')), 'page.touchscreen.tap on the gear opened settings');
-  await page.evaluate(() => { const g = document.getElementById('btnParents'); window.__hold = []; g.addEventListener('pointerdown', () => window.__hold.push(performance.now()), true); g.addEventListener('pointerup', () => window.__hold.push(performance.now()), true); });
-  for (let k = 0; k < 3; k++) {
-    await page.evaluate(() => { window.__hold = []; });
-    await tap(cdp, page, c, 1200 - k * 300);
-    await page.waitForTimeout(300);
-    const held = await page.evaluate(() => window.__hold.length >= 2 ? window.__hold[1] - window.__hold[0] : -1);
-    const open = await visible(page, 'scrSettings');
-    if (held >= 1950) { if (open) { await tapEl(page, '#btnSettingsDone'); await page.waitForTimeout(200); } continue; }
-    check(!open, `a ${Math.round(held)} ms hold opened settings`);
-    break;
-  }
-  await touchStart(cdp, [tp(c.x, c.y)]); await page.waitForTimeout(300);
-  await touchMove(cdp, [tp(c.x - 160, c.y + 200)]); await page.waitForTimeout(2000); await touchEnd(cdp);
-  await page.waitForTimeout(300);
-  const slid = await visible(page, 'scrSettings');
-  if (slid) { await tapEl(page, '#btnSettingsDone'); await page.waitForTimeout(200); }
-  check(!slid, 'a hold that slid off the gear opened settings');
-  await tap(cdp, page, c, 2300);
-  await page.waitForTimeout(300);
-  check(await visible(page, 'scrSettings'), 'a 2.3 s hold did not open settings');
-};
-T.settings_persist = async ({ page, cdp, url }) => {
-  await page.evaluate(() => { try { localStorage.clear(); } catch (e) {} });
-  await gotoTitle(page, url + '?mute=1');
-  const g = await page.locator('#btnParents').boundingBox();
-  await tap(cdp, page, { x: g.x + g.width / 2, y: g.y + g.height / 2 }, 2300);
-  await page.waitForTimeout(300);
-  check(await visible(page, 'scrSettings'), 'settings did not open');
-  await tapEl(page, '#ageChips [data-age="6"]');
+
+T.settings_persist = async (page, ctx, cdp, url) => {
+  await freshBoot(page, url);
+  // open settings through the real gate
+  const g = await page.evaluate(() => { const r = document.getElementById('btnParents').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; });
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [tp(g)] });
+  await page.waitForTimeout(2250);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await page.waitForTimeout(250);
+  check(await visible(page, '#scrSettings'), 'settings did not open');
+  await tapEl(page, '#ageChips .chip[data-age="6"]');
   await tapEl(page, '#scrSettings [data-lang="vi"]');
-  await page.fill('#inpName', 'Mầm');
-  for (const id of ['optMusic', 'optSfx']) await page.evaluate(i => { const e = document.getElementById(i); e.checked = false; e.dispatchEvent(new Event('change', { bubbles: true })); }, id);
-  await page.evaluate(() => { const v = document.getElementById('optVolume'); v.value = '40'; v.dispatchEvent(new Event('input', { bubbles: true })); v.dispatchEvent(new Event('change', { bubbles: true })); });
+  await tapEl(page, '#inpName'); await page.keyboard.type('Mai'); await page.evaluate(() => document.getElementById('inpName').blur());
+  await page.evaluate(() => { const v = document.getElementById('optVolume'); v.value = 60; v.dispatchEvent(new Event('input', { bubbles: true })); v.dispatchEvent(new Event('change', { bubbles: true })); });
+  await tapEl(page, '#optMusic');
   await tapEl(page, '#btnSettingsDone');
-  await page.waitForTimeout(200);
-  check(await visible(page, 'scrTitle'), 'Done did not return to the title');
+  const before = await page.evaluate(() => BD.debug.getState().settings);
+  await page.reload();
+  await page.waitForFunction(() => window.BD && BD.debug && BD.debug.mode === 'title', null, { timeout: 20000 });
+  const after = await page.evaluate(() => ({ s: BD.debug.getState().settings, age: document.getElementById('titleAge').textContent, lang: document.documentElement.lang,
+    gain: BD.debug.audio().volume }));
+  check(after.s.age === 6 && after.s.lang === 'vi' && after.s.name === 'Mai' && Math.abs(after.s.volume - 0.6) < 1e-6 && after.s.music === false,
+    'settings not restored: ' + JSON.stringify(after.s) + ' (before ' + JSON.stringify(before) + ')');
+  check(/6/.test(after.age) && after.lang === 'vi', 'title not restored: ' + after.age + ' ' + after.lang);
+  // URL flags are session-only
+  const saved0 = await page.evaluate(() => localStorage.getItem('bd:settings'));
+  await page.goto(url + '?mute=1&lang=en&age=3&seed=2');
+  await page.waitForFunction(() => window.BD && BD.debug && BD.debug.mode === 'title', null, { timeout: 20000 });
+  const fl = await page.evaluate(() => ({ lang: document.documentElement.lang, age: document.getElementById('titleAge').textContent }));
+  check(fl.lang === 'en' && /3/.test(fl.age), '?lang=en&age=3 not applied: ' + JSON.stringify(fl));
+  // play with the flags, change the volume from the pause menu (a real save), and the flags must still not be saved
+  await toPlay(page, 'colors');
+  await tapEl(page, '#btnPause'); await page.waitForTimeout(200);
+  await tapEl(page, '#btnVolUp'); await page.waitForTimeout(100);
+  const saved1 = await page.evaluate(() => JSON.parse(localStorage.getItem('bd:settings')));
+  check(saved1.lang === 'vi' && saved1.age === 6, 'URL flags leaked into storage: ' + JSON.stringify(saved1));
+  check(Math.abs(saved1.volume - 0.7) < 1e-6, 'pause-menu volume + not saved (want 0.7): ' + saved1.volume);
   const keys = await page.evaluate(() => Object.keys(localStorage));
-  check(keys.includes('bd:settings') && keys.every(k => k.startsWith('bd:')), 'storage keys not under nh: — ' + keys.join(','));
-  await gotoTitle(page, url + '?mute=1');
-  let s = await page.evaluate(() => ({ st: BD.debug.getState().settings, age: document.getElementById('titleAge').textContent, html: document.documentElement.lang, vol: document.getElementById('optVolume').value, music: document.getElementById('optMusic').checked, sfx: document.getElementById('optSfx').checked, name: document.getElementById('inpName').value }));
-  check(s.st.age === 6 && s.st.lang === 'vi' && s.st.name === 'Mầm' && Math.abs(s.st.volume - 0.4) < 1e-6 && s.st.music === false && s.st.sfx === false, 'settings not kept across reload: ' + JSON.stringify(s.st));
-  check(/6/.test(s.age) && s.html === 'vi' && s.vol === '40' && !s.music && !s.sfx && s.name === 'Mầm', 'reloaded UI does not show the saved settings: ' + JSON.stringify(s));
-  check(await page.evaluate(() => { for (let k = 0; k < 60; k++) if (/Mầm/.test(BD.I18N.t('vi', 'great', {}))) return true; return false; }), 'child name never used by t("great")');
-  // URL flags are session-only: they apply but are never saved — even when a setting is changed while they are active
-  await gotoTitle(page, url + '?mute=1&age=3&lang=en&speed=2&seed=4');
-  s = await page.evaluate(() => ({ age: document.getElementById('titleAge').textContent, html: document.documentElement.lang }));
-  check(/3/.test(s.age) && s.html === 'en', 'URL flags not applied: ' + JSON.stringify(s));
-  await tap(cdp, page, { x: g.x + g.width / 2, y: g.y + g.height / 2 }, 2300);
-  await page.waitForTimeout(300);
-  await page.evaluate(() => { const v = document.getElementById('optVolume'); v.value = '55'; v.dispatchEvent(new Event('input', { bubbles: true })); });
-  await page.fill('#inpName', 'Mam');
-  await tapEl(page, '#btnSettingsDone');
-  await tapEl(page, '#btnPlay');
-  await page.waitForFunction(() => BD.debug.world.state === 'intro' || BD.debug.world.state === 'round', null, { timeout: 15000 });
-  const playAge = await page.evaluate(() => BD.debug.world.age);
-  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('bd:settings')));
-  check(playAge === 3, '?age=3 not played: ' + playAge);
-  check(stored.age === 6 && stored.lang === 'vi' && stored.speed === undefined && stored.mute === undefined, 'URL flags leaked into saved settings: ' + JSON.stringify(stored));
-  check(Math.abs(stored.volume - 0.55) < 1e-6 && stored.name === 'Mam', 'settings changed under URL flags not saved: ' + JSON.stringify(stored));
-  await gotoTitle(page, url + '?mute=1');
-  s = await page.evaluate(() => ({ st: BD.debug.getState().settings, html: document.documentElement.lang, age: document.getElementById('titleAge').textContent, speed: BD.debug.getState().speed }));
-  check(s.st.age === 6 && s.html === 'vi' && /6/.test(s.age) && s.speed === 1, 'flags stuck after reload without them: ' + JSON.stringify(s));
-  await page.evaluate(() => { try { localStorage.clear(); } catch (e) {} });
+  check(keys.length > 0 && keys.every(k => k.startsWith('bd:')), 'storage keys outside bd: ' + keys.join(','));
+  await page.evaluate(() => localStorage.clear());
+  return `restored ${JSON.stringify({ age: after.s.age, lang: after.s.lang, name: after.s.name, volume: after.s.volume })}; flags not saved (${saved0 ? 'ok' : '?'}); keys ${keys.join(',')}`;
 };
-T.audio_chain_volume = async ({ page, url }) => {
-  await page.evaluate(() => { try { localStorage.clear(); } catch (e) {} });
-  await gotoTitle(page, url + '?seed=3&novoice=1');
-  await tapEl(page, '#btnPlay');   // the unlock gesture
+
+T.volume_chain = async (page, ctx, cdp, url) => {
+  await freshBoot(page, url, '?seed=4');   // not muted: the real chain
+  await tapEl(page, '#btnPlay');       // a user gesture unlocks the audio
   await page.waitForTimeout(400);
-  let a = await page.evaluate(() => { const A = BD.debug.audio(); return A.ctx ? { master: A.master.gain.value, user: A.user.gain.value, thr: A.comp && A.comp.threshold.value, ratio: A.comp && A.comp.ratio.value, chain: !!(A.master && A.comp && A.user && A.sfx && A.music && A.amb) } : null; });
-  check(a && a.chain, 'audio chain missing: ' + JSON.stringify(a));
-  check(a.thr <= -12 && a.ratio >= 2, 'compressor not set: ' + JSON.stringify(a));
-  check(Math.abs(a.user - 1.6) < 0.05 && Math.abs(a.master - 1) < 0.05, 'loud makeup gain not applied: ' + JSON.stringify(a));
-  // every synth sound + every season's bed / ambience plays without throwing
-  const bad = await page.evaluate(() => { const A = BD.debug.audio(), out = []; for (const n of A.SOUNDS) { try { A._lastPlay = {}; A.play(n, { i: 2, v: 120 }); } catch (e) { out.push(n + ': ' + e.message); } } for (let m = 0; m < 4; m++) { try { A.setMood(m); A._playStep(0, A.ctx.currentTime, { root: 60, prog: [[0, 4, 7]], lead: ['marimba', 'kalimba', 'marimba', 'bell'][m], swing: 0 }, 0.2); A._bubT = 0; A.tick(0.1); } catch (e) { out.push('season ' + m + ': ' + e.message); } } return out; });
-  check(bad.length === 0, 'sounds threw: ' + bad.join('; '));
-  await page.waitForFunction(() => BD.debug.world.state === 'round', null, { timeout: 15000 });
+  const a = await page.evaluate(() => { const A = BD.debug.audio(); return { ctx: !!A.ctx, state: A.ctx && A.ctx.state, master: !!A.master, comp: !!A.comp, user: !!A.user, sfx: !!A.sfx, music: !!A.music,
+    thr: A.comp && A.comp.threshold.value, ratio: A.comp && A.comp.ratio.value, vol: A.volume }; });
+  check(a.ctx && a.master && a.comp && a.user && a.sfx && a.music, 'audio chain incomplete: ' + JSON.stringify(a));
+  check(Math.abs(a.thr + 18) < 0.5 && Math.abs(a.ratio - 4) < 0.1, 'compressor settings ' + JSON.stringify(a));
+  await page.waitForFunction(() => BD.debug.mode === 'play');
+  await tapEl(page, '#btnPause'); await page.waitForTimeout(200);
+  await tapEl(page, '#btnVolDown'); await page.waitForTimeout(80); await tapEl(page, '#btnVolDown'); await page.waitForTimeout(300);
+  const v = await page.evaluate(() => ({ s: BD.debug.getState().settings.volume, a: BD.debug.audio().volume, g: BD.debug.audio().user.gain.value, txt: document.getElementById('volLevel').textContent }));
+  check(Math.abs(v.s - 0.8) < 1e-6 && Math.abs(v.a - 0.8) < 1e-6, 'volume − × 2 ≠ 0.8: ' + JSON.stringify(v));
+  check(v.txt === '80%', 'volume label ' + v.txt);
+  check(Math.abs(v.g - 0.8 * 1.6) < 0.05, 'user gain not following the volume: ' + v.g);
+  await page.reload();
+  await page.waitForFunction(() => window.BD && BD.debug && BD.debug.mode === 'title', null, { timeout: 20000 });
+  const r = await page.evaluate(() => ({ s: BD.debug.getState().settings.volume, a: BD.debug.audio().volume, slider: document.getElementById('optVolume').value }));
+  check(Math.abs(r.s - 0.8) < 1e-6 && Math.abs(r.a - 0.8) < 1e-6 && r.slider === '80', 'volume not restored: ' + JSON.stringify(r));
+  await page.evaluate(() => localStorage.clear());
+  return `ctx ${a.state}, master→comp(−18 dB, 4:1)→user; 0.8 restored`;
+};
+
+T.drag_right = async (page, ctx, cdp, url) => {
+  await boot(page, url);
+  await toPlay(page, 'colors');
+  const r = await page.evaluate(() => { const a = BD.debug.answer(); return { a, pts: BD.debug.routeScreen(a.houseId), cart: BD.debug.cartScreen() }; });
+  const e0 = await evCounts(page, ['grab', 'right', 'deliver', 'wrong', 'drive']);
+  let off = 0, maxOn = 0;
+  await touchDrag(page, cdp, [[r.cart.x, r.cart.y]].concat(r.pts), 16, async i => { if (i % 5 === 0) { const c = await cartCheck(page); maxOn = Math.max(maxOn, c.onEdge); off = Math.max(off, c.offScreen); } });
+  await page.waitForFunction(n => BD.debug.events.filter(e => e.type === 'deliver').length > n, e0.deliver, { timeout: 8000 }).catch(() => {});
+  const e1 = await evCounts(page, ['grab', 'right', 'deliver', 'wrong', 'drive']);
+  check(e1.grab > e0.grab, 'no grab');
+  check(e1.right === e0.right + 1 && e1.wrong === e0.wrong, 'right/wrong ' + JSON.stringify([e0, e1]));
+  check(e1.deliver > e0.deliver, 'no deliver');
+  check(maxOn < 2, 'cart off its edge by ' + maxOn.toFixed(1) + ' px');
+  check(off < 2, 'cart art off screen by ' + off.toFixed(1) + ' px');
+  await page.screenshot({ path: path.join(OUT, page.__dev + '-drag-right.png') });
+  return `${r.pts.length} pts → right + deliver`;
+};
+
+T.wrong_house = async (page, ctx, cdp, url) => {
+  await boot(page, url, '?mute=1&seed=8');
+  await toPlay(page, 'colors');
+  const id = await otherHouse(page);
+  check(id, 'no wrong house to drive to');
+  const r = await page.evaluate(h => ({ pts: BD.debug.routeScreen(h), cart: BD.debug.cartScreen() }), id);
+  const e0 = await evCounts(page, ['wrong', 'right', 'reverse']);
+  await touchDrag(page, cdp, [[r.cart.x, r.cart.y]].concat(r.pts), 16);
+  await page.waitForFunction(n => BD.debug.events.filter(e => e.type === 'wrong').length > n, e0.wrong, { timeout: 8000 }).catch(() => {});
+  let sawReverse = false;
+  for (let i = 0; i < 60 && !sawReverse; i++) { const s = await st(page); if (s.cart.state === 'reverse') sawReverse = true; else await page.waitForTimeout(50); }
+  await page.waitForFunction(() => BD.debug.world.interactive && BD.debug.world.cart.state === 'wait', null, { timeout: 10000 }).catch(() => {});
+  const e1 = await evCounts(page, ['wrong', 'right', 'reverse']);
+  const s = await st(page);
+  const wl = await page.evaluate(() => BD.debug.voiceLog.slice(-4).map(l => l.text));
+  check(e1.wrong === e0.wrong + 1, 'no wrong event ' + JSON.stringify([e0, e1]));
+  check(e1.right === e0.right, 'a wrong house counted as right');
+  check(e1.reverse > e0.reverse || sawReverse, 'the cart did not reverse');
+  check(s.mode === 'play' && s.state === 'round' && s.interactive, 'not back in play: ' + JSON.stringify({ m: s.mode, st: s.state, ph: s.phase, c: s.cart }));
+  const stopS = await page.evaluate(id => { const e = BD.Roads.edge(BD.debug.world.roads, 'to_' + id); return e ? e.stopS : 0; }, id);
+  check(s.cart.edge !== 'to_' + id || s.cart.s < 0.3 * stopS, `the cart stayed near the wrong house: ${s.cart.edge} s=${s.cart.s.toFixed(0)} / stop ${stopS.toFixed(0)}`);
+  check(s.misses >= 1, 'misses not counted');
+  return `wrong → reverse → back on ${s.cart.edge} s=${s.cart.s.toFixed(0)}/${stopS.toFixed(0)}; said "${wl.slice(-1)[0]}"`;
+};
+
+T.drag_offroad = async (page, ctx, cdp, url) => {
+  await boot(page, url, '?mute=1&seed=9');
+  await toPlay(page, 'colors');
+  // drag from the cart to the far corner opposite the houses and around in circles over empty table
+  const v = await page.evaluate(() => { const vw = BD.debug.view(); const c = BD.debug.cartScreen(); return { c, W: innerWidth, H: innerHeight }; });
+  const pts = [[v.c.x, v.c.y]];
+  for (let i = 1; i <= 30; i++) pts.push([v.c.x + (v.W * 0.05 - v.c.x) * i / 30, v.c.y + (v.H * 0.95 - v.c.y) * i / 30]);
+  for (let i = 0; i <= 30; i++) { const a = i / 30 * Math.PI * 2; pts.push([v.W / 2 + Math.cos(a) * v.W * 0.35, v.H * 0.55 + Math.sin(a) * v.H * 0.3]); }
+  let maxOn = 0, maxNear = 0, off = 0;
+  const e0 = await evCounts(page, ['grab', 'right', 'wrong']);
+  await touchDrag(page, cdp, pts, 16, async i => { if (i % 3 === 0) { const c = await cartCheck(page); maxOn = Math.max(maxOn, c.onEdge); maxNear = Math.max(maxNear, c.nearest); off = Math.max(off, c.offScreen); } });
+  await page.waitForTimeout(1500);
+  const c = await cartCheck(page);
+  maxOn = Math.max(maxOn, c.onEdge);
+  check(maxOn < 2 && maxNear < 2, `cart left the road: on-edge ${maxOn.toFixed(1)} px, nearest road ${maxNear.toFixed(1)} px`);
+  check(off < 2, 'cart off screen by ' + off.toFixed(1));
+  const e1 = await evCounts(page, ['grab', 'right', 'wrong']);
+  check(e1.grab > e0.grab, 'no grab');
+  return `cart on ${c.edge} s=${c.s.toFixed(0)}, max off-road ${maxOn.toFixed(2)} px; right ${e1.right - e0.right} wrong ${e1.wrong - e0.wrong}`;
+};
+
+T.tap_cart_honk = async (page, ctx, cdp, url) => {
+  await boot(page, url);
+  await toPlay(page, 'colors');
+  const c0 = await cartCheck(page), cs = await page.evaluate(() => BD.debug.cartScreen());
+  const e0 = await evCounts(page, ['honk', 'grab', 'autoDrive', 'right', 'wrong']);
+  await page.touchscreen.tap(Math.round(cs.x), Math.round(cs.y));
+  await page.waitForTimeout(700);
+  const c1 = await cartCheck(page), e1 = await evCounts(page, ['honk', 'grab', 'autoDrive', 'right', 'wrong']);
+  check(e1.honk === e0.honk + 1, 'no honk ' + JSON.stringify([e0, e1]));
+  check(e1.autoDrive === e0.autoDrive && e1.right === e0.right && e1.wrong === e0.wrong, 'a tap drove: ' + JSON.stringify([e0, e1]));
+  check(Math.hypot(c1.x - c0.x, c1.y - c0.y) < 4, 'cart moved ' + Math.hypot(c1.x - c0.x, c1.y - c0.y).toFixed(1) + ' px on a tap');
+  const v = await page.evaluate(() => BD.debug.voiceLog.slice(-3).map(l => l.text));
+  return 'honk; said ' + JSON.stringify(v.slice(-2));
+};
+
+T.tap_house_autodrive = async (page, ctx, cdp, url) => {
+  await boot(page, url);
+  await toPlay(page, 'colors');
+  const a = await page.evaluate(() => BD.debug.answer());
+  const hb = await page.evaluate(id => BD.debug.houseScreen(id), a.houseId);
+  const e0 = await evCounts(page, ['autoDrive', 'right']);
+  await page.touchscreen.tap(Math.round(hb.cx), Math.round(hb.cy));
+  await page.waitForTimeout(150);
+  const ad = await page.evaluate(() => BD.debug.events.filter(e => e.type === 'autoDrive').slice(-1)[0]);
+  const s1 = await st(page);
+  await page.waitForFunction(n => BD.debug.events.filter(e => e.type === 'right').length > n, e0.right, { timeout: 8000 }).catch(() => {});
+  const e1 = await evCounts(page, ['autoDrive', 'right']);
+  check(e1.autoDrive === e0.autoDrive + 1 && ad && ad.id === a.houseId, 'no autoDrive to the house: ' + JSON.stringify(ad));
+  check(s1.cart.state === 'auto', 'cart not auto-driving: ' + s1.cart.state);
+  check(e1.right === e0.right + 1, 'auto-drive did not reach the right house');
+  return 'autoDrive → right';
+};
+
+T.count_chapter = async (page, ctx, cdp, url) => {
+  await boot(page, url, '?mute=1&seed=12&age=4');
+  await page.evaluate(() => { BD.debug.startGame(); const w = BD.debug.world; w.levels[0] = 'count'; w.startLevel(0); BD.debug.setSpeed(3); });
+  await waitInteractive(page);
+  const r = await page.evaluate(() => {
+    const ev = BD.debug.events.filter(e => e.type === 'count'), ask = BD.debug.world.events ? null : null;
+    const o = BD.debug.world.orderObj, n = o.count;
+    const log = BD.debug.voiceLog.map(l => l.text);
+    const want = []; for (let i = 1; i <= n; i++) want.push(BD.I18N.sayCount('en', i));
+    const run = BD.I18N.sayCountRun('en', n, 'cookies');
+    return { n, nEv: ev.length, is: ev.map(e => BD.debug.world && e.id), cargoCount: BD.debug.world.cart.cargoCount, want, run, missing: want.filter(w => !log.includes(w)), hasRun: log.includes(run),
+      bubble: document.getElementById('bubbleText').textContent, topic: BD.debug.world.topic };
+  });
+  check(r.topic === 'count', 'topic ' + r.topic);
+  check(r.n >= 1 && r.nEv === r.n, `count events ${r.nEv} ≠ n ${r.n}`);
+  check(r.cargoCount === r.n, 'cargoCount ' + r.cargoCount + ' ≠ ' + r.n);
+  check(r.missing.length === 0, 'count numbers not said: ' + r.missing.join(','));
+  check(r.hasRun, 'count run not said: ' + r.run);
+  check(new RegExp('\\b' + r.n + '\\b').test(r.bubble), 'bubble lacks the number: ' + r.bubble);
+  // deliver it with a real drag
+  const q = await page.evaluate(() => { const a = BD.debug.answer(); return { pts: BD.debug.routeScreen(a.houseId), cart: BD.debug.cartScreen() }; });
+  const e0 = await evCount(page, 'right');
+  await touchDrag(page, cdp, [[q.cart.x, q.cart.y]].concat(q.pts), 16);
+  await page.waitForFunction(n => BD.debug.events.filter(e => e.type === 'right').length > n, e0, { timeout: 8000 }).catch(() => {});
+  check(await evCount(page, 'right') === e0 + 1, 'count delivery not right');
+  return `${r.n} cookies: ${r.want.join(' ')} ${r.run}; "${r.bubble}"`;
+};
+
+T.talk_time = async (page, ctx, cdp, url) => {
+  await boot(page, url, '?mute=1&seed=21&age=4');
+  await page.evaluate(() => {
+    BD.debug.startGame(); BD.debug.setBot(true, 1); BD.debug.setSpeed(8);
+    const w = BD.debug.world, u = w.update.bind(w);
+    w.update = dt => { u(dt); if (w.state === 'talk' && BD.debug.bot) { BD.debug.setBot(false); BD.debug.setSpeed(1); } };
+  });
+  await page.waitForFunction(() => BD.debug.mode === 'talk' && document.querySelectorAll('#talkChoices button').length >= 2, null, { timeout: 90000, polling: 100 });
+  await page.waitForTimeout(700);
+  await page.screenshot({ path: path.join(OUT, page.__dev + '-talk.png') });
+  const t = await page.evaluate(() => { const tk = BD.debug.world.talk; return { ans: String(tk.answerId != null ? tk.answerId : tk.answer), n: tk.choices.length, q: document.getElementById('talkQ').textContent, answered: BD.debug.world.talkAnswered, stars: BD.debug.world.stars }; });
+  check(!t.answered, 'Talk time already answered before the tap');
+  const e0 = await evCount(page, 'talkResult');
+  await tapEl(page, `#talkChoices button[data-id="${t.ans}"]`);
+  await page.waitForFunction(n => BD.debug.events.filter(e => e.type === 'talkResult').length > n, e0, { timeout: 4000 }).catch(() => {});
+  const res = await page.evaluate(() => BD.debug.events.filter(e => e.type === 'talkResult').slice(-1)[0]);
+  const ev = await page.evaluate(() => { const w = BD.debug.world; return { correct: w.talkAnswered, stars: w.stars }; });
+  check(res, 'no talkResult after the tap');
+  const full = await page.evaluate(() => (window.__lastTalk = null));
+  const detail = await page.evaluate(() => { const e = BD.debug.world; return { state: e.state, mode: BD.debug.mode }; });
+  await page.waitForFunction(() => BD.debug.mode === 'play' && BD.debug.world.state !== 'talk', null, { timeout: 12000 }).catch(() => {});
+  const after = await st(page);
+  check(after.mode === 'play' && after.state !== 'talk', 'did not leave Talk time: ' + JSON.stringify({ m: after.mode, s: after.state }));
+  check(ev.stars >= t.stars + 1, 'no Talk-time star: ' + t.stars + ' → ' + ev.stars);
+  return `"${t.q}" ${t.n} choices, tapped the answer → +1★ (${t.stars}→${ev.stars}), next ${after.state}/${after.level}`;
+};
+
+T.pause_resume = async (page, ctx, cdp, url) => {
+  await boot(page, url);
+  await toPlay(page, 'colors');
   await tapEl(page, '#btnPause');
   await page.waitForTimeout(200);
-  for (let k = 0; k < 3; k++) { await tapEl(page, '#btnVolDown'); await page.waitForTimeout(120); }
-  await page.waitForTimeout(400);
-  a = await page.evaluate(() => ({ user: BD.debug.audio().user.gain.value, vol: BD.debug.getState().settings.volume, label: document.getElementById('volLevel').textContent, stored: JSON.parse(localStorage.getItem('bd:settings') || '{}').volume }));
-  check(Math.abs(a.vol - 0.7) < 1e-6 && Math.abs(a.stored - 0.7) < 1e-6 && a.label === '70%', 'pause − did not set / save 70 %: ' + JSON.stringify(a));
-  check(Math.abs(a.user - 0.7 * 1.6) < 0.08, 'user gain does not follow the volume: ' + JSON.stringify(a));
-  await tapEl(page, '#btnHome');
-  await page.waitForFunction(() => BD.debug.mode === 'title');
-  await page.evaluate(() => { const v = document.getElementById('optVolume'); v.value = '30'; v.dispatchEvent(new Event('input', { bubbles: true })); v.dispatchEvent(new Event('change', { bubbles: true })); });
-  await page.waitForTimeout(400);
-  a = await page.evaluate(() => ({ user: BD.debug.audio().user.gain.value, stored: JSON.parse(localStorage.getItem('bd:settings') || '{}').volume }));
-  check(Math.abs(a.stored - 0.3) < 1e-6 && Math.abs(a.user - 0.48) < 0.06, 'slider 30 %: ' + JSON.stringify(a));
-  await gotoTitle(page, url + '?seed=3&novoice=1');
-  await tapEl(page, '#btnPlay');
+  const t0 = await page.evaluate(() => ({ m: BD.debug.mode, t: BD.debug.world.time }));
+  await page.waitForTimeout(800);
+  const t1 = await page.evaluate(() => ({ m: BD.debug.mode, t: BD.debug.world.time, vis: !document.getElementById('scrPause').classList.contains('hidden') }));
+  check(t0.m === 'paused' && t1.vis, 'pause menu not shown: ' + JSON.stringify(t1));
+  check(t1.t === t0.t, 'world ran while paused: ' + t0.t + ' → ' + t1.t);
+  // a touch on the dim pause screen never reaches the world
+  const g0 = await evCounts(page, ['grab', 'soft', 'autoDrive']);
+  // at the cart's point unless a pause-menu button sits there (a tap on Home would legitimately leave), else a dim corner
+  const cs = await page.evaluate(() => { const c = BD.debug.cartScreen(); const el = document.elementFromPoint(c.x, c.y); return el && el.closest('button') ? { x: 12, y: innerHeight - 12 } : c; });
+  await page.touchscreen.tap(Math.round(cs.x), Math.round(cs.y));
+  check(JSON.stringify(await evCounts(page, ['grab', 'soft', 'autoDrive'])) === JSON.stringify(g0), 'a touch through the pause menu reached the world');
+  await tapEl(page, '#btnResume');
   await page.waitForTimeout(500);
-  a = await page.evaluate(() => ({ user: BD.debug.audio().user.gain.value, vol: BD.debug.getState().settings.volume, slider: document.getElementById('optVolume').value }));
-  check(Math.abs(a.vol - 0.3) < 1e-6 && Math.abs(a.user - 0.48) < 0.06 && a.slider === '30', 'volume not restored after reload: ' + JSON.stringify(a));
-  await page.evaluate(() => { try { localStorage.clear(); } catch (e) {} });
+  const t2 = await page.evaluate(() => ({ m: BD.debug.mode, t: BD.debug.world.time, i: BD.debug.world.interactive }));
+  check(t2.m === 'play' && t2.t > t1.t, 'did not resume: ' + JSON.stringify(t2));
+  // still drivable after resume
+  const r = await page.evaluate(() => { const a = BD.debug.answer(); return a ? { pts: BD.debug.routeScreen(a.houseId), cart: BD.debug.cartScreen() } : null; });
+  check(r, 'no answer after resume');
+  const e0 = await evCount(page, 'right');
+  await touchDrag(page, cdp, [[r.cart.x, r.cart.y]].concat(r.pts), 16);
+  await page.waitForFunction(n => BD.debug.events.filter(e => e.type === 'right').length > n, e0, { timeout: 8000 }).catch(() => {});
+  check(await evCount(page, 'right') === e0 + 1, 'drag after resume not right');
+  return 'pause freezes the world, resume + drag ok';
 };
-T.release_over_hud = async ({ page, cdp, url }) => {
-  // a gesture that ends over the pause button must not pause (the finger is captured by the canvas)
-  await setupRound(page, url, { seed: 18 });
-  const i = await info(page);
-  const pb = await page.locator('#btnPause').boundingBox();
-  const n0 = await evLen(page);
-  const at = await page.evaluate(id => BD.debug.stoneScreen(id), i.a);
-  await swipe(cdp, page, at, { x: pb.x + pb.width / 2, y: pb.y + pb.height / 2 }, { n: 10, ms: 250 });
-  await page.waitForTimeout(400);
-  const evs = await evSince(page, n0);
-  check(evs.some(e => e.type === 'right'), 'press on the target: ' + types(evs));
-  check(await page.evaluate(() => BD.debug.mode) === 'play', 'releasing over the pause button paused the game');
-  const n1 = await evLen(page);
-  const hb = await page.locator('#hudStars').boundingBox();
-  await tap(cdp, page, { x: hb.x + hb.width / 2, y: hb.y + hb.height / 2 });
+
+T.visibility_pause = async (page, ctx, cdp, url) => {
+  await boot(page, url);
+  await toPlay(page, 'colors');
+  // the child holds the cart, then the page goes to the background
+  const r = await page.evaluate(() => { const a = BD.debug.answer(); return { pts: BD.debug.routeScreen(a.houseId), cart: BD.debug.cartScreen() }; });
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [tp([r.cart.x, r.cart.y])] });
+  for (let i = 0; i < 5; i++) { await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [tp(r.pts[i])] }); await page.waitForTimeout(16); }
+  const d0 = await page.evaluate(() => BD.debug.world.cart.state);
+  await page.evaluate(() => { Object.defineProperty(document, 'hidden', { value: true, configurable: true }); Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
   await page.waitForTimeout(200);
-  check(!(await evSince(page, n1)).some(e => e.type === 'soft' || e.type === 'wrong' || e.type === 'right'), 'a HUD tap reached the canvas');
+  const s1 = await page.evaluate(() => ({ m: BD.debug.mode, c: BD.debug.world.cart.state, g: !!BD.debug.world._g, a: BD.debug.audio().ctx ? BD.debug.audio().ctx.state : 'none' }));
+  for (let i = 5; i < 10; i++) { await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [tp(r.pts[i])] }); await page.waitForTimeout(16); }
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await page.evaluate(() => { Object.defineProperty(document, 'hidden', { value: false, configurable: true }); Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
+  await page.waitForTimeout(300);
+  const s2 = await page.evaluate(() => ({ m: BD.debug.mode, c: BD.debug.world.cart.state, pauseVis: !document.getElementById('scrPause').classList.contains('hidden') }));
+  check(d0 === 'drag', 'the drag did not start: ' + d0);
+  check(s1.m === 'paused', 'hidden page did not pause: ' + s1.m);
+  check(!s1.g && s1.c !== 'drag', 'the drag survived the background: ' + JSON.stringify(s1));
+  check(s2.m === 'paused' && s2.pauseVis, 'not waiting on the pause menu after return: ' + JSON.stringify(s2));
+  await tapEl(page, '#btnResume');
+  await page.waitForTimeout(300);
+  check((await st(page)).mode === 'play', 'resume after visibility failed');
+  return `hidden → paused, drag cancelled (cart ${s1.c}), audio ${s1.a}`;
 };
-T.url_age_shown = async ({ page, url }) => {
-  const bad = [];
-  for (const [q, want] of [['2', 3], ['4.5', 5], ['9', 7]]) {
-    await gotoTitle(page, `${url}?mute=1&age=${q}`);
-    const s = await page.evaluate(() => ({ title: document.getElementById('titleAge').textContent }));
-    await page.evaluate(() => { BD.debug.startGame(); });
-    const played = await page.evaluate(() => BD.debug.world.age);
-    const shown = (s.title.match(/[\d.]+\+?/) || [''])[0];
-    if (played !== want || shown.replace('+', '') !== String(want)) bad.push(`?age=${q}: plays ${played}, title shows "${s.title.trim()}"`);
+
+T.rotate_mid_drag = async (page, ctx, cdp, url, errors, dev) => {
+  await boot(page, url, '?mute=1&seed=14');
+  await toPlay(page, 'colors');
+  const r = await page.evaluate(() => { const a = BD.debug.answer(); return { a, pts: BD.debug.routeScreen(a.houseId), cart: BD.debug.cartScreen() }; });
+  const half = Math.floor(r.pts.length / 2);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [tp([r.cart.x, r.cart.y])] });
+  for (let i = 0; i < half; i++) { await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [tp(r.pts[i])] }); await page.waitForTimeout(16); }
+  const before = await cartCheck(page);
+  const g0 = await evCount(page, 'grab');
+  await page.setViewportSize({ width: dev.viewport.height, height: dev.viewport.width });
+  await page.waitForTimeout(700);
+  const mid = await page.evaluate(() => ({ g: !!BD.debug.world._g, c: BD.debug.world.cart.state, W: BD.debug.view().W, H: BD.debug.view().H }));
+  // the finger keeps moving (old coordinates are meaningless now) and lifts
+  for (let i = half; i < r.pts.length; i += 3) { await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [tp(r.pts[i])] }); await page.waitForTimeout(16); }
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await page.waitForTimeout(800);
+  const after = await cartCheck(page);
+  const houses = await page.evaluate(() => { const w = BD.debug.world, L = w.layout; return w.houses.map(h => { const b = BD.debug.houseScreen(h.id); return { id: h.id, x: h.x, y: h.y, in: h.x > 0 && h.x < L.W && h.y > 0 && h.y < L.H, box: b, iw: innerWidth, ih: innerHeight }; }); });
+  const s = await st(page);
+  check(before.state === 'drag', 'drag had not started: ' + before.state);
+  check(!mid.g && mid.c !== 'drag', 'drag survived the rotation: ' + JSON.stringify(mid));
+  check(after.onEdge < 2 && after.nearest < 2, 'cart off the road after rotation: ' + JSON.stringify(after));
+  check(after.offScreen < 2, 'cart off screen after rotation by ' + after.offScreen.toFixed(1));
+  check(houses.every(h => h.in && h.box && h.box.cx > 0 && h.box.cx < h.iw && h.box.cy > 0 && h.box.cy < h.ih), 'house off screen: ' + JSON.stringify(houses));
+  check(await evCount(page, 'grab') === g0, 'the stale finger re-grabbed the cart');
+  check(s.mode === 'play' && (s.interactive || s.phase === 'arrive'), 'game state after rotation ' + JSON.stringify({ m: s.mode, st: s.state, ph: s.phase, c: s.cart }));
+  // a fresh drag in the new orientation reaches the house
+  await page.waitForFunction(() => BD.debug.world.interactive && BD.debug.world.cart.state === 'wait', null, { timeout: 6000 }).catch(() => {});
+  const q = await page.evaluate(() => { const a = BD.debug.answer(); return a ? { pts: BD.debug.routeScreen(a.houseId), cart: BD.debug.cartScreen() } : null; });
+  check(q, 'not interactive after rotation');
+  const e0 = await evCount(page, 'right');
+  await touchDrag(page, cdp, [[q.cart.x, q.cart.y]].concat(q.pts), 16);
+  await page.waitForFunction(n => BD.debug.events.filter(e => e.type === 'right').length > n, e0, { timeout: 8000 }).catch(() => {});
+  check(await evCount(page, 'right') === e0 + 1, 'drag after rotation not right');
+  await page.screenshot({ path: path.join(OUT, dev.name + '-rotated.png') });
+  await page.setViewportSize(dev.viewport);
+  await page.waitForTimeout(500);
+  return `${mid.W}×${mid.H}: drag cancelled, cart on ${after.edge} (${after.state}), ${houses.length} houses on screen, new drag ok`;
+};
+
+T.second_finger = async (page, ctx, cdp, url) => {
+  await boot(page, url, '?mute=1&seed=15');
+  await toPlay(page, 'colors');
+  const r = await page.evaluate(() => { const a = BD.debug.answer(); const o = BD.debug.world.houses.find(h => h.id !== a.houseId); return { pts: BD.debug.routeScreen(a.houseId), cart: BD.debug.cartScreen(), other: BD.debug.houseScreen(o.id) }; });
+  const e0 = await evCounts(page, ['autoDrive', 'soft', 'grab', 'right', 'wrong']);
+  const f2 = [r.other.cx, r.other.cy];
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [tp([r.cart.x, r.cart.y], 1)] });
+  let states = [];
+  for (let i = 0; i < r.pts.length; i++) {
+    const both = i >= 3 && i < 12;
+    if (i === 3) await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [tp(r.pts[i], 1), tp(f2, 2)] });
+    else if (i === 12) await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [tp([f2[0] + 11, f2[1]], 2)] });   // CDP touchEnd lists the point(s) that lift: finger 2
+    else await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: both ? [tp(r.pts[i], 1), tp([f2[0] + i, f2[1]], 2)] : [tp(r.pts[i], 1)] });
+    await page.waitForTimeout(16);
+    if (i === 6 || i === 13) states.push(await page.evaluate(() => BD.debug.world.cart.state));
   }
-  check(bad.length === 0, 'the title age differs from the age played: ' + bad.join('; '));
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await page.waitForFunction(n => BD.debug.events.filter(e => e.type === 'right').length > n, e0.right, { timeout: 8000 }).catch(() => {});
+  const e1 = await evCounts(page, ['autoDrive', 'soft', 'grab', 'right', 'wrong']);
+  check(e1.grab === e0.grab + 1, 'finger 1 was lifted / re-grabbed: ' + JSON.stringify([e0, e1]));
+  check(e1.autoDrive === e0.autoDrive && e1.soft === e0.soft, 'the second finger reached the world: ' + JSON.stringify([e0, e1]));
+  check(states.every(s => s === 'drag'), 'drag lost while the 2nd finger was down: ' + states.join(','));
+  check(e1.right === e0.right + 1 && e1.wrong === e0.wrong, 'drag with a second finger did not deliver: ' + JSON.stringify([e0, e1]));
+  return 'finger 2 on the other house ignored; finger 1 delivered';
 };
 
-// fix round 1 regression (QA P2-1/2/3, playtest P1): a deterministic fake speechSynthesis (≈ 90 ms per char + 300 ms), voice ON,
-// speed 1, real touches. The question is heard (never dropped / cut short), the fruit praise is spoken, every countSeq number is spoken.
-const FAKE_SYNTH = () => {
-  window.__synth = { started: [], ended: [], cut: [] };
-  const S = { speaking: false, pending: false, paused: false, _q: [], _cur: null, onvoiceschanged: null };
-  const voices = [{ name: 'Samantha', lang: 'en-US', localService: true }, { name: 'Linh', lang: 'vi-VN', localService: true }];
-  S.getVoices = () => voices; S.addEventListener = () => {}; S.pause = () => {}; S.resume = () => {};
-  const next = () => {
-    if (S._cur || !S._q.length) { S.speaking = !!S._cur; S.pending = S._q.length > 0; return; }
-    const u = S._cur = S._q.shift(); S.speaking = true; S.pending = S._q.length > 0;
-    u._t0 = performance.now(); u._dur = 300 + 90 * u.text.length;
-    window.__synth.started.push({ text: u.text, t: u._t0 });
-    setTimeout(() => { if (u.onstart) u.onstart({}); }, 15);
-    u._timer = setTimeout(() => { if (S._cur !== u) return; S._cur = null; window.__synth.ended.push({ text: u.text }); if (u.onend) u.onend({}); next(); }, u._dur);
-  };
-  S.speak = u => { if (u.text.trim()) { S._q.push(u); setTimeout(next, 0); } else setTimeout(() => u.onend && u.onend({}), 5); };
-  S.cancel = () => {
-    const c = S._cur; S._cur = null; const q = S._q; S._q = [];
-    if (c) { clearTimeout(c._timer); window.__synth.cut.push({ text: c.text, el: Math.round(performance.now() - c._t0), dur: c._dur }); if (c.onerror) c.onerror({ error: 'interrupted' }); }
-    q.forEach(u => u.onerror && u.onerror({ error: 'canceled' }));
-    S.speaking = false; S.pending = false;
-  };
-  Object.defineProperty(window, 'speechSynthesis', { configurable: true, get: () => S });
-  window.SpeechSynthesisUtterance = function (t) { this.text = t; this.lang = ''; this.rate = 1; this.pitch = 1; this.volume = 1; };
-};
-T.voice_policy = async ({ browser, url, d }) => {
-  const errors = [];
-  const ctx = await browser.newContext({ viewport: d.viewport, deviceScaleFactor: d.dpr, isMobile: true, hasTouch: true });
-  await ctx.addInitScript(FAKE_SYNTH); await ctx.addInitScript(INIT);
-  const page = await ctx.newPage(), cdp = await ctx.newCDPSession(page);
-  page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
-  page.on('pageerror', e => errors.push('pageerror: ' + String(e)));
-  try {
-    await page.goto(url + '?seed=31&age=4&lang=en');
-    await page.waitForFunction(() => window.BD && BD.debug && BD.debug.mode === 'title', null, { timeout: 20000 });
-    await page.evaluate(() => window.__qa.hook());
-    await tapEl(page, '#btnPlay');   // the unlock gesture
-    await page.evaluate(() => { const w = BD.debug.world; w.levels[0] = 'colors'; w.levels[1] = 'count'; w.startLevel(0); });
-    const playCrossing = async () => {
-      await page.waitForFunction(READY, null, { timeout: 40000, polling: 'raf' });
-      const ask = await page.evaluate(() => document.getElementById('bubbleText').textContent);
-      // a listening child: the first tap once the question has started (it is protected from then on)
-      await page.waitForFunction(a => window.__synth.started.some(x => x.text.toLowerCase().startsWith(a.toLowerCase().slice(0, 10))), ask, { timeout: 15000, polling: 100 });
-      await page.waitForTimeout(600);
-      for (let k = 0; k < 6; k++) {
-        const st = await page.evaluate(() => { const w = BD.debug.world, a = BD.debug.answer(); return { go: w.state === 'round' && w.phase === 'play' && w.row < w.cur.k, a: a && a.id }; });
-        if (!st.go) break;
-        if (st.a == null) { await page.waitForTimeout(80); k--; continue; }
-        await tapStone(cdp, page, st.a);
-        await page.waitForFunction(() => { const w = BD.debug.world, a = BD.debug.answer(); return (w.interactive && a && BD.debug.stoneScreen(a.id)) || w.phase !== 'play' || w.row >= w.cur.k; }, null, { timeout: 15000, polling: 'raf' });
-      }
-      return ask;
-    };
-    // a colours crossing at a quick pace (taps as soon as Nim stands)
-    const n0 = await evLen(page);
-    const ask1 = await playCrossing();
-    await waitEv(page, n0, 'stick', 20000);
-    const fruit = (await evSince(page, n0)).find(e => e.type === 'stick').fruit;
-    await page.waitForTimeout(4500);
-    let sy = await page.evaluate(() => window.__synth);
-    const said = sy.started.map(x => x.text);
-    const askCut = sy.cut.filter(c => c.text.toLowerCase().startsWith(ask1.toLowerCase().slice(0, 10)));
-    check(said.some(t => t.toLowerCase().startsWith(ask1.toLowerCase().slice(0, 10))) && askCut.length === 0, 'the question was not heard in full: ' + JSON.stringify({ ask1, said, askCut }));
-    const fname = await page.evaluate(f => BD.I18N.name('en', 'fruit', f), fruit);
-    check(said.some(t => t.toLowerCase().includes(String(fname).toLowerCase())), `the fruit praise (${fname}) was not spoken: ` + JSON.stringify(said));
-    // the count chapter: countSeq numbers are all spoken, none dropped / cut
-    await page.evaluate(() => BD.debug.world.startLevel(1));
-    const s0 = (await page.evaluate(() => window.__synth.started.length));
-    const n1 = await evLen(page);
-    await playCrossing();
-    await waitEv(page, n1, 'roundDone', 20000);
-    await page.waitForTimeout(2500);
-    const k = (await evSince(page, n1)).filter(e => e.type === 'right').length;
-    sy = await page.evaluate(() => window.__synth);
-    const said2 = sy.started.slice(s0).map(x => x.text.toLowerCase());
-    const words = ['one', 'two', 'three', 'four'].slice(0, k);
-    check(words.every(wd => said2.some(t => t.startsWith(wd))), 'count numbers missing: ' + JSON.stringify({ k, said2 }));
-    const cutCount = sy.cut.filter(c => /^(one|two|three|four)!?$/i.test(c.text.trim()));
-    check(cutCount.length === 0, 'a count number was cut: ' + JSON.stringify(cutCount));
-    check(errors.length === 0, 'errors: ' + errors.slice(0, 3).join(' | '));
-  } finally { await ctx.close(); }
-};
-const CORE = ['boot_title', 'tap_right', 'tap_wrong', 'tap_ahead', 'tap_water_soft', 'full_round', 'rotate_mid_round', 'rotate_mid_hop',
-  'surprise_fish', 'surprise_frog', 'surprise_snow'];
-const EXTRA = ['count_seq', 'count_sel', 'two_misses_hint', 'nim_repeat', 'talk_time_tap', 'pause_resume', 'visibility_pause', 'second_finger_ignored',
-  'language_switch', 'parent_gate', 'settings_persist', 'audio_chain_volume', 'release_over_hud', 'url_age_shown', 'voice_policy'];
-
-async function runDevice(browser, url, d) {
-  const errors = [];
-  const { ctx, page, cdp } = await newPage(browser, d, errors);
-  let list = CORE.concat(d.extra ? EXTRA : []);
-  if (process.env.TESTS) { const want = process.env.TESTS.split(','); list = CORE.concat(EXTRA).filter(t => want.includes(t)); }
-  for (const name of list) {
-    const e0 = errors.length;
-    try {
-      await T[name]({ page, cdp, url, d, errors, browser });
-      const errs = errors.slice(e0);
-      record(d.name, name, errs.length === 0, errs.length ? 'console/page errors: ' + errs.slice(0, 3).join(' | ') : '');
-    } catch (e) {
-      await shot(page, d, 'fail-' + name);
-      let st = ''; try { st = JSON.stringify(await page.evaluate(() => { const s = BD.debug.getState(); return { mode: s.mode, state: s.state, phase: s.phase, topic: s.topic, round: s.round, row: s.row, nim: s.nim, W: s.W, H: s.H }; })); } catch (x) { /* ignore */ }
-      record(d.name, name, false, (e instanceof Fail ? '' : 'exception: ') + (e && e.message ? e.message.split('\n')[0] : e) + (st ? '  state ' + st : ''));
-      try { await page.setViewportSize(d.viewport); await cdp.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] }); } catch (x) { /* ignore */ }
-    }
+T.hud_bubble_taps = async (page, ctx, cdp, url) => {
+  await boot(page, url);
+  await toPlay(page, 'colors');
+  const vis = await visible(page, '#bubble');
+  const e0 = await evCounts(page, ['grab', 'soft', 'autoDrive', 'honk', 'pokeTupi']);
+  const v0 = await page.evaluate(() => BD.debug.voiceLog.length);
+  const hit = [];
+  for (const sel of ['#bubble', '.hud-stars', '#hudDots']) {
+    if (!(await visible(page, sel))) continue;
+    const b = await tapEl(page, sel);
+    // what is under that point in the DOM?
+    hit.push(await page.evaluate(([x, y]) => { const el = document.elementFromPoint(x, y); return el ? el.id || el.className || el.tagName : 'none'; }, [b.x, b.y]));
+    await page.waitForTimeout(250);
   }
-  await ctx.close();
-}
+  // also a drag that starts on the bubble and slides over the cart
+  if (vis) {
+    const bb = await page.evaluate(() => { const r = document.getElementById('bubble').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; });
+    const cs = await page.evaluate(() => BD.debug.cartScreen());
+    const pts = []; for (let i = 0; i <= 15; i++) pts.push([bb[0] + (cs.x - bb[0]) * i / 15, bb[1] + (cs.y - bb[1]) * i / 15]);
+    await touchDrag(page, cdp, pts, 16);
+    await page.waitForTimeout(300);
+  }
+  const e1 = await evCounts(page, ['grab', 'soft', 'autoDrive', 'honk', 'pokeTupi']);
+  const v1 = await page.evaluate(() => BD.debug.voiceLog.slice(-2).map(l => l.text));
+  check(JSON.stringify(e0) === JSON.stringify(e1), 'a HUD / bubble touch reached the canvas: ' + JSON.stringify([e0, e1]));
+  check(await page.evaluate(() => BD.debug.mode) === 'play', 'mode changed');
+  return `bubble ${vis ? 'visible' : 'hidden'}; hit ${hit.join(', ')}; 0 world events`;
+};
 
-async function runBot(browser, url, r) {
-  const d = DEVICES[r.dev], errors = [];
-  const name = `bot age ${r.age} ${r.lang}`;
-  const { ctx, page } = await newPage(browser, d, errors);
+/* ---------------------------------------------------------------- bot sessions */
+async function botSession(browser, url, run) {
+  const dev = DEVICES[run.dev];
+  const ctx = await browser.newContext({ viewport: dev.viewport, deviceScaleFactor: dev.dpr, isMobile: true, hasTouch: true });
+  const page = await ctx.newPage();
+  const errors = [];
+  page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+  page.on('pageerror', e => errors.push(String(e)));
+  page.on('response', r => { if (r.status() >= 400) errors.push('HTTP ' + r.status() + ' ' + r.url()); });
+  const name = `bot age ${run.age} ${run.lang.toUpperCase()}`;
+  const t0 = Date.now();
   try {
-    const t0 = Date.now();
-    await page.goto(`${url}?bot=1&speed=${BOT_SPEED}&autostart=1&mute=1&age=${r.age}&lang=${r.lang}&seed=${20 + r.age}`);
-    await page.waitForFunction(() => window.BD && BD.debug && BD.debug.mode === 'done', null, { timeout: 600000, polling: 500 });
-    await page.waitForTimeout(1200);
-    await page.screenshot({ path: path.join(OUT, `bot-age${r.age}-${r.lang}-done.png`) });
-    const res = await page.evaluate(() => ({ stats: BD.debug.stats, levels: BD.debug.world.levels, age: BD.debug.world.age, asks: window.__asks, said: window.__said.map(x => ({ text: x.text, lang: x.lang })), log: BD.debug.voiceLog.slice(), doneVisible: !document.getElementById('scrDone').classList.contains('hidden'), doneTitle: document.getElementById('doneTitle').textContent }));
-    const s = res.stats;
-    const secs = ((Date.now() - t0) / 1000).toFixed(0);
-    check(res.age === r.age, 'played age ' + res.age);
-    check(res.doneVisible && res.doneTitle && !RAW.test(res.doneTitle), 'done screen: ' + JSON.stringify(res.doneTitle));
-    check(s.rounds >= 12 && s.correct >= 24 && s.crossings >= 12 && s.fruits >= 12 && s.wipes >= 11 && s.talks >= 4, 'session too short: ' + JSON.stringify(s));
-    const saidSet = new Set(res.said.map(x => x.lang + '|' + x.text));
-    const missing = res.asks.filter(a => !saidSet.has(a.lang + '|' + a.text));
-    check(res.asks.length >= 12, 'too few prompts built: ' + res.asks.length);
-    check(res.asks.every(a => a.lang === r.lang), 'prompts in the wrong language: ' + JSON.stringify(res.asks.filter(a => a.lang !== r.lang).slice(0, 2)));
-    check(missing.length === 0, `${missing.length}/${res.asks.length} prompts never reached the voice: ` + JSON.stringify(missing.slice(0, 2)));
-    const raw = res.said.filter(x => !x.text || RAW.test(x.text));
-    check(raw.length === 0, 'spoken lines with a raw key / {param} / undefined: ' + JSON.stringify(raw.slice(0, 4)));
-    check(res.log.length > 0 && res.log.every(x => x.lang === r.lang), 'voice log language: ' + JSON.stringify(res.log.filter(x => x.lang !== r.lang).slice(0, 2)));
-    if (r.lang === 'vi') {
-      const notVi = res.said.filter(x => !VI_CHARS.test(x.text));
-      check(notVi.length / res.said.length < 0.12, 'VI voice has English-looking lines: ' + JSON.stringify(notVi.slice(0, 6).map(x => x.text)));
+    await page.goto(url + `?speed=${BOT_SPEED}&bot=1&autostart=1&mute=1&age=${run.age}&lang=${run.lang}&seed=${100 + run.age * 7 + (run.lang === 'vi' ? 1 : 0)}`);
+    await page.waitForFunction(() => window.BD && BD.debug && BD.debug.mode === 'done', null, { timeout: 420000, polling: 500 });
+    await page.waitForTimeout(800);
+    await page.screenshot({ path: path.join(OUT, `bot-${run.age}-${run.lang}-${dev.name}-done.png`) });
+    const r = await page.evaluate(() => ({ stats: BD.debug.stats, log: BD.debug.voiceLog.map(l => ({ lang: l.lang, text: l.text })), done: !document.getElementById('scrDone').classList.contains('hidden'),
+      title: document.getElementById('doneTitle').textContent, missing: BD.Assets.missing.slice(), keys: Object.keys(localStorage), saved: localStorage.getItem('bd:settings'),
+      topics: BD.debug.world.levels.slice(), age: BD.debug.world.age }));
+    const s = r.stats;
+    check(r.done, 'done screen not visible');
+    check(s.rounds >= 12 && s.correct >= 14 && s.deliveries >= 14 && s.talks >= 4, 'session too short: ' + JSON.stringify({ rounds: s.rounds, correct: s.correct, deliveries: s.deliveries, talks: s.talks }));
+    check(errors.length === 0, 'console errors: ' + errors.slice(0, 3).join(' | '));
+    check(r.missing.length === 0, 'missing assets ' + r.missing.join(','));
+    const leaks = r.log.filter(l => LEAK.test(l.text));
+    check(leaks.length === 0, 'voice leaks: ' + leaks.slice(0, 4).map(l => JSON.stringify(l.text)).join(' | '));
+    const wrongLang = r.log.filter(l => l.lang !== run.lang);
+    check(wrongLang.length === 0, `lines in the wrong language (${wrongLang.length}): ` + wrongLang.slice(0, 3).map(l => l.text).join(' | '));
+    check(r.keys.every(k => k.startsWith('bd:')), 'storage keys ' + r.keys.join(','));
+    check(!r.saved, 'URL flags saved a settings record: ' + r.saved);
+    let viNote = '';
+    if (run.lang === 'vi') {
+      const words = r.log.filter(l => /[a-zà-ỹ]{3,}/i.test(l.text));
+      const plain = words.filter(l => !VI_CHARS.test(l.text));
+      const uniq = [...new Set(plain.map(l => l.text))];
+      check(words.length > 20 && plain.length / words.length < 0.15, `VI lines without diacritics ${plain.length}/${words.length}: ` + uniq.slice(0, 6).join(' | '));
+      viNote = `, VI lines w/o diacritics ${plain.length}/${words.length}${uniq.length ? ' (' + uniq.slice(0, 4).join(' | ') + ')' : ''}`;
     } else {
-      const bad = res.said.filter(x => VI_CHARS.test(x.text));
-      check(bad.length === 0, 'EN voice has Vietnamese lines: ' + JSON.stringify(bad.slice(0, 3)));
+      const vi = r.log.filter(l => VI_CHARS.test(l.text));
+      check(vi.length === 0, 'EN lines with Vietnamese letters: ' + vi.slice(0, 3).map(l => l.text).join(' | '));
     }
-    const again = r.age % 2 === 1;
-    await tapEl(page, again ? '#btnAgain' : '#btnDoneHome');
-    await page.waitForTimeout(600);
-    const after = await page.evaluate(() => ({ mode: BD.debug.mode, sessions: BD.debug.stats.sessions, st: BD.debug.world.state, title: !document.getElementById('scrTitle').classList.contains('hidden'), stars: document.getElementById('titleStars').textContent }));
-    if (again) check(after.mode === 'play' && after.sessions === 2 && after.st !== 'sessionDone', 'Play again did not start a new session: ' + JSON.stringify(after));
-    else check(after.mode === 'title' && after.title && +after.stars > 0, 'Home from the done screen: ' + JSON.stringify(after));
-    check(errors.length === 0, 'errors: ' + errors.slice(0, 3).join(' | '));
-    record(d.name, name, true, '');
-    console.log(`      ${name}: ${secs}s, topics ${res.levels.join('/')}, rounds ${s.rounds}, right ${s.correct}, wrong ${s.wrong}, hints ${s.hints}, assists ${s.assists}, crossings ${s.crossings}, fruits ${s.fruits}, talks ${s.talks}, surprises ${s.surprises} (taps ${s.fishTaps}/${s.frogTaps}/${s.snowTaps}), prompts ${res.asks.length}, voice lines ${res.said.length}`);
+    record(dev.name, name, true, `${((Date.now() - t0) / 1000).toFixed(0)} s, ${r.topics.join('/')}, rounds ${s.rounds}, right ${s.correct}, wrong ${s.wrong}, talks ${s.talks}/${s.talkRight}, hints ${s.hints}, surprises ${s.surprises}, ${r.log.length} lines${viNote}; "${r.title}"`);
   } catch (e) {
-    let st = ''; try { st = JSON.stringify(await page.evaluate(() => BD.debug.getState())); } catch (x) { /* ignore */ }
-    record(d.name, name, false, (e && e.message ? e.message.split('\n')[0] : e) + (st ? '  state ' + st.slice(0, 400) : ''));
+    let state = '';
+    try { state = JSON.stringify(await page.evaluate(() => { const s = BD.debug.getState(); return { mode: s.mode, state: s.state, phase: s.phase, level: s.level, round: s.round, cart: s.cart }; })); } catch (_) { /* */ }
+    record(dev.name, name, false, (e instanceof Fail ? e.message : 'exception: ' + (e && e.message)) + ' ' + state + (errors.length ? ' errors: ' + errors.slice(0, 2).join(' | ') : ''));
   }
   await ctx.close();
 }
 
+/* ---------------------------------------------------------------- main */
 (async () => {
   const srv = await serve();
   const browser = await chromium.launch();
+  const only = process.env.ONLY, sel = process.env.TESTS ? process.env.TESTS.split(',') : null;
   const t0 = Date.now();
-  try {
-    const devs = process.env.BOT_ONLY ? [] : DEVICES.filter(d => !process.env.ONLY || d.name === process.env.ONLY);
-    for (const d of devs) await runDevice(browser, srv.url, d);
-    const bots = process.env.SKIP_BOT || (!process.env.BOT_ONLY && (process.env.ONLY || process.env.TESTS)) ? [] : BOT_RUNS;
-    for (let k = 0; k < bots.length; k += BOT_PAR) await Promise.all(bots.slice(k, k + BOT_PAR).map(r => runBot(browser, srv.url, r)));
-  } catch (e) { record('-', 'runner', false, String(e && e.stack)); }
+  if (!process.env.BOT_ONLY) {
+    for (const d of DEVICES) {
+      if (only && d.name !== only) continue;
+      const ctx = await browser.newContext({ viewport: d.viewport, deviceScaleFactor: d.dpr, isMobile: true, hasTouch: true });
+      for (const [name, fn] of Object.entries(T)) {
+        if (sel && !sel.includes(name)) continue;
+        const page = await ctx.newPage();
+        page.__dev = d.name;
+        const cdp = await ctx.newCDPSession(page);
+        const errors = [];
+        page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+        page.on('pageerror', e => errors.push(String(e)));
+        page.on('response', r => { if (r.status() >= 400) errors.push('HTTP ' + r.status() + ' ' + r.url()); });
+        page.on('crash', () => errors.push('PAGE CRASH'));
+        try {
+          const det = await fn(page, ctx, cdp, srv.url, errors, d);
+          if (errors.length) throw new Fail('console errors: ' + errors.slice(0, 3).join(' | '));
+          record(d.name, name, true, det);
+        } catch (e) {
+          try { await page.screenshot({ path: path.join(OUT, `${d.name}-FAIL-${name}.png`) }); } catch (_) { /* */ }
+          record(d.name, name, false, e instanceof Fail ? e.message : 'exception: ' + (e && e.stack ? e.stack.split('\n').slice(0, 2).join(' ') : e));
+        }
+        await page.close();
+      }
+      await ctx.close();
+    }
+  }
+  if (!only && !process.env.SKIP_BOT) {
+    const PAR = +process.env.BOT_PAR || 2;
+    const queue = BOT_RUNS.slice();
+    await Promise.all(Array.from({ length: PAR }, async () => { while (queue.length) await botSession(browser, srv.url, queue.shift()); }));
+  }
   await browser.close(); srv.close();
   const fails = results.filter(r => !r.ok);
-  fs.writeFileSync(path.join(OUT, 'results.json'), JSON.stringify({ date: new Date().toISOString(), secs: Math.round((Date.now() - t0) / 1000), results }, null, 1));
-  console.log(`\n${results.length - fails.length}/${results.length} passed in ${Math.round((Date.now() - t0) / 1000)} s`);
-  if (fails.length) { console.log('FAILED:'); fails.forEach(f => console.log(`  ${f.device} ${f.test}: ${f.detail}`)); }
+  fs.writeFileSync(path.join(OUT, 'results.json'), JSON.stringify({ when: new Date().toISOString(), seconds: Math.round((Date.now() - t0) / 1000), results }, null, 1));
+  console.log(`\n${results.length - fails.length}/${results.length} passed, ${fails.length} failed (${((Date.now() - t0) / 1000).toFixed(0)} s)`);
   process.exit(fails.length ? 1 : 0);
 })();

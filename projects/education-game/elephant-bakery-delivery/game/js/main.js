@@ -224,7 +224,15 @@
     stats.sessions++;
     requestAnimationFrame(() => { updateHudStarTarget(); applySize(); });
   }
+  /** the stars earned in an unfinished session are kept (QA-F P2-1: Home used to lose them) */
+  function bankStars() {
+    if ((mode === 'play' || mode === 'paused' || mode === 'talk') && world && world.stars > 0) {
+      progress.totalStars += world.stars; BD.Storage.setJSON('progress', progress);
+      world.stars = 0;
+    }
+  }
   function goTitle() {
+    bankStars();
     mode = 'title';
     $('stage').classList.remove('talking');
     if (BD.Voice) BD.Voice.stop();
@@ -320,6 +328,7 @@
         BD.UI.fadeBubble(false); BD.Audio.setFanfare(false);
         stats.rounds++; idleSaid = 0; lastAsk = null; lastPromptText = ''; lastRight = null; roundMissed = false; grabbedThisRound = false;
         BD.UI.setDots(world.roundsPerLevel || 4, e.round % (world.roundsPerLevel || 4));
+        if (BD.Voice && BD.Voice.dropTagged) BD.Voice.dropTagged(['party', 'thanks']);
         BD.UI.say(T('roadDone'));   // shown, not spoken: the question follows in a moment
         BD.Audio.play('pour');
         render.prewarmRound(world);
@@ -347,7 +356,7 @@
         if (world.level === 0 && world.round === 0 && (e.orderIndex | 0) === 0 && thr('drag', 12000)) speak(T('drag'), { priority: true, tag: 'drag' });
         break;
       }
-      case 'grab': stats.grabs++; grabbedThisRound = true; BD.Audio.play('grab'); break;
+      case 'grab': stats.grabs++; grabbedThisRound = true; BD.Audio.play('grab'); if (BD.Voice && BD.Voice.dropTagged) BD.Voice.dropTagged('drag'); break;
       case 'drive': BD.Audio.setDrive(!!e.on, 420); break;
       case 'bump': stats.bumps++; BD.Audio.play('bump'); break;
       case 'fork':
@@ -433,7 +442,7 @@
         break;
       }
       case 'assistArmed': BD.Audio.play('hint'); break;
-      case 'assist': stats.assists++; break;
+      case 'assist': stats.assists++; speak(T('hint'), { priority: true }); break;
       case 'idle':
         if (++idleSaid <= 4) speak((idleSaid === 1 && !grabbedThisRound ? T('drag') : T('idle')) + ' ' + currentPrompt());
         else if (idleSaid >= 5 && !bot) pause();   // ≈ 2 min without a touch: nobody is playing — pause
@@ -519,6 +528,9 @@
     const canMic = S.mic && BD.Voice && BD.Voice.canListen && BD.Voice.canListen() && !FLAGS.bot;
     BD.UI.openTalk(talk, curLang(), id => { BD.Audio.play('click'); world.talkAnswer(id); }, canMic, curAge());
     const q = T(talk.promptKey, talk.params || {});
+    if (BD.Voice && BD.Voice.dropTagged) BD.Voice.dropTagged(['party', 'right', 'thanks', 'flavour']);
+    const cutParty = BD.Voice && BD.Voice.currentTag && ['party', 'thanks', 'flavour'].includes(BD.Voice.currentTag());
+    if (cutParty && BD.Voice.stop) BD.Voice.stop();
     speakPrompt(T('talk.intro') + ' ' + q, { priority: true });   // queued after the round's praise, not cutting it off
   }
   function listen() {
@@ -629,7 +641,10 @@
     $('bubble').addEventListener('click', bubbleTap);
     $('btnPause').addEventListener('click', () => { BD.Audio.play('click'); pause(); });
     $('btnResume').addEventListener('click', () => { BD.Audio.play('click'); resume(); });
-    $('btnHome').addEventListener('click', () => { BD.Audio.play('click'); goTitle(); });
+    // Home in the pause menu: hold 1 s (a stray tap of a child must not end the session)
+    const home = $('btnHome');
+    BD.Input.holdButton(home, 1000, () => { home.style.setProperty('--p', 0); home.classList.remove('holding'); BD.Audio.play('click'); goTitle(); },
+      p => { home.style.setProperty('--p', p); home.classList.toggle('holding', p > 0); });
     $('btnAgain').addEventListener('click', () => { BD.Audio.play('click'); startGame(); });
     $('btnDoneHome').addEventListener('click', () => { BD.Audio.play('click'); goTitle(); });
     $('btnMic').addEventListener('click', listen);

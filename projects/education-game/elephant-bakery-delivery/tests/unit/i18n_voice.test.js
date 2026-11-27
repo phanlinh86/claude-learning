@@ -358,11 +358,11 @@ const colEn = ch('en', 'color', COLORS);
 section('game lines: DESIGN examples for sayRight / sayWrong / count');
 const colorsEv = (sign, left) => ({ topic: 'colors', promptKey: 'p.colors', params: { color: 'red', treat: 'cupcake' }, sign, left });
 eq(I.sayRight('en', colorsEv({ kind: 'blob', color: 'red' }, 1), r0), 'A red cupcake for the red house! One more!', 'DESIGN right colours EN + one more');
-eq(I.sayRight('vi', colorsEv({ kind: 'blob', color: 'red' }, 0), r0), 'Bánh cupcake màu đỏ cho nhà màu đỏ! Giao hết bánh rồi!', 'right colours VI + all delivered');
+eq(I.sayRight('vi', colorsEv({ kind: 'blob', color: 'red' }, 0), r0), 'Bánh cupcake màu đỏ cho nhà màu đỏ!', 'right colours VI, last order (the party line says all delivered)');
 eq(I.sayRight('en', colorsEv({ kind: 'blob', color: 'red' }), r0), 'A red cupcake for the red house!', 'no left → no tail');
 eq(I.sayRight('en', colorsEv({ kind: 'blob', color: 'red' }, 2), r0), 'A red cupcake for the red house! More to deliver!', 'left 2 → "More to deliver!"');
 eq(I.sayRight('en', { promptKey: 'p.count', cargo: { kind: 'cookies', n: 3 }, sign: { kind: 'dots', n: 3, numeral: true }, left: 0 }, r0),
-  'Three cookies for house number 3! All delivered!', 'DESIGN right count EN');
+  'Three cookies for house number 3!', 'DESIGN right count EN');
 eq(I.sayRight('vi', { promptKey: 'p.count', cargo: { kind: 'cookies', n: 3 }, sign: { kind: 'dots', n: 3 } }, r0), 'Ba cái bánh quy cho nhà số 3!', 'right count VI');
 eq(I.sayRight('en', { promptKey: 'p.home', cargo: { kind: 'animal', animal: 'penguin' }, sign: { kind: 'home', home: 'ice' } }, r0), 'The penguin lives on the ice!', 'DESIGN right home');
 eq(I.sayRight('vi', { promptKey: 'p.home', params: { animal: 'fishbowl' }, home: 'sea' }, r0), 'Bạn cá vàng sống ở biển!', 'right home VI from params + e.home');
