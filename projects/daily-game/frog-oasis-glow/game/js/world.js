@@ -33,10 +33,10 @@
     COMBO_EVENT_EVERY: 5,     // 'combo' event at 5, 10, 15…
     CLEAR_BONUS: 50,
     LEVEL_GOAL: 15,           // fireflies per chapter (a gold counts 1)
-    START_LEAVES: 4, MAX_LEAVES: 5, LEAF_EVERY: 12,   // hearts (lily-pad leaves)
-    GOLD_P: 0.07,             // share of firefly pops that are golden…
+    START_LEAVES: 5, MAX_LEAVES: 5, LEAF_EVERY: 12,   // hearts (lily-pad leaves)
+    GOLD_P: 0.10,             // share of firefly pops that are golden…
     GOLD_AFTER: 3,            // …once this many pops of the chapter have happened (so never the first pop)
-    GOLD_UP_K: 0.75,          // a gold stays up × this
+    GOLD_UP_K: 0.90,          // a gold stays up × this
     FAIR_T: 1.7,              // s without a visible firefly holder → the next pop holds one…
     FAIR_HURRY: 0.35,         // …and comes within 0.35 s (may exceed max up by one)
     MAX_FIREFLY_STREAK: 2,    // after 2 firefly pops in a row with no sleeper up, the next is a sleeper (preset maxStreak overrides)
@@ -152,7 +152,7 @@
     this.levelStartT = this.time;
     // Pip may be standing on a friend that no longer exists: hop home
     if (this.pip && this.pip.state === 'boop') this._goHome();
-    if (this._fl && this._fl.kind === 'hop') this._fl.cid = -1;
+    if (this._fl && this._fl.kind === 'hop') { this._fl.cid = -1; this._fl.hole = -1; }
     if (emit) this._ev({ type: 'levelUp', level: this.level, zone: this.zone, loop: this.loop, name: BIOME_NAMES[this.zone] });
   };
 
@@ -366,7 +366,7 @@
     z.x = f.x1; z.y = f.y1; z.vx = 0; z.vy = 0; z.squash = 1;
     this._fl = null;
     if (f.kind === 'hop') {
-      var c = f.hole >= 0 ? this.holes[f.hole].critter : null;
+      var c = f.hole >= 0 && this.holes[f.hole] ? this.holes[f.hole].critter : null;
       if (c && c.id === f.cid && c.state === 'booped' && c.bounceAt < 0) c.bounceAt = c.t;
       this._standOn = (c && c.id === f.cid) ? f.hole : -1;
       this._ev({ type: 'pipLand', x: z.x, y: z.y, hole: f.hole });

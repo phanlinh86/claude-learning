@@ -87,7 +87,7 @@
       this.world = this.makeWorld(null, false, lv);
       this.bot = this.botMode ? new POG.Bot(this.world, { skill: num('skill', 1), seed: 11 }) : null;
       // a run touched by the bot or by test flags never saves a best score
-      this.runTainted = this.botMode || params.has('speed') || params.has('level') || !!this.urlDiff;
+      this.runTainted = this.botMode || this.speed !== 1 || params.has('speed') || params.has('level') || !!this.urlDiff;
       if (!this.weather) this.weather = this.makeWeather();
       const z = this.world.zone || 0;
       this.renderer.attach(this.world, this.weather);

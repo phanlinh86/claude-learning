@@ -293,9 +293,11 @@ body.touch .tagline{font-size:max(15px, calc(var(--u)*2.2))}body.touch .best-lin
 @media (max-height:430px){
   #scrSettings .panel{padding:8px 16px}
   #scrSettings .panel h2{margin-bottom:4px;font-size:calc(var(--u)*3.4)}
-  #scrSettings .settings{display:grid;grid-template-columns:1fr 1fr;gap:6px;min-width:0}
+  #scrSettings .settings{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px;min-width:0}
+  #scrSettings .settings > *{min-width:0}
+  #scrSettings input[type=range]{min-width:0;width:100%;flex:1 1 auto}
   #scrSettings .set{padding:4px 12px;min-height:40px}
-  #scrSettings   #scrSettings .menu{margin-top:6px}
+  #scrSettings .menu{margin-top:6px}
   #scrSettings .menu .btn{min-height:44px;padding-top:0;padding-bottom:0}
 }
 /* P3-7 portrait title: tagline off the screen edges, window shows above the logo, demo calmer */
@@ -360,7 +362,7 @@ body.touch .tagline{font-size:max(15px, calc(var(--u)*2.2))}body.touch .best-lin
 .how-ico img{width:calc(var(--u)*4.4)!important;height:auto}
 #hud{transition:opacity .25s}
 #hud.ghost{opacity:.35}
-/* 6 picture slots: Zippy and the jungle friends on the first row, the four biomes on the second */
+/* 6 picture slots: Pip and the desert friends on the first row, the four chapters on the second */
 @media (min-aspect-ratio: 1/1){
   .slot-grid{grid-template-columns:repeat(12,minmax(0,1fr))}
   .slot{grid-column:span 6}
@@ -370,3 +372,9 @@ body.touch .tagline{font-size:max(15px, calc(var(--u)*2.2))}body.touch .best-lin
 
 /* QA: HUD buttons clear the notch / status bar / home indicator */
 #hud{top:max(calc(var(--u)*1.4), calc(env(safe-area-inset-top) + 6px))!important;right:max(calc(var(--u)*1.4), calc(env(safe-area-inset-right) + 6px))!important}
+
+/* QA P3-2: the volume -/+ buttons are finger-sized (44 px) and never squeezed */
+.vol-step{min-width:44px;min-height:44px;flex:0 0 auto}
+#scrSettings .settings > *{min-width:0}
+#scrSettings input[type=range]{min-width:0;flex:1 1 auto}
+#scrSettings .set-volume .vol-wrap{min-width:0;gap:6px}

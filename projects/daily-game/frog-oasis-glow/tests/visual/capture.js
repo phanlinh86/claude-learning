@@ -1,62 +1,65 @@
-// Visual QA capture: every screen on 4 viewports, every biome with critters in every state, colour-change moments,
-// banner + biome crossfade, Zippy flight / dizzy contact sheets, colour-blind simulations, HUD vs notch, custom pictures.
-// Output: tests/out/visual/*.png.  Run: node tests/visual/capture.js
+// Visual QA capture for Pip's Oasis Glow: every screen on 4 viewports, every chapter with firefly / gold / sleepy
+// friends, the page-turn transition and chapter banner, motion contact sheets (hop arc, squash, tongue, return,
+// dizzy, friend pop / booped / woken, firefly → jar, ripples, tumbleweed, night fireflies), colour-vision sims and
+// custom pictures.  Output: tests/out/visual/*.png.  Run: node tests/visual/capture.js
 const { chromium } = require('playwright');
 const path = require('path'), fs = require('fs');
 const GAME = 'file://' + path.resolve(__dirname, '../../game/index.html');
 const OUT = path.resolve(__dirname, '../out/visual'); fs.mkdirSync(OUT, { recursive: true });
 const errs = [];
+const only = process.argv[2] || '';   // optional: run one section ("screens", "moments", "motion", "cvd", "custom")
 
 const VIEWS = [
   { id: 'desk', viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1 },
   { id: 'phone', viewport: { width: 844, height: 390 }, deviceScaleFactor: 3, hasTouch: true, isMobile: true },
   { id: 'ipad', viewport: { width: 1024, height: 768 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true },
-  { id: 'portrait', viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, hasTouch: true, isMobile: true }
+  { id: 'ipadP', viewport: { width: 768, height: 1024 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true }
 ];
 
-// ---- in-page helpers (installed once per page) ----
+// ---- in-page helpers ----
 const HELPERS = () => {
   const G = POG.Game;
   window.QA = {
-    // deterministic advance: freeze the real-time loop and step the sim ourselves
-    adv(sec) {
-      G.speed = 0; const n = Math.round(sec * 60);
-      for (let i = 0; i < n; i++) { G.step(1 / 60); G.renderer.update(1 / 60); }
+    // deterministic advance: freeze real time and step the sim + renderer ourselves
+    adv(sec) { G.speed = 0; const n = Math.round(sec * 120); for (let i = 0; i < n; i++) { G.step(1 / 120); G.renderer.update(1 / 120); } },
+    clear() { G.world.holes.forEach(h => { h.critter = null; }); },
+    put(i, kind, type, state, h = 1, t = 0.05) {
+      const w = G.world; if (!w.holes[i]) return null;
+      return (w.holes[i].critter = { kind, type, state, h, hPrev: h, hs: h, v: 0, t, upFor: 999, id: 100 + i, bounceAt: -1 });
     },
-    clear() { const w = G.world; w.holes.forEach(h => { h.critter = null; }); },
-    put(i, kind, colour, state, h = 1, t = 0.05) {
-      const w = G.world; if (!w.holes[i]) return;
-      w.holes[i].critter = { kind, colour, state, h, hPrev: h, hs: h, v: 0, t, upFor: 999, id: 100 + i };
-    },
-    // a mixed tableau: every state, every colour, every kind
-    tableau(keepFx) {
-      const w = G.world, n = w.holes.length, kinds = ['monkey', 'frog', 'toucan'], states = ['up', 'rise', 'booped', 'wow', 'up', 'up', 'rise', 'up', 'up'];
+    // every row gets a firefly holder, a gold, a napper; one booped and one woken
+    tableau(keep) {
+      const w = G.world, n = w.holes.length, K = ['fennec', 'jerboa', 'tortoise'];
+      const T = n === 6 ? ['firefly', 'sleepy', 'gold', 'sleepy', 'firefly', 'firefly']
+        : n === 8 ? ['firefly', 'sleepy', 'gold', 'firefly', 'sleepy', 'firefly', 'sleepy', 'gold']
+        : ['firefly', 'sleepy', 'gold', 'sleepy', 'gold', 'firefly', 'gold', 'firefly', 'sleepy'];
       QA.clear();
-      for (let i = 0; i < n; i++) QA.put(i, kinds[i % 3], i % 4, states[i], states[i] === 'rise' ? 0.55 : 1, states[i] === 'booped' ? 0.06 : 0.05);
+      for (let i = 0; i < n; i++) QA.put(i, K[i % 3], T[i], 'up');
       w.leaves = 3; w.score = 1230; w.combo = 6; w.mult = 2; w.levelBoops = 9;
-      if (!keepFx) { G.renderer.texts.length = 0; G.renderer.banner = null; }
+      if (!keep) { G.renderer.texts.length = 0; G.renderer.banner = null; G.renderer.flyers.length = 0; G.renderer.rings.length = 0; }
     },
-    grab(x, y, w, h) {   // logical-rect crop of the canvas → dataURL
+    grab(x, y, w, h, sc) {   // logical rect → canvas (optionally scaled)
       const R = G.renderer, c = R.canvas, k = R.k, o = document.createElement('canvas');
-      o.width = Math.round(w * k); o.height = Math.round(h * k);
+      sc = sc || 1; o.width = Math.round(w * sc); o.height = Math.round(h * sc);
       o.getContext('2d').drawImage(c, R.ox + x * k, R.oy + y * k, w * k, h * k, 0, 0, o.width, o.height);
       return o;
     },
     sheet(frames, cols, labels) {
       const fw = frames[0].width, fh = frames[0].height, rows = Math.ceil(frames.length / cols);
-      const s = document.createElement('canvas'); s.width = cols * fw; s.height = rows * (fh + 22);
+      const s = document.createElement('canvas'); s.width = cols * fw; s.height = rows * (fh + 20);
       const g = s.getContext('2d'); g.fillStyle = '#222'; g.fillRect(0, 0, s.width, s.height);
       frames.forEach((f, i) => {
-        const x = (i % cols) * fw, y = Math.floor(i / cols) * (fh + 22);
-        g.drawImage(f, x, y + 22); g.fillStyle = '#fff'; g.font = '14px monospace'; g.fillText(labels[i] || String(i), x + 6, y + 16);
-        g.strokeStyle = '#555'; g.strokeRect(x + .5, y + 22.5, fw - 1, fh - 1);
+        const x = (i % cols) * fw, y = Math.floor(i / cols) * (fh + 20);
+        g.drawImage(f, x, y + 20); g.fillStyle = '#fff'; g.font = '13px monospace'; g.fillText(labels[i] || String(i), x + 4, y + 15);
+        g.strokeStyle = '#555'; g.strokeRect(x + .5, y + 20.5, fw - 1, fh - 1);
       });
-      return s.toDataURL('image/png');
+      return s.toDataURL('image/jpeg', 0.82);
     },
+    draw() { G.renderer.draw(G.mode); },
     raf() { return new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))); }
   };
 };
-const save = (dataUrl, name) => fs.writeFileSync(path.join(OUT, name), Buffer.from(dataUrl.split(',')[1], 'base64'));
+const save = (d, name) => fs.writeFileSync(path.join(OUT, name), Buffer.from(d.split(',')[1], 'base64'));
 
 async function open(b, v, q) {
   const ctx = await b.newContext({ viewport: v.viewport, deviceScaleFactor: v.deviceScaleFactor, hasTouch: !!v.hasTouch, isMobile: !!v.isMobile });
@@ -71,7 +74,6 @@ async function open(b, v, q) {
 const shot = (p, name) => p.screenshot({ path: path.join(OUT, name) });
 const raf = p => p.evaluate(() => QA.raf());
 
-// colour-vision simulation (Viénot/Brettel-style matrices) applied to the whole page with an SVG filter
 async function cvd(p, kind) {
   const M = {
     protan: '0.567 0.433 0 0 0  0.558 0.442 0 0 0  0 0.242 0.758 0 0  0 0 0 1 0',
@@ -86,7 +88,6 @@ async function cvd(p, kind) {
   }, [kind, M[kind]]);
 }
 
-// photo-like PNG made in the page (gradient sky, bokeh, a blob "pet")
 async function photoPng(p, w, h, seed) {
   const d = await p.evaluate(([w, h, seed]) => {
     const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d');
@@ -97,8 +98,6 @@ async function photoPng(p, w, h, seed) {
     g.fillStyle = '#8a5a3a'; g.beginPath(); g.ellipse(w / 2, h * 0.6, w * 0.28, h * 0.3, 0, 0, 7); g.fill();
     g.fillStyle = '#c99a6a'; g.beginPath(); g.arc(w / 2, h * 0.35, w * 0.18, 0, 7); g.fill();
     g.fillStyle = '#222'; g.beginPath(); g.arc(w * 0.45, h * 0.33, w * 0.02, 0, 7); g.arc(w * 0.55, h * 0.33, w * 0.02, 0, 7); g.fill();
-    const id = g.getImageData(0, 0, w, h); for (let i = 0; i < id.data.length; i += 4) { const n = (r() - .5) * 30; id.data[i] += n; id.data[i + 1] += n; id.data[i + 2] += n; }
-    g.putImageData(id, 0, 0);
     return c.toDataURL('image/png');
   }, [w, h, seed]);
   return Buffer.from(d.split(',')[1], 'base64');
@@ -107,162 +106,194 @@ async function photoPng(p, w, h, seed) {
 (async () => {
   const b = await chromium.launch({ args: ['--allow-file-access-from-files'] });
 
-  // ===== 1. every screen × every viewport, every biome in play =====
-  for (const v of VIEWS) {
+  // ===== 1. every screen × viewport, every chapter in play =====
+  if (!only || only === 'screens') for (const v of VIEWS) {
     const p = await open(b, v);
-    await p.waitForTimeout(2500);
+    await p.waitForTimeout(3500);
     await shot(p, `${v.id}_title.png`);
     for (const [scr, name] of [['scrHow', 'how'], ['scrSettings', 'settings'], ['scrCustom', 'custom']]) {
       await p.evaluate(s => POG.UI.open(s, 'scrTitle'), scr); await p.waitForTimeout(450);
       await shot(p, `${v.id}_${name}.png`);
     }
-    await p.evaluate(() => { POG.UI.show('scrTitle'); POG.debug.startGame(); });
-    await p.waitForTimeout(400);
-    if (v.id === 'portrait') {
-      await shot(p, 'portrait_rotate_prompt.png');
-      await p.evaluate(() => { POG.Game._rotOk = true; POG.Game.syncRotate(); });
-    }
+    await p.evaluate(() => { POG.UI.show('scrTitle'); POG.debug.startGame(); POG.Game._rotOk = true; });
     for (let lv = 0; lv < 4; lv++) {
       await p.evaluate(l => { if (l) POG.debug.gotoLevel(l); QA.adv(3.2); QA.tableau(); QA.adv(0.02); }, lv);
       await raf(p);
       await shot(p, `${v.id}_play_L${lv}.png`);
     }
-    // pause + game over
     await p.evaluate(() => { POG.Game.speed = 1; POG.Game.pause(); }); await p.waitForTimeout(450);
     await shot(p, `${v.id}_pause.png`);
-    await p.evaluate(() => { POG.Game.resume(); const w = POG.debug.world; w.stats.boops = 23; w.stats.bestCombo = 9; POG.Game.gameOver(); });
+    await p.evaluate(() => { POG.Game.resume(); const w = POG.debug.world; Object.assign(w.stats, { boops: 23, golds: 2, wrong: 3, missed: 4, bestCombo: 9 }); POG.Game.gameOver(); });
     await p.waitForTimeout(900);
     await shot(p, `${v.id}_over.png`);
-    // simulated notch (iPhone landscape 47 px / portrait 47 px top) with the HUD
-    if (v.id === 'phone' || v.id === 'portrait') {
-      await p.addStyleTag({ content: v.id === 'phone'
-        ? '#safeProbe{padding:0 47px 21px 47px !important} .screen{padding:0 47px 21px 47px !important}'
-        : '#safeProbe{padding:47px 0 34px 0 !important} .screen{padding:47px 0 34px 0 !important}' });
-      await p.evaluate(() => { POG.debug.startGame(); POG.Game.relayout(); });
-      await p.waitForTimeout(300);
-      await p.evaluate(() => { QA.adv(3.2); QA.tableau(); QA.adv(0.02); });
-      await p.evaluate(() => {   // draw the simulated notch / home bar so it shows on the shot
-        const d = document.createElement('div'); d.id = 'qa-notch';
-        d.style.cssText = 'position:fixed;z-index:99;pointer-events:none;background:rgba(0,0,0,.85);' + (innerWidth > innerHeight
-          ? 'right:0;top:calc(50% - 105px);width:34px;height:210px;border-radius:20px 0 0 20px'
-          : 'top:0;left:calc(50% - 63px);width:126px;height:37px;border-radius:0 0 20px 20px');
-        document.body.appendChild(d);
-      });
-      await raf(p);
-      await shot(p, `${v.id}_notch_hud.png`);
-    }
     await p.context().close();
   }
 
-  // ===== 2. desktop + phone: moments =====
-  for (const v of [VIEWS[0], VIEWS[1]]) {
+  // ===== 2. banner + page turn (desk + phone) =====
+  if (!only || only === 'moments') for (const v of [VIEWS[0], VIEWS[1]]) {
     const p = await open(b, v, '&autostart=1&diff=easy');
     await p.waitForFunction(() => POG.debug.mode === 'playing');
-    // level banner over the canopy back row (L2) and the ruins (L3)
-    for (const lv of [2, 3]) {
-      await p.evaluate(l => { POG.debug.gotoLevel(l); QA.adv(0.05); QA.tableau(true); QA.adv(0.6); QA.tableau(true); }, lv);
-      await raf(p); await shot(p, `${v.id}_banner_L${lv}.png`);
+    for (const lv of [0, 2, 3]) {
+      for (const t of [0.15, 0.6, 1.3]) {
+        await p.evaluate(([l, t]) => { POG.debug.gotoLevel(l); QA.adv(1.2); QA.tableau(true); POG.Game.renderer.showBanner(l); QA.adv(t); }, [lv, t]);
+        await raf(p); await shot(p, `${v.id}_banner_L${lv}_${t}.png`);
+      }
     }
-    // crossfade frames L0→L1
-    await p.evaluate(() => { POG.debug.gotoLevel(0); QA.adv(3); });
-    const frames = await p.evaluate(async () => {
-      const out = []; POG.debug.gotoLevel(1);
-      for (const t of [0, 0.15, 0.3, 0.45, 0.6, 0.9]) { QA.adv(t - (out.t || 0)); out.t = t; await QA.raf(); out.push(QA.grab(0, 0, 960, 540)); }
-      const scaled = out.map(c => { const s = document.createElement('canvas'); s.width = 480; s.height = 270; s.getContext('2d').drawImage(c, 0, 0, 480, 270); return s; });
-      return QA.sheet(scaled, 3, ['0.00s', '0.15s', '0.30s', '0.45s', '0.60s', '0.90s']);
-    });
-    save(frames, `${v.id}_crossfade_sheet.png`);
-    // colour-change warning and "New colour!"
-    await p.evaluate(() => { POG.debug.gotoLevel(2); QA.adv(3); QA.tableau(); const w = POG.debug.world; w.nextColourIn = 0; QA.tableau(true); QA.adv(0.2); });
-    await raf(p); await shot(p, `${v.id}_colour_warn_a.png`);
-    await p.evaluate(() => { POG.Game.renderer.time += 0.125; }); await raf(p); await shot(p, `${v.id}_colour_warn_b.png`);
-    await p.evaluate(() => { QA.adv(0.95); QA.tableau(true); QA.adv(0.15); }); await raf(p);
-    await shot(p, `${v.id}_new_colour.png`);
-    // combo + boop texts and Zippy on top of the back row
-    await p.evaluate(() => { QA.tableau(); const w = POG.debug.world; w.colour = 1; QA.put(1, 'frog', 1, 'up'); POG.debug.tap(1); QA.adv(0.32); });
+    for (const [a, z] of [[0, 1], [2, 3]]) {
+      await p.evaluate(a => { POG.debug.gotoLevel(a); QA.adv(3); QA.tableau(); }, a);
+      const sh = await p.evaluate(async z => {
+        const out = []; POG.debug.gotoLevel(z); let tt = 0;
+        for (const t of [0.2, 0.5, 0.8]) { QA.adv(t - tt); tt = t; QA.draw(); out.push(QA.grab(0, 0, 960, 540, 0.5)); }
+        return QA.sheet(out, 3, ['0.2s', '0.5s', '0.8s']);
+      }, z);
+      save(sh, `${v.id}_pageturn_${a}to${z}.jpg`);
+    }
+    // boop text + combo over the back row; wrong text
+    await p.evaluate(() => { POG.debug.gotoLevel(2); QA.adv(3); QA.tableau(); QA.put(1, 'jerboa', 'firefly', 'up'); POG.debug.tap(1); QA.adv(0.35); });
     await raf(p); await shot(p, `${v.id}_boop_backrow.png`);
+    await p.evaluate(() => { QA.adv(1.5); QA.tableau(); QA.put(4, 'fennec', 'sleepy', 'up'); POG.debug.tap(4); QA.adv(0.3); });
+    await raf(p); await shot(p, `${v.id}_wrong_mid.png`);
     await p.context().close();
   }
 
-  // ===== 3. Zippy flight / boop / return / dizzy contact sheets (desktop) =====
-  {
+  // ===== 3. motion contact sheets (desktop) =====
+  if (!only || only === 'motion') {
     const p = await open(b, VIEWS[0], '&autostart=1&diff=easy');
     await p.waitForFunction(() => POG.debug.mode === 'playing');
-    const sheet = await p.evaluate(async () => {
-      QA.adv(3); QA.clear(); const w = POG.debug.world; w.colour = 0;
-      QA.put(3, 'monkey', 0, 'up');   // front-left (230,460)
-      POG.debug.tap(3);
+    const run = (fn, name) => p.evaluate(fn).then(d => save(d, name));
+    // hop to front-left (230,460), land squash, tongue, return hop, home squash
+    await run(async () => {
+      QA.adv(3); QA.clear(); const w = POG.debug.world; w.leaves = 4;
+      QA.put(3, 'fennec', 'firefly', 'up'); POG.debug.tap(3);
       const fr = [], lb = []; let t = 0;
-      for (let i = 0; i < 20; i++) { await QA.raf(); fr.push(QA.grab(100, 30, 480, 450)); lb.push(t.toFixed(2) + 's ' + w.zippy.state); QA.adv(0.06); t += 0.06; }
-      const sc = fr.map(c => { const s = document.createElement('canvas'); s.width = 240; s.height = 225; s.getContext('2d').drawImage(c, 0, 0, 240, 225); return s; });
-      return QA.sheet(sc, 5, lb);
-    });
-    save(sheet, 'desk_zippy_flight_sheet.png');
-    const dz = await p.evaluate(async () => {
-      QA.adv(1.2); QA.clear(); const w = POG.debug.world; w.colour = 0;
-      QA.put(1, 'frog', 1, 'up');
-      POG.debug.tap(1);
+      for (let i = 0; i < 25; i++) { QA.draw(); fr.push(QA.grab(120, 40, 480, 450, 0.5)); lb.push(t.toFixed(2) + ' ' + w.pip.state + ' sq' + (w.pip.squash || 0).toFixed(2)); QA.adv(0.05); t += 0.05; }
+      return QA.sheet(fr, 5, lb);
+    }, 'desk_pip_hop_front_sheet.jpg');
+    // fine-grained landing: squash + tongue every 1/60
+    await run(async () => {
+      QA.adv(2); QA.clear(); const w = POG.debug.world;
+      QA.put(4, 'jerboa', 'gold', 'up'); POG.debug.tap(4);
+      let n = 0; while (w.pip.state !== 'boop' && n++ < 400) QA.adv(1 / 120);
+      QA.adv(-0); const fr = [], lb = [];
+      for (let i = 0; i < 15; i++) { QA.draw(); fr.push(QA.grab(360, 220, 240, 240, 1)); lb.push((i / 60).toFixed(3) + ' ' + w.pip.state + ' ' + (w.pip.squash || 0).toFixed(2)); QA.adv(1 / 60); }
+      return QA.sheet(fr, 5, lb);
+    }, 'desk_pip_land_tongue_sheet.jpg');
+    // full-frame trajectory overlay: hop to back-right then return (trail of Pip feet)
+    await run(async () => {
+      QA.adv(2); QA.clear(); const w = POG.debug.world;
+      QA.put(2, 'tortoise', 'firefly', 'up'); POG.debug.tap(2);
+      const pts = []; for (let i = 0; i < 240; i++) { QA.adv(1 / 120); pts.push([w.pip.x, w.pip.y, w.pip.state]); }
+      QA.draw(); const c = QA.grab(0, 0, 960, 540, 1), g = c.getContext('2d');
+      for (const [x, y, s] of pts) { g.fillStyle = s === 'hop' ? '#f0f' : s === 'return' ? '#0ff' : '#ff0'; g.fillRect(x - 2, y - 2, 4, 4); }
+      return QA.sheet([c], 1, ['feet trail: magenta hop, cyan return, yellow boop/home']);
+    }, 'desk_pip_trail.jpg');
+    // dizzy (wake a napper in the back row)
+    await run(async () => {
+      QA.adv(2); QA.clear(); const w = POG.debug.world; w.leaves = 4;
+      QA.put(1, 'jerboa', 'sleepy', 'up'); POG.debug.tap(1);
       const fr = [], lb = []; let t = 0;
-      for (let i = 0; i < 10; i++) { await QA.raf(); fr.push(QA.grab(300, 30, 360, 330)); lb.push(t.toFixed(2) + 's ' + w.zippy.state + ' ' + (w.holes[1].critter ? w.holes[1].critter.state : '-')); QA.adv(0.08); t += 0.08; }
-      const sc = fr.map(c => { const s = document.createElement('canvas'); s.width = 240; s.height = 220; s.getContext('2d').drawImage(c, 0, 0, 240, 220); return s; });
-      return QA.sheet(sc, 5, lb);
-    });
-    save(dz, 'desk_zippy_dizzy_sheet.png');
-    // flight to the far-right back burrow in the canopy: does Zippy cover the HUD / leave the stage?
-    const far = await p.evaluate(async () => {
-      POG.debug.gotoLevel(2); QA.adv(3); QA.clear(); const w = POG.debug.world; w.colour = 2;
-      QA.put(2, 'toucan', 2, 'up'); QA.put(6, 'monkey', 2, 'up');
-      POG.debug.tap(2); const fr = [], lb = [];
-      for (let i = 0; i < 8; i++) { await QA.raf(); fr.push(QA.grab(0, 0, 960, 540)); lb.push(w.zippy.state); QA.adv(0.08); if (i === 3) POG.debug.tap(6); }
-      const sc = fr.map(c => { const s = document.createElement('canvas'); s.width = 384; s.height = 216; s.getContext('2d').drawImage(c, 0, 0, 384, 216); return s; });
-      return QA.sheet(sc, 4, lb.map((l, i) => i + ' ' + l + (i === 4 ? ' (retarget)' : '')));
-    });
-    save(far, 'desk_zippy_retarget_sheet.png');
-    // ?debug=1 hit zones over the tableau in each biome
+      for (let i = 0; i < 15; i++) { QA.draw(); fr.push(QA.grab(300, 40, 360, 330, 0.66)); lb.push(t.toFixed(2) + ' ' + w.pip.state + ' ' + (w.holes[1].critter ? w.holes[1].critter.state : '-')); QA.adv(0.1); t += 0.1; }
+      return QA.sheet(fr, 5, lb);
+    }, 'desk_pip_dizzy_sheet.jpg');
+    // friend pop (real rise physics), booped bounce, woken
+    await run(async () => {
+      QA.adv(2); QA.clear(); const w = POG.debug.world;
+      POG.debug.spawn(4, 'firefly');
+      const fr = [], lb = []; let t = 0;
+      for (let i = 0; i < 10; i++) { QA.draw(); const c = w.holes[4].critter; fr.push(QA.grab(380, 240, 200, 260, 0.8)); lb.push('pop ' + t.toFixed(2) + ' h' + (c ? c.h.toFixed(2) : '-')); QA.adv(0.04); t += 0.04; }
+      POG.debug.tap(4); t = 0;
+      for (let i = 0; i < 10; i++) { QA.draw(); const c = w.holes[4].critter; fr.push(QA.grab(380, 240, 200, 260, 0.8)); lb.push('boop ' + t.toFixed(2) + ' ' + (c ? c.state : '-')); QA.adv(0.06); t += 0.06; }
+      QA.adv(2); QA.clear(); QA.put(4, 'tortoise', 'sleepy', 'up'); QA.adv(0.02); POG.debug.tap(4); t = 0;
+      for (let i = 0; i < 10; i++) { QA.draw(); const c = w.holes[4].critter; fr.push(QA.grab(380, 240, 200, 260, 0.8)); lb.push('wake ' + t.toFixed(2) + ' ' + (c ? c.state : '-')); QA.adv(0.08); t += 0.08; }
+      return QA.sheet(fr, 10, lb);
+    }, 'desk_friend_pop_boop_wake_sheet.jpg');
+    // firefly flying to the jar (full stage, half size)
+    await run(async () => {
+      QA.adv(2); QA.clear(); const w = POG.debug.world;
+      QA.put(5, 'fennec', 'firefly', 'up'); POG.debug.tap(5);
+      let n = 0; while (!POG.Game.renderer.flyers.length && n++ < 400) QA.adv(1 / 120);
+      const fr = [], lb = [];
+      for (let i = 0; i < 8; i++) { QA.draw(); fr.push(QA.grab(240, 0, 720, 540, 0.5)); lb.push('flyer ' + (i * 0.08).toFixed(2)); QA.adv(0.08); }
+      return QA.sheet(fr, 4, lb);
+    }, 'desk_firefly_to_jar_sheet.jpg');
+    // ripples on the pool (spring) after pipHome + ambient
+    await run(async () => {
+      QA.adv(1); QA.clear(); const w = POG.debug.world;
+      QA.put(0, 'jerboa', 'firefly', 'up'); POG.debug.tap(0);
+      let n = 0; while (w.pip.state !== 'home' && n++ < 1200) QA.adv(1 / 120);
+      const fr = [], lb = [];
+      for (let i = 0; i < 8; i++) { QA.draw(); fr.push(QA.grab(330, 60, 300, 130, 1)); lb.push('home+' + (i * 0.12).toFixed(2) + ' rip' + POG.Game.weather.ripples.length); QA.adv(0.12); }
+      return QA.sheet(fr, 4, lb);
+    }, 'desk_ripples_sheet.jpg');
+    // tumbleweed in the dunes: run until one is on screen, then crop around it
+    await run(async () => {
+      POG.debug.gotoLevel(2); QA.adv(3); QA.clear(); const wx = POG.Game.weather;
+      const tw = () => wx.particles.find(q => q.sprite === 'tumbleweed' && q.x > 60 && q.x < 900);
+      let n = 0; while (!tw() && n++ < 60 * 40) QA.adv(1 / 60);
+      const fr = [], lb = [];
+      for (let i = 0; i < 10; i++) { const q = tw(); QA.draw(); if (q) { fr.push(QA.grab(Math.max(0, Math.min(760, q.x - 100)), Math.max(0, Math.min(340, q.y - 120)), 200, 200, 1)); lb.push('x' + q.x.toFixed(0) + ' y' + q.y.toFixed(0) + ' r' + q.rot.toFixed(1)); } QA.adv(0.1); }
+      if (!fr.length) { QA.draw(); fr.push(QA.grab(0, 0, 960, 540, 0.4)); lb.push('no tumbleweed after 40 s'); }
+      return QA.sheet(fr, 5, lb);
+    }, 'desk_tumbleweed_sheet.jpg');
+    // night ambient fireflies + stars (empty board, full stage)
+    await run(async () => {
+      POG.debug.gotoLevel(3); QA.adv(4); QA.clear(); const fr = [], lb = [];
+      for (let i = 0; i < 4; i++) { QA.draw(); fr.push(QA.grab(0, 0, 960, 540, 0.5)); lb.push('night +' + (i * 0.5) + 's p' + POG.Game.weather.particles.length); QA.adv(0.5); }
+      return QA.sheet(fr, 2, lb);
+    }, 'desk_night_ambient_sheet.jpg');
+    // spring + palms ambient
+    await run(async () => {
+      const fr = [], lb = [];
+      for (const z of [0, 1]) { POG.debug.gotoLevel(z); QA.adv(4); QA.clear(); for (let i = 0; i < 2; i++) { QA.draw(); fr.push(QA.grab(0, 0, 960, 540, 0.5)); lb.push('zone ' + z + ' +' + i); QA.adv(0.7); } }
+      return QA.sheet(fr, 2, lb);
+    }, 'desk_day_ambient_sheet.jpg');
+    // debug hit zones
     await p.goto(GAME + '?mute=1&seed=7&autostart=1&debug=1&adaptive=0'); await p.waitForFunction(() => POG.debug && POG.debug.mode === 'playing'); await p.evaluate(HELPERS);
-    for (let lv = 0; lv < 4; lv++) { await p.evaluate(l => { if (l) POG.debug.gotoLevel(l); QA.adv(3.2); QA.tableau(); QA.adv(0.02); }, lv); await raf(p); await shot(p, `desk_debug_L${lv}.png`); }
+    for (const lv of [0, 2]) { await p.evaluate(l => { if (l) POG.debug.gotoLevel(l); QA.adv(3.2); QA.tableau(); QA.adv(0.02); }, lv); await raf(p); await shot(p, `desk_debug_L${lv}.png`); }
     await p.context().close();
   }
 
-  // ===== 4. readability of the 4 stars at phone size + colour-blind sims =====
-  {
+  // ===== 4. phone readability awake vs napping + colour-vision sims =====
+  if (!only || only === 'cvd') {
     const p = await open(b, VIEWS[1], '&autostart=1&diff=normal');
     await p.waitForFunction(() => POG.debug.mode === 'playing');
     for (const lv of [0, 1, 2, 3]) {
-      await p.evaluate(l => { if (l) POG.debug.gotoLevel(l); QA.adv(3.2); QA.clear(); const n = POG.debug.world.holes.length, k = ['monkey', 'frog', 'toucan'];
-        for (let i = 0; i < n; i++) QA.put(i, k[i % 3], i % 4, 'up'); POG.Game.renderer.texts.length = 0; QA.adv(0.02); }, lv);
+      await p.evaluate(l => { if (l) POG.debug.gotoLevel(l); QA.adv(3.2); QA.tableau(); QA.adv(0.02); }, lv);
       await raf(p);
-      for (const k of ['', 'deutan', 'protan', 'gray']) { await cvd(p, k); await raf(p); await shot(p, `phone_stars_L${lv}${k ? '_' + k : ''}.png`); }
+      for (const k of ['deutan', 'gray']) { await cvd(p, k); await raf(p); await shot(p, `phone_L${lv}_${k}.png`); }
       await cvd(p, '');
     }
-    // 1:1 crop strip at real phone pixels: the 4 star sprites from canopy back row + front row
+    // "rise" h 0.45: a half-up napper vs half-up holder (the moment a child decides)
+    await p.evaluate(() => { POG.debug.gotoLevel(2); QA.adv(3.2); QA.clear(); const K = ['fennec', 'jerboa', 'tortoise'];
+      for (let i = 0; i < 9; i++) QA.put(i, K[i % 3], i % 2 ? 'sleepy' : 'firefly', 'rise', 0.45); QA.adv(0.01); POG.debug.world.holes.forEach(h => { if (h.critter) { h.critter.h = h.critter.hPrev = 0.45; h.critter.upFor = 999; } }); });
+    await raf(p); await shot(p, 'phone_half_up.png');
     await p.context().close();
   }
 
-  // ===== 5. custom pictures =====
-  for (const v of [VIEWS[0], VIEWS[1]]) {
+  // ===== 5. custom pictures (via the customise screen's file input) =====
+  if (!only || only === 'custom') for (const v of [VIEWS[0], VIEWS[1]]) {
     const p = await open(b, v);
     const hero = await photoPng(p, 900, 1200, 11), friend = await photoPng(p, 1200, 900, 23), bg = await photoPng(p, 1600, 900, 37);
-    for (const [slot, buf, nm] of [['hero', hero, 'hero.png'], ['critter', friend, 'friend.png'], ['bg_riverbank', bg, 'bg.png'], ['bg_ruins', bg, 'bg2.png']]) {
+    await p.evaluate(() => POG.UI.open('scrCustom', 'scrTitle')); await p.waitForTimeout(300);
+    for (const [slot, buf, nm] of [['hero', hero, 'hero.png'], ['critter', friend, 'friend.png'], ['bg_spring', bg, 'bg.png'], ['bg_night', bg, 'bg2.png']]) {
       await p.evaluate(s => { POG.UI._pickSlot = s; }, slot);
       await p.setInputFiles('#filePick', { name: nm, mimeType: 'image/png', buffer: buf });
-      await p.waitForFunction(() => !document.getElementById('toast').textContent.includes('Saving'), null, { timeout: 8000 }).catch(() => errs.push('custom save timeout ' + slot));
+      await p.waitForFunction(s => POG.Assets.hasCustom(s), slot, { timeout: 8000 }).catch(() => errs.push('custom save timeout ' + slot));
       await p.waitForTimeout(300);
     }
     await p.evaluate(() => POG.UI.open('scrCustom', 'scrTitle')); await p.waitForTimeout(400);
     await shot(p, `${v.id}_custom_filled.png`);
     await p.evaluate(() => { POG.UI.back(); POG.debug.startGame(); POG.Game._rotOk = true; });
-    for (const lv of [0, 3]) {
+    for (const lv of [0, 2, 3]) {
       await p.evaluate(l => { if (l) POG.debug.gotoLevel(l); QA.adv(3.2); QA.tableau(); QA.adv(0.02); }, lv);
       await raf(p); await shot(p, `${v.id}_custom_play_L${lv}.png`);
     }
-    // round shape
-    await p.evaluate(() => { POG.Assets.setShape('hero', 'circle'); POG.Assets.setShape('critter', 'circle'); POG.Game.picturesChanged(); QA.tableau(); const w = POG.debug.world; w.colour = 0; QA.put(3, 'monkey', 0, 'up'); POG.debug.tap(3); QA.adv(0.25); });
-    await raf(p); await shot(p, `${v.id}_custom_round_flight.png`);
+    await p.evaluate(() => { QA.tableau(); QA.put(3, 'fennec', 'firefly', 'up'); POG.debug.tap(3); QA.adv(0.22); });
+    await raf(p); await shot(p, `${v.id}_custom_hop.png`);
     await p.context().close();
   }
 
   await b.close();
-  if (errs.length) { console.log('ERRORS\n' + errs.join('\n')); }
+  if (errs.length) console.log('ERRORS\n' + errs.join('\n'));
   console.log('wrote', fs.readdirSync(OUT).length, 'files to', OUT);
 })();

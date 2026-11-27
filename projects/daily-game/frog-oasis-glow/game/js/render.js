@@ -7,7 +7,7 @@
  * Rendering is interpolated between fixed simulation steps (world.alpha). */
 (function (POG) {
   'use strict';
-  const LW = 960, LH = 540, HOME = { x: 480, y: 132 };
+  const LW = 960, LH = 540, JAR = { x: 404, y: 38 };
   const GLOW = 'rgba(255,224,102,', GOLDG = 'rgba(255,184,31,';
   // per chapter: name, letterbox colours, banner ink, far-layer drift (px/s) and HUD pill tint
   const ZONE_INFO = [
@@ -29,7 +29,7 @@
       this.vis = { cur: -1, prev: -1, fade: 1 };
       this._bg = new Map();     // zone → { back, far, front, w, h }
       this._spr = { clear: () => { this._bg.clear(); POG.Assets._cache.clear(); } };
-      this.texts = []; this.rings = []; this.flyers = [];
+      this.texts = []; this.rings = []; this.flyers = []; this.pending = new Map();
       this.shake = 0; this.flash = 0; this.time = 0; this.drift = 0;
       this.banner = null; this.leafPulse = 0; this.scorePulse = 0; this.jarPulse = 0; this.padBob = 0;
       this.portrait = false;
@@ -68,7 +68,7 @@
     /* logical y offset that moves the HUD band from the stage top to the screen top (tall screens), below the notch */
     hudDy() { const top = ((this.insets && this.insets.top) || 0) * this.px; return -Math.max(0, this.oy - top) / this.k; }
 
-    attach(world, weather) { this.world = world; this.weather = weather; this.texts.length = 0; this.rings.length = 0; this.flyers.length = 0; this.banner = null; }
+    attach(world, weather) { this.world = world; this.weather = weather; this.texts.length = 0; this.rings.length = 0; this.flyers.length = 0; this.pending = new Map(); this.banner = null; }
     setLevel(zone, instant) {
       zone = ((zone % 4) + 4) % 4;
       if (zone === this.vis.cur) return;
@@ -174,24 +174,25 @@
     onEvents(evts) {
       for (const e of evts) {
         switch (e.type) {
-          case 'boop': {
+          case 'boop': this.pending.set(e.hole, { e, age: 0 }); break;   // shown when Pip lands on that friend
+          case 'pipLand': this.padBob = 0; if (this.pending.has(e.hole)) { this._catch(this.pending.get(e.hole).e); this.pending.delete(e.hole); } break;
+          case '_catch': {
             const col = e.gold ? '#ffb81f' : '#ffe066';
             this.rings.push({ x: e.x, y: e.y, t: 0, col, max: e.gold ? 0.6 : 0.45 });
-            this.texts.push({ x: e.x, y: Math.max(100, e.y - 150), t: 0, text: (e.gold ? 'Golden! +' : '+') + e.points, col: e.gold ? '#ffd45a' : '#fff3a6', size: e.gold ? 36 : e.mult > 1 ? 34 : 28, sub: e.mult > 1 ? '×' + e.mult : '' });
+            this.texts.push({ x: e.x, y: Math.max(178, e.y - 92), t: 0, text: (e.gold ? 'Golden! +' : '+') + e.points, col: e.gold ? '#ffd45a' : '#fff3a6', size: e.gold ? 36 : e.mult > 1 ? 34 : 28, sub: e.mult > 1 ? '×' + e.mult : '' });
             if (this.weather) this.weather.burst(e.gold ? 'gold' : 'sparkle', e.x, e.y);
             this.flyers.push({ x: e.x, y: e.y, t: 0, gold: !!e.gold, seed: Math.random() });   // the firefly zooms into the jar
             if (e.gold) this.flash = Math.max(this.flash, 0.25);
             break;
           }
-          case 'wrong': this.texts.push({ x: e.x, y: Math.max(100, e.y - 120), t: 0, text: 'Shh… napping!', col: '#dfe4ff', size: 26 }); this.shake = 0.22; break;
+          case 'levelUp': this.pending.clear(); this.showBanner(e.zone); break;
+          case 'wrong': this.texts.push({ x: e.x, y: Math.max(186, e.y - 84), t: 0, text: 'Shh… napping!', col: '#dfe4ff', size: 26 }); this.shake = 0.22; break;
           case 'empty': this.rings.push({ x: e.x, y: e.y, t: 0, col: 'rgba(255,255,255,.8)', max: 0.3, small: true }); break;
-          case 'pipLand': this.padBob = 0; break;
           case 'pipHome': this.padBob = 1; break;
           case 'leafLost': this.leafPulse = -1; break;
           case 'leafGained': this.leafPulse = 1; this.texts.push({ x: 300, y: 84, t: 0, text: '+1 heart', col: '#9bf07f', size: 22 }); break;
           case 'combo': this.texts.push({ x: 480, y: 190, t: 0, text: 'Combo ' + e.n + '!', col: '#fff6c8', size: 32, big: true }); break;
           case 'levelClear': this.flash = 0.6; this.jarPulse = 1; this.texts.push({ x: 480, y: 190, t: 0, text: 'The End of the chapter! +' + e.bonus, col: '#fff6c8', size: 32, big: true, life: 1.6 }); break;
-          case 'levelUp': this.showBanner(e.zone); break;
           case 'gameOver': this.shake = 0.15; break;
           case 'nap': this.texts.push({ x: 480, y: 190, t: 0, text: 'Zzz… look for the fireflies!', col: '#ffffff', size: 26, big: true, life: 1.6 }); break;
         }
@@ -200,8 +201,10 @@
       if (this.rings.length > 12) this.rings.splice(0, this.rings.length - 12);
     }
 
+    _catch(e) { this.onEvents([Object.assign({}, e, { type: '_catch' })]); }
     update(dt) {
       this.time += dt;
+      for (const [h, p] of this.pending) { p.age += dt; if (p.age > 0.9) { this._catch(p.e); this.pending.delete(h); } }
       this.drift += dt * ZONE_INFO[Math.max(0, this.vis.cur)].drift;
       if (this.vis.fade < 1) this.vis.fade = Math.min(1, this.vis.fade + dt / 1.1);
       for (const t of this.texts) t.t += dt;
@@ -252,10 +255,12 @@
       const T = () => g.setTransform(this.k, 0, 0, this.k, this.ox + sx * this.k, this.oy + sy * this.k);
       T();
       if (w) {
-        this._ripples();
         this._pad(w);
+        this._ripples();
         this._particles('back');
+        if (prev) { g.save(); g.beginPath(); g.rect(edge / this.k - this.ox / this.k - sx, -2000, 4000, 4000); g.clip(); }
         this._critters(w);
+        if (prev) g.restore();
       }
       g.setTransform(1, 0, 0, 1, 0, 0);
       g.drawImage(cur.front, Math.round(sx * this.k), Math.round(sy * this.k));
@@ -283,7 +288,7 @@
         const asp = P_ASPECT[p.sprite] || 1, w = p.size, h = p.size * asp;
         const s = this._sprite('p_' + p.sprite, Math.max(4, Math.round(w)), Math.max(4, Math.round(h)));
         if (!s) continue;
-        g.save(); g.globalAlpha = clamp(p.alpha, 0, 1);
+        g.save(); g.globalAlpha = clamp(p.alpha * (p.sprite === 'glow' && p.y > 240 ? 0.45 : 1), 0, 1);
         g.translate(p.x, p.y);
         if (p.sprite === 'glow') {   // ambient fireflies: a soft halo around the dot
           const gr = g.createRadialGradient(0, 0, 0, 0, 0, w * (night ? 1.6 : 1.1));
@@ -331,16 +336,18 @@
       const bottom = hole.y + 25 * s + (1 - h) * 140 * s;
       const cw = 140 * s, ch = 150 * s, x0 = hole.x - cw / 2, y0 = bottom - ch;
       const sleepy = c.type === 'sleepy', gold = c.type === 'gold';
+      const waiting = c.state === 'booped' && !(c.bounceAt >= 0);   // tapped, Pip still in the air
+
       let sqx = 1, sqy = 1;
-      if (c.state === 'booped') { const t = c.t || 0, e = Math.exp(-t * 7) * Math.cos(t * 26); sqx = 1 + 0.1 * e; sqy = 1 - 0.1 * e; }
+      if (c.state === 'booped' && !waiting) { const t = Math.max(0, (c.t || 0) - (c.bounceAt || 0)), e = Math.exp(-t * 7) * Math.cos(t * 26); sqx = 1 + 0.1 * e; sqy = 1 - 0.1 * e; }
       else if (c.state === 'wow') { const t = c.t || 0; sqx = 1 + 0.05 * Math.sin(t * 40) * Math.exp(-t * 6); }
       else if (sleepy) { const br = Math.sin(this.time * 2.2 + c.id) * 0.015; sqx = 1 + br; sqy = 1 - br; }   // slow sleepy breathing
       g.save();
       g.beginPath(); g.rect(hole.x - 120 * s, hole.y - 260 * s, 240 * s, 264 * s); g.clip();
       g.translate(hole.x, bottom); g.scale(sqx, sqy); g.translate(-hole.x, -bottom);
-      const face = c.state === 'booped' ? 'happy' : c.state === 'wow' ? 'wow' : sleepy ? 'sleepy' : 'up';
+      const face = c.state === 'booped' && !waiting ? 'happy' : c.state === 'wow' ? 'wow' : sleepy ? 'sleepy' : 'up';
       const fx = hole.x, fy = y0 + 94 * s;
-      const holding = !sleepy && c.state !== 'booped' && c.state !== 'wow';
+      const holding = !sleepy && (c.state !== 'booped' || waiting) && c.state !== 'wow';
       if (holding) {   // the firefly's warm glow lights the friend from the front
         const pr = 0.5 + 0.5 * Math.sin(this.time * (gold ? 9 : 5) + c.id);
         const G = gold ? GOLDG : GLOW, R = (gold ? 96 : 80) * s;
@@ -362,14 +369,14 @@
         if (!customC) this._img(c.kind + '_paws', x0, y0, cw, ch);
       }
       g.restore();
-      if (sleepy && c.state !== 'wow' && h > 0.5) this._zzz(hole.x + 34 * s, y0 + 20 * s, s, c.id);
+      if (sleepy && c.state !== 'wow' && h > 0.5) this._zzz(hole.x + 44 * s, y0 + 34 * s, s, c.id);
     }
     /* little "z" bubbles rising from a napping friend (drawn as strokes, no fonts) */
     _zzz(x, y, s, id) {
       const g = this.g;
       for (let i = 0; i < 3; i++) {
         const t = ((this.time * 0.6 + i / 3 + id * 0.17) % 1), sz = (7 + i * 2 + t * 4) * s;
-        const zx = x + t * 22 * s + Math.sin(t * 6 + i) * 4 * s, zy = y - t * 46 * s;
+        const zx = x + t * 30 * s + Math.sin(t * 6 + i) * 3 * s, zy = y - t * 26 * s;
         g.globalAlpha = Math.sin(t * Math.PI) * 0.95;
         g.lineWidth = 5 * s; g.strokeStyle = 'rgba(60,64,130,.85)'; g.lineJoin = 'round'; g.lineCap = 'round';
         const zp = () => { g.beginPath(); g.moveTo(zx - sz / 2, zy - sz / 2); g.lineTo(zx + sz / 2, zy - sz / 2); g.lineTo(zx - sz / 2, zy + sz / 2); g.lineTo(zx + sz / 2, zy + sz / 2); };
@@ -407,16 +414,17 @@
       // tongue flick: on landing, Pip's tongue snaps the firefly from the friend's paws
       if (st === 'boop' && z.target && z.target.hole != null && w.holes[z.target.hole]) {
         const hole = w.holes[z.target.hole], t = clamp((z.t || 0) / 0.18, 0, 1), ext = Math.sin(t * Math.PI);
-        const mx = x + (z.face < 0 ? -1 : 1) * (118 - 80) * sc, my = y - (128 - 74) * sc;
+        const sqk = z.squash || 0, mx = x + (z.face < 0 ? -1 : 1) * (118 - 80) * sc * (1 + 0.22 * sqk), my = y - (128 - 74) * sc * (1 - 0.2 * sqk);
         const tx = hole.x, ty = hole.y - 31 * hole.s;
-        const ex = lerp(mx, tx, ext), ey = lerp(my, ty, ext);
-        g.strokeStyle = '#ff8fa3'; g.lineCap = 'round'; g.lineWidth = 6;
-        g.beginPath(); g.moveTo(mx, my); g.quadraticCurveTo((mx + ex) / 2 + 14 * (z.face < 0 ? -1 : 1), Math.min(my, ey) - 10, ex, ey); g.stroke();
-        g.fillStyle = '#ff6f8e'; g.beginPath(); g.arc(ex, ey, 6, 0, Math.PI * 2); g.fill();
+        const ex = lerp(mx, tx, ext), ey = lerp(my, ty, ext);   // (ext: out and back in 0.18 s)
+        const sd = z.face < 0 ? -1 : 1, hs = hole.s;
+        g.strokeStyle = '#ff8fa3'; g.lineCap = 'round'; g.lineWidth = 3 + 3 * hs;
+        g.beginPath(); g.moveTo(mx, my); g.quadraticCurveTo(hole.x + sd * 78 * hs, (my + ey) / 2, ex, ey); g.stroke();
+        g.fillStyle = '#ff6f8e'; g.beginPath(); g.arc(ex, ey, 3 + 3 * hs, 0, Math.PI * 2); g.fill();
       }
       if (st === 'dizzy') {   // little stars circling his head
         for (let i = 0; i < 3; i++) {
-          const an = this.time * 5 + i * 2.1, cx = x + Math.cos(an) * 30, cy = y - 96 + Math.sin(an) * 8;
+          const an = this.time * 5 + i * 2.1, cx = x + Math.cos(an) * 30, cy = y - 88 + Math.sin(an) * 7;
           this._img('p_sparkle', cx - 9, cy - 9, 18, 18);
         }
       }
@@ -431,7 +439,7 @@
       }
       g.globalAlpha = 1;
       // fireflies zooming into the jar: an arc up with a wobbly flight path and a fading glow trail
-      const jx = 480, jy = 40 + this.hudDy();
+      const jx = JAR.x, jy = JAR.y + 2 + this.hudDy();
       for (const f of this.flyers) {
         const t = clamp(f.t / 0.6, 0, 1), e = t * t * (3 - 2 * t);
         const wob = Math.sin(t * 14 + f.seed * 6) * 14 * (1 - t);
@@ -482,7 +490,7 @@
         this._img(full ? 'leaf' : 'leaf_empty', x - s / 2 + dx + 15, y - s / 2, s, s);
       }
       // lantern jar (top-centre): glows brighter as the chapter fills; the ring shows chapter progress
-      const cx = 480, cy = 38, R = 30 + this.jarPulse * 4;
+      const cx = JAR.x, cy = JAR.y, R = 28 + this.jarPulse * 4;
       const prog = clamp((w.levelBoops || 0) / (w.levelGoal || 15), 0, 1);
       g.fillStyle = ZONE_INFO[Math.max(0, this.vis.cur)].pill; g.beginPath(); g.arc(cx, cy, R + 3, 0, Math.PI * 2); g.fill();
       const gl = 0.15 + prog * 0.6 + this.jarPulse * 0.25;
@@ -497,7 +505,7 @@
         const an = this.time * (1.3 + i * 0.37) + i * 1.9;
         g.fillStyle = 'rgba(255,240,150,.95)'; g.beginPath(); g.arc(cx + Math.cos(an) * 8, cy + 8 + Math.sin(an * 1.3) * 6, 2.6, 0, Math.PI * 2); g.fill();
       }
-      const js = 44 * (1 + this.jarPulse * 0.12);
+      const js = 42 * (1 + this.jarPulse * 0.12);
       this._img('jar', cx - js / 2, cy - js / 2 + 1, js, js);
     }
 
@@ -507,7 +515,7 @@
       const g = this.g, t = b.t;
       const a = t < 0.3 ? t / 0.3 : t > 1.2 ? Math.max(0, 1 - (t - 1.2) / 0.4) : 1;
       if (a <= 0) return;
-      const y = 182 - (t < 0.3 ? (1 - t / 0.3) * 16 : 0);
+      const y = 494 + (t < 0.3 ? (1 - t / 0.3) * 16 : 0);
       g.globalAlpha = a;
       g.font = '900 36px "Baloo 2", "Trebuchet MS", system-ui, sans-serif';
       const tw = Math.max(250, g.measureText(b.text).width + 56), x0 = 480 - tw / 2, h = 76;

@@ -1,28 +1,25 @@
-# Zippy's Jungle Boop (daily game, 2026-11-11)
+# Pip's Oasis Glow (daily game, 2026-11-27)
 
 ## Goal
-A family-friendly whack-a-critter game in a jungle with colour matching. Zippy the jetpack snail boops jungle friends (monkey, frog, toucan) who hold a star of his current colour. Four biomes: Riverbank Morning, Bamboo Grove, Treetop Canopy, Waterfall Ruins. Requirement: `REQUIREMENT.md`. Made with `/build-game random`.
+A family-friendly whack-a-critter in a desert oasis, told as a storybook. Pip the frog hops in gravity arcs onto the heads of desert friends (fennec kit, jerboa, tortoise) who hold fireflies, and catches them with his tongue into a lantern jar. Napping friends (nightcap, closed eyes, "z"s) must not be tapped; a rare golden firefly is worth 5. Four chapters: The Morning Spring, The Palm Grove, The Sunset Dunes, The Starlit Oasis. Requirement: `REQUIREMENT.md`. Made with `/build-game random`, forked from `../snail-jungle-boop/`.
 
 ## Status
-v1.0, built and tested on 2026-11-11.
-- **QA results:** unit tests 29/29; smoke test passes; functional suite 264/264 (`docs/reports/functional.md`); visual review `docs/reports/visual.md`; playtest `docs/reports/playtest.md`.
-- **Applied after QA:**
-  - Playtest: 4 starting leaves, 1.5 s colour grace, Easy up 2.8 s / spawn 3.0 s / 75 % matching (a 4-year-old model clears Riverbank 26 % → 83 %); mash guard (3 empty taps in 1 s → 1.5 s nap).
-  - Visual P1: burrow fronts drawn per hole right after its friend (a back-row lip no longer covers a front-row face); one-line level banner at y 150 that fades by 2 s; HUD buttons respect the safe area.
-  - Visual P2: Zippy boops from above the head (TARGET_DY 160); "+N" and "Oops!" texts above the faces; combo/clear texts higher; colour-warning blink slowed to 1.5 Hz; foliage frame quarters hug the screen corners; far layer extended to the screen top; floor band tiled on tall screens; stars drawn larger (68 px); a custom Zippy gets a ring and star in his colour.
-  - Functional: best score never saved for bot/test runs; stage fits the canvas exactly on iPad; the rotate card shows only on phones (< 600 px).
-- **Open:** visual P3s (crossfade double burrows, HUD on game over, custom friends have no expressions); colour-blind Coral/Sunny and Sky/Grape rely on the emblems; the idle-player hint and an "end of tour" screen suggested by the playtester; app/main.go port fallback changes origin in the browser fallback.
+v1.0, built and tested on 2026-11-27.
+- QA round (`docs/reports/`): functional 450/457 (Pip froze if the chapter changed mid-hop via `gotoLevel`; Settings overflowed sideways on a notched iPhone in landscape; `setSpeed` runs could save a best; small volume buttons); visual 3 P1 (the firefly was caught before Pip landed; the chapter card hid back-row faces and Pip's pad; the jar badge sat on Pip's eyes on 16:9) + 8 P2; playtest: kid3 cleared chapter 1 on Easy only 60 %, gold missing in 34 % of chapters.
+- Fixes applied: catch effects (happy face, "+N", firefly to the jar) now wait for Pip's landing (the friend keeps the firefly until then); chapter card in the bottom band and gone by 1.6 s; jar badge moved beside the hearts (x 404); texts kept below the HUD; tongue scaled and curling round the friend's face; dizzy stars above Pip; ripples over the lily pad; "z"s drift sideways; live friends drawn only on the new page during a page turn; night ambient fireflies dimmer in the play band; `START_LEAVES` 4 → 5, `GOLD_P` 0.07 → 0.10, `GOLD_UP_K` 0.75 → 0.90 (kid3 60 → 81 %, kid4 91 → 99 %); world guards a stale hop target; Settings grid `minmax(0,1fr)`; 44 px volume buttons; `setSpeed` taints the run.
+- Open: visual P2-7 (custom napper has no nightcap), P2-8 (iPad portrait floor seams), P3s (title icon over the demo Pip, HUD behind game over, crowded middle column in chapters 3–4); playtest ideas (chapter goal per difficulty, idle hint, end-of-book screen).
 - **Not yet verified:** a real iPhone or iPad, the music by ear, and the exe on Windows.
 
 ## Stack
 - HTML5 canvas and plain JavaScript on `window.POG` in `game/`.
-- `world.js` has no pixels and is deterministic: logical stage 960×540 px, y down, fixed 1/120 s steps; burrow layouts in `World.LAYOUTS`.
-- `render.js` fits the stage (contain) and covers the letterbox; per biome, the sky+floor+burrow backs and the foliage frame are pre-rendered once per size; friends, stars, paws, burrow fronts and Zippy are cached sprites.
+- `world.js` has no pixels and is deterministic: logical stage 960×540 px, y down, fixed 1/120 s steps; hole layouts in `World.LAYOUTS`; Pip's hops are exact parabolas (g = 2600 px/s²).
+- `render.js` fits the stage (contain) and covers the letterbox; per chapter the sky+floor+hole backs and the frame are pre-rendered once per size; a chapter change is a 1.1 s page turn.
 - The Go + WebView2 wrapper in `app/` builds `dist/PipsOasisGlow.exe` on ports 48813/48823/48833/48843. JS bridge: `pgStoreAll/pgStoreSet/pgStoreDel/pgFullscreen/pgQuit`.
-- Original SVG art from `tools/art-*`; sound synthesized with WebAudio.
+- Original SVG art from `tools/art-*`; sound synthesized with WebAudio; `extras.js` (volume + Score Card) and the loud-audio patch come from `shared/daily-mobile/apply.py`.
 
 ## Rules
-- Keep all code inside this folder. `docs/DESIGN.md` is the contract between modules.
-- Kid-friendly content: boops, giggles and stars; nothing scary; original art and sound only.
+- Keep all code inside this folder. `docs/DESIGN.md` is the contract between modules (note: the `pop` event carries `critterType`, not `type`).
+- Kid-friendly content: fireflies, giggles and naps; nothing scary; original art and sound only.
 - Storage keys use the `pog:` prefix, because all the games share one GitHub Pages origin.
-- `app/web/`, `build/`, `dist/`, `tests/out/` and the art `out/` folders are build outputs and are gitignored.
+- Test URL flags are never saved into settings; bot and test runs never save a best score.
+- `app/web/`, `build/`, `dist/`, `tests/out/`, `tests/sim/out/` and the art `out/` folders are build outputs and are gitignored.

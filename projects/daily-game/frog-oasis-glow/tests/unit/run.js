@@ -30,6 +30,7 @@ function mk(diff, seed, extra) { return new W(Object.assign({ seed: seed || 1, d
 function quiet(diff, seed) {
   const w = mk(diff, seed);
   w._quiet = true; hold(w); w.drainEvents();
+  w.leaves = 4;   // the rule tests below count from 4 hearts (START_LEAVES is 5 since the playtest)
   return w;
 }
 function hold(w) { w.spawnT = 1e9; w.noFireflyT = -1e9; }
@@ -112,7 +113,7 @@ test('contract: statics, initial state and a JSON-able getState()', () => {
   const c = s.holes.find(h => h.critter).critter;
   for (const k of ['kind', 'type', 'state', 'h', 'hPrev', 't', 'upFor', 'id']) assert.ok(k in c, 'critter.' + k);
   assert.ok(['firefly', 'gold', 'sleepy'].includes(c.type) && W.KINDS.includes(c.kind));
-  assert.strictEqual(s.phase, 'play'); assert.strictEqual(s.leaves, 4); assert.strictEqual(s.maxLeaves, 5);
+  assert.strictEqual(s.phase, 'play'); assert.strictEqual(s.leaves, C.START_LEAVES); assert.strictEqual(s.maxLeaves, 5);
   assert.strictEqual(s.levelGoal, 15);
   assert.strictEqual(s.pip.state, 'home'); assert.strictEqual(s.pip.x, 480); assert.strictEqual(s.pip.y, 132);
   // debugSpawn types
@@ -429,12 +430,12 @@ test('first pop of every chapter holds a (plain) firefly; gold never before the 
   assert.ok(firsts > 300, 'chapters seen ' + firsts);
   assert.strictEqual(early, 0, 'gold in the first 3 pops');
   const p = laterGold / later;
-  assert.ok(p > 0.045 && p < 0.095, 'gold share ' + p.toFixed(3) + ' of ' + later);
-  // a gold stays up × 0.75
+  assert.ok(p > C.GOLD_P * 0.7 && p < C.GOLD_P * 1.3, 'gold share ' + p.toFixed(3) + ' of ' + later);
+  // a gold stays up × GOLD_UP_K
   const w = quiet('easy'), a = w.debugSpawn(0, 'firefly'), g = w.debugSpawn(1, 'gold');
-  near(g.upFor / a.upFor, 0.75, 0.75 * 0.25, 'gold up ratio');
+  near(g.upFor / a.upFor, C.GOLD_UP_K, C.GOLD_UP_K * 0.25, 'gold up ratio');
   const base = C.DIFFICULTY.easy.up;
-  assert.ok(g.upFor >= 0.75 * base * 0.88 - 1e-9 && g.upFor <= 0.75 * base * 1.12 + 1e-9);
+  assert.ok(g.upFor >= C.GOLD_UP_K * base * 0.88 - 1e-9 && g.upFor <= C.GOLD_UP_K * base * 1.12 + 1e-9);
 });
 
 test('chapter 1 on Easy is gentle: ≈2.8 s up time, ≤ 2 up, 75 % fireflies, first pop a firefly, misses free', () => {
@@ -490,8 +491,8 @@ test('level: loops after the night (level 4 = spring loop 1) and every chapter /
 
 test('game over: hearts hit 0 → phase over, gameOver once, no more scoring', () => {
   const w = quiet('normal');
-  const all = [];
-  for (let k = 0; k < C.START_LEAVES; k++) {
+  const all = [], n0 = w.leaves;
+  for (let k = 0; k < n0; k++) {
     settle(w); secs(w, 0.4);
     popUp(w, k, 'sleepy'); assert.strictEqual(w.tapHole(k), 'wrong'); all.push(...w.drainEvents());
   }
@@ -502,7 +503,7 @@ test('game over: hearts hit 0 → phase over, gameOver once, no more scoring', (
   all.push(...secs(w, 10));
   assert.strictEqual(of(all, 'gameOver').length, 1); assert.strictEqual(of(all, 'gameOver')[0].score, score);
   assert.strictEqual(w.score, score); assert.strictEqual(of(all, 'pop').length, 0);
-  assert.strictEqual(of(all, 'leafLost').length, C.START_LEAVES);
+  assert.strictEqual(of(all, 'leafLost').length, n0);
 });
 
 // ---------- hit zone ----------
