@@ -1,0 +1,26 @@
+{
+  "spring": {
+    "sky": "#d5e6ec",
+    "ground": "#ebddb9",
+    "accent": "#7fb7b9",
+    "banner": "#5a4632"
+  },
+  "palms": {
+    "sky": "#a6d8f0",
+    "ground": "#edd59f",
+    "accent": "#5f9f8c",
+    "banner": "#4c3e26"
+  },
+  "dunes": {
+    "sky": "#eea58e",
+    "ground": "#ecb68f",
+    "accent": "#c26f80",
+    "banner": "#5a2c44"
+  },
+  "night": {
+    "sky": "#2f3570",
+    "ground": "#5d5f98",
+    "accent": "#a8b4ec",
+    "banner": "#f2efff"
+  }
+}
