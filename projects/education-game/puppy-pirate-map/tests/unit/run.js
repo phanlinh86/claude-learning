@@ -187,7 +187,7 @@ test('layout: DESIGN §2 boxes (ground, bubble, HUD, Mit, board, tray, item size
     const B = L.board;
     if (!P) {
       const x0 = ins.left + 250, x1 = v.W - ins.right - 30;
-      const maxS = age <= 4 ? L.item * 1.25 : L.item;
+      const maxS = age <= 4 ? L.item * CFG.sizeK.big : L.item;
       assert.ok(Math.abs(L.tray.y - Math.min(v.H - ins.bottom - L.item - (phone ? 76 : 96), L.groundY - 8 - 44 - maxS)) < 1e-9, 'tray y');
       assert.ok(L.tray.rows[0].y <= L.groundY - 8 + 1e-9, 'ledge above the home indicator');
       assert.ok(Math.abs(B.y - Math.max(ins.top + 152, L.bubble.y + L.bubble.h + 30)) < 1e-9, 'board y');
@@ -331,7 +331,8 @@ test('content: every topic × age 3–7 × 160 seeds × rounds 0–3 × level 0/
     assert.strictEqual(real.length, r.slots.length);
     if (TM.AGE_POOLS[age].includes(topic)) assert.ok(r.pieces.length <= MAXPIECES[age] && r.slots.length <= MAXSLOTS[age], `${topic} age ${age}: counts fit the layout tables`);
     assert.ok(r.pieces.length <= 5);
-    if (ri === 0 && topic !== 'oddeven') assert.ok(r.slots.length === 2 && !extra.length, 'warm-up 2 slots, no distractor');
+    if (ri === 0 && topic !== 'oddeven') assert.ok(r.slots.length === 2 && extra.length === (level === 0 ? 0 : 1), 'warm-up 2 slots; no distractor only in the session\'s first warm-up');
+    if ((ri > 0 || level > 0) && topic !== 'oddeven' && !(topic === 'initial' && r.pieces.length >= 5)) assert.strictEqual(extra.length, 1, `${topic} age ${age} round ${ri} level ${level}: a distractor (never a free last answer)`);
     if (r.short && topic !== 'oddeven') assert.strictEqual(r.slots.length, 2);
     // simulate the round: at every find step exactly one still-unplaced piece answers (independent matcher)
     const placed = new Set();
@@ -356,16 +357,19 @@ test('content: slots / distractors per age as DESIGN §5.1 (later rounds)', () =
     assert.ok(r1.slots.length >= want[age][0] && r1.slots.length <= want[age][1], `age ${age} ${topic}: ${r1.slots.length} slots`);
     assert.strictEqual(r1.pieces.length - r1.slots.length, 1, 'one distractor from round 2');
     const r0 = C.makeRound(topic, { age, rng: new TM.RNG(s), roundIndex: 1, level: 0 });
-    if (age <= 4) assert.strictEqual(r0.pieces.length, r0.slots.length, 'first chapter at ages ≤ 4: no distractor');
+    assert.strictEqual(r0.pieces.length - r0.slots.length, 1, 'first chapter round 1: a distractor too (QA: no free last answers)');
+    const w0 = C.makeRound(topic, { age, rng: new TM.RNG(s), roundIndex: 0, level: 0 }), w1 = C.makeRound(topic, { age, rng: new TM.RNG(s), roundIndex: 0, level: 2 });
+    assert.strictEqual(w0.pieces.length, 2, 'the session\'s first warm-up: 2 + 0'); assert.strictEqual(w1.pieces.length, 3, 'later warm-ups: 2 + 1');
   }
-  // age 4 colours: only 3 clash-free colours fit → 2 slots + 1 distractor (first chapter 3 + 0)
+  // age 4 colours: only 3 clash-free colours fit → 2 slots + 1 distractor (first chapter too)
   for (let s = 1; s < 40; s++) {
     const r = C.makeRound('colors', { age: 4, rng: new TM.RNG(s), roundIndex: 2, level: 1 });
     assert.strictEqual(r.slots.length, 2); assert.strictEqual(r.pieces.length, 3);
-    assert.strictEqual(C.makeRound('colors', { age: 4, rng: new TM.RNG(s), roundIndex: 2, level: 0 }).slots.length, 3);
+    assert.strictEqual(C.makeRound('colors', { age: 4, rng: new TM.RNG(s), roundIndex: 2, level: 0 }).pieces.length, 3);
   }
-  for (let s = 1; s < 40; s++) {   // age 3 distractor from round index 2, not in the first chapter
-    assert.strictEqual(C.makeRound('animals', { age: 3, rng: new TM.RNG(s), roundIndex: 1, level: 1 }).pieces.length, 2);
+  for (let s = 1; s < 40; s++) {   // age 3: a distractor from round index 1, also in the first chapter
+    assert.strictEqual(C.makeRound('animals', { age: 3, rng: new TM.RNG(s), roundIndex: 1, level: 0 }).pieces.length, 3);
+    assert.strictEqual(C.makeRound('animals', { age: 3, rng: new TM.RNG(s), roundIndex: 1, level: 1 }).pieces.length, 3);
     assert.strictEqual(C.makeRound('animals', { age: 3, rng: new TM.RNG(s), roundIndex: 2, level: 1 }).pieces.length, 3);
   }
 });
@@ -381,8 +385,10 @@ test('content: deterministic per seed; variety; topic rules (count n, dots neigh
     assert.ok(keys.size >= 12, `${topic} age ${age}: only ${keys.size} different sets`);
   }
   for (let s = 0; s < 200; s++) {
-    const c0 = C.makeRound('count', { age: 4, rng: new TM.RNG(s), roundIndex: 0 });
-    assert.deepStrictEqual(c0.pieces.map(p => p.thing.n).sort(), [1, 2], 'warm-up 1 vs 2 coins');
+    const c0 = C.makeRound('count', { age: 4, rng: new TM.RNG(s), roundIndex: 0, level: 0 });
+    assert.deepStrictEqual(c0.pieces.map(p => p.thing.n).sort(), [1, 2], 'first warm-up 1 vs 2 coins');
+    const c1 = C.makeRound('count', { age: 4, rng: new TM.RNG(s), roundIndex: 0, level: 1 });
+    assert.deepStrictEqual(c1.pieces.map(p => p.thing.n).sort(), [1, 2, 3], 'later warm-ups 1 / 2 / 3 coins (one a distractor)');
     assert.ok(c0.pieces.every(p => p.thing.kind === 'coins' && p.thing.nameKind === 'coins' && p.thing.nameValue === p.thing.n));
     assert.ok(c0.steps.every(st => st.params.kind === 'coins' && st.nameKind === 'coins'));
     const c4 = C.makeRound('count', { age: 4, rng: new TM.RNG(s), roundIndex: 2, level: 1 }), n4 = c4.pieces.map(p => p.thing.n);
@@ -768,7 +774,7 @@ test('world: picture complete → roundDone (stars), shine 0 → 1, alive motion
     let turnMid = null, catchE = null, sc = [], minK = 1, M = w.layout.mit;
     until(w, () => {
       if (w.phase === 'turn' && Math.abs(w.phaseTime - 0.4) < H / 2) turnMid = w.board.turn;
-      if (w.phase === 'turn') { sc.push({ t: w.phaseTime, x: w.board.scrollX, y: w.board.scrollY, a: w.board.scrollA }); minK = Math.min(minK, w.board.scrollK); }
+      if (w.phase === 'turn') { sc.push({ t: w.phaseTime, x: w.board.scrollX, y: w.board.scrollY, a: w.board.scrollA, v: w.board.scrollT, r: w.board.scrollRot }); minK = Math.min(minK, w.board.scrollK); }
       for (const x of evs(w)) if (x.type === 'scrollCatch') catchE = x;
       return w.state !== 'roundDone';
     });
@@ -778,6 +784,10 @@ test('world: picture complete → roundDone (stars), shine 0 → 1, alive motion
     assert.ok(Math.abs(rolling[rolling.length - 1].y - B.y) < 8, 'rolled up to the top');
     assert.ok(catchE && Math.hypot(catchE.x - (M.x + 0.32 * M.h), catchE.y - (M.y - 0.42 * M.h)) < 6, 'the scroll flies into Mit\'s paws');
     assert.ok(Math.abs(minK - CFG.scrollK) < 0.02, 'it shrinks as it flies');
+    const fly = sc.filter(q => q.t >= CFG.turnTime), Bb = w.layout.bubble;
+    assert.ok(fly.every(q => q.y >= Bb.y + Bb.h + 20 - 1e-6 || q.x > Bb.x + Bb.w + 40), 'the flying scroll stays below the speech bubble');
+    assert.ok(fly.every(q => q.v > 0.92 - 1e-6 || q.a > 0.999), 'it fades only in the last 8 %');
+    assert.ok(fly.length && Math.abs(fly[fly.length - 1].r - fly[0].r) <= 2 * Math.PI, 'it spins ≤ 2π in flight');
     const pic = w.pictures[w.pictures.length - 1];
     assert.ok(pic && pic.scene === SCENES[topic] && pic.season === 1 && pic.pieces.length === nSlots && pic.pieces.every(q => q.u > 0 && q.u < 1 && q.thing));
     assert.strictEqual(w.state, 'round'); assert.strictEqual(w.phase, 'enter');
@@ -849,8 +859,8 @@ test('world: session done — the treasure chest rises from the sand (0.6 s), op
 });
 
 // ---------------------------------------------------------------- world: surprises
-test('world: crab — lands on its ledge (top of the board frame / the bubble / Mit\'s head) 3–8 s after the ask, never over the tray, waddles + pecks, tap → crabTap (flaps up, lands)', () => {
-  for (const v of [VIEWPORTS[4], VIEWPORTS[2], VIEWPORTS[0], VIEWPORTS[6], VIEWPORTS[9]]) {
+test('world: crab — lands on its ledge (top of the board frame / the bubble / the bottom frame; never on Mit) 3–8 s after the ask, never over the tray hit circles, waddles + pecks, tap → crabTap (flaps up, lands)', () => {
+  for (const v of [VIEWPORTS[4], VIEWPORTS[2], VIEWPORTS[0], VIEWPORTS[6], VIEWPORTS[9], VIEWPORTS[3]]) {
     const w = roundOf(mkWorld({ vp: v, age: 4, surprise: true }), 'animals', 1, { surprise: 'crab' }), t0 = w.time;
     let pe = null;
     until(w, () => { for (const e of evs(w)) if (e.type === 'crab') pe = e; return !!pe; });
@@ -859,8 +869,14 @@ test('world: crab — lands on its ledge (top of the board frame / the bubble / 
     until(w, () => g.state === 'walk');
     const pr = w._perch(), L = w.layout;
     assert.ok(Math.abs(g.y - pr.y) < 1e-6, v.name + ': on its ledge');
-    assert.ok(g.y < L.tray.y - 30, v.name + ': above the tray, never over the pieces');
-    if (!pr.mit) assert.ok(g.x >= L.board.x - 1 || g.x >= L.bubble.x, v.name + ': on the frame / bubble');
+    assert.ok(!pr.mit, v.name + ': never on Mit');
+    for (let x = pr.lo; x <= pr.hi; x += 8) {   // anywhere on the ledge: clear of Mit, the tray pieces' hit circles
+      const cy = pr.y - 0.35 * CFG.crabW;
+      const M = L.mitBox; assert.ok(!(x + 48 > M.x && x - 48 < M.x + M.w && pr.y > M.y && pr.y - 84 < M.y + M.h), v.name + ': not over Mit');
+      for (const p of w.pieces) if (p.state === 'rest') assert.ok(Math.hypot(x - p.homeX, cy - p.homeY) > w._hitR(p) + 20, v.name + ': clear of a tray piece');
+    }
+    assert.ok(g.x >= L.board.x - 1 || g.x >= L.bubble.x, v.name + ': on the frame / bubble');
+    for (const K of L.keep.filter(k => k.kind === 'bubble')) if (pr.y > K.y + K.h) assert.ok(pr.y - 84 >= K.y + K.h - 1 || g.x + 40 < K.x || g.x - 40 > K.x + K.w, v.name + ': head clear of the bubble');
     for (const K of L.keep.filter(k => k.kind === 'hud')) assert.ok(!(g.x + 40 > K.x && g.y - 84 < K.y + K.h && g.y > K.y), v.name + ': not under the HUD');
     let steps = 0, last = g.step, x0 = g.x, t1 = w.time, wraps = 0;
     until(w, () => { if (g.step !== last) steps++; if (g.step < last) wraps++; last = g.step; return g.stopT > 0.5; });
@@ -928,7 +944,7 @@ test('world: rotation mid-drag — the drag is cancelled (glides home), slots re
   assert.strictEqual(w.state, 'roundDone');
 });
 
-test('world: chapter time limit — Talk time after round 3 once the chapter passed 75 s; Talk re-asks, glows, Mit answers herself', () => {
+test('world: chapter time limit — Talk time after round 3 once the chapter passed chapterTimeLimit (65 s); Talk re-asks, glows, Mit answers herself', () => {
   const w = mkWorld({ age: 4 });
   w.levels = ['animals', 'animals', 'animals', 'animals']; w.startLevel(0);
   until(w, () => w.interactive);

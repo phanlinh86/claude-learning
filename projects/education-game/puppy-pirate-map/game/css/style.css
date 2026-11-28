@@ -63,7 +63,9 @@ button { font-family: inherit; color: inherit; border: 0; background: none; curs
   text-shadow: 0 4px 0 var(--deep), 0 8px 0 rgba(0, 0, 0, .14), 0 0 24px rgba(255, 255, 255, .5);
   -webkit-text-stroke: 2px var(--deep); paint-order: stroke fill; }
 .logo span { display: inline-block; }
+#logo1 { color: #FFF3D6; -webkit-text-stroke: 3px var(--deep); }
 #logo2 { color: #ffd23f; }
+#doneTitle, .panel h2 { text-wrap: balance; }
 .tagline { margin: 4px 0 8px; font-size: clamp(17px, 3 * var(--u), 26px); font-weight: 700; color: var(--ink);
   background: rgba(255, 255, 255, .72); padding: 6px 16px; border-radius: 99px; text-align: center; }
 .btn-play { width: clamp(120px, 24 * var(--u), 190px); aspect-ratio: 1; border-radius: 50%; background: var(--green);

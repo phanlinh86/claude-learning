@@ -28,7 +28,7 @@
   var CONFIG = {
     // ---- timing / state machine (s)
     step: 1 / 120, maxFrame: 1.0,
-    roundsPerLevel: 4, chapterTimeLimit: 75, chapterMinRounds: 2,   // playtest: 3 → 2 (a slow 3-year-old stays ≤ 8 min)
+    roundsPerLevel: 4, chapterTimeLimit: 65, chapterMinRounds: 2,   // playtest: 3 → 2, 75 → 65 s (a slow 3-year-old stays ≤ 8 min)
     shortBudget: [1e9, 30, 48, 62],   // s into the chapter: a round starting later than this is short (2 slots)
     introTime: 2.5, levelDoneTime: 3.6,   // 3.6: the chapter praise with the child's name is heard before the next title
     talkAfterAnswer: 1.6, talkAskTime: 12, talkGlowAfterAsks: 2, talkMaxAsks: 3, talkGiveUp: 12,
@@ -48,7 +48,8 @@
     itemMin: { 3: 112, 4: 112, 5: 104, 6: 96, 7: 96 },                  // last-resort tier when the base item does not fit (iPad 4:3, 5 tray pieces)
     maxSlots: { 3: 2, 4: 3, 5: 4, 6: 4, 7: 4 }, maxPieces: { 3: 3, 4: 4, 5: 5, 6: 5, 7: 5 },
     slotK: 1.25, slotInset: 0.6, slotScale: 1, spotK: 1.3, spotMaxK: 1.6,
-    hitK: 0.6, hitPad: 26, sizeK: { big: 1.25, small: 0.8 },
+    hitK: 0.6, hitPad: 26, sizeK: { big: 1.35, small: 0.9 },   // QA: the small piece ≥ 0.9 item (≈ 66 css px on iPhone); big : small = 1.5
+    slotEdge: 16,                                 // a slot's piece box stays ≥ 16 px inside the parchment (clear of the frame's inner shadow / round corners)
     busyK: 1.2,                                   // slot placement: a slot fully on busy scenery (tree, window, chalkboard) costs 1.2 × item of spacing score
 
     // ---- touch
@@ -80,7 +81,7 @@
 
     // ---- alive / turn
     shineTime: 0.7, aliveRamp: 0.4, aliveTime: 2.4, woofAt: 1.2, poofAt: 0.3, poofTime: 0.35, waveStagger: 0.12,
-    turnTime: 0.9, scrollFlyTime: 0.45, scrollApex: 90, scrollK: 0.35,   // roll-up 0.9 s, then the scroll flies into Mit's paws
+    turnTime: 0.9, scrollFlyTime: 0.45, scrollApex: 90, scrollK: 0.15, scrollSpin: 5, scrollFade: 0.92, scrollKeepGap: 20,   // roll-up 0.9 s, then the scroll flies into Mit's paws
 
     // ---- session done: the treasure chest rises from the sand and opens
     chestRise: 0.6, chestOpenAt: 1.2, chestOmega: 11, chestZeta: 0.28, chestBounce: 0.4, chestSize: 230,
@@ -141,10 +142,10 @@
   function maxSizeFor(cfg, age, item) { return ageKey(age) <= 4 ? item * cfg.sizeK.big : item; }
 
   /* ---------------------------------------------------------------- slot placement (DESIGN §2)
-   * n slot centres inside the board rect inset by max(0.6 item, size/2 + 6), spread with farthest-point sampling from a jittered
+   * n slot centres inside the board rect inset by max(0.6 item, biggest size/2 + slotEdge 16), spread with farthest-point sampling from a jittered
    * 9 × 6 grid, ≥ 1.25 × item (× the pair's mean size) apart. Deterministic per seed. → { pts: [{x, y}], score } (score ≥ 0 ⇔
    * every pair is far enough). */
-  function slotInset(cfg, item, sizes) { return Math.max(cfg.slotInset * item, Math.max.apply(null, sizes) / 2 + 6); }
+  function slotInset(cfg, item, sizes) { return Math.max(cfg.slotInset * item, Math.max.apply(null, sizes) / 2 + (cfg.slotEdge === undefined ? 6 : cfg.slotEdge)); }
   /** Busy-scenery penalty of a slot at (x, y): Σ overlap(slot box, rect) / slot area × busyK × item. */
   function busyPen(busy, x, y, size, item, cfg) {
     if (!busy || !busy.length) return 0;
@@ -506,7 +507,7 @@
     }
     this.bubbles = [];
     if (this.crab) {
-      var g = this.crab; this._crabPlan();
+      var g = this.crab; g.pr = null; this._crabPlan();
       if (g.state === 'walk' || g.state === 'flap') { g.x = g._px = clamp(g.x, g.lo, g.hi); g.y = g._py = this._perch().y; }
     }
     if (this.hintHand) this._hintGeo();
@@ -1111,7 +1112,9 @@
     if (this.state !== 'roundDone' || this.phase !== 'turn') { B.scrollX = L.board.x + L.board.w / 2; B.scrollY = L.board.y + L.board.h; B.scrollT = 0; B.scrollA = 0; B.scrollK = 1; B.scrollRot = 0; }
   };
   /** turn = ROLL-UP: the parchment rolls up from the bottom (turn 0 → 1, smooth, 0.9 s; the roll sits at y = board bottom −
-   *  turn × h), then the scroll (scale 1 → 0.35, spinning) flies on an arc into Mit's paws (0.45 s, fading in its last 25 %). */
+   *  turn × h), then the scroll (scale 1 → 0.15 smoothly, spinning 5 rad < 2π) flies on an arc that ends exactly at Mit's paws
+   *  (mit.x + 0.32 h, mit.y − 0.42 h; 0.45 s). The apex never rises above the bottom of any keep-out box (speech bubble, HUD)
+   *  the path passes under + 20 px (nor ins.top + 30); it fades only in the last 8 % (v > 0.92). */
   P._stepRollUp = function () {
     var B = this.board, cfg = this.cfg, L = this.layout, t = this.phaseTime, u = clamp(t / cfg.turnTime, 0, 1), Bd = L.board;
     B.turn = smooth(u); B.shine = 1; B.alive = 1;
@@ -1122,12 +1125,21 @@
       return;
     }
     var M = L.mit, tx = M.x + 0.32 * M.h, ty = M.y - 0.42 * M.h;
-    if (!this._scrollF) this._scrollF = arc(cx, Bd.y, tx, ty, cfg.scrollFlyTime, cfg.scrollApex, 0, L.ins.top + 30);
-    var f = this._scrollF, ft = Math.min(f.T, t - cfg.turnTime), v = ft / f.T, pt = arcAt(f, ft);
+    if (!this._scrollF) this._scrollF = arc(cx, Bd.y, tx, ty, cfg.scrollFlyTime, cfg.scrollApex, 0, this._scrollMinY(cx, tx));
+    var f = this._scrollF, ft = Math.min(f.T, t - cfg.turnTime), v = ft / f.T, pt = ft >= f.T ? { x: f.x1, y: f.y1 } : arcAt(f, ft);
+    var fd = cfg.scrollFade === undefined ? 0.92 : cfg.scrollFade;
     B.scrollX = pt.x; B.scrollY = pt.y; B.scrollT = v; B.scrollK = lerp(1, cfg.scrollK, smooth(v));
-    B.scrollA = 1 - smooth((v - 0.75) / 0.25); B.scrollRot = -Bd.h / 30 - 7 * v;
+    B.scrollA = 1 - smooth((v - fd) / Math.max(1e-3, 1 - fd)); B.scrollRot = -Bd.h / 30 - (cfg.scrollSpin === undefined ? 5 : cfg.scrollSpin) * smooth(v);
   };
 
+  /** The highest y the flying scroll may reach between x0 and x1: below every keep-out box (bubble, HUD, measured boxes) whose
+   *  x-range meets the path (+ scrollKeepGap), and never above ins.top + 30. */
+  P._scrollMinY = function (x0, x1) {
+    var L = this.layout, gap = this.cfg.scrollKeepGap === undefined ? 20 : this.cfg.scrollKeepGap, lo = Math.min(x0, x1) - 40, hi = Math.max(x0, x1) + 40;
+    var m = L.ins.top + 30, ks = L.keep || [];
+    for (var i = 0; i < ks.length; i++) { var b = ks[i]; if (b.x <= hi && b.x + b.w >= lo && b.y + b.h < L.H / 2) m = Math.max(m, b.y + b.h + gap); }
+    return m;
+  };
   // ---------------------------------------------------------------- session done: the treasure chest
   P._startChest = function () {
     var L = this.layout, B = L.board, cfg = this.cfg, gy = L.tray.rows[L.tray.rows.length - 1].y;
@@ -1337,37 +1349,52 @@
   P.drawOrder = function () { return this.pieces; };
 
   // ---------------------------------------------------------------- surprises
-  /** The crab's ledge (feet y, walkable lo … hi): the top of the board frame, crabEdge in from its ends and clear of every
-   *  keep-out box (speech bubble, HUD) that reaches down into its height band. When the bubble sits right on top of the board
-   *  (iPad portrait) it walks on top of the speech bubble instead (left of the HUD); with no room on either (iPad 4:3 landscape:
-   *  bubble and HUD both reach down to the frame) it lands on Mit's head and pecks there, riding his hops. Never over the tray. */
+  /** The crab's ledge (feet y, walkable lo … hi), first that is ≥ 100 px wide:
+   *   1. the top of the board frame, crabEdge in from its ends, clear of every keep-out box (speech bubble, HUD) and Mit;
+   *      when a box reaches just into its head band (iPhone portrait: the full-width bubble ends ≈ 70 px above the frame) the
+   *      crab steps DOWN onto the frame itself (feet y up to the parchment's top edge + 6) so its head clears the box;
+   *   2. on top of the speech bubble (left of the HUD; iPad portrait, where the bubble sits right on the board);
+   *   3. the board's BOTTOM frame edge, clear of Mit, the boxes and every tray piece's hit circle (iPad 4:3 landscape);
+   *   4. the widest piece of the frame top left (never on Mit, never over the bubble / HUD / tray hit circles). */
   P._perch = function () {
-    var L = this.layout, B = L.board, cfg = this.cfg, R = cfg.crabW * 0.5, H = 0.88 * cfg.crabW;   // H: the drawn head height
-    function cut(y, lo, hi, boxes) {
+    if (this.crab && this.crab.pr) return this.crab.pr;   // one ledge per visit (re-chosen on a relayout), so it never jumps
+    var L = this.layout, B = L.board, cfg = this.cfg, R = cfg.crabW * 0.5, H = 0.88 * cfg.crabW, self = this;   // H: the drawn head height
+    var mb = L.mitBox, keep = (L.keep || []).concat(mb ? [mb] : []);
+    function cut(y, lo, hi, boxes, below) {
       var mid = (lo + hi) / 2;
+      below = below || 0;
       for (var i = 0; i < boxes.length; i++) {
         var k = boxes[i];
-        if (!k || !(k.y < y && k.y + k.h > y - H) || k.x > hi + R || k.x + k.w < lo - R) continue;
+        if (!k || !(k.y < y + below && k.y + k.h > y - H) || k.x > hi + R || k.x + k.w < lo - R) continue;
         if (k.x + k.w / 2 < mid) lo = Math.max(lo, k.x + k.w + R); else hi = Math.min(hi, k.x - R);
       }
       return { y: y, lo: lo, hi: hi };
     }
-    var fr = cut(B.y - L.frame + 2, B.x + cfg.crabEdge, B.x + B.w - cfg.crabEdge, L.keep);
-    if (fr.hi - fr.lo >= 100) return fr;
+    var best = null;
+    function ok(p) { if (!best || p.hi - p.lo > best.hi - best.lo) best = p; return p.hi - p.lo >= 100; }
+    var x0 = B.x + cfg.crabEdge, x1 = B.x + B.w - cfg.crabEdge, y0 = B.y - L.frame + 2, fr;
+    for (var y = y0; y <= B.y + 6 + 1e-9; y += 4) { fr = cut(y, x0, x1, keep); if (ok(fr)) return fr; }
     var Bb = L.bubble, hb = hudBox(L.hudKeep || [], L.W);
     if (Bb && Bb.w > 0 && Bb.y - H >= L.ins.top - 10) {
-      var bu = cut(Bb.y + 3, Bb.x + cfg.crabEdge, Bb.x + Bb.w - cfg.crabEdge, [L.keep[1], hb]);
-      if (bu.hi - bu.lo >= 100) return bu;
+      var bu = cut(Bb.y + 3, Bb.x + cfg.crabEdge, Bb.x + Bb.w - cfg.crabEdge, [L.keep[1], hb, mb]);
+      if (ok(bu)) return bu;
     }
-    var pm = this.mit || L.mit, ph = pm.h || L.mit.h;
-    return { y: L.mit.y - ph + 10 - 20 * (pm.hop || 0), lo: L.mit.x - 0.08 * ph, hi: L.mit.x + 0.12 * ph, mit: true };
+    // the bottom frame: the crab's tap circle reaches ≈ 20 px below its feet; tray pieces count as their hit circles
+    var hits = (this.pieces || []).filter(function (p) { return p.state !== 'placed' && p.state !== 'gone'; }).map(function (p) {
+      var r = self._hitR(p), cy = p.homeY === undefined ? p.y : p.homeY, cx = p.homeX === undefined ? p.x : p.homeX;
+      return { x: cx - r, y: cy - r, w: 2 * r, h: 2 * r };
+    });
+    var bot = cut(B.y + B.h + L.frame - 2, x0, x1, keep.concat(hits), 20);
+    if (ok(bot)) return bot;
+    return best.hi >= best.lo ? best : { y: y0, lo: (x0 + x1) / 2, hi: (x0 + x1) / 2 };
   };
   /** Where the crab stops to peck: on its ledge, away from the open shadows below it (the child's drop target). */
   P._crabPlan = function () {
     var g = this.crab, cfg = this.cfg;
     if (!g) return;
+    g.pr = null;
     var pr = this._perch(), lo = pr.lo, hi = pr.hi, best = hi, bd = -1e9;
-    g.lo = lo; g.hi = hi;
+    g.lo = lo; g.hi = hi; g.pr = pr;
     for (var x = lo; x <= hi + 1e-9; x += 8) {
       var dmin = 1e9;
       for (var i = 0; i < this.slots.length; i++) { var s = this.slots[i]; if (s.filled) continue; dmin = Math.min(dmin, hyp(x - s.x, pr.y - s.y)); }

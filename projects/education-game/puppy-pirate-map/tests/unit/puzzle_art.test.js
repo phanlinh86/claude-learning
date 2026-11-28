@@ -87,7 +87,9 @@ function run(withPath2D) {
       const b = A.pieceBox(t, size);
       assert.ok(b.w > 0 && b.h > 0, 'pieceBox positive ' + JSON.stringify(t));
       assert.ok(b.w <= size * 1.0001 && b.h <= size * 1.0001, 'pieceBox ≤ size ' + JSON.stringify(t) + ' ' + JSON.stringify(b));
-      assert.ok(Math.abs(Math.max(b.w, b.h) - size) < 1e-6, 'longest side == size ' + JSON.stringify(t));
+      const isCoins = (t.kind === 'coins' || t.kind === 'bunch') && Math.max(1, Math.min(5, Math.round(+t.n || 1))) < 5 && !isNaN(+t.n) && t.n != null;
+      if (isCoins) assert.ok(Math.max(b.w, b.h) >= size * 0.3, 'small coins piece still graspable ' + JSON.stringify(t) + ' ' + JSON.stringify(b));
+      else if (!(t.kind === 'coins' || t.kind === 'bunch')) assert.ok(Math.abs(Math.max(b.w, b.h) - size) < 1e-6, 'longest side == size ' + JSON.stringify(t));
     }
     const ctx = fakeCtx(); A.drawIcon(ctx, t, 120); balanced(ctx, 'icon ' + JSON.stringify(t)); checks++;
   }
@@ -110,10 +112,20 @@ function run(withPath2D) {
     for (let i = 1; i < n; i++) assert.ok(sp[i].y > sp[i - 1].y + 1 || (Math.abs(sp[i].y - sp[i - 1].y) < 1 && sp[i].x > sp[i - 1].x), 'coins counting order ' + n);
     assert.deepStrictEqual(A.pieceBox({ kind: 'bunch', n }, 112), A.pieceBox({ kind: 'coins', n }, 112), 'bunch is an alias of coins');
   }
-  const cw = [2, 3, 4, 5].map(n => { const b = box({ kind: 'coins', n }); return (b.w / b.h).toFixed(2); });
+  const cw = [2, 3, 4, 5].map(n => { const b = box({ kind: 'coins', n }); return b.w.toFixed(1) + 'x' + b.h.toFixed(1); });
   assert.strictEqual(new Set(cw).size, 4, 'coin silhouettes 2..5 differ ' + cw);
-  const dw = [1, 3, 5, 10].map(n => { const b = box({ kind: 'dots', n }); return b.w / b.h; });
-  assert.ok(dw[0] < dw[1] && dw[1] < dw[2], 'dots tiles widen with the columns ' + dw.map(v => v.toFixed(2)));
+  // coins: one constant coin radius for every n (a 1-coin piece is NOT one giant coin); n = 5 fills the size box
+  const r5 = A.coinSpots(5, 112)[0].r;
+  for (let n = 1; n <= 5; n++) assert.ok(Math.abs(A.coinSpots(n, 112)[0].r - r5) < 1e-9, 'coin radius constant for n=' + n);
+  assert.ok(r5 >= 17, 'coins not tiny at 112: r=' + r5.toFixed(1));
+  const b5 = A.pieceBox({ kind: 'coins', n: 5 }, 112), b1 = A.pieceBox({ kind: 'coins', n: 1 }, 112);
+  assert.ok(Math.abs(Math.max(b5.w, b5.h) - 112) < 1e-6, 'coins 5 fills the size box');
+  assert.ok(b1.w < b5.w && b1.w > 40, '1-coin piece is one coin-sized box ' + JSON.stringify(b1));
+  // dots: one fixed card for every n (ten-frame-like grid), dots r ≥ 9 px at 112
+  const d1 = box({ kind: 'dots', n: 1 });
+  for (const n of [2, 5, 7, 10, 12]) assert.deepStrictEqual(box({ kind: 'dots', n }), d1, 'dots card same size for n=' + n);
+  const dk = A.pieceBox({ kind: 'dots', n: 3 }, 112).w / (102 + 3.6);
+  assert.ok(9 * dk >= 9, 'dot radius ≥ 9 px at 112 (' + (9 * dk).toFixed(1) + ')');
   // distinct object silhouettes (aspect ratios not all equal)
   const asp = OBJECTS.map(o => { const b = box({ kind: 'obj', obj: o, color: 'red' }); return (b.w / b.h).toFixed(2); });
   assert.ok(new Set(asp).size >= 6, 'object silhouettes differ: ' + asp);

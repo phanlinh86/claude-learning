@@ -17,10 +17,9 @@ const TM = L.TM, I = TM.I18N;
 const args = process.argv.slice(2), get = (k, d) => { const i = args.indexOf('--' + k); return i >= 0 ? args[i + 1] : d; };
 const N = +get('n', 40), AGES = get('ages', '3,4').split(',').map(Number), MODELS = get('models', 'typical,slow3').split(','), LANGS = get('langs', 'en,vi').split(',');
 const config = JSON.parse(get('config', '{}')), DUMP = +get('dump', 0), VP = get('vpatch', '').split(',');
-// --vpatch praiseOnly: roundDone says ONE line (the 3-star 'great' with the child's name, else 'praise'); the alive text stays in the bubble
-//          fbguard: a wrong / near-miss feedback line is protected like the count run (pickup / tap names wait; the plip is enough)
-//          shortPlaced: colours / shapes / size / animals fits say a short 'Click! It fits!' (the pickup already named the piece)
-//          guard: the prompt guard after onStart = 0.6 s + 95 ms × chars (voice.js's own estimate at rate 0.9) instead of 0.3 + 72 ms × chars
+// (2026-11-28) main.js now has praiseOnly / fbguard / guard / named-short-placed built in; the sim follows it by default, plus
+// boardOut → 'rollup' (only when silent), sessionDone → 'party', chestOpen → 'chest' (interrupt) + 'session.done'.
+// --vpatch shortPlaced: the old sim-only short-placed wording (kept for comparison)
 const RATE = 0.9, MAXQ = 2, STALE = 5;
 const dur = text => (600 + text.length * 85 / RATE) / 1000;
 
@@ -66,7 +65,7 @@ function runOne(o) {
     pendingPrompt = txt; promptStart = now; promptUntil = now + 6 + 0.072 * txt.length;
     const it = say(txt, Object.assign({ kind: 'prompt' }, opt)); return it;
   }
-  function onStart(it) { if (pendingPrompt && it.text === pendingPrompt) { promptStart = now; promptUntil = now + (VP.includes('guard') ? 0.6 + 0.095 * it.text.length : 0.3 + 0.072 * it.text.length); pendingPrompt = null; } }
+  function onStart(it) { if (pendingPrompt && it.text === pendingPrompt) { promptStart = now; promptUntil = now + 0.6 + 0.095 * it.text.length; pendingPrompt = null; } }   // main.js onVoiceStart: lineMs
   const canInterrupt = () => now > promptUntil;
   const st = () => w.stepInfo || null;
   const ev2 = e => { const s = st(), p = w.pieceById(e.id); return Object.assign({ topic: w.topic, params: s ? s.params : lastAsk && lastAsk.params, promptKey: s ? s.promptKey : lastAsk && lastAsk.promptKey }, e, { thing: e.thing || (p && p.thing) }); };
@@ -82,15 +81,17 @@ function runOne(o) {
       case 'pickup': if (canInterrupt() && !(lastNamed.id === e.id && now - lastNamed.t < 2)) { lastNamed = { id: e.id, t: now }; say(line('sayPickup', ev2(e)), { interrupt: true, kind: 'pickup' }); } break;
       case 'tapPiece': if (canInterrupt() && !(lastNamed.id === e.id && now - lastNamed.t < 1.2)) { lastNamed = { id: e.id, t: now }; say(line('sayTap', ev2(e)), { interrupt: true, kind: 'tap' }); } break;
       case 'placed': { promptUntil = 0; pendingPrompt = null; const SP = { en: ['Click!', 'Click! It fits!', 'Yes! Click!'], vi: ['Cạch!', 'Cạch! Vừa khít!', 'Đúng rồi! Cạch!'] };
-        const txt = VP.includes('shortPlaced') && !e.count && (w.topic === 'colors' || w.topic === 'shapes' || w.topic === 'animals' || w.topic === 'size') ? SP[lang][Math.floor(rng.next() * 3)] : line('sayPlaced', ev2(e), 'praise'); say(txt, { interrupt: true, kind: e.count ? 'countRun' : 'placed' }); if (e.count) { S.countRuns++; promptUntil = now + 0.9 + 0.6 * (e.count.n || 1); } break; }
-      case 'nearMiss': { const t = T('nearMiss'); say(t, { interrupt: canInterrupt(), kind: 'nearMiss' }); if (VP.includes('fbguard')) promptUntil = Math.max(promptUntil, now + 0.6 + 0.095 * t.length); break; }
-      case 'wrong': if (now - lastWrongSay > 1.5) { lastWrongSay = now; const t = line('sayWrong', ev2(e), 'hint'); say(t, { interrupt: canInterrupt(), kind: 'wrong' }); if (VP.includes('fbguard')) promptUntil = Math.max(promptUntil, now + 0.6 + 0.095 * t.length); } break;
+        const txt = VP.includes('shortPlaced') && !e.count && (w.topic === 'colors' || w.topic === 'shapes' || w.topic === 'animals' || w.topic === 'size') ? SP[lang][Math.floor(rng.next() * 3)] : line('sayPlaced', Object.assign(ev2(e), { named: lastNamed.id === e.id && now - lastNamed.t < 8 }), 'praise'); say(txt, { interrupt: true, kind: e.count ? 'countRun' : 'placed' }); if (e.count) { S.countRuns++; promptUntil = now + 0.9 + 0.6 * (e.count.n || 1); } break; }
+      case 'nearMiss': { const t = T('nearMiss'); say(t, { interrupt: canInterrupt(), kind: 'nearMiss' }); promptUntil = Math.max(promptUntil, now + 0.6 + 0.095 * t.length); break; }
+      case 'wrong': if (now - lastWrongSay > 1.5) { lastWrongSay = now; const t = line('sayWrong', ev2(e), 'hint'); say(t, { interrupt: canInterrupt(), kind: 'wrong' }); promptUntil = Math.max(promptUntil, now + 0.6 + 0.095 * t.length); } break;
       case 'hint': if (!e.idle) say(T('hint'), { kind: 'hint' }); break;
       case 'assist': say(T('hint'), { kind: 'assist' }); break;
       case 'idle': if (++idleSaid <= 4) say(T('idle') + ' ' + currentPrompt(), { kind: 'idle' }); break;
       case 'pokeMit': { if (speaking() && V.cur.text === lastPromptText) break; const since = now - promptStart, stuck = pendingPrompt && since > 6;
         if (since > 3 && (!pendingPrompt || stuck)) { promptUntil = 0; speakPrompt(currentPrompt(), { interrupt: true }); } break; }
-      case 'roundDone': if (!VP.includes('praiseOnly')) say(T('alive'), { kind: 'alive' }); if (now - lastPraise > 1.2) { lastPraise = now; say(T(e.stars >= 3 ? 'great' : 'praise'), { kind: 'praise' }); } break;
+      case 'roundDone': if (now - lastPraise > 1.2) { lastPraise = now; say(T(e.stars >= 3 ? 'great' : 'praise'), { kind: 'praise' }); } break;
+      case 'boardOut': if (!speaking()) say(T('rollup'), { kind: 'rollup' }); break;
+      case 'chestOpen': say(T('chest'), { interrupt: true, kind: 'chest' }); say(T('session.done', { stars: w.stars || 0 }), { kind: 'end' }); break;
       case 'woof': if (!speaking()) say(T('woof'), { kind: 'woof' }); break;
       case 'crab': if (canInterrupt()) say(T('surprise.crab'), { kind: 'surprise' }); break;
       case 'crabTap': if (canInterrupt()) say(T('crab.tap'), { interrupt: true, kind: 'surprise' }); break;
@@ -101,7 +102,7 @@ function runOne(o) {
       case 'talkResult': { const ans = (w.talk && w.talk.choices.find(c => c.id === e.answerId)) || {};
         say(e.correct && !e.auto ? T('talk.right') : I.talkWrong(lang, ans), { interrupt: true, kind: 'talkResult' }); break; }
       case 'levelDone': say(T('great'), { kind: 'chapterPraise' }); break;
-      case 'sessionDone': say(T('party'), { interrupt: true, kind: 'end' }); say(T('session.done', { stars: e.stars || 0 }), { kind: 'end' }); break;
+      case 'sessionDone': say(T('party'), { interrupt: true, kind: 'party' }); break;   // main.js: chest + session.done follow at chestOpen
     }
   }
   w.newSession();
@@ -113,6 +114,7 @@ function runOne(o) {
     for (const e of w.drainEvents()) { if (kid.onEvent) kid.onEvent(e); onEvent(e); }
     voiceStep();
   }
+  for (let k = 0; k < 600 && w.state === 'sessionDone' && k < 240; k++) { w.update(1 / 60); now += 1 / 60; for (const e of w.drainEvents()) onEvent(e); voiceStep(); }   // the chest opens in sessionDone
   for (let k = 0; k < 600 && (V.cur || V.q.length); k++) { now += 0.05; voiceStep(); }
   // prompt delay / cut
   const pr = prompts.map(p => ({ by: p.by, frac: p.start != null ? (p.end - p.start) / p.d : 0, delay: p.start != null ? p.start - p.t : null, cut: p.how === 'cut' && p.start != null && (p.end - p.start) < 0.9 * p.d, lost: p.start == null }));
@@ -120,7 +122,12 @@ function runOne(o) {
   let rep10 = 0; const repEx = [];
   const hs = heard.slice().sort((a, b) => a.start - b.start);
   for (let i = 1; i < hs.length; i++) for (let j = i - 1; j >= 0 && hs[i].start - hs[j].start < 10; j--) if (hs[j].text === hs[i].text) { rep10++; if (repEx.length < 5) repEx.push(hs[i].kind + ': ' + hs[i].text); break; }
-  return { model: o.model, age: o.age, lang, minutes: now / 60, playT, talkT, heard: heard.map(h => ({ kind: h.kind, by: h.by, text: h.text, cut: h.how === 'cut' && (h.end - h.start) < 0.9 * h.d, frac: (h.end - h.start) / h.d })),
+  let twice = 0; const twiceEx = [];
+  for (let i = 1; i < hs.length; i++) if (hs[i].text === hs[i - 1].text) { twice++; twiceEx.push(hs[i - 1].kind + '>' + hs[i].kind + (hs[i].start - hs[i - 1].start < 4 ? ' <4s' : '')); }
+  const viMit = lang === 'vi' ? hs.filter(h => /\bMit\b/.test(h.text)).map(h => h.text) : [];
+  const ban = hs.filter(h => /elephant|balloon|town|street|season|spring|summer|autumn|winter|\bvoi\b|bóng bay|thị trấn|phố|mùa/i.test(h.text)).map(h => h.text);
+  const kinds = {}; hs.forEach(h => { kinds[h.kind] = (kinds[h.kind] || 0) + 1; });
+  return { twice, twiceEx, viMit, ban, kinds, model: o.model, age: o.age, lang, minutes: now / 60, playT, talkT, heard: heard.map(h => ({ kind: h.kind, by: h.by, text: h.text, cut: h.how === 'cut' && (h.end - h.start) < 0.9 * h.d, frac: (h.end - h.start) / h.d })),
     lost: lost.map(l => ({ kind: l.kind, how: l.how, text: l.text })), prompts: pr, rep10, repEx, countRuns: S.countRuns, log: DUMP ? all.map(a => `${a.t.toFixed(1)} ${a.start != null ? '+' + (a.start - a.t).toFixed(1) : ' lost'} [${a.kind}${a.how && a.how !== 'end' ? ' ' + a.how : ''}] ${a.text}`) : null };
 }
 
@@ -145,6 +152,8 @@ for (const k of Object.keys(by)) {
 const sessions = res.filter(r => r.model === 'typical' && r.age === 4).length || 1;
 out.push('', 'Heard in full (not cut, not lost):', ...extra);
 out.push('', 'Most heard lines (typical age 4, per session):', ...Object.entries(texts).sort((a, b) => b[1] - a[1]).slice(0, 14).map(([t, c]) => `- ${(c / (sessions / LANGS.length)).toFixed(1)}× ${t}`));
+out.push('', `Same line twice IN A ROW: ${res.reduce((a, r) => a + r.twice, 0)} (${Object.entries(res.flatMap(r => r.twiceEx).reduce((a, k) => (a[k] = (a[k] || 0) + 1, a), {})).sort((a, b) => b[1] - a[1]).slice(0, 8).map(e => e.join(' ')).join(', ')}); VI lines with "Mit": ${res.flatMap(r => r.viMit).length} ${[...new Set(res.flatMap(r => r.viMit))].slice(0, 3).join(' | ')}; banned words: ${res.flatMap(r => r.ban).length} ${[...new Set(res.flatMap(r => r.ban))].slice(0, 3).join(' | ')}`);
+{ const K = {}; res.forEach(r => { for (const k in r.kinds) K[k] = (K[k] || 0) + r.kinds[k]; }); out.push('Heard lines per session by kind: ' + Object.entries(K).sort((a, b) => b[1] - a[1]).map(([k, c]) => k + ' ' + (c / res.length).toFixed(1)).join(', ')); }
 const ex = res.flatMap(r => r.repEx).slice(0, 6); if (ex.length) out.push('', 'Repeats within 10 s (examples):', ...ex.map(x => '- ' + x));
 console.log(`# voice_flow — ${res.length} sessions, config ${JSON.stringify(config)} vpatch ${VP.join(',')}\n\n` + out.join('\n'));
 fs.mkdirSync(path.join(__dirname, 'out'), { recursive: true });

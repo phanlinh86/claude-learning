@@ -239,7 +239,7 @@
         weather.setWeather(wi, {});
         TM.Audio.setMood(wi); TM.Audio.play('chapter');
         TM.UI.setDots(world.roundsPerLevel || 4, 0);
-        speak(T('ui.chapter', { n: e.level + 1 }) + '. ' + T('topic.' + e.topic), { interrupt: true });
+        speak(T('ui.chapter', { n: e.level + 1 }) + '. ' + T('topic.' + e.topic), { interrupt: e.level === 0 });   // queued after the chapter's praise
         speak(T('weather.' + wi));   // queued after the chapter name
         TM.UI.say(T('topic.' + e.topic));
         render.prewarm(world.layout, wi);
@@ -268,7 +268,8 @@
         TM.Audio.play('pickup', { color: colorOf(e.thing) }); TM.Audio.play('drip');
         const now = performance.now();
         // the piece's name — never over a protected prompt (the plip is enough), not twice for the same piece within 2 s
-        if (canInterrupt() && !(lastNamed.id === e.id && now - lastNamed.t < 2000)) {
+        const oneCoin = e.thing && (e.thing.kind === 'coins' || e.thing.kind === 'bunch') && e.thing.n === 1;   // 'One coin!' is said when it fits
+        if (!oneCoin && canInterrupt() && !(lastNamed.id === e.id && now - lastNamed.t < 2000)) {
           lastNamed = { id: e.id, t: now };
           speak(line('sayPickup', ev2(e)), { interrupt: true });
         }
@@ -373,7 +374,7 @@
       }
       case 'poof': TM.Audio.play('poof'); render.burst('puff', e.x, e.y, { n: 8 }); render.burst('sparkles', e.x, e.y, { n: 6 }); break;
       case 'boardOut': TM.Audio.play('fwip'); if (!speaking()) { const rt = T('rollup'); TM.UI.say(rt); speak(rt); } break;
-      case 'scrollCatch': TM.Audio.play('pat'); break;
+      case 'scrollCatch': TM.Audio.play('pat'); render.caught = 0.8; break;
       case 'chest': TM.Audio.play('creak'); break;
       case 'chestOpen': {
         TM.Audio.play('jingle');
@@ -443,8 +444,8 @@
         TM.Storage.setJSON('progress', progress);
         shownStars = e.stars || shownStars; TM.UI.setStars(shownStars);
         $('doneStars').textContent = e.stars || 0;
-        $('doneTitle').textContent = T('session.done', { stars: e.stars || 0 });
-        speak(T('party'), { interrupt: true });   // 'chest' + 'session.done' follow when the chest opens
+        $('doneTitle').textContent = T('session.done', { stars: e.stars || 0 }).replace(/(\d+) (\S+)/, '$1\u00a0$2');   // keep "39 stars" together
+        TM.UI.say(T('party'));   // shown only: 'chest' + 'session.done' are spoken when the chest opens (playtest P2-1)
         mode = 'done';
         TM.UI.only('scrDone'); TM.UI.show('hud', false); TM.UI.say('');
         if (autoRestart) setTimeout(() => { if (mode === 'done') startGame(); }, 1500 / speed);

@@ -74,7 +74,7 @@
   var BDPQ = ['b', 'd', 'p', 'q'];                                   // at most one of these per round (mirror letters)
   var LOWER_PAIRS = [['m', 'w'], ['n', 'u']];
   var ADD_MAX = { 5: 10, 6: 10, 7: 20 }, SUB_MAX = 10, ODDEVEN_MAX = { 5: 10, 6: 12, 7: 20 }, DOTS_MAX = { 5: 10, 6: 12, 7: 12 };
-  var SIZE_K = { big: 1.25, small: 0.72 };
+  var SIZE_K = { big: 1.35, small: 0.9 };   // = TM.CONFIG.sizeK (world.js scales the pieces; here only the valid size names)
   /* 'initial' words (animals). VI = the noun after the classifier "con" (con vẹt → vẹt → V). */
   TM.TOY_WORDS = {
     en: { parrot: 'parrot', turtle: 'turtle', fish: 'fish', monkey: 'monkey', octopus: 'octopus', seagull: 'seagull', dolphin: 'dolphin', starfish: 'starfish' },
@@ -155,15 +155,17 @@
   }
 
   // ---------------- counts ----------------
-  /** { n: real pieces (= slots), d: distractors } (DESIGN §5.1). Warm-up 2 + 0; short rounds 2; age 3: 2 (+1 from round 2,
-   *  not in the first chapter); age 4: 3 + 1 (first chapter 3 + 0); age 5: 3–4 + 1; ages 6+: 4 + 1. */
+  /** { n: real pieces (= slots), d: distractors } (DESIGN §5.1). One distractor in EVERY round (so the last ask is never a free
+   *  answer) except the very first warm-up of the session (round 0 of chapter 0: 2 + 0). Warm-ups 2 + 1; short rounds 2 + 1;
+   *  age 3: 2 + 1; age 4: 3 + 1; age 5: 3–4 + 1; ages 6+: 4 + 1. */
+  function firstWarmUp(ri, level) { return ri === 0 && level === 0; }
   function countsFor(rng, age, ri, level, short) {
-    if (ri === 0) return { n: 2, d: 0 };
-    var n, d;
-    if (age <= 3) { n = 2; d = ri >= 2 && level !== 0 ? 1 : 0; }
-    else if (age === 4) { n = 3; d = level === 0 ? 0 : 1; }
-    else if (age === 5) { n = rng.int(3, 4); d = 1; }
-    else { n = 4; d = 1; }
+    if (ri === 0) return { n: 2, d: firstWarmUp(ri, level) ? 0 : 1 };
+    var n, d = 1;
+    if (age <= 3) n = 2;
+    else if (age === 4) n = 3;
+    else if (age === 5) n = rng.int(3, 4);
+    else n = 4;
     if (short) n = 2;
     return { n: n, d: d };
   }
@@ -258,8 +260,8 @@
       }
       case 'count': {
         var vals;
-        if (age <= 4) {   // gold coin pieces 1–5: warm-up 1 vs 2, round 1 up to 4, later up to 5
-          var hi = ri === 0 ? 2 : ri === 1 ? 4 : 5;
+        if (age <= 4) {   // gold coin pieces 1–5: warm-up 1–2 (1–3 with a distractor), round 1 up to 4, later up to 5
+          var hi = ri === 0 ? Math.max(2, n + d) : ri === 1 ? 4 : 5;
           vals = rng.sample(range(1, hi), n + d);
           for (i = 0; i < n + d; i++) (i < n ? real : extra).push(coins(vals[i]));
         } else {          // dot tiles: warm-up ≤ 5, later 1–10 (6+: 12); age 5: no two neighbours
@@ -401,9 +403,9 @@
     if (oe) {
       if (nS < 2 || nS > 3 || extra.length < 1 || extra.length > 2) return 'oddeven ' + nS + ' + ' + extra.length;
     } else {
-      if (ri === 0) { if (nS !== 2 || extra.length) return 'warm-up ' + nS + ' + ' + extra.length; }
+      if (ri === 0) { if (nS !== 2 || extra.length !== (lvl0 ? 0 : 1)) return 'warm-up ' + nS + ' + ' + extra.length; }
       else {
-        wantD = age <= 3 ? (ri >= 2 && !lvl0 ? 1 : 0) : age === 4 ? (lvl0 ? 0 : 1) : 1;
+        wantD = 1;
         if (r.topic === 'initial' && extra.length < wantD && nP >= 5) wantD = extra.length;
         if (extra.length !== wantD) return 'distractors ' + extra.length + ' (want ' + wantD + ')';
         var lo = age <= 3 ? 2 : age === 4 ? 3 : age === 5 ? 3 : 4, hi = age <= 4 ? lo : 4;
@@ -483,7 +485,7 @@
         var want = age <= 4 ? 'coins' : 'dots';
         if (nk.join() !== want) return 'count: ' + want + ' only';
         var ns = r.pieces.map(function (q) { return q.thing.n; });
-        if (want === 'coins' && Math.max.apply(null, ns) > (ri === 0 ? 2 : ri === 1 ? 4 : 5)) return 'count: too many coins for round ' + ri;
+        if (want === 'coins' && Math.max.apply(null, ns) > (ri === 0 ? nP : ri === 1 ? 4 : 5)) return 'count: too many coins for round ' + ri;
         if (want === 'dots' && Math.max.apply(null, ns) > (ri === 0 ? 5 : DOTS_MAX[age] || 10)) return 'count: too many dots';
         if (age === 5 && hasNeighbours(ns)) return 'count: neighbours at age 5';
         break;

@@ -246,6 +246,13 @@
         if (this._waterKey !== key) { this._waterKey = key; try { o.weather.setWater(L.tray.y, L.tray.y + (L.tray.h || 120)); } catch (e) { /* skip */ } }
       }
       this._mit(w.mit, L.mit);
+      if (this.caught > 0 && PA() && PA().drawScroll && L.mit) {   // the caught scroll in Mit's paws for a moment
+        this.caught -= o.dt || 0;
+        const M = L.mit, k = clamp(this.caught / 0.2, 0, 1);
+        this.g.save(); this.g.globalAlpha *= k; this.g.translate(M.x + 0.32 * M.h, M.y - 0.42 * M.h); this.g.rotate(-0.4);
+        try { PA().drawScroll(this.g, M.h * 0.42, 10); } catch (e) { /* skip */ }
+        this.g.restore();
+      }
       this._board(w, a);
       const P = PA();
       if (P && L.tray && (w.board.show || w.state === 'round' || w.state === 'roundDone')) {
@@ -259,7 +266,7 @@
           if (sp) for (const p of w.pieces || []) if (p.spot != null && sp[p.spot] && !['placed', 'gone', 'snap'].includes(p.state)) live.add(sp[p.spot].row);
           const SA = this._shelfA || (this._shelfA = {}), k = Math.min(1, (o.dt || 0.016) * 4);
           rows.forEach((r, i) => {
-            const tgt = !sp || live.has(i) ? 1 : 0;
+            const tgt = 1;   // the water stays (it is the shore), even when every piece is in the picture
             SA[i] = SA[i] == null ? tgt : SA[i] + (tgt - SA[i]) * k;
             if (SA[i] < 0.01) return;
             const box = { x: r.x0 - 14, y: r.y - ms - 26, w: r.x1 - r.x0 + 28, h: ms + 26 + 22, spots: (sp || T.spots || []).filter(s => s.row === i) };
@@ -494,15 +501,16 @@
         const cs = clamp(W * 0.3, 150, 230);
         chest = { x: W - (ins.right || 0) - 28 - cs / 2, gy: gy - 6, size: cs };
       } else {
-        const room = panel ? gy - (panel.y + panel.h) - 26 : 200;
-        const cs = clamp(room * 1.15, 120, 210);
-        chest = { x: panel ? panel.x + panel.w / 2 : W * 0.8, gy: gy - 6, size: cs };
+        // under the done panel when there is room for most of it, else in its own column between Mit and the gallery
+        const room = panel ? gy - (panel.y + panel.h) - 20 : 0;
+        if (panel && room >= 140) chest = { x: panel.x + panel.w / 2, gy: gy - 6, size: clamp(room * 1.1, 140, 210) };
+        else { const cs = clamp(H * 0.27, 130, 200); chest = { x: (ins.left || 0) + 250 + cs / 2, gy: gy - 6, size: cs, col: true }; }
       }
       let best;
       if (portrait) {   // above Mit and the chest across the full width
         const xa = (ins.left || 0) + 20, xb = W - (ins.right || 0) - 20, ya = panel ? panel.y + panel.h + 20 : H * 0.4, PB = L.mitBox;
         best = fit(xa, xb, ya, Math.min(PB ? PB.y : gy - 220, chest.gy - chest.size * 0.95) - 10);
-      } else best = fit((ins.left || 0) + 250, (panel ? panel.x : W * 0.6) - 20, (ins.top || 0) + 24, gy - 24);
+      } else best = fit((ins.left || 0) + 250 + (chest.col ? chest.size + 20 : 0), (panel ? panel.x : W * 0.6) - 20, (ins.top || 0) + 24, gy - 24);
       const { x0, x1, y0, y1 } = best;
       const cw = Math.min(best.s, 300), ch = cw * AR;
       const tw = best.c * cw + (best.c - 1) * gap, th = best.r * ch + (best.r - 1) * gap;

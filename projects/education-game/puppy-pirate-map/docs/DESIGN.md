@@ -33,8 +33,8 @@ field names `season` / `weather` stay in the code.
   `parasol` (beach umbrella), `hat` (a tricorn pirate hat, no skull), `shell` (a scallop shell), `kite`, `bottle` (a message
   bottle with a cork and a rolled note). Every silhouette clearly different.
 - Counting age ≤ 4: **`kind 'coins'`** replaces `bunch`: `n` (1–5) separate round gold coins `#F2C14E` / dark `#B8862A` /
-  light `#FFE6A0` with a star stamp, arranged 1 · 2 side by side · 3 pyramid (2+1) · 4 (2+2) · 5 (3+2), gaps ≥ 6 px at size
-  112 so the SHADOW shows n separate discs. nameKind `coins`. Coins are not an answer colour (only the count matters).
+  light `#FFE6A0` with a star stamp, arranged 1 · 2 side by side · 3 pyramid · 4 (2+2) · 5 (dice five 2·1·2), ONE coin radius for every n
+  (the n=5 scale), gaps ≥ 6 px at size 112 so the SHADOW shows n separate discs (QA fix). nameKind `coins`. Coins are not an answer colour (only the count matters).
 - `TM.ANIMALS` (`kind 'animal'`): `parrot`, `turtle`, `fish`, `monkey`, `octopus`, `seagull`, `dolphin`, `starfish`
   (natural colours, white sticker border 6 px, distinct silhouettes).
 - `TM.SCENES` (board pictures): colors → `cove` (sea, sand, a little island), shapes → `sails` (a ship's big sail / a

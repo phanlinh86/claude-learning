@@ -1,9 +1,10 @@
-// Functional QA (Mit's Puzzle Town) — Playwright, isMobile + hasTouch contexts on iPhone / iPad, portrait + landscape.
+// Functional QA (Mit's Treasure Map) — Playwright, isMobile + hasTouch contexts on iPhone / iPad, portrait + landscape.
 // Every drag is a REAL CDP touch sequence (Input.dispatchTouchEvent → pointer events → TM.Input → World): the bot bypasses
 // the input layer, so this suite is the proof that fingers work.
 //   node tests/e2e/functional.js                 (all)
 //   ONLY=iphone-portrait node tests/e2e/functional.js     (one device for the per-device tests)
 //   SKIP_BOT=1 node tests/e2e/functional.js      (skip the full bot sessions)
+//   BOT_ONLY=1 node tests/e2e/functional.js      (only the 10 bot sessions: ages 3–7 × EN/VI)
 // Writes screenshots + results.json to tests/out/functional/. Exits 1 on any failure.
 const { chromium } = require('playwright');
 const path = require('path'), fs = require('fs');
@@ -18,7 +19,10 @@ const DEVICES = [
 ];
 const BOT_RUNS = [
   { age: 3, lang: 'en', dev: 0 }, { age: 4, lang: 'vi', dev: 1 }, { age: 5, lang: 'en', dev: 2 },
-  { age: 6, lang: 'vi', dev: 3 }, { age: 7, lang: 'en', dev: 0 }
+  { age: 6, lang: 'vi', dev: 3 }, { age: 7, lang: 'en', dev: 0 },
+  // the other language for every age
+  { age: 3, lang: 'vi', dev: 2 }, { age: 4, lang: 'en', dev: 3 }, { age: 5, lang: 'vi', dev: 0 },
+  { age: 6, lang: 'en', dev: 1 }, { age: 7, lang: 'vi', dev: 2 }
 ];
 const VI_CHARS = /[ăâđêôơưàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ]/i;
 
@@ -73,9 +77,14 @@ async function tapEl(page, sel) {
   check(b, 'element not visible: ' + sel);
   await page.touchscreen.tap(b.x + b.width / 2, b.y + b.height / 2);
 }
-const evCount = (page, type, id) => page.evaluate(([t, i]) => TM.debug.events.filter(e => e.type === t && (i == null || e.id === i)).length, [type, id]);
-const evSince = (page, n0) => page.evaluate(n => TM.debug.events.slice(n).map(e => e.type), n0);
-const evLen = page => page.evaluate(() => TM.debug.events.length);
+// TM.debug.events is capped at 300 (shift) → indices drift; mirror every push into an uncapped window.__evAll
+const hookEvents = page => page.evaluate(() => {
+  const E = TM.debug.events; if (E.__mirrored) return; E.__mirrored = true; window.__evAll = E.slice();
+  const o = E.push; E.push = function () { for (const x of arguments) window.__evAll.push(x); return o.apply(this, arguments); };
+});
+const evCount = (page, type, id) => page.evaluate(([t, i]) => window.__evAll.filter(e => e.type === t && (i == null || e.id === i)).length, [type, id]);
+const evSince = (page, n0) => page.evaluate(n => window.__evAll.slice(n).map(e => e.type), n0);
+const evLen = page => page.evaluate(() => window.__evAll.length);
 const visible = (page, id) => page.evaluate(i => !document.getElementById(i).classList.contains('hidden'), id);
 
 /* ---------------------------------------------------------------- setup */
@@ -94,6 +103,7 @@ async function newPage(browser, d, errors, init = true) {
 async function gotoTitle(page, url) {
   await page.goto(url);
   await page.waitForFunction(() => window.TM && TM.debug && TM.debug.mode === 'title', null, { timeout: 20000 });
+  await hookEvents(page);
   await page.waitForTimeout(300);
 }
 /** a fresh round of `topic` at `age`, waiting for the first open ask (speed 1 when it is open) */
@@ -162,6 +172,7 @@ T.drag_wrong = async ({ page, cdp, url, d }) => {
   check(st === 'rest', 'wrong piece did not fly home: ' + st);
   const misses = await page.evaluate(() => TM.debug.world.misses);
   check(misses === 1, 'misses after one wrong drop: ' + misses);
+  check(await evCount(page, 'splash', i.other.id) >= 1, 'no splash when the wrong piece landed back in the water');
 };
 T.near_miss_then_magnet = async ({ page, cdp, url }) => {
   await setupRound(page, url);
@@ -318,6 +329,85 @@ T.rotate_mid_drag = async ({ page, cdp, url, d }) => {
   await page.waitForTimeout(300);
   check(ev2.includes('placed'), 'drag after rotation did not place: ' + ev2.join(','));
 };
+T.wash_in_and_bob = async ({ page, cdp, url }) => {
+  await gotoTitle(page, `${url}?mute=1&seed=4&age=4`);
+  const n0 = await evLen(page);
+  await page.evaluate(() => { TM.debug.startGame(); const w = TM.debug.world; w.levels[0] = 'colors'; w.startLevel(0); });
+  await page.waitForFunction(() => TM.debug.world.interactive && TM.debug.answer(), null, { timeout: 25000 });
+  await page.waitForTimeout(400);
+  const evs = await evSince(page, n0);
+  const np = await page.evaluate(() => TM.debug.world.pieces.length);
+  check(evs.filter(t => t === 'wave').length >= 1, 'no wave event at the wash-in: ' + evs.join(','));
+  check(evs.filter(t => t === 'pieceLand').length >= np, `pieceLand ${evs.filter(t => t === 'pieceLand').length} < ${np} pieces`);
+  check(evs.includes('boardIn'), 'no boardIn');
+  // resting pieces bob ±4 px and the hit circle follows the current centre
+  const smp = [];
+  for (let k = 0; k < 8; k++) {
+    smp.push(await page.evaluate(() => { const w = TM.debug.world, p = w.pieces.find(q => q.state === 'rest'); const h = w.pieceHit(p.id); return { id: p.id, y: p.y, hy: h.y, r: p.rot, hy0: p.homeY }; }));
+    await page.waitForTimeout(160);
+  }
+  const ys = smp.filter(q => q.id === smp[0].id).map(q => q.y), range = Math.max(...ys) - Math.min(...ys);
+  check(range > 2 && range <= 9, 'resting piece bob range ' + range.toFixed(2) + ' px (want ≈ 8)');
+  check(smp.every(q => Math.abs(q.y - q.hy) < 1e-6 && Math.abs(q.y - q.hy0) <= 4.5), 'hit circle not at the bobbing centre / bob > 4 px: ' + JSON.stringify(smp.slice(0, 3)));
+  // drips while lifted out of the water
+  const i = await answerInfo(page);
+  // drip lasts 0.4 s: sample it every frame in the page (a loaded machine can stall a round trip longer than that)
+  await page.evaluate(id => { window.__drip = 0; const f = () => { const p = TM.debug.world.pieceById(id); if (p) window.__drip = Math.max(window.__drip, p.drip || 0); if (!window.__dripStop) requestAnimationFrame(f); }; window.__dripStop = false; requestAnimationFrame(f); }, i.a.piece);
+  await touchStart(cdp, [tp(i.from.x, i.from.y)]);
+  await page.waitForTimeout(90);
+  await touchMove(cdp, [tp(i.from.x + 10, i.from.y - 40)]);
+  await page.waitForTimeout(60);
+  const dr = await page.evaluate(() => { window.__dripStop = true; return { held: TM.debug.world.held, drip: window.__drip }; });
+  await touchEnd(cdp);
+  check(dr.held === i.a.piece, 'piece not picked up for the drip check');
+  check(dr.drip > 0 && dr.drip <= 1, 'no drip on a lifted piece: ' + dr.drip);
+};
+T.round_done_board_out = async ({ page, cdp, url, d }) => {
+  await setupRound(page, url, { topic: 'colors', age: 3, seed: 6 });
+  const n0 = await evLen(page);
+  for (let k = 0; k < 6; k++) {
+    const st = await page.evaluate(() => TM.debug.world.state);
+    if (st !== 'round') break;
+    try { await waitInteractive(page); } catch (e) { break; }
+    const i = await answerInfo(page);
+    await drag(cdp, page, i.from, i.to);
+    await page.waitForTimeout(400);
+    await page.waitForFunction(() => { const w = TM.debug.world; return w.state !== 'round' || (w.interactive && w.pieces.every(p => p.state !== 'snap' && p.state !== 'fly')); }, null, { timeout: 15000 }).catch(() => {});
+    await page.waitForTimeout(900 + 600 * 5);   // count runs / step lines
+  }
+  await page.waitForFunction(() => window.__evAll.some(e => e.type === 'boardOut'), null, { timeout: 20000 });
+  await shot(page, d, '6-rollup');
+  const evs = await evSince(page, n0);
+  for (const t of ['placed', 'roundDone', 'alive', 'woof', 'boardOut']) check(evs.includes(t), 'no ' + t + ' event after finishing the picture: ' + evs.join(','));
+  check(!evs.includes('wrong'), 'a correct real-touch drag was judged wrong');
+};
+T.surprises_tap = async ({ page, cdp, url, d }) => {
+  await setupRound(page, url, { topic: 'colors', age: 4, seed: 8 });
+  await page.evaluate(() => { const w = TM.debug.world; w.surprise = 'crab'; w._crabNext = 0.2; });
+  await page.waitForFunction(() => TM.debug.crabScreen(), null, { timeout: 15000 });
+  await page.waitForTimeout(150);
+  const c = await page.evaluate(() => TM.debug.crabScreen());
+  check(c.x > 0 && c.x < d.viewport.width && c.y > 0 && c.y < d.viewport.height, 'crab off screen: ' + JSON.stringify(c));
+  let n0 = await evLen(page);
+  const c2 = await page.evaluate(() => TM.debug.crabScreen()) || c;   // read right before the touch: it scuttles
+  await tap(cdp, page, c2, 80);
+  await page.waitForTimeout(300);
+  let evs = await evSince(page, n0);
+  await shot(page, d, '7-crab');
+  check(evs.includes('crabTap'), 'tapping the crab did nothing: ' + evs.join(',') + ' at ' + JSON.stringify(c2));
+  check(!evs.some(t => t === 'wrong' || t === 'placed' || t === 'soft'), 'crab tap reached the board: ' + evs.join(','));
+  await page.evaluate(() => { const w = TM.debug.world; w.surprise = 'bubbles'; w._bubbleNext = 0.2; });
+  await page.waitForFunction(() => TM.debug.bubbleScreen(), null, { timeout: 15000 });
+  await page.waitForTimeout(250);
+  n0 = await evLen(page);
+  const b = await page.evaluate(() => TM.debug.bubbleScreen());
+  await tap(cdp, page, b, 60);
+  await page.waitForTimeout(300);
+  evs = await evSince(page, n0);
+  await shot(page, d, '8-bubbles');
+  check(evs.includes('bubblePop'), 'tapping a bubble did not pop it: ' + evs.join(',') + ' at ' + JSON.stringify(b));
+  check(await page.evaluate(() => TM.debug.world.misses) === 0, 'surprise taps counted as misses');
+};
 
 // ---- extra tests (run on the "extra" devices)
 T.language_switch = async ({ page, url, d }) => {
@@ -326,7 +416,7 @@ T.language_switch = async ({ page, url, d }) => {
   await tapEl(page, '.title-top [data-lang="vi"]');
   await page.waitForTimeout(200);
   let s = await page.evaluate(() => ({ html: document.documentElement.lang, logo: document.getElementById('logo1').textContent + ' ' + document.getElementById('logo2').textContent, play: document.getElementById('btnPlay').getAttribute('aria-label'), saved: TM.debug.getState().settings.lang }));
-  check(s.html === 'vi' && /Voi Mit/.test(s.logo) && s.saved === 'vi', 'VI not applied on title: ' + JSON.stringify(s));
+  check(s.html === 'vi' && /Cún Mít/.test(s.logo) && /Ghép Bản Đồ Kho Báu/.test(s.logo) && s.saved === 'vi', 'VI not applied on title: ' + JSON.stringify(s));
   await tapEl(page, '#btnPlay');
   await page.evaluate(() => { const w = TM.debug.world; w.levels[0] = 'colors'; w.startLevel(0); TM.debug.setSpeed(4); });
   await page.waitForFunction(() => TM.debug.world.interactive, null, { timeout: 20000 });
@@ -345,7 +435,7 @@ T.language_switch = async ({ page, url, d }) => {
   await tapEl(page, '.title-top [data-lang="en"]');
   await page.waitForTimeout(200);
   s = await page.evaluate(() => ({ html: document.documentElement.lang, logo: document.getElementById('logo2').textContent, saved: TM.debug.getState().settings.lang }));
-  check(s.html === 'en' && /Puzzle/.test(s.logo) && s.saved === 'en', 'EN not restored: ' + JSON.stringify(s));
+  check(s.html === 'en' && /Treasure Map/.test(s.logo) && s.saved === 'en', 'EN not restored: ' + JSON.stringify(s));
   await tapEl(page, '#btnPlay');
   await page.waitForFunction(() => TM.debug.world.interactive, null, { timeout: 25000 });
   const eb = await page.evaluate(() => document.getElementById('bubbleText').textContent);
@@ -361,9 +451,19 @@ T.parent_gate = async ({ page, cdp, url }) => {
   await page.touchscreen.tap(c.x, c.y);
   await page.waitForTimeout(400);
   check(!(await visible(page, 'scrSettings')), 'page.touchscreen.tap on the gear opened settings');
-  await tap(cdp, page, c, 1200);
-  await page.waitForTimeout(300);
-  check(!(await visible(page, 'scrSettings')), 'a 1.2 s hold opened settings');
+  // the page's own clock: a loaded machine stretches waitForTimeout(1200) past 2 s, so measure the real hold and retry
+  await page.evaluate(() => { const g = document.getElementById('btnParents'); window.__gh = [];
+    g.addEventListener('pointerdown', () => __gh.push({ d: performance.now() })); g.addEventListener('pointerup', () => { const x = __gh[__gh.length - 1]; if (x) x.u = performance.now(); }); });
+  let mid = null;
+  for (let k = 0; k < 3; k++) {
+    await tap(cdp, page, c, 1200);
+    await page.waitForTimeout(300);
+    const o = await visible(page, 'scrSettings'), h = await page.evaluate(() => __gh[__gh.length - 1]), dur = h && h.u ? h.u - h.d : null;
+    mid = { opened: o, dur };
+    if (o && dur != null && dur >= 1950) { await tapEl(page, '#btnSettingsDone'); await page.waitForTimeout(300); continue; }
+    break;
+  }
+  check(!mid.opened, 'a short hold (' + Math.round(mid.dur) + ' ms real) opened settings');
   await tap(cdp, page, c, 2300);
   await page.waitForTimeout(300);
   check(await visible(page, 'scrSettings'), 'a 2.3 s hold did not open settings');
@@ -411,16 +511,16 @@ T.count_topic = async ({ page, cdp, url }) => {
   await setupRound(page, url, { topic: 'count', age: 4 });
   const i = await answerInfo(page);
   const info = await page.evaluate(id => { const p = TM.debug.world.pieceById(id); return { kind: p.thing.kind, n: p.thing.n, topic: TM.debug.world.topic }; }, i.a.piece);
-  check(info.topic === 'count' && info.kind === 'bunch', 'not a balloon count round: ' + JSON.stringify(info));
+  check(info.topic === 'count' && info.kind === 'coins', 'not a coin count round: ' + JSON.stringify(info));
   const n0 = await evLen(page);
   await drag(cdp, page, i.from, i.to);
   await page.waitForTimeout(600 + 700 * info.n);
   const evs = await evSince(page, n0);
   const counts = await evCount(page, 'count', i.a.piece);
   check(evs.includes('placed'), 'count piece not placed: ' + evs.join(','));
-  check(counts >= info.n, `count events ${counts} for a bunch of ${info.n}`);
+  check(counts >= info.n, `count events ${counts} for ${info.n} coins`);
   const run = await page.evaluate(() => window.__said.slice(-6).map(s => s.text));
-  check(run.some(t => /one/i.test(t) && /balloon/i.test(t)), 'no count run in the voice: ' + JSON.stringify(run));
+  check(run.some(t => /one/i.test(t) && /coin/i.test(t)), 'no count run in the voice: ' + JSON.stringify(run));
 };
 T.talk_time_tap = async ({ page, url, d }) => {
   await setupRound(page, url, { topic: 'colors', age: 4, seed: 9 });
@@ -477,6 +577,8 @@ T.pause_resume = async ({ page, url }) => {
   const L0 = await page.evaluate(() => window.__said.length);
   await tapEl(page, '#btnResume');
   await page.waitForTimeout(700);
+  // the repeat is a setTimeout(300) after resume: poll for it (a loaded machine delays timers)
+  await page.waitForFunction(n => window.__said.slice(n).some(x => x.text === document.getElementById('bubbleText').textContent), L0, { timeout: 4000 }).catch(() => {});
   const s = await page.evaluate(n => ({ mode: TM.debug.mode, t: TM.debug.world.time, said: window.__said.slice(n).map(x => x.text), bubble: document.getElementById('bubbleText').textContent }), L0);
   check(s.mode === 'play' && s.t > t1, 'resume did not continue: ' + JSON.stringify(s));
   check(!(await visible(page, 'scrPause')), 'pause screen still shown');
@@ -571,9 +673,10 @@ T.url_age_shown = async ({ page, url }) => {
   check(bad.length === 0, 'the title age differs from the age played: ' + bad.join('; '));
 };
 
-const CORE = ['boot_title', 'drag_correct', 'drag_wrong', 'near_miss_then_magnet', 'drop_outside_home', 'quick_tap', 'drop_high', 'second_finger_ignored', 'rotate_mid_drag'];
+const CORE = ['boot_title', 'drag_correct', 'drag_wrong', 'near_miss_then_magnet', 'drop_outside_home', 'quick_tap', 'drop_high', 'second_finger_ignored', 'rotate_mid_drag',
+  'wash_in_and_bob', 'surprises_tap'];
 const EXTRA = ['language_switch', 'parent_gate', 'settings_persist', 'count_topic', 'talk_time_tap', 'mit_and_bubble_repeat', 'pause_resume', 'visibility_pause', 'audio_chain_volume',
-  'release_over_hud', 'soft_taps_hint_assist', 'url_age_shown'];
+  'release_over_hud', 'soft_taps_hint_assist', 'url_age_shown', 'round_done_board_out'];
 
 async function runDevice(browser, url, d) {
   const errors = [];
@@ -605,6 +708,9 @@ async function runBot(browser, url, r) {
     await page.waitForFunction(() => window.TM && TM.debug && TM.debug.mode === 'done', null, { timeout: 420000, polling: 500 });
     await page.waitForTimeout(1200);
     await page.screenshot({ path: path.join(OUT, `bot-age${r.age}-${r.lang}-done.png`) });
+    const ch = await page.evaluate(() => ({ evs: TM.debug.events.map(e => e.type), chest: TM.debug.world.chest && { y: TM.debug.world.chest.y, open: TM.debug.world.chest.open } }));
+    check(ch.evs.includes('chest') && ch.evs.includes('chestOpen'), 'no chest / chestOpen at session end: ' + ch.evs.slice(-12).join(','));
+    check(ch.chest && ch.chest.y > 0.99 && ch.chest.open > 0.5, 'chest not risen / opened: ' + JSON.stringify(ch.chest));
     const res = await page.evaluate(() => ({ stats: TM.debug.stats, levels: TM.debug.world.levels, age: TM.debug.world.age, asks: window.__asks, said: window.__said, log: TM.debug.voiceLog.slice(), doneVisible: !document.getElementById('scrDone').classList.contains('hidden'), doneTitle: document.getElementById('doneTitle').textContent }));
     const s = res.stats;
     const secs = ((Date.now() - t0) / 1000).toFixed(0);
@@ -649,7 +755,7 @@ async function runBot(browser, url, r) {
   const browser = await chromium.launch();
   const t0 = Date.now();
   try {
-    const devs = DEVICES.filter(d => !process.env.ONLY || d.name === process.env.ONLY);
+    const devs = process.env.BOT_ONLY ? [] : DEVICES.filter(d => !process.env.ONLY || d.name === process.env.ONLY);
     const bots = process.env.SKIP_BOT || process.env.ONLY ? [] : BOT_RUNS;
     // the bot sessions run alongside the per-device suites (separate contexts)
     const botP = Promise.all(bots.map(r => runBot(browser, srv.url, r)));

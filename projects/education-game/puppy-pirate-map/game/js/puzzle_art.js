@@ -11,7 +11,8 @@
  *   drawShadow(ctx, thing, size, opt)  the empty slot: EXACTLY the piece's silhouette (same paths / same text drawing),
  *       styled per §3 (rgba(40,36,60,.30) fill, 4 px darker inner rim, inner bevel, dashed light outline 10/8).
  *       opt = { glow 0..1 (pulsing gold rim), alpha 0..1 }
- *   pieceBox(thing, size) → { w, h }   the visible bounding box; max(w, h) === size (the longest side is `size`).
+ *   pieceBox(thing, size) → { w, h }   the visible bounding box; max(w, h) === size (the longest side is `size`), except
+ *                                      coins: one constant coin size for every n (n = 5 fills `size`, fewer coins → smaller box).
  *   coinSpots(n, size) → [{ x, y, r }] the coin centres / radii (px, relative to the piece centre, counting order: top row
  *       left → right, then the bottom row) — for count sparkles / "ting" fx.
  *   drawBoard(ctx, board, scene, season, opt)   origin = board top-left; board = { w, h, r, frame? }. Rope-and-wood frame
@@ -487,19 +488,20 @@
   }
 
   // ================================================================= COINS: n separate gold coins (counting, ages ≤ 4)
-  // Layout (design units): coin radius CR, visible gap CG between the outlines (≥ 6 px at size 112 for n = 5, the widest),
-  // rows: 1 · 2 side by side · 3 = 1 on top of 2 (pyramid) · 4 = 2 + 2 · 5 = 2 on top of 3. Counting order: top row L→R, then
-  // the bottom row L→R.
-  var CR = 20, CG = 10.5, CD = 2 * CR + LW + CG, CDY = CD * 0.866;
-  var COIN_ROWS = { 1: [[0]], 2: [[-0.5, 0.5]], 3: [[0], [-0.5, 0.5]], 4: [[-0.5, 0.5], [-0.5, 0.5]], 5: [[-0.5, 0.5], [-1, 0, 1]] };
+  // Layout (design units): coin radius CR, visible gap CG between the outlines (≥ 6 px at size 112),
+  // rows: 1 · 2 side by side · 3 = 1 on top of 2 (pyramid) · 4 = 2 + 2 · 5 = dice five (2 · 1 · 2, fills the square box).
+  // Counting order: top row L→R, then down. EVERY coins piece uses the scale of the n = 5 layout (spec.ref), so a coin has
+  // the same radius for any n: a 1-coin piece is one small coin (its pieceBox is smaller than size), never one giant coin.
+  var CR = 20, CG = 8.4, CD = 2 * CR + LW + CG, CDY = CD * 0.866, CD5 = CD / Math.SQRT2;
+  var COIN_ROWS = { 1: [[0]], 2: [[-0.5, 0.5]], 3: [[0], [-0.5, 0.5]], 4: [[-0.5, 0.5], [-0.5, 0.5]], 5: [[-1, 1], [0], [-1, 1]] };
   var coinCache = {};
   function coinDef(n) {
     n = Math.max(1, Math.min(5, Math.round(num(n, 1))));
     if (coinCache[n]) return coinCache[n];
-    var rows = COIN_ROWS[n], dy = n === 4 ? CD : CDY, pts = [];
+    var rows = COIN_ROWS[n], dy = n === 4 ? CD : n === 5 ? CD5 : CDY, dx = n === 5 ? CD5 : CD, pts = [];
     rows.forEach(function (row, ri) {
       var y = (ri - (rows.length - 1) / 2) * dy;
-      row.forEach(function (fx) { pts.push([fx * CD, y]); });
+      row.forEach(function (fx) { pts.push([fx * dx, y]); });
     });
     var discs = pts.map(function (p) { return function (t) { circ(t, p[0], p[1], CR); }; });
     return (coinCache[n] = { n: n, pts: pts, discs: discs, sil: discs });
@@ -546,29 +548,34 @@
   }
 
   // ================================================================= DOTS tile (1..12)
+  // One fixed card for every n (a ten-frame-like 4 × 3 grid sized for 12): dots fill row by row, L→R; empty wells show the
+  // free places. Dot radius DR = 9 design units ≈ 9.7 px at 112. The shadow shows the dots as light discs (spec.marks).
+  var DCOLS = 4, DROWS = 3, DR = 9, DS = 22, DM = 9;
+  var DW = (DCOLS - 1) * DS + 2 * DR + 2 * DM, DH = (DROWS - 1) * DS + 2 * DR + 2 * DM;
   var dotsCache = {};
+  var dotTile = function (t) { rrect(t, -DW / 2, -DH / 2, DW, DH, 12); };
+  function dotGrid(i) { return [(i % DCOLS - (DCOLS - 1) / 2) * DS, (Math.floor(i / DCOLS) - (DROWS - 1) / 2) * DS]; }
   function dotsDef(n) {
     n = Math.max(0, Math.min(12, Math.round(num(n, 1))));
     if (dotsCache[n]) return dotsCache[n];
-    var cols = Math.max(1, Math.min(n, 5)), rows = Math.max(1, Math.ceil(n / 5)), S = 18;
-    var W = S * Math.max(cols, 2) + 26, H = S * Math.max(rows, 2) + 26, pts = [];
-    for (var i = 0; i < n; i++) {
-      var row = Math.floor(i / 5), col = i % 5, inRow = n <= 5 ? n : 5;
-      var x0 = -(inRow - 1) * S / 2, y0 = -(rows - 1) * S / 2;
-      pts.push([x0 + col * S, y0 + row * S]);
-    }
-    var tile = function (t) { rrect(t, -W / 2, -H / 2, W, H, 13); };
-    return (dotsCache[n] = { n: n, W: W, H: H, pts: pts, r: n <= 2 ? 9 : 7.2, tile: tile, sil: [tile] });
+    var pts = [], wells = [];
+    for (var i = 0; i < DCOLS * DROWS; i++) (i < n ? pts : wells).push(dotGrid(i));
+    var marks = function (t) { pts.forEach(function (p) { circ(t, p[0], p[1], DR); }); };
+    return (dotsCache[n] = { n: n, W: DW, H: DH, pts: pts, wells: wells, r: DR, tile: dotTile, sil: [dotTile], marks: marks });
   }
   function drawDots(ctx, n, o) {
     var d = dotsDef(n), T = { base: '#FFF6E6', dark: '#B89B72', light: '#FFFFFF' }, red = pal('red'), cnt = o.count == null ? -1 : o.count;
-    cel(ctx, 'dt' + d.n, d.tile, T, { s: 3.5, hl: [-d.W / 2 + 12, -d.H / 2 + 9, 7, 2.6, -0.2] });
-    ctx.strokeStyle = rgba('#D9C3A0', 0.9); ctx.lineWidth = 1.6; ctx.setLineDash([3, 3]);
-    ctx.beginPath(); rrect(ctx, -d.W / 2 + 6, -d.H / 2 + 6, d.W - 12, d.H - 12, 8); ctx.stroke(); ctx.setLineDash([]);
+    cel(ctx, 'dt', d.tile, T, { s: 3.5, hl: [-d.W / 2 + 12, -d.H / 2 + 7, 7, 2.4, -0.2] });
+    ctx.strokeStyle = rgba('#D9C3A0', 0.9); ctx.lineWidth = 1.4; ctx.setLineDash([3, 3]);
+    ctx.beginPath(); rrect(ctx, -d.W / 2 + 4, -d.H / 2 + 4, d.W - 8, d.H - 8, 9); ctx.stroke(); ctx.setLineDash([]);
+    d.wells.forEach(function (p) {   // the empty places: soft pressed rings, so the card is a ten-frame-like grid
+      dot(ctx, p[0], p[1], d.r * 0.62, 'rgba(184,155,114,0.16)');
+      ctx.strokeStyle = 'rgba(184,155,114,0.38)'; ctx.lineWidth = 1.3; ctx.beginPath(); circ(ctx, p[0], p[1], d.r * 0.62); ctx.stroke();
+    });
     var bounce = (o.alive || 0);
     d.pts.forEach(function (p, i) {
       var y = p[1] - bounce * Math.max(0, Math.sin((o.t || 0) * 7 - i * 0.6)) * 3;
-      if (cnt > i) { dot(ctx, p[0], y, d.r + 4, '#FFFFFF'); ctx.strokeStyle = '#FFC93C'; ctx.lineWidth = 2; ctx.beginPath(); circ(ctx, p[0], y, d.r + 4); ctx.stroke(); }
+      if (cnt > i) { dot(ctx, p[0], y, d.r + 2.6, '#FFFFFF'); ctx.strokeStyle = '#FFC93C'; ctx.lineWidth = 2; ctx.beginPath(); circ(ctx, p[0], y, d.r + 2.6); ctx.stroke(); }
       dot(ctx, p[0] + 0.8, y + 1.2, d.r, red.dark);
       dot(ctx, p[0], y, d.r, red.base);
       ctx.strokeStyle = red.dark; ctx.lineWidth = 1.6; ctx.beginPath(); circ(ctx, p[0], y, d.r); ctx.stroke();
@@ -871,8 +878,8 @@
     t = t || {};
     if (t.kind === 'obj') { var o = OBJ[t.obj] || OBJ.boat; s = { sil: o.sil, grow: LW, draw: function (ctx, th, op) { o.draw(ctx, pal(th.color), op); } }; }
     else if (t.kind === 'shape') { var sh = SHAPE_B[t.shape] ? t.shape : 'circle'; s = { sil: [SHAPE_B[sh]], grow: LW, draw: function (ctx, th, op) { drawShapeTile(ctx, sh, pal(th.color), op); } }; }
-    else if (t.kind === 'coins' || t.kind === 'bunch') { var bd = coinDef(t.n); s = { sil: bd.sil, grow: LW, draw: function (ctx, th, op) { drawCoins(ctx, bd.n, op); } }; }
-    else if (t.kind === 'dots') { var dd = dotsDef(t.n); s = { sil: dd.sil, grow: LW, draw: function (ctx, th, op) { drawDots(ctx, dd.n, op); } }; }
+    else if (t.kind === 'coins' || t.kind === 'bunch') { var bd = coinDef(t.n); s = { sil: bd.sil, grow: LW, ref: bd.n === 5 ? null : { kind: 'coins', n: 5 }, draw: function (ctx, th, op) { drawCoins(ctx, bd.n, op); } }; }
+    else if (t.kind === 'dots') { var dd = dotsDef(t.n); s = { sil: dd.sil, grow: LW, marks: dd.marks, draw: function (ctx, th, op) { drawDots(ctx, dd.n, op); } }; }
     else if (t.kind === 'animal') {
       var an = A[t.animal] && t.animal !== '_generic' ? A[t.animal] : A._generic;
       s = { sil: an.sil, grow: LW + 2 * STK, sticker: true, draw: function (ctx, th, op) { drawSticker(ctx, s); an.draw(ctx, op); } };
@@ -940,7 +947,9 @@
       });
     }
     var w = x1 - x0, h = y1 - y0;
-    gm = { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, w: w, h: h, k: 100 / Math.max(w, h, 1) };
+    // s.ref: a reference thing whose scale is shared (coins: every n uses the n = 5 scale → constant coin radius)
+    var den = Math.max(w, h, 1); if (s.ref) { var rg = geom(s.ref); den = Math.max(den, 100 / rg.k); }
+    gm = { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, w: w, h: h, k: 100 / den };
     // a glyph measured before a canvas existed is re-measured later
     if (!(s.text && !mctx())) geomCache[k] = gm;
     return gm;
@@ -1010,6 +1019,9 @@
     h.drawImage(o.tint(o.minus(A0, o.ero(A0, 4 * sc)), 'rgba(40,36,60,0.215)'), 0, 0);            // inner rim → 0.45
     h.drawImage(o.tint(o.minus(A0, o.shift(A0, 3 * sc, 5 * sc)), 'rgba(40,36,60,0.16)'), 0, 0);   // hole depth, top-left
     h.drawImage(o.tint(o.minus(A0, o.shift(A0, -2 * sc, -3 * sc)), 'rgba(255,255,255,0.22)'), 0, 0); // lit lower-right lip
+    if (L.s.marks) {   // dots cards: the dots show as light discs inside the dark shadow, so the count reads from the shadow
+      h.save(); h.setTransform(sc, 0, 0, sc, L.W / 2, L.H / 2); h.scale(L.k, L.k); h.translate(-L.g.cx, -L.g.cy); markPaint(h, L.s.marks); h.restore();
+    }
     // dashed light outline straddling the edge
     var ring = o.minus(o.dil(A0, 2.5 * sc), o.ero(A0, 2 * sc));
     var dash = newCanvas(L.W, L.H), d = dash.getContext('2d');
@@ -1102,6 +1114,10 @@
       silPaintParts(ctx, sp, '#EFE8DC'); ctx.restore();
     }
   }
+  function markPaint(g, marks) {
+    g.fillStyle = 'rgba(252,248,240,0.82)'; g.beginPath(); marks(g); g.fill();
+    g.strokeStyle = 'rgba(40,36,60,0.34)'; g.lineWidth = 2; g.beginPath(); marks(g); g.stroke();
+  }
   function silPaintParts(ctx, s, col) {   // fill only (no grow) — for the dim veil
     ctx.fillStyle = col;
     if (s.text) { textOn(ctx); ctx.fillText(s.text, 0, 0); return; }
@@ -1130,6 +1146,7 @@
         ctx.globalAlpha *= alpha;
         silPaint(ctx, s, 'rgba(236,231,224,0.78)', 0, true);   // the underlay flattens the scenery inside the silhouette
         silPaint(ctx, s, 'rgba(40,36,60,0.36)', 0, true);
+        if (s.marks) markPaint(ctx, s.marks);
         if (ctx.setLineDash) ctx.setLineDash([10 / k, 8 / k]);
         ctx.strokeStyle = 'rgba(255,255,255,0.55)'; silStroke(ctx, s, s.text ? s.grow + 2.5 / k : 2.5 / k, true);
         if (ctx.setLineDash) ctx.setLineDash([]);
@@ -1635,9 +1652,11 @@
     opt = opt || {};
     var x = num(tray.x, 0), y = num(tray.y, 0), w = num(tray.w, 0), h = num(tray.h, 0); if (!(w > 4 && h > 4)) return;
     var mi = moodIdx(season), M = MOOD[mi], t = num(opt.t, 0), item = num(opt.item, 112), i;
-    var r = Math.min(h * 0.42, 44), lap = Math.sin(t * 1.1) * 2.2, top = y + 3 + lap, fy = waterTop(x, w, top, t, 2);
+    var r = Math.min(h * 0.42, 44), lap = Math.sin(t * 1.1) * 2.2, top = y + 3 + lap, fy = waterTop(x, w, top, t, M.wind ? 3.4 : 2);
     var cTop = '#8FDCE0', cBot = '#5CC3D6';
-    if (M.rain) { cTop = mix(cTop, '#9AABB6', 0.38); cBot = mix(cBot, '#7F96A6', 0.38); }
+    // rain: clearly greyer teal (spec §0.5); breezy: a touch deeper and choppier
+    if (M.rain) { cTop = '#A2C6C4'; cBot = '#6A9CA0'; }
+    else if (M.wind) { cTop = mix(cTop, '#6FCAD6', 0.5); cBot = mix(cBot, '#3FA9C4', 0.5); }
     function water(g, inset) {
       inset = inset || 0;
       var x0 = x + inset, x1 = x + w - inset, rr = Math.max(4, r - inset);
@@ -1679,17 +1698,26 @@
     });
     // mood life on the water
     if (M.rain) {
-      for (i = 0; i < Math.max(4, Math.round(w / 110)); i++) {
-        var q = t * 0.9 + i * 0.37, cyc = Math.floor(q), p = q - cyc, hs = hashS('r' + i + ':' + cyc);
+      ctx.fillStyle = 'rgba(70,95,100,0.12)'; ctx.fillRect(x, y, w, h);   // a grey overcast veil on the water
+      for (i = 0; i < Math.max(9, Math.round(w / 55)); i++) {             // many rain rings, two rings per drop
+        var q = t * 1.1 + i * 0.29, cyc = Math.floor(q), p = q - cyc, hs = hashS('r' + i + ':' + cyc);
         var rx = x + 12 + (hs % 1000) / 1000 * (w - 24), ry = y + 16 + ((hs >>> 10) % 1000) / 1000 * (h - 28);
-        ctx.strokeStyle = 'rgba(255,255,255,' + (0.6 * (1 - p)).toFixed(3) + ')'; ctx.lineWidth = 1.5;
-        ctx.beginPath(); ell(ctx, rx, ry, 3 + p * 14, 1.2 + p * 4.5, 0); ctx.stroke();
+        ctx.strokeStyle = 'rgba(245,250,252,' + (0.8 * (1 - p)).toFixed(3) + ')'; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ell(ctx, rx, ry, 4 + p * 22, 1.5 + p * 6.5, 0); ctx.stroke();
+        if (p > 0.25) { ctx.lineWidth = 1.2; ctx.strokeStyle = 'rgba(245,250,252,' + (0.55 * (1 - p)).toFixed(3) + ')'; ctx.beginPath(); ell(ctx, rx, ry, (p - 0.25) * 14, (p - 0.25) * 4.4, 0); ctx.stroke(); }
+        if (p < 0.18) dot(ctx, rx, ry - 2 - p * 20, 1.6, 'rgba(245,250,252,' + (0.9 * (1 - p / 0.18)).toFixed(3) + ')');   // the splash drop
       }
     } else if (M.wind) {
-      ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 2;
-      for (i = 0; i < Math.max(3, Math.round(w / 150)); i++) {
-        var wx = x + ((i * 173 + t * 40) % (w + 40)) - 20, wy = y + h * (0.4 + ((i * 0.29) % 0.45));
-        ctx.beginPath(); ctx.moveTo(wx - 8, wy + 2); ctx.quadraticCurveTo(wx - 2, wy - 5, wx + 6, wy - 3); ctx.quadraticCurveTo(wx + 2, wy, wx + 8, wy + 2); ctx.stroke();
+      ctx.strokeStyle = 'rgba(30,110,140,0.22)'; ctx.lineWidth = 1.6;   // choppy wavelets
+      for (i = 0; i < Math.max(8, Math.round(w / 45)); i++) {
+        var vx = x + ((i * 61.7 + t * 34) % (w + 30)) - 15, vy = y + h * (0.28 + ((i * 0.37) % 0.62));
+        ctx.beginPath(); ctx.moveTo(vx - 9, vy); ctx.quadraticCurveTo(vx - 4.5, vy - 4, vx, vy); ctx.quadraticCurveTo(vx + 4.5, vy - 4, vx + 9, vy); ctx.stroke();
+      }
+      ctx.strokeStyle = 'rgba(255,255,255,0.92)'; ctx.lineWidth = 2.8;
+      for (i = 0; i < Math.max(6, Math.round(w / 70)); i++) {           // white caps
+        var wx = x + ((i * 173 + t * 40) % (w + 40)) - 20, wy = y + h * (0.32 + ((i * 0.29) % 0.55)), ws = 1.3 + ((i * 0.53) % 0.8);
+        ctx.beginPath(); ctx.moveTo(wx - 9 * ws, wy + 2); ctx.quadraticCurveTo(wx - 2 * ws, wy - 6 * ws, wx + 7 * ws, wy - 3 * ws); ctx.quadraticCurveTo(wx + 2 * ws, wy, wx + 9 * ws, wy + 2); ctx.stroke();
+        dot(ctx, wx + 9 * ws, wy - 1, 1.3, 'rgba(255,255,255,0.8)');
       }
     } else {
       for (i = 0; i < Math.max(4, Math.round(w / 90)); i++) {

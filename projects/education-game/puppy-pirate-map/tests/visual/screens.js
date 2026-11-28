@@ -1,4 +1,4 @@
-// Visual QA sweep (Mit's Puzzle Town): every screen x 4 device shapes x EN/VI with emulated notch insets, every topic per
+// Visual QA sweep (Mit's Treasure Map): every screen x 4 device shapes x EN/VI with emulated notch insets, every topic per
 // age (3..7), all 4 seasons x 3 board scenes, and in-page geometry measurements (overlaps, safe area, target sizes).
 //   node tests/visual/screens.js            -> tests/out/visual/*.png + geometry[-DEV].json + issues[-DEV].txt
 //   (≈ 9 min per device; run the 4 devices in parallel with DEV=ip-p / ip-l / pad-p / pad-l)
@@ -112,7 +112,7 @@ function installProbe() {
     otherPiece() { const w = W(), a = w.answer(); const o = w.pieces.find(p => p.state === 'rest' && p.id !== a.piece); return o ? o.id : null; },
     fillGallery(n) {
       const w = W(), P = w.pictures.length ? w.pictures : [];
-      const scenes = ['street', 'shapes', 'balloons', 'park'], th = [{ kind: 'obj', obj: 'car', color: 'red' }, { kind: 'shape', shape: 'star', color: 'yellow' }, { kind: 'animal', animal: 'duck' }, { kind: 'obj', obj: 'balloon', color: 'blue' }];
+      const scenes = ['cove', 'sails', 'cave', 'lagoon'], th = [{ kind: 'obj', obj: 'boat', color: 'red' }, { kind: 'shape', shape: 'star', color: 'yellow' }, { kind: 'coins', n: 3 }, { kind: 'animal', animal: 'parrot' }];
       const out = P.slice();
       for (let i = out.length; i < n; i++) out.push(P.length ? Object.assign({}, P[i % P.length], { season: (i >> 2) % 4 }) :
         { scene: scenes[i % 4], season: (i >> 2) % 4, level: i >> 2, round: i % 4, topic: 'colors', pieces: [{ thing: th[i % 4], u: 0.3, v: 0.55, rs: 0.4 }, { thing: th[(i + 1) % 4], u: 0.7, v: 0.5, rs: 0.4 }] });
@@ -199,7 +199,9 @@ async function screens(browser, srv, dev, lang) {
   await page.evaluate(() => TM.debug.setBot(false));
   await shot(page, `${k}-12-alive`);
   await until(page, () => TM.debug.world.phase === 'turn' && TM.debug.world.phaseTime > 0.25, null, 15000).catch(() => {});
-  await shot(page, `${k}-13-pageturn`);
+  await shot(page, `${k}-13-rollup`);
+  await until(page, () => { const w = TM.debug.world; return w.phase === 'turn' && w.phaseTime > w.cfg.turnTime + w.cfg.scrollFlyTime * 0.45; }, null, 15000).catch(() => {});
+  await shot(page, `${k}-13b-scrollfly`);
   // Talk time
   await sleep(1500);
   await page.evaluate(() => { const w = TM.debug.world; w._startTalk(); }); await sleep(1100);
@@ -208,7 +210,8 @@ async function screens(browser, srv, dev, lang) {
   await shot(page, `${k}-15-talk-right`);
   // session done (gallery)
   await page.evaluate(() => { const w = TM.debug.world; QA.fillGallery(16); w.level = w.levels.length - 1; w._levelDone(); TM.debug.setSpeed(4); });
-  await until(page, () => TM.debug.mode === 'done', null, 30000).catch(() => {}); await page.evaluate(() => TM.debug.setSpeed(1)); await sleep(5200);
+  await until(page, () => TM.debug.world.chest, null, 30000).catch(() => {}); await page.evaluate(() => TM.debug.setSpeed(1)); await sleep(500);
+  await shot(page, `${k}-16a-chest-rise`); await sleep(1100); await shot(page, `${k}-16b-chest-open`); await sleep(3600);
   await shot(page, `${k}-16-done`); geo[k + '-done'] = { dom: await page.evaluate(() => QA.dom()), gallery: await page.evaluate(() => TM.render.gallery.length) };
   if (page._errs.length) geo[k + '-errors'] = page._errs.slice(0, 10);
   await ctx.close();
@@ -230,7 +233,7 @@ async function topics(browser, srv, dev, lang) {
 // every season x every board scene used by the age 3-5 topics (street, shapes, size, balloons, park, letters)
 async function seasons(browser, srv, dev) {
   const { ctx, page } = await open(browser, srv, dev, 'en', 5, 9);
-  for (const lv of [0, 1, 2, 3]) for (const t of ['colors', 'shapes', 'count', 'animals', 'letters']) {
+  for (const lv of [0, 1, 2, 3]) for (const t of ['colors', 'shapes', 'count', 'animals', 'letters', 'add']) {
     const k = `${dev}-season${lv}-${t}`;
     try { await round(page, t, lv, 1); await shot(page, k); await G(page, k); } catch (e) { geo[k + '-fatal'] = e.message.split('\n')[0]; }
   }

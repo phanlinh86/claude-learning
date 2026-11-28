@@ -64,9 +64,11 @@ w.board    { x, y, w, h, r (rest rect), ox (px), tilt (rad about the board centr
              its lower edge y + unroll·h; slots / placed pieces clipped the same way),
            turn 0..1 (ROLL-UP: smooth over 0.9 s; draw only the TOP (1 − turn) fraction + the roll at y + (1 − turn)·h; 1 = gone),
            scrollX, scrollY (px, the roll's centre: during the roll-up = board centre x, the roll line; then it flies on an arc to
-             Mit's paws (mit.x + 0.32 h, mit.y − 0.42 h) in 0.45 s), scrollK 1 → 0.35 (scale), scrollT 0..1 (fly progress, 0 while
-             rolling), scrollA 0..1 (alpha: 1 while rolling / flying, fades in the last 25 % of the flight; 0 outside the turn phase),
-             scrollRot (rad, the roll spinning) → PuzzleArt.drawScroll(ctx, board.w × scrollK, r) at (scrollX, scrollY) rotated,
+             Mit's paws (mit.x + 0.32 h, mit.y − 0.42 h) in 0.45 s, ending exactly there; apex ≤ 90 px above the board top but
+             never above the bottom of a keep-out box (bubble / HUD) the path passes under + 20 px, nor ins.top + 30),
+             scrollK 1 → 0.15 (scale, smooth over the flight), scrollT 0..1 (fly progress, 0 while
+             rolling), scrollA 0..1 (alpha: 1 while rolling / flying, fades only in the last 8 % (v > 0.92); 0 outside the turn phase),
+             scrollRot (rad, the roll spinning; the flight adds 5 rad < 2π, smooth) → PuzzleArt.drawScroll(ctx, board.w × scrollK, r) at (scrollX, scrollY) rotated,
            scene ('cove'|'sails'|'cave'|'lagoon'|'shore'|'deck'), season 0..3 (= the weather MOOD index), flip (bool, mirrored
              picture), show (bool: a board is on screen) } + _pox _ptilt _pjig _pturn _pshine _palive _punroll _pscrollX _pscrollY
            → translate(ox, jig) · rotate(tilt) about the centre (ox: a small 60 px spring slide while unrolling, tilt ≤ 0.04)
@@ -116,7 +118,8 @@ w.pictures [{ scene, season, flip, level, round, topic, pieces [{thing, u, v, rs
   holds `maxSlots[age]` (2 / 3 / 4 / 4 / 4) at 1.25 × item for slot seeds 1–6 (and the size topic's big + small pair at ages ≤ 4)
   and the tray holds `maxPieces[age]` (3 / 4 / 5 / 5 / 5) at 1.3 × item; else the base item; else `itemMin` 112 / 104 / 96 (5 / 6+;
   iPad 4:3 at ages 5+ where 5 pieces at 112 do not fit the tray). `layout.fits` says whether the chosen tier fits.
-  `maxSize` = 1.25 × item at ages ≤ 4 (the size topic's big piece), else item.
+  `maxSize` = sizeK.big 1.35 × item at ages ≤ 4 (the size topic's big piece), else item. Size pieces: big 1.35 / small 0.9 × item
+  (QA: the small one was 0.8 → 59 css px on iPhone portrait; now ≈ 66; big : small stays 1.5).
 - **Landscape:** tray.y = min(H − ins.bottom − item − (phones 76 : 96), groundY − 8 − 44 − maxSize); ONE row x ∈ [ins.left + 250,
   W − ins.right − 30], ledge = tray.y + 44 + maxSize ≤ groundY − 8 (above the home indicator; every piece top is ≥ 44 px below the zone
   line tray.y = board bottom + 30). Board: y = max(ins.top + 152, bubble bottom + 30, measured top boxes + 12), bottom = tray.y − 30,
@@ -126,7 +129,7 @@ w.pictures [{ scene, season, flip, level, round, topic, pieces [{thing, u, v, rs
   Mit's head** (ledge ≤ Mit box top − 6) and extended left to ins.left + 24. tray.y = top ledge − maxSize − 44. Board: x = ins.left
   + 24, w = W − 48 − insets, y ≥ bubble bottom + 34, bottom ≤ min(tray.y − 30, Mit box top − frame − 8), h = min(0.78 w, space),
   **centred in the free band** (on tall phones the band is taller than 0.78 w; the board no longer hugs the bubble).
-- **Slots** (`placeSlots`): inset by max(0.6 item, size / 2 + 6), farthest-point sampling over a jittered 9 × 6 grid, 14 starts (up
+- **Slots** (`placeSlots`): inset by max(0.6 item, biggest size / 2 + `slotEdge` 16) (QA: the big hat's shadow touched the frame at + 6), farthest-point sampling over a jittered 9 × 6 grid, 14 starts (up
   to 90 while no spaced set is found, then the regular 1…n-row arrangements), the best min-distance set (≥ 1.25 × the pair's mean
   size); among spaced sets the one least on **busy scenery** (`PuzzleArt.sceneBusy`: tree crowns + trunks, tent, Ferris wheel,
   chalkboard, windows; penalty overlap / slot area × `busyK` 1.2 × item, the spacing margin capped at 0.6 item); deterministic per
@@ -160,10 +163,10 @@ w.pictures [{ scene, season, flip, level, round, topic, pieces [{thing, u, v, rs
 | back in the water | every arc home (wrong / near / home / tap / cancel) ends exactly on the bobbed spot → `splash {id, kind, x, y}` + the landing squash | |
 | counting | a placed coin piece / dot tile lights `count` 1..n every 0.5 s (`count` events), all lit 0.8 s, then −1; the next ask waits n × 0.5 + 0.3 s more | |
 | alive | `roundDone` → shine 0 → 1 over 0.7 s; `alive` event, board.alive 0 → 1 in 0.4 s; per piece (envelope 0.25 s): boat sails ± 14 px (0.6 Hz) and rocks ± 0.09 rad; kite floats up 10 px + sways, flag sways 0.12 rad; bottle bobs 6 px + rolls 0.18 rad; parasol / hat bob 8 px; animals hop twice (22 px, 0.38 s) with landing squashes; pail / shell / shapes / coins / dots / glyphs a 14 px bounce wave (0.12 s apart, 0.9 s period); Mit cheer → `woof` at 1.2 s; distractors `poof` at 0.3 s (swell 1.15 then shrink, 0.35 s) → `gone` | alive 2.4 s |
-| roll-up | `boardOut`; board.turn = smooth(u) over 0.9 s (rolls up from the bottom); then the scroll flies on an arc (apex 90 px) into Mit's paws in 0.45 s, scale → 0.35, spinning; `scrollCatch` + Mit happy hop; then the picture goes into `w.pictures` and the next round enters | turn phase 1.35 s |
+| roll-up | `boardOut`; board.turn = smooth(u) over 0.9 s (rolls up from the bottom); then the scroll flies on an arc (apex 90 px, kept ≥ 20 px below the bubble / HUD it passes under) into Mit's paws in 0.45 s, scale → 0.15, spinning 5 rad, fading only for v > 0.92; `scrollCatch` + Mit happy hop; then the picture goes into `w.pictures` and the next round enters | turn phase 1.35 s |
 | chest | sessionDone: `chest`; rise ease-out 0.6 s + landing squash 0.14; at 1.2 s `chestOpen`, the lid springs open (target 1.2, clamped at the stop 1, bounce 40 %) + glow | ω 11, ζ 0.28 |
 | hint hand | 1.6 s cycle: press on the piece (0–0.15), carry it on a 50 px arc to the slot (0.15–0.7), let go (0.7–0.82), float back fading | shows 3.2 s |
-| crab | hops in SIDEWAYS (0.6 s arc from beyond the right edge, claws up) onto the right end of its **ledge — the top of the board frame** (crabEdge 70 px in from the frame's ends, clear of the bubble / HUD bands; if < 100 px are left: on top of the speech bubble left of the HUD; else on Mit's head, riding his hops); scuttles sideways left at 85 px/s (steps 5 Hz) to the ledge spot farthest from the open shadows, snips its claws (1.4 Hz) until ≈ 6 s, scuttles back to the end and hops off (0.6 s arc down past the right edge); tap → a 40 px hop with both claws waving (4 Hz, 0.9 s) and lands; untapped → once more 5 s later; hops off at once when the picture is done. Never over the tray (visual P1-1) | width 96 |
+| crab | hops in SIDEWAYS (0.6 s arc from beyond the right edge, claws up) onto the right end of its **ledge — the top of the board frame** (crabEdge 70 px in from the frame's ends, clear of the bubble / HUD / Mit bands; if a box reaches just into its 84 px head band it steps down onto the frame, feet ≤ board top + 6 — iPhone portrait; if < 100 px are left: on top of the speech bubble left of the HUD; else along the board's BOTTOM frame edge, clear of every tray piece's hit circle + its 20 px tap reach; else the widest frame-top piece — **never on Mit**); one ledge per visit (re-chosen on a relayout); scuttles sideways left at 85 px/s (steps 5 Hz) to the ledge spot farthest from the open shadows, snips its claws (1.4 Hz) until ≈ 6 s, scuttles back to the end and hops off (0.6 s arc down past the right edge); tap → a 40 px hop with both claws waving (4 Hz, 0.9 s) and lands; untapped → once more 5 s later; hops off at once when the picture is done. Never over the tray (visual P1-1) | width 96 |
 | bubbles | a little fish (`w.fish`) peeks out of the water under them when they rise right of the board; 4–6, one every 0.45 s, r 24–34, rise 45–70 px/s, wobble ± 14 px at 0.8 Hz; in the band right of the board when it is ≥ 2 r + 48 wide, else from the board's lower edge up over the picture (never over the tray); tap → pop 0.25 s; none popped → a 2nd wave 6 s later | |
 | Mit | mood timers; blink every 2.2–5 s; looks at the held piece / hint hand / crab / bubbles / the board; `hop` sin over 0.42 s on every fit, cheer, woof and right Talk answer | |
 
@@ -180,7 +183,7 @@ w.pictures [{ scene, season, flip, level, round, topic, pieces [{thing, u, v, rs
 - Stars: misses (wrong drops only) 0 / 1 / ≥ 2 → 3 / 2 / 1; + 1 for a right Talk answer.
 - Surprises: one round per chapter (round 1 or 2, never the warm-up), `crab` / `bubbles` rotating per chapter (session offset).
 - Chapter time: a round that starts after `shortBudget[round]` = 30 / 48 / 62 s into the chapter is short (2 slots); Talk time after
-  round 4, or after round ≥ 2 (`chapterMinRounds`) once the chapter passed 75 s. Talk re-asks every 12 s (`talkAsk {n}`), glows from the 2nd, stops after
+  round 4, or after round ≥ 2 (`chapterMinRounds`) once the chapter passed `chapterTimeLimit` 65 s (was 75; QA round 5: a slow 3-year-old stays ≤ 8 min). Talk re-asks every 12 s (`talkAsk {n}`), glows from the 2nd, stops after
   3; 12 s later Mit answers herself (`talkResult {auto: true}`, no star).
 
 ## 7. Events (every positional event carries x, y in logical px)
@@ -222,13 +225,14 @@ w.pictures [{ scene, season, flip, level, round, topic, pieces [{thing, u, v, rs
 ## 8. Content (`TM.Content`, DESIGN §5.1)
 - Pieces: `{id 'p0'…, thing, slot 's…' | null}` in tray order; slots `{id, piece}`; steps one per real piece in random order (findAll:
   one). At every find step exactly one still-unplaced piece matches; distractors never match (validate simulates the round).
-- Counts: warm-up 2 + 0 (odd / even: 2 + 1); age 3: 2 (+ 1 from round index 2, not in the first chapter); age 4: 3 + 1 (first chapter
-  3 + 0); age 5: 3–4 + 1; ages 6+: 4 + 1; short rounds 2 slots. **colors below age 5: only 3 clash-free colours exist, so a round
-  with a distractor has 2 slots + 1** (first chapter at age 4: 3 + 0). ≤ 5 pieces.
+- Counts: **one distractor in every round except the session's very first warm-up** (round 0 of chapter 0: 2 + 0) so the last ask
+  is never a free answer (QA: it was 34 % / 21 % of asks at ages 3 / 4); later warm-ups 2 + 1 (count warm-ups then use coins 1–3);
+  age 3: 2 + 1; age 4: 3 + 1; age 5: 3–4 + 1; ages 6+: 4 + 1; odd / even 2–3 + 1–2; short rounds 2 slots + 1. **colors below age 5:
+  only 3 clash-free colours exist, so a round with a distractor has 2 slots + 1.** ≤ 5 pieces.
 - Things: `obj` {obj, color} (colors: every piece a different object and colour; size: the same object + colour, `size` 'big'|'small'
   + `big` bool, its distractor another object with nameKind `'obj'`), `shape` {shape, color} (≤ 4: one colour, no square+rect /
   circle+oval / square+diamond; age 5: a 2 × 2 shape × colour grid, `p.shapes5`), `coins` {n} (ages ≤ 4, nameKind `'coins'` — the
-  step's nameKind too; params.kind 'coins'; n all different, 1–2 warm-up, ≤ 4 in round 1, ≤ 5 later), `dots` {n} (5+: ≤ 5 warm-up, 1–10 / 12; age 5 never n and n ± 1 together), `animal` {animal}, `glyph` {text} (letters;
+  step's nameKind too; params.kind 'coins'; n all different, 1–2 first warm-up (1–3 later warm-ups), ≤ 4 in round 1, ≤ 5 later), `dots` {n} (5+: ≤ 5 warm-up, 1–10 / 12; age 5 never n and n ± 1 together), `animal` {animal}, `glyph` {text} (letters;
   small letters without i / l, at most one of b d p q, never m+w / n+u) or {text, n} (numbers: add / sub / odd-even).
 - prevAns (the next round does not open with the answer asked last; size / odd-even ≤ 2 in a row, shapes5 exempt) and usedKeys
   (never the same set twice in a chapter). `content_stats.js 200`: 0 invalid in 20 000 rounds, 0.0 % repeated sets.
@@ -305,6 +309,12 @@ typical 3 / 4 / 5 / 6 / 7: 6.5 / 6.5 / 6.4 / 6.4 / 5.9 min (p90 ≤ 6.8); slow 3
 piece only: 100 % done at every age, 6.6–7.0 min (was stuck 40 / 40)**; tap-only 6.6–7.1; slow tap-only 7.4–7.5 (was 17); 0 NaN /
 stuck / off screen / "2 wrong without a hint". The open item above is closed by `chapterMinRounds` 2.
 
+**QA round 5 (2026-11-28, `hs_playtest.js --n 120 --ages 3,4`, 1 208 sessions, 0 failed)** after a distractor in every round but
+the first warm-up, `chapterTimeLimit` 75 → 65, sizeK 1.25 / 0.8 → 1.35 / 0.9: typical 3 / 4: chapter 83 / 84 s (p90 94 / 93),
+session 5.8 min (p90 6.2); slow 3-year-old 3 / 4: chapter 102 / 103 s, session 7.0 / 7.1 min (**p90 7.9 / 8.0**); perfect 4.7 /
+5.4 min; 0 NaN / stuck / off screen. `extra_stats` (typical, n 60): asked piece is the last one left 4.2 % / 3.8 % of asks at ages
+3 / 4 (was 34 / 21 %), 0 % of non-final asks; 92 % of rounds hold a distractor.
+
 ## 12. Deviations from DESIGN (agreed / to note)
 - State during alive / turn is **`roundDone`** (phase `alive` / `turn`), as in the sister game; `roundDone` fires at its start.
 - `sx`, `sy` **include the lift scale** (1 + 0.12 lift): render draws `scale(sx·pop, sy·pop)` and must not scale by lift again.
@@ -313,8 +323,8 @@ stuck / off screen / "2 wrong without a hint". The open item above is closed by 
 - Landscape phones: board aspect up to **2.5 : 1** (DESIGN 1.75) so the bigger phone pieces fit the short board; portrait boards are
   **centred in the free band** and stay above Mit's head (DESIGN: y = bubble bottom + 34). Tray rows are exposed as `tray.rows`.
 - **colors below age 5 with a distractor: 2 slots + 1** (only 3 clash-free colours exist; DESIGN says 3 + 1 at age 4).
-- Age 3 distractor from **round index 2** and never in the first chapter; odd / even warm-up has 1 distractor (the other parity is the
-  content); size-round distractor = another object (`nameKind 'obj'`).
+- A distractor in every round but the session's first warm-up (QA round 5; DESIGN: from round 2 / not in the first chapter at ages
+  ≤ 4); odd / even warm-up has 1 distractor (the other parity is the content); size-round distractor = another object (`nameKind 'obj'`).
 - Assist after 3 no-progress actions at ages ≤ 4 (DESIGN 6); taps on pieces and drops off the board count as no progress (never as
   misses; taps never trigger the 2-miss hint); an assisted tap of any piece (the asked one included) / a board press after the
   assist threshold glides the asked piece in (a pure tapper — even one who only taps the right piece — always finishes).
