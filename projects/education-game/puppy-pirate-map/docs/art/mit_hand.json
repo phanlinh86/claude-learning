@@ -1,0 +1,168 @@
+{
+ "_about": "Mit per frame, in the 0 0 300 300 viewBox (seat anchor 150,292). paw = the active front paw (point / wave / cheer / think: the raised one); mouth = mouth centre (woof puffs start here); hatTop = y of the paper hat peak (speech-bubble tail / stars over the head); eye = near eye centre; bbox = measured opaque box (added by tools/mit_sheet.js).",
+ "idle": {
+  "paw": [
+   140,
+   285
+  ],
+  "mouth": [
+   218,
+   160
+  ],
+  "hatTop": 34,
+  "eye": [
+   144,
+   120
+  ]
+ },
+ "blink": {
+  "paw": [
+   140,
+   285
+  ],
+  "mouth": [
+   218,
+   160
+  ],
+  "hatTop": 34,
+  "eye": [
+   144,
+   120
+  ]
+ },
+ "talk": {
+  "paw": [
+   140,
+   285
+  ],
+  "mouth": [
+   218,
+   160
+  ],
+  "hatTop": 34,
+  "eye": [
+   144,
+   120
+  ]
+ },
+ "happy": {
+  "paw": [
+   140,
+   285
+  ],
+  "mouth": [
+   218,
+   160
+  ],
+  "hatTop": 32,
+  "eye": [
+   144,
+   120
+  ]
+ },
+ "cheer": {
+  "paw": [
+   244,
+   161
+  ],
+  "mouth": [
+   218,
+   160
+  ],
+  "hatTop": 22,
+  "eye": [
+   144,
+   120
+  ]
+ },
+ "think": {
+  "paw": [
+   187,
+   169
+  ],
+  "mouth": [
+   218,
+   160
+  ],
+  "hatTop": 38,
+  "eye": [
+   144,
+   120
+  ]
+ },
+ "oops": {
+  "paw": [
+   140,
+   285
+  ],
+  "mouth": [
+   218,
+   160
+  ],
+  "hatTop": 38,
+  "eye": [
+   144,
+   120
+  ]
+ },
+ "wave": {
+  "paw": [
+   265,
+   165
+  ],
+  "mouth": [
+   218,
+   160
+  ],
+  "hatTop": 34,
+  "eye": [
+   144,
+   120
+  ]
+ },
+ "point": {
+  "paw": [
+   261,
+   179
+  ],
+  "mouth": [
+   218,
+   160
+  ],
+  "hatTop": 34,
+  "eye": [
+   144,
+   120
+  ]
+ },
+ "woof": {
+  "paw": [
+   140,
+   285
+  ],
+  "mouth": [
+   218,
+   160
+  ],
+  "hatTop": 28,
+  "eye": [
+   144,
+   120
+  ]
+ },
+ "full_wave": {
+  "paw": [
+   265,
+   165
+  ],
+  "mouth": [
+   218,
+   160
+  ],
+  "hatTop": 34,
+  "eye": [
+   144,
+   120
+  ]
+ }
+}
