@@ -1,0 +1,16 @@
+{
+  "name": "Mit's Treasure Map · Cún Mít Ghép Bản Đồ Kho Báu",
+  "short_name": "Treasure Map",
+  "description": "Jigsaw learning game with Mit the pirate puppy: drag each map piece out of the waves into its shadow — colours, shapes, counting coins, sea animals, letters. English & Vietnamese.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#7CC8F0",
+  "theme_color": "#7CC8F0",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
